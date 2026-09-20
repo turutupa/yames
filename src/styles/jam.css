@@ -749,10 +749,16 @@
 }
 
 /* Your bars in a trade. Amber, the colour the app already uses for "this one
-   is yours" in the context bar. */
+   is yours".
+
+   `--feedback-ok` is the amber-family token and every theme defines it —
+   settings.css reaches for the same one to say "that shortcut is already
+   taken". This was `var(--warning, #fbbf24)`, and `--warning` is defined by
+   no theme in this app, so all thirteen got the same hard-coded amber
+   whatever else was on the screen. */
 .jam-timeline-cell[data-band="hatsOnly"] {
-  border-color: color-mix(in srgb, var(--warning, #fbbf24) 45%, transparent);
-  background: color-mix(in srgb, var(--warning, #fbbf24) 9%, transparent);
+  border-color: color-mix(in srgb, var(--feedback-ok) 45%, transparent);
+  background: color-mix(in srgb, var(--feedback-ok) 9%, transparent);
 }
 
 /* ── The band, one row per player ──────────────────────────────────────── */
@@ -818,7 +824,7 @@
   column-gap: 16px;
   min-height: 42px;
   padding: 0 14px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
   background: color-mix(in srgb, var(--text-primary) 2%, transparent);
 }
@@ -894,8 +900,12 @@
   color: var(--text-faint);
 }
 
+/* The mic is on and the engine is hearing you. `--feedback-perfect` is the
+   theme's own "this is right" colour — it was `var(--success, #4ade80)`, and
+   `--success` is defined by no theme, so one hard-coded green appeared on
+   every one of them. */
 .jam-band-input[data-on] {
-  color: var(--success, #4ade80);
+  color: var(--feedback-perfect);
 }
 
 /* ── The practice tools ────────────────────────────────────────────────── */
@@ -956,7 +966,7 @@
   gap: 8px;
   height: 34px;
   padding: 0 10px 0 14px;
-  border-radius: var(--radius-md, 9px);
+  border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
 }
 
@@ -1109,7 +1119,12 @@
   color: var(--accent);
 }
 
-/* ── The trading cue ───────────────────────────────────────────────────── */
+/* ── The trading cue ─────────────────────────────────────────────────────
+   Amber while the band is out and it is your turn, the accent while the band
+   is back in. Both sit on `--bg-raised`, the token the panel behind them is
+   painted with — it was `var(--bg-elevated, …)`, and `--bg-elevated` is
+   defined by no theme, so the cue carried a blue-black panel into all
+   thirteen. Same class of bug as the editor drawer's `--bg-base` below. */
 .jam-cue {
   position: fixed;
   right: 40px;
@@ -1120,8 +1135,8 @@
   gap: 12px;
   padding: 12px 18px 12px 14px;
   border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--warning, #fbbf24) 35%, transparent);
-  background: color-mix(in srgb, var(--warning, #fbbf24) 12%, var(--bg-elevated, #14131f));
+  border: 1px solid color-mix(in srgb, var(--feedback-ok) 35%, transparent);
+  background: color-mix(in srgb, var(--feedback-ok) 12%, var(--bg-raised));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
   animation: jam-cue-in 0.18s ease-out;
   pointer-events: none;
@@ -1129,12 +1144,12 @@
 
 .jam-cue[data-state="full"] {
   border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated, #14131f));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-raised));
   color: var(--accent);
 }
 
 .jam-cue:not([data-state="full"]) {
-  color: var(--warning, #fbbf24);
+  color: var(--feedback-ok);
 }
 
 .jam-cue-text {
@@ -1323,7 +1338,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   background: color-mix(in srgb, var(--accent) 4%, transparent);
 }
@@ -1687,7 +1702,7 @@
   gap: 10px;
   height: 34px;
   padding: 0 10px;
-  border-radius: var(--radius-md, 9px);
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
 }
 
@@ -1787,10 +1802,17 @@
   color: var(--text-secondary);
 }
 
-/* There is no undo. The one button that destroys something says so in the
-   one colour on this screen that means "this is not reversible". */
+/* There is no undo, so the one button that destroys something is the one
+   that is coloured; the other says "no" in the ordinary text colour.
+
+   In the accent and not in a red, because the token contract has no red:
+   this was `var(--danger, #f87171)`, `--danger` is defined by no theme, and
+   the fallback was a soft red that no theme in the app contains and that a
+   light theme barely shows. songs.css settled the same question the same
+   way — a problem is said in the accent rather than in a colour this app
+   does not have. */
 .jam-take-confirm-yes {
-  color: var(--danger, #f87171);
+  color: var(--accent);
 }
 
 .jam-takes-note {
@@ -2366,7 +2388,11 @@
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--text-primary) 3%, transparent);
   color: var(--text-primary);
-  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  /* The chart is typed in columns, so it is set in a monospace stack — the
+     same one help.css uses. It was `var(--font-mono, …)`, and `--font-mono`
+     is defined by no theme; the fallback was doing all the work and the
+     indirection only suggested a token somebody could set. */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.76rem;
   line-height: 1.5;
   white-space: pre;
