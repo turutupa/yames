@@ -57,6 +57,24 @@ no bad advice? out of beta?). When it's hit, the switch is a headline and one he
 redesign — headline candidate 05 on the canvas ("The metronome that listens back") is written for
 that day and deliberately still contains the word *metronome*.
 
+### Decided — 2026-09-19 · Jam gets a section, above the coach; setlists get a card
+
+Jam (v1.2.0) is the biggest thing the app has gained since the site launched, and unlike the
+coach it is finished, so it goes first: hero → tiles → Zen → **Jam** → Coach → cards → download.
+The headline does not change — "metronome" is still the word people search for — and the hero
+only gains one clause about the band.
+
+Setlists (v1.1.0) are a card, not a section. The Drill / Hands-free pair became a trio, Drill /
+Setlists / Hands-free, in amber / violet / pink.
+
+"Backing track" is written into the Jam copy, the description and an FAQ entry on purpose: it is
+what a guitarist types into a search box, and Jam's pitch is that it is the backing track you can
+change.
+
+Only claim what the app does. The setlist card says steps move on after bars, after minutes, or
+wait for you — there is no footswitch action for "next step" as of v1.2.0, so the card does not
+say there is.
+
 ---
 
 ## Design direction
@@ -121,6 +139,27 @@ unpleasant. Choosing a theme:
 
 Arrow keys move through the picker, which is marked up as a radiogroup. The selected swatch has a
 dot under it as well as a glow, so the selection is not carried by colour alone.
+
+### Decided — 2026-09-19 · Photographs live in the fan, and nowhere else
+
+Owner's rule: real screenshots appear only in the hero carousel. Everything below it is a drawing
+or a sketch. So Jam got a figure in the same hand as the coach's exploded metronome, not a picture
+of the Jam screen: a four-bar chord chart with a sweep moving across it, a lane each for drums,
+bass and keys in solid line, and a fourth, dashed lane for the player — a line improvised over the
+changes, different every time round. The rule the two figures share: **solid ink is what Yames
+plays, dashed ink is you.** The readout names the chord and the scale that fits it.
+
+The figure leads (left) in Jam and follows (right) in the coach, so the page zigzags. On one
+column it is always text first, drawing second.
+
+### Decided — 2026-09-19 · One sound clip, only when asked for
+
+"Hear the band" plays eight bars rendered by the app's own engine (`render_band_demos`, the same
+path as `scripts/sounds/band_demo.ts`), so it is what the download sounds like and not a produced
+demo. `preload="none"`: the ~270 KB file is fetched on the click and never before, and nothing
+ever plays on its own. The owner was unsure about sound on the page and kept it on one condition —
+that what plays is fun to listen to — so the clip is chosen by the owner's ear, not by the
+author's.
 
 ---
 
