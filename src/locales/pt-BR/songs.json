@@ -214,11 +214,11 @@
         "other": "{{n}}ª vez"
       },
       "keepPortion": "Salvar esta parte",
+      "keepPortionNote": "Escolha compassos na tablatura e depois dê um nome a eles",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%",
-      "keepPortionNote": "Escolha compassos na tablatura e depois dê um nome a eles"
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }

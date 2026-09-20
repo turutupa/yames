@@ -214,11 +214,11 @@
         "other": "Passage {{n}}"
       },
       "keepPortion": "Enregistrer ce passage",
+      "keepPortionNote": "Choisissez des mesures sur la tablature, puis nommez-les",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%",
-      "keepPortionNote": "Choisissez des mesures sur la tablature, puis nommez-les"
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }

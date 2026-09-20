@@ -205,11 +205,11 @@
         "other": "{{n}}. geçiş"
       },
       "keepPortion": "Bu bölümü kaydet",
+      "keepPortionNote": "Önce tabda ölçüleri seç, sonra onlara bir ad ver",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%",
-      "keepPortionNote": "Önce tabda ölçüleri seç, sonra onlara bir ad ver"
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }

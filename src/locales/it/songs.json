@@ -214,11 +214,11 @@
         "other": "Giro {{n}}"
       },
       "keepPortion": "Salva questa parte",
+      "keepPortionNote": "Scegli le battute sulla tablatura, poi dai loro un nome",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%",
-      "keepPortionNote": "Scegli le battute sulla tablatura, poi dai loro un nome"
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }

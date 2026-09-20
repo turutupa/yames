@@ -205,11 +205,11 @@
         "other": "第 {{n}} 遍"
       },
       "keepPortion": "保存这一段",
+      "keepPortionNote": "先在六线谱上选好小节，再给它起个名字",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%",
-      "keepPortionNote": "先在六线谱上选好小节，再给它起个名字"
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }

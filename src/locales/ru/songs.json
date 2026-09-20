@@ -223,11 +223,11 @@
         "other": "{{n}}-й раз"
       },
       "keepPortion": "Сохранить этот фрагмент",
+      "keepPortionNote": "Сначала выберите такты в табулатуре, потом дайте им имя",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%",
-      "keepPortionNote": "Сначала выберите такты в табулатуре, потом дайте им имя"
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }
