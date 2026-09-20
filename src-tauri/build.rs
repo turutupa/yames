@@ -58,7 +58,8 @@ fn main() {
 ///
 /// This walks `sounds/kits/*/kit.json`, and for every folder it finds
 /// writes an entry into `$OUT_DIR/kits_generated.rs`: the manifest as a
-/// string constant and one `include_bytes!` per WAV beside it, keyed by
+/// string constant and one `include_bytes!` per sample file beside it (WAV
+/// or FLAC), keyed by
 /// file name. `kit.rs` `include!`s the result and parses the manifests with
 /// the same code it uses on a folder the musician points at, so a shipped
 /// kit and somebody's own sample folder go through one loader.
@@ -127,18 +128,24 @@ fn walk(root: &str, manifest: &str, constant: &str, required: bool) -> String {
         writeln!(out, "    ShippedKit {{").unwrap();
         writeln!(out, "        manifest: include_str!(r\"{}\"),", file.display()).unwrap();
         writeln!(out, "        files: &[").unwrap();
-        let mut wavs: Vec<_> = std::fs::read_dir(dir)
+        // Both formats, because `kit.rs` takes both. The shipped banks are
+        // FLAC — nine minutes of audio is 70 MB as WAV and 31 MB as FLAC,
+        // the same samples bit for bit — and WAV stays because a folder of
+        // somebody's own hits is a WAV folder and the two paths share one
+        // loader.
+        let mut sounds: Vec<_> = std::fs::read_dir(dir)
             .unwrap_or_else(|e| panic!("{} is not readable: {e}", dir.display()))
             .flatten()
             .map(|e| e.path())
             .filter(|p| {
-                p.extension()
-                    .is_some_and(|e| e.eq_ignore_ascii_case("wav"))
+                p.extension().is_some_and(|e| {
+                    e.eq_ignore_ascii_case("wav") || e.eq_ignore_ascii_case("flac")
+                })
             })
             .collect();
-        wavs.sort();
-        for wav in wavs {
-            let file = wav.file_name().expect("a WAV has a name").to_string_lossy();
+        sounds.sort();
+        for wav in sounds {
+            let file = wav.file_name().expect("a sample has a name").to_string_lossy();
             writeln!(
                 out,
                 "            (\"{}\", include_bytes!(r\"{}\")),",

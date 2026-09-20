@@ -1143,3 +1143,60 @@ fn an_evicted_bank_comes_back_with_the_same_id() {
     let again = cache.shipped(0, 48_000).unwrap().id;
     assert_eq!(first, again, "the same kit at the same rate is the same bank");
 }
+
+/// THE SHIPPED BANKS ARE FLAC, AND STAY FLAC.
+///
+/// Nine minutes of audio across four hundred and ten files was seventy
+/// megabytes as uncompressed WAV. It is thirty-one as FLAC, and FLAC is
+/// lossless — `a_shipped_kit_is_the_same_height_at_every_rate` and the
+/// fixtures beside it pass unchanged and unbaked, which is the proof that
+/// nothing about the sound moved. Forty-one megabytes stop being compiled
+/// into the binary; what that is worth in a compressed installer is less
+/// than forty-one and is CI's number to report, not this comment's.
+///
+/// This exists because the saving is easy to lose by accident. The banks are
+/// written by a render tool that emits WAV, the loader takes WAV and FLAC
+/// equally on purpose (a musician's own folder of hits is WAV), and so a
+/// regenerated kit dropped in as WAV would work perfectly and quietly put
+/// forty megabytes back. Compressing it is one `ffmpeg -c:a flac` per file.
+///
+/// The metronome's own clicks, in `sounds/*.wav`, are NOT in here: those are
+/// `include_bytes!` by name in `engine.rs` and decoded by rodio, which this
+/// project builds without a FLAC feature. They are 28 files and under half a
+/// megabyte, and there is nothing to win by moving them.
+#[test]
+fn the_banks_the_app_ships_are_compressed() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("sounds");
+    let mut wavs = Vec::new();
+    for folder in ["kits", "voices", "perc"] {
+        let dir = root.join(folder);
+        // `voices` and `perc` are rendered by a tool and a checkout may not
+        // have them — the loader already treats that as ordinary.
+        let Ok(banks) = std::fs::read_dir(&dir) else {
+            continue;
+        };
+        for bank in banks.flatten().map(|e| e.path()).filter(|p| p.is_dir()) {
+            for file in std::fs::read_dir(&bank).into_iter().flatten().flatten() {
+                let path = file.path();
+                if path
+                    .extension()
+                    .is_some_and(|e| e.eq_ignore_ascii_case("wav"))
+                {
+                    wavs.push(format!(
+                        "{}/{}",
+                        bank.file_name().unwrap_or_default().to_string_lossy(),
+                        path.file_name().unwrap_or_default().to_string_lossy()
+                    ));
+                }
+            }
+        }
+    }
+    assert!(
+        wavs.is_empty(),
+        "{} shipped sample(s) are still uncompressed WAV: {}. Run \
+         `python scripts/sounds/compress.py` — FLAC is lossless, so nothing \
+         about the sound changes and no fixture needs re-baking.",
+        wavs.len(),
+        wavs.join(", ")
+    );
+}

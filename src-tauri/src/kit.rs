@@ -11,7 +11,7 @@
 //!
 //! ```text
 //! src-tauri/sounds/kits/<kit>/kit.json
-//! src-tauri/sounds/kits/<kit>/<voice>.<layer>.<rr>.wav
+//! src-tauri/sounds/kits/<kit>/<voice>.<layer>.<rr>.flac
 //! ```
 //!
 //! `layer` 1 is the softest stroke and 4 the hardest; `rr` is the round
@@ -962,8 +962,17 @@ pub struct KitFolder {
     pub found: Vec<FoundVoice>,
 }
 
-/// Every `*.wav` in `dir`, as (lower-cased stem, path).
-fn wavs_in(dir: &Path) -> Result<Vec<(String, PathBuf)>, String> {
+/// The extensions a folder of samples may use.
+///
+/// The shipped banks are FLAC and a musician's own folder is almost always
+/// WAV, but neither is told to be one or the other: the rule at the top of
+/// this file is that a shipped kit and somebody's own sample pack cannot
+/// drift apart in what they support, so both take both. What a file really
+/// is, is decided by its first four bytes in [`open_reader`], not here.
+const SAMPLE_EXTS: [&str; 2] = ["wav", "flac"];
+
+/// Every sample file in `dir`, as (lower-cased stem, path).
+fn samples_in(dir: &Path) -> Result<Vec<(String, PathBuf)>, String> {
     let entries =
         std::fs::read_dir(dir).map_err(|e| format!("could not read {}: {e}", dir.display()))?;
     let mut out = Vec::new();
@@ -972,11 +981,14 @@ fn wavs_in(dir: &Path) -> Result<Vec<(String, PathBuf)>, String> {
         if !path.is_file() {
             continue;
         }
-        let is_wav = path
+        let is_sample = path
             .extension()
-            .map(|e| e.to_string_lossy().to_ascii_lowercase() == "wav")
+            .map(|e| {
+                let e = e.to_string_lossy().to_ascii_lowercase();
+                SAMPLE_EXTS.contains(&e.as_str())
+            })
             .unwrap_or(false);
-        if !is_wav {
+        if !is_sample {
             continue;
         }
         if let Some(stem) = path.file_stem() {
@@ -1048,7 +1060,7 @@ fn parse_file_name(stem: &str, has_snare_soft: bool) -> Option<(KitVoice, u8, u8
 /// directory listing and nothing more: opening a hundred WAVs to answer "is
 /// there a ride in here" would put a disk read in front of a hover.
 pub fn inspect(dir: &Path) -> Result<KitFolder, String> {
-    let files = wavs_in(dir)?;
+    let files = samples_in(dir)?;
     let has_soft = files.iter().any(|(s, _)| s == "snare_soft");
     let mut depth: [Option<(u8, u8)>; KIT_VOICES] = [None; KIT_VOICES];
     for (stem, _) in files.iter() {
@@ -1145,14 +1157,7 @@ pub(crate) fn decode_capped(
     source: &Source,
     max_secs: f64,
 ) -> Result<(Vec<f32>, u32, u16), String> {
-    let mut reader = match source {
-        Source::Bytes(b) => hound::WavReader::new(Cursor::new(*b))
-            .map(ReaderKind::Mem)
-            .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))?,
-        Source::File(p) => hound::WavReader::open(p)
-            .map(ReaderKind::Disk)
-            .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))?,
-    };
+    let mut reader = open_reader(name, source)?;
     let spec = reader.spec();
     let channels = spec.channels.max(1) as usize;
     if spec.sample_rate == 0 {
@@ -1222,11 +1227,88 @@ pub(crate) fn decode_capped(
     Ok((out, spec.sample_rate, spec.channels.max(1)))
 }
 
-/// A `hound` reader over bytes or over a file — the same three arms of
-/// sample format either way, written once.
+/// The four bytes a FLAC file starts with. A WAV starts `RIFF`.
+const FLAC_MAGIC: &[u8; 4] = b"fLaC";
+
+/// Open a source as whichever of the two formats it actually is.
+///
+/// **By the file's first four bytes, not by its name.** A folder the
+/// musician points at is theirs, and this module has always assumed the
+/// worst about what is in it — "a WAV that is really an AIFF" is in the
+/// rules at the top of this file. An extension is a claim; the magic is
+/// evidence, and getting it from the evidence means a `.wav` that is really
+/// a FLAC simply plays instead of producing a sentence about a bad header.
+fn open_reader(name: &str, source: &Source) -> Result<ReaderKind, String> {
+    match source {
+        Source::Bytes(b) => {
+            if b.starts_with(FLAC_MAGIC) {
+                claxon::FlacReader::new(Cursor::new(*b))
+                    .map(ReaderKind::FlacMem)
+                    .map_err(|e| format!("{name} could not be opened as a FLAC: {e}"))
+            } else {
+                hound::WavReader::new(Cursor::new(*b))
+                    .map(ReaderKind::Mem)
+                    .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))
+            }
+        }
+        Source::File(p) => {
+            let file = std::fs::File::open(p)
+                .map_err(|e| format!("{name} could not be opened: {e}"))?;
+            let mut buf = std::io::BufReader::new(file);
+            let mut head = [0u8; 4];
+            // Short reads are not an error here: a file too small to hold a
+            // magic number is too small to hold audio, and the decoder below
+            // says so in its own words rather than this inventing a sentence.
+            let read = fill(&mut buf, &mut head);
+            std::io::Seek::rewind(&mut buf)
+                .map_err(|e| format!("{name} could not be read from the start: {e}"))?;
+            if read == 4 && &head == FLAC_MAGIC {
+                claxon::FlacReader::new(buf)
+                    .map(ReaderKind::FlacDisk)
+                    .map_err(|e| format!("{name} could not be opened as a FLAC: {e}"))
+            } else {
+                hound::WavReader::new(buf)
+                    .map(ReaderKind::Disk)
+                    .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))
+            }
+        }
+    }
+}
+
+/// How many of `buf` a reader could fill, stopping at the first hiccup.
+fn fill(r: &mut impl std::io::Read, buf: &mut [u8]) -> usize {
+    let mut n = 0;
+    while n < buf.len() {
+        match r.read(&mut buf[n..]) {
+            Ok(0) | Err(_) => break,
+            Ok(k) => n += k,
+        }
+    }
+    n
+}
+
+/// How many frames a FLAC says it holds, and in what shape.
+///
+/// FLAC's own header carries everything [`hound::WavSpec`] does, so it is
+/// described as one and the rest of this module never learns there are two
+/// formats. Its samples are always integers — there is no float FLAC — so
+/// the sample format is not a question.
+fn flac_spec(info: claxon::metadata::StreamInfo) -> hound::WavSpec {
+    hound::WavSpec {
+        channels: info.channels.min(u32::from(u16::MAX)) as u16,
+        sample_rate: info.sample_rate,
+        bits_per_sample: info.bits_per_sample.min(u32::from(u16::MAX)) as u16,
+        sample_format: hound::SampleFormat::Int,
+    }
+}
+
+/// A reader over bytes or over a file, WAV or FLAC — the same three
+/// questions asked of all four, written once.
 enum ReaderKind {
     Mem(hound::WavReader<Cursor<&'static [u8]>>),
     Disk(hound::WavReader<std::io::BufReader<std::fs::File>>),
+    FlacMem(claxon::FlacReader<Cursor<&'static [u8]>>),
+    FlacDisk(claxon::FlacReader<std::io::BufReader<std::fs::File>>),
 }
 
 impl ReaderKind {
@@ -1234,6 +1316,8 @@ impl ReaderKind {
         match self {
             Self::Mem(r) => r.spec(),
             Self::Disk(r) => r.spec(),
+            Self::FlacMem(r) => flac_spec(r.streaminfo()),
+            Self::FlacDisk(r) => flac_spec(r.streaminfo()),
         }
     }
 
@@ -1241,6 +1325,13 @@ impl ReaderKind {
         match self {
             Self::Mem(r) => r.duration(),
             Self::Disk(r) => r.duration(),
+            // `samples` is FLAC's count of inter-channel samples — frames,
+            // the same thing `hound` calls duration. It is optional in the
+            // format; an encoder that omitted it leaves the cap below with
+            // nothing to check, which is the same position a WAV with a
+            // zero-length data chunk puts it in.
+            Self::FlacMem(r) => flac_frames(r.streaminfo()),
+            Self::FlacDisk(r) => flac_frames(r.streaminfo()),
         }
     }
 
@@ -1281,11 +1372,35 @@ impl ReaderKind {
                 }
             };
         }
+        // FLAC hands back `i32` already sign-extended to its own depth, so
+        // it wants the integer arm and nothing else — the float arm cannot
+        // be reached from a format that has no floats.
+        macro_rules! read_flac {
+            ($r:expr) => {{
+                let bits = spec.bits_per_sample;
+                if !(1..=32).contains(&bits) {
+                    return Err(format!("{name} is {bits}-bit, which is not a FLAC depth"));
+                }
+                let full = (1i64 << (bits - 1)) as f32;
+                $r.samples()
+                    .take(want)
+                    .map(|s| s.map(|v| v as f32 / full))
+                    .collect::<Result<Vec<f32>, _>>()
+                    .map_err(|e| format!("{name} stopped decoding partway through: {e}"))?
+            }};
+        }
         Ok(match self {
             Self::Mem(r) => read!(r),
             Self::Disk(r) => read!(r),
+            Self::FlacMem(r) => read_flac!(r),
+            Self::FlacDisk(r) => read_flac!(r),
         })
     }
+}
+
+/// FLAC's own frame count, or zero when the encoder left it out.
+fn flac_frames(info: claxon::metadata::StreamInfo) -> u32 {
+    u32::try_from(info.samples.unwrap_or(0)).unwrap_or(u32::MAX)
 }
 
 /// A windowed sinc whose kernel is worked out once instead of per sample.
@@ -1890,7 +2005,7 @@ pub fn load(dir: &Path, rate: u32) -> Result<KitBank, String> {
 /// would otherwise have to WRITE ninety-six megabytes of WAV to disk to
 /// reach it, which is a slow test of an arithmetic comparison.
 fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String> {
-    let files = wavs_in(dir)?;
+    let files = samples_in(dir)?;
     let has_soft = files.iter().any(|(s, _)| s == "snare_soft");
     let present: Vec<(String, PathBuf)> = files
         .into_iter()
@@ -1898,7 +2013,7 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String>
         .collect();
     if present.is_empty() {
         return Err(format!(
-            "{} holds none of {} as a .wav",
+            "{} holds none of {} as a sound file",
             dir.display(),
             // The drums: a folder of the musician's own samples is a drum
             // kit, and listing the percussionist's ten in the sentence that
@@ -1915,8 +2030,14 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String>
     // ---- The size cap, from the headers, before a single sample is read ----
     let mut declared: u64 = 0;
     for (stem, path) in present.iter() {
-        let reader = hound::WavReader::open(path)
-            .map_err(|e| format!("{stem}.wav could not be opened as a WAV: {e}"))?;
+        // The file's own name, extension included. A message about a file
+        // has to be a name the musician can find in their folder, and the
+        // stem alone is not one — `a_file_that_is_not_really_a_wav_is_
+        // refused_rather_than_crashing` holds this.
+        let name = path
+            .file_name()
+            .map_or_else(|| stem.clone(), |n| n.to_string_lossy().into_owned());
+        let reader = open_reader(&name, &Source::File(path.clone()))?;
         // Frames × eight bytes: what this file will cost as stereo `f32`.
         declared = declared.saturating_add(reader.duration() as u64 * 8);
     }
@@ -1934,7 +2055,12 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String>
     let entries: Vec<Entry> = present
         .into_iter()
         .map(|(stem, path)| Entry {
-            name: format!("{stem}.wav"),
+            // The real file name, extension and all: `build_bank` reads the
+            // stem back off it, and a `.wav` invented for a `.flac` would be
+            // the name in every message about a file that is not called that.
+            name: path
+                .file_name()
+                .map_or_else(|| format!("{stem}.wav"), |n| n.to_string_lossy().into_owned()),
             source: Source::File(path),
         })
         .collect();
@@ -1989,7 +2115,7 @@ fn stamp(modified: Option<std::time::SystemTime>) -> u128 {
 /// `set_jam`; a folder read and a `metadata` call per file is microseconds,
 /// and it is what makes the bar-ahead sends free.
 fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
-    let files = wavs_in(dir)?;
+    let files = samples_in(dir)?;
     let has_soft = files.iter().any(|(s, _)| s == "snare_soft");
     let mut stamps = Vec::new();
     for (stem, path) in files.iter() {

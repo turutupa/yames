@@ -503,6 +503,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "claxon"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bfbf56724aa9eca8afa4fcfadeb479e722935bb2a0900c2d37e0cc477af0688"
+
+[[package]]
 name = "cmake"
 version = "0.1.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6390,6 +6396,7 @@ version = "1.2.0"
 dependencies = [
  "aubio",
  "audio_thread_priority",
+ "claxon",
  "core-foundation-sys",
  "coreaudio-sys",
  "cpal",

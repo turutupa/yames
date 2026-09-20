@@ -9,7 +9,7 @@
 //!
 //! ```text
 //! src-tauri/sounds/voices/<voice>/voice.json
-//! src-tauri/sounds/voices/<voice>/<midi>.<layer>.<rr>.wav
+//! src-tauri/sounds/voices/<voice>/<midi>.<layer>.<rr>.flac
 //! ```
 //!
 //! `<midi>` is the MIDI number of the note that was recorded, and a bank

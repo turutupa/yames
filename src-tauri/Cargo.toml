@@ -74,6 +74,13 @@ audio_thread_priority = { version = "0.37.0", default-features = false }
 # without hyper-threading (an 8-core M1 got 2 threads). Optional so a
 # default build does not pay for it.
 num_cpus = { version = "1", optional = true }
+# FLAC, for the shipped sound bank only. Nine minutes of audio was 70 MB as
+# uncompressed WAV and is 31 MB as FLAC, bit for bit the same samples — see
+# `kit.rs`. Chosen over symphonia and rodio's decoders for the same reason
+# `hound` was: it is a small pure-Rust decoder that returns `Result` on a
+# file it cannot read instead of panicking, and nothing in `kit.rs` may
+# panic on a file a musician chose. Apache-2.0.
+claxon = "0.4.3"
 
 [features]
 default = []
