@@ -99,7 +99,17 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   beside Jam and the others.* A rail mode of its own beside
   Metronome, Drill, Setlists and Jam, or inside one of them.
   Proposed default: its own mode. A song library is a place.
-- **A6 — Practice tools on a song.** *open.* Proposed default for v1:
+- **A6 — Practice tools on a song.** *decided 2026-09-20 (owner):
+  "being able to select a portion of a song so it plays that portion in
+  repeat is super critical for song learning. Make sure that is
+  included."* So looping a portion is not a pair of number fields: you
+  select it ON THE TAB (drag across bars, click and shift-click, handles
+  to adjust), the selection stays highlighted, it repeats seamlessly on
+  the bar line at the chosen tempo with the count-in before the first
+  pass only, it has keys and footswitch actions (eyes-free, roadmap
+  principle 2), it is remembered per song, and a portion can be saved
+  with a name. The bar fields remain as the precise path. Spec in
+  `plans/tasks/songs/W18-STAGE.md` item 0. Proposed default for v1:
   pick a section or a bar range, loop it, play it at a percentage of
   tempo, and let the existing speed ramp climb as passes are clean.
 - **A7 — Live feedback vs the review.** *decided 2026-09-20, as

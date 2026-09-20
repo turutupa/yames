@@ -20,6 +20,48 @@ own scroll, inside an outer scroller: a scroll inside a scroll.
 
 ## What to build
 
+0. **Select a portion on the tab, and it loops.** Added 2026-09-20 on the
+   owner's word: this is *super critical for song learning*, so it comes
+   first and it must feel like the centre of the mode. Today a portion
+   can only be chosen by typing two bar numbers or pressing a section
+   chip. Build:
+   - **Selection on the tab itself.** Drag across bars to select them;
+     click a bar to start a new selection there; shift-click to extend
+     to that bar; a handle at each end to adjust by dragging. Whole bars
+     in v1 (the engine loops on bar lines). alphaTab exposes what is
+     under the pointer (`beatMouseDown` / `beatMouseMove` /
+     `beatMouseUp`, and bar bounds through its bounds lookup — see
+     W4-FINDINGS); keep its player off, as now.
+   - **The selection is visible all the time**: a themed band behind the
+     selected bars on every system it spans, surviving scroll, resize
+     and re-render, readable in all 13 themes, never the only signal
+     (the strip also says "Bars 17–24 · looping").
+   - **Selecting means looping.** Making a selection turns Loop on; a
+     clear Loop switch sits in the strip; "Whole song" clears the
+     selection. The From/To fields and the section chips drive the same
+     state and stay in sync — they are the precise and the keyboard
+     path, not a second feature.
+   - **Hands on the instrument** (roadmap principle 2). Actions in
+     `useActionDispatcher`, bindable to keys and a MIDI footswitch like
+     every other: loop starts at the bar under the cursor (`[`), loop
+     ends there (`]`), loop on/off (`L`), clear (`\`), and nudge the
+     selection a bar earlier/later. They work while playing.
+   - **While playing**, a changed selection takes effect cleanly: the
+     engine recompiles and restarts from the top of the new range
+     (W9), so debounce drags, apply on release, no second count-in.
+     The strip shows which time round it is ("3rd time").
+   - **Remembered.** The last selection, its loop state and its tempo
+     percentage persist per song (beside the mix, `songEngine.ts`). A
+     portion can be **saved with a name** ("Solo", "That run in the
+     bridge") and then sits beside the section chips, with its own
+     tempo; rename and delete from a small menu. The review's
+     `loopBars` action and a due passage both set this same selection.
+   - Tests: the selection model in vitest (drag, shift-click, handles,
+     clamping, sync with fields and chips, persistence); a harness
+     scene with a selection made and one saved portion; layout tests
+     that the band is drawn over the right bars at three window sizes
+     and that a selection spanning two systems draws on both.
+
 1. **The stage is one screen.** No outer scroll in Songs at any supported
    window size. The header, the tab and one compact control strip share the
    height; the tab flexes and keeps its own scroll (it follows the cursor
