@@ -218,7 +218,14 @@ struct PlayedSpec {
     /// What the metronome is clicking (1 = quarters, 2 = 8ths, …).
     click_subdivision: u8,
     /// What the player is playing, as a divisor of the quarter note.
+    /// With `alternatingDivisors` set this is bar 0's divisor and the
+    /// list takes over from there.
     played_divisor: u8,
+    /// Roadmap 1.4 — a player who does not stay on one grid. Bar `i`
+    /// is played in `alternatingDivisors[i % len]`. Absent for every
+    /// fixture that keeps one feel throughout, which is all of 1.3's.
+    #[serde(default)]
+    alternating_divisors: Option<Vec<u8>>,
     /// Bars of 4/4.
     bars: u32,
     /// Gaussian spread applied to each played note, in ms.
@@ -232,8 +239,27 @@ struct PlayedSpec {
     /// The guard: what the same input must NOT beat when the detector
     /// is keyed to the click, as it was before 1.3.
     click_keyed_max_score: u32,
-    /// The divisor the inference is expected to settle on.
-    expect_divisor: u8,
+    /// The divisor the inference is expected to settle on. Absent when
+    /// the fixture never settles on one — see `alternatingDivisors`.
+    #[serde(default)]
+    expect_divisor: Option<u8>,
+    /// Roadmap 1.4's second gate: how often the divisor the analyzer
+    /// believes may change, per eight bars. The roadmap's number is 2.
+    /// Absent means "not asserted", which is every 1.3 fixture.
+    #[serde(default)]
+    max_grid_changes_per_8_bars: Option<f64>,
+    /// The share of the notes the player actually played that reached
+    /// the analyzer at all.
+    ///
+    /// This is a RATCHET, not a target. A score can stay high while
+    /// half the playing is inaudible — the two alternating fixtures are
+    /// exactly that case — so the roadmap's score gate alone cannot
+    /// tell a matcher that got better from a detector that went deaf.
+    /// Each fixture carries the number its run produces today, so the
+    /// next change has to say out loud if it makes the hearing worse.
+    /// Raise it when the refractory question in the report is settled.
+    #[serde(default)]
+    min_heard_ratio: Option<f64>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -254,6 +280,11 @@ struct Replay {
     played: usize,
     heard: usize,
     expected_positions: usize,
+    /// Roadmap 1.4 — how many times `current_divisor()` changed over
+    /// the whole replay. This is what the live loop debounces into an
+    /// `InferredGridChanged` event, so it is the same number the
+    /// roadmap's anti-flapping gate is about.
+    grid_changes: u32,
 }
 
 /// Amplitude every synthetic note is given. Constant on purpose: these
@@ -282,18 +313,39 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
     let quarters = spec.bars * 4;
 
     // ── What the player plays ───────────────────────────────────────
-    let note_ns = quarter_ns / spec.played_divisor.max(1) as u64;
-    let mut rng = Xorshift64::new(spec.seed);
-    let played: Vec<u64> = (0..quarters as u64 * spec.played_divisor.max(1) as u64)
-        .map(|i| {
-            let nominal = LEAD_NS + i * note_ns;
-            if spec.jitter_ms <= 0.0 {
-                return nominal;
-            }
-            let jitter_ns = (rng.next_gauss() * spec.jitter_ms * 1_000_000.0) as i64;
-            (nominal as i64 + jitter_ns).max(0) as u64
+    // The divisor of each bar. One entry per bar so a fixture can make
+    // the player change feel at a bar line, which is roadmap 1.4's
+    // whole subject; a fixture that does not say otherwise plays the
+    // same divisor throughout and this is a run of one value.
+    let bar_divisors: Vec<u8> = (0..spec.bars)
+        .map(|bar| match spec.alternating_divisors.as_ref() {
+            Some(list) if !list.is_empty() => list[bar as usize % list.len()].max(1),
+            _ => spec.played_divisor.max(1),
         })
         .collect();
+    let mut rng = Xorshift64::new(spec.seed);
+    let mut played: Vec<u64> = Vec::new();
+    // The bar start accumulates rather than being computed from the
+    // bar index, so that a fixture on one divisor throughout lands on
+    // exactly the timestamps the pre-1.4 harness produced — integer
+    // note spacing does not always divide the quarter (a triplet at
+    // 120 BPM is 166_666_666 ns, three of which are 2 ns short of the
+    // beat), and every golden here was baked with that drift in it.
+    let mut bar_start_ns = LEAD_NS;
+    for bar in 0..spec.bars {
+        let d = bar_divisors[bar as usize];
+        let note_ns = quarter_ns / d as u64;
+        for i in 0..(4 * d as u64) {
+            let nominal = bar_start_ns + i * note_ns;
+            if spec.jitter_ms <= 0.0 {
+                played.push(nominal);
+            } else {
+                let jitter_ns = (rng.next_gauss() * spec.jitter_ms * 1_000_000.0) as i64;
+                played.push((nominal as i64 + jitter_ns).max(0) as u64);
+            }
+        }
+        bar_start_ns += 4 * d as u64 * note_ns;
+    }
 
     // ── What the metronome clicks ───────────────────────────────────
     let click_total = spec.click_subdivision.max(1);
@@ -319,6 +371,18 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
     let mut inference = RhythmInference::new();
     let mut heard: Vec<u64> = Vec::new();
 
+    // Roadmap 1.4 — what the analyzer believed as each quarter went by.
+    // The live loop invents a quarter's missing grid positions when
+    // that quarter's own anchor tick comes out of the held buffer, so
+    // the divisor in force at that moment is the one those positions
+    // are built from. Recording it here is what lets an alternating
+    // fixture be scored against the grid the analyzer would actually
+    // have used, transition latency and all, rather than against a
+    // single divisor that no part of the run was ever on.
+    let mut divisor_at_quarter: Vec<u8> = Vec::with_capacity(quarters as usize);
+    let mut grid_changes: u32 = 0;
+    let mut last_divisor = inference.current_divisor();
+
     let mut ti = 0usize;
     let mut pi = 0usize;
     while ti < ticks.len() || pi < played.len() {
@@ -327,8 +391,10 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
             (Some(_), None) => true,
             _ => false,
         };
+        let mut took_anchor = false;
         if take_tick {
             inference.update_reference(&ticks[ti]);
+            took_anchor = ticks[ti].subdivision_index == 0;
             ti += 1;
         } else {
             let ts = played[pi];
@@ -347,6 +413,15 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
             }
         }
         inference.refit();
+        // Order matters and mirrors the loop: refit first, then the
+        // quarter's positions are built from what the refit decided.
+        if took_anchor {
+            divisor_at_quarter.push(inference.current_divisor());
+        }
+        if inference.current_divisor() != last_divisor {
+            last_divisor = inference.current_divisor();
+            grid_changes += 1;
+        }
         // The live loop publishes once per matcher pass rather than
         // once per event; refitting per event only makes the lock
         // arrive marginally sooner, which overstates nothing that
@@ -367,16 +442,45 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
     // which is deliberately harsher than the live loop: notes lost
     // during cold start are counted as misses against the full grid
     // rather than quietly falling outside a coarser one.
+    //
+    // A fixture whose player changes feel has no single divisor to be
+    // built from — the run was never on one — so its grid is built
+    // quarter by quarter from what the analyzer believed at the time.
+    // That is the harsher reading again: a quarter the analyzer had
+    // not caught up with yet is scored against the grid it was still
+    // on, so transition latency shows up as missed and spurious notes,
+    // which is exactly what roadmap 1.4 is asking to be measured.
     let divisor = inference.current_divisor();
-    let offsets = virtual_tick_offsets(click_total, divisor);
+    let alternating = spec
+        .alternating_divisors
+        .as_ref()
+        .is_some_and(|l| !l.is_empty());
+    let quarter_divisor = |q: u32| -> u8 {
+        if alternating {
+            divisor_at_quarter
+                .get(q as usize)
+                .copied()
+                .unwrap_or(divisor)
+                .max(1)
+        } else {
+            divisor.max(1)
+        }
+    };
     let mut positions: Vec<u64> = Vec::new();
     for tick in &ticks {
-        if inference.is_active_tick(tick) {
+        let d = quarter_divisor(tick.beat_index);
+        // `is_active_tick` reads the inference's own current divisor,
+        // which is the right question only when the run has one. Per
+        // quarter it is the same arithmetic against that quarter's.
+        let on_grid = (tick.subdivision_index as u32 * d as u32) % click_total.max(1) as u32 == 0;
+        if on_grid {
             positions.push(tick.ts_ns);
         }
     }
-    let step_ns = quarter_ns / divisor.max(1) as u64;
     for q in 0..quarters {
+        let d = quarter_divisor(q);
+        let offsets = virtual_tick_offsets(click_total, d);
+        let step_ns = quarter_ns / d as u64;
         let anchor = LEAD_NS + q as u64 * quarter_ns;
         for &j in &offsets {
             positions.push(anchor + step_ns * j as u64);
@@ -412,6 +516,7 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
         played: played.len(),
         heard: heard.len(),
         expected_positions: expected.len(),
+        grid_changes,
     }
 }
 
@@ -459,9 +564,10 @@ fn played_grid_fixtures_hold() {
         let played = replay(&spec, RefractoryKey::Player);
         let clicked = replay(&spec, RefractoryKey::Click);
 
+        let changes_per_8_bars = played.grid_changes as f64 * 8.0 / spec.bars.max(1) as f64;
         eprintln!(
-            "  [{}] divisor {} (expected {}), heard {}/{}, {} expected positions, score {} \
-             (click-keyed: heard {}, score {})",
+            "  [{}] divisor {} (expected {:?}), heard {}/{}, {} expected positions, score {}, \
+             {} grid changes ({:.2} per 8 bars) (click-keyed: heard {}, score {})",
             spec.name,
             played.divisor,
             spec.expect_divisor,
@@ -469,15 +575,38 @@ fn played_grid_fixtures_hold() {
             played.played,
             played.expected_positions,
             played.report.score,
+            played.grid_changes,
+            changes_per_8_bars,
             clicked.heard,
             clicked.report.score,
         );
 
-        if played.divisor != spec.expect_divisor {
-            failures.push(format!(
-                "[{}] the inference settled on divisor {} but the player was playing {}",
-                spec.name, played.divisor, spec.expect_divisor,
-            ));
+        if let Some(expected) = spec.expect_divisor {
+            if played.divisor != expected {
+                failures.push(format!(
+                    "[{}] the inference settled on divisor {} but the player was playing {}",
+                    spec.name, played.divisor, expected,
+                ));
+            }
+        }
+        if let Some(floor) = spec.min_heard_ratio {
+            let ratio = played.heard as f64 / played.played.max(1) as f64;
+            if ratio < floor - 1e-9 {
+                failures.push(format!(
+                    "[{}] only {:.3} of the played notes were heard, under the {floor} this \
+                     fixture was landed at — the detector is swallowing more than it did",
+                    spec.name, ratio,
+                ));
+            }
+        }
+        if let Some(limit) = spec.max_grid_changes_per_8_bars {
+            if changes_per_8_bars > limit + 1e-9 {
+                failures.push(format!(
+                    "[{}] the grid the analyzer believes changed {:.2} times per 8 bars, \
+                     over the {limit} the roadmap allows — the inference is flapping",
+                    spec.name, changes_per_8_bars,
+                ));
+            }
         }
         if played.report.score < spec.min_score {
             failures.push(format!(

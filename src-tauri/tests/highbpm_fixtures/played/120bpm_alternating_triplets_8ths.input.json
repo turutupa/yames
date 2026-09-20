@@ -1,0 +1,15 @@
+{
+  "name": "120bpm_alternating_triplets_8ths",
+  "description": "The same alternation started from the other end: bar 0 is eighth-note triplets, bar 1 is straight eighths, and so on. The pair exists because the two directions are not the same problem. Locked on triplets the refractory is 125 ms, so both grids are audible and 96 per cent of the playing reaches the analyzer — and the inference still never moves off 3, so every eighth-note off-beat is scored against a triplet grid it is 84 ms from, which is outside its window. It scores 87 doing that. Between the two fixtures: the score gate cannot see a grid that is wrong, and in one direction the detector cannot hear that it is.",
+  "bpm": 120,
+  "clickSubdivision": 1,
+  "playedDivisor": 3,
+  "alternatingDivisors": [3, 2],
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260926,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "maxGridChangesPer8Bars": 2.0,
+  "minHeardRatio": 0.95
+}
