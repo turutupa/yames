@@ -28,6 +28,7 @@ import {
   useLiveNoteLights,
   useSongActions,
   useSongAttempt,
+  useSongProgress,
   useSongTakePitch,
 } from "./review";
 import { SongBand, SongCountIn } from "./SongBand";
@@ -176,6 +177,15 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * notes were played, only about when they landed.
    */
   const pitch = useSongTakePitch(attempt.review, takes.lastTake);
+
+  /**
+   * How this passage has gone before (`COACH_UX.md` C3).
+   *
+   * Read once when a review appears, so the resolver — which is synchronous —
+   * has the answer before it asks. A passage with fewer than two readings is
+   * not a story and the block goes, which is `resolve.ts`'s own rule.
+   */
+  const progressFor = useSongProgress(attempt.review);
 
   const actions = useSongActions({
     scoreId: song?.id ?? null,
@@ -543,6 +553,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               pitch={pitch}
               onAction={actions.run}
               onDismiss={attempt.dismiss}
+              progressFor={progressFor}
             />
           )}
         </>
