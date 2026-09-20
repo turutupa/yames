@@ -318,6 +318,16 @@ export type BlocksOptions = {
   attemptId?: string;
   /** Whether this passage has a history worth drawing (C3). */
   withProgress?: boolean;
+  /**
+   * W21 — the attempt was filmed, so the coach can point at the tape.
+   *
+   * Exactly `withProgress`'s shape and for the same reason: whether there is
+   * a recording is a fact about the world, not about the finding, and this
+   * function is pure. The host knows; it says so here, and a `take` block
+   * appears in the answer. A block naming an attempt with no picture resolves
+   * to nothing, which is correct, so this is belt as well as braces.
+   */
+  withTake?: boolean;
 };
 
 /**
@@ -351,6 +361,13 @@ export function blocksFor(t: Translate, finding: Finding, score: SongScore | nul
         ? {}
         : { attempt: opts.attemptId }),
     });
+    // W21 — and the tape, when the pass was filmed. After the excerpt, never
+    // instead of it: the notes are what the sentence is about and the picture
+    // is the evidence for it, and a teacher points at the page before they
+    // point at your hands.
+    if (opts.withTake && opts.attemptId) {
+      blocks.push({ type: "take", attempt: opts.attemptId, fromBar, toBar });
+    }
   }
 
   const action = actionFor(finding, opts.scoreId);

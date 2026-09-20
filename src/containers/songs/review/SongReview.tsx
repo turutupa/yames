@@ -46,12 +46,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CoachBlocks, resolveCoachAnswer } from "../../../coach/blocks";
-import type { CoachAction, CoachBlockContext, TabExcerptSlotProps } from "../../../coach/blocks";
+import type {
+  CoachAction,
+  CoachBlockContext,
+  TabExcerptSlotProps,
+  TakeSlotProps,
+} from "../../../coach/blocks";
+// W21 — the picture, when the pass was filmed. Lazy inside the review's own
+// chunk: a review with sound alone must not pay for a video player.
+import { TakeVideoView } from "../camera/TakeVideoView";
+import type { ReviewTakeVideo } from "../camera/TakeVideoView";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";
 import type { SongAttemptReview } from "./useSongAttempt";
 import { blocksFor } from "../../../songs/verdict";
+import { beatAtMs, passLengthMs } from "../../../songs/camera/offset";
+import { rangeTempoSteps } from "../../../songs/schedule";
+import type { BarRange } from "../../../songs/schedule";
 import { printedBarNumber } from "../../../songs/position";
 import type { Finding, NoteVerdict } from "../../../songs/types";
 import "../../../styles/songs-review.css";
@@ -74,9 +86,24 @@ export type SongReviewProps = {
   onDismiss: () => void;
   /** How this passage has gone before, for the `progress` block (C3). */
   progressFor?: CoachBlockContext["progressFor"];
+  /**
+   * W21 — the recording of this pass, when the camera was on for it.
+   *
+   * Absent is the normal case and the one A9 insists on: with no picture this
+   * screen is exactly what it was before the camera existed. Every use of it
+   * below is behind a check for that reason.
+   */
+  video?: ReviewTakeVideo;
 };
 
-export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: SongReviewProps) {
+export function SongReview({
+  review,
+  pitch,
+  onAction,
+  onDismiss,
+  progressFor,
+  video,
+}: SongReviewProps) {
   const { t } = useTranslation();
   const { score, schedule, facts, bands, findings, range } = review;
 
@@ -97,6 +124,26 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
    * — stepping through the passes, say — does not reshuffle mid-read.
    */
   const bag = useRef(createShuffleState());
+
+  /**
+   * W21 — where the tape is, in transport milliseconds, or null when nothing
+   * is playing. One number, held here, so the excerpt and the coach's own
+   * clip are reading the same clock.
+   */
+  const [playheadMs, setPlayheadMs] = useState<number | null>(null);
+  const clock = useMemo(
+    () => ({
+      steps: rangeTempoSteps(score, range, review.tempoPercent),
+      passMs: passLengthMs(score, range, review.tempoPercent),
+    }),
+    [score, range, review.tempoPercent],
+  );
+  /** ...as a beat of the schedule, which is what the excerpt marks by. */
+  const playheadBeat = useMemo(() => {
+    if (playheadMs === null) return null;
+    const within = clock.passMs > 0 ? playheadMs % clock.passMs : playheadMs;
+    return beatAtMs(clock.steps, within);
+  }, [playheadMs, clock]);
 
   const headline = findings[0] ?? null;
   const rest = findings.slice(1);
@@ -159,10 +206,60 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
         bands={bands}
         pass={pass}
         pitch={pitch}
+        playheadBeat={playheadBeat}
         className="songs-review-excerpt"
       />
     ),
-    [score, range, schedule, facts, bands, pass, pitch],
+    [score, range, schedule, facts, bands, pass, pitch, playheadBeat],
+  );
+
+  /**
+   * W21 — what the coach's "Watch it" is pointing at, and how many times it
+   * has been pressed.
+   *
+   * The nonce IS the press: the same finding pressed twice has to rewind and
+   * play again, and a value that did not change would do nothing the second
+   * time.
+   */
+  const [watch, setWatch] = useState<{ bars: BarRange | null; nonce: number } | null>(null);
+  useEffect(() => {
+    setWatch(null);
+  }, [review.attemptId]);
+
+  /**
+   * W21 — the `take` slot's real component (`slots.tsx`), at last.
+   *
+   * A BUTTON, and not a second video pane. The catalogue's `take` block means
+   * "play these bars of that take", and the tempting reading is to draw a
+   * player wherever it appears — but a review that has a picture already has
+   * one, at the top of this panel, and two transports on one screen is two
+   * things a person has to keep in step by hand. So the block POINTS the
+   * player that is already there: the finding's bars, looped, at seventy per
+   * cent — the same number every "slow it down" fix in `useSongActions` uses.
+   * A teacher rewinding to the spot, rather than opening a second television.
+   *
+   * With no picture it draws nothing, which is exactly what `resolve.ts` does
+   * with a reference to something that is not there.
+   */
+  const TakeSlot = useCallback(
+    (props: TakeSlotProps) => {
+      if (!video) return null;
+      const bars =
+        props.fromBar !== null && props.toBar !== null
+          ? { startBar: props.fromBar - 1, endBar: props.toBar - 1 }
+          : null;
+      return (
+        <button
+          type="button"
+          className="songs-btn songs-review-watch"
+          onClick={() => setWatch((current) => ({ bars, nonce: (current?.nonce ?? 0) + 1 }))}
+        >
+          {t("songs.camera.watchIt")}
+        </button>
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [video],
   );
 
   const answer = useMemo(() => {
@@ -177,6 +274,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
             scoreId: review.scoreId || null,
             attemptId: review.attemptId,
             withProgress: progressFor !== undefined,
+            withTake: video !== undefined,
           },
           bag.current,
         ),
@@ -186,7 +284,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
     // `t` is stable per language and the bag is a ref; re-resolving on every
     // render would draw a different variant of the same sentence each time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headline, score, review.scoreId, context, progressFor, t]);
+  }, [headline, score, review.scoreId, context, progressFor, video, t]);
 
   const others = useMemo(
     () =>
@@ -198,7 +296,14 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
               t,
               finding,
               score,
-              { scoreId: review.scoreId || null, attemptId: review.attemptId },
+              {
+                scoreId: review.scoreId || null,
+                attemptId: review.attemptId,
+                // W21 — the other findings point at the tape as well, so
+                // "what else" is also something you can watch rather than
+                // only read about.
+                withTake: video !== undefined,
+              },
               bag.current,
             ),
           },
@@ -206,7 +311,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
         ),
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rest, score, review.scoreId, context, t],
+    [rest, score, review.scoreId, context, video, t],
   );
 
   /**
@@ -297,11 +402,30 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
           scrolling" true at every window height, rather than true at 900 and a
           scroll away at 720. */}
       <div className="songs-review-body">
+      {/* W21 — the pass as it happened, with the verdict painted on the tape
+          under it. FIRST in the body, because it is the thing the player came
+          back for (`plans/ECHORA.md` E0.7) and a reward you have to scroll to
+          is not one — and because the coach's sentence is pinned in the head
+          above it, so A4 still has the first word. The coach's "Watch it"
+          points this player rather than opening a second. With no picture none
+          of it exists and the panel is exactly what it was. */}
+      {video && (
+        <TakeVideoView
+          review={review}
+          take={video}
+          loopBars={watch?.bars ?? null}
+          watchNonce={watch?.nonce ?? 0}
+          pass={pass}
+          onPass={setPass}
+          onPosition={setPlayheadMs}
+        />
+      )}
+
       {answer && headline && answer.blocks.length > 0 && (
         <CoachBlocks
           blocks={answer.blocks}
           onAction={handlerFor(headline)}
-          slots={{ tabExcerpt: TabExcerpt }}
+          slots={{ tabExcerpt: TabExcerpt, take: TakeSlot }}
           className="songs-review-answer"
         />
       )}
@@ -334,6 +458,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
         bands={bands}
         pass={pass}
         pitch={pitch}
+        playheadBeat={playheadBeat}
       />
 
       <ul className="songs-review-key">
@@ -367,7 +492,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
                     key={i}
                     blocks={other.answer.blocks}
                     onAction={handlerFor(other.finding)}
-                    slots={{ tabExcerpt: TabExcerpt }}
+                    slots={{ tabExcerpt: TabExcerpt, take: TakeSlot }}
                   />
                 ),
               )}

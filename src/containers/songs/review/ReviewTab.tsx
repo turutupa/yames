@@ -61,6 +61,16 @@ export type ReviewTabProps = {
   pass: number;
   /** What the ear said about the notes, when a take was listened to. */
   pitch?: readonly NoteVerdict[];
+  /**
+   * W21 — where the tape is, in beats of the schedule, while a recording of
+   * this pass plays back beside it.
+   *
+   * The column at or just before it is marked `data-now` and lifts, so the
+   * picture, the tape and the page all point at the same note. `null` — the
+   * normal case, and every case before the camera existed — marks nothing and
+   * this component draws exactly what it always drew.
+   */
+  playheadBeat?: number | null;
   className?: string;
 };
 
@@ -87,6 +97,7 @@ export function ReviewTab({
   bands,
   pass,
   pitch,
+  playheadBeat = null,
   className,
 }: ReviewTabProps) {
   const { t } = useTranslation();
@@ -152,6 +163,24 @@ export function ReviewTab({
     return [...byBar.entries()].sort((a, b) => a[0] - b[0]);
   }, [columns]);
 
+  /**
+   * W21 — the beat of the column the tape is currently over.
+   *
+   * The LAST column at or before the playhead, so a note stays lit until the
+   * next one arrives rather than flickering on for the frame it is exactly
+   * under. Computed once for the excerpt instead of per column, because the
+   * comparison is against a number that changes sixty times a second.
+   */
+  const nowBeat = useMemo(() => {
+    if (playheadBeat === null) return null;
+    let found: number | null = null;
+    for (const column of columns) {
+      if (column.beat <= playheadBeat + 1e-6) found = column.beat;
+      else break;
+    }
+    return found;
+  }, [columns, playheadBeat]);
+
   if (bars.length === 0) {
     return <p className="songs-review-tab-empty">{t("songs.review.tab.nothing")}</p>;
   }
@@ -173,6 +202,7 @@ export function ReviewTab({
                   key={`n${String(i)}`}
                   strings={strings}
                   column={column}
+                  now={nowBeat !== null && column.beat === nowBeat}
                   label={t(`songs.review.mark.${column.mark}`)}
                   accentLabel={t("songs.review.mark.accentQuiet")}
                 />
@@ -199,11 +229,14 @@ function heardName(notes: SongNote[], pitchByNote: Map<number, NoteVerdict>): st
 function NoteColumn({
   strings,
   column,
+  now = false,
   label,
   accentLabel,
 }: {
   strings: number;
   column: Extract<Column, { kind: "note" }>;
+  /** W21 — the tape is over this note right now. */
+  now?: boolean;
   label: string;
   accentLabel: string;
 }) {
@@ -211,7 +244,7 @@ function NoteColumn({
   for (const note of column.notes) frets.set(note.string, note);
 
   return (
-    <div className="songs-review-col" data-mark={column.mark}>
+    <div className="songs-review-col" data-mark={column.mark} data-now={now ? "" : undefined}>
       <div className="songs-review-strings">
         {Array.from({ length: strings }, (_, i) => {
           // String 1 is the highest and sits on top, the way it is printed.
