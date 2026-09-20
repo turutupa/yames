@@ -6637,7 +6637,14 @@ impl MetronomeEngine {
                                 }
                             }
                         } else if !form_ended_here && sample_counter >= next_beat_sample {
-                            // THIS IS THE DOWNBEAT THE SONG ENDED ON.
+                            // THIS IS THE DOWNBEAT THE FORM ENDED ON.
+                            //
+                            // "The form", and every "song" in the jam comments
+                            // below means a TUNE rather than an imported
+                            // piece: this arm is the click and the band, and
+                            // it does not run at all while a `song::SongTable`
+                            // is loaded. The two are different engine modes
+                            // and the word was here first.
                             //
                             // Armed at the bar line a tick ago, fired here,
                             // where the next bar would have begun. The tick
