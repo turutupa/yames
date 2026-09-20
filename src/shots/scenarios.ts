@@ -96,6 +96,17 @@ export interface Shot {
     playing?: boolean;
     /** Open the takes shelf — it is a popover now, not a section. */
     takes?: boolean;
+    /**
+     * Choose a portion, by dragging across the tab.
+     *
+     * Printed bar numbers, 1-based, the way a person would say them. Dragged
+     * rather than poked: the band, the handles and the strip's sentence all
+     * come from one selection, and a scene that set the state directly would
+     * photograph a state the pointer might not actually be able to reach.
+     */
+    select?: { fromBar: number; toBar: number };
+    /** Save the chosen portion under this name before the capture. */
+    keepAs?: string;
   };
   jam?: {
     row: number;
@@ -472,6 +483,22 @@ export const SHOTS: Shot[] = [
     // has the cursor on it. The picture A13 is argued from, and the one the
     // layout suite measures "can you reach it while playing" against.
     songs: { row: 0, playing: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-portion",
+    suffix: "songs-portion",
+    window: "main",
+    tab: "songs",
+    // The centre of the mode: four bars dragged out on the tab, the band
+    // drawn behind them with a handle at each end, the strip saying the same
+    // thing in words, and one portion already kept under a name beside the
+    // sections. Bars 5–8 of the fixture, which is the chorus — and the
+    // fixture's two systems mean bars 4–8 would cross a line break, which is
+    // the case `selectionBands` exists for.
+    songs: { row: 0, select: { fromBar: 5, toBar: 8 }, keepAs: "The chorus" },
     width: 1400,
     height: 900,
     settleMs: 900,

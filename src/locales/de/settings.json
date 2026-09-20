@@ -183,7 +183,8 @@
         "metronome": "Metronom",
         "view": "Ansicht",
         "navigation": "Navigation",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Songs"
       },
       "actions": {
         "play": "Start / Stopp",
@@ -218,7 +219,13 @@
         "jam-prev-section": "Vorheriger Teil",
         "jam-loop-section": "Diesen Teil loopen",
         "jam-take": "Take aufnehmen",
-        "tab-5": "Songs-Tab"
+        "tab-5": "Songs-Tab",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -253,7 +260,13 @@
         "jam-prev-section": "Am Taktstrich zurück an den Anfang des vorherigen Teils",
         "jam-loop-section": "Den Teil, in dem du bist, in die Schleife nehmen oder wieder freigeben",
         "jam-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden",
-        "tab-5": "Zum Songs-Tab wechseln"
+        "tab-5": "Zum Songs-Tab wechseln",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
       }
     },
     "inputTest": {

@@ -329,6 +329,106 @@ async function drive() {
     }
 
     /**
+     * A portion, dragged out across the tab.
+     *
+     * Real pointer events on the real overlay, so what is photographed is the
+     * gesture a player makes: down on the first bar, across to the last, up.
+     * The coordinates come from alphaTab's own bounds for those printed bars
+     * — the same lookup the stage hit-tests with — because there is no other
+     * way to know where bar five is on a page that has just been engraved.
+     */
+    if (shot!.songs.select) {
+      const { fromBar, toBar } = shot!.songs.select;
+      await until("the selection overlay", () => !!document.querySelector(".songs-tab-overlay[data-ready]"));
+      const overlay = document.querySelector(".songs-tab-overlay") as HTMLElement;
+      const box = overlay.getBoundingClientRect();
+      const api = (
+        window as unknown as {
+          __SONGS_TAB_API__?: {
+            renderer?: {
+              boundsLookup?: {
+                findMasterBarByIndex(index: number): {
+                  visualBounds: { x: number; y: number; w: number; h: number };
+                } | null;
+              } | null;
+            };
+          };
+        }
+      ).__SONGS_TAB_API__;
+      const lookup = api?.renderer?.boundsLookup;
+      if (!lookup) throw new Error("the tab has no bounds lookup to select against");
+      const midOf = (printedBar: number) => {
+        const bounds = lookup.findMasterBarByIndex(printedBar - 1);
+        if (!bounds) throw new Error(`bar ${printedBar} was not engraved`);
+        const b = bounds.visualBounds;
+        return { x: box.left + b.x + b.w / 2, y: box.top + b.y + b.h / 2 };
+      };
+      const from = midOf(fromBar);
+      const to = midOf(toBar);
+      const send = (type: string, at: { x: number; y: number }) =>
+        overlay.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            clientX: at.x,
+            clientY: at.y,
+            button: 0,
+            pointerId: 1,
+          }),
+        );
+      /*
+       * A frame between each event, because a drag is three renders.
+       *
+       * The press puts a drag in React state, the move reads it, and the
+       * release turns it into a selection. Fired back to back in one tick the
+       * move runs against a state React has not committed — which is a real
+       * pointer sequence no human can produce, and it made this scene fail
+       * about one run in four under four Playwright workers.
+       */
+      const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      /*
+       * Dragged until it takes, rather than dragged once and hoped for.
+       *
+       * The same lesson "what else" taught this file: with four Playwright
+       * workers each engraving a score at the same time, a frame is not a
+       * guarantee that React has committed, and a move that runs against an
+       * uncommitted press does nothing. A person whose drag does not take
+       * does it again; so does this.
+       */
+      for (let attempt = 0; attempt < 8; attempt++) {
+        send("pointerdown", from);
+        await frame();
+        send("pointermove", to);
+        await frame();
+        window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 1 }));
+        await frame();
+        if (document.querySelectorAll(".songs-tab-band").length > 0) break;
+      }
+      await until(
+        `bars ${fromBar}–${toBar} chosen`,
+        () => document.querySelectorAll(".songs-tab-band").length > 0,
+      );
+    }
+
+    /** And keep it under a name, the way a person does: press, type, Enter. */
+    if (shot!.songs.keepAs) {
+      await pressUntil(
+        "the keep button",
+        () => document.querySelector<HTMLElement>(".songs-portion-save")?.click(),
+        () => !!document.querySelector(".songs-portion-name-input"),
+      );
+      const input = document.querySelector<HTMLInputElement>(".songs-portion-name-input")!;
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(input, shot!.songs.keepAs);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      await until("the kept portion", () => !!document.querySelector(".songs-portion-chip"));
+    }
+
+    /**
      * The band playing, and nothing stopped.
      *
      * Pressed rather than poked, like the review above, and left running: the

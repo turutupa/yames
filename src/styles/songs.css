@@ -318,6 +318,16 @@
   min-width: 0;
 }
 
+/* The host and the selection overlay, stacked and the same size.
+   The stack is what gives the overlay something to be `inset: 0` of, and it
+   takes its height from the engraving rather than from the viewport — so the
+   band goes on lining up with bar 40 after the page has been scrolled. */
+.songs-tab-stack {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
 .songs-tab-host {
   /* alphaTab measures this box and lays the score out to its width, so it
      must not be a flex item that can be squeezed. */
@@ -329,6 +339,63 @@
 
 .songs-tab-host[data-ready] {
   opacity: 1;
+}
+
+/* ── Choosing a portion on the tab ────────────────────────────────────── */
+
+/* The overlay takes the pointer for the whole engraving.
+ *
+ * alphaTab's own selecting and seek-on-click are off (`TabStage.tsx`), so
+ * there is nothing underneath this that wants a press — and one surface that
+ * owns the gesture is simpler than two that have to agree whose press it was.
+ * The wheel still reaches the viewport, because scrolling is not a pointer
+ * event; `touch-action` keeps a drag across bars from being read as a pan. */
+.songs-tab-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  touch-action: pan-y;
+}
+
+.songs-tab-overlay[data-ready] {
+  cursor: text;
+}
+
+/* The band behind the selected bars.
+ *
+ * `--accent-subtle` is a translucent tint of the accent over the page, so the
+ * notes stay legible through it in all thirteen themes — it is the same token
+ * the chips use for "this one is chosen", which is the same thing being said.
+ * The left and right edges are the accent proper, so where the portion starts
+ * and stops is readable even in the two lowest-contrast themes. */
+.songs-tab-band {
+  position: absolute;
+  background: var(--accent-subtle);
+  border-left: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* A handle at each end. Grabbable, and the only thing on the overlay that
+   takes a press of its own — everything else is the bar under the pointer. */
+.songs-tab-handle {
+  position: absolute;
+  cursor: col-resize;
+  background: var(--accent);
+  opacity: 0.55;
+  border-radius: 3px;
+}
+
+.songs-tab-handle:hover {
+  opacity: 1;
+}
+
+/* While a drag is out, the handles are gone and the cursor says what is
+   happening — a selection being dragged does not want two grab targets
+   following the pointer around. */
+.songs-tab-viewport[data-selecting] .songs-tab-overlay {
+  cursor: col-resize;
 }
 
 /* ── The notes light while you play (SONGS.md A7) ─────────────────────── */
@@ -494,8 +561,17 @@
  * `flex: 1 1 …` on the group rather than a fixed width: the band is the part
  * of the strip that can usefully take the slack on a wide stage, and the part
  * that has to be allowed to wrap onto its own row on a narrow one. */
+/* The band takes a row of its own.
+ *
+ * Three lanes need about two hundred pixels each — an icon, a name, a fader
+ * that has to stay a fader, a number and a mute — and sharing a row with the
+ * takes chips left them a hundred and fifty, which does not overflow, it
+ * OVERLAPS: the fader has a `min-width` and stops shrinking, so the next
+ * lane's name is drawn under the last one's switch. A full row is 1080px on
+ * a wide stage, which is three comfortable lanes and no new row: the takes
+ * chips simply join the row above instead. */
 .songs-strip-band {
-  flex: 1 1 300px;
+  flex: 1 1 100%;
   min-width: 0;
 }
 
@@ -517,11 +593,13 @@
   align-items: center;
   gap: 6px;
   min-width: 0;
-  /* A floor, not a width: the fader has to stay a fader (the layout suite
-     asks for more than 40px of it) and the lane may take more if there is
-     more to take. */
-  flex: 1 1 128px;
-  max-width: 220px;
+  /* The basis is the lane's REAL minimum, not a hopeful number: an icon, a
+     name, a 44px fader, a number and a 34px switch. Under-stating it does
+     not make the lanes narrower, it makes them overlap — flex lays three of
+     them on one line because three bases fit, and then each refuses to
+     shrink past its own contents. */
+  flex: 1 1 188px;
+  max-width: 260px;
 }
 
 /* A lane that is off is still legible — it is a state, not a disabled
@@ -563,6 +641,72 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
+}
+
+/* ── Portions the player kept ─────────────────────────────────────────── */
+
+/* A chip with two small buttons tucked inside its right-hand end.
+ *
+ * Inside, not beside: a saved portion is one thing, and a name with two loose
+ * glyphs floating after it reads as three. The chip's own padding makes room
+ * for them so the name never runs underneath, and they are invisible until
+ * the chip is hovered or something inside it has focus — a row of portions
+ * should read as a row of portions, not as a row of controls. */
+.songs-portion-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.songs-portion-chip-main {
+  /* Room for the two glyphs at the right-hand end. */
+  padding-right: 34px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.songs-portion-edit {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.songs-portion-edit:nth-of-type(2) {
+  right: 17px;
+}
+
+.songs-portion-edit:nth-of-type(3) {
+  right: 3px;
+}
+
+.songs-portion-chip:hover .songs-portion-edit,
+.songs-portion-chip:focus-within .songs-portion-edit {
+  opacity: 1;
+}
+
+.songs-portion-edit:hover {
+  color: var(--accent);
+}
+
+.songs-portion-name-input {
+  width: 130px;
+  padding: 5px 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
 }
 
 /* ── The band, folded ─────────────────────────────────────────────────── */
@@ -679,7 +823,14 @@
   outline: none;
 }
 
+/* Hugging the words, not the column.
+ *
+ * An `h3` is a block, so a ring on it is a rectangle the width of the panel
+ * with three words in the corner — which reads as a text field rather than as
+ * "the caret is here". `inline-block` makes the ring the shape of what it is
+ * pointing at. */
 .songs-review-title:focus-visible {
+  display: inline-block;
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
@@ -714,6 +865,42 @@
   background: var(--bg-card);
   font-size: 13px;
   color: var(--text-tertiary);
+}
+
+/* Which time round, while a portion repeats.
+ *
+ * Top right of the frame, out of the music's way, and only while something is
+ * actually going round. A loop with no counter is a loop you lose your place
+ * in — "have I played this four times or seven?" — and the number is on every
+ * beat event the engine already sends. */
+.songs-stage-pass {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 2;
+  margin: 0;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+/* What is chosen, in words — the sentence beside the band's picture.
+ *
+ * A fixed slot, not a label that takes what it needs. It goes from "The whole
+ * song" to "4 bars · on repeat" when a section chip is pressed, and a
+ * sentence that changes width drags the repeat switch — and everything after
+ * it — along the row under the finger that just pressed something. That is
+ * the owner's own complaint about Jam's switches, one control along. */
+.songs-portion-says {
+  flex: 0 0 auto;
+  min-width: 124px;
+  color: var(--text-secondary);
 }
 
 /* A pass too short to judge is news about the pass, not a replacement for the

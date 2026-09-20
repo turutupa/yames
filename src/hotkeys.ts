@@ -48,6 +48,16 @@ export type HotkeyAction =
   | "jam-prev-section"
   | "jam-loop-section"
   | "jam-take"
+  // Songs, hands-free (W18, 2026-09-20). Choosing the portion you are working
+  // on is the centre of the mode, and a player choosing it has a guitar in
+  // their hands: these exist so the bars can be set from a footswitch, while
+  // the music is running, without looking away from the page.
+  | "songs-loop-start"
+  | "songs-loop-end"
+  | "songs-loop"
+  | "songs-loop-clear"
+  | "songs-loop-earlier"
+  | "songs-loop-later"
   | "settings";
 
 export interface HotkeyEntry {
@@ -57,7 +67,7 @@ export interface HotkeyEntry {
   id: HotkeyAction;
   desc: string;
   globalAllowed?: boolean;
-  group: "metronome" | "view" | "navigation" | "jam";
+  group: "metronome" | "view" | "navigation" | "jam" | "songs";
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -427,6 +437,64 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Record the next time you press play, or stop recording",
     group: "jam",
   },
+  /**
+   * Songs, hands-free (W18, 2026-09-20).
+   *
+   * The owner: choosing a portion of a song so it repeats is *"super critical
+   * for song learning"*. A player choosing one has a guitar in their hands —
+   * so the bars can be set from a footswitch, while the music is running,
+   * without a hand leaving the neck. `[` and `]` mark where the loop starts
+   * and stops AT THE BAR YOU ARE IN, which is the gesture every looper pedal
+   * in the world already taught everybody.
+   *
+   * Three of these keys are the metronome's elsewhere (`[`, `]`, `L` is
+   * Jam's). That is deliberate and handled where a key is turned into an
+   * action: on the Songs tab the Songs meaning wins, everywhere else the old
+   * one does. A subdivision stepper on a screen whose click follows the
+   * score's own tempo map was not doing much anyway.
+   */
+  {
+    id: "songs-loop-start",
+    action: "Loop starts here",
+    key: "[",
+    desc: "Start the portion at the bar you are playing",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-end",
+    action: "Loop ends here",
+    key: "]",
+    desc: "End the portion at the bar you are playing",
+    group: "songs",
+  },
+  {
+    id: "songs-loop",
+    action: "Repeat the portion",
+    key: "L",
+    desc: "Play the chosen bars round and round, or stop",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-clear",
+    action: "The whole song again",
+    key: "\\",
+    desc: "Forget the portion and play the piece from the top",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-earlier",
+    action: "Portion a bar earlier",
+    key: "⇧[",
+    desc: "Slide the chosen bars one bar towards the start, keeping their length",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-later",
+    action: "Portion a bar later",
+    key: "⇧]",
+    desc: "Slide the chosen bars one bar towards the end, keeping their length",
+    group: "songs",
+  },
 ];
 
 export const HOTKEY_GROUPS: { key: string; label: string }[] = [
@@ -434,6 +502,7 @@ export const HOTKEY_GROUPS: { key: string; label: string }[] = [
   { key: "view", label: "View" },
   { key: "navigation", label: "Navigation" },
   { key: "jam", label: "Jam" },
+  { key: "songs", label: "Songs" },
 ];
 
 // Delay for macOS fullscreen exit animation to complete before restoring window state

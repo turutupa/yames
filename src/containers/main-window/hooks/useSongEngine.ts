@@ -71,6 +71,10 @@ export interface SongEngine {
   setCountInBars: (bars: number) => void;
   /** Turn recording on or off for the loaded song. Remembered per song. */
   setTakes: (takes: boolean) => void;
+  /** Write the portion, the repeat, the speed or the saved portions. */
+  setStageSetting: (
+    patch: Partial<Pick<SongMixSetting, "selection" | "loop" | "tempoPercent" | "portions">>,
+  ) => void;
   /** Only the band's rows this file actually has, in playing order. */
   lanes: SongRole[];
   /** Tracks in the file this band has nobody to play, by name. */
@@ -354,12 +358,32 @@ export function useSongEngine({
     [songId],
   );
 
+  /**
+   * Write down how the player has this song set up: the portion, the repeat,
+   * the speed, and the portions they have named.
+   *
+   * One writer for the four rather than four, because they move together —
+   * choosing a saved portion sets a selection, a loop and a tempo in one
+   * gesture, and three separate writes would be three saves and two moments
+   * where the file on disk says something nobody chose.
+   */
+  const setStageSetting = useCallback(
+    (patch: Partial<Pick<SongMixSetting, "selection" | "loop" | "tempoPercent" | "portions">>) =>
+      setMixSetting((current) => {
+        const next = { ...current, ...patch };
+        if (songId) void saveMixSetting(songId, next).catch(() => {});
+        return next;
+      }),
+    [songId],
+  );
+
   return {
     mixSetting,
     setGain,
     setMute,
     setCountInBars,
     setTakes,
+    setStageSetting,
     lanes,
     leftOut: band?.leftOut ?? [],
     loaded,

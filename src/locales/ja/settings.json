@@ -183,7 +183,8 @@
         "metronome": "メトロノーム",
         "view": "ビュー",
         "navigation": "ナビゲーション",
-        "jam": "ジャム"
+        "jam": "ジャム",
+        "songs": "Songs"
       },
       "actions": {
         "play": "再生 / 停止",
@@ -218,7 +219,13 @@
         "jam-prev-section": "前のセクション",
         "jam-loop-section": "このセクションをループ",
         "jam-take": "テイクを録音",
-        "tab-5": "曲タブ"
+        "tab-5": "曲タブ",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -253,7 +260,13 @@
         "jam-prev-section": "小節線でひとつ前のセクションの頭へ戻る",
         "jam-loop-section": "いるセクションをループする、または解除する",
         "jam-take": "次に再生したときに録音する、または録音をやめる",
-        "tab-5": "曲タブへ切り替える"
+        "tab-5": "曲タブへ切り替える",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
       }
     },
     "inputTest": {

@@ -63,12 +63,14 @@ import { useSongAttempt } from "./review/useSongAttempt";
 import { useSongProgress } from "./review/useSongProgress";
 import { useSongTakePitch } from "./review/useSongTakePitch";
 import { SongBand } from "./SongBand";
+import { SongPortionChip, SongPortionSave } from "./SongPortions";
 import { SongRecordControl } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
-import { buildSchedule, meterAt, sectionRange, wholeSong } from "../../songs/schedule";
-import { songPosition } from "../../songs/position";
+import { buildSchedule, meterAt, sectionRange } from "../../songs/schedule";
+import { portionRange } from "../../songs/selection";
+import { printedBarNumber, songPosition } from "../../songs/position";
 import type { SongsSession } from "../main-window/hooks/useSongsSession";
 import type { BeatEvent } from "../../types";
 import "../../styles/songs.css";
@@ -478,9 +480,23 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   themeId={themeId}
                   lights={lights}
                   schedule={schedule}
+                  selection={session.selection}
+                  onSelect={session.setSelection}
                 />
               </Suspense>
             </div>
+
+            {/* Which time round you are, while a portion repeats.
+                A loop with no counter is a loop you lose your place in —
+                "have I played this four times or seven?" — and the number is
+                already on every beat event the engine sends. Only while
+                something is actually going round: on the first time through
+                it would be furniture. */}
+            {isPlaying && loop && (position?.pass ?? 0) > 0 && (
+              <p className="songs-stage-pass" role="status" aria-live="polite">
+                {t("songs.stage.timeRound", { n: (position?.pass ?? 0) + 1 })}
+              </p>
+            )}
 
             {/* The count, over the page, while somebody counts you in. The
                 cursor is not drawn at all until the piece starts — see
@@ -533,7 +549,12 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           {/* The strip: what you reach for with the guitar on, one row of it,
               all of it on screen while the transport runs (A13). */}
           <div className="songs-strip">
-            <div className="songs-strip-group songs-strip-range">
+            {/* The portion, and everything about it, in one group — because it
+                is one thing. The owner: selecting a portion so it repeats is
+                "super critical for song learning", so it is the first thing on
+                the strip and the tab's own band says the same thing in
+                pictures that this says in words. */}
+            <div className="songs-strip-group songs-strip-portion">
               <span className="songs-strip-label">{t("songs.range")}</span>
               <label className="songs-range-field">
                 <span className="sr-only">{t("songs.fromBar")}</span>
@@ -542,9 +563,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   min={1}
                   max={score.bars.length}
                   aria-label={t("songs.fromBar")}
-                  value={range.startBar + 1}
+                  value={printedBarNumber(score, range.startBar)}
                   onChange={(e) =>
-                    session.setRange({ ...range, startBar: Number(e.target.value) - 1 })
+                    session.setSelection({ ...range, startBar: Number(e.target.value) - 1 })
                   }
                 />
               </label>
@@ -558,26 +579,57 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   min={1}
                   max={score.bars.length}
                   aria-label={t("songs.toBar")}
-                  value={range.endBar + 1}
+                  value={printedBarNumber(score, range.endBar)}
                   onChange={(e) =>
-                    session.setRange({ ...range, endBar: Number(e.target.value) - 1 })
+                    session.setSelection({ ...range, endBar: Number(e.target.value) - 1 })
                   }
                 />
               </label>
-              {/* The count that used to be a line under the fields. It is one
-                  number and it belongs beside them, not on a line of its own
-                  that costs the tab fourteen pixels. */}
-              <span className="songs-strip-note">{t("songs.barsCount", { count: barsInRange })}</span>
+
+              {/* What is chosen, said. A band drawn on the tab is the picture
+                  and this is the sentence; neither is ever the only signal,
+                  and this one is what a screen reader and a low-contrast
+                  theme have. "· looping" is the state, not a second control:
+                  the switch beside it is the control. */}
+              <span className="songs-strip-note songs-portion-says">
+                {session.selection
+                  ? t("songs.stage.portionSays", {
+                      count: barsInRange,
+                      state: loop ? t("songs.stage.looping") : t("songs.stage.once"),
+                    })
+                  : t("songs.stage.wholeSong")}
+              </span>
+
+              <button
+                type="button"
+                className="songs-chip songs-loop-chip"
+                data-active={loop ? "" : undefined}
+                aria-pressed={loop}
+                title={t("songs.loopNote")}
+                onClick={() => session.setLoop(!loop)}
+              >
+                {loop ? t("songs.loopOn") : t("songs.loopOff")}
+              </button>
+
+              {/* Clears the portion rather than selecting every bar: they play
+                  the same music and they are not the same state — one is "I
+                  am working on this", the other is "I am playing the piece". */}
               <button
                 type="button"
                 className="songs-chip"
-                onClick={() => session.setRange(wholeSong(score))}
+                disabled={!session.selection}
+                onClick={session.clearSelection}
               >
                 {t("songs.wholeSong")}
               </button>
+
+              <SongPortionSave
+                canSave={session.selection !== null}
+                onSave={session.savePortion}
+              />
             </div>
 
-            {score.sections.length > 0 && (
+            {(score.sections.length > 0 || session.portions.length > 0) && (
               <div className="songs-strip-group songs-strip-sections">
                 <span className="songs-strip-label">{t("songs.sections")}</span>
                 <div className="songs-section-chips">
@@ -591,12 +643,31 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                         className="songs-chip"
                         data-active={chosen ? "" : undefined}
                         aria-pressed={chosen}
-                        onClick={() => session.setRange(sectionRange(score, section.name))}
+                        onClick={() => session.setSelection(sectionRange(score, section.name))}
                       >
                         {section.name}
                       </button>
                     );
                   })}
+                  {/* The portions the player named, beside the sections the
+                      file came with — because by the third week the passage
+                      you call "that run in the bridge" is more use than the
+                      section heading the engraver wrote. */}
+                  {session.portions.map((portion) => (
+                    <SongPortionChip
+                      key={portion.id}
+                      portion={portion}
+                      chosen={
+                        range.startBar === portion.startBar && range.endBar === portion.endBar
+                      }
+                      onChoose={() => {
+                        session.setSelection(portionRange(score, portion));
+                        session.setTempoPercent(portion.tempoPercent);
+                      }}
+                      onRename={(name) => session.renamePortion(portion.id, name)}
+                      onDelete={() => session.deletePortion(portion.id)}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -621,20 +692,6 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="songs-strip-group songs-strip-loop">
-              <span className="songs-strip-label">{t("songs.loop")}</span>
-              <button
-                type="button"
-                className="songs-chip songs-chip-wide"
-                data-active={loop ? "" : undefined}
-                aria-pressed={loop}
-                title={t("songs.loopNote")}
-                onClick={() => session.setLoop(!loop)}
-              >
-                {loop ? t("songs.loopOn") : t("songs.loopOff")}
-              </button>
             </div>
 
             <SongRecordControl

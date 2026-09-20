@@ -30,7 +30,7 @@
  * a group and one `<text>` inside it, and they never touch each other. An
  * empty map paints nothing and costs two map lookups.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   AlphaTabApi,
@@ -50,8 +50,20 @@ import {
 import bravuraWoff2 from "@coderline/alphatab/font/Bravura.woff2?url";
 import { parseSongFile } from "../../songs/import";
 import { groupClassByTick, lightTargets, tickByOnset } from "./tabGroups";
+import { handleRects, selectionBands } from "./selectionBands";
+import type { Rect } from "./selectionBands";
+import {
+  beginDrag,
+  dragRange,
+  dragTo,
+  playedBarOfPrinted,
+  printedBarOfPlayed,
+  printedRunsOfRange,
+} from "../../songs/selection";
+import type { SelectionDrag } from "../../songs/selection";
 import { MARK_GLYPH } from "./review/marks";
 import type { TimingMark } from "./review/marks";
+import type { BarRange } from "../../songs/schedule";
 import type { ScoreSchedule, SongScore } from "../../songs/types";
 
 export interface TabStageProps {
@@ -62,6 +74,21 @@ export interface TabStageProps {
   tick: number;
   /** Re-render when the theme changes: the colours are settings, not CSS. */
   themeId: string;
+  /**
+   * The portion chosen, in PLAYED bars, or null for the whole song.
+   *
+   * Drawn as a band behind the bars it covers, on every system it crosses.
+   */
+  selection?: BarRange | null;
+  /**
+   * A portion was dragged out on the tab.
+   *
+   * Called once, on release — not on every bar the pointer crosses. The
+   * engine recompiles the piece and restarts it from the top of the new
+   * range when the range changes (`useSongEngine`), so a selection pushed
+   * mid-drag would restart the song once per bar the pointer passed over.
+   */
+  onSelect?: (range: BarRange) => void;
   /**
    * How each expected onset has gone so far, while the pass runs
    * (`SONGS.md` A7). Empty — the default — costs nothing and draws nothing.
@@ -263,13 +290,49 @@ function buildSettings(): Settings {
   settings.player.enableElementHighlighting = true;
   // We scroll the stage ourselves, against our own container.
   settings.player.scrollMode = ScrollMode.Off;
+  /*
+   * alphaTab's own selecting and seek-on-click are off (2026-09-20).
+   *
+   * Left on, dragging across bars paints alphaTab's playback-range highlight
+   * and a click seeks a player that is never started — two selections on one
+   * page, one of which does nothing. The `beatMouseDown` / `Move` / `Up`
+   * events still fire with it off (they are triggered before the flag is
+   * read), which is the whole of what this mode needs from the pointer.
+   */
+  settings.player.enableUserInteraction = false;
   settings.display.staveProfile = StaveProfile.ScoreTab;
   settings.display.layoutMode = LayoutMode.Page;
   applyTheme(settings);
   return settings;
 }
 
-export function TabStage({ score, source, tick, themeId, lights, schedule }: TabStageProps) {
+/**
+ * The printed bar a beat is engraved in.
+ *
+ * Structural, and through the master bar rather than the staff's own index:
+ * the two agree for the single-staff tracks this mode imports, and the master
+ * bar is the one that means "the fifth bar of the piece" whatever the staff
+ * arrangement. Anything unexpected gives null and the press does nothing,
+ * which is better than selecting bar zero.
+ */
+function printedBarOfBeat(beat: unknown): number | null {
+  const bar = (beat as { voice?: { bar?: { masterBar?: { index?: unknown }; index?: unknown } } })
+    ?.voice?.bar;
+  const master = bar?.masterBar?.index;
+  if (typeof master === "number" && Number.isFinite(master)) return master;
+  return typeof bar?.index === "number" && Number.isFinite(bar.index) ? bar.index : null;
+}
+
+export function TabStage({
+  score,
+  source,
+  tick,
+  themeId,
+  lights,
+  schedule,
+  selection = null,
+  onSelect,
+}: TabStageProps) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<AlphaTabApi | null>(null);
@@ -309,6 +372,17 @@ export function TabStage({ score, source, tick, themeId, lights, schedule }: Tab
       });
       api.renderScore(parsed.atScore, [score.source.trackIndex]);
       apiRef.current = api;
+      /*
+       * The engraving's bounds, for the screenshot harness and the layout
+       * suite.
+       *
+       * They need to know where bar five is on the page — to drag a selection
+       * across it, and to check the band was drawn over the right bars — and
+       * there is no other way to find out: alphaTab lays the score out at run
+       * time and nothing about the DOM says which rectangle is which bar.
+       * Read-only, and nothing in the app ever reads it back.
+       */
+      (window as unknown as { __SONGS_TAB_API__?: AlphaTabApi }).__SONGS_TAB_API__ = api;
     } catch {
       setFailed(true);
     } finally {
@@ -317,6 +391,7 @@ export function TabStage({ score, source, tick, themeId, lights, schedule }: Tab
 
     return () => {
       apiRef.current = null;
+      delete (window as unknown as { __SONGS_TAB_API__?: AlphaTabApi }).__SONGS_TAB_API__;
       api?.destroy();
     };
   }, [source, score.source.fileName, score.source.trackIndex, themeId]);
@@ -392,6 +467,156 @@ export function TabStage({ score, source, tick, themeId, lights, schedule }: Tab
     }
   }, [lights, ticksByOnset, classByTick, ready, rendered]);
 
+  /* ── Choosing a portion on the tab ─────────────────────────────────────
+   *
+   * The owner, 2026-09-20: selecting a portion so it repeats is *"super
+   * critical for song learning"*. This is the pointer half of it; the model
+   * is `songs/selection.ts` and the arithmetic of where the band goes is
+   * `selectionBands.ts`, so what is here is only the wiring.
+   *
+   * Three things this has to get right:
+   *
+   * **Modifiers.** alphaTab's `beatMouseDown` hands over a beat and nothing
+   * else, so shift-to-extend and which handle was grabbed are read off the
+   * real pointer event in a capture-phase listener that runs first.
+   *
+   * **Printed, then played.** The page draws each bar once; the engine plays
+   * an unrolled list. The pointer speaks printed bars and the selection is
+   * kept in played ones, and `selection.ts` owns both crossings.
+   *
+   * **On release.** A range change makes the engine recompile the piece and
+   * start it again from the top, so nothing is pushed until the pointer comes
+   * up — otherwise dragging across eight bars would restart the song eight
+   * times.
+   */
+  const [drag, setDrag] = useState<SelectionDrag | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  // Read inside the pointer handlers, which are registered once and must not
+  // be torn down and rebuilt every time the selection changes.
+  const latest = useRef({ selection, onSelect, score });
+  latest.current = { selection, onSelect, score };
+
+  /**
+   * The played bar under a point on the page.
+   *
+   * Our own hit test rather than alphaTab's `beatMouseDown`, for one reason
+   * that decides it: the handles are drawn on the overlay, and an overlay
+   * that can be grabbed is an overlay alphaTab's own listeners never see. One
+   * source of pointer truth is simpler than two that have to agree about
+   * which one a press belongs to — and `boundsLookup.getBeatAtPos` is the
+   * same lookup alphaTab does for its own events, asked directly.
+   */
+  const barAtPoint = useCallback((clientX: number, clientY: number): number | null => {
+    const overlay = overlayRef.current;
+    const lookup = apiRef.current?.renderer?.boundsLookup;
+    if (!overlay || !lookup) return null;
+    const box = overlay.getBoundingClientRect();
+    const beat = lookup.getBeatAtPos(clientX - box.left, clientY - box.top);
+    const printed = printedBarOfBeat(beat);
+    if (printed === null) return null;
+    return playedBarOfPrinted(latest.current.score, printed);
+  }, []);
+
+  useEffect(() => {
+    const overlay = overlayRef.current;
+    if (!overlay || !ready) return;
+
+    const onDown = (e: PointerEvent) => {
+      // Left button only: a right-click is a context menu, and a middle-click
+      // is a scroll gesture on every mouse that has one.
+      if (e.button !== 0) return;
+      const target = e.target as HTMLElement | null;
+      const handle =
+        (target?.closest("[data-songs-handle]")?.getAttribute("data-songs-handle") as
+          | "start"
+          | "end"
+          | null) ?? null;
+      // A handle is grabbed at whichever bar it sits on rather than at the
+      // bar under the pointer: the handle straddles a bar line, and half of
+      // it is over the bar outside the selection.
+      const current = latest.current.selection;
+      const bar =
+        handle && current
+          ? handle === "start"
+            ? current.startBar
+            : current.endBar
+          : barAtPoint(e.clientX, e.clientY);
+      if (bar === null) return;
+      e.preventDefault();
+      overlay.setPointerCapture?.(e.pointerId);
+      setDrag(beginDrag(bar, { shiftKey: e.shiftKey, handle, current }));
+    };
+
+    const onMove = (e: PointerEvent) => {
+      setDrag((current) => {
+        if (!current) return current;
+        const bar = barAtPoint(e.clientX, e.clientY);
+        return bar === null ? current : dragTo(current, bar);
+      });
+    };
+
+    /**
+     * On release, and only then.
+     *
+     * A range change makes the engine recompile the piece and start it again
+     * from the top of the new bars (`useSongEngine`), so a selection pushed
+     * on every bar the pointer crossed would restart the song once per bar.
+     */
+    const onUp = () => {
+      setDrag((current) => {
+        if (current) latest.current.onSelect?.(dragRange(current));
+        return null;
+      });
+    };
+
+    overlay.addEventListener("pointerdown", onDown);
+    overlay.addEventListener("pointermove", onMove);
+    // On the window, because a pointer released off the tab — or off the
+    // window — still ends the drag, and one left open would follow the
+    // pointer back across the page when it returned.
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      overlay.removeEventListener("pointerdown", onDown);
+      overlay.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [ready, rendered, barAtPoint]);
+
+  /**
+   * The band, and the two handles, in the engraving's own coordinates.
+   *
+   * Recomputed when the selection changes and when the page is re-engraved —
+   * `rendered` — because a re-layout moves every bar. Nothing here listens to
+   * scrolling: these are drawn INSIDE the host, so they move with the music
+   * rather than against the viewport.
+   */
+  const shown = drag ? dragRange(drag) : selection;
+  const bands = useMemo<Rect[]>(() => {
+    const api = apiRef.current;
+    const lookup = api?.renderer?.boundsLookup;
+    if (!ready || !lookup || !shown) return [];
+    const runs = printedRunsOfRange(score, shown);
+    return selectionBands(runs, (printedBar) => {
+      const bounds = lookup.findMasterBarByIndex(printedBar);
+      if (!bounds) return null;
+      const box = bounds.visualBounds;
+      return { x: box.x, y: box.y, w: box.w, h: box.h };
+    });
+    // `rendered` is the engraving these coordinates belong to.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, rendered, score, shown?.startBar, shown?.endBar, shown === null]);
+
+  const handles = useMemo(() => handleRects(bands), [bands]);
+
+  /** The bars the band covers, said in printed numbers for a screen reader. */
+  const spoken = shown
+    ? `${String((printedBarOfPlayed(score, shown.startBar) ?? shown.startBar) + 1)}–${String(
+        (printedBarOfPlayed(score, shown.endBar) ?? shown.endBar) + 1,
+      )}`
+    : null;
+
   // Keep the cursor in view by scrolling our own container, rather than
   // letting alphaTab scroll something it does not own.
   useEffect(() => {
@@ -409,8 +634,59 @@ export function TabStage({ score, source, tick, themeId, lights, schedule }: Tab
   }, [tick, ready]);
 
   return (
-    <div className="songs-tab-viewport">
+    <div className="songs-tab-viewport" data-selecting={drag ? "" : undefined}>
+      {/* The host is alphaTab's, all of it: it writes its own children in
+          there and clears them on every re-render, so nothing of ours can
+          live inside it. The overlay is a sibling laid exactly over it, which
+          puts our boxes in the same coordinate space as the bounds alphaTab
+          reports — and being inside the scroller, it moves with the music
+          instead of against the viewport. */}
+      <div className="songs-tab-stack">
       <div className="songs-tab-host" ref={hostRef} data-ready={ready ? "" : undefined} />
+      <div className="songs-tab-overlay" ref={overlayRef} data-ready={ready ? "" : undefined}>
+        {/* The band behind the selected bars, and a handle at each end.
+            Never the only signal — the strip says the same thing in words. */}
+        {bands.map((band, i) => (
+          <div
+            className="songs-tab-band"
+            key={i}
+            style={{ left: band.x, top: band.y, width: band.w, height: band.h }}
+            aria-hidden="true"
+          />
+        ))}
+        {handles && !drag && (
+          <>
+            <div
+              className="songs-tab-handle"
+              data-songs-handle="start"
+              style={{
+                left: handles.start.x,
+                top: handles.start.y,
+                width: handles.start.w,
+                height: handles.start.h,
+              }}
+              aria-hidden="true"
+            />
+            <div
+              className="songs-tab-handle"
+              data-songs-handle="end"
+              style={{
+                left: handles.end.x,
+                top: handles.end.y,
+                width: handles.end.w,
+                height: handles.end.h,
+              }}
+              aria-hidden="true"
+            />
+          </>
+        )}
+      </div>
+      </div>
+      {/* What the band says, for anyone who cannot see it. Polite, so it does
+          not interrupt while the pointer is still moving. */}
+      <p className="sr-only" role="status" aria-live="polite">
+        {spoken ? t("songs.stage.selectedBars", { bars: spoken }) : t("songs.stage.wholeSong")}
+      </p>
       {!ready && !failed && <p className="songs-tab-status">{t("songs.tab.drawing")}</p>}
       {failed && <p className="songs-tab-status songs-tab-status-failed">{t("songs.tab.failed")}</p>}
     </div>

@@ -124,15 +124,15 @@ test.describe("the songs stage", () => {
   }
 
   /**
-   * The bar-range fields stay on their own line beside each other.
+   * The portion group stays on one line where there is room.
    *
-   * Two number inputs, a count and a button: the row a person uses to say
-   * "loop 17 to 24", and the one place in the mode where a wrapped control
-   * reads as a bug rather than as a layout.
+   * The bars, what they add up to, the repeat, "whole song" and "keep it":
+   * the row a person uses to say "loop 17 to 24", and the one place in the
+   * mode where a wrapped control reads as a bug rather than as a layout.
    */
-  test("keeps the bar range row together where there is room", async ({ page }) => {
+  test("keeps the portion row together where there is room", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
-    await fitsOnOneLine(page, ".songs-strip-range", "the bar range row");
+    await fitsOnOneLine(page, ".songs-strip-portion", "the portion row");
   });
 
   /**
@@ -140,20 +140,30 @@ test.describe("the songs stage", () => {
    *
    * A chip that resizes its own row when pressed is the complaint the owner
    * made about Jam's switches, and the section chips are the same shape of
-   * control on the same kind of row.
+   * control on the same kind of row. This got sharper with the portion: the
+   * sentence beside the fields goes from "The whole song" to "4 bars · on
+   * repeat" when a section is pressed, and a sentence that changes width
+   * drags every control on the row along with it.
    */
   test("does not move the controls when a section is chosen", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
     const tempo = page.locator(".songs-strip-tempo");
-    const before = await tempo.boundingBox();
+    const loop = page.locator(".songs-loop-chip");
+    const before = { tempo: await tempo.boundingBox(), loop: await loop.boundingBox() };
     await page.locator(".songs-section-chips .songs-chip").first().click();
     await page.evaluate(
       () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
     );
-    const after = await tempo.boundingBox();
-    expect(Math.round(after!.x), "the speed control moved sideways").toBe(Math.round(before!.x));
-    expect(Math.round(after!.width), "the speed control changed width").toBe(
-      Math.round(before!.width),
+    const after = { tempo: await tempo.boundingBox(), loop: await loop.boundingBox() };
+    expect(Math.round(after.tempo!.x), "the speed control moved sideways").toBe(
+      Math.round(before.tempo!.x),
+    );
+    expect(Math.round(after.tempo!.width), "the speed control changed width").toBe(
+      Math.round(before.tempo!.width),
+    );
+    // And the repeat switch, which sits right after the sentence that changed.
+    expect(Math.round(after.loop!.x), "the repeat switch moved under the hand").toBe(
+      Math.round(before.loop!.x),
     );
   });
 });
@@ -245,6 +255,147 @@ test.describe("the stage is one screen", () => {
       ).toBeGreaterThan(180);
     });
   }
+});
+
+/**
+ * The portion you are working on, drawn where it actually is (W18 item 0).
+ *
+ * The owner: *"Being able to select a portion of a song so it plays that
+ * portion in repeat is super critical for song learning."* So the band behind
+ * the chosen bars is not decoration — it is the answer to "what is it going to
+ * play?", and it has to be over the RIGHT bars. Nothing in vitest can check
+ * that: where bar five sits on the page is decided by alphaTab at run time,
+ * in a browser, at whatever width the window happens to be.
+ */
+test.describe("the chosen portion, on the tab", () => {
+  for (const size of HEIGHTS) {
+    test(`draws the band over the chosen bars at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-portion", size);
+
+      // What the scene chose, and where the engraving put those bars. The
+      // bounds come from alphaTab's own lookup — the same one the stage hit-
+      // tests with — because nothing about the DOM says which box is bar 5.
+      const measured = await page.evaluate(() => {
+        const api = (
+          window as unknown as {
+            __SONGS_TAB_API__?: {
+              renderer?: {
+                boundsLookup?: {
+                  findMasterBarByIndex(i: number): {
+                    visualBounds: { x: number; y: number; w: number; h: number };
+                  } | null;
+                } | null;
+              };
+            };
+          }
+        ).__SONGS_TAB_API__;
+        const lookup = api?.renderer?.boundsLookup;
+        if (!lookup) return null;
+        const bands = [...document.querySelectorAll<HTMLElement>(".songs-tab-band")].map((el) => ({
+          x: el.offsetLeft,
+          y: el.offsetTop,
+          w: el.offsetWidth,
+          h: el.offsetHeight,
+        }));
+        // The scene chooses printed bars 5 to 8, so 4..7 zero-based.
+        const wanted = [4, 5, 6, 7].map((i) => lookup.findMasterBarByIndex(i)?.visualBounds ?? null);
+        const notWanted = [0, 1, 2, 3].map(
+          (i) => lookup.findMasterBarByIndex(i)?.visualBounds ?? null,
+        );
+        return { bands, wanted, notWanted };
+      });
+      expect(measured, `no tab bounds at ${size.name}`).not.toBeNull();
+      const { bands, wanted, notWanted } = measured!;
+      expect(bands.length, `nothing drawn behind the chosen bars at ${size.name}`).toBeGreaterThan(
+        0,
+      );
+
+      /** Is the middle of this bar inside one of the bands? */
+      const covered = (box: { x: number; y: number; w: number; h: number } | null) => {
+        if (!box) return false;
+        const cx = box.x + box.w / 2;
+        const cy = box.y + box.h / 2;
+        return bands.some(
+          (b) => cx >= b.x - 2 && cx <= b.x + b.w + 2 && cy >= b.y - 2 && cy <= b.y + b.h + 2,
+        );
+      };
+
+      for (const [i, box] of wanted.entries()) {
+        expect(covered(box), `bar ${i + 5} is chosen but has no band over it`).toBe(true);
+      }
+      for (const [i, box] of notWanted.entries()) {
+        expect(covered(box), `bar ${i + 1} is not chosen but has a band over it`).toBe(false);
+      }
+    });
+  }
+
+  /**
+   * A selection that crosses a line break is two bands, not one box drawn
+   * across the page and through the music between the systems.
+   */
+  test("draws a band per system when the portion crosses a line break", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+
+    // Bars 3 to 6 of the fixture: the page breaks after bar 3, so this is the
+    // case that needs two. Set through the strip's own fields, which are one
+    // of the four doors to the same selection.
+    const from = page.locator(".songs-strip-range input, .songs-strip-portion input").first();
+    const to = page.locator(".songs-strip-range input, .songs-strip-portion input").nth(1);
+    await from.fill("3");
+    await to.fill("6");
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+
+    const tops = await page.$$eval(".songs-tab-band", (nodes) =>
+      nodes.map((n) => Math.round((n as HTMLElement).offsetTop)),
+    );
+    expect(tops.length, "the portion was not drawn at all").toBeGreaterThan(0);
+    expect(
+      new Set(tops).size,
+      "bars 3–6 cross a line break and were drawn as one band across the page",
+    ).toBeGreaterThan(1);
+  });
+
+  /**
+   * Choosing means looping, and the strip says so in words.
+   *
+   * The band is the picture; this is the sentence. Neither is ever the only
+   * signal — one of them is what a screen reader and a low-contrast theme
+   * have to go on.
+   */
+  test("says what is chosen, and turns the repeat on with it", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const says = page.locator(".songs-portion-says");
+    await expect(says, "a fresh song should be the whole song").toHaveText(/whole song/i);
+
+    await page.locator(".songs-strip-portion input").first().fill("3");
+    await expect(says).toContainText("bars");
+    await expect(says, "choosing a portion did not start the repeat").toContainText("repeat");
+    await expect(page.locator(".songs-loop-chip")).toHaveAttribute("aria-pressed", "true");
+
+    // "Whole song" clears it, and stops the repeat with it.
+    await page.getByRole("button", { name: /whole song/i }).click();
+    await expect(says).toHaveText(/whole song/i);
+    await expect(page.locator(".songs-tab-band")).toHaveCount(0);
+    await expect(page.locator(".songs-loop-chip")).toHaveAttribute("aria-pressed", "false");
+  });
+
+  /** A portion kept under a name sits beside the sections and comes back. */
+  test("keeps a named portion beside the sections", async ({ page }) => {
+    await openShot(page, "songs-portion", { width: 1400, height: 900 });
+    const chip = page.locator(".songs-portion-chip-main");
+    await expect(chip).toHaveText("The chorus");
+
+    // Clear it, then press the chip: the same bars come back.
+    await page.getByRole("button", { name: /^whole song$/i }).click();
+    await expect(page.locator(".songs-tab-band")).toHaveCount(0);
+    await expect(page.locator(".songs-strip-portion input").first()).toHaveValue("1");
+    await chip.click();
+    await expect(page.locator(".songs-strip-portion input").first()).toHaveValue("5");
+    await expect(page.locator(".songs-strip-portion input").nth(1)).toHaveValue("8");
+    await expect(page.locator(".songs-tab-band").first()).toBeVisible();
+  });
 });
 
 /**

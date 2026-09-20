@@ -183,7 +183,8 @@
         "metronome": "Máy đếm nhịp",
         "view": "Chế độ xem",
         "navigation": "Điều hướng",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Songs"
       },
       "actions": {
         "play": "Phát / Dừng",
@@ -218,7 +219,13 @@
         "jam-prev-section": "Đoạn trước",
         "jam-loop-section": "Lặp đoạn này",
         "jam-take": "Thu bản này",
-        "tab-5": "Trang Bài hát"
+        "tab-5": "Trang Bài hát",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -253,7 +260,13 @@
         "jam-prev-section": "Quay về đầu đoạn trước ngay ở vạch nhịp",
         "jam-loop-section": "Lặp đoạn bạn đang chơi, hoặc bỏ lặp",
         "jam-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
-        "tab-5": "Chuyển sang trang Bài hát"
+        "tab-5": "Chuyển sang trang Bài hát",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
       }
     },
     "inputTest": {
