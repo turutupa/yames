@@ -13,7 +13,10 @@
     }
   },
   "bundle": {
-    "createUpdaterArtifacts": false
+    "createUpdaterArtifacts": false,
+    "iOS": {
+      "minimumSystemVersion": "15.0"
+    }
   },
   "plugins": {}
 }

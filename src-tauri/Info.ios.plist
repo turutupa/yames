@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Merged into the generated iPhone Info.plist by the Tauri CLI, which looks for
+  `Info.ios.plist` next to `tauri.conf.json`. Keeping it here rather than
+  editing `gen/apple/Yames_iOS/Info.plist` means `ios init` can be re-run
+  without losing any of it.
+
+  Two keys, and nothing else on purpose.
+
+  `UIBackgroundModes: audio` is the whole reason the click survives a locked
+  screen: without it iOS suspends the app seconds after the screen goes off and
+  the metronome on the music stand goes quiet by itself. It is paired with the
+  `.playback` audio session in the plugin's Swift half — the entitlement is the
+  permission, the session is the use of it.
+
+  Portrait only, per the mobile plan §1. The same lock Android got in M05.
+
+  What is deliberately absent is the more interesting half of the file. There
+  is no NSMicrophoneUsageDescription (the mic evaluation does not ship on a
+  phone), no camera, no Bluetooth, no local-network and no tracking string.
+  The app asks a phone for nothing at all, and `ios.yml` greps the built
+  Info.plist and fails if any of those keys ever appears.
+-->
+<plist version="1.0">
+<dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+</dict>
+</plist>

@@ -142,8 +142,25 @@ oboe = { version = "0.6", features = ["java-interface"] }
 # off (a `mediaPlayback` foreground service), yield to a phone call (audio
 # focus), keep the screen awake, answer the Back gesture without dying, and
 # open a link. In-tree because none of it is reusable outside Yames and all of
-# it is one screen of Kotlin. iOS gets its own half in M06, which is when this
-# widens to `cfg(any(android, ios))`.
+# it is one screen of Kotlin.
+tauri-plugin-yames-mobile = { path = "plugins/yames-mobile" }
+
+# ---------------------------------------------------------------------------
+# iPhone only (M06a).
+#
+# The same plugin crate as Android, with a Swift half instead of a Kotlin one
+# (`plugins/yames-mobile/ios/`): the `AVAudioSession` that makes the click
+# survive a locked screen and ignore the silent switch, the idle-timer hold,
+# and `UIApplication.open` for the About links. Same five commands, same
+# `audio_interrupted` event, so the frontend never branches on which phone it
+# is running on.
+#
+# No `oboe` line here: iOS keeps cpal's CoreAudio backend, which honours the
+# audio session's preferred buffer duration and sample rate, so there is
+# nothing for a hand-written stream to fix. And no `midir`: CoreMIDI on the
+# iPhone is M07, not v1.
+# ---------------------------------------------------------------------------
+[target.'cfg(target_os = "ios")'.dependencies]
 tauri-plugin-yames-mobile = { path = "plugins/yames-mobile" }
 
 # Thread-priority control for the LLM inference worker (ROADMAP §3: the

@@ -1,0 +1,5 @@
+# The iPhone half's copy of the Tauri Swift package. The crate's build script
+# copies it out of the `tauri` dependency on the machine doing the build
+# (`plugins/yames-mobile/.tauri/tauri-api`), the way the Android half gets its
+# own copy under `android/.tauri`. Never committed.
+/.tauri
