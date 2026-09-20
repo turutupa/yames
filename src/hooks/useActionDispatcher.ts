@@ -58,6 +58,25 @@ interface ActionDispatcherArgs {
     loopSection: () => void;
     toggleTakes: () => void;
   };
+  /** Whether the Songs tab has a song on it. An empty stage loops nothing. */
+  songsLoaded: boolean;
+  /**
+   * The hands-free Songs actions (W18), for a footswitch.
+   *
+   * One object for the same reason the jam's are: they are one feature — the
+   * portion you are working on — and the dispatcher's job is only to decide
+   * that the Songs tab is open and a song is loaded.
+   */
+  songsActions: {
+    /** The portion starts at the bar the cursor is in. */
+    loopStartsHere: () => void;
+    /** And ends there. */
+    loopEndsHere: () => void;
+    toggleLoop: () => void;
+    clearSelection: () => void;
+    /** Slide the portion by whole bars, keeping its length. */
+    nudge: (bars: number) => void;
+  };
   state: AppState;
   isFullscreen: boolean;
   setIsFullscreen: (v: boolean) => void;
@@ -89,6 +108,8 @@ export function useActionDispatcher({
   jamEditorOpen,
   onToggleJam,
   jamActions,
+  songsLoaded,
+  songsActions,
   state,
   isFullscreen,
   setIsFullscreen,
@@ -214,6 +235,44 @@ export function useActionDispatcher({
             break;
           case "jam-take":
             jamActions.toggleTakes();
+            break;
+        }
+        return;
+      }
+
+      /**
+       * The Songs actions, on the same terms as the jam's.
+       *
+       * They only mean anything with a song on the stage, and they mean
+       * nothing anywhere else: `[` is the metronome's subdivision on every
+       * other tab, and a key that quietly re-looped a song you are not
+       * looking at would be worse than one that did nothing.
+       *
+       * They all work WHILE PLAYING, which is the point of them — the engine
+       * recompiles the piece and starts the new bars from the top, and a
+       * player marking out a passage with a footswitch never takes a hand off
+       * the neck.
+       */
+      if (actionId.startsWith("songs-")) {
+        if (view !== "songs" || !songsLoaded) return;
+        switch (actionId) {
+          case "songs-loop-start":
+            songsActions.loopStartsHere();
+            break;
+          case "songs-loop-end":
+            songsActions.loopEndsHere();
+            break;
+          case "songs-loop":
+            songsActions.toggleLoop();
+            break;
+          case "songs-loop-clear":
+            songsActions.clearSelection();
+            break;
+          case "songs-loop-earlier":
+            songsActions.nudge(-1);
+            break;
+          case "songs-loop-later":
+            songsActions.nudge(1);
             break;
         }
         return;

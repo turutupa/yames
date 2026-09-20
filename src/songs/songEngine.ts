@@ -17,6 +17,8 @@
  */
 import { storeLoad, storeSave } from "../ipc";
 import { DEFAULT_SONG_MIX, SONG_MIX_MAX, SONG_MIX_MIN } from "./types";
+import { MAX_SAVED_PORTIONS } from "./selection";
+import type { SavedPortion } from "./selection";
 import type { SongMix, SongRole } from "./types";
 
 /** A fader on the stage: the band's three rows, and the click over them. */
@@ -40,27 +42,24 @@ export type SongMixSetting = {
    */
   takes: boolean;
   /**
-   * Whether the range was left looping (W19).
+   * The portion of this song the player was last working on, and how
+   * (2026-09-20).
    *
-   * Here rather than in a key of its own because it is the same kind of fact
-   * as the mix — something the player decided about THIS piece today — and
-   * because opening a song should put back everything about it at once
-   * rather than in three round trips.
+   * Beside the band rather than on the song record, because it is the same
+   * kind of fact: not what the song IS — the record owns that — but how this
+   * player has it set up. Somebody who left off looping bars 17–24 at 70 %
+   * comes back to bars 17–24 at 70 %, which is the whole of what "practising
+   * a passage" means across two sittings.
+   *
+   * `null` is the honest empty value and means the whole song. Absent is what
+   * every song stored before this existed says, and reads back as null.
    */
+  selection: { startBar: number; endBar: number } | null;
   loop: boolean;
-  /** The speed it was left at, as a percentage of what is written. */
+  /** 50–100. The speed this song is being worked at. */
   tempoPercent: number;
-  /**
-   * The bars the player had selected, when a build has written any.
-   *
-   * **This module does not write this field.** The portion is W18's, who own
-   * the selection on the stage; `rememberPlace` below deliberately leaves it
-   * alone so there is one writer and one meaning. Read here, and only here,
-   * so that opening a song puts the player back where they were. Absent is
-   * the ordinary state and means "the whole song", which is what
-   * `useSongsSession` already does.
-   */
-  range?: { startBar: number; endBar: number };
+  /** Portions the player named and kept, oldest first. */
+  portions: SavedPortion[];
 };
 
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
@@ -68,8 +67,10 @@ export const DEFAULT_MIX_SETTING: SongMixSetting = {
   muted: [],
   countInBars: 0,
   takes: false,
+  selection: null,
   loop: false,
   tempoPercent: 100,
+  portions: [],
 };
 
 function clampGain(value: number): number {
@@ -151,27 +152,58 @@ export function readMixSetting(stored: unknown): SongMixSetting {
     // older build can hold — missing, `"yes"`, `1` — leaves the microphone
     // alone, which is the only default a switch like this may have.
     takes: raw.takes === true,
-    // Only an explicit `true` loops: a song that starts going round and
-    // round when the player pressed play expecting one pass is a surprise
-    // with a guitar in your hands.
+    selection: readSelection(raw.selection),
     loop: raw.loop === true,
     tempoPercent:
-      typeof raw.tempoPercent === "number" &&
-      raw.tempoPercent >= 25 &&
-      raw.tempoPercent <= 100
-        ? Math.round(raw.tempoPercent)
+      typeof raw.tempoPercent === "number" && Number.isFinite(raw.tempoPercent)
+        ? Math.min(100, Math.max(50, Math.round(raw.tempoPercent)))
         : 100,
-    // Read, never written here — see the field's comment. Both bars have to
-    // be whole numbers the right way round, or this is a file somebody
-    // edited by hand and the whole song is the honest answer.
-    ...(raw.range &&
-    Number.isInteger(raw.range.startBar) &&
-    Number.isInteger(raw.range.endBar) &&
-    raw.range.startBar >= 0 &&
-    raw.range.endBar >= raw.range.startBar
-      ? { range: { startBar: raw.range.startBar, endBar: raw.range.endBar } }
-      : {}),
+    portions: readPortions(raw.portions),
   };
+}
+
+/**
+ * A stored selection, or null.
+ *
+ * Not clamped to the song here: this file has no score, and a selection that
+ * points past the end of a song whose file was replaced is held inside it by
+ * `clampSelection` at the moment it is used. What it must not do is come back
+ * as `{ startBar: NaN }`, which is a loop the engine would never leave.
+ */
+function readSelection(stored: unknown): { startBar: number; endBar: number } | null {
+  const raw = stored as { startBar?: unknown; endBar?: unknown } | null | undefined;
+  if (!raw || typeof raw !== "object") return null;
+  const bar = (value: unknown) =>
+    typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.round(value) : null;
+  const start = bar(raw.startBar);
+  const end = bar(raw.endBar);
+  if (start === null || end === null) return null;
+  return { startBar: Math.min(start, end), endBar: Math.max(start, end) };
+}
+
+/** The named portions, dropping any row that is not one. */
+function readPortions(stored: unknown): SavedPortion[] {
+  if (!Array.isArray(stored)) return [];
+  const out: SavedPortion[] = [];
+  for (const row of stored) {
+    if (!row || typeof row !== "object") continue;
+    const { id, name } = row as { id?: unknown; name?: unknown };
+    const range = readSelection(row);
+    if (typeof id !== "string" || typeof name !== "string" || !name.trim() || !range) continue;
+    const percent = (row as { tempoPercent?: unknown }).tempoPercent;
+    out.push({
+      id,
+      name: name.trim().slice(0, 24),
+      startBar: range.startBar,
+      endBar: range.endBar,
+      tempoPercent:
+        typeof percent === "number" && Number.isFinite(percent)
+          ? Math.min(100, Math.max(50, Math.round(percent)))
+          : 100,
+    });
+    if (out.length >= MAX_SAVED_PORTIONS) break;
+  }
+  return out;
 }
 
 /** What this song's band was left at, or the defaults. */
@@ -193,30 +225,6 @@ export function saveMixSetting(songId: string, setting: SongMixSetting): Promise
   const apply = async () => {
     const all = (await storeLoad<StoredMixes>(SONG_MIX_KEY)) ?? {};
     await storeSave(SONG_MIX_KEY, { ...all, [songId]: setting });
-  };
-  const next = writing.then(apply, apply);
-  writing = next;
-  return next;
-}
-
-/**
- * Remember the loop and the speed, without touching anything else (W19).
- *
- * A patch rather than a whole setting, and that is the point: the caller is
- * `useSongsSession`, which owns the transport but not the faders, and a
- * write of the whole object from there would clobber a fader the player
- * moved a moment earlier. It also never writes `range`, which is W18's —
- * read-modify-write through the same chain as everything else, so the two
- * writers cannot lose each other's work.
- */
-export function rememberPlace(
-  songId: string,
-  place: { loop?: boolean; tempoPercent?: number },
-): Promise<void> {
-  const apply = async () => {
-    const all = (await storeLoad<StoredMixes>(SONG_MIX_KEY)) ?? {};
-    const current = readMixSetting(all[songId]);
-    await storeSave(SONG_MIX_KEY, { ...all, [songId]: { ...current, ...place } });
   };
   const next = writing.then(apply, apply);
   writing = next;

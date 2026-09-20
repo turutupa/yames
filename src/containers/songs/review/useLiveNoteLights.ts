@@ -1,29 +1,37 @@
 /**
  * Notes lighting as they are hit, while the transport runs (`SONGS.md` A7).
  *
- * ## What this is honest about
+ * ## Two sources, and which one wins
  *
- * **There is no live per-onset event, and this stands in for one.** The
- * analyzer's per-onset verdicts (`onsetResults`) are produced by
- * `ScheduleRun::report`, which only runs when a segment closes — so the first
- * moment anything knows that onset 41 was a miss is after you stopped. The
- * only thing that arrives *during* a pass is `beat-feedback`, one event per
- * beat, carrying a classification and a deviation, and that is what the
- * metronome's own live ring has always drawn from.
+ * **`score-onset` is the real thing.** With a `ScoreSchedule` loaded, the
+ * analyzer already knows which expected onset each played note matched, and
+ * it now says so as it happens: one event per expected note, as soon as that
+ * note's matching window closes, carrying the same state and deviation the
+ * review will carry. A bar of sixteenths lights four different notes on four
+ * different verdicts. Provisional by nature — the alignment at the end of the
+ * attempt can still revise the last bar — and the review that appears the
+ * moment you stop is the authority either way.
  *
- * So: a beat's verdict lights every attack that falls inside that beat. On a
- * bar of quarter notes that is exact. On a bar of sixteenths it is one
- * verdict across four attacks, which is a smear — and the review that appears
- * the moment you stop replaces it with the real thing, per onset. The brief
- * allows exactly this and asks that it be said out loud, so it is said here
- * and in the report.
+ * **`beat-feedback` is the fallback, and stays.** It is what the metronome's
+ * own live ring has always drawn from: one verdict per beat, no knowledge of
+ * a score. With no schedule loaded nothing emits a `score-onset` at all, so
+ * this is what a drill or a path step with no material behind it gets, and a
+ * beat's verdict then lights every attack inside that beat — exact on
+ * quarters, a smear on sixteenths.
  *
- * Nothing here costs the click anything: it is an event listener and a map,
- * on the UI thread, and the audio side does not know it exists.
+ * The switch is one-way and per pass: the first `score-onset` to arrive turns
+ * the beat smear off. Two sources painting the same notes would disagree —
+ * the beat verdict is about the click and the onset verdict is about the note
+ * — and the one that knows which note it means should win.
+ *
+ * Nothing here costs the click anything: two event listeners and a map, on
+ * the UI thread, and the audio side does not know it exists.
  */
 import { useEffect, useRef, useState } from "react";
-import { onBeatFeedback } from "../../../ipc";
+import { onBeatFeedback, onScoreOnset, scoreTimingBands } from "../../../ipc";
+import type { LiveOnset, TimingBands } from "../../../ipc";
 import type { BeatFeedback } from "../../../types";
+import { markFor } from "./marks";
 import type { TimingMark } from "./marks";
 import type { ScoreSchedule } from "../../../songs/types";
 
@@ -48,6 +56,22 @@ export function markFromFeedback(feedback: BeatFeedback): TimingMark | null {
   }
 }
 
+/**
+ * A live per-note verdict, as the same mark the review will draw.
+ *
+ * Through `markFor`, and through the same `bands` the review is given, so a
+ * note that lights amber mid-pass does not turn green in the panel underneath
+ * it a second later. `markFor` reads only the three fields a `LiveOnset`
+ * carries; the accent verdict a full `OnsetResult` also has is not one of
+ * them, and is not known live (`score.rs`).
+ */
+export function markFromOnset(onset: LiveOnset, bands: TimingBands | null): TimingMark {
+  return markFor(
+    { id: onset.id, state: onset.state, deviationMs: onset.deviationMs, pass: onset.pass },
+    bands,
+  );
+}
+
 /** Which onsets of a schedule fall inside one beat of the played range. */
 export function onsetsInBeat(schedule: ScoreSchedule, beatInRange: number): number[] {
   const floor = Math.floor(beatInRange);
@@ -63,6 +87,8 @@ export type LiveLightsInput = {
   /** Quarter notes from the start of the range, as the cursor has it. */
   beatInRange: number;
   isPlaying: boolean;
+  /** The click's tempo, for the bands a live mark is drawn against. */
+  bpm?: number;
 };
 
 export function useLiveNoteLights(input: LiveLightsInput): LiveLights {
@@ -74,6 +100,29 @@ export function useLiveNoteLights(input: LiveLightsInput): LiveLights {
   const latest = useRef(input);
   latest.current = input;
 
+  /**
+   * The same thresholds the review will use, fetched once per schedule.
+   *
+   * `null` until it answers, and `null` for good on a build whose command
+   * fails — `markFor` then draws everything that was hit as on time and
+   * everything missed as missed, which is coarser and not wrong.
+   */
+  const bands = useRef<TimingBands | null>(null);
+  const { schedule, bpm } = input;
+  useEffect(() => {
+    bands.current = null;
+    if (!schedule) return;
+    let alive = true;
+    void scoreTimingBands(schedule, 60_000 / Math.max(1, bpm ?? 120))
+      .then((found) => {
+        if (alive) bands.current = found;
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [schedule, bpm]);
+
   useEffect(() => {
     if (!input.isPlaying) {
       // The review takes over the moment the transport stops, and a stale
@@ -81,8 +130,26 @@ export function useLiveNoteLights(input: LiveLightsInput): LiveLights {
       setLights(new Map());
       return;
     }
-    let stop: (() => void) | undefined;
-    const unlisten = onBeatFeedback((feedback) => {
+    // Once the analyzer has said something about a NOTE, it stops being
+    // useful to say anything about the beat it was in.
+    let perNote = false;
+    let stopBeats: (() => void) | undefined;
+    let stopOnsets: (() => void) | undefined;
+
+    const onsets = onScoreOnset((onset) => {
+      const { schedule } = latest.current;
+      if (!schedule) return;
+      perNote = true;
+      const mark = markFromOnset(onset, bands.current);
+      setLights((previous) => {
+        const next = new Map(previous);
+        next.set(onset.id, mark);
+        return next;
+      });
+    });
+
+    const beats = onBeatFeedback((feedback) => {
+      if (perNote) return;
       const { schedule, beatInRange } = latest.current;
       if (!schedule) return;
       const mark = markFromFeedback(feedback);
@@ -95,12 +162,18 @@ export function useLiveNoteLights(input: LiveLightsInput): LiveLights {
         return next;
       });
     });
-    void unlisten.then((fn) => {
-      stop = fn;
+
+    void beats.then((fn) => {
+      stopBeats = fn;
+    });
+    void onsets.then((fn) => {
+      stopOnsets = fn;
     });
     return () => {
-      void unlisten.then((fn) => fn());
-      stop?.();
+      void beats.then((fn) => fn());
+      void onsets.then((fn) => fn());
+      stopBeats?.();
+      stopOnsets?.();
     };
   }, [input.isPlaying]);
 

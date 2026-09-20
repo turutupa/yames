@@ -1408,6 +1408,10 @@ fn main() -> ExitCode {
             round_trip_us: 0,
             out_sr_watch: Some(engine.output_sample_rate_handle()),
             owns_input: false,
+            // The probe measures the callback and the writer, not the
+            // review. The stamp is still written — that is the thing under
+            // test — and nothing reads it back.
+            position: None,
         }) {
             eprintln!("error: could not start the probe's take: {e}");
             return ExitCode::from(2);

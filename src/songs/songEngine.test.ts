@@ -18,7 +18,6 @@ import {
   forgetMixSetting,
   loadMixSetting,
   readMixSetting,
-  rememberPlace,
   saveMixSetting,
   withGain,
   withMute,
@@ -123,74 +122,5 @@ describe("where it is kept", () => {
     await saveMixSetting("one", { ...DEFAULT_MIX_SETTING, countInBars: 2 });
     expect((await loadMixSetting("one")).countInBars).toBe(2);
     expect((await loadMixSetting("two")).countInBars).toBe(0);
-  });
-});
-
-// Where the player left the song — the loop and the speed (W19). The PORTION
-// is READ here and WRITTEN by the stage; `songEngine.ts` says so where the
-// field is declared, and the last test below is what keeps that true.
-describe("where the player left this song", () => {
-  it("starts once through, at full speed, on the whole song", () => {
-    expect(DEFAULT_MIX_SETTING.loop).toBe(false);
-    expect(DEFAULT_MIX_SETTING.tempoPercent).toBe(100);
-    expect(DEFAULT_MIX_SETTING.range).toBeUndefined();
-  });
-
-  it("puts back the loop and the speed the song was left at", async () => {
-    await rememberPlace("one", { loop: true, tempoPercent: 70 });
-    const back = await loadMixSetting("one");
-    expect(back.loop).toBe(true);
-    expect(back.tempoPercent).toBe(70);
-    // ...and only for that song.
-    expect((await loadMixSetting("two")).loop).toBe(false);
-    expect((await loadMixSetting("two")).tempoPercent).toBe(100);
-  });
-
-  it("does not take the faders with it", async () => {
-    // Two writers, different hooks: the transport owns the loop and the
-    // stage owns the band. A whole-object write from either would clobber
-    // the other, and this is the half that would go unnoticed.
-    await saveMixSetting("one", withGain(DEFAULT_MIX_SETTING, "drums", 0.2));
-    await rememberPlace("one", { loop: true });
-    const back = await loadMixSetting("one");
-    expect(back.mix.drums).toBe(0.2);
-    expect(back.loop).toBe(true);
-  });
-
-  it("mistrusts a loop and a speed it reads back", () => {
-    // Only an explicit `true` loops: a song that starts going round when the
-    // player expected one pass is a surprise with a guitar on.
-    for (const junk of ["yes", 1, undefined, null]) {
-      expect(readMixSetting({ loop: junk }).loop, String(junk)).toBe(false);
-    }
-    for (const junk of [0, 24, 101, 250, "80", Number.NaN]) {
-      expect(readMixSetting({ tempoPercent: junk }).tempoPercent, String(junk)).toBe(100);
-    }
-    expect(readMixSetting({ tempoPercent: 70 }).tempoPercent).toBe(70);
-  });
-
-  it("reads the portion the stage wrote, and refuses a nonsense one", () => {
-    expect(readMixSetting({ range: { startBar: 16, endBar: 23 } }).range).toEqual({
-      startBar: 16,
-      endBar: 23,
-    });
-    for (const junk of [
-      { startBar: 4, endBar: 2 },
-      { startBar: -1, endBar: 3 },
-      { startBar: 1.5, endBar: 3 },
-      { startBar: 0 },
-      {},
-      "bars 1 to 8",
-    ]) {
-      expect(readMixSetting({ range: junk }).range, JSON.stringify(junk)).toBeUndefined();
-    }
-  });
-
-  it("never writes the portion itself — that writer is the stage", async () => {
-    // The whole reason the field is read-only here: two writers of one fact
-    // is how a player ends up looping bars they did not choose.
-    await saveMixSetting("one", { ...DEFAULT_MIX_SETTING, range: { startBar: 4, endBar: 7 } });
-    await rememberPlace("one", { loop: true, tempoPercent: 60 });
-    expect((await loadMixSetting("one")).range).toEqual({ startBar: 4, endBar: 7 });
   });
 });

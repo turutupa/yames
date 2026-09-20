@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { deletePreset, listPresets, savePreset } from "../../ipc";
+import { deletePreset, exportScoreSource, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
 import { VIBES } from "../../jam/vibes";
@@ -1084,7 +1084,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             <div className="setlist-item-rule" aria-hidden="true" />
           )}
 
-          {!showSetlists && !showJams && adding && (
+          {/* Songs joined the list of modes that keep their OWN library here,
+              and did not join the three guards below with it — so under a song
+              the panel went on drawing the metronome's presets, and under an
+              empty preset list it offered "No presets yet — save a tempo,
+              sound and meter", which means nothing about a piece of music you
+              imported. One list per mode, and on this tab the list is songs. */}
+          {!showSetlists && !showJams && !showSongs && adding && (
             <div className="preset-sidebar-item adding">
               <input
                 ref={inputRef}
@@ -1105,7 +1111,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               />
             </div>
           )}
-          {!showSetlists && !showJams && presets.map((p) => (
+          {!showSetlists && !showJams && !showSongs && presets.map((p) => (
             <button
               key={p.id}
               className={`preset-sidebar-item ${activeId === p.id ? "active" : ""} ${activeId === p.id && dirty ? "dirty" : ""}`}
@@ -1145,7 +1151,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </button>
           ))}
-          {!showSetlists && !showJams && presets.length === 0 && !adding && (
+          {!showSetlists && !showJams && !showSongs && presets.length === 0 && !adding && (
             search.trim() ? (
               <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
             ) : (
@@ -1286,6 +1292,18 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             }}
           >
             {t("presets.rename")}
+          </button>
+          {/* W19 — Yames keeps its own copy of the file a song was read
+              from, so this gives it back. A library action, in the library's
+              own menu: it is about the song rather than about the pass you
+              are in the middle of, and the stage has no height to spare. */}
+          <button
+            onClick={() => {
+              void exportScoreSource(songMenu.id).catch(() => {});
+              setSongMenu(null);
+            }}
+          >
+            {t("songs.exportOriginal")}
           </button>
           <button
             className="preset-context-delete"

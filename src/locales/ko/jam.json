@@ -252,14 +252,12 @@
       "aaba32": "AABA",
       "one": "1코드",
       "custom": "{{count}}마디",
-      "custom_one": "{{count}}마디",
       "custom_other": "{{count}}마디"
     },
     "countIn": {
       "label": "카운트인",
       "none": "없음",
       "barsAnd": "{{count}}마디 · {{sound}}",
-      "barsAnd_one": "{{count}}마디 · {{sound}}",
       "barsAnd_other": "{{count}}마디 · {{sound}}"
     },
     "fills": {
@@ -277,7 +275,6 @@
       "label": "지금",
       "aria": "{{chord}} 연주 중",
       "next": "{{count}}마디 뒤 {{chord}}",
-      "next_one": "{{count}}마디 뒤 {{chord}}",
       "next_other": "{{count}}마디 뒤 {{chord}}",
       "nextNow": "다음은 {{chord}}"
     },
@@ -301,7 +298,6 @@
       "scope": "보여줄 범위",
       "scopeKey": "이 조성",
       "scopeAll": "모든 조성",
-      "noteCount_one": "{{count}}음 스케일",
       "noteCount_other": "{{count}}음 스케일",
       "noteCount": "{{count}}음 스케일",
       "jump": "바로 가기",
@@ -409,7 +405,6 @@
       "dropOutEvery": "{{count}}마디마다 쉼",
       "dropOutBarsLabel": "밴드가 쉬는 길이",
       "forBars": "{{count}}마디 동안",
-      "forBars_one": "{{count}}마디 동안",
       "forBars_other": "{{count}}마디 동안",
       "trade": "주고받기",
       "tradeN": "{{count}}마디씩",
@@ -417,7 +412,6 @@
       "tempoUp": "템포 +{{step}}",
       "tempoEveryLabel": "템포가 오르는 주기",
       "everyChoruses": "{{count}}코러스마다",
-      "everyChoruses_one": "{{count}}코러스마다",
       "everyChoruses_other": "{{count}}코러스마다",
       "climbing": "{{from}}에서 오르는 중",
       "dropOutExplain": "가끔 밴드가 몇 마디 쉬고, 그동안 혼자 박을 지킵니다.",
@@ -521,7 +515,6 @@
       "lead": "각각 그루브, 킷, 필, 세기를 한 번에 정합니다",
       "aria": "이 바이브를 연주하는 방식",
       "count": "{{count}}가지 연주법",
-      "count_one": "{{count}}가지 연주법",
       "count_other": "{{count}}가지 연주법",
       "yours": "내 잼",
       "yoursEmpty": "아직 저장한 게 없습니다",
@@ -596,10 +589,8 @@
       "empty": "마디선, iReal 형식의 줄, 또는 가사 위에 코드를 적은 악보.",
       "none": "아직 코드가 없습니다.",
       "summary": "{{count}}마디 · {{key}} 조",
-      "summary_one": "{{count}}마디 · {{key}} 조",
       "summary_other": "{{count}}마디 · {{key}} 조",
       "check": "확인할 것 {{count}}개: {{list}}",
-      "check_one": "확인할 것 {{count}}개: {{list}}",
       "check_other": "확인할 것 {{count}}개: {{list}}"
     },
     "perc": {

@@ -24,21 +24,30 @@
  * sits inside the recording, measured from the instant that file starts, and
  * W5's warning is that getting it wrong moves every note by the same amount.
  *
- * The take is started in response to the first beat of the piece — Jam's rule,
- * so the count-in is not in the file — which means the file begins slightly
- * AFTER that beat, and the offset is therefore negative and small. It is
- * measured rather than assumed: `performance.now()` when the effect decides to
- * record, `performance.now()` again when `start_take` comes back, and the
- * difference is how much of the opening the file missed.
+ * **The engine answers it now, and this is the fallback.** The take's writer
+ * thread takes the band as its clock, so its first chunk of band is the first
+ * sample of the file; the audio callback stamps where the transport was when
+ * it rendered that chunk, and the sidecar carries it out as
+ * `JamTake.position` (`take.rs`, `song::take_position`). That is exact to one
+ * output buffer. `useSongTakePitch` prefers it and falls back to the number
+ * below.
  *
- * What that figure does NOT include, said plainly because somebody will
- * measure this one day: the beat event had already crossed the IPC boundary
- * before the first reading, and the writer's clock starts on the first chunk
- * of band the output callback renders after the ring is handed over, which is
- * up to one callback after the second reading. So the true offset is a little
- * more negative than the one reported — single-digit to low-tens of
- * milliseconds, against notes hundreds of milliseconds long. That is the size
- * of error this can have. The failure W13 fixed was seconds.
+ * The number below is what this hook measures for itself, and it is the only
+ * answer for a take recorded before the sidecar carried one — or for a take
+ * begun with the transport stopped, which has no position in any piece. The
+ * take is started in response to the first beat of the piece, which means the
+ * file begins slightly AFTER that beat and the offset is negative and small:
+ * `performance.now()` when the effect decides to record, `performance.now()`
+ * again when `start_take` comes back, and the difference is how much of the
+ * opening the file missed.
+ *
+ * What that figure does NOT include, which is exactly why the engine's is
+ * preferred: the beat event had already crossed the IPC boundary before the
+ * first reading, and the writer's clock starts on the first chunk of band the
+ * output callback renders after the ring is handed over, which is up to one
+ * callback after the second reading. So the true offset is a little more
+ * negative than the one measured here — single-digit to low-tens of
+ * milliseconds, against notes hundreds of milliseconds long.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -268,7 +277,15 @@ export function useSongTakes({
           // just played off the top of the list.
           if (take.jamId !== songIdRef.current) return;
           setTakes((prev) => sortTakes([take, ...prev]));
-          if (wasFor) setLastTake({ takeId: take.id, jamId: wasFor, startOffsetMs: offset });
+          if (wasFor)
+            setLastTake({
+              takeId: take.id,
+              jamId: wasFor,
+              startOffsetMs: offset,
+              // What the writer measured, when it had a transport to measure
+              // against. `useSongTakePitch` prefers it over the estimate.
+              ...(take.position ? { position: take.position } : {}),
+            });
         })
         .catch(() => {});
     }

@@ -17,16 +17,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { act, renderHook } from "@testing-library/react";
-import { mockInvoke, resetTauriMocks, setInvokeResponse } from "../../../test/mocks";
+import { mockInvoke, mockListen, resetTauriMocks, setInvokeResponse } from "../../../test/mocks";
 import { ReviewTab } from "./ReviewTab";
 import { MARK_GLYPH, markFor, noteNameOf, passesIn, pitchMarkFor } from "./marks";
-import { markFromFeedback, onsetsInBeat } from "./useLiveNoteLights";
+import {
+  markFromFeedback,
+  markFromOnset,
+  onsetsInBeat,
+  useLiveNoteLights,
+} from "./useLiveNoteLights";
 import { useSongActions } from "./useSongActions";
 import { __finishAttemptForTests } from "./useSongAttempt";
-import { takePitchFor } from "./useSongTakePitch";
+import { startOffsetOf, takePitchFor } from "./useSongTakePitch";
 import { scriptFindings, scriptPass } from "./reviewFixtures";
 import { buildSchedule } from "../../../songs/schedule";
-import type { TimingBands } from "../../../ipc";
+import type { LiveOnset, TimingBands } from "../../../ipc";
 import type { OnsetResult, SongNote, SongScore } from "../../../songs/types";
 
 // ---------------------------------------------------------------------------
@@ -397,6 +402,117 @@ describe("the live lights, which are a stand-in and say so", () => {
     expect(onsetsInBeat(sixteenths, 0.3)).toEqual([0, 1, 2, 3]);
     expect(onsetsInBeat(sixteenths, 1.1)).toEqual([]);
   });
+
+  it("draws a live note's verdict on the same bands the review will", () => {
+    // The point of going through `markFor`: a note that lights amber while
+    // the pass runs must not turn green in the panel underneath it a second
+    // later. Same function, same bands, same answer.
+    const live = (deviationMs: number | null, state: LiveOnset["state"] = "hit"): LiveOnset => ({
+      id: 3,
+      pass: 0,
+      state,
+      deviationMs,
+    });
+    expect(markFromOnset(live(4), BANDS)).toBe("onTime");
+    expect(markFromOnset(live(-30), BANDS)).toBe("slightlyEarly");
+    expect(markFromOnset(live(60), BANDS)).toBe("late");
+    expect(markFromOnset(live(null, "miss"), BANDS)).toBe("missed");
+    expect(markFromOnset(live(null, "softAbsent"), BANDS)).toBe("notAssessed");
+    // No bands — an older build, or a command that did not answer. Coarser,
+    // and not wrong.
+    expect(markFromOnset(live(60), null)).toBe("onTime");
+  });
+});
+
+describe("the live lights, per note, while the pass runs", () => {
+  /** The callback the hook handed to `listen` for one event name. */
+  function listenerFor(event: string): ((payload: { payload: unknown }) => void) | undefined {
+    const call = [...mockListen.mock.calls].reverse().find(([name]) => name === event);
+    return call?.[1] as ((payload: { payload: unknown }) => void) | undefined;
+  }
+
+  function sixteenthsSchedule() {
+    const score = twoBars();
+    return buildSchedule(
+      { ...score, notes: [0, 1, 2, 3].map((i) => note(i, i * 240, i + 1)) },
+      WHOLE,
+    );
+  }
+
+  it("lights the note the analyzer named, and only that one", async () => {
+    const schedule = sixteenthsSchedule();
+    const { result } = renderHook(() =>
+      useLiveNoteLights({ schedule, beatInRange: 0.3, isPlaying: true, bpm: 120 }),
+    );
+    // The bands come back from an invoke the hook fires on mount.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const onScore = listenerFor("score-onset");
+    expect(onScore).toBeTypeOf("function");
+    act(() => {
+      onScore?.({ payload: { id: 2, pass: 0, state: "hit", deviationMs: 0 } });
+    });
+    expect([...result.current.entries()]).toEqual([[2, "onTime"]]);
+  });
+
+  it("stops smearing the beat as soon as a note has been named", async () => {
+    const schedule = sixteenthsSchedule();
+    const { result } = renderHook(() =>
+      useLiveNoteLights({ schedule, beatInRange: 0.3, isPlaying: true, bpm: 120 }),
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const onBeat = listenerFor("beat-feedback");
+    const onScore = listenerFor("score-onset");
+    const beat = {
+      beatIndex: 0,
+      intervalErrorMs: 0,
+      amplitude: 1,
+      calibrationOffsetMs: 0,
+      calibrationConfidence: 1,
+      gridCorrelation: 1,
+      classification: "perfect",
+      deviationMs: 0,
+    };
+    // Before the analyzer has said anything about a note, the beat's verdict
+    // is all there is and it lights all four attacks inside that beat.
+    act(() => {
+      onBeat?.({ payload: beat });
+    });
+    expect(result.current.size).toBe(4);
+    // The first per-note verdict takes over. The beat events that follow it
+    // are ignored rather than repainting three notes the analyzer has a
+    // better answer for.
+    act(() => {
+      onScore?.({ payload: { id: 1, pass: 0, state: "miss", deviationMs: null } });
+    });
+    act(() => {
+      onBeat?.({ payload: { ...beat, classification: "perfect" } });
+    });
+    expect(result.current.get(1)).toBe("missed");
+  });
+
+  it("clears the page when the transport stops", async () => {
+    const schedule = sixteenthsSchedule();
+    const { result, rerender } = renderHook(
+      ({ playing }: { playing: boolean }) =>
+        useLiveNoteLights({ schedule, beatInRange: 0.3, isPlaying: playing, bpm: 120 }),
+      { initialProps: { playing: true } },
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      listenerFor("score-onset")?.({
+        payload: { id: 0, pass: 0, state: "hit", deviationMs: 0 },
+      });
+    });
+    expect(result.current.size).toBe(1);
+    rerender({ playing: false });
+    expect(result.current.size).toBe(0);
+  });
 });
 
 describe("the stop", () => {
@@ -664,5 +780,48 @@ describe("asking the ear which note it was", () => {
     await expect(
       takePitchFor(review, { takeId: "tk1", jamId: "j1", startOffsetMs: 0 }),
     ).resolves.toEqual([]);
+  });
+
+  /**
+   * The engine measured it; the frontend guessed at it. The guess is
+   * optimistic by tens of milliseconds — the IPC crossing on the way in and
+   * the ring handover on the way out — so where both exist the engine wins.
+   */
+  it("prefers the offset the take's own writer measured", () => {
+    const take = { takeId: "tk1", jamId: "j1", startOffsetMs: -12 };
+    expect(startOffsetOf(take)).toBe(-12);
+    expect(
+      startOffsetOf({
+        ...take,
+        position: {
+          mode: "song" as const,
+          bar: 3,
+          tick: 2880,
+          pass: 0,
+          startOffsetMs: -41.7,
+        },
+      }),
+    ).toBe(-41.7);
+    // A jam's position carries no offset — there is no beat 0 of a range to
+    // measure from — so the estimate is still the only answer there.
+    expect(
+      startOffsetOf({
+        ...take,
+        position: { mode: "jam" as const, bar: 5, tick: 0, pass: 1 },
+      }),
+    ).toBe(-12);
+  });
+
+  it("sends the measured offset rather than the estimate", async () => {
+    setInvokeResponse("analyze_take_pitch", []);
+    await takePitchFor(review, {
+      takeId: "tk1",
+      jamId: "j1",
+      startOffsetMs: -12,
+      position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -41.7 },
+    });
+    const call = mockInvoke.mock.calls.find((c) => c[0] === "analyze_take_pitch");
+    const request = (call?.[1] as { request: Record<string, unknown> }).request;
+    expect(request.startOffsetMs).toBe(-41.7);
   });
 });

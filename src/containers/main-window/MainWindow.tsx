@@ -103,6 +103,8 @@ import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
 import { setSetlistCountIn } from "../../setlist/setlists";
 import { countInIsOn, countInToggle } from "./countIn";
+import { songPosition } from "../../songs/position";
+import { nudgeRange, setEdge } from "../../songs/selection";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
@@ -134,6 +136,18 @@ import {
 } from "../../hotkeys";
 import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
+
+/**
+ * Action ids that only mean something on one tab.
+ *
+ * Read when a key belongs to more than one action — `L`, `[` and `]` all do
+ * since Songs grew a portion to loop — so that the mode's own action wins on
+ * the mode's own tab and the plain one wins everywhere else. By prefix rather
+ * than by looking the group up, because the prefix IS the convention: every
+ * action in a mode group is named after its mode, and one that is not would
+ * be the bug this would hide.
+ */
+const MODE_ACTION_PREFIXES = ["jam-", "songs-"];
 
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
 
@@ -527,6 +541,74 @@ export function MainWindow() {
     [jamSession.actions, jamSession.jam?.takes, jamTakes.requestTakes],
   );
 
+  /**
+   * The portion, hands-free (W18).
+   *
+   * The owner: choosing a portion of a song so it repeats is *"super critical
+   * for song learning"*, and a player choosing one is holding a guitar. `[`
+   * and `]` mark where it starts and stops AT THE BAR BEING PLAYED, which is
+   * what every looper pedal already means by those two symbols — so the bars
+   * can be marked out from a footswitch while the music runs, with the whole
+   * hand staying on the neck.
+   *
+   * The bar being played comes from the engine's own beat event, through the
+   * one function that answers "where are we" (`songPosition`). Never
+   * `BeatEvent.beat`: that counts the CLICK's beats, so in 7/8 a loop marked
+   * with the footswitch would start twice as far into the piece as the player
+   * is. Stopped, it is the start of the current portion — a player who has
+   * not pressed play yet is at the top of what they chose.
+   */
+  const songsActions = useMemo(
+    () => {
+      const score = songsSession.score;
+      const barNow = () => {
+        if (!score) return null;
+        return songPosition(score, songsSession.range, currentBeat, {
+          playing: state.isPlaying,
+        }).bar;
+      };
+      return {
+        loopStartsHere: () => {
+          const bar = barNow();
+          if (bar === null || !score) return;
+          songsSession.setSelection(
+            setEdge(score, songsSession.selection ?? songsSession.range, "start", bar),
+          );
+        },
+        loopEndsHere: () => {
+          const bar = barNow();
+          if (bar === null || !score) return;
+          songsSession.setSelection(
+            setEdge(score, songsSession.selection ?? songsSession.range, "end", bar),
+          );
+        },
+        toggleLoop: () => songsSession.setLoop(!songsSession.loop),
+        clearSelection: songsSession.clearSelection,
+        nudge: (bars: number) => {
+          if (!score) return;
+          songsSession.setSelection(
+            nudgeRange(score, songsSession.selection ?? songsSession.range, bars),
+          );
+        },
+      };
+    },
+    // Picked apart rather than `songsSession`, which is a fresh object every
+    // render: with the whole session in here the dispatcher — and the key
+    // listener that depends on it — would be rebuilt on every beat event.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      songsSession.score,
+      songsSession.range,
+      songsSession.selection,
+      songsSession.loop,
+      songsSession.setSelection,
+      songsSession.setLoop,
+      songsSession.clearSelection,
+      currentBeat,
+      state.isPlaying,
+    ],
+  );
+
   const handleNewJam = useCallback(() => {
     setSidebarOpen(true);
     const created = jamSession.newJam();
@@ -563,9 +645,10 @@ export function MainWindow() {
       view,
       jam: jamSession.jam ?? null,
       setlist: setlistSession.setlist ?? null,
+      song: { bars: songsSession.mixSetting.countInBars },
       state,
     }),
-    [view, jamSession.jam, setlistSession.setlist, state],
+    [view, jamSession.jam, setlistSession.setlist, songsSession.mixSetting.countInBars, state],
   );
 
   const countInOn = countInIsOn(countInSubject);
@@ -581,8 +664,15 @@ export function MainWindow() {
       if (setlist) setlistSession.setSetlist(setSetlistCountIn(setlist, beats));
       return;
     }
+    // Songs counts in bars, and the number is this song's own — the click's
+    // warm-up beats are cleared by `load_song`, so writing them here is the
+    // switch that did nothing that W18 was sent to fix.
+    if (store === "songs") {
+      songsSession.setCountInBars(beats);
+      return;
+    }
     void reconfigureRamp({ warmupBeats: beats });
-  }, [countInSubject, setlistSession.setlist]);
+  }, [countInSubject, setlistSession.setlist, songsSession.setCountInBars]);
 
   /**
    * Play, on the metronome.
@@ -1150,6 +1240,8 @@ export function MainWindow() {
     // including the first-time dialog — so a footswitch cannot start a
     // recording nobody has been told about.
     jamActions,
+    songsLoaded: !!songsSession.score,
+    songsActions,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1191,9 +1283,29 @@ export function MainWindow() {
       }
       const combo = eventToCombo(e);
       if (!combo) return;
-      const actionId = Object.entries(keyBindings).find(
-        ([_, key]) => key === combo,
-      )?.[0] as HotkeyAction | undefined;
+      /*
+       * Which action this key means — and on which tab (2026-09-20).
+       *
+       * A combo can belong to more than one action now: `L` loops a section
+       * in Jam and a portion in Songs, and `[` and `]` step the metronome's
+       * subdivision everywhere except Songs, where they mark where a portion
+       * starts and stops. Those are the right keys in both places — a looper
+       * pedal taught everybody what the brackets mean — and they are only
+       * ambiguous if you ask the question without saying where you are.
+       *
+       * So the mode's own action wins on the mode's own tab, and the plain
+       * one wins everywhere else. Taking the first match, which is what this
+       * did, meant whichever was written higher up `hotkeys.ts` silently
+       * owned the key in every mode.
+       */
+      const bound = Object.entries(keyBindings)
+        .filter(([_, key]) => key === combo)
+        .map(([action]) => action);
+      /** An action that only means something on one tab, by its own prefix. */
+      const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
+      const actionId = (bound.find((action) => action.startsWith(`${view}-`)) ??
+        bound.find((action) => !modeOnly(action)) ??
+        bound[0]) as HotkeyAction | undefined;
       // Feed tester if open
       if (inputTestMode) {
         if (["Meta", "Control", "Alt", "Shift"].includes(e.key)) return;

@@ -33,8 +33,10 @@ const importerModule = () => import("../../../songs/import");
 type Importer = Awaited<ReturnType<typeof importerModule>>;
 import type { ParsedSong, SongImportWarning, SongTrackChoice } from "../../../songs/import";
 import type { BarRange } from "../../../songs/schedule";
+import { addPortion, newPortionId, removePortion, renamePortion } from "../../../songs/selection";
+import type { SavedPortion } from "../../../songs/selection";
 import type { SongScore } from "../../../songs/types";
-import { forgetMixSetting, loadMixSetting, rememberPlace } from "../../../songs/songEngine";
+import { forgetMixSetting } from "../../../songs/songEngine";
 import { useSongEngine } from "./useSongEngine";
 import type { SongEngine } from "./useSongEngine";
 
@@ -51,11 +53,27 @@ export interface SongsSession extends SongEngine {
   score: SongScore | null;
   /** The file's bytes, for the renderer. */
   source: Uint8Array | null;
+  /**
+   * The bars the engine is playing: the selection, or the whole song.
+   *
+   * Derived and not stored. There is one idea of what is chosen — `selection`
+   * — and everything that used to read a range goes on reading one.
+   */
   range: BarRange;
+  /**
+   * The portion the player picked out, or null for the whole song.
+   *
+   * The centre of the mode (`selection.ts`): dragging on the tab, typing two
+   * bar numbers, pressing a section chip and pressing a footswitch all write
+   * this and nothing else.
+   */
+  selection: BarRange | null;
   loop: boolean;
   tempoPercent: number;
   /** The tempo the click should run at: the range's own tempo, scaled. */
   tempo: number;
+  /** Portions of this song the player named and kept. */
+  portions: SavedPortion[];
   pending: PendingImport | null;
   warnings: SongImportWarning[];
   /** A sentence to show the player, or null. */
@@ -66,9 +84,24 @@ export interface SongsSession extends SongEngine {
   cancelImport: () => void;
   renameSong: (id: string, name: string) => void;
   deleteSong: (id: string) => void;
-  setRange: (range: BarRange) => void;
+  /**
+   * Choose a portion. Choosing one turns the repeat ON.
+   *
+   * That is the owner's rule and it is what makes the feature one gesture
+   * rather than two: *"being able to select a portion of a song so it plays
+   * that portion in repeat"*. `null` clears back to the whole song and stops
+   * the repeat, which is what "Whole song" presses.
+   */
+  setRange: (range: BarRange | null) => void;
+  /** Same thing, named for what it is at the call sites that are about it. */
+  setSelection: (range: BarRange | null) => void;
+  clearSelection: () => void;
   setLoop: (loop: boolean) => void;
   setTempoPercent: (percent: number) => void;
+  /** Keep the portion on screen under a name, beside the section chips. */
+  savePortion: (name: string) => void;
+  renamePortion: (id: string, name: string) => void;
+  deletePortion: (id: string) => void;
   dismissError: () => void;
   /** Hand the current range to the engine. No-ops until W1's command lands. */
   pushSchedule: () => Promise<boolean>;
@@ -90,7 +123,7 @@ export function useSongsSession(
 ): SongsSession {
   const [songs, setSongs] = useState<SongRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [range, setRangeState] = useState<BarRange>({ startBar: 0, endBar: 0 });
+  const [selection, setSelectionState] = useState<BarRange | null>(null);
   const [loop, setLoop] = useState(false);
   const [tempoPercent, setTempoPercentState] = useState(100);
   const [pending, setPending] = useState<PendingImport | null>(null);
@@ -124,48 +157,25 @@ export function useSongsSession(
     [song],
   );
 
-  /**
-   * Open a song, and put the player back where they left it (W19).
-   *
-   * The whole song, once through, at full speed is the state a song is
-   * opened in for the first time — and then whatever the player left is read
-   * back over it. Read rather than waited for: the tab is drawn from the
-   * score and does not care, and a screen that sat blank for a store round
-   * trip to restore a loop nobody had set would be a worse trade.
-   *
-   * The PORTION comes out of the same per-song setting but is written by
-   * W18, who own the selection on the stage — `songEngine.ts` says so where
-   * the field is declared, and `rememberPlace` below deliberately does not
-   * touch it. The loop and the speed are this hook's.
-   *
-   * `markScoreOpened` is what moves the song to the top of the library on
-   * the next read (migration four). Fire and forget: a library that comes
-   * back in yesterday's order is not worth making anybody wait for, and it
-   * is right again the moment the list is read.
-   */
   const loadSong = useCallback(
     (id: string) => {
       const next = songs.find((s) => s.id === id);
       if (!next) return;
       setActiveId(id);
-      setRangeState(wholeSong(next.score));
+      // Cleared, not carried: the portion this song was left on comes back
+      // from the store a moment later (see the effect below), and carrying
+      // the last song's bars across in the meantime would loop bars 17–24 of
+      // a piece that has nine.
+      setSelectionState(null);
       setLoop(false);
       setTempoPercentState(100);
       setWarnings([]);
+      // W19 — the library is "what have I been playing" (migration four).
+      // Fire and forget: a list that comes back in yesterday's order is not
+      // worth making anybody wait for, and it is right the next time it is
+      // read. The portion, the loop and the speed come back in the effect
+      // below, which is the stage's, not this line's.
       void markScoreOpened(id).catch(() => {});
-      void loadMixSetting(id)
-        .then((place) => {
-          // Still the same song: the player may have clicked another row
-          // while the store was answering.
-          setActiveId((current) => {
-            if (current !== id) return current;
-            if (place.range) setRangeState(clampRange(next.score, place.range));
-            setLoop(place.loop);
-            setTempoPercentState(place.tempoPercent);
-            return current;
-          });
-        })
-        .catch(() => {});
     },
     [songs],
   );
@@ -210,7 +220,7 @@ export function useSongsSession(
         commit(next);
         setPending(null);
         setActiveId(record.id);
-        setRangeState(wholeSong(result.score));
+        setSelectionState(null);
         setLoop(false);
         setTempoPercentState(100);
         setWarnings(result.warnings);
@@ -239,34 +249,49 @@ export function useSongsSession(
     [songs, commit, activeId],
   );
 
-  const setRange = useCallback(
-    (next: BarRange) => setRangeState(score ? clampRange(score, next) : next),
-    [score],
+  /**
+   * The engine plays the selection, or the whole song when there is none.
+   *
+   * The one place the two ideas meet. Everything downstream — the schedule,
+   * the transport, the cursor, the review — goes on being handed a range and
+   * never learns that "nothing selected" is a state.
+   */
+  const range = useMemo<BarRange>(
+    () => (score ? (selection ? clampRange(score, selection) : wholeSong(score)) : { startBar: 0, endBar: 0 }),
+    [score, selection],
   );
 
   /**
-   * Looping, and remembered (W19).
+   * Choose a portion — and choosing one starts the repeat.
    *
-   * Only when a song is open: with none there is nothing to remember it
-   * about, and writing an entry keyed on `null` would be a row in
-   * `settings.json` for a song that does not exist.
+   * The owner's rule, and the reason this is one gesture: *"being able to
+   * select a portion of a song so it plays that portion in repeat is super
+   * critical for song learning"*. Nobody drags out eight bars in order to
+   * play them once.
+   *
+   * `null` clears back to the whole song and stops the repeat — the whole
+   * song on a loop is a thing you can still ask for with the repeat switch,
+   * but it is not what pressing "Whole song" means.
    */
-  const setLoopRemembered = useCallback(
-    (next: boolean) => {
-      setLoop(next);
-      if (activeId) void rememberPlace(activeId, { loop: next }).catch(() => {});
+  const setSelection = useCallback(
+    (next: BarRange | null) => {
+      if (!next) {
+        setSelectionState(null);
+        setLoop(false);
+        return;
+      }
+      setSelectionState(score ? clampRange(score, next) : next);
+      setLoop(true);
     },
-    [activeId],
+    [score],
   );
+
+  const clearSelection = useCallback(() => setSelection(null), [setSelection]);
 
   /** 50–100 %, the range the brief fixed. A drill is where you climb. */
   const setTempoPercent = useCallback(
-    (percent: number) => {
-      const clamped = Math.max(50, Math.min(100, Math.round(percent)));
-      setTempoPercentState(clamped);
-      if (activeId) void rememberPlace(activeId, { tempoPercent: clamped }).catch(() => {});
-    },
-    [activeId],
+    (percent: number) => setTempoPercentState(Math.max(50, Math.min(100, Math.round(percent)))),
+    [],
   );
 
   const tempo = useMemo(
@@ -303,6 +328,80 @@ export function useSongsSession(
    */
   const engine = useSongEngine({ view, score, source, range, loop, tempoPercent });
 
+  /**
+   * Come back to the passage you left off on.
+   *
+   * The store answers a moment after the song is chosen, and this is the one
+   * frame where what it says wins. `restoredFor` makes it once per song and
+   * not once per read: without it the effect would fight every later change —
+   * you drag out bars 5–8, the setting saves, the setting comes back, and the
+   * selection is put back to what it was a second ago.
+   */
+  const restoredFor = useRef<string | null>(null);
+  useEffect(() => {
+    const id = song?.id ?? null;
+    if (!id || !score) {
+      restoredFor.current = null;
+      return;
+    }
+    if (restoredFor.current === id) return;
+    // The engine's setting for a song is DEFAULT_MIX_SETTING until its own
+    // read lands, so waiting for a non-default selection is not an option —
+    // a song genuinely left on the whole song has none. What says the read
+    // has happened is the engine reporting a setting for THIS song at all,
+    // which it does by way of the effect that loads it.
+    restoredFor.current = id;
+    const stored = engine.mixSetting;
+    if (stored.selection) setSelectionState(clampRange(score, stored.selection));
+    setLoop(stored.loop);
+    setTempoPercentState(stored.tempoPercent);
+    // `engine.mixSetting` is read, not depended on: this runs when the SONG
+    // changes, and reads whatever the store has said by then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song?.id, score]);
+
+  /**
+   * And write it down again as it changes.
+   *
+   * Only for the song it belongs to, and only once it has been restored —
+   * otherwise the first render of a newly chosen song would save the cleared
+   * selection over the one in the file before the read came back.
+   */
+  const { setStageSetting } = engine;
+  useEffect(() => {
+    if (!song?.id || restoredFor.current !== song.id) return;
+    setStageSetting({ selection, loop, tempoPercent });
+  }, [song?.id, selection, loop, tempoPercent, setStageSetting]);
+
+  const portions = engine.mixSetting.portions;
+
+  const savePortion = useCallback(
+    (name: string) => {
+      const trimmed = name.trim().slice(0, 24);
+      if (!trimmed || !selection) return;
+      setStageSetting({
+        portions: addPortion(portions, {
+          id: newPortionId(),
+          name: trimmed,
+          startBar: selection.startBar,
+          endBar: selection.endBar,
+          tempoPercent,
+        }),
+      });
+    },
+    [portions, selection, tempoPercent, setStageSetting],
+  );
+
+  const renamePortionById = useCallback(
+    (id: string, name: string) => setStageSetting({ portions: renamePortion(portions, id, name) }),
+    [portions, setStageSetting],
+  );
+
+  const deletePortion = useCallback(
+    (id: string) => setStageSetting({ portions: removePortion(portions, id) }),
+    [portions, setStageSetting],
+  );
+
   return {
     ...engine,
     songs,
@@ -310,9 +409,11 @@ export function useSongsSession(
     score,
     source,
     range,
+    selection,
     loop,
     tempoPercent,
     tempo,
+    portions,
     pending,
     warnings,
     error,
@@ -322,9 +423,17 @@ export function useSongsSession(
     cancelImport,
     renameSong,
     deleteSong,
-    setRange,
-    setLoop: setLoopRemembered,
+    // One writer under two names. `setRange` is what the coach's actions and
+    // the review already call; `setSelection` is what the stage calls, and it
+    // is the name that says what it does.
+    setRange: setSelection,
+    setSelection,
+    clearSelection,
+    setLoop,
     setTempoPercent,
+    savePortion,
+    renamePortion: renamePortionById,
+    deletePortion,
     dismissError: () => setError(null),
     pushSchedule,
   };

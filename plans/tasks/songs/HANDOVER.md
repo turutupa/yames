@@ -68,6 +68,35 @@ every theme.
 8. **Jam's default mix** (the task chip from the website work): keys sit
    ~10 dB under the drums at default faders. Still open.
 
+## Waiting for your ear: Jam's default mix (merged so you can hear it in the app — NOT approved)
+
+You asked for one branch to test, so `songs-w17-jam-mix` is merged as
+`f3b0ccbb`. Play a jam with the bass and keys rows ON and judge it. If
+you do not like it: `git revert -m 1 f3b0ccbb` — nothing else depends on
+it.
+
+Six before/after pairs were sent to you on 2026-09-20; they live in
+`.claude\worktreesgent-a1b78c03f9e9ddac0\jam-mix-demos\`. The keys come up
+2.2 dB as a section (to about 6 dB under the kit), and the five basses are
+levelled against each other where a listener hears them (above 120 Hz):
+slap +4.6 dB, synth +3.1, picked +0.9, upright −1.5. The old levelling test
+measured basses in 200 Hz–4 kHz, a band a bass barely occupies. One gate
+moved: keys-under-the-snare 6 dB → 5 dB. Say yes, no, or "more keys"
+(`KEYS_TRIM` in `jam.rs` is the one knob).
+
+The same worker found three things that are yours to decide:
+- **A vibe tile hires drums and nobody else** (`DRUMS_ONLY` in
+  `src/jam/vibes.ts`): press play on a vibe and it is a drum machine until
+  the player turns the bass and keys rows on. The v1.2.0 notes promise a
+  drummer, a bass player and a keyboard player. This may be a real part of
+  "mostly drum sound", and no trim can fix it.
+- **The disco vibe already clips** at the shipped volume (rendered peak
+  1.000 before this change). The test that guards the mixer's clamp uses a
+  synthetic worst case, not the real vibes.
+- `scripts/sounds/band_demo.ts` renders chorus 1, which the Build
+  arrangement plays a rung quieter; every listening round done through it
+  heard the band held back.
+
 ## Known gaps, said plainly
 
 - 14 locales carry English for the Songs screens and the coach's new

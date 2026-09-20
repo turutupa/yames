@@ -215,6 +215,23 @@
         }
       }
     },
+    "stage": {
+      "backToTab": "Back to the tab",
+      "selectedBars": "Bars {{bars}} chosen",
+      "wholeSong": "The whole song",
+      "portionSays": "{{count}} такт · {{state}}",
+      "portionSays_few": "{{count}} такта · {{state}}",
+      "portionSays_many": "{{count}} тактов · {{state}}",
+      "portionSays_other": "{{count}} такта · {{state}}",
+      "looping": "on repeat",
+      "once": "once through",
+      "timeRound": "Go {{n}}",
+      "keepPortion": "Keep it",
+      "portionPlaceholder": "Name this bit",
+      "renamePortion": "Rename",
+      "deletePortion": "Forget this one",
+      "portionTitle": "{{name}} — at {{percent}}%"
+    },
     "offer": {
       "justArrived": "только что появился в загрузках",
       "justArrivedSized": "только что появился в загрузках · {{size}}",

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openShot, fitsOnOneLine, noSidewaysScroll, IN_ENGLISH } from "./fits";
+import { openShot, fitsOnOneLine, insideViewport, noSidewaysScroll, IN_ENGLISH } from "./fits";
 
 /*
  * English only, for now.
@@ -37,6 +37,36 @@ const WIDTHS = [
   { name: "over the breakpoint", width: 1100, height: 900 },
   { name: "wide", width: 1400, height: 900 },
 ];
+
+/**
+ * Is it on screen while the band plays? (added 2026-09-20 with W18)
+ *
+ * Every test in this file asks whether a box fits its PARENT, and a row fits
+ * its parent perfectly while the parent sits below the bottom of the window.
+ * That is how Songs shipped with the faders A13 puts on the stage 28px under
+ * a 900px window, past a hundred and seven green tests — so the question gets
+ * asked here too, of the controls A13 names for Jam: what each player is
+ * doing, and how loud they are.
+ *
+ * The chord, the beat and the band, at the two window heights a person
+ * practises at. The rest of the Jam stage — the timeline, the practice tools —
+ * is below the fold by design and this does not claim otherwise
+ * (`jam.css`: "five stacked sections and a timeline, so it overflows a 900px
+ * window"); what may not be below it is the row you reach for mid-chorus.
+ */
+test.describe("what you reach for mid-chorus", () => {
+  for (const size of [
+    { name: "a laptop", width: 1100, height: 720 },
+    { name: "the pictures", width: 1400, height: 900 },
+  ]) {
+    test(`is on screen while the jam runs at ${size.name}`, async ({ page }) => {
+      await openShot(page, "jam", size);
+      await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+      await insideViewport(page, ".jam-now", `the chord at ${size.name}`, size);
+      await insideViewport(page, ".jam-band .jam-band-lane", `the band at ${size.name}`, size);
+    });
+  }
+});
 
 test.describe("the band rows", () => {
   for (const size of WIDTHS) {

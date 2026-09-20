@@ -183,7 +183,8 @@
         "metronome": "Metronoom",
         "view": "Weergave",
         "navigation": "Navigatie",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Songs"
       },
       "actions": {
         "play": "Afspelen / Stoppen",
@@ -218,7 +219,13 @@
         "jam-prev-section": "Vorig deel",
         "jam-loop-section": "Dit deel herhalen",
         "jam-take": "Neem de take op",
-        "tab-5": "Nummers-tabblad"
+        "tab-5": "Nummers-tabblad",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -253,7 +260,13 @@
         "jam-prev-section": "Bij de maatstreep terug naar het begin van het vorige deel",
         "jam-loop-section": "Het deel waar je in zit herhalen, of daarmee stoppen",
         "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
-        "tab-5": "Naar het Nummers-tabblad"
+        "tab-5": "Naar het Nummers-tabblad",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
       }
     },
     "inputTest": {

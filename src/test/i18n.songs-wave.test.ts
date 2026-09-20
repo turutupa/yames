@@ -14,6 +14,11 @@
 // (see the report on `songs-w16-words`). A later wave adds its own list, or
 // replaces this one with the whole key space once the backlog is cleared.
 //
+// The LAST check in this file is the exception: plural forms are checked
+// across every key in every namespace in every locale, this wave's or not.
+// Scoping that one to the wave is what let 23 older keys ship with only
+// `_one` and `_other` — see the comment on the check itself.
+//
 // A value that is legitimately the same word in another language goes on
 // ALLOWED below, per language, with the reason. "BPM" is a unit; "Tempo" is
 // what a German, Spanish, French, Italian, Dutch, Polish, Turkish or
@@ -312,6 +317,7 @@ function at(tree: Record<string, unknown>, dotted: string): unknown {
 }
 
 const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+const EVERY_CATEGORY = ["zero", "one", "two", "few", "many", "other"];
 
 /** The plural categories i18next will ask this language for. */
 function categories(lang: string): string[] {
@@ -323,10 +329,59 @@ function categories(lang: string): string[] {
  *
  * i18next looks up `key_<category>` and falls back to `key`, so the bare key
  * is the singular where a language has one and the only form where it does
- * not. That is the convention every locale file here already follows.
+ * not. That is the convention every locale file here already follows — the
+ * whole `songs` namespace leans on it, carrying no `_one` in any of the
+ * fifteen, and `t("songs.barsCount", { count: 1 })` is still "1 takt" in
+ * Polish because the lookup for `songs.barsCount_one` misses and lands there.
  */
 function categoryOfBareKey(lang: string): string {
   return categories(lang).includes("one") ? "one" : "other";
+}
+
+/** Every language that ships, English included. */
+function everyLanguage(): string[] {
+  return fs
+    .readdirSync(LOCALES_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+}
+
+/** All leaf keys of a loaded language, dotted, skipping "_" meta keys. */
+function leafKeys(obj: Record<string, unknown>, prefix = ""): string[] {
+  return Object.entries(obj)
+    .filter(([key]) => !key.startsWith("_"))
+    .flatMap(([key, value]) => {
+      const next = prefix ? `${prefix}.${key}` : key;
+      return typeof value === "object" && value !== null
+        ? leafKeys(value as Record<string, unknown>, next)
+        : [next];
+    });
+}
+
+/** The bases a language writes a `_<category>` form for. */
+function pluralBases(tree: Record<string, unknown>): string[] {
+  return [
+    ...new Set(
+      leafKeys(tree)
+        .filter((key) => PLURAL_SUFFIX.test(key))
+        .map((key) => key.replace(PLURAL_SUFFIX, "")),
+    ),
+  ].sort();
+}
+
+/**
+ * The plural categories a language can actually serve for one base key: one
+ * per `base_<category>` in the files, plus whatever the bare key stands in for
+ * when it exists. That union is what i18next has to answer a `count` with.
+ */
+function formsServed(tree: Record<string, unknown>, lang: string, base: string): Set<string> {
+  const served = new Set<string>();
+  for (const category of EVERY_CATEGORY) {
+    if (typeof at(tree, `${base}_${category}`) === "string") served.add(category);
+  }
+  if (typeof at(tree, base) === "string") served.add(categoryOfBareKey(lang));
+  return served;
 }
 
 const en = loadLanguage("en");
@@ -396,32 +451,45 @@ describe("the Songs wave's strings in the other fourteen languages", () => {
     expect(drift, "a sentence gained or lost a placeholder in translation").toEqual([]);
   });
 
-  it("every language carries the plural forms its own rules need", () => {
-    // Polish and Russian need four categories, Spanish and French and Italian
-    // and Brazilian Portuguese three, Japanese and Korean and Vietnamese and
-    // both Chinese one. A missing form does not throw: i18next falls back to
-    // the bare key, which is the singular, and a Pole reads "5 takt".
-    const bases = [
-      ...new Set(
-        ADDED_BY_THE_SONGS_WAVE.filter((key) => PLURAL_SUFFIX.test(key)).map((key) =>
-          key.replace(PLURAL_SUFFIX, ""),
-        ),
-      ),
-    ].sort();
-    expect(bases.length, "the wave's pluralised keys").toBeGreaterThan(0);
+  it("every language carries exactly the plural forms its own rules need", () => {
+    // Every pluralised key in every namespace in every locale — not this
+    // wave's. Scoping this check to the wave is precisely what let the bug it
+    // was written to catch survive underneath it: 23 keys in `jam`,
+    // `metronome` and `setlist` that predate Songs carried only `_one` and
+    // `_other`. Polish and Russian need `_few` (2-4) and `_many` (0, 5-21) as
+    // well, so i18next fell back to the bare key — and the bare key in those
+    // files is whichever of the two the translator happened to write, so each
+    // key was right at one of them and wrong at the other. A Polish player
+    // read "2 kroków" on the setlist and "5 uderzenia" on the metronome; a
+    // Russian one read "5 доли". Shipped screens, every one of them.
+    //
+    // Exactly, in both directions. A missing form is a sentence in nobody's
+    // language. A form the language has no category for — `_one` in Japanese,
+    // which resolves `other` for every number there is — is a string i18next
+    // will never ask for, and the next translator to polish it will believe
+    // they changed what a player sees.
+    //
+    // English is the source of the base list: a base it does not pluralise is
+    // not a plural key, however many forms a locale has invented for it, and
+    // that case is reported rather than silently measured.
+    const enBases = pluralBases(en);
+    expect(enBases.length, "pluralised keys in English").toBeGreaterThan(20);
 
-    const gaps: string[] = [];
-    for (const lang of LANGS) {
+    const wrong: string[] = [];
+    for (const lang of everyLanguage()) {
       const tree = loadLanguage(lang);
-      const bare = categoryOfBareKey(lang);
-      for (const base of bases) {
-        for (const category of categories(lang)) {
-          if (category === bare) continue; // the bare key is this one
-          const variant = `${base}_${category}`;
-          if (typeof at(tree, variant) !== "string") gaps.push(`${lang} ${variant}`);
-        }
+      const wanted = new Set(categories(lang));
+      for (const base of enBases) {
+        const served = formsServed(tree, lang, base);
+        const missing = [...wanted].filter((c) => !served.has(c));
+        const never = [...served].filter((c) => !wanted.has(c));
+        if (missing.length) wrong.push(`${lang} ${base}: no ${missing.join(", ")}`);
+        if (never.length) wrong.push(`${lang} ${base}: ${never.join(", ")} — ${lang} never asks for it`);
+      }
+      for (const base of pluralBases(tree)) {
+        if (!enBases.includes(base)) wrong.push(`${lang} ${base}: pluralised here, not in English`);
       }
     }
-    expect(gaps, "a plural form the language's own rules will ask for").toEqual([]);
+    expect(wrong, "plural forms, against each language's own Intl.PluralRules").toEqual([]);
   });
 });

@@ -252,14 +252,12 @@
       "aaba32": "AABA",
       "one": "單和弦",
       "custom": "{{count}} 小節",
-      "custom_one": "{{count}} 小節",
       "custom_other": "{{count}} 小節"
     },
     "countIn": {
       "label": "預備拍",
       "none": "無",
       "barsAnd": "{{count}} 小節 · {{sound}}",
-      "barsAnd_one": "{{count}} 小節 · {{sound}}",
       "barsAnd_other": "{{count}} 小節 · {{sound}}"
     },
     "fills": {
@@ -277,7 +275,6 @@
       "label": "目前",
       "aria": "正在演奏 {{chord}}",
       "next": "{{count}} 小節後 {{chord}}",
-      "next_one": "{{count}} 小節後 {{chord}}",
       "next_other": "{{count}} 小節後 {{chord}}",
       "nextNow": "下一個是 {{chord}}"
     },
@@ -301,7 +298,6 @@
       "scope": "顯示範圍",
       "scopeKey": "本調內",
       "scopeAll": "所有調",
-      "noteCount_one": "{{count}} 音音階",
       "noteCount_other": "{{count}} 音音階",
       "noteCount": "{{count}} 音音階",
       "jump": "跳轉到",
@@ -409,7 +405,6 @@
       "dropOutEvery": "每 {{count}} 小節留白",
       "dropOutBarsLabel": "樂團停多久",
       "forBars": "持續 {{count}} 小節",
-      "forBars_one": "持續 {{count}} 小節",
       "forBars_other": "持續 {{count}} 小節",
       "trade": "輪奏",
       "tradeN": "每 {{count}} 小節一輪",
@@ -417,7 +412,6 @@
       "tempoUp": "速度 +{{step}}",
       "tempoEveryLabel": "多久提一次速",
       "everyChoruses": "每 {{count}} 輪",
-      "everyChoruses_one": "每 {{count}} 輪",
       "everyChoruses_other": "每 {{count}} 輪",
       "climbing": "從 {{from}} 往上",
       "dropOutExplain": "樂團每隔一陣停幾小節，由你自己保持節奏。",
@@ -521,7 +515,6 @@
       "lead": "每一種都同時定好節奏型、鼓組、律動和力度",
       "aria": "這個風格的幾種打法",
       "count": "{{count}} 種打法",
-      "count_one": "{{count}} 種打法",
       "count_other": "{{count}} 種打法",
       "yours": "你自己的",
       "yoursEmpty": "還沒有儲存",
@@ -596,10 +589,8 @@
       "empty": "小節線、iReal 格式的一行，或歌詞上方寫著和弦的譜。",
       "none": "裡面還沒有和弦。",
       "summary": "{{count}} 小節 · {{key}} 調",
-      "summary_one": "{{count}} 小節 · {{key}} 調",
       "summary_other": "{{count}} 小節 · {{key}} 調",
       "check": "有 {{count}} 處可以核對：{{list}}",
-      "check_one": "有 {{count}} 處可以核對：{{list}}",
       "check_other": "有 {{count}} 處可以核對：{{list}}"
     },
     "perc": {

@@ -183,7 +183,8 @@
         "metronome": "메트로놈",
         "view": "뷰",
         "navigation": "탐색",
-        "jam": "잼"
+        "jam": "잼",
+        "songs": "Songs"
       },
       "actions": {
         "play": "재생 / 정지",
@@ -218,7 +219,13 @@
         "jam-prev-section": "이전 섹션",
         "jam-loop-section": "이 섹션 반복",
         "jam-take": "테이크 녹음",
-        "tab-5": "곡 탭"
+        "tab-5": "곡 탭",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -253,7 +260,13 @@
         "jam-prev-section": "마디선에서 이전 섹션의 첫 마디로 돌아가기",
         "jam-loop-section": "지금 있는 섹션을 반복하거나 반복을 끄기",
         "jam-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다",
-        "tab-5": "곡 탭으로 전환합니다"
+        "tab-5": "곡 탭으로 전환합니다",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
       }
     },
     "inputTest": {

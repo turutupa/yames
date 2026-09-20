@@ -13,14 +13,27 @@
  * does not load is a mode whose controls draw unstyled.
  *
  * The switch is on the stage with the range, the speed and the band
- * (`JAM_UX_DECISIONS` A13: the stage holds what you are DOING) and the shelf
- * is under it rather than beside the transport — listening back is not part of
- * playing, and a row of recordings under your thumb while you are trying to
- * play is a row you will hit by accident.
+ * (`JAM_UX_DECISIONS` A13: the stage holds what you are DOING).
+ *
+ * ## The shelf is behind the switch now (2026-09-20, W18)
+ *
+ * It used to be a section under the stage controls, and a section under the
+ * stage controls is a section under the fold: it was one of the three blocks
+ * that pushed the verdict 175 px below the bottom of a 900 px window. Nothing
+ * about it wants to be on screen while you play — listening back is what you
+ * do INSTEAD of playing — so it opens from its own switch as a popover and
+ * closes again, and the stage keeps the height.
+ *
+ * Portalled to the body rather than drawn inside the strip, and placed by
+ * Jam's own `useMenuPlacement`: the strip is the last row above the transport,
+ * so a list drawn as its child opens straight off the bottom of the window.
+ * The rule and the hook are the ones the jam screen's menus already use.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
+import { useMenuPlacement } from "../jam/useMenuPlacement";
 import type { JamTake } from "../../jam/types";
 import { formatDate } from "../practice-coach/coachCardHelpers";
 
@@ -54,17 +67,59 @@ export interface SongTakesProps {
   onDelete: (id: string) => void;
 }
 
-/** The switch, for the stage's control row. */
+/**
+ * The strip's takes group: the record switch, and the way to the shelf.
+ *
+ * Two controls rather than one, because they are two questions — "record what
+ * I am about to play" and "let me hear what I already played" — and the second
+ * is the one that must not be under a thumb reaching for the first.
+ */
 export function SongRecordControl({
   available,
-  enabled,
+  takes,
   recording,
+  dirBytes,
+  playingId,
+  enabled,
   onRequestTakes,
-}: Pick<SongTakesProps, "available" | "enabled" | "recording" | "onRequestTakes">) {
+  onPlay,
+  onStop,
+  onDelete,
+}: SongTakesProps) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  // Upwards: the strip is the last row above the transport, and a shelf that
+  // opens downwards lands on Play.
+  const { wrapRef, menuRef, style } = useMenuPlacement(open, { prefer: "above" });
+
+  /*
+   * Escape closes it, and so does a press anywhere else.
+   *
+   * The same two ways out every menu on the jam screen has. `pointerdown`
+   * rather than `click`, so a press that lands on the stage closes the shelf
+   * before whatever it landed on acts on it.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [open, wrapRef, menuRef]);
+
   return (
-    <div className="songs-control songs-control-record">
-      <span className="songs-control-label">{t("jam.takes.label")}</span>
+    <div className="songs-strip-group songs-strip-takes" ref={wrapRef}>
+      <span className="songs-strip-label">{t("jam.takes.label")}</span>
       <button
         type="button"
         className="songs-chip songs-chip-wide"
@@ -81,7 +136,46 @@ export function SongRecordControl({
         <span className="songs-record-dot" data-live={recording ? "" : undefined} aria-hidden="true" />
         {recording ? t("jam.takes.recording") : t("jam.takes.record")}
       </button>
-      <p className="songs-control-note">{t("jam.takes.lead")}</p>
+      <button
+        type="button"
+        className="songs-chip songs-takes-opener"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        disabled={available === false}
+        onClick={() => setOpen((was) => !was)}
+      >
+        {t("jam.takes.label")}
+        {takes.length > 0 && <span className="songs-takes-count">{takes.length}</span>}
+      </button>
+
+      {open &&
+        createPortal(
+          <div
+            className="songs-takes-pop"
+            role="dialog"
+            aria-label={t("jam.takes.label")}
+            ref={menuRef}
+            style={style}
+          >
+            {/* No lead line: the chip that opened this says "Takes", and
+                what the shelf says when it is empty already says what
+                recording is FOR. A second half-sentence above it read as a
+                fragment. */}
+            <SongTakes
+              available={available}
+              takes={takes}
+              recording={recording}
+              dirBytes={dirBytes}
+              playingId={playingId}
+              enabled={enabled}
+              onRequestTakes={onRequestTakes}
+              onPlay={onPlay}
+              onStop={onStop}
+              onDelete={onDelete}
+            />
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

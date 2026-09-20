@@ -21,6 +21,27 @@
  * at is the excerpt inside the `tabExcerpt` block. The full-pass tab is here
  * because a player wants to see the whole thing they just played, and no
  * block in the catalogue means that.
+ *
+ * ## Where it appears, and how it goes away (2026-09-20, W18)
+ *
+ * It arrives where the player was already looking: it takes the tab's place
+ * inside the same frame, rather than under it. It used to be drawn below the
+ * stage controls and the takes shelf, which at 1400×900 put its first line
+ * 175 px past the bottom of the window — so a player who stopped saw nothing
+ * happen at all.
+ *
+ * The frame is the host's (`SongsView`). What is this file's is the three ways
+ * out of it and where the eye and the caret go:
+ *
+ * - **Out**: the button, Escape, or simply pressing play — the host's
+ *   `onDismiss`, the key handler here, and `useSongAttempt` clearing the
+ *   review on the transport's rising edge.
+ * - **Focus** moves to the heading when it opens, so a screen reader is told
+ *   what appeared and the keyboard starts inside the thing that just arrived;
+ *   the host puts focus back on Play when it closes.
+ * - **Reduced motion**: the entrance is a stylesheet animation and
+ *   `songs.css` turns it off under `prefers-reduced-motion`. Nothing here
+ *   animates in JavaScript, which is what makes that possible.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -219,11 +240,37 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
 
   const bars = `${String(printedBarNumber(score, range.startBar))}–${String(printedBarNumber(score, range.endBar))}`;
 
+  /**
+   * The heading takes the caret when the verdict arrives.
+   *
+   * `tabIndex={-1}` so it can be focused without joining the tab order, and
+   * `preventScroll` because the review is already the whole frame — there is
+   * nothing to scroll it into, and asking the browser to try scrolls the tab
+   * underneath instead.
+   */
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    headingRef.current?.focus({ preventScroll: true });
+  }, [review.attemptId]);
+
+  /** Escape puts it away, the way every sheet in this app closes. */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      onDismiss();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+
   return (
     <section className="songs-review" data-testid="songs-review" aria-label={t("songs.review.title")}>
       <header className="songs-review-head">
         <div className="songs-review-titles">
-          <h3 className="songs-review-title">{t("songs.review.title")}</h3>
+          <h3 className="songs-review-title" tabIndex={-1} ref={headingRef}>
+            {t("songs.review.title")}
+          </h3>
           <p className="songs-review-sub">
             {t("songs.review.summary", {
               bars,
@@ -233,11 +280,23 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
             })}
           </p>
         </div>
-        <button type="button" className="songs-btn" onClick={onDismiss}>
-          {t("songs.review.again")}
+        {/* What the button does is go back to the tab; "Go again" was what it
+            meant when the tab was still on screen above it and the press was
+            only clearing a panel. It is the review's one action and it says
+            where you land. */}
+        <button type="button" className="songs-btn songs-review-back" onClick={onDismiss}>
+          {t("songs.stage.backToTab")}
         </button>
       </header>
 
+      {/* The head is pinned and the rest scrolls under it.
+
+          The sentence and the button are the verdict (A4); the coloured tab,
+          the goes and "what else" are what you look at afterwards. Pinning the
+          head is what makes "the heading and its action are on screen without
+          scrolling" true at every window height, rather than true at 900 and a
+          scroll away at 720. */}
+      <div className="songs-review-body">
       {answer && headline && answer.blocks.length > 0 && (
         <CoachBlocks
           blocks={answer.blocks}
@@ -316,6 +375,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
           )}
         </div>
       )}
+      </div>
     </section>
   );
 }

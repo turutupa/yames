@@ -2943,6 +2943,17 @@ impl SongHandoff {
             .unwrap_or_else(|e| *e.into_inner())
     }
 
+    /// The song the engine is holding, for a command that has to read the
+    /// piece rather than change it — `start_take` is the one, which closes
+    /// over it so the take's writer can say which bar the recording opens on.
+    /// Command thread only; the audio thread has its own `Arc` already.
+    pub fn table(&self) -> Option<Arc<crate::song::SongTable>> {
+        self.table
+            .lock()
+            .map(|t| t.clone())
+            .unwrap_or_else(|e| e.into_inner().clone())
+    }
+
     /// Is a song loaded at all? Asked by the commands that have to stop one
     /// mode before starting another.
     pub fn is_loaded(&self) -> bool {
@@ -3363,6 +3374,14 @@ struct CachedParams {
     /// of the shared slot only when its generation moves.
     take_record: Option<Arc<crate::take::TakeRing>>,
     take_record_generation: u64,
+    /// Does the ring above still need to be told where the transport was?
+    ///
+    /// Raised when a ring arrives, lowered by the one buffer that stamps it.
+    /// A plain bool in the callback's own cached state, so the cost on every
+    /// other buffer of a take is a branch on a value already in a register —
+    /// the stamp itself is four relaxed stores, once, of numbers the frame
+    /// loop is about to use anyway. See `take::TakeRing::stamp_start`.
+    take_stamp_pending: bool,
     /// The take being played back, if one is: the samples, the rate they
     /// were recorded at, and how far through them the callback is.
     take_play: Option<crate::take::TakePlayback>,
@@ -5804,6 +5823,7 @@ impl MetronomeEngine {
                 song_mix_generation: 0,
                 take_record: None,
                 take_record_generation: 0,
+                take_stamp_pending: false,
                 take_play: None,
                 take_play_generation: 0,
                 take_play_pos: 0.0,
@@ -6074,6 +6094,10 @@ impl MetronomeEngine {
                         if let Some(old) = cached.take_record.take() {
                             take_retire.retire_ring(&take_shared, old);
                         }
+                        // A new ring has never been told where the piece is.
+                        // Raised even for `None` so a take that is taken away
+                        // leaves nothing armed behind it.
+                        cached.take_stamp_pending = incoming.is_some();
                         cached.take_record = incoming;
                     }
                     if let Some(incoming) = take_shared.poll_play(&mut cached.take_play_generation)
@@ -6260,6 +6284,18 @@ impl MetronomeEngine {
                         // a buffer of mic audio that would slide forward
                         // against everything after it.
                         if let Some(ref ring) = cached.take_record {
+                            // AND A TAKE THAT BEGINS HERE BEGINS NOWHERE.
+                            // The transport is stopped, so the first sample
+                            // of the file is at no position in any piece —
+                            // whatever is loaded, the silence in front of the
+                            // count-in could be seconds long. Saying `Free`
+                            // is what makes the sidecar have no position at
+                            // all, which is the truth; the frontend's own
+                            // estimate is the fallback for exactly this.
+                            if cached.take_stamp_pending {
+                                cached.take_stamp_pending = false;
+                                ring.stamp_start(crate::take::TakeTransport::Free);
+                            }
                             ring.push_strided_at(data, channels, take_offset(channels, pair));
                         }
                         if was_playing {
@@ -6366,6 +6402,46 @@ impl MetronomeEngine {
                         Some(ref p) => p.record(probe_entry_ns, frames as u32, sample_counter),
                         None => None,
                     };
+
+                    // ---- Where a take that starts now starts ----
+                    //
+                    // HERE, above the frame loop, and not beside the ring
+                    // push at the bottom: this is the only point in the
+                    // buffer where `song_pos`, `song_pass` and
+                    // `song_counting_in` still describe its FIRST sample.
+                    // The loop moves the cursor a frame at a time and can
+                    // cross a loop seam on the way, so read at the bottom
+                    // they describe the buffer's end — a bar and a bit out
+                    // on a small range, and the wrong pass across a seam.
+                    //
+                    // The cost on every buffer of every take after the first
+                    // is this branch on a bool the callback already holds.
+                    // The stamp itself happens once and is four relaxed
+                    // stores; nothing is allocated, locked or looked up.
+                    if cached.take_stamp_pending {
+                        if let Some(ref ring) = cached.take_record {
+                            cached.take_stamp_pending = false;
+                            ring.stamp_start(if cached.song.is_some() {
+                                if song_counting_in {
+                                    crate::take::TakeTransport::SongCountIn { frames: song_pos }
+                                } else {
+                                    crate::take::TakeTransport::Song {
+                                        frames: song_pos,
+                                        pass: song_pass,
+                                    }
+                                }
+                            } else if cached.jam.is_some() {
+                                crate::take::TakeTransport::Jam {
+                                    bar: jam_bar,
+                                    chorus: jam_chorus,
+                                }
+                            } else {
+                                // The plain click. There is no arranged
+                                // material, so there is no position in one.
+                                crate::take::TakeTransport::Free
+                            });
+                        }
+                    }
 
                     // ---- Check for pending chime from event thread ----
                     if let Ok(mut chime) = pending_chime_cb.try_lock() {
@@ -8919,6 +8995,46 @@ mod tests {
         energy
     }
 
+    /// Energy above 120 Hz — the band a laptop speaker radiates, for the two
+    /// instruments that live below it.
+    ///
+    /// [`laptop_band_energy`] starts at 200 Hz, and that is right for a drum:
+    /// it is what stops the kick's sub-bass from swamping a comparison of
+    /// transients. It is WRONG FOR A BASS, and wrong in a way that hid this
+    /// whole pass. A bass runs E1 to G3 (41 to 196 Hz), so a 200 Hz corner
+    /// measures a bass's harmonics and not one of its fundamentals — and two
+    /// basses that agree in their harmonics can be eight decibels apart in
+    /// the octave a listener hears the note in. `every_bass_voice_lands_at_
+    /// the_same_level` passed for a year on that band while an eight-bar line
+    /// measured above 120 Hz put the five voices ten decibels apart
+    /// (`plans/tasks/songs/W17-JAM-MIX.md`).
+    ///
+    /// 120 Hz is the brief's number and it is where a laptop's driver gives
+    /// up; the same four cascaded sections, for the same reason they are four
+    /// there — at 6 dB an octave the sub-bass is still in the answer.
+    ///
+    /// No low-pass: this is the band that reaches the ear, all of it, which
+    /// is also exactly what `ffmpeg -af highpass=f=120,ebur128` measured when
+    /// the trims below were derived. A ceiling here and none there would be
+    /// two different numbers wearing one name.
+    fn above_120_energy(buf: &[f32], sr: u32) -> f64 {
+        const HP: usize = 4;
+        let a = 1.0 / (1.0 + 2.0 * std::f64::consts::PI * 120.0 / sr as f64);
+        let (mut prev_in, mut prev_out) = ([0.0f64; HP], [0.0f64; HP]);
+        let mut energy = 0.0f64;
+        for &s in buf {
+            let mut v = s as f64;
+            for k in 0..HP {
+                let out = a * (prev_out[k] + v - prev_in[k]);
+                prev_in[k] = v;
+                prev_out[k] = out;
+                v = out;
+            }
+            energy += v * v;
+        }
+        energy
+    }
+
     /// THE ACCENT MUST BE LOUDER ON THE SPEAKER PEOPLE ACTUALLY USE.
     ///
     /// This is the test that was missing. The drum accent measured +7.8 dB
@@ -10801,7 +10917,20 @@ mod tests {
             }
             w.finalize().unwrap();
             let peak = left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs()));
-            println!("{} -> {} bars, peak {peak:.3}", wav.display(), tables.len());
+            // What the table measured of itself, worst bar of the eight. A
+            // demo that solos one lane is only comparable with the demo that
+            // solos another if NEITHER was scaled by `JAM_SAFETY_CLAMP` —
+            // that normalisation is worked out per table, so a loud one would
+            // be quiet here for a reason that has nothing to do with the
+            // voice. The two numbers being equal is what says it did not.
+            let (before, after) = tables.iter().fold((0.0f32, 0.0f32), |m, t| {
+                (m.0.max(t.peak_before), m.1.max(t.peak_after))
+            });
+            println!(
+                "{} -> {} bars, peak {peak:.3}, table {before:.3} before the clamp and {after:.3} after",
+                wav.display(),
+                tables.len()
+            );
         }
     }
 
@@ -11465,6 +11594,266 @@ mod tests {
                 r.max_voices
             );
         }
+    }
+
+    /// THE GATE for `plans/tasks/songs/W15-LIVE-AND-EXACT.md` item 2: a click
+    /// at a known tick, and the sidecar's position puts it within one output
+    /// buffer of where it actually is in the file.
+    ///
+    /// The whole of what item 2 is about is one number: the file's first
+    /// sample is at SOME position in the piece, and everything the pitch pass
+    /// does afterwards is measured from it. So this runs the real take
+    /// session, with the real writer thread and the real resolver, over a
+    /// real compiled song, and then goes and finds the click in the WAV.
+    ///
+    /// **The band here is impulses, not a mix.** Whether the mixer puts a
+    /// click on the sample the table says is
+    /// `a_song_plays_its_map_across_a_tempo_step_and_a_loop_seam`'s subject
+    /// and is already proved above; what is under test here is the
+    /// bookkeeping, and an impulse is the easiest thing in the world to
+    /// locate in a file.
+    #[test]
+    fn a_take_records_the_bar_and_the_tick_it_opened_on() {
+        let sr = 48_000u32;
+        // Bars 3 to 6 of the gate song: a 4/4, the 7/8, and the two bars
+        // after the tempo step. A take that opens inside this cannot be
+        // right by accident — the bar it lands in is not the first, its
+        // meter is not the range's, and its tempo is not the opening one.
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 3,
+            end_bar: 6,
+        };
+        t.loops = true;
+        t.count_in_bars = 0;
+        let table = Arc::new(
+            crate::song::compile(&t, None, gate_sounds(sr), sr, 1).expect("the gate's song"),
+        );
+
+        // The click to go looking for, and where the take opens: a hundred
+        // and one samples before it, which is nothing like a buffer boundary
+        // and nothing like a bar line.
+        let target = table.ticks()[5];
+        const LEAD_IN: u64 = 101;
+        let begin = target.sample - LEAD_IN;
+        // Two passes in, so `pass` has to be carried rather than assumed 0.
+        const PASS: u32 = 2;
+
+        let root = std::env::temp_dir().join(format!(
+            "yames-take-position-{}",
+            crate::clock::now_ns()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).expect("a directory to record into");
+
+        let handoff: SharedTake = Arc::new(crate::take::TakeHandoff::new());
+        let mut session = crate::take::TakeSession::default();
+        let for_resolver = table.clone();
+        session
+            .start(crate::take::TakeStart {
+                app_data: &root,
+                jam_id: "song-position",
+                handoff: &handoff,
+                mic: None,
+                out_sr: sr,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                // The same closure `start_take` builds, over the same table.
+                position: Some(Arc::new(move |at| {
+                    crate::song::take_position(Some(&for_resolver), at)
+                })),
+            })
+            .expect("the take starts");
+        let ring = {
+            let mut seen = 0u64;
+            handoff
+                .poll_record(&mut seen)
+                .expect("the callback is handed a ring")
+                .expect("and it is not None")
+        };
+
+        // ---- The callback's own two lines, in order ----
+        //
+        // Stamp where the transport is at the FIRST sample of the first
+        // buffer, then push that buffer. Everything after it is just audio.
+        ring.stamp_start(crate::take::TakeTransport::Song {
+            frames: begin,
+            pass: PASS,
+        });
+        const BUFFER: usize = 512;
+        let total = (LEAD_IN as usize) + BUFFER * 8;
+        let mut band = vec![0.0f32; total];
+        // Every click of the pass that falls inside what is recorded, on the
+        // sample the compiled table put it on.
+        for tick in table.ticks() {
+            if tick.sample >= begin && ((tick.sample - begin) as usize) < total {
+                band[(tick.sample - begin) as usize] = 0.75;
+            }
+        }
+        for chunk in band.chunks(BUFFER) {
+            ring.push(chunk);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        // The writer drains every 25 ms; give it a few of those before the
+        // stop takes the ring away.
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        let take = session
+            .stop(&handoff)
+            .expect("the take stops")
+            .expect("and there is something in it");
+
+        // ---- 1. The sidecar says where the music was ----
+        let at = take.position.expect("the sidecar records a position");
+        assert_eq!(at.mode, crate::take::TakeMode::Song);
+        assert_eq!(at.pass, PASS, "and which time round the range it was");
+        assert!(!at.count_in);
+        assert_eq!(
+            at.bar, target.bar,
+            "the take opened 101 samples before a click in bar {}, and the \
+             sidecar says bar {}",
+            target.bar, at.bar
+        );
+        // A hundred and one samples at 48 kHz is two milliseconds, so the
+        // tick is just short of the click's own.
+        assert!(
+            at.tick <= target.tick && target.tick - at.tick < 20,
+            "the take opened two milliseconds before tick {} and the sidecar \
+             says tick {}",
+            target.tick,
+            at.tick
+        );
+
+        // ---- 2. And that position finds the click in the file ----
+        let offset_ms = at
+            .start_offset_ms
+            .expect("a song's position carries the offset the pitch pass needs");
+        let played = crate::take::load_take(&root, &take.id).expect("the take reads back");
+        let found = played
+            .pcm
+            .iter()
+            .position(|s| s.abs() > 0.5)
+            .expect("the click is in the file") as f64;
+        // Where the sidecar SAYS it should be: beat 0 of pass 0 sits
+        // `offset_ms` into the file, and the click is `target.sample` past
+        // that in its own pass.
+        let origin = offset_ms / 1000.0 * sr as f64;
+        let want = target.sample as f64
+            + PASS as f64 * table.pass_samples() as f64
+            + origin;
+        assert!(
+            (found - want).abs() <= BUFFER as f64,
+            "the sidecar puts the click at sample {want} of the file and it is \
+             actually at {found} — {} samples out, and one buffer is {BUFFER}",
+            (found - want).abs()
+        );
+        // Belt and braces: it is where the arithmetic said, to the sample.
+        assert_eq!(found as u64, LEAD_IN, "the impulse was written where it was placed");
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The other two things the writer can be handed, and what they resolve
+    /// to: a take that opens inside a count-in, and a take over a jam.
+    #[test]
+    fn a_count_in_and_a_jam_resolve_to_what_they_are() {
+        use crate::take::{TakeMode, TakeTransport};
+        let sr = 48_000u32;
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 3,
+            end_bar: 6,
+        };
+        t.count_in_bars = 1;
+        let table =
+            crate::song::compile(&t, None, gate_sounds(sr), sr, 1).expect("the gate's song");
+        assert!(table.count_in_samples() > 0, "the range asked to be counted in");
+
+        // Half way through the count-in. The piece has not started, so the
+        // position is the top of the range and the offset is POSITIVE: beat
+        // 0 is still to come, that far into the file.
+        let half = table.count_in_samples() / 2;
+        let at = crate::song::take_position(Some(&table), TakeTransport::SongCountIn {
+            frames: half,
+        })
+        .expect("a count-in has a position");
+        assert_eq!(at.mode, TakeMode::Song);
+        assert!(at.count_in, "and it says the piece had not started");
+        assert_eq!(at.bar, 3, "the top of the range is where a count-in leads");
+        assert_eq!(at.tick, table.bars()[0].start_tick);
+        assert_eq!(at.pass, 0);
+        let want_ms = (table.count_in_samples() - half) as f64 / sr as f64 * 1000.0;
+        assert!(
+            (at.start_offset_ms.expect("an offset") - want_ms).abs() < 0.001,
+            "beat 0 is {want_ms} ms into the file and the sidecar says {:?}",
+            at.start_offset_ms
+        );
+
+        // A jam needs no table at all: its bar IS its position, and there is
+        // no beat 0 of a range for an offset to be measured from.
+        let jam = crate::song::take_position(None, TakeTransport::Jam { bar: 5, chorus: 3 })
+            .expect("a jam has a position");
+        assert_eq!(jam.mode, TakeMode::Jam);
+        assert_eq!(jam.bar, 5);
+        assert_eq!(jam.tick, 0);
+        assert_eq!(jam.pass, 2, "a chorus counts from one and a pass from zero");
+        assert!(jam.start_offset_ms.is_none());
+
+        // And a song stamp with no table to read it against answers nothing
+        // rather than guessing — the song was taken off the engine.
+        assert!(crate::song::take_position(
+            None,
+            TakeTransport::Song { frames: 100, pass: 0 }
+        )
+        .is_none());
+    }
+
+    /// A take begun with the transport stopped has no position in any piece,
+    /// and the sidecar says nothing rather than guessing.
+    ///
+    /// This is the case the frontend's own `performance.now()` estimate still
+    /// exists for (`useSongTakes.ts`): arm the take, then press play, and the
+    /// file opens on however many seconds of silence the player took.
+    #[test]
+    fn a_take_that_began_before_the_music_records_no_position() {
+        let sr = 48_000u32;
+        let root = std::env::temp_dir()
+            .join(format!("yames-take-no-position-{}", crate::clock::now_ns()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).expect("a directory to record into");
+
+        let handoff: SharedTake = Arc::new(crate::take::TakeHandoff::new());
+        let mut session = crate::take::TakeSession::default();
+        session
+            .start(crate::take::TakeStart {
+                app_data: &root,
+                jam_id: "stopped",
+                handoff: &handoff,
+                mic: None,
+                out_sr: sr,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: Some(Arc::new(|at| crate::song::take_position(None, at))),
+            })
+            .expect("the take starts");
+        let ring = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+        ring.stamp_start(crate::take::TakeTransport::Free);
+        for _ in 0..8 {
+            ring.push(&[0.4f32; 512]);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        assert!(
+            take.position.is_none(),
+            "a take with no transport under it must record no position: {:?}",
+            take.position
+        );
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     /// A count-in leads into the FIRST pass and no other, at the range's own
@@ -14260,7 +14649,7 @@ mod tests {
             for (o, v) in out.iter_mut().zip(buf.iter()) {
                 *o += v * slot.gain * undo;
             }
-            laptop_band_energy(&out, sr)
+            above_120_energy(&out, sr)
         };
 
         // Measured first and judged afterwards, so a failure prints the
@@ -15237,7 +15626,7 @@ mod tests {
                     *o += v * slot.gain * undo;
                 }
             }
-            laptop_band_energy(&out, sr)
+            above_120_energy(&out, sr)
         };
 
         // Measured first, judged afterwards — see the bass's version.
@@ -15273,9 +15662,24 @@ mod tests {
     /// 120 BPM. A common window is the honest comparison: measuring each
     /// sound over its own length would reward the snare for being short.
     ///
-    /// The floor is the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
-    /// asks for, not today's margin, so the trim can be nudged by ear
-    /// without this test having to move.
+    /// The floor was the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
+    /// asks for. **It is 5 dB since 2026-09-20, and the ear is why.**
+    ///
+    /// The 6 dB was an engineering argument nobody had listened to. The owner
+    /// then listened — "what I can hear is mostly drum sound, the keys and
+    /// bass is very low in comparison" — and the measurement that matches
+    /// what he heard is the one this file could not make: every keys voice
+    /// rendered alone for eight bars against the same vibe's kit rendered
+    /// alone, above 120 Hz, over four vibes at three intensities. On that,
+    /// comping sat 7.5 to 10.7 dB under the kit and as far as 16.7 under in
+    /// funk at Loud. `KEYS_TRIM` went up 2.2 dB to put the section on the
+    /// brief's own 6 dB in THAT measurement, and a voicing against one snare
+    /// accent measures about −5.5 dB once it has.
+    ///
+    /// So the two numbers are the same contract read against two references,
+    /// and the floor here follows the one that was listened to. It is still
+    /// a floor: a comping part above it is a comping part that competes with
+    /// the backbeat, which is the thing this test exists to forbid.
     #[test]
     fn the_keys_sit_under_the_snare_on_a_small_speaker() {
         let sr = 48000u32;
@@ -15332,9 +15736,9 @@ mod tests {
         let db = 10.0 * (k / s.max(1e-30)).log10();
         eprintln!("[keys] a four-note voicing measures {db:.2} dB against the snare accent");
         assert!(
-            db <= -6.0,
+            db <= -5.0,
             "a four-note voicing is {db:.2} dB against the snare accent through a \
-             200 Hz-4 kHz band-pass; comping has to sit at least 6 dB under the \
+             200 Hz-4 kHz band-pass; comping has to sit at least 5 dB under the \
              band, and this is on top of it"
         );
         // And not so far under that the harmony is a rumour.

@@ -197,6 +197,21 @@
         }
       }
     },
+    "stage": {
+      "backToTab": "Back to the tab",
+      "selectedBars": "Bars {{bars}} chosen",
+      "wholeSong": "The whole song",
+      "portionSays": "{{count}} Takt · {{state}}",
+      "portionSays_other": "{{count}} Takte · {{state}}",
+      "looping": "on repeat",
+      "once": "once through",
+      "timeRound": "Go {{n}}",
+      "keepPortion": "Keep it",
+      "portionPlaceholder": "Name this bit",
+      "renamePortion": "Rename",
+      "deletePortion": "Forget this one",
+      "portionTitle": "{{name}} — at {{percent}}%"
+    },
     "offer": {
       "justArrived": "ist gerade in deinen Downloads gelandet",
       "justArrivedSized": "ist gerade in deinen Downloads gelandet · {{size}}",

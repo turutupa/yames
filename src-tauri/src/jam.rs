@@ -263,10 +263,34 @@ const MIX_MAX: f32 = 1.5;
 ///
 /// It is a starting point for ears, not a finished balance. The musician has
 /// `keys.gain` (0.5..1.5) and `mix.keys` (0..1.5) over the top of it, so the
-/// range this trim opens is 0.035 to 0.157 — a bit under half to a bit over
-/// double. The test's floor is the brief's 6 dB and not today's 7.7, so the
-/// trim can move by ear without the test having to.
-pub(crate) const KEYS_TRIM: f32 = 0.07;
+/// range this trim opens is 0.045 to 0.203 — a bit under half to a bit over
+/// double.
+///
+/// ## 2026-09-20: +2.2 dB, because the ear got there
+///
+/// 0.07 was the number above, and it was arrived at without anybody
+/// listening. The owner then listened, making a clip for the website, and
+/// said it: "what I can hear is mostly drum sound, the keys and bass is very
+/// low in comparison."
+///
+/// Measured the way a listener hears it rather than the way a transient is
+/// compared — every keys voice rendered alone for eight bars and put through
+/// `ffmpeg -af highpass=f=120,ebur128`, against the same vibe's kit rendered
+/// alone, over four vibes at all three intensities
+/// (`scripts/sounds/jam_mix_probe.ts`, twelve cells a voice) — the keys came
+/// out **7.5 to 10.7 dB under the kit on average and as far as 16.7 dB under
+/// in funk at Loud**. `JamMix` tops out at 1.5, which is +3.5 dB, so a player
+/// could not fix it from the mixer either.
+///
+/// 0.0902 is +2.2 dB, and it puts the four voices at a mean of **kit −6.2 dB**
+/// in that measurement — the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
+/// asks for, now measured against the whole kit over eight bars instead of
+/// against one snare stroke over one beat. It is deliberately the brief's
+/// number and not further: `plans/tasks/songs/W17-JAM-MIX.md` ends in clips
+/// for the owner, and if the answer is "more", this is the constant that
+/// moves and `the_keys_sit_under_the_snare_on_a_small_speaker` is the floor
+/// that moves with it.
+pub(crate) const KEYS_TRIM: f32 = 0.0902;
 
 /// Each bass voice against the fingered one, through the small-speaker
 /// band-pass.
@@ -281,26 +305,52 @@ pub(crate) const KEYS_TRIM: f32 = 0.07;
 /// and the musician would go looking for the control that had moved on its
 /// own.
 ///
+/// ## The band these are measured in changed on 2026-09-20, and that is the
+/// whole of this pass
+///
+/// They used to be measured through the 200 Hz–4 kHz band-pass every other
+/// level claim in this codebase uses. **That band is right for a drum and
+/// wrong for a bass.** A bass runs E1 to G3 — 41 to 196 Hz — so a 200 Hz
+/// corner measures a bass's harmonics and not one of its fundamentals, and
+/// `every_bass_voice_lands_at_the_same_level` passed on it while the voices
+/// were four and a half decibels apart in the octave the note is actually
+/// heard in. The owner heard the result before any meter did: "what I can
+/// hear is mostly drum sound, the keys and bass is very low in comparison",
+/// and the website's own clip had already been hand-balanced around it
+/// (`plans/WEBSITE_DECISIONS.md`, "One sound clip, only when asked for").
+///
+/// So the measurement moved to **above 120 Hz** — the brief's band, where a
+/// laptop's driver gives up, and the same band
+/// `ffmpeg -af highpass=f=120,ebur128` was pointed at when the eight-bar
+/// lines were measured. `above_120_energy` in `engine.rs` is the filter.
+///
 /// The numbers, measured by `every_bass_voice_lands_at_the_same_level` —
 /// one note (E2) rendered into a common window of one beat at 120 BPM,
-/// through the same 200 Hz–4 kHz band-pass every other level claim in this
-/// codebase uses, against the fingered voice:
+/// against the fingered voice, with the OLD trims in place:
 ///
-/// | voice | untrimmed | trim | trimmed |
+/// | voice | at the old trims, above 120 Hz | correction | new trim |
 /// |---|---|---|---|
-/// | fingered | 0.00 dB | 1.000 | 0.00 dB |
-/// | picked | +1.21 dB | 0.870 | 0.00 dB |
-/// | upright | −1.57 dB | 1.198 | 0.00 dB |
-/// | slap | +4.94 dB | 0.566 | 0.00 dB |
-/// | synth | +13.09 dB | 0.222 | 0.00 dB |
+/// | fingered | 0.00 dB | ×1.000 | 1.0000 |
+/// | picked | −0.94 dB | ×1.115 | 0.9695 |
+/// | upright | +1.51 dB | ×0.840 | 1.0069 |
+/// | slap | −4.61 dB | ×1.702 | 0.9634 |
+/// | synth | −3.11 dB | ×1.430 | 0.3168 |
 ///
-/// The synth is the one worth explaining. It is held rather than plucked
-/// and it is a filtered saw rather than a sine, so over a beat it is eleven
-/// decibels of band-limited energy above a fingered note — and its recipe
-/// was already pulled back once for it (the cutoff went from four times the
-/// fundamental to two, which was worth four of those decibels; see
-/// `SYNTH_BASS` in `engine.rs`). What is left is the voice being the voice,
-/// and a trim is the honest way to carry it.
+/// **The slap and the synth are the two the old band could not see**, and
+/// they are the two recipes rather than recordings: a slap's energy and a
+/// filtered saw's sit under 200 Hz, so the old measurement saw what was left
+/// over and trimmed them for it. Above 120 Hz they were four and a half and
+/// three decibels under a fingered note, which on a laptop speaker is a bass
+/// that is not there. The synth's trim is still much the smallest of the
+/// five — it is HELD where the others are plucked, and that is real — but it
+/// is 3.1 dB less small than it was.
+///
+/// What this does NOT do is level the eight-bar LINES, and it should not: a
+/// slap line is short notes and space, an upright rings for two beats, and
+/// that difference is the instrument rather than the mixer. Measured over
+/// eight bars above 120 Hz the five voices still span 7.5 dB (they spanned
+/// 10.6), and the group sits at about the kit's own level instead of 1 dB
+/// under it. `plans/tasks/songs/W17-JAM-MIX.md` has the twelve cells a voice.
 ///
 /// A trim below 1 also means the note's PEAK is below the bank's 0.9, which
 /// is not a loss: the table's own normalisation then has less to take away
@@ -319,10 +369,10 @@ pub(crate) const KEYS_TRIM: f32 = 0.07;
 /// owner listens) without the test having to move every time.
 pub(crate) const BASS_VOICE_TRIM: [f32; BASS_VOICE_COUNT] = [
     1.0000, // fingered — the reference. Moving this one moves everything.
-    0.8699, // picked
-    1.1981, // upright
-    0.5661, // slap
-    0.2216, // synth
+    0.9695, // picked   (was 0.8699)
+    1.0069, // upright  (was 1.1981)
+    0.9634, // slap     (was 0.5661 — the biggest move, and the point)
+    0.3168, // synth    (was 0.2216)
 ];
 
 /// The same, for the keys, against the electric piano.
@@ -332,14 +382,18 @@ pub(crate) const BASS_VOICE_TRIM: [f32; BASS_VOICE_COUNT] = [
 /// not change how loud they are.
 ///
 /// Measured by `every_keys_voice_lands_at_the_same_level`, one four-note
-/// voicing rendered into one beat at 120 BPM through the same band-pass:
+/// voicing rendered into one beat at 120 BPM — through the 200 Hz–4 kHz
+/// band-pass until 2026-09-20 and above 120 Hz since, for the reason
+/// [`BASS_VOICE_TRIM`] gives at length. It matters far less here than it
+/// does for the bass, because a voicing has almost nothing under 120 Hz at
+/// all: the corrections below are all about a decibel.
 ///
-/// | voice | untrimmed | trim | trimmed |
-/// |---|---|---|---|
-/// | epiano | 0.00 dB | 1.000 | 0.00 dB |
-/// | organ | +7.46 dB | 0.424 | +0.00 dB |
-/// | clav | −6.09 dB | 2.016 | −0.00 dB |
-/// | pad | +6.50 dB | 0.473 | −0.00 dB |
+/// | voice | untrimmed | old trim | at the old trim, above 120 Hz | new trim |
+/// |---|---|---|---|---|
+/// | epiano | 0.00 dB | 1.0000 | 0.00 dB | 1.0000 |
+/// | organ | +7.46 dB | 0.4236 | −1.23 dB | 0.4880 |
+/// | clav | −6.09 dB | 2.0160 | −0.97 dB | 2.2553 |
+/// | pad | +6.50 dB | 0.4732 | −0.41 dB | 0.4961 |
 ///
 /// The two extremes are the two ends of what a keyboard is. An organ does
 /// not decay at all, so over a beat it carries five times an electric
@@ -349,9 +403,9 @@ pub(crate) const BASS_VOICE_TRIM: [f32; BASS_VOICE_COUNT] = [
 /// which is what a percussive stab is.
 pub(crate) const KEYS_VOICE_TRIM: [f32; KEYS_VOICE_COUNT] = [
     1.0000, // epiano — the reference, so `KEYS_TRIM`'s own measurement holds.
-    0.4236, // organ
-    2.0160, // clav
-    0.4732, // pad
+    0.4880, // organ (was 0.4236)
+    2.2553, // clav  (was 2.0160)
+    0.4961, // pad   (was 0.4732)
 ];
 
 /// How far a hit's gain wanders, either way.
