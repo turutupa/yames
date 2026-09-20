@@ -592,6 +592,30 @@ export type JamTake = {
    * record.
    */
   position?: TakePosition;
+  /**
+   * Absolute path of the picture, when the camera was on for this take
+   * (W21, `plans/SONGS.md` A9/A10, `src-tauri/src/take_video.rs`).
+   *
+   * Read off the disk by `list_takes`, like the dry stem: the container
+   * depends on what the webview could encode that day, so the record never
+   * names the file and cannot go stale when the app data directory moves.
+   * Absent for every take recorded with the camera off — which is every take
+   * in Jam, where the camera does not exist yet.
+   */
+  videoPath?: string;
+  /** How big that file is. An order of magnitude more than the sound. */
+  videoBytes?: number;
+  /**
+   * Milliseconds to ADD to a position in the take's audio to reach the same
+   * instant in the picture.
+   *
+   * A MEASUREMENT, good to a few tens of milliseconds and no better — the
+   * webview's clock fitted against the engine's beat events
+   * (`src/songs/camera/offset.ts`) — which is why the review has a nudge
+   * beside the picture. Absent when the fit had too little to go on; the
+   * review then starts the two level, which is the honest state.
+   */
+  videoOffsetMs?: number;
 };
 
 /** See `JamTake.position`. The mirror of `TakePosition` in `take.rs`. */

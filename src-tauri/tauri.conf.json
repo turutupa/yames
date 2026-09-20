@@ -51,7 +51,11 @@
       "tooltip": "Yames"
     },
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPDATA/takes/**"]
+      }
     }
   },
   "bundle": {

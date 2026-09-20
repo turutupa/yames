@@ -261,6 +261,58 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.warn.tempoFlattened",
   "songs.warn.tempoFlattened_other",
   "songs.wholeSong",
+  // W21 — the camera (`plans/SONGS.md` A9/A10). Appended rather than
+  // sorted in, so a merge with another worker's keys is an append against
+  // an append. No pluralised key among them: every sentence is written so
+  // that no number governs a noun, which keeps the whole block out of the
+  // `_few`/`_many` matrix the last check in this file enforces.
+  "songs.camera.cannotPlay",
+  "songs.camera.corner.bottomLeft",
+  "songs.camera.corner.bottomRight",
+  "songs.camera.corner.topLeft",
+  "songs.camera.corner.topRight",
+  "songs.camera.denied",
+  "songs.camera.device",
+  "songs.camera.deviceNumbered",
+  "songs.camera.failed",
+  "songs.camera.guideBody",
+  "songs.camera.guideFlip",
+  "songs.camera.guideGot",
+  "songs.camera.introNotNow",
+  "songs.camera.introPrivate",
+  "songs.camera.introStart",
+  "songs.camera.introTitle",
+  "songs.camera.introWhat",
+  "songs.camera.introWhere",
+  "songs.camera.label",
+  "songs.camera.lead",
+  "songs.camera.lostPicture",
+  "songs.camera.move",
+  "songs.camera.nextSlip",
+  "songs.camera.noCamera",
+  "songs.camera.noOffset",
+  "songs.camera.nudge",
+  "songs.camera.nudgeAt",
+  "songs.camera.nudgeEarlier",
+  "songs.camera.nudgeHow",
+  "songs.camera.nudgeLater",
+  "songs.camera.off",
+  "songs.camera.on",
+  "songs.camera.pause",
+  "songs.camera.pitchDropped",
+  "songs.camera.pitchKept",
+  "songs.camera.play",
+  "songs.camera.prevSlip",
+  "songs.camera.preview",
+  "songs.camera.slips",
+  "songs.camera.tape",
+  "songs.camera.tickOff",
+  "songs.camera.tickPlain",
+  "songs.camera.unavailable",
+  "songs.camera.watchIt",
+  "songs.camera.watchTitle",
+  "songs.camera.watchingAll",
+  "songs.camera.watchingBars",
 ];
 
 /**
@@ -269,6 +321,20 @@ const ADDED_BY_THE_SONGS_WAVE = [
  * genuinely write the English way — never "we have not got to it yet".
  */
 const ALLOWED: { key: string; langs: string[]; why: string }[] = [
+  // W21 — the camera. Four entries, and each of them is a word that is the
+  // same word rather than a translation nobody did.
+  {
+    key: "songs.camera.nudgeAt",
+    langs: ["de", "es", "fr", "it", "ja", "ko", "nl", "pl", "pt-BR", "tr", "vi"],
+    why: "ms is the unit — ru writes мс and the two Chinese write 毫秒, and they do",
+  },
+  { key: "songs.camera.pause", langs: ["de", "fr"], why: '"Pause" is Pause in both' },
+  { key: "songs.camera.label", langs: ["nl"], why: "camera is the Dutch word too" },
+  {
+    key: "songs.camera.deviceNumbered",
+    langs: ["nl"],
+    why: "...and so the numbered one is identical as well",
+  },
   { key: "songs.bpm", langs: LANGS, why: "BPM is the unit, everywhere" },
   { key: "songs.dismiss", langs: LANGS, why: '"OK" is OK in all fourteen' },
   {

@@ -712,6 +712,30 @@ pub struct JamTake {
     /// estimate as the fallback for exactly those.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub position: Option<TakePosition>,
+    /// Absolute path of the picture, when the camera was on for this take
+    /// (`plans/SONGS.md` A9/A10, `take_video.rs`).
+    ///
+    /// Read off the disk like the dry stem and for the same reason, never off
+    /// the record: the container depends on what the webview could encode that
+    /// day, and a sidecar naming a file that is not there is a review that
+    /// offers a picture and then cannot show one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_path: Option<String>,
+    /// How big that file is. Off the disk as well — the shelf says what the
+    /// feature has cost, and a picture is an order of magnitude more of it
+    /// than the sound is.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_bytes: Option<u64>,
+    /// Milliseconds to ADD to a position in the take's audio to get the same
+    /// instant in the picture (`plans/SONGS.md` A10).
+    ///
+    /// The one field here the disk cannot answer, so it is the one the sidecar
+    /// is the record of. It is a MEASUREMENT, good to a few tens of
+    /// milliseconds and no better — the webview's clock against the engine's,
+    /// fitted over a pass's beat events (`src/songs/camera/offset.ts`) — which
+    /// is why the review has a nudge beside it and why spike K3 exists.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub video_offset_ms: Option<f64>,
 }
 
 // ---------------------------------------------------------------------------
@@ -730,6 +754,16 @@ pub const TAKES_DIR: &str = "takes";
 /// `safe_stem` has to refuse an id that ends in it.
 pub const DRY_SUFFIX: &str = ".dry";
 
+/// What goes between a take's id and its container to make the picture
+/// (`plans/SONGS.md` A10, `take_video.rs`).
+///
+/// Exactly the dry stem's rule, one file further out: the camera's recording
+/// is part of a take, not a take, so it is listed under the take, deleted
+/// with the take and refused as an id of its own. It is not a WAV and its
+/// extension depends on what the webview could encode, so the two functions
+/// below are by stem rather than by name.
+pub const VIDEO_SUFFIX: &str = ".video";
+
 /// The dry stem that belongs beside a take's WAV.
 fn dry_beside(wav: &Path) -> PathBuf {
     let stem = wav.file_stem().map(|s| s.to_string_lossy().into_owned());
@@ -746,6 +780,38 @@ fn dry_beside(wav: &Path) -> PathBuf {
 /// never be confused in either direction.
 fn is_dry_stem(stem: &str) -> bool {
     stem.ends_with(DRY_SUFFIX)
+}
+
+/// Is this file a take's picture rather than a take?
+///
+/// Same rule as the dry stem: `1234.video.webm` has the file stem
+/// `1234.video`, and a take's own id is digits.
+pub(crate) fn is_video_stem(stem: &str) -> bool {
+    stem.ends_with(VIDEO_SUFFIX)
+}
+
+/// The picture that belongs beside a take's WAV, whatever it was encoded as.
+///
+/// A scan of the directory rather than a name built from a remembered
+/// extension: the container is whatever the webview could encode on the day
+/// (`take_video.rs`), a machine can gain and lose codecs between one take and
+/// the next, and a record that names the file is a record that goes stale the
+/// moment the app data directory moves. What is on disk is the truth, which is
+/// the same rule `list_takes` already applies to the dry stem.
+pub(crate) fn video_beside(wav: &Path) -> Option<PathBuf> {
+    let stem = wav.file_stem()?.to_str()?;
+    let wanted = format!("{stem}{VIDEO_SUFFIX}");
+    let dir = wav.parent()?;
+    for entry in fs::read_dir(dir).ok()?.flatten() {
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        if path.file_stem().and_then(|s| s.to_str()) == Some(wanted.as_str()) {
+            return Some(path);
+        }
+    }
+    None
 }
 
 /// The character rule: what survives of an id on its way to being a name.
@@ -838,7 +904,28 @@ fn safe_stem(id: &str) -> Result<String, String> {
     if is_dry_stem(&s) {
         return Err(format!("{id:?} is not a take id"));
     }
+    // AND A PICTURE IS NOT A TAKE EITHER, for the same reason and with one
+    // more: `take_video.rs` writes its file under a PENDING name until the
+    // take it belongs to has an id, and that name ends in the same suffix. So
+    // this one line also stops a half-written recording being addressed,
+    // played or deleted as though it were a take of somebody's playing.
+    if is_video_stem(&s) {
+        return Err(format!("{id:?} is not a take id"));
+    }
     Ok(s)
+}
+
+/// Where a jam's — or a song's — takes live. `take_video.rs` writes the
+/// picture into the same directory, and resolves it through this so there is
+/// one idea of where a take's files are and one character rule guarding it.
+pub(crate) fn take_dir(app_data: &Path, jam_id: &str) -> Result<PathBuf, String> {
+    Ok(takes_root(app_data).join(safe_dir_name(jam_id)?))
+}
+
+/// The take with this id, as a path. `take_video.rs`'s, so a picture can only
+/// ever be filed beside a take that exists.
+pub(crate) fn take_path(app_data: &Path, id: &str) -> Result<PathBuf, String> {
+    find_take(app_data, id)
 }
 
 fn takes_root(app_data: &Path) -> PathBuf {
@@ -919,6 +1006,13 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
         let dry_path = dry
             .is_file()
             .then(|| dry.to_string_lossy().into_owned());
+        // The picture, the same way and for the same reason.
+        let video = video_beside(&path);
+        let video_bytes = video
+            .as_ref()
+            .and_then(|p| fs::metadata(p).ok())
+            .map(|m| m.len());
+        let video_path = video.map(|p| p.to_string_lossy().into_owned());
         let sidecar = path.with_extension("json");
         let record = fs::read_to_string(&sidecar)
             .ok()
@@ -930,6 +1024,10 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
                 // pointing at the old one would play nothing.
                 r.path = path.to_string_lossy().into_owned();
                 r.dry_path = dry_path;
+                r.video_path = video_path;
+                r.video_bytes = video_bytes;
+                // `videoOffsetMs` is NOT overwritten: it is the one thing here
+                // the file system cannot answer, and the sidecar is its record.
                 r
             }
             None => JamTake {
@@ -943,6 +1041,12 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
                 // and this branch is the one where it is gone. The file is
                 // still a take; it simply does not know when it began.
                 position: None,
+                video_path,
+                video_bytes,
+                // Nor where the picture sat against the sound. The review
+                // starts the picture level with the sound and offers the
+                // nudge, which is the honest state rather than a guess.
+                video_offset_ms: None,
             },
         });
     }
@@ -1007,18 +1111,24 @@ fn duration_from(len: u64, header: &[u8; 44]) -> f64 {
     (len - 44) as f64 / 2.0 / sr as f64
 }
 
-/// Remove a take: the audio, its dry stem and its sidecar together. A
-/// sidecar with no audio is a label for nothing, and a dry stem left behind
-/// is a recording of the player that the screen they deleted it from no
-/// longer shows — which is the one outcome an opt-in recording feature may
-/// never produce.
+/// Remove a take: the audio, its dry stem, its picture and its sidecar
+/// together. A sidecar with no audio is a label for nothing, and a dry stem
+/// or a video left behind is a recording of the player that the screen they
+/// deleted it from no longer shows — which is the one outcome an opt-in
+/// recording feature may never produce.
 pub fn delete_take(app_data: &Path, id: &str) -> Result<(), String> {
     let wav = find_take(app_data, id)?;
     let json = wav.with_extension("json");
     let dry = dry_beside(&wav);
-    // The stem first: if the mix is removed and this fails, the take is gone
-    // from the list and the stem is orphaned with nothing left to delete it
-    // by. This way round, a failure leaves a take the user can try again on.
+    // The picture first, then the stem, then the mix: every one of these is a
+    // recording of a person, and the order is "most private first" so that a
+    // disk failure part way through leaves a take the user can press Delete on
+    // again rather than an orphan nothing lists. A picture of somebody playing
+    // is the one of the three that must never be the thing left behind.
+    if let Some(video) = video_beside(&wav) {
+        fs::remove_file(&video)
+            .map_err(|e| format!("could not delete the take's video: {e}"))?;
+    }
     if dry.is_file() {
         fs::remove_file(&dry)
             .map_err(|e| format!("could not delete the take's dry stem: {e}"))?;
@@ -1701,6 +1811,14 @@ impl TakeSession {
                 .lock()
                 .map(|p| *p)
                 .unwrap_or_else(|e| *e.into_inner()),
+            // The picture is the webview's, and it is still being written when
+            // this runs: `take_video_finish` files it under this take's id and
+            // patches this very sidecar afterwards. So the record the engine
+            // hands back says there is no video, which is true at this instant,
+            // and the shelf learns otherwise from the disk on its next read.
+            video_path: None,
+            video_bytes: None,
+            video_offset_ms: None,
         };
 
         // An empty take is a take of nothing — the user pressed record and
@@ -2250,6 +2368,9 @@ mod tests {
             path: path.to_string_lossy().into_owned(),
             dry_path: None,
             position: None,
+            video_path: None,
+            video_bytes: None,
+            video_offset_ms: None,
         };
         fs::write(
             path.with_extension("json"),

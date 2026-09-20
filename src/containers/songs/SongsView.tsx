@@ -72,6 +72,15 @@ import { SongPortionChip, SongPortionSave } from "./SongPortions";
 import { SongRecordControl } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
+/* W21 — the camera. The hook and the two small stage pieces are eager, like
+   the take's are, because they run while a pass is happening. The video player
+   is not imported here at all: it lives inside the review's own lazy chunk, so
+   a player who never turns the camera on never downloads it. */
+import { useSongCamera } from "./camera/useSongCamera";
+import { SongCameraControl } from "./camera/SongCameraControl";
+import { CameraPreview } from "./camera/CameraPreview";
+import { CameraIntroDialog } from "./camera/CameraIntroDialog";
+import "../../styles/songs-camera.css";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
 import { buildSchedule, meterAt, sectionRange } from "../../songs/schedule";
 import { portionRange } from "../../songs/selection";
@@ -252,13 +261,47 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * (`useSongTakes.ts` says why). Opt-in per song, the same first-run dialog,
    * the same list, play and delete.
    */
+  /**
+   * W21 — the camera, and the picture it puts beside the take.
+   *
+   * Declared before the take's hook because the take's hook calls into it:
+   * the engine only NAMES a take when it stops, and the picture has to be
+   * filed under that name. Everything the camera can fail at fails as "no
+   * picture this pass" — `useSongCamera`'s header says why that is the only
+   * outcome it is allowed to have.
+   */
+  const camera = useSongCamera({
+    songId: song?.id ?? null,
+    score,
+    range,
+    tempoPercent,
+    view: "songs",
+    isPlaying,
+    enabled: session.mixSetting.camera === true,
+    onSetCamera: (next) => {
+      session.setCamera(next);
+      // A picture with no sound is not a take. The camera turns Record the
+      // take on with it, so there is one promise and one decision rather
+      // than two switches whose combinations a player has to reason about.
+      if (next && !session.mixSetting.takes) session.setTakes(true);
+    },
+  });
+
   const takes = useSongTakes({
     songId: song?.id ?? null,
     view: "songs",
     isPlaying,
     countingIn: countIn !== null,
     enabled: session.mixSetting.takes,
-    onSetTakes: session.setTakes,
+    onSetTakes: (next) => {
+      session.setTakes(next);
+      // ...and the other way round: no take means nothing for a picture to
+      // hang on, so the camera closes with it.
+      if (!next && session.mixSetting.camera) session.setCamera(false);
+    },
+    // W21 — the camera's two doors.
+    onTakeStarted: camera.onTakeStarted,
+    onTakeFinished: camera.onTakeFinished,
   });
 
   /**
@@ -269,6 +312,49 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * notes were played, only about when they landed.
    */
   const pitch = useSongTakePitch(attempt.review, takes.lastTake);
+
+  /**
+   * W21 — when this pass started recording, for the ring on the preview.
+   *
+   * Read off the take's own elapsed count rather than kept here, and only
+   * recomputed when recording starts or stops: the preview is unmounted and
+   * remounted as the camera opens and closes, and a clock that restarted at
+   * zero when that happened would lie about how long you had been playing.
+   */
+  const recordingSince = useMemo(
+    () => (takes.recording ? Date.now() - takes.recordedSeconds * 1000 : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [takes.recording],
+  );
+
+  /**
+   * W21 — the picture the review plays, when the pass it is about was filmed.
+   *
+   * The path comes from the camera rather than from the shelf: the engine
+   * names a take and hands its record back while the webview is still writing
+   * the video, so that record truthfully says there is no picture and only a
+   * later read of the directory would know otherwise (`take.rs`,
+   * `list_takes`). `undefined` — no camera, no picture, or a picture that
+   * failed — is the normal case, and the review is then exactly what it was
+   * before the camera existed (`SONGS.md` A9).
+   */
+  const reviewVideo = useMemo(() => {
+    const made = camera.lastVideo;
+    const id = takes.lastTake?.takeId;
+    if (!made || !id || made.takeId !== id) return undefined;
+    const take = takes.takes.find((row) => row.id === id);
+    if (!take) return undefined;
+    return {
+      takeId: take.id,
+      path: take.path,
+      videoPath: made.path,
+      ...(made.offsetMs === null ? {} : { videoOffsetMs: made.offsetMs }),
+      ...(take.position?.startOffsetMs === undefined
+        ? {}
+        : { startOffsetMs: take.position.startOffsetMs }),
+      deviceId: camera.deviceId,
+    };
+  }, [camera.lastVideo, camera.deviceId, takes.lastTake, takes.takes]);
 
   /**
    * How this passage has gone before (`COACH_UX.md` C3).
@@ -581,6 +667,16 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               </div>
             )}
 
+            {/* W21 — the little mirror, in a corner of the frame rather than
+                in the strip: it is over the tab, so it costs the strip no
+                height and the one screen stays one screen. It draws nothing
+                at all unless the camera is actually open. */}
+            <CameraPreview
+              camera={camera}
+              countIn={countIn}
+              recordingSince={camera.recording ? recordingSince : null}
+            />
+
             {/* A3: nothing here while the transport runs. The verdict appears
                 when you stop, in the frame the player was already looking at
                 (A4), and goes away again when you start. */}
@@ -608,12 +704,16 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   </p>
                 }
               >
+                {/* W21 — `video` only when the pass this review is about was
+                    filmed. Absent is the normal case and the review is then
+                    exactly what it was before the camera existed. */}
                 <SongReview
                   review={attempt.review}
                   pitch={pitch}
                   onAction={actions.run}
                   onDismiss={dismissReview}
                   progressFor={progressFor}
+                  video={reviewVideo}
                 />
               </Suspense>
             )}
@@ -783,6 +883,13 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             </div>
 
             <SongRecordControl
+              /* W21 — the camera's chip, inside the record switch's own group:
+                 one decision about this pass, in two parts. A group of its own
+                 cost the strip a row and the tab its height at 480px, which
+                 `songs.spec.ts` measures. */
+              camera={
+                <SongCameraControl camera={camera} disabled={takes.available === false} />
+              }
               available={takes.available}
               takes={takes.takes}
               recording={takes.recording}
@@ -823,6 +930,13 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           having read it. */}
       {takes.introOpen && (
         <TakesIntroDialog onConfirm={takes.confirmIntro} onCancel={takes.cancelIntro} />
+      )}
+
+      {/* W21 — and the camera's own. A different promise from the take's: one
+          is a WAV of you and the band, the other is a picture of your hands,
+          your face and your room. Each is made in its own words. */}
+      {camera.introOpen && (
+        <CameraIntroDialog onConfirm={camera.confirmIntro} onCancel={camera.cancelIntro} />
       )}
 
       {dragging && <div className="songs-drop-hint">{t("songs.dropHere")}</div>}

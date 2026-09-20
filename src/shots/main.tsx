@@ -341,14 +341,56 @@ async function drive() {
      * schedule the app itself derived, so what is photographed is the
      * shipping review drawing shipping blocks.
      */
+    /**
+     * W21 — the camera, on, before the pass.
+     *
+     * Pressed like everything else here: the switch on the strip, then "Turn
+     * the camera on" in the promise, which is the only route a person has.
+     * `--use-fake-ui-for-media-stream` answers the browser's own prompt and
+     * `--use-fake-device-for-media-stream` supplies the picture, so what runs
+     * from here is the shipping `getUserMedia`, the shipping `MediaRecorder`
+     * and the shipping chunk pipe.
+     */
+    if (shot!.songs.camera) {
+      await until(
+        "the camera switch",
+        () => !!document.querySelector(".songs-camera-switch"),
+      );
+      (document.querySelector(".songs-camera-switch") as HTMLButtonElement).click();
+      await until("the camera promise", () => !!document.querySelector(".jam-takes-card"));
+      const accept = document.querySelectorAll<HTMLElement>(".unsaved-save");
+      if (accept.length === 0) throw new Error("no way to accept the camera promise");
+      accept[accept.length - 1].click();
+      // The stream has to be open before the transport starts, or the pass
+      // records nothing and the review has no picture to draw.
+      await until("the camera preview", () => !!document.querySelector(".songs-camera-preview"), 15000);
+    }
+
+    const filming = shot!.songs.camera === true;
     if (shot!.songs.review) {
       await until("the transport", () => !!document.querySelector(".transport-play"));
       const transport = document.querySelector(".transport-play") as HTMLButtonElement;
       transport.click();
-      // Long enough for the schedule to have been pushed and a bar to pass.
-      await new Promise((r) => setTimeout(r, 400));
+      // Long enough for the schedule to have been pushed and a bar to pass —
+      // and, with the camera on, for `MediaRecorder` to have produced at least
+      // one timeslice of video (`CHUNK_MS`).
+      await new Promise((r) => setTimeout(r, filming ? 3200 : 400));
       transport.click();
       await until("the review", () => !!document.querySelector(".songs-review"), 20000);
+      if (filming) {
+        // The picture, with something in it: `readyState >= 1` is the element
+        // having metadata, which is the difference between a video box and a
+        // video. Without this the suite would measure an empty frame, which is
+        // exactly the failure it exists to notice.
+        await until(
+          "the picture",
+          () => {
+            const video = document.querySelector<HTMLVideoElement>(".songs-take-video-picture");
+            return !!video && video.readyState >= 1;
+          },
+          20000,
+        );
+      }
       if (shot!.songs.openMore) {
         /*
          * Pressed until it takes, rather than pressed once and hoped for.

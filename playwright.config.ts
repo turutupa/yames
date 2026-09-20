@@ -66,7 +66,31 @@ export default defineConfig({
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        /*
+         * W21 — a camera, with no camera and nobody in front of it.
+         *
+         * Chromium's fake device hands the page a real `MediaStream` of a
+         * synthetic picture and the fake UI answers the permission prompt, so
+         * the `songs-camera` scene arms the shipping camera code, records with
+         * the shipping `MediaRecorder` and plays the result back in the
+         * shipping review. Without these two flags that scene cannot run at
+         * all on a build machine, and with them it needs no hardware and no
+         * person.
+         *
+         * They affect nothing else: every other scene here opens no camera, and
+         * a flag that supplies a device nobody asks for supplies nothing.
+         */
+        launchOptions: {
+          args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"],
+        },
+      },
+    },
+  ],
   /*
    * Its own server, always.
    *

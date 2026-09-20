@@ -30,6 +30,7 @@
  * The rule and the hook are the ones the jam screen's menus already use.
  */
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
@@ -75,6 +76,9 @@ export interface SongTakesProps {
  * is the one that must not be under a thumb reaching for the first.
  */
 export function SongRecordControl({
+  // W21 — the camera's chip, rendered inside this group. A node rather than an
+  // import, so `SongTakes.tsx` goes on knowing nothing about cameras.
+  camera,
   available,
   takes,
   recording,
@@ -85,7 +89,7 @@ export function SongRecordControl({
   onPlay,
   onStop,
   onDelete,
-}: SongTakesProps) {
+}: SongTakesProps & { camera?: ReactNode }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   // Upwards: the strip is the last row above the transport, and a shelf that
@@ -147,6 +151,11 @@ export function SongRecordControl({
         {t("jam.takes.label")}
         {takes.length > 0 && <span className="songs-takes-count">{takes.length}</span>}
       </button>
+
+      {/* W21 — the camera, in this group rather than in one of its own: it is
+          one decision about this pass in two parts, and a second group would
+          have cost the strip a row and the tab its height at 480px. */}
+      {camera}
 
       {open &&
         createPortal(

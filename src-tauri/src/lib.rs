@@ -50,7 +50,13 @@ mod song;
 mod speech_out;
 pub mod srs;
 mod state;
+/// Who asks for the camera, and how often (W21, item 5). Windows only; the
+/// other two platforms do it themselves and the module says how.
+mod camera_permission;
 mod take;
+/// The camera's recording, beside the take it belongs to (W21,
+/// `plans/SONGS.md` A9/A10). Nothing in it goes near the audio threads.
+mod take_video;
 pub mod timing;
 mod tts;
 mod voices;
@@ -158,6 +164,12 @@ use commands::{
     // W19 — the library is "recently played", and the file comes back out.
     export_score_source, mark_score_opened,
     EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, TakeState,
+};
+// W21 — the camera's recording. Its own module, because the file it writes
+// comes from the webview rather than from the engine, and nothing about it
+// touches a ring, a handoff or a callback.
+use take_video::{
+    take_video_append, take_video_begin, take_video_discard, take_video_finish, VideoState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -408,6 +420,12 @@ pub fn run() {
             app.manage(SongSourceState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
+            // W21 — and the picture beside it, if the camera is on. See
+            // `take_video.rs`.
+            app.manage(VideoState::default());
+            // W21 — and the camera's prompt is ours, asked once, in our own
+            // words. See `camera_permission.rs`; a no-op off Windows.
+            camera_permission::install(&app.handle().clone());
             // W19 — the Downloads watch, which exists only while Songs is
             // open. `None` here is the whole of "off": no thread, no folder
             // listed, and `read_offered_file` with nothing to read.
@@ -755,6 +773,11 @@ pub fn run() {
             play_take,
             stop_take_playback,
             takes_dir_size,
+            // W21 — the camera's recording, streamed to disk beside the take.
+            take_video_begin,
+            take_video_append,
+            take_video_finish,
+            take_video_discard,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,

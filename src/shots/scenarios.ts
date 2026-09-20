@@ -83,6 +83,20 @@ export interface Shot {
     review?: "rushing" | "missed" | "clean";
     openMore?: boolean;
     /**
+     * W21 — turn the camera on before the pass, and film it.
+     *
+     * Chromium's `--use-fake-device-for-media-stream` gives the page a real
+     * `MediaStream` from a synthetic camera and
+     * `--use-fake-ui-for-media-stream` answers the permission prompt, so this
+     * scene records with the shipping `MediaRecorder`, streams the chunks the
+     * shipping way, and shows the shipping review playing a real video
+     * element — no camera, no person, no mock of anything but the disk.
+     *
+     * Only meaningful with `review`: the picture belongs to a pass, and a
+     * pass is what the review is about.
+     */
+    camera?: boolean;
+    /**
      * Press play and photograph the stage with the transport running.
      *
      * The state A13 is about: every control you might reach for mid-passage
@@ -582,6 +596,21 @@ export const SHOTS: Shot[] = [
     // "come back to this" rather than a correction nobody needed. A4 again —
     // never generic praise.
     songs: { row: 0, review: "clean" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-camera",
+    suffix: "songs-camera",
+    window: "main",
+    tab: "songs",
+    // W21 — the whole of the camera, end to end: the switch on, the promise
+    // read, three seconds filmed by Chromium's fake device, and the review
+    // playing it back with the verdict painted on the tape underneath. The
+    // scene the layout suite measures for "does the review with a picture fit
+    // the frame W18 gives it".
+    songs: { row: 0, review: "rushing", camera: true },
     width: 1400,
     height: 900,
     settleMs: 900,

@@ -42,6 +42,16 @@ export type SongMixSetting = {
    */
   takes: boolean;
   /**
+   * W21 — record the PICTURE of this song as well (`plans/SONGS.md` A9).
+   *
+   * Beside `takes` and never instead of it: a picture with no sound is not a
+   * take, so the camera can only be on for a song that is being recorded, and
+   * `SongsView` turns one on with the other. Per song for the same reason the
+   * rest of this record is per song — whether you want to be filmed is a
+   * decision about the piece you are about to play, not about the app.
+   */
+  camera: boolean;
+  /**
    * The portion of this song the player was last working on, and how
    * (2026-09-20).
    *
@@ -67,6 +77,7 @@ export const DEFAULT_MIX_SETTING: SongMixSetting = {
   muted: [],
   countInBars: 0,
   takes: false,
+  camera: false,
   selection: null,
   loop: false,
   tempoPercent: 100,
@@ -152,6 +163,9 @@ export function readMixSetting(stored: unknown): SongMixSetting {
     // older build can hold — missing, `"yes"`, `1` — leaves the microphone
     // alone, which is the only default a switch like this may have.
     takes: raw.takes === true,
+    // W21 — and the same rule, for the same reason. Only an explicit `true`
+    // opens a camera; a hand-edited file holding `"yes"` does not.
+    camera: raw.camera === true,
     selection: readSelection(raw.selection),
     loop: raw.loop === true,
     tempoPercent:
