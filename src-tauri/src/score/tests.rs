@@ -585,6 +585,77 @@ fn accents_are_reported_and_cost_nothing() {
     // The number moves; the score does not.
     assert!((shaped.score - flat.score).abs() < 1e-4);
     assert!(shaped.accent_agreement.unwrap() > flat.accent_agreement.unwrap());
+
+    // LP C3, per note. Played flat, every written accent is reported as
+    // one that did not come out; dug in, every one of them did. Either
+    // way the score is the same number, which is the whole point of
+    // "reported, not scored".
+    let verdicts = |r: &ScheduleReport| -> (usize, usize) {
+        let heard = r
+            .results
+            .iter()
+            .filter(|x| x.accent_heard == Some(true))
+            .count();
+        let not = r
+            .results
+            .iter()
+            .filter(|x| x.accent_heard == Some(false))
+            .count();
+        (heard, not)
+    };
+    let written = schedule.onsets.iter().filter(|o| o.accent).count();
+    assert_eq!(
+        verdicts(&flat),
+        (0, written),
+        "played flat, no accent should have been heard",
+    );
+    assert_eq!(
+        verdicts(&shaped),
+        (written, 0),
+        "dug in, every written accent should have been heard",
+    );
+    // And a note nobody wrote an accent on never gets a verdict.
+    assert!(
+        shaped
+            .results
+            .iter()
+            .filter(|r| !schedule.onsets[r.id as usize].accent)
+            .all(|r| r.accent_heard.is_none()),
+        "a plain note was given an accent verdict",
+    );
+}
+
+#[test]
+fn an_accent_nobody_played_gets_no_verdict_rather_than_a_guess() {
+    // An accent on a note that was never played, and an accent whose
+    // neighbours were never played. Neither has anything to compare, so
+    // neither may answer — a `false` here would read to the player as
+    // "you did not accent that", about a note they never reached.
+    let mut schedule = dotted8th_16th_schedule(4);
+    schedule.onsets[4].accent = true;
+    schedule.onsets[10].accent = true;
+    let beats = steady(120.0, 20);
+
+    let played: Vec<PlayedOnset> = schedule
+        .onsets
+        .iter()
+        .filter(|o| ![4, 9, 11].contains(&o.id))
+        .filter_map(|o| beats.time_at_beat(o.beat))
+        .map(|t| PlayedOnset {
+            time_ms: t,
+            amplitude: 0.6,
+            confidence: 1.0,
+        })
+        .collect();
+
+    let report = match_attempt(&schedule, &beats, &played, &weights());
+    let verdict = |id: u32| report.results.iter().find(|r| r.id == id).unwrap().accent_heard;
+    assert_eq!(verdict(4), None, "an accent that was never played answered");
+    assert_eq!(
+        verdict(10),
+        None,
+        "an accent with no played neighbour answered",
+    );
 }
 
 // ── The wire ────────────────────────────────────────────────────────
@@ -615,10 +686,15 @@ fn the_wire_shape_is_the_one_the_brief_fixed() {
         state: OnsetState::SoftAbsent,
         deviation_ms: None,
         pass: 2,
+        accent_heard: None,
     };
     let json = serde_json::to_string(&result).unwrap();
     assert!(json.contains("\"state\":\"softAbsent\""), "{json}");
     assert!(json.contains("\"deviationMs\":null"), "{json}");
+    // LP C3's field is additive: with nothing to say it is not on the
+    // wire at all, so a review written against the pre-accent contract
+    // sees exactly what it saw before.
+    assert!(!json.contains("accentHeard"), "{json}");
 
     let extra = ExtraOnset {
         beat: 2.25,

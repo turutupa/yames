@@ -627,6 +627,15 @@ export type OnsetResult = {
   state: "hit" | "miss" | "softAbsent";
   deviationMs: number | null;
   pass: number;
+  /**
+   * Whether a note written with an accent actually came out louder than
+   * the notes beside it. Reported, never scored — what an accent should
+   * cost is still open (`plans/LEARNING_PATHS_DECISIONS.md` C3).
+   *
+   * Absent when there is nothing to say: no accent written, the note
+   * was not played, or the amplitudes around it were unusable.
+   */
+  accentHeard?: boolean;
 };
 
 /** A note the player made that the score did not ask for. */
@@ -845,6 +854,8 @@ export type AttemptOnset = {
   deviationMs: number | null;
   /** Times round the loop, from 0. */
   pass: number;
+  /** See `OnsetResult.accentHeard`. Reported, never scored. */
+  accentHeard?: boolean;
 };
 
 /** An onset the player produced that the score did not ask for. */

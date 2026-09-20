@@ -2189,6 +2189,7 @@ mod tests {
                     state: OnsetState::Hit,
                     deviation_ms: Some(0.0),
                     pass,
+                    accent_heard: None,
                 });
             }
         }
@@ -3151,6 +3152,7 @@ mod tests {
             state: OnsetState::SoftAbsent,
             deviation_ms: None,
             pass: 2,
+            accent_heard: None,
         };
         let json = serde_json::to_value(result).unwrap();
         assert_eq!(json["state"], "softAbsent");
