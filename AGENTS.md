@@ -289,21 +289,38 @@ Two things the numbers depend on, and one that is not a Yames bug:
 "it works" is not the standard. Before editing it, know these:
 
 - **The beat queue is the only way out of it.** `BeatQueue` is preallocated
-  when the stream opens and never grows; a push is an acquire load, ten
+  when the stream opens and never grows; a push is an acquire load, thirteen
   relaxed stores and a release store, then one `Thread::unpark`. Do not put
   a channel back — `std::sync::mpsc` allocates a block every 31 messages
   and locks the receiver's waker on every send, which is a `malloc` and a
   priority inversion per tick and is what this replaced.
+  **Its packed flag word is full.** `pack_small_fields` spends exactly 32
+  bits (three `u8`s, a three-valued enum, six flags), which is why the song's
+  position travels in three `u32` arrays of its own rather than in it. A new
+  flag needs another array or a narrower packing;
+  `the_small_word_is_full` fails loudly either way.
+- **There are two schedulers in the frame loop, not one.** A jam is a lookup
+  on a tick the click was going to play anyway; a SONG (`song.rs`) is a cursor
+  walking a table of absolute sample positions, and while one is loaded the
+  click's own `next_beat_sample` branch never runs. The two arms exist as
+  `if / else if` rather than a `match` for a borrow reason worth knowing: the
+  song's arm borrows `cached.song`, the click's arm mutates `cached`, and NLL
+  only allows that when each borrow begins and ends inside its own arm.
+- **A song's end is keyed on the frame it happened on, not on the flag that
+  stops the buffer.** `song_ended_here` stays up for the rest of the buffer
+  so nothing further sounds; `ends_here` is the one frame. Keying the
+  notification on the former pushed one per remaining frame — up to a whole
+  buffer of them, and as many `jam-ended` emits behind them.
 - **Every lock in there is a `try_lock`, and every failure is survivable.**
   The state snapshot, the jam table, the form position, the take slots, the
   coach's clip and the three retirement lists all fail by leaving the
   cached value alone and trying again next buffer. A `lock()` anywhere in
   the callback is a bug however short the critical section looks.
-- **The callback never frees.** `JamRetirement`, `take::TakeParking` and
-  `speech_out::SpeechParking` exist so the LAST `Arc` to a table, a take or
-  a line of speech is dropped on a thread that may call `free()`. A new
-  owned value on this path needs the same treatment; the probe's allocator
-  counts frees and will fail the run.
+- **The callback never frees.** `JamRetirement`, `SongRetirement`,
+  `take::TakeParking` and `speech_out::SpeechParking` exist so the LAST `Arc`
+  to a table, a song, a take or a line of speech is dropped on a thread that
+  may call `free()`. A new owned value on this path needs the same treatment;
+  the probe's allocator counts frees and will fail the run.
 - **`voices` and `cached.beat_groups` are sized, not grown.** Every
   `voices.push` is guarded by `voices.len() < MAX_VOICES`; `beat_groups`
   is refilled in place against a capacity of `MAX_BEAT_GROUPS`, which
@@ -316,6 +333,10 @@ Two things the numbers depend on, and one that is not a Yames bug:
 - **Re-run the probe.** `--jam-swap --jam-move --jam-take` together is the
   busiest path the engine has: the band on every tick, a live table
   handoff, the form moving, and a take being written to disk underneath.
+  **And `--song-loop --song-take`**, which is the other scheduler entirely: a
+  tempo map with a step in it, a meter change, a loop seam every few seconds
+  with voices ringing across it, and a take over the top. Neither run covers
+  the other.
 
 ## Coaching pipeline — latency tiers
 
