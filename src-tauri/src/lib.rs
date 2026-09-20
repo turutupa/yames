@@ -1,3 +1,7 @@
+/// Where the output callback says it is inside itself, for the counting
+/// allocator `click-jitter-probe` installs. `pub` because the allocator
+/// lives in that binary, which can only see the crate's public surface.
+pub mod alloc_probe;
 mod audio_input;
 mod calibration_cache;
 mod clock;
@@ -38,6 +42,10 @@ mod voices;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    /// The other half of the audio-safety gate: the callback raises this for
+    /// the span of its own body and the probe's `#[global_allocator]` counts
+    /// every allocation and free made while it is up. See `alloc_probe`.
+    pub use crate::alloc_probe::in_callback;
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
     /// The jitter probe's `--jam` flag builds a table directly: it runs the

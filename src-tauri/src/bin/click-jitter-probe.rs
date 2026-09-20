@@ -26,6 +26,12 @@
 //!   --gguf <path>        loop coach::generate over this model
 //!   --no-llm             baseline; no model, no generation thread
 //!   --p99-ms <f>         jitter threshold, default 1.0
+//!   --volume <f>         0.0-1.0, default 0.8 (the app's own default).
+//!                        Changes the AMPLITUDE and nothing else: a voice's
+//!                        gain is worked out once when it is spawned, so the
+//!                        mixer does identical work at 0.01 and at 0.8. It
+//!                        exists so the gate can be re-run on a machine
+//!                        somebody is asleep next to
 //!   --json               emit a machine-readable summary line as well
 //!   --dump-csv <path>    write the raw per-callback capture for re-analysis
 //!   --jam                load the busiest plausible jam (16 ticks a bar,
@@ -80,7 +86,20 @@
 //! * **Dropouts** — callbacks whose gap exceeded twice the buffer period,
 //!   i.e. the device provably ran dry. Reported for diagnosis; the gate
 //!   is on missed beats, which is what the musician perceives.
+//! * **Callback allocations / frees** — every `malloc`, `realloc` and
+//!   `free` made inside the body of the output callback, counted by this
+//!   binary's own global allocator (see below). Entry-to-entry gaps cannot
+//!   see these: an allocation on a warm heap is fast, and a rule that only
+//!   shows up when it is slow is a rule nobody is testing. Hard gate at
+//!   zero, both ways — a `free()` under the mixer is exactly what the
+//!   retirement machinery in `engine.rs`, `take.rs` and `speech_out.rs`
+//!   exists to prevent.
+//! * **Dropped notifications** — beats the callback could not hand to the
+//!   event loop. Hard gate at zero: `beat_log` is the only source
+//!   `TimingAnalyzer` has for where a beat fell, so one of these is an
+//!   expected onset the player is silently marked down for.
 
+use std::alloc::{GlobalAlloc, Layout, System};
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
@@ -88,10 +107,74 @@ use std::time::Duration;
 
 use yames_lib::probe::{
     compile_jam, compile_jam_with_voices, create_beat_log,
-    create_shared_state, load_kit, load_voice_bank, perc_ids, reference_bank, CallbackProbe, CallbackSample,
+    create_shared_state, in_callback, load_kit, load_voice_bank, perc_ids, reference_bank, CallbackProbe, CallbackSample,
     JamBassLine, JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, JamVoices, KitBank,
     MelodicBank, MetronomeEngine, TakeRing, TakeSession, TakeStart,
 };
+
+// ---------------------------------------------------------------------------
+// The counting allocator — AGENTS.md's "nothing on the callback allocates",
+// as a number instead of a promise
+// ---------------------------------------------------------------------------
+
+/// Allocations made inside the output callback's body during this run.
+static CB_ALLOCS: AtomicU64 = AtomicU64::new(0);
+/// Bytes those allocations asked for.
+static CB_ALLOC_BYTES: AtomicU64 = AtomicU64::new(0);
+/// Frees made inside it. A `free()` under the mixer is the fault the jam
+/// table's, the take's and the coach's retirement paths all exist to avoid,
+/// so it is counted separately and gated just as hard.
+static CB_FREES: AtomicU64 = AtomicU64::new(0);
+
+/// `System`, plus a count of what the audio thread did inside the callback.
+///
+/// **Probe-only by construction.** A `#[global_allocator]` applies to the
+/// binary that declares it, and this is declared in the probe, so the app's
+/// allocator is untouched — no branch, no atomic, nothing.
+///
+/// `yames_lib::probe::in_callback` is a thread-local `Cell<bool>` with a
+/// `const` initialiser and no destructor: reading it here is a TLS slot load
+/// that cannot allocate and so cannot recurse into this allocator. It is
+/// true only for the span of the callback body, not for the whole audio
+/// thread — cpal's own stream loop runs on that thread too, and a `malloc`
+/// in the backend is not a Yames defect and must not be reported as one.
+struct CountingAlloc;
+
+unsafe impl GlobalAlloc for CountingAlloc {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        if in_callback() {
+            CB_ALLOCS.fetch_add(1, Ordering::Relaxed);
+            CB_ALLOC_BYTES.fetch_add(layout.size() as u64, Ordering::Relaxed);
+        }
+        unsafe { System.alloc(layout) }
+    }
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        if in_callback() {
+            CB_ALLOCS.fetch_add(1, Ordering::Relaxed);
+            CB_ALLOC_BYTES.fetch_add(layout.size() as u64, Ordering::Relaxed);
+        }
+        unsafe { System.alloc_zeroed(layout) }
+    }
+
+    unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        if in_callback() {
+            CB_ALLOCS.fetch_add(1, Ordering::Relaxed);
+            CB_ALLOC_BYTES.fetch_add(new_size as u64, Ordering::Relaxed);
+        }
+        unsafe { System.realloc(ptr, layout, new_size) }
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        if in_callback() {
+            CB_FREES.fetch_add(1, Ordering::Relaxed);
+        }
+        unsafe { System.dealloc(ptr, layout) }
+    }
+}
+
+#[global_allocator]
+static ALLOCATOR: CountingAlloc = CountingAlloc;
 
 /// The bass's range, mirrored from `engine.rs`. The probe builds a melodic
 /// bank by hand, so it has to say which notes the band can ask for.
@@ -112,6 +195,15 @@ struct Args {
     gguf: Option<String>,
     no_llm: bool,
     p99_ms: f64,
+    /// Output level, 0.0-1.0. The app's own default unless asked otherwise.
+    ///
+    /// Every gain the mixer applies — the click's, each drum's, the bass's —
+    /// is multiplied by this ONCE, where the voice is spawned, and the
+    /// per-sample loop never sees it. So a run at 0.01 renders exactly the
+    /// same number of voices through exactly the same code as a run at 0.8
+    /// and the numbers are comparable; what changes is whether the room
+    /// hears it.
+    volume: f32,
     json: bool,
     dump_csv: Option<String>,
     jam: bool,
@@ -163,6 +255,7 @@ impl Default for Args {
             gguf: None,
             no_llm: false,
             p99_ms: 1.0,
+            volume: 0.8,
             json: false,
             dump_csv: None,
             jam: false,
@@ -206,6 +299,7 @@ fn parse_args() -> Result<Args, String> {
             "--seconds" => a.seconds = num(i)? as u64,
             "--warmup-ms" => a.warmup_ms = num(i)? as u64,
             "--p99-ms" => a.p99_ms = num(i)?,
+            "--volume" => a.volume = (num(i)? as f32).clamp(0.0, 1.0),
             "--gguf" => a.gguf = Some(value(i)?.to_string()),
             "--dump-csv" => a.dump_csv = Some(value(i)?.to_string()),
             "--no-llm" => {
@@ -293,6 +387,9 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      --features coach-llm | coach-llm-vulkan | coach-llm-metal)
   --no-llm           baseline run
   --p99-ms <f>       jitter threshold, default 1.0
+  --volume <f>       0.0-1.0, default 0.8. Amplitude only — the mixer does
+                     the same work at any level — so the gate can be run
+                     next to somebody who is asleep
   --json             also print a one-line JSON summary
   --dump-csv <path>  write the raw per-callback capture for re-analysis
   --jam              play the busiest plausible jam instead of the click
@@ -730,6 +827,7 @@ fn main() -> ExitCode {
         let mut s = state.lock().unwrap();
         s.bpm = args.bpm;
         s.subdivision = args.subdivision;
+        s.volume = args.volume;
         s.is_playing = true;
         // A 4/4 bar keeps the accent pattern (and therefore the voice mix)
         // representative; nothing here changes tick spacing.
@@ -761,7 +859,26 @@ fn main() -> ExitCode {
             }
         }
     }
-    if let Err(e) = engine.start_headless(state) {
+    // THREE TRIES AT THE DEVICE, not one.
+    //
+    // `start_headless` waits `AUDIO_SETUP_TIMEOUT` — two seconds — for the
+    // audio thread to say whether it got a stream, and on a box where five
+    // other agents are running `cargo build` that is not always enough to
+    // enumerate the devices and decode the sound bank at the device's rate.
+    // The engine is left startable by a failed setup (that is what
+    // `AudioThreadExit` is for, and `a_failed_audio_setup_leaves_the_engine_
+    // startable_again` is the test), so asking again is the honest fix for a
+    // shared machine. A run that gets a stream on the second try is not a
+    // worse measurement — the window has not opened yet.
+    let mut started = Err("not attempted".to_string());
+    for attempt in 1..=3 {
+        started = engine.start_headless(state.clone());
+        match started {
+            Ok(()) => break,
+            Err(ref e) => eprintln!("[probe] audio setup attempt {attempt}/3 failed: {e}"),
+        }
+    }
+    if let Err(e) = started {
         eprintln!("error: audio engine did not start: {e}");
         return ExitCode::from(2);
     }
@@ -883,11 +1000,13 @@ fn main() -> ExitCode {
     }
 
     eprintln!(
-        "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), warmup {} ms, window {} s",
+        "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), volume {:.2}, \
+         warmup {} ms, window {} s",
         args.bpm,
         args.subdivision,
         1.0 / tick_interval_s,
         tick_interval_s * 1000.0,
+        args.volume,
         args.warmup_ms,
         args.seconds,
     );
@@ -1088,6 +1207,12 @@ fn main() -> ExitCode {
     let samples = cb_probe.snapshot();
     let sample_rate = cb_probe.sample_rate();
     let overflow = cb_probe.overflow();
+    // Read AFTER `shutdown`, which joins the audio thread, so nothing can
+    // still be pushing while these are read.
+    let dropped_notifications = engine.dropped_notifications();
+    let cb_allocs = CB_ALLOCS.load(Ordering::Relaxed);
+    let cb_alloc_bytes = CB_ALLOC_BYTES.load(Ordering::Relaxed);
+    let cb_frees = CB_FREES.load(Ordering::Relaxed);
 
     // Joining can take one generation (up to a few seconds); do it after
     // the audio measurement is already captured.
@@ -1155,6 +1280,10 @@ fn main() -> ExitCode {
     // A pasted report has to say whether the band was playing. Two runs
     // whose only difference is `--jam` were otherwise indistinguishable on
     // the page, which is exactly the pair anyone compares.
+    // The level is on the line because a quiet run and a loud one are
+    // otherwise indistinguishable on the page, and somebody reading a
+    // pasted report deserves to know the band was turned down.
+    mode.push_str(&format!(" @ volume {:.2}", args.volume));
     if args.jam {
         mode.push_str(" + --jam");
     }
@@ -1209,10 +1338,16 @@ fn main() -> ExitCode {
     println!("max gap           {:.4} ms", report.max_gap_ms);
     println!("dropouts (>2×buf) {}", report.dropouts);
     println!("missed beats      {}", report.missed_beats);
+    println!("--- inside the callback (this binary's global allocator) ---");
+    println!("allocations       {cb_allocs} ({cb_alloc_bytes} bytes)");
+    println!("frees             {cb_frees}");
+    println!("dropped beats     {dropped_notifications} (beat queue full)");
 
     let jitter_ok = report.jitter_p99 < args.p99_ms;
     let beats_ok = report.missed_beats == 0;
     let arena_ok = report.overflow == 0;
+    let alloc_ok = cb_allocs == 0 && cb_frees == 0;
+    let queue_ok = dropped_notifications == 0;
     println!("--- gate (ROADMAP §4) ---");
     println!(
         "p99 < {:.2} ms      {}",
@@ -1223,6 +1358,17 @@ fn main() -> ExitCode {
         "missed beats = 0  {}",
         if beats_ok { "PASS" } else { "FAIL" }
     );
+    println!(
+        "callback heap = 0 {}",
+        if alloc_ok { "PASS" } else { "FAIL" }
+    );
+    // Not folded into the line above: a dropped beat is a SCORING fault, not
+    // a timing one. The click was heard; the analyzer was not told about it,
+    // and the player is marked down for a beat they played.
+    println!(
+        "dropped beats = 0 {}",
+        if queue_ok { "PASS" } else { "FAIL" }
+    );
     if !arena_ok {
         println!("arena overflow    FAIL (statistics are truncated)");
     }
@@ -1231,7 +1377,9 @@ fn main() -> ExitCode {
         println!(
             "JSON {{\"mode\":\"{}\",\"sample_rate\":{},\"frames\":{},\"callbacks\":{},\
 \"p50_ms\":{:.5},\"p95_ms\":{:.5},\"p99_ms\":{:.5},\"max_ms\":{:.5},\
-\"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\"pass\":{}}}",
+\"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\
+\"callback_allocs\":{},\"callback_alloc_bytes\":{},\"callback_frees\":{},\
+\"dropped_notifications\":{},\"pass\":{}}}",
             mode,
             report.sample_rate,
             report.median_frames,
@@ -1243,11 +1391,15 @@ fn main() -> ExitCode {
             report.max_gap_ms,
             report.dropouts,
             report.missed_beats,
-            jitter_ok && beats_ok && arena_ok
+            cb_allocs,
+            cb_alloc_bytes,
+            cb_frees,
+            dropped_notifications,
+            jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok
         );
     }
 
-    if jitter_ok && beats_ok && arena_ok {
+    if jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok {
         println!("\nRESULT PASS");
         ExitCode::SUCCESS
     } else {

@@ -46,7 +46,16 @@ template engine. Turn it on with exactly one Cargo feature:
 The GPU features imply `coach-llm`; never enable two backends at once.
 The inference worker asks for all layers on a GPU build and llama.cpp
 keeps them on the CPU when it finds no usable device, so one binary serves
-both — set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+both — set `YAMES_LLM_GPU_LAYERS=0` to put every **layer** on the CPU on a
+GPU build.
+
+**That is not a CPU-only switch, whatever it looks like.** T06 measured it:
+a `coach-llm-vulkan` binary with `YAMES_LLM_GPU_LAYERS=0` still registers
+the Vulkan backend and still allocates a 630 MiB compute buffer, because
+the backend is chosen at compile time and the variable only moves layers.
+A run that must have no GPU in it at all — the CPU row of the audio-safety
+gate, or a machine whose driver is the thing under suspicion — needs a
+binary built with plain `coach-llm`.
 
 The model, its `LlamaContext` and the llama.cpp backend live on a single
 long-lived thread (`coach::llm::LlmWorker`), demoted to below-normal
@@ -228,7 +237,9 @@ bun run yames:jitter-probe -- --no-llm                  # baseline
 # LLM runs need the feature, so call cargo directly:
 cargo run --release --manifest-path src-tauri/Cargo.toml \
   --features coach-llm-vulkan --bin click-jitter-probe -- --gguf model.gguf
-YAMES_LLM_GPU_LAYERS=0 cargo run --release ... --gguf model.gguf   # force CPU
+# Layers on the CPU — but the Vulkan backend is still registered and still
+# takes its 630 MiB buffer. A run with no GPU in it needs `--features coach-llm`.
+YAMES_LLM_GPU_LAYERS=0 cargo run --release ... --gguf model.gguf
 ```
 
 The probe runs the real `MetronomeEngine` headless (`start_headless`,
@@ -237,6 +248,25 @@ no Tauri app) and times the cpal callback from inside it via
 built the engine, so the shipping callback pays one null check per
 buffer. `--dump-csv` writes the raw capture so a run can be re-analysed
 without re-running it. Exit 0 = pass, 1 = gate failure, 2 = setup error.
+
+**It gates on four numbers, not one.** Entry-to-entry gaps cannot see an
+allocation or a stall *inside* a buffer, so two of the four come from
+elsewhere:
+
+| Number | Where it comes from | Gate |
+|---|---|---|
+| p99 callback jitter | `CallbackProbe` timings | < 1 ms (advisory on a busy box) |
+| missed beats | audio clock vs wall clock | 0, hard |
+| callback allocations / frees | the probe's own `#[global_allocator]`, armed by `alloc_probe` for the span of the callback body | 0, hard |
+| dropped notifications | `MetronomeEngine::dropped_notifications` | 0, hard |
+
+The allocator counts `malloc`, `realloc` **and** `free` made while the
+callback body is running, and nothing cpal does around it — the flag covers
+our closure, not the whole stream thread, because a `malloc` in the backend
+is not a Yames defect. A dropped notification is a *scoring* failure rather
+than a timing one: `beat_log` is the only place `TimingAnalyzer` learns
+where a beat fell, so one of them is an expected onset the player is
+marked down for missing.
 
 Two things the numbers depend on, and one that is not a Yames bug:
 
@@ -252,6 +282,40 @@ Two things the numbers depend on, and one that is not a Yames bug:
   disables power throttling on them. llama-cpp-2 0.1.146 exposes no
   `GGML_SCHED_PRIO` knob, so CPU inference is measurably noisier than GPU
   inference.
+
+### What in the output callback must not be touched
+
+`engine.rs`'s cpal output callback is the one function in this repo where
+"it works" is not the standard. Before editing it, know these:
+
+- **The beat queue is the only way out of it.** `BeatQueue` is preallocated
+  when the stream opens and never grows; a push is an acquire load, ten
+  relaxed stores and a release store, then one `Thread::unpark`. Do not put
+  a channel back — `std::sync::mpsc` allocates a block every 31 messages
+  and locks the receiver's waker on every send, which is a `malloc` and a
+  priority inversion per tick and is what this replaced.
+- **Every lock in there is a `try_lock`, and every failure is survivable.**
+  The state snapshot, the jam table, the form position, the take slots, the
+  coach's clip and the three retirement lists all fail by leaving the
+  cached value alone and trying again next buffer. A `lock()` anywhere in
+  the callback is a bug however short the critical section looks.
+- **The callback never frees.** `JamRetirement`, `take::TakeParking` and
+  `speech_out::SpeechParking` exist so the LAST `Arc` to a table, a take or
+  a line of speech is dropped on a thread that may call `free()`. A new
+  owned value on this path needs the same treatment; the probe's allocator
+  counts frees and will fail the run.
+- **`voices` and `cached.beat_groups` are sized, not grown.** Every
+  `voices.push` is guarded by `voices.len() < MAX_VOICES`; `beat_groups`
+  is refilled in place against a capacity of `MAX_BEAT_GROUPS`, which
+  `commands::validate_beat_groups` is what keeps honest. Adding a push
+  without the guard, or letting a longer grouping through validation, is a
+  reallocation under the mixer.
+- **The event loop runs at normal priority on purpose** — see the comment
+  above it. Do not promote it again without first showing that the callback
+  depends on it, which since the queue landed it does not.
+- **Re-run the probe.** `--jam-swap --jam-move --jam-take` together is the
+  busiest path the engine has: the band on every tick, a live table
+  handoff, the form moving, and a take being written to disk underneath.
 
 ## Coaching pipeline — latency tiers
 
