@@ -118,6 +118,9 @@ export function useSongActions(input: SongActionsInput): SongActions {
           // `findings.rs` only ever asks for two or three, and both survive
           // the round trip (`verdict.ts`).
           dueDay: dayOf() + (fix?.type === "comeBack" ? fix.days : comeBackDays(action.when)),
+          // Why it was asked for, so the notebook (C1) can one day say what
+          // the promise was about rather than only when it falls due.
+          reason: finding.kind,
         }).then((all) => {
           setDue(new Set(all.filter((d) => d.dueDay <= dayOf()).map((d) => d.scoreId)));
           // The rail is not below this screen and does not take a prop from
