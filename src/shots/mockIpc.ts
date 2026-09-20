@@ -220,7 +220,10 @@ function baseStore(theme: string, tab: string, zenStyle?: string): Map<string, u
   ]);
   for (const h of hints) store.set(`hints.${h}`, true);
   if (zenStyle) store.set("zenStyle", zenStyle);
-  if (tab === "songs") store.set("songs", [songShotRecord()]);
+  // `songs.json` is empty and already moved: the library lives in the store
+  // now, and `SCORES` below is what answers for it. Saying the move has run
+  // keeps the harness off a migration path the shots are not about.
+  store.set("movedToPracticeStore", true);
   return store;
 }
 
@@ -232,6 +235,13 @@ export function installShotMock(shot: Shot, theme: string): void {
   const STATE = baseState(theme) as Record<string, unknown>;
   if (shot.ramp) Object.assign(STATE.speedRamp as object, shot.ramp);
   const store = baseStore(theme, shot.tab ?? "beat", shot.zenStyle);
+
+  /** The song library, the way the practice store holds it. */
+  const SCORES = new Map<string, SongRecord>();
+  if (shot.tab === "songs") {
+    const record = songShotRecord();
+    SCORES.set(record.id, record);
+  }
 
   mockWindows(shot.window === "floating" ? "floating" : "main");
 
@@ -368,6 +378,45 @@ export function installShotMock(shot: Shot, theme: string): void {
     list_midi_devices: () => [],
     get_midi_bindings: () => [],
     get_session_history: () => [],
+    query_history: () => [],
+    /*
+     * The song library, as the practice store answers it.
+     *
+     * Songs moved out of `songs.json` into `scores`, so the harness has to
+     * answer the four commands `src/songs/library.ts` now uses. A `Map`
+     * rather than four constants because the library writes as well as
+     * reads: the shots never delete anything, but a scene that did would
+     * otherwise photograph a list that ignored it.
+     */
+    list_scores: () =>
+      [...SCORES.values()].map((r) => ({
+        id: r.id,
+        title: r.score.title,
+        artist: r.score.artist,
+        sourceFile: r.score.source.fileName,
+        format: r.score.source.format,
+        trackIndex: r.score.source.trackIndex,
+        trackName: r.score.source.trackName,
+        importedAt: r.addedAt,
+        name: r.name,
+      })),
+    get_score: (a) => SCORES.get(String(a?.id))?.score ?? null,
+    get_score_source: (a) => SCORES.get(String(a?.id))?.sourceBase64 ?? null,
+    save_score: (a) => {
+      const score = a?.score as SongRecord["score"];
+      SCORES.set(score.id, {
+        id: score.id,
+        name: (a?.name as string) ?? score.title,
+        addedAt: (a?.importedAt as number) ?? Date.now(),
+        score,
+        sourceBase64: (a?.sourceBase64 as string) ?? "",
+      });
+      return score.id;
+    },
+    delete_score: (a) => {
+      SCORES.delete(String(a?.id));
+      return null;
+    },
     is_coach_loaded: () => false,
     get_calibration_offset: () => null,
     llm_compiled: () => false,

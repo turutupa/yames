@@ -740,14 +740,7 @@ export async function queryHistory(
 // ---------------------------------------------------------------------------
 // Songs — the library, and what was played against it
 // ---------------------------------------------------------------------------
-
-/**
- * A `SongScore` as the store holds it: whole, exactly as the importer
- * produced it. The structural type lives in `src/songs/types.ts`; this
- * alias exists so `ipc.ts` does not have to depend on it, and callers are
- * expected to narrow to `SongScore` at the edge.
- */
-export type StoredSongScore = Record<string, unknown>;
+import type { SongScore } from "./songs/types";
 
 /** One row of the song library — what a list shows, without the notes. */
 export type ScoreSummary = {
@@ -760,6 +753,12 @@ export type ScoreSummary = {
   trackName: string;
   /** Epoch ms. */
   importedAt: number;
+  /**
+   * What the player calls this song, when they have renamed it. Absent means
+   * "the title it came with" — renaming a song in the library never rewrites
+   * the title printed on the page.
+   */
+  name?: string;
 };
 
 /**
@@ -824,9 +823,30 @@ export type AttemptQuery = {
   limit?: number;
 };
 
+/** What `saveScore` may say about a song besides its score. */
+export type SaveScoreOptions = {
+  /** The player's name for it. Omitted says nothing rather than clearing it. */
+  name?: string;
+  /**
+   * The bytes of the file it was read from, base64. `SONGS.md` A2: the tab is
+   * engraved from the source, so the bytes outlive the import.
+   */
+  sourceBase64?: string;
+  /** Epoch ms. Omitted means now — pass one only to preserve a date. */
+  importedAt?: number;
+};
+
 /** Import (or re-import) a song. Resolves with the score's id. */
-export async function saveScore(score: StoredSongScore): Promise<string> {
-  return invoke<string>("save_score", { score });
+export async function saveScore(
+  score: SongScore,
+  opts: SaveScoreOptions = {},
+): Promise<string> {
+  return invoke<string>("save_score", {
+    score,
+    name: opts.name ?? null,
+    sourceBase64: opts.sourceBase64 ?? null,
+    importedAt: opts.importedAt ?? null,
+  });
 }
 
 /** The library, most recently imported first. */
@@ -834,8 +854,18 @@ export async function listScores(): Promise<ScoreSummary[]> {
   return invoke<ScoreSummary[]>("list_scores");
 }
 
-export async function getScore(id: string): Promise<StoredSongScore | null> {
-  return invoke<StoredSongScore | null>("get_score", { id });
+export async function getScore(id: string): Promise<SongScore | null> {
+  return invoke<SongScore | null>("get_score", { id });
+}
+
+/**
+ * The bytes of the file a song was read from, base64, or `null`.
+ *
+ * Its own call because it is the biggest thing on the row and the library
+ * list never wants it — only the screen about to draw a tab does.
+ */
+export async function getScoreSource(id: string): Promise<string | null> {
+  return invoke<string | null>("get_score_source", { id });
 }
 
 /** Forget a song, and with it every attempt at it. */
@@ -1358,25 +1388,29 @@ export async function saveJams(jams: Jam[]): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * Songs get a store file of their own — `songs.json`, not `settings.json`.
+ * `songs.json` — where the library used to live, and no longer does.
  *
- * Everything else in the app shares one store, and songs deliberately do not,
- * because a song carries the bytes of the file it came from (`SONGS.md` A2:
- * the tab is drawn from the source). That is tens to hundreds of kilobytes
- * each, and `settings.json` is rewritten whole, with `autoSave` on, every
- * time anyone changes the volume. Putting scores in it would make every
- * unrelated setting write megabytes.
+ * Songs were given a store file of their own rather than `settings.json`,
+ * because a song carries the bytes of the file it came from (`SONGS.md` A2)
+ * and `settings.json` is rewritten whole every time anyone moves the volume
+ * slider. The right home was always W2's SQLite store, and that is where they
+ * are now: `src/songs/library.ts` reads and writes `scores` through
+ * `saveScore` / `listScores` / `getScore` / `deleteScore`.
  *
- * Only `src/songs/library.ts` calls these two — it is the interface the rest
- * of Songs goes through, so moving the library to W2's SQLite store is one
- * file rather than a search across the mode. That move is still the right
- * end state; this is the cheap way not to hurt in the meantime.
+ * These three remain for the one-time move, which is the only thing that
+ * calls them. The file is left on disk with its songs taken out — not
+ * deleted, because a file the user can see disappearing is a worse surprise
+ * than an empty one, and because a downgrade to the previous build should
+ * find a store it recognises rather than a missing one.
  *
  * Note there is no `load_score_schedule` wrapper here, on purpose:
  * `src/songs/engineBridge.ts` says why, and says to move it here when W1's
  * command exists.
  */
 const SONGS_KEY = "songs";
+
+/** Set once the songs in `songs.json` have been folded into the store. */
+const SONGS_MOVED_KEY = "movedToPracticeStore";
 
 let _songStore: Awaited<ReturnType<typeof load>> | null = null;
 async function getSongStore() {
@@ -1394,6 +1428,21 @@ export async function listSongs(): Promise<SongRecord[] | undefined> {
 export async function saveSongs(songs: SongRecord[]): Promise<void> {
   const store = await getSongStore();
   await store.set(SONGS_KEY, songs);
+}
+
+/**
+ * Whether the one-time move has already run. Recorded even when there was
+ * nothing to move — "we looked" is the fact worth keeping, the same way
+ * `db.rs` records the JSON history import.
+ */
+export async function songsMovedToStore(): Promise<boolean> {
+  const store = await getSongStore();
+  return (await store.get<boolean>(SONGS_MOVED_KEY)) === true;
+}
+
+export async function markSongsMovedToStore(): Promise<void> {
+  const store = await getSongStore();
+  await store.set(SONGS_MOVED_KEY, true);
 }
 
 /**

@@ -1818,16 +1818,29 @@ pub fn clear_all_sessions(
 // ---------------------------------------------------------------------------
 
 /// Import (or re-import) a song. Returns the score's id.
+///
+/// `name` is what the player calls it and `source_base64` the bytes of the
+/// file it was read from (`SONGS.md` A2 — the tab is engraved from the
+/// source). Both are optional, and leaving one out says nothing about it
+/// rather than clearing it: a re-import of a song the player renamed keeps
+/// the name. `imported_at` is not a parameter because the moment a song
+/// entered the library is not the frontend's to assert — except on the
+/// one-time move out of `songs.json`, which passes the date it had there.
 #[tauri::command(async)]
 pub fn save_score(
     score: serde_json::Value,
+    name: Option<String>,
+    source_base64: Option<String>,
+    imported_at: Option<i64>,
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Result<String, String> {
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_millis() as i64)
-        .unwrap_or(0);
-    store.with(|db| db.save_score(&score, now))
+    let now = imported_at.unwrap_or_else(|| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as i64)
+            .unwrap_or(0)
+    });
+    store.with(|db| db.save_score(&score, name.as_deref(), source_base64.as_deref(), now))
 }
 
 #[tauri::command(async)]
@@ -1843,6 +1856,17 @@ pub fn get_score(
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Option<serde_json::Value> {
     store.read_or(None, |db| db.get_score(&id))
+}
+
+/// The bytes of the file a song was read from, base64. Its own command
+/// because it is the biggest thing on the row and a library list never wants
+/// it — only the screen that is about to draw a tab does.
+#[tauri::command(async)]
+pub fn get_score_source(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Option<String> {
+    store.read_or(None, |db| db.get_score_source(&id))
 }
 
 /// Forget a song, and with it every attempt at it.

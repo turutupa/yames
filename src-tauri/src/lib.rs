@@ -111,7 +111,7 @@ use commands::{
     get_models_path, get_score, get_session_history, get_session_log, get_session_report, get_state,
     get_system_memory_mb,
     // W2 — the practice store (ROADMAP 1.1).
-    list_scores, query_attempts, query_history, save_attempt, save_score,
+    get_score_source, list_scores, query_attempts, query_history, save_attempt, save_score,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
     close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
@@ -716,6 +716,7 @@ pub fn run() {
             save_score,
             list_scores,
             get_score,
+            get_score_source,
             delete_score,
             save_attempt,
             query_attempts,
