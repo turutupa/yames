@@ -32,6 +32,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use yames_lib::instrument::Instrument;
+use yames_lib::score::{
+    match_attempt, BeatMap, OnsetState, PlayedOnset, ScheduleReport, ScoreSchedule,
+};
 use yames_lib::session::SessionReport;
 use yames_lib::session_log::{match_and_score, DetectedOnset, ExpectedBeat, Xorshift64};
 use yames_lib::timing::{
@@ -218,7 +221,14 @@ struct PlayedSpec {
     /// What the metronome is clicking (1 = quarters, 2 = 8ths, …).
     click_subdivision: u8,
     /// What the player is playing, as a divisor of the quarter note.
+    /// With `alternatingDivisors` set this is bar 0's divisor and the
+    /// list takes over from there.
     played_divisor: u8,
+    /// Roadmap 1.4 — a player who does not stay on one grid. Bar `i`
+    /// is played in `alternatingDivisors[i % len]`. Absent for every
+    /// fixture that keeps one feel throughout, which is all of 1.3's.
+    #[serde(default)]
+    alternating_divisors: Option<Vec<u8>>,
     /// Bars of 4/4.
     bars: u32,
     /// Gaussian spread applied to each played note, in ms.
@@ -232,8 +242,27 @@ struct PlayedSpec {
     /// The guard: what the same input must NOT beat when the detector
     /// is keyed to the click, as it was before 1.3.
     click_keyed_max_score: u32,
-    /// The divisor the inference is expected to settle on.
-    expect_divisor: u8,
+    /// The divisor the inference is expected to settle on. Absent when
+    /// the fixture never settles on one — see `alternatingDivisors`.
+    #[serde(default)]
+    expect_divisor: Option<u8>,
+    /// Roadmap 1.4's second gate: how often the divisor the analyzer
+    /// believes may change, per eight bars. The roadmap's number is 2.
+    /// Absent means "not asserted", which is every 1.3 fixture.
+    #[serde(default)]
+    max_grid_changes_per_8_bars: Option<f64>,
+    /// The share of the notes the player actually played that reached
+    /// the analyzer at all.
+    ///
+    /// This is a RATCHET, not a target. A score can stay high while
+    /// half the playing is inaudible — the two alternating fixtures are
+    /// exactly that case — so the roadmap's score gate alone cannot
+    /// tell a matcher that got better from a detector that went deaf.
+    /// Each fixture carries the number its run produces today, so the
+    /// next change has to say out loud if it makes the hearing worse.
+    /// Raise it when the refractory question in the report is settled.
+    #[serde(default)]
+    min_heard_ratio: Option<f64>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -254,6 +283,11 @@ struct Replay {
     played: usize,
     heard: usize,
     expected_positions: usize,
+    /// Roadmap 1.4 — how many times `current_divisor()` changed over
+    /// the whole replay. This is what the live loop debounces into an
+    /// `InferredGridChanged` event, so it is the same number the
+    /// roadmap's anti-flapping gate is about.
+    grid_changes: u32,
 }
 
 /// Amplitude every synthetic note is given. Constant on purpose: these
@@ -282,18 +316,39 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
     let quarters = spec.bars * 4;
 
     // ── What the player plays ───────────────────────────────────────
-    let note_ns = quarter_ns / spec.played_divisor.max(1) as u64;
-    let mut rng = Xorshift64::new(spec.seed);
-    let played: Vec<u64> = (0..quarters as u64 * spec.played_divisor.max(1) as u64)
-        .map(|i| {
-            let nominal = LEAD_NS + i * note_ns;
-            if spec.jitter_ms <= 0.0 {
-                return nominal;
-            }
-            let jitter_ns = (rng.next_gauss() * spec.jitter_ms * 1_000_000.0) as i64;
-            (nominal as i64 + jitter_ns).max(0) as u64
+    // The divisor of each bar. One entry per bar so a fixture can make
+    // the player change feel at a bar line, which is roadmap 1.4's
+    // whole subject; a fixture that does not say otherwise plays the
+    // same divisor throughout and this is a run of one value.
+    let bar_divisors: Vec<u8> = (0..spec.bars)
+        .map(|bar| match spec.alternating_divisors.as_ref() {
+            Some(list) if !list.is_empty() => list[bar as usize % list.len()].max(1),
+            _ => spec.played_divisor.max(1),
         })
         .collect();
+    let mut rng = Xorshift64::new(spec.seed);
+    let mut played: Vec<u64> = Vec::new();
+    // The bar start accumulates rather than being computed from the
+    // bar index, so that a fixture on one divisor throughout lands on
+    // exactly the timestamps the pre-1.4 harness produced — integer
+    // note spacing does not always divide the quarter (a triplet at
+    // 120 BPM is 166_666_666 ns, three of which are 2 ns short of the
+    // beat), and every golden here was baked with that drift in it.
+    let mut bar_start_ns = LEAD_NS;
+    for bar in 0..spec.bars {
+        let d = bar_divisors[bar as usize];
+        let note_ns = quarter_ns / d as u64;
+        for i in 0..(4 * d as u64) {
+            let nominal = bar_start_ns + i * note_ns;
+            if spec.jitter_ms <= 0.0 {
+                played.push(nominal);
+            } else {
+                let jitter_ns = (rng.next_gauss() * spec.jitter_ms * 1_000_000.0) as i64;
+                played.push((nominal as i64 + jitter_ns).max(0) as u64);
+            }
+        }
+        bar_start_ns += 4 * d as u64 * note_ns;
+    }
 
     // ── What the metronome clicks ───────────────────────────────────
     let click_total = spec.click_subdivision.max(1);
@@ -319,6 +374,18 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
     let mut inference = RhythmInference::new();
     let mut heard: Vec<u64> = Vec::new();
 
+    // Roadmap 1.4 — what the analyzer believed as each quarter went by.
+    // The live loop invents a quarter's missing grid positions when
+    // that quarter's own anchor tick comes out of the held buffer, so
+    // the divisor in force at that moment is the one those positions
+    // are built from. Recording it here is what lets an alternating
+    // fixture be scored against the grid the analyzer would actually
+    // have used, transition latency and all, rather than against a
+    // single divisor that no part of the run was ever on.
+    let mut divisor_at_quarter: Vec<u8> = Vec::with_capacity(quarters as usize);
+    let mut grid_changes: u32 = 0;
+    let mut last_divisor = inference.current_divisor();
+
     let mut ti = 0usize;
     let mut pi = 0usize;
     while ti < ticks.len() || pi < played.len() {
@@ -327,8 +394,10 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
             (Some(_), None) => true,
             _ => false,
         };
+        let mut took_anchor = false;
         if take_tick {
             inference.update_reference(&ticks[ti]);
+            took_anchor = ticks[ti].subdivision_index == 0;
             ti += 1;
         } else {
             let ts = played[pi];
@@ -347,6 +416,15 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
             }
         }
         inference.refit();
+        // Order matters and mirrors the loop: refit first, then the
+        // quarter's positions are built from what the refit decided.
+        if took_anchor {
+            divisor_at_quarter.push(inference.current_divisor());
+        }
+        if inference.current_divisor() != last_divisor {
+            last_divisor = inference.current_divisor();
+            grid_changes += 1;
+        }
         // The live loop publishes once per matcher pass rather than
         // once per event; refitting per event only makes the lock
         // arrive marginally sooner, which overstates nothing that
@@ -367,16 +445,45 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
     // which is deliberately harsher than the live loop: notes lost
     // during cold start are counted as misses against the full grid
     // rather than quietly falling outside a coarser one.
+    //
+    // A fixture whose player changes feel has no single divisor to be
+    // built from — the run was never on one — so its grid is built
+    // quarter by quarter from what the analyzer believed at the time.
+    // That is the harsher reading again: a quarter the analyzer had
+    // not caught up with yet is scored against the grid it was still
+    // on, so transition latency shows up as missed and spurious notes,
+    // which is exactly what roadmap 1.4 is asking to be measured.
     let divisor = inference.current_divisor();
-    let offsets = virtual_tick_offsets(click_total, divisor);
+    let alternating = spec
+        .alternating_divisors
+        .as_ref()
+        .is_some_and(|l| !l.is_empty());
+    let quarter_divisor = |q: u32| -> u8 {
+        if alternating {
+            divisor_at_quarter
+                .get(q as usize)
+                .copied()
+                .unwrap_or(divisor)
+                .max(1)
+        } else {
+            divisor.max(1)
+        }
+    };
     let mut positions: Vec<u64> = Vec::new();
     for tick in &ticks {
-        if inference.is_active_tick(tick) {
+        let d = quarter_divisor(tick.beat_index);
+        // `is_active_tick` reads the inference's own current divisor,
+        // which is the right question only when the run has one. Per
+        // quarter it is the same arithmetic against that quarter's.
+        let on_grid = (tick.subdivision_index as u32 * d as u32) % click_total.max(1) as u32 == 0;
+        if on_grid {
             positions.push(tick.ts_ns);
         }
     }
-    let step_ns = quarter_ns / divisor.max(1) as u64;
     for q in 0..quarters {
+        let d = quarter_divisor(q);
+        let offsets = virtual_tick_offsets(click_total, d);
+        let step_ns = quarter_ns / d as u64;
         let anchor = LEAD_NS + q as u64 * quarter_ns;
         for &j in &offsets {
             positions.push(anchor + step_ns * j as u64);
@@ -412,6 +519,7 @@ fn replay(spec: &PlayedSpec, key: RefractoryKey) -> Replay {
         played: played.len(),
         heard: heard.len(),
         expected_positions: expected.len(),
+        grid_changes,
     }
 }
 
@@ -459,9 +567,10 @@ fn played_grid_fixtures_hold() {
         let played = replay(&spec, RefractoryKey::Player);
         let clicked = replay(&spec, RefractoryKey::Click);
 
+        let changes_per_8_bars = played.grid_changes as f64 * 8.0 / spec.bars.max(1) as f64;
         eprintln!(
-            "  [{}] divisor {} (expected {}), heard {}/{}, {} expected positions, score {} \
-             (click-keyed: heard {}, score {})",
+            "  [{}] divisor {} (expected {:?}), heard {}/{}, {} expected positions, score {}, \
+             {} grid changes ({:.2} per 8 bars) (click-keyed: heard {}, score {})",
             spec.name,
             played.divisor,
             spec.expect_divisor,
@@ -469,15 +578,38 @@ fn played_grid_fixtures_hold() {
             played.played,
             played.expected_positions,
             played.report.score,
+            played.grid_changes,
+            changes_per_8_bars,
             clicked.heard,
             clicked.report.score,
         );
 
-        if played.divisor != spec.expect_divisor {
-            failures.push(format!(
-                "[{}] the inference settled on divisor {} but the player was playing {}",
-                spec.name, played.divisor, spec.expect_divisor,
-            ));
+        if let Some(expected) = spec.expect_divisor {
+            if played.divisor != expected {
+                failures.push(format!(
+                    "[{}] the inference settled on divisor {} but the player was playing {}",
+                    spec.name, played.divisor, expected,
+                ));
+            }
+        }
+        if let Some(floor) = spec.min_heard_ratio {
+            let ratio = played.heard as f64 / played.played.max(1) as f64;
+            if ratio < floor - 1e-9 {
+                failures.push(format!(
+                    "[{}] only {:.3} of the played notes were heard, under the {floor} this \
+                     fixture was landed at — the detector is swallowing more than it did",
+                    spec.name, ratio,
+                ));
+            }
+        }
+        if let Some(limit) = spec.max_grid_changes_per_8_bars {
+            if changes_per_8_bars > limit + 1e-9 {
+                failures.push(format!(
+                    "[{}] the grid the analyzer believes changed {:.2} times per 8 bars, \
+                     over the {limit} the roadmap allows — the inference is flapping",
+                    spec.name, changes_per_8_bars,
+                ));
+            }
         }
         if played.report.score < spec.min_score {
             failures.push(format!(
@@ -549,6 +681,306 @@ fn played_grid_fixtures_hold() {
     assert!(
         failures.is_empty(),
         "Roadmap-1.3 played-grid regression(s):\n  - {}",
+        failures.join("\n  - "),
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Roadmap 2.4 — scored against a known schedule.
+//
+// `score::tests` asserts the behaviour of the matcher; these assert the
+// numbers, on disk, where the next person to touch `match_attempt` can
+// re-run them and read the diff. The three the brief names are here:
+// the dotted-eighth phrase (right, a note dropped, a note added), the
+// looped two-bar schedule with a different mistake each pass, and the
+// tempo step at a bar line.
+//
+// A fixture is a SITUATION, not a baked onset list. It carries the beat
+// map as the quarter times the engine would have logged, the schedule as
+// the contract has it, and what the player did in beats — turned into
+// times through that beat map, which is the only honest way to do it and
+// the thing the tempo-step fixture exists to prove. The `expect` block
+// is what a human reads; the golden `ScheduleReport` beside it is what
+// catches a change nobody meant to make.
+// ---------------------------------------------------------------------------
+
+/// A note the player made, said in the frame the score is written in.
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PlayedNoteSpec {
+    /// Quarter notes from the start of the played range. On a looping
+    /// schedule this keeps counting past `lengthBeats` into pass 1.
+    beat: f64,
+    /// Human error, on top of where that beat actually fell.
+    #[serde(default)]
+    offset_ms: f64,
+    #[serde(default = "default_amplitude")]
+    amplitude: f32,
+    #[serde(default = "default_confidence")]
+    confidence: f32,
+}
+
+fn default_amplitude() -> f32 {
+    0.6
+}
+fn default_confidence() -> f32 {
+    1.0
+}
+
+/// What the fixture says must be true, in the words the brief uses.
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ScheduledExpect {
+    min_score: Option<f32>,
+    max_score: Option<f32>,
+    /// Expected-onset ids that must come back a miss, with the pass
+    /// they must come back on. Every other onset must be a hit or a
+    /// `softAbsent` listed below.
+    #[serde(default)]
+    misses: Vec<(u32, u32)>,
+    #[serde(default)]
+    soft_absent: Vec<(u32, u32)>,
+    /// Beats the extras must be reported at, with their pass.
+    #[serde(default)]
+    extras: Vec<(u32, f64)>,
+    passes: u32,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ScheduledSpec {
+    name: String,
+    #[allow(dead_code)]
+    description: String,
+    /// Where the quarter notes actually fell, in ms — the beat log. A
+    /// tempo step is a change of spacing in here and nowhere else.
+    quarter_times_ms: Vec<f64>,
+    schedule: ScoreSchedule,
+    played: Vec<PlayedNoteSpec>,
+    expect: ScheduledExpect,
+}
+
+fn scheduled_fixtures_dir() -> PathBuf {
+    fixtures_dir().join("scheduled")
+}
+
+fn collect_scheduled_specs() -> Vec<PathBuf> {
+    let dir = scheduled_fixtures_dir();
+    let mut out = Vec::new();
+    if !dir.exists() {
+        return out;
+    }
+    for entry in fs::read_dir(&dir).expect("read highbpm_fixtures/scheduled dir") {
+        let path = entry.expect("read dir entry").path();
+        let name = match path.file_name().and_then(|n| n.to_str()) {
+            Some(n) => n.to_string(),
+            None => continue,
+        };
+        if name.ends_with(".input.json") {
+            out.push(path);
+        }
+    }
+    out.sort();
+    out
+}
+
+#[test]
+fn scheduled_fixtures_hold() {
+    let specs = collect_scheduled_specs();
+    assert!(
+        !specs.is_empty(),
+        "No roadmap-2.4 fixtures found in {}",
+        scheduled_fixtures_dir().display(),
+    );
+
+    let update_mode = std::env::var("UPDATE_FIXTURES")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
+    let weights = Instrument::ElectricGuitar.profile().score_weights;
+    let mut failures = Vec::new();
+
+    for spec_path in &specs {
+        let raw = fs::read_to_string(spec_path)
+            .unwrap_or_else(|e| panic!("read {}: {e}", spec_path.display()));
+        let spec: ScheduledSpec = serde_json::from_str(&raw)
+            .unwrap_or_else(|e| panic!("parse {}: {e}", spec_path.display()));
+
+        let beats = BeatMap::from_quarter_times(spec.quarter_times_ms.clone());
+        let mut played: Vec<PlayedOnset> = spec
+            .played
+            .iter()
+            .map(|p| PlayedOnset {
+                time_ms: beats
+                    .time_at_beat(p.beat)
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "[{}] beat {} is off the end of the beat log — the fixture's \
+                             quarterTimesMs is shorter than what it says was played",
+                            spec.name, p.beat,
+                        )
+                    })
+                    + p.offset_ms,
+                amplitude: p.amplitude,
+                confidence: p.confidence,
+            })
+            .collect();
+        played.sort_by(|a, b| a.time_ms.partial_cmp(&b.time_ms).unwrap());
+
+        let report = match_attempt(&spec.schedule, &beats, &played, &weights);
+
+        eprintln!(
+            "  [{}] score {:.1}, {} passes, {} hits, {} misses, {} soft-absent, {} extras",
+            spec.name,
+            report.score,
+            report.passes,
+            report
+                .results
+                .iter()
+                .filter(|r| r.state == OnsetState::Hit)
+                .count(),
+            report
+                .results
+                .iter()
+                .filter(|r| r.state == OnsetState::Miss)
+                .count(),
+            report
+                .results
+                .iter()
+                .filter(|r| r.state == OnsetState::SoftAbsent)
+                .count(),
+            report.extras.len(),
+        );
+
+        let mut check = |ok: bool, msg: String| {
+            if !ok {
+                failures.push(format!("[{}] {msg}", spec.name));
+            }
+        };
+
+        check(
+            report.passes == spec.expect.passes,
+            format!(
+                "played {} times round, the fixture says {}",
+                report.passes, spec.expect.passes
+            ),
+        );
+        if let Some(min) = spec.expect.min_score {
+            check(
+                report.score >= min,
+                format!("scored {:.1} against a gate of {min}", report.score),
+            );
+        }
+        if let Some(max) = spec.expect.max_score {
+            check(
+                report.score <= max,
+                format!("scored {:.1}, over its ceiling of {max}", report.score),
+            );
+        }
+
+        let mut missed: Vec<(u32, u32)> = report
+            .results
+            .iter()
+            .filter(|r| r.state == OnsetState::Miss)
+            .map(|r| (r.pass, r.id))
+            .collect();
+        missed.sort_unstable();
+        let mut want_missed = spec.expect.misses.clone();
+        want_missed.sort_unstable();
+        check(
+            missed == want_missed,
+            format!("misses were {missed:?}, the fixture says {want_missed:?}"),
+        );
+
+        let mut soft: Vec<(u32, u32)> = report
+            .results
+            .iter()
+            .filter(|r| r.state == OnsetState::SoftAbsent)
+            .map(|r| (r.pass, r.id))
+            .collect();
+        soft.sort_unstable();
+        let mut want_soft = spec.expect.soft_absent.clone();
+        want_soft.sort_unstable();
+        check(
+            soft == want_soft,
+            format!("soft-absent were {soft:?}, the fixture says {want_soft:?}"),
+        );
+
+        check(
+            report.extras.len() == spec.expect.extras.len(),
+            format!(
+                "reported {} extras, the fixture says {}",
+                report.extras.len(),
+                spec.expect.extras.len()
+            ),
+        );
+        for (want_pass, want_beat) in &spec.expect.extras {
+            let found = report
+                .extras
+                .iter()
+                .any(|e| e.pass == *want_pass && (e.beat - want_beat).abs() < 1e-6);
+            check(
+                found,
+                format!(
+                    "no extra at beat {want_beat} on pass {want_pass}; got {:?}",
+                    report
+                        .extras
+                        .iter()
+                        .map(|e| (e.pass, e.beat))
+                        .collect::<Vec<_>>()
+                ),
+            );
+        }
+
+        // The golden. Compared through the same parse both sides, for
+        // the reason spelled out in `played_grid_fixtures_hold`:
+        // serde_json's default float parsing is not bit-exact, and a
+        // deviation of 3.8938775510204082 does not survive a round trip
+        // unchanged. Every number in here is a float.
+        let golden_file = golden_path(spec_path);
+        let actual_json =
+            serde_json::to_string_pretty(&report).expect("serialize ScheduleReport");
+        if update_mode {
+            fs::write(&golden_file, format!("{actual_json}\n"))
+                .unwrap_or_else(|e| panic!("write {}: {e}", golden_file.display()));
+            eprintln!("  UPDATED {}", golden_file.display());
+            continue;
+        }
+        if !golden_file.exists() {
+            failures.push(format!(
+                "[{}] no golden at {} — run `UPDATE_FIXTURES=1 node scripts/rust-test.mjs \
+                 --test highbpm_fixtures` to create it",
+                spec.name,
+                golden_file.display(),
+            ));
+            continue;
+        }
+        let golden_raw = fs::read_to_string(&golden_file)
+            .unwrap_or_else(|e| panic!("read {}: {e}", golden_file.display()));
+        let golden: ScheduleReport = serde_json::from_str(&golden_raw)
+            .unwrap_or_else(|e| panic!("parse {}: {e}", golden_file.display()));
+        let golden_json =
+            serde_json::to_string_pretty(&golden).expect("re-serialize golden ScheduleReport");
+        let actual_norm = serde_json::to_string_pretty(
+            &serde_json::from_str::<ScheduleReport>(&actual_json)
+                .expect("round-trip actual ScheduleReport"),
+        )
+        .expect("re-serialize actual ScheduleReport");
+        if actual_norm != golden_json {
+            failures.push(format!(
+                "[{}] ScheduleReport drifted.\n  actual:\n{}\n  golden:\n{}",
+                spec.name, actual_norm, golden_json,
+            ));
+        }
+    }
+
+    if update_mode {
+        return;
+    }
+
+    assert!(
+        failures.is_empty(),
+        "Roadmap-2.4 scheduled-fixture regression(s):\n  - {}",
         failures.join("\n  - "),
     );
 }

@@ -1078,6 +1078,20 @@ impl TimingAnalyzer {
             // refit pass (which runs every 5ms).
             let current_divisor = rhythm_inference.current_divisor();
             let current_locked = rhythm_inference.is_locked();
+
+            // The density cap for this pass. The grid being scored
+            // decides it: a loaded score says how many notes a beat was
+            // written to hold, and without one the locked divisor is
+            // the same question answered from what has been played.
+            // Constant for the whole pass because both inputs are —
+            // the refit above is the last thing that moves the divisor.
+            let onset_cap_this_pass = onsets_per_quarter_cap(
+                profile.max_onsets_per_beat,
+                schedule_run
+                    .as_ref()
+                    .map(|run| run.densest_quarter())
+                    .unwrap_or(current_divisor as u32),
+            );
             if Some(current_divisor) != last_surfaced_divisor
                 || current_locked != last_surfaced_lock_state
             {
@@ -1338,12 +1352,15 @@ impl TimingAnalyzer {
                             .saturating_add(periods_elapsed.saturating_mul(quarter_interval_ns));
                     }
 
-                    // Hard cap: if we've already matched max_onsets_per_beat in this
-                    // quarter-note period, reclassify this onset as spurious and skip
-                    // calibration and scoring. Activity and consecutive_misses were
-                    // already updated above — the player IS playing, the note is just
-                    // over the density cap.
-                    if onsets_this_quarter >= profile.max_onsets_per_beat as u32 {
+                    // Density cap: once this quarter-note period has held
+                    // as many onsets as the grid being scored can plausibly
+                    // carry, reclassify this onset as spurious and skip
+                    // calibration and scoring. Activity and consecutive_misses
+                    // were already updated above — the player IS playing, the
+                    // note is just over the cap. See `onsets_per_quarter_cap`
+                    // for what the cap protects and why it is no longer the
+                    // profile constant on its own.
+                    if onsets_this_quarter >= onset_cap_this_pass {
                         if let Some(seg) = segment.as_mut() {
                             seg.spurious_amplitudes.push(onset.amplitude);
                         }
@@ -2326,6 +2343,43 @@ pub fn virtual_tick_offsets(subdivision_total: u8, divisor: u8) -> Vec<u8> {
         .filter(|j| (j * total) % d != 0)
         .map(|j| j as u8)
         .collect()
+}
+
+/// How many onsets one quarter note may hold before the extras stop
+/// counting as notes and start counting as noise.
+///
+/// **What the cap is for.** The DSP plan's tremolo/roll exploit: a
+/// guitarist smearing eight picks across one beat is "near the beat"
+/// eight times, and under an unbounded rule that scores like clean
+/// technique. `profile.max_onsets_per_beat` — 3 on electric guitar, 6
+/// on drums, 8 on piano — is the plan's answer to "how many notes in
+/// one beat is physically plausible on this instrument".
+///
+/// **Why it could not stay a constant.** Written music is denser than
+/// those numbers. Sixteenths are four to the quarter and sextuplets are
+/// six, so from roadmap 1.3 — when the analyzer started inventing the
+/// grid positions the click never played, and a player's sixteenths
+/// finally reached the matcher — a constant of 3 threw one sixteenth in
+/// every four away again, one layer further down. The fixtures never
+/// saw it: they score through `match_and_score`, which takes a profile
+/// and ignores it.
+///
+/// **What it is now.** The cap follows the grid being scored. A loaded
+/// `ScoreSchedule` knows exactly how many notes a beat was written to
+/// carry (`densest_quarter`); with no score loaded the locked divisor
+/// is the best available answer to the same question. Above that sits
+/// the instrument's own headroom — `max_onsets_per_beat - 1`, which is
+/// what the profile constant already says about a quarter-note grid,
+/// read as a margin instead of a total. So a quarter-note player on
+/// electric guitar is still capped at exactly 3, as they were; a
+/// sixteenth-note player is capped at 6; a score of 32nds at 10.
+///
+/// The margin is per instrument on purpose: bass (2) gets one note of
+/// slack over the grid and piano (8) gets seven, which is the same
+/// ordering the constants always expressed.
+pub fn onsets_per_quarter_cap(profile_max_onsets_per_beat: u8, grid_onsets_per_quarter: u32) -> u32 {
+    let headroom = (profile_max_onsets_per_beat.max(1) as u32) - 1;
+    grid_onsets_per_quarter.max(1).saturating_add(headroom)
 }
 
 /// Compute the fit of a single divisor candidate: the fraction of
@@ -4315,7 +4369,7 @@ mod tests {
     }
 
     // ── Scenario 14 — Same buzz roll on E-Guitar profile ────────────
-    // E-Guitar: max_onsets_per_beat=2, cluster_window_ms=20.
+    // E-Guitar: max_onsets_per_beat=3, cluster_window_ms=20.
     // The 6-onset cluster collapses (within 20ms) to ~1-2 onsets/beat;
     // remaining 4 per beat become spurious. With 8 beats × 2 effective
     // matches = 16, and 32 spurious → total_onsets=48.
@@ -4995,5 +5049,427 @@ mod tests {
             extra_settings, 0,
             "expected exactly one SettingsChange close; later closes were {extra:?}"
         );
+    }
+
+    // ── The density cap, on the live analyzer loop ──────────────────
+    //
+    // Everything below drives `TimingAnalyzer::start` — the real thread,
+    // the real held-beat deadlines, the real virtual ticks, the real
+    // cap. That is the whole point: the raw-onset fixtures in
+    // `tests/highbpm_fixtures/` score through `match_and_score`, which
+    // takes an `InstrumentProfile` and ignores it, so the cap has never
+    // once been exercised by a fixture. It is the only piece of the
+    // scoring path that only exists live.
+    //
+    // The timeline is entirely in the PAST. The loop releases a beat
+    // when `now_ns >= beat.ts_ns + window + 30 ms`, so a timeline
+    // anchored a few seconds behind the monotonic clock has every
+    // deadline already met and the test runs at the speed of the loop
+    // rather than the speed of the music. What is still paced in real
+    // time is the ARRIVAL of each quarter: the analyzer invents a
+    // quarter's missing grid positions when that quarter's tick is
+    // processed and scores them on the NEXT pass, so feeding two
+    // quarters inside one 5 ms pass would leave the first quarter's
+    // invented positions behind `last_processed_ts_ns` and they would
+    // be skipped as already-seen. The engine delivers one tick at a
+    // time; so does this.
+
+    /// What became of every note the test played, in the order it was
+    /// played. Index into `notes` is the same index the telemetry
+    /// assigns, because the analyzer logs onsets in arrival order.
+    struct LiveNote {
+        /// Quarter of the run this note belongs to, from 0.
+        quarter: u32,
+        /// Position inside that quarter, from 0.
+        slot: u8,
+        /// A deliberate double trigger rather than a played note.
+        ghost: bool,
+        matched: bool,
+        spurious: bool,
+    }
+
+    /// Play `quarters` quarter notes of `played_divisor` notes each over
+    /// a click of `click_subdivision`, through the shipped analysis
+    /// loop, and report what happened to every note.
+    ///
+    /// `ghost_after_ms`, when set, follows every played note with a
+    /// second onset that far behind it — a double trigger as the
+    /// detector would emit one if the refractory gate let it through.
+    fn play_live(
+        profile: InstrumentProfile,
+        bpm: f64,
+        click_subdivision: u8,
+        played_divisor: u8,
+        quarters: u32,
+        ghost_after_ms: Option<f64>,
+    ) -> Vec<LiveNote> {
+        let quarter_ms = 60_000.0 / bpm;
+        let quarter_ns = (quarter_ms * 1_000_000.0) as u64;
+        let divisor = played_divisor.max(1);
+        let click = click_subdivision.max(1);
+
+        let beat_log = create_beat_log();
+        let mut analyzer = TimingAnalyzer::new(beat_log.clone());
+        // One message per scored tick. The test blocks on these rather
+        // than on a fixed sleep: a starved analysis thread then makes
+        // this slower, never red, which is the only way a wall-clock
+        // test survives a machine running four other workers.
+        let (tick_tx, tick_rx) = std::sync::mpsc::channel::<u32>();
+        analyzer.start(
+            profile,
+            "test".to_string(),
+            None,
+            None,
+            CoachMode::Default,
+            move |fb| {
+                let _ = tick_tx.send(fb.beat_index);
+            },
+            |_seg, _emit_ui| {},
+            |_| {},
+            |_| {},
+        );
+
+        // Anchor the whole run far enough behind the monotonic clock
+        // that its last beat's deadline is already in the past.
+        let span_ns = quarter_ns * (quarters as u64 + 2);
+        let base_ns = crate::clock::now_ns().saturating_sub(span_ns + 1_000_000_000);
+
+        let mut notes: Vec<LiveNote> = Vec::new();
+        for q in 0..quarters {
+            let anchor = base_ns + q as u64 * quarter_ns;
+            // Onsets first, ticks second: the loop drains the onset log
+            // before the beat log inside one iteration, so this is what
+            // guarantees the notes are in `pending_onsets` on the pass
+            // that makes the beat matchable.
+            for j in 0..divisor {
+                let ts = anchor + (quarter_ns / divisor as u64) * j as u64;
+                analyzer.log_onset(Onset {
+                    ts_ns: ts,
+                    amplitude: 0.6,
+                    centroid: 900.0,
+                    confidence: 1.0,
+                });
+                notes.push(LiveNote {
+                    quarter: q,
+                    slot: j,
+                    ghost: false,
+                    matched: false,
+                    spurious: false,
+                });
+                if let Some(gap_ms) = ghost_after_ms {
+                    analyzer.log_onset(Onset {
+                        ts_ns: ts + (gap_ms * 1_000_000.0) as u64,
+                        amplitude: 0.6,
+                        centroid: 900.0,
+                        confidence: 1.0,
+                    });
+                    notes.push(LiveNote {
+                        quarter: q,
+                        slot: j,
+                        ghost: true,
+                        matched: false,
+                        spurious: false,
+                    });
+                }
+            }
+            {
+                let mut log = beat_log.lock().unwrap();
+                for s in 0..click {
+                    log.push_back(BeatTick {
+                        ts_ns: anchor + (quarter_ns / click as u64) * s as u64,
+                        beat_index: q,
+                        is_downbeat: s == 0 && q % 4 == 0,
+                        expected_interval_ms: quarter_ms,
+                        subdivision_index: s,
+                        subdivision_total: click,
+                        beats_per_bar: 4,
+                    });
+                }
+            }
+            // Block until this quarter's audible tick has been scored —
+            // that is the pass that invents the quarter's missing grid
+            // positions — then leave the loop the few milliseconds it
+            // needs to score those on the pass after. Only then may the
+            // next quarter be published; two quarters inside one pass
+            // would leave the first quarter's invented positions behind
+            // `last_processed_ts_ns`.
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+            loop {
+                match tick_rx.recv_timeout(std::time::Duration::from_millis(200)) {
+                    Ok(index) if index == q => break,
+                    Ok(_) => {}
+                    Err(_) if std::time::Instant::now() >= deadline => {
+                        panic!("the analysis loop never scored quarter {q}")
+                    }
+                    Err(_) => {}
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+
+        std::thread::sleep(std::time::Duration::from_millis(60));
+        analyzer.stop();
+        let tel = analyzer.drain_telemetry();
+
+        for m in &tel.matches {
+            for &i in &m.onset_indices {
+                if let Some(n) = notes.get_mut(i as usize) {
+                    n.matched = true;
+                }
+            }
+        }
+        for &i in &tel.spurious_onset_indices {
+            if let Some(n) = notes.get_mut(i as usize) {
+                n.spurious = true;
+            }
+        }
+        assert_eq!(
+            tel.detected_onsets.len(),
+            notes.len(),
+            "the analyzer did not see every note the test played"
+        );
+        notes
+    }
+
+    /// The quarter from which the run is judged. Four quarters are
+    /// burned by the analyzer's warmup grace and the inference needs
+    /// eight onsets before it can lock; until it does, the click's own
+    /// divisor is all the matcher has and the off-grid notes are lost
+    /// on purpose (roadmap 1.3's cold start). Eight quarters is past
+    /// both on every grid these tests use.
+    const SETTLED_FROM_QUARTER: u32 = 8;
+
+    /// The sixteenth in four that the live path was still throwing
+    /// away. `max_onsets_per_beat` is 3 on electric guitar and there
+    /// are four sixteenths in a quarter, so before the cap followed the
+    /// grid exactly one note per quarter came back spurious — with a
+    /// correct pitch, on the beat, at the right moment, from a player
+    /// doing nothing wrong.
+    #[test]
+    fn every_sixteenth_reaches_the_scorer_on_the_live_path() {
+        let notes = play_live(
+            Instrument::ElectricGuitar.profile(),
+            100.0,
+            1, // the click plays quarters
+            4, // the player plays sixteenths
+            16,
+            None,
+        );
+        let settled: Vec<&LiveNote> = notes
+            .iter()
+            .filter(|n| n.quarter >= SETTLED_FROM_QUARTER)
+            .collect();
+        assert!(settled.len() >= 24, "too few notes to judge on");
+        let lost: Vec<(u32, u8)> = settled
+            .iter()
+            .filter(|n| !n.matched)
+            .map(|n| (n.quarter, n.slot))
+            .collect();
+        assert!(
+            lost.is_empty(),
+            "the live loop threw away {} of {} settled sixteenths at (quarter, slot) {:?}",
+            lost.len(),
+            settled.len(),
+            lost,
+        );
+        assert!(
+            settled.iter().all(|n| !n.spurious),
+            "a sixteenth a player actually played was recorded as spurious"
+        );
+    }
+
+    /// Six to the quarter, on the instrument whose constant is three.
+    /// Sextuplets are the densest grid the inference can lock onto, so
+    /// this is the widest the cap ever has to open in free play.
+    #[test]
+    fn every_sextuplet_reaches_the_scorer_on_the_live_path() {
+        let notes = play_live(
+            Instrument::ElectricGuitar.profile(),
+            100.0,
+            1, // the click plays quarters
+            6, // the player plays sextuplets
+            16,
+            None,
+        );
+        let settled: Vec<&LiveNote> = notes
+            .iter()
+            .filter(|n| n.quarter >= SETTLED_FROM_QUARTER)
+            .collect();
+        assert!(settled.len() >= 36, "too few notes to judge on");
+        let lost: Vec<(u32, u8)> = settled
+            .iter()
+            .filter(|n| !n.matched)
+            .map(|n| (n.quarter, n.slot))
+            .collect();
+        assert!(
+            lost.is_empty(),
+            "the live loop threw away {} of {} settled sextuplets at (quarter, slot) {:?}",
+            lost.len(),
+            settled.len(),
+            lost,
+        );
+    }
+
+    /// A double trigger is still cleaned up. The refractory gate is the
+    /// first line of defence and blocks a 12 ms echo outright — that is
+    /// the assertion below this one — but if one ever reached the
+    /// analyzer the matcher must still refuse to score it: one grid
+    /// position takes one onset, and the echo has nowhere to go.
+    #[test]
+    fn a_double_trigger_twelve_milliseconds_later_is_still_cleaned_up() {
+        const QUARTERS: u32 = 16;
+        let notes = play_live(
+            Instrument::ElectricGuitar.profile(),
+            100.0,
+            1,
+            4,
+            QUARTERS,
+            Some(12.0),
+        );
+        let settled: Vec<&LiveNote> = notes
+            .iter()
+            .filter(|n| n.quarter >= SETTLED_FROM_QUARTER)
+            .collect();
+        let real_lost = settled.iter().filter(|n| !n.ghost && !n.matched).count();
+        let ghosts_scored = settled.iter().filter(|n| n.ghost && n.matched).count();
+        assert_eq!(
+            real_lost, 0,
+            "the echoes pushed real notes out of the scorer"
+        );
+        assert_eq!(
+            ghosts_scored, 0,
+            "{ghosts_scored} double triggers were scored as notes"
+        );
+        // And an echo is not merely ignored, it is *counted* against the
+        // player: `onset_efficiency` is what makes a stream of notes
+        // nobody asked for cost something, and it reads the spurious
+        // pile. The last two quarters are left out because the unmatched
+        // -onset prune only runs on a pass that carried a real beat, so
+        // the tail of any session is still sitting in the pending buffer
+        // when the thread stops — true before this change and after it.
+        let prunable: Vec<&&LiveNote> = settled
+            .iter()
+            .filter(|n| n.ghost && n.quarter + 2 < QUARTERS)
+            .collect();
+        assert!(!prunable.is_empty(), "no echoes left to judge");
+        assert!(
+            prunable.iter().all(|n| n.spurious),
+            "a double trigger neither matched nor was counted against the player"
+        );
+    }
+
+    /// And the gate that actually ships in front of the analyzer never
+    /// lets one through in the first place: 12 ms is inside electric
+    /// guitar's 40 ms articulation floor at any tempo.
+    #[test]
+    fn the_refractory_gate_blocks_a_twelve_millisecond_echo() {
+        use crate::onset::{GateDecision, RefractoryGate};
+        let profile = Instrument::ElectricGuitar.profile();
+        let mut gate = RefractoryGate::new();
+        // 100 BPM sixteenths — the finest interval the tests above use.
+        let interval_ms = 150.0_f32;
+        let mut blocked = 0;
+        for i in 0..8u64 {
+            let note_ns = 1_000_000_000 + i * 150_000_000;
+            assert_eq!(
+                gate.admit(note_ns, 0.6, interval_ms, profile.refractory_floor_ms),
+                GateDecision::Accepted,
+                "a real sixteenth was not accepted"
+            );
+            if gate.admit(
+                note_ns + 12_000_000,
+                0.6,
+                interval_ms,
+                profile.refractory_floor_ms,
+            ) == GateDecision::Blocked
+            {
+                blocked += 1;
+            }
+        }
+        assert_eq!(blocked, 8, "the refractory gate let a 12 ms echo through");
+    }
+
+    // ── The cap rule itself ─────────────────────────────────────────
+
+    #[test]
+    fn a_quarter_note_player_is_capped_exactly_where_the_profile_says() {
+        // The rule must be a strict widening: on the grid the profile
+        // constants were written for — one note to the quarter — every
+        // instrument still gets exactly its own number.
+        for instr in [
+            Instrument::Drums,
+            Instrument::ElectricGuitar,
+            Instrument::AcousticGuitar,
+            Instrument::Bass,
+            Instrument::Piano,
+            Instrument::Other,
+        ] {
+            let p = instr.profile();
+            assert_eq!(
+                onsets_per_quarter_cap(p.max_onsets_per_beat, 1),
+                p.max_onsets_per_beat as u32,
+                "{instr:?} moved on a quarter-note grid"
+            );
+        }
+    }
+
+    #[test]
+    fn the_cap_is_never_below_the_grid_being_scored() {
+        // Every grid the inference can lock onto, every schedule
+        // density a 32nd-note burst could ask for, every instrument.
+        for instr in [
+            Instrument::Drums,
+            Instrument::ElectricGuitar,
+            Instrument::AcousticGuitar,
+            Instrument::Bass,
+            Instrument::Piano,
+            Instrument::Other,
+        ] {
+            let p = instr.profile();
+            for grid in [1u32, 2, 3, 4, 6, 8, 12] {
+                let cap = onsets_per_quarter_cap(p.max_onsets_per_beat, grid);
+                assert!(
+                    cap > grid,
+                    "{instr:?} at grid {grid}: cap {cap} leaves no room for the \
+                     grid itself, so the last note of every beat is thrown away"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn a_zero_grid_is_read_as_one_note_to_the_quarter() {
+        // `current_divisor()` can never return 0 and `densest_quarter`
+        // returns 0 only for an empty schedule, but the cap is the last
+        // thing between a player and a lost note: it must not divide
+        // its own protection by a bad input.
+        let p = Instrument::ElectricGuitar.profile();
+        assert_eq!(onsets_per_quarter_cap(p.max_onsets_per_beat, 0), 3);
+        assert_eq!(onsets_per_quarter_cap(0, 0), 1);
+    }
+
+    #[test]
+    fn a_loaded_score_sets_the_cap_from_its_densest_beat() {
+        use crate::score::{densest_quarter, ExpectedOnset};
+        let onset = |id: u32, beat: f64| ExpectedOnset {
+            id,
+            beat,
+            note_ids: vec![id],
+            soft: false,
+            accent: false,
+        };
+        // Two plain quarters, then one beat of 32nds, then a quarter.
+        let mut onsets = vec![onset(0, 0.0), onset(1, 1.0)];
+        for k in 0..8 {
+            onsets.push(onset(2 + k, 2.0 + k as f64 / 8.0));
+        }
+        onsets.push(onset(10, 3.0));
+        assert_eq!(
+            densest_quarter(&onsets),
+            8,
+            "the densest beat of this score holds eight 32nds"
+        );
+        let p = Instrument::ElectricGuitar.profile();
+        assert_eq!(onsets_per_quarter_cap(p.max_onsets_per_beat, 8), 10);
     }
 }

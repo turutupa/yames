@@ -221,6 +221,20 @@ pub struct OnsetResult {
     pub deviation_ms: Option<f64>,
     /// Times round a loop, from 0.
     pub pass: u32,
+    /// LP C3, the half of it that is decided: whether a note the score
+    /// marked accented actually came out louder than the notes around
+    /// it. **Reported, never scored** — what an accent should cost is
+    /// still open, and a wave that priced them before deciding would be
+    /// guessing.
+    ///
+    /// `None` means there is nothing to say: the note carries no
+    /// accent, or it was not played, or the amplitudes around it are
+    /// unusable (a silent neighbourhood, a detector that gave up). The
+    /// field is skipped on the wire when it is `None`, so a schedule
+    /// with no accents in it serializes exactly as it did before this
+    /// existed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accent_heard: Option<bool>,
 }
 
 /// What became of an expected onset.
@@ -535,6 +549,9 @@ pub fn align_pass(
 
     // ── Read the path back ──────────────────────────────────────────
     let mut results: Vec<OnsetResult> = Vec::with_capacity(m);
+    // How loud each result's note actually was, in step with `results`.
+    // `None` where nothing was played.
+    let mut heard_amplitude: Vec<Option<f32>> = Vec::with_capacity(m);
     let mut extras: Vec<ExtraOnset> = Vec::new();
     let mut i = m; // one past the last expected onset
     let mut j = n;
@@ -556,7 +573,14 @@ pub fn align_pass(
                     state: OnsetState::Hit,
                     deviation_ms: Some(dev),
                     pass,
+                    accent_heard: None,
                 });
+                // The alignment is the only place that knows WHICH
+                // played note a result came from — after this the pairing
+                // is gone and anything downstream has to guess it back
+                // from a time. The amplitude is taken here for that
+                // reason; what it means is decided below.
+                heard_amplitude.push(Some(played[j - 1].amplitude));
                 i -= 1;
                 j -= 1;
             }
@@ -570,7 +594,9 @@ pub fn align_pass(
                     },
                     deviation_ms: None,
                     pass,
+                    accent_heard: None,
                 });
+                heard_amplitude.push(None);
                 i -= 1;
             }
             Step::SkipPlayed => {
@@ -593,8 +619,81 @@ pub fn align_pass(
     }
 
     results.reverse();
+    heard_amplitude.reverse();
     extras.reverse();
+    report_accents(expected, &mut results, &heard_amplitude);
     (results, extras)
+}
+
+/// How much louder than its neighbours a note has to be before anybody
+/// would call it an accent.
+///
+/// Deliberately low. This is a report, not a judgement: the question it
+/// answers is "did the player put something there", and a guitarist
+/// digging in for an accent inside a run of sixteenths is a long way
+/// from doubling the amplitude of the pick attack. Raising it would
+/// quietly turn a report into an opinion, which is what LP C3 has not
+/// decided yet.
+const ACCENT_LOUDER_BY: f32 = 1.15;
+
+/// LP C3 — say, per note, whether a written accent was actually played
+/// louder than the notes around it.
+///
+/// The comparison is local on purpose. A piece gets louder and quieter
+/// as it goes; an accent is a thing done to the notes beside it, not to
+/// the piece. So each accented note is measured against its immediate
+/// neighbours in the same pass — the note before and the note after —
+/// and a note whose neighbours were not played, or were silent, gets no
+/// verdict rather than a guessed one.
+///
+/// Nothing here is scored. The verdict rides beside the result and the
+/// review decides what to say about it.
+fn report_accents(
+    expected: &[ExpectedOnset],
+    results: &mut [OnsetResult],
+    heard_amplitude: &[Option<f32>],
+) {
+    for k in 0..results.len() {
+        // `results` is in `expected` order — the backtrack walks the
+        // path and the reverse above puts it back — so the accent flag
+        // is `expected[k]`'s. Guarded anyway: a malformed band can end
+        // the walk early and leave the two out of step, and a silently
+        // shifted accent flag is worse than no report at all.
+        let Some(exp) = expected.get(k).filter(|e| e.id == results[k].id) else {
+            continue;
+        };
+        if !exp.accent || results[k].state != OnsetState::Hit {
+            continue;
+        }
+        let Some(amp) = heard_amplitude.get(k).copied().flatten() else {
+            continue;
+        };
+        if !amp.is_finite() || amp <= 0.0 {
+            continue;
+        }
+        let mut neighbours: Vec<f32> = Vec::with_capacity(2);
+        for n in [k.checked_sub(1), k.checked_add(1)].into_iter().flatten() {
+            // A neighbour that is itself written as an accent says
+            // nothing about this one — two accents in a row are not
+            // each other's baseline.
+            if expected.get(n).is_none_or(|e| e.accent) {
+                continue;
+            }
+            if let Some(a) = heard_amplitude.get(n).copied().flatten() {
+                if a.is_finite() && a > 0.0 {
+                    neighbours.push(a);
+                }
+            }
+        }
+        if neighbours.is_empty() {
+            continue;
+        }
+        let baseline = neighbours.iter().sum::<f32>() / neighbours.len() as f32;
+        if baseline <= 0.0 {
+            continue;
+        }
+        results[k].accent_heard = Some(amp >= baseline * ACCENT_LOUDER_BY);
+    }
 }
 
 fn cell(row: &[(f64, Step)], lo: usize, hi: usize, j: usize) -> Option<f64> {
@@ -789,6 +888,34 @@ pub fn smallest_gap_beats(onsets: &[ExpectedOnset]) -> Option<f64> {
         }
     }
     smallest
+}
+
+/// The most onsets any single quarter note of this schedule holds.
+///
+/// Not the reciprocal of the smallest gap: one pair of 32nds in an
+/// otherwise plain piece would answer 8 to that question, and the
+/// answer wanted here is how dense the music actually gets. A sliding
+/// quarter-wide window over the onsets, which are already in beat
+/// order, gives the honest number in one pass.
+///
+/// `timing.rs` reads it to bound how many notes one quarter may hold
+/// before the extras stop being music: a loaded score knows exactly
+/// how many notes a beat was written to carry, which is a better
+/// answer than any constant.
+pub fn densest_quarter(onsets: &[ExpectedOnset]) -> u32 {
+    let mut densest: u32 = 0;
+    let mut start = 0usize;
+    for end in 0..onsets.len() {
+        // Onsets are sorted by beat; walk the tail forward until the
+        // window is one quarter wide. The epsilon keeps a note exactly
+        // one beat later out of the same window, where floating point
+        // would otherwise decide it by the last bit.
+        while onsets[end].beat - onsets[start].beat >= 1.0 - 1e-9 {
+            start += 1;
+        }
+        densest = densest.max((end - start + 1) as u32);
+    }
+    densest
 }
 
 /// Whether the notes the score marked accented actually came out
@@ -1021,6 +1148,13 @@ impl ScheduleRun {
     /// work out from what has already been played.
     pub fn smallest_gap_ms(&self, quarter_ms: f64) -> Option<f64> {
         smallest_gap_beats(&self.schedule.onsets).map(|b| b * quarter_ms)
+    }
+
+    /// The most notes any one quarter of this score asks for. The
+    /// per-quarter onset cap in `timing.rs` follows this rather than a
+    /// constant while a schedule is loaded.
+    pub fn densest_quarter(&self) -> u32 {
+        densest_quarter(&self.schedule.onsets)
     }
 
     /// Match everything so far. `None` until there is a beat map to
