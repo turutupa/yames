@@ -51,6 +51,19 @@ Playwright keeps a screenshot and a trace of the moment under `test-results/`:
 npx playwright show-trace test-results/<the-failing-test>/trace.zip
 ```
 
+## The server it drives
+
+`playwright.config.ts` starts its own Vite and never reuses one. The port is
+derived from the absolute path of the checkout — so two worktrees on one
+laptop never ask for the same number, and this worktree always asks for the
+same number — and a port that is already answering fails the run out loud
+rather than being borrowed. Set `YAMES_LAYOUT_PORT` to pin it.
+
+It was one port for everybody, reused if something was already listening. A
+second worktree's dev server then answered, Vite served its `index.html` for
+every unknown scene, and the suite measured **another worker's source** while
+reporting twenty-four passes and a handful of scenes that "did not build".
+
 ## What is not here
 
 No visual-regression snapshots. A pixel-diff of the whole screen fails on a

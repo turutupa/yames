@@ -36,13 +36,18 @@ export async function openShot(
   // another app on the port it asked for, and "timed out waiting for
   // __SHOT_READY__" is a poor way to be told you are looking at the wrong
   // website.
+  //
+  // `playwright.config.ts` now starts a server of its own on a port derived
+  // from this checkout and never reuses one, so this should be unreachable —
+  // it stays because the failure it describes cost an afternoon twice.
   await page
     .waitForFunction(() => typeof window.__SHOT_MANIFEST__ === "object", undefined, {
       timeout: 15_000,
     })
     .catch(() => {
+      const origin = new URL(page.url()).origin;
       throw new Error(
-        `http://localhost:5390 is not the Yames screenshot harness — the page that answered is "${shot}" on some other server. Stop whatever is on port 5390 and run again.`,
+        `${origin} is not the Yames screenshot harness — something else answered for the "${shot}" scene. Stop whatever is on that port and run again.`,
       );
     });
 

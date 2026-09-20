@@ -34,18 +34,20 @@ async function openGallery(page: Page, size: { width: number; height: number }) 
    * That the page is the gallery at all, before waiting thirty seconds for
    * it to say it is ready.
    *
-   * `playwright.config.ts` pins port 5390 and reuses whatever is already
-   * listening on it, and Vite answers an unknown .html with `index.html` —
-   * so a dev server belonging to another checkout returns 200 and serves the
-   * APP. Two workers running this suite at once is all it takes, and the
-   * failure then reads as "the gallery never finished drawing" when the
-   * gallery was never served. `openShot` learned the same lesson the first
-   * time this suite was run; this is that guard, for this page.
+   * Vite answers an unknown .html with `index.html`, so a dev server
+   * belonging to another checkout returns 200 and serves the APP. That used
+   * to be reachable: the config pinned one port for every worktree and
+   * reused whatever was listening on it, so two workers running this suite
+   * at once was all it took, and the failure read as "the gallery never
+   * finished drawing" when the gallery was never served. The config now
+   * takes a port of this checkout's own and starts its own server; this
+   * guard stays because the failure was expensive and silent.
    */
   const title = await page.title();
+  const origin = new URL(page.url()).origin;
   expect(
     title,
-    `http://localhost:5390 answered with "${title}" — that is not this checkout's gallery. Stop whatever else is on port 5390 and run again.`,
+    `${origin} answered with "${title}" — that is not this checkout's gallery. Stop whatever else is on that port and run again.`,
   ).toContain("blocks");
 
   await page
