@@ -6,10 +6,12 @@
 import { describe, expect, it } from "vitest";
 import { importSong } from "./import";
 import {
+  beatAtSongTick,
   buildSchedule,
   clampRange,
   meterAt,
   rangeTempo,
+  rangeTempoSteps,
   rangeTicks,
   sectionRange,
   tempoAt,
@@ -211,5 +213,71 @@ describe("the whole song", () => {
     const first = schedule.onsets.filter((o) => o.beat >= 0 && o.beat < 4);
     const second = schedule.onsets.filter((o) => o.beat >= 12 && o.beat < 16);
     expect(second.map((o) => o.beat - 12)).toEqual(first.map((o) => o.beat));
+  });
+});
+
+describe("where a beat event sits on the schedule's axis", () => {
+  it("is zero at the first tick of the range, wherever the range is", () => {
+    const score = load(SECTIONS);
+    const range = sectionRange(score, "Chorus");
+    const { start } = rangeTicks(score, range);
+    expect(beatAtSongTick(score, range, start)).toBe(0);
+    expect(beatAtSongTick(score, range, start + TICKS_PER_QUARTER)).toBe(1);
+  });
+
+  it("counts quarter notes, not clicks, through a 7/8 bar", () => {
+    const score = load(TEMPO_AND_SEVEN_EIGHT);
+    const range = { startBar: 2, endBar: 2 };
+    const { start } = rangeTicks(score, range);
+    // Seven eighths. The click ticks seven times; the axis moves 3.5.
+    expect(beatAtSongTick(score, range, start + 7 * 480)).toBe(3.5);
+  });
+
+  it("lines up with the schedule's own onsets", () => {
+    const score = load(CHORD_THEN_SINGLES);
+    const range = wholeSong(score);
+    const schedule = buildSchedule(score, range);
+    for (const onset of schedule.onsets) {
+      const note = score.notes.find((n) => n.id === onset.noteIds[0])!;
+      expect(beatAtSongTick(score, range, note.tick)).toBe(onset.beat);
+    }
+  });
+});
+
+/**
+ * The tempo across a range, which is what tells the pitch pass when a note
+ * was due. A straight line here is a tracker reading the wrong seconds of
+ * the recording after a tempo step, which looks like deafness and is not.
+ */
+describe("the tempo across a range", () => {
+  it("opens at the tempo the range starts on, not at the top of the song", () => {
+    const score = load(TEMPO_AND_SEVEN_EIGHT);
+    // Bars 2 and 3 — the piece steps to 140 at bar 2.
+    const steps = rangeTempoSteps(score, { startBar: 1, endBar: 2 }, 100);
+    expect(steps[0]).toEqual({ beat: 0, bpm: 140 });
+    expect(steps).toHaveLength(1);
+  });
+
+  it("carries a step, on the schedule's own beat axis", () => {
+    const score = load(TEMPO_AND_SEVEN_EIGHT);
+    const steps = rangeTempoSteps(score, wholeSong(score), 100);
+    expect(steps).toEqual([
+      { beat: 0, bpm: 100 },
+      // Bar 2 opens one 4/4 bar in: four quarter notes.
+      { beat: 4, bpm: 140 },
+    ]);
+  });
+
+  it("is the CLICK's tempo, so a slowed-down pass says so", () => {
+    const score = load(TEMPO_AND_SEVEN_EIGHT);
+    expect(rangeTempoSteps(score, wholeSong(score), 50)).toEqual([
+      { beat: 0, bpm: 50 },
+      { beat: 4, bpm: 70 },
+    ]);
+  });
+
+  it("is one step for a piece that never changes speed", () => {
+    const score = load(SECTIONS);
+    expect(rangeTempoSteps(score, wholeSong(score), 100)).toEqual([{ beat: 0, bpm: 120 }]);
   });
 });

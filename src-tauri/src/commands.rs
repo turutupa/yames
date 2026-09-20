@@ -2109,9 +2109,126 @@ pub struct AnalyzeTakePitchRequest {
     pub extras: Vec<crate::score::ExtraOnset>,
     /// The tempo the range was played at, in BPM — the click's tempo, not
     /// the score's, when the player slowed it down.
+    ///
+    /// **One number, and a song has a map.** Kept because it is still right
+    /// for everything that has one tempo — a drill, a path step, a piece
+    /// that never changes speed — and because a frontend that has not been
+    /// rebuilt against `tempoMap` must go on working for a release. When
+    /// `tempoMap` is present this is only the fallback for a map that turns
+    /// out to be unusable.
     pub bpm: f64,
+    /// The click's tempo ACROSS the played range, stepping where the score
+    /// steps (`plans/tasks/songs/W13-SONGS-ENGINE.md`, item 5).
+    ///
+    /// This exists because of a real, silent failure. `analyze_take_pitch`
+    /// reconstructs when a note was played as "where it was due, plus how
+    /// far off it was", and "where it was due" used to be `beat × 60000/bpm`
+    /// — a straight line. A song whose tempo steps from 100 to 140 at bar
+    /// nine is not a straight line, so every note after the step was read
+    /// out of the wrong part of the file: at 100 BPM a quarter is 600 ms and
+    /// at 140 it is 429, so by bar sixteen the window is nearly three
+    /// seconds adrift and the tracker is asked about somebody else's notes.
+    /// It does not look like a clock error. It looks like a tracker that
+    /// cannot hear.
+    ///
+    /// Empty means "one tempo", which is what `bpm` says.
+    #[serde(default)]
+    pub tempo_map: Vec<RangeTempo>,
     #[serde(default)]
     pub start_offset_ms: f64,
+}
+
+/// One step of the click's tempo inside a played range.
+///
+/// `beat` is quarter notes from the START OF THE RANGE, the same axis the
+/// schedule's onsets are on, so nothing here has to know where in the piece
+/// the range begins. `bpm` is what the click actually ran at — the score's
+/// tempo already through `tempoPercent`.
+#[derive(Debug, Clone, Copy, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RangeTempo {
+    pub beat: f64,
+    pub bpm: f64,
+}
+
+/// Beats to milliseconds across a range whose tempo steps, and round a loop.
+///
+/// **Why this is not `score::BeatMap`.** That type is indexed by whole
+/// quarter notes and its own doc says, at length, that it is built from where
+/// the engine's beats ACTUALLY FELL and is deliberately never read from a
+/// tempo map. Both halves matter here. A take has no beat log to read — the
+/// pitch pass runs over a file, after the fact — and a tempo step lands on a
+/// bar line, which in 7/8 is three and a half quarters in, exactly between
+/// two of `BeatMap`'s entries. So this integrates the map instead, which is
+/// a dozen lines and exact at every point rather than at every quarter.
+#[derive(Debug, Clone)]
+struct RangeClock {
+    /// `(beat the step starts at, ms per quarter from there)`, sorted, the
+    /// first at beat 0. Milliseconds per quarter rather than BPM because
+    /// that is the only thing it is ever asked for.
+    steps: Vec<(f64, f64)>,
+    /// One time round the range, in beats and in milliseconds.
+    pass_beats: f64,
+    pass_ms: f64,
+}
+
+impl RangeClock {
+    /// The map, or one flat tempo when there is no usable map.
+    fn new(map: &[RangeTempo], pass_beats: f64, fallback_bpm: f64) -> Self {
+        let flat = 60_000.0 / fallback_bpm;
+        let mut steps: Vec<(f64, f64)> = map
+            .iter()
+            // A step the file could not have meant is dropped rather than
+            // allowed to divide by nothing: one bad entry must not take the
+            // whole take's timing with it.
+            .filter(|t| t.beat.is_finite() && t.bpm.is_finite() && t.bpm > 0.0)
+            .map(|t| (t.beat.max(0.0), 60_000.0 / t.bpm))
+            .collect();
+        steps.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+        // The range starts somewhere, whatever the map says it starts at.
+        match steps.first() {
+            Some(&(beat, _)) if beat > 0.0 => steps.insert(0, (0.0, flat)),
+            None => steps.push((0.0, flat)),
+            _ => {}
+        }
+        let pass_beats = if pass_beats.is_finite() && pass_beats > 0.0 {
+            pass_beats
+        } else {
+            0.0
+        };
+        let mut clock = Self {
+            steps,
+            pass_beats,
+            pass_ms: 0.0,
+        };
+        clock.pass_ms = clock.within_pass_ms(pass_beats);
+        clock
+    }
+
+    /// Where a beat of one pass falls, in ms from the range's first beat.
+    fn within_pass_ms(&self, beat: f64) -> f64 {
+        if !beat.is_finite() || beat <= 0.0 {
+            return 0.0;
+        }
+        let mut ms = 0.0;
+        for (i, &(start, per_quarter)) in self.steps.iter().enumerate() {
+            if start >= beat {
+                break;
+            }
+            let end = self
+                .steps
+                .get(i + 1)
+                .map(|&(next, _)| next.min(beat))
+                .unwrap_or(beat);
+            ms += (end - start).max(0.0) * per_quarter;
+        }
+        ms
+    }
+
+    /// Where an onset falls: its beat inside the range, and which time round.
+    fn ms_at(&self, beat_in_pass: f64, pass: u32) -> f64 {
+        f64::from(pass) * self.pass_ms + self.within_pass_ms(beat_in_pass)
+    }
 }
 
 /// Which note was that, for every note of the score in the played range.
@@ -2137,9 +2254,14 @@ pub fn analyze_take_pitch(
                 .to_string()
         })?;
 
-    // Beats to milliseconds on the buffer's own clock. A pass round a loop is
-    // one whole schedule later; the schedule's `lengthBeats` is what one is.
-    let beat_ms = 60_000.0 / request.bpm;
+    // Beats to milliseconds on the buffer's own clock, following the tempo
+    // where it steps. A pass round a loop is one whole schedule later; the
+    // schedule's `lengthBeats` is what one is.
+    let clock = RangeClock::new(
+        &request.tempo_map,
+        request.schedule.length_beats,
+        request.bpm,
+    );
     let by_id: std::collections::HashMap<u32, &crate::score::ExpectedOnset> = request
         .schedule
         .onsets
@@ -2154,7 +2276,6 @@ pub fn analyze_take_pitch(
             // guess at; the review draws nothing for it.
             continue;
         };
-        let beat = expected.beat + f64::from(result.pass) * request.schedule.length_beats;
         matched.push(crate::pitch::MatchedOnset::from_result(
             result.id,
             expected.note_ids.clone(),
@@ -2163,7 +2284,7 @@ pub fn analyze_take_pitch(
                 crate::score::OnsetState::Miss => crate::pitch::OnsetState::Miss,
                 crate::score::OnsetState::SoftAbsent => crate::pitch::OnsetState::SoftAbsent,
             },
-            request.start_offset_ms + beat * beat_ms,
+            request.start_offset_ms + clock.ms_at(expected.beat, result.pass),
             result.deviation_ms,
         ));
     }
@@ -2195,10 +2316,12 @@ pub fn analyze_take_pitch(
     // Every moment a note started, written or not. `notes_from` sorts them
     // and drops the ones too close together to be two notes.
     let mut onsets_ms: Vec<f64> = matched.iter().filter_map(|m| m.heard_at_ms).collect();
-    onsets_ms.extend(request.extras.iter().map(|e| {
-        request.start_offset_ms
-            + (e.beat + f64::from(e.pass) * request.schedule.length_beats) * beat_ms
-    }));
+    onsets_ms.extend(
+        request
+            .extras
+            .iter()
+            .map(|e| request.start_offset_ms + clock.ms_at(e.beat, e.pass)),
+    );
     let events = crate::pitch::analyse(&samples, rate, &onsets_ms, &cfg);
     Ok(crate::pitch::match_notes(
         &events,
@@ -3905,6 +4028,141 @@ pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
 // validation and the FREE-mode invariant are extracted above and tested here.
 // ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod range_clock_tests {
+    use super::{RangeClock, RangeTempo};
+
+    /// Two numbers that have to be exact, quoted once so the arithmetic in
+    /// the tests below is readable: a quarter note at 100 BPM and at 140.
+    const AT_100: f64 = 600.0;
+    const AT_140: f64 = 60_000.0 / 140.0;
+
+    fn close(a: f64, b: f64) -> bool {
+        (a - b).abs() < 1e-6
+    }
+
+    #[test]
+    fn one_tempo_is_a_straight_line() {
+        let clock = RangeClock::new(&[], 16.0, 100.0);
+        assert!(close(clock.ms_at(0.0, 0), 0.0));
+        assert!(close(clock.ms_at(4.0, 0), 4.0 * AT_100));
+        // And a second time round is one whole pass later.
+        assert!(close(clock.ms_at(4.0, 1), 20.0 * AT_100));
+    }
+
+    /// The failure this whole thing exists for: a step at bar nine.
+    #[test]
+    fn a_tempo_step_moves_everything_after_it() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 8.0,
+                bpm: 140.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 16.0, 100.0);
+        // Before the step, nothing has changed.
+        assert!(close(clock.ms_at(7.0, 0), 7.0 * AT_100));
+        // On it, and after it, the beats are shorter.
+        assert!(close(clock.ms_at(8.0, 0), 8.0 * AT_100));
+        assert!(close(clock.ms_at(12.0, 0), 8.0 * AT_100 + 4.0 * AT_140));
+        // The old straight line would have put that last one here, which is
+        // most of a second out and reads as a tracker that cannot segment.
+        assert!((clock.ms_at(12.0, 0) - 12.0 * AT_100).abs() > 600.0);
+    }
+
+    #[test]
+    fn a_pass_round_the_loop_is_the_whole_map_again() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 8.0,
+                bpm: 140.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 16.0, 100.0);
+        let pass = 8.0 * AT_100 + 8.0 * AT_140;
+        assert!(close(clock.ms_at(0.0, 1), pass));
+        assert!(close(clock.ms_at(4.0, 2), 2.0 * pass + 4.0 * AT_100));
+    }
+
+    /// A step that lands between two quarter notes — a bar line in 7/8 —
+    /// which is exactly what `score::BeatMap` could not have represented.
+    #[test]
+    fn a_step_on_a_seven_eight_bar_line_lands_between_two_quarters() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 3.5,
+                bpm: 140.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 7.0, 100.0);
+        assert!(close(clock.ms_at(3.5, 0), 3.5 * AT_100));
+        assert!(close(clock.ms_at(4.0, 0), 3.5 * AT_100 + 0.5 * AT_140));
+    }
+
+    #[test]
+    fn a_map_that_starts_late_still_starts_at_the_range() {
+        let map = [RangeTempo {
+            beat: 4.0,
+            bpm: 140.0,
+        }];
+        let clock = RangeClock::new(&map, 8.0, 100.0);
+        // The first four beats run at the fallback rather than at nothing.
+        assert!(close(clock.ms_at(4.0, 0), 4.0 * AT_100));
+        assert!(close(clock.ms_at(6.0, 0), 4.0 * AT_100 + 2.0 * AT_140));
+    }
+
+    /// A hand-written or half-migrated request must not divide by nothing.
+    #[test]
+    fn a_step_that_makes_no_sense_is_dropped_not_obeyed() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 4.0,
+                bpm: 0.0,
+            },
+            RangeTempo {
+                beat: 6.0,
+                bpm: f64::NAN,
+            },
+        ];
+        let clock = RangeClock::new(&map, 8.0, 100.0);
+        assert!(close(clock.ms_at(8.0, 0), 8.0 * AT_100));
+        assert!(clock.ms_at(8.0, 3).is_finite());
+    }
+
+    /// An unordered map is put in order rather than walked as it arrives.
+    #[test]
+    fn the_steps_are_sorted_however_they_arrive() {
+        let map = [
+            RangeTempo {
+                beat: 8.0,
+                bpm: 140.0,
+            },
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 16.0, 100.0);
+        assert!(close(clock.ms_at(12.0, 0), 8.0 * AT_100 + 4.0 * AT_140));
+    }
+}
 
 #[cfg(test)]
 mod sound_type_tests {

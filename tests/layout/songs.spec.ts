@@ -168,6 +168,108 @@ test.describe("the songs stage", () => {
   });
 });
 
+/**
+ * The band's faders and the count-in, at the smallest window the app opens.
+ *
+ * 480 × 780 is `minWidth`/`minHeight` in `tauri.conf.json` — the window a
+ * person can actually drag themselves down to — and it is narrower than
+ * anything else in this file. These are the two newest controls on the stage
+ * and they are the ones with the most in a row: a name, a slider, a number
+ * and a switch. A slider is the control that fails silently when the row runs
+ * out of room, because it shrinks to a few pixels and goes on working.
+ */
+const SMALLEST = { width: 480, height: 780 };
+
+/** Every theme the app ships, from `src/themes.ts`. */
+const THEMES = [
+  "mono",
+  "obsidian",
+  "velvet",
+  "neon",
+  "aurora",
+  "ivory",
+  "arctic",
+  "sand",
+  "lavender",
+  "prism",
+  "ash",
+  "ember",
+  "manuscript",
+];
+
+test.describe("the band and the count-in", () => {
+  test("has a row for the click and for each player the file has", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const names = await page.locator(".songs-band-name").allTextContents();
+    // The fixture is a guitar, a drum kit and a bass — and the guitar is the
+    // part being played, so it is never in the band.
+    expect(names.map((n) => n.trim())).toEqual(["Click", "Drums", "Bass"]);
+  });
+
+  test("offers no count-in, one bar or two, and nothing else", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const chips = await page.locator(".songs-countin-chips .songs-chip").allTextContents();
+    expect(chips).toHaveLength(3);
+    // One of them is chosen, and with nothing set it is "straight in".
+    const pressed = await page
+      .locator('.songs-countin-chips .songs-chip[aria-pressed="true"]')
+      .count();
+    expect(pressed, "no count-in choice is shown as the current one").toBe(1);
+  });
+
+  for (const theme of THEMES) {
+    test(`fits at ${SMALLEST.width}×${SMALLEST.height} under ${theme}`, async ({ page }) => {
+      await openShot(page, "songs", SMALLEST, theme);
+      await noSidewaysScroll(page, `songs at ${SMALLEST.width}px under ${theme}`);
+
+      // Every fader row is inside the window, and the slider in it is still
+      // a slider rather than a sliver.
+      const lanes = await page.$$eval(".songs-band-lane", (nodes) =>
+        nodes.map((n) => {
+          const row = n.getBoundingClientRect();
+          const slider = n.querySelector("input[type=range]")!.getBoundingClientRect();
+          const switchEl = n.querySelector("button[role=switch]")!.getBoundingClientRect();
+          return { row, slider, switchEl };
+        }),
+      );
+      expect(lanes.length, `no band under ${theme}`).toBeGreaterThan(1);
+      for (const lane of lanes) {
+        expect(
+          Math.round(lane.row.right),
+          `a fader row ends at ${Math.round(lane.row.right)}, past the window's ${SMALLEST.width}`,
+        ).toBeLessThanOrEqual(SMALLEST.width + 1);
+        expect(Math.round(lane.row.left), "a fader row starts off the left").toBeGreaterThanOrEqual(
+          -1,
+        );
+        expect(
+          Math.round(lane.slider.width),
+          `the fader is ${Math.round(lane.slider.width)}px wide under ${theme}`,
+        ).toBeGreaterThan(40);
+        // The mute is a hit target, not a hairline.
+        expect(
+          Math.round(lane.switchEl.width),
+          `the mute is ${Math.round(lane.switchEl.width)}px wide under ${theme}`,
+        ).toBeGreaterThanOrEqual(30);
+        expect(
+          Math.round(lane.switchEl.right),
+          "the mute is past the right edge",
+        ).toBeLessThanOrEqual(SMALLEST.width + 1);
+      }
+
+      // And the count-in chips wrap rather than run off the side.
+      const chips = await page.$$eval(".songs-countin-chips .songs-chip", (nodes) =>
+        nodes.map((n) => n.getBoundingClientRect().right),
+      );
+      expect(chips.length, `no count-in under ${theme}`).toBe(3);
+      for (const right of chips) {
+        expect(Math.round(right), "a count-in chip is past the right edge").toBeLessThanOrEqual(
+          SMALLEST.width + 1,
+        );
+      }
+    });
+  }
+});
+
 test.describe("the empty state", () => {
   for (const size of WIDTHS) {
     test(`fits at ${size.name} (${size.width}px)`, async ({ page }) => {

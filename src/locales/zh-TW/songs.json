@@ -23,6 +23,32 @@
     "loopOff": "Once through",
     "loopNote": "Play the bars above again and again",
     "dropHere": "Drop the file to open it",
+    "band": {
+      "label": "Who you hear",
+      "click": "Click",
+      "drums": "Drums",
+      "bass": "Bass",
+      "keys": "Keys",
+      "levelFor": "How loud the {{lane}} is",
+      "muteFor": "Turn the {{lane}} off",
+      "note": "Set the balance while you play. Yames remembers it for this song.",
+      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
+      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
+      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
+      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+    },
+    "countIn": {
+      "label": "Count-in",
+      "none": "Straight in",
+      "bars": "{{count}} bar",
+      "bars_other": "{{count}} bars",
+      "note": "Counted before the first time through, not before every repeat",
+      "counting": "Counting you in"
+    },
+    "engine": {
+      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
+      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+    },
     "empty": {
       "title": "Bring in a song you already have",
       "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",

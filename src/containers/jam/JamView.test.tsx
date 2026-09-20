@@ -29,6 +29,11 @@ function beat(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
     formBar,
     chorus,
     bandState: "full",
+    // No song loaded: what the engine reports for every tick of a jam.
+    songBar: null,
+    songTick: 0,
+    songPass: 0,
+    songCountIn: false,
   };
 }
 
