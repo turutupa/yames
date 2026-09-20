@@ -1682,77 +1682,194 @@ pub async fn clear_session(session_acc: State<'_, SharedSessionAccumulator>) -> 
     Ok(())
 }
 
-#[tauri::command]
-pub fn save_session(
-    session: crate::session::SavedSession,
-    app_handle: AppHandle,
-) -> Result<(), String> {
-    use tauri_plugin_store::StoreExt;
-    let store = app_handle
-        .store("settings.json")
-        .map_err(|e| e.to_string())?;
-    let mut history: Vec<crate::session::SavedSession> = store
-        .get("evalSessionHistory")
-        .and_then(|v| serde_json::from_value(v.clone()).ok())
-        .unwrap_or_default();
-    // Prepend new session at the front
-    history.insert(0, session);
-    // Cap at max
-    history.truncate(crate::session::MAX_SESSION_HISTORY);
-    store.set(
-        "evalSessionHistory",
-        serde_json::to_value(&history).unwrap(),
-    );
-    Ok(())
-}
+// ---------------------------------------------------------------------------
+// Session history — the practice store (ROADMAP 1.1)
+//
+// These four used to keep a thirty-entry JSON array inside `settings.json`.
+// They now read and write `practice.db` beside it; the wire shapes are
+// untouched, so nothing on the frontend had to move.
+//
+// Every one of them is `#[tauri::command(async)]`. Tauri runs a plain
+// `#[tauri::command]` on the main thread, which is the UI thread, and
+// W2's brief puts SQLite off it — `(async)` hands the (synchronous) body
+// to the async runtime's pool instead. The store itself is opened on a
+// thread spawned from `setup()`, so the disk is never touched on the way
+// to showing a window; see `db::PracticeStore` for how a command that
+// arrives before the open finishes is made to wait rather than lie.
+//
+// A store that will not open answers reads with nothing and refuses
+// writes out loud. It is never deleted or rewritten — see `db.rs`.
+// ---------------------------------------------------------------------------
 
-#[tauri::command]
-pub fn get_session_history(app_handle: AppHandle) -> Vec<crate::session::SavedSession> {
+/// Open the practice store and fold the legacy JSON history into it.
+/// Called once, from a thread spawned by `setup()`.
+pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPracticeStore) {
     use tauri_plugin_store::StoreExt;
-    app_handle
+
+    let data_dir = match app_handle.path().app_data_dir() {
+        Ok(d) => d,
+        Err(e) => {
+            store.unavailable(format!("no app data directory ({e})"));
+            return;
+        }
+    };
+    // The one-time import. `evalSessionHistory` is *read* and left exactly
+    // where it is: an older build must still find its history if the user
+    // ever goes back to one.
+    let legacy: Vec<crate::session::SavedSession> = app_handle
         .store("settings.json")
         .ok()
-        .and_then(|store| {
-            store
-                .get("evalSessionHistory")
+        .and_then(|s| {
+            s.get("evalSessionHistory")
                 .and_then(|v| serde_json::from_value(v.clone()).ok())
         })
-        .unwrap_or_default()
-}
-
-#[tauri::command]
-pub fn delete_session(id: String, app_handle: AppHandle) -> Result<(), String> {
-    use tauri_plugin_store::StoreExt;
-    let store = app_handle
-        .store("settings.json")
-        .map_err(|e| e.to_string())?;
-    let mut history: Vec<crate::session::SavedSession> = store
-        .get("evalSessionHistory")
-        .and_then(|v| serde_json::from_value(v.clone()).ok())
         .unwrap_or_default();
-    history.retain(|s| s.id != id);
-    store.set(
-        "evalSessionHistory",
-        serde_json::to_value(&history).unwrap(),
-    );
-    Ok(())
+
+    // Imported *before* the store becomes visible to any command, so the
+    // first history read of a fresh install cannot catch it half done.
+    store.open_at(&crate::db::db_path(&data_dir), |db| {
+        match db.import_json_history(&legacy) {
+            Ok(0) => {}
+            Ok(n) => eprintln!("[store] imported {n} session(s) from the JSON history"),
+            Err(e) => eprintln!("[store] could not import the JSON history: {e}"),
+        }
+    });
 }
 
-#[tauri::command]
-pub fn clear_all_sessions(app_handle: AppHandle) -> Result<(), String> {
+#[tauri::command(async)]
+pub fn save_session(
+    session: crate::session::SavedSession,
+    store: State<'_, crate::db::SharedPracticeStore>,
+    state: State<'_, SharedState>,
+) -> Result<(), String> {
+    // `SavedSession` has never carried an instrument and this wave does not
+    // change its shape, so the row is stamped with the one that is selected
+    // right now — which is the one that was just played.
+    let instrument = state.lock().ok().map(|s| s.instrument.id());
+    store.with(|db| db.save_session(&session, instrument))
+}
+
+/// The most recent `MAX_SESSION_HISTORY` sessions, newest first —
+/// deliberately the same slice the JSON array used to hold, so the history
+/// tab looks exactly as it did. The store keeps everything; `query_history`
+/// is the door to the rest of it.
+#[tauri::command(async)]
+pub fn get_session_history(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::session::SavedSession> {
+    store.read_or(Vec::new(), |db| {
+        db.session_history(crate::session::MAX_SESSION_HISTORY)
+    })
+}
+
+/// History narrowed by preset, exercise, instrument, date range or BPM
+/// band. Returns whole `SavedSession`s so `presetAwareness.ts` can be fed
+/// rows without changing a line of it.
+#[tauri::command(async)]
+pub fn query_history(
+    filter: crate::db::HistoryFilter,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::session::SavedSession> {
+    store.read_or(Vec::new(), |db| db.query_history(&filter))
+}
+
+#[tauri::command(async)]
+pub fn delete_session(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.delete_session(&id))
+}
+
+#[tauri::command(async)]
+pub fn clear_all_sessions(
+    app_handle: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
-    let store = app_handle
+    // Whether or not the database answers, the copy in `settings.json` has
+    // to go: a store that will not open is exactly the case where leaving
+    // an old history on disk after "forget what I played" would be worst.
+    let db_result = store.with(|db| db.clear_all_sessions());
+    let settings = app_handle
         .store("settings.json")
         .map_err(|e| e.to_string())?;
+    // The legacy array is emptied too. It is not read any more (the import
+    // flag has long since been set), but leaving a copy of the history
+    // behind after the user asked for it to be gone would be a lie.
     let empty: Vec<crate::session::SavedSession> = Vec::new();
-    store.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
+    settings.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
     // U3.3 — the drill-run history is practice history too. "Clear all
     // sessions" is the one gesture a user has for "forget what I played", and
     // leaving the runs behind would mean the climb still draws last month's
     // wall after they asked for it to be gone.
     let no_runs: Vec<crate::session::DrillRun> = Vec::new();
-    store.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
-    Ok(())
+    settings.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
+    db_result
+}
+
+// ---------------------------------------------------------------------------
+// Songs — the library, and what was played against it
+//
+// A `SongScore` (the first wave's contract, `plans/tasks/songs/BRIEF.md`)
+// travels through here as JSON and is stored whole. The store lifts out
+// only what a library list shows; `src-tauri/src/score.rs` owns the typed
+// form and the store has no business forking it.
+// ---------------------------------------------------------------------------
+
+/// Import (or re-import) a song. Returns the score's id.
+#[tauri::command(async)]
+pub fn save_score(
+    score: serde_json::Value,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<String, String> {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0);
+    store.with(|db| db.save_score(&score, now))
+}
+
+#[tauri::command(async)]
+pub fn list_scores(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::ScoreSummary> {
+    store.read_or(Vec::new(), |db| db.list_scores())
+}
+
+#[tauri::command(async)]
+pub fn get_score(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Option<serde_json::Value> {
+    store.read_or(None, |db| db.get_score(&id))
+}
+
+/// Forget a song, and with it every attempt at it.
+#[tauri::command(async)]
+pub fn delete_score(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.delete_score(&id))
+}
+
+#[tauri::command(async)]
+pub fn save_attempt(
+    attempt: crate::db::Attempt,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_attempt(&attempt))
+}
+
+/// Attempts at a song, oldest first — "every attempt at bars 17–24 of this
+/// song" is the question, and the order is the answer's point.
+#[tauri::command(async)]
+pub fn query_attempts(
+    query: crate::db::AttemptQuery,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::Attempt> {
+    store.read_or(Vec::new(), |db| db.query_attempts(&query))
 }
 
 // ---------------------------------------------------------------------------

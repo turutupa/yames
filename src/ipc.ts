@@ -677,7 +677,14 @@ export async function clearSession(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Session History
+// Session History — the practice store (ROADMAP 1.1)
+//
+// These four keep the shapes they have always had; underneath, history now
+// lives in `practice.db` beside `settings.json` instead of inside it. The
+// JSON array is imported once on first launch and then left alone.
+//
+// A store that will not open (corrupt, or written by a newer Yames) answers
+// reads with nothing and refuses writes — it is never deleted.
 // ---------------------------------------------------------------------------
 import type { SavedSession } from "./types";
 
@@ -685,6 +692,8 @@ export async function saveSession(session: SavedSession): Promise<void> {
   return invoke("save_session", { session });
 }
 
+/** The most recent thirty sessions, newest first — the same slice the
+ *  history tab has always shown. Use `queryHistory` for the rest. */
 export async function getSessionHistory(): Promise<SavedSession[]> {
   return invoke<SavedSession[]>("get_session_history");
 }
@@ -695,6 +704,152 @@ export async function deleteSession(id: string): Promise<void> {
 
 export async function clearAllSessions(): Promise<void> {
   return invoke("clear_all_sessions");
+}
+
+/**
+ * What `queryHistory` narrows by. Every field is optional; an empty filter
+ * is "everything, newest first".
+ */
+export type HistoryFilter = {
+  presetId?: string;
+  /** Reserved for the curriculum (ROADMAP 2.2). Nothing writes an exercise
+   *  key yet, so filtering by one matches nothing. */
+  exerciseKey?: string;
+  /** Instrument id, e.g. `"electric-guitar"`. */
+  instrument?: string;
+  /** Epoch ms, inclusive. */
+  since?: number;
+  /** Epoch ms, inclusive. */
+  until?: number;
+  bpmMin?: number;
+  bpmMax?: number;
+  limit?: number;
+};
+
+/**
+ * History beyond the last thirty sessions, narrowed. Returns whole
+ * `SavedSession`s, so everything in `src/coach/presetAwareness.ts` takes
+ * the rows as they come.
+ */
+export async function queryHistory(
+  filter: HistoryFilter = {},
+): Promise<SavedSession[]> {
+  return invoke<SavedSession[]>("query_history", { filter });
+}
+
+// ---------------------------------------------------------------------------
+// Songs — the library, and what was played against it
+// ---------------------------------------------------------------------------
+
+/**
+ * A `SongScore` as the store holds it: whole, exactly as the importer
+ * produced it. The structural type lives in `src/songs/types.ts`; this
+ * alias exists so `ipc.ts` does not have to depend on it, and callers are
+ * expected to narrow to `SongScore` at the edge.
+ */
+export type StoredSongScore = Record<string, unknown>;
+
+/** One row of the song library — what a list shows, without the notes. */
+export type ScoreSummary = {
+  id: string;
+  title: string;
+  artist: string;
+  sourceFile: string;
+  format: string;
+  trackIndex: number;
+  trackName: string;
+  /** Epoch ms. */
+  importedAt: number;
+};
+
+/**
+ * One expected onset's verdict inside an attempt. Mirrors `OnsetResult` in
+ * the wave contract (`plans/tasks/songs/BRIEF.md`) field for field.
+ */
+export type AttemptOnset = {
+  /** `ExpectedOnset.id` — an index into the score's schedule. */
+  id: number;
+  state: "hit" | "miss" | "softAbsent";
+  deviationMs: number | null;
+  /** Times round the loop, from 0. */
+  pass: number;
+};
+
+/** An onset the player produced that the score did not ask for. */
+export type AttemptExtra = {
+  /** Quarter notes from the start of the played range. */
+  beat: number;
+  pass: number;
+};
+
+/** One pass at a range of bars of one song. */
+export type Attempt = {
+  id: string;
+  scoreId: string;
+  /** The practice session this attempt belonged to, when there was one. */
+  sessionId?: string;
+  /** Epoch ms. */
+  startedAt: number;
+  /** Inclusive, in played-bar indices (`SongScore.bars[].index`). */
+  rangeStartBar: number;
+  rangeEndBar: number;
+  /** Percentage of the score's own tempo it was played at. */
+  tempoPercent: number;
+  passes: number;
+  score: number;
+  hits: number;
+  misses: number;
+  extras: number;
+  meanDevMs: number;
+  madMs: number;
+  /** Recording of the attempt, when the player kept one. */
+  takePath?: string;
+  /** Empty unless the query asked for onsets. */
+  onsets?: AttemptOnset[];
+  extraOnsets?: AttemptExtra[];
+};
+
+/** A range of played bars, inclusive at both ends. */
+export type BarRange = { startBar: number; endBar: number };
+
+export type AttemptQuery = {
+  scoreId: string;
+  /** Selects attempts that *overlap* the range: a full run-through did
+   *  cover bars 17–24, and the coach comparing tonight against it should
+   *  see it. */
+  barRange?: BarRange;
+  /** Per-onset verdicts are the biggest thing in the store — ask for them
+   *  when you are about to colour a tab, not to list attempts. */
+  includeOnsets?: boolean;
+  limit?: number;
+};
+
+/** Import (or re-import) a song. Resolves with the score's id. */
+export async function saveScore(score: StoredSongScore): Promise<string> {
+  return invoke<string>("save_score", { score });
+}
+
+/** The library, most recently imported first. */
+export async function listScores(): Promise<ScoreSummary[]> {
+  return invoke<ScoreSummary[]>("list_scores");
+}
+
+export async function getScore(id: string): Promise<StoredSongScore | null> {
+  return invoke<StoredSongScore | null>("get_score", { id });
+}
+
+/** Forget a song, and with it every attempt at it. */
+export async function deleteScore(id: string): Promise<void> {
+  return invoke("delete_score", { id });
+}
+
+export async function saveAttempt(attempt: Attempt): Promise<void> {
+  return invoke("save_attempt", { attempt });
+}
+
+/** Attempts at a song, oldest first. */
+export async function queryAttempts(query: AttemptQuery): Promise<Attempt[]> {
+  return invoke<Attempt[]>("query_attempts", { query });
 }
 
 // ---------------------------------------------------------------------------
