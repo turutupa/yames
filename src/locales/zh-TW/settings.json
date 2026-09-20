@@ -110,7 +110,13 @@
       "downloadVoices": "下載語音",
       "installed": "已安裝 {{tier}} 教練（{{size}}）",
       "removing": "移除中…",
-      "removeModels": "移除模型"
+      "removeModels": "移除模型",
+      "stance": "Coaching Style",
+      "stanceHint": "How hard the coach is on you while you play",
+      "stanceStrict": "Strict",
+      "stanceLearning": "Learning",
+      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
+      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
     },
     "general": {
       "title": "一般",

@@ -34,6 +34,7 @@
  */
 
 import type { BeatFeedback } from "../types";
+import { scaled, tierFor, type CoachStance } from "./learningMode";
 
 // ---------------------------------------------------------------------------
 // Constants — exposed for tests and tuning.
@@ -412,6 +413,14 @@ export type GatekeeperContext = {
    * Used by the `low_completeness` scenario detector.
    */
   recentHitCompleteness?: number;
+  /**
+   * How hard the coach is on the player (ROADMAP 1.5). `"learning"`
+   * widens every tolerance below by `LEARNING_WINDOW_SCALE` and demotes
+   * corrections out of the spoken channel. Defaults to `"strict"` —
+   * today's behaviour — when omitted. Never affects a score; see
+   * `learningMode.ts`.
+   */
+  stance?: CoachStance;
 };
 
 // ---------------------------------------------------------------------------
@@ -927,6 +936,7 @@ type AccuracyDropProbe =
 function probeAccuracyDrop(
   state: GatekeeperState,
   window: BeatFeedback[],
+  stance?: CoachStance,
 ): AccuracyDropProbe {
   if (window.length < ACCURACY_DROP_WINDOW * 2) return { kind: "clean" };
   const recent = window.slice(-ACCURACY_DROP_WINDOW);
@@ -939,7 +949,11 @@ function probeAccuracyDrop(
   if (scoredCount(prior) < ACCURACY_DROP_MIN_SCORED) return { kind: "clean" };
   const recentRate = hitRate(recent);
   const priorRate = hitRate(prior);
-  if (priorRate - recentRate < ACCURACY_DROP_DELTA) return { kind: "clean" };
+  // Learning mode widens the drop the player is allowed before the coach
+  // calls it one: 25 % becomes 37.5 %. ROADMAP 1.5.
+  if (priorRate - recentRate < scaled(ACCURACY_DROP_DELTA, stance)) {
+    return { kind: "clean" };
+  }
   const confirmations = state.accuracyDropConfirmations + 1;
   return {
     kind: "drop",
@@ -983,18 +997,20 @@ function detectPersonalBestStreak(
 function detectTrend(
   state: GatekeeperState,
   window: BeatFeedback[],
+  stance?: CoachStance,
 ): Detection | null {
   if (window.length < ACCURACY_DROP_WINDOW * 2) return null;
   const recent = window.slice(-ACCURACY_DROP_WINDOW);
   const prior = window.slice(-ACCURACY_DROP_WINDOW * 2, -ACCURACY_DROP_WINDOW);
   const recentMean = meanOffset(recent);
   const priorMean = meanOffset(prior);
+  // How far the passage has to lean before the coach names it. 5 ms
+  // strict, 7.5 ms while learning — the player is allowed to be half
+  // again as early before anyone says "rushing". ROADMAP 1.5.
+  const leanMs = scaled(TREND_OFFSET_THRESHOLD_MS, stance);
 
   // Rushing: recent mean < -threshold, prior near-neutral.
-  if (
-    recentMean < -TREND_OFFSET_THRESHOLD_MS &&
-    priorMean >= -TREND_PRIOR_NEUTRAL_MS
-  ) {
+  if (recentMean < -leanMs && priorMean >= -TREND_PRIOR_NEUTRAL_MS) {
     const confirmations = state.trendConfirmations.rushing + 1;
     const tier: Tier =
       confirmations >= TREND_CONFIRMATION_REQUIRED ? "spoken" : "written";
@@ -1023,10 +1039,7 @@ function detectTrend(
   }
 
   // Dragging: mirror.
-  if (
-    recentMean > TREND_OFFSET_THRESHOLD_MS &&
-    priorMean <= TREND_PRIOR_NEUTRAL_MS
-  ) {
+  if (recentMean > leanMs && priorMean <= TREND_PRIOR_NEUTRAL_MS) {
     const confirmations = state.trendConfirmations.dragging + 1;
     const tier: Tier =
       confirmations >= TREND_CONFIRMATION_REQUIRED ? "spoken" : "written";
@@ -1082,6 +1095,7 @@ function detectTrend(
 function detectBias(
   _state: GatekeeperState,
   window: BeatFeedback[],
+  stance?: CoachStance,
 ): Detection | null {
   if (window.length < ACCURACY_DROP_WINDOW) return null;
   const recent = window.slice(-ACCURACY_DROP_WINDOW);
@@ -1091,7 +1105,8 @@ function detectBias(
   if (hits.length < BIAS_MIN_HITS) return null;
 
   const m = hits.reduce((a, b) => a + b.deviationMs, 0) / hits.length;
-  if (Math.abs(m) <= BIAS_MEAN_THRESHOLD_MS) return null;
+  // 12 ms strict, 18 ms while learning. ROADMAP 1.5.
+  if (Math.abs(m) <= scaled(BIAS_MEAN_THRESHOLD_MS, stance)) return null;
 
   const variance =
     hits.reduce((a, b) => a + (b.deviationMs - m) ** 2, 0) / hits.length;
@@ -1366,7 +1381,7 @@ export function evaluate(
   // emitting — see the `probeAccuracyDrop` docstring. Both branches
   // (drop / clean) update `accuracyDropConfirmations`; only a
   // confirmed drop also commits an event.
-  const dropProbe = probeAccuracyDrop(working, ctx.window);
+  const dropProbe = probeAccuracyDrop(working, ctx.window, ctx.stance);
   if (dropProbe.kind === "drop") {
     if (dropProbe.confirmations < ACCURACY_DROP_CONFIRMATIONS) {
       // Sub-threshold: persist the bumped counter so the next
@@ -1456,7 +1471,7 @@ export function evaluate(
   }
 
   // 5. Trends — written initially, spoken on confirmation.
-  const trend = detectTrend(working, ctx.window);
+  const trend = detectTrend(working, ctx.window, ctx.stance);
   if (trend && trend.partialState) {
     working = { ...working, ...trend.partialState };
   }
@@ -1482,7 +1497,7 @@ export function evaluate(
 
   // 5.5. Bias-only: consistent offset with low scatter. Written tier
   // only — a gentle calibration note, not an accuracy alarm.
-  const bias = detectBias(working, ctx.window);
+  const bias = detectBias(working, ctx.window, ctx.stance);
   if (
     bias &&
     passesAllGates(working, bias.scenario, bias.tier, ctx.now, ctx.inDrillRamp, ctx.verbosity)
@@ -1535,11 +1550,29 @@ function applyFirstBeatsRule(
   event: GatekeeperEvent,
   ctx: GatekeeperContext,
 ): GatekeeperEvent {
-  if (event.tier !== "spoken") return event;
-  if (ctx.beatsInSegment === undefined) return event;
-  if (ctx.beatsInSegment >= FIRST_BEATS_TTS_FLOOR) return event;
-  if (isFirstBeatsExempt(event.scenario)) return event;
-  return { ...event, tier: "written" };
+  const staged = applyStanceRule(event, ctx);
+  if (staged.tier !== "spoken") return staged;
+  if (ctx.beatsInSegment === undefined) return staged;
+  if (ctx.beatsInSegment >= FIRST_BEATS_TTS_FLOOR) return staged;
+  if (isFirstBeatsExempt(staged.scenario)) return staged;
+  return { ...staged, tier: "written" };
+}
+
+/**
+ * Learning mode's second effect: a correction stops interrupting.
+ *
+ * Runs ahead of the first-beats rule — both only ever demote, so the
+ * order changes nothing, but every event reaching `commit` passes
+ * through here and that is the property worth keeping. Milestones,
+ * recoveries and the boundary signals keep their voice; see
+ * `learningMode.tierFor` for why.
+ */
+function applyStanceRule(
+  event: GatekeeperEvent,
+  ctx: GatekeeperContext,
+): GatekeeperEvent {
+  const tier = tierFor(event.scenario, event.tier, ctx.stance);
+  return tier === event.tier ? event : { ...event, tier };
 }
 
 // ---------------------------------------------------------------------------
