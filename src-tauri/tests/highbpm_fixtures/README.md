@@ -23,6 +23,31 @@ Layer-2 raw-onset regression fixtures for the `highbpm_fixtures` test suite.
 
 All fixtures use the `electric-guitar` instrument profile.
 
+## The two sub-directories
+
+`played/` and `scheduled/` hold a different kind of fixture from the
+nine above. Those are baked onset lists; these are *situations*, and the
+harness drives the shipped code over them before it scores anything.
+
+| Directory | What the input says | What it drives | Golden |
+|---|---|---|---|
+| (this one) | a finished onset list + expected beats | `match_and_score` | `SessionReport` |
+| `played/` | a click, a rhythm played over it, a tempo | `TempoContext` + `RefractoryGate` + `RhythmInference` + `virtual_tick_offsets`, then `match_and_score` | `SessionReport` |
+| `scheduled/` | where the quarters fell, the score, what the player did — all in beats | `BeatMap` + `match_attempt` | `ScheduleReport` |
+
+A `played/` input names a divisor the player is on, or (roadmap 1.4) an
+`alternatingDivisors` list they change between at each bar line; the
+grid each quarter is scored against is then the one the analyzer
+believed at that quarter, so transition latency shows up in the score.
+
+A `scheduled/` input is roadmap 2.4: it carries the beat log as
+`quarterTimesMs`, the `ScoreSchedule` exactly as the wire contract has
+it, and `played` as beats — turned into times *through that beat map*,
+which is the only honest way to do it and what the tempo-step fixture
+exists to prove. Its `expect` block says in words which notes must be
+missed and which extras reported; the golden beside it catches
+everything the words do not.
+
 ## Adding a fixture
 
 1. Add a row to `src/bin/seed-highbpm-fixtures.rs` (the `build_fixtures()` function).

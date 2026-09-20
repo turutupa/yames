@@ -32,6 +32,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use yames_lib::instrument::Instrument;
+use yames_lib::score::{
+    match_attempt, BeatMap, OnsetState, PlayedOnset, ScheduleReport, ScoreSchedule,
+};
 use yames_lib::session::SessionReport;
 use yames_lib::session_log::{match_and_score, DetectedOnset, ExpectedBeat, Xorshift64};
 use yames_lib::timing::{
@@ -678,6 +681,306 @@ fn played_grid_fixtures_hold() {
     assert!(
         failures.is_empty(),
         "Roadmap-1.3 played-grid regression(s):\n  - {}",
+        failures.join("\n  - "),
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Roadmap 2.4 — scored against a known schedule.
+//
+// `score::tests` asserts the behaviour of the matcher; these assert the
+// numbers, on disk, where the next person to touch `match_attempt` can
+// re-run them and read the diff. The three the brief names are here:
+// the dotted-eighth phrase (right, a note dropped, a note added), the
+// looped two-bar schedule with a different mistake each pass, and the
+// tempo step at a bar line.
+//
+// A fixture is a SITUATION, not a baked onset list. It carries the beat
+// map as the quarter times the engine would have logged, the schedule as
+// the contract has it, and what the player did in beats — turned into
+// times through that beat map, which is the only honest way to do it and
+// the thing the tempo-step fixture exists to prove. The `expect` block
+// is what a human reads; the golden `ScheduleReport` beside it is what
+// catches a change nobody meant to make.
+// ---------------------------------------------------------------------------
+
+/// A note the player made, said in the frame the score is written in.
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PlayedNoteSpec {
+    /// Quarter notes from the start of the played range. On a looping
+    /// schedule this keeps counting past `lengthBeats` into pass 1.
+    beat: f64,
+    /// Human error, on top of where that beat actually fell.
+    #[serde(default)]
+    offset_ms: f64,
+    #[serde(default = "default_amplitude")]
+    amplitude: f32,
+    #[serde(default = "default_confidence")]
+    confidence: f32,
+}
+
+fn default_amplitude() -> f32 {
+    0.6
+}
+fn default_confidence() -> f32 {
+    1.0
+}
+
+/// What the fixture says must be true, in the words the brief uses.
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ScheduledExpect {
+    min_score: Option<f32>,
+    max_score: Option<f32>,
+    /// Expected-onset ids that must come back a miss, with the pass
+    /// they must come back on. Every other onset must be a hit or a
+    /// `softAbsent` listed below.
+    #[serde(default)]
+    misses: Vec<(u32, u32)>,
+    #[serde(default)]
+    soft_absent: Vec<(u32, u32)>,
+    /// Beats the extras must be reported at, with their pass.
+    #[serde(default)]
+    extras: Vec<(u32, f64)>,
+    passes: u32,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ScheduledSpec {
+    name: String,
+    #[allow(dead_code)]
+    description: String,
+    /// Where the quarter notes actually fell, in ms — the beat log. A
+    /// tempo step is a change of spacing in here and nowhere else.
+    quarter_times_ms: Vec<f64>,
+    schedule: ScoreSchedule,
+    played: Vec<PlayedNoteSpec>,
+    expect: ScheduledExpect,
+}
+
+fn scheduled_fixtures_dir() -> PathBuf {
+    fixtures_dir().join("scheduled")
+}
+
+fn collect_scheduled_specs() -> Vec<PathBuf> {
+    let dir = scheduled_fixtures_dir();
+    let mut out = Vec::new();
+    if !dir.exists() {
+        return out;
+    }
+    for entry in fs::read_dir(&dir).expect("read highbpm_fixtures/scheduled dir") {
+        let path = entry.expect("read dir entry").path();
+        let name = match path.file_name().and_then(|n| n.to_str()) {
+            Some(n) => n.to_string(),
+            None => continue,
+        };
+        if name.ends_with(".input.json") {
+            out.push(path);
+        }
+    }
+    out.sort();
+    out
+}
+
+#[test]
+fn scheduled_fixtures_hold() {
+    let specs = collect_scheduled_specs();
+    assert!(
+        !specs.is_empty(),
+        "No roadmap-2.4 fixtures found in {}",
+        scheduled_fixtures_dir().display(),
+    );
+
+    let update_mode = std::env::var("UPDATE_FIXTURES")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
+    let weights = Instrument::ElectricGuitar.profile().score_weights;
+    let mut failures = Vec::new();
+
+    for spec_path in &specs {
+        let raw = fs::read_to_string(spec_path)
+            .unwrap_or_else(|e| panic!("read {}: {e}", spec_path.display()));
+        let spec: ScheduledSpec = serde_json::from_str(&raw)
+            .unwrap_or_else(|e| panic!("parse {}: {e}", spec_path.display()));
+
+        let beats = BeatMap::from_quarter_times(spec.quarter_times_ms.clone());
+        let mut played: Vec<PlayedOnset> = spec
+            .played
+            .iter()
+            .map(|p| PlayedOnset {
+                time_ms: beats
+                    .time_at_beat(p.beat)
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "[{}] beat {} is off the end of the beat log — the fixture's \
+                             quarterTimesMs is shorter than what it says was played",
+                            spec.name, p.beat,
+                        )
+                    })
+                    + p.offset_ms,
+                amplitude: p.amplitude,
+                confidence: p.confidence,
+            })
+            .collect();
+        played.sort_by(|a, b| a.time_ms.partial_cmp(&b.time_ms).unwrap());
+
+        let report = match_attempt(&spec.schedule, &beats, &played, &weights);
+
+        eprintln!(
+            "  [{}] score {:.1}, {} passes, {} hits, {} misses, {} soft-absent, {} extras",
+            spec.name,
+            report.score,
+            report.passes,
+            report
+                .results
+                .iter()
+                .filter(|r| r.state == OnsetState::Hit)
+                .count(),
+            report
+                .results
+                .iter()
+                .filter(|r| r.state == OnsetState::Miss)
+                .count(),
+            report
+                .results
+                .iter()
+                .filter(|r| r.state == OnsetState::SoftAbsent)
+                .count(),
+            report.extras.len(),
+        );
+
+        let mut check = |ok: bool, msg: String| {
+            if !ok {
+                failures.push(format!("[{}] {msg}", spec.name));
+            }
+        };
+
+        check(
+            report.passes == spec.expect.passes,
+            format!(
+                "played {} times round, the fixture says {}",
+                report.passes, spec.expect.passes
+            ),
+        );
+        if let Some(min) = spec.expect.min_score {
+            check(
+                report.score >= min,
+                format!("scored {:.1} against a gate of {min}", report.score),
+            );
+        }
+        if let Some(max) = spec.expect.max_score {
+            check(
+                report.score <= max,
+                format!("scored {:.1}, over its ceiling of {max}", report.score),
+            );
+        }
+
+        let mut missed: Vec<(u32, u32)> = report
+            .results
+            .iter()
+            .filter(|r| r.state == OnsetState::Miss)
+            .map(|r| (r.pass, r.id))
+            .collect();
+        missed.sort_unstable();
+        let mut want_missed = spec.expect.misses.clone();
+        want_missed.sort_unstable();
+        check(
+            missed == want_missed,
+            format!("misses were {missed:?}, the fixture says {want_missed:?}"),
+        );
+
+        let mut soft: Vec<(u32, u32)> = report
+            .results
+            .iter()
+            .filter(|r| r.state == OnsetState::SoftAbsent)
+            .map(|r| (r.pass, r.id))
+            .collect();
+        soft.sort_unstable();
+        let mut want_soft = spec.expect.soft_absent.clone();
+        want_soft.sort_unstable();
+        check(
+            soft == want_soft,
+            format!("soft-absent were {soft:?}, the fixture says {want_soft:?}"),
+        );
+
+        check(
+            report.extras.len() == spec.expect.extras.len(),
+            format!(
+                "reported {} extras, the fixture says {}",
+                report.extras.len(),
+                spec.expect.extras.len()
+            ),
+        );
+        for (want_pass, want_beat) in &spec.expect.extras {
+            let found = report
+                .extras
+                .iter()
+                .any(|e| e.pass == *want_pass && (e.beat - want_beat).abs() < 1e-6);
+            check(
+                found,
+                format!(
+                    "no extra at beat {want_beat} on pass {want_pass}; got {:?}",
+                    report
+                        .extras
+                        .iter()
+                        .map(|e| (e.pass, e.beat))
+                        .collect::<Vec<_>>()
+                ),
+            );
+        }
+
+        // The golden. Compared through the same parse both sides, for
+        // the reason spelled out in `played_grid_fixtures_hold`:
+        // serde_json's default float parsing is not bit-exact, and a
+        // deviation of 3.8938775510204082 does not survive a round trip
+        // unchanged. Every number in here is a float.
+        let golden_file = golden_path(spec_path);
+        let actual_json =
+            serde_json::to_string_pretty(&report).expect("serialize ScheduleReport");
+        if update_mode {
+            fs::write(&golden_file, format!("{actual_json}\n"))
+                .unwrap_or_else(|e| panic!("write {}: {e}", golden_file.display()));
+            eprintln!("  UPDATED {}", golden_file.display());
+            continue;
+        }
+        if !golden_file.exists() {
+            failures.push(format!(
+                "[{}] no golden at {} — run `UPDATE_FIXTURES=1 node scripts/rust-test.mjs \
+                 --test highbpm_fixtures` to create it",
+                spec.name,
+                golden_file.display(),
+            ));
+            continue;
+        }
+        let golden_raw = fs::read_to_string(&golden_file)
+            .unwrap_or_else(|e| panic!("read {}: {e}", golden_file.display()));
+        let golden: ScheduleReport = serde_json::from_str(&golden_raw)
+            .unwrap_or_else(|e| panic!("parse {}: {e}", golden_file.display()));
+        let golden_json =
+            serde_json::to_string_pretty(&golden).expect("re-serialize golden ScheduleReport");
+        let actual_norm = serde_json::to_string_pretty(
+            &serde_json::from_str::<ScheduleReport>(&actual_json)
+                .expect("round-trip actual ScheduleReport"),
+        )
+        .expect("re-serialize actual ScheduleReport");
+        if actual_norm != golden_json {
+            failures.push(format!(
+                "[{}] ScheduleReport drifted.\n  actual:\n{}\n  golden:\n{}",
+                spec.name, actual_norm, golden_json,
+            ));
+        }
+    }
+
+    if update_mode {
+        return;
+    }
+
+    assert!(
+        failures.is_empty(),
+        "Roadmap-2.4 scheduled-fixture regression(s):\n  - {}",
         failures.join("\n  - "),
     );
 }

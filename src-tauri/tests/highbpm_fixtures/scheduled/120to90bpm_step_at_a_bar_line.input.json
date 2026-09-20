@@ -1,0 +1,456 @@
+{
+  "name": "120to90bpm_step_at_a_bar_line",
+  "description": "Eighths through four bars; the tempo steps from 120 to 90 at bar 3. Nothing here is told either number \u2014 the schedule is in beats and the beat map is where the quarters actually fell. If the matcher ever starts computing a time from a BPM, every note after the step drifts by about 40 ms a beat and this goes red. That is the 2026-09-04 dropped-notification lesson, as a file.",
+  "quarterTimesMs": [
+    0.0,
+    500.0,
+    1000.0,
+    1500.0,
+    2000.0,
+    2500.0,
+    3000.0,
+    3500.0,
+    4000.0,
+    4666.666666666667,
+    5333.333333333334,
+    6000.000000000001,
+    6666.666666666668,
+    7333.333333333335,
+    8000.000000000002,
+    8666.666666666668,
+    9333.333333333334,
+    10000.0,
+    10666.666666666666,
+    11333.333333333332
+  ],
+  "schedule": {
+    "onsets": [
+      {
+        "id": 0,
+        "beat": 0.0,
+        "noteIds": [
+          0
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 1,
+        "beat": 0.5,
+        "noteIds": [
+          1
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 2,
+        "beat": 1.0,
+        "noteIds": [
+          2
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 3,
+        "beat": 1.5,
+        "noteIds": [
+          3
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 4,
+        "beat": 2.0,
+        "noteIds": [
+          4
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 5,
+        "beat": 2.5,
+        "noteIds": [
+          5
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 6,
+        "beat": 3.0,
+        "noteIds": [
+          6
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 7,
+        "beat": 3.5,
+        "noteIds": [
+          7
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 8,
+        "beat": 4.0,
+        "noteIds": [
+          8
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 9,
+        "beat": 4.5,
+        "noteIds": [
+          9
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 10,
+        "beat": 5.0,
+        "noteIds": [
+          10
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 11,
+        "beat": 5.5,
+        "noteIds": [
+          11
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 12,
+        "beat": 6.0,
+        "noteIds": [
+          12
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 13,
+        "beat": 6.5,
+        "noteIds": [
+          13
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 14,
+        "beat": 7.0,
+        "noteIds": [
+          14
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 15,
+        "beat": 7.5,
+        "noteIds": [
+          15
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 16,
+        "beat": 8.0,
+        "noteIds": [
+          16
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 17,
+        "beat": 8.5,
+        "noteIds": [
+          17
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 18,
+        "beat": 9.0,
+        "noteIds": [
+          18
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 19,
+        "beat": 9.5,
+        "noteIds": [
+          19
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 20,
+        "beat": 10.0,
+        "noteIds": [
+          20
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 21,
+        "beat": 10.5,
+        "noteIds": [
+          21
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 22,
+        "beat": 11.0,
+        "noteIds": [
+          22
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 23,
+        "beat": 11.5,
+        "noteIds": [
+          23
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 24,
+        "beat": 12.0,
+        "noteIds": [
+          24
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 25,
+        "beat": 12.5,
+        "noteIds": [
+          25
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 26,
+        "beat": 13.0,
+        "noteIds": [
+          26
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 27,
+        "beat": 13.5,
+        "noteIds": [
+          27
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 28,
+        "beat": 14.0,
+        "noteIds": [
+          28
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 29,
+        "beat": 14.5,
+        "noteIds": [
+          29
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 30,
+        "beat": 15.0,
+        "noteIds": [
+          30
+        ],
+        "soft": false,
+        "accent": false
+      },
+      {
+        "id": 31,
+        "beat": 15.5,
+        "noteIds": [
+          31
+        ],
+        "soft": false,
+        "accent": false
+      }
+    ],
+    "lengthBeats": 16.0,
+    "loops": false
+  },
+  "played": [
+    {
+      "beat": 0.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 0.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 1.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 1.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 2.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 2.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 3.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 3.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 4.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 4.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 5.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 5.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 6.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 6.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 7.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 7.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 8.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 8.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 9.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 9.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 10.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 10.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 11.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 11.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 12.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 12.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 13.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 13.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 14.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 14.5,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 15.0,
+      "offsetMs": 0.0
+    },
+    {
+      "beat": 15.5,
+      "offsetMs": 0.0
+    }
+  ],
+  "expect": {
+    "minScore": 85,
+    "passes": 1,
+    "misses": [],
+    "extras": []
+  }
+}
