@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "节拍器",
     "setlist": "曲目单",
-    "drill": "变速练习"
+    "drill": "变速练习",
+    "jam": "即兴伴奏"
   },
   "tooltip": {
     "zen": "禅意",
@@ -21,10 +22,12 @@
     "short": "音量"
   },
   "presets": {
+    "unsavedMetronome": "未保存的节拍器",
+    "unsavedDrill": "未保存的变速练习",
     "title": "预设",
     "titleDrill": "变速练习",
     "titleSetlist": "曲目单",
-    "saveCurrent": "保存当前设置",
+    "titleJam": "即兴伴奏",
     "search": "搜索资料库",
     "searchPlaceholder": "搜索…",
     "namePlaceholder": "名称…",
@@ -40,7 +43,9 @@
     "revert": "还原",
     "revertTooltip": "放弃更改并重新加载预设",
     "save": "保存预设",
-    "delete": "删除"
+    "delete": "删除",
+    "newPreset": "新建预设",
+    "newDrill": "新建练习"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "正在聆听",
     "inputOff": "输入已关闭",
     "coachOnPlay": "按下播放后教练开始聆听",
-    "coachQuiet": "教练在每一步中途保持安静"
+    "coachQuiet": "教练在每一步中途保持安静",
+    "countIn": "预备拍"
   },
   "rail": {
     "label": "模式与资料库",
@@ -76,6 +82,7 @@
     "collapse": "折叠侧边栏",
     "expand": "展开侧边栏",
     "collapseWithShortcut": "折叠侧边栏 ({{shortcut}})",
-    "expandWithShortcut": "展开侧边栏 ({{shortcut}})"
+    "expandWithShortcut": "展开侧边栏 ({{shortcut}})",
+    "beta": "测试版"
   }
 }

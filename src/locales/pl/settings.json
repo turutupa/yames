@@ -138,6 +138,9 @@
     "devices": {
       "title": "Urządzenia",
       "audioOutput": "Wyjście audio",
+      "outputPair": "Wyjścia",
+      "outputsPair": "Wyjścia {{a}}-{{b}}",
+      "outputPairFallback": "To urządzenie udostępnia tylko dwa wyjścia, więc klik gra na wyjściach 1-2.",
       "refreshAudio": "Odśwież urządzenia audio",
       "btLatencyWarning": "Bluetooth dodaje spore opóźnienie. Wskazania wizualne i dźwięk mogą nie być idealnie zsynchronizowane.",
       "audioInput": "Wejście audio",
@@ -173,7 +176,8 @@
       "groups": {
         "metronome": "Metronom",
         "view": "Widok",
-        "navigation": "Nawigacja"
+        "navigation": "Nawigacja",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Odtwarzaj / Zatrzymaj",
@@ -195,9 +199,19 @@
         "tab-1": "Zakładka Metronom",
         "tab-2": "Zakładka Setlista",
         "tab-3": "Zakładka Rozbieg",
+        "tab-4": "Zakładka Jam",
         "settings": "Ustawienia",
         "toggle-sidebar": "Przełącz panel boczny",
-        "toggle-coach": "Przełącz Trenera"
+        "toggle-coach": "Przełącz Trenera",
+        "jam-next-groove": "Następny groove",
+        "jam-prev-groove": "Poprzedni groove",
+        "jam-trade": "Wymiana",
+        "jam-dropout": "Takty ciszy",
+        "jam-next-shape": "Następny chwyt",
+        "jam-next-section": "Następna część",
+        "jam-prev-section": "Poprzednia część",
+        "jam-loop-section": "Zapętl tę część",
+        "jam-take": "Nagraj takę"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -219,9 +233,19 @@
         "tab-1": "Przełącz na zakładkę Metronom",
         "tab-2": "Przełącz na zakładkę Setlista",
         "tab-3": "Przełącz na zakładkę Rozbieg",
+        "tab-4": "Przełącz na zakładkę Jam",
         "settings": "Otwórz lub zamknij ustawienia",
         "toggle-sidebar": "Zwija lub rozwija lewy panel boczny",
-        "toggle-coach": "Otwórz lub zamknij panel trenera"
+        "toggle-coach": "Otwórz lub zamknij panel trenera",
+        "jam-next-groove": "Przejść do następnego groove'u bez odrywania rąk od instrumentu",
+        "jam-prev-groove": "Wrócić do poprzedniego groove'u",
+        "jam-trade": "Włączyć lub wyłączyć wymianę — cztery takty zespół, cztery ty",
+        "jam-dropout": "Włączyć lub wyłączyć takty ciszy",
+        "jam-next-shape": "Przewijać chwyty bieżącego akordu",
+        "jam-next-section": "Skoczyć na kresce taktowej na początek następnej części",
+        "jam-prev-section": "Wrócić na kresce taktowej na początek poprzedniej części",
+        "jam-loop-section": "Zapętlić część, w której jesteś, albo pętlę wyłączyć",
+        "jam-take": "Nagraj przy następnym starcie albo przerwij nagrywanie"
       }
     },
     "inputTest": {
@@ -272,6 +296,8 @@
       "updating": "Aktualizuję…",
       "upToDate": "Najnowsza wersja ✓",
       "checkUpdates": "Sprawdź aktualizacje",
+      "sounds": "Dźwięki",
+      "soundsCredit": "Zestaw Klub to Virtuosity Drums od Versilian Studios i Karoryfer Samples, zagrany przez Austina McMahona (domena publiczna). Zestaw Studio to DRSKit z projektu DrumGizmo (CC BY 4.0).",
       "madeWith": "Stworzone z {{heart}} dla muzyków na całym świecie"
     }
   },

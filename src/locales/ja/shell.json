@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "メトロノーム",
     "setlist": "セットリスト",
-    "drill": "テンポ練習"
+    "drill": "テンポ練習",
+    "jam": "ジャム"
   },
   "tooltip": {
     "zen": "禅",
@@ -21,10 +22,12 @@
     "short": "音量"
   },
   "presets": {
+    "unsavedMetronome": "未保存のメトノーム",
+    "unsavedDrill": "未保存のテンポ練習",
     "title": "プリセット",
     "titleDrill": "テンポ練習",
     "titleSetlist": "セットリスト",
-    "saveCurrent": "現在の設定を保存",
+    "titleJam": "ジャム",
     "search": "ライブラリを検索",
     "searchPlaceholder": "検索…",
     "namePlaceholder": "名前…",
@@ -40,7 +43,9 @@
     "revert": "元に戻す",
     "revertTooltip": "変更を破棄してプリセットを読み込み直す",
     "save": "プリセットを保存",
-    "delete": "削除"
+    "delete": "削除",
+    "newPreset": "新しいプリセット",
+    "newDrill": "新しいドリル"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "聴いています",
     "inputOff": "入力オフ",
     "coachOnPlay": "再生するとコーチが聴き始めます",
-    "coachQuiet": "ステップの途中ではコーチは黙っています"
+    "coachQuiet": "ステップの途中ではコーチは黙っています",
+    "countIn": "カウントイン"
   },
   "rail": {
     "label": "モードとライブラリ",
@@ -76,6 +82,7 @@
     "collapse": "サイドバーを折りたたむ",
     "expand": "サイドバーを展開",
     "collapseWithShortcut": "サイドバーを折りたたむ ({{shortcut}})",
-    "expandWithShortcut": "サイドバーを展開 ({{shortcut}})"
+    "expandWithShortcut": "サイドバーを展開 ({{shortcut}})",
+    "beta": "ベータ"
   }
 }

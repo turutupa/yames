@@ -9,7 +9,8 @@ Quick reference for Claude / Wibey / other coding agents working in this repo.
 - **Package manager**: project uses **bun** locally, but Tauri's
   `beforeDevCommand` / `beforeBuildCommand` invoke **npm** (see
   `src-tauri/tauri.conf.json`)
-- **Test runner**: Vitest (`bun run test`) + cargo (`bun run test:rust`)
+- **Test runner**: Vitest (`bun run test`) + cargo (`bun run test:rust`) +
+  Playwright for layout (`npm run test:layout`, see `tests/layout/README.md`)
 
 ## Running the app
 
@@ -121,6 +122,14 @@ $HOME/.local/bin/bun run tsc --noEmit   # strict TS, no emit
 $HOME/.local/bin/bun run test           # Vitest unit suite
 $HOME/.local/bin/bun run build          # tsc + vite production build
 ```
+
+**If you touched a stylesheet or the shape of a screen, add
+`npm run test:layout`.** Vitest runs in happy-dom, which computes no geometry
+— every element there is zero by zero — so "the control is outside its row"
+and "the menu opens off the edge of the window" are invisible to all four
+thousand unit tests. Both of those shipped. The layout suite drives the real
+UI in a real browser at four window widths and measures the rectangles; it
+takes about ninety seconds. See `tests/layout/README.md`.
 
 Only once these are green should you spin up `tauri dev` to verify the app
 actually opens.

@@ -1,0 +1,52 @@
+{
+  "id": "tight",
+  "name": "Tight",
+  "credit": "Synthesised by Yames — scripts/generate_sounds.py --kits",
+  "licence": "GPL-3.0-or-later",
+  "rate": 44100,
+  "channels": 1,
+  "drive": 1.0,
+  "voices": {
+    "kick": {
+      "layers": 1,
+      "rr": 1,
+      "trim_db": 0.0
+    },
+    "snare": {
+      "layers": 2,
+      "rr": 1,
+      "trim_db": 0.0
+    },
+    "rim": {
+      "layers": 1,
+      "rr": 1,
+      "trim_db": 0.0
+    },
+    "hat": {
+      "layers": 1,
+      "rr": 1,
+      "trim_db": 0.0,
+      "pan": 0.15
+    },
+    "hat_open": {
+      "layers": 1,
+      "rr": 1,
+      "trim_db": 0.0,
+      "pan": 0.15,
+      "choked_by": [
+        "hat",
+        "hat_pedal"
+      ]
+    },
+    "ride": {
+      "layers": 1,
+      "rr": 1,
+      "trim_db": 0.0
+    },
+    "crash": {
+      "layers": 1,
+      "rr": 1,
+      "trim_db": 0.0
+    }
+  }
+}

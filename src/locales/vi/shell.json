@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Máy đếm nhịp",
     "setlist": "Setlist",
-    "drill": "Luyện tempo"
+    "drill": "Luyện tempo",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Thiền",
@@ -21,10 +22,12 @@
     "short": "Âm"
   },
   "presets": {
+    "unsavedMetronome": "Máy đếm nhịp chưa lưu",
+    "unsavedDrill": "Bài luyện tempo chưa lưu",
     "title": "Cài đặt sẵn",
     "titleDrill": "Bài luyện tempo",
     "titleSetlist": "Setlist",
-    "saveCurrent": "Lưu cài đặt hiện tại",
+    "titleJam": "Jam",
     "search": "Tìm trong thư viện",
     "searchPlaceholder": "Tìm kiếm...",
     "namePlaceholder": "Tên...",
@@ -40,7 +43,9 @@
     "revert": "Hoàn tác",
     "revertTooltip": "Bỏ thay đổi và tải lại cài đặt sẵn",
     "save": "Lưu cài đặt sẵn",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "newPreset": "Cài đặt mới",
+    "newDrill": "Bài tập mới"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Đang nghe",
     "inputOff": "Tắt đầu vào",
     "coachOnPlay": "Huấn luyện viên nghe khi bạn bấm phát",
-    "coachQuiet": "Huấn luyện viên im lặng giữa mỗi bước"
+    "coachQuiet": "Huấn luyện viên im lặng giữa mỗi bước",
+    "countIn": "Đếm vào"
   },
   "rail": {
     "label": "Chế độ và thư viện",
@@ -76,6 +82,7 @@
     "collapse": "Thu gọn thanh bên",
     "expand": "Mở rộng thanh bên",
     "collapseWithShortcut": "Thu gọn thanh bên ({{shortcut}})",
-    "expandWithShortcut": "Mở rộng thanh bên ({{shortcut}})"
+    "expandWithShortcut": "Mở rộng thanh bên ({{shortcut}})",
+    "beta": "Bản thử"
   }
 }

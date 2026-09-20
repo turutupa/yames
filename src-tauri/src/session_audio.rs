@@ -94,6 +94,49 @@ pub fn is_enabled() -> bool {
     }
 }
 
+/// The 44-byte header of a mono 16-bit PCM WAV holding `sample_count`
+/// samples at `sample_rate`.
+///
+/// Pulled out of [`SessionAudioRecorder::finish`] so `take.rs` writes byte
+/// for byte the same header: a take and a diagnostic dump are different
+/// features with opposite privacy rules, but they are the same file format,
+/// and two hand-written copies of a header is how one of them ends up with a
+/// wrong `byte_rate` that no test notices.
+///
+/// Note the polarity of the guard on this module: [`is_enabled`] is what
+/// keeps the diagnostic recorder out of release builds, and this function is
+/// not part of that — it writes no file and records nothing, it lays out
+/// forty-four bytes.
+pub(crate) fn wav_header_mono_16bit(sample_rate: u32, sample_count: u64) -> [u8; 44] {
+    let data_bytes = sample_count * BYTES_PER_SAMPLE;
+    // chunk_size = 36 (header tail) + data_bytes. Clamped to u32 max
+    // for the WAV spec — 2^32 / 96000 ≈ 12 hours of mono 16-bit audio
+    // so this is a defensive floor, not a realistic limit.
+    let chunk_size = (36u64 + data_bytes).min(u32::MAX as u64) as u32;
+    let data_size = data_bytes.min(u32::MAX as u64) as u32;
+
+    let mut header = [0u8; 44];
+    // RIFF chunk descriptor
+    header[0..4].copy_from_slice(b"RIFF");
+    header[4..8].copy_from_slice(&chunk_size.to_le_bytes());
+    header[8..12].copy_from_slice(b"WAVE");
+    // fmt sub-chunk
+    header[12..16].copy_from_slice(b"fmt ");
+    header[16..20].copy_from_slice(&16u32.to_le_bytes()); // fmt chunk size
+    header[20..22].copy_from_slice(&WAVE_FORMAT_PCM.to_le_bytes());
+    header[22..24].copy_from_slice(&NUM_CHANNELS.to_le_bytes());
+    header[24..28].copy_from_slice(&sample_rate.to_le_bytes());
+    let byte_rate = sample_rate as u64 * NUM_CHANNELS as u64 * BYTES_PER_SAMPLE;
+    header[28..32].copy_from_slice(&(byte_rate as u32).to_le_bytes());
+    let block_align = NUM_CHANNELS * (BITS_PER_SAMPLE / 8);
+    header[32..34].copy_from_slice(&block_align.to_le_bytes());
+    header[34..36].copy_from_slice(&BITS_PER_SAMPLE.to_le_bytes());
+    // data sub-chunk
+    header[36..40].copy_from_slice(b"data");
+    header[40..44].copy_from_slice(&data_size.to_le_bytes());
+    header
+}
+
 /// Stream-to-disk WAV recorder. Created at session start, fed samples
 /// during capture, finalized at session stop.
 pub struct SessionAudioRecorder {
@@ -157,32 +200,7 @@ impl SessionAudioRecorder {
             .into_inner()
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
 
-        let data_bytes = self.sample_count * BYTES_PER_SAMPLE;
-        // chunk_size = 36 (header tail) + data_bytes. Clamped to u32 max
-        // for the WAV spec — 2^32 / 96000 ≈ 12 hours of mono 16-bit audio
-        // so this is a defensive floor, not a realistic limit.
-        let chunk_size = (36u64 + data_bytes).min(u32::MAX as u64) as u32;
-        let data_size = data_bytes.min(u32::MAX as u64) as u32;
-
-        let mut header = [0u8; 44];
-        // RIFF chunk descriptor
-        header[0..4].copy_from_slice(b"RIFF");
-        header[4..8].copy_from_slice(&chunk_size.to_le_bytes());
-        header[8..12].copy_from_slice(b"WAVE");
-        // fmt sub-chunk
-        header[12..16].copy_from_slice(b"fmt ");
-        header[16..20].copy_from_slice(&16u32.to_le_bytes()); // fmt chunk size
-        header[20..22].copy_from_slice(&WAVE_FORMAT_PCM.to_le_bytes());
-        header[22..24].copy_from_slice(&NUM_CHANNELS.to_le_bytes());
-        header[24..28].copy_from_slice(&self.sample_rate.to_le_bytes());
-        let byte_rate = self.sample_rate as u64 * NUM_CHANNELS as u64 * BYTES_PER_SAMPLE;
-        header[28..32].copy_from_slice(&(byte_rate as u32).to_le_bytes());
-        let block_align = NUM_CHANNELS * (BITS_PER_SAMPLE / 8);
-        header[32..34].copy_from_slice(&block_align.to_le_bytes());
-        header[34..36].copy_from_slice(&BITS_PER_SAMPLE.to_le_bytes());
-        // data sub-chunk
-        header[36..40].copy_from_slice(b"data");
-        header[40..44].copy_from_slice(&data_size.to_le_bytes());
+        let header = wav_header_mono_16bit(self.sample_rate, self.sample_count);
 
         file.seek(SeekFrom::Start(0))?;
         file.write_all(&header)?;

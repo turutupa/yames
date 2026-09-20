@@ -5,13 +5,17 @@ import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import type { AppState, Setlist, Preset } from "../../types";
+import type { Jam } from "../../jam/types";
 import type { MainView } from "./MainHeader";
+import type { PlayTab } from "./hooks/useTabRouting";
 
 interface RailProps {
   state: AppState;
   view: MainView;
   setView: (v: MainView) => void;
-  prevTab: { current: "beat" | "drill" | "setlist" };
+  prevTab: { current: PlayTab };
+  /** The mode the app is in — under Settings, the one Settings covers. */
+  mode?: PlayTab;
   /** The library section — the rail itself is always visible. */
   libraryOpen: boolean;
   onToggleLibrary: () => void;
@@ -25,6 +29,20 @@ interface RailProps {
   onNewSetlist: () => void;
   onDeleteSetlist: (id: string) => void;
   onRenameSetlist: (id: string, name: string) => void;
+  onDuplicateSetlist: (id: string) => void;
+  /** A setlist dragged to a new place in the library, as a jam can be. */
+  onReorderSetlists: (from: number, to: number) => void;
+  /** The jam library, on the jam tab — the same deal setlists get (U9.4). */
+  jams: Jam[];
+  activeJamId: string | null;
+  onLoadJam: (jam: Jam) => void;
+  onNewJam: () => void;
+  onDeleteJam: (id: string) => void;
+  onRenameJam: (id: string, name: string) => void;
+  onDuplicateJam: (id: string) => void;
+  onReorderJams: (from: number, to: number) => void;
+  /** A jam, into a setlist, from the library's own context menu (JAM_MODE 8.5). */
+  onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
   coachOpen: boolean;
   coachActive: boolean;
   coachListening: boolean;
@@ -75,6 +93,28 @@ const MODES = [
     labelKey: "nav.drill",
     icon: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
   },
+  {
+    id: "jam" as const,
+    labelKey: "nav.jam",
+    /**
+     * Four bars of different heights — the band's lanes, and the same glyph
+     * the jam boards use.
+     *
+     * Redrawn at the rail's 18px on stroke-2 round caps rather than lifted
+     * from the board, because every other icon in this list is a stroke and a
+     * filled block here would read as the selected one at a glance. The
+     * heights are deliberately uneven: four equal bars are a level meter, and
+     * a level meter is what the coach's row means.
+     */
+    icon: (
+      <>
+        <path d="M5 9v6" />
+        <path d="M10 5v14" />
+        <path d="M15 8v8" />
+        <path d="M20 11v2" />
+      </>
+    ),
+  },
 ];
 
 /**
@@ -96,6 +136,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     view,
     setView,
     prevTab,
+    mode,
     libraryOpen,
     onToggleLibrary,
     onLoadPreset,
@@ -107,6 +148,17 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onNewSetlist,
     onDeleteSetlist,
     onRenameSetlist,
+    onDuplicateSetlist,
+    onReorderSetlists,
+    jams,
+    activeJamId,
+    onLoadJam,
+    onNewJam,
+    onDeleteJam,
+    onRenameJam,
+    onDuplicateJam,
+    onReorderJams,
+    onAddJamToSetlist,
     coachOpen,
     coachActive,
     coachListening,
@@ -116,9 +168,10 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   sidebarRef,
 ) {
   const { t } = useTranslation();
-  // Settings is an overlay, not a library: it keeps whatever list was
-  // behind it, and "beat" is the one to fall back to.
-  const playView = view === "settings" ? "beat" : view;
+  // Settings is an overlay, not a library: it keeps whatever list was behind
+  // it. This said "beat" under Settings whatever the comment claimed, so
+  // opening Settings from the jam swapped the jam list for the presets.
+  const playView: PlayTab = view === "settings" ? (mode ?? prevTab.current) : view;
 
   // The mockup writes "Ready" at the right of the coach's row. Three words
   // rather than one, because the row already knows more than that: a session
@@ -140,31 +193,50 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     >
       <div className="rail-modes">
         {MODES.map((mode) => (
-          <button
+          /* The row is the entry, highlight and all, so `data-active` puts the
+             fill on the row rather than on the button inside it. It held a
+             second control once — a play glyph beside Jam — which is why it
+             is a row at all; the fill stopping at the button's edge and
+             leaving that glyph on the rail's own background is what made one
+             mode read as two. */
+          <div
+            className="rail-mode-row"
             key={mode.id}
-            className={`rail-mode ${view === mode.id ? "active" : ""}`}
-            // Below 620px the rail is icons only and the label is display:
-            // none, which leaves the button with no accessible name at all.
-            // The label is named here so it survives being hidden.
-            aria-label={t(mode.labelKey)}
-            data-tour={mode.id === "drill" ? "drill-tab" : undefined}
-            onClick={() => setView(mode.id)}
-            aria-current={view === mode.id ? "page" : undefined}
+            data-active={view === mode.id ? "" : undefined}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <button
+              className={`rail-mode ${view === mode.id ? "active" : ""}`}
+              // Below 620px the rail is icons only and the label is display:
+              // none, which leaves the button with no accessible name at all.
+              // The label is named here so it survives being hidden.
+              aria-label={t(mode.labelKey)}
+              data-tour={mode.id === "drill" ? "drill-tab" : undefined}
+              onClick={() => setView(mode.id)}
+              aria-current={view === mode.id ? "page" : undefined}
             >
-              {mode.icon}
-            </svg>
-            <span className="rail-mode-label">{t(mode.labelKey)}</span>
-          </button>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {mode.icon}
+              </svg>
+              <span className="rail-mode-label">{t(mode.labelKey)}</span>
+              {/* Jam is the newest mode and the one still changing under the
+                  people using it. The badge is not an apology — it is what
+                  tells a player that what they are looking at is new, so a
+                  thing that is wrong with it reads as worth reporting rather
+                  than as how the app is. It goes when the mode settles. */}
+              {mode.id === "jam" && (
+                <span className="rail-mode-badge">{t("rail.beta")}</span>
+              )}
+            </button>
+          </div>
         ))}
       </div>
 
@@ -184,6 +256,17 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onNewSetlist={onNewSetlist}
             onDeleteSetlist={onDeleteSetlist}
             onRenameSetlist={onRenameSetlist}
+            onDuplicateSetlist={onDuplicateSetlist}
+            onReorderSetlists={onReorderSetlists}
+            jams={jams}
+            activeJamId={activeJamId}
+            onLoadJam={onLoadJam}
+            onNewJam={onNewJam}
+            onDeleteJam={onDeleteJam}
+            onRenameJam={onRenameJam}
+            onDuplicateJam={onDuplicateJam}
+            onReorderJams={onReorderJams}
+            onAddJamToSetlist={onAddJamToSetlist}
           />
         )}
       </div>
@@ -286,12 +369,8 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           aria-label={t("tooltip.settings")}
           data-hint="midi-plugged"
           onClick={() => {
-            if (view === "settings") {
-              setView(prevTab.current);
-            } else {
-              prevTab.current = view === "drill" ? "drill" : "beat";
-              setView("settings");
-            }
+            // `setView` remembers the mode Settings covers; nothing here does.
+            setView(view === "settings" ? prevTab.current : "settings");
           }}
         >
           <span className="rail-action-icon">

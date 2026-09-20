@@ -29,6 +29,22 @@ export default defineConfig({
     poolOptions: {
       forks: {
         singleFork: false,
+        /*
+         * More heap than a fork gets by default.
+         *
+         * The cheat sheet's chart is twelve roots by twenty-seven chord
+         * types, and every cell is an inline SVG — three hundred-odd of them
+         * per render, and `JamView.test.tsx` renders the sheet a few dozen
+         * times. A real browser draws that without noticing; happy-dom
+         * builds a full object tree for every node and the worker ran out of
+         * memory. The limit was the test environment's, not the product's.
+         *
+         * `ChordDiagram` was made lighter at the same time and for the same
+         * reading — its twelve ruled `<line>`s became two `<path>`s — which
+         * is worth more to the app than to the tests. Do not raise this
+         * number again without first asking what is drawing so much.
+         */
+        execArgv: ["--max-old-space-size=6144"],
       },
     },
   },

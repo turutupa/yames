@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronom",
     "setlist": "Setlista",
-    "drill": "Rozbieg"
+    "drill": "Rozbieg",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Głoś."
   },
   "presets": {
+    "unsavedMetronome": "Niezapisany metronom",
+    "unsavedDrill": "Niezapisany rozbieg",
     "title": "Presety",
     "titleDrill": "Rozbiegi",
     "titleSetlist": "Setlisty",
-    "saveCurrent": "Zapisz bieżące ustawienia",
+    "titleJam": "Jamy",
     "search": "Szukaj w bibliotece",
     "searchPlaceholder": "Szukaj...",
     "namePlaceholder": "Nazwa...",
@@ -40,7 +43,9 @@
     "revert": "Przywróć",
     "revertTooltip": "Odrzuć zmiany i wczytaj preset ponownie",
     "save": "Zapisz preset",
-    "delete": "Usuń"
+    "delete": "Usuń",
+    "newPreset": "Nowy zestaw",
+    "newDrill": "Nowe ćwiczenie"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Słucham",
     "inputOff": "Wejście wyłączone",
     "coachOnPlay": "Trener słucha, gdy włączysz odtwarzanie",
-    "coachQuiet": "Trener milczy w trakcie kroku"
+    "coachQuiet": "Trener milczy w trakcie kroku",
+    "countIn": "Odliczenie"
   },
   "rail": {
     "label": "Tryby i biblioteka",
@@ -76,6 +82,7 @@
     "collapse": "Zwiń panel boczny",
     "expand": "Rozwiń panel boczny",
     "collapseWithShortcut": "Zwiń panel boczny ({{shortcut}})",
-    "expandWithShortcut": "Rozwiń panel boczny ({{shortcut}})"
+    "expandWithShortcut": "Rozwiń panel boczny ({{shortcut}})",
+    "beta": "Beta"
   }
 }

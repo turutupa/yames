@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronoom",
     "setlist": "Setlist",
-    "drill": "Tempotraining"
+    "drill": "Tempotraining",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Niet-opgeslagen metronoom",
+    "unsavedDrill": "Niet-opgeslagen tempotraining",
     "title": "Presets",
     "titleDrill": "Trainingen",
     "titleSetlist": "Setlists",
-    "saveCurrent": "Huidige instellingen opslaan",
+    "titleJam": "Jams",
     "search": "Zoeken in de bibliotheek",
     "searchPlaceholder": "Zoeken…",
     "namePlaceholder": "Naam…",
@@ -40,7 +43,9 @@
     "revert": "Herstellen",
     "revertTooltip": "Wijzigingen verwerpen en de preset opnieuw laden",
     "save": "Preset opslaan",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "newPreset": "Nieuwe preset",
+    "newDrill": "Nieuwe oefening"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Luistert",
     "inputOff": "Ingang uit",
     "coachOnPlay": "De coach luistert zodra je afspeelt",
-    "coachQuiet": "De coach zwijgt tijdens een stap"
+    "coachQuiet": "De coach zwijgt tijdens een stap",
+    "countIn": "Aftellen"
   },
   "rail": {
     "label": "Modi en bibliotheek",
@@ -76,6 +82,7 @@
     "collapse": "Zijbalk inklappen",
     "expand": "Zijbalk uitklappen",
     "collapseWithShortcut": "Zijbalk inklappen ({{shortcut}})",
-    "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})"
+    "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})",
+    "beta": "Bèta"
   }
 }

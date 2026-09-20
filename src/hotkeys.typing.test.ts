@@ -52,6 +52,28 @@ describe("isTypingTarget", () => {
     expect(isTypingTarget(window)).toBe(false);
   });
 
+  it("does not stand aside for a setlist step row — so the row itself must stop the key", () => {
+    /*
+     * A step row is `<div role="button" tabIndex={0}>` — focusable, but
+     * nothing you type into, so this guard lets ↑ and ↓ through to the tempo
+     * as it should. Shift+↑ on a focused row means "mark the step above", and
+     * the only thing standing between that gesture and a tempo change is the
+     * `stopPropagation` in `SetlistParagraph`'s own key handler. Written down
+     * here so that widening this guard to cover the row — which would be the
+     * tempting fix if the row ever nudged the BPM again — is a visible
+     * decision rather than a quiet one: it would take ↑ and ↓ away from every
+     * focused row in the app.
+     *
+     * This asserts only the premise. The protection itself is tested where it
+     * lives, in `SetlistParagraph.test.tsx` — "keeps every modified arrow off
+     * the tempo, including the ones that do nothing".
+     */
+    const row = el("div");
+    row.setAttribute("role", "button");
+    row.tabIndex = 0;
+    expect(isTypingTarget(row)).toBe(false);
+  });
+
   it("defaults an input with no type to typing", () => {
     // A bare <input> is a text field, and the fallback has to err towards
     // leaving the user alone while they type.

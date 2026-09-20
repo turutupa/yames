@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
+import { useJamLoading } from "../../hooks/useJamLoading";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
-  view: "beat" | "drill" | "setlist";
+  view: "beat" | "drill" | "setlist" | "jam";
   isPlaying: boolean;
   speedRampActive: boolean;
   isPulsing: boolean;
@@ -13,11 +14,26 @@ interface TransportProps {
   listening: boolean;
   hasSignal: boolean;
   playShortcut?: string;
-  /** Drill only — the tempo the ramp begins at, and its two run switches. */
-  startBpm: number;
+  /**
+   * Count the first bar in before anything starts. EVERY mode (2026-09-19).
+   *
+   * It used to be the drill's, sitting in the drill's own block beside the
+   * ramp's Loop — and so the metronome had none at all, the setlist kept
+   * one in the panel above its steps, and the jam's was a dropdown you had
+   * to open the setup drawer to find. The owner: "I think we should always
+   * have this option in the bottom bar, stays consistent across menus and
+   * user knows where to find it, plus its not JAM or song specific, its
+   * something you may expect from every mode."
+   *
+   * One meaning wherever it is: a bar counted at that mode's own meter,
+   * once, before the first beat. Nothing between setlist steps or jam
+   * choruses — "count in at the very beginning and that's it".
+   */
   countIn: boolean;
-  loop: boolean;
   onToggleCountIn: () => void;
+  /** Drill only — the tempo the ramp begins at, and the ramp's Loop. */
+  startBpm: number;
+  loop: boolean;
   onToggleLoop: () => void;
   onTogglePlayback: () => void;
   onStartSpeedRamp: () => void;
@@ -39,6 +55,36 @@ interface TransportProps {
    */
   setlistStartAt?: number;
   onSetlistSkip?: () => void;
+  /**
+   * Where the jam is in its form (JAM_MODE §4.2). `jamFormBars` is 0 when no
+   * jam is loaded and the whole block is absent.
+   *
+   * This replaces the plain bar counter rather than sitting beside it: on a
+   * jam the useful number is not how many bars have gone by, it is which bar
+   * of the twelve you are on — that is the thing people lose, and two bar
+   * counts in one row would be two answers to the same question.
+   */
+  jamFormBars?: number;
+  /** 0-based bar within the chorus, from the latest beat event. */
+  jamFormBar?: number;
+  /** 1-based chorus count. */
+  jamChorus?: number;
+  /**
+   * A take is being recorded (JAM_MODE §4.4).
+   *
+   * On the transport rather than inside the jam screen because the transport
+   * is the frame the button that started it sits in: the mark belongs beside
+   * Play, where the eye already is, and a microphone writing a file must
+   * never be invisible.
+   *
+   * It is never seen from another tab, and that is not an oversight. A take
+   * belongs to the jam on the engine, and leaving the Jam tab takes that jam
+   * off it — so the take ends there rather than going on recording your
+   * playing over a band that is no longer playing. See `useJamTakes`.
+   */
+  recording?: boolean;
+  /** Seconds of the take so far. */
+  recordedSeconds?: number;
 }
 
 function clock(totalSeconds: number): string {
@@ -124,11 +170,18 @@ export function Transport({
   setlistRemaining,
   setlistStartAt = 0,
   onSetlistSkip,
+  jamFormBars = 0,
+  jamFormBar = 0,
+  jamChorus = 1,
+  recording = false,
+  recordedSeconds = 0,
 }: TransportProps) {
   const { t } = useTranslation();
+  const jamLoading = useJamLoading();
   const running = view === "drill" ? speedRampActive : isPlaying;
   const anyRunning = isPlaying || speedRampActive;
   const setlisted = view === "setlist" && setlistStepCount > 0;
+  const jammed = view === "jam" && jamFormBars > 0;
 
   return (
     <div
@@ -142,6 +195,7 @@ export function Transport({
       // to the pixel, so the CSS has to be able to shed differently for it.
       data-setlist={setlisted ? "" : undefined}
       data-running={anyRunning ? "" : undefined}
+      data-recording={recording ? "" : undefined}
     >
       <button
         className={`transport-play ${anyRunning ? "playing" : ""} ${isPulsing ? "pulse" : ""}`}
@@ -186,6 +240,22 @@ export function Transport({
 
       {playShortcut && <kbd className="transport-key">{playShortcut}</kbd>}
 
+      {/* Count-in, in every mode and always here. It sits with Play rather
+          than with the mode's own settings because it is not a fact about
+          the music — the tempo, the key and the form are that, and they live
+          on the record. This is how you start playing THIS time, which is
+          the same category of thing as the button beside it. */}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={countIn}
+        className={`transport-switch ${countIn ? "on" : ""}`}
+        onClick={onToggleCountIn}
+      >
+        <span className="transport-switch-track" aria-hidden="true" />
+        {t("transport.countIn")}
+      </button>
+
       {/* Nothing has been counted yet, so there is nothing to say — a bar
           count of 1 and 0:00 elapsed is furniture pretending to be a
           reading. It stays MOUNTED and goes transparent rather than
@@ -201,9 +271,22 @@ export function Transport({
         <div className="transport-readout">
           {/* At rest this said "—". You are always about to play bar one, and
               a dash is a value the counter never actually holds. */}
-          <span className="transport-value">{anyRunning ? bar : 1}</span>
+          {jammed ? (
+            <span className="transport-value transport-value-form">
+              {anyRunning ? jamFormBar + 1 : 1}
+              <span className="transport-of">{` / ${jamFormBars}`}</span>
+            </span>
+          ) : (
+            <span className="transport-value">{anyRunning ? bar : 1}</span>
+          )}
           <span className="transport-label">{t("transport.bar")}</span>
         </div>
+        {jammed && (
+          <div className="transport-readout">
+            <span className="transport-value">{anyRunning ? jamChorus : 1}</span>
+            <span className="transport-label">{t("jam.transport.chorus")}</span>
+          </div>
+        )}
         <div className="transport-readout">
           <span className="transport-value">{clock(elapsedSeconds)}</span>
           <span className="transport-label">{t("transport.elapsed")}</span>
@@ -257,25 +340,34 @@ export function Transport({
         </div>
       )}
 
+      {/* The red dot and the clock. Beside the readouts, before the drill's
+          own block, so it lands in the same place on every tab — a mark that
+          moves about is a mark you have to look for. */}
+      {recording && (
+        <div className="transport-recording" role="status">
+          <span className="transport-recording-dot" aria-hidden="true" />
+          <span className="transport-recording-label">{t("jam.takes.recording")}</span>
+          <span className="transport-recording-clock">{clock(recordedSeconds)}</span>
+        </div>
+      )}
+
+      {/* The band is loading — a kit or a voice nobody had asked for yet.
+          Here, beside the Play button, because that is where you look when
+          you have pressed it and nothing is playing yet. Any tab: a setlist
+          step can be a jam too. */}
+      {jamLoading && (
+        <div className="transport-loading" role="status">
+          <span className="jam-spinner" aria-hidden="true" />
+          <span>{t("jam.loading")}</span>
+        </div>
+      )}
+
       {view === "drill" && (
         <div className="transport-drill">
           <div className="transport-readout">
             <span className="transport-value">{startBpm}</span>
             <span className="transport-label">{t("transport.startsAt")}</span>
           </div>
-          {/* Both switches write the drill's `speedRamp`, which is also where
-              the settings form reads them from — one setting, two places to
-              reach it, no second copy of the state. */}
-          <button
-            type="button"
-            role="switch"
-            aria-checked={countIn}
-            className={`transport-switch ${countIn ? "on" : ""}`}
-            onClick={onToggleCountIn}
-          >
-            <span className="transport-switch-track" aria-hidden="true" />
-            {t("drill.countdown")}
-          </button>
           <button
             type="button"
             role="switch"

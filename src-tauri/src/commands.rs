@@ -13,6 +13,34 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 pub struct EngineState(pub Mutex<MetronomeEngine>);
 
+/// The normalisations `set_jam` has already worked out.
+///
+/// Managed state rather than a field on the engine, because it is not the
+/// engine's: it is a memo the command thread keeps for itself, and nothing
+/// on the audio side ever reads it. See `JamGainCache` in `jam.rs` for what
+/// it holds and what it is keyed on.
+#[derive(Default)]
+pub struct JamGainState(pub crate::jam::JamGainCache);
+
+/// The kit folder `set_jam` has already decoded.
+///
+/// Managed state for the reason `JamGainState` is, and against the same
+/// traffic: the UI re-sends the whole config four to six times a chorus to
+/// keep the bass a bar ahead, and decoding eight WAVs on each of those
+/// would be a folder read per bar. See `KitCache` in `kit.rs`.
+#[derive(Default)]
+pub struct JamKitState(pub crate::kit::KitCache);
+
+/// The melodic banks `set_jam` has already built.
+///
+/// Managed state for the reason `JamKitState` is, and against the same
+/// traffic — with more to lose on a miss: building a bass bank is twenty-
+/// eight notes resampled from twelve, which is a hundred milliseconds on the
+/// command thread, and paying it four to six times a chorus would be a
+/// hitch on every bar line. See `VoiceCache` in `voices.rs`.
+#[derive(Default)]
+pub struct JamVoiceState(pub crate::voices::VoiceCache);
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -222,7 +250,17 @@ pub fn set_playing(
             }
         } else if !playing && engine.is_running() {
             engine.stop();
-            state.lock().unwrap().is_playing = false;
+            {
+                let mut s = state.lock().unwrap();
+                s.is_playing = false;
+                // A stop spends the count-in, whichever door it came through.
+                // `toggle_playback` and `stop_speed_ramp` already did this;
+                // this path (a tab change, a sound preview, the setlist
+                // runner) did not, so a jam stopped during its count-in kept
+                // the unspent beats armed, and the next Play counted them out
+                // even after the player had set the count-in to none.
+                s.count_in = crate::state::CountIn::default();
+            }
             tempo_ctx.set_playing(false);
         } else {
             // No transition to make. `is_playing` was left untouched here,
@@ -230,7 +268,13 @@ pub fn set_playing(
             // the flag stuck true and the next press of Play was spent
             // toggling it back off. Write the engine's real state instead.
             let running = engine.is_running();
-            state.lock().unwrap().is_playing = running;
+            let mut s = state.lock().unwrap();
+            s.is_playing = running;
+            // Same rule: a stop that finds nothing running still disarms.
+            if !playing {
+                s.count_in = crate::state::CountIn::default();
+            }
+            drop(s);
             tempo_ctx.set_playing(running);
         }
     }
@@ -373,7 +417,15 @@ pub fn save_window_position(label: String, x: i32, y: i32, app_handle: AppHandle
 /// Snare stored "click" and the metronome carried on playing the old kit,
 /// with nothing anywhere reporting a problem. `sound_types_match_the_ui` in
 /// the test module holds the two lists together now.
-pub const SOUND_TYPES: [&str; 5] = ["click", "wood", "beep", "drum", "snare"];
+///
+/// THE ORDER IS THE MENU'S ORDER and `sound_types_match_the_ui` compares the
+/// two as sequences, not as sets — so this is not alphabetical and not the
+/// order the kits were added. It is the order the owner asked the menu to
+/// read in: the two ticks, then the two tones, then the three kits, with
+/// the bell last.
+pub const SOUND_TYPES: [&str; 8] = [
+    "click", "sticks", "wood", "beep", "drum", "kit", "snare", "cowbell",
+];
 
 #[tauri::command]
 pub fn set_sound_type(sound_type: String, state: State<SharedState>, app_handle: AppHandle) {
@@ -1874,6 +1926,37 @@ pub fn list_audio_output_devices() -> Vec<AudioOutputDevice> {
     crate::engine::list_output_devices()
 }
 
+/// The key the per-device pair choices live under: a map from device name
+/// to the 0-based pair, so switching back to the interface brings its own
+/// outputs back rather than the laptop's.
+pub const OUTPUT_PAIRS_KEY: &str = "audioOutputPairs";
+
+/// The pair stored against `device_name`, or 0 — which is "Outputs 1-2",
+/// and the right answer for a device nobody has ever chosen a pair for.
+///
+/// `None` (the system default device) has its own entry under the empty
+/// name, so a musician who uses the default device and an interface keeps
+/// a pair for each.
+///
+/// Anything that is not a whole number of pairs the engine could act on is
+/// outputs 1-2: `settings.json` is a file a user can open, and half a pair
+/// or a pair past `MAX_OUTPUT_PAIR` is not a routing the app can honour.
+/// Clamping a silly number would be worse than ignoring it — it would send
+/// the click to an output nobody named.
+pub fn stored_output_pair(store: &serde_json::Value, device_name: Option<&str>) -> u16 {
+    store
+        .get(device_name.unwrap_or(""))
+        .and_then(|v| v.as_u64())
+        .filter(|&n| n <= MAX_OUTPUT_PAIR as u64)
+        .unwrap_or(0) as u16
+}
+
+/// The widest interface worth offering a pair on: 128 outputs. Well past
+/// anything a musician plugs into a laptop, and a ceiling means a number
+/// typed into `settings.json` by hand cannot ask the engine to open a
+/// stream nothing could deliver.
+pub const MAX_OUTPUT_PAIR: u16 = 63;
+
 #[tauri::command]
 pub fn set_audio_output_device(
     device_name: Option<String>,
@@ -1883,14 +1966,25 @@ pub fn set_audio_output_device(
 ) {
     // Persist the choice
     use tauri_plugin_store::StoreExt;
-    if let Ok(store) = app_handle.store("settings.json") {
+    let stored_pair = if let Ok(store) = app_handle.store("settings.json") {
         match &device_name {
             Some(name) => store.set("audioOutputDevice", serde_json::json!(name)),
             None => store.set("audioOutputDevice", serde_json::Value::Null),
         }
-    }
+        let pairs = store
+            .get(OUTPUT_PAIRS_KEY)
+            .unwrap_or(serde_json::Value::Null);
+        stored_output_pair(&pairs, device_name.as_deref())
+    } else {
+        0
+    };
 
     let mut engine = engine_state.0.lock().unwrap();
+    // The pair this device was last used on, in place BEFORE the restart
+    // below — the new stream reads it to decide how many outputs to ask
+    // the device for. Plug the interface back in and the click is on 3-4
+    // again without anybody touching the dropdown.
+    engine.set_output_pair_name_only(stored_pair);
     if let Err(e) = engine.set_device(device_name, state.inner().clone(), app_handle) {
         // Non-fatal, and not the failure report. `set_device` does not wait
         // for the new device — a device that will not open is announced by
@@ -1899,6 +1993,47 @@ pub fn set_audio_output_device(
         // engine startable so the next press of Play re-tries.
         eprintln!("[yames] switching audio output device failed: {e}");
     }
+}
+
+/// Move everything the app plays to another pair of the device's outputs.
+/// Returns the pair actually in effect, 0-based.
+///
+/// Remembered against the device it was chosen for, so a musician who takes
+/// the laptop to church and plugs the interface in finds the click back on
+/// outputs 3-4 without touching anything.
+#[tauri::command]
+pub fn set_audio_output_pair(
+    pair: u16,
+    state: State<SharedState>,
+    engine_state: State<EngineState>,
+    app_handle: AppHandle,
+) -> u16 {
+    use tauri_plugin_store::StoreExt;
+    // The same ceiling `stored_output_pair` reads back through, so a pair
+    // that would be ignored on the next launch is refused now rather than
+    // persisted and quietly forgotten.
+    let pair = pair.min(MAX_OUTPUT_PAIR);
+    let device_name = {
+        let engine = engine_state.0.lock().unwrap();
+        engine.device_name().map(|s| s.to_string())
+    };
+
+    if let Ok(store) = app_handle.store("settings.json") {
+        let mut pairs = match store.get(OUTPUT_PAIRS_KEY) {
+            Some(serde_json::Value::Object(m)) => m,
+            // Anything else under the key (a stale scalar from a hand-edited
+            // settings file) is replaced rather than argued with.
+            _ => serde_json::Map::new(),
+        };
+        pairs.insert(
+            device_name.clone().unwrap_or_default(),
+            serde_json::json!(pair),
+        );
+        store.set(OUTPUT_PAIRS_KEY, serde_json::Value::Object(pairs));
+    }
+
+    let mut engine = engine_state.0.lock().unwrap();
+    engine.set_output_pair(pair, state.inner().clone(), app_handle)
 }
 
 // ---------------------------------------------------------------------------
@@ -2226,22 +2361,37 @@ pub async fn tts_speak(
     // it. The active-state cancellation above gives us the interrupt
     // semantic; releasing the lock here lets the new call actually
     // proceed concurrently to do the cancelling.
-    let mut snapshot = {
+    let snapshot = {
         let engine = tts.lock().map_err(|e| format!("Lock failed: {e}"))?;
         engine.snapshot()
     }
     .ok_or_else(|| "Models directory not set".to_string())?;
 
-    // Speech now plays in-process (was macOS `afplay`, which always used
-    // the OS default output). Route it to the SAME device the metronome
-    // engine is on, exactly like `start_playback` does for the input
-    // tester — otherwise a user on a USB interface hears the click in
-    // their monitors and the coach in their laptop speakers. The engine
-    // lock is taken and released immediately; the heavy work below runs
-    // without holding it.
-    snapshot.output_device = {
-        let engine = engine_state.0.lock().unwrap();
-        engine.device_name().map(|s| s.to_string())
+    // Speech plays through the metronome engine's OWN stream — same
+    // device, same pair of outputs, same mixer as the click. Otherwise a
+    // user on a USB interface hears the click in their monitors and the
+    // coach in their laptop speakers, and a drummer who has put the click
+    // on outputs 3-4 hears the coach in the v-drums. See `speech_out`.
+    //
+    // Getting the device opening here is deliberate: the coach greets a
+    // musician who has not pressed Play yet, and there would be no stream
+    // for the line to come out of. `start_audio_thread` is a no-op when
+    // one is already running, which is the usual case.
+    //
+    // The lock is held for the SPAWN and nothing else. Waiting for the
+    // device under it would queue every synchronous Tauri command — Play,
+    // the tempo, the output pair — behind up to two seconds of device
+    // open, on the main thread, which is a frozen window and exactly what
+    // `MetronomeEngine::start` refuses to do. The wait happens on the
+    // blocking thread below, on a handle that needs no lock at all.
+    let speech_slots = {
+        let mut engine = engine_state.0.lock().unwrap();
+        if let Err(e) = engine.start_audio_thread(state.inner().clone(), app_handle.clone()) {
+            eprintln!("[yames] the coach has nowhere to speak from: {e}");
+        }
+        // AFTER the spawn: `start_audio_thread` installs a fresh `alive`,
+        // and a handle taken before it would be watching a dead thread.
+        engine.speech_slots()
     };
 
     let tts_active_arc: SharedTtsActive = tts_active.inner().clone();
@@ -2250,6 +2400,19 @@ pub async fn tts_speak(
     // Push subprocess I/O onto tokio's blocking pool so async workers
     // stay free for boundary IPC, evaluation toggles, settings, etc.
     let join_result = tokio::task::spawn_blocking(move || {
+        let mut snapshot = snapshot;
+        snapshot.speech = speech_slots.wait_for_stream();
+        if snapshot.speech.is_none() {
+            // No stream, so no speech — and this returns rather than
+            // running Piper for a line nobody can hear. An `Err` here
+            // still reaches the tail below, which emits
+            // `tts-speech-ended` and unwinds the dim: the metronome must
+            // not be left quiet because the device would not open. The
+            // audio thread has already said what went wrong through
+            // `audio-error`.
+            return Err("the audio output device is not available, so there is                         nowhere for the coach to speak"
+                .to_string());
+        }
         crate::tts::speak_standalone(&snapshot, &text_owned, &tts_active_arc, || {
             let _ = app_handle_for_emit.emit("tts-speech-started", ());
         })
@@ -2302,8 +2465,9 @@ pub fn tts_set_voice(tts: State<'_, SharedTts>, voice: String) {
 }
 
 /// Set the coach voice playback volume (0.0..=1.0). Stored on the TtsEngine
-/// and applied to the next utterance via the rodio `Sink`'s gain (it was
-/// `afplay -v` before speech playback moved in-process).
+/// and scaled into the next utterance as it is decoded, before the buffer
+/// ever reaches the audio callback — so the click pays nothing for it. It
+/// was `afplay -v`, then rodio's `Sink` gain; see `speech_out`.
 #[tauri::command]
 pub fn tts_set_volume(tts: State<'_, SharedTts>, volume: f32) {
     if let Ok(mut engine) = tts.lock() {
@@ -2409,6 +2573,562 @@ pub fn app_ready(app_handle: AppHandle) {
     let _ = main_win.set_focus();
 }
 
+// ---------------------------------------------------------------------------
+// Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
+// ---------------------------------------------------------------------------
+
+/// Hand the engine a band, or `null` to take it away and play the plain
+/// click again.
+///
+/// The config is validated and compiled into a lookup table here, on the
+/// command thread, and swapped into the engine behind an `Arc`. Nothing
+/// about a jam reaches `AppState`: the UI owns the jam *record* — it lives
+/// in the store beside presets and setlists — and the engine holds only the
+/// table it plays. So there is no `state-changed` emit and nothing to
+/// persist here.
+///
+/// A config that does not check out is rejected whole, with a message the
+/// caller can show. A half-applied groove is worse than no groove.
+///
+/// The caller is responsible for having ALREADY set the engine's subdivision
+/// to `ticksPerBeat` and its beat groups to `[beatsPerBar]`. The engine
+/// checks the product against its own bar on every tick and plays the click
+/// when they disagree, rather than guessing which column is which.
+///
+/// Compiling renders four bars of the band to find out how loud it is, and
+/// the UI calls this four to six times a chorus to keep the bass a bar
+/// ahead. `JamGainState` remembers the measurements so those sends do not
+/// each pay for one — see `JamGainCache` in `jam.rs`.
+/// A kit of the musician's own samples is decoded HERE too, on this thread,
+/// before the table is compiled — and cached by folder, file mtimes and
+/// output rate, so only the first send of a jam pays for it. It travels
+/// inside the `Arc<JamTable>`, which is what makes the drums and the
+/// samples behind them one thing the audio thread can swap and retire
+/// together; see `JamTable::custom` in `jam.rs`.
+///
+/// **`async`, and the work is on a blocking thread — the reverse of what this
+/// said until 2026-09-16.** A synchronous `#[tauri::command]` runs on the main
+/// thread, the one that draws the window, and the argument for keeping it
+/// there was that the work was "tens of milliseconds, once per folder". That
+/// stopped being true when the kits, the percussion and the melodic voices
+/// became recordings: one send now decodes a recorded kit (~19 MB, ~82 files),
+/// the percussion set, pitch-shifts every semitone of a bass and a keys voice,
+/// renders four bars to measure the band, and on the very first send builds the
+/// reference `SoundBank` (530-720 ms in release on its own). The owner saw the
+/// macOS beachball on opening Jam and on every voice or kit change.
+///
+/// The other half of the old argument — that the main thread is what keeps
+/// the sends in order — is now kept by the UI instead: every jam command
+/// goes through one queue in `ipc.ts` (`jamQueue`), which waits for each to
+/// finish before sending the next and collapses a run of waiting `set_jam`s to
+/// the newest. So no two of these ever build at once, and last bar's bass can
+/// never land on top of this bar's.
+///
+/// The dialog next door is async for a different reason — it deadlocks —
+/// but it is the same shape.
+#[tauri::command]
+pub async fn set_jam(
+    app_handle: AppHandle,
+    config: Option<crate::jam::JamConfig>,
+) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || build_and_install_jam(&app_handle, config))
+        .await
+        .map_err(|e| format!("set_jam join failed: {e}"))?
+}
+
+/// The rate a jam should be built at.
+///
+/// The running stream's rate when there is one. Before Play there is none,
+/// and this used to fall back to [`crate::engine::JAM_REFERENCE_SR`] — so on
+/// a 44 100 device every kit and voice was built once at 48 000 on opening
+/// the jam and again at 44 100 on the first Play. Now the device is asked
+/// what it WILL open at (`probe_output_rate`), which is the rate the stream
+/// takes, so the first build is the one that plays. The reference rate is
+/// left for a machine with no output at all.
+///
+/// The device name is copied out and the lock dropped before the device is
+/// asked: a device query can take a while, and the metronome's own commands
+/// take this lock on the main thread.
+fn jam_rate(app_handle: &AppHandle) -> u32 {
+    let (running, device) = {
+        let engine = app_handle.state::<EngineState>();
+        let engine = engine.0.lock().unwrap();
+        (engine.output_sample_rate(), engine.device_name().map(str::to_owned))
+    };
+    running
+        .or_else(|| crate::engine::probe_output_rate(device.as_deref()))
+        .unwrap_or(crate::engine::JAM_REFERENCE_SR)
+}
+
+/// The sounds a jam is made of: its drums, its percussion and its voices.
+type JamSounds = (
+    std::sync::Arc<crate::kit::KitBank>,
+    Option<std::sync::Arc<crate::kit::KitBank>>,
+    crate::jam::JamVoices,
+);
+
+/// Every sound a jam needs, out of the caches, at `rate`: the drums (with
+/// the built-in kit behind a folder), the percussion set, the bass and the
+/// keys. Shared by `set_jam`, which plays them, and `warm_jam`, which only
+/// wants them decoded before anybody asks.
+fn jam_sounds(
+    app_handle: &AppHandle,
+    cfg: &crate::jam::JamConfig,
+    rate: u32,
+) -> Result<JamSounds, String> {
+    let jam_kit = app_handle.state::<JamKitState>();
+    let jam_voices = app_handle.state::<JamVoiceState>();
+    // WHICH DRUMS, DECODED AT THE RATE THE DEVICE IS RUNNING AT.
+    //
+    // Every kit goes through this now, not only a folder the
+    // musician chose: the shipped kits moved out of the audio
+    // thread's `SoundBank` and into `sounds/kits/<kit>/`, because a
+    // recorded kit is a hundred and thirty-two files and decoding
+    // every kit the app ships on every device change would be most
+    // of a second of start-up for drums nobody asked for. The cache
+    // makes all but the first send of a jam a stat and an `Arc`
+    // clone — see `KitCache` in `kit.rs`.
+    let bank = {
+        let shipped = crate::engine::JamKit::from_name(&cfg.kit).0;
+        match cfg.custom_kit {
+            // A FOLDER IS A KIT WITH A KIT BEHIND IT. A voice the
+            // musician's folder does not hold comes from the built-in
+            // kit the jam names, so a folder with nothing but a kick
+            // and a snare in it is a real kit with a borrowed hat
+            // rather than a band with two drums
+            // (`plans/JAM_UX_DECISIONS.md` B3). Merged here, on the
+            // command thread, into ONE bank — the audio thread reads
+            // one kit and never asks which half a drum came from.
+            Some(ref k) => {
+                let own = jam_kit.0.get_or_load(std::path::Path::new(&k.dir), rate)?;
+                let behind = jam_kit.0.shipped(shipped, rate)?;
+                crate::kit::with_fallback(&own, &behind)
+            }
+            None => jam_kit.0.shipped(shipped, rate)?,
+        }
+    };
+    // AND WHICH BASS AND WHICH KEYS, at the same rate and through
+    // the same shape of cache. A voice whose folder ships plays the
+    // recording; one whose folder does not — and `synth`, `organ`,
+    // `clav` and `pad`, which are synthesisers in real life — plays
+    // the recipe it always has. Resolved here, on the command
+    // thread, so the audio thread receives notes rather than a
+    // decision.
+    // AND THE PERCUSSIONIST, at the same rate and out of the same
+    // cache. One set, played under every drum kit — a percussionist
+    // is not a drum kit, and choosing Brushes does not choose a
+    // different cowbell. `None` when the app ships no set, which is
+    // a checkout without `sounds/perc` and is every percussion lane
+    // silent rather than a jam that will not load.
+    let perc = match crate::kit::perc_count() {
+        0 => None,
+        _ => match jam_kit.0.perc(0, rate) {
+            Ok(set) => Some(set),
+            // A sentence on the console and a band with no shaker.
+            // The percussionist is a layer over a band that works
+            // without one, so a set that will not decode must not
+            // take the drummer down with it.
+            Err(e) => {
+                eprintln!("[perc] the shipped percussion set did not decode: {e}");
+                None
+            }
+        },
+    };
+    let voices = crate::jam::resolve_voices(cfg, &jam_voices.0, rate)?;
+    Ok((bank, perc, voices))
+}
+
+/// `set_jam`'s body, on a blocking thread. Everything that decodes, resamples
+/// or renders happens here, and the engine's lock is only taken for the
+/// moments that need it: reading the device, and swapping the table in.
+fn build_and_install_jam(
+    app_handle: &AppHandle,
+    config: Option<crate::jam::JamConfig>,
+) -> Result<(), String> {
+    let table = match config {
+        Some(ref cfg) => {
+            let rate = jam_rate(app_handle);
+            let (bank, perc, voices) = jam_sounds(app_handle, cfg, rate)?;
+            let jam_gain = app_handle.state::<JamGainState>();
+            Some(std::sync::Arc::new(crate::jam::compile_with(
+                cfg, &jam_gain.0, bank, perc, voices,
+            )?))
+        }
+        None => None,
+    };
+    app_handle
+        .state::<EngineState>()
+        .0
+        .lock()
+        .unwrap()
+        .set_jam_table(table);
+    Ok(())
+}
+
+/// DECODE THE BAND BEFORE ANYBODY ASKS FOR IT.
+///
+/// `set_jam` no longer freezes the window, but a jam whose kit or voice has
+/// not been decoded still takes a moment to come in: a recorded kit is 39 MB
+/// and a recorded bass 42-65 MB once built, and a cold one costs a few
+/// hundred milliseconds. This moves that moment to before the click:
+///
+/// * `configs` — the jams the UI expects to open, compiled. Their kits,
+///   voices and the percussion set are decoded, and so is the reference bank
+///   every table is measured against (the first `set_jam` of a session used
+///   to pay ~350 ms for that alone).
+/// * `kits` — every kit the app ships, for the kit picker being opened.
+/// * `bass_voices` / `keys_voices` — every recorded voice for that role, for
+///   its dropdown being opened.
+///
+/// Best effort, always: a sound that will not decode is logged and skipped,
+/// and the real `set_jam` will say so properly if it is ever asked for. It
+/// installs nothing and changes no state, so it does not go through the UI's
+/// jam queue and cannot put a band out of order. Everything lands in the same
+/// caches `set_jam` reads, at the rate `set_jam` will ask for.
+#[tauri::command]
+pub async fn warm_jam(
+    app_handle: AppHandle,
+    configs: Vec<crate::jam::JamConfig>,
+    kits: bool,
+    bass_voices: bool,
+    keys_voices: bool,
+) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || {
+        use crate::engine::{BassVoice, KeysVoice};
+        let rate = jam_rate(&app_handle);
+        let warn = |what: &str, e: String| eprintln!("[jam] warming {what} failed: {e}");
+        if !configs.is_empty() {
+            let _ = crate::engine::jam_reference_sample(crate::engine::SoundId::ClickHigh);
+        }
+        for cfg in &configs {
+            if let Err(e) = jam_sounds(&app_handle, cfg, rate) {
+                warn("a jam", e);
+            }
+        }
+        let jam_kit = app_handle.state::<JamKitState>();
+        if kits {
+            for i in 0..crate::kit::shipped_count() {
+                if let Err(e) = jam_kit.0.shipped(i, rate) {
+                    warn("a kit", e);
+                }
+            }
+            if crate::kit::perc_count() > 0 {
+                if let Err(e) = jam_kit.0.perc(0, rate) {
+                    warn("the percussion", e);
+                }
+            }
+        }
+        let jam_voices = app_handle.state::<JamVoiceState>();
+        let recorded =
+            |folder: Option<&'static str>| folder.and_then(crate::voices::shipped_index);
+        if bass_voices {
+            for v in BassVoice::ALL {
+                if let Some(i) = recorded(crate::jam::JamVoices::folder_for_bass(v)) {
+                    let (lo, hi) = (crate::engine::BASS_MIN_MIDI, crate::engine::BASS_MAX_MIDI);
+                    if let Err(e) = jam_voices.0.shipped(i, rate, lo, hi) {
+                        warn("a bass", e);
+                    }
+                }
+            }
+        }
+        if keys_voices {
+            for v in KeysVoice::ALL {
+                if let Some(i) = recorded(crate::jam::JamVoices::folder_for_keys(v)) {
+                    let (lo, hi) = (crate::engine::KEYS_MIN_MIDI, crate::engine::KEYS_MAX_MIDI);
+                    if let Err(e) = jam_voices.0.shipped(i, rate, lo, hi) {
+                        warn("a keys voice", e);
+                    }
+                }
+            }
+        }
+    })
+    .await
+    .map_err(|e| format!("warm_jam join failed: {e}"))
+}
+
+/// Ask the musician for a folder of drum samples.
+///
+/// A native folder dialog, and nothing else: the folder is READ on this
+/// machine when a jam that names it is loaded, and no file is copied,
+/// moved, uploaded or written. `None` when they cancel.
+///
+/// **`async fn`, and it has to be.** A `#[tauri::command]` that is not
+/// `async` runs inline on the thread that dispatched the IPC message, which
+/// is the main thread — and `blocking_pick_folder` asks the main thread to
+/// put a dialog up and then waits for the answer. On the main thread that is
+/// a deadlock in one move: the request to open the window is queued behind
+/// the call that is waiting for it, no dialog ever appears, and the whole
+/// app stops responding with no error and nothing on screen. An `async`
+/// command runs on Tauri's own runtime instead, so the main thread is free
+/// to run the dialog it was asked for. This is the shape
+/// `tauri-plugin-dialog` documents for the blocking pickers, and it is the
+/// shape the rest of this file's heavy commands already use.
+#[tauri::command]
+pub async fn pick_kit_folder(app: AppHandle) -> Option<String> {
+    use tauri_plugin_dialog::DialogExt;
+    app.dialog()
+        .file()
+        .blocking_pick_folder()
+        .and_then(|p| p.into_path().ok())
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
+/// Which of the eight voices a folder holds, and which it does not.
+///
+/// A directory listing and nothing more — no file is opened and no audio is
+/// decoded. The UI asks this while the musician is still choosing, so it has
+/// to be cheap enough to sit behind a hover; the decoding happens in
+/// `set_jam`, once, when a jam that names the folder is actually loaded.
+///
+/// `async` for a smaller reason than its neighbour above, and a real one: a
+/// directory listing is not always cheap. The folder the musician just
+/// picked can be on a network share, a sleeping external drive or a synced
+/// folder that has to be hydrated, and `read_dir` on any of those is
+/// seconds. Off the main thread, that is a spinner; on it, it is the window
+/// not repainting.
+#[tauri::command]
+pub async fn inspect_kit_folder(dir: String) -> Result<crate::kit::KitFolder, String> {
+    crate::kit::inspect(std::path::Path::new(&dir))
+}
+
+/// Move the form: jump to a bar, loop a range of bars, or clear both.
+///
+/// The engine applies it at the next bar line, so a footswitch pressed
+/// halfway through a bar finishes the bar first — which is where a musician
+/// expects the change to land, and the only place the band can change
+/// without the groove tearing.
+///
+/// The command carries both halves and replaces both, so "jump to the
+/// bridge" (`{ jumpTo: 16, loop: null }`) leaves a loop behind and "loop the
+/// turnaround" (`{ jumpTo: null, loop: {...} }`) sets one without moving
+/// yet. A bar that is not in the form is refused with a message and nothing
+/// changes: half a move is worse than none.
+///
+/// With no jam loaded there is no form to check against, so the position is
+/// accepted and held. It takes effect when a band arrives — or, if the new
+/// form is too short for the loop, it is quietly dropped there rather than
+/// looping bars that do not exist.
+#[tauri::command]
+pub fn set_jam_position(
+    command: crate::jam::JamPositionCommand,
+    engine_state: State<EngineState>,
+) -> Result<(), String> {
+    let engine = engine_state.0.lock().unwrap();
+    let position = crate::jam::validate_position(&command, engine.jam_form_bars())?;
+    engine.set_jam_position(position);
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Takes (plans/JAM_MODE.md §4.4, src-tauri/src/take.rs)
+// ---------------------------------------------------------------------------
+
+/// The take being recorded, if one is. Managed state rather than a field on
+/// the engine: the engine holds the audio-thread half (a ring to copy the
+/// band into, a buffer to play back), and this holds the writer thread, the
+/// file it is writing and the record it will hand back. Command thread only.
+#[derive(Default)]
+pub struct TakeState(pub Mutex<crate::take::TakeSession>);
+
+/// Where takes live: `<app data>/takes/<jam>/<timestamp>.wav`.
+///
+/// One resolution, used by every take command, so a build that resolves the
+/// data directory differently cannot end up writing takes in one place and
+/// listing them from another.
+fn takes_home(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
+    app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("could not find where this app keeps its files: {e}"))
+}
+
+/// Start recording a take: your playing with the band mixed in.
+///
+/// Opt-in and local. The UI only calls this for a jam whose `takes` flag the
+/// user turned on, nothing is uploaded, and the file it writes is one the
+/// user can play back and delete from the same screen (`plans/JAM_MODE.md`
+/// §4.4, and the privacy rule in the header of `take.rs`).
+///
+/// The mic is the one the onset detector already listens to. If no input
+/// stream is running this starts the default one, the way `start_evaluation`
+/// does — a take is a recording, and a recording of a band with no player in
+/// it is not what anyone pressed the button for. If that fails, the take
+/// goes ahead as the band alone rather than being refused: half a take is
+/// worth more than none, and the UI can say which it got from the file.
+/// A stream started HERE is remembered, so `stop_take` can give it back.
+#[tauri::command]
+pub fn start_take(
+    jam_id: String,
+    engine_state: State<EngineState>,
+    audio_input: State<SharedAudioInput>,
+    take_state: State<TakeState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    let home = takes_home(&app_handle)?;
+    let (handoff, out_sr, out_sr_watch, output_latency_us) = {
+        let engine = engine_state.0.lock().unwrap();
+        (
+            engine.take_handoff(),
+            engine.output_sample_rate(),
+            engine.output_sample_rate_handle(),
+            engine.output_latency_us(),
+        )
+    };
+    let out_sr = out_sr
+        .ok_or_else(|| "the audio output has not started yet, so there is no band to record")?;
+
+    let (mic, owns_input, input_latency_us) = {
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        // Whether the mic was ALREADY running matters beyond this line: an
+        // input the coach or the drill had open is theirs and stays open,
+        // and one opened here is the take's and closes with it.
+        let mut owns_input = false;
+        if !ai.is_active() {
+            match ai.start(None, 0, app_handle.clone()) {
+                Ok(()) => owns_input = true,
+                Err(e) => eprintln!("[take] no microphone for this take: {e}"),
+            }
+        }
+        (ai.begin_take_capture(), owns_input, ai.input_latency_us())
+    };
+    if mic.is_none() {
+        eprintln!("[take] recording the band only — no input stream is running");
+    }
+
+    // The mic hears the band through the speakers, so what reaches the
+    // writer is a response to audio one full round trip old. The writer
+    // pulls the mic forward by this much at the start; see the comment on
+    // the two offsets there.
+    let round_trip_us = output_latency_us + input_latency_us;
+
+    let started = {
+        let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        session.start(crate::take::TakeStart {
+            app_data: &home,
+            jam_id: &jam_id,
+            handoff: &handoff,
+            mic,
+            out_sr,
+            round_trip_us,
+            out_sr_watch: Some(out_sr_watch),
+            owns_input,
+        })
+    };
+    if started.is_err() {
+        // Nothing is going to drain the mic ring, so stop filling it — and
+        // hand back a stream nothing is going to use.
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        ai.end_take_capture();
+        if owns_input {
+            ai.stop();
+        }
+    }
+    started
+}
+
+/// Stop recording and keep the take. `null` when nothing was recording, or
+/// when the take turned out to have no audio in it — the user pressed record
+/// and stop without the band playing, and a row that plays silence is worse
+/// than no row.
+#[tauri::command]
+pub fn stop_take(
+    engine_state: State<EngineState>,
+    audio_input: State<SharedAudioInput>,
+    take_state: State<TakeState>,
+) -> Result<Option<crate::take::JamTake>, String> {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    // THE MIC KEEPS CAPTURING UNTIL THE BAND IS ON DISK.
+    //
+    // `session.stop` takes the ring off the callback and then waits for the
+    // writer to drain what the callback had already rendered — twenty-five
+    // to seventy-five milliseconds of band that has not reached the file
+    // yet, and which the player was still playing over. Lowering the mic
+    // first, as this used to, meant the writer found nothing to mix into
+    // that tail and the last note of every take was the band on its own.
+    let (result, owns_input) = {
+        let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        let owns_input = session.owns_input();
+        (session.stop(&handoff), owns_input)
+    };
+    {
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        ai.end_take_capture();
+        // And a stream this take opened closes with it. One that was
+        // already running belongs to whoever opened it.
+        if owns_input {
+            ai.stop();
+        }
+    }
+    result
+}
+
+/// The takes of one jam, newest first. A jam with none is an empty list.
+#[tauri::command]
+pub fn list_takes(jam_id: String, app_handle: AppHandle) -> Result<Vec<crate::take::JamTake>, String> {
+    let home = takes_home(&app_handle)?;
+    crate::take::list_takes(&home, &jam_id)
+}
+
+/// Every byte the takes are using, across all jams.
+///
+/// Separate from `list_takes` rather than a field on each row, because it is
+/// a fact about the DIRECTORY and not about any one take: a jam with no
+/// takes of its own would report nothing, which is exactly the case where a
+/// disk full of somebody else's jams matters. The UI shows it when it gets
+/// large enough to be worth saying (W15).
+#[tauri::command]
+pub fn takes_dir_size(app_handle: AppHandle) -> Result<u64, String> {
+    Ok(crate::take::takes_dir_size(&takes_home(&app_handle)?))
+}
+
+/// Delete a take: the audio and its label together, permanently.
+#[tauri::command]
+pub fn delete_take(
+    id: String,
+    take_state: State<TakeState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    {
+        let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        if session.is_recording() {
+            return Err("stop the take that is recording before deleting one".into());
+        }
+    }
+    crate::take::delete_take(&takes_home(&app_handle)?, &id)
+}
+
+/// Play a take back. The band and the click are both silent while it runs —
+/// listening back is not something you do over the top of a drummer.
+///
+/// The file is decoded here, on the command thread, and handed to the audio
+/// thread as one buffer; `take-playback-ended` arrives when it runs out.
+#[tauri::command]
+pub fn play_take(
+    id: String,
+    engine_state: State<EngineState>,
+    take_state: State<TakeState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    {
+        let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        if session.is_recording() {
+            return Err("stop recording before playing a take back".into());
+        }
+    }
+    let play = crate::take::load_take(&takes_home(&app_handle)?, &id)?;
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    handoff.set_play(Some(play));
+    Ok(())
+}
+
+/// Stop a take playing back and give the band the output again.
+#[tauri::command]
+pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String> {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    handoff.set_play(None);
+    handoff.drain_retired();
+    Ok(())
+}
 // ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
@@ -2684,6 +3404,39 @@ mod tests {
     }
 
     // -----------------------------------------------------------------------
+    // Your own kit — the two commands that go looking for a folder
+    // -----------------------------------------------------------------------
+
+    /// THE FOLDER DIALOG MUST NOT BE A SYNCHRONOUS COMMAND.
+    ///
+    /// A `#[tauri::command]` that is not `async` runs inline on the thread
+    /// that dispatched the IPC message — the main thread — and
+    /// `blocking_pick_folder` asks the MAIN THREAD to put a dialog up and
+    /// then waits for the answer. On the main thread that is a deadlock in
+    /// one move: the request to open the dialog queues behind the call
+    /// waiting for it, so no dialog ever appears and the window stops
+    /// responding, with nothing on screen and nothing in the log to say
+    /// why. The musician's only clue is that "Choose a folder…" kills the
+    /// app.
+    ///
+    /// A compile-time claim rather than a runtime one, because a deadlock
+    /// cannot be asserted on: this only type-checks while `pick_kit_folder`
+    /// returns a future, so a change back to a plain `fn` breaks the build
+    /// here instead of the app on somebody's desk.
+    #[test]
+    fn the_folder_dialog_runs_off_the_main_thread() {
+        fn only_an_async_command<F: std::future::Future>(_: fn(AppHandle) -> F) {}
+        only_an_async_command(pick_kit_folder);
+
+        // And its neighbour, for the smaller version of the same reason: a
+        // `read_dir` on a network share or a sleeping external drive is
+        // seconds, and seconds on the main thread is a window that does not
+        // repaint.
+        fn only_an_async_inspect<F: std::future::Future>(_: fn(String) -> F) {}
+        only_an_async_inspect(inspect_kit_folder);
+    }
+
+    // -----------------------------------------------------------------------
     // O1b — a fresh install opens the main window, not the widget
     // -----------------------------------------------------------------------
 
@@ -2705,5 +3458,55 @@ mod tests {
         // into `main` and stealing focus from a returning widget user.
         assert_eq!(resolve_startup_window(Some("widget")), "widget");
         assert_ne!(resolve_startup_window(Some("")), "main");
+    }
+
+    /// A drummer with a laptop and an interface keeps a pair of outputs for
+    /// each: the click on 3-4 at church and on 1-2 at the kitchen table,
+    /// without touching the picker either way.
+    #[test]
+    fn the_stored_pair_is_remembered_per_device() {
+        let pairs = serde_json::json!({ "": 0, "UMC204HD 192k": 1, "Scarlett 18i20": 2 });
+        assert_eq!(stored_output_pair(&pairs, Some("UMC204HD 192k")), 1);
+        assert_eq!(stored_output_pair(&pairs, Some("Scarlett 18i20")), 2);
+        assert_eq!(
+            stored_output_pair(&pairs, None),
+            0,
+            "the system default device has its own entry, under the empty name"
+        );
+        assert_eq!(
+            stored_output_pair(&pairs, Some("a headset nobody has chosen")),
+            0,
+            "a device with no stored pair plays on outputs 1-2"
+        );
+        assert_eq!(
+            stored_output_pair(&serde_json::Value::Null, Some("anything")),
+            0,
+            "and so does every device before anyone has chosen at all"
+        );
+    }
+
+    /// The store is a JSON file a user can open. Half a pair is not a pair,
+    /// and a pair that does not fit a  is not one either.
+    #[test]
+    fn a_hand_edited_pair_that_makes_no_sense_is_outputs_one_and_two() {
+        let pairs = serde_json::json!({
+            "a": -1,
+            "b": "3-4",
+            "c": 1.5,
+            "d": 99_999_999_999_i64,
+        });
+        for name in ["a", "b", "c"] {
+            assert_eq!(stored_output_pair(&pairs, Some(name)), 0, "{name}");
+        }
+        assert_eq!(
+            stored_output_pair(&pairs, Some("d")),
+            0,
+            "a pair past the ceiling is ignored, not clamped onto some other output"
+        );
+        assert_eq!(
+            stored_output_pair(&serde_json::json!({ "e": MAX_OUTPUT_PAIR }), Some("e")),
+            MAX_OUTPUT_PAIR,
+            "and the ceiling itself is still a pair"
+        );
     }
 }

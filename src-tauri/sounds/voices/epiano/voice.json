@@ -1,0 +1,24 @@
+{
+  "id": "epiano",
+  "name": "Electric piano",
+  "credit": "jRhodes3 \u2014 a 1977 Rhodes Mark I Stage 73 sampled by Jeff Learman",
+  "licence": "CC0-1.0",
+  "rate": 48000,
+  "channels": 1,
+  "layers": 3,
+  "rr": 1,
+  "trim_db": -2.53,
+  "release_ms": 250,
+  "notes": [
+    45,
+    50,
+    55,
+    59,
+    62,
+    65,
+    71,
+    76,
+    81,
+    86
+  ]
+}

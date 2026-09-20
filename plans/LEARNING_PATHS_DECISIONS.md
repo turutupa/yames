@@ -89,6 +89,18 @@ Status key: **decided** · **open** · **deferred**
   ceilings, review schedule, path position.
 - **B5 — Path format.** *open.* Steps, targets per step, prerequisites,
   and whether a path can be edited by the user.
+- **B6 — A song is a long exercise.** *open.* (Added 2026-09-18.) The
+  owner wants song learning — "Guitar Hero meets Songsterr", play over
+  the song you are learning and see how you did — and outside authors
+  (`ECHORA.md`) will bring whole pieces, not two-bar loops. Both need
+  the B1 format to hold sections, repeats, tempo and meter changes, and
+  more than one track, and both need import from Guitar Pro / MusicXML
+  because nobody re-types a tab.
+  Proposed default: design B1 so a full Guitar Pro track fits without
+  loss, even though the first packs are short loops; evaluate alphaTab
+  (open source, reads Guitar Pro, renders a scrolling tab) for D1 and
+  for the importer before writing either by hand. The app ships no song
+  content; players bring their own files.
 
 ## C. Evaluation
 
@@ -129,6 +141,12 @@ Status key: **decided** · **open** · **deferred**
   of expected notes with the click, later MIDI of detected notes (needs
   C2), later the opt-in audio ring buffer from the roadmap's stretch
   phase.
+  Added 2026-09-18: the owner wants a step finished by recording it,
+  and the review to be the player's own take — sound, and picture when
+  a camera is on — with the colored notes running alongside it. Jam's
+  take recorder (`src-tauri/src/take.rs`) already captures the sound,
+  so the "later" above is nearer than it was. One review surface should
+  serve an exercise, a song (B6) and a posted take (`ECHORA.md` A1–A2).
 - **D4 — Path screens.** *open.* Path picker, progress view, "due
   today", and how a step is started with one action.
 - **D5 — Hands-free actions.** *open.* New MIDI/hotkey actions for path

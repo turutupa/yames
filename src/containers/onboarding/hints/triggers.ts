@@ -122,3 +122,35 @@ export function shouldHintMidiPlugged(args: {
 }): boolean {
   return args.devices.length > 0 && args.bindings.length === 0;
 }
+
+// ---------------------------------------------------------------------------
+// jam-arrangement — the first time the band arranges itself (JAM_KILLER A4).
+// ---------------------------------------------------------------------------
+
+/**
+ * The chorus on which a `build` arrangement first stops repeating itself.
+ *
+ * Chorus one is held back and chorus two opens up, so two is the first bar
+ * line at which a player hears the band decide something — which is the
+ * moment the sentence "the band builds and breaks down on its own" stops
+ * being a claim and starts being an explanation.
+ */
+export const JAM_BUILD_CHORUS = 2;
+
+/**
+ * `breakdown` and `ending` are the arrangement telling us itself; the chorus
+ * is the fallback that works without it. Both are here rather than only the
+ * first because the hint has to fire on a build that has not been given an
+ * arrangement engine yet, and has to fire on the RIGHT bar once it has.
+ */
+export function shouldHintJamArrangement(args: {
+  /** The chorus the form is on, or null while the band is not playing. */
+  chorus: number | null;
+  /** This bar is a breakdown, when the band knows how to say so. */
+  breakdown?: boolean;
+  /** This bar ends the form. */
+  ending?: boolean;
+}): boolean {
+  if (args.breakdown || args.ending) return true;
+  return (args.chorus ?? 0) >= JAM_BUILD_CHORUS;
+}

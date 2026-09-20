@@ -9,7 +9,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     state: DEFAULT_TEST_STATE,
     view: "beat" as const,
     setView: vi.fn(),
-    prevTab: { current: "beat" as "beat" | "drill" | "setlist" },
+    prevTab: { current: "beat" as "beat" | "drill" | "setlist" | "jam" },
     libraryOpen: false,
     onToggleLibrary: vi.fn(),
     onLoadPreset: vi.fn(),
@@ -20,6 +20,16 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     onNewSetlist: vi.fn(),
     onDeleteSetlist: vi.fn(),
     onRenameSetlist: vi.fn(),
+    onDuplicateSetlist: vi.fn(),
+    onReorderSetlists: vi.fn(),
+    jams: [],
+    activeJamId: null,
+    onLoadJam: vi.fn(),
+    onNewJam: vi.fn(),
+    onDeleteJam: vi.fn(),
+    onRenameJam: vi.fn(),
+    onDuplicateJam: vi.fn(),
+    onReorderJams: vi.fn(),
     coachOpen: false,
     coachActive: false,
     coachListening: false,
@@ -42,7 +52,7 @@ describe("Rail", () => {
     // promise with no date. Pocket Check is gone (U1.7), Paths is not here yet.
     const { container } = setup();
     const labels = [...container.querySelectorAll(".rail-mode-label")].map((n) => n.textContent);
-    expect(labels).toEqual(["Metronome", "Setlist", "Drill"]);
+    expect(labels).toEqual(["Metronome", "Setlist", "Drill", "Jam"]);
   });
 
   it("switches mode and marks the current one for assistive tech", () => {
@@ -118,17 +128,46 @@ describe("Rail", () => {
   });
 
   it("remembers the mode it left when opening settings, and returns to it", () => {
-    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" };
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" };
     const setView = vi.fn();
     const { props, rerender } = setup({ view: "drill", prevTab, setView });
 
     fireEvent.click(screen.getByText("Settings"));
-    expect(prevTab.current).toBe("drill");
     expect(setView).toHaveBeenCalledWith("settings");
+    // `useTabRouting.setView` records the mode Settings covers (tested there);
+    // the rail only has to send you back to it.
+    prevTab.current = "drill";
 
     rerender(<Rail {...props} view="settings" />);
     fireEvent.click(screen.getByText("Settings"));
     expect(setView).toHaveBeenLastCalledWith("drill");
+  });
+
+  it("opens Jam, and comes back to it from Settings", () => {
+    // The Settings button used to read `view === "drill" ? "drill" : "beat"`,
+    // which sent anyone who opened Settings from the setlist or the jam back
+    // to the metronome. Two modes were added under that line before anyone
+    // noticed, so it is pinned here rather than left to be found a third time.
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" };
+    const setView = vi.fn();
+    const { props, rerender } = setup({ view: "jam", prevTab, setView });
+
+    fireEvent.click(screen.getByText("Settings"));
+    expect(setView).toHaveBeenCalledWith("settings");
+    prevTab.current = "jam";
+
+    rerender(<Rail {...props} view="settings" mode="jam" />);
+    fireEvent.click(screen.getByText("Settings"));
+    expect(setView).toHaveBeenLastCalledWith("jam");
+  });
+
+  it("keeps the covered mode's library under Settings", () => {
+    // It fell back to the metronome's presets whatever mode Settings was
+    // opened from, which read as "Settings switched me to the metronome".
+    const prevTab = { current: "jam" as "beat" | "drill" | "setlist" | "jam" };
+    const { container } = setup({ view: "settings", mode: "jam", prevTab, libraryOpen: true });
+    const sidebar = container.querySelector(".rail-library");
+    expect(sidebar?.textContent ?? "").not.toMatch(/Presets/i);
   });
 
   it("names every button, so the icon-only rail is still usable blind", () => {
@@ -163,6 +202,39 @@ describe("Rail", () => {
     expect(restore.slice(0, restore.indexOf("display: revert;"))).toContain(
       ".rail[data-library-open] .rail-action-status",
     );
+  });
+
+  it("marks the active mode on its row, not on the button inside it", () => {
+    // The fill is the ROW's, with the button inside it cleared, or the two
+    // backgrounds would draw a seam down the middle of one shape. The row
+    // held a second control once — a play glyph beside Jam — which is why
+    // this is a row at all.
+    const { container } = setup({ view: "jam" });
+    const row = container.querySelector(".rail-mode-row[data-active]");
+    expect(row, "the active mode's row is not marked active").toBeTruthy();
+    expect(row!.querySelector(".rail-mode.active"), "no active button in it").toBeTruthy();
+
+    const css = readStylesheet();
+    const fill = css.slice(css.indexOf(".rail-mode-row[data-active] {"));
+    expect(fill.slice(0, fill.indexOf("}"))).toContain("background: var(--accent-subtle)");
+    const cleared = css.indexOf(".rail-mode-row[data-active] .rail-mode.active");
+    expect(cleared, "the button inside an active row is not cleared").toBeGreaterThan(-1);
+    expect(css.slice(cleared, css.indexOf("}", cleared))).toContain("background: transparent");
+  });
+
+  it("says Jam is new, and says it only where the rail has words", () => {
+    // The owner: "should we also add a BETA badge next to jam too?" — on the
+    // newest mode and on no other. It hides with the labels when the rail is
+    // icons only: a badge beside an icon, with no name to qualify, is a word
+    // floating on its own.
+    const { container } = setup();
+    const badges = [...container.querySelectorAll(".rail-mode-badge")];
+    expect(badges).toHaveLength(1);
+    expect(badges[0].closest(".rail-mode")?.textContent).toContain("Jam");
+
+    const css = readStylesheet();
+    const strip = css.slice(css.indexOf("@media (max-width: 619px) {"));
+    expect(strip.slice(0, strip.indexOf("display: none;"))).toContain(".rail-mode-badge");
   });
 
   it("keeps Zen and the widget adjacent — the tour spotlights them together", () => {

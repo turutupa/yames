@@ -4,6 +4,8 @@
     "untitled": "Setlist mới",
     "newSetlist": "Setlist mới",
     "deleteSetlist": "Xóa setlist",
+    "duplicateSetlist": "Nhân bản setlist",
+    "copyName": "{{name}} bản sao",
     "librarySteps": "{{count}} bước",
     "librarySteps_one": "{{count}} bước",
     "librarySteps_other": "{{count}} bước",
@@ -22,6 +24,14 @@
     "moveLater": "Chuyển bước này xuống sau",
     "duplicateStep": "Nhân đôi bước này",
     "removeStep": "Xóa bước này",
+    "reorderHint": "Kéo để sắp xếp lại",
+    "stopToReorder": "Dừng setlist để sắp xếp lại",
+    "duplicateSteps": "Nhân đôi {{count}} bước",
+    "duplicateSteps_one": "Nhân đôi {{count}} bước",
+    "duplicateSteps_other": "Nhân đôi {{count}} bước",
+    "removeSteps": "Xóa {{count}} bước",
+    "removeSteps_one": "Xóa {{count}} bước",
+    "removeSteps_other": "Xóa {{count}} bước",
     "barOf": "ô nhịp {{current}} trên {{total}}",
     "timeLeft": "còn {{duration}}",
     "waitingForYou": "đang chờ bạn",
@@ -120,14 +130,18 @@
       "backToPlaying": "Quay lại chơi"
     },
     "countIn": {
-      "label": "Đếm vào",
-      "off": "Không đếm vào",
-      "startingIn": "bắt đầu sau",
-      "beats": "{{count}} phách",
-      "beats_one": "{{count}} phách",
-      "beats_other": "{{count}} phách",
-      "fewer": "Bớt phách đếm vào",
-      "more": "Thêm phách đếm vào"
+      "startingIn": "bắt đầu sau"
+    },
+    "jam": {
+      "mark": "Bước này là một jam",
+      "addStep": "Thêm một jam",
+      "addTo": "Thêm vào setlist…",
+      "barsOfForm": "{{count}} ô nhịp",
+      "barsOfForm_one": "{{count}} ô nhịp",
+      "barsOfForm_other": "{{count}} ô nhịp",
+      "said": "ban nhạc",
+      "goneShort": "Jam không còn nữa",
+      "gone": "Jam đó không còn trong thư viện, nên bước này chơi tiếng click mà nó mô tả."
     }
   }
 }

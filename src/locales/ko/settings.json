@@ -138,6 +138,9 @@
     "devices": {
       "title": "기기",
       "audioOutput": "오디오 출력",
+      "outputPair": "출력",
+      "outputsPair": "출력 {{a}}-{{b}}",
+      "outputPairFallback": "이 장치는 출력이 두 개뿐이라 클릭이 출력 1-2로 나옵니다.",
       "refreshAudio": "오디오 기기 새로고침",
       "btLatencyWarning": "블루투스 오디오는 지연이 큽니다. 시각 신호와 소리가 완벽히 동기화되지 않을 수 있습니다.",
       "audioInput": "오디오 입력",
@@ -173,7 +176,8 @@
       "groups": {
         "metronome": "메트로놈",
         "view": "뷰",
-        "navigation": "탐색"
+        "navigation": "탐색",
+        "jam": "잼"
       },
       "actions": {
         "play": "재생 / 정지",
@@ -195,9 +199,19 @@
         "tab-1": "메트로놈 탭",
         "tab-2": "셋리스트 탭",
         "tab-3": "템포 연습 탭",
+        "tab-4": "잼 탭",
         "settings": "설정",
         "toggle-sidebar": "사이드바 전환",
-        "toggle-coach": "코치 전환"
+        "toggle-coach": "코치 전환",
+        "jam-next-groove": "다음 그루브",
+        "jam-prev-groove": "이전 그루브",
+        "jam-trade": "주고받기",
+        "jam-dropout": "쉬는 마디",
+        "jam-next-shape": "다음 코드 폼",
+        "jam-next-section": "다음 섹션",
+        "jam-prev-section": "이전 섹션",
+        "jam-loop-section": "이 섹션 반복",
+        "jam-take": "테이크 녹음"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -219,9 +233,19 @@
         "tab-1": "메트로놈 탭으로 전환합니다",
         "tab-2": "셋리스트 탭으로 전환합니다",
         "tab-3": "템포 연습 탭으로 전환합니다",
+        "tab-4": "잼 탭으로 전환합니다",
         "settings": "설정을 열거나 닫습니다",
         "toggle-sidebar": "왼쪽 사이드바를 접거나 펼칩니다",
-        "toggle-coach": "연습 코치 패널을 열거나 닫습니다"
+        "toggle-coach": "연습 코치 패널을 열거나 닫습니다",
+        "jam-next-groove": "악기에서 손을 떼지 않고 다음 그루브로 넘어가기",
+        "jam-prev-groove": "이전 그루브로 돌아가기",
+        "jam-trade": "주고받기 켜기·끄기 — 밴드가 네 마디, 당신이 네 마디",
+        "jam-dropout": "쉬는 마디 켜기·끄기",
+        "jam-next-shape": "지금 코드의 잡는 방법을 차례로 넘기기",
+        "jam-next-section": "마디선에서 다음 섹션의 첫 마디로 건너뛰기",
+        "jam-prev-section": "마디선에서 이전 섹션의 첫 마디로 돌아가기",
+        "jam-loop-section": "지금 있는 섹션을 반복하거나 반복을 끄기",
+        "jam-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다"
       }
     },
     "inputTest": {
@@ -272,6 +296,8 @@
       "updating": "업데이트 중…",
       "upToDate": "최신 버전입니다 ✓",
       "checkUpdates": "업데이트 확인",
+      "sounds": "사운드",
+      "soundsCredit": "클럽 드럼은 Versilian Studios와 Karoryfer Samples의 Virtuosity Drums이며 Austin McMahon이 연주했습니다(퍼블릭 도메인). 스튜디오 드럼은 DrumGizmo 프로젝트의 DRSKit입니다(CC BY 4.0).",
       "madeWith": "전 세계 음악가들을 위해 {{heart}}로 만들었습니다"
     }
   },

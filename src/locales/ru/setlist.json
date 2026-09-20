@@ -4,6 +4,8 @@
     "untitled": "Новый сет-лист",
     "newSetlist": "Новый сет-лист",
     "deleteSetlist": "Удалить сет-лист",
+    "duplicateSetlist": "Дублировать сет-лист",
+    "copyName": "{{name}} копия",
     "librarySteps": "{{count}} шагов",
     "librarySteps_one": "{{count}} шаг",
     "librarySteps_other": "{{count}} шагов",
@@ -22,6 +24,14 @@
     "moveLater": "Переместить этот шаг позже",
     "duplicateStep": "Продублировать этот шаг",
     "removeStep": "Удалить этот шаг",
+    "reorderHint": "Перетащите, чтобы изменить порядок",
+    "stopToReorder": "Остановите сет-лист, чтобы изменить порядок",
+    "duplicateSteps": "Продублировать {{count}} шагов",
+    "duplicateSteps_one": "Продублировать {{count}} шаг",
+    "duplicateSteps_other": "Продублировать {{count}} шагов",
+    "removeSteps": "Удалить {{count}} шагов",
+    "removeSteps_one": "Удалить {{count}} шаг",
+    "removeSteps_other": "Удалить {{count}} шагов",
     "barOf": "такт {{current}} из {{total}}",
     "timeLeft": "осталось {{duration}}",
     "waitingForYou": "ждёт вас",
@@ -120,14 +130,18 @@
       "backToPlaying": "Вернуться к игре"
     },
     "countIn": {
-      "label": "Отсчёт",
-      "off": "Без отсчёта",
-      "startingIn": "старт через",
-      "beats": "{{count}} долей",
-      "beats_one": "{{count}} доля",
-      "beats_other": "{{count}} долей",
-      "fewer": "Меньше долей отсчёта",
-      "more": "Больше долей отсчёта"
+      "startingIn": "старт через"
+    },
+    "jam": {
+      "mark": "Этот шаг — джем",
+      "addStep": "Добавить джем",
+      "addTo": "Добавить в сет-лист…",
+      "barsOfForm": "{{count}} тактов",
+      "barsOfForm_one": "{{count}} такт",
+      "barsOfForm_other": "{{count}} тактов",
+      "said": "группа",
+      "goneShort": "Джема больше нет",
+      "gone": "Этого джема больше нет в библиотеке, поэтому шаг играет клик, который в нём описан."
     }
   }
 }

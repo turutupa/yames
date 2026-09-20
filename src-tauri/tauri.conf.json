@@ -15,6 +15,7 @@
     "windows": [
       {
         "label": "main",
+        "dragDropEnabled": false,
         "title": "Yames",
         "url": "index.html?window=main",
         "width": 800,
@@ -31,6 +32,7 @@
       },
       {
         "label": "floating",
+        "dragDropEnabled": false,
         "title": "Yames Widget",
         "url": "index.html?window=floating",
         "width": 400,

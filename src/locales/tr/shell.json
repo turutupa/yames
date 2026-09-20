@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronom",
     "setlist": "Set listesi",
-    "drill": "Tempo Antrenmanı"
+    "drill": "Tempo Antrenmanı",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Ses"
   },
   "presets": {
+    "unsavedMetronome": "Kaydedilmemiş metronom",
+    "unsavedDrill": "Kaydedilmemiş tempo antrenmanı",
     "title": "Ön Ayarlar",
     "titleDrill": "Antrenmanlar",
     "titleSetlist": "Set listeleri",
-    "saveCurrent": "Geçerli ayarları kaydet",
+    "titleJam": "Jam'ler",
     "search": "Kitaplıkta ara",
     "searchPlaceholder": "Ara...",
     "namePlaceholder": "Ad...",
@@ -40,7 +43,9 @@
     "revert": "Geri al",
     "revertTooltip": "Değişiklikleri at ve ön ayarı yeniden yükle",
     "save": "Ön ayarı kaydet",
-    "delete": "Sil"
+    "delete": "Sil",
+    "newPreset": "Yeni ayar",
+    "newDrill": "Yeni çalışma"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Dinliyor",
     "inputOff": "Giriş kapalı",
     "coachOnPlay": "Koç, oynata bastığınızda dinler",
-    "coachQuiet": "Koç adım sürerken susar"
+    "coachQuiet": "Koç adım sürerken susar",
+    "countIn": "Giriş sayımı"
   },
   "rail": {
     "label": "Modlar ve kitaplık",
@@ -76,6 +82,7 @@
     "collapse": "Kenar çubuğunu daralt",
     "expand": "Kenar çubuğunu genişlet",
     "collapseWithShortcut": "Kenar çubuğunu daralt ({{shortcut}})",
-    "expandWithShortcut": "Kenar çubuğunu genişlet ({{shortcut}})"
+    "expandWithShortcut": "Kenar çubuğunu genişlet ({{shortcut}})",
+    "beta": "Beta"
   }
 }
