@@ -158,13 +158,61 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   reopens. Which other parts of the app get a camera (Jam takes, Drill,
   path steps — `ECHORA.md` E0.7) is evaluated after Songs has shipped
   with it, not before.
-- **A10 — What a video recording is, on disk.** *open.* Proposed
-  default: the picture is recorded by the webview as its own file, the
-  sound stays the engine's take (mix + dry stem, A8), and a sidecar
-  holds the measured offset between them; the review plays them
-  together. Joining them into one ordinary video file for sharing is a
-  later step (`ECHORA.md` D4), and needs an encoder whose licence has
-  to be checked against GPL-3 before it is promised.
+- **A10 — What a video recording is, on disk.** *built as proposed
+  2026-09-20 (W21), for the owner to confirm.* The picture is recorded by
+  the webview as its own file, the sound stays the engine's take (mix +
+  dry stem, A8), and a sidecar holds the measured offset between them;
+  the review plays them together. Joining them into one ordinary video
+  file for sharing is a later step (`ECHORA.md` D4), and needs an
+  encoder whose licence has to be checked against GPL-3 before it is
+  promised.
+
+  On disk: `<takeId>.video.<mp4|webm>` beside the take's WAV, written a
+  chunk at a time through `take_video_begin/append/finish/discard`
+  (`src-tauri/src/take_video.rs`), listed, sized and deleted with its
+  take, and refused as a take id exactly as the dry stem is.
+  `videoOffsetMs` goes into the take's own sidecar and means: add this to
+  a position in the take's audio to reach the same instant in the
+  picture.
+
+  **How that offset is arrived at, and what it is worth.** The engine
+  already knows where beat 0 sits inside the WAV (`TakePosition.
+  startOffsetMs`, W15, exact to one output buffer). The webview knows
+  when its first frame landed, on `performance.now()`. What joins them is
+  the beat events: a least-squares line through `(arrival, position)`
+  pairs, lifted to the 90th percentile of its own residuals because the
+  delivery delay is ONE-SIDED — an event can be late and can never be
+  early, so the mean of the cloud is biased late by the mean delay and
+  the top edge of it is the truth (`src/songs/camera/offset.ts`, and
+  `offset.test.ts` measures both). Against synthetic events with 25 ms of
+  one-sided jitter and two 180 ms outliers the fit lands within 5 ms.
+
+  **What it cannot see, and therefore what K3 is for.** A delay that
+  never varies is invisible to it: if every beat event were exactly 20 ms
+  late, a constant delivery delay and a clock offset are the same
+  measurement. On top of that sits the camera's own capture-to-callback
+  latency, which is the camera's business and differs by an order of
+  magnitude between a built-in webcam and a capture card, and which
+  nothing in the webview reports. So the review has a NUDGE beside the
+  picture (10 ms steps, remembered per camera id), and the real number is
+  a hardware session:
+
+  > **K3, the measurement.** Point the camera at your own hands. Turn
+  > Record the picture on, press play, and on a bar line CLAP once,
+  > hard, in frame. Play four more bars and stop. Then, in the review,
+  > step the picture earlier or later until the clap you SEE and the clap
+  > you HEAR land together, and write down the nudge the screen shows.
+  > That number, plus whatever `videoOffsetMs` the sidecar already holds,
+  > is the camera's true latency. Do it three times over five minutes to
+  > see whether it holds still. Do it on each of the three platforms and
+  > on a USB camera as well as the built-in one: if the answer is a
+  > constant per device, it becomes a default the nudge starts at; if it
+  > drifts over five minutes, the review needs a re-fit mid-playback and
+  > this entry reopens.
+
+  Nothing in W21 fakes that measurement, and nothing in it claims a
+  number it did not measure — the review says outright when a take has no
+  fitted offset and starts the two level.
 
 - **A11 — The refractory when a free player speeds up.** *open, the
   owner's call (W11, 2026-09-20).* Roadmap 1.3 unpinned the detector's
