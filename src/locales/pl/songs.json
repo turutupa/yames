@@ -21,8 +21,6 @@
     "percent": "{{percent}}%",
     "speedNote": "Klik idzie w {{bpm}} BPM",
     "loop": "Powtarzaj",
-    "loopOn": "W kółko",
-    "loopOff": "Raz do końca",
     "loopNote": "Gra takty powyżej raz za razem",
     "dropHere": "Upuść plik, żeby go otworzyć",
     "band": {
@@ -44,13 +42,6 @@
       "droppedNotes_other": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma."
     },
     "countIn": {
-      "label": "Odliczenie",
-      "none": "Od razu",
-      "bars": "{{count}} takt",
-      "bars_few": "{{count}} takty",
-      "bars_many": "{{count}} taktów",
-      "bars_other": "{{count}} taktu",
-      "note": "Liczone przed pierwszym przebiegiem, nie przed każdą powtórką",
       "counting": "Odliczam ci wejście"
     },
     "engine": {
@@ -227,8 +218,14 @@
       "portionSays_other": "{{count}} taktu · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}. raz",
+        "two": "{{n}}. raz",
+        "few": "{{n}}. raz",
+        "other": "{{n}}. raz"
+      },
+      "keepPortion": "Zapisz ten fragment",
+      "keepPortionNote": "Najpierw wybierz takty w tabulaturze, potem nadaj im nazwę",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

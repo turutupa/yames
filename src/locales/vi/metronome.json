@@ -2,6 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} lần gõ",
+    "tapCount_other": "{{count}} lần gõ",
     "subdivision": "Phân nhịp",
     "meter": "Nhịp",
     "free": "FREE",
@@ -10,6 +11,7 @@
     "beatCount": "{{count}} phách",
     "beatCount_other": "{{count}} phách",
     "clicksPerBar": "{{count}} tiếng/ô nhịp",
+    "clicksPerBar_other": "{{count}} tiếng/ô nhịp",
     "addBeat": "Thêm phách",
     "removeBeat": "Bớt phách",
     "prevMeter": "Nhịp trước",

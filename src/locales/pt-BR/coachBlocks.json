@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Repetir os compassos {{from}}–{{to}}",
-      "loopBarsAt": "Repetir os compassos {{from}}–{{to}} a {{bpm}}",
+      "loopBarsAt": "Repetir os compassos {{from}}–{{to}} a {{bpm}} BPM",
       "ramp": "Suba de {{from}} até {{to}}",
       "click": {
         "1": "Clique nas semínimas",

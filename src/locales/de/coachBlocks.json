@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Takte {{from}}–{{to}} loopen",
-      "loopBarsAt": "Takte {{from}}–{{to}} bei {{bpm}} loopen",
+      "loopBarsAt": "Takte {{from}}–{{to}} bei {{bpm}} BPM loopen",
       "ramp": "Von {{from}} auf {{to}} hocharbeiten",
       "click": {
         "1": "Klick auf Viertel",

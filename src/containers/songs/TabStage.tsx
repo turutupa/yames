@@ -617,20 +617,58 @@ export function TabStage({
       )}`
     : null;
 
-  // Keep the cursor in view by scrolling our own container, rather than
-  // letting alphaTab scroll something it does not own.
+  /**
+   * Keep the cursor in view, and bring the next system in BEFORE it is
+   * needed.
+   *
+   * We scroll our own container rather than letting alphaTab scroll something
+   * it does not own (`scrollMode = Off`). Two things about how the cursor is
+   * positioned decide the whole of this:
+   *
+   * **It is moved by a transform, not by `top`.** alphaTab sets
+   * `top: 0; left: 0` on the cursor once and then writes a `translate` on
+   * every seek, so `offsetTop` is zero for ever. Measured off the page: the
+   * cursor at the second system reported `offsetTop` 0 with a transform of
+   * `translate(51.5px, 155px)`. The old rule read that zero, decided the
+   * cursor was above the scroll position and scrolled back to the top of the
+   * piece — so the one case it existed for was the one case it broke.
+   * `getBoundingClientRect` is what the box is actually at.
+   *
+   * **Half a system of lead, and the smallest scroll that buys it.** The
+   * cursor's own height is one system, so keeping half of one clear beneath
+   * it means the start of the next line is already on screen when the player
+   * gets to it rather than arriving under them — and scrolling by exactly
+   * what is missing, instead of putting the cursor at a fixed place, leaves
+   * the page still whenever it does not need to move. A rule that parks the
+   * cursor a third of the way down instead keeps the piece's title clipped
+   * off the top from the first beat, for no gain.
+   */
   useEffect(() => {
     if (!ready) return;
     const host = hostRef.current;
     const cursor = host?.querySelector<HTMLElement>(".at-cursor-bar");
-    if (!host || !cursor) return;
-    const viewport = host.parentElement;
-    if (!viewport) return;
-    const top = cursor.offsetTop;
-    const margin = viewport.clientHeight / 3;
-    if (top < viewport.scrollTop || top > viewport.scrollTop + viewport.clientHeight - margin) {
-      viewport.scrollTo({ top: Math.max(0, top - margin), behavior: "smooth" });
+    const viewport = host?.closest<HTMLElement>(".songs-tab-viewport");
+    if (!cursor || !viewport) return;
+    const box = cursor.getBoundingClientRect();
+    const frame = viewport.getBoundingClientRect();
+    if (box.height <= 0) return;
+    // The cursor's top in the scroller's own coordinates.
+    const top = box.top - frame.top + viewport.scrollTop;
+    const lead = Math.min(box.height / 2, viewport.clientHeight / 3);
+    const wantedBottom = top + box.height + lead;
+    let next: number | null = null;
+    if (top < viewport.scrollTop) next = Math.max(0, top - lead);
+    else if (wantedBottom > viewport.scrollTop + viewport.clientHeight) {
+      next = Math.min(wantedBottom - viewport.clientHeight, top);
     }
+    if (next === null || Math.abs(next - viewport.scrollTop) < 1) return;
+    viewport.scrollTo({
+      top: Math.max(0, next),
+      // A page that slides is a page somebody asked not to have slide.
+      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
   }, [tick, ready]);
 
   return (
@@ -642,18 +680,23 @@ export function TabStage({
           reports — and being inside the scroller, it moves with the music
           instead of against the viewport. */}
       <div className="songs-tab-stack">
-      <div className="songs-tab-host" ref={hostRef} data-ready={ready ? "" : undefined} />
-      <div className="songs-tab-overlay" ref={overlayRef} data-ready={ready ? "" : undefined}>
-        {/* The band behind the selected bars, and a handle at each end.
-            Never the only signal — the strip says the same thing in words. */}
+      {/* The band BEHIND the selected bars, in a layer of its own under the
+          engraving. It was in the overlay above, which put a tinted rectangle
+          over the notes and left nothing between the cursor and the handles.
+          The order now is band, then music and the cursor in it, then the
+          handles — see `songs.css`. Never the only signal either way: the
+          strip says the same thing in words. */}
+      <div className="songs-tab-bands" aria-hidden="true">
         {bands.map((band, i) => (
           <div
             className="songs-tab-band"
             key={i}
             style={{ left: band.x, top: band.y, width: band.w, height: band.h }}
-            aria-hidden="true"
           />
         ))}
+      </div>
+      <div className="songs-tab-host" ref={hostRef} data-ready={ready ? "" : undefined} />
+      <div className="songs-tab-overlay" ref={overlayRef} data-ready={ready ? "" : undefined}>
         {handles && !drag && (
           <>
             <div

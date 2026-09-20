@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Lặp ô nhịp {{from}}–{{to}}",
-      "loopBarsAt": "Lặp ô nhịp {{from}}–{{to}} ở {{bpm}}",
+      "loopBarsAt": "Lặp ô nhịp {{from}}–{{to}} ở {{bpm}} BPM",
       "ramp": "Kéo từ {{from}} lên {{to}}",
       "click": {
         "1": "Tích tắc theo nốt đen",

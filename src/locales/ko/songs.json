@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "클릭은 {{bpm}} BPM으로 갑니다",
     "loop": "반복",
-    "loopOn": "계속 돌기",
-    "loopOff": "한 번만",
     "loopNote": "위의 마디를 몇 번이고 다시 연주합니다",
     "dropHere": "파일을 놓으면 열립니다",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다."
     },
     "countIn": {
-      "label": "카운트인",
-      "none": "바로 시작",
-      "bars": "{{count}}마디",
-      "bars_other": "{{count}}마디",
-      "note": "첫 바퀴 앞에서만 세고, 반복할 때마다 세지는 않습니다",
       "counting": "카운트 중"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}}마디 · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}번째",
+        "two": "{{n}}번째",
+        "few": "{{n}}번째",
+        "other": "{{n}}번째"
+      },
+      "keepPortion": "이 부분 저장",
+      "keepPortionNote": "탭에서 마디를 먼저 고른 다음 이름을 붙이세요",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

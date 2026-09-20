@@ -20,8 +20,6 @@
     "percent": "{{percent}} %",
     "speedNote": "Le clic tourne à {{bpm}} BPM",
     "loop": "Répéter",
-    "loopOn": "En boucle",
-    "loopOff": "Une seule fois",
     "loopNote": "Rejoue les mesures ci-dessus encore et encore",
     "dropHere": "Dépose le fichier pour l'ouvrir",
     "band": {
@@ -41,12 +39,6 @@
       "droppedNotes_other": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas."
     },
     "countIn": {
-      "label": "Décompte",
-      "none": "Direct",
-      "bars": "{{count}} mesure",
-      "bars_many": "{{count}} mesures",
-      "bars_other": "{{count}} mesures",
-      "note": "Compté avant le premier passage, pas avant chaque reprise",
       "counting": "On te compte l'entrée"
     },
     "engine": {
@@ -217,8 +209,14 @@
       "portionSays_other": "{{count}} mesures · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "Passage {{n}}",
+        "two": "Passage {{n}}",
+        "few": "Passage {{n}}",
+        "other": "Passage {{n}}"
+      },
+      "keepPortion": "Enregistrer ce passage",
+      "keepPortionNote": "Choisissez des mesures sur la tablature, puis nommez-les",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

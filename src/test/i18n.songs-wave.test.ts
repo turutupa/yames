@@ -119,12 +119,12 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.bpm",
   "songs.capo",
   "songs.capoLabel",
-  "songs.countIn.bars",
-  "songs.countIn.bars_other",
+  // The count-in's own chips went when the stage became one screen: Songs had
+  // two count-in controls and the one in the bottom bar is the one that
+  // survived (W18). Its label, its "straight in", its bar counts and its note
+  // went with them; only the line over the page while somebody counts you in
+  // is still shown (W22 item 6).
   "songs.countIn.counting",
-  "songs.countIn.label",
-  "songs.countIn.none",
-  "songs.countIn.note",
   "songs.dismiss",
   "songs.dropHere",
   "songs.empty.body",
@@ -152,8 +152,9 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.library.summary",
   "songs.loop",
   "songs.loopNote",
-  "songs.loopOff",
-  "songs.loopOn",
+  // `songs.loopOff` and `songs.loopOn` were the two halves of a label that
+  // changed under the finger pressing it. One chip, one word, and the
+  // pressed state says whether the repeat is on (W22 item 3).
   "songs.meter",
   "songs.offer.failed",
   "songs.offer.justArrived",

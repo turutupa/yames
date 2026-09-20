@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "De klik loopt op {{bpm}} BPM",
     "loop": "Herhalen",
-    "loopOn": "Steeds opnieuw",
-    "loopOff": "Eén keer door",
     "loopNote": "Speelt de maten hierboven steeds opnieuw",
     "dropHere": "Laat het bestand los om het te openen",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "{{count}} noten in dit bestand zijn voor instrumenten die de band niet heeft."
     },
     "countIn": {
-      "label": "Aftellen",
-      "none": "Meteen beginnen",
-      "bars": "{{count}} maat",
-      "bars_other": "{{count}} maten",
-      "note": "Wordt voor de eerste ronde geteld, niet voor elke herhaling",
       "counting": "Je wordt ingeteld"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}} maten · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "Keer {{n}}",
+        "two": "Keer {{n}}",
+        "few": "Keer {{n}}",
+        "other": "Keer {{n}}"
+      },
+      "keepPortion": "Dit stuk bewaren",
+      "keepPortionNote": "Kies eerst maten op de tab en geef ze dan een naam",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

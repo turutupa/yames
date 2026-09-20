@@ -1,7 +1,9 @@
 {
   "metronome": {
     "tap": "TAP",
-    "tapCount": "{{count}} golpes",
+    "tapCount": "{{count}} golpe",
+    "tapCount_many": "{{count}} golpes",
+    "tapCount_other": "{{count}} golpes",
     "subdivision": "Subdivisión",
     "meter": "Compás",
     "free": "FREE",
@@ -13,7 +15,9 @@
     "beatCount_one": "{{count}} pulso",
     "beatCount_many": "{{count}} pulsos",
     "beatCount_other": "{{count}} pulsos",
-    "clicksPerBar": "{{count}} clics/compás",
+    "clicksPerBar": "{{count}} clic/compás",
+    "clicksPerBar_many": "{{count}} clics/compás",
+    "clicksPerBar_other": "{{count}} clics/compás",
     "addBeat": "Añadir pulso",
     "removeBeat": "Quitar pulso",
     "prevMeter": "Compás anterior",

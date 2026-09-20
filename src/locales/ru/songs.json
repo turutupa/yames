@@ -21,8 +21,6 @@
     "percent": "{{percent}}%",
     "speedNote": "Клик идёт на {{bpm}} BPM",
     "loop": "Повторять",
-    "loopOn": "По кругу",
-    "loopOff": "Один раз",
     "loopNote": "Играет такты выше снова и снова",
     "dropHere": "Отпусти файл, чтобы открыть его",
     "band": {
@@ -44,13 +42,6 @@
       "droppedNotes_other": "{{count}} ноты в этом файле — для инструментов, которых нет в группе."
     },
     "countIn": {
-      "label": "Отсчёт",
-      "none": "Сразу",
-      "bars": "{{count}} такт",
-      "bars_few": "{{count}} такта",
-      "bars_many": "{{count}} тактов",
-      "bars_other": "{{count}} такта",
-      "note": "Считается перед первым проходом, а не перед каждым повтором",
       "counting": "Считаю вступление"
     },
     "engine": {
@@ -227,8 +218,14 @@
       "portionSays_other": "{{count}} такта · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}-й раз",
+        "two": "{{n}}-й раз",
+        "few": "{{n}}-й раз",
+        "other": "{{n}}-й раз"
+      },
+      "keepPortion": "Сохранить этот фрагмент",
+      "keepPortionNote": "Сначала выберите такты в табулатуре, потом дайте им имя",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

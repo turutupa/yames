@@ -2,6 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}}회 탭",
+    "tapCount_other": "{{count}}회 탭",
     "subdivision": "분할",
     "meter": "박자",
     "free": "FREE",
@@ -10,6 +11,7 @@
     "beatCount": "{{count}}박",
     "beatCount_other": "{{count}}박",
     "clicksPerBar": "마디당 {{count}}회",
+    "clicksPerBar_other": "마디당 {{count}}회",
     "addBeat": "박 추가",
     "removeBeat": "박 제거",
     "prevMeter": "이전 박자",

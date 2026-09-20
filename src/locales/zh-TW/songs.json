@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "滴答走 {{bpm}} BPM",
     "loop": "重複",
-    "loopOn": "一遍又一遍",
-    "loopOff": "只走一遍",
     "loopNote": "把上面這幾小節一遍又一遍地彈",
     "dropHere": "把檔案放在這裡就會開啟",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "這個檔案裡有 {{count}} 個音屬於樂團沒有的樂器。"
     },
     "countIn": {
-      "label": "預備拍",
-      "none": "直接開始",
-      "bars": "{{count}} 小節",
-      "bars_other": "{{count}} 小節",
-      "note": "只在第一遍之前數，不是每次重複都數",
       "counting": "正在幫你數拍"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}} 小節 · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "第 {{n}} 遍",
+        "two": "第 {{n}} 遍",
+        "few": "第 {{n}} 遍",
+        "other": "第 {{n}} 遍"
+      },
+      "keepPortion": "儲存這一段",
+      "keepPortionNote": "先在六線譜上選好小節，再給它取個名字",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

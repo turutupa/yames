@@ -20,8 +20,6 @@
     "percent": "{{percent}}%",
     "speedNote": "O clique anda a {{bpm}} BPM",
     "loop": "Repetir",
-    "loopOn": "Sem parar",
-    "loopOff": "Uma vez só",
     "loopNote": "Toca os compassos acima vez após vez",
     "dropHere": "Solte o arquivo para abrir",
     "band": {
@@ -41,12 +39,6 @@
       "droppedNotes_other": "{{count}} notas deste arquivo são de instrumentos que a banda não tem."
     },
     "countIn": {
-      "label": "Contagem de entrada",
-      "none": "Direto",
-      "bars": "{{count}} compasso",
-      "bars_many": "{{count}} compassos",
-      "bars_other": "{{count}} compassos",
-      "note": "Contada antes da primeira passada, não antes de cada repetição",
       "counting": "Contando sua entrada"
     },
     "engine": {
@@ -217,8 +209,14 @@
       "portionSays_other": "{{count}} compassos · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}ª vez",
+        "two": "{{n}}ª vez",
+        "few": "{{n}}ª vez",
+        "other": "{{n}}ª vez"
+      },
+      "keepPortion": "Salvar esta parte",
+      "keepPortionNote": "Escolha compassos na tablatura e depois dê um nome a eles",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

@@ -1,7 +1,9 @@
 {
   "metronome": {
     "tap": "TAP",
-    "tapCount": "{{count}} appuis",
+    "tapCount": "{{count}} appui",
+    "tapCount_many": "{{count}} appuis",
+    "tapCount_other": "{{count}} appuis",
     "subdivision": "Subdivision",
     "meter": "Mesure",
     "free": "FREE",
@@ -13,7 +15,9 @@
     "beatCount_one": "{{count}} temps",
     "beatCount_many": "{{count}} temps",
     "beatCount_other": "{{count}} temps",
-    "clicksPerBar": "{{count}} clics/mesure",
+    "clicksPerBar": "{{count}} clic/mesure",
+    "clicksPerBar_many": "{{count}} clics/mesure",
+    "clicksPerBar_other": "{{count}} clics/mesure",
     "addBeat": "Ajouter un temps",
     "removeBeat": "Retirer un temps",
     "prevMeter": "Mesure précédente",

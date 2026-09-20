@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Zapętl takty {{from}}–{{to}}",
-      "loopBarsAt": "Zapętl takty {{from}}–{{to}} przy {{bpm}}",
+      "loopBarsAt": "Zapętl takty {{from}}–{{to}} przy {{bpm}} BPM",
       "ramp": "Podnieś to z {{from}} do {{to}}",
       "click": {
         "1": "Klik na ćwierćnutach",

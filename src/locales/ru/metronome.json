@@ -1,7 +1,10 @@
 {
   "metronome": {
     "tap": "TAP",
-    "tapCount": "{{count}} нажатий",
+    "tapCount": "{{count}} нажатие",
+    "tapCount_few": "{{count}} нажатия",
+    "tapCount_many": "{{count}} нажатий",
+    "tapCount_other": "{{count}} нажатия",
     "subdivision": "Дробление",
     "meter": "Размер",
     "free": "FREE",
@@ -15,7 +18,10 @@
     "beatCount_few": "{{count}} доли",
     "beatCount_many": "{{count}} долей",
     "beatCount_other": "{{count}} долей",
-    "clicksPerBar": "{{count}} щелчков/такт",
+    "clicksPerBar": "{{count}} щелчок/такт",
+    "clicksPerBar_few": "{{count}} щелчка/такт",
+    "clicksPerBar_many": "{{count}} щелчков/такт",
+    "clicksPerBar_other": "{{count}} щелчка/такт",
     "addBeat": "Добавить долю",
     "removeBeat": "Убрать долю",
     "prevMeter": "Предыдущий размер",

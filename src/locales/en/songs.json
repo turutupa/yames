@@ -18,9 +18,7 @@
     "speed": "Speed",
     "percent": "{{percent}}%",
     "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
+    "loop": "Loop",
     "loopNote": "Play the bars above again and again",
     "dropHere": "Drop the file to open it",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
       "counting": "Counting you in"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}} bars · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}st time round",
+        "two": "{{n}}nd time round",
+        "few": "{{n}}rd time round",
+        "other": "{{n}}th time round"
+      },
+      "keepPortion": "Save this part",
+      "keepPortionNote": "Choose bars on the tab first, then give them a name",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

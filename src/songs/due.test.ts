@@ -10,10 +10,12 @@ import {
   SONG_DUE_KEY,
   SONG_DUE_MOVED_KEY,
   __resetDueBackingForTests,
+  SONG_DUE_TEMPO_KEY,
   clearSongDue,
   dayOf,
   listSongDue,
   promiseToComeBack,
+  songDueNow,
   songsDueOn,
 } from "./due";
 import { mockInvoke, setInvokeResponse } from "../test/mocks";
@@ -232,5 +234,69 @@ describe("what the library marks", () => {
       { scoreId: "later", startBar: 0, endBar: 1, dueDay: today + 2 },
     ];
     expect([...songsDueOn(items, today)].sort()).toEqual(["today", "yesterday"]);
+  });
+});
+
+/**
+ * And what opening that song is handed (W22 item 2).
+ *
+ * Pressing the marked row has to arrive at the passage that was promised,
+ * repeating, at the speed the promise was made at — the same three things
+ * the review's own button sets, offered a day later.
+ */
+describe("the passage a due song opens at", () => {
+  beforeEach(() => {
+    withTheStore();
+  });
+
+  it("is the one that has been waiting longest, and nothing that is not due yet", () => {
+    const today = 20_000;
+    const items = [
+      { scoreId: "s1", startBar: 16, endBar: 19, dueDay: today - 2 },
+      { scoreId: "s1", startBar: 4, endBar: 7, dueDay: today },
+      { scoreId: "s1", startBar: 0, endBar: 3, dueDay: today + 3 },
+      { scoreId: "s2", startBar: 8, endBar: 9, dueDay: today - 5 },
+    ];
+    expect(songDueNow(items, "s1", today)).toEqual(items[0]);
+    // A promise for later is not an offer for today.
+    expect(songDueNow(items, "s3", today)).toBeNull();
+    expect(songDueNow([items[2]], "s1", today)).toBeNull();
+  });
+
+  it("comes back at the speed the promise was made at", async () => {
+    await promiseToComeBack({
+      scoreId: "s1",
+      startBar: 4,
+      endBar: 7,
+      dueDay: 10,
+      tempoPercent: 70,
+    });
+    const [waiting] = await listSongDue();
+    expect(waiting.tempoPercent).toBe(70);
+
+    // The table has no column for it, so it is beside the promise rather
+    // than in it — and forgetting the promise forgets the speed with it.
+    expect(kept.get(SONG_DUE_TEMPO_KEY)).toEqual({ "s1|4|7": 70 });
+    await clearSongDue("s1", 4, 7);
+    expect(kept.get(SONG_DUE_TEMPO_KEY)).toEqual({});
+  });
+
+  it("carries no speed when the promise was made before there was one", async () => {
+    await promiseToComeBack({ scoreId: "s1", startBar: 0, endBar: 3, dueDay: 10 });
+    const [waiting] = await listSongDue();
+    expect(waiting.tempoPercent).toBeUndefined();
+  });
+
+  it("holds a hand-edited speed inside the range the chips offer", async () => {
+    await promiseToComeBack({
+      scoreId: "s1",
+      startBar: 0,
+      endBar: 3,
+      dueDay: 10,
+      tempoPercent: 70,
+    });
+    kept.set(SONG_DUE_TEMPO_KEY, { "s1|0|3": 4000, "s1|9|9": "fast" });
+    const [waiting] = await listSongDue();
+    expect(waiting.tempoPercent).toBe(100);
   });
 });

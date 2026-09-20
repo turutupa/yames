@@ -1,7 +1,10 @@
 {
   "metronome": {
     "tap": "TAP",
-    "tapCount": "{{count}} tapnięć",
+    "tapCount": "{{count}} tapnięcie",
+    "tapCount_few": "{{count}} tapnięcia",
+    "tapCount_many": "{{count}} tapnięć",
+    "tapCount_other": "{{count}} tapnięcia",
     "subdivision": "Podział",
     "meter": "Metrum",
     "free": "FREE",
@@ -15,7 +18,10 @@
     "beatCount_few": "{{count}} uderzenia",
     "beatCount_many": "{{count}} uderzeń",
     "beatCount_other": "{{count}} uderzenia",
-    "clicksPerBar": "{{count}} kliknięć/takt",
+    "clicksPerBar": "{{count}} kliknięcie/takt",
+    "clicksPerBar_few": "{{count}} kliknięcia/takt",
+    "clicksPerBar_many": "{{count}} kliknięć/takt",
+    "clicksPerBar_other": "{{count}} kliknięcia/takt",
     "addBeat": "Dodaj uderzenie",
     "removeBeat": "Usuń uderzenie",
     "prevMeter": "Poprzednie metrum",
