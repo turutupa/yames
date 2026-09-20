@@ -79,11 +79,14 @@ jobs:
           key: ios-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
           restore-keys: ios-cargo-
 
+      # No `cache: npm`: it wants a lockfile this repository does not have.
+      # The project's lockfile is bun's and package-lock.json is gitignored —
+      # the same reason ci.yml, release.yml and android.yml all run
+      # `npm install` rather than `npm ci`.
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       # `npm install`, not `npm ci`: the repository's lockfile is bun's and
       # package-lock.json is gitignored. Same as ci.yml, release.yml and
