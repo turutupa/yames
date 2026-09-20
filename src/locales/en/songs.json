@@ -75,7 +75,127 @@
       "add": "Import a song",
       "empty": "No songs yet",
       "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames"
+      "remove": "Remove from Yames",
+      "due": "Due",
+      "dueTitle": "You asked to come back to this one"
+    },
+    "review": {
+      "title": "How that went",
+      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
+      "again": "Go again",
+      "working": "Listening back...",
+      "passes": "Which go",
+      "pass": "Go {{n}}",
+      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
+      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
+      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
+      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
+      "moreLabel": "What else ({{count}})",
+      "moreLabel_other": "What else ({{count}})",
+      "lessLabel": "Hide the rest",
+      "tab": {
+        "nothing": "Nothing was played in these bars."
+      },
+      "mark": {
+        "onTime": "On time",
+        "slightlyEarly": "A shade early",
+        "early": "Early",
+        "slightlyLate": "A shade late",
+        "late": "Late",
+        "missed": "Missed",
+        "notAssessed": "Not assessed",
+        "extra": "Extra note",
+        "accentQuiet": "Written with an accent, but it did not come out louder"
+      },
+      "bars": {
+        "one": "bar {{bar}}",
+        "range": "bars {{from}}–{{to}}",
+        "here": "this passage"
+      },
+      "amount": {
+        "hair": "a hair",
+        "thirtySecond": "about a thirty-second",
+        "sixteenth": "about a sixteenth",
+        "tripletEighth": "about a third of a beat",
+        "eighth": "about an eighth",
+        "mostOfABeat": "most of a beat",
+        "beat": "a whole beat"
+      },
+      "when": {
+        "early": "early",
+        "late": "late"
+      },
+      "goes": "{{count}} go",
+      "goes_other": "{{count}} goes",
+      "notes": "{{count}} note",
+      "notes_other": "{{count}} notes",
+      "say": {
+        "consistentMiss": {
+          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
+          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
+          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+        },
+        "rushing": {
+          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
+          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
+          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+        },
+        "dragging": {
+          "1": "You're behind the click through {{bars}} — {{amount}} late.",
+          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
+          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+        },
+        "afterShift": {
+          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
+          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
+          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+        },
+        "fallsApart": {
+          "1": "You start {{bars}} clean and lose it by the end.",
+          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
+          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+        },
+        "extras": {
+          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
+          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
+          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+        },
+        "uneven": {
+          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
+          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
+          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+        },
+        "beatPositionBias": {
+          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
+          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
+          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+        },
+        "subdivisionWeak": {
+          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
+          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
+          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+        },
+        "drift": {
+          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
+          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
+          "3": "The tempo under your hands slides {{when}} across the segment."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
+          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
+          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+        },
+        "improved": {
+          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
+          "2": "Something moved: you held {{bars}} where it used to slip.",
+          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+        },
+        "clean": {
+          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
+          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
+          "3": "You played {{bars}} right every time. Leave it and come back to it."
+        }
+      }
     }
   }
 }

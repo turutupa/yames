@@ -20,7 +20,7 @@ import {
 } from "../../../songs/library";
 import type { SongLibrary, SongRecord } from "../../../songs/library";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
-import { sendScoreSchedule } from "../../../songs/engineBridge";
+import { loadScoreSchedule } from "../../../ipc";
 /**
  * The importer is loaded when a file arrives, not when the app starts.
  *
@@ -222,9 +222,25 @@ export function useSongsSession(
     [score, range, tempoPercent],
   );
 
+  /**
+   * Hand the engine the onsets it should expect.
+   *
+   * Resolves either way. A rejection means the command is not in this build
+   * — which stopped being the normal case when W1 merged, but is still what a
+   * downgraded or half-built binary does — and a Songs mode that plays and
+   * scores nothing is a better one than a Songs mode whose Play button
+   * throws. The boolean is what lets the review be honest about which
+   * happened rather than showing a verdict on a pass nobody scored.
+   */
   const pushSchedule = useCallback(async () => {
     if (!score) return false;
-    return sendScoreSchedule(buildSchedule(score, range, { loops: loop }));
+    try {
+      await loadScoreSchedule(buildSchedule(score, range, { loops: loop }));
+      return true;
+    } catch (err) {
+      console.warn("[yames] the engine would not take the song's schedule", err);
+      return false;
+    }
   }, [score, range, loop]);
 
   /**

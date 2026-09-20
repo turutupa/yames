@@ -21,6 +21,8 @@ import type { JamEngineConfig } from "../jam/types";
 import { importSong } from "../songs/import";
 import { newSongRecord } from "../songs/library";
 import type { SongRecord } from "../songs/library";
+import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
+import type { ScoreSchedule } from "../songs/types";
 
 /**
  * The library in the sidebar.
@@ -317,6 +319,31 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** The bar reported on the last beat, so a bar line is detectable. */
   let jamLastBar: number | null = null;
 
+  /**
+   * The schedule the app actually pushed, and the pass built from it.
+   *
+   * The review scenes are not a mock-up: the app imports the song, derives
+   * the schedule, hands it over, and the "analyzer" here answers with a pass
+   * over THAT schedule. So the verdicts line up with the notes on the page,
+   * and a change to `schedule.ts` shows up in the pictures the way it would
+   * show up in the app.
+   */
+  let songSchedule: ScoreSchedule | null = null;
+  const scripted = () => {
+    const recipe = shot.songs?.review;
+    if (!recipe || !songSchedule) return null;
+    const record = songShotRecord();
+    // 96 BPM is the shot song's own tempo; the review's bands are taken
+    // against the click's quarter note, so it has to be the same one.
+    const quarterMs = 60_000 / 96;
+    const pass = scriptPass(songSchedule, recipe, { quarterMs });
+    return {
+      pass,
+      findings: scriptFindings(record.score, songSchedule, recipe, pass, { bpm: 96 }),
+      quarterMs,
+    };
+  };
+
   function beatLoop() {
     clearTimeout(beatTimer);
     if (!STATE.isPlaying) return;
@@ -579,6 +606,77 @@ export function installShotMock(shot: Shot, theme: string): void {
       };
     }
     if (cmd.startsWith("plugin:")) return null;
+
+    /*
+     * The score the player is about to play, and the verdict on it.
+     *
+     * Four commands, and between them they are the whole review: the app
+     * pushes a schedule, presses play, presses stop, and the forced segment
+     * close reports a pass built from that very schedule. Nothing here
+     * invents a note — the recipes are `reviewFixtures.ts`, the same ones the
+     * unit tests use, so a green suite and a picture cannot disagree.
+     */
+    if (cmd === "load_score_schedule") {
+      songSchedule = a?.schedule as ScoreSchedule;
+      return null;
+    }
+    if (cmd === "clear_score_schedule") {
+      return null;
+    }
+    if (cmd === "close_open_segment") {
+      const script = scripted();
+      if (script) {
+        emit("practice-segment-ended", {
+          startMs: 0,
+          endMs: 30_000,
+          score: script.pass.score,
+          componentScores: {
+            intervalConsistency: 0.8,
+            gridAlignment: 0.8,
+            hitCompleteness: 0.9,
+            onsetEfficiency: 0.9,
+          },
+          bpm: 96,
+          instrument: "electric-guitar",
+          endReason: "userStopped",
+          onsetCount: script.pass.results.length,
+          beatCount: 32,
+          totalOnsets: script.pass.results.length,
+          spuriousOnsets: script.pass.extras.length,
+          onsetEfficiency: 0.9,
+          inferredDivisor: 2,
+          inferredDivisorConfidence: 0.9,
+          playMode: "structured",
+          onsetResults: script.pass.results,
+          extraOnsets: script.pass.extras,
+        });
+      }
+      return null;
+    }
+    if (cmd === "score_timing_bands") {
+      // `timing.rs`'s two formulas, drawn again here and ONLY here. The real
+      // numbers come from Rust in the app; a screenshot harness cannot call
+      // it, and a review with no bands would photograph as a coarser picture
+      // than the one that ships.
+      const schedule = a?.schedule as ScoreSchedule | undefined;
+      const quarterMs = Number(a?.quarterMs) || 500;
+      const beats = (schedule?.onsets ?? []).map((o) => o.beat);
+      let gap = 1;
+      for (let i = 1; i < beats.length; i++) {
+        const d = beats[i] - beats[i - 1];
+        if (d > 1e-6 && d < gap) gap = d;
+      }
+      const windowMs = Math.max(10, Math.min(80, quarterMs * gap * 0.4));
+      const perfect = Math.max(8, windowMs * 0.2);
+      const good = Math.max(perfect, windowMs * 0.5);
+      return { windowMs, perfect, good, ok: Math.max(good, windowMs), smallestGapBeats: gap };
+    }
+    if (cmd === "analyze_attempt") {
+      return scripted()?.findings ?? [];
+    }
+    if (cmd === "save_attempt" || cmd === "query_attempts") {
+      return cmd === "query_attempts" ? [] : null;
+    }
 
     if (cmd === "set_jam") {
       jamConfig = (a?.config as JamEngineConfig | null) ?? null;

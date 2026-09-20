@@ -53,6 +53,29 @@ if (!params.get("manifest") && !shot) {
 
 if (shot) installShotMock(shot, theme);
 
+/**
+ * Press something until it has done what it was meant to do.
+ *
+ * Everything else in this file presses once, because everything else is
+ * pressed at a moment the page has already been waited for. A control inside
+ * a panel that has only just appeared is the one case where a single press
+ * can land a frame early, and a screenshot harness that fails one run in four
+ * is worse than no harness. `press` is called at most every 400 ms.
+ */
+async function pressUntil(
+  what: string,
+  press: () => void,
+  done: () => boolean,
+  timeoutMs = 15000,
+): Promise<void> {
+  const started = Date.now();
+  while (!done()) {
+    if (Date.now() - started > timeoutMs) throw new Error(`pressing ${what} never opened it`);
+    press();
+    await new Promise((r) => setTimeout(r, 400));
+  }
+}
+
 /** Wait for `check` to hold, or give up and say what never happened. */
 function until(what: string, check: () => boolean, timeoutMs = 15000): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -270,6 +293,41 @@ async function drive() {
       if (!chip) throw new Error(`no section chip called "${shot!.songs.section}"`);
       chip.click();
     }
+    /**
+     * A pass, and the verdict at the end of it.
+     *
+     * Pressed, not poked: the transport button and then the transport button
+     * again, which is the only route a person has to a review. The mocked
+     * analyzer answers the forced segment close with a pass over the
+     * schedule the app itself derived, so what is photographed is the
+     * shipping review drawing shipping blocks.
+     */
+    if (shot!.songs.review) {
+      await until("the transport", () => !!document.querySelector(".transport-play"));
+      const transport = document.querySelector(".transport-play") as HTMLButtonElement;
+      transport.click();
+      // Long enough for the schedule to have been pushed and a bar to pass.
+      await new Promise((r) => setTimeout(r, 400));
+      transport.click();
+      await until("the review", () => !!document.querySelector(".songs-review"), 20000);
+      if (shot!.songs.openMore) {
+        /*
+         * Pressed until it takes, rather than pressed once and hoped for.
+         *
+         * `until` resolves the frame the review appears, which is not
+         * necessarily the frame its own disclosure is ready to be pressed —
+         * and with four Playwright workers each engraving a score at the same
+         * time, "not necessarily" became "one run in four". A person whose
+         * press does not take presses again; so does this.
+         */
+        await pressUntil(
+          '"what else"',
+          () => document.querySelector<HTMLElement>(".songs-review-more .songs-link")?.click(),
+          () => !!document.querySelector(".songs-review-others"),
+        );
+      }
+    }
+
     if (shot!.songs.picker) {
       // The track picker, reached the only way a person reaches it — by
       // bringing a file in. The input is the view's own.

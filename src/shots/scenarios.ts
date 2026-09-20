@@ -64,6 +64,24 @@ export interface Shot {
     row: number;
     section?: string;
     picker?: string;
+    /**
+     * Play a pass, stop it, and photograph the verdict.
+     *
+     * The harness presses the transport, hands the mocked analyzer a pass
+     * built from the schedule the app actually sent it, and presses stop —
+     * so the review in the picture is the shipping component drawing the
+     * shipping blocks, not a mock-up of one. The three recipes are the three
+     * shapes a review takes (`review/reviewFixtures.ts`):
+     *
+     *   `rushing` — a tendency, with a loop as its fix
+     *   `missed`  — a passage lost on every pass, three goes to step through
+     *   `clean`   — praise that names bars and a count of goes
+     *
+     * `openMore` opens "what else", which is the one part of A4 a screenshot
+     * of the headline alone cannot show.
+     */
+    review?: "rushing" | "missed" | "clean";
+    openMore?: boolean;
   };
   jam?: {
     row: number;
@@ -440,6 +458,46 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 300,
+  },
+  {
+    id: "songs-review-rushing",
+    suffix: "songs-review-rushing",
+    window: "main",
+    tab: "songs",
+    // The coach's one thing, with its fix as a button: a tendency in the back
+    // half of the passage, the bars it is about drawn underneath the
+    // sentence, and a loop ready to press. The screen COACH_UX A4 is about.
+    songs: { row: 0, review: "rushing" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-review-missed",
+    suffix: "songs-review-missed",
+    window: "main",
+    tab: "songs",
+    // The same passage lost on every go: three goes to step through, extras
+    // between the notes where the hand kept going, and a second finding
+    // behind "what else" — which is the half of A4 that says everything
+    // else is there if you open it and never pushed.
+    songs: { row: 0, review: "missed", openMore: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-review-clean",
+    suffix: "songs-review-clean",
+    window: "main",
+    tab: "songs",
+    // Praise that is about something: the bars, the number of goes, and
+    // "come back to this" rather than a correction nobody needed. A4 again —
+    // never generic praise.
+    songs: { row: 0, review: "clean" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
   },
   {
     id: "songs-picker",

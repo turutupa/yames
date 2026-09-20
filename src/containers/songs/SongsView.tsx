@@ -12,12 +12,18 @@
  *
  * Play now means the song: the engine follows the score's own tempo map and
  * plays the file's other tracks through the band, so the band's faders, the
- * mutes and the count-in are on the stage beside the range (A13 again). The
- * review with its verdict is the one piece still to come.
+ * mutes and the count-in are on the stage beside the range (A13 again).
+ *
+ * And stopping means the verdict. Nothing the coach has to say appears while
+ * the transport runs (`COACH_UX.md` A3); the review comes up underneath the
+ * stage when you stop, and goes away again when you start. The three hooks
+ * that make that happen are `containers/songs/review/` and are mounted here
+ * in four lines — the screen itself knows nothing about findings.
  */
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
+import { SongReview, useSongActions, useSongAttempt, useSongTakePitch } from "./review";
 import { SongBand, SongCountIn } from "./SongBand";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
 import { meterAt, rangeTicks, sectionRange, wholeSong } from "../../songs/schedule";
@@ -95,6 +101,41 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    */
   const countIn =
     isPlaying && currentBeat?.songCountIn ? currentBeat.measureBeat + 1 : null;
+
+  /**
+   * The attempt, and the verdict at the end of it (`COACH_UX.md` A3–A5).
+   *
+   * Mounted here and nowhere else: the review is about the pass this screen
+   * just ran, and the two things it needs that nothing else has are the
+   * transport's edge and the range that was pushed to the engine.
+   */
+  const attempt = useSongAttempt({
+    score,
+    scoreId: song?.id ?? null,
+    range,
+    loop,
+    tempoPercent,
+    bpm: tempo,
+    isPlaying,
+  });
+
+  /**
+   * What the ear said about the notes, when there is a recording to ask.
+   *
+   * `undefined` today: the engine can record a take over a song (W9), but the
+   * Songs stage has no record button on it yet, so nothing supplies one. The
+   * review then says nothing about which notes were played — only about when
+   * they landed — which is exactly what `SONGS.md` S0.5 says it may claim.
+   */
+  const pitch = useSongTakePitch(attempt.review, undefined);
+
+  const actions = useSongActions({
+    scoreId: song?.id ?? null,
+    setRange: session.setRange,
+    setLoop: session.setLoop,
+    setTempoPercent: session.setTempoPercent,
+    review: attempt.review,
+  });
 
   // The engine gets the schedule when what it describes changes — not on every
   // render, and never while a pass is running underneath it.
@@ -412,6 +453,19 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               onMute={session.setMute}
             />
           </div>
+
+          {/* A3: nothing here while the transport runs. The verdict appears
+              when you stop, and goes away again when you start. */}
+          {attempt.working && <p className="songs-review-working">{t("songs.review.working")}</p>}
+          {attempt.tooShort && <p className="songs-review-working">{t("songs.review.tooShort")}</p>}
+          {attempt.review && (
+            <SongReview
+              review={attempt.review}
+              pitch={pitch}
+              onAction={actions.run}
+              onDismiss={attempt.dismiss}
+            />
+          )}
         </>
       )}
 

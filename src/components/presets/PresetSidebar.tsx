@@ -80,6 +80,12 @@ interface PresetSidebarProps {
    */
   songs?: SongRecord[];
   activeSongId?: string | null;
+  /**
+   * Songs with a passage the coach promised to come back to, and the day has
+   * come round (`COACH_UX.md` C2). A quiet mark on the row and nothing else:
+   * never a badge with a number on it, never a backlog, never a streak.
+   */
+  dueSongs?: ReadonlySet<string>;
   onLoadSong?: (id: string) => void;
   onImportSong?: () => void;
   onDeleteSong?: (id: string) => void;
@@ -211,6 +217,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onAddJamToSetlist,
   songs,
   activeSongId,
+  dueSongs,
   onLoadSong,
   onImportSong,
   onDeleteSong,
@@ -1049,6 +1056,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 <>
                   <span className="setlist-item-row">
                     <span className="preset-item-name">{s.name}</span>
+                    {dueSongs?.has(s.id) && (
+                      <span className="song-item-due" title={t("songs.library.dueTitle")}>
+                        {t("songs.library.due")}
+                      </span>
+                    )}
                   </span>
                   <span className="setlist-item-sub">
                     {t("songs.library.summary", {

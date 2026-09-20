@@ -47,6 +47,8 @@ interface RailProps {
   /** The song library, on the songs tab. Same deal as the jam library. */
   songs: SongRecord[];
   activeSongId: string | null;
+  /** Songs with something the coach promised to come back to today. */
+  dueSongs?: ReadonlySet<string>;
   onLoadSong: (id: string) => void;
   onImportSong: () => void;
   onDeleteSong: (id: string) => void;
@@ -193,6 +195,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onAddJamToSetlist,
     songs,
     activeSongId,
+    dueSongs,
     onLoadSong,
     onImportSong,
     onDeleteSong,
@@ -307,6 +310,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onAddJamToSetlist={onAddJamToSetlist}
             songs={songs}
             activeSongId={activeSongId}
+            dueSongs={dueSongs}
             onLoadSong={onLoadSong}
             onImportSong={onImportSong}
             onDeleteSong={onDeleteSong}
