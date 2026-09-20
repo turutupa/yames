@@ -212,6 +212,17 @@ describe("writing the library", () => {
     expect(deleteScore).not.toHaveBeenCalled();
   });
 
+  it("does not let two writes in flight undo each other", async () => {
+    // `useSongsSession` commits the whole list on every change and does not
+    // await it. A whole-file write could overlap safely because the last one
+    // won; a diff cannot — both would read the library before either wrote,
+    // and the second would delete the song the first had just added.
+    const a = record(SECTIONS, "A", 100);
+    const b = record(REPEAT_WITH_ENDINGS, "B", 200);
+    await Promise.all([songLibrary.save([a]), songLibrary.save([a, b])]);
+    expect(new Set(rows.keys())).toEqual(new Set([a.id, b.id]));
+  });
+
   it("deletes the song that left the list, and only that one", async () => {
     const a = record(SECTIONS, "A", 100);
     const b = record(REPEAT_WITH_ENDINGS, "B", 200);

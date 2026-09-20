@@ -159,7 +159,16 @@ async function toRecord(summary: {
  * The store has no "replace the library" and should not — deleting a song
  * takes every attempt at it with it, and that has to be something the user
  * asked for rather than a side effect of an array being shorter.
+ *
+ * Writes are serialised. `useSongsSession` commits the whole list on every
+ * change and does not await it, and a whole-list write to one JSON file was
+ * safe to overlap because the last one won. A diff is not: two of them in
+ * flight together both read the library BEFORE either had written, and the
+ * second would then delete a song the first had just added. One chain, in
+ * the order they were asked for.
  */
+let writing: Promise<unknown> = Promise.resolve();
+
 export const songLibrary: SongLibrary = {
   async list() {
     await moveFromJsonOnce();
@@ -169,28 +178,41 @@ export const songLibrary: SongLibrary = {
     return records.filter((r): r is SongRecord => r !== null);
   },
 
-  async save(records) {
-    const before = await listScores();
-    const known = new Map((Array.isArray(before) ? before : []).map((s) => [s.id, s]));
-    for (const record of records) {
-      const current = known.get(record.id);
-      known.delete(record.id);
-      // A song that is already there under the same name and date is the
-      // common case — every commit writes the whole list, and rewriting a
-      // few hundred kilobytes of score per keystroke of a rename would be
-      // the one thing moving out of `songs.json` was meant to stop.
-      if (current && (current.name ?? current.title) === record.name && current.importedAt === record.addedAt) {
-        continue;
-      }
-      await saveScore(record.score, {
-        name: record.name,
-        sourceBase64: record.sourceBase64 || undefined,
-        importedAt: record.addedAt,
-      });
-    }
-    for (const id of known.keys()) await deleteScore(id);
+  save(records) {
+    const next = writing.then(
+      () => applySave(records),
+      () => applySave(records),
+    );
+    writing = next;
+    return next;
   },
 };
+
+async function applySave(records: SongRecord[]): Promise<void> {
+  const before = await listScores();
+  const known = new Map((Array.isArray(before) ? before : []).map((s) => [s.id, s]));
+  for (const record of records) {
+    const current = known.get(record.id);
+    known.delete(record.id);
+    // A song that is already there under the same name and date is the
+    // common case — every commit writes the whole list, and rewriting a few
+    // hundred kilobytes of score per keystroke of a rename would be the one
+    // thing moving out of `songs.json` was meant to stop.
+    if (
+      current &&
+      (current.name ?? current.title) === record.name &&
+      current.importedAt === record.addedAt
+    ) {
+      continue;
+    }
+    await saveScore(record.score, {
+      name: record.name,
+      sourceBase64: record.sourceBase64 || undefined,
+      importedAt: record.addedAt,
+    });
+  }
+  for (const id of known.keys()) await deleteScore(id);
+}
 
 /** A record for a freshly imported score. */
 export function newSongRecord(score: SongScore, source: Uint8Array): SongRecord {
