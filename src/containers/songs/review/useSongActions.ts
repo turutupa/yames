@@ -122,6 +122,11 @@ export function useSongActions(input: SongActionsInput): SongActions {
           // Why it was asked for, so the notebook (C1) can one day say what
           // the promise was about rather than only when it falls due.
           reason: finding.kind,
+          // And at what speed, so opening it again hands the player the
+          // exercise the coach meant rather than the same bars at full
+          // tempo. The review's own percentage: the promise is about the
+          // pass that just happened.
+          tempoPercent: latest.current.review?.tempoPercent,
         }).then((all) => {
           setDue(new Set(all.filter((d) => d.dueDay <= dayOf()).map((d) => d.scoreId)));
           // The rail is not below this screen and does not take a prop from

@@ -33,6 +33,7 @@ const importerModule = () => import("../../../songs/import");
 type Importer = Awaited<ReturnType<typeof importerModule>>;
 import type { ParsedSong, SongImportWarning, SongTrackChoice } from "../../../songs/import";
 import type { BarRange } from "../../../songs/schedule";
+import { dayOf, listSongDue, songDueNow } from "../../../songs/due";
 import { addPortion, newPortionId, removePortion, renamePortion } from "../../../songs/selection";
 import type { SavedPortion } from "../../../songs/selection";
 import type { SongScore } from "../../../songs/types";
@@ -349,6 +350,38 @@ export function useSongsSession(
     if (stored.selection) setSelectionState(clampRange(score, stored.selection));
     setLoop(stored.loop);
     setTempoPercentState(stored.tempoPercent);
+
+    /*
+     * And a promise that has fallen due wins over where you left off.
+     *
+     * `COACH_UX.md` C2: at most a few things, each one tap to start. The tap
+     * is the song's own row in the library — the mark beside its name is
+     * what the coach promised — so opening it has to arrive at the passage
+     * that was promised, repeating, at the speed the promise was made at. It
+     * is the same three things `loopBars` sets when the button in the review
+     * is pressed, because it is the same offer made a day later.
+     *
+     * It arrives a moment after the stored setting because the store is a
+     * round trip; `restoredFor` is checked again on the way back so a player
+     * who has already moved on to another song is not dragged into this
+     * one's bars.
+     */
+    let alive = true;
+    void listSongDue()
+      .then((items) => {
+        if (!alive || restoredFor.current !== id) return;
+        const waiting = songDueNow(items, id, dayOf());
+        if (!waiting) return;
+        setSelectionState(
+          clampRange(score, { startBar: waiting.startBar, endBar: waiting.endBar }),
+        );
+        setLoop(true);
+        if (waiting.tempoPercent !== undefined) setTempoPercentState(waiting.tempoPercent);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
     // `engine.mixSetting` is read, not depended on: this runs when the SONG
     // changes, and reads whatever the store has said by then.
     // eslint-disable-next-line react-hooks/exhaustive-deps
