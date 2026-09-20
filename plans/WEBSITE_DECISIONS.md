@@ -50,6 +50,22 @@ Three reasons:
 3. The coach still does its job as the section that makes someone pick *this* metronome over the
    free one they already have — it just isn't the headline.
 
+### Decided — 2026-09-20 · The headline is the owner's: "Finally, an app for every practice session."
+
+After four rounds of the orchestrator's candidates (a slogan, two that leaned on Songs, a feature
+list, and "the free practice app"), the owner wrote the line himself. His reasons, which are the
+rule: it says WHEN you would use it rather than declaring a category the product has not settled
+("selling it as a practice app … is immediately putting us into a position we're not even clear
+about yet"); it is roomy on purpose; and it stays true when the attention later moves to the coach.
+It also continues the live "Finally, a metronome you won't skip." voice, and "every" sells coming
+back, which the download numbers say is the real problem.
+
+Because the headline is roomy, the eyebrow and the sub-line carry the concrete "what it does"
+immediately, with the metronome, the band and the tabs given equal weight. "Free, no account,
+offline" stays under the download button and in the price tile, not in the h1. No category word in
+titles or share text either. What did not change through any of this: the numbers, the timing (the
+new site goes live with Songs, not before), the landing pages for search, and not "toolkit".
+
 ### Decided — 2026-09-20 · "It listens" is rejected. Say what the app does.
 
 The orchestrator proposed "it listens" / "the practice room that listens back" as the thread of the
