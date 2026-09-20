@@ -68,7 +68,12 @@ every theme.
 8. **Jam's default mix** (the task chip from the website work): keys sit
    ~10 dB under the drums at default faders. Still open.
 
-## Waiting for your ear: Jam's default mix (branch `songs-w17-jam-mix`, NOT merged)
+## Waiting for your ear: Jam's default mix (merged so you can hear it in the app — NOT approved)
+
+You asked for one branch to test, so `songs-w17-jam-mix` is merged as
+`f3b0ccbb`. Play a jam with the bass and keys rows ON and judge it. If
+you do not like it: `git revert -m 1 f3b0ccbb` — nothing else depends on
+it.
 
 Six before/after pairs were sent to you on 2026-09-20; they live in
 `.claude\worktreesgent-a1b78c03f9e9ddac0\jam-mix-demos\`. The keys come up
