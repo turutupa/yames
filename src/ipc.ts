@@ -740,7 +740,14 @@ export async function queryHistory(
 // ---------------------------------------------------------------------------
 // Songs — the library, and what was played against it
 // ---------------------------------------------------------------------------
-import type { SongScore } from "./songs/types";
+import type {
+  ExtraOnset,
+  Finding,
+  NoteVerdict,
+  OnsetResult,
+  ScoreSchedule,
+  SongScore,
+} from "./songs/types";
 
 /** One row of the song library — what a list shows, without the notes. */
 export type ScoreSummary = {
@@ -875,6 +882,91 @@ export async function deleteScore(id: string): Promise<void> {
 
 export async function saveAttempt(attempt: Attempt): Promise<void> {
   return invoke("save_attempt", { attempt });
+}
+
+// ---------------------------------------------------------------------------
+// The coach's judgement, and its ears
+//
+// Both run off the UI thread (`#[tauri::command(async)]`) and both belong to
+// the post-session tier (`AGENTS.md`): the pass is over, the player is
+// reading the timing score, and there are seconds to spend.
+// ---------------------------------------------------------------------------
+
+/** One attempt at a passage: every pass, as scoring reported it. */
+export type AttemptPasses = {
+  results: OnsetResult[];
+  extras?: ExtraOnset[];
+  /** The tempo it was played at, as a share of the score's own tempo. */
+  tempoPercent: number;
+};
+
+export type AnalyzeAttemptRequest = {
+  /** The score to judge against, by id in the library… */
+  scoreId?: string;
+  /** …or whole, for a passage that is not in the library yet. */
+  score?: SongScore;
+  /** Always from `src/songs/schedule.ts` — it is what derives one. */
+  schedule: ScoreSchedule;
+  attempt: AttemptPasses;
+  /** Earlier attempts at the same passage, oldest first, given whole. */
+  earlier?: AttemptPasses[];
+  /**
+   * …or asked of the store instead: every earlier attempt overlapping these
+   * bars. Needs `scoreId`. It is what makes "improved" and the tempo ceiling
+   * possible, and nothing else depends on it.
+   */
+  earlierBars?: BarRange;
+  /** The attempt being judged, when it is already saved — so it is not
+   *  compared against itself. */
+  excludeAttemptId?: string;
+};
+
+/** The coach's verdict, ranked, headline first (`COACH_UX.md` A4). */
+export async function analyzeAttempt(
+  request: AnalyzeAttemptRequest,
+): Promise<Finding[]> {
+  return invoke<Finding[]>("analyze_attempt", { request });
+}
+
+export type AnalyzeTakePitchRequest = {
+  /** The take to listen to, and the jam it was recorded under. Its DRY stem
+   *  is what is read — the mix has the band in it. */
+  takeId: string;
+  jamId: string;
+  scoreId?: string;
+  score?: SongScore;
+  schedule: ScoreSchedule;
+  results: OnsetResult[];
+  /**
+   * Onsets the player produced that the score did not ask for.
+   *
+   * No verdict is given on them — they are not notes of the score — but they
+   * are where the tracker is cut. Nothing in a pitch track tells one note
+   * from the next; an onset does, and an extra note left out here gets
+   * folded into the written note before it and drags its median off.
+   */
+  extras?: ExtraOnset[];
+  /** The tempo the range was played at — the click's, not the score's. */
+  bpm: number;
+  /**
+   * Where the FIRST BEAT of the played range sits inside the dry stem, in ms
+   * from the instant that file starts.
+   *
+   * The one number everything else rests on. `OnsetResult` carries a
+   * deviation and not an absolute time, so when a note was played has to be
+   * reconstructed as "where it was due, plus how far off it was" — and
+   * "where it was due" only means anything against the buffer's own clock.
+   * Get this wrong and every note moves by the same amount, which looks like
+   * a tracker that cannot segment rather than a clock that is out.
+   */
+  startOffsetMs?: number;
+};
+
+/** Which note was that, for every note of the score in the played range. */
+export async function analyzeTakePitch(
+  request: AnalyzeTakePitchRequest,
+): Promise<NoteVerdict[]> {
+  return invoke<NoteVerdict[]>("analyze_take_pitch", { request });
 }
 
 /** Attempts at a song, oldest first. */

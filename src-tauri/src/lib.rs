@@ -112,6 +112,8 @@ use commands::{
     get_system_memory_mb,
     // W2 — the practice store (ROADMAP 1.1).
     get_score_source, list_scores, query_attempts, query_history, save_attempt, save_score,
+    // W10 — the door to the coach's judgement (findings.rs) and its ears (pitch.rs).
+    analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
     close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
@@ -720,6 +722,9 @@ pub fn run() {
             delete_score,
             save_attempt,
             query_attempts,
+            // W10 — the coach's judgement and its ears.
+            analyze_attempt,
+            analyze_take_pitch,
             list_session_logs,
             get_session_log,
             export_session_logs,
