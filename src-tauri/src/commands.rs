@@ -2228,6 +2228,10 @@ fn stored_attempt_to_passes(row: &crate::db::Attempt) -> AttemptPasses {
                     state,
                     deviation_ms: o.deviation_ms,
                     pass: o.pass.max(0) as u32,
+                    // The store does not keep accents yet (they arrived
+                    // the same night as this command), so an earlier
+                    // attempt read back has nothing to say about them.
+                    accent_heard: None,
                 })
             })
             .collect(),

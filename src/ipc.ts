@@ -607,39 +607,15 @@ export async function closeOpenSegment(): Promise<void> {
  * pull-off); absent, it costs nothing. `onsets` must be sorted by
  * `beat` — `src/songs/schedule.ts` is where that is guaranteed.
  */
-export type ExpectedOnset = {
-  id: number;
-  beat: number;
-  noteIds: number[];
-  soft: boolean;
-  accent: boolean;
-};
-
-export type ScoreSchedule = {
-  onsets: ExpectedOnset[];
-  lengthBeats: number;
-  loops: boolean;
-};
-
-/** What became of one expected onset. `pass` counts loops, from 0. */
-export type OnsetResult = {
-  id: number;
-  state: "hit" | "miss" | "softAbsent";
-  deviationMs: number | null;
-  pass: number;
-  /**
-   * Whether a note written with an accent actually came out louder than
-   * the notes beside it. Reported, never scored — what an accent should
-   * cost is still open (`plans/LEARNING_PATHS_DECISIONS.md` C3).
-   *
-   * Absent when there is nothing to say: no accent written, the note
-   * was not played, or the amplitudes around it were unusable.
-   */
-  accentHeard?: boolean;
-};
-
-/** A note the player made that the score did not ask for. */
-export type ExtraOnset = { beat: number; pass: number };
+// The types themselves live in `src/songs/types.ts`, the contract's one home
+// on this side of the wire; they are re-exported here because this file is
+// where a caller of `loadScoreSchedule` looks for them.
+export type {
+  ExpectedOnset,
+  ScoreSchedule,
+  OnsetResult,
+  ExtraOnset,
+} from "./songs/types";
 
 /**
  * Load a schedule. Takes effect from the next downbeat, so a count-in
