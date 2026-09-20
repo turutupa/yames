@@ -32,8 +32,27 @@ export function AboutSection({
         <div className="about-row">
           <span className="about-label">{t("settings.about.updates")}</span>
           <span className="about-value">
+            {/*
+              The row says what is known, and — unless something is actually
+              in flight — offers the check again.
+
+              It used to offer it only in "idle", so the first click was the
+              last one available: a check that came back up to date replaced
+              the button with the words "up to date" and left no way to ask
+              a second time, for the rest of the session. The owner: "once a
+              user clicks on it, there's no way of re-triggering that button,
+              it disappears." A release published five minutes later was
+              unreachable without restarting the app.
+
+              "checking" and "downloading" are the two states where asking
+              again means nothing, so they are the two without a button.
+              "failed" had no arm at all and rendered an empty row.
+            */}
             {updateStatus === "checking" && (
               <span className="update-status">{t("settings.about.checking")}</span>
+            )}
+            {updateStatus === "downloading" && (
+              <span className="update-status">{t("settings.about.updating")}</span>
             )}
             {updateStatus === "available" && (
               <button
@@ -43,20 +62,26 @@ export function AboutSection({
                 {t("settings.about.available", { version: latestVersion })}
               </button>
             )}
-            {updateStatus === "downloading" && (
-              <span className="update-status">{t("settings.about.updating")}</span>
-            )}
             {updateStatus === "up-to-date" && (
               <span className="update-status up-to-date">
                 {t("settings.about.upToDate")}
               </span>
             )}
-            {updateStatus === "idle" && (
+            {updateStatus === "failed" && (
+              <span className="update-status">{t("settings.about.failed")}</span>
+            )}
+            {(updateStatus === "idle" ||
+              updateStatus === "up-to-date" ||
+              updateStatus === "failed") && (
               <button
                 className="update-check-btn"
                 onClick={onCheckUpdate}
               >
-                {t("settings.about.checkUpdates")}
+                {t(
+                  updateStatus === "idle"
+                    ? "settings.about.checkUpdates"
+                    : "settings.about.checkAgain",
+                )}
               </button>
             )}
           </span>

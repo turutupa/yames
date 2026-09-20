@@ -296,6 +296,8 @@
       "updating": "Mise à jour…",
       "upToDate": "À jour ✓",
       "checkUpdates": "Rechercher les mises à jour",
+      "checkAgain": "Rechercher à nouveau",
+      "failed": "Échec de la recherche",
       "sounds": "Sons",
       "soundsCredit": "La batterie Club, c'est Virtuosity Drums, de Versilian Studios et Karoryfer Samples, jouée par Austin McMahon (domaine public). La batterie Studio, c'est DRSKit, du projet DrumGizmo (CC BY 4.0).",
       "madeWith": "Fait avec {{heart}} pour les musiciens du monde entier"

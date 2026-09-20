@@ -110,6 +110,17 @@ export interface Shot {
     /** Scroll this selector to the top of the stage. */
     scrollTo?: string;
   };
+  /**
+   * Open Settings, and optionally hand the updater something to report.
+   *
+   * Settings is a sheet over whatever mode is showing rather than a fifth
+   * tab, so it is reached the way a person reaches it: the rail's own
+   * button. `update: "available"` makes the mocked updater answer with a
+   * pending version, which is the only way to photograph the install
+   * banner — and the only way to measure it against the panel below, which
+   * it spent a release overlapping by four pixels.
+   */
+  settings?: { update?: "available" };
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
@@ -379,6 +390,19 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 400,
+  },
+  {
+    // Settings with an update pending. Not a screenshot for the site — the
+    // layout suite is what opens it — but it lives here because this is
+    // where "what the app can be put into" is written down.
+    id: "settings-update",
+    suffix: "settings-update",
+    window: "main",
+    tab: "beat",
+    settings: { update: "available" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
   },
   {
     id: "widget",

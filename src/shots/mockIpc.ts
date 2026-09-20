@@ -430,6 +430,21 @@ export function installShotMock(shot: Shot, theme: string): void {
       }
       return null;
     }
+    // The updater. `check()` turns whatever comes back here into an
+    // `Update`, or into null when it is null — so a shot that asked for a
+    // pending version gets the real banner, in its real place, rendered by
+    // the real component.
+    if (cmd === "plugin:updater|check") {
+      if (shot.settings?.update !== "available") return null;
+      return {
+        rid: 1,
+        currentVersion: "1.2.0",
+        version: "1.2.1",
+        date: null,
+        body: "- A much smaller download, and the same band",
+        rawJson: {},
+      };
+    }
     if (cmd.startsWith("plugin:")) return null;
 
     if (cmd === "set_jam") {

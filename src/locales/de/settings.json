@@ -296,6 +296,8 @@
       "updating": "Aktualisiere…",
       "upToDate": "Aktuell ✓",
       "checkUpdates": "Nach Updates suchen",
+      "checkAgain": "Erneut suchen",
+      "failed": "Suche fehlgeschlagen",
       "sounds": "Klänge",
       "soundsCredit": "Das Club-Kit ist Virtuosity Drums von Versilian Studios und Karoryfer Samples, eingespielt von Austin McMahon (gemeinfrei). Das Studio-Kit ist DRSKit vom DrumGizmo-Projekt (CC BY 4.0).",
       "madeWith": "Mit {{heart}} für Musiker überall"

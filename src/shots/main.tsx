@@ -257,6 +257,21 @@ async function drive() {
     }
   }
 
+  if (shot!.settings) {
+    // The rail's Settings button, by its label — the same press a person
+    // makes. `view` becomes "settings" and the sheet covers the mode.
+    await until("the rail", () => !!document.querySelector(".rail-action"));
+    const button = [...document.querySelectorAll<HTMLElement>(".rail-action")].find(
+      (b) => (b.getAttribute("aria-label") ?? "").toLowerCase().includes("settings"),
+    );
+    if (!button) throw new Error("no Settings button on the rail");
+    button.click();
+    await until("the settings panels", () => !!document.querySelector(".settings-section"));
+    if (shot!.settings.update === "available") {
+      await until("the update banner", () => !!document.querySelector(".update-banner"));
+    }
+  }
+
   if (shot!.zen) {
     // The rail's Zen button, by the anchor the tour already puts on it.
     await until("the Zen button", () => !!document.querySelector('[data-tour="zen-widget"]'));

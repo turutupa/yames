@@ -296,6 +296,8 @@
       "updating": "Đang cập nhật…",
       "upToDate": "Đã là bản mới nhất ✓",
       "checkUpdates": "Kiểm tra bản cập nhật",
+      "checkAgain": "Kiểm tra lại",
+      "failed": "Không kiểm tra được",
       "sounds": "Âm thanh",
       "soundsCredit": "Bộ Club là Virtuosity Drums của Versilian Studios và Karoryfer Samples, do Austin McMahon chơi (thuộc phạm vi công cộng). Bộ Studio là DRSKit của dự án DrumGizmo (CC BY 4.0).",
       "madeWith": "Được làm bằng {{heart}} cho các nhạc sĩ"
