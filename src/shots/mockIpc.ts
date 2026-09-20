@@ -100,6 +100,43 @@ const TAKES = [
     durationSec: 118, path: "takes/tk1.wav" },
 ];
 
+/**
+ * W21 — the take the camera scene records, and the sound it plays back.
+ *
+ * One second of silence as a WAV, base64'd into a data URL: the review plays
+ * the take's MIX in an `<audio>` element and reads the clock off it, so a
+ * scene with no audio is a scene whose tape never moves. Built rather than
+ * checked in because forty-four bytes of header and a run of zeros is shorter
+ * to write than to explain.
+ */
+const SILENT_WAV = (() => {
+  const rate = 8000;
+  const samples = rate;
+  const bytes = new Uint8Array(44 + samples * 2);
+  const view = new DataView(bytes.buffer);
+  const ascii = (at: number, text: string) => {
+    for (let i = 0; i < text.length; i++) view.setUint8(at + i, text.charCodeAt(i));
+  };
+  ascii(0, "RIFF");
+  view.setUint32(4, 36 + samples * 2, true);
+  ascii(8, "WAVEfmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, rate, true);
+  view.setUint32(28, rate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  ascii(36, "data");
+  view.setUint32(40, samples * 2, true);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return `data:audio/wav;base64,${btoa(binary)}`;
+})();
+
+const SHOT_TAKE_ID = "w21";
+const SHOT_TAKE_JAM = "shot-song";
+
 function baseState(theme: string) {
   return {
     // 120 reads ALLEGRO on the tempo scale; 4/4 with eighths is the setting
@@ -274,6 +311,19 @@ function baseStore(
 export function installShotMock(shot: Shot, theme: string): void {
   const w = window as unknown as Record<string, unknown>;
   if (w.__TAURI_INTERNALS__) return;
+
+  /** W21 — the bytes `MediaRecorder` handed over during the camera scene. */
+  const cameraChunks: ArrayBuffer[] = [];
+  const cameraMime = "video/webm";
+  /**
+   * The id the take was STARTED with.
+   *
+   * Echoed back by `stop_take`, because that is what the real engine does and
+   * because `useSongTakes` drops a take whose `jamId` is not the song on the
+   * stage — a run at one piece filed under another. A fixed id here meant the
+   * shelf, and therefore the review's picture, silently went nowhere.
+   */
+  let cameraTakeFor = SHOT_TAKE_JAM;
 
   const STATE = baseState(theme) as Record<string, unknown>;
   if (shot.ramp) Object.assign(STATE.speedRamp as object, shot.ramp);
@@ -535,8 +585,60 @@ export function installShotMock(shot: Shot, theme: string): void {
      * recorded — could not be photographed at all.
      */
     list_takes: (a) => TAKES.filter((take) => take.jamId === a?.jamId),
-    start_take: () => null,
-    stop_take: () => null,
+    /*
+     * W21 — a take with a real picture on it, made by the harness's own fake
+     * camera.
+     *
+     * The real engine writes a WAV and hands back a record; here the take is
+     * a second of silence as a data URL, which every webview will play, and
+     * `startOffsetMs` is a plausible small negative — the file starts a moment
+     * after beat 0, which is what recording on the first beat produces. The
+     * PICTURE is not faked at all: Chromium's `--use-fake-device-for-media-
+     * stream` gives the page a synthetic camera, `MediaRecorder` encodes it
+     * for real, and the chunks that arrive at `take_video_append` below are
+     * the bytes it produced. So the layout suite measures the shipping review
+     * playing a real video element, which is the only version of this scene
+     * worth having.
+     */
+    start_take: (a) => {
+      cameraChunks.length = 0;
+      if (typeof a?.jamId === "string") cameraTakeFor = a.jamId;
+      return null;
+    },
+    stop_take: () => ({
+      id: SHOT_TAKE_ID,
+      jamId: cameraTakeFor,
+      createdAt: Date.now(),
+      durationSec: 3,
+      path: SILENT_WAV,
+      position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -40 },
+    }),
+    take_video_begin: () => {
+      cameraChunks.length = 0;
+      return null;
+    },
+    /*
+     * The chunk arrives as the invoke's BODY rather than as named arguments —
+     * `ipc.ts` sends a `Uint8Array` so a third of a megabyte of video crosses
+     * as a third of a megabyte — so what lands here is the bytes themselves.
+     * `mockIPC` carries no headers, so the chunk's own number is not
+     * available; order of call is order of chunk, which is what the pipe
+     * guarantees anyway.
+     */
+    take_video_append: (a) => {
+      const bytes = a as unknown as Uint8Array | ArrayBuffer | undefined;
+      if (bytes instanceof Uint8Array) cameraChunks.push(bytes.slice().buffer);
+      else if (bytes instanceof ArrayBuffer) cameraChunks.push(bytes);
+      return cameraChunks.reduce((n, c) => n + c.byteLength, 0);
+    },
+    take_video_finish: () => {
+      const blob = new Blob(cameraChunks as BlobPart[], { type: cameraMime });
+      // A blob URL rather than a path: the harness is an ordinary browser with
+      // no asset protocol behind it, and `songs/camera/src.ts` hands anything
+      // that is already a URL straight to the element.
+      return { path: URL.createObjectURL(blob), bytes: blob.size, offsetMs: 120 };
+    },
+    take_video_discard: () => null,
     delete_take: () => null,
     play_take: () => null,
     stop_take_playback: () => null,
