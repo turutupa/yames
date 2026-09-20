@@ -649,6 +649,11 @@ const DRUMS: ScenarioCatalog = {
     ],
   },
   rushing_trend: {
+    neutral: [
+      "Sticks are arriving before the click. Let the hat wait for it.",
+      "You're ahead of the beat — put the kick on the click, not just before it.",
+      "Pulse is creeping up. Play the backbeat a shade later than feels right.",
+    ],
     correction: [
       "Right hand is leading the kick — lay it back.",
       "Snare's rushing. Count the in-between 16ths and place beat 2 right on the click.",
@@ -661,6 +666,11 @@ const DRUMS: ScenarioCatalog = {
     ],
   },
   dragging_trend: {
+    neutral: [
+      "Sitting behind the click. Bring the kick up to meet it.",
+      "The groove is leaning late — lift the hat back onto the beat.",
+      "You're a little behind. Play the snare where you think it is, not after.",
+    ],
     correction: [
       "Right hand is lagging the kick — lean into the hi-hat.",
       "Snare's dragging. Lead beats 2 and 4 a touch, don't wait for the click.",
@@ -685,7 +695,7 @@ const DRUMS: ScenarioCatalog = {
     ],
   },
   new_band_locked: {
-    neutral: [
+    encouragement: [
       "{bpmLow}–{bpmHigh} BPM band sustained — kick-snare relationship is locked.",
       "Pocket holding at {bpmLow}–{bpmHigh} BPM.",
       "Sustained at {bpmLow}–{bpmHigh} BPM — that's the new floor.",
@@ -738,7 +748,7 @@ const DRUMS: ScenarioCatalog = {
     ],
   },
   tempo_milestone: {
-    correction: [
+    encouragement: [
       "At {bpmLow} BPM — stay here until the kick is automatic. Don't push higher yet.",
       "{bpmLow} BPM milestone. Make sure both feet are clean before pushing.",
       "New band: {bpmLow}-{bpmHigh}. Play one stroke per beat to the click before climbing.",
@@ -750,7 +760,7 @@ const DRUMS: ScenarioCatalog = {
     ],
   },
   check_in: {
-    encouragement: [
+    neutral: [
       "Long stretch on the kit — anything specific you're working on?",
       "Five-plus minutes in. Want me to call out the kick, the hat, or both?",
       "You've been deep in the pocket. Tell me what you want next.",
@@ -844,6 +854,38 @@ const DRUMS: ScenarioCatalog = {
       "Timing's locked across the board. That's the feel you're building toward.",
     ],
   },
+  // ── ROADMAP 1.7 ─────────────────────────────────────────────────
+  // The severities below are the ones the gatekeeper actually asks
+  // for: an unconfirmed trend is written and neutral, and the first
+  // mention of it should sound like a note rather than an order.
+  low_confidence: {
+    neutral: [
+      "The kit is washing together on my end — I'm reading it less clearly than usual.",
+      "Cymbals are bleeding into everything. My read on the last half-minute is rough.",
+      "Hard to pick single hits out of the kit right now. Take the numbers loosely.",
+    ],
+  },
+  boundary_signal_a: {
+    neutral: [
+      "{change}. New segment from here — the kit starts fresh.",
+      "{change}. The previous stretch is closed and counted.",
+      "{change} — scoring starts again on the next stroke.",
+    ],
+  },
+  boundary_signal_b: {
+    neutral: [
+      "Sticks went down long enough to close the segment — {score}% at {bpm} BPM.",
+      "The pause closed that stretch behind the kit: {score}% at {bpm} BPM.",
+      "{score}% at {bpm} BPM logged for that one.",
+    ],
+  },
+  preset_ceiling_hit: {
+    neutral: [
+      "{bpmLow}–{bpmHigh} is where this one stops holding together — {attemptCount} sessions, each near {score}.",
+      "You're back at {bpmLow}–{bpmHigh}. The kit has landed around {score} here {attemptCount} times.",
+      "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play.",
+    ],
+  },
 } as const;
 
 const ELECTRIC_GUITAR: ScenarioCatalog = {
@@ -884,6 +926,11 @@ const ELECTRIC_GUITAR: ScenarioCatalog = {
     ],
   },
   rushing_trend: {
+    neutral: [
+      "Picking hand is landing before the click. Let it wait.",
+      "You're a touch ahead — hear the click, then pick.",
+      "Notes are arriving early. Sit further back in each beat.",
+    ],
     correction: [
       "Down-picks are leading — land the up-picks right on the click.",
       "Picking hand's rushing. Let the metronome lead each down-stroke.",
@@ -896,6 +943,11 @@ const ELECTRIC_GUITAR: ScenarioCatalog = {
     ],
   },
   dragging_trend: {
+    neutral: [
+      "The pick is landing behind the click. Bring it forward.",
+      "You're sitting late — start the stroke a fraction sooner.",
+      "Each note is a little behind. Aim at the front of the click.",
+    ],
     correction: [
       "Up-picks are lagging — meet the click on the down.",
       "Picking hand's dragging. Play with the click, don't wait for it.",
@@ -920,7 +972,7 @@ const ELECTRIC_GUITAR: ScenarioCatalog = {
     ],
   },
   new_band_locked: {
-    neutral: [
+    encouragement: [
       "{bpmLow}–{bpmHigh} BPM band sustained — picking hand is locked.",
       "Picking-hand pocket holding at {bpmLow}–{bpmHigh} BPM.",
       "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this riff.",
@@ -973,7 +1025,7 @@ const ELECTRIC_GUITAR: ScenarioCatalog = {
     ],
   },
   tempo_milestone: {
-    correction: [
+    encouragement: [
       "At {bpmLow} BPM — make sure the up-picks are as loud as the downs before pushing.",
       "{bpmLow} BPM milestone. Hold this until the pick attack is even.",
       "New band: {bpmLow}-{bpmHigh}. Pick down-up on a single open string before climbing.",
@@ -985,7 +1037,7 @@ const ELECTRIC_GUITAR: ScenarioCatalog = {
     ],
   },
   check_in: {
-    encouragement: [
+    neutral: [
       "Long stretch with the guitar — riff, chords, something specific?",
       "Five-plus minutes in. Want me to call out picking, rhythm, or both?",
       "You've been locked in. Tell me what you want feedback on.",
@@ -1079,6 +1131,38 @@ const ELECTRIC_GUITAR: ScenarioCatalog = {
       "Timing is locked across the board. That's what the riff should feel like.",
     ],
   },
+  // ── ROADMAP 1.7 ─────────────────────────────────────────────────
+  // The severities below are the ones the gatekeeper actually asks
+  // for: an unconfirmed trend is written and neutral, and the first
+  // mention of it should sound like a note rather than an order.
+  low_confidence: {
+    neutral: [
+      "Your signal is noisy on my end — I'm reading this stretch less clearly.",
+      "Hard to tell picked notes from string noise right now. Take the numbers loosely.",
+      "The input is murky for the last half-minute. My read is softer than usual.",
+    ],
+  },
+  boundary_signal_a: {
+    neutral: [
+      "{change}. New segment from here.",
+      "{change}. The previous stretch is closed and counted.",
+      "{change} — scoring starts again on the next note.",
+    ],
+  },
+  boundary_signal_b: {
+    neutral: [
+      "The pause closed that segment — {score}% at {bpm} BPM.",
+      "Strings went quiet long enough to end it: {score}% at {bpm} BPM.",
+      "{score}% at {bpm} BPM logged for that stretch.",
+    ],
+  },
+  preset_ceiling_hit: {
+    neutral: [
+      "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
+      "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
+      "{attemptCount} sessions at this tempo, all of them near {score}. Let's see how today sits.",
+    ],
+  },
 } as const;
 
 const BASS: ScenarioCatalog = {
@@ -1119,6 +1203,11 @@ const BASS: ScenarioCatalog = {
     ],
   },
   rushing_trend: {
+    neutral: [
+      "Plucking hand is arriving before the click. Let the click come to you.",
+      "The line is pulling ahead — hold each root a moment longer.",
+      "You're a touch early. Play the note where the click is, not before it.",
+    ],
     correction: [
       "Plucking hand is leading the kick — hold it back.",
       "Right hand's rushing. Sit deeper behind the beat with the drummer.",
@@ -1131,6 +1220,11 @@ const BASS: ScenarioCatalog = {
     ],
   },
   dragging_trend: {
+    neutral: [
+      "The line is sitting behind the click. Bring it up.",
+      "You're landing late — start the pluck a fraction sooner.",
+      "Each root is arriving after the beat. Aim at the front of it.",
+    ],
     correction: [
       "Plucks are lagging the kick — push slightly into each note.",
       "Right hand's dragging. Play with the click; don't wait for the kick to land.",
@@ -1155,7 +1249,7 @@ const BASS: ScenarioCatalog = {
     ],
   },
   new_band_locked: {
-    neutral: [
+    encouragement: [
       "{bpmLow}–{bpmHigh} BPM band sustained — bass-kick lock is solid.",
       "Root-note pocket holding at {bpmLow}–{bpmHigh} BPM.",
       "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this groove.",
@@ -1208,7 +1302,7 @@ const BASS: ScenarioCatalog = {
     ],
   },
   tempo_milestone: {
-    correction: [
+    encouragement: [
       "At {bpmLow} BPM — make sure each note rings clean before climbing.",
       "{bpmLow} BPM milestone. Lock root notes to the click before pushing.",
       "New band: {bpmLow}-{bpmHigh}. Walk it slow first, then add the fancy notes.",
@@ -1220,7 +1314,7 @@ const BASS: ScenarioCatalog = {
     ],
   },
   check_in: {
-    encouragement: [
+    neutral: [
       "Long stretch on the bass — line, groove, something specific?",
       "Five-plus minutes locked with the kick. Anything you want to dial in?",
       "You've been deep in the pocket. What's next?",
@@ -1313,6 +1407,38 @@ const BASS: ScenarioCatalog = {
       "Timing locked across the board. That's the bass line feel you want.",
     ],
   },
+  // ── ROADMAP 1.7 ─────────────────────────────────────────────────
+  // The severities below are the ones the gatekeeper actually asks
+  // for: an unconfirmed trend is written and neutral, and the first
+  // mention of it should sound like a note rather than an order.
+  low_confidence: {
+    neutral: [
+      "The low end is hard to read on my end — I'm less sure of this stretch.",
+      "Your signal is muddy down there. Take the last half-minute's numbers loosely.",
+      "Hard to pick attacks out of the low end right now. My read is softer than usual.",
+    ],
+  },
+  boundary_signal_a: {
+    neutral: [
+      "{change}. New segment from here.",
+      "{change}. The previous stretch is closed and counted.",
+      "{change} — scoring starts again on the next note.",
+    ],
+  },
+  boundary_signal_b: {
+    neutral: [
+      "The pause closed that segment — {score}% at {bpm} BPM.",
+      "The line went quiet long enough to end it: {score}% at {bpm} BPM.",
+      "{score}% at {bpm} BPM logged for that stretch.",
+    ],
+  },
+  preset_ceiling_hit: {
+    neutral: [
+      "{bpmLow}–{bpmHigh} is where this line stops sitting right — {attemptCount} sessions, each near {score}.",
+      "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
+      "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play.",
+    ],
+  },
 } as const;
 
 const ACOUSTIC_GUITAR: ScenarioCatalog = {
@@ -1353,6 +1479,11 @@ const ACOUSTIC_GUITAR: ScenarioCatalog = {
     ],
   },
   rushing_trend: {
+    neutral: [
+      "The down-strum is arriving before the click. Let it wait.",
+      "Strumming arm is leading a touch — hear the click, then move.",
+      "You're a shade early. Let the click pull the strum out of you.",
+    ],
     correction: [
       "Strumming arm is leading — land the down-strum right on the click.",
       "Strumming hand's rushing. Let the click drive the strum.",
@@ -1365,6 +1496,11 @@ const ACOUSTIC_GUITAR: ScenarioCatalog = {
     ],
   },
   dragging_trend: {
+    neutral: [
+      "The strum is landing behind the click. Bring it forward.",
+      "Strumming arm is trailing — start the stroke a fraction sooner.",
+      "You're sitting late. Aim the down-strum at the front of the click.",
+    ],
     correction: [
       "Strum is lagging — meet the click on the down.",
       "Strumming hand's dragging. Play with the click; don't wait for it.",
@@ -1389,7 +1525,7 @@ const ACOUSTIC_GUITAR: ScenarioCatalog = {
     ],
   },
   new_band_locked: {
-    neutral: [
+    encouragement: [
       "{bpmLow}–{bpmHigh} BPM band sustained — strumming is locked.",
       "Strumming pocket holding at {bpmLow}–{bpmHigh} BPM.",
       "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this pattern.",
@@ -1442,7 +1578,7 @@ const ACOUSTIC_GUITAR: ScenarioCatalog = {
     ],
   },
   tempo_milestone: {
-    correction: [
+    encouragement: [
       "At {bpmLow} BPM — make sure each strum has equal weight before climbing.",
       "{bpmLow} BPM milestone. Hold here until the down-up balance is even.",
       "New band: {bpmLow}-{bpmHigh}. Try the pattern on one chord first, then move.",
@@ -1454,7 +1590,7 @@ const ACOUSTIC_GUITAR: ScenarioCatalog = {
     ],
   },
   check_in: {
-    encouragement: [
+    neutral: [
       "Long stretch on the acoustic — chords, fingerpicking, something specific?",
       "Five-plus minutes in. Want me to call out the strumming or the chord changes?",
       "You've been locked in. Tell me what you want feedback on.",
@@ -1547,6 +1683,38 @@ const ACOUSTIC_GUITAR: ScenarioCatalog = {
       "Timing locked across the board. That's the strum feel you want.",
     ],
   },
+  // ── ROADMAP 1.7 ─────────────────────────────────────────────────
+  // The severities below are the ones the gatekeeper actually asks
+  // for: an unconfirmed trend is written and neutral, and the first
+  // mention of it should sound like a note rather than an order.
+  low_confidence: {
+    neutral: [
+      "The room is crowding your signal — I'm reading this stretch less clearly.",
+      "Hard to tell strums from room noise right now. Take the numbers loosely.",
+      "Your sound is arriving murky for the last half-minute. My read is softer than usual.",
+    ],
+  },
+  boundary_signal_a: {
+    neutral: [
+      "{change}. New segment from here.",
+      "{change}. The previous stretch is closed and counted.",
+      "{change} — scoring starts again on the next strum.",
+    ],
+  },
+  boundary_signal_b: {
+    neutral: [
+      "The pause closed that segment — {score}% at {bpm} BPM.",
+      "The strumming stopped long enough to end it: {score}% at {bpm} BPM.",
+      "{score}% at {bpm} BPM logged for that stretch.",
+    ],
+  },
+  preset_ceiling_hit: {
+    neutral: [
+      "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
+      "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
+      "{attemptCount} sessions at this tempo, all of them near {score}. Let's see how today sits.",
+    ],
+  },
 } as const;
 
 const PIANO: ScenarioCatalog = {
@@ -1587,6 +1755,11 @@ const PIANO: ScenarioCatalog = {
     ],
   },
   rushing_trend: {
+    neutral: [
+      "Your hands are arriving before the click. Let it come to you.",
+      "You're a touch ahead — hear the click, then drop the chord.",
+      "The right hand is leading. Sit further back in each beat.",
+    ],
     correction: [
       "Right hand is leading the left — land the bass note right on the click.",
       "Rushing — sit deeper into the keys; let the click pull each note.",
@@ -1599,6 +1772,11 @@ const PIANO: ScenarioCatalog = {
     ],
   },
   dragging_trend: {
+    neutral: [
+      "Your hands are landing behind the click. Bring them forward.",
+      "You're sitting late — start the chord a fraction sooner.",
+      "The left hand is trailing. Aim at the front of the beat.",
+    ],
     correction: [
       "Left hand is lagging — lead with the bass, not the melody.",
       "Dragging — lead the downbeat with the left hand; don't wait for the click.",
@@ -1623,7 +1801,7 @@ const PIANO: ScenarioCatalog = {
     ],
   },
   new_band_locked: {
-    neutral: [
+    encouragement: [
       "{bpmLow}–{bpmHigh} BPM band sustained — both hands locked to the click.",
       "Hand-sync pocket holding at {bpmLow}–{bpmHigh} BPM.",
       "Sustained at {bpmLow}–{bpmHigh} BPM — new floor for this voicing.",
@@ -1676,7 +1854,7 @@ const PIANO: ScenarioCatalog = {
     ],
   },
   tempo_milestone: {
-    correction: [
+    encouragement: [
       "At {bpmLow} BPM — make sure the left hand is rock-solid before climbing.",
       "{bpmLow} BPM milestone. Hold here until both hands are independent.",
       "New band: {bpmLow}-{bpmHigh}. Hands separately first, then together.",
@@ -1688,7 +1866,7 @@ const PIANO: ScenarioCatalog = {
     ],
   },
   check_in: {
-    encouragement: [
+    neutral: [
       "Long stretch at the keys — piece, exercise, something specific?",
       "Five-plus minutes in. Want me to call out the left hand, right hand, or both?",
       "You've been locked in. Tell me what you want feedback on.",
@@ -1779,6 +1957,38 @@ const PIANO: ScenarioCatalog = {
       "Spacing and placement both on point. The phrase is sitting exactly where it should.",
       "Both dimensions dialed — you're playing with real precision right now.",
       "Timing locked across the board. That's the feel you've been building toward.",
+    ],
+  },
+  // ── ROADMAP 1.7 ─────────────────────────────────────────────────
+  // The severities below are the ones the gatekeeper actually asks
+  // for: an unconfirmed trend is written and neutral, and the first
+  // mention of it should sound like a note rather than an order.
+  low_confidence: {
+    neutral: [
+      "The notes are blurring together on my end — I'm reading this stretch less clearly.",
+      "Pedal is smearing the attacks. Take the last half-minute's numbers loosely.",
+      "Hard to pick single attacks out of the chords right now. My read is softer than usual.",
+    ],
+  },
+  boundary_signal_a: {
+    neutral: [
+      "{change}. New segment from here.",
+      "{change}. The previous stretch is closed and counted.",
+      "{change} — scoring starts again on the next chord.",
+    ],
+  },
+  boundary_signal_b: {
+    neutral: [
+      "The pause closed that segment — {score}% at {bpm} BPM.",
+      "Your hands came off the keys long enough to end it: {score}% at {bpm} BPM.",
+      "{score}% at {bpm} BPM logged for that stretch.",
+    ],
+  },
+  preset_ceiling_hit: {
+    neutral: [
+      "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions, each near {score}.",
+      "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
+      "{attemptCount} sessions at this tempo, all of them near {score}. Worth knowing while you play.",
     ],
   },
 } as const;
