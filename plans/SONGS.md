@@ -56,6 +56,21 @@ Status key: **decided** · **open** · **deferred**
   `plans/COACH_UX.md`, drafted by the orchestrator for the owner to react
   to rather than designed by committee.
 
+- **S0.9 Getting a song in, without touching anybody's tab site.** (Owner,
+  2026-09-20.) No tab site is embedded, scraped or called from inside
+  Yames: they host mostly unlicensed transcriptions, and an app that
+  fetches them stops being a bystander. Instead: the Downloads folder is
+  watched while Songs is open and a new Guitar Pro or MusicXML file is
+  offered for import (the owner's favourite: "so users don't have to
+  browse manually"); the file types open with Yames; what is opened is
+  kept as Yames's own copy so clearing Downloads loses nothing, and the
+  library is ordered by what was played most recently; a neutral "find a
+  tab" link opens the player's own browser on an ordinary web search; and
+  a small shelf of original and public-domain pieces means the mode is
+  never empty. A licensed catalogue (mySongBook, Songsterr) is a
+  partnership conversation for when there is traction. Brief:
+  `plans/tasks/songs/W19-FRICTION.md`.
+
 ### State of the engine this stands on (checked 2026-09-18)
 
 Roadmap Phase 0 is done. Phase 1 is untouched: no SQLite store (1.1), no
