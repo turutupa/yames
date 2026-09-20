@@ -35,9 +35,6 @@
     "beatPlacement": "Beatplaatsing"
   },
   "coachReport": {
-    "cov": "Dekking",
-    "eff": "Efficiëntie",
-    "grid": "Raster",
     "segment": "Segment",
     "thinkingAria": "De coach bereidt zich voor om te spreken",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "Op de beat",
     "pocketEarly": "Je speelde gemiddeld {{ms}}ms te vroeg",
     "pocketLate": "Je speelde gemiddeld {{ms}}ms te laat",
-    "pocketCentred": "Je timing viel precies op de beat (gemiddeld ±5ms)"
+    "pocketCentred": "Je timing viel precies op de beat (gemiddeld ±5ms)",
+    "covLabel": "Beats covered",
+    "covTitle": "How many of the beats I was expecting actually got played",
+    "effLabel": "Notes on a beat",
+    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
+    "gridLabel": "Locked to the click",
+    "gridTitle": "How closely the whole passage tracked the click"
   },
   "eval": {
     "today": "Vandaag",

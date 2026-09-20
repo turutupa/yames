@@ -10,6 +10,7 @@ import type {
   WidgetMode,
 } from "../../types";
 import type { ModelStatus, VoiceDiagnostic } from "../../ipc";
+import type { CoachStance } from "../../coach/learningMode";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
 import type { BindingTarget } from "./KeybindingModals";
@@ -88,6 +89,8 @@ interface SettingsViewProps {
   setCoachVerbosity: Dispatch<SetStateAction<Verbosity>>;
   coachMode: CoachMode;
   setCoachMode: Dispatch<SetStateAction<CoachMode>>;
+  coachStance: CoachStance;
+  setCoachStance: Dispatch<SetStateAction<CoachStance>>;
   modelStatus: ModelStatus | null;
   setModelStatus: Dispatch<SetStateAction<ModelStatus | null>>;
   modelDownloading: boolean;
@@ -181,6 +184,8 @@ export function SettingsView({
   setCoachVerbosity,
   coachMode,
   setCoachMode,
+  coachStance,
+  setCoachStance,
   modelStatus,
   setModelStatus,
   modelDownloading,
@@ -284,6 +289,8 @@ export function SettingsView({
         setCoachVerbosity={setCoachVerbosity}
         coachMode={coachMode}
         setCoachMode={setCoachMode}
+        coachStance={coachStance}
+        setCoachStance={setCoachStance}
         modelStatus={modelStatus}
         setModelStatus={setModelStatus}
         modelDownloading={modelDownloading}

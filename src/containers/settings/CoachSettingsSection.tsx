@@ -22,6 +22,7 @@ import {
   ttsStop,
 } from "../../ipc";
 import { brainTierLabelKey } from "../../coach/brainTiers";
+import type { CoachStance } from "../../coach/learningMode";
 import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import { formatBytes } from "./formatBytes";
 import { coachStatusLabel, coachTierLabel } from "./coachStatus";
@@ -55,6 +56,8 @@ export function CoachSettingsSection({
   setCoachVerbosity,
   coachMode,
   setCoachMode,
+  coachStance,
+  setCoachStance,
   modelStatus,
   setModelStatus,
   modelDownloading,
@@ -80,6 +83,8 @@ export function CoachSettingsSection({
   setCoachVerbosity: Dispatch<SetStateAction<Verbosity>>;
   coachMode: CoachMode;
   setCoachMode: Dispatch<SetStateAction<CoachMode>>;
+  coachStance: CoachStance;
+  setCoachStance: Dispatch<SetStateAction<CoachStance>>;
   modelStatus: ModelStatus | null;
   setModelStatus: Dispatch<SetStateAction<ModelStatus | null>>;
   modelDownloading: boolean;
@@ -430,6 +435,38 @@ export function CoachSettingsSection({
               }}
             >
               {mode === "default" ? t("settings.coach.scoringDefault") : t("settings.coach.scoringPro")}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* ROADMAP 1.5. Sits under Scoring Mode on purpose: the two are
+          easy to confuse and the pairing is the clearest way to show
+          they are different questions. Scoring Mode decides how the
+          number is worked out; this decides how the coach talks about
+          it, and its hint says outright that the score does not move. */}
+      <div className="setting-row">
+        <div className="setting-label">
+          <label>{t("settings.coach.stance")}</label>
+          <span className="setting-hint">{t("settings.coach.stanceHint")}</span>
+          <span className="setting-hint" style={{ marginTop: 4 }}>
+            {coachStance === "learning"
+              ? t("settings.coach.stanceLearningDesc")
+              : t("settings.coach.stanceStrictDesc")}
+          </span>
+        </div>
+        <div className="toggle-group">
+          {(["strict", "learning"] as const).map((stance) => (
+            <button
+              key={stance}
+              className={`toggle-btn ${coachStance === stance ? "active" : ""}`}
+              onClick={() => {
+                setCoachStance(stance);
+                storeSave("coachStance", stance);
+              }}
+            >
+              {stance === "strict"
+                ? t("settings.coach.stanceStrict")
+                : t("settings.coach.stanceLearning")}
             </button>
           ))}
         </div>

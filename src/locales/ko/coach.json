@@ -35,9 +35,6 @@
     "beatPlacement": "박 위치"
   },
   "coachReport": {
-    "cov": "커버",
-    "eff": "효율",
-    "grid": "그리드",
     "segment": "구간",
     "thinkingAria": "코치가 말할 준비를 하고 있습니다",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "박 위",
     "pocketEarly": "평균 {{ms}}ms 앞당겨 연주했습니다",
     "pocketLate": "평균 {{ms}}ms 뒤처져 연주했습니다",
-    "pocketCentred": "타이밍이 박에 정확히 맞았습니다 (평균 ±5ms)"
+    "pocketCentred": "타이밍이 박에 정확히 맞았습니다 (평균 ±5ms)",
+    "covLabel": "Beats covered",
+    "covTitle": "How many of the beats I was expecting actually got played",
+    "effLabel": "Notes on a beat",
+    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
+    "gridLabel": "Locked to the click",
+    "gridTitle": "How closely the whole passage tracked the click"
   },
   "eval": {
     "today": "오늘",

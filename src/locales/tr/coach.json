@@ -35,9 +35,6 @@
     "beatPlacement": "Vuruş yerleşimi"
   },
   "coachReport": {
-    "cov": "Kapsam",
-    "eff": "Verim",
-    "grid": "Izgara",
     "segment": "Bölüm",
     "thinkingAria": "Koç konuşmaya hazırlanıyor",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "vuruşta",
     "pocketEarly": "Ortalama {{ms}} ms erken çaldın",
     "pocketLate": "Ortalama {{ms}} ms geç çaldın",
-    "pocketCentred": "Zamanlaman vuruşun tam ortasındaydı (±5ms ortalama)"
+    "pocketCentred": "Zamanlaman vuruşun tam ortasındaydı (±5ms ortalama)",
+    "covLabel": "Beats covered",
+    "covTitle": "How many of the beats I was expecting actually got played",
+    "effLabel": "Notes on a beat",
+    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
+    "gridLabel": "Locked to the click",
+    "gridTitle": "How closely the whole passage tracked the click"
   },
   "eval": {
     "today": "Bugün",
