@@ -59,6 +59,7 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
 import { SongsView } from "../songs/SongsView";
+import { useSongsDue } from "../songs/review/useSongsDue";
 import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
@@ -425,6 +426,14 @@ export function MainWindow() {
    * with no song open, like the jam above it.
    */
   const songsSession = useSongsSession();
+
+  /**
+   * The songs the coach promised to come back to, and the day has come round
+   * (`COACH_UX.md` C2). Read from the store rather than handed down from the
+   * Songs screen: the promise outlives the session that made it, and the rail
+   * shows it whether or not that screen is open.
+   */
+  const songsDue = useSongsDue();
 
   /*
    * Wrapped, because it is the root of a chain of fresh objects.
@@ -1439,6 +1448,7 @@ export function MainWindow() {
           }}
           songs={songsSession.songs}
           activeSongId={songsSession.song?.id ?? null}
+          dueSongs={songsDue}
           onLoadSong={songsSession.loadSong}
           /* The library's "+" reaches the same file input the stage owns.
              There is only one, on the view, so the picker and the drop

@@ -484,6 +484,25 @@
   pointer-events: none;
 }
 
+/* ── The library's "due" mark ─────────────────────────────────────────── */
+
+/* A word, not a badge (COACH_UX C2: never a backlog, never a number to
+   clear). It sits beside the song's name and says the coach promised to come
+   back to something in it today. `setlist.css` and `jam.css` carry their own
+   sidebar rows the same way. */
+.song-item-due {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 /* ── Narrow stages ────────────────────────────────────────────────────── */
 
 /* Asked of the STAGE, not the window: the coach dock and the rail both take

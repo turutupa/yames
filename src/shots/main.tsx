@@ -256,6 +256,31 @@ async function drive() {
       if (!chip) throw new Error(`no section chip called "${shot!.songs.section}"`);
       chip.click();
     }
+    /**
+     * A pass, and the verdict at the end of it.
+     *
+     * Pressed, not poked: the transport button and then the transport button
+     * again, which is the only route a person has to a review. The mocked
+     * analyzer answers the forced segment close with a pass over the
+     * schedule the app itself derived, so what is photographed is the
+     * shipping review drawing shipping blocks.
+     */
+    if (shot!.songs.review) {
+      await until("the transport", () => !!document.querySelector(".transport-play"));
+      const transport = document.querySelector(".transport-play") as HTMLButtonElement;
+      transport.click();
+      // Long enough for the schedule to have been pushed and a bar to pass.
+      await new Promise((r) => setTimeout(r, 400));
+      transport.click();
+      await until("the review", () => !!document.querySelector(".songs-review"), 20000);
+      if (shot!.songs.openMore) {
+        const more = document.querySelector(".songs-review-more .songs-link") as HTMLElement | null;
+        if (!more) throw new Error("no \"what else\" link on the review");
+        more.click();
+        await until("the other findings", () => !!document.querySelector(".songs-review-others"));
+      }
+    }
+
     if (shot!.songs.picker) {
       // The track picker, reached the only way a person reaches it — by
       // bringing a file in. The input is the view's own.

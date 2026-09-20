@@ -18,8 +18,10 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
+import { SongReview, useSongActions, useSongAttempt } from "./review";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
-import { meterAt, rangeTicks, sectionRange, wholeSong } from "../../songs/schedule";
+import { meterAt, sectionRange, wholeSong } from "../../songs/schedule";
+import { songTickAt } from "../../songs/position";
 import type { SongsSession } from "../main-window/hooks/useSongsSession";
 import type { BeatEvent } from "../../types";
 import "../../styles/songs.css";
@@ -62,22 +64,41 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * Where the cursor stands, in ticks.
    *
    * The ONLY input is the engine's beat count. No timer, no animation frame,
-   * no interpolation: a beat arrives, the cursor moves. `beat` counts from
-   * the moment the engine started, so a loop wraps with a modulo rather than
-   * by anyone keeping a position.
+   * no interpolation: a beat arrives, the cursor moves. The arithmetic itself
+   * is `src/songs/position.ts`, which is also where the review's live
+   * lighting reads position from — one function, so the day the engine starts
+   * sending `songBar` / `songTick` of its own the swap is one line and both
+   * follow.
    */
-  const tick = useMemo(() => {
-    if (!score) return 0;
-    const { start, end } = rangeTicks(score, range);
-    if (currentBeat === null || !isPlaying) return start;
-    const beatTicks = score.ticksPerQuarter;
-    const spanBeats = (end - start) / beatTicks;
-    // `beat` counts quarter notes since the engine started. A loop wraps with
-    // a modulo rather than by anybody keeping a position of their own.
-    const elapsed = currentBeat.beat;
-    const played = loop && spanBeats > 0 ? elapsed % spanBeats : Math.min(elapsed, spanBeats);
-    return start + played * beatTicks;
-  }, [score, range, currentBeat, isPlaying, loop]);
+  const tick = useMemo(
+    () => (score ? songTickAt(score, range, currentBeat, { playing: isPlaying, loops: loop }) : 0),
+    [score, range, currentBeat, isPlaying, loop],
+  );
+
+  /**
+   * The attempt, and the verdict at the end of it (`COACH_UX.md` A3–A5).
+   *
+   * Mounted here and nowhere else: the review is about the pass this screen
+   * just ran, and the two things it needs that nothing else has are the
+   * transport's edge and the range that was pushed to the engine.
+   */
+  const attempt = useSongAttempt({
+    score,
+    scoreId: song?.id ?? null,
+    range,
+    loop,
+    tempoPercent,
+    bpm: tempo,
+    isPlaying,
+  });
+
+  const actions = useSongActions({
+    scoreId: song?.id ?? null,
+    setRange: session.setRange,
+    setLoop: session.setLoop,
+    setTempoPercent: session.setTempoPercent,
+    review: attempt.review,
+  });
 
   // The engine gets the schedule when what it describes changes — not on every
   // render, and never while a pass is running underneath it.
@@ -330,6 +351,18 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               <p className="songs-control-note">{t("songs.loopNote")}</p>
             </div>
           </div>
+
+          {/* A3: nothing here while the transport runs. The verdict appears
+              when you stop, and goes away again when you start. */}
+          {attempt.working && <p className="songs-review-working">{t("songs.review.working")}</p>}
+          {attempt.tooShort && <p className="songs-review-working">{t("songs.review.tooShort")}</p>}
+          {attempt.review && (
+            <SongReview
+              review={attempt.review}
+              onAction={actions.run}
+              onDismiss={attempt.dismiss}
+            />
+          )}
         </>
       )}
 
