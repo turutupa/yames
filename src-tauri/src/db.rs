@@ -1138,12 +1138,19 @@ impl PracticeStore {
         }
     }
 
-    /// Open the database and publish the result. Call from a background
-    /// thread; every waiting command is woken when it returns.
-    pub fn open_at(&self, path: &Path) {
+    /// Open the database, run `after_open` against it, and only then
+    /// publish it. Call from a background thread; every waiting command is
+    /// woken when it returns.
+    ///
+    /// `after_open` is where the one-time JSON import goes. It runs before
+    /// the store is visible to any command, so the first `getSessionHistory`
+    /// of a fresh install cannot see a half-imported history — and a
+    /// `clearAllSessions` cannot race the import and be undone by it.
+    pub fn open_at(&self, path: &Path, after_open: impl FnOnce(&mut Db)) {
         let result = Db::open(path);
         let slot = match result {
-            Ok(db) => {
+            Ok(mut db) => {
+                after_open(&mut db);
                 eprintln!("[store] practice store ready at {}", db.path().display());
                 Slot::Ready(Box::new(db))
             }
@@ -1743,7 +1750,7 @@ mod tests {
         );
 
         let store = PracticeStore::new();
-        store.open_at(&path);
+        store.open_at(&path, |_| {});
         assert!(
             store
                 .read_or(Vec::new(), |db| db.session_history(30))
@@ -1788,10 +1795,32 @@ mod tests {
         );
 
         let store = PracticeStore::new();
-        store.open_at(&path);
+        store.open_at(&path, |_| {});
         assert!(store
             .read_or(Vec::new(), |db| db.session_history(30))
             .is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_import_happens_before_any_command_can_see_the_store() {
+        // A history that appeared halfway through a read would be a
+        // first-launch-only bug nobody could reproduce. The hook runs
+        // inside `open_at`, before the slot is published, so the first
+        // thing any command can see is the finished history.
+        let dir = temp_dir("import-hook");
+        let path = db_path(&dir);
+        let store = PracticeStore::new();
+        let fixtures = fixture_sessions();
+        store.open_at(&path, |db| {
+            db.import_json_history(&fixtures).unwrap();
+        });
+        assert_eq!(
+            store
+                .read_or(Vec::new(), |db| db.session_history(100))
+                .len(),
+            fixtures.len()
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 

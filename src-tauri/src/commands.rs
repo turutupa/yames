@@ -1713,8 +1713,6 @@ pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPrac
             return;
         }
     };
-    store.open_at(&crate::db::db_path(&data_dir));
-
     // The one-time import. `evalSessionHistory` is *read* and left exactly
     // where it is: an older build must still find its history if the user
     // ever goes back to one.
@@ -1726,11 +1724,16 @@ pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPrac
                 .and_then(|v| serde_json::from_value(v.clone()).ok())
         })
         .unwrap_or_default();
-    match store.with(|db| db.import_json_history(&legacy)) {
-        Ok(0) => {}
-        Ok(n) => eprintln!("[store] imported {n} session(s) from the JSON history"),
-        Err(e) => eprintln!("[store] could not import the JSON history: {e}"),
-    }
+
+    // Imported *before* the store becomes visible to any command, so the
+    // first history read of a fresh install cannot catch it half done.
+    store.open_at(&crate::db::db_path(&data_dir), |db| {
+        match db.import_json_history(&legacy) {
+            Ok(0) => {}
+            Ok(n) => eprintln!("[store] imported {n} session(s) from the JSON history"),
+            Err(e) => eprintln!("[store] could not import the JSON history: {e}"),
+        }
+    });
 }
 
 #[tauri::command(async)]
@@ -1784,7 +1787,10 @@ pub fn clear_all_sessions(
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
-    store.with(|db| db.clear_all_sessions())?;
+    // Whether or not the database answers, the copy in `settings.json` has
+    // to go: a store that will not open is exactly the case where leaving
+    // an old history on disk after "forget what I played" would be worst.
+    let db_result = store.with(|db| db.clear_all_sessions());
     let settings = app_handle
         .store("settings.json")
         .map_err(|e| e.to_string())?;
@@ -1799,7 +1805,7 @@ pub fn clear_all_sessions(
     // wall after they asked for it to be gone.
     let no_runs: Vec<crate::session::DrillRun> = Vec::new();
     settings.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
-    Ok(())
+    db_result
 }
 
 // ---------------------------------------------------------------------------
