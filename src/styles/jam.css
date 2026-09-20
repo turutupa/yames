@@ -3129,15 +3129,21 @@
    thing that scrolls it. Sections read top to bottom like every other page
    here, and "Take me to" scrolls DOWN, which is the direction a page moves
    anyway. */
+/* Centred, like the scales page beside it. A section is as wide as its own
+   family needs and no two are the same width, so left-aligned they made a
+   ragged edge down a page whose whole job is to look like a printed card. */
 .jam-chord-chart {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 26px;
 }
 
 .jam-chord-family {
   display: flex;
   flex-direction: column;
+  /* Wide enough for its own table, never wider than the sheet. */
+  max-width: 100%;
   gap: 8px;
   /* A jump lands the heading clear of the top rather than flush against it,
      where it reads as having overshot. */

@@ -735,6 +735,11 @@
     "phrygianDominant": "фригийский доминантовый",
     "lydianDominant": "лидийский доминантовый",
     "harmonicMajor": "гармонический мажор",
-    "hungarianMinor": "венгерский минор"
+    "hungarianMinor": "венгерский минор",
+    "augmentedScale": "увеличенная",
+    "bebopDominant": "бибоп доминантовая",
+    "bebopMajor": "бибоп мажорная",
+    "bebopMinor": "бибоп минорная",
+    "chromatic": "хроматическая"
   }
 }

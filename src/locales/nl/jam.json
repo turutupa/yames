@@ -735,6 +735,11 @@
     "phrygianDominant": "frygisch dominant",
     "lydianDominant": "lydisch dominant",
     "harmonicMajor": "harmonisch majeur",
-    "hungarianMinor": "hongaars mineur"
+    "hungarianMinor": "hongaars mineur",
+    "augmentedScale": "overmatig",
+    "bebopDominant": "bebop dominant",
+    "bebopMajor": "bebop majeur",
+    "bebopMinor": "bebop mineur",
+    "chromatic": "chromatisch"
   }
 }

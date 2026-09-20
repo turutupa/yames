@@ -269,3 +269,61 @@ describe("the scales a key offers", () => {
     }
   });
 });
+
+/**
+ * What a printed guitar scales poster carries (2026-09-19).
+ *
+ * The owner asked repeatedly for the list to match the cards people buy,
+ * and I kept adding what I reasoned my way to instead of what they print.
+ * So this is the published set, written down: the widely sold posters run
+ * to seventeen diagrams in five groups — the seven modes of the major
+ * scale, the two minor scales, the two pentatonics, the two blues, and
+ * FOUR symmetrical scales — and the larger ones add the three bebop scales
+ * and the chromatic.
+ *
+ * The symmetrical group is the one this app kept getting wrong: it had
+ * three of the four for a long time, because the augmented scale is the
+ * one nobody remembers until they look at a poster.
+ *
+ * Anything beyond this is ours to choose. Anything INSIDE it is not.
+ */
+describe("the scales a printed poster carries", () => {
+  const POSTER: Record<string, ScaleId[]> = {
+    "the modes of the major scale": [
+      "major",
+      "dorian",
+      "phrygian",
+      "lydian",
+      "mixolydian",
+      "naturalMinor",
+      "locrian",
+    ],
+    "the minor scales": ["harmonicMinor", "melodicMinor"],
+    "the pentatonics": ["majorPentatonic", "minorPentatonic"],
+    "the blues scales": ["blues", "majorBlues"],
+    "the symmetrical scales": [
+      "diminishedHalfWhole",
+      "diminishedWholeHalf",
+      "augmentedScale",
+      "wholeTone",
+    ],
+    "the bebop scales": ["bebopDominant", "bebopMajor", "bebopMinor"],
+  };
+
+  for (const [group, ids] of Object.entries(POSTER)) {
+    it(`has all of ${group}`, () => {
+      expect(ids.filter((id) => !SCALE_IDS.includes(id))).toEqual([]);
+    });
+  }
+
+  it("names every one of them, and spells every one correctly", () => {
+    for (const id of SCALE_IDS) {
+      expect(SCALE_NAMES_EN[id], id).toBeTruthy();
+      const notes = scaleNotes(0, id);
+      // Ascending from the root, no note twice, all inside an octave.
+      expect(notes[0]).toBe(0);
+      expect(new Set(notes).size, `${id} repeats a note`).toBe(notes.length);
+      expect([...notes].sort((a, b) => a - b), `${id} is not ascending`).toEqual(notes);
+    }
+  });
+});

@@ -735,6 +735,11 @@
     "phrygianDominant": "프리지안 도미넌트",
     "lydianDominant": "리디안 도미넌트",
     "harmonicMajor": "하모닉 메이저",
-    "hungarianMinor": "헝가리안 마이너"
+    "hungarianMinor": "헝가리안 마이너",
+    "augmentedScale": "어그멘티드",
+    "bebopDominant": "비밥 도미넌트",
+    "bebopMajor": "비밥 메이저",
+    "bebopMinor": "비밥 마이너",
+    "chromatic": "크로매틱"
   }
 }

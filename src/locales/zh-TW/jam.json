@@ -735,6 +735,11 @@
     "phrygianDominant": "弗里幾亞屬",
     "lydianDominant": "利底亞屬",
     "harmonicMajor": "和聲大調",
-    "hungarianMinor": "匈牙利小調"
+    "hungarianMinor": "匈牙利小調",
+    "augmentedScale": "增音階",
+    "bebopDominant": "比波普屬",
+    "bebopMajor": "比波普大調",
+    "bebopMinor": "比波普小調",
+    "chromatic": "半音階"
   }
 }

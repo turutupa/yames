@@ -735,6 +735,11 @@
     "phrygianDominant": "phrygian át",
     "lydianDominant": "lydian át",
     "harmonicMajor": "trưởng hòa thanh",
-    "hungarianMinor": "thứ Hungary"
+    "hungarianMinor": "thứ Hungary",
+    "augmentedScale": "tăng",
+    "bebopDominant": "bebop át",
+    "bebopMajor": "bebop trưởng",
+    "bebopMinor": "bebop thứ",
+    "chromatic": "nửa cung"
   }
 }

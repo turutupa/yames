@@ -735,6 +735,11 @@
     "phrygianDominant": "フリジアン・ドミナント",
     "lydianDominant": "リディアン・ドミナント",
     "harmonicMajor": "ハーモニック・メジャー",
-    "hungarianMinor": "ハンガリアン・マイナー"
+    "hungarianMinor": "ハンガリアン・マイナー",
+    "augmentedScale": "オーギュメント",
+    "bebopDominant": "ビバップ・ドミナント",
+    "bebopMajor": "ビバップ・メジャー",
+    "bebopMinor": "ビバップ・マイナー",
+    "chromatic": "クロマチック"
   }
 }

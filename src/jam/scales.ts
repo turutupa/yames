@@ -43,7 +43,14 @@ export type ScaleId =
   | "phrygianDominant"
   | "lydianDominant"
   | "harmonicMajor"
-  | "hungarianMinor";
+  | "hungarianMinor"
+  // The rest of what the printed posters carry (2026-09-19). The fourth
+  // symmetrical scale, the three bebop scales, and the chromatic.
+  | "augmentedScale"
+  | "bebopDominant"
+  | "bebopMajor"
+  | "bebopMinor"
+  | "chromatic";
 
 export type ScaleDefinition = {
   id: ScaleId;
@@ -163,6 +170,45 @@ export const SCALES: Record<ScaleId, ScaleDefinition> = {
     intervals: [0, 2, 3, 6, 7, 8, 11],
     labelKey: "scale.hungarianMinor",
   },
+  /*
+   * The fourth symmetrical scale. Every scales poster prints four of them —
+   * half-whole, whole-half, augmented, whole tone — and this app had three.
+   * A minor third and a semitone, over and over: the augmented triad's own
+   * scale.
+   */
+  augmentedScale: {
+    id: "augmentedScale",
+    intervals: [0, 3, 4, 7, 8, 11],
+    labelKey: "scale.augmentedScale",
+  },
+  /*
+   * The bebop scales: a seven-note scale with one passing note added, so
+   * that playing it in eighths from the root puts the chord tones on the
+   * beats. That is the whole idea, and it is why there are three of them —
+   * one for each of the chords a ii-V-I is made of.
+   */
+  bebopDominant: {
+    id: "bebopDominant",
+    intervals: [0, 2, 4, 5, 7, 9, 10, 11],
+    labelKey: "scale.bebopDominant",
+  },
+  bebopMajor: {
+    id: "bebopMajor",
+    intervals: [0, 2, 4, 5, 7, 8, 9, 11],
+    labelKey: "scale.bebopMajor",
+  },
+  bebopMinor: {
+    id: "bebopMinor",
+    intervals: [0, 2, 3, 4, 5, 7, 9, 10],
+    labelKey: "scale.bebopMinor",
+  },
+  // All twelve. It lights the whole neck, which is exactly what it is: the
+  // picture that says every note is available and the choosing is yours.
+  chromatic: {
+    id: "chromatic",
+    intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    labelKey: "scale.chromatic",
+  },
 };
 
 export const SCALE_IDS: readonly ScaleId[] = Object.keys(SCALES) as ScaleId[];
@@ -193,6 +239,11 @@ export const SCALE_NAMES_EN: Record<ScaleId, string> = {
   lydianDominant: "Lydian dominant",
   harmonicMajor: "Harmonic major",
   hungarianMinor: "Hungarian minor",
+  augmentedScale: "Augmented",
+  bebopDominant: "Bebop dominant",
+  bebopMajor: "Bebop major",
+  bebopMinor: "Bebop minor",
+  chromatic: "Chromatic",
 };
 
 /** The pitch classes of a scale, ascending from its root. */

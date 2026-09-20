@@ -735,6 +735,11 @@
     "phrygianDominant": "frygijska dominantowa",
     "lydianDominant": "lidyjska dominantowa",
     "harmonicMajor": "durowa harmoniczna",
-    "hungarianMinor": "molowa węgierska"
+    "hungarianMinor": "molowa węgierska",
+    "augmentedScale": "zwiększona",
+    "bebopDominant": "bebop dominantowa",
+    "bebopMajor": "bebop durowa",
+    "bebopMinor": "bebop molowa",
+    "chromatic": "chromatyczna"
   }
 }

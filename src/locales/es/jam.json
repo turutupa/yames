@@ -735,6 +735,11 @@
     "phrygianDominant": "frigia dominante",
     "lydianDominant": "lidia dominante",
     "harmonicMajor": "mayor armónica",
-    "hungarianMinor": "menor húngara"
+    "hungarianMinor": "menor húngara",
+    "augmentedScale": "aumentada",
+    "bebopDominant": "bebop dominante",
+    "bebopMajor": "bebop mayor",
+    "bebopMinor": "bebop menor",
+    "chromatic": "cromática"
   }
 }

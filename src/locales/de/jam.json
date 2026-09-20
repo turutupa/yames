@@ -735,6 +735,11 @@
     "phrygianDominant": "phrygisch-dominant",
     "lydianDominant": "lydisch-dominant",
     "harmonicMajor": "harmonisch Dur",
-    "hungarianMinor": "ungarisch Moll"
+    "hungarianMinor": "ungarisch Moll",
+    "augmentedScale": "übermäßig",
+    "bebopDominant": "Bebop-Dominant",
+    "bebopMajor": "Bebop-Dur",
+    "bebopMinor": "Bebop-Moll",
+    "chromatic": "chromatisch"
   }
 }
