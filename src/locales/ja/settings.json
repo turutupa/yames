@@ -322,6 +322,18 @@
       "sounds": "音源",
       "soundsCredit": "クラブのキットは Versilian Studios と Karoryfer Samples による Virtuosity Drums、演奏は Austin McMahon（パブリックドメイン）。スタジオのキットは DrumGizmo プロジェクトの DRSKit（CC BY 4.0）。",
       "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ"
+    },
+    "songs": {
+      "title": "曲",
+      "catchDownloads": "ダウンロードした曲を知らせる",
+      "catchDownloadsHint": "「曲」を開いている間、Yames はダウンロードフォルダーを見て、開く前に必ず尋ねます。あなたのファイルを移動・改名・削除することはありません。",
+      "folder": "このフォルダーを見る",
+      "folderUnknown": "このコンピューターはダウンロード先を Yames に教えていません",
+      "chooseFolder": "選ぶ...",
+      "useDownloads": "ダウンロードを使う",
+      "turnedDown": "見送った曲",
+      "turnedDownHint": "Yames が二度と知らせないファイルが {{n}} 件",
+      "forgetTurnedDown": "もう一度知らせる"
     }
   },
   "keybindings": {

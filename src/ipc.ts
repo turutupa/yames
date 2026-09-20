@@ -883,6 +883,17 @@ export type ScoreSummary = {
    * the title printed on the page.
    */
   name?: string;
+  /**
+   * When the player last opened it, epoch ms (migration four).
+   *
+   * Absent for a song nobody has opened since the counting started, which is
+   * every song that was in the library before it. The store sorts on
+   * `COALESCE(lastOpenedAt, importedAt)`, so a library from before the
+   * migration comes back in exactly the order it always did.
+   */
+  lastOpenedAt?: number;
+  /** How many times it has been opened since the counting started. */
+  openCount?: number;
 };
 
 /**
@@ -992,6 +1003,28 @@ export async function getScore(id: string): Promise<SongScore | null> {
  */
 export async function getScoreSource(id: string): Promise<string | null> {
   return invoke<string | null>("get_score_source", { id });
+}
+
+/**
+ * The player opened this song: it goes to the top of the library.
+ *
+ * The time is the store's, not ours — when a song was opened is a fact about
+ * this machine rather than a claim the webview gets to make.
+ */
+export async function markScoreOpened(id: string): Promise<void> {
+  return invoke("mark_score_opened", { id });
+}
+
+/**
+ * Give the player their file back, through a native save dialog.
+ *
+ * Yames keeps its own copy of every file it imports, so clearing the
+ * Downloads folder loses nothing; this is the other half of that promise.
+ * Resolves with the path it was written to, or `null` when the player
+ * cancelled — which is not a failure and must not put a sentence on screen.
+ */
+export async function exportScoreSource(id: string): Promise<string | null> {
+  return invoke<string | null>("export_score_source", { id });
 }
 
 /** Forget a song, and with it every attempt at it. */
@@ -1193,6 +1226,85 @@ export async function analyzeTakePitch(
 /** Attempts at a song, oldest first. */
 export async function queryAttempts(query: AttemptQuery): Promise<Attempt[]> {
   return invoke<Attempt[]>("query_attempts", { query });
+}
+
+// ---------------------------------------------------------------------------
+// The download is caught (W19, `plans/SONGS.md` S0.9)
+//
+// While Songs is the open mode, Rust lists the Downloads folder and says when
+// a Guitar Pro or MusicXML file has finished arriving. It offers; it never
+// imports, never moves the file and never opens it — `readOfferedFile` is the
+// only call that reads bytes, and it runs after the player has pressed the
+// button. No tab site is touched by any of this, by any route.
+// ---------------------------------------------------------------------------
+
+import type { DownloadOffer } from "./songs/downloadWatch";
+
+/** Where this machine puts downloads, or null if the OS will not say. */
+export async function defaultDownloadsDir(): Promise<string | null> {
+  return invoke<string | null>("default_downloads_dir");
+}
+
+/**
+ * Start watching. `folder` is null for this machine's own Downloads.
+ *
+ * Resolves with the folder actually being watched, so the setting can show it
+ * without having to work out what "the default" means on this OS. Rejects
+ * when the folder is not there, which is the case a player who moved a
+ * removable drive will hit.
+ */
+export async function startDownloadWatch(folder: string | null): Promise<string> {
+  return invoke<string>("start_download_watch", { dir: folder });
+}
+
+/** Stop watching. Idempotent. After this there is no watcher thread at all. */
+export async function stopDownloadWatch(): Promise<void> {
+  return invoke("stop_download_watch");
+}
+
+/** "Not this one", for as long as this watch runs. */
+export async function dismissDownloadOffer(fileName: string): Promise<void> {
+  return invoke("dismiss_download_offer", { fileName });
+}
+
+/** The offered file's bytes, base64 — after the player has said yes. */
+export async function readOfferedFile(path: string): Promise<string> {
+  return invoke<string>("read_offered_file", { path });
+}
+
+/** A file has finished arriving in the watched folder. */
+export function onDownloadOffer(callback: (offer: DownloadOffer) => void) {
+  return listen<DownloadOffer>("songs-download-offer", (e) => callback(e.payload));
+}
+
+// ---------------------------------------------------------------------------
+// The file opens with Yames (W19, `plans/SONGS.md` S0.9)
+//
+// "Open with Yames" on a Guitar Pro or MusicXML file, from a cold start or
+// while Yames is already running. The webview never names a path: it asks
+// whether the OS handed this process one, and gets the bytes back.
+// ---------------------------------------------------------------------------
+
+/** A file the OS asked Yames to open. */
+export type OpenedFile = {
+  fileName: string;
+  /** The bytes, base64 — `decodeSource` turns it back into a file. */
+  base64: string;
+};
+
+/**
+ * The next file the OS asked Yames to open, or null.
+ *
+ * Null on every launch that was not a double-click, which is nearly all of
+ * them. Taking it empties the queue, so a file is only ever opened once.
+ */
+export async function takePendingOpen(): Promise<OpenedFile | null> {
+  return invoke<OpenedFile | null>("take_pending_open");
+}
+
+/** Yames was asked to open a file while it was already running. */
+export function onOpenFile(callback: () => void) {
+  return listen("songs-open-file", () => callback());
 }
 
 // ---------------------------------------------------------------------------

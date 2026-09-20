@@ -108,6 +108,26 @@ export interface Shot {
     /** Save the chosen portion under this name before the capture. */
     keepAs?: string;
   };
+  /**
+   * A download that has just finished, offered on the Songs screen (S0.9).
+   *
+   * Driven the way the real thing is: the app starts the watch when Songs
+   * opens, the mocked backend answers that a file has arrived, and the
+   * shipping banner draws itself. Its own flag rather than a field of
+   * `songs` because it is not about a song being loaded — the offer appears
+   * over the empty state too, which is the screen most players will meet it
+   * on.
+   */
+  downloadOffer?: boolean;
+  /**
+   * The shelf Yames ships with, seeded into the library (W19, S0.9).
+   *
+   * Every other Songs scene has it turned OFF — `mockIpc` writes the "already
+   * seeded" flag into the store — because seven extra library rows would
+   * change which song row 0 is and quietly re-point every songs shot at a
+   * different piece. This is the one scene that lets the seeding run.
+   */
+  starterShelf?: boolean;
   jam?: {
     row: number;
     bar?: number;
@@ -585,6 +605,35 @@ export const SHOTS: Shot[] = [
 \\tuning e5 b4 g4 d4 a3 e3
 \\ts 4 4 3.3.4 3.3.4 3.3.4 3.3.4 |`,
     },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-offer",
+    suffix: "songs-offer",
+    window: "main",
+    tab: "songs",
+    // A download caught, over the empty state — the screen a player meets
+    // this on the first time. Not a marketing picture: it is here so the
+    // layout suite can ask whether the strip and its two buttons fit at the
+    // smallest window the app opens.
+    downloadOffer: true,
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "songs-starter",
+    suffix: "songs-starter",
+    window: "main",
+    tab: "songs",
+    // The library on a fresh install: the seven pieces Yames ships with, each
+    // marked as having come with the app, and the first of them on the stage.
+    // The layout suite is what this is for — it asks whether the marker fits
+    // beside a song's name without pushing anything out of the row.
+    starterShelf: true,
+    songs: { row: 0 },
     width: 1400,
     height: 900,
     settleMs: 900,

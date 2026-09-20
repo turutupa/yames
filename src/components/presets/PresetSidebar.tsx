@@ -1,12 +1,15 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { deletePreset, listPresets, savePreset } from "../../ipc";
+import { deletePreset, exportScoreSource, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
 import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
 import type { SongRecord } from "../../songs/library";
+// W19 — which library rows came with Yames. Ids from `settings.json`; this
+// module is a few dozen lines and pulls no importer with it.
+import { starterIds } from "../../songs/starter/shelf";
 import { JamGlyph } from "../jam/JamGlyph";
 
 export interface PresetSidebarHandle {
@@ -401,6 +404,25 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [songMenu]);
+
+  /**
+   * W19 — which songs came with Yames rather than from the player.
+   *
+   * Read from the store rather than passed down, the way `dueSongs` is read
+   * by the window above: the list is written once, on the launch that seeded
+   * the shelf, and re-read whenever the library grows so a piece that was
+   * just seeded is marked without a reload. Ids only — no score, no alphaTab.
+   */
+  const [starterSongs, setStarterSongs] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    void starterIds().then((ids) => {
+      if (!cancelled) setStarterSongs(ids);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [songs?.length]);
 
   useEffect(() => {
     if (!jamMenu) {
@@ -1061,6 +1083,16 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                         {t("songs.library.due")}
                       </span>
                     )}
+                    {/* W19 — a piece that came with Yames rather than one
+                        the player brought in. A word and not a badge, the
+                        way "due" beside it is: it explains where the song
+                        came from and is not something to clear. Deleting
+                        one works exactly like deleting any other song. */}
+                    {starterSongs.has(s.id) && (
+                      <span className="song-item-starter" title={t("songs.library.starterTitle")}>
+                        {t("songs.library.starter")}
+                      </span>
+                    )}
                   </span>
                   <span className="setlist-item-sub">
                     {t("songs.library.summary", {
@@ -1292,6 +1324,18 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             }}
           >
             {t("presets.rename")}
+          </button>
+          {/* W19 — Yames keeps its own copy of the file a song was read
+              from, so this gives it back. A library action, in the library's
+              own menu: it is about the song rather than about the pass you
+              are in the middle of, and the stage has no height to spare. */}
+          <button
+            onClick={() => {
+              void exportScoreSource(songMenu.id).catch(() => {});
+              setSongMenu(null);
+            }}
+          >
+            {t("songs.exportOriginal")}
           </button>
           <button
             className="preset-context-delete"

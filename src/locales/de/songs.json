@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} Takte",
       "remove": "Aus Yames entfernen",
       "due": "Fällig",
-      "dueTitle": "Du wolltest hierher zurückkommen"
+      "dueTitle": "Du wolltest hierher zurückkommen",
+      "starter": "Dabei",
+      "starterTitle": "Kam mit Yames mit. Du kannst sie jederzeit löschen."
     },
     "review": {
       "title": "Wie das lief",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "ist gerade in deinen Downloads gelandet",
+      "justArrivedSized": "ist gerade in deinen Downloads gelandet · {{size}}",
+      "more": "{{n}} weitere warten",
+      "open": "Öffnen",
+      "opening": "Wird geöffnet ...",
+      "notThisOne": "Diese nicht",
+      "failed": "Yames konnte diese Datei nicht öffnen. Vielleicht lädt sie noch."
+    },
+    "keepsCopy": "Yames behält von jeder Datei, die du hereinholst, eine eigene Kopie. Du kannst deine Downloads also bedenkenlos aufräumen.",
+    "exportOriginal": "Datei irgendwo speichern",
+    "exporting": "Wird gespeichert ...",
+    "exportDone": "Gespeichert.",
+    "exportFailed": "Yames konnte die Datei dort nicht schreiben.",
+    "findTab": {
+      "what": "Song und Künstler",
+      "link": "Tab dafür suchen",
+      "note": "Öffnet deinen eigenen Browser mit einer ganz normalen Websuche. Yames schlägt nichts für dich nach."
     }
   }
 }

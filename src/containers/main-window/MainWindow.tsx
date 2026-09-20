@@ -60,6 +60,7 @@ import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
 import { SongsView } from "../songs/SongsView";
 import { useSongsDue } from "../songs/review/useSongsDue";
+import { useOpenedSong } from "../songs/useOpenedSong";
 import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
@@ -440,6 +441,16 @@ export function MainWindow() {
    * is looking at. Inert with no song open, like the jam above it.
    */
   const songsSession = useSongsSession(undefined, { view });
+
+  /**
+   * "Open with Yames" on a Guitar Pro or MusicXML file (`SONGS.md` S0.9).
+   *
+   * Here and not in `SongsView`, because the whole point is that the player
+   * may be anywhere — or nowhere, on a cold start — when the file arrives.
+   * It walks them to Songs and hands the bytes to the same `offerFile` the
+   * picker uses, so the track picker opens exactly as it always does.
+   */
+  useOpenedSong({ setView, onFile: songsSession.offerFile });
 
   /**
    * The songs the coach promised to come back to, and the day has come round

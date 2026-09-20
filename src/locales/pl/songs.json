@@ -89,7 +89,9 @@
       "summary": "{{track}} · {{bars}} taktów",
       "remove": "Usuń z Yames",
       "due": "Na dziś",
-      "dueTitle": "Prosiłeś, żeby do tego wrócić"
+      "dueTitle": "Prosiłeś, żeby do tego wrócić",
+      "starter": "W zestawie",
+      "starterTitle": "Przyszła razem z Yames. Skasuj ją, kiedy chcesz."
     },
     "review": {
       "title": "Jak poszło",
@@ -231,6 +233,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "właśnie trafił do pobranych",
+      "justArrivedSized": "właśnie trafił do pobranych · {{size}}",
+      "more": "czeka jeszcze {{n}}",
+      "open": "Otwórz",
+      "opening": "Otwieranie...",
+      "notThisOne": "Nie ten",
+      "failed": "Yames nie mógł otworzyć tego pliku. Może wciąż się pobiera."
+    },
+    "keepsCopy": "Yames trzyma własną kopię każdego wczytanego pliku, więc czyszczenie pobranych niczego nie kosztuje.",
+    "exportOriginal": "Zapisz plik gdzieś",
+    "exporting": "Zapisywanie...",
+    "exportDone": "Zapisano.",
+    "exportFailed": "Yames nie mógł tam zapisać pliku.",
+    "findTab": {
+      "what": "Utwór i wykonawca",
+      "link": "Poszukaj tabulatury",
+      "note": "Otwiera twoją własną przeglądarkę ze zwykłym wyszukiwaniem. Yames niczego za ciebie nie sprawdza."
     }
   }
 }

@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}}마디",
       "remove": "Yames에서 빼기",
       "due": "오늘 할 것",
-      "dueTitle": "이 곡으로 돌아오겠다고 했습니다"
+      "dueTitle": "이 곡으로 돌아오겠다고 했습니다",
+      "starter": "기본 제공",
+      "starterTitle": "Yames에 처음부터 들어 있습니다. 언제든 지워도 됩니다."
     },
     "review": {
       "title": "방금은 어땠는지",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "이(가) 다운로드에 방금 도착했습니다",
+      "justArrivedSized": "이(가) 다운로드에 방금 도착했습니다 · {{size}}",
+      "more": "{{n}}개가 더 기다리고 있습니다",
+      "open": "열기",
+      "opening": "여는 중...",
+      "notThisOne": "이건 아니에요",
+      "failed": "이 파일을 열 수 없습니다. 아직 내려받는 중일 수 있습니다."
+    },
+    "keepsCopy": "가져온 파일은 Yames가 자체 사본을 보관합니다. 다운로드 폴더를 비워도 아무것도 잃지 않습니다.",
+    "exportOriginal": "파일을 어딘가에 저장",
+    "exporting": "저장하는 중...",
+    "exportDone": "저장했습니다.",
+    "exportFailed": "그곳에 파일을 쓸 수 없었습니다.",
+    "findTab": {
+      "what": "곡과 연주자",
+      "link": "탭 악보 찾기",
+      "note": "평소 쓰는 브라우저에서 평범한 웹 검색을 엽니다. Yames가 대신 찾아보지는 않습니다."
     }
   }
 }

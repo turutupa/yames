@@ -322,6 +322,18 @@
       "sounds": "사운드",
       "soundsCredit": "클럽 드럼은 Versilian Studios와 Karoryfer Samples의 Virtuosity Drums이며 Austin McMahon이 연주했습니다(퍼블릭 도메인). 스튜디오 드럼은 DrumGizmo 프로젝트의 DRSKit입니다(CC BY 4.0).",
       "madeWith": "전 세계 음악가들을 위해 {{heart}}로 만들었습니다"
+    },
+    "songs": {
+      "title": "곡",
+      "catchDownloads": "내려받은 곡 알려주기",
+      "catchDownloadsHint": "곡 화면이 열려 있는 동안 Yames가 다운로드 폴더를 살피고, 무엇이든 열기 전에 먼저 물어봅니다. 파일을 옮기거나 이름을 바꾸거나 지우지 않습니다.",
+      "folder": "이 폴더 살피기",
+      "folderUnknown": "이 컴퓨터가 다운로드 위치를 Yames에게 알려주지 않았습니다",
+      "chooseFolder": "고르기...",
+      "useDownloads": "다운로드 폴더 쓰기",
+      "turnedDown": "지나친 곡",
+      "turnedDownHint": "Yames가 다시 알리지 않을 파일 {{n}}개",
+      "forgetTurnedDown": "다시 알려주기"
     }
   },
   "keybindings": {

@@ -83,7 +83,9 @@
       "summary": "{{track}} · {{bars}} mesures",
       "remove": "Retirer de Yames",
       "due": "À revoir",
-      "dueTitle": "Tu as demandé à y revenir"
+      "dueTitle": "Tu as demandé à y revenir",
+      "starter": "Fournie",
+      "starterTitle": "Fournie avec Yames. Supprimez-la quand vous voulez."
     },
     "review": {
       "title": "Ce que ça a donné",
@@ -221,6 +223,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "vient d'arriver dans vos téléchargements",
+      "justArrivedSized": "vient d'arriver dans vos téléchargements · {{size}}",
+      "more": "{{n}} autres en attente",
+      "open": "L'ouvrir",
+      "opening": "Ouverture...",
+      "notThisOne": "Pas celui-ci",
+      "failed": "Yames n'a pas pu ouvrir ce fichier. Il est peut-être encore en cours de téléchargement."
+    },
+    "keepsCopy": "Yames garde sa propre copie de chaque fichier que vous apportez : vider vos téléchargements ne perd rien.",
+    "exportOriginal": "Enregistrer le fichier quelque part",
+    "exporting": "Enregistrement...",
+    "exportDone": "Enregistré.",
+    "exportFailed": "Yames n'a pas pu écrire le fichier là.",
+    "findTab": {
+      "what": "Morceau et artiste",
+      "link": "Chercher une tablature",
+      "note": "Ouvre votre propre navigateur sur une recherche web ordinaire. Yames ne cherche rien à votre place."
     }
   }
 }

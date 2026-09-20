@@ -1998,6 +1998,89 @@ pub fn get_score_source(
     store.read_or(None, |db| db.get_score_source(&id))
 }
 
+/// The player opened this song: it goes to the top of the library, and the
+/// visit is counted (migration four).
+///
+/// The time is taken here rather than sent from the frontend for the reason
+/// `save_score`'s is: when a song was opened is a fact about this machine,
+/// not a claim the webview gets to make.
+#[tauri::command(async)]
+pub fn mark_score_opened(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0);
+    store.with(|db| db.mark_score_opened(&id, now))
+}
+
+/// Give the player their file back.
+///
+/// Yames keeps its own copy of every file it imports (`scores.source_b64`),
+/// so clearing the Downloads folder loses nothing — and this is the other
+/// half of that promise: what Yames kept, the player can have back, byte for
+/// byte, wherever they want it.
+///
+/// A Rust command and a native save dialog because the webview cannot write
+/// anywhere: `plugin-fs` is not installed and a browser download is inert
+/// inside a Tauri window. `Ok(None)` is the player cancelling the dialog,
+/// which is not a failure and must not put a sentence on their screen.
+///
+/// `async fn` for the reason `pick_kit_folder` is, and it is not optional: a
+/// non-async command runs on the main thread, and asking the main thread to
+/// put up a modal dialog and then wait for the answer is a deadlock in one
+/// move.
+#[tauri::command]
+pub async fn export_score_source(
+    id: String,
+    app: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Option<String>, String> {
+    use base64::Engine as _;
+    use tauri_plugin_dialog::DialogExt;
+
+    let summary = store
+        .read_or(Vec::new(), |db| db.list_scores())
+        .into_iter()
+        .find(|s| s.id == id)
+        .ok_or_else(|| "that song is not in the library any more".to_string())?;
+    let base64 = store
+        .read_or(None, |db| db.get_score_source(&id))
+        .ok_or_else(|| {
+            "Yames has no copy of the file this song came from. It was imported by a build \
+             that did not keep one."
+                .to_string()
+        })?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(base64.as_bytes())
+        .map_err(|e| format!("the stored copy could not be read back: {e}"))?;
+
+    // The name the file came in with, which is the name the player will look
+    // for. `file_name` on the summary is the source file, not the song's
+    // title: exporting "Blackbird.gp5" as "Blackbird (my version).gp5"
+    // because they renamed it in the library would be a surprise.
+    let suggested = std::path::Path::new(&summary.source_file)
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| summary.source_file.clone());
+
+    let chosen = app
+        .dialog()
+        .file()
+        .set_file_name(&suggested)
+        .blocking_save_file();
+    let Some(chosen) = chosen else {
+        return Ok(None);
+    };
+    let path = chosen
+        .into_path()
+        .map_err(|e| format!("that is not a place Yames can write to: {e}"))?;
+    std::fs::write(&path, &bytes).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(Some(path.to_string_lossy().into_owned()))
+}
+
 /// Forget a song, and with it every attempt at it.
 #[tauri::command(async)]
 pub fn delete_score(
@@ -4142,6 +4225,314 @@ pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String
     handoff.drain_retired();
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// W19 — the download is caught (`plans/SONGS.md` S0.9)
+//
+// The Downloads folder is listed while Songs is the open mode, and a Guitar
+// Pro or MusicXML file that has finished arriving is OFFERED. Every rule is in
+// `downloads.rs`, which has no Tauri in it and is tested against a temp
+// directory; these four commands are the wiring.
+//
+// Nothing here makes a network request. Nothing here opens a file except
+// `read_offered_file`, which runs after the player has pressed the button.
+// ---------------------------------------------------------------------------
+
+/// Where this machine puts downloads, or `None` if the OS will not say.
+///
+/// Tauri's own path API rather than a guess at `~/Downloads`: it reads the
+/// XDG user-dirs / known-folder setting, so a player whose downloads go
+/// somewhere else is watched where their files actually land.
+#[tauri::command]
+pub fn default_downloads_dir(app_handle: AppHandle) -> Option<String> {
+    app_handle
+        .path()
+        .download_dir()
+        .ok()
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
+/// Start watching a folder. Replaces any watch already running.
+///
+/// `dir` is the folder the player chose, or `None` for this machine's own
+/// Downloads. Turning the offer off does not call this — it calls
+/// `stop_download_watch`, and then there is no thread at all.
+#[tauri::command]
+pub fn start_download_watch(
+    dir: Option<String>,
+    app_handle: AppHandle,
+    watch: State<'_, crate::downloads::WatchState>,
+) -> Result<String, String> {
+    let dir = match dir {
+        Some(d) if !d.trim().is_empty() => std::path::PathBuf::from(d),
+        _ => app_handle
+            .path()
+            .download_dir()
+            .map_err(|e| format!("this computer has no Downloads folder Yames can find: {e}"))?,
+    };
+    if !dir.is_dir() {
+        return Err(format!("{} is not a folder", dir.display()));
+    }
+    let mut held = watch.0.lock().unwrap();
+    if let Some(running) = held.take() {
+        running.stop();
+    }
+    let emitter = app_handle.clone();
+    let started = crate::downloads::spawn_watch(dir.clone(), move |offer| {
+        let _ = emitter.emit("songs-download-offer", &offer);
+    });
+    *held = Some(started);
+    Ok(dir.to_string_lossy().into_owned())
+}
+
+/// Stop watching. Idempotent: leaving Songs twice is not an error.
+#[tauri::command]
+pub fn stop_download_watch(watch: State<'_, crate::downloads::WatchState>) {
+    if let Some(running) = watch.0.lock().unwrap().take() {
+        running.stop();
+    }
+}
+
+/// "Not this one." The watch stops offering it for as long as it runs; the
+/// frontend remembers it across restarts.
+#[tauri::command]
+pub fn dismiss_download_offer(
+    file_name: String,
+    watch: State<'_, crate::downloads::WatchState>,
+) {
+    if let Some(running) = watch.0.lock().unwrap().as_ref() {
+        running.dismiss(&file_name);
+    }
+}
+
+/// The offered file's bytes, base64 — after the player has said yes.
+///
+/// The one place in this feature that opens a file, and it is guarded twice:
+/// the path has to be a direct child of the folder currently being watched
+/// (canonicalised on both sides, so `..` cannot walk out of it) and it has to
+/// be a name the watcher would have offered. Base64 rather than a byte array
+/// because Tauri serialises `Vec<u8>` as a JSON array of numbers, and a
+/// megabyte of Guitar Pro would cross the wire as a million decimal integers.
+#[tauri::command(async)]
+pub fn read_offered_file(
+    path: String,
+    watch: State<'_, crate::downloads::WatchState>,
+) -> Result<String, String> {
+    use base64::Engine as _;
+    let dir = {
+        let held = watch.0.lock().unwrap();
+        held.as_ref()
+            .map(|w| w.dir.clone())
+            // No watch means nothing was offered, so there is nothing to
+            // read. Refusing here is what stops this being a "read any file"
+            // command that happens to be called by the Songs screen.
+            .ok_or_else(|| "Yames is not watching for downloads right now".to_string())?
+    };
+    let bytes = crate::downloads::read_offered(&dir, std::path::Path::new(&path))
+        .map_err(|e| e.to_string())?;
+    Ok(base64::engine::general_purpose::STANDARD.encode(bytes))
+}
+
+// ---------------------------------------------------------------------------
+// W19 — the file opens with Yames
+//
+// Two ways in, and they are genuinely different: a COLD START, where the path
+// is in `std::env::args()` before a window exists, and a RUNNING app, where
+// Windows or the desktop hands the path to a second process and
+// `tauri-plugin-single-instance` forwards its argv to the one already open.
+// Both land here, and after that they are the same thing.
+//
+// The webview never supplies a path. It asks whether the OS handed one over,
+// and gets back the bytes of a file THIS PROCESS was told to open — which is
+// why there is no guard here like `downloads::check_offer`: there is nothing
+// for a caller to point somewhere else.
+// ---------------------------------------------------------------------------
+
+/// Files the OS asked Yames to open, oldest first, not yet collected.
+///
+/// A queue and not one slot: `yames.exe a.gp5 b.gp5` is a thing a file
+/// manager will do when two files are selected, and dropping one silently
+/// would be worse than asking twice.
+#[derive(Default)]
+pub struct PendingOpenState(pub Mutex<Vec<std::path::PathBuf>>);
+
+/// One file the OS handed over, on its way to the importer.
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenedFile {
+    pub file_name: String,
+    /// The bytes, base64 — the shape `decodeSource` on the other side takes.
+    pub base64: String,
+}
+
+/// Take the paths out of a command line and remember the ones we can open.
+///
+/// Returns how many were taken, so the caller knows whether to bring the
+/// window forward. `argv[0]` is the executable and is skipped; everything
+/// else is a candidate, and anything that is not a song file we understand is
+/// ignored rather than complained about — a flag or a stray argument is not
+/// the player asking for anything.
+pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
+    let mut queued = 0;
+    let mut held = state.0.lock().unwrap();
+    for arg in argv.iter().skip(1) {
+        let path = std::path::PathBuf::from(arg);
+        let openable = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .map(crate::downloads::is_openable)
+            .unwrap_or(false);
+        if !openable || !path.is_file() {
+            continue;
+        }
+        if held.iter().any(|p| p == &path) {
+            continue;
+        }
+        held.push(path);
+        queued += 1;
+    }
+    queued
+}
+
+/// A second Yames was launched on a file while one was already running, or
+/// this one was started with a path. Bring the window forward and say so.
+pub fn announce_opened_paths(app: &AppHandle, argv: &[String]) {
+    let queued = queue_opened_paths(&app.state::<PendingOpenState>(), argv);
+    if queued == 0 {
+        return;
+    }
+    // The player double-clicked a file: the window they expect to see is the
+    // main one, not the widget they left running in a corner.
+    if let Some(floating) = app.get_webview_window("floating") {
+        let _ = floating.hide();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.unminimize();
+        let _ = main.set_focus();
+    }
+    let _ = app.emit("songs-open-file", ());
+}
+
+/// The next file the OS asked Yames to open, read.
+///
+/// `None` when there is nothing waiting, which is the ordinary case on every
+/// launch that was not a double-click. The frontend asks once on mount and
+/// again whenever `songs-open-file` arrives.
+#[tauri::command(async)]
+pub fn take_pending_open(
+    pending: State<'_, PendingOpenState>,
+) -> Result<Option<OpenedFile>, String> {
+    use base64::Engine as _;
+    let path = {
+        let mut held = pending.0.lock().unwrap();
+        if held.is_empty() {
+            return Ok(None);
+        }
+        held.remove(0)
+    };
+    let file_name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    // Sixty-four megabytes, the same ceiling a caught download gets and for
+    // the same reason: a song is kilobytes, and a disk image is not a song.
+    let meta = std::fs::metadata(&path).map_err(|e| format!("{file_name}: {e}"))?;
+    if meta.len() > crate::downloads::MAX_OFFER_BYTES {
+        return Err(format!("{file_name} is too big to be a song"));
+    }
+    let bytes = std::fs::read(&path).map_err(|e| format!("{file_name}: {e}"))?;
+    Ok(Some(OpenedFile {
+        file_name,
+        base64: base64::engine::general_purpose::STANDARD.encode(bytes),
+    }))
+}
+
+#[cfg(test)]
+mod opened_paths_tests {
+    use super::{queue_opened_paths, PendingOpenState};
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    /// A temp directory of this test's own. Never a real data directory.
+    fn temp_dir(tag: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("yames-w19-open-{tag}-{nanos}"));
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn takes_the_song_files_off_a_command_line_and_nothing_else() {
+        let dir = temp_dir("argv");
+        for name in ["riff.gp5", "score.musicxml", "notes.txt"] {
+            std::fs::write(dir.join(name), b"bytes").unwrap();
+        }
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec![
+            dir.join("yames.exe").to_string_lossy().into_owned(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+            // Not a song file.
+            dir.join("notes.txt").to_string_lossy().into_owned(),
+            // A song file that is not there.
+            dir.join("ghost.gp5").to_string_lossy().into_owned(),
+            // A flag, which is not a path at all.
+            "--some-flag".into(),
+            dir.join("score.musicxml").to_string_lossy().into_owned(),
+        ];
+
+        assert_eq!(queue_opened_paths(&state, &argv), 2);
+        let held = state.0.lock().unwrap();
+        let names: Vec<_> = held
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(names, ["riff.gp5", "score.musicxml"]);
+        drop(held);
+
+        // `argv[0]` is the executable, and would be a song file only if
+        // somebody renamed Yames to `riff.gp5`. It is skipped either way.
+        let state = PendingOpenState::default();
+        assert_eq!(
+            queue_opened_paths(
+                &state,
+                &[dir.join("riff.gp5").to_string_lossy().into_owned()],
+            ),
+            0,
+        );
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn the_same_file_twice_is_queued_once() {
+        let dir = temp_dir("twice");
+        std::fs::write(dir.join("riff.gp5"), b"bytes").unwrap();
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec![
+            "yames.exe".into(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+        ];
+        assert_eq!(queue_opened_paths(&state, &argv), 1);
+        // And again from a second launch, while the first is still waiting to
+        // be collected: two double-clicks on one file are one file.
+        assert_eq!(queue_opened_paths(&state, &argv), 0);
+        assert_eq!(state.0.lock().unwrap().len(), 1);
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn an_ordinary_launch_queues_nothing() {
+        let state = PendingOpenState::default();
+        assert_eq!(queue_opened_paths(&state, &["yames.exe".to_string()]), 0);
+        assert!(state.0.lock().unwrap().is_empty());
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the

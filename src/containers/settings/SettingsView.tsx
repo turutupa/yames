@@ -20,6 +20,7 @@ import { GeneralSettingsSection } from "./GeneralSettingsSection";
 import { AppearanceSettingsSection } from "./AppearanceSettingsSection";
 import { DevicesSettingsSection } from "./DevicesSettingsSection";
 import { CoachSettingsSection } from "./CoachSettingsSection";
+import { SongsSettingsSection } from "./SongsSettingsSection";
 import { WidgetSettingsSection } from "./WidgetSettingsSection";
 import { HotkeysSettingsSection } from "./HotkeysSettingsSection";
 import { SupportSection } from "./SupportSection";
@@ -306,6 +307,11 @@ export function SettingsView({
         onStartDownload={onStartDownload}
         onRequestDownload={onRequestDownload}
       />
+
+      {/* W19 — catching a download is the only part of Songs that happens
+          without being asked for, so it is the only part with a switch.
+          Takes no props: it reads and writes `settings.json` itself. */}
+      <SongsSettingsSection />
 
       <WidgetSettingsSection
         widgetMode={widgetMode}

@@ -30,7 +30,13 @@ Status key: **decided** · **open** · **deferred**
   `jam-v5`; the work is on `jam-v6`. Paper work and research only until
   then.
 - **S0.4 The app ships no songs.** Players import their own files.
-  (`ECHORA.md` S2.)
+  (`ECHORA.md` S2.) **Narrowed by S0.9 (2026-09-20):** it ships no
+  SOMEBODY ELSE'S songs — no Guitar Pro or MusicXML file anybody sold or
+  transcribed, and nothing taken off a recording. It does ship a shelf of
+  seven short pieces, six written for Yames and one (the Ode to Joy theme)
+  public domain worldwide, so that the mode is not an empty screen on the
+  first launch. The rule the code keeps is unchanged and is the one worth
+  quoting: **no real song is ever committed to this repository.**
 - **S0.5 Honest scope for the first release.** Timing is scored on
   everything. Which note was played is checked on single-note lines
   only, and the review says so where it cannot tell.

@@ -20,7 +20,7 @@ import {
 } from "../../../songs/library";
 import type { SongLibrary, SongRecord } from "../../../songs/library";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
-import { loadScoreSchedule } from "../../../ipc";
+import { loadScoreSchedule, markScoreOpened } from "../../../ipc";
 /**
  * The importer is loaded when a file arrives, not when the app starts.
  *
@@ -37,6 +37,9 @@ import { addPortion, newPortionId, removePortion, renamePortion } from "../../..
 import type { SavedPortion } from "../../../songs/selection";
 import type { SongScore } from "../../../songs/types";
 import { forgetMixSetting } from "../../../songs/songEngine";
+// W19 — the shelf Yames ships with. The pieces and the importer are both
+// loaded lazily inside it; this module is a few dozen lines.
+import { markStarterSeeded, seedStarterShelf } from "../../../songs/starter/shelf";
 import { useSongEngine } from "./useSongEngine";
 import type { SongEngine } from "./useSongEngine";
 
@@ -136,7 +139,28 @@ export function useSongsSession(
   useEffect(() => {
     if (loaded.current) return;
     loaded.current = true;
-    void library.list().then(setSongs);
+    void library.list().then(async (list) => {
+      setSongs(list);
+      /**
+       * The shelf Yames ships with (W19, `SONGS.md` S0.9), on the first
+       * launch and never again.
+       *
+       * After the list rather than instead of it: the screen shows whatever
+       * is already there immediately, and the seven pieces arrive a moment
+       * later on the one launch that needs them. The flag is written only
+       * once the store has taken them, so a crash halfway means the next
+       * launch tries again rather than a library that is permanently short.
+       *
+       * Deleting one is remembered, because the flag is a fact about this
+       * installation and not about what the library currently holds.
+       */
+      const shelf = await seedStarterShelf();
+      if (shelf.length === 0) return;
+      const seeded = [...shelf].reverse().reduce((acc, record) => addSong(acc, record), list);
+      setSongs(seeded);
+      await library.save(seeded);
+      await markStarterSeeded(shelf);
+    });
   }, [library]);
 
   const commit = useCallback(
@@ -170,6 +194,12 @@ export function useSongsSession(
       setLoop(false);
       setTempoPercentState(100);
       setWarnings([]);
+      // W19 — the library is "what have I been playing" (migration four).
+      // Fire and forget: a list that comes back in yesterday's order is not
+      // worth making anybody wait for, and it is right the next time it is
+      // read. The portion, the loop and the speed come back in the effect
+      // below, which is the stage's, not this line's.
+      void markScoreOpened(id).catch(() => {});
     },
     [songs],
   );

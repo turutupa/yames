@@ -322,6 +322,18 @@
       "sounds": "Sesler",
       "soundsCredit": "Kulüp takımı, Versilian Studios ve Karoryfer Samples'ın Virtuosity Drums'ı; çalan Austin McMahon (kamu malı). Stüdyo takımı, DrumGizmo projesinin DRSKit'i (CC BY 4.0).",
       "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı"
+    },
+    "songs": {
+      "title": "Parçalar",
+      "catchDownloads": "İndirdiğin parçaları öner",
+      "catchDownloadsHint": "Parçalar açıkken Yames indirilenler klasörüne bakar ve bir şeyi açmadan önce sorar. Dosyan asla taşınmaz, adı değişmez, silinmez.",
+      "folder": "Bu klasörü izle",
+      "folderUnknown": "Bu bilgisayar Yames'e indirilenlerin nereye gittiğini söylemedi",
+      "chooseFolder": "Seç...",
+      "useDownloads": "İndirilenleri kullan",
+      "turnedDown": "Geri çevirdiğin parçalar",
+      "turnedDownHint": "Yames'in bir daha önermeyeceği {{n}} dosya",
+      "forgetTurnedDown": "Yine önersin"
     }
   },
   "keybindings": {

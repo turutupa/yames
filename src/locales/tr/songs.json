@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} ölçü",
       "remove": "Yames'ten çıkar",
       "due": "Bugüne",
-      "dueTitle": "Buna geri dönmek istemiştin"
+      "dueTitle": "Buna geri dönmek istemiştin",
+      "starter": "Hazır gelen",
+      "starterTitle": "Yames ile birlikte geldi. İstediğin zaman silebilirsin."
     },
     "review": {
       "title": "Nasıl gitti",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "az önce indirilenlere düştü",
+      "justArrivedSized": "az önce indirilenlere düştü · {{size}}",
+      "more": "{{n}} tane daha bekliyor",
+      "open": "Aç",
+      "opening": "Açılıyor...",
+      "notThisOne": "Bu değil",
+      "failed": "Yames bu dosyayı açamadı. Hâlâ iniyor olabilir."
+    },
+    "keepsCopy": "Yames içeri aldığın her dosyanın kendi kopyasını saklar, indirilenleri temizlemen bir şey kaybettirmez.",
+    "exportOriginal": "Dosyayı bir yere kaydet",
+    "exporting": "Kaydediliyor...",
+    "exportDone": "Kaydedildi.",
+    "exportFailed": "Yames dosyayı oraya yazamadı.",
+    "findTab": {
+      "what": "Parça ve sanatçı",
+      "link": "Ona bir tab bul",
+      "note": "Kendi tarayıcını sıradan bir web aramasıyla açar. Yames senin yerine hiçbir şey aramaz."
     }
   }
 }

@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} ô nhịp",
       "remove": "Bỏ khỏi Yames",
       "due": "Hôm nay",
-      "dueTitle": "Bạn đã hẹn quay lại bài này"
+      "dueTitle": "Bạn đã hẹn quay lại bài này",
+      "starter": "Có sẵn",
+      "starterTitle": "Có sẵn cùng Yames. Xoá lúc nào cũng được."
     },
     "review": {
       "title": "Vừa rồi thế nào",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "vừa về trong thư mục tải xuống của bạn",
+      "justArrivedSized": "vừa về trong thư mục tải xuống của bạn · {{size}}",
+      "more": "còn {{n}} tệp nữa đang chờ",
+      "open": "Mở tệp",
+      "opening": "Đang mở...",
+      "notThisOne": "Không phải tệp này",
+      "failed": "Yames không mở được tệp đó. Có thể tệp vẫn đang tải."
+    },
+    "keepsCopy": "Yames giữ bản sao riêng của mọi tệp bạn đưa vào, nên dọn thư mục tải xuống cũng không mất gì.",
+    "exportOriginal": "Lưu tệp ra ngoài",
+    "exporting": "Đang lưu...",
+    "exportDone": "Đã lưu.",
+    "exportFailed": "Yames không ghi được tệp vào đó.",
+    "findTab": {
+      "what": "Bài hát và nghệ sĩ",
+      "link": "Tìm bản tab cho bài này",
+      "note": "Mở trình duyệt của chính bạn với một tìm kiếm web bình thường. Yames không tra cứu gì thay bạn."
     }
   }
 }

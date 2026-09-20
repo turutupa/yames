@@ -83,7 +83,9 @@
       "summary": "{{track}} · {{bars}} compassos",
       "remove": "Tirar do Yames",
       "due": "Para hoje",
-      "dueTitle": "Você pediu para voltar a esta"
+      "dueTitle": "Você pediu para voltar a esta",
+      "starter": "Inclusa",
+      "starterTitle": "Veio com o Yames. Apague quando quiser."
     },
     "review": {
       "title": "Como foi",
@@ -221,6 +223,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "acabou de chegar nos seus downloads",
+      "justArrivedSized": "acabou de chegar nos seus downloads · {{size}}",
+      "more": "mais {{n}} esperando",
+      "open": "Abrir",
+      "opening": "Abrindo...",
+      "notThisOne": "Esse não",
+      "failed": "O Yames não conseguiu abrir esse arquivo. Talvez ainda esteja baixando."
+    },
+    "keepsCopy": "O Yames guarda a própria cópia de cada arquivo que você traz, então limpar seus downloads não perde nada.",
+    "exportOriginal": "Salvar o arquivo em algum lugar",
+    "exporting": "Salvando...",
+    "exportDone": "Salvo.",
+    "exportFailed": "O Yames não conseguiu gravar o arquivo ali.",
+    "findTab": {
+      "what": "Música e artista",
+      "link": "Procurar uma tablatura",
+      "note": "Abre o seu próprio navegador numa busca comum na web. O Yames não procura nada por você."
     }
   }
 }

@@ -63,6 +63,11 @@ import { useSongAttempt } from "./review/useSongAttempt";
 import { useSongProgress } from "./review/useSongProgress";
 import { useSongTakePitch } from "./review/useSongTakePitch";
 import { SongBand } from "./SongBand";
+// W19 — the download is caught (`plans/SONGS.md` S0.9). Its own component,
+// its own hook and its own stylesheet; mounted in two lines below.
+import { DownloadOffer } from "./DownloadOffer";
+import { FindATab } from "./FindATab";
+import { useDownloadWatch } from "./useDownloadWatch";
 import { SongPortionChip, SongPortionSave } from "./SongPortions";
 import { SongRecordControl } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
@@ -289,6 +294,21 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   );
 
   /**
+   * A download that has just finished, offered rather than opened (S0.9).
+   *
+   * The caught file goes through `offerFile` — the same door the picker and
+   * the drop target use — so the track picker still opens and the player
+   * still chooses their part. Nothing is automatic.
+   *
+   * The strip is what the offer must not move. It cannot: `.songs-view` is a
+   * fixed-height column whose ONE flexible child is the frame, so a banner
+   * beside it takes its height from the tab and the strip stays exactly
+   * where it was. The layout suite asks that question directly.
+   */
+  const onCaughtFile = useCallback((file: File) => void session.offerFile(file), [session]);
+  const downloads = useDownloadWatch({ view: "songs", onFile: onCaughtFile });
+
+  /**
    * The library's "+" opens this screen's file input.
    *
    * One input, on the view, reached by an event rather than copied into the
@@ -347,6 +367,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
         }}
       />
 
+      <DownloadOffer watch={downloads} />
+
       {session.error && (
         <div className="songs-alert" role="alert">
           <span>{session.error}</span>
@@ -388,6 +410,14 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             {t("songs.import")}
           </button>
           <p className="songs-empty-note">{t("songs.empty.private")}</p>
+          {/* W19 — the half of the promise that makes clearing your
+              downloads safe. Said here because this is the screen somebody
+              is standing on when they wonder. */}
+          <p className="songs-keeps-copy">{t("songs.keepsCopy")}</p>
+          {/* W19 — haven't got the file yet? Yames opens your own browser on
+              an ordinary web search. It names no tab site and fetches
+              nothing; `songs/findTab.ts` is where that is a test. */}
+          <FindATab />
         </div>
       ) : (
         <>

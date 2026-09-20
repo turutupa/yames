@@ -322,6 +322,18 @@
       "sounds": "Sounds",
       "soundsCredit": "The Club kit is Virtuosity Drums by Versilian Studios and Karoryfer Samples, performed by Austin McMahon (public domain). The Studio kit is DRSKit by the DrumGizmo project (CC BY 4.0).",
       "madeWith": "Made with {{heart}} for musicians everywhere"
+    },
+    "songs": {
+      "title": "Songs",
+      "catchDownloads": "Offer songs you download",
+      "catchDownloadsHint": "While Songs is open, Yames watches your downloads folder and asks before opening anything. Your file is never moved, renamed or deleted.",
+      "folder": "Watch this folder",
+      "folderUnknown": "This computer has not told Yames where downloads go",
+      "chooseFolder": "Choose...",
+      "useDownloads": "Use downloads",
+      "turnedDown": "Songs you turned down",
+      "turnedDownHint": "{{n}} files Yames will not offer again",
+      "forgetTurnedDown": "Offer them again"
     }
   },
   "keybindings": {

@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} 小节",
       "remove": "从 Yames 移除",
       "due": "今天练",
-      "dueTitle": "你说过要回到这首"
+      "dueTitle": "你说过要回到这首",
+      "starter": "自带",
+      "starterTitle": "随 Yames 一起来的。想删就删。"
     },
     "review": {
       "title": "刚才那遍如何",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "刚刚出现在你的下载里",
+      "justArrivedSized": "刚刚出现在你的下载里 · {{size}}",
+      "more": "还有 {{n}} 个在等着",
+      "open": "打开它",
+      "opening": "正在打开...",
+      "notThisOne": "不是这个",
+      "failed": "Yames 打不开这个文件，也许它还在下载。"
+    },
+    "keepsCopy": "你带进来的每个文件，Yames 都会自己留一份，所以清理下载不会丢东西。",
+    "exportOriginal": "把文件存到别处",
+    "exporting": "正在保存...",
+    "exportDone": "已保存。",
+    "exportFailed": "Yames 无法把文件写到那里。",
+    "findTab": {
+      "what": "歌名和演唱者",
+      "link": "去找一份谱",
+      "note": "会用你自己的浏览器打开一次普通的网页搜索。Yames 不替你查任何东西。"
     }
   }
 }

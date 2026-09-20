@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} maten",
       "remove": "Uit Yames halen",
       "due": "Aan de beurt",
-      "dueTitle": "Je wilde hierop terugkomen"
+      "dueTitle": "Je wilde hierop terugkomen",
+      "starter": "Meegeleverd",
+      "starterTitle": "Kwam met Yames mee. Verwijder hem wanneer je wilt."
     },
     "review": {
       "title": "Hoe dat ging",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "staat net in je downloads",
+      "justArrivedSized": "staat net in je downloads · {{size}}",
+      "more": "nog {{n}} in de wacht",
+      "open": "Openen",
+      "opening": "Bezig met openen...",
+      "notThisOne": "Deze niet",
+      "failed": "Yames kon dat bestand niet openen. Misschien wordt het nog gedownload."
+    },
+    "keepsCopy": "Yames bewaart een eigen kopie van elk bestand dat je binnenhaalt, dus je downloads opruimen kost je niets.",
+    "exportOriginal": "Bestand ergens opslaan",
+    "exporting": "Bezig met opslaan...",
+    "exportDone": "Opgeslagen.",
+    "exportFailed": "Yames kon het bestand daar niet schrijven.",
+    "findTab": {
+      "what": "Nummer en artiest",
+      "link": "Zoek er een tab bij",
+      "note": "Opent je eigen browser met een gewone zoekopdracht. Yames zoekt niets voor je op."
     }
   }
 }

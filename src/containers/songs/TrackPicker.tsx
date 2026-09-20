@@ -12,6 +12,9 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { SongTrackChoice } from "../../songs/import";
+import { FindATab } from "./FindATab";
+// W19's own stylesheet: `songs-keeps-copy` is the one class from it used here.
+import "../../styles/songs-import.css";
 
 /** MIDI note to a note name, for the tuning line. Sharps, no octave games. */
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -89,6 +92,16 @@ export function TrackPicker({ title, fileName, tracks, onChoose, onCancel }: Tra
           ))}
         </ul>
         <footer className="songs-picker-foot">
+          {/* W19 — said at the moment of importing, which is the moment
+              somebody wonders whether they have to keep the file. They do
+              not: the bytes go into Yames's own store, and the library's
+              menu will give them back. */}
+          <p className="songs-keeps-copy">{t("songs.keepsCopy")}</p>
+          {/* W19 — the file turned out to be the wrong arrangement, or has
+              no guitar in it. The title is already known here, so this is
+              just the link: the player's own browser, an ordinary web
+              search, and no tab site named by Yames. */}
+          <FindATab query={title || fileName.replace(/\.[^.]+$/, "")} />
           <button type="button" className="songs-btn" onClick={onCancel}>
             {t("songs.picker.cancel")}
           </button>

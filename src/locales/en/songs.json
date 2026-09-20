@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} bars",
       "remove": "Remove from Yames",
       "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "dueTitle": "You asked to come back to this one",
+      "starter": "Included",
+      "starterTitle": "Came with Yames. Delete it whenever you like."
     },
     "review": {
       "title": "How that went",
@@ -211,6 +213,25 @@
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
       "portionTitle": "{{name}} — at {{percent}}%"
+    },
+    "offer": {
+      "justArrived": "just arrived in your downloads",
+      "justArrivedSized": "just arrived in your downloads · {{size}}",
+      "more": "{{n}} more waiting",
+      "open": "Open it",
+      "opening": "Opening...",
+      "notThisOne": "Not this one",
+      "failed": "Yames could not open that file. It may still be downloading."
+    },
+    "keepsCopy": "Yames keeps its own copy of every file you bring in, so clearing your downloads loses nothing.",
+    "exportOriginal": "Save the file somewhere",
+    "exporting": "Saving...",
+    "exportDone": "Saved.",
+    "exportFailed": "Yames could not write the file there.",
+    "findTab": {
+      "what": "Song and artist",
+      "link": "Find a tab for it",
+      "note": "Opens your own browser on an ordinary web search. Yames looks nothing up for you."
     }
   }
 }

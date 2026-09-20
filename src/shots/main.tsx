@@ -303,7 +303,11 @@ async function drive() {
    */
   if (shot!.songs) {
     const rows = ".preset-sidebar-item.song-item";
-    await until("the song library", () => document.querySelectorAll(rows).length > shot!.songs!.row);
+    // The starter shelf is seeded asynchronously on a fresh store, so this
+    // scene waits for all seven rather than for one — otherwise it could
+    // click a row while six more were still arriving under it.
+    const wanted = shot!.starterShelf ? 7 : shot!.songs.row + 1;
+    await until("the song library", () => document.querySelectorAll(rows).length >= wanted);
     (document.querySelectorAll(rows)[shot!.songs!.row] as HTMLElement).click();
     await until("the songs stage", () => !!document.querySelector(".songs-view"));
     await until("the drawn tab", () => !!document.querySelector(".songs-tab-host[data-ready]"));
@@ -505,6 +509,19 @@ async function drive() {
       input.dispatchEvent(new Event("change", { bubbles: true }));
       await until("the track picker", () => !!document.querySelector(".songs-picker"));
     }
+  }
+
+  /**
+   * A download, caught and offered (W19, `SONGS.md` S0.9).
+   *
+   * Nothing is pressed: the whole point of the feature is that it appears
+   * without being asked for. The wait is on the shipping banner, so a scene
+   * that photographed the screen before the event landed would fail here
+   * rather than quietly measure a strip that is not there.
+   */
+  if (shot!.downloadOffer) {
+    await until("the songs stage", () => !!document.querySelector(".songs-view"));
+    await until("the download offer", () => !!document.querySelector(".songs-offer"));
   }
 
   /**
