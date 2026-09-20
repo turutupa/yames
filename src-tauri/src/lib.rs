@@ -24,6 +24,8 @@ mod kit;
 mod midi;
 mod models;
 mod onset;
+/// The score a player is playing against, and — roadmap 2.4 — what came
+/// back from a pass at it. `pub` for the same reason the three below are.
 pub mod score;
 // `pitch` is `pub` for the same reason the three below are: the fixture
 // suite in `tests/pitch_fixtures.rs` and the `pitch-inspect` bin are
@@ -114,7 +116,8 @@ use commands::{
     list_scores, query_attempts, query_history, save_attempt, save_score,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
+    clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
+    open_url, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
     set_instrument,
@@ -702,6 +705,9 @@ pub fn run() {
             get_evaluation_state,
             notify_settings_change,
             close_open_segment,
+            // Roadmap 2.4 — the score the player is playing against.
+            load_score_schedule,
+            clear_score_schedule,
             get_session_report,
             get_final_session_report,
             clear_session,

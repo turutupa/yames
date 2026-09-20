@@ -1205,6 +1205,12 @@ pub async fn start_evaluation(
     let app_for_segment = app_handle.clone();
     let session_for_segment = session_acc.inner().clone();
     let mut ta = timing_analyzer.lock().unwrap();
+    // Roadmap 1.3 — the analyzer publishes the divisor it locks into
+    // the same tempo context the onset detector reads, so the
+    // refractory follows the player instead of the click. Without this
+    // handle a quarter click at 100 BPM swallows every played 16th
+    // before the analyzer ever sees one.
+    ta.set_tempo_context(tempo_ctx.inner().clone());
     ta.start(
         ta_profile,
         ta_instrument,
@@ -1265,6 +1271,10 @@ pub async fn start_evaluation(
                     inferred_divisor_confidence: segment_end.inferred_divisor_confidence,
                     // D4c — forward raw IC errors for post-hoc debugging.
                     interval_errors: segment_end.interval_errors.clone(),
+                    // D4c — and where each burst starts in them, without
+                    // which the errors above cannot reproduce the IC
+                    // score they sit beside.
+                    burst_start_indices: segment_end.burst_start_indices.clone(),
                 });
             }
         },
@@ -1624,6 +1634,43 @@ pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Resul
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
     ta.close_open_segment();
+    Ok(())
+}
+
+/// Roadmap 2.4 — tell the analyzer what the player is about to play.
+///
+/// From the next downbeat, matching runs against this score instead of
+/// against the grid the inference guessed: an expected note that does
+/// not arrive is a miss rather than a rest, and a note nobody asked for
+/// is an extra. The per-note verdicts come back on the existing
+/// `practice-segment-ended` event (`onsetResults` / `extraOnsets`) —
+/// there is deliberately no second channel for them, so the review
+/// never has to reconcile two sources for one pass.
+///
+/// Safe to call before or during a session. `schedule.onsets` must be
+/// sorted by `beat`; the importer that builds it
+/// (`src/songs/schedule.ts`) is where that is guaranteed.
+#[tauri::command]
+pub fn load_score_schedule(
+    schedule: crate::score::ScoreSchedule,
+    timing_analyzer: State<SharedTimingAnalyzer>,
+) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.load_score_schedule(schedule);
+    Ok(())
+}
+
+/// Roadmap 2.4 — back to free play. Whatever the current attempt had
+/// accumulated is dropped; the caller already has it from the last
+/// `practice-segment-ended`. Safe to call when nothing is loaded.
+#[tauri::command]
+pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.clear_score_schedule();
     Ok(())
 }
 

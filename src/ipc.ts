@@ -592,6 +592,63 @@ export async function closeOpenSegment(): Promise<void> {
   return invoke("close_open_segment");
 }
 
+/**
+ * Roadmap 2.4 — what the player is about to play.
+ *
+ * Until a schedule is loaded the analyzer matches against a grid it
+ * infers from the playing itself, so a note that never arrives is a
+ * rest: nothing knows a note was due. With one loaded, matching runs
+ * against the score — a missing note is a miss, a note nobody asked for
+ * is an extra, and each verdict comes back on the note's own id so the
+ * review can colour the tab from it.
+ *
+ * `beat` is quarter notes from the start of the played range. `soft`
+ * marks an attack that may be too quiet to detect (a hammer-on, a
+ * pull-off); absent, it costs nothing. `onsets` must be sorted by
+ * `beat` — `src/songs/schedule.ts` is where that is guaranteed.
+ */
+export type ExpectedOnset = {
+  id: number;
+  beat: number;
+  noteIds: number[];
+  soft: boolean;
+  accent: boolean;
+};
+
+export type ScoreSchedule = {
+  onsets: ExpectedOnset[];
+  lengthBeats: number;
+  loops: boolean;
+};
+
+/** What became of one expected onset. `pass` counts loops, from 0. */
+export type OnsetResult = {
+  id: number;
+  state: "hit" | "miss" | "softAbsent";
+  deviationMs: number | null;
+  pass: number;
+};
+
+/** A note the player made that the score did not ask for. */
+export type ExtraOnset = { beat: number; pass: number };
+
+/**
+ * Load a schedule. Takes effect from the next downbeat, so a count-in
+ * played before it belongs to nobody and is ignored rather than
+ * reported. Safe to call before or during a session.
+ *
+ * The results arrive on the existing `practice-segment-ended` event
+ * rather than a channel of their own — see `PracticeSegmentEndedPayload`.
+ */
+export async function loadScoreSchedule(schedule: ScoreSchedule): Promise<void> {
+  return invoke("load_score_schedule", { schedule });
+}
+
+/** Back to free play. Safe to call when nothing is loaded. */
+export async function clearScoreSchedule(): Promise<void> {
+  return invoke("clear_score_schedule");
+}
+
 export function onAudioSpectrum(callback: (spectrum: AudioSpectrum) => void) {
   return listen<AudioSpectrum>("audio-spectrum", (e) => callback(e.payload));
 }
@@ -644,6 +701,21 @@ export type PracticeSegmentEndedPayload = {
   inferredDivisor: number;
   inferredDivisorConfidence: number;
   playMode: "structured" | "noodling";
+  /**
+   * Roadmap 2.4 — one verdict per expected onset, present only when a
+   * `ScoreSchedule` was loaded. Absent in free play, where the fields
+   * are left off the wire entirely rather than sent empty. When these
+   * are present, `score` and `componentScores` were computed against
+   * the schedule rather than against the inferred grid.
+   */
+  onsetResults?: OnsetResult[];
+  extraOnsets?: ExtraOnset[];
+  /**
+   * How far the accents the score marked actually came out louder than
+   * their neighbours, 0–1, when there was enough signal to tell.
+   * Reported and not scored while LP C3 is open.
+   */
+  accentAgreement?: number;
 };
 
 export function onPracticeSegmentEnded(
