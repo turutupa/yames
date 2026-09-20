@@ -20,6 +20,11 @@ const LOCALES_DIR = path.resolve(process.cwd(), "src/locales");
 
 const NAMESPACES = [
   "coach",
+  // The coach's blocks (COACH_UX D3) get their own file rather than joining
+  // `coach`: the renderer is one component with one vocabulary, and a whole
+  // screen's strings arriving in the file the coach card already uses is how
+  // two people editing two features end up in one diff.
+  "coachBlocks",
   "common",
   "drill",
   "jam",
