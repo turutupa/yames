@@ -193,13 +193,13 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "回到六線譜",
+      "selectedBars": "已選第 {{bars}} 小節",
+      "wholeSong": "整首",
       "portionSays": "{{count}} 小節 · {{state}}",
       "portionSays_other": "{{count}} 小節 · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "循環中",
+      "once": "只彈一遍",
       "timeRound": {
         "one": "第 {{n}} 遍",
         "two": "第 {{n}} 遍",
@@ -208,10 +208,10 @@
       },
       "keepPortion": "儲存這一段",
       "keepPortionNote": "先在六線譜上選好小節，再給它取個名字",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "給這一段取個名字",
+      "renamePortion": "重新命名",
+      "deletePortion": "忘掉這一段",
+      "portionTitle": "{{name}} — {{percent}}%"
     },
     "offer": {
       "justArrived": "剛剛出現在你的下載裡",

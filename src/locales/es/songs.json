@@ -201,14 +201,14 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "Volver a la tablatura",
+      "selectedBars": "Compases {{bars}} elegidos",
+      "wholeSong": "Toda la canción",
       "portionSays": "{{count}} compás · {{state}}",
       "portionSays_many": "{{count}} compases · {{state}}",
       "portionSays_other": "{{count}} compases · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "en repetición",
+      "once": "una sola vez",
       "timeRound": {
         "one": "Vuelta {{n}}",
         "two": "Vuelta {{n}}",
@@ -217,10 +217,10 @@
       },
       "keepPortion": "Guardar esta parte",
       "keepPortionNote": "Elige compases en la tablatura y luego ponles nombre",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "Ponle nombre a esta parte",
+      "renamePortion": "Renombrar",
+      "deletePortion": "Olvidar esta",
+      "portionTitle": "{{name}} — al {{percent}}%"
     },
     "offer": {
       "justArrived": "acaba de llegar a tus descargas",

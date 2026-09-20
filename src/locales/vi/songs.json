@@ -193,13 +193,13 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "Quay lại tab",
+      "selectedBars": "Đã chọn ô nhịp {{bars}}",
+      "wholeSong": "Cả bài",
       "portionSays": "{{count}} ô nhịp · {{state}}",
       "portionSays_other": "{{count}} ô nhịp · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "đang lặp",
+      "once": "một lượt",
       "timeRound": {
         "one": "Lượt {{n}}",
         "two": "Lượt {{n}}",
@@ -208,10 +208,10 @@
       },
       "keepPortion": "Lưu đoạn này",
       "keepPortionNote": "Chọn ô nhịp trên tab trước, rồi đặt tên cho chúng",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "Đặt tên cho đoạn này",
+      "renamePortion": "Đổi tên",
+      "deletePortion": "Quên đoạn này",
+      "portionTitle": "{{name}} — ở {{percent}}%"
     },
     "offer": {
       "justArrived": "vừa về trong thư mục tải xuống của bạn",

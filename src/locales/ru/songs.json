@@ -209,15 +209,15 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "Назад к табулатуре",
+      "selectedBars": "Выбраны такты {{bars}}",
+      "wholeSong": "Вся песня",
       "portionSays": "{{count}} такт · {{state}}",
       "portionSays_few": "{{count}} такта · {{state}}",
       "portionSays_many": "{{count}} тактов · {{state}}",
       "portionSays_other": "{{count}} такта · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "на повторе",
+      "once": "один раз",
       "timeRound": {
         "one": "{{n}}-й раз",
         "two": "{{n}}-й раз",
@@ -226,10 +226,10 @@
       },
       "keepPortion": "Сохранить этот фрагмент",
       "keepPortionNote": "Сначала выберите такты в табулатуре, потом дайте им имя",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "Назовите этот фрагмент",
+      "renamePortion": "Переименовать",
+      "deletePortion": "Забыть этот",
+      "portionTitle": "{{name}} — на {{percent}}%"
     },
     "offer": {
       "justArrived": "только что появился в загрузках",

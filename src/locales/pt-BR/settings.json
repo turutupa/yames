@@ -184,7 +184,7 @@
         "view": "Visualização",
         "navigation": "Navegação",
         "jam": "Jam",
-        "songs": "Songs"
+        "songs": "Músicas"
       },
       "actions": {
         "play": "Tocar / Parar",
@@ -220,12 +220,12 @@
         "jam-loop-section": "Repetir esta seção",
         "jam-take": "Gravar a tomada",
         "tab-5": "Aba Músicas",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "A repetição começa aqui",
+        "songs-loop-end": "A repetição termina aqui",
+        "songs-loop": "Repetir a parte",
+        "songs-loop-clear": "A música inteira de novo",
+        "songs-loop-earlier": "A parte um compasso antes",
+        "songs-loop-later": "A parte um compasso depois"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -261,12 +261,12 @@
         "jam-loop-section": "Pôr em loop a seção em que você está, ou tirar",
         "jam-take": "Gravar na próxima vez que você tocar, ou parar de gravar",
         "tab-5": "Vai para a aba Músicas",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Começar a parte no compasso que você está tocando",
+        "songs-loop-end": "Terminar a parte no compasso que você está tocando",
+        "songs-loop": "Tocar os compassos escolhidos vez após vez, ou parar",
+        "songs-loop-clear": "Esquecer a parte e tocar a peça desde o começo",
+        "songs-loop-earlier": "Deslizar os compassos escolhidos um compasso rumo ao começo, mantendo o tamanho",
+        "songs-loop-later": "Deslizar os compassos escolhidos um compasso rumo ao fim, mantendo o tamanho"
       }
     },
     "inputTest": {

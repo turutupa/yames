@@ -220,12 +220,12 @@
         "jam-loop-section": "Diesen Teil loopen",
         "jam-take": "Take aufnehmen",
         "tab-5": "Songs-Tab",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "Wiederholung beginnt hier",
+        "songs-loop-end": "Wiederholung endet hier",
+        "songs-loop": "Teil wiederholen",
+        "songs-loop-clear": "Wieder der ganze Song",
+        "songs-loop-earlier": "Teil einen Takt früher",
+        "songs-loop-later": "Teil einen Takt später"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -261,12 +261,12 @@
         "jam-loop-section": "Den Teil, in dem du bist, in die Schleife nehmen oder wieder freigeben",
         "jam-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden",
         "tab-5": "Zum Songs-Tab wechseln",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Den Teil bei dem Takt beginnen lassen, den du gerade spielst",
+        "songs-loop-end": "Den Teil bei dem Takt enden lassen, den du gerade spielst",
+        "songs-loop": "Die gewählten Takte immer wieder spielen — oder aufhören",
+        "songs-loop-clear": "Den Teil vergessen und das Stück von vorn spielen",
+        "songs-loop-earlier": "Die gewählten Takte um einen Takt Richtung Anfang schieben, gleich lang",
+        "songs-loop-later": "Die gewählten Takte um einen Takt Richtung Ende schieben, gleich lang"
       }
     },
     "inputTest": {

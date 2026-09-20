@@ -209,15 +209,15 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "Wróć do tabulatury",
+      "selectedBars": "Wybrane takty {{bars}}",
+      "wholeSong": "Cały utwór",
       "portionSays": "{{count}} takt · {{state}}",
       "portionSays_few": "{{count}} takty · {{state}}",
       "portionSays_many": "{{count}} taktów · {{state}}",
       "portionSays_other": "{{count}} taktu · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "w powtórce",
+      "once": "tylko raz",
       "timeRound": {
         "one": "{{n}}. raz",
         "two": "{{n}}. raz",
@@ -226,10 +226,10 @@
       },
       "keepPortion": "Zapisz ten fragment",
       "keepPortionNote": "Najpierw wybierz takty w tabulaturze, potem nadaj im nazwę",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "Nazwij ten fragment",
+      "renamePortion": "Zmień nazwę",
+      "deletePortion": "Zapomnij ten",
+      "portionTitle": "{{name}} — przy {{percent}}%"
     },
     "offer": {
       "justArrived": "właśnie trafił do pobranych",
