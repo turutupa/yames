@@ -82,6 +82,20 @@ export interface Shot {
      */
     review?: "rushing" | "missed" | "clean";
     openMore?: boolean;
+    /**
+     * Press play and photograph the stage with the transport running.
+     *
+     * The state A13 is about: every control you might reach for mid-passage
+     * has to be on screen WHILE the band is playing, and a picture of a
+     * stopped stage cannot say whether it is. Pressed, not poked — the
+     * transport button, the way a person starts.
+     *
+     * Ignored when `review` is set: that recipe presses play itself, and
+     * what it photographs is the stop.
+     */
+    playing?: boolean;
+    /** Open the takes shelf — it is a popover now, not a section. */
+    takes?: boolean;
   };
   jam?: {
     row: number;
@@ -446,6 +460,32 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     // alphaTab lays the score out on this thread; give it room to finish.
+    settleMs: 900,
+  },
+  {
+    id: "songs-playing",
+    suffix: "songs-playing",
+    window: "main",
+    tab: "songs",
+    // The stage with the band playing: the bars, the sections, the speed, the
+    // repeat, recording and the faders all on screen at once, under a tab that
+    // has the cursor on it. The picture A13 is argued from, and the one the
+    // layout suite measures "can you reach it while playing" against.
+    songs: { row: 0, playing: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-takes",
+    suffix: "songs-takes",
+    window: "main",
+    tab: "songs",
+    // The shelf, open off its own switch. It is a popover now rather than a
+    // section under the stage, so this is the only way to photograph it.
+    songs: { row: 0, takes: true },
+    width: 1400,
+    height: 900,
     settleMs: 900,
   },
   {

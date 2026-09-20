@@ -11,14 +11,38 @@
  * main content, and everything else makes room for it.
  *
  * Play now means the song: the engine follows the score's own tempo map and
- * plays the file's other tracks through the band, so the band's faders, the
- * mutes and the count-in are on the stage beside the range (A13 again).
+ * plays the file's other tracks through the band, so the band's faders and the
+ * mutes are on the stage beside the range (A13 again).
  *
  * And stopping means the verdict. Nothing the coach has to say appears while
- * the transport runs (`COACH_UX.md` A3); the review comes up underneath the
- * stage when you stop, and goes away again when you start. The three hooks
- * that make that happen are `containers/songs/review/` and are mounted here
- * in four lines — the screen itself knows nothing about findings.
+ * the transport runs (`COACH_UX.md` A3); the review comes up when you stop and
+ * goes away again when you start. The three hooks that make that happen are
+ * `containers/songs/review/` and are mounted here in four lines — the screen
+ * itself knows nothing about findings.
+ *
+ * ## The stage is one screen (2026-09-20, W18)
+ *
+ * It was a column inside a scroller, and the column was longer than the
+ * window. Measured at 1400×900: the band's faders started at 928 px and the
+ * review at 1075 px, both under the fold — so the controls A13 puts on the
+ * stage could not be reached while playing, and a player who stopped saw
+ * nothing happen at all. A hundred and seven green layout tests missed it,
+ * because not one of them asked whether a thing was VISIBLE.
+ *
+ * So the shape is fixed now, and it is three parts that share the height:
+ *
+ * 1. **The head** — what the song IS. Read-only, so it never grows.
+ * 2. **The frame** — flexible, and the only thing that takes the slack. The
+ *    tab lives in it and scrolls inside it (the cursor walks down the page
+ *    anyway), and the verdict takes its place there when you stop.
+ * 3. **The strip** — one compact row of what you reach for with the guitar
+ *    on: the bars, the sections, the speed, the repeat, recording, the band.
+ *
+ * Nothing outside the frame scrolls. The three blocks that used to sit below
+ * the controls have gone somewhere they do not cost the stage its height: the
+ * takes shelf is a popover off its own switch, the verdict is in the frame,
+ * and the count-in is the transport's switch — one count-in, not two
+ * (`main-window/countIn.ts`).
  */
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,8 +62,8 @@ import { useSongActions } from "./review/useSongActions";
 import { useSongAttempt } from "./review/useSongAttempt";
 import { useSongProgress } from "./review/useSongProgress";
 import { useSongTakePitch } from "./review/useSongTakePitch";
-import { SongBand, SongCountIn } from "./SongBand";
-import { SongRecordControl, SongTakes } from "./SongTakes";
+import { SongBand } from "./SongBand";
+import { SongRecordControl } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
@@ -98,6 +122,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   const { t } = useTranslation();
   const { score, source, song, range, loop, tempoPercent, tempo } = session;
   const fileRef = useRef<HTMLInputElement>(null);
+  /** The stage itself, so the band can fold when this column gets narrow. */
+  const stageRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
   /**
@@ -211,6 +237,27 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    */
   const progressFor = useSongProgress(attempt.review);
 
+  /** Whether the verdict is the thing in the frame rather than the tab. */
+  const reviewShowing = attempt.review !== null;
+
+  /**
+   * Put the verdict away and give the caret back to Play.
+   *
+   * The review took focus when it opened, so something has to take it back or
+   * a keyboard player is left on a heading that no longer exists. Play is
+   * where they were before the pass and where they are going next, and the
+   * transport is shell furniture this screen does not own — hence the query
+   * rather than a ref threaded through four components for one line.
+   *
+   * Pressing play dismisses it too, and that path is `useSongAttempt`'s: it
+   * clears the review on the transport's rising edge, wherever the press came
+   * from — the button, the space bar or a footswitch.
+   */
+  const dismissReview = useCallback(() => {
+    attempt.dismiss();
+    document.querySelector<HTMLElement>(".transport-play")?.focus();
+  }, [attempt.dismiss]);
+
   const actions = useSongActions({
     scoreId: song?.id ?? null,
     setRange: session.setRange,
@@ -274,6 +321,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   return (
     <div
       className="songs-view"
+      ref={stageRef}
       data-dragging={dragging ? "" : undefined}
       onDragOver={(e) => {
         e.preventDefault();
@@ -404,23 +452,35 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             </ul>
           )}
 
-          <div className="songs-tab-frame">
-            <Suspense
-              fallback={
-                <div className="songs-tab-viewport">
-                  <p className="songs-tab-status">{t("songs.tab.drawing")}</p>
-                </div>
-              }
-            >
-              <TabStage
-                score={score}
-                source={source}
-                tick={tick}
-                themeId={themeId}
-                lights={lights}
-                schedule={schedule}
-              />
-            </Suspense>
+          {/* The frame: the tab, and the verdict in its place when you stop.
+              It is the one thing on this screen that flexes, and the one
+              thing that scrolls. */}
+          <div className="songs-stage-frame">
+            {/* The tab stays MOUNTED behind the verdict, hidden rather than
+                unmounted. alphaTab engraves a whole score to the width of this
+                box and throws the SVG away when the box changes — taking it
+                down at every stop would re-engrave the piece twice a minute.
+                `visibility` keeps the box and its width exactly as they were,
+                and takes the tab out of the reading order and the tab order
+                while the verdict is the thing being read. */}
+            <div className="songs-tab-pane" data-behind={reviewShowing ? "" : undefined}>
+              <Suspense
+                fallback={
+                  <div className="songs-tab-viewport">
+                    <p className="songs-tab-status">{t("songs.tab.drawing")}</p>
+                  </div>
+                }
+              >
+                <TabStage
+                  score={score}
+                  source={source}
+                  tick={tick}
+                  themeId={themeId}
+                  lights={lights}
+                  schedule={schedule}
+                />
+              </Suspense>
+            </div>
 
             {/* The count, over the page, while somebody counts you in. The
                 cursor is not drawn at all until the piece starts — see
@@ -431,56 +491,95 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 <span className="songs-countin-caption">{t("songs.countIn.counting")}</span>
               </div>
             )}
+
+            {/* A3: nothing here while the transport runs. The verdict appears
+                when you stop, in the frame the player was already looking at
+                (A4), and goes away again when you start. */}
+            {attempt.working && (
+              <p className="songs-review-working" role="status">
+                {t("songs.review.working")}
+              </p>
+            )}
+            {/* Not over the tab: a false start is worth a line, not the
+                screen. It sits along the bottom of the frame and goes on the
+                next press of play. */}
+            {attempt.tooShort && (
+              <p className="songs-stage-notice" role="status">
+                {t("songs.review.tooShort")}
+              </p>
+            )}
+            {attempt.review && (
+              // The same line the screen shows between the stop and the
+              // verdict, so a chunk that has not arrived yet looks like a coach
+              // still thinking rather than like a panel that failed to open.
+              <Suspense
+                fallback={
+                  <p className="songs-review-working" role="status">
+                    {t("songs.review.working")}
+                  </p>
+                }
+              >
+                <SongReview
+                  review={attempt.review}
+                  pitch={pitch}
+                  onAction={actions.run}
+                  onDismiss={dismissReview}
+                  progressFor={progressFor}
+                />
+              </Suspense>
+            )}
           </div>
 
-          {/* The stage controls: what you reach for with the guitar on. */}
-          <div className="songs-stage-controls">
-            <div className="songs-control songs-control-range">
-              <span className="songs-control-label">{t("songs.range")}</span>
-              <div className="songs-range-fields">
-                <label className="songs-range-field">
-                  <span>{t("songs.fromBar")}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={score.bars.length}
-                    value={range.startBar + 1}
-                    onChange={(e) =>
-                      session.setRange({ ...range, startBar: Number(e.target.value) - 1 })
-                    }
-                  />
-                </label>
-                <label className="songs-range-field">
-                  <span>{t("songs.toBar")}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={score.bars.length}
-                    value={range.endBar + 1}
-                    onChange={(e) =>
-                      session.setRange({ ...range, endBar: Number(e.target.value) - 1 })
-                    }
-                  />
-                </label>
-                <button
-                  type="button"
-                  className="songs-btn"
-                  onClick={() => session.setRange(wholeSong(score))}
-                >
-                  {t("songs.wholeSong")}
-                </button>
-              </div>
-              <p className="songs-control-note">{t("songs.barsCount", { count: barsInRange })}</p>
+          {/* The strip: what you reach for with the guitar on, one row of it,
+              all of it on screen while the transport runs (A13). */}
+          <div className="songs-strip">
+            <div className="songs-strip-group songs-strip-range">
+              <span className="songs-strip-label">{t("songs.range")}</span>
+              <label className="songs-range-field">
+                <span className="sr-only">{t("songs.fromBar")}</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={score.bars.length}
+                  aria-label={t("songs.fromBar")}
+                  value={range.startBar + 1}
+                  onChange={(e) =>
+                    session.setRange({ ...range, startBar: Number(e.target.value) - 1 })
+                  }
+                />
+              </label>
+              <span className="songs-range-dash" aria-hidden="true">
+                –
+              </span>
+              <label className="songs-range-field">
+                <span className="sr-only">{t("songs.toBar")}</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={score.bars.length}
+                  aria-label={t("songs.toBar")}
+                  value={range.endBar + 1}
+                  onChange={(e) =>
+                    session.setRange({ ...range, endBar: Number(e.target.value) - 1 })
+                  }
+                />
+              </label>
+              {/* The count that used to be a line under the fields. It is one
+                  number and it belongs beside them, not on a line of its own
+                  that costs the tab fourteen pixels. */}
+              <span className="songs-strip-note">{t("songs.barsCount", { count: barsInRange })}</span>
+              <button
+                type="button"
+                className="songs-chip"
+                onClick={() => session.setRange(wholeSong(score))}
+              >
+                {t("songs.wholeSong")}
+              </button>
             </div>
 
-            <SongCountIn
-              bars={session.mixSetting.countInBars}
-              onChange={session.setCountInBars}
-            />
-
             {score.sections.length > 0 && (
-              <div className="songs-control songs-control-sections">
-                <span className="songs-control-label">{t("songs.sections")}</span>
+              <div className="songs-strip-group songs-strip-sections">
+                <span className="songs-strip-label">{t("songs.sections")}</span>
                 <div className="songs-section-chips">
                   {score.sections.map((section, i) => {
                     const chosen =
@@ -502,8 +601,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               </div>
             )}
 
-            <div className="songs-control songs-control-tempo">
-              <span className="songs-control-label">{t("songs.speed")}</span>
+            <div className="songs-strip-group songs-strip-tempo">
+              <span className="songs-strip-label">{t("songs.speed")}</span>
               <div className="songs-tempo-chips">
                 {TEMPO_STEPS.map((percent) => (
                   <button
@@ -512,34 +611,43 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                     className="songs-chip"
                     data-active={tempoPercent === percent ? "" : undefined}
                     aria-pressed={tempoPercent === percent}
+                    /* The tempo the click will actually run at, which used to
+                       be a sentence under the chips. A number nobody has to
+                       read to use the control belongs in the tooltip. */
+                    title={t("songs.speedNote", { bpm: Math.round((tempo * percent) / tempoPercent) })}
                     onClick={() => session.setTempoPercent(percent)}
                   >
                     {t("songs.percent", { percent })}
                   </button>
                 ))}
               </div>
-              <p className="songs-control-note">{t("songs.speedNote", { bpm: tempo })}</p>
             </div>
 
-            <div className="songs-control songs-control-loop">
-              <span className="songs-control-label">{t("songs.loop")}</span>
+            <div className="songs-strip-group songs-strip-loop">
+              <span className="songs-strip-label">{t("songs.loop")}</span>
               <button
                 type="button"
                 className="songs-chip songs-chip-wide"
                 data-active={loop ? "" : undefined}
                 aria-pressed={loop}
+                title={t("songs.loopNote")}
                 onClick={() => session.setLoop(!loop)}
               >
                 {loop ? t("songs.loopOn") : t("songs.loopOff")}
               </button>
-              <p className="songs-control-note">{t("songs.loopNote")}</p>
             </div>
 
             <SongRecordControl
               available={takes.available}
-              enabled={session.mixSetting.takes}
+              takes={takes.takes}
               recording={takes.recording}
+              dirBytes={takes.dirBytes}
+              playingId={takes.playingId}
+              enabled={session.mixSetting.takes}
               onRequestTakes={takes.requestTakes}
+              onPlay={takes.play}
+              onStop={takes.stopPlayback}
+              onDelete={takes.remove}
             />
 
             <SongBand
@@ -547,44 +655,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               lanes={session.lanes}
               onGain={session.setGain}
               onMute={session.setMute}
+              stageRef={stageRef}
             />
           </div>
-
-          {/* The shelf, under the song it belongs to. Drawn even when empty:
-              a feature that appears only once you have used it is a feature
-              nobody finds, and what it says when empty is what recording is
-              FOR. */}
-          <SongTakes
-            available={takes.available}
-            takes={takes.takes}
-            recording={takes.recording}
-            dirBytes={takes.dirBytes}
-            playingId={takes.playingId}
-            enabled={session.mixSetting.takes}
-            onRequestTakes={takes.requestTakes}
-            onPlay={takes.play}
-            onStop={takes.stopPlayback}
-            onDelete={takes.remove}
-          />
-
-          {/* A3: nothing here while the transport runs. The verdict appears
-              when you stop, and goes away again when you start. */}
-          {attempt.working && <p className="songs-review-working">{t("songs.review.working")}</p>}
-          {attempt.tooShort && <p className="songs-review-working">{t("songs.review.tooShort")}</p>}
-          {attempt.review && (
-            // The same line the screen shows between the stop and the
-            // verdict, so a chunk that has not arrived yet looks like a coach
-            // still thinking rather than like a panel that failed to open.
-            <Suspense fallback={<p className="songs-review-working">{t("songs.review.working")}</p>}>
-              <SongReview
-                review={attempt.review}
-                pitch={pitch}
-                onAction={actions.run}
-                onDismiss={attempt.dismiss}
-                progressFor={progressFor}
-              />
-            </Suspense>
-          )}
         </>
       )}
 

@@ -196,6 +196,9 @@
           "3": "You played {{bars}} right every time. Leave it and come back to it."
         }
       }
+    },
+    "stage": {
+      "backToTab": "Back to the tab"
     }
   }
 }

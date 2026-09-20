@@ -5,8 +5,18 @@
  * where you can reach it with a guitar on. Turning the drums down because the
  * file's kit is loud, or muting the bass to hear your own line under it, is
  * exactly that — so these are here beside the bar range and not behind a
- * sheet. The count-in sits with them because it is the other thing you set in
- * the same breath ("give me a bar, then bars 17 to 24, slowly").
+ * sheet.
+ *
+ * ## A row, not a column (2026-09-20, W18)
+ *
+ * It was four stacked mixer rows, and stacked is what put it 28 px below the
+ * bottom of a 900 px window — a control A13 says lives on the stage that you
+ * could not reach while playing without scrolling. So each player is one short
+ * row now, and the players sit side by side: an icon, a fader, a mute. The
+ * name goes when the stage is too narrow to keep it (a container query, so it
+ * is the STAGE's width that decides, not the window's — the rail and the coach
+ * dock both take from it), and the icon and the fader's own `aria-label` carry
+ * the name for anyone who cannot see the picture.
  *
  * Shaped after Jam's `BandLanes`, deliberately: it is the same gesture on the
  * same kind of row, and a musician who has learned one should not have to
@@ -21,8 +31,12 @@
  *   balance against the band rather than the thing the band plays to, and it
  *   arrives at 0.45 for that reason (`song.rs`).
  */
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { MAX_COUNT_IN_BARS, SONG_MIX_MAX } from "../../songs/types";
+import { useMenuPlacement } from "../jam/useMenuPlacement";
+import { useStageIsNarrow } from "./useStageIsNarrow";
+import { SONG_MIX_MAX } from "../../songs/types";
 import type { SongLane, SongMixSetting } from "../../songs/songEngine";
 import type { SongRole } from "../../songs/types";
 
@@ -122,45 +136,95 @@ export interface SongBandProps {
   lanes: SongRole[];
   onGain: (lane: SongLane, value: number) => void;
   onMute: (lane: SongLane, muted: boolean) => void;
+  /**
+   * The stage the faders have to fit on, so the band knows when to fold.
+   *
+   * The element and not a width: `useStageIsNarrow` measures it and keeps
+   * measuring it, because the coach dock can narrow this column without the
+   * window changing at all.
+   */
+  stageRef: { current: HTMLElement | null };
 }
 
-export function SongBand({ setting, lanes, onGain, onMute }: SongBandProps) {
+/**
+ * Below this, one short row per player no longer fits beside anything else.
+ *
+ * Three lanes at their 104px floor is 320px of stage, which is all of it at
+ * the smallest window the app opens — so the band would take a row of its own
+ * and a caption above it, and the tab would be down to nothing. The same
+ * number `songs.css` folds the head at, because it is the same question.
+ */
+const FOLD_AT = 620;
+
+export function SongBand({ setting, lanes, onGain, onMute, stageRef }: SongBandProps) {
   const { t } = useTranslation();
+  const folded = useStageIsNarrow(stageRef, FOLD_AT);
+  const [open, setOpen] = useState(false);
+  // Upwards, like the takes shelf beside it and for the same reason: the
+  // strip is the last row above the transport.
+  const { wrapRef, menuRef, style } = useMenuPlacement(open && folded, { prefer: "above" });
+
   const muted = new Set(setting.muted);
   // The click is always there: a song with no band at all still has one
   // fader, and it is the one that decides whether you are playing to a
   // metronome or to nothing.
   const rows: SongLane[] = ["click", ...lanes];
+  /** How many players are turned down to nothing, for the folded chip. */
+  const off = rows.filter((lane) => muted.has(lane)).length;
 
-  return (
-    <div className="songs-control songs-control-band">
-      <span className="songs-control-label">{t("songs.band.label")}</span>
-      <div className="songs-band">
-        {rows.map((lane) => {
+  // A stage that gets wider again must not leave a popover hanging over it.
+  useEffect(() => {
+    if (!folded) setOpen(false);
+  }, [folded]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [open, wrapRef, menuRef]);
+
+  const band = (
+    <div className="songs-band" role="group" aria-label={t("songs.band.label")}>
+      {rows.map((lane) => {
           const off = muted.has(lane);
+          const name = t(`songs.band.${lane}`);
           return (
             <div className="songs-band-lane" key={lane} data-off={off ? "" : undefined}>
-              <span className="songs-band-name">
+              {/* `title` rather than a tooltip component: below the width the
+                  name is dropped at, this is the only thing that can still be
+                  asked "which one is this?" with a mouse. */}
+              <span className="songs-band-name" title={name}>
                 {laneIcon(lane)}
-                {t(`songs.band.${lane}`)}
+                <span className="songs-band-name-text">{name}</span>
               </span>
-              {/* A div and not a label: the input carries its own
-                  `aria-label`, and a label around it would say the lane
-                  twice to a screen reader. */}
-              <div className="songs-band-volume">
-                <input
-                  type="range"
-                  min={0}
-                  max={SONG_MIX_MAX}
-                  step={0.05}
-                  value={setting.mix[lane]}
-                  aria-label={t("songs.band.levelFor", { lane: t(`songs.band.${lane}`) })}
-                  onChange={(e) => onGain(lane, Number(e.target.value))}
-                />
-                <span className="songs-band-volume-value">
-                  {Math.round(setting.mix[lane] * 100)}
-                </span>
-              </div>
+              <input
+                type="range"
+                className="songs-band-fader"
+                min={0}
+                max={SONG_MIX_MAX}
+                step={0.05}
+                value={setting.mix[lane]}
+                aria-label={t("songs.band.levelFor", { lane: name })}
+                onChange={(e) => onGain(lane, Number(e.target.value))}
+              />
+              {/* The number stays, narrow as the row is: Jam's lanes show it
+                  and a musician who learned that row should not find this one
+                  answering a different question. */}
+              <span className="songs-band-volume-value">
+                {Math.round(setting.mix[lane] * 100)}
+              </span>
               <button
                 type="button"
                 role="switch"
@@ -172,57 +236,62 @@ export function SongBand({ setting, lanes, onGain, onMute }: SongBandProps) {
                 onClick={() => onMute(lane, !off)}
               >
                 <span className="transport-switch-track" aria-hidden="true" />
-                <span className="sr-only">
-                  {t("songs.band.muteFor", { lane: t(`songs.band.${lane}`) })}
-                </span>
+                <span className="sr-only">{t("songs.band.muteFor", { lane: name })}</span>
               </button>
             </div>
           );
         })}
-      </div>
-      <p className="songs-control-note">{t("songs.band.note")}</p>
     </div>
   );
-}
 
-/**
- * Bars of counting before the first time through.
- *
- * Beside the bar range rather than with the band, because it is about when
- * the piece starts rather than about how loud anybody is — and because "a bar
- * in, then bars 17 to 24" is one sentence a person says to themselves.
- *
- * It is spent on the first pass only, however many times round the loop goes:
- * a count before every repetition would be four bars of waiting in every
- * thirty seconds of practice.
- */
-export function SongCountIn({
-  bars,
-  onChange,
-}: {
-  bars: number;
-  onChange: (bars: number) => void;
-}) {
-  const { t } = useTranslation();
-  const choices = Array.from({ length: MAX_COUNT_IN_BARS + 1 }, (_, i) => i);
-  return (
-    <div className="songs-control songs-control-countin">
-      <span className="songs-control-label">{t("songs.countIn.label")}</span>
-      <div className="songs-countin-chips">
-        {choices.map((choice) => (
-          <button
-            key={choice}
-            type="button"
-            className="songs-chip"
-            data-active={bars === choice ? "" : undefined}
-            aria-pressed={bars === choice}
-            onClick={() => onChange(choice)}
-          >
-            {choice === 0 ? t("songs.countIn.none") : t("songs.countIn.bars", { count: choice })}
-          </button>
-        ))}
+  if (!folded) {
+    return (
+      <div className="songs-strip-group songs-strip-band">
+        <span className="songs-strip-label">{t("songs.band.label")}</span>
+        {band}
       </div>
-      <p className="songs-control-note">{t("songs.countIn.note")}</p>
+    );
+  }
+
+  /*
+   * Folded: one chip, and the faders in a popover off it.
+   *
+   * Portalled rather than drawn under the chip, because the strip is the last
+   * row above the transport and a panel that grows downwards opens straight
+   * off the bottom of the window. The chip carries the state worth knowing
+   * without opening it — how many players are muted — so a player who turned
+   * the drums off does not have to open the shelf to be reminded.
+   */
+  return (
+    <div className="songs-strip-group songs-strip-band" ref={wrapRef}>
+      <span className="songs-strip-label">{t("songs.band.label")}</span>
+      <button
+        type="button"
+        className="songs-chip songs-band-opener"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={() => setOpen((was) => !was)}
+      >
+        {rows.map((lane) => (
+          <span className="songs-band-opener-icon" key={lane} data-off={muted.has(lane) ? "" : undefined}>
+            {laneIcon(lane)}
+          </span>
+        ))}
+        {off > 0 && <span className="songs-band-opener-off">{off}</span>}
+      </button>
+      {open &&
+        createPortal(
+          <div
+            className="songs-band-pop"
+            role="dialog"
+            aria-label={t("songs.band.label")}
+            ref={menuRef}
+            style={style}
+          >
+            {band}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

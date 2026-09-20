@@ -552,9 +552,10 @@ export function MainWindow() {
       view,
       jam: jamSession.jam ?? null,
       setlist: setlistSession.setlist ?? null,
+      song: { bars: songsSession.mixSetting.countInBars },
       state,
     }),
-    [view, jamSession.jam, setlistSession.setlist, state],
+    [view, jamSession.jam, setlistSession.setlist, songsSession.mixSetting.countInBars, state],
   );
 
   const countInOn = countInIsOn(countInSubject);
@@ -570,8 +571,15 @@ export function MainWindow() {
       if (setlist) setlistSession.setSetlist(setSetlistCountIn(setlist, beats));
       return;
     }
+    // Songs counts in bars, and the number is this song's own — the click's
+    // warm-up beats are cleared by `load_song`, so writing them here is the
+    // switch that did nothing that W18 was sent to fix.
+    if (store === "songs") {
+      songsSession.setCountInBars(beats);
+      return;
+    }
     void reconfigureRamp({ warmupBeats: beats });
-  }, [countInSubject, setlistSession.setlist]);
+  }, [countInSubject, setlistSession.setlist, songsSession.setCountInBars]);
 
   /**
    * Play, on the metronome.

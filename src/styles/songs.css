@@ -18,6 +18,13 @@
   --stage-band: 1176px;
 }
 
+/* The stage does not scroll (W18).
+ *
+ * It used to: `overflow-y: auto` here, a column inside it longer than the
+ * window, and so the band's faders at 928px in a 900px window and the verdict
+ * at 1075px. Everything that made the column long has moved, so the wrapper
+ * clips instead — a scrollbar here is now a bug, and `tests/layout/songs.spec`
+ * fails if one appears. */
 .main-content[data-view="songs"] > .view-transition-wrapper {
   align-self: flex-start;
   align-items: flex-start;
@@ -27,8 +34,8 @@
   padding-left: 48px;
   padding-right: 48px;
   justify-content: flex-start;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* The stage asks about its own width, not the window's: the rail and the
@@ -39,9 +46,14 @@
   container-name: stage;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   width: 100%;
   min-width: 0;
+  /* It takes the room the wrapper has and no more. The frame inside it is the
+     only child that grows, so the head and the strip keep their own heights
+     and the tab gets whatever is left. */
+  height: 100%;
+  min-height: 0;
   position: relative;
 }
 
@@ -254,29 +266,49 @@
   color: var(--text-tertiary);
 }
 
-/* ── The tab ──────────────────────────────────────────────────────────── */
+/* ── The frame: the tab, and the verdict in its place ─────────────────── */
 
-/* The frame exists only so the count-in can be drawn OVER the page. It takes
-   the sizing the viewport used to have, because it is now the flex child of
-   the stage, and passes the room straight through. */
-.songs-tab-frame {
+/* The one part of the stage that flexes, and the one part that scrolls.
+   Everything drawn in it — the tab, the count, the verdict — fills it. */
+.songs-stage-frame {
   position: relative;
   display: flex;
   flex: 1 1 auto;
+  /* Without this a flex child refuses to shrink below its content, which is
+     how a "one screen" layout quietly becomes a scroller again. */
   min-height: 0;
   width: 100%;
   min-width: 0;
 }
 
+/* The tab's half of the frame. It keeps its box while the verdict is up —
+   `visibility`, not `display` — because alphaTab engraves the score to this
+   box's width and throws the drawing away when the width changes. */
+.songs-tab-pane {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.songs-tab-pane[data-behind] {
+  visibility: hidden;
+}
+
 /* The score is the main content and is never hidden behind a toggle. It gets
    the room left over, with a floor so it does not collapse to nothing on a
-   short window, and it scrolls on its own so the controls under it stay put
-   while the cursor walks down the page. */
+   short window, and it scrolls on its own so the strip under it stays put
+   while the cursor walks down the page.
+ *
+ * `max-height` is gone with the outer scroller: the frame's own height is the
+ * cap now, and a 58vh cap inside a box that is already the leftover room is a
+ * second opinion that can only disagree. */
 .songs-tab-viewport {
   position: relative;
   flex: 1 1 auto;
-  min-height: 220px;
-  max-height: 58vh;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -366,56 +398,61 @@
   color: var(--text-secondary);
 }
 
-/* ── The stage controls: what you reach for with the guitar on ────────── */
+/* ── The strip: what you reach for with the guitar on ─────────────────── */
 
-.songs-stage-controls {
+/* One row, wrapping onto as few rows as the width allows, and never scrolling.
+   It takes its own height out of the stage and the frame above it takes the
+   rest — so whatever is in here is on screen while the transport runs, which
+   is the whole of A13 in one rule.
+ *
+ * Each group is `label · controls` on one line. The labelled COLUMNS it
+ * replaced put a 10px caption and an 11px footnote above and below every
+ * control: five of those is 140 px of the window spent on captions, and it is
+ * the tab that paid for them. */
+.songs-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 28px;
+  align-items: center;
+  gap: 10px 22px;
   width: 100%;
   min-width: 0;
-  padding-bottom: 8px;
+  flex: 0 0 auto;
+  padding-bottom: 4px;
 }
 
-.songs-control {
+.songs-strip-group {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   min-width: 0;
 }
 
-.songs-control-label {
+.songs-strip-label {
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-faint);
+  white-space: nowrap;
 }
 
-.songs-control-note {
-  margin: 0;
+/* A number that belongs to the control beside it — "8 bars" next to the two
+   fields that say which eight. */
+.songs-strip-note {
   font-size: 11px;
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
-}
-
-.songs-range-fields {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 8px;
+  white-space: nowrap;
 }
 
 .songs-range-field {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 11px;
-  color: var(--text-tertiary);
+  align-items: center;
 }
 
 .songs-range-field input {
-  width: 76px;
-  padding: 7px 8px;
+  width: 58px;
+  padding: 5px 7px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-raised);
@@ -425,47 +462,70 @@
   font-variant-numeric: tabular-nums;
 }
 
+.songs-range-dash {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
 .songs-section-chips,
-.songs-tempo-chips,
-.songs-countin-chips {
+.songs-tempo-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
-}
-
-/* ── The band the file came with ──────────────────────────────────────── */
-
-/* One row per player, stacked, so the column reads down like a mixer. The
-   whole block is one stage control and wraps with the others. */
-/* Four rows of name, fader and switch need more room than a chip row, and
-   will take a column of their own when the stage is wide enough. */
-.songs-control-band {
-  flex: 1 1 280px;
-  max-width: 380px;
-}
-
-.songs-band {
-  display: flex;
-  flex-direction: column;
   gap: 4px;
   min-width: 0;
 }
 
+/* The strip's chips are smaller than the page's: six speed chips, two
+   sections and a repeat in one row is what buys the tab its height back. */
+.songs-strip .songs-chip {
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.songs-strip .songs-chip-wide {
+  min-width: 92px;
+}
+
+/* ── The band the file came with ──────────────────────────────────────── */
+
+/* One short row per player, side by side. It was a stacked mixer column, and
+   stacked is what put it under the fold.
+ *
+ * `flex: 1 1 …` on the group rather than a fixed width: the band is the part
+ * of the strip that can usefully take the slack on a wide stage, and the part
+ * that has to be allowed to wrap onto its own row on a narrow one. */
+.songs-strip-band {
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.songs-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .songs-band-switch {
-  margin-left: auto;
   flex: 0 0 auto;
 }
 
 .songs-band-lane {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   min-width: 0;
+  /* A floor, not a width: the fader has to stay a fader (the layout suite
+     asks for more than 40px of it) and the lane may take more if there is
+     more to take. */
+  flex: 1 1 128px;
+  max-width: 220px;
 }
 
 /* A lane that is off is still legible — it is a state, not a disabled
-   control, and the fader under it still sets the level it comes back at. */
+   control, and the fader beside it still sets the level it comes back at. */
 .songs-band-lane[data-off] .songs-band-name,
 .songs-band-lane[data-off] .songs-band-volume-value {
   color: var(--text-faint);
@@ -474,11 +534,10 @@
 .songs-band-name {
   display: flex;
   align-items: center;
-  gap: 6px;
-  /* Wide enough for the longest of the four names in the languages that
-     have them, so the faders line up in a column rather than stepping. */
-  flex: 0 0 82px;
+  gap: 5px;
+  flex: 0 0 auto;
   min-width: 0;
+  max-width: 76px;
   font-size: 12px;
   color: var(--text-secondary);
   overflow: hidden;
@@ -486,35 +545,236 @@
   white-space: nowrap;
 }
 
-.songs-band-volume {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1 1 88px;
+.songs-band-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.songs-band-volume input[type="range"] {
-  flex: 1 1 60px;
-  min-width: 0;
+.songs-band-fader {
+  flex: 1 1 56px;
+  min-width: 44px;
   accent-color: var(--accent);
 }
 
 .songs-band-volume-value {
   flex: 0 0 auto;
-  min-width: 28px;
+  min-width: 24px;
   text-align: right;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
 }
 
-/* ── Recording the pass, and the shelf under the song ─────────────────── */
+/* ── The band, folded ─────────────────────────────────────────────────── */
+
+/* On a stage too narrow for a row of faders, the band is one chip: the
+   players' own icons, dimmed for anyone turned off, and a count if any are.
+   The faders themselves are in a popover off it (`SongBand.tsx`). */
+.songs-band-opener {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.songs-band-opener-icon {
+  display: inline-flex;
+  color: var(--text-secondary);
+}
+
+.songs-band-opener-icon[data-off] {
+  color: var(--text-faint);
+}
+
+.songs-band-opener-off {
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-band-pop {
+  position: fixed;
+  z-index: 70;
+  width: min(300px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+/* Stacked in the popover: there is a column's worth of room in there and no
+   reason to squeeze three faders across it. */
+.songs-band-pop .songs-band {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.songs-band-pop .songs-band-lane {
+  flex: 0 0 auto;
+  max-width: none;
+}
+
+.songs-band-pop .songs-band-name {
+  flex: 0 0 74px;
+  max-width: none;
+}
+
+.songs-band-pop .songs-band-name-text {
+  display: inline;
+}
+
+/* ── The verdict, in the tab's place ──────────────────────────────────── */
+
+/* It fills the frame the player was already looking at (COACH_UX A4). Opaque,
+   because the tab is still laid out underneath it — hidden, but there.
+ *
+ * `songs-review.css` styles everything INSIDE it and ships with the review’s
+ * own lazy chunk — so it is parsed AFTER this file and would win a tie. These
+ * rules are scoped to the stage to settle that: they are facts about WHERE the
+ * panel sits on this screen rather than about how it is drawn, and they have to
+ * hold whether or not that chunk has arrived yet. */
+.songs-view .songs-review {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: auto;
+  background: var(--bg-card);
+  animation: songs-review-in 140ms ease-out;
+}
+
+/* The head is pinned and the body scrolls under it, so the sentence and the
+   button are on screen at every window height rather than at 900 only. */
+.songs-view .songs-review > .songs-review-head {
+  flex: 0 0 auto;
+}
+
+.songs-view .songs-review-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.songs-review-back {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* The heading takes the caret when the verdict arrives, so that a screen
+   reader is told what appeared — and it is given no ring for it, because
+   nobody asked for focus by pressing a key. A player who DOES arrive here on
+   the keyboard still gets one. */
+.songs-review-title:focus {
+  outline: none;
+}
+
+.songs-review-title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@keyframes songs-review-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* A verdict that slides in is a verdict that moves under the eye of somebody
+   who asked for nothing to move. It still arrives; it just arrives. */
+@media (prefers-reduced-motion: reduce) {
+  .songs-view .songs-review {
+    animation: none;
+  }
+}
+
+/* Between the stop and the verdict. Over the frame rather than under the
+   stage, because that is where the player is looking. */
+.songs-view .songs-review-working {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* A pass too short to judge is news about the pass, not a replacement for the
+   page: a line along the bottom of the frame, and the tab still readable. */
+
+.songs-stage-notice {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ── Recording the pass, and the shelf behind its own switch ──────────── */
 
 /* The same surface Jam's takes have, in this mode's class names, because
    songs.css does not reach into jam.css (see the header) and a stylesheet a
    mode does not load is a mode whose controls draw unstyled. The behaviour
    and every sentence are Jam's — `SongTakes.tsx` says why. */
+
+/* The shelf, portalled to the body and placed by Jam's `useMenuPlacement`:
+   `position: fixed` because the numbers it is given are window coordinates,
+   which is what stops a list opening off the bottom of a strip that sits one
+   row above the transport. */
+.songs-takes-pop {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* 320 and not a pixel more: `useMenuPlacement` caps the width it POSITIONS
+     against at 320, so a panel wider than that is slid to an edge the hook
+     thinks it is inside and hangs 40px off the right of a 480px window. */
+  width: min(320px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+/* How many there are, on the button that opens them — the one thing about the
+   shelf worth knowing without opening it. */
+.songs-takes-count {
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
 
 .songs-record-dot {
   width: 8px;
@@ -847,22 +1107,44 @@
 
 /* Asked of the STAGE, not the window: the coach dock and the rail both take
    width, so a 1500px window can leave this column at 700px. */
+/* The band loses the names before it loses the faders.
+ *
+ * A lane is an icon, a fader, a number and a mute. At this width three of them
+ * side by side can keep everything but the word, and the word is the part the
+ * icon already says — so it goes and the row survives. The name is still on
+ * the lane's `title` and in every control's `aria-label`, so nothing is lost
+ * to a mouse or to a screen reader.
+ *
+ * Asked of the STAGE and not the window, because the rail and the coach dock
+ * both take width: a 1500px window can leave this column at 700px. */
+@container stage (max-width: 860px) {
+  .songs-band-name-text {
+    display: none;
+  }
+
+  .songs-band-lane {
+    flex: 1 1 104px;
+  }
+}
+
 @container stage (max-width: 620px) {
   .songs-head {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .songs-stage-controls {
-    gap: 14px 18px;
+  /* `flex: 1 1 240px` is a WIDTH while the head is a row, and 240 pixels of
+     empty height the moment the rule above turns it into a column — which is
+     what it had been doing: a fifty-pixel title in a two-hundred-and-forty
+     pixel box, on exactly the windows with the least room to spare. Invisible
+     until the stage stopped scrolling; it was simply pushing everything down
+     a page nobody could see the bottom of. */
+  .songs-head-titles {
+    flex: 0 0 auto;
   }
 
-  .songs-control {
-    flex: 1 1 100%;
-  }
-
-  .songs-tab-viewport {
-    max-height: 46vh;
+  .songs-strip {
+    gap: 8px 14px;
   }
 }
 

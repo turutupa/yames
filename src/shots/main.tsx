@@ -328,6 +328,35 @@ async function drive() {
       }
     }
 
+    /**
+     * The band playing, and nothing stopped.
+     *
+     * Pressed rather than poked, like the review above, and left running: the
+     * whole question this scene answers is whether what A13 puts on the stage
+     * is on SCREEN with the transport going, and a stage photographed at rest
+     * cannot answer it.
+     */
+    if (shot!.songs.playing && !shot!.songs.review) {
+      await until("the transport", () => !!document.querySelector(".transport-play"));
+      (document.querySelector(".transport-play") as HTMLButtonElement).click();
+      // Long enough for the schedule to be pushed and the count to be over,
+      // so the cursor is on the page rather than a number over it.
+      await until(
+        "the transport running",
+        () => !!document.querySelector(".transport-play.playing"),
+      );
+      await new Promise((r) => setTimeout(r, 400));
+    }
+
+    /** The takes shelf, opened from its own switch — it is a popover now. */
+    if (shot!.songs.takes) {
+      await pressUntil(
+        "the takes shelf",
+        () => document.querySelector<HTMLElement>(".songs-takes-opener")?.click(),
+        () => !!document.querySelector(".songs-takes-pop"),
+      );
+    }
+
     if (shot!.songs.picker) {
       // The track picker, reached the only way a person reaches it — by
       // bringing a file in. The input is the view's own.
