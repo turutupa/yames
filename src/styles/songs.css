@@ -145,10 +145,40 @@
 /* `--accent-subtle` is a translucent tint of the accent over the page, so the
    ink on it is the accent itself — `--accent-text` is for a SOLID accent
    button and would be near-invisible here. `themes.test.ts` checks the
-   accent-on-subtle contrast for exactly this pairing. */
+   accent-on-subtle contrast for exactly this pairing.
+ *
+ * ## And a mark, because a tint is not enough (2026-09-20)
+ *
+ * In Ivory the chosen chip and the one beside it were hard to tell apart: the
+ * ground is beige, the accent is a dark olive, and a ten-per-cent wash of one
+ * over the other is a shade nobody should have to look twice at. Under a
+ * capture of the whole strip, which chip was pressed was a guess.
+ *
+ * So the pressed state says it twice: the tint, and a solid bar along the
+ * foot of the chip. The bar is a SHAPE — it survives a low-contrast theme, a
+ * screenshot, a colour-blind reader and a phone held in the sun, none of
+ * which a hue does on its own.
+ *
+ * Drawn as an inset shadow rather than a border or an underline on purpose.
+ * It costs the chip no width and no height, so pressing one does not nudge
+ * the controls along the row — which is the complaint this stage already has
+ * a layout test watching for. A bolder label would have been the other
+ * obvious cue and it is exactly the one that cannot be used here: bold text
+ * is wider text, and wider is the row moving under the hand that pressed it.
+ *
+ * Songs' chips are their own; Jam's are `.jam-chip` with an `.active` class
+ * in `jam.css` and nothing here reaches them. */
 .songs-chip[data-active] {
   background: var(--accent-subtle);
   border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 -3px 0 0 var(--accent);
+}
+
+/* The bar belongs to the chip, not to the press: a chip being held down or
+   hovered is still the chip that is chosen. */
+.songs-chip[data-active]:hover {
+  background: var(--accent-subtle-hover);
   color: var(--accent);
 }
 

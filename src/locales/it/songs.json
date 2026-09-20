@@ -39,12 +39,6 @@
       "droppedNotes_other": "{{count}} note di questo file sono per strumenti che la band non ha."
     },
     "countIn": {
-      "label": "Conteggio iniziale",
-      "none": "Si parte subito",
-      "bars": "{{count}} battuta",
-      "bars_many": "{{count}} battute",
-      "bars_other": "{{count}} battute",
-      "note": "Contato prima del primo giro, non prima di ogni ripetizione",
       "counting": "Ti conta l'entrata"
     },
     "engine": {

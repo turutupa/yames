@@ -36,11 +36,6 @@
       "droppedNotes_other": "這個檔案裡有 {{count}} 個音屬於樂團沒有的樂器。"
     },
     "countIn": {
-      "label": "預備拍",
-      "none": "直接開始",
-      "bars": "{{count}} 小節",
-      "bars_other": "{{count}} 小節",
-      "note": "只在第一遍之前數，不是每次重複都數",
       "counting": "正在幫你數拍"
     },
     "engine": {

@@ -36,11 +36,6 @@
       "droppedNotes_other": "{{count}} nốt trong tệp này thuộc về những nhạc cụ mà ban nhạc không có."
     },
     "countIn": {
-      "label": "Đếm vào",
-      "none": "Vào thẳng",
-      "bars": "{{count}} ô nhịp",
-      "bars_other": "{{count}} ô nhịp",
-      "note": "Chỉ đếm trước lượt đầu tiên, không đếm trước mỗi lần lặp",
       "counting": "Đang đếm vào"
     },
     "engine": {

@@ -39,12 +39,6 @@
       "droppedNotes_other": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas."
     },
     "countIn": {
-      "label": "Décompte",
-      "none": "Direct",
-      "bars": "{{count}} mesure",
-      "bars_many": "{{count}} mesures",
-      "bars_other": "{{count}} mesures",
-      "note": "Compté avant le premier passage, pas avant chaque reprise",
       "counting": "On te compte l'entrée"
     },
     "engine": {

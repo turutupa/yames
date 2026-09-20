@@ -36,11 +36,6 @@
       "droppedNotes_other": "Bu dosyadaki {{count}} nota, grupta olmayan çalgılara ait."
     },
     "countIn": {
-      "label": "Giriş sayımı",
-      "none": "Doğrudan",
-      "bars": "{{count}} ölçü",
-      "bars_other": "{{count}} ölçü",
-      "note": "Yalnızca ilk turdan önce sayılır, her tekrardan önce değil",
       "counting": "Girişini sayıyorum"
     },
     "engine": {

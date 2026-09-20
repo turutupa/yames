@@ -39,12 +39,6 @@
       "droppedNotes_other": "{{count}} notas deste arquivo são de instrumentos que a banda não tem."
     },
     "countIn": {
-      "label": "Contagem de entrada",
-      "none": "Direto",
-      "bars": "{{count}} compasso",
-      "bars_many": "{{count}} compassos",
-      "bars_other": "{{count}} compassos",
-      "note": "Contada antes da primeira passada, não antes de cada repetição",
       "counting": "Contando sua entrada"
     },
     "engine": {

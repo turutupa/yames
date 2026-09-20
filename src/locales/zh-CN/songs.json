@@ -36,11 +36,6 @@
       "droppedNotes_other": "这个文件里有 {{count}} 个音属于乐队没有的乐器。"
     },
     "countIn": {
-      "label": "预备拍",
-      "none": "直接开始",
-      "bars": "{{count}} 小节",
-      "bars_other": "{{count}} 小节",
-      "note": "只在第一遍之前数，不是每次重复都数",
       "counting": "正在给你数拍"
     },
     "engine": {

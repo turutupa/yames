@@ -36,11 +36,6 @@
       "droppedNotes_other": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。"
     },
     "countIn": {
-      "label": "カウントイン",
-      "none": "すぐに開始",
-      "bars": "{{count}} 小節",
-      "bars_other": "{{count}} 小節",
-      "note": "最初の一周の前だけ数えます。繰り返しのたびには数えません",
       "counting": "カウント中"
     },
     "engine": {

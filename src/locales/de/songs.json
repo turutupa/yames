@@ -36,11 +36,6 @@
       "droppedNotes_other": "{{count}} Noten in dieser Datei sind für Instrumente, die die Band nicht hat."
     },
     "countIn": {
-      "label": "Einzähler",
-      "none": "Direkt los",
-      "bars": "{{count}} Takt",
-      "bars_other": "{{count}} Takte",
-      "note": "Wird vor dem ersten Durchgang gezählt, nicht vor jeder Wiederholung",
       "counting": "Zählt dich ein"
     },
     "engine": {

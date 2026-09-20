@@ -36,11 +36,6 @@
       "droppedNotes_other": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다."
     },
     "countIn": {
-      "label": "카운트인",
-      "none": "바로 시작",
-      "bars": "{{count}}마디",
-      "bars_other": "{{count}}마디",
-      "note": "첫 바퀴 앞에서만 세고, 반복할 때마다 세지는 않습니다",
       "counting": "카운트 중"
     },
     "engine": {

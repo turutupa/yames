@@ -36,11 +36,6 @@
       "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
       "counting": "Counting you in"
     },
     "engine": {

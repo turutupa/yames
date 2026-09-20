@@ -42,13 +42,6 @@
       "droppedNotes_other": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma."
     },
     "countIn": {
-      "label": "Odliczenie",
-      "none": "Od razu",
-      "bars": "{{count}} takt",
-      "bars_few": "{{count}} takty",
-      "bars_many": "{{count}} taktów",
-      "bars_other": "{{count}} taktu",
-      "note": "Liczone przed pierwszym przebiegiem, nie przed każdą powtórką",
       "counting": "Odliczam ci wejście"
     },
     "engine": {
