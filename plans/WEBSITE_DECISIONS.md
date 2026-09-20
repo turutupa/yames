@@ -161,6 +161,15 @@ ever plays on its own. The owner was unsure about sound on the page and kept it 
 that what plays is fun to listen to — so the clip is chosen by the owner's ear, not by the
 author's.
 
+Mixed for the speakers it will be heard through. The first two attempts were the engine's plain
+render and the owner heard "mostly drums": at default faders the keys meter 10–20 dB under the
+kit, and a slap bass is 13 dB quieter above 120 Hz than below it, which on a laptop means it is
+not there. So each player is rendered alone, balanced by meter (the bass measured above 120 Hz),
+given a small lift around 900 Hz on the bass, and summed. Every note is still the app's band; the
+caption says "played by the band in the app", not "straight out of the app". Pick a bass that
+has harmonics (picked, fingered) in a key that keeps its root up (D, not E), and a keys style
+that moves (arpeggio, montuno, shuffleComp) rather than one that holds.
+
 ---
 
 ## Copy
