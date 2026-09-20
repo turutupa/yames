@@ -12,12 +12,19 @@ mod commands;
 /// test would import.
 pub mod db;
 mod engine;
+// `findings`, `score` and `srs` are the coach's judgement, the score format
+// it judges against, and the schedule it reviews on. They are `pub` for the
+// same reason `timing` is: nothing in the command surface reaches them yet
+// (the review wave wires the IPC), and a private module of unused public
+// functions is a page of dead-code warnings.
+pub mod findings;
 pub mod instrument;
 mod jam;
 mod kit;
 mod midi;
 mod models;
 mod onset;
+pub mod score;
 // `session`, `session_log`, and `timing` are exposed `pub` so the
 // integration tests in `tests/dsp_fixtures.rs` can import
 // `score_feedbacks`, `BeatFeedback`, and `SessionReport` directly.
@@ -28,6 +35,7 @@ pub mod session;
 mod session_audio;
 pub mod session_log;
 mod speech_out;
+pub mod srs;
 mod state;
 mod take;
 pub mod timing;
