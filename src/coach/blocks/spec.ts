@@ -148,9 +148,6 @@ export const NECK_POSITIONS: readonly string[] = [
 
 export const INSTRUMENTS: readonly string[] = ["guitar", "bass"];
 
-/** When to be reminded. A date is the app's to work out, not the model's. */
-export const COME_BACK_WHEN: readonly string[] = ["tomorrow", "nextSession", "inThreeDays"];
-
 // ---------------------------------------------------------------------------
 // The bounds
 // ---------------------------------------------------------------------------
@@ -163,8 +160,15 @@ export const MAX_ID = 64;
 export const MAX_SHAPE_INDEX = 29;
 /** A score of ten thousand bars is not a song anybody imports. */
 export const MAX_BAR = 9999;
-/** The store's attempt ids are row numbers. */
-export const MAX_ATTEMPT = 999_999_999;
+/**
+ * The longest a "come back to this" may be put off, in days.
+ *
+ * Two weeks. `findings.rs` asks for two or three days out of `srs.rs`'s
+ * ladder and nothing in it reaches a fortnight, so the bound is generous
+ * rather than tight — and a reminder further away than that is not a
+ * reminder, it is a note in a diary nobody keeps.
+ */
+export const MAX_COME_BACK_DAYS = 14;
 /** The tempo range the app itself clamps to (`useActionDispatcher`). */
 export const MIN_BPM = 20;
 export const MAX_BPM = 300;
@@ -179,6 +183,22 @@ const scoreField: Field = {
   note: "The id of a score the player has imported.",
 };
 
+/**
+ * Bars are always PLAYED bars, counted from 1.
+ *
+ * The two numberings are a real trap on a song with repeats: a played bar is
+ * a position in the performance and a printed bar is a number on the page,
+ * and a piece whose first eight bars repeat has played bars 9–16 printed as
+ * 1–8. Everything that ACTS on bars — the transport, the range, the schedule,
+ * the excerpt — needs the played one. Everything a player READS needs the
+ * printed one.
+ *
+ * So the catalogue fixes one of them: a block says played bars, because a
+ * block is an instruction to the app. `resolve.ts` looks the printed numbers
+ * up from the score and hands both to the renderer, which shows the printed
+ * pair. That way a heading and a sentence cannot disagree about which bars
+ * they mean, which is exactly what happened when each side chose for itself.
+ */
 const fromBarField: Field = {
   name: "fromBar",
   type: { kind: "integer", min: 1, max: MAX_BAR },
@@ -189,6 +209,21 @@ const toBarField: Field = {
   name: "toBar",
   type: { kind: "integer", min: 1, max: MAX_BAR },
   note: "The last bar of the passage, and not before the first.",
+};
+
+/**
+ * An attempt, by the id the store gave it.
+ *
+ * A STRING, because `attempts.id` is a UUID the frontend mints
+ * (`newAttemptId`) and not a row number. This field used to be an integer
+ * with a bound of a billion, on the strength of a comment here that said the
+ * store numbered its rows — which it never did, so no block naming an
+ * attempt could ever have resolved.
+ */
+const attemptField: Field = {
+  name: "attempt",
+  type: { kind: "id", maxLength: MAX_ID },
+  note: "The id of one of the player's attempts at a song.",
 };
 
 export const CATALOGUE: CatalogueSpec = {
@@ -291,10 +326,9 @@ export const CATALOGUE: CatalogueSpec = {
         fromBarField,
         toBarField,
         {
-          name: "attempt",
+          ...attemptField,
           optional: true,
-          type: { kind: "integer", min: 1, max: MAX_ATTEMPT },
-          note: "Which attempt to colour it by. Left out, the plain notes.",
+          note: "Which attempt to colour it by, by its id. Left out, the plain notes.",
         },
       ],
     },
@@ -307,11 +341,7 @@ export const CATALOGUE: CatalogueSpec = {
       type: "take",
       note: "Play back a recorded take.",
       fields: [
-        {
-          name: "attempt",
-          type: { kind: "integer", min: 1, max: MAX_ATTEMPT },
-          note: "Which attempt the take belongs to.",
-        },
+        { ...attemptField, note: "Which attempt the take belongs to, by its id." },
         { ...fromBarField, optional: true, note: "The first bar to play. Left out, all of it." },
         { ...toBarField, optional: true, note: "The last bar to play. Left out, all of it." },
       ],
@@ -324,10 +354,10 @@ export const CATALOGUE: CatalogueSpec = {
           name: "attempts",
           type: {
             kind: "tuple",
-            of: { kind: "integer", min: 1, max: MAX_ATTEMPT },
+            of: { kind: "id", maxLength: MAX_ID },
             length: 2,
           },
-          note: "The two attempts, the older one first.",
+          note: "The ids of the two attempts, the older one first.",
         },
       ],
     },
@@ -411,9 +441,14 @@ export const CATALOGUE: CatalogueSpec = {
                 note: "Leave it for another day.",
                 fields: [
                   {
-                    name: "when",
-                    type: { kind: "enum", values: COME_BACK_WHEN },
-                    note: "When to bring it up again.",
+                    name: "days",
+                    type: { kind: "integer", min: 1, max: MAX_COME_BACK_DAYS },
+                    // DAYS, not one of three named occasions. `findings.rs`
+                    // decides out of `srs.rs`'s ladder and its `Fix::ComeBack`
+                    // carries a number of days; three words could not hold
+                    // that number, so a two-day promise arrived as "tomorrow"
+                    // and came back out as one day. A number round-trips.
+                    note: "How many days from now to bring it up again.",
                   },
                 ],
               },

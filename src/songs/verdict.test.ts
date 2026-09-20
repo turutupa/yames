@@ -19,7 +19,6 @@ import {
   barsPhrase,
   beatFractionKey,
   blocksFor,
-  comeBackDays,
   directionKey,
   printedBarsOf,
   rangeForFix,
@@ -229,12 +228,22 @@ describe("the fix becomes a button, and the button becomes a state change", () =
     expect(actionFor(f, "song-1")).toBeNull();
   });
 
-  it("keeps the days when it turns them into an occasion and back", () => {
-    for (const days of [1, 2, 3]) {
+  /**
+   * `Fix::ComeBack { days }` round-trips EXACTLY now. It used to go out as
+   * one of three named occasions, so four days came back as three — and
+   * nothing said so.
+   */
+  it("carries the days the ladder asked for, whatever they are", () => {
+    for (const days of [1, 2, 3, 4, 7, 14]) {
       const f = finding("clean", { fix: { type: "comeBack", days } });
       const action = actionFor(f, "song-1");
-      expect(action?.kind).toBe("comeBack");
-      expect(comeBackDays((action as { when: string }).when)).toBe(days);
+      expect(action).toEqual({ kind: "comeBack", days });
+    }
+  });
+
+  it("loses the button rather than clamping a promise the catalogue refuses", () => {
+    for (const days of [0, -2, 15, 900, NaN]) {
+      expect(actionFor(finding("clean", { fix: { type: "comeBack", days } }), "song-1")).toBeNull();
     }
   });
 
@@ -257,7 +266,7 @@ describe("the fix becomes a button, and the button becomes a state change", () =
 describe("the blocks the coach answers with", () => {
   const context = {
     scores: [{ id: "song-1", title: "A made-up thing", bars: 4 }],
-    attempts: [{ id: 1, scoreId: "song-1" }],
+    attempts: [{ id: "att-1", scoreId: "song-1" }],
   };
 
   for (const kind of FINDING_KINDS) {
@@ -266,7 +275,7 @@ describe("the blocks the coach answers with", () => {
         t,
         finding(kind),
         score(),
-        { scoreId: "song-1", attemptNumber: 1 },
+        { scoreId: "song-1", attemptId: "att-1" },
         createShuffleState(),
       );
       const answer = resolveCoachAnswer({ blocks }, context);
@@ -280,7 +289,7 @@ describe("the blocks the coach answers with", () => {
       t,
       finding("rushing"),
       score(),
-      { scoreId: "song-1", attemptNumber: 1 },
+      { scoreId: "song-1", attemptId: "att-1" },
       createShuffleState(),
     );
     expect(blocks.map((b) => b.type)).toEqual(["text", "tabExcerpt", "action"]);
@@ -291,10 +300,10 @@ describe("the blocks the coach answers with", () => {
       t,
       finding("rushing"),
       score(),
-      { scoreId: "song-1", attemptNumber: 1 },
+      { scoreId: "song-1", attemptId: "att-1" },
       createShuffleState(),
     );
-    expect(blocks[1]).toMatchObject({ type: "tabExcerpt", fromBar: 3, toBar: 4, attempt: 1 });
+    expect(blocks[1]).toMatchObject({ type: "tabExcerpt", fromBar: 3, toBar: 4, attempt: "att-1" });
   });
 
   it("draws the passage over time only when there is a story to draw", () => {
@@ -302,7 +311,7 @@ describe("the blocks the coach answers with", () => {
       t,
       finding("improved"),
       score(),
-      { scoreId: "song-1", attemptNumber: 1, withProgress: true },
+      { scoreId: "song-1", attemptId: "att-1", withProgress: true },
       createShuffleState(),
     );
     expect(withHistory.map((b) => b.type)).toContain("progress");
@@ -310,7 +319,7 @@ describe("the blocks the coach answers with", () => {
       t,
       finding("improved"),
       score(),
-      { scoreId: "song-1", attemptNumber: 1 },
+      { scoreId: "song-1", attemptId: "att-1" },
       createShuffleState(),
     );
     expect(without.map((b) => b.type)).not.toContain("progress");
@@ -327,7 +336,7 @@ describe("the blocks the coach answers with", () => {
         t,
         finding(kind),
         score(),
-        { scoreId: "song-1", attemptNumber: 1, withProgress: true },
+        { scoreId: "song-1", attemptId: "att-1", withProgress: true },
         createShuffleState(),
       );
       expect(blocks.length).toBeLessThanOrEqual(4);

@@ -15,9 +15,10 @@ const SCORE = { id: "song", title: "Wish You Were Here", bars: 64 };
 const CTX: CoachBlockContext = {
   scores: [SCORE],
   attempts: [
-    { id: 411, scoreId: "song" },
-    { id: 412, scoreId: "song" },
-    { id: 500, scoreId: "another" },
+    // The ids the store mints are strings, not row numbers.
+    { id: "att-411", scoreId: "song" },
+    { id: "att-412", scoreId: "song" },
+    { id: "att-500", scoreId: "another" },
   ],
   presets: [{ id: "warmup", name: "Warm-up" }],
   jams: [{ id: "blues", name: "Slow blues in A" }],
@@ -215,10 +216,10 @@ describe("a passage of a song", () => {
   });
 
   it("drops an attempt that is not a run at this song", () => {
-    expect(why({ type: "tabExcerpt", score: "song", fromBar: 1, toBar: 4, attempt: 500 })).toBe(
+    expect(why({ type: "tabExcerpt", score: "song", fromBar: 1, toBar: 4, attempt: "att-500" })).toBe(
       "unknownAttempt",
     );
-    expect(why({ type: "tabExcerpt", score: "song", fromBar: 1, toBar: 4, attempt: 411 })).toBe(
+    expect(why({ type: "tabExcerpt", score: "song", fromBar: 1, toBar: 4, attempt: "att-411" })).toBe(
       "kept",
     );
   });
@@ -244,28 +245,28 @@ describe("progress over time", () => {
 
 describe("takes", () => {
   it("keeps a whole take without needing the song loaded", () => {
-    expect(why({ type: "take", attempt: 500 })).toBe("kept");
+    expect(why({ type: "take", attempt: "att-500" })).toBe("kept");
   });
 
   it("drops part of a take when the song that bounds it is not loaded", () => {
-    expect(why({ type: "take", attempt: 500, fromBar: 1, toBar: 4 })).toBe("unknownScore");
+    expect(why({ type: "take", attempt: "att-500", fromBar: 1, toBar: 4 })).toBe("unknownScore");
   });
 
   it("drops an attempt nobody made", () => {
-    expect(why({ type: "take", attempt: 9 })).toBe("unknownAttempt");
+    expect(why({ type: "take", attempt: "att-9" })).toBe("unknownAttempt");
   });
 
   it("refuses to compare a take with itself", () => {
-    expect(why({ type: "compare", attempts: [412, 412] })).toBe("sameTakeTwice");
+    expect(why({ type: "compare", attempts: ["att-412", "att-412"] })).toBe("sameTakeTwice");
   });
 
   it("refuses to compare takes of different songs", () => {
-    expect(why({ type: "compare", attempts: [411, 500] })).toBe("unknownAttempt");
+    expect(why({ type: "compare", attempts: ["att-411", "att-500"] })).toBe("unknownAttempt");
   });
 
   it("compares two goes at the same song, older first", () => {
-    const { blocks } = one({ type: "compare", attempts: [411, 412] });
-    expect(blocks[0]).toMatchObject({ older: { id: 411 }, newer: { id: 412 } });
+    const { blocks } = one({ type: "compare", attempts: ["att-411", "att-412"] });
+    expect(blocks[0]).toMatchObject({ older: { id: "att-411" }, newer: { id: "att-412" } });
   });
 });
 
@@ -285,6 +286,22 @@ describe("the button", () => {
       action: { kind: "loopBars", score: "song", fromBar: 17, toBar: 20, bpm: 96 },
     }).blocks[0] as { label: { key: string } };
     expect(tempo.label.key).toBe("coachBlocks.action.loopBarsAt");
+  });
+
+  it("counts the days, and says “tomorrow” for the one day that has a word", () => {
+    const label = (days: number) =>
+      (
+        one({ type: "action", action: { kind: "comeBack", days } }).blocks[0] as {
+          label: { key: string; values: Record<string, unknown> };
+        }
+      ).label;
+    expect(label(1)).toEqual({ key: "coachBlocks.action.comeBack.tomorrow", values: {} });
+    expect(label(4)).toEqual({ key: "coachBlocks.action.comeBack.inDays", values: { days: 4 } });
+  });
+
+  it("refuses a promise further off than the catalogue allows", () => {
+    expect(why({ type: "action", action: { kind: "comeBack", days: 0 } })).toBe("badField");
+    expect(why({ type: "action", action: { kind: "comeBack", days: 15 } })).toBe("badField");
   });
 
   it("names the preset and the jam rather than repeating their ids", () => {
@@ -352,5 +369,72 @@ describe("what survives alongside what does not", () => {
       [3, "tabExcerpt", "unknownScore"],
     ]);
     for (const drop of out.dropped) expect(drop.detail.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * THE TWO NUMBERINGS.
+ *
+ * A block names PLAYED bars because that is what the app acts on; the player
+ * reads PRINTED numbers off the page. On a song whose first eight bars are
+ * played twice, played bar 9 is printed as bar 1 — and before this, a
+ * heading and a sentence about the same passage said two different things.
+ */
+describe("played bars for the machine, printed bars for the player", () => {
+  /** Eight bars, played twice: printed 1..8, 1..8. */
+  const REPEATED = {
+    id: "repeat",
+    title: "Round Twice",
+    bars: 16,
+    printedBars: [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8],
+  };
+  const ctx: CoachBlockContext = {
+    scores: [REPEATED],
+    attempts: [{ id: "att-1", scoreId: "repeat" }],
+    progressFor: () => [
+      { at: "a", percent: 40 },
+      { at: "b", percent: 70 },
+    ],
+  };
+
+  it("keeps the played bars for the slot and adds the printed ones for the heading", () => {
+    const block = one(
+      { type: "tabExcerpt", score: "repeat", fromBar: 9, toBar: 12, attempt: "att-1" },
+      ctx,
+    ).blocks[0];
+    expect(block).toMatchObject({ fromBar: 9, toBar: 12, printedFrom: 1, printedTo: 4 });
+  });
+
+  it("does the same for progress and for part of a take", () => {
+    expect(one({ type: "progress", score: "repeat", fromBar: 9, toBar: 16 }, ctx).blocks[0])
+      .toMatchObject({ fromBar: 9, toBar: 16, printedFrom: 1, printedTo: 8 });
+    expect(
+      one({ type: "take", attempt: "att-1", fromBar: 11, toBar: 12 }, ctx).blocks[0],
+    ).toMatchObject({ fromBar: 11, toBar: 12, printedFrom: 3, printedTo: 4 });
+  });
+
+  it("puts the printed numbers on the button and the played ones in the action", () => {
+    const block = one(
+      { type: "action", action: { kind: "loopBars", score: "repeat", fromBar: 9, toBar: 12 } },
+      ctx,
+    ).blocks[0] as {
+      label: { values: Record<string, unknown> };
+      action: { fromBar: number; toBar: number };
+    };
+    expect(block.label.values).toEqual({ from: 1, to: 4 });
+    expect(block.action).toMatchObject({ fromBar: 9, toBar: 12 });
+  });
+
+  it("checks the bars against the PLAYED length, so the second time round is reachable", () => {
+    expect(why({ type: "tabExcerpt", score: "repeat", fromBar: 9, toBar: 12 }, ctx)).toBe("kept");
+    expect(why({ type: "tabExcerpt", score: "repeat", fromBar: 15, toBar: 17 }, ctx)).toBe(
+      "barsOutsideScore",
+    );
+  });
+
+  it("answers with the played number when the score has no mapping to offer", () => {
+    // Every song without repeats, and every caller with no score loaded.
+    expect(one({ type: "tabExcerpt", score: "song", fromBar: 17, toBar: 20 }).blocks[0])
+      .toMatchObject({ fromBar: 17, toBar: 20, printedFrom: 17, printedTo: 20 });
   });
 });

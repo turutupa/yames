@@ -31,7 +31,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { setSubdivision } from "../../../ipc";
 import type { Subdivision } from "../../../types";
 import type { CoachAction } from "../../../coach/blocks";
-import { comeBackDays, rangeForFix, tempoPercentForFix } from "../../../songs/verdict";
+import { rangeForFix, tempoPercentForFix } from "../../../songs/verdict";
 import { dayOf, promiseToComeBack } from "../../../songs/due";
 import { announceSongsDue } from "./useSongsDue";
 import type { BarRange } from "../../../songs/schedule";
@@ -114,10 +114,11 @@ export function useSongActions(input: SongActionsInput): SongActions {
           scoreId,
           startBar: range.startBar,
           endBar: range.endBar,
-          // The action carries an occasion and the fix carries the days.
-          // `findings.rs` only ever asks for two or three, and both survive
-          // the round trip (`verdict.ts`).
-          dueDay: dayOf() + (fix?.type === "comeBack" ? fix.days : comeBackDays(action.when)),
+          // The action carries the days now, so there is nothing to map:
+          // whatever `srs.rs`'s ladder returned is what is written down.
+          // The fix is still preferred where there is one, because it is
+          // the number `findings.rs` decided rather than a copy of it.
+          dueDay: dayOf() + (fix?.type === "comeBack" ? fix.days : action.days),
           // Why it was asked for, so the notebook (C1) can one day say what
           // the promise was about rather than only when it falls due.
           reason: finding.kind,
