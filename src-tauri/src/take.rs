@@ -1588,14 +1588,22 @@ mod tests {
         base
     }
 
-    /// Poll a fact for up to four seconds, two orders of magnitude past
-    /// what the writer needs even on a machine running the whole suite.
+    /// Poll a fact until it is true, or give up.
+    ///
+    /// The deadline is a HANG-CATCHER and not a performance gate: what is
+    /// being waited for takes the writer thread a few milliseconds, and the
+    /// only thing a failure here can mean is that it never happened at all.
+    /// It was four seconds, which is a number a laptop running four workers
+    /// and a cargo build can reach without anything being wrong — and a test
+    /// that fails because somebody else was compiling is a test that gets
+    /// deleted. Sixty seconds is still three orders of magnitude past the
+    /// work, and a thread that never wrote never will.
     fn wait_until(what: &str, mut ready: impl FnMut() -> bool) {
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(4);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(60);
         while !ready() {
             assert!(
                 std::time::Instant::now() < deadline,
-                "waited four seconds for {what}"
+                "waited a minute for {what} — it is not slow, it never happened"
             );
             std::thread::sleep(std::time::Duration::from_millis(2));
         }
