@@ -177,6 +177,11 @@ ending where the band stops together. A four-bar form because the pay-off has to
 fifteen seconds. The master is one static gain and a limiter, never a loudness normaliser, which
 would lift the quiet first chorus up to meet the last and flatten the very thing being shown.
 
+A custom-length form has no changes of its own: with `form: { kind: "custom", bars: 4 }` and no
+`progression`, the band sits on the tonic for the whole clip, which the owner heard at once ("why
+are the keys almost always playing the same chord?"). Type the chords in. The clip is hard rock in
+E over E | G | A | E, which comes home in bar four so the last held hit lands on the one.
+
 ---
 
 ## Copy
