@@ -25,6 +25,11 @@ src/devShim.local.ts
 __pycache__/
 *.pyc
 
+# Before/after clips of Jam's mix, rendered for the owner's ear. Audio is
+# never committed: it is regenerated from `scripts/sounds/jam_mix_probe.ts`
+# and `render_band_demos` whenever somebody needs to hear it again.
+jam-mix-demos/
+
 # Playwright: the browser it downloads, and what a failing layout run leaves
 # behind (screenshots and traces of the moment it failed).
 test-results/

@@ -8919,6 +8919,46 @@ mod tests {
         energy
     }
 
+    /// Energy above 120 Hz — the band a laptop speaker radiates, for the two
+    /// instruments that live below it.
+    ///
+    /// [`laptop_band_energy`] starts at 200 Hz, and that is right for a drum:
+    /// it is what stops the kick's sub-bass from swamping a comparison of
+    /// transients. It is WRONG FOR A BASS, and wrong in a way that hid this
+    /// whole pass. A bass runs E1 to G3 (41 to 196 Hz), so a 200 Hz corner
+    /// measures a bass's harmonics and not one of its fundamentals — and two
+    /// basses that agree in their harmonics can be eight decibels apart in
+    /// the octave a listener hears the note in. `every_bass_voice_lands_at_
+    /// the_same_level` passed for a year on that band while an eight-bar line
+    /// measured above 120 Hz put the five voices ten decibels apart
+    /// (`plans/tasks/songs/W17-JAM-MIX.md`).
+    ///
+    /// 120 Hz is the brief's number and it is where a laptop's driver gives
+    /// up; the same four cascaded sections, for the same reason they are four
+    /// there — at 6 dB an octave the sub-bass is still in the answer.
+    ///
+    /// No low-pass: this is the band that reaches the ear, all of it, which
+    /// is also exactly what `ffmpeg -af highpass=f=120,ebur128` measured when
+    /// the trims below were derived. A ceiling here and none there would be
+    /// two different numbers wearing one name.
+    fn above_120_energy(buf: &[f32], sr: u32) -> f64 {
+        const HP: usize = 4;
+        let a = 1.0 / (1.0 + 2.0 * std::f64::consts::PI * 120.0 / sr as f64);
+        let (mut prev_in, mut prev_out) = ([0.0f64; HP], [0.0f64; HP]);
+        let mut energy = 0.0f64;
+        for &s in buf {
+            let mut v = s as f64;
+            for k in 0..HP {
+                let out = a * (prev_out[k] + v - prev_in[k]);
+                prev_in[k] = v;
+                prev_out[k] = out;
+                v = out;
+            }
+            energy += v * v;
+        }
+        energy
+    }
+
     /// THE ACCENT MUST BE LOUDER ON THE SPEAKER PEOPLE ACTUALLY USE.
     ///
     /// This is the test that was missing. The drum accent measured +7.8 dB
@@ -10801,7 +10841,20 @@ mod tests {
             }
             w.finalize().unwrap();
             let peak = left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs()));
-            println!("{} -> {} bars, peak {peak:.3}", wav.display(), tables.len());
+            // What the table measured of itself, worst bar of the eight. A
+            // demo that solos one lane is only comparable with the demo that
+            // solos another if NEITHER was scaled by `JAM_SAFETY_CLAMP` —
+            // that normalisation is worked out per table, so a loud one would
+            // be quiet here for a reason that has nothing to do with the
+            // voice. The two numbers being equal is what says it did not.
+            let (before, after) = tables.iter().fold((0.0f32, 0.0f32), |m, t| {
+                (m.0.max(t.peak_before), m.1.max(t.peak_after))
+            });
+            println!(
+                "{} -> {} bars, peak {peak:.3}, table {before:.3} before the clamp and {after:.3} after",
+                wav.display(),
+                tables.len()
+            );
         }
     }
 
@@ -14260,7 +14313,7 @@ mod tests {
             for (o, v) in out.iter_mut().zip(buf.iter()) {
                 *o += v * slot.gain * undo;
             }
-            laptop_band_energy(&out, sr)
+            above_120_energy(&out, sr)
         };
 
         // Measured first and judged afterwards, so a failure prints the
@@ -15237,7 +15290,7 @@ mod tests {
                     *o += v * slot.gain * undo;
                 }
             }
-            laptop_band_energy(&out, sr)
+            above_120_energy(&out, sr)
         };
 
         // Measured first, judged afterwards — see the bass's version.
@@ -15273,9 +15326,24 @@ mod tests {
     /// 120 BPM. A common window is the honest comparison: measuring each
     /// sound over its own length would reward the snare for being short.
     ///
-    /// The floor is the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
-    /// asks for, not today's margin, so the trim can be nudged by ear
-    /// without this test having to move.
+    /// The floor was the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
+    /// asks for. **It is 5 dB since 2026-09-20, and the ear is why.**
+    ///
+    /// The 6 dB was an engineering argument nobody had listened to. The owner
+    /// then listened — "what I can hear is mostly drum sound, the keys and
+    /// bass is very low in comparison" — and the measurement that matches
+    /// what he heard is the one this file could not make: every keys voice
+    /// rendered alone for eight bars against the same vibe's kit rendered
+    /// alone, above 120 Hz, over four vibes at three intensities. On that,
+    /// comping sat 7.5 to 10.7 dB under the kit and as far as 16.7 under in
+    /// funk at Loud. `KEYS_TRIM` went up 2.2 dB to put the section on the
+    /// brief's own 6 dB in THAT measurement, and a voicing against one snare
+    /// accent measures about −5.5 dB once it has.
+    ///
+    /// So the two numbers are the same contract read against two references,
+    /// and the floor here follows the one that was listened to. It is still
+    /// a floor: a comping part above it is a comping part that competes with
+    /// the backbeat, which is the thing this test exists to forbid.
     #[test]
     fn the_keys_sit_under_the_snare_on_a_small_speaker() {
         let sr = 48000u32;
@@ -15332,9 +15400,9 @@ mod tests {
         let db = 10.0 * (k / s.max(1e-30)).log10();
         eprintln!("[keys] a four-note voicing measures {db:.2} dB against the snare accent");
         assert!(
-            db <= -6.0,
+            db <= -5.0,
             "a four-note voicing is {db:.2} dB against the snare accent through a \
-             200 Hz-4 kHz band-pass; comping has to sit at least 6 dB under the \
+             200 Hz-4 kHz band-pass; comping has to sit at least 5 dB under the \
              band, and this is on top of it"
         );
         // And not so far under that the harmony is a rumour.
