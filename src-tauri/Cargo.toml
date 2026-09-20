@@ -23,7 +23,13 @@ crate-type = ["lib", "cdylib", "staticlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["macos-private-api", "tray-icon"] }
+# `protocol-asset` is W21's: the review plays a take's picture, and a webview
+# can only decode video from a URL it is allowed to fetch. The asset protocol
+# is scoped in `tauri.conf.json` to `$APPDATA/takes/**` and to nothing else, so
+# what it opens is exactly the directory the player can already see, play and
+# delete through the app. The feature and the scope have to agree or the build
+# script refuses, which is how this line came to be here.
+tauri = { version = "2", features = ["macos-private-api", "tray-icon", "protocol-asset"] }
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-store = "2"
 serde = { version = "1", features = ["derive"] }
@@ -135,6 +141,20 @@ core-foundation-sys = "0.8"
 # graph transitively, so declaring them adds no new downloads.
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_SystemInformation"] }
+# W21 — the camera's permission prompt on Windows.
+#
+# WebView2 asks for a camera the way a browser does: its own bar, per origin,
+# and by default it asks again next time. Yames has already asked, in its own
+# words, in a dialog the player answered before `getUserMedia` was ever called
+# (`CameraIntroDialog`), so a second prompt from the webview is the app asking
+# twice and looking like a web page while it does it.
+#
+# Both crates are ALREADY in Cargo.lock underneath wry at exactly these
+# versions, so declaring them adds no download and no new package — and pinning
+# the same minors is what keeps the COM types identical to the ones
+# `PlatformWebview::controller()` hands over. MIT/Apache-2.0, like Tauri.
+webview2-com = "0.38"
+windows = { version = "0.61", features = ["Win32_Foundation"] }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
