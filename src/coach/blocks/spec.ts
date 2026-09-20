@@ -112,19 +112,18 @@ export const ROOT_NAMES: readonly string[] = [
 /**
  * What each quality is written as after the root, in the catalogue's order.
  *
- * `chordSuffix` is the app's own table and this is it, with one substitution:
- * it writes the six-nine chord "6/9", and `parseChordName` reads a slash as a
- * bass note and would hand back a plain sixth. "69" is the spelling it reads
- * back as the chord it is, and `spec.test.ts` round-trips every one of these
+ * `chordSuffix` is the app's own table and this is it, unchanged. It carried
+ * one substitution until the six-nine chord was fixed: `chordSuffix("69")`
+ * writes "6/9", and `parseChordName` used to read the slash as a bass note
+ * and hand back a plain sixth, so the catalogue offered "69" instead. The
+ * parser now reads "6/9" whole (`src/jam/harmony.ts`), and the app writes one
+ * spelling everywhere again. `spec.test.ts` round-trips every one of these
  * through the parser so a future entry cannot quietly break the same way.
  *
  * The major triad's suffix is the empty string — "C" is a chord name — so the
  * grammar has to allow a chord that is a root and nothing else.
  */
-export const CHORD_SUFFIXES: readonly string[] = CHORD_QUALITIES.map((quality) => {
-  const written = chordSuffix(quality);
-  return written === "6/9" ? "69" : written;
-})
+export const CHORD_SUFFIXES: readonly string[] = CHORD_QUALITIES.map(chordSuffix)
   .slice()
   .sort((a, b) => b.length - a.length || (a < b ? -1 : a > b ? 1 : 0));
 
