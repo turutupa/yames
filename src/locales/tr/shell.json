@@ -3,7 +3,8 @@
     "metronome": "Metronom",
     "setlist": "Set listesi",
     "drill": "Tempo Antrenmanı",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Şarkılar"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Ön ayarı kaydet",
     "delete": "Sil",
     "newPreset": "Yeni ayar",
-    "newDrill": "Yeni çalışma"
+    "newDrill": "Yeni çalışma",
+    "titleSongs": "Şarkılar"
   },
   "emptyStates": {
     "presets": {

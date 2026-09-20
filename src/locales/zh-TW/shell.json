@@ -3,7 +3,8 @@
     "metronome": "節拍器",
     "setlist": "曲目單",
     "drill": "變速練習",
-    "jam": "即興伴奏"
+    "jam": "即興伴奏",
+    "songs": "曲目"
   },
   "tooltip": {
     "zen": "禪意",
@@ -45,7 +46,8 @@
     "save": "儲存預設",
     "delete": "刪除",
     "newPreset": "新增預設",
-    "newDrill": "新增練習"
+    "newDrill": "新增練習",
+    "titleSongs": "曲目"
   },
   "emptyStates": {
     "presets": {

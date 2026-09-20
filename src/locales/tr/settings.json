@@ -217,7 +217,8 @@
         "jam-next-section": "Sonraki bölüm",
         "jam-prev-section": "Önceki bölüm",
         "jam-loop-section": "Bu bölümü döngüye al",
-        "jam-take": "Kaydı al"
+        "jam-take": "Kaydı al",
+        "tab-5": "Şarkılar sekmesi"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -251,7 +252,8 @@
         "jam-next-section": "Ölçü çizgisinde sonraki bölümün başına atla",
         "jam-prev-section": "Ölçü çizgisinde önceki bölümün başına dön",
         "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar",
-        "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur"
+        "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur",
+        "tab-5": "Şarkılar sekmesine geç"
       }
     },
     "inputTest": {

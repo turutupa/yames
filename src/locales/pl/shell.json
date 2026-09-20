@@ -3,7 +3,8 @@
     "metronome": "Metronom",
     "setlist": "Setlista",
     "drill": "Rozbieg",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Utwory"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Zapisz preset",
     "delete": "Usuń",
     "newPreset": "Nowy zestaw",
-    "newDrill": "Nowe ćwiczenie"
+    "newDrill": "Nowe ćwiczenie",
+    "titleSongs": "Utwory"
   },
   "emptyStates": {
     "presets": {

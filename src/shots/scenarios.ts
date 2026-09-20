@@ -42,7 +42,7 @@ export interface Shot {
   /** Which of the app's two windows to mount. */
   window: "main" | "floating";
   /** The tab to open on. Absent for the widget, which has no tabs. */
-  tab?: "beat" | "drill" | "jam" | "setlist";
+  tab?: "beat" | "drill" | "jam" | "setlist" | "songs";
   /**
    * The Jam tab, with a jam actually on it.
    *
@@ -52,6 +52,19 @@ export interface Shot {
    * mode's whole subject is moving through a form, and bar one of chorus one
    * is the one bar that says nothing about it.
    */
+  /**
+   * The Songs tab, with a song drawn on it.
+   *
+   * Same shape as `jam`, and for the same reason: the tab opens on a library
+   * and a shot of the library says nothing about the mode. `section` presses
+   * one of the section chips; `picker` is alphaTex to bring in through the
+   * file input, which is the only door the track picker has.
+   */
+  songs?: {
+    row: number;
+    section?: string;
+    picker?: string;
+  };
   jam?: {
     row: number;
     bar?: number;
@@ -403,6 +416,53 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 300,
+  },
+  {
+    id: "songs",
+    suffix: "songs",
+    window: "main",
+    tab: "songs",
+    // A song on the stage: the tab drawn, the facts about it above, and the
+    // bar range, sections, speed and repeat under it.
+    songs: { row: 0 },
+    width: 1400,
+    height: 900,
+    // alphaTab lays the score out on this thread; give it room to finish.
+    settleMs: 900,
+  },
+  {
+    id: "songs-empty",
+    suffix: "songs-empty",
+    window: "main",
+    tab: "songs",
+    // The mode before you have brought anything in. No `songs` block, so no
+    // library row is pressed and the empty state is what is on screen.
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "songs-picker",
+    suffix: "songs-picker",
+    window: "main",
+    tab: "songs",
+    // The track picker, over the stage. Two tracks, so the ordering (guitars
+    // before basses) and the tuning line are both visible.
+    songs: {
+      row: 0,
+      picker: `\\title "Two parts"
+\\tempo 120
+.
+\\track "Bass"
+\\tuning d3 a2 d2 g1
+\\ts 4 4 2.1.4 2.1.4 2.1.4 2.1.4 |
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\ts 4 4 3.3.4 3.3.4 3.3.4 3.3.4 |`,
+    },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
   },
   {
     id: "widget",

@@ -6,6 +6,7 @@ import { formBars } from "../../jam/forms";
 import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
+import type { SongRecord } from "../../songs/library";
 import { JamGlyph } from "../jam/JamGlyph";
 
 export interface PresetSidebarHandle {
@@ -14,13 +15,14 @@ export interface PresetSidebarHandle {
   triggerRename: (id: string) => void;
   triggerRenameSetlist: (id: string) => void;
   triggerRenameJam: (id: string) => void;
+  triggerRenameSong: (id: string) => void;
   /** Drop the loaded marker — a setlist has taken the context bar. */
   clearActive: () => void;
 }
 
 interface PresetSidebarProps {
   state: AppState;
-  view: "beat" | "drill" | "setlist" | "jam";
+  view: "beat" | "drill" | "setlist" | "jam" | "songs";
   isOpen: boolean;
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
@@ -71,6 +73,17 @@ interface PresetSidebarProps {
    * the library, not while you are playing it.
    */
   onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
+  /**
+   * The song library. Newest first and not reorderable, unlike jams: a song
+   * is a file you brought in rather than something you arranged, so the
+   * order nobody chose is the order it arrived in.
+   */
+  songs?: SongRecord[];
+  activeSongId?: string | null;
+  onLoadSong?: (id: string) => void;
+  onImportSong?: () => void;
+  onDeleteSong?: (id: string) => void;
+  onRenameSong?: (id: string, name: string) => void;
 }
 
 /** What a jam row says on its right: the tempo and the shape. */
@@ -196,6 +209,12 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onDuplicateJam,
   onReorderJams,
   onAddJamToSetlist,
+  songs,
+  activeSongId,
+  onLoadSong,
+  onImportSong,
+  onDeleteSong,
+  onRenameSong,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -221,6 +240,8 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   const [setlistMenu, setSetlistMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [renamingJam, setRenamingJam] = useState<string | null>(null);
   const [jamMenu, setJamMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [renamingSong, setRenamingSong] = useState<string | null>(null);
+  const [songMenu, setSongMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   /** The jam menu's "add to setlist" item, expanded into the setlists. */
   const [jamMenuSetlists, setJamMenuSetlists] = useState(false);
   /**
@@ -364,6 +385,17 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   }, [setlistMenu]);
 
   useEffect(() => {
+    if (!songMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
+        setSongMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [songMenu]);
+
+  useEffect(() => {
     if (!jamMenu) {
       // Shut with the menu, or the next right-click opens on a list the user
       // did not ask for.
@@ -498,7 +530,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setRenameValue(jam.name);
       setRenamingJam(id);
     },
-  }), [activeId, allPresets, setlists, jams, state, view]);
+    triggerRenameSong: (id: string) => {
+      const song = songs?.find((s) => s.id === id);
+      if (!song) return;
+      setRenameValue(song.name);
+      setRenamingSong(id);
+    },
+  }), [activeId, allPresets, setlists, jams, songs, state, view]);
 
   // The rail's setlist glyph at row size — lines with a play head, a list that
   // runs in order. Rail.tsx has the note on why it is no longer a chain.
@@ -579,6 +617,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     ? VIBES.filter((v) => v.id === jamVibe || jams!.some((j) => j.vibe === v.id))
     : [];
 
+  const showSongs = view === "songs" && !!songs;
+  const songList = showSongs
+    ? songs!.filter(
+        (s) => !search.trim() || s.name.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
   /**
    * Finish a drag: move the dragged jam to where it was dropped.
    *
@@ -643,7 +688,9 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                   ? "presets.titleSetlist"
                   : view === "jam"
                     ? "presets.titleJam"
-                    : "presets.title",
+                    : view === "songs"
+                      ? "presets.titleSongs"
+                      : "presets.title",
             )}
           </span>
           <div className="preset-sidebar-header-actions">
@@ -691,7 +738,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 {newIcon}
               </button>
             )}
-            {!showSetlists && !showJams && viewPresets.length < MAX_PRESETS && (
+            {/* On Songs the "+" opens the file picker. There is nothing to
+                save here — a song comes from a file the player already has,
+                so the only way to add one is to bring one in. */}
+            {showSongs && onImportSong && (
+              <button
+                className="preset-sidebar-head-btn preset-sidebar-new-song"
+                onClick={onImportSong}
+                aria-label={t("songs.library.add")}
+                data-tip={t("songs.library.add")}
+              >
+                {newIcon}
+              </button>
+            )}
+            {!showSetlists && !showJams && !showSongs && viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
@@ -941,6 +1001,71 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
           )}
 
+          {/* Songs. No drag: the order is when they arrived, and there is
+              nothing to arrange. Rename and remove are on the context menu,
+              the way they are for a jam. */}
+          {songList.map((s) => (
+            <div
+              key={s.id}
+              className={`preset-sidebar-item song-item ${activeSongId === s.id ? "active" : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => onLoadSong?.(s.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onLoadSong?.(s.id);
+                }
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setSongMenu({ id: s.id, x: e.clientX, y: e.clientY });
+              }}
+            >
+              {renamingSong === s.id ? (
+                <input
+                  ref={renameRef}
+                  className="preset-sidebar-name-input"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onBlur={() => {
+                    const name = renameValue.trim();
+                    if (name) onRenameSong?.(s.id, name);
+                    setRenamingSong(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const name = renameValue.trim();
+                      if (name) onRenameSong?.(s.id, name);
+                      setRenamingSong(null);
+                    }
+                    if (e.key === "Escape") setRenamingSong(null);
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  maxLength={40}
+                />
+              ) : (
+                <>
+                  <span className="setlist-item-row">
+                    <span className="preset-item-name">{s.name}</span>
+                  </span>
+                  <span className="setlist-item-sub">
+                    {t("songs.library.summary", {
+                      track: s.score.source.trackName,
+                      bars: s.score.bars.length,
+                    })}
+                  </span>
+                </>
+              )}
+            </div>
+          ))}
+          {showSongs && songList.length === 0 && (
+            <div className="preset-sidebar-empty">
+              {search.trim() ? t("presets.noResults") : t("songs.library.empty")}
+            </div>
+          )}
+
           {/* The rule separates setlists from presets; on the setlist tab
               there are no presets under it to separate. */}
           {setlistList.length > 0 && !showSetlists && (
@@ -1128,6 +1253,36 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             }}
           >
             {t("jam.deleteJam")}
+          </button>
+        </div>
+      )}
+
+      {songMenu && (
+        <div
+          ref={contextRef}
+          className="preset-context-menu"
+          style={{ top: songMenu.y, left: songMenu.x }}
+        >
+          <button
+            onClick={() => {
+              const s = songs?.find((s) => s.id === songMenu.id);
+              if (s) {
+                setRenameValue(s.name);
+                setRenamingSong(songMenu.id);
+              }
+              setSongMenu(null);
+            }}
+          >
+            {t("presets.rename")}
+          </button>
+          <button
+            className="preset-context-delete"
+            onClick={() => {
+              onDeleteSong?.(songMenu.id);
+              setSongMenu(null);
+            }}
+          >
+            {t("songs.library.remove")}
           </button>
         </div>
       )}

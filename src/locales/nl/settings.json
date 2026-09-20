@@ -217,7 +217,8 @@
         "jam-next-section": "Volgend deel",
         "jam-prev-section": "Vorig deel",
         "jam-loop-section": "Dit deel herhalen",
-        "jam-take": "Neem de take op"
+        "jam-take": "Neem de take op",
+        "tab-5": "Nummers-tabblad"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -251,7 +252,8 @@
         "jam-next-section": "Bij de maatstreep naar het begin van het volgende deel springen",
         "jam-prev-section": "Bij de maatstreep terug naar het begin van het vorige deel",
         "jam-loop-section": "Het deel waar je in zit herhalen, of daarmee stoppen",
-        "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen"
+        "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
+        "tab-5": "Naar het Nummers-tabblad"
       }
     },
     "inputTest": {

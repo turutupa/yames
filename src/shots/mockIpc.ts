@@ -18,6 +18,9 @@ import { STARTER_JAMS } from "../jam/jams";
 import { jamToSetlistStep } from "../setlist/setlists";
 import { bandStateForBar } from "../jam/practice";
 import type { JamEngineConfig } from "../jam/types";
+import { importSong } from "../songs/import";
+import { newSongRecord } from "../songs/library";
+import type { SongRecord } from "../songs/library";
 
 /**
  * The library in the sidebar.
@@ -143,6 +146,42 @@ function baseState(theme: string) {
 }
 
 /**
+ * The one song in the library on a Songs shot.
+ *
+ * Written here in alphaTex, like the importer's fixtures and for the same
+ * reason: the app ships no songs and this repository holds no real ones
+ * (`plans/SONGS.md` S0.4). Eight bars in two named sections, so the section
+ * chips, the bar range and a tab worth scrolling are all in frame.
+ */
+const SHOT_SONG_TEX = `\\title "Practice piece"
+\\artist "Written for the pictures"
+\\tempo 96
+.
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\section Verse
+\\ts 4 4 5.5.8 7.5.8 5.4.8 7.4.8 5.5.8 7.5.8 5.4.8 7.4.8 |
+5.5.8 7.5.8 5.4.8 7.4.8 5.5.8 7.5.8 5.4.8 7.4.8 |
+3.5.8 5.5.8 3.4.8 5.4.8 3.5.8 5.5.8 3.4.8 5.4.8 |
+3.5.8 5.5.8 3.4.8 5.4.8 3.5.8 5.5.8 3.4.8 5.4.8 |
+\\section Chorus
+8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
+8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
+7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
+7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |`;
+
+let songRecord: SongRecord | null = null;
+
+/** Built once: parsing is the expensive half and the shot never changes it. */
+function songShotRecord(): SongRecord {
+  if (!songRecord) {
+    const bytes = new TextEncoder().encode(SHOT_SONG_TEX);
+    songRecord = newSongRecord(importSong(bytes, "Practice piece.alphatex", 0).score, bytes);
+  }
+  return songRecord;
+}
+
+/**
  * The store, settled.
  *
  * Everything a first-time user sees is a screen that must never reach a
@@ -181,6 +220,7 @@ function baseStore(theme: string, tab: string, zenStyle?: string): Map<string, u
   ]);
   for (const h of hints) store.set(`hints.${h}`, true);
   if (zenStyle) store.set("zenStyle", zenStyle);
+  if (tab === "songs") store.set("songs", [songShotRecord()]);
   return store;
 }
 

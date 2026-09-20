@@ -6,6 +6,7 @@ import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
+import type { SongRecord } from "../../songs/library";
 import type { MainView } from "./MainHeader";
 import type { PlayTab } from "./hooks/useTabRouting";
 
@@ -43,6 +44,13 @@ interface RailProps {
   onReorderJams: (from: number, to: number) => void;
   /** A jam, into a setlist, from the library's own context menu (JAM_MODE 8.5). */
   onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
+  /** The song library, on the songs tab. Same deal as the jam library. */
+  songs: SongRecord[];
+  activeSongId: string | null;
+  onLoadSong: (id: string) => void;
+  onImportSong: () => void;
+  onDeleteSong: (id: string) => void;
+  onRenameSong: (id: string, name: string) => void;
   coachOpen: boolean;
   coachActive: boolean;
   coachListening: boolean;
@@ -115,6 +123,30 @@ const MODES = [
       </>
     ),
   },
+  {
+    id: "songs" as const,
+    labelKey: "nav.songs",
+    /**
+     * Six strings with a stopped note on them — a fragment of tab, which is
+     * the thing this mode puts on the screen.
+     *
+     * Not a musical note or a disc: both say "a recording", and a song here
+     * is something you read and play rather than something you listen to.
+     * Four lines rather than six, because at 18px on stroke 2 the six real
+     * strings close up into a grey block; four keeps the gaps open and still
+     * reads as a stave. The dot sits on the second line so it is clearly ON a
+     * string rather than between two.
+     */
+    icon: (
+      <>
+        <path d="M3 6h18" />
+        <path d="M3 10h18" />
+        <path d="M3 14h18" />
+        <path d="M3 18h18" />
+        <circle cx="9" cy="10" r="2.25" fill="currentColor" stroke="none" />
+      </>
+    ),
+  },
 ];
 
 /**
@@ -159,6 +191,12 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onDuplicateJam,
     onReorderJams,
     onAddJamToSetlist,
+    songs,
+    activeSongId,
+    onLoadSong,
+    onImportSong,
+    onDeleteSong,
+    onRenameSong,
     coachOpen,
     coachActive,
     coachListening,
@@ -267,6 +305,12 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onDuplicateJam={onDuplicateJam}
             onReorderJams={onReorderJams}
             onAddJamToSetlist={onAddJamToSetlist}
+            songs={songs}
+            activeSongId={activeSongId}
+            onLoadSong={onLoadSong}
+            onImportSong={onImportSong}
+            onDeleteSong={onDeleteSong}
+            onRenameSong={onRenameSong}
           />
         )}
       </div>

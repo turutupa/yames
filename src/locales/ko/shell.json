@@ -3,7 +3,8 @@
     "metronome": "메트로놈",
     "setlist": "셋리스트",
     "drill": "템포 연습",
-    "jam": "잼"
+    "jam": "잼",
+    "songs": "곡"
   },
   "tooltip": {
     "zen": "젠 모드",
@@ -45,7 +46,8 @@
     "save": "프리셋 저장",
     "delete": "삭제",
     "newPreset": "새 프리셋",
-    "newDrill": "새 드릴"
+    "newDrill": "새 드릴",
+    "titleSongs": "곡"
   },
   "emptyStates": {
     "presets": {

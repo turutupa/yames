@@ -235,6 +235,43 @@ async function drive() {
   }
 
   /**
+   * A song, loaded and drawn.
+   *
+   * Through the library row, like the jam above. The wait is on the RENDERED
+   * tab rather than on the view, because alphaTab lays the score out
+   * asynchronously and a shot taken before `data-ready` is a picture of an
+   * empty box — which is exactly the failure the layout suite is here to
+   * notice, so it must not be the thing the suite itself photographs.
+   */
+  if (shot!.songs) {
+    const rows = ".preset-sidebar-item.song-item";
+    await until("the song library", () => document.querySelectorAll(rows).length > shot!.songs!.row);
+    (document.querySelectorAll(rows)[shot!.songs!.row] as HTMLElement).click();
+    await until("the songs stage", () => !!document.querySelector(".songs-view"));
+    await until("the drawn tab", () => !!document.querySelector(".songs-tab-host[data-ready]"));
+
+    if (shot!.songs.section) {
+      const chips = [...document.querySelectorAll<HTMLElement>(".songs-section-chips .songs-chip")];
+      const chip = chips.find((c) => c.textContent?.trim() === shot!.songs!.section);
+      if (!chip) throw new Error(`no section chip called "${shot!.songs.section}"`);
+      chip.click();
+    }
+    if (shot!.songs.picker) {
+      // The track picker, reached the only way a person reaches it — by
+      // bringing a file in. The input is the view's own.
+      const input = document.querySelector<HTMLInputElement>(".songs-file-input");
+      if (!input) throw new Error("no file input on the songs view");
+      const bytes = new TextEncoder().encode(shot!.songs.picker);
+      const file = new File([bytes], "Picker.alphatex", { type: "text/plain" });
+      const data = new DataTransfer();
+      data.items.add(file);
+      input.files = data.files;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      await until("the track picker", () => !!document.querySelector(".songs-picker"));
+    }
+  }
+
+  /**
    * A setlist, loaded and open in the paragraph.
    *
    * By clicking the library row, like the jam above and for the same reason:
