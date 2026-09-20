@@ -176,6 +176,111 @@ export async function fitsOnOneLine(page: Page, selector: string, where: string)
   }
 }
 
+/**
+ * Every element matching `selector` is inside the window, on all four sides.
+ *
+ * The question none of the 107 tests in this folder asked, and the one that
+ * cost W18 a task: they all measured whether a thing fitted its PARENT, and a
+ * row fits its parent perfectly while the parent sits 28px below the bottom of
+ * the window. Measured at 1400×900 on 2026-09-20, the Songs band's faders
+ * started at y=928 and the verdict at y=1075 — both a scroll away, both green.
+ *
+ * Parts a layout chooses not to draw measure zero and are skipped: a control
+ * a container query has hidden is not off-screen, it is not there.
+ */
+export async function insideViewport(
+  page: Page,
+  selector: string,
+  where: string,
+  size: { width: number; height: number },
+) {
+  const boxes = await page.$$eval(selector, (nodes) =>
+    nodes.map((node) => {
+      const r = node.getBoundingClientRect();
+      return {
+        left: r.left,
+        right: r.right,
+        top: r.top,
+        bottom: r.bottom,
+        what: (node.className || node.tagName).toString().slice(0, 60),
+      };
+    }),
+  );
+  expect(boxes.length, `${where}: nothing matched ${selector}`).toBeGreaterThan(0);
+
+  for (const box of boxes) {
+    if (box.right - box.left === 0 && box.bottom - box.top === 0) continue;
+    expect(
+      Math.round(box.top),
+      `${where}: "${box.what}" starts at y=${Math.round(box.top)}, above the window`,
+    ).toBeGreaterThanOrEqual(-1);
+    expect(
+      Math.round(box.bottom),
+      `${where}: "${box.what}" ends at y=${Math.round(box.bottom)}, past the window's ${size.height} — it is under the fold`,
+    ).toBeLessThanOrEqual(size.height + 1);
+    expect(
+      Math.round(box.left),
+      `${where}: "${box.what}" starts at x=${Math.round(box.left)}, off the left`,
+    ).toBeGreaterThanOrEqual(-1);
+    expect(
+      Math.round(box.right),
+      `${where}: "${box.what}" ends at x=${Math.round(box.right)}, past the window's ${size.width}`,
+    ).toBeLessThanOrEqual(size.width + 1);
+  }
+}
+
+/**
+ * Inside `root`, only the elements named in `allowed` may scroll.
+ *
+ * A scroller inside a scroller is the shape of the bug: the Songs tab had its
+ * own 520px viewport, inside a stage that also scrolled, inside a window — so
+ * the wheel did something different depending on which pixel the pointer was
+ * over, and half the screen was reachable only by the outer one. Naming the
+ * few boxes that are ALLOWED to scroll is the only way to say that; asking
+ * "does the window scroll" misses every scroller between.
+ *
+ * Only boxes that can ACTUALLY scroll count, which means `overflow: auto` or
+ * `scroll` on the axis. Content bigger than an `overflow: visible` box simply
+ * spills — that is a different bug and `insideViewport` is what catches it —
+ * and `overflow: hidden` is a box with no bar and no wheel. Without this the
+ * first thing every run reported was `.sr-only`, which is a 1×1 clipped span
+ * holding a whole sentence, three times per fader.
+ *
+ * Two pixels of slack: a sub-pixel border or a rounded line height can leave
+ * `scrollHeight` one greater than `clientHeight` on a box nobody can scroll.
+ */
+export async function onlyTheseScroll(
+  page: Page,
+  root: string,
+  allowed: string[],
+  where: string,
+) {
+  const rogue = await page.evaluate(
+    ({ root, allowed }) => {
+      const host = document.querySelector(root);
+      if (!host) return null;
+      const out: { what: string; over: number; how: "down" | "across" }[] = [];
+      const scrolls = (value: string) => value === "auto" || value === "scroll";
+      for (const el of [host, ...host.querySelectorAll("*")]) {
+        if (allowed.some((sel) => el.matches(sel) || el.closest(sel))) continue;
+        const style = getComputedStyle(el);
+        const down = el.scrollHeight - el.clientHeight;
+        const across = el.scrollWidth - el.clientWidth;
+        const what = (el.className || el.tagName).toString().slice(0, 60);
+        if (down > 2 && scrolls(style.overflowY)) out.push({ what, over: down, how: "down" });
+        if (across > 2 && scrolls(style.overflowX)) out.push({ what, over: across, how: "across" });
+      }
+      return out;
+    },
+    { root, allowed },
+  );
+  expect(rogue, `${where}: nothing matched ${root}`).not.toBeNull();
+  expect(
+    rogue!.map((r) => `"${r.what}" scrolls ${r.how} by ${Math.round(r.over)}px`),
+    `${where}: only ${allowed.join(", ")} may scroll`,
+  ).toEqual([]);
+}
+
 /** The window never scrolls sideways. A horizontal bar is always a mistake. */
 export async function noSidewaysScroll(page: Page, where: string) {
   const overflow = await page.evaluate(() => {

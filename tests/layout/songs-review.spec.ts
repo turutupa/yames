@@ -13,7 +13,7 @@
 // Both are checked here, at the two narrowest widths the app is ever dragged
 // to, against the real stylesheets.
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, noSidewaysScroll } from "./fits";
+import { openShot, insideViewport, noSidewaysScroll, onlyTheseScroll } from "./fits";
 
 /** The two narrowest widths, which is where a review either fits or does not. */
 const WIDTHS = [
@@ -110,18 +110,20 @@ test.describe("the verdict", () => {
    */
   test("does not move the headline when the rest is opened", async ({ page }) => {
     await openShot(page, "songs-review-missed", { width: 1400, height: 900 });
-    // Measured against the review's own top, not the viewport's: the stage
-    // scrolls, so closing a section shortens the page and the browser clamps
-    // the scroll position — which moves everything on screen without moving
-    // anything in the layout. That is not the bug this test is about.
+    // Measured in the body's own LAYOUT, not against the viewport: the review
+    // scrolls inside the frame now, so closing a section shortens the content
+    // and the browser clamps the scroll position — which moves everything on
+    // screen without moving anything in the layout. Adding `scrollTop` back
+    // asks the question this test is actually about, which is whether the
+    // sentence sits in a different place in the panel.
     const offset = async () => {
       const box = await page.evaluate(() => {
         const answer = document.querySelector(".songs-review-answer");
-        const review = document.querySelector(".songs-review");
-        if (!answer || !review) return null;
+        const body = document.querySelector(".songs-review-body");
+        if (!answer || !body) return null;
         const a = answer.getBoundingClientRect();
-        const r = review.getBoundingClientRect();
-        return { top: a.top - r.top, width: a.width };
+        const b = body.getBoundingClientRect();
+        return { top: a.top - b.top + body.scrollTop, width: a.width };
       });
       expect(box, "no headline on the review").not.toBeNull();
       return box!;
@@ -149,6 +151,127 @@ test.describe("the verdict", () => {
     );
     expect(rows.length, "no go-stepper — the fixture should have three goes").toBeGreaterThan(1);
     expect(new Set(rows).size, "the goes are on more than one line at 1400px").toBe(1);
+  });
+});
+
+/**
+ * The verdict arrives where you were looking (W18, COACH_UX A4).
+ *
+ * It used to be drawn below the stage controls, the takes shelf and two more
+ * blocks, inside a stage that scrolled — so at 1400×900 its first line was at
+ * y=1075 and a player who stopped saw nothing happen at all. It takes the
+ * tab's place in the same frame now, and these are the three things that has
+ * to mean: it is where the tab was, its sentence and its button need no
+ * scroll to be read, and the tab is still behind it rather than thrown away.
+ */
+const HEIGHTS = [
+  { name: "the smallest window", width: 480, height: 780 },
+  { name: "a laptop", width: 1100, height: 720 },
+  { name: "the pictures", width: 1400, height: 900 },
+];
+
+test.describe("where the verdict appears", () => {
+  for (const size of HEIGHTS) {
+    test(`puts its heading and its button on screen at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-review-rushing", size);
+
+      // The two things a player has to be able to see without moving: what
+      // the coach said, and the way back.
+      await insideViewport(
+        page,
+        ".songs-review-title, .songs-review-sub, .songs-review-back",
+        `the verdict at ${size.name}`,
+        size,
+      );
+      await noSidewaysScroll(page, `the verdict at ${size.name}`);
+    });
+  }
+
+  for (const size of HEIGHTS) {
+    test(`takes the tab's own frame at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-review-rushing", size);
+      const where = await page.evaluate(() => {
+        const review = document.querySelector(".songs-review");
+        const frame = document.querySelector(".songs-stage-frame");
+        const pane = document.querySelector(".songs-tab-pane");
+        if (!review || !frame || !pane) return null;
+        const r = review.getBoundingClientRect();
+        const f = frame.getBoundingClientRect();
+        return {
+          dTop: Math.abs(r.top - f.top),
+          dLeft: Math.abs(r.left - f.left),
+          dBottom: Math.abs(r.bottom - f.bottom),
+          // The tab is hidden, not unmounted: alphaTab engraved the score to
+          // this box's width and would have to do it again from scratch.
+          paneHidden: getComputedStyle(pane).visibility === "hidden",
+          paneWidth: pane.getBoundingClientRect().width,
+        };
+      });
+      expect(where, `nothing to measure at ${size.name}`).not.toBeNull();
+      expect(where!.dTop, "the verdict does not start where the tab did").toBeLessThanOrEqual(2);
+      expect(where!.dLeft, "the verdict is not over the tab").toBeLessThanOrEqual(2);
+      expect(where!.dBottom, "the verdict does not fill the frame").toBeLessThanOrEqual(2);
+      expect(where!.paneHidden, "the tab is still showing under the verdict").toBe(true);
+      expect(
+        where!.paneWidth,
+        "the tab lost its box — alphaTab will re-engrave the whole score",
+      ).toBeGreaterThan(100);
+    });
+  }
+
+  /**
+   * Nothing scrolls but the verdict's own body.
+   *
+   * A scroller inside a scroller is the shape of the bug this task was sent
+   * to fix. The body is allowed one, because "what else" opens a second
+   * finding under the first; the stage is not.
+   */
+  for (const size of HEIGHTS) {
+    test(`scrolls nowhere but its own body at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-review-missed", size);
+      await onlyTheseScroll(
+        page,
+        ".songs-view",
+        [".songs-tab-viewport", ".songs-review-body", ".songs-takes-pop"],
+        `the verdict at ${size.name}`,
+      );
+    });
+  }
+
+  /**
+   * The three ways out, and where the caret lands.
+   *
+   * The button, Escape, and simply pressing play. Focus goes to the heading
+   * when it opens so a screen reader is told something arrived, and back to
+   * Play when it closes so a keyboard player is not left on a heading that no
+   * longer exists.
+   */
+  test("takes focus to its heading and gives it back to Play", async ({ page }) => {
+    await openShot(page, "songs-review-rushing", { width: 1400, height: 900 });
+    expect(
+      await page.evaluate(() => document.activeElement?.className ?? ""),
+      "the verdict did not take focus",
+    ).toContain("songs-review-title");
+
+    await page.locator(".songs-review-back").click();
+    await expect(page.locator(".songs-review")).toHaveCount(0);
+    expect(
+      await page.evaluate(() => document.activeElement?.className ?? ""),
+      "focus was left nowhere after the verdict closed",
+    ).toContain("transport-play");
+  });
+
+  test("closes on Escape", async ({ page }) => {
+    await openShot(page, "songs-review-rushing", { width: 1400, height: 900 });
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".songs-review")).toHaveCount(0);
+    await expect(page.locator(".songs-tab-pane[data-behind]")).toHaveCount(0);
+  });
+
+  test("closes when play is pressed again", async ({ page }) => {
+    await openShot(page, "songs-review-rushing", { width: 1400, height: 900 });
+    await page.locator(".transport-play").click();
+    await expect(page.locator(".songs-review")).toHaveCount(0);
   });
 });
 

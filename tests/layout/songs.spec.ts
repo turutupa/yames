@@ -9,7 +9,7 @@
 // nothing, is not a cosmetic problem — it is a score engraved to the wrong
 // width with a cursor walking off the side of it.
 import { test, expect } from "@playwright/test";
-import { openShot, fitsOnOneLine, noSidewaysScroll, IN_ENGLISH, LAYOUT_LOCALE } from "./fits";
+import { openShot, fitsOnOneLine, insideViewport, noSidewaysScroll, onlyTheseScroll, IN_ENGLISH, LAYOUT_LOCALE } from "./fits";
 
 /**
  * The four widths jam.spec uses, and for the same reasons: the narrow window
@@ -113,36 +113,20 @@ test.describe("the songs stage", () => {
   for (const size of WIDTHS) {
     test(`keeps every stage control inside the window at ${size.width}px`, async ({ page }) => {
       await openShot(page, "songs", size);
-      const boxes = await page.$$eval(".songs-stage-controls > *", (nodes) =>
-        nodes.map((n) => {
-          const r = n.getBoundingClientRect();
-          return { left: r.left, right: r.right, what: n.className.toString() };
-        }),
-      );
-      expect(boxes.length, `no stage controls at ${size.width}px`).toBeGreaterThan(0);
-      for (const box of boxes) {
-        expect(
-          Math.round(box.right),
-          `"${box.what}" ends at ${Math.round(box.right)}, past the window's ${size.width}`,
-        ).toBeLessThanOrEqual(size.width + 1);
-        expect(
-          Math.round(box.left),
-          `"${box.what}" starts at ${Math.round(box.left)}, off the left of the window`,
-        ).toBeGreaterThanOrEqual(-1);
-      }
+      await insideViewport(page, ".songs-strip > *", `the strip at ${size.width}px`, size);
     });
   }
 
   /**
-   * The bar-range fields stay on their own line beside each other.
+   * The portion group stays on one line where there is room.
    *
-   * Two number inputs and a button: the row a person uses to say "loop 17 to
-   * 24", and the one place in the mode where a wrapped control reads as a
-   * bug rather than as a layout.
+   * The bars, what they add up to, the repeat, "whole song" and "keep it":
+   * the row a person uses to say "loop 17 to 24", and the one place in the
+   * mode where a wrapped control reads as a bug rather than as a layout.
    */
-  test("keeps the bar range row together where there is room", async ({ page }) => {
+  test("keeps the portion row together where there is room", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
-    await fitsOnOneLine(page, ".songs-range-fields", "the bar range row");
+    await fitsOnOneLine(page, ".songs-strip-portion", "the portion row");
   });
 
   /**
@@ -150,32 +134,356 @@ test.describe("the songs stage", () => {
    *
    * A chip that resizes its own row when pressed is the complaint the owner
    * made about Jam's switches, and the section chips are the same shape of
-   * control on the same kind of row.
+   * control on the same kind of row. This got sharper with the portion: the
+   * sentence beside the fields goes from "The whole song" to "4 bars · on
+   * repeat" when a section is pressed, and a sentence that changes width
+   * drags every control on the row along with it.
    */
   test("does not move the controls when a section is chosen", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
-    const tempo = page.locator(".songs-control-tempo");
-    const before = await tempo.boundingBox();
+    const tempo = page.locator(".songs-strip-tempo");
+    const loop = page.locator(".songs-loop-chip");
+    const before = { tempo: await tempo.boundingBox(), loop: await loop.boundingBox() };
     await page.locator(".songs-section-chips .songs-chip").first().click();
     await page.evaluate(
       () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
     );
-    const after = await tempo.boundingBox();
-    expect(Math.round(after!.x), "the speed control moved sideways").toBe(Math.round(before!.x));
-    expect(Math.round(after!.width), "the speed control changed width").toBe(
-      Math.round(before!.width),
+    const after = { tempo: await tempo.boundingBox(), loop: await loop.boundingBox() };
+    expect(Math.round(after.tempo!.x), "the speed control moved sideways").toBe(
+      Math.round(before.tempo!.x),
+    );
+    expect(Math.round(after.tempo!.width), "the speed control changed width").toBe(
+      Math.round(before.tempo!.width),
+    );
+    // And the repeat switch, which sits right after the sentence that changed.
+    expect(Math.round(after.loop!.x), "the repeat switch moved under the hand").toBe(
+      Math.round(before.loop!.x),
     );
   });
 });
 
 /**
- * The band's faders and the count-in, at the smallest window the app opens.
+ * Is it on screen? (W18, 2026-09-20)
+ *
+ * The question the hundred and seven tests above and beside this one never
+ * asked. Every one of them measured a box against its PARENT, and a row fits
+ * its parent perfectly while the parent sits below the bottom of the window.
+ * Measured on the day this was written, at 1400×900: the band's faders began
+ * at y=928 and the verdict at y=1075, in a 900px window, with every test
+ * green. So these ask about the WINDOW, in the state each thing is for — the
+ * strip while the band is playing, the verdict after the stop.
+ *
+ * Three sizes: the smallest window the app can be dragged to
+ * (`tauri.conf.json`'s `minWidth`/`minHeight`), the one a laptop lid gives
+ * you, and the one the pictures are taken at.
+ */
+const HEIGHTS = [
+  { name: "the smallest window", width: 480, height: 780 },
+  { name: "a laptop", width: 1100, height: 720 },
+  { name: "the pictures", width: 1400, height: 900 },
+];
+
+/**
+ * The boxes that are allowed to scroll, and nothing else.
+ *
+ * The tab, because the cursor walks down a page that is longer than any
+ * window; the verdict's body, because "what else" opens a second finding
+ * under the first; and the takes shelf, which is a popover and is portalled
+ * out of the stage anyway.
+ */
+const MAY_SCROLL = [".songs-tab-viewport", ".songs-review-body", ".songs-takes-pop"];
+
+test.describe("the stage is one screen", () => {
+  for (const size of HEIGHTS) {
+    test(`puts every control within reach while playing at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-playing", size);
+
+      // Still playing, so this is the state A13 is about rather than a stage
+      // that quietly stopped before it was measured.
+      await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+
+      // Every group of the strip, and every control inside every group: the
+      // fader is the one that fails silently, because it goes on working at
+      // four pixels and at minus forty.
+      await insideViewport(page, ".songs-strip > *", `the strip at ${size.name}`, size);
+      await insideViewport(
+        page,
+        ".songs-band-lane, .songs-strip .songs-chip, .songs-range-field input",
+        `the strip's controls at ${size.name}`,
+        size,
+      );
+      await noSidewaysScroll(page, `songs playing at ${size.name}`);
+    });
+  }
+
+  for (const size of HEIGHTS) {
+    test(`scrolls nowhere but the tab at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      await onlyTheseScroll(page, ".songs-view", MAY_SCROLL, `songs at ${size.name}`);
+
+      // And the stage's own wrapper, which is where the outer scroller was.
+      const outer = await page.evaluate(() => {
+        const el = document.querySelector('.main-content[data-view="songs"] > .view-transition-wrapper');
+        return el ? el.scrollHeight - el.clientHeight : null;
+      });
+      expect(outer, "no songs stage wrapper").not.toBeNull();
+      expect(outer!, `the stage itself scrolls ${outer}px at ${size.name}`).toBeLessThanOrEqual(2);
+    });
+  }
+
+  /**
+   * The tab keeps real room at every one of them.
+   *
+   * The other half of "one screen": a stage that fits because the score was
+   * squeezed to eighty pixels has not solved anything, and alphaTab engraves
+   * to whatever box it is given.
+   */
+  for (const size of HEIGHTS) {
+    test(`still gives the tab a page to read at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      const viewport = await page.locator(".songs-tab-viewport").boundingBox();
+      expect(viewport, `no tab viewport at ${size.name}`).not.toBeNull();
+      expect(
+        viewport!.height,
+        `the tab is only ${Math.round(viewport!.height)}px tall at ${size.name}`,
+      ).toBeGreaterThan(180);
+    });
+  }
+});
+
+/**
+ * The portion you are working on, drawn where it actually is (W18 item 0).
+ *
+ * The owner: *"Being able to select a portion of a song so it plays that
+ * portion in repeat is super critical for song learning."* So the band behind
+ * the chosen bars is not decoration — it is the answer to "what is it going to
+ * play?", and it has to be over the RIGHT bars. Nothing in vitest can check
+ * that: where bar five sits on the page is decided by alphaTab at run time,
+ * in a browser, at whatever width the window happens to be.
+ */
+test.describe("the chosen portion, on the tab", () => {
+  for (const size of HEIGHTS) {
+    test(`draws the band over the chosen bars at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-portion", size);
+
+      // What the scene chose, and where the engraving put those bars. The
+      // bounds come from alphaTab's own lookup — the same one the stage hit-
+      // tests with — because nothing about the DOM says which box is bar 5.
+      const measured = await page.evaluate(() => {
+        const api = (
+          window as unknown as {
+            __SONGS_TAB_API__?: {
+              renderer?: {
+                boundsLookup?: {
+                  findMasterBarByIndex(i: number): {
+                    visualBounds: { x: number; y: number; w: number; h: number };
+                  } | null;
+                } | null;
+              };
+            };
+          }
+        ).__SONGS_TAB_API__;
+        const lookup = api?.renderer?.boundsLookup;
+        if (!lookup) return null;
+        const bands = [...document.querySelectorAll<HTMLElement>(".songs-tab-band")].map((el) => ({
+          x: el.offsetLeft,
+          y: el.offsetTop,
+          w: el.offsetWidth,
+          h: el.offsetHeight,
+        }));
+        // The scene chooses printed bars 5 to 8, so 4..7 zero-based.
+        const wanted = [4, 5, 6, 7].map((i) => lookup.findMasterBarByIndex(i)?.visualBounds ?? null);
+        const notWanted = [0, 1, 2, 3].map(
+          (i) => lookup.findMasterBarByIndex(i)?.visualBounds ?? null,
+        );
+        return { bands, wanted, notWanted };
+      });
+      expect(measured, `no tab bounds at ${size.name}`).not.toBeNull();
+      const { bands, wanted, notWanted } = measured!;
+      expect(bands.length, `nothing drawn behind the chosen bars at ${size.name}`).toBeGreaterThan(
+        0,
+      );
+
+      /** Is the middle of this bar inside one of the bands? */
+      const covered = (box: { x: number; y: number; w: number; h: number } | null) => {
+        if (!box) return false;
+        const cx = box.x + box.w / 2;
+        const cy = box.y + box.h / 2;
+        return bands.some(
+          (b) => cx >= b.x - 2 && cx <= b.x + b.w + 2 && cy >= b.y - 2 && cy <= b.y + b.h + 2,
+        );
+      };
+
+      for (const [i, box] of wanted.entries()) {
+        expect(covered(box), `bar ${i + 5} is chosen but has no band over it`).toBe(true);
+      }
+      for (const [i, box] of notWanted.entries()) {
+        expect(covered(box), `bar ${i + 1} is not chosen but has a band over it`).toBe(false);
+      }
+    });
+  }
+
+  /**
+   * A selection that crosses a line break is two bands, not one box drawn
+   * across the page and through the music between the systems.
+   */
+  test("draws a band per system when the portion crosses a line break", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+
+    // Bars 3 to 6 of the fixture: the page breaks after bar 3, so this is the
+    // case that needs two. Set through the strip's own fields, which are one
+    // of the four doors to the same selection.
+    const from = page.locator(".songs-strip-range input, .songs-strip-portion input").first();
+    const to = page.locator(".songs-strip-range input, .songs-strip-portion input").nth(1);
+    await from.fill("3");
+    await to.fill("6");
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+
+    const tops = await page.$$eval(".songs-tab-band", (nodes) =>
+      nodes.map((n) => Math.round((n as HTMLElement).offsetTop)),
+    );
+    expect(tops.length, "the portion was not drawn at all").toBeGreaterThan(0);
+    expect(
+      new Set(tops).size,
+      "bars 3–6 cross a line break and were drawn as one band across the page",
+    ).toBeGreaterThan(1);
+  });
+
+  /**
+   * Choosing means looping, and the strip says so in words.
+   *
+   * The band is the picture; this is the sentence. Neither is ever the only
+   * signal — one of them is what a screen reader and a low-contrast theme
+   * have to go on.
+   */
+  test("says what is chosen, and turns the repeat on with it", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const says = page.locator(".songs-portion-says");
+    await expect(says, "a fresh song should be the whole song").toHaveText(/whole song/i);
+
+    await page.locator(".songs-strip-portion input").first().fill("3");
+    await expect(says).toContainText("bars");
+    await expect(says, "choosing a portion did not start the repeat").toContainText("repeat");
+    await expect(page.locator(".songs-loop-chip")).toHaveAttribute("aria-pressed", "true");
+
+    // "Whole song" clears it, and stops the repeat with it.
+    await page.getByRole("button", { name: /whole song/i }).click();
+    await expect(says).toHaveText(/whole song/i);
+    await expect(page.locator(".songs-tab-band")).toHaveCount(0);
+    await expect(page.locator(".songs-loop-chip")).toHaveAttribute("aria-pressed", "false");
+  });
+
+  /** A portion kept under a name sits beside the sections and comes back. */
+  test("keeps a named portion beside the sections", async ({ page }) => {
+    await openShot(page, "songs-portion", { width: 1400, height: 900 });
+    const chip = page.locator(".songs-portion-chip-main");
+    await expect(chip).toHaveText("The chorus");
+
+    // Clear it, then press the chip: the same bars come back.
+    await page.getByRole("button", { name: /^whole song$/i }).click();
+    await expect(page.locator(".songs-tab-band")).toHaveCount(0);
+    await expect(page.locator(".songs-strip-portion input").first()).toHaveValue("1");
+    await chip.click();
+    await expect(page.locator(".songs-strip-portion input").first()).toHaveValue("5");
+    await expect(page.locator(".songs-strip-portion input").nth(1)).toHaveValue("8");
+    await expect(page.locator(".songs-tab-band").first()).toBeVisible();
+  });
+});
+
+/**
+ * One count-in, not two (W18 item 3).
+ *
+ * Songs shipped with the stage's three chips AND the transport's switch, and
+ * the transport's wrote the click's warm-up beats — which `load_song` clears,
+ * so the one in the bottom bar did nothing at all. There is one now, it is
+ * the transport's, and it writes the song's own setting.
+ */
+test.describe("the count-in", () => {
+  test("is the transport's switch and nothing else on the stage", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+
+    expect(
+      await page.locator(".songs-view .songs-countin-chips").count(),
+      "the stage still has its own count-in chips",
+    ).toBe(0);
+
+    const transportSwitch = page.locator(".transport .transport-switch").first();
+    await expect(transportSwitch, "no count-in switch in the transport").toHaveCount(1);
+    await expect(transportSwitch).toHaveAttribute("aria-checked", "false");
+  });
+
+  test("turns the song's own count-in on when it is pressed", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const transportSwitch = page.locator(".transport .transport-switch").first();
+    await transportSwitch.click();
+    await expect(
+      transportSwitch,
+      "the switch went back off — it is writing somewhere the song does not read",
+    ).toHaveAttribute("aria-checked", "true");
+  });
+});
+
+/**
+ * The library panel under a song is the song library, and nothing else.
+ *
+ * It used to go on drawing the metronome's presets beneath the songs, and
+ * with none saved it offered "No presets yet — save a tempo, sound and meter
+ * you keep coming back to", which is not a sentence about a piece of music.
+ */
+test.describe("the sidebar under a song", () => {
+  test("offers no presets", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    expect(
+      await page.locator(".preset-sidebar-empty-state").count(),
+      "the preset empty state is still under the song list",
+    ).toBe(0);
+    expect(
+      await page.locator(".preset-sidebar-item:not(.song-item)").count(),
+      "a preset row is still under the song list",
+    ).toBe(0);
+    // And the songs themselves are still there.
+    expect(await page.locator(".preset-sidebar-item.song-item").count()).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * The takes shelf is a popover now, and it does not land on Play.
+ *
+ * It was a section under the stage controls — one of the three blocks that
+ * pushed the verdict under the fold. A popover off its own switch costs the
+ * stage nothing, and the one rule it has to keep is the one the cheat sheet
+ * keeps in `jam.spec.ts`: never over the transport.
+ */
+test.describe("the takes shelf", () => {
+  for (const size of HEIGHTS) {
+    test(`opens inside the window and clear of Play at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs-takes", size);
+      const shelf = await page.locator(".songs-takes-pop").boundingBox();
+      expect(shelf, `no takes shelf at ${size.name}`).not.toBeNull();
+      expect(shelf!.y, "off the top").toBeGreaterThanOrEqual(-1);
+      expect(shelf!.y + shelf!.height, "off the bottom").toBeLessThanOrEqual(size.height + 1);
+      expect(shelf!.x, "off the left").toBeGreaterThanOrEqual(-1);
+      expect(shelf!.x + shelf!.width, "off the right").toBeLessThanOrEqual(size.width + 1);
+
+      const play = await page.locator(".transport-play").boundingBox();
+      expect(play, "no transport").not.toBeNull();
+      expect(
+        Math.round(shelf!.y + shelf!.height),
+        "the shelf covers the Play button",
+      ).toBeLessThanOrEqual(Math.round(play!.y) + 1);
+    });
+  }
+});
+
+/**
+ * The band's faders, at the smallest window the app opens.
  *
  * 480 × 780 is `minWidth`/`minHeight` in `tauri.conf.json` — the window a
  * person can actually drag themselves down to — and it is narrower than
- * anything else in this file. These are the two newest controls on the stage
- * and they are the ones with the most in a row: a name, a slider, a number
- * and a switch. A slider is the control that fails silently when the row runs
+ * anything else in this file. A lane is a name, a slider, a number and a
+ * switch, and a slider is the control that fails silently when the row runs
  * out of room, because it shrinks to a few pixels and goes on working.
  */
 const SMALLEST = { width: 480, height: 780 };
@@ -197,7 +505,7 @@ const THEMES = [
   "manuscript",
 ];
 
-test.describe("the band and the count-in", () => {
+test.describe("the band", () => {
   test("has a row for the click and for each player the file has", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
     const names = await page.locator(".songs-band-name").allTextContents();
@@ -213,21 +521,53 @@ test.describe("the band and the count-in", () => {
     expect(names.map((n) => n.trim())).toEqual(["Click", "Drums", "Bass"]);
   });
 
-  test("offers no count-in, one bar or two, and nothing else", async ({ page }) => {
+  /**
+   * Every lane keeps its name where the stage is wide enough, and loses it
+   * rather than the fader where it is not.
+   *
+   * The container query does the dropping, and what it must never do is drop
+   * the name while leaving the row too wide to fit anyway — so both ends are
+   * asserted rather than the rule being trusted.
+   */
+  test("sheds the names, then the row, as the stage narrows", async ({ page }) => {
+    // Wide: name, fader, number and mute, all of it on the strip.
     await openShot(page, "songs", { width: 1400, height: 900 });
-    const chips = await page.locator(".songs-countin-chips .songs-chip").allTextContents();
-    expect(chips).toHaveLength(3);
-    // One of them is chosen, and with nothing set it is "straight in".
-    const pressed = await page
-      .locator('.songs-countin-chips .songs-chip[aria-pressed="true"]')
-      .count();
-    expect(pressed, "no count-in choice is shown as the current one").toBe(1);
+    const wide = await page.locator(".songs-band-name-text").first().boundingBox();
+    expect(wide, "no lane name at 1400px").not.toBeNull();
+    expect(wide!.width, "the lane names are gone on a wide stage").toBeGreaterThan(10);
+
+    // Middling: the container query drops the WORD and keeps the row, so the
+    // faders stay on the strip where A13 wants them.
+    await page.setViewportSize({ width: 1100, height: 900 });
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+    await expect(
+      page.locator(".songs-strip .songs-band-lane"),
+      "the lanes left the strip before they had to",
+    ).toHaveCount(3);
+    expect(
+      await page.locator(".songs-band-name-text").first().boundingBox(),
+      "the lane names are still laid out at a middling width",
+    ).toBeNull();
+
+    // Narrow: a row no longer fits at all, so the band folds into one chip
+    // and the faders are a press away rather than a scroll away.
+    await page.setViewportSize({ width: 480, height: 780 });
+    await expect(page.locator(".songs-band-opener")).toHaveCount(1);
+    await expect(page.locator(".songs-strip .songs-band-lane")).toHaveCount(0);
   });
 
   for (const theme of THEMES) {
     test(`fits at ${SMALLEST.width}×${SMALLEST.height} under ${theme}`, async ({ page }) => {
       await openShot(page, "songs", SMALLEST, theme);
       await noSidewaysScroll(page, `songs at ${SMALLEST.width}px under ${theme}`);
+
+      // At this width the band is folded, so the faders are inside its
+      // popover — opened here the way a person opens it, because a control
+      // behind a press still has to be a control when it is reached.
+      await page.locator(".songs-band-opener").click();
+      await expect(page.locator(".songs-band-pop")).toHaveCount(1);
 
       // Every fader row is inside the window, and the slider in it is still
       // a slider rather than a sliver.
@@ -263,13 +603,13 @@ test.describe("the band and the count-in", () => {
         ).toBeLessThanOrEqual(SMALLEST.width + 1);
       }
 
-      // And the count-in chips wrap rather than run off the side.
-      const chips = await page.$$eval(".songs-countin-chips .songs-chip", (nodes) =>
+      // And the speed chips wrap rather than run off the side.
+      const chips = await page.$$eval(".songs-tempo-chips .songs-chip", (nodes) =>
         nodes.map((n) => n.getBoundingClientRect().right),
       );
-      expect(chips.length, `no count-in under ${theme}`).toBe(3);
+      expect(chips.length, `no speed chips under ${theme}`).toBe(6);
       for (const right of chips) {
-        expect(Math.round(right), "a count-in chip is past the right edge").toBeLessThanOrEqual(
+        expect(Math.round(right), "a speed chip is past the right edge").toBeLessThanOrEqual(
           SMALLEST.width + 1,
         );
       }

@@ -1084,7 +1084,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             <div className="setlist-item-rule" aria-hidden="true" />
           )}
 
-          {!showSetlists && !showJams && adding && (
+          {/* Songs joined the list of modes that keep their OWN library here,
+              and did not join the three guards below with it — so under a song
+              the panel went on drawing the metronome's presets, and under an
+              empty preset list it offered "No presets yet — save a tempo,
+              sound and meter", which means nothing about a piece of music you
+              imported. One list per mode, and on this tab the list is songs. */}
+          {!showSetlists && !showJams && !showSongs && adding && (
             <div className="preset-sidebar-item adding">
               <input
                 ref={inputRef}
@@ -1105,7 +1111,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               />
             </div>
           )}
-          {!showSetlists && !showJams && presets.map((p) => (
+          {!showSetlists && !showJams && !showSongs && presets.map((p) => (
             <button
               key={p.id}
               className={`preset-sidebar-item ${activeId === p.id ? "active" : ""} ${activeId === p.id && dirty ? "dirty" : ""}`}
@@ -1145,7 +1151,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </button>
           ))}
-          {!showSetlists && !showJams && presets.length === 0 && !adding && (
+          {!showSetlists && !showJams && !showSongs && presets.length === 0 && !adding && (
             search.trim() ? (
               <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
             ) : (

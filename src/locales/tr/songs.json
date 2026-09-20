@@ -196,6 +196,21 @@
           "3": "{{bars}} her seferinde doğru çaldın. Bırak ve sonra geri dön."
         }
       }
+    },
+    "stage": {
+      "backToTab": "Back to the tab",
+      "selectedBars": "Bars {{bars}} chosen",
+      "wholeSong": "The whole song",
+      "portionSays": "{{count}} bar · {{state}}",
+      "portionSays_other": "{{count}} bars · {{state}}",
+      "looping": "on repeat",
+      "once": "once through",
+      "timeRound": "Go {{n}}",
+      "keepPortion": "Keep it",
+      "portionPlaceholder": "Name this bit",
+      "renamePortion": "Rename",
+      "deletePortion": "Forget this one",
+      "portionTitle": "{{name}} — at {{percent}}%"
     }
   }
 }

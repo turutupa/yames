@@ -17,6 +17,8 @@
  */
 import { storeLoad, storeSave } from "../ipc";
 import { DEFAULT_SONG_MIX, SONG_MIX_MAX, SONG_MIX_MIN } from "./types";
+import { MAX_SAVED_PORTIONS } from "./selection";
+import type { SavedPortion } from "./selection";
 import type { SongMix, SongRole } from "./types";
 
 /** A fader on the stage: the band's three rows, and the click over them. */
@@ -39,6 +41,25 @@ export type SongMixSetting = {
    * stored before this existed says.
    */
   takes: boolean;
+  /**
+   * The portion of this song the player was last working on, and how
+   * (2026-09-20).
+   *
+   * Beside the band rather than on the song record, because it is the same
+   * kind of fact: not what the song IS — the record owns that — but how this
+   * player has it set up. Somebody who left off looping bars 17–24 at 70 %
+   * comes back to bars 17–24 at 70 %, which is the whole of what "practising
+   * a passage" means across two sittings.
+   *
+   * `null` is the honest empty value and means the whole song. Absent is what
+   * every song stored before this existed says, and reads back as null.
+   */
+  selection: { startBar: number; endBar: number } | null;
+  loop: boolean;
+  /** 50–100. The speed this song is being worked at. */
+  tempoPercent: number;
+  /** Portions the player named and kept, oldest first. */
+  portions: SavedPortion[];
 };
 
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
@@ -46,6 +67,10 @@ export const DEFAULT_MIX_SETTING: SongMixSetting = {
   muted: [],
   countInBars: 0,
   takes: false,
+  selection: null,
+  loop: false,
+  tempoPercent: 100,
+  portions: [],
 };
 
 function clampGain(value: number): number {
@@ -127,7 +152,58 @@ export function readMixSetting(stored: unknown): SongMixSetting {
     // older build can hold — missing, `"yes"`, `1` — leaves the microphone
     // alone, which is the only default a switch like this may have.
     takes: raw.takes === true,
+    selection: readSelection(raw.selection),
+    loop: raw.loop === true,
+    tempoPercent:
+      typeof raw.tempoPercent === "number" && Number.isFinite(raw.tempoPercent)
+        ? Math.min(100, Math.max(50, Math.round(raw.tempoPercent)))
+        : 100,
+    portions: readPortions(raw.portions),
   };
+}
+
+/**
+ * A stored selection, or null.
+ *
+ * Not clamped to the song here: this file has no score, and a selection that
+ * points past the end of a song whose file was replaced is held inside it by
+ * `clampSelection` at the moment it is used. What it must not do is come back
+ * as `{ startBar: NaN }`, which is a loop the engine would never leave.
+ */
+function readSelection(stored: unknown): { startBar: number; endBar: number } | null {
+  const raw = stored as { startBar?: unknown; endBar?: unknown } | null | undefined;
+  if (!raw || typeof raw !== "object") return null;
+  const bar = (value: unknown) =>
+    typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.round(value) : null;
+  const start = bar(raw.startBar);
+  const end = bar(raw.endBar);
+  if (start === null || end === null) return null;
+  return { startBar: Math.min(start, end), endBar: Math.max(start, end) };
+}
+
+/** The named portions, dropping any row that is not one. */
+function readPortions(stored: unknown): SavedPortion[] {
+  if (!Array.isArray(stored)) return [];
+  const out: SavedPortion[] = [];
+  for (const row of stored) {
+    if (!row || typeof row !== "object") continue;
+    const { id, name } = row as { id?: unknown; name?: unknown };
+    const range = readSelection(row);
+    if (typeof id !== "string" || typeof name !== "string" || !name.trim() || !range) continue;
+    const percent = (row as { tempoPercent?: unknown }).tempoPercent;
+    out.push({
+      id,
+      name: name.trim().slice(0, 24),
+      startBar: range.startBar,
+      endBar: range.endBar,
+      tempoPercent:
+        typeof percent === "number" && Number.isFinite(percent)
+          ? Math.min(100, Math.max(50, Math.round(percent)))
+          : 100,
+    });
+    if (out.length >= MAX_SAVED_PORTIONS) break;
+  }
+  return out;
 }
 
 /** What this song's band was left at, or the defaults. */

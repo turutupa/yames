@@ -183,7 +183,8 @@
         "metronome": "Métronome",
         "view": "Affichage",
         "navigation": "Navigation",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Songs"
       },
       "actions": {
         "play": "Lecture / Arrêt",
@@ -218,7 +219,13 @@
         "jam-prev-section": "Section précédente",
         "jam-loop-section": "Boucler cette section",
         "jam-take": "Enregistrer la prise",
-        "tab-5": "Onglet Morceaux"
+        "tab-5": "Onglet Morceaux",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -253,7 +260,13 @@
         "jam-prev-section": "Revenir au début de la section précédente à la barre de mesure",
         "jam-loop-section": "Mettre en boucle la section où tu es, ou l'en sortir",
         "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
-        "tab-5": "Passer à l'onglet Morceaux"
+        "tab-5": "Passer à l'onglet Morceaux",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
       }
     },
     "inputTest": {
