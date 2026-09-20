@@ -318,10 +318,31 @@
   min-width: 0;
 }
 
-/* The host and the selection overlay, stacked and the same size.
-   The stack is what gives the overlay something to be `inset: 0` of, and it
-   takes its height from the engraving rather than from the viewport — so the
-   band goes on lining up with bar 40 after the page has been scrolled. */
+/* The host and the selection layers, stacked and the same size.
+   The stack is what gives them something to be `inset: 0` of, and it takes
+   its height from the engraving rather than from the viewport — so the band
+   goes on lining up with bar 40 after the page has been scrolled.
+ *
+ * ## Three layers, in this order, and the order is the feature
+ *
+ * Bottom to top: the band behind the chosen bars, then the engraving with
+ * alphaTab's cursor over it, then the handles you can take hold of.
+ *
+ *   0  .songs-tab-bands    the portion, a wash behind the music
+ *   1  .songs-tab-host     the notes, and the cursor inside them
+ *   2  .songs-tab-overlay  the pointer surface, and a handle at each end
+ *
+ * The band and the handles used to be one layer above the host, which put a
+ * tinted rectangle over the notes and left the cursor with nothing between it
+ * and the handle a player drags. Splitting them is what lets the cursor sit
+ * ABOVE the band it is walking through and BELOW the handles.
+ *
+ * `z-index` on the host is also what CONFINES alphaTab's cursor. alphaTab
+ * writes its own cursor wrapper with an inline `z-index: 1000`; with the host
+ * a plain positioned box that number is measured against this stack, and the
+ * cursor floats over everything in it, handles included. Giving the host a
+ * z-index of its own makes it a stacking context, so 1000 means "above the
+ * notes" and stops there. */
 .songs-tab-stack {
   position: relative;
   width: 100%;
@@ -333,12 +354,26 @@
      must not be a flex item that can be squeezed. */
   width: 100%;
   min-width: 0;
+  /* alphaTab sets `position: relative` on this element itself when it builds
+     its cursors; said here too so the layer exists before the first render
+     and does not depend on a library's side effect. */
+  position: relative;
+  z-index: 1;
   opacity: 0;
   transition: opacity 140ms ease;
 }
 
 .songs-tab-host[data-ready] {
   opacity: 1;
+}
+
+/* The band's own layer, under the music. Never takes a press: every pointer
+   on the tab belongs to the overlay above. */
+.songs-tab-bands {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* ── Choosing a portion on the tab ────────────────────────────────────── */
@@ -353,7 +388,7 @@
 .songs-tab-overlay {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   touch-action: pan-y;
 }
 
@@ -396,6 +431,49 @@
    following the pointer around. */
 .songs-tab-viewport[data-selecting] .songs-tab-overlay {
   cursor: col-resize;
+}
+
+/* ── Where you are on the page ────────────────────────────────────────── */
+
+/* The cursor, and the reason there was none (2026-09-20).
+ *
+ * alphaTab draws two boxes over the engraving — one the width of the bar
+ * being played, one three pixels wide on the beat — and gives them the
+ * classes below, a position, and NOTHING ELSE. The package ships no
+ * stylesheet at all: there is not one `.css` file anywhere in
+ * `@coderline/alphatab`, and its own documentation hands you these two
+ * selectors to fill in. Nobody filled them in here, so both boxes were
+ * `background-color: rgba(0, 0, 0, 0)` — present, positioned, moving, and
+ * completely invisible. In all thirteen themes, not some of them.
+ *
+ * That is why a capture of the stage with the band playing showed a
+ * transport counting bars over a page with no cursor on it.
+ *
+ * Two marks rather than one, because they say two different things and a
+ * player reads both at a glance: the bar you are in, as a wash the notes stay
+ * readable through, and the beat you are on, as a line. The line is the one
+ * that has to be unmistakable, so it is the accent at full strength with a
+ * ring of the page's own ground around it — over a note head, over a staff
+ * line, or over the tint of a chosen portion, there is always a pixel of
+ * background between the line and whatever is under it. The halo is the
+ * theme's own glow token, which is the accent again and needs no new colour.
+ *
+ * `--accent` is a theme token, not a guess: `themes.test.ts` already pins it
+ * as readable against the card each of these is drawn on. */
+.songs-tab-host .at-cursor-bar {
+  /* The same wash the chosen portion uses, on purpose: over a bar inside the
+     portion the two tints add up, so "here" is brighter than "this bit" and
+     the page never has two rectangles competing to be the loudest. */
+  background: var(--accent-subtle);
+  border-radius: 3px;
+}
+
+.songs-tab-host .at-cursor-beat {
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px var(--bg-card),
+    0 0 6px 1px var(--accent-glow);
 }
 
 /* ── The notes light while you play (SONGS.md A7) ─────────────────────── */

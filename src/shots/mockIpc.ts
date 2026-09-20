@@ -22,7 +22,7 @@ import { importSong } from "../songs/import";
 import { newSongRecord } from "../songs/library";
 import type { SongRecord } from "../songs/library";
 import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
-import type { ScoreSchedule } from "../songs/types";
+import type { ScoreSchedule, SongTransport } from "../songs/types";
 
 /**
  * The library in the sidebar.
@@ -329,6 +329,29 @@ export function installShotMock(shot: Shot, theme: string): void {
    * show up in the app.
    */
   let songSchedule: ScoreSchedule | null = null;
+
+  /**
+   * The song the "engine" is carrying, as `load_song` was given it.
+   *
+   * Kept for one reason, and it is the bug this harness was hiding: the beat
+   * event the mock sent carried the jam's fields and none of the song's, so
+   * `songTick` arrived `undefined`, `songPosition` fell back to the start of
+   * the range, and the tab's cursor sat on tick zero for the whole of every
+   * playing scene. A capture of the stage then showed a transport counting
+   * bars four over a page with the cursor still on bar one — which read as
+   * "the cursor is not drawn" and was really "the harness never moved it".
+   *
+   * A mock that answers a command has to send what the command's engine
+   * sends. `engine.rs` walks the song's own tick table and reports
+   * `songBar`, `songTick`, `songPass` and `songCountIn` on every tick; the
+   * transport it was handed carries every number needed to do the same, so
+   * that is what happens below.
+   */
+  let songTransport: SongTransport | null = null;
+
+  /** Which onsets of the pushed schedule have already been reported. */
+  let onsetsSaid = 0;
+
   const scripted = () => {
     const recipe = shot.songs?.review;
     if (!recipe || !songSchedule) return null;
@@ -343,6 +366,85 @@ export function installShotMock(shot: Shot, theme: string): void {
       quarterMs,
     };
   };
+
+  /**
+   * Where a song is on this tick, the way `engine.rs` reports it.
+   *
+   * The contract is `BeatEvent`'s four song fields and `src/songs/position.ts`
+   * is what reads them, so this walks the transport it was handed rather than
+   * inventing an axis: the range's bars in order, in the score's own ticks,
+   * wrapping when the range repeats. A count-in is whole bars of the range's
+   * first meter and reports `songBar: null` — a count-in is not a bar of the
+   * piece, and a cursor that walked through one would be pointing at notes
+   * nobody has been asked to play yet.
+   */
+  function songAt(beat: number) {
+    const rest = { songBar: null as number | null, songTick: 0, songPass: 0, songCountIn: false };
+    const transport = songTransport;
+    if (!transport) return rest;
+    const bars = transport.bars.slice(transport.range.startBar, transport.range.endBar + 1);
+    const first = bars[0];
+    if (!first) return rest;
+
+    // One click per beat of the bar's own meter: a 6/8 counts eighths, and
+    // `ticksPerQuarter` is about quarters, so the denominator does the work.
+    const tpq = transport.ticksPerQuarter;
+    const beatTicks = (tpq * 4) / (first.denominator || 4);
+    const countInBeats = (transport.countInBars || 0) * (first.numerator || 4);
+    if (beat < countInBeats) return { ...rest, songCountIn: true };
+
+    const span = bars.reduce((sum, bar) => sum + bar.lengthTicks, 0);
+    if (span <= 0) return rest;
+    const walked = (beat - countInBeats) * beatTicks;
+    // Off the end with no repeat is the range's last tick, which is where a
+    // song that has finished leaves the cursor.
+    const into = transport.loops ? walked % span : Math.min(walked, span - 1);
+
+    let bar = transport.range.startBar;
+    let seen = 0;
+    for (let i = 0; i < bars.length; i++) {
+      bar = transport.range.startBar + i;
+      if (into < seen + bars[i].lengthTicks) break;
+      seen += bars[i].lengthTicks;
+    }
+    return {
+      songBar: bar,
+      songTick: first.startTick + into,
+      songPass: transport.loops ? Math.floor(walked / span) : 0,
+      songCountIn: false,
+    };
+  }
+
+  /**
+   * And the verdicts on the notes that have gone by (`SONGS.md` A7).
+   *
+   * One `score-onset` per expected note as the cursor passes it, which is
+   * what the analyzer emits when a schedule is loaded. Without these the
+   * stage photographs with nothing lit, so the one check nobody could make
+   * was whether a lit note is visible at all.
+   *
+   * The verdicts are a fixed cycle rather than anything random: a screenshot
+   * has to come out the same way twice, and a cycle gives the picture the
+   * whole mark language — on time, a little either side, and one that got
+   * away — instead of a page of green.
+   */
+  const ONSET_DEVIATIONS: (number | null)[] = [-3, 8, 2, -22, 5, null, -9, 30];
+  function sayOnsets(beatInRange: number, pass: number) {
+    const schedule = songSchedule;
+    if (!schedule) return;
+    while (onsetsSaid < schedule.onsets.length) {
+      const onset = schedule.onsets[onsetsSaid];
+      if (onset.beat > beatInRange) return;
+      const deviationMs = ONSET_DEVIATIONS[onsetsSaid % ONSET_DEVIATIONS.length];
+      emit("score-onset", {
+        id: onset.id,
+        pass,
+        state: deviationMs === null ? "miss" : "hit",
+        deviationMs,
+      });
+      onsetsSaid += 1;
+    }
+  }
 
   function beatLoop() {
     clearTimeout(beatTimer);
@@ -389,6 +491,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       });
     }
 
+    const song = songAt(beatCount);
+
     emit("beat", {
       beat: beatCount,
       measureBeat,
@@ -400,7 +504,13 @@ export function installShotMock(shot: Shot, theme: string): void {
       chorus,
       bandState,
       beatsPerMeasure: total,
+      ...song,
     });
+    if (!song.songCountIn && songTransport) {
+      const tpq = songTransport.ticksPerQuarter;
+      const start = songTransport.bars[songTransport.range.startBar]?.startTick ?? 0;
+      sayOnsets((song.songTick - start) / tpq, song.songPass);
+    }
     beatCount += 1;
     beatTimer = setTimeout(beatLoop, 60000 / (STATE.bpm as number));
   }
@@ -408,6 +518,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   function setPlaying(next: boolean) {
     STATE.isPlaying = next;
     beatCount = 0;
+    // A new pass has said nothing about any note yet.
+    onsetsSaid = 0;
     emit("state-changed", STATE);
     if (next) beatLoop();
     else clearTimeout(beatTimer);
@@ -537,9 +649,33 @@ export function installShotMock(shot: Shot, theme: string): void {
      * and that `droppedNotes` is zero, so the quiet line under the facts
      * stays out of the picture.
      */
-    load_song: () => ({ bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 }),
-    set_song_range: () => ({ bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 }),
-    clear_song: () => null,
+    load_song: (a) => {
+      songTransport = (a?.transport as SongTransport | undefined) ?? null;
+      return { bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 };
+    },
+    /*
+     * A new range starts the piece again from the top of it, so the beat
+     * count the cursor is derived from starts again too — the way the
+     * engine recompiles and restarts (W9).
+     */
+    set_song_range: (a) => {
+      if (songTransport) {
+        songTransport = {
+          ...songTransport,
+          range: (a?.range as SongTransport["range"]) ?? songTransport.range,
+          loops: a?.loops === true,
+          tempoPercent: Number(a?.tempoPercent) || songTransport.tempoPercent,
+          countInBars: Number(a?.countInBars) || 0,
+        };
+      }
+      beatCount = 0;
+      onsetsSaid = 0;
+      return { bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 };
+    },
+    clear_song: () => {
+      songTransport = null;
+      return null;
+    },
     set_song_mix: () => null,
     pick_kit_folder: () => "C:\\Users\\you\\Samples\\Studio Kit",
     inspect_kit_folder: () => ({
@@ -618,9 +754,15 @@ export function installShotMock(shot: Shot, theme: string): void {
      */
     if (cmd === "load_score_schedule") {
       songSchedule = a?.schedule as ScoreSchedule;
+      onsetsSaid = 0;
       return null;
     }
     if (cmd === "clear_score_schedule") {
+      // The schedule itself is kept: `analyze_attempt` is asked for a pass
+      // over it after the transport has already cleared it, and a review
+      // scene with nothing to score photographs as a coach with nothing to
+      // say. Only the "which notes have been reported" counter resets.
+      onsetsSaid = 0;
       return null;
     }
     if (cmd === "close_open_segment") {
