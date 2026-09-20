@@ -100,11 +100,17 @@ base64 = "0.22"
 # One Yames at a time, so that double-clicking a Guitar Pro file while the app
 # is already open hands the path to the running window instead of starting a
 # second copy — which would fight the first for the audio device and the
-# settings store. Windows uses a named mutex and WM_COPYDATA, Linux a
-# Unix-domain socket, macOS nothing at all (LaunchServices already forwards to
-# the running app, and the plugin is a no-op there). A few kilobytes of code
-# and no transitive downloads: everything it needs is already in the graph
-# under tauri. Apache-2.0 OR MIT, like Tauri itself.
+# settings store. Apache-2.0 OR MIT, like Tauri itself.
+#
+# What it costs, per platform, because it is NOT the same on all three:
+# on Windows a named mutex plus a hidden window and WM_COPYDATA, over
+# `windows-sys`, which is already in this graph — a few kilobytes. On macOS
+# it is close to nothing; LaunchServices already forwards a second launch to
+# the running app. On LINUX it talks over D-Bus, and that pulls `zbus` and
+# its async stack: **thirty packages into Cargo.lock**, all of them behind
+# `cfg(target_os = "linux")` so nothing but the Linux build compiles them.
+# The lock file grew by thirty-one entries; the Windows and macOS binaries
+# did not.
 tauri-plugin-single-instance = "2"
 
 [features]
