@@ -513,6 +513,23 @@ impl Db {
         &self.path
     }
 
+    /// What SQLite says it will do with a statement. Tests only — it is
+    /// how the index gate asserts something a busy machine cannot spoil.
+    #[cfg(test)]
+    fn explain(&self, sql: &str, args: &[Box<dyn rusqlite::ToSql>]) -> String {
+        let params: Vec<&dyn rusqlite::ToSql> = args.iter().map(|b| b.as_ref()).collect();
+        let mut stmt = self
+            .conn
+            .prepare(&format!("EXPLAIN QUERY PLAN {sql}"))
+            .expect("the plan of a statement we wrote");
+        let rows = stmt
+            .query_map(params.as_slice(), |r| r.get::<_, String>(3))
+            .expect("plan rows");
+        rows.map(|r| r.expect("a plan row"))
+            .collect::<Vec<_>>()
+            .join(" | ")
+    }
+
     // -- meta -------------------------------------------------------------
 
     fn meta_get(&self, key: &str) -> DbResult<Option<String>> {
@@ -657,41 +674,7 @@ impl Db {
     /// `presetAwareness.ts` and the coach can be fed rows without knowing
     /// anything about SQL.
     pub fn query_history(&self, filter: &HistoryFilter) -> DbResult<Vec<SavedSession>> {
-        let mut sql = String::from(
-            "SELECT id, started_at, bpm_start, time_signature, preset_id, preset_name,
-                    report_json, segments_json
-             FROM sessions WHERE 1 = 1",
-        );
-        let mut args: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
-        let mut push = |sql: &mut String, clause: &str, v: Box<dyn rusqlite::ToSql>| {
-            args.push(v);
-            sql.push_str(&format!(" AND {clause} ?{}", args.len()));
-        };
-        if let Some(v) = &filter.preset_id {
-            push(&mut sql, "preset_id =", Box::new(v.clone()));
-        }
-        if let Some(v) = &filter.exercise_key {
-            push(&mut sql, "exercise_key =", Box::new(v.clone()));
-        }
-        if let Some(v) = &filter.instrument {
-            push(&mut sql, "instrument =", Box::new(v.clone()));
-        }
-        if let Some(v) = filter.since {
-            push(&mut sql, "started_at >=", Box::new(v));
-        }
-        if let Some(v) = filter.until {
-            push(&mut sql, "started_at <=", Box::new(v));
-        }
-        if let Some(v) = filter.bpm_min {
-            push(&mut sql, "bpm_start >=", Box::new(v as i64));
-        }
-        if let Some(v) = filter.bpm_max {
-            push(&mut sql, "bpm_start <=", Box::new(v as i64));
-        }
-        sql.push_str(" ORDER BY started_at DESC, id DESC LIMIT ?");
-        sql.push_str(&(args.len() + 1).to_string());
-        args.push(Box::new(filter.limit.unwrap_or(u32::MAX) as i64));
-
+        let (sql, args) = history_sql(filter);
         let mut stmt = self.conn.prepare(&sql).map_err(DbError::from)?;
         let params: Vec<&dyn rusqlite::ToSql> = args.iter().map(|b| b.as_ref()).collect();
         let rows = stmt
@@ -973,23 +956,7 @@ impl Db {
     /// Attempts at a song, **oldest first** — the order the question
     /// "how has this range gone over time" wants to be answered in.
     pub fn query_attempts(&self, query: &AttemptQuery) -> DbResult<Vec<Attempt>> {
-        let mut sql = String::from(
-            "SELECT id, score_id, session_id, started_at, range_start_bar, range_end_bar,
-                    tempo_percent, passes, score, hits, misses, extras, mean_dev_ms, mad_ms,
-                    take_path
-             FROM attempts WHERE score_id = ?1",
-        );
-        let mut args: Vec<Box<dyn rusqlite::ToSql>> = vec![Box::new(query.score_id.clone())];
-        if let Some(range) = query.bar_range {
-            // Overlap, not equality — see `AttemptQuery`.
-            args.push(Box::new(range.end_bar));
-            args.push(Box::new(range.start_bar));
-            sql.push_str(" AND range_start_bar <= ?2 AND range_end_bar >= ?3");
-        }
-        sql.push_str(" ORDER BY started_at ASC, id ASC LIMIT ?");
-        sql.push_str(&(args.len() + 1).to_string());
-        args.push(Box::new(query.limit.unwrap_or(u32::MAX) as i64));
-
+        let (sql, args) = attempts_sql(query);
         let mut stmt = self.conn.prepare(&sql).map_err(DbError::from)?;
         let params: Vec<&dyn rusqlite::ToSql> = args.iter().map(|b| b.as_ref()).collect();
         let rows = stmt
@@ -1089,6 +1056,73 @@ impl Db {
         }
         Ok(())
     }
+}
+
+// ---------------------------------------------------------------------------
+// Statement builders
+//
+// Separate functions rather than inline text so a test can ask SQLite for
+// the *plan* of the very statement that runs in production. A wall clock
+// on a machine running six hundred other tests is a measurement of the
+// scheduler; "this query uses its index" is a measurement of the query.
+// ---------------------------------------------------------------------------
+
+fn history_sql(filter: &HistoryFilter) -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
+    let mut sql = String::from(
+        "SELECT id, started_at, bpm_start, time_signature, preset_id, preset_name,
+                report_json, segments_json
+         FROM sessions WHERE 1 = 1",
+    );
+    let mut args: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+    let mut push = |sql: &mut String, clause: &str, v: Box<dyn rusqlite::ToSql>| {
+        args.push(v);
+        sql.push_str(&format!(" AND {clause} ?{}", args.len()));
+    };
+    if let Some(v) = &filter.preset_id {
+        push(&mut sql, "preset_id =", Box::new(v.clone()));
+    }
+    if let Some(v) = &filter.exercise_key {
+        push(&mut sql, "exercise_key =", Box::new(v.clone()));
+    }
+    if let Some(v) = &filter.instrument {
+        push(&mut sql, "instrument =", Box::new(v.clone()));
+    }
+    if let Some(v) = filter.since {
+        push(&mut sql, "started_at >=", Box::new(v));
+    }
+    if let Some(v) = filter.until {
+        push(&mut sql, "started_at <=", Box::new(v));
+    }
+    if let Some(v) = filter.bpm_min {
+        push(&mut sql, "bpm_start >=", Box::new(v as i64));
+    }
+    if let Some(v) = filter.bpm_max {
+        push(&mut sql, "bpm_start <=", Box::new(v as i64));
+    }
+    sql.push_str(" ORDER BY started_at DESC, id DESC LIMIT ?");
+    sql.push_str(&(args.len() + 1).to_string());
+    args.push(Box::new(filter.limit.unwrap_or(u32::MAX) as i64));
+    (sql, args)
+}
+
+fn attempts_sql(query: &AttemptQuery) -> (String, Vec<Box<dyn rusqlite::ToSql>>) {
+    let mut sql = String::from(
+        "SELECT id, score_id, session_id, started_at, range_start_bar, range_end_bar,
+                tempo_percent, passes, score, hits, misses, extras, mean_dev_ms, mad_ms,
+                take_path
+         FROM attempts WHERE score_id = ?1",
+    );
+    let mut args: Vec<Box<dyn rusqlite::ToSql>> = vec![Box::new(query.score_id.clone())];
+    if let Some(range) = query.bar_range {
+        // Overlap, not equality — see `AttemptQuery`.
+        args.push(Box::new(range.end_bar));
+        args.push(Box::new(range.start_bar));
+        sql.push_str(" AND range_start_bar <= ?2 AND range_end_bar >= ?3");
+    }
+    sql.push_str(" ORDER BY started_at ASC, id ASC LIMIT ?");
+    sql.push_str(&(args.len() + 1).to_string());
+    args.push(Box::new(query.limit.unwrap_or(u32::MAX) as i64));
+    (sql, args)
 }
 
 // ---------------------------------------------------------------------------
@@ -1837,13 +1871,33 @@ mod tests {
 
     // -- the timing gate --------------------------------------------------
 
+    /// The fastest of `n` runs.
+    ///
+    /// A single wall-clock sample inside a suite that runs six hundred
+    /// other tests in parallel measures the scheduler, not the query —
+    /// the first version of this gate was green on its own and red in
+    /// the full run, which is the worst kind of test there is. A
+    /// scheduling hiccup does not land on all of a handful of runs, so
+    /// the fastest of them is the query. The gate stays literal:
+    /// "answers in under 20 ms".
+    fn fastest_ms(n: usize, mut run: impl FnMut()) -> f64 {
+        let mut best = f64::MAX;
+        for _ in 0..n {
+            let t = Instant::now();
+            run();
+            best = best.min(t.elapsed().as_secs_f64() * 1000.0);
+        }
+        best
+    }
+
     /// ROADMAP 1.1's gate, and W2's: 500 sessions and 5 000 attempts, and
     /// both questions the coach asks answered in under 20 ms.
     ///
-    /// Measured on the debug build the rest of `npm run test:rust` uses —
-    /// if the indexes are right there is well over an order of magnitude
-    /// of headroom, and if they are wrong the scan shows up here rather
-    /// than in a user's history tab.
+    /// Two assertions, because the clock alone is not trustworthy on a
+    /// shared machine. The plan assertion is the one that actually says
+    /// the indexes are doing their job, and it says the same thing on an
+    /// idle laptop and a CI runner under load; the clock is the sanity
+    /// check on top of it.
     #[test]
     fn a_full_store_answers_both_questions_under_twenty_milliseconds() {
         let mut db = Db::open_in_memory().unwrap();
@@ -1915,48 +1969,64 @@ mod tests {
             tx.commit().unwrap();
         }
 
-        // Warm the page cache and the statement planner once, so what is
-        // measured is the query and not the first touch of a b-tree.
-        let _ = db
-            .query_history(&HistoryFilter {
-                preset_id: Some("p3".into()),
-                ..Default::default()
-            })
-            .unwrap();
+        let history_filter = HistoryFilter {
+            preset_id: Some("p3".into()),
+            bpm_min: Some(100),
+            bpm_max: Some(160),
+            limit: Some(50),
+            ..Default::default()
+        };
+        let attempt_query = AttemptQuery {
+            score_id: "song1".into(),
+            bar_range: Some(BarRange {
+                start_bar: 17,
+                end_bar: 24,
+            }),
+            limit: Some(100),
+            ..Default::default()
+        };
 
-        let t0 = Instant::now();
-        let history = db
-            .query_history(&HistoryFilter {
-                preset_id: Some("p3".into()),
-                bpm_min: Some(100),
-                bpm_max: Some(160),
-                limit: Some(50),
-                ..Default::default()
-            })
-            .unwrap();
-        let history_ms = t0.elapsed().as_secs_f64() * 1000.0;
-        assert!(!history.is_empty(), "the filter should match something");
+        // 1. The load-independent half: SQLite reaches both answers
+        //    through an index. A full scan of 500 sessions is fast enough
+        //    to pass a clock on a quiet machine and is still the bug —
+        //    the coach will be asking these questions of a store far
+        //    larger than this fixture.
+        let (sql, args) = history_sql(&history_filter);
+        let plan = db.explain(&sql, &args);
+        assert!(
+            plan.contains("sessions_preset"),
+            "queryHistory should reach the preset's sessions through `sessions_preset`, \
+             but SQLite plans to: {plan}"
+        );
+        let (sql, args) = attempts_sql(&attempt_query);
+        let plan = db.explain(&sql, &args);
+        assert!(
+            plan.contains("attempts_score_range"),
+            "queryAttempts should reach a song's attempts through `attempts_score_range`, \
+             but SQLite plans to: {plan}"
+        );
 
-        let t1 = Instant::now();
-        let attempts = db
-            .query_attempts(&AttemptQuery {
-                score_id: "song1".into(),
-                bar_range: Some(BarRange {
-                    start_bar: 17,
-                    end_bar: 24,
-                }),
-                limit: Some(100),
-                ..Default::default()
-            })
-            .unwrap();
-        let attempts_ms = t1.elapsed().as_secs_f64() * 1000.0;
-        assert!(!attempts.is_empty(), "bars 17–24 should have been played");
+        // 2. The clock. Warmed once so the first touch of a b-tree is not
+        //    what is measured, then the fastest of fifteen runs.
+        let _ = db.query_history(&history_filter).unwrap();
+        let _ = db.query_attempts(&attempt_query).unwrap();
+
+        let mut history_rows = 0usize;
+        let history_ms = fastest_ms(15, || {
+            history_rows = db.query_history(&history_filter).unwrap().len();
+        });
+        let mut attempt_rows = 0usize;
+        let attempts_ms = fastest_ms(15, || {
+            attempt_rows = db.query_attempts(&attempt_query).unwrap().len();
+        });
+        assert!(history_rows > 0, "the filter should match something");
+        assert!(attempt_rows > 0, "bars 17–24 should have been played");
 
         // Printed (visible under `--nocapture`) so a run that is merely
         // close to the gate is as obvious as one that fails it.
         eprintln!(
             "[store] gate: queryHistory {history_ms:.2} ms, queryAttempts {attempts_ms:.2} ms \
-             (500 sessions, 5 000 attempts, 80 000 onsets, debug build)"
+             (fastest of 15; 500 sessions, 5 000 attempts, 80 000 onsets, debug build)"
         );
         assert!(
             history_ms < 20.0,
