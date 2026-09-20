@@ -2,6 +2,7 @@
   "metronome": {
     "tap": "点拍",
     "tapCount": "{{count}} 次",
+    "tapCount_other": "{{count}} 次",
     "subdivision": "细分",
     "meter": "拍号",
     "free": "FREE",
@@ -10,6 +11,7 @@
     "beatCount": "{{count}} 拍",
     "beatCount_other": "{{count}} 拍",
     "clicksPerBar": "每小节 {{count}} 次",
+    "clicksPerBar_other": "每小节 {{count}} 次",
     "addBeat": "增加一拍",
     "removeBeat": "减少一拍",
     "prevMeter": "上一个拍号",

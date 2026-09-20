@@ -2,6 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} タップ",
+    "tapCount_other": "{{count}} タップ",
     "subdivision": "分割",
     "meter": "拍子",
     "free": "FREE",
@@ -10,6 +11,7 @@
     "beatCount": "{{count}} 拍",
     "beatCount_other": "{{count}} 拍",
     "clicksPerBar": "{{count}} クリック/小節",
+    "clicksPerBar_other": "{{count}} クリック/小節",
     "addBeat": "拍を追加",
     "removeBeat": "拍を削除",
     "prevMeter": "前の拍子",
