@@ -34,9 +34,11 @@
 //!   year of practice to a failed `PRAGMA` is not a trade this app makes.
 //! * **It never runs on an audio thread**, and the Tauri layer keeps it
 //!   off the UI thread as well — see `PracticeStore`.
-//! * **The JSON history is read, never written.** The one-time import
-//!   leaves `evalSessionHistory` in `settings.json` untouched, so
-//!   downgrading to an older build still finds its history.
+//! * **The one-time import only reads.** It leaves `evalSessionHistory`
+//!   in `settings.json` exactly as it found it, so downgrading to an
+//!   older build still finds its history. The single place that array is
+//!   ever written after that is `clear_all_sessions`, where the user has
+//!   asked for all of it to be gone — see `commands.rs`.
 
 use std::collections::HashMap;
 use std::fmt;
