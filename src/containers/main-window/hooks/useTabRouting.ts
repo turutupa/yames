@@ -52,7 +52,7 @@ import type { MainView } from "../MainHeader";
  * A runtime array rather than only a type, because the persisted tab arrives
  * as an unchecked string and something has to narrow it.
  */
-export const PLAY_TABS = ["beat", "setlist", "drill", "jam"] as const;
+export const PLAY_TABS = ["beat", "setlist", "drill", "jam", "songs"] as const;
 
 export type PlayTab = (typeof PLAY_TABS)[number];
 

@@ -1,0 +1,55 @@
+{
+  "songs": {
+    "import": "Import a song",
+    "dismiss": "OK",
+    "tuning": "Tuning",
+    "capoLabel": "Capo",
+    "capo": "Capo at fret {{fret}}",
+    "meter": "Time",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Bars",
+    "fromBar": "From",
+    "toBar": "To",
+    "wholeSong": "Whole song",
+    "barsCount": "{{count}} bar",
+    "barsCount_other": "{{count}} bars",
+    "sections": "Sections",
+    "speed": "Speed",
+    "percent": "{{percent}}%",
+    "speedNote": "The click runs at {{bpm}} BPM",
+    "loop": "Repeat",
+    "loopOn": "Round and round",
+    "loopOff": "Once through",
+    "loopNote": "Play the bars above again and again",
+    "dropHere": "Drop the file to open it",
+    "empty": {
+      "title": "Bring in a song you already have",
+      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
+      "private": "The file stays on this computer. Nothing is uploaded."
+    },
+    "tab": {
+      "drawing": "Laying out the music...",
+      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+    },
+    "picker": {
+      "title": "Choose your part",
+      "which": "Which part are you playing?",
+      "strings": "{{count}} string",
+      "strings_other": "{{count}} strings",
+      "notTab": "Not written as tab",
+      "cancel": "Not now"
+    },
+    "warn": {
+      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
+      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
+      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+    },
+    "library": {
+      "add": "Import a song",
+      "empty": "No songs yet",
+      "summary": "{{track}} · {{bars}} bars",
+      "remove": "Remove from Yames"
+    }
+  }
+}

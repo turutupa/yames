@@ -3,7 +3,8 @@
     "metronome": "Metronoom",
     "setlist": "Setlist",
     "drill": "Tempotraining",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Nummers"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Preset opslaan",
     "delete": "Verwijderen",
     "newPreset": "Nieuwe preset",
-    "newDrill": "Nieuwe oefening"
+    "newDrill": "Nieuwe oefening",
+    "titleSongs": "Nummers"
   },
   "emptyStates": {
     "presets": {

@@ -211,7 +211,8 @@
         "jam-next-section": "Section suivante",
         "jam-prev-section": "Section précédente",
         "jam-loop-section": "Boucler cette section",
-        "jam-take": "Enregistrer la prise"
+        "jam-take": "Enregistrer la prise",
+        "tab-5": "Onglet Morceaux"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -245,7 +246,8 @@
         "jam-next-section": "Sauter au début de la section suivante à la barre de mesure",
         "jam-prev-section": "Revenir au début de la section précédente à la barre de mesure",
         "jam-loop-section": "Mettre en boucle la section où tu es, ou l'en sortir",
-        "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement"
+        "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
+        "tab-5": "Passer à l'onglet Morceaux"
       }
     },
     "inputTest": {

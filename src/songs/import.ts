@@ -26,6 +26,9 @@ type AtNote = model.Note;
 type AtScore = model.Score;
 type AtTrack = model.Track;
 import { TICKS_PER_QUARTER } from "./types";
+// Re-exported so nothing that already reads it from here has to move; the
+// constant itself lives in `types.ts`, which does not drag alphaTab along.
+export { SONG_FILE_EXTENSIONS } from "./types";
 import type {
   SongBar,
   SongFormat,
@@ -95,20 +98,6 @@ export type ParsedSong = {
 };
 
 // --- reading the file ------------------------------------------------------
-
-/** The extensions we say we take, for the file input and the drop target. */
-export const SONG_FILE_EXTENSIONS = [
-  ".gp",
-  ".gp3",
-  ".gp4",
-  ".gp5",
-  ".gpx",
-  ".musicxml",
-  ".xml",
-  ".mxl",
-  ".alphatex",
-  ".tex",
-] as const;
 
 /**
  * Tidy a piece of text the file gave us.

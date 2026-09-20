@@ -58,6 +58,7 @@ import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
+import { SongsView } from "../songs/SongsView";
 import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
@@ -94,6 +95,7 @@ import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
+import { useSongsSession } from "./hooks/useSongsSession";
 import { useJamTakes } from "./hooks/useJamTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
@@ -412,6 +414,16 @@ export function MainWindow() {
       setlistSession.closeSetlist();
     },
   });
+
+  /**
+   * The Songs library and the loaded song.
+   *
+   * Takes nothing from the engine and gives it nothing but a schedule: the
+   * cursor is driven from `currentBeat` inside `SongsView`, and the click is
+   * the ordinary metronome running at the tempo the range asks for. Inert
+   * with no song open, like the jam above it.
+   */
+  const songsSession = useSongsSession();
 
   /*
    * Wrapped, because it is the root of a chain of fresh objects.
@@ -1424,6 +1436,18 @@ export function MainWindow() {
             const jam = jamSession.jams.find((j) => j.id === jamId);
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
+          songs={songsSession.songs}
+          activeSongId={songsSession.song?.id ?? null}
+          onLoadSong={songsSession.loadSong}
+          /* The library's "+" reaches the same file input the stage owns.
+             There is only one, on the view, so the picker and the drop
+             target cannot drift apart. */
+          onImportSong={() => {
+            setView("songs");
+            window.dispatchEvent(new CustomEvent("yames:songs-import"));
+          }}
+          onDeleteSong={songsSession.deleteSong}
+          onRenameSong={songsSession.renameSong}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -1701,6 +1725,13 @@ export function MainWindow() {
                renders now, not a screen anybody sits on. */
             null
           )
+        ) : view === "songs" ? (
+          <SongsView
+            session={songsSession}
+            currentBeat={currentBeat}
+            isPlaying={state.isPlaying}
+            themeId={state.theme}
+          />
         ) : view === "drill" ? (
           <DrillView
             state={state}
@@ -1813,7 +1844,8 @@ export function MainWindow() {
         {(view === "beat" ||
           view === "drill" ||
           (view === "setlist" && !!setlistSession.setlist) ||
-          (view === "jam" && !!jamSession.jam)) && (
+          (view === "jam" && !!jamSession.jam) ||
+          (view === "songs" && !!songsSession.score)) && (
           <Transport
             view={view}
             isPlaying={state.isPlaying}

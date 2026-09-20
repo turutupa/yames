@@ -3,7 +3,8 @@
     "metronome": "Metronome",
     "setlist": "Setlist",
     "drill": "Drill",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Songs"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Save preset",
     "delete": "Delete",
     "newPreset": "New preset",
-    "newDrill": "New drill"
+    "newDrill": "New drill",
+    "titleSongs": "Songs"
   },
   "emptyStates": {
     "presets": {

@@ -1,0 +1,515 @@
+/* songs.css — the Songs mode (plans/SONGS.md, plans/tasks/songs/W4-SONGS.md).
+ *
+ * The tab itself is drawn by alphaTab into `.songs-tab-host`, in SVG, in the
+ * theme's own colours — those are settings rather than CSS (see
+ * `TabStage.tsx`), so almost nothing here paints the score. What this file
+ * owns is the room the score gets, and the controls around it.
+ *
+ * Every colour is a token from `themes.ts`'s TOKEN_CONTRACT and nothing else:
+ * jam.css reaches for `--warning`, `--radius-md` and `--bg-elevated`, none of
+ * which exist anywhere, and they silently resolve to nothing. Do not copy
+ * that here.
+ *
+ * Imported by `SongsView.tsx`, the way `jam.css` is imported by `JamView.tsx`,
+ * so a mode nobody opens costs nothing to parse. */
+
+/* The stage band, the same expression the other modes use. */
+.main-content[data-view="songs"] {
+  --stage-band: 1176px;
+}
+
+.main-content[data-view="songs"] > .view-transition-wrapper {
+  align-self: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1176px;
+  margin-left: max(0px, calc(50% - var(--stage-band) / 2));
+  padding-left: 48px;
+  padding-right: 48px;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* The stage asks about its own width, not the window's: the rail and the
+   coach dock both take from it, and a media query would answer about the
+   wrong box. */
+.songs-view {
+  container-type: inline-size;
+  container-name: stage;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.songs-file-input {
+  display: none;
+}
+
+/* ── The empty state ──────────────────────────────────────────────────── */
+
+/* Auto margins centre it and collapse to nothing when the stage is short —
+   the same trick jam.css uses, and the reason neither can simply centre. */
+.songs-empty {
+  margin-top: auto;
+  margin-bottom: auto;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  max-width: 460px;
+  padding: 32px 16px;
+}
+
+.songs-empty-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.songs-empty-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.songs-empty-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+/* ── Buttons and chips ────────────────────────────────────────────────── */
+
+.songs-btn {
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.songs-btn:hover {
+  background: var(--surface-hover);
+}
+
+.songs-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.songs-chip {
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.songs-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* `--accent-subtle` is a translucent tint of the accent over the page, so the
+   ink on it is the accent itself — `--accent-text` is for a SOLID accent
+   button and would be near-invisible here. `themes.test.ts` checks the
+   accent-on-subtle contrast for exactly this pairing. */
+.songs-chip[data-active] {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.songs-chip-wide {
+  min-width: 108px;
+  text-align: center;
+}
+
+/* ── The head: what the song IS, read-only while you play ─────────────── */
+
+.songs-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+.songs-head-titles {
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.songs-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.songs-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  overflow-wrap: anywhere;
+}
+
+.songs-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+}
+
+.songs-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.songs-fact dt {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.songs-fact dd {
+  margin: 0;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* ── What the importer changed on the way in ──────────────────────────── */
+
+.songs-warnings {
+  margin: 0;
+  padding: 10px 14px 10px 30px;
+  list-style: disc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* There is no `--warning` or `--danger` in the token contract, so a problem
+   is said in the accent rather than in a red this app does not have. */
+.songs-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.songs-alert > span {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+/* ── The tab ──────────────────────────────────────────────────────────── */
+
+/* The score is the main content and is never hidden behind a toggle. It gets
+   the room left over, with a floor so it does not collapse to nothing on a
+   short window, and it scrolls on its own so the controls under it stay put
+   while the cursor walks down the page. */
+.songs-tab-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 220px;
+  max-height: 58vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  width: 100%;
+  min-width: 0;
+}
+
+.songs-tab-host {
+  /* alphaTab measures this box and lays the score out to its width, so it
+     must not be a flex item that can be squeezed. */
+  width: 100%;
+  min-width: 0;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.songs-tab-host[data-ready] {
+  opacity: 1;
+}
+
+.songs-tab-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.songs-tab-status-failed {
+  color: var(--text-secondary);
+}
+
+/* ── The stage controls: what you reach for with the guitar on ────────── */
+
+.songs-stage-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 8px;
+}
+
+.songs-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.songs-control-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.songs-control-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-range-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.songs-range-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.songs-range-field input {
+  width: 76px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-section-chips,
+.songs-tempo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* ── The track picker: setup, so it is a sheet over the stage ─────────── */
+
+.songs-picker-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: color-mix(in srgb, var(--bg-primary) 74%, transparent);
+}
+
+.songs-picker {
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  max-height: min(78vh, 640px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.songs-picker-head {
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.songs-picker-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.songs-picker-sub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.songs-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.songs-picker-track {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.songs-picker-track:hover:not(:disabled),
+.songs-picker-track:focus-visible {
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+.songs-picker-track:disabled {
+  cursor: default;
+  color: var(--text-faint);
+}
+
+.songs-picker-track-name {
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.songs-picker-track-detail {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.songs-picker-track-tuning {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+
+.songs-picker-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Dropping a file on the window ────────────────────────────────────── */
+
+.songs-view[data-dragging]::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+.songs-drop-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* ── Narrow stages ────────────────────────────────────────────────────── */
+
+/* Asked of the STAGE, not the window: the coach dock and the rail both take
+   width, so a 1500px window can leave this column at 700px. */
+@container stage (max-width: 620px) {
+  .songs-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .songs-stage-controls {
+    gap: 14px 18px;
+  }
+
+  .songs-control {
+    flex: 1 1 100%;
+  }
+
+  .songs-tab-viewport {
+    max-height: 46vh;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content[data-view="songs"] > .view-transition-wrapper {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

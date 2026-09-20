@@ -28,6 +28,7 @@ const NAMESPACES = [
   "setlist",
   "settings",
   "shell",
+  "songs",
   "zen",
 ];
 

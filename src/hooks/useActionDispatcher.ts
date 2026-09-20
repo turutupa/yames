@@ -16,12 +16,12 @@ import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
 import { meterKey, stepMeter } from "../utils/meter";
 
-export type ViewName = "beat" | "drill" | "setlist" | "jam" | "settings";
+export type ViewName = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
 
 interface ActionDispatcherArgs {
   view: ViewName;
   setView: (v: ViewName) => void;
-  prevTab: MutableRefObject<"beat" | "drill" | "setlist" | "jam">;
+  prevTab: MutableRefObject<"beat" | "drill" | "setlist" | "jam" | "songs">;
   /** Whether the setlist tab has one open — with none, there is nothing to start. */
   setlistLoaded: boolean;
   /** Same for the jam tab, and the same reason: an empty stage starts nothing. */
@@ -110,13 +110,14 @@ export function useActionDispatcher({
         actionId === "tab-2" ||
         actionId === "tab-3" ||
         actionId === "tab-4" ||
+        actionId === "tab-5" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
         actionId === "toggle-coach"
       ) {
         switch (actionId) {
-          // In rail order: Metronome, Setlist, Drill, Jam.
+          // In rail order: Metronome, Setlist, Drill, Jam, Songs.
           case "tab-1":
             setView("beat");
             break;
@@ -129,6 +130,9 @@ export function useActionDispatcher({
           case "tab-4":
             setView("jam");
             break;
+          case "tab-5":
+            setView("songs");
+            break;
           case "settings":
             // `setView` remembers the mode Settings covers.
             setView(view === "settings" ? prevTab.current : "settings");
@@ -140,7 +144,7 @@ export function useActionDispatcher({
             showFloating();
             break;
           case "toggle-sidebar":
-            if (view === "beat" || view === "drill" || view === "jam")
+            if (view === "beat" || view === "drill" || view === "jam" || view === "songs")
               setSidebarOpen((o) => !o);
             break;
           case "toggle-coach":

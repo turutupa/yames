@@ -3,7 +3,8 @@
     "metronome": "Metrónomo",
     "setlist": "Setlist",
     "drill": "Rampa de tempo",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Canciones"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Guardar preajuste",
     "delete": "Eliminar",
     "newPreset": "Nuevo preajuste",
-    "newDrill": "Nuevo ejercicio"
+    "newDrill": "Nuevo ejercicio",
+    "titleSongs": "Canciones"
   },
   "emptyStates": {
     "presets": {

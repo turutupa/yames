@@ -211,7 +211,8 @@
         "jam-next-section": "Siguiente sección",
         "jam-prev-section": "Sección anterior",
         "jam-loop-section": "Repetir esta sección",
-        "jam-take": "Grabar la toma"
+        "jam-take": "Grabar la toma",
+        "tab-5": "Pestaña Canciones"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -245,7 +246,8 @@
         "jam-next-section": "Saltar al principio de la siguiente sección en la barra de compás",
         "jam-prev-section": "Volver al principio de la sección anterior en la barra de compás",
         "jam-loop-section": "Poner en bucle la sección en la que estás, o quitarlo",
-        "jam-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar"
+        "jam-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar",
+        "tab-5": "Cambia a la pestaña Canciones"
       }
     },
     "inputTest": {

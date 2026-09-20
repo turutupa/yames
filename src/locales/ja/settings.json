@@ -211,7 +211,8 @@
         "jam-next-section": "次のセクション",
         "jam-prev-section": "前のセクション",
         "jam-loop-section": "このセクションをループ",
-        "jam-take": "テイクを録音"
+        "jam-take": "テイクを録音",
+        "tab-5": "曲タブ"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -245,7 +246,8 @@
         "jam-next-section": "小節線で次のセクションの頭へ飛ぶ",
         "jam-prev-section": "小節線でひとつ前のセクションの頭へ戻る",
         "jam-loop-section": "いるセクションをループする、または解除する",
-        "jam-take": "次に再生したときに録音する、または録音をやめる"
+        "jam-take": "次に再生したときに録音する、または録音をやめる",
+        "tab-5": "曲タブへ切り替える"
       }
     },
     "inputTest": {

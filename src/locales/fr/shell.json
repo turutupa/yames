@@ -3,7 +3,8 @@
     "metronome": "Métronome",
     "setlist": "Setlist",
     "drill": "Rampe",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Morceaux"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Enregistrer le préréglage",
     "delete": "Supprimer",
     "newPreset": "Nouveau préréglage",
-    "newDrill": "Nouvel exercice"
+    "newDrill": "Nouvel exercice",
+    "titleSongs": "Morceaux"
   },
   "emptyStates": {
     "presets": {

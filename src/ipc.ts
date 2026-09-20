@@ -1174,6 +1174,7 @@ export function onPlaybackFinished(callback: () => void) {
 // ---------------------------------------------------------------------------
 
 import type { Jam, JamEngineConfig, JamPositionCommand, JamTake } from "./jam/types";
+import type { SongRecord } from "./songs/library";
 
 /**
  * Jams live beside presets and setlists in the same `settings.json` store,
@@ -1195,6 +1196,49 @@ export async function listJams(): Promise<Jam[] | undefined> {
 /** The whole list, in order. The UI owns ordering, the store keeps it. */
 export async function saveJams(jams: Jam[]): Promise<void> {
   await storeSave(JAMS_KEY, jams);
+}
+
+// ---------------------------------------------------------------------------
+// Songs (plans/SONGS.md, plans/tasks/songs/W4-SONGS.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * Songs get a store file of their own — `songs.json`, not `settings.json`.
+ *
+ * Everything else in the app shares one store, and songs deliberately do not,
+ * because a song carries the bytes of the file it came from (`SONGS.md` A2:
+ * the tab is drawn from the source). That is tens to hundreds of kilobytes
+ * each, and `settings.json` is rewritten whole, with `autoSave` on, every
+ * time anyone changes the volume. Putting scores in it would make every
+ * unrelated setting write megabytes.
+ *
+ * Only `src/songs/library.ts` calls these two — it is the interface the rest
+ * of Songs goes through, so moving the library to W2's SQLite store is one
+ * file rather than a search across the mode. That move is still the right
+ * end state; this is the cheap way not to hurt in the meantime.
+ *
+ * Note there is no `load_score_schedule` wrapper here, on purpose:
+ * `src/songs/engineBridge.ts` says why, and says to move it here when W1's
+ * command exists.
+ */
+const SONGS_KEY = "songs";
+
+let _songStore: Awaited<ReturnType<typeof load>> | null = null;
+async function getSongStore() {
+  if (!_songStore) _songStore = await load("songs.json", { autoSave: true, defaults: {} });
+  return _songStore;
+}
+
+/** `undefined` when nothing was ever saved. The app ships no songs to seed. */
+export async function listSongs(): Promise<SongRecord[] | undefined> {
+  const store = await getSongStore();
+  const songs = await store.get<SongRecord[]>(SONGS_KEY);
+  return Array.isArray(songs) ? songs : undefined;
+}
+
+export async function saveSongs(songs: SongRecord[]): Promise<void> {
+  const store = await getSongStore();
+  await store.set(SONGS_KEY, songs);
 }
 
 /**

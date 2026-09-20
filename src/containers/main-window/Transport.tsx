@@ -3,7 +3,7 @@ import { useJamLoading } from "../../hooks/useJamLoading";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
-  view: "beat" | "drill" | "setlist" | "jam";
+  view: "beat" | "drill" | "setlist" | "jam" | "songs";
   isPlaying: boolean;
   speedRampActive: boolean;
   isPulsing: boolean;

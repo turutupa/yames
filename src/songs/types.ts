@@ -21,6 +21,26 @@ export const TICKS_PER_QUARTER = 960;
 /** What the importer read the file as. */
 export type SongFormat = "gp" | "musicxml" | "alphatex";
 
+/**
+ * The extensions we say we take, for the file input and the drop target.
+ *
+ * Here rather than in `import.ts` on purpose: that module pulls alphaTab in
+ * with it, and the file input has to exist on a screen that has not loaded
+ * the renderer yet (`SongsView` imports the tab lazily).
+ */
+export const SONG_FILE_EXTENSIONS = [
+  ".gp",
+  ".gp3",
+  ".gp4",
+  ".gp5",
+  ".gpx",
+  ".musicxml",
+  ".xml",
+  ".mxl",
+  ".alphatex",
+  ".tex",
+] as const;
+
 export type SongSource = {
   fileName: string;
   format: SongFormat;

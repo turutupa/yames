@@ -3,7 +3,8 @@
     "metronome": "Метроном",
     "setlist": "Сет-лист",
     "drill": "Темповая тренировка",
-    "jam": "Джем"
+    "jam": "Джем",
+    "songs": "Песни"
   },
   "tooltip": {
     "zen": "Дзен",
@@ -45,7 +46,8 @@
     "save": "Сохранить пресет",
     "delete": "Удалить",
     "newPreset": "Новый пресет",
-    "newDrill": "Новое упражнение"
+    "newDrill": "Новое упражнение",
+    "titleSongs": "Песни"
   },
   "emptyStates": {
     "presets": {

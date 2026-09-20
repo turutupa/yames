@@ -208,7 +208,7 @@ function HelpGlyph() {
  * write a plan out as sentences and press Start, and it runs itself and
  * changes tempo as it goes. The metronome is knobs and a click.
  */
-export type MainView = "beat" | "drill" | "setlist" | "jam" | "settings";
+export type MainView = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
 
 interface MainHeaderProps {
   state: AppState;

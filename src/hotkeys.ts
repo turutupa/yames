@@ -35,6 +35,7 @@ export type HotkeyAction =
   | "tab-2"
   | "tab-3"
   | "tab-4"
+  | "tab-5"
   // Jam, hands-free (JAM_MODE §4.7). These exist so a MIDI footswitch can
   // reach them: your hands are on the instrument, which is the whole point of
   // playing over a band rather than setting one up.
@@ -307,6 +308,13 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Jam tab",
     key: "⌘4",
     desc: "Switch to Jam tab",
+    group: "navigation",
+  },
+  {
+    id: "tab-5",
+    action: "Songs tab",
+    key: "⌘5",
+    desc: "Switch to Songs tab",
     group: "navigation",
   },
   {

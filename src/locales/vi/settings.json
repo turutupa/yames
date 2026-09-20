@@ -211,7 +211,8 @@
         "jam-next-section": "Đoạn kế tiếp",
         "jam-prev-section": "Đoạn trước",
         "jam-loop-section": "Lặp đoạn này",
-        "jam-take": "Thu bản này"
+        "jam-take": "Thu bản này",
+        "tab-5": "Trang Bài hát"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -245,7 +246,8 @@
         "jam-next-section": "Nhảy tới đầu đoạn kế tiếp ngay ở vạch nhịp",
         "jam-prev-section": "Quay về đầu đoạn trước ngay ở vạch nhịp",
         "jam-loop-section": "Lặp đoạn bạn đang chơi, hoặc bỏ lặp",
-        "jam-take": "Thu vào lần phát tiếp theo, hoặc dừng thu"
+        "jam-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
+        "tab-5": "Chuyển sang trang Bài hát"
       }
     },
     "inputTest": {

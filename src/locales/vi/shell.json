@@ -3,7 +3,8 @@
     "metronome": "Máy đếm nhịp",
     "setlist": "Setlist",
     "drill": "Luyện tempo",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Bài hát"
   },
   "tooltip": {
     "zen": "Thiền",
@@ -45,7 +46,8 @@
     "save": "Lưu cài đặt sẵn",
     "delete": "Xóa",
     "newPreset": "Cài đặt mới",
-    "newDrill": "Bài tập mới"
+    "newDrill": "Bài tập mới",
+    "titleSongs": "Bài hát"
   },
   "emptyStates": {
     "presets": {
