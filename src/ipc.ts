@@ -634,6 +634,38 @@ export async function clearScoreSchedule(): Promise<void> {
   return invoke("clear_score_schedule");
 }
 
+/**
+ * The bands the review colours a note by — the scorer's own.
+ *
+ * `score.rs` judges a deviation against a window taken over the schedule's
+ * smallest gap, at the tempo the pass was actually played: a piece of
+ * sixteenths is judged on a sixteenth's tolerance. A review that drew its own
+ * boundaries would colour a note green that the same pass had already counted
+ * as merely "ok", and the player would be right to believe neither number.
+ *
+ * `quarterMs` is the length of a quarter note at the tempo the click ran at
+ * — 60000 / BPM — not at the score's written tempo.
+ */
+export type TimingBands = {
+  /** The matching window, ms. Past it is a miss. */
+  windowMs: number;
+  /** Absolute deviation, ms: inside this is dead on. */
+  perfect: number;
+  /** …inside this is a shade early or late… */
+  good: number;
+  /** …and inside this is early or late enough to feel. */
+  ok: number;
+  /** The gap the window was taken over, in quarter notes. */
+  smallestGapBeats: number;
+};
+
+export async function scoreTimingBands(
+  schedule: ScoreSchedule,
+  quarterMs: number,
+): Promise<TimingBands> {
+  return invoke<TimingBands>("score_timing_bands", { schedule, quarterMs });
+}
+
 export function onAudioSpectrum(callback: (spectrum: AudioSpectrum) => void) {
   return listen<AudioSpectrum>("audio-spectrum", (e) => callback(e.payload));
 }
@@ -1554,9 +1586,11 @@ export async function saveJams(jams: Jam[]): Promise<void> {
  * than an empty one, and because a downgrade to the previous build should
  * find a store it recognises rather than a missing one.
  *
- * Note there is no `load_score_schedule` wrapper here, on purpose:
- * `src/songs/engineBridge.ts` says why, and says to move it here when W1's
- * command exists.
+ * `loadScoreSchedule` used to live outside this file, in
+ * `src/songs/engineBridge.ts`, because `ipc.commands.test.ts` scrapes every
+ * `invoke("…")` here and W1's command did not exist yet. It exists now, so
+ * the bridge is gone and the wrapper is up with the rest of the scoring
+ * calls, where the gate can see it.
  */
 const SONGS_KEY = "songs";
 
