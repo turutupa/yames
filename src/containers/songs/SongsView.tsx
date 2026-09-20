@@ -23,10 +23,17 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
-import { SongReview, useSongActions, useSongAttempt, useSongTakePitch } from "./review";
+import {
+  SongReview,
+  useLiveNoteLights,
+  useSongActions,
+  useSongAttempt,
+  useSongTakePitch,
+} from "./review";
 import { SongBand, SongCountIn } from "./SongBand";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
-import { meterAt, rangeTicks, sectionRange, wholeSong } from "../../songs/schedule";
+import { buildSchedule, meterAt, sectionRange, wholeSong } from "../../songs/schedule";
+import { songPosition } from "../../songs/position";
 import type { SongsSession } from "../main-window/hooks/useSongsSession";
 import type { BeatEvent } from "../../types";
 import "../../styles/songs.css";
@@ -66,30 +73,21 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   const [dragging, setDragging] = useState(false);
 
   /**
-   * Where the cursor stands, in ticks.
+   * Where the player is — the cursor's tick and the beat of the range the
+   * lights are hung on, from the one function that answers it.
    *
-   * The ONLY input is `songTick` — where the engine says the song is, in the
-   * score's own ticks. No timer, no animation frame, no interpolation: a beat
-   * arrives, the cursor moves.
-   *
-   * **Never `BeatEvent.beat`.** That is what this used to read, and it was
-   * wrong in two ways that both look like the cursor drifting. `beat` counts
-   * the CLICK's beats, so in 7/8 it counts eighths and the cursor advances at
-   * twice the rate the music does; and it counts them at one length, so after
-   * a tempo step at bar nine the cursor and the page are further apart with
-   * every bar. `songTick` is the engine's own position in the piece and
-   * carries both, along with the loop seam, for nothing.
+   * The ONLY input is what the engine sent: `songTick`, `songBar`, `songPass`.
+   * No timer, no animation frame, no interpolation. **Never `BeatEvent.beat`**
+   * — that counts the CLICK's beats, so in 7/8 it counts eighths and a
+   * position taken from it is twice as far into the piece as the music is.
+   * `src/songs/position.ts` is where that lesson lives, and this screen and
+   * the review both read through it.
    */
-  const tick = useMemo(() => {
-    if (!score) return 0;
-    const { start } = rangeTicks(score, range);
-    // No song on the engine, stopped, or counting in: the cursor sits on the
-    // first bar of the range and waits. A cursor walking through a count-in
-    // would be a cursor on notes nobody has been asked to play yet.
-    if (currentBeat === null || !isPlaying) return start;
-    if (currentBeat.songCountIn || currentBeat.songBar === null) return start;
-    return currentBeat.songTick;
-  }, [score, range, currentBeat, isPlaying]);
+  const position = useMemo(
+    () => (score ? songPosition(score, range, currentBeat, { playing: isPlaying }) : null),
+    [score, range, currentBeat, isPlaying],
+  );
+  const tick = position?.tick ?? 0;
 
   /**
    * The count, while one is being counted in.
@@ -101,6 +99,37 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    */
   const countIn =
     isPlaying && currentBeat?.songCountIn ? currentBeat.measureBeat + 1 : null;
+
+  /**
+   * The schedule the pass is against, for the notes that light as it runs.
+   *
+   * The same one `useSongAttempt` captures when play is pressed and
+   * `useSongsSession` pushes to the engine — built from the same three inputs
+   * by the same pure function, so there is no third idea of what was asked
+   * for. Rebuilt only when the score, the range or the loop changes.
+   */
+  const schedule = useMemo(
+    () => (score ? buildSchedule(score, range, { loops: loop }) : null),
+    [score, range, loop],
+  );
+
+  /**
+   * The notes light as they are played (`SONGS.md` A7).
+   *
+   * W12 built and tested this and could not mount it: the surface is
+   * alphaTab's engraving, and nothing mapped an onset onto a note element.
+   * `TabStage` does that now, so the hook's map goes straight to it.
+   *
+   * It is honest about being a stand-in — one verdict per BEAT, spread across
+   * the attacks inside it, because that is the only thing that arrives while a
+   * pass runs. On quarters it is exact; on sixteenths it is a smear, and the
+   * review that appears the moment you stop replaces it per onset.
+   */
+  const lights = useLiveNoteLights({
+    schedule,
+    beatInRange: position?.beatInRange ?? 0,
+    isPlaying,
+  });
 
   /**
    * The attempt, and the verdict at the end of it (`COACH_UX.md` A3–A5).
@@ -330,7 +359,14 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 </div>
               }
             >
-              <TabStage score={score} source={source} tick={tick} themeId={themeId} />
+              <TabStage
+                score={score}
+                source={source}
+                tick={tick}
+                themeId={themeId}
+                lights={lights}
+                schedule={schedule}
+              />
             </Suspense>
 
             {/* The count, over the page, while somebody counts you in. The

@@ -299,6 +299,57 @@
   opacity: 1;
 }
 
+/* ── The notes light while you play (SONGS.md A7) ─────────────────────── */
+
+/* alphaTab writes its colours as SVG presentation attributes — `fill="#…"` on
+   every path and text it draws — and a presentation attribute loses to any
+   stylesheet rule at all. So these four rules repaint a beat without alphaTab
+   knowing, and stop the moment the attribute comes off.
+ *
+ * Quiet on purpose: the tab is the thing being read and a bar of traffic
+ * lights is harder to play from than a bar of notes. The colour is the
+ * theme's own feedback token at four fifths, and the mark under the fret
+ * number is the same glyph language the review uses — `MARK_GLYPH`, so a
+ * player never has to learn two alphabets for one verdict, and so the two
+ * low-contrast themes still say which side of the beat a note fell on. */
+.songs-tab-host [data-song-light] path,
+.songs-tab-host [data-song-light] text {
+  fill: var(--songs-light-tone);
+  stroke: var(--songs-light-tone);
+  opacity: 0.82;
+}
+
+.songs-tab-host [data-song-light="onTime"] {
+  --songs-light-tone: var(--feedback-perfect);
+}
+
+.songs-tab-host [data-song-light="slightlyEarly"],
+.songs-tab-host [data-song-light="slightlyLate"] {
+  --songs-light-tone: var(--feedback-good);
+}
+
+.songs-tab-host [data-song-light="early"],
+.songs-tab-host [data-song-light="late"] {
+  --songs-light-tone: var(--feedback-ok);
+}
+
+.songs-tab-host [data-song-light="missed"] {
+  --songs-light-tone: var(--feedback-miss);
+}
+
+.songs-tab-host [data-song-light="notAssessed"] {
+  --songs-light-tone: var(--text-faint);
+}
+
+/* The mark itself. Smaller than the fret number beside it and in the theme's
+   own face, so it reads as an annotation rather than as something the
+   engraver wrote. */
+.songs-tab-host .songs-note-light-glyph {
+  font-family: var(--font-family);
+  font-size: 10px;
+  opacity: 1;
+}
+
 .songs-tab-status {
   position: absolute;
   inset: 0;
