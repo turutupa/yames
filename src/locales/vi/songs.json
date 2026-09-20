@@ -1,199 +1,199 @@
 {
   "songs": {
-    "import": "Import a song",
+    "import": "Nhập một bài hát",
     "dismiss": "OK",
-    "tuning": "Tuning",
+    "tuning": "Lên dây",
     "capoLabel": "Capo",
-    "capo": "Capo at fret {{fret}}",
-    "meter": "Time",
+    "capo": "Capo ở phím {{fret}}",
+    "meter": "Nhịp",
     "tempo": "Tempo",
     "bpm": "{{bpm}} BPM",
-    "range": "Bars",
-    "fromBar": "From",
-    "toBar": "To",
-    "wholeSong": "Whole song",
-    "barsCount": "{{count}} bar",
-    "barsCount_other": "{{count}} bars",
-    "sections": "Sections",
-    "speed": "Speed",
+    "range": "Ô nhịp",
+    "fromBar": "Từ",
+    "toBar": "Đến",
+    "wholeSong": "Cả bài",
+    "barsCount": "{{count}} ô nhịp",
+    "barsCount_other": "{{count}} ô nhịp",
+    "sections": "Các đoạn",
+    "speed": "Tốc độ",
     "percent": "{{percent}}%",
-    "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
-    "loopNote": "Play the bars above again and again",
-    "dropHere": "Drop the file to open it",
+    "speedNote": "Tiếng gõ chạy ở {{bpm}} BPM",
+    "loop": "Lặp lại",
+    "loopOn": "Lặp mãi",
+    "loopOff": "Một lần thôi",
+    "loopNote": "Chơi đi chơi lại những ô nhịp ở trên",
+    "dropHere": "Thả tệp vào đây để mở",
     "band": {
-      "label": "Who you hear",
-      "click": "Click",
-      "drums": "Drums",
+      "label": "Bạn nghe thấy ai",
+      "click": "Tích tắc",
+      "drums": "Trống",
       "bass": "Bass",
-      "keys": "Keys",
-      "levelFor": "How loud the {{lane}} is",
-      "muteFor": "Turn the {{lane}} off",
-      "note": "Set the balance while you play. Yames remembers it for this song.",
-      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
-      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
-      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
-      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+      "keys": "Phím",
+      "levelFor": "{{lane}} to đến đâu",
+      "muteFor": "Tắt {{lane}}",
+      "note": "Chỉnh cân bằng ngay trong lúc chơi. Yames nhớ nó cho bài này.",
+      "leftOut": "{{tracks}} có trong tệp này, nhưng Yames không có ai chơi phần đó.",
+      "leftOut_other": "{{tracks}} có trong tệp này, nhưng Yames không có ai chơi những phần đó.",
+      "droppedNotes": "{{count}} nốt trong tệp này thuộc về một nhạc cụ mà ban nhạc không có.",
+      "droppedNotes_other": "{{count}} nốt trong tệp này thuộc về những nhạc cụ mà ban nhạc không có."
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
-      "counting": "Counting you in"
+      "label": "Đếm vào",
+      "none": "Vào thẳng",
+      "bars": "{{count}} ô nhịp",
+      "bars_other": "{{count}} ô nhịp",
+      "note": "Chỉ đếm trước lượt đầu tiên, không đếm trước mỗi lần lặp",
+      "counting": "Đang đếm vào"
     },
     "engine": {
-      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
-      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+      "cannotPlay": "Yames chưa chơi được bài này cùng ban nhạc lúc này. Tiếng gõ vẫn giữ nhịp.",
+      "busy": "Có thứ khác đang dùng âm thanh nên bài hát đã dừng. Bấm phát lại khi bạn sẵn sàng."
     },
     "empty": {
-      "title": "Bring in a song you already have",
-      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "title": "Mang vào một bài bạn đã có sẵn",
+      "body": "Mở một tệp Guitar Pro hoặc MusicXML, Yames sẽ hiện bản tab, giữ nhịp và bám theo chỗ bạn đang chơi. Thả tệp vào bất cứ đâu trên màn hình này, hoặc chọn một tệp.",
+      "private": "Tệp ở lại trên máy này. Không có gì được tải lên."
     },
     "tab": {
-      "drawing": "Laying out the music...",
-      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+      "drawing": "Đang dàn bản nhạc...",
+      "failed": "Yames đọc được tệp này nhưng không vẽ được. Ô nhịp và nhịp vẫn hoạt động bình thường."
     },
     "picker": {
-      "title": "Choose your part",
-      "which": "Which part are you playing?",
-      "strings": "{{count}} string",
-      "strings_other": "{{count}} strings",
-      "notTab": "Not written as tab",
-      "cancel": "Not now"
+      "title": "Chọn bè của bạn",
+      "which": "Bạn chơi bè nào?",
+      "strings": "{{count}} dây",
+      "strings_other": "{{count}} dây",
+      "notTab": "Không viết bằng tab",
+      "cancel": "Để sau"
     },
     "warn": {
-      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
-      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
-      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+      "tempoFlattened": "Tempo trượt dần trong {{count}} ô nhịp. Yames đổi nó ngay tại vạch nhịp.",
+      "tempoFlattened_other": "Tempo trượt dần trong {{count}} ô nhịp. Yames đổi nó ngay tại vạch nhịp.",
+      "barOverfilled": "Ô nhịp {{bar}} chứa nhiều hơn số chỉ nhịp cho phép. Nó được chơi đúng như đã viết."
     },
     "library": {
-      "add": "Import a song",
-      "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames",
-      "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "add": "Nhập một bài hát",
+      "empty": "Chưa có bài nào",
+      "summary": "{{track}} · {{bars}} ô nhịp",
+      "remove": "Bỏ khỏi Yames",
+      "due": "Hôm nay",
+      "dueTitle": "Bạn đã hẹn quay lại bài này"
     },
     "review": {
-      "title": "How that went",
-      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
-      "again": "Go again",
-      "working": "Listening back...",
-      "passes": "Which go",
-      "pass": "Go {{n}}",
-      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
-      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
-      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
-      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
-      "moreLabel": "What else ({{count}})",
-      "moreLabel_other": "What else ({{count}})",
-      "lessLabel": "Hide the rest",
+      "title": "Vừa rồi thế nào",
+      "summary": "Ô nhịp {{bars}} ở {{percent}}% — {{hits}} trên {{of}} nốt vào đúng chỗ",
+      "again": "Chơi lại",
+      "working": "Đang nghe lại...",
+      "passes": "Lượt nào",
+      "pass": "Lượt {{n}}",
+      "nothingToSay": "Lượt vừa rồi không có gì nổi lên. Chơi lại một lần nữa để huấn luyện viên có thêm cơ sở.",
+      "chordsHonesty": "Tôi chưa kiểm được các nốt bên trong hợp âm, chỉ kiểm được lúc chúng rơi.",
+      "notSaved": "Yames không ghi lại được lượt này, nên lần sau sẽ không có gì để đối chiếu.",
+      "tooShort": "Vừa rồi ngắn quá nên chưa đánh giá được. Chơi ít nhất tám nốt của đoạn này thì huấn luyện viên sẽ có điều để nói.",
+      "moreLabel": "Còn gì nữa ({{count}})",
+      "moreLabel_other": "Còn gì nữa ({{count}})",
+      "lessLabel": "Ẩn phần còn lại",
       "tab": {
-        "nothing": "Nothing was played in these bars."
+        "nothing": "Không có gì được chơi trong những ô nhịp này."
       },
       "mark": {
-        "onTime": "On time",
-        "slightlyEarly": "A shade early",
-        "early": "Early",
-        "slightlyLate": "A shade late",
-        "late": "Late",
-        "missed": "Missed",
-        "notAssessed": "Not assessed",
-        "extra": "Extra note",
-        "accentQuiet": "Written with an accent, but it did not come out louder"
+        "onTime": "Đúng chỗ",
+        "slightlyEarly": "Hơi sớm",
+        "early": "Sớm",
+        "slightlyLate": "Hơi trễ",
+        "late": "Trễ",
+        "missed": "Thiếu",
+        "notAssessed": "Chưa chấm",
+        "extra": "Nốt thừa",
+        "accentQuiet": "Ghi có dấu nhấn, nhưng không ra to hơn"
       },
       "bars": {
-        "one": "bar {{bar}}",
-        "range": "bars {{from}}–{{to}}",
-        "here": "this passage"
+        "one": "ở ô nhịp {{bar}}",
+        "range": "ở ô nhịp {{from}}–{{to}}",
+        "here": "ở đoạn này"
       },
       "amount": {
-        "hair": "a hair",
-        "thirtySecond": "about a thirty-second",
-        "sixteenth": "about a sixteenth",
-        "tripletEighth": "about a third of a beat",
-        "eighth": "about an eighth",
-        "mostOfABeat": "most of a beat",
-        "beat": "a whole beat"
+        "hair": "một sợi tóc",
+        "thirtySecond": "khoảng một nốt móc ba",
+        "sixteenth": "khoảng một nốt móc kép",
+        "tripletEighth": "khoảng một phần ba phách",
+        "eighth": "khoảng một nốt móc đơn",
+        "mostOfABeat": "gần trọn một phách",
+        "beat": "trọn một phách"
       },
       "when": {
-        "early": "early",
-        "late": "late"
+        "early": "sớm",
+        "late": "trễ"
       },
-      "goes": "{{count}} go",
-      "goes_other": "{{count}} goes",
-      "notes": "{{count}} note",
-      "notes_other": "{{count}} notes",
+      "goes": "{{count}} lượt",
+      "goes_other": "{{count}} lượt",
+      "notes": "{{count}} nốt",
+      "notes_other": "{{count}} nốt",
       "say": {
         "consistentMiss": {
-          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
-          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
-          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+          "1": "Lần nào cũng đúng chỗ đó — bạn mất {{bars}} ở {{affected}} trên {{goes}}.",
+          "2": "Nó vỡ {{bars}}: rơi mất {{affected}} lần trên {{passes}}.",
+          "3": "Phần còn lại vẫn trụ. Chỗ cứ biến mất là {{bars}}, ở {{affected}} trên {{goes}}."
         },
         "rushing": {
-          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
-          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
-          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+          "1": "Bạn đi trước tiếng gõ {{bars}} — sớm {{amount}}, suốt cả đoạn.",
+          "2": "Có sự vội {{bars}}: trung bình sớm {{amount}}.",
+          "3": "Ngồi lui lại một chút {{bars}}. Ở đó bạn đang rơi sớm {{amount}}."
         },
         "dragging": {
-          "1": "You're behind the click through {{bars}} — {{amount}} late.",
-          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
-          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+          "1": "Bạn đi sau tiếng gõ {{bars}} — trễ {{amount}}.",
+          "2": "Nó bị kéo {{bars}}: các nốt rơi sau phách {{amount}}.",
+          "3": "Nghiêng tới một chút {{bars}}. Nó đang ngồi trễ {{amount}}."
         },
         "afterShift": {
-          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
-          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
-          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+          "1": "Mỗi lần tay bạn đổi thế {{bars}}, nốt kế tiếp đến {{when}} {{amount}}.",
+          "2": "Cú đổi thế {{bars}} làm nốt ngay sau đó {{when}} {{amount}}.",
+          "3": "Đặt gọn cú đổi thế {{bars}} thì phần còn lại theo sau — hiện giờ nốt sau đó đang {{when}} {{amount}}."
         },
         "fallsApart": {
-          "1": "You start {{bars}} clean and lose it by the end.",
-          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
-          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+          "1": "Bạn vào sạch {{bars}} rồi để tuột về cuối.",
+          "2": "Nửa sau mới là chỗ buông {{bars}} — phần đầu vẫn ổn.",
+          "3": "Sức bền, không phải nốt: {{bars}} càng về sau càng luộm thuộm."
         },
         "extras": {
-          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
-          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
-          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+          "1": "Có những nốt {{bars}} mà không ai gọi — {{extras}}.",
+          "2": "Bạn đang thêm {{extras}} {{bars}}. Hãy để dấu lặng là dấu lặng.",
+          "3": "Có thứ len vào {{bars}}: {{extras}} không có trong bản ghi."
         },
         "uneven": {
-          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
-          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
-          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+          "1": "{{bars}} không phải sớm hay trễ — mà là không đều. Nốt rơi tản mát.",
+          "2": "Nhịp tay bạn lang thang {{bars}} chứ không nghiêng hẳn về bên nào.",
+          "3": "Chắc trước, nhanh sau: {{bars}} vẫn chưa có gì đều, theo cả hai hướng."
         },
         "beatPositionBias": {
-          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
-          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
-          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+          "1": "Phách {{beat}} của ô nhịp là phách bị tuột — {{when}} {{amount}}, ô nhịp nào cũng vậy.",
+          "2": "Bạn tì vào phách {{beat}}: {{when}} {{amount}} mỗi lần nó quay lại.",
+          "3": "Chính phách {{beat}} lệch ra, ô nhịp này qua ô nhịp khác — {{when}} {{amount}}."
         },
         "subdivisionWeak": {
-          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
-          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
-          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+          "1": "Nốt thứ {{position}} trong mỗi {{outOf}} là nốt bạn cứ đánh rơi.",
+          "2": "Trong mỗi nhóm {{outOf}} nốt, nốt biến mất là nốt thứ {{position}}.",
+          "3": "Đếm to cả nhóm lên — chỗ trượt là nốt thứ {{position}} trên {{outOf}}."
         },
         "drift": {
-          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
-          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
-          "3": "The tempo under your hands slides {{when}} across the segment."
+          "1": "Bạn vào cùng tiếng gõ rồi trôi {{when}} {{amount}} vào lúc kết.",
+          "2": "Càng đi càng kéo: ở những ô nhịp cuối, {{when}} {{amount}}.",
+          "3": "Tempo dưới tay bạn trượt dần suốt đoạn — đến cuối thì {{when}} hẳn."
         },
         "tempoCeiling": {
-          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
-          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
-          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+          "1": "{{hold}} thì còn giữ được. Đến {{collapse}} là vỡ.",
+          "2": "Trần của bạn ở đây là {{hold}} — {{collapse}} chưa phải của bạn.",
+          "3": "{{hold}} là của bạn. {{collapse}} là thứ tiếp theo phải giành lấy, không phải tempo của hôm nay."
         },
         "improved": {
-          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
-          "2": "Something moved: you held {{bars}} where it used to slip.",
-          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+          "1": "Khá hơn rồi — {{bars}} chắc hơn lần trước {{ms}} ms.",
+          "2": "Có thứ đã dịch chuyển: bạn giữ được {{bars}}, chỗ trước đây hay tuột.",
+          "3": "Tiến bộ thật {{bars}} — chặt hơn các lượt trước {{ms}} ms."
         },
         "clean": {
-          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
-          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
-          "3": "You played {{bars}} right every time. Leave it and come back to it."
+          "1": "Không có gì phải sửa {{bars}} — đúng cả {{goes}}.",
+          "2": "Cái này là của bạn: {{bars}}, {{goes}}, không trượt lần nào.",
+          "3": "Bạn chơi đúng {{bars}} mọi lần. Để đó rồi quay lại sau."
         }
       }
     }

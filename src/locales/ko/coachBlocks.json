@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "{{from}}–{{to}}마디 반복",
+      "loopBarsAt": "{{from}}–{{to}}마디를 {{bpm}}로 반복",
+      "ramp": "{{from}}에서 {{to}}까지 올리기",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "클릭을 4분음표로",
+        "2": "클릭을 8분음표로",
+        "3": "클릭을 셋잇단음표로",
+        "4": "클릭을 16분음표로",
+        "5": "클릭을 다섯잇단음표로",
+        "6": "클릭을 여섯잇단음표로"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "{{name}} 준비하기",
+      "loadJam": "{{name}}에 맞춰 연주하기",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "내일 다시 여기로",
         "inDays": "{{days}}일 뒤에 다시"
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}, 지판 위"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "오픈 포지션",
+      "rootOn6": "근음은 6번 줄",
+      "rootOn5": "근음은 5번 줄",
+      "rootOn4": "근음은 4번 줄",
+      "rootOn3": "근음은 3번 줄"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "{{count}}개 중 {{index}}번째 폼"
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "{{title}}의 {{from}}–{{to}}마디"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "{{first}}%에서 {{last}}%로, {{goes}} 동안",
+      "aria": "{{from}}마디부터 {{to}}마디까지의 흐름"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "그 번의 연주로 색을 입힘",
+      "plain": "악보에 적힌 그대로의 음",
+      "soon": "이 마디의 타브 악보는 곧 준비됩니다."
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "{{title}}의 내 테이크",
+      "any": "내 테이크",
+      "soon": "테이크 다시 듣기는 곧 준비됩니다."
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "{{title}}의 두 번을 나란히",
+      "any": "두 번을 나란히",
+      "soon": "두 번을 나란히 듣기는 곧 준비됩니다."
     }
   }
 }

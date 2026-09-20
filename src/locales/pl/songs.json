@@ -1,199 +1,217 @@
 {
   "songs": {
-    "import": "Import a song",
+    "import": "Zaimportuj utwór",
     "dismiss": "OK",
-    "tuning": "Tuning",
-    "capoLabel": "Capo",
-    "capo": "Capo at fret {{fret}}",
-    "meter": "Time",
+    "tuning": "Strój",
+    "capoLabel": "Kapodaster",
+    "capo": "Kapodaster na {{fret}}. progu",
+    "meter": "Metrum",
     "tempo": "Tempo",
     "bpm": "{{bpm}} BPM",
-    "range": "Bars",
-    "fromBar": "From",
-    "toBar": "To",
-    "wholeSong": "Whole song",
-    "barsCount": "{{count}} bar",
-    "barsCount_other": "{{count}} bars",
-    "sections": "Sections",
-    "speed": "Speed",
+    "range": "Takty",
+    "fromBar": "Od",
+    "toBar": "Do",
+    "wholeSong": "Cały utwór",
+    "barsCount": "{{count}} takt",
+    "barsCount_few": "{{count}} takty",
+    "barsCount_many": "{{count}} taktów",
+    "barsCount_other": "{{count}} taktu",
+    "sections": "Części",
+    "speed": "Prędkość",
     "percent": "{{percent}}%",
-    "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
-    "loopNote": "Play the bars above again and again",
-    "dropHere": "Drop the file to open it",
+    "speedNote": "Klik idzie w {{bpm}} BPM",
+    "loop": "Powtarzaj",
+    "loopOn": "W kółko",
+    "loopOff": "Raz do końca",
+    "loopNote": "Gra takty powyżej raz za razem",
+    "dropHere": "Upuść plik, żeby go otworzyć",
     "band": {
-      "label": "Who you hear",
-      "click": "Click",
-      "drums": "Drums",
-      "bass": "Bass",
-      "keys": "Keys",
-      "levelFor": "How loud the {{lane}} is",
-      "muteFor": "Turn the {{lane}} off",
-      "note": "Set the balance while you play. Yames remembers it for this song.",
-      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
-      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
-      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
-      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+      "label": "Kogo słyszysz",
+      "click": "Klik",
+      "drums": "Perkusja",
+      "bass": "Bas",
+      "keys": "Klawisze",
+      "levelFor": "Jak głośno gra {{lane}}",
+      "muteFor": "Wyłącz {{lane}}",
+      "note": "Ustaw balans w trakcie grania. Yames zapamięta go dla tego utworu.",
+      "leftOut": "{{tracks}} jest w tym pliku, ale Yames nie ma komu tego zagrać.",
+      "leftOut_few": "{{tracks}} są w tym pliku, ale Yames nie ma komu ich zagrać.",
+      "leftOut_many": "{{tracks}} są w tym pliku, ale Yames nie ma komu ich zagrać.",
+      "leftOut_other": "{{tracks}} są w tym pliku, ale Yames nie ma komu ich zagrać.",
+      "droppedNotes": "{{count}} nuta w tym pliku należy do instrumentu, którego zespół nie ma.",
+      "droppedNotes_few": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma.",
+      "droppedNotes_many": "{{count}} nut w tym pliku należy do instrumentów, których zespół nie ma.",
+      "droppedNotes_other": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma."
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
-      "counting": "Counting you in"
+      "label": "Odliczenie",
+      "none": "Od razu",
+      "bars": "{{count}} takt",
+      "bars_few": "{{count}} takty",
+      "bars_many": "{{count}} taktów",
+      "bars_other": "{{count}} taktu",
+      "note": "Liczone przed pierwszym przebiegiem, nie przed każdą powtórką",
+      "counting": "Odliczam ci wejście"
     },
     "engine": {
-      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
-      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+      "cannotPlay": "Yames nie może w tej chwili zagrać tego utworu z zespołem. Klik dalej trzyma czas.",
+      "busy": "Coś innego używa dźwięku, więc utwór się zatrzymał. Naciśnij odtwarzanie jeszcze raz, kiedy będziesz gotowy."
     },
     "empty": {
-      "title": "Bring in a song you already have",
-      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "title": "Wciągnij utwór, który już masz",
+      "body": "Otwórz plik Guitar Pro albo MusicXML, a Yames pokaże ci tabulaturę, będzie trzymał czas i śledził, gdzie jesteś. Upuść plik w dowolnym miejscu tego ekranu albo wybierz go z dysku.",
+      "private": "Plik zostaje na tym komputerze. Nic nie jest wysyłane."
     },
     "tab": {
-      "drawing": "Laying out the music...",
-      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+      "drawing": "Układam nuty...",
+      "failed": "Yames odczytał ten plik, ale nie umie go narysować. Takty i czas działają tak samo."
     },
     "picker": {
-      "title": "Choose your part",
-      "which": "Which part are you playing?",
-      "strings": "{{count}} string",
-      "strings_other": "{{count}} strings",
-      "notTab": "Not written as tab",
-      "cancel": "Not now"
+      "title": "Wybierz swoją partię",
+      "which": "Którą partię grasz?",
+      "strings": "{{count}} struna",
+      "strings_few": "{{count}} struny",
+      "strings_many": "{{count}} strun",
+      "strings_other": "{{count}} struny",
+      "notTab": "Nie zapisana w tabulaturze",
+      "cancel": "Nie teraz"
     },
     "warn": {
-      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
-      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
-      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+      "tempoFlattened": "Tempo zmienia się płynnie w {{count}} takcie. Yames przestawia je zamiast tego na kresce taktowej.",
+      "tempoFlattened_few": "Tempo zmienia się płynnie w {{count}} taktach. Yames przestawia je zamiast tego na kresce taktowej.",
+      "tempoFlattened_many": "Tempo zmienia się płynnie w {{count}} taktach. Yames przestawia je zamiast tego na kresce taktowej.",
+      "tempoFlattened_other": "Tempo zmienia się płynnie w {{count}} taktach. Yames przestawia je zamiast tego na kresce taktowej.",
+      "barOverfilled": "Takt {{bar}} mieści więcej, niż pozwala jego metrum. Gramy go tak, jak jest zapisany."
     },
     "library": {
-      "add": "Import a song",
-      "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames",
-      "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "add": "Zaimportuj utwór",
+      "empty": "Jeszcze nie ma utworów",
+      "summary": "{{track}} · {{bars}} taktów",
+      "remove": "Usuń z Yames",
+      "due": "Na dziś",
+      "dueTitle": "Prosiłeś, żeby do tego wrócić"
     },
     "review": {
-      "title": "How that went",
-      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
-      "again": "Go again",
-      "working": "Listening back...",
-      "passes": "Which go",
-      "pass": "Go {{n}}",
-      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
-      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
-      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
-      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
-      "moreLabel": "What else ({{count}})",
-      "moreLabel_other": "What else ({{count}})",
-      "lessLabel": "Hide the rest",
+      "title": "Jak poszło",
+      "summary": "Takty {{bars}} przy {{percent}}% — {{hits}} z {{of}} nut na miejscu",
+      "again": "Jeszcze raz",
+      "working": "Odsłuchuję...",
+      "passes": "Które podejście",
+      "pass": "Podejście {{n}}",
+      "nothingToSay": "W tym nic się nie rzuciło w oczy. Zagraj jeszcze raz, a trener będzie miał się czego chwycić.",
+      "chordsHonesty": "Nie umiem jeszcze sprawdzić dźwięków wewnątrz akordów, tylko to, kiedy padają.",
+      "notSaved": "Yames nie zdołał tego zapisać, więc następnym razem nie będzie do czego porównać.",
+      "tooShort": "To było za krótkie, żeby ocenić. Zagraj co najmniej osiem nut tego fragmentu, a trener będzie miał coś do powiedzenia.",
+      "moreLabel": "Co jeszcze ({{count}})",
+      "moreLabel_few": "Co jeszcze ({{count}})",
+      "moreLabel_many": "Co jeszcze ({{count}})",
+      "moreLabel_other": "Co jeszcze ({{count}})",
+      "lessLabel": "Ukryj resztę",
       "tab": {
-        "nothing": "Nothing was played in these bars."
+        "nothing": "W tych taktach nic nie zabrzmiało."
       },
       "mark": {
-        "onTime": "On time",
-        "slightlyEarly": "A shade early",
-        "early": "Early",
-        "slightlyLate": "A shade late",
-        "late": "Late",
-        "missed": "Missed",
-        "notAssessed": "Not assessed",
-        "extra": "Extra note",
-        "accentQuiet": "Written with an accent, but it did not come out louder"
+        "onTime": "Na miejscu",
+        "slightlyEarly": "Odrobinę wcześnie",
+        "early": "Wcześnie",
+        "slightlyLate": "Odrobinę późno",
+        "late": "Późno",
+        "missed": "Brak",
+        "notAssessed": "Nieoceniona",
+        "extra": "Nuta z zewnątrz",
+        "accentQuiet": "Zapisana z akcentem, ale nie wyszła głośniej"
       },
       "bars": {
-        "one": "bar {{bar}}",
-        "range": "bars {{from}}–{{to}}",
-        "here": "this passage"
+        "one": "w takcie {{bar}}",
+        "range": "w taktach {{from}}–{{to}}",
+        "here": "w tym miejscu"
       },
       "amount": {
-        "hair": "a hair",
-        "thirtySecond": "about a thirty-second",
-        "sixteenth": "about a sixteenth",
-        "tripletEighth": "about a third of a beat",
-        "eighth": "about an eighth",
-        "mostOfABeat": "most of a beat",
-        "beat": "a whole beat"
+        "hair": "o włos",
+        "thirtySecond": "o jakąś trzydziestodwójkę",
+        "sixteenth": "o jakąś szesnastkę",
+        "tripletEighth": "o jakąś jedną trzecią miary",
+        "eighth": "o jakąś ósemkę",
+        "mostOfABeat": "o prawie całą miarę",
+        "beat": "o całą miarę"
       },
       "when": {
-        "early": "early",
-        "late": "late"
+        "early": "za wcześnie",
+        "late": "za późno"
       },
-      "goes": "{{count}} go",
-      "goes_other": "{{count}} goes",
-      "notes": "{{count}} note",
-      "notes_other": "{{count}} notes",
+      "goes": "{{count}} podejście",
+      "goes_few": "{{count}} podejścia",
+      "goes_many": "{{count}} podejść",
+      "goes_other": "{{count}} podejścia",
+      "notes": "{{count}} nuta",
+      "notes_few": "{{count}} nuty",
+      "notes_many": "{{count}} nut",
+      "notes_other": "{{count}} nuty",
       "say": {
         "consistentMiss": {
-          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
-          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
-          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+          "1": "Zawsze to samo miejsce — gubisz to {{bars}}, w {{affected}} z {{goes}}.",
+          "2": "Rozsypuje się {{bars}}: znika {{affected}} razy na {{passes}}.",
+          "3": "Reszta trzyma. Gubi się wciąż to samo {{bars}} — w {{affected}} z {{goes}}."
         },
         "rushing": {
-          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
-          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
-          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+          "1": "Jesteś przed klikiem {{bars}} — przez cały czas {{amount}} za wcześnie.",
+          "2": "Jest pośpiech {{bars}}: średnio {{amount}} za wcześnie.",
+          "3": "Usiądź trochę głębiej {{bars}}. Lądujesz tam {{amount}} za wcześnie."
         },
         "dragging": {
-          "1": "You're behind the click through {{bars}} — {{amount}} late.",
-          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
-          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+          "1": "Jesteś za klikiem {{bars}} — {{amount}} za późno.",
+          "2": "Wlecze się {{bars}}: nuty lądują {{amount}} po mierze.",
+          "3": "Wychyl się trochę do przodu {{bars}}. Siedzi {{amount}} za późno."
         },
         "afterShift": {
-          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
-          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
-          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+          "1": "Za każdym razem, gdy ręka się przesuwa {{bars}}, następna nuta wchodzi {{amount}} {{when}}.",
+          "2": "Zmiana pozycji {{bars}} kosztuje cię {{amount}} {{when}} na nucie po niej.",
+          "3": "Dociągnij zmianę pozycji {{bars}}, a reszta pójdzie sama — teraz nuta po niej jest {{amount}} {{when}}."
         },
         "fallsApart": {
-          "1": "You start {{bars}} clean and lose it by the end.",
-          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
-          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+          "1": "Zaczynasz czysto {{bars}} i tracisz to pod koniec.",
+          "2": "To druga połowa puszcza {{bars}} — początek stoi.",
+          "3": "Kondycja, nie nuty: {{bars}} im dalej, tym bardziej się rozjeżdża."
         },
         "extras": {
-          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
-          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
-          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+          "1": "Są nuty {{bars}}, o które nikt nie prosił — {{extras}}.",
+          "2": "Dokładasz {{extras}} {{bars}}. Niech pauzy będą pauzami.",
+          "3": "Coś się wkrada {{bars}}: {{extras}}, których nie ma w zapisie."
         },
         "uneven": {
-          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
-          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
-          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+          "1": "{{bars}} to nie jest za wcześnie ani za późno — to jest nierówno. Nuty lądują wszędzie.",
+          "2": "Twój czas błądzi {{bars}}, zamiast przechylać się w jedną stronę.",
+          "3": "Najpierw równo, potem szybko: {{bars}} nic jeszcze nie jest równe, w żadną stronę."
         },
         "beatPositionBias": {
-          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
-          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
-          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+          "1": "Miara {{beat}} w takcie to ta, która ucieka — {{amount}} {{when}}, takt po takcie.",
+          "2": "Opierasz się na mierze {{beat}}: {{amount}} {{when}}, ilekroć wraca.",
+          "3": "To miara {{beat}} wypada, takt po takcie — {{amount}} {{when}}."
         },
         "subdivisionWeak": {
-          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
-          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
-          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+          "1": "Nuta {{position}} z każdych {{outOf}} to ta, którą wciąż gubisz.",
+          "2": "W każdej grupie po {{outOf}} brakuje nuty {{position}}.",
+          "3": "Policz grupę na głos — to na nucie {{position}} z {{outOf}} się wysypuje."
         },
         "drift": {
-          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
-          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
-          "3": "The tempo under your hands slides {{when}} across the segment."
+          "1": "Zacząłeś razem z klikiem, a na końcu byłeś {{amount}} {{when}}.",
+          "2": "Im dalej, tym bardziej ciągnie: przy ostatnich taktach {{amount}} {{when}}.",
+          "3": "Tempo pod twoimi rękami zjeżdża przez cały odcinek — na końcu jesteś {{when}}."
         },
         "tempoCeiling": {
-          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
-          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
-          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+          "1": "{{hold}} trzyma się kupy. Przy {{collapse}} rozsypuje się.",
+          "2": "Twój sufit to tutaj {{hold}} — {{collapse}} jeszcze nie jest twoje.",
+          "3": "{{hold}} jest twoje. {{collapse}} to następna rzecz do zdobycia, nie tempo na dziś."
         },
         "improved": {
-          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
-          "2": "Something moved: you held {{bars}} where it used to slip.",
-          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+          "1": "Lepiej — {{bars}} jest {{ms}} ms równiej niż ostatnio.",
+          "2": "Coś drgnęło: trzymasz {{bars}} tam, gdzie wcześniej uciekało.",
+          "3": "Prawdziwy postęp {{bars}} — {{ms}} ms ciaśniej niż w poprzednich podejściach."
         },
         "clean": {
-          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
-          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
-          "3": "You played {{bars}} right every time. Leave it and come back to it."
+          "1": "Nie ma czego poprawiać {{bars}} — czysto we wszystkich {{goes}}.",
+          "2": "To jest twoje: {{bars}}, {{goes}}, ani jednego potknięcia.",
+          "3": "Zagrałeś {{bars}} dobrze za każdym razem. Zostaw to i wróć później."
         }
       }
     }

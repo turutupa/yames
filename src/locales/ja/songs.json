@@ -1,199 +1,199 @@
 {
   "songs": {
-    "import": "Import a song",
+    "import": "曲を読み込む",
     "dismiss": "OK",
-    "tuning": "Tuning",
-    "capoLabel": "Capo",
-    "capo": "Capo at fret {{fret}}",
-    "meter": "Time",
-    "tempo": "Tempo",
+    "tuning": "チューニング",
+    "capoLabel": "カポ",
+    "capo": "カポは {{fret}} フレット",
+    "meter": "拍子",
+    "tempo": "テンポ",
     "bpm": "{{bpm}} BPM",
-    "range": "Bars",
-    "fromBar": "From",
-    "toBar": "To",
-    "wholeSong": "Whole song",
-    "barsCount": "{{count}} bar",
-    "barsCount_other": "{{count}} bars",
-    "sections": "Sections",
-    "speed": "Speed",
+    "range": "小節",
+    "fromBar": "開始",
+    "toBar": "終了",
+    "wholeSong": "曲全体",
+    "barsCount": "{{count}} 小節",
+    "barsCount_other": "{{count}} 小節",
+    "sections": "セクション",
+    "speed": "速さ",
     "percent": "{{percent}}%",
-    "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
-    "loopNote": "Play the bars above again and again",
-    "dropHere": "Drop the file to open it",
+    "speedNote": "クリックは {{bpm}} BPM で動きます",
+    "loop": "繰り返し",
+    "loopOn": "何度でも",
+    "loopOff": "一度だけ",
+    "loopNote": "上の小節を何度も繰り返し弾きます",
+    "dropHere": "ファイルをここに落とすと開きます",
     "band": {
-      "label": "Who you hear",
-      "click": "Click",
-      "drums": "Drums",
-      "bass": "Bass",
-      "keys": "Keys",
-      "levelFor": "How loud the {{lane}} is",
-      "muteFor": "Turn the {{lane}} off",
-      "note": "Set the balance while you play. Yames remembers it for this song.",
-      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
-      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
-      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
-      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+      "label": "誰が鳴るか",
+      "click": "クリック",
+      "drums": "ドラム",
+      "bass": "ベース",
+      "keys": "キーボード",
+      "levelFor": "{{lane}} の音量",
+      "muteFor": "{{lane}} を切る",
+      "note": "弾きながらバランスを決めてください。Yames はこの曲のぶんを覚えています。",
+      "leftOut": "{{tracks}} はこのファイルに入っていますが、Yames には弾ける相手がいません。",
+      "leftOut_other": "{{tracks}} はこのファイルに入っていますが、Yames には弾ける相手がいません。",
+      "droppedNotes": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。",
+      "droppedNotes_other": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。"
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
-      "counting": "Counting you in"
+      "label": "カウントイン",
+      "none": "すぐに開始",
+      "bars": "{{count}} 小節",
+      "bars_other": "{{count}} 小節",
+      "note": "最初の一周の前だけ数えます。繰り返しのたびには数えません",
+      "counting": "カウント中"
     },
     "engine": {
-      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
-      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+      "cannotPlay": "Yames は今この曲をバンドで鳴らせません。クリックは変わらず時間を刻みます。",
+      "busy": "ほかの何かが音を使っているので、曲が止まりました。用意ができたらもう一度再生を押してください。"
     },
     "empty": {
-      "title": "Bring in a song you already have",
-      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "title": "手元にある曲を持ち込んでください",
+      "body": "Guitar Pro か MusicXML のファイルを開くと、Yames がタブ譜を表示し、時間を刻み、今いる場所を追いかけます。この画面のどこにでもファイルを落とすか、選んでください。",
+      "private": "ファイルはこのパソコンに残ります。どこにも送られません。"
     },
     "tab": {
-      "drawing": "Laying out the music...",
-      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+      "drawing": "譜面を組んでいます...",
+      "failed": "Yames はこのファイルを読めましたが、描けません。小節と時間はそのまま使えます。"
     },
     "picker": {
-      "title": "Choose your part",
-      "which": "Which part are you playing?",
-      "strings": "{{count}} string",
-      "strings_other": "{{count}} strings",
-      "notTab": "Not written as tab",
-      "cancel": "Not now"
+      "title": "弾くパートを選ぶ",
+      "which": "どのパートを弾きますか？",
+      "strings": "{{count}} 弦",
+      "strings_other": "{{count}} 弦",
+      "notTab": "タブ譜では書かれていません",
+      "cancel": "今はやめる"
     },
     "warn": {
-      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
-      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
-      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+      "tempoFlattened": "{{count}} 小節でテンポが連続的に変わります。Yames は代わりに小節線で切り替えます。",
+      "tempoFlattened_other": "{{count}} 小節でテンポが連続的に変わります。Yames は代わりに小節線で切り替えます。",
+      "barOverfilled": "{{bar}} 小節目は拍子が許す量より多く入っています。書かれたとおりに鳴らします。"
     },
     "library": {
-      "add": "Import a song",
-      "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames",
-      "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "add": "曲を読み込む",
+      "empty": "まだ曲がありません",
+      "summary": "{{track}} · {{bars}} 小節",
+      "remove": "Yames から外す",
+      "due": "今日の分",
+      "dueTitle": "この曲に戻ると決めていました"
     },
     "review": {
-      "title": "How that went",
-      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
-      "again": "Go again",
-      "working": "Listening back...",
-      "passes": "Which go",
-      "pass": "Go {{n}}",
-      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
-      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
-      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
-      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
-      "moreLabel": "What else ({{count}})",
-      "moreLabel_other": "What else ({{count}})",
-      "lessLabel": "Hide the rest",
+      "title": "今のはどうだったか",
+      "summary": "{{bars}} 小節、{{percent}}% — {{of}} 音中 {{hits}} 音が決まりました",
+      "again": "もう一度",
+      "working": "聴き返しています...",
+      "passes": "どの回",
+      "pass": "{{n}} 回目",
+      "nothingToSay": "今のには目立つところがありませんでした。もう一度弾けば、コーチに見えるものが増えます。",
+      "chordsHonesty": "和音の中の音はまだ確認できません。タイミングだけです。",
+      "notSaved": "Yames はこれを書き留められなかったので、次回の比較には残りません。",
+      "tooShort": "短すぎて判断できませんでした。この箇所を8音以上弾けば、コーチが言えることが出てきます。",
+      "moreLabel": "ほかには（{{count}}）",
+      "moreLabel_other": "ほかには（{{count}}）",
+      "lessLabel": "残りを隠す",
       "tab": {
-        "nothing": "Nothing was played in these bars."
+        "nothing": "この小節では何も鳴っていません。"
       },
       "mark": {
-        "onTime": "On time",
-        "slightlyEarly": "A shade early",
-        "early": "Early",
-        "slightlyLate": "A shade late",
-        "late": "Late",
-        "missed": "Missed",
-        "notAssessed": "Not assessed",
-        "extra": "Extra note",
-        "accentQuiet": "Written with an accent, but it did not come out louder"
+        "onTime": "ぴったり",
+        "slightlyEarly": "やや早い",
+        "early": "早い",
+        "slightlyLate": "やや遅い",
+        "late": "遅い",
+        "missed": "抜け",
+        "notAssessed": "判定なし",
+        "extra": "余分な音",
+        "accentQuiet": "アクセント付きで書かれていますが、強く出ていません"
       },
       "bars": {
-        "one": "bar {{bar}}",
-        "range": "bars {{from}}–{{to}}",
-        "here": "this passage"
+        "one": "{{bar}} 小節目",
+        "range": "{{from}}–{{to}} 小節",
+        "here": "この箇所"
       },
       "amount": {
-        "hair": "a hair",
-        "thirtySecond": "about a thirty-second",
-        "sixteenth": "about a sixteenth",
-        "tripletEighth": "about a third of a beat",
-        "eighth": "about an eighth",
-        "mostOfABeat": "most of a beat",
-        "beat": "a whole beat"
+        "hair": "ほんのわずか",
+        "thirtySecond": "32分音符ほど",
+        "sixteenth": "16分音符ほど",
+        "tripletEighth": "1拍の3分の1ほど",
+        "eighth": "8分音符ほど",
+        "mostOfABeat": "ほぼ1拍",
+        "beat": "まるまる1拍"
       },
       "when": {
-        "early": "early",
-        "late": "late"
+        "early": "早く",
+        "late": "遅く"
       },
-      "goes": "{{count}} go",
-      "goes_other": "{{count}} goes",
-      "notes": "{{count}} note",
-      "notes_other": "{{count}} notes",
+      "goes": "{{count}} 回",
+      "goes_other": "{{count}} 回",
+      "notes": "{{count}} 音",
+      "notes_other": "{{count}} 音",
       "say": {
         "consistentMiss": {
-          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
-          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
-          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+          "1": "毎回同じところです。{{goes}}のうち {{affected}} 回、{{bars}}が抜けています。",
+          "2": "{{bars}}で崩れます。{{passes}} 回中 {{affected}} 回、落ちています。",
+          "3": "ほかは持ちこたえています。毎回こぼれるのは{{bars}}で、{{goes}}のうち {{affected}} 回です。"
         },
         "rushing": {
-          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
-          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
-          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+          "1": "{{bars}}でクリックより前に出ています。最後まで{{amount}}早いままです。",
+          "2": "{{bars}}で走っています。平均で{{amount}}早いです。",
+          "3": "{{bars}}では少し後ろに座ってください。そこで{{amount}}早く落ちています。"
         },
         "dragging": {
-          "1": "You're behind the click through {{bars}} — {{amount}} late.",
-          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
-          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+          "1": "{{bars}}でクリックより後ろにいます。{{amount}}遅いです。",
+          "2": "{{bars}}でもたついています。音が拍より{{amount}}あとに落ちています。",
+          "3": "{{bars}}では少し前に出てください。{{amount}}遅く座っています。"
         },
         "afterShift": {
-          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
-          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
-          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+          "1": "{{bars}}で手が動くたび、次の音が{{amount}}{{when}}出ます。",
+          "2": "{{bars}}のポジション移動が、次の音を{{amount}}{{when}}させています。",
+          "3": "{{bars}}の移動を決めれば、あとはついてきます。今は次の音が{{amount}}{{when}}出ています。"
         },
         "fallsApart": {
-          "1": "You start {{bars}} clean and lose it by the end.",
-          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
-          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+          "1": "{{bars}}はきれいに入って、終わりに向けて崩れます。",
+          "2": "{{bars}}の後半が落ちます。前半は大丈夫です。",
+          "3": "音ではなく持久力です。{{bars}}は進むほど粗くなります。"
         },
         "extras": {
-          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
-          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
-          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+          "1": "{{bars}}に、誰も頼んでいない音が入っています。{{extras}}です。",
+          "2": "{{bars}}で{{extras}}を足しています。休符は休符のままにしてください。",
+          "3": "{{bars}}に何かが入り込んでいます。譜面にない{{extras}}です。"
         },
         "uneven": {
-          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
-          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
-          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+          "1": "{{bars}}は早い遅いではなく、ばらついています。音があちこちに落ちています。",
+          "2": "{{bars}}では、どちらかに寄るのではなくタイミングがさまよっています。",
+          "3": "速さより先に安定です。{{bars}}はまだどちらの向きにも揃っていません。"
         },
         "beatPositionBias": {
-          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
-          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
-          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+          "1": "小節の {{beat}} 拍目が逃げています。毎小節、{{amount}}{{when}}です。",
+          "2": "{{beat}} 拍目に寄りかかっています。回ってくるたび{{amount}}{{when}}なります。",
+          "3": "外れているのは {{beat}} 拍目です。小節ごとに{{amount}}{{when}}なります。"
         },
         "subdivisionWeak": {
-          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
-          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
-          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+          "1": "{{outOf}} 個のうち {{position}} 番目の音が、いつも抜け落ちます。",
+          "2": "{{outOf}} 個ずつのまとまりの中で、消えるのは {{position}} 番目の音です。",
+          "3": "声に出して数えてみてください。{{outOf}} 個中 {{position}} 番目でずれます。"
         },
         "drift": {
-          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
-          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
-          "3": "The tempo under your hands slides {{when}} across the segment."
+          "1": "クリックと一緒に始めて、終わりには{{amount}}{{when}}なっていました。",
+          "2": "進むほど引っぱられます。最後の小節では{{amount}}{{when}}なります。",
+          "3": "手の中のテンポが区間を通して滑っています。終わりには{{when}}なっています。"
         },
         "tempoCeiling": {
-          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
-          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
-          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+          "1": "{{hold}} なら持ちます。{{collapse}} で崩れます。",
+          "2": "ここでの上限は {{hold}} です。{{collapse}} はまだ手に入っていません。",
+          "3": "{{hold}} は自分のものです。{{collapse}} は次に取りにいくもので、今日のテンポではありません。"
         },
         "improved": {
-          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
-          "2": "Something moved: you held {{bars}} where it used to slip.",
-          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+          "1": "よくなっています。{{bars}}は前回より {{ms}} ms 安定しています。",
+          "2": "動きがありました。前は滑っていた{{bars}}を、今は保てています。",
+          "3": "{{bars}}は本物の前進です。前の回より {{ms}} ms 締まっています。"
         },
         "clean": {
-          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
-          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
-          "3": "You played {{bars}} right every time. Leave it and come back to it."
+          "1": "{{bars}}に直すところはありません。{{goes}}とも決まっています。",
+          "2": "これは自分のものです。{{bars}}、{{goes}}、ひとつも崩れていません。",
+          "3": "{{bars}}は毎回きちんと弾けました。いったん置いて、また戻ってきてください。"
         }
       }
     }

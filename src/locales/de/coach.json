@@ -66,12 +66,12 @@
     "pocketEarly": "Du spielst im Schnitt {{ms}} ms zu früh",
     "pocketLate": "Du spielst im Schnitt {{ms}} ms zu spät",
     "pocketCentred": "Dein Timing war auf den Beat zentriert (±5 ms im Schnitt)",
-    "covLabel": "Beats covered",
-    "covTitle": "How many of the beats I was expecting actually got played",
-    "effLabel": "Notes on a beat",
-    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
-    "gridLabel": "Locked to the click",
-    "gridTitle": "How closely the whole passage tracked the click"
+    "covLabel": "Gespielte Schläge",
+    "covTitle": "Wie viele der erwarteten Schläge tatsächlich gespielt wurden",
+    "effLabel": "Noten auf dem Schlag",
+    "effTitle": "Wie viel von allem, was ich gehört habe, auf einem Schlag lag statt dazwischen",
+    "gridLabel": "Am Klick",
+    "gridTitle": "Wie eng die ganze Passage am Klick lag"
   },
   "eval": {
     "today": "Heute",

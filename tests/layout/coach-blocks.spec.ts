@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { noSidewaysScroll } from "./fits";
+import { LAYOUT_LOCALE, noSidewaysScroll } from "./fits";
 
 /**
  * The coach's blocks, measured in a real browser.
@@ -28,7 +28,11 @@ const WIDTHS = [
 
 async function openGallery(page: Page, size: { width: number; height: number }) {
   await page.setViewportSize(size);
-  await page.goto("/blocks-gallery.html");
+  // The gallery's own scene names stay English — it is a dev workbench and
+  // they are literals in `gallery.tsx`. What `?lng=` changes is the blocks'
+  // sentences, which is the point: "Loop bars 17–24" is two words in German
+  // and a lot more characters, in a 380px dock.
+  await page.goto(`/blocks-gallery.html?lng=${LAYOUT_LOCALE}`);
 
   /*
    * That the page is the gallery at all, before waiting thirty seconds for

@@ -111,12 +111,12 @@
       "installed": "{{tier}}-Coach installiert ({{size}})",
       "removing": "Wird entfernt…",
       "removeModels": "Modelle entfernen",
-      "stance": "Coaching Style",
-      "stanceHint": "How hard the coach is on you while you play",
-      "stanceStrict": "Strict",
-      "stanceLearning": "Learning",
-      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
-      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
+      "stance": "Coaching-Stil",
+      "stanceHint": "Wie streng der Coach beim Spielen mit dir ist",
+      "stanceStrict": "Streng",
+      "stanceLearning": "Lernen",
+      "stanceStrictDesc": "Benennt eine Tendenz, sobald sie auftaucht, und sagt sie laut. Die richtige Einstellung, wenn du eine Stelle übst, die du schon kannst.",
+      "stanceLearningDesc": "Lässt dir die Hälfte mehr Spielraum, bevor überhaupt etwas gesagt wird, hält Korrekturen beim Spielen aus deinen Ohren und fängt mit dem an, was gut lief. Deine Bewertung wird in beiden Fällen genau gleich gerechnet."
     },
     "general": {
       "title": "Allgemein",

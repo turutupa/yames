@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "Boucler les mesures {{from}}–{{to}}",
+      "loopBarsAt": "Boucler les mesures {{from}}–{{to}} à {{bpm}}",
+      "ramp": "Monte-la de {{from}} à {{to}}",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "Clic sur les noires",
+        "2": "Clic sur les croches",
+        "3": "Clic sur les triolets",
+        "4": "Clic sur les doubles-croches",
+        "5": "Clic sur les quintolets",
+        "6": "Clic sur les sextolets"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "Préparer {{name}}",
+      "loadJam": "Jouer sur {{name}}",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "Reviens-y demain",
         "inDays": "Reviens-y dans {{days}} jours"
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}, sur le manche"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "position ouverte",
+      "rootOn6": "fondamentale sur la 6e corde",
+      "rootOn5": "fondamentale sur la 5e corde",
+      "rootOn4": "fondamentale sur la 4e corde",
+      "rootOn3": "fondamentale sur la 3e corde"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "position {{index}} sur {{count}}"
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "Mesures {{from}}–{{to}} de {{title}}"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "de {{first}} % à {{last}} %, sur {{goes}} essais",
+      "aria": "Comment se sont passées les mesures {{from}} à {{to}}"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "coloré d'après cet essai",
+      "plain": "les notes telles qu'elles sont écrites",
+      "soon": "La tablature de ces mesures arrive bientôt."
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "Ta prise de {{title}}",
+      "any": "Ta prise",
+      "soon": "Réécouter une prise arrive bientôt."
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "Deux essais sur {{title}}, côte à côte",
+      "any": "Deux essais, côte à côte",
+      "soon": "Écouter deux essais côte à côte arrive bientôt."
     }
   }
 }

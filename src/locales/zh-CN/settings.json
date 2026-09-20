@@ -111,12 +111,12 @@
       "installed": "已安装{{tier}}教练（{{size}}）",
       "removing": "移除中…",
       "removeModels": "移除模型",
-      "stance": "Coaching Style",
-      "stanceHint": "How hard the coach is on you while you play",
-      "stanceStrict": "Strict",
-      "stanceLearning": "Learning",
-      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
-      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
+      "stance": "教练风格",
+      "stanceHint": "你弹的时候教练对你有多严",
+      "stanceStrict": "严格",
+      "stanceLearning": "学习中",
+      "stanceStrictDesc": "偏差一出现就点名，并且说出来。打磨一段你已经会弹的乐句时，这是对的设置。",
+      "stanceLearningDesc": "在开口之前多给你一半的余地，弹的时候不把纠正送进你耳朵，而且先说做对的地方。两种设置下你的评分算法完全一样。"
     },
     "general": {
       "title": "通用",

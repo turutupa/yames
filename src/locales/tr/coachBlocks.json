@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "{{from}}–{{to}}. ölçüyü döngüye al",
+      "loopBarsAt": "{{from}}–{{to}}. ölçüyü {{bpm}} ile döngüye al",
+      "ramp": "{{from}} tempodan {{to}} tempoya çıkar",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "Tık dörtlüklerde",
+        "2": "Tık sekizliklerde",
+        "3": "Tık üçlemelerde",
+        "4": "Tık onaltılıklarda",
+        "5": "Tık beşlemelerde",
+        "6": "Tık altılemelerde"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "{{name}} hazırla",
+      "loadJam": "{{name}} ile birlikte çal",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "Yarın buna geri dön",
         "inDays": "{{days}} gün sonra buna geri dön"
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}, klavye üzerinde"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "açık pozisyon",
+      "rootOn6": "kökü 6. telde",
+      "rootOn5": "kökü 5. telde",
+      "rootOn4": "kökü 4. telde",
+      "rootOn3": "kökü 3. telde"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "{{count}} biçimden {{index}}."
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "{{title}} parçasının {{from}}–{{to}}. ölçüleri"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "%{{first}}'ten %{{last}}'e, {{goes}} boyunca",
+      "aria": "{{from}}–{{to}}. ölçülerin nasıl gittiği"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "o tura göre renklendirildi",
+      "plain": "notalar yazıldığı gibi",
+      "soon": "Bu ölçülerin tabı yakında geliyor."
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "{{title}} kaydın",
+      "any": "Kaydın",
+      "soon": "Bir kaydı geri dinlemek yakında geliyor."
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "{{title}} parçasından iki tur, yan yana",
+      "any": "İki tur, yan yana",
+      "soon": "İki turu yan yana dinlemek yakında geliyor."
     }
   }
 }

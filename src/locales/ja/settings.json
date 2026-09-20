@@ -111,12 +111,12 @@
       "installed": "{{tier}}コーチをインストール済み（{{size}}）",
       "removing": "削除中…",
       "removeModels": "モデルを削除",
-      "stance": "Coaching Style",
-      "stanceHint": "How hard the coach is on you while you play",
-      "stanceStrict": "Strict",
-      "stanceLearning": "Learning",
-      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
-      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
+      "stance": "コーチのスタイル",
+      "stanceHint": "演奏中にコーチがどれだけ厳しくするか",
+      "stanceStrict": "厳しめ",
+      "stanceLearning": "習得中",
+      "stanceStrictDesc": "偏りが出たらその場で名前を付けて、声に出して伝えます。すでに弾ける箇所を詰めるときに向いた設定です。",
+      "stanceLearningDesc": "何か言うまでの余裕を1.5倍にし、演奏中は指摘を耳に入れず、うまくいったところから話します。採点はどちらでもまったく同じに計算されます。"
     },
     "general": {
       "title": "一般",

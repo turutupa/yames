@@ -66,12 +66,12 @@
     "pocketEarly": "Trung bình bạn đánh sớm hơn {{ms}}ms",
     "pocketLate": "Trung bình bạn đánh muộn hơn {{ms}}ms",
     "pocketCentred": "Nhịp của bạn bám đúng phách (trung bình ±5ms)",
-    "covLabel": "Beats covered",
-    "covTitle": "How many of the beats I was expecting actually got played",
-    "effLabel": "Notes on a beat",
-    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
-    "gridLabel": "Locked to the click",
-    "gridTitle": "How closely the whole passage tracked the click"
+    "covLabel": "Phách đã chơi",
+    "covTitle": "Trong những phách tôi chờ, bao nhiêu thực sự vang lên",
+    "effLabel": "Nốt nằm trên phách",
+    "effTitle": "Trong tất cả những gì tôi nghe được, bao nhiêu rơi đúng vào phách thay vì giữa hai phách",
+    "gridLabel": "Bám tiếng gõ",
+    "gridTitle": "Cả đoạn bám theo tiếng gõ sát đến đâu"
   },
   "eval": {
     "today": "Hôm nay",

@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "循環第 {{from}}–{{to}} 小節",
+      "loopBarsAt": "以 {{bpm}} 循環第 {{from}}–{{to}} 小節",
+      "ramp": "從 {{from}} 練到 {{to}}",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "滴答走四分音符",
+        "2": "滴答走八分音符",
+        "3": "滴答走三連音",
+        "4": "滴答走十六分音符",
+        "5": "滴答走五連音",
+        "6": "滴答走六連音"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "備好 {{name}}",
+      "loadJam": "跟著 {{name}} 彈",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "明天再回到這裡",
         "inDays": "{{days}} 天後再練這裡"
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}，在指板上"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "開放把位",
+      "rootOn6": "根音在第 6 弦",
+      "rootOn5": "根音在第 5 弦",
+      "rootOn4": "根音在第 4 弦",
+      "rootOn3": "根音在第 3 弦"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "第 {{index}} 個把位，共 {{count}} 個"
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "{{title}} 的第 {{from}}–{{to}} 小節"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "從 {{first}}% 到 {{last}}%，共 {{goes}}",
+      "aria": "第 {{from}} 到 {{to}} 小節的變化"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "依那一遍上色",
+      "plain": "譜面上寫的音",
+      "soon": "這幾小節的六線譜即將推出。"
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "你錄的 {{title}}",
+      "any": "你的錄音",
+      "soon": "回聽錄音即將推出。"
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "{{title}} 的兩遍，並排擺",
+      "any": "兩遍並排擺",
+      "soon": "並排聽兩遍即將推出。"
     }
   }
 }

@@ -66,12 +66,12 @@
     "pocketEarly": "Tu as joué en moyenne {{ms}} ms en avance",
     "pocketLate": "Tu as joué en moyenne {{ms}} ms en retard",
     "pocketCentred": "Ton timing était centré sur le temps (±5 ms en moyenne)",
-    "covLabel": "Beats covered",
-    "covTitle": "How many of the beats I was expecting actually got played",
-    "effLabel": "Notes on a beat",
-    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
-    "gridLabel": "Locked to the click",
-    "gridTitle": "How closely the whole passage tracked the click"
+    "covLabel": "Temps joués",
+    "covTitle": "Combien des temps que j'attendais ont vraiment été joués",
+    "effLabel": "Notes sur un temps",
+    "effTitle": "Sur tout ce que j'ai entendu, la part qui est tombée sur un temps plutôt qu'entre deux",
+    "gridLabel": "Collé au clic",
+    "gridTitle": "À quel point tout le passage a suivi le clic"
   },
   "eval": {
     "today": "Aujourd'hui",

@@ -66,12 +66,12 @@
     "pocketEarly": "平均 {{ms}}ms 早く演奏していました",
     "pocketLate": "平均 {{ms}}ms 遅く演奏していました",
     "pocketCentred": "タイミングはビートのど真ん中でした（平均 ±5ms）",
-    "covLabel": "Beats covered",
-    "covTitle": "How many of the beats I was expecting actually got played",
-    "effLabel": "Notes on a beat",
-    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
-    "gridLabel": "Locked to the click",
-    "gridTitle": "How closely the whole passage tracked the click"
+    "covLabel": "鳴った拍",
+    "covTitle": "こちらが待っていた拍のうち、実際に鳴ったのはどれだけか",
+    "effLabel": "拍に乗った音",
+    "effTitle": "聴こえた音のうち、拍と拍の間ではなく拍の上に落ちたのはどれだけか",
+    "gridLabel": "クリックへの密着",
+    "gridTitle": "この区間全体がどれだけクリックに沿っていたか"
   },
   "eval": {
     "today": "今日",

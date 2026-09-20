@@ -1,199 +1,199 @@
 {
   "songs": {
-    "import": "Import a song",
+    "import": "Bir şarkı içe aktar",
     "dismiss": "OK",
-    "tuning": "Tuning",
-    "capoLabel": "Capo",
-    "capo": "Capo at fret {{fret}}",
-    "meter": "Time",
+    "tuning": "Akort",
+    "capoLabel": "Kapo",
+    "capo": "Kapo {{fret}}. perdede",
+    "meter": "Ölçü",
     "tempo": "Tempo",
     "bpm": "{{bpm}} BPM",
-    "range": "Bars",
-    "fromBar": "From",
-    "toBar": "To",
-    "wholeSong": "Whole song",
-    "barsCount": "{{count}} bar",
-    "barsCount_other": "{{count}} bars",
-    "sections": "Sections",
-    "speed": "Speed",
-    "percent": "{{percent}}%",
-    "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
-    "loopNote": "Play the bars above again and again",
-    "dropHere": "Drop the file to open it",
+    "range": "Ölçüler",
+    "fromBar": "Başlangıç",
+    "toBar": "Bitiş",
+    "wholeSong": "Şarkının tamamı",
+    "barsCount": "{{count}} ölçü",
+    "barsCount_other": "{{count}} ölçü",
+    "sections": "Bölümler",
+    "speed": "Hız",
+    "percent": "%{{percent}}",
+    "speedNote": "Tık {{bpm}} BPM ile gidiyor",
+    "loop": "Tekrarla",
+    "loopOn": "Baştan başa",
+    "loopOff": "Bir kez",
+    "loopNote": "Yukarıdaki ölçüleri tekrar tekrar çalar",
+    "dropHere": "Açmak için dosyayı buraya bırak",
     "band": {
-      "label": "Who you hear",
-      "click": "Click",
-      "drums": "Drums",
-      "bass": "Bass",
-      "keys": "Keys",
-      "levelFor": "How loud the {{lane}} is",
-      "muteFor": "Turn the {{lane}} off",
-      "note": "Set the balance while you play. Yames remembers it for this song.",
-      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
-      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
-      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
-      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+      "label": "Kimi duyuyorsun",
+      "click": "Tık",
+      "drums": "Davul",
+      "bass": "Bas",
+      "keys": "Klavye",
+      "levelFor": "{{lane}} ne kadar yüksek",
+      "muteFor": "{{lane}} sesini kapat",
+      "note": "Dengeyi çalarken ayarla. Yames bunu bu şarkı için aklında tutar.",
+      "leftOut": "{{tracks}} bu dosyada var, ama Yames'te onu çalacak kimse yok.",
+      "leftOut_other": "{{tracks}} bu dosyada var, ama Yames'te onları çalacak kimse yok.",
+      "droppedNotes": "Bu dosyadaki {{count}} nota, grupta olmayan bir çalgıya ait.",
+      "droppedNotes_other": "Bu dosyadaki {{count}} nota, grupta olmayan çalgılara ait."
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
-      "counting": "Counting you in"
+      "label": "Giriş sayımı",
+      "none": "Doğrudan",
+      "bars": "{{count}} ölçü",
+      "bars_other": "{{count}} ölçü",
+      "note": "Yalnızca ilk turdan önce sayılır, her tekrardan önce değil",
+      "counting": "Girişini sayıyorum"
     },
     "engine": {
-      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
-      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+      "cannotPlay": "Yames bu şarkıyı şu anda grupla çalamıyor. Tık zamanı tutmaya devam ediyor.",
+      "busy": "Sesi başka bir şey kullanıyor, bu yüzden şarkı durdu. Hazır olduğunda oynata tekrar bas."
     },
     "empty": {
-      "title": "Bring in a song you already have",
-      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "title": "Elinde zaten olan bir şarkıyı getir",
+      "body": "Bir Guitar Pro ya da MusicXML dosyası aç; Yames sana tabı gösterir, zamanı tutar ve nerede olduğunu takip eder. Dosyayı bu ekranın herhangi bir yerine bırak ya da birini seç.",
+      "private": "Dosya bu bilgisayarda kalır. Hiçbir şey yüklenmez."
     },
     "tab": {
-      "drawing": "Laying out the music...",
-      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+      "drawing": "Nota yerleşimi yapılıyor...",
+      "failed": "Yames bu dosyayı okudu ama çizemiyor. Ölçüler ve zamanlama yine de çalışıyor."
     },
     "picker": {
-      "title": "Choose your part",
-      "which": "Which part are you playing?",
-      "strings": "{{count}} string",
-      "strings_other": "{{count}} strings",
-      "notTab": "Not written as tab",
-      "cancel": "Not now"
+      "title": "Partini seç",
+      "which": "Hangi partiyi çalıyorsun?",
+      "strings": "{{count}} tel",
+      "strings_other": "{{count}} tel",
+      "notTab": "Tab olarak yazılmamış",
+      "cancel": "Şimdi değil"
     },
     "warn": {
-      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
-      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
-      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+      "tempoFlattened": "Tempo {{count}} ölçüde kayıyor. Yames bunun yerine ölçü çizgisinde bir anda değiştiriyor.",
+      "tempoFlattened_other": "Tempo {{count}} ölçüde kayıyor. Yames bunun yerine ölçü çizgisinde bir anda değiştiriyor.",
+      "barOverfilled": "{{bar}}. ölçü, ölçü sayısının izin verdiğinden fazlasını taşıyor. Yazıldığı gibi çalınıyor."
     },
     "library": {
-      "add": "Import a song",
-      "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames",
-      "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "add": "Bir şarkı içe aktar",
+      "empty": "Henüz şarkı yok",
+      "summary": "{{track}} · {{bars}} ölçü",
+      "remove": "Yames'ten çıkar",
+      "due": "Bugüne",
+      "dueTitle": "Buna geri dönmek istemiştin"
     },
     "review": {
-      "title": "How that went",
-      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
-      "again": "Go again",
-      "working": "Listening back...",
-      "passes": "Which go",
-      "pass": "Go {{n}}",
-      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
-      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
-      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
-      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
-      "moreLabel": "What else ({{count}})",
-      "moreLabel_other": "What else ({{count}})",
-      "lessLabel": "Hide the rest",
+      "title": "Nasıl gitti",
+      "summary": "{{bars}}. ölçüler, %{{percent}} — {{of}} notadan {{hits}} tanesi yerine oturdu",
+      "again": "Bir daha",
+      "working": "Geri dinleniyor...",
+      "passes": "Hangi tur",
+      "pass": "{{n}}. tur",
+      "nothingToSay": "Bunda öne çıkan bir şey olmadı. Bir daha çal, koçun elinde daha fazla şey olsun.",
+      "chordsHonesty": "Akorların içindeki notaları henüz kontrol edemiyorum, yalnızca ne zaman düştüklerini.",
+      "notSaved": "Yames bunu not edemedi, bu yüzden bir dahaki sefere karşılaştıracak bir şey olmayacak.",
+      "tooShort": "Bu, yargılamak için fazla kısaydı. Bölümden en az sekiz nota çal, koçun söyleyecek bir şeyi olsun.",
+      "moreLabel": "Başka ne var ({{count}})",
+      "moreLabel_other": "Başka ne var ({{count}})",
+      "lessLabel": "Geri kalanı gizle",
       "tab": {
-        "nothing": "Nothing was played in these bars."
+        "nothing": "Bu ölçülerde hiçbir şey çalınmadı."
       },
       "mark": {
-        "onTime": "On time",
-        "slightlyEarly": "A shade early",
-        "early": "Early",
-        "slightlyLate": "A shade late",
-        "late": "Late",
-        "missed": "Missed",
-        "notAssessed": "Not assessed",
-        "extra": "Extra note",
-        "accentQuiet": "Written with an accent, but it did not come out louder"
+        "onTime": "Yerinde",
+        "slightlyEarly": "Az erken",
+        "early": "Erken",
+        "slightlyLate": "Az geç",
+        "late": "Geç",
+        "missed": "Eksik",
+        "notAssessed": "Değerlendirilmedi",
+        "extra": "Fazladan nota",
+        "accentQuiet": "Aksanla yazılmış, ama daha yüksek çıkmadı"
       },
       "bars": {
-        "one": "bar {{bar}}",
-        "range": "bars {{from}}–{{to}}",
-        "here": "this passage"
+        "one": "{{bar}}. ölçüde",
+        "range": "{{from}}–{{to}}. ölçülerde",
+        "here": "bu bölümde"
       },
       "amount": {
-        "hair": "a hair",
-        "thirtySecond": "about a thirty-second",
-        "sixteenth": "about a sixteenth",
-        "tripletEighth": "about a third of a beat",
-        "eighth": "about an eighth",
-        "mostOfABeat": "most of a beat",
-        "beat": "a whole beat"
+        "hair": "kıl payı",
+        "thirtySecond": "yaklaşık bir otuzikilik",
+        "sixteenth": "yaklaşık bir onaltılık",
+        "tripletEighth": "yaklaşık üçte bir vuruş",
+        "eighth": "yaklaşık bir sekizlik",
+        "mostOfABeat": "neredeyse tam bir vuruş",
+        "beat": "tam bir vuruş"
       },
       "when": {
-        "early": "early",
-        "late": "late"
+        "early": "erken",
+        "late": "geç"
       },
-      "goes": "{{count}} go",
-      "goes_other": "{{count}} goes",
-      "notes": "{{count}} note",
-      "notes_other": "{{count}} notes",
+      "goes": "{{count}} tur",
+      "goes_other": "{{count}} tur",
+      "notes": "{{count}} nota",
+      "notes_other": "{{count}} nota",
       "say": {
         "consistentMiss": {
-          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
-          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
-          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+          "1": "Her seferinde aynı yer — {{goes}} turun {{affected}} tanesinde {{bars}} kaybediyorsun.",
+          "2": "{{bars}} dağılıyor: {{passes}} turun {{affected}} tanesinde düşüyor.",
+          "3": "Geri kalanı duruyor. Sürekli kaybolan yer {{bars}}, {{goes}} turun {{affected}} tanesinde."
         },
         "rushing": {
-          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
-          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
-          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+          "1": "{{bars}} tıkın önündesin — baştan sona {{amount}} erken.",
+          "2": "{{bars}} bir acele var: ortalama {{amount}} erken.",
+          "3": "{{bars}} biraz geriye yaslan. Orada {{amount}} erken düşüyorsun."
         },
         "dragging": {
-          "1": "You're behind the click through {{bars}} — {{amount}} late.",
-          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
-          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+          "1": "{{bars}} tıkın gerisindesin — {{amount}} geç.",
+          "2": "{{bars}} sürükleniyor: notalar vuruştan {{amount}} sonra düşüyor.",
+          "3": "{{bars}} biraz öne yaslan. {{amount}} geç oturuyor."
         },
         "afterShift": {
-          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
-          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
-          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+          "1": "{{bars}} elin her yer değiştirdiğinde, sonraki nota {{amount}} {{when}} geliyor.",
+          "2": "{{bars}} pozisyon değişimi, hemen sonraki notada sana {{amount}} {{when}} kaybettiriyor.",
+          "3": "{{bars}} geçişi yerine otursun, gerisi kendiliğinden gelir — şu an sonraki nota {{amount}} {{when}}."
         },
         "fallsApart": {
-          "1": "You start {{bars}} clean and lose it by the end.",
-          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
-          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+          "1": "{{bars}} temiz başlıyorsun ve sona doğru kaybediyorsun.",
+          "2": "{{bars}} ikinci yarı bırakıyor — başı sağlam.",
+          "3": "Nota değil, dayanıklılık: {{bars}} ilerledikçe dağınıklaşıyor."
         },
         "extras": {
-          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
-          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
-          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+          "1": "{{bars}} kimsenin istemediği notalar var — {{extras}}.",
+          "2": "{{bars}} fazladan {{extras}} ekliyorsun. Bırak sus susturak kalsın.",
+          "3": "{{bars}} araya bir şeyler karışıyor: yazılı olmayan {{extras}}."
         },
         "uneven": {
-          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
-          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
-          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+          "1": "{{bars}} erken ya da geç değil — düzensiz. Notalar her yere düşüyor.",
+          "2": "{{bars}} zamanlaman bir yöne yatmak yerine dolaşıyor.",
+          "3": "Önce sağlam, sonra hızlı: {{bars}} henüz hiçbir yönde tutarlı bir şey yok."
         },
         "beatPositionBias": {
-          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
-          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
-          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+          "1": "Ölçünün {{beat}}. vuruşu kaçan vuruş — her ölçüde {{amount}} {{when}}.",
+          "2": "{{beat}}. vuruşa yükleniyorsun: her geldiğinde {{amount}} {{when}}.",
+          "3": "Ölçü ölçü kayan şey {{beat}}. vuruş — {{amount}} {{when}}."
         },
         "subdivisionWeak": {
-          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
-          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
-          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+          "1": "Her {{outOf}} notanın {{position}}. tanesi sürekli düşürdüğün nota.",
+          "2": "Her {{outOf}}'lük grupta kaybolan {{position}}. nota.",
+          "3": "Grubu yüksek sesle say — {{outOf}} notanın {{position}}. tanesinde kayıyor."
         },
         "drift": {
-          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
-          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
-          "3": "The tempo under your hands slides {{when}} across the segment."
+          "1": "Tıkla birlikte başladın ve sona geldiğinde {{amount}} {{when}} kaldın.",
+          "2": "İlerledikçe çekiyor: son ölçülerde {{amount}} {{when}}.",
+          "3": "Ellerinin altındaki tempo bölüm boyunca kayıyor — sonunda {{when}} kalıyorsun."
         },
         "tempoCeiling": {
-          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
-          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
-          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+          "1": "{{hold}} bir arada duruyor. {{collapse}} olunca dağılıyor.",
+          "2": "Buradaki tavanın {{hold}} — {{collapse}} henüz senin değil.",
+          "3": "{{hold}} senin. {{collapse}} kazanılacak bir sonraki şey, bugünün temposu değil."
         },
         "improved": {
-          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
-          "2": "Something moved: you held {{bars}} where it used to slip.",
-          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+          "1": "Bu daha iyi — {{bars}} geçen seferden {{ms}} ms daha sağlam.",
+          "2": "Bir şey oynadı: eskiden kaydığın {{bars}} artık duruyor.",
+          "3": "{{bars}} gerçek ilerleme — önceki turlarından {{ms}} ms daha sıkı."
         },
         "clean": {
-          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
-          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
-          "3": "You played {{bars}} right every time. Leave it and come back to it."
+          "1": "{{bars}} düzeltilecek bir şey yok — {{goes}} turun hepsinde yerinde.",
+          "2": "Bu senin: {{bars}}, {{goes}}, tek bir kayma yok.",
+          "3": "{{bars}} her seferinde doğru çaldın. Bırak ve sonra geri dön."
         }
       }
     }
