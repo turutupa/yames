@@ -235,6 +235,11 @@
     "exportOriginal": "Salvar o arquivo em algum lugar",
     "exporting": "Salvando...",
     "exportDone": "Salvo.",
-    "exportFailed": "O Yames não conseguiu gravar o arquivo ali."
+    "exportFailed": "O Yames não conseguiu gravar o arquivo ali.",
+    "findTab": {
+      "what": "Música e artista",
+      "link": "Procurar uma tablatura",
+      "note": "Abre o seu próprio navegador numa busca comum na web. O Yames não procura nada por você."
+    }
   }
 }

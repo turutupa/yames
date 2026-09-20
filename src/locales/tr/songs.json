@@ -225,6 +225,11 @@
     "exportOriginal": "Dosyayı bir yere kaydet",
     "exporting": "Kaydediliyor...",
     "exportDone": "Kaydedildi.",
-    "exportFailed": "Yames dosyayı oraya yazamadı."
+    "exportFailed": "Yames dosyayı oraya yazamadı.",
+    "findTab": {
+      "what": "Parça ve sanatçı",
+      "link": "Ona bir tab bul",
+      "note": "Kendi tarayıcını sıradan bir web aramasıyla açar. Yames senin yerine hiçbir şey aramaz."
+    }
   }
 }

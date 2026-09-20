@@ -245,6 +245,11 @@
     "exportOriginal": "Zapisz plik gdzieś",
     "exporting": "Zapisywanie...",
     "exportDone": "Zapisano.",
-    "exportFailed": "Yames nie mógł tam zapisać pliku."
+    "exportFailed": "Yames nie mógł tam zapisać pliku.",
+    "findTab": {
+      "what": "Utwór i wykonawca",
+      "link": "Poszukaj tabulatury",
+      "note": "Otwiera twoją własną przeglądarkę ze zwykłym wyszukiwaniem. Yames niczego za ciebie nie sprawdza."
+    }
   }
 }

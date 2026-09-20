@@ -235,6 +235,11 @@
     "exportOriginal": "Guardar el archivo en algún sitio",
     "exporting": "Guardando...",
     "exportDone": "Guardado.",
-    "exportFailed": "Yames no pudo escribir el archivo ahí."
+    "exportFailed": "Yames no pudo escribir el archivo ahí.",
+    "findTab": {
+      "what": "Canción y artista",
+      "link": "Buscar una tablatura",
+      "note": "Abre tu propio navegador con una búsqueda web normal. Yames no busca nada por ti."
+    }
   }
 }

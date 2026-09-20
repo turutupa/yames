@@ -225,6 +225,11 @@
     "exportOriginal": "Datei irgendwo speichern",
     "exporting": "Wird gespeichert ...",
     "exportDone": "Gespeichert.",
-    "exportFailed": "Yames konnte die Datei dort nicht schreiben."
+    "exportFailed": "Yames konnte die Datei dort nicht schreiben.",
+    "findTab": {
+      "what": "Song und Künstler",
+      "link": "Tab dafür suchen",
+      "note": "Öffnet deinen eigenen Browser mit einer ganz normalen Websuche. Yames schlägt nichts für dich nach."
+    }
   }
 }

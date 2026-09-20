@@ -225,6 +225,11 @@
     "exportOriginal": "Bestand ergens opslaan",
     "exporting": "Bezig met opslaan...",
     "exportDone": "Opgeslagen.",
-    "exportFailed": "Yames kon het bestand daar niet schrijven."
+    "exportFailed": "Yames kon het bestand daar niet schrijven.",
+    "findTab": {
+      "what": "Nummer en artiest",
+      "link": "Zoek er een tab bij",
+      "note": "Opent je eigen browser met een gewone zoekopdracht. Yames zoekt niets voor je op."
+    }
   }
 }

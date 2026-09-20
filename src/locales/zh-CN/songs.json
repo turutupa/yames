@@ -225,6 +225,11 @@
     "exportOriginal": "把文件存到别处",
     "exporting": "正在保存...",
     "exportDone": "已保存。",
-    "exportFailed": "Yames 无法把文件写到那里。"
+    "exportFailed": "Yames 无法把文件写到那里。",
+    "findTab": {
+      "what": "歌名和演唱者",
+      "link": "去找一份谱",
+      "note": "会用你自己的浏览器打开一次普通的网页搜索。Yames 不替你查任何东西。"
+    }
   }
 }

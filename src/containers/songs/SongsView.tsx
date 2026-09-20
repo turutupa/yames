@@ -66,6 +66,7 @@ import { SongBand } from "./SongBand";
 // W19 — the download is caught (`plans/SONGS.md` S0.9). Its own component,
 // its own hook and its own stylesheet; mounted in two lines below.
 import { DownloadOffer } from "./DownloadOffer";
+import { FindATab } from "./FindATab";
 import { useDownloadWatch } from "./useDownloadWatch";
 import { SongPortionChip, SongPortionSave } from "./SongPortions";
 import { SongRecordControl } from "./SongTakes";
@@ -413,6 +414,10 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               downloads safe. Said here because this is the screen somebody
               is standing on when they wonder. */}
           <p className="songs-keeps-copy">{t("songs.keepsCopy")}</p>
+          {/* W19 — haven't got the file yet? Yames opens your own browser on
+              an ordinary web search. It names no tab site and fetches
+              nothing; `songs/findTab.ts` is where that is a test. */}
+          <FindATab />
         </div>
       ) : (
         <>

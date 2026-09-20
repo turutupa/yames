@@ -225,6 +225,11 @@
     "exportOriginal": "Lưu tệp ra ngoài",
     "exporting": "Đang lưu...",
     "exportDone": "Đã lưu.",
-    "exportFailed": "Yames không ghi được tệp vào đó."
+    "exportFailed": "Yames không ghi được tệp vào đó.",
+    "findTab": {
+      "what": "Bài hát và nghệ sĩ",
+      "link": "Tìm bản tab cho bài này",
+      "note": "Mở trình duyệt của chính bạn với một tìm kiếm web bình thường. Yames không tra cứu gì thay bạn."
+    }
   }
 }

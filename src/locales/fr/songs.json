@@ -235,6 +235,11 @@
     "exportOriginal": "Enregistrer le fichier quelque part",
     "exporting": "Enregistrement...",
     "exportDone": "Enregistré.",
-    "exportFailed": "Yames n'a pas pu écrire le fichier là."
+    "exportFailed": "Yames n'a pas pu écrire le fichier là.",
+    "findTab": {
+      "what": "Morceau et artiste",
+      "link": "Chercher une tablature",
+      "note": "Ouvre votre propre navigateur sur une recherche web ordinaire. Yames ne cherche rien à votre place."
+    }
   }
 }

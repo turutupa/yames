@@ -225,6 +225,11 @@
     "exportOriginal": "파일을 어딘가에 저장",
     "exporting": "저장하는 중...",
     "exportDone": "저장했습니다.",
-    "exportFailed": "그곳에 파일을 쓸 수 없었습니다."
+    "exportFailed": "그곳에 파일을 쓸 수 없었습니다.",
+    "findTab": {
+      "what": "곡과 연주자",
+      "link": "탭 악보 찾기",
+      "note": "평소 쓰는 브라우저에서 평범한 웹 검색을 엽니다. Yames가 대신 찾아보지는 않습니다."
+    }
   }
 }
