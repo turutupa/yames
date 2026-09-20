@@ -576,6 +576,45 @@ export type JamTake = {
    * skips the field rather than writing a null into those files.
    */
   dryPath?: string;
+  /**
+   * Where the music was when the take's first sample was written
+   * (`take.rs`, `TakePosition`).
+   *
+   * Measured by the take's writer thread, which takes the band as its clock:
+   * its first chunk of band IS the first sample of the file, and the audio
+   * callback stamped where the transport was when it rendered that chunk. So
+   * this is exact to one output buffer, where the frontend's own
+   * `performance.now()` estimate is optimistic by however long the IPC
+   * crossing and the ring handover took.
+   *
+   * Optional: every sidecar written before this existed has none, and a take
+   * recorded with neither a song nor a jam on the engine has no position to
+   * record.
+   */
+  position?: TakePosition;
+};
+
+/** See `JamTake.position`. The mirror of `TakePosition` in `take.rs`. */
+export type TakePosition = {
+  mode: "song" | "jam";
+  /**
+   * A song: the PLAYED bar — the index into `SongScore.bars`, never the
+   * number printed on the page. A jam: the bar of the form.
+   */
+  bar: number;
+  /** Ticks into the piece at 960 to the quarter. 0 for a jam. */
+  tick: number;
+  /** Times round the range, from 0. A jam's chorus, less one. */
+  pass: number;
+  /** The first sample landed in the count-in rather than in the music. */
+  countIn?: boolean;
+  /**
+   * Where beat 0 of the first pass sits inside the file, in milliseconds from
+   * the instant it starts — exactly what `analyze_take_pitch` means by
+   * `startOffsetMs`. Negative when the file starts after that beat.
+   * Absent for a jam, which has no beat 0 to measure from.
+   */
+  startOffsetMs?: number;
 };
 
 export type JamCustomGroove = {

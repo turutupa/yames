@@ -769,3 +769,308 @@ fn the_smallest_gap_is_what_the_detector_should_be_told() {
     };
     assert!((smallest_gap_beats(&plain.onsets).unwrap() - 1.0).abs() < 1e-9);
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// `plans/SONGS.md` A7 — the verdict that arrives while you are playing
+// ──────────────────────────────────────────────────────────────────────
+
+/// A schedule of straight sixteenths, `bars` bars of 4/4.
+fn sixteenths(bars: u32, loops: bool) -> ScoreSchedule {
+    let mut onsets = Vec::new();
+    for i in 0..(bars * 16) {
+        onsets.push(onset(i, i as f64 * 0.25));
+    }
+    ScoreSchedule {
+        length_beats: (bars * 4) as f64,
+        onsets,
+        loops,
+    }
+}
+
+/// Replay a pass into a run at the rate the analyzer actually sweeps, and
+/// collect every verdict that came out, in order.
+///
+/// Deliberately a replay rather than a thread: the sweep is a pure function
+/// of the beat map, the notes and the clock, so making the clock a variable
+/// is what lets the assertions below be about the RULE. That it runs on the
+/// analyzer's own thread, off real events, is
+/// `timing.rs`'s `sixteenths_light_one_by_one_while_the_pass_is_running`.
+///
+/// The sweep clock deliberately does not line up with the music: the
+/// analyzer wakes on its own 5 ms tick and the notes fall where they fall.
+fn replay(
+    run: &mut ScheduleRun,
+    quarter_ms: f64,
+    quarters: usize,
+    played: &[PlayedOnset],
+    until_ms: f64,
+) -> Vec<LiveOnset> {
+    let mut out: Vec<LiveOnset> = Vec::new();
+    let mut next_beat = 0usize;
+    let mut next_note = 0usize;
+    let mut now = 0.0f64;
+    while now <= until_ms {
+        while next_beat < quarters && next_beat as f64 * quarter_ms <= now {
+            run.note_quarter(next_beat == 0, next_beat as f64 * quarter_ms);
+            next_beat += 1;
+        }
+        while next_note < played.len() && played[next_note].time_ms <= now {
+            run.note_onset(played[next_note]);
+            next_note += 1;
+        }
+        run.settle(now, &mut out);
+        now += LIVE_SWEEP_MS;
+    }
+    out
+}
+
+#[test]
+fn every_sixteenth_gets_its_own_live_verdict() {
+    // The whole of A7: a bar of sixteenths played right comes back as
+    // sixteen verdicts against sixteen different ids, not as four beats'
+    // worth of one verdict smeared over four notes each.
+    let schedule = sixteenths(1, false);
+    let beats = steady(120.0, 6);
+    let played = perfect_play(&schedule, &beats);
+    let mut run = ScheduleRun::new(schedule);
+    let live = replay(&mut run, 500.0, 6, &played, 4000.0);
+
+    assert_eq!(
+        live.len(),
+        16,
+        "one verdict per expected onset and no more; got {live:?}"
+    );
+    for (i, v) in live.iter().enumerate() {
+        assert_eq!(v.id, i as u32, "verdicts arrive in the order they are played");
+        assert_eq!(v.pass, 0);
+        assert_eq!(
+            v.state,
+            OnsetState::Hit,
+            "onset {i} was played on the nose and came back {:?}",
+            v.state
+        );
+        assert!(
+            v.deviation_ms.is_some_and(|d| d.abs() < 1.0),
+            "onset {i} was played on the nose and reports {:?}",
+            v.deviation_ms
+        );
+    }
+}
+
+#[test]
+fn a_live_verdict_lands_within_a_beat_of_the_note_it_is_about() {
+    // The gate's number. An onset settles once its matching window has
+    // closed and the detector's own latency has been allowed for, so the
+    // wait is a fraction of a sixteenth plus one sweep — comfortably inside
+    // the beat the note was played in, which is what "live" has to mean for
+    // a page a player is reading.
+    let quarter = 500.0;
+    let schedule = sixteenths(1, false);
+    let beats = steady(120.0, 6);
+    let played = perfect_play(&schedule, &beats);
+    let mut run = ScheduleRun::new(schedule);
+
+    let mut judged_at: Vec<Option<f64>> = vec![None; 16];
+    let mut out: Vec<LiveOnset> = Vec::new();
+    let mut next_beat = 0usize;
+    let mut next_note = 0usize;
+    let mut now = 0.0f64;
+    while now <= 8.0 * quarter {
+        while next_beat < 6 && next_beat as f64 * quarter <= now {
+            run.note_quarter(next_beat == 0, next_beat as f64 * quarter);
+            next_beat += 1;
+        }
+        while next_note < played.len() && played[next_note].time_ms <= now {
+            run.note_onset(played[next_note]);
+            next_note += 1;
+        }
+        out.clear();
+        run.settle(now, &mut out);
+        for v in out.iter() {
+            judged_at[v.id as usize] = Some(now);
+        }
+        now += LIVE_SWEEP_MS;
+    }
+
+    for (i, at) in judged_at.iter().enumerate() {
+        let at = at.unwrap_or_else(|| panic!("onset {i} never got a live verdict"));
+        let played_at = i as f64 * 0.25 * quarter;
+        let lag = at - played_at;
+        assert!(
+            lag <= quarter,
+            "onset {i} was played at {played_at} ms and judged at {at} ms — \
+             {lag} ms later, which is past the beat it was played in"
+        );
+    }
+}
+
+#[test]
+fn a_dropped_note_is_reported_live_as_its_own_id_and_nobody_elses() {
+    // The failure `align_pass` exists to avoid, on the live path. Drop one
+    // sixteenth out of a bar and every note after it is still a hit; a
+    // nearest-neighbour matcher would slide and report nine mistakes for
+    // one. The context either side of the settled run is what buys this.
+    let schedule = sixteenths(1, false);
+    let beats = steady(120.0, 6);
+    let mut played = perfect_play(&schedule, &beats);
+    played.remove(6);
+    let mut run = ScheduleRun::new(schedule);
+    let live = replay(&mut run, 500.0, 6, &played, 4000.0);
+
+    let missed: Vec<u32> = live
+        .iter()
+        .filter(|v| v.state != OnsetState::Hit)
+        .map(|v| v.id)
+        .collect();
+    assert_eq!(missed, vec![6], "one note is missing, and it is note 6");
+    assert_eq!(live.len(), 16, "every onset still gets exactly one verdict");
+}
+
+#[test]
+fn a_loop_keeps_judging_and_says_which_time_round() {
+    // A two-beat loop played three times. Each pass carries its own
+    // verdicts with `pass` on them — the contract's rule for the report,
+    // and it has to be the same rule live or the page would light one note
+    // three times and never say which go it meant.
+    let schedule = ScoreSchedule {
+        onsets: vec![onset(0, 0.0), onset(1, 0.5), onset(2, 1.0), onset(3, 1.5)],
+        length_beats: 2.0,
+        loops: true,
+    };
+    let beats = steady(120.0, 8);
+    let mut played = Vec::new();
+    for pass in 0..3u32 {
+        for o in schedule.onsets.iter() {
+            let t = beats
+                .time_at_beat(pass as f64 * 2.0 + o.beat)
+                .expect("inside the log");
+            played.push(PlayedOnset {
+                time_ms: t,
+                amplitude: 0.6,
+                confidence: 1.0,
+            });
+        }
+    }
+    let mut run = ScheduleRun::new(schedule);
+    let live = replay(&mut run, 500.0, 8, &played, 5000.0);
+
+    let played_passes: Vec<(u32, u32)> = live
+        .iter()
+        .take(12)
+        .map(|v| (v.pass, v.id))
+        .collect();
+    let want: Vec<(u32, u32)> = (0..3).flat_map(|p| (0..4).map(move |i| (p, i))).collect();
+    assert_eq!(
+        played_passes, want,
+        "three passes of four, each named by the time round"
+    );
+    assert!(live.iter().take(12).all(|v| v.state == OnsetState::Hit));
+    // The click ran on for a fourth time round that nobody played, and the
+    // sweep says so rather than stopping when the notes did — a note that is
+    // due and does not arrive is a miss, live as well as in the report.
+    assert!(
+        live.iter().skip(12).all(|v| v.pass == 3 && v.state == OnsetState::Miss),
+        "the fourth time round was not played and must read as missed: {:?}",
+        &live[12..]
+    );
+}
+
+#[test]
+fn nothing_is_judged_past_the_last_beat_the_engine_reported() {
+    // The transport stops mid-phrase. The beat log stops with it, and the
+    // sweep stops there too: `BeatMap::time_at_beat` carries the last
+    // interval on forever, so a sweep that trusted it would turn "the
+    // player pressed stop" into two bars of misses on a page that is no
+    // longer moving.
+    let schedule = sixteenths(2, false);
+    let beats = steady(120.0, 9);
+    let played = perfect_play(&schedule, &beats);
+    let mut run = ScheduleRun::new(schedule);
+    for i in 0..4 {
+        run.note_quarter(i == 0, i as f64 * 500.0);
+    }
+    for p in played.iter().filter(|p| p.time_ms <= 1500.0) {
+        run.note_onset(*p);
+    }
+    // Four quarters of beat log, and then the clock runs on for another
+    // nine beats' worth with nothing arriving.
+    let mut out: Vec<LiveOnset> = Vec::new();
+    let mut now = 0.0f64;
+    while now <= 6000.0 {
+        run.settle(now, &mut out);
+        now += LIVE_SWEEP_MS;
+    }
+    // Beat 3 is the last one reported, so onset 12 (beat 3.00) is the last
+    // that may be judged.
+    let furthest = out.iter().map(|v| v.id).max();
+    assert_eq!(
+        furthest,
+        Some(12),
+        "the sweep must reach the notes that happened and stop at the last \
+         reported beat; it reached {furthest:?}"
+    );
+    assert!(out.iter().all(|v| v.state == OnsetState::Hit));
+}
+
+#[test]
+fn the_live_sweep_changes_nothing_about_the_report() {
+    // The gate's third clause, and the one that matters most: the
+    // end-of-attempt results are the authority and must be exactly what
+    // they were before any of this existed. Two identical runs — one swept
+    // twenty-five times a second the whole way through, one never swept at
+    // all — scored at the end and compared whole.
+    let schedule = sixteenths(2, false);
+    let beats = steady(120.0, 10);
+    let mut played = perfect_play(&schedule, &beats);
+    // A pass with something in it to disagree about: a drop, a late note,
+    // and one nobody asked for.
+    played.remove(11);
+    played[4].time_ms += 38.0;
+    played.push(PlayedOnset {
+        time_ms: 1420.0,
+        amplitude: 0.5,
+        confidence: 1.0,
+    });
+    played.sort_by(|a, b| a.time_ms.partial_cmp(&b.time_ms).unwrap());
+
+    let mut swept = ScheduleRun::new(schedule.clone());
+    let live = replay(&mut swept, 500.0, 10, &played, 6000.0);
+    assert!(!live.is_empty(), "the swept run has to have actually swept");
+
+    let mut quiet = ScheduleRun::new(schedule);
+    for i in 0..10 {
+        quiet.note_quarter(i == 0, i as f64 * 500.0);
+    }
+    for p in played.iter() {
+        quiet.note_onset(*p);
+    }
+
+    let a = swept.report(&weights()).expect("a report");
+    let b = quiet.report(&weights()).expect("a report");
+    assert_eq!(
+        a, b,
+        "the live sweep moved the attempt's own verdicts — it may only read"
+    );
+}
+
+#[test]
+fn a_schedule_with_nothing_in_it_settles_nothing() {
+    // Free play's shape, reached the other way. `timing.rs` never calls
+    // this without a schedule at all, and a schedule of no onsets must go
+    // quiet rather than divide by its own length.
+    let mut run = ScheduleRun::new(ScoreSchedule {
+        onsets: Vec::new(),
+        length_beats: 0.0,
+        loops: true,
+    });
+    let mut out: Vec<LiveOnset> = Vec::new();
+    for i in 0..8 {
+        run.note_quarter(i == 0, i as f64 * 500.0);
+    }
+    let mut now = 0.0f64;
+    while now < 8000.0 {
+        run.settle(now, &mut out);
+        now += LIVE_SWEEP_MS;
+    }
+    assert!(out.is_empty(), "nothing was due, so nothing can be judged");
+}

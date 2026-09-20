@@ -127,6 +127,33 @@ describe("the take the review is handed", () => {
     // would move every note the wrong way.
     expect(last?.startOffsetMs).toBeLessThanOrEqual(0);
     expect(Number.isFinite(last?.startOffsetMs ?? NaN)).toBe(true);
+    // Nothing measured it on the engine's side in this fixture, so there is
+    // no position to hand on and the estimate above is all the review gets.
+    expect(last?.position).toBeUndefined();
+  });
+
+  /**
+   * The engine's own answer, when the sidecar carries one. The estimate above
+   * is optimistic by tens of milliseconds; `useSongTakePitch` prefers this
+   * and only falls back when it is absent.
+   */
+  it("hands the review the position the take's writer measured", async () => {
+    ipc.stopTake.mockImplementation(() =>
+      Promise.resolve(
+        take({
+          position: { mode: "song", bar: 3, tick: 2880, pass: 1, startOffsetMs: -41.7 },
+        }),
+      ),
+    );
+    const view = mount();
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: true, countingIn: false, enabled: true });
+    await settle();
+    view.rerender({ songId: SONG, isPlaying: false, countingIn: false, enabled: true });
+    await settle();
+
+    expect(view.result.current.lastTake?.position?.startOffsetMs).toBe(-41.7);
+    expect(view.result.current.lastTake?.position?.bar).toBe(3);
   });
 
   it("stops being this pass's take the moment the next pass starts", async () => {

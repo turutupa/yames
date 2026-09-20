@@ -23,18 +23,26 @@
  * 3. **`startOffsetMs`.** Where the first beat of the range sits inside the
  *    stem. Wrong, and every note moves by the same amount.
  *
- * ## Nothing in Songs starts a take yet
+ * ## Where that third number comes from, and why there are two of them
  *
- * The engine can record one over a song (W9), and `start_take` is the door —
- * but it takes a jam id and the Songs stage has no record button on it. So
- * this hook is built, tested and wired into the review, and `take` is
- * `undefined` until somebody puts that button on the stage. The review says
- * nothing about which notes were played in the meantime, which is the honest
- * state rather than a guess (`SONGS.md` S0.5).
+ * **The take's own sidecar, when it has one.** The writer thread takes the
+ * band as its clock, so its first chunk of band is the first sample of the
+ * file, and the audio callback stamped where the transport was when it
+ * rendered that chunk. `TakePosition.startOffsetMs` is that, to within one
+ * output buffer, and it is what this hook uses.
+ *
+ * **The frontend's own measurement, otherwise.** `useSongTakes` reads
+ * `performance.now()` either side of `start_take` — which misses the beat
+ * event's crossing of the IPC boundary on the way in, and the wait for the
+ * callback to pick the ring up on the way out, so it is optimistic by tens of
+ * milliseconds. It is kept because every take recorded before this existed has
+ * only that, and because a take begun with the transport stopped has no
+ * musical position for the sidecar to record.
  */
 import { useEffect, useState } from "react";
 import { analyzeTakePitch } from "../../../ipc";
 import { rangeTempoSteps } from "../../../songs/schedule";
+import type { TakePosition } from "../../../jam/types";
 import type { NoteVerdict } from "../../../songs/types";
 import type { SongAttemptReview } from "./useSongAttempt";
 
@@ -45,10 +53,26 @@ export type SongTake = {
   jamId: string;
   /**
    * Where the first beat of the played range sits inside the dry stem, in ms
-   * from the instant the file starts. A count-in is part of that distance.
+   * from the instant the file starts, as the FRONTEND measured it. A count-in
+   * is part of that distance. The fallback — see the header.
    */
   startOffsetMs: number;
+  /** What the take's own sidecar says, when it says anything. Preferred. */
+  position?: TakePosition;
 };
+
+/**
+ * The offset to analyse against: the engine's, when the take recorded one.
+ *
+ * A jam's position has no `startOffsetMs` — there is no beat 0 of a range to
+ * measure from — so this falls through to the estimate there too.
+ */
+export function startOffsetOf(take: SongTake): number {
+  const measured = take.position?.startOffsetMs;
+  return typeof measured === "number" && Number.isFinite(measured)
+    ? measured
+    : take.startOffsetMs;
+}
 
 /**
  * The verdicts, or an empty list.
@@ -100,6 +124,6 @@ export async function takePitchFor(
     extras: review.facts.extras,
     bpm: review.bpm,
     tempoMap: rangeTempoSteps(review.score, review.range, review.tempoPercent),
-    startOffsetMs: take.startOffsetMs,
+    startOffsetMs: startOffsetOf(take),
   }).catch(() => []);
 }

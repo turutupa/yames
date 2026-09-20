@@ -140,7 +140,43 @@ pub struct TakeRing {
     write: AtomicU64,
     read: AtomicU64,
     dropped: AtomicUsize,
+    /// Where the transport was at the FIRST sample the callback ever pushed
+    /// into this ring. See [`TakeRing::stamp_start`] — five words, written
+    /// once per take, and the reason a take knows when it began.
+    start_kind: AtomicU32,
+    start_frames: AtomicU64,
+    start_a: AtomicU32,
+    start_b: AtomicU32,
+    start_known: AtomicBool,
 }
+
+/// Where the engine's transport was at one instant, in the terms the output
+/// callback already has in hand.
+///
+/// **Samples, not bars.** Turning a sample cursor into a bar and a tick is a
+/// walk over the compiled song table, which is exactly the kind of work the
+/// callback may not do; what it has is the cursor itself, and the cursor is
+/// the exact answer rather than an approximation of one. The walk happens on
+/// the writer side, through the function [`TakeStart::position`] hands over —
+/// `song::take_position` is the one that exists.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TakeTransport {
+    /// Nothing arranged was playing: the plain click, or a stopped transport.
+    /// A take begun here has no musical position and says so.
+    Free,
+    /// A song, `frames` samples into its count-in.
+    SongCountIn { frames: u64 },
+    /// A song, `frames` samples into pass `pass` of the played range.
+    Song { frames: u64, pass: u32 },
+    /// A jam, at `bar` of `chorus`, as the engine counts both.
+    Jam { bar: u32, chorus: u32 },
+}
+
+// The discriminants, spelled out because they cross a pair of atomics.
+const TRANSPORT_FREE: u32 = 0;
+const TRANSPORT_SONG_COUNT_IN: u32 = 1;
+const TRANSPORT_SONG: u32 = 2;
+const TRANSPORT_JAM: u32 = 3;
 
 impl TakeRing {
     /// A ring holding at least `samples` samples, rounded up to a power of
@@ -155,7 +191,56 @@ impl TakeRing {
             write: AtomicU64::new(0),
             read: AtomicU64::new(0),
             dropped: AtomicUsize::new(0),
+            start_kind: AtomicU32::new(TRANSPORT_FREE),
+            start_frames: AtomicU64::new(0),
+            start_a: AtomicU32::new(0),
+            start_b: AtomicU32::new(0),
+            start_known: AtomicBool::new(false),
         }
+    }
+
+    /// PRODUCER (an audio callback): say where the transport was at the first
+    /// sample of the first buffer pushed into this ring.
+    ///
+    /// Four relaxed stores of values the callback is already holding, and one
+    /// release, ONCE per take — the caller keeps the "not yet stamped" flag in
+    /// its own cached state, so the cost on every other buffer of the take is
+    /// a bool it has already loaded. No allocation, no lock, no table walk.
+    ///
+    /// Called BEFORE the buffer it describes is pushed, so a consumer that
+    /// can see any samples at all can see this: the push's release on the
+    /// write index publishes everything stored before it.
+    pub fn stamp_start(&self, at: TakeTransport) {
+        let (kind, frames, a, b) = match at {
+            TakeTransport::Free => (TRANSPORT_FREE, 0, 0, 0),
+            TakeTransport::SongCountIn { frames } => (TRANSPORT_SONG_COUNT_IN, frames, 0, 0),
+            TakeTransport::Song { frames, pass } => (TRANSPORT_SONG, frames, pass, 0),
+            TakeTransport::Jam { bar, chorus } => (TRANSPORT_JAM, 0, bar, chorus),
+        };
+        self.start_kind.store(kind, Ordering::Relaxed);
+        self.start_frames.store(frames, Ordering::Relaxed);
+        self.start_a.store(a, Ordering::Relaxed);
+        self.start_b.store(b, Ordering::Relaxed);
+        self.start_known.store(true, Ordering::Release);
+    }
+
+    /// CONSUMER: what the callback stamped, or `None` if it never did.
+    pub fn start_transport(&self) -> Option<TakeTransport> {
+        if !self.start_known.load(Ordering::Acquire) {
+            return None;
+        }
+        let frames = self.start_frames.load(Ordering::Relaxed);
+        let a = self.start_a.load(Ordering::Relaxed);
+        let b = self.start_b.load(Ordering::Relaxed);
+        Some(match self.start_kind.load(Ordering::Relaxed) {
+            TRANSPORT_SONG_COUNT_IN => TakeTransport::SongCountIn { frames },
+            TRANSPORT_SONG => TakeTransport::Song { frames, pass: a },
+            TRANSPORT_JAM => TakeTransport::Jam {
+                bar: a,
+                chorus: b,
+            },
+            _ => TakeTransport::Free,
+        })
     }
 
     /// How many samples the ring holds.
@@ -539,6 +624,62 @@ impl TakeParking {
 // The record
 // ---------------------------------------------------------------------------
 
+/// Which transport a take's position is measured against.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TakeMode {
+    Song,
+    Jam,
+}
+
+/// Where the music was when the take's first sample was written.
+///
+/// `plans/tasks/songs/W15-LIVE-AND-EXACT.md`: the pitch pass has to know the
+/// instant the analysed audio starts, relative to the piece. Measuring that
+/// from the frontend — `performance.now()` either side of `start_take` —
+/// misses the IPC crossing on the way in and the wait for the callback to
+/// pick the ring up on the way out, which is tens of milliseconds it can
+/// only ever be optimistic by. The writer thread does not have to guess: it
+/// takes the band as its clock, so the first chunk of band it sees IS the
+/// first sample of the file, and the callback stamped where the transport
+/// was when it rendered that chunk.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TakePosition {
+    pub mode: TakeMode,
+    /// A song: the PLAYED bar — the index into `SongScore.bars`, never the
+    /// number printed on the page. A jam: the bar of the form, as the engine
+    /// counts them.
+    pub bar: u32,
+    /// Ticks into the piece at 960 to the quarter, for a song. 0 for a jam,
+    /// which has no score to count ticks in.
+    pub tick: u32,
+    /// Times round the range, from 0 — the contract's `pass`. A jam's chorus,
+    /// less one, so the two modes count the same way.
+    pub pass: u32,
+    /// The first sample landed in the count-in rather than in the music.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub count_in: bool,
+    /// Where beat 0 of the FIRST pass sits inside the file, in milliseconds
+    /// from the instant it starts — exactly what `analyze_take_pitch` means
+    /// by `startOffsetMs`. Negative when the file starts after that beat,
+    /// which is the usual case; positive when the take opens in a count-in.
+    ///
+    /// `None` for a jam, which has no beat 0 to measure from.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_offset_ms: Option<f64>,
+}
+
+/// Turn where the transport was into where the music was.
+///
+/// A function rather than a table, because the table that knows the answer
+/// (`song::SongTable`) lives on the command thread and this module has never
+/// had to know a song exists — see `useSongTakes.ts` on why that was the
+/// finding rather than a shortcut. `start_take` closes over the song the
+/// engine is holding and hands the writer this; `song::take_position` is the
+/// implementation.
+pub type TakePositionSource = Arc<dyn Fn(TakeTransport) -> Option<TakePosition> + Send + Sync>;
+
 /// A recorded take. The mirror of `JamTake` in `src/jam/types.ts`, and the
 /// content of the sidecar JSON that sits beside every WAV.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -561,6 +702,16 @@ pub struct JamTake {
     /// lost. Skipped when empty so those sidecars do not grow a null.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dry_path: Option<String>,
+    /// Where the music was when the first sample was written. See
+    /// [`TakePosition`].
+    ///
+    /// Optional, and skipped when absent, for the same two reasons the dry
+    /// stem is: every sidecar already on a musician's disk has none, and a
+    /// take recorded with neither a song nor a jam on the engine has no
+    /// position to record. The frontend keeps its old `performance.now()`
+    /// estimate as the fallback for exactly those.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<TakePosition>,
 }
 
 // ---------------------------------------------------------------------------
@@ -788,6 +939,10 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
                 duration_sec: duration_of(&path),
                 path: path.to_string_lossy().into_owned(),
                 dry_path,
+                // The sidecar is the only place a position was ever written,
+                // and this branch is the one where it is gone. The file is
+                // still a take; it simply does not know when it began.
+                position: None,
             },
         });
     }
@@ -1103,6 +1258,10 @@ struct ActiveTake {
     /// gives it back — a take is not a reason for the microphone to stay
     /// open for the rest of the session.
     owns_input: bool,
+    /// Where the music was when the writer's first chunk of band arrived.
+    /// Filled in by the writer, once, and read here when the sidecar is
+    /// written. `None` if the take never saw a transport.
+    position: Arc<Mutex<Option<TakePosition>>>,
     writer: Option<std::thread::JoinHandle<()>>,
 }
 
@@ -1132,6 +1291,11 @@ pub struct TakeStart<'a> {
     pub out_sr_watch: Option<Arc<AtomicU32>>,
     /// Did the caller start the input stream for this take?
     pub owns_input: bool,
+    /// How to read the transport stamp the callback leaves on the band ring.
+    /// `None` in the probe and in the tests that have no transport at all;
+    /// the take is then recorded exactly as it always was and its sidecar
+    /// simply has no position in it.
+    pub position: Option<TakePositionSource>,
 }
 
 /// Everything the take commands own. One per app, behind a mutex, on the
@@ -1169,6 +1333,7 @@ impl TakeSession {
             round_trip_us,
             out_sr_watch,
             owns_input,
+            position,
         } = args;
         if let Some(running) = self.recording_jam() {
             return Err(if running == jam_id {
@@ -1228,6 +1393,9 @@ impl TakeSession {
         let written_for_writer = written.clone();
         let mic_for_writer = mic.clone();
         let path_for_writer = path.clone();
+        let where_it_began: Arc<Mutex<Option<TakePosition>>> = Arc::new(Mutex::new(None));
+        let position_for_writer = where_it_began.clone();
+        let position_for_writer_fn = position;
         let writer = std::thread::Builder::new()
             .name("yames-take-writer".into())
             .spawn(move || {
@@ -1333,6 +1501,20 @@ impl TakeSession {
                             band_started = true;
                             mic_ready.clear();
                             mic_skip = round_trip_samples;
+                            // AND SO DOES THE MUSIC'S. This chunk begins with
+                            // the first sample the callback ever pushed, so
+                            // the stamp it left with it is where the piece
+                            // was at sample zero of the file — not where it
+                            // is now, twenty-five milliseconds later, and
+                            // not where the frontend guessed it would be
+                            // before `start_take` had returned.
+                            if let Some(resolve) = position_for_writer_fn.as_ref() {
+                                if let Some(at) = band_for_writer.start_transport() {
+                                    if let Ok(mut slot) = position_for_writer.lock() {
+                                        *slot = resolve(at);
+                                    }
+                                }
+                            }
                         }
                         if mic_skip > 0 {
                             let n = mic_skip.min(mic_ready.len());
@@ -1455,6 +1637,7 @@ impl TakeSession {
             written,
             out_sr,
             owns_input,
+            position: where_it_began,
             writer: Some(writer),
         });
         Ok(())
@@ -1511,6 +1694,13 @@ impl TakeSession {
                 .as_ref()
                 .filter(|p| p.is_file())
                 .map(|p| p.to_string_lossy().into_owned()),
+            // The writer has been joined, so whatever it captured on its
+            // first chunk of band is final.
+            position: active
+                .position
+                .lock()
+                .map(|p| *p)
+                .unwrap_or_else(|e| *e.into_inner()),
         };
 
         // An empty take is a take of nothing — the user pressed record and
@@ -1574,6 +1764,7 @@ mod tests {
             round_trip_us: 0,
             out_sr_watch: None,
             owns_input: false,
+            position: None,
         }
     }
 
@@ -2058,6 +2249,7 @@ mod tests {
             duration_sec: secs,
             path: path.to_string_lossy().into_owned(),
             dry_path: None,
+            position: None,
         };
         fs::write(
             path.with_extension("json"),
