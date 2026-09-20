@@ -1,199 +1,199 @@
 {
   "songs": {
-    "import": "Import a song",
+    "import": "导入一首曲子",
     "dismiss": "OK",
-    "tuning": "Tuning",
-    "capoLabel": "Capo",
-    "capo": "Capo at fret {{fret}}",
-    "meter": "Time",
-    "tempo": "Tempo",
+    "tuning": "调弦",
+    "capoLabel": "变调夹",
+    "capo": "变调夹在第 {{fret}} 品",
+    "meter": "拍号",
+    "tempo": "速度",
     "bpm": "{{bpm}} BPM",
-    "range": "Bars",
-    "fromBar": "From",
-    "toBar": "To",
-    "wholeSong": "Whole song",
-    "barsCount": "{{count}} bar",
-    "barsCount_other": "{{count}} bars",
-    "sections": "Sections",
-    "speed": "Speed",
+    "range": "小节",
+    "fromBar": "从",
+    "toBar": "到",
+    "wholeSong": "整首",
+    "barsCount": "{{count}} 小节",
+    "barsCount_other": "{{count}} 小节",
+    "sections": "段落",
+    "speed": "倍速",
     "percent": "{{percent}}%",
-    "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
-    "loopNote": "Play the bars above again and again",
-    "dropHere": "Drop the file to open it",
+    "speedNote": "滴答走 {{bpm}} BPM",
+    "loop": "重复",
+    "loopOn": "一遍又一遍",
+    "loopOff": "只走一遍",
+    "loopNote": "把上面这几小节一遍又一遍地弹",
+    "dropHere": "把文件放在这里就会打开",
     "band": {
-      "label": "Who you hear",
-      "click": "Click",
-      "drums": "Drums",
-      "bass": "Bass",
-      "keys": "Keys",
-      "levelFor": "How loud the {{lane}} is",
-      "muteFor": "Turn the {{lane}} off",
-      "note": "Set the balance while you play. Yames remembers it for this song.",
-      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
-      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
-      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
-      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+      "label": "你会听到谁",
+      "click": "滴答",
+      "drums": "鼓",
+      "bass": "贝斯",
+      "keys": "键盘",
+      "levelFor": "{{lane}} 有多响",
+      "muteFor": "关掉 {{lane}}",
+      "note": "边弹边调平衡。Yames 会为这首曲子记住它。",
+      "leftOut": "这个文件里有 {{tracks}}，但 Yames 没人能弹。",
+      "leftOut_other": "这个文件里有 {{tracks}}，但 Yames 没人能弹。",
+      "droppedNotes": "这个文件里有 {{count}} 个音属于乐队没有的乐器。",
+      "droppedNotes_other": "这个文件里有 {{count}} 个音属于乐队没有的乐器。"
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
-      "counting": "Counting you in"
+      "label": "预备拍",
+      "none": "直接开始",
+      "bars": "{{count}} 小节",
+      "bars_other": "{{count}} 小节",
+      "note": "只在第一遍之前数，不是每次重复都数",
+      "counting": "正在给你数拍"
     },
     "engine": {
-      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
-      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+      "cannotPlay": "Yames 现在没法带着乐队弹这首曲子。滴答照样给你守时间。",
+      "busy": "别的东西正在用声音，所以曲子停了。你准备好就再按一次播放。"
     },
     "empty": {
-      "title": "Bring in a song you already have",
-      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "title": "把你手上已有的曲子拿进来",
+      "body": "打开一个 Guitar Pro 或 MusicXML 文件，Yames 就会给你显示六线谱、守住时间，并跟着你弹到哪里。把文件放到这个界面的任何地方，或者挑一个。",
+      "private": "文件留在这台电脑上。什么都不会上传。"
     },
     "tab": {
-      "drawing": "Laying out the music...",
-      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+      "drawing": "正在排谱...",
+      "failed": "Yames 读得了这个文件，却画不出来。小节和时间照常可用。"
     },
     "picker": {
-      "title": "Choose your part",
-      "which": "Which part are you playing?",
-      "strings": "{{count}} string",
-      "strings_other": "{{count}} strings",
-      "notTab": "Not written as tab",
-      "cancel": "Not now"
+      "title": "选你要弹的声部",
+      "which": "你弹哪一个声部？",
+      "strings": "{{count}} 弦",
+      "strings_other": "{{count}} 弦",
+      "notTab": "不是用六线谱写的",
+      "cancel": "先不用"
     },
     "warn": {
-      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
-      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
-      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+      "tempoFlattened": "速度在 {{count}} 个小节里是渐变的。Yames 改在小节线上一次换过去。",
+      "tempoFlattened_other": "速度在 {{count}} 个小节里是渐变的。Yames 改在小节线上一次换过去。",
+      "barOverfilled": "第 {{bar}} 小节装的比拍号允许的多。它照谱面原样弹。"
     },
     "library": {
-      "add": "Import a song",
-      "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames",
-      "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "add": "导入一首曲子",
+      "empty": "还没有曲子",
+      "summary": "{{track}} · {{bars}} 小节",
+      "remove": "从 Yames 移除",
+      "due": "今天练",
+      "dueTitle": "你说过要回到这首"
     },
     "review": {
-      "title": "How that went",
-      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
-      "again": "Go again",
-      "working": "Listening back...",
-      "passes": "Which go",
-      "pass": "Go {{n}}",
-      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
-      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
-      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
-      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
-      "moreLabel": "What else ({{count}})",
-      "moreLabel_other": "What else ({{count}})",
-      "lessLabel": "Hide the rest",
+      "title": "刚才那遍如何",
+      "summary": "第 {{bars}} 小节，{{percent}}% — {{of}} 个音里有 {{hits}} 个落到位",
+      "again": "再来一遍",
+      "working": "正在回听...",
+      "passes": "哪一遍",
+      "pass": "第 {{n}} 遍",
+      "nothingToSay": "这一遍没什么突出的。再弹一遍，教练就有更多依据了。",
+      "chordsHonesty": "和弦里面的音我还查不了，只能看它们落在什么时候。",
+      "notSaved": "Yames 没能把这一遍记下来，所以下次没有东西可以对比。",
+      "tooShort": "刚才太短了，判断不了。把这一段弹满八个音，教练就有话可说。",
+      "moreLabel": "还有什么（{{count}}）",
+      "moreLabel_other": "还有什么（{{count}}）",
+      "lessLabel": "收起其余的",
       "tab": {
-        "nothing": "Nothing was played in these bars."
+        "nothing": "这几小节里什么都没弹。"
       },
       "mark": {
-        "onTime": "On time",
-        "slightlyEarly": "A shade early",
-        "early": "Early",
-        "slightlyLate": "A shade late",
-        "late": "Late",
-        "missed": "Missed",
-        "notAssessed": "Not assessed",
-        "extra": "Extra note",
-        "accentQuiet": "Written with an accent, but it did not come out louder"
+        "onTime": "到位",
+        "slightlyEarly": "略早",
+        "early": "早",
+        "slightlyLate": "略晚",
+        "late": "晚",
+        "missed": "漏掉",
+        "notAssessed": "未评判",
+        "extra": "多出的音",
+        "accentQuiet": "谱上写了重音，但没有弹得更响"
       },
       "bars": {
-        "one": "bar {{bar}}",
-        "range": "bars {{from}}–{{to}}",
-        "here": "this passage"
+        "one": "第 {{bar}} 小节",
+        "range": "第 {{from}}–{{to}} 小节",
+        "here": "这一段"
       },
       "amount": {
-        "hair": "a hair",
-        "thirtySecond": "about a thirty-second",
-        "sixteenth": "about a sixteenth",
-        "tripletEighth": "about a third of a beat",
-        "eighth": "about an eighth",
-        "mostOfABeat": "most of a beat",
-        "beat": "a whole beat"
+        "hair": "一丝",
+        "thirtySecond": "大约一个三十二分音符",
+        "sixteenth": "大约一个十六分音符",
+        "tripletEighth": "大约三分之一拍",
+        "eighth": "大约一个八分音符",
+        "mostOfABeat": "将近一整拍",
+        "beat": "整整一拍"
       },
       "when": {
-        "early": "early",
-        "late": "late"
+        "early": "早了",
+        "late": "晚了"
       },
-      "goes": "{{count}} go",
-      "goes_other": "{{count}} goes",
-      "notes": "{{count}} note",
-      "notes_other": "{{count}} notes",
+      "goes": "{{count}} 遍",
+      "goes_other": "{{count}} 遍",
+      "notes": "{{count}} 个音",
+      "notes_other": "{{count}} 个音",
       "say": {
         "consistentMiss": {
-          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
-          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
-          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+          "1": "每次都是同一个地方 —— {{goes}}里有 {{affected}} 遍在{{bars}}丢了。",
+          "2": "在{{bars}}散掉：{{passes}} 遍里掉了 {{affected}} 遍。",
+          "3": "其余都撑得住。一直丢的是{{bars}}，{{goes}}里占了 {{affected}} 遍。"
         },
         "rushing": {
-          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
-          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
-          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+          "1": "你在{{bars}}走在滴答前面 —— 从头到尾早了{{amount}}。",
+          "2": "{{bars}}有点赶：平均早了{{amount}}。",
+          "3": "在{{bars}}往后坐一点。你在那里早了{{amount}}落下去。"
         },
         "dragging": {
-          "1": "You're behind the click through {{bars}} — {{amount}} late.",
-          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
-          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+          "1": "你在{{bars}}落在滴答后面 —— 晚了{{amount}}。",
+          "2": "{{bars}}拖了：音落在拍后{{amount}}。",
+          "3": "在{{bars}}往前靠一点。它坐得晚了{{amount}}。"
         },
         "afterShift": {
-          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
-          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
-          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+          "1": "每次你的手在{{bars}}换把，下一个音就{{when}}{{amount}}。",
+          "2": "{{bars}}的换把让紧接着那个音{{when}}{{amount}}。",
+          "3": "把{{bars}}的换把落稳，后面就顺了 —— 现在它后面那个音{{when}}{{amount}}。"
         },
         "fallsApart": {
-          "1": "You start {{bars}} clean and lose it by the end.",
-          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
-          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+          "1": "你在{{bars}}开头很干净，到后面就散了。",
+          "2": "散的是{{bars}}的后半段 —— 前半段没问题。",
+          "3": "是耐力，不是音：{{bars}}越往后越糙。"
         },
         "extras": {
-          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
-          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
-          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+          "1": "{{bars}}有没人要的音 —— {{extras}}。",
+          "2": "你在{{bars}}多加了{{extras}}。让休止符就是休止符。",
+          "3": "有东西溜进了{{bars}}：谱上没有的{{extras}}。"
         },
         "uneven": {
-          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
-          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
-          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+          "1": "{{bars}}不是早也不是晚 —— 是不匀。音落得到处都是。",
+          "2": "你在{{bars}}的时值在游走，而不是偏向某一边。",
+          "3": "先稳再快：{{bars}}还没有稳定的东西，两边都没有。"
         },
         "beatPositionBias": {
-          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
-          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
-          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+          "1": "跑掉的是小节里的第 {{beat}} 拍 —— 每小节都{{when}}{{amount}}。",
+          "2": "你压在第 {{beat}} 拍上：每次轮到它都{{when}}{{amount}}。",
+          "3": "一小节接一小节偏出去的是第 {{beat}} 拍 —— {{when}}{{amount}}。"
         },
         "subdivisionWeak": {
-          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
-          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
-          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+          "1": "每 {{outOf}} 个音里的第 {{position}} 个，是你一直丢掉的那个。",
+          "2": "每 {{outOf}} 个一组里，不见的是第 {{position}} 个音。",
+          "3": "把一组数出声 —— 是在 {{outOf}} 个里的第 {{position}} 个滑掉的。"
         },
         "drift": {
-          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
-          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
-          "3": "The tempo under your hands slides {{when}} across the segment."
+          "1": "你跟着滴答起的头，到最后{{when}}{{amount}}。",
+          "2": "越往后拉得越多：到最后几小节{{when}}{{amount}}。",
+          "3": "你手上的速度在整段里一路滑 —— 到末尾就{{when}}。"
         },
         "tempoCeiling": {
-          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
-          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
-          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+          "1": "{{hold}} 撑得住。到 {{collapse}} 就散了。",
+          "2": "你在这里的上限是 {{hold}} —— {{collapse}} 还不是你的。",
+          "3": "{{hold}} 是你的。{{collapse}} 是下一个要拿下的，不是今天的速度。"
         },
         "improved": {
-          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
-          "2": "Something moved: you held {{bars}} where it used to slip.",
-          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+          "1": "这次更好 —— {{bars}}比上次稳了 {{ms}} 毫秒。",
+          "2": "有东西动了：以前会滑的{{bars}}，这次你守住了。",
+          "3": "{{bars}}是真的进步 —— 比你之前几遍紧了 {{ms}} 毫秒。"
         },
         "clean": {
-          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
-          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
-          "3": "You played {{bars}} right every time. Leave it and come back to it."
+          "1": "{{bars}}没什么要改的 —— {{goes}}都对。",
+          "2": "这一段是你的了：{{bars}}，{{goes}}，一次都没滑。",
+          "3": "{{bars}}你每一遍都弹对了。先放着，过阵子再回来。"
         }
       }
     }

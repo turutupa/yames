@@ -13,7 +13,7 @@
  */
 import ReactDOM from "react-dom/client";
 import App from "../App";
-import "../i18n";
+import i18n from "../i18n";
 import "../styles/global.css";
 import "../styles/session-narrative.css";
 import { installShotMock } from "./mockIpc";
@@ -25,6 +25,8 @@ declare global {
     __SHOT_ERROR__?: string;
     /** The shot list, for the capture script. See `?manifest=1` below. */
     __SHOT_MANIFEST__?: { themes: readonly string[]; shots: readonly unknown[] };
+    /** The language this scene was actually built in. See `?lng=` below. */
+    __SHOT_LOCALE__?: string;
   }
 }
 
@@ -45,6 +47,39 @@ if (params.get("manifest")) {
 
 const shot = params.get("manifest") ? undefined : shotById(params.get("shot") ?? "metronome");
 const theme = params.get("theme") ?? "ember";
+
+/**
+ * `?lng=de` — build the scene in another language.
+ *
+ * German is about a third longer than English and Russian is longer still, so
+ * "does it fit" is a different question in every locale and the layout suite
+ * is the only thing in this repo that can answer it. Changed before the app
+ * mounts, and synchronously: `resources` are bundled by `../i18n`, nothing is
+ * fetched, so the first render is already in the right language and the
+ * harness never photographs a frame of English.
+ *
+ * An unknown tag would silently fall back to English and the run would pass
+ * while measuring nothing, so it fails the scene instead.
+ */
+const lng = params.get("lng");
+if (lng) {
+  if (!Object.keys(i18n.options.resources ?? {}).includes(lng)) {
+    window.__SHOT_ERROR__ = `unknown language "${lng}" (have: ${Object.keys(i18n.options.resources ?? {}).join(", ")})`;
+    throw new Error(window.__SHOT_ERROR__);
+  }
+  void i18n.changeLanguage(lng);
+}
+
+/*
+ * What the scene is really in, for whoever is measuring it.
+ *
+ * `changeLanguage` to a tag i18next does not hold resolves happily and leaves
+ * the fallback in place, so "the page loaded" is not evidence the page is in
+ * German. The check above rules that out here; this says so out loud, and
+ * `openShot` refuses to measure a scene whose answer is not the language it
+ * asked for.
+ */
+window.__SHOT_LOCALE__ = i18n.language;
 
 if (!params.get("manifest") && !shot) {
   window.__SHOT_ERROR__ = `unknown shot "${params.get("shot")}" (have: ${SHOTS.map((s) => s.id).join(", ")})`;
@@ -369,9 +404,15 @@ async function drive() {
   if (shot!.settings) {
     // The rail's Settings button, by its label — the same press a person
     // makes. `view` becomes "settings" and the sheet covers the mode.
+    //
+    // Through `i18n.t` rather than the literal "settings", because `?lng=`
+    // means the label on that button is whatever the locale says it is, and
+    // a scene that cannot find its own button reads as "timed out waiting
+    // for the settings panels" half a minute later.
     await until("the rail", () => !!document.querySelector(".rail-action"));
+    const wanted = i18n.t("tooltip.settings").toLowerCase();
     const button = [...document.querySelectorAll<HTMLElement>(".rail-action")].find(
-      (b) => (b.getAttribute("aria-label") ?? "").toLowerCase().includes("settings"),
+      (b) => (b.getAttribute("aria-label") ?? "").toLowerCase().includes(wanted),
     );
     if (!button) throw new Error("no Settings button on the rail");
     button.click();

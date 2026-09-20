@@ -111,12 +111,12 @@
       "installed": "Huấn luyện viên {{tier}} đã cài ({{size}})",
       "removing": "Đang gỡ…",
       "removeModels": "Gỡ mô hình",
-      "stance": "Coaching Style",
-      "stanceHint": "How hard the coach is on you while you play",
-      "stanceStrict": "Strict",
-      "stanceLearning": "Learning",
-      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
-      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
+      "stance": "Lối huấn luyện",
+      "stanceHint": "Huấn luyện viên khắt khe với bạn đến đâu khi bạn đang chơi",
+      "stanceStrict": "Khắt khe",
+      "stanceLearning": "Đang học",
+      "stanceStrictDesc": "Gọi tên một thói quen ngay khi nó lộ ra, và nói thành lời. Đây là mức phù hợp khi bạn đang mài một đoạn mình đã thuộc.",
+      "stanceLearningDesc": "Cho bạn thêm một nửa khoảng dung sai trước khi nói bất cứ điều gì, giữ lời nhắc ra khỏi tai bạn trong lúc chơi, và bắt đầu từ chỗ đã ổn. Điểm của bạn vẫn được tính y hệt nhau ở cả hai cách."
     },
     "general": {
       "title": "Chung",

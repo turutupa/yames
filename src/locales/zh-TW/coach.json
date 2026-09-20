@@ -66,12 +66,12 @@
     "pocketEarly": "你平均提前 {{ms}} ms",
     "pocketLate": "你平均延後 {{ms}} ms",
     "pocketCentred": "你的節奏正好落在拍點上（平均 ±5ms）",
-    "covLabel": "Beats covered",
-    "covTitle": "How many of the beats I was expecting actually got played",
-    "effLabel": "Notes on a beat",
-    "effTitle": "Of every note I heard, how much of it landed on a beat rather than between them",
-    "gridLabel": "Locked to the click",
-    "gridTitle": "How closely the whole passage tracked the click"
+    "covLabel": "彈到的拍",
+    "covTitle": "我等的那些拍裡，真正彈出來了多少",
+    "effLabel": "落在拍上的音",
+    "effTitle": "我聽到的所有音裡，有多少落在拍上而不是拍與拍之間",
+    "gridLabel": "咬住滴答",
+    "gridTitle": "整段有多貼著滴答走"
   },
   "eval": {
     "today": "今天",

@@ -1,5 +1,22 @@
 import { test, expect } from "@playwright/test";
-import { openShot, fitsOnOneLine, noSidewaysScroll } from "./fits";
+import { openShot, fitsOnOneLine, noSidewaysScroll, IN_ENGLISH } from "./fits";
+
+/*
+ * English only, for now.
+ *
+ * Every jam scene is driven by pressing Jam's own labels — "set up", "cheat
+ * sheet", "edit changes", and a timeline that has to read "bar 5 of" before
+ * the scene is ready — and those strings are English literals in
+ * `src/shots/scenarios.ts`. Under `YAMES_LAYOUT_LOCALE` the buttons are still
+ * there but no longer answer to those names, and the whole file times out
+ * thirty seconds at a time saying nothing useful.
+ *
+ * Skipping is honest and cheap; making it run means giving the scenes locale
+ * keys instead of labels, which is Jam's own piece of work and not the Songs
+ * wave's. Songs, the review, the blocks gallery and Settings all run in every
+ * language.
+ */
+test.skip(!IN_ENGLISH, "jam scenes are driven by Jam's English labels (see the note in jam.spec.ts)");
 
 /**
  * The Jam playing screen, measured in a real browser.

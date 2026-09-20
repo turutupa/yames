@@ -111,12 +111,12 @@
       "installed": "{{tier}} 코치 설치됨 ({{size}})",
       "removing": "제거 중…",
       "removeModels": "모델 제거",
-      "stance": "Coaching Style",
-      "stanceHint": "How hard the coach is on you while you play",
-      "stanceStrict": "Strict",
-      "stanceLearning": "Learning",
-      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
-      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
+      "stance": "코칭 방식",
+      "stanceHint": "연주하는 동안 코치가 얼마나 엄하게 볼지",
+      "stanceStrict": "엄격하게",
+      "stanceLearning": "익히는 중",
+      "stanceStrictDesc": "치우침이 보이는 순간 이름을 붙여 소리 내어 말합니다. 이미 칠 줄 아는 대목을 다듬을 때 맞는 설정입니다.",
+      "stanceLearningDesc": "무언가 말하기까지의 여유를 절반 더 주고, 연주 중에는 지적을 귀에 넣지 않으며, 잘된 것부터 이야기합니다. 점수는 어느 쪽이든 똑같이 계산됩니다."
     },
     "general": {
       "title": "일반",

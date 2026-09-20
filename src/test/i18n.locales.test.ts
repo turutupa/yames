@@ -4,8 +4,14 @@
 //   - no top-level group is claimed by two namespaces (the loader merges
 //     namespaces shallowly, so a clash would resolve by glob order)
 //   - each language declares a "_name" (native name, used by the picker)
-//   - every language has exactly the keys of English (no missing, no extra)
+//   - every language has exactly the keys of English (no missing, no extra),
+//     counting a plural variant as its base key: Polish and Russian need
+//     `_few` and `_many` for a key English writes twice, and those extra
+//     forms are the language being right, not the file drifting
 //   - every {{placeholder}} token used in English appears in each language too
+//
+// What a key SAYS is `i18n.songs-wave.test.ts`'s job: this file passes just
+// as happily when every value is still the English sentence.
 //
 // The namespaces exist so that work on four screens touches four files rather
 // than one. They are not part of the key space: `t("drill.mode")` is
@@ -77,26 +83,60 @@ function collectKeys(obj: Record<string, unknown>, prefix = ""): string[] {
     .sort();
 }
 
-function leafValues(obj: Record<string, unknown>): unknown[] {
-  return Object.entries(obj)
-    .filter(([key]) => !key.startsWith("_"))
-    .flatMap(([, value]) =>
-      typeof value === "object" && value !== null
-        ? leafValues(value as Record<string, unknown>)
-        : [value]
-    );
-}
-
 function placeholders(value: unknown): string[] {
   if (typeof value !== "string") return [];
   return [...value.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
+}
+
+/**
+ * A plural variant reduced to the key it is a form of.
+ *
+ * i18next resolves `bars_few` from `bars`, so the two are one key as far as
+ * this file's "same key set" contract goes. A language whose rules need more
+ * forms than English's carries more of them; a language whose rules need
+ * fewer may still carry English's, which costs nothing and keeps the files
+ * looking alike. Only the underscore counts — `review.bars.one` is a key
+ * called "one", not a plural of "review.bars".
+ */
+function baseKey(key: string): string {
+  return key.replace(/_(zero|one|two|few|many|other)$/, "");
+}
+
+function baseKeys(obj: Record<string, unknown>): string[] {
+  return [...new Set(collectKeys(obj).map(baseKey))].sort();
+}
+
+/** The value at a dotted key, or undefined. */
+function at(tree: Record<string, unknown>, dotted: string): unknown {
+  let node: unknown = tree;
+  for (const part of dotted.split(".")) {
+    if (typeof node !== "object" || node === null) return undefined;
+    node = (node as Record<string, unknown>)[part];
+  }
+  return node;
+}
+
+/**
+ * Base key → the placeholders its sentence uses, as one sorted string.
+ *
+ * Every plural form of a key says the same thing about a different number, so
+ * they are folded together: a language with four forms of "{{count}} bar" is
+ * not using `{{count}}` four times as often as English.
+ */
+function tokensByBase(tree: Record<string, unknown>): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const key of collectKeys(tree)) {
+    const base = baseKey(key);
+    const tokens = new Set([...(out.get(base) ?? "").split(",").filter(Boolean), ...placeholders(at(tree, key))]);
+    out.set(base, [...tokens].sort().join(","));
+  }
+  return out;
 }
 
 describe("locale files", () => {
   const langs = languages();
   const en = loadLanguage("en");
   const enKeys = collectKeys(en);
-  const enPlaceholders = leafValues(en).flatMap(placeholders);
 
   it("English is present and is the source of truth", () => {
     expect(langs).toContain("en");
@@ -139,15 +179,26 @@ describe("locale files", () => {
   });
 
   it("every language has exactly the English key set", () => {
+    const enBases = baseKeys(en);
     for (const lang of langs) {
-      expect(collectKeys(loadLanguage(lang)), `${lang} key mismatch`).toEqual(enKeys);
+      expect(baseKeys(loadLanguage(lang)), `${lang} key mismatch`).toEqual(enBases);
     }
   });
 
   it("every {{placeholder}} from English exists in every language", () => {
+    // Per base key, not as one bag for the whole file. The bag version passed
+    // just as happily when a translator moved `{{amount}}` out of one
+    // sentence and into another, which is how fourteen locales once carried
+    // it in `songs.review.say.drift.3` where English had only `{{when}}`.
+    const enTokens = tokensByBase(en);
     for (const lang of langs) {
-      const p = leafValues(loadLanguage(lang)).flatMap(placeholders);
-      expect(p, `${lang} placeholder drift`).toEqual(enPlaceholders);
+      const theirs = tokensByBase(loadLanguage(lang));
+      const drift: string[] = [];
+      for (const [key, want] of enTokens) {
+        const got = theirs.get(key) ?? "";
+        if (got !== want) drift.push(`${key}: English has [${want}], ${lang} has [${got}]`);
+      }
+      expect(drift, `${lang} placeholder drift`).toEqual([]);
     }
   });
 

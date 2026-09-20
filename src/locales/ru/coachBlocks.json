@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "Зациклить такты {{from}}–{{to}}",
+      "loopBarsAt": "Зациклить такты {{from}}–{{to}} на {{bpm}}",
+      "ramp": "Подними с {{from}} до {{to}}",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "Клик по четвертям",
+        "2": "Клик по восьмым",
+        "3": "Клик по триолям",
+        "4": "Клик по шестнадцатым",
+        "5": "Клик по квинтолям",
+        "6": "Клик по секстолям"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "Настроить {{name}}",
+      "loadJam": "Сыграть под {{name}}",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "Вернись к этому завтра",
         "inDays": "Вернись к этому через {{days}} дн."
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}, на грифе"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "открытая позиция",
+      "rootOn6": "с основным тоном на 6-й струне",
+      "rootOn5": "с основным тоном на 5-й струне",
+      "rootOn4": "с основным тоном на 4-й струне",
+      "rootOn3": "с основным тоном на 3-й струне"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "аппликатура {{index}} из {{count}}"
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "Такты {{from}}–{{to}} из {{title}}"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "с {{first}}% до {{last}}%, за {{goes}}",
+      "aria": "Как шли такты с {{from}} по {{to}}"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "раскрашено по этому проходу",
+      "plain": "ноты так, как записаны",
+      "soon": "Табулатура этих тактов появится позже."
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "Твой дубль {{title}}",
+      "any": "Твой дубль",
+      "soon": "Прослушивание дубля появится позже."
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "Два прохода по {{title}}, рядом",
+      "any": "Два прохода, рядом",
+      "soon": "Сравнение двух проходов появится позже."
     }
   }
 }

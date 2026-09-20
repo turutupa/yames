@@ -12,7 +12,7 @@
  */
 
 import ReactDOM from "react-dom/client";
-import "../../i18n";
+import i18n from "../../i18n";
 import BlocksGallery from "./gallery";
 import "./gallery.css";
 
@@ -20,6 +20,18 @@ declare global {
   interface Window {
     __GALLERY_READY__?: boolean;
   }
+}
+
+/**
+ * `?lng=de` — draw the catalogue in another language, the way
+ * `src/shots/main.tsx` does, so the layout suite can ask whether a block
+ * whose sentence is a third longer still fits the 380px coach dock. An
+ * unknown tag is ignored rather than fatal: this page has no error channel,
+ * and the suite's own check is that the page came up at all.
+ */
+const lng = new URLSearchParams(window.location.search).get("lng");
+if (lng && Object.keys(i18n.options.resources ?? {}).includes(lng)) {
+  void i18n.changeLanguage(lng);
 }
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(<BlocksGallery />);

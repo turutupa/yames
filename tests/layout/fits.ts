@@ -1,6 +1,25 @@
 import { expect, type Page } from "@playwright/test";
 
 /**
+ * The language every scene in this run is built in.
+ *
+ * `YAMES_LAYOUT_LOCALE=de npm run test:layout` measures the German build.
+ * English is the default because it is the shortest of the fifteen and a
+ * suite that only ever passed in the longest one would be a suite nobody
+ * ran. "Does it fit" is a different question per locale: German runs about a
+ * third longer than English, Russian longer again, and a rail label or a
+ * fader name that fits at 480px in English can leave the window in either.
+ *
+ * Scenes are built through the harness's own `?lng=`, which fails the scene
+ * outright on a tag it does not have — a run that silently fell back to
+ * English would pass while measuring nothing.
+ */
+export const LAYOUT_LOCALE = process.env.YAMES_LAYOUT_LOCALE ?? "en";
+
+/** True when this run is measuring English, and may assert on English words. */
+export const IN_ENGLISH = LAYOUT_LOCALE === "en";
+
+/**
  * Open one scene of the screenshot harness at one window size.
  *
  * `shots.html` is the same page the capture script drives: the real UI with a
@@ -29,7 +48,7 @@ export async function openShot(
    */
   const BUILD_AT = { width: 1440, height: Math.max(size.height, 900) };
   await page.setViewportSize(BUILD_AT);
-  await page.goto(`/shots.html?shot=${shot}&theme=${theme}&window=main`);
+  await page.goto(`/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${LAYOUT_LOCALE}`);
 
   // That the page is the harness at all, before waiting thirty seconds for it
   // to say it is ready. The first run of this suite met a dev server for
@@ -58,6 +77,13 @@ export async function openShot(
   );
   const failed = await page.evaluate(() => window.__SHOT_ERROR__);
   expect(failed, `the "${shot}" scene did not build`).toBeUndefined();
+
+  // And it is in the language this run asked for. A locale run that quietly
+  // fell back to English would report a clean suite having measured nothing.
+  const built = await page.evaluate(() => window.__SHOT_LOCALE__);
+  expect(built, `the "${shot}" scene was built in ${built}, not ${LAYOUT_LOCALE}`).toBe(
+    LAYOUT_LOCALE,
+  );
 
   if (size.width !== BUILD_AT.width || size.height !== BUILD_AT.height) {
     await page.setViewportSize(size);
@@ -164,5 +190,6 @@ declare global {
     __SHOT_READY__?: boolean;
     __SHOT_ERROR__?: string;
     __SHOT_MANIFEST__?: unknown;
+    __SHOT_LOCALE__?: string;
   }
 }

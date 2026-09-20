@@ -111,12 +111,12 @@
       "installed": "{{tier}}-coach geïnstalleerd ({{size}})",
       "removing": "Verwijderen…",
       "removeModels": "Modellen verwijderen",
-      "stance": "Coaching Style",
-      "stanceHint": "How hard the coach is on you while you play",
-      "stanceStrict": "Strict",
-      "stanceLearning": "Learning",
-      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
-      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
+      "stance": "Manier van coachen",
+      "stanceHint": "Hoe streng de coach voor je is terwijl je speelt",
+      "stanceStrict": "Streng",
+      "stanceLearning": "Lerend",
+      "stanceStrictDesc": "Benoemt een neiging zodra die zichtbaar wordt, en zegt het hardop. De juiste stand als je een passage slijpt die je al kent.",
+      "stanceLearningDesc": "Geeft je de helft meer ruimte voordat er iets gezegd wordt, houdt correcties uit je oren terwijl je speelt, en begint bij wat goed ging. Je score wordt in beide gevallen precies hetzelfde berekend."
     },
     "general": {
       "title": "Algemeen",

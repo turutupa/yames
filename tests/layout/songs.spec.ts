@@ -9,7 +9,7 @@
 // nothing, is not a cosmetic problem — it is a score engraved to the wrong
 // width with a cursor walking off the side of it.
 import { test, expect } from "@playwright/test";
-import { openShot, fitsOnOneLine, noSidewaysScroll } from "./fits";
+import { openShot, fitsOnOneLine, noSidewaysScroll, IN_ENGLISH, LAYOUT_LOCALE } from "./fits";
 
 /**
  * The four widths jam.spec uses, and for the same reasons: the narrow window
@@ -201,6 +201,13 @@ test.describe("the band and the count-in", () => {
   test("has a row for the click and for each player the file has", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
     const names = await page.locator(".songs-band-name").allTextContents();
+    if (!IN_ENGLISH) {
+      // In another language the three names are that language's words. That
+      // the band has exactly three lanes, in this order, is still worth
+      // saying; what they are called is `i18n.songs-wave.test.ts`'s job.
+      expect(names, `three lanes in ${LAYOUT_LOCALE}`).toHaveLength(3);
+      return;
+    }
     // The fixture is a guitar, a drum kit and a bass — and the guitar is the
     // part being played, so it is never in the band.
     expect(names.map((n) => n.trim())).toEqual(["Click", "Drums", "Bass"]);
@@ -309,6 +316,10 @@ test.describe("the track picker", () => {
   }
 
   test("shows every track's tuning, and puts the guitar first", async ({ page }) => {
+    // Track names and note names come from the file, not from a locale, so
+    // this one would hold in any language — but it says nothing about
+    // layout, and running it fifteen times over engraves fifteen scores.
+    test.skip(!IN_ENGLISH, "track and note names are the file's, not the locale's");
     await openShot(page, "songs-picker", { width: 1400, height: 900 });
     const names = await page
       .locator(".songs-picker-track-name")

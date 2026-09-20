@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "{{from}}–{{to}} 小節をループ",
+      "loopBarsAt": "{{from}}–{{to}} 小節を {{bpm}} でループ",
+      "ramp": "{{from}} から {{to}} まで上げていく",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "クリックを4分音符に",
+        "2": "クリックを8分音符に",
+        "3": "クリックを3連符に",
+        "4": "クリックを16分音符に",
+        "5": "クリックを5連符に",
+        "6": "クリックを6連符に"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "{{name}} を用意する",
+      "loadJam": "{{name}} に合わせて弾く",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "明日もう一度ここへ",
         "inDays": "{{days}}日後にもう一度"
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}、指板の上"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "オープンポジション",
+      "rootOn6": "ルートは6弦",
+      "rootOn5": "ルートは5弦",
+      "rootOn4": "ルートは4弦",
+      "rootOn3": "ルートは3弦"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "フォーム {{index}}／{{count}}"
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "{{title}} の {{from}}–{{to}} 小節"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "{{first}}% から {{last}}% へ、{{goes}} 回で",
+      "aria": "{{from}} から {{to}} 小節がどう推移したか"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "その回の演奏で色分け",
+      "plain": "譜面どおりの音",
+      "soon": "この小節のタブ譜は近日公開です。"
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "{{title}} のあなたのテイク",
+      "any": "あなたのテイク",
+      "soon": "テイクの聴き返しは近日公開です。"
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "{{title}} の2回を並べて",
+      "any": "2回を並べて",
+      "soon": "2回を並べて聴くのは近日公開です。"
     }
   }
 }

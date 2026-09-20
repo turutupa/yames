@@ -1,58 +1,58 @@
 {
   "coachBlocks": {
     "action": {
-      "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
-      "ramp": "Work it from {{from}} to {{to}}",
+      "loopBars": "Lặp ô nhịp {{from}}–{{to}}",
+      "loopBarsAt": "Lặp ô nhịp {{from}}–{{to}} ở {{bpm}}",
+      "ramp": "Kéo từ {{from}} lên {{to}}",
       "click": {
-        "1": "Put the click on quarters",
-        "2": "Put the click on eighths",
-        "3": "Put the click on triplets",
-        "4": "Put the click on sixteenths",
-        "5": "Put the click on quintuplets",
-        "6": "Put the click on sextuplets"
+        "1": "Tích tắc theo nốt đen",
+        "2": "Tích tắc theo nốt móc đơn",
+        "3": "Tích tắc theo chùm ba",
+        "4": "Tích tắc theo nốt móc kép",
+        "5": "Tích tắc theo chùm năm",
+        "6": "Tích tắc theo chùm sáu"
       },
-      "loadPreset": "Set up {{name}}",
-      "loadJam": "Play along with {{name}}",
+      "loadPreset": "Dựng sẵn {{name}}",
+      "loadJam": "Chơi cùng {{name}}",
       "comeBack": {
-        "tomorrow": "Come back to this tomorrow",
+        "tomorrow": "Mai quay lại phần này",
         "inDays": "Quay lại phần này sau {{days}} ngày"
       }
     },
     "fretboard": {
-      "aria": "{{what}}, on the neck"
+      "aria": "{{what}}, trên cần đàn"
     },
     "position": {
-      "open": "open position",
-      "rootOn6": "rooted on the 6th string",
-      "rootOn5": "rooted on the 5th string",
-      "rootOn4": "rooted on the 4th string",
-      "rootOn3": "rooted on the 3rd string"
+      "open": "thế mở",
+      "rootOn6": "nốt gốc ở dây 6",
+      "rootOn5": "nốt gốc ở dây 5",
+      "rootOn4": "nốt gốc ở dây 4",
+      "rootOn3": "nốt gốc ở dây 3"
     },
     "shape": {
-      "which": "shape {{index}} of {{count}}"
+      "which": "thế bấm {{index}} trên {{count}}"
     },
     "passage": {
-      "bars": "Bars {{from}}–{{to}} of {{title}}"
+      "bars": "Ô nhịp {{from}}–{{to}} của {{title}}"
     },
     "progress": {
-      "caption": "{{first}}% to {{last}}%, over {{goes}} goes",
-      "aria": "How bars {{from}} to {{to}} have gone"
+      "caption": "từ {{first}}% lên {{last}}%, qua {{goes}}",
+      "aria": "Ô nhịp {{from}} đến {{to}} đã đi thế nào"
     },
     "tab": {
-      "attempt": "coloured by that go",
-      "plain": "the notes as written",
-      "soon": "The tab for these bars is coming soon."
+      "attempt": "tô màu theo lượt đó",
+      "plain": "các nốt đúng như bản ghi",
+      "soon": "Bản tab cho những ô nhịp này sắp có."
     },
     "take": {
-      "whole": "Your take of {{title}}",
-      "any": "Your take",
-      "soon": "Listening back to a take is coming soon."
+      "whole": "Bản thu {{title}} của bạn",
+      "any": "Bản thu của bạn",
+      "soon": "Nghe lại bản thu sắp có."
     },
     "compare": {
-      "title": "Two goes at {{title}}, side by side",
-      "any": "Two goes, side by side",
-      "soon": "Hearing two goes side by side is coming soon."
+      "title": "Hai lượt {{title}}, đặt cạnh nhau",
+      "any": "Hai lượt, đặt cạnh nhau",
+      "soon": "Nghe hai lượt cạnh nhau sắp có."
     }
   }
 }

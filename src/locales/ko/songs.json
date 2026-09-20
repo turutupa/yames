@@ -1,199 +1,199 @@
 {
   "songs": {
-    "import": "Import a song",
+    "import": "곡 가져오기",
     "dismiss": "OK",
-    "tuning": "Tuning",
-    "capoLabel": "Capo",
-    "capo": "Capo at fret {{fret}}",
-    "meter": "Time",
-    "tempo": "Tempo",
+    "tuning": "튜닝",
+    "capoLabel": "카포",
+    "capo": "카포 {{fret}}프렛",
+    "meter": "박자",
+    "tempo": "템포",
     "bpm": "{{bpm}} BPM",
-    "range": "Bars",
-    "fromBar": "From",
-    "toBar": "To",
-    "wholeSong": "Whole song",
-    "barsCount": "{{count}} bar",
-    "barsCount_other": "{{count}} bars",
-    "sections": "Sections",
-    "speed": "Speed",
+    "range": "마디",
+    "fromBar": "시작",
+    "toBar": "끝",
+    "wholeSong": "곡 전체",
+    "barsCount": "{{count}}마디",
+    "barsCount_other": "{{count}}마디",
+    "sections": "섹션",
+    "speed": "속도",
     "percent": "{{percent}}%",
-    "speedNote": "The click runs at {{bpm}} BPM",
-    "loop": "Repeat",
-    "loopOn": "Round and round",
-    "loopOff": "Once through",
-    "loopNote": "Play the bars above again and again",
-    "dropHere": "Drop the file to open it",
+    "speedNote": "클릭은 {{bpm}} BPM으로 갑니다",
+    "loop": "반복",
+    "loopOn": "계속 돌기",
+    "loopOff": "한 번만",
+    "loopNote": "위의 마디를 몇 번이고 다시 연주합니다",
+    "dropHere": "파일을 놓으면 열립니다",
     "band": {
-      "label": "Who you hear",
-      "click": "Click",
-      "drums": "Drums",
-      "bass": "Bass",
-      "keys": "Keys",
-      "levelFor": "How loud the {{lane}} is",
-      "muteFor": "Turn the {{lane}} off",
-      "note": "Set the balance while you play. Yames remembers it for this song.",
-      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
-      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
-      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
-      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have."
+      "label": "무엇이 들릴지",
+      "click": "클릭",
+      "drums": "드럼",
+      "bass": "베이스",
+      "keys": "건반",
+      "levelFor": "{{lane}} 음량",
+      "muteFor": "{{lane}} 끄기",
+      "note": "연주하면서 밸런스를 잡으세요. Yames가 이 곡의 설정을 기억합니다.",
+      "leftOut": "{{tracks}}이(가) 이 파일에 있지만, Yames에는 연주할 사람이 없습니다.",
+      "leftOut_other": "{{tracks}}이(가) 이 파일에 있지만, Yames에는 연주할 사람이 없습니다.",
+      "droppedNotes": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다.",
+      "droppedNotes_other": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다."
     },
     "countIn": {
-      "label": "Count-in",
-      "none": "Straight in",
-      "bars": "{{count}} bar",
-      "bars_other": "{{count}} bars",
-      "note": "Counted before the first time through, not before every repeat",
-      "counting": "Counting you in"
+      "label": "카운트인",
+      "none": "바로 시작",
+      "bars": "{{count}}마디",
+      "bars_other": "{{count}}마디",
+      "note": "첫 바퀴 앞에서만 세고, 반복할 때마다 세지는 않습니다",
+      "counting": "카운트 중"
     },
     "engine": {
-      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
-      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+      "cannotPlay": "Yames가 지금은 이 곡을 밴드로 연주할 수 없습니다. 클릭은 그대로 박을 지킵니다.",
+      "busy": "다른 무언가가 소리를 쓰고 있어서 곡이 멈췄습니다. 준비되면 재생을 다시 누르세요."
     },
     "empty": {
-      "title": "Bring in a song you already have",
-      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "title": "이미 가지고 있는 곡을 가져오세요",
+      "body": "Guitar Pro나 MusicXML 파일을 열면 Yames가 타브 악보를 보여 주고, 박을 지키고, 지금 어디인지 따라갑니다. 이 화면 아무 곳에나 파일을 놓거나, 하나 고르세요.",
+      "private": "파일은 이 컴퓨터에 남습니다. 아무것도 올라가지 않습니다."
     },
     "tab": {
-      "drawing": "Laying out the music...",
-      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+      "drawing": "악보를 짜는 중...",
+      "failed": "Yames가 이 파일을 읽었지만 그릴 수는 없습니다. 마디와 박은 그대로 동작합니다."
     },
     "picker": {
-      "title": "Choose your part",
-      "which": "Which part are you playing?",
-      "strings": "{{count}} string",
-      "strings_other": "{{count}} strings",
-      "notTab": "Not written as tab",
-      "cancel": "Not now"
+      "title": "연주할 파트 고르기",
+      "which": "어느 파트를 연주하시나요?",
+      "strings": "{{count}}줄",
+      "strings_other": "{{count}}줄",
+      "notTab": "타브 악보로 적혀 있지 않음",
+      "cancel": "나중에"
     },
     "warn": {
-      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
-      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
-      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+      "tempoFlattened": "{{count}}마디에서 템포가 이어서 변합니다. Yames는 대신 마딧줄에서 한 번에 바꿉니다.",
+      "tempoFlattened_other": "{{count}}마디에서 템포가 이어서 변합니다. Yames는 대신 마딧줄에서 한 번에 바꿉니다.",
+      "barOverfilled": "{{bar}}마디에 박자가 허용하는 것보다 많이 들어 있습니다. 적힌 그대로 연주합니다."
     },
     "library": {
-      "add": "Import a song",
-      "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
-      "remove": "Remove from Yames",
-      "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "add": "곡 가져오기",
+      "empty": "아직 곡이 없습니다",
+      "summary": "{{track}} · {{bars}}마디",
+      "remove": "Yames에서 빼기",
+      "due": "오늘 할 것",
+      "dueTitle": "이 곡으로 돌아오겠다고 했습니다"
     },
     "review": {
-      "title": "How that went",
-      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
-      "again": "Go again",
-      "working": "Listening back...",
-      "passes": "Which go",
-      "pass": "Go {{n}}",
-      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
-      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
-      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
-      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
-      "moreLabel": "What else ({{count}})",
-      "moreLabel_other": "What else ({{count}})",
-      "lessLabel": "Hide the rest",
+      "title": "방금은 어땠는지",
+      "summary": "{{bars}}마디, {{percent}}% — {{of}}개 중 {{hits}}개가 자리에 들어왔습니다",
+      "again": "한 번 더",
+      "working": "다시 듣는 중...",
+      "passes": "어느 번",
+      "pass": "{{n}}번째",
+      "nothingToSay": "방금 것에서는 눈에 띄는 게 없었습니다. 한 번 더 연주하면 코치가 볼 것이 늘어납니다.",
+      "chordsHonesty": "화음 안의 음은 아직 확인하지 못합니다. 언제 울렸는지만 봅니다.",
+      "notSaved": "Yames가 이번 것을 적어 두지 못했습니다. 다음에 견줘 볼 기록이 남지 않습니다.",
+      "tooShort": "판단하기에는 너무 짧았습니다. 이 대목을 여덟 음 이상 연주하면 코치가 할 말이 생깁니다.",
+      "moreLabel": "그 밖에 ({{count}})",
+      "moreLabel_other": "그 밖에 ({{count}})",
+      "lessLabel": "나머지 숨기기",
       "tab": {
-        "nothing": "Nothing was played in these bars."
+        "nothing": "이 마디에서는 아무것도 연주되지 않았습니다."
       },
       "mark": {
-        "onTime": "On time",
-        "slightlyEarly": "A shade early",
-        "early": "Early",
-        "slightlyLate": "A shade late",
-        "late": "Late",
-        "missed": "Missed",
-        "notAssessed": "Not assessed",
-        "extra": "Extra note",
-        "accentQuiet": "Written with an accent, but it did not come out louder"
+        "onTime": "제자리",
+        "slightlyEarly": "살짝 빠름",
+        "early": "빠름",
+        "slightlyLate": "살짝 늦음",
+        "late": "늦음",
+        "missed": "빠짐",
+        "notAssessed": "판정 없음",
+        "extra": "여분의 음",
+        "accentQuiet": "악센트로 적혀 있지만 더 세게 나오지 않았습니다"
       },
       "bars": {
-        "one": "bar {{bar}}",
-        "range": "bars {{from}}–{{to}}",
-        "here": "this passage"
+        "one": "{{bar}}마디",
+        "range": "{{from}}–{{to}}마디",
+        "here": "이 대목"
       },
       "amount": {
-        "hair": "a hair",
-        "thirtySecond": "about a thirty-second",
-        "sixteenth": "about a sixteenth",
-        "tripletEighth": "about a third of a beat",
-        "eighth": "about an eighth",
-        "mostOfABeat": "most of a beat",
-        "beat": "a whole beat"
+        "hair": "아주 조금",
+        "thirtySecond": "32분음표쯤",
+        "sixteenth": "16분음표쯤",
+        "tripletEighth": "한 박의 3분의 1쯤",
+        "eighth": "8분음표쯤",
+        "mostOfABeat": "거의 한 박",
+        "beat": "한 박 통째로"
       },
       "when": {
-        "early": "early",
-        "late": "late"
+        "early": "빨리",
+        "late": "늦게"
       },
-      "goes": "{{count}} go",
-      "goes_other": "{{count}} goes",
-      "notes": "{{count}} note",
-      "notes_other": "{{count}} notes",
+      "goes": "{{count}}번",
+      "goes_other": "{{count}}번",
+      "notes": "{{count}}개의 음",
+      "notes_other": "{{count}}개의 음",
       "say": {
         "consistentMiss": {
-          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
-          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
-          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+          "1": "늘 같은 자리입니다. {{goes}} 가운데 {{affected}}번, {{bars}}에서 놓쳤습니다.",
+          "2": "{{bars}}에서 무너집니다. {{passes}}번 중 {{affected}}번 빠졌습니다.",
+          "3": "나머지는 버팁니다. 자꾸 사라지는 건 {{bars}}이고, {{goes}} 가운데 {{affected}}번입니다."
         },
         "rushing": {
-          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
-          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
-          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+          "1": "{{bars}}에서 클릭보다 앞서 있습니다. 끝까지 {{amount}} 빠릅니다.",
+          "2": "{{bars}}에서 서두릅니다. 평균 {{amount}} 빠릅니다.",
+          "3": "{{bars}}에서는 조금 뒤에 앉으세요. 거기서 {{amount}} 빨리 떨어지고 있습니다."
         },
         "dragging": {
-          "1": "You're behind the click through {{bars}} — {{amount}} late.",
-          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
-          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+          "1": "{{bars}}에서 클릭보다 뒤에 있습니다. {{amount}} 늦습니다.",
+          "2": "{{bars}}에서 끌립니다. 음이 박보다 {{amount}} 뒤에 떨어집니다.",
+          "3": "{{bars}}에서는 조금 앞으로 나오세요. {{amount}} 늦게 앉아 있습니다."
         },
         "afterShift": {
-          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
-          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
-          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+          "1": "{{bars}}에서 손이 움직일 때마다, 다음 음이 {{amount}} {{when}} 나옵니다.",
+          "2": "{{bars}}의 포지션 이동이 다음 음을 {{amount}} {{when}} 만들고 있습니다.",
+          "3": "{{bars}}의 이동만 제자리에 놓으면 나머지는 따라옵니다. 지금은 다음 음이 {{amount}} {{when}} 나옵니다."
         },
         "fallsApart": {
-          "1": "You start {{bars}} clean and lose it by the end.",
-          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
-          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+          "1": "{{bars}}는 깨끗하게 시작해서 끝으로 갈수록 흐트러집니다.",
+          "2": "{{bars}}의 뒷부분이 무너집니다. 앞부분은 괜찮습니다.",
+          "3": "음이 아니라 지구력입니다. {{bars}}는 갈수록 거칠어집니다."
         },
         "extras": {
-          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
-          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
-          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+          "1": "{{bars}}에 아무도 부르지 않은 음이 있습니다. {{extras}}입니다.",
+          "2": "{{bars}}에서 {{extras}}를 더하고 있습니다. 쉼표는 쉼표로 두세요.",
+          "3": "{{bars}}에 뭔가가 끼어듭니다. 악보에 없는 {{extras}}입니다."
         },
         "uneven": {
-          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
-          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
-          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+          "1": "{{bars}}는 빠르거나 늦은 게 아니라 고르지 않습니다. 음이 사방으로 떨어집니다.",
+          "2": "{{bars}}에서는 한쪽으로 기우는 대신 박자가 떠돕니다.",
+          "3": "빠르기보다 안정이 먼저입니다. {{bars}}는 아직 어느 쪽으로도 고르지 않습니다."
         },
         "beatPositionBias": {
-          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
-          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
-          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+          "1": "한 마디의 {{beat}}번째 박이 달아납니다. 마디마다 {{amount}} {{when}}입니다.",
+          "2": "{{beat}}번째 박에 기대고 있습니다. 돌아올 때마다 {{amount}} {{when}}입니다.",
+          "3": "어긋나는 건 {{beat}}번째 박입니다. 마디마다 {{amount}} {{when}}입니다."
         },
         "subdivisionWeak": {
-          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
-          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
-          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+          "1": "{{outOf}}개 가운데 {{position}}번째 음을 계속 흘리고 있습니다.",
+          "2": "{{outOf}}개씩 묶인 그룹에서 사라지는 건 {{position}}번째 음입니다.",
+          "3": "그룹을 소리 내어 세어 보세요. {{outOf}}개 중 {{position}}번째에서 미끄러집니다."
         },
         "drift": {
-          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
-          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
-          "3": "The tempo under your hands slides {{when}} across the segment."
+          "1": "클릭과 함께 시작해서 끝에는 {{amount}} {{when}} 갔습니다.",
+          "2": "갈수록 끌려갑니다. 마지막 마디에서는 {{amount}} {{when}}입니다.",
+          "3": "손안의 템포가 구간 내내 미끄러집니다. 끝에 가면 {{when}} 갑니다."
         },
         "tempoCeiling": {
-          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
-          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
-          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+          "1": "{{hold}}에서는 버팁니다. {{collapse}}에서 무너집니다.",
+          "2": "여기서 천장은 {{hold}}입니다. {{collapse}}는 아직 내 것이 아닙니다.",
+          "3": "{{hold}}는 내 것입니다. {{collapse}}는 다음에 가져올 것이지, 오늘의 템포는 아닙니다."
         },
         "improved": {
-          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
-          "2": "Something moved: you held {{bars}} where it used to slip.",
-          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+          "1": "나아졌습니다. {{bars}}가 지난번보다 {{ms}} ms 더 단단합니다.",
+          "2": "움직임이 있습니다. 전에는 흘리던 {{bars}}를 지금은 잡고 있습니다.",
+          "3": "{{bars}}는 진짜 진전입니다. 이전 번들보다 {{ms}} ms 더 조여졌습니다."
         },
         "clean": {
-          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
-          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
-          "3": "You played {{bars}} right every time. Leave it and come back to it."
+          "1": "{{bars}}는 고칠 게 없습니다. {{goes}} 모두 제자리였습니다.",
+          "2": "이건 내 것입니다. {{bars}}, {{goes}}, 한 번도 미끄러지지 않았습니다.",
+          "3": "{{bars}}를 매번 제대로 쳤습니다. 잠시 두었다가 나중에 다시 오세요."
         }
       }
     }
