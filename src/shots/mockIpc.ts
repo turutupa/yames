@@ -155,6 +155,14 @@ function baseState(theme: string) {
  * (`plans/SONGS.md` S0.4). Eight bars in two named sections, so the section
  * chips, the bar range and a tab worth scrolling are all in frame.
  */
+/**
+ * The song on the stage, and the band under it.
+ *
+ * The guitar is track 0 and is the part the shot plays; the drums and the
+ * bass are what the engine plays behind it, and they are here so the band's
+ * faders on the stage have rows to be about (`W13-SONGS-ENGINE.md` item 4).
+ * `\articulation defaults` is what makes the drum names parse at all.
+ */
 const SHOT_SONG_TEX = `\\title "Practice piece"
 \\artist "Written for the pictures"
 \\tempo 96
@@ -170,7 +178,28 @@ const SHOT_SONG_TEX = `\\title "Practice piece"
 8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
 8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
 7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
-7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |`;
+7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
+\\track "Drums"
+\\instrument percussion
+\\articulation defaults
+\\ts 4 4 (KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+\\track "Bass"
+\\tuning g2 d2 a1 e1
+\\ts 4 4 5.4.4 5.4.4 5.4.4 5.4.4 |
+5.4.4 5.4.4 5.4.4 5.4.4 |
+3.4.4 3.4.4 3.4.4 3.4.4 |
+3.4.4 3.4.4 3.4.4 3.4.4 |
+8.4.4 8.4.4 8.4.4 8.4.4 |
+8.4.4 8.4.4 8.4.4 8.4.4 |
+7.4.4 7.4.4 7.4.4 7.4.4 |
+7.4.4 7.4.4 7.4.4 7.4.4 |`;
 
 let songRecord: SongRecord | null = null;
 
@@ -497,6 +526,21 @@ export function installShotMock(shot: Shot, theme: string): void {
     // free pack so the row reads like something a person would actually point
     // at, and short one voice — the interesting picture is the sentence that
     // says where the missing one comes from, not a folder with all eight.
+    /**
+     * Songs on the engine. Answered rather than left to fall through to
+     * `null`, because the stage reads what came back: a `SongLoaded` of
+     * nothing would photograph as a song that loaded no notes, and the
+     * notice about instruments the band cannot play would never appear.
+     *
+     * The numbers are a plausible eight bars of the fixture above and
+     * nothing turns on them — what the shot needs is that the call resolves
+     * and that `droppedNotes` is zero, so the quiet line under the facts
+     * stays out of the picture.
+     */
+    load_song: () => ({ bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 }),
+    set_song_range: () => ({ bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 }),
+    clear_song: () => null,
+    set_song_mix: () => null,
     pick_kit_folder: () => "C:\\Users\\you\\Samples\\Studio Kit",
     inspect_kit_folder: () => ({
       voices: ["kick", "snare", "hat", "hat_open", "ride", "rim", "crash"],

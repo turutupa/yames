@@ -1,41 +1,36 @@
 /**
  * Where you are in a song — the one function that answers it.
  *
- * Today the only thing the app knows about position is the engine's beat
- * count: `BeatEvent.beat` counts quarter notes from the moment the transport
- * started, and everything about where that lands in the score — which bar,
- * which tick, which time round a loop — is worked out here from the range
- * that was handed to the engine.
+ * The engine says where it is: `BeatEvent.songTick` is its own position in
+ * the piece, in the score's own ticks, and `songBar` and `songPass` come with
+ * it. Everything here is arithmetic over those — which bar of the range that
+ * tick is in, and how many quarter notes into the range it sits, which is the
+ * axis a `ScoreSchedule` counts in.
  *
- * **That is a stand-in, and it is deliberately the only one.** W9's engine
- * carries a song of its own (`song.rs`) and the beat event is growing
- * `songBar` / `songTick` fields that say where the engine's own cursor is,
- * which is the truth once a tempo map means the click and the score no longer
- * advance at the same rate. When they arrive, this file is the only place
- * that changes: `songPosition` starts reading them and every caller — the
- * tab's cursor, the review's live lighting, the pass counter — follows.
- * That is why the cursor does not compute its own tick any more.
+ * **Never `BeatEvent.beat`.** That counts the CLICK's beats, so in 7/8 it
+ * counts eighths and the cursor advances at twice the rate the music does;
+ * and it counts them at one length, so after a tempo step the cursor and the
+ * page drift apart with every bar. `SongsView` learned that the hard way and
+ * the comment on its cursor says so; this file is where everything else reads
+ * position, so the lesson only has to be learned once.
  *
- * Nothing here reads a clock or holds state. Given a beat count it is a pure
+ * Nothing here reads a clock or holds state. Given a beat event it is a pure
  * function of the score, and it is tested as one.
  */
-import { clampRange, rangeTicks } from "./schedule";
+import { beatAtSongTick, clampRange, rangeTicks } from "./schedule";
 import type { BarRange } from "./schedule";
 import type { SongScore } from "./types";
 
 /** What the engine tells us, narrowed to the part about position. */
 export type BeatPosition = {
-  /** Quarter notes since the transport started. */
-  beat: number;
-  /**
-   * The engine's own bar inside the song, when it has one.
-   *
-   * Absent today — W9 owns the field and the engine does not send it yet —
-   * and preferred over the beat count the moment it appears.
-   */
-  songBar?: number;
-  /** The engine's own tick inside the song. Same story as `songBar`. */
-  songTick?: number;
+  /** Which played bar of the piece, or null with no song and through a count-in. */
+  songBar: number | null;
+  /** Where inside the piece, in the score's own ticks. */
+  songTick: number;
+  /** Which time round the range, from 0. The contract's `pass`. */
+  songPass: number;
+  /** The click is running and the piece has not started. */
+  songCountIn: boolean;
 };
 
 /** Where the player is, as everything downstream wants it. */
@@ -46,62 +41,55 @@ export type SongPosition = {
   bar: number;
   /** Quarter notes from the start of the RANGE, which is what a schedule counts in. */
   beatInRange: number;
-  /** Times round the loop, from 0. Always 0 when the range does not loop. */
+  /** Times round the range, from 0. */
   pass: number;
+  /** The piece has not started: the click is counting you in. */
+  countingIn: boolean;
 };
 
 /**
- * The position a beat count puts you at inside a range.
+ * The position the engine's beat event puts you at inside a range.
  *
- * `beat` counts from the transport, so a loop wraps with a modulo rather than
- * by anybody keeping a position of their own, and a range played once stops
- * at its own end rather than walking off it.
+ * Stopped, counting in, or with no song on the engine, the answer is the
+ * first bar of the range — a cursor walking through a count-in is a cursor on
+ * notes nobody has been asked to play yet.
  */
 export function songPosition(
   score: SongScore,
   range: BarRange,
   beat: BeatPosition | null,
-  options: { playing: boolean; loops: boolean },
+  options: { playing: boolean },
 ): SongPosition {
-  const { start, end } = rangeTicks(score, range);
+  const { start } = rangeTicks(score, range);
   const clamped = clampRange(score, range);
-  const ticksPerQuarter = score.ticksPerQuarter || 960;
-  const spanBeats = (end - start) / ticksPerQuarter;
+  const resting: SongPosition = {
+    tick: start,
+    bar: clamped.startBar,
+    beatInRange: 0,
+    pass: 0,
+    countingIn: false,
+  };
 
-  if (beat === null || !options.playing || spanBeats <= 0) {
-    return { tick: start, bar: clamped.startBar, beatInRange: 0, pass: 0 };
-  }
+  if (beat === null || !options.playing) return resting;
+  if (beat.songCountIn) return { ...resting, countingIn: true };
+  if (beat.songBar === null) return resting;
 
-  // When the engine starts saying where IT is, that is the answer and none of
-  // the arithmetic below runs.
-  if (typeof beat.songTick === "number") {
-    const tick = beat.songTick;
-    return {
-      tick,
-      bar: barAtTick(score, tick, clamped),
-      beatInRange: (tick - start) / ticksPerQuarter,
-      pass: 0,
-    };
-  }
-  if (typeof beat.songBar === "number") {
-    const bar = Math.min(Math.max(beat.songBar, clamped.startBar), clamped.endBar);
-    const tick = score.bars[bar]?.startTick ?? start;
-    return { tick, bar, beatInRange: (tick - start) / ticksPerQuarter, pass: 0 };
-  }
-
-  const elapsed = Math.max(0, beat.beat);
-  const pass = options.loops ? Math.floor(elapsed / spanBeats) : 0;
-  const beatInRange = options.loops ? elapsed % spanBeats : Math.min(elapsed, spanBeats);
-  const tick = start + beatInRange * ticksPerQuarter;
-  return { tick, bar: barAtTick(score, tick, clamped), beatInRange, pass };
+  const tick = beat.songTick;
+  return {
+    tick,
+    bar: Math.min(Math.max(beat.songBar, clamped.startBar), clamped.endBar),
+    beatInRange: beatAtSongTick(score, range, tick),
+    pass: beat.songPass,
+    countingIn: false,
+  };
 }
 
-/** Just the tick, for the cursor, which wants nothing else. */
+/** Just the tick, for a cursor, which wants nothing else. */
 export function songTickAt(
   score: SongScore,
   range: BarRange,
   beat: BeatPosition | null,
-  options: { playing: boolean; loops: boolean },
+  options: { playing: boolean },
 ): number {
   return songPosition(score, range, beat, options).tick;
 }
@@ -129,7 +117,7 @@ function barAtTick(score: SongScore, tick: number, range: BarRange): number {
  * The bar a beat of the schedule belongs to, as a PLAYED bar index.
  *
  * The review needs the other direction — a finding names bars, an onset names
- * a beat — and this is the same arithmetic run backwards.
+ * a beat — and this is `beatAtSongTick` run backwards.
  */
 export function barAtBeatInRange(
   score: SongScore,

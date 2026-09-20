@@ -34,6 +34,9 @@ type Importer = Awaited<ReturnType<typeof importerModule>>;
 import type { ParsedSong, SongImportWarning, SongTrackChoice } from "../../../songs/import";
 import type { BarRange } from "../../../songs/schedule";
 import type { SongScore } from "../../../songs/types";
+import { forgetMixSetting } from "../../../songs/songEngine";
+import { useSongEngine } from "./useSongEngine";
+import type { SongEngine } from "./useSongEngine";
 
 /** A file read and waiting for the player to pick a track (`SONGS.md` A3). */
 export type PendingImport = {
@@ -42,7 +45,7 @@ export type PendingImport = {
   tracks: SongTrackChoice[];
 };
 
-export interface SongsSession {
+export interface SongsSession extends SongEngine {
   songs: SongRecord[];
   song: SongRecord | null;
   score: SongScore | null;
@@ -71,7 +74,20 @@ export interface SongsSession {
   pushSchedule: () => Promise<boolean>;
 }
 
-export function useSongsSession(library: SongLibrary = songLibrary): SongsSession {
+/**
+ * What the hook needs from the window around it.
+ *
+ * Only the tab, and only because the engine can hold one mode at a time: the
+ * song has to be taken off the engine when the player walks to the Metronome,
+ * or the click there would go on following a score nobody is looking at. The
+ * jam takes the same single field for the same reason.
+ */
+export type SongsSessionOptions = { view?: string };
+
+export function useSongsSession(
+  library: SongLibrary = songLibrary,
+  { view = "songs" }: SongsSessionOptions = {},
+): SongsSession {
   const [songs, setSongs] = useState<SongRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [range, setRangeState] = useState<BarRange>({ startBar: 0, endBar: 0 });
@@ -182,6 +198,9 @@ export function useSongsSession(library: SongLibrary = songLibrary): SongsSessio
   const deleteSong = useCallback(
     (id: string) => {
       commit(deleteFromList(songs, id));
+      // The song's band goes with it. A mix left behind would come back on
+      // the day somebody imports the same file again, which is a surprise.
+      void forgetMixSetting(id).catch(() => {});
       if (activeId === id) setActiveId(null);
     },
     [songs, commit, activeId],
@@ -224,7 +243,16 @@ export function useSongsSession(library: SongLibrary = songLibrary): SongsSessio
     }
   }, [score, range, loop]);
 
+  /**
+   * The engine's half: the song on the click, the file's band, the faders.
+   *
+   * Its own hook because it is all effects and no list — this one owns the
+   * library and the selection, that one owns what the engine is holding.
+   */
+  const engine = useSongEngine({ view, score, source, range, loop, tempoPercent });
+
   return {
+    ...engine,
     songs,
     song,
     score,

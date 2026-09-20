@@ -110,17 +110,35 @@ test.describe("the verdict", () => {
    */
   test("does not move the headline when the rest is opened", async ({ page }) => {
     await openShot(page, "songs-review-missed", { width: 1400, height: 900 });
-    const answer = page.locator(".songs-review-answer");
-    const before = await answer.boundingBox();
+    // Measured against the review's own top, not the viewport's: the stage
+    // scrolls, so closing a section shortens the page and the browser clamps
+    // the scroll position — which moves everything on screen without moving
+    // anything in the layout. That is not the bug this test is about.
+    const offset = async () => {
+      const box = await page.evaluate(() => {
+        const answer = document.querySelector(".songs-review-answer");
+        const review = document.querySelector(".songs-review");
+        if (!answer || !review) return null;
+        const a = answer.getBoundingClientRect();
+        const r = review.getBoundingClientRect();
+        return { top: a.top - r.top, width: a.width };
+      });
+      expect(box, "no headline on the review").not.toBeNull();
+      return box!;
+    };
+
+    const before = await offset();
     // The scene already opened it; close it and open it again, which is the
     // press a person makes.
     await page.locator(".songs-review-more .songs-link").click();
     await page.evaluate(
       () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
     );
-    const after = await answer.boundingBox();
-    expect(Math.round(after!.y), "the headline moved down the page").toBe(Math.round(before!.y));
-    expect(Math.round(after!.width), "the headline changed width").toBe(Math.round(before!.width));
+    const after = await offset();
+    expect(Math.round(after.top), "the headline moved down the review").toBe(
+      Math.round(before.top),
+    );
+    expect(Math.round(after.width), "the headline changed width").toBe(Math.round(before.width));
   });
 
   /** The pass stepper is a row of chips and must not wrap into a column. */
@@ -157,42 +175,81 @@ test.describe("the marks are readable", () => {
   }
 });
 
-/** The least legible mark on the page, and how legible it is. */
+/**
+ * The least legible mark on the page, and how legible it is.
+ *
+ * The ground under a mark has to be COMPOSITED, not looked up. Four of the
+ * thirteen themes paint their cards in `rgba(255, 255, 255, 0.05)` over a
+ * gradient, so `backgroundColor` on every ancestor is translucent or
+ * transparent and there is no single computed colour to compare against —
+ * a first version of this took the first opaque ancestor, found none, fell
+ * back to white, and reported Aurora's bright green at 1.9:1 when it is a
+ * bright green on a near-black gradient. So: start from the theme's own
+ * `--bg-primary` (its first colour stop when it is a gradient) and lay every
+ * layer between there and the mark over it.
+ */
 async function worstMarkContrast(page: Page) {
   return page.evaluate(() => {
-    const parse = (value: string): [number, number, number] | null => {
-      const m = /rgba?\(([^)]+)\)/.exec(value);
-      if (!m) return null;
-      const parts = m[1].split(",").map((p) => parseFloat(p));
-      return [parts[0], parts[1], parts[2]];
+    type Rgba = [number, number, number, number];
+
+    const parse = (value: string): Rgba | null => {
+      const rgb = /rgba?\(([^)]+)\)/.exec(value);
+      if (rgb) {
+        const p = rgb[1].split(",").map((x) => parseFloat(x));
+        return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+      }
+      const hex = /#([0-9a-f]{6})\b/i.exec(value);
+      if (hex) {
+        const n = parseInt(hex[1], 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1];
+      }
+      return null;
     };
+
+    /** `over` laid on `under`, both premultiplied out. */
+    const composite = (under: Rgba, over: Rgba): Rgba => {
+      const a = over[3];
+      if (a <= 0) return under;
+      if (a >= 1) return over;
+      return [
+        over[0] * a + under[0] * (1 - a),
+        over[1] * a + under[1] * (1 - a),
+        over[2] * a + under[2] * (1 - a),
+        1,
+      ];
+    };
+
     const channel = (c: number) => {
       const s = c / 255;
       return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
     };
-    const luminance = ([r, g, b]: [number, number, number]) =>
-      0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+    const luminance = (c: Rgba) =>
+      0.2126 * channel(c[0]) + 0.7152 * channel(c[1]) + 0.0722 * channel(c[2]);
 
-    /** The first ancestor that actually paints something. */
-    const behind = (el: Element): [number, number, number] => {
-      let node: Element | null = el;
+    // The theme's own ground, which is a gradient in four of the thirteen —
+    // its first stop is what the top of the page actually shows.
+    const base =
+      parse(getComputedStyle(document.documentElement).getPropertyValue("--bg-primary")) ??
+      ([255, 255, 255, 1] as Rgba);
+
+    const groundUnder = (el: Element): Rgba => {
+      const layers: Rgba[] = [];
+      let node: Element | null = el.parentElement;
       while (node) {
         const bg = parse(getComputedStyle(node).backgroundColor);
-        const alpha = /rgba\(/.test(getComputedStyle(node).backgroundColor)
-          ? parseFloat(getComputedStyle(node).backgroundColor.split(",")[3] ?? "1")
-          : 1;
-        if (bg && alpha > 0.5) return bg;
+        if (bg && bg[3] > 0) layers.push(bg);
         node = node.parentElement;
       }
-      return [255, 255, 255];
+      // Outermost first: the page, then everything stacked on it.
+      return layers.reverse().reduce<Rgba>((under, over) => composite(under, over), base);
     };
 
     let worst: { mark: string; ratio: number } | null = null;
     for (const el of document.querySelectorAll<HTMLElement>(".songs-review-mark")) {
       const ink = parse(getComputedStyle(el).color);
       if (!ink) continue;
-      const paper = behind(el);
-      const a = luminance(ink);
+      const paper = groundUnder(el);
+      const a = luminance(composite(paper, ink));
       const b = luminance(paper);
       const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
       const mark = el.parentElement?.getAttribute("data-mark") ?? "?";

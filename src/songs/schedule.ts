@@ -96,11 +96,10 @@ export function buildSchedule(
 /**
  * The tempo a range starts at.
  *
- * This wave's engine clicks at one tempo for the whole pass (`W4-SONGS.md`
- * stage C); the tempo map goes to the engine in the next one. So what the
- * click needs is the tempo in force where the range begins, which is the last
- * step at or before it — not `tempoMap[0]`, which is the top of the song and
- * may be nothing like the section you are looping.
+ * The last step at or before the range's first tick — not `tempoMap[0]`,
+ * which is the top of the song and may be nothing like the section you are
+ * looping. It is what the facts line on the stage quotes, and what the
+ * fallback tempo is when nobody has a map.
  */
 export function tempoAt(score: SongScore, tick: number): number {
   let bpm = score.tempoMap[0]?.bpm ?? 120;
@@ -116,6 +115,58 @@ export function rangeTempo(score: SongScore, range: BarRange, percent: number): 
   const { start } = rangeTicks(score, range);
   const written = tempoAt(score, start);
   return Math.max(20, Math.round((written * percent) / 100));
+}
+
+/**
+ * Where a beat event sits on the schedule's axis.
+ *
+ * The one line that turns "the engine is at song tick 34560" into "that is
+ * beat 12 of this schedule", which is what every onset in a `ScoreSchedule`
+ * is measured in. It is here, once, because deriving it at each call site is
+ * how two parts of the app end up disagreeing about where beat zero is —
+ * and because the tempting version, counting `BeatEvent.beat`, is wrong in
+ * 7/8 (it counts eighths) and after a tempo step (it counts them at two
+ * different lengths).
+ */
+export function beatAtSongTick(score: SongScore, range: BarRange, songTick: number): number {
+  const { start } = rangeTicks(score, range);
+  return (songTick - start) / TICKS_PER_QUARTER;
+}
+
+/** One step of the click's tempo, in quarter notes from the range's start. */
+export type RangeTempoStep = { beat: number; bpm: number };
+
+/**
+ * The tempo across a range, on the schedule's own beat axis.
+ *
+ * What `analyze_take_pitch` needs to know when a note was due
+ * (`plans/tasks/songs/W13-SONGS-ENGINE.md` item 5). It was given one BPM,
+ * which is a straight line — and a song whose tempo steps from 100 to 140 at
+ * bar nine is not one, so every note after the step was read out of the
+ * wrong part of the take's audio. That failure does not look like a clock
+ * error; it looks like a tracker that cannot hear.
+ *
+ * The first step is always at beat 0, and every BPM is the CLICK's — the
+ * score's tempo already through `percent` — because that is what the take
+ * was recorded against.
+ */
+export function rangeTempoSteps(
+  score: SongScore,
+  range: BarRange,
+  percent: number,
+): RangeTempoStep[] {
+  const { start, end } = rangeTicks(score, range);
+  const scaled = (bpm: number) => Math.max(1, (bpm * percent) / 100);
+  const steps: RangeTempoStep[] = [{ beat: 0, bpm: scaled(tempoAt(score, start)) }];
+  for (const step of score.tempoMap) {
+    // `>` and not `>=`: a step exactly on the range's first tick is the
+    // tempo the range starts at, which is already the entry above.
+    if (step.tick <= start || step.tick >= end) continue;
+    const bpm = scaled(step.bpm);
+    if (bpm === steps[steps.length - 1].bpm) continue;
+    steps.push({ beat: (step.tick - start) / TICKS_PER_QUARTER, bpm });
+  }
+  return steps;
 }
 
 /** The meter in force at a played bar — what the engine counts in. */

@@ -110,7 +110,12 @@
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--bg-base);
+  /* `--bg-card`, not `--bg-base`: there is no `--bg-base` in the token
+     contract and it silently resolves to nothing, which is the exact bug
+     songs.css's own header warns about and jam.css shipped twice. The tab
+     sits one step DOWN from the review's `--bg-raised`, the way the stage's
+     own tab viewport sits on `--bg-card`. */
+  background: var(--bg-card);
 }
 
 .songs-review-bar {

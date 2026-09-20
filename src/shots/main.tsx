@@ -53,6 +53,29 @@ if (!params.get("manifest") && !shot) {
 
 if (shot) installShotMock(shot, theme);
 
+/**
+ * Press something until it has done what it was meant to do.
+ *
+ * Everything else in this file presses once, because everything else is
+ * pressed at a moment the page has already been waited for. A control inside
+ * a panel that has only just appeared is the one case where a single press
+ * can land a frame early, and a screenshot harness that fails one run in four
+ * is worse than no harness. `press` is called at most every 400 ms.
+ */
+async function pressUntil(
+  what: string,
+  press: () => void,
+  done: () => boolean,
+  timeoutMs = 15000,
+): Promise<void> {
+  const started = Date.now();
+  while (!done()) {
+    if (Date.now() - started > timeoutMs) throw new Error(`pressing ${what} never opened it`);
+    press();
+    await new Promise((r) => setTimeout(r, 400));
+  }
+}
+
 /** Wait for `check` to hold, or give up and say what never happened. */
 function until(what: string, check: () => boolean, timeoutMs = 15000): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -249,6 +272,20 @@ async function drive() {
     (document.querySelectorAll(rows)[shot!.songs!.row] as HTMLElement).click();
     await until("the songs stage", () => !!document.querySelector(".songs-view"));
     await until("the drawn tab", () => !!document.querySelector(".songs-tab-host[data-ready]"));
+    /*
+     * And the band, which arrives after the tab does.
+     *
+     * The file's other tracks are read in a second pass and the engine send
+     * is debounced, so the faders appear a moment after the score is drawn.
+     * Without this wait the layout suite measures a stage that has a click
+     * row and nothing else — which is the real narrow-window failure it is
+     * here to catch, so it must not be the state it photographs.
+     * Three rows: the click, the drums and the bass of `SHOT_SONG_TEX`.
+     */
+    await until(
+      "the band's faders",
+      () => document.querySelectorAll(".songs-band-lane").length >= 3,
+    );
 
     if (shot!.songs.section) {
       const chips = [...document.querySelectorAll<HTMLElement>(".songs-section-chips .songs-chip")];
@@ -274,10 +311,20 @@ async function drive() {
       transport.click();
       await until("the review", () => !!document.querySelector(".songs-review"), 20000);
       if (shot!.songs.openMore) {
-        const more = document.querySelector(".songs-review-more .songs-link") as HTMLElement | null;
-        if (!more) throw new Error("no \"what else\" link on the review");
-        more.click();
-        await until("the other findings", () => !!document.querySelector(".songs-review-others"));
+        /*
+         * Pressed until it takes, rather than pressed once and hoped for.
+         *
+         * `until` resolves the frame the review appears, which is not
+         * necessarily the frame its own disclosure is ready to be pressed —
+         * and with four Playwright workers each engraving a score at the same
+         * time, "not necessarily" became "one run in four". A person whose
+         * press does not take presses again; so does this.
+         */
+        await pressUntil(
+          '"what else"',
+          () => document.querySelector<HTMLElement>(".songs-review-more .songs-link")?.click(),
+          () => !!document.querySelector(".songs-review-others"),
+        );
       }
     }
 

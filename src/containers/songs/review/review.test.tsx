@@ -23,6 +23,7 @@ import { MARK_GLYPH, markFor, noteNameOf, passesIn, pitchMarkFor } from "./marks
 import { markFromFeedback, onsetsInBeat } from "./useLiveNoteLights";
 import { useSongActions } from "./useSongActions";
 import { __finishAttemptForTests } from "./useSongAttempt";
+import { takePitchFor } from "./useSongTakePitch";
 import { scriptFindings, scriptPass } from "./reviewFixtures";
 import { buildSchedule } from "../../../songs/schedule";
 import type { TimingBands } from "../../../ipc";
@@ -595,5 +596,73 @@ describe("an action changes the state it names", () => {
     expect(calls.range).toEqual([]);
     expect(calls.loop).toEqual([]);
     expect(calls.percent).toEqual([]);
+  });
+});
+
+describe("asking the ear which note it was", () => {
+  const score = twoBars();
+  const schedule = buildSchedule(score, WHOLE);
+  const pass = scriptPass(schedule, "clean", { quarterMs: 500 });
+
+  const review = {
+    attemptId: "a1",
+    scoreId: "song-1",
+    score,
+    schedule,
+    range: WHOLE,
+    tempoPercent: 80,
+    bpm: 96,
+    startedAt: 0,
+    facts: {
+      ...pass,
+      passes: 1,
+      hits: 8,
+      misses: 0,
+      softAbsent: 0,
+      extraCount: 0,
+      meanDevMs: 0,
+      madMs: 0,
+      scoredOnsets: 8,
+    },
+    bands: BANDS,
+    findings: [],
+    saved: true,
+  };
+
+  /**
+   * The tempo map, not one BPM. A song that steps from 100 to 140 at bar nine
+   * has every note after the step read out of the wrong part of the audio
+   * without it — and that failure looks like a tracker that cannot hear.
+   */
+  it("sends the click's tempo across the range, stepping where the score steps", async () => {
+    setInvokeResponse("analyze_take_pitch", []);
+    await takePitchFor(review, { takeId: "tk1", jamId: "j1", startOffsetMs: 1500 });
+    const call = mockInvoke.mock.calls.find((c) => c[0] === "analyze_take_pitch");
+    const request = (call?.[1] as { request: Record<string, unknown> }).request;
+    expect(request.tempoMap).toBeTruthy();
+    expect((request.tempoMap as { beat: number }[])[0].beat).toBe(0);
+    expect(request.startOffsetMs).toBe(1500);
+    expect(request.scoreId).toBe("song-1");
+  });
+
+  it("sends the extras, because they are where the tracker is cut", async () => {
+    setInvokeResponse("analyze_take_pitch", []);
+    const missed = scriptPass(schedule, "missed", { quarterMs: 500, passes: 1 });
+    await takePitchFor(
+      { ...review, facts: { ...review.facts, extras: missed.extras } },
+      { takeId: "tk1", jamId: "j1", startOffsetMs: 0 },
+    );
+    const call = mockInvoke.mock.calls.find((c) => c[0] === "analyze_take_pitch");
+    const request = (call?.[1] as { request: Record<string, unknown> }).request;
+    expect((request.extras as unknown[]).length).toBe(2);
+  });
+
+  it("says nothing rather than failing when the take cannot be read", async () => {
+    setInvokeResponse("analyze_take_pitch", () => {
+      throw new Error("that take was recorded without a microphone");
+    });
+    await expect(
+      takePitchFor(review, { takeId: "tk1", jamId: "j1", startOffsetMs: 0 }),
+    ).resolves.toEqual([]);
   });
 });

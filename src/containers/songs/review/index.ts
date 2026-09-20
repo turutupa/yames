@@ -27,6 +27,11 @@ export type { SongActions, SongActionsInput, SongRamp } from "./useSongActions";
 export { useLiveNoteLights, markFromFeedback, onsetsInBeat } from "./useLiveNoteLights";
 export type { LiveLights } from "./useLiveNoteLights";
 
+export { useSongTakePitch, takePitchFor } from "./useSongTakePitch";
+export type { SongTake } from "./useSongTakePitch";
+
+export { useSongsDue, announceSongsDue, SONGS_DUE_EVENT } from "./useSongsDue";
+
 export {
   MARK_GLYPH,
   MARK_TOKEN,

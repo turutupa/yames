@@ -119,6 +119,51 @@ export const NO_STRINGS = `\\title "Keys only"
 \\instrument acousticgrandpiano
 \\ts 4 4 c4.4 e4.4 g4.4 c5.4 |`;
 
+/**
+ * A whole band: the guitar you play, a drum kit, a bass, a piano and a horn.
+ *
+ * Written for `buildBacking`, and every track is there to answer one
+ * question. The drums say that a General MIDI percussion number comes out the
+ * far end (alphaTab hands back an articulation INDEX, not a note). The bass
+ * is tuned as a bass and has no program that says so, so it is the
+ * bass-tuned case. The piano is the keys case. The horn is the one the band
+ * has nobody to play and must be NAMED rather than vanish. And bar three is
+ * 7/8, so the transport's meter map is exercised on a bar that is not four
+ * quarters long.
+ *
+ * `\articulation defaults` is what registers the drum names — without it
+ * alphaTex will not parse a percussion note at all.
+ */
+export const BAND_WITH_SEVEN_EIGHT = `\\title "The band"
+\\tempo 100
+.
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\ts 4 4 3.3.4 3.3.4 3.3.4 3.3.4 |
+3.3.4 3.3.4 3.3.4 3.3.4 |
+\\ts 7 8 3.3.8 3.3.8 3.3.8 3.3.8 3.3.8 3.3.8 3.3.8 |
+\\track "Drums"
+\\instrument percussion
+\\articulation defaults
+\\ts 4 4 (KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+(KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
+\\ts 7 8 KickHit.8 HiHatClosed.8 SnareHit.8 HiHatClosed.8 KickHit.8 HiHatClosed.8 SnareHit.8 |
+\\track "Bass"
+\\tuning g2 d2 a1 e1
+\\ts 4 4 3.4.4 3.4.4 5.4.4 5.4.4 |
+3.4.4 3.4.4 5.4.4 5.4.4 |
+\\ts 7 8 3.4.8 3.4.8 3.4.8 3.4.8 3.4.8 3.4.8 3.4.8 |
+\\track "Piano"
+\\instrument acousticgrandpiano
+\\ts 4 4 c4.4 e4.4 g4.4 c5.4 |
+c4.4 e4.4 g4.4 c5.4 |
+\\ts 7 8 c4.8 e4.8 g4.8 c5.8 c4.8 e4.8 g4.8 |
+\\track "Horn"
+\\instrument frenchhorn
+\\ts 4 4 c4.4 c4.4 c4.4 c4.4 |
+c4.4 c4.4 c4.4 c4.4 |
+\\ts 7 8 c4.8 c4.8 c4.8 c4.8 c4.8 c4.8 c4.8 |`;
+
 /** A pull-off (down a fret) beside a hammer-on (up one). */
 export const HAMMER_AND_PULL = `\\title "Hammer and pull"
 \\tempo 120

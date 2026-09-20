@@ -976,6 +976,92 @@ export async function saveAttempt(attempt: Attempt): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Songs on the engine — the piece the click walks, and the band from the file
+//
+// Songs is its own engine mode beside the metronome, the drill and the jam
+// (`plans/tasks/songs/W9-ENGINE-SONG.md`): while a song is loaded the click
+// follows the score's tempo map instead of `AppState.bpm`, and starting a jam
+// takes the song away. The engine holds only the compiled tables; the imported
+// file stays in the UI, exactly as a jam's record does.
+// ---------------------------------------------------------------------------
+
+import type { SongBacking, SongMix, SongTransport } from "./songs/types";
+
+/** What a song turned out to be, once the engine had compiled it. */
+export type SongLoaded = {
+  /** How many bars the range plays. */
+  bars: number;
+  /** How long one pass lasts, in milliseconds at the chosen speed. */
+  passMs: number;
+  /** How many backing notes play. */
+  playedNotes: number;
+  /** And how many named something this band has no voice for. */
+  droppedNotes: number;
+};
+
+/**
+ * Hand the engine a song: where it is in time, and the file's own band.
+ *
+ * Starting a song stops the others — the band goes, a running speed ramp
+ * stops, and a count-in the metronome had armed is spent, because a song
+ * carries its own. Rejects with a sentence when the transport describes
+ * something the engine cannot play.
+ */
+export async function loadSong(
+  transport: SongTransport,
+  backing: SongBacking | null = null,
+): Promise<SongLoaded> {
+  return invoke<SongLoaded>("load_song", { transport, backing });
+}
+
+/** Take the song away and leave the plain click. */
+export async function clearSong(): Promise<void> {
+  return invoke("clear_song");
+}
+
+/**
+ * Loop bars 17 to 24 at 70 %, or stop looping, or play the whole piece.
+ *
+ * It recompiles on the Rust side and starts the range again from the top,
+ * which is why the UI does not send one per keystroke of a number field.
+ */
+export async function setSongRange(
+  range: { startBar: number; endBar: number },
+  loops: boolean,
+  tempoPercent: number,
+  countInBars?: number,
+): Promise<SongLoaded> {
+  return invoke<SongLoaded>("set_song_range", {
+    range,
+    loops,
+    tempoPercent,
+    countInBars: countInBars ?? null,
+  });
+}
+
+/**
+ * How loud the click and each of the band's three rows are.
+ *
+ * Applies on the next buffer and recompiles nothing, so this is safe to send
+ * on every step of a fader drag. Out-of-range values are clamped rather than
+ * refused — a fader that stops moving is better than a dialog.
+ */
+export async function setSongMix(mix: SongMix): Promise<void> {
+  return invoke("set_song_mix", { mix });
+}
+
+/**
+ * The engine let go of the song: the audio device changed under it, or a jam
+ * started and took the band with it.
+ *
+ * It carries nothing, because there is nothing to say beyond that it
+ * happened — what to do about it is the mode's business, not the engine's.
+ */
+export function onSongDropped(callback: () => void) {
+  return listen<null>("song-dropped", () => callback());
+}
+
+// ---------------------------------------------------------------------------
 // The coach's judgement, and its ears
 //
 // Both run off the UI thread (`#[tauri::command(async)]`) and both belong to
@@ -1037,8 +1123,24 @@ export type AnalyzeTakePitchRequest = {
    * folded into the written note before it and drags its median off.
    */
   extras?: ExtraOnset[];
-  /** The tempo the range was played at — the click's, not the score's. */
+  /**
+   * The tempo the range was played at — the click's, not the score's.
+   *
+   * One number, and a song has a map. Kept for everything that really does
+   * have one tempo, and as the fallback when `tempoMap` is absent.
+   */
   bpm: number;
+  /**
+   * The click's tempo across the range, stepping where the score steps.
+   * `beat` is quarter notes from the range's start; `src/songs/schedule.ts`'s
+   * `rangeTempoSteps` is what derives it.
+   *
+   * Without this a tempo step puts every note after it in the wrong part of
+   * the take — at 100 BPM a quarter is 600 ms and at 140 it is 429, so eight
+   * bars past a step the window is seconds adrift and the tracker is asked
+   * about somebody else's notes.
+   */
+  tempoMap?: { beat: number; bpm: number }[];
   /**
    * Where the FIRST BEAT of the played range sits inside the dry stem, in ms
    * from the instant that file starts.
