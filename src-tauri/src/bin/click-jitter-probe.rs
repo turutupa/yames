@@ -59,6 +59,16 @@
 //!                        a writer thread resamples, mixes and writes it to
 //!                        a temporary WAV underneath the stream. Combines
 //!                        with the other two
+//!   --song               play an imported SONG rather than the click or the
+//!                        band: a tempo map with a step in it, a 7/8 bar, and
+//!                        the file's own drums, bass and keys. The one path
+//!                        where the callback walks a table of sample
+//!                        positions rather than counting ticks, so it is the
+//!                        one the gate has to cover on its own. Not with --jam
+//!   --song-loop          --song, looping the four bars that span the meter
+//!                        change and the tempo step — the seam every few
+//!                        seconds for the length of the run
+//!   --song-take          --song, and record a take of it
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -106,10 +116,11 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    compile_jam, compile_jam_with_voices, create_beat_log,
-    create_shared_state, in_callback, load_kit, load_voice_bank, perc_ids, reference_bank, CallbackProbe, CallbackSample,
+    compile_jam, compile_jam_with_voices, compile_song, create_beat_log,
+    create_shared_state, in_callback, load_kit, load_voice_bank, perc_ids, reference_bank, reference_perc, CallbackProbe, CallbackSample,
     JamBassLine, JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, JamVoices, KitBank,
-    MelodicBank, MetronomeEngine, TakeRing, TakeSession, TakeStart,
+    MelodicBank, MetronomeEngine, SongBacking, SongBar, SongNote, SongRange, SongRole, SongSounds,
+    SongTempo, SongTrack, SongTransport, TakeRing, TakeSession, TakeStart,
 };
 
 // ---------------------------------------------------------------------------
@@ -223,7 +234,28 @@ struct Args {
     /// both to disk while the measurement is running — which is the load a
     /// take actually puts on the machine, and the one path where the audio
     /// thread does work on behalf of the filesystem.
-    jam_take: bool,
+    /// `--jam-take` or `--song-take`: record a take of the whole run. The
+    /// output callback then copies every buffer into a ring, a synthetic
+    /// 44.1 kHz "mic" fills a second one, and a writer thread resamples,
+    /// mixes and writes both to disk while the measurement is running.
+    ///
+    /// One flag for both modes, because it is one path: `take.rs` does not
+    /// know whether it is recording a band or a song, and that is exactly the
+    /// claim `--song-take` is here to check.
+    take: bool,
+    /// Play an imported SONG instead of the click or the band: a tempo map
+    /// with a step in it, a 7/8 bar, and the file's own drums, bass and keys
+    /// on every sixteenth.
+    ///
+    /// The one path where the callback walks a table of sample positions
+    /// rather than counting ticks, so it is the one the gate has to cover
+    /// separately: a different transport, a different table, a different
+    /// retirement list.
+    song: bool,
+    /// `--song`, and loop a four-bar range of it — so the seam, which is the
+    /// one moment a song's cursors all move at once, happens every few
+    /// seconds for the length of the run.
+    song_loop: bool,
     /// `--jam`, and play the bass and the keys out of this folder of
     /// recorded notes instead of the synthesised recipes.
     ///
@@ -261,7 +293,9 @@ impl Default for Args {
             jam: false,
             jam_swap: false,
             jam_move: false,
-            jam_take: false,
+            take: false,
+            song: false,
+            song_loop: false,
             jam_kit: None,
             jam_voice: None,
             bpm_set: false,
@@ -326,7 +360,21 @@ fn parse_args() -> Result<Args, String> {
             }
             "--jam-take" => {
                 a.jam = true;
-                a.jam_take = true;
+                a.take = true;
+                consumed = 1;
+            }
+            "--song" => {
+                a.song = true;
+                consumed = 1;
+            }
+            "--song-loop" => {
+                a.song = true;
+                a.song_loop = true;
+                consumed = 1;
+            }
+            "--song-take" => {
+                a.song = true;
+                a.take = true;
                 consumed = 1;
             }
             "--jam-voice" => {
@@ -348,6 +396,18 @@ fn parse_args() -> Result<Args, String> {
     }
     if a.bpm == 0 {
         return Err("--bpm must be >= 1".into());
+    }
+    // A SONG IS ITS OWN ENGINE MODE, and the callback prefers it over the
+    // band when both are loaded — so a run that asked for both would measure
+    // the song and report the jam. Refuse rather than measure the wrong thing
+    // quietly, which is the rule the `--jam --subdivision` check below is
+    // also written under.
+    if a.song && a.jam {
+        return Err(
+            "--song and --jam are different engine modes; the song wins and the jam \
+             would be silent, so this run would measure the song and call it a jam"
+                .into(),
+        );
     }
     // The band's own band: 240 BPM sixteenths is 16 ticks a bar at 16 ticks
     // a second, which is the top of what a jam can ask the mixer for.
@@ -413,6 +473,20 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      stream is open, handed to the callback inside the
                      table, and swapped and retired with it. Combines
                      with all three above.
+  --song             play an imported SONG instead of the click or the
+                     band: twelve bars at 240 with a 7/8 at bar 4 and a
+                     tempo step at bar 5, every drum on every sixteenth,
+                     a bass on every eighth and a chord on every beat
+                     held a beat and a half. The one path where the
+                     callback walks a table of sample positions rather
+                     than counting ticks. Not with --jam
+  --song-loop        --song, looping the four bars that span the 7/8 and
+                     the tempo step, so the seam — both cursors back to
+                     nought with the voices left ringing — happens every
+                     few seconds for the whole run
+  --song-take        --song, and record a take of it. `take.rs` does not
+                     know whether it is recording a band or a song, and
+                     this is the flag that checks that
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -777,6 +851,148 @@ fn busiest_jam() -> JamConfig {
     }
 }
 
+/// Ticks to a quarter note, as `song.rs` fixes it.
+const SONG_TPQ: u32 = 960;
+
+/// The busiest song anyone could plausibly import, for `--song`.
+///
+/// Twelve bars at 240 BPM with a 7/8 at bar 4 and a tempo step to 180 on the
+/// bar line of bar 5 — so the run crosses a meter change and a tempo change
+/// over and over — with the file's own drums on every sixteenth, a bass note
+/// on every eighth and a four-note chord on every beat held for a beat and a
+/// half, so there is always a voicing still ringing when the next one lands.
+///
+/// It is the song shape of `busiest_jam` and it is written for the same
+/// reason: the gate is about what the mixer carries, not about music. What it
+/// adds over the jam is the thing only a song has — a table of absolute
+/// sample positions, two cursors walking it, a tempo step inside it, and
+/// (with `--song-loop`) a seam every four bars where both cursors go back to
+/// nought while the voices do not.
+fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
+    let mut bars = Vec::new();
+    let mut tick = 0u32;
+    for i in 0..12u32 {
+        let (num, den) = if i == 4 { (7u32, 8u32) } else { (4, 4) };
+        let len = SONG_TPQ * 4 / den * num;
+        bars.push(SongBar {
+            start_tick: tick,
+            length_ticks: len,
+            numerator: num,
+            denominator: den,
+        });
+        tick += len;
+    }
+    let step_at = bars[5].start_tick;
+    let mut drums = Vec::new();
+    let mut bass = Vec::new();
+    let mut keys = Vec::new();
+    // Every drum this engine has a voice for, cycled over the sixteenths, so
+    // the choke masks, the percussion set and the fallback chain are all in
+    // the run rather than only the kick and the snare.
+    const GM: [u8; 12] = [36, 42, 38, 46, 41, 44, 47, 49, 51, 53, 54, 56];
+    for bar in bars.iter() {
+        let sixteenth = SONG_TPQ / 4;
+        let mut at = bar.start_tick;
+        let mut n = 0usize;
+        while at < bar.start_tick + bar.length_ticks {
+            drums.push(SongNote {
+                tick: at,
+                dur_ticks: sixteenth,
+                midi: GM[n % GM.len()],
+                velocity: 0.9,
+            });
+            // Two drums on most sixteenths: a kit plays a hand and a foot at
+            // once, and two onsets on one sample is the case the cursor walk
+            // has to get right.
+            drums.push(SongNote {
+                tick: at,
+                dur_ticks: sixteenth,
+                midi: GM[(n + 5) % GM.len()],
+                velocity: 0.6,
+            });
+            n += 1;
+            at += sixteenth;
+        }
+        let eighth = SONG_TPQ / 2;
+        let mut at = bar.start_tick;
+        while at < bar.start_tick + bar.length_ticks {
+            bass.push(SongNote {
+                tick: at,
+                dur_ticks: eighth,
+                midi: 40 + (at / eighth % 12) as u8,
+                velocity: 0.9,
+            });
+            at += eighth;
+        }
+        let beat = SONG_TPQ * 4 / bar.denominator;
+        let mut at = bar.start_tick;
+        while at < bar.start_tick + bar.length_ticks {
+            for note in [55u8, 60, 64, 67] {
+                keys.push(SongNote {
+                    tick: at,
+                    // A beat and a half: the chord is still ringing when the
+                    // next one starts, which is what makes the mixer carry
+                    // eight voices of keys instead of four.
+                    dur_ticks: beat + beat / 2,
+                    midi: note,
+                    velocity: 0.8,
+                });
+            }
+            at += beat;
+        }
+    }
+    (
+        SongTransport {
+            ticks_per_quarter: SONG_TPQ,
+            tempo_map: vec![
+                SongTempo { tick: 0, bpm: 240.0 },
+                SongTempo {
+                    tick: step_at,
+                    bpm: 180.0,
+                },
+            ],
+            bars,
+            // Four bars that span the 7/8 AND the tempo step, so a looping
+            // run crosses both on every pass.
+            range: if loops {
+                SongRange {
+                    start_bar: 3,
+                    end_bar: 6,
+                }
+            } else {
+                SongRange {
+                    start_bar: 0,
+                    end_bar: 11,
+                }
+            },
+            loops,
+            tempo_percent: 100,
+            // A count-in is a few clicks at the start and nothing the gate
+            // can see over sixty seconds; the run is about the piece.
+            count_in_bars: 0,
+        },
+        SongBacking {
+            tracks: vec![
+                SongTrack {
+                    role: SongRole::Drums,
+                    name: "drums".into(),
+                    notes: drums,
+                },
+                SongTrack {
+                    role: SongRole::Bass,
+                    name: "bass".into(),
+                    notes: bass,
+                },
+                SongTrack {
+                    role: SongRole::Keys,
+                    name: "keys".into(),
+                    notes: keys,
+                },
+            ],
+        },
+    )
+}
+
 fn main() -> ExitCode {
     let args = match parse_args() {
         Ok(a) => a,
@@ -914,6 +1130,68 @@ fn main() -> ExitCode {
         }
         None => None,
     };
+
+    // `--song`: built HERE rather than before the stream, because a song's
+    // tables are sample positions at the OUTPUT rate and the output rate is
+    // not a thing anybody knows until the device has opened. Installing it
+    // now also makes this a live handoff into a running stream, which is more
+    // of a test than a table set before the first buffer, not less; it lands
+    // inside the warm-up window the measurement already excludes.
+    if args.song {
+        let rate = engine.output_sample_rate().unwrap_or(48_000);
+        let (transport, backing) = probe_song(args.song_loop);
+        let sounds = SongSounds {
+            // The reference decode, as `--jam` uses: it is built at
+            // `JAM_REFERENCE_SR` rather than at the device's rate, so on a
+            // 44.1 kHz box the probe's drums are a fraction of a semitone
+            // sharp. That is a pitch the gate does not measure — the mixer
+            // reads the same number of samples either way — and it saves the
+            // run a second decode of the whole kit.
+            bank: match reference_bank("brushes") {
+                Ok(b) => b,
+                Err(e) => {
+                    eprintln!("error: the probe's song kit did not decode: {e}");
+                    return ExitCode::from(2);
+                }
+            },
+            perc: reference_perc(),
+            // The synthesised recipes, as a checkout without the voice
+            // folders plays. `--jam-voice` is the flag that covers recorded
+            // banks, and it covers the same `SoundId::Voice` path.
+            voices: JamVoices::default(),
+        };
+        let table = match compile_song(
+            &transport,
+            Some(&backing),
+            sounds,
+            rate,
+            args.subdivision as u32,
+        ) {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("error: the probe's own song did not compile: {e}");
+                return ExitCode::from(2);
+            }
+        };
+        eprintln!(
+            "[probe] song loaded: {} bars of the range, one pass is {:.2} s at {} Hz, \
+             {} clicks and {} band notes a pass, {} dropped, band held at {:.2}, \
+             {}",
+            table.bars().len(),
+            table.pass_samples() as f64 / rate as f64,
+            rate,
+            table.ticks().len(),
+            table.band().len(),
+            table.dropped_notes,
+            table.band_trim,
+            if table.loops() {
+                "looping"
+            } else {
+                "one pass then the transport stops"
+            },
+        );
+        engine.set_song_table(Some(Arc::new(table)));
+    }
 
     // WHICH PERCUSSION SET the band is playing, said out loud. The ten
     // rows in `busiest_jam` are silent on a checkout with no `sounds/perc`
@@ -1105,7 +1383,7 @@ fn main() -> ExitCode {
     // is synthetic because the probe runs headless with no input stream;
     // what matters for the gate is that the writer is doing a take's real
     // work — the resampler, the mix and the disk — while the stream runs.
-    let taker = if args.jam_take {
+    let taker = if args.take {
         let handoff = engine.take_handoff();
         let out_sr = match engine.output_sample_rate() {
             Some(sr) => sr,
@@ -1297,8 +1575,18 @@ fn main() -> ExitCode {
             PROBE_LOOP.1 + 1
         ));
     }
+    if args.song {
+        mode.push_str(if args.song_loop {
+            " + --song-loop (bars 4-7, a 7/8 and a tempo step, looping)"
+        } else {
+            " + --song (twelve bars, a 7/8 and a tempo step)"
+        });
+    }
     if let Some(ref t) = take_summary {
-        mode.push_str(&format!(" + --jam-take ({t})"));
+        mode.push_str(&format!(
+            " + --{}-take ({t})",
+            if args.song { "song" } else { "jam" }
+        ));
     }
     // Last, because `--jam-swap` is spelled by appending "-swap" to the
     // "--jam" above it and anything in between turns it into nonsense.
@@ -1330,6 +1618,17 @@ fn main() -> ExitCode {
         "ticks             {} rendered, {:.1} expected",
         report.ticks_rendered, report.ticks_expected
     );
+    if args.song {
+        // The expected figure above is `window / (60 / bpm / subdivision)`,
+        // and a song does not tick at `--bpm`: it ticks where its own map
+        // says, through a meter change and a tempo step. Say so rather than
+        // let somebody read a mismatch as a fault.
+        println!(
+            "                  (--song: the ticks come from the song's map, not from \
+             --bpm {}, so 'expected' does not apply)",
+            args.bpm
+        );
+    }
     println!("--- callback-to-callback jitter (|Δwall − buffer period|) ---");
     println!("p50               {:.4} ms", report.jitter_p50);
     println!("p95               {:.4} ms", report.jitter_p95);

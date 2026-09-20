@@ -41,6 +41,26 @@ pub struct JamKitState(pub crate::kit::KitCache);
 #[derive(Default)]
 pub struct JamVoiceState(pub crate::voices::VoiceCache);
 
+/// The song the engine is playing, as it arrived — before it was compiled.
+///
+/// Managed state, and it is here rather than on the engine for the reason
+/// `JamGainState` is: the engine holds the compiled table and nothing else,
+/// and this is what the COMMAND thread needs in order to compile a new one.
+///
+/// `set_song_range` is why it exists. Changing the range, the speed or the
+/// count-in changes where every sample of the piece sits, so there is nothing
+/// to patch — the table is built again from the same transport and the same
+/// backing. Asking the frontend to re-send a four-thousand-bar score to move a
+/// loop by one bar would be a megabyte of IPC for a button press.
+#[derive(Default)]
+pub struct SongSourceState(pub Mutex<Option<SongSource>>);
+
+/// What `set_song_range` needs to build the piece again.
+pub struct SongSource {
+    pub transport: crate::song::SongTransport,
+    pub backing: Option<crate::song::SongBacking>,
+}
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -3248,13 +3268,272 @@ fn build_and_install_jam(
         }
         None => None,
     };
-    app_handle
-        .state::<EngineState>()
-        .0
-        .lock()
-        .unwrap()
-        .set_jam_table(table);
+    {
+        let engine = app_handle.state::<EngineState>();
+        let engine = engine.0.lock().unwrap();
+        // ONE MODE AT A TIME. Starting a jam stops a song, which is what
+        // "Songs is its own engine mode beside the jam" has to mean on this
+        // side: the callback already prefers the song's table when both are
+        // loaded, so a band arriving over the top of a song would be a band
+        // nobody can hear and a piece nobody asked for.
+        //
+        // Only when a band actually arrives. `set_jam(null)` is the UI taking
+        // the band away, which happens on leaving the Jam tab, and that must
+        // not take a song with it.
+        if table.is_some() && engine.song_loaded() {
+            engine.set_song_table(None);
+            eprintln!("[song] a jam started, so the song was unloaded");
+            let _ = app_handle.emit("song-dropped", ());
+        }
+        engine.set_jam_table(table);
+    }
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Songs — the imported piece the engine plays
+// ---------------------------------------------------------------------------
+
+/// Load a song: its transport, and the file's own rhythm section.
+///
+/// The transport and the backing are compiled here, on a blocking thread,
+/// into the sample-indexed tables the callback walks — see `song.rs` for what
+/// that means and why. Nothing about a song reaches `AppState`: the UI owns
+/// the imported FILE, and the engine holds only the tables it plays, exactly
+/// as it does for a jam.
+///
+/// **Starting a song stops the others.** The band is taken away, a running
+/// drill is stopped, and a count-in the metronome had armed is spent: a song
+/// carries its own count-in, at its own tempo and in its own meter, and two
+/// of them running at once would be two clicks disagreeing about where the
+/// downbeat is.
+///
+/// `async`, with the work on a blocking thread, for the reason `set_jam` is:
+/// this decodes a kit, a percussion set and two melodic banks — tens of
+/// megabytes at the device's rate — and a synchronous command runs on the
+/// thread that draws the window.
+#[tauri::command]
+pub async fn load_song(
+    app_handle: AppHandle,
+    transport: crate::song::SongTransport,
+    backing: Option<crate::song::SongBacking>,
+) -> Result<SongLoaded, String> {
+    tokio::task::spawn_blocking(move || {
+        let loaded = build_and_install_song(&app_handle, &transport, backing.as_ref())?;
+        // Kept for `set_song_range`, and only once the compile succeeded: a
+        // transport that would not build is not one to rebuild later.
+        *app_handle
+            .state::<SongSourceState>()
+            .0
+            .lock()
+            .unwrap_or_else(|e| e.into_inner()) = Some(SongSource { transport, backing });
+        Ok(loaded)
+    })
+    .await
+    .map_err(|e| format!("load_song join failed: {e}"))?
+}
+
+/// What a song turned out to be, once it was compiled.
+///
+/// Reported so a file that came out thin is visible rather than mysterious —
+/// a drum track written for a General MIDI set this band has no voice for is
+/// the common case, and a player whose hand claps and splash cymbals silently
+/// vanished deserves to be told rather than left wondering what they imported.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct SongLoaded {
+    /// How many bars the range plays.
+    pub bars: u32,
+    /// How long one pass lasts, in milliseconds at the chosen speed.
+    #[serde(rename = "passMs")]
+    pub pass_ms: u64,
+    /// How many backing notes play.
+    #[serde(rename = "playedNotes")]
+    pub played_notes: u32,
+    /// And how many named something this band has no voice for.
+    #[serde(rename = "droppedNotes")]
+    pub dropped_notes: u32,
+}
+
+/// Compile a song at the rate the device is running at and hand it over.
+fn build_and_install_song(
+    app_handle: &AppHandle,
+    transport: &crate::song::SongTransport,
+    backing: Option<&crate::song::SongBacking>,
+) -> Result<SongLoaded, String> {
+    let rate = jam_rate(app_handle);
+    // The click's resolution while the song plays. The app's own, taken here
+    // on the command thread: the ticks are a table, so changing it is a
+    // recompile rather than a field the callback reads.
+    let subdivision = {
+        let s = app_handle.state::<SharedState>();
+        let s = s.lock().unwrap();
+        s.subdivision.max(1) as u32
+    };
+    let sounds = song_sounds(app_handle, rate)?;
+    let table = crate::song::compile(transport, backing, sounds, rate, subdivision)?;
+    let loaded = SongLoaded {
+        bars: table.bars().len() as u32,
+        pass_ms: table.pass_samples() * 1000 / rate.max(1) as u64,
+        played_notes: table.played_notes,
+        dropped_notes: table.dropped_notes,
+    };
+
+    {
+        let engine = app_handle.state::<EngineState>();
+        let engine = engine.0.lock().unwrap();
+        // The band goes before the song arrives, not after: for the one
+        // buffer between them the callback would otherwise be holding both,
+        // and the mixer prefers the song — which is the right answer, and
+        // still a window where the jam's bar line could fire under it.
+        engine.set_jam_table(None);
+        engine.set_song_table(Some(std::sync::Arc::new(table)));
+    }
+    // A drill climbing its own ladder under a song would be two things moving
+    // the tempo, and a count-in the metronome armed would be a second one
+    // counting. Both go, and the screen is told.
+    {
+        let state = app_handle.state::<SharedState>();
+        let mut s = state.lock().unwrap();
+        s.speed_ramp.active = false;
+        s.count_in = crate::state::CountIn::default();
+        let snapshot = s.clone();
+        drop(s);
+        let _ = app_handle.emit("state-changed", &snapshot);
+    }
+    Ok(loaded)
+}
+
+/// The kit, the percussion set and the melodic banks a song plays out of.
+///
+/// The defaults, and that is the whole of the decision: the contract's
+/// `SongBacking` names a role and a note and nothing about who is playing it,
+/// because a Guitar Pro file does not say which bass. `jam_sounds`'s caches do
+/// the work, so a song and a jam that want the same drums share one decode.
+fn song_sounds(app_handle: &AppHandle, rate: u32) -> Result<crate::song::SongSounds, String> {
+    use crate::engine::{BassVoice, KeysVoice};
+    let jam_kit = app_handle.state::<JamKitState>();
+    let jam_voices = app_handle.state::<JamVoiceState>();
+    let bank = jam_kit
+        .0
+        .shipped(crate::engine::JamKit::fallback().0, rate)?;
+    let perc = match crate::kit::perc_count() {
+        0 => None,
+        // A set that will not decode is a band with no shaker, not a song
+        // that will not load. `jam_sounds` makes the same call in the same
+        // words.
+        _ => match jam_kit.0.perc(0, rate) {
+            Ok(set) => Some(set),
+            Err(e) => {
+                eprintln!("[song] the shipped percussion set did not decode: {e}");
+                None
+            }
+        },
+    };
+    let recorded = |folder: Option<&'static str>| folder.and_then(crate::voices::shipped_index);
+    let bass = recorded(crate::jam::JamVoices::folder_for_bass(BassVoice::Fingered))
+        .map(|i| {
+            jam_voices.0.shipped(
+                i,
+                rate,
+                crate::engine::BASS_MIN_MIDI,
+                crate::engine::BASS_MAX_MIDI,
+            )
+        })
+        .transpose()?;
+    let keys = recorded(crate::jam::JamVoices::folder_for_keys(KeysVoice::Epiano))
+        .map(|i| {
+            jam_voices.0.shipped(
+                i,
+                rate,
+                crate::engine::KEYS_MIN_MIDI,
+                crate::engine::KEYS_MAX_MIDI,
+            )
+        })
+        .transpose()?;
+    Ok(crate::song::SongSounds {
+        bank,
+        perc,
+        voices: crate::jam::JamVoices { bass, keys },
+    })
+}
+
+/// Take the song away and leave the click.
+///
+/// Synchronous: it decodes nothing, and dropping the table here is a `free()`
+/// on the command thread, which is where one belongs.
+#[tauri::command]
+pub fn clear_song(engine_state: State<EngineState>, source: State<SongSourceState>) {
+    engine_state.0.lock().unwrap().set_song_table(None);
+    *source.0.lock().unwrap_or_else(|e| e.into_inner()) = None;
+}
+
+/// Loop bars 17 to 24 at 70 %, or stop looping, or play the whole piece.
+///
+/// **It recompiles, and that is not an implementation detail.** A range and a
+/// speed decide how long a pass is, and how long a pass is decides where every
+/// sample of every click and every note sits. There is nothing to patch. The
+/// transport and the backing are the ones `load_song` was given — see
+/// `SongSourceState` — so this costs the compile and no IPC.
+///
+/// It takes effect when the table arrives, which is the next buffer, and the
+/// song starts again from the top of the new range: a range that changed under
+/// a playing cursor would be a cursor somewhere the range no longer is.
+#[tauri::command]
+pub async fn set_song_range(
+    app_handle: AppHandle,
+    range: crate::song::SongRange,
+    loops: bool,
+    tempo_percent: u32,
+    count_in_bars: Option<u32>,
+) -> Result<SongLoaded, String> {
+    tokio::task::spawn_blocking(move || {
+        let source = app_handle.state::<SongSourceState>();
+        let mut held = source.0.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(src) = held.as_mut() else {
+            return Err("there is no song loaded to set a range on".to_string());
+        };
+        // Written back whatever happens next, so a rejected range does not
+        // leave the stored transport describing a table nobody built. The
+        // OLD values are put back on a failure, below.
+        let before = (
+            src.transport.range,
+            src.transport.loops,
+            src.transport.tempo_percent,
+            src.transport.count_in_bars,
+        );
+        src.transport.range = range;
+        src.transport.loops = loops;
+        src.transport.tempo_percent = tempo_percent;
+        if let Some(bars) = count_in_bars {
+            src.transport.count_in_bars = bars;
+        }
+        match build_and_install_song(&app_handle, &src.transport, src.backing.as_ref()) {
+            Ok(loaded) => Ok(loaded),
+            Err(e) => {
+                src.transport.range = before.0;
+                src.transport.loops = before.1;
+                src.transport.tempo_percent = before.2;
+                src.transport.count_in_bars = before.3;
+                Err(e)
+            }
+        }
+    })
+    .await
+    .map_err(|e| format!("set_song_range join failed: {e}"))?
+}
+
+/// How loud the click, the drums, the bass and the keys are in the song.
+///
+/// Applies on the next buffer and recompiles nothing: the four dials are
+/// `Copy` and cross to the callback behind their own generation counter, the
+/// same handshake a jam's form position uses. A fader is not a musical event
+/// and does not wait for a bar line.
+///
+/// 0 is off and 1.5 is the ceiling; anything outside that is clamped rather
+/// than refused, because a fader that stops moving is better than a dialog.
+#[tauri::command]
+pub fn set_song_mix(mix: crate::song::SongMix, engine_state: State<EngineState>) {
+    engine_state.0.lock().unwrap().set_song_mix(mix.gains());
 }
 
 /// DECODE THE BAND BEFORE ANYBODY ASKS FOR IT.
