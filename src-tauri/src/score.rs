@@ -1,14 +1,32 @@
-//! The score the player is playing against, and what came back.
+//! The score — one format for a song, an exercise, a path step — and
+//! what came back from a pass at it.
 //!
-//! Roadmap 2.4, `LEARNING_PATHS_DECISIONS.md` C1 and C4. Everything the
-//! rest of the app has measured until now was measured against a grid
-//! the analyzer inferred: every note the player did not play was a rest,
-//! because nothing knew a note was due. When the material is known —
-//! a song they imported, an exercise the curriculum built, a step in a
-//! path — that stops being true. A note that is due and does not arrive
-//! is a *miss*. A note that arrives and is not due is an *extra*. That
-//! difference is the whole of this module, and it is what the review
-//! after a pass has to say something about.
+//! The first half is the Rust side of the contract in
+//! `plans/tasks/songs/BRIEF.md`: the serde mirror of
+//! `src/songs/types.ts`, `camelCase` on the wire, data and nothing else.
+//! The importer builds it in TypeScript, the schedule is derived in
+//! TypeScript, and everything on this side (`timing.rs`, `findings.rs`,
+//! `srs.rs`) reads it.
+//!
+//! Two things about that shape are easy to get wrong and are
+//! load-bearing:
+//!
+//! * **`bars` is what is played, in order.** Repeats and endings are
+//!   unrolled by the importer, so bar 30 of a score with a repeat may be
+//!   printed bar 12; `printed_bar` carries the number on the page, which is
+//!   the only number a player recognises.
+//! * **A tied continuation makes no onset.** `tie_from_previous` is the
+//!   flag that keeps the schedule from expecting a pick that never happens.
+//!
+//! The second half, from `PlayedOnset` down, is roadmap 2.4 and
+//! `LEARNING_PATHS_DECISIONS.md` C1 and C4: matching what was played
+//! against what was written. Everything the app measured before this
+//! was measured against a grid the analyzer inferred from the playing
+//! itself, so a note the player did not play was a rest — nothing knew
+//! a note was due. When the material is known that stops being true. A
+//! note that is due and does not arrive is a *miss*; a note that
+//! arrives and is not due is an *extra*; and that difference is what
+//! the review after a pass has to say something about.
 //!
 //! Three things make it harder than "nearest note wins":
 //!
@@ -19,8 +37,8 @@
 //!    is allowed to leave a slot empty rather than fill it wrongly.
 //! 2. **The schedule is in beats; playing happens in time.** And the
 //!    tempo inside a song steps at bar lines. So nothing here computes
-//!    a time from a BPM. Beat positions become times through `BeatMap`,
-//!    which is built from where the engine's beats *actually fell* — the
+//!    a time from a BPM: beat positions become times through `BeatMap`,
+//!    built from where the engine's beats *actually fell*. That is the
 //!    lesson written into `timing.rs` on 2026-09-04, where a dropped
 //!    beat notification degraded a score nobody could explain.
 //! 3. **Some notes are not expected to be audible.** A hammer-on or a
@@ -28,88 +46,200 @@
 //!    absence as a miss would punish the player for good legato. Those
 //!    arrive flagged `soft`; absent, they cost nothing.
 //!
-//! The pitch of a note is not this module's business — timing only.
-//! Which note was played waits for `pitch.rs` (LP C2, S0.5).
+//! The pitch of a note is nobody's business here — timing only. Which
+//! note was played waits for `pitch.rs` (LP C2, S0.5).
 
 use serde::{Deserialize, Serialize};
 
 use crate::instrument::ScoreWeights;
 use crate::timing::{tempo_aware_window_ms, window_thresholds};
 
-// ──────────────────────────────────────────────────────────────────────
-// The wire contract (plans/tasks/songs/BRIEF.md). camelCase on the wire,
-// mirrored by `src/songs/types.ts` on the TypeScript side.
-// ──────────────────────────────────────────────────────────────────────
+/// The one schema version this wave speaks.
+pub const SCORE_SCHEMA: u32 = 1;
 
-/// One moment in the score at which the player is expected to make a
-/// sound. Notes that share a tick are one onset — a chord is one
-/// attack, not six.
+/// Ticks per quarter note. Fixed at 960 by the contract so that every
+/// importer, every schedule and every fixture agree on what a tick is:
+/// 960 divides by 2, 3, 4, 5, 6 and 8, so eighths, triplets, sixteenths,
+/// quintuplets and sextuplets are all exact integers.
+pub const TICKS_PER_QUARTER: u32 = 960;
+
+/// Where a score came from.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SongSource {
+    pub file_name: String,
+    pub format: SourceFormat,
+    pub track_index: u32,
+    pub track_name: String,
+}
+
+/// The file formats the importer accepts. `alphatex` is alphaTab's own
+/// text notation — the format an exercise or a path step is written in
+/// when nobody exported it from anywhere.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SourceFormat {
+    Gp,
+    MusicXml,
+    AlphaTex,
+}
+
+/// A step tempo change. Bar lines only in v1: the importer flattens a
+/// gradual change to one step per bar and records that it did.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TempoChange {
+    pub tick: u32,
+    pub bpm: f64,
+}
+
+/// A time-signature change, keyed by played bar.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MeterChange {
+    pub bar: u32,
+    pub numerator: u8,
+    pub denominator: u8,
+}
+
+/// One played bar.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScoreBar {
+    /// Index into `SongScore::bars`, and the bar number every fix speaks in.
+    pub index: u32,
+    pub start_tick: u32,
+    pub length_ticks: u32,
+    /// The bar as it is numbered on the page. Differs from `index`
+    /// wherever a repeat was unrolled.
+    pub printed_bar: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub section: Option<String>,
+}
+
+/// A named span of played bars — "Verse", "Solo".
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScoreSection {
+    pub name: String,
+    pub start_bar: u32,
+    pub end_bar: u32,
+}
+
+/// One notated note.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SongNote {
+    /// Index into `SongScore::notes`, stable for a given score.
+    pub id: u32,
+    pub tick: u32,
+    pub dur_ticks: u32,
+    /// String 1 is the highest-sounding string, as Guitar Pro numbers them.
+    pub string: u8,
+    pub fret: u8,
+    pub midi: u8,
+    /// A tied continuation makes no onset.
+    pub tie_from_previous: bool,
+    pub ghost: bool,
+    pub dead: bool,
+    pub accent: bool,
+    pub techniques: Vec<Technique>,
+}
+
+/// Playing techniques carried on a note.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Technique {
+    Hammer,
+    Pull,
+    Slide,
+    Bend,
+    Vibrato,
+    PalmMute,
+    Harmonic,
+    Tap,
+    LetRing,
+}
+
+/// A song, an exercise, or a path step — the same format for all three.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SongScore {
+    pub schema: u32,
+    /// Stable: a hash of the source bytes plus the track.
+    pub id: String,
+    pub title: String,
+    pub artist: String,
+    pub source: SongSource,
+    /// MIDI note per string, string 1 (highest) first.
+    pub tuning: Vec<u8>,
+    pub capo: u8,
+    pub ticks_per_quarter: u32,
+    /// Step changes, first at tick 0.
+    pub tempo_map: Vec<TempoChange>,
+    pub meter_map: Vec<MeterChange>,
+    /// What is played, in order — repeats and endings unrolled.
+    pub bars: Vec<ScoreBar>,
+    /// Sorted by tick, then string.
+    pub notes: Vec<SongNote>,
+    pub sections: Vec<ScoreSection>,
+}
+
+/// One thing the player is expected to pick, derived from the score by
+/// `src/songs/schedule.ts` and handed to the analyzer.
+///
+/// Notes sharing a tick are ONE onset. A hammer-on or pull-off is flagged
+/// `soft`: it may be too quiet to detect, and must never be scored as a
+/// miss when it is absent.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExpectedOnset {
     pub id: u32,
-    /// Quarter notes from the start of the played range, as f64.
+    /// Quarter notes from the start of the played range.
     pub beat: f64,
-    /// Which notes of the score this onset stands for. Carried through
-    /// untouched so the review can colour the tab.
     pub note_ids: Vec<u32>,
-    /// A hammer-on, a pull-off — an attack that may be too quiet to
-    /// detect. Absent, it costs nothing.
     pub soft: bool,
-    /// The score marks this one accented. Checked when amplitude
-    /// allows, and reported rather than scored in this wave (LP C3).
     pub accent: bool,
 }
 
-/// What the player is being asked to play.
+/// The whole of what the player is expected to pick, for one played range.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScoreSchedule {
-    /// Sorted by `beat`. Built in TypeScript from the song score
-    /// (`src/songs/schedule.ts`), never here.
     pub onsets: Vec<ExpectedOnset>,
-    /// Quarter notes in the played range. A loop wraps here.
     pub length_beats: f64,
-    /// Whether the range repeats.
     pub loops: bool,
 }
 
-/// What became of one expected onset.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum OnsetState {
-    /// A note arrived for it.
-    Hit,
-    /// Nothing arrived, and something should have.
-    Miss,
-    /// Nothing arrived, and that is allowed — see `ExpectedOnset::soft`.
-    SoftAbsent,
-}
-
-/// One expected onset's verdict.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// How one expected onset went, on one pass.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OnsetResult {
     pub id: u32,
     pub state: OnsetState,
-    /// Signed milliseconds, negative early. `None` unless `state` is
-    /// `Hit`.
+    /// Negative is early. `None` when there was nothing to measure.
     pub deviation_ms: Option<f64>,
-    /// Times round the loop, from 0.
+    /// Times round a loop, from 0.
     pub pass: u32,
 }
 
-/// A note the player made that the score did not ask for.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// What became of an expected onset.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum OnsetState {
+    Hit,
+    Miss,
+    /// A `soft` onset that was not heard. Never counts against the player.
+    SoftAbsent,
+}
+
+/// An onset that was played and is not written.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExtraOnset {
-    /// Where it landed, in quarter notes from the start of the played
-    /// range — the same frame as `ExpectedOnset::beat`, so the review
-    /// can draw it between the notes it sits between.
     pub beat: f64,
     pub pass: u32,
 }
-
 /// A note the player actually made, as this module wants it.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PlayedOnset {

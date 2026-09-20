@@ -16,6 +16,7 @@ import {
   type Vocabulary,
 } from "../../../coach/templates";
 import { TEMPLATE_CATALOG } from "../../../coach/templateCatalog";
+import { PRESET_CEILING_MAX_SESSIONS } from "../../../coach/gatekeeper";
 import { coachDebug } from "../../../coach/debug";
 
 export function useRealtimeTips(params: {
@@ -82,13 +83,17 @@ export function useRealtimeTips(params: {
       ? detectStaminaPattern(history, presetId)
       : null;
 
-    // Pace coaching seed
+    // Pace coaching seed. The four-attempt floor is the same line the
+    // gatekeeper's `preset_ceiling_hit` stops at — up to three attempts
+    // the coach only observes the ceiling, from the fourth it suggests
+    // dropping a band. Exactly one of the two fires for a given band,
+    // so the player never hears both. See `PRESET_CEILING_MAX_SESSIONS`.
     paceCoachingFiredRef.current = false;
     paceCoachingRef.current = (() => {
       if (!presetId || !history) return null;
       const summary = summarizePreset(presetId, presetName, history);
       const { bpmCeiling } = detectRecurringIssues(summary);
-      if (!bpmCeiling || bpmCeiling.sessions < 4) return null;
+      if (!bpmCeiling || bpmCeiling.sessions <= PRESET_CEILING_MAX_SESSIONS) return null;
       return {
         ceilingBpmLow: bpmCeiling.bpmLow,
         suggestedBpm: Math.max(bpmCeiling.bpmLow - BPM_BAND_WIDTH, 40),

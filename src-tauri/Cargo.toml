@@ -81,6 +81,13 @@ num_cpus = { version = "1", optional = true }
 # file it cannot read instead of panicking, and nothing in `kit.rs` may
 # panic on a file a musician chose. Apache-2.0.
 claxon = "0.4.3"
+# The practice store (ROADMAP 1.1). `bundled` compiles SQLite from the
+# amalgamation shipped inside libsqlite3-sys, so the app never depends on
+# whatever sqlite3 the machine happens to have — a metronome that loses a
+# year of practice because a system library moved is not a coach. SQLite
+# itself is public domain and rusqlite is MIT, so neither touches the
+# GPL-3 promise in ROADMAP §1 principle 5.
+rusqlite = { version = "0.37", features = ["bundled"] }
 
 [features]
 default = []

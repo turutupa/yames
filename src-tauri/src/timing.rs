@@ -172,6 +172,22 @@ pub struct PracticeSegmentEnded {
     /// exactly which intervals drove the IC score.
     #[serde(rename = "intervalErrors", default)]
     pub interval_errors: Vec<f64>,
+    /// D4c — where each gap-separated phrase begins in `interval_errors`.
+    /// IC is computed per burst and aggregated length-weighted, not over
+    /// the pooled errors, so the two numbers can differ a long way and
+    /// nothing downstream could see why: the split points were computed
+    /// and thrown away. Emitting them lets the 2026-05-22 IC anomaly be
+    /// settled from logs that already exist rather than from a session
+    /// somebody has to go and play again. Empty means one burst, which
+    /// is what continuous play produces — and is skipped on the wire,
+    /// so the event a continuous free-play session emits is byte for
+    /// byte the one it has always emitted.
+    #[serde(
+        rename = "burstStartIndices",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
+    pub burst_start_indices: Vec<usize>,
     /// Roadmap 2.4 — one verdict per expected onset, when a
     /// `ScoreSchedule` was loaded. This is what the review after a pass
     /// colours the tab from. Empty in free play, and skipped on the
@@ -2601,6 +2617,7 @@ fn build_segment_ended(
             PlayMode::Noodling
         },
         interval_errors: seg.interval_errors.clone(),
+        burst_start_indices: seg.burst_start_indices.clone(),
         onset_results,
         extra_onsets,
         accent_agreement,

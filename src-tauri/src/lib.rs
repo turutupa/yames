@@ -1,17 +1,31 @@
+/// Where the output callback says it is inside itself, for the counting
+/// allocator `click-jitter-probe` installs. `pub` because the allocator
+/// lives in that binary, which can only see the crate's public surface.
+pub mod alloc_probe;
 mod audio_input;
 mod calibration_cache;
 mod clock;
 mod coach;
 mod commands;
+/// The practice store (ROADMAP 1.1). `pub` for the same reason `session`
+/// and `timing` are: the store's own types are what a future integration
+/// test would import.
+pub mod db;
 mod engine;
+// `findings`, `score` and `srs` are the coach's judgement, the score format
+// it judges against, and the schedule it reviews on. They are `pub` for the
+// same reason `timing` is: nothing in the command surface reaches them yet
+// (the review wave wires the IPC), and a private module of unused public
+// functions is a page of dead-code warnings.
+pub mod findings;
 pub mod instrument;
 mod jam;
 mod kit;
 mod midi;
 mod models;
 mod onset;
-/// Roadmap 2.4 — the score a player is playing against, and what came
-/// back. `pub` for the same reason the three below are.
+/// The score a player is playing against, and — roadmap 2.4 — what came
+/// back from a pass at it. `pub` for the same reason the three below are.
 pub mod score;
 // `session`, `session_log`, and `timing` are exposed `pub` so the
 // integration tests in `tests/dsp_fixtures.rs` can import
@@ -23,6 +37,7 @@ pub mod session;
 mod session_audio;
 pub mod session_log;
 mod speech_out;
+pub mod srs;
 mod state;
 mod take;
 pub mod timing;
@@ -37,6 +52,10 @@ mod voices;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    /// The other half of the audio-safety gate: the callback raises this for
+    /// the span of its own body and the probe's `#[global_allocator]` counts
+    /// every allocation and free made while it is up. See `alloc_probe`.
+    pub use crate::alloc_probe::in_callback;
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
     /// The jitter probe's `--jam` flag builds a table directly: it runs the
@@ -80,13 +99,16 @@ use coach::create_shared_engine;
 use commands::{
     cancel_model_download, clear_all_sessions, clear_calibration_cache_entry, clear_midi_binding,
     clear_session, clear_session_logs, coach_generate, configure_speed_ramp, connect_midi_device,
-    delete_models, delete_preset, delete_session, discard_recording, disconnect_midi_device,
+    delete_models, delete_preset, delete_score, delete_session, discard_recording,
+    disconnect_midi_device,
     export_session_logs, get_active_tab, get_calibration_cache_entry, get_calibration_offset,
     get_coach_capabilities, get_evaluation_state, get_final_session_report, get_midi_bindings,
     get_model_status,
     get_drill_runs,
-    get_models_path, get_session_history, get_session_log, get_session_report, get_state,
+    get_models_path, get_score, get_session_history, get_session_log, get_session_report, get_state,
     get_system_memory_mb,
+    // W2 — the practice store (ROADMAP 1.1).
+    list_scores, query_attempts, query_history, save_attempt, save_score,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
     clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
@@ -345,6 +367,22 @@ pub fn run() {
             app.manage(create_shared_onset_detector());
             app.manage(Arc::new(Mutex::new(TimingAnalyzer::new(beat_log))));
             app.manage(create_shared_session_accumulator());
+
+            // The practice store (ROADMAP 1.1). Opened, migrated and
+            // back-filled from the JSON history on a thread of its own:
+            // `setup()` runs on the main thread and a window should not
+            // wait on a disk. Commands that arrive before it is ready wait
+            // on the store's condvar rather than being told, wrongly, that
+            // there is no history.
+            let practice_store = db::create_shared_practice_store();
+            app.manage(practice_store.clone());
+            {
+                let handle = app.handle().clone();
+                std::thread::spawn(move || {
+                    commands::open_practice_store(&handle, &practice_store);
+                });
+            }
+
             app.manage(create_shared_engine());
             // Per-instrument calibration cache (DSP plan §"Per-instrument
             // calibration cache"). Hydrated from the store with TTL
@@ -674,6 +712,14 @@ pub fn run() {
             get_drill_runs,
             delete_session,
             clear_all_sessions,
+            // W2 — the practice store (ROADMAP 1.1).
+            query_history,
+            save_score,
+            list_scores,
+            get_score,
+            delete_score,
+            save_attempt,
+            query_attempts,
             list_session_logs,
             get_session_log,
             export_session_logs,

@@ -119,11 +119,21 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   get_session_report: () => null,
   clear_session: () => undefined,
 
-  // Session history
+  // Session history (the practice store, ROADMAP 1.1)
   save_session: () => undefined,
   get_session_history: () => [],
+  query_history: () => [],
   delete_session: () => undefined,
   clear_all_sessions: () => undefined,
+
+  // Songs — library and attempts
+  save_score: (args) =>
+    ((args?.score as { id?: string } | undefined)?.id ?? "score-id"),
+  list_scores: () => [],
+  get_score: () => null,
+  delete_score: () => undefined,
+  save_attempt: () => undefined,
+  query_attempts: () => [],
 
   // Diagnostic session logs (D1)
   list_session_logs: () => [],

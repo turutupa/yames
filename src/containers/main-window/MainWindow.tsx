@@ -237,6 +237,7 @@ export function MainWindow() {
     voiceMode: coach.coachVoiceMode,
     coachVerbosity: coach.coachVerbosity,
     coachMode: coach.coachMode,
+    coachStance: coach.coachStance,
     // "off" means no model: `startSession` skips the load entirely.
     brainTier: coach.coachBrainTier,
     instrument,
@@ -1762,6 +1763,8 @@ export function MainWindow() {
             setCoachVerbosity={coach.setCoachVerbosity}
             coachMode={coach.coachMode}
             setCoachMode={coach.setCoachMode}
+            coachStance={coach.coachStance}
+            setCoachStance={coach.setCoachStance}
             modelStatus={coach.modelStatus}
             setModelStatus={coach.setModelStatus}
             modelDownloading={coach.modelDownloading}

@@ -121,18 +121,77 @@ export function computeLegacyScore(report: RescorableFields): number {
 }
 
 /**
+ * What a score MEANS — the one table (ROADMAP 1.7, P3-COACH-3).
+ *
+ * Four places used to answer this question and three of them disagreed.
+ * The letter grade and the narrative both broke at 95/85/70/55/40; the
+ * end-report's one-word qualifier broke at 90/75/55; the score ring and
+ * badge coloured at 90/70/50. A score of 72 therefore arrived as a
+ * cyan "good" ring, the word "Fair", and a paragraph opening "72 is a
+ * real foundation" — three readings of one number, on one card.
+ *
+ * So the boundaries live here, once, and everything that turns a score
+ * into a word, a letter or a colour reads them. `bandForScore` is the
+ * primitive; `gradeForScore` keeps the letters the Rust report uses
+ * (`session.rs::report`), which is why the band ids are named after the
+ * feeling rather than the letter — the letters are Rust's vocabulary,
+ * not the coach's.
+ */
+export type ScoreBand = "flawless" | "strong" | "solid" | "fair" | "building" | "early";
+
+/** Lower bound of each band, highest first. The single source of truth. */
+const SCORE_BANDS: ReadonlyArray<readonly [ScoreBand, number]> = [
+  ["flawless", 95],
+  ["strong", 85],
+  ["solid", 70],
+  ["fair", 55],
+  ["building", 40],
+  ["early", 0],
+];
+
+export function bandForScore(score: number): ScoreBand {
+  for (const [band, floor] of SCORE_BANDS) {
+    if (score >= floor) return band;
+  }
+  return "early";
+}
+
+/**
  * Convert a numeric score to the same letter grade the Rust report uses
  * (`session.rs::report`).  Kept next to `computeLegacyScore` so any time
  * we override `score` we can override `grade` in lockstep without
  * duplicating the band boundaries.
  */
 export function gradeForScore(score: number): string {
-  if (score >= 95) return "S";
-  if (score >= 85) return "A";
-  if (score >= 70) return "B";
-  if (score >= 55) return "C";
-  if (score >= 40) return "D";
-  return "F";
+  switch (bandForScore(score)) {
+    case "flawless": return "S";
+    case "strong": return "A";
+    case "solid": return "B";
+    case "fair": return "C";
+    case "building": return "D";
+    default: return "F";
+  }
+}
+
+/**
+ * The hit-quality colour a score is drawn in — the same four feedback
+ * colours a beat gets, so the ring, the badge and the breakdown bars
+ * speak one visual language.
+ *
+ * Two bands share a colour at each end: there are six bands and four
+ * colours, and "flawless" versus "strong" is a distinction the words
+ * make, not one worth a fifth hue.
+ */
+export function feedbackToneForScore(
+  score: number,
+): "perfect" | "good" | "ok" | "miss" {
+  switch (bandForScore(score)) {
+    case "flawless":
+    case "strong": return "perfect";
+    case "solid": return "good";
+    case "fair": return "ok";
+    default: return "miss";
+  }
 }
 
 /**
