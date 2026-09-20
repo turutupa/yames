@@ -57,7 +57,7 @@ pub const DB_FILE_NAME: &str = "practice.db";
 /// Schema version this build writes and understands. A database whose
 /// `PRAGMA user_version` is higher was written by a newer Yames: refuse
 /// it (see `DbError::Newer`) rather than guess at columns that moved.
-pub const SCHEMA_VERSION: i64 = 3;
+pub const SCHEMA_VERSION: i64 = 4;
 
 /// How long a command waits for the store to finish opening before it
 /// gives up and answers as though there were no history. Opening is a
@@ -158,6 +158,16 @@ pub struct ScoreSummary {
     /// a rename never rewrites what is printed on the page.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// When the player last opened this song, epoch ms. `None` for a song
+    /// nobody has opened since migration four — which is every song that was
+    /// already in the library, and is why the sort falls back to the import
+    /// date rather than treating them as never played.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_opened_at: Option<i64>,
+    /// How many times it has been opened since the counting started.
+    /// Reported, not sorted on — the coach will want it.
+    #[serde(default)]
+    pub open_count: i64,
 }
 
 /// The handful of fields the store lifts out of a `SongScore` so a song
@@ -531,6 +541,39 @@ CREATE TABLE score_due (
 CREATE INDEX score_due_day ON score_due(due_day);
 "#;
 
+/// v4 — the library is "recently played", not "recently imported".
+///
+/// `imported_at` answers a question nobody asks. A player with thirty songs
+/// wants the four they are working on this month at the top, and the date a
+/// file happened to arrive says nothing about that — a song imported in
+/// January and played every day since sat below one imported in March and
+/// opened once.
+///
+/// `last_opened_at` is NULL for every row already on disk, which is exactly
+/// right and is why it is nullable rather than defaulted to the import date:
+/// "never opened since Yames started counting" and "opened at the moment it
+/// was imported" are different facts, and the sort uses `COALESCE` so a row
+/// that has never been opened falls back to its import date and the library
+/// looks the same as it did the day before the migration ran.
+///
+/// `open_count` is `NOT NULL DEFAULT 0` because there is nothing to be unsure
+/// about: a row nobody has opened since the counting started has been opened
+/// zero times since then. It is not read by the library sort — it is for the
+/// coach, which will one day want to know the difference between a piece
+/// somebody returns to and one they opened once and abandoned.
+///
+/// Its own migration. One, two and three are left exactly as they shipped:
+/// databases at each of those versions exist on this machine already.
+const MIGRATION_V4: &str = r#"
+ALTER TABLE scores ADD COLUMN last_opened_at INTEGER;
+ALTER TABLE scores ADD COLUMN open_count     INTEGER NOT NULL DEFAULT 0;
+
+-- The library's one question: "what have I been playing?" The expression has
+-- to match `list_scores`'s ORDER BY exactly or SQLite sorts in memory.
+CREATE INDEX scores_last_opened
+    ON scores(COALESCE(last_opened_at, imported_at) DESC, title ASC);
+"#;
+
 // ---------------------------------------------------------------------------
 // The store
 // ---------------------------------------------------------------------------
@@ -604,6 +647,9 @@ impl Db {
         }
         if from < 3 {
             tx.execute_batch(MIGRATION_V3).map_err(DbError::from)?;
+        }
+        if from < 4 {
+            tx.execute_batch(MIGRATION_V4).map_err(DbError::from)?;
         }
         // `user_version` is a pragma, not a statement, so it is set on the
         // connection rather than inside the batch — but still before the
@@ -949,15 +995,21 @@ impl Db {
         Ok(meta.id)
     }
 
-    /// The library, most recently imported first.
+    /// The library, most recently OPENED first (migration four).
+    ///
+    /// It used to be most recently imported, which answers a question nobody
+    /// asks: the date a file arrived says nothing about whether it is what
+    /// you are working on. A song nobody has opened since the counting
+    /// started falls back to its import date through the `COALESCE`, so a
+    /// library that existed before migration four looks exactly as it did.
+    ///
+    /// The `ORDER BY` is written to match `scores_last_opened` expression for
+    /// expression; `the_library_sort_uses_its_index` fails if it drifts and
+    /// SQLite goes back to sorting the whole table in memory.
     pub fn list_scores(&self) -> DbResult<Vec<ScoreSummary>> {
         let mut stmt = self
             .conn
-            .prepare(
-                "SELECT id, title, artist, source_file, format, track_index, track_name,
-                        imported_at, display_name
-                 FROM scores ORDER BY imported_at DESC, title ASC",
-            )
+            .prepare(Db::LIST_SCORES_SQL)
             .map_err(DbError::from)?;
         let rows = stmt
             .query_map([], |r| {
@@ -971,10 +1023,41 @@ impl Db {
                     track_name: r.get(6)?,
                     imported_at: r.get(7)?,
                     name: r.get(8)?,
+                    last_opened_at: r.get(9)?,
+                    open_count: r.get(10)?,
                 })
             })
             .map_err(DbError::from)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    const LIST_SCORES_SQL: &'static str =
+        "SELECT id, title, artist, source_file, format, track_index, track_name,
+                imported_at, display_name, last_opened_at, open_count
+         FROM scores
+         ORDER BY COALESCE(last_opened_at, imported_at) DESC, title ASC";
+
+    /// The player opened this song: move it to the top of the library and
+    /// count the visit.
+    ///
+    /// `at` is passed in rather than read from the clock here for the reason
+    /// every other time in this module is: a test that cannot say what time
+    /// it is cannot assert an order.
+    ///
+    /// A song that is not there is not an error. The frontend commits the
+    /// library and opens a song in the same breath, and losing a race with
+    /// its own write should not put a sentence on a musician's screen.
+    pub fn mark_score_opened(&self, id: &str, at: i64) -> DbResult<()> {
+        self.conn
+            .execute(
+                "UPDATE scores
+                    SET last_opened_at = ?2,
+                        open_count = open_count + 1
+                  WHERE id = ?1",
+                rusqlite::params![id, at],
+            )
+            .map_err(DbError::from)?;
+        Ok(())
     }
 
     pub fn get_score(&self, id: &str) -> DbResult<Option<serde_json::Value>> {
@@ -1990,6 +2073,128 @@ mod tests {
         })
         .unwrap();
         assert_eq!(db.list_due().unwrap().len(), 1);
+    }
+
+    /// Migration four on a database that already has a library in it.
+    ///
+    /// The fact worth pinning is the fallback: every row on disk gets a NULL
+    /// `last_opened_at`, and if the sort treated that as "never played" the
+    /// whole library would come back in an arbitrary order on the first
+    /// launch after the upgrade. `COALESCE` is why it does not.
+    #[test]
+    fn a_v3_database_counts_openings_and_keeps_its_library_in_order() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(MIGRATION_V1).unwrap();
+        conn.execute_batch(MIGRATION_V2).unwrap();
+        conn.execute_batch(MIGRATION_V3).unwrap();
+        conn.pragma_update(None, "user_version", 3).unwrap();
+        for (id, title, imported) in [("old", "Blackbird", 7), ("newer", "Anji", 90)] {
+            conn.execute(
+                "INSERT INTO scores (id, title, artist, source_file, format,
+                                     track_index, track_name, imported_at, json)
+                 VALUES (?1, ?2, 'somebody', 'x.gp5', 'gp', 0, 'Acoustic', ?3, ?4)",
+                rusqlite::params![id, title, imported, sample_score(id).to_string()],
+            )
+            .unwrap();
+        }
+
+        let db = Db::from_connection(conn, PathBuf::from(":memory:")).unwrap();
+        let v: i64 = db
+            .conn
+            .pragma_query_value(None, "user_version", |r| r.get(0))
+            .unwrap();
+        assert_eq!(v, SCHEMA_VERSION);
+
+        // Nobody has opened anything, so the import date still decides and
+        // the library looks exactly as it did before the upgrade.
+        let list = db.list_scores().unwrap();
+        assert_eq!(
+            list.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+            ["newer", "old"],
+        );
+        assert_eq!(list[0].last_opened_at, None);
+        assert_eq!(list[0].open_count, 0);
+
+        // Now open the older one. It goes to the top and stays there.
+        db.mark_score_opened("old", 1_000).unwrap();
+        let list = db.list_scores().unwrap();
+        assert_eq!(
+            list.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+            ["old", "newer"],
+        );
+        assert_eq!(list[0].last_opened_at, Some(1_000));
+        assert_eq!(list[0].open_count, 1);
+
+        // And twice is twice.
+        db.mark_score_opened("old", 2_000).unwrap();
+        let list = db.list_scores().unwrap();
+        assert_eq!(list[0].last_opened_at, Some(2_000));
+        assert_eq!(list[0].open_count, 2);
+
+        // A song that is not there is not an error: the frontend commits the
+        // library and opens a song in the same breath.
+        assert!(db.mark_score_opened("nothing-like-this", 3_000).is_ok());
+    }
+
+    /// The whole of "clearing Downloads loses nothing", asserted rather than
+    /// asserted about: the file's bytes are in the store, they come back byte
+    /// for byte, and re-importing the same file does not produce a second
+    /// row — because the id is a hash of those bytes and the track, so "the
+    /// same song" is a fact the database can check.
+    #[test]
+    fn yames_keeps_its_own_copy_and_the_same_file_twice_is_one_song() {
+        let db = Db::open_in_memory().unwrap();
+        let score = sample_score("hash-of-the-bytes-and-track-0");
+        // Not really Guitar Pro; the store neither knows nor cares, which is
+        // the point — it keeps bytes.
+        let source = "UEsDBBQAAAAIAA==";
+
+        db.save_score(&score, Some("Blackbird"), Some(source), 100)
+            .unwrap();
+        assert_eq!(db.list_scores().unwrap().len(), 1);
+        assert_eq!(db.get_score_source(&score["id"].as_str().unwrap().to_string()).unwrap().as_deref(), Some(source));
+
+        // The player imports the same file again — same bytes, same track,
+        // so the same id. One row, and the name they gave it survives.
+        db.save_score(&score, None, Some(source), 200).unwrap();
+        let list = db.list_scores().unwrap();
+        assert_eq!(list.len(), 1, "re-importing the same file made a second song");
+        assert_eq!(list[0].name.as_deref(), Some("Blackbird"));
+
+        // ...and the bytes are still there after the re-import, which is the
+        // half that would break silently: a caller passing `None` for the
+        // source is saying nothing about it, not clearing it.
+        db.save_score(&score, None, None, 300).unwrap();
+        assert_eq!(
+            db.get_score_source("hash-of-the-bytes-and-track-0")
+                .unwrap()
+                .as_deref(),
+            Some(source),
+            "a re-import with no bytes threw away the copy Yames was keeping",
+        );
+
+        // A different track of the same file is a different song, and has to
+        // be: the contract makes the id a hash of the bytes AND the track.
+        let mut other = sample_score("hash-of-the-bytes-and-track-1");
+        other["source"]["trackIndex"] = serde_json::json!(1);
+        db.save_score(&other, None, Some(source), 400).unwrap();
+        assert_eq!(db.list_scores().unwrap().len(), 2);
+    }
+
+    /// The library's own question reaches its answer through an index.
+    ///
+    /// The `ORDER BY` and the index expression have to match character for
+    /// character or SQLite sorts the whole table in memory — which is fine
+    /// for thirty songs and is not what this app is being built for.
+    #[test]
+    fn the_library_sort_uses_its_index() {
+        let db = Db::open_in_memory().unwrap();
+        let plan = db.explain(Db::LIST_SCORES_SQL, &[]);
+        assert!(
+            plan.contains("scores_last_opened"),
+            "listScores should reach the library through `scores_last_opened`, \
+             but SQLite plans to: {plan}"
+        );
     }
 
     #[test]

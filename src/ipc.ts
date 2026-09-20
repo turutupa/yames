@@ -855,6 +855,17 @@ export type ScoreSummary = {
    * the title printed on the page.
    */
   name?: string;
+  /**
+   * When the player last opened it, epoch ms (migration four).
+   *
+   * Absent for a song nobody has opened since the counting started, which is
+   * every song that was in the library before it. The store sorts on
+   * `COALESCE(lastOpenedAt, importedAt)`, so a library from before the
+   * migration comes back in exactly the order it always did.
+   */
+  lastOpenedAt?: number;
+  /** How many times it has been opened since the counting started. */
+  openCount?: number;
 };
 
 /**
@@ -964,6 +975,28 @@ export async function getScore(id: string): Promise<SongScore | null> {
  */
 export async function getScoreSource(id: string): Promise<string | null> {
   return invoke<string | null>("get_score_source", { id });
+}
+
+/**
+ * The player opened this song: it goes to the top of the library.
+ *
+ * The time is the store's, not ours — when a song was opened is a fact about
+ * this machine rather than a claim the webview gets to make.
+ */
+export async function markScoreOpened(id: string): Promise<void> {
+  return invoke("mark_score_opened", { id });
+}
+
+/**
+ * Give the player their file back, through a native save dialog.
+ *
+ * Yames keeps its own copy of every file it imports, so clearing the
+ * Downloads folder loses nothing; this is the other half of that promise.
+ * Resolves with the path it was written to, or `null` when the player
+ * cancelled — which is not a failure and must not put a sentence on screen.
+ */
+export async function exportScoreSource(id: string): Promise<string | null> {
+  return invoke<string | null>("export_score_source", { id });
 }
 
 /** Forget a song, and with it every attempt at it. */

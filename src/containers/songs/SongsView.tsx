@@ -42,6 +42,7 @@ import { SongBand, SongCountIn } from "./SongBand";
 // W19 — getting a song in (`plans/SONGS.md` S0.9). Three small pieces, each
 // in its own file with its own stylesheet, mounted here and nowhere else.
 import { DownloadOffer } from "./DownloadOffer";
+import { SongFileNote } from "./SongFileNote";
 import { useDownloadWatch } from "./useDownloadWatch";
 import { SongRecordControl, SongTakes } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
@@ -351,6 +352,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             {t("songs.import")}
           </button>
           <p className="songs-empty-note">{t("songs.empty.private")}</p>
+          <p className="songs-keeps-copy">{t("songs.keepsCopy")}</p>
         </div>
       ) : (
         <>
@@ -386,6 +388,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               </div>
             </dl>
           </header>
+
+          <SongFileNote songId={song?.id ?? null} />
 
           {session.warnings.length > 0 && (
             <ul className="songs-warnings">

@@ -205,6 +205,11 @@
       "opening": "Bezig met openen...",
       "notThisOne": "Deze niet",
       "failed": "Yames kon dat bestand niet openen. Misschien wordt het nog gedownload."
-    }
+    },
+    "keepsCopy": "Yames bewaart een eigen kopie van elk bestand dat je binnenhaalt, dus je downloads opruimen kost je niets.",
+    "exportOriginal": "Bestand ergens opslaan",
+    "exporting": "Bezig met opslaan...",
+    "exportDone": "Opgeslagen.",
+    "exportFailed": "Yames kon het bestand daar niet schrijven."
   }
 }

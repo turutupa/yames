@@ -205,6 +205,11 @@
       "opening": "Opening...",
       "notThisOne": "Not this one",
       "failed": "Yames could not open that file. It may still be downloading."
-    }
+    },
+    "keepsCopy": "Yames keeps its own copy of every file you bring in, so clearing your downloads loses nothing.",
+    "exportOriginal": "Save the file somewhere",
+    "exporting": "Saving...",
+    "exportDone": "Saved.",
+    "exportFailed": "Yames could not write the file there."
   }
 }

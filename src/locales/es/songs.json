@@ -214,6 +214,11 @@
       "opening": "Abriendo...",
       "notThisOne": "Este no",
       "failed": "Yames no pudo abrir ese archivo. Puede que aún se esté descargando."
-    }
+    },
+    "keepsCopy": "Yames guarda su propia copia de cada archivo que traes, así que vaciar tus descargas no pierde nada.",
+    "exportOriginal": "Guardar el archivo en algún sitio",
+    "exporting": "Guardando...",
+    "exportDone": "Guardado.",
+    "exportFailed": "Yames no pudo escribir el archivo ahí."
   }
 }

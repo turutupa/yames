@@ -20,7 +20,7 @@ import {
 } from "../../../songs/library";
 import type { SongLibrary, SongRecord } from "../../../songs/library";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
-import { loadScoreSchedule } from "../../../ipc";
+import { loadScoreSchedule, markScoreOpened } from "../../../ipc";
 /**
  * The importer is loaded when a file arrives, not when the app starts.
  *
@@ -34,7 +34,7 @@ type Importer = Awaited<ReturnType<typeof importerModule>>;
 import type { ParsedSong, SongImportWarning, SongTrackChoice } from "../../../songs/import";
 import type { BarRange } from "../../../songs/schedule";
 import type { SongScore } from "../../../songs/types";
-import { forgetMixSetting } from "../../../songs/songEngine";
+import { forgetMixSetting, loadMixSetting, rememberPlace } from "../../../songs/songEngine";
 import { useSongEngine } from "./useSongEngine";
 import type { SongEngine } from "./useSongEngine";
 
@@ -124,6 +124,25 @@ export function useSongsSession(
     [song],
   );
 
+  /**
+   * Open a song, and put the player back where they left it (W19).
+   *
+   * The whole song, once through, at full speed is the state a song is
+   * opened in for the first time — and then whatever the player left is read
+   * back over it. Read rather than waited for: the tab is drawn from the
+   * score and does not care, and a screen that sat blank for a store round
+   * trip to restore a loop nobody had set would be a worse trade.
+   *
+   * The PORTION comes out of the same per-song setting but is written by
+   * W18, who own the selection on the stage — `songEngine.ts` says so where
+   * the field is declared, and `rememberPlace` below deliberately does not
+   * touch it. The loop and the speed are this hook's.
+   *
+   * `markScoreOpened` is what moves the song to the top of the library on
+   * the next read (migration four). Fire and forget: a library that comes
+   * back in yesterday's order is not worth making anybody wait for, and it
+   * is right again the moment the list is read.
+   */
   const loadSong = useCallback(
     (id: string) => {
       const next = songs.find((s) => s.id === id);
@@ -133,6 +152,20 @@ export function useSongsSession(
       setLoop(false);
       setTempoPercentState(100);
       setWarnings([]);
+      void markScoreOpened(id).catch(() => {});
+      void loadMixSetting(id)
+        .then((place) => {
+          // Still the same song: the player may have clicked another row
+          // while the store was answering.
+          setActiveId((current) => {
+            if (current !== id) return current;
+            if (place.range) setRangeState(clampRange(next.score, place.range));
+            setLoop(place.loop);
+            setTempoPercentState(place.tempoPercent);
+            return current;
+          });
+        })
+        .catch(() => {});
     },
     [songs],
   );
@@ -211,10 +244,29 @@ export function useSongsSession(
     [score],
   );
 
+  /**
+   * Looping, and remembered (W19).
+   *
+   * Only when a song is open: with none there is nothing to remember it
+   * about, and writing an entry keyed on `null` would be a row in
+   * `settings.json` for a song that does not exist.
+   */
+  const setLoopRemembered = useCallback(
+    (next: boolean) => {
+      setLoop(next);
+      if (activeId) void rememberPlace(activeId, { loop: next }).catch(() => {});
+    },
+    [activeId],
+  );
+
   /** 50–100 %, the range the brief fixed. A drill is where you climb. */
   const setTempoPercent = useCallback(
-    (percent: number) => setTempoPercentState(Math.max(50, Math.min(100, Math.round(percent)))),
-    [],
+    (percent: number) => {
+      const clamped = Math.max(50, Math.min(100, Math.round(percent)));
+      setTempoPercentState(clamped);
+      if (activeId) void rememberPlace(activeId, { tempoPercent: clamped }).catch(() => {});
+    },
+    [activeId],
   );
 
   const tempo = useMemo(
@@ -271,7 +323,7 @@ export function useSongsSession(
     renameSong,
     deleteSong,
     setRange,
-    setLoop,
+    setLoop: setLoopRemembered,
     setTempoPercent,
     dismissError: () => setError(null),
     pushSchedule,

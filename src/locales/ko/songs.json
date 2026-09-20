@@ -205,6 +205,11 @@
       "opening": "여는 중...",
       "notThisOne": "이건 아니에요",
       "failed": "이 파일을 열 수 없습니다. 아직 내려받는 중일 수 있습니다."
-    }
+    },
+    "keepsCopy": "가져온 파일은 Yames가 자체 사본을 보관합니다. 다운로드 폴더를 비워도 아무것도 잃지 않습니다.",
+    "exportOriginal": "파일을 어딘가에 저장",
+    "exporting": "저장하는 중...",
+    "exportDone": "저장했습니다.",
+    "exportFailed": "그곳에 파일을 쓸 수 없었습니다."
   }
 }

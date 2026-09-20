@@ -214,6 +214,11 @@
       "opening": "Ouverture...",
       "notThisOne": "Pas celui-ci",
       "failed": "Yames n'a pas pu ouvrir ce fichier. Il est peut-être encore en cours de téléchargement."
-    }
+    },
+    "keepsCopy": "Yames garde sa propre copie de chaque fichier que vous apportez : vider vos téléchargements ne perd rien.",
+    "exportOriginal": "Enregistrer le fichier quelque part",
+    "exporting": "Enregistrement...",
+    "exportDone": "Enregistré.",
+    "exportFailed": "Yames n'a pas pu écrire le fichier là."
   }
 }

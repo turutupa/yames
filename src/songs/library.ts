@@ -146,12 +146,18 @@ async function toRecord(summary: {
 }
 
 /**
- * Songs in the practice store, newest import first.
+ * Songs in the practice store, most recently OPENED first.
+ *
+ * The order is the store's (`db.rs` migration four), not this file's: the
+ * library is "what have I been playing", and the date a file happened to
+ * arrive said nothing about that. A song nobody has opened since the
+ * counting started falls back to its import date, so a library that existed
+ * before the migration comes back exactly as it always did.
  *
  * `list` returns `[]` for both "never imported anything" and "deleted them
- * all" — unlike jams, which seed a starter set and so have to tell those two
- * apart. The app ships no songs (`SONGS.md` S0.4), so there is nothing to
- * seed and nothing to distinguish.
+ * all". The starter shelf (W19) is seeded on top of this by
+ * `songs/starter/`, which knows which ids it put there and which of them the
+ * player has since deleted; this file stays the plain list it always was.
  *
  * `save` takes the whole list because that is the interface the mode was
  * built against, and turns it into the rows that changed: a song that is new

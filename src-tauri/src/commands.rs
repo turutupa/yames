@@ -1985,6 +1985,89 @@ pub fn get_score_source(
     store.read_or(None, |db| db.get_score_source(&id))
 }
 
+/// The player opened this song: it goes to the top of the library, and the
+/// visit is counted (migration four).
+///
+/// The time is taken here rather than sent from the frontend for the reason
+/// `save_score`'s is: when a song was opened is a fact about this machine,
+/// not a claim the webview gets to make.
+#[tauri::command(async)]
+pub fn mark_score_opened(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0);
+    store.with(|db| db.mark_score_opened(&id, now))
+}
+
+/// Give the player their file back.
+///
+/// Yames keeps its own copy of every file it imports (`scores.source_b64`),
+/// so clearing the Downloads folder loses nothing — and this is the other
+/// half of that promise: what Yames kept, the player can have back, byte for
+/// byte, wherever they want it.
+///
+/// A Rust command and a native save dialog because the webview cannot write
+/// anywhere: `plugin-fs` is not installed and a browser download is inert
+/// inside a Tauri window. `Ok(None)` is the player cancelling the dialog,
+/// which is not a failure and must not put a sentence on their screen.
+///
+/// `async fn` for the reason `pick_kit_folder` is, and it is not optional: a
+/// non-async command runs on the main thread, and asking the main thread to
+/// put up a modal dialog and then wait for the answer is a deadlock in one
+/// move.
+#[tauri::command]
+pub async fn export_score_source(
+    id: String,
+    app: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Option<String>, String> {
+    use base64::Engine as _;
+    use tauri_plugin_dialog::DialogExt;
+
+    let summary = store
+        .read_or(Vec::new(), |db| db.list_scores())
+        .into_iter()
+        .find(|s| s.id == id)
+        .ok_or_else(|| "that song is not in the library any more".to_string())?;
+    let base64 = store
+        .read_or(None, |db| db.get_score_source(&id))
+        .ok_or_else(|| {
+            "Yames has no copy of the file this song came from. It was imported by a build \
+             that did not keep one."
+                .to_string()
+        })?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(base64.as_bytes())
+        .map_err(|e| format!("the stored copy could not be read back: {e}"))?;
+
+    // The name the file came in with, which is the name the player will look
+    // for. `file_name` on the summary is the source file, not the song's
+    // title: exporting "Blackbird.gp5" as "Blackbird (my version).gp5"
+    // because they renamed it in the library would be a surprise.
+    let suggested = std::path::Path::new(&summary.source_file)
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| summary.source_file.clone());
+
+    let chosen = app
+        .dialog()
+        .file()
+        .set_file_name(&suggested)
+        .blocking_save_file();
+    let Some(chosen) = chosen else {
+        return Ok(None);
+    };
+    let path = chosen
+        .into_path()
+        .map_err(|e| format!("that is not a place Yames can write to: {e}"))?;
+    std::fs::write(&path, &bytes).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(Some(path.to_string_lossy().into_owned()))
+}
+
 /// Forget a song, and with it every attempt at it.
 #[tauri::command(async)]
 pub fn delete_score(

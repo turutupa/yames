@@ -205,6 +205,11 @@
       "opening": "Wird geöffnet ...",
       "notThisOne": "Diese nicht",
       "failed": "Yames konnte diese Datei nicht öffnen. Vielleicht lädt sie noch."
-    }
+    },
+    "keepsCopy": "Yames behält von jeder Datei, die du hereinholst, eine eigene Kopie. Du kannst deine Downloads also bedenkenlos aufräumen.",
+    "exportOriginal": "Datei irgendwo speichern",
+    "exporting": "Wird gespeichert ...",
+    "exportDone": "Gespeichert.",
+    "exportFailed": "Yames konnte die Datei dort nicht schreiben."
   }
 }

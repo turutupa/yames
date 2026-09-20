@@ -214,6 +214,11 @@
       "opening": "Apertura...",
       "notThisOne": "Non questo",
       "failed": "Yames non è riuscito ad aprire quel file. Forse è ancora in download."
-    }
+    },
+    "keepsCopy": "Yames tiene una copia sua di ogni file che porti dentro, quindi svuotare i download non perde niente.",
+    "exportOriginal": "Salva il file da qualche parte",
+    "exporting": "Salvataggio...",
+    "exportDone": "Salvato.",
+    "exportFailed": "Yames non è riuscito a scrivere il file lì."
   }
 }

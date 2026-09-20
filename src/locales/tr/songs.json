@@ -205,6 +205,11 @@
       "opening": "Açılıyor...",
       "notThisOne": "Bu değil",
       "failed": "Yames bu dosyayı açamadı. Hâlâ iniyor olabilir."
-    }
+    },
+    "keepsCopy": "Yames içeri aldığın her dosyanın kendi kopyasını saklar, indirilenleri temizlemen bir şey kaybettirmez.",
+    "exportOriginal": "Dosyayı bir yere kaydet",
+    "exporting": "Kaydediliyor...",
+    "exportDone": "Kaydedildi.",
+    "exportFailed": "Yames dosyayı oraya yazamadı."
   }
 }

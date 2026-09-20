@@ -223,6 +223,11 @@
       "opening": "Otwieranie...",
       "notThisOne": "Nie ten",
       "failed": "Yames nie mógł otworzyć tego pliku. Może wciąż się pobiera."
-    }
+    },
+    "keepsCopy": "Yames trzyma własną kopię każdego wczytanego pliku, więc czyszczenie pobranych niczego nie kosztuje.",
+    "exportOriginal": "Zapisz plik gdzieś",
+    "exporting": "Zapisywanie...",
+    "exportDone": "Zapisano.",
+    "exportFailed": "Yames nie mógł tam zapisać pliku."
   }
 }

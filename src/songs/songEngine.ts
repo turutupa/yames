@@ -39,6 +39,28 @@ export type SongMixSetting = {
    * stored before this existed says.
    */
   takes: boolean;
+  /**
+   * Whether the range was left looping (W19).
+   *
+   * Here rather than in a key of its own because it is the same kind of fact
+   * as the mix — something the player decided about THIS piece today — and
+   * because opening a song should put back everything about it at once
+   * rather than in three round trips.
+   */
+  loop: boolean;
+  /** The speed it was left at, as a percentage of what is written. */
+  tempoPercent: number;
+  /**
+   * The bars the player had selected, when a build has written any.
+   *
+   * **This module does not write this field.** The portion is W18's, who own
+   * the selection on the stage; `rememberPlace` below deliberately leaves it
+   * alone so there is one writer and one meaning. Read here, and only here,
+   * so that opening a song puts the player back where they were. Absent is
+   * the ordinary state and means "the whole song", which is what
+   * `useSongsSession` already does.
+   */
+  range?: { startBar: number; endBar: number };
 };
 
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
@@ -46,6 +68,8 @@ export const DEFAULT_MIX_SETTING: SongMixSetting = {
   muted: [],
   countInBars: 0,
   takes: false,
+  loop: false,
+  tempoPercent: 100,
 };
 
 function clampGain(value: number): number {
@@ -127,6 +151,26 @@ export function readMixSetting(stored: unknown): SongMixSetting {
     // older build can hold — missing, `"yes"`, `1` — leaves the microphone
     // alone, which is the only default a switch like this may have.
     takes: raw.takes === true,
+    // Only an explicit `true` loops: a song that starts going round and
+    // round when the player pressed play expecting one pass is a surprise
+    // with a guitar in your hands.
+    loop: raw.loop === true,
+    tempoPercent:
+      typeof raw.tempoPercent === "number" &&
+      raw.tempoPercent >= 25 &&
+      raw.tempoPercent <= 100
+        ? Math.round(raw.tempoPercent)
+        : 100,
+    // Read, never written here — see the field's comment. Both bars have to
+    // be whole numbers the right way round, or this is a file somebody
+    // edited by hand and the whole song is the honest answer.
+    ...(raw.range &&
+    Number.isInteger(raw.range.startBar) &&
+    Number.isInteger(raw.range.endBar) &&
+    raw.range.startBar >= 0 &&
+    raw.range.endBar >= raw.range.startBar
+      ? { range: { startBar: raw.range.startBar, endBar: raw.range.endBar } }
+      : {}),
   };
 }
 
@@ -149,6 +193,30 @@ export function saveMixSetting(songId: string, setting: SongMixSetting): Promise
   const apply = async () => {
     const all = (await storeLoad<StoredMixes>(SONG_MIX_KEY)) ?? {};
     await storeSave(SONG_MIX_KEY, { ...all, [songId]: setting });
+  };
+  const next = writing.then(apply, apply);
+  writing = next;
+  return next;
+}
+
+/**
+ * Remember the loop and the speed, without touching anything else (W19).
+ *
+ * A patch rather than a whole setting, and that is the point: the caller is
+ * `useSongsSession`, which owns the transport but not the faders, and a
+ * write of the whole object from there would clobber a fader the player
+ * moved a moment earlier. It also never writes `range`, which is W18's —
+ * read-modify-write through the same chain as everything else, so the two
+ * writers cannot lose each other's work.
+ */
+export function rememberPlace(
+  songId: string,
+  place: { loop?: boolean; tempoPercent?: number },
+): Promise<void> {
+  const apply = async () => {
+    const all = (await storeLoad<StoredMixes>(SONG_MIX_KEY)) ?? {};
+    const current = readMixSetting(all[songId]);
+    await storeSave(SONG_MIX_KEY, { ...all, [songId]: { ...current, ...place } });
   };
   const next = writing.then(apply, apply);
   writing = next;

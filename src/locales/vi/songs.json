@@ -205,6 +205,11 @@
       "opening": "Đang mở...",
       "notThisOne": "Không phải tệp này",
       "failed": "Yames không mở được tệp đó. Có thể tệp vẫn đang tải."
-    }
+    },
+    "keepsCopy": "Yames giữ bản sao riêng của mọi tệp bạn đưa vào, nên dọn thư mục tải xuống cũng không mất gì.",
+    "exportOriginal": "Lưu tệp ra ngoài",
+    "exporting": "Đang lưu...",
+    "exportDone": "Đã lưu.",
+    "exportFailed": "Yames không ghi được tệp vào đó."
   }
 }

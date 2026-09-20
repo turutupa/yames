@@ -473,6 +473,11 @@ export function installShotMock(shot: Shot, theme: string): void {
       SCORES.delete(String(a?.id));
       return null;
     },
+    // W19 — the library is "recently played" now. The shots open exactly one
+    // song, so there is no order for this to change; it exists so the call
+    // the session makes on every open resolves rather than returning the
+    // harness's blanket `null`.
+    mark_score_opened: () => null,
     is_coach_loaded: () => false,
     get_calibration_offset: () => null,
     llm_compiled: () => false,

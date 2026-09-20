@@ -205,6 +205,11 @@
       "opening": "正在開啟...",
       "notThisOne": "不是這個",
       "failed": "Yames 打不開這個檔案，也許它還在下載。"
-    }
+    },
+    "keepsCopy": "你帶進來的每個檔案，Yames 都會自己留一份，所以清理下載不會掉東西。",
+    "exportOriginal": "把檔案存到別處",
+    "exporting": "正在儲存...",
+    "exportDone": "已儲存。",
+    "exportFailed": "Yames 無法把檔案寫到那裡。"
   }
 }
