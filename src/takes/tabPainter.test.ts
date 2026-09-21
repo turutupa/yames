@@ -160,13 +160,29 @@ describe("whether a phone can read it", () => {
     // A wide frame is 1228 pixels across and a tall one 692, so the same
     // number of bars would be half as far apart in the tall one — which for
     // sixteenths is eleven pixels and unreadable at any type size.
-    expect(TAB_WINDOW_BARS.tall).toBeLessThan(TAB_WINDOW_BARS.wide);
+    expect(TAB_WINDOW_BARS.tall[0]).toBeLessThan(TAB_WINDOW_BARS.wide[0]);
     const s = score();
     // Two bars of 4/4 at 120 is four seconds; three is six.
     expect(tabWindowMs(s, RANGE, 100, "tall")).toBeCloseTo(4000, 6);
     expect(tabWindowMs(s, RANGE, 100, "wide")).toBeCloseTo(6000, 6);
     // Slower music scrolls slower, which is the whole of the sync claim.
     expect(tabWindowMs(s, RANGE, 50, "tall")).toBeCloseTo(8000, 6);
+  });
+
+  it("narrows the window rather than shrinking the numbers, when the music is dense", () => {
+    const s = score();
+    // Quarter notes at 120 are 500 ms apart: everything fits, so the widest
+    // window is taken in both shapes.
+    expect(tabWindowMs(s, RANGE, 100, "tall", 500)).toBeCloseTo(4000, 6);
+    expect(tabWindowMs(s, RANGE, 100, "wide", 500)).toBeCloseTo(6000, 6);
+    // Sixteenths at 120 are 125 ms apart. Two bars across 692 pixels puts
+    // them 21 pixels apart, which no type size rescues — so a tall clip shows
+    // one bar, and a wide one two.
+    expect(tabWindowMs(s, RANGE, 100, "tall", 125)).toBeCloseTo(2000, 6);
+    expect(tabWindowMs(s, RANGE, 100, "wide", 125)).toBeCloseTo(4000, 6);
+    // And it never goes below one bar, however fast the passage is: a window
+    // that showed half a bar would scroll faster than anybody reads.
+    expect(tabWindowMs(s, RANGE, 100, "tall", 10)).toBeCloseTo(2000, 6);
   });
 
   it("fits every string, the bar numbers and the row under them inside the band", () => {

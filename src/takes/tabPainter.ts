@@ -47,7 +47,7 @@
  * refilled in place. Only the window is walked — `visibleTabNotes` bisects —
  * so a six-minute attempt costs what a four-bar one does.
  */
-import { captionAt, fullBandHeight, visibleBars } from "../songs/camera/clip";
+import { captionAt, clipPad, clipSize, fullBandHeight, visibleBars } from "../songs/camera/clip";
 import type { ClipBox, ClipShape } from "../songs/camera/clip";
 import type { ClipPalette } from "../songs/camera/clipRecorder";
 import { barLengthMs } from "../songs/camera/tape";
@@ -69,19 +69,46 @@ import type { TabNote, TabTape } from "./tabTape";
  * because the two frames are 692 and 1228 pixels across — a bar of sixteenths
  * needs about 350 pixels before the numbers stop touching.
  */
-export const TAB_WINDOW_BARS: Record<ClipShape, number> = { wide: 3, tall: 2 };
+export const TAB_WINDOW_BARS: Record<ClipShape, number[]> = { wide: [3, 2, 1], tall: [2, 1] };
 
-/** How much of the take is across the tab at once, for one shape. */
+/**
+ * The closest two fret numbers may get before the window has to narrow.
+ *
+ * Thirty pixels holds a two-digit number at about twenty-three-point type,
+ * which is where legible starts once a phone has scaled a 720-wide clip down.
+ * Below it there is no type size that helps and the only thing that does is
+ * showing less music at a time.
+ */
+const MIN_NOTE_PX = 30;
+
+/**
+ * How much of the take is across the tab at once, for one shape.
+ *
+ * A whole number of bars, so the scroll speed is constant at a constant tempo
+ * — but WHICH whole number depends on the music. Three bars of a riff in
+ * eighths reads beautifully across a wide frame; three bars of sixteenths
+ * across a tall one is a number every eleven pixels. So the widest window
+ * whose tightest pair still has room is the one taken, and a run of
+ * sixteenths simply shows fewer bars at a time, which is what a human
+ * transcriber would do with the same page.
+ */
 export function tabWindowMs(
   score: SongScore,
   range: BarRange,
   tempoPercent: number,
   shape: ClipShape,
+  tightestMs = Number.POSITIVE_INFINITY,
 ): number {
   const clamped = clampRange(score, range);
   const bar = barLengthMs(score, clamped, tempoPercent, clamped.startBar);
-  // A score with one zero-length bar in it is a file, not an impossibility.
-  return Math.max(800, bar * TAB_WINDOW_BARS[shape]);
+  const across = clipSize(shape).width - clipPad(shape) * 2;
+  const choices = TAB_WINDOW_BARS[shape];
+  for (const bars of choices) {
+    // A score with one zero-length bar in it is a file, not an impossibility.
+    const windowMs = Math.max(800, bar * bars);
+    if ((tightestMs * across) / windowMs >= MIN_NOTE_PX) return windowMs;
+  }
+  return Math.max(800, bar * choices[choices.length - 1]);
 }
 
 /**
@@ -91,13 +118,37 @@ export function tabWindowMs(
  * the room allows up to it, so a band that got taller does not leave six lines
  * huddled at the top of it.
  */
-type TabMetrics = { small: number; header: number; foot: number; edge: number; maxGap: number };
+type TabMetrics = {
+  small: number;
+  header: number;
+  foot: number;
+  edge: number;
+  maxGap: number;
+  maxFret: number;
+};
 
-function tabMetrics(shape: ClipShape, strings: number): TabMetrics {
-  const small = shape === "tall" ? 20 : 17;
+/**
+ * `big` is the no-picture clip, where the tab is not a band in a frame — it
+ * IS the frame. Everything grows: a player with no camera should get a video
+ * of their piece going by, large, and the same six lines huddled in the
+ * middle of 720 pixels of empty ground is not that.
+ */
+function tabMetrics(shape: ClipShape, strings: number, big = false): TabMetrics {
+  const small = big ? (shape === "tall" ? 30 : 26) : shape === "tall" ? 20 : 17;
   const lines = Math.max(1, strings - 1);
+  if (big) {
+    return {
+      small,
+      header: small + 12,
+      foot: Math.round(small * 0.8) + 12,
+      edge: 16,
+      maxGap: shape === "tall" ? Math.min(78, Math.floor(430 / lines)) : Math.min(56, Math.floor(300 / lines)),
+      maxFret: shape === "tall" ? 40 : 34,
+    };
+  }
   return {
     small,
+    maxFret: shape === "tall" ? 22 : 16,
     // The bar numbers and section names, and the air under them.
     header: small + 8,
     // Under the strings: "P.M.", "let ring", and the ticks for notes that
@@ -150,13 +201,38 @@ export type TabGeometry = {
  * were looked at too, because a number that fits is not the same as a number
  * anybody wants to read.
  */
-export function tabGeometry(box: ClipBox, strings: number, shape: ClipShape): TabGeometry {
-  const m = tabMetrics(shape, strings);
+export function tabGeometry(
+  box: ClipBox,
+  strings: number,
+  shape: ClipShape,
+  options: {
+    /** The band IS the clip — there is no picture over it. */
+    big?: boolean;
+    /**
+     * How far apart the tightest notes are, in pixels across this box.
+     *
+     * The second half of "legible": type is sized to the MUSIC as well as to
+     * the frame, so a run of sixteenths comes out small enough to read and a
+     * piece of half notes comes out as large as the band allows. Left out
+     * (or zero) means only the frame decides, which is what a caller with no
+     * tape in its hand can say.
+     */
+    tightestPx?: number;
+  } = {},
+): TabGeometry {
+  const m = tabMetrics(shape, strings, options.big === true);
   const lines = Math.max(1, strings - 1);
   const room = box.height - m.header - m.foot - m.edge * 2;
-  const gap = Math.max(9, Math.min(m.maxGap, Math.floor(room / lines)));
+  const roomGap = Math.max(9, Math.min(m.maxGap, Math.floor(room / lines)));
+  // A two-digit fret is about 1.15 type sizes wide, so 0.78 of the spacing
+  // leaves a hair of air between the tightest pair in the piece.
+  const byMusic = options.tightestPx ? Math.round(options.tightestPx * 0.78) : m.maxFret;
+  const fret = Math.max(9, Math.min(m.maxFret, byMusic, Math.round(roomGap * 0.76)));
+  // The strings close up around the numbers once the numbers have had to get
+  // smaller. Six lines spread across 400 pixels with 17-pixel numbers on them
+  // is not a tab; it is six lines with something written on two of them.
+  const gap = Math.max(9, Math.min(roomGap, Math.round(fret * 2)));
   const block = gap * lines;
-  const fret = Math.max(9, Math.min(shape === "tall" ? 22 : 16, Math.round(gap * 0.76)));
   // Centred in whatever is left, which is what keeps the tall no-picture clip
   // — where the band is the whole frame — well clear of the Yames mark.
   const spare = box.height - m.header - m.foot - block;
@@ -264,7 +340,7 @@ export function tabStrip(args: TabStripArgs): ClipStrip {
 
   return {
     bandFor(shape, hasPicture) {
-      const windowMs = tabWindowMs(score, range, tempoPercent, shape);
+      const windowMs = tabWindowMs(score, range, tempoPercent, shape, tab.tightestMs);
       if (!hasPicture) {
         // No camera: the tab is the clip, and it fills the frame.
         return { height: fullBandHeight(shape), overPicture: false, head: TAB_HEAD_AT, windowMs };
@@ -280,9 +356,12 @@ export function tabStrip(args: TabStripArgs): ClipStrip {
       };
     },
 
-    paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks }) {
+    paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks, hasPicture }) {
       const shape: ClipShape = layout.width > layout.height ? "wide" : "tall";
-      const g = tabGeometry(box, tab.strings, shape);
+      const g = tabGeometry(box, tab.strings, shape, {
+        big: !hasPicture,
+        tightestPx: windowMs > 0 ? (tab.tightestMs * box.width) / windowMs : 0,
+      });
       const head = layout.head;
       const bottom = g.topY + g.block;
 
@@ -341,10 +420,14 @@ export function tabStrip(args: TabStripArgs): ClipStrip {
       for (let s = 1; s <= tab.strings; s++) {
         breaks[s].push(box.x - 2, box.x + g.letters);
       }
+      const firstX = box.x + g.letters + 4;
       for (const { note, at } of notes) {
         if (note.string < 1 || note.string > tab.strings) continue;
         const x = box.x + at * box.width;
         const half = widthOf(note) / 2 + 3;
+        // Already behind the tuning letters, which are fixed at the left edge
+        // and win: a number half under an "A" is worse than a number gone.
+        if (x - half < firstX) continue;
         breaks[note.string].push(x - half, x + half);
       }
 
@@ -394,10 +477,11 @@ export function tabStrip(args: TabStripArgs): ClipStrip {
       for (const { note, at } of notes) {
         if (note.string < 1 || note.string > tab.strings) continue;
         const x = box.x + at * box.width;
+        const width = widthOf(note);
+        if (x - width / 2 - 3 < firstX) continue;
         const y = g.topY + (note.string - 1) * g.gap;
         const ink = inkFor(note, palette, marks);
         const label = fretLabel(note);
-        const width = widthOf(note);
 
         // The letter in the gap, where there is a gap to put it in: a hammer,
         // a pull or a slide, half way between this note and the last one on
@@ -520,6 +604,7 @@ function paintRun(
   let from = Number.NaN;
   let to = Number.NaN;
 
+  const left = box.x + g.letters;
   const flush = () => {
     if (Number.isNaN(from)) return;
     const span = Math.max(to - from, 0);
@@ -527,9 +612,14 @@ function paintRun(
     ctx.fillStyle = palette.quiet;
     ctx.strokeStyle = palette.quiet;
     ctx.globalAlpha = 0.85;
-    if (span > wordWidth * 1.25) {
+    // The word only where the run STARTS on screen. A run that began before
+    // the window did would otherwise show its last two letters at the left
+    // edge, which reads as a mistake rather than as a palm mute.
+    if (span > wordWidth * 1.25 && from >= left) {
       ctx.fillText(word, from, y);
       lineFrom = from + wordWidth + 5;
+    } else if (from < left) {
+      lineFrom = left;
     }
     if (to > lineFrom + 4) {
       const line = y + Math.round(g.small * 0.4);

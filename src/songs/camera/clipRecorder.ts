@@ -321,7 +321,7 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
     const top = Math.min(layout.caption.y, box.y) - 10;
     const bottom = Math.max(layout.caption.y + layout.caption.height, box.y + box.height) + 8;
     roundedPath(ctx, box.x, top, box.width, bottom - top, 18);
-    ctx.fillStyle = "rgba(11, 10, 20, 0.62)";
+    ctx.fillStyle = "rgba(11, 10, 20, 0.74)";
     ctx.fill();
   }
 
@@ -483,7 +483,9 @@ export function recordClip(options: RecordClipOptions): ClipRun {
   const hasPicture = videoSrc !== null;
   const band = strip.bandFor?.(shape, hasPicture) ?? null;
   const layout = clipLayout(shape, band);
-  const window = band ? band.windowMs : windowMs;
+  // NOT `window`: this function reaches for the real one further down, and a
+  // local of that name turns "is there an audio graph" into a silent no.
+  const across = band ? band.windowMs : windowMs;
   canvas.width = layout.width;
   canvas.height = layout.height;
   const ctx = canvas.getContext("2d", { alpha: false });
@@ -559,7 +561,7 @@ export function recordClip(options: RecordClipOptions): ClipRun {
         palette,
         picture: video && video.readyState >= 2 ? video : null,
         strip,
-        windowMs: window,
+        windowMs: across,
         nowMs,
         marks,
         hasPicture,

@@ -79,6 +79,22 @@ export type TabTape = {
   /** Ascending by `atMs`, then by string from the top down. */
   notes: TabNote[];
   extras: TabExtra[];
+  /**
+   * How close together the notes get, in milliseconds — the near-tightest
+   * gap between one attack and the next.
+   *
+   * The painter needs it because the one thing that decides whether a tab is
+   * readable is not the type size, it is the type size against the spacing:
+   * twenty-two-pixel numbers are beautiful under eighth notes and a smear
+   * under sixteenths. So the drawing sizes the numbers to the music rather
+   * than to the frame, and a run of sixteenths comes out smaller and legible
+   * instead of large and overlapping.
+   *
+   * A low PERCENTILE rather than the minimum: one grace note, one flam, one
+   * chord whose notes the importer put a tick apart would otherwise shrink
+   * the whole piece to nothing.
+   */
+  tightestMs: number;
 };
 
 /**
@@ -169,7 +185,31 @@ export function buildTabTape(args: {
     stringNames: tuning.map(stringLetter),
     notes,
     extras: tape.extras.map((extra) => ({ atMs: extra.atMs, pass: extra.pass })),
+    tightestMs: tightestGapMs(notes),
   };
+}
+
+/**
+ * The tenth-percentile gap between one attack and the next.
+ *
+ * Attacks, not notes: three notes of a chord are one moment and a gap of
+ * zero, and counting those would say every piece with a chord in it is
+ * infinitely dense. A piece with one note in it, or none, has no gap to
+ * measure and gets a whole second — which asks the painter for the largest
+ * numbers it will draw, and is right.
+ */
+const NO_GAP_MS = 1000;
+
+function tightestGapMs(notes: readonly TabNote[]): number {
+  const gaps: number[] = [];
+  let previous = Number.NaN;
+  for (const note of notes) {
+    if (!Number.isNaN(previous) && note.atMs - previous > 1) gaps.push(note.atMs - previous);
+    if (Number.isNaN(previous) || note.atMs > previous) previous = note.atMs;
+  }
+  if (gaps.length === 0) return NO_GAP_MS;
+  gaps.sort((a, b) => a - b);
+  return Math.max(30, gaps[Math.floor(gaps.length * 0.1)]);
 }
 
 /**
