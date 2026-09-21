@@ -304,8 +304,27 @@ export function useActionDispatcher({
         return;
       }
 
-      if (document.activeElement instanceof HTMLElement)
-        document.activeElement.blur();
+      /*
+       * The caret is dropped before an app-wide action — except on a widget
+       * that owns its own keyboard (W34 item 3).
+       *
+       * The blur is here so that a control with focus does not ALSO take the
+       * key: a button that has been clicked and then hears Space would fire
+       * twice. But the Songs tab is `role="application"`: it is a page of
+       * music you arrive on, move a bar at a time with the arrows and press
+       * Esc on, and blurring it means pressing Space to start the song takes
+       * the arrow keys away until you click the page again. A player who
+       * presses play and then reaches for the arrows finds them dead, which
+       * is exactly the shape of the complaint this item is about.
+       *
+       * `role="application"` is the standard way of saying "this widget owns
+       * the keyboard", so the rule is written in those terms rather than
+       * naming the Songs tab.
+       */
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && focused.getAttribute("role") !== "application") {
+        focused.blur();
+      }
       switch (actionId) {
         case "play":
           if (view === "drill") {
@@ -416,12 +435,37 @@ export function useActionDispatcher({
         }
       }
     },
+    /*
+     * Everything this callback READS is in here, and three things were not
+     * (W34 item 3).
+     *
+     * `songsLoaded`, `songsActions` and `setlistLoaded` were missing, and the
+     * consequence is the owner's complaint one layer down from where it was
+     * fixed. The play key on Songs got its branch on 2026-09-21 and still did
+     * nothing, because this callback is built once per `view` and a song is
+     * loaded WITHOUT the view changing: you are already on the Songs tab, you
+     * click a row in the library, and the dispatcher goes on holding the
+     * `songsLoaded: false` it was born with. Switching tabs and coming back
+     * fixed it, which is exactly the kind of "sometimes it works" that makes
+     * a bug like this survive a fix.
+     *
+     * Every `songs-` action was dead the same way (`if (view !== "songs" ||
+     * !songsLoaded) return`), and so was the play key on a setlist opened
+     * without leaving the Setlist tab.
+     *
+     * `songsActions` and `jamActions` are both `useMemo`s in `MainWindow`, so
+     * naming them here costs a rebuild when the song or the jam changes and
+     * not one per render.
+     */
     [
       view,
       jamLoaded,
       jamEditorOpen,
       onToggleJam,
       jamActions,
+      setlistLoaded,
+      songsLoaded,
+      songsActions,
       state.bpm,
       state.subdivision,
       // Stable key — `state.beatGroups` is a fresh array on every

@@ -35,6 +35,15 @@ export async function openShot(
   shot: string,
   size: { width: number; height: number },
   theme = "ember",
+  /**
+   * Anything else the harness reads off its own query string.
+   *
+   * `{ song: "long" }` is the only user so far: the Songs scenes pick which
+   * of the written-for-the-pictures songs is on the stage from `?song=`, and
+   * a question about a page taller than the frame cannot be asked of the
+   * eight-bar one (W34 item 5).
+   */
+  query: Record<string, string> = {},
 ) {
   /*
    * Built wide, then narrowed to the size under test.
@@ -48,7 +57,12 @@ export async function openShot(
    */
   const BUILD_AT = { width: 1440, height: Math.max(size.height, 900) };
   await page.setViewportSize(BUILD_AT);
-  await page.goto(`/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${LAYOUT_LOCALE}`);
+  const extra = Object.entries(query)
+    .map(([key, value]) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join("");
+  await page.goto(
+    `/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${LAYOUT_LOCALE}${extra}`,
+  );
 
   // That the page is the harness at all, before waiting thirty seconds for it
   // to say it is ready. The first run of this suite met a dev server for

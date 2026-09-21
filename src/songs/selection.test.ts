@@ -12,6 +12,7 @@ import {
   addPortion,
   beginDrag,
   clampSelection,
+  clickClearsPortion,
   dragRange,
   dragTo,
   isWholeSong,
@@ -305,5 +306,44 @@ describe("a click or a drag", () => {
   it("is a drag from the first pixel on a handle or with shift", () => {
     expect(pressIsDrag(press({ handle: "end" }), 100, 200)).toBe(true);
     expect(pressIsDrag(press({ shiftKey: true }), 100, 200)).toBe(true);
+  });
+});
+
+/**
+ * And what a click does to the portion (W34 item 4).
+ *
+ * The owner reversed W29 on 2026-09-21, having played with both: *"if i
+ * single click a different part of the song it should go to that part but the
+ * selected area doesn't get unselected, it's like it doesn't exit loop
+ * mode"*. So the portion survives a click inside itself and not one outside.
+ */
+describe("a click and the portion", () => {
+  const four = { startBar: 4, endBar: 7 };
+
+  it("keeps the portion when the click lands inside it", () => {
+    for (const bar of [4, 5, 6, 7]) {
+      expect(clickClearsPortion(four, bar), `bar ${String(bar)} is inside`).toBe(false);
+    }
+  });
+
+  it("puts the portion away when the click lands anywhere else", () => {
+    for (const bar of [0, 3, 8, 40]) {
+      expect(clickClearsPortion(four, bar), `bar ${String(bar)} is outside`).toBe(true);
+    }
+  });
+
+  it("has nothing to clear when nothing is chosen", () => {
+    expect(clickClearsPortion(null, 0)).toBe(false);
+    expect(clickClearsPortion(null, 99)).toBe(false);
+  });
+
+  it("reads a range that was stored the wrong way round", () => {
+    expect(clickClearsPortion({ startBar: 7, endBar: 4 }, 5)).toBe(false);
+    expect(clickClearsPortion({ startBar: 7, endBar: 4 }, 9)).toBe(true);
+  });
+
+  it("keeps a one-bar portion when that bar is clicked", () => {
+    expect(clickClearsPortion({ startBar: 9, endBar: 9 }, 9)).toBe(false);
+    expect(clickClearsPortion({ startBar: 9, endBar: 9 }, 10)).toBe(true);
   });
 });

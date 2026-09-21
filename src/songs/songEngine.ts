@@ -25,7 +25,7 @@ import {
 } from "./types";
 import { MAX_SAVED_PORTIONS } from "./selection";
 import type { SavedPortion } from "./selection";
-import type { SongBackingTrack, SongMix } from "./types";
+import type { SongBackingTrack, SongMix, SongMixGains } from "./types";
 
 /**
  * A fader on the stage: the click, or one track of the file by its index.
@@ -92,6 +92,23 @@ export type SongMixSetting = {
   tempoPercent: number;
   /** Portions the player named and kept, oldest first. */
   portions: SavedPortion[];
+  /**
+   * Has this player said anything about the click for this song? (W34 item 7)
+   *
+   * The owner: *"is the drums playing by default? i've played tabs with no
+   * drums and it still plays them"*. His click's sound is set to Drum — the
+   * chip in the header says so — so over a song with a band of its own, a
+   * click ticking through every bar is a drummer playing along. `clickOn`
+   * below turns it OFF by default when the file has parts that sound, which
+   * is what every tab player does: the song keeps the time.
+   *
+   * This is the flag that keeps that a DEFAULT rather than a decision. False
+   * — which is what every song stored before this says — means "nobody has
+   * touched it, use the default"; the switch on the strip sets it, and from
+   * then on the song keeps what the player chose whatever the default
+   * becomes.
+   */
+  clickChosen: boolean;
 };
 
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
@@ -105,7 +122,30 @@ export const DEFAULT_MIX_SETTING: SongMixSetting = {
   loop: false,
   tempoPercent: 100,
   portions: [],
+  clickChosen: false,
 };
+
+/**
+ * Is the click sounding through this song? (W34 item 7)
+ *
+ * One line, three cases, and the order matters:
+ *
+ * 1. **The player turned it off** — it is off, whatever the song holds.
+ * 2. **The player has said something about it** — `clickChosen`, so it is on
+ *    unless case 1 caught it. A decision outlives a default.
+ * 3. **Nobody has said anything** — it is off when the song has any sounding
+ *    part and on when it has none. A file with a band keeps its own time; a
+ *    bare tab has nothing to keep it, so the click does.
+ *
+ * Deliberately NOT written into `muted`: a default that has been written down
+ * is a default that can never be changed again, and `startingMix`'s own
+ * comment two screens down says the same thing about the faders.
+ */
+export function clickOn(setting: SongMixSetting, hasSoundingPart: boolean): boolean {
+  if (setting.muted.includes("click")) return false;
+  if (setting.clickChosen) return true;
+  return !hasSoundingPart;
+}
 
 function clampGain(value: number): number {
   if (!Number.isFinite(value)) return 1;
@@ -126,7 +166,7 @@ function clampGain(value: number): number {
  * player has never touched arrives at the level the arrangement was written
  * at rather than at nothing.
  */
-export function engineMix(setting: SongMixSetting, trackCount: number): SongMix {
+export function engineMix(setting: SongMixSetting, trackCount: number): SongMixGains {
   const off = new Set(setting.muted);
   const solo = setting.soloed.filter((n) => n >= 0 && n < trackCount);
   const tracks: number[] = [];
@@ -135,7 +175,11 @@ export function engineMix(setting: SongMixSetting, trackCount: number): SongMix 
     tracks.push(silenced ? 0 : clampGain(gainOf(setting, n)));
   }
   return {
-    click: off.has("click") ? 0 : clampGain(setting.mix.click),
+    click: clickOn(setting, trackCount > 0) ? clampGain(setting.mix.click) : 0,
+    // The count-in always counts, at whatever level the click's own fader is
+    // set to (W34 item 7). A count-in you cannot hear is not one, and this is
+    // the one thing the click being off must not take with it.
+    countIn: clampGain(setting.mix.click),
     tracks,
   };
 }
@@ -154,7 +198,9 @@ export function withGain(
   value: number,
 ): SongMixSetting {
   if (lane === "click") {
-    return { ...setting, mix: { ...setting.mix, click: clampGain(value) } };
+    // Moving the click's fader is saying something about the click, so the
+    // song stops taking the default from here on (W34 item 7).
+    return { ...setting, clickChosen: true, mix: { ...setting.mix, click: clampGain(value) } };
   }
   const tracks = [...setting.mix.tracks];
   while (tracks.length <= lane) tracks.push(DEFAULT_TRACK_MIX);
@@ -169,7 +215,9 @@ export function withMute(
   muted: boolean,
 ): SongMixSetting {
   const without = setting.muted.filter((id) => id !== lane);
-  return { ...setting, muted: muted ? [...without, lane] : without };
+  const next = { ...setting, muted: muted ? [...without, lane] : without };
+  // ...and so is the switch. From here the song keeps what the player chose.
+  return lane === "click" ? { ...next, clickChosen: true } : next;
 }
 
 /** Solo one track, or take it out of the solo. */
@@ -255,6 +303,9 @@ export function readMixSetting(stored: unknown): SongMixSetting {
         ? Math.min(100, Math.max(50, Math.round(raw.tempoPercent)))
         : 100,
     portions: readPortions(raw.portions),
+    // Only an explicit `true` counts as a decision, which is what makes every
+    // song stored before W34 take the new default (item 7).
+    clickChosen: raw.clickChosen === true,
   };
 }
 

@@ -363,6 +363,8 @@
       "notationNote": "Auch das Notensystem über der Tabulatur zeigen",
       "bigger": "Größer",
       "smaller": "Kleiner"
-    }
+    },
+    "clickChip": "Klick",
+    "clickNote": "Zum Stück mitticken. Zu Beginn aus, wenn die Datei eine eigene Band mitbringt."
   }
 }

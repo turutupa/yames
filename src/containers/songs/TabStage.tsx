@@ -51,6 +51,8 @@ import {
 // WebView2, WKWebView, WebKitGTK — has supported woff2 for years.
 import bravuraWoff2 from "@coderline/alphatab/font/Bravura.woff2?url";
 import { parseSongFile } from "../../songs/import";
+import { cursorTickAt, leadFromFrame, onReport } from "../../songs/cursor";
+import type { CursorMotion } from "../../songs/cursor";
 import { groupClassByTick, lightTargets, tickByOnset } from "./tabGroups";
 import { handleRects, selectionBands } from "./selectionBands";
 import type { Rect } from "./selectionBands";
@@ -75,8 +77,27 @@ export interface TabStageProps {
   score: SongScore;
   /** The file's bytes, kept so the tab is drawn from the source (SONGS A2). */
   source: Uint8Array;
-  /** Where the cursor stands, in ticks from the start of the song. */
+  /**
+   * Where the cursor stands, in ticks from the start of the song.
+   *
+   * The ENGINE's last word, not a per-frame position: it changes once per
+   * click tick while the transport runs, and the gliding between two of them
+   * is this file's own (`songs/cursor.ts`, W34 item 1).
+   */
   tick: number;
+  /**
+   * The transport is running, so the cursor travels between reports.
+   *
+   * Stopped, `tick` is simply written where it is told and nothing animates —
+   * a page nobody is playing has no motion to interpolate.
+   */
+  playing?: boolean;
+  /** Which time round the range `tick` was reported on. A change is a seam. */
+  pass?: number;
+  /** The speed the engine is playing at, 50–100. Half speed, half the rate. */
+  tempoPercent?: number;
+  /** The last tick of the bars being played; the cursor waits there. */
+  endTick?: number;
   /** Re-render when the theme changes: the colours are settings, not CSS. */
   themeId: string;
   /**
@@ -340,6 +361,43 @@ function buildSettings(view: StageView, fretted: boolean): Settings {
   // Never true here. W4-FINDINGS §5: under vite the worker URL 404s and
   // rendering silently never finishes.
   settings.core.useWorkers = false;
+  /*
+   * ── The whole song is drawn, all of it, all the time (W34 items 5 and 2) ──
+   *
+   * alphaTab's `enableLazyLoading` defaults to ON and its own documentation
+   * says what is wrong with it here: *"AlphaTab tries to detect which elements
+   * are visible on the screen, and only appends those elements to the DOM …
+   * but is not working for all layouts and use cases."* Ours is one of the
+   * use cases it does not work for, and it is the cause of two separate
+   * things the owner reported on 2026-09-21.
+   *
+   * What it does, measured on a 120-bar fixture at 2000x1124: the engraving
+   * is twenty-three systems, and SEVEN of them have any content in the DOM.
+   * The other sixteen are empty `div`s of the right height. Scroll to the
+   * bottom and it is the other way round — the fourteen at the top are
+   * emptied and nine at the bottom are filled in.
+   *
+   * - *"I imported a tab and it feels like it's not rendering the entire
+   *   song, just a section of it"*. It was not rendering the entire song. It
+   *   was rendering the section in front of you and throwing the rest away,
+   *   and putting it back a frame after you scrolled to it.
+   * - *"When it's playing and I stop it, the whole alpha tab flickers as in
+   *   re-rendering"*. Stopping puts the cursor back at the top of the range,
+   *   which scrolls the page back — and every system the scroll passes is
+   *   emptied and re-filled on the way. Nothing was re-rendered; the DOM was
+   *   being taken apart and put back, which looks identical.
+   *
+   * Off, the whole engraving stays in the DOM: nothing blanks, nothing
+   * flickers, and bar 100 is drawn before anybody scrolls to it — which is
+   * also what the note lights, `boundsLookup` and the selection bands need,
+   * since none of them can paint into a system that is not there.
+   *
+   * The cost it saves is real and is not ours to save: it is for a page with
+   * several scores on it in the browser's own scroll. This is ONE score in a
+   * box we own, and a hundred and twenty bars is under fifteen hundred
+   * elements.
+   */
+  settings.core.enableLazyLoading = false;
   settings.core.smuflFontSources = new Map([[FontFileFormat.Woff2, bravuraWoff2]]);
   settings.core.logLevel = LogLevel.Warning;
   // The engine is the time axis. The player is never started.
@@ -419,7 +477,31 @@ function buildSettings(view: StageView, fretted: boolean): Settings {
    */
   settings.display.scale = view.zoom;
   settings.display.padding = [10, 8];
-  settings.display.firstSystemPaddingTop = 2;
+  /*
+   * ── Room for what is written ABOVE the first bar (W34 item 6) ─────────
+   *
+   * The owner, 2026-09-21: *"the first row's tempo mark is drawn on top of
+   * the section name and the cursor"*. Measured on the fixture at 2000px
+   * before this: `♩ = 96` occupied y 167–183 and `Verse` y 183–199 — two
+   * boxes touching to the pixel, with the bar number's own row starting one
+   * pixel later and the beat cursor drawn straight through all three.
+   *
+   * Two numbers, and each fixes a different half:
+   *
+   * `effectBandPaddingBottom` is the space BETWEEN two effect bands, and
+   * alphaTab's 2 is a printed page's. The tempo mark is a band, the section
+   * name is the band under it, and alphaTab paints the tempo's own text on
+   * the band's bottom baseline — so at 2 the quarter-note glyph hangs into
+   * the name of the section it is announcing.
+   *
+   * `firstSystemPaddingTop` was 2, which put the tempo mark against the top
+   * edge of the frame with the cursor's wash beginning in the same pixel.
+   * The room is bought back below: `systemPaddingTop` and the two bottoms
+   * stay tight, so this costs the page eight pixels ONCE rather than eight
+   * per system.
+   */
+  settings.display.effectBandPaddingBottom = 6;
+  settings.display.firstSystemPaddingTop = 10;
   settings.display.systemPaddingTop = 2;
   settings.display.systemPaddingBottom = 4;
   settings.display.lastSystemPaddingBottom = 2;
@@ -450,6 +532,10 @@ export function TabStage({
   score,
   source,
   tick,
+  playing = false,
+  pass = 0,
+  tempoPercent = 100,
+  endTick = Number.POSITIVE_INFINITY,
   themeId,
   lights,
   schedule,
@@ -478,9 +564,40 @@ export function TabStage({
   /** The chosen track's PRINTED bars, kept from the parse the render used. */
   const barsRef = useRef<ReturnType<typeof printedBarsOf>>([]);
 
-  // Build once per song, per track, per theme. Not per tick — re-rendering a
-  // two-hundred-bar score sixty times a second is the freeze this mode would
-  // be remembered for.
+  /**
+   * The file, read when the score is engraved and never depended on (W34
+   * item 2).
+   *
+   * `source` is a `Uint8Array` decoded from the library record. It is
+   * memoised per record — so any write that replaces that record hands this
+   * component a DIFFERENT array holding the same bytes, and an effect that
+   * depends on the array destroys the api, re-parses the file and re-engraves
+   * the whole score. Every one of those is invisible in a code review and
+   * unmistakable on screen.
+   *
+   * What actually decides the engraving is the SCORE: `score.id` is a hash of
+   * the file's bytes and the chosen track (`songs/library.ts`), so it changes
+   * when and only when there is a different piece of music to draw. That is
+   * what the effect below is keyed on, and the bytes are read through here.
+   */
+  const fileRef = useRef({ source, fileName: score.source.fileName, track: score.source.trackIndex });
+  fileRef.current = { source, fileName: score.source.fileName, track: score.source.trackIndex };
+
+  /*
+   * ── When the score is drawn, and the whole list of reasons ──────────────
+   *
+   * The file, the part, the notation mode, the zoom, the theme, and the WIDTH
+   * (which is alphaTab's own `ResizeObserver`, not this effect). Nothing else
+   * — not the transport, not the selection, not a beat event, not the
+   * verdict, and not a library record being written.
+   *
+   * The owner: *"when it's playing and i stop it, the whole alpha tab
+   * flickers as in re-rendering, this is very annoying"*. What he was seeing
+   * was alphaTab's lazy loading emptying and re-filling systems as the page
+   * scrolled back to the top — see `buildSettings` — and this effect is the
+   * other half of the same promise: `TabStage.render.test.tsx` counts the
+   * engravings across play, stop, play, a seek and a loop and finds ONE.
+   */
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -489,16 +606,17 @@ export function TabStage({
 
     let api: AlphaTabApi | null = null;
     const spoken = Logger.logLevel;
+    const file = fileRef.current;
     try {
-      const parsed = parseSongFile(source, score.source.fileName);
-      barsRef.current = printedBarsOf(parsed.atScore, score.source.trackIndex);
+      const parsed = parseSongFile(file.source, file.fileName);
+      barsRef.current = printedBarsOf(parsed.atScore, file.track);
       api = new AlphaTabApi(host, buildSettings(view, score.tuning.length > 0));
       api.error.on(() => setFailed(true));
       api.postRenderFinished.on(() => {
         setReady(true);
         setRendered((n) => n + 1);
       });
-      api.renderScore(parsed.atScore, [score.source.trackIndex]);
+      api.renderScore(parsed.atScore, [file.track]);
       apiRef.current = api;
       /*
        * The engraving's bounds, for the screenshot harness and the layout
@@ -522,18 +640,15 @@ export function TabStage({
       delete (window as unknown as { __SONGS_TAB_API__?: AlphaTabApi }).__SONGS_TAB_API__;
       api?.destroy();
     };
-    // `view` is a setting the whole engraving is built from, so a change to
-    // it is a fresh `AlphaTabApi` — the same as a theme change. Its two
-    // fields rather than the object, which is new on every render.
+    // `score.id` and NOT `source`, `fileName` or `trackIndex`: it is a hash
+    // of the bytes and the track, so it says "a different piece of music to
+    // draw" and nothing else does — an identical file decoded into a new
+    // array does not change it, and that is the whole point. `view` is a
+    // setting the engraving is built from, so a change to it is a fresh
+    // `AlphaTabApi`, the same as a theme change; its two fields rather than
+    // the object, which is new on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    source,
-    score.source.fileName,
-    score.source.trackIndex,
-    themeId,
-    view.notation,
-    view.zoom,
-  ]);
+  }, [score.id, themeId, view.notation, view.zoom]);
 
   /**
    * Ctrl/Cmd and the wheel makes the music bigger (W29 item 3).
@@ -557,13 +672,85 @@ export function TabStage({
     return () => viewport.removeEventListener("wheel", onWheel);
   }, [onZoom, ready]);
 
-  // The cursor. One property set per beat event, measured at 0.02 ms — this
-  // is the whole of the "driven by the engine" requirement.
+  /**
+   * ── The cursor, and how it gets from one report to the next (W34 item 1) ──
+   *
+   * The owner: *"there's a sweep picking section that it's not following note
+   * per note in a smooth movement, it's doing blocks at a time"*. It was one
+   * property set per beat event — seven hundred milliseconds apart at 84 BPM
+   * — so a run of sixteenths passed entirely between two writes and the line
+   * crossed the whole run in one step.
+   *
+   * The engine is still the only clock. What changed is that the report is
+   * now an ANCHOR rather than the whole answer: `songs/cursor.ts` advances
+   * the tick through the score's tempo map on `requestAnimationFrame`, and
+   * every report re-anchors it, so the line glides at the screen's own rate
+   * and cannot drift past one report's worth of error.
+   *
+   * Two things about alphaTab that decide the shape of this:
+   *
+   * **Writing `tickPosition` is cheap here, and only here.** The player is
+   * `EnabledExternalMedia` and is never started, so the sequencer's seek is
+   * arithmetic — `_mainSilentProcess` does nothing while nothing is playing —
+   * and no audio, no MIDI and no highlighting pass is on this path. Sixty
+   * writes a second is sixty transform updates.
+   *
+   * **A seek re-places the cursor at a FRACTION of a beat.** alphaTab skips
+   * the work when the tick is still inside the same engraved beat — except on
+   * a seek, which every `tickPosition` write is, and which places the line at
+   * `onNotesX + width * (tick - beatStart) / beatLength`. That is why this
+   * works at all: the line moves WITHIN a note, not only from note to note.
+   *
+   * Nothing here re-renders React. The cursor is alphaTab's own `div`; a
+   * state update per frame would put the whole stage through React sixty
+   * times a second, which is the opposite of what item 2 asks for.
+   */
+  const motionRef = useRef<CursorMotion | null>(null);
+  /** The frame interval, smoothed — the lead is two of them. */
+  const frameMsRef = useRef(0);
   useEffect(() => {
     const api = apiRef.current;
     if (!api || !ready) return;
-    api.tickPosition = tick;
-  }, [tick, ready]);
+    if (!playing) {
+      // Stopped is a place, not a journey: the playhead, or the top of the
+      // range, written once.
+      motionRef.current = null;
+      api.tickPosition = tick;
+      return;
+    }
+
+    motionRef.current = onReport(
+      score,
+      motionRef.current,
+      { tick, pass, atMs: performance.now() },
+      tempoPercent,
+    );
+
+    let frame = 0;
+    let previous = 0;
+    const step = (now: number) => {
+      frame = requestAnimationFrame(step);
+      if (previous > 0) {
+        const delta = now - previous;
+        // A running mean over about half a second, so one long frame does not
+        // move the lead and a change of monitor does within the bar.
+        frameMsRef.current =
+          frameMsRef.current > 0 ? frameMsRef.current * 0.9 + delta * 0.1 : delta;
+      }
+      previous = now;
+      const motion = motionRef.current;
+      if (!motion) return;
+      const next = cursorTickAt(score, motion, now, {
+        percent: tempoPercent,
+        endTick,
+        leadMs: leadFromFrame(frameMsRef.current),
+      });
+      motionRef.current = next.motion;
+      api.tickPosition = next.tick;
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [tick, pass, playing, tempoPercent, endTick, score, ready]);
 
   /**
    * Which group each onset is engraved in, worked out once per engraving.
@@ -650,10 +837,20 @@ export function TabStage({
    * already had.
    *
    * So the two things this file takes from them are: a plain click seeks, and
-   * a portion is whole bars with handles. The one thing it does NOT take is
-   * alphaTab's "a click clears the loop": in Songsterr, Ultimate Guitar and
-   * Guitar Pro the repeat is a switch, and clearing it by touching the page
-   * is how you lose the passage you were working on.
+   * a portion is whole bars with handles.
+   *
+   * **And since 2026-09-21 it takes a third, because the owner asked for it
+   * after his second session** (W34 item 4): *"if i single click a different
+   * part of the song it should go to that part but the selected area doesn't
+   * get unselected, it's like it doesn't exit loop mode"*. W29's note here
+   * said the opposite, on the evidence of those three players, where the
+   * repeat is a switch that touching the page never takes off you. He has
+   * played with both and his word wins over theirs. A click OUTSIDE the
+   * portion goes there and puts the portion and the repeat away; a click
+   * INSIDE it moves your place and keeps it, because you are still working on
+   * that passage. `selection.ts`'s `clickClearsPortion` is the rule, and
+   * `useSongsSession`'s `seekTo` is where it is applied — this file just
+   * reports a bar.
    *
    * Five things this has to get right:
    *
@@ -782,9 +979,10 @@ export function TabStage({
      * on every bar the pointer crossed would restart the song once per bar.
      *
      * A press that never became a drag is the click, and the click goes
-     * there. It touches the portion not at all — that is what the owner
-     * asked for, and what Songsterr, Ultimate Guitar and Guitar Pro all do:
-     * the repeat is a switch, not something the page takes off you.
+     * there — and whether the portion survives it depends on where it landed
+     * (W34 item 4, the header above). That decision is not made here: this
+     * reports the bar, and `useSongsSession` owns both the portion and the
+     * playhead and is where one line can say what happens to both.
      */
     const onUp = () => {
       const press = pressRef.current;
@@ -840,12 +1038,23 @@ export function TabStage({
         return;
       }
       if (!seek) return;
-      const last = Math.max(0, current.bars.length - 1);
-      const from = playheadRef.current ?? 0;
+      /*
+       * The arrows and Home stay INSIDE the portion when there is one.
+       *
+       * They always have in effect — the playhead is clamped into the portion
+       * downstream — but since W34 item 4 a bar outside the portion is what
+       * puts the portion away, and stepping off the end of a four-bar loop is
+       * not "I have gone somewhere else". A click is; these are not.
+       */
+      const floor = chosen ? Math.min(chosen.startBar, chosen.endBar) : 0;
+      const last = chosen
+        ? Math.max(chosen.startBar, chosen.endBar)
+        : Math.max(0, current.bars.length - 1);
+      const from = playheadRef.current ?? floor;
       let next: number | null = null;
-      if (e.key === "ArrowLeft") next = Math.max(0, from - 1);
+      if (e.key === "ArrowLeft") next = Math.max(floor, from - 1);
       else if (e.key === "ArrowRight") next = Math.min(last, from + 1);
-      else if (e.key === "Home") next = 0;
+      else if (e.key === "Home") next = floor;
       if (next === null) return;
       e.preventDefault();
       seek(next);

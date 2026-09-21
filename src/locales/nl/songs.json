@@ -363,6 +363,8 @@
       "notationNote": "Laat ook de notenbalk boven de tab zien",
       "bigger": "Groter",
       "smaller": "Kleiner"
-    }
+    },
+    "clickChip": "Klik",
+    "clickNote": "Tikt mee met het nummer. Staat eerst uit als het bestand zijn eigen band meebrengt."
   }
 }

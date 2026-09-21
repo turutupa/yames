@@ -363,6 +363,8 @@
       "notationNote": "Show the notation staff above the tab as well",
       "bigger": "Bigger",
       "smaller": "Smaller"
-    }
+    },
+    "clickChip": "Click",
+    "clickNote": "Tick along with the song. Off to start with when the file brings its own band."
   }
 }

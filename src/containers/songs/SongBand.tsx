@@ -48,7 +48,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { SONG_MIX_MAX } from "../../songs/types";
-import { gainOf } from "../../songs/songEngine";
+import { clickOn, gainOf } from "../../songs/songEngine";
 import type { SongLane, SongMixSetting } from "../../songs/songEngine";
 import type { SongBackingTrack, SongRole } from "../../songs/types";
 
@@ -231,7 +231,12 @@ export function SongBand({ setting, tracks, onGain, onMute, onSolo }: SongBandPr
   return (
     <div className="songs-band" role="group" aria-label={t("songs.band.label")}>
       {rows.map((row) => {
-        const rowOff = muted.has(row.lane);
+        // The click's row asks the rule rather than the mute list (W34
+        // item 7): over a song with a band the click starts off, and it does
+        // so WITHOUT being written down as muted — so a switch reading the
+        // list alone would show it on while nothing was ticking.
+        const rowOff =
+          row.lane === "click" ? !clickOn(setting, tracks.length > 0) : muted.has(row.lane);
         const rowSolo = row.track !== null && soloed.has(row.track);
         // A track nobody soloed, while somebody else is soloed, is not muted
         // — it is standing down — and it reads as faint for the same reason

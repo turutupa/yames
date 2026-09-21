@@ -49,6 +49,14 @@ song-ab-clips/
 # again by that spec whenever somebody needs to look; never committed.
 .jam-frames/
 
+# What the Songs stage looks like at the two windows W34 is argued at, and
+# the long fixture scrolled to bar 100, written by
+# `tests/layout/songs-stage.spec.ts` and `songs-long.spec.ts`. Pictures of the
+# app, for the reason `.jam-shots` exists: a suite can measure a rectangle,
+# and only a person (or an agent that can read a PNG) can say whether the tab
+# is using the room. Rendered again by those specs; never committed.
+.w34-shots/
+
 # What the jam drawer looks like with a take open in it (W33), written by
 # `tests/layout/jam-watch.spec.ts` at three widths in two themes. Pictures of
 # the app rather than of a canvas, for the same reason `.jam-frames` exists:

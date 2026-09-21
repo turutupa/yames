@@ -374,6 +374,8 @@
       "notationNote": "Mostra anche il pentagramma sopra la tablatura",
       "bigger": "Più grande",
       "smaller": "Più piccolo"
-    }
+    },
+    "clickChip": "Clic",
+    "clickNote": "Scandisce il tempo sul brano. Spento all'inizio se il file porta la sua band."
   }
 }

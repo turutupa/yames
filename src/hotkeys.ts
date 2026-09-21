@@ -134,6 +134,32 @@ const NON_TEXT_INPUTS = new Set([
   "image",
 ]);
 
+/**
+ * What Shift does to a punctuation key, undone (W34 item 3).
+ *
+ * `⇧[` and `⇧]` nudge a song's portion a bar earlier or later, and neither of
+ * them worked: the browser reports `key: "{"` for Shift and the bracket, so
+ * the combo built here was `⇧{`, which is bound to nothing. Two hotkeys in
+ * the settings list that could not be pressed.
+ *
+ * `code` is the key's PHYSICAL position and is the only thing that can say
+ * "that was the bracket". It is used as a cross-check rather than as the
+ * answer, because a German keyboard's bracket position is `ü`: the mapping
+ * applies only when the character the browser reported is the one a US
+ * layout produces from that position, so a layout where it is not simply
+ * keeps what the browser said.
+ *
+ * Only the punctuation this app binds is listed. A letter needs nothing —
+ * Shift turns `t` into `T` and `T` is what `⇧T` already means.
+ */
+const SHIFTED_PUNCTUATION: Record<string, { shifted: string; plain: string }> = {
+  BracketLeft: { shifted: "{", plain: "[" },
+  BracketRight: { shifted: "}", plain: "]" },
+  Backslash: { shifted: "|", plain: "\\" },
+  Comma: { shifted: "<", plain: "," },
+  Period: { shifted: ">", plain: "." },
+};
+
 export function eventToCombo(e: KeyboardEvent): string {
   const parts: string[] = [];
   const cmdMod = IS_MAC ? e.metaKey : e.ctrlKey;
@@ -141,7 +167,8 @@ export function eventToCombo(e: KeyboardEvent): string {
   if (IS_MAC && e.ctrlKey) parts.push("⌃");
   if (e.altKey) parts.push("⌥");
   if (e.shiftKey) parts.push("⇧");
-  const key = e.key;
+  const unshifted = e.shiftKey ? SHIFTED_PUNCTUATION[e.code] : undefined;
+  const key = unshifted && e.key === unshifted.shifted ? unshifted.plain : e.key;
   if (["Meta", "Control", "Alt", "Shift"].includes(key)) return parts.join("");
   switch (key) {
     case " ":
@@ -164,6 +191,44 @@ export function eventToCombo(e: KeyboardEvent): string {
       break;
   }
   return parts.join("");
+}
+
+/**
+ * Actions that only mean anything on their own tab, by their own prefix.
+ *
+ * `L` loops a section in Jam and a portion in Songs; `[` and `]` step the
+ * metronome's subdivision everywhere except Songs, where they mark where a
+ * portion starts and stops. Both are the right key in both places.
+ */
+export const MODE_ACTION_PREFIXES = ["jam-", "songs-"];
+
+/**
+ * Which action a key press means, on the tab it was pressed on.
+ *
+ * One combo can belong to more than one action, and which one it means
+ * depends on where you are: the mode's own action wins on the mode's own tab,
+ * the plain one wins everywhere else. Taking the first match — which is what
+ * this did before 2026-09-20 — meant whichever action was written higher up
+ * the table below silently owned the key in every mode.
+ *
+ * Here rather than inside `MainWindow` since W34 item 3, so the question
+ * "does this key reach anything on the Songs tab" can be asked of a function
+ * instead of of a window.
+ */
+export function actionForCombo(
+  bindings: Record<string, string>,
+  combo: string,
+  view: string,
+): string | undefined {
+  const bound = Object.entries(bindings)
+    .filter(([, key]) => key === combo)
+    .map(([action]) => action);
+  const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
+  return (
+    bound.find((action) => action.startsWith(`${view}-`)) ??
+    bound.find((action) => !modeOnly(action)) ??
+    bound[0]
+  );
 }
 
 export const HOTKEYS: HotkeyEntry[] = [

@@ -90,9 +90,10 @@ import { useStageIsNarrow } from "./useStageIsNarrow";
 import { useStageView } from "./useStageView";
 import { ZOOM_MAX, ZOOM_MIN } from "../../songs/stageView";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
-import { buildSchedule, meterAt, sectionRange } from "../../songs/schedule";
+import { buildSchedule, meterAt, rangeTicks, sectionRange } from "../../songs/schedule";
 import { portionRange } from "../../songs/selection";
 import { printedBarNumber, songPosition } from "../../songs/position";
+import { clickOn } from "../../songs/songEngine";
 import type { SongsSession } from "../main-window/hooks/useSongsSession";
 import type { BeatEvent } from "../../types";
 import "../../styles/songs.css";
@@ -222,6 +223,18 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     }
     return position?.tick ?? 0;
   }, [score, isPlaying, session.playFrom, position?.tick]);
+
+  /**
+   * Where the bars being played stop, in the song's own ticks.
+   *
+   * The cursor's far end: it waits there rather than gliding off the end of a
+   * range while the engine gets round to reporting that it has come back to
+   * the top (W34 item 1).
+   */
+  const rangeEndTick = useMemo(
+    () => (score ? rangeTicks(score, range).end : 0),
+    [score, range],
+  );
 
   /**
    * The count, while one is being counted in.
@@ -560,6 +573,15 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   /** How many players are turned down, for the mark on the "More" chip. */
   const mutedCount = session.mixSetting.muted.length;
 
+  /**
+   * Is the click ticking through this song? (W34 item 7)
+   *
+   * `songEngine.ts`'s rule, asked once and used by the switch on the strip:
+   * off by default when the file has parts of its own, on when it has none,
+   * and whatever the player chose once they have chosen.
+   */
+  const clickSounding = clickOn(session.mixSetting, session.band.length > 0);
+
   /** The bar runs the player has already given a name of their own. */
   const named = useMemo(
     () => new Set(session.portions.map((p) => rangeKey(p.startBar, p.endBar))),
@@ -867,6 +889,15 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   score={score}
                   source={source}
                   tick={tick}
+                  /* W34 item 1 — what the cursor needs to get from one of the
+                     engine's reports to the next: whether anything is
+                     running, which time round this report was on, the speed
+                     the tempo map is being played at, and where the bars
+                     being played stop. `TabStage` does the gliding. */
+                  playing={isPlaying}
+                  pass={position?.pass ?? 0}
+                  tempoPercent={tempoPercent}
+                  endTick={rangeEndTick}
                   themeId={themeId}
                   lights={lights}
                   schedule={schedule}
@@ -1058,6 +1089,28 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               onChoose={session.setTempoPercent}
               folded={tightStage}
             />
+
+            {/* The click, on the row and not inside "More" (W34 item 7).
+                The owner: *"is the drums playing by default? i've played tabs
+                with no drums and it still plays them"* — his click's sound is
+                a kit, so over a song with a band of its own a click ticking
+                through every bar IS a drummer playing along. It starts off
+                now when the file has parts that sound, the way every tab
+                player works: the song keeps the time. Which makes it a switch
+                somebody reaches for, so it is where they can see it. The
+                fader behind it is still in the band panel. */}
+            <div className="songs-strip-group songs-strip-click">
+              <button
+                type="button"
+                className="songs-chip songs-click-chip"
+                data-active={clickSounding ? "" : undefined}
+                aria-pressed={clickSounding}
+                title={t("songs.clickNote")}
+                onClick={() => session.setMute("click", clickSounding)}
+              >
+                {t("songs.clickChip")}
+              </button>
+            </div>
 
             {/* And the rest, one press away. What is set once before you play
                 rather than changed while you are playing: recording, the

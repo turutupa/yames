@@ -1062,7 +1062,7 @@ export async function saveAttempt(attempt: Attempt): Promise<void> {
 // file stays in the UI, exactly as a jam's record does.
 // ---------------------------------------------------------------------------
 
-import type { SongBacking, SongMix, SongTransport } from "./songs/types";
+import type { SongBacking, SongMixGains, SongTransport } from "./songs/types";
 
 /** What a song turned out to be, once the engine had compiled it. */
 export type SongLoaded = {
@@ -1126,7 +1126,7 @@ export async function setSongRange(
  * is how long the audio already rendered ahead of the playhead takes to
  * drain (`src-tauri/src/synth.rs`).
  */
-export async function setSongMix(mix: SongMix): Promise<void> {
+export async function setSongMix(mix: SongMixGains): Promise<void> {
   return invoke("set_song_mix", { mix });
 }
 

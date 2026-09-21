@@ -42,6 +42,7 @@ import { dayOf, listSongDue, songDueNow } from "../../../songs/due";
 import {
   addPortion,
   clampSelection,
+  clickClearsPortion,
   newPortionId,
   removePortion,
   renamePortion,
@@ -544,11 +545,18 @@ export function useSongsSession(
   /**
    * Go to a bar (W29 item 1) — a click on the tab, or an arrow key.
    *
-   * It moves the playhead and NOTHING else. The portion is left exactly as it
-   * was, which is what Songsterr, Ultimate Guitar and Guitar Pro all do (the
-   * repeat is a switch there too) and what the owner asked for: *"just going
-   * to that place"*. `clampSelection` holds it inside the song; `playFrom`
-   * above holds it inside the portion.
+   * It moves the playhead, and it puts the portion away when the bar is
+   * OUTSIDE it (W34 item 4). W29 kept the portion on every click, on the
+   * evidence of Songsterr, Ultimate Guitar and Guitar Pro, where the repeat
+   * is a switch and touching the page never takes it off you. The owner
+   * played with that and decided the other way: *"if i single click a
+   * different part of the song it should go to that part but the selected
+   * area doesn't get unselected, it's like it doesn't exit loop mode"*. His
+   * word wins. `selection.ts`'s `clickClearsPortion` is the rule and says so;
+   * a click INSIDE the portion still only moves your place within it.
+   *
+   * `clampSelection` holds the bar inside the song; `playFrom` above holds it
+   * inside whatever portion is left.
    *
    * **Two different things either side of the transport (W28).** Stopped, it
    * writes `playFrom`, which is where the next pass begins — a range, and a
@@ -566,6 +574,26 @@ export function useSongsSession(
     (playedBar: number) => {
       if (!score) return;
       const bar = clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar;
+      /*
+       * Somewhere else in the song: the portion and the repeat go with you.
+       *
+       * Both pieces of state are written here rather than through
+       * `setSelection`, because that one also clears the playhead — it is
+       * about CHOOSING a portion, and this is about leaving one. The playhead
+       * is the whole point of the gesture.
+       *
+       * While the transport runs this is a range change, so the engine
+       * recompiles and starts the piece at the bar that was clicked — which
+       * is what the player asked for and better than the seek below, which
+       * moves the cursor inside a range the click has just left.
+       */
+      if (clickClearsPortion(selection, bar)) {
+        setSelectionState(null);
+        setLoop(false);
+        setPlayFrom(bar);
+        if (isPlaying) void pushSchedule();
+        return;
+      }
       if (isPlaying) {
         // `playFrom` is deliberately left alone: writing it would change
         // `range`, and changing the range is the recompile this exists to
@@ -581,7 +609,7 @@ export function useSongsSession(
       }
       setPlayFrom(bar);
     },
-    [score, isPlaying, pushSchedule],
+    [score, isPlaying, pushSchedule, selection],
   );
 
   const clearSelection = useCallback(() => setSelection(null), [setSelection]);

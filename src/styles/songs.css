@@ -32,11 +32,22 @@
   width: 100%;
   max-width: none;
   margin-left: 0;
-  /* The gutters the rest of the app uses, not the forty-eight this stage had
-     (W29 item 3): a page of music is the widest thing in Yames and it was
-     giving up ninety-six pixels of a row to white. */
-  padding-left: 24px;
-  padding-right: 24px;
+  /* NO gutter of its own (W34 item 6).
+   *
+   * `.main-content` already pads the content region by 24px — the gutter the
+   * Play button, the header chips and every other screen sit against — and
+   * this rule used to add a second 24 on top of it. Measured at 2000x1124 on
+   * 2026-09-21: the tab's frame started 48px right of the rail and stopped
+   * 48px short of the window, which is two gutters of a page of music given
+   * up to white on each side. The owner asked twice; this is the second half
+   * of the answer (the `max-width: 1176px` cap came off in 68351a26).
+   *
+   * Zero, not a smaller number: one gutter is the app's, and a stage that
+   * invents a second one is exactly what was wrong. `tests/layout/
+   * songs-stage.spec.ts` holds the frame to within one gutter of the content
+   * region at 1100, 1440 and 2000. */
+  padding-left: 0;
+  padding-right: 0;
   justify-content: flex-start;
   overflow: hidden;
   min-height: 0;
@@ -537,6 +548,20 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: auto;
+  /* The sideways scrollbar under an eight-bar piece (W34 item 6).
+   *
+   * alphaTab measures `.songs-tab-host` and engraves a whole score to that
+   * width. A piece longer than the frame then puts a VERTICAL scrollbar on
+   * this box, which takes its 15px off the host — and the engraving, already
+   * drawn, is now wider than the box it was drawn for, so a horizontal bar
+   * appears under it. alphaTab's own ResizeObserver re-lays it out a frame
+   * later and the bar goes away again, which is how it reads as a flicker
+   * rather than as a bug.
+   *
+   * Reserving the room whether or not the bar is showing means the width
+   * alphaTab measures is the width it keeps. It costs 15px once, against a
+   * re-layout of the whole score every time the page grows past the frame. */
+  scrollbar-gutter: stable;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-card);
@@ -913,6 +938,7 @@
 
 .songs-strip-portion,
 .songs-strip-tempo,
+.songs-strip-click,
 .songs-strip-more {
   flex: 0 0 auto;
 }
@@ -1928,6 +1954,26 @@
 
   .songs-title {
     font-size: 14px;
+  }
+}
+
+/* One more rung, for the click's own switch (W34 item 7).
+ *
+ * The row gained a control — the click is a switch somebody reaches for now
+ * that it starts off over a song with a band, so it is on the strip and not
+ * inside "More" — and at the smallest window the app opens (480px, which is
+ * `tauri.conf.json`'s `minWidth`) that was two pixels more than the row had.
+ *
+ * Following the brief's own shed order: nothing is taken away here, the row
+ * is simply drawn tighter. The bar fields still hold four digits, which is
+ * every song anybody has. */
+@container stage (max-width: 520px) {
+  .songs-strip {
+    gap: 0 8px;
+  }
+
+  .songs-range-field input {
+    width: 42px;
   }
 }
 

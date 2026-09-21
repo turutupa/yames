@@ -89,6 +89,37 @@ export function pressIsDrag(press: TabPress, clientX: number, clientY: number): 
   return Math.hypot(clientX - press.clientX, clientY - press.clientY) > CLICK_SLOP_PX;
 }
 
+/**
+ * Does this click put the portion away? (W34 item 4)
+ *
+ * **The owner's decision, 2026-09-21, and it reverses W29's.** W29 looked at
+ * Songsterr, Ultimate Guitar and Guitar Pro, found that in all three the
+ * repeat is a switch and clicking the page does not touch it, and kept the
+ * portion on every click. He played with it and wants the other thing:
+ * *"if i single click a different part of the song it should go to that part
+ * but the selected area doesn't get unselected, it's like it doesn't exit
+ * loop mode"*. His word wins over the other players'.
+ *
+ * So the rule is where the click LANDS, and it is one line:
+ *
+ * - **Inside the portion** — you are working on this passage and moving your
+ *   place within it. The portion stays, the loop stays.
+ * - **Outside it** — you have gone somewhere else, and a loop over bars you
+ *   are no longer looking at is the state he called "it doesn't exit loop
+ *   mode". It goes, and so does the repeat.
+ *
+ * Nothing else changes: a drag still makes a portion, shift-click still
+ * extends one, Esc still clears, and a portion the player SAVED under a name
+ * is a different thing entirely and is never touched by any of this.
+ *
+ * Bars are PLAYED bars on both sides, which is what the caller has.
+ */
+export function clickClearsPortion(selection: BarRange | null, bar: number): boolean {
+  if (!selection) return false;
+  return bar < Math.min(selection.startBar, selection.endBar) ||
+    bar > Math.max(selection.startBar, selection.endBar);
+}
+
 /** A portion the player named and kept. Stored per song beside the mix. */
 export type SavedPortion = {
   id: string;

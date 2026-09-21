@@ -461,6 +461,25 @@ describe("the band from the file", () => {
     ]);
   });
 
+  /**
+   * A file with no drums in it gets no drummer (W34 item 7).
+   *
+   * The owner: *"is the drums playing by default? i've played tabs with no
+   * drums and it still plays them"*. The answer turned out to be the CLICK,
+   * whose sound on his machine is a kit — but the other candidate was this,
+   * and it is worth a line rather than an argument. Only a track the file
+   * marks as percussion becomes one; a guitar and a bass cannot.
+   */
+  it("gives the drums to nobody when the file has no drums", () => {
+    const twoTracks = parseSongFile(texBytes(GUITAR_AND_BASS), "two.alphatex");
+    const { backing } = buildBacking(twoTracks, 1);
+    expect(backing.tracks.map((t) => [t.name, t.role])).toEqual([
+      ["Bass", "bass"],
+      ["Lead", "synth"],
+    ]);
+    expect(backing.tracks.some((t) => t.role === "drums")).toBe(false);
+  });
+
   it("marks the part you are learning as the guide, and only that one", () => {
     const { backing } = buildBacking(parsed(), 0);
     expect(backing.tracks.filter((t) => t.guide).map((t) => t.name)).toEqual(["Guitar"]);
