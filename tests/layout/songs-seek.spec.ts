@@ -256,3 +256,208 @@ test.describe("a click on the tab goes where it was clicked", () => {
     );
   });
 });
+
+/**
+ * And the same click while the song is PLAYING, which is where the owner
+ * found the rest of it.
+ *
+ * *"when clicking on alphatab to go to a certain place, i think it's mostly
+ * flaky WHEN THE TABS ARE PLAYING"*, and *"if they're not playing sometimes
+ * they do a flickering thing like the cursor goes to where it was already and
+ * then to the target location"*.
+ *
+ * One cause: the engine reports where it is once per click tick — 625 ms at
+ * the fixture's 96 BPM — so for up to one of those intervals after a click
+ * the webview was still interpolating from the anchor it already had. The
+ * line went on walking at the bar the song was in and then teleported, and
+ * the page went with it. `TabStage` believes the click at once now and
+ * ignores reports until one agrees with it.
+ *
+ * Sampled every frame rather than asserted at the end: "it gets there
+ * eventually" was always true. What was wrong was the second and a half in
+ * between, and only a sample per frame can see it.
+ */
+test.describe("a click while the song is playing", () => {
+  /** Every frame for `ms`: where the line is, and where the page is. */
+  async function watch(page: import("@playwright/test").Page, ms: number) {
+    return page.evaluate(
+      (span: number) =>
+        new Promise<{ x: number; docY: number; scrollTop: number; at: number }[]>((resolve) => {
+          const out: { x: number; docY: number; scrollTop: number; at: number }[] = [];
+          const opened = performance.now();
+          const sample = () => {
+            const cursor = document.querySelector(".songs-tab-host .at-cursor-beat");
+            const viewport = document.querySelector(".songs-tab-viewport") as HTMLElement | null;
+            const host = document.querySelector(".songs-tab-host") as HTMLElement | null;
+            if (cursor && viewport && host) {
+              const c = cursor.getBoundingClientRect();
+              const h = host.getBoundingClientRect();
+              out.push({
+                // In the ENGRAVING's own coordinates, so a sample means the
+                // same thing however the page has been scrolled.
+                x: c.left - h.left,
+                docY: c.top - h.top,
+                scrollTop: viewport.scrollTop,
+                at: performance.now() - opened,
+              });
+            }
+            if (performance.now() - opened < span) requestAnimationFrame(sample);
+            else resolve(out);
+          };
+          requestAnimationFrame(sample);
+        }),
+      ms,
+    );
+  }
+
+  /**
+   * A bar somebody could actually click mid-song: below the line, and on the
+   * screen.
+   *
+   * Not a fixed bar number, because while the piece runs the page follows the
+   * cursor — parking it at bar 40 and clicking there is a gesture nobody can
+   * make, and a test that made it would be measuring a scroll fight rather
+   * than a seek.
+   */
+  async function belowTheLine(page: import("@playwright/test").Page) {
+    return page.evaluate(() => {
+      const api = (window as unknown as { __SONGS_TAB_API__?: any }).__SONGS_TAB_API__;
+      const lookup = api?.renderer?.boundsLookup;
+      const viewport = document.querySelector(".songs-tab-viewport") as HTMLElement | null;
+      const host = document.querySelector(".songs-tab-host") as HTMLElement | null;
+      const cursor = document.querySelector(".songs-tab-host .at-cursor-beat");
+      if (!lookup || !viewport || !host || !cursor) return null;
+      const lineY = cursor.getBoundingClientRect().top - host.getBoundingClientRect().top;
+      let best: { index: number; x: number; y: number; w: number; h: number } | null = null;
+      for (let i = 0; i < 120; i++) {
+        const bounds = lookup.findMasterBarByIndex(i);
+        if (!bounds) continue;
+        const v = bounds.visualBounds;
+        if (v.y <= lineY + 8) continue;
+        if (v.y < viewport.scrollTop) continue;
+        if (v.y + v.h > viewport.scrollTop + viewport.clientHeight) break;
+        best = { index: i, x: v.x, y: v.y, w: v.w, h: v.h };
+      }
+      return best
+        ? { ...best, lineY, scrollTop: viewport.scrollTop, clientHeight: viewport.clientHeight }
+        : null;
+    });
+  }
+
+  for (const zoom of ZOOMS) {
+    test(`never walks back to where the song was at zoom ${String(zoom)}`, async ({ page }) => {
+      await openShot(page, "songs-playing", WINDOW, "ember", LONG);
+      await setZoom(page, zoom);
+      await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+      await expect(page.locator(".songs-tab-host .at-cursor-beat")).toHaveCount(1);
+
+      const box = await belowTheLine(page);
+      expect(box, `no bar below the line and on screen at zoom ${String(zoom)}`).not.toBeNull();
+
+      // Clicked through the overlay's own box, so the point is in the
+      // engraving's coordinates whatever the page has scrolled to by the
+      // instant the press lands — which, mid-song, is not what it was when
+      // the bar was chosen.
+      await page.locator(".songs-tab-overlay").click({
+        position: { x: box!.x + box!.w / 2, y: box!.y + box!.h / 2 },
+      });
+      // Two and a half seconds, deliberately longer than the second and a
+      // half the click is believed for on its own: past that the ENGINE has
+      // to be the one keeping the line there. A window that stopped at the
+      // backstop would pass on a seek the engine never made.
+      const frames = await watch(page, 2600);
+      expect(frames.length, "no frames were sampled").toBeGreaterThan(20);
+
+      // The first few frames may still carry alphaTab's previous transform —
+      // it defers a position change by two animation frames — and after that
+      // the line is at the clicked bar or past it, and never above it again.
+      const settled = frames.filter((f) => f.at > 120);
+      expect(settled.length, "nothing was sampled after the click settled").toBeGreaterThan(10);
+      // eslint-disable-next-line no-console
+      console.log(
+        `[w36] zoom ${String(zoom)} playing: the line was at y=${String(
+          Math.round(box!.lineY),
+        )}, clicked printed bar ${String(box!.index + 1)} at y=${String(
+          Math.round(box!.y),
+        )}; the line then ran y=${String(Math.round(settled[0].docY))}…${String(
+          Math.round(settled[settled.length - 1].docY),
+        )}, the page ${String(Math.round(settled[0].scrollTop))}…${String(
+          Math.round(settled[settled.length - 1].scrollTop),
+        )} over ${String(settled.length)} frames`,
+      );
+
+      const above = settled.filter((f) => f.docY < box!.y - 2);
+      expect(
+        above.length,
+        `the line was above the clicked bar on ${String(above.length)} of ${String(
+          settled.length,
+        )} frames — it went back to where the song was`,
+      ).toBe(0);
+
+      // On the clicked bar's own row it is never left of the bar either.
+      const before = settled.filter((f) => f.docY < box!.y + box!.h && f.x < box!.x - 2);
+      expect(
+        before.length,
+        `the line was left of the clicked bar on ${String(before.length)} frames of its own row`,
+      ).toBe(0);
+
+      // And the page never lost it: the line is on the screen on every frame.
+      const lost = settled.filter(
+        (f) => f.docY < f.scrollTop - 2 || f.docY > f.scrollTop + box!.clientHeight + 2,
+      );
+      expect(
+        lost.length,
+        `the line was off the screen on ${String(lost.length)} of ${String(
+          settled.length,
+        )} frames — the page was dragged away from the bar that was clicked`,
+      ).toBe(0);
+    });
+  }
+
+  /**
+   * Stopped, the line takes exactly one new position: no bounce.
+   *
+   * The owner saw it *"go to where it was already and then to the target
+   * location"* — two writes to alphaTab's position, which defers each one by
+   * two animation frames and so draws both.
+   */
+  for (const zoom of ZOOMS) {
+    test(`moves once and not twice, stopped, at zoom ${String(zoom)}`, async ({ page }) => {
+      await openShot(page, "songs", WINDOW, "ember", LONG);
+      await setZoom(page, zoom);
+
+      const box = (await barBox(page, 39))!;
+      await page.evaluate((y: number) => {
+        const viewport = document.querySelector(".songs-tab-viewport")! as HTMLElement;
+        viewport.scrollTop = Math.max(0, y - 200);
+      }, box.y);
+
+      // Sampling starts BEFORE the press, so the old position is in the
+      // series and "it moved once" is a thing that can be said about it.
+      const watching = watch(page, 1200);
+      await page.locator(".songs-tab-overlay").click({
+        position: { x: box.x + box.w / 2, y: box.y + box.h / 2 },
+      });
+      const frames = await watching;
+      expect(frames.length, "no frames were sampled").toBeGreaterThan(20);
+
+      const key = (f: { x: number; docY: number }) =>
+        `${String(Math.round(f.x))},${String(Math.round(f.docY))}`;
+      const runs: string[] = [];
+      for (const frame of frames) {
+        const at = key(frame);
+        if (runs[runs.length - 1] !== at) runs.push(at);
+      }
+      // eslint-disable-next-line no-console
+      console.log(`[w36] zoom ${String(zoom)} stopped: the line took ${runs.join(" -> ")}`);
+      expect(
+        runs.length,
+        `the line took ${String(runs.length)} positions (${runs.join(" -> ")}) — one press should move it once`,
+      ).toBeLessThanOrEqual(2);
+      // And it ended on the bar that was clicked.
+      const last = frames[frames.length - 1];
+      expect(Math.abs(last.docY - box.y)).toBeLessThanOrEqual(box.h);
+      expect(last.x).toBeGreaterThanOrEqual(box.x - 2);
+    });
+  }
+});

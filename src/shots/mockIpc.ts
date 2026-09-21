@@ -1249,6 +1249,38 @@ export function installShotMock(shot: Shot, theme: string): void {
       onsetsSaid = 0;
       return { bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 };
     },
+    /*
+     * A click on the tab while the piece is running (W28, and W36 item 1).
+     *
+     * `commands.rs`'s `seek_song` walks the table the callback is walking and
+     * puts the cursor at that bar's first sample, so the next report comes
+     * from there; the count this harness derives its reports from is the same
+     * idea one level up. Without it the mock answered a seek by doing nothing
+     * at all, the song went on playing where it was, and the one thing a test
+     * about clicking mid-song wants to measure could not happen.
+     */
+    seek_song: (a) => {
+      const transport = songTransport;
+      if (!transport) return null;
+      const bars = transport.bars.slice(transport.range.startBar, transport.range.endBar + 1);
+      const first = bars[0];
+      if (!first) return null;
+      const beatTicks = (transport.ticksPerQuarter * 4) / (first.denominator || 4);
+      const countInBeats = (transport.countInBars || 0) * (first.numerator || 4);
+      // The nearest edge for a bar the range does not hold, which is what the
+      // real command's binary search falls back to.
+      const asked = Math.min(
+        Math.max(Number(a?.playedBar) || 0, transport.range.startBar),
+        transport.range.endBar,
+      );
+      let into = 0;
+      for (let i = transport.range.startBar; i < asked; i++) {
+        into += transport.bars[i]?.lengthTicks ?? 0;
+      }
+      beatCount = countInBeats + Math.round(into / beatTicks);
+      onsetsSaid = 0;
+      return null;
+    },
     clear_song: () => {
       songTransport = null;
       return null;

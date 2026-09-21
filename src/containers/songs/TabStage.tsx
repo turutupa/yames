@@ -706,6 +706,59 @@ export function TabStage({
    * state update per frame would put the whole stage through React sixty
    * times a second, which is the opposite of what item 2 asks for.
    */
+  /* ── A click's own answer, until the engine catches up (W36, item 1's
+   *    second half) ───────────────────────────────────────────────────────
+   *
+   * The owner, after the first fix landed: *"when clicking on alphatab to go
+   * to a certain place, i think it's mostly flaky WHEN THE TABS ARE
+   * PLAYING"*, and *"if they're not playing sometimes they do a flickering
+   * thing like the cursor goes to where it was already and then to the target
+   * location"*. Two reports, one cause.
+   *
+   * The engine is the clock and a click is a message to it. Clicking bar 60
+   * while the piece runs sets a range (or calls `seek_song`), the engine acts
+   * on it at the next buffer, and its next POSITION report — the only thing
+   * this component was ever told — arrives one click tick later: seven
+   * hundred milliseconds at 84 BPM. For that whole interval the webview went
+   * on interpolating from the anchor it already had, so the line kept walking
+   * at bar 5 and then teleported to bar 60. Stopped, the same shape in
+   * miniature: a render that still carried the old position wrote it to
+   * `tickPosition`, the next render wrote the new one, and alphaTab drew both
+   * — the line going back where it was and then to where you clicked.
+   *
+   * So the click is believed at once, here, and the engine's reports are
+   * ignored until one of them agrees with it. That is the whole of the fix:
+   * the moment somebody presses the page, the webview's position IS the
+   * clicked beat, the cursor snaps there, the follow-scroll goes there, and
+   * nothing that was already in flight can pull either of them back.
+   *
+   * "Agrees" is a window rather than an equality, because the report the
+   * engine sends after a seek is the first click tick AFTER it, not the seek
+   * itself — a beat or so past the bar line. Six quarter notes is a bar and a
+   * half at four-four, which is wider than any first report and narrower than
+   * the distance to anywhere somebody would have bothered clicking from. A
+   * report BEFORE the target is always stale, whichever direction the click
+   * went, so the window is one-sided.
+   *
+   * And a backstop: if no report ever agrees — an engine that refused the
+   * seek, a piece that ended — the click stops being believed after a second
+   * and a half and the engine is the truth again. A cursor frozen on a
+   * promise nobody kept is worse than a cursor in the wrong bar.
+   */
+  const [localSeek, setLocalSeek] = useState<number | null>(null);
+  const quarter = score.ticksPerQuarter > 0 ? score.ticksPerQuarter : 960;
+  useEffect(() => {
+    if (localSeek === null) return;
+    if (tick >= localSeek && tick <= localSeek + quarter * 6) setLocalSeek(null);
+  }, [tick, localSeek, quarter]);
+  useEffect(() => {
+    if (localSeek === null) return;
+    const timer = window.setTimeout(() => setLocalSeek(null), 1500);
+    return () => window.clearTimeout(timer);
+  }, [localSeek]);
+  /** Where the line is drawn: the click's answer, or the engine's. */
+  const shownTick = localSeek ?? tick;
+
   const motionRef = useRef<CursorMotion | null>(null);
   /** The frame interval, smoothed — the lead is two of them. */
   const frameMsRef = useRef(0);
@@ -716,14 +769,14 @@ export function TabStage({
       // Stopped is a place, not a journey: the playhead, or the top of the
       // range, written once.
       motionRef.current = null;
-      api.tickPosition = tick;
+      api.tickPosition = shownTick;
       return;
     }
 
     motionRef.current = onReport(
       score,
       motionRef.current,
-      { tick, pass, atMs: performance.now() },
+      { tick: shownTick, pass, atMs: performance.now() },
       tempoPercent,
     );
 
@@ -751,7 +804,12 @@ export function TabStage({
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [tick, pass, playing, tempoPercent, endTick, score, ready]);
+    // `shownTick` and not `tick`: a click is believed before the engine
+    // answers (see above), and re-anchoring on it is what makes the line
+    // start travelling from the bar that was clicked instead of from the bar
+    // the song was in half a second ago. `onReport` sees a tick the tempo map
+    // does not lead to and snaps, which is exactly right for a seek.
+  }, [shownTick, pass, playing, tempoPercent, endTick, score, ready]);
 
   /**
    * Which group each onset is engraved in, worked out once per engraving.
@@ -885,6 +943,26 @@ export function TabStage({
   // be torn down and rebuilt every time the selection changes.
   const latest = useRef({ selection, onSelect, onSeek, onClear, score });
   latest.current = { selection, onSelect, onSeek, onClear, score };
+
+  /**
+   * Go to a played bar: believe it here, then tell whoever owns the engine.
+   *
+   * Both halves matter and they are one gesture, so they are one function —
+   * the pointer and the arrow keys both go through it, and neither can move
+   * the playhead without the line and the page following it at once
+   * (W36 item 1). `onSeek` decides what the ENGINE does about it; this
+   * decides what the player SEES, which is the half that was arriving up to
+   * a click tick late.
+   */
+  const goTo = useCallback((playedBar: number) => {
+    const { score: current, onSeek: seek } = latest.current;
+    if (!seek) return;
+    const at = current.bars[playedBar]?.startTick;
+    if (at !== undefined) setLocalSeek(at);
+    seek(playedBar);
+  }, []);
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
   /** Where the arrows start counting from. Read, not depended on. */
   const playheadRef = useRef<number | null>(playhead);
   playheadRef.current = playhead;
@@ -994,7 +1072,7 @@ export function TabStage({
         latest.current.onSelect?.(dragRange(dragging));
         return;
       }
-      if (press) latest.current.onSeek?.(press.bar);
+      if (press) goToRef.current(press.bar);
     };
 
     overlay.addEventListener("pointerdown", onDown);
@@ -1032,6 +1110,7 @@ export function TabStage({
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       const { score: current, selection: chosen, onSeek: seek, onClear: clear } = latest.current;
+      const go = goToRef.current;
       if (e.key === "Escape") {
         if (!chosen) return;
         e.preventDefault();
@@ -1058,7 +1137,10 @@ export function TabStage({
       else if (e.key === "Home") next = floor;
       if (next === null) return;
       e.preventDefault();
-      seek(next);
+      // Through `goTo`, like a click: an arrow that moved the playhead
+      // without the line following it for half a second is the same
+      // complaint in a different gesture.
+      go(next);
     },
     [],
   );
@@ -1174,7 +1256,7 @@ export function TabStage({
     const viewport = host?.closest<HTMLElement>(".songs-tab-viewport");
     const lookup = apiRef.current?.renderer?.boundsLookup;
     if (!host || !viewport || !lookup) return;
-    const printed = printedBarOfPlayed(score, playedBarAtTick(score, tick));
+    const printed = printedBarOfPlayed(score, playedBarAtTick(score, shownTick));
     if (printed === null) return;
     const bounds = lookup.findMasterBarByIndex(printed);
     if (!bounds) return;
@@ -1202,8 +1284,10 @@ export function TabStage({
     });
     // `rendered` is the engraving these rectangles belong to: a re-engrave at
     // another zoom moves every bar, and the place has to be found again on the
-    // new page rather than kept from the old one.
-  }, [tick, ready, rendered, playing, score]);
+    // new page rather than kept from the old one. `shownTick` rather than
+    // `tick`, so a click takes the page with it at once and a report that
+    // predates the click cannot drag it back (W36 item 1).
+  }, [shownTick, ready, rendered, playing, score]);
 
   return (
     <div className="songs-tab-viewport" data-selecting={drag ? "" : undefined}>
