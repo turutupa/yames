@@ -13,7 +13,24 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
-echo "==> regenerating"
+# From scratch, not on top of what the build left behind. Two things get in
+# the way otherwise, and neither is drift:
+#
+#   * `Externals/` fills up with the compiled Rust library once a build has
+#     run, and the next `xcodegen` pass adds file references for everything it
+#     finds there — forty lines of `libapp.a` groups that exist only because
+#     this job already built the app.
+#   * `yames_iOS/Info.plist` is rewritten during a build (that is where
+#     `Info.ios.plist` is merged in), and `ios init` leaves an existing one
+#     alone, so what would be compared is the build's file, not the
+#     generator's.
+#
+# Deleting the directory first and regenerating the whole thing is what
+# actually answers the question this check asks: is the copy in the repository
+# what the generator writes? Anything the generator does not write back comes
+# out as a deletion, which is the right answer too.
+echo "==> regenerating from scratch"
+rm -rf src-tauri/gen/apple
 bash "$(dirname "$0")/ios-generate-project.sh"
 
 # A build leaves its own output inside the project directory; only tracked

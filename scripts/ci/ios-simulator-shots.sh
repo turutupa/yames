@@ -215,7 +215,15 @@ test -n "$END_STORE" && cat "$END_STORE"
 # The app's own log. `--style compact` and a predicate on the process, so what
 # comes out is Yames talking and not the whole simulator.
 # ---------------------------------------------------------------------------
-echo "==> the app's log for this session"
+echo "==> what Yames itself said"
+# Its own lines, separately and in full. The broad capture below is tailed —
+# the app is far noisier than it is talkative, and WebKit's chatter would push
+# a startup line out of any window worth keeping.
+xcrun simctl spawn "$UDID" log show --last 12m --style compact \
+  --predicate 'eventMessage CONTAINS "[YamesMobile]" OR eventMessage CONTAINS "[yames]"' \
+  2>/dev/null | tee "$OUT/yames-log.txt" || echo "(no log)"
+
+echo "==> the app's log for this session (last 200 lines)"
 xcrun simctl spawn "$UDID" log show --last 12m --style compact \
   --predicate 'processImagePath CONTAINS "Yames" OR eventMessage CONTAINS "YamesMobile" OR eventMessage CONTAINS "[yames]"' \
   2>/dev/null | tail -200 | tee "$OUT/app-log.txt" || echo "(no log)"
@@ -225,7 +233,7 @@ xcrun simctl spawn "$UDID" log show --last 12m --style compact \
 # none of the interruption handlers ever fire. This one line at startup is the
 # whole proof that the plugin loaded and configured the session.
 echo "==> the phone's native half"
-if grep -F "[YamesMobile]" "$OUT/app-log.txt" 2>/dev/null; then
+if grep -F "[YamesMobile]" "$OUT/yames-log.txt" 2>/dev/null; then
   :
 else
   echo "::warning::nothing from the native half in the log — did the plugin load?"

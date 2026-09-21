@@ -17,7 +17,8 @@
 | `.github/workflows/ios.yml` | Generates, type-checks, compiles, boots and photographs the app. Triggered on push to `mob/m06-ios` and by hand. |
 | `src-tauri/gen/apple` | The Xcode project, generated on the runner and committed, with the Yames icon, `com.yames.metronome`, portrait, iOS 15. |
 | `src-tauri/plugins/yames-mobile/ios/` | The Swift half of the plugin: the audio session, the interruptions, the idle timer, the links. |
-| `src-tauri/Info.ios.plist` | `UIBackgroundModes: audio`, portrait, and — the interesting half — nothing else. |
+| `src-tauri/ios-project.yml` | The Xcode project as a template: portrait, background audio, manual signing with no identity, and the one Xcode 26 workaround the app cannot link without. |
+| `src-tauri/Info.ios.plist` | The same two keys through Tauri's own plist merge — and, the interesting half, nothing else. |
 | Screenshots | `plans/tasks/mobile/m06/` |
 | `M06b-OWNER-STEPS.md` | Everything the owner has to do, and which of it needs a Mac (none of it). |
 
@@ -153,9 +154,54 @@ The files outside M08's set that changed are the plugin crate
 
 ## Gates
 
-### On the runner
+### On the runner — GitHub `macos-latest`, Xcode 26.6, iPhone 15 simulator
 
-*(filled in from the green run — see the table below)*
+| Gate | Result |
+|---|---|
+| `cargo check --lib --target aarch64-apple-ios` | **Pass.** Builds the Swift package on the way through, so this is also the first check that the plugin's iPhone half compiles. |
+| `cargo check --lib --target aarch64-apple-ios-sim` | **Pass.** |
+| `tauri ios init` reproduces `src-tauri/gen/apple` | **Pass**, from a clean tree. |
+| Phone bundle free of the cut features (`check-mobile-bundle.mjs`) | **Pass**, both times it is built. |
+| The screenshot hooks are absent from the shipping bundle | **Pass.** Neither marker string is in the `dist/` that goes into the device archive. |
+| `tauri ios build --target aarch64-sim` | **Pass.** |
+| The app boots on an iPhone 15 simulator and reaches its own interface | **Pass.** Six screenshots, below. |
+| A changed setting survives a relaunch | **Pass**, read-back half only — see the note under the screenshots. |
+| `tauri ios build --target aarch64` archives for a real iPhone, unsigned | **Pass.** `Yames.app`, arm64, `iPhoneOS`, minimum iOS 15.0, `com.yames.metronome`, 1.1.0. The export that follows fails for want of a signature, which is the point. |
+| The built app asks a phone for nothing (`ios-check-plist.sh`) | **Pass.** Zero `NS*UsageDescription` keys of the fifteen checked; `UIBackgroundModes` is `[audio]`; the only orientation is portrait. |
+
+**The app, unsigned, for a real iPhone:** `Yames.app` is **6.2 MB** on disk and
+the binary inside it is **4.8 MB**. For scale, ROADMAP §5.0.1 budgets 80 MB
+per platform and the Android arm64 APK is 12.8 MB (M05). Neither number is a
+download size: the App Store re-packages and thins the app, and this one has
+never been through that.
+
+### The screenshots — `plans/tasks/mobile/m06/`
+
+| File | What it shows |
+|---|---|
+| `00-first-launch-onboarding.png` | A fresh install, first launch: the phone's three-step setup — "Set me up (about a minute)" / "Just give me the click". Not a white WebView, and not the desktop wizard: no instrument step, no coach, no microphone. |
+| `01-metronome.png` | The metronome at **143 BPM** in the **neon** theme with triplets (`12 clicks/bar`) — none of which is a default. All three were written into the settings store while the app was shut, so this picture is the app reading them back on a cold launch. |
+| `02-drill.png` | The drill: the 80 → 120 plan, +5 BPM every 12 bars, Linear/Zigzag/Adaptive, "9 steps · 108 bars · about 4m 23s", and the climb chart. |
+| `03-setlist.png` | The setlist tab, empty, with its explanation and "New setlist". |
+| `04-settings.png` | Settings, General. Language, Button flash, Active border, Drill auto-collapse, Run setup again — and no coach, no hotkeys, no devices, no microphone. The mobile cut, seen rather than asserted. |
+| `05-zen.png` | Zen, with the × exit button and the hint that names it (M05's fix, now confirmed on the other phone), the transport row, and 143 BPM. |
+| `06-metronome-again.png` | The metronome again after five more launches: still 143, still neon. |
+
+**What the tab bar and the notch say.** The app's header clears the status bar
+and Dynamic Island, and the bottom tab labels clear the home indicator, on all
+six. The gap at the bottom measures ~34 pt at 3x, which is exactly
+`safe-area-inset-bottom` on an iPhone 15 — so **WKWebView's
+`env(safe-area-inset-*)` tells the truth and iOS needs none of the
+insets-from-native workaround Android needed in M05b.** That was the open
+question the brief asked to answer with the shots rather than assume, and the
+answer is no: the Swift half sends no insets and no `window_insets` event.
+
+**What "a changed setting survives a relaunch" does and does not prove here.**
+Every screen above is a cold launch against a store written while the app was
+shut, so the *read* half — store → Rust → interface — is proven six times
+over. The *write* half is not: nothing in CI taps a control, so no setting was
+ever changed from inside the app on iOS. It is the same Rust store code
+Android exercised end to end in M05, but on iOS it has only been read.
 
 ### On Windows, locally
 
@@ -238,6 +284,26 @@ exports, and exporting is the only step that genuinely needs an identity.
 * **A failed run does not save the cargo cache**, so every failure pays a cold
   iOS dependency build. That is the reason the workflow puts both `cargo
   check`s first: they are the cheapest things in it that can fail.
+* **Nothing in CI presses play**, so the audio session is never activated,
+  none of the interruption handlers ever fires, and no click is ever rendered.
+  The plugin says one line at startup (`[YamesMobile] audio session
+  configured: .playback/.default, asked 48000 Hz / 5.0 ms`) precisely because
+  that is otherwise the only sign from outside the app that its native half is
+  running at all. What *is* visible in the log is CoreAudio opening a
+  `RemoteIO` stream at 48 000 Hz, 2 channels, Float32, 512-frame buffer —
+  cpal's backend doing its job.
+* **The drift check regenerates from an empty directory.** Checking after a
+  build compares the wrong thing twice over: `Externals/` fills with the
+  compiled Rust library and the next `xcodegen` pass adds forty lines of file
+  references for it, and `yames_iOS/Info.plist` is rewritten during the build
+  (that is where `Info.ios.plist` merges in) while `ios init` leaves an
+  existing one alone.
+* **`Info.ios.plist` is belt to the template's braces.** The keys that matter
+  — background audio and the portrait lock — are in `src-tauri/ios-project.yml`
+  and therefore in the generated project itself, which is what the check reads
+  off the built app. `src-tauri/Info.ios.plist` says the same thing through
+  Tauri's own merge. Either alone would do; both is deliberate, because the
+  one that is easy to lose in a CLI upgrade is the template.
 
 ---
 
