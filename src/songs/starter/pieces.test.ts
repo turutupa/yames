@@ -118,6 +118,18 @@ describe("the starter shelf", () => {
         }
       });
 
+      it("names them the way a musician would write them", () => {
+        // W35 — a section's name is printed on the tab and on the chips above
+        // it. `\section TwoStrings` is an alphaTex identifier and it reached
+        // the screen as "TwoStrings"; a quoted argument takes the spaces.
+        for (const section of score.sections) {
+          expect(
+            section.name,
+            `"${section.name}" is an identifier, not something a person wrote`,
+          ).not.toMatch(/[a-z][A-Z]/);
+        }
+      });
+
       it("runs at a tempo somebody would practise at", () => {
         expect(score.tempoMap.length).toBeGreaterThan(0);
         expect(score.tempoMap[0].tick).toBe(0);
