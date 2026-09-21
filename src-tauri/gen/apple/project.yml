@@ -1,0 +1,129 @@
+# The Xcode project Yames is built from, as a template.
+#
+# A copy of the Tauri CLI's own `templates/mobile/ios/project.yml` (2.10.1)
+# with three changes, and `tauri.ios.conf.json` points `bundle.iOS.template`
+# here so `tauri ios init` uses it. That path is written as
+# `src-tauri/ios-project.yml` — relative to where the CLI is *run*, which for
+# `npm run tauri` is the repository root, not to the config file beside this
+# one. It is a template rather than an edit to
+# the generated `gen/apple/project.yml` because that file is regenerated, and
+# a hand edit there would be silently undone — and caught by the drift check
+# at the end of `.github/workflows/ios.yml`.
+#
+# The three changes, each explained where it appears below:
+#   * portrait only,
+#   * `UIBackgroundModes: audio`,
+#   * the Swift library search path, which is a workaround for Xcode 26.
+#
+# Everything else is upstream's, handlebars and all. When the Tauri CLI is
+# upgraded, diff this against the new upstream template before assuming it
+# still applies.
+name: yames
+options:
+  bundleIdPrefix: com.yames.metronome
+  deploymentTarget:
+    iOS: 15.0
+fileGroups: [../../src]
+configs:
+  debug: debug
+  release: release
+settingGroups:
+  app:
+    base:
+      PRODUCT_NAME: Yames
+      PRODUCT_BUNDLE_IDENTIFIER: com.yames.metronome
+      DEVELOPMENT_TEAM: BBG489SR42
+targetTemplates:
+  app:
+    type: application
+    sources:
+      - path: Sources
+    scheme:
+      environmentVariables:
+        RUST_BACKTRACE: full
+        RUST_LOG: info
+    settings:
+      groups: [app]
+targets:
+  yames_iOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Assets.xcassets
+      - path: Externals
+      - path: yames_iOS
+      - path: assets
+        buildPhase: resources
+        type: folder
+      - path: LaunchScreen.storyboard
+    info:
+      path: yames_iOS/Info.plist
+      properties:
+        LSRequiresIPhoneOS: true
+        UILaunchStoryboardName: LaunchScreen
+        UIRequiredDeviceCapabilities: [arm64, metal]
+        # Portrait only, mobile plan §1 — the same lock Android got in M05.
+        # A metronome on a music stand has one orientation.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+        # The whole reason the click survives a locked screen. Paired with the
+        # `.playback` audio session in the plugin's Swift half: this is the
+        # permission, the session is the use of it. `ios-check-plist.sh` fails
+        # the build if it is ever missing from the built app — and fails it
+        # just as hard if anything asking for the microphone, the camera,
+        # Bluetooth or the network appears beside it.
+        UIBackgroundModes:
+          - audio
+        CFBundleShortVersionString: 1.1.0
+        CFBundleVersion: "1.1.0"
+    entitlements:
+      path: yames_iOS/yames_iOS.entitlements
+    scheme:
+      environmentVariables:
+        RUST_BACKTRACE: full
+        RUST_LOG: info
+    settings:
+      base:
+        ENABLE_BITCODE: false
+        ARCHS: [arm64]
+        VALID_ARCHS: arm64 
+        # `DT_TOOLCHAIN_DIR`, not `TOOLCHAIN_DIR`. This is the one change to
+        # the stock template that is a bug fix rather than a product
+        # decision: under Xcode 26, `TOOLCHAIN_DIR` resolves to the *Metal*
+        # toolchain, which contains no Swift libraries, and the linker then
+        # cannot find `swiftCompatibility56` — so nothing with Swift in it
+        # links, which since M06a is the whole app:
+        #
+        #   ld: warning: search path '…Metal.xctoolchain/usr/lib/swift/
+        #       iphonesimulator' not found
+        #   Undefined symbols for architecture arm64:
+        #     "__swift_FORCE_LOAD_$_swiftCompatibility56", referenced from:
+        #       …_$_tauri_plugin_yames_mobile in libapp.a(YamesMobilePlugin.swift.o)
+        #
+        # `DT_TOOLCHAIN_DIR` always points at XcodeDefault.xctoolchain, which
+        # is where those libraries actually are.
+        LIBRARY_SEARCH_PATHS[arch=x86_64]: $(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(DT_TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)
+        LIBRARY_SEARCH_PATHS[arch=arm64]: $(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(DT_TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: true
+        EXCLUDED_ARCHS[sdk=iphoneos*]: x86_64
+      groups: [app]
+    dependencies:
+      - framework: libapp.a
+        embed: false
+      - sdk: CoreGraphics.framework
+      - sdk: Metal.framework
+      - sdk: MetalKit.framework
+      - sdk: QuartzCore.framework
+      - sdk: Security.framework
+      - sdk: UIKit.framework
+      - sdk: WebKit.framework
+    preBuildScripts:
+      - script: npm run -- tauri ios xcode-script -v --platform ${PLATFORM_DISPLAY_NAME:?} --sdk-root ${SDKROOT:?} --framework-search-paths "${FRAMEWORK_SEARCH_PATHS:?}" --header-search-paths "${HEADER_SEARCH_PATHS:?}" --gcc-preprocessor-definitions "${GCC_PREPROCESSOR_DEFINITIONS:-}" --configuration ${CONFIGURATION:?} ${FORCE_COLOR} ${ARCHS:?}
+        name: Build Rust Code
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Externals/x86_64/${CONFIGURATION}/libapp.a
+          - $(SRCROOT)/Externals/arm64/${CONFIGURATION}/libapp.a
