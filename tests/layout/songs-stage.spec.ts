@@ -160,6 +160,91 @@ test.describe("the tab uses all the room", () => {
   });
 
   /**
+   * The line travels; it does not jump a block of notes at a time.
+   *
+   * The owner: *"there's a sweep picking section that it's not following note
+   * per note in a smooth movement, it's doing blocks at a time"*. The engine
+   * reports once per click tick — 625 ms at the fixture's 96 BPM — so before
+   * `songs/cursor.ts` the cursor had exactly ONE position over the half
+   * second sampled here, whatever was written in those bars.
+   *
+   * Measured on the cursor's own rectangle, on the page's own frames, because
+   * the question is what a player sees and not what a number says.
+   */
+  test("moves the cursor every frame while the song plays", async ({ page }) => {
+    await openShot(page, "songs-playing", { width: 1440, height: 900 });
+    await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+    await expect(page.locator(".songs-tab-host .at-cursor-beat")).toHaveCount(1);
+
+    const xs = await page.evaluate(
+      () =>
+        new Promise<number[]>((resolve) => {
+          const cursor = document.querySelector(".songs-tab-host .at-cursor-beat");
+          if (!cursor) {
+            resolve([]);
+            return;
+          }
+          const out: number[] = [];
+          const opened = performance.now();
+          const sample = () => {
+            out.push(cursor.getBoundingClientRect().x);
+            if (performance.now() - opened < 500) requestAnimationFrame(sample);
+            else resolve(out);
+          };
+          requestAnimationFrame(sample);
+        }),
+    );
+    expect(xs.length, "no frames were sampled").toBeGreaterThan(10);
+
+    // Half a second is less than one beat of the fixture, so at most one
+    // system wrap or loop seam can fall inside it; everything else must be a
+    // step forwards.
+    const backwards = xs.filter((x, i) => i > 0 && x < xs[i - 1] - 1);
+    expect(
+      backwards.length,
+      `the cursor went backwards ${String(backwards.length)} times in half a second`,
+    ).toBeLessThanOrEqual(1);
+
+    const distinct = new Set(xs.map((x) => Math.round(x * 10))).size;
+    expect(
+      distinct,
+      `the cursor took ${String(distinct)} positions across ${String(
+        xs.length,
+      )} frames of half a second — a report arrives every 625ms, so anything near 1 is the block-at-a-time bug`,
+    ).toBeGreaterThan(8);
+  });
+
+  /**
+   * And the same thing as pictures: six frames inside one beat.
+   *
+   * A number saying the cursor moved is not the same as seeing it stand
+   * between two notes of a beat, and that is what the owner reported on.
+   */
+  test("photographs the cursor between two notes of one beat", async ({ page }) => {
+    await openShot(page, "songs-playing", { width: 1440, height: 900 });
+    const host = page.locator(".songs-tab-host");
+    const box = (await host.boundingBox())!;
+    const xs: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      xs.push(
+        await page.evaluate(
+          () =>
+            document.querySelector(".songs-tab-host .at-cursor-beat")?.getBoundingClientRect().x ??
+            -1,
+        ),
+      );
+      await page.screenshot({
+        path: path.join(OUT, `cursor-frame-${String(i)}.png`),
+        clip: { x: box.x, y: box.y, width: Math.min(700, box.width), height: 160 },
+        scale: "css",
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.log(`[w34] cursor x across six frames: ${xs.map((x) => x.toFixed(1)).join(", ")}`);
+    expect(new Set(xs.map((x) => Math.round(x))).size).toBeGreaterThan(2);
+  });
+
+  /**
    * The pictures. Not an assertion — a thing to look at.
    *
    * Stopped and playing, at the two windows the brief names, plus the numbers

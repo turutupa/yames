@@ -51,6 +51,8 @@ import {
 // WebView2, WKWebView, WebKitGTK — has supported woff2 for years.
 import bravuraWoff2 from "@coderline/alphatab/font/Bravura.woff2?url";
 import { parseSongFile } from "../../songs/import";
+import { cursorTickAt, leadFromFrame, onReport } from "../../songs/cursor";
+import type { CursorMotion } from "../../songs/cursor";
 import { groupClassByTick, lightTargets, tickByOnset } from "./tabGroups";
 import { handleRects, selectionBands } from "./selectionBands";
 import type { Rect } from "./selectionBands";
@@ -75,8 +77,27 @@ export interface TabStageProps {
   score: SongScore;
   /** The file's bytes, kept so the tab is drawn from the source (SONGS A2). */
   source: Uint8Array;
-  /** Where the cursor stands, in ticks from the start of the song. */
+  /**
+   * Where the cursor stands, in ticks from the start of the song.
+   *
+   * The ENGINE's last word, not a per-frame position: it changes once per
+   * click tick while the transport runs, and the gliding between two of them
+   * is this file's own (`songs/cursor.ts`, W34 item 1).
+   */
   tick: number;
+  /**
+   * The transport is running, so the cursor travels between reports.
+   *
+   * Stopped, `tick` is simply written where it is told and nothing animates —
+   * a page nobody is playing has no motion to interpolate.
+   */
+  playing?: boolean;
+  /** Which time round the range `tick` was reported on. A change is a seam. */
+  pass?: number;
+  /** The speed the engine is playing at, 50–100. Half speed, half the rate. */
+  tempoPercent?: number;
+  /** The last tick of the bars being played; the cursor waits there. */
+  endTick?: number;
   /** Re-render when the theme changes: the colours are settings, not CSS. */
   themeId: string;
   /**
@@ -474,6 +495,10 @@ export function TabStage({
   score,
   source,
   tick,
+  playing = false,
+  pass = 0,
+  tempoPercent = 100,
+  endTick = Number.POSITIVE_INFINITY,
   themeId,
   lights,
   schedule,
@@ -581,13 +606,85 @@ export function TabStage({
     return () => viewport.removeEventListener("wheel", onWheel);
   }, [onZoom, ready]);
 
-  // The cursor. One property set per beat event, measured at 0.02 ms — this
-  // is the whole of the "driven by the engine" requirement.
+  /**
+   * ── The cursor, and how it gets from one report to the next (W34 item 1) ──
+   *
+   * The owner: *"there's a sweep picking section that it's not following note
+   * per note in a smooth movement, it's doing blocks at a time"*. It was one
+   * property set per beat event — seven hundred milliseconds apart at 84 BPM
+   * — so a run of sixteenths passed entirely between two writes and the line
+   * crossed the whole run in one step.
+   *
+   * The engine is still the only clock. What changed is that the report is
+   * now an ANCHOR rather than the whole answer: `songs/cursor.ts` advances
+   * the tick through the score's tempo map on `requestAnimationFrame`, and
+   * every report re-anchors it, so the line glides at the screen's own rate
+   * and cannot drift past one report's worth of error.
+   *
+   * Two things about alphaTab that decide the shape of this:
+   *
+   * **Writing `tickPosition` is cheap here, and only here.** The player is
+   * `EnabledExternalMedia` and is never started, so the sequencer's seek is
+   * arithmetic — `_mainSilentProcess` does nothing while nothing is playing —
+   * and no audio, no MIDI and no highlighting pass is on this path. Sixty
+   * writes a second is sixty transform updates.
+   *
+   * **A seek re-places the cursor at a FRACTION of a beat.** alphaTab skips
+   * the work when the tick is still inside the same engraved beat — except on
+   * a seek, which every `tickPosition` write is, and which places the line at
+   * `onNotesX + width * (tick - beatStart) / beatLength`. That is why this
+   * works at all: the line moves WITHIN a note, not only from note to note.
+   *
+   * Nothing here re-renders React. The cursor is alphaTab's own `div`; a
+   * state update per frame would put the whole stage through React sixty
+   * times a second, which is the opposite of what item 2 asks for.
+   */
+  const motionRef = useRef<CursorMotion | null>(null);
+  /** The frame interval, smoothed — the lead is two of them. */
+  const frameMsRef = useRef(0);
   useEffect(() => {
     const api = apiRef.current;
     if (!api || !ready) return;
-    api.tickPosition = tick;
-  }, [tick, ready]);
+    if (!playing) {
+      // Stopped is a place, not a journey: the playhead, or the top of the
+      // range, written once.
+      motionRef.current = null;
+      api.tickPosition = tick;
+      return;
+    }
+
+    motionRef.current = onReport(
+      score,
+      motionRef.current,
+      { tick, pass, atMs: performance.now() },
+      tempoPercent,
+    );
+
+    let frame = 0;
+    let previous = 0;
+    const step = (now: number) => {
+      frame = requestAnimationFrame(step);
+      if (previous > 0) {
+        const delta = now - previous;
+        // A running mean over about half a second, so one long frame does not
+        // move the lead and a change of monitor does within the bar.
+        frameMsRef.current =
+          frameMsRef.current > 0 ? frameMsRef.current * 0.9 + delta * 0.1 : delta;
+      }
+      previous = now;
+      const motion = motionRef.current;
+      if (!motion) return;
+      const next = cursorTickAt(score, motion, now, {
+        percent: tempoPercent,
+        endTick,
+        leadMs: leadFromFrame(frameMsRef.current),
+      });
+      motionRef.current = next.motion;
+      api.tickPosition = next.tick;
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [tick, pass, playing, tempoPercent, endTick, score, ready]);
 
   /**
    * Which group each onset is engraved in, worked out once per engraving.

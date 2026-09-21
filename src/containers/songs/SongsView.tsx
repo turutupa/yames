@@ -90,7 +90,7 @@ import { useStageIsNarrow } from "./useStageIsNarrow";
 import { useStageView } from "./useStageView";
 import { ZOOM_MAX, ZOOM_MIN } from "../../songs/stageView";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
-import { buildSchedule, meterAt, sectionRange } from "../../songs/schedule";
+import { buildSchedule, meterAt, rangeTicks, sectionRange } from "../../songs/schedule";
 import { portionRange } from "../../songs/selection";
 import { printedBarNumber, songPosition } from "../../songs/position";
 import type { SongsSession } from "../main-window/hooks/useSongsSession";
@@ -222,6 +222,18 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     }
     return position?.tick ?? 0;
   }, [score, isPlaying, session.playFrom, position?.tick]);
+
+  /**
+   * Where the bars being played stop, in the song's own ticks.
+   *
+   * The cursor's far end: it waits there rather than gliding off the end of a
+   * range while the engine gets round to reporting that it has come back to
+   * the top (W34 item 1).
+   */
+  const rangeEndTick = useMemo(
+    () => (score ? rangeTicks(score, range).end : 0),
+    [score, range],
+  );
 
   /**
    * The count, while one is being counted in.
@@ -863,6 +875,15 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   score={score}
                   source={source}
                   tick={tick}
+                  /* W34 item 1 — what the cursor needs to get from one of the
+                     engine's reports to the next: whether anything is
+                     running, which time round this report was on, the speed
+                     the tempo map is being played at, and where the bars
+                     being played stop. `TabStage` does the gliding. */
+                  playing={isPlaying}
+                  pass={position?.pass ?? 0}
+                  tempoPercent={tempoPercent}
+                  endTick={rangeEndTick}
                   themeId={themeId}
                   lights={lights}
                   schedule={schedule}
