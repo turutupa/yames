@@ -90,7 +90,7 @@ import { blankStrip } from "../../../takes/clipStrip";
 import type { ClipBandChoice } from "../../../takes/clipStrip";
 import { CLIP_BAND_KEY } from "../../../takes/keys";
 import { storeLoad, storeSave } from "../../../ipc";
-import { captionAt, clipSpan } from "../../../takes/clip";
+import { captionAt, clipSpan } from "../../../songs/camera/songClip";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";

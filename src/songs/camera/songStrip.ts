@@ -1,4 +1,4 @@
-import { captionAt, clipWindowMs, visibleBars, visibleTicks } from "../../takes/clip";
+import { captionAt, clipWindowMs, visibleBars, visibleTicks } from "./songClip";
 import type { Tape } from "./tape";
 import type { BarRange } from "../schedule";
 import type { SongScore } from "../types";

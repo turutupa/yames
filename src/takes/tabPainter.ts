@@ -47,7 +47,11 @@
  * refilled in place. Only the window is walked — `visibleTabNotes` bisects —
  * so a six-minute attempt costs what a four-bar one does.
  */
-import { captionAt, clipPad, clipSize, fullBandHeight, visibleBars } from "./clip";
+import { clipPad, clipSize, fullBandHeight } from "./clip";
+// The song's half of the clip arithmetic (W33 item 4). This painter is the
+// one thing under `takes/` that IS about songs — it draws a score — so it is
+// also the one that still reaches across.
+import { captionAt, visibleBars } from "../songs/camera/songClip";
 import type { ClipBox, ClipShape } from "./clip";
 import type { ClipPalette } from "./clipRecorder";
 import { barLengthMs } from "../songs/camera/tape";
