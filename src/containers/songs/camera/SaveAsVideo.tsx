@@ -46,7 +46,7 @@ import { CLIP_BRAND_KEY } from "../../../songs/camera/keys";
 import { placesFor, SHARE_PLACES } from "../../../songs/camera/share";
 import { clipSeconds } from "../../../songs/camera/clip";
 import type { ClipShape } from "../../../songs/camera/clip";
-import type { ClipStrip } from "../../../takes/clipStrip";
+import type { ClipBandChoice, ClipStrip } from "../../../takes/clipStrip";
 import { recordClip } from "../../../songs/camera/clipRecorder";
 import type { ClipPalette, ClipRun } from "../../../songs/camera/clipRecorder";
 import { clipSupport } from "../../../songs/camera/support";
@@ -94,6 +94,14 @@ export type SaveAsVideoProps = {
    * left out rather than shown doing nothing.
    */
   canShowMarks?: boolean;
+  /**
+   * What goes under the picture — the tab, the marks alone, or nothing (W31).
+   *
+   * Owned by the caller because the caller is the only thing that can build
+   * the renderer each answer means, and remembered by it for the same reason.
+   * Absent for a jam, which has no tab and is not asked.
+   */
+  band?: { value: ClipBandChoice; onChange: (next: ClipBandChoice) => void };
   /** The take's mix, and its picture when it has one. */
   mixSrc: string;
   videoSrc: string | null;
@@ -177,6 +185,7 @@ export function SaveAsVideo({
   spanFor,
   canChooseBars = true,
   canShowMarks = true,
+  band,
   mixSrc,
   videoSrc,
   startOffsetMs,
@@ -398,6 +407,34 @@ export function SaveAsVideo({
             </>
           )}
 
+          {/* W31 — what scrolls under the picture. The tab by default: it is
+              what makes a clip a play-along video rather than a video with a
+              scorecard on it. The dots stay because somebody will want them,
+              and "nothing" because somebody is showing the playing. */}
+          {band && (
+            <>
+              <span className="songs-strip-label">{t("songs.clip.underPicture")}</span>
+              <div
+                className="songs-clip-choice"
+                role="group"
+                aria-label={t("songs.clip.underPicture")}
+              >
+                {(["tab", "marks", "none"] as const).map((which) => (
+                  <button
+                    key={which}
+                    type="button"
+                    className="songs-chip"
+                    data-active={band.value === which ? "" : undefined}
+                    aria-pressed={band.value === which}
+                    onClick={() => band.onChange(which)}
+                  >
+                    {t(`songs.clip.band.${which}`)}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
           <span className="songs-strip-label">{t("songs.clip.shape")}</span>
           <div className="songs-clip-choice" role="group" aria-label={t("songs.clip.shape")}>
             {(["wide", "tall"] as const).map((which) => (
@@ -418,8 +455,9 @@ export function SaveAsVideo({
           </div>
 
           {/* A jam has no notes to be right or wrong about, so there is no
-              verdict to paint and no switch for it. */}
-          {canShowMarks && (
+              verdict to paint and no switch for it — and neither has a clip
+              with nothing under the picture to paint it on. */}
+          {canShowMarks && band?.value !== "none" && (
             <button
               type="button"
               className="songs-chip"

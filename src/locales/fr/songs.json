@@ -326,7 +326,13 @@
       "showInFolder": "Afficher dans le dossier",
       "postItTo": "Publier sur",
       "dragItIn": "Ouvrez-en un et glissez le fichier dedans — Yames n'envoie rien et ne demande aucun compte.",
-      "webmWarning": "Ouvrez-en un et glissez le fichier dedans. Celui-ci est un WebM, et la plupart n'acceptent que le MP4 ; un convertisseur gratuit s'en charge."
+      "webmWarning": "Ouvrez-en un et glissez le fichier dedans. Celui-ci est un WebM, et la plupart n'acceptent que le MP4 ; un convertisseur gratuit s'en charge.",
+      "underPicture": "Sous l’image",
+      "band": {
+        "tab": "La tablature",
+        "marks": "Les repères seuls",
+        "none": "Rien"
+      }
     },
     "compare": {
       "title": "Mesures {{bars}}, avant et maintenant",

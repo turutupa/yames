@@ -82,7 +82,15 @@ import { CompareTakes } from "../camera/CompareTakes";
 import type { SongCompare } from "./useSongCompare";
 import { buildTape } from "../../../songs/camera/tape";
 import { songStrip, songWindowMs } from "../../../songs/camera/songStrip";
-import { clipSpan } from "../../../songs/camera/clip";
+// W31 — the tab itself, scrolling under a playhead, which is what the owner
+// asked a shared clip to show. Third renderer behind the compositor's seam.
+import { tabStrip } from "../../../takes/tabPainter";
+import { buildTabTape } from "../../../takes/tabTape";
+import { blankStrip } from "../../../takes/clipStrip";
+import type { ClipBandChoice } from "../../../takes/clipStrip";
+import { CLIP_BAND_KEY } from "../../../songs/camera/keys";
+import { storeLoad, storeSave } from "../../../ipc";
+import { captionAt, clipSpan } from "../../../songs/camera/clip";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";
@@ -306,6 +314,59 @@ export function SongReview({
 
   /** "Save as a video" wants the take to itself while it plays it through. */
   const [pauseNonce, setPauseNonce] = useState(0);
+
+  /**
+   * W31 — what a saved clip carries under the picture.
+   *
+   * The TAB by default: the owner asked for "the notes it's playing so its
+   * kinda in sync", and a scrolling tab is what every play-along video on the
+   * internet is. The dots stay as a choice because they are what a shared
+   * clip looked like until now, and "nothing" because a player showing a
+   * friend how a passage sounds does not always want it marked.
+   */
+  const [clipBand, setClipBand] = useState<ClipBandChoice>("tab");
+  useEffect(() => {
+    let alive = true;
+    void storeLoad<ClipBandChoice>(CLIP_BAND_KEY)
+      .then((saved) => {
+        if (alive && (saved === "tab" || saved === "marks" || saved === "none")) setClipBand(saved);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const chooseClipBand = useCallback((next: ClipBandChoice) => {
+    setClipBand(next);
+    void storeSave(CLIP_BAND_KEY, next).catch(() => {});
+  }, []);
+
+  /**
+   * The tab of this attempt, laid out in time.
+   *
+   * Built from the same `tape` the review is drawn from, so a clip's colours
+   * are the screen's colours rather than a second judgement of the same pass.
+   * Only when the tab is what the player has asked for: an attempt at a long
+   * piece is a few thousand notes, and nobody should pay for them to pick
+   * "Nothing".
+   */
+  const tabTape = useMemo(
+    () =>
+      clipBand === "tab"
+        ? buildTabTape({ score, schedule, tape, range, tempoPercent: review.tempoPercent })
+        : null,
+    [clipBand, score, schedule, tape, range, review.tempoPercent],
+  );
+
+  /** What scrolls across the clip, for the answer the player chose. */
+  const clipStrip = useMemo(() => {
+    const args = { tape, score, range, tempoPercent: review.tempoPercent };
+    if (clipBand === "none") {
+      return blankStrip((nowMs) => captionAt(tape, score, range, review.tempoPercent, nowMs));
+    }
+    if (clipBand === "tab" && tabTape) return tabStrip({ ...args, tab: tabTape });
+    return songStrip(args);
+  }, [clipBand, tabTape, tape, score, range, review.tempoPercent]);
 
   /**
    * Which bars a clip starts out being of.
@@ -589,11 +650,12 @@ export function SongReview({
           file and decide where it goes. */}
       {video && (
         <SaveAsVideo
-          // What scrolls across the clip: Songs' own excerpt, with the
-          // verdict on it (W30 lifted this behind an interface so a jam can
-          // put its bar grid there instead).
-          strip={songStrip({ tape, score, range, tempoPercent: review.tempoPercent })}
+          // What scrolls across the clip: the tab, the dots or nothing (W30
+          // lifted this behind an interface so a jam can put its bar grid
+          // there instead; W31 made the tab the third thing behind it).
+          strip={clipStrip}
           windowMs={songWindowMs(score, range, review.tempoPercent)}
+          band={{ value: clipBand, onChange: chooseClipBand }}
           spanFor={(wholeTake) =>
             clipSpan({
               tape,

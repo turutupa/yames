@@ -326,7 +326,13 @@
       "showInFolder": "Mostra nella cartella",
       "postItTo": "Pubblica su",
       "dragItIn": "Aprine uno e trascina dentro il file — Yames non carica nulla e non chiede alcun account.",
-      "webmWarning": "Aprine uno e trascina dentro il file. Questo è un WebM e quasi tutti accettano solo MP4; un convertitore gratuito lo trasforma."
+      "webmWarning": "Aprine uno e trascina dentro il file. Questo è un WebM e quasi tutti accettano solo MP4; un convertitore gratuito lo trasforma.",
+      "underPicture": "Sotto l’immagine",
+      "band": {
+        "tab": "L’intavolatura",
+        "marks": "Solo i segni",
+        "none": "Niente"
+      }
     },
     "compare": {
       "title": "Battute {{bars}}, prima e adesso",

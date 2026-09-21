@@ -316,7 +316,13 @@
       "showInFolder": "Mở thư mục chứa",
       "postItTo": "Đăng lên",
       "dragItIn": "Mở một nơi rồi kéo tệp vào — Yames không tải gì lên và không cần tài khoản.",
-      "webmWarning": "Mở một nơi rồi kéo tệp vào. Đây là tệp WebM, mà phần lớn chỉ nhận MP4 — một trình chuyển đổi miễn phí là xong."
+      "webmWarning": "Mở một nơi rồi kéo tệp vào. Đây là tệp WebM, mà phần lớn chỉ nhận MP4 — một trình chuyển đổi miễn phí là xong.",
+      "underPicture": "Dưới hình",
+      "band": {
+        "tab": "Bản tab",
+        "marks": "Chỉ các dấu",
+        "none": "Không có gì"
+      }
     },
     "compare": {
       "title": "Ô nhịp {{bars}}, hồi đó và bây giờ",
