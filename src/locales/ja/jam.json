@@ -702,6 +702,25 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "録る音",
+      "yames": "Yames と自分の入力",
+      "everything": "このパソコンが鳴らす音すべて",
+      "warning": "Yames だけでなく、このパソコンが鳴らす音すべてを録ります。ビデオ通話も、通知音も、ブラウザの曲も入ります。",
+      "listensTo": "{{device}} を聴いています。",
+      "check": "音を確かめる",
+      "listening": "聴いています…",
+      "level": "レベル",
+      "silent": "何も届きませんでした。このパソコンの音量が上がっていて、ミュートになっていないか確かめてください。",
+      "notHere": "このパソコンはスピーカーが鳴らしている音を Yames に渡せません。ここでの録音は Yames と自分の入力になります。",
+      "recordingEverything": "このパソコンが鳴らす音すべてを録音中",
+      "recordingYames": "Yames と自分の入力を録音中",
+      "takeEverything": "このパソコンが鳴らした音すべて"
+    },
+    "takeVideo": {
+      "save": "動画にして保存",
+      "chorus": "コーラス {{count}}"
     }
   },
   "scale": {

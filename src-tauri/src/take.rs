@@ -744,6 +744,24 @@ pub struct JamTake {
     /// is why the review has a nudge beside it and why spike K3 exists.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub video_offset_ms: Option<f64>,
+    /// What this take is a recording OF (`loopback.rs`).
+    ///
+    /// The one field here that is a promise rather than a description, which
+    /// is why it is written and why the screen shows it for the whole length
+    /// of a take rather than only where the switch is. A take made of
+    /// everything this computer plays may contain a video call, a
+    /// notification or a song in a browser tab, and a musician who comes back
+    /// to a shelf of takes a week later has to be able to see which ones
+    /// those are.
+    ///
+    /// Defaulted, because every sidecar already on a disk was written before
+    /// there was a choice, and every one of those is Yames and your input.
+    #[serde(default)]
+    pub sound: TakeSound,
+    /// The speaker it listened to, as the operating system names it. `None`
+    /// for a take of Yames and your input, which listens to no speaker.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sound_device: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -1090,6 +1108,13 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
                 // starts the picture level with the sound and offers the
                 // nudge, which is the honest state rather than a guess.
                 video_offset_ms: None,
+                // Same branch, same reason: the sidecar was the only record of
+                // what this take was made of, and it is gone. The header says
+                // how many channels the file has, which is a hint and not the
+                // answer, so this says the honest thing rather than the clever
+                // one and calls it the ordinary kind.
+                sound: TakeSound::default(),
+                sound_device: None,
             },
         });
     }
@@ -1146,12 +1171,20 @@ fn duration_of(path: &Path) -> f64 {
 /// point — a take is two bytes a sample at the rate the header states, and
 /// reading a hundred megabytes to count them tells you nothing the size
 /// did not.
+///
+/// The CHANNEL COUNT comes out of the header too, and has to: a take made of
+/// everything this computer plays is stereo (`loopback.rs`), so half the
+/// files in the folder are two bytes a sample and half are four bytes a
+/// frame. Reading the count rather than assuming one is the difference
+/// between a shelf that says "1:04" and one that says "2:08" for the same
+/// minute of music.
 fn duration_from(len: u64, header: &[u8; 44]) -> f64 {
+    let ch = u16::from_le_bytes([header[22], header[23]]).max(1) as u64;
     let sr = u32::from_le_bytes([header[24], header[25], header[26], header[27]]);
     if sr == 0 || len < 44 {
         return 0.0;
     }
-    (len - 44) as f64 / 2.0 / sr as f64
+    (len - 44) as f64 / 2.0 / ch as f64 / sr as f64
 }
 
 /// Remove a take: the audio, its dry stem, its picture and its sidecar
@@ -1204,12 +1237,22 @@ pub fn load_take(app_data: &Path, id: &str) -> Result<TakePlayback, String> {
     })
 }
 
-/// Decode a mono 16-bit PCM WAV — the only kind this module writes.
+/// Decode a 16-bit PCM WAV of one or two channels — the only kinds this
+/// module writes.
 ///
 /// Deliberately not `rodio`: these are our own files, the format is fixed,
 /// and a reader that knows exactly what it is reading cannot be surprised by
 /// a WAV extension nobody meant to support. A file that is not one of ours
 /// is refused with a message rather than decoded on a guess.
+///
+/// **A stereo take comes back folded to mono**, and that is not a loss of the
+/// recording: this function exists for one caller, `load_take`, which hands
+/// the result to the engine's own playback, and that path mixes ONE sample
+/// per frame into a click the musician is playing over. The file on disk
+/// keeps both sides, the review plays the file itself, and the clip saved out
+/// of it is made from the file — so the only thing that hears the fold is the
+/// engine's own "play that take back at me" button, where a stereo image was
+/// never going to be audible under a metronome anyway.
 fn decode_wav_bytes(bytes: &[u8]) -> Result<(Vec<f32>, u32), String> {
     if bytes.len() < 44 || &bytes[0..4] != b"RIFF" || &bytes[8..12] != b"WAVE" {
         return Err("that file is not a WAV".into());
@@ -1217,16 +1260,21 @@ fn decode_wav_bytes(bytes: &[u8]) -> Result<(Vec<f32>, u32), String> {
     let channels = u16::from_le_bytes([bytes[22], bytes[23]]);
     let sample_rate = u32::from_le_bytes([bytes[24], bytes[25], bytes[26], bytes[27]]);
     let bits = u16::from_le_bytes([bytes[34], bytes[35]]);
-    if channels != 1 || bits != 16 || sample_rate == 0 {
+    if !(1..=2).contains(&channels) || bits != 16 || sample_rate == 0 {
         return Err(format!(
             "that take is {channels} channel(s) of {bits}-bit at {sample_rate} Hz, and \
-             takes are mono 16-bit"
+             takes are 16-bit, mono or stereo"
         ));
     }
     let data = &bytes[44..];
-    let mut pcm = Vec::with_capacity(data.len() / 2);
-    for frame in data.chunks_exact(2) {
-        pcm.push(i16::from_le_bytes([frame[0], frame[1]]) as f32 / 32767.0);
+    let step = channels as usize * 2;
+    let mut pcm = Vec::with_capacity(data.len() / step);
+    for frame in data.chunks_exact(step) {
+        let mut sum = 0f32;
+        for s in frame.chunks_exact(2) {
+            sum += i16::from_le_bytes([s[0], s[1]]) as f32 / 32767.0;
+        }
+        pcm.push(sum / channels as f32);
     }
     Ok((pcm, sample_rate))
 }
@@ -1247,10 +1295,55 @@ struct TakeWavWriter {
     writer: BufWriter<fs::File>,
     samples: u64,
     sample_rate: u32,
+    /// One for the mix and the dry stem, two for a take made of everything
+    /// this computer plays. See [`wav_header_16bit`].
+    channels: u16,
+}
+
+/// The 44-byte header a take's WAV opens with.
+///
+/// `session_audio::wav_header_mono_16bit` is where this shape came from, and
+/// a take that is mono is byte-for-byte what that function writes — asserted
+/// by `the_mono_header_is_still_the_one_session_audio_writes`, which is the
+/// point of having the assertion rather than the comment. What it could not
+/// do is a second channel, and it should not learn to: that module is a
+/// debug artefact compiled out of release builds and this is a file a
+/// musician will look for later.
+///
+/// `frames` is FRAMES, not samples — the one place the distinction is worth
+/// the extra word, because getting it wrong writes a header claiming twice
+/// the audio the file holds and every player then reads past the end.
+fn wav_header_16bit(sample_rate: u32, channels: u16, frames: u64) -> [u8; 44] {
+    const BITS: u16 = 16;
+    let ch = channels.max(1);
+    let data_bytes = frames * ch as u64 * 2;
+    let chunk_size = (36u64 + data_bytes).min(u32::MAX as u64) as u32;
+    let data_size = data_bytes.min(u32::MAX as u64) as u32;
+
+    let mut header = [0u8; 44];
+    header[0..4].copy_from_slice(b"RIFF");
+    header[4..8].copy_from_slice(&chunk_size.to_le_bytes());
+    header[8..12].copy_from_slice(b"WAVE");
+    header[12..16].copy_from_slice(b"fmt ");
+    header[16..20].copy_from_slice(&16u32.to_le_bytes());
+    header[20..22].copy_from_slice(&1u16.to_le_bytes()); // WAVE_FORMAT_PCM
+    header[22..24].copy_from_slice(&ch.to_le_bytes());
+    header[24..28].copy_from_slice(&sample_rate.to_le_bytes());
+    let byte_rate = sample_rate as u64 * ch as u64 * 2;
+    header[28..32].copy_from_slice(&(byte_rate as u32).to_le_bytes());
+    header[32..34].copy_from_slice(&(ch * (BITS / 8)).to_le_bytes());
+    header[34..36].copy_from_slice(&BITS.to_le_bytes());
+    header[36..40].copy_from_slice(b"data");
+    header[40..44].copy_from_slice(&data_size.to_le_bytes());
+    header
 }
 
 impl TakeWavWriter {
     fn create(path: &Path, sample_rate: u32) -> std::io::Result<Self> {
+        Self::create_with(path, sample_rate, 1)
+    }
+
+    fn create_with(path: &Path, sample_rate: u32, channels: u16) -> std::io::Result<Self> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
@@ -1261,6 +1354,7 @@ impl TakeWavWriter {
             writer: BufWriter::with_capacity(64 * 1024, file),
             samples: 0,
             sample_rate,
+            channels: channels.max(1),
         })
     }
 
@@ -1289,7 +1383,8 @@ impl TakeWavWriter {
             .writer
             .into_inner()
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
-        let header = crate::session_audio::wav_header_mono_16bit(self.sample_rate, self.samples);
+        let frames = self.samples / self.channels.max(1) as u64;
+        let header = wav_header_16bit(self.sample_rate, self.channels, frames);
         file.seek(SeekFrom::Start(0))?;
         file.write_all(&header)?;
         file.sync_all()?;
@@ -1396,6 +1491,310 @@ fn mix_chunk(band: &[f32], dry: &[f32], out: &mut Vec<f32>) {
 }
 
 // ---------------------------------------------------------------------------
+// Everything this computer plays
+// ---------------------------------------------------------------------------
+
+/// Turn a run of interleaved samples from the speaker's own stream into the
+/// stereo the take is written in.
+///
+/// Three jobs, all of them on the writer thread and none of them anywhere
+/// near a callback: fold however many channels the device's mix format has
+/// down to two ([`crate::loopback::fold_to_stereo`]), move both sides from
+/// the device's rate to the take's, and interleave them again.
+///
+/// A struct rather than a function because two of those jobs have STATE that
+/// has to survive between chunks — a resampler's phase, and the tail of a
+/// frame that arrived split across two callbacks. Losing either is a click
+/// every twenty-five milliseconds.
+///
+/// It is also the reason the gate can be run without a sound card: feed it a
+/// tone at 44.1 kHz stereo, or at 48 kHz in 5.1, and what comes out is what
+/// would have gone into the file.
+pub(crate) struct LoopbackFold {
+    channels: usize,
+    /// The beginning of a frame whose remaining samples have not arrived yet.
+    /// Never longer than `channels - 1`.
+    partial: Vec<f32>,
+    left: LinearResampler,
+    right: LinearResampler,
+    l_out: VecDeque<f32>,
+    r_out: VecDeque<f32>,
+}
+
+impl LoopbackFold {
+    pub(crate) fn new(channels: u16, in_sr: u32, out_sr: u32) -> Self {
+        Self {
+            channels: channels.max(1) as usize,
+            partial: Vec::with_capacity(8),
+            left: LinearResampler::new(in_sr, out_sr),
+            right: LinearResampler::new(in_sr, out_sr),
+            l_out: VecDeque::new(),
+            r_out: VecDeque::new(),
+        }
+    }
+
+    /// Append every whole stereo frame `raw` completes to `out`, interleaved
+    /// left-then-right, and return how many FRAMES that was.
+    ///
+    /// The two sides go through two resamplers rather than one interleaved
+    /// one on purpose: an interpolation that walks an interleaved buffer
+    /// reads the other channel as the sample after, which is a hard-panned
+    /// bleed at every fractional position and exactly the kind of defect
+    /// nobody notices until they put on headphones.
+    pub(crate) fn push(&mut self, raw: &[f32], out: &mut Vec<f32>) -> usize {
+        let ch = self.channels;
+        // Frames, from whatever was left over plus what just arrived.
+        let mut l_in: Vec<f32> = Vec::with_capacity(raw.len() / ch + 1);
+        let mut r_in: Vec<f32> = Vec::with_capacity(raw.len() / ch + 1);
+        let mut frame: Vec<f32> = std::mem::take(&mut self.partial);
+        for &s in raw {
+            frame.push(s);
+            if frame.len() == ch {
+                let (l, r) = crate::loopback::fold_to_stereo(&frame, ch);
+                l_in.push(l);
+                r_in.push(r);
+                frame.clear();
+            }
+        }
+        self.partial = frame;
+
+        self.left.push(&l_in, &mut self.l_out);
+        self.right.push(&r_in, &mut self.r_out);
+
+        let n = self.l_out.len().min(self.r_out.len());
+        out.clear();
+        out.reserve(n * 2);
+        for _ in 0..n {
+            // Clamped HERE and only here: the fold can sum a centre channel
+            // and a surround into a side that was already near the ceiling,
+            // and sixteen bits is where a number has to stop being a number.
+            let l = self.l_out.pop_front().unwrap_or(0.0);
+            let r = self.r_out.pop_front().unwrap_or(0.0);
+            out.push(l.clamp(-1.0, 1.0));
+            out.push(r.clamp(-1.0, 1.0));
+        }
+        n
+    }
+
+    /// How many frames are waiting, held back because only one side of the
+    /// pair has been resampled far enough yet. The writer's stop condition
+    /// reads it so a take does not end a resampler's phase early.
+    #[cfg(test)]
+    pub(crate) fn pending(&self) -> usize {
+        self.l_out.len().min(self.r_out.len())
+    }
+}
+
+/// Everything [`write_everything_this_computer_plays`] needs. A struct
+/// because thirteen positional arguments, six of which are `Arc`s of
+/// different things, is a call site nobody can check by reading.
+struct EverythingWriter {
+    wav: TakeWavWriter,
+    /// The speaker's own stream, interleaved.
+    ring: Arc<TakeRing>,
+    in_sr: u32,
+    channels: u16,
+    out_sr: u32,
+    /// Yames' band. Drained and thrown away — see the loop.
+    band: Arc<TakeRing>,
+    stop: Arc<AtomicBool>,
+    written: Arc<AtomicU64>,
+    out_sr_watch: Option<Arc<AtomicU32>>,
+    handoff: SharedTake,
+    position_slot: Arc<Mutex<Option<TakePosition>>>,
+    position_fn: Option<TakePositionSource>,
+    path: PathBuf,
+}
+
+/// Write a take made of everything this computer plays.
+///
+/// **What it does NOT do** is as much of the design as what it does: it never
+/// touches the microphone, never writes a dry stem, and never mixes Yames'
+/// own band in. All three are already in the stream it is reading — the band
+/// because Yames played it to this very speaker, the player because his amp
+/// simulator played it to the same one. Adding Yames' copy of the band on top
+/// would put it in twice, a buffer or so apart, which is a comb filter and
+/// not a thicker sound.
+///
+/// **Yames' band is still drained**, every tick, and thrown away. Two
+/// reasons, and neither is the audio: the output callback is copying into
+/// that ring whatever this thread does, and a ring nobody drains fills up and
+/// starts counting drops — a number the audio-safety gate reads and would
+/// then fail on. And the FIRST chunk of it carries the transport stamp, which
+/// is how a take knows which bar it opened on, and is as true of this kind of
+/// take as of the other.
+///
+/// **The speaker is the clock here**, where the band is the clock for an
+/// ordinary take. It is the same crystal either way — this listens to the
+/// device Yames plays through — so the two cannot drift; what changes is that
+/// a take is exactly as long as the speaker delivered, with no silence
+/// invented to pad it out to what the band rendered.
+fn write_everything_this_computer_plays(w: EverythingWriter) {
+    let EverythingWriter {
+        mut wav,
+        ring,
+        in_sr,
+        channels,
+        out_sr,
+        band,
+        stop,
+        written,
+        out_sr_watch,
+        handoff,
+        position_slot,
+        position_fn,
+        path,
+    } = w;
+
+    let mut fold = LoopbackFold::new(channels, in_sr, out_sr);
+    let mut raw: Vec<f32> = Vec::with_capacity(in_sr as usize * channels.max(1) as usize);
+    let mut band_buf: Vec<f32> = Vec::with_capacity(out_sr as usize);
+    let mut stereo: Vec<f32> = Vec::with_capacity(out_sr as usize * 2);
+    let cap_frames = TAKE_MAX_SECS * out_sr as u64;
+    let mut stamped = false;
+    /// How many ticks the writer will go on draining after a stop before it
+    /// finishes anyway. Twenty-five milliseconds each, so this is half a
+    /// second — two orders of magnitude more than the two or three buffers a
+    /// closed stream actually has left, and a bound on how long a Stop button
+    /// can appear not to work.
+    const MAX_DRAIN_TICKS: u32 = 20;
+    let mut drain_ticks = 0u32;
+
+    loop {
+        let stopping = stop.load(Ordering::Acquire);
+
+        // The same guard the other writer has, for the same reason: past a
+        // device change everything would be written at a rate the header does
+        // not claim, and the rest of the take would play back sharp with
+        // nothing in the file to say so.
+        let live_sr = out_sr_watch
+            .as_ref()
+            .map_or(out_sr, |s| s.load(Ordering::Acquire));
+        if live_sr != 0 && live_sr != out_sr {
+            eprintln!(
+                "[take] {} ends here: the output moved from {out_sr} Hz to {live_sr} Hz mid-take",
+                path.display()
+            );
+            stop.store(true, Ordering::Release);
+            break;
+        }
+
+        // Yames' band: drained, stamped once, discarded.
+        band_buf.clear();
+        band.drain_into(&mut band_buf);
+        if !band_buf.is_empty() && !stamped {
+            stamped = true;
+            if let (Some(resolve), Some(at)) = (position_fn.as_ref(), band.start_transport()) {
+                if let Ok(mut slot) = position_slot.lock() {
+                    *slot = resolve(at);
+                }
+            }
+        }
+
+        raw.clear();
+        ring.drain_into(&mut raw);
+        let frames = fold.push(&raw, &mut stereo);
+
+        if frames > 0 {
+            let already = written.load(Ordering::Relaxed);
+            let room = cap_frames.saturating_sub(already) as usize;
+            if room == 0 {
+                eprintln!(
+                    "[take] {} reached the {TAKE_MAX_SECS}s cap and finished there",
+                    path.display()
+                );
+                handoff.set_record(None);
+                handoff.note_capped();
+                stop.store(true, Ordering::Release);
+                break;
+            }
+            let n = room.min(frames);
+            if let Err(e) = wav.push(&stereo[..n * 2]) {
+                eprintln!("[take] writing stopped: {e}");
+                break;
+            }
+            written.fetch_add(n as u64, Ordering::Release);
+        }
+
+        // A stop only ends the take once the speaker's own stream has run
+        // dry — the last two or three buffers of it are the last thing the
+        // musician played, and they arrive after the button.
+        //
+        // ...but only for so long. `TakeSession::stop` closes the capture
+        // before it asks for this, so the ring always does run dry; the
+        // counter is what makes that a belief the code does not depend on. A
+        // stream that goes on delivering after it has been closed would
+        // otherwise keep this thread here for ever, and the thing joining it
+        // is the musician's Stop button.
+        if stopping {
+            drain_ticks += 1;
+            if (raw.is_empty() && frames == 0) || drain_ticks > MAX_DRAIN_TICKS {
+                break;
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
+    }
+
+    let dropped = ring.dropped();
+    if dropped > 0 {
+        eprintln!(
+            "[take] {dropped} samples were dropped: the writer could not keep up with what \
+             this computer was playing"
+        );
+    }
+    if let Err(e) = wav.finish() {
+        eprintln!("[take] could not finish the WAV: {e}");
+    }
+}
+
+/// Where a take's sound comes from.
+///
+/// Two answers, and the screen says which one a take was made with for the
+/// whole length of that take — the owner's question when this was proposed
+/// was *"so you'll record ALL the audio coming from the pc?"*, and a switch
+/// whose answer is not visible afterwards is not an honest answer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TakeSound {
+    /// Yames' own band with your input mixed under it. What a take has always
+    /// been, and the default, because it records the one thing you asked for
+    /// and nothing you did not.
+    #[default]
+    YamesAndInput,
+    /// Everything this computer plays: the band, your amp simulator, and
+    /// whatever else happened to make a sound. See `loopback.rs`.
+    Everything,
+}
+
+/// The loopback, handed to the take.
+pub struct TakeLoopback {
+    /// Interleaved samples, `channels` at a time, at `sample_rate`.
+    pub ring: Arc<TakeRing>,
+    pub sample_rate: u32,
+    pub channels: u16,
+    /// The device this is a recording of, for the sidecar and the screen.
+    pub device: String,
+    /// The open stream, so it closes when the take does and NOT before or
+    /// after. `None` only in tests, which fill the ring by hand.
+    ///
+    /// This field is the whole of "the capture runs between record and stop":
+    /// `start` moves it into the take, `stop` drops the take, and dropping
+    /// this closes the endpoint. There is no other owner and no other
+    /// lifetime it could take.
+    pub capture: Option<crate::loopback::LoopbackCapture>,
+}
+
+impl std::fmt::Debug for TakeLoopback {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TakeLoopback")
+            .field("device", &self.device)
+            .field("sample_rate", &self.sample_rate)
+            .field("channels", &self.channels)
+            .finish()
+    }
+}
+
+// ---------------------------------------------------------------------------
 // The session
 // ---------------------------------------------------------------------------
 
@@ -1423,6 +1822,16 @@ struct ActiveTake {
     /// written. `None` if the take never saw a transport.
     position: Arc<Mutex<Option<TakePosition>>>,
     writer: Option<std::thread::JoinHandle<()>>,
+    /// What this take is made of, for the sidecar and the screen.
+    sound: TakeSound,
+    /// The speaker being listened to, when this is a take of everything this
+    /// computer plays.
+    sound_device: Option<String>,
+    /// The open capture. **Held only here**, so it lives exactly as long as
+    /// the take does: `start` moves it in, `stop` drops the `ActiveTake`, and
+    /// the drop closes the endpoint. Nothing listens to the speakers before
+    /// record or after stop.
+    capture: Option<crate::loopback::LoopbackCapture>,
 }
 
 /// Everything a take needs to know about the world it is being recorded in.
@@ -1456,6 +1865,14 @@ pub struct TakeStart<'a> {
     /// the take is then recorded exactly as it always was and its sidecar
     /// simply has no position in it.
     pub position: Option<TakePositionSource>,
+    /// Everything this computer plays, when the musician asked for that
+    /// instead (`loopback.rs`). `None` is the take Yames has always made.
+    ///
+    /// When it is `Some`, the microphone above is ignored and no dry stem is
+    /// written: this stream already contains the band, the player and
+    /// whatever else was making a sound, and mixing Yames' own band under it
+    /// would put the same band in twice a few milliseconds apart.
+    pub loopback: Option<TakeLoopback>,
 }
 
 /// Everything the take commands own. One per app, behind a mutex, on the
@@ -1494,7 +1911,13 @@ impl TakeSession {
             out_sr_watch,
             owns_input,
             position,
+            loopback,
         } = args;
+        // A take of everything this computer plays has no use for the
+        // microphone and no dry stem to put it in: the speaker's own stream
+        // already contains the player. Dropping it here rather than at every
+        // later `if` means the writer below cannot accidentally mix one in.
+        let mic = if loopback.is_some() { None } else { mic };
         if let Some(running) = self.recording_jam() {
             return Err(if running == jam_id {
                 "a take is already recording".to_string()
@@ -1521,7 +1944,12 @@ impl TakeSession {
         let stop = Arc::new(AtomicBool::new(false));
         let written = Arc::new(AtomicU64::new(0));
 
-        let mut wav = TakeWavWriter::create(&path, out_sr)
+        // Stereo when the take is everything this computer plays, because
+        // that is what came out of the speakers and a fold to mono would
+        // throw away the one thing a musician notices about an amp
+        // simulator's sound. Mono otherwise, exactly as before.
+        let take_channels: u16 = if loopback.is_some() { 2 } else { 1 };
+        let mut wav = TakeWavWriter::create_with(&path, out_sr, take_channels)
             .map_err(|e| format!("could not open the take for writing: {e}"))?;
 
         // The dry stem, when and only when there is a mic to put in it. A
@@ -1556,9 +1984,48 @@ impl TakeSession {
         let where_it_began: Arc<Mutex<Option<TakePosition>>> = Arc::new(Mutex::new(None));
         let position_for_writer = where_it_began.clone();
         let position_for_writer_fn = position;
+        // The capture and the ring part company here: the ring goes to the
+        // writer thread, the open stream stays with the take so that closing
+        // the take closes the endpoint.
+        let (loop_for_writer, capture, sound, sound_device) = match loopback {
+            Some(lb) => (
+                Some((lb.ring, lb.sample_rate, lb.channels)),
+                lb.capture,
+                TakeSound::Everything,
+                Some(lb.device),
+            ),
+            None => (None, None, TakeSound::YamesAndInput, None),
+        };
         let writer = std::thread::Builder::new()
             .name("yames-take-writer".into())
             .spawn(move || {
+                // ---- The other kind of take ----
+                //
+                // A whole loop of its own rather than a flag threaded through
+                // the one below, because almost nothing is shared: there is
+                // no microphone to line up, no round trip to correct for, no
+                // band to mix in, and the clock is the speaker's rather than
+                // the output callback's. Two short readable loops, and the
+                // take Yames has always made goes on being exactly the code
+                // it was.
+                if let Some((ring, in_sr, channels)) = loop_for_writer {
+                    write_everything_this_computer_plays(EverythingWriter {
+                        wav,
+                        ring,
+                        in_sr,
+                        channels,
+                        out_sr,
+                        band: band_for_writer,
+                        stop: stop_for_writer,
+                        written: written_for_writer,
+                        out_sr_watch,
+                        handoff: handoff_for_writer,
+                        position_slot: position_for_writer,
+                        position_fn: position_for_writer_fn,
+                        path: path_for_writer,
+                    });
+                    return;
+                }
                 let mut band_buf: Vec<f32> = Vec::with_capacity(out_sr as usize);
                 let mut mic_raw: Vec<f32> = Vec::with_capacity(out_sr as usize);
                 let mut mic_ready: VecDeque<f32> = VecDeque::with_capacity(out_sr as usize);
@@ -1799,6 +2266,9 @@ impl TakeSession {
             owns_input,
             position: where_it_began,
             writer: Some(writer),
+            sound,
+            sound_device,
+            capture,
         });
         Ok(())
     }
@@ -1831,6 +2301,21 @@ impl TakeSession {
         // The callback stops writing FIRST, so the writer's last drain is
         // the last of the audio and nothing arrives after the file is shut.
         handoff.set_record(None);
+        // AND SO DOES THE SPEAKER, before the writer is asked to finish
+        // rather than after it.
+        //
+        // This order is load-bearing and the wrong one hangs the app. A take
+        // of everything this computer plays ends when the writer has drained
+        // what is left of the loopback ring — and a loopback stream delivers
+        // for as long as anything is playing, which during a jam is always.
+        // Closing the capture after joining the writer meant the writer
+        // waited for a ring that was still being filled by a stream waiting
+        // for the writer: Stop never returned. Closed here, the stream stops
+        // adding, the writer drains what already arrived (the last few
+        // buffers, which are the last thing the musician played) and exits.
+        if let Some(mut capture) = active.capture.take() {
+            capture.stop();
+        }
         active.stop.store(true, Ordering::Release);
         if let Some(handle) = active.writer.take() {
             let _ = handle.join();
@@ -1872,7 +2357,17 @@ impl TakeSession {
             // webview from the preview and written after the take is named.
             thumb_path: None,
             video_offset_ms: None,
+            sound: active.sound,
+            sound_device: active.sound_device.clone(),
         };
+        // The capture was already closed above, before the writer was joined
+        // — see the comment there for why that order is the only one that
+        // works. This is the belt to that braces: a take that ended any other
+        // way (an error path, a future caller) still gives the endpoint back
+        // here, and `LoopbackCapture`'s own `Drop` is the third.
+        if let Some(mut capture) = active.capture.take() {
+            capture.stop();
+        }
 
         // An empty take is a take of nothing — the user pressed record and
         // stop without the band playing. Keeping a 44-byte WAV in the list
@@ -1936,6 +2431,7 @@ mod tests {
             out_sr_watch: None,
             owns_input: false,
             position: None,
+            loopback: None,
         }
     }
 
@@ -2263,11 +2759,22 @@ mod tests {
     #[test]
     fn a_file_that_is_not_one_of_ours_is_refused_rather_than_guessed_at() {
         assert!(decode_wav_bytes(b"not a wav at all, not even close").is_err());
-        let mut stereo = crate::session_audio::wav_header_mono_16bit(48_000, 2).to_vec();
-        stereo[22] = 2; // two channels
-        stereo.extend_from_slice(&[0u8; 4]);
-        let err = decode_wav_bytes(&stereo).expect_err("stereo is not a take");
-        assert!(err.contains("mono"), "{err}");
+        // Stereo used to be refused here, and is now one of ours: a take of
+        // everything this computer plays keeps both sides (W30,
+        // `a_stereo_take_plays_back_through_the_engine_as_one_signal`). What
+        // is still refused is everything past two — nothing writes a
+        // six-channel take, so a file claiming to be one is a file from
+        // somewhere else, and guessing at its layout is how you play
+        // somebody's surround mix back as a chipmunk.
+        let mut surround = wav_header_16bit(48_000, 6, 1).to_vec();
+        surround.extend_from_slice(&[0u8; 12]);
+        let err = decode_wav_bytes(&surround).expect_err("six channels is not a take");
+        assert!(err.contains("mono or stereo"), "{err}");
+        // And so is a bit depth we never write.
+        let mut deep = wav_header_16bit(48_000, 1, 1).to_vec();
+        deep[34] = 24;
+        deep.extend_from_slice(&[0u8; 4]);
+        assert!(decode_wav_bytes(&deep).is_err());
     }
 
     // ---- The names on disk ----
@@ -2425,6 +2932,8 @@ mod tests {
             video_bytes: None,
             thumb_path: None,
             video_offset_ms: None,
+            sound: TakeSound::default(),
+            sound_device: None,
         };
         fs::write(
             path.with_extension("json"),
@@ -3424,5 +3933,405 @@ mod tests {
         handoff.note_capped();
         handoff.set_record(None);
         assert!(handoff.take_capped(), "the cap still has to be reported");
+    }
+    // ---- Everything this computer plays (W30) ----
+
+    /// Read a take's WAV back: (channels, sample rate, interleaved samples).
+    fn read_take_wav(path: &Path) -> (u16, u32, Vec<f32>) {
+        let bytes = fs::read(path).expect("the take is on disk");
+        assert!(bytes.len() >= 44, "a take has a header");
+        assert_eq!(&bytes[0..4], b"RIFF");
+        let channels = u16::from_le_bytes([bytes[22], bytes[23]]);
+        let sr = u32::from_le_bytes([bytes[24], bytes[25], bytes[26], bytes[27]]);
+        let bits = u16::from_le_bytes([bytes[34], bytes[35]]);
+        assert_eq!(bits, 16);
+        // The header's own `data` size has to agree with the bytes that are
+        // actually there: a stereo header over a mono body is the defect this
+        // whole change could have introduced, and it plays as a chipmunk.
+        let declared = u32::from_le_bytes([bytes[40], bytes[41], bytes[42], bytes[43]]) as usize;
+        assert_eq!(
+            declared,
+            bytes.len() - 44,
+            "the header claims {declared} bytes of audio and the file holds {}",
+            bytes.len() - 44
+        );
+        let pcm = bytes[44..]
+            .chunks_exact(2)
+            .map(|b| i16::from_le_bytes([b[0], b[1]]) as f32 / 32767.0)
+            .collect();
+        (channels, sr, pcm)
+    }
+
+    /// The frequency of a run of samples, from its zero crossings.
+    ///
+    /// Crude and exactly right for this: the question a resampler has to
+    /// answer is "is it still the same note", and a tone that came out at
+    /// 44.1/48ths of its pitch would be off by two whole tones, which no
+    /// measurement this rough could miss.
+    fn pitch_of(samples: &[f32], sr: u32) -> f64 {
+        let mut crossings = 0usize;
+        for pair in samples.windows(2) {
+            if pair[0] <= 0.0 && pair[1] > 0.0 {
+                crossings += 1;
+            }
+        }
+        if samples.len() < 2 {
+            return 0.0;
+        }
+        crossings as f64 * sr as f64 / samples.len() as f64
+    }
+
+    /// Start a take of everything this computer plays, push `raw` into its
+    /// ring, and hand back the finished record.
+    fn take_of_everything(
+        name: &str,
+        raw: &[f32],
+        in_sr: u32,
+        channels: u16,
+        out_sr: u32,
+    ) -> (PathBuf, JamTake) {
+        let root = tmp_dir(name);
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let ring = Arc::new(TakeRing::new(raw.len().next_power_of_two().max(1024)));
+        let mut session = TakeSession::default();
+        session
+            .start(TakeStart {
+                app_data: &root,
+                jam_id: "loopback",
+                handoff: &handoff,
+                mic: None,
+                out_sr,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: None,
+                loopback: Some(TakeLoopback {
+                    ring: ring.clone(),
+                    sample_rate: in_sr,
+                    channels,
+                    device: "a test speaker".into(),
+                    // No stream: the ring is filled by hand, which is the
+                    // whole point of the field being optional.
+                    capture: None,
+                }),
+            })
+            .expect("the take starts");
+
+        // Yames' own band, so the writer has something to stamp and something
+        // to drain. None of it reaches the file.
+        let band = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+        band.stamp_start(TakeTransport::Jam { bar: 2, chorus: 1 });
+        band.push(&vec![0.5f32; out_sr as usize / 10]);
+
+        ring.push(raw);
+        let frames_in = raw.len() / channels.max(1) as usize;
+        let expect = (frames_in as u64 * out_sr as u64) / in_sr.max(1) as u64;
+        // Nine tenths, because the resampler holds a sample back and the
+        // writer wakes on a timer: the exact length is asserted on the file.
+        wait_until("the loopback take to be written", || {
+            session.written_samples() >= expect * 9 / 10
+        });
+        let take = session
+            .stop(&handoff)
+            .expect("the take stops")
+            .expect("there is a take");
+        (root, take)
+    }
+
+    #[test]
+    fn everything_this_computer_plays_becomes_a_stereo_take_at_the_engines_rate() {
+        // A stereo speaker running at 44.1 kHz under an engine at 48 kHz: the
+        // rates differ, so this is the resampling path and not a copy.
+        let tone = sine(440.0, 44_100, 0.5);
+        let mut raw = Vec::with_capacity(tone.len() * 2);
+        for s in &tone {
+            raw.push(*s);
+            // The right side is the same note, half as loud, so a fold that
+            // collapsed the two or crossed them would be visible.
+            raw.push(*s * 0.5);
+        }
+        let (_root, take) = take_of_everything("lb-44", &raw, 44_100, 2, 48_000);
+
+        let (ch, sr, pcm) = read_take_wav(Path::new(&take.path));
+        assert_eq!(ch, 2, "a take of the speakers keeps both sides");
+        assert_eq!(sr, 48_000, "written at the rate the engine is running");
+
+        let frames = pcm.len() / 2;
+        let want = (tone.len() as f64 * 48_000.0 / 44_100.0) as usize;
+        assert!(
+            frames.abs_diff(want) < 64,
+            "half a second at 44.1 kHz is {want} frames at 48 kHz, got {frames}"
+        );
+
+        let left: Vec<f32> = pcm.iter().step_by(2).copied().collect();
+        let right: Vec<f32> = pcm.iter().skip(1).step_by(2).copied().collect();
+        let hz = pitch_of(&left, 48_000);
+        assert!(
+            (hz - 440.0).abs() < 5.0,
+            "the note has to survive the rate change: got {hz} Hz"
+        );
+        let peak_l = left.iter().fold(0f32, |a, b| a.max(b.abs()));
+        let peak_r = right.iter().fold(0f32, |a, b| a.max(b.abs()));
+        assert!(peak_l > 0.9, "the left side is the loud one: {peak_l}");
+        assert!(
+            (peak_r - 0.5).abs() < 0.05,
+            "and the right side stayed half as loud: {peak_r}"
+        );
+
+        // The record says what it is a recording of, which is the promise.
+        assert_eq!(take.sound, TakeSound::Everything);
+        assert_eq!(take.sound_device.as_deref(), Some("a test speaker"));
+        // And half a second is half a second, however many channels it took.
+        assert!(
+            (take.duration_sec - 0.5).abs() < 0.02,
+            "duration {}",
+            take.duration_sec
+        );
+    }
+
+    #[test]
+    fn a_surround_speaker_folds_down_to_the_same_stereo_take() {
+        // 48 kHz 5.1 — no rate change, six channels. Front left carries the
+        // note; the centre and the surrounds carry silence, so the fold is
+        // measured rather than merely survived.
+        let tone = sine(220.0, 48_000, 0.4);
+        let mut raw = Vec::with_capacity(tone.len() * 6);
+        for s in &tone {
+            raw.extend_from_slice(&[*s, *s * 0.5, 0.0, 0.9, 0.0, 0.0]);
+        }
+        let (_root, take) = take_of_everything("lb-51", &raw, 48_000, 6, 48_000);
+
+        let (ch, sr, pcm) = read_take_wav(Path::new(&take.path));
+        assert_eq!(ch, 2);
+        assert_eq!(sr, 48_000);
+        let frames = pcm.len() / 2;
+        assert!(
+            frames.abs_diff(tone.len()) < 64,
+            "no rate change, so the length is the length: {frames} vs {}",
+            tone.len()
+        );
+        let left: Vec<f32> = pcm.iter().step_by(2).copied().collect();
+        let hz = pitch_of(&left, 48_000);
+        assert!((hz - 220.0).abs() < 5.0, "got {hz} Hz");
+        // The LFE was the loudest channel in the file and must not be in the
+        // fold: a left side over 1.0 would have clamped and flattened.
+        let peak_l = left.iter().fold(0f32, |a, b| a.max(b.abs()));
+        assert!(
+            (peak_l - 1.0).abs() < 0.02,
+            "front left, and nothing else: {peak_l}"
+        );
+    }
+
+    #[test]
+    fn a_take_of_everything_has_no_dry_stem_and_never_opens_the_microphone() {
+        // The microphone is handed over and has to be ignored: the player is
+        // already in the speaker's stream, and a second copy of them would be
+        // the same performance twice, a round trip apart.
+        let mic = Arc::new(TakeRing::new(4096));
+        mic.push(&vec![0.75f32; 2048]);
+
+        let root = tmp_dir("lb-nomic");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let ring = Arc::new(TakeRing::new(65_536));
+        let mut session = TakeSession::default();
+        session
+            .start(TakeStart {
+                app_data: &root,
+                jam_id: "loopback",
+                handoff: &handoff,
+                mic: Some((mic.clone(), 48_000)),
+                out_sr: 48_000,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: None,
+                loopback: Some(TakeLoopback {
+                    ring: ring.clone(),
+                    sample_rate: 48_000,
+                    channels: 2,
+                    device: "a test speaker".into(),
+                    capture: None,
+                }),
+            })
+            .expect("the take starts");
+        ring.push(&vec![0.25f32; 4_800 * 2]);
+        wait_until("the take to be written", || {
+            session.written_samples() >= 4_000
+        });
+        let take = session.stop(&handoff).unwrap().unwrap();
+
+        assert!(
+            take.dry_path.is_none(),
+            "there is no channel the player is alone on, so there is no stem"
+        );
+        assert!(
+            !dry_beside(Path::new(&take.path)).exists(),
+            "and nothing was written where one would go"
+        );
+        let (_ch, _sr, pcm) = read_take_wav(Path::new(&take.path));
+        let peak = pcm.iter().fold(0f32, |a, b| a.max(b.abs()));
+        assert!(
+            (peak - 0.25).abs() < 0.02,
+            "only the speaker is in the file: {peak}"
+        );
+        drop(root);
+    }
+
+    #[test]
+    fn a_speaker_that_never_stops_talking_does_not_hang_the_stop_button() {
+        // THE BUG THIS EXISTS FOR, found by the audio-safety probe hanging:
+        // the writer's stop condition was "the loopback ring has run dry",
+        // and a loopback stream delivers for as long as anything is playing —
+        // which during a jam is always. `stop` then joined a writer that was
+        // waiting for a ring a live stream was still filling, and the Stop
+        // button never came back.
+        //
+        // `TakeSession::stop` now closes the capture before it joins. This
+        // test is the other half: a ring that goes on being filled ANYWAY —
+        // by a thread standing in for a stream that ignored its close —
+        // still lets the take finish.
+        let root = tmp_dir("lb-hang");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let ring = Arc::new(TakeRing::new(1 << 16));
+        let mut session = TakeSession::default();
+        session
+            .start(TakeStart {
+                app_data: &root,
+                jam_id: "loopback",
+                handoff: &handoff,
+                mic: None,
+                out_sr: 48_000,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: None,
+                loopback: Some(TakeLoopback {
+                    ring: ring.clone(),
+                    sample_rate: 48_000,
+                    channels: 2,
+                    device: "a speaker that will not shut up".into(),
+                    capture: None,
+                }),
+            })
+            .expect("the take starts");
+
+        let alive = Arc::new(AtomicBool::new(true));
+        let filling = alive.clone();
+        let feed = ring.clone();
+        let pump = std::thread::spawn(move || {
+            while filling.load(Ordering::Acquire) {
+                feed.push(&vec![0.1f32; 960 * 2]);
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+        });
+
+        wait_until("the take to be recording", || session.written_samples() > 0);
+        // No `capture` to close, so `stop` cannot help itself here: only the
+        // writer's own bound can end this, and it has half a second to.
+        let began = std::time::Instant::now();
+        let take = session.stop(&handoff).expect("the take stops");
+        let took = began.elapsed();
+        alive.store(false, Ordering::Release);
+        let _ = pump.join();
+
+        assert!(take.is_some(), "the take is kept");
+        assert!(
+            took < std::time::Duration::from_secs(5),
+            "stopping took {took:?} against a stream that would not stop"
+        );
+    }
+
+    #[test]
+    fn the_mono_header_is_still_the_one_session_audio_writes() {
+        // The one assertion that keeps a second WAV header honest: for the
+        // take Yames has always made, this module writes the same forty-four
+        // bytes it always did, byte for byte.
+        for (sr, frames) in [(48_000u32, 0u64), (44_100, 1), (22_050, 123_456)] {
+            assert_eq!(
+                wav_header_16bit(sr, 1, frames),
+                crate::session_audio::wav_header_mono_16bit(sr, frames),
+                "the mono header drifted at {sr} Hz / {frames} frames"
+            );
+        }
+    }
+
+    #[test]
+    fn a_stereo_takes_length_is_read_off_its_own_header() {
+        // Two bytes a sample and two samples a frame: a stereo take that was
+        // measured as if it were mono would read twice as long, and the shelf
+        // would say so.
+        let one_second_stereo = wav_header_16bit(48_000, 2, 48_000);
+        let len = 44 + 48_000 * 2 * 2;
+        assert!((duration_from(len, &one_second_stereo) - 1.0).abs() < 1e-9);
+        let one_second_mono = wav_header_16bit(48_000, 1, 48_000);
+        let len = 44 + 48_000 * 2;
+        assert!((duration_from(len, &one_second_mono) - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_stereo_take_plays_back_through_the_engine_as_one_signal() {
+        // `load_take` feeds the engine's own callback, which mixes one sample
+        // per frame. A stereo file has to fold rather than be refused — and
+        // it has to fold, not be read as twice as many mono samples, which
+        // would play back an octave-ish too fast and half again too long.
+        let mut bytes = wav_header_16bit(48_000, 2, 3).to_vec();
+        for (l, r) in [(1.0f32, 0.0f32), (0.5, 0.5), (-1.0, 1.0)] {
+            for v in [l, r] {
+                bytes.extend_from_slice(&((v * 32767.0) as i16).to_le_bytes());
+            }
+        }
+        let (pcm, sr) = decode_wav_bytes(&bytes).expect("a stereo take decodes");
+        assert_eq!(sr, 48_000);
+        assert_eq!(pcm.len(), 3, "three frames, not six samples");
+        assert!((pcm[0] - 0.5).abs() < 1e-3);
+        assert!((pcm[1] - 0.5).abs() < 1e-3);
+        assert!(pcm[2].abs() < 1e-3, "hard-panned opposites cancel");
+    }
+
+    #[test]
+    fn the_fold_keeps_its_place_when_a_frame_arrives_split_in_two() {
+        // A callback boundary can land in the middle of a 5.1 frame. Losing
+        // the tail would rotate every channel afterwards by one — the centre
+        // would become the left, quietly, for the rest of the take.
+        let mut fold = LoopbackFold::new(6, 48_000, 48_000);
+        let mut out = Vec::new();
+        let mut left: Vec<f32> = Vec::new();
+        // A ramp in the front-left channel and nothing anywhere else — inside
+        // full scale, because the fold clamps on its way out and a ramp of
+        // 1, 2, 3 would come back as 1, 1, 1 and prove nothing. Two and a
+        // half frames, then the tail and two more.
+        fold.push(
+            &[
+                0.1, 0.0, 0.0, 0.0, 0.0, 0.0, // frame 1
+                0.2, 0.0, 0.0, 0.0, 0.0, 0.0, // frame 2
+                0.3, 0.0, 0.0, // frame 3, cut in half by the callback
+            ],
+            &mut out,
+        );
+        left.extend(out.iter().step_by(2));
+        // The rest of frame 3, then two whole ones.
+        fold.push(
+            &[
+                0.0, 0.0, 0.0, // the tail of frame 3
+                0.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+            ],
+            &mut out,
+        );
+        left.extend(out.iter().step_by(2));
+        // Every front-left sample, in order and none of them rotated into a
+        // neighbouring channel. The resampler holds the last one back, which
+        // is why this is a prefix rather than an equality.
+        let want = [0.1f32, 0.2, 0.3, 0.4, 0.5];
+        assert!(left.len() >= 4, "got {left:?}");
+        for (i, v) in left.iter().enumerate() {
+            assert!(
+                (v - want[i]).abs() < 1e-6,
+                "sample {i} of {left:?} should be {}",
+                want[i]
+            );
+        }
     }
 }

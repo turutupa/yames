@@ -626,7 +626,34 @@ export type JamTake = {
    * with the camera off, which is every take in Jam.
    */
   thumbPath?: string;
+  /**
+   * What this take is a recording OF (W30, `plans/SONGS.md` A12).
+   *
+   * The one field here that is a promise rather than a description. A take
+   * made of everything this computer plays may hold a video call, a
+   * notification or a song in a browser tab, so a shelf of takes a week later
+   * has to be able to say which ones those are.
+   *
+   * Absent on every take recorded before there was a choice, and every one of
+   * those is `yamesAndInput`.
+   */
+  sound?: TakeSound;
+  /**
+   * The speaker it listened to, as the operating system names it. Absent for
+   * a take of Yames and your input, which listens to no speaker.
+   */
+  soundDevice?: string;
 };
+
+/**
+ * Where a take's sound comes from (`plans/SONGS.md` A12, `take.rs`).
+ *
+ * - `yamesAndInput` — the band Yames rendered with your input mixed under it,
+ *   and the dry stem beside it. What a take has always been, and the default.
+ * - `everything` — the speaker's own stream read back: your amp simulator,
+ *   Yames' band, and whatever else was making a sound.
+ */
+export type TakeSound = "yamesAndInput" | "everything";
 
 /** See `JamTake.position`. The mirror of `TakePosition` in `take.rs`. */
 export type TakePosition = {

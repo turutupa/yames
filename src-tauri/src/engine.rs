@@ -12440,6 +12440,7 @@ mod tests {
                 position: Some(Arc::new(move |at| {
                     crate::song::take_position(Some(&for_resolver), at)
                 })),
+                loopback: None,
             })
             .expect("the take starts");
         let ring = {
@@ -12612,6 +12613,7 @@ mod tests {
                 out_sr_watch: None,
                 owns_input: false,
                 position: Some(Arc::new(|at| crate::song::take_position(None, at))),
+                loopback: None,
             })
             .expect("the take starts");
         let ring = {

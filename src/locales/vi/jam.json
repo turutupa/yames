@@ -702,6 +702,25 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Âm thanh",
+      "yames": "Yames và đầu vào của tôi",
+      "everything": "Mọi thứ máy tính này phát ra",
+      "warning": "Bản ghi này thu mọi thứ máy tính phát ra, không chỉ Yames — một cuộc gọi video, một thông báo, một bài hát trên trình duyệt.",
+      "listensTo": "Đang nghe {{device}}.",
+      "check": "Kiểm tra âm thanh",
+      "listening": "Đang nghe…",
+      "level": "Mức",
+      "silent": "Không có gì đến cả. Hãy kiểm tra âm lượng máy tính đã bật và không bị tắt tiếng.",
+      "notHere": "Máy tính này không thể đưa cho Yames thứ mà loa của nó đang phát, nên ở đây một bản ghi là Yames và đầu vào của bạn.",
+      "recordingEverything": "Đang thu mọi thứ máy tính này phát ra",
+      "recordingYames": "Đang thu Yames và đầu vào của bạn",
+      "takeEverything": "mọi thứ máy tính này đã phát"
+    },
+    "takeVideo": {
+      "save": "Lưu thành video",
+      "chorus": "Vòng {{count}}"
     }
   },
   "scale": {

@@ -102,6 +102,7 @@ function takesState(
     takes: [],
     recording: false,
     recordedSeconds: 0,
+    recordingSound: "yamesAndInput",
     playingId: null,
     dirBytes: 0,
     play: vi.fn(),
@@ -111,6 +112,18 @@ function takesState(
     introOpen: false,
     confirmIntro: vi.fn(),
     cancelIntro: vi.fn(),
+    // A machine that cannot record what it plays, which is the picture in
+    // every test that is not about that: the source control draws nothing and
+    // the sheet looks exactly as it did before W30. The tests that ARE about
+    // it override this.
+    soundSource: {
+      sound: "yamesAndInput",
+      setSound: vi.fn(),
+      check: { can: false, peak: 0 },
+      recheck: vi.fn(),
+      checking: false,
+      canRecordEverything: false,
+    },
     ...overrides,
   };
 }

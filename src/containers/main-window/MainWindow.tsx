@@ -2048,6 +2048,7 @@ export function MainWindow() {
             jamChorus={currentBeat?.chorus ?? 1}
             recording={jamTakes.recording}
             recordedSeconds={jamTakes.recordedSeconds}
+            recordingSound={jamTakes.recordingSound}
           />
         )}
       </div>

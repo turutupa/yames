@@ -711,6 +711,27 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "The sound",
+      "yames": "Yames and my input",
+      "everything": "Everything this computer plays",
+      "warning": "This records everything this computer plays, not only Yames — a video call, a notification, a song in a browser tab.",
+      "listensTo": "It listens to {{device}}.",
+      "check": "Check the sound",
+      "listening": "Listening…",
+      "level": "Level",
+      "silent": "Nothing came through. Check this computer's volume is turned up and not muted.",
+      "notHere": "This computer cannot give Yames what its speakers are playing, so a take here is Yames and your input.",
+      "recordingEverything": "Recording everything this computer plays",
+      "recordingYames": "Recording Yames and your input",
+      "takeEverything": "everything this computer played"
+    },
+    "takeVideo": {
+      "save": "Save as a video",
+      "chorus": "Chorus {{count}}",
+      "chorus_one": "Chorus {{count}}",
+      "chorus_other": "Chorus {{count}}"
     }
   },
   "scale": {

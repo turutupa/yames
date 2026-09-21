@@ -81,6 +81,8 @@ import { SaveAsVideo } from "../camera/SaveAsVideo";
 import { CompareTakes } from "../camera/CompareTakes";
 import type { SongCompare } from "./useSongCompare";
 import { buildTape } from "../../../songs/camera/tape";
+import { songStrip, songWindowMs } from "../../../songs/camera/songStrip";
+import { clipSpan } from "../../../songs/camera/clip";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";
@@ -587,16 +589,26 @@ export function SongReview({
           file and decide where it goes. */}
       {video && (
         <SaveAsVideo
-          tape={tape}
-          score={score}
-          range={range}
-          tempoPercent={review.tempoPercent}
+          // What scrolls across the clip: Songs' own excerpt, with the
+          // verdict on it (W30 lifted this behind an interface so a jam can
+          // put its bar grid there instead).
+          strip={songStrip({ tape, score, range, tempoPercent: review.tempoPercent })}
+          windowMs={songWindowMs(score, range, review.tempoPercent)}
+          spanFor={(wholeTake) =>
+            clipSpan({
+              tape,
+              score,
+              range,
+              tempoPercent: review.tempoPercent,
+              bars: wholeTake ? null : (watch?.bars ?? clipBars),
+              pass: wholeTake ? null : pass,
+            })
+          }
+          canChooseBars={Boolean(watch?.bars ?? clipBars)}
           mixSrc={video.path}
           videoSrc={video.videoPath}
           startOffsetMs={video.startOffsetMs ?? 0}
           videoOffsetMs={video.videoOffsetMs ?? 0}
-          bars={watch?.bars ?? clipBars}
-          pass={pass}
           title={score.title}
           onBeforeSave={() => setPauseNonce((n) => n + 1)}
         />

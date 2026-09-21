@@ -729,6 +729,29 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Dźwięk",
+      "yames": "Yames i moje wejście",
+      "everything": "Wszystko, co gra ten komputer",
+      "warning": "To nagrywa wszystko, co gra ten komputer, nie tylko Yames — rozmowę wideo, powiadomienie, utwór w przeglądarce.",
+      "listensTo": "Słucha {{device}}.",
+      "check": "Sprawdź dźwięk",
+      "listening": "Słucha…",
+      "level": "Poziom",
+      "silent": "Nic nie dotarło. Sprawdź, czy głośność tego komputera jest podkręcona i czy nie jest wyciszony.",
+      "notHere": "Ten komputer nie może przekazać Yames tego, co grają jego głośniki, więc nagranie to tutaj Yames i twoje wejście.",
+      "recordingEverything": "Nagrywa wszystko, co gra ten komputer",
+      "recordingYames": "Nagrywa Yames i twoje wejście",
+      "takeEverything": "wszystko, co zagrał ten komputer"
+    },
+    "takeVideo": {
+      "save": "Zapisz jako wideo",
+      "chorus": "Przejście {{count}}",
+      "chorus_one": "Przejście {{count}}",
+      "chorus_few": "Przejście {{count}}",
+      "chorus_many": "Przejście {{count}}",
+      "chorus_other": "Przejście {{count}}"
     }
   },
   "scale": {

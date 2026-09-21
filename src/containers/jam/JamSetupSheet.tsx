@@ -56,6 +56,7 @@ import { JamSelect } from "./JamSelect";
 import { KitPicker } from "./KitPicker";
 import { Segmented } from "./Segmented";
 import { TakesSection } from "./TakesSection";
+import { TakeSoundControl } from "../../takes/TakeSoundControl";
 import { VibePicker } from "./VibePicker";
 import type { VibePreviewMark } from "./VibePicker";
 
@@ -1261,12 +1262,21 @@ export function JamSetupSheet({
         }
       >
 
+            {/* What a take is made of, above the shelf it fills and below the
+                switch that starts it — the order a person reads in: turn it
+                on, decide what goes in, see what came out. */}
+            {takes.available !== false && (
+              <TakeSoundControl state={takes.soundSource} disabled={!jam.takes} />
+            )}
+
             <TakesSection
               available={takes.available}
               takes={takes.takes}
               recording={takes.recording}
               dirBytes={takes.dirBytes}
               playingId={takes.playingId}
+              jam={jam}
+              vibeLabel={jam.vibe ?? null}
               onPlay={takes.play}
               onStop={takes.stopPlayback}
               onDelete={takes.remove}

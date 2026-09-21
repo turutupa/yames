@@ -40,11 +40,9 @@
  */
 import { createChunkPipe } from "./chunks";
 import type { ChunkSink } from "./chunks";
-import { captionAt, clipLayout, clipWindowMs, visibleBars, visibleTicks } from "./clip";
+import { clipLayout } from "./clip";
 import type { ClipLayout, ClipShape } from "./clip";
-import type { Tape } from "./tape";
-import type { BarRange } from "../schedule";
-import type { SongScore } from "../types";
+import type { ClipStrip } from "../../takes/clipStrip";
 import type { TimingMark } from "../../containers/songs/review/marks";
 
 /** How often the canvas is sampled. 30 is what the camera records at. */
@@ -79,10 +77,17 @@ export type ClipFrameState = {
   palette: ClipPalette;
   /** The picture, or null for a take that has none. */
   picture: CanvasImageSource | null;
-  tape: Tape;
-  score: SongScore;
-  range: BarRange;
-  tempoPercent: number;
+  /**
+   * What scrolls under the picture, and what the caption says.
+   *
+   * An INTERFACE rather than the score itself (W30): Songs paints the notes
+   * of the piece with the verdict on them, a jam paints its bar grid with the
+   * chord names, and everything else about a clip — the ground, the picture,
+   * the caption's layout, the playhead, the Yames mark, the real-time
+   * recording and the chunked save — is the same for both. See
+   * `src/takes/clipStrip.ts`.
+   */
+  strip: ClipStrip;
   windowMs: number;
   nowMs: number;
   /** Whether the verdict is painted on the excerpt at all. */
@@ -234,9 +239,23 @@ function roundedPath(
  * which is the point of item 2 saying so.
  */
 function paintPicture(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { picture, layout } = state;
+  const { picture, layout, strip, palette, nowMs } = state;
   const box = layout.picture;
-  if (!picture) return;
+  if (!picture) {
+    // NO CAMERA, and the renderer may want the room. See
+    // `ClipStrip.paintInsteadOfPicture` — a jam's clip without a picture is
+    // the chords going by, and they should fill the frame rather than hide in
+    // a band along the bottom of it.
+    if (strip.paintInsteadOfPicture) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(box.x, box.y, box.width, box.height);
+      ctx.clip();
+      strip.paintInsteadOfPicture(ctx, { box, layout, palette, nowMs });
+      ctx.restore();
+    }
+    return;
+  }
 
   const source = sourceSize(picture);
   if (!source) return;
@@ -282,7 +301,7 @@ function sourceSize(source: CanvasImageSource): { width: number; height: number 
  * the marking.
  */
 function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, tape, nowMs, windowMs, marks } = state;
+  const { layout, palette, strip, nowMs, windowMs, marks } = state;
   const box = layout.strip;
 
   ctx.save();
@@ -295,35 +314,14 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
   ctx.fillRect(box.x, box.y, box.width, box.height);
   ctx.globalAlpha = 1;
 
-  // Bar lines, and the section names that open on them.
-  ctx.strokeStyle = palette.quiet;
-  ctx.lineWidth = 1;
-  ctx.font = `600 ${layout.type.section}px system-ui, sans-serif`;
-  ctx.textBaseline = "top";
-  for (const bar of visibleBars(tape, nowMs, windowMs)) {
-    const x = box.x + bar.at * box.width;
-    ctx.beginPath();
-    ctx.moveTo(x, box.y);
-    ctx.lineTo(x, box.y + box.height);
-    ctx.stroke();
-    if (bar.section) {
-      ctx.fillStyle = palette.quiet;
-      ctx.fillText(bar.section, x + 6, box.y + 4);
-    }
-  }
-
-  // The notes.
-  const midline = box.y + box.height * 0.62;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = `${Math.round(box.height * 0.42)}px system-ui, sans-serif`;
-  for (const { tick, at } of visibleTicks(tape, nowMs, windowMs)) {
-    const x = box.x + at * box.width;
-    ctx.fillStyle = marks ? state.palette.marks[tick.mark] : palette.ink;
-    ctx.beginPath();
-    ctx.arc(x, midline, Math.max(3, box.height * 0.08), 0, Math.PI * 2);
-    ctx.fill();
-  }
+  // WHAT MOVES is the renderer's, and the only part of a clip that differs
+  // between a song and a jam. The ground under it, the clip region around it
+  // and the playhead over it are this file's, so a second renderer cannot get
+  // any of those subtly different. It is given a clean context and may leave
+  // it however it likes: `restore` below puts it back.
+  ctx.save();
+  strip.paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks });
+  ctx.restore();
 
   // The playhead, last so nothing is drawn over it.
   const head = box.x + box.width / 2;
@@ -339,9 +337,9 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
 
 /** Bar, section, tempo — and the mark that is the whole point of the clip. */
 function paintCaption(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, tape, score, range, tempoPercent, nowMs, words } = state;
+  const { layout, palette, strip, nowMs, words } = state;
   const box = layout.caption;
-  const caption = captionAt(tape, score, range, tempoPercent, nowMs);
+  const caption = strip.captionAt(nowMs);
 
   ctx.save();
   ctx.textAlign = "left";
@@ -399,10 +397,10 @@ export type RecordClipOptions = {
   videoSrc: string | null;
   startOffsetMs: number;
   videoOffsetMs: number;
-  tape: Tape;
-  score: SongScore;
-  range: BarRange;
-  tempoPercent: number;
+  /** What scrolls, and what the caption says. See [`ClipFrameState`]. */
+  strip: ClipStrip;
+  /** How much of the take is across the strip at once. */
+  windowMs: number;
   palette: ClipPalette;
   wordmark: string;
   words: { bar: string; bpm: string };
@@ -445,10 +443,8 @@ export function recordClip(options: RecordClipOptions): ClipRun {
     videoSrc,
     startOffsetMs,
     videoOffsetMs,
-    tape,
-    score,
-    range,
-    tempoPercent,
+    strip,
+    windowMs,
     palette,
     wordmark,
     words,
@@ -462,7 +458,6 @@ export function recordClip(options: RecordClipOptions): ClipRun {
   canvas.height = layout.height;
   const ctx = canvas.getContext("2d", { alpha: false });
 
-  const windowMs = clipWindowMs(score, range, tempoPercent);
   const audio = mediaElement(document.createElement("audio"), mixSrc);
   const video = videoSrc ? mediaElement(document.createElement("video"), videoSrc) : null;
   if (video) {
@@ -533,10 +528,7 @@ export function recordClip(options: RecordClipOptions): ClipRun {
         layout,
         palette,
         picture: video && video.readyState >= 2 ? video : null,
-        tape,
-        score,
-        range,
-        tempoPercent,
+        strip,
         windowMs,
         nowMs,
         marks,

@@ -1687,6 +1687,129 @@
   color: var(--text-faint);
 }
 
+/* ---------------------------------------------------------------------------
+   What a take is made of (W30, `plans/SONGS.md` A12).
+
+   Between the switch that starts a take and the shelf that holds them, in the
+   order a person reads in: turn it on, decide what goes in, see what came out.
+   The warning and the device name are the honest half of the feature and are
+   drawn as plain sentences rather than as a tooltip nobody opens.
+   --------------------------------------------------------------------------- */
+
+.takes-sound {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 2px 0 10px;
+}
+
+.takes-sound .jam-segmented {
+  /* The segments carry the whole question, so the heading above them is for
+     screen readers' benefit and the eye's, not a second explanation. */
+  gap: 4px;
+}
+
+.takes-sound-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle, var(--border));
+  border-radius: 8px;
+  background: var(--surface-sunken, transparent);
+}
+
+.takes-sound-warning,
+.takes-sound-device,
+.takes-sound-silent,
+.takes-sound-absent {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+.takes-sound-warning {
+  /* The one sentence that answers "so you'll record ALL the audio coming from
+     the pc?". It is not a footnote. */
+  color: var(--text-muted, var(--text-faint));
+}
+
+.takes-sound-device {
+  font-variant-numeric: tabular-nums;
+}
+
+.takes-sound-silent {
+  color: var(--warning, var(--text-faint));
+}
+
+.takes-sound-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* A narrow drawer puts the meter under the button rather than squeezing it
+     to nothing; the meter is useless below about sixty pixels. */
+  flex-wrap: wrap;
+}
+
+.takes-sound-listen {
+  flex: 0 0 auto;
+  font-size: 0.76rem;
+  padding: 3px 10px;
+}
+
+.takes-sound-meter {
+  flex: 1 1 90px;
+  min-width: 90px;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--border-subtle, var(--border));
+}
+
+.takes-sound-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 120ms ease-out;
+}
+
+/* "Save as a video", and the panel it opens.
+
+   The panel is a full-width row of its own under the take it belongs to
+   rather than a popover: it holds a canvas, four chips and a share row, and
+   inside the 320 px menu cap a popover of that would be unreadable. The list
+   item becomes a two-row flex column when one is open, and goes back to a
+   single row when it closes. */
+.jam-take-share {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.jam-take:has(> .jam-take-video) {
+  flex-wrap: wrap;
+}
+
+.jam-take-video {
+  flex: 1 0 100%;
+  min-width: 0;
+  margin-top: 6px;
+}
+
+/* The badge on a take that is not the ordinary kind. Quiet, and allowed to
+   shrink away before the date and the length do: it is the third thing on the
+   row, not the first. */
+.jam-take-sound {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
 .jam-takes-list {
   display: flex;
   flex-direction: column;
