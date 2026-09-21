@@ -23,8 +23,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 bash scripts/ci/ios-ensure-assets.sh
-# shellcheck source=./ios-xcode-env.sh
-. scripts/ci/ios-xcode-env.sh
+bash scripts/ci/ios-xcode-env.sh
 
 export CODE_SIGNING_ALLOWED=NO
 export CODE_SIGNING_REQUIRED=NO

@@ -20,8 +20,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 bash scripts/ci/ios-ensure-assets.sh
-# shellcheck source=./ios-xcode-env.sh
-. scripts/ci/ios-xcode-env.sh
+bash scripts/ci/ios-xcode-env.sh
 
 npm run tauri -- ios build --debug --target aarch64-sim
 

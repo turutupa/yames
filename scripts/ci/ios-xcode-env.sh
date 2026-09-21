@@ -1,48 +1,32 @@
 #!/usr/bin/env bash
-# Build settings that have to be forced on Xcode from outside the project.
+# Print where Swift's static back-deployment libraries actually are.
 #
-# Sourced, not run: `. scripts/ci/ios-xcode-env.sh`. xcodebuild reads build
-# settings out of its environment, and this is the only way to reach it —
-# `src-tauri/gen/apple` is generated from the Tauri config, so editing the
-# project by hand is not an option, and `tauri ios build` is the only thing
-# that can drive the build at all (its Xcode script phase talks back to the
-# CLI process over a local socket, so a hand-written xcodebuild line cannot
-# compile the Rust half).
+# This exists because of the failure that cost this task two CI rounds. The
+# stock Tauri Xcode project sends the linker to
+# `$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)` for them, and under
+# Xcode 26 on the GitHub runner `TOOLCHAIN_DIR` resolves to the *Metal*
+# toolchain, which has none — so `swiftCompatibility56` is not found and
+# nothing containing Swift links, which since M06a is the whole app.
 #
-# ## Why LIBRARY_SEARCH_PATHS is overridden
+# The fix is in `src-tauri/ios-project.yml` (`DT_TOOLCHAIN_DIR`), not here.
+# What is here is the evidence: if this ever prints zero, that fix has stopped
+# working and the link error further down the log is the symptom, not the
+# cause.
 #
-# The generated project points the linker at
-# `$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)` for Swift's static
-# back-deployment libraries. Under Xcode 26 on the GitHub runner,
-# `TOOLCHAIN_DIR` resolves to the *Metal* toolchain, which has no Swift
-# libraries in it:
-#
-#   ld: warning: search path '/var/run/com.apple.security.cryptexd/mnt/
-#       …Metal.xctoolchain/usr/lib/swift/iphonesimulator' not found
-#   ld: warning: Could not find or use auto-linked library 'swiftCompatibility56'
-#   Undefined symbols for architecture arm64:
-#     "__swift_FORCE_LOAD_$_swiftCompatibility56", referenced from:
-#       …_$_tauri_plugin_yames_mobile in libapp.a[29](YamesMobilePlugin.swift.o)
-#
-# Anything with Swift in it fails to link, which since M06a is the whole app.
-# The fix is to spell the default toolchain out absolutely, from
-# `xcode-select`, rather than trust a variable Xcode has repurposed. The
-# `Externals` entries have to be repeated because an environment override
-# replaces the project's value rather than adding to it, and that is where
-# `libapp.a` — the Rust half — is.
+# Overriding the setting through the environment does NOT work, and was tried:
+# the project assigns `LIBRARY_SEARCH_PATHS[arch=arm64]` at target level, and
+# a target-level assignment beats an environment one. Hence the template.
 set -u
 
 TOOLCHAIN="$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain"
-
-echo "==> Swift back-deployment libraries in $TOOLCHAIN:"
+echo "==> Swift back-deployment libraries under $TOOLCHAIN:"
 for platform in iphoneos iphonesimulator; do
   dir="$TOOLCHAIN/usr/lib/swift/$platform"
   if [ -d "$dir" ]; then
-    echo "    $platform: $(ls "$dir" | grep -ci compatibility) compatibility libraries"
+    n=$(ls "$dir" | grep -ci compatibility || true)
+    echo "    $platform: $n"
+    [ "$n" -gt 0 ] || echo "::warning::no compatibility libraries for $platform — the link step will fail"
   else
-    echo "::warning::$dir does not exist — the link step may fail"
+    echo "::warning::$dir does not exist — the link step will fail"
   fi
 done
-
-export LIBRARY_SEARCH_PATHS="\$(PROJECT_DIR)/Externals/arm64/\$(CONFIGURATION) \$(PROJECT_DIR)/Externals/x86_64/\$(CONFIGURATION) \$(SDKROOT)/usr/lib/swift $TOOLCHAIN/usr/lib/swift/\$(PLATFORM_NAME) $TOOLCHAIN/usr/lib/swift-5.0/\$(PLATFORM_NAME)"
-echo "==> LIBRARY_SEARCH_PATHS=$LIBRARY_SEARCH_PATHS"

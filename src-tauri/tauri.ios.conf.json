@@ -15,7 +15,8 @@
   "bundle": {
     "createUpdaterArtifacts": false,
     "iOS": {
-      "minimumSystemVersion": "15.0"
+      "minimumSystemVersion": "15.0",
+      "template": "ios-project.yml"
     }
   },
   "plugins": {}
