@@ -2063,6 +2063,29 @@ export function MainWindow() {
             onNewSetlist={handleNewSetlist}
             onDeleteSetlist={setlistSession.deleteSetlist}
             onRenameSetlist={setlistSession.renameSetlist}
+            // The jams, same as the rail hands them over on a desktop.
+            // Without these the sheet drew no jam rows at all, so on a phone
+            // there was no way to open a jam: the tab came up empty and
+            // stayed that way (M08).
+            jams={jamSession.jams}
+            activeJamId={jamSession.jam?.id ?? null}
+            onLoadJam={(next) => {
+              // The jam you are already on is the row saying so.
+              if (next.id === jamSession.jam?.id) return;
+              guarded(() => {
+                jamSession.loadJam(next);
+                releaseSidebarFocus();
+              });
+            }}
+            onNewJam={newJamGuarded}
+            onDeleteJam={jamSession.deleteJam}
+            onRenameJam={jamSession.renameJam}
+            onDuplicateJam={jamSession.duplicateJam}
+            onReorderJams={jamSession.reorderJams}
+            onAddJamToSetlist={(jamId, setlistId) => {
+              const jam = jamSession.jams.find((j) => j.id === jamId);
+              if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
+            }}
           />
         </Sheet>
       )}

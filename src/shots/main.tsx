@@ -107,9 +107,27 @@ async function drive() {
    */
   if (shot!.jam) {
     const rows = ".preset-sidebar-item.jam-item";
+    /**
+     * On a phone the library is a sheet, and it starts closed (M03b), so
+     * the rows this waits for are not on screen until something opens it.
+     * The bottom bar's library button is what a person would press, and it
+     * is the same door the setlist shots already go through — pressed here
+     * rather than in every jam scene's step list, because the jam driver
+     * below is the thing that needs it.
+     */
+    const libraryTab = document.querySelector<HTMLElement>(".mobile-tab-library");
+    if (libraryTab && !document.querySelector(rows)) {
+      libraryTab.click();
+      await until("the library sheet", () => !!document.querySelector(".sheet--library"));
+    }
     await until("the jam library", () => document.querySelectorAll(rows).length > shot!.jam!.row);
     (document.querySelectorAll(rows)[shot!.jam!.row] as HTMLElement).click();
     await until("the jam stage", () => !!document.querySelector(".jam-view"));
+    // Loading from the sheet does not close it; the sheet's own toggle does.
+    if (libraryTab && document.querySelector(".sheet--library")) {
+      libraryTab.click();
+      await until("the library sheet to close", () => !document.querySelector(".sheet--library"));
+    }
 
     const wanted = shot!.jam.bar ?? 1;
     if (wanted > 1) {
