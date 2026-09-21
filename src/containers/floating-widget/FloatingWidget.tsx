@@ -211,9 +211,11 @@ export function FloatingWidget() {
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
-  // Accent comes from the engine event — which is false in FREE mode,
-  // and knows about the speed ramp's own bar. No local re-derive.
-  const isAccent = currentBeat?.isAccent ?? false;
+  // Accent comes from the engine event — nothing in FREE mode past beat
+  // one, and it knows about the speed ramp's own bar. No local re-derive.
+  // The widget's dots are 6px across and have one lit state, so the middle
+  // tier does not reach them: accented or not is all they can say.
+  const isAccent = (currentBeat?.accentLevel ?? 0) > 0;
   const widgetBeats = beatsPerMeasure;
   const widgetActiveBeat = activeBeat;
 

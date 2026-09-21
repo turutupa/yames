@@ -1,5 +1,5 @@
 /**
- * The six trigger predicates (ONBOARDING_PLAN §5) as pure functions.
+ * The trigger predicates (ONBOARDING_PLAN §5, JAM_KILLER A4) as pure functions.
  *
  * Everything here is plain data in, boolean out — no React, no store, no
  * Tauri. Each rule gets its positive case and the cases that must NOT fire,
@@ -17,6 +17,7 @@ import {
   setupKey,
   shouldHintCoachAsk,
   shouldHintDrillFirstOpen,
+  shouldHintJamArrangement,
   shouldHintMidiPlugged,
   shouldHintWidgetDiscover,
   shouldHintZenFirst,
@@ -199,5 +200,25 @@ describe("midi-plugged", () => {
     expect(shouldHintMidiPlugged({ devices: [], bindings: [] })).toBe(false);
     expect(shouldHintMidiPlugged({ devices: [{}], bindings: [{}] })).toBe(false);
     expect(shouldHintMidiPlugged({ devices: [], bindings: [{}] })).toBe(false);
+  });
+});
+
+describe("jam-arrangement", () => {
+  it("fires once the band has played past the chorus it holds back", () => {
+    // A `build` holds chorus one back and opens up on chorus two, so two is
+    // the first bar line at which the band has audibly decided something.
+    expect(shouldHintJamArrangement({ chorus: 2 })).toBe(true);
+    expect(shouldHintJamArrangement({ chorus: 7 })).toBe(true);
+  });
+
+  it("stays quiet through the first chorus, and while nothing is playing", () => {
+    expect(shouldHintJamArrangement({ chorus: 1 })).toBe(false);
+    expect(shouldHintJamArrangement({ chorus: null })).toBe(false);
+  });
+
+  it("takes the arrangement's own word for it when it has one", () => {
+    // A breakdown or an ending IS the sentence, whichever chorus it lands on.
+    expect(shouldHintJamArrangement({ chorus: 1, breakdown: true })).toBe(true);
+    expect(shouldHintJamArrangement({ chorus: 1, ending: true })).toBe(true);
   });
 });

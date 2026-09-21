@@ -24,3 +24,10 @@ src/devShim.local.ts
 # Python bytecode from the sound generators in scripts/
 __pycache__/
 *.pyc
+
+# Playwright: the browser it downloads, and what a failing layout run leaves
+# behind (screenshots and traces of the moment it failed).
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

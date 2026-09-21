@@ -30,8 +30,27 @@ mod android_audio;
 pub mod drill;
 mod engine;
 pub mod instrument;
+/// The band. Both halves ship on a phone: `jam` compiles the table the
+/// callback reads, `kit` decodes the sound bank it reads samples out of.
+/// Neither pulls a desktop-only crate — see the `hound` / `claxon` note in
+/// `Cargo.toml`.
+mod jam;
+mod kit;
 mod state;
 mod tempo_context;
+/// Where a take's audio and the coach's speech wait for the audio callback.
+///
+/// Both are compiled on every platform on purpose. They are pure std +
+/// serde, and they are the two slots the output callback reads on `main`:
+/// gating them off a phone would mean two versions of the callback body,
+/// and the one thing this port never does is give the click a second
+/// shape. On a phone nothing ever fills either slot — the mic
+/// (`audio_input`) and the voice (`tts`) are both `cfg(desktop)`, and so
+/// are the commands that would start a take or say a line — so the
+/// callback's relaxed load finds an empty slot every buffer, exactly as it
+/// does on a desktop with the coach silent.
+mod speech_out;
+mod take;
 
 #[cfg(desktop)]
 mod audio_input;
@@ -61,6 +80,7 @@ pub mod session_log;
 pub mod timing;
 #[cfg(desktop)]
 mod tts;
+mod voices;
 
 /// Everything `src/bin/click-jitter-probe.rs` needs, and nothing more.
 ///
@@ -73,6 +93,32 @@ pub mod probe {
     pub use crate::beat_log::create_beat_log;
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
+    /// The jitter probe's `--jam` flag builds a table directly: it runs the
+    /// engine headless, with no Tauri command surface to call `set_jam`
+    /// through.
+    pub use crate::jam::{
+        band_state_for_bar, compile as compile_jam, compile_with_kit as compile_jam_with_kit,
+        compile_with_voices as compile_jam_with_voices, reference_bank, JamBandState, JamBassLine,
+        JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig,
+        JamTable, JamTrade, JamVoices,
+    };
+    /// The recorded bass and keys. `--jam-voice <dir>` plays a folder of
+    /// notes, so the gate covers the path a melodic bank takes to the mixer:
+    /// a MONO buffer through the drum bus, a round robin decided on the
+    /// tick, and a raised-cosine release on every note the line's cap ends —
+    /// which is the one per-sample `cos` anywhere near the callback.
+    pub use crate::voices::{load as load_voice_bank, MelodicBank};
+    /// The drums. Every kit is decoded on the command thread and travels
+    /// inside the table, so the gate covers the sound source the audio
+    /// thread actually reads — including `--jam-kit <dir>`, a folder of the
+    /// musician's own samples, which is the one that was never in the
+    /// binary at all.
+    pub use crate::kit::{load as load_kit, perc_ids, KitBank, KitVoice};
+    /// The take recorder. `--jam-take` runs one during the measurement, so
+    /// the gate covers the ring the output callback writes into and the
+    /// writer thread draining it to disk underneath the stream.
+    pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
+
     pub use crate::state::{create_shared_state, AppState, SharedState};
 
     // `desktop` as well as the feature: `coach-llm` still *exists* as a
@@ -106,17 +152,19 @@ use commands::{
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
     close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
-    set_audio_output_device, set_bpm, set_calibration_offset, set_input_gain, set_instrument,
+    set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
+    set_instrument,
     set_beat_groups, set_free_mode, set_midi_binding, set_playing, set_sound_type, set_subdivision, set_theme,
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, set_accent_mode, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk,
-    EngineState,
+    delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
+    EngineState, JamGainState, JamKitState, JamVoiceState,
 };
 #[cfg(desktop)]
-use commands::DownloadState;
+use commands::{DownloadState, TakeState};
 use beat_log::create_beat_log;
 use engine::MetronomeEngine;
 use state::create_shared_state;
@@ -189,6 +237,11 @@ pub fn run() {
     #[allow(unused_mut)]
     let mut builder = builder
         .plugin(tauri_plugin_updater::Builder::new().build())
+        // The native folder picker behind `pick_kit_folder`. Only the
+        // Rust side uses it — `pick_kit_folder` is our own command —
+        // so nothing in the frontend invokes a `plugin:dialog|…`
+        // command and no capability has to be widened for it.
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init());
 
     #[cfg(all(desktop, not(target_os = "macos")))]
@@ -344,15 +397,41 @@ pub fn run() {
             // command that called it to learn that and clear it.
             engine.set_tempo_context(tempo_ctx);
 
-            // Restore saved audio output device
+            // Restore saved audio output device, and the pair of outputs
+            // that device was last used on. Both before the first stream
+            // opens, so it opens wide enough to carry the pair — see
+            // `engine::channels_for_pair`.
             {
                 let store = app.store("settings.json")?;
-                if let Some(device_name) = store.get("audioOutputDevice").and_then(|v| v.as_str().map(String::from)) {
+                let device_name = store
+                    .get("audioOutputDevice")
+                    .and_then(|v| v.as_str().map(String::from));
+                let pairs = store
+                    .get(commands::OUTPUT_PAIRS_KEY)
+                    .unwrap_or(serde_json::Value::Null);
+                engine.set_output_pair_name_only(commands::stored_output_pair(
+                    &pairs,
+                    device_name.as_deref(),
+                ));
+                if let Some(device_name) = device_name {
                     engine.set_device_name(Some(device_name));
                 }
             }
 
             app.manage(EngineState(Mutex::new(engine)));
+            // The `set_jam` normalisation memo. See `JamGainState`.
+            app.manage(JamGainState::default());
+            // The decoded kit folder, so the bar-ahead sends do not each
+            // re-read eight WAVs. See `KitCache` in `kit.rs`.
+            app.manage(JamKitState::default());
+            // ...and the decoded melodic banks, for the same reason and at a
+            // higher price per miss. See `VoiceCache` in `voices.rs`.
+            app.manage(JamVoiceState::default());
+            // The take being recorded, if one is. See `TakeState`.
+            // Desktop only: a take is your playing mixed with the band, and
+            // the mic it needs is not compiled into a phone build (M08).
+            #[cfg(desktop)]
+            app.manage(TakeState::default());
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -662,6 +741,18 @@ pub fn run() {
             start_speed_ramp_from,
             arm_count_in,
             set_accent_mode,
+            set_jam,
+            set_jam_position,
+            warm_jam,
+            pick_kit_folder,
+            inspect_kit_folder,
+            start_take,
+            stop_take,
+            list_takes,
+            delete_take,
+            play_take,
+            stop_take_playback,
+            takes_dir_size,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,
@@ -709,6 +800,7 @@ pub fn run() {
             set_input_gain,
             list_audio_output_devices,
             set_audio_output_device,
+            set_audio_output_pair,
             get_model_status,
             get_system_memory_mb,
             write_model_chunk,
@@ -759,6 +851,54 @@ pub fn run() {
                             let _ = store.save(); // flush to disk before exit
                         }
                     }
+                    // A TAKE STILL RECORDING IS FINISHED BEFORE ANYTHING
+                    // ELSE HAPPENS.
+                    //
+                    // A take's WAV is written with a 44-byte header of
+                    // zeroes and patched with the real length when the
+                    // writer thread finishes; the sidecar with the record is
+                    // written after that. Quitting used to run straight past
+                    // both — `exit(0)` below is not a `Drop`, it takes the
+                    // process down — so an hour's playing left a file the
+                    // decoder refuses and a take the list never shows. The
+                    // whole point of the feature is being able to listen
+                    // back to it later.
+                    //
+                    // Before the engine shutdown, so the callback is still
+                    // there while the writer drains the last of the band,
+                    // and for ANY window, because `exit(0)` below is for any
+                    // window too.
+                    if let (Some(engine_state), Some(take_state)) = (
+                        window.try_state::<EngineState>(),
+                        window.try_state::<TakeState>(),
+                    ) {
+                        let handoff = engine_state
+                            .0
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .take_handoff();
+                        let mut session =
+                            take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+                        if session.is_recording() {
+                            match session.stop(&handoff) {
+                                Ok(Some(take)) => eprintln!(
+                                    "[take] finished on quit: {} ({:.1}s)",
+                                    take.path, take.duration_sec
+                                ),
+                                Ok(None) => {}
+                                Err(e) => eprintln!("[take] could not finish on quit: {e}"),
+                            }
+                        }
+                    }
+                    if let Some(audio_input) =
+                        window.try_state::<crate::audio_input::SharedAudioInput>()
+                    {
+                        audio_input
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .end_take_capture();
+                    }
+
                     // Quit the entire app when user closes ANY window. The
                     // engine shutdown is destructive (rips down the audio
                     // thread); we gate it to the "main" window so closing

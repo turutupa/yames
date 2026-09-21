@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "節拍器",
     "setlist": "曲目單",
-    "drill": "變速練習"
+    "drill": "變速練習",
+    "jam": "即興伴奏"
   },
   "tooltip": {
     "zen": "禪意",
@@ -21,10 +22,12 @@
     "short": "音量"
   },
   "presets": {
+    "unsavedMetronome": "未儲存的節拍器",
+    "unsavedDrill": "未儲存的變速練習",
     "title": "預設",
     "titleDrill": "變速練習",
     "titleSetlist": "曲目單",
-    "saveCurrent": "儲存目前設定",
+    "titleJam": "即興伴奏",
     "search": "搜尋資料庫",
     "searchPlaceholder": "搜尋…",
     "namePlaceholder": "名稱…",
@@ -40,7 +43,9 @@
     "revert": "還原",
     "revertTooltip": "捨棄變更並重新載入預設",
     "save": "儲存預設",
-    "delete": "刪除"
+    "delete": "刪除",
+    "newPreset": "新增預設",
+    "newDrill": "新增練習"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "正在聆聽",
     "inputOff": "輸入已關閉",
     "coachOnPlay": "按下播放後教練開始聆聽",
-    "coachQuiet": "教練在每一步中途保持安靜"
+    "coachQuiet": "教練在每一步中途保持安靜",
+    "countIn": "預備拍"
   },
   "rail": {
     "label": "模式與資料庫",
@@ -76,7 +82,8 @@
     "collapse": "摺疊側邊欄",
     "expand": "展開側邊欄",
     "collapseWithShortcut": "摺疊側邊欄 ({{shortcut}})",
-    "expandWithShortcut": "展開側邊欄 ({{shortcut}})"
+    "expandWithShortcut": "展開側邊欄 ({{shortcut}})",
+    "beta": "測試版"
   },
   "tabs": {
     "library": "資料庫"
@@ -85,6 +92,7 @@
     "metronome": "節拍器",
     "drill": "練習",
     "setlist": "曲目單",
+    "jam": "伴奏",
     "settings": "設定",
     "library": "資料庫",
     "zen": "禪意"

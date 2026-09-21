@@ -155,6 +155,15 @@
       "midiPlugged": {
         "body": "Hay un dispositivo MIDI conectado pero nada asignado. ¿Asignas un pedal a Reproducir/Parar?",
         "action": "Abrir atajos"
+      },
+      "jamSheets": {
+        "body": "Ajustes cambia la banda; Acordes es tu chuleta."
+      },
+      "jamLive": {
+        "body": "Todo lo de aquí cambia en el compás siguiente."
+      },
+      "jamArrangement": {
+        "body": "La banda sube y baja por su cuenta: Bucle, en Ajustes, lo desactiva."
       }
     },
     "tour": {

@@ -4,6 +4,8 @@
     "untitled": "Nieuwe setlist",
     "newSetlist": "Nieuwe setlist",
     "deleteSetlist": "Setlist verwijderen",
+    "duplicateSetlist": "Setlist dupliceren",
+    "copyName": "{{name}} kopie",
     "librarySteps": "{{count}} stappen",
     "librarySteps_one": "{{count}} stap",
     "librarySteps_other": "{{count}} stappen",
@@ -22,6 +24,14 @@
     "moveLater": "Deze stap naar achteren",
     "duplicateStep": "Deze stap dupliceren",
     "removeStep": "Deze stap verwijderen",
+    "reorderHint": "Sleep om te herschikken",
+    "stopToReorder": "Stop de setlist om te herschikken",
+    "duplicateSteps": "{{count}} stappen dupliceren",
+    "duplicateSteps_one": "{{count}} stap dupliceren",
+    "duplicateSteps_other": "{{count}} stappen dupliceren",
+    "removeSteps": "{{count}} stappen verwijderen",
+    "removeSteps_one": "{{count}} stap verwijderen",
+    "removeSteps_other": "{{count}} stappen verwijderen",
     "barOf": "maat {{current}} van {{total}}",
     "timeLeft": "nog {{duration}}",
     "waitingForYou": "wacht op jou",
@@ -120,14 +130,18 @@
       "backToPlaying": "Terug naar spelen"
     },
     "countIn": {
-      "label": "Aftellen",
-      "off": "Niet aftellen",
-      "startingIn": "start over",
-      "beats": "{{count}} tellen",
-      "beats_one": "{{count}} tel",
-      "beats_other": "{{count}} tellen",
-      "fewer": "Minder tellen aftellen",
-      "more": "Meer tellen aftellen"
+      "startingIn": "start over"
+    },
+    "jam": {
+      "mark": "Deze stap is een jam",
+      "addStep": "Een jam toevoegen",
+      "addTo": "Aan setlist toevoegen…",
+      "barsOfForm": "{{count}} maten",
+      "barsOfForm_one": "{{count}} maat",
+      "barsOfForm_other": "{{count}} maten",
+      "said": "de band",
+      "goneShort": "De jam is weg",
+      "gone": "Die jam staat niet meer in de bibliotheek, dus deze stap speelt de klik die hij beschrijft."
     }
   }
 }

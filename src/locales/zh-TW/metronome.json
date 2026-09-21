@@ -14,6 +14,8 @@
     "clicksPerBar": "每小節 {{count}} 次",
     "addBeat": "增加一拍",
     "removeBeat": "減少一拍",
+    "prevMeter": "上一個拍號",
+    "nextMeter": "下一個拍號",
     "grouping": "分組",
     "tempo": "速度",
     "tempoUp": "提高速度",
@@ -41,10 +43,13 @@
   },
   "sound": {
     "click": "滴答",
+    "sticks": "鼓棒",
     "wood": "木聲",
     "beep": "嗶聲",
     "drum": "鼓聲",
-    "snare": "小鼓"
+    "kit": "鼓組",
+    "snare": "小鼓",
+    "cowbell": "牛鈴"
   },
   "driftMeter": {
     "early": "偏快",

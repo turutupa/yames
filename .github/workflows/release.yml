@@ -423,6 +423,19 @@ jobs:
             sleep 5
           done
 
+      # `wingetcreate submit` opens its PR from turutupa/winget-pkgs, and it
+      # refuses outright once that fork has drifted from upstream: "The forked
+      # repository could not be synced with the upstream commits. Sync your
+      # fork manually and try again." Nobody syncs a fork they never visit, so
+      # it drifted 25,908 commits behind: 1.1.0 and 1.2.0 both submitted
+      # nothing at all, leaving winget on 1.0.4. Fast-forwarding it here costs
+      # one API call and removes the only way this has ever failed.
+      - name: Sync the winget-pkgs fork with upstream
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_PAT }}
+        run: gh api -X POST repos/turutupa/winget-pkgs/merge-upstream -f branch=master
+
       - name: Install wingetcreate
         shell: pwsh
         run: |
@@ -438,8 +451,12 @@ jobs:
       # So the manifests are generated to disk, the licence is corrected, and
       # then they are submitted. `--out` without `--submit` is what makes that
       # gap available.
+      # NOT `continue-on-error`. It was, and that is why a publishing channel
+      # that published nothing for two releases reported success both times
+      # — the release itself is already out by the time this runs, nothing
+      # depends on this job, and a red X here is the only thing that would
+      # ever have said winget was broken.
       - name: Submit PR to winget-pkgs
-        continue-on-error: true
         shell: pwsh
         env:
           VERSION: ${{ steps.version.outputs.version }}

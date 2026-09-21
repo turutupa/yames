@@ -1,7 +1,7 @@
 {
   "name": "yames",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Yames — Free desktop metronome built for real practice. MIDI footswitch control, sub-millisecond precision, zen mode, speed drills, presets, AI practice coach (coming soon). Hands stay on the instrument. macOS, Windows, Linux.",
   "license": "GPL-3.0-or-later",
   "homepage": "https://yames.app",
@@ -36,6 +36,8 @@
     "tauri": "node scripts/tauri.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:layout": "playwright test",
+    "test:layout:ui": "playwright test --ui",
     "test:rust": "node scripts/rust-test.mjs --lib --no-default-features",
     "test:dsp": "node scripts/rust-test.mjs --test dsp_fixtures",
     "test:dsp:bake": "UPDATE_FIXTURES=1 node scripts/rust-test.mjs --test dsp_fixtures",
@@ -57,6 +59,7 @@
     "react-i18next": "^17.0.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tauri-apps/cli": "~2.10.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

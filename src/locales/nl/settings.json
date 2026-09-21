@@ -138,6 +138,9 @@
     "devices": {
       "title": "Apparaten",
       "audioOutput": "Audio-uitvoer",
+      "outputPair": "Uitgangen",
+      "outputsPair": "Uitgangen {{a}}-{{b}}",
+      "outputPairFallback": "Dit apparaat levert maar twee uitgangen, dus de klik speelt via uitgang 1-2.",
       "refreshAudio": "Audio-apparaten vernieuwen",
       "btLatencyWarning": "Bluetooth-audio voegt flink wat vertraging toe. Visuele aanwijzingen en geluid lopen mogelijk niet perfect synchroon.",
       "audioInput": "Audio-invoer",
@@ -173,7 +176,8 @@
       "groups": {
         "metronome": "Metronoom",
         "view": "Weergave",
-        "navigation": "Navigatie"
+        "navigation": "Navigatie",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Afspelen / Stoppen",
@@ -195,9 +199,19 @@
         "tab-1": "Metronoom-tabblad",
         "tab-2": "Setlist-tabblad",
         "tab-3": "Tempotraining-tabblad",
+        "tab-4": "Jam-tabblad",
         "settings": "Instellingen",
         "toggle-sidebar": "Zijbalk schakelen",
-        "toggle-coach": "Coach aan/uit"
+        "toggle-coach": "Coach aan/uit",
+        "jam-next-groove": "Volgende groove",
+        "jam-prev-groove": "Vorige groove",
+        "jam-trade": "Wisselen",
+        "jam-dropout": "Stilte-maten",
+        "jam-next-shape": "Volgende greep",
+        "jam-next-section": "Volgend deel",
+        "jam-prev-section": "Vorig deel",
+        "jam-loop-section": "Dit deel herhalen",
+        "jam-take": "Neem de take op"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -219,9 +233,19 @@
         "tab-1": "Naar het Metronoom-tabblad",
         "tab-2": "Naar het Setlist-tabblad",
         "tab-3": "Naar het Tempotraining-tabblad",
+        "tab-4": "Naar het Jam-tabblad",
         "settings": "Instellingen openen of sluiten",
         "toggle-sidebar": "De linkerzijbalk in- of uitklappen",
-        "toggle-coach": "Open of sluit het oefencoach-paneel"
+        "toggle-coach": "Open of sluit het oefencoach-paneel",
+        "jam-next-groove": "Naar de volgende groove zonder je handen van het instrument te halen",
+        "jam-prev-groove": "Terug naar de vorige groove",
+        "jam-trade": "Wisselen aan of uit — vier maten de band, vier maten jij",
+        "jam-dropout": "De stilte-maten aan of uit zetten",
+        "jam-next-shape": "Door de grepen van het huidige akkoord bladeren",
+        "jam-next-section": "Bij de maatstreep naar het begin van het volgende deel springen",
+        "jam-prev-section": "Bij de maatstreep terug naar het begin van het vorige deel",
+        "jam-loop-section": "Het deel waar je in zit herhalen, of daarmee stoppen",
+        "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen"
       }
     },
     "inputTest": {
@@ -272,6 +296,10 @@
       "updating": "Bijwerken…",
       "upToDate": "Bijgewerkt ✓",
       "checkUpdates": "Controleren op updates",
+      "checkAgain": "Opnieuw controleren",
+      "failed": "Controle mislukt",
+      "sounds": "Geluiden",
+      "soundsCredit": "De Club-kit is Virtuosity Drums van Versilian Studios en Karoryfer Samples, gespeeld door Austin McMahon (publiek domein). De Studio-kit is DRSKit van het DrumGizmo-project (CC BY 4.0).",
       "madeWith": "Gemaakt met {{heart}} voor muzikanten overal"
     }
   },

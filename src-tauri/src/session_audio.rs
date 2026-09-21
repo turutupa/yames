@@ -52,12 +52,6 @@ use std::fs::File;
 use std::io::{BufWriter, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 
-/// Format code 1 = PCM (16-bit integer). Float (3) needs an extra "fact"
-/// chunk; sticking to PCM keeps the header at exactly 44 bytes.
-const WAVE_FORMAT_PCM: u16 = 1;
-const BITS_PER_SAMPLE: u16 = 16;
-const NUM_CHANNELS: u16 = 1;
-const BYTES_PER_SAMPLE: u64 = (BITS_PER_SAMPLE / 8) as u64;
 /// 64KB I/O buffer keeps disk writes off the audio thread's hot path on
 /// average — actual writes happen during the spectrum/sleep window.
 const WRITER_BUFFER_BYTES: usize = 64 * 1024;
@@ -93,6 +87,16 @@ pub fn is_enabled() -> bool {
         false
     }
 }
+
+// The 44-byte mono 16-bit WAV header both this recorder and `take.rs`
+// write lives in `take.rs` now, and is re-exported here under its old
+// name so this file reads as it did.
+//
+// It moved because `take.rs` compiles on every platform and this module
+// does not: the mic dump is desktop-only, the band is not (M08). The
+// point of having ONE copy is unchanged — two hand-written headers is how
+// one of them ends up with a wrong `byte_rate` that no test notices.
+pub(crate) use crate::take::wav_header_mono_16bit;
 
 /// Stream-to-disk WAV recorder. Created at session start, fed samples
 /// during capture, finalized at session stop.
@@ -157,32 +161,7 @@ impl SessionAudioRecorder {
             .into_inner()
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
 
-        let data_bytes = self.sample_count * BYTES_PER_SAMPLE;
-        // chunk_size = 36 (header tail) + data_bytes. Clamped to u32 max
-        // for the WAV spec — 2^32 / 96000 ≈ 12 hours of mono 16-bit audio
-        // so this is a defensive floor, not a realistic limit.
-        let chunk_size = (36u64 + data_bytes).min(u32::MAX as u64) as u32;
-        let data_size = data_bytes.min(u32::MAX as u64) as u32;
-
-        let mut header = [0u8; 44];
-        // RIFF chunk descriptor
-        header[0..4].copy_from_slice(b"RIFF");
-        header[4..8].copy_from_slice(&chunk_size.to_le_bytes());
-        header[8..12].copy_from_slice(b"WAVE");
-        // fmt sub-chunk
-        header[12..16].copy_from_slice(b"fmt ");
-        header[16..20].copy_from_slice(&16u32.to_le_bytes()); // fmt chunk size
-        header[20..22].copy_from_slice(&WAVE_FORMAT_PCM.to_le_bytes());
-        header[22..24].copy_from_slice(&NUM_CHANNELS.to_le_bytes());
-        header[24..28].copy_from_slice(&self.sample_rate.to_le_bytes());
-        let byte_rate = self.sample_rate as u64 * NUM_CHANNELS as u64 * BYTES_PER_SAMPLE;
-        header[28..32].copy_from_slice(&(byte_rate as u32).to_le_bytes());
-        let block_align = NUM_CHANNELS * (BITS_PER_SAMPLE / 8);
-        header[32..34].copy_from_slice(&block_align.to_le_bytes());
-        header[34..36].copy_from_slice(&BITS_PER_SAMPLE.to_le_bytes());
-        // data sub-chunk
-        header[36..40].copy_from_slice(b"data");
-        header[40..44].copy_from_slice(&data_size.to_le_bytes());
+        let header = wav_header_mono_16bit(self.sample_rate, self.sample_count);
 
         file.seek(SeekFrom::Start(0))?;
         file.write_all(&header)?;

@@ -3,6 +3,12 @@ import type { Preset } from "../../types";
 
 interface PresetSaveBarProps {
   activePreset: Preset | null;
+  /**
+   * Which stage the bar is describing, for the case where no preset is
+   * loaded. A metronome and a drill are two different things to have in front
+   * of you, and the bar has to say which one it is naming.
+   */
+  view: "beat" | "drill";
   presetDirty: boolean;
   updateFeedback: boolean;
   onRename: (presetId: string) => void;
@@ -23,13 +29,20 @@ interface PresetSaveBarProps {
  * to have been taught. Update and Revert appear only when there is something
  * to update or revert.
  *
- * With no preset loaded the bar degrades to the one affordance that still
- * makes sense — Save preset — which is also how the user gets their first one.
+ * With no preset loaded the bar NAMES what is on the stage — "Unsaved
+ * metronome", "Unsaved drill" — in the place and the size the preset's name
+ * would have had, with Save beside it. It used to be the Save button on its
+ * own, and that read as a mode you had not started yet: the owner opened
+ * Drill, saw a whole drill set up on the stage and a bar that said only
+ * "Save preset", and could not tell what the screen was showing. Nothing on
+ * this stage is ever nothing — the settings in front of you ARE the drill —
+ * so the bar says so, and saving is what files it in the library.
  *
  * Pure UI: the parent owns all state and provides the action callbacks.
  */
 export function PresetSaveBar({
   activePreset,
+  view,
   presetDirty,
   updateFeedback,
   onRename,
@@ -102,28 +115,37 @@ export function PresetSaveBar({
           )}
         </>
       ) : (
-        <button
-          className="preset-save-btn preset-save-btn--save"
-          onClick={onSave}
-          title={t("presets.save")}
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        <>
+          {/* Not a button: there is no stored name to rename yet. The class
+              is the loaded preset's so the two states sit on the same line
+              at the same size — what changes between them is the words. */}
+          <span className="preset-active-name preset-active-name--unsaved">
+            {t(view === "drill" ? "presets.unsavedDrill" : "presets.unsavedMetronome")}
+          </span>
+
+          <button
+            className="preset-save-btn preset-save-btn--save"
+            onClick={onSave}
+            title={t("presets.save")}
           >
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          <span className="preset-save-btn-label">{t("presets.save")}</span>
-        </button>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span className="preset-save-btn-label">{t("presets.save")}</span>
+          </button>
+        </>
       )}
     </div>
   );

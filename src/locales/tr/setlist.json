@@ -4,6 +4,8 @@
     "untitled": "Yeni set listesi",
     "newSetlist": "Yeni set listesi",
     "deleteSetlist": "Set listesini sil",
+    "duplicateSetlist": "Set listesini çoğalt",
+    "copyName": "{{name}} kopya",
     "librarySteps": "{{count}} adım",
     "librarySteps_one": "{{count}} adım",
     "librarySteps_other": "{{count}} adım",
@@ -22,6 +24,14 @@
     "moveLater": "Bu adımı geriye al",
     "duplicateStep": "Bu adımı çoğalt",
     "removeStep": "Bu adımı kaldır",
+    "reorderHint": "Sıralamak için sürükleyin",
+    "stopToReorder": "Sıralamak için set listesini durdur",
+    "duplicateSteps": "{{count}} adımı çoğalt",
+    "duplicateSteps_one": "{{count}} adımı çoğalt",
+    "duplicateSteps_other": "{{count}} adımı çoğalt",
+    "removeSteps": "{{count}} adımı kaldır",
+    "removeSteps_one": "{{count}} adımı kaldır",
+    "removeSteps_other": "{{count}} adımı kaldır",
     "barOf": "{{total}} ölçüden {{current}}. ölçü",
     "timeLeft": "{{duration}} kaldı",
     "waitingForYou": "seni bekliyor",
@@ -120,14 +130,18 @@
       "backToPlaying": "Çalmaya dön"
     },
     "countIn": {
-      "label": "Sayım",
-      "off": "Sayım yok",
-      "startingIn": "başlıyor",
-      "beats": "{{count}} vuruş",
-      "beats_one": "{{count}} vuruş",
-      "beats_other": "{{count}} vuruş",
-      "fewer": "Daha az sayım vuruşu",
-      "more": "Daha çok sayım vuruşu"
+      "startingIn": "başlıyor"
+    },
+    "jam": {
+      "mark": "Bu adım bir jam",
+      "addStep": "Bir jam ekle",
+      "addTo": "Set listesine ekle…",
+      "barsOfForm": "{{count}} ölçü",
+      "barsOfForm_one": "{{count}} ölçü",
+      "barsOfForm_other": "{{count}} ölçü",
+      "said": "grup",
+      "goneShort": "Jam artık yok",
+      "gone": "O jam artık kütüphanede yok, bu yüzden bu adım tarif ettiği kliği çalıyor."
     }
   }
 }

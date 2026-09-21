@@ -2,7 +2,11 @@ import { useTranslation } from "react-i18next";
 import { meterLabel } from "../../utils/meter";
 import { spanLabel, stepSeconds, transitionLabel } from "./format";
 import type { SetlistRemaining, Translate } from "./format";
-import type { Setlist, SetlistStep } from "../../types";
+import { JamGlyph } from "../jam/JamGlyph";
+import { barInView, formBars, jamHarmony, nextChange } from "../../jam";
+import { chordName } from "../../jam/harmony";
+import type { Jam } from "../../jam";
+import type { BeatEvent, Setlist, SetlistStep } from "../../types";
 
 /**
  * A setlist, playing.
@@ -40,6 +44,18 @@ interface SetlistPlayerProps {
   isPlaying: boolean;
   /** The engine's live count-in. `beats` of 0 is nothing counting. */
   countIn: { beats: number; done: number };
+  /**
+   * The jam this step IS, while one is running (JAM_MODE §8.5).
+   *
+   * A jam step's own clock is the form, not the step: "bar 5 of 12, on the
+   * IV" is where you are, and the step's own "bar 9 of 32" is a number about
+   * the routine rather than about the music. So it goes in the readout row
+   * beside the step's, not instead of it — the routine still has to say when
+   * this step is over.
+   */
+  jam?: Jam | null;
+  /** The latest beat, for the jam's place in the form. */
+  currentBeat?: BeatEvent | null;
   /** Back to the paragraph. The setlist keeps running. */
   onEdit: () => void;
 }
@@ -111,6 +127,8 @@ export function SetlistPlayer({
   isDownbeat,
   isPlaying,
   countIn,
+  jam = null,
+  currentBeat = null,
   onEdit,
 }: SetlistPlayerProps) {
   const { t } = useTranslation();
@@ -139,6 +157,20 @@ export function SetlistPlayer({
   const average = known.length ? known.reduce((a, b) => a + b, 0) / known.length : 1;
   const widths = shares.map((s) => (s === null ? average * MANUAL_SHARE : s));
   const span = widths.reduce((a, b) => a + b, 0) || 1;
+
+  /**
+   * The jam's place in its form, and the chord under your hands.
+   *
+   * The same `jamHarmony` the jam screen and Zen draw from, so the chord on
+   * the setlist player and the chord on the jam tab cannot be two different
+   * chords. Nothing is computed when the step is not a jam.
+   */
+  const jamBars = jam ? formBars(jam.form) : 0;
+  const jamHarm = jam ? jamHarmony(jam) : null;
+  const jamBar = jam ? barInView(jam, currentBeat?.formBar ?? 0, isPlaying) : 0;
+  const jamChordAt = jamHarm?.chords[jamBar] ?? null;
+  const jamChord = jamHarm && jamChordAt ? chordName(jamChordAt, jamHarm.key) : null;
+  const jamNext = jamHarm ? nextChange(jamHarm.chords, jamBar, jamHarm.key) : null;
 
   const groups = step.beatGroups.length ? step.beatGroups : [4];
   let beatOffset = 0;
@@ -192,6 +224,30 @@ export function SetlistPlayer({
       </div>
 
       <div className="setlist-player-left">{leftLabel(t, step, remaining)}</div>
+
+      {/* Where the band is, when the step is a band. Under the step's own
+          countdown because the two answer different questions and a player
+          reading from two metres away needs both: the form tells you what to
+          play next, the countdown tells you how long you have left to. */}
+      {jam && (
+        <div className="setlist-player-jam">
+          <JamGlyph size={13} />
+          <span className="setlist-player-jam-where">
+            {t("jam.form.barOf", { current: jamBar + 1, total: jamBars })}
+          </span>
+          {jamChord && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="setlist-player-jam-chord">{jamChord}</span>
+            </>
+          )}
+          {jamNext && (
+            <span className="setlist-player-jam-next">
+              {t("jam.now.next", { chord: jamNext.name, count: jamNext.inBars })}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="setlist-player-ribbon" aria-hidden="true">
         {setlist.steps.map((s, index) => (

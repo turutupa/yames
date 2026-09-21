@@ -28,6 +28,55 @@
   --safe-left: env(safe-area-inset-left, 0px);
 }
 
+/* ── Scrollbars, everywhere ───────────────────────────────────────────────
+ *
+ * The app draws its own menus, its own sliders and its own switches, and then
+ * handed the operating system every scrollbar in it — so a dropdown opened on
+ * Windows came with a wide grey Windows scrollbar down its side, in the one
+ * palette on the screen that belongs to nobody. The owner: "can we also have
+ * a custom scrollbar? something that matches the theme better?"
+ *
+ * Thin, rounded, the ink colour at low alpha, brighter under the pointer, and
+ * the track left transparent so it disappears where nothing overflows. Both
+ * webviews this app ships in are WebKit-derived — WebView2 is Chromium, macOS
+ * is WKWebView — so the `::-webkit-` rules are the ones that paint;
+ * `scrollbar-color` is the standard property for everything else.
+ *
+ * Global rather than per-component: three screens had already styled their
+ * own, which is how a fourth came to be missed. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  /* Painted into the padding box so the border above reads as a margin, and
+     the thumb sits in its lane rather than filling it. */
+  background-clip: padding-box;
+  background-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+}
+
+@media (hover: hover) {
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--text-primary) 38%, transparent);
+  }
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* =================== Layout: fixed header + scrolling content =================== */
 .main-window {
   height: 100%;
@@ -480,6 +529,40 @@
   color: var(--text-secondary);
 }
 
+/* The jam library's style filter. A wrapping row of chips above the list,
+   scrolled with the panel's own padding so the chips line up with the rows
+   they narrow. */
+.preset-sidebar-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 10px 8px;
+}
+
+.preset-sidebar-chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+@media (hover: hover) {
+  .preset-sidebar-chip:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+}
+
+.preset-sidebar-chip.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
 .preset-sidebar-list {
   flex: 1;
   overflow-y: auto;
@@ -510,6 +593,38 @@
   .preset-sidebar-item:hover {
     background: rgba(255, 255, 255, 0.06);
   }
+}
+
+/* A row you can pick up says so before you pick it up.
+ *
+ * Written for whatever library row is DRAGGABLE rather than for either kind,
+ * because both libraries in the sidebar are ordered by hand — jams on their
+ * tab, setlists on theirs — and one grab has to feel like the other. It also
+ * tracks the guard the rows already carry: a row being renamed is a text
+ * field, its `draggable` goes false, and the hand goes with it.
+ *
+ * The attribute buys the specificity this needs, which is the other half of
+ * the story: `.preset-sidebar-item.setlist-item` is two simple selectors and
+ * setlist.css is imported after this file, so anything written as one class
+ * here loses the cursor to it.
+ */
+.preset-sidebar-item[draggable="true"] {
+  cursor: grab;
+}
+
+/* Picked up, and the row it is over. A line between rows rather than a filled
+   one: "after this one" and "instead of this one" are different answers and a
+   wash only gives the second. */
+.preset-sidebar-item[data-dragging] {
+  opacity: 0.45;
+}
+
+.preset-sidebar-item[draggable="true"][data-dragging] {
+  cursor: grabbing;
+}
+
+.preset-sidebar-item[data-drag-over] {
+  box-shadow: inset 0 2px 0 0 var(--accent);
 }
 
 .preset-sidebar-item.active {
@@ -839,24 +954,41 @@
   }
 }
 
+/* The same line, when nothing has been saved yet — "Unsaved metronome". It is
+   a label rather than a door, so it neither invites a click nor lights up
+   under the pointer, and it sits a shade back from a name you chose because
+   the app picked those words, not you. */
+.preset-active-name--unsaved {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .preset-active-name--unsaved:hover {
+    color: var(--text-muted);
+    cursor: default;
+  }
+}
+
 /* "Edited", not a bullet. The dot is the glance; the word is what makes the
    glance mean something the first time you see it. `--feedback-ok` is the
    token contract's warm attention colour — the only amber the themes agree
-   on — and it is never used for anything else inside the bar. */
+   on — and it is never used for anything else inside the bar.
+
+   A dot and a word, no pill: it used to be the brightest thing in the row,
+   brighter than the Save button it was pointing at, and the owner read that
+   as a mistake. It was. The state is a footnote; the button is the action. */
 .preset-edited {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
   height: 22px;
-  padding: 0 9px 0 8px;
-  border-radius: 11px;
-  border: 1px solid color-mix(in srgb, var(--feedback-ok) 35%, transparent);
-  background: color-mix(in srgb, var(--feedback-ok) 10%, transparent);
-  color: var(--feedback-ok);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  padding: 0 2px;
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
@@ -867,52 +999,171 @@
   background: var(--feedback-ok);
 }
 
-/* Save and Revert are text, not buttons with walls: the chips on the other
-   side of the bar are the only bordered things in the row, so the eye finds
-   the output cluster without being told. */
+/* Save and Revert.
+
+   Save, when there is something to save, is the one filled button in the bar
+   — the owner's words for the text-only version were "barely visible, it
+   doesn't even have a background". Revert stands beside it with a hairline
+   wall, so the pair reads as one decision with a quiet way out. When there
+   is nothing to save the button stays (its absence would be a third state
+   to read) but goes back to faint text. */
 .preset-text-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  padding: 4px 6px;
-  border: none;
-  border-radius: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   background: none;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
   transition:
     color 0.15s,
-    background 0.15s;
+    background 0.15s,
+    border-color 0.15s,
+    filter 0.15s;
 }
 
-.preset-text-btn--save {
-  color: var(--accent);
-}
-
-.preset-text-btn--revert {
-  color: var(--text-tertiary);
+.preset-text-btn--save:not(:disabled):not(.preset-text-btn--feedback) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text, #fff);
 }
 
 @media (hover: hover) {
-  .preset-text-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, currentColor 12%, transparent);
+  .preset-text-btn--save:not(:disabled):not(.preset-text-btn--feedback):hover {
+    filter: brightness(1.08);
   }
+}
+
+.preset-text-btn--revert {
+  border-color: var(--border);
+  color: var(--text-secondary);
 }
 
 @media (hover: hover) {
   .preset-text-btn--revert:hover:not(:disabled) {
-    color: var(--text-secondary);
+    background: var(--surface-hover, color-mix(in srgb, currentColor 8%, transparent));
+    color: var(--text-primary);
   }
 }
 
 /* Nothing to save reads as nothing to save. The button stays — its absence
    would be a third state to interpret — but it stops offering itself. */
 .preset-text-btn:disabled {
+  padding: 0 4px;
   color: var(--text-faint);
   cursor: default;
+}
+
+/* ─── The jam's context bar ─────────────────────────────────────────────
+ *
+ * What this is (name, badge, the vibe it started from), then the two doors,
+ * then the save cluster. The doors are drawn as buttons with a glyph each,
+ * because the text-only version was the thing the owner did not find.
+ * `.jam-sheet-btn` stays on them for the screenshot harness and the tests;
+ * `.jam-door` is the look. */
+.jam-save-area {
+  gap: 8px;
+}
+
+.jam-save-area .preset-active-name {
+  margin-right: 2px;
+}
+
+/* In the jam bar the save cluster is a second state, not a permanent
+   fixture: clean, the bar is the name, the vibe and the two doors; edited, a
+   divider, "Edited", Save and Revert appear after them. "No changes" as a
+   standing caption was one more word in a row the owner already found
+   crowded, so here the disabled button is not drawn at all. */
+.jam-save-area .preset-text-btn:disabled {
+  display: none;
+}
+
+.jam-bar-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.jam-vibe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 9px 0 8px;
+  border: none;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+button.jam-vibe-chip {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  button.jam-vibe-chip:hover {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
+}
+
+.jam-vibe-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.jam-save-area .jam-sheet-btn.jam-door {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  margin: 0;
+  padding: 0 13px 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+}
+
+@media (hover: hover) {
+  .jam-save-area .jam-sheet-btn.jam-door:hover {
+    background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+  }
+}
+
+.jam-save-area .jam-sheet-btn.jam-door.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.jam-door-glyph {
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .preset-text-btn--feedback,
@@ -1061,10 +1312,112 @@
   color: var(--accent);
 }
 
+/* "Beta", after the mode's name. Not an apology — it is what tells a player
+   that what they are looking at is new, so a thing that is wrong with it
+   reads as worth reporting rather than as how the app is. Quiet: it is a
+   note about the mode, not a second name for it. */
+.rail-mode-badge {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: color-mix(in srgb, var(--accent) 85%, var(--text-primary));
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .rail-mode-label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ── Jam now, on the rail (JAM_KILLER A4) ──────────────────────────────────
+ *
+ * A play glyph beside the Jam entry while no jam is open. It sits in a row
+ * with the mode rather than inside it — a button inside a button is not a
+ * thing a browser will draw — and the mode keeps all the room it had, because
+ * the glyph is the last 24px and the label ellipsises before it. */
+.rail-mode-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rail-mode-row .rail-mode {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The highlight belongs to the ENTRY, and the glyph is part of the entry.
+   It used to be painted on the button, which stopped at the label and left
+   the play button sitting on the rail's own background — one mode drawn as
+   two controls. The row carries the fill now and the button inside it goes
+   transparent, so there is one shape and no seam down the middle of it. The
+   accent bar stays on the button: it is the button's left edge and the row's
+   left edge, and leaving it there keeps the narrow and collapsed rails —
+   where the glyph is hidden and the row IS the button — exactly as they
+   were. */
+@media (hover: hover) {
+  .rail-mode-row:hover {
+    border-radius: var(--radius-sm);
+    background: var(--surface-hover);
+  }
+}
+
+.rail-mode-row[data-active] {
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+}
+
+.rail-mode-row[data-active] .rail-mode.active {
+  background: transparent;
+}
+
+@media (hover: hover) {
+  .rail-mode-row:hover .rail-mode {
+    background: transparent;
+  }
+}
+
+/* Over the row's own fill, the glyph's hover needs to be the stronger of the
+   two or it reads as nothing happening. */
+@media (hover: hover) {
+  .rail-mode-row[data-active] .rail-mode-now:hover {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+}
+
+.rail-mode-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-right: 2px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .rail-mode-now:hover {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+  }
+}
+
+.rail-mode-now:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .rail-library {
@@ -1112,6 +1465,14 @@
     background: var(--surface-hover);
     color: var(--text-primary);
   }
+}
+
+/* A maximized cheat sheet is fixed over the window down to the transport,
+   so the only part of the rail left showing was the strip under it — the
+   middle of a row, cut in half, which reads as a bug because it is one. The
+   sheet covers the rail on purpose; this finishes the job. */
+body[data-sheet-maximized] .rail {
+  display: none;
 }
 
 .rail-footer {
@@ -1581,10 +1942,18 @@
   }
 
   .rail-mode-label,
+  .rail-mode-badge,
   .rail-action-label,
   .rail-action-status,
   .rail-library,
   .rail-action-dot {
+    display: none;
+  }
+
+  /* At 68px there is no room beside an icon, and a 26px glyph crowding a
+     42px row would read as a second mode rather than an action on this one.
+     The empty Jam screen still has the button, in words. */
+  .rail-mode-now {
     display: none;
   }
 
@@ -1610,11 +1979,17 @@
   }
 
   .rail[data-library-open] .rail-mode-label,
+  .rail[data-library-open] .rail-mode-badge,
   .rail[data-library-open] .rail-action-label,
   .rail[data-library-open] .rail-action-status,
   .rail[data-library-open] .rail-library,
   .rail[data-library-open] .rail-action-dot {
     display: revert;
+  }
+
+  /* The rail has its width back, so the glyph has its place back. */
+  .rail[data-library-open] .rail-mode-now {
+    display: flex;
   }
 
   .rail[data-library-open] .rail-library {
@@ -2059,6 +2434,7 @@
 }
 
 .rail[data-collapsed] .rail-mode-label,
+.rail[data-collapsed] .rail-mode-badge,
 .rail[data-collapsed] .rail-action-label,
 .rail[data-collapsed] .rail-action-status,
 .rail[data-collapsed] .rail-library {
@@ -2267,6 +2643,21 @@
 
 /* The name carries the sentence — it is the one word that says WHICH thing
    you are about to walk away from. */
+/* The mode the unsaved work belongs to, as a small tag before its name. */
+.unsaved-kind {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  vertical-align: 1px;
+}
+
 .unsaved-name {
   color: var(--text-primary);
   font-weight: 700;
@@ -2335,6 +2726,147 @@
 .unsaved-actions button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* â”€â”€ The recording mark (JAM_MODE Â§4.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   On the transport, beside the button that starts it: a microphone writing
+   a file must never be invisible. A take ends when its jam leaves the engine
+   (`useJamTakes`), so this is a Jam-tab sight in practice.
+   A red dot, the word, and the clock â€” nothing to press,
+   because stopping a take is stopping the transport and there is already a
+   button for that two inches to the left. */
+.transport-recording {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  height: 26px;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--danger, #f87171) 34%, transparent);
+  background: color-mix(in srgb, var(--danger, #f87171) 8%, transparent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--danger, #f87171);
+  white-space: nowrap;
+}
+
+.transport-recording-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger, #f87171);
+  animation: transport-recording-pulse 1.8s ease-in-out infinite;
+}
+
+/* The dot breathes rather than blinks. A hard blink at the edge of vision is
+   the shape an ERROR takes in this app, and a take running normally is not
+   one; reduced motion turns it off entirely and the dot simply stays lit,
+   which says the same thing. */
+@keyframes transport-recording-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transport-recording-dot {
+    animation: none;
+  }
+}
+
+.transport-recording-clock {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* The coach's sentence is the first thing to go: it is an explanation, and a
+   take that is running is a fact. */
+@media (max-width: 1100px) {
+  .transport[data-recording] .transport-note {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .transport[data-recording] .transport-recording-label {
+    display: none;
+  }
+}
+
+/* â”€â”€ "Add to setlistâ€¦", expanded (JAM_MODE Â§8.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   The setlists are listed inside the menu that offered them rather than in a
+   flyout beside it. A flyout needs a hover corridor and a placement rule, and
+   this list is at most a handful of one-word names: indenting them under the
+   item they belong to says the same thing with nothing to get wrong. */
+.preset-context-menu .preset-context-open {
+  color: var(--accent);
+}
+
+.preset-context-menu .preset-context-sub {
+  padding-left: 26px;
+  color: var(--text-secondary);
+}
+
+.header-more-menu .header-more-sub {
+  padding-left: 34px;
+  color: var(--text-secondary);
+}
+
+.header-more-menu .sub-dropdown-item.open {
+  color: var(--accent);
+}
+
+/* ── The band is loading ──────────────────────────────────────────────────
+   A small ring, shared by the bottom bar and the jam pickers. Only ever shown
+   when a load has taken longer than a blink (`JAM_LOADING_AFTER_MS`), and
+   never with anything disabled beside it. */
+.jam-spinner {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-top-color: var(--accent);
+  animation: jam-spinner-turn 0.8s linear infinite;
+}
+
+@keyframes jam-spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Same footprint as the recording chip beside it, quieter colour: it is
+   news, not an alarm. */
+.transport-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  height: 26px;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Reduced motion: the ring holds still and pulses its opacity instead, so it
+   still reads as "working" without spinning. */
+@media (prefers-reduced-motion: reduce) {
+  .jam-spinner {
+    animation: jam-spinner-breathe 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes jam-spinner-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 /* =================== Touch targets =================== */

@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Métronome",
     "setlist": "Setlist",
-    "drill": "Rampe"
+    "drill": "Rampe",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Métronome non enregistré",
+    "unsavedDrill": "Rampe non enregistrée",
     "title": "Préréglages",
     "titleDrill": "Rampes",
     "titleSetlist": "Setlists",
-    "saveCurrent": "Enregistrer les réglages actuels",
+    "titleJam": "Jams",
     "search": "Rechercher dans la bibliothèque",
     "searchPlaceholder": "Rechercher…",
     "namePlaceholder": "Nom…",
@@ -40,7 +43,9 @@
     "revert": "Rétablir",
     "revertTooltip": "Annuler les modifications et recharger le préréglage",
     "save": "Enregistrer le préréglage",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "newPreset": "Nouveau préréglage",
+    "newDrill": "Nouvel exercice"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "À l'écoute",
     "inputOff": "Entrée coupée",
     "coachOnPlay": "Le coach écoute dès que vous lancez la lecture",
-    "coachQuiet": "Le coach se tait pendant une étape"
+    "coachQuiet": "Le coach se tait pendant une étape",
+    "countIn": "Décompte"
   },
   "rail": {
     "label": "Modes et bibliothèque",
@@ -76,7 +82,8 @@
     "collapse": "Réduire la barre latérale",
     "expand": "Développer la barre latérale",
     "collapseWithShortcut": "Réduire la barre latérale ({{shortcut}})",
-    "expandWithShortcut": "Développer la barre latérale ({{shortcut}})"
+    "expandWithShortcut": "Développer la barre latérale ({{shortcut}})",
+    "beta": "Bêta"
   },
   "tabs": {
     "library": "Bibliothèque"
@@ -85,6 +92,7 @@
     "metronome": "Clic",
     "drill": "Rampe",
     "setlist": "Setlist",
+    "jam": "Jam",
     "settings": "Réglages",
     "library": "Presets",
     "zen": "Zen"

@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Метроном",
     "setlist": "Сет-лист",
-    "drill": "Темповая тренировка"
+    "drill": "Темповая тренировка",
+    "jam": "Джем"
   },
   "tooltip": {
     "zen": "Дзен",
@@ -21,10 +22,12 @@
     "short": "Громк."
   },
   "presets": {
+    "unsavedMetronome": "Несохранённый метроном",
+    "unsavedDrill": "Несохранённая темповая тренировка",
     "title": "Пресеты",
     "titleDrill": "Тренировки",
     "titleSetlist": "Сет-листы",
-    "saveCurrent": "Сохранить текущие настройки",
+    "titleJam": "Джемы",
     "search": "Поиск в библиотеке",
     "searchPlaceholder": "Поиск…",
     "namePlaceholder": "Название…",
@@ -40,7 +43,9 @@
     "revert": "Вернуть",
     "revertTooltip": "Отменить изменения и загрузить пресет заново",
     "save": "Сохранить пресет",
-    "delete": "Удалить"
+    "delete": "Удалить",
+    "newPreset": "Новый пресет",
+    "newDrill": "Новое упражнение"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Слушаю",
     "inputOff": "Вход выключен",
     "coachOnPlay": "Тренер слушает, когда вы нажимаете «Играть»",
-    "coachQuiet": "Тренер молчит внутри шага"
+    "coachQuiet": "Тренер молчит внутри шага",
+    "countIn": "Отсчёт"
   },
   "rail": {
     "label": "Режимы и библиотека",
@@ -76,7 +82,8 @@
     "collapse": "Свернуть боковую панель",
     "expand": "Развернуть боковую панель",
     "collapseWithShortcut": "Свернуть боковую панель ({{shortcut}})",
-    "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})"
+    "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})",
+    "beta": "Бета"
   },
   "tabs": {
     "library": "Библиотека"
@@ -85,6 +92,7 @@
     "metronome": "Клик",
     "drill": "Разгон",
     "setlist": "Сетлист",
+    "jam": "Джем",
     "settings": "Опции",
     "library": "Пресеты",
     "zen": "Дзен"

@@ -4,6 +4,8 @@
     "untitled": "Neue Setlist",
     "newSetlist": "Neue Setlist",
     "deleteSetlist": "Setlist löschen",
+    "duplicateSetlist": "Setlist duplizieren",
+    "copyName": "{{name}} Kopie",
     "librarySteps": "{{count}} Schritte",
     "librarySteps_one": "{{count}} Schritt",
     "librarySteps_other": "{{count}} Schritte",
@@ -22,6 +24,14 @@
     "moveLater": "Diesen Schritt nach hinten schieben",
     "duplicateStep": "Diesen Schritt duplizieren",
     "removeStep": "Diesen Schritt entfernen",
+    "reorderHint": "Zum Umsortieren ziehen",
+    "stopToReorder": "Zum Umsortieren die Setlist stoppen",
+    "duplicateSteps": "{{count}} Schritte duplizieren",
+    "duplicateSteps_one": "{{count}} Schritt duplizieren",
+    "duplicateSteps_other": "{{count}} Schritte duplizieren",
+    "removeSteps": "{{count}} Schritte entfernen",
+    "removeSteps_one": "{{count}} Schritt entfernen",
+    "removeSteps_other": "{{count}} Schritte entfernen",
     "barOf": "Takt {{current}} von {{total}}",
     "timeLeft": "noch {{duration}}",
     "waitingForYou": "wartet auf dich",
@@ -120,14 +130,18 @@
       "backToPlaying": "Zurück zum Spielen"
     },
     "countIn": {
-      "label": "Einzähler",
-      "off": "Kein Einzähler",
-      "startingIn": "Start in",
-      "beats": "{{count}} Schläge",
-      "beats_one": "{{count}} Schlag",
-      "beats_other": "{{count}} Schläge",
-      "fewer": "Weniger Einzählschläge",
-      "more": "Mehr Einzählschläge"
+      "startingIn": "Start in"
+    },
+    "jam": {
+      "mark": "Dieser Schritt ist ein Jam",
+      "addStep": "Jam hinzufügen",
+      "addTo": "Zur Setlist hinzufügen…",
+      "barsOfForm": "{{count}} Takte",
+      "barsOfForm_one": "{{count}} Takt",
+      "barsOfForm_other": "{{count}} Takte",
+      "said": "die Band",
+      "goneShort": "Der Jam ist weg",
+      "gone": "Dieser Jam ist nicht mehr in der Bibliothek, also spielt dieser Schritt den Klick, den er beschreibt."
     }
   }
 }

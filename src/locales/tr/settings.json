@@ -138,6 +138,9 @@
     "devices": {
       "title": "Cihazlar",
       "audioOutput": "Ses Çıkışı",
+      "outputPair": "Çıkışlar",
+      "outputsPair": "Çıkışlar {{a}}-{{b}}",
+      "outputPairFallback": "Bu cihaz yalnızca iki çıkış verdi, bu yüzden klik 1-2 numaralı çıkışlardan çalıyor.",
       "refreshAudio": "Ses cihazlarını yenile",
       "btLatencyWarning": "Bluetooth ses belirgin gecikme ekler. Görsel ipuçları ve ses tam olarak senkronize olmayabilir.",
       "audioInput": "Ses Girişi",
@@ -173,7 +176,8 @@
       "groups": {
         "metronome": "Metronom",
         "view": "Görünüm",
-        "navigation": "Gezinme"
+        "navigation": "Gezinme",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Çal / Durdur",
@@ -195,9 +199,19 @@
         "tab-1": "Metronom sekmesi",
         "tab-2": "Set listesi sekmesi",
         "tab-3": "Tempo Antrenmanı sekmesi",
+        "tab-4": "Jam sekmesi",
         "settings": "Ayarlar",
         "toggle-sidebar": "Kenar çubuğunu aç/kapat",
-        "toggle-coach": "Koç panelini aç/kapat"
+        "toggle-coach": "Koç panelini aç/kapat",
+        "jam-next-groove": "Sonraki groove",
+        "jam-prev-groove": "Önceki groove",
+        "jam-trade": "Sıra sana",
+        "jam-dropout": "Sessiz ölçüler",
+        "jam-next-shape": "Sonraki akor basışı",
+        "jam-next-section": "Sonraki bölüm",
+        "jam-prev-section": "Önceki bölüm",
+        "jam-loop-section": "Bu bölümü döngüye al",
+        "jam-take": "Kaydı al"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -219,9 +233,19 @@
         "tab-1": "Metronom sekmesine geç",
         "tab-2": "Set listesi sekmesine geç",
         "tab-3": "Tempo Antrenmanı sekmesine geç",
+        "tab-4": "Jam sekmesine geç",
         "settings": "Ayarları aç veya kapat",
         "toggle-sidebar": "Sol kenar çubuğunu daraltır veya genişletir",
-        "toggle-coach": "Pratik Koçu panelini aç veya kapat"
+        "toggle-coach": "Pratik Koçu panelini aç veya kapat",
+        "jam-next-groove": "Elini enstrümandan çekmeden sonraki groove'a geç",
+        "jam-prev-groove": "Bir önceki groove'a dön",
+        "jam-trade": "Sırayla çalmayı aç ya da kapat — dört ölçü grup, dört ölçü sen",
+        "jam-dropout": "Sessiz ölçüleri aç ya da kapat",
+        "jam-next-shape": "Çaldığın akorun basış biçimleri arasında gez",
+        "jam-next-section": "Ölçü çizgisinde sonraki bölümün başına atla",
+        "jam-prev-section": "Ölçü çizgisinde önceki bölümün başına dön",
+        "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar",
+        "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur"
       }
     },
     "inputTest": {
@@ -272,6 +296,10 @@
       "updating": "Güncelleniyor…",
       "upToDate": "Güncel ✓",
       "checkUpdates": "Güncellemeleri kontrol et",
+      "checkAgain": "Yeniden kontrol et",
+      "failed": "Kontrol başarısız",
+      "sounds": "Sesler",
+      "soundsCredit": "Kulüp takımı, Versilian Studios ve Karoryfer Samples'ın Virtuosity Drums'ı; çalan Austin McMahon (kamu malı). Stüdyo takımı, DrumGizmo projesinin DRSKit'i (CC BY 4.0).",
       "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı"
     }
   },

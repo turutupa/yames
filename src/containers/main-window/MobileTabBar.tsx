@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
 import type { MainView } from "./MainHeader";
+import type { PlayTab } from "./hooks/useTabRouting";
 
 interface MobileTabBarProps {
   view: MainView;
   setView: (v: MainView) => void;
   /** Where Settings returns you to, exactly as the rail's own button does. */
-  prevTab: { current: "beat" | "drill" | "setlist" };
+  prevTab: { current: PlayTab };
   libraryOpen: boolean;
   onToggleLibrary: () => void;
   onZen: () => void;
@@ -54,6 +55,18 @@ const setlistIcon = (
   </>
 );
 
+/* The band's four lanes, the same glyph the rail uses for Jam and the same
+   one the jam boards draw. Uneven heights on purpose: four equal bars are a
+   level meter. */
+const jamIcon = (
+  <>
+    <path d="M5 9v6" />
+    <path d="M10 5v14" />
+    <path d="M15 8v8" />
+    <path d="M20 11v2" />
+  </>
+);
+
 const settingsIcon = (
   <>
     <line x1="4" y1="8" x2="20" y2="8" />
@@ -90,6 +103,9 @@ const TABS = [
   { id: "beat" as const, labelKey: "mobileTabs.metronome", fullLabelKey: "nav.metronome", icon: beatIcon },
   { id: "drill" as const, labelKey: "mobileTabs.drill", fullLabelKey: "nav.drill", icon: drillIcon },
   { id: "setlist" as const, labelKey: "mobileTabs.setlist", fullLabelKey: "nav.setlist", icon: setlistIcon },
+  // The band. Fifth, after the three the metronome was already about, and
+  // before Settings — a destination, not a tool (M08).
+  { id: "jam" as const, labelKey: "mobileTabs.jam", fullLabelKey: "nav.jam", icon: jamIcon },
   { id: "settings" as const, labelKey: "mobileTabs.settings", fullLabelKey: "tooltip.settings", icon: settingsIcon },
 ];
 

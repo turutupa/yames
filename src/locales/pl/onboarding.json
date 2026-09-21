@@ -155,6 +155,15 @@
       "midiPlugged": {
         "body": "Urządzenie MIDI jest podłączone, ale nic nie jest przypisane. Przypisać pedał do Start/Stop?",
         "action": "Otwórz skróty"
+      },
+      "jamSheets": {
+        "body": "Ustawienia zmieniają zespół; Akordy to twoja ściąga."
+      },
+      "jamLive": {
+        "body": "Wszystko tutaj zmienia się od następnego taktu."
+      },
+      "jamArrangement": {
+        "body": "Zespół sam się rozkręca i sam wycisza — Pętla w Ustawieniach to wyłącza."
       }
     },
     "tour": {

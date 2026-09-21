@@ -347,3 +347,59 @@ pub fn tts_voice_diagnostics() -> Vec<serde_json::Value> {
 pub fn start_voice_repair() -> Result<(), String> {
     Err(NOT_AVAILABLE.into())
 }
+
+// ---------------------------------------------------------------------------
+// The band's two desktop halves: a kit of your own samples, and takes.
+//
+// The band itself plays on a phone — that is the point of M08. These two do
+// not. A custom kit is a folder on a disk you point a file manager at, and a
+// take is your playing mixed with the band, which needs the mic the phone
+// build does not compile (`audio_input`, and aubio with it). Both are absent
+// from the mobile bundle, so nothing below is ever called; it is here because
+// `generate_handler!` cannot cfg an entry out.
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+pub fn pick_kit_folder() -> Option<String> {
+    None
+}
+
+#[tauri::command]
+pub fn inspect_kit_folder() -> Result<serde_json::Value, String> {
+    Err(NOT_AVAILABLE.into())
+}
+
+#[tauri::command]
+pub fn start_take() -> Result<(), String> {
+    Err(NOT_AVAILABLE.into())
+}
+
+#[tauri::command]
+pub fn stop_take() -> Result<Option<serde_json::Value>, String> {
+    Ok(None)
+}
+
+#[tauri::command]
+pub fn list_takes() -> Result<Vec<serde_json::Value>, String> {
+    Ok(Vec::new())
+}
+
+#[tauri::command]
+pub fn takes_dir_size() -> Result<u64, String> {
+    Ok(0)
+}
+
+#[tauri::command]
+pub fn delete_take() -> Result<(), String> {
+    Err(NOT_AVAILABLE.into())
+}
+
+#[tauri::command]
+pub fn play_take() -> Result<(), String> {
+    Err(NOT_AVAILABLE.into())
+}
+
+#[tauri::command]
+pub fn stop_take_playback() -> Result<(), String> {
+    Ok(())
+}

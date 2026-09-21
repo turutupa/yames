@@ -9,7 +9,7 @@
  * of which had already drifted.
  *
  * Note on *live* accents: while the metronome is playing the UI must use
- * `BeatEvent.isAccent` from the engine, not `accentPositions`. The engine
+ * `BeatEvent.accentLevel` from the engine, not `accentPositions`. The engine
  * owns the accent decision (it also handles the speed-ramp bar), and
  * re-deriving it here would re-introduce the drift this module exists to
  * remove. `accentPositions` is for the STATIC markers drawn while
@@ -45,32 +45,43 @@ export function meterKey(groups: number[] | undefined | null): string {
 }
 
 /**
- * Bar-local positions that open a group, i.e. the accented beats.
- * `[3, 2, 2]` → `{0, 3, 5}`.
+ * Bar-local positions that open a group, and how hard each one is accented:
+ * 2 for the beat that opens the bar, 1 for a group start inside it.
+ * `[3, 2, 2]` → `{0: 2, 3: 1, 5: 1}`.
+ *
+ * A position missing from the map is not accented — there is no 0 in here,
+ * so `map.get(pos) ?? 0` is the level of any beat you care to ask about.
  *
  * FREE mode is not a case here, and used to be: it is one group of N beats —
  * Rust's `collapse_to_free` enforces that on the way in — so it accents beat
  * 0 and nothing else, straight out of the same loop as every other meter.
+ * Beat 0 opens the bar, so what it gets is 2.
  */
 export function accentPositions(
   groups: number[] | undefined | null,
   mode: "groups" | "all" | "none" = "groups",
-): Set<number> {
-  const positions = new Set<number>();
+): Map<number, 1 | 2> {
+  const positions = new Map<number, 1 | 2>();
   // Mirrors `accent_for` in engine.rs, and must keep mirroring it: this is
   // what the dots draw at rest, and the engine is what you hear. They
   // disagreed for exactly as long as the accent control existed without this
   // argument — you could pick "every beat", hear it, and watch one dot stay
-  // lit.
+  // lit. `meter.accentPositions.test.ts` walks every meter the app ships and
+  // checks this against the rule written out a second time; the Rust side
+  // walks the same list as `ALL_METERS` in engine.rs.
   if (mode === "none") return positions;
   if (mode === "all") {
+    // Every beat, and every one of them strong. "Every beat" is the mode for
+    // a flat pulse — quietly making five beats of seven a middle accent
+    // would put back the shape it exists to remove.
     const total = meterTotal(groups);
-    for (let i = 0; i < total; i++) positions.add(i);
+    for (let i = 0; i < total; i++) positions.set(i, 2);
     return positions;
   }
   let cursor = 0;
   for (const g of groups ?? []) {
-    positions.add(cursor);
+    // The first group start is the bar's own; the rest are its middles.
+    positions.set(cursor, cursor === 0 ? 2 : 1);
     cursor += g;
   }
   return positions;

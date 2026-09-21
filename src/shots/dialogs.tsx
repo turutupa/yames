@@ -36,6 +36,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   ) : (
     // A name long enough to be realistic — the dialog quotes it in the body.
     <UnsavedChangesDialog
+      kind="setlist"
       name="Daily routine"
       onSave={noop}
       onDiscard={noop}

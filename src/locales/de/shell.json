@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronom",
     "setlist": "Setlist",
-    "drill": "Tempo-Training"
+    "drill": "Tempo-Training",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Lautst."
   },
   "presets": {
+    "unsavedMetronome": "Nicht gespeichertes Metronom",
+    "unsavedDrill": "Nicht gespeichertes Tempo-Training",
     "title": "Presets",
     "titleDrill": "Trainings",
     "titleSetlist": "Setlists",
-    "saveCurrent": "Aktuelle Einstellungen speichern",
+    "titleJam": "Jams",
     "search": "Bibliothek durchsuchen",
     "searchPlaceholder": "Suchen…",
     "namePlaceholder": "Name…",
@@ -40,7 +43,9 @@
     "revert": "Zurücksetzen",
     "revertTooltip": "Änderungen verwerfen und das Preset neu laden",
     "save": "Preset speichern",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "newPreset": "Neues Preset",
+    "newDrill": "Neue Übung"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Hört zu",
     "inputOff": "Eingang aus",
     "coachOnPlay": "Der Coach hört zu, sobald du startest",
-    "coachQuiet": "Der Coach schweigt während eines Schritts"
+    "coachQuiet": "Der Coach schweigt während eines Schritts",
+    "countIn": "Einzähler"
   },
   "rail": {
     "label": "Modi und Bibliothek",
@@ -76,7 +82,8 @@
     "collapse": "Seitenleiste einklappen",
     "expand": "Seitenleiste ausklappen",
     "collapseWithShortcut": "Seitenleiste einklappen ({{shortcut}})",
-    "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})"
+    "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})",
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Bibliothek"
@@ -85,6 +92,7 @@
     "metronome": "Metronom",
     "drill": "Übung",
     "setlist": "Setlist",
+    "jam": "Jam",
     "settings": "Optionen",
     "library": "Presets",
     "zen": "Zen"

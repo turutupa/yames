@@ -97,6 +97,7 @@
     updatePicker();
     zen.recolour();
     coachFigure.recolour();
+    jamFigure.recolour();
   }
 
   /* ── Theme fan (slot-machine roll) ────────────────────── */
@@ -1597,6 +1598,426 @@
     };
   })();
 
+  /* ── The jam figure ───────────────────────────────────────────────
+     The band as a chart rather than as a picture of the app: four bars
+     of changes, a line sweeping across them in time, and a lane each for
+     the drummer, the bass player and the keyboard player. Same rule as
+     the coach figure above — solid ink is what Yames plays, dashed ink is
+     the player — so the fourth lane is dashed: a line improvised over the
+     changes, different every time round.
+
+     Flat, so no projection. Everything is placed in beats and turned
+     into pixels in one place (`bx`).
+     ────────────────────────────────────────────────────────────────── */
+
+  const jamFigure = (() => {
+    const canvas = $("#jam-figure");
+    const ctx = canvas?.getContext("2d");
+    const chordEl = $("#jam-chord");
+    const scaleEl = $("#jam-scale");
+
+    const BPM = 104;
+    const BEAT = 60000 / BPM;
+    const BARS = 4, PER_BAR = 4, BEATS = BARS * PER_BAR;
+    /* The top strip belongs to the HTML readout (.figure__readout--jam).
+       How deep that strip is gets measured, not guessed: the readout is
+       set in vw-scaled type over a canvas that scales with its column, so
+       no single fraction clears it at every width. On a phone the readout
+       is hidden and the chart takes the room back. */
+    let readout = 0;
+
+    /* ii – V – I – IV in G, and the scale that sits on each chord. */
+    const CHANGES = [
+      { name: "Am7", fits: "A dorian" },
+      { name: "D7", fits: "D mixolydian" },
+      { name: "Gmaj7", fits: "G major" },
+      { name: "Cmaj7", fits: "C lydian" },
+    ];
+
+    /* Each part, written in beats from the top of the four bars.
+       `y` is 0 at the bottom of the lane and 1 at the top. */
+    const DRUMS = [];
+    const BASS = [];
+    const KEYS = [];
+    const WALK = [
+      [0.22, 0.48, 0.7, 0.84],
+      [0.9, 0.66, 0.46, 0.3],
+      [0.2, 0.42, 0.6, 0.5],
+      [0.4, 0.62, 0.78, 0.34],
+    ];
+    const VOICING = [0.5, 0.58, 0.44, 0.52];
+    for (let bar = 0; bar < BARS; bar++) {
+      const t = bar * PER_BAR;
+      for (let e = 0; e < PER_BAR * 2; e++) DRUMS.push({ at: t + e / 2, kind: "hat" });
+      DRUMS.push({ at: t, kind: "kick" }, { at: t + 2, kind: "kick" }, { at: t + 2.5, kind: "kick" });
+      DRUMS.push({ at: t + 1, kind: "snare" }, { at: t + 3, kind: "snare" });
+      WALK[bar].forEach((y, i) => BASS.push({ at: t + i, len: 1, y }));
+      KEYS.push({ at: t, len: 1.5, y: VOICING[bar] }, { at: t + 2.5, len: 1.25, y: VOICING[bar] });
+    }
+
+    let w = 0, h = 0, running = false, rafId = null, last = 0;
+    let pos = 0, shownBar = -1, round = 0;
+    let ink = "245,163,11", youInk = "255,107,166";
+    let display = "sans-serif", body = "sans-serif";
+    let line = [];
+
+    /* A small seeded generator, so the still frame a reduced-motion
+       visitor gets is the same drawing every time. */
+    function seeded(seed) {
+      let s = seed >>> 0;
+      return () => {
+        s = (s + 0x6d2b79f5) >>> 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    /** The player's line: eighth notes that move mostly by step, leap now
+        and then, and leave room — a phrase, a breath, another phrase. */
+    function improvise(seed) {
+      const rnd = seeded(seed);
+      const pts = [];
+      let y = 0.35 + rnd() * 0.3, resting = 0;
+      for (let e = 0; e < BEATS * 2; e++) {
+        if (resting > 0) { resting--; pts.push(null); continue; }
+        if (e > 3 && rnd() < 0.13) { resting = 1 + Math.floor(rnd() * 2); pts.push(null); continue; }
+        const leap = rnd() < 0.18;
+        y += (rnd() - 0.5) * (leap ? 0.7 : 0.26);
+        y = Math.max(0.1, Math.min(0.9, y));
+        pts.push(y);
+      }
+      return pts;
+    }
+
+    /** How hard a note that started at `at` is ringing right now: 1 on the
+        hit, fading to 0 over half a beat. */
+    function ring(at) {
+      let d = pos - at;
+      if (d < 0) d += BEATS;
+      return d < 0.5 ? 1 - d / 0.5 : 0;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.setLineDash([]);
+
+      const padX = w * 0.055;
+      const gutter = Math.max(44, w * 0.125);
+      const x0 = padX + gutter, x1 = w - padX;
+      const bx = (beat) => x0 + (beat / BEATS) * (x1 - x0);
+      const barW = (x1 - x0) / BARS;
+
+      const chartTop = Math.max(h * 0.08, readout), chartH = h * 0.13;
+      const rulerY = chartTop + chartH + h * 0.035;
+      const lanesTop = rulerY + h * 0.03, lanesBottom = h * 0.95;
+      const laneH = (lanesBottom - lanesTop) / 4;
+      const bar = Math.min(BARS - 1, Math.floor(pos / PER_BAR));
+
+      /* The chart: four boxes, the one being played drawn in. */
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `800 ${Math.max(12, Math.min(22, h * 0.058))}px ${display}`;
+      for (let b = 0; b < BARS; b++) {
+        const on = b === bar;
+        const x = x0 + b * barW;
+        if (on) {
+          ctx.fillStyle = `rgba(${ink}, 0.1)`;
+          ctx.fillRect(x + 2, chartTop, barW - 4, chartH);
+        }
+        ctx.strokeStyle = `rgba(${ink}, ${on ? 0.95 : 0.32})`;
+        ctx.lineWidth = on ? 1.5 : 1;
+        ctx.strokeRect(x + 2, chartTop, barW - 4, chartH);
+        ctx.fillStyle = `rgba(${ink}, ${on ? 1 : 0.5})`;
+        ctx.fillText(CHANGES[b].name, x + barW / 2, chartTop + chartH / 2 + 1);
+      }
+
+      /* The ruler: a tick a beat, taller on the one. */
+      ctx.strokeStyle = `rgba(${ink}, 0.4)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 0; i <= BEATS; i++) {
+        const tall = i % PER_BAR === 0;
+        ctx.moveTo(bx(i), rulerY - (tall ? 7 : 3));
+        ctx.lineTo(bx(i), rulerY);
+      }
+      ctx.moveTo(x0, rulerY);
+      ctx.lineTo(x1, rulerY);
+      ctx.stroke();
+
+      /* Lane names and the floor each lane stands on. */
+      const NAMES = ["Drums", "Bass", "Keys", "You"];
+      ctx.textAlign = "left";
+      ctx.font = `700 ${Math.max(9, Math.min(12, h * 0.03))}px ${body}`;
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "0.14em";
+      NAMES.forEach((name, i) => {
+        const floor = lanesTop + (i + 1) * laneH - laneH * 0.12;
+        const you = i === 3;
+        ctx.fillStyle = `rgba(${you ? youInk : ink}, ${you ? 0.95 : 0.7})`;
+        ctx.fillText(name.toUpperCase(), padX, lanesTop + i * laneH + laneH * 0.5);
+        ctx.strokeStyle = `rgba(${you ? youInk : ink}, 0.13)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x0, floor);
+        ctx.lineTo(x1, floor);
+        ctx.stroke();
+      });
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+
+      /* `y` inside lane `i`, 0 on its floor and 1 at its ceiling. */
+      const ly = (i, y) => {
+        const floor = lanesTop + (i + 1) * laneH - laneH * 0.12;
+        return floor - y * laneH * 0.76;
+      };
+
+      /* Drums: hats along the top, kick on the floor, snare between. */
+      for (const hit of DRUMS) {
+        const r = ring(hit.at), x = bx(hit.at);
+        if (hit.kind === "hat") {
+          ctx.strokeStyle = `rgba(${ink}, ${0.3 + r * 0.6})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, ly(0, 1));
+          ctx.lineTo(x, ly(0, 1) + 5 + r * 4);
+          ctx.stroke();
+          continue;
+        }
+        const kick = hit.kind === "kick";
+        const rad = (kick ? 4.2 : 3.6) * (1 + r * 0.7) * Math.max(0.8, Math.min(1.3, w / 520));
+        ctx.beginPath();
+        ctx.arc(x, ly(0, kick ? 0.08 : 0.5), rad, 0, Math.PI * 2);
+        if (kick) {
+          ctx.fillStyle = `rgba(${ink}, ${0.5 + r * 0.5})`;
+          ctx.fill();
+        } else {
+          ctx.strokeStyle = `rgba(${ink}, ${0.55 + r * 0.45})`;
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
+      }
+
+      /* Bass: a stepped line, each note joined to the next by a riser. */
+      BASS.forEach((note, n) => {
+        const r = ring(note.at);
+        const xa = bx(note.at) + 3, xb = bx(note.at + note.len) - 3, y = ly(1, note.y);
+        ctx.strokeStyle = `rgba(${ink}, ${0.5 + r * 0.5})`;
+        ctx.lineWidth = 2.4 + r * 1.6;
+        ctx.beginPath();
+        ctx.moveTo(xa, y);
+        ctx.lineTo(xb, y);
+        ctx.stroke();
+        const next = BASS[n + 1];
+        if (next) {
+          ctx.strokeStyle = `rgba(${ink}, 0.2)`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(xb + 3, y);
+          ctx.lineTo(xb + 3, ly(1, next.y));
+          ctx.stroke();
+        }
+      });
+
+      /* Keys: a voicing is three notes stacked, held for as long as it is held. */
+      for (const chord of KEYS) {
+        const r = ring(chord.at);
+        const xa = bx(chord.at) + 3, xb = bx(chord.at + chord.len) - 3;
+        ctx.strokeStyle = `rgba(${ink}, ${0.42 + r * 0.58})`;
+        ctx.lineWidth = 1.8 + r;
+        for (let v = -1; v <= 1; v++) {
+          const y = ly(2, chord.y + v * 0.2);
+          ctx.beginPath();
+          ctx.moveTo(xa, y);
+          ctx.lineTo(xb, y);
+          ctx.stroke();
+        }
+      }
+
+      /* You: dashed, drawn only as far as the sweep has got, the oldest
+         of it already fading. */
+      /* Gather the phrases first: a phrase is a run of notes between two
+         breaths. The one being played right now ends on the sweep itself,
+         part-way to its next note, so the pen never lags the beat. */
+      const upto = pos * 2, whole = Math.floor(upto);
+      const phrases = [];
+      let phrase = null;
+      for (let e = 0; e < line.length && e <= whole; e++) {
+        if (line[e] == null) { phrase = null; continue; }
+        if (!phrase) phrases.push((phrase = { pts: [], end: 0 }));
+        phrase.pts.push([bx(e / 2), ly(3, line[e])]);
+        phrase.end = e / 2;
+      }
+      let pen = null;
+      if (phrase && line[whole] != null && line[whole + 1] != null) {
+        const y = line[whole] + (line[whole + 1] - line[whole]) * (upto - whole);
+        pen = [bx(pos), ly(3, y)];
+        phrase.pts.push(pen);
+        phrase.end = pos;
+      } else if (phrase && line[whole] != null) {
+        pen = phrase.pts[phrase.pts.length - 1];
+      }
+
+      /* One stroke a phrase, rounded through the midpoints so it reads as
+         a line somebody played rather than a graph, and so the dashes run
+         unbroken along it. Older phrases have already begun to fade. */
+      ctx.setLineDash([5, 4]);
+      ctx.lineWidth = 1.7;
+      for (const { pts, end } of phrases) {
+        if (pts.length < 2) continue;
+        ctx.strokeStyle = `rgba(${youInk}, ${Math.max(0.3, 1 - (pos - end) / 8).toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length - 1; i++) {
+          ctx.quadraticCurveTo(pts[i][0], pts[i][1],
+            (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+        }
+        const tip = pts[pts.length - 1];
+        ctx.lineTo(tip[0], tip[1]);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      if (pen) {
+        ctx.fillStyle = `rgba(${youInk}, 1)`;
+        ctx.beginPath();
+        ctx.arc(pen[0], pen[1], 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      /* The sweep. */
+      const px = bx(pos);
+      ctx.strokeStyle = `rgba(${ink}, 0.75)`;
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(px, chartTop - 4);
+      ctx.lineTo(px, lanesBottom);
+      ctx.stroke();
+      ctx.fillStyle = `rgba(${ink}, 0.95)`;
+      ctx.beginPath();
+      ctx.moveTo(px - 4, chartTop - 9);
+      ctx.lineTo(px + 4, chartTop - 9);
+      ctx.lineTo(px, chartTop - 3);
+      ctx.closePath();
+      ctx.fill();
+
+      if (bar !== shownBar) {
+        shownBar = bar;
+        if (chordEl) chordEl.textContent = CHANGES[bar].name;
+        if (scaleEl) scaleEl.textContent = CHANGES[bar].fits + " fits";
+      }
+    }
+
+    function frame(now) {
+      if (!running) return;
+      /* The first frame's timestamp can sit a hair before the
+         performance.now() taken when the loop was started, and a negative
+         step would put the sweep before bar one. */
+      const dt = Math.max(0, Math.min(now - last, 60));
+      last = now;
+      pos += dt / BEAT;
+      if (pos >= BEATS) {
+        pos -= BEATS;
+        line = improvise(++round * 7919 + 11);
+      }
+      draw();
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function resize() {
+      if (!canvas || !ctx) return;
+      const r = canvas.getBoundingClientRect();
+      if (r.width < 2) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = r.width; h = r.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const box = chordEl?.parentElement?.getBoundingClientRect();
+      readout = box && box.height ? box.bottom - r.top + 16 : 0;
+      if (!running) draw();
+    }
+
+    function readInk() {
+      const cs = getComputedStyle(document.documentElement);
+      const hex = (v) => {
+        const s = cs.getPropertyValue(v).trim().replace("#", "");
+        return s.length === 6
+          ? `${parseInt(s.slice(0, 2), 16)},${parseInt(s.slice(2, 4), 16)},${parseInt(s.slice(4, 6), 16)}`
+          : null;
+      };
+      ink = hex("--a1") || ink;
+      youInk = hex("--a2") || youInk;
+      display = cs.getPropertyValue("--ff-display").trim() || display;
+      body = cs.getPropertyValue("--ff-body").trim() || body;
+    }
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      rafId = requestAnimationFrame(frame);
+    };
+    const stop = () => {
+      running = false;
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+
+    return {
+      init() {
+        if (!canvas || !ctx) return;
+        readInk();
+        line = improvise(11);
+        /* The still frame: most of the way through the third bar, so the
+           chart, all three players and a good length of the line show. */
+        if (reduceMotion) pos = 10.6;
+        resize();
+        window.addEventListener("resize", resize);
+        /* The chord names are set in a web font that may land after this. */
+        document.fonts?.ready.then(() => { if (!running) draw(); });
+        if (reduceMotion) return;
+        new IntersectionObserver(([e]) => {
+          if (e.isIntersecting) start(); else stop();
+        }, { threshold: 0.05 }).observe(canvas);
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) stop();
+          else if (canvas.getBoundingClientRect().top < innerHeight &&
+                   canvas.getBoundingClientRect().bottom > 0) start();
+        });
+      },
+      recolour() {
+        readInk();
+        if (!running && w) draw();
+      },
+    };
+  })();
+
+  /* ── "Hear the band" ──────────────────────────────────────────────
+     One clip, fetched only when asked for, never on its own. */
+
+  (() => {
+    const btn = $("#jam-listen");
+    const audio = $("#jam-audio");
+    const label = $("#jam-listen-label");
+    if (!btn || !audio) return;
+
+    const show = (playing) => {
+      btn.setAttribute("aria-pressed", String(playing));
+      if (label) label.textContent = playing ? "Stop" : "Hear the band";
+    };
+
+    btn.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.currentTime = 0;
+        audio.play().then(() => show(true), () => show(false));
+      } else {
+        audio.pause();
+        show(false);
+      }
+    });
+    audio.addEventListener("ended", () => show(false));
+    audio.addEventListener("pause", () => show(false));
+  })();
+
   /* ── Go ───────────────────────────────────────────────── */
 
   buildFan();
@@ -1604,6 +2025,7 @@
   applyTheme(currentTheme, { persist: false });
   zen.init();
   coachFigure.init();
+  jamFigure.init();
 
   // The fan measures itself, so re-roll once images have their real size.
   window.addEventListener("load", () =>

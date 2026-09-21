@@ -23,6 +23,7 @@ import type { useKeybindings } from "./hooks/useKeybindings";
 import type { useSession } from "./hooks/useSession";
 import type { UseMidiReturn } from "./hooks/useMidi";
 import type { InputTester } from "./containers/main-window/hooks/useInputTester";
+import type { JamTakesState } from "./containers/main-window/hooks/useJamTakes";
 
 const noop = () => {};
 const asyncNoop = async () => {};
@@ -115,4 +116,27 @@ export const INERT_INPUT_TESTER: InputTester = {
   inputTestModeRef: { current: false },
   appendLog: noop,
   clearLog: noop,
+};
+
+/**
+ * Recording a take. The band plays on a phone; recording yourself over it
+ * does not, because a take mixes the MIC in and the mic path is cut
+ * (plan §1). `available: false` is the shape the Jam sheet already knows —
+ * it is what a build whose engine rejects the commands looks like — and the
+ * section is gated out on top of it, so a phone shows no takes row at all.
+ */
+export const INERT_JAM_TAKES: JamTakesState = {
+  available: false,
+  takes: [],
+  recording: false,
+  recordedSeconds: 0,
+  playingId: null,
+  dirBytes: 0,
+  play: noop,
+  stopPlayback: noop,
+  remove: noop,
+  requestTakes: noop,
+  introOpen: false,
+  confirmIntro: noop,
+  cancelIntro: noop,
 };

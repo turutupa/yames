@@ -17,11 +17,12 @@ import { useBackDismiss } from "../../mobile/backStack";
 import {
   INERT_EVALUATION,
   INERT_INPUT_TESTER,
+  INERT_JAM_TAKES,
   INERT_KEYBINDINGS,
   INERT_MIDI,
   INERT_SESSION,
 } from "../../platform.inert";
-import { configureSpeedRamp, setBpm, setInstrument as setInstrumentBackend, setSoundType, setSubdivision, setTheme, setBeatGroups, setFreeMode, setVolume, startSpeedRamp, stopSpeedRamp, storeLoad, storeSave, togglePlayback } from "../../ipc";
+import { armCountIn, configureSpeedRamp, setBpm, setInstrument as setInstrumentBackend, setSoundType, setSubdivision, setTheme, setBeatGroups, setFreeMode, setVolume, startSpeedRamp, stopSpeedRamp, storeLoad, storeSave, togglePlayback } from "../../ipc";
 import { downloadAndInstallUpdate, setAlwaysOnTop, showFloating, setWidgetAlwaysOnTop, setWidgetMode } from "../../ipc.desktop";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
@@ -47,6 +48,7 @@ import { WhatsNewModal } from "../onboarding/whats-new/WhatsNewModal";
 import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
+import { JamView } from "../jam/JamView";
 import { FullscreenView } from "../zen/FullscreenView";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
@@ -68,6 +70,9 @@ import SettingsTimeline from "../settings/SettingsTimeline";
 import { InputTesterModal } from "../settings/InputTesterModal";
 import { coachDebug } from "../../utils/debug";
 import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
+import { formBars } from "../../jam/forms";
+import { barInView, jamHarmony, nextChange } from "../../jam/display";
+import { chordName } from "../../jam/harmony";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
 import { useUiPreferences } from "./hooks/useUiPreferences";
@@ -82,12 +87,19 @@ import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
+import { useJamSession } from "./hooks/useJamSession";
+import { useJamTakes } from "./hooks/useJamTakes";
+import { TakesIntroDialog } from "../jam/TakesIntroDialog";
+import type { Jam, JamBand } from "../../jam";
+import { setSetlistCountIn } from "../../setlist/setlists";
+import { countInIsOn, countInToggle } from "./countIn";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
-import { SetlistEmpty } from "../../components/setlist/SetlistEmpty";
+import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
+import { jamEscapeTarget } from "./jamEscape";
 import {
   CoachDownloadConfirmDialog,
   DownloadProgressBar,
@@ -145,7 +157,7 @@ export function MainWindow() {
   // restore on mount, scroll-to-top for track/settings) — owned by a
   // dedicated hook. `contentRef` is also returned so the scrollable
   // content container can be wired directly to it.
-  const { view, setView, prevTab, contentRef } = useTabRouting({
+  const { view, mode, setView, prevTab, contentRef } = useTabRouting({
     isPlaying: state.isPlaying,
     speedRampActive: !!state.speedRamp?.active,
   });
@@ -219,6 +231,16 @@ export function MainWindow() {
     setInstrumentBackend(id as InstrumentId).catch(() => {});
   }, []);
 
+  /**
+   * Whether a band is playing rather than a click.
+   *
+   * State set from an effect rather than read straight off `jamSession`,
+   * because the coach session is built before the jam session is — and the
+   * coach only needs to know by the time a segment ends, which is many beats
+   * later. See `UseSessionOptions.jamMode`.
+   */
+  const [jamModeActive, setJamModeActive] = useState(false);
+
   const session = IS_MOBILE ? INERT_SESSION : useSession({
     evaluation,
     isPlaying: state.isPlaying,
@@ -245,6 +267,7 @@ export function MainWindow() {
     drillStartBpm: state.speedRamp?.startBpm,
     drillTargetBpm: state.speedRamp?.targetBpm,
     drillCompleted: state.speedRamp?.completed ?? false,
+    jamMode: jamModeActive,
   });
 
   /**
@@ -283,20 +306,291 @@ export function MainWindow() {
     setPresetDirty(dirty);
   }, []);
 
+  /**
+   * `jamSession.closeJam`, reachable from callbacks defined before it exists.
+   *
+   * Loading a setlist has to put the jam away — one thing is loaded at a time,
+   * and a jam left open behind a setlist would go on writing its table to the
+   * engine. The setlist hook is built first, so it cannot name the jam hook
+   * directly; the ref is filled in below, once there is something to fill it
+   * with, and is a no-op until then.
+   */
+  const closeJamRef = useRef<() => void>(() => {});
+
+  /**
+   * The jam library and the lineup, reachable from the setlist hook.
+   *
+   * Same shape as `closeJamRef` and for the same reason: a setlist step can
+   * BE a jam (JAM_MODE §8.5), so the runner has to be able to look one up by
+   * id, and the library lives in the jam hook, which is built second. Filled
+   * in during the render below rather than from an effect — the runner reads
+   * it only at the moment a step starts, and a value one commit stale there
+   * would be a jam loaded from yesterday's library.
+   */
+  const jamsRef = useRef<Jam[]>([]);
+  const jamLineupRef = useRef<JamBand | undefined>(undefined);
+
   // The setlist the window has open (U9). With none loaded every one of these
   // is inert and the metronome behaves exactly as it did.
   const setlistSession = useSetlistSession({
     state,
     isPlaying: state.isPlaying,
     currentBeat,
+    // The MODE, not the screen, for the reason the jam hook is given the same
+    // one: Settings is a layer over the setlist, and a setlist tab that
+    // counted as "not showing" while Settings was open would try to open a
+    // second setlist the moment Settings closed.
+    view: mode,
     setView,
     onSetlistLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
       sidebarRef.current?.clearActive();
       setActivePreset(null);
       setPresetDirty(false);
+      closeJamRef.current();
+    },
+    /*
+     * What a jam STEP needs. Every field is read through a ref by the runner,
+     * so this object being new on every render costs nothing — and it has to
+     * be new, because `meter` is the engine's live meter and the whole point
+     * of it is that the run hands back whatever was there when it started.
+     */
+    jamContext: {
+      getJam: (id: string) => jamsRef.current.find((j) => j.id === id) ?? null,
+      get lineup() {
+        return jamLineupRef.current;
+      },
+      meter: {
+        subdivision: state.subdivision,
+        beatGroups: state.beatGroups,
+        freeMode: state.freeMode,
+      },
+      countingIn: (state.countIn?.beats ?? 0) > 0,
     },
   });
+
+  // UI preferences (buttonFlash, activeBorder, drillAutoCollapse,
+  // viewTransitions, animationStyle, jamCues) — owned by a dedicated hook
+  // that hydrates them from the store on mount. Destructured here so the rest
+  // of MainWindow keeps referencing them as bare variables.
+  //
+  // Read before the jam session rather than after it: spoken cues are a
+  // preference now (JAM_UX_DECISIONS A4), and `useJamSession` is handed the
+  // answer rather than reading the store a second time.
+  const {
+    buttonFlash,
+    setButtonFlash,
+    activeBorder,
+    setActiveBorder,
+    drillAutoCollapse,
+    setDrillAutoCollapse,
+    viewTransitions,
+    setViewTransitions,
+    animationStyle,
+    setAnimationStyle,
+    jamCues,
+    setJamCues,
+  } = useUiPreferences();
+
+  // The jam the window has open (JAM_MODE). With none loaded every one of
+  // these is inert and the metronome behaves exactly as it did.
+  const jamSession = useJamSession({
+    // The MODE, not the screen: Settings is a layer over the jam, and a jam
+    // that took its band off the engine whenever Settings opened fell back to
+    // the bare click under it (2026-09-16).
+    view: mode,
+    isPlaying: state.isPlaying,
+    instrument,
+    currentBeat,
+    // The engine counts the band in on the same tick grid it plays on, so the
+    // jam has to be told when a bar line is the count rather than the form.
+    countingIn: (state.countIn?.beats ?? 0) > 0,
+    // The count-in as numbers, for the spoken count, and whether there is a
+    // voice to speak it with. Cues on with no voice installed is silent —
+    // see `shouldSpeak` in src/jam/cues.ts.
+    countIn: state.countIn ?? { beats: 0, done: 0 },
+    // `!IS_MOBILE &&` first, and not an optional chain on `coach`: there is
+    // no coach object at all on a phone, and a build-time branch is what
+    // keeps this from reaching for one — the same rule the rest of this file
+    // follows. No voice on a phone means the cues are silent and every cue
+    // is still on the screen.
+    voiceReady: !IS_MOBILE && !!coach.modelStatus?.voiceReady,
+    cues: jamCues,
+    // The metronome's own meter, so the jam can hand it back on the way out.
+    // A jam sets the engine's subdivision and beat groups to the groove's, and
+    // without this a trip through Jam quietly re-signatures the metronome tab.
+    meter: {
+      subdivision: state.subdivision,
+      beatGroups: state.beatGroups,
+      freeMode: state.freeMode,
+    },
+    onJamLoaded: () => {
+      // The library marks what is loaded, and only one thing can be.
+      sidebarRef.current?.clearActive();
+      setActivePreset(null);
+      setPresetDirty(false);
+      setlistSession.closeSetlist();
+    },
+  });
+
+  /*
+   * Wrapped, because it is the root of a chain of fresh objects.
+   *
+   * An inline arrow here made `requestTakes` new every render, which made
+   * `jamActions` new, which made the global hotkey dispatcher new — so the
+   * window's keydown listener was torn down and re-registered on every beat
+   * event. `editJam` is itself stable, so this has no dependencies.
+   */
+  const setJamTakes = useCallback(
+    (takes: boolean) => jamSession.editJam({ takes }),
+    [jamSession.editJam],
+  );
+
+  /**
+   * The loaded jam's takes (JAM_MODE §4.4).
+   *
+   * At the window level rather than inside `JamView` because both ends of
+   * recording are the window's: the mark it puts on the transport, and the
+   * TAB, which is how the hook knows the jam has left the engine. A take
+   * belongs to the jam on the engine and ends when that jam does, so leaving
+   * the Jam tab ends it — see `useJamTakes`.
+   */
+  // A take is your playing mixed with the band, and the mic it records you
+  // through is the one a phone build does not have (plan §1 cuts the whole
+  // mic path). So Jam ships on a phone without takes: the section is absent
+  // rather than disabled, and the `IS_MOBILE ?` form is what lets Rollup drop
+  // the hook and the seven commands it reaches (M08).
+  const jamTakes = IS_MOBILE ? INERT_JAM_TAKES : useJamTakes({
+    jam: jamSession.jam,
+    view: mode,
+    isPlaying: state.isPlaying,
+    countingIn: (state.countIn?.beats ?? 0) > 0,
+    onSetTakes: setJamTakes,
+  });
+
+  useEffect(() => {
+    closeJamRef.current = jamSession.closeJam;
+  }, [jamSession.closeJam]);
+
+  // During the render, not from an effect: a jam step that starts on this
+  // commit must find the library this commit is drawing.
+  jamsRef.current = jamSession.jams;
+  jamLineupRef.current = jamSession.lineup;
+
+  useEffect(() => {
+    setJamModeActive(mode === "jam" && !!jamSession.jam);
+  }, [mode, jamSession.jam]);
+
+  /**
+   * What Zen shows over a jam: the chord, the next one, the place in the form.
+   *
+   * Worked out here rather than inside `FullscreenView` because it is the jam
+   * screen's own harmony — the same `jamHarmony` the stage draws from, so the
+   * big chord in Zen and the big chord on the stage cannot be two different
+   * chords. Null with no jam loaded, and Zen is Zen as it always was.
+   */
+  const zenJam = useMemo(() => {
+    const jam = jamSession.jam;
+    if (!jam) return null;
+    const harmony = jamHarmony(jam);
+    const bars = formBars(jam.form);
+    const at = barInView(jam, currentBeat?.formBar ?? 0, state.isPlaying);
+    const chord = harmony.chords[at] ?? null;
+    return {
+      chord: chord ? chordName(chord, harmony.key) : null,
+      next: nextChange(harmony.chords, at, harmony.key),
+      bar: at,
+      bars,
+      chorus: currentBeat?.chorus ?? 1,
+    };
+  }, [jamSession.jam, currentBeat?.formBar, currentBeat?.chorus, state.isPlaying]);
+
+  /**
+   * The hands-free jam actions, with recording added.
+   *
+   * Combined here rather than inside `useJamSession` because turning takes on
+   * is the one action that can stop and ask a question, and the question is
+   * the window's — `useJamTakes` owns both halves of it. Memoised because the
+   * dispatcher lists this object as a dependency and a fresh one every render
+   * would rebuild it on every beat event.
+   */
+  const jamActions = useMemo(
+    () => ({ ...jamSession.actions, toggleTakes: () => jamTakes.requestTakes(!jamSession.jam?.takes) }),
+    [jamSession.actions, jamSession.jam?.takes, jamTakes.requestTakes],
+  );
+
+  const handleNewJam = useCallback(() => {
+    setSidebarOpen(true);
+    const created = jamSession.newJam();
+    // Same delay the preset "+" uses: let the library settle before the name
+    // field appears under the caret.
+    setTimeout(() => sidebarRef.current?.triggerRenameJam(created.id), 150);
+  }, [jamSession.newJam]);
+
+
+  /**
+   * Play, on the jam tab.
+   *
+   * A jam with a count-in arms it before the transport starts, exactly the way
+   * `useSetlistRunner` does — the engine counts the beats out and then begins,
+   * so the band and the player start together rather than the band starting
+   * and the player catching up.
+   */
+  const toggleJamPlayback = useCallback(() => {
+    const jam = jamSession.jam;
+    if (!jam) return;
+    if (!state.isPlaying && jam.countIn > 0) {
+      void armCountIn(jam.countIn).catch(() => {});
+    }
+    void togglePlayback();
+  }, [jamSession.jam, state.isPlaying]);
+
+  /* ── One count-in, four modes (2026-09-19) ───────────────────────────────
+   * The rules live in `./countIn`, which is a module because they are real
+   * logic — a meter to read, a ceiling to respect, four stores to tell apart
+   * — and this file is the one no test can render. Here is only the wiring.
+   */
+  const countInSubject = useMemo(
+    () => ({
+      view,
+      jam: jamSession.jam ?? null,
+      setlist: setlistSession.setlist ?? null,
+      state,
+    }),
+    [view, jamSession.jam, setlistSession.setlist, state],
+  );
+
+  const countInOn = countInIsOn(countInSubject);
+
+  const toggleCountIn = useCallback(() => {
+    const { store, beats } = countInToggle(countInSubject);
+    if (store === "jam") {
+      jamSession.editJam({ countIn: beats });
+      return;
+    }
+    if (store === "setlist") {
+      const setlist = setlistSession.setlist;
+      if (setlist) setlistSession.setSetlist(setSetlistCountIn(setlist, beats));
+      return;
+    }
+    void reconfigureRamp({ warmupBeats: beats });
+  }, [countInSubject, setlistSession.setlist]);
+
+  /**
+   * Play, on the metronome.
+   *
+   * The engine has always been able to count a plain click in — the audio
+   * thread gates on `count_in`, not on the drill — and nothing had ever
+   * armed it, so the metronome was the one mode with no count-in at all.
+   * The drill's Start seeds it in Rust and the setlist's runner arms its
+   * own, so this is only ever the metronome's Play.
+   */
+  const togglePlaybackCountedIn = useCallback(() => {
+    if (view === "beat" && !state.isPlaying && state.speedRamp.warmupBeats > 0) {
+      void armCountIn(state.speedRamp.warmupBeats).catch(() => {});
+    }
+    void togglePlayback();
+  }, [view, state.isPlaying, state.speedRamp.warmupBeats]);
 
   const handleNewSetlist = useCallback(async () => {
     setSidebarOpen(true);
@@ -361,29 +655,16 @@ export function MainWindow() {
     clearLog: clearInputTestLog,
   } = IS_MOBILE ? INERT_INPUT_TESTER : useInputTester();
 
-  // UI preferences (buttonFlash, activeBorder, drillAutoCollapse,
-  // viewTransitions, animationStyle) — owned by a dedicated hook that
-  // hydrates them from the store on mount. Destructured here so the rest
-  // of MainWindow keeps referencing them as bare variables.
-  const {
-    buttonFlash,
-    setButtonFlash,
-    activeBorder,
-    setActiveBorder,
-    drillAutoCollapse,
-    setDrillAutoCollapse,
-    viewTransitions,
-    setViewTransitions,
-    animationStyle,
-    setAnimationStyle,
-  } = useUiPreferences();
   // Audio output device list + selection — owned by a dedicated hook that
   // hydrates from the OS + persisted store and listens for hot-plug events.
   const {
     audioOutputDevices,
     setAudioOutputDevices,
     selectedOutputDevice,
-    setSelectedOutputDevice,
+    outputPair,
+    selectOutputPair,
+    selectOutputDevice,
+    outputPairFellBack,
   } = useAudioOutputDevices();
   // Auto-update preference, app version, banner status, and the
   // "Check now" callback — owned by a dedicated hook that hydrates the
@@ -595,28 +876,23 @@ export function MainWindow() {
 
   // Use measureBeat from the engine — it resets correctly when groups change mid-play,
   // unlike beat % beatsPerMeasure which produces misaligned values after a meter switch.
-  /**
-   * Leaving the setlist, from either door: Escape, or clicking the one you
-   * are already in.
+  /*
+   * There is no door out of a setlist any more (2026-09-17).
    *
-   * A clean setlist closes without a word. A dirty one asks — losing an
-   * afternoon of edits to a single keypress is the failure worth a dialog,
-   * and a dialog that appears every time is one nobody reads.
-   */
-  /**
-   * Close the setlist, and let go of the row in the library.
+   * Escape closed it, and so did clicking the row of the one you were already
+   * in — both of which left the tab showing a screen with a button on it.
+   * Every mode has a live working object now: the Setlist tab always has a
+   * setlist on it, the way the Metronome tab always has a tempo on it, and
+   * the library holds the ones you chose to save. So closing without opening
+   * something else is not a thing you can ask for, and both gestures were
+   * taken out rather than left to close a setlist that reopened a frame later
+   * — which on a dirty one meant a dialog about losing edits, answered, and
+   * then the same setlist back on the stage.
    *
-   * You open a setlist by clicking its row, which focuses it. Escape then
-   * closes the setlist and the row keeps the focus — and because Escape is a
-   * keyboard action the browser draws `:focus-visible` on it, so a ring sits
-   * in the sidebar around a setlist that is no longer open. The row has done
-   * its job; releasing it is what a mouse click would have implied anyway.
+   * `useSetlistSession` still has `closeSetlist`, and it still matters: it is
+   * what makes room when a JAM or a preset is loaded, and the tab changes
+   * with it.
    */
-  const closeAndRelease = useCallback(() => {
-    setlistSession.closeSetlist();
-    const active = document.activeElement as HTMLElement | null;
-    if (active && active.closest(".preset-sidebar")) active.blur();
-  }, [setlistSession]);
 
   /**
    * The action waiting on an answer about unsaved work, or null.
@@ -632,6 +908,7 @@ export function MainWindow() {
    * object over, and `handlePresetUpdate` is its save.
    */
   const [pending, setPending] = useState<{
+    kind: UnsavedKind;
     name: string;
     save: () => void | Promise<unknown>;
     run: () => void;
@@ -641,57 +918,130 @@ export function MainWindow() {
    * Run `action`, unless there is unsaved work in the way — then ask, and run
    * it once the question is answered.
    *
-   * A dirty SETLIST wins over a dirty preset when somehow both are true: the
-   * setlist is the thing on screen, and it is the one whose edits are not
-   * also visible as knob positions.
+   * A dirty SETLIST or JAM wins over a dirty preset when somehow both are
+   * true: that one is the thing on screen, and it is the one whose edits are
+   * not also visible as knob positions.
    */
   const guarded = useCallback(
     (action: () => void) => {
       if (setlistSession.setlist && setlistSession.dirty) {
         setPending({
+          kind: "setlist",
           name: setlistSession.setlist.name,
           save: setlistSession.saveActiveSetlist,
           run: action,
         });
         return;
       }
+      if (jamSession.jam && jamSession.dirty) {
+        setPending({
+          kind: "jam",
+          name: jamSession.jam.name,
+          save: jamSession.saveActiveJam,
+          run: action,
+        });
+        return;
+      }
       if (activePreset && presetDirty) {
-        setPending({ name: activePreset.name, save: handlePresetUpdate, run: action });
+        setPending({ kind: "preset", name: activePreset.name, save: handlePresetUpdate, run: action });
         return;
       }
       action();
     },
-    [setlistSession, activePreset, presetDirty, handlePresetUpdate],
+    [setlistSession, jamSession, activePreset, presetDirty, handlePresetUpdate],
   );
-  const askToLeave = useCallback(() => {
-    if (!setlistSession.setlist) return;
-    guarded(closeAndRelease);
-  }, [setlistSession.setlist, guarded, closeAndRelease]);
+  /*
+   * Everything that OPENS something closes whatever was open — one thing is
+   * loaded at a time — so every one of them goes through the gate. "New
+   * setlist", "New jam" and "Jam now" did not, and threw an edited jam or
+   * setlist away without a word (2026-09-16).
+   */
+  const newSetlistGuarded = useCallback(
+    () => guarded(() => void handleNewSetlist()),
+    [guarded, handleNewSetlist],
+  );
+  const newJamGuarded = useCallback(() => guarded(handleNewJam), [guarded, handleNewJam]);
 
-  // Escape is the other door. Not while something is typed into, and not
-  // while a popover owns the key — those close themselves first, and a
-  // window-level handler that fired anyway would close the setlist out from
-  // under a field you were editing.
+  /**
+   * The row in the library keeps the focus a click gave it. Space would then
+   * press the row again — and pressing the open jam's row is the gesture
+   * that closes it — so the first Space after loading a jam un-selected it
+   * instead of playing. Releasing the row hands Space back to the transport.
+   */
+  const releaseSidebarFocus = useCallback(() => {
+    const active = document.activeElement as HTMLElement | null;
+    if (active && active.closest(".preset-sidebar")) active.blur();
+  }, []);
+
+  /*
+   * Escape puts away whatever is open OVER the jam — and stops there.
+   *
+   * It used to close the jam itself as its last resort, which left the tab
+   * showing a screen with a button on it. Every mode has a live working
+   * object now (2026-09-17), so there is nothing behind the jam to close to,
+   * and a press that closed it would only be undone by the tab opening
+   * another one a frame later.
+   *
+   * The dependency list is picked apart rather than `jamSession`, which is a
+   * fresh object literal on every render: with the whole session in it this
+   * listener was torn down and re-registered on every beat event, sixteen
+   * times a bar.
+   */
+  const jamScreen = jamSession.screen;
+  const jamLoaded = !!jamSession.jam;
   useEffect(() => {
-    if (!setlistSession.setlist) return;
+    if (view !== "jam" || !jamLoaded) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       const el = document.activeElement as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
-      askToLeave();
+      // The innermost thing open is what gets put away; `jamEscapeTarget` is
+      // that order, on its own, with a test on it.
+      const target = jamEscapeTarget({
+        typing: !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable),
+        dialogOpen: !!document.querySelector('[role="dialog"], [role="alertdialog"]'),
+        editorOpen: !!jamScreen?.editorOpen,
+        editingBar: jamScreen?.editingBar ?? null,
+        setupOpen: !!jamScreen?.setupOpen,
+        chordsOpen: !!jamScreen?.chordsOpen,
+      });
+      if (target === "nothing") return;
+      if (target === "chordPicker") {
+        jamScreen?.setEditingBar(null);
+        return;
+      }
+      if (target === "setupSheet") {
+        jamScreen?.setSetupOpen(false);
+        return;
+      }
+      if (target === "chordSheet") {
+        jamScreen?.setChordsOpen(false);
+        return;
+      }
+      // `jamEscapeTarget` still answers "jam" once the sheets are away, and
+      // that answer is now nothing to do. The function is left as it is
+      // because it is the written-down ORDER of what closes first, and the
+      // order has not changed — only what happens when the list runs out.
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [setlistSession.setlist, askToLeave]);
+  }, [view, jamLoaded, jamScreen]);
 
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 
+  /**
+   * The tempo, from every control that sets one.
+   *
+   * On the jam tab the tempo belongs to the JAM, not to the engine: it is
+   * saved with the groove and the form, and the engine is downstream of the
+   * record. Writing only the engine would have made the tempo the one setting
+   * on that screen that Save did not save.
+   */
   const handleBpmChange = (value: number) => {
     const clamped = Math.max(20, Math.min(300, value));
     setBpm(clamped);
+    if (mode === "jam") jamSession.editJam({ bpm: clamped });
   };
 
   // A narrow window cannot hold the library and a usable stage at once. A
@@ -766,9 +1116,11 @@ export function MainWindow() {
       }
     }
     if (preset.view === "drill" || preset.view === "beat") setView(preset.view);
-    // Loading a preset is loading a preset. Leaving the setlist open would put
-    // the track over a stage the setlist no longer describes.
+    // Loading a preset is loading a preset. Leaving the setlist or the jam open
+    // would put the stage over something it no longer describes — and a jam
+    // left loaded goes on writing its table to the engine.
     setlistSession.closeSetlist();
+    closeJamRef.current();
   }, [setView, setlistSession.closeSetlist]);
 
 
@@ -796,6 +1148,13 @@ export function MainWindow() {
     setView,
     prevTab,
     setlistLoaded: !!setlistSession.setlist,
+    jamLoaded: !!jamSession.jam,
+    jamEditorOpen: jamSession.screen.editorOpen,
+    onToggleJam: toggleJamPlayback,
+    // The record switch goes through the same gate the on-screen one does —
+    // including the first-time dialog — so a footswitch cannot start a
+    // recording nobody has been told about.
+    jamActions,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -940,6 +1299,12 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     midiDevices: midi.devices,
     midiBindings: midi.bindings,
+    // The three Jam hints (JAM_KILLER A4): the two doors, the sheet that is
+    // live while the band plays, and the band arranging itself.
+    jamLoaded: !!jamSession.jam,
+    jamSetupOpen: jamSession.screen.setupOpen,
+    jamChordsOpen: jamSession.screen.chordsOpen,
+    jamChorus: currentBeat?.chorus ?? null,
     onSavePreset: handlePresetSave,
     onOpenWidget: () => {
       void markWidgetOpened();
@@ -948,7 +1313,6 @@ export function MainWindow() {
     onOpenHotkeys: () => {
       // O3's MIDI capture flow is not merged yet — until it is, the hint
       // lands the user on the section that owns the mapping UI.
-      prevTab.current = view === "settings" ? prevTab.current : (view as "beat" | "drill");
       setView("settings");
       setTimeout(() => {
         document
@@ -1015,7 +1379,11 @@ export function MainWindow() {
       <FullscreenView
         state={state}
         currentBeat={currentBeat}
-        activeTab={view === "drill" ? "drill" : "beat"}
+        activeTab={mode === "drill" ? "drill" : mode === "jam" && jamSession.jam ? "jam" : "beat"}
+        jam={zenJam}
+        // Whichever tab put it there: the jam tab's own, or a setlist step
+        // that is a jam, which reads as "beat" above and is still a band.
+        jamOnEngine={(mode === "jam" && !!jamSession.jam) || !!setlistSession.runner.jam}
         onExit={zenExitHandler}
       />
     </ZenTransition>
@@ -1107,6 +1475,7 @@ export function MainWindow() {
           ref={sidebarRef}
           state={state}
           view={view}
+          mode={mode}
           setView={setView}
           prevTab={prevTab}
           libraryOpen={sidebarOpen}
@@ -1118,18 +1487,38 @@ export function MainWindow() {
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
           setlists={setlistSession.setlists}
           activeSetlistId={setlistSession.setlist?.id ?? null}
-          onLoadSetlist={(next) =>
-            // Clicking the setlist you are already in is the way out of it,
-            // the same way clicking the open tab closes it in most things
-            // with tabs. Any other setlist replaces this one — which is the
-            // commonest way to lose edits, so it goes through the gate.
-            next.id === setlistSession.setlist?.id
-              ? askToLeave()
-              : guarded(() => setlistSession.loadSetlist(next))
-          }
-          onNewSetlist={handleNewSetlist}
+          onLoadSetlist={(next) => {
+            // Clicking the setlist you are already in used to be the way out
+            // of it; there is no out any more, so it is the row saying what
+            // is already true. Any OTHER setlist replaces this one — which is
+            // the commonest way to lose edits, so it goes through the gate.
+            if (next.id === setlistSession.setlist?.id) return;
+            guarded(() => setlistSession.loadSetlist(next));
+          }}
+          onNewSetlist={newSetlistGuarded}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
+          onDuplicateSetlist={setlistSession.duplicateSetlist}
+          onReorderSetlists={setlistSession.reorderSetlists}
+          jams={jamSession.jams}
+          activeJamId={jamSession.jam?.id ?? null}
+          // And the same for a jam: the row you are on is where you are.
+          onLoadJam={(next) => {
+            if (next.id === jamSession.jam?.id) return;
+            guarded(() => {
+              jamSession.loadJam(next);
+              releaseSidebarFocus();
+            });
+          }}
+          onNewJam={newJamGuarded}
+          onDeleteJam={jamSession.deleteJam}
+          onRenameJam={jamSession.renameJam}
+          onDuplicateJam={jamSession.duplicateJam}
+          onReorderJams={jamSession.reorderJams}
+          onAddJamToSetlist={(jamId, setlistId) => {
+            const jam = jamSession.jams.find((j) => j.id === jamId);
+            if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
+          }}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -1175,6 +1564,7 @@ export function MainWindow() {
           }
           activeSetlist={setlistSession.setlist}
           setlistDirty={setlistSession.dirty}
+          setlistUnsaved={setlistSession.unsaved}
           setlistSaveFeedback={setlistSession.saveFeedback}
           onSaveSetlist={() => void setlistSession.saveActiveSetlist()}
           onRevertSetlist={setlistSession.revertSetlist}
@@ -1183,6 +1573,38 @@ export function MainWindow() {
             if (!id) return;
             setSidebarOpen(true);
             setTimeout(() => sidebarRef.current?.triggerRenameSetlist(id), 150);
+          }}
+          activeJam={jamSession.jam}
+          jamDirty={jamSession.dirty}
+          jamUnsaved={jamSession.unsaved}
+          jamSaveFeedback={jamSession.saveFeedback}
+          onSaveJam={jamSession.saveActiveJam}
+          onRevertJam={jamSession.revertJam}
+          onRenameJam={() => {
+            const id = jamSession.jam?.id;
+            if (!id) return;
+            setSidebarOpen(true);
+            setTimeout(() => sidebarRef.current?.triggerRenameJam(id), 150);
+          }}
+          // The two sheets. One open at a time: they occupy the same 640px on
+          // the right, and two of them stacked would be a screen with no jam
+          // left on it.
+          jamSetupOpen={jamSession.screen.setupOpen}
+          onToggleJamSetup={() => {
+            const next = !jamSession.screen.setupOpen;
+            jamSession.screen.setSetupOpen(next);
+            if (next) jamSession.screen.setChordsOpen(false);
+          }}
+          jamChordsOpen={jamSession.screen.chordsOpen}
+          onToggleJamChords={() => {
+            const next = !jamSession.screen.chordsOpen;
+            jamSession.screen.setChordsOpen(next);
+            if (next) jamSession.screen.setSetupOpen(false);
+          }}
+          setlistsForJam={setlistSession.setlists}
+          onAddJamToSetlist={(setlistId) => {
+            const jam = jamSession.jam;
+            if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
           listening={evaluation.enabled}
           soundOpen={soundOpen}
@@ -1229,8 +1651,19 @@ export function MainWindow() {
           />
         )}
 
+        {/* Asked once, before the first take is ever recorded. Beside the
+            unsaved-changes dialog because they are the app's two modals and
+            they wear the same card. */}
+        {jamTakes.introOpen && (
+          <TakesIntroDialog
+            onConfirm={jamTakes.confirmIntro}
+            onCancel={jamTakes.cancelIntro}
+          />
+        )}
+
         {pending && (
           <UnsavedChangesDialog
+            kind={pending.kind}
             name={pending.name}
             onSave={() => {
               const { save, run } = pending;
@@ -1268,6 +1701,8 @@ export function MainWindow() {
               isDownbeat={isDownbeat}
               isPlaying={state.isPlaying}
               countIn={state.countIn ?? { beats: 0, done: 0 }}
+              jam={setlistSession.runner.jam}
+              currentBeat={currentBeat}
               onEdit={setlistSession.editWhileRunning}
             />
           ) : setlistSession.setlist ? (
@@ -1275,17 +1710,26 @@ export function MainWindow() {
               setlist={setlistSession.setlist}
               selectedStepId={setlistSession.selectedStepId}
               onSelectStep={setlistSession.selectStep}
+              selectedStepIds={setlistSession.selectedStepIds}
+              onExtendSelection={setlistSession.extendSelection}
+              onToggleSelection={setlistSession.toggleStepSelection}
+              onCollapseSelection={setlistSession.collapseSelection}
               runningIndex={setlistSession.runningIndex}
               onChange={setlistSession.setSetlist}
               onPatchStep={setlistSession.patchStep}
               onAddStep={setlistSession.addStepFromNow}
+              jams={jamSession.jams}
+              onAddJamStep={setlistSession.addJamStep}
               onBackToPlaying={setlistSession.backToPlaying}
             />
           ) : (
-            /* The tab standing up cold. A mode can be clicked with nothing
-               loaded — the one state this screen never had while it was a
-               corner of the metronome. */
-            <SetlistEmpty onNew={() => void handleNewSetlist()} />
+            /* Nothing, and only for as long as it takes the tab to pick one.
+               The Setlist tab opens on the setlist you last had, on the first
+               in the library, or on a new one — so "no setlist" is a moment
+               between two renders now, not a screen anybody sits on. A full
+               empty state drawn for that moment would be a flash of an
+               invitation nobody needed. */
+            null
           )
         ) : view === "beat" ? (
           <MetronomeView
@@ -1309,6 +1753,52 @@ export function MainWindow() {
             onStartBpmEdit={startBpmEdit}
             onCommitBpmEdit={commitBpmEdit}
           />
+        ) : view === "jam" ? (
+          jamSession.jam ? (
+            <JamView
+              jam={jamSession.jam}
+              jams={jamSession.jams}
+              onEdit={jamSession.editJam}
+              onLoadJam={(next) => guarded(() => jamSession.loadJam(next))}
+              currentBeat={currentBeat}
+              isPlaying={state.isPlaying}
+              instrument={instrument}
+              lineup={jamSession.lineup}
+              trainedBpm={jamSession.trainedBpm}
+              listening={evaluation.enabled}
+              takes={jamTakes}
+              onToggleTakes={jamTakes.requestTakes}
+              onPreviewKit={jamSession.startKitPreview}
+              previewingKit={jamSession.previewKit}
+              onPreviewVibe={jamSession.previewVibe}
+              onStopPreview={jamSession.stopPreview}
+              previewingVibe={jamSession.previewingVibe}
+              customKitRefused={jamSession.customKitRefused}
+              screen={jamSession.screen}
+              position={jamSession.position}
+              themeId={state.theme}
+              viewTransitions={viewTransitions}
+              animationStyle={animationStyle}
+              tapActive={tapActive}
+              tapCount={tapCount}
+              tapPulse={tapPulse}
+              editingBpm={editingBpm}
+              bpmEditValue={bpmEditValue}
+              setBpmEditValue={setBpmEditValue}
+              setEditingBpm={setEditingBpm}
+              bpmInputRef={bpmInputRef}
+              onTap={handleTap}
+              onBpmChange={handleBpmChange}
+              onStartBpmEdit={startBpmEdit}
+              onCommitBpmEdit={commitBpmEdit}
+            />
+          ) : (
+            /* Nothing, and only for as long as it takes the tab to pick one.
+               The Jam tab opens on the jam you last had, on the first in the
+               library, or on a new one — so "no jam" is a moment between two
+               renders now, not a screen anybody sits on. */
+            null
+          )
         ) : view === "drill" ? (
           <DrillView
             state={state}
@@ -1355,7 +1845,10 @@ export function MainWindow() {
             audioOutputDevices={audioOutputDevices}
             setAudioOutputDevices={setAudioOutputDevices}
             selectedOutputDevice={selectedOutputDevice}
-            setSelectedOutputDevice={setSelectedOutputDevice}
+            outputPair={outputPair}
+            selectOutputPair={selectOutputPair}
+            selectOutputDevice={selectOutputDevice}
+            outputPairFellBack={outputPairFellBack}
             evaluation={evaluation}
             midi={midi}
             onOpenInputTest={() => setInputTestOpen(true)}
@@ -1386,6 +1879,8 @@ export function MainWindow() {
                     availableVoices: coach.availableVoices,
                     voiceDiagnostics: coach.voiceDiagnostics,
                     setInstrument,
+                    jamCues,
+                    setJamCues,
                     onStartDownload: coach.handleStartDownload,
                     onRequestDownload: coach.setPendingDownloadTier,
                   }
@@ -1444,7 +1939,8 @@ export function MainWindow() {
         {/* Nothing to transport on an empty setlist tab. */}
         {(view === "beat" ||
           view === "drill" ||
-          (view === "setlist" && !!setlistSession.setlist)) && (
+          (view === "setlist" && !!setlistSession.setlist) ||
+          (view === "jam" && !!jamSession.jam)) && (
           <Transport
             view={view}
             isPlaying={state.isPlaying}
@@ -1456,24 +1952,47 @@ export function MainWindow() {
             hasSignal={evaluation.hasSignal}
             playShortcut={platformKey(keyBindings["play"] || "")}
             startBpm={state.speedRamp.startBpm}
-            countIn={state.speedRamp.warmupBeats > 0}
+            countIn={countInOn}
             loop={state.speedRamp.cyclic}
-            onToggleCountIn={() =>
-              reconfigureRamp({ warmupBeats: state.speedRamp.warmupBeats > 0 ? 0 : 4 })
-            }
+            onToggleCountIn={toggleCountIn}
             onToggleLoop={() => reconfigureRamp({ cyclic: !state.speedRamp.cyclic })}
-            onTogglePlayback={() => togglePlayback()}
+            onTogglePlayback={() =>
+              view === "jam" ? toggleJamPlayback() : togglePlaybackCountedIn()
+            }
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}
             setlistStepNumber={setlistSession.runner.stepNumber}
-            setlistStepCount={setlistSession.setlist?.steps.length ?? 0}
+            /* The transport says what the SCREEN is doing, or what is actually
+               running. This and `jamFormBars` used to be handed over whenever
+               a setlist or a jam was loaded at all — harmless while that meant
+               "you opened one", and not harmless once every mode began
+               restoring what you last had open: the metronome's transport grew
+               a "step 1 of 4" and a Skip for a set nobody had started. A run
+               that IS going keeps its readout wherever you wander, which is
+               the point of pressing play on a set and going to look at
+               something else. */
+            setlistStepCount={
+              mode === "setlist" || setlistSession.runner.step
+                ? (setlistSession.setlist?.steps.length ?? 0)
+                : 0
+            }
             setlistRemaining={setlistSession.runner.remaining}
             setlistStartAt={setlistSession.startAt}
             onSetlistSkip={setlistSession.runner.skip}
+            jamFormBars={
+              (mode === "jam" || setlistSession.runner.jam) && jamSession.jam
+                ? formBars(jamSession.jam.form)
+                : 0
+            }
+            jamFormBar={currentBeat?.formBar ?? 0}
+            jamChorus={currentBeat?.chorus ?? 1}
+            recording={jamTakes.recording}
+            recordedSeconds={jamTakes.recordedSeconds}
           />
         )}
       </div>
-      {!IS_MOBILE && (view === "beat" || view === "drill" || view === "setlist") && (
+      {!IS_MOBILE &&
+        (view === "beat" || view === "drill" || view === "setlist" || view === "jam") && (
       <CoachCard
         open={session.cardOpen}
         active={session.active}
@@ -1534,11 +2053,13 @@ export function MainWindow() {
             onActiveChange={handleActivePresetChange}
             setlists={setlistSession.setlists}
             activeSetlistId={setlistSession.setlist?.id ?? null}
-            onLoadSetlist={(next) =>
-              next.id === setlistSession.setlist?.id
-                ? askToLeave()
-                : guarded(() => setlistSession.loadSetlist(next))
-            }
+            onLoadSetlist={(next) => {
+              // The same rule as the sidebar above: the setlist you are
+              // already in is the row saying so, and any other one replaces
+              // it through the unsaved-changes gate.
+              if (next.id === setlistSession.setlist?.id) return;
+              guarded(() => setlistSession.loadSetlist(next));
+            }}
             onNewSetlist={handleNewSetlist}
             onDeleteSetlist={setlistSession.deleteSetlist}
             onRenameSetlist={setlistSession.renameSetlist}
@@ -1686,7 +2207,7 @@ export function MainWindow() {
         onTakeTour={() => {
           // The tour has no stop in Settings, so leave first and hand it the
           // tab it must restore — same contract the Settings entry uses.
-          const back = view === "settings" ? prevTab.current : (view as "beat" | "drill");
+          const back = view === "settings" ? prevTab.current : view;
           if (view === "settings") setView(back);
           tour?.open(back);
         }}

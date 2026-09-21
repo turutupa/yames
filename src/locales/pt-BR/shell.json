@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metrônomo",
     "setlist": "Setlist",
-    "drill": "Treino"
+    "drill": "Treino",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Modo Zen",
@@ -21,10 +22,12 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Metrônomo não salvo",
+    "unsavedDrill": "Treino não salvo",
     "title": "Predefinições",
     "titleDrill": "Treinos",
     "titleSetlist": "Setlists",
-    "saveCurrent": "Salvar configurações atuais",
+    "titleJam": "Jams",
     "search": "Buscar na biblioteca",
     "searchPlaceholder": "Buscar...",
     "namePlaceholder": "Nome...",
@@ -40,7 +43,9 @@
     "revert": "Reverter",
     "revertTooltip": "Descartar as alterações e recarregar a predefinição",
     "save": "Salvar predefinição",
-    "delete": "Excluir"
+    "delete": "Excluir",
+    "newPreset": "Novo preset",
+    "newDrill": "Novo exercício"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Ouvindo",
     "inputOff": "Entrada desligada",
     "coachOnPlay": "O coach escuta quando você toca",
-    "coachQuiet": "O coach fica quieto durante o passo"
+    "coachQuiet": "O coach fica quieto durante o passo",
+    "countIn": "Contagem inicial"
   },
   "rail": {
     "label": "Modos e biblioteca",
@@ -76,7 +82,8 @@
     "collapse": "Recolher barra lateral",
     "expand": "Expandir barra lateral",
     "collapseWithShortcut": "Recolher barra lateral ({{shortcut}})",
-    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})"
+    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})",
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Biblioteca"
@@ -85,6 +92,7 @@
     "metronome": "Clique",
     "drill": "Treino",
     "setlist": "Setlist",
+    "jam": "Jam",
     "settings": "Ajustes",
     "library": "Presets",
     "zen": "Zen"

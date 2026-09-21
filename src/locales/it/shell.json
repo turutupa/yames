@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronomo",
     "setlist": "Scaletta",
-    "drill": "Rampa"
+    "drill": "Rampa",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Metronomo non salvato",
+    "unsavedDrill": "Rampa non salvata",
     "title": "Preset",
     "titleDrill": "Rampe",
     "titleSetlist": "Scalette",
-    "saveCurrent": "Salva impostazioni attuali",
+    "titleJam": "Jam",
     "search": "Cerca nella libreria",
     "searchPlaceholder": "Cerca…",
     "namePlaceholder": "Nome…",
@@ -40,7 +43,9 @@
     "revert": "Ripristina",
     "revertTooltip": "Annulla le modifiche e ricarica il preset",
     "save": "Salva preset",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "newPreset": "Nuovo preset",
+    "newDrill": "Nuovo esercizio"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "In ascolto",
     "inputOff": "Ingresso spento",
     "coachOnPlay": "Il coach ascolta quando avvii",
-    "coachQuiet": "Il coach tace durante ogni step"
+    "coachQuiet": "Il coach tace durante ogni step",
+    "countIn": "Conteggio iniziale"
   },
   "rail": {
     "label": "Modalità e libreria",
@@ -76,7 +82,8 @@
     "collapse": "Comprimi barra laterale",
     "expand": "Espandi barra laterale",
     "collapseWithShortcut": "Comprimi barra laterale ({{shortcut}})",
-    "expandWithShortcut": "Espandi barra laterale ({{shortcut}})"
+    "expandWithShortcut": "Espandi barra laterale ({{shortcut}})",
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Libreria"
@@ -85,6 +92,7 @@
     "metronome": "Click",
     "drill": "Rampa",
     "setlist": "Scaletta",
+    "jam": "Jam",
     "settings": "Opzioni",
     "library": "Libreria",
     "zen": "Zen"

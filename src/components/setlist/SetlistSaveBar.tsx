@@ -4,6 +4,12 @@ import type { Setlist } from "../../types";
 interface SetlistSaveBarProps {
   setlist: Setlist;
   dirty: boolean;
+  /**
+   * True while this setlist has never reached the library — the tab put it on
+   * the stage and nothing has filed it yet. Save is live; "Edited" is not,
+   * because there is no stored version for it to differ from.
+   */
+  unsaved?: boolean;
   saveFeedback: boolean;
   onRename: () => void;
   onSave: () => void;
@@ -27,6 +33,7 @@ interface SetlistSaveBarProps {
 export function SetlistSaveBar({
   setlist,
   dirty,
+  unsaved = false,
   saveFeedback,
   onRename,
   onSave,
@@ -52,11 +59,15 @@ export function SetlistSaveBar({
           saveFeedback ? "preset-text-btn--feedback" : ""
         }`}
         onClick={onSave}
-        disabled={!dirty && !saveFeedback}
-        title={dirty ? t("setlist.saveTooltip") : t("setlist.noChanges")}
+        disabled={!dirty && !unsaved && !saveFeedback}
+        title={dirty || unsaved ? t("setlist.saveTooltip") : t("setlist.noChanges")}
       >
         <span className="preset-save-btn-label">
-          {saveFeedback ? t("setlist.saved") : dirty ? t("setlist.save") : t("setlist.noChanges")}
+          {saveFeedback
+            ? t("setlist.saved")
+            : dirty || unsaved
+              ? t("setlist.save")
+              : t("setlist.noChanges")}
         </span>
       </button>
 

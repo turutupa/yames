@@ -155,6 +155,15 @@
       "midiPlugged": {
         "body": "A MIDI device is connected but nothing is mapped. Map a pedal to Play/Stop?",
         "action": "Open Hotkeys"
+      },
+      "jamSheets": {
+        "body": "Set up changes the band; Chords is your cheat sheet."
+      },
+      "jamLive": {
+        "body": "Everything here changes at the next bar."
+      },
+      "jamArrangement": {
+        "body": "The band builds and breaks down on its own — Loop in Set up turns that off."
       }
     },
     "tour": {
