@@ -17,6 +17,16 @@ video on the internet looks like: **the tablature itself — six lines,
 fret numbers — scrolling under a fixed playhead, in time with the
 sound.**
 
+**W32 runs in parallel** and, as its first commit, `git mv`s the shared
+camera and clip files from `src/songs/camera/**` and
+`src/containers/songs/camera/**` into `src/takes/**` as a PURE RENAME.
+So: put your new files under `src/takes/` (W30 already made it, with
+`clipStrip.ts` — the tape interface your painter plugs into as a second
+renderer), and keep your edits to the existing files (`SaveAsVideo`,
+the clip options, `SongReview`'s hand-down of `buildTape`) small and
+local, so git's rename detection carries them across when both
+branches merge. Do not move or restructure those files yourself.
+
 ## What to build
 
 1. **A tablature painter for the canvas**, pure and testable, drawn
