@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "Nur {{lane}} hören",
       "tooManyParts": "{{tracks}} bleibt stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können.",
-      "tooManyParts_other": "{{tracks}} bleiben stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können."
+      "tooManyParts_other": "{{tracks}} bleiben stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können.",
+      "turnedDown": "{{count}} Mitspieler leiser gestellt",
+      "turnedDown_other": "{{count}} Mitspieler leiser gestellt"
     },
     "countIn": {
       "counting": "Zählt dich ein"
@@ -362,9 +364,13 @@
       "tabAndNotes": "Tab + Noten",
       "notationNote": "Auch das Notensystem über der Tabulatur zeigen",
       "bigger": "Größer",
-      "smaller": "Kleiner"
+      "smaller": "Kleiner",
+      "size": "Größe"
     },
     "clickChip": "Klick",
-    "clickNote": "Zum Stück mitticken. Zu Beginn aus, wenn die Datei eine eigene Band mitbringt."
+    "clickNote": "Zum Stück mitticken. Zu Beginn aus, wenn die Datei eine eigene Band mitbringt.",
+    "notes": {
+      "label": "Hinweise zu dieser Datei"
+    }
   }
 }

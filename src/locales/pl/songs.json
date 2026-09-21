@@ -46,7 +46,11 @@
       "tooManyParts": "{{tracks}} milczy: ten plik ma więcej partii, niż może zabrzmieć naraz.",
       "tooManyParts_few": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz.",
       "tooManyParts_many": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz.",
-      "tooManyParts_other": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz."
+      "tooManyParts_other": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz.",
+      "turnedDown": "{{count}} muzyk ściszony",
+      "turnedDown_few": "{{count}} muzyków ściszonych",
+      "turnedDown_many": "{{count}} muzyków ściszonych",
+      "turnedDown_other": "{{count}} muzyków ściszonych"
     },
     "countIn": {
       "counting": "Odliczam ci wejście"
@@ -384,9 +388,13 @@
       "tabAndNotes": "Tabulatura + nuty",
       "notationNote": "Pokaż też pięciolinię nad tabulaturą",
       "bigger": "Większe",
-      "smaller": "Mniejsze"
+      "smaller": "Mniejsze",
+      "size": "Rozmiar"
     },
     "clickChip": "Klik",
-    "clickNote": "Wybija puls razem z utworem. Na początku wyłączony, gdy plik ma własny zespół."
+    "clickNote": "Wybija puls razem z utworem. Na początku wyłączony, gdy plik ma własny zespół.",
+    "notes": {
+      "label": "Uwagi o tym pliku"
+    }
   }
 }

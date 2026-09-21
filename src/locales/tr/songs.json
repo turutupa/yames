@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "Sadece {{lane}} dinle",
       "tooManyParts": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
-      "tooManyParts_other": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var."
+      "tooManyParts_other": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
+      "turnedDown": "{{count}} çalgı kısıldı",
+      "turnedDown_other": "{{count}} çalgı kısıldı"
     },
     "countIn": {
       "counting": "Girişini sayıyorum"
@@ -362,9 +364,13 @@
       "tabAndNotes": "Tab + nota",
       "notationNote": "Tabın üstünde porteyi de göster",
       "bigger": "Daha büyük",
-      "smaller": "Daha küçük"
+      "smaller": "Daha küçük",
+      "size": "Boyut"
     },
     "clickChip": "Tık",
-    "clickNote": "Parçayla birlikte vuruşu sayar. Dosya kendi grubunu getiriyorsa başlangıçta kapalıdır."
+    "clickNote": "Parçayla birlikte vuruşu sayar. Dosya kendi grubunu getiriyorsa başlangıçta kapalıdır.",
+    "notes": {
+      "label": "Bu dosyayla ilgili notlar"
+    }
   }
 }

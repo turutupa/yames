@@ -66,6 +66,7 @@ import {
   printedRunsOfRange,
 } from "../../songs/selection";
 import type { SelectionDrag, TabPress } from "../../songs/selection";
+import { playedBarAtTick } from "../../songs/position";
 import { MARK_GLYPH } from "./review/marks";
 import type { TimingMark } from "./review/marks";
 import { DEFAULT_STAGE_VIEW } from "../../songs/stageView";
@@ -1120,46 +1121,74 @@ export function TabStage({
     : null;
 
   /**
-   * Keep the cursor in view, and bring the next system in BEFORE it is
-   * needed.
+   * Keep the place in view, and bring the next system in BEFORE it is needed.
    *
    * We scroll our own container rather than letting alphaTab scroll something
-   * it does not own (`scrollMode = Off`). Two things about how the cursor is
-   * positioned decide the whole of this:
+   * it does not own (`scrollMode = Off`).
    *
-   * **It is moved by a transform, not by `top`.** alphaTab sets
-   * `top: 0; left: 0` on the cursor once and then writes a `translate` on
-   * every seek, so `offsetTop` is zero for ever. Measured off the page: the
-   * cursor at the second system reported `offsetTop` 0 with a transform of
-   * `translate(51.5px, 155px)`. The old rule read that zero, decided the
-   * cursor was above the scroll position and scrolled back to the top of the
-   * piece — so the one case it existed for was the one case it broke.
-   * `getBoundingClientRect` is what the box is actually at.
+   * ## It is worked out from the ENGRAVING, never measured off the cursor
+   * (W36 item 1)
    *
-   * **Half a system of lead, and the smallest scroll that buys it.** The
-   * cursor's own height is one system, so keeping half of one clear beneath
-   * it means the start of the next line is already on screen when the player
-   * gets to it rather than arriving under them — and scrolling by exactly
-   * what is missing, instead of putting the cursor at a fixed place, leaves
-   * the page still whenever it does not need to move. A rule that parks the
-   * cursor a third of the way down instead keeps the piece's title clipped
-   * off the top from the first beat, for no gain.
+   * The owner, 2026-09-21: *"when i click on a part of the tab that is not on
+   * the first row … it's scrolling to the wrong location"*. Measured on the
+   * 120-bar fixture at 2000x1124: with the page at bar 60 and bar 60 clicked,
+   * the seek was right — the playhead mark landed on bar 60 — and the page
+   * scrolled to **zero**. Clicking bar 118 next scrolled it to bar 60. Every
+   * click landed on the bar clicked BEFORE it.
+   *
+   * The reason is alphaTab's, and it is not a units or a zoom problem (its
+   * `BoundsLookup.finish(scale)` multiplies every rectangle by
+   * `display.scale`, so bounds are final CSS pixels at any zoom). It is that
+   * **alphaTab moves its cursor two animation frames after the tick is
+   * written.** `api.tickPosition = …` raises `playerPositionChanged`, whose
+   * handler is `uiFacade.beginInvoke` — a `requestAnimationFrame` — and the
+   * work it schedules ends in a SECOND `beginInvoke` before
+   * `_internalCursorUpdateBeat` finally calls `placeBarCursor`. A React effect
+   * runs in the same commit as the write, so a rule that measured
+   * `.at-cursor-bar` was always reading the previous position. While the
+   * transport runs the reports are continuous and two frames of lag is
+   * invisible; a seek is a jump, and a jump read one position late is a jump
+   * to the wrong place. Changing the zoom made it worse rather than caused it:
+   * a re-engrave builds a fresh `AlphaTabApi` whose cursor has not been placed
+   * at all, so the first scroll after one went to the top of the piece.
+   *
+   * So the bar is looked up instead: `placeBarCursor` sets the cursor to
+   * `masterBarBounds.visualBounds` and nothing else, which is exactly the
+   * rectangle `boundsLookup.findMasterBarByIndex` hands back — synchronously,
+   * off the engraving the page is currently showing. Same rectangle, no lag,
+   * and it is the same lookup the playhead mark and the selection bands
+   * already draw from, so the three can never disagree.
+   *
+   * **Half a system of lead while it is PLAYING, and none when it is not.**
+   * Playing, keeping half a system clear beneath the cursor means the start of
+   * the next line is on screen before the player reaches it. Stopped, the
+   * owner's sentence is that the page must not move at all if the bar was
+   * already visible — so a click brings the bar into view and does nothing
+   * more. Either way it is the smallest scroll that does the job, rather than
+   * parking the bar at a fixed place, which would keep the first system
+   * clipped off the top from the first beat for no gain.
    */
   useEffect(() => {
     if (!ready) return;
     const host = hostRef.current;
-    const cursor = host?.querySelector<HTMLElement>(".at-cursor-bar");
     const viewport = host?.closest<HTMLElement>(".songs-tab-viewport");
-    if (!cursor || !viewport) return;
-    const box = cursor.getBoundingClientRect();
-    const frame = viewport.getBoundingClientRect();
-    if (box.height <= 0) return;
-    // The cursor's top in the scroller's own coordinates.
-    const top = box.top - frame.top + viewport.scrollTop;
-    const lead = Math.min(box.height / 2, viewport.clientHeight / 3);
-    const wantedBottom = top + box.height + lead;
+    const lookup = apiRef.current?.renderer?.boundsLookup;
+    if (!host || !viewport || !lookup) return;
+    const printed = printedBarOfPlayed(score, playedBarAtTick(score, tick));
+    if (printed === null) return;
+    const bounds = lookup.findMasterBarByIndex(printed);
+    if (!bounds) return;
+    const box = bounds.visualBounds;
+    if (box.h <= 0) return;
+    // The engraving's coordinates are the host's; the host's own offset inside
+    // the scroller is what turns them into the scroller's.
+    const offset =
+      host.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop;
+    const top = offset + box.y;
+    const lead = playing ? Math.min(box.h / 2, viewport.clientHeight / 3) : 0;
+    const wantedBottom = top + box.h + lead;
     let next: number | null = null;
-    if (top < viewport.scrollTop) next = Math.max(0, top - lead);
+    if (top - lead < viewport.scrollTop) next = Math.max(0, top - lead);
     else if (wantedBottom > viewport.scrollTop + viewport.clientHeight) {
       next = Math.min(wantedBottom - viewport.clientHeight, top);
     }
@@ -1171,7 +1200,10 @@ export function TabStage({
         ? "auto"
         : "smooth",
     });
-  }, [tick, ready]);
+    // `rendered` is the engraving these rectangles belong to: a re-engrave at
+    // another zoom moves every bar, and the place has to be found again on the
+    // new page rather than kept from the old one.
+  }, [tick, ready, rendered, playing, score]);
 
   return (
     <div className="songs-tab-viewport" data-selecting={drag ? "" : undefined}>

@@ -42,7 +42,10 @@
       "soloFor": "Ascolta solo {{lane}}",
       "tooManyParts": "{{tracks}} resta in silenzio: questo file ha più parti di quante possano suonare insieme.",
       "tooManyParts_many": "{{tracks}} restano in silenzio: questo file ha più parti di quante possano suonare insieme.",
-      "tooManyParts_other": "{{tracks}} restano in silenzio: questo file ha più parti di quante possano suonare insieme."
+      "tooManyParts_other": "{{tracks}} restano in silenzio: questo file ha più parti di quante possano suonare insieme.",
+      "turnedDown": "{{count}} musicista abbassato",
+      "turnedDown_many": "{{count}} musicisti abbassati",
+      "turnedDown_other": "{{count}} musicisti abbassati"
     },
     "countIn": {
       "counting": "Ti conta l'entrata"
@@ -373,9 +376,13 @@
       "tabAndNotes": "Tablatura + note",
       "notationNote": "Mostra anche il pentagramma sopra la tablatura",
       "bigger": "Più grande",
-      "smaller": "Più piccolo"
+      "smaller": "Più piccolo",
+      "size": "Dimensione"
     },
     "clickChip": "Clic",
-    "clickNote": "Scandisce il tempo sul brano. Spento all'inizio se il file porta la sua band."
+    "clickNote": "Scandisce il tempo sul brano. Spento all'inizio se il file porta la sua band.",
+    "notes": {
+      "label": "Note su questo file"
+    }
   }
 }

@@ -225,26 +225,37 @@
   text-align: center;
 }
 
-/* ── The head: what the song IS, on ONE line (W29 item 3) ─────────────── */
+/* ── The head: what the song IS, on the APP's own bar (W36 item 2) ────── */
 
 /* It was a title block over a labelled table of facts — two rows, about
- * seventy pixels, above a tab that was getting under half the window. The
- * owner asked for the room back, so the head is one line: the name, who wrote
- * it, which part you are reading, the tuning, the meter, the tempo, and the
- * two controls for how you look at it.
+ * seventy pixels. W29 made it one line of the stage. This is the last step:
+ * it is not a row of the stage at all any more, it is the app's top bar.
  *
- * `nowrap` and not a wrapping row: the head is the one thing on this screen
- * that must not grow, because everything it grows by comes out of the tab.
- * What does not fit is ellipsised (the title) or dropped by a container query
- * (the facts) rather than pushed onto a second line. */
+ * The owner, on his third session: *"the top rail, do we need it anymore? …
+ * can we merge the information from the songs stage area into that rail? like
+ * the song name, the tuning etc"*. Three rows of furniture above the music
+ * became one, and the tab gained the other two.
+ *
+ * It is portalled into `MainHeader`'s slot (`headerSlot.ts`), so these rules
+ * are styling a child of `.main-header` and not of `.songs-view` — which is
+ * why the fade that used to dim the facts mid-song is gone from here: the
+ * whole bar already recedes while the transport runs (`shell.css`'s
+ * `.main-window[data-playing="true"] .main-header`), and two fades over one
+ * row is one fade too many.
+ *
+ * `nowrap` still: the bar is 56px and one row at every window the app opens.
+ * What does not fit is ellipsised (the title), hidden by a container query
+ * (the artist) or moved (the facts, into the part menu's panel; the zoom,
+ * into the bar's overflow) — never pushed onto a second line. */
 .songs-head {
   display: flex;
   flex-wrap: nowrap;
-  align-items: baseline;
-  gap: 4px 14px;
+  align-items: center;
+  gap: 0 12px;
+  flex: 1 1 auto;
   width: 100%;
   min-width: 0;
-  flex: 0 0 auto;
+  overflow: hidden;
 }
 
 .songs-title {
@@ -269,15 +280,30 @@
 }
 
 /* The facts sit at the right-hand end, and they are the first thing to go
-   when the stage narrows: the tuning is also in the instrument menu and the
-   tempo is on the transport. */
+   when the bar narrows — into the part menu's own panel, where the tuning is
+   what you wanted to know about the part anyway.
+ *
+ * `data-folded` rather than a container query, because folding them is a MOVE
+ * and CSS cannot reparent. They stay in the DOM, hidden — which is what keeps
+ * them out of the accessibility tree while the copy in the menu is the one
+ * being read, and `display: none` is the only way to say that. */
 .songs-facts {
   display: flex;
   flex-wrap: nowrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0 14px;
-  margin: 0 0 0 auto;
+  margin: 0;
   min-width: 0;
+}
+
+.songs-head .songs-facts[data-folded] {
+  display: none;
+}
+
+/* What pushes the facts and the view controls to the right-hand end. The
+   title and the part menu keep the left, whatever the song is called. */
+.songs-head .songs-sub {
+  margin-right: auto;
 }
 
 /* `label value` on one line, not a caption above a number: a caption is a
@@ -301,6 +327,86 @@
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
+}
+
+/* ── What the importer had to say (W36 item 2) ────────────────────────── */
+
+/* It was a bordered banner above the music, permanently. Now it is a mark
+ * beside the song's name, the same size as the head's chips and in the same
+ * quiet ink: a note about a file is not a problem with it, and a warning
+ * colour next to a song's name reads as one. */
+.songs-notes {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.songs-notes-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  padding: 3px 0;
+  color: var(--text-tertiary);
+}
+
+.songs-notes-pop {
+  position: fixed;
+  z-index: 70;
+  width: min(320px, calc(100vw - 24px));
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+.songs-notes-title {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.songs-notes-list {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Said once, over the foot of the stage rather than in a row of it: a toast
+   that took a row would be the banner again with a timer on it. `absolute`
+   inside `.songs-view`, which is `position: relative`, so it floats over the
+   music and the strip keeps its place. */
+.songs-notes-toast {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  bottom: 64px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: min(460px, calc(100% - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+}
+
+.songs-notes-toast-body {
+  min-width: 0;
+}
+
+.songs-notes-toast-ok {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  font-size: 12px;
 }
 
 /* ── How you read it: tab or tab and notes, and how big ───────────────── */
@@ -411,6 +517,53 @@
   background: var(--bg-panel);
   box-shadow: var(--shadow);
   overflow-y: auto;
+}
+
+/* The list inside the panel, and the facts folded in under it (W36 item 2).
+   The panel is the only scroller; the facts are a footer of it, so a file
+   with nine parts still shows the tuning at the bottom of the list. */
+.songs-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.songs-track-pop-facts {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* Inside a panel the facts are a column, not a row: there is no width to
+   compete for in here and a wrapped row of four is worse than four lines. */
+.songs-track-pop-facts .songs-facts,
+.songs-head-more .songs-facts {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px 0;
+}
+
+.songs-track-pop-facts .songs-fact,
+.songs-head-more .songs-fact {
+  justify-content: space-between;
+  gap: 0 12px;
+}
+
+/* And the same, in the bar's overflow, for a file with one part and so no
+   part menu to fold them into. */
+.songs-head-more {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.songs-head-more-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 12px;
 }
 
 .songs-track-row {
@@ -889,20 +1042,19 @@
  * `opacity` and nothing else, for that reason: a rule that shrank or hid a
  * control would move the one beside it under the hand reaching for it, which
  * is the owner's own complaint about Jam's switches. `:focus-within` is what
- * keeps a keyboard player from tabbing into something they cannot see. */
-.songs-view[data-playing] .songs-strip,
-.songs-view[data-playing] .songs-facts,
-.songs-view[data-playing] .songs-sub {
+ * keeps a keyboard player from tabbing into something they cannot see.
+ *
+ * The head is not in this list any more (W36 item 2). It lives in the app's
+ * own bar, and `shell.css` already dims that whole bar while the click runs
+ * and brings it back on hover — the same idea, one rung up the same ladder.
+ * Two fades over one row would have been 0.4 of 0.55. */
+.songs-view[data-playing] .songs-strip {
   opacity: 0.4;
   transition: opacity 320ms ease;
 }
 
 .songs-view[data-playing] .songs-strip:hover,
-.songs-view[data-playing] .songs-strip:focus-within,
-.songs-view[data-playing] .songs-head:hover .songs-facts,
-.songs-view[data-playing] .songs-head:focus-within .songs-facts,
-.songs-view[data-playing] .songs-head:hover .songs-sub,
-.songs-view[data-playing] .songs-head:focus-within .songs-sub {
+.songs-view[data-playing] .songs-strip:focus-within {
   opacity: 1;
   transition: opacity 120ms ease;
 }
@@ -910,9 +1062,7 @@
 /* Somebody who asked for nothing to move gets no fade either: a control that
    dims and undims under the eye is movement by another name. */
 @media (prefers-reduced-motion: reduce) {
-  .songs-view[data-playing] .songs-strip,
-  .songs-view[data-playing] .songs-facts,
-  .songs-view[data-playing] .songs-sub {
+  .songs-view[data-playing] .songs-strip {
     opacity: 1;
     transition: none;
   }
@@ -1942,17 +2092,7 @@
  *
  * The head keeps the title, the part you are reading and the two view
  * buttons at every width, because those are the only things in it you press. */
-@container stage (max-width: 900px) {
-  .songs-facts .songs-fact:not(:first-child) {
-    display: none;
-  }
-}
-
 @container stage (max-width: 780px) {
-  .songs-facts {
-    display: none;
-  }
-
   .songs-portion-says {
     display: none;
   }
@@ -1965,17 +2105,46 @@
 
   .songs-strip > * > .songs-strip-label,
   .songs-range-dash,
-  .songs-portion-clear,
-  .songs-sub-artist {
+  .songs-portion-clear {
     display: none;
   }
 
   .songs-range-field input {
     width: 46px;
   }
+}
+
+/* ── The bar's own rungs (W36 item 2) ──────────────────────────────────
+ *
+ * The head is in `MainHeader`'s slot now, so what it can afford is a question
+ * about the SLOT and not about the stage — the stage is below it and is a
+ * different width. These are the sheds that are only a word going away and so
+ * need no reparenting; the facts and the zoom MOVE, and `SongsView` measures
+ * the same box to decide that.
+ *
+ * In the brief's order: the facts (in JS, above), then the artist, then the
+ * zoom (in JS). The title ellipsises at every width and never disappears. */
+@container modebar (max-width: 520px) {
+  .songs-head {
+    gap: 0 10px;
+  }
+
+  .songs-sub-artist {
+    display: none;
+  }
+}
+
+@container modebar (max-width: 380px) {
+  .songs-head {
+    gap: 0 8px;
+  }
 
   .songs-title {
     font-size: 14px;
+  }
+
+  .songs-track-chip {
+    max-width: 130px;
   }
 }
 

@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "只聽 {{lane}}",
       "tooManyParts": "{{tracks}} 不會發聲：這個檔案的聲部比能同時響起的還多。",
-      "tooManyParts_other": "{{tracks}} 不會發聲：這個檔案的聲部比能同時響起的還多。"
+      "tooManyParts_other": "{{tracks}} 不會發聲：這個檔案的聲部比能同時響起的還多。",
+      "turnedDown": "已調低 {{count}} 位樂手",
+      "turnedDown_other": "已調低 {{count}} 位樂手"
     },
     "countIn": {
       "counting": "正在幫你數拍"
@@ -362,9 +364,13 @@
       "tabAndNotes": "六線譜 + 五線譜",
       "notationNote": "在六線譜上方也顯示五線譜",
       "bigger": "放大",
-      "smaller": "縮小"
+      "smaller": "縮小",
+      "size": "大小"
     },
     "clickChip": "滴答",
-    "clickNote": "跟著曲子打拍子。檔案自帶伴奏時預設關閉。"
+    "clickNote": "跟著曲子打拍子。檔案自帶伴奏時預設關閉。",
+    "notes": {
+      "label": "關於這個檔案"
+    }
   }
 }

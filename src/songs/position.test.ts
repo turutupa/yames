@@ -6,7 +6,13 @@
 // in. `BeatEvent.beat` is never read: it counts the CLICK's beats, so in 7/8
 // it counts eighths, and the 7/8 case below is the one that proves it.
 import { describe, expect, it } from "vitest";
-import { barAtBeatInRange, printedBarNumber, songPosition, songTickAt } from "./position";
+import {
+  barAtBeatInRange,
+  playedBarAtTick,
+  printedBarNumber,
+  songPosition,
+  songTickAt,
+} from "./position";
 import type { BeatPosition } from "./position";
 import type { SongScore } from "./types";
 
@@ -168,6 +174,30 @@ describe("the other direction, and the page's own numbers", () => {
     expect(printedBarNumber(score(), 0)).toBe(1);
     expect(printedBarNumber(score(), 2)).toBe(1);
     expect(printedBarNumber(score(), 3)).toBe(2);
+  });
+});
+
+/**
+ * The whole piece, not a range (W36 item 1).
+ *
+ * The tab's follow-scroll is given the engine's tick in the SONG and has to
+ * find the bar it is written in on the page, which is a different question
+ * from "where in the bars you asked for".
+ */
+describe("the bar a tick is written in", () => {
+  it("walks the whole piece, past the end of any range", () => {
+    expect(playedBarAtTick(score(), 0)).toBe(0);
+    expect(playedBarAtTick(score(), 3839)).toBe(0);
+    expect(playedBarAtTick(score(), 3840)).toBe(1);
+    expect(playedBarAtTick(score(), 11520)).toBe(3);
+  });
+
+  it("holds a tick past the last bar line on the last bar", () => {
+    expect(playedBarAtTick(score(), 999_999)).toBe(3);
+  });
+
+  it("answers zero for a song with no bars rather than throwing", () => {
+    expect(playedBarAtTick({ ...score(), bars: [] }, 900)).toBe(0);
   });
 });
 

@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "Hear only {{lane}}",
       "tooManyParts": "{{tracks}} stays silent: this file has more parts than can sound at once.",
-      "tooManyParts_other": "{{tracks}} stay silent: this file has more parts than can sound at once."
+      "tooManyParts_other": "{{tracks}} stay silent: this file has more parts than can sound at once.",
+      "turnedDown": "{{count}} player turned down",
+      "turnedDown_other": "{{count}} players turned down"
     },
     "countIn": {
       "counting": "Counting you in"
@@ -362,9 +364,13 @@
       "tabAndNotes": "Tab + notes",
       "notationNote": "Show the notation staff above the tab as well",
       "bigger": "Bigger",
-      "smaller": "Smaller"
+      "smaller": "Smaller",
+      "size": "How big"
     },
     "clickChip": "Click",
-    "clickNote": "Tick along with the song. Off to start with when the file brings its own band."
+    "clickNote": "Tick along with the song. Off to start with when the file brings its own band.",
+    "notes": {
+      "label": "Notes on this file"
+    }
   }
 }

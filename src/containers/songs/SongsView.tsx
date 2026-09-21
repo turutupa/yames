@@ -45,9 +45,12 @@
  * (`main-window/countIn.ts`).
  */
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
 import { TrackMenu } from "./TrackMenu";
+import { SongNotesMark, SongNotesToast, useSongNotesSeen } from "./SongNotes";
+import { useHeaderSlot } from "../main-window/headerSlot";
 /*
  * The review's hooks, from their own modules rather than through
  * `./review`.
@@ -582,6 +585,83 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
   /** How many players are turned down, for the mark on the "More" chip. */
   const mutedCount = session.mixSetting.muted.length;
 
+  /* ── The song lives on the app's own top bar now (W36 item 2) ──────────
+   *
+   * The owner: *"the top rail, do we need it anymore? … can we merge the
+   * information from the songs stage area into that rail? like the song name,
+   * the tuning etc"*. Songs was stacking three rows above the music — the
+   * app's bar, the song's head, and the importer's warning banner — and at his
+   * 1124 px window the tab was getting 74 % of the height.
+   *
+   * `MainHeader` offers a slot and knows nothing about what goes in it
+   * (`main-window/headerSlot.ts`); this is what fills it. A portal rather than
+   * a render prop threaded through `MainWindow`, because everything the head
+   * says — the song, the part being read, the tuning, how it is drawn — is
+   * state this component already holds and the shell has no business seeing.
+   */
+  const barSlot = useHeaderSlot("bar");
+  const moreSlot = useHeaderSlot("more");
+  /**
+   * The SLOT is what decides what fits, not this stage and not the window.
+   *
+   * The head is in the bar now, so the question "is there room for the facts"
+   * is about the room the bar has left after its own chips — which is exactly
+   * the slot, and is why the slot is an `inline-size` container
+   * (`shell.css`): its width comes from the flex line rather than from what
+   * is in it, so asking it is not circular. Memoised on the node so the
+   * observer is not torn down and rebuilt on every render.
+   */
+  const slotRef = useMemo(() => ({ current: barSlot }), [barSlot]);
+  /*
+   * What the bar sheds, and in which order (W36 item 2).
+   *
+   * The brief's order: the facts first, then the artist, then the zoom, with
+   * the title ellipsising throughout and the part menu, the Tab switch and
+   * the bar's own Vol and Input staying longest. The two numbers here are the
+   * two that need a MOVE and so cannot be a container query; the artist is a
+   * word and goes by `@container modebar` in `songs.css`.
+   *
+   * Measured on the built bar at the three windows the brief names: the slot
+   * is about 520px of an 1100px window, 860px of 1440 and 1340px of 2000. The
+   * facts want a little under 280px of that, which is what puts their
+   * threshold between the first two.
+   */
+  const factsFolded = useStageIsNarrow(slotRef, 700);
+  const zoomFolded = useStageIsNarrow(slotRef, 380);
+  /** A file with one part has no menu to fold the facts into. */
+  const factsInMenu = factsFolded && session.tracks.length >= 2;
+
+  /**
+   * What the importer had to say, as lines — and once, quietly (W36 item 2).
+   *
+   * It was two bulleted banners above the music, for ever. The same sentences
+   * now appear as a toast the first time the song is opened and live behind a
+   * mark beside its name after that (`SongNotes.tsx`).
+   */
+  const notes = useMemo(() => {
+    const lines: string[] = [];
+    for (const w of session.warnings) {
+      lines.push(
+        w.kind === "tempoFlattened"
+          ? t("songs.warn.tempoFlattened", { count: w.bars })
+          : t("songs.warn.barOverfilled", { bar: w.printedBar + 1 }),
+      );
+    }
+    if (session.leftOut.length > 0) {
+      lines.push(
+        t("songs.band.tooManyParts", {
+          count: session.leftOut.length,
+          tracks: session.leftOut.join(", "),
+        }),
+      );
+    }
+    const dropped = session.loaded?.droppedNotes ?? 0;
+    if (dropped > 0) lines.push(t("songs.band.droppedNotes", { count: dropped }));
+    return lines;
+  }, [session.warnings, session.leftOut, session.loaded?.droppedNotes, t]);
+
+  const firstLook = useSongNotesSeen(song?.id ?? null, notes.length > 0);
+
   /**
    * Is the click ticking through this song? (W34 item 7)
    *
@@ -660,6 +740,137 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
               </div>
     ) : null;
 
+  /**
+   * The facts — tuning, capo, meter, tempo.
+   *
+   * Drawn on the bar while there is room and, when there is not, in the part
+   * menu's own panel (or in the bar's overflow, for a file with one part and
+   * so no menu). The copy on the bar is not removed when it folds, it is
+   * hidden with `display: none` — which takes it out of the accessibility
+   * tree as surely as removing it would, and keeps the head's own shape a
+   * thing the layout suite can go on measuring at every width.
+   */
+  const facts = score ? (
+    <>
+      <div className="songs-fact">
+        <dt>{t("songs.tuning")}</dt>
+        <dd>{tuningLabel(score.tuning)}</dd>
+      </div>
+      {score.capo > 0 && (
+        <div className="songs-fact">
+          <dt>{t("songs.capoLabel")}</dt>
+          <dd>{t("songs.capo", { fret: score.capo })}</dd>
+        </div>
+      )}
+      {meter && (
+        <div className="songs-fact">
+          <dt>{t("songs.meter")}</dt>
+          <dd>
+            {meter.numerator}/{meter.denominator}
+          </dd>
+        </div>
+      )}
+      <div className="songs-fact">
+        <dt>{t("songs.tempo")}</dt>
+        <dd>{t("songs.bpm", { bpm: tempo })}</dd>
+      </div>
+    </>
+  ) : null;
+
+  /** The same facts, as a list of their own, for wherever they fold to. */
+  const factsList = facts ? <dl className="songs-facts">{facts}</dl> : null;
+
+  /** How big the music is drawn. On the bar, or in its overflow. */
+  const zoomControls = (
+    <div className="songs-zoom">
+      <button
+        type="button"
+        className="songs-chip songs-zoom-btn"
+        aria-label={t("songs.view.smaller")}
+        title={t("songs.view.smaller")}
+        disabled={stage.view.zoom <= ZOOM_MIN}
+        onClick={() => stage.zoom(-1)}
+      >
+        −
+      </button>
+      <button
+        type="button"
+        className="songs-chip songs-zoom-btn"
+        aria-label={t("songs.view.bigger")}
+        title={t("songs.view.bigger")}
+        disabled={stage.view.zoom >= ZOOM_MAX}
+        onClick={() => stage.zoom(1)}
+      >
+        +
+      </button>
+    </div>
+  );
+
+  /**
+   * The one bar at the top (W36 item 2).
+   *
+   * Everything the song IS and everything about how you are reading it, on the
+   * app's own header: the name, the mark that carries the importer's notes,
+   * who wrote it, which part you are on, the tuning, the meter, the tempo, tab
+   * or tab-and-notes, and how big. What the bar keeps of its own — the two
+   * volumes, the input readout and the overflow — sits to the right of it. The
+   * click's sound picker is not shown at all on this tab (`MainWindow`).
+   *
+   * `nowrap` and one row at every window the app opens: everything this grows
+   * by comes out of the music.
+   */
+  const songHead =
+    score && source ? (
+      <div className="songs-head">
+        <h2 className="songs-title">{song?.name ?? score.title}</h2>
+        {/* What the importer changed on the way in, behind a mark rather than
+            in a banner that costs the tab a row for ever. */}
+        <SongNotesMark notes={notes} />
+        <p className="songs-sub">
+          {score.artist && <span className="songs-sub-artist">{score.artist}</span>}
+          <TrackMenu
+            tracks={session.tracks}
+            current={score.source.trackIndex}
+            currentName={score.source.trackName}
+            onChoose={(index) => void session.switchTrack(index)}
+            facts={factsInMenu ? factsList : null}
+          />
+        </p>
+        <dl className="songs-facts" data-folded={factsFolded ? "" : undefined}>
+          {facts}
+        </dl>
+        {/* How you READ it, at the end of the bar where a reader's controls
+            go: tab, or tab with the notation staff over it, and how big.
+            Remembered for the player, not for the song. */}
+        <div className="songs-view-controls">
+          <button
+            type="button"
+            className="songs-chip songs-notation-chip"
+            data-active={stage.view.notation ? "" : undefined}
+            aria-pressed={stage.view.notation}
+            title={t("songs.view.notationNote")}
+            onClick={() => stage.setNotation(!stage.view.notation)}
+          >
+            {stage.view.notation ? t("songs.view.tabAndNotes") : t("songs.view.tabOnly")}
+          </button>
+          {!zoomFolded && zoomControls}
+        </div>
+      </div>
+    ) : null;
+
+  /** What the bar had no width for, in its own overflow menu. */
+  const headInMore =
+    score && source && (zoomFolded || (factsFolded && !factsInMenu)) ? (
+      <div className="songs-head-more">
+        {factsFolded && !factsInMenu && factsList}
+        {zoomFolded && (
+          <div className="songs-head-more-row">
+            <span className="songs-strip-label">{t("songs.view.size")}</span>
+            {zoomControls}
+          </div>
+        )}
+      </div>
+    ) : null;
 
   return (
     <div
@@ -756,124 +967,13 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
         </div>
       ) : (
         <>
-          {/* The head, on ONE line (W29 item 3).
-              It was a title block and a labelled table of facts, two rows
-              deep, above a tab that was getting under half the window. What
-              the song IS still all fits: the name, who wrote it, the part
-              you are reading, and the tuning, the meter and the tempo as
-              plain facts rather than a captioned list. The facts fade back
-              while the transport runs — see `songs.css`. */}
-          <header className="songs-head">
-            <h2 className="songs-title">{song?.name ?? score.title}</h2>
-            {/* Who wrote it, and WHICH PART OF IT YOU ARE READING — a menu
-                now, not a label (W29 item 2). It is a different question
-                from the band's faders on the strip: this one chooses what
-                you read and are scored on, those choose what you hear. */}
-            <p className="songs-sub">
-              {score.artist && <span className="songs-sub-artist">{score.artist}</span>}
-              <TrackMenu
-                tracks={session.tracks}
-                current={score.source.trackIndex}
-                currentName={score.source.trackName}
-                onChoose={(index) => void session.switchTrack(index)}
-              />
-            </p>
-            <dl className="songs-facts">
-              <div className="songs-fact">
-                <dt>{t("songs.tuning")}</dt>
-                <dd>{tuningLabel(score.tuning)}</dd>
-              </div>
-              {score.capo > 0 && (
-                <div className="songs-fact">
-                  <dt>{t("songs.capoLabel")}</dt>
-                  <dd>{t("songs.capo", { fret: score.capo })}</dd>
-                </div>
-              )}
-              {meter && (
-                <div className="songs-fact">
-                  <dt>{t("songs.meter")}</dt>
-                  <dd>
-                    {meter.numerator}/{meter.denominator}
-                  </dd>
-                </div>
-              )}
-              <div className="songs-fact">
-                <dt>{t("songs.tempo")}</dt>
-                <dd>{t("songs.bpm", { bpm: tempo })}</dd>
-              </div>
-            </dl>
-            {/* How you READ it, at the end of the head where a reader's
-                controls go: tab, or tab with the notation staff over it, and
-                how big. Remembered for the player, not for the song. */}
-            <div className="songs-view-controls">
-              <button
-                type="button"
-                className="songs-chip songs-notation-chip"
-                data-active={stage.view.notation ? "" : undefined}
-                aria-pressed={stage.view.notation}
-                title={t("songs.view.notationNote")}
-                onClick={() => stage.setNotation(!stage.view.notation)}
-              >
-                {stage.view.notation ? t("songs.view.tabAndNotes") : t("songs.view.tabOnly")}
-              </button>
-              <div className="songs-zoom">
-                <button
-                  type="button"
-                  className="songs-chip songs-zoom-btn"
-                  aria-label={t("songs.view.smaller")}
-                  title={t("songs.view.smaller")}
-                  disabled={stage.view.zoom <= ZOOM_MIN}
-                  onClick={() => stage.zoom(-1)}
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  className="songs-chip songs-zoom-btn"
-                  aria-label={t("songs.view.bigger")}
-                  title={t("songs.view.bigger")}
-                  disabled={stage.view.zoom >= ZOOM_MAX}
-                  onClick={() => stage.zoom(1)}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </header>
-
-          {session.warnings.length > 0 && (
-            <ul className="songs-warnings">
-              {session.warnings.map((w, i) => (
-                <li key={i}>
-                  {w.kind === "tempoFlattened"
-                    ? t("songs.warn.tempoFlattened", { count: w.bars })
-                    : t("songs.warn.barOverfilled", { bar: w.printedBar + 1 })}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* What could not be brought, said once and quietly.
-              Since W28 this is almost always nothing: every track in the file
-              sounds, so the only part that can stay silent is one past the
-              sixteen MIDI itself has channels for. Neither line is a failure
-              — the piece still plays — and both exist so a file that came out
-              thin is visible rather than mysterious. */}
-          {(session.leftOut.length > 0 || (session.loaded?.droppedNotes ?? 0) > 0) && (
-            <ul className="songs-warnings songs-warnings-quiet">
-              {session.leftOut.length > 0 && (
-                <li>
-                  {t("songs.band.tooManyParts", {
-                    count: session.leftOut.length,
-                    tracks: session.leftOut.join(", "),
-                  })}
-                </li>
-              )}
-              {(session.loaded?.droppedNotes ?? 0) > 0 && (
-                <li>{t("songs.band.droppedNotes", { count: session.loaded!.droppedNotes })}</li>
-              )}
-            </ul>
-          )}
+          {/* The song's head is not a row of the stage any more: it is in the
+              app's own top bar, through the slot `MainHeader` offers (W36
+              item 2). What the importer had to say went with it — a mark
+              beside the name, and a toast the first time the song is opened
+              — so neither costs the music a row. */}
+          {barSlot && createPortal(songHead, barSlot)}
+          {moreSlot && headInMore && createPortal(headInMore, moreSlot)}
 
           {/* The frame: the tab, and the verdict in its place when you stop.
               It is the one thing on this screen that flexes, and the one
@@ -1209,6 +1309,13 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
           your face and your room. Each is made in its own words. */}
       {camera.introOpen && (
         <CameraIntroDialog onConfirm={camera.confirmIntro} onCancel={camera.cancelIntro} />
+      )}
+
+      {/* What the importer changed, said once, over the foot of the stage
+          rather than in a row of it (W36 item 2). It goes on its own, and the
+          mark beside the song's name has the same lines for ever after. */}
+      {firstLook.showToast && (
+        <SongNotesToast notes={notes} onDismiss={firstLook.dismissToast} />
       )}
 
       {dragging && <div className="songs-drop-hint">{t("songs.dropHere")}</div>}

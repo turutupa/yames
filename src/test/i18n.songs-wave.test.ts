@@ -135,6 +135,11 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.band.levelFor",
   "songs.band.muteFor",
   "songs.band.note",
+  // W36 item 4 — the count on the "More" chip says what it counts now, in
+  // the chip's tooltip and in its accessible name. A bare "1" beside a word
+  // is a number nobody can read.
+  "songs.band.turnedDown",
+  "songs.band.turnedDown_other",
   "songs.barsCount",
   "songs.barsCount_other",
   "songs.bpm",
@@ -188,6 +193,10 @@ const ADDED_BY_THE_SONGS_WAVE = [
   // changed under the finger pressing it. One chip, one word, and the
   // pressed state says whether the repeat is on (W22 item 3).
   "songs.meter",
+  // W36 item 2 — what the importer changed on the way in, behind a mark
+  // beside the song's name instead of a banner that cost the tab a row for
+  // the life of the piece.
+  "songs.notes.label",
   "songs.offer.failed",
   "songs.offer.justArrived",
   "songs.offer.justArrivedSized",
@@ -306,6 +315,10 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.tempo",
   "songs.toBar",
   "songs.tuning",
+  // W36 item 2 — the word over the zoom buttons when they fold into the
+  // bar's overflow. The two buttons themselves are glyphs and say their own
+  // names through `songs.view.bigger` / `smaller`, which predate this list.
+  "songs.view.size",
   "songs.warn.barOverfilled",
   "songs.warn.tempoFlattened",
   "songs.warn.tempoFlattened_other",
