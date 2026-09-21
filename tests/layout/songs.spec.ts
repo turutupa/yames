@@ -252,6 +252,123 @@ test.describe("the stage is one screen", () => {
 });
 
 /**
+ * The tab gets the room (W29 item 3).
+ *
+ * The owner: *"figure out how to use as much space as possible on the stage
+ * area with tabs, right now a lot of space is under used"*. Measured before
+ * the change: 502 px of a 900 px window at 1440×900, which is 55.8 %, and
+ * 181 px of 780 at the smallest window the app opens, which is 23.2 % — the
+ * strip was three rows there and five here.
+ *
+ * ## What the window actually has to give
+ *
+ * At 1440×900 the stage's own column is 672 px: the app's header takes 84
+ * above it and the transport 104 below, and neither is this screen's to
+ * spend. So **74.7 % is the ceiling**, and the brief's 70 % would leave 42
+ * pixels for a title, the instrument menu, the bar fields, the repeat and
+ * the speed — a one-line head and a one-row strip are 50 between them at
+ * their smallest. The numbers asserted here are what a head and a strip that
+ * are each genuinely one row leave over: measured at 67.7 % and 62.5 %, with
+ * a point of slack for a font that rounds the other way.
+ */
+test.describe("the tab's share of the window", () => {
+  const SHARE = [
+    { name: "the pictures", width: 1440, height: 900, least: 66 },
+    { name: "the smallest window", width: 480, height: 780, least: 55 },
+  ];
+
+  for (const size of SHARE) {
+    for (const scene of ["songs", "songs-playing"]) {
+      test(`is at least ${size.least}% at ${size.name}, ${scene === "songs" ? "stopped" : "playing"}`, async ({
+        page,
+      }) => {
+        await openShot(page, scene, size);
+        const viewport = await page.locator(".songs-tab-viewport").boundingBox();
+        expect(viewport, `no tab viewport at ${size.name}`).not.toBeNull();
+        const share = (viewport!.height / size.height) * 100;
+        expect(
+          share,
+          `the tab is ${share.toFixed(1)}% of the window's height at ${size.name} (${Math.round(viewport!.height)} of ${size.height})`,
+        ).toBeGreaterThanOrEqual(size.least);
+      });
+    }
+  }
+
+  /**
+   * And the full width of the content region.
+   *
+   * A page of music is the widest thing in Yames, and it was giving up
+   * ninety-six pixels of every row to gutters the rest of the app does not
+   * use.
+   */
+  for (const size of SHARE) {
+    test(`takes the whole width of the stage at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      const viewport = await page.locator(".songs-tab-viewport").boundingBox();
+      const column = await page.locator(".songs-view").boundingBox();
+      expect(viewport, `no tab viewport at ${size.name}`).not.toBeNull();
+      expect(column, `no stage column at ${size.name}`).not.toBeNull();
+      expect(
+        Math.round(viewport!.width),
+        `the tab is ${Math.round(viewport!.width)}px inside a ${Math.round(column!.width)}px stage`,
+      ).toBe(Math.round(column!.width));
+    });
+  }
+
+  /**
+   * One row of strip, at every width. Two is thirty pixels off the tab.
+   *
+   * `fitsOnOneLine` asks the question directly: every group shares vertical
+   * space with the row's middle. It is the assertion that fails the day
+   * somebody puts a fourth control back on the strip.
+   */
+  for (const size of HEIGHTS) {
+    test(`keeps the strip to one row at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      await fitsOnOneLine(page, ".songs-strip", `the strip at ${size.name}`);
+      await fitsOnOneLine(page, ".songs-head", `the head at ${size.name}`);
+    });
+  }
+
+  /**
+   * Tablature first, and the notation staff one press away.
+   *
+   * The page drew standard notation AND tab for every system, so a screen
+   * held half the bars it could. Counting the staves is the only way to ask:
+   * alphaTab decides its own layout at run time, in a browser.
+   */
+  /**
+   * Measured rather than asked about: alphaTab writes no class that says
+   * "this is a tab staff", so what is checked is the consequence. The same
+   * eight bars at the same width take a great deal more height when every
+   * system carries a notation staff as well — that extra height is the
+   * screenful of bars this item went looking for.
+   */
+  test("draws tab alone, and both staves when asked", async ({ page }) => {
+    await openShot(page, "songs", { width: 1440, height: 900 });
+    const engraving = () =>
+      page.evaluate(() => {
+        const host = document.querySelector(".songs-tab-host");
+        return host ? host.getBoundingClientRect().height : 0;
+      });
+    const tabOnly = await engraving();
+    expect(tabOnly, "nothing was engraved").toBeGreaterThan(0);
+
+    await page.locator(".songs-notation-chip").click();
+    await expect(page.locator(".songs-tab-host[data-ready]")).toHaveCount(1);
+    await expect
+      .poll(engraving, { message: "the notation staff never came back" })
+      .toBeGreaterThan(tabOnly * 1.3);
+
+    // And back again, so the control is a two-state control and not a door.
+    await page.locator(".songs-notation-chip").click();
+    await expect.poll(engraving, { message: "the notation staff never went away" }).toBeLessThan(
+      tabOnly * 1.1,
+    );
+  });
+});
+
+/**
  * The portion you are working on, drawn where it actually is (W18 item 0).
  *
  * The owner: *"Being able to select a portion of a song so it plays that
@@ -706,8 +823,37 @@ const THEMES = [
 ];
 
 test.describe("the band", () => {
+  /**
+   * The faders are one press away now (W29 item 3).
+   *
+   * They had a row of the strip to themselves, and the strip is one row.
+   * Opening "More" is what a person does, and it is what these do: a control
+   * behind a press still has to be a control when it is reached. On a narrow
+   * stage the band folds again inside the panel, into its own chip — that is
+   * `SongBand`'s own rule and W28 owns it, so this only follows it.
+   */
+  const openBand = async (page: import("@playwright/test").Page) => {
+    await page.locator(".songs-more-chip").click();
+    await expect(page.locator(".songs-more-pop")).toHaveCount(1);
+    if ((await page.locator(".songs-band-opener").count()) > 0) {
+      await page.locator(".songs-band-opener").click();
+      await expect(page.locator(".songs-band-pop")).toHaveCount(1);
+    }
+    await expect(page.locator(".songs-band-lane").first()).toBeVisible();
+  };
+
+  test("never takes a row of the strip", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    // W28 is about to put a fader in here for every track in the file, and
+    // a dozen of them on the strip is the tab's height gone again.
+    await expect(page.locator(".songs-strip .songs-band-lane")).toHaveCount(0);
+    await openBand(page);
+    await expect(page.locator(".songs-band-lane")).toHaveCount(3);
+  });
+
   test("has a row for the click and for each player the file has", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
+    await openBand(page);
     const names = await page.locator(".songs-band-name").allTextContents();
     if (!IN_ENGLISH) {
       // In another language the three names are that language's words. That
@@ -722,40 +868,27 @@ test.describe("the band", () => {
   });
 
   /**
-   * Every lane keeps its name where the stage is wide enough, and loses it
-   * rather than the fader where it is not.
+   * Every lane keeps its name, at every width.
    *
-   * The container query does the dropping, and what it must never do is drop
-   * the name while leaving the row too wide to fit anyway — so both ends are
-   * asserted rather than the rule being trusted.
+   * It used to lose the word on a middling stage, because the lanes were
+   * side by side on the strip and a lane is a name, a slider, a number and a
+   * switch. They are stacked in a panel now, so the width they are squeezed
+   * by is the panel's and not the stage's — and the panel is portalled to
+   * the body, outside the `@container stage` this mode's rules ask about, so
+   * the name stays whatever the window is doing.
    */
-  test("sheds the names, then the row, as the stage narrows", async ({ page }) => {
-    // Wide: name, fader, number and mute, all of it on the strip.
+  test("keeps every lane's name, however narrow the stage", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
+    await openBand(page);
     const wide = await page.locator(".songs-band-name-text").first().boundingBox();
     expect(wide, "no lane name at 1400px").not.toBeNull();
     expect(wide!.width, "the lane names are gone on a wide stage").toBeGreaterThan(10);
 
-    // Middling: the container query drops the WORD and keeps the row, so the
-    // faders stay on the strip where A13 wants them.
-    await page.setViewportSize({ width: 1100, height: 900 });
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
-    );
-    await expect(
-      page.locator(".songs-strip .songs-band-lane"),
-      "the lanes left the strip before they had to",
-    ).toHaveCount(3);
-    expect(
-      await page.locator(".songs-band-name-text").first().boundingBox(),
-      "the lane names are still laid out at a middling width",
-    ).toBeNull();
-
-    // Narrow: a row no longer fits at all, so the band folds into one chip
-    // and the faders are a press away rather than a scroll away.
-    await page.setViewportSize({ width: 480, height: 780 });
-    await expect(page.locator(".songs-band-opener")).toHaveCount(1);
-    await expect(page.locator(".songs-strip .songs-band-lane")).toHaveCount(0);
+    await openShot(page, "songs", { width: 480, height: 780 });
+    await openBand(page);
+    const narrow = await page.locator(".songs-band-name-text").first().boundingBox();
+    expect(narrow, "no lane name at 480px").not.toBeNull();
+    expect(narrow!.width, "the lane names went at the smallest window").toBeGreaterThan(10);
   });
 
   for (const theme of THEMES) {
@@ -763,11 +896,10 @@ test.describe("the band", () => {
       await openShot(page, "songs", SMALLEST, theme);
       await noSidewaysScroll(page, `songs at ${SMALLEST.width}px under ${theme}`);
 
-      // At this width the band is folded, so the faders are inside its
-      // popover — opened here the way a person opens it, because a control
-      // behind a press still has to be a control when it is reached.
-      await page.locator(".songs-band-opener").click();
-      await expect(page.locator(".songs-band-pop")).toHaveCount(1);
+      // The faders are behind "More" now, and behind the band's own chip at
+      // this width — opened here the way a person opens them, because a
+      // control behind a press still has to be a control when it is reached.
+      await openBand(page);
 
       // Every fader row is inside the window, and the slider in it is still
       // a slider rather than a sliver.
@@ -803,13 +935,24 @@ test.describe("the band", () => {
         ).toBeLessThanOrEqual(SMALLEST.width + 1);
       }
 
-      // And the speed chips wrap rather than run off the side.
-      const chips = await page.$$eval(".songs-tempo-chips .songs-chip", (nodes) =>
+      // And the speed, which at this width is one chip with the six behind
+      // it (W29 item 3) — it keeps its place on the row rather than leaving,
+      // because the repeat and the speed are what sheds last.
+      await page.keyboard.press("Escape");
+      const speed = await page.locator(".songs-speed-chip").boundingBox();
+      expect(speed, `no speed control under ${theme}`).not.toBeNull();
+      expect(
+        Math.round(speed!.x + speed!.width),
+        "the speed chip is past the right edge",
+      ).toBeLessThanOrEqual(SMALLEST.width + 1);
+
+      await page.locator(".songs-speed-chip").click();
+      const steps = await page.$$eval(".songs-speed-pop .songs-chip", (nodes) =>
         nodes.map((n) => n.getBoundingClientRect().right),
       );
-      expect(chips.length, `no speed chips under ${theme}`).toBe(6);
-      for (const right of chips) {
-        expect(Math.round(right), "a speed chip is past the right edge").toBeLessThanOrEqual(
+      expect(steps.length, `no speed steps under ${theme}`).toBe(6);
+      for (const right of steps) {
+        expect(Math.round(right), "a speed step is past the right edge").toBeLessThanOrEqual(
           SMALLEST.width + 1,
         );
       }

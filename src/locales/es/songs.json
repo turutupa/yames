@@ -340,6 +340,16 @@
       "percussion": "Batería — no es para seguir",
       "notTab": "No está escrita como tablatura",
       "empty": "Aquí no hay nada escrito"
+    },
+    "strip": {
+      "more": "Más"
+    },
+    "view": {
+      "tabOnly": "Tablatura",
+      "tabAndNotes": "Tablatura + notas",
+      "notationNote": "Mostrar también el pentagrama sobre la tablatura",
+      "bigger": "Más grande",
+      "smaller": "Más pequeño"
     }
   }
 }

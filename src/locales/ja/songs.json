@@ -331,6 +331,16 @@
       "percussion": "ドラム — 追いかけられないパートです",
       "notTab": "タブ譜で書かれていません",
       "empty": "このパートには何も書かれていません"
+    },
+    "strip": {
+      "more": "その他"
+    },
+    "view": {
+      "tabOnly": "タブ",
+      "tabAndNotes": "タブ＋五線",
+      "notationNote": "タブの上に五線も表示します",
+      "bigger": "大きく",
+      "smaller": "小さく"
     }
   }
 }

@@ -331,6 +331,16 @@
       "percussion": "Drums — not one to follow",
       "notTab": "Not written as tab",
       "empty": "Nothing written on this one"
+    },
+    "strip": {
+      "more": "More"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + notes",
+      "notationNote": "Show the notation staff above the tab as well",
+      "bigger": "Bigger",
+      "smaller": "Smaller"
     }
   }
 }

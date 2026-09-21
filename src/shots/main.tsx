@@ -336,10 +336,29 @@ async function drive() {
      * here to catch, so it must not be the state it photographs.
      * Three rows: the click, the drums and the bass of `SHOT_SONG_TEX`.
      */
-    await until(
-      "the band's faders",
+    /*
+     * W29 — and they are behind "More" now, so the wait has to open it.
+     *
+     * The band no longer has a row of its own on the strip: the strip is one
+     * row and the faders are in the popover off it. So the scene presses
+     * More, waits for the three lanes to be there, and presses it again —
+     * what is photographed is still the stage with the panel closed, and the
+     * guarantee is still the one this wait was written for, that the file's
+     * other tracks have been read.
+     */
+    await pressUntil(
+      "the rest of the strip",
+      () => {
+        // Only ever OPENS it: the chip is a toggle, and a press repeated
+        // every 400 ms until the band arrives would spend half its tries
+        // closing the panel it had just opened.
+        if (document.querySelector(".songs-more-pop")) return;
+        document.querySelector<HTMLElement>(".songs-more-chip")?.click();
+      },
       () => document.querySelectorAll(".songs-band-lane").length >= 3,
     );
+    document.querySelector<HTMLElement>(".songs-more-chip")?.click();
+    await until("the strip's panel to close", () => !document.querySelector(".songs-more-pop"));
 
     if (shot!.songs.section) {
       const chips = [...document.querySelectorAll<HTMLElement>(".songs-section-chips .songs-chip")];
@@ -367,8 +386,14 @@ async function drive() {
      * and the shipping chunk pipe.
      */
     if (shot!.songs.camera) {
-      await until(
-        "the camera switch",
+      // W29 — the switch is inside "More" now, with the record switch it
+      // belongs to. The panel is opened first, exactly as a person does it.
+      await pressUntil(
+        "the rest of the strip",
+        () => {
+          if (document.querySelector(".songs-more-pop")) return;
+          document.querySelector<HTMLElement>(".songs-more-chip")?.click();
+        },
         () => !!document.querySelector(".songs-camera-switch"),
       );
       (document.querySelector(".songs-camera-switch") as HTMLButtonElement).click();
@@ -555,8 +580,22 @@ async function drive() {
       );
     }
 
-    /** And keep it under a name, the way a person does: press, type, Enter. */
+    /**
+     * And keep it under a name, the way a person does: press, type, Enter.
+     *
+     * W29 — "Save this part" is in the strip's "More" panel now, with the
+     * rest of what you set once rather than reach for mid-bar, so the panel
+     * is opened first and closed again afterwards.
+     */
     if (shot!.songs.keepAs) {
+      await pressUntil(
+        "the rest of the strip",
+        () => {
+          if (document.querySelector(".songs-more-pop")) return;
+          document.querySelector<HTMLElement>(".songs-more-chip")?.click();
+        },
+        () => !!document.querySelector(".songs-portion-save"),
+      );
       await pressUntil(
         "the keep button",
         () => document.querySelector<HTMLElement>(".songs-portion-save")?.click(),
@@ -571,6 +610,10 @@ async function drive() {
       input.dispatchEvent(new Event("input", { bubbles: true }));
       input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
       await until("the kept portion", () => !!document.querySelector(".songs-portion-chip"));
+      // The panel goes away again: what is photographed is the stage, with
+      // the named portion beside the sections on the strip.
+      document.querySelector<HTMLElement>(".songs-more-chip")?.click();
+      await until("the strip's panel to close", () => !document.querySelector(".songs-more-pop"));
     }
 
     /**
@@ -593,8 +636,23 @@ async function drive() {
       await new Promise((r) => setTimeout(r, 400));
     }
 
-    /** The takes shelf, opened from its own switch — it is a popover now. */
+    /**
+     * The takes shelf — two presses now (W29 item 3).
+     *
+     * The strip is one row, and the record switch went into "More" with the
+     * camera and the band. So the panel is opened first and the shelf's own
+     * switch is pressed inside it; the shelf is portalled to the body, so
+     * what is photographed is the list, with the panel behind it.
+     */
     if (shot!.songs.takes) {
+      await pressUntil(
+        "the rest of the strip",
+        () => {
+          if (document.querySelector(".songs-more-pop")) return;
+          document.querySelector<HTMLElement>(".songs-more-chip")?.click();
+        },
+        () => !!document.querySelector(".songs-takes-opener"),
+      );
       await pressUntil(
         "the takes shelf",
         () => document.querySelector<HTMLElement>(".songs-takes-opener")?.click(),

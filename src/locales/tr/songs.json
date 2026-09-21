@@ -331,6 +331,16 @@
       "percussion": "Davul — takip edilecek bir parti değil",
       "notTab": "Tab olarak yazılmamış",
       "empty": "Burada bir şey yazmıyor"
+    },
+    "strip": {
+      "more": "Daha fazla"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + nota",
+      "notationNote": "Tabın üstünde porteyi de göster",
+      "bigger": "Daha büyük",
+      "smaller": "Daha küçük"
     }
   }
 }

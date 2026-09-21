@@ -331,6 +331,16 @@
       "percussion": "드럼 — 따라갈 수 있는 파트가 아닙니다",
       "notTab": "탭으로 적혀 있지 않습니다",
       "empty": "여기에는 아무것도 적혀 있지 않습니다"
+    },
+    "strip": {
+      "more": "더 보기"
+    },
+    "view": {
+      "tabOnly": "탭",
+      "tabAndNotes": "탭 + 오선",
+      "notationNote": "탭 위에 오선보도 함께 표시합니다",
+      "bigger": "크게",
+      "smaller": "작게"
     }
   }
 }

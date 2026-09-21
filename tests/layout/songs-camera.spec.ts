@@ -552,10 +552,20 @@ test.describe("the camera on the stage", () => {
     ).toBeLessThanOrEqual(2);
   });
 
-  /** The switch is on the strip and reachable at the smallest window. */
+  /**
+   * The switch is reachable, and on screen once it is reached.
+   *
+   * W29 — one press away rather than none: the strip is one row now and the
+   * camera went into "More" with the record switch it belongs to and the
+   * band. It is still on a footswitch (`yames:songs-camera`), which is the
+   * door A13 cares about most, and it is still a thing you arm before a pass
+   * rather than change during one.
+   */
   for (const size of SIZES) {
     test(`keeps the camera switch on screen at ${size.width}px`, async ({ page }) => {
       await openShot(page, "songs", size);
+      await page.locator(".songs-more-chip").click();
+      await expect(page.locator(".songs-more-pop")).toHaveCount(1);
       await insideViewport(
         page,
         ".songs-camera-switch",

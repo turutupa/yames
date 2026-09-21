@@ -331,6 +331,16 @@
       "percussion": "鼓 — 跟不了這一條",
       "notTab": "不是用六線譜寫的",
       "empty": "這一條什麼也沒寫"
+    },
+    "strip": {
+      "more": "更多"
+    },
+    "view": {
+      "tabOnly": "六線譜",
+      "tabAndNotes": "六線譜 + 五線譜",
+      "notationNote": "在六線譜上方也顯示五線譜",
+      "bigger": "放大",
+      "smaller": "縮小"
     }
   }
 }

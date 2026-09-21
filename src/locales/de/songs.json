@@ -331,6 +331,16 @@
       "percussion": "Schlagzeug — dafür nicht gedacht",
       "notTab": "Nicht als Tabulatur geschrieben",
       "empty": "Hier steht nichts drin"
+    },
+    "strip": {
+      "more": "Mehr"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + Noten",
+      "notationNote": "Auch das Notensystem über der Tabulatur zeigen",
+      "bigger": "Größer",
+      "smaller": "Kleiner"
     }
   }
 }

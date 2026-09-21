@@ -31,8 +31,11 @@
   width: 100%;
   max-width: 1176px;
   margin-left: max(0px, calc(50% - var(--stage-band) / 2));
-  padding-left: 48px;
-  padding-right: 48px;
+  /* The gutters the rest of the app uses, not the forty-eight this stage had
+     (W29 item 3): a page of music is the widest thing in Yames and it was
+     giving up ninety-six pixels of a row to white. */
+  padding-left: 24px;
+  padding-right: 24px;
   justify-content: flex-start;
   overflow: hidden;
   min-height: 0;
@@ -46,7 +49,11 @@
   container-name: stage;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  /* Six pixels, not fourteen. The head and the strip are one line each now
+     (W29 item 3) and the gaps around them were costing the tab twenty-eight
+     pixels of a window that has, after the app's own header and transport,
+     six hundred and seventy-two to give. */
+  gap: 6px;
   width: 100%;
   min-width: 0;
   /* It takes the room the wrapper has and no more. The frame inside it is the
@@ -187,53 +194,72 @@
   text-align: center;
 }
 
-/* ── The head: what the song IS, read-only while you play ─────────────── */
+/* ── The head: what the song IS, on ONE line (W29 item 3) ─────────────── */
 
+/* It was a title block over a labelled table of facts — two rows, about
+ * seventy pixels, above a tab that was getting under half the window. The
+ * owner asked for the room back, so the head is one line: the name, who wrote
+ * it, which part you are reading, the tuning, the meter, the tempo, and the
+ * two controls for how you look at it.
+ *
+ * `nowrap` and not a wrapping row: the head is the one thing on this screen
+ * that must not grow, because everything it grows by comes out of the tab.
+ * What does not fit is ellipsised (the title) or dropped by a container query
+ * (the facts) rather than pushed onto a second line. */
 .songs-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px 24px;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 4px 14px;
   width: 100%;
   min-width: 0;
-}
-
-.songs-head-titles {
-  min-width: 0;
-  flex: 1 1 240px;
+  flex: 0 0 auto;
 }
 
 .songs-title {
   margin: 0;
-  font-size: 20px;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .songs-sub {
-  margin: 2px 0 0;
-  font-size: 13px;
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 12px;
   color: var(--text-tertiary);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
+/* The facts sit at the right-hand end, and they are the first thing to go
+   when the stage narrows: the tuning is also in the instrument menu and the
+   tempo is on the transport. */
 .songs-facts {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin: 0;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0 14px;
+  margin: 0 0 0 auto;
+  min-width: 0;
 }
 
+/* `label value` on one line, not a caption above a number: a caption is a
+   second row, and a second row in the head is fifteen pixels off the tab. */
 .songs-fact {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
 }
 
 .songs-fact dt {
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -241,9 +267,46 @@
 
 .songs-fact dd {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+}
+
+/* ── How you read it: tab or tab and notes, and how big ───────────────── */
+
+.songs-view-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.songs-head .songs-chip {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.songs-notation-chip {
+  white-space: nowrap;
+}
+
+.songs-zoom {
+  display: flex;
+  gap: 2px;
+}
+
+/* A square, so the two of them are a pair rather than two words of different
+   lengths. Tabular figures elsewhere; here it is a glyph. */
+.songs-zoom-btn {
+  width: 22px;
+  padding: 3px 0;
+  text-align: center;
+  line-height: 1;
+}
+
+.songs-zoom-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ── Which part of the file you are reading (W29 item 2) ──────────────── */
@@ -748,15 +811,66 @@
  * replaced put a 10px caption and an 11px footnote above and below every
  * control: five of those is 140 px of the window spent on captions, and it is
  * the tab that paid for them. */
+/* ONE row, and it stays one row (W29 item 3).
+ *
+ * It wrapped onto three at 1440×900 and five at 480×780, and the tab paid for
+ * every one of them. What is left on it is what A13 is really about — the
+ * thing you change with a guitar on, mid-passage, over and over: which bars,
+ * whether they repeat, and how fast. Everything else is one press away in
+ * "More" (`SongStripMore.tsx`), which is where the sections, the record and
+ * camera switches and the band's faders now live.
+ *
+ * `nowrap`, so a group that no longer fits is a bug this suite can see rather
+ * than a second row that quietly appears. The groups that can shed do it by
+ * container query below. */
 .songs-strip {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 10px 22px;
+  gap: 0 14px;
   width: 100%;
   min-width: 0;
   flex: 0 0 auto;
-  padding-bottom: 4px;
+}
+
+/* While the transport runs, what you are not using stands back (W29 item 3).
+ *
+ * Faded, never moved and never gone: the brief's own rule is "do not move
+ * anything the player aims at mid-song", so every control keeps its exact
+ * box and keeps taking the pointer — one hover, or one tap, or a press of
+ * Tab, and the row is back at full strength. It is the music that should be
+ * the brightest thing on the screen while somebody is playing it.
+ *
+ * `opacity` and nothing else, for that reason: a rule that shrank or hid a
+ * control would move the one beside it under the hand reaching for it, which
+ * is the owner's own complaint about Jam's switches. `:focus-within` is what
+ * keeps a keyboard player from tabbing into something they cannot see. */
+.songs-view[data-playing] .songs-strip,
+.songs-view[data-playing] .songs-facts,
+.songs-view[data-playing] .songs-sub {
+  opacity: 0.4;
+  transition: opacity 320ms ease;
+}
+
+.songs-view[data-playing] .songs-strip:hover,
+.songs-view[data-playing] .songs-strip:focus-within,
+.songs-view[data-playing] .songs-head:hover .songs-facts,
+.songs-view[data-playing] .songs-head:focus-within .songs-facts,
+.songs-view[data-playing] .songs-head:hover .songs-sub,
+.songs-view[data-playing] .songs-head:focus-within .songs-sub {
+  opacity: 1;
+  transition: opacity 120ms ease;
+}
+
+/* Somebody who asked for nothing to move gets no fade either: a control that
+   dims and undims under the eye is movement by another name. */
+@media (prefers-reduced-motion: reduce) {
+  .songs-view[data-playing] .songs-strip,
+  .songs-view[data-playing] .songs-facts,
+  .songs-view[data-playing] .songs-sub {
+    opacity: 1;
+    transition: none;
+  }
 }
 
 /* ...except while the verdict is up (W25).
@@ -781,9 +895,112 @@
 .songs-strip-group {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
+  gap: 0 6px;
+  min-width: 0;
+}
+
+/* The sections and the portions the player named are the one group with no
+   fixed width — a piece can have nine of them — so it is the one allowed to
+   take the slack and to run out of room, and it scrolls rather than pushing
+   the speed off the row. */
+.songs-strip-sections {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.songs-strip-portion,
+.songs-strip-tempo,
+.songs-strip-more {
+  flex: 0 0 auto;
+}
+
+/* "More", at the end of the row, and the panel it opens.
+ *
+ * Upwards, like the takes shelf it now contains: the strip is the last row
+ * above the transport, and a panel that grew downwards would open over Play
+ * and Stop. 320 and not a pixel more — `useMenuPlacement` positions against
+ * a width it caps at 320. */
+.songs-more-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.songs-more-pop {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(320px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+/* Inside the panel every group is a block of its own, stacked, with room to
+   wrap — it is a column, not a row, and nothing in here is competing for
+   width with the tab. */
+.songs-more-pop .songs-strip-group {
   flex-wrap: wrap;
   gap: 6px 8px;
-  min-width: 0;
+  width: 100%;
+}
+
+.songs-more-pop .songs-strip-sections {
+  overflow: visible;
+}
+
+.songs-more-pop .songs-band {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.songs-more-pop .songs-band-lane {
+  flex: 0 0 auto;
+  max-width: none;
+}
+
+.songs-more-pop .songs-band-name {
+  flex: 0 0 74px;
+  max-width: none;
+}
+
+.songs-more-pop .songs-band-name-text {
+  display: inline;
+}
+
+/* The speed, folded to one chip on a narrow stage (`SongSpeed.tsx`). */
+.songs-speed-chip {
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-speed-pop {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(320px, calc(100vw - 24px));
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+.songs-speed-row {
+  text-align: left;
 }
 
 .songs-strip-label {
@@ -828,9 +1045,18 @@
 .songs-section-chips,
 .songs-tempo-chips {
   display: flex;
-  flex-wrap: wrap;
+  /* On the strip they may not wrap: a second line of section chips is a
+     second row of strip, and a second row of strip is thirty pixels off the
+     tab (W29 item 3). Inside the "More" panel they wrap freely — see the
+     rule under `.songs-more-pop`. */
+  flex-wrap: nowrap;
   gap: 4px;
   min-width: 0;
+}
+
+.songs-more-pop .songs-section-chips,
+.songs-more-pop .songs-tempo-chips {
+  flex-wrap: wrap;
 }
 
 /* The strip's chips are smaller than the page's: six speed chips, two
@@ -1674,24 +1900,50 @@
   }
 }
 
+/* Below this the row sheds, rather than wrapping (W29 item 3).
+ *
+ * In this order, and the order is the brief's: the words go before the
+ * controls, and the repeat and the speed go last. First the captions and the
+ * facts in the head, then the sentence beside the bar fields, then "Whole
+ * song" and "Save this part" — both of which are also in the tab's own
+ * gestures (Esc clears the portion) and on a footswitch.
+ *
+ * The head keeps the title, the part you are reading and the two view
+ * buttons at every width, because those are the only things in it you press. */
+@container stage (max-width: 900px) {
+  .songs-facts .songs-fact:not(:first-child) {
+    display: none;
+  }
+}
+
+@container stage (max-width: 780px) {
+  .songs-facts {
+    display: none;
+  }
+
+  .songs-portion-says {
+    display: none;
+  }
+}
+
 @container stage (max-width: 620px) {
-  .songs-head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /* `flex: 1 1 240px` is a WIDTH while the head is a row, and 240 pixels of
-     empty height the moment the rule above turns it into a column — which is
-     what it had been doing: a fifty-pixel title in a two-hundred-and-forty
-     pixel box, on exactly the windows with the least room to spare. Invisible
-     until the stage stopped scrolling; it was simply pushing everything down
-     a page nobody could see the bottom of. */
-  .songs-head-titles {
-    flex: 0 0 auto;
-  }
-
   .songs-strip {
-    gap: 8px 14px;
+    gap: 0 10px;
+  }
+
+  .songs-strip > * > .songs-strip-label,
+  .songs-range-dash,
+  .songs-portion-clear,
+  .songs-sub-artist {
+    display: none;
+  }
+
+  .songs-range-field input {
+    width: 46px;
+  }
+
+  .songs-title {
+    font-size: 14px;
   }
 }
 

@@ -331,6 +331,16 @@
       "percussion": "Drums — niet om te volgen",
       "notTab": "Niet als tab geschreven",
       "empty": "Hier staat niets in"
+    },
+    "strip": {
+      "more": "Meer"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + noten",
+      "notationNote": "Laat ook de notenbalk boven de tab zien",
+      "bigger": "Groter",
+      "smaller": "Kleiner"
     }
   }
 }

@@ -349,6 +349,16 @@
       "percussion": "Perkusja — nie da się jej śledzić",
       "notTab": "Nie zapisana w tabulaturze",
       "empty": "Tu nic nie zapisano"
+    },
+    "strip": {
+      "more": "Więcej"
+    },
+    "view": {
+      "tabOnly": "Tabulatura",
+      "tabAndNotes": "Tabulatura + nuty",
+      "notationNote": "Pokaż też pięciolinię nad tabulaturą",
+      "bigger": "Większe",
+      "smaller": "Mniejsze"
     }
   }
 }

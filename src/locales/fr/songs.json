@@ -340,6 +340,16 @@
       "percussion": "Batterie — pas une partie à suivre",
       "notTab": "Pas écrite en tablature",
       "empty": "Rien d'écrit sur celle-ci"
+    },
+    "strip": {
+      "more": "Plus"
+    },
+    "view": {
+      "tabOnly": "Tablature",
+      "tabAndNotes": "Tablature + notes",
+      "notationNote": "Afficher aussi la portée au-dessus de la tablature",
+      "bigger": "Plus grand",
+      "smaller": "Plus petit"
     }
   }
 }

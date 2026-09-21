@@ -38,10 +38,12 @@ import {
   LayoutMode,
   LogLevel,
   Logger,
+  NotationElement,
   PlayerMode,
   ScrollMode,
   Settings,
   StaveProfile,
+  TabRhythmMode,
   model,
 } from "@coderline/alphatab";
 // woff2 only. The .woff beside it is another 550 KB in the installer and is
@@ -64,6 +66,8 @@ import {
 import type { SelectionDrag, TabPress } from "../../songs/selection";
 import { MARK_GLYPH } from "./review/marks";
 import type { TimingMark } from "./review/marks";
+import { DEFAULT_STAGE_VIEW } from "../../songs/stageView";
+import type { StageView } from "../../songs/stageView";
 import type { BarRange } from "../../songs/schedule";
 import type { ScoreSchedule, SongScore } from "../../songs/types";
 
@@ -109,6 +113,13 @@ export interface TabStageProps {
    * thing that says where the next press of play will begin.
    */
   playhead?: number | null;
+  /**
+   * How this player likes to read a tab: notation on or off, and how big
+   * (W29 item 3). Changing either re-engraves the piece.
+   */
+  view?: StageView;
+  /** Ctrl/Cmd and the wheel over the music. The head has buttons for it too. */
+  onZoom?: (steps: number) => void;
   /**
    * How each expected onset has gone so far, while the pass runs
    * (`SONGS.md` A7). Empty — the default — costs nothing and draws nothing.
@@ -297,7 +308,34 @@ function printedBarsOf(atScore: model.Score, trackIndex: number) {
   return atScore.tracks[trackIndex]?.staves[0]?.bars ?? [];
 }
 
-function buildSettings(): Settings {
+/**
+ * What the ENGRAVING may say, and what the head says instead (W29 item 3).
+ *
+ * alphaTab prints the piece's title, subtitle, artist and tuning legend at
+ * the top of the page, as a sheet of music does. On a screen that costs about
+ * a hundred and twenty pixels of a nine-hundred-pixel window to repeat, in a
+ * serif face, three things the stage's own head is already saying in the
+ * theme's face — the title, who wrote it and what it is tuned to — plus a
+ * numbered list of six strings.
+ *
+ * So the page is the MUSIC, and the facts live in the head. Everything left
+ * on is something the head cannot say: the section names, which belong over
+ * the bar they start on, and every effect and marking that is part of the
+ * notes.
+ */
+const HIDDEN_ELEMENTS: NotationElement[] = [
+  NotationElement.ScoreTitle,
+  NotationElement.ScoreSubTitle,
+  NotationElement.ScoreArtist,
+  NotationElement.ScoreAlbum,
+  NotationElement.ScoreWords,
+  NotationElement.ScoreMusic,
+  NotationElement.ScoreWordsAndMusic,
+  NotationElement.ScoreCopyright,
+  NotationElement.GuitarTuning,
+];
+
+function buildSettings(view: StageView, fretted: boolean): Settings {
   const settings = new Settings();
   // Never true here. W4-FINDINGS §5: under vite the worker URL 404s and
   // rendering silently never finishes.
@@ -337,7 +375,55 @@ function buildSettings(): Settings {
    * pointer events are also what makes a Windows touchscreen work at all.
    */
   settings.player.enableUserInteraction = false;
-  settings.display.staveProfile = StaveProfile.ScoreTab;
+
+  /*
+   * ── Tablature first (W29 item 3) ──────────────────────────────────────
+   *
+   * It was `ScoreTab`: a notation staff AND a tab staff for every system, so
+   * a screen held half the bars it could. The owner asked for the room back.
+   *
+   * `StaveProfile.Tab` is tab only. The rhythm comes back under it with
+   * `notation.rhythmMode` — `ShowWithBars` rather than `ShowWithBeams`,
+   * because bars connect across a beat the way a reader expects and beams
+   * per beat break a run of sixteenths into fours. (`Automatic`, the
+   * default, decides by whether notation is hidden, which is right here and
+   * is not right in the other mode — so it is said rather than inferred.)
+   * **Not `TabMixed`**, whatever its name suggests: what distinguishes that
+   * one is hiding rests and time signatures, which is a thing for rendering
+   * several tracks at once and would take the meter off a piece that changes
+   * it.
+   *
+   * A part with no strings is not written as tab at all, so it falls back to
+   * notation rather than being drawn as an empty six-line staff.
+   */
+  settings.display.staveProfile = fretted
+    ? view.notation
+      ? StaveProfile.ScoreTab
+      : StaveProfile.Tab
+    : StaveProfile.Score;
+  settings.notation.rhythmMode = TabRhythmMode.ShowWithBars;
+  for (const element of HIDDEN_ELEMENTS) settings.notation.elements.set(element, false);
+
+  /*
+   * ── The room a row takes ──────────────────────────────────────────────
+   *
+   * alphaTab's defaults are a printed page's: 35 px of margin all round, ten
+   * above and below every system. On a stage that is already the leftover
+   * room, that is two systems' worth of white per screen.
+   *
+   * `stretchForce` is the one to leave alone. It is the spring constant of
+   * the Gourlay spacing the engraving is built on, and turning it down packs
+   * more bars into a row by making a sixteenth-note run narrower than a
+   * reader can follow — which is exactly what the brief says not to trade
+   * away. The room comes from the margins, which cost nothing to read.
+   */
+  settings.display.scale = view.zoom;
+  settings.display.padding = [10, 8];
+  settings.display.firstSystemPaddingTop = 2;
+  settings.display.systemPaddingTop = 2;
+  settings.display.systemPaddingBottom = 4;
+  settings.display.lastSystemPaddingBottom = 2;
+
   settings.display.layoutMode = LayoutMode.Page;
   applyTheme(settings);
   return settings;
@@ -372,6 +458,8 @@ export function TabStage({
   onSeek,
   onClear,
   playhead = null,
+  view = DEFAULT_STAGE_VIEW,
+  onZoom,
 }: TabStageProps) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -404,7 +492,7 @@ export function TabStage({
     try {
       const parsed = parseSongFile(source, score.source.fileName);
       barsRef.current = printedBarsOf(parsed.atScore, score.source.trackIndex);
-      api = new AlphaTabApi(host, buildSettings());
+      api = new AlphaTabApi(host, buildSettings(view, score.tuning.length > 0));
       api.error.on(() => setFailed(true));
       api.postRenderFinished.on(() => {
         setReady(true);
@@ -434,7 +522,40 @@ export function TabStage({
       delete (window as unknown as { __SONGS_TAB_API__?: AlphaTabApi }).__SONGS_TAB_API__;
       api?.destroy();
     };
-  }, [source, score.source.fileName, score.source.trackIndex, themeId]);
+    // `view` is a setting the whole engraving is built from, so a change to
+    // it is a fresh `AlphaTabApi` — the same as a theme change. Its two
+    // fields rather than the object, which is new on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    source,
+    score.source.fileName,
+    score.source.trackIndex,
+    themeId,
+    view.notation,
+    view.zoom,
+  ]);
+
+  /**
+   * Ctrl/Cmd and the wheel makes the music bigger (W29 item 3).
+   *
+   * On the viewport rather than the overlay, so it works over the margins
+   * too, and `passive: false` because the whole point is to take the
+   * gesture off the browser's own page zoom — which in a Tauri webview
+   * would scale the app's chrome and leave the score exactly as it was.
+   * A wheel with no modifier still scrolls the page.
+   */
+  useEffect(() => {
+    const viewport = hostRef.current?.closest<HTMLElement>(".songs-tab-viewport");
+    if (!viewport || !onZoom) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      if (e.deltaY === 0) return;
+      onZoom(e.deltaY < 0 ? 1 : -1);
+    };
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+    return () => viewport.removeEventListener("wheel", onWheel);
+  }, [onZoom, ready]);
 
   // The cursor. One property set per beat event, measured at 0.02 ms — this
   // is the whole of the "driven by the engine" requirement.
