@@ -1,0 +1,33 @@
+# Phone polish, after the first APK is out
+
+Owner's call, 2026-09-20: **ship first, polish later.** Nothing here
+blocks the first Android build on the website. Each item says who saw
+it and where.
+
+## 1. The metronome's tempo block sits hard left (owner, 2026-09-20)
+
+On a phone the big BPM number, `−` / `+` and TAP hug the left edge and
+the right half of the screen is empty: the layout is the desktop's
+wide left column, narrowed. The owner's instinct: centre it, "or maybe
+not so much to the left"; possibly a proper phone design for the
+metronome screen rather than a narrowed desktop one.
+
+When this is picked up: two or three variants as phone shots at 360 /
+390 / 430 for the owner to choose from, not one implementation. Think
+about thumbs: `−` / `+` and TAP are the controls used mid-practice, and
+Play is already bottom-left. Same question applies to the drill's BPM
+readout and Jam's tempo row (M09 only makes that one *fit*).
+See `plans/tasks/mobile/m06/01-metronome.png` (iPhone) and the
+`beat-360` shot from `npm run shots:mobile`.
+
+## 2. Settings toggles are full-width slabs (orchestrator, 2026-09-20)
+
+"On" as a 600 px wide filled button under every setting (M03c stacked
+the rows so they fit). It fits and works; it reads heavy. A label-left,
+switch-right row is what a phone user expects.
+
+## 3. "Reset hints" is offered on a phone (orchestrator, 2026-09-20)
+
+The plan recommended cutting the tour and hints on mobile v1. Check
+whether any hint can actually appear on a phone; if none can, the row
+should go.

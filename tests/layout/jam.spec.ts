@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openShot, fitsOnOneLine, noSidewaysScroll } from "./fits";
+import { openShot, fitsOnOneLine, noSidewaysScroll, MOBILE_URL } from "./fits";
 
 /**
  * The Jam playing screen, measured in a real browser.
@@ -561,5 +561,221 @@ test.describe("the groove editor", () => {
     expect(Math.max(...cells), "a cell runs off the right").toBeLessThanOrEqual(width);
 
     await noSidewaysScroll(page, "the jam screen with the groove editor open");
+  });
+});
+
+/*
+ * ── The same screen on a phone (M09) ──────────────────────────────────────
+ *
+ * `M08-JAM-GAPS.md` measured the band's rows at 360px and found the picker
+ * painted underneath the volume slider, and said where the gate for it
+ * already lives: "the desktop layout suite already has a gate for exactly
+ * this — 'keeps the volume and the switch reachable on every player's row' —
+ * and it passes, because it runs at 760px and up. M09 should extend that spec
+ * to 360/390/430 rather than write a new one."
+ *
+ * So this is that assertion, three widths lower, against the PHONE build —
+ * which is a different build, not a narrower window: `IS_MOBILE` folds at
+ * compile time and every rule M09 wrote hangs off the class it produces. The
+ * second Vite server in `playwright.config.ts` is what serves it; `MOBILE_URL`
+ * is how a block asks for it.
+ *
+ * `fitsOnOneLine` is deliberately NOT used here. On a phone a player's row is
+ * two lines on purpose — name, level and switch, then the picker — so the
+ * desktop's "everything shares the row's middle" would be a false failure.
+ * What has to hold is what held before: nothing is off the screen, and no
+ * control is drawn on top of another.
+ */
+const PHONES = [
+  { width: 360, height: 800 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+];
+
+/** A thumb, per M03a's survey and every platform's guidance. */
+const TOUCH_TARGET = 44;
+
+test.describe("the jam on a phone", () => {
+  test.use({ baseURL: MOBILE_URL, isMobile: true, hasTouch: true });
+
+  for (const size of PHONES) {
+    test(`keeps every player's level and switch on the screen at ${size.width}px`, async ({
+      page,
+    }) => {
+      await openShot(page, "jam-band", size);
+      const width = page.viewportSize()!.width;
+
+      for (const control of [".jam-band-volume", ".jam-band-lane > .jam-switch"]) {
+        const boxes = await page.$$eval(control, (nodes) =>
+          nodes.map((n) => {
+            const r = n.getBoundingClientRect();
+            return { left: r.left, right: r.right };
+          }),
+        );
+        expect(boxes.length, `no ${control} on the screen`).toBeGreaterThan(0);
+        for (const box of boxes) {
+          expect(Math.round(box.right), `${control} ends at ${Math.round(box.right)}, past the window`)
+            .toBeLessThanOrEqual(width);
+          expect(Math.round(box.left), `${control} starts at ${Math.round(box.left)}`)
+            .toBeGreaterThanOrEqual(0);
+        }
+      }
+
+      await noSidewaysScroll(page, `the jam screen at ${size.width}px`);
+    });
+
+    test(`never draws one of a player's controls over another at ${size.width}px`, async ({
+      page,
+    }) => {
+      // The reported bug in its own words: "GROOVE" under the slider's track
+      // with the thumb over the O. Two lines cannot be checked by comparing
+      // every part with the one before it — the picker is legitimately below
+      // the slider — so the parts are grouped into lines first and only
+      // neighbours on the same line are compared.
+      await openShot(page, "jam-band", size);
+      const rows = await page.$$(".jam-band-lane");
+      expect(rows.length, "no player rows on the screen").toBeGreaterThan(0);
+
+      for (const row of rows) {
+        const lines = await row.evaluate((node) => {
+          const parts = [...node.children]
+            .map((child) => {
+              const r = child.getBoundingClientRect();
+              return {
+                left: r.left,
+                right: r.right,
+                middle: r.top + r.height / 2,
+                what: (child.className || child.tagName).toString().slice(0, 40),
+              };
+            })
+            .filter((p) => p.right > p.left);
+          const byLine = new Map<number, typeof parts>();
+          for (const part of parts) {
+            // Anything within half a row's height of another is beside it.
+            const key = [...byLine.keys()].find((k) => Math.abs(k - part.middle) < 12);
+            if (key === undefined) byLine.set(part.middle, [part]);
+            else byLine.get(key)!.push(part);
+          }
+          return [...byLine.values()].map((line) => line.sort((a, b) => a.left - b.left));
+        });
+
+        for (const line of lines) {
+          for (let i = 1; i < line.length; i++) {
+            expect(
+              Math.round(line[i].left),
+              `"${line[i - 1].what}" ends at ${Math.round(line[i - 1].right)} and "${line[i].what}" starts at ${Math.round(line[i].left)} — they overlap`,
+            ).toBeGreaterThanOrEqual(Math.round(line[i - 1].right) - 1);
+          }
+        }
+      }
+    });
+
+    test(`keeps the tempo operable at ${size.width}px`, async ({ page }) => {
+      /*
+       * The operability gap, and the reason M09 exists: at 360 the big BPM
+       * number was on screen and −, + and TAP were entirely off the right
+       * edge, so a musician on the Jam tab could read the tempo and not
+       * change it. Not a cosmetic failure — it is the difference between a
+       * control being there and not.
+       */
+      await openShot(page, "jam", size);
+      const width = page.viewportSize()!.width;
+
+      const controls = await page.$$eval(
+        ".tempo-controls .bpm-btn, .tempo-controls .tap-btn",
+        (nodes) =>
+          nodes.map((n) => {
+            const r = n.getBoundingClientRect();
+            return {
+              left: r.left,
+              right: r.right,
+              height: r.height,
+              what: (n.getAttribute("aria-label") || n.textContent || "").trim().slice(0, 20),
+            };
+          }),
+      );
+      expect(controls.length, "no tempo controls on the jam screen").toBe(3);
+
+      for (const control of controls) {
+        expect(Math.round(control.right), `"${control.what}" ends at ${Math.round(control.right)}, past the window`)
+          .toBeLessThanOrEqual(width);
+        expect(Math.round(control.left), `"${control.what}" starts off the left`).toBeGreaterThanOrEqual(0);
+        expect(Math.round(control.height), `"${control.what}" is ${Math.round(control.height)}px tall`)
+          .toBeGreaterThanOrEqual(TOUCH_TARGET);
+      }
+    });
+
+    test(`puts Set up and the cheat sheet on the stage at ${size.width}px`, async ({ page }) => {
+      // A phone's context bar is forty pixels holding a name, two volumes and
+      // an overflow; both doors were drawn off the end of it. They are on the
+      // stage now, and they are the size of a thumb.
+      await openShot(page, "jam", size);
+      const width = page.viewportSize()!.width;
+
+      const doors = await page.$$eval(".jam-phone-doors .jam-sheet-btn", (nodes) =>
+        nodes.map((n) => {
+          const r = n.getBoundingClientRect();
+          return { left: r.left, right: r.right, height: r.height, text: (n.textContent ?? "").trim() };
+        }),
+      );
+      expect(doors.length, "the two doors are not on the stage").toBe(2);
+      for (const door of doors) {
+        expect(Math.round(door.left), `"${door.text}" starts off the left`).toBeGreaterThanOrEqual(0);
+        expect(Math.round(door.right), `"${door.text}" runs past the window`).toBeLessThanOrEqual(width);
+        expect(Math.round(door.height), `"${door.text}" is ${Math.round(door.height)}px tall`)
+          .toBeGreaterThanOrEqual(TOUCH_TARGET);
+      }
+    });
+  }
+
+  test("reads the cheat sheet's chart by dragging it, not the page", async ({ page }) => {
+    /*
+     * A chord box has a floor of about 96px — below that it is six strings
+     * drawn inside a stamp — so twelve roots by seven qualities is wider than
+     * any phone. The chart scrolls sideways inside its own box; the page does
+     * not. That distinction is the whole of "it fits on a phone" here.
+     */
+    await openShot(page, "jam-chords", { width: 360, height: 800 });
+    await page.waitForSelector(".jam-chord-table-wrap");
+
+    const chart = await page.$$eval(".jam-chord-table-wrap", (wraps) =>
+      wraps.map((w) => ({
+        over: w.scrollWidth - w.clientWidth,
+        overflowX: getComputedStyle(w).overflowX,
+        right: Math.round(w.getBoundingClientRect().right),
+      })),
+    );
+    expect(chart.length, "no chart drawn").toBeGreaterThan(0);
+    const width = page.viewportSize()!.width;
+    for (const wrap of chart) {
+      expect(wrap.right, "the chart's own box runs off the screen").toBeLessThanOrEqual(width);
+      expect(wrap.overflowX, "the chart cannot be dragged").toMatch(/auto|scroll/);
+    }
+    expect(chart.some((w) => w.over > 0), "no section is wide enough to need dragging").toBe(true);
+
+    await noSidewaysScroll(page, "the jam screen with the cheat sheet open");
+  });
+
+  test("never draws the cheat sheet over Stop", async ({ page }) => {
+    /*
+     * The transport's own rule, written where it sheds controls on a narrow
+     * window: "Play and Stop never go — finding how to stop is the one thing
+     * that must always work." The sheet opens maximized on a desktop, and
+     * maximized is `position: fixed` down to a 76px transport — which on a
+     * 360x800 screen covered the transport outright. On a phone it stays
+     * docked between the header and the transport instead.
+     */
+    await openShot(page, "jam-chords", { width: 360, height: 800 });
+    const sheet = (await (await page.waitForSelector(".jam-sheet")).boundingBox())!;
+    const transport = await page.$(".transport");
+    expect(transport, "no transport on the jam screen").toBeTruthy();
+    const stop = (await transport!.boundingBox())!;
+
+    expect(
+      Math.round(sheet.y + sheet.height),
+      "the cheat sheet is drawn over the transport",
+    ).toBeLessThanOrEqual(Math.round(stop.y) + 1);
+    expect(Math.round(stop.y + stop.height), "the transport is off the bottom of the screen")
+      .toBeLessThanOrEqual(page.viewportSize()!.height);
   });
 });

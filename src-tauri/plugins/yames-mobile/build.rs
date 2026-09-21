@@ -12,5 +12,10 @@ const COMMANDS: &[&str] = &[
 fn main() {
     tauri_plugin::Builder::new(COMMANDS)
         .android_path("android")
+        // The Swift half. Only ever looked at when the *host* is macOS and the
+        // target is iOS — `tauri-plugin`'s own arm for it is `#[cfg(target_os =
+        // "macos")]` — so naming it here costs an Android or desktop build
+        // nothing.
+        .ios_path("ios")
         .build();
 }

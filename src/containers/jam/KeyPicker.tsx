@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SHARP_NAMES, keyName, noteName } from "../../jam/harmony";
 import type { Key, KeyMode } from "../../jam/harmony";
+import { IS_MOBILE } from "../../platform";
+import { useBackDismiss } from "../../mobile/backStack";
 
 const KEY_MODES: KeyMode[] = ["major", "minor", "blues"];
 
@@ -47,6 +49,11 @@ export function KeyPicker({
   const [shift, setShift] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // A phone's Escape — the grid goes before whatever it opened over. Same
+  // stack every other layer uses (mobile/backStack.ts); `IS_MOBILE` is a
+  // build constant, so the hook order never varies at runtime.
+  if (IS_MOBILE) useBackDismiss(open, () => setOpen(false));
 
   useEffect(() => {
     if (!open) {

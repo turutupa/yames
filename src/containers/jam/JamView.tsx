@@ -54,6 +54,8 @@ import type { VibePreviewMark } from "./VibePicker";
 import { JamSheet } from "./JamSheet";
 import { GrooveEditorDrawer } from "./GrooveEditorDrawer";
 import { MotionProvider, Presence, useLastPresent } from "../../components/Presence";
+import { IS_MOBILE } from "../../platform";
+import { useBackDismiss } from "../../mobile/backStack";
 import "../../styles/jam.css";
 
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
@@ -276,6 +278,31 @@ export function JamView({
   // `i18n` for the band row's list formatter: "shaker and congas" is a
   // sentence, and which language it is in decides where the "and" goes.
   const { t, i18n } = useTranslation();
+
+  /*
+   * What the system Back gesture closes on this tab, and in what order.
+   *
+   * Jam's sheets are its own docked drawer rather than the mobile `Sheet`
+   * primitive, so nothing had registered them and Back went straight past a
+   * full-screen setup drawer to background the app (M09). They join the app's
+   * one back stack instead of growing a second one: the stack pops what was
+   * opened last, which gives the order `jamEscapeTarget` writes down — a
+   * menu, then the picker or the editor it was opened from, then the sheet
+   * they were opened over — without either of them having to know about the
+   * other. The portalled menus register themselves (`JamSelect`, `KeyPicker`).
+   *
+   * When the last of them closes the stack is empty and the Android side is
+   * free to background the app on the next Back, band still playing: the
+   * foreground service is what keeps it playing, and nothing here stops it.
+   *
+   * `IS_MOBILE` is a build-time constant, so the hook order never varies at
+   * runtime — see platform.ts and the same shape in MainWindow.
+   */
+  if (IS_MOBILE) useBackDismiss(screen.setupOpen, () => screen.setSetupOpen(false));
+  if (IS_MOBILE) useBackDismiss(screen.chordsOpen, () => screen.setChordsOpen(false));
+  if (IS_MOBILE) useBackDismiss(screen.editorOpen, () => screen.setEditorOpen(false));
+  if (IS_MOBILE) useBackDismiss(screen.editingBar !== null, () => screen.setEditingBar(null));
+
   const shownBpm = trainedBpm ?? jam.bpm;
   const marking = getTempoMarking(shownBpm);
 
@@ -522,6 +549,48 @@ export function JamView({
   return (
     <MotionProvider value={motionInputs}>
     <div className="jam-view" data-sheet={screen.setupOpen ? "setup" : undefined}>
+      {/* ── The two doors, on a phone (M09) ───────────────────────────────
+          On a desktop these live in the context bar, where the app already
+          answers "what am I looking at, and what can I do to it". A phone's
+          context bar is forty pixels holding a name, two volumes and an
+          overflow, and both buttons were drawn off the end of it: all that
+          was left of "Cheat sheet" was two letters behind the `⋯`
+          (M08-JAM-GAPS). Set up is the whole configuration of the mode, so
+          it belongs on the screen it configures rather than behind a menu.
+
+          They keep `.jam-sheet-btn` — the class the shots harness and the
+          layout suite press to open either sheet — and the same one-at-a-time
+          rule the header's pair has: they occupy the same room, and two of
+          them at once is a screen with no jam left on it. */}
+      {IS_MOBILE && (
+        <div className="jam-phone-doors">
+          <button
+            type="button"
+            className={`jam-sheet-btn jam-door${screen.setupOpen ? " active" : ""}`}
+            aria-pressed={screen.setupOpen}
+            onClick={() => {
+              const next = !screen.setupOpen;
+              screen.setSetupOpen(next);
+              if (next) screen.setChordsOpen(false);
+            }}
+          >
+            {t("jam.sheet.setUp")}
+          </button>
+          <button
+            type="button"
+            className={`jam-sheet-btn jam-door${screen.chordsOpen ? " active" : ""}`}
+            aria-pressed={screen.chordsOpen}
+            onClick={() => {
+              const next = !screen.chordsOpen;
+              screen.setChordsOpen(next);
+              if (next) screen.setSetupOpen(false);
+            }}
+          >
+            {t("jam.cheat.label")}
+          </button>
+        </div>
+      )}
+
       <TradeCue bandState={bandState} isPlaying={isPlaying} />
 
       {/* ── 1 and 3. The chord, and the tempo beside it ─────────────────── */}
@@ -879,8 +948,17 @@ export function JamView({
               // The cheat sheet can fill the region; the setup sheet cannot.
               // Setup is a column of controls beside the thing they change,
               // and widening it would cover the band it is being used on.
-              canMaximize={shownSheet === "chords"}
-              openMaximized={shownSheet === "chords"}
+              //
+              // Neither can on a phone, and one of them must not: a sheet is
+              // already the whole width there, so there is nothing to grow
+              // into — and maximized means `position: fixed` down to the
+              // desktop's 76px transport, which on a 360x800 screen drew the
+              // cheat sheet straight over Stop. The transport's own rule is
+              // that "Play and Stop never go — finding how to stop is the one
+              // thing that must always work", so on a phone the sheet stays
+              // docked between the header and the transport (M09).
+              canMaximize={!IS_MOBILE && shownSheet === "chords"}
+              openMaximized={!IS_MOBILE && shownSheet === "chords"}
               dim={shownSheet === "setup"}
               closeOnOutside={shownSheet === "setup"}
               title={shownSheet === "setup" ? jam.name : chordTitle.title}

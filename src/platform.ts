@@ -30,3 +30,35 @@ declare const __YAMES_MOBILE__: boolean;
 
 export const IS_MOBILE: boolean =
   typeof __YAMES_MOBILE__ !== "undefined" && __YAMES_MOBILE__;
+
+/**
+ * Whether this phone build may be put on a screen from outside itself.
+ *
+ * Set by nothing except the iPhone simulator job in
+ * `.github/workflows/ios.yml`, through `YAMES_MOBILE_DEBUG=1`. A simulator
+ * running with no one in front of it cannot tap a tab bar, and every screen
+ * the release checklist wants a picture of has to be reached somehow. Three
+ * of them already can be: the tab the app was last on is persisted, so
+ * writing `activeTab` into the settings store and relaunching lands on the
+ * metronome, the drill or the setlist with no app code involved at all.
+ *
+ * The settings pane and zen are not tabs and are not persisted, so those two
+ * get the values below instead — read in exactly two places
+ * (`useTabRouting`, `useFullscreenLifecycle`) and only when this constant is
+ * true.
+ *
+ * It folds to `false` in every build that is not that job, which takes the
+ * two marker strings out of `dist/` entirely. The workflow greps for them
+ * before it archives anything for a real device, so "compiled out" is checked
+ * rather than asserted.
+ */
+declare const __YAMES_MOBILE_DEBUG__: boolean;
+
+export const MOBILE_DEBUG_SCREENS: boolean =
+  typeof __YAMES_MOBILE_DEBUG__ !== "undefined" && __YAMES_MOBILE_DEBUG__;
+
+/** Start on the settings pane. Only honoured when `MOBILE_DEBUG_SCREENS`. */
+export const DEBUG_SCREEN_SETTINGS = "debug:settings";
+
+/** Start in zen. Only honoured when `MOBILE_DEBUG_SCREENS`. */
+export const DEBUG_SCREEN_ZEN = "debug:zen";

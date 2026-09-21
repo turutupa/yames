@@ -6,6 +6,10 @@ import {
   setPlaying,
   stopSpeedRamp,
 } from "../../../ipc";
+import {
+  DEBUG_SCREEN_SETTINGS,
+  MOBILE_DEBUG_SCREENS,
+} from "../../../platform";
 import type { MainView } from "../MainHeader";
 
 /**
@@ -129,6 +133,13 @@ export function useTabRouting({
    */
   useEffect(() => {
     getActiveTab().then((tab) => {
+      // The one screen a headless simulator cannot otherwise be put on — see
+      // `MOBILE_DEBUG_SCREENS`. `false` in every build but the screenshot job,
+      // so this whole branch and the string it compares against fold away.
+      if (MOBILE_DEBUG_SCREENS && tab === DEBUG_SCREEN_SETTINGS) {
+        setViewRaw("settings");
+        return;
+      }
       if (!isPlayTab(tab)) return;
       if (viewRef.current !== "beat" || prevTab.current !== "beat") return;
       viewRef.current = tab;

@@ -13,7 +13,11 @@
     }
   },
   "bundle": {
-    "createUpdaterArtifacts": false
+    "createUpdaterArtifacts": false,
+    "iOS": {
+      "minimumSystemVersion": "15.0",
+      "template": "src-tauri/ios-project.yml"
+    }
   },
   "plugins": {}
 }

@@ -1,0 +1,255 @@
+name: iPhone (simulator + unsigned archive)
+
+# The Mac in this task is this file.
+#
+# The owner is about to lose access to the only Mac in the project, so nothing
+# about the iPhone build may depend on one. GitHub's macOS runners have Xcode
+# and this repository is public, so the minutes are free: the project is
+# generated here, the app is compiled here, it is booted on a simulator here,
+# and the pictures come back as artifacts.
+#
+# It does not touch `release.yml` (the desktop release), `ci.yml` (the desktop
+# gate), `android.yml`, `pages.yml` or `snap.yml`.
+#
+# **No signing happens here, and no secret reaches it.** Everything is built
+# with `CODE_SIGNING_ALLOWED=NO`, which is enough to prove the app compiles and
+# links for a real iPhone. Turning that archive into something installable is
+# M06b, it needs the owner's Apple Developer account, and the steps are written
+# out in plans/tasks/mobile/M06b-OWNER-STEPS.md.
+#
+# The `push` trigger is scaffolding for M06a and nothing else. When `mobile`
+# reaches `main`, drop the branch trigger and leave `workflow_dispatch` —
+# which only becomes usable once this file is on the default branch, because
+# that is where GitHub looks for dispatchable workflows.
+on:
+  push:
+    branches: [mob/m06-ios]
+  workflow_dispatch:
+
+# Each run is 10-25 minutes of a macOS runner. A second push while one is in
+# flight should not pay for both.
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # The simulator every screenshot is taken on. An iPhone 15 has the notch and
+  # the home indicator, which is the whole point: it is what says whether
+  # WKWebView's `env(safe-area-inset-*)` tells the truth, or whether iOS needs
+  # the same insets-from-native workaround Android needed in M05b.
+  SIM_DEVICE: iPhone 15
+  APP_ID: com.yames.metronome
+  # Not a secret, and not used to sign anything here. Xcode refuses to generate
+  # or open an iOS project without a team id at all, so the Tauri CLI insists
+  # on one; every build in this workflow then overrides it with
+  # CODE_SIGNING_ALLOWED=NO. The value is the one already published in
+  # src-tauri/tauri.conf.json, where the macOS signing identity has carried it
+  # since long before this workflow existed. Real signing material is M06b's
+  # and lives in repository secrets, not here.
+  APPLE_DEVELOPMENT_TEAM: BBG489SR42
+
+jobs:
+  iphone:
+    name: generate, compile, boot
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust with the iPhone targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # `aarch64-apple-ios` is a real iPhone; `-sim` is the simulator on an
+          # Apple-silicon runner. `x86_64-apple-ios` is not built: the runners
+          # are arm64 and no iPhone has ever been x86.
+          targets: aarch64-apple-ios,aarch64-apple-ios-sim
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            src-tauri/target
+          key: ios-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: ios-cargo-
+
+      # No `cache: npm`: it wants a lockfile this repository does not have.
+      # The project's lockfile is bun's and package-lock.json is gitignored —
+      # the same reason ci.yml, release.yml and android.yml all run
+      # `npm install` rather than `npm ci`.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # `npm install`, not `npm ci`: the repository's lockfile is bun's and
+      # package-lock.json is gitignored. Same as ci.yml, release.yml and
+      # android.yml.
+      - name: Install frontend dependencies
+        run: npm install
+
+      # cargo-mobile2 — the thing underneath `tauri ios init` — wants
+      # `xcodegen` to write the Xcode project and `pod` for dependency
+      # resolution, and it installs them through Homebrew if they are
+      # missing. Doing it here instead means the install is visible in the log
+      # and does not happen inside a command that would otherwise have failed
+      # with something obscure. The runner image already carries CocoaPods.
+      - name: Install the Xcode project generator
+        run: |
+          command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
+          command -v pod >/dev/null 2>&1 || brew install cocoapods
+          xcodegen --version
+          pod --version
+
+      - name: Show the toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          rustc --version
+
+      # ------------------------------------------------------------------
+      # The type-check, first, because it is the cheapest thing that can fail
+      # and it fails for reasons that have nothing to do with Xcode.
+      #
+      # `--lib` because the shipped artifact is the staticlib: the four DSP
+      # dev-tool binaries under src-tauri/src/bin are desktop-only and do not
+      # build for a phone, exactly as on Android (M01).
+      # ------------------------------------------------------------------
+      - name: cargo check for a real iPhone
+        run: cargo check --manifest-path src-tauri/Cargo.toml --lib --target aarch64-apple-ios
+
+      - name: cargo check for the simulator
+        run: cargo check --manifest-path src-tauri/Cargo.toml --lib --target aarch64-apple-ios-sim
+
+      # ------------------------------------------------------------------
+      # The Xcode project.
+      #
+      # On the first run of this workflow `src-tauri/gen/apple` does not exist
+      # yet: it is generated here and uploaded, so it can be committed and
+      # every later run builds from the committed copy — the same arrangement
+      # `gen/android` has had since M00. Once it is committed, re-running
+      # `ios init` must change nothing, and the drift check at the end of the
+      # job is what proves it.
+      # ------------------------------------------------------------------
+      - name: Is the Xcode project already committed?
+        id: project
+        run: |
+          if [ -f src-tauri/gen/apple/project.yml ]; then
+            echo "committed=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "committed=no" >> "$GITHUB_OUTPUT"
+            echo "::notice::src-tauri/gen/apple is not in this ref; generating it and uploading it as an artifact."
+          fi
+
+      - name: Generate the Xcode project
+        if: steps.project.outputs.committed == 'no'
+        run: bash scripts/ci/ios-generate-project.sh
+
+      - name: Upload the generated project
+        if: steps.project.outputs.committed == 'no'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-project-generated
+          path: src-tauri/gen/apple
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+      # A generated-here project has never been looked at, so stop before
+      # spending twenty minutes building something nobody has read. With the
+      # project committed this step does not run at all.
+      - name: Stop after generating
+        if: steps.project.outputs.committed == 'no'
+        run: |
+          echo "### The Xcode project was generated" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download the \`ios-project-generated\` artifact, commit it as \`src-tauri/gen/apple\`, and push again." >> "$GITHUB_STEP_SUMMARY"
+          find src-tauri/gen/apple -maxdepth 2 | sort
+
+      # ------------------------------------------------------------------
+      # Everything below needs the committed project.
+      # ------------------------------------------------------------------
+
+      # The frontend the simulator will run. `YAMES_MOBILE=1` is the phone
+      # bundle (no coach, no evaluation, no window management);
+      # `YAMES_MOBILE_DEBUG=1` is the two marker strings that let this job put
+      # the app on the settings pane and in zen — see src/platform.ts. The
+      # device archive further down is built without it and checked for their
+      # absence.
+      - name: Build the phone frontend, with the screenshot hooks
+        if: steps.project.outputs.committed == 'yes'
+        env:
+          YAMES_MOBILE: '1'
+          YAMES_MOBILE_DEBUG: '1'
+        run: |
+          npm run build
+          node scripts/check-mobile-bundle.mjs
+
+      - name: Compile for the simulator
+        if: steps.project.outputs.committed == 'yes'
+        env:
+          YAMES_MOBILE: '1'
+          YAMES_MOBILE_DEBUG: '1'
+        run: bash scripts/ci/ios-build-sim.sh
+
+      - name: Boot a phone, install, launch, take the pictures
+        if: steps.project.outputs.committed == 'yes'
+        run: bash scripts/ci/ios-simulator-shots.sh
+
+      - name: Upload the screenshots
+        if: always() && steps.project.outputs.committed == 'yes'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-shots
+          path: artifacts/ios
+          if-no-files-found: warn
+          retention-days: 14
+
+      # ------------------------------------------------------------------
+      # The real-iPhone half: an unsigned archive, so the only thing M06b has
+      # left to find out is whether the signing works.
+      #
+      # Built from a frontend WITHOUT the screenshot hooks, and checked for
+      # them, so "compiled out of release builds" is a thing this workflow
+      # proves rather than a thing the comment claims.
+      # ------------------------------------------------------------------
+      - name: Build the phone frontend, as it would ship
+        if: steps.project.outputs.committed == 'yes'
+        env:
+          YAMES_MOBILE: '1'
+        run: |
+          npm run build
+          node scripts/check-mobile-bundle.mjs
+          bash scripts/ci/ios-check-no-debug-hooks.sh
+
+      - name: Compile for a real iPhone, unsigned
+        if: steps.project.outputs.committed == 'yes'
+        env:
+          YAMES_MOBILE: '1'
+        run: bash scripts/ci/ios-build-device.sh
+
+      - name: What the app asks a phone for
+        if: steps.project.outputs.committed == 'yes'
+        run: bash scripts/ci/ios-check-plist.sh
+
+      - name: Upload the unsigned app
+        if: steps.project.outputs.committed == 'yes'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-device-app
+          path: artifacts/ios-device
+          if-no-files-found: error
+          retention-days: 14
+
+      # Last, because it rewrites the working tree. If `ios init` would change
+      # the committed project, the committed project is stale and the next
+      # person to run it loses whatever was hand-edited.
+      - name: The committed project is what `ios init` produces
+        if: steps.project.outputs.committed == 'yes'
+        run: bash scripts/ci/ios-check-project-drift.sh
