@@ -303,6 +303,14 @@
       "unavailable": "Diese Version kann kein Video speichern.",
       "bar": "Takt",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "Takte {{bars}}, damals und heute",
+      "then": "Damals",
+      "now": "Heute",
+      "facts": "{{percent}} % · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Nur Ton — die Kamera war dabei aus.",
+      "locked": "Die beiden laufen taktweise zusammen, nicht nach der Uhr, also passt auch ein langsamerer Durchgang."
     }
   }
 }

@@ -338,6 +338,14 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.clip.wholeTake",
   "songs.clip.wide",
   "songs.clip.withMarks",
+  // W25 — then and now (addendum 11, `plans/ECHORA.md` A2). Appended, and
+  // unpluralised for the same reason: nothing here counts anything.
+  "songs.compare.facts",
+  "songs.compare.locked",
+  "songs.compare.now",
+  "songs.compare.soundOnly",
+  "songs.compare.then",
+  "songs.compare.title",
 ];
 
 /**
@@ -363,6 +371,11 @@ const ALLOWED: { key: string; langs: string[]; why: string }[] = [
   // W25 — the clip's caption. The same unit as `songs.bpm`, painted on a
   // canvas rather than set in HTML, which is why it is a key of its own.
   { key: "songs.clip.bpmUnit", langs: LANGS, why: "BPM is the unit, everywhere" },
+  {
+    key: "songs.compare.facts",
+    langs: ["es", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "vi", "zh-CN", "zh-TW"],
+    why: "three numbers and two units, no words — de and fr space the %, tr puts the sign first",
+  },
   { key: "songs.bpm", langs: LANGS, why: "BPM is the unit, everywhere" },
   { key: "songs.dismiss", langs: LANGS, why: '"OK" is OK in all fourteen' },
   {

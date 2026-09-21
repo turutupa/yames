@@ -303,6 +303,14 @@
       "unavailable": "이 버전에서는 영상을 저장할 수 없습니다.",
       "bar": "마디",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "{{bars}}마디, 그때와 지금",
+      "then": "그때",
+      "now": "지금",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "소리만 있습니다. 이 연주는 카메라가 꺼져 있었습니다.",
+      "locked": "둘은 시계가 아니라 마디로 맞춰져 있어서, 느리게 친 연주도 그대로 들어맞습니다."
     }
   }
 }

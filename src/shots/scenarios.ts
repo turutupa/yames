@@ -73,14 +73,16 @@ export interface Shot {
      * shipping blocks, not a mock-up of one. The three recipes are the three
      * shapes a review takes (`review/reviewFixtures.ts`):
      *
-     *   `rushing` — a tendency, with a loop as its fix
-     *   `missed`  — a passage lost on every pass, three goes to step through
-     *   `clean`   — praise that names bars and a count of goes
+     *   `rushing`  — a tendency, with a loop as its fix
+     *   `missed`   — a passage lost on every pass, three goes to step through
+     *   `clean`    — praise that names bars and a count of goes
+     *   `improved` — the passage is better than it was, which is the one
+     *                finding that offers to show you the difference (W25)
      *
      * `openMore` opens "what else", which is the one part of A4 a screenshot
      * of the headline alone cannot show.
      */
-    review?: "rushing" | "missed" | "clean";
+    review?: "rushing" | "missed" | "clean" | "improved";
     openMore?: boolean;
     /**
      * W21 — turn the camera on before the pass, and film it.
@@ -110,6 +112,15 @@ export interface Shot {
      * is what the review is about.
      */
     clip?: "open" | "make";
+    /**
+     * W25 — then and now (addendum 11).
+     *
+     * Puts one earlier run at these bars in the store and its recording on
+     * the shelf, so the coach's `improved` finding has a pair to offer. Only
+     * meaningful with `review: "improved"`, which is the one finding that
+     * offers to show the difference.
+     */
+    compare?: boolean;
     /**
      * Press play and photograph the stage with the transport running.
      *
@@ -652,6 +663,20 @@ export const SHOTS: Shot[] = [
     buildAt: { width: 1440, height: 900 },
     width: 480,
     height: 780,
+    settleMs: 900,
+  },
+  {
+    id: "songs-compare",
+    suffix: "songs-compare",
+    window: "main",
+    tab: "songs",
+    // W25 item 3 — then and now. The coach says this passage has come on, and
+    // under the sentence are the two runs it is talking about: a month ago at
+    // 70 % and tonight, side by side, held together by the BAR rather than by
+    // the clock so the slower one still lines up.
+    songs: { row: 0, review: "improved", camera: true, compare: true },
+    width: 1400,
+    height: 900,
     settleMs: 900,
   },
   {

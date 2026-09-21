@@ -161,6 +161,23 @@ function takeWav(seconds: number): string {
 const TAKE_WAV = takeWav(22);
 
 const SHOT_TAKE_ID = "w21";
+/**
+ * W25 — the run from a month ago, for then-and-now.
+ *
+ * The take's PATH is the join between the store's row and the shelf's
+ * listing, which is how the real app pairs an attempt with its recording, so
+ * the mock has to be consistent about it in both places or the compare finds
+ * nothing and says nothing — which is exactly the failure it should have.
+ */
+const OLD_ATTEMPT_ID = "w25-then";
+const OLD_TAKE_ID = "w25then";
+/**
+ * The same tone as tonight's, because the older side has to PLAY: the
+ * comparison drives two media elements and the harness has no asset protocol
+ * behind it, so the "path" is the sound itself (`songs/camera/src.ts` hands
+ * anything that is already a URL straight to the element).
+ */
+const OLD_TAKE_PATH = TAKE_WAV;
 const SHOT_TAKE_JAM = "shot-song";
 
 function baseState(theme: string) {
@@ -341,7 +358,15 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** W21 — the bytes `MediaRecorder` handed over during the camera scene. */
   const cameraChunks: ArrayBuffer[] = [];
   const cameraMime = "video/webm";
-  /** W25 — and the ones the canvas compositor handed over for a clip. */
+  /**
+   * W25 — the picture the fake camera made, once it has been filed.
+   *
+   * Held so the compare scene can put the SAME one on its older take: the
+   * harness can film once, and what then-and-now is a picture of is the
+   * layout and the bar-locking rather than two different faces.
+   */
+  let cameraVideoUrl: string | null = null;
+  /** ...and the chunks the canvas compositor handed over for a clip. */
   const clipChunks: ArrayBuffer[] = [];
   /**
    * The id the take was STARTED with.
@@ -724,7 +749,34 @@ export function installShotMock(shot: Shot, theme: string): void {
      * the empty shelf — the one a musician sees on every jam but the one they
      * recorded — could not be photographed at all.
      */
-    list_takes: (a) => TAKES.filter((take) => take.jamId === a?.jamId),
+    list_takes: (a) => [
+      ...TAKES.filter((take) => take.jamId === a?.jamId),
+      /*
+       * W25 — the run from a month ago, on the shelf beside tonight's.
+       *
+       * Only for the compare scene, and only on the song: a second take on
+       * every other one would change the takes shelf's picture and the review
+       * scenes' behaviour for something none of them are about. Its PICTURE
+       * is the one the harness's own fake camera made a moment ago, reused —
+       * the harness can film once, and what then-and-now is a picture of is
+       * the layout and the bar-locking, not two different faces.
+       */
+      ...(shot.songs?.compare && a?.jamId === cameraTakeFor && cameraVideoUrl
+        ? [
+            {
+              id: OLD_TAKE_ID,
+              jamId: cameraTakeFor,
+              createdAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
+              durationSec: 22,
+              path: OLD_TAKE_PATH,
+              position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -40 },
+              videoPath: cameraVideoUrl,
+              videoBytes: 1_200_000,
+              videoOffsetMs: 120,
+            },
+          ]
+        : []),
+    ],
     /*
      * W21 — a take with a real picture on it, made by the harness's own fake
      * camera.
@@ -776,7 +828,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       // A blob URL rather than a path: the harness is an ordinary browser with
       // no asset protocol behind it, and `songs/camera/src.ts` hands anything
       // that is already a URL straight to the element.
-      return { path: URL.createObjectURL(blob), bytes: blob.size, offsetMs: 120 };
+      cameraVideoUrl = URL.createObjectURL(blob);
+      return { path: cameraVideoUrl, bytes: blob.size, offsetMs: 120 };
     },
     take_video_discard: () => null,
     /*
@@ -1002,8 +1055,49 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (cmd === "analyze_attempt") {
       return scripted()?.findings ?? [];
     }
-    if (cmd === "save_attempt" || cmd === "query_attempts") {
-      return cmd === "query_attempts" ? [] : null;
+    if (cmd === "save_attempt") return null;
+    /*
+     * W25 — the history then-and-now is built on.
+     *
+     * Empty for every scene but the compare one, because an empty history is
+     * what the app has for a song somebody has just imported and it is what
+     * every other review scene should photograph. For `songs-compare` it is
+     * one earlier run at the same bars, a month ago, slower and rougher —
+     * scripted by the same `scriptPass` the review itself uses, so the tape
+     * the old side draws is a real pass with real verdicts and not a row of
+     * decorative dots.
+     */
+    if (cmd === "query_attempts") {
+      if (!shot.songs?.compare || !songSchedule) return [];
+      const record = songShotRecord();
+      const then = scriptPass(songSchedule, "rushing", { quarterMs: 60_000 / 67 });
+      return [
+        {
+          id: OLD_ATTEMPT_ID,
+          scoreId: record.id,
+          startedAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
+          rangeStartBar: 0,
+          rangeEndBar: Math.max(0, record.score.bars.length - 1),
+          // Seventy per cent of the song's own tempo — where a passage is
+          // practised before it is played.
+          tempoPercent: 70,
+          passes: 1,
+          score: then.score,
+          hits: then.results.filter((r) => r.state === "hit").length,
+          misses: then.results.filter((r) => r.state === "miss").length,
+          extras: then.extras.length,
+          meanDevMs: -34,
+          madMs: 22,
+          takePath: OLD_TAKE_PATH,
+          onsets: then.results.map((r) => ({
+            id: r.id,
+            state: r.state,
+            deviationMs: r.deviationMs,
+            pass: r.pass,
+          })),
+          extraOnsets: then.extras,
+        },
+      ];
     }
 
     if (cmd === "set_jam") {

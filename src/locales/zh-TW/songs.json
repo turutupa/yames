@@ -303,6 +303,14 @@
       "unavailable": "這個版本無法儲存影片。",
       "bar": "小節",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "第 {{bars}} 小節，那時和現在",
+      "then": "那時",
+      "now": "現在",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "只有聲音——這一遍攝影機是關著的。",
+      "locked": "兩邊是按小節對齊的，不是按秒，所以彈得慢的那一遍也能對上。"
     }
   }
 }

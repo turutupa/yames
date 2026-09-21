@@ -312,6 +312,14 @@
       "unavailable": "Questa versione non può salvare un video.",
       "bar": "Battuta",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "Battute {{bars}}, prima e adesso",
+      "then": "Prima",
+      "now": "Adesso",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Solo suono: la videocamera era spenta in questa.",
+      "locked": "Le due si allineano sulla battuta e non sull'orologio, così anche un giro più lento combacia."
     }
   }
 }

@@ -65,6 +65,7 @@ import { CoachBlocks, resolveCoachAnswer } from "../../../coach/blocks";
 import type {
   CoachAction,
   CoachBlockContext,
+  CompareSlotProps,
   TabExcerptSlotProps,
   TakeSlotProps,
 } from "../../../coach/blocks";
@@ -76,6 +77,9 @@ import type { ReviewTakeVideo } from "../camera/TakeVideoView";
 // everything else here: a player who never stops a pass never downloads a
 // canvas compositor.
 import { SaveAsVideo } from "../camera/SaveAsVideo";
+// W25 — then and now (addendum 11). Same chunk, same reason.
+import { CompareTakes } from "../camera/CompareTakes";
+import type { SongCompare } from "./useSongCompare";
 import { buildTape } from "../../../songs/camera/tape";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
@@ -120,6 +124,17 @@ export type SongReviewProps = {
    * appears.
    */
   video?: ReviewTakeVideo;
+  /**
+   * W25 — an older recording of these bars, and this one, ready to play side
+   * by side (addendum 11, `plans/ECHORA.md` A2).
+   *
+   * `undefined` is the normal case and stays the normal case: it needs two
+   * kept recordings of the same passage, which a player only has after coming
+   * back to something. `useSongCompare` is what decides there is a pair;
+   * `blocksFor` only emits the block when there is one and the coach has just
+   * said the passage improved.
+   */
+  compare?: SongCompare;
 };
 
 export function SongReview({
@@ -129,6 +144,7 @@ export function SongReview({
   onDismiss,
   progressFor,
   video,
+  compare,
 }: SongReviewProps) {
   const { t } = useTranslation();
   const { score, schedule, facts, bands, findings, range } = review;
@@ -210,10 +226,22 @@ export function SongReview({
           scoreId: review.scoreId,
           playedAt: new Date(review.startedAt).toISOString(),
         },
+        // W25 — and the older run of these bars, when there is one, so a
+        // `compare` block naming it resolves rather than being dropped as
+        // "no attempt numbered …".
+        ...(compare
+          ? [
+              {
+                id: compare.older.attemptId,
+                scoreId: review.scoreId,
+                playedAt: new Date(compare.older.startedAt).toISOString(),
+              },
+            ]
+          : []),
       ],
       ...(progressFor ? { progressFor } : {}),
     }),
-    [review.scoreId, review.attemptId, review.startedAt, score, progressFor],
+    [review.scoreId, review.attemptId, review.startedAt, score, progressFor, compare],
   );
 
   /** The `tabExcerpt` slot's real component, at last (`slots.tsx`). */
@@ -329,6 +357,32 @@ export function SongReview({
     [video],
   );
 
+  /**
+   * W25 — the `compare` slot's real component, at last (`slots.tsx`).
+   *
+   * The block carries two attempt IDS and nothing else (D3 rule 1: blocks
+   * carry references, never content), so this is where they become two
+   * passes: the host has already fetched them, and the ids are matched rather
+   * than assumed in order — an answer that named them the other way round
+   * would otherwise play tonight against March labelled "then".
+   */
+  const CompareSlot = useCallback(
+    (props: CompareSlotProps) => {
+      if (!compare) return null;
+      const byId = (id: string) =>
+        compare.older.attemptId === id
+          ? compare.older
+          : compare.newer.attemptId === id
+            ? compare.newer
+            : null;
+      const older = byId(props.older.id);
+      const newer = byId(props.newer.id);
+      if (!older || !newer || older === newer) return null;
+      return <CompareTakes older={older} newer={newer} score={score} />;
+    },
+    [compare, score],
+  );
+
   const answer = useMemo(() => {
     if (!headline) return null;
     return resolveCoachAnswer(
@@ -342,6 +396,10 @@ export function SongReview({
             attemptId: review.attemptId,
             withProgress: progressFor !== undefined,
             withTake: video?.videoPath != null,
+            // W25 — and, on an `improved` finding, the older run of these
+            // bars to hold this one against. Only the headline gets it: one
+            // then-and-now is the evidence, two is a slideshow.
+            ...(compare ? { olderAttemptId: compare.older.attemptId } : {}),
           },
           bag.current,
         ),
@@ -351,7 +409,7 @@ export function SongReview({
     // `t` is stable per language and the bag is a ref; re-resolving on every
     // render would draw a different variant of the same sentence each time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headline, score, review.scoreId, context, progressFor, video, t]);
+  }, [headline, score, review.scoreId, context, progressFor, video, compare, t]);
 
   /**
    * The headline, split where A4 splits it.
@@ -550,7 +608,7 @@ export function SongReview({
         <CoachBlocks
           blocks={shown}
           onAction={handlerFor(headline)}
-          slots={{ tabExcerpt: TabExcerpt, take: TakeSlot }}
+          slots={{ tabExcerpt: TabExcerpt, take: TakeSlot, compare: CompareSlot }}
           className="songs-review-answer"
         />
       )}
@@ -617,7 +675,7 @@ export function SongReview({
                     key={i}
                     blocks={other.answer.blocks}
                     onAction={handlerFor(other.finding)}
-                    slots={{ tabExcerpt: TabExcerpt, take: TakeSlot }}
+                    slots={{ tabExcerpt: TabExcerpt, take: TakeSlot, compare: CompareSlot }}
                   />
                 ),
               )}

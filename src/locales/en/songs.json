@@ -303,6 +303,14 @@
       "unavailable": "This version cannot save a video.",
       "bar": "Bar",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "Bars {{bars}}, then and now",
+      "then": "Then",
+      "now": "Now",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Sound only — the camera was off for this one.",
+      "locked": "The two are held together by the bar, not by the clock, so a slower go still lines up."
     }
   }
 }

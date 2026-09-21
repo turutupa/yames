@@ -13,7 +13,7 @@
 // page scrolling.** A video pane is the largest thing this app has ever put
 // inside that frame, and "it fits with sound alone" says nothing about it.
 import { test, expect } from "@playwright/test";
-import { openShot, insideViewport, noSidewaysScroll } from "./fits";
+import { openShot, insideViewport, noSidewaysScroll, IN_ENGLISH } from "./fits";
 
 /**
  * The sizes the orchestrator named: the minimum window the app allows
@@ -357,6 +357,89 @@ test.describe("the clip you can send somebody", () => {
       clip!.peak,
       "the clip's audio track is silent — the mix never reached the recorder",
     ).toBeGreaterThan(0.01);
+  });
+});
+
+/**
+ * Then and now (W25 item 3, `plans/ECHORA.md` A2).
+ *
+ * The scene is a review whose headline is `improved`, with one earlier run at
+ * the same bars in the store — a month ago, at 70 % — and its recording on
+ * the shelf. What the coach offers under the sentence is the two of them,
+ * side by side.
+ */
+test.describe("then and now", () => {
+  test("draws both takes, each with its own tape", async ({ page }) => {
+    await openShot(page, "songs-compare", { width: 1400, height: 900 });
+    await expect(page.locator(".songs-compare-side")).toHaveCount(2);
+    // Each side's own tape, from its own pass: the old run was judged at its
+    // own tempo against its own boundaries, and one tape drawn twice would be
+    // a comparison of a pass with itself.
+    await expect(page.locator(".songs-compare .songs-tape-strip")).toHaveCount(2);
+    if (IN_ENGLISH) {
+      await expect(page.locator(".songs-compare-label").first()).toHaveText("Then");
+      await expect(page.locator(".songs-compare-label").nth(1)).toHaveText("Now");
+    }
+    // Side by side where there is room, which is what "side by side" means.
+    const boxes = await page.$$eval(".songs-compare-side", (nodes) =>
+      nodes.map((n) => n.getBoundingClientRect().top),
+    );
+    expect(new Set(boxes.map(Math.round)).size, "the two are stacked at 1400px").toBe(1);
+  });
+
+  /** ...and one under the other where there is not, with nothing off-screen. */
+  test("stacks rather than squeezing at the smallest window", async ({ page }) => {
+    const size = { width: 480, height: 780 };
+    await openShot(page, "songs-compare", size);
+    await noSidewaysScroll(page, "then and now at 480px");
+    const boxes = await page.$$eval(".songs-compare-side", (nodes) =>
+      nodes.map((n) => {
+        const r = n.getBoundingClientRect();
+        return { top: Math.round(r.top), left: r.left, right: r.right };
+      }),
+    );
+    expect(boxes.length).toBe(2);
+    expect(new Set(boxes.map((b) => b.top)).size, "still side by side at 480px").toBe(2);
+    for (const box of boxes) {
+      expect(box.left).toBeGreaterThanOrEqual(-1);
+      expect(box.right).toBeLessThanOrEqual(size.width + 1);
+    }
+  });
+
+  /**
+   * The claim the whole thing rests on: the two are locked to BARS.
+   *
+   * March was at 70 % and tonight at 100 %, so after a few seconds the older
+   * recording is several seconds further behind in its own file — and both
+   * are at the same bar of the music. Asserted on the elements' own
+   * `currentTime`, which is the only place the truth is: a test that read the
+   * app's own idea of where they were would be asking the code to confirm
+   * itself.
+   */
+  test("holds the two to the same BAR while their clocks differ", async ({ page }) => {
+    await openShot(page, "songs-compare", { width: 1400, height: 900 });
+    await page.locator(".songs-compare-controls button").first().click();
+    // Long enough for the leader to cross several bar lines — a bar of the
+    // fixture is 2.5 s at 96 BPM and 3.6 s at 67.
+    await page.waitForTimeout(6000);
+
+    const seen = await page.$$eval(".songs-compare audio", (nodes) =>
+      nodes.map((n) => (n as HTMLAudioElement).currentTime),
+    );
+    expect(seen.length, "the two takes have no audio").toBe(2);
+    const [older, newer] = seen;
+    expect(newer, "the newer take never started playing").toBeGreaterThan(1);
+
+    // 70 % against 100 %: the older recording covers the same bars in about
+    // 1/0.7 of the time, so at the same bar it is that much further into its
+    // own file. Locked to SECONDS the two would be equal, which is the bug
+    // this exists to make impossible.
+    const ratio = older / newer;
+    expect(
+      ratio,
+      `the older take is at ${older.toFixed(2)}s against ${newer.toFixed(2)}s — ratio ${ratio.toFixed(2)}`,
+    ).toBeGreaterThan(1.2);
+    expect(ratio).toBeLessThan(1.7);
   });
 });
 

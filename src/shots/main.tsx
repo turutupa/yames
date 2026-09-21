@@ -435,6 +435,22 @@ async function drive() {
         }
       }
 
+      /**
+       * W25 — then and now, scrolled to.
+       *
+       * The two takes are a block of the coach's answer, and the answer is
+       * under the whole video pane inside a body that scrolls. Waited for
+       * rather than assumed: the pair comes from a read of the store and the
+       * shelf, so a scene that photographed before it landed would photograph
+       * a review with no comparison in it — which is a real state and not
+       * this one.
+       */
+      if (shot!.songs.compare) {
+        await until("the two takes", () => !!document.querySelector(".songs-compare"), 20000);
+        document.querySelector(".songs-compare")?.scrollIntoView({ block: "center" });
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+
       if (shot!.songs.openMore) {
         /*
          * Pressed until it takes, rather than pressed once and hoped for.

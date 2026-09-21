@@ -60,6 +60,7 @@ import { TrackPicker, tuningLabel } from "./TrackPicker";
 import { useLiveNoteLights } from "./review/useLiveNoteLights";
 import { useSongActions } from "./review/useSongActions";
 import { useSongAttempt } from "./review/useSongAttempt";
+import { useSongCompare } from "./review/useSongCompare";
 import { useSongProgress } from "./review/useSongProgress";
 import { useSongTakePitch } from "./review/useSongTakePitch";
 import { SongBand } from "./SongBand";
@@ -370,6 +371,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * not a story and the block goes, which is `resolve.ts`'s own rule.
    */
   const progressFor = useSongProgress(attempt.review);
+
+  /**
+   * W25 — an older recording of these bars, to hold this one against
+   * (addendum 11, `plans/ECHORA.md` A2, `COACH_UX.md` C3).
+   *
+   * `undefined` until a player has come back to a passage with the recorder
+   * on twice, which is the honest state and the common one. The coach offers
+   * "see the difference" only when there is a pair AND it has just said the
+   * passage improved.
+   */
+  const compare = useSongCompare(attempt.review, song?.id ?? null, reviewVideo);
 
   /** Whether the verdict is the thing in the frame rather than the tab. */
   const reviewShowing = attempt.review !== null;
@@ -728,6 +740,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   onDismiss={dismissReview}
                   progressFor={progressFor}
                   video={reviewVideo}
+                  compare={compare}
                 />
               </Suspense>
             )}

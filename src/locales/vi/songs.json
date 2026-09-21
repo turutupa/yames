@@ -303,6 +303,14 @@
       "unavailable": "Bản này không lưu được video.",
       "bar": "Ô nhịp",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "Ô nhịp {{bars}}, hồi đó và bây giờ",
+      "then": "Hồi đó",
+      "now": "Bây giờ",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Chỉ có tiếng — lần này máy quay tắt.",
+      "locked": "Hai bên khớp theo ô nhịp chứ không theo đồng hồ, nên lần chơi chậm hơn vẫn ăn khớp."
     }
   }
 }

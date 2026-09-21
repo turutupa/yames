@@ -321,6 +321,14 @@
       "unavailable": "Ta wersja nie potrafi zapisać wideo.",
       "bar": "Takt",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "Takty {{bars}}, kiedyś i teraz",
+      "then": "Kiedyś",
+      "now": "Teraz",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Tylko dźwięk — przy tym podejściu kamera była wyłączona.",
+      "locked": "Oba są zgrane co takt, a nie co sekundę, więc wolniejsze podejście też pasuje."
     }
   }
 }

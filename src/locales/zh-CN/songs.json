@@ -303,6 +303,14 @@
       "unavailable": "此版本无法保存视频。",
       "bar": "小节",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "第 {{bars}} 小节，那时和现在",
+      "then": "那时",
+      "now": "现在",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "只有声音——这一遍摄像头是关着的。",
+      "locked": "两边是按小节对齐的，不是按秒，所以弹得慢的那一遍也能对上。"
     }
   }
 }

@@ -328,6 +328,19 @@ export type BlocksOptions = {
    * to nothing, which is correct, so this is belt as well as braces.
    */
   withTake?: boolean;
+  /**
+   * W25 — there is an older recording of these bars to hold this one against.
+   *
+   * The id of the earlier attempt, or absent. Same shape and same reason as
+   * `withProgress`: whether a pair exists is a fact about the world, not
+   * about the finding, and this function is pure — the host looks it up
+   * (`review/useSongCompare.ts`) and says so here.
+   *
+   * Only ever used on an `improved` finding. "See the difference" after a
+   * correction would be the coach rubbing it in; after "this is better than
+   * it was" it is the evidence (`COACH_UX.md` C3, `plans/ECHORA.md` A2).
+   */
+  olderAttemptId?: string;
 };
 
 /**
@@ -368,6 +381,15 @@ export function blocksFor(t: Translate, finding: Finding, score: SongScore | nul
     if (opts.withTake && opts.attemptId) {
       blocks.push({ type: "take", attempt: opts.attemptId, fromBar, toBar });
     }
+  }
+
+  // W25 — and, when the coach has just said this passage is better than it
+  // was, the two takes that show it. After `improved` and after nothing else:
+  // "see the difference" alongside a correction would be the coach making a
+  // point, and C3 is explicit that the before-and-after is volunteered only
+  // when it is real. `resolve.ts` drops a pair it cannot find either way.
+  if (finding.kind === "improved" && opts.olderAttemptId && opts.attemptId) {
+    blocks.push({ type: "compare", attempts: [opts.olderAttemptId, opts.attemptId] });
   }
 
   const action = actionFor(finding, opts.scoreId);

@@ -312,6 +312,14 @@
       "unavailable": "Esta versão não consegue salvar um vídeo.",
       "bar": "Compasso",
       "bpmUnit": "BPM"
+    },
+    "compare": {
+      "title": "Compassos {{bars}}, antes e agora",
+      "then": "Antes",
+      "now": "Agora",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Só som — nesta a câmera estava desligada.",
+      "locked": "As duas andam juntas por compasso, não por relógio, então uma passada mais devagar também encaixa."
     }
   }
 }
