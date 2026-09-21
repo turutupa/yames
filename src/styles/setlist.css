@@ -1178,3 +1178,269 @@
   font-size: 0.8rem;
   color: var(--text-faint);
 }
+
+/* ============ A step reads like a sentence on a phone (M11) ================
+ *
+ * Under `.main-window.is-mobile`, which only the phone build writes — so none
+ * of this can reach a desktop pixel at any window width. See the note at the
+ * foot of shell.css.
+ *
+ * What it looked like before: at 360px every word of a step was on its own
+ * line — "70 BPM", "4/4", "quarter", "for", "8 bars", "then", "cut", a "·"
+ * alone on a line, "wood", another "·", "volume 70%" — 650px for one step, so
+ * a four-step routine was three screens of fragments. Two things caused it and
+ * neither was about phones:
+ *
+ *   1. The sentence is drawn with the drill's `.drill-plan` classes, and the
+ *      drill turns that row into a COLUMN under 560px (`drill-view.css`) —
+ *      right for a three-phrase plan in a narrow desktop window, wrong for a
+ *      list of steps. The `.drill-plan-sep` dots are hidden there too, which
+ *      is why the `·` separators left behind — the detail line's, which are
+ *      text — ended up alone on lines of their own.
+ *   2. The four step tools are `flex: none` and drawn on EVERY row at
+ *      `opacity: 0` so a row cannot change height when they appear. At 1400px
+ *      that costs nothing; at 360 it is 100px — a third of the screen —
+ *      permanently taken from the sentence on every step, invisible.
+ *
+ * So on a phone the row is a grid rather than a flex line: the number and the
+ * sentence share the first row and get the whole width, and the tools drop to
+ * a second row that only the step you are working with has. The sentence then
+ * breaks where a reader would break it rather than wherever the words ran out:
+ *
+ *     Loosen up
+ *     70 BPM · 4/4 · quarter
+ *     for 8 bars then cut
+ *     wood · volume 70%          <- the selected step only
+ *
+ * Sound and volume behind the selection, and not on every step, because the
+ * question a routine answers while you are scrolling it between exercises is
+ * what comes next, at what tempo, for how long. Which click and how loud are
+ * decisions you make while building a step — and while you are making them
+ * that step is the one under your thumb. A desktop has the width to say all of
+ * it at once and keeps doing so.
+ */
+
+/* ── 1. The sentence is a sentence again ─────────────────────────────────── */
+
+/* Four classes against the drill's one, so this wins wherever the two files
+   are read in. Only inside a setlist sentence: the drill's own plan keeps the
+   stack, which is right for it. */
+/* The row gap is half of what a line costs, because a deliberate break takes
+   a (zero-height) flex line of its own: a 100%-wide item never shares a line
+   with the words before it, so the break pays the gap twice and comes to the
+   16px the block below uses between its two rows. A line that merely ran out
+   of room pays it once, and reads as the continuation it is. */
+.main-window.is-mobile .setlist-sentence .drill-plan {
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+/* A phrase and the little word in front of it, as one item that wraps
+   together: "for 8 bars", "then cut", "and then the setlist ends". A line
+   that ends on "then" reads as a mistake, and in the long locales the middle
+   line does wrap. No box at all off a phone — `display: contents` makes the
+   wrapper generate none — so a desktop line is exactly the flex row it was. */
+.setlist-said-group {
+  display: contents;
+}
+
+.main-window.is-mobile .setlist-sentence-folded .setlist-said-group {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+/* The loud line carries three phrases — tempo, meter, subdivision — and at
+   1.5rem "96 BPM 4/4 sixteenth" did not fit a 360px screen. It does at this
+   size, with the separators gone; a long locale still wraps, and wraps onto a
+   line that begins with a word. */
+.main-window.is-mobile .setlist-sentence.setlist-sentence-folded {
+  --plan-loud: 1.4rem;
+}
+
+/* No separator in a step, at all.
+ *
+ * A "·" between two phrases is a desktop luxury: it costs 15px, and on a
+ * 360px screen those are the fifteen that decide whether "sechzehntel" fits
+ * beside the meter or starts a line of its own. And there is no rule that can
+ * keep a dot off the head of a line once the words beside it wrap — grouping
+ * it with the phrase it introduces (below) only moves the stray dot from the
+ * end of one line to the start of the next.
+ *
+ * So the gap does the separating, which is what the drill's own plan does
+ * under 560px and what the dotted rule under every phrase was already saying.
+ * `.drill-plan-sep` is a 4px circle and `.drill-plan-detail-sep` is the text
+ * "·"; both go. */
+.main-window.is-mobile .setlist-sentence-folded .drill-plan-sep,
+.main-window.is-mobile .setlist-sentence-folded .drill-plan-detail-sep {
+  display: none;
+}
+
+/* 16px between the lines, and every token below drawn at least 26px tall, so
+   a transparent 9px overlay takes each of them past 44 without two lines'
+   overlays overlapping by more than a pixel or two. Height spent on air
+   rather than on type is height a finger can use. */
+.main-window.is-mobile .setlist-sentence.setlist-sentence-folded {
+  gap: 16px;
+}
+
+.main-window.is-mobile .setlist-sentence-folded .setlist-plan-timing {
+  margin-top: 0;
+}
+
+/* ── 2. Where the lines break ────────────────────────────────────────────── */
+
+/* Nothing, off a phone. An element with no box changes no desktop geometry. */
+.setlist-said-break {
+  display: none;
+}
+
+/* A full-width item in a wrapping flex row is a line break you can rely on in
+   fifteen languages, which "it happens to be too long" is not. */
+.main-window.is-mobile .setlist-sentence-folded .setlist-said-break {
+  display: block;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 0;
+}
+
+/* The sound and the volume, on the step you are working with. */
+.main-window.is-mobile .setlist-step:not(.selected) .setlist-said-extras {
+  display: none;
+}
+
+/* ── 3. The row: number and sentence first, controls underneath ──────────── */
+
+.main-window.is-mobile .setlist-step {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-areas:
+    "no   said"
+    "grip tools";
+  align-items: start;
+  column-gap: 8px;
+  row-gap: 10px;
+  padding: 11px 12px 12px;
+}
+
+.main-window.is-mobile .setlist-step-no {
+  grid-area: no;
+  width: auto;
+  padding-top: 5px;
+}
+
+.main-window.is-mobile .setlist-sentence.setlist-sentence-folded {
+  grid-area: said;
+}
+
+.main-window.is-mobile .setlist-step-grip {
+  grid-area: grip;
+}
+
+.main-window.is-mobile .setlist-step-tools {
+  grid-area: tools;
+}
+
+/* Reserved space is what the invisible tools were for, and on a phone that is
+   the one thing there is none of. They appear on the step you tapped — which
+   is the accordion this screen has always been: your own movement, at the row
+   your eye is already on. */
+.main-window.is-mobile .setlist-step:not(.selected) .setlist-step-grip,
+.main-window.is-mobile .setlist-step:not(.selected) .setlist-step-tools {
+  display: none;
+}
+
+/* A row of four 27px icons 2px apart was the last of M03-GAPS' too-small
+   controls. With a line of its own they are a quarter of the width each and
+   44px tall for real, so the transparent overlay the touch pass gave them —
+   which reached 11px up and down into the steps above and below — is switched
+   off rather than left stacked on top of a target that no longer needs it. */
+.main-window.is-mobile .setlist-step.selected .setlist-step-tools {
+  opacity: 1;
+  gap: 8px;
+  padding-top: 0;
+}
+
+.main-window.is-mobile .setlist-step-tools button {
+  flex: 1;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.main-window.is-mobile .setlist-step-tools button::after {
+  inset: 0;
+}
+
+/* The handle sits where the number is, at the head of its own row. HTML5 drag
+   does not exist on a touch screen — the up and down buttons beside it are the
+   move a phone actually has — so it is here to be seen and not to be relied
+   on, at the size everything else on this row is. */
+.main-window.is-mobile .setlist-step.selected .setlist-step-grip {
+  opacity: 1;
+  min-height: 44px;
+  width: 20px;
+  padding-top: 0;
+  justify-content: center;
+}
+
+/* ── 4. Touch targets, line by line ──────────────────────────────────────── */
+
+/* The name leads its own line, so it can have the padding a desktop sentence
+   could not give it without lifting the dotted rule off the baseline it shares
+   with the words beside it. 27px drawn, 45px to a finger — where M03-GAPS had
+   to settle for 28x28 and say so. A long name in German wraps rather than
+   running off the screen. */
+.main-window.is-mobile .setlist-folded-name {
+  font-size: 14px;
+  padding: 4px 6px 5px;
+  margin-right: 0;
+  white-space: normal;
+  text-align: left;
+}
+
+.main-window.is-mobile .setlist-folded-name::after {
+  inset: -9px -6px;
+}
+
+/* 26px drawn on the loud line, 26 on the middle one. */
+.main-window.is-mobile .setlist-sentence-folded .drill-plan-token {
+  padding: 1px 8px 2px;
+}
+
+.main-window.is-mobile .setlist-sentence-folded .setlist-plan-timing .drill-plan-token {
+  padding: 5px 7px 6px;
+}
+
+/* The middle line was 0.78rem, which is small to read and smaller to hit. */
+.main-window.is-mobile .setlist-sentence-folded .setlist-plan-mid {
+  font-size: 0.88rem;
+}
+
+.main-window.is-mobile .setlist-sentence-folded .setlist-plan-glue {
+  font-size: 0.88rem;
+  padding: 0 3px 2px;
+}
+
+/* Sound and volume: 18px of type, 27px drawn, 45 to a finger. */
+.main-window.is-mobile .setlist-sentence-folded .drill-plan-detail-token {
+  padding: 4px 4px 5px;
+}
+
+.main-window.is-mobile .setlist-sentence-folded .drill-plan-token::after,
+.main-window.is-mobile .setlist-sentence-folded .drill-plan-detail-token::after {
+  inset: -9px -4px;
+}
+
+/* ── 5. The list around it ───────────────────────────────────────────────── */
+
+/* The paragraph's head is a label, a summary, a spacer and a repeat stepper on
+   one line; at 360 the stepper was pushed under the label with 22px between
+   them, which is what kept its minus and plus at 45x39 (M03-GAPS). Wrapped on
+   purpose, each half whole, and the gap is the one the steppers needed. */
+.main-window.is-mobile .setlist-paragraph-head {
+  flex-wrap: wrap;
+  row-gap: 12px;
+}

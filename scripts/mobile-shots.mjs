@@ -241,6 +241,46 @@ const SCREENS = [
     ],
   },
 
+  {
+    // Further down the same routine, where the step kinds the first screen
+    // never shows are: the jam step — a band rather than a click, so its
+    // sentence says bars of the form instead of a meter and "the band" instead
+    // of a sound — and the two ways to add another step. The editor's own
+    // stage is the scroller, the same one the drill's chart uses.
+    id: "setlist-editor-end",
+    shot: "metronome",
+    steps: [
+      tap('.mobile-tab[data-tab="setlist"]'),
+      tap(".mobile-tab-library"),
+      wait(".sheet--library"),
+      tap(".preset-sidebar-item.setlist-item"),
+      wait(".setlist-paragraph"),
+      tap(".mobile-tab-library"),
+      waitGone(".sheet--library"),
+      { scrollToBottom: ".setlist-paragraph-list" },
+      settle(400),
+    ],
+  },
+  {
+    // The setlist RUNNING, which is a different screen from the editor and
+    // never appears beside it: `SetlistPlayer`, its per-step ribbon and the
+    // countdown a player reads from a metre back.
+    id: "setlist-playing",
+    shot: "metronome",
+    steps: [
+      tap('.mobile-tab[data-tab="setlist"]'),
+      tap(".mobile-tab-library"),
+      wait(".sheet--library"),
+      tap(".preset-sidebar-item.setlist-item"),
+      wait(".setlist-paragraph"),
+      tap(".mobile-tab-library"),
+      waitGone(".sheet--library"),
+      tap(".transport-play"),
+      wait(".setlist-player"),
+      settle(600),
+    ],
+  },
+
   // ── the meter sheet ──────────────────────────────────────────────────────
   { id: "meter-sheet", shot: "metronome", steps: [tap(".meter-chip"), wait(".sheet--meter")] },
 
@@ -673,6 +713,28 @@ async function scrollStageToBottom(cdp, sessionId) {
   );
 }
 
+/**
+ * Scroll one named scroller to its bottom.
+ *
+ * Some screens keep their own: the setlist's step list is a flex child with
+ * `overflow-y: auto`, so the stage above it has only a few pixels of travel
+ * and `scrollStageToBottom` stops long before the last step.
+ */
+async function scrollToBottom(cdp, sessionId, selector) {
+  await waitFor(cdp, sessionId, selector);
+  await evaluate(
+    cdp,
+    sessionId,
+    `(() => {
+      const el = document.querySelector(${JSON.stringify(selector)});
+      if (!el) return false;
+      el.scrollTop = el.scrollHeight;
+      return true;
+    })()`,
+  );
+  await sleep(120);
+}
+
 async function runStep(cdp, sessionId, step) {
   if (step.click) return clickSelector(cdp, sessionId, step.click);
   if (step.wait) return waitFor(cdp, sessionId, step.wait);
@@ -684,6 +746,7 @@ async function runStep(cdp, sessionId, step) {
   if (step.openSettings) return openSettings(cdp, sessionId);
   if (step.zenButton) return clickZen(cdp, sessionId);
   if (step.scrollStageToBottom) return scrollStageToBottom(cdp, sessionId);
+  if (step.scrollToBottom) return scrollToBottom(cdp, sessionId, step.scrollToBottom);
   throw new Error(`unrecognised step: ${JSON.stringify(step)}`);
 }
 

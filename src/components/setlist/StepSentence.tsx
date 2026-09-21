@@ -154,18 +154,29 @@ export function StepSentence({
           </span>
         )}
         {folded && (
-          <button
-            type="button"
-            ref={anchor("name")}
-            className={`setlist-folded-name${open === "name" ? " open" : ""}`}
-            aria-expanded={open === "name"}
-            onClick={() => {
-              setNameDraft(step.name);
-              toggle("name")();
-            }}
-          >
-            {step.name}
-          </button>
+          <>
+            <button
+              type="button"
+              ref={anchor("name")}
+              className={`setlist-folded-name${open === "name" ? " open" : ""}`}
+              aria-expanded={open === "name"}
+              onClick={() => {
+                setNameDraft(step.name);
+                toggle("name")();
+              }}
+            >
+              {step.name}
+            </button>
+            {/* A line break the phone can rely on. `display: none` everywhere
+                else, so a desktop step is the single line it has always been;
+                on a phone it is `flex-basis: 100%` in a wrapping row, which
+                puts the name on a line of its own and the tempo, the meter and
+                the subdivision together on the next. A break that depends on
+                the words running out is a break that lands differently in
+                German than in English — see the phone section of
+                `setlist.css`. */}
+            <span className="setlist-said-break" aria-hidden="true" />
+          </>
         )}
         <button
           type="button"
@@ -178,8 +189,6 @@ export function StepSentence({
           <span className="drill-plan-unit">{t("drill.bpmUnit")}</span>
         </button>
 
-        <span className="drill-plan-sep" aria-hidden="true" />
-
         {/* The meter is the JAM's, and it is not a control here.
             `pushJam` sets the engine's subdivision and beat groups from the
             groove before it sends the table, and the engine refuses a table
@@ -188,37 +197,50 @@ export function StepSentence({
             a jam step would therefore be a button that takes the band away
             and says nothing. What the step's length is measured in is the
             chorus, so that is what stands here instead. */}
+        {/* Each separator travels with the phrase it introduces.
+            `display: contents` off a phone, so the line is exactly the flex
+            row it has always been; on a phone it is one inline-flex item, and
+            a dot can therefore never be left stranded at the end of a line
+            when the words after it wrap — which is what "96 BPM · 4/4 ·" with
+            "sixteenth" underneath it was. */}
         {isJam ? (
-          <span className="drill-plan-value setlist-jam-bars">
-            {t("setlist.jam.barsOfForm", { count: chorusBars })}
+          <span className="setlist-said-group">
+            <span className="drill-plan-sep" aria-hidden="true" />
+            <span className="drill-plan-value setlist-jam-bars">
+              {t("setlist.jam.barsOfForm", { count: chorusBars })}
+            </span>
           </span>
         ) : (
           <>
-            <button
-              type="button"
-              ref={anchor("meter")}
-              className={`drill-plan-token${open === "meter" ? " open" : ""}`}
-              aria-expanded={open === "meter"}
-              aria-label={t("metronome.meter")}
-              onClick={toggle("meter")}
-            >
-              <span className="drill-plan-value">{meter}</span>
-            </button>
+            <span className="setlist-said-group">
+              <span className="drill-plan-sep" aria-hidden="true" />
+              <button
+                type="button"
+                ref={anchor("meter")}
+                className={`drill-plan-token${open === "meter" ? " open" : ""}`}
+                aria-expanded={open === "meter"}
+                aria-label={t("metronome.meter")}
+                onClick={toggle("meter")}
+              >
+                <span className="drill-plan-value">{meter}</span>
+              </button>
+            </span>
 
-            <span className="drill-plan-sep" aria-hidden="true" />
-
-            <button
-              type="button"
-              ref={anchor("sub")}
-              className={`drill-plan-token${open === "sub" ? " open" : ""}`}
-              aria-expanded={open === "sub"}
-              aria-label={t("metronome.subdivision")}
-              onClick={toggle("sub")}
-            >
-              <span className="drill-plan-value">
-                {t(`subdiv.${step.subdivision}`).toLowerCase()}
-              </span>
-            </button>
+            <span className="setlist-said-group">
+              <span className="drill-plan-sep" aria-hidden="true" />
+              <button
+                type="button"
+                ref={anchor("sub")}
+                className={`drill-plan-token${open === "sub" ? " open" : ""}`}
+                aria-expanded={open === "sub"}
+                aria-label={t("metronome.subdivision")}
+                onClick={toggle("sub")}
+              >
+                <span className="drill-plan-value">
+                  {t(`subdiv.${step.subdivision}`).toLowerCase()}
+                </span>
+              </button>
+            </span>
           </>
         )}
       </div>
@@ -228,67 +250,89 @@ export function StepSentence({
           A window each — they are two decisions, and one window holding both
           was two headings and two steppers deep before you had read either. */}
       <div className="drill-plan setlist-plan-timing">
-        <span className="setlist-plan-glue">
-          {step.trigger.kind === "manual" ? t("setlist.said.runs") : t("setlist.said.for")}
-        </span>
-        <button
-          type="button"
-          ref={anchor("trigger")}
-          className={`drill-plan-token${open === "trigger" ? " open" : ""}`}
-          aria-expanded={open === "trigger"}
-          aria-label={t("setlist.gap.moveOn")}
-          onClick={toggle("trigger")}
-        >
-          <span className="drill-plan-value setlist-plan-mid">{triggerLabel(t, step.trigger)}</span>
-        </button>
-        <span className="setlist-plan-glue">
-          {isLast ? t("setlist.said.andThen") : t("setlist.said.then")}
-        </span>
-        <button
-          type="button"
-          ref={anchor("transition")}
-          className={`drill-plan-token${open === "transition" ? " open" : ""}`}
-          aria-expanded={open === "transition"}
-          aria-label={t("setlist.gap.getThereBy")}
-          onClick={toggle("transition")}
-        >
-          <span className="drill-plan-value setlist-plan-mid">
-            {isLast ? t("setlist.said.theSetlistEnds") : transitionLabel(t, step.transition)}
+        {/* "for 8 bars" and "then cut" are two phrases, and each keeps its
+            little word: a line that ends on "then" reads as a mistake. Same
+            `display: contents` wrapper as the line above. */}
+        <span className="setlist-said-group">
+          <span className="setlist-plan-glue">
+            {step.trigger.kind === "manual" ? t("setlist.said.runs") : t("setlist.said.for")}
           </span>
-        </button>
+          <button
+            type="button"
+            ref={anchor("trigger")}
+            className={`drill-plan-token${open === "trigger" ? " open" : ""}`}
+            aria-expanded={open === "trigger"}
+            aria-label={t("setlist.gap.moveOn")}
+            onClick={toggle("trigger")}
+          >
+            <span className="drill-plan-value setlist-plan-mid">
+              {triggerLabel(t, step.trigger)}
+            </span>
+          </button>
+        </span>
+        <span className="setlist-said-group">
+          <span className="setlist-plan-glue">
+            {isLast ? t("setlist.said.andThen") : t("setlist.said.then")}
+          </span>
+          <button
+            type="button"
+            ref={anchor("transition")}
+            className={`drill-plan-token${open === "transition" ? " open" : ""}`}
+            aria-expanded={open === "transition"}
+            aria-label={t("setlist.gap.getThereBy")}
+            onClick={toggle("transition")}
+          >
+            <span className="drill-plan-value setlist-plan-mid">
+              {isLast ? t("setlist.said.theSetlistEnds") : transitionLabel(t, step.transition)}
+            </span>
+          </button>
+        </span>
 
         {folded && (
           <>
-            <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
+            {/* On a phone the sound and the volume move onto a line of their
+                own, and only on the step you are working with — so the break
+                and the separator that leads them carry the same class the two
+                tokens do. On a desktop none of these classes does anything at
+                all. */}
+            <span
+              className="setlist-said-break setlist-said-extras"
+              aria-hidden="true"
+            />
+            <span className="drill-plan-detail-sep setlist-said-extras" aria-hidden="true">
+              ·
+            </span>
         {/* A jam step's sound is the band, and the click behind it is only
             what plays if the jam is ever deleted. Offering a click picker on
             a step that plays drums, bass and keys would be a control with
             nothing to do. */}
         {isJam ? (
-          <span className="drill-plan-detail-token setlist-jam-said">
+          <span className="drill-plan-detail-token setlist-jam-said setlist-said-extras">
             {t("setlist.jam.said")}
           </span>
         ) : (
         <button
           type="button"
           ref={anchor("sound")}
-          className={`drill-plan-detail-token${open === "sound" ? " open" : ""}`}
+          className={`drill-plan-detail-token setlist-said-extras${open === "sound" ? " open" : ""}`}
           aria-expanded={open === "sound"}
           onClick={toggle("sound")}
         >
           {t(`sound.${step.soundType}`).toLowerCase()}
         </button>
         )}
-        <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
-        <button
-          type="button"
-          ref={anchor("volume")}
-          className={`drill-plan-detail-token${open === "volume" ? " open" : ""}`}
-          aria-expanded={open === "volume"}
-          onClick={toggle("volume")}
-        >
-          {t("setlist.said.volume", { percent: Math.round(step.volume * 100) })}
-        </button>
+        <span className="setlist-said-group setlist-said-extras">
+          <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
+          <button
+            type="button"
+            ref={anchor("volume")}
+            className={`drill-plan-detail-token${open === "volume" ? " open" : ""}`}
+            aria-expanded={open === "volume"}
+            onClick={toggle("volume")}
+          >
+            {t("setlist.said.volume", { percent: Math.round(step.volume * 100) })}
+          </button>
+        </span>
           </>
         )}
       </div>

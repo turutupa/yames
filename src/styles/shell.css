@@ -3120,6 +3120,25 @@ body[data-sheet-maximized] .rail {
   gap: 14px;
 }
 
+/* ...except with a setlist running, where it did not fit and the thing that
+   fell off the edge was the one control that matters (M11).
+ *
+ * The desktop shedding order was written for a window: the step count goes
+ * under 680px, Skip loses its words under 820, and what is left — "Next in 8
+ * bars" and the button — is 125px against the 73px a 360px screen has after
+ * Stop and the count-in switch. Measured: the group ran 52px past the right
+ * edge and Skip was entirely off screen. On a "when I say" step nothing is
+ * counting down and no bar is running out, so Skip is the ONLY way the
+ * routine moves on — an unreachable one.
+ *
+ * So the words go and the button stays, which is the same order every other
+ * width uses. Nothing is lost: the step you are on, the bar you are in and
+ * how much of it is left are all drawn large on the player above it, which is
+ * the screen you are looking at while it plays. */
+.main-window.is-mobile .transport[data-setlist] .transport-setlist-next {
+  display: none;
+}
+
 /* The library is a sheet now, so the rail's own drawer geometry has nothing
    to animate and nothing to sit beside. */
 .main-window.is-mobile .main-body {
