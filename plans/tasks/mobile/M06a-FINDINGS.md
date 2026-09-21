@@ -156,6 +156,9 @@ The files outside M08's set that changed are the plugin crate
 
 ### On the runner — GitHub `macos-latest`, Xcode 26.6, iPhone 15 simulator
 
+Green, every step:
+<https://github.com/turutupa/yames/actions/runs/35550530399>
+
 | Gate | Result |
 |---|---|
 | `cargo check --lib --target aarch64-apple-ios` | **Pass.** Builds the Swift package on the way through, so this is also the first check that the plugin's iPhone half compiles. |
@@ -289,9 +292,21 @@ exports, and exporting is the only step that genuinely needs an identity.
   The plugin says one line at startup (`[YamesMobile] audio session
   configured: .playback/.default, asked 48000 Hz / 5.0 ms`) precisely because
   that is otherwise the only sign from outside the app that its native half is
-  running at all. What *is* visible in the log is CoreAudio opening a
-  `RemoteIO` stream at 48 000 Hz, 2 channels, Float32, 512-frame buffer —
-  cpal's backend doing its job.
+  running at all — and it is there, on every launch:
+
+  ```
+  Yames[19281] (Foundation) [YamesMobile] audio session configured:
+    .playback/.default, asked 48000 Hz / 5.0 ms
+  Yames[19281] [stderr] [yames] Using audio output device: "Default Device"
+  Yames[19281] [stderr] [yames] CoreAudio output latency: 0 frames
+  ```
+
+  Twice per launch, from `init()` and again from `load(webview:)`, which is
+  deliberate: the category can be reset out from under an app by a
+  media-services reset, and setting it twice costs nothing. Alongside it,
+  CoreAudio opens a `RemoteIO` stream at 48 000 Hz, 2 channels, Float32, with
+  a 512-frame buffer — cpal's backend doing its job. The `0 frames` latency is
+  the simulator having nothing to report, exactly as on the Android emulator.
 * **The drift check regenerates from an empty directory.** Checking after a
   build compares the wrong thing twice over: `Externals/` fills with the
   compiled Rust library and the next `xcodegen` pass adds forty lines of file
