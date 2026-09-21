@@ -361,6 +361,43 @@ function buildSettings(view: StageView, fretted: boolean): Settings {
   // Never true here. W4-FINDINGS §5: under vite the worker URL 404s and
   // rendering silently never finishes.
   settings.core.useWorkers = false;
+  /*
+   * ── The whole song is drawn, all of it, all the time (W34 items 5 and 2) ──
+   *
+   * alphaTab's `enableLazyLoading` defaults to ON and its own documentation
+   * says what is wrong with it here: *"AlphaTab tries to detect which elements
+   * are visible on the screen, and only appends those elements to the DOM …
+   * but is not working for all layouts and use cases."* Ours is one of the
+   * use cases it does not work for, and it is the cause of two separate
+   * things the owner reported on 2026-09-21.
+   *
+   * What it does, measured on a 120-bar fixture at 2000x1124: the engraving
+   * is twenty-three systems, and SEVEN of them have any content in the DOM.
+   * The other sixteen are empty `div`s of the right height. Scroll to the
+   * bottom and it is the other way round — the fourteen at the top are
+   * emptied and nine at the bottom are filled in.
+   *
+   * - *"I imported a tab and it feels like it's not rendering the entire
+   *   song, just a section of it"*. It was not rendering the entire song. It
+   *   was rendering the section in front of you and throwing the rest away,
+   *   and putting it back a frame after you scrolled to it.
+   * - *"When it's playing and I stop it, the whole alpha tab flickers as in
+   *   re-rendering"*. Stopping puts the cursor back at the top of the range,
+   *   which scrolls the page back — and every system the scroll passes is
+   *   emptied and re-filled on the way. Nothing was re-rendered; the DOM was
+   *   being taken apart and put back, which looks identical.
+   *
+   * Off, the whole engraving stays in the DOM: nothing blanks, nothing
+   * flickers, and bar 100 is drawn before anybody scrolls to it — which is
+   * also what the note lights, `boundsLookup` and the selection bands need,
+   * since none of them can paint into a system that is not there.
+   *
+   * The cost it saves is real and is not ours to save: it is for a page with
+   * several scores on it in the browser's own scroll. This is ONE score in a
+   * box we own, and a hundred and twenty bars is under fifteen hundred
+   * elements.
+   */
+  settings.core.enableLazyLoading = false;
   settings.core.smuflFontSources = new Map([[FontFileFormat.Woff2, bravuraWoff2]]);
   settings.core.logLevel = LogLevel.Warning;
   // The engine is the time axis. The player is never started.
@@ -527,9 +564,40 @@ export function TabStage({
   /** The chosen track's PRINTED bars, kept from the parse the render used. */
   const barsRef = useRef<ReturnType<typeof printedBarsOf>>([]);
 
-  // Build once per song, per track, per theme. Not per tick — re-rendering a
-  // two-hundred-bar score sixty times a second is the freeze this mode would
-  // be remembered for.
+  /**
+   * The file, read when the score is engraved and never depended on (W34
+   * item 2).
+   *
+   * `source` is a `Uint8Array` decoded from the library record. It is
+   * memoised per record — so any write that replaces that record hands this
+   * component a DIFFERENT array holding the same bytes, and an effect that
+   * depends on the array destroys the api, re-parses the file and re-engraves
+   * the whole score. Every one of those is invisible in a code review and
+   * unmistakable on screen.
+   *
+   * What actually decides the engraving is the SCORE: `score.id` is a hash of
+   * the file's bytes and the chosen track (`songs/library.ts`), so it changes
+   * when and only when there is a different piece of music to draw. That is
+   * what the effect below is keyed on, and the bytes are read through here.
+   */
+  const fileRef = useRef({ source, fileName: score.source.fileName, track: score.source.trackIndex });
+  fileRef.current = { source, fileName: score.source.fileName, track: score.source.trackIndex };
+
+  /*
+   * ── When the score is drawn, and the whole list of reasons ──────────────
+   *
+   * The file, the part, the notation mode, the zoom, the theme, and the WIDTH
+   * (which is alphaTab's own `ResizeObserver`, not this effect). Nothing else
+   * — not the transport, not the selection, not a beat event, not the
+   * verdict, and not a library record being written.
+   *
+   * The owner: *"when it's playing and i stop it, the whole alpha tab
+   * flickers as in re-rendering, this is very annoying"*. What he was seeing
+   * was alphaTab's lazy loading emptying and re-filling systems as the page
+   * scrolled back to the top — see `buildSettings` — and this effect is the
+   * other half of the same promise: `TabStage.render.test.tsx` counts the
+   * engravings across play, stop, play, a seek and a loop and finds ONE.
+   */
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -538,16 +606,17 @@ export function TabStage({
 
     let api: AlphaTabApi | null = null;
     const spoken = Logger.logLevel;
+    const file = fileRef.current;
     try {
-      const parsed = parseSongFile(source, score.source.fileName);
-      barsRef.current = printedBarsOf(parsed.atScore, score.source.trackIndex);
+      const parsed = parseSongFile(file.source, file.fileName);
+      barsRef.current = printedBarsOf(parsed.atScore, file.track);
       api = new AlphaTabApi(host, buildSettings(view, score.tuning.length > 0));
       api.error.on(() => setFailed(true));
       api.postRenderFinished.on(() => {
         setReady(true);
         setRendered((n) => n + 1);
       });
-      api.renderScore(parsed.atScore, [score.source.trackIndex]);
+      api.renderScore(parsed.atScore, [file.track]);
       apiRef.current = api;
       /*
        * The engraving's bounds, for the screenshot harness and the layout
@@ -571,18 +640,15 @@ export function TabStage({
       delete (window as unknown as { __SONGS_TAB_API__?: AlphaTabApi }).__SONGS_TAB_API__;
       api?.destroy();
     };
-    // `view` is a setting the whole engraving is built from, so a change to
-    // it is a fresh `AlphaTabApi` — the same as a theme change. Its two
-    // fields rather than the object, which is new on every render.
+    // `score.id` and NOT `source`, `fileName` or `trackIndex`: it is a hash
+    // of the bytes and the track, so it says "a different piece of music to
+    // draw" and nothing else does — an identical file decoded into a new
+    // array does not change it, and that is the whole point. `view` is a
+    // setting the engraving is built from, so a change to it is a fresh
+    // `AlphaTabApi`, the same as a theme change; its two fields rather than
+    // the object, which is new on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    source,
-    score.source.fileName,
-    score.source.trackIndex,
-    themeId,
-    view.notation,
-    view.zoom,
-  ]);
+  }, [score.id, themeId, view.notation, view.zoom]);
 
   /**
    * Ctrl/Cmd and the wheel makes the music bigger (W29 item 3).
