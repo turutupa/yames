@@ -206,11 +206,18 @@
  *
  * Songs' chips are their own; Jam's are `.jam-chip` with an `.active` class
  * in `jam.css` and nothing here reaches them. */
+/* 2026-09-21, the owner: "not a huge fan of that cutesy way of rendering [the
+ * chosen chip]. Can we have regular buttons with just an active border without
+ * that depth effect?" So the bar along the foot is gone. What is left still
+ * says it twice without a hue doing all the work: the tint, and a border drawn
+ * two pixels strong — as a ring in `box-shadow`, because a thicker real border
+ * is a wider chip, and a wider chip is the row moving under the hand that
+ * pressed it (the layout suite watches for exactly that). Flat, no depth. */
 .songs-chip[data-active] {
   background: var(--accent-subtle);
   border-color: var(--accent);
   color: var(--accent);
-  box-shadow: inset 0 -3px 0 0 var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 /* The bar belongs to the chip, not to the press: a chip being held down or
@@ -588,13 +595,13 @@
   border-color: var(--border);
 }
 
-/* The part being read, marked twice: the tint and a bar along the foot, the
-   same pairing the chips use — a hue on its own does not survive the two
-   lowest-contrast themes or a screenshot. */
+/* The part being read: the tint and a flat two-pixel border, the same
+   pairing the chips use (and no bar along the foot, for the same reason:
+   the owner, 2026-09-21, "regular buttons with just an active border"). */
 .songs-track-row[data-chosen] {
   background: var(--accent-subtle);
   border-color: var(--accent);
-  box-shadow: inset 0 -3px 0 0 var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 /* Listed, and not offered. A drum chart and a vocal line are in the file and
