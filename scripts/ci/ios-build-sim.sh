@@ -24,6 +24,8 @@ find_app() {
   find "$1" -maxdepth "${2:-4}" -name '*.app' -type d -print 2>/dev/null | sort | head -1
 }
 
+bash scripts/ci/ios-ensure-assets.sh
+
 echo "==> attempt 1: the Tauri CLI"
 if npm run tauri -- ios build --debug --target aarch64-sim; then
   APP=$(find_app src-tauri/gen/apple/build)

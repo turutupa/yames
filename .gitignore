@@ -19,6 +19,11 @@ src-tauri/gen/schemas/
 /artifacts/
 /build/
 
+# The Xcode project's link to the built frontend. A symlink to `dist/`,
+# remade by scripts/ci/ios-ensure-assets.sh on every build — see the comment
+# in that file for why it is not committed.
+src-tauri/gen/apple/assets
+
 # Seeded design-canvas output — regenerated from the .dc.html working files
 design/**/yames-app-redesign.html
 design/**/yames-site-directions.html

@@ -14,6 +14,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
+bash scripts/ci/ios-ensure-assets.sh
+
 PROJECT=$(find src-tauri/gen/apple -maxdepth 1 -name '*.xcodeproj' -print | sort | head -1)
 test -n "$PROJECT" || { echo "::error::no .xcodeproj under src-tauri/gen/apple"; exit 1; }
 echo "==> project: $PROJECT"
