@@ -24,7 +24,7 @@
 import { markFor } from "../../containers/songs/review/marks";
 import type { TimingMark } from "../../containers/songs/review/marks";
 import { isWrong } from "../../containers/songs/review/marks";
-import { msAtBeat, passLengthMs } from "./offset";
+import { msAtBeat, passLengthMs } from "../../takes/offset";
 import { barAtBeatInRange, printedBarNumber } from "../position";
 import { clampRange, rangeTempoSteps } from "../schedule";
 import type { BarRange } from "../schedule";

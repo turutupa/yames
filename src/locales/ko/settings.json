@@ -227,7 +227,8 @@
         "songs-loop-earlier": "부분을 한 마디 앞으로",
         "songs-loop-later": "부분을 한 마디 뒤로",
         "songs-take": "테이크 녹음",
-        "songs-camera": "영상 녹화"
+        "songs-camera": "영상 녹화",
+        "jam-camera": "영상 녹화"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "고른 마디를 길이는 그대로 한 마디 앞쪽으로 밀기",
         "songs-loop-later": "고른 마디를 길이는 그대로 한 마디 뒤쪽으로 밀기",
         "songs-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다",
-        "songs-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다"
+        "songs-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다",
+        "jam-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다"
       }
     },
     "inputTest": {

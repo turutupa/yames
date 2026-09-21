@@ -731,7 +731,8 @@
       "save": "Opslaan als video",
       "chorus": "Ronde {{count}}",
       "chorus_one": "Ronde {{count}}",
-      "chorus_other": "Ronde {{count}}"
+      "chorus_other": "Ronde {{count}}",
+      "next": "dan"
     }
   },
   "scale": {

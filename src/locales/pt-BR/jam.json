@@ -741,7 +741,8 @@
       "chorus": "Volta {{count}}",
       "chorus_one": "Volta {{count}}",
       "chorus_many": "Volta {{count}}",
-      "chorus_other": "Volta {{count}}"
+      "chorus_other": "Volta {{count}}",
+      "next": "depois"
     }
   },
   "scale": {

@@ -40,10 +40,10 @@
  */
 import { createChunkPipe } from "./chunks";
 import type { ChunkSink } from "./chunks";
-import { clipLayout } from "./clip";
+import { clipLayout, clipOverlayLayout } from "./clip";
 import type { ClipLayout, ClipShape } from "./clip";
-import type { ClipStrip } from "../../takes/clipStrip";
-import type { TimingMark } from "../../containers/songs/review/marks";
+import type { ClipStrip } from "./clipStrip";
+import type { TimingMark } from "../containers/songs/review/marks";
 
 /** How often the canvas is sampled. 30 is what the camera records at. */
 export const CLIP_FPS = 30;
@@ -70,6 +70,20 @@ export type ClipPalette = {
   accent: string;
   /** One per timing mark, in the order `marks.ts` names them. */
   marks: Record<TimingMark, string>;
+  /**
+   * The app's own display face, as a CSS font stack (W32).
+   *
+   * Read off the document with the colours and handed over for the same
+   * reason: a canvas knows nothing about the page it is on. It was
+   * `system-ui, sans-serif` hard-coded here, which is a DIFFERENT face
+   * from the one the app is set in — so a chord on a clip was drawn in a
+   * typeface the player had never seen in Yames.
+   *
+   * `recordClip` waits for it before the first frame (`document.fonts
+   * .load`); without that wait the opening second of every clip is drawn
+   * in whatever the canvas falls back to and then silently changes.
+   */
+  face: string;
 };
 
 export type ClipFrameState = {
@@ -115,6 +129,7 @@ export function paintClipFrame(ctx: CanvasRenderingContext2D, state: ClipFrameSt
   ctx.fillRect(0, 0, layout.width, layout.height);
 
   paintPicture(ctx, state);
+  paintOverPicture(ctx, state);
   paintStrip(ctx, state);
   paintCaption(ctx, state);
   if (state.brand) paintMark(ctx, state);
@@ -143,12 +158,36 @@ export function paintClipFrame(ctx: CanvasRenderingContext2D, state: ClipFrameSt
  */
 function paintMark(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
   const { layout, wordmark } = state;
-  const box = layout.mark;
   const type = layout.type.mark;
   const inset = Math.round(type * 0.42);
   const tile = Math.round(type * 1.25);
 
   ctx.save();
+
+  /*
+   * The panel, MEASURED rather than estimated (W32).
+   *
+   * `clip.ts` sizes `layout.mark` from "roughly 0.52 of the type size per
+   * character for a system sans", because it is pure arithmetic with no
+   * rendering context to ask. That estimate is fine for a sans and wrong for
+   * a serif: under Ivory, whose display face is one, "yames.app" overran the
+   * panel and the final "p" was clipped by the right edge of a 720-wide
+   * frame. This file HAS a context, so it measures the word and widens the
+   * panel to fit, keeping the same right-hand inset the layout chose — the
+   * mark stays in the corner it belongs in and is never covered or cut.
+   */
+  ctx.font = `600 ${type}px ${state.palette.face}`;
+  const wordWidth = ctx.measureText(wordmark).width;
+  const gap = Math.round(type * 0.4);
+  const planned = layout.mark;
+  const rightInset = layout.width - (planned.x + planned.width);
+  const width = Math.max(planned.width, inset * 2 + tile + gap + Math.ceil(wordWidth));
+  const box = {
+    x: layout.width - rightInset - width,
+    y: planned.y,
+    width,
+    height: planned.height,
+  };
 
   // The backing. Dark and translucent rather than the theme's own card: the
   // clip may be watched anywhere, and what it has to survive is the picture
@@ -192,10 +231,10 @@ function paintMark(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
   ctx.stroke();
 
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = `600 ${type}px system-ui, sans-serif`;
+  ctx.font = `600 ${type}px ${state.palette.face}`;
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(wordmark, tileX + tile + Math.round(type * 0.4), box.y + box.height / 2 + 1);
+  ctx.fillText(wordmark, tileX + tile + gap, box.y + box.height / 2 + 1);
 
   ctx.restore();
 }
@@ -276,6 +315,35 @@ function paintPicture(ctx: CanvasRenderingContext2D, state: ClipFrameState): voi
   ctx.restore();
 }
 
+/**
+ * What the renderer wants ON the picture — the chord, and the next one.
+ *
+ * After the picture and before the strip, with the picture's own box, so a
+ * jam can put the chord you are playing over large in a lower corner of the
+ * frame. Songs has nothing to put here and does not implement it.
+ *
+ * Not folded into `paintInto`: the strip is a band this file clips to and
+ * draws a playhead through, and a chord a fifth of the frame high does not
+ * live in a band.
+ */
+function paintOverPicture(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
+  const { layout, palette, strip, nowMs, picture } = state;
+  if (!strip.paintOverPicture) return;
+  const box = layout.picture;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(box.x, box.y, box.width, box.height);
+  ctx.clip();
+  strip.paintOverPicture(ctx, {
+    box,
+    layout,
+    palette,
+    nowMs,
+    hasPicture: picture !== null,
+  });
+  ctx.restore();
+}
+
 /** How big the thing being drawn is, whichever kind of source it is. */
 function sourceSize(source: CanvasImageSource): { width: number; height: number } | null {
   const video = source as HTMLVideoElement;
@@ -301,7 +369,7 @@ function sourceSize(source: CanvasImageSource): { width: number; height: number 
  * the marking.
  */
 function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, strip, nowMs, windowMs, marks } = state;
+  const { layout, palette, strip, nowMs, windowMs, marks, picture } = state;
   const box = layout.strip;
 
   ctx.save();
@@ -309,10 +377,14 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
   ctx.rect(box.x, box.y, box.width, box.height);
   ctx.clip();
 
-  ctx.fillStyle = palette.line;
-  ctx.globalAlpha = 0.35;
-  ctx.fillRect(box.x, box.y, box.width, box.height);
-  ctx.globalAlpha = 1;
+  // Over a picture the renderer lays its own ground — this file has never
+  // seen the room behind it and cannot know how dark it has to be.
+  if (!strip.overlay) {
+    ctx.fillStyle = palette.line;
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(box.x, box.y, box.width, box.height);
+    ctx.globalAlpha = 1;
+  }
 
   // WHAT MOVES is the renderer's, and the only part of a clip that differs
   // between a song and a jam. The ground under it, the clip region around it
@@ -320,7 +392,15 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
   // any of those subtly different. It is given a clean context and may leave
   // it however it likes: `restore` below puts it back.
   ctx.save();
-  strip.paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks });
+  strip.paintInto(ctx, {
+    box,
+    layout,
+    palette,
+    nowMs,
+    windowMs,
+    marks,
+    hasPicture: picture !== null,
+  });
   ctx.restore();
 
   // The playhead, last so nothing is drawn over it.
@@ -337,23 +417,36 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
 
 /** Bar, section, tempo — and the mark that is the whole point of the clip. */
 function paintCaption(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, strip, nowMs, words } = state;
+  const { layout, palette, strip, nowMs, words, picture } = state;
   const box = layout.caption;
   const caption = strip.captionAt(nowMs);
+  // OVER A PICTURE the ink is light in every theme, and that is the same
+  // rule the Yames mark keeps two functions above: what a clip has to
+  // survive is the room it was filmed in, not the app it was made in. A
+  // light theme’s ink is dark brown, and dark brown over somebody’s living
+  // room is a caption nobody can read. The theme still decides the accent,
+  // the grid and everything on a clip with no picture.
+  const over = strip.overlay === true && picture !== null;
+  const ink = over ? "#FFFFFF" : palette.ink;
+  const quiet = over ? "rgba(255, 255, 255, 0.78)" : palette.quiet;
 
   ctx.save();
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   const middle = box.y + box.height / 2;
 
-  ctx.fillStyle = palette.ink;
-  ctx.font = `600 ${layout.type.caption}px system-ui, sans-serif`;
+  ctx.fillStyle = ink;
+  if (over) {
+    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+    ctx.shadowBlur = Math.round(layout.type.caption * 0.5);
+  }
+  ctx.font = `600 ${layout.type.caption}px ${palette.face}`;
   const bar = `${words.bar} ${String(caption.printedBar)}`;
   ctx.fillText(bar, box.x, middle);
   const barWidth = ctx.measureText(bar).width;
 
-  ctx.fillStyle = palette.quiet;
-  ctx.font = `${layout.type.section}px system-ui, sans-serif`;
+  ctx.fillStyle = quiet;
+  ctx.font = `${layout.type.section}px ${palette.face}`;
   const rest = [caption.section, `${String(caption.bpm)} ${words.bpm}`]
     .filter(Boolean)
     .join("  ·  ");
@@ -453,7 +546,7 @@ export function recordClip(options: RecordClipOptions): ClipRun {
     onProgress,
   } = options;
 
-  const layout = clipLayout(shape);
+  const layout = strip.overlay ? clipOverlayLayout(shape) : clipLayout(shape);
   canvas.width = layout.width;
   canvas.height = layout.height;
   const ctx = canvas.getContext("2d", { alpha: false });
@@ -556,6 +649,15 @@ export function recordClip(options: RecordClipOptions): ClipRun {
 
   /** Everything that has to have happened before a single frame is recorded. */
   const ready = (async () => {
+    // The face, before a single frame is painted.
+    //
+    // A canvas asked to draw in a face it has not loaded draws in the
+    // fallback and swaps silently when the face arrives — which in a
+    // real-time recording means the opening second of the clip is in the
+    // wrong typeface, permanently, in the file. `document.fonts.load`
+    // takes a CSS font shorthand, and it has to be asked for every WEIGHT
+    // the clip uses or the bold chord is the one that swaps.
+    await warmFace(palette.face);
     await whenReady(audio);
     if (video) await whenReady(video);
     audio.currentTime = audioAt(span.startMs);
@@ -618,6 +720,29 @@ export function recordClip(options: RecordClipOptions): ClipRun {
       return progress;
     },
   };
+}
+
+/**
+ * Load every weight the clip draws in, and never fail because of it.
+ *
+ * One size is enough per weight: `FontFaceSet.load` resolves a family and
+ * a weight, and the size in the shorthand only has to parse. A webview
+ * without `document.fonts` (and there are still a few) simply gets the
+ * behaviour it had before this existed.
+ */
+async function warmFace(face: string): Promise<void> {
+  const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+  if (!fonts || typeof fonts.load !== "function") return;
+  try {
+    await Promise.all([
+      fonts.load(`400 32px ${face}`),
+      fonts.load(`600 32px ${face}`),
+      fonts.load(`700 96px ${face}`),
+    ]);
+  } catch {
+    // A face the browser will not resolve is a face it will fall back
+    // from, which is what it would have done anyway.
+  }
 }
 
 /** Wait for a media element to know how long it is and where its frames are. */

@@ -42,3 +42,9 @@ playwright/.cache/
 # the reason `jam-mix-demos` is not — it is rendered again by
 # `render_song_ab` whenever somebody needs to hear it.
 song-ab-clips/
+
+# The frames a jam clip is painted from (W32), written by
+# `tests/layout/jam-clip-frames.spec.ts` so a person — or an agent that
+# cannot see the app — can LOOK at what the compositor draws. Rendered
+# again by that spec whenever somebody needs to look; never committed.
+.jam-frames/

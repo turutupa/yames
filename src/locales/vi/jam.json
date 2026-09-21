@@ -720,7 +720,8 @@
     },
     "takeVideo": {
       "save": "Lưu thành video",
-      "chorus": "Vòng {{count}}"
+      "chorus": "Vòng {{count}}",
+      "next": "tiếp"
     }
   },
   "scale": {

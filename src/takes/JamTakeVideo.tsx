@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { SaveAsVideo } from "../containers/songs/camera/SaveAsVideo";
-import { mediaSrc } from "../songs/camera/src";
+import { SaveAsVideo } from "./SaveAsVideo";
+import { mediaSrc } from "./src";
 import { jamStrip, jamTapeShape, jamWindowMs } from "./jamStrip";
+import { jamBand } from "../jam/compile";
 import type { Jam, JamTake } from "../jam/types";
 
 /**
@@ -39,9 +40,36 @@ export function JamTakeVideo({
   onBeforeSave?: () => void;
 }) {
   const { t } = useTranslation();
+  /**
+   * Who is playing, in the reader's language (W32).
+   *
+   * On a clip with no picture — which for a jam is the common case — this is
+   * what says the thing behind the chords is a BAND rather than a metronome,
+   * and it is the one fact about the recording a stranger cannot work out by
+   * looking. Built from the same `jamBand` the stage draws its lanes from, so
+   * a clip cannot name a player the take does not have.
+   */
+  const lineup = useMemo(() => {
+    const band = jamBand(jam);
+    const who = [
+      band.drums ? t("jam.band.drums") : null,
+      band.bass ? t("jam.band.bass") : null,
+      band.keys ? t("jam.band.keys") : null,
+    ].filter(Boolean);
+    return who.length > 0 ? who.join(" · ").toLowerCase() : null;
+  }, [jam, t]);
+
   const shape = useMemo(
-    () => jamTapeShape(jam, take, vibeLabel, (n) => t("jam.takeVideo.chorus", { count: n })),
-    [jam, take, vibeLabel, t],
+    () =>
+      jamTapeShape(
+        jam,
+        take,
+        vibeLabel,
+        (n) => t("jam.takeVideo.chorus", { count: n }),
+        lineup,
+        t("jam.takeVideo.next"),
+      ),
+    [jam, take, vibeLabel, lineup, t],
   );
   const strip = useMemo(() => jamStrip(shape), [shape]);
   const span = useMemo(

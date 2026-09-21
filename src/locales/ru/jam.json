@@ -751,7 +751,8 @@
       "chorus_one": "Квадрат {{count}}",
       "chorus_few": "Квадрат {{count}}",
       "chorus_many": "Квадрат {{count}}",
-      "chorus_other": "Квадрат {{count}}"
+      "chorus_other": "Квадрат {{count}}",
+      "next": "дальше"
     }
   },
   "scale": {

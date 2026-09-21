@@ -121,6 +121,22 @@ interface UseJamTakesArgs {
   countingIn: boolean;
   /** Write `Jam.takes` on the loaded jam. The record owns the switch. */
   onSetTakes: (next: boolean) => void;
+  /**
+   * W32 — the two moments the camera has to rendezvous with, exactly as
+   * `useSongTakes` has them.
+   *
+   * `onTakeStarted` fires on the first bar after the count-in, which is the
+   * frame worth keeping for the shelf's thumbnail; `onTakeFinished` fires
+   * with the take the engine handed back, or `null` when there was not one —
+   * and `null` is what tells the camera to throw its recording away rather
+   * than leave a file nothing lists.
+   *
+   * Optional, never awaited, and every call is inside a `try`: a camera that
+   * threw here would be a camera that lost somebody's take, which is the one
+   * thing `useTakeCamera`'s header says cannot happen.
+   */
+  onTakeStarted?: () => void;
+  onTakeFinished?: (take: JamTake | null) => void;
 }
 
 export function useJamTakes({
@@ -129,6 +145,8 @@ export function useJamTakes({
   isPlaying,
   countingIn,
   onSetTakes,
+  onTakeStarted,
+  onTakeFinished,
 }: UseJamTakesArgs): JamTakesState {
   const [available, setAvailable] = useState<boolean | null>(null);
   const [takes, setTakes] = useState<JamTake[]>([]);
@@ -159,6 +177,17 @@ export function useJamTakes({
    * means the worst a failed read can do is ask once more.
    */
   const introSeen = useRef(false);
+  /**
+   * The camera's two doors, behind refs.
+   *
+   * `useSongTakes` does the same and its comment says why: the effect below
+   * is keyed on the edges of recording, and re-arming it every time the
+   * camera's hook produced a new function identity would restart the take.
+   */
+  const startedDoor = useRef(onTakeStarted);
+  const finishedDoor = useRef(onTakeFinished);
+  startedDoor.current = onTakeStarted;
+  finishedDoor.current = onTakeFinished;
 
   /** So `stop` can tell "we started one" from "the transport merely stopped". */
   const recordingRef = useRef(false);
@@ -308,6 +337,12 @@ export function useJamTakes({
       // decided. See `recordingSound`.
       const source = soundRef.current;
       setRecordingSound(source);
+      // The first bar after the count-in, which is the frame the shelf wants.
+      try {
+        startedDoor.current?.();
+      } catch {
+        // The camera's problem, never the take's.
+      }
       void startTake(id, source).catch(() => {
         // The engine said no. No mark on the transport, no phantom take, and
         // the section switches to saying this build cannot record — which is
@@ -317,6 +352,12 @@ export function useJamTakes({
         startedAt.current = null;
         setRecording(false);
         setAvailable(false);
+        // No take, so nothing for a picture to be filed under.
+        try {
+          finishedDoor.current?.(null);
+        } catch {
+          /* the camera's problem */
+        }
       });
       return;
     }
@@ -329,6 +370,14 @@ export function useJamTakes({
       setRecordedSeconds(0);
       void stopTake()
         .then((take) => {
+          // The camera first, and with whatever the engine said — `null`
+          // included, because that is what tells it to throw its recording
+          // away rather than leave one nothing lists.
+          try {
+            finishedDoor.current?.(take ?? null);
+          } catch {
+            /* the camera's problem */
+          }
           // `null` is the engine saying nothing was recording, which is not a
           // failure and not a take.
           if (!take) return;

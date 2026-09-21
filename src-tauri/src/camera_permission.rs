@@ -20,7 +20,7 @@
 //!
 //! * **Linux / WebKitGTK** varies by build. Some ask through the portal, some
 //!   have no `MediaRecorder` for video at all, and the frontend detects that
-//!   and hides the switch behind a sentence (`songs/camera/support.ts`). There
+//!   and hides the switch behind a sentence (`takes/support.ts`). There
 //!   is nothing useful to do from Rust in either case.
 //!
 //! ## The microphone is refused here, on purpose

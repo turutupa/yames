@@ -42,6 +42,84 @@
   width: 100%;
 }
 
+/* The mirror on the jam stage (W32).
+ *
+ * It wears Songs' own `.songs-camera-preview` — one picture-in-picture, one
+ * set of states, one stylesheet — and this only says what is different here:
+ * it is narrower, because the jam stage is a column of wide rows rather than
+ * an engraving with margins, and a fifth of the width at 1440 would be a
+ * 280 px face beside a 16-bar grid.
+ *
+ * The two bottom corners are the only ones offered (`JAM_PREVIEW_CORNERS`),
+ * so nothing here has to fight the chord for the top of the screen. */
+/* FIXED to the window, not absolute inside the stage.
+ *
+ * Two measurements made that decision and both are worth keeping:
+ *
+ * * At 480×780 the jam stage is 162 px taller than the room it has and
+ *   scrolls. A picture anchored to the bottom of that column is a picture
+ *   below the fold — the same bug as covering something, and harder to see.
+ * * `.jam-view` is a container-query container, and layout containment makes
+ *   it the containing block for anything `position: fixed` inside it. So the
+ *   mirror cannot be fixed to the window from in there at all; it is mounted
+ *   by `MainWindow` instead.
+ *
+ * It is narrower than the Songs one because the jam stage is a column of wide
+ * rows rather than an engraving with margins, and a fifth of the width at
+ * 1440 would be a 280 px face beside a 16-bar grid. */
+.jam-camera-preview {
+  position: fixed;
+  width: clamp(104px, 14vw, 168px);
+}
+
+/* Lifted clear of the transport.
+ *
+ * MEASURED: at 1100×720 the window's play button sits at y 658–704, over the
+ * last few pixels of the stage. A mirror ten pixels off the bottom of the
+ * window therefore landed on Stop — the one control a player reaches for with
+ * a guitar on, and exactly what the layout suite exists to protect.
+ *
+ * 96 px is the transport's own 76 px plus a finger's clearance. BOTH bottom
+ * corners get it: the play button is to the left at some sizes and the setup
+ * sheet narrows the stage from the right at others, so a rule that moved the
+ * picture sideways would only trade one collision for the other.
+ * `tests/layout/jam-camera.spec.ts` measures all six combinations. */
+.songs-camera-preview.jam-camera-preview[data-corner="bottomLeft"],
+.songs-camera-preview.jam-camera-preview[data-corner="bottomRight"] {
+  bottom: 96px;
+}
+
+/* At the smallest window there is no corner to be in, so there is no mirror.
+ *
+ * Also measured: at 480×780 the stage is 314 px wide and the form's bar grid
+ * runs from y 493 to 689 — the whole width, all the way down to the
+ * transport. There is no rectangle left over that a 123 px picture could sit
+ * in, and something has to give. What gives is the MIRROR, not the grid: a
+ * player reads a jam off the chord and the form, and a picture of their own
+ * face over either of them is worse than no picture of their own face.
+ *
+ * Nothing about the recording changes — the camera is open, the take is
+ * filmed, the thumbnail is grabbed at the first downbeat — and the chip in
+ * the setup sheet still says "Camera on" with its live dot, which is the
+ * signal that actually matters. The mirror comes back the moment the window
+ * has room for it. `tests/layout/jam-camera.spec.ts` asserts both halves. */
+@media (max-width: 899px) {
+  .jam-camera-preview {
+    display: none;
+  }
+}
+
+/* The camera's chip, under the sound choice in the takes group. Its own row
+   rather than inline with the sound control: the two are different questions
+   and the group reads as "turn it on, decide what goes in, decide whether you
+   are in it". */
+.jam-camera-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 /* The stage is aligned to the start so that a long jam can scroll, which
    leaves the empty state stranded at the top of an otherwise empty screen.
    Auto margins put it back in the middle and collapse to nothing the moment

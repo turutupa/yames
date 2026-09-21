@@ -720,7 +720,8 @@
     },
     "takeVideo": {
       "save": "動画にして保存",
-      "chorus": "コーラス {{count}}"
+      "chorus": "コーラス {{count}}",
+      "next": "次は"
     }
   },
   "scale": {

@@ -741,7 +741,8 @@
       "chorus": "Grille {{count}}",
       "chorus_one": "Grille {{count}}",
       "chorus_many": "Grille {{count}}",
-      "chorus_other": "Grille {{count}}"
+      "chorus_other": "Grille {{count}}",
+      "next": "ensuite"
     }
   },
   "scale": {

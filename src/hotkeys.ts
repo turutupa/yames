@@ -48,6 +48,7 @@ export type HotkeyAction =
   | "jam-prev-section"
   | "jam-loop-section"
   | "jam-take"
+  | "jam-camera"
   // Songs, hands-free (W18, 2026-09-20). Choosing the portion you are working
   // on is the centre of the mode, and a player choosing it has a guitar in
   // their hands: these exist so the bars can be set from a footswitch, while
@@ -441,6 +442,21 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Record the take",
     key: "R",
     desc: "Record the next time you press play, or stop recording",
+    group: "jam",
+  },
+  /**
+   * The picture, hands-free (W32).
+   *
+   * Exactly Songs' `C` and exactly its meaning, because a player who has
+   * learned what `C` does on one tab has learned it on the other. It arms the
+   * NEXT play for the same reason `R` does, and it goes through the switch
+   * rather than the record, so a first press still shows the promise.
+   */
+  {
+    id: "jam-camera",
+    action: "Record the picture",
+    key: "C",
+    desc: "Film the next time you press play, or turn the camera off",
     group: "jam",
   },
   /**

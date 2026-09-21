@@ -99,6 +99,15 @@ import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
 import { useJamTakes } from "./hooks/useJamTakes";
+/* W32 — the camera comes to Jam. The hook and the preview are eager, like the
+   take's machinery is, because they run while a jam is happening; the
+   compositor behind "save as a video" is the only lazy thing on this tab. */
+import { useTakeCamera } from "../../takes/useTakeCamera";
+import { jamClockShape, jamSampler, jamTakeStartMs } from "../../takes/jamClock";
+import { CameraIntroDialog } from "../../takes/CameraIntroDialog";
+import { CameraPreview } from "../../takes/CameraPreview";
+import type { PreviewCorner } from "../../takes/CameraPreview";
+import "../../styles/songs-camera.css";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
 import { setSetlistCountIn } from "../../setlist/setlists";
@@ -147,6 +156,17 @@ import "../../styles/audio-input-test.css";
  * action in a mode group is named after its mode, and one that is not would
  * be the bug this would hide.
  */
+/**
+ * The corners the jam stage offers the little mirror (W32).
+ *
+ * The two at the BOTTOM, and only those. The chord you are playing over and
+ * the form's bar grid are the top of the jam screen, and a picture of your
+ * own face over either of them would make the mode unusable with the camera
+ * on — so the choice is narrowed rather than left to a default nobody is
+ * obliged to keep. `tests/layout/jam-camera.spec.ts` measures it.
+ */
+const JAM_PREVIEW_CORNERS: readonly PreviewCorner[] = ["bottomLeft", "bottomRight"];
+
 const MODE_ACTION_PREFIXES = ["jam-", "songs-"];
 
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
@@ -474,6 +494,19 @@ export function MainWindow() {
   );
 
   /**
+   * W32 — and the camera's, on the same terms.
+   *
+   * Turning the picture off when recording goes off is done HERE rather than
+   * inside either hook, because it is the one rule that spans both: a picture
+   * with no sound is not a take, so the two switches move together and there
+   * is one promise rather than two states to reason about.
+   */
+  const setJamCamera = useCallback(
+    (camera: boolean) => jamSession.editJam(camera ? { camera, takes: true } : { camera }),
+    [jamSession.editJam],
+  );
+
+  /**
    * The loaded jam's takes (JAM_MODE §4.4).
    *
    * At the window level rather than inside `JamView` because both ends of
@@ -482,13 +515,79 @@ export function MainWindow() {
    * belongs to the jam on the engine and ends when that jam does, so leaving
    * the Jam tab ends it — see `useJamTakes`.
    */
+  /**
+   * W32 — the camera on the Jam tab, declared before the take's hook because
+   * the take's hook calls into it.
+   *
+   * The engine only NAMES a take when it stops, and the picture has to be
+   * filed under that name; everything the camera can fail at fails as "no
+   * picture this jam". It lives at the window level for the same reason the
+   * takes do: the tab is how it knows the jam has left the engine.
+   */
+  const countingInRef = useRef(false);
+  countingInRef.current = (state.countIn?.beats ?? 0) > 0;
+  const jamCamera = useTakeCamera({
+    ownerId: jamSession.jam?.id ?? null,
+    active: mode === "jam",
+    isPlaying: state.isPlaying,
+    enabled: jamSession.jam?.camera === true,
+    onSetCamera: setJamCamera,
+    // A jam's clock is its own tempo and meter against the bar of the form
+    // the engine is on — there is no score to count ticks in. Opened once per
+    // jam, so the take's opening bar and the beat events are measured from
+    // the same origin (`jamClock.ts`).
+    openClock: () => {
+      const jam = jamSession.jam;
+      if (!jam) return null;
+      const shape = jamClockShape(jam);
+      return {
+        sample: jamSampler(jam, () => countingInRef.current),
+        startMs: (take) => jamTakeStartMs(shape, take),
+      };
+    },
+  });
+
   const jamTakes = useJamTakes({
     jam: jamSession.jam,
     view: mode,
     isPlaying: state.isPlaying,
     countingIn: (state.countIn?.beats ?? 0) > 0,
     onSetTakes: setJamTakes,
+    onTakeStarted: jamCamera.onTakeStarted,
+    onTakeFinished: jamCamera.onTakeFinished,
   });
+
+  /**
+   * Recording off takes the picture with it.
+   *
+   * The other half of `setJamCamera`'s rule, and it has to be an effect
+   * rather than a line in `setJamTakes`: the switch is not the only way
+   * recording ends — loading another jam, leaving the tab, or a build whose
+   * engine cannot record all turn it off underneath, and a camera left open
+   * over a take nobody is making is the one lie this feature may not tell.
+   */
+  useEffect(() => {
+    if (jamSession.jam?.camera && !jamSession.jam.takes) setJamCamera(false);
+  }, [jamSession.jam?.camera, jamSession.jam?.takes, setJamCamera]);
+
+  /**
+   * The count over the picture, and when this take started — the preview's
+   * two numbers, exactly as Songs works them out.
+   *
+   * `jamRecordingSince` is read off the take's own elapsed count and only
+   * recomputed when recording starts or stops, because the preview is
+   * unmounted and remounted as the camera opens and closes and a clock that
+   * restarted at zero then would lie about how long you had been playing.
+   */
+  const jamCountIn =
+    state.isPlaying && (state.countIn?.beats ?? 0) > 0
+      ? Math.max(1, (state.countIn?.beats ?? 0) - (state.countIn?.done ?? 0))
+      : null;
+  const jamRecordingSince = useMemo(
+    () => (jamTakes.recording ? Date.now() - jamTakes.recordedSeconds * 1000 : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [jamTakes.recording],
+  );
 
   useEffect(() => {
     closeJamRef.current = jamSession.closeJam;
@@ -537,8 +636,22 @@ export function MainWindow() {
    * would rebuild it on every beat event.
    */
   const jamActions = useMemo(
-    () => ({ ...jamSession.actions, toggleTakes: () => jamTakes.requestTakes(!jamSession.jam?.takes) }),
-    [jamSession.actions, jamSession.jam?.takes, jamTakes.requestTakes],
+    () => ({
+      ...jamSession.actions,
+      toggleTakes: () => jamTakes.requestTakes(!jamSession.jam?.takes),
+      // W32 — `C`, and through the SWITCH rather than the record behind it,
+      // so a first press still shows the promise. A camera that came on from
+      // a footswitch without anybody having read what it records would be the
+      // one thing this feature may not do.
+      toggleCamera: () => jamCamera.request(!jamSession.jam?.camera),
+    }),
+    [
+      jamSession.actions,
+      jamSession.jam?.takes,
+      jamSession.jam?.camera,
+      jamTakes.requestTakes,
+      jamCamera.request,
+    ],
   );
 
   /**
@@ -1740,6 +1853,42 @@ export function MainWindow() {
           />
         )}
 
+        {/* W32 — and the camera's own, a different promise from the take's:
+            one is about a file of your playing, the other is about a picture
+            of you. Once per MACHINE and not once per mode, so a player who
+            read it on the Songs tab is not asked again here — the key is
+            `CAMERA_INTRO_KEY` and it is the same one. */}
+        {jamCamera.introOpen && (
+          <CameraIntroDialog
+            onConfirm={jamCamera.confirmIntro}
+            onCancel={jamCamera.cancelIntro}
+          />
+        )}
+
+        {/* W32 — the little mirror, over the jam stage.
+
+            Drawn by the WINDOW and fixed to it, not by `JamView`. The jam
+            stage is a column that scrolls — at 480×780 it is a hundred and
+            sixty pixels taller than the room it has — so a picture anchored
+            to the bottom of that column is a picture below the fold, which
+            is the same bug as covering something and harder to notice. It
+            also cannot be fixed to the window from inside the stage:
+            `.jam-view` is a container query container, and layout
+            containment makes it the containing block for anything fixed
+            inside it.
+
+            So it lives here, above the transport, in one of the two bottom
+            corners. It draws nothing at all unless the camera is open. */}
+        {mode === "jam" && (
+          <CameraPreview
+            camera={jamCamera}
+            countIn={jamCountIn}
+            recordingSince={jamCamera.recording ? jamRecordingSince : null}
+            corners={JAM_PREVIEW_CORNERS}
+            className="jam-camera-preview"
+          />
+        )}
+
         {pending && (
           <UnsavedChangesDialog
             kind={pending.kind}
@@ -1847,6 +1996,7 @@ export function MainWindow() {
               listening={evaluation.enabled}
               takes={jamTakes}
               onToggleTakes={jamTakes.requestTakes}
+              camera={jamCamera}
               onPreviewKit={jamSession.startKitPreview}
               previewingKit={jamSession.previewKit}
               onPreviewVibe={jamSession.previewVibe}

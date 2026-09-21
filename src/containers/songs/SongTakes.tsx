@@ -38,7 +38,7 @@ import { useMenuPlacement } from "../jam/useMenuPlacement";
 import type { JamTake } from "../../jam/types";
 import { formatDate } from "../practice-coach/coachCardHelpers";
 // W25 — a take looks like a take: a frame of it, and what it was a go at.
-import { mediaSrc } from "../../songs/camera/src";
+import { mediaSrc } from "../../takes/src";
 import { printedBarNumber } from "../../songs/position";
 import type { TakeDetail } from "./useSongTakes";
 import type { SongScore } from "../../songs/types";

@@ -720,7 +720,8 @@
     },
     "takeVideo": {
       "save": "영상으로 저장",
-      "chorus": "코러스 {{count}}"
+      "chorus": "코러스 {{count}}",
+      "next": "다음"
     }
   },
   "scale": {

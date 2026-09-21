@@ -27,8 +27,8 @@ import {
   visibleTicks,
   WINDOW_BARS,
 } from "./clip";
-import { buildTape } from "./tape";
-import type { OnsetResult, ScoreSchedule, SongScore } from "../types";
+import { buildTape } from "../songs/camera/tape";
+import type { OnsetResult, ScoreSchedule, SongScore } from "../songs/types";
 
 /** Four bars of 4/4 at 120, with a section name on bar 3 — `tape.test.ts`'s. */
 function score(): SongScore {

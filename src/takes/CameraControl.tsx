@@ -26,14 +26,14 @@
  *   that throws when it is pressed.
  */
 import { useTranslation } from "react-i18next";
-import type { SongCameraState } from "./useSongCamera";
+import type { TakeCameraState } from "./useTakeCamera";
 
-export function SongCameraControl({
+export function CameraControl({
   camera,
   disabled,
 }: {
-  camera: SongCameraState;
-  /** The song cannot record at all — no take, so no picture. */
+  camera: TakeCameraState;
+  /** This mode cannot record at all — no take, so no picture. */
   disabled?: boolean;
 }) {
   const { t } = useTranslation();

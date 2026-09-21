@@ -14,7 +14,17 @@
  * be filmed is a decision about the thing you are about to play.
  */
 
-/** The promise has been read. One reading, for the life of the install. */
+import type { TakeSound } from "../jam/types";
+
+/**
+ * The promise has been read. One reading, for the life of the install.
+ *
+ * ONE key for the whole app and not one per mode (W32): what it promises is
+ * about the machine — what is recorded, where it stays, that nothing is
+ * uploaded — and a person who has read it on the Songs tab has read it. The
+ * key keeps its `songs.` spelling because it is the one that is already on
+ * disk, and moving it would ask everybody the question a second time.
+ */
 export const CAMERA_INTRO_KEY = "songs.cameraIntroSeen";
 
 /** Which camera, by its `deviceId`. */
@@ -51,16 +61,30 @@ export const CLIP_BRAND_KEY = "songs.clipBrand";
 export const AUDIO_OUTPUT_KEY = "audioOutputDevice";
 
 /**
- * The nudge, per camera.
+ * The nudge, per camera and per kind of recording.
  *
  * Per camera and not per take: the thing being corrected is the camera's own
  * capture latency, which is a property of that device and its driver and is
  * the same on Tuesday as it was on Monday. A player who lines up their webcam
  * once should never have to do it again — and a player who plugs in a capture
  * card gets a fresh zero for it rather than the webcam's number.
+ *
+ * **And per sound source (W32), because the two are not the same number.**
+ * `plans/SONGS.md` A12 spells out why: a take of Yames and your input is
+ * EARLY by the input buffer, and a take of everything this computer plays is
+ * LATE by the output buffer. So the nudge that lines a clap up in one mode
+ * lines it up wrong in the other, by the whole round trip, and a single
+ * remembered number would silently carry one mode's answer into the other.
+ * The owner will measure both — the clap procedure and its second form are
+ * both written out in A12 — and this is where the two answers live.
+ *
+ * `yamesAndInput` keeps the key it has always had rather than gaining a
+ * suffix, so a nudge measured before there was a choice is still the nudge
+ * after it.
  */
-export function cameraNudgeKey(deviceId: string | null): string {
-  return `songs.cameraNudgeMs.${deviceId || "default"}`;
+export function cameraNudgeKey(deviceId: string | null, sound?: TakeSound): string {
+  const base = `songs.cameraNudgeMs.${deviceId || "default"}`;
+  return sound === "everything" ? `${base}.everything` : base;
 }
 
 /** The nudge's step, in milliseconds. */

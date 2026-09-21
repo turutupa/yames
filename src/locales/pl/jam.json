@@ -751,7 +751,8 @@
       "chorus_one": "Przejście {{count}}",
       "chorus_few": "Przejście {{count}}",
       "chorus_many": "Przejście {{count}}",
-      "chorus_other": "Przejście {{count}}"
+      "chorus_other": "Przejście {{count}}",
+      "next": "dalej"
     }
   },
   "scale": {

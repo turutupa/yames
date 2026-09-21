@@ -78,10 +78,11 @@ import { TakesIntroDialog } from "../jam/TakesIntroDialog";
    the take's are, because they run while a pass is happening. The video player
    is not imported here at all: it lives inside the review's own lazy chunk, so
    a player who never turns the camera on never downloads it. */
-import { useSongCamera } from "./camera/useSongCamera";
-import { SongCameraControl } from "./camera/SongCameraControl";
-import { CameraPreview } from "./camera/CameraPreview";
-import { CameraIntroDialog } from "./camera/CameraIntroDialog";
+import { useTakeCamera } from "../../takes/useTakeCamera";
+import { songClock } from "../../songs/camera/songClock";
+import { CameraControl } from "../../takes/CameraControl";
+import { CameraPreview } from "../../takes/CameraPreview";
+import { CameraIntroDialog } from "../../takes/CameraIntroDialog";
 import "../../styles/songs-camera.css";
 import { SongSpeed } from "./SongSpeed";
 import { SongStripMore } from "./SongStripMore";
@@ -298,16 +299,22 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * Declared before the take's hook because the take's hook calls into it:
    * the engine only NAMES a take when it stops, and the picture has to be
    * filed under that name. Everything the camera can fail at fails as "no
-   * picture this pass" — `useSongCamera`'s header says why that is the only
+   * picture this pass" — `useTakeCamera`'s header says why that is the only
    * outcome it is allowed to have.
+   *
+   * W32 — the hook serves Jam as well now, so how the music is MEASURED comes
+   * from here rather than from inside it: `songClock` is the sampler and the
+   * take's opening instant, both exactly what the hook used to do itself.
+   * Opened once per pass, so a range or a speed changed mid-pass does not
+   * refit the clock against a piece the recording is not of.
    */
-  const camera = useSongCamera({
-    songId: song?.id ?? null,
-    score,
-    range,
-    tempoPercent,
-    view: "songs",
+  const camera = useTakeCamera({
+    ownerId: song?.id ?? null,
+    // This screen is mounted only while Songs is the tab (`MainWindow`), so
+    // being rendered at all IS being the tab that is showing.
+    active: true,
     isPlaying,
+    openClock: () => (score ? songClock(score, range, tempoPercent) : null),
     enabled: session.mixSetting.camera === true,
     onSetCamera: (next) => {
       session.setCamera(next);
@@ -1076,7 +1083,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 /* W21 — the camera's chip, inside the record switch's own
                    group: one decision about this pass, in two parts. */
                 camera={
-                  <SongCameraControl camera={camera} disabled={takes.available === false} />
+                  <CameraControl camera={camera} disabled={takes.available === false} />
                 }
                 available={takes.available}
                 takes={takes.takes}

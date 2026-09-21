@@ -741,7 +741,8 @@
       "chorus": "Giro {{count}}",
       "chorus_one": "Giro {{count}}",
       "chorus_many": "Giro {{count}}",
-      "chorus_other": "Giro {{count}}"
+      "chorus_other": "Giro {{count}}",
+      "next": "poi"
     }
   },
   "scale": {

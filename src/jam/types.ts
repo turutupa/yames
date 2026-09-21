@@ -496,6 +496,17 @@ export type Jam = {
   /** Record takes, opt-in. Absent: off. */
   takes?: boolean;
   /**
+   * Film the take as well, opt-in (W32, `plans/SONGS.md` A9 as the owner
+   * reopened it). Absent: off.
+   *
+   * On the jam rather than on the machine, for the reason the take switch is:
+   * whether you want to be filmed is a decision about the thing you are about
+   * to play, not a setting. Turning it on turns `takes` on with it — a
+   * picture with no sound is not a take — and turning `takes` off turns this
+   * off too, so there is one promise and one decision.
+   */
+  camera?: boolean;
+  /**
    * Second pass (plans/JAM_UX_DECISIONS.md). The vibe the jam started from
    * and its variation, the voices the bass and keys play with, a kit of your
    * own samples, and what the chord sheet keeps on the playing screen.
@@ -611,7 +622,7 @@ export type JamTake = {
    *
    * A MEASUREMENT, good to a few tens of milliseconds and no better — the
    * webview's clock fitted against the engine's beat events
-   * (`src/songs/camera/offset.ts`) — which is why the review has a nudge
+   * (`src/takes/offset.ts`) — which is why the review has a nudge
    * beside the picture. Absent when the fit had too little to go on; the
    * review then starts the two level, which is the honest state.
    */

@@ -28,16 +28,16 @@
  * `requestVideoFrameCallback` is the only thing in a browser that says when a
  * frame was actually captured, and it exists on a `<video>` element rather
  * than on a stream. So the element showing the preview is also what tells
- * `useSongCamera` the instant the first frame landed, which is one half of the
- * alignment (`src/songs/camera/offset.ts`). A webview without it costs the
+ * `useTakeCamera` the instant the first frame landed, which is one half of the
+ * alignment (`src/takes/offset.ts`). A webview without it costs the
  * clock reading beside `MediaRecorder.start()` instead, and the review says as
  * much.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { storeLoad, storeSave } from "../../../ipc";
-import { CAMERA_CORNER_KEY, CAMERA_GUIDE_KEY } from "../../../songs/camera/keys";
-import type { SongCameraState } from "./useSongCamera";
+import { storeLoad, storeSave } from "../ipc";
+import { CAMERA_CORNER_KEY, CAMERA_GUIDE_KEY } from "./keys";
+import type { TakeCameraState } from "./useTakeCamera";
 
 export type PreviewCorner = "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 
@@ -53,16 +53,34 @@ export function CameraPreview({
   camera,
   countIn,
   recordingSince,
+  corners = CORNERS,
+  className,
 }: {
-  camera: SongCameraState;
+  camera: TakeCameraState;
   /** The count a person would say out loud, or null. */
   countIn: number | null;
   /** `Date.now()` when this pass started recording, or null. */
   recordingSince: number | null;
+  /**
+   * Which corners this stage offers (W32). All four by default.
+   *
+   * Jam offers the two at the BOTTOM, and that is a load-bearing restriction
+   * rather than a preference: the chord you are playing over and the form's
+   * bar grid are the top of the jam stage and they are the whole screen —
+   * covering either of them with a picture of your own face would make the
+   * mode unusable while the camera is on. Restricting the choice makes "the
+   * preview never covers the chord" true by construction, which is a better
+   * guarantee than a default nobody is obliged to keep.
+   */
+  corners?: readonly PreviewCorner[];
+  /** An extra class, so a stage can size or inset it for its own furniture. */
+  className?: string;
 }) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [corner, setCorner] = useState<PreviewCorner>("bottomRight");
+  const [corner, setCorner] = useState<PreviewCorner>(
+    () => corners[corners.length - 1] ?? "bottomRight",
+  );
   const [guideSeen, setGuideSeen] = useState(true);
   const [flipped, setFlipped] = useState(false);
   const [since, setSince] = useState(0);
@@ -71,7 +89,11 @@ export function CameraPreview({
     let alive = true;
     void storeLoad<string>(CAMERA_CORNER_KEY)
       .then((saved) => {
-        if (alive && typeof saved === "string" && CORNERS.includes(saved as PreviewCorner)) {
+        // Remembered across the app, but only honoured where this stage
+        // offers it: a corner chosen on the Songs tab that a jam does not
+        // offer leaves the jam's own default alone rather than putting the
+        // picture over the chord.
+        if (alive && typeof saved === "string" && corners.includes(saved as PreviewCorner)) {
           setCorner(saved as PreviewCorner);
         }
       })
@@ -84,6 +106,9 @@ export function CameraPreview({
     return () => {
       alive = false;
     };
+    // `corners` is a constant per stage; re-reading the store on its
+    // identity would be a round trip on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -174,7 +199,7 @@ export function CameraPreview({
 
   return (
     <div
-      className="songs-camera-preview"
+      className={`songs-camera-preview${className ? ` ${className}` : ""}`}
       data-corner={corner}
       data-running={running ? "" : undefined}
       role="group"
@@ -236,7 +261,7 @@ export function CameraPreview({
 
       {!running && (
         <div className="songs-camera-corners" aria-label={t("songs.camera.move")}>
-          {CORNERS.map((c) => (
+          {corners.map((c) => (
             <button
               key={c}
               type="button"

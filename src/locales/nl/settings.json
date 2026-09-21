@@ -227,7 +227,8 @@
         "songs-loop-earlier": "Stuk een maat eerder",
         "songs-loop-later": "Stuk een maat later",
         "songs-take": "Neem de take op",
-        "songs-camera": "Neem het beeld op"
+        "songs-camera": "Neem het beeld op",
+        "jam-camera": "Neem het beeld op"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "De gekozen maten een maat richting het begin schuiven, even lang",
         "songs-loop-later": "De gekozen maten een maat richting het eind schuiven, even lang",
         "songs-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
-        "songs-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten"
+        "songs-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten",
+        "jam-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten"
       }
     },
     "inputTest": {
