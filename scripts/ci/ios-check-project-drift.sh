@@ -37,6 +37,18 @@ bash "$(dirname "$0")/ios-generate-project.sh"
 # files are the question here.
 CHANGED=$(git status --porcelain -- src-tauri/gen/apple | grep -v '^??' || true)
 
+# The project lists every Rust source file by name, for Xcode's sidebar and
+# nothing else: cargo builds the library, Xcode never compiles a `.rs`. So a
+# new `alloc_probe.rs` on any branch made this check red, twice in one day,
+# with nobody at a Mac to regenerate. A difference made ONLY of those file
+# references is not drift; anything else still is. (`-I` drops a hunk when
+# every changed line in it matches.)
+if [ -n "$CHANGED" ] && git diff --quiet -I'/\* [A-Za-z0-9_]+\.rs \*/' -- src-tauri/gen/apple; then
+  echo "only the list of Rust source files moved; that list is for Xcode's sidebar:"
+  git --no-pager diff --stat -- src-tauri/gen/apple
+  CHANGED=""
+fi
+
 if [ -n "$CHANGED" ]; then
   echo "::error::re-running \`tauri ios init\` changes the committed Xcode project."
   echo "$CHANGED"

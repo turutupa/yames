@@ -69,6 +69,7 @@
 		DB629E03B89B8950F7833EE8 /* commands.rs */ = {isa = PBXFileReference; path = commands.rs; sourceTree = "<group>"; };
 		DD9619378DA8BBE7DDE1EDC7 /* models.rs */ = {isa = PBXFileReference; path = models.rs; sourceTree = "<group>"; };
 		E20F51DFCEBD1B166B582E26 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E2E4DEBE07B613B3F5928F67 /* alloc_probe.rs */ = {isa = PBXFileReference; path = alloc_probe.rs; sourceTree = "<group>"; };
 		E5A8CE1BAC24685D15A1A9A8 /* speech_out.rs */ = {isa = PBXFileReference; path = speech_out.rs; sourceTree = "<group>"; };
 		E6B5F502A752E23F12B28E8B /* midi.rs */ = {isa = PBXFileReference; path = midi.rs; sourceTree = "<group>"; };
 		F06BBE1628DF0721756ED2F8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -191,6 +192,7 @@
 		C2CE27A7DC6E7C8EC0A2BE4F /* src */ = {
 			isa = PBXGroup;
 			children = (
+				E2E4DEBE07B613B3F5928F67 /* alloc_probe.rs */,
 				D24670A81B7C2BE0DC35FEA8 /* android_audio.rs */,
 				332D5AAB4367B5939F9B0E65 /* audio_input.rs */,
 				44729B25C349F961924F13B6 /* beat_log.rs */,
