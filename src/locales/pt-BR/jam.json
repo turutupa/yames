@@ -743,6 +743,17 @@
       "chorus_many": "Volta {{count}}",
       "chorus_other": "Volta {{count}}",
       "next": "depois"
+    },
+    "watch": {
+      "open": "Ouvir de novo",
+      "where": "Compasso {{bar}} · {{chorus}}",
+      "goToBar": "Ir ao compasso {{bar}}",
+      "barBack": "Um compasso atrás",
+      "barOn": "Um compasso à frente",
+      "nudge": "Imagem",
+      "nudgeBack": "Imagem um pouco antes",
+      "nudgeOn": "Imagem um pouco depois",
+      "broken": "Esse take não tocou. O arquivo pode ter sido movido ou apagado."
     }
   },
   "scale": {

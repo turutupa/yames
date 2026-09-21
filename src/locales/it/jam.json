@@ -743,6 +743,17 @@
       "chorus_many": "Giro {{count}}",
       "chorus_other": "Giro {{count}}",
       "next": "poi"
+    },
+    "watch": {
+      "open": "Riascoltalo",
+      "where": "Battuta {{bar}} · {{chorus}}",
+      "goToBar": "Vai alla battuta {{bar}}",
+      "barBack": "Una battuta indietro",
+      "barOn": "Una battuta avanti",
+      "nudge": "Immagine",
+      "nudgeBack": "Immagine un po' prima",
+      "nudgeOn": "Immagine un po' dopo",
+      "broken": "Questa take non si è riprodotta. Il file potrebbe essere stato spostato o eliminato."
     }
   },
   "scale": {

@@ -31,6 +31,7 @@ export function JamTakeVideo({
   take,
   vibeLabel,
   onBeforeSave,
+  nudgeMs = 0,
 }: {
   jam: Jam;
   take: JamTake;
@@ -38,6 +39,16 @@ export function JamTakeVideo({
   vibeLabel?: string | null;
   /** Stop whatever else is playing: two transports is two things out of step. */
   onBeforeSave?: () => void;
+  /**
+   * What the player has nudged the picture by, on top of the fit (W33).
+   *
+   * Handed in rather than read here, because the screen that has the nudge
+   * control is the screen that has just been watched on: a clip exported
+   * straight after somebody lined their picture up by eye has to come out
+   * lined up the same way, and a second answer to "how far out is the camera"
+   * is a clip that disagrees with the thing it was made from.
+   */
+  nudgeMs?: number;
 }) {
   const { t } = useTranslation();
   /**
@@ -91,7 +102,7 @@ export function JamTakeVideo({
       // A jam's take has no beat 0 to measure from — `TakePosition` says so —
       // and the picture's own offset is zero until the camera comes to Jam.
       startOffsetMs={0}
-      videoOffsetMs={take.videoOffsetMs ?? 0}
+      videoOffsetMs={(take.videoOffsetMs ?? 0) + nudgeMs}
       title={jam.name}
       onBeforeSave={onBeforeSave}
     />

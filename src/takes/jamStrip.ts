@@ -4,7 +4,7 @@ import { parseKey } from "../jam/harmony";
 import { jamChords } from "../jam/progression";
 import type { Jam, JamTake } from "../jam/types";
 import type { ClipStrip } from "./clipStrip";
-import type { ClipCaption } from "./clip";
+import type { ClipBox, ClipCaption, ClipLayout } from "./clip";
 
 /**
  * A jam, as the thing that scrolls under the picture in a saved video (W30).
@@ -244,6 +244,248 @@ function panel(
 }
 
 /**
+ * The biggest this text can be set and still fit across `room` (W33 item 2).
+ *
+ * Chord names are not all two characters. "F7" is; "Bbmaj7#11" is nine, and
+ * at the size a two-character chord wants it runs off the side of a
+ * phone-shaped frame — and the serif face Ivory is set in is wider again than
+ * the sans the sizes were chosen against. So every piece of type on a clip
+ * that carries a chord name asks for its size rather than being told it.
+ *
+ * It measures rather than estimating characters, because the compositor HAS a
+ * context and `clip.ts`'s own header says what estimating costs (the final
+ * "p" of "yames.app" clipped off the edge of a 720-wide frame under Ivory).
+ * Ten steps at most: each takes a millisecond off a painter with 33 to spend,
+ * and the answer is always within one step of exact.
+ */
+function fitType(
+  measure: Measure,
+  text: string,
+  weight: number,
+  wanted: number,
+  room: number,
+): number {
+  let size = Math.max(8, Math.round(wanted));
+  for (let i = 0; i < 10; i++) {
+    const width = measure(text, weight, size);
+    if (width <= room || size <= 10) break;
+    // Straight to the size that fits, then a hair off for the rounding.
+    size = Math.max(10, Math.floor(size * (room / width)) - 1);
+  }
+  return size;
+}
+
+/**
+ * How wide this text is at this weight and size.
+ *
+ * A function rather than a canvas, so the geometry below can be worked out —
+ * and tested — without one. The painter passes a closure over its own
+ * context; a test passes a ruler it can reason about.
+ */
+export type Measure = (text: string, weight: number, size: number) => number;
+
+/**
+ * A `Measure` over a real canvas.
+ *
+ * It leaves `ctx.font` wherever the last question left it, which is fine
+ * because every painter below sets the font it is about to draw with.
+ */
+function ruler(ctx: CanvasRenderingContext2D, face: string): Measure {
+  return (text, weight, size) => {
+    ctx.font = `${String(weight)} ${String(size)}px ${face}`;
+    return ctx.measureText(text).width;
+  };
+}
+
+/** Where the chord and the line under it go, in canvas pixels. */
+export type JamChordBlock = {
+  /** The chord's type size. */
+  size: number;
+  /** The next line's type size, or 0 when there is no next line. */
+  small: number;
+  /** The chord's baseline (over a picture) or its middle (with none). */
+  chordY: number;
+  /** Where the chord starts across the frame. */
+  chordX: number;
+  /** The next line's baseline (over a picture) or its middle (with none). */
+  nextY: number;
+  nextX: number;
+  /** How far the chord block reaches from its middle. 0 over a picture. */
+  ringR: number;
+  /**
+   * Whether a beat ring is drawn around the chord at all.
+   *
+   * False when one wide enough to go round the name would not fit the frame:
+   * a circle through the middle of "Bbmaj7#11" is worse than no circle, and
+   * the beat is still readable in the chord itself.
+   */
+  ring: boolean;
+  /** Where the line-up sits, or null when there is nobody to name. */
+  lineupY: number | null;
+  lineupSize: number;
+};
+
+/**
+ * The chord block ON a picture: bottom-left, above the grid (W32, W33 §2).
+ *
+ * Pure, and exported, because the two facts it has to get right are facts a
+ * test can check and a rendered frame can only be looked at: the block must
+ * not reach into the bar-grid panel under it, and nothing in it may run off
+ * the side of the frame. Both of those were wrong — "next Bb7" sat twelve
+ * pixels inside the top of the panel in 9:16, and the chord's size was a
+ * fraction of the frame's width, which a nine-character name in a serif face
+ * overruns.
+ */
+export function jamOverPictureBlock(args: {
+  layout: ClipLayout;
+  box: ClipBox;
+  /** The chord being played, and "next Bb7" or "" — already assembled. */
+  now: string;
+  word: string;
+  measure: Measure;
+}): JamChordBlock {
+  const { layout, box, now, word, measure } = args;
+  const tall = layout.height > layout.width;
+  const pad = Math.round(layout.width * 0.045);
+  const across = box.width - pad * 2;
+  // Wide puts the next chord BESIDE the chord, so the two share the width;
+  // tall puts it under, so each has the frame to itself. A phone-shaped frame
+  // has height to spend and no width at all.
+  const nowRoom = tall ? across : across * 0.62;
+  const size = fitType(measure, now, 700, layout.width * (tall ? 0.24 : 0.13), nowRoom);
+  const small = word
+    ? fitType(
+        measure,
+        word,
+        600,
+        Math.round(size * (tall ? 0.3 : 0.34)),
+        tall ? across : across - nowRoom - Math.round(size * 0.22),
+      )
+    : 0;
+
+  /*
+   * The bottom of the block, a DESCENDER clear of the grid.
+   *
+   * Both pieces sit on an alphabetic baseline, so what has to clear the panel
+   * is not the baseline but the tail of the "j" in "maj7" — about a quarter
+   * of the type size. Placing the baseline a fixed fraction of the FRAME's
+   * height above the grid is what W32 did and what put "next Bb7" inside the
+   * panel in 9:16: the frame's height has nothing to do with how far a letter
+   * hangs below its line.
+   */
+  const tail = Math.round((tall && word ? small : size) * 0.3);
+  const foot = layout.strip.y - Math.round(layout.height * 0.012) - tail;
+  // In tall the chord stands on the next line, far enough up that its own
+  // descenders clear that line's capitals.
+  const chordY = tall && word ? foot - Math.round(small + size * 0.3) : foot;
+  const chordX = box.x + pad;
+  // Beside it in wide, and never off the right edge: the gap closes before
+  // the type shrinks, because a name a player can read matters more than the
+  // space between two of them.
+  const nextX = tall
+    ? chordX
+    : Math.min(
+        chordX + measure(now, 700, size) + Math.round(size * 0.22),
+        Math.max(chordX, box.x + box.width - pad - measure(word, 600, small)),
+      );
+  return {
+    size,
+    small,
+    chordY,
+    chordX,
+    nextY: tall ? foot : chordY,
+    nextX,
+    ringR: 0,
+    ring: false,
+    lineupY: null,
+    lineupSize: 0,
+  };
+}
+
+/**
+ * The chord block with NO picture, where the chord IS the clip (W32, W33 §2).
+ *
+ * W32 put the chord half way between the top of the frame and the grid and
+ * hung everything off its type size — and the beat ring, drawn at 0.88 of
+ * that size, was not in the arithmetic. It came down across the top of "next
+ * Bb7" on every stroke. A ring through a word is not something a viewer
+ * forgives, so the ring is part of the measurement now: the chord, the ring
+ * around it and the line under it are ONE block, fitted into the space
+ * between the top of the frame and whatever is below it.
+ */
+export function jamFullFrameBlock(args: {
+  layout: ClipLayout;
+  box: ClipBox;
+  now: string;
+  word: string;
+  /** "drums · bass · keys", or null when nothing is playing. */
+  lineup: string | null;
+  measure: Measure;
+}): JamChordBlock {
+  const { layout, box, now, word, lineup, measure } = args;
+  const tall = layout.height > layout.width;
+  const pad = Math.round(layout.width * 0.045);
+  const across = box.width - pad * 2;
+
+  // Who is playing, measured first, because it is what the rest of the frame
+  // has to stay clear of.
+  const lineupSize = Math.round(layout.type.section * 0.95);
+  const lineupY = lineup ? layout.strip.y - Math.round(lineupSize * 1.5) : null;
+  const ceiling = box.y + Math.round(layout.height * 0.05);
+  const floor = (lineupY ?? layout.strip.y) - Math.round(lineupSize * (lineup ? 1.1 : 0.4));
+  const room = Math.max(40, floor - ceiling);
+
+  // The ring reaches 0.88 of the type size either side of the chord's middle;
+  // the line under it is 0.26 of it and sits a fifth of it clear of the ring.
+  // So a block is about 2.35 type sizes tall with the line and 1.9 without,
+  // and the type is whichever of that and the width the frame can afford.
+  const stack = word ? 2.35 : 1.9;
+  const wanted = Math.min(box.height * (tall ? 0.2 : 0.34), box.width * 0.44, room / stack);
+  const size = fitType(measure, now, 700, wanted, across);
+  const small = word ? fitType(measure, word, 600, Math.round(size * 0.26), across) : 0;
+  const gap = Math.round(size * 0.2);
+
+  /*
+   * The ring is as wide as the CHORD, or it is not drawn at all.
+   *
+   * 0.88 of the type size is a circle around "F7" and a circle through the
+   * middle of "Bbmaj7#11", which nine characters of a serif face overflow
+   * long before the type has had to shrink. So the ring takes whichever is
+   * bigger — and where that will not fit the frame, there is no ring: the
+   * beat is still in the chord itself, and a ring drawn through the name of
+   * the chord is worse than no ring at all.
+   */
+  const wantR = Math.max(Math.round(size * 0.88), Math.round(measure(now, 700, size) / 2 + size * 0.3));
+  const ring =
+    wantR * 2 <= box.width - pad &&
+    wantR * 2 + (word ? gap + small : 0) <= room;
+  // Half the chord block either way, so the line below is placed against the
+  // same number whether the ring is there or not.
+  const ringR = ring ? wantR : Math.round(size * 0.62);
+  const blockH = ringR * 2 + (word ? gap + small : 0);
+  // Centred in the room it was given, so the frame is composed rather than
+  // top-heavy when the chord had to shrink.
+  const chordY = ceiling + Math.round((room - blockH) / 2) + ringR;
+  const centreX = box.x + box.width / 2;
+
+  return {
+    size,
+    small,
+    chordY,
+    chordX: centreX,
+    // BELOW the ring's widest moment, not below the letters: the ring swells
+    // on every beat, and a line that only cleared the chord would be crossed
+    // four times a bar.
+    nextY: chordY + ringR + gap + small / 2,
+    nextX: centreX,
+    ring,
+    ringR,
+    lineupY,
+    lineupSize,
+  };
+}
+
+/**
  * The renderer: what a jam looks like as a video somebody would post.
  *
  * W30 got this working and it was plain — a flat ground, the chord in a
@@ -378,42 +620,33 @@ export function jamStrip(shape: JamTapeShape): ClipStrip {
       ctx.fillStyle = fade;
       ctx.fillRect(box.x, box.y, box.width, box.height);
 
-      const pad = Math.round(layout.width * 0.045);
-      // The chord sits above the strip, which is above the caption.
-      const baseline = layout.strip.y - Math.round(layout.height * (tall ? 0.045 : 0.035));
-      const size = Math.round(layout.width * (tall ? 0.24 : 0.13));
+      const word = next && next !== now ? `${shape.nextWord} ${next}` : "";
+      const at = jamOverPictureBlock({ layout, box, now, word, measure: ruler(ctx, palette.face) });
 
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
+
       // The beat, in the chord itself: it lifts a little and brightens on
       // every stroke and harder on the one. A muted clip has no tempo in it
       // otherwise, and this is the one element a viewer is already looking at.
-      ctx.font = `700 ${size + Math.round(size * 0.035 * pulse)}px ${palette.face}`;
+      ctx.font = `700 ${String(at.size + Math.round(at.size * 0.035 * pulse))}px ${palette.face}`;
       // White, not the theme’s ink: this is over the room. See
       // `paintCaption` in `clipRecorder.ts` for the rule and why it is one.
       ctx.fillStyle = "#FFFFFF";
       ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-      ctx.shadowBlur = Math.round(size * 0.18);
-      ctx.fillText(now, box.x + pad, baseline);
-      const nowWidth = ctx.measureText(now).width;
+      ctx.shadowBlur = Math.round(at.size * 0.18);
+      ctx.fillText(now, at.chordX, at.chordY);
       ctx.shadowBlur = 0;
 
       // "next Bb7", quietly — the thing a player's eye is already looking
       // for. Left out when it is the same chord again, which on a blues is
       // most bars and would read as a stutter.
-      if (next && next !== now) {
-        const small = Math.round(size * (tall ? 0.3 : 0.34));
-        ctx.font = `600 ${small}px ${palette.face}`;
+      if (word) {
+        ctx.font = `600 ${String(at.small)}px ${palette.face}`;
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        ctx.shadowBlur = Math.round(small * 0.4);
-        const word = `${shape.nextWord} ${next}`;
-        if (tall) {
-          // Under it: a phone-shaped frame has height to spend and no width.
-          ctx.fillText(word, box.x + pad, baseline + Math.round(small * 1.35));
-        } else {
-          ctx.fillText(word, box.x + pad + nowWidth + Math.round(size * 0.22), baseline);
-        }
+        ctx.shadowBlur = Math.round(at.small * 0.4);
+        ctx.fillText(word, at.nextX, at.nextY);
         ctx.shadowBlur = 0;
       }
     },
@@ -434,7 +667,6 @@ export function jamStrip(shape: JamTapeShape): ClipStrip {
       const now = chordAt(shape, barsIn);
       if (!now) return;
       const next = chordAt(shape, barsIn + 1);
-      const tall = layout.height > layout.width;
       const onOne = onBarLine(shape, nowMs);
       const pulse = beatPulse(shape, nowMs);
 
@@ -455,59 +687,51 @@ export function jamStrip(shape: JamTapeShape): ClipStrip {
       ctx.fillRect(box.x, box.y, box.width, box.height);
       ctx.globalAlpha = 1;
 
-      // The chord sits above the furniture rather than in the middle of the
-      // whole frame: the strip and the caption are the bottom sixth, and a
-      // chord centred on the frame would sit low against them.
-      const centre = box.y + (layout.strip.y - box.y) * 0.5;
-      const size = Math.round(Math.min(box.height * (tall ? 0.2 : 0.34), box.width * 0.44));
+      const word = next && next !== now ? `${shape.nextWord} ${next}` : "";
+      const at = jamFullFrameBlock({
+        layout,
+        box,
+        now,
+        word,
+        lineup: shape.lineup,
+        measure: ruler(ctx, palette.face),
+      });
 
       // The beat, as a ring around the chord — where the eye already is. It
-      // is drawn UNDER the chord so a thick stroke never crosses a letter.
-      if (pulse > 0.02) {
-        const radius = size * (0.78 + 0.1 * (1 - pulse));
+      // is drawn UNDER the chord so a thick stroke never crosses a letter,
+      // and its widest moment is what the line below was placed clear of.
+      if (at.ring && pulse > 0.02) {
+        const radius = at.ringR * (0.89 + 0.11 * (1 - pulse));
         ctx.strokeStyle = palette.accent;
         ctx.globalAlpha = (onOne ? 0.34 : 0.16) * pulse;
-        ctx.lineWidth = Math.max(2, Math.round(size * (onOne ? 0.028 : 0.016)));
+        ctx.lineWidth = Math.max(2, Math.round(at.size * (onOne ? 0.028 : 0.016)));
         ctx.beginPath();
-        ctx.arc(box.x + box.width / 2, centre, radius, 0, Math.PI * 2);
+        ctx.arc(at.chordX, at.chordY, radius, 0, Math.PI * 2);
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
 
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = `700 ${size}px ${palette.face}`;
+      ctx.font = `700 ${String(at.size)}px ${palette.face}`;
       ctx.fillStyle = palette.ink;
-      ctx.fillText(now, box.x + box.width / 2, centre);
+      ctx.fillText(now, at.chordX, at.chordY);
 
-      if (next && next !== now) {
-        const small = Math.round(size * 0.26);
-        ctx.font = `600 ${small}px ${palette.face}`;
+      if (word) {
+        ctx.font = `600 ${String(at.small)}px ${palette.face}`;
         ctx.fillStyle = palette.quiet;
-        ctx.fillText(
-          `${shape.nextWord} ${next}`,
-          box.x + box.width / 2,
-          centre + size * 0.74,
-        );
+        ctx.fillText(word, at.nextX, at.nextY);
       }
 
-      // Who is playing, and which time round — small, at the foot of the
-      // picture and above the grid. The line-up is what says the thing behind
-      // the chords is a band rather than a metronome.
-      // Who is playing, and only that: which time round is already on the
+      // Who is playing — and only that: which time round is already on the
       // caption a centimetre below, and a frame that says "Chorus 1" twice
-      // is a frame talking to itself.
-      const foot = shape.lineup;
-      if (foot) {
-        const small = Math.round(layout.type.section * 0.95);
-        ctx.font = `600 ${small}px ${palette.face}`;
+      // is a frame talking to itself. The line-up is what says the thing
+      // behind the chords is a band rather than a metronome.
+      if (shape.lineup && at.lineupY !== null) {
+        ctx.font = `600 ${String(at.lineupSize)}px ${palette.face}`;
         ctx.fillStyle = palette.quiet;
         ctx.globalAlpha = 0.8;
-        ctx.fillText(
-          foot,
-          box.x + box.width / 2,
-          layout.strip.y - Math.round(small * 1.5),
-        );
+        ctx.fillText(shape.lineup, at.chordX, at.lineupY);
         ctx.globalAlpha = 1;
       }
     },

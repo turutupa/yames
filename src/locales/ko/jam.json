@@ -722,6 +722,17 @@
       "save": "영상으로 저장",
       "chorus": "코러스 {{count}}",
       "next": "다음"
+    },
+    "watch": {
+      "open": "다시 듣기",
+      "where": "{{bar}}마디 · {{chorus}}",
+      "goToBar": "{{bar}}마디로",
+      "barBack": "한 마디 뒤로",
+      "barOn": "한 마디 앞으로",
+      "nudge": "영상",
+      "nudgeBack": "영상을 조금 빠르게",
+      "nudgeOn": "영상을 조금 느리게",
+      "broken": "이 테이크를 재생할 수 없습니다. 파일이 옮겨졌거나 삭제되었을 수 있습니다."
     }
   },
   "scale": {

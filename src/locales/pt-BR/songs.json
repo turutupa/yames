@@ -299,7 +299,9 @@
       "watchingAll": "A passada inteira.",
       "watchingBars": "Compassos {{bars}}, sem parar.",
       "sinkUnsupported": "Esta versão só toca a gravação pelas caixas de som normais do computador, não por {{device}}.",
-      "sinkUnmatched": "Está tocando pelas caixas de som normais do computador — daqui não deu para achar {{device}}."
+      "sinkUnmatched": "Está tocando pelas caixas de som normais do computador — daqui não deu para achar {{device}}.",
+      "peek": "Ver você",
+      "peekNote": "Confira o enquadramento. Fecha quando você toca."
     },
     "clip": {
       "save": "Salvar como vídeo",
@@ -326,7 +328,13 @@
       "showInFolder": "Mostrar na pasta",
       "postItTo": "Publicar em",
       "dragItIn": "Abra um e arraste o arquivo — o Yames não envia nada e não pede conta.",
-      "webmWarning": "Abra um e arraste o arquivo. Este é um WebM e a maioria só aceita MP4 — um conversor gratuito resolve."
+      "webmWarning": "Abra um e arraste o arquivo. Este é um WebM e a maioria só aceita MP4 — um conversor gratuito resolve.",
+      "underPicture": "Abaixo da imagem",
+      "band": {
+        "tab": "A tablatura",
+        "marks": "Só as marcas",
+        "none": "Nada"
+      }
     },
     "compare": {
       "title": "Compassos {{bars}}, antes e agora",

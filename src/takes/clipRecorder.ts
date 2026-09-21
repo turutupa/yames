@@ -106,6 +106,8 @@ export type ClipFrameState = {
   nowMs: number;
   /** Whether the verdict is painted on the excerpt at all. */
   marks: boolean;
+  /** Whether there is a camera picture in this clip. The renderer is told. */
+  hasPicture: boolean;
   /** Whether the Yames mark is on the clip at all. Its own switch. */
   brand: boolean;
   /** What the mark says beside the tile. Not translated: it is an address. */
@@ -327,7 +329,7 @@ function paintPicture(ctx: CanvasRenderingContext2D, state: ClipFrameState): voi
  * live in a band.
  */
 function paintOverPicture(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, strip, nowMs, picture } = state;
+  const { layout, palette, strip, nowMs, hasPicture } = state;
   if (!strip.paintOverPicture) return;
   const box = layout.picture;
   ctx.save();
@@ -339,7 +341,7 @@ function paintOverPicture(ctx: CanvasRenderingContext2D, state: ClipFrameState):
     layout,
     palette,
     nowMs,
-    hasPicture: picture !== null,
+    hasPicture,
   });
   ctx.restore();
 }
@@ -369,17 +371,40 @@ function sourceSize(source: CanvasImageSource): { width: number; height: number 
  * the marking.
  */
 function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, strip, nowMs, windowMs, marks, picture } = state;
+  const { layout, palette, strip, nowMs, windowMs, marks, hasPicture } = state;
   const box = layout.strip;
+  // "Nothing under the picture" is one of the three things a player may ask
+  // for (W31 item 4), and it is a band of no height: no ground, no playhead.
+  if (box.height <= 0) return;
 
   ctx.save();
+
+  // Over the picture, the band needs a ground of its own — it is sitting on
+  // whatever the room was, and a fret number drawn straight onto a white wall
+  // is not a fret number. Dark, translucent and rounded, the same treatment
+  // the Yames mark gets and for the same reason; it covers the caption too,
+  // because the two are one panel to look at. Drawn BEFORE the clip region so
+  // it can reach up to the caption above the band.
+  if (layout.overPicture) {
+    const top = Math.min(layout.caption.y, box.y) - 10;
+    const bottom = Math.max(layout.caption.y + layout.caption.height, box.y + box.height) + 8;
+    roundedPath(ctx, box.x, top, box.width, bottom - top, 18);
+    ctx.fillStyle = "rgba(11, 10, 20, 0.74)";
+    ctx.fill();
+  }
+
   ctx.beginPath();
   ctx.rect(box.x, box.y, box.width, box.height);
   ctx.clip();
 
   // Over a picture the renderer lays its own ground — this file has never
-  // seen the room behind it and cannot know how dark it has to be.
-  if (!strip.overlay) {
+  // seen the room behind it and cannot know how dark it has to be. Two
+  // renderers ask for that in two ways and both mean it: a jam asks for the
+  // whole overlay composition (`strip.overlay`), the tab asks for a band that
+  // lies over the picture's lower third (`layout.overPicture`, from its
+  // `bandFor`). Either way the plain band ground would be a grey slab under
+  // somebody's living room.
+  if (!strip.overlay && !layout.overPicture) {
     ctx.fillStyle = palette.line;
     ctx.globalAlpha = 0.35;
     ctx.fillRect(box.x, box.y, box.width, box.height);
@@ -392,19 +417,12 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
   // any of those subtly different. It is given a clean context and may leave
   // it however it likes: `restore` below puts it back.
   ctx.save();
-  strip.paintInto(ctx, {
-    box,
-    layout,
-    palette,
-    nowMs,
-    windowMs,
-    marks,
-    hasPicture: picture !== null,
-  });
+  strip.paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks, hasPicture });
   ctx.restore();
 
-  // The playhead, last so nothing is drawn over it.
-  const head = box.x + box.width / 2;
+  // The playhead, last so nothing is drawn over it. In the middle for the
+  // dots and a jam; wherever the renderer's band asked for it otherwise.
+  const head = box.x + box.width * layout.head;
   ctx.strokeStyle = palette.accent;
   ctx.lineWidth = 3;
   ctx.beginPath();
@@ -417,7 +435,7 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
 
 /** Bar, section, tempo — and the mark that is the whole point of the clip. */
 function paintCaption(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, strip, nowMs, words, picture } = state;
+  const { layout, palette, strip, nowMs, words, hasPicture } = state;
   const box = layout.caption;
   const caption = strip.captionAt(nowMs);
   // OVER A PICTURE the ink is light in every theme, and that is the same
@@ -426,7 +444,7 @@ function paintCaption(ctx: CanvasRenderingContext2D, state: ClipFrameState): voi
   // light theme’s ink is dark brown, and dark brown over somebody’s living
   // room is a caption nobody can read. The theme still decides the accent,
   // the grid and everything on a clip with no picture.
-  const over = strip.overlay === true && picture !== null;
+  const over = strip.overlay === true && hasPicture;
   const ink = over ? "#FFFFFF" : palette.ink;
   const quiet = over ? "rgba(255, 255, 255, 0.78)" : palette.quiet;
 
@@ -546,7 +564,21 @@ export function recordClip(options: RecordClipOptions): ClipRun {
     onProgress,
   } = options;
 
-  const layout = strip.overlay ? clipOverlayLayout(shape) : clipLayout(shape);
+  // How much room the thing that scrolls needs, and how it wants to be driven
+  // (W31). Asked ONCE, before a frame is painted: a band that changed size
+  // half way through a clip would be a clip with a seam in it. The dots answer
+  // nothing and get the layout this file has always made.
+  const hasPicture = videoSrc !== null;
+  const band = strip.bandFor?.(shape, hasPicture) ?? null;
+  // The two compositions, and a renderer declares one or neither (W32/W31). A
+  // jam asks for the overlay — the picture fills the frame and the furniture
+  // sits on its lower edge — and composes it whole rather than as a band, so
+  // it has no `bandFor` to answer with. Songs asks with a band, or with
+  // nothing at all and gets the letterboxed clip both workers started from.
+  const layout = strip.overlay ? clipOverlayLayout(shape) : clipLayout(shape, band);
+  // NOT `window`: this function reaches for the real one further down, and a
+  // local of that name turns "is there an audio graph" into a silent no.
+  const across = band ? band.windowMs : windowMs;
   canvas.width = layout.width;
   canvas.height = layout.height;
   const ctx = canvas.getContext("2d", { alpha: false });
@@ -622,9 +654,10 @@ export function recordClip(options: RecordClipOptions): ClipRun {
         palette,
         picture: video && video.readyState >= 2 ? video : null,
         strip,
-        windowMs,
+        windowMs: across,
         nowMs,
         marks,
+        hasPicture,
         brand,
         wordmark,
         words,

@@ -32,6 +32,32 @@ const THEMES = ["ember", "ivory"];
 /** Both shapes, with a picture behind the furniture and without one. */
 const SHAPES = ["wide", "tall"] as const;
 
+/**
+ * The chord names, and which themes each set is drawn in (W33 item 2).
+ *
+ * The ordinary pass is a real blues in both themes. The second is the same
+ * frames with the longest names a chart carries — "Bbmaj7#11", "F#m7b5" — in
+ * IVORY alone, because Ivory's display face is a serif and a serif is the
+ * widest thing the type has to survive. Both of W32's overlaps were found by
+ * looking at frames rather than by any assertion; these are the frames that
+ * would have shown them sooner, and `jamStrip.test.ts` is the assertion.
+ */
+const NAMES = [
+  { suffix: "", chords: [] as string[], themes: THEMES },
+  {
+    suffix: "-long",
+    // Bar four is where these frames are painted (see `nowMs` below), so the
+    // two names the brief names are the one being played and the one coming
+    // next — the two the composition has to fit side by side.
+    chords: [
+      "Ebm9", "Ebm9", "C7alt", "Bbmaj7#11",
+      "F#m7b5", "F#m7b5", "Ebm9", "Bbmaj7#11",
+      "C7alt", "Bbmaj7#11", "F#m7b5", "C7alt",
+    ],
+    themes: ["ivory"],
+  },
+];
+
 type Painted = { dataUrl: string; width: number; height: number; ms: number };
 
 test.describe("the frames a jam clip is made of", () => {
@@ -39,16 +65,17 @@ test.describe("the frames a jam clip is made of", () => {
     fs.mkdirSync(OUT, { recursive: true });
   });
 
-  for (const theme of THEMES) {
+  for (const names of NAMES) {
+    for (const theme of names.themes) {
     for (const shape of SHAPES) {
       for (const withPicture of [true, false]) {
-        const what = `${shape}-${withPicture ? "picture" : "no-picture"}-${theme}`;
+        const what = `${shape}-${withPicture ? "picture" : "no-picture"}-${theme}${names.suffix}`;
         test(`paints ${what}`, async ({ page }) => {
           await page.goto(`/shots.html?manifest=1&theme=${theme}`);
           await page.waitForLoadState("networkidle");
 
           const painted: Painted = await page.evaluate(
-            async ({ which, picture, themeId }) => {
+            async ({ which, picture, themeId, long }) => {
               // The theme, applied by hand.
               //
               // `shots.html?manifest=1` mounts no app, so nothing has set the
@@ -95,6 +122,11 @@ test.describe("the frames a jam clip is made of", () => {
                 "drums · bass · keys",
                 "next",
               );
+              // W33 item 2 — the long names, when this run is about them.
+              // Replaced on the SHAPE rather than invented in the painter, so
+              // what is drawn is the shipping drawing of a real progression
+              // whose chords happen to be nine characters long.
+              if (long.length > 0) shape2.chords = long;
               const renderer = strip.jamStrip(shape2);
               // The renderer asks for the overlay composition; the harness has
               // to pick the same one the recorder would.
@@ -150,6 +182,12 @@ test.describe("the frames a jam clip is made of", () => {
                   face,
                 },
                 picture: source,
+                // Said separately from `picture`, because the recorder says it
+                // separately (W31): a frame painted before the video element
+                // is ready has no picture in it yet and must not be drawn as
+                // if the take had none, or the first second of every clip is
+                // a different composition from the rest of it.
+                hasPicture: picture,
                 strip: renderer,
                 windowMs: strip.jamWindowMs(shape2),
                 // Bar four of the blues, a hair past the bar line: the chord
@@ -192,7 +230,7 @@ test.describe("the frames a jam clip is made of", () => {
                 ms,
               };
             },
-            { which: shape, picture: withPicture, themeId: theme },
+            { which: shape, picture: withPicture, themeId: theme, long: names.chords },
           );
 
           const base64 = painted.dataUrl.replace(/^data:image\/png;base64,/, "");
@@ -223,6 +261,7 @@ test.describe("the frames a jam clip is made of", () => {
           );
         });
       }
+    }
     }
   }
 });

@@ -743,6 +743,17 @@
       "chorus_many": "Grille {{count}}",
       "chorus_other": "Grille {{count}}",
       "next": "ensuite"
+    },
+    "watch": {
+      "open": "Réécouter",
+      "where": "Mesure {{bar}} · {{chorus}}",
+      "goToBar": "Aller à la mesure {{bar}}",
+      "barBack": "Une mesure en arrière",
+      "barOn": "Une mesure en avant",
+      "nudge": "Image",
+      "nudgeBack": "Image un peu plus tôt",
+      "nudgeOn": "Image un peu plus tard",
+      "broken": "Cette prise n'a pas pu être lue. Le fichier a peut-être été déplacé ou supprimé."
     }
   },
   "scale": {

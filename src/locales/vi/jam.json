@@ -722,6 +722,17 @@
       "save": "Lưu thành video",
       "chorus": "Vòng {{count}}",
       "next": "tiếp"
+    },
+    "watch": {
+      "open": "Nghe lại",
+      "where": "Ô nhịp {{bar}} · {{chorus}}",
+      "goToBar": "Tới ô nhịp {{bar}}",
+      "barBack": "Lùi một ô nhịp",
+      "barOn": "Tiến một ô nhịp",
+      "nudge": "Hình",
+      "nudgeBack": "Hình sớm hơn một chút",
+      "nudgeOn": "Hình muộn hơn một chút",
+      "broken": "Bản thu này không phát được. Có thể tệp đã bị di chuyển hoặc xóa."
     }
   },
   "scale": {

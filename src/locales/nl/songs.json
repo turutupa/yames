@@ -289,7 +289,9 @@
       "watchingAll": "De hele ronde.",
       "watchingBars": "Maten {{bars}}, rondje na rondje.",
       "sinkUnsupported": "Deze versie kan de opname alleen via de gewone luidsprekers van de computer afspelen, niet via {{device}}.",
-      "sinkUnmatched": "Hij speelt via de gewone luidsprekers van de computer — {{device}} was hiervandaan niet te vinden."
+      "sinkUnmatched": "Hij speelt via de gewone luidsprekers van de computer — {{device}} was hiervandaan niet te vinden.",
+      "peek": "Jezelf zien",
+      "peekNote": "Check je beeld. Het sluit zodra je speelt."
     },
     "clip": {
       "save": "Als video opslaan",
@@ -316,7 +318,13 @@
       "showInFolder": "Toon in map",
       "postItTo": "Plaatsen op",
       "dragItIn": "Open er een en sleep het bestand erin — Yames uploadt niets en heeft geen account nodig.",
-      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van."
+      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van.",
+      "underPicture": "Onder het beeld",
+      "band": {
+        "tab": "De tab",
+        "marks": "Alleen de tekens",
+        "none": "Niets"
+      }
     },
     "compare": {
       "title": "Maten {{bars}}, toen en nu",

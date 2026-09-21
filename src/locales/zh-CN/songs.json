@@ -289,7 +289,9 @@
       "watchingAll": "整整一遍。",
       "watchingBars": "第 {{bars}} 小节，一遍又一遍。",
       "sinkUnsupported": "这个版本只能用电脑平时的扬声器播放录音，不能走 {{device}}。",
-      "sinkUnmatched": "正在用电脑平时的扬声器播放——这里找不到 {{device}}。"
+      "sinkUnmatched": "正在用电脑平时的扬声器播放——这里找不到 {{device}}。",
+      "peek": "看看自己",
+      "peekNote": "检查一下取景。开始演奏时会自动关闭。"
     },
     "clip": {
       "save": "保存为视频",
@@ -316,7 +318,13 @@
       "showInFolder": "在文件夹中显示",
       "postItTo": "发到",
       "dragItIn": "打开一个，把文件拖进去——Yames 不上传任何东西，也不需要账号。",
-      "webmWarning": "打开一个，把文件拖进去。这个是 WebM，大多数地方只收 MP4，用免费转换工具转一下就行。"
+      "webmWarning": "打开一个，把文件拖进去。这个是 WebM，大多数地方只收 MP4，用免费转换工具转一下就行。",
+      "underPicture": "画面下方",
+      "band": {
+        "tab": "六线谱",
+        "marks": "只显示标记",
+        "none": "不显示"
+      }
     },
     "compare": {
       "title": "第 {{bars}} 小节，那时和现在",

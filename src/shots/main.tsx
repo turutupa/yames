@@ -257,6 +257,39 @@ async function drive() {
     }
 
     /**
+     * W33 — one take, opened to be watched back.
+     *
+     * The row's own button, by its position in the shelf. After the camera
+     * block above, so a scene can film and then open a take in the same run.
+     */
+    if (typeof shot!.jam.watchTake === "number") {
+      const which = shot!.jam.watchTake;
+      await until("the takes shelf", () => !!document.querySelector(".jam-takes-list .jam-take"));
+      /*
+       * Pressed on every poll until it opens, rather than once.
+       *
+       * The shelf appears as soon as `list_takes` answers and settles a
+       * moment later, when the folder's size arrives; a press that lands in
+       * between is a press on a row React is about to replace, and it opens
+       * nothing. A person pressing a button on a list that has finished
+       * moving never meets this, and waiting for "finished moving" is a thing
+       * the harness has no way to ask about — so it presses until the panel
+       * is there, which is also what a person would do.
+       */
+      await until(
+        "the watch panel",
+        () => {
+          const rows = [...document.querySelectorAll<HTMLElement>(".jam-takes-list .jam-take")];
+          const open = rows[which]?.querySelector<HTMLElement>(".jam-take-share");
+          if (!open) return false;
+          if (open.getAttribute("aria-expanded") !== "true") open.click();
+          return !!document.querySelector(".jam-watch-grid");
+        },
+        20000,
+      );
+    }
+
+    /**
      * The chord sheet's page, its reading and its filter (A10).
      *
      * By the label on the segment, not by an index: the four flavours are in

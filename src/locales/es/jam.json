@@ -743,6 +743,17 @@
       "chorus_many": "Vuelta {{count}}",
       "chorus_other": "Vuelta {{count}}",
       "next": "luego"
+    },
+    "watch": {
+      "open": "Escúchalo",
+      "where": "Compás {{bar}} · {{chorus}}",
+      "goToBar": "Ir al compás {{bar}}",
+      "barBack": "Un compás atrás",
+      "barOn": "Un compás adelante",
+      "nudge": "Imagen",
+      "nudgeBack": "Imagen un poco antes",
+      "nudgeOn": "Imagen un poco después",
+      "broken": "Ese take no se pudo reproducir. Puede que el archivo se haya movido o borrado."
     }
   },
   "scale": {

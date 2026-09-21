@@ -168,6 +168,13 @@ interface JamSetupSheetProps {
    * the takes are, because both end when the jam leaves the engine.
    */
   camera?: TakeCameraState | null;
+  /**
+   * The band is going (W33 §3).
+   *
+   * Only the camera's "see yourself" uses it, and only to shut: checking your
+   * framing is something you do before you play.
+   */
+  isPlaying?: boolean;
 }
 
 /**
@@ -241,6 +248,7 @@ export function JamSetupSheet({
   takes,
   onToggleTakes,
   camera = null,
+  isPlaying = false,
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
   /** Which roles' voices this sheet has already asked to be built. Once each. */
@@ -1290,7 +1298,16 @@ export function JamSetupSheet({
                 {/* Greyed while recording is off rather than hidden: a switch
                     that appears only once another switch is on is a switch
                     nobody finds. */}
-                <CameraControl camera={camera} disabled={!jam.takes} />
+                {/* W33 §3 — and a way to LOOK at what it is filming. The
+                    stage's own mirror is not drawn below 900px (`jam.css`
+                    says why), so at a small window this is the only way a
+                    player sees their own framing before they play. */}
+                <CameraControl
+                  camera={camera}
+                  disabled={!jam.takes}
+                  canPeek
+                  playing={isPlaying}
+                />
               </div>
             )}
 

@@ -20,6 +20,8 @@
 // on Stop at 1100×720, and the second was a hundred and sixty pixels below
 // the fold at 480×780 because the jam stage is a column that scrolls.
 import { test, expect } from "@playwright/test";
+import * as fs from "fs";
+import * as path from "path";
 import { openShot, noSidewaysScroll } from "./fits";
 
 /**
@@ -172,4 +174,102 @@ test.describe("the camera's switch", () => {
     // have a sticker over it, so the app says it (`CameraControl`).
     await expect(chip.locator(".songs-camera-dot[data-live]")).toHaveCount(1);
   });
+});
+
+/**
+ * "See yourself" — the answer to the mirror not being there (W33 §3).
+ *
+ * The stage draws no mirror below 900px, and W32's own report called out what
+ * that leaves: a player at a small window records a picture they have never
+ * seen. So the camera chip gained a neighbour, and what matters about it is
+ * that it exists at the size the mirror does NOT, that it opens a real live
+ * picture, and that the picture stays inside the window it was opened in —
+ * a portalled panel off a control deep in a drawer is exactly the shape of
+ * bug this suite was written for.
+ */
+test.describe("seeing yourself when there is no mirror", () => {
+  for (const size of [NO_ROOM, { name: "a laptop", width: 1100, height: 720 }]) {
+    test(`opens a live picture at ${size.name} (${String(size.width)}px)`, async ({ page }) => {
+      await openShot(page, "jam-camera", size);
+
+      const peek = page.locator(".songs-camera-peek");
+      await expect(peek, "no way to see yourself with the camera on").toHaveCount(1);
+      await expect(peek).toHaveAttribute("aria-expanded", "false");
+      await peek.click();
+
+      const pop = page.locator(".songs-camera-peek-pop");
+      await expect(pop).toHaveCount(1);
+      // A real picture, not an empty box: the same `readyState >= 1` the
+      // stage's own preview is held to. Polled, because a camera hands over
+      // its first frame when it is ready and not when a test asks.
+      await expect
+        .poll(
+          () =>
+            page.$eval(
+              ".songs-camera-peek-pop video",
+              (node) => (node as HTMLVideoElement).readyState,
+            ),
+          { message: "the picture has no video in it", timeout: 15_000 },
+        )
+        .toBeGreaterThanOrEqual(1);
+
+      // Inside the window, both ways. It is allowed to cover the grid while
+      // it is open — you are not reading the form while you are framing up —
+      // but a panel half off the screen is a panel nobody can use.
+      //
+      // Measured after a breath: `useMenuPlacement` places against the chip
+      // the instant the panel mounts and places again on every scroll, and
+      // the press itself scrolls the drawer. A reading taken in the same tick
+      // as the click is a reading of where the chip WAS.
+      await page.waitForTimeout(250);
+      const box = (await pop.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(-1);
+      expect(box.y).toBeGreaterThanOrEqual(-1);
+      expect(box.x + box.width).toBeLessThanOrEqual(size.width + 1);
+      expect(box.y + box.height).toBeLessThanOrEqual(size.height + 1);
+
+      await noSidewaysScroll(page, `the jam screen with the picture open at ${String(size.width)}px`);
+
+      // Escape shuts it, like every other menu on this screen.
+      await page.keyboard.press("Escape");
+      await expect(pop).toHaveCount(0);
+    });
+  }
+});
+
+/** The stage with the camera on, photographed for a person to look at. */
+test.describe("what the stage looks like", () => {
+  const OUT = path.resolve(process.cwd(), ".jam-shots");
+  test.beforeAll(() => {
+    fs.mkdirSync(OUT, { recursive: true });
+  });
+  for (const theme of ["ember", "ivory"]) {
+    for (const size of [NO_ROOM, ...ROOMY]) {
+      test(`photographs the stage at ${String(size.width)}px under ${theme}`, async ({ page }) => {
+        await openShot(page, "jam-camera", size, theme);
+        /*
+         * The drawer is shut first, and the first-run hint with it.
+         *
+         * The scene has to OPEN the drawer to reach the two switches — there
+         * is no other door — but what this photograph is of is the STAGE with
+         * the camera on it, and at 480px the drawer is the whole window.
+         * Closing it is what a player does the moment they have armed the
+         * thing, so it is also the state they actually play in.
+         */
+        const hint = page.getByRole("button", { name: "Got it", exact: true });
+        if ((await hint.count()) > 0) await hint.first().click();
+        const done = page.locator(".jam-sheet-done, .jam-sheet-frame-done").first();
+        if ((await done.count()) > 0) await done.click();
+        else {
+          const label = page.getByRole("button", { name: "Done", exact: true });
+          if ((await label.count()) > 0) await label.first().click();
+        }
+        await expect(page.locator(".jam-sheet")).toHaveCount(0);
+        await page.waitForTimeout(300);
+        const file = path.join(OUT, `jam-stage-${String(size.width)}-${theme}.png`);
+        await page.screenshot({ path: file });
+        console.log(`[shot] ${file}`);
+      });
+    }
+  }
 });

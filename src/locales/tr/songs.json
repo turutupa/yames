@@ -289,7 +289,9 @@
       "watchingAll": "Turun tamamı.",
       "watchingBars": "{{bars}} ölçüleri, döne döne.",
       "sinkUnsupported": "Bu sürüm kaydı yalnızca bilgisayarın her zamanki hoparlörlerinden çalabiliyor, {{device}} üzerinden değil.",
-      "sinkUnmatched": "Bilgisayarın her zamanki hoparlörlerinden çalıyor — buradan {{device}} bulunamadı."
+      "sinkUnmatched": "Bilgisayarın her zamanki hoparlörlerinden çalıyor — buradan {{device}} bulunamadı.",
+      "peek": "Kendini gör",
+      "peekNote": "Kadrajını kontrol et. Çalmaya başlayınca kapanır."
     },
     "clip": {
       "save": "Video olarak kaydet",
@@ -316,7 +318,13 @@
       "showInFolder": "Klasörde göster",
       "postItTo": "Şuraya yükle",
       "dragItIn": "Birini aç ve dosyayı içine sürükle — Yames hiçbir şey yüklemez, hesap da istemez.",
-      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor."
+      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor.",
+      "underPicture": "Görüntünün altında",
+      "band": {
+        "tab": "Tab",
+        "marks": "Sadece işaretler",
+        "none": "Hiçbiri"
+      }
     },
     "compare": {
       "title": "{{bars}}. ölçüler, o zaman ve şimdi",

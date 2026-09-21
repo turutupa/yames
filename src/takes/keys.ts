@@ -49,6 +49,16 @@ export const CAMERA_GUIDE_KEY = "songs.cameraGuideSeen";
 export const CLIP_BRAND_KEY = "songs.clipBrand";
 
 /**
+ * What a saved clip carries under the picture (W31): the tab, the marks
+ * alone, or nothing.
+ *
+ * Remembered like the mark is, and for the same reason: a player who has
+ * decided they do not want their mistakes painted on things they post should
+ * not have to decide it again on the next take.
+ */
+export const CLIP_BAND_KEY = "songs.clipBand";
+
+/**
  * The output device the player chose in settings, by cpal's name for it.
  *
  * NOT a camera key and not one this wave invented: it is the key

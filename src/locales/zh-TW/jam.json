@@ -722,6 +722,17 @@
       "save": "存成影片",
       "chorus": "第 {{count}} 遍",
       "next": "接下來"
+    },
+    "watch": {
+      "open": "回放",
+      "where": "第 {{bar}} 小節 · {{chorus}}",
+      "goToBar": "跳到第 {{bar}} 小節",
+      "barBack": "退一小節",
+      "barOn": "進一小節",
+      "nudge": "畫面",
+      "nudgeBack": "畫面稍早",
+      "nudgeOn": "畫面稍晚",
+      "broken": "這段錄音無法播放。檔案可能已被移動或刪除。"
     }
   },
   "scale": {
