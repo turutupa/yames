@@ -419,7 +419,31 @@ function buildSettings(view: StageView, fretted: boolean): Settings {
    */
   settings.display.scale = view.zoom;
   settings.display.padding = [10, 8];
-  settings.display.firstSystemPaddingTop = 2;
+  /*
+   * ── Room for what is written ABOVE the first bar (W34 item 6) ─────────
+   *
+   * The owner, 2026-09-21: *"the first row's tempo mark is drawn on top of
+   * the section name and the cursor"*. Measured on the fixture at 2000px
+   * before this: `♩ = 96` occupied y 167–183 and `Verse` y 183–199 — two
+   * boxes touching to the pixel, with the bar number's own row starting one
+   * pixel later and the beat cursor drawn straight through all three.
+   *
+   * Two numbers, and each fixes a different half:
+   *
+   * `effectBandPaddingBottom` is the space BETWEEN two effect bands, and
+   * alphaTab's 2 is a printed page's. The tempo mark is a band, the section
+   * name is the band under it, and alphaTab paints the tempo's own text on
+   * the band's bottom baseline — so at 2 the quarter-note glyph hangs into
+   * the name of the section it is announcing.
+   *
+   * `firstSystemPaddingTop` was 2, which put the tempo mark against the top
+   * edge of the frame with the cursor's wash beginning in the same pixel.
+   * The room is bought back below: `systemPaddingTop` and the two bottoms
+   * stay tight, so this costs the page eight pixels ONCE rather than eight
+   * per system.
+   */
+  settings.display.effectBandPaddingBottom = 6;
+  settings.display.firstSystemPaddingTop = 10;
   settings.display.systemPaddingTop = 2;
   settings.display.systemPaddingBottom = 4;
   settings.display.lastSystemPaddingBottom = 2;
