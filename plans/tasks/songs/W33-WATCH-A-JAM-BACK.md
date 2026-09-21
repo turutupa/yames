@@ -1,11 +1,49 @@
 # W33 — Watch a jam back, and the last untidy corners of the camera work
 
-Branch `songs-w33-watch-a-jam-back`, from `songs-v1` **once it contains
-both `merge(songs-w32-camera-in-jam)` and
-`merge(songs-w31-tab-in-the-video)`** (the orchestrator launches this
-after both are in). Size M. W32 stopped cleanly after the camera and the
-better-looking video; this is its item 3 plus what its report and the
-orchestrator's look at the frames left open. One commit per item.
+Branch `songs-w33-watch-a-jam-back`, from `songs-v1` (it contains
+`merge(songs-w32-camera-in-jam)`). Size L. W32 stopped cleanly after the
+camera and the better-looking video; this is its item 3 plus what its
+report and the orchestrator's look at the frames left open. One commit
+per item.
+
+## 0. First: bring the tab-in-the-video work in (`songs-w31-tab-in-the-video`)
+
+W31 and W32 ran side by side and both changed the compositor. The
+orchestrator tried `git merge songs-w31-tab-in-the-video` into
+`songs-v1` on 2026-09-21 and backed out: five files conflict —
+`.gitignore` (union), `src/containers/songs/review/SongReview.tsx` (1
+block), `src/takes/SaveAsVideo.tsx` (1), `src/takes/clipStrip.ts` (3)
+and `src/takes/clipRecorder.ts` (4). Rename detection carried W31's
+edits into `src/takes/`; what is left is two real designs meeting:
+
+- **W32** gave `ClipStrip` an `overlay` flag and `paintOverPicture`, a
+  `clipOverlayLayout` in `clip.ts` (a jam's picture fills the frame and
+  the furniture sits on its lower edge), fonts loaded before the first
+  frame, the active theme's palette, and a beat pulse.
+- **W31** gave `ClipStrip` a `bandFor(shape, hasPicture)` (how tall the
+  band is, where the playhead sits — a third of the way in for the tab,
+  the middle for everything else — and how many bars the window holds),
+  `clipLayout(shape, band?)`, `clipPad` / `fullBandHeight`, and a tab
+  that lies OVER the picture in 9:16 and IS the frame with no picture.
+- Both added `hasPicture` to `paintInto`'s args, with the same meaning.
+
+Do the merge on your branch as your FIRST commit
+(`git merge songs-w31-tab-in-the-video`), keeping BOTH: a renderer may
+declare `overlay` / `paintOverPicture`, or `bandFor`, or neither; the
+jam's frames and the song's frames must each come out exactly as their
+own worker left them. W31's new files import `../songs/camera/clip`,
+`/tape`, `/offset`, `/clipRecorder`; after W32's move those are `./…`
+for what moved and stay `../songs/camera/…` for what did not
+(`align`, `songStrip`, `tape` stayed) — fix the imports, W31 said so
+itself. The proof is pictures, not a green build: re-render W32's eight
+jam frames (`tests/layout/jam-clip-frames.spec.ts` → `.jam-frames/`)
+and W31's tab frames (its `tab-clips/` scripts and
+`songs-camera.spec.ts` › "writes a real video, with the take's sound
+in it"), READ them, and compare with the originals kept at
+`C:\Users\alber\Dev\yames-songs\w32-frames\` and in W31's worktree
+`C:\Users\alber\Dev\yames\.claude\worktrees\agent-a1d01f7994b2c5310\tab-clips\`
+(read-only; do not edit anything there). Then every unit test of both
+(`tabTape`, `tabPainter`, the clip tests, the jam clock).
 
 Read first: `W32-THE-CAMERA-IN-JAM.md` item 3, W32's three commit
 bodies (`git log --format=%B -3 songs-w32-camera-in-jam`), W25's
