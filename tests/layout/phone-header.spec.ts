@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, MOBILE_URL } from "./fits";
+import { openShot, switchLanguage, MOBILE_URL } from "./fits";
 
 /**
  * The bar above the stage, on a phone (M09).
@@ -209,33 +209,6 @@ async function openSetlist(page: Page, size: { width: number; height: number }) 
   await page.waitForSelector(".sheet--library");
   await page.click(".preset-sidebar-item.setlist-item");
   await page.waitForSelector(".setlist-paragraph");
-}
-
-/**
- * The whole page's language, through Settings → General → the dropdown — the
- * door a person uses, and the one `scripts/mobile-shots.mjs` drives for its
- * `--locale` runs. The list names each language in its own words, so the
- * option is found by that name rather than by the code.
- */
-const NATIVE_NAME: Record<string, string> = {
-  de: "Deutsch",
-  ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
-  ja: "\u65e5\u672c\u8a9e",
-};
-
-async function switchLanguage(page: Page, code: keyof typeof NATIVE_NAME | string) {
-  const settings = '.mobile-tab[data-tab="settings"]';
-  await page.click(settings);
-  await page.waitForSelector(".settings-section");
-  await page.click(".lang-select-btn");
-  await page.waitForSelector(".lang-options");
-  await page.getByText(NATIVE_NAME[code], { exact: true }).first().click();
-  // Back to the tab the test came from.
-  await page.click(settings);
-  await page.waitForSelector(".main-header");
-  await page.evaluate(
-    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
-  );
 }
 
 /** Is this element's text being cut off with an ellipsis? */

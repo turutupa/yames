@@ -254,7 +254,10 @@ export function Transport({
         onClick={onToggleCountIn}
       >
         <span className="transport-switch-track" aria-hidden="true" />
-        {t("transport.countIn")}
+        {/* The word in its own box, so that the one row that is allowed to
+            squash — a phone's, with a setlist on it — has something to put an
+            ellipsis on. Everywhere else it is the same text it always was. */}
+        <span className="transport-switch-label">{t("transport.countIn")}</span>
       </button>
 
       {/* Nothing has been counted yet, so there is nothing to say — a bar

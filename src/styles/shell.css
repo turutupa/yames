@@ -3169,6 +3169,50 @@ body[data-sheet-maximized] .rail {
   display: none;
 }
 
+/* ...and the same row again, in the longest language there is (M12).
+ *
+ * M11 left Stop, the count-in switch and Skip, and in English that is 359px
+ * of content in 358px of row — exact, and only exact. In Brazilian
+ * Portuguese "Count-in" is "Contagem inicial" and the switch is 140px rather
+ * than 95, so Skip was pushed off the right edge again: on the tab where a
+ * routine is running, with nothing left to shed.
+ *
+ * Three pixels-worth of changes and one rule:
+ *
+ *   - The gap drops from 14 to 10 and the gutter from 14 to 12. Three
+ *     controls, not six, and they are far enough apart for a thumb at either.
+ *   - The spacer goes. It exists to push the setlist group to the right of a
+ *     wide window; in a row that is already full it contributes nothing but
+ *     one more gap.
+ *   - And the count-in's WORD may be cut, which is this file's one exception
+ *     to `.transport > *`'s "nothing squashes, it sheds instead". Shedding
+ *     the word outright is what the header does to its chips and the tab bar
+ *     does to its last two buttons — but both of those leave a glyph that
+ *     says what the control is, and a switch with nothing beside it says
+ *     nothing at all. "Contagem in…" is still the words; a bare toggle
+ *     between Stop and Skip is a riddle.
+ *
+ * English, German, Russian, Japanese and Vietnamese all fit with room to
+ * spare and nothing in them is cut. */
+.main-window.is-mobile .transport[data-setlist] {
+  gap: 10px;
+  padding: 0 12px;
+}
+
+.main-window.is-mobile .transport[data-setlist] .transport-spacer {
+  display: none;
+}
+
+.main-window.is-mobile .transport[data-setlist] .transport-switch {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.main-window.is-mobile .transport[data-setlist] .transport-switch-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* The library is a sheet now, so the rail's own drawer geometry has nothing
    to animate and nothing to sit beside. */
 .main-window.is-mobile .main-body {
