@@ -251,5 +251,21 @@ jobs:
       # the committed project, the committed project is stale and the next
       # person to run it loses whatever was hand-edited.
       - name: The committed project is what `ios init` produces
+        id: drift
         if: steps.project.outputs.committed == 'yes'
         run: bash scripts/ci/ios-check-project-drift.sh
+
+      # The project lists every Rust source file and carries the app's
+      # version, so it goes stale whenever `main` adds a file or cuts a
+      # release, and nobody here has a Mac to regenerate it on. When the check
+      # above fails, the tree it leaves behind IS the regenerated project:
+      # hand it over, so the fix is `gh run download` and a commit.
+      - name: Upload the regenerated project
+        if: failure() && steps.drift.conclusion == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-regenerated-project
+          path: src-tauri/gen/apple
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
