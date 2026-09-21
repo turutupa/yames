@@ -45,7 +45,7 @@ import {
 import type { SongLane, SongMixSetting } from "../../../songs/songEngine";
 import type { BarRange } from "../../../songs/schedule";
 import { MAX_COUNT_IN_BARS } from "../../../songs/types";
-import type { SongBackingTrack, SongScore } from "../../../songs/types";
+import type { SongBackingTrack, SongDrums, SongScore } from "../../../songs/types";
 
 /**
  * The importer, loaded when a song is opened rather than when the app starts.
@@ -82,6 +82,11 @@ export interface SongEngine {
   /** Hear one track on its own, or stop. Tracks only; the click is not soloed. */
   setSolo: (track: number, soloed: boolean) => void;
   setCountInBars: (bars: number) => void;
+  /**
+   * Whose kit plays the file's drums: Yames' recorded one, or the file's own
+   * through the General MIDI synthesiser (W37 item 3). Remembered per song.
+   */
+  setDrums: (drums: SongDrums) => void;
   /** Turn recording on or off for the loaded song. Remembered per song. */
   setTakes: (takes: boolean) => void;
   /** W21 — and the camera, the same way. Opens nothing; it is a switch. */
@@ -187,7 +192,12 @@ export function useSongEngine({
       try {
         const importer = await importerModule();
         const parsed = importer.parseSongFile(source, score.source.fileName);
-        const built = importer.buildBacking(parsed, score.source.trackIndex);
+        // The drums choice is part of the BAND rather than of the mix: it
+        // decides which lane the file's percussion is compiled onto, so it is
+        // a re-read of the file and a fresh load rather than a fader.
+        const built = importer.buildBacking(parsed, score.source.trackIndex, {
+          drums: mixSetting.drums,
+        });
         if (!cancelled) setBand({ tracks: built.backing.tracks, leftOut: built.leftOut });
       } catch {
         // A file we cannot re-read is a song with no band, not a song that
@@ -200,7 +210,10 @@ export function useSongEngine({
     return () => {
       cancelled = true;
     };
-  }, [score, source]);
+    // `mixSetting.drums` and not the whole setting: a fader move must not
+    // re-parse a megabyte of Guitar Pro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [score, source, mixSetting.drums]);
 
   // --- what this song's band was left at ----------------------------------
   useEffect(() => {
@@ -255,7 +268,18 @@ export function useSongEngine({
    * A ref and not state, because it is written from inside the effect that
    * reads it — keeping it in state would re-run the effect that set it.
    */
-  const heldRef = useRef<{ songId: string; key: string; music: string } | null>(null);
+  const heldRef = useRef<{
+    songId: string;
+    key: string;
+    music: string;
+    /**
+     * The band this table was built from. A new object is a new band — the
+     * drums moved to the synthesiser, or the file re-read — and a band change
+     * is a LOAD rather than a range, because `set_song_range` reuses the
+     * backing the engine already has.
+     */
+    band: unknown;
+  } | null>(null);
   const reloadedAtRef = useRef(0);
   const onSongsRef = useRef(onSongs);
   onSongsRef.current = onSongs;
@@ -326,8 +350,9 @@ export function useSongEngine({
       void (async () => {
         try {
           const importer = await importerModule();
-          const sameSong = heldRef.current?.songId === score.id;
-          heldRef.current = { songId: score.id, key: settingsKey, music: musicKey };
+          const sameSong =
+            heldRef.current?.songId === score.id && heldRef.current?.band === band;
+          heldRef.current = { songId: score.id, key: settingsKey, music: musicKey, band };
           const options = {
             loops: loop,
             tempoPercent,
@@ -461,6 +486,26 @@ export function useSongEngine({
     [songId],
   );
 
+  /**
+   * Whose kit the file's drums are played on (W37 item 3).
+   *
+   * Stored beside the faders because it is the same kind of fact — something
+   * the player decided about this piece — and it is read where the band is
+   * built, so changing it re-reads the file and loads the piece again. That
+   * is a fraction of a second, and it is a thing you press once rather than
+   * sweep.
+   */
+  const setDrums = useCallback(
+    (drums: SongDrums) =>
+      setMixSetting((current) => {
+        if (current.drums === drums) return current;
+        const next = { ...current, drums };
+        if (songId) void saveMixSetting(songId, next).catch(() => {});
+        return next;
+      }),
+    [songId],
+  );
+
   const setCountInBars = useCallback(
     (bars: number) =>
       setMixSetting((current) => {
@@ -534,6 +579,7 @@ export function useSongEngine({
     setMute,
     setSolo,
     setCountInBars,
+    setDrums,
     setTakes,
     setCamera,
     setStageSetting,

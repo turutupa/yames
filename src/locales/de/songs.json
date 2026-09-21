@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} bleibt stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können.",
       "tooManyParts_other": "{{tracks}} bleiben stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können.",
       "turnedDown": "{{count}} Mitspieler leiser gestellt",
-      "turnedDown_other": "{{count}} Mitspieler leiser gestellt"
+      "turnedDown_other": "{{count}} Mitspieler leiser gestellt",
+      "drumsLabel": "Schlagzeug",
+      "drumsKit": "Yames' Set",
+      "drumsFile": "Das der Datei"
     },
     "countIn": {
       "counting": "Zählt dich ein"

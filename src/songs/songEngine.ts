@@ -25,7 +25,7 @@ import {
 } from "./types";
 import { MAX_SAVED_PORTIONS } from "./selection";
 import type { SavedPortion } from "./selection";
-import type { SongBackingTrack, SongMix, SongMixGains } from "./types";
+import type { SongBackingTrack, SongDrums, SongMix, SongMixGains } from "./types";
 
 /**
  * A fader on the stage: the click, or one track of the file by its index.
@@ -109,6 +109,14 @@ export type SongMixSetting = {
    * becomes.
    */
   clickChosen: boolean;
+  /**
+   * Whose kit plays the file's drum track (W37 item 3).
+   *
+   * Per song, beside the drums' own fader in "More", because the answer
+   * depends on the transcription and the only way to decide is to flip it
+   * while the song plays. `"kit"` is the default and is Yames' recorded one.
+   */
+  drums: SongDrums;
 };
 
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
@@ -123,6 +131,7 @@ export const DEFAULT_MIX_SETTING: SongMixSetting = {
   tempoPercent: 100,
   portions: [],
   clickChosen: false,
+  drums: "kit",
 };
 
 /**
@@ -306,6 +315,9 @@ export function readMixSetting(stored: unknown): SongMixSetting {
     // Only an explicit `true` counts as a decision, which is what makes every
     // song stored before W34 take the new default (item 7).
     clickChosen: raw.clickChosen === true,
+    // Anything a hand-edited file or an older build can hold falls to the
+    // recorded kit, which is what every song played before this existed.
+    drums: raw.drums === "file" ? "file" : "kit",
   };
 }
 

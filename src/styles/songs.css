@@ -1386,6 +1386,54 @@
   flex: 0 0 auto;
 }
 
+/* ── Whose kit plays the file's drums (W37 item 3) ──────────────────────────
+   Under the faders, because it is about the drums row above it. A pair of
+   flat buttons with an active border, which is what a chosen chip looks like
+   everywhere else on this stage. */
+.songs-band-drums {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px solid var(--border);
+}
+
+.songs-band-drums-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.songs-band-drums-choice {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.songs-band-drums-btn {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.songs-band-drums-btn:hover {
+  color: var(--text-primary);
+}
+
+.songs-band-drums-btn.on {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
 .songs-band-lane {
   display: flex;
   align-items: center;

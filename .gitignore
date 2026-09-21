@@ -78,6 +78,12 @@ tab-clips/
 # and `songs-type.spec.ts`. Pictures of the app; never committed.
 .w36-shots/
 
+# The "More" panel with the drums choice in it (W37 item 3), at the owner's
+# window and the smallest one, written by `tests/layout/songs-drums.spec.ts`.
+# Pictures of the app: the suite measures the rectangle, and only a person can
+# say whether the thing reads. Rendered again by that spec; never committed.
+.w37-shots/
+
 # W37's working folder: the owner's own song file copied out of the app's
 # library so the drums could be measured and rendered offline, and the A/B/C
 # clips made from it. NEVER committed — the file is somebody's transcription,

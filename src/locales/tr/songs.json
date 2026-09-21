@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
       "tooManyParts_other": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
       "turnedDown": "{{count}} çalgı kısıldı",
-      "turnedDown_other": "{{count}} çalgı kısıldı"
+      "turnedDown_other": "{{count}} çalgı kısıldı",
+      "drumsLabel": "Davul",
+      "drumsKit": "Yames'in seti",
+      "drumsFile": "Dosyanınki"
     },
     "countIn": {
       "counting": "Girişini sayıyorum"

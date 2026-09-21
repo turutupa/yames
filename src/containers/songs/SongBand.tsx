@@ -50,7 +50,7 @@ import { useTranslation } from "react-i18next";
 import { SONG_MIX_MAX } from "../../songs/types";
 import { clickOn, gainOf } from "../../songs/songEngine";
 import type { SongLane, SongMixSetting } from "../../songs/songEngine";
-import type { SongBackingTrack, SongRole } from "../../songs/types";
+import type { SongBackingTrack, SongDrums, SongRole } from "../../songs/types";
 
 /** The metronome's own beater, for the click's row. */
 function ClickIcon() {
@@ -200,13 +200,20 @@ export interface SongBandProps {
   onGain: (lane: SongLane, value: number) => void;
   onMute: (lane: SongLane, muted: boolean) => void;
   onSolo: (track: number, soloed: boolean) => void;
+  /**
+   * Whose kit plays the file's drums (W37 item 3). Absent for a file with no
+   * drum track at all, which is most tabs.
+   */
+  onDrums?: (drums: SongDrums) => void;
 }
 
-export function SongBand({ setting, tracks, onGain, onMute, onSolo }: SongBandProps) {
+export function SongBand({ setting, tracks, onGain, onMute, onSolo, onDrums }: SongBandProps) {
   const { t } = useTranslation();
 
   const muted = new Set(setting.muted);
   const soloed = new Set(setting.soloed);
+  /** Has the file a drum track at all? Whichever kit is playing it. */
+  const hasDrums = tracks.some((track) => track.role === "drums" || track.percussion === true);
   // The click is always there: a song with no band at all still has one
   // fader, and it is the one that decides whether you are playing to a
   // metronome or to nothing. The part being learned comes next, because it is
@@ -301,6 +308,32 @@ export function SongBand({ setting, tracks, onGain, onMute, onSolo }: SongBandPr
           </div>
         );
       })}
+
+      {/* ── Whose kit (W37 item 3) ────────────────────────────────────────
+          The owner: *"the 'drums' layer in a song i'm playing sounds AWFUL,
+          the click sounds very good tho"*. What was a bug is fixed; what is
+          left is taste, and taste is a switch you flip while the song plays
+          rather than an argument. It sits under the faders because it is
+          about the drums row above it, and it is only here when the file has
+          a drum track to have an opinion about. */}
+      {onDrums && hasDrums && (
+        <div className="songs-band-drums" role="group" aria-label={t("songs.band.drumsLabel")}>
+          <span className="songs-band-drums-label">{t("songs.band.drumsLabel")}</span>
+          <div className="songs-band-drums-choice">
+            {(["kit", "file"] as const).map((which) => (
+              <button
+                key={which}
+                type="button"
+                aria-pressed={setting.drums === which}
+                className={`songs-band-drums-btn${setting.drums === which ? " on" : ""}`}
+                onClick={() => onDrums(which)}
+              >
+                {t(which === "kit" ? "songs.band.drumsKit" : "songs.band.drumsFile")}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

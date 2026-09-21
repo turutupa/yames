@@ -11666,6 +11666,7 @@ mod tests {
             tempo_percent: 100,
             count_in_bars: 0,
             start_tick: 0,
+            drums_as_written: false,
         }
     }
 
@@ -11734,6 +11735,7 @@ mod tests {
                     name: "drums".into(),
                     program: 0,
                     guide: false,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: drums,
                 },
@@ -11742,6 +11744,7 @@ mod tests {
                     name: "bass".into(),
                     program: 0,
                     guide: false,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: bass,
                 },
@@ -11750,6 +11753,7 @@ mod tests {
                     name: "keys".into(),
                     program: 0,
                     guide: false,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: keys,
                 },
@@ -12120,6 +12124,7 @@ mod tests {
             tempo_percent: 100,
             count_in_bars: 0,
             start_tick: 0,
+            drums_as_written: false,
         };
         let mut lead = Vec::new();
         let mut rhythm = Vec::new();
@@ -12175,6 +12180,7 @@ mod tests {
             name: name.into(),
             program,
             guide,
+            percussion: false,
             bends: Vec::new(),
             notes,
         };
@@ -12280,6 +12286,170 @@ mod tests {
                 table.played_notes - table.synth_notes,
                 table.synth_notes,
             );
+        }
+    }
+
+
+    /// A song from a FILE, sixteen bars of it, three ways, for the owner's ear.
+    ///
+    /// **W37 item 3 wants an ear and this is how it gets one.** The owner:
+    /// *"the 'drums' layer in a song i'm playing sounds AWFUL, the click sounds
+    /// very good tho"*. Nothing in this repository can hear, so the same
+    /// sixteen bars of the same file are rendered three ways and the numbers
+    /// are printed beside them:
+    ///
+    ///   a — the recorded kit as it was (every drum cut to its written note
+    ///       value, one recording per drum, three velocity layers);
+    ///   b — the recorded kit repaired (drums play out, the round robin
+    ///       rotates, every layer the kit recorded, a hat closes a hat);
+    ///   c — the file's drums through the General MIDI synthesiser instead.
+    ///
+    /// The transport and the backing come from a JSON file the importer wrote,
+    /// so what is rendered is exactly what the app would compile — no fixture
+    /// stands in for the player's own transcription.
+    ///
+    ///   YAMES_SONG_FILE=<transport+backing json> YAMES_SONG_AB=<folder> \
+    ///     node scripts/rust-test.mjs --lib --no-default-features \
+    ///     render_owner_song -- --ignored --nocapture
+    ///
+    /// Ignored by default for the reason `render_song_ab` beside it is: it
+    /// writes files, it takes seconds, and its output is a judgement rather
+    /// than an assertion.
+    #[test]
+    #[ignore]
+    fn render_owner_song() {
+        let (Ok(file), Ok(dir)) = (
+            std::env::var("YAMES_SONG_FILE"),
+            std::env::var("YAMES_SONG_AB"),
+        ) else {
+            eprintln!("YAMES_SONG_FILE / YAMES_SONG_AB are not set; nothing to render");
+            return;
+        };
+        std::fs::create_dir_all(&dir).expect("the clip folder");
+        let raw = std::fs::read(&file).expect("the song's transport");
+        let parsed: serde_json::Value = serde_json::from_slice(&raw).expect("valid json");
+        let mut transport: SongTransport =
+            serde_json::from_value(parsed["transport"].clone()).expect("a transport");
+        let backing: crate::song::SongBacking =
+            serde_json::from_value(parsed["backing"].clone()).expect("a backing");
+
+        // Sixteen bars from the top of the piece, which is where the drums
+        // are dense enough to judge and short enough to listen to twice.
+        let bars: u32 = std::env::var("YAMES_SONG_FROM")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(0);
+        transport.range = SongRange {
+            start_bar: bars,
+            end_bar: (bars + 15).min(transport.bars.len() as u32 - 1),
+        };
+        transport.loops = false;
+        transport.count_in_bars = 0;
+        transport.start_tick = transport.bars[bars as usize].start_tick;
+
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let font = crate::synth::load_font(None).expect("the shipped sound set");
+
+        // The file's drums through the synthesiser instead of the kit.
+        let mut through_the_synth = backing.clone();
+        for t in through_the_synth.tracks.iter_mut() {
+            if t.role == SongRole::Drums {
+                t.role = SongRole::Synth;
+                t.program = 0;
+                // Channel 9, or a kick drum plays as a note of whatever
+                // instrument the channel it landed on is set to.
+                t.percussion = true;
+            }
+        }
+
+        // What the drum track actually holds, counted once.
+        for t in backing.tracks.iter() {
+            if t.role != SongRole::Drums {
+                continue;
+            }
+            let inside: Vec<_> = t
+                .notes
+                .iter()
+                .filter(|n| {
+                    n.tick >= transport.bars[transport.range.start_bar as usize].start_tick
+                        && n.tick
+                            < transport.bars[transport.range.end_bar as usize].start_tick
+                                + transport.bars[transport.range.end_bar as usize].length_ticks
+                })
+                .collect();
+            println!(
+                "drum track \"{}\": {} notes in the piece, {} in these sixteen bars",
+                t.name,
+                t.notes.len(),
+                inside.len()
+            );
+        }
+
+        for (name, backing, as_written) in [
+            ("a-today", &backing, true),
+            ("b-repaired", &backing, false),
+            ("c-file-drums-through-the-synth", &through_the_synth, false),
+        ] {
+            transport.drums_as_written = as_written;
+            let table = crate::song::compile(&transport, Some(backing), song_sounds_for_clips(sr), sr, 1)
+                .expect("the song compiles");
+            let frames = (table.pass_samples() + sr as u64 * 2) as usize;
+            let sampled = render_song(&table, &bank, frames, sr);
+            let (mut left, mut right) = (sampled.left.clone(), sampled.right.clone());
+            let mut synth_peak = 0.0f32;
+            if let Some(score) = table.synth_score.as_ref() {
+                let gains: Vec<f32> = backing
+                    .tracks
+                    .iter()
+                    .map(|t| if t.guide { 0.7 } else { 1.0 })
+                    .collect();
+                let (sl, sr_) = crate::synth::render_offline(score, &font, sr, frames, &gains)
+                    .expect("the synth renders");
+                for n in 0..frames {
+                    synth_peak = synth_peak.max(sl[n].abs()).max(sr_[n].abs());
+                    left[n] += sl[n] * 0.8;
+                    right[n] += sr_[n] * 0.8;
+                }
+            }
+            let path = std::path::Path::new(&dir).join(format!("{name}.wav"));
+            write_wav(&path, &left, &right, sr);
+            println!(
+                "{}\n  sampled band RMS {:.4}  peak {:.4}  synth peak {:.4}  mix peak {:.4}\n  \
+                 band trim {:.3} ({:.1} dB)  {} sampled notes  {} synth notes  {} dropped\n  \
+                 most voices ringing at once: {}",
+                path.display(),
+                rms(&sampled.left),
+                sampled.band_peak,
+                synth_peak,
+                left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs())),
+                table.band_trim,
+                20.0 * table.band_trim.max(1e-6).log10(),
+                table.played_notes - table.synth_notes,
+                table.synth_notes,
+                table.dropped_notes,
+                sampled.max_voices,
+            );
+        }
+    }
+
+    /// The kit, the percussion set and the recorded bass and keys a song is
+    /// actually played with — `commands::song_sounds` without a Tauri handle.
+    fn song_sounds_for_clips(sr: u32) -> SongSounds {
+        let kits = crate::kit::KitCache::default();
+        let voices = crate::voices::VoiceCache::default();
+        let bass = crate::jam::JamVoices::folder_for_bass(BassVoice::Fingered)
+            .and_then(crate::voices::shipped_index)
+            .and_then(|i| voices.shipped(i, sr, BASS_MIN_MIDI, BASS_MAX_MIDI).ok());
+        let keys = crate::jam::JamVoices::folder_for_keys(KeysVoice::Epiano)
+            .and_then(crate::voices::shipped_index)
+            .and_then(|i| voices.shipped(i, sr, KEYS_MIN_MIDI, KEYS_MAX_MIDI).ok());
+        SongSounds {
+            bank: kits
+                .shipped(JamKit::fallback().0, sr)
+                .expect("the fallback kit decodes"),
+            perc: kits.perc(0, sr).ok(),
+            voices: crate::jam::JamVoices { bass, keys },
         }
     }
 

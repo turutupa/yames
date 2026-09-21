@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} stays silent: this file has more parts than can sound at once.",
       "tooManyParts_other": "{{tracks}} stay silent: this file has more parts than can sound at once.",
       "turnedDown": "{{count}} player turned down",
-      "turnedDown_other": "{{count}} players turned down"
+      "turnedDown_other": "{{count}} players turned down",
+      "drumsLabel": "Drums",
+      "drumsKit": "Yames' kit",
+      "drumsFile": "The file's own"
     },
     "countIn": {
       "counting": "Counting you in"

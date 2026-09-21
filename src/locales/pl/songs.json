@@ -50,7 +50,10 @@
       "turnedDown": "{{count}} muzyk ściszony",
       "turnedDown_few": "{{count}} muzyków ściszonych",
       "turnedDown_many": "{{count}} muzyków ściszonych",
-      "turnedDown_other": "{{count}} muzyków ściszonych"
+      "turnedDown_other": "{{count}} muzyków ściszonych",
+      "drumsLabel": "Perkusja",
+      "drumsKit": "Zestaw Yames",
+      "drumsFile": "Z pliku"
     },
     "countIn": {
       "counting": "Odliczam ci wejście"

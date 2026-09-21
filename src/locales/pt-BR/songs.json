@@ -45,7 +45,10 @@
       "tooManyParts_other": "{{tracks}} ficam em silêncio: este arquivo tem mais partes do que dá para tocar de uma vez.",
       "turnedDown": "{{count}} músico abaixado",
       "turnedDown_many": "{{count}} músicos abaixados",
-      "turnedDown_other": "{{count}} músicos abaixados"
+      "turnedDown_other": "{{count}} músicos abaixados",
+      "drumsLabel": "Bateria",
+      "drumsKit": "A bateria do Yames",
+      "drumsFile": "A do arquivo"
     },
     "countIn": {
       "counting": "Contando sua entrada"

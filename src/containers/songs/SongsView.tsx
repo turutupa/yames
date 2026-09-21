@@ -1307,6 +1307,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
                 onGain={session.setGain}
                 onMute={session.setMute}
                 onSolo={session.setSolo}
+                onDrums={session.setDrums}
               />
             </SongStripMore>
           </div>

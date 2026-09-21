@@ -569,4 +569,37 @@ describe("the band from the file", () => {
     expect(backing.tracks[0].notes.length).toBeGreaterThan(0);
     expect(leftOut).toEqual([]);
   });
+
+  /* ── Whose kit plays the file's drums (W37 item 3) ───────────────────── */
+
+  it("sends the file's drums to the recorded kit unless somebody says otherwise", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    const drums = backing.tracks.filter((t) => t.role === "drums");
+    expect(drums).toHaveLength(1);
+    expect(drums[0].percussion).toBeUndefined();
+    // The numbers on a drum row are General MIDI PERCUSSION numbers, which is
+    // what the kit's map takes.
+    expect(drums[0].notes.every((n) => n.midi >= 35 && n.midi <= 81)).toBe(true);
+  });
+
+  it("sends them to the synthesiser, on the percussion channel, when asked", () => {
+    const { backing } = buildBacking(parsed(), 0, { drums: "file" });
+    expect(backing.tracks.some((t) => t.role === "drums")).toBe(false);
+    const drums = backing.tracks.find((t) => t.name === "Drums")!;
+    expect(drums.role).toBe("synth");
+    // The flag the engine reads to put it on channel 9. Without it a kick
+    // would play as a note of whatever instrument the channel it landed on
+    // is set to.
+    expect(drums.percussion).toBe(true);
+    expect(drums.notes.length).toBeGreaterThan(0);
+  });
+
+  it("leaves every other part exactly where it was, either way", () => {
+    const kit = buildBacking(parsed(), 0).backing;
+    const file = buildBacking(parsed(), 0, { drums: "file" }).backing;
+    const others = (b: typeof kit) =>
+      b.tracks.filter((t) => t.name !== "Drums").map((t) => [t.name, t.role, t.notes.length]);
+    expect(others(file)).toEqual(others(kit));
+  });
 });
+
