@@ -4,6 +4,8 @@
     "untitled": "새 셋리스트",
     "newSetlist": "새 셋리스트",
     "deleteSetlist": "셋리스트 삭제",
+    "duplicateSetlist": "셋리스트 복제",
+    "copyName": "{{name}} 복사본",
     "librarySteps": "{{count}}단계",
     "librarySteps_one": "{{count}}단계",
     "librarySteps_other": "{{count}}단계",
@@ -22,6 +24,14 @@
     "moveLater": "이 단계를 뒤로 옮기기",
     "duplicateStep": "이 단계 복제",
     "removeStep": "이 단계 삭제",
+    "reorderHint": "끌어서 순서 바꾸기",
+    "stopToReorder": "순서를 바꾸려면 셋리스트를 멈추세요",
+    "duplicateSteps": "{{count}}단계 복제",
+    "duplicateSteps_one": "{{count}}단계 복제",
+    "duplicateSteps_other": "{{count}}단계 복제",
+    "removeSteps": "{{count}}단계 삭제",
+    "removeSteps_one": "{{count}}단계 삭제",
+    "removeSteps_other": "{{count}}단계 삭제",
     "barOf": "{{current}}/{{total}}마디",
     "timeLeft": "{{duration}} 남음",
     "waitingForYou": "신호를 기다리는 중",
@@ -120,14 +130,18 @@
       "backToPlaying": "재생으로 돌아가기"
     },
     "countIn": {
-      "label": "카운트인",
-      "off": "카운트인 없음",
-      "startingIn": "시작까지",
-      "beats": "{{count}}박",
-      "beats_one": "{{count}}박",
-      "beats_other": "{{count}}박",
-      "fewer": "카운트인 박 줄이기",
-      "more": "카운트인 박 늘리기"
+      "startingIn": "시작까지"
+    },
+    "jam": {
+      "mark": "이 단계는 잼입니다",
+      "addStep": "잼 추가",
+      "addTo": "셋리스트에 추가…",
+      "barsOfForm": "{{count}}마디",
+      "barsOfForm_one": "{{count}}마디",
+      "barsOfForm_other": "{{count}}마디",
+      "said": "밴드",
+      "goneShort": "잼이 없습니다",
+      "gone": "그 잼은 더 이상 라이브러리에 없어서, 이 단계는 적혀 있는 클릭을 연주합니다."
     }
   }
 }

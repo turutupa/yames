@@ -1,6 +1,27 @@
 """Rebuild the metronome samples from their originals, and synthesise the ones
 that have no original.
 
+THIS SCRIPT NO LONGER OWNS WOOD OR SNARE. Since 2026-09-14 both are
+RECORDINGS, cut from Virtuosity Drums and from the Studio kit by
+`scripts/sounds/render_click.py`, which is their generator of record along
+with the new `sticks_*`, `cowbell_*` and `kit_*`. They are gone from `TARGETS`
+and from `SYNTH` so that re-running this script cannot quietly overwrite a
+recording with the synthesis it replaced — which is the only way this file
+could still do damage.
+
+What is left here is click, beep, drum, the drum body and the two chimes —
+and, since 2026-09-15, the two MIDDLE STROKES that belong to the synthesised
+presets, `click_mid` and `beep_mid`. Point 7 below is their whole story; the
+five recorded presets' middles are cut by `render_click.py` beside their own
+siblings, for the same reason everything else here splits that way.
+
+Points 4, 5 and 6 below, and `_snare` / `snare_high` / `snare_low` further
+down, are KEPT AND ARE NOT RUN. They are the record of a kit that was
+rejected three times and of what each rejection cost, they are what
+`engine.rs` points at when it explains why this kit's two sounds have to be
+the same drum, and `render_click.py` had to learn every one of those lessons
+again from a recording. Deleting them would delete the reasons.
+
 WHAT THIS FIXES, and how it was found: every number below came from measuring
 the shipped files, not from listening. See the commit that introduced this
 script for the full table.
@@ -170,6 +191,43 @@ script for the full table.
    hears "disproportionate", the next lever is the kick's 0.50 in
    `snare_high`, not the ring.
 
+7. THE MIDDLE OF THE BAR, WHICH WAS A VOLUME AND IS NOW A STROKE.
+   "The same click 2 dB quieter is below what a musician notices on a
+   transient." A bar of 6/8 has a beat one and a beat four, and the first
+   attempt at marking the second played the accent file at 80 %
+   (`MEDIUM_GAIN`). The owner listened and heard nothing. A real metronome
+   marks three levels with three SOUNDS, because pitch and timbre are what
+   the ear separates; so every preset ships a third file and `MEDIUM_GAIN`
+   is 1.0, with the level living in the file.
+
+   For the two synthesised presets the third sound is the obvious one — the
+   same generator at a pitch between the other two. `click_mid` is 980 Hz,
+   the geometric mean of 1200 and 800; `beep_mid` is 760 Hz, between 880 and
+   660. Pitch is the whole design of these two presets and a third pitch is
+   what they were always missing.
+
+   WHAT IS NOT OBVIOUS IS THE LEVEL, and it is the same trap
+   `render_click.py`'s header spends a section on from the other side. Both
+   files ship at 0.930 against siblings that ship at about 0.90 (click) and
+   0.987/0.954 (beep), so the peak buys no ladder at all — click's middle
+   would measure 0.08 dB LOUDER than its own downbeat. What is left is the
+   envelope, and it is the honest knob rather than a convenient one: a
+   lighter strike rings less. `click_mid` decays at 140/s where its siblings
+   decay at 80, and `beep_mid` at 53/s where its siblings decay at 30. That
+   puts each of them at the geometric centre of its own kit's span through
+   the band a laptop radiates — click -2.10 dB under its downbeat and
+   +2.16 over its beat, beep -2.29 and +2.29 — which is where
+   `every_medium_accent_sits_between_its_strong_and_its_beat` wants them.
+
+   THESE TWO ARE DITHERED AND THEIR SIBLINGS ARE NOT. `write` below truncates
+   to sixteen bits, which is what the originals got in 2023 and is why they
+   are what they are; a middle stroke cut today gets the TPDF dither, the
+   exact peak and the zero landing that all sixteen recorded click files get,
+   because there is no reason to reproduce an accident. The DC removal is not
+   the siblings' either — it is windowed (`land`), because a flat subtraction
+   put a step at sample 1 of `beep_mid`. Everything else is the same: same
+   generator, same 4 ms tail fade.
+
 THE TRANSFORM STAGE IS NOT IDEMPOTENT — running it twice adds a second beater
 to the kick. It refuses to run when every sample already ends in silence,
 which is true only after it has run. To re-run it, restore the originals:
@@ -193,9 +251,10 @@ SND = os.path.join("src-tauri", "sounds")
 SR = 44100
 FADE_MS = 4.0
 
+# No `wood_*`: the wood block is a recording now and `render_click.py` lands
+# its tails itself. Left here it would be faded a second time on every run.
 TARGETS = [
     "click_low.wav", "click_high.wav",
-    "wood_low.wav", "wood_high.wav",
     "beep_low.wav", "beep_high.wav",
     "drum_low.wav", "drum_high.wav",
     "drum_metal.wav", "drum_crash.wav",
@@ -224,12 +283,75 @@ def write(path, x, sr):
         w.writeframes((x * 32767).astype(np.int16).tobytes())
 
 
+def write_dithered(path, x, sr, target, rng):
+    """`render_click._write`, spelled again here rather than imported.
+
+    The five recorded middles land on their peak with TPDF dither, both ends
+    forced to zero and the peak itself placed exactly; the two synthesised
+    ones get the same treatment so that all seven files of a tier are the same
+    kind of object. Kept as a copy and not an import because these two scripts
+    have never depended on each other and a build tool that cannot be run from
+    a checkout of one file is a build tool that rots.
+    """
+    p = np.max(np.abs(x))
+    if p <= 0:
+        raise SystemExit("silent buffer for %s" % path)
+    y = np.asarray(x, dtype=np.float64) * (target / p)
+    d = rng.random(y.shape) + rng.random(y.shape) - 1.0
+    q = np.rint(y + d).astype(np.int64)
+    np.clip(q, -target, target, out=q)
+    q[0] = 0
+    q[-1] = 0
+    m = int(np.max(np.abs(q)))
+    if 0 < m < target:
+        i = int(np.argmax(np.abs(q)))
+        q[i] = target if q[i] > 0 else -target
+    with wave.open(path, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(sr)
+        w.writeframes(q.astype(np.int16).tobytes())
+
+
 def fade_tail(x, sr):
     n = min(len(x), int(sr * FADE_MS / 1000))
     if n < 2:
         return x
     y = x.copy()
     y[-n:] *= 0.5 * (1 + np.cos(np.linspace(0, np.pi, n)))
+    return y
+
+
+def land(x, sr, fade_in_ms=1.0):
+    """Take the DC out WITHOUT putting a step at the front, and land both ends.
+
+    A decaying sine that starts at phase zero has a non-zero mean, so it has to
+    come off — and the obvious way, `x - x.mean()` followed by forcing sample 0
+    to zero, is what `beep_mid` shipped with for an afternoon: the correction is
+    a flat offset, sample 0 is pulled back to zero on its own, and sample 1 is
+    left 108 LSB off the axis. That IS a step, at the very front of the file,
+    which is the one place a click cannot afford one.
+
+    So the CORRECTION is windowed and the SIGNAL is not. `render_kit.
+    trim_and_fade` multiplies both, which is right for a recording it is also
+    fading in; here the attack is the sound and must not be touched. The window
+    is zero at both ends, so the correction vanishes exactly where the file has
+    to be zero, and it still sums to the whole offset, so the mean comes out
+    exactly zero.
+    """
+    y = np.asarray(x, dtype=np.float64).copy()
+    win = np.ones(len(y))
+    fi = min(int(sr * fade_in_ms / 1000.0), len(y) // 4)
+    if fi > 1:
+        win[:fi] = 0.5 - 0.5 * np.cos(np.linspace(0.0, np.pi, fi))
+    fo = min(int(sr * FADE_MS / 1000.0), len(y) // 2)
+    if fo > 1:
+        win[-fo:] = 0.5 + 0.5 * np.cos(np.linspace(0.0, np.pi, fo))
+    s = float(np.sum(win))
+    if s > 0:
+        y -= (y.mean() * len(y) / s) * win
+    y[0] = 0.0
+    y[-1] = 0.0
     return y
 
 
@@ -265,7 +387,25 @@ def rebuild(name):
 # is what makes this stage safe to re-run, unlike the transform stage above.
 # ---------------------------------------------------------------------------
 
-SYNTH = ["drum_body.wav", "snare_low.wav", "snare_high.wav"]
+# `snare_low` and `snare_high` are NOT in here any more — see the top of the
+# file. Their recipes are still below, and `synthesise` still answers for
+# them, so anyone comparing the recording against what it replaced can render
+# the old pair by name; nothing reaches them from `main`.
+SYNTH = ["drum_body.wav", "click_mid.wav", "beep_mid.wav"]
+
+# The middles are written through `write_dithered` and everything else here
+# through `write`. Point 7 in the module docstring says why.
+DITHERED = {"click_mid.wav", "beep_mid.wav"}
+
+MID_PEAK_I16 = 30473
+"""0.93 x 32767 — `render_click.MID_PEAK` in sixteen bits, so a middle stroke
+has the same ceiling whichever of the two scripts cut it."""
+
+MID_SEED = 6180
+"""The dither needs a generator and a generator needs a seed, or these two
+files change on every run and the repository fills with noise diffs. Same
+reason as `render_click.SEED`, different number so the two streams are not
+accidentally the same noise."""
 
 
 def _noise(n, seed):
@@ -547,9 +687,74 @@ def snare_low(sr):
     return fade_tail(_saturate(_snare(sr, hard=False), 1.5, 0.72), sr)
 
 
+def click_mid(sr):
+    """The CLICK preset's middle stroke: the same sine tick, a third pitch.
+
+    `generate_sounds.gen_click` is the generator of the pair this sits between
+    — 1200 Hz for the downbeat, 800 Hz for the beat — and this is that
+    function's arithmetic at 980 Hz, the geometric mean of the two, with the
+    same third-harmonic dusting over the first 2 ms and the same DC removal
+    and 4 ms tail fade the transform stage gives its siblings.
+
+    THE DECAY IS 140/s AND THEIRS IS 80. That is the only number that is not
+    simply "between", and point 7 in the module docstring has the measurement:
+    at the peak a middle file ships at, the envelope is the only thing left
+    that can put this stroke under the downbeat, and a lighter strike ringing
+    for less time is what a lighter strike IS. At 140 it measures 2.10 dB
+    under the downbeat and 2.16 dB over the plain beat through the band a
+    laptop radiates, which is the centre of this preset's span.
+
+    22 ms rather than the downbeat's 25 and the beat's 20 — between those too,
+    though at this decay the last few milliseconds carry almost nothing and
+    the number is for tidiness rather than for level.
+
+    `land` and not `x - x.mean()`: see that function. A sine starting at phase
+    zero already has sample 0 on the axis and sample 1 is the click itself —
+    4200 LSB of it — so nothing here is hidden by the windowed correction, and
+    the file is measured starting at zero with no step either way."""
+    n = int(sr * 22.0 / 1000)
+    t = np.arange(n) / sr
+    env = np.exp(-t * 140.0)
+    y = np.sin(2 * np.pi * 980.0 * t) * env
+    k = int(sr * 0.002)
+    y[:k] += np.sin(2 * np.pi * 980.0 * 3 * t[:k]) * 0.3 * env[:k]
+    return land(fade_tail(y, sr), sr)
+
+
+def beep_mid(sr):
+    """The BEEP preset's middle stroke: the same tone, a third pitch.
+
+    `generate_sounds.gen_beep` again — 880 Hz over 660 Hz — at 760 Hz, with
+    the same 2 ms attack ramp and 8 ms release ramp and the same exponential
+    between them. 37 ms, between the downbeat's 40 and the beat's 35.
+
+    THE DECAY IS 53/s AND THEIRS IS 30, for the reason `click_mid` gives: the
+    beep's two existing files peak at 0.987 and 0.954 and a middle ships at
+    0.930, so the peak convention hands this stroke no ladder and the envelope
+    has to. At 53 it measures 2.29 dB under the downbeat and 2.29 dB over the
+    plain beat — the centre of the widest span of the eight presets, which is
+    why this one lands symmetrical to the second decimal and the others do
+    not.
+
+    THIS FILE IS WHY `land` EXISTS. Its envelope ramps from zero over 2 ms, so
+    sample 1 is a thousandth of full scale; subtracting a flat DC offset and
+    then forcing sample 0 back to zero left that sample 108 LSB off the axis,
+    which is a step at the front of a click. The correction is windowed now."""
+    n = int(sr * 37.0 / 1000)
+    t = np.arange(n) / sr
+    attack, release = int(sr * 0.002), int(sr * 0.008)
+    env = np.exp(-t * 53.0)
+    env[:attack] = np.arange(attack) / attack
+    tail = np.arange(n) > n - release
+    env[tail] = (n - np.arange(n)[tail]) / release
+    return land(fade_tail(np.sin(2 * np.pi * 760.0 * t) * env, sr), sr)
+
+
 def synthesise(name, sr=SR):
     return {
         "drum_body.wav": drum_body,
+        "click_mid.wav": click_mid,
+        "beep_mid.wav": beep_mid,
         "snare_low.wav": snare_low,
         "snare_high.wav": snare_high,
     }[name](sr)
@@ -575,8 +780,13 @@ def main():
     # second beater. This is also the only stage that still works after the
     # transform stage has run, which is the state the repo is normally in.
     if not check:
+        rng = np.random.default_rng(MID_SEED)
         for name in SYNTH:
-            write(os.path.join(SND, name), synthesise(name), SR)
+            path = os.path.join(SND, name)
+            if name in DITHERED:
+                write_dithered(path, synthesise(name), SR, MID_PEAK_I16, rng)
+            else:
+                write(path, synthesise(name), SR)
             print(f"synthesised {name}")
 
     if not synth_only:

@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} clics/mesure",
     "addBeat": "Ajouter un temps",
     "removeBeat": "Retirer un temps",
+    "prevMeter": "Mesure précédente",
+    "nextMeter": "Mesure suivante",
     "grouping": "groupement",
     "tempo": "Tempo",
     "tempoUp": "Accélérer le tempo",
@@ -41,10 +43,13 @@
   },
   "sound": {
     "click": "Clic",
+    "sticks": "Baguettes",
     "wood": "Bois",
     "beep": "Bip",
     "drum": "Caisse",
-    "snare": "Caisse claire"
+    "kit": "Batterie",
+    "snare": "Caisse claire",
+    "cowbell": "Cloche"
   },
   "driftMeter": {
     "early": "En avance",

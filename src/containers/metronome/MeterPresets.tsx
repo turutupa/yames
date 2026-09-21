@@ -10,13 +10,19 @@ interface MeterPresetsProps {
   beatGroups: number[];
   freeMode: boolean;
   /**
-   * Sits between the meter chip and the grouping badges — the bar's length,
-   * which is the same subject as the two things either side of it.
-   *
-   * It used to hang at the right-hand end of the row, far from the meter it
-   * belongs to and with a gap in the middle that meant nothing.
+   * The `− 6 +`. Sits between the meter chip and the grouping badges, in the
+   * control row under the heading — all three are things you press, and the
+   * bar's length is the same subject as the two things either side of it.
    */
   stepper?: React.ReactNode;
+  /**
+   * Clicks/bar, on the heading line beside the word METER.
+   *
+   * It is the one thing here you cannot press, so it belongs with the title
+   * rather than in the row of controls — the same shape SUBDIVISION has, and
+   * the reason this section was rebuilt as a heading over a row.
+   */
+  clicks?: React.ReactNode;
 }
 
 /**
@@ -34,7 +40,7 @@ interface MeterPresetsProps {
  * the click accents group starts, and FREE mode is how you get none. Adding a
  * picker for behaviour the engine cannot produce would be a lie on the screen.
  */
-export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProps) {
+export function MeterPresets({ beatGroups, freeMode, stepper, clicks }: MeterPresetsProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -111,11 +117,18 @@ export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProp
 
   return (
     <div className="meter-presets" ref={pickerRef}>
+      {/* The heading line: the section's name, and the one number on it that
+          is a readout rather than a control. TEMPO and SUBDIVISION are both a
+          title with their controls beneath; this used to be a single flat run
+          of label-then-controls, which is what made the stage read as three
+          different kinds of section. */}
       <div className="meter-head">
-        {/* Inline, above the dots it describes. It used to hang in a gutter to
-            the left of its row, which is what the 80px of stage padding was
-            for; the design labels its sections like TEMPO instead. */}
         <span className="stage-label">{t("metronome.meter")}</span>
+        {clicks}
+      </div>
+
+      {/* Everything you press, on one row under the heading. */}
+      <div className="meter-controls">
         <button
           className={`meter-chip ${open ? "open" : ""}`}
           onClick={() => setOpen((o) => !o)}

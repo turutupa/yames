@@ -155,6 +155,15 @@
       "midiPlugged": {
         "body": "Há um dispositivo MIDI conectado, mas nada mapeado. Mapear um pedal para Tocar/Parar?",
         "action": "Abrir atalhos"
+      },
+      "jamSheets": {
+        "body": "Ajustes muda a banda; Acordes é a sua cola."
+      },
+      "jamLive": {
+        "body": "Tudo aqui muda no compasso seguinte."
+      },
+      "jamArrangement": {
+        "body": "A banda cresce e desmonta sozinha — Loop, em Ajustes, desliga isso."
       }
     },
     "tour": {

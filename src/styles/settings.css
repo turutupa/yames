@@ -181,7 +181,9 @@
   padding: 8px 16px;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 8px;
+  /* The same corner the panels below it are cut with; 8px read as a
+     different kind of object sitting on top of them. */
+  border-radius: var(--radius);
   color: var(--accent);
   font-size: 12px;
   font-weight: 500;
@@ -2039,6 +2041,21 @@
   margin-bottom: 28px;
 }
 
+/* Where the drums came from — the credit the recorded kits' licences ask for. */
+.about-sounds {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+.about-sounds-title {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
 .about-footer {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -2056,8 +2073,15 @@
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  margin-top: 16px;
-  margin-bottom: -4px;
+  /* The panels' own rhythm, because the banner is one of the stack now.
+     `margin-top: 16px; margin-bottom: -4px` was tuned for the long scroll
+     this view used to be, where the first section carried 10px of its own
+     and the hairline separators did the dividing. Under the panel layout
+     (UI_REVAMP C3) the negative margin pulled the General panel four pixels
+     UP over the banner, and the owner saw exactly that: "the install and
+     restart banner is sitting a bit awkwardly behind the settings." */
+  margin-top: 14px;
+  margin-bottom: 0;
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   border-radius: 8px;
@@ -2429,6 +2453,15 @@
 }
 
 .settings-section:first-child {
+  margin-top: 14px;
+}
+
+/* A panel gets its top margin from one of two rules: it is the first child,
+   or it follows another panel. The panel under the update banner is neither
+   — the banner is the first child, and it is not a `.settings-section` — so
+   it fell through both and sat flush against the banner above it. This is
+   the third case, and it is the same fourteen pixels as the other two. */
+.update-banner + .settings-section {
   margin-top: 14px;
 }
 

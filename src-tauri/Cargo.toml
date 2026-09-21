@@ -1,6 +1,6 @@
 [package]
 name = "yames"
-version = "1.1.0"
+version = "1.2.1"
 description = "Yet Another Metronome Everyone Skips — practice metronome with MIDI control, speed drills, and AI coach"
 authors = ["you"]
 license = "GPL-3.0-or-later"
@@ -49,6 +49,20 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rodio = { version = "0.19", default-features = false, features = ["wav"] }
 cpal = "0.15"
+# WAV decoding. Already in the graph under rodio, which is why this adds no
+# package to Cargo.lock — declared directly because rodio's own decoder
+# narrows every file to i16 and PANICS on a spec it does not implement, and a
+# file the user chose must be REFUSED with a message, never crash the command.
+# Apache-2.0. Every platform: `kit.rs` reads the shipped sound bank through it
+# and the band ships on the phone too.
+hound = "3"
+# FLAC, for the shipped sound bank. Nine minutes of audio was 70 MB as
+# uncompressed WAV and is 31 MB as FLAC, bit for bit the same samples — see
+# `kit.rs`. Chosen over symphonia and rodio's decoders for the same reason
+# `hound` was: it is a small pure-Rust decoder that returns `Result` on a
+# file it cannot read instead of panicking, and nothing in `kit.rs` may
+# panic on a file a musician chose. Apache-2.0.
+claxon = "0.4.3"
 # Tauri already pulls tokio in transitively; declared explicitly so we can
 # use `tokio::task::spawn_blocking` from blocking command handlers.
 tokio = { version = "1", features = ["rt"] }
@@ -120,6 +134,12 @@ encoding_rs = { version = "0.8", optional = true }
 # without hyper-threading (an 8-core M1 got 2 threads). Optional so a
 # default build does not pay for it.
 num_cpus = { version = "1", optional = true }
+# The native folder picker behind `pick_kit_folder` — a kit of your own
+# samples is a folder you point the app at (plans/JAM_UX_DECISIONS.md B3),
+# and only the OS can draw that dialog. Apache-2.0 OR MIT, like Tauri
+# itself, so it changes nothing about what this app may ship. Desktop only:
+# a phone has no folder to point at, so M08 cut the custom kit there.
+tauri-plugin-dialog = "2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 coreaudio-sys = "0.2"

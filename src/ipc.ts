@@ -286,8 +286,31 @@ export async function setAudioOutputDevice(deviceName: string | null): Promise<v
   return invoke("set_audio_output_device", { deviceName });
 }
 
+/**
+ * Move everything the app plays — the click, the band, take playback, the
+ * coach's voice — to another pair of the device's outputs. `pair` is
+ * 0-based: 0 is "Outputs 1-2", 1 is "Outputs 3-4".
+ *
+ * Resolves with the pair actually in effect. Remembered against the device
+ * it was chosen for, so switching back to the interface brings its outputs
+ * back with it.
+ */
+export async function setAudioOutputPair(pair: number): Promise<number> {
+  return invoke<number>("set_audio_output_pair", { pair });
+}
+
 export function onAudioDevicesChanged(callback: (devices: AudioOutputDevice[]) => void) {
   return listen<AudioOutputDevice[]>("audio-devices-changed", (e) => callback(e.payload));
+}
+
+/**
+ * The chosen device turned out to have fewer outputs than it advertised,
+ * so the app is playing on the pair named in the payload (which is 0 —
+ * outputs 1-2 — in every case the backend can produce today). The screen
+ * moves the picker back and says why.
+ */
+export function onAudioOutputPairFallback(callback: (pair: number) => void) {
+  return listen<number>("audio-output-pair-fallback", (e) => callback(e.payload));
 }
 
 /**
@@ -317,5 +340,204 @@ export async function saveDrillRun(run: DrillRun): Promise<void> {
 /** Newest first, the same order `getSessionHistory` returns. */
 export async function getDrillRuns(): Promise<DrillRun[]> {
   return invoke<DrillRun[]>("get_drill_runs");
+}
+
+// ---------------------------------------------------------------------------
+// Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
+// ---------------------------------------------------------------------------
+
+import type { Jam, JamEngineConfig, JamPositionCommand } from "./jam/types";
+
+/**
+ * Jams live beside presets and setlists in the same `settings.json` store,
+ * under their own key. Read-modify-write like setlists: a jam has no
+ * engine-side reader, the engine only ever sees the compiled table.
+ */
+const JAMS_KEY = "jams";
+
+/**
+ * `undefined` when nothing was ever saved under the key, so the caller can
+ * seed the starter jams exactly once. An empty array means the user deleted
+ * them all, and they stay deleted.
+ */
+export async function listJams(): Promise<Jam[] | undefined> {
+  const jams = await storeLoad<Jam[]>(JAMS_KEY);
+  return Array.isArray(jams) ? jams : undefined;
+}
+
+/** The whole list, in order. The UI owns ordering, the store keeps it. */
+export async function saveJams(jams: Jam[]): Promise<void> {
+  await storeSave(JAMS_KEY, jams);
+}
+
+/**
+ * Hand the engine a compiled jam, or `null` to take it away and play the
+ * plain click again. The UI sets the subdivision and the beat groups FIRST;
+ * the engine checks the product against its bar and plays the click if they
+ * disagree.
+ */
+export async function setJam(config: JamEngineConfig | null): Promise<void> {
+  return jamQueue.table(config);
+}
+
+/**
+ * Move the form: jump to a bar, or loop a range of bars. The engine applies
+ * it at the next bar line, so the change lands where a musician expects it.
+ *
+ * Through the same queue as `setJam`, so a jump sent after a new form is
+ * checked against that form and not the one it replaces.
+ */
+export async function setJamPosition(command: JamPositionCommand): Promise<void> {
+  return jamQueue.position(command);
+}
+
+/** What to decode ahead of time. See `warmJam`. */
+export type JamWarmRequest = {
+  /** Jams the screen expects to open, compiled. */
+  configs?: JamEngineConfig[];
+  /** Every kit the app ships — the kit picker is open. */
+  kits?: boolean;
+  /** Every recorded bass — the bass dropdown is about to open. */
+  bassVoices?: boolean;
+  /** Every recorded keys voice — the keys dropdown is about to open. */
+  keysVoices?: boolean;
+};
+
+/**
+ * Decode sounds before anybody asks for them, so choosing a jam, a kit or a
+ * voice plays at once instead of after a load.
+ *
+ * Fire and forget. It installs nothing, so it does not wait in `jamQueue`,
+ * and a failure only means the load happens later, when the sound is really
+ * asked for — which is where an error is worth showing. The same request
+ * twice is cheap: everything lands in a cache and the second pass finds it.
+ */
+export function warmJam(request: JamWarmRequest): void {
+  void invoke("warm_jam", {
+    configs: request.configs ?? [],
+    kits: !!request.kits,
+    bassVoices: !!request.bassVoices,
+    keysVoices: !!request.keysVoices,
+  }).catch(() => {});
+}
+
+/**
+ * ONE LINE FOR EVERY JAM COMMAND, IN THE ORDER THEY WERE SENT.
+ *
+ * `set_jam` runs off the main thread now (it decodes recorded kits and
+ * voices, and on the main thread that was the beachball), so the engine no
+ * longer gets its order for free. This is where the order comes from: each
+ * command waits for the one before it to finish.
+ *
+ * And a run of `setJam`s that are all still waiting collapses to the NEWEST.
+ * Every send is a whole band, so the older ones are already out of date —
+ * the bar-ahead sends pile up exactly this way behind a cold kit decode, and
+ * building each of them in turn would only make the band later. Every caller
+ * still gets its promise settled, with the result of the send that replaced
+ * it. A position command is never collapsed and never jumped over: it lands
+ * after the table sent before it and before the table sent after it.
+ */
+/**
+ * IS THE BAND STILL LOADING?
+ *
+ * True while a `setJam` has been on its way for longer than
+ * `JAM_LOADING_AFTER_MS`, false once the queue is empty. The delay is so a
+ * send that finds its sounds already decoded — almost all of them — never
+ * flashes a spinner; only a real load shows one. Read it with
+ * `useJamLoading`. Nothing is disabled while it is true: a player who picked
+ * the wrong kit can pick another straight away, and the queue plays the last.
+ */
+export const JAM_LOADING_AFTER_MS = 150;
+let jamLoading = false;
+const jamLoadingWatchers = new Set<() => void>();
+
+export function subscribeJamLoading(listener: () => void): () => void {
+  jamLoadingWatchers.add(listener);
+  return () => {
+    jamLoadingWatchers.delete(listener);
+  };
+}
+
+export function isJamLoading(): boolean {
+  return jamLoading;
+}
+
+function setJamLoading(next: boolean): void {
+  if (jamLoading === next) return;
+  jamLoading = next;
+  for (const watcher of [...jamLoadingWatchers]) watcher();
+}
+
+type JamJob =
+  | { kind: "table"; config: JamEngineConfig | null; waiters: Waiter[] }
+  | { kind: "position"; command: JamPositionCommand; waiters: Waiter[] };
+type Waiter = { resolve: () => void; reject: (err: unknown) => void };
+
+export const jamQueue = (() => {
+  const pending: JamJob[] = [];
+  let running = false;
+
+  async function drain(): Promise<void> {
+    if (running) return;
+    running = true;
+    let slow: ReturnType<typeof setTimeout> | null = null;
+    try {
+      while (pending.length > 0) {
+        const job = pending.shift()!;
+        if (job.kind === "table" && job.config && slow === null) {
+          slow = setTimeout(() => setJamLoading(true), JAM_LOADING_AFTER_MS);
+        }
+        try {
+          if (job.kind === "table") await invoke("set_jam", { config: job.config });
+          else await invoke("set_jam_position", { command: job.command });
+          for (const w of job.waiters) w.resolve();
+        } catch (err) {
+          for (const w of job.waiters) w.reject(err);
+        }
+      }
+    } finally {
+      running = false;
+      if (slow !== null) clearTimeout(slow);
+      setJamLoading(false);
+    }
+  }
+
+  function enqueue(job: JamJob): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const last = pending[pending.length - 1];
+      if (job.kind === "table" && last && last.kind === "table") {
+        // Superseded before it was sent: the newer band replaces it.
+        last.config = job.config;
+        last.waiters.push({ resolve, reject });
+      } else {
+        job.waiters.push({ resolve, reject });
+        pending.push(job);
+      }
+      void drain();
+    });
+  }
+
+  return {
+    table: (config: JamEngineConfig | null) =>
+      enqueue({ kind: "table", config, waiters: [] }),
+    position: (command: JamPositionCommand) =>
+      enqueue({ kind: "position", command, waiters: [] }),
+  };
+})();
+
+/**
+ * The tune finished itself.
+ *
+ * A `song` arrangement marks its last bar `endsForm` (plans/tasks/jam-v4/BRIEF.md
+ * A1); the engine plays that bar out, stops, and says so here. No payload: the
+ * only thing the UI needs to know is that it happened, and which jam it was is
+ * the one it has open.
+ *
+ * A build whose engine never emits it is not a broken build — it is a build
+ * where a song simply goes round again, which is what every build did before
+ * the arrangement existed.
+ */
+export function onJamEnded(callback: () => void) {
+  return listen<null>("jam-ended", () => callback());
 }
 

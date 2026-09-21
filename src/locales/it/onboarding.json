@@ -155,6 +155,15 @@
       "midiPlugged": {
         "body": "C'è un dispositivo MIDI collegato ma nulla è assegnato. Assegni un pedale a Play/Stop?",
         "action": "Apri scorciatoie"
+      },
+      "jamSheets": {
+        "body": "Impostazioni cambia la band; Accordi è il tuo bigliettino."
+      },
+      "jamLive": {
+        "body": "Tutto qui cambia alla battuta successiva."
+      },
+      "jamArrangement": {
+        "body": "La band cresce e si ferma da sola — Loop, in Impostazioni, lo disattiva."
       }
     },
     "tour": {

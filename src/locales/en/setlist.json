@@ -4,6 +4,8 @@
     "untitled": "New setlist",
     "newSetlist": "New setlist",
     "deleteSetlist": "Delete setlist",
+    "duplicateSetlist": "Duplicate setlist",
+    "copyName": "{{name}} copy",
     "librarySteps": "{{count}} steps",
     "librarySteps_one": "{{count}} step",
     "librarySteps_other": "{{count}} steps",
@@ -22,6 +24,14 @@
     "moveLater": "Move this step later",
     "duplicateStep": "Duplicate this step",
     "removeStep": "Remove this step",
+    "reorderHint": "Drag to reorder",
+    "stopToReorder": "Stop the setlist to reorder",
+    "duplicateSteps": "Duplicate {{count}} steps",
+    "duplicateSteps_one": "Duplicate {{count}} step",
+    "duplicateSteps_other": "Duplicate {{count}} steps",
+    "removeSteps": "Remove {{count}} steps",
+    "removeSteps_one": "Remove {{count}} step",
+    "removeSteps_other": "Remove {{count}} steps",
     "barOf": "bar {{current}} of {{total}}",
     "timeLeft": "{{duration}} left",
     "waitingForYou": "waiting for you",
@@ -120,14 +130,18 @@
       "backToPlaying": "Back to playing"
     },
     "countIn": {
-      "label": "Count in",
-      "off": "No count-in",
-      "startingIn": "starting in",
-      "beats": "{{count}} beats",
-      "beats_one": "{{count}} beat",
-      "beats_other": "{{count}} beats",
-      "fewer": "Fewer count-in beats",
-      "more": "More count-in beats"
+      "startingIn": "starting in"
+    },
+    "jam": {
+      "mark": "This step is a jam",
+      "addStep": "Add a jam",
+      "addTo": "Add to setlist…",
+      "barsOfForm": "{{count}} bars",
+      "barsOfForm_one": "{{count}} bar",
+      "barsOfForm_other": "{{count}} bars",
+      "said": "the band",
+      "goneShort": "The jam is gone",
+      "gone": "That jam is no longer in the library, so this step plays the click it describes."
     }
   }
 }

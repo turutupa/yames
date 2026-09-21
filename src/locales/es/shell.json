@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metrónomo",
     "setlist": "Setlist",
-    "drill": "Rampa de tempo"
+    "drill": "Rampa de tempo",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -21,10 +22,12 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Metrónomo sin guardar",
+    "unsavedDrill": "Rampa de tempo sin guardar",
     "title": "Preajustes",
     "titleDrill": "Rampas",
     "titleSetlist": "Setlists",
-    "saveCurrent": "Guardar ajustes actuales",
+    "titleJam": "Jams",
     "search": "Buscar en la biblioteca",
     "searchPlaceholder": "Buscar…",
     "namePlaceholder": "Nombre…",
@@ -40,7 +43,9 @@
     "revert": "Descartar",
     "revertTooltip": "Descartar los cambios y volver a cargar el preajuste",
     "save": "Guardar preajuste",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "newPreset": "Nuevo preajuste",
+    "newDrill": "Nuevo ejercicio"
   },
   "emptyStates": {
     "presets": {
@@ -67,7 +72,8 @@
     "listening": "Escuchando",
     "inputOff": "Entrada apagada",
     "coachOnPlay": "El entrenador escucha al pulsar reproducir",
-    "coachQuiet": "El entrenador calla durante cada paso"
+    "coachQuiet": "El entrenador calla durante cada paso",
+    "countIn": "Cuenta de entrada"
   },
   "rail": {
     "label": "Modos y biblioteca",
@@ -76,7 +82,8 @@
     "collapse": "Contraer barra lateral",
     "expand": "Expandir barra lateral",
     "collapseWithShortcut": "Contraer barra lateral ({{shortcut}})",
-    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})"
+    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})",
+    "beta": "Beta"
   },
   "tabs": {
     "library": "Biblioteca"
@@ -85,6 +92,7 @@
     "metronome": "Clic",
     "drill": "Rampa",
     "setlist": "Setlist",
+    "jam": "Jam",
     "settings": "Ajustes",
     "library": "Presets",
     "zen": "Zen"

@@ -11,6 +11,9 @@ import { METER_PRESETS, SOUND_TYPES } from "../../constants/metronome";
 import { meterLabel, meterTotal } from "../../utils/meter";
 import { triggerLabel, transitionLabel } from "./format";
 import { TransitionEditor } from "./TransitionEditor";
+import { JamGlyph } from "../jam/JamGlyph";
+import { jamStepBars } from "../../setlist";
+import type { Jam } from "../../jam";
 import type { SetlistStep, SetlistTransition, SetlistTrigger, Subdivision } from "../../types";
 
 /**
@@ -73,6 +76,19 @@ interface StepSentenceProps {
    * lines that were already there, it does not take anything away.
    */
   folded?: boolean;
+  /**
+   * The jam this step IS, when it is one (JAM_MODE §8.5).
+   *
+   * Three states, and they are all different sentences. No `jamId` on the
+   * step: an ordinary step, and none of this happens. A `jamId` and a jam:
+   * the step reads as the jam — name, tempo, the length of one chorus — and
+   * the meter is not offered, because the meter belongs to the groove and
+   * changing it is how you get the plain click instead of a band. A `jamId`
+   * and NO jam: the jam has been deleted, the step plays as the plain
+   * metronome step it describes, and the sentence says so rather than
+   * pretending there is still a band behind it.
+   */
+  jam?: Jam | null;
 }
 
 export function StepSentence({
@@ -83,6 +99,7 @@ export function StepSentence({
   onChange,
   quiet,
   folded,
+  jam = null,
 }: StepSentenceProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Field>(null);
@@ -98,6 +115,12 @@ export function StepSentence({
 
   const meter = step.freeMode ? t("metronome.free") : meterLabel(step.beatGroups);
   const beats = meterTotal(step.beatGroups);
+
+  /** A jam step with its jam still in the library. */
+  const isJam = !!step.jamId && !!jam;
+  /** A jam step whose jam has been deleted. It plays as the plain step. */
+  const jamGone = !!step.jamId && !jam;
+  const chorusBars = jamStepBars(jam);
 
   /** The window's quiet footer: what one pass of this step comes to. */
   const note = t("setlist.said.stepNote", { number, total });
@@ -115,6 +138,21 @@ export function StepSentence({
         {/* Folded, the name leads its own sentence instead of sitting in the
             quiet line underneath — at this size there is no quiet line left
             to put it in, and a step you are reading wants its name first. */}
+        {/* The mark that says this step is a band and not a click. On the
+            step's own line, before the name, because it is the first thing
+            you want to know about the row you are reading. */}
+        {(isJam || jamGone) && (
+          <span
+            className="setlist-jam-mark"
+            data-gone={jamGone ? "" : undefined}
+            title={isJam ? t("setlist.jam.mark") : t("setlist.jam.goneShort")}
+          >
+            <JamGlyph size={folded ? 12 : 14} />
+            <span className="sr-only">
+              {isJam ? t("setlist.jam.mark") : t("setlist.jam.goneShort")}
+            </span>
+          </span>
+        )}
         {folded && (
           <button
             type="button"
@@ -142,29 +180,47 @@ export function StepSentence({
 
         <span className="drill-plan-sep" aria-hidden="true" />
 
-        <button
-          type="button"
-          ref={anchor("meter")}
-          className={`drill-plan-token${open === "meter" ? " open" : ""}`}
-          aria-expanded={open === "meter"}
-          aria-label={t("metronome.meter")}
-          onClick={toggle("meter")}
-        >
-          <span className="drill-plan-value">{meter}</span>
-        </button>
+        {/* The meter is the JAM's, and it is not a control here.
+            `pushJam` sets the engine's subdivision and beat groups from the
+            groove before it sends the table, and the engine refuses a table
+            whose `ticksPerBeat × beatsPerBar` disagrees with the bar it is
+            running — by playing the plain click, silently. A meter button on
+            a jam step would therefore be a button that takes the band away
+            and says nothing. What the step's length is measured in is the
+            chorus, so that is what stands here instead. */}
+        {isJam ? (
+          <span className="drill-plan-value setlist-jam-bars">
+            {t("setlist.jam.barsOfForm", { count: chorusBars })}
+          </span>
+        ) : (
+          <>
+            <button
+              type="button"
+              ref={anchor("meter")}
+              className={`drill-plan-token${open === "meter" ? " open" : ""}`}
+              aria-expanded={open === "meter"}
+              aria-label={t("metronome.meter")}
+              onClick={toggle("meter")}
+            >
+              <span className="drill-plan-value">{meter}</span>
+            </button>
 
-        <span className="drill-plan-sep" aria-hidden="true" />
+            <span className="drill-plan-sep" aria-hidden="true" />
 
-        <button
-          type="button"
-          ref={anchor("sub")}
-          className={`drill-plan-token${open === "sub" ? " open" : ""}`}
-          aria-expanded={open === "sub"}
-          aria-label={t("metronome.subdivision")}
-          onClick={toggle("sub")}
-        >
-          <span className="drill-plan-value">{t(`subdiv.${step.subdivision}`).toLowerCase()}</span>
-        </button>
+            <button
+              type="button"
+              ref={anchor("sub")}
+              className={`drill-plan-token${open === "sub" ? " open" : ""}`}
+              aria-expanded={open === "sub"}
+              aria-label={t("metronome.subdivision")}
+              onClick={toggle("sub")}
+            >
+              <span className="drill-plan-value">
+                {t(`subdiv.${step.subdivision}`).toLowerCase()}
+              </span>
+            </button>
+          </>
+        )}
       </div>
 
       {/* The line the cards never had room for, and the one a setlist is
@@ -204,6 +260,15 @@ export function StepSentence({
         {folded && (
           <>
             <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
+        {/* A jam step's sound is the band, and the click behind it is only
+            what plays if the jam is ever deleted. Offering a click picker on
+            a step that plays drums, bass and keys would be a control with
+            nothing to do. */}
+        {isJam ? (
+          <span className="drill-plan-detail-token setlist-jam-said">
+            {t("setlist.jam.said")}
+          </span>
+        ) : (
         <button
           type="button"
           ref={anchor("sound")}
@@ -213,6 +278,7 @@ export function StepSentence({
         >
           {t(`sound.${step.soundType}`).toLowerCase()}
         </button>
+        )}
         <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
         <button
           type="button"
@@ -244,6 +310,12 @@ export function StepSentence({
             {`“${step.name}”`}
           </button>
           <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
+        {/* The band, not a click — see the folded row above. */}
+        {isJam ? (
+          <span className="drill-plan-detail-token setlist-jam-said">
+            {t("setlist.jam.said")}
+          </span>
+        ) : (
         <button
           type="button"
           ref={anchor("sound")}
@@ -253,6 +325,7 @@ export function StepSentence({
         >
           {t(`sound.${step.soundType}`).toLowerCase()}
         </button>
+        )}
         <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
         <button
           type="button"
@@ -443,6 +516,12 @@ export function StepSentence({
           </DrillPopoverRow>
         </DrillConfigPopover>
       )}
+
+      {/* The jam is gone. Said in the sentence rather than left to be
+          discovered by pressing play: the step still has the tempo, the meter
+          and the sound the jam gave it, so it plays — as a click. That is the
+          honest outcome and it is not what the row looks like it will do. */}
+      {jamGone && <p className="setlist-jam-gone">{t("setlist.jam.gone")}</p>}
 
       {open === "trigger" && (
         <TransitionEditor

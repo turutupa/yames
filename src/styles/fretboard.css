@@ -1,0 +1,133 @@
+/*
+ * The fretboard.
+ *
+ * Every colour in here is one of the app's CSS custom properties, so the
+ * board follows the theme the user picked. There are no hex values in this
+ * file on purpose, and `Fretboard.test.tsx` fails the build if one appears:
+ * a hard-coded colour is a board that looks wrong in half the themes.
+ */
+
+.fretboard {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The wood. */
+.fretboard-wood {
+  fill: var(--bg-card);
+}
+
+/* Fret wires: present, not loud. */
+.fretboard-fret {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+/* The nut is the one line that should read as an edge. */
+.fretboard-nut {
+  stroke: var(--text-secondary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.fretboard-string {
+  stroke: var(--text-secondary);
+  stroke-width: 1;
+  opacity: 0.45;
+}
+
+.fretboard-large .fretboard-string {
+  stroke-width: 1.25;
+}
+
+/* The dots in the wood at 3, 5, 7, 9 and 12. */
+.fretboard-inlay {
+  fill: var(--text-secondary);
+  opacity: 0.22;
+}
+
+/* A note in the scale: an outline, so the root stands out against it. */
+.fretboard-dot {
+  fill: var(--bg-panel, var(--bg-card));
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+/* On the scales sheet, filled and quiet.
+   A whole neck of ringed dots is a mesh of accent with the root somewhere
+   inside it — the printed card draws its scale notes solid and dark and
+   keeps the colour for the root alone, which is the only way the root is
+   findable at a glance. */
+.fretboard-sheet .fretboard-dot {
+  fill: var(--text-secondary);
+  /* The ring is removed by width rather than by painting it away. Every
+     colour in this file has to come from a theme variable and the test
+     beside the component enforces it — including, it turns out, inside a
+     comment. A zero width is the same picture and argues with nothing. */
+  stroke-width: 0;
+}
+
+.fretboard-sheet .fretboard-dot-root {
+  fill: var(--accent);
+  stroke-width: 0;
+}
+
+/* A name written INSIDE a filled dot has to be the colour behind the board,
+   not the colour of text. The sheet's dots became solid and the names stayed
+   `--text-primary`, so every label but the root's was light-on-light and
+   invisible — the owner: "scales are ONLY rendering on the root note, maybe
+   its because the same font color is used on regular dots". Exactly that. */
+.fretboard-sheet .fretboard-dot-name {
+  fill: var(--bg-primary);
+}
+
+/* The root: filled, and the only solid accent on the board. */
+.fretboard-dot-root {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.fretboard-number {
+  fill: var(--text-secondary);
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* What the note under the pointer is: its name and what it is doing in the
+   scale. Drawn inside the SVG so nothing the board sits in can clip it. */
+.fretboard-note-label rect {
+  fill: var(--bg-secondary);
+  /* It is over the board, not on it. In the app's own border colour, a panel
+     filled with one of the app's own surfaces read as one more thing printed
+     on the neck; the accent says it belongs to the pointer and will go when
+     the pointer does. (A drop shadow would say the same and is what this
+     first reached for — but every colour in this file has to come from the
+     theme, and a shadow cannot be written that way.) */
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.fretboard-note-label text {
+  fill: var(--text-primary);
+  font-weight: 700;
+}
+
+/* The dot the pointer is on is a target, so it says so. */
+.fretboard-dot {
+  cursor: default;
+}
+
+/* A note's name, inside its dot. The hollow dots take the board's text
+   colour; the filled root dot takes the background it is filled with, which
+   is the only way a name on it is legible. */
+.fretboard-dot-name {
+  fill: var(--text-primary);
+  font-weight: 800;
+}
+
+.fretboard-dot-name-root {
+  fill: var(--bg-primary);
+}

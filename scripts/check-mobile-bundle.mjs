@@ -47,6 +47,12 @@ const FORBIDDEN = [
   ["check_update", "the in-app updater"],
   ["practice-coach", "the coach containers"],
   ["CoachCard", "the coach card"],
+  // The band ships on a phone (M08). Two halves of it do not, and both fail
+  // the same way if a gate slips: a control that answers nothing.
+  ["start_take", "recording a take — it records you through the mic, and there is no mic"],
+  ["takes_dir_size", "the takes shelf"],
+  ["pick_kit_folder", "the folder dialog for a kit of your own samples"],
+  ["inspect_kit_folder", "reading a folder of your own samples"],
 ];
 
 /** Every file under `dist/assets`, recursively. */

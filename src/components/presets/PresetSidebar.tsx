@@ -2,20 +2,25 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
+import { formBars } from "../../jam/forms";
+import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
+import type { Jam } from "../../jam/types";
+import { JamGlyph } from "../jam/JamGlyph";
 
 export interface PresetSidebarHandle {
   triggerAdd: () => void;
   triggerUpdate: () => void;
   triggerRename: (id: string) => void;
   triggerRenameSetlist: (id: string) => void;
+  triggerRenameJam: (id: string) => void;
   /** Drop the loaded marker — a setlist has taken the context bar. */
   clearActive: () => void;
 }
 
 interface PresetSidebarProps {
   state: AppState;
-  view: "beat" | "drill" | "setlist";
+  view: "beat" | "drill" | "setlist" | "jam";
   isOpen: boolean;
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
@@ -32,6 +37,52 @@ interface PresetSidebarProps {
   onNewSetlist?: () => void;
   onDeleteSetlist?: (id: string) => void;
   onRenameSetlist?: (id: string, name: string) => void;
+  onDuplicateSetlist?: (id: string) => void;
+  /**
+   * A setlist dragged to a new place in the library — the jam rows' reorder,
+   * read for setlists.
+   *
+   * Setlists are ordered by hand for the same reason jams are: a library of
+   * routines is an ORDER, the one you warm up on first and the one you finish
+   * with, and the only way to say that is to move the rows.
+   */
+  onReorderSetlists?: (from: number, to: number) => void;
+  /**
+   * Jams, on the jam tab. Same deal as setlists: the stage edits the loaded
+   * one continuously, so the list is the parent's state and this component
+   * only draws it. Ordering is the library's, which is why there is a
+   * reorder callback here and none for presets — presets sort by name.
+   */
+  jams?: Jam[];
+  activeJamId?: string | null;
+  onLoadJam?: (jam: Jam) => void;
+  onNewJam?: () => void;
+  onDeleteJam?: (id: string) => void;
+  onRenameJam?: (id: string, name: string) => void;
+  onDuplicateJam?: (id: string) => void;
+  onReorderJams?: (from: number, to: number) => void;
+  /**
+   * "Add to setlist…" on a jam's context menu (JAM_MODE §8.5).
+   *
+   * The jam library is on the Jam tab and the setlists are on the Setlist
+   * tab, so this is the one place in the app where the two lists meet — which
+   * is exactly why the item belongs here as well as in the jam screen's
+   * overflow: you decide a jam belongs in a routine while you are looking at
+   * the library, not while you are playing it.
+   */
+  onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
+}
+
+/** What a jam row says on its right: the tempo and the shape. */
+function jamSummary(
+  jam: Jam,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  const form =
+    jam.form.kind === "custom"
+      ? t("jam.short.custom", { count: formBars(jam.form) })
+      : t(`jam.short.${jam.form.kind}`);
+  return t("jam.summary", { bpm: jam.bpm, form });
 }
 
 function generateId(): string {
@@ -134,6 +185,17 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onNewSetlist,
   onDeleteSetlist,
   onRenameSetlist,
+  onDuplicateSetlist,
+  onReorderSetlists,
+  jams,
+  activeJamId,
+  onLoadJam,
+  onNewJam,
+  onDeleteJam,
+  onRenameJam,
+  onDuplicateJam,
+  onReorderJams,
+  onAddJamToSetlist,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -157,6 +219,52 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   // would have to say which list it meant.
   const [renamingSetlist, setRenamingSetlist] = useState<string | null>(null);
   const [setlistMenu, setSetlistMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [renamingJam, setRenamingJam] = useState<string | null>(null);
+  const [jamMenu, setJamMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  /** The jam menu's "add to setlist" item, expanded into the setlists. */
+  const [jamMenuSetlists, setJamMenuSetlists] = useState(false);
+  /**
+   * The jam being dragged, and the row it is currently over.
+   *
+   * A jam library is an ORDER — the one you warm up on first, the one you end
+   * on — so unlike presets it is not sorted for you, and the only way to
+   * express that order is to move the rows. The id rather than the index: the
+   * list can be filtered by the search field while a drag is in flight.
+   */
+  const [dragJamId, setDragJamId] = useState<string | null>(null);
+  const [dragOverJamId, setDragOverJamIdState] = useState<string | null>(null);
+  /**
+   * The setlist being dragged, and the row it is over. Same two pieces of
+   * state the jam library keeps, and kept apart from them on purpose: a
+   * setlist and a jam are different things and neither can land in the
+   * other's list.
+   */
+  const [dragSetlistId, setDragSetlistId] = useState<string | null>(null);
+  const [dragOverSetlistId, setDragOverSetlistId] = useState<string | null>(null);
+  /**
+   * A jam row marks itself as a drop target only for a JAM.
+   *
+   * `onDragEnter` fires for whatever is being dragged — a setlist from the
+   * other tab, a file off the desktop, a selection — and any of them would
+   * light up a row that cannot accept them: an invitation to a drop that does
+   * nothing. So the line is drawn only while a jam is actually in the hand,
+   * which is the rule the setlist rows below already follow. Guarded here
+   * rather than in the row so the jam rows keep one reading of "the row I am
+   * over".
+   */
+  const setDragOverJamId = (id: string | null) => {
+    if (id !== null && !dragJamId) return;
+    setDragOverJamIdState(id);
+  };
+  /**
+   * Which style the jam library is showing, or null for all of them.
+   *
+   * Fifty starters is a library rather than a shelf (JAM_KILLER §2 A3), and
+   * "the blues ones" is how a player asks for a third of it. A vibe rather
+   * than a groove family: a jam is a piece of music, and what it belongs to is
+   * the tile it came off, not the table its drummer reads.
+   */
+  const [jamVibe, setJamVibe] = useState<string | null>(null);
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -177,7 +285,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
    * this are not rendered at all, so the fallback is unreachable — it exists
    * so the type says what is true rather than being asserted away.
    */
-  const presetView: "beat" | "drill" = view === "setlist" ? "beat" : view;
+  const presetView: "beat" | "drill" = view === "beat" || view === "drill" ? view : "beat";
 
   const viewPresets = allPresets
     .filter((p) => p.view === view)
@@ -193,6 +301,23 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setSearchOpen(false);
     }
   }, [isOpen]);
+
+  /*
+   * Changing tabs ends whatever was in the hand.
+   *
+   * `dragend` fires on the row the drag started from, and that row is gone the
+   * moment the library lists something else — so an id left behind would
+   * outlive the gesture for the rest of the session: the row comes back faded,
+   * and the guard that keeps the two kinds apart reads a drag that is not
+   * happening and refuses the drop line to every later one. Ending the drag
+   * with the tab is also what it looks like from the outside.
+   */
+  useEffect(() => {
+    setDragSetlistId(null);
+    setDragOverSetlistId(null);
+    setDragJamId(null);
+    setDragOverJamIdState(null);
+  }, [view]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -219,11 +344,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
   useEffect(() => {
-    if (renaming || renamingSetlist) {
+    if (renaming || renamingSetlist || renamingJam) {
       renameRef.current?.focus();
       renameRef.current?.select();
     }
-  }, [renaming, renamingSetlist]);
+  }, [renaming, renamingSetlist, renamingJam]);
 
   // Close the setlist context menu on an outside click, same rule as the
   // preset one above.
@@ -237,6 +362,22 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [setlistMenu]);
+
+  useEffect(() => {
+    if (!jamMenu) {
+      // Shut with the menu, or the next right-click opens on a list the user
+      // did not ask for.
+      setJamMenuSetlists(false);
+      return;
+    }
+    const handler = (e: MouseEvent) => {
+      if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
+        setJamMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [jamMenu]);
 
   const handleSave = useCallback(async () => {
     const name = newName.trim();
@@ -351,10 +492,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setRenameValue(setlist.name);
       setRenamingSetlist(id);
     },
-  }), [activeId, allPresets, setlists, state, view]);
+    triggerRenameJam: (id: string) => {
+      const jam = jams?.find((j) => j.id === id);
+      if (!jam) return;
+      setRenameValue(jam.name);
+      setRenamingJam(id);
+    },
+  }), [activeId, allPresets, setlists, jams, state, view]);
 
   // The rail's setlist glyph at row size — lines with a play head, a list that
   // runs in order. Rail.tsx has the note on why it is no longer a chain.
+  // The rail's setlist glyph at row size — lines with a play head, a list that
+  // runs in order. Rail.tsx has the note on why it is no longer a chain. It
+  // marks a ROW in the library, where saying what kind of thing this is is
+  // the whole job; the header's button above says "new" instead.
   const setlistIcon = (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M4 6.5h11" />
@@ -364,16 +515,106 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     </svg>
   );
 
+  // The band's lanes at row size — the same component the setlist's jam
+  // steps draw.
+  const jamIcon = <JamGlyph />;
+
+  /**
+   * "Make me a new one", on every tab (2026-09-19).
+   *
+   * There used to be three different glyphs here — a floppy on the
+   * metronome and the drill, a setlist's own lines, the band's bars — for
+   * one gesture, because each was drawn to say what KIND of thing it made.
+   * The library below it already says that. The owner: "we should have the
+   * same icon for create new metronome preset/new setlist/new drill and
+   * potentially should be a plus icon which is very generic".
+   *
+   * A plus, then. It is the one glyph nobody has to learn.
+   */
+  const newIcon = (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+
   // The setlist tab's library IS the setlists, and no other tab's carries
   // them. This is what a mode buys that a section heading could not: each
   // list holds one kind of thing, so nothing has to be labelled to be told
   // apart, and the panel's title is true on every tab.
+  // The band's lanes at row size — the rail's jam glyph, same four bars, and
+  // now the same component the setlist's jam steps draw.
   const showSetlists = view === "setlist" && !!setlists;
   const setlistList = showSetlists
     ? (search.trim()
         ? setlists!.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
         : setlists!)
     : [];
+  const showJams = view === "jam" && !!jams;
+  const jamList = showJams
+    ? jams!.filter(
+        (j) =>
+          (!search.trim() || j.name.toLowerCase().includes(search.toLowerCase())) &&
+          (!jamVibe || j.vibe === jamVibe),
+      )
+    : [];
+  /**
+   * The chips to offer: only the styles the library actually holds.
+   *
+   * A chip for a vibe nobody has a jam in is a chip that empties the list, and
+   * a filter that can show you nothing is a filter people stop trusting. The
+   * current one is kept even when it empties, so the row does not rearrange
+   * itself under the finger that just tapped it.
+   */
+  const jamVibes = showJams
+    ? VIBES.filter((v) => v.id === jamVibe || jams!.some((j) => j.vibe === v.id))
+    : [];
+
+  /**
+   * Finish a drag: move the dragged jam to where it was dropped.
+   *
+   * The indices are looked up in the FULL list rather than the filtered one —
+   * dropping row two of a search result onto row four must move the jam to the
+   * fourth jam's place in the library, not to the fourth row of a view that
+   * will not exist a keystroke later.
+   */
+  const dropJam = (targetId: string) => {
+    const from = jams?.findIndex((j) => j.id === dragJamId) ?? -1;
+    const to = jams?.findIndex((j) => j.id === targetId) ?? -1;
+    setDragJamId(null);
+    setDragOverJamId(null);
+    if (from === -1 || to === -1 || from === to) return;
+    onReorderJams?.(from, to);
+  };
+
+  /**
+   * The same finish for a setlist row, against the same full list.
+   *
+   * A search that hides rows must still report where the setlist landed in the
+   * LIBRARY: dropping the second row of a result onto the fourth moves it to
+   * the fourth setlist's place, not to the fourth row of a view that will not
+   * exist a keystroke later.
+   *
+   * A jam in flight leaves `dragSetlistId` null, so `from` is -1 and the drop
+   * does nothing — a jam cannot land in the setlist library.
+   */
+  const dropSetlist = (targetId: string) => {
+    const from = setlists?.findIndex((c) => c.id === dragSetlistId) ?? -1;
+    const to = setlists?.findIndex((c) => c.id === targetId) ?? -1;
+    setDragSetlistId(null);
+    setDragOverSetlistId(null);
+    if (from === -1 || to === -1 || from === to) return;
+    onReorderSetlists?.(from, to);
+  };
 
   return (
     <>
@@ -400,7 +641,9 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 ? "presets.titleDrill"
                 : view === "setlist"
                   ? "presets.titleSetlist"
-                  : "presets.title",
+                  : view === "jam"
+                    ? "presets.titleJam"
+                    : "presets.title",
             )}
           </span>
           <div className="preset-sidebar-header-actions">
@@ -432,34 +675,34 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 aria-label={t("setlist.newSetlist")}
                 data-tip={t("setlist.newSetlist")}
               >
-                {setlistIcon}
+                {newIcon}
               </button>
             )}
-            {!showSetlists && viewPresets.length < MAX_PRESETS && (
+            {/* The jam tab's opener. It copies the loaded jam rather than
+                starting from nothing — "another one like this" is what a
+                player actually wants at the moment they press it. */}
+            {showJams && onNewJam && (
+              <button
+                className="preset-sidebar-head-btn preset-sidebar-new-jam"
+                onClick={onNewJam}
+                aria-label={t("jam.newJam")}
+                data-tip={t("jam.newJam")}
+              >
+                {newIcon}
+              </button>
+            )}
+            {!showSetlists && !showJams && viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
-                aria-label={t("presets.saveCurrent")}
-                data-tip={t("presets.saveCurrent")}
+                aria-label={t(view === "drill" ? "presets.newDrill" : "presets.newPreset")}
+                data-tip={t(view === "drill" ? "presets.newDrill" : "presets.newPreset")}
               >
-                {/* The same floppy the context bar's "Save preset" carries.
-                    It was a "+", which reads as "add an empty one" — the two
-                    buttons do the same thing and now say so. */}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
+                {/* It said "Save current settings", under a floppy, on a
+                    button that files a NEW thing in the library beside it —
+                    and on the drill tab that sentence names neither the
+                    thing nor the act. It makes a new drill. */}
+                {newIcon}
               </button>
             )}
           </div>
@@ -494,6 +737,33 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         </div>
         )}
 
+        {/* The jam library's style filter (A3). Above the list rather than in
+            the header: it narrows what is under it, and a control that lives
+            beside the search field would read as another way to search. */}
+        {showJams && jamVibes.length > 1 && (
+          <div className="preset-sidebar-filter" role="group" aria-label={t("jam.filter.style")}>
+            <button
+              type="button"
+              className={`preset-sidebar-chip${jamVibe === null ? " active" : ""}`}
+              aria-pressed={jamVibe === null}
+              onClick={() => setJamVibe(null)}
+            >
+              {t("jam.filter.all")}
+            </button>
+            {jamVibes.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                className={`preset-sidebar-chip${jamVibe === v.id ? " active" : ""}`}
+                aria-pressed={jamVibe === v.id}
+                onClick={() => setJamVibe(jamVibe === v.id ? null : v.id)}
+              >
+                {t(v.nameKey)}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="preset-sidebar-list">
           {/* Setlists sit above the presets and above the rule that separates
               them: they are the bigger thing, and a list that opened with
@@ -504,12 +774,48 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               className={`preset-sidebar-item setlist-item ${activeSetlistId === c.id ? "active" : ""}`}
               role="button"
               tabIndex={0}
+              /* A row being renamed is a text field, and a drag would take the
+                 caret with it — the jam rows' guard, for the same reason. */
+              draggable={!renamingSetlist}
+              data-dragging={dragSetlistId === c.id ? "" : undefined}
+              data-drag-over={
+                dragOverSetlistId === c.id && dragSetlistId && dragSetlistId !== c.id
+                  ? ""
+                  : undefined
+              }
+              title={t("setlist.reorderHint")}
               onClick={() => onLoadSetlist?.(c)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   onLoadSetlist?.(c);
                 }
+              }}
+              onDragStart={(e) => {
+                setDragSetlistId(c.id);
+                e.dataTransfer.effectAllowed = "move";
+                // Firefox refuses to start a drag without data on it.
+                e.dataTransfer.setData("text/plain", c.id);
+              }}
+              /* Only for a setlist. A jam being dragged is not a thing this
+                 list can accept, so it gets no drop target and no "move"
+                 cursor — the drop it would invite does nothing. */
+              onDragEnter={() => {
+                if (dragSetlistId) setDragOverSetlistId(c.id);
+              }}
+              onDragOver={(e) => {
+                if (!dragSetlistId) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                if (!dragSetlistId) return;
+                e.preventDefault();
+                dropSetlist(c.id);
+              }}
+              onDragEnd={() => {
+                setDragSetlistId(null);
+                setDragOverSetlistId(null);
               }}
               onContextMenu={(e) => {
                 e.preventDefault();
@@ -552,13 +858,96 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </div>
           ))}
+          {jamList.map((j) => (
+            <div
+              key={j.id}
+              className={`preset-sidebar-item jam-item ${activeJamId === j.id ? "active" : ""}`}
+              role="button"
+              tabIndex={0}
+              draggable={!renamingJam}
+              data-dragging={dragJamId === j.id ? "" : undefined}
+              data-drag-over={dragOverJamId === j.id && dragJamId !== j.id ? "" : undefined}
+              title={t("jam.reorderHint")}
+              onClick={() => onLoadJam?.(j)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onLoadJam?.(j);
+                }
+              }}
+              onDragStart={(e) => {
+                setDragJamId(j.id);
+                e.dataTransfer.effectAllowed = "move";
+                // Firefox refuses to start a drag without data on it.
+                e.dataTransfer.setData("text/plain", j.id);
+              }}
+              onDragEnter={() => setDragOverJamId(j.id)}
+              onDragOver={(e) => {
+                // Only a jam can land here. Without this the row accepts the
+                // drop — the "move" cursor and all — for anything at all, and
+                // then does nothing with it.
+                if (!dragJamId) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                dropJam(j.id);
+              }}
+              onDragEnd={() => {
+                setDragJamId(null);
+                setDragOverJamId(null);
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setJamMenu({ id: j.id, x: e.clientX, y: e.clientY });
+              }}
+            >
+              {renamingJam === j.id ? (
+                <input
+                  ref={renameRef}
+                  className="preset-sidebar-name-input"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onBlur={() => {
+                    const name = renameValue.trim();
+                    if (name) onRenameJam?.(j.id, name);
+                    setRenamingJam(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const name = renameValue.trim();
+                      if (name) onRenameJam?.(j.id, name);
+                      setRenamingJam(null);
+                    }
+                    if (e.key === "Escape") setRenamingJam(null);
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  maxLength={24}
+                />
+              ) : (
+                <>
+                  <span className="setlist-item-row">
+                    <span className="setlist-item-glyph">{jamIcon}</span>
+                    <span className="preset-item-name">{j.name}</span>
+                  </span>
+                  <span className="setlist-item-sub">{jamSummary(j, t)}</span>
+                </>
+              )}
+            </div>
+          ))}
+          {showJams && jamList.length === 0 && (search.trim() || jamVibe) && (
+            <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
+          )}
+
           {/* The rule separates setlists from presets; on the setlist tab
               there are no presets under it to separate. */}
           {setlistList.length > 0 && !showSetlists && (
             <div className="setlist-item-rule" aria-hidden="true" />
           )}
 
-          {!showSetlists && adding && (
+          {!showSetlists && !showJams && adding && (
             <div className="preset-sidebar-item adding">
               <input
                 ref={inputRef}
@@ -579,7 +968,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               />
             </div>
           )}
-          {!showSetlists && presets.map((p) => (
+          {!showSetlists && !showJams && presets.map((p) => (
             <button
               key={p.id}
               className={`preset-sidebar-item ${activeId === p.id ? "active" : ""} ${activeId === p.id && dirty ? "dirty" : ""}`}
@@ -619,7 +1008,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </button>
           ))}
-          {!showSetlists && presets.length === 0 && !adding && (
+          {!showSetlists && !showJams && presets.length === 0 && !adding && (
             search.trim() ? (
               <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
             ) : (
@@ -679,6 +1068,70 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         </div>
       )}
 
+      {jamMenu && (
+        <div
+          ref={contextRef}
+          className="preset-context-menu"
+          style={{ top: jamMenu.y, left: jamMenu.x }}
+        >
+          <button
+            onClick={() => {
+              const j = jams?.find((j) => j.id === jamMenu.id);
+              if (j) {
+                setRenameValue(j.name);
+                setRenamingJam(jamMenu.id);
+              }
+              setJamMenu(null);
+            }}
+          >
+            {t("presets.rename")}
+          </button>
+          <button
+            onClick={() => {
+              onDuplicateJam?.(jamMenu.id);
+              setJamMenu(null);
+            }}
+          >
+            {t("jam.duplicateJam")}
+          </button>
+          {/* Only with somewhere to put it. An item that opens on an empty
+              list is a click that teaches nothing. */}
+          {onAddJamToSetlist && !!setlists?.length && (
+            <>
+              <button
+                className={jamMenuSetlists ? "preset-context-open" : undefined}
+                aria-expanded={jamMenuSetlists}
+                onClick={() => setJamMenuSetlists((open) => !open)}
+              >
+                {t("setlist.jam.addTo")}
+              </button>
+              {jamMenuSetlists &&
+                setlists!.map((setlist) => (
+                  <button
+                    key={setlist.id}
+                    className="preset-context-sub"
+                    onClick={() => {
+                      onAddJamToSetlist(jamMenu.id, setlist.id);
+                      setJamMenu(null);
+                    }}
+                  >
+                    {setlist.name}
+                  </button>
+                ))}
+            </>
+          )}
+          <button
+            className="preset-context-delete"
+            onClick={() => {
+              onDeleteJam?.(jamMenu.id);
+              setJamMenu(null);
+            }}
+          >
+            {t("jam.deleteJam")}
+          </button>
+        </div>
+      )}
+
       {setlistMenu && (
         <div
           ref={contextRef}
@@ -696,6 +1149,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             }}
           >
             {t("presets.rename")}
+          </button>
+          <button
+            onClick={() => {
+              onDuplicateSetlist?.(setlistMenu.id);
+              setSetlistMenu(null);
+            }}
+          >
+            {t("setlist.duplicateSetlist")}
           </button>
           <button
             className="preset-context-delete"

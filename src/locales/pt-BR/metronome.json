@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} cliques/compasso",
     "addBeat": "Adicionar tempo",
     "removeBeat": "Remover tempo",
+    "prevMeter": "Compasso anterior",
+    "nextMeter": "Próximo compasso",
     "grouping": "agrupamento",
     "tempo": "Andamento",
     "tempoUp": "Aumentar o andamento",
@@ -41,10 +43,13 @@
   },
   "sound": {
     "click": "Clique",
+    "sticks": "Baquetas",
     "wood": "Madeira",
     "beep": "Bipe",
     "drum": "Bateria",
-    "snare": "Caixa"
+    "kit": "Kit de bateria",
+    "snare": "Caixa",
+    "cowbell": "Cowbell"
   },
   "driftMeter": {
     "early": "Adiantado",

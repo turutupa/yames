@@ -16,7 +16,7 @@ import {
 import { GroupEditor } from "./GroupEditor";
 import { LastSession } from "./LastSession";
 import { AccentControl } from "./AccentControl";
-import { BeatStepper } from "./BeatStepper";
+import { BeatStepper, ClicksPerBar } from "./BeatStepper";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
@@ -268,11 +268,11 @@ export function MetronomeView({
       <div className="stage-divider" aria-hidden="true" />
 
       <section className="meter-section">
-        {/* The meter and the bar's length share a row, and the row is a grid
-            with a fixed first column — so the stepper sits at the same x
-            whatever the meter is called and however long the grouping reads.
-            It used to trail the dots, which slid it sideways on every click
-            of the very buttons you were clicking repeatedly. */}
+        {/* METER and ACCENT sit side by side, and each is now a heading over
+            its controls — the shape SUBDIVISION already had, and TEMPO before
+            it. They used to be one flat run of label-chip-stepper-number-
+            badges-label-buttons, which is why the stage read as three
+            different kinds of section rather than one. */}
         <div className="meter-row">
           <MeterPresets
             beatGroups={state.beatGroups}
@@ -280,13 +280,18 @@ export function MetronomeView({
             stepper={
               <BeatStepper
                 beatGroups={state.beatGroups}
-                subdivision={state.subdivision}
                 freeMode={state.freeMode}
                 onBeatGroupsChange={(next) => setBeatGroups(next)}
               />
             }
+            clicks={
+              <ClicksPerBar
+                beatGroups={state.beatGroups}
+                subdivision={state.subdivision}
+              />
+            }
           />
-          {/* Right of the meter row, as the artboard draws it: the meter says
+          {/* Right of the meter, as the artboard draws it: the meter says
               where the accents fall, and this says whether they fall at all. */}
           <AccentControl mode={state.accentMode} />
         </div>
@@ -300,7 +305,7 @@ export function MetronomeView({
           isDownbeat={isDownbeat}
           freeMode={state.freeMode}
           accentMode={state.accentMode ?? "groups"}
-          isAccentBeat={currentBeat?.isAccent ?? false}
+          accentBeat={currentBeat?.accentLevel ?? 0}
           feedback={dotFeedback}
           onBeatGroupsChange={(next) => {
             // No notifySettingsChange() — useSession watches the meter

@@ -80,12 +80,37 @@ export type BeatEvent = {
   subdivision: number;
   isDownbeat: boolean;
   /**
-   * Whether the engine accented this tick — it opens a beat group, or
-   * is beat 0 of the speed ramp's bar. Read this for the LIVE accent
-   * state instead of re-deriving group starts from `beatGroups`; the
-   * engine is the only thing that knows which rule applied.
+   * How hard the engine accented this tick: 0 not at all, 1 a group start
+   * inside the bar — the middle of a 6/8 — and 2 the bar's own opening,
+   * which is also what a ramp's bar line and "every beat" report.
+   *
+   * Read this for the LIVE accent state instead of re-deriving group starts
+   * from `beatGroups`; the engine is the only thing that knows which rule
+   * applied. `accentPositions` in `utils/meter.ts` mirrors the same rule for
+   * the markers drawn while stopped.
+   */
+  accentLevel: 0 | 1 | 2;
+  /**
+   * `accentLevel > 0` — whether this tick was accented at all, which is what
+   * an accent was before it had tiers.
+   *
+   * @deprecated Kept for one release so nothing reading the old field
+   * silently loses its accents. Use `accentLevel`; the engine derives this
+   * from it, so they cannot disagree.
    */
   isAccent: boolean;
+  /**
+   * Where this tick sits in a jam's form (plans/JAM_MODE.md). `formBar` is
+   * the 0-based bar within the chorus, `chorus` is 1-based. Both count only
+   * while a jam is loaded in the engine; otherwise 0 and 1.
+   */
+  formBar: number;
+  chorus: number;
+  /**
+   * What the band is doing on this bar: "full", "hatsOnly" (a trade, your
+   * bars) or "silent" (a drop-out). "full" when no jam is loaded.
+   */
+  bandState: "full" | "hatsOnly" | "silent";
 };
 
 // ---------------------------------------------------------------------------
@@ -180,6 +205,13 @@ export type SetlistStep = {
    */
   trigger: SetlistTrigger;
   transition: SetlistTransition;
+  /**
+   * A step that is a jam (plans/JAM_MODE.md §8.5). The jam is loaded by id
+   * when the step starts and cleared when it ends; the fields above carry
+   * the jam's tempo and meter for the sentence and the engine. A jam that
+   * no longer exists plays as the plain metronome step it describes.
+   */
+  jamId?: string;
 };
 
 export type Setlist = {
@@ -210,6 +242,13 @@ export type AudioOutputDevice = {
   name: string;
   isDefault: boolean;
   isBluetooth: boolean;
+  /**
+   * How many outputs this device has, at its widest. More than two means
+   * the Outputs picker appears under it in Settings › Devices, so a
+   * musician on an interface can send the click somewhere other than the
+   * first pair.
+   */
+  channels: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -529,6 +568,22 @@ export type SessionSegment = {
   timeSignature: number;
   startTime?: number;
   endTime?: number;
+  /**
+   * `"jam"` when this stretch was played over the band (JAM_MODE §3, principle
+   * 5). A band is louder than a click, and through speakers its hits land on
+   * the grid and the mic scores them as your notes, so a score from a jam is
+   * not comparable with a score from a bare click and nothing downstream
+   * should treat it as though it were.
+   *
+   * It lives on the SEGMENT rather than on `SavedSession` for two reasons.
+   * `SavedSession` is mirrored in Rust (`src-tauri/src/session.rs`) and has no
+   * free metadata field, so a flag added there from the frontend is dropped by
+   * serde on the way through and silently does not persist; `segments` is
+   * stored as raw JSON and comes back exactly as it was written. And it is the
+   * truer place anyway — you can leave the jam tab mid-session, and only the
+   * stretches actually played over a band should carry the caveat.
+   */
+  mode?: "jam";
 };
 
 /**

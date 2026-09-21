@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} クリック/小節",
     "addBeat": "拍を追加",
     "removeBeat": "拍を削除",
+    "prevMeter": "前の拍子",
+    "nextMeter": "次の拍子",
     "grouping": "グループ分け",
     "tempo": "テンポ",
     "tempoUp": "テンポを上げる",
@@ -41,10 +43,13 @@
   },
   "sound": {
     "click": "クリック",
+    "sticks": "スティック",
     "wood": "ウッド",
     "beep": "ビープ",
     "drum": "ドラム",
-    "snare": "スネア"
+    "kit": "ドラムキット",
+    "snare": "スネア",
+    "cowbell": "カウベル"
   },
   "driftMeter": {
     "early": "早め",

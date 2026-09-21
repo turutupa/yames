@@ -32,7 +32,10 @@ async function emitBeat(beat: Partial<BeatEvent>) {
         measureBeat: 0,
         subdivision: 0,
         isDownbeat: true,
+        accentLevel: 0,
         isAccent: false,
+        formBar: 0,
+        chorus: 1,
         ...beat,
       },
     });
@@ -160,14 +163,30 @@ describe("FloatingWidget", () => {
       expect(container.querySelectorAll(".fw-beat-dot").length).toBe(4);
     });
 
-    await emitBeat({ beat: 1, measureBeat: 1, isDownbeat: true, isAccent: true });
+    await emitBeat({ beat: 1, measureBeat: 1, isDownbeat: true, accentLevel: 2 });
     expect(
       (container.querySelectorAll(".fw-beat-dot")[1] as HTMLElement).className,
     ).toContain("downbeat");
 
-    await emitBeat({ beat: 0, measureBeat: 0, isDownbeat: true, isAccent: false });
+    await emitBeat({ beat: 0, measureBeat: 0, isDownbeat: true, accentLevel: 0 });
     expect(
       (container.querySelectorAll(".fw-beat-dot")[0] as HTMLElement).className,
     ).not.toContain("downbeat");
+  });
+
+  it("lights a middle accent too — the widget's dots have one lit state", async () => {
+    // 6/8's beat four is level 1, and a 6px dot cannot draw a third state.
+    // What it must not do is treat a middle as no accent at all, which is
+    // what reading a `level > 0` as a boolean gets right and a truthiness
+    // check on the wrong field would not.
+    const { container } = render(<FloatingWidget />);
+    await waitFor(() => {
+      expect(container.querySelectorAll(".fw-beat-dot").length).toBe(4);
+    });
+
+    await emitBeat({ beat: 3, measureBeat: 3, isDownbeat: true, accentLevel: 1 });
+    expect(
+      (container.querySelectorAll(".fw-beat-dot")[3] as HTMLElement).className,
+    ).toContain("downbeat");
   });
 });

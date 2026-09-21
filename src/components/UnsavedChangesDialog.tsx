@@ -21,12 +21,31 @@ import { useTranslation } from "react-i18next";
  * keep the work; making that two dialogs — cancel, then go and find Save —
  * would be the app being pedantic at you.
  */
+/** What is unsaved. A preset belongs to the metronome, and says so. */
+export type UnsavedKind = "setlist" | "jam" | "preset";
+
+const KIND_LABEL: Record<UnsavedKind, string> = {
+  setlist: "nav.setlist",
+  jam: "nav.jam",
+  preset: "nav.metronome",
+};
+
 export function UnsavedChangesDialog({
+  kind,
   name,
   onSave,
   onDiscard,
   onCancel,
 }: {
+  /**
+   * Which mode the unsaved work belongs to, shown before its name.
+   *
+   * The dialog can be about something that is not on screen — opening a
+   * setlist closes the jam you edited an hour ago on the Jam tab — and a
+   * bare "Slow blues in A has changes" on the setlist screen read as a
+   * question about a setlist nobody had heard of (2026-09-16).
+   */
+  kind: UnsavedKind;
   name: string;
   onSave: () => void;
   onDiscard: () => void;
@@ -75,6 +94,7 @@ export function UnsavedChangesDialog({
         </div>
 
         <p className="unsaved-body" id="unsaved-body">
+          <span className="unsaved-kind">{t(KIND_LABEL[kind])}</span>
           <strong className="unsaved-name">{name}</strong>
           {t("common.unsaved.body")}
         </p>

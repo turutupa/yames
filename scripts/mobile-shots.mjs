@@ -189,6 +189,18 @@ const SCREENS = [
   { id: "tab-drill", shot: "metronome", steps: [tap('.mobile-tab[data-tab="drill"]')] },
   { id: "tab-setlist", shot: "metronome", steps: [tap('.mobile-tab[data-tab="setlist"]')] },
   { id: "tab-settings", shot: "metronome", steps: [tap('.mobile-tab[data-tab="settings"]'), wait(".settings-section")] },
+  { id: "tab-jam", shot: "metronome", steps: [tap('.mobile-tab[data-tab="jam"]')] },
+
+  // ── the band (M08) ───────────────────────────────────────────
+  //
+  // Jam ships on a phone from M08 on, and it was drawn for a 1400px
+  // window. These three are the shots M09 works from: the playing screen,
+  // the band's own rows further down it, and the drawer you set the whole
+  // thing up in. Same scenarios the desktop store shots use, so the two
+  // can be put side by side.
+  { id: "jam", shot: "jam", settleMs: 600 },
+  { id: "jam-band", shot: "jam-band", settleMs: 600 },
+  { id: "jam-setup", shot: "jam-setup", settleMs: 600 },
 
   // ── the library sheet ───────────────────────────────────────────────────
   { id: "library-presets", shot: "metronome", steps: [tap(".mobile-tab-library"), wait(".sheet--library")] },

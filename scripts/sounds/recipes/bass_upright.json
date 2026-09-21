@@ -1,0 +1,76 @@
+{
+  "id": "bass_upright",
+  "name": "Upright bass",
+  "credit": "Meatbass — Karoryfer Samples",
+  "licence": "CC0-1.0",
+
+  "_what": [
+    "A double bass, pizzicato. The `arco` articulations are a bowed",
+    "instrument and a different voice; `perc` is the body being hit and is",
+    "not a note at all.",
+    "",
+    "This library names its samples at the pitch they SOUND — `a0` is 28 Hz",
+    "— so unlike Black And Blue there is no octave correction. The tool",
+    "measures every note it writes either way.",
+    "",
+    "The key and the velocity live on the `<group>` here and only `sample=`",
+    "is on the region, which is why render_voice parses SFZ headers properly",
+    "rather than scanning for regions."
+  ],
+
+  "source": {
+    "format": "sfz",
+    "root": "${YAMES_SAMPLES}/karoryfer/Meatbass",
+    "sample_base": "Programs",
+    "key_offset": 0,
+    "dynamic_from": "filename_vl",
+    "rr_from": "filename_rr",
+    "maps": [
+      { "dynamic": "pizz", "path": "Programs/pizz_basic_map.sfz" }
+    ]
+  },
+
+  "range": [28, 55],
+
+  "_notes": [
+    "This is the one bank whose grid is the LIBRARY'S and not this tool's.",
+    "Meatbass samples every third semitone — A0, C1, Eb1, Gb1 and up — so",
+    "the five-semitone spacing the electric basses use is not available: the",
+    "choice is every 3 (ten notes in range, 11.3 MB, past what this voice is",
+    "allowed) or every 6.",
+    "",
+    "F#1, A1 and C2 at the library's own three-semitone spacing, then every",
+    "six up to F#3. That keeps the whole bottom octave, where a bass line",
+    "actually walks, within a semitone of a sample, and spends the worst",
+    "stretch of three on Eb2, A2 and Eb3 higher up. Three semitones is the",
+    "engine's limit rather than a comfortable number, and this is the voice",
+    "that sits on it."
+  ],
+  "notes": [30, 33, 36, 42, 48, 54],
+
+  "layers": 3,
+  "rr": 2,
+  "layer_step_db": 5.5,
+
+  "rate": 48000,
+  "cap_s": 2.0,
+
+  "_release": [
+    "Not the source's literal number. Meatbass declares `ampeg_release=0.001`",
+    "with `ampeg_sustain=0`, which is a library saying 'the sample IS the",
+    "decay, there is no release stage' — the decay is on CC102 and the",
+    "player lets the note ring. One millisecond in our engine is not that,",
+    "it is a step to zero on every note, which is a click on every note. So",
+    "this bank takes the contract's default of 60 ms, which is a hand landing",
+    "on a string, and the sample carries the ring as the library intended."
+  ],
+  "release_ms": 60,
+
+  "level_ref": "upright",
+
+  "dc_block_hz": 20.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 3009
+}

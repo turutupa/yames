@@ -862,3 +862,73 @@ export async function cancelModelDownload(): Promise<void> {
 export function onPlaybackFinished(callback: () => void) {
   return listen<void>("playback-finished", () => callback());
 }
+
+// ---------------------------------------------------------------------------
+// Takes, and a kit of your own samples (plans/JAM_MODE.md §4.4, §8).
+//
+// The band plays on a phone; these two do not. A take is your playing mixed
+// with the band, and the mic it records you through is the one the phone
+// build does not have. A custom kit is a folder on a disk, chosen through a
+// native folder dialog a phone does not draw. Both sit here so the mobile
+// bundle cannot reach them — see the header of this file.
+// ---------------------------------------------------------------------------
+
+import type { JamTake } from "./jam/types";
+
+/** Start recording; the engine mixes the mic and the band into one WAV. */
+export async function startTake(jamId: string): Promise<void> {
+  return invoke("start_take", { jamId });
+}
+
+/** Stop and keep the take, or `null` when nothing was recording. */
+export async function stopTake(): Promise<JamTake | null> {
+  return invoke("stop_take");
+}
+
+export async function listTakes(jamId: string): Promise<JamTake[]> {
+  return invoke("list_takes", { jamId });
+}
+
+export async function deleteTake(id: string): Promise<void> {
+  return invoke("delete_take", { id });
+}
+
+/** Play a take through the engine; the band is silent while it plays. */
+export async function playTake(id: string): Promise<void> {
+  return invoke("play_take", { id });
+}
+
+export async function stopTakePlayback(): Promise<void> {
+  return invoke("stop_take_playback");
+}
+
+export function onTakePlaybackEnded(callback: () => void) {
+  return listen<null>("take-playback-ended", () => callback());
+}
+
+/**
+ * A take ran into the twenty-minute cap and finished itself; the engine has
+ * already kept it and written its record. Fires once per capped take.
+ */
+export function onTakeCapped(callback: () => void) {
+  return listen<null>("take-capped", () => callback());
+}
+
+/** Bytes the takes directory holds, across every jam. A fact about the disk, not about a take. */
+export async function takesDirSize(): Promise<number> {
+  return invoke("takes_dir_size");
+}
+
+/**
+ * Ask the user for a folder of drum samples (a native folder dialog). Resolves
+ * to the folder path, or null when they cancel. The folder is read on this
+ * machine and never copied or uploaded.
+ */
+export async function pickKitFolder(): Promise<string | null> {
+  return invoke("pick_kit_folder");
+}
+
+/** What a kit folder holds: which of the eight voices were found as WAV. */
+export async function inspectKitFolder(dir: string): Promise<{ voices: string[]; missing: string[] }> {
+  return invoke("inspect_kit_folder", { dir });
+}

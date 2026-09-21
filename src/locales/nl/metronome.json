@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} kliks/maat",
     "addBeat": "Beat toevoegen",
     "removeBeat": "Beat verwijderen",
+    "prevMeter": "Vorige maatsoort",
+    "nextMeter": "Volgende maatsoort",
     "grouping": "groepering",
     "tempo": "Tempo",
     "tempoUp": "Tempo omhoog",
@@ -41,10 +43,13 @@
   },
   "sound": {
     "click": "Klik",
+    "sticks": "Stokken",
     "wood": "Hout",
     "beep": "Piep",
     "drum": "Drum",
-    "snare": "Snare"
+    "kit": "Drumstel",
+    "snare": "Snare",
+    "cowbell": "Koebel"
   },
   "driftMeter": {
     "early": "Te vroeg",

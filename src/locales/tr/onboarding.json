@@ -155,6 +155,15 @@
       "midiPlugged": {
         "body": "Bir MIDI cihazı bağlı ama hiçbir eşleme yok. Bir pedalı Oynat/Durdur'a bağlayalım mı?",
         "action": "Kısayolları aç"
+      },
+      "jamSheets": {
+        "body": "Kurulum grubu değiştirir; Akorlar senin kopya kâğıdın."
+      },
+      "jamLive": {
+        "body": "Buradaki her şey bir sonraki ölçüde devreye girer."
+      },
+      "jamArrangement": {
+        "body": "Grup kendi kendine yükselir ve kırılır — Kurulum'daki Döngü bunu kapatır."
       }
     },
     "tour": {

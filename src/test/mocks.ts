@@ -107,6 +107,9 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   // Audio output
   list_audio_output_devices: () => [],
   set_audio_output_device: () => undefined,
+  // The backend answers with the pair actually in effect; the mock takes
+  // the app at its word, which is what a device wide enough would do.
+  set_audio_output_pair: (args) => (args?.pair as number) ?? 0,
 
   // Audio input / evaluation
   list_audio_input_devices: () => [],

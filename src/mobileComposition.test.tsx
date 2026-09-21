@@ -84,7 +84,7 @@ describe("MainWindow on a phone", () => {
       [...tabs.querySelectorAll(".mobile-tab[data-tab] .mobile-tab-label")].map(
         (el) => el.textContent,
       ),
-    ).toEqual(["Metronome", "Drill", "Setlist", "Settings"]);
+    ).toEqual(["Metronome", "Drill", "Setlist", "Jam", "Settings"]);
 
     // Zen ships on a phone (plan §1) and the rail was its only door.
     expect(container.querySelector(".mobile-tab-zen")).not.toBeNull();

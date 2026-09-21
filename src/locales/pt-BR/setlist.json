@@ -4,6 +4,8 @@
     "untitled": "Novo setlist",
     "newSetlist": "Novo setlist",
     "deleteSetlist": "Excluir setlist",
+    "duplicateSetlist": "Duplicar setlist",
+    "copyName": "{{name}} cópia",
     "librarySteps": "{{count}} passos",
     "librarySteps_one": "{{count}} passo",
     "librarySteps_other": "{{count}} passos",
@@ -22,6 +24,14 @@
     "moveLater": "Mover este passo para depois",
     "duplicateStep": "Duplicar este passo",
     "removeStep": "Remover este passo",
+    "reorderHint": "Arraste para reordenar",
+    "stopToReorder": "Pare o setlist para reordenar",
+    "duplicateSteps": "Duplicar {{count}} passos",
+    "duplicateSteps_one": "Duplicar {{count}} passo",
+    "duplicateSteps_other": "Duplicar {{count}} passos",
+    "removeSteps": "Remover {{count}} passos",
+    "removeSteps_one": "Remover {{count}} passo",
+    "removeSteps_other": "Remover {{count}} passos",
     "barOf": "compasso {{current}} de {{total}}",
     "timeLeft": "faltam {{duration}}",
     "waitingForYou": "esperando você",
@@ -120,14 +130,18 @@
       "backToPlaying": "Voltar a tocar"
     },
     "countIn": {
-      "label": "Contagem",
-      "off": "Sem contagem",
-      "startingIn": "começa em",
-      "beats": "{{count}} tempos",
-      "beats_one": "{{count}} tempo",
-      "beats_other": "{{count}} tempos",
-      "fewer": "Menos tempos de contagem",
-      "more": "Mais tempos de contagem"
+      "startingIn": "começa em"
+    },
+    "jam": {
+      "mark": "Este passo é um jam",
+      "addStep": "Adicionar um jam",
+      "addTo": "Adicionar ao setlist…",
+      "barsOfForm": "{{count}} compassos",
+      "barsOfForm_one": "{{count}} compasso",
+      "barsOfForm_other": "{{count}} compassos",
+      "said": "a banda",
+      "goneShort": "O jam não existe mais",
+      "gone": "Esse jam não está mais na biblioteca, então este passo toca o clique que descreve."
     }
   }
 }

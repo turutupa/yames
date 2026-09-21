@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} tiếng/ô nhịp",
     "addBeat": "Thêm phách",
     "removeBeat": "Bớt phách",
+    "prevMeter": "Nhịp trước",
+    "nextMeter": "Nhịp tiếp theo",
     "grouping": "nhóm nhịp",
     "tempo": "Nhịp độ",
     "tempoUp": "Tăng nhịp độ",
@@ -41,10 +43,13 @@
   },
   "sound": {
     "click": "Tích tắc",
+    "sticks": "Dùi trống",
     "wood": "Gỗ",
     "beep": "Bíp",
     "drum": "Trống",
-    "snare": "Trống snare"
+    "kit": "Bộ trống",
+    "snare": "Trống snare",
+    "cowbell": "Chuông bò"
   },
   "driftMeter": {
     "early": "Sớm",

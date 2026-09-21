@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Click presets — three strokes</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1c1f25; --line: #2a2f38; --ink: #e8eaee;
+    --dim: #9aa2ae; --hot: #ff7043; --mid: #f2b45c; --ok: #6fcf97;
+    --accent: #7aa2f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 24px 60px; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.09em;
+       color: var(--dim); margin: 30px 0 10px; font-weight: 600; }
+  p.sub { color: var(--dim); margin: 0 0 22px; max-width: 68ch; }
+  .card { background: var(--panel); border: 1px solid var(--line);
+          border-radius: 10px; padding: 16px 18px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-weight: 600; color: var(--ink); background: #262b33;
+    border: 1px solid var(--line); border-radius: 7px; padding: 9px 15px;
+    cursor: pointer; transition: background .12s, border-color .12s;
+  }
+  button:hover:not(:disabled) { background: #2f3540; border-color: #3d4450; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.big { padding: 11px 20px; }
+  button.meter.on { background: var(--accent); border-color: var(--accent); color: #16181c; }
+  button.stroke { font-weight: 500; padding: 7px 12px; font-size: 14px; min-width: 104px; }
+  button.stroke.s { border-color: var(--hot); }
+  button.stroke.m { border-color: var(--mid); }
+  label { color: var(--dim); font-size: 14px; display: inline-flex;
+          align-items: center; gap: 8px; }
+  input[type=range] { accent-color: var(--hot); width: 170px; vertical-align: middle; }
+  .bpm { font-variant-numeric: tabular-nums; color: var(--ink); min-width: 4ch;
+         display: inline-block; font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 6px; }
+  th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line);
+           vertical-align: middle; }
+  th { color: var(--dim); font-weight: 600; font-size: 12px;
+       text-transform: uppercase; letter-spacing: 0.06em; }
+  td.name { font-weight: 600; width: 92px; }
+  td.why { color: var(--dim); font-size: 13px; }
+  code { background: #262b33; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .warn { background: #3a2118; border: 1px solid #7a3b22; color: #ffc9a8;
+          border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .hint { color: var(--dim); font-size: 13.5px; margin: 8px 0 0; max-width: 72ch; }
+  .status { color: var(--dim); font-size: 13.5px; min-height: 1.4em; }
+  .dots { display: flex; gap: 6px; margin: 16px 0 2px; }
+  .dot { width: 22px; height: 22px; border-radius: 50%; background: #262b33;
+         border: 2px solid #323841; transition: background .06s, border-color .06s; }
+  .dot.g1 { border-color: #4a5260; }
+  .dot.lit { background: #3d4450; }
+  .dot.s.lit { background: var(--hot); border-color: var(--hot); }
+  .dot.m.lit { background: var(--mid); border-color: var(--mid); }
+  .credit { color: var(--dim); font-size: 13px; margin-top: 12px; max-width: 72ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Click presets — three strokes</h1>
+<p class="sub">
+  Every preset ships a downbeat, a middle and a plain beat. This plays them on
+  their own, and plays the bar they were built for, with the gains the engine
+  uses and nothing else — no reverb, no humanising, no subdivision ticks.
+</p>
+
+<div id="fileWarn" class="warn" hidden>
+  <strong>This page needs a local server.</strong> Opened straight off disk, the
+  browser refuses to read the WAVs. From the repository root run
+  <code>python -m http.server 8123</code> and then open
+  <code>http://localhost:8123/scripts/sounds/ab_click.html</code>.
+</div>
+
+<h2>The bar</h2>
+<div class="card">
+  <div class="row" id="meters"></div>
+  <div class="dots" id="dots"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="big" id="play">Loop the bar</button>
+    <button class="big" id="once">One bar, once</button>
+    <button class="big" id="round">Round robin — every preset</button>
+    <label style="margin-left:6px">
+      Tempo <input type="range" id="bpm" min="50" max="220" value="120" step="1">
+      <span class="bpm" id="bpmOut">120</span>
+    </label>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <label>Preset <span class="bpm" id="whichOut">click</span></label>
+    <span class="status" id="status"></span>
+  </div>
+  <p class="hint">
+    The orange dot is the downbeat at 1.0, the amber one is the middle at
+    <code>MEDIUM_GAIN</code>, the grey ones are the plain beat at
+    <code>BEAT_GAIN</code>. 4/4 is here on purpose and has no amber dot: it is
+    one group, so there is nothing in the middle of it to mark. Pick a preset
+    from the table below while it is looping and it swaps at the top of the
+    next bar.
+  </p>
+</div>
+
+<h2>The three strokes, one at a time</h2>
+<div class="card">
+  <table id="table">
+    <thead>
+      <tr><th>Preset</th><th>Downbeat</th><th>Middle</th><th>Plain beat</th>
+          <th>What the middle is</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p class="hint">
+    Each button plays that file at the gain the engine gives it, so the
+    downbeat and the middle are both at 1.0 and the difference you hear is the
+    difference in the files. The plain beat plays at 0.65, which is what it
+    plays at in a bar.
+  </p>
+  <p class="credit" id="credit">
+    Recorded strokes from Virtuosity Drums (Versilian Studios / Karoryfer, CC0)
+    and DRSKit via the Studio kit (DrumGizmo, CC BY 4.0); click, beep and drum
+    are synthesised. <code>scripts/sounds/render_click.py</code> and
+    <code>scripts/sounds/rebuild.py</code> cut all of them.
+  </p>
+</div>
+
+</div>
+
+<script>
+// The engine's own numbers. If these drift from `engine.rs` this page lies
+// about what the app plays, which is the only thing it is for.
+const BEAT_GAIN = 0.65;
+const MEDIUM_GAIN = 1.0;
+const DIR = "../../src-tauri/sounds/";
+
+// `SoundKit::ALL`, in the order the menu offers them.
+const KITS = [
+  ["click",   "980 Hz between 1200 and 800, damped faster"],
+  ["sticks",  "the same stick-shot at vl3, less arm behind it"],
+  ["wood",    "the same small block at vl3, at 0.814"],
+  ["beep",    "760 Hz between 880 and 660, damped faster"],
+  ["drum",    "the kick and the body — the cymbal taken off"],
+  ["kit",     "the backbeat with no kick under it, at 0.760"],
+  ["snare",   "the same drum at layer 2"],
+  ["cowbell", "the bell's middle dynamic, 2.1 dB down"],
+];
+
+// `[3, 3]` is 6/8, `[4]` is 4/4, `[3, 2, 2]` is 7/8 — the meters exactly as
+// `engine.rs` stores them, so the accents fall where `accent_for` puts them.
+const METERS = [
+  ["6/8 — 3+3", [3, 3]],
+  ["4/4", [4]],
+  ["7/8 — 3+2+2", [3, 2, 2]],
+];
+
+let ctx = null;
+const audio = () => (ctx = ctx || new (window.AudioContext || window.webkitAudioContext)());
+const buffers = {};            // "click_high" -> AudioBuffer
+let kit = "click";
+let meter = METERS[0][1];
+let bpm = 120;
+let looping = false;
+let timer = null;
+let roundRobin = null;
+
+if (location.protocol === "file:") document.getElementById("fileWarn").hidden = false;
+
+const say = (t) => { document.getElementById("status").textContent = t || ""; };
+
+async function load(name) {
+  if (buffers[name]) return buffers[name];
+  const r = await fetch(DIR + name + ".wav");
+  if (!r.ok) throw new Error(name + " is not there (" + r.status + ")");
+  const bytes = await r.arrayBuffer();
+  buffers[name] = await audio().decodeAudioData(bytes);
+  return buffers[name];
+}
+
+/** `SoundBank::new`'s two premixes, spelled the way that function spells them.
+ *  Drum's accent and middle are not files: they are mixed when the bank is
+ *  built, out of four layers that ship separately. */
+async function drumPremix(which) {
+  const key = "drum_" + which;
+  if (buffers[key]) return buffers[key];
+  const [high, metal, crash, body] = await Promise.all(
+    ["drum_high", "drum_metal", "drum_crash", "drum_body"].map(load));
+  const parts = which === "mid"
+    ? [[high, 0.70], [body, 1.0]]
+    : [[high, 0.70], [metal, 0.70], [crash, 0.45], [body, 1.0]];
+  const n = Math.max(...parts.map(([b]) => b.length));
+  const out = audio().createBuffer(1, n, audio().sampleRate);
+  const y = out.getChannelData(0);
+  for (const [b, g] of parts) {
+    const src = b.getChannelData(0);
+    for (let i = 0; i < src.length; i++) y[i] += src[i] * g;
+  }
+  const sh = Math.tanh(1.0);
+  let peak = 0;
+  for (let i = 0; i < n; i++) { y[i] = Math.tanh(y[i]) / sh; peak = Math.max(peak, Math.abs(y[i])); }
+  // The accent is held down only if it is over its ceiling; the middle lands
+  // on 0.930 exactly, like the seven files that are files.
+  const ceil = which === "mid" ? 0.93 : 0.97;
+  if (which === "mid" || peak > ceil) {
+    const g = ceil / peak;
+    for (let i = 0; i < n; i++) y[i] *= g;
+  }
+  buffers[key] = out;
+  return out;
+}
+
+const stroke = (k, tier) =>
+  k === "drum"
+    ? (tier === "low" ? load("drum_low") : drumPremix(tier === "high" ? "accent" : "mid"))
+    : load(k + "_" + tier);
+
+/** EVERYTHING IS DECODED BEFORE ANYTHING IS SCHEDULED, and that is not a
+ *  nicety. `fire` used to await the fetch and the decode and only then call
+ *  `start(at)`; a time already in the past starts immediately, so the first
+ *  bar after a cold load came out as a flam — on a page whose whole job is to
+ *  tell you whether a bar flams. Twenty-four buffers, about 400 kB. */
+let ready = null;
+function preload() {
+  if (!ready) {
+    audio();
+    ready = Promise.all(
+      KITS.flatMap(([k]) => ["high", "mid", "low"].map((t) => stroke(k, t)))
+    );
+  }
+  return ready;
+}
+
+/** Schedules only. Everything it can play is already in `buffers`; `preload`
+ *  is awaited by the callers before any time is computed. */
+function fire(k, tier, gain, at) {
+  const buf = buffers[k === "drum" ? (tier === "low" ? "drum_low"
+    : tier === "high" ? "drum_accent" : "drum_mid") : k + "_" + tier];
+  if (!buf) return;
+  const src = audio().createBufferSource();
+  const amp = audio().createGain();
+  src.buffer = buf;
+  amp.gain.value = gain;
+  src.connect(amp).connect(audio().destination);
+  src.start(at === undefined ? audio().currentTime : at);
+}
+
+/** Which tier each beat of this meter gets — `accent_for` with AccentMode
+ *  Groups: the first group start is Strong, every later one is Medium. */
+function tiers(groups) {
+  const out = [];
+  let first = true;
+  for (const g of groups) {
+    for (let i = 0; i < g; i++) out.push(i === 0 ? (first ? "s" : "m") : "b");
+    first = false;
+  }
+  return out;
+}
+
+function drawDots(lit) {
+  const t = tiers(meter);
+  const box = document.getElementById("dots");
+  box.innerHTML = "";
+  t.forEach((tier, i) => {
+    const d = document.createElement("div");
+    d.className = "dot " + (tier === "s" ? "s" : tier === "m" ? "m" : "") +
+      (i === lit ? " lit" : "");
+    box.appendChild(d);
+  });
+}
+
+function playBar(k, startAt) {
+  const t = tiers(meter);
+  const step = 60 / bpm;
+  for (let i = 0; i < t.length; i++) {
+    const at = startAt + i * step;
+    if (t[i] === "s") fire(k, "high", 1.0, at);
+    else if (t[i] === "m") fire(k, "mid", MEDIUM_GAIN, at);
+    else fire(k, "low", BEAT_GAIN, at);
+    setTimeout(() => drawDots(i), Math.max(0, (at - audio().currentTime) * 1000));
+  }
+  return t.length * step;
+}
+
+function loop() {
+  if (!looping) return;
+  if (roundRobin !== null) {
+    kit = KITS[roundRobin % KITS.length][0];
+    document.getElementById("whichOut").textContent = kit;
+    roundRobin++;
+  }
+  const len = playBar(kit, audio().currentTime + 0.08);
+  timer = setTimeout(loop, len * 1000);
+}
+
+function stop() {
+  looping = false;
+  roundRobin = null;
+  clearTimeout(timer);
+  document.getElementById("play").textContent = "Loop the bar";
+  say("");
+  drawDots(-1);
+}
+
+async function armed(fn) {
+  say("loading the presets…");
+  try {
+    await preload();
+    say("");
+  } catch (e) {
+    say(String(e));
+    return;
+  }
+  fn();
+}
+
+document.getElementById("play").onclick = () => {
+  if (looping) return stop();
+  armed(() => {
+    looping = true;
+    document.getElementById("play").textContent = "Stop";
+    loop();
+  });
+};
+document.getElementById("once").onclick = () => {
+  stop();
+  armed(() => playBar(kit, audio().currentTime + 0.05));
+};
+document.getElementById("round").onclick = () => {
+  stop();
+  armed(() => {
+    looping = true;
+    roundRobin = 0;
+    document.getElementById("play").textContent = "Stop";
+    say("one bar each, in menu order");
+    loop();
+  });
+};
+document.getElementById("bpm").oninput = (e) => {
+  bpm = +e.target.value;
+  document.getElementById("bpmOut").textContent = bpm;
+};
+
+const mbox = document.getElementById("meters");
+METERS.forEach(([label, groups], i) => {
+  const b = document.createElement("button");
+  b.className = "meter" + (i === 0 ? " on" : "");
+  b.textContent = label;
+  b.onclick = () => {
+    meter = groups;
+    [...mbox.children].forEach((c) => c.classList.remove("on"));
+    b.classList.add("on");
+    drawDots(-1);
+  };
+  mbox.appendChild(b);
+});
+
+const rows = document.getElementById("rows");
+KITS.forEach(([k, why]) => {
+  const tr = document.createElement("tr");
+  const name = document.createElement("td");
+  name.className = "name";
+  name.textContent = k;
+  name.style.cursor = "pointer";
+  name.title = "play the bar with this preset";
+  name.onclick = () => {
+    kit = k;
+    document.getElementById("whichOut").textContent = k;
+    if (!looping) document.getElementById("once").click();
+  };
+  tr.appendChild(name);
+  [["high", "downbeat", 1.0, "s"], ["mid", "middle", MEDIUM_GAIN, "m"],
+   ["low", "plain beat", BEAT_GAIN, ""]].forEach(([tier, label, gain, cls]) => {
+    const td = document.createElement("td");
+    const b = document.createElement("button");
+    b.className = "stroke " + cls;
+    b.textContent = label;
+    b.onclick = () => armed(() => fire(k, tier, gain));
+    td.appendChild(b);
+    tr.appendChild(td);
+  });
+  const w = document.createElement("td");
+  w.className = "why";
+  w.textContent = why;
+  tr.appendChild(w);
+  rows.appendChild(tr);
+});
+
+drawDots(-1);
+</script>
+</body>
+</html>
