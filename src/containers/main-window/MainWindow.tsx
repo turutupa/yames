@@ -440,7 +440,7 @@ export function MainWindow() {
    * otherwise the Metronome tab would go on clicking through a score nobody
    * is looking at. Inert with no song open, like the jam above it.
    */
-  const songsSession = useSongsSession(undefined, { view });
+  const songsSession = useSongsSession(undefined, { view, isPlaying: state.isPlaying });
 
   /**
    * "Open with Yames" on a Guitar Pro or MusicXML file (`SONGS.md` S0.9).

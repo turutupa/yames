@@ -2890,6 +2890,19 @@ pub struct SongHandoff {
     mix: Mutex<crate::song::SongMixGains>,
     mix_generation: AtomicU64,
     retired: Mutex<Vec<Arc<crate::song::SongTable>>>,
+    /// Where the player just clicked, as `sample + 1` into the pass, or 0 for
+    /// "nowhere". One `u64`, written by the command thread and taken by the
+    /// callback with a swap.
+    ///
+    /// **`+ 1` so that zero can mean nothing**, which matters because a seek
+    /// to the top of the range is the commonest one there is — pressing Home,
+    /// or clicking bar one — and a sentinel that collided with it would make
+    /// exactly that gesture the one that does not work.
+    ///
+    /// Two seeks between two buffers is one swap after another, and the
+    /// callback reads the last: a player dragging across the tab gets where
+    /// they let go, not a stutter through everywhere they passed.
+    seek: AtomicU64,
 }
 
 /// How many replaced songs the command thread can be behind on. A song is
@@ -2905,6 +2918,27 @@ impl SongHandoff {
             mix: Mutex::new(crate::song::SongMixGains::default()),
             mix_generation: AtomicU64::new(0),
             retired: Mutex::new(Vec::with_capacity(SONG_RETIRED_CAP)),
+            seek: AtomicU64::new(0),
+        }
+    }
+
+    /// Move the playhead inside the piece the engine is already holding.
+    ///
+    /// **Not a recompile.** `set_song_range` builds a new table and starts it
+    /// from the top, which is the right answer for a new range and the wrong
+    /// one for a click on bar 34 of the one that is playing: it would stop
+    /// the pass, and stopping a pass ends the attempt and raises the review
+    /// (`COACH_UX.md` A3). This moves a cursor and nothing else.
+    pub fn seek(&self, sample: u64) {
+        self.seek.store(sample.saturating_add(1), Ordering::Release);
+    }
+
+    /// The callback's half: take the seek, if there is one.
+    #[inline]
+    fn take_seek(&self) -> Option<u64> {
+        match self.seek.swap(0, Ordering::Acquire) {
+            0 => None,
+            n => Some(n - 1),
         }
     }
 
@@ -5153,6 +5187,17 @@ impl MetronomeEngine {
     /// Move the song's faders. Applied on the next buffer; nothing is
     /// recompiled and nothing waits for a bar line, because a level is not a
     /// musical event.
+    /// Go to a place in the song that is playing, without stopping it.
+    pub fn seek_song(&self, sample: u64) {
+        self.song.seek(sample);
+    }
+
+    /// The song the engine is holding, for a command that has to read the
+    /// piece rather than change it. Command thread only.
+    pub fn song_table(&self) -> Option<Arc<crate::song::SongTable>> {
+        self.song.table()
+    }
+
     pub fn set_song_mix(&self, mix: crate::song::SongMixGains) {
         self.song.set_mix(mix);
         // And the half of the band a thread of its own is making. The
@@ -6563,6 +6608,58 @@ impl MetronomeEngine {
                     // the same rule: once it has, no further event of this
                     // buffer sounds.
                     let mut song_ended_here = false;
+
+                    // ---- WHERE THE PLAYER JUST CLICKED ----
+                    //
+                    // Taken once per buffer, at the top, and BEFORE the
+                    // synthesiser is asked what it has ready — so the whole
+                    // of a seek is one instant as far as the rest of this
+                    // callback is concerned, and a buffer is never half in
+                    // one place and half in another.
+                    //
+                    // One swap, a binary search over a table that is already
+                    // in cache, and a walk over the voices that are already
+                    // sounding. No allocation, no free, no lock, and nothing
+                    // that depends on how far the seek went.
+                    if song_active && !song_ended_here {
+                        if let Some(target) = song_shared.take_seek() {
+                            if let Some(song) = cached.song.as_deref() {
+                                // Clamped, because a seek posted against the
+                                // table before this one would otherwise put
+                                // the cursor past the end of this one. A
+                                // human cannot produce that race; a command
+                                // and a recompile arriving together can.
+                                let to = song.seek(target, song_pass);
+                                song_pos = to.sample;
+                                song_tick_at = to.tick_at;
+                                song_band_at = to.band_at;
+                                song_play = to.play;
+                                // A count-in leads into the FIRST pass, and a
+                                // seek is not that pass beginning — so a
+                                // click during the count-in lands in the
+                                // piece rather than counting again.
+                                song_counting_in = false;
+                                song_count_in_at = song.count_in().len();
+                                // Everything the band was sounding is cut,
+                                // over the same few milliseconds a choked hi
+                                // hat takes: a note left ringing through a
+                                // jump is a note from somewhere the player
+                                // is no longer, and cutting it dead would be
+                                // a click.
+                                for v in voices.iter_mut() {
+                                    if v.band && v.fade_len == 0 {
+                                        v.fade_len = choke_frames.max(1);
+                                        v.fade_left = v.fade_len;
+                                    }
+                                }
+                                // And the synthesiser's queue, which is a
+                                // tenth of a second of somewhere else.
+                                if let Some(ring) = song.synth() {
+                                    ring.invalidate();
+                                }
+                            }
+                        }
+                    }
 
                     // ---- WHAT THE SYNTHESISER HAS READY ----
                     //
@@ -11889,6 +11986,35 @@ mod tests {
             pos += 1;
         }
         out
+    }
+
+    /// Two seeks between two buffers is one seek, and it is the last one.
+    ///
+    /// A player dragging a finger across the tab posts a seek per bar it
+    /// crosses. What they want is where they let go; what a queue would give
+    /// them is a stutter through everywhere they passed, at a buffer each.
+    /// One slot and a swap is the whole mechanism, and this is the whole of
+    /// what it promises.
+    #[test]
+    fn two_seeks_between_two_buffers_are_the_last_one() {
+        let handoff = SongHandoff::new();
+        assert_eq!(handoff.take_seek(), None, "a transport nobody clicked");
+
+        handoff.seek(96_000);
+        handoff.seek(4_800);
+        handoff.seek(192_000);
+        assert_eq!(handoff.take_seek(), Some(192_000), "an earlier click won");
+        assert_eq!(
+            handoff.take_seek(),
+            None,
+            "the same seek was taken twice, so the cursor jumped back next buffer",
+        );
+
+        // And nought is a place, not a sentinel: seeking to the top of the
+        // range is the commonest seek there is.
+        handoff.seek(0);
+        assert_eq!(handoff.take_seek(), Some(0));
+        assert_eq!(handoff.take_seek(), None);
     }
 
     /// Eight bars of a two-guitar song, for the ear and for the meter.

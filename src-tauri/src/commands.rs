@@ -3936,6 +3936,49 @@ pub fn clear_song(
     *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
 }
 
+/// Go to a bar of the song that is playing, without stopping it.
+///
+/// **The owner's own words, after his first session with Songs: "when i click
+/// on the tab [it should be] just going to that place".** W29 made the click
+/// move the playhead; until this existed the playhead only decided where the
+/// NEXT pass would begin, because `set_song_range` recompiles and restarts
+/// and there was nothing else to call. Stopping and starting again is not an
+/// answer: stopping ends the attempt and raises the review (`COACH_UX.md`
+/// A3), so a click on bar 34 would have thrown away the pass you were in the
+/// middle of.
+///
+/// So this moves a cursor inside the table the engine is already holding.
+/// Nothing is recompiled, the click does not miss a beat, the take goes on
+/// recording into the same file, and the band is cut over a few milliseconds
+/// rather than left ringing from somewhere the player no longer is.
+///
+/// `played_bar` is an index into the transport's `bars`, which is what the
+/// tab's own cursor counts in. A bar outside the range being played is
+/// clamped into it: a click past the end of a portion means the end of the
+/// portion, not silence.
+#[tauri::command]
+pub fn seek_song(played_bar: u32, engine_state: State<EngineState>) -> Result<(), String> {
+    let engine = engine_state.0.lock().unwrap();
+    let Some(table) = engine.song_table() else {
+        return Err("there is no song loaded to seek in".to_string());
+    };
+    let bars = table.bars();
+    if bars.is_empty() {
+        return Err("the song has no bars in it".to_string());
+    }
+    // The bar's own first sample, out of the table the callback is walking —
+    // so the two cannot disagree about where bar 34 is, whatever the tempo
+    // map and the speed did to it.
+    let at = match bars.binary_search_by(|b| b.index.cmp(&played_bar)) {
+        Ok(i) => i,
+        // A bar the range does not hold: the nearest edge of it.
+        Err(0) => 0,
+        Err(i) => i.min(bars.len() - 1),
+    };
+    engine.seek_song(bars[at].start_sample);
+    Ok(())
+}
+
 /// Play the song's other parts out of a sound set of the player's own.
 ///
 /// Desktop only, and a `.sf2`: the shipped set is 1.3 MB and small sets have

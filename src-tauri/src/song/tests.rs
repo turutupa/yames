@@ -574,3 +574,170 @@ fn a_synth_track_gets_a_channel_of_its_own_and_never_the_percussion_one() {
     sorted.dedup();
     assert_eq!(sorted.len(), 12, "two parts share a fader: {claimed:?}");
 }
+
+
+// ─── Going to a place in the song that is playing ────────────────────────
+//
+// The owner, after his first session: "when i click on the tab [it should be]
+// just going to that place". W29 made the click move the playhead; this is
+// what makes it move while the piece is sounding, without stopping it — and
+// stopping it is not a smaller thing than it sounds, because stopping ends
+// the attempt and raises the review (`COACH_UX.md` A3).
+//
+// `SongTable::seek` is the whole of the arithmetic, so it is the whole of
+// what these ask about. What the callback adds to it is cutting the voices
+// that are ringing and bumping the synthesiser's ring, neither of which is a
+// number.
+
+/// A table to seek about in: the twelve-bar piece with a kit behind it.
+fn seekable(percent: u32, loops: bool) -> SongTable {
+    let mut t = twelve_bar();
+    t.tempo_percent = percent;
+    t.loops = loops;
+    if loops {
+        t.range = SongRange {
+            start_bar: 2,
+            end_bar: 5,
+        };
+    }
+    let mut notes = Vec::new();
+    for bar in t.bars.iter() {
+        let beat_ticks = TICKS_PER_QUARTER * 4 / bar.denominator;
+        for beat in 0..bar.numerator {
+            notes.push(SongNote {
+                tick: bar.start_tick + beat * beat_ticks,
+                dur_ticks: beat_ticks,
+                midi: if beat == 0 { 36 } else { 42 },
+                velocity: 0.9,
+            });
+        }
+    }
+    let backing = SongBacking {
+        tracks: vec![SongTrack {
+            role: SongRole::Drums,
+            name: "Drums".into(),
+            program: 0,
+            guide: false,
+            bends: Vec::new(),
+            notes,
+        }],
+    };
+    compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("the song compiles")
+}
+
+#[test]
+fn a_seek_forward_lands_on_the_bar_and_leaves_no_event_behind_it() {
+    let table = seekable(100, false);
+    let bars = table.bars();
+    let to = table.seek(bars[7].start_sample, 0);
+    assert_eq!(to.sample, bars[7].start_sample, "a bar line is where it says");
+    // Nothing before the target may sound again: the next click and the next
+    // drum are both at or after it.
+    assert!(table.ticks()[to.tick_at].sample >= to.sample);
+    assert!(table.band()[to.band_at].sample >= to.sample);
+    // And nothing at it is skipped — a click on bar 8 hears bar 8's downbeat.
+    assert_eq!(
+        table.ticks()[to.tick_at].sample,
+        to.sample,
+        "the bar's own click was stepped over",
+    );
+    assert_eq!(table.ticks()[to.tick_at].bar, bars[7].index);
+    assert_eq!(table.band()[to.band_at].sample, to.sample, "and its downbeat");
+}
+
+#[test]
+fn a_seek_backward_puts_the_cursors_back_rather_than_only_the_position() {
+    // The bug this is here to catch is a position that moves while the walks
+    // do not: the transport says bar 2 and the next click that sounds is bar
+    // 9's, because the cursor was never wound back.
+    let table = seekable(100, false);
+    let bars = table.bars();
+    let far = table.seek(bars[9].start_sample, 0);
+    let back = table.seek(bars[1].start_sample, 0);
+    assert!(back.tick_at < far.tick_at, "the click walk did not go back");
+    assert!(back.band_at < far.band_at, "the band's walk did not go back");
+    assert_eq!(table.ticks()[back.tick_at].bar, bars[1].index);
+}
+
+#[test]
+fn a_seek_exactly_on_a_bar_line_is_that_bar_and_not_the_one_before_it() {
+    // Every bar of the piece, by its own first sample. The off-by-one here
+    // would be silent and constant: every click on the tab landing a bar
+    // early, which reads as "the cursor is wrong" rather than as a seek bug.
+    let table = seekable(100, false);
+    for bar in table.bars() {
+        let to = table.seek(bar.start_sample, 0);
+        assert_eq!(to.sample, bar.start_sample);
+        assert_eq!(
+            table.ticks()[to.tick_at].bar,
+            bar.index,
+            "seeking to bar {} landed in bar {}",
+            bar.index,
+            table.ticks()[to.tick_at].bar,
+        );
+    }
+}
+
+#[test]
+fn a_seek_inside_a_looping_portion_keeps_the_piece_s_own_clock_going_forward() {
+    // The invariant the synthesiser's renderer reads: `play` counts every
+    // frame of the piece, seams included, so it must not fall back into an
+    // earlier pass when somebody clicks a bar on the third time round. The
+    // POSITION goes back; the clock does not.
+    let table = seekable(100, true);
+    assert!(table.loops());
+    let bars = table.bars();
+    let pass = table.pass_samples();
+    let on_the_third = table.seek(bars[1].start_sample, 2);
+    assert_eq!(on_the_third.sample, bars[1].start_sample);
+    assert_eq!(
+        on_the_third.play,
+        2 * pass + bars[1].start_sample,
+        "the clock the renderer reads slipped a pass",
+    );
+    // And the renderer's own modulo brings it back to the same place in the
+    // range, which is what keeps the two threads on one sample.
+    assert_eq!(on_the_third.play % pass, on_the_third.sample);
+    // A seek past the end of the portion is the end of the portion, not
+    // silence and not a cursor outside the table.
+    let past = table.seek(pass * 4, 0);
+    assert_eq!(past.sample, pass - 1);
+    assert!(past.tick_at <= table.ticks().len());
+    assert!(past.band_at <= table.band().len());
+}
+
+#[test]
+fn a_seek_at_half_speed_goes_to_the_same_bar_in_the_music() {
+    // Half speed doubles every sample position, so a seek that was computed
+    // in samples and not in bars would land in the middle of the piece. What
+    // is asserted is the BAR, which is what the player clicked on.
+    let full = seekable(100, false);
+    let half = seekable(50, false);
+    assert_eq!(half.pass_samples(), full.pass_samples() * 2);
+    for n in [0usize, 3, 4, 7, 11] {
+        let a = full.seek(full.bars()[n].start_sample, 0);
+        let b = half.seek(half.bars()[n].start_sample, 0);
+        assert_eq!(b.sample, a.sample * 2, "bar {n} is not twice as far in");
+        assert_eq!(
+            full.ticks()[a.tick_at].bar,
+            half.ticks()[b.tick_at].bar,
+            "bar {n} at 50 % landed somewhere else in the music",
+        );
+        // The same click of the same bar, not merely the same bar.
+        assert_eq!(full.ticks()[a.tick_at].beat, half.ticks()[b.tick_at].beat);
+    }
+}
+
+#[test]
+fn a_seek_to_the_very_top_is_a_seek_and_not_a_sentinel() {
+    // Bar one is the commonest seek there is — pressing Home, or clicking
+    // the first bar — and `SongHandoff` carries a seek as `sample + 1` so
+    // that a target of nought is still a target. This is that, from the
+    // table's side: it has to be an ordinary answer.
+    let table = seekable(100, false);
+    let to = table.seek(0, 0);
+    assert_eq!(to.sample, 0);
+    assert_eq!(to.tick_at, 0);
+    assert_eq!(to.band_at, 0);
+    assert_eq!(to.play, 0);
+}

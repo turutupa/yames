@@ -1095,19 +1095,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               />
 
               {/* The band never takes a row of its own again (W29 item 3),
-                  and W28 put a fader in here for every track in the file. It
-                  is handed the same stage it always was, so it goes on
-                  deciding for itself whether it has room for lanes or folds
-                  into its own chip; in here the lanes are stacked down the
-                  panel rather than laid across a row — one column, as many
-                  players as the file has (`songs.css`). */}
+                  and W28 put a fader in here for every track in the file —
+                  one column, as many players as the file has, and the panel
+                  is what scrolls. It does not fold again inside here: it is
+                  already one press away, and a popover in a popover is two
+                  presses to reach a fader. */}
               <SongBand
                 setting={session.mixSetting}
                 tracks={session.band}
                 onGain={session.setGain}
                 onMute={session.setMute}
                 onSolo={session.setSolo}
-                stageRef={stageRef}
               />
             </SongStripMore>
           </div>

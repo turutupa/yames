@@ -1131,6 +1131,21 @@ export async function setSongMix(mix: SongMix): Promise<void> {
 }
 
 /**
+ * Go to a bar of the song that is playing, without stopping it.
+ *
+ * `set_song_range` recompiles the piece and starts it again from the top,
+ * which is right for a new range and wrong for a click on bar 34 of the one
+ * that is sounding: it would end the pass, and ending a pass ends the attempt
+ * and raises the review (`COACH_UX.md` A3). This moves a cursor inside the
+ * table the engine already has. The click does not miss a beat, the take goes
+ * on recording, and the band is cut over a few milliseconds rather than left
+ * ringing from somewhere the player no longer is.
+ */
+export async function seekSong(playedBar: number): Promise<void> {
+  return invoke("seek_song", { playedBar });
+}
+
+/**
  * Play a song's other instruments out of a `.sf2` of the player's own.
  *
  * Desktop only; the phone build has no Songs. An empty path goes back to the

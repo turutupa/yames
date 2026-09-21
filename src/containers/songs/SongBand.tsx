@@ -18,6 +18,16 @@
  * dock both take from it), and the icon and the fader's own `aria-label` carry
  * the name for anyone who cannot see the picture.
  *
+ * ## It does not fold any more (W28, after W29)
+ *
+ * It used to fold into a chip of its own with the faders in a popover off it,
+ * because it was a row of the strip and a narrow stage had no room for one.
+ * W29 took the whole band off the strip and put it behind "More", so it is
+ * already one press away — and a popover inside a popover is two presses to
+ * reach a fader, and a second thing to place inside a window that is only
+ * 480 px wide. Both went. The lanes are a column inside the panel, and the
+ * panel is what scrolls when a file has a lot of parts.
+ *
  * ## One row per TRACK, and the part you are learning is one of them (W28)
  *
  * It used to be the click and Jam's three rows, because those were the only
@@ -36,11 +46,7 @@
  *   ever did. Below `FOLD_AT` it folds into one chip with the whole band in a
  *   popover, exactly as it did before.
  */
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { useMenuPlacement } from "../jam/useMenuPlacement";
-import { useStageIsNarrow } from "./useStageIsNarrow";
 import { SONG_MIX_MAX } from "../../songs/types";
 import { gainOf } from "../../songs/songEngine";
 import type { SongLane, SongMixSetting } from "../../songs/songEngine";
@@ -194,40 +200,10 @@ export interface SongBandProps {
   onGain: (lane: SongLane, value: number) => void;
   onMute: (lane: SongLane, muted: boolean) => void;
   onSolo: (track: number, soloed: boolean) => void;
-  /**
-   * The stage the faders have to fit on, so the band knows when to fold.
-   *
-   * The element and not a width: `useStageIsNarrow` measures it and keeps
-   * measuring it, because the coach dock can narrow this column without the
-   * window changing at all.
-   */
-  stageRef: { current: HTMLElement | null };
 }
 
-/**
- * Below this, one short row per player no longer fits beside anything else.
- *
- * Three lanes at their 104px floor is 320px of stage, which is all of it at
- * the smallest window the app opens — so the band would take a row of its own
- * and a caption above it, and the tab would be down to nothing. The same
- * number `songs.css` folds the head at, because it is the same question.
- */
-const FOLD_AT = 620;
-
-export function SongBand({
-  setting,
-  tracks,
-  onGain,
-  onMute,
-  onSolo,
-  stageRef,
-}: SongBandProps) {
+export function SongBand({ setting, tracks, onGain, onMute, onSolo }: SongBandProps) {
   const { t } = useTranslation();
-  const folded = useStageIsNarrow(stageRef, FOLD_AT);
-  const [open, setOpen] = useState(false);
-  // Upwards, like the takes shelf beside it and for the same reason: the
-  // strip is the last row above the transport.
-  const { wrapRef, menuRef, style } = useMenuPlacement(open && folded, { prefer: "above" });
 
   const muted = new Set(setting.muted);
   const soloed = new Set(setting.soloed);
@@ -250,34 +226,9 @@ export function SongBand({
         track: index,
       })),
   ];
-  /** How many players are turned down to nothing, for the folded chip. */
-  const off = rows.filter((row) => muted.has(row.lane)).length;
   const anySolo = soloed.size > 0;
 
-  // A stage that gets wider again must not leave a popover hanging over it.
-  useEffect(() => {
-    if (!folded) setOpen(false);
-  }, [folded]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const onDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (wrapRef.current?.contains(target) || menuRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onDown, true);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onDown, true);
-    };
-  }, [open, wrapRef, menuRef]);
-
-  const band = (
+  return (
     <div className="songs-band" role="group" aria-label={t("songs.band.label")}>
       {rows.map((row) => {
         const rowOff = muted.has(row.lane);
@@ -347,68 +298,4 @@ export function SongBand({
       })}
     </div>
   );
-
-  if (!folded) {
-    return (
-      <div className="songs-strip-group songs-strip-band">
-        <span className="songs-strip-label">{t("songs.band.label")}</span>
-        {band}
-      </div>
-    );
-  }
-
-  /*
-   * Folded: one chip, and the faders in a popover off it.
-   *
-   * Portalled rather than drawn under the chip, because the strip is the last
-   * row above the transport and a panel that grows downwards opens straight
-   * off the bottom of the window. The chip carries the state worth knowing
-   * without opening it — how many players are muted — so a player who turned
-   * the drums off does not have to open the shelf to be reminded.
-   *
-   * Only the first few icons are drawn on it: a ten-track file would
-   * otherwise put ten pictures on a chip that has to fit beside a transport.
-   */
-  return (
-    <div className="songs-strip-group songs-strip-band" ref={wrapRef}>
-      <span className="songs-strip-label">{t("songs.band.label")}</span>
-      <button
-        type="button"
-        className="songs-chip songs-band-opener"
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        onClick={() => setOpen((was) => !was)}
-      >
-        {rows.slice(0, MAX_CHIP_ICONS).map((row) => (
-          <span
-            className="songs-band-opener-icon"
-            key={String(row.lane)}
-            data-off={muted.has(row.lane) ? "" : undefined}
-          >
-            {row.icon}
-          </span>
-        ))}
-        {rows.length > MAX_CHIP_ICONS && (
-          <span className="songs-band-opener-more">+{rows.length - MAX_CHIP_ICONS}</span>
-        )}
-        {off > 0 && <span className="songs-band-opener-off">{off}</span>}
-      </button>
-      {open &&
-        createPortal(
-          <div
-            className="songs-band-pop"
-            role="dialog"
-            aria-label={t("songs.band.label")}
-            ref={menuRef}
-            style={style}
-          >
-            {band}
-          </div>,
-          document.body,
-        )}
-    </div>
-  );
 }
-
-/** How many pictures the folded chip carries before it says "and more". */
-const MAX_CHIP_ICONS = 4;

@@ -828,17 +828,17 @@ test.describe("the band", () => {
    *
    * They had a row of the strip to themselves, and the strip is one row.
    * Opening "More" is what a person does, and it is what these do: a control
-   * behind a press still has to be a control when it is reached. On a narrow
-   * stage the band folds again inside the panel, into its own chip — that is
-   * `SongBand`'s own rule and W28 owns it, so this only follows it.
+   * behind a press still has to be a control when it is reached.
+   *
+   * ONE press, at every width (W28). The band used to fold again inside the
+   * panel into a chip of its own, which was two presses to reach a fader and
+   * a second popover to place inside a 480 px window — and it was placed
+   * three pixels off the right edge of one, which is how this comment came
+   * to be written.
    */
   const openBand = async (page: import("@playwright/test").Page) => {
     await page.locator(".songs-more-chip").click();
     await expect(page.locator(".songs-more-pop")).toHaveCount(1);
-    if ((await page.locator(".songs-band-opener").count()) > 0) {
-      await page.locator(".songs-band-opener").click();
-      await expect(page.locator(".songs-band-pop")).toHaveCount(1);
-    }
     await expect(page.locator(".songs-band-lane").first()).toBeVisible();
   };
 

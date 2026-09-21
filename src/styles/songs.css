@@ -961,6 +961,13 @@
   align-items: stretch;
   gap: 8px;
   width: 100%;
+  /* W28 — a band is every track in the file now, and a file can have eight.
+     The panel keeps the height it had and the faders scroll inside it: what
+     may never happen is the panel growing off the bottom of a 780 px
+     window, which is the smallest the app opens at. */
+  max-height: min(46vh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .songs-more-pop .songs-band-lane {
@@ -1263,81 +1270,6 @@
   color: var(--text-primary);
   font-family: inherit;
   font-size: 12px;
-}
-
-/* ── The band, folded ─────────────────────────────────────────────────── */
-
-/* On a stage too narrow for a row of faders, the band is one chip: the
-   players' own icons, dimmed for anyone turned off, and a count if any are.
-   The faders themselves are in a popover off it (`SongBand.tsx`). */
-.songs-band-opener {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.songs-band-opener-icon {
-  display: inline-flex;
-  color: var(--text-secondary);
-}
-
-.songs-band-opener-icon[data-off] {
-  color: var(--text-faint);
-}
-
-/* "and four more", on the folded chip: a ten-track file must not put ten
-   pictures on a chip that has to fit beside a transport. */
-.songs-band-opener-more {
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-tertiary);
-}
-
-.songs-band-opener-off {
-  padding: 0 5px;
-  border-radius: var(--radius-sm);
-  background: var(--accent-subtle);
-  color: var(--accent);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.songs-band-pop {
-  position: fixed;
-  z-index: 70;
-  width: min(300px, calc(100vw - 24px));
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow);
-  overflow-y: auto;
-}
-
-/* Stacked in the popover: there is a column's worth of room in there and no
-   reason to squeeze three faders across it. */
-.songs-band-pop .songs-band {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-  /* In the popover there is a column's worth of room, so the strip's own
-     two-row cap does not apply — the popover is what scrolls. */
-  max-height: none;
-  overflow: visible;
-}
-
-.songs-band-pop .songs-band-lane {
-  flex: 0 0 auto;
-  max-width: none;
-}
-
-.songs-band-pop .songs-band-name {
-  flex: 0 0 74px;
-  max-width: none;
-}
-
-.songs-band-pop .songs-band-name-text {
-  display: inline;
 }
 
 /* ── The verdict, in the tab's place ──────────────────────────────────── */

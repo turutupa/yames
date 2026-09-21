@@ -166,7 +166,7 @@ use commands::{
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
     // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
-    clear_song, load_song, pick_sound_font, set_song_mix, set_song_range,
+    clear_song, load_song, pick_sound_font, seek_song, set_song_mix, set_song_range,
     set_song_sound_font,
     // W19 — the download is caught, and the file opens with Yames (S0.9).
     default_downloads_dir, dismiss_download_offer, read_offered_file, start_download_watch,
@@ -776,6 +776,7 @@ pub fn run() {
             load_song,
             clear_song,
             set_song_range,
+            seek_song,
             set_song_mix,
             set_song_sound_font,
             pick_sound_font,

@@ -1471,6 +1471,18 @@ fn main() -> ExitCode {
     //   dropout count has to stay at zero across.
     let song_hand = song_synth.as_ref().map(|(_, ring)| {
         let ring = Arc::clone(ring);
+        // The transport's own seek, which is the whole of the path the
+        // owner's click on the tab takes: `SongHandoff::seek` posts a sample,
+        // the callback takes it with a swap, moves three cursors, cuts every
+        // voice the sampled band has ringing and bumps the synthesiser's
+        // ring. Driven from a thread here for the reason `--jam-move` is:
+        // there is no command surface in a headless run.
+        let handoff = engine.song_handoff();
+        let seam = engine
+            .song_handoff()
+            .table()
+            .map(|t| t.pass_samples())
+            .unwrap_or(0);
         let stop = Arc::new(AtomicBool::new(false));
         let flag = stop.clone();
         let moves = Arc::new(AtomicU64::new(0));
@@ -1484,9 +1496,11 @@ fn main() -> ExitCode {
                 let gain = 0.2 + 0.8 * ((n % 8) as f32 / 8.0);
                 ring.set_gain(3, gain);
                 // And every three seconds, the cursor is dropped somewhere
-                // else in the piece.
-                if n % 12 == 11 {
-                    ring.invalidate();
+                // else in the piece — forwards and backwards by turns, so a
+                // seek that only ever went one way could not pass this.
+                if n % 12 == 11 && seam > 0 {
+                    let quarter = seam / 4;
+                    handoff.seek(quarter * ((n / 12) % 4 + 1).min(3));
                 }
                 n += 1;
                 count.fetch_add(1, Ordering::Relaxed);

@@ -659,6 +659,53 @@ impl SongTable {
     pub fn synth(&self) -> Option<&Arc<crate::synth::SynthRing>> {
         self.synth.as_ref()
     }
+
+    /// Where a seek puts every cursor.
+    ///
+    /// **The whole of a seek's arithmetic, in one pure function**, so the
+    /// callback's job is to copy four numbers out of it and cut what is
+    /// ringing — and so the things a seek has to get right can be asserted
+    /// without an audio device. Two binary searches over tables that are
+    /// already in cache; no allocation, no lock, and no dependence on how far
+    /// the seek went.
+    ///
+    /// `pass` is how many times round the range the transport has been, which
+    /// the piece's own clock is counted from — see [`SongSeek::play`].
+    pub fn seek(&self, target: u64, pass: u32) -> SongSeek {
+        // Clamped, because a seek posted against the table before this one
+        // would otherwise put the cursor past the end of this one. A human
+        // cannot produce that race; a command and a recompile arriving
+        // together can.
+        let sample = target.min(self.pass_samples.saturating_sub(1));
+        SongSeek {
+            sample,
+            // The first event AT OR AFTER the target. A click on a bar line
+            // hears that bar line's click and that bar's downbeat, which is
+            // the one case where "at or after" rather than "after" is the
+            // whole of what a player would call working.
+            tick_at: self.ticks.partition_point(|t| t.sample < sample),
+            band_at: self.band.partition_point(|e| e.sample < sample),
+            play: pass as u64 * self.pass_samples + sample,
+        }
+    }
+}
+
+/// Where a seek leaves the transport. See [`SongTable::seek`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SongSeek {
+    /// The new position in the pass, in frames.
+    pub sample: u64,
+    /// The new index into the table's clicks.
+    pub tick_at: usize,
+    /// And into the sampled band's notes.
+    pub band_at: usize,
+    /// The piece's own clock, which the synthesiser's renderer is told, and
+    /// which is NOT the position in the pass: it counts every frame of the
+    /// piece that has been played, seams included, so the two threads can
+    /// never disagree about which time round the range they are on. The
+    /// invariant the ordinary advance keeps — `play == pass * pass_samples +
+    /// sample` — is what a seek has to keep as well, and this is it.
+    pub play: u64,
 }
 
 // ---------------------------------------------------------------------------
