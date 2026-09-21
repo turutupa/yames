@@ -32,6 +32,17 @@ interface TransportProps {
    */
   countIn: boolean;
   onToggleCountIn: () => void;
+  /**
+   * Back to the start of what is playing, or absent where there is no such
+   * thing (W37 item 1).
+   *
+   * Songs is the mode that needs it: a stop there is a PAUSE — the line stays
+   * where it stopped and the next press of Play continues from that exact
+   * place — so the way back to the top has to be something you can see and
+   * press. It sits beside Play because it is the same kind of thing: how you
+   * start playing THIS time.
+   */
+  onBackToStart?: () => void;
   /** Drill only — the tempo the ramp begins at, and the ramp's Loop. */
   startBpm: number;
   loop: boolean;
@@ -170,6 +181,7 @@ export function Transport({
   startBpm,
   countIn,
   loop,
+  onBackToStart,
   onToggleCountIn,
   onToggleLoop,
   onTogglePlayback,
@@ -250,6 +262,26 @@ export function Transport({
       </button>
 
       {playShortcut && <kbd className="transport-key">{playShortcut}</kbd>}
+
+      {/* Back to the start (W37 item 1). A rewind bar-and-triangle, drawn
+          rather than typed, because a glyph would be in whatever face the
+          theme happens to carry it in. It is the portion's first bar while a
+          portion is chosen — the passage you are working on is the thing you
+          go back to the top of. */}
+      {onBackToStart && (
+        <button
+          type="button"
+          className="transport-rewind"
+          onClick={onBackToStart}
+          title={t("transport.backToStart")}
+          aria-label={t("transport.backToStart")}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M4 3v10" />
+            <path d="M13 3.5v9L6 8z" />
+          </svg>
+        </button>
+      )}
 
       {/* Count-in, in every mode and always here. It sits with Play rather
           than with the mode's own settings because it is not a fact about

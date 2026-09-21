@@ -233,9 +233,27 @@ pub struct SongTransport {
     pub range: SongRange,
     pub loops: bool,
     pub tempo_percent: u32,
-    /// Bars of count-in before the FIRST pass, at the range's first tempo and
-    /// meter.
+    /// Bars of count-in before the FIRST pass, at the tempo and meter of the
+    /// bar the first pass begins in.
     pub count_in_bars: u32,
+    /// WHERE THE FIRST PASS BEGINS, in the song's own ticks (W37 item 1).
+    ///
+    /// The playhead. A range says which bars are being practised; this says
+    /// where inside them the next press of Play starts, and it is the whole
+    /// of "stop is a pause" — a stop leaves the playhead where the music
+    /// stopped, and the press after it begins there rather than at the top.
+    ///
+    /// It moves the CURSOR and nothing else: `pass_samples` is still one whole
+    /// pass of the range, so the second time round a loop is whole. A tick
+    /// outside the range is held to its nearest edge rather than refused,
+    /// because a playhead is a place somebody clicked and clamping it is what
+    /// every screen above this already does.
+    ///
+    /// `serde(default)` so a caller that has nothing to say about it — the
+    /// probe, the gate's own fixtures — means "at the top", which is what
+    /// every caller meant before this field existed.
+    #[serde(default)]
+    pub start_tick: u32,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize)]
@@ -577,6 +595,13 @@ pub struct SongTable {
     /// start of the COUNT-IN, and it plays before the first pass only.
     count_in: Vec<SongTick>,
     count_in_samples: u64,
+    /// Where the first pass begins — the playhead, resolved (W37 item 1).
+    ///
+    /// The same four numbers a seek produces, worked out once here so the
+    /// audio thread's "back to the top of the range" is four copies out of
+    /// the table it is already holding rather than a search. `pass == 0`, so
+    /// `play` is the sample itself.
+    start: SongSeek,
     /// How long one pass of the range is. The loop seam, to the sample.
     pass_samples: u64,
     loops: bool,
@@ -645,6 +670,47 @@ impl SongTable {
     #[inline]
     pub fn count_in_samples(&self) -> u64 {
         self.count_in_samples
+    }
+
+    /// WHERE A PRESS OF PLAY BEGINS (W37 item 1).
+    ///
+    /// Read on the audio thread, off the table it is already holding, at the
+    /// three moments a song starts over. Four copies and no arithmetic: the
+    /// playhead was resolved when the piece was compiled, which is what makes
+    /// "play starts AT the playhead" cost the callback nothing and makes it
+    /// impossible for the first buffer to be at the top of the range and the
+    /// second somewhere else.
+    #[inline]
+    pub fn start(&self) -> SongSeek {
+        self.start
+    }
+
+    /// The sample a song tick falls on, for a seek posted while the piece is
+    /// playing.
+    ///
+    /// The bar plan's own arithmetic — the same walk `place` does for a note
+    /// — so a click on bar 34 and the notes written in bar 34 cannot disagree
+    /// about where bar 34 is, whatever the tempo map and the speed did to it.
+    /// A tick before the range starts is its first sample; one past the end is
+    /// the last sample of the pass.
+    pub fn sample_at_tick(&self, tick: u32) -> u64 {
+        let Some(first) = self.bars.first() else {
+            return 0;
+        };
+        let mut plan = *first;
+        for bar in self.bars.iter() {
+            if bar.start_tick <= tick {
+                plan = *bar;
+            } else {
+                break;
+            }
+        }
+        if tick <= plan.start_tick {
+            return plan.start_sample;
+        }
+        let into = (tick - plan.start_tick) as f64 / TICKS_PER_QUARTER as f64 * 60.0 / plan.bpm;
+        let at = ((plan.start_seconds + into) * self.rate as f64).round() as u64;
+        at.min(self.pass_samples.saturating_sub(1))
     }
 
     /// How long one pass of the range is, in frames.
@@ -920,6 +986,7 @@ pub fn compile(
     subdivision: u32,
 ) -> Result<SongTable, String> {
     let plan = plan_range(transport, rate, subdivision)?;
+    let start_sample = plan.start_sample;
     let SongSounds { bank, perc, voices } = sounds;
 
     let mut table = SongTable {
@@ -927,6 +994,12 @@ pub fn compile(
         band: Vec::new(),
         count_in: plan.count_in,
         count_in_samples: plan.count_in_samples,
+        start: SongSeek {
+            sample: 0,
+            tick_at: 0,
+            band_at: 0,
+            play: 0,
+        },
         pass_samples: plan.pass_samples,
         loops: transport.loops,
         bars: plan.bars,
@@ -953,6 +1026,11 @@ pub fn compile(
         table.band.sort_by_key(|e| e.sample);
         table.band_trim = hold_the_band_down(&mut table.band, rate);
     }
+    // The playhead, resolved against the finished tables — after the band is
+    // sorted, because `band_at` is an index into it. `SongTable::seek` is the
+    // one piece of arithmetic that says where a position puts every cursor,
+    // and a press of Play is a seek to the playhead by another name.
+    table.start = table.seek(start_sample, 0);
     Ok(table)
 }
 
@@ -1000,6 +1078,8 @@ struct RangePlan {
     count_in_samples: u64,
     pass_samples: u64,
     bars: Vec<SongBarPlan>,
+    /// Where the first pass begins — `SongTransport::start_tick`, in frames.
+    start_sample: u64,
 }
 
 /// The transport, checked and turned into samples.
@@ -1182,17 +1262,51 @@ fn plan_range(
         return Err("the range is no time at all".to_string());
     }
 
+    // ---- Where the first pass begins ----
+    //
+    // The playhead (W37 item 1). `bars` is in order, so this is a walk to the
+    // bar the tick is written in and then the bar's own tempo for the rest of
+    // the way — the arithmetic `place` does for a note, because a playhead
+    // and a note on the same tick have to land on the same sample.
+    let start_bar = {
+        let mut at = 0usize;
+        for (i, bar) in bars.iter().enumerate() {
+            if bar.start_tick <= transport.start_tick {
+                at = i;
+            } else {
+                break;
+            }
+        }
+        at
+    };
+    let start_sample = {
+        let plan = &bars[start_bar];
+        if transport.start_tick <= plan.start_tick {
+            plan.start_sample
+        } else {
+            let into = (transport.start_tick - plan.start_tick) as f64
+                / TICKS_PER_QUARTER as f64
+                * 60.0
+                / plan.bpm;
+            (((plan.start_seconds + into) * rate as f64).round() as u64)
+                .min(pass_samples.saturating_sub(1))
+        }
+    };
+
     // ---- The count-in ----
     //
-    // The range's FIRST tempo and meter, whatever the bars after it do: a
-    // count-in is somebody counting you into the first bar, and counting it
-    // in the meter of bar three would be counting you into the wrong piece.
+    // The tempo and meter of the bar the first pass BEGINS in, whatever the
+    // bars around it do: a count-in is somebody counting you into the bar you
+    // are about to play, and counting it in the meter of bar one when you are
+    // starting at bar forty would be counting you into the wrong piece. Bar
+    // one is still the answer whenever the playhead is at the top, which is
+    // most of the time and is what this said before W37.
     //
     // It is the song's own, and not `AppState::count_in`: the engine's
     // count-in counts beats at `AppState::bpm`, which is not this song's
-    // tempo and knows nothing about a 7/8. `load_song` clears that one so the
-    // two cannot both run.
-    let first = &bars[0];
+    // tempo and knows nothing about a 7/8. `load_song` and `set_song_range`
+    // both clear that one so the two cannot both run.
+    let first = &bars[start_bar];
     let mut count_in: Vec<SongTick> = Vec::new();
     let mut count_in_samples = 0u64;
     if transport.count_in_bars > 0 {
@@ -1239,6 +1353,7 @@ fn plan_range(
         count_in_samples,
         pass_samples,
         bars,
+        start_sample,
     })
 }
 

@@ -47,6 +47,7 @@ pub(super) fn twelve_bar() -> SongTransport {
         loops: false,
         tempo_percent: 100,
         count_in_bars: 0,
+        start_tick: 0,
     }
 }
 
@@ -208,6 +209,7 @@ fn six_eight_has_a_beat_one_and_a_beat_four_that_are_not_the_same_event() {
         loops: false,
         tempo_percent: 100,
         count_in_bars: 0,
+        start_tick: 0,
     };
     let p = plan(&t, 48_000, 1);
     let levels: Vec<u8> = p.ticks.iter().map(|x| x.accent).collect();
@@ -801,4 +803,190 @@ fn a_seek_to_the_very_top_is_a_seek_and_not_a_sentinel() {
     assert_eq!(to.tick_at, 0);
     assert_eq!(to.band_at, 0);
     assert_eq!(to.play, 0);
+}
+
+// ─── Where a press of Play begins (W37 item 1) ───────────────────────────
+//
+// The owner: *"i hit pause when it's on bar 3, if i click on bar 6 and hit
+// play again, it will resume from bar 3 but then immediately go on from bar
+// 6"*. The playhead is compiled into the table now, so a press of Play is
+// already at the right place on its first frame rather than being corrected
+// a buffer or two later.
+
+/// The same fixture as `seekable`, with the playhead somewhere other than the
+/// top of the range.
+fn started_at(tick: u32, percent: u32, loops: bool) -> SongTable {
+    let mut t = twelve_bar();
+    t.tempo_percent = percent;
+    t.loops = loops;
+    if loops {
+        t.range = SongRange {
+            start_bar: 2,
+            end_bar: 5,
+        };
+    }
+    t.start_tick = tick;
+    let mut notes = Vec::new();
+    for bar in t.bars.iter() {
+        let beat_ticks = TICKS_PER_QUARTER * 4 / bar.denominator;
+        for beat in 0..bar.numerator {
+            notes.push(SongNote {
+                tick: bar.start_tick + beat * beat_ticks,
+                dur_ticks: beat_ticks,
+                midi: if beat == 0 { 36 } else { 42 },
+                velocity: 0.9,
+            });
+        }
+    }
+    let backing = SongBacking {
+        tracks: vec![SongTrack {
+            role: SongRole::Drums,
+            name: "Drums".into(),
+            program: 0,
+            guide: false,
+            bends: Vec::new(),
+            notes,
+        }],
+    };
+    compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("the song compiles")
+}
+
+#[test]
+fn a_song_with_no_playhead_begins_at_the_top_of_its_range() {
+    let table = seekable(100, false);
+    let at = table.start();
+    assert_eq!(at.sample, 0);
+    assert_eq!(at.tick_at, 0);
+    assert_eq!(at.band_at, 0);
+    assert_eq!(at.play, 0);
+}
+
+#[test]
+fn a_press_of_play_begins_on_the_bar_line_it_was_left_on() {
+    let bars = twelve_bar().bars;
+    let table = started_at(bars[7].start_tick, 100, false);
+    let at = table.start();
+    assert_eq!(
+        at.sample,
+        table.bars()[7].start_sample,
+        "the playhead is a bar line and the piece begins on it",
+    );
+    // The same three promises a seek makes, because a press of Play IS one:
+    // nothing before it sounds, and nothing AT it is stepped over.
+    assert_eq!(table.ticks()[at.tick_at].sample, at.sample);
+    assert_eq!(table.ticks()[at.tick_at].bar, 7);
+    assert_eq!(table.band()[at.band_at].sample, at.sample);
+    assert_eq!(at.play, at.sample, "the first pass, so the clock is the cursor");
+}
+
+#[test]
+fn a_playhead_part_way_through_a_bar_begins_part_way_through_it() {
+    let bars = twelve_bar().bars;
+    // Beat three of bar eight — 4/4 at 90 BPM, so two beats is 4/3 seconds.
+    let tick = bars[7].start_tick + TICKS_PER_QUARTER * 2;
+    let table = started_at(tick, 100, false);
+    let at = table.start();
+    let want = table.bars()[7].start_sample + (2.0f64 * 60.0 / 90.0 * 48_000.0).round() as u64;
+    assert_eq!(at.sample, want, "a playhead is a tick, not a bar");
+    assert!(table.ticks()[at.tick_at].sample >= at.sample);
+    assert!(table.band()[at.band_at].sample >= at.sample);
+}
+
+#[test]
+fn half_speed_puts_the_playhead_twice_as_far_in() {
+    let bars = twelve_bar().bars;
+    let tick = bars[7].start_tick + TICKS_PER_QUARTER * 2;
+    let full = started_at(tick, 100, false);
+    let half = started_at(tick, 50, false);
+    assert_eq!(half.start().sample, full.start().sample * 2);
+    // And it is the same PLACE IN THE MUSIC, which is the thing that matters.
+    assert_eq!(
+        full.ticks()[full.start().tick_at].beat,
+        half.ticks()[half.start().tick_at].beat,
+    );
+}
+
+#[test]
+fn a_playhead_inside_a_looping_portion_starts_there_and_the_loop_stays_whole() {
+    // Bars 2 to 5, repeating, paused half way down bar 4 (the 7/8).
+    let bars = twelve_bar().bars;
+    let tick = bars[4].start_tick + TICKS_PER_QUARTER * 2;
+    let table = started_at(tick, 100, true);
+    let plain = seekable(100, true);
+    assert_eq!(
+        table.pass_samples(),
+        plain.pass_samples(),
+        "the playhead moves the cursor, never the length of a pass",
+    );
+    assert!(table.loops());
+    assert!(
+        table.start().sample > 0 && table.start().sample < table.pass_samples(),
+        "a pause inside a loop continues inside it",
+    );
+    // The seam still sends the cursor to the top of the portion, which is
+    // what makes the SECOND time round whole — `engine.rs` wraps to 0.
+    assert_eq!(table.bars()[0].start_sample, 0);
+}
+
+#[test]
+fn a_playhead_outside_the_range_is_held_to_its_nearest_edge() {
+    // Bars 2 to 5 repeating, with a playhead written at bar 11 — which the
+    // screen clamps and the engine must not trust it to.
+    let bars = twelve_bar().bars;
+    let table = started_at(bars[11].start_tick, 100, true);
+    assert!(
+        table.start().sample < table.pass_samples(),
+        "a playhead past the end is the end, not silence",
+    );
+}
+
+#[test]
+fn a_count_in_counts_you_into_the_bar_the_playhead_is_on() {
+    // Bar 4 is the 7/8 and bar 6 is 4/4 at 90. A count-in that led into the
+    // piece's FIRST bar would count four at 120 wherever you started.
+    let bars = twelve_bar().bars;
+    let mut t = twelve_bar();
+    t.count_in_bars = 1;
+    t.start_tick = bars[4].start_tick;
+    let p = plan(&t, 48_000, 1);
+    assert_eq!(p.count_in.len(), 7, "one bar of the 7/8 you are about to play");
+    assert_eq!(p.count_in[0].beats_per_bar, 7);
+    // A beat of a 7/8 at 120 BPM is an eighth note, which is a quarter of
+    // a second: 60/120 x 4/8.
+    assert_eq!(p.count_in[1].sample, 12_000);
+
+    let mut later = twelve_bar();
+    later.count_in_bars = 1;
+    later.start_tick = bars[6].start_tick;
+    let q = plan(&later, 48_000, 1);
+    assert_eq!(q.count_in.len(), 4, "four-four again");
+    // A quarter at 90 BPM is two thirds of a second.
+    assert_eq!(q.count_in[1].sample, 32_000);
+}
+
+#[test]
+fn the_sample_a_tick_falls_on_is_the_sample_its_notes_were_placed_at() {
+    // What `seek_song` asks, and it has to give the same answer the compiler
+    // gave the band — otherwise a click on a note and the note itself would
+    // be different places.
+    let table = seekable(100, false);
+    for (n, bar) in table.bars().iter().enumerate() {
+        assert_eq!(
+            table.sample_at_tick(bar.start_tick),
+            bar.start_sample,
+            "bar {n} is somewhere else when asked by tick",
+        );
+    }
+    // And inside a bar: beat three of bar eight, 4/4 at 90.
+    let tick = table.bars()[7].start_tick + TICKS_PER_QUARTER * 2;
+    assert_eq!(
+        table.sample_at_tick(tick),
+        table.bars()[7].start_sample + (2.0f64 * 60.0 / 90.0 * 48_000.0).round() as u64,
+    );
+    // A tick past the end is the last frame of the pass, never past it.
+    assert_eq!(
+        table.sample_at_tick(u32::MAX),
+        table.pass_samples() - 1,
+        "a seek past the end is the end",
+    );
 }

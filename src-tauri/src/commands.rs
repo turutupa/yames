@@ -3952,30 +3952,25 @@ pub fn clear_song(
 /// recording into the same file, and the band is cut over a few milliseconds
 /// rather than left ringing from somewhere the player no longer is.
 ///
-/// `played_bar` is an index into the transport's `bars`, which is what the
-/// tab's own cursor counts in. A bar outside the range being played is
-/// clamped into it: a click past the end of a portion means the end of the
-/// portion, not silence.
+/// `tick` is a position in the SONG's own ticks — the one unit the playhead
+/// is kept in everywhere above this (W37 item 1), so a click on the tab, the
+/// mark drawn on the page, the tick sent to the engine and the sample the
+/// band is cut at are all the same number. A tick outside the range being
+/// played is clamped into it: a click past the end of a portion means the end
+/// of the portion, not silence.
 #[tauri::command]
-pub fn seek_song(played_bar: u32, engine_state: State<EngineState>) -> Result<(), String> {
+pub fn seek_song(tick: u32, engine_state: State<EngineState>) -> Result<(), String> {
     let engine = engine_state.0.lock().unwrap();
     let Some(table) = engine.song_table() else {
         return Err("there is no song loaded to seek in".to_string());
     };
-    let bars = table.bars();
-    if bars.is_empty() {
+    if table.bars().is_empty() {
         return Err("the song has no bars in it".to_string());
     }
-    // The bar's own first sample, out of the table the callback is walking —
-    // so the two cannot disagree about where bar 34 is, whatever the tempo
-    // map and the speed did to it.
-    let at = match bars.binary_search_by(|b| b.index.cmp(&played_bar)) {
-        Ok(i) => i,
-        // A bar the range does not hold: the nearest edge of it.
-        Err(0) => 0,
-        Err(i) => i.min(bars.len() - 1),
-    };
-    engine.seek_song(bars[at].start_sample);
+    // The tick's own sample, out of the table the callback is walking — so
+    // the two cannot disagree about where bar 34 beat 3 is, whatever the
+    // tempo map and the speed did to it.
+    engine.seek_song(table.sample_at_tick(tick));
     Ok(())
 }
 
@@ -4012,6 +4007,7 @@ pub async fn set_song_range(
     loops: bool,
     tempo_percent: u32,
     count_in_bars: Option<u32>,
+    start_tick: Option<u32>,
 ) -> Result<SongLoaded, String> {
     tokio::task::spawn_blocking(move || {
         let source = app_handle.state::<SongSourceState>();
@@ -4027,6 +4023,7 @@ pub async fn set_song_range(
             src.transport.loops,
             src.transport.tempo_percent,
             src.transport.count_in_bars,
+            src.transport.start_tick,
         );
         src.transport.range = range;
         src.transport.loops = loops;
@@ -4034,13 +4031,37 @@ pub async fn set_song_range(
         if let Some(bars) = count_in_bars {
             src.transport.count_in_bars = bars;
         }
+        // The playhead (W37 item 1). `None` leaves it where it was, for the
+        // same reason the count-in's `None` does: a caller with nothing to
+        // say about it is not a caller asking for the top of the range.
+        if let Some(tick) = start_tick {
+            src.transport.start_tick = tick;
+        }
         match build_and_install_song(&app_handle, &src.transport, src.backing.as_ref()) {
-            Ok(loaded) => Ok(loaded),
+            Ok(loaded) => {
+                // AND A COUNT-IN THE CLICK HAD ARMED IS SPENT, exactly as
+                // `load_song` spends one (W37 item 2). A song's count-in is
+                // its own — one bar of its own meter at its own tempo — and
+                // the switch in the transport writes that and nothing else.
+                // `load_song` had this and this did not, so an armed
+                // `AppState::count_in` could outlive the only command a
+                // running Songs session sends.
+                let state = app_handle.state::<SharedState>();
+                let mut s = state.lock().unwrap();
+                if s.count_in.beats > 0 {
+                    s.count_in = crate::state::CountIn::default();
+                    let snapshot = s.clone();
+                    drop(s);
+                    let _ = app_handle.emit("state-changed", &snapshot);
+                }
+                Ok(loaded)
+            }
             Err(e) => {
                 src.transport.range = before.0;
                 src.transport.loops = before.1;
                 src.transport.tempo_percent = before.2;
                 src.transport.count_in_bars = before.3;
+                src.transport.start_tick = before.4;
                 Err(e)
             }
         }

@@ -75,7 +75,8 @@
     "inputOff": "Wejście wyłączone",
     "coachOnPlay": "Trener słucha, gdy włączysz odtwarzanie",
     "coachQuiet": "Trener milczy w trakcie kroku",
-    "countIn": "Odliczenie"
+    "countIn": "Odliczenie",
+    "backToStart": "Wróć na początek"
   },
   "rail": {
     "label": "Tryby i biblioteka",

@@ -1013,6 +1013,7 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
             // A count-in is a few clicks at the start and nothing the gate
             // can see over sixty seconds; the run is about the piece.
             count_in_bars: 0,
+            start_tick: 0,
         },
         SongBacking {
             tracks: vec![

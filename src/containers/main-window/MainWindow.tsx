@@ -459,7 +459,13 @@ export function MainWindow() {
    * otherwise the Metronome tab would go on clicking through a score nobody
    * is looking at. Inert with no song open, like the jam above it.
    */
-  const songsSession = useSongsSession(undefined, { view, isPlaying: state.isPlaying });
+  const songsSession = useSongsSession(undefined, {
+    view,
+    isPlaying: state.isPlaying,
+    // The session owns the one playhead (W37 item 1), so the engine's reports
+    // have to reach it and not only the screen.
+    beat: currentBeat,
+  });
 
   /**
    * "Open with Yames" on a Guitar Pro or MusicXML file (`SONGS.md` S0.9).
@@ -2154,6 +2160,12 @@ export function MainWindow() {
             startBpm={state.speedRamp.startBpm}
             countIn={countInOn}
             loop={state.speedRamp.cyclic}
+            /* Back to the start, beside Play — and only where there is a piece
+               to go back to the start OF (W37 item 1). A stop in Songs is a
+               pause now, so something visible has to rewind. */
+            onBackToStart={
+              view === "songs" && songsSession.score ? songsSession.backToStart : undefined
+            }
             onToggleCountIn={toggleCountIn}
             onToggleLoop={() => reconfigureRamp({ cyclic: !state.speedRamp.cyclic })}
             onTogglePlayback={() =>

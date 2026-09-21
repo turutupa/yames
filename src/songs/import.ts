@@ -501,6 +501,14 @@ export type TransportOptions = {
   tempoPercent?: number;
   /** 0, 1 or 2 bars before the first pass. */
   countInBars?: number;
+  /**
+   * Where the first pass begins, in the song's own ticks (W37 item 1).
+   *
+   * Clamped into the range, because a playhead is a place somebody clicked
+   * and every screen above this already holds it inside the bars that are
+   * going to play.
+   */
+  startTick?: number;
 };
 
 /**
@@ -546,14 +554,22 @@ export function buildTransport(
   if (tempoMap.length === 0) tempoMap.push({ tick: firstBarTick, bpm: 120 });
   if (tempoMap[0].tick > firstBarTick) tempoMap[0] = { ...tempoMap[0], tick: firstBarTick };
 
+  const played = clampRange(score, range);
+  // The playhead, held inside the bars that are about to play: the engine
+  // clamps it too, and agreeing here is what makes the mark on the page and
+  // the sample the band starts on the same place.
+  const first = bars[played.startBar]?.startTick ?? 0;
+  const lastBar = bars[played.endBar];
+  const end = lastBar ? lastBar.startTick + lastBar.lengthTicks - 1 : first;
   return {
     ticksPerQuarter: TICKS_PER_QUARTER,
     tempoMap,
     bars,
-    range: clampRange(score, range),
+    range: played,
     loops: options.loops ?? false,
     tempoPercent: clampInt(options.tempoPercent ?? 100, MIN_TEMPO_PERCENT, MAX_TEMPO_PERCENT),
     countInBars: clampInt(options.countInBars ?? 0, 0, MAX_COUNT_IN_BARS),
+    startTick: clampInt(options.startTick ?? first, first, Math.max(first, end)),
   };
 }
 

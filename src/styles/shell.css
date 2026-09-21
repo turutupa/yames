@@ -1516,6 +1516,41 @@ body[data-sheet-maximized] .rail {
   box-shadow: 0 0 0 6px var(--accent-glow);
 }
 
+/* Back to the start, beside Play (W37 item 1). Square, quiet, and the same
+   height as the switches next to it so the row stays one line of furniture.
+   The glyph is a stroked-and-filled SVG rather than a character, so it looks
+   the same in all thirteen themes' typefaces. */
+.transport-rewind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.transport-rewind svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.transport-rewind:hover,
+.transport-rewind:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
 .transport-key {
   font-family: inherit;
   font-size: 0.68rem;

@@ -75,7 +75,8 @@
     "inputOff": "Tắt đầu vào",
     "coachOnPlay": "Huấn luyện viên nghe khi bạn bấm phát",
     "coachQuiet": "Huấn luyện viên im lặng giữa mỗi bước",
-    "countIn": "Đếm vào"
+    "countIn": "Đếm vào",
+    "backToStart": "Về đầu bài"
   },
   "rail": {
     "label": "Chế độ và thư viện",

@@ -6294,7 +6294,7 @@ impl MetronomeEngine {
                         };
                     }
 
-                    // BACK TO THE TOP OF THE RANGE.
+                    // BACK TO THE PLAYHEAD.
                     //
                     // Six assignments, at the three moments a song starts
                     // over: a press of Play, a song arriving or being taken
@@ -6303,6 +6303,26 @@ impl MetronomeEngine {
                     // closure — a function would need six `&mut`s and would
                     // read worse than the thing it replaced.
                     //
+                    // **The top of the range is the PLAYHEAD now** (W37
+                    // item 1). The owner: *"i hit pause when it's on bar 3,
+                    // if i click on bar 6 and hit play again, it will resume
+                    // from bar 3 but then immediately go on from bar 6"*.
+                    // That was this line: the transport always started at
+                    // zero and the webview corrected it with a seek a buffer
+                    // or two later, so the first thing heard and seen was the
+                    // OLD place. `SongTable::start` is where the next press
+                    // begins, resolved when the piece was compiled — four
+                    // copies out of a table the callback is already holding,
+                    // no search, no allocation, no atomic.
+                    //
+                    // The CURSOR starts at the head of the count-in when
+                    // there is one and at the playhead when there is not;
+                    // everything else — the tick and band indices, and the
+                    // piece's own clock the synthesiser is told — is the
+                    // playhead either way, because a count-in leads into the
+                    // playhead's bar and nothing of the piece sounds during
+                    // it.
+                    //
                     // `song_counting_in` starts TRUE whether or not the song
                     // has a count-in: a song with none spends it on its own
                     // first frame, where the seam check below finds a
@@ -6310,13 +6330,48 @@ impl MetronomeEngine {
                     // no second one asking whether there is anything to count.
                     macro_rules! song_from_the_top {
                         () => {{
-                            song_pos = 0;
+                            let at = match cached.song.as_deref() {
+                                Some(song) => song.start(),
+                                None => crate::song::SongSeek {
+                                    sample: 0,
+                                    tick_at: 0,
+                                    band_at: 0,
+                                    play: 0,
+                                },
+                            };
+                            let counting = cached
+                                .song
+                                .as_deref()
+                                .is_some_and(|s| s.count_in_samples() > 0);
+                            song_pos = if counting { 0 } else { at.sample };
                             song_pass = 0;
-                            song_tick_at = 0;
-                            song_band_at = 0;
+                            song_tick_at = at.tick_at;
+                            song_band_at = at.band_at;
                             song_count_in_at = 0;
                             song_counting_in = true;
-                            song_play = 0;
+                            song_play = at.play;
+                        }};
+                    }
+
+                    // AND THE SYNTHESISER'S QUEUE, which is a tenth of a
+                    // second of wherever the piece last was.
+                    //
+                    // One atomic — `invalidate` is a `fetch_add` and frees
+                    // nothing — after which the callback throws the queue
+                    // away on its next buffer and the renderer begins again
+                    // at the `song_play` this buffer has just published.
+                    // Without it the ring's stream still begins where the
+                    // last pass did, `ready` refuses every frame of a
+                    // playhead behind it, and the file's guitars never
+                    // arrive. Only at the two edges that START something —
+                    // never on the stopped path, which runs every buffer and
+                    // would reset the renderer faster than it could build
+                    // its lead.
+                    macro_rules! song_stream_begins_again {
+                        () => {{
+                            if let Some(ring) = cached.song.as_deref().and_then(|s| s.synth()) {
+                                ring.invalidate();
+                            }
                         }};
                     }
 
@@ -6332,6 +6387,7 @@ impl MetronomeEngine {
                     if cached.song_changed {
                         cached.song_changed = false;
                         song_from_the_top!();
+                        song_stream_begins_again!();
                     }
 
                     // ---- A take playing back ----
@@ -6493,8 +6549,9 @@ impl MetronomeEngine {
                         // reason about.
                         jam_in_pickup = false;
                         // A press of Play is a new pass of the song, counted
-                        // in from the top of the range.
+                        // in to the bar the playhead stands on (W37 item 1).
                         song_from_the_top!();
+                        song_stream_begins_again!();
                         voices.clear();
                     }
 
@@ -6717,7 +6774,16 @@ impl MetronomeEngine {
                                         // the first pass and a loop comes
                                         // round without one, which is what
                                         // being counted in means.
-                                        song_pos = 0;
+                                        //
+                                        // AND THE FIRST PASS BEGINS AT THE
+                                        // PLAYHEAD (W37 item 1), not at the
+                                        // top of the range. The other three
+                                        // cursors are already there — see
+                                        // `song_from_the_top` — because a
+                                        // count-in leads into the playhead's
+                                        // own bar and no note of the piece
+                                        // sounds while it runs.
+                                        song_pos = song.start().sample;
                                         song_counting_in = false;
                                     }
                                 } else if !song_ended_here && song_pos >= song.pass_samples() {
@@ -11599,6 +11665,7 @@ mod tests {
             loops: false,
             tempo_percent: 100,
             count_in_bars: 0,
+            start_tick: 0,
         }
     }
 
@@ -12052,6 +12119,7 @@ mod tests {
             loops: false,
             tempo_percent: 100,
             count_in_bars: 0,
+            start_tick: 0,
         };
         let mut lead = Vec::new();
         let mut rhythm = Vec::new();

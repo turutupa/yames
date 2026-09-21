@@ -133,6 +133,16 @@ export type SongEngineInput = {
   range: BarRange;
   loop: boolean;
   tempoPercent: number;
+  /**
+   * Where the next pass begins, in the song's own ticks — the playhead
+   * (W37 item 1).
+   *
+   * It is part of the compiled piece, so a change to it is a rebuild, which
+   * is why the session holds it still while the transport runs and lets it
+   * catch up on the stop: recompiling under a running pass would end the
+   * attempt and raise the review.
+   */
+  startTick: number;
 };
 
 export function useSongEngine({
@@ -142,6 +152,7 @@ export function useSongEngine({
   range,
   loop,
   tempoPercent,
+  startTick,
 }: SongEngineInput): SongEngine {
   const [mixSetting, setMixSetting] = useState<SongMixSetting>(DEFAULT_MIX_SETTING);
   const [band, setBand] = useState<Band | null>(null);
@@ -247,6 +258,7 @@ export function useSongEngine({
     loop,
     tempoPercent,
     mixSetting.countInBars,
+    startTick,
   ]);
 
   useEffect(() => {
@@ -275,6 +287,7 @@ export function useSongEngine({
             loops: loop,
             tempoPercent,
             countInBars: mixSetting.countInBars,
+            startTick,
           };
           const transport = importer.buildTransport(score, range, options);
           // A range or a speed change on a song the engine already holds is
@@ -286,6 +299,7 @@ export function useSongEngine({
                 transport.loops,
                 transport.tempoPercent,
                 transport.countInBars,
+                transport.startTick,
               )
             : await loadSong(transport, band.tracks.length > 0 ? { tracks: band.tracks } : null);
           setLoaded(result ?? null);

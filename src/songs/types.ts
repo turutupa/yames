@@ -169,8 +169,17 @@ export type SongTransport = {
   range: { startBar: number; endBar: number };
   loops: boolean;
   tempoPercent: number;
-  /** 0, 1 or 2 bars, at the range's first tempo and meter. */
+  /** 0, 1 or 2 bars, at the tempo and meter of the bar play begins in. */
   countInBars: number;
+  /**
+   * Where the first pass begins, in the song's own ticks — the playhead
+   * (W37 item 1).
+   *
+   * The range says which bars are being practised; this says where inside
+   * them a press of Play starts. It moves the cursor and nothing else: a pass
+   * is still the whole range, so the second time round a loop is whole.
+   */
+  startTick: number;
 };
 
 /** Which of the band's three rows a backing track is played on. */

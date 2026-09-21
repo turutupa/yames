@@ -24,6 +24,22 @@ import type { SongLibrary, SongRecord } from "../../../songs/library";
 // this is the module that knows which records are the same piece of music.
 import { groupByFile, migrateSongNames } from "../../../songs/songFiles";
 import type { LibrarySong } from "../../../songs/songFiles";
+import {
+  NO_PLAYHEAD,
+  barOfTick,
+  clampTick,
+  giveUpWaiting,
+  goTo as goToTick,
+  onReport as playheadOnReport,
+  pauseAt as playheadPauseAt,
+  playheadTick as playheadTickOf,
+  rangeStartTick,
+  tickOfBar,
+  toStart as playheadToStart,
+  BELIEVE_MS,
+} from "../../../songs/playhead";
+import type { PlayheadState } from "../../../songs/playhead";
+import type { BeatPosition } from "../../../songs/position";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
 import { loadScoreSchedule, markScoreOpened, seekSong } from "../../../ipc";
 /**
@@ -95,14 +111,38 @@ export interface SongsSession extends SongEngine {
    */
   portion: BarRange;
   /**
-   * Where the playhead stands, as a played bar, or null for the start.
+   * WHERE YOU ARE IN THE SONG, in the song's own ticks (W37 item 1).
    *
-   * A click on the tab moves it (W29 item 1). It is the bar the next pass
-   * begins at, and — while the piece is stopped — the bar the cursor sits on.
+   * The one playhead. The cursor is drawn here, the next press of Play begins
+   * here, the count-in counts into this bar, and a stop leaves it where the
+   * music stopped. `songs/playhead.ts` is the whole of the rule.
    */
-  playFrom: number | null;
-  /** Go to a bar. Clamped into the song; the portion is left alone. */
+  playheadTick: number;
+  /** The same place as a played bar, for the mark drawn on the page. */
+  playFrom: number;
+  /** Go to a bar. Clamped into what is playing; the portion is left alone. */
   seekTo: (playedBar: number) => void;
+  /** Go to a tick. What `seekTo` is made of, for anything finer than a bar. */
+  seekToTick: (tick: number) => void;
+  /**
+   * Back to the first bar of what is being played — the portion's, or the
+   * song's (W37 item 1). The button beside Play and the Home key.
+   */
+  backToStart: () => void;
+  /**
+   * The transport stopped, and a stop is a PAUSE: leave the playhead where
+   * the music stopped. `tick` is where the line was; null leaves it alone.
+   */
+  pauseAt: (tick: number | null) => void;
+  /**
+   * The playhead the ENGINE has been told, in ticks.
+   *
+   * The same place, held still while the transport runs: a start the engine
+   * is told is a recompile, and recompiling under a running pass would end
+   * the attempt and raise the review. While it runs a click is a `seek_song`
+   * instead, and this catches up on the stop.
+   */
+  engineStartTick: number;
   /**
    * The portion the player picked out, or null for the whole song.
    *
@@ -185,29 +225,37 @@ export interface SongsSession extends SongEngine {
 export type SongsSessionOptions = {
   view?: string;
   /**
-   * Is the transport running? Read by `seekTo` and by nothing else.
+   * Is the transport running?
    *
-   * A click on the tab means two different things either side of it. Stopped,
-   * it decides where the next pass begins, which is a range and a recompile.
-   * Playing, it has to move the playhead where it already is — a recompile
-   * there would end the pass, and ending a pass ends the attempt and raises
-   * the review (`COACH_UX.md` A3), so the click would throw away the take the
-   * player was in the middle of (W28, after W29).
+   * A click on the tab means the same thing either side of it since W37 — it
+   * moves the one playhead — but HOW the engine is told differs. Stopped, the
+   * playhead is compiled into the piece, which the debounced rebuild does.
+   * Playing, it is a `seek_song`: a recompile there would end the pass, and
+   * ending a pass ends the attempt and raises the review (`COACH_UX.md` A3),
+   * so the click would throw away the take the player was in the middle of.
    */
   isPlaying?: boolean;
+  /**
+   * What the engine last said about where it is (W37 item 1).
+   *
+   * The session owns the playhead, so the engine's reports have to reach it
+   * rather than only the screen — otherwise "where we are" would be two
+   * things again the moment the transport started.
+   */
+  beat?: BeatPosition | null;
 };
 
 export function useSongsSession(
   library: SongLibrary = songLibrary,
-  { view = "songs", isPlaying = false }: SongsSessionOptions = {},
+  { view = "songs", isPlaying = false, beat = null }: SongsSessionOptions = {},
 ): SongsSession {
   const [songs, setSongs] = useState<SongRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selection, setSelectionState] = useState<BarRange | null>(null);
   const [loop, setLoop] = useState(false);
   const [tempoPercent, setTempoPercentState] = useState(100);
-  /** Where a click on the tab left the playhead, in played bars (W29). */
-  const [playFromState, setPlayFrom] = useState<number | null>(null);
+  /** The one playhead, in the song's own ticks (W37 item 1). */
+  const [playhead, setPlayhead] = useState<PlayheadState>(NO_PLAYHEAD);
   const [pending, setPending] = useState<PendingImport | null>(null);
   const [warnings, setWarnings] = useState<SongImportWarning[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -280,7 +328,7 @@ export function useSongsSession(
       const next = songs.find((s) => s.id === id);
       if (!next) return;
       setActiveId(id);
-      setPlayFrom(null);
+      setPlayhead(NO_PLAYHEAD);
       // Cleared, not carried: the portion this song was left on comes back
       // from the store a moment later (see the effect below), and carrying
       // the last song's bars across in the meantime would loop bars 17–24 of
@@ -354,7 +402,7 @@ export function useSongsSession(
         commit(next);
         setPending(null);
         setActiveId(record.id);
-        setPlayFrom(null);
+        setPlayhead(NO_PLAYHEAD);
         setSelectionState(null);
         setLoop(false);
         setTempoPercentState(100);
@@ -445,39 +493,72 @@ export function useSongsSession(
   );
 
   /**
-   * And where the playhead stands inside it (W29 item 1).
+   * WHAT THE ENGINE IS GIVEN: the portion, always (W37 item 1).
    *
-   * Clamped into the portion rather than kept wherever it was clicked: a
-   * playhead outside the bars that are going to play is a cursor pointing at
-   * music nobody is about to hear.
+   * It used to be the portion with the playhead folded into its first bar,
+   * because the engine could only begin a pass at the top of whatever range
+   * it was handed — so "click here, press play, start here" had to be spelt
+   * as a different range, and a range change is a recompile. That is a good
+   * half of why there were five ideas of "where we are" on one screen: the
+   * range moved under the cursor, a loop lost its own first bar, and a click
+   * while the piece ran had to be something else again because a recompile
+   * would have ended the pass.
+   *
+   * The engine takes a start INSIDE the compiled table now
+   * (`SongTransport.startTick`, `song.rs`), so the range is the bars being
+   * practised and the playhead is where inside them play begins. A pass is
+   * still the whole portion, which is what makes "pause inside a loop
+   * continues inside it, and the next time round is whole" true.
    */
-  const playFrom = useMemo<number | null>(() => {
-    if (playFromState === null || !score) return null;
-    return Math.min(Math.max(playFromState, portion.startBar), portion.endBar);
-  }, [playFromState, score, portion]);
+  const range = portion;
 
   /**
-   * What the engine is actually given.
+   * THE ONE PLAYHEAD (W37 item 1), in the song's own ticks.
    *
-   * **The playhead only moves the start when the repeat is off.** The engine
-   * has no seek: `set_song_range` recompiles the piece and starts it at the
-   * top of whatever range it is handed (`commands.rs`), so a loop always
-   * begins at its own first bar. With the repeat on, the portion is the unit
-   * being practised and it plays whole — the playhead is then where your eye
-   * is, and the cursor shows it while the piece is stopped. With the repeat
-   * off, "click here, press play, it starts here" is exactly what happens.
-   *
-   * What the engine would need for the other half is small and belongs to
-   * whoever owns `song.rs`: a `seek_song(tick)` that moves the cursor inside
-   * the table already compiled, and a first pass that may begin part-way
-   * through a loop. Doing it here instead would mean stopping — and a stop
-   * ends the attempt and raises the verdict (`COACH_UX.md` A3), so clicking
-   * the tab mid-song would throw a review on screen every time.
+   * `songs/playhead.ts` is the rule and this is the only place it is asked:
+   * a click the engine has not confirmed wins, then the engine while it is
+   * running, then where the player last left it, then the first bar of what
+   * is playing. Clamped into the portion — a playhead outside the bars that
+   * are going to play is a cursor pointing at music nobody is about to hear.
    */
-  const range = useMemo<BarRange>(
-    () => (playFrom === null || loop ? portion : { startBar: playFrom, endBar: portion.endBar }),
-    [portion, playFrom, loop],
+  const playheadTick = useMemo(
+    () =>
+      score
+        ? playheadTickOf(score, portion, playhead, {
+            playing: isPlaying,
+            report: beat && !beat.songCountIn ? beat.songTick : null,
+          })
+        : 0,
+    [score, portion, playhead, isPlaying, beat],
   );
+
+  /** The same place as a played bar — the mark the tab draws. */
+  const playFrom = useMemo(
+    () => (score ? barOfTick(score, portion, playheadTick) : 0),
+    [score, portion, playheadTick],
+  );
+
+  /**
+   * A report arrived: stop believing the click once the engine agrees with it.
+   *
+   * `playheadOnReport` hands the same object back when nothing changed, so
+   * this costs a render only on the report that actually settles a click.
+   */
+  useEffect(() => {
+    if (!score || !isPlaying || !beat || beat.songCountIn) return;
+    setPlayhead((current) => playheadOnReport(score, current, beat.songTick));
+  }, [score, isPlaying, beat]);
+
+  /**
+   * And a backstop. If no report ever agrees — an engine that refused the
+   * seek, a piece that ended — the click stops being believed after a second
+   * and a half and the engine is the truth again.
+   */
+  useEffect(() => {
+    if (playhead.pending === null) return;
+    const timer = window.setTimeout(() => setPlayhead(giveUpWaiting), BELIEVE_MS);
+    return () => window.clearTimeout(timer);
+  }, [playhead.pending]);
 
   /**
    * Choose a portion — and choosing one starts the repeat.
@@ -496,7 +577,7 @@ export function useSongsSession(
       // A new portion starts at its own first bar: the playhead was a place
       // inside the LAST one, and carrying it across would begin a freshly
       // chosen passage somewhere in the middle of itself (W29).
-      setPlayFrom(null);
+      setPlayhead(playheadToStart());
       if (!next) {
         setSelectionState(null);
         setLoop(false);
@@ -543,76 +624,117 @@ export function useSongsSession(
   }, [score, range, loop]);
 
   /**
-   * Go to a bar (W29 item 1) — a click on the tab, or an arrow key.
+   * GO THERE (W37 item 1) — a click on the tab, an arrow key, a chip.
    *
-   * It moves the playhead, and it puts the portion away when the bar is
-   * OUTSIDE it (W34 item 4). W29 kept the portion on every click, on the
-   * evidence of Songsterr, Ultimate Guitar and Guitar Pro, where the repeat
-   * is a switch and touching the page never takes it off you. The owner
-   * played with that and decided the other way: *"if i single click a
-   * different part of the song it should go to that part but the selected
-   * area doesn't get unselected, it's like it doesn't exit loop mode"*. His
-   * word wins. `selection.ts`'s `clickClearsPortion` is the rule and says so;
-   * a click INSIDE the portion still only moves your place within it.
+   * One gesture with one meaning on both sides of the transport, which is the
+   * whole of the owner's complaint: *"as if there are 2 states for the
+   * current location, one when playing and another one when paused"*. It
+   * writes the ONE playhead, and the playhead is believed at once (W36's
+   * rule, now the only rule) so the line and the page go there in the same
+   * frame. What differs either side of the transport is only how the ENGINE
+   * is told: stopped, the playhead is compiled into the piece by the
+   * debounced rebuild in `useSongEngine`; playing, it is a `seek_song`,
+   * because a recompile would end the pass, and ending a pass ends the
+   * attempt and raises the review (`COACH_UX.md` A3) — the click would throw
+   * away the take the player was in the middle of.
    *
-   * `clampSelection` holds the bar inside the song; `playFrom` above holds it
-   * inside whatever portion is left.
-   *
-   * **Two different things either side of the transport (W28).** Stopped, it
-   * writes `playFrom`, which is where the next pass begins — a range, and a
-   * recompile. Playing, a recompile would end the pass, and ending a pass
-   * ends the attempt and raises the review (`COACH_UX.md` A3): the click
-   * would throw away the take the player was in the middle of. So the engine
-   * moves its own cursor instead and the piece carries on.
+   * It also puts the portion away when the bar is OUTSIDE it (W34 item 4).
+   * W29 kept the portion on every click, on the evidence of Songsterr,
+   * Ultimate Guitar and Guitar Pro, where the repeat is a switch and touching
+   * the page never takes it off you. The owner played with that and decided
+   * the other way: *"if i single click a different part of the song it should
+   * go to that part but the selected area doesn't get unselected, it's like
+   * it doesn't exit loop mode"*. His word wins; `selection.ts`'s
+   * `clickClearsPortion` is the rule.
    *
    * Below `pushSchedule` rather than beside its neighbours, because it calls
    * it: a dependency array naming a `const` declared later is a reference
    * into the temporal dead zone, which is a crash on the first render rather
    * than a lint.
    */
-  const seekTo = useCallback(
-    (playedBar: number) => {
+  const seekToTick = useCallback(
+    (tick: number) => {
       if (!score) return;
-      const bar = clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar;
-      /*
-       * Somewhere else in the song: the portion and the repeat go with you.
-       *
-       * Both pieces of state are written here rather than through
-       * `setSelection`, because that one also clears the playhead — it is
-       * about CHOOSING a portion, and this is about leaving one. The playhead
-       * is the whole point of the gesture.
-       *
-       * While the transport runs this is a range change, so the engine
-       * recompiles and starts the piece at the bar that was clicked — which
-       * is what the player asked for and better than the seek below, which
-       * moves the cursor inside a range the click has just left.
-       */
+      const whole = wholeSong(score);
+      const at = clampTick(score, whole, tick);
+      const bar = barOfTick(score, whole, at);
+      // Somewhere else in the song: the portion and the repeat go with you.
+      // Written here rather than through `setSelection`, which also sends the
+      // playhead back to the top — that one is about CHOOSING a portion and
+      // this is about leaving one, and the playhead is the point of it.
       if (clickClearsPortion(selection, bar)) {
         setSelectionState(null);
         setLoop(false);
-        setPlayFrom(bar);
-        if (isPlaying) void pushSchedule();
-        return;
       }
-      if (isPlaying) {
-        // `playFrom` is deliberately left alone: writing it would change
-        // `range`, and changing the range is the recompile this exists to
-        // avoid. While the transport runs, where the cursor IS comes from the
-        // engine's beat events anyway.
-        void seekSong(bar).catch(() => {});
-        // And the scorer starts again from here. An attempt that was seeked
-        // scores what was actually played AFTER the seek: the onsets that
-        // were jumped over never happened, and a note nobody was in a
-        // position to play must not be marked as one they missed.
-        void pushSchedule();
-        return;
-      }
-      setPlayFrom(bar);
+      setPlayhead(goToTick(at));
+      if (!isPlaying) return;
+      // The engine moves its own cursor and the piece carries on.
+      void seekSong(at).catch(() => {});
+      // And the scorer starts again from here. An attempt that was seeked
+      // scores what was actually played AFTER the seek: the onsets that were
+      // jumped over never happened, and a note nobody was in a position to
+      // play must not be marked as one they missed.
+      void pushSchedule();
     },
     [score, isPlaying, pushSchedule, selection],
   );
 
+  /** The same thing, said in bars, which is what the tab reports. */
+  const seekTo = useCallback(
+    (playedBar: number) => {
+      if (!score) return;
+      const bar = clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar;
+      seekToTick(tickOfBar(score, wholeSong(score), bar));
+    },
+    [score, seekToTick],
+  );
+
+  /**
+   * BACK TO THE START (W37 item 1) — the button beside Play, and Home.
+   *
+   * Since a stop became a pause, something visible has to rewind, and this is
+   * it. The first bar of what is being PLAYED: with a portion chosen that is
+   * the portion's own first bar, because the portion is the thing being
+   * practised and going back to bar one of a five-minute song is not what the
+   * gesture means while you are working on bars 41 to 48.
+   */
+  const backToStart = useCallback(() => {
+    if (!score) return;
+    setPlayhead(playheadToStart());
+    if (!isPlaying) return;
+    void seekSong(rangeStartTick(score, portion)).catch(() => {});
+    void pushSchedule();
+  }, [score, portion, isPlaying, pushSchedule]);
+
+  /**
+   * The transport stopped, and **a stop is a pause** (W37 item 1).
+   *
+   * The line stays where it stopped and the next press of Play continues from
+   * that exact place. `tick` is where the cursor actually was — the engine's
+   * last report carried forward through the tempo map to the instant of the
+   * stop — so the line does not step back to the last click tick as it
+   * settles.
+   */
+  const pauseAt = useCallback((tick: number | null) => {
+    setPlayhead((current) => playheadPauseAt(current, tick));
+  }, []);
+
   const clearSelection = useCallback(() => setSelection(null), [setSelection]);
+
+  /**
+   * THE PLAYHEAD THE ENGINE HAS BEEN TOLD.
+   *
+   * Held still while the transport runs. A start the engine is told is part
+   * of the compiled piece, so letting it follow the playhead live would
+   * recompile the song on every beat — and a recompile ends the pass. While
+   * it runs the engine is moved by `seek_song`; this catches up on the stop,
+   * which is the same moment the pause writes where the music stopped.
+   */
+  const [engineStartTick, setEngineStartTick] = useState(0);
+  useEffect(() => {
+    if (isPlaying) return;
+    setEngineStartTick(playheadTick);
+  }, [isPlaying, playheadTick]);
 
   /**
    * The engine's half: the song on the click, the file's band, the faders.
@@ -620,7 +742,15 @@ export function useSongsSession(
    * Its own hook because it is all effects and no list — this one owns the
    * library and the selection, that one owns what the engine is holding.
    */
-  const engine = useSongEngine({ view, score, source, range, loop, tempoPercent });
+  const engine = useSongEngine({
+    view,
+    score,
+    source,
+    range,
+    loop,
+    tempoPercent,
+    startTick: engineStartTick,
+  });
 
   /**
    * Come back to the passage you left off on.
@@ -810,7 +940,12 @@ export function useSongsSession(
     source,
     range,
     portion,
+    playheadTick,
     playFrom,
+    seekToTick,
+    backToStart,
+    pauseAt,
+    engineStartTick,
     seekTo,
     selection,
     loop,

@@ -75,7 +75,8 @@
     "inputOff": "Eingang aus",
     "coachOnPlay": "Der Coach hört zu, sobald du startest",
     "coachQuiet": "Der Coach schweigt während eines Schritts",
-    "countIn": "Einzähler"
+    "countIn": "Einzähler",
+    "backToStart": "Zurück zum Anfang"
   },
   "rail": {
     "label": "Modi und Bibliothek",
