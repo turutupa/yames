@@ -2015,6 +2015,77 @@
   gap: 12px;
 }
 
+/* "Version 1.3.0 is out" (M11).
+ *
+ * The first line of About on the phone build people download from the site,
+ * and deliberately the quietest thing that could carry the news: a sentence
+ * and two words, no colour, no icon, no card. It is not an alert — the app
+ * works perfectly well as it is, and somebody who opened Settings in the
+ * middle of a practice session did not come here to be sold an upgrade. The
+ * tint is the accent at a tenth, which is the same wash a selected step gets:
+ * "this is the one worth looking at", not "act now".
+ *
+ * Wraps rather than squeezes: at 360px in German the sentence and the two
+ * words do not fit on one line and the buttons are what a finger is aiming
+ * at. */
+.about-newer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.about-newer-said {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-right: auto;
+}
+
+.about-newer-get,
+.about-newer-hide {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.about-newer-get {
+  color: var(--accent);
+}
+
+.about-newer-hide {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+@media (hover: hover) {
+  .about-newer-get:hover {
+    background: var(--accent-subtle);
+  }
+
+  .about-newer-hide:hover {
+    color: var(--text-secondary);
+  }
+}
+
+/* Both are real targets on the screen this only ever appears on. */
+@media (pointer: coarse) {
+  .about-newer-get,
+  .about-newer-hide {
+    min-height: 44px;
+    padding: 4px 12px;
+  }
+}
+
 .about-label {
   font-size: 0.85rem;
   color: var(--text-secondary);

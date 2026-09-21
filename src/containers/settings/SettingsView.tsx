@@ -21,6 +21,7 @@ type ViewTransitionLevel = "off" | "subtle" | "smooth" | "expressive";
 type AnimationStyle = "fade" | "scale" | "blur" | "slide" | "reveal";
 // The union lives with the hook that owns the state.
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
+import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
 type Evaluation = ReturnType<typeof useEvaluation>;
 
 interface SettingsViewProps {
@@ -30,6 +31,11 @@ interface SettingsViewProps {
   latestVersion: string;
   appVersion: string;
   doUpdateCheck: () => void;
+  /**
+   * "Version 1.3.0 is out" — only ever set on the phone build people
+   * download from yames.app, which nothing else keeps current (M11).
+   */
+  newerVersion?: NewerVersion;
   /** Absent on a phone: the store keeps the app up to date. */
   downloadAndInstallUpdate?: () => Promise<void>;
 
@@ -101,6 +107,7 @@ export function SettingsView({
   setUpdateStatus,
   latestVersion,
   appVersion,
+  newerVersion = NEVER_NEWER,
   doUpdateCheck,
   downloadAndInstallUpdate,
   autoCheckUpdates,
@@ -222,6 +229,7 @@ export function SettingsView({
 
       <AboutSection
         appVersion={appVersion}
+        newerVersion={newerVersion}
         updateStatus={updateStatus}
         latestVersion={latestVersion}
         onInstallUpdate={handleInstallUpdate}

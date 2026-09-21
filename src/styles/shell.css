@@ -3039,6 +3039,36 @@ body[data-sheet-maximized] .rail {
   color: var(--accent-2);
 }
 
+/* A newer version is out (M11).
+ *
+ * Six pixels on the Settings tab, and that is the whole of it: enough that
+ * somebody notices it eventually, not enough to interrupt anything. It is
+ * drawn from an attribute on the window rather than from a prop, so
+ * `MobileTabBar.tsx` does not have to know that updates exist — the tab bar
+ * belongs to another task, and a mark is a mark whatever put it there. Gone
+ * while you are in Settings, where the line itself is; gone for good once the
+ * version is taken or waved away.
+ *
+ * Only the phone build from the website can ever set the attribute
+ * (`SAYS_WHEN_NEWER`), so a store build cannot reach this rule. */
+.main-window[data-newer-version] .mobile-tab[data-tab="settings"] {
+  position: relative;
+}
+
+.main-window[data-newer-version] .mobile-tab[data-tab="settings"]::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  /* Half the tab, plus half the 21px glyph, less the dot — the corner of the
+     icon rather than the corner of the button, so it reads as belonging to
+     the icon at every tab width the fifteen locales produce. */
+  left: calc(50% + 8px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .mobile-tab-label {
   max-width: 100%;
   font-size: 0.58rem;
@@ -3118,6 +3148,25 @@ body[data-sheet-maximized] .rail {
   margin: 0 -14px;
   padding: 0 14px;
   gap: 14px;
+}
+
+/* ...except with a setlist running, where it did not fit and the thing that
+   fell off the edge was the one control that matters (M11).
+ *
+ * The desktop shedding order was written for a window: the step count goes
+ * under 680px, Skip loses its words under 820, and what is left — "Next in 8
+ * bars" and the button — is 125px against the 73px a 360px screen has after
+ * Stop and the count-in switch. Measured: the group ran 52px past the right
+ * edge and Skip was entirely off screen. On a "when I say" step nothing is
+ * counting down and no bar is running out, so Skip is the ONLY way the
+ * routine moves on — an unreachable one.
+ *
+ * So the words go and the button stays, which is the same order every other
+ * width uses. Nothing is lost: the step you are on, the bar you are in and
+ * how much of it is left are all drawn large on the player above it, which is
+ * the screen you are looking at while it plays. */
+.main-window.is-mobile .transport[data-setlist] .transport-setlist-next {
+  display: none;
 }
 
 /* The library is a sheet now, so the rail's own drawer geometry has nothing

@@ -62,3 +62,28 @@ export const DEBUG_SCREEN_SETTINGS = "debug:settings";
 
 /** Start in zen. Only honoured when `MOBILE_DEBUG_SCREENS`. */
 export const DEBUG_SCREEN_ZEN = "debug:zen";
+
+/**
+ * Whether this phone build came from yames.app rather than from a store.
+ *
+ * Set by `YAMES_SIDELOAD=1` (see `vite.config.ts`), which only the APK job in
+ * `.github/workflows/android.yml` passes — never the job that builds the
+ * bundle a store gets.
+ *
+ * It exists because the two builds are updated by different things and only
+ * one of them by nothing. A store keeps its own apps current; an app someone
+ * downloaded from the website has no way of learning that a newer one exists,
+ * so it asks once a day and says so quietly in About. A store build must not:
+ * it would be a second, worse update path in front of the real one, and both
+ * stores refuse an app that points at its own download page.
+ *
+ * Every read of it is inside a `SAYS_WHEN_NEWER ? … : …` or a
+ * `SAYS_WHEN_NEWER &&`, which is the form Rollup folds — so in a store build
+ * the check, the notice and the two web addresses they use are not in `dist/`
+ * at all. `scripts/check-mobile-bundle.mjs --sideload` and its plain form
+ * check both halves of that.
+ */
+declare const __YAMES_SIDELOAD__: boolean;
+
+export const SAYS_WHEN_NEWER: boolean =
+  typeof __YAMES_SIDELOAD__ !== "undefined" && __YAMES_SIDELOAD__;
