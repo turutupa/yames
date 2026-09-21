@@ -987,6 +987,79 @@ test.describe("clicking the tab", () => {
 });
 
 /**
+ * The part you are reading, from the head (W29 item 2).
+ *
+ * The owner: *"there's no dropdown for selecting the instrument if a file has
+ * multiple instruments"*. The menu is portalled to the body, so nothing about
+ * where it lands can be reasoned about from the stylesheet — and 320 px is
+ * not a decoration: `useMenuPlacement` positions against a width it caps at
+ * 320, so a wider panel is slid to an edge the hook thinks it is inside and
+ * hangs off the right of a 480 px window.
+ */
+test.describe("the instrument menu", () => {
+  for (const size of HEIGHTS) {
+    test(`opens inside the window at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      await page.locator(".songs-track-chip").click();
+      const pop = await page.locator(".songs-track-pop").boundingBox();
+      expect(pop, `no instrument menu at ${size.name}`).not.toBeNull();
+      expect(pop!.width, `the menu is ${Math.round(pop!.width)}px wide`).toBeLessThanOrEqual(320);
+      expect(pop!.x, `the menu starts off-screen at ${size.name}`).toBeGreaterThanOrEqual(0);
+      expect(
+        pop!.x + pop!.width,
+        `the menu runs past the right edge at ${size.name}`,
+      ).toBeLessThanOrEqual(size.width);
+      expect(pop!.y + pop!.height, `the menu runs off the bottom at ${size.name}`).toBeLessThanOrEqual(
+        size.height,
+      );
+      await noSidewaysScroll(page, `the instrument menu at ${size.name}`);
+    });
+  }
+
+  test("lists every part, and says why one cannot be chosen", async ({ page }) => {
+    // The fixture's track names are the FILE's, not the locale's.
+    test.skip(!IN_ENGLISH, "track names come from the file");
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    await page.locator(".songs-track-chip").click();
+    const rows = await page.$$eval(".songs-track-row", (nodes) =>
+      nodes.map((node) => ({
+        name: node.querySelector(".songs-track-row-name")?.textContent ?? "",
+        facts: node.querySelector(".songs-track-row-facts")?.textContent ?? "",
+        disabled: (node as HTMLButtonElement).disabled,
+        chosen: node.hasAttribute("data-chosen"),
+      })),
+    );
+    expect(rows.map((r) => r.name), "not every part of the file is listed").toEqual([
+      "Guitar",
+      "Drums",
+      "Bass",
+    ]);
+    // The part being read is marked, and every fretted part says its tuning.
+    expect(rows.filter((r) => r.chosen).map((r) => r.name)).toEqual(["Guitar"]);
+    expect(rows[0].facts).toContain("E A D G B E");
+    expect(rows[2].facts).toContain("E A D G");
+    // The drum chart is there and is not offered, with the reason in the row.
+    expect(rows[1].disabled, "the drum chart was offered as something to read").toBe(true);
+    expect(rows[1].facts.length, "the drum row does not say why").toBeGreaterThan(0);
+  });
+
+  test("switches the tab, the tuning and the name to the chosen part", async ({ page }) => {
+    test.skip(!IN_ENGLISH, "track names come from the file");
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const tuning = page.locator(".songs-facts dd").first();
+    await expect(tuning).toHaveText("E A D G B E");
+
+    await page.locator(".songs-track-chip").click();
+    await page.getByRole("option", { name: /Bass/ }).click();
+
+    await expect(page.locator(".songs-track-chip-name")).toHaveText("Bass");
+    await expect(tuning).toHaveText("E A D G");
+    // And the tab was re-engraved for it rather than left on the guitar.
+    await expect(page.locator(".songs-tab-host[data-ready]")).toHaveCount(1);
+  });
+});
+
+/**
  * Every theme draws the tab, and draws it in that theme's ink.
  *
  * This is here rather than in vitest because happy-dom runs no renderer:

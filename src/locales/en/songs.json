@@ -325,6 +325,12 @@
       "withPicture": "With picture",
       "noneFilmed": "None of these was filmed.",
       "was": "Bars {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Which part you are reading",
+      "percussion": "Drums — not one to follow",
+      "notTab": "Not written as tab",
+      "empty": "Nothing written on this one"
     }
   }
 }

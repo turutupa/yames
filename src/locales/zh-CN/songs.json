@@ -325,6 +325,12 @@
       "withPicture": "有画面",
       "noneFilmed": "这些都没有录画面。",
       "was": "第 {{bars}} 小节 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "你在看哪一个声部",
+      "percussion": "鼓 — 跟不了这一条",
+      "notTab": "不是用六线谱写的",
+      "empty": "这一条什么也没写"
     }
   }
 }

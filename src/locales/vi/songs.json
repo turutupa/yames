@@ -325,6 +325,12 @@
       "withPicture": "Có hình",
       "noneFilmed": "Không có bản nào được quay hình.",
       "was": "Ô nhịp {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Bè bạn đang đọc",
+      "percussion": "Trống — không phải bè để theo",
+      "notTab": "Không viết dưới dạng tab",
+      "empty": "Bè này không có gì cả"
     }
   }
 }

@@ -325,6 +325,12 @@
       "withPicture": "Met beeld",
       "noneFilmed": "Hiervan is er geen gefilmd.",
       "was": "Maten {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Welke partij je leest",
+      "percussion": "Drums — niet om te volgen",
+      "notTab": "Niet als tab geschreven",
+      "empty": "Hier staat niets in"
     }
   }
 }

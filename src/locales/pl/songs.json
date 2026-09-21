@@ -343,6 +343,12 @@
       "withPicture": "Z obrazem",
       "noneFilmed": "Żadne z tych nie było nagrywane obrazem.",
       "was": "Takty {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Którą partię czytasz",
+      "percussion": "Perkusja — nie da się jej śledzić",
+      "notTab": "Nie zapisana w tabulaturze",
+      "empty": "Tu nic nie zapisano"
     }
   }
 }

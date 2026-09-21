@@ -325,6 +325,12 @@
       "withPicture": "영상 있음",
       "noneFilmed": "이 중에 촬영된 것은 없습니다.",
       "was": "{{bars}}마디 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "지금 보고 있는 파트",
+      "percussion": "드럼 — 따라갈 수 있는 파트가 아닙니다",
+      "notTab": "탭으로 적혀 있지 않습니다",
+      "empty": "여기에는 아무것도 적혀 있지 않습니다"
     }
   }
 }

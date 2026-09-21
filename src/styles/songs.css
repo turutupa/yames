@@ -246,6 +246,138 @@
   color: var(--text-primary);
 }
 
+/* ── Which part of the file you are reading (W29 item 2) ──────────────── */
+
+/* The sub-line is a row now rather than a sentence, because the part's name
+   in it is a control. */
+.songs-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.songs-sub-artist::after {
+  content: "·";
+  margin-left: 8px;
+  color: var(--text-faint);
+}
+
+/* A file with one part is not a choice, so it is not a button. */
+.songs-track-one {
+  color: var(--text-tertiary);
+}
+
+.songs-track-menu {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.songs-track-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 260px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.songs-track-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songs-track-glyph,
+.songs-track-row-glyph {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--text-tertiary);
+}
+
+.songs-track-caret {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+}
+
+/* Portalled and placed by `useMenuPlacement`, so `fixed`: the numbers it is
+   given are window coordinates. 320 and not a pixel more — the hook caps the
+   width it positions against at 320, and a wider panel is slid to an edge it
+   thinks it is inside and hangs off the right of a 480px window. */
+.songs-track-pop {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(320px, calc(100vw - 24px));
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+.songs-track-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 2px 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.songs-track-row:hover:not(:disabled),
+.songs-track-row:focus-visible {
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+/* The part being read, marked twice: the tint and a bar along the foot, the
+   same pairing the chips use — a hue on its own does not survive the two
+   lowest-contrast themes or a screenshot. */
+.songs-track-row[data-chosen] {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  box-shadow: inset 0 -3px 0 0 var(--accent);
+}
+
+/* Listed, and not offered. A drum chart and a vocal line are in the file and
+   a list that hid them would look like it had lost them; the facts column
+   says why instead. */
+.songs-track-row:disabled {
+  cursor: default;
+  color: var(--text-faint);
+}
+
+.songs-track-row-name {
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.songs-track-row-facts {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.songs-track-row-note {
+  grid-column: 2 / -1;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
 /* ── What the importer changed on the way in ──────────────────────────── */
 
 .songs-warnings {

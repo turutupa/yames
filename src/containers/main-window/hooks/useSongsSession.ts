@@ -102,6 +102,23 @@ export interface SongsSession extends SongEngine {
   tempo: number;
   /** Portions of this song the player named and kept. */
   portions: SavedPortion[];
+  /**
+   * Every track in the open song's file, for the header's instrument menu
+   * (W29 item 2). Empty until the file has been read back, and for a song
+   * whose bytes were never stored.
+   */
+  tracks: SongTrackChoice[];
+  /**
+   * Read a different track of the same file.
+   *
+   * A song's id is a hash of the bytes AND the track (`songId`), so each
+   * track is its own row in the store with its own attempts, its own takes
+   * and its own promises — which is exactly what "takes and history belong to
+   * the track they were played on" asks for, and why there is no migration
+   * here. This switches to that row, making it if it is new, and carries the
+   * portion, the playhead and the speed across.
+   */
+  switchTrack: (trackIndex: number) => Promise<void>;
   pending: PendingImport | null;
   warnings: SongImportWarning[];
   /** A sentence to show the player, or null. */
@@ -285,6 +302,38 @@ export function useSongsSession(
   );
 
   const cancelImport = useCallback(() => setPending(null), []);
+
+  /**
+   * The tracks of the open file, read back once per song (W29 item 2).
+   *
+   * The header's menu has to list every part in the file, and a `SongScore`
+   * knows only about the one that was chosen. The bytes are already in
+   * memory, so this is a parse and no I/O — and it is the parse, not the
+   * menu, that is the expensive half, which is why it happens here and once
+   * rather than in the component every time somebody opens the list.
+   */
+  const [tracks, setTracks] = useState<SongTrackChoice[]>([]);
+  useEffect(() => {
+    if (!score || !source || source.length === 0) {
+      setTracks([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const importer = await importerModule();
+        const parsed = importer.parseSongFile(source, score.source.fileName);
+        if (!cancelled) setTracks(parsed.tracks);
+      } catch {
+        // A file we cannot re-read is a song with one track as far as the
+        // menu is concerned. It is already imported and it still plays.
+        if (!cancelled) setTracks([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [score, source]);
 
   const renameSong = useCallback(
     (id: string, name: string) => commit(renameInList(songs, id, name)),
@@ -514,6 +563,70 @@ export function useSongsSession(
     setStageSetting({ selection, loop, tempoPercent });
   }, [song?.id, selection, loop, tempoPercent, setStageSetting]);
 
+  /**
+   * Read a different part of the same file (W29 item 2).
+   *
+   * The owner, after his first session: *"there's no dropdown for selecting
+   * the instrument if a file has multiple instruments"*. The track was chosen
+   * once at import and was invisible and final after that.
+   *
+   * ## Each track is its own song, and always was
+   *
+   * `songId` hashes the bytes AND the track index, so the guitar part and the
+   * bass part of one file are two rows in the store — two scores, and
+   * `attempts.score_id` points at one of them. Which means the history, the
+   * takes, "then and now" and the coach's promises were already kept apart by
+   * track and there is nothing to migrate: switching here opens the other
+   * row, and every attempt anybody ever made stays with the part it was
+   * played on.
+   *
+   * The row is named after the part so the library does not show one file
+   * twice under one name.
+   *
+   * ## What crosses over
+   *
+   * The bars you were working on, the playhead and the speed — you are
+   * looking at the same passage of the same piece, and arriving at bar 1 of
+   * the bass part because that is where the bass part was left a fortnight
+   * ago is not what "show me the bass" meant. `restoredFor` is stamped with
+   * the new id first, so the effect that restores a song's stored portion
+   * sees this song as already restored and leaves those three alone; the
+   * effect that writes them down then saves them under the new id, which is
+   * what "remembers the choice per song" comes to.
+   */
+  const switchTrack = useCallback(
+    async (trackIndex: number) => {
+      if (!song || !score || !source || source.length === 0) return;
+      if (trackIndex === score.source.trackIndex) return;
+      setError(null);
+      const importer = await importerModule();
+      try {
+        const parsed = importer.parseSongFile(source, score.source.fileName);
+        const result = importer.buildSongScore(parsed, trackIndex, source);
+        const existing = songs.find((s) => s.id === result.score.id);
+        // The name the player gave this song, without the part it is already
+        // named after — so switching twice does not build up a tail.
+        const suffix = ` · ${score.source.trackName}`;
+        const base = song.name.endsWith(suffix) ? song.name.slice(0, -suffix.length) : song.name;
+        const record =
+          existing ??
+          {
+            ...newSongRecord(result.score, source),
+            name: `${base} · ${result.score.source.trackName}`,
+            addedAt: song.addedAt,
+          };
+        commit(addSong(songs, record));
+        restoredFor.current = record.id;
+        setActiveId(record.id);
+        setWarnings(result.warnings);
+        void markScoreOpened(record.id).catch(() => {});
+      } catch (err) {
+        setError(err instanceof importer.SongImportError ? err.message : String(err));
+      }
+    },
+    [song, score, source, songs, commit],
+  );
+
   const portions = engine.mixSetting.portions;
 
   const savePortion = useCallback(
@@ -558,6 +671,8 @@ export function useSongsSession(
     tempoPercent,
     tempo,
     portions,
+    tracks,
+    switchTrack,
     pending,
     warnings,
     error,

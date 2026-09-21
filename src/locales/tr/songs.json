@@ -325,6 +325,12 @@
       "withPicture": "Görüntülü",
       "noneFilmed": "Bunların hiçbiri kaydedilmedi.",
       "was": "Ölçü {{bars}} · %{{percent}} · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Hangi partisyonu okuyorsun",
+      "percussion": "Davul — takip edilecek bir parti değil",
+      "notTab": "Tab olarak yazılmamış",
+      "empty": "Burada bir şey yazmıyor"
     }
   }
 }

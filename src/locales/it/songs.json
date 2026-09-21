@@ -334,6 +334,12 @@
       "withPicture": "Con immagine",
       "noneFilmed": "Nessuna di queste è stata ripresa.",
       "was": "Battute {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Quale parte stai leggendo",
+      "percussion": "Batteria — non è una parte da seguire",
+      "notTab": "Non è scritta in tablatura",
+      "empty": "Qui non c'è scritto niente"
     }
   }
 }

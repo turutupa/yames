@@ -334,6 +334,12 @@
       "withPicture": "Com imagem",
       "noneFilmed": "Nenhuma delas foi filmada.",
       "was": "Compassos {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Que parte você está lendo",
+      "percussion": "Bateria — não dá para acompanhar",
+      "notTab": "Não está escrita em tablatura",
+      "empty": "Não tem nada escrito aqui"
     }
   }
 }

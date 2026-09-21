@@ -47,6 +47,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
+import { TrackMenu } from "./TrackMenu";
 /*
  * The review's hooks, from their own modules rather than through
  * `./review`.
@@ -617,8 +618,18 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           <header className="songs-head">
             <div className="songs-head-titles">
               <h2 className="songs-title">{song?.name ?? score.title}</h2>
+              {/* Who wrote it, and WHICH PART OF IT YOU ARE READING — a menu
+                  now, not a label (W29 item 2). It is a different question
+                  from the band's faders on the strip: this one chooses what
+                  you read and are scored on, those choose what you hear. */}
               <p className="songs-sub">
-                {[score.artist, score.source.trackName].filter(Boolean).join(" · ")}
+                {score.artist && <span className="songs-sub-artist">{score.artist}</span>}
+                <TrackMenu
+                  tracks={session.tracks}
+                  current={score.source.trackIndex}
+                  currentName={score.source.trackName}
+                  onChoose={(index) => void session.switchTrack(index)}
+                />
               </p>
             </div>
             <dl className="songs-facts">

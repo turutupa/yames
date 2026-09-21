@@ -325,6 +325,12 @@
       "withPicture": "映像あり",
       "noneFilmed": "どれも撮影されていません。",
       "was": "{{bars}}小節 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "読んでいるパート",
+      "percussion": "ドラム — 追いかけられないパートです",
+      "notTab": "タブ譜で書かれていません",
+      "empty": "このパートには何も書かれていません"
     }
   }
 }

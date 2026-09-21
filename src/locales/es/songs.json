@@ -334,6 +334,12 @@
       "withPicture": "Con vídeo",
       "noneFilmed": "Ninguna de estas se grabó en vídeo.",
       "was": "Compases {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Qué parte estás leyendo",
+      "percussion": "Batería — no es para seguir",
+      "notTab": "No está escrita como tablatura",
+      "empty": "Aquí no hay nada escrito"
     }
   }
 }

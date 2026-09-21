@@ -325,6 +325,12 @@
       "withPicture": "Mit Bild",
       "noneFilmed": "Keine davon wurde gefilmt.",
       "was": "Takte {{bars}} · {{percent}} % · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Welche Stimme du liest",
+      "percussion": "Schlagzeug — dafür nicht gedacht",
+      "notTab": "Nicht als Tabulatur geschrieben",
+      "empty": "Hier steht nichts drin"
     }
   }
 }
