@@ -749,6 +749,7 @@ export function useSongsSession(
     range,
     loop,
     tempoPercent,
+    isPlaying,
     startTick: engineStartTick,
   });
 

@@ -134,6 +134,13 @@ export type SongEngineInput = {
   loop: boolean;
   tempoPercent: number;
   /**
+   * Is the transport running? Read by the rebuild and by nothing else.
+   *
+   * A rebuild is a restart, so the two things that only decide how the NEXT
+   * pass begins — the count-in and the playhead — are held until the stop.
+   */
+  isPlaying: boolean;
+  /**
    * Where the next pass begins, in the song's own ticks — the playhead
    * (W37 item 1).
    *
@@ -152,6 +159,7 @@ export function useSongEngine({
   range,
   loop,
   tempoPercent,
+  isPlaying,
   startTick,
 }: SongEngineInput): SongEngine {
   const [mixSetting, setMixSetting] = useState<SongMixSetting>(DEFAULT_MIX_SETTING);
@@ -247,19 +255,51 @@ export function useSongEngine({
    * A ref and not state, because it is written from inside the effect that
    * reads it — keeping it in state would re-run the effect that set it.
    */
-  const heldRef = useRef<{ songId: string; key: string } | null>(null);
+  const heldRef = useRef<{ songId: string; key: string; music: string } | null>(null);
   const reloadedAtRef = useRef(0);
   const onSongsRef = useRef(onSongs);
   onSongsRef.current = onSongs;
 
-  const settingsKey = JSON.stringify([
-    range.startBar,
-    range.endBar,
-    loop,
-    tempoPercent,
-    mixSetting.countInBars,
-    startTick,
-  ]);
+  /*
+   * ── Two keys, because two of these are typed and two are pressed ────────
+   *
+   * The bar fields are number inputs and fire per keystroke, so a range or a
+   * speed waits [`REBUILD_DEBOUNCE_MS`] before the piece is rebuilt — typing
+   * "24" into the end bar would otherwise compile it twice, once for bar 2.
+   *
+   * **The count-in and the playhead are not typed.** They are a switch and a
+   * click, and a quarter of a second is long enough to press Play in. The
+   * owner, 2026-09-21: *"count in is happening for songs whether it's enabled
+   * or not"*. Turn the switch off, press Play inside the debounce, and the
+   * piece the engine is still holding is the one compiled with the count-in —
+   * so it counts you in, and then the rebuild lands underneath and starts the
+   * song again. Both halves of that are this timer. So a change to either of
+   * these goes at once, and only the two that come from a keyboard wait.
+   */
+  const musicKey = JSON.stringify([range.startBar, range.endBar, loop, tempoPercent]);
+
+  /**
+   * And NEITHER of them is sent while the transport runs.
+   *
+   * A rebuild is a restart: `set_song_range` compiles the piece again and the
+   * callback begins it from the playhead (`song.rs`), which under a running
+   * pass would end the attempt and raise the review. Both of these only
+   * decide how the NEXT pass begins — a count-in leads into a first pass that
+   * has already happened, and the playhead is moved live by `seek_song` — so
+   * holding them until the stop costs nothing and takes the restart away.
+   */
+  const [heldStart, setHeldStart] = useState({ countInBars: 0, startTick: 0 });
+  useEffect(() => {
+    if (isPlaying) return;
+    setHeldStart((current) =>
+      current.countInBars === mixSetting.countInBars && current.startTick === startTick
+        ? current
+        : { countInBars: mixSetting.countInBars, startTick },
+    );
+  }, [isPlaying, mixSetting.countInBars, startTick]);
+
+  const startKey = JSON.stringify([heldStart.countInBars, heldStart.startTick]);
+  const settingsKey = `${musicKey}|${startKey}`;
 
   useEffect(() => {
     if (!onSongs || !score || band === null) {
@@ -277,17 +317,22 @@ export function useSongEngine({
     const held = heldRef.current;
     if (held && held.songId === score.id && held.key === settingsKey) return;
 
+    // Only what somebody TYPED waits. A switch and a click go on the next
+    // tick, which is still a tick later rather than inside this effect: the
+    // send is async and an effect that awaited would be an effect that could
+    // not be cancelled.
+    const typed = !held || held.songId !== score.id || held.music !== musicKey;
     const timer = setTimeout(() => {
       void (async () => {
         try {
           const importer = await importerModule();
           const sameSong = heldRef.current?.songId === score.id;
-          heldRef.current = { songId: score.id, key: settingsKey };
+          heldRef.current = { songId: score.id, key: settingsKey, music: musicKey };
           const options = {
             loops: loop,
             tempoPercent,
-            countInBars: mixSetting.countInBars,
-            startTick,
+            countInBars: heldStart.countInBars,
+            startTick: heldStart.startTick,
           };
           const transport = importer.buildTransport(score, range, options);
           // A range or a speed change on a song the engine already holds is
@@ -315,7 +360,7 @@ export function useSongEngine({
           setEngineError({ kind: "load", ...(detail ? { detail } : {}) });
         }
       })();
-    }, REBUILD_DEBOUNCE_MS);
+    }, typed ? REBUILD_DEBOUNCE_MS : 0);
 
     return () => clearTimeout(timer);
     // `settingsKey` is every field of the send, in one string; listing them
