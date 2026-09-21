@@ -25,10 +25,33 @@ cd "$(dirname "$0")/../.."
 bash scripts/ci/ios-ensure-assets.sh
 bash scripts/ci/ios-xcode-env.sh
 
-export CODE_SIGNING_ALLOWED=NO
-export CODE_SIGNING_REQUIRED=NO
-export CODE_SIGN_IDENTITY=""
-export CODE_SIGN_ENTITLEMENTS=""
+# How signing is switched off, and why it looks like this.
+#
+# Build settings cannot be forced on Xcode from the environment here: the
+# Tauri CLI runs xcodebuild through `duct … .full_env(env.explicit_env())`,
+# which *replaces* the environment with a short allow-list, so
+# `CODE_SIGNING_ALLOWED=NO` never arrives. The CLI has exactly one path that
+# passes those flags to xcodebuild itself, and it takes it when App Store
+# Connect credentials are present in the environment — because the intended
+# flow is to build and archive unsigned and then sign at export, with the key.
+#
+# So: three placeholder values, which authenticate nothing and are never sent
+# anywhere. They make the CLI build and archive with
+# `CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY=""`,
+# which is precisely the unsigned arm64 archive this step exists to produce.
+# The export that follows then fails, as it must — and the archive it fails
+# after is what gets measured.
+#
+# If real credentials are ever set on this repository (M06b), they are used
+# instead and this block does nothing.
+if [ -z "${APPLE_API_KEY:-}" ]; then
+  echo "==> no App Store Connect credentials; using placeholders so the archive is built unsigned"
+  PLACEHOLDER_KEY="$(mktemp -d)/AuthKey_UNSIGNED000.p8"
+  printf 'this is not a key. M06a never handles one. See M06b-OWNER-STEPS.md.\n' > "$PLACEHOLDER_KEY"
+  export APPLE_API_KEY=UNSIGNED000
+  export APPLE_API_ISSUER=00000000-0000-0000-0000-000000000000
+  export APPLE_API_KEY_PATH="$PLACEHOLDER_KEY"
+fi
 
 echo "==> building for a real iPhone (export is expected to fail: nothing here is signed)"
 if npm run tauri -- ios build --target aarch64 --export-method debugging; then
