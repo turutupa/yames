@@ -449,6 +449,56 @@ const SHOT_SONG_SEVEN = `\\title "Seven strings"
 0.7.4 0.7.4 (0.7 0.6 0.5).2 |
 ${SHOT_BAND_TEX}`;
 
+/**
+ * `?song=long` — a hundred and twenty bars, six sections and a repeat (W34).
+ *
+ * The owner, 2026-09-21: *"I imported a tab and it feels like it's not
+ * rendering the entire song, just a section of it"*. Every song written for
+ * these pictures until now was eight bars, which fits on two systems and can
+ * never show that: the whole failure is about a page taller than the frame
+ * it scrolls in. This one is six screens of music, so bar 100 is a real
+ * scroll away and the bars past the fold are the question.
+ *
+ * Built by a loop rather than typed out, because a hundred and twenty bars of
+ * hand-written alphaTex is a hundred and twenty chances to make a typo that
+ * reads as a rendering bug. The repeat in the Bridge is what makes played
+ * bars and printed bars differ, which is the other half of the same report.
+ */
+const LONG_SECTIONS = ["Intro", "Verse", "Bridge", "Chorus", "Solo", "Outro"];
+const LONG_BARS_PER_SECTION = 20;
+
+function longSongTex(): string {
+  const lines: string[] = [
+    `\\title "The long one"`,
+    `\\artist "Written for the pictures"`,
+    `\\tempo 96`,
+    ".",
+    `\\track "Guitar"`,
+    `\\tuning e5 b4 g4 d4 a3 e3`,
+  ];
+  let bar = 0;
+  for (const [s, section] of LONG_SECTIONS.entries()) {
+    lines.push(`\\section ${section}`);
+    for (let i = 0; i < LONG_BARS_PER_SECTION; i++) {
+      // Every bar reads differently, so a picture of bar 100 cannot be
+      // mistaken for a picture of bar 4.
+      const fret = 3 + (bar % 8) * 2;
+      const notes = [5, 5, 4, 4, 5, 5, 4, 4]
+        .map((string, n) => `${String(fret + (n % 2) * 2)}.${String(string)}.8`)
+        .join(" ");
+      // One repeated block, in the middle of the Bridge: printed bars and
+      // played bars part company there and nowhere else.
+      const open = s === 2 && i === 4 ? "\\ro " : "";
+      const close = s === 2 && i === 7 ? "\\rc 2 " : "";
+      const meter = bar === 0 ? "\\ts 4 4 " : "";
+      lines.push(`${open}${close}${meter}${notes} |`);
+      bar += 1;
+    }
+  }
+  lines.push(SHOT_BAND_TEX);
+  return lines.join("\n");
+}
+
 let songRecord: SongRecord | null = null;
 let songRecordFor = "";
 
@@ -459,9 +509,9 @@ let songRecordFor = "";
  * notes, every scene means the same thing with any of them, and a field would
  * have been three copies of every Songs recipe in `scenarios.ts`.
  */
-function songChoice(): "default" | "sixteenths" | "seven" {
+function songChoice(): "default" | "sixteenths" | "seven" | "long" {
   const asked = new URLSearchParams(window.location.search).get("song");
-  return asked === "sixteenths" || asked === "seven" ? asked : "default";
+  return asked === "sixteenths" || asked === "seven" || asked === "long" ? asked : "default";
 }
 
 /** Built once: parsing is the expensive half and the shot never changes it. */
@@ -473,7 +523,9 @@ function songShotRecord(): SongRecord {
         ? SHOT_SONG_SIXTEENTHS
         : choice === "seven"
           ? SHOT_SONG_SEVEN
-          : SHOT_SONG_TEX;
+          : choice === "long"
+            ? longSongTex()
+            : SHOT_SONG_TEX;
     const name =
       choice === "default" ? "Practice piece.alphatex" : `${choice}.alphatex`;
     const bytes = new TextEncoder().encode(tex);
