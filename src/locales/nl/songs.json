@@ -211,7 +211,8 @@
       "portionPlaceholder": "Geef dit stuk een naam",
       "renamePortion": "Hernoemen",
       "deletePortion": "Deze vergeten",
-      "portionTitle": "{{name}} — op {{percent}}%"
+      "portionTitle": "{{name}} — op {{percent}}%",
+      "tabLabel": "De tab. Klik op een maat om daarheen te gaan, of sleep over maten om een stuk te kiezen."
     },
     "offer": {
       "justArrived": "staat net in je downloads",

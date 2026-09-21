@@ -211,7 +211,8 @@
       "portionPlaceholder": "Đặt tên cho đoạn này",
       "renamePortion": "Đổi tên",
       "deletePortion": "Quên đoạn này",
-      "portionTitle": "{{name}} — ở {{percent}}%"
+      "portionTitle": "{{name}} — ở {{percent}}%",
+      "tabLabel": "Bản tab. Nhấp vào một ô nhịp để tới đó, hoặc kéo qua các ô nhịp để chọn một đoạn."
     },
     "offer": {
       "justArrived": "vừa về trong thư mục tải xuống của bạn",

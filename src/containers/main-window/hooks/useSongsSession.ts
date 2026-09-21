@@ -34,7 +34,13 @@ type Importer = Awaited<ReturnType<typeof importerModule>>;
 import type { ParsedSong, SongImportWarning, SongTrackChoice } from "../../../songs/import";
 import type { BarRange } from "../../../songs/schedule";
 import { dayOf, listSongDue, songDueNow } from "../../../songs/due";
-import { addPortion, newPortionId, removePortion, renamePortion } from "../../../songs/selection";
+import {
+  addPortion,
+  clampSelection,
+  newPortionId,
+  removePortion,
+  renamePortion,
+} from "../../../songs/selection";
 import type { SavedPortion } from "../../../songs/selection";
 import type { SongScore } from "../../../songs/types";
 import { forgetMixSetting } from "../../../songs/songEngine";
@@ -64,6 +70,24 @@ export interface SongsSession extends SongEngine {
    * — and everything that used to read a range goes on reading one.
    */
   range: BarRange;
+  /**
+   * The bars the PORTION covers — the selection, or the whole song.
+   *
+   * `range` is what plays and is where the playhead has put it; this is what
+   * the player chose. The two are the same until somebody clicks a bar, and
+   * the strip's fields, the band on the tab and everything that says "what am
+   * I working on" read this one (W29).
+   */
+  portion: BarRange;
+  /**
+   * Where the playhead stands, as a played bar, or null for the start.
+   *
+   * A click on the tab moves it (W29 item 1). It is the bar the next pass
+   * begins at, and — while the piece is stopped — the bar the cursor sits on.
+   */
+  playFrom: number | null;
+  /** Go to a bar. Clamped into the song; the portion is left alone. */
+  seekTo: (playedBar: number) => void;
   /**
    * The portion the player picked out, or null for the whole song.
    *
@@ -130,6 +154,8 @@ export function useSongsSession(
   const [selection, setSelectionState] = useState<BarRange | null>(null);
   const [loop, setLoop] = useState(false);
   const [tempoPercent, setTempoPercentState] = useState(100);
+  /** Where a click on the tab left the playhead, in played bars (W29). */
+  const [playFromState, setPlayFrom] = useState<number | null>(null);
   const [pending, setPending] = useState<PendingImport | null>(null);
   const [warnings, setWarnings] = useState<SongImportWarning[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -187,6 +213,7 @@ export function useSongsSession(
       const next = songs.find((s) => s.id === id);
       if (!next) return;
       setActiveId(id);
+      setPlayFrom(null);
       // Cleared, not carried: the portion this song was left on comes back
       // from the store a moment later (see the effect below), and carrying
       // the last song's bars across in the meantime would loop bars 17–24 of
@@ -245,6 +272,7 @@ export function useSongsSession(
         commit(next);
         setPending(null);
         setActiveId(record.id);
+        setPlayFrom(null);
         setSelectionState(null);
         setLoop(false);
         setTempoPercentState(100);
@@ -275,15 +303,50 @@ export function useSongsSession(
   );
 
   /**
-   * The engine plays the selection, or the whole song when there is none.
+   * The bars the player chose: the selection, or the whole song.
    *
    * The one place the two ideas meet. Everything downstream — the schedule,
    * the transport, the cursor, the review — goes on being handed a range and
    * never learns that "nothing selected" is a state.
    */
-  const range = useMemo<BarRange>(
+  const portion = useMemo<BarRange>(
     () => (score ? (selection ? clampRange(score, selection) : wholeSong(score)) : { startBar: 0, endBar: 0 }),
     [score, selection],
+  );
+
+  /**
+   * And where the playhead stands inside it (W29 item 1).
+   *
+   * Clamped into the portion rather than kept wherever it was clicked: a
+   * playhead outside the bars that are going to play is a cursor pointing at
+   * music nobody is about to hear.
+   */
+  const playFrom = useMemo<number | null>(() => {
+    if (playFromState === null || !score) return null;
+    return Math.min(Math.max(playFromState, portion.startBar), portion.endBar);
+  }, [playFromState, score, portion]);
+
+  /**
+   * What the engine is actually given.
+   *
+   * **The playhead only moves the start when the repeat is off.** The engine
+   * has no seek: `set_song_range` recompiles the piece and starts it at the
+   * top of whatever range it is handed (`commands.rs`), so a loop always
+   * begins at its own first bar. With the repeat on, the portion is the unit
+   * being practised and it plays whole — the playhead is then where your eye
+   * is, and the cursor shows it while the piece is stopped. With the repeat
+   * off, "click here, press play, it starts here" is exactly what happens.
+   *
+   * What the engine would need for the other half is small and belongs to
+   * whoever owns `song.rs`: a `seek_song(tick)` that moves the cursor inside
+   * the table already compiled, and a first pass that may begin part-way
+   * through a loop. Doing it here instead would mean stopping — and a stop
+   * ends the attempt and raises the verdict (`COACH_UX.md` A3), so clicking
+   * the tab mid-song would throw a review on screen every time.
+   */
+  const range = useMemo<BarRange>(
+    () => (playFrom === null || loop ? portion : { startBar: playFrom, endBar: portion.endBar }),
+    [portion, playFrom, loop],
   );
 
   /**
@@ -300,6 +363,10 @@ export function useSongsSession(
    */
   const setSelection = useCallback(
     (next: BarRange | null) => {
+      // A new portion starts at its own first bar: the playhead was a place
+      // inside the LAST one, and carrying it across would begin a freshly
+      // chosen passage somewhere in the middle of itself (W29).
+      setPlayFrom(null);
       if (!next) {
         setSelectionState(null);
         setLoop(false);
@@ -307,6 +374,23 @@ export function useSongsSession(
       }
       setSelectionState(score ? clampRange(score, next) : next);
       setLoop(true);
+    },
+    [score],
+  );
+
+  /**
+   * Go to a bar (W29 item 1) — a click on the tab, or an arrow key.
+   *
+   * It moves the playhead and NOTHING else. The portion is left exactly as it
+   * was, which is what Songsterr, Ultimate Guitar and Guitar Pro all do (the
+   * repeat is a switch there too) and what the owner asked for: *"just going
+   * to that place"*. `clampSelection` holds it inside the song; `playFrom`
+   * above holds it inside the portion.
+   */
+  const seekTo = useCallback(
+    (playedBar: number) => {
+      if (!score) return;
+      setPlayFrom(clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar);
     },
     [score],
   );
@@ -466,6 +550,9 @@ export function useSongsSession(
     score,
     source,
     range,
+    portion,
+    playFrom,
+    seekTo,
     selection,
     loop,
     tempoPercent,

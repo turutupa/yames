@@ -229,7 +229,8 @@
       "portionPlaceholder": "Назовите этот фрагмент",
       "renamePortion": "Переименовать",
       "deletePortion": "Забыть этот",
-      "portionTitle": "{{name}} — на {{percent}}%"
+      "portionTitle": "{{name}} — на {{percent}}%",
+      "tabLabel": "Табулатура. Нажми на такт, чтобы перейти туда, или протяни по тактам, чтобы выбрать кусок."
     },
     "offer": {
       "justArrived": "только что появился в загрузках",

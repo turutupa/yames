@@ -211,7 +211,8 @@
       "portionPlaceholder": "Diesen Teil benennen",
       "renamePortion": "Umbenennen",
       "deletePortion": "Diesen hier vergessen",
-      "portionTitle": "{{name}} — bei {{percent}} %"
+      "portionTitle": "{{name}} — bei {{percent}} %",
+      "tabLabel": "Die Tabulatur. Klick auf einen Takt, um dorthin zu springen, oder zieh über mehrere Takte, um einen Teil zu wählen."
     },
     "offer": {
       "justArrived": "ist gerade in deinen Downloads gelandet",

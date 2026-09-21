@@ -18,12 +18,13 @@ import {
   MAX_SAVED_PORTIONS,
   nudgeRange,
   playedBarOfPrinted,
+  pressIsDrag,
   printedRunsOfRange,
   removePortion,
   renamePortion,
   setEdge,
 } from "./selection";
-import type { SavedPortion } from "./selection";
+import type { SavedPortion, TabPress } from "./selection";
 import type { SongScore } from "./types";
 
 /** A song of `count` played bars, each of them its own printed bar. */
@@ -270,5 +271,39 @@ describe("portions the player keeps", () => {
   it("forgets one by id and leaves the rest", () => {
     const all = addPortion(addPortion([], portion("A", "a")), portion("B", "b"));
     expect(removePortion(all, "a").map((p) => p.id)).toEqual(["b"]);
+  });
+});
+
+/**
+ * A click and a drag, told apart (W29 item 1).
+ *
+ * The whole of the owner's complaint lives in this one distinction: *"when i
+ * click on the tab its selecting it for loop instead of just going to that
+ * place"*. Pixels and not bars, because two bars can be forty pixels apart
+ * and a hand that shook while pressing must still be a click.
+ */
+describe("a click or a drag", () => {
+  const press = (over: Partial<TabPress> = {}): TabPress => ({
+    bar: 4,
+    clientX: 100,
+    clientY: 200,
+    handle: null,
+    shiftKey: false,
+    ...over,
+  });
+
+  it("is a click while the pointer has barely moved", () => {
+    expect(pressIsDrag(press(), 100, 200)).toBe(false);
+    expect(pressIsDrag(press(), 103, 202)).toBe(false);
+  });
+
+  it("becomes a drag once the pointer travels", () => {
+    expect(pressIsDrag(press(), 112, 200)).toBe(true);
+    expect(pressIsDrag(press(), 100, 188)).toBe(true);
+  });
+
+  it("is a drag from the first pixel on a handle or with shift", () => {
+    expect(pressIsDrag(press({ handle: "end" }), 100, 200)).toBe(true);
+    expect(pressIsDrag(press({ shiftKey: true }), 100, 200)).toBe(true);
   });
 });

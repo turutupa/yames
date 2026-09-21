@@ -884,6 +884,109 @@ test.describe("the track picker", () => {
 });
 
 /**
+ * A click goes there; a drag chooses a portion (W29 item 1).
+ *
+ * The owner, after his first session: *"when i click on the tab its selecting
+ * it for loop instead of just going to that place — mimic songsterr click
+ * events, they are the common industry"*. It belongs here and nowhere else:
+ * telling the two gestures apart needs a pointer over a bar, and where a bar
+ * is on the page is decided by alphaTab at run time in a real browser. The
+ * arithmetic underneath — four pixels of slop — is `selection.test.ts`.
+ */
+test.describe("clicking the tab", () => {
+  /** The middle of a printed bar, in window coordinates. */
+  const barMiddle = (page: import("@playwright/test").Page, printedBar: number) =>
+    page.evaluate((n) => {
+      const overlay = document.querySelector(".songs-tab-overlay");
+      const api = (
+        window as unknown as {
+          __SONGS_TAB_API__?: {
+            renderer?: {
+              boundsLookup?: {
+                findMasterBarByIndex(
+                  index: number,
+                ): { visualBounds: { x: number; y: number; w: number; h: number } } | null;
+              } | null;
+            };
+          };
+        }
+      ).__SONGS_TAB_API__;
+      const bounds = api?.renderer?.boundsLookup?.findMasterBarByIndex(n - 1);
+      if (!overlay || !bounds) return null;
+      const box = overlay.getBoundingClientRect();
+      const b = bounds.visualBounds;
+      return { x: box.left + b.x + b.w / 2, y: box.top + b.y + b.h / 2 };
+    }, printedBar);
+
+  /** Where alphaTab's beat cursor is standing. */
+  const cursorAt = (page: import("@playwright/test").Page) =>
+    page.evaluate(() => {
+      const el = document.querySelector(".at-cursor-beat");
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: Math.round(r.x), y: Math.round(r.y) };
+    });
+
+  test("moves the playhead and chooses nothing", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const before = await cursorAt(page);
+    expect(before, "no cursor to move").not.toBeNull();
+
+    const bar = await barMiddle(page, 3);
+    expect(bar, "bar 3 was not engraved").not.toBeNull();
+    await page.mouse.click(bar!.x, bar!.y);
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+
+    // It went there...
+    const after = await cursorAt(page);
+    expect(
+      after!.x !== before!.x || after!.y !== before!.y,
+      "the cursor did not move to the bar that was clicked",
+    ).toBe(true);
+    // ...and the mark that says where play will begin is drawn on that bar.
+    await expect(page.locator(".songs-tab-playhead")).toHaveCount(1);
+    // ...and it chose nothing. A band would mean the old behaviour is back.
+    await expect(page.locator(".songs-tab-band")).toHaveCount(0);
+  });
+
+  test("a drag across bars chooses them, and a click afterwards leaves them alone", async ({
+    page,
+  }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const from = await barMiddle(page, 5);
+    const to = await barMiddle(page, 7);
+    expect(from, "bar 5 was not engraved").not.toBeNull();
+    expect(to, "bar 7 was not engraved").not.toBeNull();
+
+    await page.mouse.move(from!.x, from!.y);
+    await page.mouse.down();
+    await page.mouse.move(to!.x, to!.y, { steps: 8 });
+    await page.mouse.up();
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+
+    const bands = await page.locator(".songs-tab-band").count();
+    expect(bands, "the drag chose nothing").toBeGreaterThan(0);
+
+    // And now a plain click inside it. The repeat is a switch in every tab
+    // player people know — Songsterr, Ultimate Guitar, Guitar Pro — so
+    // touching the page must not take the passage away.
+    const inside = await barMiddle(page, 6);
+    await page.mouse.click(inside!.x, inside!.y);
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+    expect(
+      await page.locator(".songs-tab-band").count(),
+      "a click threw the chosen portion away",
+    ).toBe(bands);
+  });
+});
+
+/**
  * Every theme draws the tab, and draws it in that theme's ink.
  *
  * This is here rather than in vitest because happy-dom runs no renderer:

@@ -422,8 +422,40 @@
   touch-action: pan-y;
 }
 
+/* A click goes there, so the pointer says "you can press this" rather than
+   "you can select this" (W29). `text` was right while a press was only ever
+   the start of a selection; it is not right now that the first thing a press
+   does is move the playhead. */
 .songs-tab-overlay[data-ready] {
-  cursor: text;
+  cursor: pointer;
+}
+
+/* The tab takes the arrow keys, so it takes the caret — and a page of music
+   with a focus ring around every pixel of it is not a ring anybody wants
+   except the person who arrived by pressing Tab. */
+.songs-tab-overlay:focus {
+  outline: none;
+}
+
+.songs-tab-overlay:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Where the next press of play begins.
+ *
+ * Under the music, in the band's own layer: it is a place, not an
+ * annotation, and it must never be mistaken for a note. Stopped, alphaTab's
+ * beat cursor is over it; running, this is the only mark on the page that
+ * says where a click while playing will take effect — the engine cannot seek
+ * mid-pass, so that click is a promise about the next one. */
+.songs-tab-playhead {
+  position: absolute;
+  background: var(--accent);
+  opacity: 0.5;
+  border-radius: 2px;
+  pointer-events: none;
 }
 
 /* The band behind the selected bars.

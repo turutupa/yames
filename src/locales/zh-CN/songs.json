@@ -211,7 +211,8 @@
       "portionPlaceholder": "给这一段起个名字",
       "renamePortion": "重命名",
       "deletePortion": "忘掉这一段",
-      "portionTitle": "{{name}} — {{percent}}%"
+      "portionTitle": "{{name}} — {{percent}}%",
+      "tabLabel": "六线谱。点一个小节就跳到那里，拖过几个小节就选出一段。"
     },
     "offer": {
       "justArrived": "刚刚出现在你的下载里",

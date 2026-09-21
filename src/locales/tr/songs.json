@@ -211,7 +211,8 @@
       "portionPlaceholder": "Bu bölüme bir ad ver",
       "renamePortion": "Yeniden adlandır",
       "deletePortion": "Bunu unut",
-      "portionTitle": "{{name}} — %{{percent}}"
+      "portionTitle": "{{name}} — %{{percent}}",
+      "tabLabel": "Tab. Gitmek istediğin ölçüye tıkla ya da bir bölüm seçmek için ölçülerin üzerinde sürükle."
     },
     "offer": {
       "justArrived": "az önce indirilenlere düştü",

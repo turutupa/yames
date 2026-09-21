@@ -220,7 +220,8 @@
       "portionPlaceholder": "Nommez ce passage",
       "renamePortion": "Renommer",
       "deletePortion": "Oublier celui-ci",
-      "portionTitle": "{{name}} — à {{percent}} %"
+      "portionTitle": "{{name}} — à {{percent}} %",
+      "tabLabel": "La tablature. Clique sur une mesure pour y aller, ou fais glisser sur plusieurs mesures pour choisir un passage."
     },
     "offer": {
       "justArrived": "vient d'arriver dans vos téléchargements",

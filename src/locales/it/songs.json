@@ -220,7 +220,8 @@
       "portionPlaceholder": "Dai un nome a questa parte",
       "renamePortion": "Rinomina",
       "deletePortion": "Dimentica questa",
-      "portionTitle": "{{name}} — al {{percent}}%"
+      "portionTitle": "{{name}} — al {{percent}}%",
+      "tabLabel": "La tablatura. Clicca su una battuta per andarci, o trascina sulle battute per scegliere una parte."
     },
     "offer": {
       "justArrived": "è appena arrivato nei tuoi download",

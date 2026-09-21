@@ -169,7 +169,13 @@ function timeRoundKey(language: string, n: number): string {
 
 export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsViewProps) {
   const { t, i18n } = useTranslation();
-  const { score, source, song, range, loop, tempoPercent, tempo } = session;
+  /**
+   * `session.range` is what PLAYS — the portion with the playhead folded in.
+   * `bars` is what the player picked OUT. They part company the moment
+   * somebody clicks a bar (W29), and everything on the strip that says "what
+   * am I working on" reads `bars`.
+   */
+  const { score, source, song, range, portion: bars, loop, tempoPercent, tempo } = session;
   const fileRef = useRef<HTMLInputElement>(null);
   /** The stage itself, so the band can fold when this column gets narrow. */
   const stageRef = useRef<HTMLDivElement>(null);
@@ -190,7 +196,23 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     () => (score ? songPosition(score, range, currentBeat, { playing: isPlaying }) : null),
     [score, range, currentBeat, isPlaying],
   );
-  const tick = position?.tick ?? 0;
+  /**
+   * Where the cursor is drawn.
+   *
+   * The engine's position while it is running. Stopped, it is the playhead —
+   * the bar somebody clicked (W29 item 1). Those are the same answer whenever
+   * the repeat is off, because the playhead is then the range's own first
+   * bar; with a portion repeating they are not, and it is the CLICK that has
+   * to be honoured, or a click inside the portion would move nothing on
+   * screen at all.
+   */
+  const tick = useMemo(() => {
+    if (score && !isPlaying && session.playFrom !== null) {
+      const bar = score.bars[session.playFrom];
+      if (bar) return bar.startTick;
+    }
+    return position?.tick ?? 0;
+  }, [score, isPlaying, session.playFrom, position?.tick]);
 
   /**
    * The count, while one is being counted in.
@@ -497,8 +519,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     [onFiles],
   );
 
-  const meter = score ? meterAt(score, range.startBar) : null;
-  const barsInRange = range.endBar - range.startBar + 1;
+  const meter = score ? meterAt(score, bars.startBar) : null;
+  const barsInRange = bars.endBar - bars.startBar + 1;
 
   /** The bar runs the player has already given a name of their own. */
   const named = useMemo(
@@ -686,6 +708,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   schedule={schedule}
                   selection={session.selection}
                   onSelect={session.setSelection}
+                  onSeek={session.seekTo}
+                  onClear={session.clearSelection}
+                  playhead={session.playFrom}
                 />
               </Suspense>
             </div>
@@ -784,9 +809,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   min={1}
                   max={score.bars.length}
                   aria-label={t("songs.fromBar")}
-                  value={printedBarNumber(score, range.startBar)}
+                  value={printedBarNumber(score, bars.startBar)}
                   onChange={(e) =>
-                    session.setSelection({ ...range, startBar: Number(e.target.value) - 1 })
+                    session.setSelection({ ...bars, startBar: Number(e.target.value) - 1 })
                   }
                 />
               </label>
@@ -800,9 +825,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   min={1}
                   max={score.bars.length}
                   aria-label={t("songs.toBar")}
-                  value={printedBarNumber(score, range.endBar)}
+                  value={printedBarNumber(score, bars.endBar)}
                   onChange={(e) =>
-                    session.setSelection({ ...range, endBar: Number(e.target.value) - 1 })
+                    session.setSelection({ ...bars, endBar: Number(e.target.value) - 1 })
                   }
                 />
               </label>
@@ -861,8 +886,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 <div className="songs-section-chips">
                   {score.sections.map((section, i) => {
                     const chosen =
-                      range.startBar === section.startBar &&
-                      range.endBar === section.endBar &&
+                      bars.startBar === section.startBar &&
+                      bars.endBar === section.endBar &&
                       // One chip lights for one set of bars. A player who
                       // saved the chorus under a name of their own has two
                       // chips over exactly those bars, and both used to come
@@ -894,7 +919,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                       key={portion.id}
                       portion={portion}
                       chosen={
-                        range.startBar === portion.startBar && range.endBar === portion.endBar
+                        bars.startBar === portion.startBar && bars.endBar === portion.endBar
                       }
                       onChoose={() => {
                         session.setSelection(portionRange(score, portion));
