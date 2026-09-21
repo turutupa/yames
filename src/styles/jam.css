@@ -3771,15 +3771,15 @@
  *
  * The sheet is drawn between the header and the transport, and it measures
  * both from the desktop's own numbers — 56px and 76px. A phone's header is
- * 40px (shell.css), so the sheet and its scrim started sixteen pixels below
+ * 48px (shell.css), so the sheet and its scrim started eight pixels below
  * the hairline and left a strip of stage showing above a full-width drawer. */
 .main-window.is-mobile .jam-sheet,
 .main-window.is-mobile .jam-sheet-scrim {
-  top: 40px;
+  top: 48px;
 }
 
 .main-window.is-mobile .jam-sheet-scrim {
-  inset: 40px 0 76px 0;
+  inset: 48px 0 76px 0;
 }
 
 /* Done is the way out of a sheet that covers the whole screen, so it is a

@@ -3190,3 +3190,69 @@ body[data-sheet-maximized] .rail {
 .mobile-tab {
   flex: 1 1 auto;
 }
+
+/* ── The bar above the stage, on a phone (M09) ─────────────────────────────
+ *
+ * It was 40px tall and everything in it is 44: the touch pass gave every chip
+ * and every text button a 44px minimum, which is the size of a fingertip and
+ * not negotiable, and the row centred them in four pixels less than that. So
+ * the sound chip, the volume chip, the overflow and Save were all drawn two
+ * pixels above the top of the screen with their top border cut off, on every
+ * tab.
+ *
+ * 48px: a 44px control with two pixels of air above and below it. The bar
+ * still reads as an app bar rather than a toolbar, and — this is the half a
+ * screenshot cannot show — it stays clear of the status bar whatever the real
+ * inset is, because the inset is padding on the window OUTSIDE this region
+ * (shell.css's `--safe-top` on `.main-window`), so nothing here was ever
+ * under the status bar; it was simply taller than its own row.
+ */
+.main-window.is-mobile .main-header {
+  height: 48px;
+}
+
+/* Save, as the icon it already carries.
+ *
+ * With no preset loaded the bar is "Unsaved metronome" and a Save button, and
+ * at 360 the button kept every letter of its label while the name — the
+ * answer to "what am I looking at" — was cut to "Unsa…". The name is worth
+ * more than the button's words: the button has a floppy disc on it and sits
+ * where it always sits, and what it does is the one thing in this bar that
+ * needs no reading.
+ *
+ * Clipped rather than removed, the way this file sheds every other label
+ * (see the chips at 1081px): the word stays in the accessibility tree, so a
+ * screen reader still hears "Save preset".
+ */
+.main-window.is-mobile .preset-save-btn .preset-save-btn-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.main-window.is-mobile .preset-save-btn {
+  position: relative;
+  min-width: 44px;
+  justify-content: center;
+  padding: 0;
+}
+
+/* And the name takes what that gives back. It is the first thing in the bar
+   and the only one that can flex, so it is the one that has to be told it
+   may.
+
+   15px rather than 16.5: still the largest text in the bar and still the
+   answer to "what am I looking at", and a phone's bar is 110px of name where
+   a desktop's is three hundred. The placeholder the app writes for a stage
+   nobody has saved yet — "Unsaved metronome" — is a sentence rather than a
+   name and still does not fit at 360; every name a musician actually gives a
+   preset does. */
+.main-window.is-mobile .preset-save-area .preset-active-name {
+  flex: 0 1 auto;
+  max-width: 100%;
+  font-size: 15px;
+}
