@@ -349,7 +349,27 @@ function land(setlist: Setlist, state: SetlistRunState, seconds: number): Setlis
     const entered = enterStep(setlist, { ...state, pending }, seconds);
     const beats = countInBeats(setlist, pending, transition.bars);
     return beats > 0
-      ? { ...entered, effects: [...entered.effects, { kind: "countIn", beats }] }
+      ? {
+          /*
+           * AND THE COUNT IS NOT THE STEP'S TIME.
+           *
+           * `enterStep` anchors on the bar line it lands on, because normally
+           * that line IS the step's bar one. A count-in puts a count between
+           * the two: the engine hands the step a second bar line when it
+           * turns the count over (`is_last_warmup` puts `measure_beat` back
+           * to 0 on the beat you start playing on), and an anchored step had
+           * already spent its bar one on the count. "Eight bars" after a
+           * count-in played seven, and the seconds clock started a count too
+           * early.
+           *
+           * Unanchored, bar one and the seconds clock both begin on the beat
+           * the player actually plays on. `start()` has always done this for
+           * the count at the top of a run; this is the same rule between two
+           * steps.
+           */
+          state: { ...entered.state, anchored: false },
+          effects: [...entered.effects, { kind: "countIn", beats }],
+        }
       : entered;
   }
 

@@ -581,18 +581,60 @@ describe("transitions", () => {
     expect(log[12].state.stepIndex).toBe(1);
   });
 
-  it("treats countIn as a cut for now (U9.5)", () => {
+  it("counts a step in, and the count is not one of its bars (U9.5)", () => {
+    /*
+     * The step is entered on the bar line the switch landed on, and then a
+     * count runs before a note of it is played. The engine hands the count
+     * over by putting `measure_beat` back to 0 on the beat you start playing
+     * on (`is_last_warmup`), so the step gets a SECOND bar line — and an
+     * anchored step had already spent bar one on the count. "Two bars" after
+     * a count-in played one and a bit.
+     *
+     * Four beats of count at 4/4, so the switch is at beat 4, bar one of the
+     * new step opens at beat 8, and its two bars run 8..11 and 12..15.
+     */
+    const counted = setlistOf([
+      step("a", { kind: "bars", bars: 1 }, { kind: "countIn", bars: 1 }),
+      step("b", { kind: "bars", bars: 2 }),
+      step("c", { kind: "manual" }),
+    ]);
+    const { log } = play(counted, { beats: 20 });
+
+    expect(log[4].state.stepIndex).toBe(1);
+    expect(log[4].effects).toEqual([
+      { kind: "applyStep", index: 1, step: counted.steps[1] },
+      { kind: "countIn", beats: 4 },
+    ]);
+    // Entered, but belonging to no bar yet: the count is running.
+    expect(log[4].state.anchored).toBe(false);
+    expect(log[7].state.barsInStep).toBe(0);
+    // The beat the count hands over is bar one, and the seconds clock starts
+    // there too rather than a count earlier.
+    expect(log[8].state.anchored).toBe(true);
+    expect(log[8].state.barsInStep).toBe(0);
+    expect(log[8].state.stepStartedAt).toBe(4.5);
+    expect(log[4].state.stepStartedAt).toBe(2.5);
+    expect(log[12].state.barsInStep).toBe(1);
+    // Two whole bars of playing, then the move on. Anchored, the step would
+    // have gone at beat 12 with one bar and a count behind it.
+    expect(log[15].state.stepIndex).toBe(1);
+    expect(log[16].state.stepIndex).toBe(2);
+  });
+
+  it("a cut hands the step the bar line it landed on, and a count-in does not", () => {
     const cut = setlistOf([
       step("a", { kind: "bars", bars: 1 }, { kind: "cut" }),
-      step("b", { kind: "manual" }),
+      step("b", { kind: "bars", bars: 2 }),
+      step("c", { kind: "manual" }),
     ]);
     const counted = setlistOf([
-      step("a", { kind: "bars", bars: 1 }, { kind: "countIn", bars: 2 }),
-      step("b", { kind: "manual" }),
+      step("a", { kind: "bars", bars: 1 }, { kind: "countIn", bars: 1 }),
+      step("b", { kind: "bars", bars: 2 }),
+      step("c", { kind: "manual" }),
     ]);
-    const a = play(cut, { beats: 12 });
-    const b = play(counted, { beats: 12 });
-    expect(b.log.map((l) => l.state.stepIndex)).toEqual(a.log.map((l) => l.state.stepIndex));
+    // Same switch, one bar apart afterwards: the count is the bar between.
+    expect(play(cut, { beats: 20 }).log[12].state.stepIndex).toBe(2);
+    expect(play(counted, { beats: 20 }).log[12].state.stepIndex).toBe(1);
   });
 
   it("treats a rest of zero bars as a cut", () => {
