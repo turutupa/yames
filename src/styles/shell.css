@@ -3149,3 +3149,44 @@ body[data-sheet-maximized] .rail {
   gap: 20px;
   padding-bottom: 16px;
 }
+
+/* ── Seven along the bottom, and only five of them are places (M09) ────────
+ *
+ * Jam made the bar a seventh button and the first label went to "Metrono…"
+ * at 360px. Shorter words are not the fix — M03d already spent that budget
+ * choosing labels that fit fifteen languages in six tabs — and a smaller font
+ * is not one either.
+ *
+ * So the two on the right of the hairline give up their words. They were
+ * never destinations: the library is a sheet over whatever you are on and Zen
+ * is a mode of it, neither ever carries `aria-current`, and the hairline has
+ * been saying they are a different kind of thing since M03b. A musician
+ * reaches for a PLACE by name — Metronome, Drill, Setlist, Jam, Settings —
+ * and for these two by the glyph, the way a phone's share and search buttons
+ * are reached everywhere else.
+ *
+ * The full names stay: `aria-label` already carries "Library" and "Zen", so
+ * a screen reader hears exactly what it heard before, and the five names on
+ * the left get the width back — enough for "Metronome" to be a word again.
+ */
+.mobile-tab-library,
+.mobile-tab-zen {
+  flex: 0 0 44px;
+}
+
+.mobile-tab-library .mobile-tab-label,
+.mobile-tab-zen .mobile-tab-label {
+  display: none;
+}
+
+/* And the five share the room by what their words need rather than by
+   counting to five. Equal columns are the reflex for a bottom bar, and they
+   are why the longest label was the only one that truncated while "Jam" sat
+   in a box twice the width of the word in it: five equal fifths give
+   "Metronome" the same 54px they give "Jam". Content-sized with the slack
+   spread over them, every label on the bar is a whole word — and in a locale
+   long enough to run out of room they give way together instead of one of
+   them carrying all of it. */
+.mobile-tab {
+  flex: 1 1 auto;
+}
