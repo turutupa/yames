@@ -72,12 +72,18 @@
     "library": {
       "add": "Bir şarkı içe aktar",
       "empty": "Henüz şarkı yok",
-      "summary": "{{track}} · {{bars}} ölçü",
       "remove": "Yames'ten çıkar",
       "due": "Bugüne",
       "dueTitle": "Buna geri dönmek istemiştin",
       "starter": "Hazır gelen",
-      "starterTitle": "Yames ile birlikte geldi. İstediğin zaman silebilirsin."
+      "starterTitle": "Yames ile birlikte geldi. İstediğin zaman silebilirsin.",
+      "removeTitle": "{{name}} çıkarılsın mı?",
+      "removeBody": "Şarkının tamamı gider: bütün partileri, Yames'in onunla ilgili hatırladığı her şey ve Yames'in tuttuğu dosya kopyası. Geri alınamıyor.",
+      "removeTakes": "Ona ait {{count}} kayıt da gider.",
+      "removeTakes_other": "Ona ait {{count}} kayıt da gider.",
+      "removeNoTakes": "Ondan hiç kayıt almadın.",
+      "removeConfirm": "Çıkar",
+      "removeCancel": "Kalsın"
     },
     "review": {
       "title": "Nasıl gitti",

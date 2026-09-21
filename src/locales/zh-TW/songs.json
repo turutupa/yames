@@ -72,12 +72,18 @@
     "library": {
       "add": "匯入一首曲子",
       "empty": "還沒有曲子",
-      "summary": "{{track}} · {{bars}} 小節",
       "remove": "從 Yames 移除",
       "due": "今天練",
       "dueTitle": "你說過要回到這首",
       "starter": "內附",
-      "starterTitle": "隨 Yames 一起來的。想刪就刪。"
+      "starterTitle": "隨 Yames 一起來的。想刪就刪。",
+      "removeTitle": "移除 {{name}}？",
+      "removeBody": "整首曲子都會不見：每個聲部、Yames 記下的一切，還有 Yames 保存的那份檔案副本。無法復原。",
+      "removeTakes": "它的 {{count}} 段錄音也會一起不見。",
+      "removeTakes_other": "它的 {{count}} 段錄音也會一起不見。",
+      "removeNoTakes": "你還沒錄過這首。",
+      "removeConfirm": "移除",
+      "removeCancel": "保留"
     },
     "review": {
       "title": "剛才那遍如何",

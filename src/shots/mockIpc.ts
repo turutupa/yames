@@ -484,6 +484,36 @@ function songShotRecord(): SongRecord {
 }
 
 /**
+ * A library for the scenes that photograph the LIST (W35).
+ *
+ * Three songs of the player's own, or one with a title far wider than the
+ * panel. Built through the real importer out of the same alphaTex the stage
+ * scenes use, so the rows are real rows — one file each, with a real id and a
+ * real artist under the title.
+ *
+ * The long one is a real sentence rather than a run of x's: a title cut off
+ * at the end has to still read like the beginning of a name.
+ */
+const LONG_TITLE =
+  "Rondo in C for two guitars and a very patient metronome, second movement";
+
+function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
+  const build = (tex: string, file: string, name?: string) => {
+    const bytes = new TextEncoder().encode(tex);
+    const record = newSongRecord(importSong(bytes, file, 0).score, bytes);
+    return name ? { ...record, name } : record;
+  };
+  if (which === "longTitle") {
+    return [build(SHOT_SONG_TEX, "Practice piece.alphatex", LONG_TITLE)];
+  }
+  return [
+    build(SHOT_SONG_TEX, "Practice piece.alphatex"),
+    build(SHOT_SONG_SIXTEENTHS, "sixteenths.alphatex"),
+    build(SHOT_SONG_SEVEN, "seven.alphatex"),
+  ];
+}
+
+/**
  * The store, settled.
  *
  * Everything a first-time user sees is a screen that must never reach a
@@ -579,7 +609,10 @@ export function installShotMock(shot: Shot, theme: string): void {
   // and the layout suite see is the seven pieces the app really ships with,
   // seeded by the real code through the real importer — not this fixture
   // beside them.
-  if (shot.tab === "songs" && !shot.starterShelf) {
+  if (shot.songLibrary) {
+    // W35 — the scenes that are about the LIST rather than the stage.
+    for (const record of songLibraryRecords(shot.songLibrary)) SCORES.set(record.id, record);
+  } else if (shot.tab === "songs" && !shot.starterShelf) {
     const record = songShotRecord();
     SCORES.set(record.id, record);
   }
@@ -877,6 +910,9 @@ export function installShotMock(shot: Shot, theme: string): void {
         trackName: r.score.source.trackName,
         importedAt: r.addedAt,
         name: r.name,
+        // W35 — which part of a file the sidebar's row opens is "the one I
+        // had open last", and the store is where that is counted.
+        lastOpenedAt: r.openedAt,
       })),
     get_score: (a) => SCORES.get(String(a?.id))?.score ?? null,
     get_score_source: (a) => SCORES.get(String(a?.id))?.sourceBase64 ?? null,
@@ -886,6 +922,7 @@ export function installShotMock(shot: Shot, theme: string): void {
         id: score.id,
         name: (a?.name as string) ?? score.title,
         addedAt: (a?.importedAt as number) ?? Date.now(),
+        openedAt: SCORES.get(score.id)?.openedAt ?? (a?.importedAt as number) ?? Date.now(),
         score,
         sourceBase64: (a?.sourceBase64 as string) ?? "",
       });
@@ -895,11 +932,14 @@ export function installShotMock(shot: Shot, theme: string): void {
       SCORES.delete(String(a?.id));
       return null;
     },
-    // W19 — the library is "recently played" now. The shots open exactly one
-    // song, so there is no order for this to change; it exists so the call
-    // the session makes on every open resolves rather than returning the
-    // harness's blanket `null`.
-    mark_score_opened: () => null,
+    // W19 — the library is "recently played" now. It writes the time rather
+    // than doing nothing, because W35's rows open the part of a file that was
+    // open last and that is the column the answer comes from.
+    mark_score_opened: (a) => {
+      const record = SCORES.get(String(a?.id));
+      if (record) SCORES.set(record.id, { ...record, openedAt: Date.now() });
+      return null;
+    },
     is_coach_loaded: () => false,
     get_calibration_offset: () => null,
     llm_compiled: () => false,

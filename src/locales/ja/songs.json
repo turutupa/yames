@@ -72,12 +72,18 @@
     "library": {
       "add": "曲を読み込む",
       "empty": "まだ曲がありません",
-      "summary": "{{track}} · {{bars}} 小節",
       "remove": "Yames から外す",
       "due": "今日の分",
       "dueTitle": "この曲に戻ると決めていました",
       "starter": "付属",
-      "starterTitle": "Yames に最初から入っています。いつでも消せます。"
+      "starterTitle": "Yames に最初から入っています。いつでも消せます。",
+      "removeTitle": "{{name}} を外しますか？",
+      "removeBody": "曲ごと消えます。すべてのパート、Yames が覚えていること、そして Yames が持っているファイルのコピーも。元には戻せません。",
+      "removeTakes": "この曲の録音 {{count}} 件も一緒に消えます。",
+      "removeTakes_other": "この曲の録音 {{count}} 件も一緒に消えます。",
+      "removeNoTakes": "この曲はまだ録音していません。",
+      "removeConfirm": "外す",
+      "removeCancel": "残す"
     },
     "review": {
       "title": "今のはどうだったか",

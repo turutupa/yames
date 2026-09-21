@@ -167,6 +167,19 @@ export interface Shot {
    * different piece. This is the one scene that lets the seeding run.
    */
   starterShelf?: boolean;
+  /**
+   * What the song library holds, for the scenes that are about the LIST (W35).
+   *
+   * Every other Songs scene gets the one song the stage is about, which is
+   * what `row: 0` opens. These two are pictures of the sidebar:
+   *
+   *   "three"      three songs of the player's own. With `starterShelf` as
+   *                well, the Included heading is under them — and folded,
+   *                because a player with songs of their own is what folds it.
+   *   "longTitle"  one song with a title far wider than the panel, which is
+   *                the case the row has to ellipsise rather than wrap.
+   */
+  songLibrary?: "three" | "longTitle";
   jam?: {
     row: number;
     bar?: number;
@@ -844,6 +857,34 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 900,
+  },
+  {
+    id: "songs-library",
+    suffix: "songs-library",
+    window: "main",
+    tab: "songs",
+    // The sidebar with three songs of the player's own and the shelf folded
+    // away under them (W35). No song on the stage: this scene is about the
+    // LIST, and the layout suite is what opens it — one row per file, the
+    // title across the whole row, no instrument and no bar count.
+    starterShelf: true,
+    songLibrary: "three",
+    width: 1400,
+    height: 900,
+    settleMs: 600,
+  },
+  {
+    id: "songs-long-title",
+    suffix: "songs-long-title",
+    window: "main",
+    tab: "songs",
+    // One song whose title is far wider than the panel. The row has to cut
+    // it at the end and keep the whole of it on the tooltip, rather than
+    // wrapping to two lines or pushing the panel sideways.
+    songLibrary: "longTitle",
+    width: 1400,
+    height: 900,
+    settleMs: 600,
   },
   {
     id: "widget",

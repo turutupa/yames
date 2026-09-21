@@ -84,12 +84,20 @@
     "library": {
       "add": "Zaimportuj utwór",
       "empty": "Jeszcze nie ma utworów",
-      "summary": "{{track}} · {{bars}} taktów",
       "remove": "Usuń z Yames",
       "due": "Na dziś",
       "dueTitle": "Prosiłeś, żeby do tego wrócić",
       "starter": "W zestawie",
-      "starterTitle": "Przyszła razem z Yames. Skasuj ją, kiedy chcesz."
+      "starterTitle": "Przyszła razem z Yames. Skasuj ją, kiedy chcesz.",
+      "removeTitle": "Usunąć {{name}}?",
+      "removeBody": "Znika cały utwór: każda jego partia, wszystko, co Yames o nim pamięta, i kopia pliku, którą Yames trzyma. Tego nie da się cofnąć.",
+      "removeTakes": "Zniknie też {{count}} nagranie tego utworu.",
+      "removeTakes_few": "Znikną też {{count}} nagrania tego utworu.",
+      "removeTakes_many": "Zniknie też {{count}} nagrań tego utworu.",
+      "removeTakes_other": "Zniknie też {{count}} nagrania tego utworu.",
+      "removeNoTakes": "Nic z tego utworu nie zostało nagrane.",
+      "removeConfirm": "Usuń",
+      "removeCancel": "Zostaw"
     },
     "review": {
       "title": "Jak poszło",

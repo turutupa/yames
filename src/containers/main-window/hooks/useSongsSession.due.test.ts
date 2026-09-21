@@ -81,6 +81,7 @@ const RECORD: SongRecord = {
   score: SCORE,
   sourceBase64: "",
   addedAt: 1,
+  openedAt: 1,
 };
 
 const library: SongLibrary = {

@@ -72,12 +72,18 @@
     "library": {
       "add": "Song importieren",
       "empty": "Noch keine Songs",
-      "summary": "{{track}} · {{bars}} Takte",
       "remove": "Aus Yames entfernen",
       "due": "Fällig",
       "dueTitle": "Du wolltest hierher zurückkommen",
       "starter": "Dabei",
-      "starterTitle": "Kam mit Yames mit. Du kannst sie jederzeit löschen."
+      "starterTitle": "Kam mit Yames mit. Du kannst sie jederzeit löschen.",
+      "removeTitle": "{{name}} entfernen?",
+      "removeBody": "Der ganze Song geht — jede Stimme davon, alles, was Yames darüber weiß, und die Kopie der Datei, die Yames aufbewahrt. Das lässt sich nicht rückgängig machen.",
+      "removeTakes": "{{count}} Aufnahme davon geht mit.",
+      "removeTakes_other": "{{count}} Aufnahmen davon gehen mit.",
+      "removeNoTakes": "Du hast davon noch nichts aufgenommen.",
+      "removeConfirm": "Entfernen",
+      "removeCancel": "Behalten"
     },
     "review": {
       "title": "Wie das lief",

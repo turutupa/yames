@@ -32,6 +32,12 @@
  * field that reaches the screen (it is drawn under the title), and a study
  * has no artist.
  *
+ * **Section names are quoted, and they are what a musician would write.**
+ * `\section TwoStrings` is an alphaTex identifier, and the name it makes is
+ * the one printed on the tab and on the chips above it (W35) — "TwoStrings",
+ * "BendAndRelease", "MelodyOnTop". A quoted argument may hold the spaces a
+ * person would put there, so every one of them does.
+ *
  * Tunings and the numbering follow the fixtures beside this folder: string 1
  * is the highest, `e5 b4 g4 d4 a3 e3` is a guitar and `g2 d2 a1 e1` is a
  * bass, which is what alphaTab hands back as `[76, 71, 67, 62, 57, 52]` and
@@ -89,12 +95,12 @@ const PICKING = `\\title "Picking study in A minor"
 .
 \\track "Guitar"
 \\tuning e5 b4 g4 d4 a3 e3
-\\section TwoStrings
+\\section "Two strings"
 \\ts 4 4 5.4.8 5.3.8 7.4.8 7.3.8 5.4.8 5.3.8 7.4.8 7.3.8 |
 7.4.8 7.3.8 5.4.8 5.3.8 7.4.8 7.3.8 5.4.8 5.3.8 |
 5.4.8 7.4.8 5.3.8 7.3.8 5.4.8 7.4.8 5.3.8 7.3.8 |
 5.4.4 5.3.4 7.4.4 7.3.4 |
-\\section ThreeStrings
+\\section "Three strings"
 5.4.8 5.3.8 5.2.8 5.3.8 7.4.8 7.3.8 7.2.8 7.3.8 |
 5.4.8 5.3.8 5.2.8 5.3.8 7.4.8 7.3.8 7.2.8 7.3.8 |
 5.4.8 7.4.8 5.3.8 7.3.8 5.2.8 7.2.8 5.3.8 7.3.8 |
@@ -121,12 +127,12 @@ const LEGATO = `\\title "Legato run in A minor"
 .
 \\track "Guitar"
 \\tuning e5 b4 g4 d4 a3 e3
-\\section Climbing
+\\section "Climbing"
 \\ts 4 4 5.3{h}.8 7.3.8 5.3{h}.8 7.3.8 5.2{h}.8 8.2.8 5.2{h}.8 8.2.8 |
 8.2{h}.8 5.2.8 8.2{h}.8 5.2.8 7.3{h}.8 5.3.8 7.3{h}.8 5.3.8 |
 5.4{h}.8 7.4.8 5.3{h}.8 7.3.8 5.2{h}.8 8.2.8 5.1{h}.8 8.1.8 |
 8.1{h}.2 5.1.2 |
-\\section Falling
+\\section "Falling"
 8.1{h}.8 5.1.8 8.2{h}.8 5.2.8 7.3{h}.8 5.3.8 7.4{h}.8 5.4.8 |
 5.4{h}.8 7.4.8 5.3{h}.8 7.3.8 5.2{h}.8 8.2.8 5.1{h}.8 8.1.8 |
 8.1{h}.8 5.1.8 8.2{h}.8 5.2.8 7.3{h}.8 5.3.8 7.4{h}.8 5.4.8 |
@@ -153,12 +159,12 @@ const BENDING = `\\title "Bending phrase in G minor"
 .
 \\track "Guitar"
 \\tuning e5 b4 g4 d4 a3 e3
-\\section BendAndHold
+\\section "Bend and hold"
 \\ts 4 4 6.2.4 8.2{b (0 4)}.2 6.2.4 |
 6.3.4 5.3.4 3.3{v}.2 |
 6.2.4 8.2{b (0 4)}.2 6.2.4 |
 3.2.4 6.3.4 5.3.4 3.3{v}.4 |
-\\section BendAndRelease
+\\section "Bend and release"
 8.2{b (0 4 0)}.2 6.2.4 3.2.4 |
 6.3.4 5.3.4 3.3.4 6.3.4 |
 8.2{b (0 4)}.2 6.2{v}.2 |
@@ -185,12 +191,12 @@ const BLUES = `\\title "Blues lick in A"
 .
 \\track "Guitar"
 \\tuning e5 b4 g4 d4 a3 e3
-\\section Say
+\\section "Say"
 \\ts 4 4 5.5.8 7.5.8 5.4.8 7.4.8 5.3.8 7.3.8 5.2.8 8.2.8 |
 5.1.4 8.1.4 5.1.4 8.1.4 |
 8.2{b (0 4)}.4 5.2.4 7.3.4 5.3.4 |
 7.4.2 5.4.2 |
-\\section Answer
+\\section "Answer"
 5.3.8 7.3.8 5.2.8 8.2.8 5.1.8 8.1.8 5.1.8 8.1.8 |
 8.1{b (0 4)}.2 5.1.2 |
 5.2.8 8.2.8 5.3.8 7.3.8 5.4.8 7.4.8 5.5.8 7.5.8 |
@@ -221,12 +227,12 @@ const BASS_GROOVE = `\\title "Bass groove in E"
 .
 \\track "Bass"
 \\tuning g2 d2 a1 e1
-\\section Straight
+\\section "Straight"
 \\ts 4 4 0.4.8 0.4.8 0.4.8 0.4.8 0.4.8 0.4.8 3.4.8 2.4.8 |
 0.3.8 0.3.8 0.3.8 0.3.8 0.3.8 0.3.8 2.3.8 0.3.8 |
 0.4.8 0.4.8 0.4.8 0.4.8 0.4.8 0.4.8 3.4.8 2.4.8 |
 2.3.4 0.3.4 0.4.2 |
-\\section Pushing
+\\section "Pushing"
 0.4.8 0.4.8 3.4.8 0.4.8 5.4.8 0.4.8 3.4.8 2.4.8 |
 0.3.8 0.3.8 3.3.8 0.3.8 0.3.8 2.3.8 0.3.8 3.3.8 |
 0.4.8 0.4.8 3.4.8 0.4.8 5.4.8 0.4.8 3.4.8 2.4.8 |
@@ -253,12 +259,12 @@ const FINGERSTYLE = `\\title "Fingerstyle pattern in C"
 .
 \\track "Guitar"
 \\tuning e5 b4 g4 d4 a3 e3
-\\section TheRoll
+\\section "The roll"
 \\ts 4 4 3.5{lr}.8 0.3{lr}.8 1.2{lr}.8 0.3{lr}.8 3.5{lr}.8 0.3{lr}.8 0.1{lr}.8 0.3{lr}.8 |
 0.5{lr}.8 2.3{lr}.8 1.2{lr}.8 2.3{lr}.8 0.5{lr}.8 2.3{lr}.8 0.1{lr}.8 2.3{lr}.8 |
 3.5{lr}.8 2.3{lr}.8 1.2{lr}.8 2.3{lr}.8 3.5{lr}.8 2.3{lr}.8 1.1{lr}.8 2.3{lr}.8 |
 3.6{lr}.8 0.3{lr}.8 0.2{lr}.8 0.3{lr}.8 3.6{lr}.8 0.3{lr}.8 3.1{lr}.8 0.3{lr}.8 |
-\\section MelodyOnTop
+\\section "Melody on top"
 3.5{lr}.8 0.3{lr}.8 1.2{lr}.8 0.3{lr}.8 3.5{lr}.8 0.3{lr}.8 3.1{lr}.8 0.3{lr}.8 |
 0.5{lr}.8 2.3{lr}.8 1.2{lr}.8 2.3{lr}.8 0.5{lr}.8 2.3{lr}.8 1.1{lr}.8 2.3{lr}.8 |
 3.5{lr}.8 2.3{lr}.8 1.2{lr}.8 2.3{lr}.8 3.5{lr}.8 2.3{lr}.8 0.1{lr}.8 2.3{lr}.8 |
@@ -299,12 +305,12 @@ const ODE = `\\title "Ode to Joy (Beethoven)"
 .
 \\track "Guitar"
 \\tuning e5 b4 g4 d4 a3 e3
-\\section FirstTime
+\\section "First time"
 \\ts 4 4 5.2.4 5.2.4 6.2.4 3.1.4 |
 3.1.4 6.2.4 5.2.4 3.2.4 |
 1.2.4 1.2.4 3.2.4 5.2.4 |
 5.2.4{d} 3.2.8 3.2.2 |
-\\section TheAnswer
+\\section "The answer"
 5.2.4 5.2.4 6.2.4 3.1.4 |
 3.1.4 6.2.4 5.2.4 3.2.4 |
 1.2.4 1.2.4 3.2.4 5.2.4 |

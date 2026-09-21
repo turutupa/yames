@@ -72,12 +72,18 @@
     "library": {
       "add": "Nhập một bài hát",
       "empty": "Chưa có bài nào",
-      "summary": "{{track}} · {{bars}} ô nhịp",
       "remove": "Bỏ khỏi Yames",
       "due": "Hôm nay",
       "dueTitle": "Bạn đã hẹn quay lại bài này",
       "starter": "Có sẵn",
-      "starterTitle": "Có sẵn cùng Yames. Xoá lúc nào cũng được."
+      "starterTitle": "Có sẵn cùng Yames. Xoá lúc nào cũng được.",
+      "removeTitle": "Bỏ {{name}}?",
+      "removeBody": "Cả bài sẽ mất: mọi bè của nó, mọi thứ Yames nhớ về nó, và bản sao tệp mà Yames giữ. Không hoàn tác được.",
+      "removeTakes": "{{count}} bản ghi của bài cũng mất theo.",
+      "removeTakes_other": "{{count}} bản ghi của bài cũng mất theo.",
+      "removeNoTakes": "Bạn chưa ghi gì của bài này.",
+      "removeConfirm": "Bỏ",
+      "removeCancel": "Giữ"
     },
     "review": {
       "title": "Vừa rồi thế nào",

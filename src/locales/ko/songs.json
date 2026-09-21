@@ -72,12 +72,18 @@
     "library": {
       "add": "곡 가져오기",
       "empty": "아직 곡이 없습니다",
-      "summary": "{{track}} · {{bars}}마디",
       "remove": "Yames에서 빼기",
       "due": "오늘 할 것",
       "dueTitle": "이 곡으로 돌아오겠다고 했습니다",
       "starter": "기본 제공",
-      "starterTitle": "Yames에 처음부터 들어 있습니다. 언제든 지워도 됩니다."
+      "starterTitle": "Yames에 처음부터 들어 있습니다. 언제든 지워도 됩니다.",
+      "removeTitle": "{{name}}을(를) 뺄까요?",
+      "removeBody": "곡 전체가 사라집니다. 모든 파트, Yames가 기억하는 모든 것, 그리고 Yames가 가지고 있는 파일 사본까지. 되돌릴 수 없습니다.",
+      "removeTakes": "이 곡의 녹음 {{count}}개도 함께 사라집니다.",
+      "removeTakes_other": "이 곡의 녹음 {{count}}개도 함께 사라집니다.",
+      "removeNoTakes": "이 곡은 아직 녹음한 것이 없습니다.",
+      "removeConfirm": "빼기",
+      "removeCancel": "유지"
     },
     "review": {
       "title": "방금은 어땠는지",

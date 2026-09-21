@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   addSong,
+  addSongPart,
   decodeSource,
   deleteSong as deleteFromList,
   newSongRecord,
@@ -19,6 +20,10 @@ import {
   songLibrary,
 } from "../../../songs/library";
 import type { SongLibrary, SongRecord } from "../../../songs/library";
+// W35 — the sidebar lists FILES. Each part of a file keeps its own record;
+// this is the module that knows which records are the same piece of music.
+import { groupByFile, migrateSongNames } from "../../../songs/songFiles";
+import type { LibrarySong } from "../../../songs/songFiles";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
 import { loadScoreSchedule, markScoreOpened, seekSong } from "../../../ipc";
 /**
@@ -59,6 +64,15 @@ export type PendingImport = {
 
 export interface SongsSession extends SongEngine {
   songs: SongRecord[];
+  /**
+   * The library as the sidebar lists it: one entry per FILE (W35).
+   *
+   * `songs` is still every record — the stage, the takes and the coach all
+   * work in parts — and this is the same list grouped. The owner: *"on the
+   * left side it's for songs, and then when in a song, in the stage area i
+   * should be able to select the instrument"*.
+   */
+  songFiles: LibrarySong[];
   song: SongRecord | null;
   score: SongScore | null;
   /** The file's bytes, for the renderer. */
@@ -127,8 +141,15 @@ export interface SongsSession extends SongEngine {
   offerFile: (file: File) => Promise<void>;
   chooseTrack: (trackIndex: number) => Promise<void>;
   cancelImport: () => void;
-  renameSong: (id: string, name: string) => void;
-  deleteSong: (id: string) => void;
+  /**
+   * Rename and delete act on the SONG, so both take a FILE's key.
+   *
+   * A rename that touched one part would come back under its old name the
+   * next time the player opened the other, and a delete that took one part
+   * would leave the file behind under a row that no longer showed it.
+   */
+  renameSong: (fileKey: string, name: string) => void;
+  deleteSong: (fileKey: string) => void;
   /**
    * Choose a portion. Choosing one turns the repeat ON.
    *
@@ -196,8 +217,20 @@ export function useSongsSession(
   useEffect(() => {
     if (loaded.current) return;
     loaded.current = true;
-    void library.list().then(async (list) => {
+    void library.list().then(async (stored) => {
+      /*
+       * W35 — the part comes back out of the names W29 wrote it into.
+       *
+       * Here rather than in `library.ts` because it is a change of mind about
+       * what a row is CALLED rather than about how one is stored, and because
+       * this is the one place that reads the library at startup. It is a shape
+       * test on each name, so it is idempotent; `migrateSongNames` returns the
+       * same array when there is nothing to do, and only then is there
+       * nothing to write.
+       */
+      const list = migrateSongNames(stored);
       setSongs(list);
+      if (list !== stored) await library.save(list);
       /**
        * The shelf Yames ships with (W19, `SONGS.md` S0.9), on the first
        * launch and never again.
@@ -231,6 +264,9 @@ export function useSongsSession(
   const song = useMemo(() => songs.find((s) => s.id === activeId) ?? null, [songs, activeId]);
   const score = song?.score ?? null;
 
+  /** The library the sidebar draws: one entry per file (W35). */
+  const songFiles = useMemo(() => groupByFile(songs), [songs]);
+
   // Decoding base64 is not free and the bytes do not change while a song is
   // open, so it happens once per song rather than once per render.
   const source = useMemo(
@@ -258,6 +294,21 @@ export function useSongsSession(
       // read. The portion, the loop and the speed come back in the effect
       // below, which is the stage's, not this line's.
       void markScoreOpened(id).catch(() => {});
+      /*
+       * And the same fact, on the copy the screen reasons with (W35).
+       *
+       * The row the player pressed opens the part of the file that was open
+       * last, and that answer comes from `openedAt`. Without this line it
+       * would be right only after a restart: the store has the new time and
+       * the list in memory still has yesterday's, so switching part and
+       * coming back to the row would open the part you just left.
+       *
+       * Not through `commit`: the store is already being told by the line
+       * above, and it is the store's own clock that counts.
+       */
+      setSongs((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, openedAt: Date.now() } : s)),
+      );
     },
     [songs],
   );
@@ -348,20 +399,36 @@ export function useSongsSession(
     };
   }, [score, source]);
 
+  /** Rename the SONG: every part's record takes the new name (W35). */
   const renameSong = useCallback(
-    (id: string, name: string) => commit(renameInList(songs, id, name)),
-    [songs, commit],
+    (fileKey: string, name: string) => {
+      const file = songFiles.find((f) => f.key === fileKey);
+      if (!file) return;
+      commit(renameInList(songs, file.parts.map((p) => p.id), name));
+    },
+    [songs, songFiles, commit],
   );
 
+  /**
+   * Delete the SONG — every part of it, and Yames's copy of the file.
+   *
+   * The one destructive thing the library can do, and the sidebar asks first
+   * (`DeleteSongDialog`): every part's record goes, and with it every attempt
+   * and every take filed against it. The file's bytes are a column on those
+   * rows, so removing them all is what removes the copy.
+   */
   const deleteSong = useCallback(
-    (id: string) => {
-      commit(deleteFromList(songs, id));
+    (fileKey: string) => {
+      const file = songFiles.find((f) => f.key === fileKey);
+      if (!file) return;
+      const ids = file.parts.map((p) => p.id);
+      commit(deleteFromList(songs, ids));
       // The song's band goes with it. A mix left behind would come back on
       // the day somebody imports the same file again, which is a surprise.
-      void forgetMixSetting(id).catch(() => {});
-      if (activeId === id) setActiveId(null);
+      for (const id of ids) void forgetMixSetting(id).catch(() => {});
+      if (activeId && ids.includes(activeId)) setActiveId(null);
     },
-    [songs, commit, activeId],
+    [songs, songFiles, commit, activeId],
   );
 
   /**
@@ -621,8 +688,9 @@ export function useSongsSession(
    * row, and every attempt anybody ever made stays with the part it was
    * played on.
    *
-   * The row is named after the part so the library does not show one file
-   * twice under one name.
+   * The library shows one row for the FILE either way (W35), so the record
+   * takes the song's own name and the sidebar does not move, rename or
+   * reorder anything when the part changes.
    *
    * ## What crosses over
    *
@@ -645,18 +713,26 @@ export function useSongsSession(
         const parsed = importer.parseSongFile(source, score.source.fileName);
         const result = importer.buildSongScore(parsed, trackIndex, source);
         const existing = songs.find((s) => s.id === result.score.id);
-        // The name the player gave this song, without the part it is already
-        // named after — so switching twice does not build up a tail.
-        const suffix = ` · ${score.source.trackName}`;
-        const base = song.name.endsWith(suffix) ? song.name.slice(0, -suffix.length) : song.name;
+        // The new part is the same SONG and is named after it (W35). It used
+        // to be filed as `<song> · <part>`, because two rows under one name
+        // would have been worse than two rows under two; with one row per
+        // file there is nothing to tell apart, and the part is a fact of the
+        // record rather than of its name.
         const record =
           existing ??
           {
             ...newSongRecord(result.score, source),
-            name: `${base} · ${result.score.source.trackName}`,
+            name: song.name,
             addedAt: song.addedAt,
           };
-        commit(addSong(songs, record));
+        // Choosing a part is opening it: the row goes back to this one next
+        // time (W35), the same way `loadSong` marks the record it opened.
+        //
+        // `addSongPart` rather than `addSong`, and that is the whole of "the
+        // sidebar does not move": a new record at the top of the list would
+        // carry its file's row to the top with it, and this is a menu on the
+        // stage about the song you are already looking at.
+        commit(addSongPart(songs, { ...record, openedAt: Date.now() }, song.id));
         restoredFor.current = record.id;
         setActiveId(record.id);
         setWarnings(result.warnings);
@@ -700,6 +776,7 @@ export function useSongsSession(
   return {
     ...engine,
     songs,
+    songFiles,
     song,
     score,
     source,
