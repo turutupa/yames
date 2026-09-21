@@ -172,7 +172,8 @@ use commands::{
 // other half: the player's file, at a path they chose in a save dialog.
 use take_video::{
     clip_save_append, clip_save_begin, clip_save_discard, clip_save_finish, take_video_append,
-    take_video_begin, take_video_discard, take_video_finish, ClipState, VideoState,
+    take_thumb_write, take_video_begin, take_video_discard, take_video_finish, ClipState,
+    VideoState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -791,6 +792,8 @@ pub fn run() {
             clip_save_append,
             clip_save_finish,
             clip_save_discard,
+            // W25 — one frame of the picture, so a take looks like a take.
+            take_thumb_write,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,

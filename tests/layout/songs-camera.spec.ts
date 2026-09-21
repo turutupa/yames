@@ -472,6 +472,58 @@ test.describe("then and now", () => {
   });
 });
 
+/**
+ * Takes look like takes (W25 item 4, addendum 10).
+ *
+ * A frame of the picture, what the take was a go AT, and a filter for the
+ * ones that were filmed — inside a popover `useMenuPlacement` caps at 320px,
+ * which is the constraint the whole row has to live in.
+ */
+test.describe("the takes shelf", () => {
+  for (const size of SIZES) {
+    test(`shows a frame and the facts, inside 320px at ${size.width}px`, async ({ page }) => {
+      await openShot(page, "songs-takes", size);
+      await expect(page.locator(".songs-takes-pop")).toHaveCount(1);
+      await expect(page.locator(".songs-take")).toHaveCount(3);
+      // Two of the three were filmed, and their boxes hold an image; the
+      // third has the same box, empty, so the rows stay scannable.
+      await expect(page.locator(".songs-take-thumb img")).toHaveCount(2);
+      await expect(page.locator(".songs-take-thumb[data-empty]")).toHaveCount(1);
+      await expect(page.locator(".songs-take-was")).toHaveCount(3);
+
+      const pop = await page.locator(".songs-takes-pop").boundingBox();
+      expect(pop, "no shelf").not.toBeNull();
+      expect(pop!.width, `the shelf is ${Math.round(pop!.width)}px wide`).toBeLessThanOrEqual(320);
+      expect(pop!.x, "the shelf starts off-screen").toBeGreaterThanOrEqual(-1);
+      expect(pop!.x + pop!.width, "the shelf runs past the window").toBeLessThanOrEqual(
+        size.width + 1,
+      );
+
+      // Nothing clipped: the score is the end of the facts line and the one
+      // an ellipsis would eat.
+      const clipped = await page.$$eval(".songs-take-was", (nodes) =>
+        nodes.filter((n) => n.scrollWidth > n.clientWidth + 1).length,
+      );
+      expect(clipped, "a take's facts are cut off").toBe(0);
+      for (const row of await page.$$eval(".songs-take", (nodes) =>
+        nodes.map((n) => n.getBoundingClientRect()),
+      )) {
+        expect(row.right).toBeLessThanOrEqual(pop!.x + pop!.width + 1);
+      }
+    });
+  }
+
+  /** The filter narrows the list to the ones with a picture, and says so. */
+  test("filters to the takes that were filmed", async ({ page }) => {
+    await openShot(page, "songs-takes", { width: 1400, height: 900 });
+    await page.locator(".songs-takes-filter").click();
+    await expect(page.locator(".songs-take")).toHaveCount(2);
+    await expect(page.locator(".songs-take-thumb[data-empty]")).toHaveCount(0);
+    await page.locator(".songs-takes-filter").click();
+    await expect(page.locator(".songs-take")).toHaveCount(3);
+  });
+});
+
 test.describe("the camera on the stage", () => {
   /**
    * The preview sits over the tab rather than in the strip, so it costs the

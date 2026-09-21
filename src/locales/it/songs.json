@@ -326,6 +326,11 @@
       "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
       "soundOnly": "Solo suono: la videocamera era spenta in questa.",
       "locked": "Le due si allineano sulla battuta e non sull'orologio, così anche un giro più lento combacia."
+    },
+    "takes": {
+      "withPicture": "Con immagine",
+      "noneFilmed": "Nessuna di queste è stata ripresa.",
+      "was": "Battute {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

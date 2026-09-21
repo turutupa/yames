@@ -356,6 +356,12 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.compare.soundOnly",
   "songs.compare.then",
   "songs.compare.title",
+  // W25 — takes look like takes (addendum 10). `was` is three numbers and a
+  // count that `songs.review.goes` already pluralises, so nothing here is
+  // pluralised either.
+  "songs.takes.noneFilmed",
+  "songs.takes.was",
+  "songs.takes.withPicture",
 ];
 
 /**

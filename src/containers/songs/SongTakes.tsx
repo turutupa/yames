@@ -37,6 +37,11 @@ import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes"
 import { useMenuPlacement } from "../jam/useMenuPlacement";
 import type { JamTake } from "../../jam/types";
 import { formatDate } from "../practice-coach/coachCardHelpers";
+// W25 — a take looks like a take: a frame of it, and what it was a go at.
+import { mediaSrc } from "../../songs/camera/src";
+import { printedBarNumber } from "../../songs/position";
+import type { TakeDetail } from "./useSongTakes";
+import type { SongScore } from "../../songs/types";
 
 function PlayGlyph() {
   return (
@@ -66,6 +71,16 @@ export interface SongTakesProps {
   onPlay: (id: string) => void;
   onStop: () => void;
   onDelete: (id: string) => void;
+  /**
+   * W25 — what each take was a go AT: bars, speed, times round, score.
+   *
+   * Optional, and empty is the state a shelf is in until the store answers —
+   * the row then says what it always said, a date and a length. See
+   * `useSongTakes`.
+   */
+  details?: Map<string, TakeDetail>;
+  /** The song, so a row can print the bar numbers the PAGE uses. */
+  score?: SongScore | null;
 }
 
 /**
@@ -89,6 +104,8 @@ export function SongRecordControl({
   onPlay,
   onStop,
   onDelete,
+  details,
+  score,
 }: SongTakesProps & { camera?: ReactNode }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -181,6 +198,8 @@ export function SongRecordControl({
               onPlay={onPlay}
               onStop={onStop}
               onDelete={onDelete}
+              details={details}
+              score={score}
             />
           </div>,
           document.body,
@@ -199,8 +218,22 @@ export function SongTakes({
   onPlay,
   onStop,
   onDelete,
+  details,
+  score,
 }: SongTakesProps) {
   const { t, i18n } = useTranslation();
+  /**
+   * W25 — "with picture", off by default.
+   *
+   * A filter and not a sort: a player looking for the go they filmed is
+   * looking for a short list, and a shelf that quietly reordered itself would
+   * make the row they pressed yesterday somewhere else today. Drawn only when
+   * there is something to filter — a chip that always says "0 of 0" is a
+   * control that teaches nothing.
+   */
+  const [filmedOnly, setFilmedOnly] = useState(false);
+  const filmed = takes.filter((take) => take.videoPath).length;
+  const shown = filmedOnly ? takes.filter((take) => take.videoPath) : takes;
   /**
    * The take a Delete click has asked about, waiting for the second click.
    *
@@ -219,22 +252,50 @@ export function SongTakes({
         <p className="songs-takes-size">{t("jam.takes.size", { megabytes: megabytes(dirBytes) })}</p>
       )}
 
+      {/* W25 — the one filter worth having on a shelf of takes. */}
+      {available !== false && filmed > 0 && takes.length > filmed && (
+        <button
+          type="button"
+          className="songs-chip songs-takes-filter"
+          data-active={filmedOnly ? "" : undefined}
+          aria-pressed={filmedOnly}
+          onClick={() => setFilmedOnly((was) => !was)}
+        >
+          {t("songs.takes.withPicture")}
+        </button>
+      )}
+
       {available === false ? (
         <p className="songs-takes-empty">{t("jam.takes.unavailable")}</p>
-      ) : takes.length === 0 ? (
+      ) : shown.length === 0 ? (
         <p className="songs-takes-empty">
-          {recording ? t("jam.takes.recordingNow") : t("jam.takes.empty")}
+          {filmedOnly
+            ? t("songs.takes.noneFilmed")
+            : recording
+              ? t("jam.takes.recordingNow")
+              : t("jam.takes.empty")}
         </p>
       ) : (
         <ul className="songs-takes-list">
-          {takes.map((take) => {
+          {shown.map((take) => {
             const isPlaying = playingId === take.id;
             // While one take plays the engine has muted the band and is
             // playing a file; starting another or deleting one underneath it
             // is not a thing the engine has been asked to survive.
             const busy = playingId !== null && !isPlaying;
+            const detail = details?.get(take.id);
             return (
               <li className="songs-take" key={take.id} data-playing={isPlaying ? "" : undefined}>
+                {/* W25 — a frame of it, grabbed at the first downbeat, so the
+                    shelf shows what a take is a picture of. A take with the
+                    camera off gets the same box empty rather than no box: a
+                    list whose rows are different heights is a list nobody can
+                    scan. */}
+                <span className="songs-take-thumb" data-empty={take.thumbPath ? undefined : ""}>
+                  {take.thumbPath && (
+                    <img src={mediaSrc(take.thumbPath)} alt="" loading="lazy" />
+                  )}
+                </span>
                 <button
                   type="button"
                   className={`songs-take-play${isPlaying ? " playing" : ""}`}
@@ -245,10 +306,27 @@ export function SongTakes({
                 >
                   {isPlaying ? <StopGlyph /> : <PlayGlyph />}
                 </button>
-                <span className="songs-take-when">
-                  {formatDate(take.createdAt, t, i18n.language)}
+                <span className="songs-take-facts">
+                  <span className="songs-take-when">
+                    {formatDate(take.createdAt, t, i18n.language)}
+                    <span className="songs-take-length">{takeLength(take.durationSec)}</span>
+                  </span>
+                  {/* What it was a go AT. Bars as the PAGE numbers them, which
+                      is what a player is looking at; the store counts played
+                      bars from zero and nobody says those out loud. */}
+                  {detail && score && (
+                    <span className="songs-take-was">
+                      {t("songs.takes.was", {
+                        bars: `${String(printedBarNumber(score, detail.startBar))}–${String(
+                          printedBarNumber(score, detail.endBar),
+                        )}`,
+                        percent: detail.tempoPercent,
+                        goes: t("songs.review.goes", { count: Math.max(1, detail.passes) }),
+                        score: Math.round(detail.score),
+                      })}
+                    </span>
+                  )}
                 </span>
-                <span className="songs-take-length">{takeLength(take.durationSec)}</span>
                 {/* What the band is doing while this plays. Said rather than
                     left to be noticed: a player who pressed play and heard no
                     drums would reasonably think the band had crashed. */}

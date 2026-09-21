@@ -326,6 +326,11 @@
       "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
       "soundOnly": "Só som — nesta a câmera estava desligada.",
       "locked": "As duas andam juntas por compasso, não por relógio, então uma passada mais devagar também encaixa."
+    },
+    "takes": {
+      "withPicture": "Com imagem",
+      "noneFilmed": "Nenhuma delas foi filmada.",
+      "was": "Compassos {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

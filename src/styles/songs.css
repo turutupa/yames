@@ -1177,15 +1177,84 @@
   cursor: default;
 }
 
+/* W25 — a frame of the take, so a shelf of takes looks like takes.
+ *
+ * The same box whether there is a picture or not: a list whose rows change
+ * height with their contents is a list nobody can scan, and most takes have
+ * the camera off. 16:9 at 44px wide is big enough to tell two goes apart and
+ * small enough that six rows still fit a 320px popover. */
+.songs-take-thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 44px;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.songs-take-thumb[data-empty] {
+  border: 1px dashed var(--border);
+  background: transparent;
+}
+
+.songs-take-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Two lines where there is something to say on the second, one where there is
+   not — the row's `min-height` is what keeps them the same height either way. */
+/* `flex: 1 1 auto` and not auto-width: the popover is capped at 320px
+   (`useMenuPlacement`), and with the thumbnail, the play button and Delete
+   taking their own room the facts had about 140px and lost the score to an
+   ellipsis. It takes the row's slack instead, and the spacer beside it has
+   nothing left to take. */
+.songs-take-facts {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* `nowrap` on the row and `wrap` on the box: the DATE is a text node and the
+   length is a span, so this breaks between them rather than inside "Today
+   3:58 PM" — which is what a serif theme at 320px was doing. */
 .songs-take-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  white-space: nowrap;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
+/* "Bars 5–8 · 80% · 3 goes · 74" — what the take was a go AT. */
+/* It wraps rather than clipping. In a 320px popover, in German, four facts
+   do not fit on one line — and the one that would be lost to an ellipsis is
+   the score, which is the end of the line and the thing a player is looking
+   for. Two lines of ten-pixel text cost the row nine pixels. */
+.songs-take-was {
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.songs-takes-filter {
+  align-self: flex-start;
+}
+
 .songs-take-length,
 .songs-take-bandoff {
   font-size: 11px;
+  font-weight: 400;
   color: var(--text-faint);
 }
 

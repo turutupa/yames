@@ -919,6 +919,10 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               }
               available={takes.available}
               takes={takes.takes}
+              /* W25 — what each take was a go at, and the score to print its
+                 bars the way the page does. */
+              details={takes.details}
+              score={score}
               recording={takes.recording}
               dirBytes={takes.dirBytes}
               playingId={takes.playingId}

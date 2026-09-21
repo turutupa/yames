@@ -46,6 +46,7 @@ import {
   onBeat,
   storeLoad,
   storeSave,
+  takeThumbWrite,
   takeVideoAppend,
   takeVideoBegin,
   takeVideoDiscard,
@@ -93,6 +94,14 @@ export type SongCameraState = {
   cancelIntro: () => void;
   /** A frame was painted, from the preview's own frame callback. */
   noteFrame: (atMs: number) => void;
+  /**
+   * W25 — the preview's element, so one frame of it can become a thumbnail.
+   *
+   * Handed over rather than reached for, exactly as `noteFrame` is and for
+   * the same reason: the live picture is on a `<video>` that the preview owns
+   * and this hook never renders. Null when the preview goes.
+   */
+  holdPreview: (element: HTMLVideoElement | null) => void;
   /** Called by `useSongTakes` when a take begins and when it ends. */
   onTakeStarted: () => void;
   onTakeFinished: (take: JamTake | null) => void;
@@ -411,10 +420,69 @@ export function useSongCamera({
   /** What `onTakeFinished` left waiting for the recorder to finish. */
   const pendingTake = useRef<(() => void) | null>(null);
 
-  const onTakeStarted = useCallback(() => {
-    // Nothing to do: the recorder started with the transport, which is before
-    // this. Kept as a door so `useSongTakes` has one shape to call.
+  /**
+   * W25 — the preview's element, and the frame taken off it.
+   *
+   * The thumbnail is grabbed at the FIRST DOWNBEAT, which is exactly when the
+   * take begins: the count-in is over, the player's hands are on the
+   * instrument, and a frame from a second earlier is a picture of somebody
+   * waiting. It is drawn from the live preview rather than decoded out of the
+   * recording afterwards — the recording is still being written at that
+   * moment, and decoding a video to get one frame out of it is a second
+   * decoder for a picture the screen already has.
+   *
+   * Not mirrored: `CameraPreview` mirrors with a CSS `transform`, which is a
+   * property of that element and reaches neither the file nor this canvas, so
+   * the thumbnail is the room as it was — the same as the recording.
+   */
+  const preview = useRef<HTMLVideoElement | null>(null);
+  const holdPreview = useCallback((element: HTMLVideoElement | null) => {
+    preview.current = element;
   }, []);
+
+  /** The frame, waiting for the take to be named. */
+  const thumb = useRef<Uint8Array | null>(null);
+
+  const grabThumb = useCallback(() => {
+    const video = preview.current;
+    if (!video || video.readyState < 2 || video.videoWidth === 0) return;
+    // 320 across, which is the widest the takes shelf can be
+    // (`useMenuPlacement` caps it), so the shelf never scales one up.
+    const width = 320;
+    const height = Math.max(1, Math.round((video.videoHeight / video.videoWidth) * width));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    try {
+      ctx.drawImage(video, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return;
+          void blob
+            .arrayBuffer()
+            .then((buffer) => {
+              thumb.current = new Uint8Array(buffer);
+            })
+            .catch(() => {});
+        },
+        "image/jpeg",
+        0.72,
+      );
+    } catch {
+      // A camera that stopped between the check and the draw. A take with no
+      // thumbnail is a take, and the shelf draws a plain tile for it.
+    }
+  }, []);
+
+  const onTakeStarted = useCallback(() => {
+    // The recorder started with the TRANSPORT, which is before this — so
+    // there is nothing to start here. What this moment IS is the first
+    // downbeat, which is the frame worth keeping.
+    thumb.current = null;
+    grabThumb();
+  }, [grabThumb]);
 
   /**
    * The take has its id. File the picture under it, or throw it away.
@@ -446,8 +514,16 @@ export function useSongCamera({
       void takeVideoFinish(take.id, offset)
         .then((made) => {
           setLastVideo({ takeId: take.id, path: made.path, offsetMs: offset });
+          // W25 — and the frame from the first downbeat, beside it. AFTER
+          // the picture is filed, not before: a thumbnail of a take whose
+          // recording then failed to land would be a row on the shelf
+          // offering a picture that is not there.
+          const frame = thumb.current;
+          thumb.current = null;
+          if (frame) void takeThumbWrite(take.id, frame).catch(() => {});
         })
         .catch(() => {
+          thumb.current = null;
           void takeVideoDiscard().catch(() => {});
         });
     };
@@ -493,6 +569,7 @@ export function useSongCamera({
     confirmIntro,
     cancelIntro,
     noteFrame,
+    holdPreview,
     onTakeStarted,
     onTakeFinished,
     lastCost,

@@ -178,6 +178,108 @@ const OLD_TAKE_ID = "w25then";
  * anything that is already a URL straight to the element).
  */
 const OLD_TAKE_PATH = TAKE_WAV;
+
+/**
+ * W25 — a thumbnail, drawn rather than checked in.
+ *
+ * The shelf's whole point is that a take LOOKS like a take, and an empty grey
+ * box proves nothing about that. The real one is a frame of the player's
+ * picture; this is a few hundred bytes of gradient with a shape on it, which
+ * is enough to show that the box holds an image, keeps its aspect and is
+ * cropped rather than squashed.
+ */
+function shotThumb(hue: number): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 180;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+  const sky = ctx.createLinearGradient(0, 0, 320, 180);
+  sky.addColorStop(0, `hsl(${String(hue)} 55% 38%)`);
+  sky.addColorStop(1, `hsl(${String((hue + 40) % 360)} 45% 18%)`);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 320, 180);
+  ctx.fillStyle = `hsl(${String((hue + 180) % 360)} 70% 62%)`;
+  ctx.beginPath();
+  ctx.ellipse(150, 120, 74, 46, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  return canvas.toDataURL("image/jpeg", 0.7);
+}
+
+/**
+ * Three goes at the song, for the shelf (W25 item 4).
+ *
+ * Two filmed and one not, which is the mix the filter exists for, and each
+ * with an attempt behind it so the row can say what it was a go AT. Built
+ * lazily because the thumbnails need a canvas and this file is evaluated
+ * before the page has one.
+ */
+type ShotSongTake = {
+  id: string;
+  createdAt: number;
+  durationSec: number;
+  path: string;
+  thumbPath?: string;
+  videoPath?: string;
+  videoBytes?: number;
+  startBar: number;
+  endBar: number;
+  tempoPercent: number;
+  passes: number;
+  score: number;
+};
+
+let shotSongTakes: ShotSongTake[] | null = null;
+function songShelfTakes(): ShotSongTake[] {
+  if (!shotSongTakes) {
+    const day = 24 * 60 * 60 * 1000;
+    shotSongTakes = [
+      {
+        id: "sh3",
+        createdAt: Date.now() - 2 * 60 * 60 * 1000,
+        durationSec: 21,
+        // A fragment on the data URL, so the three rows have three DIFFERENT
+        // paths: the shelf joins a take to its attempt on the WAV's path, and
+        // three takes at one path would all be the same go.
+        path: `${TAKE_WAV}#sh3`,
+        thumbPath: shotThumb(28),
+        videoPath: TAKE_WAV,
+        videoBytes: 4_100_000,
+        startBar: 4,
+        endBar: 7,
+        tempoPercent: 90,
+        passes: 3,
+        score: 88,
+      },
+      {
+        id: "sh2",
+        createdAt: Date.now() - 2 * day,
+        durationSec: 34,
+        path: `${TAKE_WAV}#sh2`,
+        startBar: 0,
+        endBar: 7,
+        tempoPercent: 100,
+        passes: 1,
+        score: 71,
+      },
+      {
+        id: "sh1",
+        createdAt: Date.now() - 9 * day,
+        durationSec: 48,
+        path: `${TAKE_WAV}#sh1`,
+        thumbPath: shotThumb(205),
+        videoPath: TAKE_WAV,
+        videoBytes: 9_400_000,
+        startBar: 4,
+        endBar: 7,
+        tempoPercent: 70,
+        passes: 4,
+        score: 54,
+      },
+    ];
+  }
+  return shotSongTakes;
+}
 const SHOT_TAKE_JAM = "shot-song";
 
 function baseState(theme: string) {
@@ -752,6 +854,26 @@ export function installShotMock(shot: Shot, theme: string): void {
     list_takes: (a) => [
       ...TAKES.filter((take) => take.jamId === a?.jamId),
       /*
+       * W25 — three goes at the song, for the shelf scene.
+       *
+       * Only when the scene is about the shelf: every other songs scene
+       * should photograph the shelf a player has before they have recorded
+       * anything, which is empty. Two of the three are filmed and one is not,
+       * which is the mix the "with picture" filter exists for.
+       */
+      ...(shot.songs?.takes && a?.jamId === songShotRecord().id
+        ? songShelfTakes().map((take) => ({
+            id: take.id,
+            jamId: a.jamId as string,
+            createdAt: take.createdAt,
+            durationSec: take.durationSec,
+            path: take.path,
+            ...(take.thumbPath ? { thumbPath: take.thumbPath } : {}),
+            ...(take.videoPath ? { videoPath: take.videoPath } : {}),
+            ...(take.videoBytes ? { videoBytes: take.videoBytes } : {}),
+          }))
+        : []),
+      /*
        * W25 — the run from a month ago, on the shelf beside tonight's.
        *
        * Only for the compare scene, and only on the song: a second take on
@@ -1068,6 +1190,27 @@ export function installShotMock(shot: Shot, theme: string): void {
      * decorative dots.
      */
     if (cmd === "query_attempts") {
+      // The shelf's rows say what each take was a go AT, and that comes from
+      // the store rather than from the file (W25 item 4).
+      if (shot.songs?.takes) {
+        const record = songShotRecord();
+        return songShelfTakes().map((take) => ({
+          id: `att-${take.id}`,
+          scoreId: record.id,
+          startedAt: take.createdAt,
+          rangeStartBar: take.startBar,
+          rangeEndBar: take.endBar,
+          tempoPercent: take.tempoPercent,
+          passes: take.passes,
+          score: take.score,
+          hits: 0,
+          misses: 0,
+          extras: 0,
+          meanDevMs: 0,
+          madMs: 0,
+          takePath: take.path,
+        }));
+      }
       if (!shot.songs?.compare || !songSchedule) return [];
       const record = songShotRecord();
       const then = scriptPass(songSchedule, "rushing", { quarterMs: 60_000 / 67 });

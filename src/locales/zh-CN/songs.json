@@ -317,6 +317,11 @@
       "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
       "soundOnly": "只有声音——这一遍摄像头是关着的。",
       "locked": "两边是按小节对齐的，不是按秒，所以弹得慢的那一遍也能对上。"
+    },
+    "takes": {
+      "withPicture": "有画面",
+      "noneFilmed": "这些都没有录画面。",
+      "was": "第 {{bars}} 小节 · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

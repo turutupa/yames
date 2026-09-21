@@ -317,6 +317,11 @@
       "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
       "soundOnly": "Chỉ có tiếng — lần này máy quay tắt.",
       "locked": "Hai bên khớp theo ô nhịp chứ không theo đồng hồ, nên lần chơi chậm hơn vẫn ăn khớp."
+    },
+    "takes": {
+      "withPicture": "Có hình",
+      "noneFilmed": "Không có bản nào được quay hình.",
+      "was": "Ô nhịp {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

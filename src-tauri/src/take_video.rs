@@ -56,7 +56,7 @@ use serde::{Deserialize, Serialize};
 use tauri::ipc::{InvokeBody, Request};
 use tauri::{AppHandle, Manager, State};
 
-use crate::take::{is_video_stem, take_dir, take_path, VIDEO_SUFFIX};
+use crate::take::{is_video_stem, take_dir, take_path, thumb_beside, VIDEO_SUFFIX};
 
 /// The most a single recording may grow to.
 ///
@@ -503,6 +503,55 @@ pub fn take_video_finish(
 pub fn take_video_discard(video: State<VideoState>) -> Result<(), String> {
     let mut slot = video.slot().unwrap_or_else(|e| e.into_inner());
     discard(&mut slot)
+}
+
+// ---------------------------------------------------------------------------
+// The thumbnail (W25 item 4) — one frame, so a take looks like a take
+// ---------------------------------------------------------------------------
+
+/// The most a thumbnail may be.
+///
+/// It is 320 px of JPEG — twenty or thirty kilobytes — and the cap is two
+/// orders of magnitude past that. It is here because the bytes arrive from
+/// the webview and a size limit on a file the app writes without looking at
+/// it is the cheapest guard there is.
+const MAX_THUMB_BYTES: usize = 2 * 1024 * 1024;
+
+/// Write one frame of a take's picture beside it.
+///
+/// The frame is grabbed by the webview — it is the only thing that can decode
+/// the recording — at the first downbeat, which is the moment the player's
+/// hands are on the instrument and the count-in is over. It arrives as JPEG
+/// bytes in the request body, the way a chunk does, and is written under the
+/// take's own id through `take_path`: so a thumbnail can only ever be filed
+/// beside a WAV that is really there, and `safe_stem` refuses `.thumb` as an
+/// id exactly as it refuses `.dry` and `.video`.
+///
+/// A failure is never worth reporting up: a take with no thumbnail is a take,
+/// and the shelf draws a plain tile for it.
+#[tauri::command]
+pub fn take_thumb_write(
+    request: Request<'_>,
+    app_handle: AppHandle,
+) -> Result<String, String> {
+    let take_id = request
+        .headers()
+        .get("take")
+        .and_then(|v| v.to_str().ok())
+        .ok_or_else(|| "a thumbnail has to say which take it is of".to_string())?
+        .to_string();
+    let bytes = bytes_of(request.body())?;
+    if bytes.is_empty() {
+        return Err("that thumbnail has no picture in it".into());
+    }
+    if bytes.len() > MAX_THUMB_BYTES {
+        return Err("that thumbnail is larger than the app will write".into());
+    }
+    let app_data = home(&app_handle)?;
+    let wav = take_path(&app_data, &take_id)?;
+    let target = thumb_beside(&wav).ok_or_else(|| "that take has no name".to_string())?;
+    fs::write(&target, &bytes).map_err(|e| format!("could not write the thumbnail: {e}"))?;
+    Ok(target.to_string_lossy().into_owned())
 }
 
 // ---------------------------------------------------------------------------

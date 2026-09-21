@@ -317,6 +317,11 @@
       "facts": "%{{percent}} · {{bpm}} BPM · {{score}}",
       "soundOnly": "Yalnızca ses — bunda kamera kapalıydı.",
       "locked": "İkisi saate göre değil ölçüye göre tutuluyor, yani daha yavaş bir geçiş de denk düşüyor."
+    },
+    "takes": {
+      "withPicture": "Görüntülü",
+      "noneFilmed": "Bunların hiçbiri kaydedilmedi.",
+      "was": "Ölçü {{bars}} · %{{percent}} · {{goes}} · {{score}}"
     }
   }
 }

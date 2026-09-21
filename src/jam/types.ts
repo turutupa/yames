@@ -616,6 +616,16 @@ export type JamTake = {
    * review then starts the two level, which is the honest state.
    */
   videoOffsetMs?: number;
+  /**
+   * Absolute path of the thumbnail — one frame of the picture, grabbed at the
+   * first downbeat and written as a small JPEG (W25, `take.rs`).
+   *
+   * Read off the disk like the picture and the dry stem: a take recorded
+   * before thumbnails existed has a picture and no frame, and it is the
+   * directory rather than the sidecar that knows which. Absent for every take
+   * with the camera off, which is every take in Jam.
+   */
+  thumbPath?: string;
 };
 
 /** See `JamTake.position`. The mirror of `TakePosition` in `take.rs`. */

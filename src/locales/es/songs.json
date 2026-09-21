@@ -326,6 +326,11 @@
       "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
       "soundOnly": "Solo sonido: la cámara estaba apagada en esta.",
       "locked": "Las dos se sincronizan por compás, no por reloj, así que una pasada más lenta también cuadra."
+    },
+    "takes": {
+      "withPicture": "Con vídeo",
+      "noneFilmed": "Ninguna de estas se grabó en vídeo.",
+      "was": "Compases {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

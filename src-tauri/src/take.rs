@@ -726,6 +726,14 @@ pub struct JamTake {
     /// than the sound is.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub video_bytes: Option<u64>,
+    /// Absolute path of the thumbnail — one frame of the picture, grabbed at
+    /// the first downbeat (W25).
+    ///
+    /// Off the disk like the two above, and for one reason more: a take
+    /// recorded before this existed has a picture and no thumbnail, and it is
+    /// the directory rather than the sidecar that knows which.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thumb_path: Option<String>,
     /// Milliseconds to ADD to a position in the take's audio to get the same
     /// instant in the picture (`plans/SONGS.md` A10).
     ///
@@ -764,6 +772,14 @@ pub const DRY_SUFFIX: &str = ".dry";
 /// below are by stem rather than by name.
 pub const VIDEO_SUFFIX: &str = ".video";
 
+/// ...and what goes between it and `.jpg` to make the THUMBNAIL (W25).
+///
+/// One frame of the picture, grabbed at the first downbeat, so the takes
+/// shelf can show what a take is a picture of rather than a row of dates.
+/// Exactly the same rule as the other two: part of a take, not a take —
+/// listed under it, deleted with it, and refused as an id of its own.
+pub const THUMB_SUFFIX: &str = ".thumb";
+
 /// The dry stem that belongs beside a take's WAV.
 fn dry_beside(wav: &Path) -> PathBuf {
     let stem = wav.file_stem().map(|s| s.to_string_lossy().into_owned());
@@ -788,6 +804,21 @@ fn is_dry_stem(stem: &str) -> bool {
 /// `1234.video`, and a take's own id is digits.
 pub(crate) fn is_video_stem(stem: &str) -> bool {
     stem.ends_with(VIDEO_SUFFIX)
+}
+
+/// Is this file a take's thumbnail rather than a take? Same rule again.
+pub(crate) fn is_thumb_stem(stem: &str) -> bool {
+    stem.ends_with(THUMB_SUFFIX)
+}
+
+/// The thumbnail that belongs beside a take's WAV.
+///
+/// A name rather than a scan, unlike the picture: this one the app writes
+/// itself and it is always a JPEG, so there is no "whatever the webview could
+/// encode that day" to look up.
+pub(crate) fn thumb_beside(wav: &Path) -> Option<PathBuf> {
+    let stem = wav.file_stem()?.to_str()?;
+    Some(wav.with_file_name(format!("{stem}{THUMB_SUFFIX}.jpg")))
 }
 
 /// The picture that belongs beside a take's WAV, whatever it was encoded as.
@@ -912,6 +943,12 @@ fn safe_stem(id: &str) -> Result<String, String> {
     if is_video_stem(&s) {
         return Err(format!("{id:?} is not a take id"));
     }
+    // AND NEITHER IS A THUMBNAIL (W25). It is a frame of the same recording
+    // and belongs to the same take; it is reached through the take's id and
+    // removed with it.
+    if is_thumb_stem(&s) {
+        return Err(format!("{id:?} is not a take id"));
+    }
     Ok(s)
 }
 
@@ -1013,6 +1050,10 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
             .and_then(|p| fs::metadata(p).ok())
             .map(|m| m.len());
         let video_path = video.map(|p| p.to_string_lossy().into_owned());
+        // ...and the thumbnail, the same way again.
+        let thumb_path = thumb_beside(&path)
+            .filter(|p| p.is_file())
+            .map(|p| p.to_string_lossy().into_owned());
         let sidecar = path.with_extension("json");
         let record = fs::read_to_string(&sidecar)
             .ok()
@@ -1026,6 +1067,7 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
                 r.dry_path = dry_path;
                 r.video_path = video_path;
                 r.video_bytes = video_bytes;
+                r.thumb_path = thumb_path;
                 // `videoOffsetMs` is NOT overwritten: it is the one thing here
                 // the file system cannot answer, and the sidecar is its record.
                 r
@@ -1043,6 +1085,7 @@ pub fn list_takes(app_data: &Path, jam_id: &str) -> Result<Vec<JamTake>, String>
                 position: None,
                 video_path,
                 video_bytes,
+                thumb_path,
                 // Nor where the picture sat against the sound. The review
                 // starts the picture level with the sound and offers the
                 // nudge, which is the honest state rather than a guess.
@@ -1125,6 +1168,13 @@ pub fn delete_take(app_data: &Path, id: &str) -> Result<(), String> {
     // disk failure part way through leaves a take the user can press Delete on
     // again rather than an orphan nothing lists. A picture of somebody playing
     // is the one of the three that must never be the thing left behind.
+    // The thumbnail is a FRAME of that picture, so it goes with it and goes
+    // first — a shelf that still showed somebody's face after they deleted
+    // the take would be the same broken promise in miniature.
+    if let Some(thumb) = thumb_beside(&wav).filter(|p| p.is_file()) {
+        fs::remove_file(&thumb)
+            .map_err(|e| format!("could not delete the take's thumbnail: {e}"))?;
+    }
     if let Some(video) = video_beside(&wav) {
         fs::remove_file(&video)
             .map_err(|e| format!("could not delete the take's video: {e}"))?;
@@ -1818,6 +1868,9 @@ impl TakeSession {
             // and the shelf learns otherwise from the disk on its next read.
             video_path: None,
             video_bytes: None,
+            // ...and no thumbnail either: the frame is grabbed by the
+            // webview from the preview and written after the take is named.
+            thumb_path: None,
             video_offset_ms: None,
         };
 
@@ -2370,6 +2423,7 @@ mod tests {
             position: None,
             video_path: None,
             video_bytes: None,
+            thumb_path: None,
             video_offset_ms: None,
         };
         fs::write(
@@ -2533,6 +2587,67 @@ mod tests {
         assert!(delete_take(&root, "1000.dry").is_err());
         assert!(dry.exists());
         assert!(load_take(&root, "1000.dry").is_err());
+        assert!(take.exists());
+    }
+
+    // ---- The thumbnail (W25) ----
+
+    /// One frame of the picture, beside the take, the way the webview writes
+    /// it. The bytes are not a JPEG and nothing here decodes one: what is
+    /// being tested is that a file with this NAME is part of its take.
+    fn write_thumb(take: &Path) -> PathBuf {
+        let path = thumb_beside(take).unwrap();
+        fs::write(&path, b"a frame").unwrap();
+        path
+    }
+
+    #[test]
+    fn a_thumbnail_is_listed_as_part_of_its_take_and_not_as_a_take() {
+        let root = tmp_dir("thumb-list");
+        let take = write_take(&root, "blues", "1000", 0.5);
+        let thumb = write_thumb(&take);
+        let listed = list_takes(&root, "blues").unwrap();
+        assert_eq!(listed.len(), 1, "the frame must not be a row of its own");
+        assert_eq!(
+            listed[0].thumb_path.as_deref(),
+            Some(&*thumb.to_string_lossy())
+        );
+    }
+
+    /// Off the DISK and not off the record, like the stem and the picture:
+    /// every take already on a musician's disk was recorded before
+    /// thumbnails existed, and a sidecar with no `thumbPath` in it must not
+    /// hide one written later.
+    #[test]
+    fn a_take_with_no_frame_beside_it_says_so() {
+        let root = tmp_dir("thumb-absent");
+        write_take(&root, "blues", "1000", 0.5);
+        assert_eq!(list_takes(&root, "blues").unwrap()[0].thumb_path, None);
+    }
+
+    /// A FRAME OF THE PLAYER MAY NOT SURVIVE THE TAKE IT BELONGS TO.
+    ///
+    /// The same rule as the picture it was cut from, and the same reason: a
+    /// shelf that still showed somebody's face after they deleted the take
+    /// is the promise broken in miniature.
+    #[test]
+    fn deleting_a_take_takes_its_thumbnail_with_it() {
+        let root = tmp_dir("thumb-delete");
+        let take = write_take(&root, "blues", "1000", 0.5);
+        let thumb = write_thumb(&take);
+        assert!(thumb.exists());
+        delete_take(&root, "1000").unwrap();
+        assert!(!thumb.exists(), "the frame outlived the take it belongs to");
+    }
+
+    #[test]
+    fn a_thumbnail_cannot_be_addressed_as_a_take_of_its_own() {
+        let root = tmp_dir("thumb-address");
+        let take = write_take(&root, "blues", "1000", 0.5);
+        let thumb = write_thumb(&take);
+        assert!(delete_take(&root, "1000.thumb").is_err());
+        assert!(thumb.exists());
+        assert!(load_take(&root, "1000.thumb").is_err());
         assert!(take.exists());
     }
 

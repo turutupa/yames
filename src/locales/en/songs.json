@@ -317,6 +317,11 @@
       "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
       "soundOnly": "Sound only — the camera was off for this one.",
       "locked": "The two are held together by the bar, not by the clock, so a slower go still lines up."
+    },
+    "takes": {
+      "withPicture": "With picture",
+      "noneFilmed": "None of these was filmed.",
+      "was": "Bars {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

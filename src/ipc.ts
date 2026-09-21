@@ -2181,6 +2181,17 @@ export async function takeVideoDiscard(): Promise<void> {
   return invoke("take_video_discard");
 }
 
+/**
+ * W25 — one frame of the picture, beside the take, so the shelf can show what
+ * a take is a picture of rather than a row of dates.
+ *
+ * Raw bytes for `takeVideoAppend`'s reason, and the take's id in a header for
+ * the same one: the body is the JPEG and nothing else.
+ */
+export async function takeThumbWrite(takeId: string, bytes: Uint8Array): Promise<string> {
+  return invoke("take_thumb_write", bytes, { headers: { take: takeId } });
+}
+
 // ---- W25: "Save as a video" — the clip the player sends somebody ----------
 //
 // The same four-step pipe as the camera's, pointed somewhere else entirely:

@@ -326,6 +326,11 @@
       "facts": "{{percent}} % · {{bpm}} BPM · {{score}}",
       "soundOnly": "Son seul : la caméra était éteinte pour celle-ci.",
       "locked": "Les deux sont calées à la mesure et non à l'horloge, donc une prise plus lente tombe juste elle aussi."
+    },
+    "takes": {
+      "withPicture": "Avec image",
+      "noneFilmed": "Aucune de celles-ci n'a été filmée.",
+      "was": "Mesures {{bars}} · {{percent}} % · {{goes}} · {{score}}"
     }
   }
 }
