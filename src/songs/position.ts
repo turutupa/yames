@@ -114,6 +114,20 @@ function barAtTick(score: SongScore, tick: number, range: BarRange): number {
 }
 
 /**
+ * The played bar a tick falls in, anywhere in the piece.
+ *
+ * `barAtTick` held inside a range answers "where is the player in the bars
+ * they asked for"; this answers "which bar of the PAGE is this tick written
+ * in", which is what anything drawing on the engraving needs — the tab's
+ * follow-scroll asks it on every report, and the tick it is given is the
+ * engine's position in the whole song, not in the range.
+ */
+export function playedBarAtTick(score: SongScore, tick: number): number {
+  const last = Math.max(0, score.bars.length - 1);
+  return barAtTick(score, tick, { startBar: 0, endBar: last });
+}
+
+/**
  * The bar a beat of the schedule belongs to, as a PLAYED bar index.
  *
  * The review needs the other direction — a finding names bars, an onset names

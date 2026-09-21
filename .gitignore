@@ -71,6 +71,13 @@ song-ab-clips/
 # changes, and the scripts that make it live beside it.
 tab-clips/
 
+# The Songs stage as W36 argues it: the one bar at the top, the strip's air,
+# the "More" panel with two parts and with twelve, and three themes' type —
+# at 1100, 1440 and 2000×1124, rail open and collapsed. Written by
+# `tests/layout/songs-room.spec.ts`, `songs-seek.spec.ts`, `songs-more.spec.ts`
+# and `songs-type.spec.ts`. Pictures of the app; never committed.
+.w36-shots/
+
 # The songs library, photographed for a person to look at (W35): the shelf
 # on its own, three of the player's own songs with the shelf folded under them,
 # and a title far wider than the panel — three themes, two languages, two
