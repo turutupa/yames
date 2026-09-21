@@ -115,9 +115,21 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-// Never 1420 — that's the real dev server's port, and running this while
-// `tauri dev` is up would otherwise strictPort-collide with it.
-const VITE_PORT = 1436;
+/**
+ * A port nobody else is on, chosen fresh for this run (M09).
+ *
+ * It was the fixed 1436, and `startVite` decides the server is up by fetching
+ * `/shots.html` — so a second copy of this script, in a second worktree, found
+ * the first one's server already answering on 1436 and photographed ITS build.
+ * Its own Vite died instantly on `--strictPort` and nothing said so; the
+ * pictures came out of somebody else's checkout, looking exactly like pictures
+ * of this one. Two agents on one machine is the normal case here.
+ *
+ * A free port fixes it at the root: the only thing that can answer is the
+ * server this run started. (Never 1420 either, which is what `tauri dev`
+ * uses — and a random high port is never that.)
+ */
+const VITE_PORT = await freePort();
 
 const DEVICE_SCALE = 2;
 const DEFAULT_WIDTHS = [360, 390, 430];
@@ -172,7 +184,17 @@ const wait = (sel) => ({ wait: sel });
 const waitGone = (sel) => ({ waitGone: sel });
 const clickText = (sel, text) => ({ clickText: sel, text });
 const settle = (ms) => ({ sleep: ms });
-const settingsSection = (idx) => ({ settingsSection: idx });
+/**
+ * Scroll one settings section to the top of the sheet, BY NAME.
+ *
+ * It used to be an index into the rendered sections, and the day the Devices
+ * section started returning null on a phone (M08 — a dropdown that changes
+ * nothing there) every number after it pointed at the wrong screen and
+ * `settings-about` failed outright with "no settings section 4 (have 4)".
+ * A selector cannot drift: each section carries its own id or class, and a
+ * section that does not ship on a phone is simply not asked for.
+ */
+const settingsSection = (selector) => ({ settingsSection: selector });
 
 /** Settings is a mobile tab; opening it also works from the desktop rail
  *  (`button[aria-label="Settings"]`), which is all the parity probe needs. */
@@ -274,16 +296,20 @@ const SCREENS = [
   },
 
   // ── every settings section that ships on a phone ────────────────────────
-  { id: "settings-general", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(0)] },
-  { id: "settings-appearance", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(1)] },
-  { id: "settings-devices", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(2)] },
-  { id: "settings-support", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(3)] },
-  { id: "settings-about", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(4)] },
+  //
+  // Devices is not one of them: its only control was an output picker that
+  // does nothing on Android (the system routes Oboe), so the section returns
+  // null there (M08). It had a scene here until M09, and that scene was what
+  // pushed every section after it one place along.
+  { id: "settings-general", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection("#settings-general")] },
+  { id: "settings-appearance", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection("#settings-appearance")] },
+  { id: "settings-support", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(".support-card")] },
+  { id: "settings-about", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(".about-section:not(.support-card)")] },
   {
     id: "settings-language-open",
     shot: "metronome",
     root: ".main-content",
-    steps: [...OPEN_SETTINGS, settingsSection(0), tap(".lang-select-btn"), wait(".lang-options")],
+    steps: [...OPEN_SETTINGS, settingsSection("#settings-general"), tap(".lang-select-btn"), wait(".lang-options")],
   },
 
   // ── zen ──────────────────────────────────────────────────────────────────
@@ -623,9 +649,9 @@ async function clickByText(cdp, sessionId, selector, text) {
   await sleep(260);
 }
 
-/** Scroll the settings sheet so section `idx` (General=0 … About=4 on a
- *  phone build) sits at the top. */
-async function scrollToSettingsSection(cdp, sessionId, idx) {
+/** Scroll the settings sheet so the section matching `selector` sits at the
+ *  top. By name rather than by position — see `settingsSection` above. */
+async function scrollToSettingsSection(cdp, sessionId, selector) {
   const title = await evaluate(
     cdp,
     sessionId,
@@ -634,11 +660,14 @@ async function scrollToSettingsSection(cdp, sessionId, idx) {
         document.querySelector('.main-content[data-view="settings"] .view-transition-wrapper') ||
         document.querySelector(".main-content .view-transition-wrapper");
       if (!scroller) throw new Error("no settings scroller");
-      const secs = scroller.querySelectorAll("section.settings-section, section.hotkeys-section");
-      const sec = secs[${idx}];
-      if (!sec) throw new Error("no settings section ${idx} (have " + secs.length + ")");
+      const sec = scroller.querySelector(${JSON.stringify(selector)});
+      if (!sec) {
+        const have = [...scroller.querySelectorAll("section.settings-section, section.hotkeys-section")]
+          .map((s) => (s.id || s.className));
+        throw new Error("no settings section matching ${selector} — on screen: " + have.join(", "));
+      }
       scroller.scrollTop = sec.offsetTop - scroller.offsetTop - 8;
-      return (sec.querySelector("h2") || {}).textContent || String(${idx});
+      return (sec.querySelector("h2") || {}).textContent || ${JSON.stringify(selector)};
     })()`,
   );
   await sleep(200);
@@ -694,7 +723,7 @@ async function runStep(cdp, sessionId, step) {
   if (step.clickText) return clickByText(cdp, sessionId, step.clickText, step.text);
   if (step.clickButtonText) return clickButtonByText(cdp, sessionId, step.clickButtonText);
   if (typeof step.sleep === "number") return sleep(step.sleep);
-  if (typeof step.settingsSection === "number") return void (await scrollToSettingsSection(cdp, sessionId, step.settingsSection));
+  if (typeof step.settingsSection === "string") return void (await scrollToSettingsSection(cdp, sessionId, step.settingsSection));
   if (step.openSettings) return openSettings(cdp, sessionId);
   if (step.zenButton) return clickZen(cdp, sessionId);
   if (step.scrollStageToBottom) return scrollStageToBottom(cdp, sessionId);
