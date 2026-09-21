@@ -289,7 +289,9 @@
       "watchingAll": "整整一遍。",
       "watchingBars": "第 {{bars}} 小節，一遍又一遍。",
       "sinkUnsupported": "這個版本只能用電腦平常的喇叭播放錄音，不能走 {{device}}。",
-      "sinkUnmatched": "正在用電腦平常的喇叭播放——這裡找不到 {{device}}。"
+      "sinkUnmatched": "正在用電腦平常的喇叭播放——這裡找不到 {{device}}。",
+      "peek": "看看自己",
+      "peekNote": "檢查一下取景。開始演奏時會自動關閉。"
     },
     "clip": {
       "save": "存成影片",

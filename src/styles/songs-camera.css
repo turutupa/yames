@@ -285,3 +285,77 @@
     width: clamp(96px, 30%, 140px);
   }
 }
+
+/* ── "See yourself" (W33 §3) ──────────────────────────────────────────────
+   The stage draws no mirror below 900px — `jam.css` above says why, and it is
+   a measurement rather than a preference — so a player at a small window was
+   filming something they could never see. This is the look, once, before they
+   play: a small portalled picture off the camera chip, placed by the same
+   hook every menu on this screen uses, and gone the moment the band starts.
+
+   Portalled, because the chip is deep inside a drawer that scrolls and a
+   panel drawn as its child opens off the bottom of the window. It may cover
+   the grid while it is open, and that is the trade: you are not reading the
+   form while you are framing up. */
+/* The camera's controls, in a box of their OWN.
+
+   It was `display: contents`, which lays the children out exactly as before
+   and is therefore the tidy answer — and it is why the picture opened 185px
+   below the bottom of a 1100×720 window. `useMenuPlacement` places a portal
+   against its anchor's rectangle, and an element with `display: contents`
+   has no rectangle: every measurement came back zero and the hook placed the
+   panel against the top-left of the document. So it is a real inline box,
+   laid out the way both rows it lives in lay their children out. */
+.songs-camera-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* A FIXED size, both ways.
+
+   `useMenuPlacement` measures the panel the instant it is mounted and places
+   it against the chip from that one reading. A panel sized by its contents is
+   a panel that is measured empty and then grows — which put this one 185px
+   below the bottom of a 1100×720 window, because the video had no stream in
+   it yet when the hook asked how tall it was. So the box is the box before
+   anything arrives, and the picture fits itself into it. */
+.songs-camera-peek-pop {
+  /* FIXED, because `useMenuPlacement` hands back window coordinates and a
+     statically positioned element ignores them — the panel was drawn at the
+     foot of the document with a perfectly correct `top: 202px` on it. Every
+     other portal on this screen says the same word for the same reason. */
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 244px;
+  height: 182px;
+  overflow: hidden;
+  padding: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 38%);
+}
+
+.songs-camera-peek-pop video {
+  width: 228px;
+  height: 128px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: #000;
+  object-fit: cover;
+  /* Mirrored, like the stage's own preview: a mirror is how a person knows
+     which hand is which. Nothing about this reaches the recorder. */
+  transform: scaleX(-1);
+}
+
+.songs-camera-peek-pop p {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+}

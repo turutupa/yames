@@ -299,7 +299,9 @@
       "watchingAll": "La pasada entera.",
       "watchingBars": "Compases {{bars}}, una y otra vez.",
       "sinkUnsupported": "Esta versión solo puede reproducir la toma por los altavoces habituales del ordenador, no por {{device}}.",
-      "sinkUnmatched": "Suena por los altavoces habituales del ordenador: no se pudo encontrar {{device}} desde aquí."
+      "sinkUnmatched": "Suena por los altavoces habituales del ordenador: no se pudo encontrar {{device}} desde aquí.",
+      "peek": "Verte",
+      "peekNote": "Comprueba el encuadre. Se cierra al empezar a tocar."
     },
     "clip": {
       "save": "Guardar como vídeo",

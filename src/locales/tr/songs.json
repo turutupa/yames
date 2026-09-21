@@ -289,7 +289,9 @@
       "watchingAll": "Turun tamamı.",
       "watchingBars": "{{bars}} ölçüleri, döne döne.",
       "sinkUnsupported": "Bu sürüm kaydı yalnızca bilgisayarın her zamanki hoparlörlerinden çalabiliyor, {{device}} üzerinden değil.",
-      "sinkUnmatched": "Bilgisayarın her zamanki hoparlörlerinden çalıyor — buradan {{device}} bulunamadı."
+      "sinkUnmatched": "Bilgisayarın her zamanki hoparlörlerinden çalıyor — buradan {{device}} bulunamadı.",
+      "peek": "Kendini gör",
+      "peekNote": "Kadrajını kontrol et. Çalmaya başlayınca kapanır."
     },
     "clip": {
       "save": "Video olarak kaydet",

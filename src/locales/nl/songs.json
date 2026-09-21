@@ -289,7 +289,9 @@
       "watchingAll": "De hele ronde.",
       "watchingBars": "Maten {{bars}}, rondje na rondje.",
       "sinkUnsupported": "Deze versie kan de opname alleen via de gewone luidsprekers van de computer afspelen, niet via {{device}}.",
-      "sinkUnmatched": "Hij speelt via de gewone luidsprekers van de computer — {{device}} was hiervandaan niet te vinden."
+      "sinkUnmatched": "Hij speelt via de gewone luidsprekers van de computer — {{device}} was hiervandaan niet te vinden.",
+      "peek": "Jezelf zien",
+      "peekNote": "Check je beeld. Het sluit zodra je speelt."
     },
     "clip": {
       "save": "Als video opslaan",

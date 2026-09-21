@@ -289,7 +289,9 @@
       "watchingAll": "한 바퀴 전부.",
       "watchingBars": "{{bars}}마디를 돌고 돌며.",
       "sinkUnsupported": "이 버전에서는 테이크를 컴퓨터의 기본 스피커로만 재생할 수 있습니다. {{device}} 로는 보낼 수 없습니다.",
-      "sinkUnmatched": "컴퓨터의 기본 스피커로 재생 중입니다. 여기서는 {{device}} 를 찾지 못했습니다."
+      "sinkUnmatched": "컴퓨터의 기본 스피커로 재생 중입니다. 여기서는 {{device}} 를 찾지 못했습니다.",
+      "peek": "내 모습 보기",
+      "peekNote": "화면에 어떻게 나오는지 확인하세요. 연주를 시작하면 닫힙니다."
     },
     "clip": {
       "save": "영상으로 저장",

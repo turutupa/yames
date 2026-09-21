@@ -299,7 +299,9 @@
       "watchingAll": "Tutto il giro.",
       "watchingBars": "Battute {{bars}}, in tondo.",
       "sinkUnsupported": "Questa versione può riprodurre la registrazione solo dagli altoparlanti soliti del computer, non da {{device}}.",
-      "sinkUnmatched": "Sta suonando dagli altoparlanti soliti del computer: {{device}} non si trova da qui."
+      "sinkUnmatched": "Sta suonando dagli altoparlanti soliti del computer: {{device}} non si trova da qui.",
+      "peek": "Vediti",
+      "peekNote": "Controlla l'inquadratura. Si chiude quando suoni."
     },
     "clip": {
       "save": "Salva come video",

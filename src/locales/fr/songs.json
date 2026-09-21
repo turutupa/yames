@@ -299,7 +299,9 @@
       "watchingAll": "Tout le passage.",
       "watchingBars": "Mesures {{bars}}, en boucle.",
       "sinkUnsupported": "Cette version ne peut lire la prise que par les haut-parleurs habituels de l'ordinateur, pas par {{device}}.",
-      "sinkUnmatched": "La lecture passe par les haut-parleurs habituels de l'ordinateur : {{device}} est introuvable d'ici."
+      "sinkUnmatched": "La lecture passe par les haut-parleurs habituels de l'ordinateur : {{device}} est introuvable d'ici.",
+      "peek": "Te voir",
+      "peekNote": "Vérifie ton cadrage. Ça se ferme quand tu joues."
     },
     "clip": {
       "save": "Enregistrer en vidéo",

@@ -289,7 +289,9 @@
       "watchingAll": "The whole pass.",
       "watchingBars": "Bars {{bars}}, round and round.",
       "sinkUnsupported": "This version can only play the take through your computer's usual speakers, not through {{device}}.",
-      "sinkUnmatched": "It is playing through your computer's usual speakers — it could not find {{device}} from here."
+      "sinkUnmatched": "It is playing through your computer's usual speakers — it could not find {{device}} from here.",
+      "peek": "See yourself",
+      "peekNote": "Check your framing. It closes when you play."
     },
     "clip": {
       "save": "Save as a video",

@@ -912,6 +912,7 @@ export function JamView({
                 <JamSetupSheet
                   jam={jam}
                   jams={jams}
+                  isPlaying={isPlaying}
                   onEdit={onEdit}
                   onLoadJam={(next) => onLoadJam?.(next)}
                   instrument={instrument}

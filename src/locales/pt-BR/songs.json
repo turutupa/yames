@@ -299,7 +299,9 @@
       "watchingAll": "A passada inteira.",
       "watchingBars": "Compassos {{bars}}, sem parar.",
       "sinkUnsupported": "Esta versão só toca a gravação pelas caixas de som normais do computador, não por {{device}}.",
-      "sinkUnmatched": "Está tocando pelas caixas de som normais do computador — daqui não deu para achar {{device}}."
+      "sinkUnmatched": "Está tocando pelas caixas de som normais do computador — daqui não deu para achar {{device}}.",
+      "peek": "Ver você",
+      "peekNote": "Confira o enquadramento. Fecha quando você toca."
     },
     "clip": {
       "save": "Salvar como vídeo",

@@ -309,7 +309,9 @@
       "watchingAll": "Całe przejście.",
       "watchingBars": "Takty {{bars}}, w kółko.",
       "sinkUnsupported": "Ta wersja potrafi odtworzyć nagranie tylko przez zwykłe głośniki komputera, nie przez {{device}}.",
-      "sinkUnmatched": "Gra przez zwykłe głośniki komputera — stąd nie udało się znaleźć {{device}}."
+      "sinkUnmatched": "Gra przez zwykłe głośniki komputera — stąd nie udało się znaleźć {{device}}.",
+      "peek": "Zobacz siebie",
+      "peekNote": "Sprawdź kadr. Zamknie się, gdy zaczniesz grać."
     },
     "clip": {
       "save": "Zapisz jako wideo",

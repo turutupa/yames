@@ -289,7 +289,9 @@
       "watchingAll": "Cả lượt.",
       "watchingBars": "Ô nhịp {{bars}}, vòng đi vòng lại.",
       "sinkUnsupported": "Bản này chỉ phát được bản thu qua loa thường của máy, không qua {{device}}.",
-      "sinkUnmatched": "Đang phát qua loa thường của máy — từ đây không tìm thấy {{device}}."
+      "sinkUnmatched": "Đang phát qua loa thường của máy — từ đây không tìm thấy {{device}}.",
+      "peek": "Xem bản thân",
+      "peekNote": "Kiểm tra khung hình. Nó đóng lại khi bạn bắt đầu chơi."
     },
     "clip": {
       "save": "Lưu thành video",
