@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useJamLoading } from "../../hooks/useJamLoading";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
+import type { TakeSound } from "../../jam/types";
 
 interface TransportProps {
   view: "beat" | "drill" | "setlist" | "jam" | "songs";
@@ -85,6 +86,15 @@ interface TransportProps {
   recording?: boolean;
   /** Seconds of the take so far. */
   recordedSeconds?: number;
+  /**
+   * What the take being recorded is made of (`plans/SONGS.md` A12).
+   *
+   * Fixed when the take started, so the mark says the same thing for the
+   * whole length of it even if the switch moves underneath. Absent means the
+   * take Yames has always made, which is what every caller that has not
+   * learned about this yet is recording.
+   */
+  recordingSound?: TakeSound;
 }
 
 function clock(totalSeconds: number): string {
@@ -175,6 +185,7 @@ export function Transport({
   jamChorus = 1,
   recording = false,
   recordedSeconds = 0,
+  recordingSound = "yamesAndInput",
 }: TransportProps) {
   const { t } = useTranslation();
   const jamLoading = useJamLoading();
@@ -346,7 +357,16 @@ export function Transport({
       {recording && (
         <div className="transport-recording" role="status">
           <span className="transport-recording-dot" aria-hidden="true" />
-          <span className="transport-recording-label">{t("jam.takes.recording")}</span>
+          <span className="transport-recording-label">
+            {/* WHICH SOURCE, for the whole length of the take, not only where
+                the switch is (`plans/SONGS.md` A12). "Everything this computer
+                plays" can pick up a video call or a browser tab, and a mark
+                that says only "Recording" while it does that is the app being
+                quiet about the one thing it owes an answer on. */}
+            {recordingSound === "everything"
+              ? t("jam.takeSound.recordingEverything")
+              : t("jam.takes.recording")}
+          </span>
           <span className="transport-recording-clock">{clock(recordedSeconds)}</span>
         </div>
       )}

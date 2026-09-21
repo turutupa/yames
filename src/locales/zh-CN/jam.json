@@ -702,6 +702,21 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "录什么声音",
+      "yames": "Yames 和我的输入",
+      "everything": "这台电脑发出的全部声音",
+      "warning": "这会录下这台电脑发出的全部声音，不只是 Yames——视频通话、通知声、浏览器里的歌都会录进去。",
+      "listensTo": "正在听 {{device}}。",
+      "check": "试一下声音",
+      "listening": "正在听…",
+      "level": "电平",
+      "silent": "什么都没进来。看看这台电脑的音量是否开着、有没有静音。",
+      "notHere": "这台电脑没法把扬声器正在放的声音交给 Yames，所以这里录的是 Yames 和你的输入。",
+      "recordingEverything": "正在录这台电脑发出的全部声音",
+      "recordingYames": "正在录 Yames 和你的输入",
+      "takeEverything": "这台电脑当时发出的全部声音"
     }
   },
   "scale": {

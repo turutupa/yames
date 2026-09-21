@@ -720,6 +720,21 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "O som",
+      "yames": "Yames e minha entrada",
+      "everything": "Tudo o que este computador toca",
+      "warning": "Isto grava tudo o que este computador toca, não só o Yames — uma videochamada, uma notificação, uma música no navegador.",
+      "listensTo": "Ele escuta {{device}}.",
+      "check": "Conferir o som",
+      "listening": "Escutando…",
+      "level": "Nível",
+      "silent": "Não chegou nada. Veja se o volume deste computador está alto e sem mudo.",
+      "notHere": "Este computador não consegue entregar ao Yames o que os alto-falantes estão tocando, então aqui uma gravação é o Yames e a sua entrada.",
+      "recordingEverything": "Gravando tudo o que este computador toca",
+      "recordingYames": "Gravando o Yames e a sua entrada",
+      "takeEverything": "tudo o que este computador tocou"
     }
   },
   "scale": {

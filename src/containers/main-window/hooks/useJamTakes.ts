@@ -14,7 +14,10 @@ import {
 } from "../../../ipc";
 import { sortTakes } from "../../../jam";
 import { TAKES_INTRO_KEY } from "../../../jam/takes";
+import { useTakeSound } from "../../../takes/useTakeSound";
+import type { TakeSoundState } from "../../../takes/useTakeSound";
 import type { Jam, JamTake } from "../../../jam";
+import type { TakeSound } from "../../../jam/types";
 
 /**
  * The takes of the jam on the stage: what is on the shelf, what is being
@@ -57,6 +60,11 @@ export type JamTakesState = {
   recording: boolean;
   /** Seconds of the take so far, for the mark on the transport. */
   recordedSeconds: number;
+  /**
+   * What the take now recording is made of — fixed when it started, so the
+   * indicator says the same thing for the whole length of it.
+   */
+  recordingSound: TakeSound;
   /** The take playing back, or null. The band is silent while one plays. */
   playingId: string | null;
   /**
@@ -85,6 +93,15 @@ export type JamTakesState = {
   confirmIntro: () => void;
   /** "Not now" — nothing changes, and it will ask again next time. */
   cancelIntro: () => void;
+  /**
+   * What a take is made of, and whether this machine can record what it plays
+   * (`plans/SONGS.md` A12).
+   *
+   * Handed straight through from `useTakeSound` rather than re-modelled here:
+   * the answer belongs to the machine, not to the jam, and Songs asks the
+   * same hook the same question.
+   */
+  soundSource: TakeSoundState;
 };
 
 interface UseJamTakesArgs {
@@ -120,6 +137,19 @@ export function useJamTakes({
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [dirBytes, setDirBytes] = useState(0);
   const [introOpen, setIntroOpen] = useState(false);
+  const soundSource = useTakeSound();
+  /**
+   * The source the take now recording was STARTED with.
+   *
+   * Its own state rather than a read of the live switch, because the
+   * indicator has to say what is actually being recorded for the whole length
+   * of the take. If the musician moves the switch mid-take, the take does not
+   * change under them and the screen must not claim it did.
+   */
+  const [recordingSound, setRecordingSound] = useState<TakeSound>("yamesAndInput");
+  /** The live value for the effect below, without re-arming it on a change. */
+  const soundRef = useRef(soundSource.sound);
+  soundRef.current = soundSource.sound;
   /**
    * Whether the dialog has been read, as far as we know.
    *
@@ -274,7 +304,11 @@ export function useJamTakes({
       startedAt.current = Date.now();
       setRecording(true);
       setRecordedSeconds(0);
-      void startTake(id).catch(() => {
+      // Fixed for the length of the take, here, at the one moment it is
+      // decided. See `recordingSound`.
+      const source = soundRef.current;
+      setRecordingSound(source);
+      void startTake(id, source).catch(() => {
         // The engine said no. No mark on the transport, no phantom take, and
         // the section switches to saying this build cannot record — which is
         // the truth, and better than a red dot over nothing.
@@ -398,6 +432,8 @@ export function useJamTakes({
     takes,
     recording,
     recordedSeconds,
+    recordingSound,
+    soundSource,
     playingId,
     dirBytes,
     play,

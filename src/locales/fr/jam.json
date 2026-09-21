@@ -720,6 +720,21 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Le son",
+      "yames": "Yames et mon entrée",
+      "everything": "Tout ce que joue cet ordinateur",
+      "warning": "Cela enregistre tout ce que joue cet ordinateur, pas seulement Yames : un appel vidéo, une notification, un morceau dans le navigateur.",
+      "listensTo": "Il écoute {{device}}.",
+      "check": "Vérifier le son",
+      "listening": "Écoute…",
+      "level": "Niveau",
+      "silent": "Rien n'est arrivé. Vérifiez que le volume de cet ordinateur est monté et non coupé.",
+      "notHere": "Cet ordinateur ne peut pas donner à Yames ce que jouent ses haut-parleurs ; ici une prise, c'est Yames et votre entrée.",
+      "recordingEverything": "Enregistre tout ce que joue cet ordinateur",
+      "recordingYames": "Enregistre Yames et votre entrée",
+      "takeEverything": "tout ce qu'a joué cet ordinateur"
     }
   },
   "scale": {

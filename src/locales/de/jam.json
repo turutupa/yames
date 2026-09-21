@@ -711,6 +711,21 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Der Klang",
+      "yames": "Yames und mein Eingang",
+      "everything": "Alles, was dieser Computer spielt",
+      "warning": "Damit wird alles aufgenommen, was dieser Computer spielt, nicht nur Yames – ein Videoanruf, eine Benachrichtigung, ein Lied im Browser.",
+      "listensTo": "Es hört auf {{device}}.",
+      "check": "Klang prüfen",
+      "listening": "Hört zu …",
+      "level": "Pegel",
+      "silent": "Es kam nichts an. Prüfe, ob die Lautstärke dieses Computers aufgedreht und nicht stummgeschaltet ist.",
+      "notHere": "Dieser Computer kann Yames nicht weitergeben, was seine Lautsprecher spielen. Eine Aufnahme ist hier Yames und dein Eingang.",
+      "recordingEverything": "Nimmt alles auf, was dieser Computer spielt",
+      "recordingYames": "Nimmt Yames und deinen Eingang auf",
+      "takeEverything": "alles, was dieser Computer gespielt hat"
     }
   },
   "scale": {

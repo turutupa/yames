@@ -702,6 +702,21 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "녹음할 소리",
+      "yames": "Yames와 내 입력",
+      "everything": "이 컴퓨터가 내는 모든 소리",
+      "warning": "Yames뿐 아니라 이 컴퓨터가 내는 모든 소리가 녹음됩니다. 화상 통화, 알림음, 브라우저의 노래까지 들어갑니다.",
+      "listensTo": "{{device}}을(를) 듣고 있습니다.",
+      "check": "소리 확인",
+      "listening": "듣는 중…",
+      "level": "레벨",
+      "silent": "아무 소리도 들어오지 않았습니다. 이 컴퓨터의 볼륨이 켜져 있고 음소거가 아닌지 확인하세요.",
+      "notHere": "이 컴퓨터는 스피커가 내는 소리를 Yames에 넘겨줄 수 없습니다. 여기서는 Yames와 내 입력이 녹음됩니다.",
+      "recordingEverything": "이 컴퓨터가 내는 모든 소리를 녹음 중",
+      "recordingYames": "Yames와 내 입력을 녹음 중",
+      "takeEverything": "이 컴퓨터가 냈던 모든 소리"
     }
   },
   "scale": {

@@ -1843,7 +1843,7 @@ export function onPlaybackFinished(callback: () => void) {
 // Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
 // ---------------------------------------------------------------------------
 
-import type { Jam, JamEngineConfig, JamPositionCommand, JamTake } from "./jam/types";
+import type { Jam, JamEngineConfig, JamPositionCommand, JamTake, TakeSound } from "./jam/types";
 import type { SongRecord } from "./songs/library";
 
 /**
@@ -2109,9 +2109,49 @@ export function onJamEnded(callback: () => void) {
 // machine.
 // ---------------------------------------------------------------------------
 
-/** Start recording; the engine mixes the mic and the band into one WAV. */
-export async function startTake(jamId: string): Promise<void> {
-  return invoke("start_take", { jamId });
+/**
+ * Start recording.
+ *
+ * With no `sound`, or with `"yamesAndInput"`, the engine mixes your input and
+ * the band into one WAV, exactly as takes have always worked. With
+ * `"everything"` it instead records what comes out of the speaker Yames is
+ * playing through — your amp simulator and anything else that is making a
+ * sound, in stereo, with no microphone and no dry stem
+ * (`plans/SONGS.md` A12, `src-tauri/src/loopback.rs`).
+ *
+ * **The speakers are listened to only between this call and `stopTake`.** A
+ * failure to open that capture refuses the take rather than quietly recording
+ * the other thing under the same name.
+ */
+export async function startTake(jamId: string, sound?: TakeSound): Promise<void> {
+  return invoke("start_take", { jamId, sound: sound ?? null });
+}
+
+/** What `checkTakeSound` found. */
+export interface TakeSoundCheck {
+  /** Can this machine record what it plays at all? */
+  can: boolean;
+  /** The speaker it listened to, as the operating system names it. */
+  device?: string;
+  sampleRate?: number;
+  channels?: number;
+  /** The loudest thing it heard, 0 to 1. Zero means silence. */
+  peak: number;
+  /** Why it could not, in words that can go straight on screen. */
+  trouble?: string;
+}
+
+/**
+ * Listen to the speakers for a fifth of a second and say what is there.
+ *
+ * The only thing in Yames that opens that capture outside a take, and it
+ * closes again immediately. Nothing it hears is written anywhere; what comes
+ * back is one number. It exists so a musician sees the level BEFORE a take
+ * rather than finding silence after one — on Windows the mute and the volume
+ * slider sit before the tap, so a muted machine records nothing at all.
+ */
+export async function checkTakeSound(): Promise<TakeSoundCheck> {
+  return invoke("check_take_sound");
 }
 
 /** Stop and keep the take, or `null` when nothing was recording. */

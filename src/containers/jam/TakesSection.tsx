@@ -128,6 +128,14 @@ export function TakesSection({
                   {formatDate(take.createdAt, t, i18n.language)}
                 </span>
                 <span className="jam-take-length">{takeLength(take.durationSec)}</span>
+                {/* WHAT THIS ONE IS A RECORDING OF (`plans/SONGS.md` A12).
+                    Only on the takes that are not the ordinary kind, because
+                    a label on every row is a label nobody reads — and because
+                    the thing worth noticing a week later is "this one has
+                    whatever else the computer was playing in it". */}
+                {take.sound === "everything" && (
+                  <span className="jam-take-sound">{t("jam.takeSound.takeEverything")}</span>
+                )}
                 {/* What the band is doing while this plays. Said rather than
                     left to be noticed: a player who pressed play and heard no
                     drums would reasonably think the drummer had crashed. */}
