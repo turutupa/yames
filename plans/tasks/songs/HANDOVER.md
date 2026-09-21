@@ -47,10 +47,47 @@ through speakers (not through an interface or headphones). W28 recommends
 muting the guide while a take records; it is ON for now. And band fader
 levels saved before W28 return to default (the click's is kept).
 
-Being built while you slept: W30 (record a jam, with the picture, and with
-"everything this computer plays" as the sound so your plugin guitar is in it;
-save as a video with the Yames mark) and then W31 (the real tab, scrolling
-and coloured, in a Songs video).
+## Recording, built while you slept (W30, W31, W32, W33 — all merged, all gated)
+
+**Record a jam, with the sound you actually heard.** Jam -> Set up -> Takes ->
+*Record the take*, and under it a new choice: *Yames and my input* (as before)
+or **Everything this computer plays** — your guitar through its plugins, the
+band and the click, as one recording. It listens only between Record and Stop
+(plus 200 ms for *Check the sound*), the mark beside Play names the source for
+the whole take, nothing is uploaded. Windows is verified; Linux is compiled and
+never run; a Mac shows one sentence and no switch (it needs a newer audio
+library than the engine sits on).
+- **Your default speakers were muted at 0 % last night.** On this machine the
+  mute sits before the capture point: a muted output records pure silence.
+  Unmute, then *Check the sound*.
+- **If your plugin host plays through ASIO, Windows cannot hear it** and neither
+  can this. Then either choose your interface's own loopback input as Yames'
+  input and use the ordinary source, or run the host in shared mode while
+  recording. Tell me which you have.
+
+**The picture.** *Record the picture* beside it (`C`; `R` arms the take);
+*See yourself* pops a mirror out so you can check the framing; it rolls from
+the count-in. **Watch it back** on a take's row: your picture with the chorus's
+bar grid under it, the bar you hear lit, the chord and the next one, step by
+bar, press a bar to go there, nudge the picture against the sound.
+
+**Save as a video**, from Jam or from Songs' review: 16:9 or 9:16, the Yames
+logo + "yames.app" top right (its own switch, on by default), then *Show in
+folder* and links to the upload pages of Instagram, TikTok, YouTube and X. A
+jam video shows the chord large, "next Bb7", a beat ring that pulses, the bar
+grid, in the app's own typeface and the theme you were in — with or without a
+camera. **A Songs video shows the tab you played**: real strings and fret
+numbers scrolling under a fixed playhead, coloured by how each note went
+(switchable: The tab / Marks only / Nothing; "show how it went" is separate).
+Frames to look at without running anything: `w32-frames/`, and the clips I sent.
+
+Still open from this work: tab under each side of "then and now" (not cheap,
+left); the clap for picture-to-sound sync, once per sound source (they are off
+in opposite directions); program-only capture on Windows was researched and is
+not worth it. And two Jam layout bugs that predate all this: at 480x780 the
+stage is 258 px taller than its room (the bar grid's fourth row is cut), and at
+1100x720 Play overlaps the stage's corner. The first needs a decision about
+what gives at that size.
 
 ## Try it (in this order)
 
@@ -191,16 +228,17 @@ Run it. Then the manual pass, the jitter probe on a quiet machine (both
 first launch on a copy of a real settings folder to watch the history and
 song migrations run once. The store has never been opened by a live app.
 
-## The gates, run by the orchestrator on the final branch (evening of 2026-09-20, after W25)
+## The gates, run by the orchestrator on the final branch (morning of 2026-09-21, after W33)
 
 ```
-npm run build         built, tsc clean (alphaTab, the review, the video export and then-and-now are lazy)
-npm run test          204 files, 5200 tests passed
-npm run test:layout   190 passed
-npm run test:rust     895 passed; 0 failed; 1 ignored
+npm run build         built, tsc clean (alphaTab, the review, both video exports and jam playback are lazy)
+npm run test          213 files, 5313 tests passed
+npm run test:layout   250 passed
+npm run test:rust     929 passed; 0 failed; 2 ignored
 npm run test:dsp      1 passed
 npm run test:highbpm  3 passed  (raw-onset, played-rhythm and known-score layers)
 npm run test:pitch    8 passed
+jitter probe          jam + a take of everything the computer plays: p99 0.43 ms, 0 allocations, 0 frees, 0 missed
 ```
 `songs-v1` is 80 commits and +53 829 / −673 lines across 285 files ahead of
 `main`. That is a lot to review in one sitting: the merge commits are one
