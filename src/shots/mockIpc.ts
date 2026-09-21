@@ -484,6 +484,36 @@ function songShotRecord(): SongRecord {
 }
 
 /**
+ * A library for the scenes that photograph the LIST (W35).
+ *
+ * Three songs of the player's own, or one with a title far wider than the
+ * panel. Built through the real importer out of the same alphaTex the stage
+ * scenes use, so the rows are real rows — one file each, with a real id and a
+ * real artist under the title.
+ *
+ * The long one is a real sentence rather than a run of x's: a title cut off
+ * at the end has to still read like the beginning of a name.
+ */
+const LONG_TITLE =
+  "Rondo in C for two guitars and a very patient metronome, second movement";
+
+function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
+  const build = (tex: string, file: string, name?: string) => {
+    const bytes = new TextEncoder().encode(tex);
+    const record = newSongRecord(importSong(bytes, file, 0).score, bytes);
+    return name ? { ...record, name } : record;
+  };
+  if (which === "longTitle") {
+    return [build(SHOT_SONG_TEX, "Practice piece.alphatex", LONG_TITLE)];
+  }
+  return [
+    build(SHOT_SONG_TEX, "Practice piece.alphatex"),
+    build(SHOT_SONG_SIXTEENTHS, "sixteenths.alphatex"),
+    build(SHOT_SONG_SEVEN, "seven.alphatex"),
+  ];
+}
+
+/**
  * The store, settled.
  *
  * Everything a first-time user sees is a screen that must never reach a
@@ -579,7 +609,10 @@ export function installShotMock(shot: Shot, theme: string): void {
   // and the layout suite see is the seven pieces the app really ships with,
   // seeded by the real code through the real importer — not this fixture
   // beside them.
-  if (shot.tab === "songs" && !shot.starterShelf) {
+  if (shot.songLibrary) {
+    // W35 — the scenes that are about the LIST rather than the stage.
+    for (const record of songLibraryRecords(shot.songLibrary)) SCORES.set(record.id, record);
+  } else if (shot.tab === "songs" && !shot.starterShelf) {
     const record = songShotRecord();
     SCORES.set(record.id, record);
   }

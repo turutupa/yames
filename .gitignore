@@ -62,3 +62,9 @@ song-ab-clips/
 # the reason the audio above is not — it is made again whenever the drawing
 # changes, and the scripts that make it live beside it.
 tab-clips/
+
+# The songs library, photographed for a person to look at (W35): the shelf
+# on its own, three of the player's own songs with the shelf folded under them,
+# and a title far wider than the panel — three themes, two languages, two
+# widths. Written by `tests/layout/songs-library-shots.spec.ts`; never committed.
+.songs-library-shots/

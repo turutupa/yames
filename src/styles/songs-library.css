@@ -118,7 +118,20 @@
   color: var(--text-tertiary);
 }
 
-/* The destructive half says what it does and looks like it. */
-.song-remove-confirm {
+/* The card's heading carries a song's NAME, and `.unsaved-title` shouts. A
+   name the player typed, or a title in a script with no capitals to make, is
+   not something to put through `text-transform`. */
+.song-remove-card .unsaved-title {
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--text-secondary);
+}
+
+/* The destructive half says what it does and looks like it. Written against
+   the card so it beats `.unsaved-discard` in shell.css, which is imported
+   after this file and is otherwise the same weight of selector. */
+.song-remove-card .song-remove-confirm {
+  border-color: color-mix(in srgb, var(--danger, #e5484d) 45%, transparent);
   color: var(--danger, #e5484d);
 }

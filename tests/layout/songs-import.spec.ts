@@ -136,9 +136,14 @@ test.describe("the shelf Yames ships with", () => {
    *
    * The scene lets the real seeding run against an empty store, so these are
    * the pieces the app actually ships — imported by the real importer, drawn
-   * by the real sidebar. What can go wrong is a title plus an "Included"
-   * marker that does not fit the row, which is invisible to vitest because
-   * happy-dom computes no geometry at all.
+   * by the real sidebar. What can go wrong is a title that does not fit the
+   * row, which is invisible to vitest because happy-dom computes no geometry
+   * at all.
+   *
+   * W35 moved the "Included" marker off the rows and made it the heading they
+   * sit under: it is one line at the bottom of the list rather than a word on
+   * every row, and on a fresh install — this scene — it is open, because the
+   * shelf is then the whole of the mode.
    */
   for (const size of [
     { width: 1100, height: 720 },
@@ -151,31 +156,39 @@ test.describe("the shelf Yames ships with", () => {
       const rows = page.locator(".preset-sidebar-item.song-item");
       expect(await rows.count(), "the shelf did not arrive").toBe(7);
 
-      // Every row is marked as having come with Yames, and every marker is
-      // inside its own row rather than hanging off the end of it.
+      // One heading over them, and it is inside the panel.
+      const heading = page.locator(".song-shelf-heading");
+      await expect(heading, "no heading over the shelf").toHaveCount(1);
+      await expect(heading, "the shelf is folded on a fresh install").toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+      // And no row carries a marker of its own any more.
+      expect(
+        await page.locator(".song-item-starter").count(),
+        "a piece still wears the INCLUDED badge",
+      ).toBe(0);
+
+      // Every title is inside its own row rather than hanging off the end of
+      // it, and it has the room the meta column used to take.
       const marked = await page.$$eval(".preset-sidebar-item.song-item", (nodes) =>
         nodes.map((node) => {
           const row = node.getBoundingClientRect();
-          const mark = node.querySelector(".song-item-starter")?.getBoundingClientRect();
-          const name = node.querySelector(".preset-item-name")!.getBoundingClientRect();
+          const name = node.querySelector(".song-item-title")!.getBoundingClientRect();
           return {
-            text: node.querySelector(".preset-item-name")?.textContent ?? "",
+            text: node.querySelector(".song-item-title")?.textContent ?? "",
             rowRight: row.right,
             rowLeft: row.left,
-            markRight: mark?.right ?? null,
+            nameRight: name.right,
             nameWidth: name.width,
           };
         }),
       );
       for (const row of marked) {
-        expect(row.markRight, `"${row.text}" is not marked as included`).not.toBeNull();
         expect(
-          Math.round(row.markRight!),
-          `the marker on "${row.text}" ends at ${Math.round(row.markRight!)}, past the row's ${Math.round(row.rowRight)}`,
+          Math.round(row.nameRight),
+          `"${row.text}" ends at ${Math.round(row.nameRight)}, past the row's ${Math.round(row.rowRight)}`,
         ).toBeLessThanOrEqual(Math.round(row.rowRight) + 1);
-        // And the marker has not squeezed the name to nothing: a row that
-        // says "Included" and shows three letters of the title is worse than
-        // one that says nothing.
         expect(row.nameWidth, `"${row.text}" has no room left for its name`).toBeGreaterThan(40);
       }
     });

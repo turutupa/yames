@@ -1253,3 +1253,159 @@ test.describe("the tab under a theme", () => {
     });
   }
 });
+
+/**
+ * The library panel: one row per SONG, and the title gets the row (W35).
+ *
+ * The owner's screenshot of his Mac is what this measures. Every row carried
+ * an INCLUDED badge and a meta column — "Guitar · 8 bars" — which wrapped to
+ * two lines and left about fifteen characters for the name of the piece. The
+ * meta column is gone, the badge is a heading at the bottom, and what is left
+ * has to be the title across the whole row.
+ *
+ * Two widths: the window the pictures are taken at, and 620px, which is the
+ * narrowest one that still shows the library at all (`useLibraryFit`'s
+ * LIBRARY_MIN_WIDTH — below it the rail is a strip of icons). The panel is
+ * 220px either way; what changes is everything around it.
+ */
+test.describe("the song library's rows", () => {
+  const SIZES = [
+    { name: "the default window", width: 1400, height: 900 },
+    { name: "the narrowest window that shows it", width: 620, height: 780 },
+  ];
+  /** The three the brief names. A row is a rectangle in all thirteen, but
+   *  these are the three the owner reads in. */
+  const ROW_THEMES = ["ember", "ivory", "manuscript"];
+
+  /** Every song row's box, and its title's, measured in the page. */
+  async function rows(page: import("@playwright/test").Page) {
+    return page.$$eval(".preset-sidebar-item.song-item", (nodes) =>
+      nodes.map((node) => {
+        const style = getComputedStyle(node);
+        const inner =
+          node.getBoundingClientRect().width -
+          parseFloat(style.paddingLeft) -
+          parseFloat(style.paddingRight) -
+          parseFloat(style.borderLeftWidth) -
+          parseFloat(style.borderRightWidth);
+        const title = node.querySelector(".song-item-title");
+        const t = title?.getBoundingClientRect();
+        const r = node.getBoundingClientRect();
+        return {
+          rowLeft: r.left,
+          rowRight: r.right,
+          inner,
+          due: !!node.querySelector(".song-item-due"),
+          text: (title?.textContent ?? "").slice(0, 40),
+          titleLeft: t?.left ?? 0,
+          titleRight: t?.right ?? 0,
+          titleWidth: t?.width ?? 0,
+          // One line or two, told from the box against its own type size:
+          // `line-height` computes to the word "normal" here, which is not a
+          // number to divide by.
+          titleHeight: t?.height ?? 0,
+          titleFontSize: title ? parseFloat(getComputedStyle(title).fontSize) : 0,
+          clipped: title ? title.scrollWidth > title.clientWidth + 1 : false,
+          tip: node.getAttribute("title") ?? "",
+        };
+      }),
+    );
+  }
+
+  for (const theme of ROW_THEMES) {
+    for (const size of SIZES) {
+      test(`give the title the row at ${size.name} under ${theme}`, async ({ page }) => {
+        await openShot(page, "songs-library", size, theme);
+        const measured = await rows(page);
+        expect(measured.length, "no song rows").toBeGreaterThanOrEqual(3);
+
+        for (const row of measured) {
+          expect(
+            Math.round(row.titleRight),
+            `"${row.text}" runs past its row`,
+          ).toBeLessThanOrEqual(Math.round(row.rowRight) + 1);
+          expect(
+            Math.round(row.titleLeft),
+            `"${row.text}" starts before its row`,
+          ).toBeGreaterThanOrEqual(Math.round(row.rowLeft) - 1);
+          // The brief's number. A row with the coach's mark on it spends a
+          // word on the promise, which is the one thing allowed to take room
+          // from the title; everything else is the title's.
+          const floor = row.due ? 0.6 : 0.8;
+          expect(
+            row.titleWidth / row.inner,
+            `"${row.text}" gets ${Math.round((row.titleWidth / row.inner) * 100)}% of its row, not ${floor * 100}%`,
+          ).toBeGreaterThanOrEqual(floor);
+        }
+
+        await noSidewaysScroll(page, `the song library at ${size.width}px under ${theme}`);
+      });
+    }
+  }
+
+  test("says nothing about the instrument or the bar count", async ({ page }) => {
+    await openShot(page, "songs-library", { width: 1400, height: 900 });
+    // The meta column, and the badge that sat beside the name.
+    expect(
+      await page.locator(".preset-sidebar-item.song-item .setlist-item-sub").count(),
+      "a song row still carries the meta column",
+    ).toBe(0);
+    expect(
+      await page.locator(".song-item-starter").count(),
+      "the INCLUDED badge is still on the rows",
+    ).toBe(0);
+  });
+
+  test("cuts a very long title at the end and keeps the whole of it", async ({ page }) => {
+    await openShot(page, "songs-long-title", { width: 1400, height: 900 });
+    const [row] = await rows(page);
+    expect(row, "no song row").toBeDefined();
+    expect(row.clipped, "a title wider than the panel was not cut off").toBe(true);
+    expect(
+      row.titleHeight,
+      `the title wrapped: ${Math.round(row.titleHeight)}px tall at ${row.titleFontSize}px type`,
+    ).toBeLessThan(row.titleFontSize * 1.8);
+    // The whole of it is the row's tooltip and its accessible name.
+    expect(row.tip.length, "the full title is not on the row").toBeGreaterThan(40);
+    await noSidewaysScroll(page, "the song library with a long title");
+  });
+
+  test("puts the included pieces under their own heading, folded", async ({ page }) => {
+    await openShot(page, "songs-library", { width: 1400, height: 900 });
+    const heading = page.locator(".song-shelf-heading");
+    await expect(heading, "no heading for the included pieces").toHaveCount(1);
+    await expect(
+      heading,
+      "the shelf is open over a library the player has filled themselves",
+    ).toHaveAttribute("aria-expanded", "false");
+    // Folded, so only the player's own three rows are drawn.
+    expect(await page.locator(".preset-sidebar-item.song-item").count()).toBe(3);
+
+    await heading.click();
+    expect(
+      await page.locator(".preset-sidebar-item.song-item").count(),
+      "unfolding the heading did not bring the shelf back",
+    ).toBeGreaterThan(3);
+  });
+
+  test("asks before it removes a song, inside the smallest window", async ({ page }) => {
+    // The one thing in this panel that cannot be undone, at the narrowest
+    // width that still has a panel to press it in.
+    await openShot(page, "songs-library", { width: 620, height: 780 });
+    await page.locator(".preset-sidebar-item.song-item").first().click({ button: "right" });
+    await page.locator(".preset-context-menu .preset-context-delete").click();
+    await expect(page.locator(".song-remove-card")).toBeVisible();
+    await insideViewport(page, ".song-remove-card", "the remove confirm", {
+      width: 620,
+      height: 780,
+    });
+    await noSidewaysScroll(page, "the remove confirm");
+  });
+
+  test("opens the heading for a player who has imported nothing", async ({ page }) => {
+    // The shelf is the whole of the mode on a fresh install, so it is shown.
+    await openShot(page, "songs-starter", { width: 1400, height: 900 });
+    await expect(page.locator(".song-shelf-heading")).toHaveAttribute("aria-expanded", "true");
+    expect(await page.locator(".preset-sidebar-item.song-item").count()).toBe(7);
+  });
+});

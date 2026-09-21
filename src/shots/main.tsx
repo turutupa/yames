@@ -366,6 +366,23 @@ async function drive() {
   }
 
   /**
+   * W35 — the scenes that photograph the LIST rather than the stage.
+   *
+   * Nothing is clicked: the subject is the sidebar. The wait is on the rows
+   * being there, and on the Included heading when the shelf is seeding — the
+   * seven pieces arrive asynchronously through the real importer, and a
+   * capture taken before them is a picture of a list that is still filling.
+   */
+  if (shot!.songLibrary) {
+    const rows = ".preset-sidebar-item.song-item";
+    const wanted = shot!.songLibrary === "three" ? 3 : 1;
+    await until("the song library", () => document.querySelectorAll(rows).length >= wanted);
+    if (shot!.starterShelf) {
+      await until("the shelf's heading", () => !!document.querySelector(".song-shelf-heading"));
+    }
+  }
+
+  /**
    * A song, loaded and drawn.
    *
    * Through the library row, like the jam above. The wait is on the RENDERED
