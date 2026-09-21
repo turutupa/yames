@@ -438,6 +438,17 @@ async function drive() {
      * guarantee is still the one this wait was written for, that the file's
      * other tracks have been read.
      */
+    /*
+     * How many lanes the file is going to produce: the click, plus one per
+     * track. Four for the songs written for these pictures, which have a
+     * guitar, a drum kit and a bass; `?song=band<N>` (W36 item 4) says its
+     * own number, and a wait that held out for four over a two-part file
+     * would never finish.
+     */
+    const partsAsked = /^band(\d+)$/.exec(
+      new URLSearchParams(window.location.search).get("song") ?? "",
+    );
+    const wantLanes = partsAsked ? Number(partsAsked[1]) + 1 : 4;
     await pressUntil(
       "the rest of the strip",
       () => {
@@ -447,7 +458,7 @@ async function drive() {
         if (document.querySelector(".songs-more-pop")) return;
         document.querySelector<HTMLElement>(".songs-more-chip")?.click();
       },
-      () => document.querySelectorAll(".songs-band-lane").length >= 4,
+      () => document.querySelectorAll(".songs-band-lane").length >= wantLanes,
     );
     document.querySelector<HTMLElement>(".songs-more-chip")?.click();
     await until("the strip's panel to close", () => !document.querySelector(".songs-more-pop"));

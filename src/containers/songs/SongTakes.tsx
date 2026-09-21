@@ -143,7 +143,15 @@ export function SongRecordControl({
       <span className="songs-strip-label">{t("jam.takes.label")}</span>
       <button
         type="button"
-        className="songs-chip songs-chip-wide"
+        /* `songs-record-switch` is what makes the dot a dot (W36 item 4).
+           The owner: *"the record dot draws as a broken glyph over the first
+           letter"*. It was a `<span>` with a width, a height and a 50 %
+           radius inside a plain `button` — which is not a flex container, so
+           an inline span took none of them and drew a curled border over the
+           R of "Record". The camera's switch beside it has had the three
+           lines that fix it since W21 (`songs-camera.css`); this is the same
+           three, so the two controls draw the same mark. */
+        className="songs-chip songs-chip-wide songs-record-switch"
         data-active={enabled ? "" : undefined}
         data-recording={recording ? "" : undefined}
         aria-pressed={enabled}
