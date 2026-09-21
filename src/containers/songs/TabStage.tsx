@@ -837,10 +837,20 @@ export function TabStage({
    * already had.
    *
    * So the two things this file takes from them are: a plain click seeks, and
-   * a portion is whole bars with handles. The one thing it does NOT take is
-   * alphaTab's "a click clears the loop": in Songsterr, Ultimate Guitar and
-   * Guitar Pro the repeat is a switch, and clearing it by touching the page
-   * is how you lose the passage you were working on.
+   * a portion is whole bars with handles.
+   *
+   * **And since 2026-09-21 it takes a third, because the owner asked for it
+   * after his second session** (W34 item 4): *"if i single click a different
+   * part of the song it should go to that part but the selected area doesn't
+   * get unselected, it's like it doesn't exit loop mode"*. W29's note here
+   * said the opposite, on the evidence of those three players, where the
+   * repeat is a switch that touching the page never takes off you. He has
+   * played with both and his word wins over theirs. A click OUTSIDE the
+   * portion goes there and puts the portion and the repeat away; a click
+   * INSIDE it moves your place and keeps it, because you are still working on
+   * that passage. `selection.ts`'s `clickClearsPortion` is the rule, and
+   * `useSongsSession`'s `seekTo` is where it is applied — this file just
+   * reports a bar.
    *
    * Five things this has to get right:
    *
@@ -969,9 +979,10 @@ export function TabStage({
      * on every bar the pointer crossed would restart the song once per bar.
      *
      * A press that never became a drag is the click, and the click goes
-     * there. It touches the portion not at all — that is what the owner
-     * asked for, and what Songsterr, Ultimate Guitar and Guitar Pro all do:
-     * the repeat is a switch, not something the page takes off you.
+     * there — and whether the portion survives it depends on where it landed
+     * (W34 item 4, the header above). That decision is not made here: this
+     * reports the bar, and `useSongsSession` owns both the portion and the
+     * playhead and is where one line can say what happens to both.
      */
     const onUp = () => {
       const press = pressRef.current;
@@ -1027,12 +1038,23 @@ export function TabStage({
         return;
       }
       if (!seek) return;
-      const last = Math.max(0, current.bars.length - 1);
-      const from = playheadRef.current ?? 0;
+      /*
+       * The arrows and Home stay INSIDE the portion when there is one.
+       *
+       * They always have in effect — the playhead is clamped into the portion
+       * downstream — but since W34 item 4 a bar outside the portion is what
+       * puts the portion away, and stepping off the end of a four-bar loop is
+       * not "I have gone somewhere else". A click is; these are not.
+       */
+      const floor = chosen ? Math.min(chosen.startBar, chosen.endBar) : 0;
+      const last = chosen
+        ? Math.max(chosen.startBar, chosen.endBar)
+        : Math.max(0, current.bars.length - 1);
+      const from = playheadRef.current ?? floor;
       let next: number | null = null;
-      if (e.key === "ArrowLeft") next = Math.max(0, from - 1);
+      if (e.key === "ArrowLeft") next = Math.max(floor, from - 1);
       else if (e.key === "ArrowRight") next = Math.min(last, from + 1);
-      else if (e.key === "Home") next = 0;
+      else if (e.key === "Home") next = floor;
       if (next === null) return;
       e.preventDefault();
       seek(next);

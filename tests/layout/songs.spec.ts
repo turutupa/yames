@@ -1101,7 +1101,7 @@ test.describe("clicking the tab", () => {
     await expect(page.locator(".songs-tab-band")).toHaveCount(0);
   });
 
-  test("a drag across bars chooses them, and a click afterwards leaves them alone", async ({
+  test("a drag across bars chooses them, and a click inside leaves them alone", async ({
     page,
   }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
@@ -1121,9 +1121,9 @@ test.describe("clicking the tab", () => {
     const bands = await page.locator(".songs-tab-band").count();
     expect(bands, "the drag chose nothing").toBeGreaterThan(0);
 
-    // And now a plain click inside it. The repeat is a switch in every tab
-    // player people know — Songsterr, Ultimate Guitar, Guitar Pro — so
-    // touching the page must not take the passage away.
+    // And now a plain click INSIDE it. You are still working on this passage
+    // and only moving your place within it, so the portion stays (W34 item 4
+    // keeps this half of W29 and reverses the other).
     const inside = await barMiddle(page, 6);
     await page.mouse.click(inside!.x, inside!.y);
     await page.evaluate(
@@ -1131,8 +1131,74 @@ test.describe("clicking the tab", () => {
     );
     expect(
       await page.locator(".songs-tab-band").count(),
-      "a click threw the chosen portion away",
+      "a click inside the portion threw it away",
     ).toBe(bands);
+  });
+
+  /**
+   * ...and a click OUTSIDE it goes there and puts it away (W34 item 4).
+   *
+   * The owner, after his second session: *"if i single click a different part
+   * of the song it should go to that part but the selected area doesn't get
+   * unselected, it's like it doesn't exit loop mode"*. W29 decided the other
+   * way on the evidence of Songsterr, Ultimate Guitar and Guitar Pro; he has
+   * now played with both and his word wins.
+   */
+  test("a click outside the portion goes there and clears it", async ({ page }) => {
+    await openShot(page, "songs", { width: 1400, height: 900 });
+    const from = await barMiddle(page, 5);
+    const to = await barMiddle(page, 7);
+    await page.mouse.move(from!.x, from!.y);
+    await page.mouse.down();
+    await page.mouse.move(to!.x, to!.y, { steps: 8 });
+    await page.mouse.up();
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+    expect(await page.locator(".songs-tab-band").count(), "the drag chose nothing")
+      .toBeGreaterThan(0);
+    // Choosing a portion starts the repeat, which is the state he called
+    // "loop mode".
+    await expect(page.locator(".songs-loop-chip[data-active]")).toHaveCount(1);
+
+    const outside = await barMiddle(page, 2);
+    expect(outside, "bar 2 was not engraved").not.toBeNull();
+    await page.mouse.click(outside!.x, outside!.y);
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+
+    // The band is gone, the repeat is off, and the strip says the whole song.
+    await expect(page.locator(".songs-tab-band")).toHaveCount(0);
+    await expect(page.locator(".songs-loop-chip[data-active]")).toHaveCount(0);
+    if (IN_ENGLISH) {
+      await expect(page.locator(".songs-portion-says")).toContainText(/whole song/i);
+    }
+    // And it went there: the mark that says where play begins is on bar 2.
+    const mark = await page.evaluate(() => {
+      const api = (
+        window as unknown as {
+          __SONGS_TAB_API__?: {
+            renderer?: {
+              boundsLookup?: {
+                findMasterBarByIndex(
+                  i: number,
+                ): { visualBounds: { x: number; y: number } } | null;
+              } | null;
+            };
+          };
+        }
+      ).__SONGS_TAB_API__;
+      const want = api?.renderer?.boundsLookup?.findMasterBarByIndex(1)?.visualBounds;
+      const head = document.querySelector(".songs-tab-playhead") as HTMLElement | null;
+      if (!want || !head) return null;
+      return { left: parseFloat(head.style.left), want: want.x };
+    });
+    expect(mark, "no playhead mark after the click").not.toBeNull();
+    expect(
+      Math.abs(mark!.left - mark!.want),
+      `the playhead is at ${String(Math.round(mark!.left))}, bar 2 starts at ${String(Math.round(mark!.want))}`,
+    ).toBeLessThanOrEqual(2);
   });
 });
 
