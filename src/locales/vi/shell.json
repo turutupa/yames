@@ -45,7 +45,8 @@
     "save": "Lưu cài đặt sẵn",
     "delete": "Xóa",
     "newPreset": "Cài đặt mới",
-    "newDrill": "Bài tập mới"
+    "newDrill": "Bài tập mới",
+    "unsaved": "Chưa lưu"
   },
   "emptyStates": {
     "presets": {

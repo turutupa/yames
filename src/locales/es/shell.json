@@ -45,7 +45,8 @@
     "save": "Guardar preajuste",
     "delete": "Eliminar",
     "newPreset": "Nuevo preajuste",
-    "newDrill": "Nuevo ejercicio"
+    "newDrill": "Nuevo ejercicio",
+    "unsaved": "Sin guardar"
   },
   "emptyStates": {
     "presets": {

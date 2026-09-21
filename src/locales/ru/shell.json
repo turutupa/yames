@@ -45,7 +45,8 @@
     "save": "Сохранить пресет",
     "delete": "Удалить",
     "newPreset": "Новый пресет",
-    "newDrill": "Новое упражнение"
+    "newDrill": "Новое упражнение",
+    "unsaved": "Не сохранено"
   },
   "emptyStates": {
     "presets": {

@@ -45,7 +45,8 @@
     "save": "Preset speichern",
     "delete": "Löschen",
     "newPreset": "Neues Preset",
-    "newDrill": "Neue Übung"
+    "newDrill": "Neue Übung",
+    "unsaved": "Ungespeichert"
   },
   "emptyStates": {
     "presets": {

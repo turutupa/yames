@@ -45,7 +45,8 @@
     "save": "프리셋 저장",
     "delete": "삭제",
     "newPreset": "새 프리셋",
-    "newDrill": "새 드릴"
+    "newDrill": "새 드릴",
+    "unsaved": "저장 안 됨"
   },
   "emptyStates": {
     "presets": {

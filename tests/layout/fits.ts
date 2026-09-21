@@ -80,6 +80,39 @@ export async function openShot(
   }
 }
 
+/**
+ * The whole page's language, switched through Settings → General → the
+ * dropdown — the door a person uses, and the one `scripts/mobile-shots.mjs`
+ * drives for its `--locale` runs. The list names each language in its own
+ * words, so the option is found by that name rather than by the code.
+ *
+ * Phone builds only: it presses the bottom bar's Settings tab, and presses it
+ * again to come back to the tab the test started on.
+ */
+export const NATIVE_NAME: Record<string, string> = {
+  de: "Deutsch",
+  ja: "\u65e5\u672c\u8a9e",
+  "pt-BR": "Portugu\u00eas (Brasil)",
+  ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+};
+
+export async function switchLanguage(page: Page, code: string) {
+  const name = NATIVE_NAME[code];
+  if (!name) throw new Error(`no native name on file for "${code}"`);
+  const settings = '.mobile-tab[data-tab="settings"]';
+  await page.click(settings);
+  await page.waitForSelector(".settings-section");
+  await page.click(".lang-select-btn");
+  await page.waitForSelector(".lang-options");
+  await page.getByText(name, { exact: true }).first().click();
+  // Back to the tab the test came from.
+  await page.click(settings);
+  await page.waitForSelector(".main-header");
+  await page.evaluate(
+    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+  );
+}
+
 /** A box in page pixels, rounded the way a reader's eye rounds it. */
 export type Box = { left: number; right: number; top: number; bottom: number; text: string };
 

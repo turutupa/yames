@@ -45,7 +45,8 @@
     "save": "Save preset",
     "delete": "Delete",
     "newPreset": "New preset",
-    "newDrill": "New drill"
+    "newDrill": "New drill",
+    "unsaved": "Unsaved"
   },
   "emptyStates": {
     "presets": {

@@ -26,11 +26,11 @@ See `plans/tasks/mobile/m06/01-metronome.png` (iPhone) and the
 the rows so they fit). It fits and works; it reads heavy. A label-left,
 switch-right row is what a phone user expects.
 
-## 3. "Reset hints" is offered on a phone (orchestrator, 2026-09-20)
+## 3. ~~"Reset hints" is offered on a phone~~ — done (M12, 2026-09-20)
 
-The plan recommended cutting the tour and hints on mobile v1. Check
-whether any hint can actually appear on a phone; if none can, the row
-should go.
+None of the nine hints can appear in a mobile build: `useAppHints` is
+not called at all (`MainWindow`), the card is not rendered, and Zen's
+own `zen-first` is gated the same way. The row went.
 
 ## 4. One loaded jam is 122 MB of memory (M10, 2026-09-20)
 
@@ -55,3 +55,46 @@ On a phone the next jam's sounds are decoded at the boundary, not a
 step ahead (a phone's cache holds two sets, and warming a third would
 evict the one playing). Expect a short gap where the click plays alone
 on the big kits (Club ~0.6-0.8 s, Studio ~0.4 s on the emulator).
+
+## 6. "Copy link" is the one English word in a translated app (M12, 2026-09-20)
+
+Settings → Support, every language but English: WhatsApp, X, Facebook
+and Reddit are brand names and stay as they are, and then the fifth
+button says "Copy link" while the whole page around it is German or
+Japanese. `settings-support-360` under `--locale de`.
+
+It is one line. `SupportSection.tsx` draws `opt.label` — the raw English
+string in `constants/metronome.ts` — where `ShareMenuPopover.tsx` draws
+`t("share.copyLink")` for the same button, and `share.copyLink` is
+already translated in all fifteen languages. Left here rather than
+fixed because it is not a phone rule: the desktop app has said "Copy
+link" in German since the section was written, and this release's rule
+is that nothing about the desktop moves.
+
+## 7. The cheat sheet's "Fingering" switch truncates in German and Russian (M12)
+
+`jam-cheat-360` under `--locale de` and `--locale ru`: the three-way
+switch under ON THE DOTS reads "Finger…" / "Апплика…" at 360. It
+ellipsises inside its own box and the other two words are whole, so the
+control works and reads; it is simply the longest word in the sheet in
+the two longest languages. A shorter word in those two locales, or a
+switch that wraps, whichever the owner prefers.
+
+## 8. The drill's climb chart floats in a screen of empty space (M12)
+
+`drill-climb-360`: scrolled to the bottom of the drill, the bars and
+their tempo labels sit in the middle of the stage with roughly a third
+of the screen empty below them. Nothing is cut and nothing overlaps —
+the chart is a horizontal scroller by design (M03) and it scrolls — but
+the screen ends in a lot of nothing. Same family as item 1: a phone
+layout for the drill, rather than the desktop's with the width taken
+away.
+
+## 9. The German placeholder is a word nobody would say out loud (M12)
+
+With nothing saved yet the bar says `Ungespeichert`, because "Nicht
+gespeichert" — which is what a German speaker would actually say — is
+17 characters and the bar has room for about 13 at 360. Correct German,
+slightly stiff German. If the bar ever gets more room (see item 1), put
+the natural phrasing back: `src/locales/de/shell.json`,
+`presets.unsaved`.

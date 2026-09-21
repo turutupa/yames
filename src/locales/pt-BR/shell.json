@@ -45,7 +45,8 @@
     "save": "Salvar predefinição",
     "delete": "Excluir",
     "newPreset": "Novo preset",
-    "newDrill": "Novo exercício"
+    "newDrill": "Novo exercício",
+    "unsaved": "Não salvo"
   },
   "emptyStates": {
     "presets": {

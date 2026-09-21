@@ -45,7 +45,8 @@
     "save": "プリセットを保存",
     "delete": "削除",
     "newPreset": "新しいプリセット",
-    "newDrill": "新しいドリル"
+    "newDrill": "新しいドリル",
+    "unsaved": "未保存"
   },
   "emptyStates": {
     "presets": {
