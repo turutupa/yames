@@ -18,8 +18,11 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  SONG_SOUND_FONT_KEY,
   defaultDownloadsDir,
   pickKitFolder,
+  pickSoundFont,
+  setSongSoundFont,
   stopDownloadWatch,
   storeLoad,
   storeSave,
@@ -41,6 +44,15 @@ export function SongsSettingsSection() {
   const [setting, setSetting] = useState<DownloadWatchSetting>(DEFAULT_DOWNLOAD_WATCH);
   /** What the OS calls Downloads, shown when the player has chosen nothing. */
   const [fallback, setFallback] = useState<string | null>(null);
+  /**
+   * The sound set a song's other instruments play out of (W28).
+   *
+   * Null is the one the app ships: 1.3 MB of General MIDI, which is enough
+   * for a backing part and is not going to be anybody's favourite guitar. A
+   * player who has a SoundFont they like points at it here and the whole band
+   * changes; it costs nobody who does not.
+   */
+  const [soundFont, setSoundFont] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,10 +64,20 @@ export function SongsSettingsSection() {
         if (!cancelled) setFallback(dir);
       })
       .catch(() => {});
+    void storeLoad<string>(SONG_SOUND_FONT_KEY).then((path) => {
+      if (!cancelled) setSoundFont(typeof path === "string" && path ? path : null);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  /** Remember the set, and tell the engine, which decodes it on the next song. */
+  const writeSoundFont = (path: string | null) => {
+    setSoundFont(path);
+    void storeSave(SONG_SOUND_FONT_KEY, path ?? "").catch(() => {});
+    void setSongSoundFont(path).catch(() => {});
+  };
 
   const write = (next: DownloadWatchSetting) => {
     setSetting(next);
@@ -114,6 +136,32 @@ export function SongsSettingsSection() {
           </div>
         </div>
       )}
+      {/* W28 — the instruments behind the part you are learning. */}
+      <div className="setting-row">
+        <div className="setting-label">
+          <label>{t("settings.songs.soundSet")}</label>
+          <span className="setting-hint">
+            {soundFont ?? t("settings.songs.soundSetBuiltIn")}
+          </span>
+        </div>
+        <div className="setting-control">
+          <button
+            className="toggle-btn"
+            onClick={() => {
+              void pickSoundFont().then((path) => {
+                if (path) writeSoundFont(path);
+              });
+            }}
+          >
+            {t("settings.songs.chooseSoundSet")}
+          </button>
+          {soundFont && (
+            <button className="toggle-btn" onClick={() => writeSoundFont(null)}>
+              {t("settings.songs.useBuiltInSoundSet")}
+            </button>
+          )}
+        </div>
+      </div>
       {setting.dismissed.length > 0 && (
         <div className="setting-row">
           <div className="setting-label">

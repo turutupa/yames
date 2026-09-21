@@ -709,6 +709,13 @@
   gap: 6px 14px;
   min-width: 0;
   flex: 1 1 auto;
+  /* W28 — a band is now every track in the file, and a file can have eight.
+     The strip keeps the height it had and scrolls inside itself past it,
+     because the one thing it may never do is take room off the tab. Two rows
+     of faders is about as much of the stage as the band was ever worth. */
+  max-height: 68px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .songs-band-switch {
@@ -768,6 +775,38 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
+}
+
+/* Solo: a letter, not a switch.
+ *
+ * The mute beside it is a switch because muting is a state you leave a row
+ * in; a solo is a thing you do for eight bars and undo, and every mixer a
+ * musician has touched draws it as a small lit button. It is deliberately
+ * narrower than the mute so the two are never confused by the hand. */
+.songs-band-solo {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.songs-band-solo:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-strong, var(--border));
+}
+
+.songs-band-solo.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast, #fff);
 }
 
 /* ── Portions the player kept ─────────────────────────────────────────── */
@@ -856,6 +895,14 @@
   color: var(--text-faint);
 }
 
+/* "and four more", on the folded chip: a ten-track file must not put ten
+   pictures on a chip that has to fit beside a transport. */
+.songs-band-opener-more {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+
 .songs-band-opener-off {
   padding: 0 5px;
   border-radius: var(--radius-sm);
@@ -883,6 +930,10 @@
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
+  /* In the popover there is a column's worth of room, so the strip's own
+     two-row cap does not apply — the popover is what scrolls. */
+  max-height: none;
+  overflow: visible;
 }
 
 .songs-band-pop .songs-band-lane {

@@ -33,7 +33,12 @@
       "leftOut": "{{tracks}} có trong tệp này, nhưng Yames không có ai chơi phần đó.",
       "leftOut_other": "{{tracks}} có trong tệp này, nhưng Yames không có ai chơi những phần đó.",
       "droppedNotes": "{{count}} nốt trong tệp này thuộc về một nhạc cụ mà ban nhạc không có.",
-      "droppedNotes_other": "{{count}} nốt trong tệp này thuộc về những nhạc cụ mà ban nhạc không có."
+      "droppedNotes_other": "{{count}} nốt trong tệp này thuộc về những nhạc cụ mà ban nhạc không có.",
+      "myPart": "Phần của tôi",
+      "soloShort": "S",
+      "soloFor": "Chỉ nghe {{lane}}",
+      "tooManyParts": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
+      "tooManyParts_other": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc."
     },
     "countIn": {
       "counting": "Đang đếm vào"

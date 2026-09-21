@@ -334,11 +334,13 @@ async function drive() {
      * Without this wait the layout suite measures a stage that has a click
      * row and nothing else — which is the real narrow-window failure it is
      * here to catch, so it must not be the state it photographs.
-     * Three rows: the click, the drums and the bass of `SHOT_SONG_TEX`.
+     * Four rows since W28: the click, the guitar being learned (which is
+     * now in the band, as the guide), the drums and the bass of
+     * `SHOT_SONG_TEX`.
      */
     await until(
       "the band's faders",
-      () => document.querySelectorAll(".songs-band-lane").length >= 3,
+      () => document.querySelectorAll(".songs-band-lane").length >= 4,
     );
 
     if (shot!.songs.section) {

@@ -116,10 +116,11 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    compile_jam, compile_jam_with_voices, compile_song, create_beat_log,
+    compile_jam, compile_jam_with_voices, compile_song, create_beat_log, load_font,
     create_shared_state, in_callback, load_kit, load_voice_bank, perc_ids, reference_bank, reference_perc, CallbackProbe, CallbackSample,
     JamBassLine, JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, JamVoices, KitBank,
     MelodicBank, MetronomeEngine, SongBacking, SongBar, SongNote, SongRange, SongRole, SongSounds,
+    SynthPlayer, SynthRing,
     SongTempo, SongTrack, SongTransport, TakeRing, TakeSession, TakeStart,
 };
 
@@ -890,6 +891,11 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
     // the choke masks, the percussion set and the fallback chain are all in
     // the run rather than only the kick and the snare.
     const GM: [u8; 12] = [36, 42, 38, 46, 41, 44, 47, 49, 51, 53, 54, 56];
+    // And a guitar, which is what W28 added and what a two-guitar tab is
+    // made of: six notes a bar through the synthesiser, ringing across the
+    // beat, so the ring the callback reads is never empty and the renderer
+    // has real work to do under the measurement.
+    let mut guitar = Vec::new();
     for bar in bars.iter() {
         let sixteenth = SONG_TPQ / 4;
         let mut at = bar.start_tick;
@@ -940,6 +946,21 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
             }
             at += beat;
         }
+        let beat = SONG_TPQ * 4 / bar.denominator;
+        let mut at = bar.start_tick;
+        let mut n = 0usize;
+        while at < bar.start_tick + bar.length_ticks {
+            for note in [52u8, 59, 64] {
+                guitar.push(SongNote {
+                    tick: at,
+                    dur_ticks: beat + beat / 2,
+                    midi: note + (n % 3) as u8,
+                    velocity: 0.75,
+                });
+            }
+            n += 1;
+            at += beat;
+        }
     }
     (
         SongTransport {
@@ -976,17 +997,36 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
                 SongTrack {
                     role: SongRole::Drums,
                     name: "drums".into(),
+                    program: 0,
+                    guide: false,
+                    bends: Vec::new(),
                     notes: drums,
                 },
                 SongTrack {
                     role: SongRole::Bass,
                     name: "bass".into(),
+                    program: 0,
+                    guide: false,
+                    bends: Vec::new(),
                     notes: bass,
                 },
                 SongTrack {
                     role: SongRole::Keys,
                     name: "keys".into(),
+                    program: 0,
+                    guide: false,
+                    bends: Vec::new(),
                     notes: keys,
+                },
+                SongTrack {
+                    role: SongRole::Synth,
+                    name: "guitar".into(),
+                    // 30, overdriven guitar: the loudest, busiest voice in a
+                    // General MIDI set, which is the one to measure.
+                    program: 29,
+                    guide: true,
+                    bends: Vec::new(),
+                    notes: guitar,
                 },
             ],
         },
@@ -1137,6 +1177,10 @@ fn main() -> ExitCode {
     // now also makes this a live handoff into a running stream, which is more
     // of a test than a table set before the first buffer, not less; it lands
     // inside the warm-up window the measurement already excludes.
+    // The renderer thread and the ring it fills, held for the life of the
+    // run: dropping the player stops and joins the thread, which is a thing
+    // the end of `main` may do and the callback may not.
+    let mut song_synth: Option<(SynthPlayer, Arc<SynthRing>)> = None;
     if args.song {
         let rate = engine.output_sample_rate().unwrap_or(48_000);
         let (transport, backing) = probe_song(args.song_loop);
@@ -1190,7 +1234,45 @@ fn main() -> ExitCode {
                 "one pass then the transport stops"
             },
         );
-        engine.set_song_table(Some(Arc::new(table)));
+        // ---- THE SYNTHESISER, AND THE THREAD FEEDING IT ----
+        //
+        // W28. This is the one thing on the callback that another thread
+        // fills, so the gate has to cover it: without a renderer running, the
+        // ring is empty and `ready()` returns 0 on every buffer, which is the
+        // one path that costs nothing and proves nothing. The player is held
+        // for the life of the run and dropped at the end, where joining a
+        // thread is allowed.
+        let table = Arc::new(table);
+        song_synth = match (table.synth(), table.synth_score.clone()) {
+            (Some(ring), Some(score)) => match load_font(None) {
+                Ok(font) => {
+                    // The callback has not run a buffer for this table yet,
+                    // so the renderer may begin as soon as it is started.
+                    match SynthPlayer::start(Arc::clone(ring), score, font, rate) {
+                        Ok(player) => {
+                            eprintln!(
+                                "[probe] the song's guitar is on the synthesiser: \
+                                 {} note-ons a pass, {} ms of lead into a {} frame ring",
+                                table.synth_notes,
+                                yames_lib::synth::SYNTH_LEAD_MS,
+                                ring.capacity(),
+                            );
+                            Some((player, Arc::clone(ring)))
+                        }
+                        Err(e) => {
+                            eprintln!("error: the probe's renderer would not start: {e}");
+                            return ExitCode::from(2);
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("error: the probe's sound set did not load: {e}");
+                    return ExitCode::from(2);
+                }
+            },
+            _ => None,
+        };
+        engine.set_song_table(Some(table));
     }
 
     // WHICH PERCUSSION SET the band is playing, said out loud. The ten
@@ -1373,6 +1455,46 @@ fn main() -> ExitCode {
         None
     };
 
+    // ---- A HAND ON A FADER, AND A SEEK, WHILE THE SONG PLAYS ----
+    //
+    // The brief's own conditions for the W28 gate. They are two different
+    // things and both had to be in the run:
+    //
+    // * **A fader** is a gain the renderer picks up on its next block and
+    //   turns into a channel volume. It changes nothing on the callback and
+    //   invalidates nothing, so what it tests is that a write racing the
+    //   renderer's read costs the audio thread nothing at all.
+    // * **A seek** bumps the ring's epoch. The callback then throws the whole
+    //   queue away in constant time and mixes no synth until the renderer has
+    //   begun again — which is the one path where the callback does something
+    //   about the synthesiser beyond adding two numbers, and the one the
+    //   dropout count has to stay at zero across.
+    let song_hand = song_synth.as_ref().map(|(_, ring)| {
+        let ring = Arc::clone(ring);
+        let stop = Arc::new(AtomicBool::new(false));
+        let flag = stop.clone();
+        let moves = Arc::new(AtomicU64::new(0));
+        let count = moves.clone();
+        let handle = std::thread::spawn(move || {
+            let mut n = 0u64;
+            while !flag.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_millis(250));
+                // The guitar's own fader, swept rather than stepped: a drag
+                // is what a musician actually does to one.
+                let gain = 0.2 + 0.8 * ((n % 8) as f32 / 8.0);
+                ring.set_gain(3, gain);
+                // And every three seconds, the cursor is dropped somewhere
+                // else in the piece.
+                if n % 12 == 11 {
+                    ring.invalidate();
+                }
+                n += 1;
+                count.fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        (handle, stop, moves)
+    });
+
     // `--jam-take`: record a take for the whole run.
     //
     // This is the one place the audio callback does work on behalf of the
@@ -1485,6 +1607,18 @@ fn main() -> ExitCode {
         }
         None => 0,
     };
+    let song_moves = match song_hand {
+        Some((handle, stop, moves)) => {
+            stop.store(true, Ordering::Relaxed);
+            let _ = handle.join();
+            moves.load(Ordering::Relaxed)
+        }
+        None => 0,
+    };
+    // The renderer, stopped and joined HERE — on the way out, on a thread
+    // that may block — and not left to a destructor somewhere the stream is
+    // still running.
+    drop(song_synth);
 
     let samples = cb_probe.snapshot();
     let sample_rate = cb_probe.sample_rate();
@@ -1577,6 +1711,11 @@ fn main() -> ExitCode {
             " + --jam-move (bars {}-{} looped, {moves_done} jumps while playing)",
             PROBE_LOOP.0 + 1,
             PROBE_LOOP.1 + 1
+        ));
+    }
+    if song_moves > 0 {
+        mode.push_str(&format!(
+            " + a fader moved {song_moves} times and a seek every three seconds"
         ));
     }
     if args.song {

@@ -325,7 +325,8 @@
       "failed": "Không kiểm tra được",
       "sounds": "Âm thanh",
       "soundsCredit": "Bộ Club là Virtuosity Drums của Versilian Studios và Karoryfer Samples, do Austin McMahon chơi (thuộc phạm vi công cộng). Bộ Studio là DRSKit của dự án DrumGizmo (CC BY 4.0).",
-      "madeWith": "Được làm bằng {{heart}} cho các nhạc sĩ"
+      "madeWith": "Được làm bằng {{heart}} cho các nhạc sĩ",
+      "soundsCreditSongs": "Các nhạc cụ còn lại lấy từ bộ tiếng General MIDI của Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
       "title": "Bài hát",
@@ -337,7 +338,11 @@
       "useDownloads": "Dùng thư mục tải xuống",
       "turnedDown": "Bài bạn đã bỏ qua",
       "turnedDownHint": "{{n}} tệp Yames sẽ không mời lại",
-      "forgetTurnedDown": "Mời lại"
+      "forgetTurnedDown": "Mời lại",
+      "soundSet": "Bộ tiếng",
+      "soundSetBuiltIn": "Bộ đi kèm Yames",
+      "chooseSoundSet": "Chọn tệp .sf2",
+      "useBuiltInSoundSet": "Dùng bộ có sẵn"
     }
   },
   "keybindings": {

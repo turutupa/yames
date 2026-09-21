@@ -33,7 +33,12 @@
       "leftOut": "{{tracks}}이(가) 이 파일에 있지만, Yames에는 연주할 사람이 없습니다.",
       "leftOut_other": "{{tracks}}이(가) 이 파일에 있지만, Yames에는 연주할 사람이 없습니다.",
       "droppedNotes": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다.",
-      "droppedNotes_other": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다."
+      "droppedNotes_other": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다.",
+      "myPart": "내 파트",
+      "soloShort": "S",
+      "soloFor": "{{lane}}만 듣기",
+      "tooManyParts": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
+      "tooManyParts_other": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다."
     },
     "countIn": {
       "counting": "카운트 중"

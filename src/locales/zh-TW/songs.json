@@ -33,7 +33,12 @@
       "leftOut": "這個檔案裡有 {{tracks}}，但 Yames 沒人能彈。",
       "leftOut_other": "這個檔案裡有 {{tracks}}，但 Yames 沒人能彈。",
       "droppedNotes": "這個檔案裡有 {{count}} 個音屬於樂團沒有的樂器。",
-      "droppedNotes_other": "這個檔案裡有 {{count}} 個音屬於樂團沒有的樂器。"
+      "droppedNotes_other": "這個檔案裡有 {{count}} 個音屬於樂團沒有的樂器。",
+      "myPart": "我的聲部",
+      "soloShort": "S",
+      "soloFor": "只聽 {{lane}}",
+      "tooManyParts": "{{tracks}} 不會發聲：這個檔案的聲部比能同時響起的還多。",
+      "tooManyParts_other": "{{tracks}} 不會發聲：這個檔案的聲部比能同時響起的還多。"
     },
     "countIn": {
       "counting": "正在幫你數拍"

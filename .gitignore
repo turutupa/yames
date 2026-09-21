@@ -36,3 +36,9 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# W28's A/B clips of a song's band: the recorded half against the synthesised
+# one, rendered so the owner can judge by ear. Audio is never committed, for
+# the reason `jam-mix-demos` is not — it is rendered again by
+# `render_song_ab` whenever somebody needs to hear it.
+song-ab-clips/

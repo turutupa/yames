@@ -560,9 +560,18 @@ const BASS_TOP_STRING = 52;
 /** The bass clef. A staff written on one is a bass or a left hand. */
 const BASS_CLEF = 3;
 
-function roleOf(track: AtTrack): SongRole | null {
+/**
+ * Who plays this track.
+ *
+ * **Nothing comes back `null` any more** (W28). It used to, and what came
+ * back `null` was every guitar in the file — so a two-guitar tab arrived at
+ * the engine as an empty band and played as a click. The three recorded
+ * rows are kept where they are because a sampled kit is a kit somebody hit;
+ * everything else is `synth`, which is an instrument rather than an apology.
+ */
+function roleOf(track: AtTrack): SongRole {
   const staff = track.staves[0];
-  if (!staff) return null;
+  if (!staff) return "synth";
   if (track.isPercussion || staff.isPercussion) return "drums";
   const program = track.playbackInfo.program;
   const tuning = staff.tuning;
@@ -570,7 +579,7 @@ function roleOf(track: AtTrack): SongRole | null {
   const bassClef = staff.bars[0]?.clef === BASS_CLEF;
   if (BASS_PROGRAMS(program) || bassTuned || bassClef) return "bass";
   if (KEYS_PROGRAMS(program)) return "keys";
-  return null;
+  return "synth";
 }
 
 /**
@@ -617,61 +626,105 @@ function drumMidi(track: AtTrack, note: AtNote): number | null {
 }
 
 /**
- * The file's own rhythm section, every track but the one being played.
+ * The band: **every track in the file**, the player's own included.
  *
- * The unroll is the same one line `buildSongScore` uses and for the same
- * reason — `playedBar.start + beat.playbackStart` — so the band's notes and
- * the player's notes are on one timeline and a repeat is played by both.
+ * ## What changed, and why it had to (W28, 2026-09-20)
  *
- * A tied note makes no event: the file has already sounded it, and striking
- * a sampled bass again on the tie is the one thing that would make the
- * backing audibly wrong rather than merely approximate.
+ * This used to keep the tracks Jam's recorded band could play — percussion,
+ * General MIDI basses, pianos and organs — and put the rest in `leftOut`,
+ * which is a list the screen shows and nobody can do anything about. For the
+ * ordinary tab that is every guitar in the file, so the ordinary tab played
+ * as a metronome. The owner pressed play, heard a click, and was right to
+ * ask what had happened.
+ *
+ * Now nothing is left out. What the recorded band cannot play goes to the
+ * General MIDI synthesiser (`src-tauri/src/synth.rs`), which is why `leftOut`
+ * is empty in the normal case and kept only for the one thing that can still
+ * happen: a file with more parts than MIDI has channels.
+ *
+ * ## And the player's own part
+ *
+ * It is in the band too, as the guide, which is what every tab player does
+ * and what nobody has to be taught. It is marked `guide` rather than given a
+ * role of its own, because the difference is not who plays it — it is a
+ * guitar like the others — but what the mix does with it and what the strip
+ * calls it.
+ *
+ * ## Where the notes come from
+ *
+ * Two places, and deliberately:
+ *
+ * - **The recorded rows walk the beats**, as they did before. A sampled kit
+ *   wants the articulation's own General MIDI percussion number, and that is
+ *   on the note rather than in a MIDI stream.
+ * - **The synthesised rows come out of alphaTab's own MIDI generation**
+ *   (`MidiFileGenerator`, the same one `playedBars` already runs for the tick
+ *   lookup — so this costs one generation, not two). That is where a bend, a
+ *   slide, a hammer-on, a palm mute and a let-ring have already been turned
+ *   into pitch bends and note lengths by people who know the format, and
+ *   reinventing them here would be reinventing them worse. It is generation
+ *   only: no `AlphaSynth`, no WebAudio, the webview makes no sound.
+ *
+ * Both are on one timeline — the generator's — which is the same timeline
+ * `buildSongScore` puts the player's notes on, so a repeat is played by all
+ * of them and the scorer's expected onsets line up with what is heard.
  */
 export function buildBacking(parsed: ParsedSong, chosenTrackIndex: number): SongBackingResult {
   const tracks: SongBackingTrack[] = [];
   const leftOut: string[] = [];
-  const byTrack = new Map<number, SongBackingNote[]>();
+  const byTrack = new Map<number, SongBackingTrack>();
+  const generated = generateMidi(parsed.atScore);
 
   for (const track of parsed.atScore.tracks) {
-    // THE PLAYER'S OWN TRACK IS NEVER IN THE BACKING. That is the whole point
-    // of the mode: the part under the cursor is the part you play.
-    if (track.index === chosenTrackIndex) continue;
-    const role = roleOf(track);
-    if (!role) {
+    if (tracks.length >= MAX_BAND_TRACKS) {
+      // Past what MIDI itself has channels for. Named rather than dropped in
+      // silence, which is the only thing `leftOut` is still for.
       leftOut.push(tidy(track.name) || `Track ${track.index + 1}`);
       continue;
     }
-    const notes: SongBackingNote[] = [];
-    byTrack.set(track.index, notes);
-    tracks.push({ role, name: tidy(track.name) || `Track ${track.index + 1}`, notes });
+    const role = roleOf(track);
+    const row: SongBackingTrack = {
+      role,
+      name: tidy(track.name) || `Track ${track.index + 1}`,
+      program: track.isPercussion ? 0 : clampProgram(track.playbackInfo.program),
+      // THE PART UNDER THE CURSOR IS THE PART YOU PLAY — and, since W28, the
+      // part you can also hear, at the level `GUIDE_TRACK_MIX` names.
+      guide: track.index === chosenTrackIndex,
+      notes: [],
+      bends: [],
+    };
+    byTrack.set(track.index, row);
+    tracks.push(row);
   }
 
-  if (tracks.length > 0) {
-    for (const playedBar of playedBars(parsed.atScore)) {
-      const master = playedBar.masterBar;
-      const startTick = playedBar.start;
-      for (const track of parsed.atScore.tracks) {
-        const notes = byTrack.get(track.index);
-        if (!notes) continue;
-        const drums = track.isPercussion || track.staves[0]?.isPercussion;
-        for (const staff of track.staves) {
-          const printed = staff.bars[master.index];
-          if (!printed) continue;
-          for (const voice of printed.voices) {
-            for (const beat of voice.beats) {
-              if (beat.isRest || beat.notes.length === 0) continue;
-              const tick = startTick + beat.playbackStart;
-              for (const note of beat.notes) {
-                if (note.isTieDestination) continue;
-                const midi = drums ? drumMidi(track, note) : note.realValue;
-                if (midi === null || midi < 0 || midi > 127) continue;
-                notes.push({
-                  tick,
-                  durTicks: beat.playbackDuration,
-                  midi,
-                  velocity: velocityOf(note),
-                });
-              }
+  for (const playedBar of playedBars(parsed.atScore)) {
+    const master = playedBar.masterBar;
+    const startTick = playedBar.start;
+    for (const track of parsed.atScore.tracks) {
+      const row = byTrack.get(track.index);
+      if (!row || row.role === "synth") continue;
+      const drums = track.isPercussion || track.staves[0]?.isPercussion;
+      for (const staff of track.staves) {
+        const printed = staff.bars[master.index];
+        if (!printed) continue;
+        for (const voice of printed.voices) {
+          for (const beat of voice.beats) {
+            if (beat.isRest || beat.notes.length === 0) continue;
+            const tick = startTick + beat.playbackStart;
+            for (const note of beat.notes) {
+              // A tied note makes no event: the file has already sounded it,
+              // and striking a sampled bass again on the tie is the one
+              // thing that would make the backing audibly wrong rather than
+              // merely approximate.
+              if (note.isTieDestination) continue;
+              const midi = drums ? drumMidi(track, note) : note.realValue;
+              if (midi === null || midi < 0 || midi > 127) continue;
+              row.notes.push({
+                tick,
+                durTicks: beat.playbackDuration,
+                midi,
+                velocity: velocityOf(note),
+              });
             }
           }
         }
@@ -679,14 +732,130 @@ export function buildBacking(parsed: ParsedSong, chosenTrackIndex: number): Song
     }
   }
 
-  // Sorted, because the engine places them in the order they arrive and a
-  // chord written across two voices would otherwise be two instants.
+  // And the synthesised rows, off the generated MIDI.
+  if (generated) fillFromMidi(parsed.atScore, generated, byTrack);
+
   for (const track of tracks) {
+    // Sorted, because the engine places them in the order they arrive and a
+    // chord written across two voices would otherwise be two instants.
     track.notes.sort((a, b) => a.tick - b.tick || a.midi - b.midi);
+    track.bends.sort((a, b) => a.tick - b.tick);
     // The engine refuses a track longer than this rather than allocate for
     // it. Two hundred thousand notes is not a song anybody wrote, so cutting
     // the tail is the right shape of failure: the piece still plays.
     if (track.notes.length > MAX_BACKING_NOTES) track.notes.length = MAX_BACKING_NOTES;
+    if (track.bends.length > MAX_BACKING_NOTES) track.bends.length = MAX_BACKING_NOTES;
   }
   return { backing: { tracks }, leftOut };
+}
+
+/** `song.rs`'s own ceiling: MIDI has sixteen channels and so has a band. */
+const MAX_BAND_TRACKS = 16;
+
+function clampProgram(program: number): number {
+  if (!Number.isFinite(program)) return 0;
+  return Math.min(127, Math.max(0, Math.round(program)));
+}
+
+/**
+ * The file as MIDI, for the parts the recorded band does not play.
+ *
+ * `MidiFileGenerator` with an `AlphaSynthMidiFileHandler` writing into a
+ * `MidiFile` — generation and nothing else. It runs without the player it
+ * normally feeds, which is what keeps alphaTab "reads and draws only" here:
+ * no `AlphaSynth` is constructed, no `AudioContext` is opened, and the webview
+ * makes no sound at any point.
+ *
+ * A file the generator chokes on is a file whose synthesised parts are silent
+ * rather than a file that will not open — the recorded rows and the tab are
+ * already built by then and are worth more than the guitars.
+ */
+function generateMidi(atScore: AtScore): midi.MidiFile | null {
+  try {
+    const file = new midi.MidiFile();
+    const generator = new midi.MidiFileGenerator(
+      atScore,
+      null,
+      new midi.AlphaSynthMidiFileHandler(file),
+    );
+    generator.generate();
+    return file;
+  } catch (err) {
+    console.warn("[yames] the file's MIDI could not be generated", err);
+    return null;
+  }
+}
+
+/**
+ * Turn the generated MIDI into the synthesised rows' notes and bends.
+ *
+ * The events carry a MIDI channel, and a track's channels are on
+ * `playbackInfo` — so which events belong to which part is the file's own
+ * answer rather than a guess. A track and its "secondary" channel (Guitar
+ * Pro's second voice) both land on the same row, which is what a player
+ * reading one staff expects.
+ *
+ * Durations come from the note-off, which is where the palm mute and the
+ * let-ring already are: the generator shortened one and lengthened the other
+ * before this saw either.
+ */
+function fillFromMidi(
+  atScore: AtScore,
+  file: midi.MidiFile,
+  byTrack: Map<number, SongBackingTrack>,
+): void {
+  /** Which row a MIDI channel belongs to. */
+  const rowOf = new Map<number, SongBackingTrack>();
+  for (const track of atScore.tracks) {
+    const row = byTrack.get(track.index);
+    if (!row || row.role !== "synth") continue;
+    rowOf.set(track.playbackInfo.primaryChannel, row);
+    rowOf.set(track.playbackInfo.secondaryChannel, row);
+  }
+  if (rowOf.size === 0) return;
+  // Where each channel's notes are still ringing, so a note-off can find the
+  // note-on it ends. A key struck twice before it is released is two notes,
+  // and the first one's length is where the second one begins.
+  const open = new Map<string, SongBackingNote>();
+  const shift = file.tickShift ?? 0;
+
+  for (const event of file.events) {
+    const channel = (event as { channel?: number }).channel;
+    if (channel === undefined) continue;
+    const row = rowOf.get(channel);
+    if (!row) continue;
+    const tick = Math.max(0, event.tick - shift);
+    if (event instanceof midi.NoteOnEvent) {
+      const key = `${channel}:${event.noteKey}`;
+      const held = open.get(key);
+      if (held) held.durTicks = Math.max(1, tick - held.tick);
+      const note: SongBackingNote = {
+        tick,
+        durTicks: 0,
+        midi: event.noteKey,
+        velocity: Math.min(1, Math.max(0, event.noteVelocity / 127)),
+      };
+      // Velocity zero is a note-off written as a note-on, which is what half
+      // the MIDI in the world does.
+      if (event.noteVelocity <= 0) {
+        if (held) open.delete(key);
+        continue;
+      }
+      open.set(key, note);
+      row.notes.push(note);
+    } else if (event instanceof midi.NoteOffEvent) {
+      const key = `${channel}:${event.noteKey}`;
+      const held = open.get(key);
+      if (!held) continue;
+      held.durTicks = Math.max(1, tick - held.tick);
+      open.delete(key);
+    } else if (event instanceof midi.PitchBendEvent) {
+      row.bends.push({ tick, value: Math.min(16383, Math.max(0, event.value)) });
+    }
+  }
+  // A note the file never released rings for a beat rather than for ever: an
+  // uncapped note on a synthesiser is a drone nobody wrote.
+  for (const note of open.values()) {
+    if (note.durTicks === 0) note.durTicks = TICKS_PER_QUARTER;
+  }
 }

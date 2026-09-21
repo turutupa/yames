@@ -127,25 +127,26 @@ describe("the starter shelf", () => {
         }
       });
 
-      it("gives the band something to play", () => {
+      it("gives the band something to play, the player's own part included", () => {
         const parsed = parseSongFile(bytesOf(piece.tex), piece.fileName);
         const { backing, leftOut } = buildBacking(parsed, piece.trackIndex);
-        // Drums, and one melodic part — a bass behind a guitar, or keys
-        // behind the bass study, where doubling the bass would hide the
-        // thing the study is about.
+        // Drums, one melodic part behind them — a bass behind a guitar, or
+        // keys behind the bass study, where doubling the bass would hide the
+        // thing the study is about — and, since W28, the part being learned,
+        // as the guide.
         const roles = backing.tracks.map((t) => t.role).sort();
         expect(roles).toContain("drums");
-        expect(roles.length, `only ${roles.join(", ")}`).toBe(2);
+        expect(roles.length, `only ${roles.join(", ")}`).toBe(3);
+        expect(backing.tracks.filter((t) => t.guide).length).toBe(1);
         for (const track of backing.tracks) {
-          expect(track.notes.length, `${track.role} has nothing to play`).toBeGreaterThan(0);
+          expect(track.notes.length, `${track.name} has nothing to play`).toBeGreaterThan(0);
           // A General MIDI number the engine's voices can address.
           for (const note of track.notes) {
             expect(note.midi >= 0 && note.midi <= 127).toBe(true);
             expect(note.velocity > 0 && note.velocity <= 1).toBe(true);
           }
         }
-        // Nothing in the file the band has nobody to play: every track is
-        // either the player's or one of the three rows.
+        // Nothing in the file goes unplayed: press play and hear the piece.
         expect(leftOut).toEqual([]);
       });
     });

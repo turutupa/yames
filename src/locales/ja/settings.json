@@ -325,7 +325,8 @@
       "failed": "確認できませんでした",
       "sounds": "音源",
       "soundsCredit": "クラブのキットは Versilian Studios と Karoryfer Samples による Virtuosity Drums、演奏は Austin McMahon（パブリックドメイン）。スタジオのキットは DrumGizmo プロジェクトの DRSKit（CC BY 4.0）。",
-      "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ"
+      "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ",
+      "soundsCreditSongs": "ほかの楽器は Sonivox の General MIDI 音源です（Sonic Network Inc., Apache-2.0）。"
     },
     "songs": {
       "title": "曲",
@@ -337,7 +338,11 @@
       "useDownloads": "ダウンロードを使う",
       "turnedDown": "見送った曲",
       "turnedDownHint": "Yames が二度と知らせないファイルが {{n}} 件",
-      "forgetTurnedDown": "もう一度知らせる"
+      "forgetTurnedDown": "もう一度知らせる",
+      "soundSet": "音色セット",
+      "soundSetBuiltIn": "Yames に付属のもの",
+      "chooseSoundSet": ".sf2 を選ぶ",
+      "useBuiltInSoundSet": "付属のものを使う"
     }
   },
   "keybindings": {

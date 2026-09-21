@@ -1117,15 +1117,38 @@ export async function setSongRange(
 }
 
 /**
- * How loud the click and each of the band's three rows are.
+ * How loud the click is, and each track of the file.
  *
  * Applies on the next buffer and recompiles nothing, so this is safe to send
  * on every step of a fader drag. Out-of-range values are clamped rather than
- * refused — a fader that stops moving is better than a dialog.
+ * refused — a fader that stops moving is better than a dialog. A fader on a
+ * track the synthesiser plays is heard about a tenth of a second later, which
+ * is how long the audio already rendered ahead of the playhead takes to
+ * drain (`src-tauri/src/synth.rs`).
  */
 export async function setSongMix(mix: SongMix): Promise<void> {
   return invoke("set_song_mix", { mix });
 }
+
+/**
+ * Play a song's other instruments out of a `.sf2` of the player's own.
+ *
+ * Desktop only; the phone build has no Songs. An empty path goes back to the
+ * set the app ships. It takes effect on the next song, because a sound set is
+ * decoded when a piece is compiled — and a set that will not open falls back
+ * to the shipped one rather than leaving the song silent.
+ */
+export async function setSongSoundFont(path: string | null): Promise<void> {
+  return invoke("set_song_sound_font", { path });
+}
+
+/** The native file dialog for one, filtered to `.sf2`. Null if they cancel. */
+export async function pickSoundFont(): Promise<string | null> {
+  return invoke("pick_sound_font");
+}
+
+/** Where the player's own sound set is remembered, if they chose one. */
+export const SONG_SOUND_FONT_KEY = "songSoundFont";
 
 /**
  * The engine let go of the song: the audio device changed under it, or a jam

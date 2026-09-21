@@ -706,19 +706,22 @@ const THEMES = [
 ];
 
 test.describe("the band", () => {
-  test("has a row for the click and for each player the file has", async ({ page }) => {
+  test("has a row for the click and for every track the file has", async ({ page }) => {
     await openShot(page, "songs", { width: 1400, height: 900 });
     const names = await page.locator(".songs-band-name").allTextContents();
     if (!IN_ENGLISH) {
-      // In another language the three names are that language's words. That
-      // the band has exactly three lanes, in this order, is still worth
-      // saying; what they are called is `i18n.songs-wave.test.ts`'s job.
-      expect(names, `three lanes in ${LAYOUT_LOCALE}`).toHaveLength(3);
+      // In another language the names are that language's words, except the
+      // three that are the FILE's and are never translated. That the band
+      // has exactly four rows is still worth saying; what the one
+      // translated row is called is `i18n.songs-wave.test.ts`'s job.
+      expect(names, `four rows in ${LAYOUT_LOCALE}`).toHaveLength(4);
       return;
     }
-    // The fixture is a guitar, a drum kit and a bass — and the guitar is the
-    // part being played, so it is never in the band.
-    expect(names.map((n) => n.trim())).toEqual(["Click", "Drums", "Bass"]);
+    // W28 — the fixture is a guitar, a drum kit and a bass, and all three
+    // sound. The guitar is the part being played, so it is FIRST and it is
+    // the guide: before this it was the one track that was never heard,
+    // which is what made pressing play a metronome.
+    expect(names.map((n) => n.trim())).toEqual(["Click", "Guitar", "Drums", "Bass"]);
   });
 
   /**
@@ -745,7 +748,7 @@ test.describe("the band", () => {
     await expect(
       page.locator(".songs-strip .songs-band-lane"),
       "the lanes left the strip before they had to",
-    ).toHaveCount(3);
+    ).toHaveCount(4);
     expect(
       await page.locator(".songs-band-name-text").first().boundingBox(),
       "the lane names are still laid out at a middling width",
@@ -775,7 +778,11 @@ test.describe("the band", () => {
         nodes.map((n) => {
           const row = n.getBoundingClientRect();
           const slider = n.querySelector("input[type=range]")!.getBoundingClientRect();
-          const switchEl = n.querySelector("button[role=switch]")!.getBoundingClientRect();
+          // The MUTE, by its class rather than by its role: the solo
+          // button beside it is a button too, and a query that took
+          // whichever came first would measure the wrong control and pass
+          // or fail for a reason nobody could read off the failure.
+          const switchEl = n.querySelector(".songs-band-switch")!.getBoundingClientRect();
           return { row, slider, switchEl };
         }),
       );

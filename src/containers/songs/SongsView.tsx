@@ -637,16 +637,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             </ul>
           )}
 
-          {/* What the engine could not bring, said once and quietly. Neither
-              of these is a failure: a file written for a band this one does
-              not have still plays, and a player who imported an orchestral
-              arrangement deserves to know where the strings went rather than
-              to wonder whether the import worked. */}
+          {/* What could not be brought, said once and quietly.
+              Since W28 this is almost always nothing: every track in the file
+              sounds, so the only part that can stay silent is one past the
+              sixteen MIDI itself has channels for. Neither line is a failure
+              — the piece still plays — and both exist so a file that came out
+              thin is visible rather than mysterious. */}
           {(session.leftOut.length > 0 || (session.loaded?.droppedNotes ?? 0) > 0) && (
             <ul className="songs-warnings songs-warnings-quiet">
               {session.leftOut.length > 0 && (
                 <li>
-                  {t("songs.band.leftOut", {
+                  {t("songs.band.tooManyParts", {
                     count: session.leftOut.length,
                     tracks: session.leftOut.join(", "),
                   })}
@@ -956,9 +957,10 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
 
             <SongBand
               setting={session.mixSetting}
-              lanes={session.lanes}
+              tracks={session.tracks}
               onGain={session.setGain}
               onMute={session.setMute}
+              onSolo={session.setSolo}
               stageRef={stageRef}
             />
           </div>

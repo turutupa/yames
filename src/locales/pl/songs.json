@@ -39,7 +39,14 @@
       "droppedNotes": "{{count}} nuta w tym pliku należy do instrumentu, którego zespół nie ma.",
       "droppedNotes_few": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma.",
       "droppedNotes_many": "{{count}} nut w tym pliku należy do instrumentów, których zespół nie ma.",
-      "droppedNotes_other": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma."
+      "droppedNotes_other": "{{count}} nuty w tym pliku należą do instrumentów, których zespół nie ma.",
+      "myPart": "Moja partia",
+      "soloShort": "S",
+      "soloFor": "Słuchaj tylko: {{lane}}",
+      "tooManyParts": "{{tracks}} milczy: ten plik ma więcej partii, niż może zabrzmieć naraz.",
+      "tooManyParts_few": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz.",
+      "tooManyParts_many": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz.",
+      "tooManyParts_other": "{{tracks}} milczą: ten plik ma więcej partii, niż może zabrzmieć naraz."
     },
     "countIn": {
       "counting": "Odliczam ci wejście"

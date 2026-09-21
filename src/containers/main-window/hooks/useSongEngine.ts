@@ -21,20 +21,31 @@
  *   which is what `JAM_UX_DECISIONS.md` A13 means by putting it on the stage.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { clearSong, loadSong, onSongDropped, setSongMix, setSongRange } from "../../../ipc";
+import {
+  SONG_SOUND_FONT_KEY,
+  clearSong,
+  loadSong,
+  onSongDropped,
+  setSongMix,
+  setSongRange,
+  setSongSoundFont,
+  storeLoad,
+} from "../../../ipc";
 import type { SongLoaded } from "../../../ipc";
 import {
   DEFAULT_MIX_SETTING,
   engineMix,
   loadMixSetting,
   saveMixSetting,
+  startingMix,
   withGain,
   withMute,
+  withSolo,
 } from "../../../songs/songEngine";
 import type { SongLane, SongMixSetting } from "../../../songs/songEngine";
 import type { BarRange } from "../../../songs/schedule";
 import { MAX_COUNT_IN_BARS } from "../../../songs/types";
-import type { SongBackingTrack, SongRole, SongScore } from "../../../songs/types";
+import type { SongBackingTrack, SongScore } from "../../../songs/types";
 
 /**
  * The importer, loaded when a song is opened rather than when the app starts.
@@ -68,6 +79,8 @@ export interface SongEngine {
   mixSetting: SongMixSetting;
   setGain: (lane: SongLane, value: number) => void;
   setMute: (lane: SongLane, muted: boolean) => void;
+  /** Hear one track on its own, or stop. Tracks only; the click is not soloed. */
+  setSolo: (track: number, soloed: boolean) => void;
   setCountInBars: (bars: number) => void;
   /** Turn recording on or off for the loaded song. Remembered per song. */
   setTakes: (takes: boolean) => void;
@@ -77,8 +90,12 @@ export interface SongEngine {
   setStageSetting: (
     patch: Partial<Pick<SongMixSetting, "selection" | "loop" | "tempoPercent" | "portions">>,
   ) => void;
-  /** Only the band's rows this file actually has, in playing order. */
-  lanes: SongRole[];
+  /**
+   * Every track of the file, in the file's own order, with its name, its
+   * role and whether it is the part being learned. The band strip draws one
+   * fader per entry, and `mixSetting.mix.tracks[n]` is that entry's level.
+   */
+  tracks: SongBackingTrack[];
   /** Tracks in the file this band has nobody to play, by name. */
   leftOut: string[];
   /** What the engine made of the song, or null before it has been told. */
@@ -177,6 +194,38 @@ export function useSongEngine({
   }, [songId]);
 
   /**
+   * The sound set the player chose, told to the engine once.
+   *
+   * Here rather than in Settings alone, because Settings is a screen most
+   * players open once: the engine is a fresh process every launch and has to
+   * be told again. It is a path and a string comparison — the decode happens
+   * when a piece is compiled, and only when the path has actually changed.
+   */
+  useEffect(() => {
+    void storeLoad<string>(SONG_SOUND_FONT_KEY)
+      .then((path) => setSongSoundFont(typeof path === "string" && path ? path : null))
+      .catch(() => {});
+  }, []);
+
+  /**
+   * The faders a song that has never been mixed arrives with.
+   *
+   * Written when the band is known and nothing was stored for it, because
+   * the one level the app has an opinion about — the player's own part, a few
+   * dB under the rest — cannot be known before the file has been read. It is
+   * not saved: a fader nobody has touched is a default, and a default that
+   * has been written down is a default that can never be changed again.
+   */
+  useEffect(() => {
+    if (!band || band.tracks.length === 0) return;
+    setMixSetting((current) =>
+      current.mix.tracks.length > 0
+        ? current
+        : { ...current, mix: { ...current.mix, tracks: startingMix(band.tracks) } },
+    );
+  }, [band]);
+
+  /**
    * What the engine is holding: which song, and at which settings.
    *
    * A ref and not state, because it is written from inside the effect that
@@ -238,7 +287,7 @@ export function useSongEngine({
           setEngineError(null);
           // The mix is not part of the table, so it has to be said again
           // whenever a new one arrives.
-          void setSongMix(engineMix(mixSetting)).catch(() => {});
+          void setSongMix(engineMix(mixSetting, band.tracks.length)).catch(() => {});
         } catch (err) {
           heldRef.current = null;
           setLoaded(null);
@@ -270,7 +319,8 @@ export function useSongEngine({
   // Sent as it moves. Four floats cross to the audio callback behind their
   // own generation counter and recompile nothing, so a hand on a fader costs
   // the engine nothing and a musician hears the change on the next buffer.
-  const gains = useMemo(() => engineMix(mixSetting), [mixSetting]);
+  const trackCount = band?.tracks.length ?? 0;
+  const gains = useMemo(() => engineMix(mixSetting, trackCount), [mixSetting, trackCount]);
   useEffect(() => {
     if (!heldRef.current) return;
     void setSongMix(gains).catch(() => {});
@@ -302,12 +352,12 @@ export function useSongEngine({
   }, []);
 
   // --- what the stage shows -----------------------------------------------
-  const lanes = useMemo<SongRole[]>(() => {
-    const has = new Set((band?.tracks ?? []).map((t) => t.role));
-    // Playing order, not the file's: drums, bass, keys is how a band reads
-    // down a mixer and how Jam's own rows are stacked.
-    return (["drums", "bass", "keys"] as SongRole[]).filter((role) => has.has(role));
-  }, [band]);
+  // THE FILE'S OWN ORDER, and not a playing order (W28). It was drums, bass,
+  // keys, because those were the only three rows a song could have. A file's
+  // tracks are laid out by whoever wrote it and the tab is drawn in that
+  // order, so a strip that sorted them would be a strip whose second fader is
+  // not the tab's second staff.
+  const tracks = useMemo(() => band?.tracks ?? [], [band]);
 
   const setGain = useCallback(
     (lane: SongLane, value: number) =>
@@ -323,6 +373,24 @@ export function useSongEngine({
     (lane: SongLane, muted: boolean) =>
       setMixSetting((current) => {
         const next = withMute(current, lane, muted);
+        if (songId) void saveMixSetting(songId, next).catch(() => {});
+        return next;
+      }),
+    [songId],
+  );
+
+  /**
+   * Hear one track on its own.
+   *
+   * Additive: soloing a second track hears both, which is what a solo button
+   * on a mixer does and what somebody checking a two-guitar harmony wants.
+   * It never touches the mutes, so clearing a solo gives back the band the
+   * player had rather than the band the app assumed.
+   */
+  const setSolo = useCallback(
+    (track: number, soloed: boolean) =>
+      setMixSetting((current) => {
+        const next = withSolo(current, track, soloed);
         if (songId) void saveMixSetting(songId, next).catch(() => {});
         return next;
       }),
@@ -400,11 +468,12 @@ export function useSongEngine({
     mixSetting,
     setGain,
     setMute,
+    setSolo,
     setCountInBars,
     setTakes,
     setCamera,
     setStageSetting,
-    lanes,
+    tracks,
     leftOut: band?.leftOut ?? [],
     loaded,
     engineError,

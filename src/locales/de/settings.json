@@ -325,7 +325,8 @@
       "failed": "Suche fehlgeschlagen",
       "sounds": "Klänge",
       "soundsCredit": "Das Club-Kit ist Virtuosity Drums von Versilian Studios und Karoryfer Samples, eingespielt von Austin McMahon (gemeinfrei). Das Studio-Kit ist DRSKit vom DrumGizmo-Projekt (CC BY 4.0).",
-      "madeWith": "Mit {{heart}} für Musiker überall"
+      "madeWith": "Mit {{heart}} für Musiker überall",
+      "soundsCreditSongs": "Die übrigen Instrumente stammen aus dem Sonivox-General-MIDI-Klangsatz (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
       "title": "Songs",
@@ -337,7 +338,11 @@
       "useDownloads": "Downloads nehmen",
       "turnedDown": "Abgelehnte Songs",
       "turnedDownHint": "{{n}} Dateien bietet Yames nicht noch einmal an",
-      "forgetTurnedDown": "Wieder anbieten"
+      "forgetTurnedDown": "Wieder anbieten",
+      "soundSet": "Klangsatz",
+      "soundSetBuiltIn": "Der von Yames mitgelieferte",
+      "chooseSoundSet": ".sf2 wählen",
+      "useBuiltInSoundSet": "Den eingebauten nehmen"
     }
   },
   "keybindings": {

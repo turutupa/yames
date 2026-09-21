@@ -419,15 +419,17 @@ fn a_note_outside_a_banks_range_comes_back_in_octaves() {
 fn a_mix_is_clamped_and_never_nan() {
     let g = SongMix {
         click: 9.0,
-        drums: -1.0,
-        bass: f32::NAN,
-        keys: 0.5,
+        tracks: vec![-1.0, f32::NAN, 0.5],
     }
     .gains();
     assert_eq!(g.click, MIX_MAX);
-    assert_eq!(g.lane(SongLane::Drums), MIX_MIN);
-    assert_eq!(g.lane(SongLane::Bass), 1.0, "a NaN fader is a fader at unity");
-    assert_eq!(g.lane(SongLane::Keys), 0.5);
+    assert_eq!(g.track(0), MIX_MIN);
+    assert_eq!(g.track(1), 1.0, "a NaN fader is a fader at unity");
+    assert_eq!(g.track(2), 0.5);
+    // A file with more tracks than the mix was sent for plays them, rather
+    // than playing them silently: a band nobody has touched is a band at the
+    // level the arrangement was written at.
+    assert_eq!(g.track(9), 1.0);
 }
 
 /// The band arrives at the level the arrangement was written at, and the
@@ -436,9 +438,139 @@ fn a_mix_is_clamped_and_never_nan() {
 #[test]
 fn the_default_mix_leaves_the_band_alone_and_the_click_under_it() {
     let g = SongMixGains::default();
-    assert_eq!(g.lanes, [1.0, 1.0, 1.0]);
+    assert!(g.tracks.iter().all(|t| *t == 1.0));
     assert!(
         g.click < 1.0 && g.click > 0.0,
         "the click is a reference over a song, not the loudest thing in it"
     );
+}
+
+
+// ─── The synthesised half of the band ────────────────────────────────────
+
+/// The sounds a song compiles against, with the recorded kit out of the way
+/// so a test about the synthesiser is about the synthesiser.
+fn bare_sounds() -> SongSounds {
+    let kits = crate::kit::KitCache::default();
+    SongSounds {
+        bank: kits
+            .shipped(crate::engine::JamKit::fallback().0, 48_000)
+            .expect("the fallback kit decodes"),
+        perc: None,
+        voices: crate::jam::JamVoices::default(),
+    }
+}
+
+/// A guitar on every beat of the twelve-bar piece, as the importer sends one.
+fn guitar_track() -> SongBacking {
+    let t = twelve_bar();
+    let mut notes = Vec::new();
+    for bar in t.bars.iter() {
+        let beat_ticks = TICKS_PER_QUARTER * 4 / bar.denominator;
+        for beat in 0..bar.numerator {
+            notes.push(SongNote {
+                tick: bar.start_tick + beat * beat_ticks,
+                dur_ticks: beat_ticks,
+                midi: 64,
+                velocity: 0.8,
+            });
+        }
+    }
+    SongBacking {
+        tracks: vec![SongTrack {
+            role: SongRole::Synth,
+            name: "Guitar".into(),
+            program: 29,
+            guide: false,
+            bends: Vec::new(),
+            notes,
+        }],
+    }
+}
+
+/// **Half speed is the same piece, played slowly.**
+///
+/// Every note-on the synthesiser is given must sit on the beat the schedule
+/// says it does, whatever `tempoPercent` is — so the check is not on samples,
+/// which double, but on the BEAT each note-on falls on, which must not move.
+/// That is the same claim `the_gate` makes about the click and the recorded
+/// band, made about the half of the band a different thread plays, because a
+/// guitar a beat out at 50 % is a guitar the player is practising against.
+#[test]
+fn tempo_does_not_move_a_synth_note_off_its_beat() {
+    let rate = 48_000u32;
+    let mut beats_at: Vec<Vec<f64>> = Vec::new();
+    for percent in [100u32, 50] {
+        let mut t = twelve_bar();
+        t.tempo_percent = percent;
+        let table = compile(&t, Some(&guitar_track()), bare_sounds(), rate, 1)
+            .expect("the song compiles");
+        let score = table.synth_score.as_ref().expect("a synthesised part");
+        let bars = table.bars();
+        let mut beats = Vec::new();
+        for e in score.events.iter() {
+            if !matches!(e.kind, crate::synth::SynthEventKind::NoteOn { .. }) {
+                continue;
+            }
+            // Which bar the frame is in, and how far into it in beats — the
+            // bar's own tempo, which is where `tempoPercent` already is.
+            let at = match bars.binary_search_by(|b| b.start_sample.cmp(&e.sample)) {
+                Ok(i) => i,
+                Err(0) => 0,
+                Err(i) => i - 1,
+            };
+            let bar = &bars[at];
+            let into_seconds = (e.sample - bar.start_sample) as f64 / rate as f64;
+            let beats_into = into_seconds * bar.bpm / 60.0;
+            // Bars from the top, in the meter's own beats, so the 7/8 counts
+            // as seven eighths rather than as three and a half quarters.
+            beats.push(at as f64 + (beats_into * bar.denominator as f64 / 4.0).round() / 16.0);
+        }
+        beats_at.push(beats);
+    }
+    assert_eq!(
+        beats_at[0].len(),
+        beats_at[1].len(),
+        "half speed played a different number of notes",
+    );
+    for (n, (full, half)) in beats_at[0].iter().zip(beats_at[1].iter()).enumerate() {
+        assert!(
+            (full - half).abs() < 1e-6,
+            "note {n} is on beat {full} at 100 % and on beat {half} at 50 %",
+        );
+    }
+}
+
+/// A file with more parts than MIDI has channels still plays the ones it can,
+/// and the seventeenth is counted rather than silently gone.
+#[test]
+fn a_synth_track_gets_a_channel_of_its_own_and_never_the_percussion_one() {
+    let rate = 48_000u32;
+    let t = twelve_bar();
+    let one = guitar_track();
+    let mut many = SongBacking { tracks: Vec::new() };
+    for _ in 0..12 {
+        many.tracks.push(one.tracks[0].clone());
+    }
+    let table = compile(&t, Some(&many), bare_sounds(), rate, 1).expect("the song compiles");
+    let score = table.synth_score.as_ref().expect("a synthesised part");
+    // Channel 9 is percussion in every General MIDI set ever written, so a
+    // guitar put on it plays a cymbal.
+    assert_eq!(
+        score.channel_track[crate::synth::PERCUSSION_CHANNEL as usize],
+        u8::MAX,
+        "a melodic part was put on the percussion channel",
+    );
+    // Twelve parts, twelve channels, each answering to its own fader.
+    let claimed: Vec<u8> = score
+        .channel_track
+        .iter()
+        .copied()
+        .filter(|t| *t != u8::MAX)
+        .collect();
+    assert_eq!(claimed.len(), 12);
+    let mut sorted = claimed.clone();
+    sorted.sort_unstable();
+    sorted.dedup();
+    assert_eq!(sorted.len(), 12, "two parts share a fader: {claimed:?}");
 }

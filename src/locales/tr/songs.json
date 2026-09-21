@@ -33,7 +33,12 @@
       "leftOut": "{{tracks}} bu dosyada var, ama Yames'te onu çalacak kimse yok.",
       "leftOut_other": "{{tracks}} bu dosyada var, ama Yames'te onları çalacak kimse yok.",
       "droppedNotes": "Bu dosyadaki {{count}} nota, grupta olmayan bir çalgıya ait.",
-      "droppedNotes_other": "Bu dosyadaki {{count}} nota, grupta olmayan çalgılara ait."
+      "droppedNotes_other": "Bu dosyadaki {{count}} nota, grupta olmayan çalgılara ait.",
+      "myPart": "Benim partim",
+      "soloShort": "S",
+      "soloFor": "Sadece {{lane}} dinle",
+      "tooManyParts": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
+      "tooManyParts_other": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var."
     },
     "countIn": {
       "counting": "Girişini sayıyorum"

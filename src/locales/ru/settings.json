@@ -325,7 +325,8 @@
       "failed": "Не удалось проверить",
       "sounds": "Звуки",
       "soundsCredit": "Установка «Клуб» — это Virtuosity Drums от Versilian Studios и Karoryfer Samples, играет Austin McMahon (общественное достояние). Установка «Студия» — это DRSKit проекта DrumGizmo (CC BY 4.0).",
-      "madeWith": "Сделано с {{heart}} для музыкантов во всём мире"
+      "madeWith": "Сделано с {{heart}} для музыкантов во всём мире",
+      "soundsCreditSongs": "Остальные инструменты — из набора звуков General MIDI от Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
       "title": "Песни",
@@ -337,7 +338,11 @@
       "useDownloads": "Брать из загрузок",
       "turnedDown": "Отклонённые песни",
       "turnedDownHint": "{{n}} файлов Yames больше не предложит",
-      "forgetTurnedDown": "Предлагать снова"
+      "forgetTurnedDown": "Предлагать снова",
+      "soundSet": "Набор звуков",
+      "soundSetBuiltIn": "Тот, что идёт с Yames",
+      "chooseSoundSet": "Выбрать .sf2",
+      "useBuiltInSoundSet": "Взять встроенный"
     }
   },
   "keybindings": {

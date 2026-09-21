@@ -446,27 +446,54 @@ describe("the transport", () => {
 describe("the band from the file", () => {
   const parsed = () => parseSongFile(texBytes(BAND_WITH_SEVEN_EIGHT), "band.alphatex");
 
-  it("gives every other track a role, and never the one you are playing", () => {
+  it("gives EVERY track a player, the one you are learning included", () => {
+    // W28. Before it, the horn and the guitar were in `leftOut` and a file
+    // of two guitars played as a metronome — which is the bug this whole
+    // task is. Every track now has somebody to play it, and what the
+    // recorded band cannot play goes to the General MIDI synthesiser.
     const { backing } = buildBacking(parsed(), 0);
     expect(backing.tracks.map((t) => [t.name, t.role])).toEqual([
+      ["Guitar", "synth"],
       ["Drums", "drums"],
       ["Bass", "bass"],
       ["Piano", "keys"],
+      ["Horn", "synth"],
     ]);
-    expect(backing.tracks.map((t) => t.name)).not.toContain("Guitar");
   });
 
-  it("names what it left out rather than letting it vanish", () => {
-    const { leftOut } = buildBacking(parsed(), 0);
-    expect(leftOut).toEqual(["Horn"]);
+  it("marks the part you are learning as the guide, and only that one", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    expect(backing.tracks.filter((t) => t.guide).map((t) => t.name)).toEqual(["Guitar"]);
+    const bassist = buildBacking(parsed(), 2);
+    expect(bassist.backing.tracks.filter((t) => t.guide).map((t) => t.name)).toEqual(["Bass"]);
   });
 
-  it("leaves the player's own part out whichever part that is", () => {
-    // The bass player's band has no bass in it, and the guitar it does have
-    // is a track this band cannot play — so it is named, not silently gone.
-    const { backing, leftOut } = buildBacking(parsed(), 2);
-    expect(backing.tracks.map((t) => t.role)).toEqual(["drums", "keys"]);
-    expect(leftOut).toEqual(["Guitar", "Horn"]);
+  it("leaves nothing out of a file MIDI itself has room for", () => {
+    expect(buildBacking(parsed(), 0).leftOut).toEqual([]);
+    expect(buildBacking(parsed(), 2).leftOut).toEqual([]);
+  });
+
+  it("carries the General MIDI instrument each track asks for", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    for (const track of backing.tracks) {
+      expect(track.program).toBeGreaterThanOrEqual(0);
+      expect(track.program).toBeLessThanOrEqual(127);
+    }
+  });
+
+  it("gives a synthesised track its notes out of the file's own MIDI", () => {
+    // The guitar the player is learning is one of them, because it is the
+    // guide. Lengths come from the note-offs the generator wrote, which is
+    // where a palm mute and a let-ring already differ.
+    const { backing } = buildBacking(parsed(), 0);
+    const guitar = backing.tracks.find((t) => t.name === "Guitar")!;
+    expect(guitar.notes.length).toBeGreaterThan(0);
+    expect(guitar.notes.every((n) => n.durTicks > 0)).toBe(true);
+    expect(guitar.notes.every((n) => n.midi >= 0 && n.midi <= 127)).toBe(true);
+    expect(guitar.notes.every((n) => n.velocity > 0 && n.velocity <= 1)).toBe(true);
+    // Sorted, because the engine walks them in the order they arrive.
+    const ticks = guitar.notes.map((n) => n.tick);
+    expect([...ticks].sort((a, b) => a - b)).toEqual(ticks);
   });
 
   it("reads drums as General MIDI percussion numbers, not as articulations", () => {
@@ -511,12 +538,16 @@ describe("the band from the file", () => {
     }
   });
 
-  it("is an empty band, not a crash, when the file has only your part in it", () => {
+  it("is your own part alone when that is all the file has in it", () => {
+    // Not an empty band any more: a file with one track still plays, because
+    // the one track is the guide. A player who opened a solo transcription
+    // presses play and hears the piece.
     const { backing, leftOut } = buildBacking(
       parseSongFile(texBytes(REPEAT_WITH_ENDINGS), "repeat.alphatex"),
       0,
     );
-    expect(backing.tracks).toEqual([]);
+    expect(backing.tracks.map((t) => [t.name, t.guide])).toEqual([["Lead", true]]);
+    expect(backing.tracks[0].notes.length).toBeGreaterThan(0);
     expect(leftOut).toEqual([]);
   });
 });
