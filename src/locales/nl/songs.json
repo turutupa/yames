@@ -316,7 +316,13 @@
       "showInFolder": "Toon in map",
       "postItTo": "Plaatsen op",
       "dragItIn": "Open er een en sleep het bestand erin — Yames uploadt niets en heeft geen account nodig.",
-      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van."
+      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van.",
+      "underPicture": "Onder het beeld",
+      "band": {
+        "tab": "De tab",
+        "marks": "Alleen de tekens",
+        "none": "Niets"
+      }
     },
     "compare": {
       "title": "Maten {{bars}}, toen en nu",

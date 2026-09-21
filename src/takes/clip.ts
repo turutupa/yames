@@ -51,6 +51,28 @@ export function clipSize(shape: ClipShape): { width: number; height: number } {
 /** A rectangle, in canvas pixels. */
 export type ClipBox = { x: number; y: number; width: number; height: number };
 
+/** The gap the frame keeps around everything in it, for one shape. */
+export function clipPad(shape: ClipShape): number {
+  return Math.round(clipSize(shape).width * 0.02);
+}
+
+/** How tall the caption's own line is. */
+function captionHeightOf(shape: ClipShape): number {
+  return shape === "tall" ? 64 : 46;
+}
+
+/**
+ * The tallest a band can be: the frame, less the caption under it (W31).
+ *
+ * What a renderer asks for when it IS the clip rather than a strip inside one
+ * — a take with no camera in it, which is every take until somebody turns the
+ * camera on. The picture's box then has no height and nothing is drawn in it.
+ */
+export function fullBandHeight(shape: ClipShape): number {
+  const pad = clipPad(shape);
+  return Math.max(0, clipSize(shape).height - captionHeightOf(shape) - pad * 3);
+}
+
 export type ClipLayout = {
   width: number;
   height: number;
@@ -73,6 +95,46 @@ export type ClipLayout = {
   mark: ClipBox;
   /** Type sizes for this shape, so the two are proportionate rather than equal. */
   type: { caption: number; section: number; mark: number };
+  /**
+   * Where the playhead sits across the strip, 0 at its left edge (W31).
+   *
+   * The middle for the dots and for a jam. A third of the way in for the tab,
+   * because a fret number is something you play and a player reads ahead.
+   */
+  head: number;
+  /**
+   * The strip and its caption are drawn OVER the bottom of the picture rather
+   * than in a band under it (W31, 9:16).
+   *
+   * A tall frame is 1280 pixels of it, and giving a third of that to
+   * furniture would leave a portrait clip of somebody's chin. So the picture
+   * keeps the whole frame and the tab sits over its lower third on a soft
+   * dark ground, which is what a phone-shaped play-along video looks like.
+   */
+  overPicture: boolean;
+};
+
+/**
+ * How one renderer wants its band placed and driven (W31).
+ *
+ * See `ClipStrip.bandFor`. Absent is the clip the compositor has always made;
+ * every field here is something only the thing being drawn can know.
+ */
+export type ClipBand = {
+  /**
+   * How tall the band is, in canvas pixels.
+   *
+   * `0` means no band at all — the picture, the caption and the mark, and
+   * nothing scrolling. That is a real answer: "Nothing" is one of the three
+   * things a player may want under their picture.
+   */
+  height: number;
+  /** Over the bottom of the picture, with the caption above it. */
+  overPicture: boolean;
+  /** Where the playhead sits across it, 0..1. */
+  head: number;
+  /** How much of the take is across it at once, in transport milliseconds. */
+  windowMs: number;
 };
 
 /**
@@ -83,31 +145,45 @@ export type ClipLayout = {
  * the caption sit UNDER it rather than over it in both shapes: a marked-up
  * band across a person's hands is the one composition that makes the picture
  * worse, and a clip whose furniture moves between shapes is two designs.
+ *
+ * `band` is the one renderer that argues with that, and it is allowed to
+ * (W31). Six lines of tablature legible on a phone do not fit in 86 pixels,
+ * and in a 1280-tall frame the only place they fit without eating the picture
+ * is over its lower third. Called with nothing — the dots, a jam's chord grid
+ * — this function is exactly what it was.
  */
-export function clipLayout(shape: ClipShape): ClipLayout {
+export function clipLayout(shape: ClipShape, band?: ClipBand | null): ClipLayout {
   const { width, height } = clipSize(shape);
   // The furniture is kept under a quarter of the frame in both shapes, and
   // `clip.test.ts` holds it there: the picture is the reason anybody watches
   // a clip of somebody playing, and a marked-up band that took a third of a
   // 16:9 frame would be a clip nobody posts.
-  const pad = Math.round(width * 0.02);
-  const stripHeight = shape === "tall" ? 86 : 56;
-  const captionHeight = shape === "tall" ? 64 : 46;
+  const pad = clipPad(shape);
+  const stripHeight = band ? Math.max(0, Math.round(band.height)) : shape === "tall" ? 86 : 56;
+  const captionHeight = captionHeightOf(shape);
+  const overPicture = band?.overPicture === true;
   const furniture = stripHeight + captionHeight + pad * 3;
+
+  // Over the picture: the band is hard against the bottom of the frame with
+  // the caption directly above it, and the picture keeps the whole frame.
+  const stripY = overPicture ? height - pad - stripHeight : height - furniture + pad;
+  const captionY = overPicture
+    ? stripY - captionHeight - Math.round(pad / 2)
+    : height - captionHeight - pad;
 
   return {
     width,
     height,
-    picture: { x: 0, y: 0, width, height: height - furniture },
+    picture: { x: 0, y: 0, width, height: overPicture ? height : Math.max(0, height - furniture) },
     strip: {
       x: pad,
-      y: height - furniture + pad,
+      y: stripY,
       width: width - pad * 2,
       height: stripHeight,
     },
     caption: {
       x: pad,
-      y: height - captionHeight - pad,
+      y: captionY,
       width: width - pad * 2,
       height: captionHeight,
     },
@@ -117,6 +193,8 @@ export function clipLayout(shape: ClipShape): ClipLayout {
       section: shape === "tall" ? 20 : 18,
       mark: markType(shape),
     },
+    head: band ? band.head : 0.5,
+    overPicture,
   };
 }
 
@@ -169,6 +247,17 @@ export function clipOverlayLayout(shape: ClipShape): ClipLayout {
       section: shape === "tall" ? 22 : 19,
       mark: markType(shape),
     },
+    // The playhead through the middle of the grid, which is where a bar grid
+    // reads from: a chord is a thing you are ON, and W31's third-of-the-way-in
+    // playhead is for a tab, where the numbers are things you are about to
+    // play and a player reads ahead.
+    head: 0.5,
+    // FALSE, even though this whole composition is over the picture — the flag
+    // is the compositor's instruction to draw W31's dark rounded panel behind
+    // a band and lift the caption above it, and this composition lays its own
+    // ground and puts the caption underneath. Two ways of sitting on a
+    // picture, and the compositor must not apply one renderer's to the other.
+    overPicture: false,
   };
 }
 
@@ -243,19 +332,27 @@ export function visibleTicks(tape: Tape, nowMs: number, windowMs: number): ClipT
   return out;
 }
 
-/** The bar lines on the strip right now, same axis. */
+/**
+ * The bar lines on the strip right now, same axis.
+ *
+ * `headAt` is where the playhead is across the strip: the middle for the dots
+ * and a jam, a third of the way in for the tab (W31). One axis for all three,
+ * because two definitions of "where along the strip" is how a bar line and
+ * the note that opens it end up in different places.
+ */
 export function visibleBars(
   tape: Tape,
   nowMs: number,
   windowMs: number,
+  headAt = 0.5,
 ): { printedBar: number; section: string | null; at: number }[] {
-  const half = windowMs / 2;
+  const from = nowMs - headAt * windowMs;
   return tape.bars
-    .filter((bar) => bar.atMs >= nowMs - half && bar.atMs <= nowMs + half)
+    .filter((bar) => bar.atMs >= from && bar.atMs <= from + windowMs)
     .map((bar) => ({
       printedBar: bar.printedBar,
       section: bar.section,
-      at: (bar.atMs - (nowMs - half)) / windowMs,
+      at: (bar.atMs - from) / windowMs,
     }));
 }
 

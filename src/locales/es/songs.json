@@ -326,7 +326,13 @@
       "showInFolder": "Mostrar en la carpeta",
       "postItTo": "Publicar en",
       "dragItIn": "Abre una y arrastra el archivo — Yames no sube nada y no necesita cuenta.",
-      "webmWarning": "Abre una y arrastra el archivo. Este es un WebM y casi todas admiten solo MP4; un conversor gratuito lo convierte."
+      "webmWarning": "Abre una y arrastra el archivo. Este es un WebM y casi todas admiten solo MP4; un conversor gratuito lo convierte.",
+      "underPicture": "Debajo de la imagen",
+      "band": {
+        "tab": "La tablatura",
+        "marks": "Solo las marcas",
+        "none": "Nada"
+      }
     },
     "compare": {
       "title": "Compases {{bars}}, antes y ahora",

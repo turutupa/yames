@@ -316,7 +316,13 @@
       "showInFolder": "Show in folder",
       "postItTo": "Post it to",
       "dragItIn": "Open one and drag the file in — Yames uploads nothing and needs no account.",
-      "webmWarning": "Open one and drag the file in. This one is a WebM, and most of these take MP4 only — a free converter will turn it into one."
+      "webmWarning": "Open one and drag the file in. This one is a WebM, and most of these take MP4 only — a free converter will turn it into one.",
+      "underPicture": "Under the picture",
+      "band": {
+        "tab": "The tab",
+        "marks": "Marks only",
+        "none": "Nothing"
+      }
     },
     "compare": {
       "title": "Bars {{bars}}, then and now",

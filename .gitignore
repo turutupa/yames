@@ -48,3 +48,10 @@ song-ab-clips/
 # cannot see the app — can LOOK at what the compositor draws. Rendered
 # again by that spec whenever somebody needs to look; never committed.
 .jam-frames/
+
+# W31's saved videos and the frames pulled out of them: whether the tablature
+# in a clip is readable is a question only a picture answers, so they are
+# exported from the shots harness and looked at. Video is never committed, for
+# the reason the audio above is not — it is made again whenever the drawing
+# changes, and the scripts that make it live beside it.
+tab-clips/

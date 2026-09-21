@@ -316,7 +316,13 @@
       "showInFolder": "Klasörde göster",
       "postItTo": "Şuraya yükle",
       "dragItIn": "Birini aç ve dosyayı içine sürükle — Yames hiçbir şey yüklemez, hesap da istemez.",
-      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor."
+      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor.",
+      "underPicture": "Görüntünün altında",
+      "band": {
+        "tab": "Tab",
+        "marks": "Sadece işaretler",
+        "none": "Hiçbiri"
+      }
     },
     "compare": {
       "title": "{{bars}}. ölçüler, o zaman ve şimdi",

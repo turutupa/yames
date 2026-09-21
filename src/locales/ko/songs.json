@@ -316,7 +316,13 @@
       "showInFolder": "폴더에서 보기",
       "postItTo": "올릴 곳",
       "dragItIn": "하나를 열고 파일을 끌어다 놓으세요. Yames 는 아무것도 올리지 않고 계정도 필요 없습니다.",
-      "webmWarning": "하나를 열고 파일을 끌어다 놓으세요. 이건 WebM 이고 대부분은 MP4 만 받습니다. 무료 변환기로 바꿀 수 있습니다."
+      "webmWarning": "하나를 열고 파일을 끌어다 놓으세요. 이건 WebM 이고 대부분은 MP4 만 받습니다. 무료 변환기로 바꿀 수 있습니다.",
+      "underPicture": "영상 아래",
+      "band": {
+        "tab": "탭 악보",
+        "marks": "표시만",
+        "none": "없음"
+      }
     },
     "compare": {
       "title": "{{bars}}마디, 그때와 지금",

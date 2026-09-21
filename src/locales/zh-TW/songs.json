@@ -316,7 +316,13 @@
       "showInFolder": "在資料夾中顯示",
       "postItTo": "發到",
       "dragItIn": "打開一個，把檔案拖進去——Yames 不上傳任何東西，也不需要帳號。",
-      "webmWarning": "打開一個，把檔案拖進去。這個是 WebM，大多數地方只收 MP4，用免費轉換工具轉一下就行。"
+      "webmWarning": "打開一個，把檔案拖進去。這個是 WebM，大多數地方只收 MP4，用免費轉換工具轉一下就行。",
+      "underPicture": "畫面下方",
+      "band": {
+        "tab": "六線譜",
+        "marks": "只顯示標記",
+        "none": "不顯示"
+      }
     },
     "compare": {
       "title": "第 {{bars}} 小節，那時和現在",

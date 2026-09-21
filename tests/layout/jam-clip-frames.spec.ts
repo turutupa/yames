@@ -150,6 +150,12 @@ test.describe("the frames a jam clip is made of", () => {
                   face,
                 },
                 picture: source,
+                // Said separately from `picture`, because the recorder says it
+                // separately (W31): a frame painted before the video element
+                // is ready has no picture in it yet and must not be drawn as
+                // if the take had none, or the first second of every clip is
+                // a different composition from the rest of it.
+                hasPicture: picture,
                 strip: renderer,
                 windowMs: strip.jamWindowMs(shape2),
                 // Bar four of the blues, a hair past the bar line: the chord

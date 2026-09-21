@@ -316,7 +316,13 @@
       "showInFolder": "Im Ordner zeigen",
       "postItTo": "Hochladen bei",
       "dragItIn": "Öffne eine Seite und zieh die Datei hinein — Yames lädt nichts hoch und braucht kein Konto.",
-      "webmWarning": "Öffne eine Seite und zieh die Datei hinein. Diese ist eine WebM, und die meisten nehmen nur MP4 — ein kostenloser Konverter macht eine daraus."
+      "webmWarning": "Öffne eine Seite und zieh die Datei hinein. Diese ist eine WebM, und die meisten nehmen nur MP4 — ein kostenloser Konverter macht eine daraus.",
+      "underPicture": "Unter dem Bild",
+      "band": {
+        "tab": "Die Tabulatur",
+        "marks": "Nur die Markierungen",
+        "none": "Nichts"
+      }
     },
     "compare": {
       "title": "Takte {{bars}}, damals und heute",
