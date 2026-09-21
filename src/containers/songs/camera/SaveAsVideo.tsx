@@ -32,7 +32,18 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { clipSaveAppend, clipSaveBegin, clipSaveDiscard, clipSaveFinish } from "../../../ipc";
+import {
+  clipSaveAppend,
+  clipSaveBegin,
+  clipSaveDiscard,
+  clipSaveFinish,
+  openUrl,
+  revealInFolder,
+  storeLoad,
+  storeSave,
+} from "../../../ipc";
+import { CLIP_BRAND_KEY } from "../../../songs/camera/keys";
+import { placesFor, SHARE_PLACES } from "../../../songs/camera/share";
 import { clipSeconds, clipSpan } from "../../../songs/camera/clip";
 import type { ClipShape } from "../../../songs/camera/clip";
 import { recordClip } from "../../../songs/camera/clipRecorder";
@@ -162,6 +173,30 @@ export function SaveAsVideo({
   const [open, setOpen] = useState(false);
   const [shape, setShape] = useState<ClipShape>("wide");
   const [marks, setMarks] = useState(true);
+  /**
+   * The Yames mark, on by default and remembered (the owner, W25).
+   *
+   * Its own switch rather than a part of "show the marks": they answer
+   * different questions. One is whether a player wants their mistakes painted
+   * on something they are about to post; this is whether the clip says where
+   * it was made.
+   */
+  const [brand, setBrand] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    void storeLoad<boolean>(CLIP_BRAND_KEY)
+      .then((saved) => {
+        if (alive && saved === false) setBrand(false);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const chooseBrand = useCallback((next: boolean) => {
+    setBrand(next);
+    void storeSave(CLIP_BRAND_KEY, next).catch(() => {});
+  }, []);
   /** The chosen bars, or the whole attempt. Defaults to the selection. */
   const [wholeTake, setWholeTake] = useState(false);
   const [stage, setStage] = useState<Stage>({ kind: "idle" });
@@ -215,6 +250,7 @@ export function SaveAsVideo({
         canvas: canvasRef.current,
         shape,
         marks,
+        brand,
         span,
         // Through `mediaSrc` for the reason the review's own player is:
         // a path on this machine is not something a media element can load,
@@ -229,7 +265,9 @@ export function SaveAsVideo({
         range,
         tempoPercent,
         palette: readPalette(),
-        wordmark: "yames",
+        // Not translated and not a key: it is an address, and an address is
+        // the same in every language.
+        wordmark: "yames.app",
         words: { bar: t("songs.clip.bar"), bpm: t("songs.clip.bpmUnit") },
         mimeType: support.mimeType,
         sink: (seq, bytes) => clipSaveAppend(seq, bytes),
@@ -258,6 +296,7 @@ export function SaveAsVideo({
     title,
     shape,
     marks,
+    brand,
     span,
     mixSrc,
     videoSrc,
@@ -354,6 +393,9 @@ export function SaveAsVideo({
                 onClick={() => setShape(which)}
               >
                 {t(`songs.clip.${which}`)}
+                {/* Which places want this shape — a few words, beside the
+                    choice they belong to. Names of sites, not translated. */}
+                <span className="songs-clip-places">{placesFor(which)}</span>
               </button>
             ))}
           </div>
@@ -366,6 +408,17 @@ export function SaveAsVideo({
             onClick={() => setMarks((was) => !was)}
           >
             {t("songs.clip.withMarks")}
+          </button>
+
+          <button
+            type="button"
+            className="songs-chip"
+            data-active={brand ? "" : undefined}
+            aria-pressed={brand}
+            title={t("songs.clip.brandNote")}
+            onClick={() => chooseBrand(!brand)}
+          >
+            {t("songs.clip.brand")}
           </button>
 
           <button
@@ -384,10 +437,46 @@ export function SaveAsVideo({
         </div>
       )}
 
+      {/*
+       * It is saved, and now the player wants to put it somewhere.
+       *
+       * The folder first, because the first thing anybody needs is to find
+       * the file — then four links that open each site's own upload page in
+       * their own browser. **The app uploads nothing and calls no API**: it
+       * opens a tab, and the player drags in the file they just saved. That
+       * is the difference between a feature that needs somebody's password
+       * and one that cannot fail in a way that loses their clip.
+       */}
       {stage.kind === "saved" && (
-        <p className="songs-clip-note" role="status">
-          {t("songs.clip.saved", { where: stage.path })}
-        </p>
+        <div className="songs-clip-done" role="status">
+          <p className="songs-clip-note">{t("songs.clip.saved", { where: stage.path })}</p>
+          <div className="songs-clip-share">
+            <button
+              type="button"
+              className="songs-chip"
+              onClick={() => void revealInFolder(stage.path).catch(() => {})}
+            >
+              {t("songs.clip.showInFolder")}
+            </button>
+            <span className="songs-clip-share-lead">{t("songs.clip.postItTo")}</span>
+            {SHARE_PLACES.map((place) => (
+              <button
+                key={place.name}
+                type="button"
+                className="songs-chip songs-clip-place"
+                onClick={() => void openUrl(place.url).catch(() => {})}
+              >
+                {place.name}
+              </button>
+            ))}
+          </div>
+          {/* MP4 is what they all take, so a WebM is worth one sentence HERE
+              — where the player is about to try to post it — rather than
+              only up in the choices where they were not thinking about it. */}
+          <p className="songs-clip-note">
+            {stage.container === "mp4" ? t("songs.clip.dragItIn") : t("songs.clip.webmWarning")}
+          </p>
+        </div>
       )}
       {stage.kind === "failed" && (
         <p className="songs-clip-note songs-clip-failed" role="status">

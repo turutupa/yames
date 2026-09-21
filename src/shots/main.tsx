@@ -432,6 +432,10 @@ async function drive() {
             () => !!(window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__,
             120000,
           );
+          // The done state: where it went, and the places to put it.
+          await until("where it went", () => !!document.querySelector(".songs-clip-done"), 10000);
+          document.querySelector(".songs-clip-done")?.scrollIntoView({ block: "end" });
+          await new Promise((r) => requestAnimationFrame(r));
         }
       }
 

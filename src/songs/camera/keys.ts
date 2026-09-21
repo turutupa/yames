@@ -27,6 +27,18 @@ export const CAMERA_CORNER_KEY = "songs.cameraCorner";
 export const CAMERA_GUIDE_KEY = "songs.cameraGuideSeen";
 
 /**
+ * Whether a saved clip carries the Yames mark (W25, the owner's ask).
+ *
+ * ON by default and remembered, and its OWN switch rather than a part of the
+ * verdict marks: they answer different questions. "Show the marks" is about
+ * whether a player wants their mistakes painted on something they are about
+ * to post; this is about whether the clip says where it was made, which is
+ * the growth loop every shared clip is worth (`plans/ECHORA.md` D4) and not
+ * something to bury inside another control's meaning.
+ */
+export const CLIP_BRAND_KEY = "songs.clipBrand";
+
+/**
  * The nudge, per camera.
  *
  * Per camera and not per take: the thing being corrected is the camera's own

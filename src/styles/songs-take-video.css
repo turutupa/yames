@@ -334,6 +334,38 @@
   margin-right: -10px;
 }
 
+/* "Instagram, TikTok" under "Tall": which places want this shape. A second
+   line inside the chip rather than a row of its own, so the hint belongs to
+   the choice it is about and costs the panel no height. */
+.songs-clip-places:not(:empty) {
+  display: block;
+  margin-top: 1px;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+}
+
+.songs-clip-done {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.songs-clip-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.songs-clip-share-lead {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-left: 6px;
+}
+
 .songs-clip-note {
   margin: 0;
   flex: 1 1 100%;

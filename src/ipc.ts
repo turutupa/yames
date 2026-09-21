@@ -2217,6 +2217,17 @@ export async function clipSaveDiscard(): Promise<void> {
 }
 
 /**
+ * Show a file the player just saved, in their own file manager.
+ *
+ * The first thing somebody who has made a clip needs is to find it. Nothing
+ * is opened, played or sent anywhere: the folder is shown and the app is
+ * finished with the file.
+ */
+export async function revealInFolder(path: string): Promise<void> {
+  return invoke("reveal_in_folder", { path });
+}
+
+/**
  * Ask the user for a folder of drum samples (a native folder dialog). Resolves
  * to the folder path, or null when they cancel. The folder is read on this
  * machine and never copied or uploaded.

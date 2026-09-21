@@ -60,7 +60,16 @@ export type ClipLayout = {
   strip: ClipBox;
   /** Bar, section and tempo, under the strip. */
   caption: ClipBox;
-  /** The Yames mark. */
+  /**
+   * The Yames mark — the tile, the word and the panel behind them.
+   *
+   * In the TOP-RIGHT of the picture, which is the one corner nothing else
+   * uses: the excerpt runs the width of the frame along the bottom and the
+   * bar/section/tempo readout is under it on the left. It is over the picture
+   * rather than under it because that is where a mark on a shared clip
+   * belongs — the bottom of a phone screen is where the caption, the play bar
+   * and somebody's thumb are.
+   */
   mark: ClipBox;
   /** Type sizes for this shape, so the two are proportionate rather than equal. */
   type: { caption: number; section: number; mark: number };
@@ -102,18 +111,41 @@ export function clipLayout(shape: ClipShape): ClipLayout {
       width: width - pad * 2,
       height: captionHeight,
     },
-    mark: {
-      x: width - pad - 120,
-      y: height - captionHeight - pad,
-      width: 120,
-      height: captionHeight,
-    },
+    mark: markBox(shape, width, pad),
     type: {
       caption: shape === "tall" ? 30 : 26,
       section: shape === "tall" ? 20 : 18,
-      mark: shape === "tall" ? 22 : 20,
+      mark: markType(shape),
     },
   };
+}
+
+/**
+ * How big the word "yames.app" is on the mark.
+ *
+ * Big enough to read on a phone, which is the whole requirement and the
+ * reason it is not a twelve-pixel ghost: a 1280-wide clip viewed in a feed on
+ * a 400-point screen is scaled to about a third, so twenty-eight pixels here
+ * is nine there — about the size of a caption, which is legible and is as far
+ * as a mark should go.
+ */
+function markType(shape: ClipShape): number {
+  return shape === "tall" ? 30 : 28;
+}
+
+/** The panel the tile and the word sit on, in the top right of the picture. */
+function markBox(shape: ClipShape, width: number, pad: number): ClipBox {
+  const type = markType(shape);
+  const tile = Math.round(type * 1.25);
+  const inset = Math.round(type * 0.42);
+  // The word, measured the way a canvas will lay it out — roughly 0.52 of the
+  // type size per character for a system sans at this weight. It is a layout
+  // BOX and not the drawing, so an estimate that is a few pixels wide only
+  // makes the backing a few pixels wider than it needed to be.
+  const word = Math.round(type * 0.52 * "yames.app".length);
+  const boxWidth = inset * 2 + tile + Math.round(type * 0.4) + word;
+  const boxHeight = inset * 2 + Math.max(tile, Math.round(type * 1.1));
+  return { x: width - pad - boxWidth, y: pad, width: boxWidth, height: boxHeight };
 }
 
 /**

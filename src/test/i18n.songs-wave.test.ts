@@ -321,6 +321,16 @@ const ADDED_BY_THE_SONGS_WAVE = [
   // two languages, for no gain to anybody reading it.
   "songs.clip.bar",
   "songs.clip.bpmUnit",
+  // ...and the owner's second pass on it: the mark is the app's own, said in
+  // words, and after a save the player gets the folder and four places to
+  // put it. The place NAMES are not keys — they are proper nouns and live in
+  // `songs/camera/share.ts`.
+  "songs.clip.brand",
+  "songs.clip.brandNote",
+  "songs.clip.dragItIn",
+  "songs.clip.postItTo",
+  "songs.clip.showInFolder",
+  "songs.clip.webmWarning",
   "songs.clip.cancel",
   "songs.clip.chosenBars",
   "songs.clip.failed",

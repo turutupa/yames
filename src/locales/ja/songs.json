@@ -302,7 +302,13 @@
       "failed": "動画を作れませんでした。何も保存していません。",
       "unavailable": "このバージョンでは動画を保存できません。",
       "bar": "小節",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Yames のマーク",
+      "brandNote": "隅に小さな Yames のロゴと yames.app。動画を見た人がアプリにたどり着く道です。",
+      "showInFolder": "フォルダーで表示",
+      "postItTo": "投稿先",
+      "dragItIn": "どれかを開いてファイルをドラッグしてください。Yames は何もアップロードせず、アカウントも要りません。",
+      "webmWarning": "どれかを開いてファイルをドラッグしてください。これは WebM で、ほとんどは MP4 しか受け付けません。無料の変換ソフトで MP4 にできます。"
     },
     "compare": {
       "title": "{{bars}}小節、あの頃と今",

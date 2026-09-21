@@ -311,7 +311,13 @@
       "failed": "La vidéo n'a pas pu être créée. Rien n'a été enregistré.",
       "unavailable": "Cette version ne peut pas enregistrer de vidéo.",
       "bar": "Mesure",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Marque Yames",
+      "brandNote": "Un petit logo Yames et yames.app dans le coin. C'est ainsi que celui qui voit votre vidéo trouve l'appli.",
+      "showInFolder": "Afficher dans le dossier",
+      "postItTo": "Publier sur",
+      "dragItIn": "Ouvrez-en un et glissez le fichier dedans — Yames n'envoie rien et ne demande aucun compte.",
+      "webmWarning": "Ouvrez-en un et glissez le fichier dedans. Celui-ci est un WebM, et la plupart n'acceptent que le MP4 ; un convertisseur gratuit s'en charge."
     },
     "compare": {
       "title": "Mesures {{bars}}, avant et maintenant",

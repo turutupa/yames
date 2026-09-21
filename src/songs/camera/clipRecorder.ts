@@ -87,7 +87,9 @@ export type ClipFrameState = {
   nowMs: number;
   /** Whether the verdict is painted on the excerpt at all. */
   marks: boolean;
-  /** What the small mark in the corner says. */
+  /** Whether the Yames mark is on the clip at all. Its own switch. */
+  brand: boolean;
+  /** What the mark says beside the tile. Not translated: it is an address. */
   wordmark: string;
   /** "Bar" and the tempo unit, translated by the caller. */
   words: { bar: string; bpm: string };
@@ -110,7 +112,116 @@ export function paintClipFrame(ctx: CanvasRenderingContext2D, state: ClipFrameSt
   paintPicture(ctx, state);
   paintStrip(ctx, state);
   paintCaption(ctx, state);
+  if (state.brand) paintMark(ctx, state);
   ctx.restore();
+}
+
+/**
+ * The Yames mark: the real one, big enough to read on a phone.
+ *
+ * The owner asked for this by name, and every part of it is a decision:
+ *
+ * * **The app's own ember**, not a word in the accent colour — the amber tile
+ *   with the Y knocked through it in ink, the same geometry
+ *   `components/AppMark.tsx` draws and `docs/favicon.svg` carries. A clip
+ *   that goes out with the brand on it has to carry the brand, and the ember
+ *   is the thing people will recognise on a second one.
+ * * **"yames.app" beside it**, because a logo nobody can type is a logo that
+ *   sends nobody anywhere. Not translated: it is an address.
+ * * **On a soft backing.** The mark sits over the picture, and the picture is
+ *   whatever the room was — a white wall or a dark studio. A translucent
+ *   rounded panel means the same mark is legible over both, which a plain
+ *   drawing over live video is not.
+ * * **Top right.** The excerpt runs the width of the frame along the bottom
+ *   and the bar/section/tempo readout is under it on the left. The bottom of
+ *   a phone screen is also where the caption, the play bar and a thumb are.
+ */
+function paintMark(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
+  const { layout, wordmark } = state;
+  const box = layout.mark;
+  const type = layout.type.mark;
+  const inset = Math.round(type * 0.42);
+  const tile = Math.round(type * 1.25);
+
+  ctx.save();
+
+  // The backing. Dark and translucent rather than the theme's own card: the
+  // clip may be watched anywhere, and what it has to survive is the picture
+  // behind it rather than the app it was made in.
+  roundedPath(ctx, box.x, box.y, box.width, box.height, Math.round(box.height * 0.34));
+  ctx.fillStyle = "rgba(11, 10, 20, 0.55)";
+  ctx.fill();
+
+  // The ember tile: the gradient and the 15/64 corner radius of the real
+  // mark, scaled. `AppMark.tsx` is the original and its header explains that
+  // the geometry is copied by hand in three places already; this is a fourth,
+  // on a canvas, and `clip.test.ts` pins the proportions rather than the
+  // pixels.
+  const tileX = box.x + inset;
+  const tileY = box.y + Math.round((box.height - tile) / 2);
+  const gradient = ctx.createLinearGradient(
+    tileX + tile * (6 / 64),
+    tileY,
+    tileX + tile * (58 / 64),
+    tileY + tile,
+  );
+  gradient.addColorStop(0, "#FFC24D");
+  gradient.addColorStop(1, "#E8760C");
+  roundedPath(ctx, tileX, tileY, tile, tile, tile * (15 / 64));
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // The Y, knocked through in ink — the fork is the metronome's swing and
+  // the stem is the rod, which is why it is two strokes and not a glyph.
+  const at = (x: number, y: number) => [tileX + (x / 64) * tile, tileY + (y / 64) * tile] as const;
+  ctx.strokeStyle = "#0B0A14";
+  ctx.lineWidth = (8 / 64) * tile;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(...at(18, 17));
+  ctx.lineTo(...at(32, 37));
+  ctx.lineTo(...at(46, 17));
+  ctx.moveTo(...at(32, 37));
+  ctx.lineTo(...at(32, 48));
+  ctx.stroke();
+
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = `600 ${type}px system-ui, sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(wordmark, tileX + tile + Math.round(type * 0.4), box.y + box.height / 2 + 1);
+
+  ctx.restore();
+}
+
+/**
+ * A rounded rectangle, by hand.
+ *
+ * `roundRect` is on every webview this app ships on except the oldest
+ * WebKitGTK builds, and a clip that threw on one of those would be a clip
+ * that could not be made at all rather than one drawn with square corners.
+ */
+function roundedPath(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+): void {
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.arcTo(x + width, y, x + width, y + r, r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.arcTo(x + width, y + height, x + width - r, y + height, r);
+  ctx.lineTo(x + r, y + height);
+  ctx.arcTo(x, y + height, x, y + height - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
 }
 
 /**
@@ -228,7 +339,7 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
 
 /** Bar, section, tempo — and the mark that is the whole point of the clip. */
 function paintCaption(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, tape, score, range, tempoPercent, nowMs, words, wordmark } = state;
+  const { layout, palette, tape, score, range, tempoPercent, nowMs, words } = state;
   const box = layout.caption;
   const caption = captionAt(tape, score, range, tempoPercent, nowMs);
 
@@ -249,13 +360,6 @@ function paintCaption(ctx: CanvasRenderingContext2D, state: ClipFrameState): voi
     .filter(Boolean)
     .join("  ·  ");
   ctx.fillText(rest, box.x + barWidth + 16, middle + 1);
-
-  // The mark. Small, quiet and always there: every clip anybody shares says
-  // where it was made, which is the whole of the growth loop D4 is about.
-  ctx.textAlign = "right";
-  ctx.fillStyle = palette.accent;
-  ctx.font = `600 ${layout.type.mark}px system-ui, sans-serif`;
-  ctx.fillText(wordmark, layout.mark.x + layout.mark.width, middle);
   ctx.restore();
 }
 
@@ -285,6 +389,8 @@ export type RecordClipOptions = {
   canvas: HTMLCanvasElement;
   shape: ClipShape;
   marks: boolean;
+  /** The Yames mark, on or off. Its own switch (the owner, W25). */
+  brand: boolean;
   /** The stretch of the take, in transport milliseconds. */
   span: { startMs: number; endMs: number };
   /** The take's mix, as a media element will load it. */
@@ -333,6 +439,7 @@ export function recordClip(options: RecordClipOptions): ClipRun {
     canvas,
     shape,
     marks,
+    brand,
     span,
     mixSrc,
     videoSrc,
@@ -433,6 +540,7 @@ export function recordClip(options: RecordClipOptions): ClipRun {
         windowMs,
         nowMs,
         marks,
+        brand,
         wordmark,
         words,
       });

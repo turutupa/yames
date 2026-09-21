@@ -311,7 +311,13 @@
       "failed": "Non è stato possibile creare il video. Non è stato salvato nulla.",
       "unavailable": "Questa versione non può salvare un video.",
       "bar": "Battuta",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Marchio Yames",
+      "brandNote": "Un piccolo logo Yames e yames.app nell'angolo. È così che chi vede il tuo video trova l'app.",
+      "showInFolder": "Mostra nella cartella",
+      "postItTo": "Pubblica su",
+      "dragItIn": "Aprine uno e trascina dentro il file — Yames non carica nulla e non chiede alcun account.",
+      "webmWarning": "Aprine uno e trascina dentro il file. Questo è un WebM e quasi tutti accettano solo MP4; un convertitore gratuito lo trasforma."
     },
     "compare": {
       "title": "Battute {{bars}}, prima e adesso",

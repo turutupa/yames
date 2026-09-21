@@ -302,7 +302,13 @@
       "failed": "De video kon niet gemaakt worden. Er is niets opgeslagen.",
       "unavailable": "Deze versie kan geen video opslaan.",
       "bar": "Maat",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Yames-merk",
+      "brandNote": "Een klein Yames-logo en yames.app in de hoek. Zo vindt wie je video ziet de app.",
+      "showInFolder": "Toon in map",
+      "postItTo": "Plaatsen op",
+      "dragItIn": "Open er een en sleep het bestand erin — Yames uploadt niets en heeft geen account nodig.",
+      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van."
     },
     "compare": {
       "title": "Maten {{bars}}, toen en nu",

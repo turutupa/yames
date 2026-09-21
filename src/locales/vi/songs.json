@@ -302,7 +302,13 @@
       "failed": "Không tạo được video. Chưa lưu gì cả.",
       "unavailable": "Bản này không lưu được video.",
       "bar": "Ô nhịp",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Dấu Yames",
+      "brandNote": "Một logo Yames nhỏ và yames.app ở góc. Người xem video của bạn tìm ra ứng dụng nhờ nó.",
+      "showInFolder": "Mở thư mục chứa",
+      "postItTo": "Đăng lên",
+      "dragItIn": "Mở một nơi rồi kéo tệp vào — Yames không tải gì lên và không cần tài khoản.",
+      "webmWarning": "Mở một nơi rồi kéo tệp vào. Đây là tệp WebM, mà phần lớn chỉ nhận MP4 — một trình chuyển đổi miễn phí là xong."
     },
     "compare": {
       "title": "Ô nhịp {{bars}}, hồi đó và bây giờ",

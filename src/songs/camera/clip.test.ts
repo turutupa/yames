@@ -132,6 +132,44 @@ describe("the clip's shape", () => {
     }
   });
 
+  /**
+   * The Yames mark is a marketing asset, so it is measured like one.
+   *
+   * The owner asked for the real logo plus "yames.app", legible on a phone —
+   * "not a faint 12 px ghost" — in a corner nothing else uses. Every one of
+   * those is a fact about the LAYOUT, which is what this file is for; what
+   * it looks like is checked by making a clip and extracting a frame.
+   */
+  it("gives the mark a corner of its own, at a size a phone can read", () => {
+    for (const shape of ["wide", "tall"] as const) {
+      const layout = clipLayout(shape);
+      const size = clipSize(shape);
+
+      // Legible: a 1280-wide clip in a phone feed is scaled to about a
+      // third, so anything under about 24 here is under 8 there.
+      expect(layout.type.mark, `${shape}: the mark's type is too small`).toBeGreaterThanOrEqual(24);
+
+      // In the picture, at the top, and hard against the right edge.
+      expect(layout.mark.y, `${shape}: the mark is not at the top`).toBeLessThan(
+        layout.picture.height / 4,
+      );
+      expect(
+        layout.mark.x + layout.mark.width,
+        `${shape}: the mark runs off the right`,
+      ).toBeLessThanOrEqual(size.width);
+      expect(layout.mark.x, `${shape}: the mark is not on the right`).toBeGreaterThan(
+        size.width / 2,
+      );
+
+      // And clear of the two things that ARE drawn: the excerpt runs the
+      // width of the frame along the bottom, and the caption is under it.
+      expect(
+        layout.mark.y + layout.mark.height,
+        `${shape}: the mark is over the excerpt`,
+      ).toBeLessThan(layout.strip.y);
+    }
+  });
+
   it("does not let the strip and the caption overlap", () => {
     for (const shape of ["wide", "tall"] as const) {
       const layout = clipLayout(shape);

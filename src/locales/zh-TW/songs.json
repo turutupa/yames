@@ -302,7 +302,13 @@
       "failed": "影片沒能做出來。什麼都沒有儲存。",
       "unavailable": "這個版本無法儲存影片。",
       "bar": "小節",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Yames 標記",
+      "brandNote": "角落一個小小的 Yames 標誌和 yames.app。看到你影片的人就是這樣找到這個應用程式的。",
+      "showInFolder": "在資料夾中顯示",
+      "postItTo": "發到",
+      "dragItIn": "打開一個，把檔案拖進去——Yames 不上傳任何東西，也不需要帳號。",
+      "webmWarning": "打開一個，把檔案拖進去。這個是 WebM，大多數地方只收 MP4，用免費轉換工具轉一下就行。"
     },
     "compare": {
       "title": "第 {{bars}} 小節，那時和現在",

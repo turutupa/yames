@@ -320,7 +320,13 @@
       "failed": "Nie udało się utworzyć wideo. Nic nie zostało zapisane.",
       "unavailable": "Ta wersja nie potrafi zapisać wideo.",
       "bar": "Takt",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Znak Yames",
+      "brandNote": "Małe logo Yames i yames.app w rogu. Tak trafia do aplikacji każdy, kto zobaczy twoje wideo.",
+      "showInFolder": "Pokaż w folderze",
+      "postItTo": "Wrzuć na",
+      "dragItIn": "Otwórz jedno i przeciągnij plik — Yames nic nie wysyła i nie potrzebuje konta.",
+      "webmWarning": "Otwórz jedno i przeciągnij plik. To jest WebM, a większość przyjmuje tylko MP4 — darmowy konwerter to załatwi."
     },
     "compare": {
       "title": "Takty {{bars}}, kiedyś i teraz",

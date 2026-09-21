@@ -311,7 +311,13 @@
       "failed": "No se pudo crear el vídeo. No se guardó nada.",
       "unavailable": "Esta versión no puede guardar un vídeo.",
       "bar": "Compás",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Marca de Yames",
+      "brandNote": "Un pequeño logo de Yames y yames.app en la esquina. Así encuentra la app quien vea tu vídeo.",
+      "showInFolder": "Mostrar en la carpeta",
+      "postItTo": "Publicar en",
+      "dragItIn": "Abre una y arrastra el archivo — Yames no sube nada y no necesita cuenta.",
+      "webmWarning": "Abre una y arrastra el archivo. Este es un WebM y casi todas admiten solo MP4; un conversor gratuito lo convierte."
     },
     "compare": {
       "title": "Compases {{bars}}, antes y ahora",

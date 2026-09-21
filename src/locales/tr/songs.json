@@ -302,7 +302,13 @@
       "failed": "Video oluşturulamadı. Hiçbir şey kaydedilmedi.",
       "unavailable": "Bu sürüm video kaydedemiyor.",
       "bar": "Ölçü",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Yames işareti",
+      "brandNote": "Köşede küçük bir Yames logosu ve yames.app. Videonu gören biri uygulamayı böyle buluyor.",
+      "showInFolder": "Klasörde göster",
+      "postItTo": "Şuraya yükle",
+      "dragItIn": "Birini aç ve dosyayı içine sürükle — Yames hiçbir şey yüklemez, hesap da istemez.",
+      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor."
     },
     "compare": {
       "title": "{{bars}}. ölçüler, o zaman ve şimdi",

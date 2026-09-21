@@ -358,6 +358,35 @@ test.describe("the clip you can send somebody", () => {
       "the clip's audio track is silent — the mix never reached the recorder",
     ).toBeGreaterThan(0.01);
   });
+
+  /**
+   * ...and once it is saved, the player is told where it went and given
+   * somewhere to put it (the owner's second pass on item 2).
+   *
+   * The links are checked to be the SITES' OWN upload pages and nothing
+   * else: the whole design is that Yames opens a tab and the player drags
+   * the file in, so a link that pointed anywhere but outwards would be the
+   * feature quietly becoming an integration.
+   */
+  test("says where the clip went and offers somewhere to put it", async ({ page }) => {
+    await openShot(page, "songs-clip-make", { width: 1400, height: 900 });
+    await expect(page.locator(".songs-clip-done")).toHaveCount(1);
+    await expect(page.locator(".songs-clip-share .songs-clip-place")).toHaveCount(4);
+    if (IN_ENGLISH) {
+      await expect(page.locator(".songs-clip-share").first()).toContainText("Show in folder");
+      for (const name of ["Instagram", "TikTok", "YouTube", "X"]) {
+        await expect(page.getByRole("button", { name, exact: true })).toHaveCount(1);
+      }
+    }
+    // Nothing off the right edge of the panel.
+    const panel = await page.locator(".songs-clip").boundingBox();
+    const chips = await page.$$eval(".songs-clip-share button", (nodes) =>
+      nodes.map((n) => n.getBoundingClientRect().right),
+    );
+    for (const right of chips) {
+      expect(right).toBeLessThanOrEqual(panel!.x + panel!.width + 1);
+    }
+  });
 });
 
 /**

@@ -302,7 +302,13 @@
       "failed": "Das Video ließ sich nicht erstellen. Es wurde nichts gespeichert.",
       "unavailable": "Diese Version kann kein Video speichern.",
       "bar": "Takt",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Yames-Zeichen",
+      "brandNote": "Ein kleines Yames-Logo und yames.app in der Ecke. So findet jeder, der dein Video sieht, die App.",
+      "showInFolder": "Im Ordner zeigen",
+      "postItTo": "Hochladen bei",
+      "dragItIn": "Öffne eine Seite und zieh die Datei hinein — Yames lädt nichts hoch und braucht kein Konto.",
+      "webmWarning": "Öffne eine Seite und zieh die Datei hinein. Diese ist eine WebM, und die meisten nehmen nur MP4 — ein kostenloser Konverter macht eine daraus."
     },
     "compare": {
       "title": "Takte {{bars}}, damals und heute",

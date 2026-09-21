@@ -311,7 +311,13 @@
       "failed": "Não deu para criar o vídeo. Nada foi salvo.",
       "unavailable": "Esta versão não consegue salvar um vídeo.",
       "bar": "Compasso",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Marca do Yames",
+      "brandNote": "Um pequeno logo do Yames e yames.app no canto. É assim que quem vê seu vídeo chega ao app.",
+      "showInFolder": "Mostrar na pasta",
+      "postItTo": "Publicar em",
+      "dragItIn": "Abra um e arraste o arquivo — o Yames não envia nada e não pede conta.",
+      "webmWarning": "Abra um e arraste o arquivo. Este é um WebM e a maioria só aceita MP4 — um conversor gratuito resolve."
     },
     "compare": {
       "title": "Compassos {{bars}}, antes e agora",

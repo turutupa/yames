@@ -145,7 +145,7 @@ use commands::{
     clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
     // W12 — the bands the review colours a note by, from the scorer's own rule.
     score_timing_bands,
-    open_url, reorder_presets, save_drill_run, save_preset, save_session,
+    open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
     set_instrument,
@@ -800,6 +800,8 @@ pub fn run() {
             clear_calibration_cache_entry,
             list_calibration_cache,
             open_url,
+            // W25 — "show me where that clip went", after a save.
+            reveal_in_folder,
             list_midi_devices,
             connect_midi_device,
             disconnect_midi_device,

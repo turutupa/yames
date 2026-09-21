@@ -302,7 +302,13 @@
       "failed": "That video could not be made. Nothing was saved.",
       "unavailable": "This version cannot save a video.",
       "bar": "Bar",
-      "bpmUnit": "BPM"
+      "bpmUnit": "BPM",
+      "brand": "Yames mark",
+      "brandNote": "A small Yames logo and yames.app in the corner. It is how anybody who sees your clip finds the app.",
+      "showInFolder": "Show in folder",
+      "postItTo": "Post it to",
+      "dragItIn": "Open one and drag the file in — Yames uploads nothing and needs no account.",
+      "webmWarning": "Open one and drag the file in. This one is a WebM, and most of these take MP4 only — a free converter will turn it into one."
     },
     "compare": {
       "title": "Bars {{bars}}, then and now",
