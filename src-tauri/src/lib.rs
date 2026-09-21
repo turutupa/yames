@@ -247,10 +247,12 @@ pub fn run() {
     #[cfg(all(desktop, not(target_os = "macos")))]
     let builder = builder.plugin(tauri_plugin_decorum::init());
 
-    // The phone's own half: the foreground service that keeps the click going
-    // with the screen off, audio focus, the wake lock, the Back gesture and
-    // `open_url`. Android only until M06 writes the Swift side.
-    #[cfg(target_os = "android")]
+    // The phone's own half: on Android the foreground service that keeps the
+    // click going with the screen off, audio focus, the wake lock and the Back
+    // gesture; on iPhone the audio session that does the same job, the
+    // idle-timer hold and the interruption notifications. Plus `open_url` on
+    // both, because there is no process to spawn on a phone.
+    #[cfg(mobile)]
     let builder = builder.plugin(tauri_plugin_yames_mobile::init());
 
     let builder = builder.setup(move |app| {

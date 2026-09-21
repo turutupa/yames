@@ -3,7 +3,7 @@ name = "tauri-plugin-yames-mobile"
 version = "0.1.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
-description = "The five things Yames needs from Android that a webview cannot do: keep playing with the screen off, yield to a phone call, keep the screen awake, answer the Back gesture, and open a link."
+description = "The five things Yames needs from a phone that a webview cannot do: keep playing with the screen off, yield to a phone call, keep the screen awake, answer the Back gesture, and open a link."
 # `tauri-plugin`'s build helper refuses to run without this, and the Tauri CLI
 # reads the `android_library_path` this package's build script prints under it
 # to find `android/` and add it to the gradle build.

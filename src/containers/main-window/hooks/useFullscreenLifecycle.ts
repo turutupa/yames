@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getActiveTab } from "../../../ipc";
 import { onFullscreenChanged } from "../../../ipc.desktop";
 import { FULLSCREEN_EXIT_DELAY } from "../../../hotkeys";
-import { IS_MOBILE } from "../../../platform";
+import {
+  DEBUG_SCREEN_ZEN,
+  IS_MOBILE,
+  MOBILE_DEBUG_SCREENS,
+} from "../../../platform";
 import type { MainView } from "../MainHeader";
 
 /**
@@ -70,6 +75,16 @@ export function useFullscreenLifecycle({
   const [isOsFullscreen, setIsOsFullscreen] = useState(false);
   const wasOsFullscreen = useRef(false);
   const prevFullscreen = useRef(false);
+
+  // Zen is not a tab and is not persisted, so the screenshot job cannot get a
+  // picture of it the way it gets the other four — see `MOBILE_DEBUG_SCREENS`.
+  // `false` in every build but that job, which folds this away entirely.
+  useEffect(() => {
+    if (!MOBILE_DEBUG_SCREENS) return;
+    getActiveTab().then((tab) => {
+      if (tab === DEBUG_SCREEN_ZEN) setIsFullscreen(true);
+    });
+  }, []);
 
   // 1. Listen for fullscreen changes from Rust (global shortcut)
   useEffect(() => {
