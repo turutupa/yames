@@ -24,7 +24,7 @@ mkdir -p "$OUT"
 
 APP="${SIM_APP:-}"
 if [ -z "$APP" ]; then
-  APP=$(find src-tauri/gen/apple/build -name '*.app' -type d -maxdepth 4 -print | sort | head -1)
+  APP=$(find src-tauri/gen/apple/build -maxdepth 4 -name '*.app' -type d -print | sort | head -1)
 fi
 test -n "$APP" || { echo "::error::no .app to install"; exit 1; }
 echo "==> app: $APP"

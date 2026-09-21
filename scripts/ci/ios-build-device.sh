@@ -19,23 +19,24 @@ test -n "$PROJECT" || { echo "::error::no .xcodeproj under src-tauri/gen/apple";
 echo "==> project: $PROJECT"
 
 # The scheme and configuration names come out of the project rather than being
-# hardcoded: they are cargo-mobile2's, not a promise.
-SCHEME=$(xcodebuild -project "$PROJECT" -list -json \
-  | python3 -c "
-import json,sys
-p = json.load(sys.stdin)['project']
-schemes = p['schemes']
+# hardcoded: they are cargo-mobile2's, not a promise. `-list -json` puts
+# warnings ahead of the JSON often enough that the payload has to be found
+# rather than parsed from the first byte.
+LIST=$(xcodebuild -project "$PROJECT" -list -json 2>/dev/null || true)
+read -r SCHEME CONFIG <<EOF
+$(printf '%s' "$LIST" | python3 -c "
+import json, sys
+text = sys.stdin.read()
+start = text.find('{')
+p = json.loads(text[start:])['project']
+schemes = p.get('schemes') or ['']
 ios = [s for s in schemes if s.endswith('_iOS')]
-print((ios or schemes)[0])")
-CONFIG=$(xcodebuild -project "$PROJECT" -list -json \
-  | python3 -c "
-import json,sys
-c = json.load(sys.stdin)['project']['configurations']
-for want in ('release', 'Release'):
-    if want in c:
-        print(want); break
-else:
-    print(c[-1])")
+configs = p.get('configurations') or ['release']
+config = next((c for c in ('release', 'Release') if c in configs), configs[-1])
+print((ios or schemes)[0], config)
+")
+EOF
+test -n "$SCHEME" || { echo "::error::could not read a scheme out of $PROJECT"; printf '%s\n' "$LIST"; exit 1; }
 echo "==> scheme: $SCHEME, configuration: $CONFIG"
 
 ARCHIVE="$PWD/build/ios-device.xcarchive"
