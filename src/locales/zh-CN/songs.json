@@ -354,6 +354,8 @@
       "notationNote": "在六线谱上方也显示五线谱",
       "bigger": "放大",
       "smaller": "缩小"
-    }
+    },
+    "clickChip": "滴答",
+    "clickNote": "跟着曲子打拍子。文件自带伴奏时默认关闭。"
   }
 }

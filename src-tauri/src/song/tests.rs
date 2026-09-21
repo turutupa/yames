@@ -419,10 +419,12 @@ fn a_note_outside_a_banks_range_comes_back_in_octaves() {
 fn a_mix_is_clamped_and_never_nan() {
     let g = SongMix {
         click: 9.0,
+        count_in: f32::NAN,
         tracks: vec![-1.0, f32::NAN, 0.5],
     }
     .gains();
     assert_eq!(g.click, MIX_MAX);
+    assert_eq!(g.count_in, 1.0, "a NaN count-in is a count-in at unity");
     assert_eq!(g.track(0), MIX_MIN);
     assert_eq!(g.track(1), 1.0, "a NaN fader is a fader at unity");
     assert_eq!(g.track(2), 0.5);
@@ -442,6 +444,65 @@ fn the_default_mix_leaves_the_band_alone_and_the_click_under_it() {
     assert!(
         g.click < 1.0 && g.click > 0.0,
         "the click is a reference over a song, not the loudest thing in it"
+    );
+    assert_eq!(g.count_in, g.click, "a count-in you cannot hear is not one");
+}
+
+/// The count-in has a dial of its own, and it is not the click's (W34 item 7).
+///
+/// Songs turns the click off by default over a song that has parts of its own
+/// — the owner's click sound is a kit, so a click ticking through every bar is
+/// a drummer playing along — and the count-in is the one thing that cannot go
+/// off with it, because it is how you know when to come in.
+#[test]
+fn the_count_in_still_sounds_when_the_click_is_off() {
+    let g = SongMix {
+        click: 0.0,
+        count_in: 0.45,
+        tracks: vec![1.0],
+    }
+    .gains();
+    assert_eq!(g.click, 0.0, "the click through the piece is off");
+    assert_eq!(g.count_in, 0.45, "the count-in still counts you in");
+}
+
+/// A file with no drums in it puts no drum in the band (W34 item 7).
+///
+/// The owner's report — *"is the drums playing by default? i've played tabs
+/// with no drums and it still plays them"* — had two candidates, and the one
+/// that turned out to be it is the CLICK, whose sound on his machine is a kit.
+/// This is the other one, asked directly of the compiled table rather than
+/// reasoned about: only a track the importer called `Drums` can put a note on
+/// the drum lane, and a guitar cannot become one by being loud.
+#[test]
+fn a_song_with_no_percussion_track_compiles_no_drum() {
+    let t = twelve_bar();
+    let backing = guitar_track();
+    assert!(
+        backing.tracks.iter().all(|track| track.role != SongRole::Drums),
+        "the fixture is a guitar, and a guitar is not a drum"
+    );
+    let table = crate::song::compile(&t, Some(&backing), bare_sounds(), 48_000, 1)
+        .expect("the song compiles");
+    assert!(table.played_notes > 0, "the guitar plays");
+    // The sampled band — the kit, the bass and the keys — has nothing on the
+    // drum lane. (The guitar itself is on the synthesiser, which has no drums
+    // to reach for at all: `SongRole::Synth` never touches `drum_slot`.)
+    assert!(
+        table.band().iter().all(|e| e.lane != SongLane::Drums),
+        "a file with no percussion track put a note on the drum lane"
+    );
+}
+
+/// And a webview that has never heard of the field still gets a count-in.
+#[test]
+fn a_mix_without_a_count_in_counts_at_the_click_s_usual_level() {
+    let mix: SongMix = serde_json::from_str(r#"{"click":0.0,"tracks":[1.0]}"#)
+        .expect("an older mix still deserialises");
+    assert_eq!(
+        mix.gains().count_in,
+        SongMixGains::default().click,
+        "a missing countIn is the click's usual level, not silence"
     );
 }
 

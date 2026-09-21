@@ -6826,7 +6826,16 @@ impl MetronomeEngine {
                                             t,
                                             level,
                                             cached.kit,
-                                            cached.volume * cached.song_mix.click,
+                                            // The COUNT-IN's own dial, not the
+                                            // click's (W34 item 7). Songs
+                                            // turns the click off by default
+                                            // over a song with a band — a
+                                            // click whose sound is a kit is a
+                                            // drummer playing along — and the
+                                            // count is the one thing that
+                                            // cannot go with it, because it is
+                                            // how you know when to come in.
+                                            cached.volume * cached.song_mix.count_in,
                                         );
                                         let notif = song_notification(
                                             t,
@@ -12731,6 +12740,7 @@ mod tests {
         let full = SongMixGains::default();
         let off = crate::song::SongMix {
             click: 1.0,
+            count_in: 1.0,
             tracks: vec![0.0, 0.0, 0.0],
         }
         .gains();

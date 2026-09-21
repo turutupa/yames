@@ -13,6 +13,7 @@ vi.mock("../ipc", () => ({
 }));
 
 import {
+  clickOn,
   DEFAULT_MIX_SETTING,
   engineMix,
   forgetMixSetting,
@@ -37,11 +38,51 @@ const BAND: SongBackingTrack[] = [
 beforeEach(() => store.clear());
 
 describe("what the engine is sent", () => {
-  it("starts with the click under the band, which is the engine's own number", () => {
+  /**
+   * The click is off over a song that has a band, and on over one that has
+   * none (W34 item 7).
+   *
+   * The owner: *"is the drums playing by default? i've played tabs with no
+   * drums and it still plays them"*. His click's sound is a kit, so a click
+   * ticking through every bar of a song with its own drums IS a drummer
+   * playing along. The song keeps the time, as it does in every tab player.
+   */
+  it("leaves the click off over a song that brings its own band", () => {
     expect(engineMix(DEFAULT_MIX_SETTING, 3)).toEqual({
-      click: 0.45,
+      click: 0,
+      countIn: 0.45,
       tracks: [1, 1, 1],
     });
+  });
+
+  it("keeps the click on over a song with nothing else sounding", () => {
+    expect(engineMix(DEFAULT_MIX_SETTING, 0)).toEqual({
+      click: 0.45,
+      countIn: 0.45,
+      tracks: [],
+    });
+  });
+
+  it("counts you in whether or not the click is ticking", () => {
+    // The one thing the click being off must not take with it: a count-in you
+    // cannot hear is not one. It sounds at the level the player set.
+    const quieter = withGain(DEFAULT_MIX_SETTING, "click", 0.2);
+    expect(engineMix(withMute(quieter, "click", true), 3)).toMatchObject({
+      click: 0,
+      countIn: 0.2,
+    });
+  });
+
+  it("keeps what the player chose once they have chosen", () => {
+    // Turning it ON over a song with a band is a decision, and it outlives
+    // the default from then on.
+    const on = withMute(DEFAULT_MIX_SETTING, "click", false);
+    expect(engineMix(on, 3).click).toBe(0.45);
+    // As is turning it off over a song that has nothing else.
+    const off = withMute(DEFAULT_MIX_SETTING, "click", true);
+    expect(engineMix(off, 0).click).toBe(0);
+    // And moving the fader is saying something about it too.
+    expect(engineMix(withGain(DEFAULT_MIX_SETTING, "click", 0.8), 3).click).toBe(0.8);
   });
 
   it("sends a muted track as nothing while the fader keeps its level", () => {
@@ -133,6 +174,32 @@ describe("reading back what was stored", () => {
       expect(readMixSetting({ takes: value }).takes, JSON.stringify(value)).toBe(false);
     }
     expect(readMixSetting({ takes: true }).takes).toBe(true);
+  });
+
+  /**
+   * And the same rule for the click, which is what makes the new default
+   * reach songs that already exist (W34 item 7).
+   *
+   * A song stored before this has no `clickChosen` at all, so it reads back
+   * false and takes the default: off over a file with a band. A song whose
+   * player HAS touched the click keeps what they chose.
+   */
+  it("treats a song stored before the click had a default as untouched", () => {
+    expect(readMixSetting(undefined).clickChosen).toBe(false);
+    expect(readMixSetting({ mix: { click: 0.45 }, muted: [] }).clickChosen).toBe(false);
+    expect(clickOn(readMixSetting({}), true)).toBe(false);
+    expect(clickOn(readMixSetting({}), false)).toBe(true);
+  });
+
+  it("keeps a click the player did set", () => {
+    const chosen = readMixSetting({ clickChosen: true });
+    expect(clickOn(chosen, true)).toBe(true);
+    const off = readMixSetting({ clickChosen: true, muted: ["click"] });
+    expect(clickOn(off, false)).toBe(false);
+    // Anything that is not the literal `true` is nobody having chosen.
+    for (const value of ["true", 1, {}, null]) {
+      expect(readMixSetting({ clickChosen: value }).clickChosen, JSON.stringify(value)).toBe(false);
+    }
   });
 });
 

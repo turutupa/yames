@@ -236,6 +236,22 @@ export type SongMix = {
 };
 
 /**
+ * What the ENGINE is sent: the same faders, plus the count-in's own level.
+ *
+ * The count-in is a dial of its own because Songs turns the click off by
+ * default over a song that has parts of its own (W34 item 7) — the owner:
+ * *"is the drums playing by default? i've played tabs with no drums and it
+ * still plays them"*, and his click's sound is a kit. The count is the one
+ * thing that cannot go off with it: it is how you know when to come in.
+ *
+ * Not stored. `songEngine.ts`'s `engineMix` is the only thing that makes one,
+ * and it puts the click's own fader here whether or not the click is on, so
+ * a player who has turned the click down gets a count-in at the level they
+ * chose rather than at the app's.
+ */
+export type SongMixGains = SongMix & { countIn: number };
+
+/**
  * The click at 0.45, and that is the engine's number, not a guess.
  *
  * `song.rs`'s `DEFAULT_CLICK_MIX`: a metronome at full scale is the loudest

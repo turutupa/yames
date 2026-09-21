@@ -374,6 +374,8 @@
       "notationNote": "Pokaż też pięciolinię nad tabulaturą",
       "bigger": "Większe",
       "smaller": "Mniejsze"
-    }
+    },
+    "clickChip": "Klik",
+    "clickNote": "Wybija puls razem z utworem. Na początku wyłączony, gdy plik ma własny zespół."
   }
 }

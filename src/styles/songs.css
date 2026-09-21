@@ -938,6 +938,7 @@
 
 .songs-strip-portion,
 .songs-strip-tempo,
+.songs-strip-click,
 .songs-strip-more {
   flex: 0 0 auto;
 }
@@ -1953,6 +1954,26 @@
 
   .songs-title {
     font-size: 14px;
+  }
+}
+
+/* One more rung, for the click's own switch (W34 item 7).
+ *
+ * The row gained a control — the click is a switch somebody reaches for now
+ * that it starts off over a song with a band, so it is on the strip and not
+ * inside "More" — and at the smallest window the app opens (480px, which is
+ * `tauri.conf.json`'s `minWidth`) that was two pixels more than the row had.
+ *
+ * Following the brief's own shed order: nothing is taken away here, the row
+ * is simply drawn tighter. The bar fields still hold four digits, which is
+ * every song anybody has. */
+@container stage (max-width: 520px) {
+  .songs-strip {
+    gap: 0 8px;
+  }
+
+  .songs-range-field input {
+    width: 42px;
   }
 }
 

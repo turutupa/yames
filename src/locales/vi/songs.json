@@ -354,6 +354,8 @@
       "notationNote": "Hiện cả khuông nhạc phía trên bản tab",
       "bigger": "To hơn",
       "smaller": "Nhỏ hơn"
-    }
+    },
+    "clickChip": "Tích tắc",
+    "clickNote": "Gõ nhịp cùng bài hát. Ban đầu tắt khi tệp đã có ban nhạc riêng."
   }
 }

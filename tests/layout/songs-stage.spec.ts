@@ -16,7 +16,7 @@
 import { test, expect } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
-import { openShot, noSidewaysScroll } from "./fits";
+import { openShot, insideViewport, noSidewaysScroll } from "./fits";
 
 const OUT = path.resolve(process.cwd(), ".w34-shots");
 
@@ -243,6 +243,36 @@ test.describe("the tab uses all the room", () => {
     console.log(`[w34] cursor x across six frames: ${xs.map((x) => x.toFixed(1)).join(", ")}`);
     expect(new Set(xs.map((x) => Math.round(x))).size).toBeGreaterThan(2);
   });
+
+  /**
+   * The click starts off over a song that brings its own band, and its switch
+   * is on the row (W34 item 7).
+   *
+   * The owner: *"is the drums playing by default? i've played tabs with no
+   * drums and it still plays them"*. His click's sound is a kit — the chip in
+   * the header says Drum — so a click ticking through every bar of a song
+   * with its own drums is a drummer playing along.
+   */
+  for (const size of [
+    { name: "the smallest window", width: 480, height: 780 },
+    { name: "the pictures", width: 1440, height: 900 },
+    { name: "the owner's window", width: 2000, height: 1124 },
+  ]) {
+    test(`shows the click's switch on the strip at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      const chip = page.locator(".songs-strip > .songs-strip-click .songs-click-chip");
+      await expect(chip, "the click's switch is not on the strip").toHaveCount(1);
+      // On the row and inside the window, not folded away into "More".
+      await insideViewport(page, ".songs-click-chip", `the click chip at ${size.name}`, size);
+
+      // The shot song has drums and a bass, so the click starts off.
+      await expect(chip).toHaveAttribute("aria-pressed", "false");
+      await chip.click();
+      await expect(chip).toHaveAttribute("aria-pressed", "true");
+      await chip.click();
+      await expect(chip).toHaveAttribute("aria-pressed", "false");
+    });
+  }
 
   /**
    * The pictures. Not an assertion — a thing to look at.

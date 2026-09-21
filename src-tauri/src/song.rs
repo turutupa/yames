@@ -345,8 +345,33 @@ pub struct SongNote {
 #[serde(rename_all = "camelCase")]
 pub struct SongMix {
     pub click: f32,
+    /// How loud the COUNT-IN's clicks are, which is a separate dial (W34
+    /// item 7).
+    ///
+    /// The owner, 2026-09-21: *"is the drums playing by default? i've played
+    /// tabs with no drums and it still plays them"* — his click's sound is a
+    /// kit, and over a song with a band of its own a click ticking through
+    /// every bar IS a drummer playing along. So Songs turns the click off by
+    /// default when the file has parts of its own, and the song keeps the
+    /// time, as it does in every tab player.
+    ///
+    /// The count-in is the one thing that cannot go with it: it is how you
+    /// know when to come in, and a count-in you cannot hear is not one. It
+    /// has its own number for that reason — the webview sends the click's own
+    /// level here whether or not the click is muted — rather than a flag,
+    /// because the audio thread reads a gain and a flag would be a branch.
+    ///
+    /// `#[serde(default = ...)]` and not `#[serde(default)]`: a webview that
+    /// has not been told about this field means "the click's usual level",
+    /// and `f32::default()` is silence.
+    #[serde(default = "default_click_mix")]
+    pub count_in: f32,
     #[serde(default)]
     pub tracks: Vec<f32>,
+}
+
+fn default_click_mix() -> f32 {
+    DEFAULT_CLICK_MIX
 }
 
 /// How loud the click is over a song before the musician touches anything.
@@ -367,6 +392,7 @@ impl Default for SongMix {
     fn default() -> Self {
         Self {
             click: DEFAULT_CLICK_MIX,
+            count_in: DEFAULT_CLICK_MIX,
             tracks: Vec::new(),
         }
     }
@@ -395,6 +421,7 @@ impl SongMix {
         }
         SongMixGains {
             click: clamp(self.click),
+            count_in: clamp(self.count_in),
             tracks,
         }
     }
@@ -404,6 +431,10 @@ impl SongMix {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SongMixGains {
     pub click: f32,
+    /// The count-in's own level — see [`SongMix::count_in`]. Read only by the
+    /// count-in's arm of the frame loop, which is a different branch from the
+    /// piece's own ticks and costs nothing to anybody who never counts in.
+    pub count_in: f32,
     /// Indexed by the track's position in [`SongBacking::tracks`].
     pub tracks: [f32; MAX_SONG_TRACKS],
 }

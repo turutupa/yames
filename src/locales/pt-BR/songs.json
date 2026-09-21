@@ -364,6 +364,8 @@
       "notationNote": "Mostrar também a pauta acima da tablatura",
       "bigger": "Maior",
       "smaller": "Menor"
-    }
+    },
+    "clickChip": "Clique",
+    "clickNote": "Marca o tempo junto com a música. Começa desligado quando o arquivo traz a própria banda."
   }
 }

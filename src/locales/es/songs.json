@@ -364,6 +364,8 @@
       "notationNote": "Mostrar también el pentagrama sobre la tablatura",
       "bigger": "Más grande",
       "smaller": "Más pequeño"
-    }
+    },
+    "clickChip": "Clic",
+    "clickNote": "Marca el pulso sobre la canción. Empieza apagado si el archivo trae su propia banda."
   }
 }
