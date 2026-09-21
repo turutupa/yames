@@ -1400,6 +1400,10 @@ fn main() -> ExitCode {
             app_data: &dir,
             jam_id: "probe",
             handoff: &handoff,
+            // The probe measures the take Yames has always made; a
+            // loopback take opens a second device and would measure that
+            // device's driver as much as this engine's callback.
+            loopback: None,
             mic: Some((mic.clone(), 44_100)),
             out_sr,
             // The probe measures the writer, not the alignment: a synthetic

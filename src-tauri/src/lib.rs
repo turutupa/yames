@@ -53,6 +53,9 @@ mod state;
 /// Who asks for the camera, and how often (W21, item 5). Windows only; the
 /// other two platforms do it themselves and the module says how.
 mod camera_permission;
+/// Everything this computer plays, when that is what a take is made of
+/// (W30). Its own input stream, its own callback, nothing on the output one.
+mod loopback;
 mod take;
 /// The camera's recording, beside the take it belongs to (W21,
 /// `plans/SONGS.md` A9/A10). Nothing in it goes near the audio threads.
@@ -155,7 +158,8 @@ use commands::{
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
     arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
-    delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
+    check_take_sound, delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback,
+    takes_dir_size,
     // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
     clear_song, load_song, set_song_mix, set_song_range,
     // W19 — the download is caught, and the file opens with Yames (S0.9).
@@ -775,6 +779,7 @@ pub fn run() {
             pick_kit_folder,
             inspect_kit_folder,
             start_take,
+            check_take_sound,
             stop_take,
             list_takes,
             delete_take,

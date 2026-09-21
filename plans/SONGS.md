@@ -245,6 +245,88 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   number it did not measure — the review says outright when a take has no
   fitted offset and starts the two level.
 
+  **A9's "Songs only" is over, on the owner's word (2026-09-21, W30).**
+  A9 said which other parts of the app get a camera "is evaluated after
+  Songs has shipped with it, not before". Songs shipped with it, and the
+  evaluation is one sentence from the owner, going to bed:
+
+  > "you think you could include video recording (and audio of course)
+  > for jam sessions too? I think this would be a killer feature … for
+  > making a recording of the app, and sharing on social media, but also
+  > cause folks can record themselves jamming … (in fact, i already
+  > wanted to record myself tonight to share with a friend). The video
+  > recorder, specially for jam, should record everything as it comes out
+  > from the pc ideally, cause im using guitar effects and distortion and
+  > stuff with plugins to play on top of the drums and keys and bass and
+  > it sounds really cool."
+
+  So Jam gets the camera, on the same terms Songs has it (opt in per
+  recording, kept on the machine, visible, playable, deletable, never
+  uploaded), and the shared half of it moves out of `src/songs/camera`
+  into a neutral home rather than being forked.
+
+- **A12 — What a take is a recording OF.** *decided 2026-09-21 (owner,
+  the sentence above), built in W30.* A take gets a **sound source**,
+  chosen where takes are switched on and remembered per machine rather
+  than per jam:
+
+  - **"Yames and my input"** — what a take has always been: the band the
+    output callback rendered with the microphone mixed under it, plus the
+    dry stem (A8). The default, because it records the one thing you
+    asked for and nothing you did not.
+  - **"Everything this computer plays"** — the speaker's own stream, read
+    back: his amp simulator, Yames' band, and whatever else was making a
+    sound. `src-tauri/src/loopback.rs`.
+
+  The second one is the answer to his actual problem: his guitar goes
+  through a plugin in another program, and until now nothing in Yames
+  could hear it. In that mode the take does **not** also mix Yames' own
+  band and microphone in — the loopback already contains both, and a
+  second copy a buffer later is a comb filter, not a thicker sound — so
+  there is no dry stem either and the review says pitch checking wants
+  the other source. The take is **stereo** in that mode and mono in the
+  other, because what came out of the speakers had two sides and an amp
+  simulator's is the one thing a guitarist would notice losing.
+
+  **It listens to the speaker Yames is playing through**, not to the
+  system default, when the two differ. Three reasons, in order of how
+  much they matter: a loopback of a device Yames is not playing to has no
+  band in it and is not a take of anything; the band being in it is what
+  makes mixing Yames' own copy unnecessary; and a loopback endpoint that
+  nothing is rendering to hands over nothing at all rather than silence,
+  so it needs a stream to keep it alive — and Yames' own output stream,
+  on that very endpoint, is already it. The screen names the device.
+
+  **His first question was "so you'll record ALL the audio coming from
+  the pc?"**, and that is the right question: this mode records a video
+  call, a notification, a song in a browser tab. So it is off by default,
+  the switch says in plain words what it does, the recording indicator
+  says which source is live for the whole length of the take, the sidecar
+  keeps it (`sound`, `soundDevice`) so a shelf of takes a week later
+  still says which are which, and **the capture stream is open only
+  between record and stop** — plus two hundred milliseconds when he asks
+  for the level check, and at no other time.
+
+  **What is not offered, and why.** Measured on the owner's Realtek
+  endpoint: with the speakers muted, a full-scale tone rendered into that
+  endpoint comes back through the loopback as exact zeroes. The mute and
+  the volume slider sit before the tap, so a take of everything this
+  computer plays is as loud as Windows was set to play it. Nothing
+  normalises that behind his back; instead the switch has a "listen for a
+  moment and show me the level" check, so silence is visible before a
+  take rather than after one.
+
+  **Linux** looks for a PulseAudio or PipeWire monitor source and says so
+  honestly when there is none; nobody here has a Linux machine, so it is
+  compiled and fails safe rather than claimed. **macOS does not offer the
+  option at all.** Core Audio has no loopback without a third-party
+  driver; the two Apple APIs that can do it are ScreenCaptureKit audio
+  (13+, screen-recording permission) and Core Audio process taps (14.4+,
+  `NSAudioCaptureUsageDescription`), and cpal reaches the second of those
+  only from 0.17 with a macOS 14.6 floor. Yames is on cpal 0.15.3, under
+  the engine's own output stream. That upgrade is a task of its own and
+  this entry reopens when somebody does it.
+
 - **A11 — The refractory when a free player speeds up.** *open, the
   owner's call (W11, 2026-09-20).* Roadmap 1.3 unpinned the detector's
   refractory from the click and pinned it to the rhythm the app has

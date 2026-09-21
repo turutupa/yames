@@ -4093,13 +4093,19 @@ fn takes_home(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
 #[tauri::command]
 pub fn start_take(
     jam_id: String,
+    // `sound` is what the take is made of (W30). Absent means the take Yames
+    // has always made — every caller that predates the choice keeps its
+    // behaviour, and so does every jam saved before the switch existed.
+    sound: Option<crate::take::TakeSound>,
     engine_state: State<EngineState>,
     audio_input: State<SharedAudioInput>,
     take_state: State<TakeState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let home = takes_home(&app_handle)?;
-    let (handoff, out_sr, out_sr_watch, output_latency_us, song) = {
+    let sound = sound.unwrap_or_default();
+    let everything = sound == crate::take::TakeSound::Everything;
+    let (handoff, out_sr, out_sr_watch, output_latency_us, song, output_device) = {
         let engine = engine_state.0.lock().unwrap();
         (
             engine.take_handoff(),
@@ -4111,12 +4117,51 @@ pub fn start_take(
             // different table, and the take's opening bar was measured
             // against this one.
             engine.song_handoff().table(),
+            // The speaker Yames is playing to. `None` is "whatever the
+            // system calls default", which is what the loopback will then
+            // ask for as well, so the two agree by construction.
+            engine.device_name().map(str::to_owned),
         )
     };
     let out_sr = out_sr
         .ok_or_else(|| "the audio output has not started yet, so there is no band to record")?;
 
-    let (mic, owns_input, input_latency_us) = {
+    // ---- Everything this computer plays ----
+    //
+    // Opened HERE and nowhere else: after the checks that would refuse the
+    // take, before anything is on disk, and moved straight into the take so
+    // that it closes when the take does. Between one take and the next
+    // nothing in Yames is listening to the speakers.
+    //
+    // A failure here REFUSES the take rather than quietly falling back to
+    // Yames and the microphone. The two are different recordings and the
+    // musician asked for one of them; handing over the other under the same
+    // name is the kind of thing that is only discovered a week later.
+    let loopback = if everything {
+        let capture = crate::loopback::open(output_device.as_deref())?;
+        let f = capture.format().clone();
+        eprintln!(
+            "[take] recording everything {} is playing — {} Hz, {} channel(s)",
+            f.device, f.sample_rate, f.channels
+        );
+        Some(crate::take::TakeLoopback {
+            ring: capture.ring(),
+            sample_rate: f.sample_rate,
+            channels: f.channels,
+            device: f.device,
+            capture: Some(capture),
+        })
+    } else {
+        None
+    };
+
+    // The microphone is not opened at all for a take of everything this
+    // computer plays: the player is already in that stream, through whatever
+    // they are actually playing through, and a second copy of them arriving a
+    // round trip later is not a take anybody wants.
+    let (mic, owns_input, input_latency_us) = if everything {
+        (None, false, 0)
+    } else {
         let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
         // Whether the mic was ALREADY running matters beyond this line: an
         // input the coach or the drill had open is theirs and stays open,
@@ -4130,7 +4175,7 @@ pub fn start_take(
         }
         (ai.begin_take_capture(), owns_input, ai.input_latency_us())
     };
-    if mic.is_none() {
+    if mic.is_none() && !everything {
         eprintln!("[take] recording the band only — no input stream is running");
     }
 
@@ -4161,6 +4206,7 @@ pub fn start_take(
             out_sr_watch: Some(out_sr_watch),
             owns_input,
             position: Some(position),
+            loopback,
         })
     };
     if started.is_err() {
@@ -4173,6 +4219,81 @@ pub fn start_take(
         }
     }
     started
+}
+
+/// What a listen to the speakers found — the answer to "is it going to hear
+/// anything, and how loud".
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TakeSoundCheck {
+    /// Can this machine record what it plays at all?
+    pub can: bool,
+    /// The speaker it listened to, as the operating system names it.
+    pub device: Option<String>,
+    pub sample_rate: Option<u32>,
+    pub channels: Option<u16>,
+    /// The loudest thing it heard, 0 to 1. Zero means silence, which is a
+    /// fact worth showing BEFORE a take rather than after one.
+    pub peak: f32,
+    /// Why it could not, in the words the screen will use.
+    pub trouble: Option<String>,
+}
+
+/// Listen to the speakers for a moment and say what is there.
+///
+/// **This is the only thing in Yames that opens the capture outside a take**,
+/// and it is open for [`CHECK_MS`] and then closed — long enough for a level
+/// to mean something and far too short to be a recording. Nothing it hears is
+/// written anywhere; what comes back is one number.
+///
+/// It exists because the alternative is worse. A musician turns the switch on,
+/// plays a take, and finds out afterwards that their interface was routed
+/// somewhere else and the file is four minutes of silence. A meter before the
+/// first take is the difference.
+#[tauri::command]
+pub fn check_take_sound(engine_state: State<EngineState>) -> TakeSoundCheck {
+    /// How long to listen. Two hundred milliseconds of a meter is enough to
+    /// see a strum and short enough that nobody would call it recording.
+    const CHECK_MS: u64 = 200;
+
+    if !crate::loopback::supported() {
+        return TakeSoundCheck {
+            can: false,
+            device: None,
+            sample_rate: None,
+            channels: None,
+            peak: 0.0,
+            trouble: Some(crate::loopback::unsupported_here().to_string()),
+        };
+    }
+    let device_name = {
+        let engine = engine_state.0.lock().unwrap();
+        engine.device_name().map(str::to_owned)
+    };
+    match crate::loopback::open(device_name.as_deref()) {
+        Ok(mut capture) => {
+            let f = capture.format().clone();
+            std::thread::sleep(std::time::Duration::from_millis(CHECK_MS));
+            let peak = capture.take_peak();
+            capture.stop();
+            TakeSoundCheck {
+                can: true,
+                device: Some(f.device),
+                sample_rate: Some(f.sample_rate),
+                channels: Some(f.channels),
+                peak,
+                trouble: None,
+            }
+        }
+        Err(e) => TakeSoundCheck {
+            can: false,
+            device: device_name,
+            sample_rate: None,
+            channels: None,
+            peak: 0.0,
+            trouble: Some(e),
+        },
+    }
 }
 
 /// Stop recording and keep the take. `null` when nothing was recording, or
