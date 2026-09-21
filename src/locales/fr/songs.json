@@ -220,7 +220,8 @@
       "portionPlaceholder": "Nommez ce passage",
       "renamePortion": "Renommer",
       "deletePortion": "Oublier celui-ci",
-      "portionTitle": "{{name}} — à {{percent}} %"
+      "portionTitle": "{{name}} — à {{percent}} %",
+      "tabLabel": "La tablature. Clique sur une mesure pour y aller, ou fais glisser sur plusieurs mesures pour choisir un passage."
     },
     "offer": {
       "justArrived": "vient d'arriver dans vos téléchargements",
@@ -333,6 +334,22 @@
       "withPicture": "Avec image",
       "noneFilmed": "Aucune de celles-ci n'a été filmée.",
       "was": "Mesures {{bars}} · {{percent}} % · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "La partie que tu lis",
+      "percussion": "Batterie — pas une partie à suivre",
+      "notTab": "Pas écrite en tablature",
+      "empty": "Rien d'écrit sur celle-ci"
+    },
+    "strip": {
+      "more": "Plus"
+    },
+    "view": {
+      "tabOnly": "Tablature",
+      "tabAndNotes": "Tablature + notes",
+      "notationNote": "Afficher aussi la portée au-dessus de la tablature",
+      "bigger": "Plus grand",
+      "smaller": "Plus petit"
     }
   }
 }

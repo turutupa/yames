@@ -55,6 +55,40 @@ export type SelectionDrag = {
   moved: boolean;
 };
 
+/**
+ * How far the pointer may travel and still be a click (W29).
+ *
+ * The gesture that decides everything on the tab is "did they mean to go
+ * there, or did they mean to choose something?", and bars are not the way to
+ * tell: two bars can be forty pixels apart, so a hand that shook by six
+ * pixels while pressing would be a portion. Pixels are, and four of them is
+ * what a browser's own `click` allows between press and release.
+ */
+export const CLICK_SLOP_PX = 4;
+
+/** A press on the tab, kept until the pointer comes up. */
+export type TabPress = {
+  /** The played bar under the press. */
+  bar: number;
+  clientX: number;
+  clientY: number;
+  /** Which handle was grabbed, when the press landed on one. */
+  handle: "start" | "end" | null;
+  shiftKey: boolean;
+};
+
+/**
+ * Has this press become a drag?
+ *
+ * A press on a HANDLE or with SHIFT down is a drag from the first pixel: both
+ * of them are gestures about the portion and neither has a "go there" reading
+ * at all, so waiting for four pixels would only make them feel sticky.
+ */
+export function pressIsDrag(press: TabPress, clientX: number, clientY: number): boolean {
+  if (press.handle || press.shiftKey) return true;
+  return Math.hypot(clientX - press.clientX, clientY - press.clientY) > CLICK_SLOP_PX;
+}
+
 /** A portion the player named and kept. Stored per song beside the mix. */
 export type SavedPortion = {
   id: string;

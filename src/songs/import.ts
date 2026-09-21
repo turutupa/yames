@@ -97,6 +97,17 @@ export type SongTrackChoice = {
   stringCount: number;
   /** Guitar and bass are offered first; the rest are still importable. */
   kind: "guitar" | "bass" | "other";
+  /**
+   * A drum chart, in the file's own words (W29).
+   *
+   * Said separately from `kind` and from the string count because the header's
+   * instrument menu has to explain ITSELF: "there is a drum part in here and
+   * it is not something Yames can follow your fingers on" is a different
+   * sentence from "this one has no notes in it".
+   */
+  percussion: boolean;
+  /** Is there anything written on this track at all? */
+  hasNotes: boolean;
 };
 
 /** A file read once, so the picker and the import do not parse it twice. */
@@ -153,6 +164,26 @@ function trackKind(track: AtTrack): SongTrackChoice["kind"] {
 }
 
 /**
+ * Is anything written on this staff?
+ *
+ * Stops at the first note it finds, so an empty track costs a walk of its
+ * bars and a full one costs almost nothing. It exists for the header's
+ * instrument menu (W29): a file often carries a track that is nothing but
+ * rests — a part the arranger left for later — and a row that says so is
+ * kinder than a tab that draws eighty empty bars.
+ */
+function staffHasNotes(staff: AtTrack["staves"][number]): boolean {
+  for (const bar of staff.bars) {
+    for (const voice of bar.voices) {
+      for (const beat of voice.beats) {
+        if (!beat.isRest && beat.notes.length > 0) return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * Read the file. Throws `SongImportError` and nothing else — alphaTab throws
  * several different shapes (a format error, a reader running off the end of
  * the bytes, a bag of alphaTex diagnostics) and none of them is a sentence.
@@ -191,6 +222,8 @@ export function parseSongFile(bytes: Uint8Array, fileName: string): ParsedSong {
       capo: staff.capo ?? 0,
       stringCount: staff.tuning.length,
       kind: trackKind(track),
+      percussion: staff.isPercussion === true,
+      hasNotes: staffHasNotes(staff),
     };
   });
 

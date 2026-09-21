@@ -220,7 +220,8 @@
       "portionPlaceholder": "Ponle nombre a esta parte",
       "renamePortion": "Renombrar",
       "deletePortion": "Olvidar esta",
-      "portionTitle": "{{name}} — al {{percent}}%"
+      "portionTitle": "{{name}} — al {{percent}}%",
+      "tabLabel": "La tablatura. Haz clic en un compás para ir ahí, o arrastra sobre varios compases para elegir una parte."
     },
     "offer": {
       "justArrived": "acaba de llegar a tus descargas",
@@ -333,6 +334,22 @@
       "withPicture": "Con vídeo",
       "noneFilmed": "Ninguna de estas se grabó en vídeo.",
       "was": "Compases {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Qué parte estás leyendo",
+      "percussion": "Batería — no es para seguir",
+      "notTab": "No está escrita como tablatura",
+      "empty": "Aquí no hay nada escrito"
+    },
+    "strip": {
+      "more": "Más"
+    },
+    "view": {
+      "tabOnly": "Tablatura",
+      "tabAndNotes": "Tablatura + notas",
+      "notationNote": "Mostrar también el pentagrama sobre la tablatura",
+      "bigger": "Más grande",
+      "smaller": "Más pequeño"
     }
   }
 }

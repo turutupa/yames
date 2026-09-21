@@ -34,7 +34,13 @@ type Importer = Awaited<ReturnType<typeof importerModule>>;
 import type { ParsedSong, SongImportWarning, SongTrackChoice } from "../../../songs/import";
 import type { BarRange } from "../../../songs/schedule";
 import { dayOf, listSongDue, songDueNow } from "../../../songs/due";
-import { addPortion, newPortionId, removePortion, renamePortion } from "../../../songs/selection";
+import {
+  addPortion,
+  clampSelection,
+  newPortionId,
+  removePortion,
+  renamePortion,
+} from "../../../songs/selection";
 import type { SavedPortion } from "../../../songs/selection";
 import type { SongScore } from "../../../songs/types";
 import { forgetMixSetting } from "../../../songs/songEngine";
@@ -65,6 +71,24 @@ export interface SongsSession extends SongEngine {
    */
   range: BarRange;
   /**
+   * The bars the PORTION covers — the selection, or the whole song.
+   *
+   * `range` is what plays and is where the playhead has put it; this is what
+   * the player chose. The two are the same until somebody clicks a bar, and
+   * the strip's fields, the band on the tab and everything that says "what am
+   * I working on" read this one (W29).
+   */
+  portion: BarRange;
+  /**
+   * Where the playhead stands, as a played bar, or null for the start.
+   *
+   * A click on the tab moves it (W29 item 1). It is the bar the next pass
+   * begins at, and — while the piece is stopped — the bar the cursor sits on.
+   */
+  playFrom: number | null;
+  /** Go to a bar. Clamped into the song; the portion is left alone. */
+  seekTo: (playedBar: number) => void;
+  /**
    * The portion the player picked out, or null for the whole song.
    *
    * The centre of the mode (`selection.ts`): dragging on the tab, typing two
@@ -78,6 +102,23 @@ export interface SongsSession extends SongEngine {
   tempo: number;
   /** Portions of this song the player named and kept. */
   portions: SavedPortion[];
+  /**
+   * Every track in the open song's file, for the header's instrument menu
+   * (W29 item 2). Empty until the file has been read back, and for a song
+   * whose bytes were never stored.
+   */
+  tracks: SongTrackChoice[];
+  /**
+   * Read a different track of the same file.
+   *
+   * A song's id is a hash of the bytes AND the track (`songId`), so each
+   * track is its own row in the store with its own attempts, its own takes
+   * and its own promises — which is exactly what "takes and history belong to
+   * the track they were played on" asks for, and why there is no migration
+   * here. This switches to that row, making it if it is new, and carries the
+   * portion, the playhead and the speed across.
+   */
+  switchTrack: (trackIndex: number) => Promise<void>;
   pending: PendingImport | null;
   warnings: SongImportWarning[];
   /** A sentence to show the player, or null. */
@@ -130,6 +171,8 @@ export function useSongsSession(
   const [selection, setSelectionState] = useState<BarRange | null>(null);
   const [loop, setLoop] = useState(false);
   const [tempoPercent, setTempoPercentState] = useState(100);
+  /** Where a click on the tab left the playhead, in played bars (W29). */
+  const [playFromState, setPlayFrom] = useState<number | null>(null);
   const [pending, setPending] = useState<PendingImport | null>(null);
   const [warnings, setWarnings] = useState<SongImportWarning[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -187,6 +230,7 @@ export function useSongsSession(
       const next = songs.find((s) => s.id === id);
       if (!next) return;
       setActiveId(id);
+      setPlayFrom(null);
       // Cleared, not carried: the portion this song was left on comes back
       // from the store a moment later (see the effect below), and carrying
       // the last song's bars across in the meantime would loop bars 17–24 of
@@ -245,6 +289,7 @@ export function useSongsSession(
         commit(next);
         setPending(null);
         setActiveId(record.id);
+        setPlayFrom(null);
         setSelectionState(null);
         setLoop(false);
         setTempoPercentState(100);
@@ -257,6 +302,38 @@ export function useSongsSession(
   );
 
   const cancelImport = useCallback(() => setPending(null), []);
+
+  /**
+   * The tracks of the open file, read back once per song (W29 item 2).
+   *
+   * The header's menu has to list every part in the file, and a `SongScore`
+   * knows only about the one that was chosen. The bytes are already in
+   * memory, so this is a parse and no I/O — and it is the parse, not the
+   * menu, that is the expensive half, which is why it happens here and once
+   * rather than in the component every time somebody opens the list.
+   */
+  const [tracks, setTracks] = useState<SongTrackChoice[]>([]);
+  useEffect(() => {
+    if (!score || !source || source.length === 0) {
+      setTracks([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const importer = await importerModule();
+        const parsed = importer.parseSongFile(source, score.source.fileName);
+        if (!cancelled) setTracks(parsed.tracks);
+      } catch {
+        // A file we cannot re-read is a song with one track as far as the
+        // menu is concerned. It is already imported and it still plays.
+        if (!cancelled) setTracks([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [score, source]);
 
   const renameSong = useCallback(
     (id: string, name: string) => commit(renameInList(songs, id, name)),
@@ -275,15 +352,50 @@ export function useSongsSession(
   );
 
   /**
-   * The engine plays the selection, or the whole song when there is none.
+   * The bars the player chose: the selection, or the whole song.
    *
    * The one place the two ideas meet. Everything downstream — the schedule,
    * the transport, the cursor, the review — goes on being handed a range and
    * never learns that "nothing selected" is a state.
    */
-  const range = useMemo<BarRange>(
+  const portion = useMemo<BarRange>(
     () => (score ? (selection ? clampRange(score, selection) : wholeSong(score)) : { startBar: 0, endBar: 0 }),
     [score, selection],
+  );
+
+  /**
+   * And where the playhead stands inside it (W29 item 1).
+   *
+   * Clamped into the portion rather than kept wherever it was clicked: a
+   * playhead outside the bars that are going to play is a cursor pointing at
+   * music nobody is about to hear.
+   */
+  const playFrom = useMemo<number | null>(() => {
+    if (playFromState === null || !score) return null;
+    return Math.min(Math.max(playFromState, portion.startBar), portion.endBar);
+  }, [playFromState, score, portion]);
+
+  /**
+   * What the engine is actually given.
+   *
+   * **The playhead only moves the start when the repeat is off.** The engine
+   * has no seek: `set_song_range` recompiles the piece and starts it at the
+   * top of whatever range it is handed (`commands.rs`), so a loop always
+   * begins at its own first bar. With the repeat on, the portion is the unit
+   * being practised and it plays whole — the playhead is then where your eye
+   * is, and the cursor shows it while the piece is stopped. With the repeat
+   * off, "click here, press play, it starts here" is exactly what happens.
+   *
+   * What the engine would need for the other half is small and belongs to
+   * whoever owns `song.rs`: a `seek_song(tick)` that moves the cursor inside
+   * the table already compiled, and a first pass that may begin part-way
+   * through a loop. Doing it here instead would mean stopping — and a stop
+   * ends the attempt and raises the verdict (`COACH_UX.md` A3), so clicking
+   * the tab mid-song would throw a review on screen every time.
+   */
+  const range = useMemo<BarRange>(
+    () => (playFrom === null || loop ? portion : { startBar: playFrom, endBar: portion.endBar }),
+    [portion, playFrom, loop],
   );
 
   /**
@@ -300,6 +412,10 @@ export function useSongsSession(
    */
   const setSelection = useCallback(
     (next: BarRange | null) => {
+      // A new portion starts at its own first bar: the playhead was a place
+      // inside the LAST one, and carrying it across would begin a freshly
+      // chosen passage somewhere in the middle of itself (W29).
+      setPlayFrom(null);
       if (!next) {
         setSelectionState(null);
         setLoop(false);
@@ -307,6 +423,23 @@ export function useSongsSession(
       }
       setSelectionState(score ? clampRange(score, next) : next);
       setLoop(true);
+    },
+    [score],
+  );
+
+  /**
+   * Go to a bar (W29 item 1) — a click on the tab, or an arrow key.
+   *
+   * It moves the playhead and NOTHING else. The portion is left exactly as it
+   * was, which is what Songsterr, Ultimate Guitar and Guitar Pro all do (the
+   * repeat is a switch there too) and what the owner asked for: *"just going
+   * to that place"*. `clampSelection` holds it inside the song; `playFrom`
+   * above holds it inside the portion.
+   */
+  const seekTo = useCallback(
+    (playedBar: number) => {
+      if (!score) return;
+      setPlayFrom(clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar);
     },
     [score],
   );
@@ -430,6 +563,70 @@ export function useSongsSession(
     setStageSetting({ selection, loop, tempoPercent });
   }, [song?.id, selection, loop, tempoPercent, setStageSetting]);
 
+  /**
+   * Read a different part of the same file (W29 item 2).
+   *
+   * The owner, after his first session: *"there's no dropdown for selecting
+   * the instrument if a file has multiple instruments"*. The track was chosen
+   * once at import and was invisible and final after that.
+   *
+   * ## Each track is its own song, and always was
+   *
+   * `songId` hashes the bytes AND the track index, so the guitar part and the
+   * bass part of one file are two rows in the store — two scores, and
+   * `attempts.score_id` points at one of them. Which means the history, the
+   * takes, "then and now" and the coach's promises were already kept apart by
+   * track and there is nothing to migrate: switching here opens the other
+   * row, and every attempt anybody ever made stays with the part it was
+   * played on.
+   *
+   * The row is named after the part so the library does not show one file
+   * twice under one name.
+   *
+   * ## What crosses over
+   *
+   * The bars you were working on, the playhead and the speed — you are
+   * looking at the same passage of the same piece, and arriving at bar 1 of
+   * the bass part because that is where the bass part was left a fortnight
+   * ago is not what "show me the bass" meant. `restoredFor` is stamped with
+   * the new id first, so the effect that restores a song's stored portion
+   * sees this song as already restored and leaves those three alone; the
+   * effect that writes them down then saves them under the new id, which is
+   * what "remembers the choice per song" comes to.
+   */
+  const switchTrack = useCallback(
+    async (trackIndex: number) => {
+      if (!song || !score || !source || source.length === 0) return;
+      if (trackIndex === score.source.trackIndex) return;
+      setError(null);
+      const importer = await importerModule();
+      try {
+        const parsed = importer.parseSongFile(source, score.source.fileName);
+        const result = importer.buildSongScore(parsed, trackIndex, source);
+        const existing = songs.find((s) => s.id === result.score.id);
+        // The name the player gave this song, without the part it is already
+        // named after — so switching twice does not build up a tail.
+        const suffix = ` · ${score.source.trackName}`;
+        const base = song.name.endsWith(suffix) ? song.name.slice(0, -suffix.length) : song.name;
+        const record =
+          existing ??
+          {
+            ...newSongRecord(result.score, source),
+            name: `${base} · ${result.score.source.trackName}`,
+            addedAt: song.addedAt,
+          };
+        commit(addSong(songs, record));
+        restoredFor.current = record.id;
+        setActiveId(record.id);
+        setWarnings(result.warnings);
+        void markScoreOpened(record.id).catch(() => {});
+      } catch (err) {
+        setError(err instanceof importer.SongImportError ? err.message : String(err));
+      }
+    },
+    [song, score, source, songs, commit],
+  );
+
   const portions = engine.mixSetting.portions;
 
   const savePortion = useCallback(
@@ -466,11 +663,16 @@ export function useSongsSession(
     score,
     source,
     range,
+    portion,
+    playFrom,
+    seekTo,
     selection,
     loop,
     tempoPercent,
     tempo,
     portions,
+    tracks,
+    switchTrack,
     pending,
     warnings,
     error,

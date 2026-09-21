@@ -211,7 +211,8 @@
       "portionPlaceholder": "Diesen Teil benennen",
       "renamePortion": "Umbenennen",
       "deletePortion": "Diesen hier vergessen",
-      "portionTitle": "{{name}} — bei {{percent}} %"
+      "portionTitle": "{{name}} — bei {{percent}} %",
+      "tabLabel": "Die Tabulatur. Klick auf einen Takt, um dorthin zu springen, oder zieh über mehrere Takte, um einen Teil zu wählen."
     },
     "offer": {
       "justArrived": "ist gerade in deinen Downloads gelandet",
@@ -324,6 +325,22 @@
       "withPicture": "Mit Bild",
       "noneFilmed": "Keine davon wurde gefilmt.",
       "was": "Takte {{bars}} · {{percent}} % · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Welche Stimme du liest",
+      "percussion": "Schlagzeug — dafür nicht gedacht",
+      "notTab": "Nicht als Tabulatur geschrieben",
+      "empty": "Hier steht nichts drin"
+    },
+    "strip": {
+      "more": "Mehr"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + Noten",
+      "notationNote": "Auch das Notensystem über der Tabulatur zeigen",
+      "bigger": "Größer",
+      "smaller": "Kleiner"
     }
   }
 }

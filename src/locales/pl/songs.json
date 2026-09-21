@@ -229,7 +229,8 @@
       "portionPlaceholder": "Nazwij ten fragment",
       "renamePortion": "Zmień nazwę",
       "deletePortion": "Zapomnij ten",
-      "portionTitle": "{{name}} — przy {{percent}}%"
+      "portionTitle": "{{name}} — przy {{percent}}%",
+      "tabLabel": "Tabulatura. Kliknij takt, żeby tam przejść, albo przeciągnij po taktach, żeby wybrać fragment."
     },
     "offer": {
       "justArrived": "właśnie trafił do pobranych",
@@ -342,6 +343,22 @@
       "withPicture": "Z obrazem",
       "noneFilmed": "Żadne z tych nie było nagrywane obrazem.",
       "was": "Takty {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Którą partię czytasz",
+      "percussion": "Perkusja — nie da się jej śledzić",
+      "notTab": "Nie zapisana w tabulaturze",
+      "empty": "Tu nic nie zapisano"
+    },
+    "strip": {
+      "more": "Więcej"
+    },
+    "view": {
+      "tabOnly": "Tabulatura",
+      "tabAndNotes": "Tabulatura + nuty",
+      "notationNote": "Pokaż też pięciolinię nad tabulaturą",
+      "bigger": "Większe",
+      "smaller": "Mniejsze"
     }
   }
 }
