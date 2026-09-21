@@ -2,7 +2,10 @@
 #
 # A copy of the Tauri CLI's own `templates/mobile/ios/project.yml` (2.10.1)
 # with three changes, and `tauri.ios.conf.json` points `bundle.iOS.template`
-# here so `tauri ios init` uses it. It is a template rather than an edit to
+# here so `tauri ios init` uses it. That path is written as
+# `src-tauri/ios-project.yml` — relative to where the CLI is *run*, which for
+# `npm run tauri` is the repository root, not to the config file beside this
+# one. It is a template rather than an edit to
 # the generated `gen/apple/project.yml` because that file is regenerated, and
 # a hand edit there would be silently undone — and caught by the drift check
 # at the end of `.github/workflows/ios.yml`.

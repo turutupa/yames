@@ -16,7 +16,7 @@
     "createUpdaterArtifacts": false,
     "iOS": {
       "minimumSystemVersion": "15.0",
-      "template": "ios-project.yml"
+      "template": "src-tauri/ios-project.yml"
     }
   },
   "plugins": {}
