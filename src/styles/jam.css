@@ -3834,3 +3834,16 @@
   overflow-y: hidden;
   overscroll-behavior-x: contain;
 }
+
+/* One section of the form per line, at every phone width.
+ *
+ * The groups are 180px-wide flex items below 880px, which at 360 puts one
+ * four-bar section on each line — the 4 × 3 grid M08 measured and liked — and
+ * at 430 puts two of them on the first line and one on the second. Twelve
+ * bars as 8 then 4 is the same twelve bars reading as a mistake: the whole
+ * point of the row is that a section is a section. A phone holds one per
+ * line, whatever the phone is, and a longer form's eight-bar sections keep
+ * the shape they already had at 360. */
+.main-window.is-mobile .jam-timeline-group {
+  flex: 1 1 100%;
+}
