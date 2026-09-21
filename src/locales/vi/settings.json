@@ -225,7 +225,9 @@
         "songs-loop": "Repeat the portion",
         "songs-loop-clear": "The whole song again",
         "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-later": "Portion a bar later",
+        "songs-take": "Thu bản này",
+        "songs-camera": "Quay hình"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -266,7 +268,9 @@
         "songs-loop": "Play the chosen bars round and round, or stop",
         "songs-loop-clear": "Forget the portion and play the piece from the top",
         "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length",
+        "songs-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
+        "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay"
       }
     },
     "inputTest": {

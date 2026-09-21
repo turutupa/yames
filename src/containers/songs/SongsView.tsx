@@ -459,6 +459,27 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   }, []);
 
   /**
+   * W25 — the footswitch reaching the two switches, and their promises.
+   *
+   * `useActionDispatcher` cannot call `takes.requestTakes` or `camera.request`
+   * directly: they belong to hooks mounted on this screen, and the window has
+   * no handle on them. It raises an event instead, exactly as the library's
+   * "+" does to reach the file input above — and it goes through the REQUEST
+   * doors rather than the settings behind them, so a first press still shows
+   * the promise about what is recorded and where it is kept.
+   */
+  useEffect(() => {
+    const take = () => takes.requestTakes(!session.mixSetting.takes);
+    const film = () => camera.request(!session.mixSetting.camera);
+    window.addEventListener("yames:songs-take", take);
+    window.addEventListener("yames:songs-camera", film);
+    return () => {
+      window.removeEventListener("yames:songs-take", take);
+      window.removeEventListener("yames:songs-camera", film);
+    };
+  }, [takes.requestTakes, camera.request, session.mixSetting.takes, session.mixSetting.camera]);
+
+  /**
    * Drop a file on the window.
    *
    * Plain DOM drag events, not Tauri's. `tauri.conf.json` sets

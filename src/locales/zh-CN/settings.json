@@ -225,7 +225,9 @@
         "songs-loop": "Repeat the portion",
         "songs-loop-clear": "The whole song again",
         "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-later": "Portion a bar later",
+        "songs-take": "录下这一遍",
+        "songs-camera": "录下画面"
       },
       "descs": {
         "play": "开始或停止节拍器",
@@ -266,7 +268,9 @@
         "songs-loop": "Play the chosen bars round and round, or stop",
         "songs-loop-clear": "Forget the portion and play the piece from the top",
         "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length",
+        "songs-take": "下次按播放时录音，或停止录音",
+        "songs-camera": "下次按播放时开始录像，或关掉摄像头"
       }
     },
     "inputTest": {

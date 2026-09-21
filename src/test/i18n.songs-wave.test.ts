@@ -367,6 +367,13 @@ const ADDED_BY_THE_SONGS_WAVE = [
   // one is about this build and one is about this machine.
   "songs.camera.sinkUnmatched",
   "songs.camera.sinkUnsupported",
+  // W25 item 5 — hands on the instrument. `songs-take` takes the wording
+  // `jam-take` already has in each language, because it is the same action:
+  // a player who learned what R does in Jam has learned it here.
+  "settings.hotkeys.actions.songs-camera",
+  "settings.hotkeys.actions.songs-take",
+  "settings.hotkeys.descs.songs-camera",
+  "settings.hotkeys.descs.songs-take",
 ];
 
 /**

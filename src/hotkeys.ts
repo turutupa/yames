@@ -58,6 +58,12 @@ export type HotkeyAction =
   | "songs-loop-clear"
   | "songs-loop-earlier"
   | "songs-loop-later"
+  // ...and the two that decide what is KEPT of the pass (W25). A player who
+  // wants the next go filmed is holding a guitar exactly as much as one
+  // marking out a portion, and reaching for a chip on the strip costs them
+  // the same hand.
+  | "songs-take"
+  | "songs-camera"
   | "settings";
 
 export interface HotkeyEntry {
@@ -493,6 +499,39 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Portion a bar later",
     key: "⇧]",
     desc: "Slide the chosen bars one bar towards the end, keeping their length",
+    group: "songs",
+  },
+  /**
+   * Recording, hands-free, on a song (W25).
+   *
+   * Exactly Jam's `R` and exactly Jam's meaning — it arms the NEXT play
+   * rather than starting a take now, because a take begins after the
+   * count-in and a key that started one mid-chorus would produce a recording
+   * of the back half of a passage. Two actions can share `R`: the tab
+   * decides which one a press means (`MainWindow`'s `MODE_ACTION_PREFIXES`),
+   * and a player who has learned what R does in Jam has learned it here.
+   *
+   * `C` is the camera, and it is the coach's key everywhere else. Same rule,
+   * and the same reason it is worth the collision: `C` for camera is what
+   * somebody would guess, and the coach card is not on the Songs tab at all.
+   *
+   * Both go through the SWITCHES rather than the settings behind them, so a
+   * first press still shows the promise. A camera that came on from a
+   * footswitch without anybody having read what it records would be the one
+   * thing this feature may not do.
+   */
+  {
+    id: "songs-take",
+    action: "Record the take",
+    key: "R",
+    desc: "Record the next time you press play, or stop recording",
+    group: "songs",
+  },
+  {
+    id: "songs-camera",
+    action: "Record the picture",
+    key: "C",
+    desc: "Film the next time you press play, or turn the camera off",
     group: "songs",
   },
 ];

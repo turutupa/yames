@@ -225,7 +225,9 @@
         "songs-loop": "Repeat the portion",
         "songs-loop-clear": "The whole song again",
         "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-later": "Portion a bar later",
+        "songs-take": "Grabar la toma",
+        "songs-camera": "Grabar la imagen"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -266,7 +268,9 @@
         "songs-loop": "Play the chosen bars round and round, or stop",
         "songs-loop-clear": "Forget the portion and play the piece from the top",
         "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length",
+        "songs-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar",
+        "songs-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara"
       }
     },
     "inputTest": {

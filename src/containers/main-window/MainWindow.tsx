@@ -590,6 +590,24 @@ export function MainWindow() {
             nudgeRange(score, songsSession.selection ?? songsSession.range, bars),
           );
         },
+        /*
+         * W25 — recording and the camera, hands-free.
+         *
+         * Through an EVENT and not through `songsSession.setTakes`, which is
+         * right there. The switches are not settings: pressing one for the
+         * first time shows a promise about what is recorded and where it is
+         * kept, and the hooks that own those promises
+         * (`useSongTakes.requestTakes`, `useSongCamera.request`) live inside
+         * the Songs screen. A footswitch that wrote the setting directly
+         * would turn a camera on without anybody having read what it does,
+         * which is the one thing this feature may not do.
+         *
+         * The same door the library's "+" already uses to reach this screen's
+         * file input, for the same reason: the window has no handle on a
+         * control that is not its own.
+         */
+        toggleTakes: () => window.dispatchEvent(new Event("yames:songs-take")),
+        toggleCamera: () => window.dispatchEvent(new Event("yames:songs-camera")),
       };
     },
     // Picked apart rather than `songsSession`, which is a fresh object every
