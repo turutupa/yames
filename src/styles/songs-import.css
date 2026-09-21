@@ -162,22 +162,11 @@
 
 /* ── The shelf Yames ships with ───────────────────────────────────────── */
 
-/* A word beside the song's name, not a badge — the same shape `song-item-due`
-   in songs.css takes, and for the same reason: it says where the song came
-   from and is not a thing to clear. Quieter than "due", because "due" is the
-   coach asking for something and this is only a label. */
-.song-item-starter {
-  margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  color: var(--text-tertiary);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
+/* `.song-item-starter` was a word beside the song's name on every piece that
+   came with Yames. With the instrument and the bar count on the same row it
+   left the owner's titles fifteen characters wide, and it said something
+   about where a song came from rather than which song it is. It is a heading
+   at the bottom of the list now — `songs-library.css`, W35. */
 
 /* ── What the import promises ─────────────────────────────────────────── */
 

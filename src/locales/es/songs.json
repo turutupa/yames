@@ -78,12 +78,19 @@
     "library": {
       "add": "Importar una canción",
       "empty": "Todavía no hay canciones",
-      "summary": "{{track}} · {{bars}} compases",
       "remove": "Quitar de Yames",
       "due": "Toca hoy",
       "dueTitle": "Pediste volver a esta",
       "starter": "Incluida",
-      "starterTitle": "Viene con Yames. Bórrala cuando quieras."
+      "starterTitle": "Viene con Yames. Bórrala cuando quieras.",
+      "removeTitle": "¿Quitar {{name}}?",
+      "removeBody": "Se va la canción entera: todas sus partes, todo lo que Yames recuerda de ella y la copia del archivo que guarda. No se puede deshacer.",
+      "removeTakes": "{{count}} grabación suya se va también.",
+      "removeTakes_many": "{{count}} grabaciones suyas se van también.",
+      "removeTakes_other": "{{count}} grabaciones suyas se van también.",
+      "removeNoTakes": "No has grabado nada de ella.",
+      "removeConfirm": "Quitar",
+      "removeCancel": "Conservar"
     },
     "review": {
       "title": "Cómo ha ido",

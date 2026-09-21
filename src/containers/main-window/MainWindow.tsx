@@ -1701,7 +1701,9 @@ export function MainWindow() {
             const jam = jamSession.jams.find((j) => j.id === jamId);
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
-          songs={songsSession.songs}
+          /* One row per FILE (W35). `activeSongId` is still the PART on the
+             stage; the row it lights is the file that part belongs to. */
+          songFiles={songsSession.songFiles}
           activeSongId={songsSession.song?.id ?? null}
           dueSongs={songsDue}
           onLoadSong={songsSession.loadSong}

@@ -168,9 +168,20 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.library.dueTitle",
   "songs.library.empty",
   "songs.library.remove",
+  // W35 — the confirm the library asks before it takes a song, every part of
+  // it, every take of it and Yames's own copy of the file.
+  "songs.library.removeBody",
+  "songs.library.removeCancel",
+  "songs.library.removeConfirm",
+  "songs.library.removeNoTakes",
+  "songs.library.removeTakes",
+  "songs.library.removeTakes_other",
+  "songs.library.removeTitle",
   "songs.library.starter",
   "songs.library.starterTitle",
-  "songs.library.summary",
+  // `songs.library.summary` was "Guitar · 8 bars" in a column on the right of
+  // every row. It is what squeezed the owner's titles to fifteen characters,
+  // and the part it named is chosen on the stage now (W35).
   "songs.loop",
   "songs.loopNote",
   // `songs.loopOff` and `songs.loopOn` were the two halves of a label that

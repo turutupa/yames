@@ -78,12 +78,19 @@
     "library": {
       "add": "Importer un morceau",
       "empty": "Pas encore de morceaux",
-      "summary": "{{track}} · {{bars}} mesures",
       "remove": "Retirer de Yames",
       "due": "À revoir",
       "dueTitle": "Tu as demandé à y revenir",
       "starter": "Fournie",
-      "starterTitle": "Fournie avec Yames. Supprimez-la quand vous voulez."
+      "starterTitle": "Fournie avec Yames. Supprimez-la quand vous voulez.",
+      "removeTitle": "Retirer {{name}} ?",
+      "removeBody": "Tout le morceau s'en va : chacune de ses parties, tout ce que Yames en retient, et la copie du fichier qu'il garde. C'est sans retour.",
+      "removeTakes": "{{count}} prise du morceau part avec.",
+      "removeTakes_many": "{{count}} prises du morceau partent avec.",
+      "removeTakes_other": "{{count}} prises du morceau partent avec.",
+      "removeNoTakes": "Vous n'en avez enregistré aucune prise.",
+      "removeConfirm": "Retirer",
+      "removeCancel": "Garder"
     },
     "review": {
       "title": "Ce que ça a donné",

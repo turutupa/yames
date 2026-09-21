@@ -6,7 +6,7 @@ import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
-import type { SongRecord } from "../../songs/library";
+import type { LibrarySong } from "../../songs/songFiles";
 import type { MainView } from "./MainHeader";
 import type { PlayTab } from "./hooks/useTabRouting";
 
@@ -44,15 +44,20 @@ interface RailProps {
   onReorderJams: (from: number, to: number) => void;
   /** A jam, into a setlist, from the library's own context menu (JAM_MODE 8.5). */
   onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
-  /** The song library, on the songs tab. Same deal as the jam library. */
-  songs: SongRecord[];
+  /**
+   * The song library, on the songs tab: one entry per FILE (W35). Same deal
+   * as the jam library — the panel draws it, the session owns it.
+   */
+  songFiles: LibrarySong[];
+  /** The PART on the stage, whose file's row is the lit one. */
   activeSongId: string | null;
-  /** Songs with something the coach promised to come back to today. */
+  /** Parts with something the coach promised to come back to today. */
   dueSongs?: ReadonlySet<string>;
   onLoadSong: (id: string) => void;
   onImportSong: () => void;
-  onDeleteSong: (id: string) => void;
-  onRenameSong: (id: string, name: string) => void;
+  /** Both take a FILE's key: removing and renaming are about the song. */
+  onDeleteSong: (fileKey: string) => void;
+  onRenameSong: (fileKey: string, name: string) => void;
   coachOpen: boolean;
   coachActive: boolean;
   coachListening: boolean;
@@ -193,7 +198,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onDuplicateJam,
     onReorderJams,
     onAddJamToSetlist,
-    songs,
+    songFiles,
     activeSongId,
     dueSongs,
     onLoadSong,
@@ -308,7 +313,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onDuplicateJam={onDuplicateJam}
             onReorderJams={onReorderJams}
             onAddJamToSetlist={onAddJamToSetlist}
-            songs={songs}
+            songFiles={songFiles}
             activeSongId={activeSongId}
             dueSongs={dueSongs}
             onLoadSong={onLoadSong}

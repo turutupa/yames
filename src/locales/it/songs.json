@@ -78,12 +78,19 @@
     "library": {
       "add": "Importa un brano",
       "empty": "Ancora nessun brano",
-      "summary": "{{track}} · {{bars}} battute",
       "remove": "Togli da Yames",
       "due": "Da riprendere",
       "dueTitle": "Hai chiesto di tornare su questo",
       "starter": "Inclusa",
-      "starterTitle": "Arrivata con Yames. Cancellala quando vuoi."
+      "starterTitle": "Arrivata con Yames. Cancellala quando vuoi.",
+      "removeTitle": "Togliere {{name}}?",
+      "removeBody": "Se ne va tutto il brano: ogni sua parte, tutto quello che Yames ricorda di lui e la copia del file che tiene. Non si torna indietro.",
+      "removeTakes": "Se ne va anche {{count}} registrazione.",
+      "removeTakes_many": "Se ne vanno anche {{count}} registrazioni.",
+      "removeTakes_other": "Se ne vanno anche {{count}} registrazioni.",
+      "removeNoTakes": "Non ne hai registrato niente.",
+      "removeConfirm": "Togli",
+      "removeCancel": "Tieni"
     },
     "review": {
       "title": "Com'è andata",

@@ -72,12 +72,18 @@
     "library": {
       "add": "Een nummer importeren",
       "empty": "Nog geen nummers",
-      "summary": "{{track}} · {{bars}} maten",
       "remove": "Uit Yames halen",
       "due": "Aan de beurt",
       "dueTitle": "Je wilde hierop terugkomen",
       "starter": "Meegeleverd",
-      "starterTitle": "Kwam met Yames mee. Verwijder hem wanneer je wilt."
+      "starterTitle": "Kwam met Yames mee. Verwijder hem wanneer je wilt.",
+      "removeTitle": "{{name}} verwijderen?",
+      "removeBody": "Het hele nummer gaat weg: elke partij ervan, alles wat Yames erover onthoudt en de kopie van het bestand die Yames bewaart. Dit kan niet ongedaan worden gemaakt.",
+      "removeTakes": "{{count}} opname ervan gaat mee.",
+      "removeTakes_other": "{{count}} opnames ervan gaan mee.",
+      "removeNoTakes": "Je hebt er nog niets van opgenomen.",
+      "removeConfirm": "Verwijderen",
+      "removeCancel": "Bewaren"
     },
     "review": {
       "title": "Hoe dat ging",

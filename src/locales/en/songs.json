@@ -72,12 +72,18 @@
     "library": {
       "add": "Import a song",
       "empty": "No songs yet",
-      "summary": "{{track}} · {{bars}} bars",
       "remove": "Remove from Yames",
       "due": "Due",
       "dueTitle": "You asked to come back to this one",
       "starter": "Included",
-      "starterTitle": "Came with Yames. Delete it whenever you like."
+      "starterTitle": "Came with Yames. Delete it whenever you like.",
+      "removeTitle": "Remove {{name}}?",
+      "removeBody": "The whole song goes — every part of it, everything Yames remembers about it, and the copy of the file it keeps. There is no undo.",
+      "removeTakes": "{{count}} take of it goes too.",
+      "removeTakes_other": "{{count}} takes of it go too.",
+      "removeNoTakes": "You have not recorded anything of it.",
+      "removeConfirm": "Remove",
+      "removeCancel": "Keep it"
     },
     "review": {
       "title": "How that went",
