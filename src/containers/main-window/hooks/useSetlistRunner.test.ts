@@ -14,6 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useSetlistRunner } from "./useSetlistRunner";
 import { mockInvoke } from "../../../test/mocks";
+import { engineTick } from "../../../test/engineTicks";
 import { jamToSetlistStep } from "../../../setlist";
 import { STARTER_JAMS } from "../../../jam/jams";
 import type { Jam } from "../../../jam/types";
@@ -50,19 +51,7 @@ const CHAIN: Setlist = {
  * the engine's own: a whole beat, subdivision zero — NOT a bar line.
  */
 function beat(n: number, measureBeat = n % 4, subdivision = 0): BeatEvent {
-  const isDownbeat = subdivision === 0;
-  // The bar opens Strong; nothing else in [4] is accented at all.
-  const accentLevel = isDownbeat && measureBeat === 0 ? 2 : 0;
-  return {
-    beat: n,
-    measureBeat,
-    subdivision,
-    isDownbeat,
-    accentLevel,
-    isAccent: accentLevel > 0,
-    formBar: 0,
-    chorus: 1,
-  };
+  return engineTick({ beat: n, measureBeat, subdivision });
 }
 
 /** Args of every invoke of `command` so far. */
@@ -95,7 +84,10 @@ describe("useSetlistRunner", () => {
     // so it lands a microtask later than the tempo does.
     await settle();
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 80 });
-    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+    // `atBarLine` on every meter the RUNNER sends: the engine then gives it
+    // to the bar the switch landed on instead of restacking its grid a beat
+    // later, which is what used to leave a one-beat bar at every seam.
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4], atBarLine: true });
     expect(callsTo("set_sound_type")).toContainEqual({ soundType: "click" });
     expect(callsTo("set_volume")).toContainEqual({ volume: 0.5 });
   });
@@ -448,7 +440,7 @@ describe("a setlist step that is a jam", () => {
     expect(callsTo("set_jam")).toContainEqual({ config: null });
     // The plain step is about to set its own meter; handing back a remembered
     // one here would undo it on the beat it landed.
-    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4] }]);
+    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4], atBarLine: true }]);
   });
 
   it("gives the metronome its own meter back when the run stops", async () => {
@@ -533,7 +525,7 @@ describe("a setlist step that is a jam", () => {
     expect(result.current.jam).toBeNull();
     expect(callsTo("set_jam")).toEqual([{ config: null }]);
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 92 });
-    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4], atBarLine: true });
   });
 
   it("sends the next bar's bass at the bar line, and only when it moves", async () => {

@@ -10,6 +10,7 @@ import { JamView } from "./JamView";
 import { STARTER_JAMS } from "../../jam/jams";
 import { CHORD_QUALITIES } from "../../jam/diatonic";
 import { CHORD_FAMILIES } from "../../jam/cheatSheet";
+import { engineTick } from "../../test/engineTicks";
 import type { Jam } from "../../jam/types";
 import type { BeatEvent } from "../../types";
 
@@ -18,23 +19,16 @@ const jamOf = (overrides: Partial<Jam> = {}): Jam => ({
   ...overrides,
 });
 
+/**
+ * One tick of a jam, in the shape `engine.rs` emits.
+ *
+ * Through `engineTick`, because this used to say `isDownbeat: measureBeat
+ * === 0` — a stream no engine produces. `isDownbeat` is "a whole beat and
+ * not a subdivision" and is true on every beat of the bar; the bar line is
+ * `isDownbeat && measureBeat === 0`.
+ */
 function beat(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
-  return {
-    beat: formBar * 4 + measureBeat,
-    measureBeat,
-    subdivision: 0,
-    isDownbeat: measureBeat === 0,
-    accentLevel: measureBeat === 0 ? 2 : 0,
-    isAccent: measureBeat === 0,
-    formBar,
-    chorus,
-    bandState: "full",
-    // No song loaded: what the engine reports for every tick of a jam.
-    songBar: null,
-    songTick: 0,
-    songPass: 0,
-    songCountIn: false,
-  };
+  return engineTick({ beat: formBar * 4 + measureBeat, measureBeat, formBar, chorus });
 }
 
 /**

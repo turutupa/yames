@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useSetlistSession } from "./useSetlistSession";
 import { DEFAULT_TEST_STATE, mockInvoke } from "../../../test/mocks";
+import { engineTick } from "../../../test/engineTicks";
 import * as ipc from "../../../ipc";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { jamToSetlistStep } from "../../../setlist";
@@ -439,16 +440,7 @@ describe("a run that ends on a plain step", () => {
    * cannot tell a runner counting BARS from one counting beats.
    */
   function barLine(n: number): BeatEvent {
-    return {
-      beat: n,
-      measureBeat: n % 4,
-      subdivision: 0,
-      isDownbeat: true,
-      accentLevel: 2,
-      isAccent: true,
-      formBar: 0,
-      chorus: 1,
-    };
+    return engineTick({ beat: n });
   }
 
   /** A step's own configuration, as the engine would report it back. */

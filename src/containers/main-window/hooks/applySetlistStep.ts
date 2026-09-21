@@ -13,15 +13,29 @@ import type { SetlistStep, Subdivision } from "../../../types";
  * copies would be two definitions of what a step *is*.
  *
  * The tempo, the sound and the volume are fired off unawaited: none of them
- * is checked against anything, and every one of the runner's applications
- * lands on a downbeat, so the `measure_beat` reset that `set_beat_groups`
- * triggers is a no-op there. Selecting a step while stopped has no bar to
- * cut in half either.
+ * is checked against anything and none of them can move a bar line.
+ *
+ * THE METER CAN, and `atBarLine` is what stops it moving one. The runner's
+ * switches land on a bar line, but the config only leaves here once that
+ * tick has already sounded — so the engine used to see the new meter one
+ * beat late and restack its grid there, and the seam between a 4/4 step and
+ * a 7/8 one was a bar one beat long: two accents a beat apart, and a bar of
+ * the arriving step spent on it. The comment that used to sit here said the
+ * reset "is a no-op there". It never was, and could not be. `atBarLine`
+ * hands the engine the bar line the switch landed on, and the new meter
+ * takes the bar that line opened. Selecting a step while stopped passes
+ * nothing: there is no bar to cut in half, and none to wait for.
  *
  * The table and the meter are the pair that IS ordered — see the two branches
  * below, which are the same rule read from opposite ends.
  */
-export function applySetlistStep(step: SetlistStep, jam?: Jam | null, lineup?: JamBand): void {
+export function applySetlistStep(
+  step: SetlistStep,
+  jam?: Jam | null,
+  lineup?: JamBand,
+  /** True when this application lands on a bar line — the runner's switch. */
+  atBarLine = false,
+): void {
   void setBpm(step.bpm).catch(() => {});
   void setSoundType(step.soundType).catch(() => {});
   void setVolume(step.volume).catch(() => {});
@@ -39,6 +53,11 @@ export function applySetlistStep(step: SetlistStep, jam?: Jam | null, lineup?: J
      * a meter the table it already accepted was not written for. The step
      * carries the jam's meter anyway — `jamToSetlistStep` copied it — so
      * nothing is lost by letting the jam be the one that sends it.
+     *
+     * Which is also why `atBarLine` stops here. Holding the meter back to a
+     * bar line while the table goes out straight away would hand the engine
+     * a table to check against the meter it is still playing, and its way of
+     * refusing one is silence. The pair travels together or not at all.
      */
     pushJam(jam, compileJam(jam, { formBar: 0, lineup }));
     return;
@@ -75,7 +94,8 @@ export function applySetlistStep(step: SetlistStep, jam?: Jam | null, lineup?: J
     const steps: Array<() => Promise<unknown>> = [
       () => setSubdivision(step.subdivision as Subdivision),
     ];
-    if (step.beatGroups.length > 0) steps.push(() => setBeatGroups(step.beatGroups));
+    if (step.beatGroups.length > 0)
+      steps.push(() => setBeatGroups(step.beatGroups, atBarLine));
     if (typeof step.freeMode === "boolean") steps.push(() => setFreeMode(step.freeMode as boolean));
     for (const run of steps) {
       try {

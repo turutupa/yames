@@ -34,9 +34,11 @@ import type { BeatEvent, Setlist, SetlistStep } from "../../../types";
  * accent dots, the zen visuals, the floating widget all want "a whole beat".
  *
  * `measureBeat` is bar-local and captured before the engine's counters
- * advance, so it is 0 again the moment `beat_groups` changes: a step whose
- * meter differs from the one before it starts counting from its own bar one,
- * and a step that only changes tempo cannot move the count at all.
+ * advance. A step whose meter differs from the one before it starts counting
+ * from its own bar one, because the engine gives a meter posted at a bar
+ * line to the bar that line opened — the switch's bar line and the new
+ * meter's bar one are the same bar line, and there is no one-beat bar
+ * between them. A step that only changes tempo cannot move the count at all.
  *
  * The clocks are deliberately different in kind, for the reason
  * `usePlaybackClock` gives: bars are counted from engine bar lines, because
@@ -170,7 +172,12 @@ export function useSetlistRunner(
         freeMode: context.meter.freeMode,
       };
     }
-    applySetlistStep(step, jam, context?.lineup);
+    // On a bar line, always: the runtime lands every switch on one (U9.3),
+    // and a run's first step is applied as playback starts, where the engine
+    // is opening bar one anyway. That is what lets the engine give the step's
+    // meter to the bar the switch landed on instead of restacking its grid a
+    // beat later — see `applySetlistStep`.
+    applySetlistStep(step, jam, context?.lineup, true);
     playingJamRef.current = jam;
     setPlayingJam(jam);
     jamLinesRef.current = jam

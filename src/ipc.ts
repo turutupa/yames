@@ -79,8 +79,24 @@ export async function setSoundType(soundType: string): Promise<void> {
   return invoke("set_sound_type", { soundType });
 }
 
-export async function setBeatGroups(groups: number[]): Promise<void> {
-  return invoke("set_beat_groups", { groups });
+/**
+ * Set the bar's beat grouping.
+ *
+ * `atBarLine` is the setlist's, and nothing else's: a step switch is posted
+ * ON a bar line, and the engine then gives the new meter to the bar that line
+ * opened rather than restacking its grid one tick later. Without it the seam
+ * between two steps in different meters was a one-beat bar — two accents a
+ * beat apart — and the step arriving lost a bar of real playing.
+ *
+ * Every other caller leaves it out. A meter changed by hand while the click
+ * runs restarts the bar under your fingers, which is what somebody dragging
+ * 4/4 to 3/4 on the meter screen is asking for.
+ */
+export async function setBeatGroups(groups: number[], atBarLine = false): Promise<void> {
+  // Sent only when it is true. Rust reads it as an `Option<bool>`, so a
+  // caller that has never heard of bar lines sends the payload it always
+  // sent and gets the behaviour it always got.
+  return invoke("set_beat_groups", atBarLine ? { groups, atBarLine } : { groups });
 }
 
 export async function setFreeMode(enabled: boolean): Promise<void> {
