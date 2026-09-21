@@ -121,6 +121,58 @@ export function clipLayout(shape: ClipShape): ClipLayout {
 }
 
 /**
+ * The other composition: the picture fills the frame, the furniture sits ON it.
+ *
+ * W32. Songs' clip puts a marked-up band UNDER the picture and the comment on
+ * `clipLayout` says why — a strip of verdict dots across a person's hands is
+ * the one arrangement that makes the picture worse. A JAM has no verdict. What
+ * it has is a chord, the next chord and a bar grid, which is furniture of the
+ * kind every play-along video on the internet lays over the picture, and
+ * which a viewer reads more easily large over the frame than small under a
+ * letterboxed one.
+ *
+ * So a renderer says which composition it wants (`ClipStrip.overlay`) and the
+ * two live side by side. Songs' geometry is untouched, to the pixel.
+ *
+ * The furniture keeps the same boxes and the same names, so the compositor
+ * paints one or the other without knowing which: `picture` is simply the whole
+ * frame, and `strip` and `caption` sit over its lower edge on a ground the
+ * renderer draws for itself.
+ */
+export function clipOverlayLayout(shape: ClipShape): ClipLayout {
+  const { width, height } = clipSize(shape);
+  const pad = Math.round(width * 0.02);
+  // Taller than the letterboxed band, because it is over the picture rather
+  // than beside it and the chord in it is the thing being read.
+  const stripHeight = shape === "tall" ? 96 : 64;
+  const captionHeight = shape === "tall" ? 60 : 44;
+
+  return {
+    width,
+    height,
+    picture: { x: 0, y: 0, width, height },
+    strip: {
+      x: pad,
+      y: height - captionHeight - stripHeight - pad * 2,
+      width: width - pad * 2,
+      height: stripHeight,
+    },
+    caption: {
+      x: pad,
+      y: height - captionHeight - pad,
+      width: width - pad * 2,
+      height: captionHeight,
+    },
+    mark: markBox(shape, width, pad),
+    type: {
+      caption: shape === "tall" ? 30 : 26,
+      section: shape === "tall" ? 22 : 19,
+      mark: markType(shape),
+    },
+  };
+}
+
+/**
  * How big the word "yames.app" is on the mark.
  *
  * Big enough to read on a phone, which is the whole requirement and the

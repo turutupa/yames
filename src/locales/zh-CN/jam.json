@@ -720,7 +720,8 @@
     },
     "takeVideo": {
       "save": "存成视频",
-      "chorus": "第 {{count}} 遍"
+      "chorus": "第 {{count}} 遍",
+      "next": "接下来"
     }
   },
   "scale": {

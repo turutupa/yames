@@ -142,6 +142,14 @@ function readPalette(): ClipPalette {
     line: token("--border", "#2a2a2a"),
     accent: token("--accent", "#ff7a1a"),
     marks,
+    // The face the app is actually set in (W32), read off the body rather
+    // than guessed: the canvas was drawing in `system-ui`, which on this
+    // machine is a different typeface from the one on screen. The fallback is
+    // `global.css`'s own stack, spelled out, for a webview that will not
+    // report a computed family.
+    face:
+      getComputedStyle(document.body).fontFamily ||
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   };
 }
 

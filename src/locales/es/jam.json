@@ -741,7 +741,8 @@
       "chorus": "Vuelta {{count}}",
       "chorus_one": "Vuelta {{count}}",
       "chorus_many": "Vuelta {{count}}",
-      "chorus_other": "Vuelta {{count}}"
+      "chorus_other": "Vuelta {{count}}",
+      "next": "luego"
     }
   },
   "scale": {

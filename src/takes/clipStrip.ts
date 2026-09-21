@@ -22,6 +22,40 @@ import type { ClipPalette } from "./clipRecorder";
  */
 export type ClipStrip = {
   /**
+   * Which composition this renderer wants (W32).
+   *
+   * `false` or absent is Songs': the picture in the top of the frame with the
+   * furniture in a band under it. `true` is a jam's: the picture fills the
+   * frame and the furniture sits on its lower edge, the way every play-along
+   * video on the internet is laid out. See `clipOverlayLayout` in `clip.ts`
+   * for why the two exist rather than one.
+   *
+   * A renderer that asks for the overlay draws its own ground under the
+   * furniture — the compositor cannot know how dark that needs to be over a
+   * picture it has never seen.
+   */
+  overlay?: boolean;
+  /**
+   * Paint over the PICTURE, after it and before the strip. Optional.
+   *
+   * Where a jam puts the chord you are playing over: large, in a lower corner
+   * of the frame, with the one coming next small beside it. It is here rather
+   * than in `paintInto` because the strip is a band the compositor clips to
+   * and draws a playhead through, and a chord that size does not live in a
+   * band. Called whether or not there is a picture, with the picture's box.
+   */
+  paintOverPicture?: (
+    ctx: CanvasRenderingContext2D,
+    args: {
+      box: ClipBox;
+      layout: ClipLayout;
+      palette: ClipPalette;
+      nowMs: number;
+      /** True when there is a real picture under this. */
+      hasPicture: boolean;
+    },
+  ) => void;
+  /**
    * Paint the scrolling content into `box`.
    *
    * The compositor has already filled the ground and clipped to the box, and
@@ -45,6 +79,15 @@ export type ClipStrip = {
        * no verdict to paint, which simply ignores it.
        */
       marks: boolean;
+      /**
+       * Whether there is a real picture behind this frame (W32).
+       *
+       * A renderer laying its own ground needs it: a dark scrim is right over
+       * somebody’s living room and wrong over a light theme with nothing
+       * behind it, where it reads as a grey slab with the theme’s dark ink
+       * on top of it.
+       */
+      hasPicture: boolean;
     },
   ) => void;
   /**

@@ -731,7 +731,8 @@
       "save": "Als Video speichern",
       "chorus": "Chorus {{count}}",
       "chorus_one": "Chorus {{count}}",
-      "chorus_other": "Chorus {{count}}"
+      "chorus_other": "Chorus {{count}}",
+      "next": "als Nächstes"
     }
   },
   "scale": {
