@@ -45,7 +45,8 @@
     "save": "Enregistrer le préréglage",
     "delete": "Supprimer",
     "newPreset": "Nouveau préréglage",
-    "newDrill": "Nouvel exercice"
+    "newDrill": "Nouvel exercice",
+    "unsaved": "Non enregistré"
   },
   "emptyStates": {
     "presets": {

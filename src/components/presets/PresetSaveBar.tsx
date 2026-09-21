@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { Preset } from "../../types";
+import { IS_MOBILE } from "../../platform";
 
 interface PresetSaveBarProps {
   activePreset: Preset | null;
@@ -118,9 +119,21 @@ export function PresetSaveBar({
         <>
           {/* Not a button: there is no stored name to rename yet. The class
               is the loaded preset's so the two states sit on the same line
-              at the same size — what changes between them is the words. */}
+              at the same size — what changes between them is the words.
+
+              On a phone it is one word. "Unsaved metronome" needs 150px and
+              the bar has 110, so at 360 it read "Unsaved metr…" — a sentence
+              the screen cut in half to tell you which mode you were in, on a
+              screen whose lit tab already says so. The tab carries the noun;
+              the bar carries the state. */}
           <span className="preset-active-name preset-active-name--unsaved">
-            {t(view === "drill" ? "presets.unsavedDrill" : "presets.unsavedMetronome")}
+            {t(
+              IS_MOBILE
+                ? "presets.unsaved"
+                : view === "drill"
+                  ? "presets.unsavedDrill"
+                  : "presets.unsavedMetronome",
+            )}
           </span>
 
           <button

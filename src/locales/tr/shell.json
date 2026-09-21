@@ -45,7 +45,8 @@
     "save": "Ön ayarı kaydet",
     "delete": "Sil",
     "newPreset": "Yeni ayar",
-    "newDrill": "Yeni çalışma"
+    "newDrill": "Yeni çalışma",
+    "unsaved": "Kaydedilmedi"
   },
   "emptyStates": {
     "presets": {

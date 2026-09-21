@@ -3297,11 +3297,40 @@ body[data-sheet-maximized] .rail {
    15px rather than 16.5: still the largest text in the bar and still the
    answer to "what am I looking at", and a phone's bar is 110px of name where
    a desktop's is three hundred. The placeholder the app writes for a stage
-   nobody has saved yet — "Unsaved metronome" — is a sentence rather than a
-   name and still does not fit at 360; every name a musician actually gives a
-   preset does. */
+   nobody has saved yet is one word on a phone for the same reason — see
+   PresetSaveBar. */
 .main-window.is-mobile .preset-save-area .preset-active-name {
   flex: 0 1 auto;
   max-width: 100%;
   font-size: 15px;
+}
+
+/* ── What is left of the bar's left half on a phone (M12) ──────────────────
+ *
+ * Measured at 360 on the merged branch, the setlist tab's bar read
+ *
+ *     D  [SETLIST]  No changes
+ *
+ * — a routine called "Daily routine" cut to its initial, to make room for a
+ * badge repeating the word already lit in the tab bar and for a caption
+ * saying that nothing had happened. Both go, and the name gets the room.
+ *
+ * The badge: the tab bar at the foot of the screen says Setlist, in the
+ * accent, with the tab lit. Saying it twice on a 360px row costs the one
+ * thing the row is for. (The jam's badge went the same way in M09.)
+ *
+ * "No changes": a disabled button is a state you have to read to learn that
+ * there is nothing to do. The jam bar already drew nothing there; the preset
+ * and setlist bars now do the same, so the only save affordance a phone ever
+ * shows is a live one. "Edited" is already a bare dot below 1081px, which is
+ * every phone — the word stays in the accessibility tree.
+ *
+ * Desktop keeps all three: it has the room, and the badge is what makes
+ * "setlist" a precise word there (U9.4). */
+.main-window.is-mobile .setlist-save-area .setlist-badge {
+  display: none;
+}
+
+.main-window.is-mobile .preset-save-area .preset-text-btn:disabled {
+  display: none;
 }

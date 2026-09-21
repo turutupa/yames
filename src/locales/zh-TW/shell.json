@@ -45,7 +45,8 @@
     "save": "儲存預設",
     "delete": "刪除",
     "newPreset": "新增預設",
-    "newDrill": "新增練習"
+    "newDrill": "新增練習",
+    "unsaved": "未儲存"
   },
   "emptyStates": {
     "presets": {
