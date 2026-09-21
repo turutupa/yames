@@ -1029,6 +1029,20 @@
   width: 100%;
   min-width: 0;
   flex: 0 0 auto;
+  /* ── The air moved, it was not added (W36 item 3) ─────────────────────
+   *
+   * The owner: *"the row below the alphatab is great, but can we reduce its
+   * margin bottom and increase its margin top so it's not so close to the
+   * tabs?"*. Measured at 2000×1124 before this: six pixels between the frame
+   * and the strip, and twenty-eight between the strip and the transport — so
+   * the row was pressed against the music and floating over nothing.
+   *
+   * Twenty above and sixteen below now. The six is `.songs-view`'s own gap
+   * and this is the rest of it; the sixteen is the content region's gap,
+   * narrowed for this tab alone just below. Moving the air rather than adding
+   * it leaves the frame TALLER than it was — 862px to 872px at the owner's
+   * window — which is the condition the brief puts on this. */
+  margin-top: 14px;
 }
 
 /* While the transport runs, what you are not using stands back (W29 item 3).
@@ -1137,6 +1151,11 @@
   background: var(--bg-panel);
   box-shadow: var(--shadow);
   overflow-y: auto;
+  /* No sideways scroll inside a popover, ever (W36 item 4). The panel is a
+     fixed 320px and everything in it is told to fit; a horizontal bar here
+     would mean something did not, and hiding it is how that becomes a
+     clipped row somebody reports rather than a bar somebody drags. */
+  overflow-x: hidden;
 }
 
 /* Inside the panel every group is a block of its own, stacked, with room to
@@ -1154,6 +1173,19 @@
 
 .songs-more-pop .songs-band {
   flex-direction: column;
+  /* `nowrap`, and this one line is most of item 4 (W36).
+   *
+   * The band's own rule says `flex-wrap: wrap`, from the days when it was a
+   * ROW of lanes on the strip. Turned into a column and left wrapping, it is
+   * `column wrap` — and in a column-wrap container the cross axis is
+   * horizontal, so each COLUMN of lanes is as wide as its widest lane and
+   * `align-items: stretch` stretches to that rather than to the panel.
+   * Measured with a forty-character part name: the panel 290px inside, and
+   * every lane 447px, which is the mute switch hanging 157px off the right
+   * edge and the 718px of sideways scroll under it. Both of the things in
+   * the owner's screenshot, from one word inherited out of a rule about a
+   * layout this has not had since W29. */
+  flex-wrap: nowrap;
   align-items: stretch;
   gap: 8px;
   width: 100%;
@@ -1163,17 +1195,49 @@
      window, which is the smallest the app opens at. */
   max-height: min(46vh, 320px);
   overflow-y: auto;
+  /* ── Never sideways, and never a lane wider than the panel (W36 item 4) ──
+   *
+   * The owner's screenshot: the mute switches cut in half at the right edge
+   * and a horizontal scrollbar under the band. A file with six parts puts a
+   * VERTICAL scrollbar on this box, which takes its fifteen pixels off the
+   * lanes — and the lanes were laid out from fixed numbers, so they did not
+   * give the fifteen back, they overflowed. `scrollbar-gutter` reserves the
+   * room whether the bar is showing or not, so a row is the same width with
+   * six parts as with twelve; `overflow-x` is the promise itself. A popover
+   * that scrolls sideways is never right, whatever put it there. */
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
   overscroll-behavior: contain;
+  min-width: 0;
 }
 
 .songs-more-pop .songs-band-lane {
   flex: 0 0 auto;
+  min-width: 0;
   max-width: none;
 }
 
+/* ── What gives, and in what order, when a name is long (W36 item 4) ─────
+ *
+ * The owner: part names cut to seven letters — "Lead Gu…", "Rhythm …",
+ * "Addition…" — with room to spare on the row. They were cut because the
+ * name was pinned at a flat 74px whatever the panel had left over.
+ *
+ * So the name takes the slack now, and the slider is what gives first:
+ * `flex-shrink: 4` against the name's 1 means a lane short of room takes it
+ * out of the fader until the fader hits its floor, and only then does the
+ * name begin to ellipsise. The number, the S and the mute have no shrink at
+ * all — those are the three things clipped in the owner's screenshot, and
+ * none of them can be again. */
 .songs-more-pop .songs-band-name {
-  flex: 0 0 74px;
+  flex: 1 1 auto;
+  min-width: 4ch;
   max-width: none;
+}
+
+.songs-more-pop .songs-band-fader {
+  flex: 0 4 110px;
+  min-width: 44px;
 }
 
 .songs-more-pop .songs-band-name-text {
@@ -1660,6 +1724,21 @@
   color: var(--accent);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+}
+
+/* The switch the dot lives on (W36 item 4).
+ *
+ * Without these three lines the dot is an INLINE span: its width, its height
+ * and its `flex` do nothing, and a 50 % radius on a 1.5px border with no box
+ * to bend around draws a curl over the first letter of the word beside it.
+ * That is the "broken record glyph" in the owner's screenshot. The camera's
+ * switch has had exactly this rule since W21, which is why its dot was the
+ * one that looked right. */
+.songs-record-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 }
 
 .songs-record-dot {
@@ -2173,4 +2252,19 @@
     padding-left: 20px;
     padding-right: 20px;
   }
+}
+
+/* The other half of moving the strip's air (W36 item 3).
+ *
+ * The content region puts 28px between the bar, the stage and the transport,
+ * everywhere in the app. On this tab that 28 is what sat under the strip
+ * doing nothing, and 28 above the stage is a gap under a bar that now carries
+ * the song rather than furniture. Sixteen in both places: the strip's own
+ * `margin-top` spends part of what the bottom one gives up, and the music
+ * keeps the rest.
+ *
+ * `[data-view="songs"]`, so no other mode's spacing moves — the layout suite
+ * measures all five. */
+.main-content[data-view="songs"] {
+  gap: 16px;
 }

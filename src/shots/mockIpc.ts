@@ -499,6 +499,56 @@ function longSongTex(): string {
   return lines.join("\n");
 }
 
+/**
+ * `?song=band2` / `band6` / `band12` — a file with that many parts (W36 item 4).
+ *
+ * The owner's screenshot of the "More" panel: the band's rows wider than the
+ * panel, the mute switches cut in half at the right edge, a sideways
+ * scrollbar, and the part names cut to seven letters with room to spare. Not
+ * one of them is visible on a three-part file, which is every song written
+ * for these pictures until now — a lane is only squeezed once there are
+ * enough of them to put a scrollbar down the side, and a name is only cut
+ * once it is longer than the box it was pinned into.
+ *
+ * So: the number of parts is a knob, and one of them carries a forty-
+ * character name, which is about what a Guitar Pro file off the internet
+ * calls its second rhythm guitar.
+ */
+const LONG_PART_NAME = "Additional Rhythm Guitar, Left Channel!!";
+
+function bandSongTex(parts: number): string {
+  const figure = [
+    "\\ts 4 4 5.4.4 5.4.4 5.4.4 5.4.4 |",
+    "5.4.4 5.4.4 5.4.4 5.4.4 |",
+    "3.4.4 3.4.4 3.4.4 3.4.4 |",
+    "3.4.4 3.4.4 3.4.4 3.4.4 |",
+  ].join("\n");
+  const extras: string[] = [];
+  for (let i = 1; i < parts; i++) {
+    // The long name goes on the second part, where it is the first thing a
+    // reader of the panel meets.
+    const name = i === 1 ? LONG_PART_NAME : `Part ${String(i + 1)}`;
+    extras.push(`\\track "${name}"\n\\tuning e5 b4 g4 d4 a3 e3\n${figure}`);
+  }
+  return `\\title "A full band"
+\\artist "Written for the pictures"
+\\tempo 96
+.
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\section Verse
+${figure}
+${extras.join("\n")}`;
+}
+
+/** `band2`, `band6`, `band12` — how many parts the file has. */
+function bandPartsAsked(choice: string): number | null {
+  const match = /^band(\d+)$/.exec(choice);
+  if (!match) return null;
+  const parts = Number(match[1]);
+  return parts >= 1 && parts <= 16 ? parts : null;
+}
+
 let songRecord: SongRecord | null = null;
 let songRecordFor = "";
 
@@ -509,17 +559,21 @@ let songRecordFor = "";
  * notes, every scene means the same thing with any of them, and a field would
  * have been three copies of every Songs recipe in `scenarios.ts`.
  */
-function songChoice(): "default" | "sixteenths" | "seven" | "long" {
-  const asked = new URLSearchParams(window.location.search).get("song");
-  return asked === "sixteenths" || asked === "seven" || asked === "long" ? asked : "default";
+function songChoice(): string {
+  const asked = new URLSearchParams(window.location.search).get("song") ?? "";
+  if (asked === "sixteenths" || asked === "seven" || asked === "long") return asked;
+  return bandPartsAsked(asked) === null ? "default" : asked;
 }
 
 /** Built once: parsing is the expensive half and the shot never changes it. */
 function songShotRecord(): SongRecord {
   const choice = songChoice();
   if (!songRecord || songRecordFor !== choice) {
+    const parts = bandPartsAsked(choice);
     const tex =
-      choice === "sixteenths"
+      parts !== null
+        ? bandSongTex(parts)
+        : choice === "sixteenths"
         ? SHOT_SONG_SIXTEENTHS
         : choice === "seven"
           ? SHOT_SONG_SEVEN
@@ -1248,6 +1302,38 @@ export function installShotMock(shot: Shot, theme: string): void {
       beatCount = 0;
       onsetsSaid = 0;
       return { bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 };
+    },
+    /*
+     * A click on the tab while the piece is running (W28, and W36 item 1).
+     *
+     * `commands.rs`'s `seek_song` walks the table the callback is walking and
+     * puts the cursor at that bar's first sample, so the next report comes
+     * from there; the count this harness derives its reports from is the same
+     * idea one level up. Without it the mock answered a seek by doing nothing
+     * at all, the song went on playing where it was, and the one thing a test
+     * about clicking mid-song wants to measure could not happen.
+     */
+    seek_song: (a) => {
+      const transport = songTransport;
+      if (!transport) return null;
+      const bars = transport.bars.slice(transport.range.startBar, transport.range.endBar + 1);
+      const first = bars[0];
+      if (!first) return null;
+      const beatTicks = (transport.ticksPerQuarter * 4) / (first.denominator || 4);
+      const countInBeats = (transport.countInBars || 0) * (first.numerator || 4);
+      // The nearest edge for a bar the range does not hold, which is what the
+      // real command's binary search falls back to.
+      const asked = Math.min(
+        Math.max(Number(a?.playedBar) || 0, transport.range.startBar),
+        transport.range.endBar,
+      );
+      let into = 0;
+      for (let i = transport.range.startBar; i < asked; i++) {
+        into += transport.bars[i]?.lengthTicks ?? 0;
+      }
+      beatCount = countInBeats + Math.round(into / beatTicks);
+      onsetsSaid = 0;
+      return null;
     },
     clear_song: () => {
       songTransport = null;

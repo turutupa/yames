@@ -1226,11 +1226,11 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
                 camera, and the file's own band. Every one of them is on a
                 footswitch as well (W25). */}
             <SongStripMore
-              badge={
-                mutedCount > 0 ? (
-                  <span className="songs-band-opener-off">{mutedCount}</span>
-                ) : undefined
-              }
+              /* W36 item 4 — the figure says what it counts, in the tooltip
+                 and in the button's accessible name. "More 1" said that
+                 something was one of something. */
+              count={mutedCount}
+              countLabel={t("songs.band.turnedDown", { count: mutedCount })}
             >
               {sectionsInMore && sectionsGroup}
 

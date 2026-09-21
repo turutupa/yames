@@ -30,7 +30,7 @@
  * a group and one `<text>` inside it, and they never touch each other. An
  * empty map paints nothing and costs two map lookups.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   AlphaTabApi,
@@ -235,6 +235,31 @@ function applyTheme(settings: Settings): void {
    * list written here goes stale silently — a font nobody assigned is not an
    * error, it is just Georgia.
    *
+   * ## And the walk missed fifteen more, until W36 item 5
+   *
+   * The owner: *"I love that you change the font of the numbers to match the
+   * theme… can we also do that with other fonts like 'TAB' or the number for
+   * the bpm … it says 161 but in that weird font"*.
+   *
+   * He had spotted exactly where the walk stopped. `Object.keys` returns OWN
+   * properties, and in alphaTab 1.8 only four fonts are still own fields of
+   * `RenderingResources` — the tablature numbers among them, which is why the
+   * numbers were the part that looked right. Every other face moved into
+   * `elementFonts`, a `Map<NotationElement, Font>` filled in the constructor:
+   * the tempo marker, the section names, the bar numbers, the fingerings, the
+   * chord names, the tuning legend, "P.M." and the rest. A Map is not a
+   * `Font`, so the walk stepped straight over it and fifteen faces stayed
+   * Georgia and Arial.
+   *
+   * So the walk goes one level into any Map it finds, rather than naming
+   * `elementFonts`: the same reason the walk exists at all is the reason it
+   * should not know that name either.
+   *
+   * What this cannot reach is the music font. "TAB" at the head of the staff
+   * is `MusicFontSymbol.SixStringTabClef` — a Bravura glyph, the tab staff's
+   * clef, drawn the way a G clef is — and the quarter note in "♩ = 96" is
+   * another. They are notation, not text, and they stay alphaTab's.
+   *
    * Only the families change. The sizes and styles alphaTab chose are part of
    * the engraving, and a music renderer has better reasons for them than we
    * do.
@@ -243,8 +268,56 @@ function applyTheme(settings: Settings): void {
   for (const key of Object.keys(res)) {
     const value = (res as unknown as Record<string, unknown>)[key];
     if (value instanceof model.Font) value.families = families;
+    else if (value instanceof Map) {
+      // Per-instance clones — `RenderingResources`'s constructor copies each
+      // default with `withSize` — so writing to them cannot reach back into
+      // the statics every other score would then be drawn from.
+      for (const entry of (value as Map<unknown, unknown>).values()) {
+        if (entry instanceof model.Font) entry.families = families;
+      }
+    }
   }
 }
+
+/**
+ * The theme's faces, in the browser, before a note is engraved (W36 item 5).
+ *
+ * alphaTab measures every piece of text it draws and lays the page out from
+ * the answer. Asked to measure in a face the browser has not loaded, it
+ * measures the FALLBACK — and then the face arrives, the glyphs swap, and the
+ * spacing is the spacing of a font that is no longer on the page. Nine of the
+ * thirteen themes name a Google font (`index.html` fetches them all in one
+ * stylesheet), so this is the ordinary case rather than an edge one.
+ *
+ * `document.fonts.load` takes a CSS font shorthand and has to be asked for
+ * every WEIGHT and STYLE that will be drawn, or the italic effect text is the
+ * one that swaps.
+ *
+ * `null` means "there is nothing to wait for" — no `document.fonts` (happy-dom
+ * has none, and there are still a webview or two that do not), or a stack this
+ * file cannot make a shorthand out of. It is a separate answer from a promise
+ * that resolves immediately, because the caller can act on it in the same
+ * commit: a wait that costs a render is a blank frame nobody asked for.
+ */
+function warmFaces(families: string[]): Promise<unknown> | null {
+  const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+  const first = families[0];
+  if (!fonts || typeof fonts.load !== "function" || !first) return null;
+  try {
+    return Promise.all([
+      fonts.load(`400 14px ${first}`),
+      fonts.load(`700 14px ${first}`),
+      fonts.load(`italic 400 12px ${first}`),
+      // A family the browser will not resolve is a family it would have
+      // fallen back from anyway; the stack's next face is what gets drawn.
+    ]).catch(() => undefined);
+  } catch {
+    return null;
+  }
+}
+
+/** Themes whose faces this document has already been made to fetch. */
+const warmedThemes = new Set<string>();
 
 /** One map, shared, so "no lights" allocates nothing on every render. */
 const EMPTY_LIGHTS: ReadonlyMap<number, TimingMark> = new Map();
@@ -599,9 +672,41 @@ export function TabStage({
    * other half of the same promise: `TabStage.render.test.tsx` counts the
    * engravings across play, stop, play, a seek and a loop and finds ONE.
    */
+  /**
+   * The theme's faces are fetched before the first engrave (W36 item 5).
+   *
+   * `warmTheme` is which theme's faces are known to be in the browser, and
+   * the render effect below will not draw until it is this one — otherwise
+   * alphaTab measures in the fallback and lays the whole page out to
+   * somebody else's widths. A theme that has already been warmed once is
+   * answered in the same commit, so switching back and forth does not blank
+   * the page; `useLayoutEffect` is what makes that "same commit" rather than
+   * "one painted frame later".
+   */
+  const [warmTheme, setWarmTheme] = useState<string | null>(null);
+  useLayoutEffect(() => {
+    const warming = warmedThemes.has(themeId) ? null : warmFaces(themeFontFamilies());
+    if (!warming) {
+      warmedThemes.add(themeId);
+      setWarmTheme(themeId);
+      return;
+    }
+    let alive = true;
+    void warming.then(() => {
+      warmedThemes.add(themeId);
+      if (alive) setWarmTheme(themeId);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [themeId]);
+
   useEffect(() => {
     const host = hostRef.current;
-    if (!host) return;
+    // Nothing is engraved in a face the browser has not got yet — see
+    // `warmFaces`. Not a `setFailed`: it is a wait, and the "drawing…" line
+    // is already what is on screen.
+    if (!host || warmTheme !== themeId) return;
     setReady(false);
     setFailed(false);
 
@@ -647,9 +752,11 @@ export function TabStage({
     // array does not change it, and that is the whole point. `view` is a
     // setting the engraving is built from, so a change to it is a fresh
     // `AlphaTabApi`, the same as a theme change; its two fields rather than
-    // the object, which is new on every render.
+    // the object, which is new on every render. `warmTheme` is the gate on
+    // this theme's own faces having arrived (W36 item 5), not a fifth reason
+    // to re-engrave: it changes once per theme and never again.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [score.id, themeId, view.notation, view.zoom]);
+  }, [score.id, themeId, warmTheme, view.notation, view.zoom]);
 
   /**
    * Ctrl/Cmd and the wheel makes the music bigger (W29 item 3).
@@ -706,6 +813,59 @@ export function TabStage({
    * state update per frame would put the whole stage through React sixty
    * times a second, which is the opposite of what item 2 asks for.
    */
+  /* ── A click's own answer, until the engine catches up (W36, item 1's
+   *    second half) ───────────────────────────────────────────────────────
+   *
+   * The owner, after the first fix landed: *"when clicking on alphatab to go
+   * to a certain place, i think it's mostly flaky WHEN THE TABS ARE
+   * PLAYING"*, and *"if they're not playing sometimes they do a flickering
+   * thing like the cursor goes to where it was already and then to the target
+   * location"*. Two reports, one cause.
+   *
+   * The engine is the clock and a click is a message to it. Clicking bar 60
+   * while the piece runs sets a range (or calls `seek_song`), the engine acts
+   * on it at the next buffer, and its next POSITION report — the only thing
+   * this component was ever told — arrives one click tick later: seven
+   * hundred milliseconds at 84 BPM. For that whole interval the webview went
+   * on interpolating from the anchor it already had, so the line kept walking
+   * at bar 5 and then teleported to bar 60. Stopped, the same shape in
+   * miniature: a render that still carried the old position wrote it to
+   * `tickPosition`, the next render wrote the new one, and alphaTab drew both
+   * — the line going back where it was and then to where you clicked.
+   *
+   * So the click is believed at once, here, and the engine's reports are
+   * ignored until one of them agrees with it. That is the whole of the fix:
+   * the moment somebody presses the page, the webview's position IS the
+   * clicked beat, the cursor snaps there, the follow-scroll goes there, and
+   * nothing that was already in flight can pull either of them back.
+   *
+   * "Agrees" is a window rather than an equality, because the report the
+   * engine sends after a seek is the first click tick AFTER it, not the seek
+   * itself — a beat or so past the bar line. Six quarter notes is a bar and a
+   * half at four-four, which is wider than any first report and narrower than
+   * the distance to anywhere somebody would have bothered clicking from. A
+   * report BEFORE the target is always stale, whichever direction the click
+   * went, so the window is one-sided.
+   *
+   * And a backstop: if no report ever agrees — an engine that refused the
+   * seek, a piece that ended — the click stops being believed after a second
+   * and a half and the engine is the truth again. A cursor frozen on a
+   * promise nobody kept is worse than a cursor in the wrong bar.
+   */
+  const [localSeek, setLocalSeek] = useState<number | null>(null);
+  const quarter = score.ticksPerQuarter > 0 ? score.ticksPerQuarter : 960;
+  useEffect(() => {
+    if (localSeek === null) return;
+    if (tick >= localSeek && tick <= localSeek + quarter * 6) setLocalSeek(null);
+  }, [tick, localSeek, quarter]);
+  useEffect(() => {
+    if (localSeek === null) return;
+    const timer = window.setTimeout(() => setLocalSeek(null), 1500);
+    return () => window.clearTimeout(timer);
+  }, [localSeek]);
+  /** Where the line is drawn: the click's answer, or the engine's. */
+  const shownTick = localSeek ?? tick;
+
   const motionRef = useRef<CursorMotion | null>(null);
   /** The frame interval, smoothed — the lead is two of them. */
   const frameMsRef = useRef(0);
@@ -716,14 +876,14 @@ export function TabStage({
       // Stopped is a place, not a journey: the playhead, or the top of the
       // range, written once.
       motionRef.current = null;
-      api.tickPosition = tick;
+      api.tickPosition = shownTick;
       return;
     }
 
     motionRef.current = onReport(
       score,
       motionRef.current,
-      { tick, pass, atMs: performance.now() },
+      { tick: shownTick, pass, atMs: performance.now() },
       tempoPercent,
     );
 
@@ -751,7 +911,12 @@ export function TabStage({
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [tick, pass, playing, tempoPercent, endTick, score, ready]);
+    // `shownTick` and not `tick`: a click is believed before the engine
+    // answers (see above), and re-anchoring on it is what makes the line
+    // start travelling from the bar that was clicked instead of from the bar
+    // the song was in half a second ago. `onReport` sees a tick the tempo map
+    // does not lead to and snaps, which is exactly right for a seek.
+  }, [shownTick, pass, playing, tempoPercent, endTick, score, ready]);
 
   /**
    * Which group each onset is engraved in, worked out once per engraving.
@@ -885,6 +1050,26 @@ export function TabStage({
   // be torn down and rebuilt every time the selection changes.
   const latest = useRef({ selection, onSelect, onSeek, onClear, score });
   latest.current = { selection, onSelect, onSeek, onClear, score };
+
+  /**
+   * Go to a played bar: believe it here, then tell whoever owns the engine.
+   *
+   * Both halves matter and they are one gesture, so they are one function —
+   * the pointer and the arrow keys both go through it, and neither can move
+   * the playhead without the line and the page following it at once
+   * (W36 item 1). `onSeek` decides what the ENGINE does about it; this
+   * decides what the player SEES, which is the half that was arriving up to
+   * a click tick late.
+   */
+  const goTo = useCallback((playedBar: number) => {
+    const { score: current, onSeek: seek } = latest.current;
+    if (!seek) return;
+    const at = current.bars[playedBar]?.startTick;
+    if (at !== undefined) setLocalSeek(at);
+    seek(playedBar);
+  }, []);
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
   /** Where the arrows start counting from. Read, not depended on. */
   const playheadRef = useRef<number | null>(playhead);
   playheadRef.current = playhead;
@@ -994,7 +1179,7 @@ export function TabStage({
         latest.current.onSelect?.(dragRange(dragging));
         return;
       }
-      if (press) latest.current.onSeek?.(press.bar);
+      if (press) goToRef.current(press.bar);
     };
 
     overlay.addEventListener("pointerdown", onDown);
@@ -1032,6 +1217,7 @@ export function TabStage({
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       const { score: current, selection: chosen, onSeek: seek, onClear: clear } = latest.current;
+      const go = goToRef.current;
       if (e.key === "Escape") {
         if (!chosen) return;
         e.preventDefault();
@@ -1058,7 +1244,10 @@ export function TabStage({
       else if (e.key === "Home") next = floor;
       if (next === null) return;
       e.preventDefault();
-      seek(next);
+      // Through `goTo`, like a click: an arrow that moved the playhead
+      // without the line following it for half a second is the same
+      // complaint in a different gesture.
+      go(next);
     },
     [],
   );
@@ -1174,7 +1363,7 @@ export function TabStage({
     const viewport = host?.closest<HTMLElement>(".songs-tab-viewport");
     const lookup = apiRef.current?.renderer?.boundsLookup;
     if (!host || !viewport || !lookup) return;
-    const printed = printedBarOfPlayed(score, playedBarAtTick(score, tick));
+    const printed = printedBarOfPlayed(score, playedBarAtTick(score, shownTick));
     if (printed === null) return;
     const bounds = lookup.findMasterBarByIndex(printed);
     if (!bounds) return;
@@ -1202,8 +1391,10 @@ export function TabStage({
     });
     // `rendered` is the engraving these rectangles belong to: a re-engrave at
     // another zoom moves every bar, and the place has to be found again on the
-    // new page rather than kept from the old one.
-  }, [tick, ready, rendered, playing, score]);
+    // new page rather than kept from the old one. `shownTick` rather than
+    // `tick`, so a click takes the page with it at once and a report that
+    // predates the click cannot drag it back (W36 item 1).
+  }, [shownTick, ready, rendered, playing, score]);
 
   return (
     <div className="songs-tab-viewport" data-selecting={drag ? "" : undefined}>

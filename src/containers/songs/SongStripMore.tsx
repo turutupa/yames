@@ -28,11 +28,21 @@ import { useMenuPlacement } from "../jam/useMenuPlacement";
 
 export interface SongStripMoreProps {
   children: React.ReactNode;
-  /** Shown on the chip: how many of the players are turned down, and so on. */
-  badge?: React.ReactNode;
+  /**
+   * A number to put on the chip, and what it counts (W36 item 4).
+   *
+   * The owner: *"the chip reads 'More 1' with an unexplained count"*. It was
+   * a bare figure beside a word, which tells a reader that something is one
+   * of something and nothing else — and a screen reader read it as "More 1",
+   * which is worse. Both halves arrive together now or neither does: the
+   * figure is the glance, the sentence is the tooltip and the accessible
+   * name, and a caller with nothing to count passes nothing.
+   */
+  count?: number;
+  countLabel?: string;
 }
 
-export function SongStripMore({ children, badge }: SongStripMoreProps) {
+export function SongStripMore({ children, count = 0, countLabel }: SongStripMoreProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { wrapRef, menuRef, style } = useMenuPlacement(open, { prefer: "above" });
@@ -67,10 +77,21 @@ export function SongStripMore({ children, badge }: SongStripMoreProps) {
         className="songs-chip songs-more-chip"
         aria-expanded={open}
         aria-haspopup="dialog"
+        title={count > 0 ? countLabel : undefined}
         onClick={() => setOpen((was) => !was)}
       >
         {t("songs.strip.more")}
-        {badge}
+        {count > 0 && countLabel && (
+          <>
+            <span className="songs-band-opener-off" aria-hidden="true">
+              {count}
+            </span>
+            {/* The figure is the glance and this is what it means — so the
+                button's accessible name is "More, 2 players turned down"
+                rather than "More 2". */}
+            <span className="sr-only">{countLabel}</span>
+          </>
+        )}
       </button>
       {open &&
         createPortal(
