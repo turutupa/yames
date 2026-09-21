@@ -3468,3 +3468,369 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* ══ The band, on a phone (M09) ════════════════════════════════════════════
+ *
+ * Everything below is under `.main-window.is-mobile`, the class only the
+ * phone build writes (`MainWindow`, from the build-time `IS_MOBILE`). A
+ * desktop window dragged to 360px still has a rail, a pointer and a keyboard,
+ * and these are the wrong answers for it — the same reasoning shell.css gives
+ * for the phone shell.
+ *
+ * The container queries above keep doing their job: the stage and the band
+ * are still containers, and what they decide at 312px is still what the rows
+ * start from. These rules are the phone's own layout on top of that, and
+ * they are written against `.main-window.is-mobile` rather than a width, so
+ * nothing here can reach a desktop pixel.
+ *
+ * What was measured before they existed (plans/tasks/mobile/M08-JAM-GAPS.md):
+ * the stage laid out at 953px inside a 360px screen, and the −, + and TAP
+ * that change the tempo were entirely off the right-hand edge.
+ */
+
+/* The stage's 48px gutters — 24 under 880px — were cut for a window with a
+ * 252px rail beside it. On a phone the content region already pads 14px each
+ * side, so those were another 48px of a 360px screen spent on nothing while
+ * the tempo ran off the edge. The stage takes the region's own gutter and
+ * keeps the bottom padding every other phone stage has, so the last block
+ * clears the transport when you scroll to it. */
+.main-window.is-mobile .main-content[data-view="jam"] > .view-transition-wrapper {
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 16px;
+}
+
+/* The key, the feel and the drum intensity: a column of full-width controls.
+ *
+ * They are a wrapping row on a desktop, where three 214px pills fit side by
+ * side. At 360 that row is three pills on three lines, each ending 100px
+ * short of the right edge — which reads as a staircase rather than as a
+ * decision. Full width, they read as what they are: one control per line,
+ * each a thumb tall. */
+.main-window.is-mobile .jam-head-controls {
+  width: 100%;
+  align-self: stretch;
+  align-items: stretch;
+}
+
+.main-window.is-mobile .jam-head-row {
+  align-items: stretch;
+  width: 100%;
+  gap: 12px;
+}
+
+.main-window.is-mobile .jam-head-row > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.main-window.is-mobile .jam-head-row .jam-segmented {
+  width: 100%;
+}
+
+/* The key chip is a dropdown, and on this column it is the same shape as the
+   two pills under it rather than a chip left hanging at its own width. */
+.main-window.is-mobile .jam-key-picker .jam-dropdown {
+  width: 100%;
+  justify-content: space-between;
+}
+
+/* ── The tempo ─────────────────────────────────────────────────────────────
+ *
+ * This block is the whole reason the stage was 953px wide at 360: the number,
+ * its units and the three controls were one row that could not break, so a
+ * musician on the Jam tab could read the tempo and not change it.
+ *
+ * The row wraps now, and the controls take the line under it at the size a
+ * thumb needs: −, + and a TAP that fills what is left, which is both the
+ * easiest of the three to hit and the one you press in time with music. */
+.main-window.is-mobile .main-content[data-view="jam"] .tempo-block {
+  width: 100%;
+}
+
+.main-window.is-mobile .main-content[data-view="jam"] .bpm-display {
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0 14px;
+}
+
+.main-window.is-mobile .main-content[data-view="jam"] .tempo-controls {
+  flex: 1 0 100%;
+  gap: 10px;
+  margin-left: 0;
+  padding-bottom: 0;
+}
+
+.main-window.is-mobile .main-content[data-view="jam"] .tap-btn {
+  flex: 1 1 auto;
+  height: 44px;
+  margin-left: 0;
+}
+
+/* The units column is fixed at 7rem on a desktop so the buttons beside it
+   cannot slide when "Lento" becomes "Prestissimo". Nothing sits beside it
+   here — the controls are on their own line — so it gives that width back to
+   the number. */
+.main-window.is-mobile .main-content[data-view="jam"] .tempo-units {
+  min-width: 0;
+  padding-bottom: 0;
+}
+
+/* The number is read across a room on a desktop and from a music stand on a
+   phone. 2.6rem is the biggest that leaves BPM and the marking beside it at
+   360 without either of them wrapping. */
+.main-window.is-mobile .main-content[data-view="jam"] .bpm-input {
+  width: auto;
+  min-width: 0;
+  font-size: 2.6rem;
+  text-align: left;
+}
+
+/* ── The order the stage reads in, on a phone ──────────────────────────────
+ *
+ * On a desktop the chord and the three controls beside it are one ROW, so the
+ * key, the feel and the drum intensity cost no height at all and the timeline
+ * — the headline of the whole mode — is the second thing on the screen.
+ * Stacked on a phone those three controls are three hundred pixels between
+ * the chord and the timeline, which is the exact arrangement JamView's own
+ * note says the second pass got rid of: "the timeline, the headline of the
+ * whole mode, below the fold".
+ *
+ * So the column is re-ordered rather than re-stacked: the chord, the timeline,
+ * then the things you set. `display: contents` on `.jam-top` lifts its two
+ * halves into the stage's own flex column, which is what makes an `order`
+ * between them and the timeline possible at all — nothing about the markup
+ * changes, and a desktop build never reads a line of it.
+ */
+.main-window.is-mobile .jam-top {
+  display: contents;
+}
+
+/* The two doors first: on a desktop they are in the context bar ABOVE the
+   stage, and a phone's stage begins where that bar runs out of room. */
+.main-window.is-mobile .jam-phone-doors {
+  order: 1;
+}
+
+.main-window.is-mobile .jam-cue {
+  order: 2;
+}
+
+.main-window.is-mobile .jam-now,
+.main-window.is-mobile .jam-now-quiet {
+  order: 3;
+}
+
+/* The pinned grip belongs to the chord above it, and it is as wide as the
+   grip rather than as wide as the stage. */
+.main-window.is-mobile .jam-pinned {
+  order: 4;
+  align-self: flex-start;
+}
+
+.main-window.is-mobile .jam-timeline-section {
+  order: 5;
+}
+
+/* The picker belongs to the bar you tapped, so it stays with the timeline
+   rather than with the controls below it. */
+.main-window.is-mobile .jam-chord-picker {
+  order: 6;
+}
+
+.main-window.is-mobile .jam-head-controls {
+  order: 7;
+}
+
+.main-window.is-mobile .jam-band {
+  order: 8;
+}
+
+.main-window.is-mobile .jam-practice {
+  order: 9;
+}
+
+/* Last, and the only one that has to be told: it is sticky to the foot of
+   the stage, and a stray `order: 0` would have put the groove you are
+   drawing above the chord you are drawing it for. */
+.main-window.is-mobile .jam-editor-drawer {
+  order: 10;
+  /* The gutters it bleeds into are gone, so the bleed goes too. */
+  margin: 8px 0 0;
+  padding: 0 0 12px;
+}
+
+/* The blocks sit closer on a phone than on a desktop: 22px between six of
+   them is a scroll of air, and the screen has none to spare. */
+.main-window.is-mobile .jam-view {
+  gap: 16px;
+}
+
+/* ── A player's row, on a phone ────────────────────────────────────────────
+ *
+ * Four things on one line — name, picker, volume, switch — is 104 + 280 +
+ * 118 + a switch before a single gap, and at 360 the grid drew them on top of
+ * each other: "GROOVE" painted underneath the volume slider with the thumb
+ * over the O, the chevron inside the track (M08-JAM-GAPS, the clearest
+ * picture in the set).
+ *
+ * Two lines, and which two is the whole decision. The top line carries the
+ * name, the level and the switch: turning somebody down and sending somebody
+ * home are the two things you do to a player WHILE the band is playing, and
+ * they are one tap each, at the same place on every row, without scrolling
+ * past anything. What the player is playing is a choice you make between
+ * choruses, so it takes the line underneath — where it is finally wide enough
+ * to read: "Auto · Roots on the kick" rather than "STY…" under a slider.
+ */
+.main-window.is-mobile .jam-band-lane {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  padding: 9px 12px;
+}
+
+.main-window.is-mobile .jam-band-name {
+  grid-area: 1 / 1;
+}
+
+.main-window.is-mobile .jam-band-volume {
+  grid-area: 1 / 2;
+  width: 134px;
+  justify-self: end;
+}
+
+.main-window.is-mobile .jam-band-volume input[type="range"] {
+  width: 96px;
+  /* The one control on this screen you drag rather than tap. */
+  height: 28px;
+}
+
+.main-window.is-mobile .jam-band-lane > .jam-switch {
+  grid-area: 1 / 3;
+}
+
+/* Full width, under the three above it. */
+.main-window.is-mobile .jam-band-extra {
+  grid-area: 2 / 1 / 3 / -1;
+}
+
+/* "You" has no picker and no level: the chip saying whether anything is
+   listening takes the whole of the top line's right-hand side. */
+.main-window.is-mobile .jam-band-input {
+  grid-area: 1 / 2 / 2 / -1;
+}
+
+/* The kit name and the bass's live notes are already gone at this width (the
+   band container's own rules); saying so here as well is what keeps them from
+   landing back in the picker's line when the grid changes shape. */
+.main-window.is-mobile .jam-band-detail,
+.main-window.is-mobile .jam-band-live {
+  display: none;
+}
+
+/* ── The two doors, at the top of the stage ────────────────────────────────
+ *
+ * Set up and the cheat sheet, side by side and a thumb tall. They are the
+ * width of the screen between them because they are the only two things on
+ * this row and because a musician holding an instrument aims with one hand.
+ *
+ * `.jam-door` carries the desktop's look through `.jam-sheet-btn`; the size
+ * is the phone's, and the pressed state is the same accent the context bar
+ * gives them, so a sheet that is down says so in the place you opened it. */
+.main-window.is-mobile .jam-phone-doors {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.main-window.is-mobile .jam-phone-doors .jam-sheet-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  padding: 0 10px;
+  border-radius: var(--radius-md, 9px);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main-window.is-mobile .jam-phone-doors .jam-sheet-btn.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* ── The sheets, on a phone ────────────────────────────────────────────────
+ *
+ * The sheet is drawn between the header and the transport, and it measures
+ * both from the desktop's own numbers — 56px and 76px. A phone's header is
+ * 40px (shell.css), so the sheet and its scrim started sixteen pixels below
+ * the hairline and left a strip of stage showing above a full-width drawer. */
+.main-window.is-mobile .jam-sheet,
+.main-window.is-mobile .jam-sheet-scrim {
+  top: 40px;
+}
+
+.main-window.is-mobile .jam-sheet-scrim {
+  inset: 40px 0 76px 0;
+}
+
+/* Done is the way out of a sheet that covers the whole screen, so it is a
+   thumb's worth of button rather than a word in a heading. */
+.main-window.is-mobile .jam-sheet-head {
+  padding: 10px 14px;
+}
+
+.main-window.is-mobile .jam-sheet-done {
+  min-height: 44px;
+}
+
+/* ── What is left of the jam's context bar on a phone ──────────────────────
+ *
+ * The bar answers one question here: which jam is on the stage. The name was
+ * the one thing in it that could shrink, so it shrank to nothing and the row
+ * showed a JAM badge and a vibe chip instead — a jam whose name you could not
+ * read, beside a word you could (M08-JAM-GAPS, `jam-360.png`).
+ *
+ * The badge goes because the tab bar at the foot of the screen already says
+ * Jam, in the accent, with the tab lit. The vibe chip goes because it is a
+ * door into Set up and Set up is now a button on the stage; the vibe's own
+ * name is the first line of that sheet. What is left is the name, and the
+ * save cluster when there is something to save. */
+.main-window.is-mobile .jam-save-area .jam-badge,
+.main-window.is-mobile .jam-save-area .jam-vibe-chip,
+.main-window.is-mobile .jam-save-area .jam-bar-divider {
+  display: none;
+}
+
+.main-window.is-mobile .jam-save-area .preset-active-name {
+  flex: 0 1 auto;
+  max-width: 100%;
+  font-size: 15px;
+}
+
+/* ── The cheat sheet, on a phone ───────────────────────────────────────────
+ *
+ * The chart is twelve roots by up to sixteen qualities and every diagram has
+ * a floor of about 96px, because below that a chord box is six strings drawn
+ * inside a stamp. Three of them is a 360px screen. So the chart keeps its
+ * size and scrolls sideways INSIDE its own box — the page does not — and the
+ * root column is already sticky, so C stays beside its own row while you
+ * drag across the qualities.
+ *
+ * `overflow-x: auto` is on the wrap already; saying `hidden` on the other
+ * axis is what makes it a deliberate horizontal scroller rather than a box
+ * that happens to scroll both ways — which is the difference between "read
+ * this chart by dragging it" and "part of this page is off the screen". */
+.main-window.is-mobile .jam-chord-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+}
