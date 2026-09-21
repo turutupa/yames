@@ -25,34 +25,16 @@ cd "$(dirname "$0")/../.."
 bash scripts/ci/ios-ensure-assets.sh
 bash scripts/ci/ios-xcode-env.sh
 
-# How signing is switched off, and why it looks like this.
+# Signing is switched off in the project itself, not from here — see the
+# `CODE_SIGN_STYLE: Manual` block in `src-tauri/ios-project.yml` for why it
+# has to be there. Build settings cannot be forced on Xcode from this script:
+# the Tauri CLI runs xcodebuild through `duct … .full_env(env.explicit_env())`,
+# which replaces the environment with a short allow-list, so anything exported
+# here is thrown away before xcodebuild sees it.
 #
-# Build settings cannot be forced on Xcode from the environment here: the
-# Tauri CLI runs xcodebuild through `duct … .full_env(env.explicit_env())`,
-# which *replaces* the environment with a short allow-list, so
-# `CODE_SIGNING_ALLOWED=NO` never arrives. The CLI has exactly one path that
-# passes those flags to xcodebuild itself, and it takes it when App Store
-# Connect credentials are present in the environment — because the intended
-# flow is to build and archive unsigned and then sign at export, with the key.
-#
-# So: three placeholder values, which authenticate nothing and are never sent
-# anywhere. They make the CLI build and archive with
-# `CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY=""`,
-# which is precisely the unsigned arm64 archive this step exists to produce.
-# The export that follows then fails, as it must — and the archive it fails
-# after is what gets measured.
-#
-# If real credentials are ever set on this repository (M06b), they are used
-# instead and this block does nothing.
-if [ -z "${APPLE_API_KEY:-}" ]; then
-  echo "==> no App Store Connect credentials; using placeholders so the archive is built unsigned"
-  PLACEHOLDER_KEY="$(mktemp -d)/AuthKey_UNSIGNED000.p8"
-  printf 'this is not a key. M06a never handles one. See M06b-OWNER-STEPS.md.\n' > "$PLACEHOLDER_KEY"
-  export APPLE_API_KEY=UNSIGNED000
-  export APPLE_API_ISSUER=00000000-0000-0000-0000-000000000000
-  export APPLE_API_KEY_PATH="$PLACEHOLDER_KEY"
-fi
-
+# No credentials are invented either. The CLI reads APPLE_API_KEY,
+# APPLE_API_ISSUER and APPLE_API_KEY_PATH, validates the key as a PEM, and
+# nothing in M06a creates or handles one.
 echo "==> building for a real iPhone (export is expected to fail: nothing here is signed)"
 if npm run tauri -- ios build --target aarch64 --export-method debugging; then
   echo "==> the CLI got all the way through"
@@ -60,13 +42,16 @@ else
   echo "==> the CLI stopped, as expected without a signing identity; looking for the archive"
 fi
 
+# `grep -v -- -sim`: a simulator .app from the screenshot step earlier in the
+# job is sitting in the same tree, and it is not what this step is about.
 find_app() {
-  find "$1" -maxdepth "${2:-6}" -name 'Yames.app' -type d -print 2>/dev/null | sort | head -1
+  find "$1" -maxdepth "${2:-8}" -name 'Yames.app' -type d -print 2>/dev/null \
+    | grep -v -- '-sim' | sort | head -1
 }
 
 APP=$(find_app src-tauri/gen/apple/build)
-[ -n "$APP" ] || APP=$(find_app "$HOME/Library/Developer/Xcode/DerivedData" 8)
-[ -n "$APP" ] || APP=$(find_app "$HOME/Library/Developer/Xcode/Archives" 8)
+[ -n "$APP" ] || APP=$(find_app "$HOME/Library/Developer/Xcode/Archives")
+[ -n "$APP" ] || APP=$(find_app "$HOME/Library/Developer/Xcode/DerivedData")
 
 if [ -z "$APP" ]; then
   echo "::error::nothing was built for a real iPhone"

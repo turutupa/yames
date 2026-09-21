@@ -138,6 +138,13 @@ class YamesMobilePlugin: Plugin {
       try session.setCategory(.playback, mode: .default, options: [])
       try session.setPreferredSampleRate(Self.preferredSampleRate)
       try session.setPreferredIOBufferDuration(Self.preferredBufferDuration)
+      // Said out loud, once, because it is the only proof from outside the
+      // app that this half of it is running at all. On a simulator nothing
+      // ever presses play, so the activation line further down never fires,
+      // and without this the log has nothing from Yames in it.
+      NSLog(
+        "[YamesMobile] audio session configured: .playback/.default, asked %.0f Hz / %.1f ms",
+        Self.preferredSampleRate, Self.preferredBufferDuration * 1000)
     } catch {
       NSLog("[YamesMobile] could not configure the audio session: %@", "\(error)")
     }

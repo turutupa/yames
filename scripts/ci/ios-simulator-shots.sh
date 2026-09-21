@@ -220,6 +220,17 @@ xcrun simctl spawn "$UDID" log show --last 12m --style compact \
   --predicate 'processImagePath CONTAINS "Yames" OR eventMessage CONTAINS "YamesMobile" OR eventMessage CONTAINS "[yames]"' \
   2>/dev/null | tail -200 | tee "$OUT/app-log.txt" || echo "(no log)"
 
+# The Swift half is not reachable from outside the app in any other way: on a
+# simulator nothing presses play, so the audio session is never activated and
+# none of the interruption handlers ever fire. This one line at startup is the
+# whole proof that the plugin loaded and configured the session.
+echo "==> the phone's native half"
+if grep -F "[YamesMobile]" "$OUT/app-log.txt" 2>/dev/null; then
+  :
+else
+  echo "::warning::nothing from the native half in the log — did the plugin load?"
+fi
+
 echo "==> anything at error level from the app"
 if grep -iE '\[yames\].*(error|panic)|Yames.*crash' "$OUT/app-log.txt" >/dev/null 2>&1; then
   grep -iE '\[yames\].*(error|panic)|Yames.*crash' "$OUT/app-log.txt"

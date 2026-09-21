@@ -100,6 +100,25 @@ targets:
       {{/each}}{{~/if}}
     settings:
       base:
+        # Manual signing, with no identity, as the default.
+        #
+        # Nothing in this repository can sign an iPhone app and nothing in it
+        # should be able to: the certificate and the provisioning profile are
+        # the owner's, and M06b is where they arrive. Left on Xcode's
+        # automatic signing, every build — including CI's, which only wants to
+        # know whether the thing compiles — stops with "No Accounts: Add a new
+        # account in Accounts settings". Manual with an empty identity builds
+        # the app and does not sign it, which is exactly the state M06b picks
+        # up from.
+        #
+        # It does not get in the way when real signing arrives. Tauri rewrites
+        # these in the project itself at build time from whatever credentials
+        # it finds in the environment (`synchronize_project_config`), and the
+        # App Store Connect key path skips code signing during the build
+        # anyway and signs at export.
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: ""
+        PROVISIONING_PROFILE_SPECIFIER: ""
         ENABLE_BITCODE: false
         ARCHS: [{{join ios-valid-archs}}]
         VALID_ARCHS: {{~#each ios-valid-archs}} {{this}} {{/each}}
