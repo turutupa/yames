@@ -24,7 +24,8 @@ import {
   type SetlistEvent,
   type SetlistRunState,
 } from "./runtime";
-import type { Setlist, SetlistStep, SetlistTransition, SetlistTrigger } from "../types";
+import { engineTick, isBarStart } from "../test/engineTicks";
+import type { BeatEvent, Setlist, SetlistStep, SetlistTransition, SetlistTrigger } from "../types";
 
 // --- fixtures --------------------------------------------------------------
 
@@ -51,22 +52,17 @@ function setlistOf(steps: SetlistStep[], repeat = 1): Setlist {
 }
 
 /**
- * One tick as `engine.rs` emits it: bar-local position, which subdivision of
- * the beat it is, and the engine's own `isDownbeat` — `sub == 0`, "a whole
- * beat and not a subdivision", which is true on EVERY beat of the bar.
- */
-type EngineTick = { measureBeat: number; subdivision: number; isDownbeat: boolean };
-
-/**
  * What `useSetlistRunner` makes of one engine tick, written out here so the
  * runtime's tests and the hook cannot drift apart.
  *
  * Subdivision ticks are not beats and are dropped; a bar opens on the pair
- * the engine itself tests when it opens one.
+ * the engine itself tests when it opens one, which `isBarStart` is. The
+ * ticks themselves come from `test/engineTicks.ts` — the one builder in the
+ * app that knows `isDownbeat` is `sub == 0` and true on every beat.
  */
-function fromEngine(tick: EngineTick, seconds: number): SetlistEvent | null {
+function fromEngine(tick: BeatEvent, seconds: number): SetlistEvent | null {
   if (tick.subdivision !== 0) return null;
-  return { kind: "beat", barStart: tick.isDownbeat && tick.measureBeat === 0, seconds };
+  return { kind: "beat", barStart: isBarStart(tick), seconds };
 }
 
 /**
@@ -114,7 +110,7 @@ function play(
       // Seconds are wall time, so a subdivision tick is not free: the beat's
       // own tick opens it and the rest fall inside it.
       const seconds = (i + sub / subdivisions + 1) * secondsPerBeat;
-      const event = fromEngine({ measureBeat, subdivision: sub, isDownbeat: sub === 0 }, seconds);
+      const event = fromEngine(engineTick({ measureBeat, subdivision: sub }), seconds);
       if (!event) continue;
       const result = setlistReduce(setlist, state, event);
       state = result.state;
@@ -471,7 +467,7 @@ describe("a bar is a bar, and never a beat", () => {
     let state = setlistReduce(setlist, IDLE_SETLIST_RUN, { kind: "start", seconds: 0 }).state;
     const stepAt: number[] = [];
     measureBeats.forEach((measureBeat, i) => {
-      const event = fromEngine({ measureBeat, subdivision: 0, isDownbeat: true }, (i + 1) * 0.5);
+      const event = fromEngine(engineTick({ measureBeat, beatGroups: [2, 2, 3] }), (i + 1) * 0.5);
       state = setlistReduce(setlist, state, event!).state;
       stepAt.push(state.stepIndex);
     });

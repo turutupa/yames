@@ -14,6 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useSetlistRunner } from "./useSetlistRunner";
 import { mockInvoke } from "../../../test/mocks";
+import { engineTick } from "../../../test/engineTicks";
 import { jamToSetlistStep } from "../../../setlist";
 import { STARTER_JAMS } from "../../../jam/jams";
 import type { Jam } from "../../../jam/types";
@@ -50,19 +51,7 @@ const CHAIN: Setlist = {
  * the engine's own: a whole beat, subdivision zero — NOT a bar line.
  */
 function beat(n: number, measureBeat = n % 4, subdivision = 0): BeatEvent {
-  const isDownbeat = subdivision === 0;
-  // The bar opens Strong; nothing else in [4] is accented at all.
-  const accentLevel = isDownbeat && measureBeat === 0 ? 2 : 0;
-  return {
-    beat: n,
-    measureBeat,
-    subdivision,
-    isDownbeat,
-    accentLevel,
-    isAccent: accentLevel > 0,
-    formBar: 0,
-    chorus: 1,
-  };
+  return engineTick({ beat: n, measureBeat, subdivision });
 }
 
 /** Args of every invoke of `command` so far. */
