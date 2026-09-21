@@ -5097,6 +5097,18 @@ impl MetronomeEngine {
                         None => 0,
                     };
 
+                    // Audio-safety probe, the allocation half: everything
+                    // this thread allocates or frees until this guard drops
+                    // is counted against the callback. `None` in the app —
+                    // the same null check as the line above, and the guard
+                    // is a zero-sized value with nothing to drop — and the
+                    // only way to say "replacing the band never freed here"
+                    // as a measurement instead of as a reading of the code.
+                    // See `alloc_probe.rs`.
+                    let _alloc_scope = probe_cb
+                        .as_ref()
+                        .map(|_| crate::alloc_probe::AllocScope::enter());
+
                     // Output latency compensation.
                     // CoreAudio device/safety/stream latency + one buffer of
                     // buffering (the buffer we're currently writing into hasn't

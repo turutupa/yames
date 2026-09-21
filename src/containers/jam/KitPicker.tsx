@@ -132,8 +132,20 @@ export function KitPicker({
   const [busy, setBusy] = useState(false);
   const { wrapRef, menuRef, style } = useMenuPlacement(open);
   const warmedRef = useRef(false);
+  /**
+   * Every kit the app ships, decoded before one is clicked — so the audition
+   * is instant.
+   *
+   * **Not on a phone (M10).** The seven kits are about 97 MB, and on a phone
+   * that is 97 MB of drums nobody has asked to hear, held for as long as the
+   * app is open, on the device where holding memory is what gets the app
+   * killed. A phone decodes the kit that is CHOSEN, when it is chosen:
+   * `onKit` recompiles the jam, `set_jam` decodes it off the window's thread,
+   * and the spinner `JamSetupSheet` already puts on the row you touched says
+   * so while it happens.
+   */
   const warmKits = () => {
-    if (warmedRef.current) return;
+    if (IS_MOBILE || warmedRef.current) return;
     warmedRef.current = true;
     warmJam({ kits: true });
   };

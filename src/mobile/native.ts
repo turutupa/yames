@@ -101,6 +101,18 @@ export type NativeEvent =
   | { event: "audio_interrupted"; kind: AudioInterruption }
   | { event: "back_pressed" }
   | { event: "stop_requested" }
+  /**
+   * The activity came back to the screen, or left it (`onResume` / `onStop`).
+   * What listens is `bandMemory.ts`: out of sight and stopped is when the
+   * decoded band is allowed to go.
+   */
+  | { event: "app_visible"; visible: boolean }
+  /**
+   * `ComponentCallbacks2.onTrimMemory`, with Android's own level. 20 and
+   * above mean the app's UI is gone; 10 and 15 mean the phone is short of
+   * memory while the app is still on screen.
+   */
+  | { event: "memory_trim"; level: number }
   | ({ event: "window_insets" } & WindowInsets);
 
 /**

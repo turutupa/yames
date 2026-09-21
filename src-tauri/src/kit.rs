@@ -2158,7 +2158,27 @@ fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
 /// have the set evicted by the third kit and re-decoded on the next bar —
 /// a folder read, on the command thread, several times a chorus, which is
 /// the cost this cache exists to remove.
+#[cfg(not(mobile))]
 const CACHE_ENTRIES: usize = 9;
+
+/// TWO ON A PHONE: the kit the loaded jam plays, and the percussion set
+/// underneath it.
+///
+/// Nine entries is about 97 MB of decoded drums, and a phone that is holding
+/// 97 MB of drums nobody is listening to is a phone that kills the app the
+/// moment it goes to the background — the one thing M04's foreground service
+/// exists to prevent. So the budget on a phone is exactly what the jam on
+/// screen is playing: `jam_sounds` asks for the kit and then for the set, so
+/// two entries hold both and a jam loaded after it pushes the kit it replaced
+/// straight out (M10).
+///
+/// What it costs: auditioning a kit re-decodes the one you came from when you
+/// go back to it, and that is a visible "loading" on the row being changed
+/// rather than a hitch in the band — `set_jam` decodes off the window's
+/// thread (7bdb6eb) and `JamSetupSheet` already shows a spinner on the
+/// control you touched.
+#[cfg(mobile)]
+const CACHE_ENTRIES: usize = 2;
 
 /// The kits the app has already decoded.
 #[derive(Default)]
@@ -2230,6 +2250,29 @@ impl KitCache {
     pub fn get_or_load(&self, dir: &Path, rate: u32) -> Result<Arc<KitBank>, String> {
         let key = key_for(dir, rate)?;
         self.fetch(key, 0x666f_6c64_6572, || load(dir, rate))
+    }
+
+    /// LET EVERY DECODE GO. Command thread only, and never while the band is
+    /// playing — `commands::release_jam_sounds` is the only caller and it
+    /// checks the transport first.
+    ///
+    /// What is freed is what nothing else is holding: an `Arc<KitBank>` that
+    /// is also inside a loaded `JamTable` stays alive until that table goes
+    /// too, which is why the release takes the table away first. The frees
+    /// happen here, on the thread that calls this, and the audio thread is
+    /// never one of them (M10).
+    #[cfg(any(mobile, test))]
+    pub fn clear(&self) {
+        if let Ok(mut slot) = self.entries.lock() {
+            slot.clear();
+        }
+    }
+
+    /// How many decodes the cache is holding. Tests, and the release path's
+    /// own log line.
+    #[cfg(any(mobile, test))]
+    pub fn len(&self) -> usize {
+        self.entries.lock().map(|s| s.len()).unwrap_or(0)
     }
 
     /// Is this folder's decode the one the cache is holding? Tests only — it

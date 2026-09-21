@@ -705,3 +705,25 @@ fn one_voice_key_builds_once_however_many_threads_ask() {
     let again = cache.shipped(0, 48_000, 28, 55).unwrap().id;
     assert_eq!(first, again, "evicted and rebuilt, it is the same bank");
 }
+
+/// CLEARING THE CACHE LETS GO, AND CHANGES NO BASS PLAYER.
+///
+/// The voice half of `kit::tests::a_cleared_cache_lets_go_and_the_kit_comes_
+/// back_the_same`, and there for the same two reasons: a phone's release
+/// (`commands::release_jam_sounds`, M10) has to actually free the banks, and
+/// the bank that comes back afterwards has to be the same bank as far as the
+/// bar-line handshake is concerned.
+#[test]
+fn a_cleared_voice_cache_lets_go_and_the_bank_comes_back_the_same() {
+    if super::shipped_ids().is_empty() {
+        eprintln!("[voices] no shipped banks, nothing to check");
+        return;
+    }
+    let cache = super::VoiceCache::default();
+    let before = cache.shipped(0, 48_000, 28, 55).unwrap().id;
+    assert_eq!(cache.len(), 1, "one bank built is one entry");
+    cache.clear();
+    assert_eq!(cache.len(), 0, "the release holds nothing back");
+    let after = cache.shipped(0, 48_000, 28, 55).unwrap().id;
+    assert_eq!(before, after, "cleared and rebuilt, it is the same bank");
+}

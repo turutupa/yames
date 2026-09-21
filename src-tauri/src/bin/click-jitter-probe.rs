@@ -4,8 +4,15 @@
 //! measures the output callback from inside itself, optionally while the
 //! coach LLM generates continuously on a background thread. The gate:
 //!
-//!   * p99 callback-to-callback jitter < 1 ms, and
-//!   * zero missed beats over the measurement window.
+//!   * p99 callback-to-callback jitter < 1 ms,
+//!   * zero missed beats over the measurement window, and
+//!   * **zero frees inside the output callback** — see `alloc_probe.rs`. The
+//!     callback holds the band, which on a phone is tens of megabytes of
+//!     decoded drums, bass and keys, and dropping the last `Arc` to that
+//!     frees every buffer in it. `--jam-swap` is the mode that exercises it:
+//!     the table is replaced from another thread while the stream runs, which
+//!     is what the bar-ahead handshake does several times a chorus and what
+//!     a phone's release does when the app goes out of sight (M10).
 //!
 //! Usage:
 //!
@@ -81,10 +88,40 @@
 //!   i.e. the device provably ran dry. Reported for diagnosis; the gate
 //!   is on missed beats, which is what the musician perceives.
 
+use std::alloc::{GlobalAlloc, Layout, System};
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
+
+/// THE SYSTEM ALLOCATOR, WITH A TALLY OF WHAT THE AUDIO CALLBACK ASKED IT
+/// FOR.
+///
+/// Installed in this binary and nowhere else — the shipping app links the
+/// plain system allocator and never calls `note_alloc` or `note_free` at all.
+/// Everything the process allocates comes through here; `alloc_probe.rs`
+/// counts only what happened while an output callback was on the stack, and
+/// the gate is that no `free` ever was.
+///
+/// `realloc` and `alloc_zeroed` are deliberately left to the default
+/// implementations, which route through `alloc`/`dealloc` above and are
+/// therefore counted too.
+struct CountingAlloc;
+
+unsafe impl GlobalAlloc for CountingAlloc {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        yames_lib::probe::note_alloc();
+        System.alloc(layout)
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        yames_lib::probe::note_free();
+        System.dealloc(ptr, layout)
+    }
+}
+
+#[global_allocator]
+static ALLOCATOR: CountingAlloc = CountingAlloc;
 
 use yames_lib::probe::{
     compile_jam, compile_jam_with_voices, create_beat_log,
@@ -1210,9 +1247,21 @@ fn main() -> ExitCode {
     println!("dropouts (>2×buf) {}", report.dropouts);
     println!("missed beats      {}", report.missed_beats);
 
+    let (cb_allocs, cb_frees) = yames_lib::probe::callback_allocations();
+    println!("--- allocator, inside the callback ---");
+    println!("allocations       {cb_allocs}");
+    println!("frees             {cb_frees}");
+
     let jitter_ok = report.jitter_p99 < args.p99_ms;
     let beats_ok = report.missed_beats == 0;
     let arena_ok = report.overflow == 0;
+    // A `free` on the audio thread can take the allocator's lock, coalesce a
+    // heap, or hand a page back to the kernel, and the band is tens of
+    // megabytes of buffers whose last `Arc` the callback is often holding.
+    // Everything in `JamHandoff` — the retirement slot, the parking spaces —
+    // exists so the drop lands on the command thread instead. This is the
+    // number that says so.
+    let frees_ok = cb_frees == 0;
     println!("--- gate (ROADMAP §4) ---");
     println!(
         "p99 < {:.2} ms      {}",
@@ -1223,6 +1272,10 @@ fn main() -> ExitCode {
         "missed beats = 0  {}",
         if beats_ok { "PASS" } else { "FAIL" }
     );
+    println!(
+        "callback frees=0  {}",
+        if frees_ok { "PASS" } else { "FAIL" }
+    );
     if !arena_ok {
         println!("arena overflow    FAIL (statistics are truncated)");
     }
@@ -1231,7 +1284,7 @@ fn main() -> ExitCode {
         println!(
             "JSON {{\"mode\":\"{}\",\"sample_rate\":{},\"frames\":{},\"callbacks\":{},\
 \"p50_ms\":{:.5},\"p95_ms\":{:.5},\"p99_ms\":{:.5},\"max_ms\":{:.5},\
-\"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\"pass\":{}}}",
+\"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\"cb_allocs\":{},\"cb_frees\":{},\"pass\":{}}}",
             mode,
             report.sample_rate,
             report.median_frames,
@@ -1243,11 +1296,13 @@ fn main() -> ExitCode {
             report.max_gap_ms,
             report.dropouts,
             report.missed_beats,
-            jitter_ok && beats_ok && arena_ok
+            cb_allocs,
+            cb_frees,
+            jitter_ok && beats_ok && arena_ok && frees_ok
         );
     }
 
-    if jitter_ok && beats_ok && arena_ok {
+    if jitter_ok && beats_ok && arena_ok && frees_ok {
         println!("\nRESULT PASS");
         ExitCode::SUCCESS
     } else {

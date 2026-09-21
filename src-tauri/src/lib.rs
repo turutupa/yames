@@ -18,6 +18,10 @@
 //
 // `desktop` / `mobile` are cfgs emitted by `tauri_build::build()`.
 // ---------------------------------------------------------------------------
+/// The allocation half of the audio-safety gate. Inert unless the binary
+/// that links it installs a counting allocator, which only
+/// `click-jitter-probe` does.
+mod alloc_probe;
 mod beat_log;
 mod clock;
 mod commands;
@@ -90,6 +94,11 @@ mod voices;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    /// The allocation gate. The probe installs a `#[global_allocator]` that
+    /// calls `note_alloc` / `note_free` on every allocation the process
+    /// makes, and those two count only the ones made inside an output
+    /// callback — which for `free` must be none at all.
+    pub use crate::alloc_probe::{callback_allocations, note_alloc, note_free};
     pub use crate::beat_log::create_beat_log;
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
@@ -158,7 +167,7 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, release_jam_sounds, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
     EngineState, JamGainState, JamKitState, JamVoiceState,
@@ -744,6 +753,7 @@ pub fn run() {
             set_jam,
             set_jam_position,
             warm_jam,
+            release_jam_sounds,
             pick_kit_folder,
             inspect_kit_folder,
             start_take,
