@@ -45,10 +45,34 @@ export default defineConfig({
    * error rather than a quiet move to the next port, which would leave
    * `baseURL` pointing at nothing.
    */
-  webServer: {
-    command: "npx vite --port 5390 --strictPort",
-    url: "http://localhost:5390/shots.html?manifest=1",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: "npx vite --port 5390 --strictPort",
+      url: "http://localhost:5390/shots.html?manifest=1",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    /*
+     * The same harness, built for a phone (M09).
+     *
+     * `IS_MOBILE` is a build-time constant (src/platform.ts) and the phone's
+     * rules are written against the `.main-window.is-mobile` class it writes,
+     * not against a width — so a desktop build narrowed to 360px is not the
+     * phone and never can be. The only way to measure the phone in a browser
+     * is to serve one, which is what `scripts/mobile-shots.mjs` does for the
+     * screenshots and what this does for the assertions.
+     *
+     * Its own port and its own server, because one Vite process can only be
+     * one build. Tests opt in with `test.use({ baseURL: MOBILE_URL })` — see
+     * `MOBILE_URL` in tests/layout/fits.ts — so everything else still
+     * measures the desktop.
+     */
+    {
+      command: "npx vite --port 5391 --strictPort",
+      url: "http://localhost:5391/shots.html?manifest=1",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      env: { YAMES_MOBILE: "1" },
+    },
+  ],
 });

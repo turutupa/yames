@@ -202,6 +202,20 @@ const SCREENS = [
   { id: "jam-band", shot: "jam-band", settleMs: 600 },
   { id: "jam-setup", shot: "jam-setup", settleMs: 600 },
 
+  // ── the cheat sheet (M09) ────────────────────────────────────────────
+  //
+  // The one part of the mode M08 never photographed: "they are reached from
+  // the context bar, which is where this document stops". Three screens,
+  // because the sheet is three different shapes — a page of grips for the
+  // key, the stacked necks behind the Scales tab, and the root × quality
+  // chart, which is the widest thing the app draws anywhere.
+  //
+  // Driven through the English labels on the sheet's own controls, so these
+  // three are the screens the harness header warns about under `--locale`.
+  { id: "jam-cheat", shot: "jam-chords", settleMs: 600 },
+  { id: "jam-cheat-scales", shot: "jam-chords-colours", settleMs: 600 },
+  { id: "jam-cheat-chart", shot: "jam-chords-all", settleMs: 600 },
+
   // ── the library sheet ───────────────────────────────────────────────────
   { id: "library-presets", shot: "metronome", steps: [tap(".mobile-tab-library"), wait(".sheet--library")] },
   {
