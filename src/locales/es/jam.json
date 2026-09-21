@@ -735,6 +735,13 @@
       "recordingEverything": "Grabando todo lo que suena en este ordenador",
       "recordingYames": "Grabando Yames y tu entrada",
       "takeEverything": "todo lo que sonó en este ordenador"
+    },
+    "takeVideo": {
+      "save": "Guardar como vídeo",
+      "chorus": "Vuelta {{count}}",
+      "chorus_one": "Vuelta {{count}}",
+      "chorus_many": "Vuelta {{count}}",
+      "chorus_other": "Vuelta {{count}}"
     }
   },
   "scale": {

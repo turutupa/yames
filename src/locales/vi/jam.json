@@ -717,6 +717,10 @@
       "recordingEverything": "Đang thu mọi thứ máy tính này phát ra",
       "recordingYames": "Đang thu Yames và đầu vào của bạn",
       "takeEverything": "mọi thứ máy tính này đã phát"
+    },
+    "takeVideo": {
+      "save": "Lưu thành video",
+      "chorus": "Vòng {{count}}"
     }
   },
   "scale": {

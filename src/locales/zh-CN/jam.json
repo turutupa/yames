@@ -717,6 +717,10 @@
       "recordingEverything": "正在录这台电脑发出的全部声音",
       "recordingYames": "正在录 Yames 和你的输入",
       "takeEverything": "这台电脑当时发出的全部声音"
+    },
+    "takeVideo": {
+      "save": "存成视频",
+      "chorus": "第 {{count}} 遍"
     }
   },
   "scale": {

@@ -1275,6 +1275,8 @@ export function JamSetupSheet({
               recording={takes.recording}
               dirBytes={takes.dirBytes}
               playingId={takes.playingId}
+              jam={jam}
+              vibeLabel={jam.vibe ?? null}
               onPlay={takes.play}
               onStop={takes.stopPlayback}
               onDelete={takes.remove}

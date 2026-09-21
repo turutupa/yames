@@ -44,18 +44,16 @@ import {
 } from "../../../ipc";
 import { CLIP_BRAND_KEY } from "../../../songs/camera/keys";
 import { placesFor, SHARE_PLACES } from "../../../songs/camera/share";
-import { clipSeconds, clipSpan } from "../../../songs/camera/clip";
+import { clipSeconds } from "../../../songs/camera/clip";
 import type { ClipShape } from "../../../songs/camera/clip";
+import type { ClipStrip } from "../../../takes/clipStrip";
 import { recordClip } from "../../../songs/camera/clipRecorder";
 import type { ClipPalette, ClipRun } from "../../../songs/camera/clipRecorder";
 import { clipSupport } from "../../../songs/camera/support";
 import { takeLength } from "../../../jam/takes";
 import { mediaSrc } from "../../../songs/camera/src";
-import type { Tape } from "../../../songs/camera/tape";
 import { MARK_TOKEN } from "../review/marks";
 import type { TimingMark } from "../review/marks";
-import type { BarRange } from "../../../songs/schedule";
-import type { SongScore } from "../../../songs/types";
 import "../../../styles/songs-take-video.css";
 
 /** Where the clip is in its life. */
@@ -66,19 +64,41 @@ type Stage =
   | { kind: "failed" };
 
 export type SaveAsVideoProps = {
-  tape: Tape;
-  score: SongScore;
-  range: BarRange;
-  tempoPercent: number;
+  /**
+   * What scrolls across the middle, and what the caption says (W30).
+   *
+   * The one thing that differs between a clip of a song and a clip of a jam.
+   * Everything else on this screen — the shape, the Yames mark, the ring, the
+   * cancel, the save dialog, the share row — is the same question either way,
+   * which is why there is one screen rather than two. See
+   * `src/takes/clipStrip.ts`.
+   */
+  strip: ClipStrip;
+  /** How much of the take is across the strip at once. */
+  windowMs: number;
+  /**
+   * The stretch of the take to make a clip of, for each answer to "which
+   * bars". A function rather than two spans because only the caller knows
+   * what "the chosen bars" means — a selection in Songs' review, and nothing
+   * at all in a jam.
+   */
+  spanFor: (wholeTake: boolean) => { startMs: number; endMs: number };
+  /**
+   * Is there a chosen portion to offer, or only the whole take? When false
+   * the question is not asked at all: a row of one choice is not a choice.
+   */
+  canChooseBars?: boolean;
+  /**
+   * Is there a verdict that could be painted on the strip? False for a jam,
+   * which has no notes to be right or wrong about, and the switch is then
+   * left out rather than shown doing nothing.
+   */
+  canShowMarks?: boolean;
   /** The take's mix, and its picture when it has one. */
   mixSrc: string;
   videoSrc: string | null;
   startOffsetMs: number;
   videoOffsetMs: number;
-  /** The bars the review has selected, which is what a clip defaults to. */
-  bars: BarRange | null;
-  /** Which time round the loop. `null` is all of them. */
-  pass: number | null;
   /** The name to suggest in the save dialog. */
   title: string;
   /** Stop the review's own player: two transports is two things out of step. */
@@ -152,16 +172,15 @@ function ProgressRing({ fraction }: { fraction: number }) {
 }
 
 export function SaveAsVideo({
-  tape,
-  score,
-  range,
-  tempoPercent,
+  strip,
+  windowMs,
+  spanFor,
+  canChooseBars = true,
+  canShowMarks = true,
   mixSrc,
   videoSrc,
   startOffsetMs,
   videoOffsetMs,
-  bars,
-  pass,
   title,
   onBeforeSave,
 }: SaveAsVideoProps) {
@@ -197,22 +216,14 @@ export function SaveAsVideo({
     setBrand(next);
     void storeSave(CLIP_BRAND_KEY, next).catch(() => {});
   }, []);
-  /** The chosen bars, or the whole attempt. Defaults to the selection. */
-  const [wholeTake, setWholeTake] = useState(false);
+  /**
+   * The chosen bars, or the whole attempt. Defaults to the selection — or to
+   * the whole take where there is nothing else on offer.
+   */
+  const [wholeTake, setWholeTake] = useState(!canChooseBars);
   const [stage, setStage] = useState<Stage>({ kind: "idle" });
 
-  const span = useMemo(
-    () =>
-      clipSpan({
-        tape,
-        score,
-        range,
-        tempoPercent,
-        bars: wholeTake ? null : bars,
-        pass: wholeTake ? null : pass,
-      }),
-    [tape, score, range, tempoPercent, bars, pass, wholeTake],
-  );
+  const span = useMemo(() => spanFor(wholeTake), [spanFor, wholeTake]);
   /**
    * How long it will take, as a length rather than a count.
    *
@@ -260,10 +271,8 @@ export function SaveAsVideo({
         videoSrc: videoSrc === null ? null : mediaSrc(videoSrc),
         startOffsetMs,
         videoOffsetMs,
-        tape,
-        score,
-        range,
-        tempoPercent,
+        strip,
+        windowMs,
         palette: readPalette(),
         // Not translated and not a key: it is an address, and an address is
         // the same in every language.
@@ -302,10 +311,8 @@ export function SaveAsVideo({
     videoSrc,
     startOffsetMs,
     videoOffsetMs,
-    tape,
-    score,
-    range,
-    tempoPercent,
+    strip,
+    windowMs,
     t,
   ]);
 
@@ -358,28 +365,38 @@ export function SaveAsVideo({
               choices rather than as "which bars", "which way up" and a
               switch — the layout suite can measure that they fit and cannot
               see that they say nothing. */}
-          <span className="songs-strip-label">{t("songs.clip.whichBars")}</span>
-          <div className="songs-clip-choice" role="group" aria-label={t("songs.clip.whichBars")}>
-            <button
-              type="button"
-              className="songs-chip"
-              data-active={wholeTake ? undefined : ""}
-              aria-pressed={!wholeTake}
-              disabled={!bars}
-              onClick={() => setWholeTake(false)}
-            >
-              {t("songs.clip.chosenBars")}
-            </button>
-            <button
-              type="button"
-              className="songs-chip"
-              data-active={wholeTake ? "" : undefined}
-              aria-pressed={wholeTake}
-              onClick={() => setWholeTake(true)}
-            >
-              {t("songs.clip.wholeTake")}
-            </button>
-          </div>
+          {/* Only where there is something to choose BETWEEN. A jam's clip is
+              the take, and a row holding one chip is a question with one
+              answer. */}
+          {canChooseBars && (
+            <>
+              <span className="songs-strip-label">{t("songs.clip.whichBars")}</span>
+              <div
+                className="songs-clip-choice"
+                role="group"
+                aria-label={t("songs.clip.whichBars")}
+              >
+                <button
+                  type="button"
+                  className="songs-chip"
+                  data-active={wholeTake ? undefined : ""}
+                  aria-pressed={!wholeTake}
+                  onClick={() => setWholeTake(false)}
+                >
+                  {t("songs.clip.chosenBars")}
+                </button>
+                <button
+                  type="button"
+                  className="songs-chip"
+                  data-active={wholeTake ? "" : undefined}
+                  aria-pressed={wholeTake}
+                  onClick={() => setWholeTake(true)}
+                >
+                  {t("songs.clip.wholeTake")}
+                </button>
+              </div>
+            </>
+          )}
 
           <span className="songs-strip-label">{t("songs.clip.shape")}</span>
           <div className="songs-clip-choice" role="group" aria-label={t("songs.clip.shape")}>
@@ -400,15 +417,19 @@ export function SaveAsVideo({
             ))}
           </div>
 
-          <button
-            type="button"
-            className="songs-chip"
-            data-active={marks ? "" : undefined}
-            aria-pressed={marks}
-            onClick={() => setMarks((was) => !was)}
-          >
-            {t("songs.clip.withMarks")}
-          </button>
+          {/* A jam has no notes to be right or wrong about, so there is no
+              verdict to paint and no switch for it. */}
+          {canShowMarks && (
+            <button
+              type="button"
+              className="songs-chip"
+              data-active={marks ? "" : undefined}
+              aria-pressed={marks}
+              onClick={() => setMarks((was) => !was)}
+            >
+              {t("songs.clip.withMarks")}
+            </button>
+          )}
 
           <button
             type="button"

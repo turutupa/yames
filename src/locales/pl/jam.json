@@ -744,6 +744,14 @@
       "recordingEverything": "Nagrywa wszystko, co gra ten komputer",
       "recordingYames": "Nagrywa Yames i twoje wejście",
       "takeEverything": "wszystko, co zagrał ten komputer"
+    },
+    "takeVideo": {
+      "save": "Zapisz jako wideo",
+      "chorus": "Przejście {{count}}",
+      "chorus_one": "Przejście {{count}}",
+      "chorus_few": "Przejście {{count}}",
+      "chorus_many": "Przejście {{count}}",
+      "chorus_other": "Przejście {{count}}"
     }
   },
   "scale": {

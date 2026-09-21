@@ -717,6 +717,10 @@
       "recordingEverything": "このパソコンが鳴らす音すべてを録音中",
       "recordingYames": "Yames と自分の入力を録音中",
       "takeEverything": "このパソコンが鳴らした音すべて"
+    },
+    "takeVideo": {
+      "save": "動画にして保存",
+      "chorus": "コーラス {{count}}"
     }
   },
   "scale": {

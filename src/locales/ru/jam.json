@@ -744,6 +744,14 @@
       "recordingEverything": "Записывает всё, что играет этот компьютер",
       "recordingYames": "Записывает Yames и ваш вход",
       "takeEverything": "всё, что играл этот компьютер"
+    },
+    "takeVideo": {
+      "save": "Сохранить как видео",
+      "chorus": "Квадрат {{count}}",
+      "chorus_one": "Квадрат {{count}}",
+      "chorus_few": "Квадрат {{count}}",
+      "chorus_many": "Квадрат {{count}}",
+      "chorus_other": "Квадрат {{count}}"
     }
   },
   "scale": {

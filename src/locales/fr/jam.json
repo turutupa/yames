@@ -735,6 +735,13 @@
       "recordingEverything": "Enregistre tout ce que joue cet ordinateur",
       "recordingYames": "Enregistre Yames et votre entrée",
       "takeEverything": "tout ce qu'a joué cet ordinateur"
+    },
+    "takeVideo": {
+      "save": "Enregistrer en vidéo",
+      "chorus": "Grille {{count}}",
+      "chorus_one": "Grille {{count}}",
+      "chorus_many": "Grille {{count}}",
+      "chorus_other": "Grille {{count}}"
     }
   },
   "scale": {

@@ -735,6 +735,13 @@
       "recordingEverything": "Gravando tudo o que este computador toca",
       "recordingYames": "Gravando o Yames e a sua entrada",
       "takeEverything": "tudo o que este computador tocou"
+    },
+    "takeVideo": {
+      "save": "Salvar como vídeo",
+      "chorus": "Volta {{count}}",
+      "chorus_one": "Volta {{count}}",
+      "chorus_many": "Volta {{count}}",
+      "chorus_other": "Volta {{count}}"
     }
   },
   "scale": {

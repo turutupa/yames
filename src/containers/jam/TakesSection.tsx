@@ -1,8 +1,20 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
-import type { JamTake } from "../../jam/types";
+import type { Jam, JamTake } from "../../jam/types";
 import { formatDate } from "../practice-coach/coachCardHelpers";
+
+/**
+ * The compositor, downloaded the first time somebody asks for a video.
+ *
+ * A canvas painter, a media recorder and a share row is a third of a
+ * megabyte, and the overwhelming majority of sessions never open this drawer
+ * at all — let alone press the button. So it is behind a `lazy`, which is the
+ * only thing on the Jam screen that is.
+ */
+const JamTakeVideo = lazy(() =>
+  import("../../takes/JamTakeVideo").then((m) => ({ default: m.JamTakeVideo })),
+);
 
 /**
  * The shelf: this jam's takes, newest first (JAM_MODE §4.4).
@@ -54,6 +66,17 @@ interface TakesSectionProps {
   dirBytes: number;
   /** The take playing back, or null. */
   playingId: string | null;
+  /**
+   * The jam these takes belong to, for "save as a video" (W30).
+   *
+   * The clip's bar grid and chord names come off the record rather than off
+   * the take: a take is a WAV and a timestamp, and what makes the video worth
+   * watching is the form it was played over. Absent — no jam loaded — and the
+   * button is not drawn.
+   */
+  jam?: Jam | null;
+  /** What the vibe is called, already translated. Goes in the clip's caption. */
+  vibeLabel?: string | null;
   onPlay: (id: string) => void;
   onStop: () => void;
   onDelete: (id: string) => void;
@@ -65,11 +88,21 @@ export function TakesSection({
   recording,
   dirBytes,
   playingId,
+  jam,
+  vibeLabel,
   onPlay,
   onStop,
   onDelete,
 }: TakesSectionProps) {
   const { t, i18n } = useTranslation();
+  /**
+   * The take whose "save as a video" panel is open, or null.
+   *
+   * One at a time, and closed by default: the panel is a compositor, a canvas
+   * and a share row, and six of them under six rows would be a drawer nobody
+   * could read. Opening one closes the other.
+   */
+  const [sharing, setSharing] = useState<string | null>(null);
   /**
    * The take a Delete click has asked about, waiting for the second click.
    *
@@ -161,14 +194,48 @@ export function TakesSection({
                     </button>
                   </span>
                 ) : (
-                  <button
-                    type="button"
-                    className="jam-take-delete"
-                    disabled={busy || recording}
-                    onClick={() => setConfirming(take.id)}
-                  >
-                    {t("jam.takes.delete")}
-                  </button>
+                  <>
+                    {/* A take you can send somebody. Before Delete, because
+                        the two are opposite intentions and a row that puts
+                        them side by side in the wrong order is a row people
+                        mis-click. */}
+                    {jam && (
+                      <button
+                        type="button"
+                        className="jam-take-share"
+                        aria-expanded={sharing === take.id}
+                        disabled={busy || recording}
+                        onClick={() =>
+                          setSharing((was) => (was === take.id ? null : take.id))
+                        }
+                      >
+                        {t("jam.takeVideo.save")}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="jam-take-delete"
+                      disabled={busy || recording}
+                      onClick={() => setConfirming(take.id)}
+                    >
+                      {t("jam.takes.delete")}
+                    </button>
+                  </>
+                )}
+                {jam && sharing === take.id && (
+                  <div className="jam-take-video">
+                    {/* Nothing while the chunk arrives: it is a hundred
+                        milliseconds on any machine that has already loaded
+                        the app, and a spinner for that reads as a fault. */}
+                    <Suspense fallback={null}>
+                      <JamTakeVideo
+                        jam={jam}
+                        take={take}
+                        vibeLabel={vibeLabel}
+                        onBeforeSave={onStop}
+                      />
+                    </Suspense>
+                  </div>
                 )}
               </li>
             );

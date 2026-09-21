@@ -717,6 +717,10 @@
       "recordingEverything": "이 컴퓨터가 내는 모든 소리를 녹음 중",
       "recordingYames": "Yames와 내 입력을 녹음 중",
       "takeEverything": "이 컴퓨터가 냈던 모든 소리"
+    },
+    "takeVideo": {
+      "save": "영상으로 저장",
+      "chorus": "코러스 {{count}}"
     }
   },
   "scale": {

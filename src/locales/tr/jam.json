@@ -726,6 +726,12 @@
       "recordingEverything": "Bu bilgisayarın çaldığı her şey kaydediliyor",
       "recordingYames": "Yames ve girişin kaydediliyor",
       "takeEverything": "bu bilgisayarın çaldığı her şey"
+    },
+    "takeVideo": {
+      "save": "Video olarak kaydet",
+      "chorus": "Tur {{count}}",
+      "chorus_one": "Tur {{count}}",
+      "chorus_other": "Tur {{count}}"
     }
   },
   "scale": {

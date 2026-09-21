@@ -726,6 +726,12 @@
       "recordingEverything": "Recording everything this computer plays",
       "recordingYames": "Recording Yames and your input",
       "takeEverything": "everything this computer played"
+    },
+    "takeVideo": {
+      "save": "Save as a video",
+      "chorus": "Chorus {{count}}",
+      "chorus_one": "Chorus {{count}}",
+      "chorus_other": "Chorus {{count}}"
     }
   },
   "scale": {

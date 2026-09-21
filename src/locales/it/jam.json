@@ -735,6 +735,13 @@
       "recordingEverything": "Registra tutto quello che suona questo computer",
       "recordingYames": "Registra Yames e il tuo ingresso",
       "takeEverything": "tutto quello che ha suonato questo computer"
+    },
+    "takeVideo": {
+      "save": "Salva come video",
+      "chorus": "Giro {{count}}",
+      "chorus_one": "Giro {{count}}",
+      "chorus_many": "Giro {{count}}",
+      "chorus_other": "Giro {{count}}"
     }
   },
   "scale": {

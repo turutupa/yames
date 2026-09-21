@@ -1775,6 +1775,28 @@
   transition: width 120ms ease-out;
 }
 
+/* "Save as a video", and the panel it opens.
+
+   The panel is a full-width row of its own under the take it belongs to
+   rather than a popover: it holds a canvas, four chips and a share row, and
+   inside the 320 px menu cap a popover of that would be unreadable. The list
+   item becomes a two-row flex column when one is open, and goes back to a
+   single row when it closes. */
+.jam-take-share {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.jam-take:has(> .jam-take-video) {
+  flex-wrap: wrap;
+}
+
+.jam-take-video {
+  flex: 1 0 100%;
+  min-width: 0;
+  margin-top: 6px;
+}
+
 /* The badge on a take that is not the ordinary kind. Quiet, and allowed to
    shrink away before the date and the length do: it is the third thing on the
    row, not the first. */
