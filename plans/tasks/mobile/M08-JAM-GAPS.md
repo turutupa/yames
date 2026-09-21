@@ -134,3 +134,37 @@ Worth writing down so M09 does not "fix" it:
 - **Spoken cues are absent** for the same reason — no voice in a mobile build.
 - The cheat sheet's own screens were not photographed; they are reached from
   the context bar, which is where this document stops.
+
+---
+
+## One thing that is not layout, and is bigger than layout
+
+The band costs **342 MB of memory, and it is spent 2.5 seconds after the app
+starts, whether or not the musician ever opens the Jam tab.**
+
+Measured on the R8-minified release APK on the Pixel 6 AVD, `adb shell dumpsys
+meminfo`, cold start:
+
+| Moment | Native heap | Total PSS |
+|---|---|---|
+| 6 s in, before the library warms | **22.7 MB** | **87.5 MB** |
+| 26 s in, after `warm_jam` decoded the library's sound sets | **364.7 MB** | **455.4 MB** |
+| band playing | 364.7 MB | 455.5 MB |
+| after five minutes of it, two with the screen off | 364.7 MB | 456.8 MB |
+
+Two things to read off that table. **Playing costs nothing** — the decode is
+the whole price, and five minutes of a band leaks 8 KB, which is nothing.
+And **the price is paid at launch**: `useJamSession` warms every distinct
+sound set the saved library names, 2.5 s after the jams load, so a musician
+who opens the app for a metronome pays for fifty jams' worth of drums, bass
+and keys they did not ask for.
+
+On a desktop that warm is the fix for a main-thread freeze and it is free.
+On a phone 455 MB of PSS is what gets an app killed when it goes to the
+background, which is the one thing the foreground service exists to prevent.
+
+This is not M09's layout work and it should not be squeezed into it — but it
+is the next brief after M09, and it wants a real decision: warm the jam that
+is loaded rather than the whole library, warm on entering the Jam tab rather
+than at launch, or cap the cache. **Nothing was changed here, because
+changing it changes the desktop too.**
