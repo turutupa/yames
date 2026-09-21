@@ -2,8 +2,14 @@
 
 Written 2026-09-20 by the orchestrator, for the owner. Fourteen Opus 5
 workers, fourteen branches, all merged into **`songs-v1`** (worktree
-`C:\Users\alber\Dev\yames-songs`). Nothing is pushed. `main` is untouched.
+`C:\Users\alber\Dev\yames-songs`). `main` is untouched.
 Every gate is green on the combined branch (numbers at the end).
+
+**Updated the evening of 2026-09-20:** twelve more branches are in (W15 to
+W27, listed under "Since the first night"), and `songs-v1` **is pushed**
+(draft PR #57, where CI builds and tests it on Windows, macOS and Linux). On another machine:
+`git fetch && git checkout songs-v1 && npm install && npm run tauri dev`.
+`npm install` is not optional: Songs added the tab library.
 
 **Nobody has heard or seen any of this run.** Workers may not start the
 app. Everything below is proven by tests, fixtures, the layout suite and
@@ -46,6 +52,23 @@ every theme.
 | W9 engine | Tempo and meter steps to the sample, looping ranges, count-in, the band from the file, Songs as an engine mode. |
 | W12, W14 review | Attempt → coloured tab → verdict in blocks → action. Live note lights. Record in Songs. |
 
+## Since the first night (W15 to W27)
+
+| | |
+|---|---|
+| W15 live | The note you just played lights, per note, and a take knows which bar it opened on (the two "known gaps" about both are closed). |
+| W16, W20, W24 words | Songs, the coach's sentences, the stage and the Songs hotkeys in all fourteen other languages, with the four plural forms Polish and Russian need. |
+| W18 stage | **Choose a portion on the tab and it plays round and round** (drag, or hotkeys for start / end / nudge / clear). The review arrives where you were looking instead of under the fold. |
+| W19 friction | A Guitar Pro file landing in Downloads is offered at once; recently played; every opened file is copied into Yames' own library; a starter shelf so the library is never empty; "open with Yames". |
+| W22 polish | The tab's cursor can be seen (the tab library ships no styles; it was invisible in every theme) and follows; a promised passage opens at its bars, looping, at its speed. |
+| W21, W25 camera | You watch yourself play with the verdict painted on the tape. **Save as a video** (16:9 or 9:16, mp4 where the machine can) with the scrolling marks, bar / section / tempo and **the Yames logo + "yames.app" top right** (own switch, on by default). After saving: show in folder, and links that open the upload page of Instagram, TikTok, YouTube and X. Nothing is uploaded by the app. **Then and now**: two takes of the same bars side by side, locked bar to bar. Thumbnails on takes. `R` records, `C` is the camera, both bindable to a footswitch. The review's sound follows the chosen output. |
+| W24 BAR | The transport's bar readout was counting beats. |
+| W26, W27 setlists | **On `main` since v1.1.0:** "after 8 bars" moved on after 8 beats, rests were counted the same way, a step that changed the meter got a one-beat stub bar, a count-in cost the next step a bar, and the drill's lit dot drifted after a grouping change. All fixed. The click's callback change is a compare and a copy into reserved space. |
+
+**For the release notes** (W26 wrote the wording, it is in its merge): anyone
+who typed 32 to get eight bars of 4/4 now gets 32 bars. Say "check your
+numbers" where a skimming reader sees it.
+
 ## Yours to decide (none blocks trying it)
 
 1. **`SONGS.md` A11 — the refractory when a free player speeds up.** The
@@ -67,6 +90,15 @@ every theme.
    B2 and D3 were built on; everything else waits for your reaction.
 8. **Jam's default mix** (the task chip from the website work): keys sit
    ~10 dB under the drums at default faders. Still open.
+9. **Opening a second copy of Yames** now hands the file to the one already
+   running (W19, needed for "open with Yames"). That is a behaviour change
+   for anyone who ran two windows on purpose.
+10. **Linux packaging** (W19): the Guitar Pro file type, the snap's `home`
+    plug, the flatpak's filesystem permission and stale manifest versions
+    are listed in W19's merge and not done.
+11. **"Copy file" is not in the share row** (W25): a webview cannot put a
+    file on the clipboard, and doing it natively is three platform
+    dependencies for one button. "Show in folder" is there instead.
 
 ## Waiting for your ear: Jam's default mix (merged so you can hear it in the app — NOT approved)
 
@@ -99,16 +131,21 @@ The same worker found three things that are yours to decide:
 
 ## Known gaps, said plainly
 
-- 14 locales carry English for the Songs screens and the coach's new
-  sentences. Rail label and shortcuts are translated.
 - Guitar Pro 3–5 files are untested (no file to test with).
-- Live note lights are one verdict per beat smeared over its notes; the
-  review corrects them per note on stop. There is no live per-note event.
-- The take's start offset for pitch is measured from the frontend and is
-  tens of milliseconds optimistic. Exact needs the engine to report it.
+- **No camera code has met a camera.** Every camera test runs on a fake
+  device. macOS will ask for camera permission the first time; that path
+  has never run. Picture-to-sound sync needs the clap session (K3).
+- A saved video is made in real time (a 20-second clip takes 20 seconds).
+- A count-in of two or more bars between setlist steps would still cost
+  a bar; the editor only ever writes one, so it cannot be reached.
+- If a setlist's meter change reaches the engine more than a beat late,
+  the old meter plays one more full bar first. Only plausible at extreme
+  tempos on a stalled machine.
 - A song does not survive an audio device change; it is reloaded once.
 - The camera spike (`SONGS.md` K3) was not run: it needs you and a camera.
 - `bun.lock` is stale and nothing uses it; `package-lock.json` is ignored.
+  Use `npm install`. If you use `bun install`, do not commit the lockfile
+  it rewrites.
 
 ## Before this goes to main
 
@@ -117,13 +154,13 @@ Run it. Then the manual pass, the jitter probe on a quiet machine (both
 first launch on a copy of a real settings folder to watch the history and
 song migrations run once. The store has never been opened by a live app.
 
-## The gates, run by the orchestrator on the final branch
+## The gates, run by the orchestrator on the final branch (evening of 2026-09-20, after W25)
 
 ```
-npm run build         built, tsc clean (main bundle 684.5 kB gzip; alphaTab and the review are lazy)
-npm run test          188 files, 4956 tests passed
-npm run test:layout   107 passed
-npm run test:rust     834 passed; 0 failed; 1 ignored
+npm run build         built, tsc clean (alphaTab, the review, the video export and then-and-now are lazy)
+npm run test          204 files, 5200 tests passed
+npm run test:layout   190 passed
+npm run test:rust     895 passed; 0 failed; 1 ignored
 npm run test:dsp      1 passed
 npm run test:highbpm  3 passed  (raw-onset, played-rhythm and known-score layers)
 npm run test:pitch    8 passed
