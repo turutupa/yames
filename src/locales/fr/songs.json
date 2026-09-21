@@ -42,7 +42,10 @@
       "soloFor": "N'entendre que {{lane}}",
       "tooManyParts": "{{tracks}} reste muet : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
       "tooManyParts_many": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
-      "tooManyParts_other": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois."
+      "tooManyParts_other": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
+      "turnedDown": "{{count}} musicien baissé",
+      "turnedDown_many": "{{count}} musiciens baissés",
+      "turnedDown_other": "{{count}} musiciens baissés"
     },
     "countIn": {
       "counting": "On te compte l'entrée"
@@ -373,9 +376,13 @@
       "tabAndNotes": "Tablature + notes",
       "notationNote": "Afficher aussi la portée au-dessus de la tablature",
       "bigger": "Plus grand",
-      "smaller": "Plus petit"
+      "smaller": "Plus petit",
+      "size": "Taille"
     },
     "clickChip": "Clic",
-    "clickNote": "Marque le tempo sur le morceau. Éteint au départ quand le fichier a son propre groupe."
+    "clickNote": "Marque le tempo sur le morceau. Éteint au départ quand le fichier a son propre groupe.",
+    "notes": {
+      "label": "Remarques sur ce fichier"
+    }
   }
 }

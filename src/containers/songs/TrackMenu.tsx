@@ -139,9 +139,19 @@ export interface TrackMenuProps {
   /** What the head says when the file is one track, or has not been read. */
   currentName: string;
   onChoose: (trackIndex: number) => void;
+  /**
+   * The song's facts — tuning, capo, meter, tempo — folded in under the list
+   * when the bar is too narrow to carry them (W36 item 2).
+   *
+   * Here rather than in the bar's overflow because it is the same question:
+   * this menu is already "which part am I reading", and a part's tuning is
+   * the first thing you want to know about it. Null whenever the bar has room
+   * for them, so they are never in two places at once.
+   */
+  facts?: React.ReactNode;
 }
 
-export function TrackMenu({ tracks, current, currentName, onChoose }: TrackMenuProps) {
+export function TrackMenu({ tracks, current, currentName, onChoose, facts = null }: TrackMenuProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { wrapRef, menuRef, style } = useMenuPlacement(open);
@@ -204,11 +214,10 @@ export function TrackMenu({ tracks, current, currentName, onChoose }: TrackMenuP
         createPortal(
           <div
             className="songs-track-pop"
-            role="listbox"
-            aria-label={t("songs.track.choose")}
             ref={menuRef}
             style={style}
           >
+            <div role="listbox" aria-label={t("songs.track.choose")} className="songs-track-list">
             {tracks.map((track) => {
               const trouble = trackTrouble(track);
               const chosen = track.index === current;
@@ -244,6 +253,8 @@ export function TrackMenu({ tracks, current, currentName, onChoose }: TrackMenuP
                 </button>
               );
             })}
+            </div>
+            {facts && <div className="songs-track-pop-facts">{facts}</div>}
           </div>,
           document.body,
         )}

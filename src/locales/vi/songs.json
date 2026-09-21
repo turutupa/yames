@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "Chỉ nghe {{lane}}",
       "tooManyParts": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
-      "tooManyParts_other": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc."
+      "tooManyParts_other": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
+      "turnedDown": "Đã giảm {{count}} người chơi",
+      "turnedDown_other": "Đã giảm {{count}} người chơi"
     },
     "countIn": {
       "counting": "Đang đếm vào"
@@ -362,9 +364,13 @@
       "tabAndNotes": "Tab + khuông nhạc",
       "notationNote": "Hiện cả khuông nhạc phía trên bản tab",
       "bigger": "To hơn",
-      "smaller": "Nhỏ hơn"
+      "smaller": "Nhỏ hơn",
+      "size": "Kích cỡ"
     },
     "clickChip": "Tích tắc",
-    "clickNote": "Gõ nhịp cùng bài hát. Ban đầu tắt khi tệp đã có ban nhạc riêng."
+    "clickNote": "Gõ nhịp cùng bài hát. Ban đầu tắt khi tệp đã có ban nhạc riêng.",
+    "notes": {
+      "label": "Ghi chú về tệp này"
+    }
   }
 }

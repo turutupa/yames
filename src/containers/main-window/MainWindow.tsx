@@ -1783,6 +1783,13 @@ export function MainWindow() {
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
           listening={evaluation.enabled}
+          /* W36 item 2 — on Songs the bar carries the song, and the click's
+             sound picker is not part of it: over a file that brings its own
+             band the click starts off, and what it sounds like when it is on
+             is a metronome setting. Which modes want the picker is the
+             shell's question, so it is answered here. */
+          soundPicker={view !== "songs"}
+          modeBar={view === "songs"}
           soundOpen={soundOpen}
           setSoundOpen={setSoundOpen}
           soundDropdownRef={soundDropdownRef}

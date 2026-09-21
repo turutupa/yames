@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "{{lane}}만 듣기",
       "tooManyParts": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
-      "tooManyParts_other": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다."
+      "tooManyParts_other": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
+      "turnedDown": "{{count}}명의 소리를 줄였습니다",
+      "turnedDown_other": "{{count}}명의 소리를 줄였습니다"
     },
     "countIn": {
       "counting": "카운트 중"
@@ -362,9 +364,13 @@
       "tabAndNotes": "탭 + 오선",
       "notationNote": "탭 위에 오선보도 함께 표시합니다",
       "bigger": "크게",
-      "smaller": "작게"
+      "smaller": "작게",
+      "size": "크기"
     },
     "clickChip": "클릭",
-    "clickNote": "곡에 맞춰 박을 칩니다. 파일에 자체 반주가 있으면 처음에는 꺼져 있습니다."
+    "clickNote": "곡에 맞춰 박을 칩니다. 파일에 자체 반주가 있으면 처음에는 꺼져 있습니다.",
+    "notes": {
+      "label": "이 파일에 대한 안내"
+    }
   }
 }

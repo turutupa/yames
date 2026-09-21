@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "Alleen {{lane}} horen",
       "tooManyParts": "{{tracks}} blijft stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
-      "tooManyParts_other": "{{tracks}} blijven stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken."
+      "tooManyParts_other": "{{tracks}} blijven stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
+      "turnedDown": "{{count}} speler zachter gezet",
+      "turnedDown_other": "{{count}} spelers zachter gezet"
     },
     "countIn": {
       "counting": "Je wordt ingeteld"
@@ -362,9 +364,13 @@
       "tabAndNotes": "Tab + noten",
       "notationNote": "Laat ook de notenbalk boven de tab zien",
       "bigger": "Groter",
-      "smaller": "Kleiner"
+      "smaller": "Kleiner",
+      "size": "Grootte"
     },
     "clickChip": "Klik",
-    "clickNote": "Tikt mee met het nummer. Staat eerst uit als het bestand zijn eigen band meebrengt."
+    "clickNote": "Tikt mee met het nummer. Staat eerst uit als het bestand zijn eigen band meebrengt.",
+    "notes": {
+      "label": "Opmerkingen over dit bestand"
+    }
   }
 }

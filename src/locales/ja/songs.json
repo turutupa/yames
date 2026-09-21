@@ -38,7 +38,9 @@
       "soloShort": "S",
       "soloFor": "{{lane}} だけを聞く",
       "tooManyParts": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
-      "tooManyParts_other": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。"
+      "tooManyParts_other": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
+      "turnedDown": "{{count}} 人の音量を下げています",
+      "turnedDown_other": "{{count}} 人の音量を下げています"
     },
     "countIn": {
       "counting": "カウント中"
@@ -362,9 +364,13 @@
       "tabAndNotes": "タブ＋五線",
       "notationNote": "タブの上に五線も表示します",
       "bigger": "大きく",
-      "smaller": "小さく"
+      "smaller": "小さく",
+      "size": "大きさ"
     },
     "clickChip": "クリック",
-    "clickNote": "曲に合わせて刻みます。ファイルに伴奏が入っているときは最初はオフです。"
+    "clickNote": "曲に合わせて刻みます。ファイルに伴奏が入っているときは最初はオフです。",
+    "notes": {
+      "label": "このファイルについて"
+    }
   }
 }
