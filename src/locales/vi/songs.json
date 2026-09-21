@@ -282,6 +282,27 @@
       "watchTitle": "Xem lại",
       "watchingAll": "Cả lượt.",
       "watchingBars": "Ô nhịp {{bars}}, vòng đi vòng lại."
+    },
+    "clip": {
+      "save": "Lưu thành video",
+      "go": "Tạo video",
+      "cancel": "Dừng",
+      "making": "Đang tạo — {{percent}}%",
+      "whichBars": "Những ô nhịp nào",
+      "chosenBars": "Những ô nhịp này",
+      "wholeTake": "Toàn bộ bản thu",
+      "shape": "Khổ hình",
+      "wide": "Ngang",
+      "tall": "Dọc",
+      "withMarks": "Hiện các dấu",
+      "realTime": "Nó ghi trong lúc phát, nên mất đúng bằng thời lượng bản nhạc: {{length}}.",
+      "isMp4": "Bạn nhận được tệp MP4, đăng ở đâu cũng được.",
+      "isWebm": "Bạn nhận được tệp WebM. Một số nơi chỉ nhận MP4.",
+      "saved": "Đã lưu vào {{where}}",
+      "failed": "Không tạo được video. Chưa lưu gì cả.",
+      "unavailable": "Bản này không lưu được video.",
+      "bar": "Ô nhịp",
+      "bpmUnit": "BPM"
     }
   }
 }

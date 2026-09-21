@@ -283,3 +283,102 @@
     gap: 8px;
   }
 }
+
+/* ── "Save as a video" (W25, `plans/ECHORA.md` D4) ─────────────────────── */
+
+/* The clip the player sends somebody. Its own row under the tape, because it
+ * is a different act from watching: you have finished looking and are taking
+ * something away. */
+.songs-clip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* The canvas the recorder samples.
+ *
+ * It has to be IN the document and painted: `display: none` stops a canvas
+ * being composited and `captureStream` then hands the encoder frozen frames.
+ * So it is one pixel, transparent, out of the flow and out of the way — and
+ * it is still a real, drawn canvas, which is all the recorder needs. */
+.songs-clip-canvas {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.songs-clip-row,
+.songs-clip-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Wider between the questions than inside them, so six chips read as
+     "which bars", "which way up" and a switch rather than as six choices. */
+  gap: 8px 16px;
+  min-width: 0;
+}
+
+.songs-clip-choice {
+  display: flex;
+  gap: 4px;
+}
+
+/* The caption belongs to the group after it and must never be left on a line
+   of its own at the end of a row. */
+.songs-clip-options .songs-strip-label {
+  margin-right: -10px;
+}
+
+.songs-clip-note {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+  /* A path is a long unbreakable word on a 296px panel. */
+  overflow-wrap: anywhere;
+}
+
+.songs-clip-failed {
+  color: var(--feedback-miss);
+}
+
+.songs-clip-absent {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.songs-clip-progress {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The ring: an arc redrawn as the clip is made, not an animation. It is
+ * reporting a real number — a clip takes exactly as long as it lasts — and a
+ * spinner turning at its own speed would say nothing about how much longer. */
+.songs-clip-ring {
+  flex: 0 0 auto;
+  transform: rotate(-90deg);
+}
+
+.songs-clip-ring-track,
+.songs-clip-ring-arc {
+  fill: none;
+  stroke-width: 3;
+}
+
+.songs-clip-ring-track {
+  stroke: var(--border);
+}
+
+.songs-clip-ring-arc {
+  stroke: var(--accent);
+  stroke-linecap: round;
+}

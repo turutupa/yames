@@ -291,6 +291,27 @@
       "watchTitle": "Verlo otra vez",
       "watchingAll": "La pasada entera.",
       "watchingBars": "Compases {{bars}}, una y otra vez."
+    },
+    "clip": {
+      "save": "Guardar como vídeo",
+      "go": "Crear el vídeo",
+      "cancel": "Detener",
+      "making": "Creándolo — {{percent}}%",
+      "whichBars": "Qué compases",
+      "chosenBars": "Estos compases",
+      "wholeTake": "La toma entera",
+      "shape": "Formato",
+      "wide": "Horizontal",
+      "tall": "Vertical",
+      "withMarks": "Mostrar las marcas",
+      "realTime": "Se graba mientras suena, así que tarda lo mismo que la música: {{length}}.",
+      "isMp4": "Obtienes un MP4, que se sube a cualquier sitio.",
+      "isWebm": "Obtienes un WebM. Algunos sitios solo admiten MP4.",
+      "saved": "Guardado en {{where}}",
+      "failed": "No se pudo crear el vídeo. No se guardó nada.",
+      "unavailable": "Esta versión no puede guardar un vídeo.",
+      "bar": "Compás",
+      "bpmUnit": "BPM"
     }
   }
 }

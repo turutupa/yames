@@ -313,6 +313,31 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.camera.watchTitle",
   "songs.camera.watchingAll",
   "songs.camera.watchingBars",
+  // W25 — "Save as a video" (`plans/ECHORA.md` D4). Appended for the reason
+  // the camera's block was, and written under the same rule: not one of them
+  // is pluralised, because how long a clip takes is said as a LENGTH ("0:42")
+  // rather than as a count of seconds. A number governing a noun would drag
+  // the sentence into the `_few`/`_many` matrix the last check enforces, in
+  // two languages, for no gain to anybody reading it.
+  "songs.clip.bar",
+  "songs.clip.bpmUnit",
+  "songs.clip.cancel",
+  "songs.clip.chosenBars",
+  "songs.clip.failed",
+  "songs.clip.go",
+  "songs.clip.isMp4",
+  "songs.clip.isWebm",
+  "songs.clip.making",
+  "songs.clip.realTime",
+  "songs.clip.save",
+  "songs.clip.saved",
+  "songs.clip.shape",
+  "songs.clip.tall",
+  "songs.clip.unavailable",
+  "songs.clip.whichBars",
+  "songs.clip.wholeTake",
+  "songs.clip.wide",
+  "songs.clip.withMarks",
 ];
 
 /**
@@ -335,6 +360,9 @@ const ALLOWED: { key: string; langs: string[]; why: string }[] = [
     langs: ["nl"],
     why: "...and so the numbered one is identical as well",
   },
+  // W25 — the clip's caption. The same unit as `songs.bpm`, painted on a
+  // canvas rather than set in HTML, which is why it is a key of its own.
+  { key: "songs.clip.bpmUnit", langs: LANGS, why: "BPM is the unit, everywhere" },
   { key: "songs.bpm", langs: LANGS, why: "BPM is the unit, everywhere" },
   { key: "songs.dismiss", langs: LANGS, why: '"OK" is OK in all fourteen' },
   {

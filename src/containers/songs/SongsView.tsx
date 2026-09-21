@@ -339,16 +339,22 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * before the camera existed (`SONGS.md` A9).
    */
   const reviewVideo = useMemo(() => {
-    const made = camera.lastVideo;
     const id = takes.lastTake?.takeId;
-    if (!made || !id || made.takeId !== id) return undefined;
+    if (!id) return undefined;
     const take = takes.takes.find((row) => row.id === id);
     if (!take) return undefined;
+    // W25 — the picture is now optional rather than the whole reason for
+    // this object. A take with none still reaches the review, where the
+    // watching half is not drawn (A9) and "Save as a video" is.
+    const made = camera.lastVideo;
+    const picture = made && made.takeId === id ? made : null;
     return {
       takeId: take.id,
       path: take.path,
-      videoPath: made.path,
-      ...(made.offsetMs === null ? {} : { videoOffsetMs: made.offsetMs }),
+      videoPath: picture?.path ?? null,
+      ...(picture?.offsetMs === undefined || picture.offsetMs === null
+        ? {}
+        : { videoOffsetMs: picture.offsetMs }),
       ...(take.position?.startOffsetMs === undefined
         ? {}
         : { startOffsetMs: take.position.startOffsetMs }),

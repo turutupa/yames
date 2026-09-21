@@ -291,6 +291,27 @@
       "watchTitle": "Le revoir",
       "watchingAll": "Tout le passage.",
       "watchingBars": "Mesures {{bars}}, en boucle."
+    },
+    "clip": {
+      "save": "Enregistrer en vidéo",
+      "go": "Créer la vidéo",
+      "cancel": "Arrêter",
+      "making": "Création — {{percent}} %",
+      "whichBars": "Quelles mesures",
+      "chosenBars": "Ces mesures",
+      "wholeTake": "La prise entière",
+      "shape": "Format",
+      "wide": "Paysage",
+      "tall": "Portrait",
+      "withMarks": "Afficher les repères",
+      "realTime": "L'enregistrement se fait en lecture : cela dure aussi longtemps que la musique, soit {{length}}.",
+      "isMp4": "Vous obtenez un MP4, qui se publie partout.",
+      "isWebm": "Vous obtenez un WebM. Certains sites n'acceptent que le MP4.",
+      "saved": "Enregistré dans {{where}}",
+      "failed": "La vidéo n'a pas pu être créée. Rien n'a été enregistré.",
+      "unavailable": "Cette version ne peut pas enregistrer de vidéo.",
+      "bar": "Mesure",
+      "bpmUnit": "BPM"
     }
   }
 }

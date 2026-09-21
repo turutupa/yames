@@ -72,6 +72,11 @@ import type {
 // chunk: a review with sound alone must not pay for a video player.
 import { TakeVideoView } from "../camera/TakeVideoView";
 import type { ReviewTakeVideo } from "../camera/TakeVideoView";
+// W25 — "Save as a video" (`plans/ECHORA.md` D4). In the review's chunk with
+// everything else here: a player who never stops a pass never downloads a
+// canvas compositor.
+import { SaveAsVideo } from "../camera/SaveAsVideo";
+import { buildTape } from "../../../songs/camera/tape";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";
@@ -103,11 +108,16 @@ export type SongReviewProps = {
   /** How this passage has gone before, for the `progress` block (C3). */
   progressFor?: CoachBlockContext["progressFor"];
   /**
-   * W21 — the recording of this pass, when the camera was on for it.
+   * W21 — the recording of this pass, when there was one.
    *
-   * Absent is the normal case and the one A9 insists on: with no picture this
-   * screen is exactly what it was before the camera existed. Every use of it
-   * below is behind a check for that reason.
+   * `videoPath` is what says whether the camera was on. With it null the
+   * watching half of this screen is not drawn at all and the review is
+   * exactly what it was before the camera existed, which is A9's condition —
+   * but the take is still a take, and W25's "Save as a video" makes a clip
+   * out of it: the excerpt and the marks over a plain ground.
+   *
+   * Absent altogether is a pass that was not recorded, and then neither half
+   * appears.
    */
   video?: ReviewTakeVideo;
 };
@@ -243,6 +253,45 @@ export function SongReview({
   }, [review.attemptId]);
 
   /**
+   * W25 — the pass laid out in time, built once here.
+   *
+   * Two things read it now: the tape under the picture, and the clip the
+   * player saves out of it. One `buildTape` and one object, so the marks on a
+   * shared clip are the same marks that are on the screen it was made from —
+   * not a second, equal, computation that a later change could make unequal.
+   */
+  const tape = useMemo(
+    () =>
+      buildTape({
+        score,
+        schedule,
+        range,
+        tempoPercent: review.tempoPercent,
+        results: facts.results,
+        extras: facts.extras,
+        bands,
+      }),
+    [score, schedule, range, review.tempoPercent, facts, bands],
+  );
+
+  /** "Save as a video" wants the take to itself while it plays it through. */
+  const [pauseNonce, setPauseNonce] = useState(0);
+
+  /**
+   * Which bars a clip starts out being of.
+   *
+   * The ones the coach has just pointed at, when it pointed at any — a player
+   * saving a clip a moment after being told about bars 17–20 means those
+   * bars, and "the whole take" is one press away. With no headline, or a
+   * finding about the passage as a whole, it is the whole attempt.
+   */
+  const clipBars = useMemo<BarRange | null>(() => {
+    const at = headline?.bars;
+    if (!at) return null;
+    return { startBar: at[0], endBar: at[1] };
+  }, [headline]);
+
+  /**
    * W21 — the `take` slot's real component (`slots.tsx`), at last.
    *
    * A BUTTON, and not a second video pane. The catalogue's `take` block means
@@ -259,7 +308,9 @@ export function SongReview({
    */
   const TakeSlot = useCallback(
     (props: TakeSlotProps) => {
-      if (!video) return null;
+      // No picture, no player to point at: "Watch it" is a button that moves
+      // the tape, and with sound alone there is no tape on screen to move.
+      if (!video || video.videoPath === null) return null;
       const bars =
         props.fromBar !== null && props.toBar !== null
           ? { startBar: props.fromBar - 1, endBar: props.toBar - 1 }
@@ -290,7 +341,7 @@ export function SongReview({
             scoreId: review.scoreId || null,
             attemptId: review.attemptId,
             withProgress: progressFor !== undefined,
-            withTake: video !== undefined,
+            withTake: video?.videoPath != null,
           },
           bag.current,
         ),
@@ -339,7 +390,7 @@ export function SongReview({
                 // W21 — the other findings point at the tape as well, so
                 // "what else" is also something you can watch rather than
                 // only read about.
-                withTake: video !== undefined,
+                withTake: video?.videoPath != null,
               },
               bag.current,
             ),
@@ -457,15 +508,39 @@ export function SongReview({
           above it, so A4 still has the first word. The coach's "Watch it"
           points this player rather than opening a second. With no picture none
           of it exists and the panel is exactly what it was. */}
-      {video && (
+      {video && video.videoPath !== null && (
         <TakeVideoView
           review={review}
           take={video}
+          tape={tape}
           loopBars={watch?.bars ?? null}
           watchNonce={watch?.nonce ?? 0}
+          pauseNonce={pauseNonce}
           pass={pass}
           onPass={setPass}
           onPosition={setPlayheadMs}
+        />
+      )}
+
+      {/* W25 — a take you can send to somebody (`plans/ECHORA.md` D4). Under
+          the picture where there is one, and on its own where there is not:
+          a player with no camera still gets a clip, which is the excerpt and
+          the marks over a plain ground. Nothing is uploaded — they save a
+          file and decide where it goes. */}
+      {video && (
+        <SaveAsVideo
+          tape={tape}
+          score={score}
+          range={range}
+          tempoPercent={review.tempoPercent}
+          mixSrc={video.path}
+          videoSrc={video.videoPath}
+          startOffsetMs={video.startOffsetMs ?? 0}
+          videoOffsetMs={video.videoOffsetMs ?? 0}
+          bars={watch?.bars ?? clipBars}
+          pass={pass}
+          title={score.title}
+          onBeforeSave={() => setPauseNonce((n) => n + 1)}
         />
       )}
 

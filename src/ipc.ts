@@ -2181,6 +2181,41 @@ export async function takeVideoDiscard(): Promise<void> {
   return invoke("take_video_discard");
 }
 
+// ---- W25: "Save as a video" — the clip the player sends somebody ----------
+//
+// The same four-step pipe as the camera's, pointed somewhere else entirely:
+// the file is the PLAYER'S, at a path they chose in a native save dialog, and
+// the app neither lists it nor reads it back. Nothing is uploaded; there is no
+// call here that could.
+
+/**
+ * Ask where the clip goes and open the file.
+ *
+ * Resolves to the path, or `null` when the player cancels the dialog — which
+ * is not a failure and must not put a sentence on their screen.
+ */
+export async function clipSaveBegin(
+  suggested: string,
+  container: "mp4" | "webm",
+): Promise<string | null> {
+  return invoke("clip_save_begin", { suggested, container });
+}
+
+/** Append one composited chunk. Raw bytes, for `takeVideoAppend`'s reasons. */
+export async function clipSaveAppend(seq: number, bytes: Uint8Array): Promise<number> {
+  return invoke("clip_save_append", bytes, { headers: { seq: String(seq) } });
+}
+
+/** Close it. The path comes back so the screen can say where it went. */
+export async function clipSaveFinish(): Promise<{ path: string; bytes: number }> {
+  return invoke("clip_save_finish");
+}
+
+/** Cancelled, or something went wrong. Nothing is left at the chosen name. */
+export async function clipSaveDiscard(): Promise<void> {
+  return invoke("clip_save_discard");
+}
+
 /**
  * Ask the user for a folder of drum samples (a native folder dialog). Resolves
  * to the folder path, or null when they cancel. The folder is read on this

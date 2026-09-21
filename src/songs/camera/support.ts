@@ -53,6 +53,56 @@ const CANDIDATES: { mimeType: string; container: CameraContainer }[] = [
   { mimeType: "video/webm", container: "webm" },
 ];
 
+/**
+ * ...and the containers a SHARED clip ends up in (W25 item 2).
+ *
+ * A different list from the camera's, and the difference is the audio codec.
+ * The camera records a picture with no sound in it, so `video/mp4;codecs=avc1`
+ * says everything there is to say; a clip carries the take's mix, so the
+ * container has to name an audio codec as well or a webview is free to answer
+ * "yes" to the video half and then write something its own `<video>` will not
+ * play back. AAC for MP4 and Opus for WebM are the pairs every one of the
+ * three webviews actually ships.
+ *
+ * MP4 first for the reason it is first above, and here it matters more: this
+ * is the file the player is going to put somewhere. Several of the places a
+ * musician posts a clip take MP4 and nothing else, which is why the screen
+ * SAYS which one they got rather than leaving them to find out.
+ */
+const CLIP_CANDIDATES: { mimeType: string; container: CameraContainer }[] = [
+  { mimeType: 'video/mp4;codecs="avc1.42E01E,mp4a.40.2"', container: "mp4" },
+  { mimeType: "video/mp4;codecs=avc1,mp4a.40.2", container: "mp4" },
+  { mimeType: "video/mp4", container: "mp4" },
+  { mimeType: "video/webm;codecs=vp9,opus", container: "webm" },
+  { mimeType: "video/webm;codecs=vp8,opus", container: "webm" },
+  { mimeType: "video/webm", container: "webm" },
+];
+
+/**
+ * Can this webview write a clip, and as what?
+ *
+ * No `mediaDevices` check: a clip is a canvas and an audio graph, and a
+ * machine with no camera at all can still make one out of a take recorded on
+ * another — or out of a take with no picture, which is every take until
+ * somebody turns the camera on.
+ */
+export function clipSupport(env: CameraEnvironment = browserEnvironment()): CameraSupport {
+  const isSupported = env.mediaRecorder?.isTypeSupported;
+  if (!env.mediaRecorder || typeof isSupported !== "function") {
+    return { ok: false, reason: "noRecorder" };
+  }
+  for (const candidate of CLIP_CANDIDATES) {
+    let supported = false;
+    try {
+      supported = isSupported.call(env.mediaRecorder, candidate.mimeType) === true;
+    } catch {
+      supported = false;
+    }
+    if (supported) return { ok: true, mimeType: candidate.mimeType, container: candidate.container };
+  }
+  return { ok: false, reason: "noContainer" };
+}
+
 /** Just enough of the browser to answer the question. */
 export type CameraEnvironment = {
   mediaDevices?: { getUserMedia?: unknown; enumerateDevices?: unknown } | undefined;

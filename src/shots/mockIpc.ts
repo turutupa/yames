@@ -103,15 +103,23 @@ const TAKES = [
 /**
  * W21 — the take the camera scene records, and the sound it plays back.
  *
- * One second of silence as a WAV, base64'd into a data URL: the review plays
- * the take's MIX in an `<audio>` element and reads the clock off it, so a
- * scene with no audio is a scene whose tape never moves. Built rather than
- * checked in because forty-four bytes of header and a run of zeros is shorter
- * to write than to explain.
+ * A WAV, base64'd into a data URL: the review plays the take's MIX in an
+ * `<audio>` element and reads the clock off it, so a scene with no audio is a
+ * scene whose tape never moves. Built rather than checked in because
+ * forty-four bytes of header and a run of samples is shorter to write than to
+ * explain.
+ *
+ * **It carries a quiet tone rather than silence (W25).** The clip export
+ * routes this file through a `MediaElementAudioSourceNode` into the recorder,
+ * and a graph that is not connected at all produces a perfectly valid audio
+ * track full of zeros — which is indistinguishable from a correct export of
+ * silence. With a tone in it, decoding the finished clip and looking at the
+ * peak is a real answer to "did the sound get in", which is the one question
+ * about a shared clip nobody can answer by looking.
  */
-const SILENT_WAV = (() => {
+function takeWav(seconds: number): string {
   const rate = 8000;
-  const samples = rate;
+  const samples = Math.round(rate * seconds);
   const bytes = new Uint8Array(44 + samples * 2);
   const view = new DataView(bytes.buffer);
   const ascii = (at: number, text: string) => {
@@ -129,10 +137,28 @@ const SILENT_WAV = (() => {
   view.setUint16(34, 16, true);
   ascii(36, "data");
   view.setUint32(40, samples * 2, true);
+  // A 220 Hz sine at about a tenth of full scale — loud enough to survive
+  // being encoded to AAC and measured, quiet enough that nobody running the
+  // harness with speakers on is startled.
+  for (let i = 0; i < samples; i++) {
+    view.setInt16(44 + i * 2, Math.round(Math.sin((2 * Math.PI * 220 * i) / rate) * 3200), true);
+  }
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return `data:audio/wav;base64,${btoa(binary)}`;
-})();
+}
+
+/**
+ * Long enough to be the whole pass, which W25 made it have to be.
+ *
+ * It used to be one second, which was plenty when the only thing reading it
+ * was the review's clock. "Save as a video" plays the take THROUGH — in real
+ * time, from wherever the chosen bars start — so a one-second file is a clip
+ * that ends before it begins. Twenty-two seconds covers the fixture's eight
+ * bars at 96 BPM (twenty) with headroom, and costs the harness half a
+ * megabyte of data URL that never leaves the browser.
+ */
+const TAKE_WAV = takeWav(22);
 
 const SHOT_TAKE_ID = "w21";
 const SHOT_TAKE_JAM = "shot-song";
@@ -315,6 +341,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** W21 — the bytes `MediaRecorder` handed over during the camera scene. */
   const cameraChunks: ArrayBuffer[] = [];
   const cameraMime = "video/webm";
+  /** W25 — and the ones the canvas compositor handed over for a clip. */
+  const clipChunks: ArrayBuffer[] = [];
   /**
    * The id the take was STARTED with.
    *
@@ -721,8 +749,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       id: SHOT_TAKE_ID,
       jamId: cameraTakeFor,
       createdAt: Date.now(),
-      durationSec: 3,
-      path: SILENT_WAV,
+      durationSec: 22,
+      path: TAKE_WAV,
       position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -40 },
     }),
     take_video_begin: () => {
@@ -751,6 +779,41 @@ export function installShotMock(shot: Shot, theme: string): void {
       return { path: URL.createObjectURL(blob), bytes: blob.size, offsetMs: 120 };
     },
     take_video_discard: () => null,
+    /*
+     * W25 — "Save as a video". The real commands put up a save dialog and
+     * stream the composited chunks to a file the player named; here the
+     * dialog is answered with a plausible path and the chunks are kept, so
+     * the SHIPPING compositor, the shipping `canvas.captureStream()`, the
+     * shipping audio graph and the shipping `MediaRecorder` all run for real
+     * and what is mocked is only the disk.
+     *
+     * The finished blob is hung on `window.__SHOT_CLIP__` so a test can pull
+     * the bytes out and put a real file in front of `ffprobe`. It is the only
+     * way to answer "is that a video?" — no assertion about a Blob's size can.
+     */
+    clip_save_begin: () => {
+      clipChunks.length = 0;
+      delete (window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__;
+      return "C:\\Users\\you\\Videos\\Practice piece.mp4";
+    },
+    clip_save_append: (a) => {
+      const bytes = a as unknown as Uint8Array | ArrayBuffer | undefined;
+      if (bytes instanceof Uint8Array) clipChunks.push(bytes.slice().buffer);
+      else if (bytes instanceof ArrayBuffer) clipChunks.push(bytes);
+      return clipChunks.reduce((n, c) => n + c.byteLength, 0);
+    },
+    clip_save_finish: () => {
+      const blob = new Blob(clipChunks as BlobPart[]);
+      (window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__ = {
+        url: URL.createObjectURL(blob),
+        bytes: blob.size,
+      };
+      return { path: "C:\\Users\\you\\Videos\\Practice piece.mp4", bytes: blob.size };
+    },
+    clip_save_discard: () => {
+      clipChunks.length = 0;
+      return null;
+    },
     delete_take: () => null,
     play_take: () => null,
     stop_take_playback: () => null,

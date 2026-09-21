@@ -282,6 +282,27 @@
       "watchTitle": "見返す",
       "watchingAll": "一周ぜんぶ。",
       "watchingBars": "{{bars}} 小節を、繰り返し。"
+    },
+    "clip": {
+      "save": "動画として保存",
+      "go": "動画を作る",
+      "cancel": "中止",
+      "making": "作成中 — {{percent}}%",
+      "whichBars": "どの小節",
+      "chosenBars": "この小節",
+      "wholeTake": "テイク全体",
+      "shape": "形",
+      "wide": "横",
+      "tall": "縦",
+      "withMarks": "印を表示",
+      "realTime": "再生しながら録画するので、音楽と同じ長さ（{{length}}）かかります。",
+      "isMp4": "MP4 で保存されます。どこにでも投稿できます。",
+      "isWebm": "WebM で保存されます。MP4 しか受け付けない場所もあります。",
+      "saved": "{{where}} に保存しました",
+      "failed": "動画を作れませんでした。何も保存していません。",
+      "unavailable": "このバージョンでは動画を保存できません。",
+      "bar": "小節",
+      "bpmUnit": "BPM"
     }
   }
 }

@@ -291,6 +291,27 @@
       "watchTitle": "Rever",
       "watchingAll": "A passada inteira.",
       "watchingBars": "Compassos {{bars}}, sem parar."
+    },
+    "clip": {
+      "save": "Salvar como vídeo",
+      "go": "Criar o vídeo",
+      "cancel": "Parar",
+      "making": "Criando — {{percent}}%",
+      "whichBars": "Quais compassos",
+      "chosenBars": "Estes compassos",
+      "wholeTake": "A gravação inteira",
+      "shape": "Formato",
+      "wide": "Deitado",
+      "tall": "Em pé",
+      "withMarks": "Mostrar as marcas",
+      "realTime": "Ele grava enquanto toca, então leva o mesmo tempo da música: {{length}}.",
+      "isMp4": "Você recebe um MP4, que sobe em qualquer lugar.",
+      "isWebm": "Você recebe um WebM. Alguns lugares só aceitam MP4.",
+      "saved": "Salvo em {{where}}",
+      "failed": "Não deu para criar o vídeo. Nada foi salvo.",
+      "unavailable": "Esta versão não consegue salvar um vídeo.",
+      "bar": "Compasso",
+      "bpmUnit": "BPM"
     }
   }
 }

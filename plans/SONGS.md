@@ -173,10 +173,30 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   2026-09-20 (W21), for the owner to confirm.* The picture is recorded by
   the webview as its own file, the sound stays the engine's take (mix +
   dry stem, A8), and a sidecar holds the measured offset between them;
-  the review plays them together. Joining them into one ordinary video
-  file for sharing is a later step (`ECHORA.md` D4), and needs an
-  encoder whose licence has to be checked against GPL-3 before it is
-  promised.
+  the review plays them together.
+
+  **Joining them into one ordinary video file is built (W25, 2026-09-20),
+  and the licence question turned out not to exist.** A10 said sharing
+  "needs an encoder whose licence has to be checked against GPL-3 before it
+  is promised". It needs no encoder: the webview already has the one it
+  recorded the picture with, and `canvas.captureStream()` plus a
+  `MediaStreamAudioDestinationNode` fed by the take's mix, into
+  `MediaRecorder`, is how you reach it. No dependency, nothing to license,
+  nothing uploaded — the player picks a place in a native save dialog and
+  the bytes stream to it a chunk at a time, exactly as the camera's do
+  (`clip_save_begin/append/finish/discard`).
+
+  What it costs instead is TIME: it is real, so a forty-second clip takes
+  forty seconds. That is a progress ring and a cancel rather than a
+  problem. The clip is MP4 (H.264 + AAC) where the webview can and WebM
+  otherwise, and the screen says which the player got, because several of
+  the places a musician posts a clip take MP4 and nothing else. Measured on
+  this machine through the harness: 1280×720 at 30 fps, AAC 48 kHz stereo,
+  10.3 s for a four-bar selection at 96 BPM, 977 kB; 9:16 comes out
+  720×1280. A take with NO picture makes a clip too — the scrolling
+  coloured excerpt, the bar, section and tempo and the Yames mark over a
+  plain ground — because a player without a camera should still have
+  something to show somebody.
 
   On disk: `<takeId>.video.<mp4|webm>` beside the take's WAV, written a
   chunk at a time through `take_video_begin/append/finish/discard`

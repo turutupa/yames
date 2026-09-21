@@ -97,6 +97,20 @@ export interface Shot {
      */
     camera?: boolean;
     /**
+     * W25 — open "Save as a video" on the review, and optionally make one.
+     *
+     * `"open"` presses the button and photographs the choices: which bars,
+     * which way up, marks on or off, and how long it will take. `"make"` goes
+     * on to press Make the video and waits for the file — which runs the
+     * shipping compositor, the shipping `canvas.captureStream()` and the
+     * shipping `MediaRecorder` in real time, so it is only worth doing in a
+     * test that is going to look at the bytes afterwards.
+     *
+     * Only meaningful with `review`: a clip is made out of a take, and a take
+     * is what the review is about.
+     */
+    clip?: "open" | "make";
+    /**
      * Press play and photograph the stage with the transport running.
      *
      * The state A13 is about: every control you might reach for mid-passage
@@ -639,6 +653,35 @@ export const SHOTS: Shot[] = [
     width: 480,
     height: 780,
     settleMs: 900,
+  },
+  {
+    id: "songs-clip",
+    suffix: "songs-clip",
+    window: "main",
+    tab: "songs",
+    // W25 item 2 — "Save as a video", open on its choices: which bars, which
+    // way up, marks on or off, how long it will take and which container the
+    // player is going to get. The clip itself is not made here; that takes as
+    // long as the music does and belongs in a test that reads the bytes.
+    songs: { row: 0, review: "rushing", camera: true, clip: "open" },
+    width: 1100,
+    height: 720,
+    settleMs: 600,
+  },
+  {
+    id: "songs-clip-make",
+    suffix: "songs-clip-make",
+    window: "main",
+    tab: "songs",
+    // ...and the same screen with the clip actually MADE. It runs the
+    // compositor in real time, so it is here for `songs-camera.spec.ts` to
+    // pull the bytes off `window.__SHOT_CLIP__` and ask whether they are a
+    // video — which is the only question about a video worth asking, and one
+    // no assertion about a Blob can answer.
+    songs: { row: 0, review: "rushing", camera: true, clip: "make" },
+    width: 1100,
+    height: 720,
+    settleMs: 200,
   },
   {
     id: "songs-camera-armed",

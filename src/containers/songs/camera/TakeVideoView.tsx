@@ -43,7 +43,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { storeLoad, storeSave } from "../../../ipc";
-import { barLengthMs, buildTape, slipJump } from "../../../songs/camera/tape";
+import { barLengthMs, slipJump } from "../../../songs/camera/tape";
+import type { Tape } from "../../../songs/camera/tape";
 import { cameraNudgeKey, NUDGE_LIMIT_MS, NUDGE_STEP_MS } from "../../../songs/camera/keys";
 import { mediaSrc } from "../../../songs/camera/src";
 import { msAtBeat } from "../../../songs/camera/offset";
@@ -59,8 +60,17 @@ export type ReviewTakeVideo = {
   takeId: string;
   /** Absolute path (or already a URL) of the mix. */
   path: string;
-  /** Absolute path (or already a URL) of the picture. */
-  videoPath: string;
+  /**
+   * Absolute path (or already a URL) of the picture, or `null` for a take
+   * recorded with the camera off — which is every take until somebody turns
+   * it on.
+   *
+   * This view is not drawn at all in that case (`SongReview` checks), so A9
+   * still holds: with no picture the review is exactly what it was. What the
+   * null is FOR is "Save as a video", which works on a take with sound alone
+   * — the excerpt and the marks over a plain ground.
+   */
+  videoPath: string | null;
   /** What the fit measured, or null when it had too little to go on. */
   videoOffsetMs?: number;
   /** Where beat 0 sits in the WAV, from the take's own sidecar. */
@@ -87,6 +97,8 @@ const DRIFT_MS = 90;
 export type TakeVideoViewProps = {
   review: SongAttemptReview;
   take: ReviewTakeVideo;
+  /** The pass laid out in time. Built once by the host and shared. */
+  tape: Tape;
   /**
    * The bars to loop, counted as played-bar indices, or null for the whole
    * attempt. The coach's "Watch it" passes the finding's bars; the review
@@ -109,18 +121,30 @@ export type TakeVideoViewProps = {
   watchNonce?: number;
   /** The speed to open at, as a percentage. */
   startSpeed?: number;
+  /**
+   * Somewhere else needs the take to itself — "Save as a video" plays it
+   * again on its own clock, and two transports over one recording is two
+   * things a person has to keep in step by hand.
+   *
+   * A counter rather than a flag, for `watchNonce`'s reason: the second
+   * export has to pause this player too, and a boolean that was already true
+   * would do nothing.
+   */
+  pauseNonce?: number;
   className?: string;
 };
 
 export function TakeVideoView({
   review,
   take,
+  tape,
   loopBars = null,
   pass = null,
   onPass,
   onPosition,
   watchNonce = 0,
   startSpeed = 100,
+  pauseNonce = 0,
   className,
 }: TakeVideoViewProps) {
   const { t } = useTranslation();
@@ -135,20 +159,6 @@ export function TakeVideoView({
 
   const startOffsetMs = take.startOffsetMs ?? 0;
   const baseOffsetMs = take.videoOffsetMs ?? 0;
-
-  const tape = useMemo(
-    () =>
-      buildTape({
-        score: review.score,
-        schedule: review.schedule,
-        range: review.range,
-        tempoPercent: review.tempoPercent,
-        results: review.facts.results,
-        extras: review.facts.extras,
-        bands: review.bands,
-      }),
-    [review],
-  );
 
   /** The window being looped, in transport milliseconds. */
   const loop = useMemo(() => {
@@ -332,6 +342,14 @@ export function TakeVideoView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchNonce]);
 
+  /** Something else has taken the take. Stand down rather than play over it. */
+  useEffect(() => {
+    if (pauseNonce <= 0) return;
+    pause();
+    // The press is the whole trigger; `pause` is read as it is at that moment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pauseNonce]);
+
   /** Half a bar of the bar the slip is in — a teacher rewinds to just before. */
   const leadMs = useMemo(() => {
     const bar = tape.ticks.find((tick) => tick.atMs >= nowMs)?.bar ?? review.range.startBar;
@@ -378,7 +396,7 @@ export function TakeVideoView({
         <video
           ref={videoRef}
           className="songs-take-video-picture"
-          src={mediaSrc(take.videoPath)}
+          src={mediaSrc(take.videoPath ?? "")}
           muted
           playsInline
           preload="auto"

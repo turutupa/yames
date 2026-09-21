@@ -168,8 +168,11 @@ use commands::{
 // W21 — the camera's recording. Its own module, because the file it writes
 // comes from the webview rather than from the engine, and nothing about it
 // touches a ring, a handoff or a callback.
+// W25 — and the clip the player saves out of one, which is the same module's
+// other half: the player's file, at a path they chose in a save dialog.
 use take_video::{
-    take_video_append, take_video_begin, take_video_discard, take_video_finish, VideoState,
+    clip_save_append, clip_save_begin, clip_save_discard, clip_save_finish, take_video_append,
+    take_video_begin, take_video_discard, take_video_finish, ClipState, VideoState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -423,6 +426,10 @@ pub fn run() {
             // W21 — and the picture beside it, if the camera is on. See
             // `take_video.rs`.
             app.manage(VideoState::default());
+            // W25 — and the clip being saved out of one, if there is. A slot
+            // of its own: a clip is written at a path the player named and
+            // has nothing to do with the takes directory.
+            app.manage(ClipState::default());
             // W21 — and the camera's prompt is ours, asked once, in our own
             // words. See `camera_permission.rs`; a no-op off Windows.
             camera_permission::install(&app.handle().clone());
@@ -778,6 +785,12 @@ pub fn run() {
             take_video_append,
             take_video_finish,
             take_video_discard,
+            // W25 — "Save as a video": the same pipe, to a file the player
+            // named in a native save dialog.
+            clip_save_begin,
+            clip_save_append,
+            clip_save_finish,
+            clip_save_discard,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,

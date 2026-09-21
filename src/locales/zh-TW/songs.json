@@ -282,6 +282,27 @@
       "watchTitle": "回看",
       "watchingAll": "整整一遍。",
       "watchingBars": "第 {{bars}} 小節，一遍又一遍。"
+    },
+    "clip": {
+      "save": "存成影片",
+      "go": "製作影片",
+      "cancel": "停止",
+      "making": "製作中 — {{percent}}%",
+      "whichBars": "哪幾個小節",
+      "chosenBars": "這幾個小節",
+      "wholeTake": "整段錄音",
+      "shape": "畫面比例",
+      "wide": "橫向",
+      "tall": "直向",
+      "withMarks": "顯示標記",
+      "realTime": "它一邊播放一邊錄製，所以和音樂一樣長：{{length}}。",
+      "isMp4": "你會得到一個 MP4，哪裡都能上傳。",
+      "isWebm": "你會得到一個 WebM。有些地方只收 MP4。",
+      "saved": "已儲存到 {{where}}",
+      "failed": "影片沒能做出來。什麼都沒有儲存。",
+      "unavailable": "這個版本無法儲存影片。",
+      "bar": "小節",
+      "bpmUnit": "BPM"
     }
   }
 }

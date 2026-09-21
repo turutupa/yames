@@ -282,6 +282,27 @@
       "watchTitle": "Zurückschauen",
       "watchingAll": "Der ganze Durchgang.",
       "watchingBars": "Takte {{bars}}, immer wieder."
+    },
+    "clip": {
+      "save": "Als Video speichern",
+      "go": "Video erstellen",
+      "cancel": "Anhalten",
+      "making": "Wird erstellt — {{percent}}%",
+      "whichBars": "Welche Takte",
+      "chosenBars": "Diese Takte",
+      "wholeTake": "Die ganze Aufnahme",
+      "shape": "Format",
+      "wide": "Quer",
+      "tall": "Hoch",
+      "withMarks": "Markierungen zeigen",
+      "realTime": "Es wird beim Abspielen aufgezeichnet und dauert so lange wie die Musik: {{length}}.",
+      "isMp4": "Du bekommst eine MP4, die sich überall hochladen lässt.",
+      "isWebm": "Du bekommst eine WebM. Manche Seiten nehmen nur MP4.",
+      "saved": "Gespeichert unter {{where}}",
+      "failed": "Das Video ließ sich nicht erstellen. Es wurde nichts gespeichert.",
+      "unavailable": "Diese Version kann kein Video speichern.",
+      "bar": "Takt",
+      "bpmUnit": "BPM"
     }
   }
 }

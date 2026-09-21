@@ -282,6 +282,27 @@
       "watchTitle": "Watching it back",
       "watchingAll": "The whole pass.",
       "watchingBars": "Bars {{bars}}, round and round."
+    },
+    "clip": {
+      "save": "Save as a video",
+      "go": "Make the video",
+      "cancel": "Stop",
+      "making": "Making it — {{percent}}%",
+      "whichBars": "Which bars",
+      "chosenBars": "These bars",
+      "wholeTake": "The whole take",
+      "shape": "Shape",
+      "wide": "Wide",
+      "tall": "Tall",
+      "withMarks": "Show the marks",
+      "realTime": "It records as it plays, so it takes as long as the music: {{length}}.",
+      "isMp4": "You get an MP4, which posts anywhere.",
+      "isWebm": "You get a WebM. Some places only take MP4.",
+      "saved": "Saved to {{where}}",
+      "failed": "That video could not be made. Nothing was saved.",
+      "unavailable": "This version cannot save a video.",
+      "bar": "Bar",
+      "bpmUnit": "BPM"
     }
   }
 }

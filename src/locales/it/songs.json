@@ -291,6 +291,27 @@
       "watchTitle": "Riguardarlo",
       "watchingAll": "Tutto il giro.",
       "watchingBars": "Battute {{bars}}, in tondo."
+    },
+    "clip": {
+      "save": "Salva come video",
+      "go": "Crea il video",
+      "cancel": "Ferma",
+      "making": "In creazione — {{percent}}%",
+      "whichBars": "Quali battute",
+      "chosenBars": "Queste battute",
+      "wholeTake": "Tutta la registrazione",
+      "shape": "Formato",
+      "wide": "Orizzontale",
+      "tall": "Verticale",
+      "withMarks": "Mostra i segni",
+      "realTime": "Si registra mentre suona, quindi dura quanto la musica: {{length}}.",
+      "isMp4": "Ottieni un MP4, che si pubblica ovunque.",
+      "isWebm": "Ottieni un WebM. Alcuni siti accettano solo MP4.",
+      "saved": "Salvato in {{where}}",
+      "failed": "Non è stato possibile creare il video. Non è stato salvato nulla.",
+      "unavailable": "Questa versione non può salvare un video.",
+      "bar": "Battuta",
+      "bpmUnit": "BPM"
     }
   }
 }

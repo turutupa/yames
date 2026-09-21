@@ -263,6 +263,103 @@ test.describe("the review with a picture", () => {
   }
 });
 
+/**
+ * "Save as a video" (W25 item 2, `plans/ECHORA.md` D4).
+ *
+ * The only question worth asking about a video is whether it is one, and no
+ * assertion about a `Blob` answers it. So the scene makes a real clip — the
+ * shipping compositor, the shipping `canvas.captureStream()`, the shipping
+ * audio graph and the shipping `MediaRecorder`, in real time — and these
+ * tests open the bytes it produced.
+ */
+test.describe("the clip you can send somebody", () => {
+  /** The choices fit, at every window the app opens. */
+  for (const size of SIZES) {
+    test(`keeps its choices inside the window at ${size.width}px`, async ({ page }) => {
+      await openShot(page, "songs-clip", size);
+      const boxes = await page.$$eval(".songs-clip-options button", (nodes) =>
+        nodes.map((node) => {
+          const r = node.getBoundingClientRect();
+          return { left: r.left, right: r.right, what: (node.textContent ?? "").slice(0, 30) };
+        }),
+      );
+      expect(boxes.length, `no choices at ${size.width}px`).toBeGreaterThan(0);
+      for (const box of boxes) {
+        expect(box.left, `"${box.what}" starts off-screen`).toBeGreaterThanOrEqual(-1);
+        expect(box.right, `"${box.what}" runs past the window`).toBeLessThanOrEqual(size.width + 1);
+      }
+      await noSidewaysScroll(page, `the clip's choices at ${size.width}px`);
+    });
+  }
+
+  /**
+   * It is a real video, with real sound in it.
+   *
+   * Four facts, and each of them is a different way the export could be
+   * quietly broken: the container's own magic bytes say it is a file a player
+   * will open; the picture is a whole number of seconds of 1280×720; there is
+   * an audio track at all; and the audio is NOT SILENT — which is the one the
+   * others cannot catch, because a `MediaStreamAudioDestinationNode` that was
+   * never connected to anything produces a perfectly valid track full of
+   * zeros. The harness's take carries a tone for exactly this.
+   *
+   * Decoded in the page rather than by a tool: the browser that wrote the
+   * file is the one asked to read it back, and the suite gains no dependency.
+   */
+  test("writes a real video, with the take's sound in it", async ({ page }) => {
+    await openShot(page, "songs-clip-make", { width: 1100, height: 720 });
+
+    const clip = await page.evaluate(async () => {
+      const made = (window as unknown as { __SHOT_CLIP__?: { url: string; bytes: number } })
+        .__SHOT_CLIP__;
+      if (!made) return null;
+      const buffer = await (await fetch(made.url)).arrayBuffer();
+      const head = [...new Uint8Array(buffer.slice(0, 12))];
+      // `ftyp` at offset 4 is an MP4; 0x1A45DFA3 at 0 is a Matroska/WebM.
+      const container =
+        String.fromCharCode(head[4], head[5], head[6], head[7]) === "ftyp"
+          ? "mp4"
+          : head[0] === 0x1a && head[1] === 0x45 && head[2] === 0xdf && head[3] === 0xa3
+            ? "webm"
+            : "neither";
+
+      let peak = 0;
+      let seconds = 0;
+      let channels = 0;
+      try {
+        const ctx = new OfflineAudioContext(1, 1, 48_000);
+        const decoded = await ctx.decodeAudioData(buffer.slice(0));
+        seconds = decoded.duration;
+        channels = decoded.numberOfChannels;
+        const samples = decoded.getChannelData(0);
+        for (let i = 0; i < samples.length; i += 17) {
+          const value = Math.abs(samples[i]);
+          if (value > peak) peak = value;
+        }
+      } catch {
+        // Left at zero, which fails below and says so.
+      }
+      return { bytes: made.bytes, container, peak, seconds, channels };
+    });
+
+    expect(clip, "no clip was made").not.toBeNull();
+    expect(clip!.container, "the bytes are not a video container").not.toBe("neither");
+    // A ten-second 720p clip at four megabits is about a megabyte. A file of
+    // a few kilobytes is a container with no pictures in it.
+    expect(clip!.bytes, "the clip is too small to have a picture in it").toBeGreaterThan(200_000);
+    expect(clip!.channels, "the clip has no audio track").toBeGreaterThan(0);
+    // The chosen bars are four bars at 96 BPM, which is ten seconds, and the
+    // export is real time — so a clip that is not about ten seconds long is
+    // an export that stopped early or never started.
+    expect(clip!.seconds, `the clip is ${clip!.seconds.toFixed(1)}s long`).toBeGreaterThan(8);
+    expect(clip!.seconds).toBeLessThan(13);
+    expect(
+      clip!.peak,
+      "the clip's audio track is silent — the mix never reached the recorder",
+    ).toBeGreaterThan(0.01);
+  });
+});
+
 test.describe("the camera on the stage", () => {
   /**
    * The preview sits over the tab rather than in the strip, so it costs the

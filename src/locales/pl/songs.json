@@ -300,6 +300,27 @@
       "watchTitle": "Obejrzeć to",
       "watchingAll": "Całe przejście.",
       "watchingBars": "Takty {{bars}}, w kółko."
+    },
+    "clip": {
+      "save": "Zapisz jako wideo",
+      "go": "Utwórz wideo",
+      "cancel": "Zatrzymaj",
+      "making": "Tworzenie — {{percent}}%",
+      "whichBars": "Które takty",
+      "chosenBars": "Te takty",
+      "wholeTake": "Całe nagranie",
+      "shape": "Format",
+      "wide": "Poziomo",
+      "tall": "Pionowo",
+      "withMarks": "Pokaż oznaczenia",
+      "realTime": "Nagrywa się w trakcie odtwarzania, więc trwa tyle co muzyka: {{length}}.",
+      "isMp4": "Dostajesz MP4, które wrzucisz wszędzie.",
+      "isWebm": "Dostajesz WebM. Niektóre miejsca przyjmują tylko MP4.",
+      "saved": "Zapisano w {{where}}",
+      "failed": "Nie udało się utworzyć wideo. Nic nie zostało zapisane.",
+      "unavailable": "Ta wersja nie potrafi zapisać wideo.",
+      "bar": "Takt",
+      "bpmUnit": "BPM"
     }
   }
 }

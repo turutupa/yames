@@ -282,6 +282,27 @@
       "watchTitle": "Terugkijken",
       "watchingAll": "De hele ronde.",
       "watchingBars": "Maten {{bars}}, rondje na rondje."
+    },
+    "clip": {
+      "save": "Als video opslaan",
+      "go": "Video maken",
+      "cancel": "Stoppen",
+      "making": "Bezig — {{percent}}%",
+      "whichBars": "Welke maten",
+      "chosenBars": "Deze maten",
+      "wholeTake": "De hele opname",
+      "shape": "Vorm",
+      "wide": "Liggend",
+      "tall": "Staand",
+      "withMarks": "Markeringen tonen",
+      "realTime": "Hij neemt op terwijl hij speelt, dus het duurt net zo lang als de muziek: {{length}}.",
+      "isMp4": "Je krijgt een MP4, die overal te plaatsen is.",
+      "isWebm": "Je krijgt een WebM. Sommige plekken nemen alleen MP4.",
+      "saved": "Opgeslagen in {{where}}",
+      "failed": "De video kon niet gemaakt worden. Er is niets opgeslagen.",
+      "unavailable": "Deze versie kan geen video opslaan.",
+      "bar": "Maat",
+      "bpmUnit": "BPM"
     }
   }
 }

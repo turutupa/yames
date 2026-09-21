@@ -282,6 +282,27 @@
       "watchTitle": "Geri izlemek",
       "watchingAll": "Turun tamamı.",
       "watchingBars": "{{bars}} ölçüleri, döne döne."
+    },
+    "clip": {
+      "save": "Video olarak kaydet",
+      "go": "Videoyu oluştur",
+      "cancel": "Durdur",
+      "making": "Oluşturuluyor — %{{percent}}",
+      "whichBars": "Hangi ölçüler",
+      "chosenBars": "Bu ölçüler",
+      "wholeTake": "Kaydın tamamı",
+      "shape": "Biçim",
+      "wide": "Yatay",
+      "tall": "Dikey",
+      "withMarks": "İşaretleri göster",
+      "realTime": "Çalarken kaydediyor, yani müzik kadar sürüyor: {{length}}.",
+      "isMp4": "MP4 alırsın, her yere yüklenir.",
+      "isWebm": "WebM alırsın. Bazı yerler yalnızca MP4 kabul ediyor.",
+      "saved": "{{where}} konumuna kaydedildi",
+      "failed": "Video oluşturulamadı. Hiçbir şey kaydedilmedi.",
+      "unavailable": "Bu sürüm video kaydedemiyor.",
+      "bar": "Ölçü",
+      "bpmUnit": "BPM"
     }
   }
 }
