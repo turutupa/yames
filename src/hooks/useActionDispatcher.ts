@@ -331,6 +331,15 @@ export function useActionDispatcher({
             // the play key would do nothing at all on the setlist tab, which
             // is the shape of bug a new `view` value quietly introduces.
             togglePlayback();
+          } else if (view === "songs") {
+            // And here is that bug, a view later: Songs shipped with a Play
+            // button and a "Space" hint beside it, and the key did nothing,
+            // because this chain had no branch for it. The owner, 2026-09-21:
+            // "space not working for play pause is by far the most annoying
+            // thing ever". Same transport the on-screen button uses, and the
+            // same rule as the setlist and the jam: an empty stage plays
+            // nothing.
+            if (songsLoaded) togglePlayback();
           }
           break;
         case "bpm-up":
