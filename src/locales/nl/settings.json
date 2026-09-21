@@ -325,7 +325,8 @@
       "failed": "Controle mislukt",
       "sounds": "Geluiden",
       "soundsCredit": "De Club-kit is Virtuosity Drums van Versilian Studios en Karoryfer Samples, gespeeld door Austin McMahon (publiek domein). De Studio-kit is DRSKit van het DrumGizmo-project (CC BY 4.0).",
-      "madeWith": "Gemaakt met {{heart}} voor muzikanten overal"
+      "madeWith": "Gemaakt met {{heart}} voor muzikanten overal",
+      "soundsCreditSongs": "De andere instrumenten komen uit de Sonivox General MIDI-klankset (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
       "title": "Nummers",
@@ -337,7 +338,11 @@
       "useDownloads": "Downloads gebruiken",
       "turnedDown": "Afgewezen nummers",
       "turnedDownHint": "{{n}} bestanden die Yames niet opnieuw aanbiedt",
-      "forgetTurnedDown": "Opnieuw aanbieden"
+      "forgetTurnedDown": "Opnieuw aanbieden",
+      "soundSet": "Klankset",
+      "soundSetBuiltIn": "Die bij Yames zit",
+      "chooseSoundSet": "Kies een .sf2",
+      "useBuiltInSoundSet": "Gebruik de ingebouwde"
     }
   },
   "keybindings": {

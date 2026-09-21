@@ -325,7 +325,8 @@
       "failed": "Échec de la recherche",
       "sounds": "Sons",
       "soundsCredit": "La batterie Club, c'est Virtuosity Drums, de Versilian Studios et Karoryfer Samples, jouée par Austin McMahon (domaine public). La batterie Studio, c'est DRSKit, du projet DrumGizmo (CC BY 4.0).",
-      "madeWith": "Fait avec {{heart}} pour les musiciens du monde entier"
+      "madeWith": "Fait avec {{heart}} pour les musiciens du monde entier",
+      "soundsCreditSongs": "Les autres instruments viennent du jeu de sons General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
       "title": "Morceaux",
@@ -337,7 +338,11 @@
       "useDownloads": "Utiliser les téléchargements",
       "turnedDown": "Morceaux refusés",
       "turnedDownHint": "{{n}} fichiers que Yames ne proposera plus",
-      "forgetTurnedDown": "Les proposer à nouveau"
+      "forgetTurnedDown": "Les proposer à nouveau",
+      "soundSet": "Jeu de sons",
+      "soundSetBuiltIn": "Celui fourni avec Yames",
+      "chooseSoundSet": "Choisir un .sf2",
+      "useBuiltInSoundSet": "Utiliser celui d'origine"
     }
   },
   "keybindings": {

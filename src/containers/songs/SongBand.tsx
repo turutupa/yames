@@ -2,10 +2,10 @@
  * The band that came with the file, on the stage.
  *
  * `JAM_UX_DECISIONS.md` A13 is the rule: what you change while playing lives
- * where you can reach it with a guitar on. Turning the drums down because the
- * file's kit is loud, or muting the bass to hear your own line under it, is
- * exactly that — so these are here beside the bar range and not behind a
- * sheet.
+ * where you can reach it with a guitar on. Turning a guitar down because the
+ * file's rhythm part is loud, or muting the drums to hear your own line under
+ * them, is exactly that — so these are here beside the bar range and not
+ * behind a sheet.
  *
  * ## A row, not a column (2026-09-20, W18)
  *
@@ -18,27 +18,39 @@
  * dock both take from it), and the icon and the fader's own `aria-label` carry
  * the name for anyone who cannot see the picture.
  *
- * Shaped after Jam's `BandLanes`, deliberately: it is the same gesture on the
- * same kind of row, and a musician who has learned one should not have to
- * learn the other. Two things differ, and both follow from a song's band
- * being the FILE's rather than one you built:
+ * ## It does not fold any more (W28, after W29)
  *
- * - **Only the rows the file has.** A file with no bass track has no bass
- *   fader. A control for a player who is not there is a control that does
- *   nothing, and Jam's switch — "is this player in the band at all" — is not
- *   a question anybody can answer about a Guitar Pro file.
- * - **The click is one of the rows.** Over a song the click is a part you
- *   balance against the band rather than the thing the band plays to, and it
- *   arrives at 0.45 for that reason (`song.rs`).
+ * It used to fold into a chip of its own with the faders in a popover off it,
+ * because it was a row of the strip and a narrow stage had no room for one.
+ * W29 took the whole band off the strip and put it behind "More", so it is
+ * already one press away — and a popover inside a popover is two presses to
+ * reach a fader, and a second thing to place inside a window that is only
+ * 480 px wide. Both went. The lanes are a column inside the panel, and the
+ * panel is what scrolls when a file has a lot of parts.
+ *
+ * ## One row per TRACK, and the part you are learning is one of them (W28)
+ *
+ * It used to be the click and Jam's three rows, because those were the only
+ * three things a song could play. Now every track in the file sounds, so
+ * every track in the file has a row — a file with two guitars has two guitar
+ * faders — and the part the player opened the file to learn is the first of
+ * them, marked "my part", on by default a few dB under the rest.
+ *
+ * Two things follow from a band being the file's rather than one you built,
+ * and they are why this is shaped after Jam's `BandLanes` without being it:
+ *
+ * - **There is no "is this player in the band" switch.** A Guitar Pro file
+ *   says what is in it. What a player can do is mute a row, or solo one.
+ * - **There can be a lot of rows.** So the strip scrolls sideways inside
+ *   itself rather than growing, and takes no more of the stage than the band
+ *   ever did. Below `FOLD_AT` it folds into one chip with the whole band in a
+ *   popover, exactly as it did before.
  */
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { useMenuPlacement } from "../jam/useMenuPlacement";
-import { useStageIsNarrow } from "./useStageIsNarrow";
 import { SONG_MIX_MAX } from "../../songs/types";
+import { gainOf } from "../../songs/songEngine";
 import type { SongLane, SongMixSetting } from "../../songs/songEngine";
-import type { SongRole } from "../../songs/types";
+import type { SongBackingTrack, SongRole } from "../../songs/types";
 
 /** The metronome's own beater, for the click's row. */
 function ClickIcon() {
@@ -123,175 +135,167 @@ function KeysIcon() {
   );
 }
 
-function laneIcon(lane: SongLane) {
-  if (lane === "click") return <ClickIcon />;
-  if (lane === "drums") return <DrumsIcon />;
-  if (lane === "bass") return <BassIcon />;
-  return <KeysIcon />;
+/** Everything else the file has: a guitar, which is what most of them are. */
+function StringsIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M13.5 10.5 20 4" />
+      <path d="M17.6 6.4 19 3l2 2-3.4 1.4" />
+      <circle cx="9.5" cy="14.5" r="5.5" />
+      <circle cx="9.5" cy="14.5" r="1.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
 }
+
+/** The part the player is learning. A person, not an instrument. */
+function MyPartIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.8 20c0-3.6 3.2-5.6 7.2-5.6s7.2 2 7.2 5.6" />
+    </svg>
+  );
+}
+
+function roleIcon(role: SongRole) {
+  if (role === "drums") return <DrumsIcon />;
+  if (role === "bass") return <BassIcon />;
+  if (role === "keys") return <KeysIcon />;
+  return <StringsIcon />;
+}
+
+/** One row of the strip: the click, or a track of the file. */
+type Row = {
+  lane: SongLane;
+  name: string;
+  icon: React.ReactNode;
+  /** Only a track can be soloed, so only a track carries an index. */
+  track: number | null;
+};
 
 export interface SongBandProps {
   setting: SongMixSetting;
-  /** The band's rows this file has, in playing order. Never the click. */
-  lanes: SongRole[];
+  /** Every track of the file, in the file's own order. Never the click. */
+  tracks: SongBackingTrack[];
   onGain: (lane: SongLane, value: number) => void;
   onMute: (lane: SongLane, muted: boolean) => void;
-  /**
-   * The stage the faders have to fit on, so the band knows when to fold.
-   *
-   * The element and not a width: `useStageIsNarrow` measures it and keeps
-   * measuring it, because the coach dock can narrow this column without the
-   * window changing at all.
-   */
-  stageRef: { current: HTMLElement | null };
+  onSolo: (track: number, soloed: boolean) => void;
 }
 
-/**
- * Below this, one short row per player no longer fits beside anything else.
- *
- * Three lanes at their 104px floor is 320px of stage, which is all of it at
- * the smallest window the app opens — so the band would take a row of its own
- * and a caption above it, and the tab would be down to nothing. The same
- * number `songs.css` folds the head at, because it is the same question.
- */
-const FOLD_AT = 620;
-
-export function SongBand({ setting, lanes, onGain, onMute, stageRef }: SongBandProps) {
+export function SongBand({ setting, tracks, onGain, onMute, onSolo }: SongBandProps) {
   const { t } = useTranslation();
-  const folded = useStageIsNarrow(stageRef, FOLD_AT);
-  const [open, setOpen] = useState(false);
-  // Upwards, like the takes shelf beside it and for the same reason: the
-  // strip is the last row above the transport.
-  const { wrapRef, menuRef, style } = useMenuPlacement(open && folded, { prefer: "above" });
 
   const muted = new Set(setting.muted);
+  const soloed = new Set(setting.soloed);
   // The click is always there: a song with no band at all still has one
   // fader, and it is the one that decides whether you are playing to a
-  // metronome or to nothing.
-  const rows: SongLane[] = ["click", ...lanes];
-  /** How many players are turned down to nothing, for the folded chip. */
-  const off = rows.filter((lane) => muted.has(lane)).length;
+  // metronome or to nothing. The part being learned comes next, because it is
+  // the one row the player is certain to want.
+  const rows: Row[] = [
+    { lane: "click", name: t("songs.band.click"), icon: <ClickIcon />, track: null },
+    ...tracks
+      .map((track, index) => ({ track, index }))
+      .sort((a, b) => Number(b.track.guide) - Number(a.track.guide))
+      .map(({ track, index }) => ({
+        lane: index as SongLane,
+        // The file's own name for the part, and only "my part" when the file
+        // did not bother to name it — a player who called a track "Rhythm"
+        // should see "Rhythm".
+        name: track.guide ? track.name || t("songs.band.myPart") : track.name,
+        icon: track.guide ? <MyPartIcon /> : roleIcon(track.role),
+        track: index,
+      })),
+  ];
+  const anySolo = soloed.size > 0;
 
-  // A stage that gets wider again must not leave a popover hanging over it.
-  useEffect(() => {
-    if (!folded) setOpen(false);
-  }, [folded]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const onDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (wrapRef.current?.contains(target) || menuRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onDown, true);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onDown, true);
-    };
-  }, [open, wrapRef, menuRef]);
-
-  const band = (
+  return (
     <div className="songs-band" role="group" aria-label={t("songs.band.label")}>
-      {rows.map((lane) => {
-          const off = muted.has(lane);
-          const name = t(`songs.band.${lane}`);
-          return (
-            <div className="songs-band-lane" key={lane} data-off={off ? "" : undefined}>
-              {/* `title` rather than a tooltip component: below the width the
-                  name is dropped at, this is the only thing that can still be
-                  asked "which one is this?" with a mouse. */}
-              <span className="songs-band-name" title={name}>
-                {laneIcon(lane)}
-                <span className="songs-band-name-text">{name}</span>
-              </span>
-              <input
-                type="range"
-                className="songs-band-fader"
-                min={0}
-                max={SONG_MIX_MAX}
-                step={0.05}
-                value={setting.mix[lane]}
-                aria-label={t("songs.band.levelFor", { lane: name })}
-                onChange={(e) => onGain(lane, Number(e.target.value))}
-              />
-              {/* The number stays, narrow as the row is: Jam's lanes show it
-                  and a musician who learned that row should not find this one
-                  answering a different question. */}
-              <span className="songs-band-volume-value">
-                {Math.round(setting.mix[lane] * 100)}
-              </span>
+      {rows.map((row) => {
+        const rowOff = muted.has(row.lane);
+        const rowSolo = row.track !== null && soloed.has(row.track);
+        // A track nobody soloed, while somebody else is soloed, is not muted
+        // — it is standing down — and it reads as faint for the same reason
+        // a muted one does: it is not making a sound.
+        const quiet = rowOff || (anySolo && row.track !== null && !rowSolo);
+        const { name } = row;
+        return (
+          <div className="songs-band-lane" key={String(row.lane)} data-off={quiet ? "" : undefined}>
+            {/* `title` rather than a tooltip component: below the width the
+                name is dropped at, this is the only thing that can still be
+                asked "which one is this?" with a mouse. */}
+            <span className="songs-band-name" title={name}>
+              {row.icon}
+              <span className="songs-band-name-text">{name}</span>
+            </span>
+            <input
+              type="range"
+              className="songs-band-fader"
+              min={0}
+              max={SONG_MIX_MAX}
+              step={0.05}
+              value={gainOf(setting, row.lane)}
+              aria-label={t("songs.band.levelFor", { lane: name })}
+              onChange={(e) => onGain(row.lane, Number(e.target.value))}
+            />
+            {/* The number stays, narrow as the row is: Jam's lanes show it
+                and a musician who learned that row should not find this one
+                answering a different question. */}
+            <span className="songs-band-volume-value">
+              {Math.round(gainOf(setting, row.lane) * 100)}
+            </span>
+            {row.track !== null && (
               <button
                 type="button"
-                role="switch"
-                aria-checked={!off}
-                /* `transport-switch` is shell.css and so is on every screen;
-                   `jam-switch` is not — jam.css is only loaded by the Jam
-                   tab — so the one line it carries is ours. */
-                className={`transport-switch songs-band-switch ${off ? "" : "on"}`}
-                onClick={() => onMute(lane, !off)}
+                /* `aria-pressed` and not `role="switch"`: a switch is a state
+                   you leave something in — which is what the mute beside it
+                   is — and a solo is a button you hold a passage down with
+                   and let go of. Screen readers say "pressed"/"not pressed"
+                   rather than "on"/"off", which is the right word for it. */
+                aria-pressed={rowSolo}
+                className={`songs-band-solo ${rowSolo ? "on" : ""}`}
+                onClick={() => onSolo(row.track!, !rowSolo)}
+                title={t("songs.band.soloFor", { lane: name })}
               >
-                <span className="transport-switch-track" aria-hidden="true" />
-                <span className="sr-only">{t("songs.band.muteFor", { lane: name })}</span>
+                <span aria-hidden="true">{t("songs.band.soloShort")}</span>
+                <span className="sr-only">{t("songs.band.soloFor", { lane: name })}</span>
               </button>
-            </div>
-          );
-        })}
-    </div>
-  );
-
-  if (!folded) {
-    return (
-      <div className="songs-strip-group songs-strip-band">
-        <span className="songs-strip-label">{t("songs.band.label")}</span>
-        {band}
-      </div>
-    );
-  }
-
-  /*
-   * Folded: one chip, and the faders in a popover off it.
-   *
-   * Portalled rather than drawn under the chip, because the strip is the last
-   * row above the transport and a panel that grows downwards opens straight
-   * off the bottom of the window. The chip carries the state worth knowing
-   * without opening it — how many players are muted — so a player who turned
-   * the drums off does not have to open the shelf to be reminded.
-   */
-  return (
-    <div className="songs-strip-group songs-strip-band" ref={wrapRef}>
-      <span className="songs-strip-label">{t("songs.band.label")}</span>
-      <button
-        type="button"
-        className="songs-chip songs-band-opener"
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        onClick={() => setOpen((was) => !was)}
-      >
-        {rows.map((lane) => (
-          <span className="songs-band-opener-icon" key={lane} data-off={muted.has(lane) ? "" : undefined}>
-            {laneIcon(lane)}
-          </span>
-        ))}
-        {off > 0 && <span className="songs-band-opener-off">{off}</span>}
-      </button>
-      {open &&
-        createPortal(
-          <div
-            className="songs-band-pop"
-            role="dialog"
-            aria-label={t("songs.band.label")}
-            ref={menuRef}
-            style={style}
-          >
-            {band}
-          </div>,
-          document.body,
-        )}
+            )}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!rowOff}
+              /* `transport-switch` is shell.css and so is on every screen;
+                 `jam-switch` is not — jam.css is only loaded by the Jam
+                 tab — so the one line it carries is ours. */
+              className={`transport-switch songs-band-switch ${rowOff ? "" : "on"}`}
+              onClick={() => onMute(row.lane, !rowOff)}
+            >
+              <span className="transport-switch-track" aria-hidden="true" />
+              <span className="sr-only">{t("songs.band.muteFor", { lane: name })}</span>
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

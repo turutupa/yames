@@ -2890,6 +2890,19 @@ pub struct SongHandoff {
     mix: Mutex<crate::song::SongMixGains>,
     mix_generation: AtomicU64,
     retired: Mutex<Vec<Arc<crate::song::SongTable>>>,
+    /// Where the player just clicked, as `sample + 1` into the pass, or 0 for
+    /// "nowhere". One `u64`, written by the command thread and taken by the
+    /// callback with a swap.
+    ///
+    /// **`+ 1` so that zero can mean nothing**, which matters because a seek
+    /// to the top of the range is the commonest one there is — pressing Home,
+    /// or clicking bar one — and a sentinel that collided with it would make
+    /// exactly that gesture the one that does not work.
+    ///
+    /// Two seeks between two buffers is one swap after another, and the
+    /// callback reads the last: a player dragging across the tab gets where
+    /// they let go, not a stutter through everywhere they passed.
+    seek: AtomicU64,
 }
 
 /// How many replaced songs the command thread can be behind on. A song is
@@ -2905,6 +2918,27 @@ impl SongHandoff {
             mix: Mutex::new(crate::song::SongMixGains::default()),
             mix_generation: AtomicU64::new(0),
             retired: Mutex::new(Vec::with_capacity(SONG_RETIRED_CAP)),
+            seek: AtomicU64::new(0),
+        }
+    }
+
+    /// Move the playhead inside the piece the engine is already holding.
+    ///
+    /// **Not a recompile.** `set_song_range` builds a new table and starts it
+    /// from the top, which is the right answer for a new range and the wrong
+    /// one for a click on bar 34 of the one that is playing: it would stop
+    /// the pass, and stopping a pass ends the attempt and raises the review
+    /// (`COACH_UX.md` A3). This moves a cursor and nothing else.
+    pub fn seek(&self, sample: u64) {
+        self.seek.store(sample.saturating_add(1), Ordering::Release);
+    }
+
+    /// The callback's half: take the seek, if there is one.
+    #[inline]
+    fn take_seek(&self) -> Option<u64> {
+        match self.seek.swap(0, Ordering::Acquire) {
+            0 => None,
+            n => Some(n - 1),
         }
     }
 
@@ -5153,8 +5187,31 @@ impl MetronomeEngine {
     /// Move the song's faders. Applied on the next buffer; nothing is
     /// recompiled and nothing waits for a bar line, because a level is not a
     /// musical event.
+    /// Go to a place in the song that is playing, without stopping it.
+    pub fn seek_song(&self, sample: u64) {
+        self.song.seek(sample);
+    }
+
+    /// The song the engine is holding, for a command that has to read the
+    /// piece rather than change it. Command thread only.
+    pub fn song_table(&self) -> Option<Arc<crate::song::SongTable>> {
+        self.song.table()
+    }
+
     pub fn set_song_mix(&self, mix: crate::song::SongMixGains) {
         self.song.set_mix(mix);
+        // And the half of the band a thread of its own is making. The
+        // renderer reads these once a block and turns them into channel
+        // volumes, so a fader is heard when the audio already queued ahead of
+        // it has drained — a tenth of a second, and no recompile. See
+        // `synth::SYNTH_LEAD_MS`.
+        if let Some(table) = self.song.table() {
+            if let Some(ring) = table.synth() {
+                for (n, gain) in mix.tracks.iter().enumerate() {
+                    ring.set_gain(n, *gain);
+                }
+            }
+        }
     }
 
     /// The faders as they stand.
@@ -5818,6 +5875,16 @@ impl MetronomeEngine {
             let mut song_tick_at: usize = 0;
             let mut song_band_at: usize = 0;
             let mut song_count_in_at: usize = 0;
+            // FRAMES OF THE PIECE the callback has played, counting from the
+            // first frame of the first pass and never resetting at a seam.
+            //
+            // The transport's `song_pos` wraps every time round, and the
+            // renderer thread in `synth.rs` could not tell one pass from the
+            // next if it were handed that. This is the number both sides
+            // count, so a frame means the same thing to each of them, and the
+            // modulo lives on the renderer's side, where a division is
+            // allowed.
+            let mut song_play: u64 = 0;
             let mut song_retire = SongRetirement::new();
             let mut take_retire = crate::take::TakeParking::new();
             let mut speech_retire = crate::speech_out::SpeechParking::new();
@@ -6249,6 +6316,7 @@ impl MetronomeEngine {
                             song_band_at = 0;
                             song_count_in_at = 0;
                             song_counting_in = true;
+                            song_play = 0;
                         }};
                     }
 
@@ -6541,6 +6609,72 @@ impl MetronomeEngine {
                     // buffer sounds.
                     let mut song_ended_here = false;
 
+                    // ---- WHERE THE PLAYER JUST CLICKED ----
+                    //
+                    // Taken once per buffer, at the top, and BEFORE the
+                    // synthesiser is asked what it has ready — so the whole
+                    // of a seek is one instant as far as the rest of this
+                    // callback is concerned, and a buffer is never half in
+                    // one place and half in another.
+                    //
+                    // One swap, a binary search over a table that is already
+                    // in cache, and a walk over the voices that are already
+                    // sounding. No allocation, no free, no lock, and nothing
+                    // that depends on how far the seek went.
+                    if song_active && !song_ended_here {
+                        if let Some(target) = song_shared.take_seek() {
+                            if let Some(song) = cached.song.as_deref() {
+                                // Clamped, because a seek posted against the
+                                // table before this one would otherwise put
+                                // the cursor past the end of this one. A
+                                // human cannot produce that race; a command
+                                // and a recompile arriving together can.
+                                let to = song.seek(target, song_pass);
+                                song_pos = to.sample;
+                                song_tick_at = to.tick_at;
+                                song_band_at = to.band_at;
+                                song_play = to.play;
+                                // A count-in leads into the FIRST pass, and a
+                                // seek is not that pass beginning — so a
+                                // click during the count-in lands in the
+                                // piece rather than counting again.
+                                song_counting_in = false;
+                                song_count_in_at = song.count_in().len();
+                                // Everything the band was sounding is cut,
+                                // over the same few milliseconds a choked hi
+                                // hat takes: a note left ringing through a
+                                // jump is a note from somewhere the player
+                                // is no longer, and cutting it dead would be
+                                // a click.
+                                for v in voices.iter_mut() {
+                                    if v.band && v.fade_len == 0 {
+                                        v.fade_len = choke_frames.max(1);
+                                        v.fade_left = v.fade_len;
+                                    }
+                                }
+                                // And the synthesiser's queue, which is a
+                                // tenth of a second of somewhere else.
+                                if let Some(ring) = song.synth() {
+                                    ring.invalidate();
+                                }
+                            }
+                        }
+                    }
+
+                    // ---- WHAT THE SYNTHESISER HAS READY ----
+                    //
+                    // Asked once per buffer, and it is the whole of what this
+                    // thread does about the guitars: one store of where the
+                    // playhead is, three loads, and a number saying how many
+                    // frames somebody else has already made. No render, no
+                    // lock, no wait, and nothing that grows with how busy the
+                    // arrangement is. `synth.rs` owns the proof.
+                    let synth_ready = match cached.song.as_deref().and_then(|s| s.synth()) {
+                        Some(ring) => ring.ready(song_play),
+                        None => 0,
+                    };
+                    let mut synth_used = 0u64;
+
                     // ---- Per-frame processing ----
                     for frame_idx in 0..frames {
                         // ---- The song, if there is one ----
@@ -6764,7 +6898,7 @@ impl MetronomeEngine {
                                             e,
                                             e.slot.gain
                                                 * cached.volume
-                                                * cached.song_mix.lane(e.lane),
+                                                * cached.song_mix.track(e.track),
                                             choke_frames,
                                         );
                                     }
@@ -7531,6 +7665,36 @@ impl MetronomeEngine {
                             (0.0, 0.0)
                         };
 
+                        // ---- And the synthesised half of the band ----
+                        //
+                        // AFTER the bus and not through it: the bus is a
+                        // drum bus, tuned to hold a kit's transients down,
+                        // and a guitar driven into its tanh is a guitar with
+                        // a different tone than the file asked for. Two adds
+                        // and an index; the frames were made on another
+                        // thread minutes of CPU ago.
+                        //
+                        // It advances only on frames the PIECE advances on,
+                        // which is what keeps it on the renderer's sample:
+                        // a count-in frame and a frame after the end move
+                        // neither `song_play` nor this.
+                        let (bus_l, bus_r) = if song_active
+                            && !song_counting_in
+                            && !song_ended_here
+                            && synth_used < synth_ready
+                        {
+                            match cached.song.as_deref().and_then(|s| s.synth()) {
+                                Some(ring) => {
+                                    let (l, r) = ring.at(synth_used);
+                                    synth_used += 1;
+                                    (bus_l + l * cached.volume, bus_r + r * cached.volume)
+                                }
+                                None => (bus_l, bus_r),
+                            }
+                        } else {
+                            (bus_l, bus_r)
+                        };
+
                         // Write out. A stereo device gets the band where the
                         // kit was placed; a mono one gets both sides folded,
                         // which is the same band without the room.
@@ -7560,6 +7724,25 @@ impl MetronomeEngine {
                         // apart.
                         if song_active {
                             song_pos += 1;
+                            // AND THE PIECE'S OWN CLOCK, which the count-in
+                            // and the frames after the end are not part of.
+                            // It is what the synthesiser's renderer is told,
+                            // and the one number both threads count.
+                            if !song_counting_in && !song_ended_here {
+                                song_play += 1;
+                            }
+                        }
+                    }
+
+                    // ---- Take the synthesised frames that were mixed ----
+                    //
+                    // One store, once per buffer, and only what was actually
+                    // heard: a buffer that ran out of them leaves the rest
+                    // where they are rather than throwing away audio the next
+                    // buffer is about to want.
+                    if synth_used > 0 {
+                        if let Some(ring) = cached.song.as_deref().and_then(|s| s.synth()) {
+                            ring.consume(synth_used);
                         }
                     }
 
@@ -11473,16 +11656,25 @@ mod tests {
                 SongTrack {
                     role: SongRole::Drums,
                     name: "drums".into(),
+                    program: 0,
+                    guide: false,
+                    bends: Vec::new(),
                     notes: drums,
                 },
                 SongTrack {
                     role: SongRole::Bass,
                     name: "bass".into(),
+                    program: 0,
+                    guide: false,
+                    bends: Vec::new(),
                     notes: bass,
                 },
                 SongTrack {
                     role: SongRole::Keys,
                     name: "keys".into(),
+                    program: 0,
+                    guide: false,
+                    bends: Vec::new(),
                     notes: keys,
                 },
             ],
@@ -11621,6 +11813,14 @@ mod tests {
         click_peak: f32,
         band_peak: f32,
         max_voices: usize,
+        /// The mix itself, so a render can be written out and listened to.
+        /// The click is summed mono into both, exactly as a stereo device
+        /// gets it — see the write-out at the bottom of the callback.
+        left: Vec<f32>,
+        right: Vec<f32>,
+        /// And the two halves again, kept apart, so the A/B clips can carry a
+        /// band with no click on it and a click with no band.
+        click_only: Vec<f32>,
     }
 
     /// A miniature of the callback's SONG path: the seam check at the top of
@@ -11651,6 +11851,9 @@ mod tests {
             click_peak: 0.0,
             band_peak: 0.0,
             max_voices: 0,
+            left: Vec::with_capacity(frames),
+            right: Vec::with_capacity(frames),
+            click_only: Vec::with_capacity(frames),
         };
         let mut pos: u64 = 0;
         let mut counting_in = true;
@@ -11716,7 +11919,7 @@ mod tests {
                         spawn_song_voice(
                             &mut voices,
                             e,
-                            e.slot.gain * volume * mix.lane(e.lane),
+                            e.slot.gain * volume * mix.track(e.track),
                             choke_frames,
                         );
                         out.onsets.push((frame, e.lane));
@@ -11771,6 +11974,9 @@ mod tests {
                 .max((click + bus_r).abs());
             out.click_peak = out.click_peak.max(click.abs());
             out.band_peak = out.band_peak.max(bus_l.abs()).max(bus_r.abs());
+            out.left.push(bus_l);
+            out.right.push(bus_r);
+            out.click_only.push(click);
 
             voices.retain(|v| {
                 let buf = jam_sample(bank, banks, v.sound_id);
@@ -11780,6 +11986,246 @@ mod tests {
             pos += 1;
         }
         out
+    }
+
+    /// Two seeks between two buffers is one seek, and it is the last one.
+    ///
+    /// A player dragging a finger across the tab posts a seek per bar it
+    /// crosses. What they want is where they let go; what a queue would give
+    /// them is a stutter through everywhere they passed, at a buffer each.
+    /// One slot and a swap is the whole mechanism, and this is the whole of
+    /// what it promises.
+    #[test]
+    fn two_seeks_between_two_buffers_are_the_last_one() {
+        let handoff = SongHandoff::new();
+        assert_eq!(handoff.take_seek(), None, "a transport nobody clicked");
+
+        handoff.seek(96_000);
+        handoff.seek(4_800);
+        handoff.seek(192_000);
+        assert_eq!(handoff.take_seek(), Some(192_000), "an earlier click won");
+        assert_eq!(
+            handoff.take_seek(),
+            None,
+            "the same seek was taken twice, so the cursor jumped back next buffer",
+        );
+
+        // And nought is a place, not a sentinel: seeking to the top of the
+        // range is the commonest seek there is.
+        handoff.seek(0);
+        assert_eq!(handoff.take_seek(), Some(0));
+        assert_eq!(handoff.take_seek(), None);
+    }
+
+    /// Eight bars of a two-guitar song, for the ear and for the meter.
+    ///
+    /// Written to be the shape of the file the owner actually opened: a part
+    /// being learned, a second guitar behind it, a bass and a kit. Before W28
+    /// three of those four were dropped and the fourth was a click, which is
+    /// the whole of what went wrong.
+    fn ab_song() -> (SongTransport, SongBacking) {
+        let mut bars = Vec::new();
+        let mut tick = 0u32;
+        for _ in 0..8u32 {
+            bars.push(SongBar {
+                start_tick: tick,
+                length_ticks: TICKS_PER_QUARTER * 4,
+                numerator: 4,
+                denominator: 4,
+            });
+            tick += TICKS_PER_QUARTER * 4;
+        }
+        let transport = SongTransport {
+            tempo_map: vec![SongTempo { tick: 0, bpm: 100.0 }],
+            ticks_per_quarter: TICKS_PER_QUARTER,
+            bars: bars.clone(),
+            range: SongRange { start_bar: 0, end_bar: 7 },
+            loops: false,
+            tempo_percent: 100,
+            count_in_bars: 0,
+        };
+        let mut lead = Vec::new();
+        let mut rhythm = Vec::new();
+        let mut bass = Vec::new();
+        let mut drums = Vec::new();
+        // A minor pentatonic phrase over an A minor riff — nobody's music,
+        // and enough of a tune that a guitarist can tell whether the
+        // instrument playing it is one they would keep.
+        const PHRASE: [u8; 8] = [69, 72, 74, 76, 74, 72, 69, 67];
+        for (n, bar) in bars.iter().enumerate() {
+            for beat in 0..4u32 {
+                let at = bar.start_tick + beat * TICKS_PER_QUARTER;
+                lead.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER,
+                    midi: PHRASE[((n * 4 + beat as usize) % PHRASE.len())],
+                    velocity: 0.75,
+                });
+                // The rhythm part is a chord held for the bar, struck once.
+                if beat == 0 {
+                    for note in [45u8, 52, 57] {
+                        rhythm.push(SongNote {
+                            tick: at,
+                            dur_ticks: TICKS_PER_QUARTER * 4,
+                            midi: note,
+                            velocity: 0.62,
+                        });
+                    }
+                }
+                bass.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER,
+                    midi: if beat % 2 == 0 { 33 } else { 40 },
+                    velocity: 0.8,
+                });
+                // Kick, snare and a hat on every beat.
+                drums.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER / 2,
+                    midi: if beat % 2 == 0 { 36 } else { 38 },
+                    velocity: 0.85,
+                });
+                drums.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER / 2,
+                    midi: 42,
+                    velocity: 0.5,
+                });
+            }
+        }
+        let track = |role, name: &str, program, guide, notes| SongTrack {
+            role,
+            name: name.into(),
+            program,
+            guide,
+            bends: Vec::new(),
+            notes,
+        };
+        (
+            transport,
+            SongBacking {
+                tracks: vec![
+                    track(SongRole::Synth, "Lead", 29, true, lead),
+                    track(SongRole::Synth, "Rhythm", 29, false, rhythm),
+                    track(SongRole::Bass, "Bass", 33, false, bass),
+                    track(SongRole::Drums, "Drums", 0, false, drums),
+                ],
+            },
+        )
+    }
+
+    /// The same eight bars, both ways, written out for the owner to judge.
+    ///
+    /// **W28 wants an ear, and this is how it gets one.** Nothing in this
+    /// repository can hear, so the two arrangements the brief asks about —
+    /// the recorded band with the guitars synthesised, against everything
+    /// through the synthesiser — are rendered to WAV and the levels are
+    /// printed beside them. The default is the first, and the clips are what
+    /// says whether that was right.
+    ///
+    ///   YAMES_SONG_AB=<folder> cargo test --lib --no-default-features \
+    ///       render_song_ab -- --ignored --nocapture
+    ///
+    /// Ignored by default for the reason `render_band_demos` beside it is: it
+    /// writes files, it takes seconds, and its output is a judgement rather
+    /// than an assertion.
+    #[test]
+    #[ignore]
+    fn render_song_ab() {
+        let Ok(dir) = std::env::var("YAMES_SONG_AB") else {
+            eprintln!("YAMES_SONG_AB is not set; nothing to render");
+            return;
+        };
+        std::fs::create_dir_all(&dir).expect("the clip folder");
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let font = crate::synth::load_font(None).expect("the shipped sound set");
+        let (transport, recorded) = ab_song();
+
+        // The second arrangement: the same eight bars with every part on the
+        // synthesiser, so the two clips differ in exactly one thing.
+        let mut all_synth = recorded.clone();
+        for t in all_synth.tracks.iter_mut() {
+            if t.role == SongRole::Drums {
+                // Channel 9's General MIDI kit. The numbers are already
+                // General MIDI percussion, which is what a drum track
+                // carries, so nothing has to be translated.
+                t.role = SongRole::Synth;
+                t.program = 0;
+            } else if t.role == SongRole::Bass || t.role == SongRole::Keys {
+                t.role = SongRole::Synth;
+            }
+        }
+
+        for (name, backing) in [("a-recorded-band", &recorded), ("b-all-synth", &all_synth)] {
+            let table = crate::song::compile(&transport, Some(backing), gate_sounds(sr), sr, 1)
+                .expect("the song compiles");
+            let frames = (table.pass_samples() + sr as u64) as usize;
+            let sampled = render_song(&table, &bank, frames, sr);
+            let (mut left, mut right) = (sampled.left.clone(), sampled.right.clone());
+            let mut synth_peak = 0.0f32;
+            if let Some(score) = table.synth_score.as_ref() {
+                // Every fader at the level a song arrives at, the guide a few
+                // dB under — which is what the player hears on the first
+                // press of play and so what these clips must be.
+                let gains: Vec<f32> = backing
+                    .tracks
+                    .iter()
+                    .map(|t| if t.guide { 0.7 } else { 1.0 })
+                    .collect();
+                let (sl, sr_) = crate::synth::render_offline(score, &font, sr, frames, &gains)
+                    .expect("the synth renders");
+                for n in 0..frames {
+                    synth_peak = synth_peak.max(sl[n].abs()).max(sr_[n].abs());
+                    left[n] += sl[n] * 0.8;
+                    right[n] += sr_[n] * 0.8;
+                }
+            }
+            // And the click over it, at the level a song arrives at.
+            let click_rms = rms(&sampled.click_only);
+            for n in 0..frames {
+                left[n] += sampled.click_only[n];
+                right[n] += sampled.click_only[n];
+            }
+            let path = std::path::Path::new(&dir).join(format!("{name}.wav"));
+            write_wav(&path, &left, &right, sr);
+            println!(
+                "{}\n  band RMS {:.4}  synth peak {:.4}  click RMS {:.4}  \
+                 mix peak {:.4}  band-to-click {:+.1} dB  trim {:.3}  \
+                 {} sampled notes, {} synth notes",
+                path.display(),
+                rms(&sampled.left),
+                synth_peak,
+                click_rms,
+                left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs())),
+                20.0 * (rms(&sampled.left).max(1e-9) / click_rms.max(1e-9)).log10(),
+                table.band_trim,
+                table.played_notes - table.synth_notes,
+                table.synth_notes,
+            );
+        }
+    }
+
+    fn rms(buf: &[f32]) -> f32 {
+        if buf.is_empty() {
+            return 0.0;
+        }
+        (buf.iter().map(|s| s * s).sum::<f32>() / buf.len() as f32).sqrt()
+    }
+
+    fn write_wav(path: &std::path::Path, left: &[f32], right: &[f32], sr: u32) {
+        let spec = hound::WavSpec {
+            channels: 2,
+            sample_rate: sr,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut w = hound::WavWriter::create(path, spec).expect("a writable WAV");
+        for (l, r) in left.iter().zip(right.iter()) {
+            w.write_sample((l.clamp(-1.0, 1.0) * 32767.0) as i16).unwrap();
+            w.write_sample((r.clamp(-1.0, 1.0) * 32767.0) as i16).unwrap();
+        }
+        w.finalize().unwrap();
     }
 
     /// THE GATE (`plans/tasks/songs/W9-ENGINE-SONG.md`).
@@ -12283,13 +12729,11 @@ mod tests {
         let full = SongMixGains::default();
         let off = crate::song::SongMix {
             click: 1.0,
-            drums: 0.0,
-            bass: 0.0,
-            keys: 0.0,
+            tracks: vec![0.0, 0.0, 0.0],
         }
         .gains();
-        assert_eq!(off.lane(SongLane::Drums), 0.0);
-        assert_eq!(full.lane(SongLane::Drums), 1.0);
+        assert_eq!(off.track(0), 0.0);
+        assert_eq!(full.track(0), 1.0);
         // The table is untouched by either: the dials are applied where the
         // voice is spawned, which is what makes a fader move cost nothing.
         let before: Vec<f32> = table.band().iter().map(|e| e.slot.gain).collect();

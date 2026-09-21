@@ -61,6 +61,53 @@ pub struct SongSource {
     pub backing: Option<crate::song::SongBacking>,
 }
 
+/// The thread making the song's guitars, and the sound set it is reading.
+///
+/// It lives HERE, on the command thread's side, and never inside the
+/// `SongTable` the audio callback holds: stopping it joins a thread, and
+/// joining a thread is not something an audio callback may do even by
+/// accident, even in a destructor. The callback's half is the ring, which is
+/// inside the table and retires with it.
+#[derive(Default)]
+pub struct SongSynthState {
+    pub player: Mutex<Option<crate::synth::SynthPlayer>>,
+    /// The `.sf2` the player pointed at in Settings, or `None` for the set
+    /// the app ships. Desktop only; the phone build has no Songs.
+    pub font_path: Mutex<Option<std::path::PathBuf>>,
+    /// The set, decoded. A SoundFont is read-only and every song of a session
+    /// wants the same one, so the second piece costs nothing.
+    pub font: Mutex<Option<(Option<std::path::PathBuf>, std::sync::Arc<rustysynth::SoundFont>)>>,
+}
+
+impl SongSynthState {
+    /// The sound set, decoded once. A set the player chose that will not
+    /// open falls back to the shipped one rather than leaving the song
+    /// silent — a bad file in Settings must not be a song that does not play.
+    fn font(&self) -> Result<std::sync::Arc<rustysynth::SoundFont>, String> {
+        let want = self
+            .font_path
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone();
+        let mut held = self.font.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some((path, font)) = held.as_ref() {
+            if *path == want {
+                return Ok(std::sync::Arc::clone(font));
+            }
+        }
+        let font = match crate::synth::load_font(want.as_deref()) {
+            Ok(f) => f,
+            Err(e) if want.is_some() => {
+                eprintln!("[song] {e}; falling back to the set the app ships");
+                crate::synth::load_font(None)?
+            }
+            Err(e) => return Err(e),
+        };
+        *held = Some((want, std::sync::Arc::clone(&font)));
+        Ok(font)
+    }
+}
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -3715,6 +3762,10 @@ pub struct SongLoaded {
     /// And how many named something this band has no voice for.
     #[serde(rename = "droppedNotes")]
     pub dropped_notes: u32,
+    /// How many of them the General MIDI synthesiser plays — the guitars,
+    /// the horns, the strings and the player's own guide part.
+    #[serde(rename = "synthNotes")]
+    pub synth_notes: u32,
 }
 
 /// Compile a song at the rate the device is running at and hand it over.
@@ -3739,7 +3790,54 @@ fn build_and_install_song(
         pass_ms: table.pass_samples() * 1000 / rate.max(1) as u64,
         played_notes: table.played_notes,
         dropped_notes: table.dropped_notes,
+        synth_notes: table.synth_notes,
     };
+
+    // ---- The guitars, and the thread that makes them ----
+    //
+    // Started BEFORE the table is installed, so the ring already has its lead
+    // by the time the callback is walking the piece and the first bar does
+    // not come in a tenth of a second late. Starting it is not fatal: a song
+    // whose synthesiser would not start is a song with its drums and its bass,
+    // which is what it had before W28, and that is better than a song that
+    // will not load.
+    let table = std::sync::Arc::new(table);
+    let synth = app_handle.state::<SongSynthState>();
+    {
+        // The mix the engine is already holding, so a band the player turned
+        // down stays turned down across a range change.
+        let gains = app_handle
+            .state::<EngineState>()
+            .0
+            .lock()
+            .unwrap()
+            .song_mix();
+        if let (Some(ring), Some(score)) = (table.synth(), table.synth_score.clone()) {
+            for (n, gain) in gains.tracks.iter().enumerate() {
+                ring.set_gain(n, *gain);
+            }
+            match synth.font().and_then(|font| {
+                crate::synth::SynthPlayer::start(
+                    std::sync::Arc::clone(ring),
+                    score,
+                    font,
+                    rate,
+                )
+            }) {
+                Ok(player) => {
+                    // The old one is stopped and joined here, on the command
+                    // thread, which is the only place a join belongs.
+                    *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = Some(player);
+                }
+                Err(e) => {
+                    eprintln!("[song] {e}; the song plays without its synthesised parts");
+                    *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
+                }
+            }
+        } else {
+            *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        }
+    }
 
     {
         let engine = app_handle.state::<EngineState>();
@@ -3749,7 +3847,7 @@ fn build_and_install_song(
         // and the mixer prefers the song — which is the right answer, and
         // still a window where the jam's bar line could fire under it.
         engine.set_jam_table(None);
-        engine.set_song_table(Some(std::sync::Arc::new(table)));
+        engine.set_song_table(Some(table));
     }
     // A drill climbing its own ladder under a song would be two things moving
     // the tempo, and a count-in the metronome armed would be a second one
@@ -3825,9 +3923,75 @@ fn song_sounds(app_handle: &AppHandle, rate: u32) -> Result<crate::song::SongSou
 /// Synchronous: it decodes nothing, and dropping the table here is a `free()`
 /// on the command thread, which is where one belongs.
 #[tauri::command]
-pub fn clear_song(engine_state: State<EngineState>, source: State<SongSourceState>) {
+pub fn clear_song(
+    engine_state: State<EngineState>,
+    source: State<SongSourceState>,
+    synth: State<SongSynthState>,
+) {
     engine_state.0.lock().unwrap().set_song_table(None);
     *source.0.lock().unwrap_or_else(|e| e.into_inner()) = None;
+    // Stops the renderer and joins it. Here, on the command thread, for the
+    // reason `clear_song` is synchronous at all: the tidying up a song leaves
+    // behind belongs off the audio thread.
+    *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
+}
+
+/// Go to a bar of the song that is playing, without stopping it.
+///
+/// **The owner's own words, after his first session with Songs: "when i click
+/// on the tab [it should be] just going to that place".** W29 made the click
+/// move the playhead; until this existed the playhead only decided where the
+/// NEXT pass would begin, because `set_song_range` recompiles and restarts
+/// and there was nothing else to call. Stopping and starting again is not an
+/// answer: stopping ends the attempt and raises the review (`COACH_UX.md`
+/// A3), so a click on bar 34 would have thrown away the pass you were in the
+/// middle of.
+///
+/// So this moves a cursor inside the table the engine is already holding.
+/// Nothing is recompiled, the click does not miss a beat, the take goes on
+/// recording into the same file, and the band is cut over a few milliseconds
+/// rather than left ringing from somewhere the player no longer is.
+///
+/// `played_bar` is an index into the transport's `bars`, which is what the
+/// tab's own cursor counts in. A bar outside the range being played is
+/// clamped into it: a click past the end of a portion means the end of the
+/// portion, not silence.
+#[tauri::command]
+pub fn seek_song(played_bar: u32, engine_state: State<EngineState>) -> Result<(), String> {
+    let engine = engine_state.0.lock().unwrap();
+    let Some(table) = engine.song_table() else {
+        return Err("there is no song loaded to seek in".to_string());
+    };
+    let bars = table.bars();
+    if bars.is_empty() {
+        return Err("the song has no bars in it".to_string());
+    }
+    // The bar's own first sample, out of the table the callback is walking —
+    // so the two cannot disagree about where bar 34 is, whatever the tempo
+    // map and the speed did to it.
+    let at = match bars.binary_search_by(|b| b.index.cmp(&played_bar)) {
+        Ok(i) => i,
+        // A bar the range does not hold: the nearest edge of it.
+        Err(0) => 0,
+        Err(i) => i.min(bars.len() - 1),
+    };
+    engine.seek_song(bars[at].start_sample);
+    Ok(())
+}
+
+/// Play the song's other parts out of a sound set of the player's own.
+///
+/// Desktop only, and a `.sf2`: the shipped set is 1.3 MB and small sets have
+/// small guitars, so a player who has a SoundFont they like can use it. An
+/// empty path is "go back to the one the app ships". Takes effect on the next
+/// song, because a sound set is decoded when a piece is compiled.
+#[tauri::command]
+pub fn set_song_sound_font(path: Option<String>, synth: State<SongSynthState>) {
+    let path = path
+        .map(|p| p.trim().to_string())
+        .filter(|p| !p.is_empty())
+        .map(std::path::PathBuf::from);
+    *synth.font_path.lock().unwrap_or_else(|e| e.into_inner()) = path;
 }
 
 /// Loop bars 17 to 24 at 70 %, or stop looping, or play the whole piece.
@@ -3997,6 +4161,22 @@ pub async fn warm_jam(
 /// to run the dialog it was asked for. This is the shape
 /// `tauri-plugin-dialog` documents for the blocking pickers, and it is the
 /// shape the rest of this file's heavy commands already use.
+/// The sound set a song's other instruments are played out of (W28).
+///
+/// A native FILE dialog rather than a folder one, filtered to `.sf2`,
+/// because a SoundFont is one file. `async fn` for the reason
+/// `pick_kit_folder` below it is, and the reason is a deadlock.
+#[tauri::command]
+pub async fn pick_sound_font(app: AppHandle) -> Option<String> {
+    use tauri_plugin_dialog::DialogExt;
+    app.dialog()
+        .file()
+        .add_filter("SoundFont", &["sf2"])
+        .blocking_pick_file()
+        .and_then(|p| p.into_path().ok())
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
 #[tauri::command]
 pub async fn pick_kit_folder(app: AppHandle) -> Option<String> {
     use tauri_plugin_dialog::DialogExt;

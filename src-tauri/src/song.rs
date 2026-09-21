@@ -55,6 +55,7 @@ use crate::engine::{
 };
 use crate::jam::{choke_map, voice_layer, voice_slot, JamLane, JamSlot, JamVoices, Voicing};
 use crate::kit::{KitBank, KitVoice};
+use crate::synth::MAX_SONG_TRACKS;
 use crate::voices::MelodicBank;
 
 // ---------------------------------------------------------------------------
@@ -273,15 +274,46 @@ pub struct SongTrack {
     pub role: SongRole,
     #[serde(default)]
     pub name: String,
+    /// The General MIDI instrument the file asks for, 0..=127. Read only by
+    /// the [`SongRole::Synth`] lane; the sampled kit, bass and keys are what
+    /// they are.
+    #[serde(default)]
+    pub program: u8,
+    /// The part the player opened the file to learn, played as the guide
+    /// every tab player has (`W28`). Exactly one track may be, and it is the
+    /// only track whose notes are also the notes scoring expects — which is
+    /// why it is a flag here rather than a fourth role.
+    #[serde(default)]
+    pub guide: bool,
     pub notes: Vec<SongNote>,
+    /// Bends and slides, as MIDI writes them: 0..=16383 with 8192 at rest,
+    /// on the track's own channel. Empty for everything the sampled band
+    /// plays, because a recorded bass sample cannot bend.
+    #[serde(default)]
+    pub bends: Vec<SongBend>,
 }
 
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SongBend {
+    pub tick: u32,
+    pub value: u16,
+}
+
+/// Who plays a track.
+///
+/// The first three are Jam's recorded band, which is where they were before
+/// W28 and where they sound best: a sampled kit is a kit somebody hit. The
+/// fourth is everything else in the file — every guitar, and so the reason
+/// the mode exists — through the General MIDI synthesiser in
+/// [`crate::synth`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SongRole {
     Drums,
     Bass,
     Keys,
+    Synth,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize)]
@@ -300,14 +332,21 @@ pub struct SongNote {
     pub velocity: f32,
 }
 
-/// What the musician wants to hear of the song, per lane. 0 is off.
-#[derive(Debug, Clone, Copy, Deserialize)]
+/// What the musician wants to hear of the song, per TRACK. 0 is off.
+///
+/// **Per track since W28, and not per lane.** It was four numbers — a click
+/// and Jam's three rows — because those were the only three things a song
+/// could play. Now every track in the file sounds, so every track in the file
+/// has a fader, and `tracks[n]` is the `n`th entry of [`SongBacking::tracks`].
+/// A file with two guitars has two guitar faders, which is the whole of what
+/// "the band strip lists every track in the file" means from the engine's
+/// side.
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SongMix {
     pub click: f32,
-    pub drums: f32,
-    pub bass: f32,
-    pub keys: f32,
+    #[serde(default)]
+    pub tracks: Vec<f32>,
 }
 
 /// How loud the click is over a song before the musician touches anything.
@@ -328,9 +367,7 @@ impl Default for SongMix {
     fn default() -> Self {
         Self {
             click: DEFAULT_CLICK_MIX,
-            drums: 1.0,
-            bass: 1.0,
-            keys: 1.0,
+            tracks: Vec::new(),
         }
     }
 }
@@ -338,11 +375,13 @@ impl Default for SongMix {
 impl SongMix {
     /// The same dials, clamped, as the audio thread reads them.
     ///
-    /// `Copy`, four floats, and no allocation: it crosses to the callback
+    /// `Copy`, seventeen floats, and no allocation: it crosses to the callback
     /// behind its own generation counter exactly the way `JamPosition` does,
     /// so a musician moving a fader changes the next buffer and recompiles
-    /// nothing.
-    pub fn gains(self) -> SongMixGains {
+    /// nothing. A fixed array and not the `Vec` it arrives in, because a `Vec`
+    /// is a pointer the callback would be following and a `free()` somebody
+    /// would have to own.
+    pub fn gains(&self) -> SongMixGains {
         let clamp = |v: f32| {
             if v.is_finite() {
                 v.clamp(MIX_MIN, MIX_MAX)
@@ -350,9 +389,13 @@ impl SongMix {
                 1.0
             }
         };
+        let mut tracks = [1.0f32; MAX_SONG_TRACKS];
+        for (slot, value) in tracks.iter_mut().zip(self.tracks.iter()) {
+            *slot = clamp(*value);
+        }
         SongMixGains {
             click: clamp(self.click),
-            lanes: [clamp(self.drums), clamp(self.bass), clamp(self.keys)],
+            tracks,
         }
     }
 }
@@ -361,8 +404,8 @@ impl SongMix {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SongMixGains {
     pub click: f32,
-    /// Indexed by [`SongLane`].
-    pub lanes: [f32; 3],
+    /// Indexed by the track's position in [`SongBacking::tracks`].
+    pub tracks: [f32; MAX_SONG_TRACKS],
 }
 
 impl Default for SongMixGains {
@@ -372,9 +415,14 @@ impl Default for SongMixGains {
 }
 
 impl SongMixGains {
+    /// One track's fader. A track index the mix is too short for is at unity
+    /// rather than silent: a band nobody has touched plays.
     #[inline]
-    pub fn lane(&self, lane: SongLane) -> f32 {
-        self.lanes[lane as usize]
+    pub fn track(&self, track: u8) -> f32 {
+        match self.tracks.get(track as usize) {
+            Some(g) => *g,
+            None => 1.0,
+        }
     }
 }
 
@@ -382,8 +430,11 @@ impl SongMixGains {
 // The compiled table — what the audio thread reads
 // ---------------------------------------------------------------------------
 
-/// Which of the band's three rows an event belongs to. The index into
-/// [`SongMixGains::lanes`], and the only thing the mix has to ask.
+/// Which of Jam's three recorded rows a sampled event came out of.
+///
+/// Not the fader any more — that is the event's `track` — but still the thing
+/// that says which bank a slot was resolved against, which the take's mixdown
+/// and the tests both ask.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum SongLane {
@@ -453,6 +504,8 @@ pub struct SongEvent {
     /// tempo step cost the callback nothing.
     pub cap_samples: u32,
     pub lane: SongLane,
+    /// Which fader it answers to: the track's own place in the file.
+    pub track: u8,
 }
 
 /// One played bar, as the transport and the UI see it.
@@ -522,6 +575,19 @@ pub struct SongTable {
     /// [`SONG_TRANSIENT_CEILING`]. Diagnostics — the audio thread never reads
     /// it, because it is already in every slot's gain.
     pub band_trim: f32,
+    /// Where the synthesised half of the band arrives from, or `None` for a
+    /// song whose every track the sampled band can play.
+    ///
+    /// **Inside the table** for the reason the kit is: it arrives with the
+    /// song, swaps with it, and retires with it down `SongRetirement`, on a
+    /// thread that may `free()`. The callback holds an `Arc` and reads frames
+    /// somebody else has already made; it never renders and never waits.
+    synth: Option<Arc<crate::synth::SynthRing>>,
+    /// The same events, for the renderer thread that `commands` starts beside
+    /// the table. Not read on the audio thread at all.
+    pub synth_score: Option<Arc<crate::synth::SynthScore>>,
+    /// How many of `played_notes` the synthesiser plays.
+    pub synth_notes: u32,
 }
 
 impl SongTable {
@@ -586,6 +652,60 @@ impl SongTable {
     pub fn bars(&self) -> &[SongBarPlan] {
         &self.bars
     }
+
+    /// The synthesised half of the band, for the callback to mix and for the
+    /// command thread to point a renderer at.
+    #[inline]
+    pub fn synth(&self) -> Option<&Arc<crate::synth::SynthRing>> {
+        self.synth.as_ref()
+    }
+
+    /// Where a seek puts every cursor.
+    ///
+    /// **The whole of a seek's arithmetic, in one pure function**, so the
+    /// callback's job is to copy four numbers out of it and cut what is
+    /// ringing — and so the things a seek has to get right can be asserted
+    /// without an audio device. Two binary searches over tables that are
+    /// already in cache; no allocation, no lock, and no dependence on how far
+    /// the seek went.
+    ///
+    /// `pass` is how many times round the range the transport has been, which
+    /// the piece's own clock is counted from — see [`SongSeek::play`].
+    pub fn seek(&self, target: u64, pass: u32) -> SongSeek {
+        // Clamped, because a seek posted against the table before this one
+        // would otherwise put the cursor past the end of this one. A human
+        // cannot produce that race; a command and a recompile arriving
+        // together can.
+        let sample = target.min(self.pass_samples.saturating_sub(1));
+        SongSeek {
+            sample,
+            // The first event AT OR AFTER the target. A click on a bar line
+            // hears that bar line's click and that bar's downbeat, which is
+            // the one case where "at or after" rather than "after" is the
+            // whole of what a player would call working.
+            tick_at: self.ticks.partition_point(|t| t.sample < sample),
+            band_at: self.band.partition_point(|e| e.sample < sample),
+            play: pass as u64 * self.pass_samples + sample,
+        }
+    }
+}
+
+/// Where a seek leaves the transport. See [`SongTable::seek`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SongSeek {
+    /// The new position in the pass, in frames.
+    pub sample: u64,
+    /// The new index into the table's clicks.
+    pub tick_at: usize,
+    /// And into the sampled band's notes.
+    pub band_at: usize,
+    /// The piece's own clock, which the synthesiser's renderer is told, and
+    /// which is NOT the position in the pass: it counts every frame of the
+    /// piece that has been played, seams included, so the two threads can
+    /// never disagree about which time round the range they are on. The
+    /// invariant the ordinary advance keeps — `play == pass * pass_samples +
+    /// sample` — is what a seek has to keep as well, and this is it.
+    pub play: u64,
 }
 
 // ---------------------------------------------------------------------------
@@ -788,6 +908,9 @@ pub fn compile(
         dropped_notes: 0,
         played_notes: 0,
         band_trim: 1.0,
+        synth: None,
+        synth_score: None,
+        synth_notes: 0,
     };
 
     if let Some(backing) = backing {
@@ -1144,8 +1267,75 @@ fn compile_backing(
     let mut dropped = 0u32;
     let mut played = 0u32;
     let mut events: Vec<SongEvent> = Vec::new();
+    // The synth's half. One MIDI channel per synthesised track, in the order
+    // they appear, which is why the file's own channel numbers are not used:
+    // two tracks of a Guitar Pro file can share a channel, and two faders
+    // cannot.
+    let mut synth_events: Vec<crate::synth::SynthEvent> = Vec::new();
+    let mut channel_track = [u8::MAX; 16];
+    let mut next_channel = 0u8;
 
-    for track in backing.tracks.iter() {
+    for (index, track) in backing.tracks.iter().enumerate() {
+        if index >= MAX_SONG_TRACKS {
+            // The seventeenth part and beyond. Named rather than silently
+            // dropped, and counted as dropped notes so the screen can say so.
+            dropped += track.notes.len() as u32;
+            continue;
+        }
+        let index = index as u8;
+        if track.role == SongRole::Synth {
+            let channel = claim_channel(&mut next_channel, &mut channel_track, index);
+            synth_events.push(crate::synth::SynthEvent {
+                sample: 0,
+                channel,
+                kind: crate::synth::SynthEventKind::Program {
+                    program: track.program,
+                },
+            });
+            for note in track.notes.iter() {
+                let Some((sample, cap_samples)) = place(table, transport, note, rate) else {
+                    continue;
+                };
+                played += 1;
+                let velocity = (note.velocity.clamp(0.0, 1.0) * 127.0).round() as u8;
+                synth_events.push(crate::synth::SynthEvent {
+                    sample,
+                    channel,
+                    kind: crate::synth::SynthEventKind::NoteOn {
+                        key: note.midi,
+                        velocity: velocity.max(1),
+                    },
+                });
+                // `cap_samples` is how long the note is written for, already
+                // through the tempo map and the speed — which is where a palm
+                // mute and a let-ring became two different lengths, back in
+                // the file's own MIDI generation.
+                synth_events.push(crate::synth::SynthEvent {
+                    sample: sample + cap_samples.max(1) as u64,
+                    channel,
+                    kind: crate::synth::SynthEventKind::NoteOff { key: note.midi },
+                });
+            }
+            for bend in track.bends.iter() {
+                let note = SongNote {
+                    tick: bend.tick,
+                    dur_ticks: 0,
+                    midi: 0,
+                    velocity: 1.0,
+                };
+                let Some((sample, _)) = place(table, transport, &note, rate) else {
+                    continue;
+                };
+                synth_events.push(crate::synth::SynthEvent {
+                    sample,
+                    channel,
+                    kind: crate::synth::SynthEventKind::Bend {
+                        value: bend.value.min(16_383),
+                    },
+                });
+            }
+            continue;
+        }
         for note in track.notes.iter() {
             let Some((sample, cap_samples)) = place(table, transport, note, rate) else {
                 // A note outside the range is not a note that was dropped for
@@ -1168,6 +1358,7 @@ fn compile_backing(
                     velocity,
                     keys_bank.as_deref(),
                 ),
+                SongRole::Synth => unreachable!("handled above"),
             };
             match made {
                 Some(slot) => {
@@ -1179,8 +1370,9 @@ fn compile_backing(
                         lane: match track.role {
                             SongRole::Drums => SongLane::Drums,
                             SongRole::Bass => SongLane::Bass,
-                            SongRole::Keys => SongLane::Keys,
+                            SongRole::Keys | SongRole::Synth => SongLane::Keys,
                         },
+                        track: index,
                     });
                 }
                 None => dropped += 1,
@@ -1193,10 +1385,43 @@ fn compile_backing(
              voice for and were dropped; {played} play"
         );
     }
-    table.band = events;
     table.dropped_notes = dropped;
     table.played_notes = played;
+    if !synth_events.is_empty() {
+        synth_events.sort_by_key(|e| e.sample);
+        table.synth_notes = synth_events
+            .iter()
+            .filter(|e| matches!(e.kind, crate::synth::SynthEventKind::NoteOn { .. }))
+            .count() as u32;
+        table.synth = Some(Arc::new(crate::synth::SynthRing::new(rate)));
+        table.synth_score = Some(Arc::new(crate::synth::SynthScore {
+            events: synth_events,
+            pass_samples: table.pass_samples,
+            loops: table.loops,
+            channel_track,
+        }));
+    }
+    table.band = events;
     Ok(())
+}
+
+/// The MIDI channel a synthesised track gets, and the fader it answers to.
+///
+/// Channel 9 is skipped because it is percussion in every General MIDI set
+/// ever written, and a guitar put on it plays a cymbal. Past the fifteen that
+/// leaves, tracks share the last channel and so share a fader — which is what
+/// MIDI itself does, and is a file with more parts than MIDI has channels.
+fn claim_channel(next: &mut u8, map: &mut [u8; 16], track: u8) -> u8 {
+    while *next < 16 && (*next == crate::synth::PERCUSSION_CHANNEL || map[*next as usize] != u8::MAX)
+    {
+        *next += 1;
+    }
+    let channel = (*next).min(15);
+    if map[channel as usize] == u8::MAX {
+        map[channel as usize] = track;
+    }
+    *next = channel.saturating_add(1);
+    channel
 }
 
 /// Where a note lands, and how long it sounds — or `None` when its tick is

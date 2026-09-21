@@ -961,6 +961,13 @@
   align-items: stretch;
   gap: 8px;
   width: 100%;
+  /* W28 — a band is every track in the file now, and a file can have eight.
+     The panel keeps the height it had and the faders scroll inside it: what
+     may never happen is the panel growing off the bottom of a 780 px
+     window, which is the smallest the app opens at. */
+  max-height: min(46vh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .songs-more-pop .songs-band-lane {
@@ -1099,6 +1106,13 @@
   gap: 6px 14px;
   min-width: 0;
   flex: 1 1 auto;
+  /* W28 — a band is now every track in the file, and a file can have eight.
+     The strip keeps the height it had and scrolls inside itself past it,
+     because the one thing it may never do is take room off the tab. Two rows
+     of faders is about as much of the stage as the band was ever worth. */
+  max-height: 68px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .songs-band-switch {
@@ -1158,6 +1172,38 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
+}
+
+/* Solo: a letter, not a switch.
+ *
+ * The mute beside it is a switch because muting is a state you leave a row
+ * in; a solo is a thing you do for eight bars and undo, and every mixer a
+ * musician has touched draws it as a small lit button. It is deliberately
+ * narrower than the mute so the two are never confused by the hand. */
+.songs-band-solo {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.songs-band-solo:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-strong, var(--border));
+}
+
+.songs-band-solo.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast, #fff);
 }
 
 /* ── Portions the player kept ─────────────────────────────────────────── */
@@ -1224,69 +1270,6 @@
   color: var(--text-primary);
   font-family: inherit;
   font-size: 12px;
-}
-
-/* ── The band, folded ─────────────────────────────────────────────────── */
-
-/* On a stage too narrow for a row of faders, the band is one chip: the
-   players' own icons, dimmed for anyone turned off, and a count if any are.
-   The faders themselves are in a popover off it (`SongBand.tsx`). */
-.songs-band-opener {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.songs-band-opener-icon {
-  display: inline-flex;
-  color: var(--text-secondary);
-}
-
-.songs-band-opener-icon[data-off] {
-  color: var(--text-faint);
-}
-
-.songs-band-opener-off {
-  padding: 0 5px;
-  border-radius: var(--radius-sm);
-  background: var(--accent-subtle);
-  color: var(--accent);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.songs-band-pop {
-  position: fixed;
-  z-index: 70;
-  width: min(300px, calc(100vw - 24px));
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow);
-  overflow-y: auto;
-}
-
-/* Stacked in the popover: there is a column's worth of room in there and no
-   reason to squeeze three faders across it. */
-.songs-band-pop .songs-band {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-}
-
-.songs-band-pop .songs-band-lane {
-  flex: 0 0 auto;
-  max-width: none;
-}
-
-.songs-band-pop .songs-band-name {
-  flex: 0 0 74px;
-  max-width: none;
-}
-
-.songs-band-pop .songs-band-name-text {
-  display: inline;
 }
 
 /* ── The verdict, in the tab's place ──────────────────────────────────── */

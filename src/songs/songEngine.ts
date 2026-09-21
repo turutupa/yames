@@ -16,21 +16,43 @@
  * The whole map is a few dozen bytes per song.
  */
 import { storeLoad, storeSave } from "../ipc";
-import { DEFAULT_SONG_MIX, SONG_MIX_MAX, SONG_MIX_MIN } from "./types";
+import {
+  DEFAULT_SONG_MIX,
+  DEFAULT_TRACK_MIX,
+  GUIDE_TRACK_MIX,
+  SONG_MIX_MAX,
+  SONG_MIX_MIN,
+} from "./types";
 import { MAX_SAVED_PORTIONS } from "./selection";
 import type { SavedPortion } from "./selection";
-import type { SongMix, SongRole } from "./types";
+import type { SongBackingTrack, SongMix } from "./types";
 
-/** A fader on the stage: the band's three rows, and the click over them. */
-export type SongLane = "click" | SongRole;
+/**
+ * A fader on the stage: the click, or one track of the file by its index.
+ *
+ * A number rather than a role since W28, because the band is the file's and
+ * a file has two guitars far more often than it has one of anything. The
+ * click keeps its name because it is the one row that is not in the file.
+ */
+export type SongLane = "click" | number;
 
-export const SONG_LANES: SongLane[] = ["click", "drums", "bass", "keys"];
+/** How many faders a song can have: `song.rs`'s own ceiling, which is MIDI's. */
+export const MAX_SONG_TRACKS = 16;
 
 /** A song's band, as the player left it. */
 export type SongMixSetting = {
   mix: SongMix;
   /** The lanes that are off. A mute is not a fader at zero — see below. */
   muted: SongLane[];
+  /**
+   * The tracks that are soloed. Empty is "everybody plays".
+   *
+   * Separate from the mutes, and it has to be: a solo is a thing you do for
+   * eight bars and undo, and a player who solos the bass to hear a line and
+   * then clears it must get back the band they had, mutes included. Written
+   * as track indices only — soloing the click is not a gesture anybody makes.
+   */
+  soloed: number[];
   /** 0, 1 or 2 bars before the first pass. */
   countInBars: number;
   /**
@@ -75,6 +97,7 @@ export type SongMixSetting = {
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
   mix: DEFAULT_SONG_MIX,
   muted: [],
+  soloed: [],
   countInBars: 0,
   takes: false,
   camera: false,
@@ -90,31 +113,53 @@ function clampGain(value: number): number {
 }
 
 /**
- * The four numbers the engine is sent.
+ * The numbers the engine is sent: the click, and one per track.
  *
  * A muted lane goes to zero and its fader keeps whatever it was set to, which
  * is why the mute is a separate thing rather than a fader at the bottom: you
  * mute the drums to hear yourself over one passage and un-mute them back to
- * the level you had, not back to full.
+ * the level you had, not back to full. A solo does the same to everybody
+ * else, and undoing it gives the same band back for the same reason.
+ *
+ * `trackCount` is how many rows the file has: the array is sent that long so
+ * the engine's fixed sixteen are filled from the front, and a track the
+ * player has never touched arrives at the level the arrangement was written
+ * at rather than at nothing.
  */
-export function engineMix(setting: SongMixSetting): SongMix {
+export function engineMix(setting: SongMixSetting, trackCount: number): SongMix {
   const off = new Set(setting.muted);
-  const lane = (id: SongLane, value: number) => (off.has(id) ? 0 : clampGain(value));
+  const solo = setting.soloed.filter((n) => n >= 0 && n < trackCount);
+  const tracks: number[] = [];
+  for (let n = 0; n < Math.min(trackCount, MAX_SONG_TRACKS); n += 1) {
+    const silenced = off.has(n) || (solo.length > 0 && !solo.includes(n));
+    tracks.push(silenced ? 0 : clampGain(gainOf(setting, n)));
+  }
   return {
-    click: lane("click", setting.mix.click),
-    drums: lane("drums", setting.mix.drums),
-    bass: lane("bass", setting.mix.bass),
-    keys: lane("keys", setting.mix.keys),
+    click: off.has("click") ? 0 : clampGain(setting.mix.click),
+    tracks,
   };
 }
 
-/** Set one fader, leaving the others and the mutes alone. */
+/** One fader's value, or the default for a track nobody has touched. */
+export function gainOf(setting: SongMixSetting, lane: SongLane): number {
+  if (lane === "click") return setting.mix.click;
+  const value = setting.mix.tracks[lane];
+  return typeof value === "number" && Number.isFinite(value) ? value : DEFAULT_TRACK_MIX;
+}
+
+/** Set one fader, leaving the others, the mutes and the solos alone. */
 export function withGain(
   setting: SongMixSetting,
   lane: SongLane,
   value: number,
 ): SongMixSetting {
-  return { ...setting, mix: { ...setting.mix, [lane]: clampGain(value) } };
+  if (lane === "click") {
+    return { ...setting, mix: { ...setting.mix, click: clampGain(value) } };
+  }
+  const tracks = [...setting.mix.tracks];
+  while (tracks.length <= lane) tracks.push(DEFAULT_TRACK_MIX);
+  tracks[lane] = clampGain(value);
+  return { ...setting, mix: { ...setting.mix, tracks } };
 }
 
 /** Turn one lane off, or back on. */
@@ -125,6 +170,28 @@ export function withMute(
 ): SongMixSetting {
   const without = setting.muted.filter((id) => id !== lane);
   return { ...setting, muted: muted ? [...without, lane] : without };
+}
+
+/** Solo one track, or take it out of the solo. */
+export function withSolo(
+  setting: SongMixSetting,
+  track: number,
+  soloed: boolean,
+): SongMixSetting {
+  const without = setting.soloed.filter((id) => id !== track);
+  return { ...setting, soloed: soloed ? [...without, track] : without };
+}
+
+/**
+ * The faders a file arrives with.
+ *
+ * Everything at the level the arrangement was written at, and the player's
+ * own part a few dB under it — which is what a guide is, and the one place
+ * in Songs where the app has an opinion about a level. Called once, when a
+ * song is opened and nothing was stored for it.
+ */
+export function startingMix(tracks: SongBackingTrack[]): number[] {
+  return tracks.map((t) => (t.guide ? GUIDE_TRACK_MIX : DEFAULT_TRACK_MIX));
 }
 
 // --- where it is kept ------------------------------------------------------
@@ -148,12 +215,27 @@ export function readMixSetting(stored: unknown): SongMixSetting {
   return {
     mix: {
       click: gain(mix.click, DEFAULT_SONG_MIX.click),
-      drums: gain(mix.drums, DEFAULT_SONG_MIX.drums),
-      bass: gain(mix.bass, DEFAULT_SONG_MIX.bass),
-      keys: gain(mix.keys, DEFAULT_SONG_MIX.keys),
+      // A band stored before W28 was four named lanes; there is no honest way
+      // to map "the drums row" onto "the file's third track", so the faders
+      // come back at the default and only the click — which meant the same
+      // thing in both — is kept. A level is a thing you set in five seconds;
+      // a level silently applied to the wrong instrument is not.
+      tracks: Array.isArray(mix.tracks)
+        ? mix.tracks.slice(0, MAX_SONG_TRACKS).map((v) => gain(v, DEFAULT_TRACK_MIX))
+        : [],
     },
     muted: Array.isArray(raw.muted)
-      ? SONG_LANES.filter((lane) => raw.muted!.includes(lane))
+      ? raw.muted.filter(
+          (lane): lane is SongLane =>
+            lane === "click" ||
+            (typeof lane === "number" && Number.isInteger(lane) && lane >= 0 && lane < MAX_SONG_TRACKS),
+        )
+      : [],
+    soloed: Array.isArray(raw.soloed)
+      ? raw.soloed.filter(
+          (n): n is number =>
+            typeof n === "number" && Number.isInteger(n) && n >= 0 && n < MAX_SONG_TRACKS,
+        )
       : [],
     countInBars:
       typeof raw.countInBars === "number" && raw.countInBars >= 0 && raw.countInBars <= 2

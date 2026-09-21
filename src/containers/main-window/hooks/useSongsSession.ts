@@ -20,7 +20,7 @@ import {
 } from "../../../songs/library";
 import type { SongLibrary, SongRecord } from "../../../songs/library";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
-import { loadScoreSchedule, markScoreOpened } from "../../../ipc";
+import { loadScoreSchedule, markScoreOpened, seekSong } from "../../../ipc";
 /**
  * The importer is loaded when a file arrives, not when the app starts.
  *
@@ -160,11 +160,24 @@ export interface SongsSession extends SongEngine {
  * or the click there would go on following a score nobody is looking at. The
  * jam takes the same single field for the same reason.
  */
-export type SongsSessionOptions = { view?: string };
+export type SongsSessionOptions = {
+  view?: string;
+  /**
+   * Is the transport running? Read by `seekTo` and by nothing else.
+   *
+   * A click on the tab means two different things either side of it. Stopped,
+   * it decides where the next pass begins, which is a range and a recompile.
+   * Playing, it has to move the playhead where it already is — a recompile
+   * there would end the pass, and ending a pass ends the attempt and raises
+   * the review (`COACH_UX.md` A3), so the click would throw away the take the
+   * player was in the middle of (W28, after W29).
+   */
+  isPlaying?: boolean;
+};
 
 export function useSongsSession(
   library: SongLibrary = songLibrary,
-  { view = "songs" }: SongsSessionOptions = {},
+  { view = "songs", isPlaying = false }: SongsSessionOptions = {},
 ): SongsSession {
   const [songs, setSongs] = useState<SongRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -427,24 +440,7 @@ export function useSongsSession(
     [score],
   );
 
-  /**
-   * Go to a bar (W29 item 1) — a click on the tab, or an arrow key.
-   *
-   * It moves the playhead and NOTHING else. The portion is left exactly as it
-   * was, which is what Songsterr, Ultimate Guitar and Guitar Pro all do (the
-   * repeat is a switch there too) and what the owner asked for: *"just going
-   * to that place"*. `clampSelection` holds it inside the song; `playFrom`
-   * above holds it inside the portion.
-   */
-  const seekTo = useCallback(
-    (playedBar: number) => {
-      if (!score) return;
-      setPlayFrom(clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar);
-    },
-    [score],
-  );
 
-  const clearSelection = useCallback(() => setSelection(null), [setSelection]);
 
   /** 50–100 %, the range the brief fixed. A drill is where you climb. */
   const setTempoPercent = useCallback(
@@ -477,6 +473,51 @@ export function useSongsSession(
       return false;
     }
   }, [score, range, loop]);
+
+  /**
+   * Go to a bar (W29 item 1) — a click on the tab, or an arrow key.
+   *
+   * It moves the playhead and NOTHING else. The portion is left exactly as it
+   * was, which is what Songsterr, Ultimate Guitar and Guitar Pro all do (the
+   * repeat is a switch there too) and what the owner asked for: *"just going
+   * to that place"*. `clampSelection` holds it inside the song; `playFrom`
+   * above holds it inside the portion.
+   *
+   * **Two different things either side of the transport (W28).** Stopped, it
+   * writes `playFrom`, which is where the next pass begins — a range, and a
+   * recompile. Playing, a recompile would end the pass, and ending a pass
+   * ends the attempt and raises the review (`COACH_UX.md` A3): the click
+   * would throw away the take the player was in the middle of. So the engine
+   * moves its own cursor instead and the piece carries on.
+   *
+   * Below `pushSchedule` rather than beside its neighbours, because it calls
+   * it: a dependency array naming a `const` declared later is a reference
+   * into the temporal dead zone, which is a crash on the first render rather
+   * than a lint.
+   */
+  const seekTo = useCallback(
+    (playedBar: number) => {
+      if (!score) return;
+      const bar = clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar;
+      if (isPlaying) {
+        // `playFrom` is deliberately left alone: writing it would change
+        // `range`, and changing the range is the recompile this exists to
+        // avoid. While the transport runs, where the cursor IS comes from the
+        // engine's beat events anyway.
+        void seekSong(bar).catch(() => {});
+        // And the scorer starts again from here. An attempt that was seeked
+        // scores what was actually played AFTER the seek: the onsets that
+        // were jumped over never happened, and a note nobody was in a
+        // position to play must not be marked as one they missed.
+        void pushSchedule();
+        return;
+      }
+      setPlayFrom(bar);
+    },
+    [score, isPlaying, pushSchedule],
+  );
+
+  const clearSelection = useCallback(() => setSelection(null), [setSelection]);
 
   /**
    * The engine's half: the song on the click, the file's band, the faders.

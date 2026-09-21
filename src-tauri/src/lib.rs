@@ -48,6 +48,10 @@ pub mod session_log;
 /// imported file (`plans/SONGS.md` A1/A4/A6).
 mod song;
 mod speech_out;
+/// The General MIDI synthesiser every track the recorded band cannot play
+/// goes through, and the lock-free ring that keeps it off the audio callback
+/// (`plans/tasks/songs/W28-HEAR-THE-SONG.md`).
+pub mod synth;
 pub mod srs;
 mod state;
 /// Who asks for the camera, and how often (W21, item 5). Windows only; the
@@ -106,6 +110,11 @@ pub mod probe {
     /// to call. The gate then covers the one path where the callback walks a
     /// table of sample positions rather than counting ticks — the loop seam
     /// and the tempo step included.
+    /// The General MIDI half of a song's band. `--song` builds a guitar
+    /// track and starts a renderer, so the gate covers the one thing on the
+    /// callback that another thread is feeding: `ready`, `at` and `consume`
+    /// on `SynthRing`, under a fader moving and a seek every few seconds.
+    pub use crate::synth::{load_font, SynthPlayer, SynthRing};
     pub use crate::song::{
         compile as compile_song, SongBacking, SongBar, SongMix, SongNote, SongRange, SongRole,
         SongSounds, SongTable, SongTempo, SongTrack, SongTransport,
@@ -157,13 +166,15 @@ use commands::{
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
     // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
-    clear_song, load_song, set_song_mix, set_song_range,
+    clear_song, load_song, pick_sound_font, seek_song, set_song_mix, set_song_range,
+    set_song_sound_font,
     // W19 — the download is caught, and the file opens with Yames (S0.9).
     default_downloads_dir, dismiss_download_offer, read_offered_file, start_download_watch,
     stop_download_watch, take_pending_open,
     // W19 — the library is "recently played", and the file comes back out.
     export_score_source, mark_score_opened,
-    EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, TakeState,
+    EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, SongSynthState,
+    TakeState,
 };
 // W21 — the camera's recording. Its own module, because the file it writes
 // comes from the webview rather than from the engine, and nothing about it
@@ -422,6 +433,9 @@ pub fn run() {
             // without the frontend re-sending a whole score. See
             // `SongSourceState`.
             app.manage(SongSourceState::default());
+            // And the thread that makes the song's guitars, which is owned
+            // beside the piece rather than inside it (W28).
+            app.manage(SongSynthState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
             // W21 — and the picture beside it, if the camera is on. See
@@ -762,7 +776,10 @@ pub fn run() {
             load_song,
             clear_song,
             set_song_range,
+            seek_song,
             set_song_mix,
+            set_song_sound_font,
+            pick_sound_font,
             // W19 — the download is caught (`plans/SONGS.md` S0.9).
             default_downloads_dir,
             start_download_watch,

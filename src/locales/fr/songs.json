@@ -36,7 +36,13 @@
       "leftOut_other": "{{tracks}} sont dans ce fichier, mais Yames n'a personne pour les jouer.",
       "droppedNotes": "{{count}} note de ce fichier est pour un instrument que le groupe n'a pas.",
       "droppedNotes_many": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas.",
-      "droppedNotes_other": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas."
+      "droppedNotes_other": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas.",
+      "myPart": "Ma partie",
+      "soloShort": "S",
+      "soloFor": "N'entendre que {{lane}}",
+      "tooManyParts": "{{tracks}} reste muet : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
+      "tooManyParts_many": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
+      "tooManyParts_other": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois."
     },
     "countIn": {
       "counting": "On te compte l'entrée"

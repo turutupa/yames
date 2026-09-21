@@ -811,16 +811,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             </ul>
           )}
 
-          {/* What the engine could not bring, said once and quietly. Neither
-              of these is a failure: a file written for a band this one does
-              not have still plays, and a player who imported an orchestral
-              arrangement deserves to know where the strings went rather than
-              to wonder whether the import worked. */}
+          {/* What could not be brought, said once and quietly.
+              Since W28 this is almost always nothing: every track in the file
+              sounds, so the only part that can stay silent is one past the
+              sixteen MIDI itself has channels for. Neither line is a failure
+              — the piece still plays — and both exist so a file that came out
+              thin is visible rather than mysterious. */}
           {(session.leftOut.length > 0 || (session.loaded?.droppedNotes ?? 0) > 0) && (
             <ul className="songs-warnings songs-warnings-quiet">
               {session.leftOut.length > 0 && (
                 <li>
-                  {t("songs.band.leftOut", {
+                  {t("songs.band.tooManyParts", {
                     count: session.leftOut.length,
                     tracks: session.leftOut.join(", "),
                   })}
@@ -1094,18 +1095,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               />
 
               {/* The band never takes a row of its own again (W29 item 3),
-                  and W28 is about to put a fader in here for every track in
-                  the file. It is handed the same stage it always was, so it
-                  goes on deciding for itself whether it has room for lanes
-                  or folds into its own chip; in here the lanes are stacked
-                  down the panel rather than laid across a row — one column,
-                  as many players as the file has (`songs.css`). */}
+                  and W28 put a fader in here for every track in the file —
+                  one column, as many players as the file has, and the panel
+                  is what scrolls. It does not fold again inside here: it is
+                  already one press away, and a popover in a popover is two
+                  presses to reach a fader. */}
               <SongBand
                 setting={session.mixSetting}
-                lanes={session.lanes}
+                tracks={session.band}
                 onGain={session.setGain}
                 onMute={session.setMute}
-                stageRef={stageRef}
+                onSolo={session.setSolo}
               />
             </SongStripMore>
           </div>

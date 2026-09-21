@@ -174,7 +174,15 @@ export type SongTransport = {
 };
 
 /** Which of the band's three rows a backing track is played on. */
-export type SongRole = "drums" | "bass" | "keys";
+/**
+ * Who plays a track.
+ *
+ * The first three are Jam's recorded band. The fourth is everything else the
+ * file has — every guitar, and so the reason Songs exists — through the
+ * General MIDI synthesiser in `src-tauri/src/synth.rs`. Before W28 there was
+ * no fourth, and a two-guitar file played as a metronome.
+ */
+export type SongRole = "drums" | "bass" | "keys" | "synth";
 
 /**
  * One note of the file's own rhythm section.
@@ -190,21 +198,41 @@ export type SongBackingNote = {
   velocity: number;
 };
 
+/** A bend or a slide, as MIDI writes one: 0..16383, 8192 at rest. */
+export type SongBackingBend = { tick: number; value: number };
+
 export type SongBackingTrack = {
   role: SongRole;
   name: string;
+  /**
+   * The General MIDI instrument the file asks for, 0..127. Read only for a
+   * `synth` track; the recorded kit, bass and keys are what they are.
+   */
+  program: number;
+  /**
+   * The part the player opened the file to learn, played as the guide every
+   * tab player has. Exactly one track of a song is.
+   */
+  guide: boolean;
   notes: SongBackingNote[];
+  /** Empty for everything the recorded band plays: a sample cannot bend. */
+  bends: SongBackingBend[];
 };
 
-/** The file's own rhythm section. `null` is a song the engine only clicks to. */
+/** The file's own band. `null` is a song the engine only clicks to. */
 export type SongBacking = { tracks: SongBackingTrack[] };
 
-/** How loud the click and each of the band's three rows are. */
+/**
+ * How loud the click is, and each track of the file.
+ *
+ * **Per track since W28.** It was a click and Jam's three rows, because those
+ * were the only three things a song could play. Now every track sounds, so
+ * every track has a fader: `tracks[n]` is the `n`th entry of
+ * `SongBacking.tracks`, which is the order the band strip draws them in.
+ */
 export type SongMix = {
   click: number;
-  drums: number;
-  bass: number;
-  keys: number;
+  tracks: number[];
 };
 
 /**
@@ -216,10 +244,21 @@ export type SongMix = {
  */
 export const DEFAULT_SONG_MIX: SongMix = {
   click: 0.45,
-  drums: 1,
-  bass: 1,
-  keys: 1,
+  tracks: [],
 };
+
+/**
+ * How loud the player's own part comes back at.
+ *
+ * On, and a few dB under the rest, which is what every tab player does with
+ * the part you are learning: loud enough to follow, quiet enough that you are
+ * the one playing it. A player who wants it gone has the mute, and a player
+ * who wants to be led has the fader.
+ */
+export const GUIDE_TRACK_MIX = 0.7;
+
+/** A fader nobody has touched. The arrangement's own level. */
+export const DEFAULT_TRACK_MIX = 1;
 
 /** The loudest a lane goes, and the quietest. `song.rs`'s `MIX_MIN`/`MIX_MAX`. */
 export const SONG_MIX_MAX = 1.5;

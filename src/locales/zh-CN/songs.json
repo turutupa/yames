@@ -33,7 +33,12 @@
       "leftOut": "这个文件里有 {{tracks}}，但 Yames 没人能弹。",
       "leftOut_other": "这个文件里有 {{tracks}}，但 Yames 没人能弹。",
       "droppedNotes": "这个文件里有 {{count}} 个音属于乐队没有的乐器。",
-      "droppedNotes_other": "这个文件里有 {{count}} 个音属于乐队没有的乐器。"
+      "droppedNotes_other": "这个文件里有 {{count}} 个音属于乐队没有的乐器。",
+      "myPart": "我的声部",
+      "soloShort": "S",
+      "soloFor": "只听 {{lane}}",
+      "tooManyParts": "{{tracks}} 不会发声：这个文件的声部比能同时响起的还多。",
+      "tooManyParts_other": "{{tracks}} 不会发声：这个文件的声部比能同时响起的还多。"
     },
     "countIn": {
       "counting": "正在给你数拍"

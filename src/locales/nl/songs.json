@@ -33,7 +33,12 @@
       "leftOut": "{{tracks}} zit in dit bestand, maar Yames heeft niemand die het speelt.",
       "leftOut_other": "{{tracks}} zitten in dit bestand, maar Yames heeft niemand die ze speelt.",
       "droppedNotes": "{{count}} noot in dit bestand is voor een instrument dat de band niet heeft.",
-      "droppedNotes_other": "{{count}} noten in dit bestand zijn voor instrumenten die de band niet heeft."
+      "droppedNotes_other": "{{count}} noten in dit bestand zijn voor instrumenten die de band niet heeft.",
+      "myPart": "Mijn partij",
+      "soloShort": "S",
+      "soloFor": "Alleen {{lane}} horen",
+      "tooManyParts": "{{tracks}} blijft stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
+      "tooManyParts_other": "{{tracks}} blijven stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken."
     },
     "countIn": {
       "counting": "Je wordt ingeteld"

@@ -33,7 +33,12 @@
       "leftOut": "{{tracks}} ist in dieser Datei, aber Yames hat niemanden, der das spielt.",
       "leftOut_other": "{{tracks}} sind in dieser Datei, aber Yames hat niemanden, der das spielt.",
       "droppedNotes": "{{count}} Note in dieser Datei ist für ein Instrument, das die Band nicht hat.",
-      "droppedNotes_other": "{{count}} Noten in dieser Datei sind für Instrumente, die die Band nicht hat."
+      "droppedNotes_other": "{{count}} Noten in dieser Datei sind für Instrumente, die die Band nicht hat.",
+      "myPart": "Meine Stimme",
+      "soloShort": "S",
+      "soloFor": "Nur {{lane}} hören",
+      "tooManyParts": "{{tracks}} bleibt stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können.",
+      "tooManyParts_other": "{{tracks}} bleiben stumm: Diese Datei hat mehr Stimmen, als gleichzeitig klingen können."
     },
     "countIn": {
       "counting": "Zählt dich ein"

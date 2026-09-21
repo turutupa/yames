@@ -334,15 +334,17 @@ async function drive() {
      * Without this wait the layout suite measures a stage that has a click
      * row and nothing else — which is the real narrow-window failure it is
      * here to catch, so it must not be the state it photographs.
-     * Three rows: the click, the drums and the bass of `SHOT_SONG_TEX`.
+     * Four rows since W28: the click, the guitar being learned (which is
+     * now in the band, as the guide), the drums and the bass of
+     * `SHOT_SONG_TEX`.
      */
     /*
      * W29 — and they are behind "More" now, so the wait has to open it.
      *
      * The band no longer has a row of its own on the strip: the strip is one
      * row and the faders are in the popover off it. So the scene presses
-     * More, waits for the three lanes to be there, and presses it again —
-     * what is photographed is still the stage with the panel closed, and the
+     * More, waits for the rows to be there, and presses it again — what is
+     * photographed is still the stage with the panel closed, and the
      * guarantee is still the one this wait was written for, that the file's
      * other tracks have been read.
      */
@@ -355,7 +357,7 @@ async function drive() {
         if (document.querySelector(".songs-more-pop")) return;
         document.querySelector<HTMLElement>(".songs-more-chip")?.click();
       },
-      () => document.querySelectorAll(".songs-band-lane").length >= 3,
+      () => document.querySelectorAll(".songs-band-lane").length >= 4,
     );
     document.querySelector<HTMLElement>(".songs-more-chip")?.click();
     await until("the strip's panel to close", () => !document.querySelector(".songs-more-pop"));

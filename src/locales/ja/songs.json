@@ -33,7 +33,12 @@
       "leftOut": "{{tracks}} はこのファイルに入っていますが、Yames には弾ける相手がいません。",
       "leftOut_other": "{{tracks}} はこのファイルに入っていますが、Yames には弾ける相手がいません。",
       "droppedNotes": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。",
-      "droppedNotes_other": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。"
+      "droppedNotes_other": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。",
+      "myPart": "自分のパート",
+      "soloShort": "S",
+      "soloFor": "{{lane}} だけを聞く",
+      "tooManyParts": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
+      "tooManyParts_other": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。"
     },
     "countIn": {
       "counting": "カウント中"
