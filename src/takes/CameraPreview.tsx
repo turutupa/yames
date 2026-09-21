@@ -29,14 +29,14 @@
  * frame was actually captured, and it exists on a `<video>` element rather
  * than on a stream. So the element showing the preview is also what tells
  * `useSongCamera` the instant the first frame landed, which is one half of the
- * alignment (`src/songs/camera/offset.ts`). A webview without it costs the
+ * alignment (`src/takes/offset.ts`). A webview without it costs the
  * clock reading beside `MediaRecorder.start()` instead, and the review says as
  * much.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { storeLoad, storeSave } from "../../../ipc";
-import { CAMERA_CORNER_KEY, CAMERA_GUIDE_KEY } from "../../../songs/camera/keys";
+import { storeLoad, storeSave } from "../ipc";
+import { CAMERA_CORNER_KEY, CAMERA_GUIDE_KEY } from "./keys";
 import type { SongCameraState } from "./useSongCamera";
 
 export type PreviewCorner = "topLeft" | "topRight" | "bottomLeft" | "bottomRight";

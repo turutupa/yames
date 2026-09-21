@@ -23,7 +23,7 @@
  * exact to one output buffer. `videoOffsetMs` is the camera's, fitted from the
  * pass's beat events, and is good to a few tens of milliseconds and no better
  * — which is what the nudge is for and why the nudge is remembered per camera
- * (`songs/camera/keys.ts`).
+ * (`takes/keys.ts`).
  *
  * ## Why the mix is not played through the engine
  *
@@ -41,7 +41,7 @@
  * interface — which is most of the people this app is for — the review came
  * out of a different speaker from the band. `setSinkId` moves it, where the
  * webview has one and the two namespaces can be joined on a label
- * (`songs/camera/sink.ts` is that join, and is honest about being a match).
+ * (`takes/sink.ts` is that join, and is honest about being a match).
  * Where they cannot, the note under the controls says which speaker it is
  * using rather than leaving somebody to wonder why it sounds different.
  *
@@ -61,11 +61,11 @@ import {
   cameraNudgeKey,
   NUDGE_LIMIT_MS,
   NUDGE_STEP_MS,
-} from "../../../songs/camera/keys";
-import { followChosenOutput } from "../../../songs/camera/sink";
-import type { SinkDevice, SinkState } from "../../../songs/camera/sink";
-import { mediaSrc } from "../../../songs/camera/src";
-import { msAtBeat } from "../../../songs/camera/offset";
+} from "../../../takes/keys";
+import { followChosenOutput } from "../../../takes/sink";
+import type { SinkDevice, SinkState } from "../../../takes/sink";
+import { mediaSrc } from "../../../takes/src";
+import { msAtBeat } from "../../../takes/offset";
 import { clampRange, rangeTempoSteps } from "../../../songs/schedule";
 import { printedBarNumber } from "../../../songs/position";
 import { TakeTape } from "./TakeTape";

@@ -1,5 +1,5 @@
-import type { ClipBox, ClipCaption, ClipLayout } from "../songs/camera/clip";
-import type { ClipPalette } from "../songs/camera/clipRecorder";
+import type { ClipBox, ClipCaption, ClipLayout } from "./clip";
+import type { ClipPalette } from "./clipRecorder";
 
 /**
  * The scrolling thing under the picture, as the compositor sees it.

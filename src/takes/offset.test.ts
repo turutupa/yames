@@ -19,7 +19,7 @@ import {
   MIN_CLOCK_SAMPLES,
 } from "./offset";
 import type { ClockSample } from "./offset";
-import type { SongScore } from "../types";
+import type { SongScore } from "../songs/types";
 
 /** Four bars of 4/4 at 120, the same shape `position.test.ts` uses. */
 function fourBarScore(): SongScore {

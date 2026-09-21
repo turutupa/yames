@@ -49,10 +49,10 @@
  * hardware session with a clap in it (spike K3) rather than a number this file
  * pretends to know.
  */
-import { beatAtSongTick, rangeTempoSteps } from "../schedule";
-import type { BarRange, RangeTempoStep } from "../schedule";
-import type { SongScore } from "../types";
-import type { BeatPosition } from "../position";
+import { beatAtSongTick, rangeTempoSteps } from "../songs/schedule";
+import type { BarRange, RangeTempoStep } from "../songs/schedule";
+import type { SongScore } from "../songs/types";
+import type { BeatPosition } from "../songs/position";
 
 /** One beat event: when it arrived here, and where the piece was. */
 export type ClockSample = {

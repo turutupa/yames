@@ -4,7 +4,7 @@ import { parseKey } from "../jam/harmony";
 import { jamChords } from "../jam/progression";
 import type { Jam, JamTake } from "../jam/types";
 import type { ClipStrip } from "./clipStrip";
-import type { ClipCaption } from "../songs/camera/clip";
+import type { ClipCaption } from "./clip";
 
 /**
  * A jam, as the thing that scrolls under the picture in a saved video (W30).

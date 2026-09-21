@@ -38,7 +38,7 @@ import { useTranslation } from "react-i18next";
 import { barAtMs, msAtBar, overlapOf } from "../../../songs/camera/align";
 import { buildTape } from "../../../songs/camera/tape";
 import type { Tape } from "../../../songs/camera/tape";
-import { mediaSrc } from "../../../songs/camera/src";
+import { mediaSrc } from "../../../takes/src";
 import { TakeTape } from "./TakeTape";
 import type { CompareSide } from "../review/useSongCompare";
 import { printedBarNumber } from "../../../songs/position";

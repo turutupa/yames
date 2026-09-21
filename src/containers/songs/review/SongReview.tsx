@@ -76,19 +76,19 @@ import type { ReviewTakeVideo } from "../camera/TakeVideoView";
 // W25 — "Save as a video" (`plans/ECHORA.md` D4). In the review's chunk with
 // everything else here: a player who never stops a pass never downloads a
 // canvas compositor.
-import { SaveAsVideo } from "../camera/SaveAsVideo";
+import { SaveAsVideo } from "../../../takes/SaveAsVideo";
 // W25 — then and now (addendum 11). Same chunk, same reason.
 import { CompareTakes } from "../camera/CompareTakes";
 import type { SongCompare } from "./useSongCompare";
 import { buildTape } from "../../../songs/camera/tape";
 import { songStrip, songWindowMs } from "../../../songs/camera/songStrip";
-import { clipSpan } from "../../../songs/camera/clip";
+import { clipSpan } from "../../../takes/clip";
 import { createShuffleState } from "../../../coach/templates";
 import { ReviewTab } from "./ReviewTab";
 import { passesIn } from "./marks";
 import type { SongAttemptReview } from "./useSongAttempt";
 import { blocksFor } from "../../../songs/verdict";
-import { beatAtMs, passLengthMs } from "../../../songs/camera/offset";
+import { beatAtMs, passLengthMs } from "../../../takes/offset";
 import { rangeTempoSteps } from "../../../songs/schedule";
 import type { BarRange } from "../../../songs/schedule";
 import { printedBarNumber } from "../../../songs/position";

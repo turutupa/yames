@@ -41,20 +41,20 @@ import {
   revealInFolder,
   storeLoad,
   storeSave,
-} from "../../../ipc";
-import { CLIP_BRAND_KEY } from "../../../songs/camera/keys";
-import { placesFor, SHARE_PLACES } from "../../../songs/camera/share";
-import { clipSeconds } from "../../../songs/camera/clip";
-import type { ClipShape } from "../../../songs/camera/clip";
-import type { ClipStrip } from "../../../takes/clipStrip";
-import { recordClip } from "../../../songs/camera/clipRecorder";
-import type { ClipPalette, ClipRun } from "../../../songs/camera/clipRecorder";
-import { clipSupport } from "../../../songs/camera/support";
-import { takeLength } from "../../../jam/takes";
-import { mediaSrc } from "../../../songs/camera/src";
-import { MARK_TOKEN } from "../review/marks";
-import type { TimingMark } from "../review/marks";
-import "../../../styles/songs-take-video.css";
+} from "../ipc";
+import { CLIP_BRAND_KEY } from "./keys";
+import { placesFor, SHARE_PLACES } from "./share";
+import { clipSeconds } from "./clip";
+import type { ClipShape } from "./clip";
+import type { ClipStrip } from "./clipStrip";
+import { recordClip } from "./clipRecorder";
+import type { ClipPalette, ClipRun } from "./clipRecorder";
+import { clipSupport } from "./support";
+import { takeLength } from "../jam/takes";
+import { mediaSrc } from "./src";
+import { MARK_TOKEN } from "../containers/songs/review/marks";
+import type { TimingMark } from "../containers/songs/review/marks";
+import "../styles/songs-take-video.css";
 
 /** Where the clip is in its life. */
 type Stage =

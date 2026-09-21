@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { SaveAsVideo } from "../containers/songs/camera/SaveAsVideo";
-import { mediaSrc } from "../songs/camera/src";
+import { SaveAsVideo } from "./SaveAsVideo";
+import { mediaSrc } from "./src";
 import { jamStrip, jamTapeShape, jamWindowMs } from "./jamStrip";
 import type { Jam, JamTake } from "../jam/types";
 

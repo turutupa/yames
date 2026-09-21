@@ -78,10 +78,10 @@ import { TakesIntroDialog } from "../jam/TakesIntroDialog";
    the take's are, because they run while a pass is happening. The video player
    is not imported here at all: it lives inside the review's own lazy chunk, so
    a player who never turns the camera on never downloads it. */
-import { useSongCamera } from "./camera/useSongCamera";
-import { SongCameraControl } from "./camera/SongCameraControl";
-import { CameraPreview } from "./camera/CameraPreview";
-import { CameraIntroDialog } from "./camera/CameraIntroDialog";
+import { useSongCamera } from "../../takes/useSongCamera";
+import { SongCameraControl } from "../../takes/SongCameraControl";
+import { CameraPreview } from "../../takes/CameraPreview";
+import { CameraIntroDialog } from "../../takes/CameraIntroDialog";
 import "../../styles/songs-camera.css";
 import { SongSpeed } from "./SongSpeed";
 import { SongStripMore } from "./SongStripMore";

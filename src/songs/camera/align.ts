@@ -23,7 +23,7 @@
  * but the playhead has to be drawn somewhere between them, and a mark that
  * jumped a bar at a time would be a mark nobody could read against the music.
  */
-import { msAtBeat, beatAtMs } from "./offset";
+import { msAtBeat, beatAtMs } from "../../takes/offset";
 import { clampRange, rangeTempoSteps } from "../schedule";
 import type { BarRange } from "../schedule";
 import type { SongScore } from "../types";

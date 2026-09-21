@@ -35,7 +35,7 @@
  *   the take stops   → `finishFor(take)` files the picture under its id and
  *                      writes the fitted offset into the take's sidecar
  *
- * The fit and the arithmetic are in `src/songs/camera/offset.ts`, which is
+ * The fit and the arithmetic are in `src/takes/offset.ts`, which is
  * pure and tested. The arrival stamp is taken INSIDE the event listener rather
  * than from a prop, because a prop has been through a React commit by the time
  * anything can read a clock, and a constant delay added to every sample is a
@@ -51,21 +51,21 @@ import {
   takeVideoBegin,
   takeVideoDiscard,
   takeVideoFinish,
-} from "../../../ipc";
-import { recordVideo } from "../../../songs/camera/recorder";
-import type { Recording } from "../../../songs/camera/recorder";
-import { cameraConstraints, cameraSupport } from "../../../songs/camera/support";
-import type { CameraSupport } from "../../../songs/camera/support";
-import { fitTransportClock, sampleFor, videoOffsetMs } from "../../../songs/camera/offset";
-import type { ClockSample } from "../../../songs/camera/offset";
+} from "../ipc";
+import { recordVideo } from "./recorder";
+import type { Recording } from "./recorder";
+import { cameraConstraints, cameraSupport } from "./support";
+import type { CameraSupport } from "./support";
+import { fitTransportClock, sampleFor, videoOffsetMs } from "./offset";
+import type { ClockSample } from "./offset";
 import {
   CAMERA_DEVICE_KEY,
   CAMERA_INTRO_KEY,
   MAX_CLOCK_SAMPLES,
-} from "../../../songs/camera/keys";
-import type { BarRange } from "../../../songs/schedule";
-import type { SongScore } from "../../../songs/types";
-import type { JamTake } from "../../../jam/types";
+} from "./keys";
+import type { BarRange } from "../songs/schedule";
+import type { SongScore } from "../songs/types";
+import type { JamTake } from "../jam/types";
 
 /** What went wrong, in words the control can say. */
 export type CameraTrouble = "denied" | "noCamera" | "failed" | "lostPicture";

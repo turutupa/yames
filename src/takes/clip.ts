@@ -24,13 +24,13 @@
  * tempo. The review, the tape and the clip are then three drawings of one
  * number, and a clip cannot drift from the screen it was made on.
  */
-import { barLengthMs } from "./tape";
-import type { Tape, TapeTick } from "./tape";
+import { barLengthMs } from "../songs/camera/tape";
+import type { Tape, TapeTick } from "../songs/camera/tape";
 import { msAtBeat } from "./offset";
-import { clampRange, rangeTempoSteps } from "../schedule";
-import type { BarRange } from "../schedule";
-import { printedBarNumber } from "../position";
-import type { SongScore } from "../types";
+import { clampRange, rangeTempoSteps } from "../songs/schedule";
+import type { BarRange } from "../songs/schedule";
+import { printedBarNumber } from "../songs/position";
+import type { SongScore } from "../songs/types";
 
 /** Which way up the clip is. */
 export type ClipShape = "wide" | "tall";

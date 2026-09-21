@@ -42,8 +42,8 @@ import { createChunkPipe } from "./chunks";
 import type { ChunkSink } from "./chunks";
 import { clipLayout } from "./clip";
 import type { ClipLayout, ClipShape } from "./clip";
-import type { ClipStrip } from "../../takes/clipStrip";
-import type { TimingMark } from "../../containers/songs/review/marks";
+import type { ClipStrip } from "./clipStrip";
+import type { TimingMark } from "../containers/songs/review/marks";
 
 /** How often the canvas is sampled. 30 is what the camera records at. */
 export const CLIP_FPS = 30;

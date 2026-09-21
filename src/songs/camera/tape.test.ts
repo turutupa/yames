@@ -10,9 +10,9 @@
  */
 import { describe, expect, it } from "vitest";
 import { barLengthMs, buildTape, slipJump } from "./tape";
-import { passLengthMs } from "./offset";
-import { cameraSupport } from "./support";
-import { mediaSrc } from "./src";
+import { passLengthMs } from "../../takes/offset";
+import { cameraSupport } from "../../takes/support";
+import { mediaSrc } from "../../takes/src";
 import type { OnsetResult, ScoreSchedule, SongScore } from "../types";
 
 /** Four bars of 4/4 at 120, with a section name on bar 3. */
