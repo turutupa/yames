@@ -1144,6 +1144,26 @@ fn an_evicted_bank_comes_back_with_the_same_id() {
     assert_eq!(first, again, "the same kit at the same rate is the same bank");
 }
 
+/// CLEARING THE CACHE LETS GO, AND CHANGES NO DRUM.
+///
+/// A phone lets the whole band go once it has been out of sight and stopped
+/// for a while (`commands::release_jam_sounds`, M10). Two things have to be
+/// true of that. The cache must really be empty afterwards — a release that
+/// left an entry behind would leave tens of megabytes behind with it — and
+/// the kit must come back as ITSELF when the musician returns, for the same
+/// reason an evicted one does: a new id is a new drummer to the bar-line
+/// handshake and a band the four-bar memo has to measure again.
+#[test]
+fn a_cleared_cache_lets_go_and_the_kit_comes_back_the_same() {
+    let cache = KitCache::default();
+    let before = cache.shipped(0, 48_000).unwrap().id;
+    assert_eq!(cache.len(), 1, "one kit decoded is one entry");
+    cache.clear();
+    assert_eq!(cache.len(), 0, "the release holds nothing back");
+    let after = cache.shipped(0, 48_000).unwrap().id;
+    assert_eq!(before, after, "the same kit at the same rate is the same bank");
+}
+
 /// THE SHIPPED BANKS ARE FLAC, AND STAY FLAC.
 ///
 /// Nine minutes of audio across four hundred and ten files was seventy

@@ -2,7 +2,9 @@ package com.yames.metronome.mobile
 
 import android.Manifest
 import android.app.Activity
+import android.content.ComponentCallbacks2
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -142,18 +144,65 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
             }
         }
 
+    /**
+     * What the system says when it wants memory back.
+     *
+     * The honest signal for "the band may go now". A decoded backing band is
+     * tens of megabytes of samples, and the biggest background process is the
+     * first one Android kills — so the app is told when its UI is gone
+     * (`TRIM_MEMORY_UI_HIDDEN` and above) and when the phone is short while
+     * the app is still on screen (`RUNNING_LOW` / `RUNNING_CRITICAL`). What to
+     * do about it is the frontend's call, in `src/mobile/bandMemory.ts`;
+     * nothing here knows what a jam is.
+     */
+    private val memoryCallbacks =
+        object : ComponentCallbacks2 {
+            override fun onTrimMemory(level: Int) {
+                emit(JSObject().put("event", "memory_trim").put("level", level))
+            }
+
+            override fun onConfigurationChanged(newConfig: Configuration) {}
+
+            @Deprecated("Superseded by onTrimMemory, and still called on older phones")
+            override fun onLowMemory() {
+                emit(
+                    JSObject()
+                        .put("event", "memory_trim")
+                        .put("level", ComponentCallbacks2.TRIM_MEMORY_COMPLETE),
+                )
+            }
+        }
+
     override fun load(webView: WebView) {
         activity.runOnUiThread {
             (activity as? AppCompatActivity)?.onBackPressedDispatcher?.addCallback(backCallback)
             watchWindowInsets()
         }
+        activity.registerComponentCallbacks(memoryCallbacks)
         ClickService.onStopRequested = {
             emit(JSObject().put("event", "stop_requested"))
         }
     }
 
+    /**
+     * On screen / off screen, straight from the activity's own lifecycle.
+     *
+     * `onStop` and not `onPause`: a permission dialog over the app pauses it
+     * without hiding it, and a band let go for a dialog that closes a second
+     * later would be a re-decode nobody asked for. `onStop` is the activity
+     * really being gone from the screen.
+     */
+    override fun onResume() {
+        emit(JSObject().put("event", "app_visible").put("visible", true))
+    }
+
+    override fun onStop() {
+        emit(JSObject().put("event", "app_visible").put("visible", false))
+    }
+
     override fun onDestroy() {
         ClickService.onStopRequested = null
+        activity.unregisterComponentCallbacks(memoryCallbacks)
         abandonFocus()
         stopService()
     }

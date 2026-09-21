@@ -6,7 +6,8 @@ import {
   type SetlistEffect,
   type SetlistRunState,
 } from "../../../setlist";
-import { armCountIn, setPlaying, setVolume } from "../../../ipc";
+import { armCountIn, setPlaying, setVolume, warmJam } from "../../../ipc";
+import { IS_MOBILE } from "../../../platform";
 import { compileJam, lastVoicing } from "../../../jam";
 import type { Jam, JamBand } from "../../../jam";
 import { applySetlistStep } from "./applySetlistStep";
@@ -136,6 +137,41 @@ export function useSetlistRunner(
   const jamPushedRef = useRef(false);
 
   /**
+   * THE BAND THAT IS ABOUT TO COME ON, DECODED WHILE A PLAIN STEP RUNS (M10).
+   *
+   * A phone no longer decodes the library at launch, so a setlist that runs
+   * four minutes of warm-up and then a jam would meet the band a few hundred
+   * milliseconds into the step it belongs to. Decoding it one step early
+   * fixes that, and costs nothing: with no band on the step now playing, the
+   * caches are holding nothing this run is using.
+   *
+   * **Only from a step that has no band.** A phone's caches hold exactly the
+   * jam that is loaded (`kit::CACHE_ENTRIES`), so decoding a second band
+   * while a first one is playing would push the playing one out — and the
+   * bar-ahead send would then re-decode it on every bar line, which is worse
+   * than a late entry by a wide margin. A setlist that steps from one band
+   * straight into another pays the decode at the boundary instead.
+   *
+   * Desktop does none of this and needs none: `warmJam` already ran over the
+   * whole library at launch.
+   */
+  const warmNextJamStep = useCallback(() => {
+    if (!IS_MOBILE) return;
+    const context = jamContextRef.current;
+    const steps = setlistRef.current?.steps;
+    if (!context || !steps) return;
+    const next = steps[stateRef.current.stepIndex + 1];
+    const upcoming = next?.jamId ? context.getJam(next.jamId) : null;
+    if (!upcoming) return;
+    try {
+      warmJam({ configs: [compileJam(upcoming, { formBar: 0, lineup: context.lineup })] });
+    } catch {
+      // A jam that will not compile is the step's own problem when it lands,
+      // with a message on the screen it belongs to. Nothing to warm here.
+    }
+  }, []);
+
+  /**
    * Load a jam step's jam, or take the last one away.
    *
    * Called from `applyStep` and nowhere else, so the engine's band and the
@@ -164,6 +200,7 @@ export function useSetlistRunner(
     // Bar 0 is on its way, meter first. The bar-ahead effect below runs on
     // this same commit and must not race past it.
     jamPushedRef.current = !!jam;
+    if (!jam) warmNextJamStep();
   }, []);
 
   /** The band away and the metronome's own meter back — the end of a run. */

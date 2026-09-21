@@ -422,6 +422,24 @@ export function warmJam(request: JamWarmRequest): void {
 }
 
 /**
+ * Let the decoded band go, and say whether it went.
+ *
+ * The other end of `warmJam`, and a phone's alone: a band that has been
+ * decoded costs tens of megabytes for as long as anything holds it, and on a
+ * phone that is what decides whether the app survives being put down (M10).
+ * The loaded table goes first and the two caches after it, all on a blocking
+ * thread — never the audio thread, and never while the band is playing,
+ * which the engine refuses under its own lock.
+ *
+ * `false` means it refused, which today means the band was playing. Every
+ * caller is behind `IS_MOBILE`; on a desktop the command answers `false` and
+ * changes nothing.
+ */
+export async function releaseJamSounds(): Promise<boolean> {
+  return invoke<boolean>("release_jam_sounds");
+}
+
+/**
  * ONE LINE FOR EVERY JAM COMMAND, IN THE ORDER THEY WERE SENT.
  *
  * `set_jam` runs off the main thread now (it decodes recorded kits and

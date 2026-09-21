@@ -22,6 +22,12 @@
  *    does not describe either of them — see `WindowInsets` in
  *    `src/mobile/native.ts`. The Android side measures them; this writes them
  *    into the `--safe-*` tokens every layout already pads with.
+ * 5. **The system's memory pressure reaches the band.** A decoded backing
+ *    band is tens of megabytes, and the biggest backgrounded process is the
+ *    first one Android kills. The activity's own lifecycle and
+ *    `onTrimMemory` are forwarded to `mobile/bandMemory.ts`, which lets the
+ *    band go once the app has been out of sight and stopped for a while, and
+ *    brings it back when the musician does (M10).
  *
  * Mounted only on a phone (`IS_MOBILE`), so none of `src/mobile/` reaches a
  * desktop bundle.
@@ -29,6 +35,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { setPlaying } from "../../../ipc";
+import { appVisibilityChanged, memoryTrimmed } from "../../../mobile/bandMemory";
 import { dismissTop } from "../../../mobile/backStack";
 import type { WindowInsets } from "../../../mobile/native";
 import { keepAwake, listenToNative, setBackgroundAudio } from "../../../mobile/native";
@@ -129,6 +136,15 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
         case "stop_requested":
           standAside(false);
           stop();
+          break;
+        case "app_visible":
+          // Out of sight and stopped is when the decoded band is allowed to
+          // go, and back on screen is when it comes back. The decision is
+          // `bandMemory.ts`'s; this is only the wire.
+          appVisibilityChanged(event.visible);
+          break;
+        case "memory_trim":
+          memoryTrimmed(event.level);
           break;
         case "audio_interrupted":
           if (event.kind === "focus_lost") {

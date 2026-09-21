@@ -3729,6 +3729,33 @@ pub(crate) fn take_offset(channels: usize, pair: usize) -> usize {
 ///
 /// A device query, so never under the engine's lock and never on the main
 /// thread. `None` when there is no device or it will not say.
+///
+/// **A PHONE HAS TO ASK OBOE, NOT CPAL** (M10). M04 took Android's output off
+/// cpal and opened it at `oboe` directly, because cpal 0.15.3 asks for
+/// 44 100 into a 48 kHz device — and this function was still asking cpal. So
+/// a jam opened before Play was decoded at 44 100, the stream then opened at
+/// 48 000, and the first Play decoded the whole band a second time: measured
+/// on the Pixel 6 AVD, native heap went from 134 MB to 245 MB on pressing
+/// Play, for the same band. Asking the stream the app actually opens makes
+/// the first decode the one that plays, which is what this function was
+/// written for in the first place.
+///
+/// Once per process. Before Play there is no stream to ask and probing means
+/// opening a throwaway one, which is not something to do on every edit in the
+/// setup sheet; the moment a stream IS running `jam_rate` reads the real rate
+/// off it and never comes here at all, so a routing change that moves the
+/// rate is answered by the stream rather than by this.
+#[cfg(target_os = "android")]
+pub fn probe_output_rate(_device_name: Option<&str>) -> Option<u32> {
+    static PROBED: std::sync::OnceLock<Option<u32>> = std::sync::OnceLock::new();
+    *PROBED.get_or_init(|| {
+        crate::android_audio::probe_output_format()
+            .ok()
+            .map(|fmt| fmt.sample_rate)
+    })
+}
+
+#[cfg(not(target_os = "android"))]
 pub fn probe_output_rate(device_name: Option<&str>) -> Option<u32> {
     let host = cpal::default_host();
     let device = match device_name {
@@ -5096,6 +5123,18 @@ impl MetronomeEngine {
                         Some(_) => crate::clock::now_ns(),
                         None => 0,
                     };
+
+                    // Audio-safety probe, the allocation half: everything
+                    // this thread allocates or frees until this guard drops
+                    // is counted against the callback. `None` in the app —
+                    // the same null check as the line above, and the guard
+                    // is a zero-sized value with nothing to drop — and the
+                    // only way to say "replacing the band never freed here"
+                    // as a measurement instead of as a reading of the code.
+                    // See `alloc_probe.rs`.
+                    let _alloc_scope = probe_cb
+                        .as_ref()
+                        .map(|_| crate::alloc_probe::AllocScope::enter());
 
                     // Output latency compensation.
                     // CoreAudio device/safety/stream latency + one buffer of

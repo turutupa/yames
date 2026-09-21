@@ -248,8 +248,18 @@ export function JamSetupSheet({
     return () => clearTimeout(timer);
   }, [changed, loading]);
   const spinning = (which: "kit" | "bass" | "keys") => loading && changed === which;
+  /**
+   * Every recorded voice for this role, built before one is chosen.
+   *
+   * **Not on a phone (M10).** The four recorded voices are about 215 MB
+   * between them, and a phone that is holding four bass players to make one
+   * dropdown instant is a phone that kills the app the moment it goes to the
+   * background. A phone builds the voice that is CHOSEN, when it is chosen —
+   * `onEdit` recompiles, `set_jam` builds it off the window's thread, and the
+   * spinner below shows on the row that is waiting for it.
+   */
   const warmVoices = (role: "bass" | "keys") => {
-    if (warmedRef.current[role]) return;
+    if (IS_MOBILE || warmedRef.current[role]) return;
     warmedRef.current[role] = true;
     warmJam(role === "bass" ? { bassVoices: true } : { keysVoices: true });
   };

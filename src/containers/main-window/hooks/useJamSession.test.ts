@@ -204,6 +204,45 @@ describe("warming the library", () => {
     await new Promise((r) => setTimeout(r, 2700));
     expect(names("warmJam")).toHaveLength(1);
   }, 10000);
+
+  /**
+   * NOT ON A PHONE (M10).
+   *
+   * The same warm that is free on a laptop is 342 MB on a phone, spent two
+   * and a half seconds after launch by somebody who opened the app for a
+   * metronome — and a backgrounded app holding 455 MB is the one Android
+   * kills. A phone decodes the jam it is asked to open and nothing else.
+   *
+   * Re-imported with the flag set rather than given its own file, so it runs
+   * against exactly the same engine harness the case above does.
+   */
+  it("decodes nothing at launch on a phone", async () => {
+    vi.stubGlobal("__YAMES_MOBILE__", true);
+    vi.resetModules();
+    try {
+      const { useJamSession: mobileHook } = await import("./useJamSession");
+      const { result } = renderHook(() =>
+        mobileHook({
+          view: "jam",
+          isPlaying: false,
+          onJamLoaded: () => {},
+          instrument: "electric-guitar",
+          currentBeat: null,
+          countingIn: false,
+        }),
+      );
+      await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
+      // Well past the 2.5 s the desktop warm waits for.
+      await new Promise((r) => setTimeout(r, 3200));
+      expect(names("warmJam")).toHaveLength(0);
+      // And the jam on screen still reaches the engine, which is what
+      // decodes the band a phone actually needs.
+      expect(names("setJam").length).toBeGreaterThan(0);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    }
+  }, 15000);
 });
 
 describe("seeding", () => {

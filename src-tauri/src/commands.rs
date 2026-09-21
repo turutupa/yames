@@ -2875,7 +2875,61 @@ fn build_and_install_jam(
         .lock()
         .unwrap()
         .set_jam_table(table);
+    #[cfg(mobile)]
+    schedule_retired_drain(app_handle);
     Ok(())
+}
+
+/// THE BAND YOU JUST REPLACED, FREED NOW RATHER THAN AT THE NEXT SEND.
+///
+/// The callback does not drop a table it is told to stop reading — it hands
+/// it back through the retirement slot, and `JamHandoff::set` empties that
+/// slot on its way IN. So a table is freed one send late, which while the
+/// band is playing is one bar and costs nothing: the bar-ahead handshake
+/// sends four to six times a chorus.
+///
+/// **Stopped, the next send may never come.** Loading a jam, looking at it,
+/// and loading another left the first band — a kit, a percussion set, a bass
+/// and a keys voice, and on the Pixel 6 AVD a hundred and fifty megabytes —
+/// parked in a slot nothing was going to drain. On a laptop that is a number
+/// nobody notices. On a phone it is the whole point of M10.
+///
+/// So: a phone, stopped, spawns one short-lived thread that waits for the
+/// callback to hand the table over and frees it there. Not on the audio
+/// thread, not on the main thread, and not on the command thread either —
+/// `set_jam` is awaited by the UI's jam queue and a hand on the bass fader
+/// sends thirty a second, which is why this waits somewhere else and why
+/// only one is ever in flight.
+#[cfg(mobile)]
+fn schedule_retired_drain(app_handle: &AppHandle) {
+    use std::sync::atomic::{AtomicBool, Ordering};
+    static SCHEDULED: AtomicBool = AtomicBool::new(false);
+
+    let (running, handoff) = {
+        let state = app_handle.state::<EngineState>();
+        let Ok(engine) = state.0.lock() else { return };
+        (engine.is_running(), engine.jam_handoff())
+    };
+    // Playing: the next bar line drains it, sooner than this thread would.
+    if running {
+        return;
+    }
+    if SCHEDULED.swap(true, Ordering::AcqRel) {
+        return;
+    }
+    std::thread::spawn(move || {
+        // Long enough for the callback to notice the new generation and hand
+        // the old table over. At 512 frames that is eleven milliseconds.
+        std::thread::sleep(std::time::Duration::from_millis(200));
+        handoff.drain_retired();
+        // Only now may another send schedule one, and the second pass covers
+        // a send that landed inside this thread's own window — a hand on a
+        // fader sends thirty a second and the last of them must not be the
+        // one left holding a band.
+        SCHEDULED.store(false, Ordering::Release);
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        handoff.drain_retired();
+    });
 }
 
 /// DECODE THE BAND BEFORE ANYBODY ASKS FOR IT.
@@ -2957,6 +3011,75 @@ pub async fn warm_jam(
     })
     .await
     .map_err(|e| format!("warm_jam join failed: {e}"))
+}
+
+/// GIVE THE PHONE ITS MEMORY BACK WHEN NOBODY IS LISTENING.
+///
+/// A decoded band is tens of megabytes of `f32` and it lives for as long as
+/// something holds it: the loaded `JamTable` the audio thread reads, and the
+/// two caches `set_jam` fills. On a laptop that is free. On a phone it is
+/// what decides whether the app is still there when the musician comes back
+/// to it — Android kills the biggest backgrounded process first, and M08
+/// measured 455 MB (M10).
+///
+/// So: the app calls this when it has been in the background and stopped
+/// long enough to mean it, and gets `true` back if the band was let go.
+///
+/// **Never while the band is playing.** The transport is checked under the
+/// engine's own lock and the table is taken away under the same lock, so
+/// there is no moment where Play lands between the check and the clear.
+///
+/// **And never a free on the audio thread.** Three owners let go, all of
+/// them here, on this blocking thread:
+///
+/// 1. `set_jam_table(None)` drops the table the command side was holding —
+///    `JamHandoff::set` does that behind its own mutex, on the caller.
+/// 2. The copy the callback was holding is handed back rather than dropped
+///    (`JamRetirement::retire`), and `drain_retired` frees it here. The wait
+///    is for the callback to notice the generation bump; at 512 frames that
+///    is eleven milliseconds and this allows fifteen times that.
+/// 3. The caches' own `Arc`s go last, because until the two above have let
+///    go they are not the last reference to anything.
+///
+/// Desktop does nothing and says so: `IS_MOBILE` is false, no caller exists
+/// there, and a laptop's 455 MB is 455 MB it has.
+#[tauri::command]
+pub async fn release_jam_sounds(app_handle: AppHandle) -> Result<bool, String> {
+    release_jam_sounds_impl(app_handle).await
+}
+
+#[cfg(not(mobile))]
+async fn release_jam_sounds_impl(_app_handle: AppHandle) -> Result<bool, String> {
+    Ok(false)
+}
+
+#[cfg(mobile)]
+async fn release_jam_sounds_impl(app_handle: AppHandle) -> Result<bool, String> {
+    tokio::task::spawn_blocking(move || {
+        let handoff = {
+            let state = app_handle.state::<EngineState>();
+            let engine = state.0.lock().map_err(|_| "the engine is unavailable".to_string())?;
+            if engine.is_running() {
+                return Ok(false);
+            }
+            engine.set_jam_table(None);
+            engine.jam_handoff()
+        };
+        // Long enough for the callback to pick up the empty slot and hand its
+        // own copy back. If no stream is open there is nothing to hand back
+        // and this is only a pause.
+        std::thread::sleep(std::time::Duration::from_millis(160));
+        handoff.drain_retired();
+        let kits = app_handle.state::<JamKitState>();
+        let voices = app_handle.state::<JamVoiceState>();
+        let (k, v) = (kits.0.len(), voices.0.len());
+        kits.0.clear();
+        voices.0.clear();
+        eprintln!("[jam] the band was let go: {k} kit decode(s), {v} voice bank(s)");
+        Ok(true)
+    })
+    .await
+    .map_err(|e| format!("release_jam_sounds join failed: {e}"))?
 }
 
 /// Ask the musician for a folder of drum samples.
