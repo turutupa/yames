@@ -1,5 +1,6 @@
 import { useRef, useLayoutEffect, useEffect, type ReactNode } from "react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { IS_MOBILE } from "../platform";
 
 interface ViewTransitionProps {
   viewKey: string;
@@ -96,6 +97,31 @@ export function ViewTransition({
       window.clearTimeout(timer);
     };
   }, [viewKey, disabled, reducedMotion]);
+
+  /**
+   * A new screen starts at its top (M12, phones only).
+   *
+   * This box is the scroller, and it is the SAME box for every tab: the
+   * children swap, the scroll offset does not. On a desktop that is
+   * invisible, because the window is tall enough that nothing but Settings
+   * scrolls at all. On a phone every screen scrolls, and Settings is long —
+   * so scrolling to the bottom of Settings and pressing Metronome landed on
+   * a metronome whose big BPM number was drawn behind the bar at the top.
+   * Tapping through the five tabs left every one of them somewhere in the
+   * middle of itself.
+   *
+   * Its own layout effect rather than a line in the one above, because that
+   * one returns early whenever the animation is off — and the scroll is not
+   * an animation, it is where the screen begins. Before paint, so the new
+   * screen is never drawn at the old screen's offset.
+   */
+  const scrolledKeyRef = useRef(viewKey);
+  useLayoutEffect(() => {
+    if (!IS_MOBILE) return;
+    if (viewKey === scrolledKeyRef.current) return;
+    scrolledKeyRef.current = viewKey;
+    if (wrapperRef.current) wrapperRef.current.scrollTop = 0;
+  }, [viewKey]);
 
   // If transitions are disabled mid-animation, clear classes immediately.
   // Flipping the OS reduced-motion setting counts as disabling them.
