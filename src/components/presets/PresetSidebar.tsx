@@ -706,8 +706,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   const isStarter = (file: LibrarySong) => file.parts.some((p) => starterSongs.has(p.id));
   const mySongs = matchingSongs.filter((f) => !isStarter(f));
   const starterList = matchingSongs.filter(isStarter);
-  /** Until the store answers, and for a player with nothing of their own. */
-  const starterSectionOpen = starterOpen ?? mySongs.length === 0;
+  /**
+   * Until the store answers, and for a player with nothing of their own.
+   *
+   * A query opens it regardless: a search that hides its own results is a
+   * search that says the song is not there.
+   */
+  const starterSectionOpen = search.trim() ? true : (starterOpen ?? mySongs.length === 0);
   const setStarterSection = (open: boolean) => {
     setStarterOpen(open);
     void storeSave(STARTER_OPEN_KEY, open).catch(() => {});
