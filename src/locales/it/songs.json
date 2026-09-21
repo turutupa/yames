@@ -54,7 +54,9 @@
     "empty": {
       "title": "Porta dentro un brano che hai già",
       "body": "Apri un file Guitar Pro o MusicXML e Yames ti mostra la tablatura, tiene il tempo e ti segue. Lascia il file in un punto qualsiasi di questa schermata, oppure scegline uno.",
-      "private": "Il file resta su questo computer. Non viene caricato nulla."
+      "private": "Il file resta su questo computer. Non viene caricato nulla.",
+      "bodyShort": "Guitar Pro o MusicXML. Lascia il file in un punto qualsiasi di questa schermata, oppure scegline uno.",
+      "stays": "Resta su questo computer, e Yames ne conserva una copia sua."
     },
     "tab": {
       "drawing": "Sto impaginando la musica...",
@@ -253,7 +255,8 @@
     "findTab": {
       "what": "Brano e artista",
       "link": "Cerca una tablatura",
-      "note": "Apre il tuo browser su una normale ricerca web. Yames non cerca niente per te."
+      "note": "Apre il tuo browser su una normale ricerca web. Yames non cerca niente per te.",
+      "ask": "Non hai ancora il file?"
     },
     "camera": {
       "cannotPlay": "L'immagine non è partita.",

@@ -50,7 +50,9 @@
     "empty": {
       "title": "Bring in a song you already have",
       "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded."
+      "private": "The file stays on this computer. Nothing is uploaded.",
+      "bodyShort": "Guitar Pro or MusicXML. Drop the file anywhere on this screen, or choose one.",
+      "stays": "It stays on this computer, and Yames keeps its own copy."
     },
     "tab": {
       "drawing": "Laying out the music...",
@@ -242,7 +244,8 @@
     "findTab": {
       "what": "Song and artist",
       "link": "Find a tab for it",
-      "note": "Opens your own browser on an ordinary web search. Yames looks nothing up for you."
+      "note": "Opens your own browser on an ordinary web search. Yames looks nothing up for you.",
+      "ask": "Haven't got the file?"
     },
     "camera": {
       "cannotPlay": "The picture would not play.",

@@ -54,7 +54,9 @@
     "empty": {
       "title": "Traga uma música que você já tem",
       "body": "Abra um arquivo do Guitar Pro ou MusicXML e o Yames mostra a tablatura, segura o tempo e acompanha onde você está. Solte o arquivo em qualquer lugar desta tela, ou escolha um.",
-      "private": "O arquivo fica neste computador. Nada é enviado."
+      "private": "O arquivo fica neste computador. Nada é enviado.",
+      "bodyShort": "Guitar Pro ou MusicXML. Solte o arquivo em qualquer lugar desta tela, ou escolha um.",
+      "stays": "Ele fica neste computador, e o Yames guarda uma cópia própria."
     },
     "tab": {
       "drawing": "Montando a partitura...",
@@ -253,7 +255,8 @@
     "findTab": {
       "what": "Música e artista",
       "link": "Procurar uma tablatura",
-      "note": "Abre o seu próprio navegador numa busca comum na web. O Yames não procura nada por você."
+      "note": "Abre o seu próprio navegador numa busca comum na web. O Yames não procura nada por você.",
+      "ask": "Ainda não tem o arquivo?"
     },
     "camera": {
       "cannotPlay": "A imagem não tocou.",

@@ -54,7 +54,9 @@
     "empty": {
       "title": "Apporte un morceau que tu as déjà",
       "body": "Ouvre un fichier Guitar Pro ou MusicXML et Yames t'affiche la tablature, tient le temps et te suit. Dépose le fichier n'importe où sur cet écran, ou choisis-en un.",
-      "private": "Le fichier reste sur cet ordinateur. Rien n'est envoyé."
+      "private": "Le fichier reste sur cet ordinateur. Rien n'est envoyé.",
+      "bodyShort": "Guitar Pro ou MusicXML. Dépose le fichier n'importe où sur cet écran, ou choisis-en un.",
+      "stays": "Il reste sur cet ordinateur, et Yames en garde sa propre copie."
     },
     "tab": {
       "drawing": "Mise en page de la musique...",
@@ -253,7 +255,8 @@
     "findTab": {
       "what": "Morceau et artiste",
       "link": "Chercher une tablature",
-      "note": "Ouvre votre propre navigateur sur une recherche web ordinaire. Yames ne cherche rien à votre place."
+      "note": "Ouvre votre propre navigateur sur une recherche web ordinaire. Yames ne cherche rien à votre place.",
+      "ask": "Pas encore le fichier ?"
     },
     "camera": {
       "cannotPlay": "L'image n'a pas voulu se lire.",

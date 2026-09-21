@@ -50,7 +50,9 @@
     "empty": {
       "title": "Elinde zaten olan bir şarkıyı getir",
       "body": "Bir Guitar Pro ya da MusicXML dosyası aç; Yames sana tabı gösterir, zamanı tutar ve nerede olduğunu takip eder. Dosyayı bu ekranın herhangi bir yerine bırak ya da birini seç.",
-      "private": "Dosya bu bilgisayarda kalır. Hiçbir şey yüklenmez."
+      "private": "Dosya bu bilgisayarda kalır. Hiçbir şey yüklenmez.",
+      "bodyShort": "Guitar Pro veya MusicXML. Dosyayı bu ekranın herhangi bir yerine bırak ya da birini seç.",
+      "stays": "Bu bilgisayarda kalır, Yames de kendi kopyasını saklar."
     },
     "tab": {
       "drawing": "Nota yerleşimi yapılıyor...",
@@ -242,7 +244,8 @@
     "findTab": {
       "what": "Parça ve sanatçı",
       "link": "Ona bir tab bul",
-      "note": "Kendi tarayıcını sıradan bir web aramasıyla açar. Yames senin yerine hiçbir şey aramaz."
+      "note": "Kendi tarayıcını sıradan bir web aramasıyla açar. Yames senin yerine hiçbir şey aramaz.",
+      "ask": "Dosya henüz yok mu?"
     },
     "camera": {
       "cannotPlay": "Görüntü oynatılamadı.",

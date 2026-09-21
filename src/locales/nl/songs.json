@@ -50,7 +50,9 @@
     "empty": {
       "title": "Haal een nummer binnen dat je al hebt",
       "body": "Open een Guitar Pro- of MusicXML-bestand en Yames laat je de tab zien, houdt de tijd en volgt waar je bent. Laat het bestand ergens op dit scherm los, of kies er een.",
-      "private": "Het bestand blijft op deze computer. Er wordt niets geüpload."
+      "private": "Het bestand blijft op deze computer. Er wordt niets geüpload.",
+      "bodyShort": "Guitar Pro of MusicXML. Laat het bestand ergens op dit scherm los, of kies er een.",
+      "stays": "Het blijft op deze computer, en Yames bewaart een eigen kopie."
     },
     "tab": {
       "drawing": "De muziek wordt opgemaakt...",
@@ -242,7 +244,8 @@
     "findTab": {
       "what": "Nummer en artiest",
       "link": "Zoek er een tab bij",
-      "note": "Opent je eigen browser met een gewone zoekopdracht. Yames zoekt niets voor je op."
+      "note": "Opent je eigen browser met een gewone zoekopdracht. Yames zoekt niets voor je op.",
+      "ask": "Heb je het bestand nog niet?"
     },
     "camera": {
       "cannotPlay": "Het beeld speelde niet af.",

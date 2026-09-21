@@ -58,7 +58,9 @@
     "empty": {
       "title": "Wciągnij utwór, który już masz",
       "body": "Otwórz plik Guitar Pro albo MusicXML, a Yames pokaże ci tabulaturę, będzie trzymał czas i śledził, gdzie jesteś. Upuść plik w dowolnym miejscu tego ekranu albo wybierz go z dysku.",
-      "private": "Plik zostaje na tym komputerze. Nic nie jest wysyłane."
+      "private": "Plik zostaje na tym komputerze. Nic nie jest wysyłane.",
+      "bodyShort": "Guitar Pro lub MusicXML. Upuść plik w dowolnym miejscu tego ekranu albo wybierz go z dysku.",
+      "stays": "Zostaje na tym komputerze, a Yames zachowuje własną kopię."
     },
     "tab": {
       "drawing": "Układam nuty...",
@@ -264,7 +266,8 @@
     "findTab": {
       "what": "Utwór i wykonawca",
       "link": "Poszukaj tabulatury",
-      "note": "Otwiera twoją własną przeglądarkę ze zwykłym wyszukiwaniem. Yames niczego za ciebie nie sprawdza."
+      "note": "Otwiera twoją własną przeglądarkę ze zwykłym wyszukiwaniem. Yames niczego za ciebie nie sprawdza.",
+      "ask": "Nie masz jeszcze pliku?"
     },
     "camera": {
       "cannotPlay": "Obraz nie chciał się odtworzyć.",

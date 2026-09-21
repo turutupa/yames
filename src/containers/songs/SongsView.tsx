@@ -701,7 +701,15 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
       {!score || !source ? (
         <div className="songs-empty">
           <h2 className="songs-empty-title">{t("songs.empty.title")}</h2>
-          <p className="songs-empty-body">{t("songs.empty.body")}</p>
+          {/* Said in fewer words (2026-09-21, the owner: "this screen is too
+              busy"). It was a title, a paragraph, the button, two separate
+              promises about the file, a search box and a caption under it —
+              seven things around one action. Now: what it takes, the button,
+              ONE line that holds both promises (it stays here; Yames keeps
+              its own copy, so clearing your downloads loses nothing), and
+              the search folded behind a question only somebody without a
+              file needs to read. */}
+          <p className="songs-empty-body">{t("songs.empty.bodyShort")}</p>
           <button
             type="button"
             className="songs-btn songs-btn-primary"
@@ -709,15 +717,11 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           >
             {t("songs.import")}
           </button>
-          <p className="songs-empty-note">{t("songs.empty.private")}</p>
-          {/* W19 — the half of the promise that makes clearing your
-              downloads safe. Said here because this is the screen somebody
-              is standing on when they wonder. */}
-          <p className="songs-keeps-copy">{t("songs.keepsCopy")}</p>
+          <p className="songs-empty-note">{t("songs.empty.stays")}</p>
           {/* W19 — haven't got the file yet? Yames opens your own browser on
               an ordinary web search. It names no tab site and fetches
               nothing; `songs/findTab.ts` is where that is a test. */}
-          <FindATab />
+          <FindATab folded />
         </div>
       ) : (
         <>

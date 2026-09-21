@@ -152,6 +152,15 @@
   text-decoration: none;
 }
 
+/* Folded (2026-09-21): on the import screen the search is one quiet question
+   with the link in it, a step apart from the promise above so it reads as a
+   different thought, and it opens into the row above when pressed. */
+.songs-find-tab-ask {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
 .songs-find-tab-note {
   flex: 1 1 100%;
   margin: 0;

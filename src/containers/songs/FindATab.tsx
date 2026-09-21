@@ -25,9 +25,13 @@ import { openUrl } from "../../ipc";
 import { tabSearchUrl } from "../../songs/findTab";
 import "../../styles/songs-import.css";
 
-export function FindATab({ query }: { query?: string }) {
+export function FindATab({ query, folded = false }: { query?: string; folded?: boolean }) {
   const { t } = useTranslation();
   const [typed, setTyped] = useState("");
+  // `folded` is the import screen's shape since 2026-09-21: the box and its
+  // caption were two more things on a screen with one job. Somebody who has
+  // the file never opens this; somebody who has not reads one question.
+  const [open, setOpen] = useState(!folded);
 
   const words = query ?? typed;
   const url = tabSearchUrl(words);
@@ -40,6 +44,17 @@ export function FindATab({ query }: { query?: string }) {
       <button type="button" className="songs-find-tab-go" disabled={!url} onClick={go}>
         {t("songs.findTab.link")}
       </button>
+    );
+  }
+
+  if (!open) {
+    return (
+      <p className="songs-find-tab-ask">
+        {t("songs.findTab.ask")}{" "}
+        <button type="button" className="songs-find-tab-go" onClick={() => setOpen(true)}>
+          {t("songs.findTab.link")}
+        </button>
+      </p>
     );
   }
 
@@ -61,6 +76,8 @@ export function FindATab({ query }: { query?: string }) {
         aria-label={t("songs.findTab.what")}
         placeholder={t("songs.findTab.what")}
         maxLength={120}
+        // Opened by a press, so the next thing the player does is type.
+        autoFocus={folded}
         onChange={(e) => setTyped(e.target.value)}
       />
       <button type="submit" className="songs-find-tab-go" disabled={!url}>
