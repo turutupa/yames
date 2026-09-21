@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   addSong,
+  addSongPart,
   decodeSource,
   deleteSong as deleteFromList,
   newSongRecord,
@@ -726,7 +727,12 @@ export function useSongsSession(
           };
         // Choosing a part is opening it: the row goes back to this one next
         // time (W35), the same way `loadSong` marks the record it opened.
-        commit(addSong(songs, { ...record, openedAt: Date.now() }));
+        //
+        // `addSongPart` rather than `addSong`, and that is the whole of "the
+        // sidebar does not move": a new record at the top of the list would
+        // carry its file's row to the top with it, and this is a menu on the
+        // stage about the song you are already looking at.
+        commit(addSongPart(songs, { ...record, openedAt: Date.now() }, song.id));
         restoredFor.current = record.id;
         setActiveId(record.id);
         setWarnings(result.warnings);

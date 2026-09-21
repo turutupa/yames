@@ -160,7 +160,7 @@ describe("renaming and removing a song", () => {
   });
 
   it("removes every part of the file, and its band with it", async () => {
-    const other = { ...newSongRecord(importSong(texBytes(SECTIONS), "o.alphatex", 0).score, texBytes(SECTIONS)) };
+    const other = newSongRecordOf(SECTIONS, "o.alphatex");
     const { hook } = await openSession([...macLibrary(), other]);
     const key = hook.result.current.songFiles[0].key;
     const going = hook.result.current.songFiles[0].parts.map((p) => p.id);
@@ -191,6 +191,31 @@ describe("renaming and removing a song", () => {
 });
 
 describe("choosing another part on the stage", () => {
+  it("leaves the row where it was in the list", async () => {
+    // The instrument menu is about the song you are already looking at. A
+    // new record at the top of the list would carry its row to the top with
+    // it, under the hand that opened the menu.
+    const other = newSongRecordOf(SECTIONS, "first.alphatex");
+    const { hook } = await openSession([
+      { ...other, addedAt: 9000, openedAt: 9000 },
+      part(0, { name: "Two tracks", addedAt: 1000, openedAt: 1000 }),
+    ]);
+    const bass = hook.result.current.songs[1];
+    await act(async () => {
+      hook.result.current.loadSong(bass.id);
+    });
+    await waitFor(() => expect(hook.result.current.tracks.length).toBeGreaterThan(1));
+
+    const before = hook.result.current.songFiles.map((f) => f.key);
+    await act(async () => {
+      await hook.result.current.switchTrack(1);
+    });
+    expect(
+      hook.result.current.songFiles.map((f) => f.key),
+      "the row moved when the part changed",
+    ).toEqual(before);
+  });
+
   it("adds no row, renames nothing, and leaves the song selected", async () => {
     const { hook } = await openSession([part(0, { name: "Two tracks", addedAt: 1000 })]);
     const first = hook.result.current.songs[0];
@@ -213,3 +238,9 @@ describe("choosing another part on the stage", () => {
     expect(files[0].parts.some((p) => p.id === hook.result.current.song?.id)).toBe(true);
   });
 });
+
+/** Another file entirely, for the tests that need two rows. */
+function newSongRecordOf(tex: string, file: string): SongRecord {
+  const bytes = texBytes(tex);
+  return newSongRecord(importSong(bytes, file, 0).score, bytes);
+}

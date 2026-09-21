@@ -263,6 +263,34 @@ export function addSong(records: SongRecord[], incoming: SongRecord): SongRecord
 }
 
 /**
+ * Another PART of a song already in the list, kept where the song is.
+ *
+ * `addSong` puts the incoming record at the top, which is right for a file a
+ * player has just brought in: the newest song is the one they want. It is
+ * wrong for choosing the bass part of the third song down — the sidebar lists
+ * files (W35), so that would pick the row up and move it to the top while the
+ * player was looking at it, and the brief's rule for the stage's instrument
+ * menu is that it adds, renames and reorders nothing.
+ *
+ * So the new record goes in beside the one it was switched from, and a part
+ * that is already there is replaced in place. The library's own order —
+ * recently played first — is the store's, and it is re-read on the next
+ * launch; a part's own `openedAt` is what moves then, not the row.
+ */
+export function addSongPart(
+  records: SongRecord[],
+  incoming: SongRecord,
+  besideId: string,
+): SongRecord[] {
+  if (records.some((r) => r.id === incoming.id)) {
+    return records.map((r) => (r.id === incoming.id ? incoming : r));
+  }
+  const at = records.findIndex((r) => r.id === besideId);
+  if (at === -1) return [incoming, ...records];
+  return [...records.slice(0, at + 1), incoming, ...records.slice(at + 1)];
+}
+
+/**
  * Rename, and delete, take a song's WHOLE file.
  *
  * One id or several, because the sidebar now lists files rather than parts
