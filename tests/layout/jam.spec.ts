@@ -193,7 +193,21 @@ test.describe("a player's heading in the setup drawer", () => {
     const control = (await page.$(
       '.jam-sheet-group[data-player="drums"] .jam-sheet-group-control',
     ))!;
-    const before = (await control.boundingBox())!;
+    // The drawer slides in from the right, and the scene reports ready while
+    // it is still moving: `before` came back as 1234 one day and 1201 the
+    // next against an `after` that was always 1195, on every branch including
+    // `main` (2026-09-21). That is the drawer arriving, not the switch
+    // pushing anything. Wait until the control has stopped before asking
+    // where it is.
+    let before = (await control.boundingBox())!;
+    for (let still = 0; still < 3; ) {
+      await page.evaluate(
+        () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+      );
+      const now = (await control.boundingBox())!;
+      still = Math.round(now.x) === Math.round(before.x) ? still + 1 : 0;
+      before = now;
+    }
 
     await (await control.$('[role="switch"]'))!.click();
     await page.evaluate(

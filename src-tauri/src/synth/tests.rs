@@ -241,7 +241,8 @@ fn the_renderer_thread_fills_the_ring_and_the_callback_takes_a_song_out_of_it() 
     let mut frames_taken = 0u64;
     // Half a second of buffers. The deadline is generous because this runs
     // beside a build; what it is watching for is a ring that never fills.
-    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    let started = std::time::Instant::now();
+    let deadline = started + std::time::Duration::from_secs(10);
     while play < rate as u64 / 2 && std::time::Instant::now() < deadline {
         let have = ring.ready(play).min(buffer);
         for n in 0..have {
@@ -251,11 +252,16 @@ fn the_renderer_thread_fills_the_ring_and_the_callback_takes_a_song_out_of_it() 
         ring.consume(have);
         frames_taken += have;
         play += buffer;
-        if have < buffer {
-            // The renderer has not got that far yet. A real callback would
-            // mix silence for the shortfall and go on; here it is given the
-            // moment it needs rather than spun on.
-            std::thread::sleep(std::time::Duration::from_millis(2));
+        // A real callback is paced by the sound card: 256 frames every
+        // 5.3 ms. This loop used to sleep 2 ms only when starved, which
+        // walked the playhead at 2.5x real time — a race the renderer wins
+        // alone and lost once inside the full suite (2026-09-21, 928 other
+        // tests on the same cores). Hold the playhead to the clock instead,
+        // so what is tested is "does the ring fill", not "is this machine
+        // idle".
+        let due = started + std::time::Duration::from_micros(play * 1_000_000 / rate as u64);
+        if let Some(wait) = due.checked_duration_since(std::time::Instant::now()) {
+            std::thread::sleep(wait);
         }
     }
     drop(player);
