@@ -103,6 +103,12 @@ pub mod probe {
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.
     pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
+    /// W30 — and the other kind of take. `--jam-loopback-take` opens a real
+    /// capture on the output endpoint, so the gate covers the output callback
+    /// with a SECOND device's callback running beside it and a writer thread
+    /// draining, resampling and folding its ring underneath.
+    pub use crate::loopback::{open as open_loopback, LoopbackCapture, LoopbackFormat};
+    pub use crate::take::TakeLoopback;
     /// The song. `--song` builds a transport and a backing track directly and
     /// hands the engine the compiled table, for the reason `--jam` compiles a
     /// jam here: the probe runs headless and there is no `load_song` command

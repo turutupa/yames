@@ -4239,22 +4239,33 @@ pub struct TakeSoundCheck {
     pub trouble: Option<String>,
 }
 
-/// Listen to the speakers for a moment and say what is there.
+/// Can this machine record what it plays — and, if asked, how loud is it
+/// right now.
 ///
 /// **This is the only thing in Yames that opens the capture outside a take**,
-/// and it is open for [`CHECK_MS`] and then closed — long enough for a level
-/// to mean something and far too short to be a recording. Nothing it hears is
-/// written anywhere; what comes back is one number.
+/// and it comes in two sizes:
 ///
-/// It exists because the alternative is worse. A musician turns the switch on,
-/// plays a take, and finds out afterwards that their interface was routed
-/// somewhere else and the file is four minutes of silence. A meter before the
-/// first take is the difference.
+/// * `listen: false` (the default, and what the screen asks at start-up):
+///   open the endpoint, read what format it would hand over, close it. It
+///   takes no audio out of the ring at all — the ring is dropped unread —
+///   so the answer is "yes, this works" and nothing else. That is the honest
+///   way to decide whether to DRAW a switch: asking the machine, rather than
+///   guessing from the operating system's name and being wrong on a Linux
+///   box with no monitor source or a Windows box with no speaker.
+/// * `listen: true`: stay open for [`CHECK_MS`] and report the loudest thing
+///   heard. That is the musician pressing "check the sound", and it exists
+///   because the alternative is worse — turning the switch on, playing a
+///   take, and finding out afterwards that the machine was muted and the
+///   file is four minutes of silence.
+///
+/// Neither writes anything anywhere. What comes back is one number.
 #[tauri::command]
-pub fn check_take_sound(engine_state: State<EngineState>) -> TakeSoundCheck {
-    /// How long to listen. Two hundred milliseconds of a meter is enough to
-    /// see a strum and short enough that nobody would call it recording.
+pub fn check_take_sound(listen: Option<bool>, engine_state: State<EngineState>) -> TakeSoundCheck {
+    /// How long to listen when asked to. Two hundred milliseconds of a meter
+    /// is enough to see a strum and short enough that nobody would call it
+    /// recording.
     const CHECK_MS: u64 = 200;
+    let listen = listen.unwrap_or(false);
 
     if !crate::loopback::supported() {
         return TakeSoundCheck {
@@ -4273,8 +4284,15 @@ pub fn check_take_sound(engine_state: State<EngineState>) -> TakeSoundCheck {
     match crate::loopback::open(device_name.as_deref()) {
         Ok(mut capture) => {
             let f = capture.format().clone();
-            std::thread::sleep(std::time::Duration::from_millis(CHECK_MS));
-            let peak = capture.take_peak();
+            // Asked whether it WORKS, not what is playing: closed again
+            // without waiting, and the ring is dropped with nothing read out
+            // of it.
+            let peak = if listen {
+                std::thread::sleep(std::time::Duration::from_millis(CHECK_MS));
+                capture.take_peak()
+            } else {
+                0.0
+            };
             capture.stop();
             TakeSoundCheck {
                 can: true,

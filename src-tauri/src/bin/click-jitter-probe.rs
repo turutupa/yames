@@ -243,6 +243,14 @@ struct Args {
     /// know whether it is recording a band or a song, and that is exactly the
     /// claim `--song-take` is here to check.
     take: bool,
+    /// Make that take out of everything this computer plays (W30).
+    ///
+    /// Opens a real loopback capture on the output device beside the engine's
+    /// own stream, so the run measures the output callback with a SECOND
+    /// device's callback running and a writer thread draining, resampling and
+    /// folding its ring. Off unless `--jam-loopback-take` asks for it: it
+    /// needs a sound card.
+    loopback: bool,
     /// Play an imported SONG instead of the click or the band: a tempo map
     /// with a step in it, a 7/8 bar, and the file's own drums, bass and keys
     /// on every sixteenth.
@@ -282,6 +290,7 @@ impl Default for Args {
         Self {
             bpm: 200,
             subdivision: 4,
+            loopback: false,
             seconds: 60,
             warmup_ms: 1500,
             gguf: None,
@@ -361,6 +370,19 @@ fn parse_args() -> Result<Args, String> {
             "--jam-take" => {
                 a.jam = true;
                 a.take = true;
+                consumed = 1;
+            }
+            // W30 — the take is made of everything this computer plays, so a
+            // SECOND audio device is open and delivering into a ring that the
+            // same writer thread is draining, resampling and folding to
+            // stereo, under the same output callback. That is the arrangement
+            // `plans/SONGS.md` A12 has to be safe in, and this is how it is
+            // measured. Needs a real speaker; on a machine with none the
+            // capture refuses and the run says so rather than passing.
+            "--jam-loopback-take" => {
+                a.jam = true;
+                a.take = true;
+                a.loopback = true;
                 consumed = 1;
             }
             "--song" => {
@@ -1395,16 +1417,42 @@ fn main() -> ExitCode {
         };
         let dir = std::env::temp_dir().join(format!("yames-probe-takes-{}", std::process::id()));
         let mic = Arc::new(TakeRing::new(44_100 * 4));
+        // W30 — a take made of everything this computer plays. A REAL capture
+        // on a real endpoint, because the thing under test is what a second
+        // device's callback and a busier writer thread do to the first
+        // device's callback, and a synthetic ring would measure neither.
+        let loopback = if args.loopback {
+            match yames_lib::probe::open_loopback(None) {
+                Ok(capture) => {
+                    let f = capture.format().clone();
+                    eprintln!(
+                        "[probe] recording everything {} plays — {} Hz, {} channel(s)",
+                        f.device, f.sample_rate, f.channels
+                    );
+                    Some(yames_lib::probe::TakeLoopback {
+                        ring: capture.ring(),
+                        sample_rate: f.sample_rate,
+                        channels: f.channels,
+                        device: f.device,
+                        capture: Some(capture),
+                    })
+                }
+                Err(e) => {
+                    eprintln!("error: could not listen to this computer: {e}");
+                    return ExitCode::from(2);
+                }
+            }
+        } else {
+            None
+        };
+        let loopback_mic = if args.loopback { None } else { Some((mic.clone(), 44_100)) };
         let mut session = TakeSession::default();
         if let Err(e) = session.start(TakeStart {
             app_data: &dir,
             jam_id: "probe",
             handoff: &handoff,
-            // The probe measures the take Yames has always made; a
-            // loopback take opens a second device and would measure that
-            // device's driver as much as this engine's callback.
-            loopback: None,
-            mic: Some((mic.clone(), 44_100)),
+            loopback,
+            mic: loopback_mic,
             out_sr,
             // The probe measures the writer, not the alignment: a synthetic
             // mic has no round trip to correct and there is no device change

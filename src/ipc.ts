@@ -2142,16 +2142,23 @@ export interface TakeSoundCheck {
 }
 
 /**
- * Listen to the speakers for a fifth of a second and say what is there.
+ * Can this machine record what it plays — and, with `listen`, how loud is it.
  *
  * The only thing in Yames that opens that capture outside a take, and it
- * closes again immediately. Nothing it hears is written anywhere; what comes
- * back is one number. It exists so a musician sees the level BEFORE a take
- * rather than finding silence after one — on Windows the mute and the volume
- * slider sit before the tap, so a muted machine records nothing at all.
+ * comes in two sizes. Without `listen` it opens the speaker, reads the format
+ * it would hand over and closes again, taking no audio at all: that is what
+ * the screen asks at start-up to decide whether to draw the switch, and it is
+ * asking the machine rather than guessing from the operating system's name.
+ * With `listen` it stays open for a fifth of a second and reports the loudest
+ * thing it heard — the musician pressing "check the sound", so they see the
+ * level BEFORE a take rather than finding silence after one. On Windows the
+ * mute and the volume slider sit before the tap, so a muted machine records
+ * nothing at all and this is the only warning of it there can be.
+ *
+ * Neither writes anything anywhere.
  */
-export async function checkTakeSound(): Promise<TakeSoundCheck> {
-  return invoke("check_take_sound");
+export async function checkTakeSound(listen = false): Promise<TakeSoundCheck> {
+  return invoke("check_take_sound", { listen });
 }
 
 /** Stop and keep the take, or `null` when nothing was recording. */

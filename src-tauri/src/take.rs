@@ -1652,6 +1652,13 @@ fn write_everything_this_computer_plays(w: EverythingWriter) {
     let mut stereo: Vec<f32> = Vec::with_capacity(out_sr as usize * 2);
     let cap_frames = TAKE_MAX_SECS * out_sr as u64;
     let mut stamped = false;
+    /// How many ticks the writer will go on draining after a stop before it
+    /// finishes anyway. Twenty-five milliseconds each, so this is half a
+    /// second — two orders of magnitude more than the two or three buffers a
+    /// closed stream actually has left, and a bound on how long a Stop button
+    /// can appear not to work.
+    const MAX_DRAIN_TICKS: u32 = 20;
+    let mut drain_ticks = 0u32;
 
     loop {
         let stopping = stop.load(Ordering::Acquire);
@@ -1712,8 +1719,18 @@ fn write_everything_this_computer_plays(w: EverythingWriter) {
         // A stop only ends the take once the speaker's own stream has run
         // dry — the last two or three buffers of it are the last thing the
         // musician played, and they arrive after the button.
-        if stopping && raw.is_empty() && frames == 0 {
-            break;
+        //
+        // ...but only for so long. `TakeSession::stop` closes the capture
+        // before it asks for this, so the ring always does run dry; the
+        // counter is what makes that a belief the code does not depend on. A
+        // stream that goes on delivering after it has been closed would
+        // otherwise keep this thread here for ever, and the thing joining it
+        // is the musician's Stop button.
+        if stopping {
+            drain_ticks += 1;
+            if (raw.is_empty() && frames == 0) || drain_ticks > MAX_DRAIN_TICKS {
+                break;
+            }
         }
         std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
     }
@@ -2284,6 +2301,21 @@ impl TakeSession {
         // The callback stops writing FIRST, so the writer's last drain is
         // the last of the audio and nothing arrives after the file is shut.
         handoff.set_record(None);
+        // AND SO DOES THE SPEAKER, before the writer is asked to finish
+        // rather than after it.
+        //
+        // This order is load-bearing and the wrong one hangs the app. A take
+        // of everything this computer plays ends when the writer has drained
+        // what is left of the loopback ring — and a loopback stream delivers
+        // for as long as anything is playing, which during a jam is always.
+        // Closing the capture after joining the writer meant the writer
+        // waited for a ring that was still being filled by a stream waiting
+        // for the writer: Stop never returned. Closed here, the stream stops
+        // adding, the writer drains what already arrived (the last few
+        // buffers, which are the last thing the musician played) and exits.
+        if let Some(mut capture) = active.capture.take() {
+            capture.stop();
+        }
         active.stop.store(true, Ordering::Release);
         if let Some(handle) = active.writer.take() {
             let _ = handle.join();
@@ -2328,10 +2360,11 @@ impl TakeSession {
             sound: active.sound,
             sound_device: active.sound_device.clone(),
         };
-        // The endpoint goes back to the operating system HERE, the moment the
-        // writer has been joined and the file is closed — not when the screen
-        // gets round to noticing. Nothing is listening to the speakers between
-        // one take and the next.
+        // The capture was already closed above, before the writer was joined
+        // — see the comment there for why that order is the only one that
+        // works. This is the belt to that braces: a take that ended any other
+        // way (an error path, a future caller) still gives the endpoint back
+        // here, and `LoopbackCapture`'s own `Drop` is the third.
         if let Some(mut capture) = active.capture.take() {
             capture.stop();
         }
@@ -4145,6 +4178,70 @@ mod tests {
             "only the speaker is in the file: {peak}"
         );
         drop(root);
+    }
+
+    #[test]
+    fn a_speaker_that_never_stops_talking_does_not_hang_the_stop_button() {
+        // THE BUG THIS EXISTS FOR, found by the audio-safety probe hanging:
+        // the writer's stop condition was "the loopback ring has run dry",
+        // and a loopback stream delivers for as long as anything is playing —
+        // which during a jam is always. `stop` then joined a writer that was
+        // waiting for a ring a live stream was still filling, and the Stop
+        // button never came back.
+        //
+        // `TakeSession::stop` now closes the capture before it joins. This
+        // test is the other half: a ring that goes on being filled ANYWAY —
+        // by a thread standing in for a stream that ignored its close —
+        // still lets the take finish.
+        let root = tmp_dir("lb-hang");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let ring = Arc::new(TakeRing::new(1 << 16));
+        let mut session = TakeSession::default();
+        session
+            .start(TakeStart {
+                app_data: &root,
+                jam_id: "loopback",
+                handoff: &handoff,
+                mic: None,
+                out_sr: 48_000,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: None,
+                loopback: Some(TakeLoopback {
+                    ring: ring.clone(),
+                    sample_rate: 48_000,
+                    channels: 2,
+                    device: "a speaker that will not shut up".into(),
+                    capture: None,
+                }),
+            })
+            .expect("the take starts");
+
+        let alive = Arc::new(AtomicBool::new(true));
+        let filling = alive.clone();
+        let feed = ring.clone();
+        let pump = std::thread::spawn(move || {
+            while filling.load(Ordering::Acquire) {
+                feed.push(&vec![0.1f32; 960 * 2]);
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+        });
+
+        wait_until("the take to be recording", || session.written_samples() > 0);
+        // No `capture` to close, so `stop` cannot help itself here: only the
+        // writer's own bound can end this, and it has half a second to.
+        let began = std::time::Instant::now();
+        let take = session.stop(&handoff).expect("the take stops");
+        let took = began.elapsed();
+        alive.store(false, Ordering::Release);
+        let _ = pump.join();
+
+        assert!(take.is_some(), "the take is kept");
+        assert!(
+            took < std::time::Duration::from_secs(5),
+            "stopping took {took:?} against a stream that would not stop"
+        );
     }
 
     #[test]

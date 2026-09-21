@@ -316,6 +316,36 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   moment and show me the level" check, so silence is visible before a
   take rather than after one.
 
+  **The latency of this mode, and how to measure it.** The two sources are
+  wrong in OPPOSITE directions, which is worth knowing before anybody
+  compares a nudge measured in one against a nudge measured in the other:
+
+  - *Yames and my input* is EARLY by the input buffer. The player answers
+    what they heard, which is the band a full output latency after it was
+    rendered, and their answer takes an input latency to arrive — so the
+    writer pulls the microphone forward by that round trip (`take.rs`).
+  - *Everything this computer plays* is LATE by the output buffer, and needs
+    no correction at all. Both halves of it — the band and the guitar —
+    come through one stream already mixed by the operating system at the
+    times the speakers got them, so nothing inside the take is out of step
+    with anything else in it. What IS a few milliseconds off is the take's
+    opening bar against the transport stamp: the stamp is taken when the
+    callback renders, the loopback hands that same audio over about one
+    device period later (10.7 ms at 512 frames and 48 kHz, measured on this
+    machine's endpoint). That is two per cent of a beat at 120 BPM, it is
+    not corrected, and the only thing that reads it is which bar a saved
+    video's grid opens on.
+
+  > **The clap, in this mode.** Turn Record the picture on and the sound to
+  > "Everything this computer plays", press play, and on a bar line CLAP
+  > once, hard, in frame and into whatever your guitar goes through, so the
+  > clap lands in the recording and in the picture. Then step the picture
+  > earlier or later in the review until the clap you SEE and the clap you
+  > HEAR land together — and write that number down separately from K3's,
+  > because it is the camera's latency against a recording that is LATE by
+  > the output buffer, where K3's was against one that was EARLY by the
+  > input buffer. The two will not agree, and both are right.
+
   **Linux** looks for a PulseAudio or PipeWire monitor source and says so
   honestly when there is none; nobody here has a Linux machine, so it is
   compiled and fails safe rather than claimed. **macOS does not offer the

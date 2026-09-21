@@ -26,13 +26,18 @@ export type TakeSoundState = {
   /**
    * `null` until something has asked, then whatever the engine said.
    *
-   * Asked once at the top of the session — a question about what this machine
-   * CAN do, which costs a fifth of a second of listening and is the only way
-   * to know honestly. A build with no such command answers `can: false`,
-   * which is the right picture for it too.
+   * Asked once at the top of the session, WITHOUT listening: the engine opens
+   * the speaker, reads what format it would hand over and closes it again, so
+   * the answer is "this machine can do it" and nothing more. A build with no
+   * such command answers `can: false`, which is the right picture for it too.
    */
   check: TakeSoundCheck | null;
-  /** Listen again, for the meter. True while it is listening. */
+  /**
+   * Listen for a fifth of a second and report the level. True while it is.
+   *
+   * **The only thing in the app that listens to the speakers outside a
+   * take**, and it is a button somebody pressed.
+   */
   recheck: () => void;
   checking: boolean;
   /** Can this machine record what it plays? Shorthand for `check?.can`. */
@@ -59,10 +64,10 @@ export function useTakeSound(): TakeSoundState {
     };
   }, []);
 
-  const ask = useCallback(async () => {
+  const ask = useCallback(async (listen: boolean) => {
     setChecking(true);
     try {
-      const result = await checkTakeSound();
+      const result = await checkTakeSound(listen);
       setCheck(result);
       return result;
     } catch {
@@ -77,15 +82,20 @@ export function useTakeSound(): TakeSoundState {
   }, []);
 
   /**
-   * Ask once, at the top of the session.
+   * Ask once, at the top of the session — and ask WITHOUT listening.
    *
-   * Two hundred milliseconds of listening, once, to answer a question the
-   * screen has to draw from. Doing it lazily — only when the switch is first
-   * opened — would be cheaper still, and would mean the switch appearing a
-   * moment after the sheet, which reads as the app changing its mind.
+   * The question here is "is there a speaker this could work on", which the
+   * engine answers by opening the endpoint and closing it again, taking no
+   * audio out of it. Nothing is heard. The only thing in this app that ever
+   * listens outside a take is [`TakeSoundState.recheck`], and that is a
+   * button somebody presses.
+   *
+   * Asked at start-up rather than lazily because the answer decides whether a
+   * switch is drawn at all, and a switch that appears a moment after the
+   * drawer opens reads as the app changing its mind.
    */
   useEffect(() => {
-    void ask();
+    void ask(false);
   }, [ask]);
 
   const setSound = useCallback((next: TakeSound) => {
@@ -94,8 +104,9 @@ export function useTakeSound(): TakeSoundState {
     void storeSave(TAKE_SOUND_KEY, next).catch(() => {});
   }, []);
 
+  /** The button. This one listens — see [`TakeSoundState.recheck`]. */
   const recheck = useCallback(() => {
-    void ask();
+    void ask(true);
   }, [ask]);
 
   return {
