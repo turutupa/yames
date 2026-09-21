@@ -11,7 +11,7 @@ import { useMetronome } from "../../hooks/useMetronome";
 import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
-import { IS_MOBILE } from "../../platform";
+import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
 import { useAndroidNative } from "./hooks/useAndroidNative";
 import { useBackDismiss } from "../../mobile/backStack";
 import {
@@ -79,6 +79,7 @@ import { useUiPreferences } from "./hooks/useUiPreferences";
 import { useAudioOutputDevices } from "./hooks/useAudioOutputDevices";
 import { useFullscreenLifecycle } from "./hooks/useFullscreenLifecycle";
 import { useAppUpdates } from "./hooks/useAppUpdates";
+import { NEVER_NEWER, useNewerVersion } from "./hooks/useNewerVersion";
 import { useTabRouting } from "./hooks/useTabRouting";
 import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
@@ -679,6 +680,15 @@ export function MainWindow() {
     setUpdateStatus,
     doUpdateCheck,
   } = useAppUpdates();
+
+  // "Version 1.3.0 is out" — the website's phone build only (M11). A store
+  // keeps its own apps current and refuses an app that points at its own
+  // download page; a desktop has the real updater above. The `? … :` form is
+  // the one Rollup folds, so in every other build this hook, its module and
+  // the two web addresses in it are not in `dist/` at all.
+  const newerVersion = SAYS_WHEN_NEWER
+    ? useNewerVersion({ appVersion, isPlaying: state.isPlaying })
+    : NEVER_NEWER;
 
   // Motion gate (O8): the OS `prefers-reduced-motion` setting OR the app's own
   // `viewTransitions === "off"`. One value, passed to every animated overlay,
@@ -1395,6 +1405,12 @@ export function MainWindow() {
       className={`main-window ${IS_MOBILE ? "is-mobile" : ""} ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : IS_WINDOWS ? "os-windows" : IS_LINUX ? "os-linux" : "os-other"}`}
       data-playing={state.isPlaying}
       data-border={activeBorder}
+      /* A newer version is out and you have not been to About yet. One
+         attribute on the window rather than a prop into the tab bar: the dot
+         is a mark on the Settings tab and the tab bar belongs to another
+         task, so this says the fact and `shell.css` draws it. Absent while
+         you are actually in Settings — the row is right there. */
+      data-newer-version={newerVersion.newest && view !== "settings" ? "" : undefined}
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       {!IS_MOBILE && <TitleBar />}
@@ -1826,6 +1842,7 @@ export function MainWindow() {
             setUpdateStatus={setUpdateStatus}
             latestVersion={latestVersion}
             appVersion={appVersion}
+            newerVersion={newerVersion}
             doUpdateCheck={doUpdateCheck}
             downloadAndInstallUpdate={
               IS_MOBILE ? undefined : downloadAndInstallUpdate

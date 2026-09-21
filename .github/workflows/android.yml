@@ -150,12 +150,26 @@ jobs:
       # `npm run tauri --`, not a bare `npx tauri`: the wrapper is what sets
       # YAMES_MOBILE=1 for the frontend build (no coach in a phone bundle) and
       # what makes sure CI and a laptop run the same command.
+      # `YAMES_SIDELOAD=1` on the APK and NOWHERE else. The APK is what the
+      # website offers, and nothing keeps it current — so that build, and only
+      # that build, asks once a day whether a newer release exists and says so
+      # in About. The AAB below goes to a store, which does its own updating
+      # and refuses an app that points at its own download page.
+      #
+      # The frontend is rebuilt by `beforeBuildCommand` for each of these two
+      # steps, so the flag set here reaches that build and is gone for the
+      # next one. The two checks after them prove it both ways rather than
+      # trusting it.
       - name: Build the signed arm64 APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          YAMES_SIDELOAD: "1"
         run: npm run tauri -- android build --apk --target aarch64
+
+      - name: The APK can say when a newer version is out
+        run: node scripts/check-mobile-bundle.mjs --sideload
 
       - name: Build the signed AAB (all four ABIs)
         env:
@@ -163,6 +177,11 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: npm run tauri -- android build --aab
+
+      # The store's bundle, and the `dist/` the AAB was built from is still
+      # on disk: neither web address may be in it.
+      - name: The store bundle says nothing about downloads
+        run: node scripts/check-mobile-bundle.mjs
 
       # Locate the outputs rather than hardcode paths: the gradle flavour
       # directory ("universal") is the Tauri template's, not a promise.

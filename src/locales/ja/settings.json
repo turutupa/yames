@@ -300,7 +300,10 @@
       "failed": "確認できませんでした",
       "sounds": "音源",
       "soundsCredit": "クラブのキットは Versilian Studios と Karoryfer Samples による Virtuosity Drums、演奏は Austin McMahon（パブリックドメイン）。スタジオのキットは DrumGizmo プロジェクトの DRSKit（CC BY 4.0）。",
-      "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ"
+      "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ",
+      "newerOut": "バージョン {{version}} が出ています",
+      "getIt": "入手する",
+      "notNow": "あとで"
     }
   },
   "keybindings": {

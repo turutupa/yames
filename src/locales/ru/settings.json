@@ -300,7 +300,10 @@
       "failed": "Не удалось проверить",
       "sounds": "Звуки",
       "soundsCredit": "Установка «Клуб» — это Virtuosity Drums от Versilian Studios и Karoryfer Samples, играет Austin McMahon (общественное достояние). Установка «Студия» — это DRSKit проекта DrumGizmo (CC BY 4.0).",
-      "madeWith": "Сделано с {{heart}} для музыкантов во всём мире"
+      "madeWith": "Сделано с {{heart}} для музыкантов во всём мире",
+      "newerOut": "Вышла версия {{version}}",
+      "getIt": "Скачать",
+      "notNow": "Не сейчас"
     }
   },
   "keybindings": {

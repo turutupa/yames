@@ -346,6 +346,25 @@ const SCREENS = [
   { id: "settings-support", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(".support-card")] },
   { id: "settings-about", shot: "metronome", root: ".main-content", steps: [...OPEN_SETTINGS, settingsSection(".about-section:not(.support-card)")] },
   {
+    // About, on the phone build from the website, when a newer version is
+    // out (M11). Two screens in one run: the tab bar's dot is in frame at the
+    // bottom of the About shot, and `settings-about-newer-tab` below catches
+    // it on the metronome, where you would actually first see it.
+    //
+    // Needs `YAMES_SIDELOAD=1` in the environment — without it the row does
+    // not exist in the build at all and this shot is plain About, which is
+    // exactly what a store's build looks like.
+    id: "settings-about-newer",
+    shot: "newer-version",
+    root: ".main-content",
+    steps: [...OPEN_SETTINGS, settingsSection(".about-section:not(.support-card)")],
+  },
+  {
+    id: "settings-about-newer-tab",
+    shot: "newer-version",
+    settleMs: 500,
+  },
+  {
     id: "settings-language-open",
     shot: "metronome",
     root: ".main-content",

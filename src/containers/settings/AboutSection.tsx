@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { IS_MOBILE } from "../../platform";
+import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
 
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
+import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
 
 /**
  * About section — version, update status (with inline install button when an
@@ -12,12 +13,15 @@ export function AboutSection({
   appVersion,
   updateStatus,
   latestVersion,
+  newerVersion = NEVER_NEWER,
   onInstallUpdate,
   onCheckUpdate,
 }: {
   appVersion: string;
   updateStatus: UpdateStatus;
   latestVersion: string;
+  /** Empty on every build but the phone one from yames.app (M11). */
+  newerVersion?: NewerVersion;
   onInstallUpdate: () => void;
   onCheckUpdate: () => void;
 }) {
@@ -26,6 +30,39 @@ export function AboutSection({
     <section className="settings-section about-section">
       <h2>{t("settings.about.title")}</h2>
       <div className="about-info">
+        {/* A newer version exists, and this app is the one nobody updates for
+            you — installed from the website, where there is no store behind
+            it. One quiet line at the top of About: no dialog, no banner over
+            the metronome, nothing that arrives in the middle of practising.
+            "Not now" quiets this version and only this version; the next one
+            gets to speak for itself.
+
+            `SAYS_WHEN_NEWER &&` and not just the value: the constant is
+            known at build time, so on a store build this whole block — its
+            markup, its class names and the three keys it asks i18n for — is
+            dead code and Rollup takes it out of `dist/` along with the hook
+            behind it. `scripts/check-mobile-bundle.mjs` is the gate. */}
+        {SAYS_WHEN_NEWER && newerVersion.newest && (
+          <div className="about-newer">
+            <span className="about-newer-said">
+              {t("settings.about.newerOut", { version: newerVersion.newest })}
+            </span>
+            <button
+              type="button"
+              className="about-newer-get"
+              onClick={newerVersion.getIt}
+            >
+              {t("settings.about.getIt")}
+            </button>
+            <button
+              type="button"
+              className="about-newer-hide"
+              onClick={newerVersion.hide}
+            >
+              {t("settings.about.notNow")}
+            </button>
+          </div>
+        )}
         <div className="about-row">
           <span className="about-label">{t("settings.about.version")}</span>
           <span className="about-value">{appVersion}</span>

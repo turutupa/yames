@@ -300,7 +300,10 @@
       "failed": "Controllo non riuscito",
       "sounds": "Suoni",
       "soundsCredit": "La batteria Club è Virtuosity Drums, di Versilian Studios e Karoryfer Samples, suonata da Austin McMahon (pubblico dominio). La batteria Studio è DRSKit, del progetto DrumGizmo (CC BY 4.0).",
-      "madeWith": "Fatto con {{heart}} per i musicisti di tutto il mondo"
+      "madeWith": "Fatto con {{heart}} per i musicisti di tutto il mondo",
+      "newerOut": "È uscita la versione {{version}}",
+      "getIt": "Scarica",
+      "notNow": "Non ora"
     }
   },
   "keybindings": {

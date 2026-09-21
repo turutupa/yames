@@ -18,16 +18,32 @@
  * When you cut something new, add its most distinctive string here.
  *
  *   node scripts/check-mobile-bundle.mjs [dist-dir]
+ *   node scripts/check-mobile-bundle.mjs --sideload [dist-dir]
  *
- * Exit 0 = clean, 1 = something survived, 2 = nothing to check (which is a
- * failure too — a silent zero here would pass every build).
+ * There are two phone bundles and they are not the same app (M11). The one a
+ * store gets must not be able to tell you a newer version exists: a store
+ * keeps its own apps current, and both stores refuse an app that points at
+ * its own download page. The one people download from yames.app must, because
+ * nothing else will. So the flavour is an argument rather than something this
+ * script could sniff — a missing `YAMES_SIDELOAD=1` and a deliberate store
+ * build produce byte-identical output, and only the person running the build
+ * knows which one they meant.
+ *
+ * Without `--sideload` the two addresses are forbidden. With it they are
+ * REQUIRED, so a website build that lost its flag somewhere in the pipeline
+ * fails here rather than shipping as a phone app that can never update.
+ *
+ * Exit 0 = clean, 1 = something survived (or is missing), 2 = nothing to
+ * check (which is a failure too — a silent zero here would pass every build).
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const distDir = resolve(process.argv[2] ?? join(repoRoot, "dist"));
+const args = process.argv.slice(2);
+const sideload = args.includes("--sideload");
+const distDir = resolve(args.find((a) => !a.startsWith("--")) ?? join(repoRoot, "dist"));
 
 /**
  * Each entry is a string that must not appear, and what its presence means.
@@ -60,6 +76,24 @@ const FORBIDDEN = [
   ["jam-band-you", "the band's “you” row, which reports a microphone a phone does not have"],
 ];
 
+/**
+ * The two addresses that only the website's own phone build may carry (M11).
+ *
+ * Forbidden in a store bundle, required in a sideload one — the same two
+ * strings read both ways, because "the flag was set" and "the flag was not
+ * set" are the only two things that can be true and each has a wrong answer.
+ */
+const SIDELOAD_ONLY = [
+  [
+    "api.github.com/repos/turutupa/yames/releases/latest",
+    "the once-a-day check for a newer version",
+  ],
+  [
+    "https://yames.app/#download",
+    "the website's own download page — a store build must never point at it",
+  ],
+];
+
 /** Every file under `dist/assets`, recursively. */
 function assetFiles(dir) {
   let out = [];
@@ -87,13 +121,38 @@ if (files.length === 0) {
   process.exit(2);
 }
 
+const forbidden = sideload ? FORBIDDEN : [...FORBIDDEN, ...SIDELOAD_ONLY];
 const hits = [];
+/** Needles the sideload flavour must CARRY, and where each was seen. */
+const found = new Set();
+
 for (const file of files) {
   const text = readFileSync(file, "utf8");
-  for (const [needle, what] of FORBIDDEN) {
+  for (const [needle, what] of forbidden) {
     if (text.includes(needle)) {
       hits.push({ file: relative(repoRoot, file), needle, what });
     }
+  }
+  if (sideload) {
+    for (const [needle] of SIDELOAD_ONLY) {
+      if (text.includes(needle)) found.add(needle);
+    }
+  }
+}
+
+if (sideload) {
+  const missing = SIDELOAD_ONLY.filter(([needle]) => !found.has(needle));
+  if (missing.length > 0) {
+    console.error(
+      "This was built as the website's phone app, and it cannot tell anyone a\n" +
+        "newer version exists — the following is not in the bundle:\n",
+    );
+    for (const [needle, what] of missing) console.error(`  ${needle}  — ${what}`);
+    console.error(
+      "\nThe build was missing YAMES_SIDELOAD=1, or a call site stopped being\n" +
+        "guarded by `SAYS_WHEN_NEWER ? … :` and got folded away with it.",
+    );
+    process.exit(1);
   }
 }
 
@@ -115,6 +174,10 @@ if (hits.length > 0) {
 }
 
 console.log(
-  `Mobile bundle is clean: ${files.length} file${files.length === 1 ? "" : "s"} checked, ` +
-    `none of the ${FORBIDDEN.length} cut features found.`,
+  `Mobile bundle is clean (${sideload ? "the website's build" : "a store's build"}): ` +
+    `${files.length} file${files.length === 1 ? "" : "s"} checked, ` +
+    `none of the ${forbidden.length} cut features found` +
+    (sideload
+      ? `, and both of the ${SIDELOAD_ONLY.length} things only this build may carry are present.`
+      : "."),
 );

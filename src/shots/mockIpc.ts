@@ -63,6 +63,15 @@ const JAM_STEP = {
   transition: { kind: "cut" as const },
 };
 
+/**
+ * What the app answers when it is asked its own version.
+ *
+ * A fixed string rather than `package.json`'s: these pictures are compared
+ * across releases, and a version row that changes on every bump would make
+ * every one of them differ for no reason anybody cares about.
+ */
+const APP_VERSION = "1.2.1";
+
 const SETLISTS = [
   {
     id: "c1", name: "Daily routine", createdAt: 1, repeat: 1, countIn: 0,
@@ -172,9 +181,13 @@ function baseStore(theme: string, tab: string, zenStyle?: string): Map<string, u
     ["onboarding.version", 1],
     ["onboarding.completedAt", "2026-01-01T00:00:00.000Z"],
     ["tour.seenVersion", 99],
-    // Any string will do: the modal opens only when this differs from the
-    // running app's version, and a mocked backend reports no version at all.
-    ["whatsNew.seenVersion", "screenshots"],
+    // The modal opens whenever this differs from the running app's version,
+    // so it has to BE the running app's version. It used to be any old string
+    // and got away with it only because the mock answered no version at all;
+    // the moment `plugin:app|version` started answering (M11, so About's
+    // Version row is not blank), "screenshots" put a release-notes card over
+    // the middle of every picture.
+    ["whatsNew.seenVersion", APP_VERSION],
     ["appSessionCount", 12],
     ["widgetOpened", true],
     ["lastWindow", "main"],
@@ -192,6 +205,13 @@ export function installShotMock(shot: Shot, theme: string): void {
   const STATE = baseState(theme) as Record<string, unknown>;
   if (shot.ramp) Object.assign(STATE.speedRamp as object, shot.ramp);
   const store = baseStore(theme, shot.tab ?? "beat", shot.zenStyle);
+  // A newer release, already asked for today — so the About row is drawn from
+  // the answer the app would have kept rather than from a live request
+  // (M11). The keys are `src/mobile/newerVersion.ts`'s.
+  if (shot.newerVersion) {
+    store.set("newerVersion.askedAt", Date.now());
+    store.set("newerVersion.latest", shot.newerVersion);
+  }
 
   mockWindows(shot.window === "floating" ? "floating" : "main");
 
@@ -445,6 +465,11 @@ export function installShotMock(shot: Shot, theme: string): void {
         rawJson: {},
       };
     }
+    // The running version. It used to fall through to the catch-all below,
+    // so About's "Version" row photographed empty in every shot and nothing
+    // that compares against the running version could be photographed at all.
+    if (cmd === "plugin:app|version") return APP_VERSION;
+
     if (cmd.startsWith("plugin:")) return null;
 
     if (cmd === "set_jam") {

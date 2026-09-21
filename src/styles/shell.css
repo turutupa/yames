@@ -3039,6 +3039,36 @@ body[data-sheet-maximized] .rail {
   color: var(--accent-2);
 }
 
+/* A newer version is out (M11).
+ *
+ * Six pixels on the Settings tab, and that is the whole of it: enough that
+ * somebody notices it eventually, not enough to interrupt anything. It is
+ * drawn from an attribute on the window rather than from a prop, so
+ * `MobileTabBar.tsx` does not have to know that updates exist — the tab bar
+ * belongs to another task, and a mark is a mark whatever put it there. Gone
+ * while you are in Settings, where the line itself is; gone for good once the
+ * version is taken or waved away.
+ *
+ * Only the phone build from the website can ever set the attribute
+ * (`SAYS_WHEN_NEWER`), so a store build cannot reach this rule. */
+.main-window[data-newer-version] .mobile-tab[data-tab="settings"] {
+  position: relative;
+}
+
+.main-window[data-newer-version] .mobile-tab[data-tab="settings"]::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  /* Half the tab, plus half the 21px glyph, less the dot — the corner of the
+     icon rather than the corner of the button, so it reads as belonging to
+     the icon at every tab width the fifteen locales produce. */
+  left: calc(50% + 8px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .mobile-tab-label {
   max-width: 100%;
   font-size: 0.58rem;

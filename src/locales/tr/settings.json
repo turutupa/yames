@@ -300,7 +300,10 @@
       "failed": "Kontrol başarısız",
       "sounds": "Sesler",
       "soundsCredit": "Kulüp takımı, Versilian Studios ve Karoryfer Samples'ın Virtuosity Drums'ı; çalan Austin McMahon (kamu malı). Stüdyo takımı, DrumGizmo projesinin DRSKit'i (CC BY 4.0).",
-      "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı"
+      "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı",
+      "newerOut": "{{version}} sürümü çıktı",
+      "getIt": "İndir",
+      "notNow": "Şimdi değil"
     }
   },
   "keybindings": {
