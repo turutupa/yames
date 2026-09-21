@@ -34,14 +34,18 @@
 		332D5AAB4367B5939F9B0E65 /* audio_input.rs */ = {isa = PBXFileReference; path = audio_input.rs; sourceTree = "<group>"; };
 		34C58871948D5D553EB3C8B9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		38B48D62D571BF1C7A0D4731 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
+		3D0237A17E48A29743D0F85F /* tests.rs */ = {isa = PBXFileReference; path = tests.rs; sourceTree = "<group>"; };
 		3D9A921EE84E279CE8C5F9DA /* seed-highbpm-fixtures.rs */ = {isa = PBXFileReference; path = "seed-highbpm-fixtures.rs"; sourceTree = "<group>"; };
 		3E3A9F043EBC85E3C9C5E757 /* clock.rs */ = {isa = PBXFileReference; path = clock.rs; sourceTree = "<group>"; };
 		44729B25C349F961924F13B6 /* beat_log.rs */ = {isa = PBXFileReference; path = beat_log.rs; sourceTree = "<group>"; };
 		4C29EC6CEFC014F7FB9ADA1F /* yames_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = yames_iOS.entitlements; sourceTree = "<group>"; };
 		4EF5EF45C5CCBB1B6CF85390 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		54989780B7A6AC324562471A /* main.rs */ = {isa = PBXFileReference; path = main.rs; sourceTree = "<group>"; };
+		558627CEDB1C7CB9B3153983 /* tests.rs */ = {isa = PBXFileReference; path = tests.rs; sourceTree = "<group>"; };
 		57FDCC4B673C5AE9013D6850 /* calibration_cache.rs */ = {isa = PBXFileReference; path = calibration_cache.rs; sourceTree = "<group>"; };
 		5A93F319A865D71E5C8968D5 /* engine.rs */ = {isa = PBXFileReference; path = engine.rs; sourceTree = "<group>"; };
+		5C00151FC66E2948CE517F78 /* take.rs */ = {isa = PBXFileReference; path = take.rs; sourceTree = "<group>"; };
+		5F0B454D9D681E3BA670963B /* jam.rs */ = {isa = PBXFileReference; path = jam.rs; sourceTree = "<group>"; };
 		64201CE9FD7F34A17974F6F0 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		65D9F956543A9B73B98BD428 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		8792F1A7EEBA9CE5E5032887 /* score-playground.rs */ = {isa = PBXFileReference; path = "score-playground.rs"; sourceTree = "<group>"; };
@@ -50,6 +54,7 @@
 		9D8516D5EAD5773C3A122590 /* coach.rs */ = {isa = PBXFileReference; path = coach.rs; sourceTree = "<group>"; };
 		A805353DDEB50A38F7E3073F /* inspect-session.rs */ = {isa = PBXFileReference; path = "inspect-session.rs"; sourceTree = "<group>"; };
 		A8A5F87A0EBCBC0CE91218D2 /* session_log.rs */ = {isa = PBXFileReference; path = session_log.rs; sourceTree = "<group>"; };
+		B0C7556D1FAE0A9715CF99B8 /* kit.rs */ = {isa = PBXFileReference; path = kit.rs; sourceTree = "<group>"; };
 		B76B97FB5A887D60F171AF77 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		BC83F219C0D75BAC8E7C8943 /* tts.rs */ = {isa = PBXFileReference; path = tts.rs; sourceTree = "<group>"; };
 		BE1E52CAEF89C39DDF1C1B82 /* dump-fixture.rs */ = {isa = PBXFileReference; path = "dump-fixture.rs"; sourceTree = "<group>"; };
@@ -64,8 +69,10 @@
 		DB629E03B89B8950F7833EE8 /* commands.rs */ = {isa = PBXFileReference; path = commands.rs; sourceTree = "<group>"; };
 		DD9619378DA8BBE7DDE1EDC7 /* models.rs */ = {isa = PBXFileReference; path = models.rs; sourceTree = "<group>"; };
 		E20F51DFCEBD1B166B582E26 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E5A8CE1BAC24685D15A1A9A8 /* speech_out.rs */ = {isa = PBXFileReference; path = speech_out.rs; sourceTree = "<group>"; };
 		E6B5F502A752E23F12B28E8B /* midi.rs */ = {isa = PBXFileReference; path = midi.rs; sourceTree = "<group>"; };
 		F06BBE1628DF0721756ED2F8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F751A78F99B51FF67B2B09C2 /* voices.rs */ = {isa = PBXFileReference; path = voices.rs; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +140,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		5C2E606B01CD0E0E5C2010DE /* kit */ = {
+			isa = PBXGroup;
+			children = (
+				3D0237A17E48A29743D0F85F /* tests.rs */,
+			);
+			path = kit;
+			sourceTree = "<group>";
+		};
+		6336F6571966DC24E4BA438B /* voices */ = {
+			isa = PBXGroup;
+			children = (
+				558627CEDB1C7CB9B3153983 /* tests.rs */,
+			);
+			path = voices;
+			sourceTree = "<group>";
+		};
 		6AC8A6E5F2CA6A1BA20CDA03 /* bindings */ = {
 			isa = PBXGroup;
 			children = (
@@ -178,6 +201,8 @@
 				CF31C813C68B4669C2438114 /* drill.rs */,
 				5A93F319A865D71E5C8968D5 /* engine.rs */,
 				C73FEB8F61C7FA1BF43987F8 /* instrument.rs */,
+				5F0B454D9D681E3BA670963B /* jam.rs */,
+				B0C7556D1FAE0A9715CF99B8 /* kit.rs */,
 				131B6DA8C53A2F26807F0B23 /* lib.rs */,
 				54989780B7A6AC324562471A /* main.rs */,
 				E6B5F502A752E23F12B28E8B /* midi.rs */,
@@ -186,12 +211,17 @@
 				8B1838E7722FA4DB2CCF57B1 /* session_audio.rs */,
 				A8A5F87A0EBCBC0CE91218D2 /* session_log.rs */,
 				BF182C9BF200B444EF0F522A /* session.rs */,
+				E5A8CE1BAC24685D15A1A9A8 /* speech_out.rs */,
 				01E6B6576D1E330E6587FEC2 /* state.rs */,
+				5C00151FC66E2948CE517F78 /* take.rs */,
 				BEA1AFD9BA8A5CD86B8E823C /* tempo_context.rs */,
 				C4AD9AB3AF292B3544F3B298 /* timing.rs */,
 				BC83F219C0D75BAC8E7C8943 /* tts.rs */,
+				F751A78F99B51FF67B2B09C2 /* voices.rs */,
 				C76E1C521E676F3B65935D00 /* bin */,
 				079B72C8B2D5D9ED980A3BD0 /* commands */,
+				5C2E606B01CD0E0E5C2010DE /* kit */,
+				6336F6571966DC24E4BA438B /* voices */,
 			);
 			name = src;
 			path = ../../src;
