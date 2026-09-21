@@ -935,7 +935,10 @@ export function installShotMock(shot: Shot, theme: string): void {
     // A bool, not an object — see `get_evaluation_state` in commands.rs. An
     // object here is truthy, and the app drew a live green "Listening" chip
     // over a microphone that was not on.
-    get_evaluation_state: () => false,
+    // …except on a scene that shows a verdict: a pass can only have been heard
+    // with the input on, and since 2026-09-21 a stop with it off (rightly) says
+    // nothing at all, so a review scene with the input off never builds.
+    get_evaluation_state: () => Boolean(shot.songs?.review),
     list_audio_input_devices: () => [],
     list_audio_output_devices: () => ["Default"],
     list_midi_devices: () => [],
