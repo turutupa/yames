@@ -269,25 +269,33 @@ export function GeneralSettingsSection({
           </button>
         </div>
       )}
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.resetHints")}</label>
-          <span className="setting-hint">
-            {t("settings.general.resetHintsHint")}
-          </span>
+      {/* Not on a phone (M12). All nine hints are switched off in a mobile
+          build — two of them point at the floating widget and the hotkeys
+          screen, which a phone does not have, and the rest are turned off
+          alongside them in MainWindow and in the Zen overlay. So the row
+          offered to bring back tips that can never appear: a button that
+          says "Reset", says "Done!", and changes nothing anybody will see. */}
+      {!IS_MOBILE && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.resetHints")}</label>
+            <span className="setting-hint">
+              {t("settings.general.resetHintsHint")}
+            </span>
+          </div>
+          <button
+            className="toggle-btn"
+            onClick={() => {
+              void resetHints();
+              setHintsReset(true);
+            }}
+          >
+            {hintsReset
+              ? t("settings.general.resetHintsDone")
+              : t("settings.general.resetHintsAction")}
+          </button>
         </div>
-        <button
-          className="toggle-btn"
-          onClick={() => {
-            void resetHints();
-            setHintsReset(true);
-          }}
-        >
-          {hintsReset
-            ? t("settings.general.resetHintsDone")
-            : t("settings.general.resetHintsAction")}
-        </button>
-      </div>
+      )}
     </section>
   );
 }

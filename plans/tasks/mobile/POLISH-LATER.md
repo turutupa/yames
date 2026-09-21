@@ -26,11 +26,11 @@ See `plans/tasks/mobile/m06/01-metronome.png` (iPhone) and the
 the rows so they fit). It fits and works; it reads heavy. A label-left,
 switch-right row is what a phone user expects.
 
-## 3. "Reset hints" is offered on a phone (orchestrator, 2026-09-20)
+## 3. ~~"Reset hints" is offered on a phone~~ — done (M12, 2026-09-20)
 
-The plan recommended cutting the tour and hints on mobile v1. Check
-whether any hint can actually appear on a phone; if none can, the row
-should go.
+None of the nine hints can appear in a mobile build: `useAppHints` is
+not called at all (`MainWindow`), the card is not rendered, and Zen's
+own `zen-first` is gated the same way. The row went.
 
 ## 4. One loaded jam is 122 MB of memory (M10, 2026-09-20)
 
