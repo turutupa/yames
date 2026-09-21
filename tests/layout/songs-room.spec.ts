@@ -30,12 +30,14 @@ const SIZES = [
  * Measured on the long fixture and set a point under what the layout actually
  * reaches. Before item 2 merged the song's head into the app's bar: 67.7 % at
  * 1100×900 and at 1440×900, 74.2 % at 2000×1124 — the same with the rail
- * collapsed, because the rail takes width and not height.
+ * collapsed, because the rail takes width and not height. After items 2 and
+ * 3: 72.0 %, 72.0 % and 77.6 %, which is 38px of window back at every size.
+ * W29 measured 74.7 % as the ceiling with the old header.
  */
 const FLOOR: Record<number, number> = {
-  1100: 0.7,
-  1440: 0.7,
-  2000: 0.76,
+  1100: 0.71,
+  1440: 0.71,
+  2000: 0.77,
 };
 
 test.slow();
@@ -143,6 +145,51 @@ test.describe("the room the tab gets", () => {
         ).toFixed(1)}% of the window's height`,
       );
       expect(boxes.frame.height / boxes.window.height).toBeGreaterThanOrEqual(FLOOR[2000]);
+    });
+  }
+
+  /**
+   * The air around the strip, moved rather than added (W36 item 3).
+   *
+   * The owner: *"the row below the alphatab is great, but can we reduce its
+   * margin bottom and increase its margin top so it's not so close to the
+   * tabs?"*. Before: 6px between the frame and the strip and 28px between the
+   * strip and the transport — pressed against the music and floating over
+   * nothing. The condition on the fix is that the frame does not pay for it.
+   */
+  for (const size of SIZES) {
+    test(`gives the strip more room above than below at ${String(size.width)}×${String(size.height)}`, async ({
+      page,
+    }) => {
+      await openShot(page, "songs", size, "ember", { song: "long" });
+      const air = await page.evaluate(() => {
+        const frame = document.querySelector(".songs-stage-frame");
+        const strip = document.querySelector(".songs-strip");
+        const transport = document.querySelector(".transport");
+        if (!frame || !strip || !transport) return null;
+        const f = frame.getBoundingClientRect();
+        const s = strip.getBoundingClientRect();
+        const t = transport.getBoundingClientRect();
+        return { above: s.top - f.bottom, below: t.top - s.bottom, frame: f.height };
+      });
+      expect(air, `no strip at ${String(size.width)}px`).not.toBeNull();
+      // eslint-disable-next-line no-console
+      console.log(
+        `[w36] ${String(size.width)}×${String(size.height)}: ${String(
+          Math.round(air!.above),
+        )}px above the strip, ${String(Math.round(air!.below))}px below it, frame ${String(
+          Math.round(air!.frame),
+        )}px tall`,
+      );
+      expect(
+        Math.round(air!.above),
+        `the strip has ${String(Math.round(air!.above))}px above it and ${String(
+          Math.round(air!.below),
+        )}px below — it is still closer to the music than to the transport`,
+      ).toBeGreaterThan(Math.round(air!.below));
+      // Not a stripe of white either: the room came off the bottom, and the
+      // frame is what it was or taller (checked by FLOOR above).
+      expect(Math.round(air!.above)).toBeLessThanOrEqual(28);
     });
   }
 

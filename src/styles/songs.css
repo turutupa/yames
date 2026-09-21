@@ -1029,6 +1029,20 @@
   width: 100%;
   min-width: 0;
   flex: 0 0 auto;
+  /* ── The air moved, it was not added (W36 item 3) ─────────────────────
+   *
+   * The owner: *"the row below the alphatab is great, but can we reduce its
+   * margin bottom and increase its margin top so it's not so close to the
+   * tabs?"*. Measured at 2000×1124 before this: six pixels between the frame
+   * and the strip, and twenty-eight between the strip and the transport — so
+   * the row was pressed against the music and floating over nothing.
+   *
+   * Twenty above and sixteen below now. The six is `.songs-view`'s own gap
+   * and this is the rest of it; the sixteen is the content region's gap,
+   * narrowed for this tab alone just below. Moving the air rather than adding
+   * it leaves the frame TALLER than it was — 862px to 872px at the owner's
+   * window — which is the condition the brief puts on this. */
+  margin-top: 14px;
 }
 
 /* While the transport runs, what you are not using stands back (W29 item 3).
@@ -2173,4 +2187,19 @@
     padding-left: 20px;
     padding-right: 20px;
   }
+}
+
+/* The other half of moving the strip's air (W36 item 3).
+ *
+ * The content region puts 28px between the bar, the stage and the transport,
+ * everywhere in the app. On this tab that 28 is what sat under the strip
+ * doing nothing, and 28 above the stage is a gap under a bar that now carries
+ * the song rather than furniture. Sixteen in both places: the strip's own
+ * `margin-top` spends part of what the bottom one gives up, and the music
+ * keeps the rest.
+ *
+ * `[data-view="songs"]`, so no other mode's spacing moves — the layout suite
+ * measures all five. */
+.main-content[data-view="songs"] {
+  gap: 16px;
 }
