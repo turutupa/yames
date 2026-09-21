@@ -211,6 +211,14 @@ export interface Shot {
      * arms the shipping code and gets a real `MediaStream`.
      */
     camera?: boolean;
+    /**
+     * Open a take's "Watch it back" panel, by its row in the shelf (W33).
+     *
+     * Pressed rather than poked, like everything else here: the button is on
+     * the row and a person has no other way in. The shelf is inside the setup
+     * sheet's takes group, so this goes with `sheet: "setup"`.
+     */
+    watchTake?: number;
     /** Tap this chord on the chord sheet (0-based) to expand its shapes. */
     chordCard?: number;
     /**
@@ -396,6 +404,45 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 400,
+  },
+  {
+    id: "jam-watch",
+    suffix: "jam-watch",
+    window: "main",
+    tab: "jam",
+    // W33 — a take opened to be watched back: the picture, the form going by
+    // under it, the transport and the three things you can then do with it,
+    // all inside the setup drawer's 320px cap. The first fixture take is the
+    // filmed one.
+    jam: { row: 0, sheet: "setup", watchTake: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 500,
+  },
+  {
+    id: "jam-watch-nopicture",
+    suffix: "jam-watch-nopicture",
+    window: "main",
+    tab: "jam",
+    // ...and the same panel on a take with no picture, which is most takes:
+    // the timeline is then the whole view.
+    jam: { row: 0, sheet: "setup", watchTake: 2 },
+    width: 1400,
+    height: 900,
+    settleMs: 500,
+  },
+  {
+    id: "jam-watch-midform",
+    suffix: "jam-watch-midform",
+    window: "main",
+    tab: "jam",
+    // ...and the take the engine stamped at bar eight of the form, which is
+    // what pressing record while the band is already going produces. The
+    // grid's first seven cells are bars nobody played.
+    jam: { row: 0, sheet: "setup", watchTake: 1 },
+    width: 1400,
+    height: 900,
+    settleMs: 500,
   },
   {
     id: "jam-setup",

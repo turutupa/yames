@@ -733,6 +733,17 @@
       "chorus_one": "Ronde {{count}}",
       "chorus_other": "Ronde {{count}}",
       "next": "dan"
+    },
+    "watch": {
+      "open": "Terugluisteren",
+      "where": "Maat {{bar}} · {{chorus}}",
+      "goToBar": "Naar maat {{bar}}",
+      "barBack": "Een maat terug",
+      "barOn": "Een maat verder",
+      "nudge": "Beeld",
+      "nudgeBack": "Beeld iets eerder",
+      "nudgeOn": "Beeld iets later",
+      "broken": "Deze take speelde niet af. Misschien is het bestand verplaatst of verwijderd."
     }
   },
   "scale": {

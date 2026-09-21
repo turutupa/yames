@@ -941,7 +941,39 @@ export function installShotMock(shot: Shot, theme: string): void {
      * recorded — could not be photographed at all.
      */
     list_takes: (a) => [
-      ...TAKES.filter((take) => take.jamId === a?.jamId),
+      /*
+       * W33 — two of the jam's three takes were filmed, and one was not.
+       *
+       * The same mix Songs' shelf has, and for the same three reasons: the
+       * thumbnail is only a picture when there is a picture, the "with
+       * picture" filter only exists once some takes have one and some do not,
+       * and "watch a jam back" has to photograph both a take with a picture
+       * and a take that is the timeline alone. The sound and the position are
+       * the ones the engine stamps, so the panel's bar grid opens where a
+       * real take's would rather than always at bar one.
+       */
+      ...TAKES.filter((take) => take.jamId === a?.jamId).map((take, i) =>
+        i === 0
+          ? {
+              ...take,
+              thumbPath: shotThumb(28),
+              videoPath: TAKE_WAV,
+              videoBytes: 2_400_000,
+              videoOffsetMs: 90,
+              position: { mode: "jam", bar: 0, tick: 0, pass: 0 },
+            }
+          : i === 1
+            ? {
+                ...take,
+                thumbPath: shotThumb(196),
+                videoPath: TAKE_WAV,
+                videoBytes: 1_800_000,
+                videoOffsetMs: -40,
+                sound: "everything",
+                position: { mode: "jam", bar: 7, tick: 0, pass: 1 },
+              }
+            : { ...take, position: { mode: "jam", bar: 0, tick: 0, pass: 0 } },
+      ),
       /*
        * W25 — three goes at the song, for the shelf scene.
        *

@@ -1860,13 +1860,38 @@
    inside the 320 px menu cap a popover of that would be unreadable. The list
    item becomes a two-row flex column when one is open, and goes back to a
    single row when it closes. */
+/* A text button like Delete beside it, rather than the browser's own grey
+   slab — which is what it was, because nothing ever styled it. Always shown
+   and not revealed on hover the way Delete is: listening back is the thing
+   you came to the shelf FOR, and a way in that only appears under the mouse
+   is a way in a touch screen never finds. */
 .jam-take-share {
   flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
   white-space: nowrap;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
 }
 
+.jam-take-share:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* The row becomes a column when a take is open in it. `height: auto` and not
+   only `flex-wrap`: the row is 34px tall by rule, and a panel inside a box
+   with a fixed height overflows it — the two rows below were drawn straight
+   over the picture. */
 .jam-take:has(> .jam-take-video) {
   flex-wrap: wrap;
+  align-items: flex-start;
+  height: auto;
+  padding-top: 4px;
+  padding-bottom: 8px;
 }
 
 .jam-take-video {
@@ -3643,4 +3668,281 @@
   .jam-sheet .jam-cards-groove {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/* ── Watching a jam back (W33) ────────────────────────────────────────────
+   The panel a take opens into, inside the setup drawer's 320 px cap. Every
+   measurement here is that cap: the picture is as wide as the panel and no
+   wider, the bar grid wraps rather than scrolling sideways, and the three
+   actions at the foot are a wrapping row rather than three fixed columns.
+
+   It replaces the "Save as a video" panel that used to open here, and that
+   panel is now one press further in — which is the right order: you listen
+   to a take before you decide to send it to somebody. */
+.jam-watch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+/* The picture, capped in HEIGHT as well as shaped.
+
+   The setup sheet is a 320px popover on a small window and a docked panel
+   nearly seven hundred wide on a laptop, and a full-width 16:9 picture in the
+   wide one is 388px tall — which put the chord eight pixels under the bottom
+   of a 1100x720 window, measured. So the height is capped and the picture is
+   LETTERBOXED rather than cropped: what a player is checking in a preview is
+   their own framing, and a preview that quietly cut the top off their hands
+   would be answering the wrong question. */
+.jam-watch-picture {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(260px, 30vh);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.jam-watch-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* The chord you were playing over, and where in the form that was. The same
+   three facts the clip's own furniture carries, in the same order. */
+.jam-watch-now {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.jam-watch-chord {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.jam-watch-next {
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.jam-watch-where {
+  flex: 1 1 auto;
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+/* One cell per bar of the take. Wrapped, because a take is minutes long and
+   a row that scrolls sideways inside a drawer is a row nobody finds the end
+   of; the bar that opens a chorus carries the heavier left edge, which is the
+   same signal the stage's own timeline gives. */
+.jam-watch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.jam-watch-bar {
+  flex: 0 0 auto;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.jam-watch-bar[data-opens] {
+  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.jam-watch-bar[data-current] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text-primary);
+}
+
+/* A bar of the form the take does not contain — before it started, or after
+   it stopped. Drawn so the grid is always the form's own width, and dead
+   because there is nothing there to go to. */
+.jam-watch-bar:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.jam-watch-transport {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.jam-watch-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.jam-watch-play.playing {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.jam-watch-step {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+
+.jam-watch-spacer {
+  flex: 1 1 auto;
+}
+
+/* The picture's own offset. The fit is good to a few tens of milliseconds and
+   no better, so this is how a player lines their own camera up by eye. */
+.jam-watch-nudge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.66rem;
+  color: var(--text-faint);
+}
+
+.jam-watch-nudge button {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+
+.jam-watch-nudge-value {
+  min-width: 34px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-watch-note {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+}
+
+.jam-watch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jam-watch-action {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* There is no undo, so the one press that destroys something is the one in
+   the accent — the same answer `.jam-take-confirm-yes` gives, and for the
+   same reason: the token contract has no red. */
+.jam-watch-delete {
+  color: var(--accent);
+}
+
+.jam-watch-export {
+  width: 100%;
+  min-width: 0;
+}
+
+/* The shelf's own head and its filter (W33). What every take here is a
+   recording OF, said once rather than on each of six rows. */
+.jam-takes-facts {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.jam-takes-filter {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.jam-takes-filter[data-active] {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* A frame of the take, so the shelf shows what it is a picture of. Fixed
+   width and an empty box on the takes with the camera off, so the rows all
+   line up and the eye can run down them. */
+.jam-take-thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 36px;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.jam-take-thumb[data-empty] {
+  border: 1px dashed var(--border);
+  background: transparent;
+}
+
+.jam-take-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }

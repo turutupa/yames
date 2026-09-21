@@ -733,6 +733,17 @@
       "chorus_one": "Chorus {{count}}",
       "chorus_other": "Chorus {{count}}",
       "next": "als Nächstes"
+    },
+    "watch": {
+      "open": "Zurückhören",
+      "where": "Takt {{bar}} · {{chorus}}",
+      "goToBar": "Zu Takt {{bar}}",
+      "barBack": "Einen Takt zurück",
+      "barOn": "Einen Takt vor",
+      "nudge": "Bild",
+      "nudgeBack": "Bild etwas früher",
+      "nudgeOn": "Bild etwas später",
+      "broken": "Dieser Take ließ sich nicht abspielen. Die Datei wurde vielleicht verschoben oder gelöscht."
     }
   },
   "scale": {

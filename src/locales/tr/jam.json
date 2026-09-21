@@ -733,6 +733,17 @@
       "chorus_one": "Tur {{count}}",
       "chorus_other": "Tur {{count}}",
       "next": "sonra"
+    },
+    "watch": {
+      "open": "Geri dinle",
+      "where": "Ölçü {{bar}} · {{chorus}}",
+      "goToBar": "{{bar}}. ölçüye git",
+      "barBack": "Bir ölçü geri",
+      "barOn": "Bir ölçü ileri",
+      "nudge": "Görüntü",
+      "nudgeBack": "Görüntü biraz önce",
+      "nudgeOn": "Görüntü biraz sonra",
+      "broken": "Bu kayıt çalmadı. Dosya taşınmış veya silinmiş olabilir."
     }
   },
   "scale": {

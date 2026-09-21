@@ -722,6 +722,17 @@
       "save": "動画にして保存",
       "chorus": "コーラス {{count}}",
       "next": "次は"
+    },
+    "watch": {
+      "open": "聴き返す",
+      "where": "{{bar}} 小節 · {{chorus}}",
+      "goToBar": "{{bar}} 小節へ",
+      "barBack": "1 小節戻る",
+      "barOn": "1 小節進む",
+      "nudge": "映像",
+      "nudgeBack": "映像を少し早く",
+      "nudgeOn": "映像を少し遅く",
+      "broken": "このテイクは再生できませんでした。ファイルが移動または削除された可能性があります。"
     }
   },
   "scale": {

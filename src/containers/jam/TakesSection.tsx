@@ -3,17 +3,22 @@ import { useTranslation } from "react-i18next";
 import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
 import type { Jam, JamTake } from "../../jam/types";
 import { formatDate } from "../practice-coach/coachCardHelpers";
+// W33 — a take looks like a take: a frame of it, grabbed at the first
+// downbeat, exactly as Songs' shelf has shown one since W25.
+import { mediaSrc } from "../../takes/src";
 
 /**
- * The compositor, downloaded the first time somebody asks for a video.
+ * Watching one back, downloaded the first time somebody opens a take (W33).
  *
- * A canvas painter, a media recorder and a share row is a third of a
- * megabyte, and the overwhelming majority of sessions never open this drawer
- * at all — let alone press the button. So it is behind a `lazy`, which is the
- * only thing on the Jam screen that is.
+ * A media player, a bar grid and the arithmetic behind them, behind a `lazy`
+ * because the overwhelming majority of sessions never open this drawer at all
+ * — and the ones that do are mostly turning recording on rather than
+ * listening to what came out. The compositor is behind a second `lazy` inside
+ * it, so a player who opens a take to hear it does not also download a canvas
+ * painter and a media recorder.
  */
-const JamTakeVideo = lazy(() =>
-  import("../../takes/JamTakeVideo").then((m) => ({ default: m.JamTakeVideo })),
+const JamTakeView = lazy(() =>
+  import("../../takes/JamTakeView").then((m) => ({ default: m.JamTakeView })),
 );
 
 /**
@@ -112,8 +117,35 @@ export function TakesSection({
    * mistake it is guarding against.
    */
   const [confirming, setConfirming] = useState<string | null>(null);
+  /**
+   * W33 — "with picture", off by default.
+   *
+   * A FILTER and not a sort, exactly as Songs' shelf has it: a player looking
+   * for the go they filmed is looking for a short list, and a shelf that
+   * quietly reordered itself would put yesterday's row somewhere else today.
+   * Drawn only when there is something to filter — a chip that always says
+   * everything is a control that teaches nothing.
+   */
+  const [filmedOnly, setFilmedOnly] = useState(false);
 
   const heavy = dirBytes >= TAKES_SIZE_NOTICE_BYTES;
+  const filmed = takes.filter((take) => take.videoPath).length;
+  const shown = filmedOnly ? takes.filter((take) => take.videoPath) : takes;
+
+  /**
+   * What these takes are OF, said once above the shelf rather than on each row.
+   *
+   * W32's brief asks for "vibe · key · tempo" on the row. A jam take carries
+   * none of those: they are read off the jam record, every take on this shelf
+   * belongs to that one jam, and printing the same three words on six rows
+   * inside a 320 px drawer is six copies of one fact taking the room the date
+   * and the length need. So it is the shelf's line, once.
+   */
+  const facts = jam
+    ? [vibeLabel ?? null, jam.key ?? null, t("songs.bpm", { bpm: Math.round(jam.bpm) })]
+        .filter(Boolean)
+        .join("  ·  ")
+    : null;
 
   return (
     <section className="jam-takes" aria-label={t("jam.takes.label")}>
@@ -123,23 +155,45 @@ export function TakesSection({
           The size still belongs here — it is about the folder, not about the
           feature — and only once the folder is worth mentioning, since below
           the threshold a number is clutter on a screen read at arm's length. */}
-      {available && heavy && (
+      {available && (heavy || (takes.length > 0 && facts)) && (
         <div className="jam-section-head">
-          <span className="jam-takes-size">
-            {t("jam.takes.size", { megabytes: megabytes(dirBytes) })}
-          </span>
+          {/* What every take on this shelf is a recording of. */}
+          {takes.length > 0 && facts && <span className="jam-takes-facts">{facts}</span>}
+          {heavy && (
+            <span className="jam-takes-size">
+              {t("jam.takes.size", { megabytes: megabytes(dirBytes) })}
+            </span>
+          )}
         </div>
+      )}
+
+      {/* W33 — the one filter worth having on a shelf of takes, and only once
+          some of them are filmed and some are not. */}
+      {available !== false && filmed > 0 && takes.length > filmed && (
+        <button
+          type="button"
+          className="jam-takes-filter"
+          data-active={filmedOnly ? "" : undefined}
+          aria-pressed={filmedOnly}
+          onClick={() => setFilmedOnly((was) => !was)}
+        >
+          {t("songs.takes.withPicture")}
+        </button>
       )}
 
       {available === false ? (
         <p className="jam-takes-empty">{t("jam.takes.unavailable")}</p>
-      ) : takes.length === 0 ? (
+      ) : shown.length === 0 ? (
         <p className="jam-takes-empty">
-          {recording ? t("jam.takes.recordingNow") : t("jam.takes.empty")}
+          {filmedOnly
+            ? t("songs.takes.noneFilmed")
+            : recording
+              ? t("jam.takes.recordingNow")
+              : t("jam.takes.empty")}
         </p>
       ) : (
         <ul className="jam-takes-list">
-          {takes.map((take) => {
+          {shown.map((take) => {
             const isPlaying = playingId === take.id;
             // While one take plays the engine has muted the band and is
             // playing a file; starting another or deleting one underneath it
@@ -157,6 +211,14 @@ export function TakesSection({
                 >
                   {isPlaying ? <StopGlyph /> : <PlayGlyph />}
                 </button>
+                {/* W33 — a frame of it, grabbed at the first downbeat, so the
+                    shelf shows what a take is a picture of. A take with the
+                    camera off gets the same box empty rather than no box: a
+                    list whose rows are different widths is a list nobody can
+                    scan. */}
+                <span className="jam-take-thumb" data-empty={take.thumbPath ? undefined : ""}>
+                  {take.thumbPath && <img src={mediaSrc(take.thumbPath)} alt="" loading="lazy" />}
+                </span>
                 <span className="jam-take-when">
                   {formatDate(take.createdAt, t, i18n.language)}
                 </span>
@@ -195,10 +257,15 @@ export function TakesSection({
                   </span>
                 ) : (
                   <>
-                    {/* A take you can send somebody. Before Delete, because
-                        the two are opposite intentions and a row that puts
-                        them side by side in the wrong order is a row people
-                        mis-click. */}
+                    {/* W33 — the way IN to a take: the picture, the form going
+                        by under it, and everything you would then want to do
+                        with it. It used to be "Save as a video", which was the
+                        third thing you want and the only one on offer; saving
+                        one is now inside, where it belongs, after you have
+                        listened to what you are about to send somebody.
+                        Before Delete, because the two are opposite intentions
+                        and a row that puts them side by side in the wrong
+                        order is a row people mis-click. */}
                     {jam && (
                       <button
                         type="button"
@@ -209,7 +276,7 @@ export function TakesSection({
                           setSharing((was) => (was === take.id ? null : take.id))
                         }
                       >
-                        {t("jam.takeVideo.save")}
+                        {t("jam.watch.open")}
                       </button>
                     )}
                     <button
@@ -228,11 +295,15 @@ export function TakesSection({
                         milliseconds on any machine that has already loaded
                         the app, and a spinner for that reads as a fault. */}
                     <Suspense fallback={null}>
-                      <JamTakeVideo
+                      <JamTakeView
                         jam={jam}
                         take={take}
                         vibeLabel={vibeLabel}
-                        onBeforeSave={onStop}
+                        // The engine's own playback and this panel are two
+                        // transports over one file; opening this one stands
+                        // the other down rather than playing over it.
+                        onBeforePlay={onStop}
+                        onDelete={() => setConfirming(take.id)}
                       />
                     </Suspense>
                   </div>

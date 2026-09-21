@@ -753,6 +753,17 @@
       "chorus_many": "Przejście {{count}}",
       "chorus_other": "Przejście {{count}}",
       "next": "dalej"
+    },
+    "watch": {
+      "open": "Odsłuchaj",
+      "where": "Takt {{bar}} · {{chorus}}",
+      "goToBar": "Do taktu {{bar}}",
+      "barBack": "Takt w tył",
+      "barOn": "Takt w przód",
+      "nudge": "Obraz",
+      "nudgeBack": "Obraz trochę wcześniej",
+      "nudgeOn": "Obraz trochę później",
+      "broken": "Tego nagrania nie udało się odtworzyć. Plik mógł zostać przeniesiony lub usunięty."
     }
   },
   "scale": {
