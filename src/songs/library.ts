@@ -42,6 +42,17 @@ export type SongRecord = {
   name: string;
   /** Milliseconds, for "newest first" and for nothing else. */
   addedAt: number;
+  /**
+   * When this part was last opened, epoch ms — the store's `last_opened_at`,
+   * falling back to the import date for a song nobody has opened since the
+   * counting started (migration four).
+   *
+   * Read and never written: `markScoreOpened` is what moves it, and this is
+   * the copy the screen reasons with. It is what lets the sidebar open the
+   * part of a file the player last had open (`songFiles.ts`) without a second
+   * thing to remember in `settings.json`.
+   */
+  openedAt: number;
   score: SongScore;
   /**
    * The file itself, base64.
@@ -128,6 +139,7 @@ async function toRecord(summary: {
   title: string;
   importedAt: number;
   name?: string;
+  lastOpenedAt?: number;
 }): Promise<SongRecord | null> {
   const [score, source] = await Promise.all([
     getScore(summary.id),
@@ -140,6 +152,7 @@ async function toRecord(summary: {
     id: summary.id,
     name: summary.name ?? score.title ?? summary.title,
     addedAt: summary.importedAt,
+    openedAt: summary.lastOpenedAt ?? summary.importedAt,
     score,
     sourceBase64: source ?? "",
   };
@@ -222,10 +235,14 @@ async function applySave(records: SongRecord[]): Promise<void> {
 
 /** A record for a freshly imported score. */
 export function newSongRecord(score: SongScore, source: Uint8Array): SongRecord {
+  const now = Date.now();
   return {
     id: score.id,
     name: score.title || score.source.fileName,
-    addedAt: Date.now(),
+    addedAt: now,
+    // Importing a song is opening it. Without this the part just chosen would
+    // rank below a part of the same file opened a year ago.
+    openedAt: now,
     score,
     sourceBase64: encodeSource(source),
   };
@@ -245,12 +262,31 @@ export function addSong(records: SongRecord[], incoming: SongRecord): SongRecord
   return [merged, ...records.filter((r) => r.id !== incoming.id)];
 }
 
-export function renameSong(records: SongRecord[], id: string, name: string): SongRecord[] {
-  const trimmed = name.trim();
-  if (!trimmed) return records;
-  return records.map((r) => (r.id === id ? { ...r, name: trimmed } : r));
+/**
+ * Rename, and delete, take a song's WHOLE file.
+ *
+ * One id or several, because the sidebar now lists files rather than parts
+ * (`songFiles.ts`): renaming a song has to rename every part's record or the
+ * row would go back to its old name the next time the player opened the other
+ * part, and deleting one has to take every part with it — the confirm says so,
+ * with the takes that go too.
+ */
+function idSet(ids: string | readonly string[]): ReadonlySet<string> {
+  return new Set(typeof ids === "string" ? [ids] : ids);
 }
 
-export function deleteSong(records: SongRecord[], id: string): SongRecord[] {
-  return records.filter((r) => r.id !== id);
+export function renameSong(
+  records: SongRecord[],
+  ids: string | readonly string[],
+  name: string,
+): SongRecord[] {
+  const trimmed = name.trim();
+  if (!trimmed) return records;
+  const wanted = idSet(ids);
+  return records.map((r) => (wanted.has(r.id) ? { ...r, name: trimmed } : r));
+}
+
+export function deleteSong(records: SongRecord[], ids: string | readonly string[]): SongRecord[] {
+  const wanted = idSet(ids);
+  return records.filter((r) => !wanted.has(r.id));
 }

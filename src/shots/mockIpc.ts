@@ -877,6 +877,9 @@ export function installShotMock(shot: Shot, theme: string): void {
         trackName: r.score.source.trackName,
         importedAt: r.addedAt,
         name: r.name,
+        // W35 — which part of a file the sidebar's row opens is "the one I
+        // had open last", and the store is where that is counted.
+        lastOpenedAt: r.openedAt,
       })),
     get_score: (a) => SCORES.get(String(a?.id))?.score ?? null,
     get_score_source: (a) => SCORES.get(String(a?.id))?.sourceBase64 ?? null,
@@ -886,6 +889,7 @@ export function installShotMock(shot: Shot, theme: string): void {
         id: score.id,
         name: (a?.name as string) ?? score.title,
         addedAt: (a?.importedAt as number) ?? Date.now(),
+        openedAt: SCORES.get(score.id)?.openedAt ?? (a?.importedAt as number) ?? Date.now(),
         score,
         sourceBase64: (a?.sourceBase64 as string) ?? "",
       });
@@ -895,11 +899,14 @@ export function installShotMock(shot: Shot, theme: string): void {
       SCORES.delete(String(a?.id));
       return null;
     },
-    // W19 — the library is "recently played" now. The shots open exactly one
-    // song, so there is no order for this to change; it exists so the call
-    // the session makes on every open resolves rather than returning the
-    // harness's blanket `null`.
-    mark_score_opened: () => null,
+    // W19 — the library is "recently played" now. It writes the time rather
+    // than doing nothing, because W35's rows open the part of a file that was
+    // open last and that is the column the answer comes from.
+    mark_score_opened: (a) => {
+      const record = SCORES.get(String(a?.id));
+      if (record) SCORES.set(record.id, { ...record, openedAt: Date.now() });
+      return null;
+    },
     is_coach_loaded: () => false,
     get_calibration_offset: () => null,
     llm_compiled: () => false,
