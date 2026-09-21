@@ -75,7 +75,8 @@
     "inputOff": "입력 꺼짐",
     "coachOnPlay": "재생하면 코치가 듣습니다",
     "coachQuiet": "단계 진행 중에는 코치가 조용합니다",
-    "countIn": "카운트인"
+    "countIn": "카운트인",
+    "backToStart": "처음으로"
   },
   "rail": {
     "label": "모드 및 라이브러리",

@@ -45,7 +45,10 @@
       "tooManyParts_other": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
       "turnedDown": "{{count}} musicien baissé",
       "turnedDown_many": "{{count}} musiciens baissés",
-      "turnedDown_other": "{{count}} musiciens baissés"
+      "turnedDown_other": "{{count}} musiciens baissés",
+      "drumsLabel": "Batterie",
+      "drumsKit": "La batterie de Yames",
+      "drumsFile": "Celle du fichier"
     },
     "countIn": {
       "counting": "On te compte l'entrée"

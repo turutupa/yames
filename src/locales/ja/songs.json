@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
       "tooManyParts_other": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
       "turnedDown": "{{count}} 人の音量を下げています",
-      "turnedDown_other": "{{count}} 人の音量を下げています"
+      "turnedDown_other": "{{count}} 人の音量を下げています",
+      "drumsLabel": "ドラム",
+      "drumsKit": "Yamesのキット",
+      "drumsFile": "ファイルのもの"
     },
     "countIn": {
       "counting": "カウント中"

@@ -169,8 +169,17 @@ export type SongTransport = {
   range: { startBar: number; endBar: number };
   loops: boolean;
   tempoPercent: number;
-  /** 0, 1 or 2 bars, at the range's first tempo and meter. */
+  /** 0, 1 or 2 bars, at the tempo and meter of the bar play begins in. */
   countInBars: number;
+  /**
+   * Where the first pass begins, in the song's own ticks — the playhead
+   * (W37 item 1).
+   *
+   * The range says which bars are being practised; this says where inside
+   * them a press of Play starts. It moves the cursor and nothing else: a pass
+   * is still the whole range, so the second time round a loop is whole.
+   */
+  startTick: number;
 };
 
 /** Which of the band's three rows a backing track is played on. */
@@ -183,6 +192,22 @@ export type SongTransport = {
  * no fourth, and a two-guitar file played as a metronome.
  */
 export type SongRole = "drums" | "bass" | "keys" | "synth";
+
+/**
+ * Whose kit plays the file's drum track (W37 item 3).
+ *
+ * The owner: *"the 'drums' layer in a song i'm playing sounds AWFUL, the click
+ * sounds very good tho"*. Some of that was bugs and is fixed; the rest is
+ * taste, and taste is a switch rather than an argument. "kit" is Yames' own
+ * recorded kit — somebody hit those drums, in four velocity layers and in
+ * more than one take. "file" sends the same notes to the General MIDI
+ * synthesiser instead, which is what the file sounds like in every other
+ * program that opens it.
+ *
+ * Per song, because it depends on the transcription: five written dynamics
+ * and a full tom run is a different question from four on the floor.
+ */
+export type SongDrums = "kit" | "file";
 
 /**
  * One note of the file's own rhythm section.
@@ -214,6 +239,16 @@ export type SongBackingTrack = {
    * tab player has. Exactly one track of a song is.
    */
   guide: boolean;
+  /**
+   * This track is the file's own DRUM KIT, played through the General MIDI
+   * synthesiser rather than Yames' recorded one (W37 item 3).
+   *
+   * Only ever set beside a `synth` role, and it changes one thing: the track
+   * takes MIDI channel 9, which is percussion in every General MIDI set ever
+   * written. Without it a kick drum would arrive on a melodic channel and
+   * play as a note of whatever instrument that channel is set to.
+   */
+  percussion?: boolean;
   notes: SongBackingNote[];
   /** Empty for everything the recorded band plays: a sample cannot bend. */
   bends: SongBackingBend[];

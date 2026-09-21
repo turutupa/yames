@@ -1013,6 +1013,8 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
             // A count-in is a few clicks at the start and nothing the gate
             // can see over sixty seconds; the run is about the piece.
             count_in_bars: 0,
+            start_tick: 0,
+            drums_as_written: false,
         },
         SongBacking {
             tracks: vec![
@@ -1021,6 +1023,7 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
                     name: "drums".into(),
                     program: 0,
                     guide: false,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: drums,
                 },
@@ -1029,6 +1032,7 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
                     name: "bass".into(),
                     program: 0,
                     guide: false,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: bass,
                 },
@@ -1037,6 +1041,7 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
                     name: "keys".into(),
                     program: 0,
                     guide: false,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: keys,
                 },
@@ -1047,6 +1052,7 @@ fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
                     // General MIDI set, which is the one to measure.
                     program: 29,
                     guide: true,
+                    percussion: false,
                     bends: Vec::new(),
                     notes: guitar,
                 },

@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} blijft stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
       "tooManyParts_other": "{{tracks}} blijven stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
       "turnedDown": "{{count}} speler zachter gezet",
-      "turnedDown_other": "{{count}} spelers zachter gezet"
+      "turnedDown_other": "{{count}} spelers zachter gezet",
+      "drumsLabel": "Drums",
+      "drumsKit": "Yames' set",
+      "drumsFile": "Die van het bestand"
     },
     "countIn": {
       "counting": "Je wordt ingeteld"

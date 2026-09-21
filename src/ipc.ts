@@ -1107,12 +1107,16 @@ export async function setSongRange(
   loops: boolean,
   tempoPercent: number,
   countInBars?: number,
+  startTick?: number,
 ): Promise<SongLoaded> {
   return invoke<SongLoaded>("set_song_range", {
     range,
     loops,
     tempoPercent,
     countInBars: countInBars ?? null,
+    // The playhead (W37 item 1). `null` leaves the engine's where it is, the
+    // same as the count-in beside it.
+    startTick: startTick === undefined ? null : Math.max(0, Math.round(startTick)),
   });
 }
 
@@ -1131,18 +1135,22 @@ export async function setSongMix(mix: SongMixGains): Promise<void> {
 }
 
 /**
- * Go to a bar of the song that is playing, without stopping it.
+ * Go to a place in the song that is playing, without stopping it.
  *
- * `set_song_range` recompiles the piece and starts it again from the top,
- * which is right for a new range and wrong for a click on bar 34 of the one
- * that is sounding: it would end the pass, and ending a pass ends the attempt
- * and raises the review (`COACH_UX.md` A3). This moves a cursor inside the
- * table the engine already has. The click does not miss a beat, the take goes
- * on recording, and the band is cut over a few milliseconds rather than left
+ * `set_song_range` recompiles the piece and starts it again, which is right
+ * for a new range and wrong for a click on bar 34 of the one that is
+ * sounding: it would end the pass, and ending a pass ends the attempt and
+ * raises the review (`COACH_UX.md` A3). This moves a cursor inside the table
+ * the engine already has. The click does not miss a beat, the take goes on
+ * recording, and the band is cut over a few milliseconds rather than left
  * ringing from somewhere the player no longer is.
+ *
+ * `tick` is the SONG's own tick — the one unit the playhead is kept in
+ * everywhere above this (W37 item 1), so the mark on the page, the place the
+ * next press of Play begins and what this moves are the same number.
  */
-export async function seekSong(playedBar: number): Promise<void> {
-  return invoke("seek_song", { playedBar });
+export async function seekSong(tick: number): Promise<void> {
+  return invoke("seek_song", { tick: Math.max(0, Math.round(tick)) });
 }
 
 /**

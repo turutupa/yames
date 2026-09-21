@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} 不会发声：这个文件的声部比能同时响起的还多。",
       "tooManyParts_other": "{{tracks}} 不会发声：这个文件的声部比能同时响起的还多。",
       "turnedDown": "已调低 {{count}} 位乐手",
-      "turnedDown_other": "已调低 {{count}} 位乐手"
+      "turnedDown_other": "已调低 {{count}} 位乐手",
+      "drumsLabel": "鼓",
+      "drumsKit": "Yames 的鼓组",
+      "drumsFile": "文件自带的"
     },
     "countIn": {
       "counting": "正在给你数拍"

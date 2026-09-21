@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
       "tooManyParts_other": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
       "turnedDown": "Đã giảm {{count}} người chơi",
-      "turnedDown_other": "Đã giảm {{count}} người chơi"
+      "turnedDown_other": "Đã giảm {{count}} người chơi",
+      "drumsLabel": "Trống",
+      "drumsKit": "Bộ trống Yames",
+      "drumsFile": "Của tệp"
     },
     "countIn": {
       "counting": "Đang đếm vào"

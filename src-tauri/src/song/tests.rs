@@ -47,6 +47,8 @@ pub(super) fn twelve_bar() -> SongTransport {
         loops: false,
         tempo_percent: 100,
         count_in_bars: 0,
+        start_tick: 0,
+        drums_as_written: false,
     }
 }
 
@@ -208,6 +210,8 @@ fn six_eight_has_a_beat_one_and_a_beat_four_that_are_not_the_same_event() {
         loops: false,
         tempo_percent: 100,
         count_in_bars: 0,
+        start_tick: 0,
+        drums_as_written: false,
     };
     let p = plan(&t, 48_000, 1);
     let levels: Vec<u8> = p.ticks.iter().map(|x| x.accent).collect();
@@ -543,6 +547,7 @@ fn guitar_track() -> SongBacking {
             name: "Guitar".into(),
             program: 29,
             guide: false,
+            percussion: false,
             bends: Vec::new(),
             notes,
         }],
@@ -679,6 +684,7 @@ fn seekable(percent: u32, loops: bool) -> SongTable {
             name: "Drums".into(),
             program: 0,
             guide: false,
+            percussion: false,
             bends: Vec::new(),
             notes,
         }],
@@ -801,4 +807,492 @@ fn a_seek_to_the_very_top_is_a_seek_and_not_a_sentinel() {
     assert_eq!(to.tick_at, 0);
     assert_eq!(to.band_at, 0);
     assert_eq!(to.play, 0);
+}
+
+// ─── Where a press of Play begins (W37 item 1) ───────────────────────────
+//
+// The owner: *"i hit pause when it's on bar 3, if i click on bar 6 and hit
+// play again, it will resume from bar 3 but then immediately go on from bar
+// 6"*. The playhead is compiled into the table now, so a press of Play is
+// already at the right place on its first frame rather than being corrected
+// a buffer or two later.
+
+/// The same fixture as `seekable`, with the playhead somewhere other than the
+/// top of the range.
+fn started_at(tick: u32, percent: u32, loops: bool) -> SongTable {
+    let mut t = twelve_bar();
+    t.tempo_percent = percent;
+    t.loops = loops;
+    if loops {
+        t.range = SongRange {
+            start_bar: 2,
+            end_bar: 5,
+        };
+    }
+    t.start_tick = tick;
+    let mut notes = Vec::new();
+    for bar in t.bars.iter() {
+        let beat_ticks = TICKS_PER_QUARTER * 4 / bar.denominator;
+        for beat in 0..bar.numerator {
+            notes.push(SongNote {
+                tick: bar.start_tick + beat * beat_ticks,
+                dur_ticks: beat_ticks,
+                midi: if beat == 0 { 36 } else { 42 },
+                velocity: 0.9,
+            });
+        }
+    }
+    let backing = SongBacking {
+        tracks: vec![SongTrack {
+            role: SongRole::Drums,
+            name: "Drums".into(),
+            program: 0,
+            guide: false,
+            percussion: false,
+            bends: Vec::new(),
+            notes,
+        }],
+    };
+    compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("the song compiles")
+}
+
+#[test]
+fn a_song_with_no_playhead_begins_at_the_top_of_its_range() {
+    let table = seekable(100, false);
+    let at = table.start();
+    assert_eq!(at.sample, 0);
+    assert_eq!(at.tick_at, 0);
+    assert_eq!(at.band_at, 0);
+    assert_eq!(at.play, 0);
+}
+
+#[test]
+fn a_press_of_play_begins_on_the_bar_line_it_was_left_on() {
+    let bars = twelve_bar().bars;
+    let table = started_at(bars[7].start_tick, 100, false);
+    let at = table.start();
+    assert_eq!(
+        at.sample,
+        table.bars()[7].start_sample,
+        "the playhead is a bar line and the piece begins on it",
+    );
+    // The same three promises a seek makes, because a press of Play IS one:
+    // nothing before it sounds, and nothing AT it is stepped over.
+    assert_eq!(table.ticks()[at.tick_at].sample, at.sample);
+    assert_eq!(table.ticks()[at.tick_at].bar, 7);
+    assert_eq!(table.band()[at.band_at].sample, at.sample);
+    assert_eq!(at.play, at.sample, "the first pass, so the clock is the cursor");
+}
+
+#[test]
+fn a_playhead_part_way_through_a_bar_begins_part_way_through_it() {
+    let bars = twelve_bar().bars;
+    // Beat three of bar eight — 4/4 at 90 BPM, so two beats is 4/3 seconds.
+    let tick = bars[7].start_tick + TICKS_PER_QUARTER * 2;
+    let table = started_at(tick, 100, false);
+    let at = table.start();
+    let want = table.bars()[7].start_sample + (2.0f64 * 60.0 / 90.0 * 48_000.0).round() as u64;
+    assert_eq!(at.sample, want, "a playhead is a tick, not a bar");
+    assert!(table.ticks()[at.tick_at].sample >= at.sample);
+    assert!(table.band()[at.band_at].sample >= at.sample);
+}
+
+#[test]
+fn half_speed_puts_the_playhead_twice_as_far_in() {
+    let bars = twelve_bar().bars;
+    let tick = bars[7].start_tick + TICKS_PER_QUARTER * 2;
+    let full = started_at(tick, 100, false);
+    let half = started_at(tick, 50, false);
+    assert_eq!(half.start().sample, full.start().sample * 2);
+    // And it is the same PLACE IN THE MUSIC, which is the thing that matters.
+    assert_eq!(
+        full.ticks()[full.start().tick_at].beat,
+        half.ticks()[half.start().tick_at].beat,
+    );
+}
+
+#[test]
+fn a_playhead_inside_a_looping_portion_starts_there_and_the_loop_stays_whole() {
+    // Bars 2 to 5, repeating, paused half way down bar 4 (the 7/8).
+    let bars = twelve_bar().bars;
+    let tick = bars[4].start_tick + TICKS_PER_QUARTER * 2;
+    let table = started_at(tick, 100, true);
+    let plain = seekable(100, true);
+    assert_eq!(
+        table.pass_samples(),
+        plain.pass_samples(),
+        "the playhead moves the cursor, never the length of a pass",
+    );
+    assert!(table.loops());
+    assert!(
+        table.start().sample > 0 && table.start().sample < table.pass_samples(),
+        "a pause inside a loop continues inside it",
+    );
+    // The seam still sends the cursor to the top of the portion, which is
+    // what makes the SECOND time round whole — `engine.rs` wraps to 0.
+    assert_eq!(table.bars()[0].start_sample, 0);
+}
+
+#[test]
+fn a_playhead_outside_the_range_is_held_to_its_nearest_edge() {
+    // Bars 2 to 5 repeating, with a playhead written at bar 11 — which the
+    // screen clamps and the engine must not trust it to.
+    let bars = twelve_bar().bars;
+    let table = started_at(bars[11].start_tick, 100, true);
+    assert!(
+        table.start().sample < table.pass_samples(),
+        "a playhead past the end is the end, not silence",
+    );
+}
+
+#[test]
+fn a_count_in_counts_you_into_the_bar_the_playhead_is_on() {
+    // Bar 4 is the 7/8 and bar 6 is 4/4 at 90. A count-in that led into the
+    // piece's FIRST bar would count four at 120 wherever you started.
+    let bars = twelve_bar().bars;
+    let mut t = twelve_bar();
+    t.count_in_bars = 1;
+    t.start_tick = bars[4].start_tick;
+    let p = plan(&t, 48_000, 1);
+    assert_eq!(p.count_in.len(), 7, "one bar of the 7/8 you are about to play");
+    assert_eq!(p.count_in[0].beats_per_bar, 7);
+    // A beat of a 7/8 at 120 BPM is an eighth note, which is a quarter of
+    // a second: 60/120 x 4/8.
+    assert_eq!(p.count_in[1].sample, 12_000);
+
+    let mut later = twelve_bar();
+    later.count_in_bars = 1;
+    later.start_tick = bars[6].start_tick;
+    let q = plan(&later, 48_000, 1);
+    assert_eq!(q.count_in.len(), 4, "four-four again");
+    // A quarter at 90 BPM is two thirds of a second.
+    assert_eq!(q.count_in[1].sample, 32_000);
+}
+
+#[test]
+fn the_sample_a_tick_falls_on_is_the_sample_its_notes_were_placed_at() {
+    // What `seek_song` asks, and it has to give the same answer the compiler
+    // gave the band — otherwise a click on a note and the note itself would
+    // be different places.
+    let table = seekable(100, false);
+    for (n, bar) in table.bars().iter().enumerate() {
+        assert_eq!(
+            table.sample_at_tick(bar.start_tick),
+            bar.start_sample,
+            "bar {n} is somewhere else when asked by tick",
+        );
+    }
+    // And inside a bar: beat three of bar eight, 4/4 at 90.
+    let tick = table.bars()[7].start_tick + TICKS_PER_QUARTER * 2;
+    assert_eq!(
+        table.sample_at_tick(tick),
+        table.bars()[7].start_sample + (2.0f64 * 60.0 / 90.0 * 48_000.0).round() as u64,
+    );
+    // A tick past the end is the last frame of the pass, never past it.
+    assert_eq!(
+        table.sample_at_tick(u32::MAX),
+        table.pass_samples() - 1,
+        "a seek past the end is the end",
+    );
+}
+
+// ─── Drums worth hearing (W37 item 3) ────────────────────────────────────
+//
+// The owner, on a 141-bar metal song at 161 BPM: *"the 'drums' layer in a
+// song i'm playing sounds AWFUL, the click sounds very good tho"*. His track
+// holds 2 922 notes over twelve General MIDI numbers, none of them dropped,
+// and four things were being done to them. Each of these is one of the four.
+
+/// A kit with something to choose BETWEEN.
+///
+/// `bare_sounds` decodes the fallback kit, whose kick is one recording at one
+/// layer — which is the right kit for a question about the map and the wrong
+/// one for a question about layers and round robins. Studio records four
+/// layers and three takes of a kick, which is what these are about.
+fn layered_sounds() -> SongSounds {
+    let kits = crate::kit::KitCache::default();
+    SongSounds {
+        bank: kits
+            .shipped(
+                crate::kit::shipped_index("studio").expect("the Studio kit ships"),
+                48_000,
+            )
+            .expect("the Studio kit decodes"),
+        perc: None,
+        voices: crate::jam::JamVoices::default(),
+    }
+}
+
+/// A drum track written the way a transcription writes one: rhythmic note
+/// values, real dynamics, and the same drum struck again and again.
+fn drum_song(velocities: &[f32], midi: u8) -> (SongTransport, SongBacking) {
+    let mut t = twelve_bar();
+    t.range = SongRange {
+        start_bar: 0,
+        end_bar: 0,
+    };
+    let mut notes = Vec::new();
+    for (i, v) in velocities.iter().enumerate() {
+        notes.push(SongNote {
+            // Sixteenths, which is what a double kick is written as.
+            tick: i as u32 * (TICKS_PER_QUARTER / 4),
+            // ...and a sixteenth is the length they carry, which is the whole
+            // of the first bug: it is rhythm, not sustain.
+            dur_ticks: TICKS_PER_QUARTER / 4,
+            midi,
+            velocity: *v,
+        });
+    }
+    (
+        t,
+        SongBacking {
+            tracks: vec![SongTrack {
+                role: SongRole::Drums,
+                name: "Drums".into(),
+                program: 0,
+                guide: false,
+                percussion: false,
+                bends: Vec::new(),
+                notes,
+            }],
+        },
+    )
+}
+
+#[test]
+fn a_drum_plays_out_instead_of_being_cut_to_its_written_note_value() {
+    // A crash written as a sixteenth at 120 BPM is 125 milliseconds of paper
+    // and about two seconds of cymbal. Cut there — with `release: 0`, so the
+    // cut is a hard one — it is a click rather than a crash.
+    let (t, backing) = drum_song(&[1.0, 1.0, 1.0, 1.0], 49);
+    let table = compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("it compiles");
+    assert_eq!(table.band().len(), 4);
+    for (i, e) in table.band().iter().enumerate() {
+        assert_eq!(e.cap_samples, 0, "crash {i} was cut to its written length");
+    }
+
+    // And the old behaviour is still reachable, for the A/B clips and for
+    // nothing else.
+    let mut written = t.clone();
+    written.drums_as_written = true;
+    let old = compile(&written, Some(&backing), bare_sounds(), 48_000, 1).expect("it compiles");
+    assert!(
+        old.band().iter().all(|e| e.cap_samples > 0),
+        "the as-written render has to be the thing it is being compared with",
+    );
+}
+
+#[test]
+fn the_same_drum_twice_running_is_not_the_same_recording_twice() {
+    // Fourteen hundred and ninety kicks in the owner's song, every one of
+    // them the same recording of a kick, at ninety-three milliseconds apart.
+    // Every kit the app ships records two or three of each.
+    let (t, backing) = drum_song(&[1.0; 8], 36);
+    let table = compile(&t, Some(&backing), layered_sounds(), 48_000, 1).expect("it compiles");
+    let robins: Vec<u8> = table
+        .band()
+        .iter()
+        .map(|e| match e.slot.sound {
+            SoundId::Band { robin, .. } => robin,
+            _ => panic!("a drum is a Band sound"),
+        })
+        .collect();
+    let rr = table.band()[0].slot.rr;
+    if rr > 1 {
+        assert!(
+            robins.windows(2).any(|w| w[0] != w[1]),
+            "every kick played round robin {robins:?} — the rotation never moved",
+        );
+        assert!(
+            robins.iter().all(|r| *r < rr),
+            "a robin past the end of what the bank holds",
+        );
+    }
+
+    let mut written = t.clone();
+    written.drums_as_written = true;
+    let old = compile(&written, Some(&backing), layered_sounds(), 48_000, 1).expect("it compiles");
+    assert!(
+        old.band().iter().all(|e| matches!(
+            e.slot.sound,
+            SoundId::Band { robin: 0, .. }
+        )),
+        "the as-written render has to be the thing it is being compared with",
+    );
+}
+
+#[test]
+fn a_written_dynamic_reaches_every_layer_the_kit_recorded() {
+    // Guitar Pro writes eight dynamics; the owner's transcription uses five
+    // (63, 79, 95, 111 and 127 out of 127). Through `voice_layer`'s three
+    // buckets those landed on layers 1, 2, 2, 2 and 3 — and the kick is
+    // recorded in four, so the hardest one never played.
+    let velocities = [63.0 / 127.0, 79.0 / 127.0, 95.0 / 127.0, 111.0 / 127.0, 1.0];
+    let (t, backing) = drum_song(&velocities, 36);
+    let table = compile(&t, Some(&backing), layered_sounds(), 48_000, 1).expect("it compiles");
+    let layers: Vec<u8> = table
+        .band()
+        .iter()
+        .map(|e| match e.slot.sound {
+            SoundId::Band { layer, .. } => layer,
+            _ => panic!("a drum is a Band sound"),
+        })
+        .collect();
+    let top = *layers.iter().max().unwrap();
+    let low = *layers.iter().min().unwrap();
+    assert!(
+        top > low,
+        "five written dynamics all came out on layer {top}",
+    );
+    // Never past the end of what the bank holds, whatever the file says.
+    // Studio records four layers of a kick, so the indices are 0..=3.
+    assert!(layers.iter().all(|l| *l <= 3), "a layer past the bank: {layers:?}");
+    assert_eq!(top, 3, "the hardest layer the kit recorded was never reached");
+    // And they only ever go UP with the dynamic.
+    assert!(
+        layers.windows(2).all(|w| w[0] <= w[1]),
+        "a softer note reached a harder layer: {layers:?}",
+    );
+
+    // What it was: three buckets, so the five dynamics came out 0, 1, 1, 1, 2
+    // and the fourth layer was unreachable.
+    let mut written = t.clone();
+    written.drums_as_written = true;
+    let old = compile(&written, Some(&backing), layered_sounds(), 48_000, 1).expect("it compiles");
+    let before: Vec<u8> = old
+        .band()
+        .iter()
+        .map(|e| match e.slot.sound {
+            SoundId::Band { layer, .. } => layer,
+            _ => panic!("a drum is a Band sound"),
+        })
+        .collect();
+    assert_eq!(before, vec![0, 1, 1, 1, 2], "the as-written render moved");
+}
+
+#[test]
+fn a_hat_closes_a_hat() {
+    // 551 open hats against 32 closed ones, an eighth note apart, in the
+    // owner's file. With the cap gone they would all ring together.
+    let (t, backing) = drum_song(&[1.0; 4], 46);
+    let table = compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("it compiles");
+    let slot = table.band()[0].slot;
+    assert_ne!(
+        slot.chokes & (1u32 << slot.voice),
+        0,
+        "an open hat does not close the open hat before it",
+    );
+
+    // The closed hat and the foot still close it too — that is the kits' own
+    // declaration and nothing here may take it away.
+    let (t2, closed) = drum_song(&[1.0], 42);
+    let with_closed = compile(&t2, Some(&closed), bare_sounds(), 48_000, 1).expect("it compiles");
+    let hat = with_closed.band()[0].slot;
+    assert_ne!(hat.chokes, 0, "the closed hat stopped closing the open one");
+
+    // And the as-written render is the thing it is being compared with.
+    let mut written = t.clone();
+    written.drums_as_written = true;
+    let old = compile(&written, Some(&backing), bare_sounds(), 48_000, 1).expect("it compiles");
+    assert_eq!(
+        old.band()[0].slot.chokes & (1u32 << old.band()[0].slot.voice),
+        0,
+    );
+}
+
+#[test]
+fn a_dense_arrangement_is_not_held_down_for_a_coincidence_it_never_makes() {
+    // The window used to add the gains straight up, which is the worst case
+    // only if every drum peaks on the same sample in the same direction.
+    // Measured on the owner's song: the straight sum said 2.99 and the render
+    // peaked at 1.57, so the whole kit and the bass were held fourteen
+    // decibels under two guitars that are not in the sum at all.
+    let mut t = twelve_bar();
+    t.range = SongRange {
+        start_bar: 0,
+        end_bar: 0,
+    };
+    // A kick, a snare, a crash and an open hat on the same instant, which is
+    // an ordinary metal downbeat.
+    let notes: Vec<SongNote> = [36u8, 40, 49, 46]
+        .iter()
+        .map(|midi| SongNote {
+            tick: 0,
+            dur_ticks: TICKS_PER_QUARTER,
+            midi: *midi,
+            velocity: 1.0,
+        })
+        .collect();
+    let backing = SongBacking {
+        tracks: vec![SongTrack {
+            role: SongRole::Drums,
+            name: "Drums".into(),
+            program: 0,
+            guide: false,
+            percussion: false,
+            bends: Vec::new(),
+            notes,
+        }],
+    };
+    let table = compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("it compiles");
+    // Four drums of equal gain `g` on one instant. Added in amplitude that is
+    // `4g` and the trim would be `ceiling / 4g`; added in power it is `2g`,
+    // which is twice the level and is the one that matches the render.
+    let g = table.band()[0].slot.gain / table.band_trim;
+    let power = SONG_TRANSIENT_CEILING / (2.0 * g);
+    let amplitude = SONG_TRANSIENT_CEILING / (4.0 * g);
+    assert!(
+        (table.band_trim - power).abs() < 1e-4,
+        "the trim came out {:.4} and the power sum asks for {power:.4}",
+        table.band_trim,
+    );
+    assert!(
+        table.band_trim > amplitude * 1.9,
+        "the trim is still the old rule's {amplitude:.4}",
+    );
+    assert!(
+        table.band_trim > 0.0 && table.band_trim <= 1.0,
+        "the trim is a level, not a multiplier upward",
+    );
+
+    // And a sparse arrangement — one drum on its own instant — is where the
+    // two rules agree, which is why the ceiling did not have to move.
+    let (one_t, one) = drum_song(&[1.0], 36);
+    let sparse = compile(&one_t, Some(&one), bare_sounds(), 48_000, 1).expect("it compiles");
+    let alone = sparse.band()[0].slot.gain / sparse.band_trim;
+    assert!(
+        (sparse.band_trim - (SONG_TRANSIENT_CEILING / alone).min(1.0)).abs() < 1e-4,
+        "one drum is one drum whichever way the window adds",
+    );
+}
+
+#[test]
+fn the_files_own_drums_go_to_the_percussion_channel() {
+    // A drum track routed to the synthesiser has to land on MIDI channel 9,
+    // which is percussion in every General MIDI set ever written. Anywhere
+    // else and a kick plays as a note of whatever instrument is on it.
+    let (t, mut backing) = drum_song(&[1.0; 4], 36);
+    backing.tracks[0].role = SongRole::Synth;
+    backing.tracks[0].percussion = true;
+    backing.tracks[0].program = 0;
+    let table = compile(&t, Some(&backing), bare_sounds(), 48_000, 1).expect("it compiles");
+    assert!(table.band().is_empty(), "nothing is left on the recorded kit");
+    let score = table.synth_score.as_ref().expect("a synthesised part");
+    assert!(
+        score
+            .events
+            .iter()
+            .all(|e| e.channel == crate::synth::PERCUSSION_CHANNEL),
+        "the file's own drums did not go to channel 9",
+    );
+    // And no program change, which on channel 9 would be choosing a drum set
+    // nobody asked for rather than an instrument.
+    assert!(
+        !score
+            .events
+            .iter()
+            .any(|e| matches!(e.kind, crate::synth::SynthEventKind::Program { .. })),
+        "a program change was sent to the percussion channel",
+    );
+    assert_eq!(score.channel_track[crate::synth::PERCUSSION_CHANNEL as usize], 0);
 }

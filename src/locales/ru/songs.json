@@ -50,7 +50,10 @@
       "turnedDown": "{{count}} музыкант убавлен",
       "turnedDown_few": "{{count}} музыканта убавлены",
       "turnedDown_many": "{{count}} музыкантов убавлены",
-      "turnedDown_other": "{{count}} музыканта убавлены"
+      "turnedDown_other": "{{count}} музыканта убавлены",
+      "drumsLabel": "Барабаны",
+      "drumsKit": "Установка Yames",
+      "drumsFile": "Из файла"
     },
     "countIn": {
       "counting": "Считаю вступление"

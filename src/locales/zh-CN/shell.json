@@ -75,7 +75,8 @@
     "inputOff": "输入已关闭",
     "coachOnPlay": "按下播放后教练开始聆听",
     "coachQuiet": "教练在每一步中途保持安静",
-    "countIn": "预备拍"
+    "countIn": "预备拍",
+    "backToStart": "回到开头"
   },
   "rail": {
     "label": "模式与资料库",

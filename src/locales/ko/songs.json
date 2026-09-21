@@ -40,7 +40,10 @@
       "tooManyParts": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
       "tooManyParts_other": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
       "turnedDown": "{{count}}명의 소리를 줄였습니다",
-      "turnedDown_other": "{{count}}명의 소리를 줄였습니다"
+      "turnedDown_other": "{{count}}명의 소리를 줄였습니다",
+      "drumsLabel": "드럼",
+      "drumsKit": "Yames의 드럼",
+      "drumsFile": "파일의 드럼"
     },
     "countIn": {
       "counting": "카운트 중"

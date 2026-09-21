@@ -61,6 +61,9 @@ import { useHeaderSlot } from "../main-window/headerSlot";
  * hooks are a few hundred lines and run on every pass; the drawing is sixty
  * kilobytes and is only ever seen after you stop. See `SongReview` below.
  */
+// W37 item 1 — the same arithmetic the cursor glides by, asked once at the
+// stop so the playhead is left where the line actually was.
+import { advanceTicks } from "../../songs/cursor";
 import { useLiveNoteLights } from "./review/useLiveNoteLights";
 import { useSongActions } from "./review/useSongActions";
 import { useSongAttempt } from "./review/useSongAttempt";
@@ -218,22 +221,47 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
     [score, range, currentBeat, isPlaying],
   );
   /**
-   * Where the cursor is drawn.
+   * Where the cursor is drawn: THE playhead, and nothing else (W37 item 1).
    *
-   * The engine's position while it is running. Stopped, it is the playhead —
-   * the bar somebody clicked (W29 item 1). Those are the same answer whenever
-   * the repeat is off, because the playhead is then the range's own first
-   * bar; with a portion repeating they are not, and it is the CLICK that has
-   * to be honoured, or a click inside the portion would move nothing on
-   * screen at all.
+   * This used to be a third answer — the engine's position while it ran, the
+   * clicked bar while it did not, and `TabStage` keeping a fourth of its own
+   * for the moment after a click. The session owns one now
+   * (`songs/playhead.ts`) and everything on this screen reads it.
    */
-  const tick = useMemo(() => {
-    if (score && !isPlaying && session.playFrom !== null) {
-      const bar = score.bars[session.playFrom];
-      if (bar) return bar.startTick;
+  const tick = session.playheadTick;
+
+  /**
+   * And where the line actually IS, for the pause that ends a pass.
+   *
+   * A stop is a pause, so the playhead has to be left where the music
+   * stopped — and "where the music stopped" is not the last report, which can
+   * be a whole click tick behind. It is that report carried forward through
+   * the tempo map to this instant, which is the position `TabStage` has been
+   * drawing all along (`songs/cursor.ts`, the same function). Two refs and no
+   * clock of our own: the arrival instant is stamped when the report lands.
+   */
+  const reportRef = useRef<{ tick: number; atMs: number } | null>(null);
+  useEffect(() => {
+    if (!isPlaying || !currentBeat || currentBeat.songCountIn) return;
+    reportRef.current = { tick: currentBeat.songTick, atMs: performance.now() };
+  }, [isPlaying, currentBeat]);
+  const wasPlaying = useRef(isPlaying);
+  useEffect(() => {
+    const before = wasPlaying.current;
+    wasPlaying.current = isPlaying;
+    if (isPlaying || !before) return;
+    const at = reportRef.current;
+    reportRef.current = null;
+    if (!score || !at) {
+      session.pauseAt(null);
+      return;
     }
-    return position?.tick ?? 0;
-  }, [score, isPlaying, session.playFrom, position?.tick]);
+    session.pauseAt(
+      advanceTicks(score, at.tick, performance.now() - at.atMs, tempoPercent),
+    );
+    // `session.pauseAt` is stable and `tempoPercent` is read at the stop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying]);
 
   /**
    * Where the bars being played stop, in the song's own ticks.
@@ -1279,6 +1307,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId, listening 
                 onGain={session.setGain}
                 onMute={session.setMute}
                 onSolo={session.setSolo}
+                onDrums={session.setDrums}
               />
             </SongStripMore>
           </div>

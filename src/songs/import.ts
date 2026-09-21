@@ -36,6 +36,7 @@ import {
 export { SONG_FILE_EXTENSIONS } from "./types";
 import type {
   SongBacking,
+  SongDrums,
   SongBackingNote,
   SongBackingTrack,
   SongBar,
@@ -501,6 +502,14 @@ export type TransportOptions = {
   tempoPercent?: number;
   /** 0, 1 or 2 bars before the first pass. */
   countInBars?: number;
+  /**
+   * Where the first pass begins, in the song's own ticks (W37 item 1).
+   *
+   * Clamped into the range, because a playhead is a place somebody clicked
+   * and every screen above this already holds it inside the bars that are
+   * going to play.
+   */
+  startTick?: number;
 };
 
 /**
@@ -546,14 +555,22 @@ export function buildTransport(
   if (tempoMap.length === 0) tempoMap.push({ tick: firstBarTick, bpm: 120 });
   if (tempoMap[0].tick > firstBarTick) tempoMap[0] = { ...tempoMap[0], tick: firstBarTick };
 
+  const played = clampRange(score, range);
+  // The playhead, held inside the bars that are about to play: the engine
+  // clamps it too, and agreeing here is what makes the mark on the page and
+  // the sample the band starts on the same place.
+  const first = bars[played.startBar]?.startTick ?? 0;
+  const lastBar = bars[played.endBar];
+  const end = lastBar ? lastBar.startTick + lastBar.lengthTicks - 1 : first;
   return {
     ticksPerQuarter: TICKS_PER_QUARTER,
     tempoMap,
     bars,
-    range: clampRange(score, range),
+    range: played,
     loops: options.loops ?? false,
     tempoPercent: clampInt(options.tempoPercent ?? 100, MIN_TEMPO_PERCENT, MAX_TEMPO_PERCENT),
     countInBars: clampInt(options.countInBars ?? 0, 0, MAX_COUNT_IN_BARS),
+    startTick: clampInt(options.startTick ?? first, first, Math.max(first, end)),
   };
 }
 
@@ -702,7 +719,23 @@ function drumMidi(track: AtTrack, note: AtNote): number | null {
  * `buildSongScore` puts the player's notes on, so a repeat is played by all
  * of them and the scorer's expected onsets line up with what is heard.
  */
-export function buildBacking(parsed: ParsedSong, chosenTrackIndex: number): SongBackingResult {
+export function buildBacking(
+  parsed: ParsedSong,
+  chosenTrackIndex: number,
+  options: { drums?: SongDrums } = {},
+): SongBackingResult {
+  /*
+   * Whose kit plays the file's drum track (W37 item 3).
+   *
+   * "kit" is Yames' recorded one — somebody hit those drums — and it is the
+   * default. "file" sends the same notes to the General MIDI synthesiser
+   * instead, on channel 9, which is what a Guitar Pro file sounds like
+   * everywhere else. It is a per-song choice because the answer is a taste
+   * one and it depends on the transcription: a part written with five
+   * dynamics and a full tom run is a different question from four-on-the-
+   * floor.
+   */
+  const fromFile = options.drums === "file";
   const tracks: SongBackingTrack[] = [];
   const leftOut: string[] = [];
   const byTrack = new Map<number, SongBackingTrack>();
@@ -715,9 +748,12 @@ export function buildBacking(parsed: ParsedSong, chosenTrackIndex: number): Song
       leftOut.push(tidy(track.name) || `Track ${track.index + 1}`);
       continue;
     }
-    const role = roleOf(track);
+    const kind = roleOf(track);
+    const drumsToTheSynth = fromFile && kind === "drums";
+    const role: SongRole = drumsToTheSynth ? "synth" : kind;
     const row: SongBackingTrack = {
       role,
+      ...(drumsToTheSynth ? { percussion: true } : {}),
       name: tidy(track.name) || `Track ${track.index + 1}`,
       program: track.isPercussion ? 0 : clampProgram(track.playbackInfo.program),
       // THE PART UNDER THE CURSOR IS THE PART YOU PLAY — and, since W28, the
@@ -735,6 +771,8 @@ export function buildBacking(parsed: ParsedSong, chosenTrackIndex: number): Song
     const startTick = playedBar.start;
     for (const track of parsed.atScore.tracks) {
       const row = byTrack.get(track.index);
+      // A `synth` row's notes come out of the generated MIDI below — the
+      // file's own drums included, when the player has asked for them.
       if (!row || row.role === "synth") continue;
       const drums = track.isPercussion || track.staves[0]?.isPercussion;
       for (const staff of track.staves) {
@@ -781,6 +819,13 @@ export function buildBacking(parsed: ParsedSong, chosenTrackIndex: number): Song
   }
   return { backing: { tracks }, leftOut };
 }
+
+/**
+ * Percussion's channel, in every General MIDI file ever written.
+ *
+ * `src-tauri/src/synth.rs`'s `PERCUSSION_CHANNEL`, on this side of the wire.
+ */
+const PERCUSSION_CHANNEL = 9;
 
 /** `song.rs`'s own ceiling: MIDI has sixteen channels and so has a band. */
 const MAX_BAND_TRACKS = 16;
@@ -842,8 +887,27 @@ function fillFromMidi(
   for (const track of atScore.tracks) {
     const row = byTrack.get(track.index);
     if (!row || row.role !== "synth") continue;
-    rowOf.set(track.playbackInfo.primaryChannel, row);
-    rowOf.set(track.playbackInfo.secondaryChannel, row);
+    /*
+     * CHANNEL 9 BELONGS TO THE DRUMS AND TO NOTHING ELSE (W37 item 3).
+     *
+     * It is percussion in every General MIDI set ever written, and alphaTab
+     * hands out secondary channels by counting: in a five-track file the
+     * Horn's second voice is channel 9. Claiming it made that row the owner
+     * of every drum in the piece — so with the drums on the recorded kit a
+     * french horn was quietly being handed nineteen kick and snare notes to
+     * play as pitches, and with the drums routed here they arrived on a row
+     * that is not the drums.
+     *
+     * So a part that is not a kit never takes channel 9, and a part that IS
+     * one takes nothing else.
+     */
+    if (row.percussion) {
+      rowOf.set(PERCUSSION_CHANNEL, row);
+      continue;
+    }
+    const { primaryChannel, secondaryChannel } = track.playbackInfo;
+    if (primaryChannel !== PERCUSSION_CHANNEL) rowOf.set(primaryChannel, row);
+    if (secondaryChannel !== PERCUSSION_CHANNEL) rowOf.set(secondaryChannel, row);
   }
   if (rowOf.size === 0) return;
   // Where each channel's notes are still ringing, so a note-off can find the

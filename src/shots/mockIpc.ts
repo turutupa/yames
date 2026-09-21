@@ -865,6 +865,24 @@ export function installShotMock(shot: Shot, theme: string): void {
   }
 
   /**
+   * Which beat a press of Play begins on (W37 item 1).
+   *
+   * The engine compiles the playhead into the table and the callback starts
+   * there; this harness counts beats, so the same fact is where the count
+   * starts. A count-in still runs in front of it, into the playhead's bar.
+   */
+  function beatAtPlayhead(): number {
+    const transport = songTransport;
+    if (!transport) return 0;
+    const first = transport.bars[transport.range.startBar];
+    if (!first) return 0;
+    const beatTicks = (transport.ticksPerQuarter * 4) / (first.denominator || 4);
+    const countInBeats = (transport.countInBars || 0) * (first.numerator || 4);
+    const into = Math.max(0, (transport.startTick ?? first.startTick) - first.startTick);
+    return countInBeats + Math.round(into / beatTicks);
+  }
+
+  /**
    * And the verdicts on the notes that have gone by (`SONGS.md` A7).
    *
    * One `score-onset` per expected note as the cursor passes it, which is
@@ -966,7 +984,10 @@ export function installShotMock(shot: Shot, theme: string): void {
 
   function setPlaying(next: boolean) {
     STATE.isPlaying = next;
-    beatCount = 0;
+    // A press of Play begins AT THE PLAYHEAD (W37 item 1), which is where
+    // the engine's own first frame is — not at the top of the range with a
+    // correction arriving a buffer later.
+    beatCount = next ? beatAtPlayhead() : 0;
     // A new pass has said nothing about any note yet.
     onsetsSaid = 0;
     emit("state-changed", STATE);
@@ -1297,9 +1318,13 @@ export function installShotMock(shot: Shot, theme: string): void {
           loops: a?.loops === true,
           tempoPercent: Number(a?.tempoPercent) || songTransport.tempoPercent,
           countInBars: Number(a?.countInBars) || 0,
+          startTick:
+            a?.startTick === null || a?.startTick === undefined
+              ? songTransport.startTick
+              : Number(a.startTick),
         };
       }
-      beatCount = 0;
+      beatCount = beatAtPlayhead();
       onsetsSaid = 0;
       return { bars: 8, passMs: 20_000, playedNotes: 96, droppedNotes: 0 };
     },
@@ -1323,15 +1348,12 @@ export function installShotMock(shot: Shot, theme: string): void {
       const countInBeats = (transport.countInBars || 0) * (first.numerator || 4);
       // The nearest edge for a bar the range does not hold, which is what the
       // real command's binary search falls back to.
-      const asked = Math.min(
-        Math.max(Number(a?.playedBar) || 0, transport.range.startBar),
-        transport.range.endBar,
-      );
-      let into = 0;
-      for (let i = transport.range.startBar; i < asked; i++) {
-        into += transport.bars[i]?.lengthTicks ?? 0;
-      }
-      beatCount = countInBeats + Math.round(into / beatTicks);
+      const last = bars[bars.length - 1];
+      const end = last ? last.startTick + last.lengthTicks - 1 : first.startTick;
+      // The nearest edge for a tick the range does not hold, which is what
+      // the real command's clamp falls back to.
+      const asked = Math.min(Math.max(Number(a?.tick) || 0, first.startTick), end);
+      beatCount = countInBeats + Math.round((asked - first.startTick) / beatTicks);
       onsetsSaid = 0;
       return null;
     },

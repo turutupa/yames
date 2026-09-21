@@ -45,7 +45,7 @@ import {
 import type { SongLane, SongMixSetting } from "../../../songs/songEngine";
 import type { BarRange } from "../../../songs/schedule";
 import { MAX_COUNT_IN_BARS } from "../../../songs/types";
-import type { SongBackingTrack, SongScore } from "../../../songs/types";
+import type { SongBackingTrack, SongDrums, SongScore } from "../../../songs/types";
 
 /**
  * The importer, loaded when a song is opened rather than when the app starts.
@@ -82,6 +82,11 @@ export interface SongEngine {
   /** Hear one track on its own, or stop. Tracks only; the click is not soloed. */
   setSolo: (track: number, soloed: boolean) => void;
   setCountInBars: (bars: number) => void;
+  /**
+   * Whose kit plays the file's drums: Yames' recorded one, or the file's own
+   * through the General MIDI synthesiser (W37 item 3). Remembered per song.
+   */
+  setDrums: (drums: SongDrums) => void;
   /** Turn recording on or off for the loaded song. Remembered per song. */
   setTakes: (takes: boolean) => void;
   /** W21 — and the camera, the same way. Opens nothing; it is a switch. */
@@ -133,6 +138,23 @@ export type SongEngineInput = {
   range: BarRange;
   loop: boolean;
   tempoPercent: number;
+  /**
+   * Is the transport running? Read by the rebuild and by nothing else.
+   *
+   * A rebuild is a restart, so the two things that only decide how the NEXT
+   * pass begins — the count-in and the playhead — are held until the stop.
+   */
+  isPlaying: boolean;
+  /**
+   * Where the next pass begins, in the song's own ticks — the playhead
+   * (W37 item 1).
+   *
+   * It is part of the compiled piece, so a change to it is a rebuild, which
+   * is why the session holds it still while the transport runs and lets it
+   * catch up on the stop: recompiling under a running pass would end the
+   * attempt and raise the review.
+   */
+  startTick: number;
 };
 
 export function useSongEngine({
@@ -142,6 +164,8 @@ export function useSongEngine({
   range,
   loop,
   tempoPercent,
+  isPlaying,
+  startTick,
 }: SongEngineInput): SongEngine {
   const [mixSetting, setMixSetting] = useState<SongMixSetting>(DEFAULT_MIX_SETTING);
   const [band, setBand] = useState<Band | null>(null);
@@ -168,7 +192,12 @@ export function useSongEngine({
       try {
         const importer = await importerModule();
         const parsed = importer.parseSongFile(source, score.source.fileName);
-        const built = importer.buildBacking(parsed, score.source.trackIndex);
+        // The drums choice is part of the BAND rather than of the mix: it
+        // decides which lane the file's percussion is compiled onto, so it is
+        // a re-read of the file and a fresh load rather than a fader.
+        const built = importer.buildBacking(parsed, score.source.trackIndex, {
+          drums: mixSetting.drums,
+        });
         if (!cancelled) setBand({ tracks: built.backing.tracks, leftOut: built.leftOut });
       } catch {
         // A file we cannot re-read is a song with no band, not a song that
@@ -181,7 +210,10 @@ export function useSongEngine({
     return () => {
       cancelled = true;
     };
-  }, [score, source]);
+    // `mixSetting.drums` and not the whole setting: a fader move must not
+    // re-parse a megabyte of Guitar Pro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [score, source, mixSetting.drums]);
 
   // --- what this song's band was left at ----------------------------------
   useEffect(() => {
@@ -236,18 +268,62 @@ export function useSongEngine({
    * A ref and not state, because it is written from inside the effect that
    * reads it — keeping it in state would re-run the effect that set it.
    */
-  const heldRef = useRef<{ songId: string; key: string } | null>(null);
+  const heldRef = useRef<{
+    songId: string;
+    key: string;
+    music: string;
+    /**
+     * The band this table was built from. A new object is a new band — the
+     * drums moved to the synthesiser, or the file re-read — and a band change
+     * is a LOAD rather than a range, because `set_song_range` reuses the
+     * backing the engine already has.
+     */
+    band: unknown;
+  } | null>(null);
   const reloadedAtRef = useRef(0);
   const onSongsRef = useRef(onSongs);
   onSongsRef.current = onSongs;
 
-  const settingsKey = JSON.stringify([
-    range.startBar,
-    range.endBar,
-    loop,
-    tempoPercent,
-    mixSetting.countInBars,
-  ]);
+  /*
+   * ── Two keys, because two of these are typed and two are pressed ────────
+   *
+   * The bar fields are number inputs and fire per keystroke, so a range or a
+   * speed waits [`REBUILD_DEBOUNCE_MS`] before the piece is rebuilt — typing
+   * "24" into the end bar would otherwise compile it twice, once for bar 2.
+   *
+   * **The count-in and the playhead are not typed.** They are a switch and a
+   * click, and a quarter of a second is long enough to press Play in. The
+   * owner, 2026-09-21: *"count in is happening for songs whether it's enabled
+   * or not"*. Turn the switch off, press Play inside the debounce, and the
+   * piece the engine is still holding is the one compiled with the count-in —
+   * so it counts you in, and then the rebuild lands underneath and starts the
+   * song again. Both halves of that are this timer. So a change to either of
+   * these goes at once, and only the two that come from a keyboard wait.
+   */
+  const musicKey = JSON.stringify([range.startBar, range.endBar, loop, tempoPercent]);
+
+  /**
+   * And NEITHER of them is sent while the transport runs.
+   *
+   * A rebuild is a restart: `set_song_range` compiles the piece again and the
+   * callback begins it from the playhead (`song.rs`), which under a running
+   * pass would end the attempt and raise the review. Both of these only
+   * decide how the NEXT pass begins — a count-in leads into a first pass that
+   * has already happened, and the playhead is moved live by `seek_song` — so
+   * holding them until the stop costs nothing and takes the restart away.
+   */
+  const [heldStart, setHeldStart] = useState({ countInBars: 0, startTick: 0 });
+  useEffect(() => {
+    if (isPlaying) return;
+    setHeldStart((current) =>
+      current.countInBars === mixSetting.countInBars && current.startTick === startTick
+        ? current
+        : { countInBars: mixSetting.countInBars, startTick },
+    );
+  }, [isPlaying, mixSetting.countInBars, startTick]);
+
+  const startKey = JSON.stringify([heldStart.countInBars, heldStart.startTick]);
+  const settingsKey = `${musicKey}|${startKey}`;
 
   useEffect(() => {
     if (!onSongs || !score || band === null) {
@@ -265,16 +341,23 @@ export function useSongEngine({
     const held = heldRef.current;
     if (held && held.songId === score.id && held.key === settingsKey) return;
 
+    // Only what somebody TYPED waits. A switch and a click go on the next
+    // tick, which is still a tick later rather than inside this effect: the
+    // send is async and an effect that awaited would be an effect that could
+    // not be cancelled.
+    const typed = !held || held.songId !== score.id || held.music !== musicKey;
     const timer = setTimeout(() => {
       void (async () => {
         try {
           const importer = await importerModule();
-          const sameSong = heldRef.current?.songId === score.id;
-          heldRef.current = { songId: score.id, key: settingsKey };
+          const sameSong =
+            heldRef.current?.songId === score.id && heldRef.current?.band === band;
+          heldRef.current = { songId: score.id, key: settingsKey, music: musicKey, band };
           const options = {
             loops: loop,
             tempoPercent,
-            countInBars: mixSetting.countInBars,
+            countInBars: heldStart.countInBars,
+            startTick: heldStart.startTick,
           };
           const transport = importer.buildTransport(score, range, options);
           // A range or a speed change on a song the engine already holds is
@@ -286,6 +369,7 @@ export function useSongEngine({
                 transport.loops,
                 transport.tempoPercent,
                 transport.countInBars,
+                transport.startTick,
               )
             : await loadSong(transport, band.tracks.length > 0 ? { tracks: band.tracks } : null);
           setLoaded(result ?? null);
@@ -301,7 +385,7 @@ export function useSongEngine({
           setEngineError({ kind: "load", ...(detail ? { detail } : {}) });
         }
       })();
-    }, REBUILD_DEBOUNCE_MS);
+    }, typed ? REBUILD_DEBOUNCE_MS : 0);
 
     return () => clearTimeout(timer);
     // `settingsKey` is every field of the send, in one string; listing them
@@ -402,6 +486,26 @@ export function useSongEngine({
     [songId],
   );
 
+  /**
+   * Whose kit the file's drums are played on (W37 item 3).
+   *
+   * Stored beside the faders because it is the same kind of fact — something
+   * the player decided about this piece — and it is read where the band is
+   * built, so changing it re-reads the file and loads the piece again. That
+   * is a fraction of a second, and it is a thing you press once rather than
+   * sweep.
+   */
+  const setDrums = useCallback(
+    (drums: SongDrums) =>
+      setMixSetting((current) => {
+        if (current.drums === drums) return current;
+        const next = { ...current, drums };
+        if (songId) void saveMixSetting(songId, next).catch(() => {});
+        return next;
+      }),
+    [songId],
+  );
+
   const setCountInBars = useCallback(
     (bars: number) =>
       setMixSetting((current) => {
@@ -475,6 +579,7 @@ export function useSongEngine({
     setMute,
     setSolo,
     setCountInBars,
+    setDrums,
     setTakes,
     setCamera,
     setStageSetting,

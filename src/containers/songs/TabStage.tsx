@@ -813,58 +813,26 @@ export function TabStage({
    * state update per frame would put the whole stage through React sixty
    * times a second, which is the opposite of what item 2 asks for.
    */
-  /* ── A click's own answer, until the engine catches up (W36, item 1's
-   *    second half) ───────────────────────────────────────────────────────
+  /* ── A click is believed at once, and it is believed in ONE place now
+   *    (W36 item 1, kept; W37 item 1, moved) ─────────────────────────────
    *
-   * The owner, after the first fix landed: *"when clicking on alphatab to go
-   * to a certain place, i think it's mostly flaky WHEN THE TABS ARE
-   * PLAYING"*, and *"if they're not playing sometimes they do a flickering
-   * thing like the cursor goes to where it was already and then to the target
-   * location"*. Two reports, one cause.
+   * The owner, after W36's fix landed: *"when clicking on alphatab to go to a
+   * certain place, i think it's mostly flaky WHEN THE TABS ARE PLAYING"*.
+   * The engine is the clock and a click is a message to it: its answer comes
+   * back one click tick later — seven hundred milliseconds at 84 BPM — and
+   * for that whole interval a cursor that waited went on walking where the
+   * music used to be and then teleported. So the click is the position, at
+   * once, and the engine's reports are ignored until one of them agrees.
    *
-   * The engine is the clock and a click is a message to it. Clicking bar 60
-   * while the piece runs sets a range (or calls `seek_song`), the engine acts
-   * on it at the next buffer, and its next POSITION report — the only thing
-   * this component was ever told — arrives one click tick later: seven
-   * hundred milliseconds at 84 BPM. For that whole interval the webview went
-   * on interpolating from the anchor it already had, so the line kept walking
-   * at bar 5 and then teleported to bar 60. Stopped, the same shape in
-   * miniature: a render that still carried the old position wrote it to
-   * `tickPosition`, the next render wrote the new one, and alphaTab drew both
-   * — the line going back where it was and then to where you clicked.
-   *
-   * So the click is believed at once, here, and the engine's reports are
-   * ignored until one of them agrees with it. That is the whole of the fix:
-   * the moment somebody presses the page, the webview's position IS the
-   * clicked beat, the cursor snaps there, the follow-scroll goes there, and
-   * nothing that was already in flight can pull either of them back.
-   *
-   * "Agrees" is a window rather than an equality, because the report the
-   * engine sends after a seek is the first click tick AFTER it, not the seek
-   * itself — a beat or so past the bar line. Six quarter notes is a bar and a
-   * half at four-four, which is wider than any first report and narrower than
-   * the distance to anywhere somebody would have bothered clicking from. A
-   * report BEFORE the target is always stale, whichever direction the click
-   * went, so the window is one-sided.
-   *
-   * And a backstop: if no report ever agrees — an engine that refused the
-   * seek, a piece that ended — the click stops being believed after a second
-   * and a half and the engine is the truth again. A cursor frozen on a
-   * promise nobody kept is worse than a cursor in the wrong bar.
+   * That rule is unchanged. What changed is WHERE it lives. This file used to
+   * keep its own copy of the answer (`localSeek`), which was one of the five
+   * ideas of "where we are" the owner counted in his fourth session. The
+   * session owns the playhead now — `songs/playhead.ts` holds the same
+   * believe-until-the-engine-agrees window, the same one-and-a-half-second
+   * backstop, and hands the answer down as `tick`. This component draws what
+   * it is given and keeps no position of its own.
    */
-  const [localSeek, setLocalSeek] = useState<number | null>(null);
-  const quarter = score.ticksPerQuarter > 0 ? score.ticksPerQuarter : 960;
-  useEffect(() => {
-    if (localSeek === null) return;
-    if (tick >= localSeek && tick <= localSeek + quarter * 6) setLocalSeek(null);
-  }, [tick, localSeek, quarter]);
-  useEffect(() => {
-    if (localSeek === null) return;
-    const timer = window.setTimeout(() => setLocalSeek(null), 1500);
-    return () => window.clearTimeout(timer);
-  }, [localSeek]);
-  /** Where the line is drawn: the click's answer, or the engine's. */
-  const shownTick = localSeek ?? tick;
+  const shownTick = tick;
 
   const motionRef = useRef<CursorMotion | null>(null);
   /** The frame interval, smoothed — the lead is two of them. */
@@ -1052,21 +1020,17 @@ export function TabStage({
   latest.current = { selection, onSelect, onSeek, onClear, score };
 
   /**
-   * Go to a played bar: believe it here, then tell whoever owns the engine.
+   * Go to a played bar.
    *
-   * Both halves matter and they are one gesture, so they are one function —
-   * the pointer and the arrow keys both go through it, and neither can move
-   * the playhead without the line and the page following it at once
-   * (W36 item 1). `onSeek` decides what the ENGINE does about it; this
-   * decides what the player SEES, which is the half that was arriving up to
-   * a click tick late.
+   * One line now (W37 item 1). It used to do two things — write this file's
+   * own idea of the position so the line moved at once, and tell the session
+   * — because the session's answer arrived up to a click tick late. The
+   * session's answer IS the click now, in the same commit, so there is one
+   * writer and one reader and nothing to keep in step. The pointer and the
+   * arrow keys both come through here.
    */
   const goTo = useCallback((playedBar: number) => {
-    const { score: current, onSeek: seek } = latest.current;
-    if (!seek) return;
-    const at = current.bars[playedBar]?.startTick;
-    if (at !== undefined) setLocalSeek(at);
-    seek(playedBar);
+    latest.current.onSeek?.(playedBar);
   }, []);
   const goToRef = useRef(goTo);
   goToRef.current = goTo;

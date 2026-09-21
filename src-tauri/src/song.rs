@@ -169,6 +169,17 @@ pub const MIX_MAX: f32 = 1.5;
 /// plays UNDER the click, because the click following the tempo map is half
 /// of what a song is for, and the two land on the same downbeat.
 ///
+/// **0.45 since W37, and it is the same loudness it always was.** The window
+/// below used to add the gains in amplitude and now adds them in power (see
+/// [`hold_the_band_down`] for the measurement that says why), which is a
+/// different scale — so the number aimed at had to move with it or every song
+/// would have come out louder. Re-measured against the same twelve-bar
+/// arrangement: at 0.45 it renders band 0.618 and 0.88 with the click over
+/// it, which is what 0.60 rendered before. What the change buys is the DENSE
+/// case, where the two rules disagree: the owner's 161 BPM metal song went
+/// from being held 14.0 dB down to 10.5 dB, and its drums from peaking at
+/// 0.32 to 0.45.
+///
 /// 0.60 was measured against the twelve-bar arrangement in
 /// `a_song_plays_its_map_across_a_tempo_step_and_a_loop_seam` — a kick, a
 /// bass note and a chord on every bar line with a cymbal still washing over
@@ -202,7 +213,7 @@ pub const MIX_MAX: f32 = 1.5;
 ///
 /// Like the jam's clamp this only ever scales DOWN, and only a band that
 /// exceeds it: a sparse arrangement keeps its own level exactly.
-const SONG_TRANSIENT_CEILING: f32 = 0.60;
+const SONG_TRANSIENT_CEILING: f32 = 0.45;
 
 /// How close two onsets have to be before they count as the same instant.
 ///
@@ -233,9 +244,38 @@ pub struct SongTransport {
     pub range: SongRange,
     pub loops: bool,
     pub tempo_percent: u32,
-    /// Bars of count-in before the FIRST pass, at the range's first tempo and
-    /// meter.
+    /// Bars of count-in before the FIRST pass, at the tempo and meter of the
+    /// bar the first pass begins in.
     pub count_in_bars: u32,
+    /// WHERE THE FIRST PASS BEGINS, in the song's own ticks (W37 item 1).
+    ///
+    /// The playhead. A range says which bars are being practised; this says
+    /// where inside them the next press of Play starts, and it is the whole
+    /// of "stop is a pause" — a stop leaves the playhead where the music
+    /// stopped, and the press after it begins there rather than at the top.
+    ///
+    /// It moves the CURSOR and nothing else: `pass_samples` is still one whole
+    /// pass of the range, so the second time round a loop is whole. A tick
+    /// outside the range is held to its nearest edge rather than refused,
+    /// because a playhead is a place somebody clicked and clamping it is what
+    /// every screen above this already does.
+    ///
+    /// `serde(default)` so a caller that has nothing to say about it — the
+    /// probe, the gate's own fixtures — means "at the top", which is what
+    /// every caller meant before this field existed.
+    #[serde(default)]
+    pub start_tick: u32,
+    /// Play the drums the way W28 played them, for the A/B clips and nothing
+    /// else.
+    ///
+    /// Every drum cut to its written note value, one recording per drum, and
+    /// three velocity layers out of the kit's four — which is what the owner
+    /// was listening to when he said the drums sounded awful (W37 item 3).
+    /// It is here so the two clips he judges by ear are rendered by the same
+    /// binary from the same file, rather than one of them being a memory.
+    /// **Nothing in the app sets it**; `render_owner_song` does.
+    #[serde(default)]
+    pub drums_as_written: bool,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize)]
@@ -285,6 +325,16 @@ pub struct SongTrack {
     /// why it is a flag here rather than a fourth role.
     #[serde(default)]
     pub guide: bool,
+    /// This track is the file's own DRUM KIT, played through the General
+    /// MIDI synthesiser rather than the recorded one (W37 item 3).
+    ///
+    /// Only ever true beside [`SongRole::Synth`], and what it changes is one
+    /// thing: the track claims MIDI channel 9, which is percussion in every
+    /// General MIDI set ever written. Without it the notes would arrive on a
+    /// melodic channel and a kick drum would play as a note of whatever
+    /// instrument that channel is set to.
+    #[serde(default)]
+    pub percussion: bool,
     pub notes: Vec<SongNote>,
     /// Bends and slides, as MIDI writes them: 0..=16383 with 8192 at rest,
     /// on the track's own channel. Empty for everything the sampled band
@@ -577,6 +627,13 @@ pub struct SongTable {
     /// start of the COUNT-IN, and it plays before the first pass only.
     count_in: Vec<SongTick>,
     count_in_samples: u64,
+    /// Where the first pass begins — the playhead, resolved (W37 item 1).
+    ///
+    /// The same four numbers a seek produces, worked out once here so the
+    /// audio thread's "back to the top of the range" is four copies out of
+    /// the table it is already holding rather than a search. `pass == 0`, so
+    /// `play` is the sample itself.
+    start: SongSeek,
     /// How long one pass of the range is. The loop seam, to the sample.
     pass_samples: u64,
     loops: bool,
@@ -645,6 +702,47 @@ impl SongTable {
     #[inline]
     pub fn count_in_samples(&self) -> u64 {
         self.count_in_samples
+    }
+
+    /// WHERE A PRESS OF PLAY BEGINS (W37 item 1).
+    ///
+    /// Read on the audio thread, off the table it is already holding, at the
+    /// three moments a song starts over. Four copies and no arithmetic: the
+    /// playhead was resolved when the piece was compiled, which is what makes
+    /// "play starts AT the playhead" cost the callback nothing and makes it
+    /// impossible for the first buffer to be at the top of the range and the
+    /// second somewhere else.
+    #[inline]
+    pub fn start(&self) -> SongSeek {
+        self.start
+    }
+
+    /// The sample a song tick falls on, for a seek posted while the piece is
+    /// playing.
+    ///
+    /// The bar plan's own arithmetic — the same walk `place` does for a note
+    /// — so a click on bar 34 and the notes written in bar 34 cannot disagree
+    /// about where bar 34 is, whatever the tempo map and the speed did to it.
+    /// A tick before the range starts is its first sample; one past the end is
+    /// the last sample of the pass.
+    pub fn sample_at_tick(&self, tick: u32) -> u64 {
+        let Some(first) = self.bars.first() else {
+            return 0;
+        };
+        let mut plan = *first;
+        for bar in self.bars.iter() {
+            if bar.start_tick <= tick {
+                plan = *bar;
+            } else {
+                break;
+            }
+        }
+        if tick <= plan.start_tick {
+            return plan.start_sample;
+        }
+        let into = (tick - plan.start_tick) as f64 / TICKS_PER_QUARTER as f64 * 60.0 / plan.bpm;
+        let at = ((plan.start_seconds + into) * self.rate as f64).round() as u64;
+        at.min(self.pass_samples.saturating_sub(1))
     }
 
     /// How long one pass of the range is, in frames.
@@ -920,6 +1018,7 @@ pub fn compile(
     subdivision: u32,
 ) -> Result<SongTable, String> {
     let plan = plan_range(transport, rate, subdivision)?;
+    let start_sample = plan.start_sample;
     let SongSounds { bank, perc, voices } = sounds;
 
     let mut table = SongTable {
@@ -927,6 +1026,12 @@ pub fn compile(
         band: Vec::new(),
         count_in: plan.count_in,
         count_in_samples: plan.count_in_samples,
+        start: SongSeek {
+            sample: 0,
+            tick_at: 0,
+            band_at: 0,
+            play: 0,
+        },
         pass_samples: plan.pass_samples,
         loops: transport.loops,
         bars: plan.bars,
@@ -951,8 +1056,13 @@ pub fn compile(
         // keep the order the file gave them — which is the order a chord's
         // notes were written in, and the order a take records them in.
         table.band.sort_by_key(|e| e.sample);
-        table.band_trim = hold_the_band_down(&mut table.band, rate);
+        table.band_trim = hold_the_band_down(&mut table.band, rate, transport.drums_as_written);
     }
+    // The playhead, resolved against the finished tables — after the band is
+    // sorted, because `band_at` is an index into it. `SongTable::seek` is the
+    // one piece of arithmetic that says where a position puts every cursor,
+    // and a press of Play is a seek to the playhead by another name.
+    table.start = table.seek(start_sample, 0);
     Ok(table)
 }
 
@@ -961,31 +1071,63 @@ pub fn compile(
 ///
 /// See [`SONG_TRANSIENT_CEILING`] for why this is a sliding window over
 /// onsets rather than a render of the piece, and why that is enough.
-fn hold_the_band_down(band: &mut [SongEvent], rate: u32) -> f32 {
+fn hold_the_band_down(band: &mut [SongEvent], rate: u32, as_written: bool) -> f32 {
+    // The old rule, kept only so the A/B clips the owner judges by ear are
+    // rendered by one binary — see `SongTransport::drums_as_written`.
+    let ceiling = if as_written { 0.60 } else { SONG_TRANSIENT_CEILING };
     let window = (SONG_TRANSIENT_WINDOW_MS / 1000.0 * rate as f64) as u64;
     let mut worst = 0.0f32;
-    let mut sum = 0.0f32;
+    let mut power = 0.0f32;
     let mut from = 0usize;
-    // `band` is sorted by sample, so the window only ever moves forward: one
-    // pass, two cursors, and no allocation.
+    /*
+     * ── THE WINDOW ADDS IN POWER, NOT IN AMPLITUDE (W37 item 3) ───────────
+     *
+     * It used to add the gains straight up, which is the worst case only if
+     * every one of those drums reaches its own peak on the same sample and in
+     * the same direction. Two transients recorded in different rooms off
+     * different drums do not. Measured on the owner's 161 BPM metal song,
+     * sixteen bars, a kick and a snare and a crash and an open hat and a bass
+     * note inside eight milliseconds:
+     *
+     *   straight sum of the gains  2.99      -> trim 0.201, -14.0 dB
+     *   what the render actually peaked at   1.57
+     *
+     * So the arithmetic over-stated the real peak by five and a half
+     * decibels, and the whole kit and the bass paid for it — they were held
+     * fourteen decibels under two guitars that go through the synthesiser and
+     * are not in this sum at all. That is most of what "the drums layer
+     * sounds AWFUL" is: not the wrong drum, the right drum buried.
+     *
+     * `sqrt(sum of squares)` is what uncorrelated sources actually do, and on
+     * the sparse arrangement the ceiling was calibrated against it is within a
+     * decibel of the straight sum, because two or three things coinciding is
+     * where the two agree. It is the DENSE case the old rule got wrong, and a
+     * dense arrangement is the one that needed the level.
+     *
+     * The ceiling itself is unchanged: [`SONG_TRANSIENT_CEILING`] was
+     * measured against a render rather than against this arithmetic, and it
+     * is still the right number to aim at. What changed is the aiming.
+     */
     for to in 0..band.len() {
-        sum += band[to].slot.gain;
+        let g = band[to].slot.gain;
+        power += if as_written { g } else { g * g };
         while band[to].sample - band[from].sample > window {
-            sum -= band[from].slot.gain;
+            let out = band[from].slot.gain;
+            power -= if as_written { out } else { out * out };
             from += 1;
         }
-        worst = worst.max(sum);
+        worst = worst.max(if as_written { power } else { power.max(0.0).sqrt() });
     }
-    if !(worst > SONG_TRANSIENT_CEILING) {
+    if !(worst > ceiling) {
         return 1.0;
     }
-    let trim = SONG_TRANSIENT_CEILING / worst;
+    let trim = ceiling / worst;
     for e in band.iter_mut() {
         e.slot.gain *= trim;
     }
     eprintln!(
-        "[song] the band's busiest instant summed to {worst:.2} and was held down to \
-         {SONG_TRANSIENT_CEILING:.2} ({:.1} dB)",
+        "[song] the band's busiest instant came to {worst:.2} and was held down to \
+         {ceiling:.2} ({:.1} dB)",
         20.0 * trim.log10()
     );
     trim
@@ -1000,6 +1142,8 @@ struct RangePlan {
     count_in_samples: u64,
     pass_samples: u64,
     bars: Vec<SongBarPlan>,
+    /// Where the first pass begins — `SongTransport::start_tick`, in frames.
+    start_sample: u64,
 }
 
 /// The transport, checked and turned into samples.
@@ -1182,17 +1326,51 @@ fn plan_range(
         return Err("the range is no time at all".to_string());
     }
 
+    // ---- Where the first pass begins ----
+    //
+    // The playhead (W37 item 1). `bars` is in order, so this is a walk to the
+    // bar the tick is written in and then the bar's own tempo for the rest of
+    // the way — the arithmetic `place` does for a note, because a playhead
+    // and a note on the same tick have to land on the same sample.
+    let start_bar = {
+        let mut at = 0usize;
+        for (i, bar) in bars.iter().enumerate() {
+            if bar.start_tick <= transport.start_tick {
+                at = i;
+            } else {
+                break;
+            }
+        }
+        at
+    };
+    let start_sample = {
+        let plan = &bars[start_bar];
+        if transport.start_tick <= plan.start_tick {
+            plan.start_sample
+        } else {
+            let into = (transport.start_tick - plan.start_tick) as f64
+                / TICKS_PER_QUARTER as f64
+                * 60.0
+                / plan.bpm;
+            (((plan.start_seconds + into) * rate as f64).round() as u64)
+                .min(pass_samples.saturating_sub(1))
+        }
+    };
+
     // ---- The count-in ----
     //
-    // The range's FIRST tempo and meter, whatever the bars after it do: a
-    // count-in is somebody counting you into the first bar, and counting it
-    // in the meter of bar three would be counting you into the wrong piece.
+    // The tempo and meter of the bar the first pass BEGINS in, whatever the
+    // bars around it do: a count-in is somebody counting you into the bar you
+    // are about to play, and counting it in the meter of bar one when you are
+    // starting at bar forty would be counting you into the wrong piece. Bar
+    // one is still the answer whenever the playhead is at the top, which is
+    // most of the time and is what this said before W37.
     //
     // It is the song's own, and not `AppState::count_in`: the engine's
     // count-in counts beats at `AppState::bpm`, which is not this song's
-    // tempo and knows nothing about a 7/8. `load_song` clears that one so the
-    // two cannot both run.
-    let first = &bars[0];
+    // tempo and knows nothing about a 7/8. `load_song` and `set_song_range`
+    // both clear that one so the two cannot both run.
+    let first = &bars[start_bar];
     let mut count_in: Vec<SongTick> = Vec::new();
     let mut count_in_samples = 0u64;
     if transport.count_in_bars > 0 {
@@ -1239,6 +1417,7 @@ fn plan_range(
         count_in_samples,
         pass_samples,
         bars,
+        start_sample,
     })
 }
 
@@ -1280,7 +1459,28 @@ fn compile_backing(
             ));
         }
     }
-    let chokes = choke_map(&table.bank);
+    let mut chokes = choke_map(&table.bank);
+    /*
+     * A HI-HAT IS ONE INSTRUMENT (W37 item 3).
+     *
+     * Every kit declares the one choke relationship every kit in the world
+     * has — the closed hat and the foot close the open hat — and stops there.
+     * That is enough for a jam, which caps its hats by tick length because it
+     * writes one on every eighth and a wash is what that sounds like
+     * uncapped. A SONG's drums play out (see `drum_slot`), and a metal
+     * transcription can write five hundred open hats: the owner's has 551 of
+     * them against 32 closed ones, an eighth note apart at 161 BPM. Without
+     * this that is five hundred open hats ringing over each other, which is
+     * not a hi-hat, it is a cymbal wash with a kick under it.
+     *
+     * So a hat closes a hat, which is what the one pair of cymbals on the
+     * stand actually does. Added here rather than in the seven manifests
+     * because it is a fact about reading a transcription, not about the
+     * recordings — a jam's hats are still capped and unchanged.
+     */
+    if !transport.drums_as_written {
+        chokes[KitVoice::HatOpen as usize] |= KitVoice::HatOpen.bit();
+    }
     let voicing = Voicing {
         bank: &table.bank,
         perc: table.perc.as_deref(),
@@ -1315,14 +1515,29 @@ fn compile_backing(
         }
         let index = index as u8;
         if track.role == SongRole::Synth {
-            let channel = claim_channel(&mut next_channel, &mut channel_track, index);
-            synth_events.push(crate::synth::SynthEvent {
-                sample: 0,
-                channel,
-                kind: crate::synth::SynthEventKind::Program {
-                    program: track.program,
-                },
-            });
+            let channel = if track.percussion {
+                // The file's own kit. Channel 9 is percussion everywhere, and
+                // the notes are already General MIDI percussion numbers, so
+                // nothing has to be translated — but two drum tracks would
+                // share the channel and so share a fader, which is what MIDI
+                // itself does with percussion.
+                channel_track[crate::synth::PERCUSSION_CHANNEL as usize] = index;
+                crate::synth::PERCUSSION_CHANNEL
+            } else {
+                claim_channel(&mut next_channel, &mut channel_track, index)
+            };
+            if !track.percussion {
+                // A program change on channel 9 is which KIT, not which
+                // instrument, and a file's `program` is a melodic number: sent
+                // there it would choose a drum set nobody asked for.
+                synth_events.push(crate::synth::SynthEvent {
+                    sample: 0,
+                    channel,
+                    kind: crate::synth::SynthEventKind::Program {
+                        program: track.program,
+                    },
+                });
+            }
             for note in track.notes.iter() {
                 let Some((sample, cap_samples)) = place(table, transport, note, rate) else {
                     continue;
@@ -1367,6 +1582,10 @@ fn compile_backing(
             }
             continue;
         }
+        // How many times each drum of this kit has been struck so far, for
+        // the round robin. Per track, so two percussion parts rotate through
+        // their recordings independently.
+        let mut hits = [0u32; crate::kit::KIT_VOICES];
         for note in track.notes.iter() {
             let Some((sample, cap_samples)) = place(table, transport, note, rate) else {
                 // A note outside the range is not a note that was dropped for
@@ -1374,9 +1593,41 @@ fn compile_backing(
                 // play — so it is not counted against the file.
                 continue;
             };
+            /*
+             * A DRUM PLAYS OUT (W37 item 3).
+             *
+             * `cap_samples` is the note's written length, and for a pitched
+             * instrument that is what it is: a bass note lasts as long as it
+             * is written for. **A drum's written length is RHYTHM, not
+             * sustain.** Nobody writes a crash as a whole note because they
+             * mean it to ring for four beats; they write it on the beat it is
+             * hit and the next thing in the bar decides the value. The
+             * owner's file writes its ride as sixteenths, its snare as
+             * thirty-seconds and half its crashes as sixteenths — so every
+             * cymbal was being cut off after ninety-three milliseconds, and
+             * the snare after forty-six, with `release: 0` so the cut was a
+             * hard one. Two thousand nine hundred hard cuts in a hundred and
+             * forty-one bars, every one of them a click.
+             *
+             * `drum_slot`'s own comment has said "a drum plays out" since
+             * W9; the length on the event was quietly overriding it. The
+             * choke map is what stops a cymbal — a hat closing a hat, a stick
+             * closing an open one — which is what stops one on a real kit.
+             */
+            let cap_samples = if track.role == SongRole::Drums && !transport.drums_as_written {
+                0
+            } else {
+                cap_samples
+            };
             let velocity = velocity_of(note.velocity);
             let made = match track.role {
-                SongRole::Drums => drum_slot(&voicing, note.midi, velocity),
+                SongRole::Drums => drum_slot(
+                    &voicing,
+                    note.midi,
+                    velocity,
+                    &mut hits,
+                    transport.drums_as_written,
+                ),
                 SongRole::Bass => melodic_slot(
                     VoiceLine::Bass,
                     note.midi,
@@ -1514,10 +1765,17 @@ fn velocity_of(v: f32) -> f32 {
 
 /// One General MIDI percussion number as a slot of the loaded kit, or `None`
 /// when neither the kit nor the percussion set has that voice.
-fn drum_slot(voicing: &Voicing, gm: u8, velocity: f32) -> Option<JamSlot> {
+///
+/// `hits` is how many times each drum has been struck so far in this track,
+/// and it is what the round robin counts — see below.
+fn drum_slot(
+    voicing: &Voicing,
+    gm: u8,
+    velocity: f32,
+    hits: &mut [u32; crate::kit::KIT_VOICES],
+    as_written: bool,
+) -> Option<JamSlot> {
     let voice = gm_drum(gm)?;
-    // 1-based, as `voice_slot` takes it: the layer the velocity reaches, or
-    // the voice's own top when it has fewer.
     let bank = if voice.is_perc() {
         voicing.perc?.voice(voice)
     } else {
@@ -1527,8 +1785,50 @@ fn drum_slot(voicing: &Voicing, gm: u8, velocity: f32) -> Option<JamSlot> {
     // the contract's fallbacks — a kit with no cross-stick plays its softest
     // snare — and only a chain that runs out is silence.
     let layers = bank.map_or(3, |b| b.layers());
-    let layer = voice_layer(velocity, layers) + 1;
-    voice_slot(
+    /*
+     * EVERY LAYER THE KIT RECORDED (W37 item 3).
+     *
+     * This used to be `voice_layer`, which buckets a level into three —
+     * under 0.6, under 0.9, and the rest — because a jam's drums have three
+     * levels: a hit, an accent and a ghost. A FILE's drum note carries a real
+     * dynamic: Guitar Pro writes eight of them and the owner's metal
+     * transcription uses five (63, 79, 95, 111 and 127). Through three
+     * buckets those five landed on layers 1, 2, 2, 2 and 3 — and the kick and
+     * the snare are recorded in FOUR layers, so the hardest one was never
+     * played at all. A double-kick pattern written with a dynamic on every
+     * note came out flat.
+     *
+     * 1-based, as `voice_slot` takes it, and `ceil` so the quietest playable
+     * velocity still reaches layer one.
+     */
+    let layer = if as_written {
+        voice_layer(velocity, layers) + 1
+    } else {
+        ((velocity.clamp(0.0, 1.0) * layers as f32).ceil() as u8).clamp(1, layers.max(1))
+    };
+    /*
+     * AND WHICH RECORDING OF IT (W37 item 3).
+     *
+     * `spawn_song_voice` says a song's round robin "is already in the
+     * `SoundId`" because the bar and the tick are known when the table is
+     * compiled. It never was: `voice_slot` writes `robin: 0` and nothing here
+     * changed it, so all fourteen hundred and ninety kicks of the owner's
+     * song played the same recording of a kick, and all five hundred and five
+     * snares the same snare — at ninety-three and forty-six milliseconds
+     * apart. Every kit the app ships records two or three of each. A jam
+     * rotates them on the audio thread; a song never rotated them anywhere.
+     *
+     * The COUNT of hits on this drum, not the tick: a tick is a multiple of
+     * the subdivision, and three divides every one of them in four-four, so
+     * `tick % 3` is nought for every drum in the piece and the rotation would
+     * never move. The count is also deterministic, which is what lets a take
+     * be played back and sound like the take.
+     */
+    let rr = bank.map_or(1, |b| b.rr()).max(1);
+    let n = &mut hits[voice as usize];
+    let robin = if as_written { 0 } else { (*n % rr as u32) as u8 };
+    *n = n.wrapping_add(1);
+    let mut slot = voice_slot(
         voicing,
         voice,
         layer,
@@ -1537,13 +1837,25 @@ fn drum_slot(voicing: &Voicing, gm: u8, velocity: f32) -> Option<JamSlot> {
         // A DRUM PLAYS OUT. A jam caps its hats because it writes a hat on
         // every eighth and a wash is what that sounds like uncapped; a song's
         // drum track carries the strokes somebody actually played, and the
-        // choke map is what closes the open hat. `SongEvent::cap_samples`
-        // carries the length instead, in frames.
+        // choke map is what closes the open hat. `compile_backing` gives a
+        // drum event no cap at all, for the reason written there.
         0.0,
         // The dots mark the click's own accents while a song plays — the
         // meter is what the player is reading — so no drum lights one.
         false,
-    )
+    )?;
+    if let SoundId::Band { voice, layer, .. } = slot.sound {
+        // `voice_slot` may have resolved a fallback — a kit with no
+        // cross-stick plays its softest snare — so the voice and the layer
+        // come back off the slot rather than from above, and the robin is
+        // held inside what that bank actually has.
+        slot.sound = SoundId::Band {
+            voice,
+            layer,
+            robin: robin.min(slot.rr.saturating_sub(1)),
+        };
+    }
+    Some(slot)
 }
 
 /// Which lane a drum belongs to, for the practice windows and for `is_perc`.
