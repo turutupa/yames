@@ -345,23 +345,14 @@ function baseState(theme: string) {
  * faders on the stage have rows to be about (`W13-SONGS-ENGINE.md` item 4).
  * `\articulation defaults` is what makes the drum names parse at all.
  */
-const SHOT_SONG_TEX = `\\title "Practice piece"
-\\artist "Written for the pictures"
-\\tempo 96
-.
-\\track "Guitar"
-\\tuning e5 b4 g4 d4 a3 e3
-\\section Verse
-\\ts 4 4 5.5.8 7.5.8 5.4.8 7.4.8 5.5.8 7.5.8 5.4.8 7.4.8 |
-5.5.8 7.5.8 5.4.8 7.4.8 5.5.8 7.5.8 5.4.8 7.4.8 |
-3.5.8 5.5.8 3.4.8 5.4.8 3.5.8 5.5.8 3.4.8 5.4.8 |
-3.5.8 5.5.8 3.4.8 5.4.8 3.5.8 5.5.8 3.4.8 5.4.8 |
-\\section Chorus
-8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
-8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
-7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
-7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
-\\track "Drums"
+/**
+ * The eight bars of drums and bass every song on the stage is played over.
+ *
+ * Its own constant since W31, when the stage grew two more songs to be
+ * photographed with: the band is what the faders on the strip are ABOUT, and
+ * a scene whose song had no band never finished building.
+ */
+const SHOT_BAND_TEX = `\\track "Drums"
 \\instrument percussion
 \\articulation defaults
 \\ts 4 4 (KickHit HiHatClosed).4 HiHatClosed.4 (SnareHit HiHatClosed).4 HiHatClosed.4 |
@@ -383,13 +374,111 @@ const SHOT_SONG_TEX = `\\title "Practice piece"
 7.4.4 7.4.4 7.4.4 7.4.4 |
 7.4.4 7.4.4 7.4.4 7.4.4 |`;
 
+const SHOT_SONG_TEX = `\\title "Practice piece"
+\\artist "Written for the pictures"
+\\tempo 96
+.
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\section Verse
+\\ts 4 4 5.5.8 7.5.8 5.4.8 7.4.8 5.5.8 7.5.8 5.4.8 7.4.8 |
+5.5.8 7.5.8 5.4.8 7.4.8 5.5.8 7.5.8 5.4.8 7.4.8 |
+3.5.8 5.5.8 3.4.8 5.4.8 3.5.8 5.5.8 3.4.8 5.4.8 |
+3.5.8 5.5.8 3.4.8 5.4.8 3.5.8 5.5.8 3.4.8 5.4.8 |
+\\section Chorus
+8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
+8.5.8 10.5.8 8.4.8 10.4.8 8.5.8 10.5.8 8.4.8 10.4.8 |
+7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
+7.5.8 8.5.8 7.4.8 8.4.8 7.5.8 8.5.8 7.4.8 8.4.8 |
+${SHOT_BAND_TEX}`;
+
+/**
+ * `?song=sixteenths` — the same eight bars, played four times as fast.
+ *
+ * W31: a scrolling tab has one failure mode that only shows up in a picture,
+ * and it is density — the numbers touching, or shrinking until a phone cannot
+ * read them. Eighth notes never reach it. Sixteenths at 96 do, which is what
+ * a player practising a run actually has in front of them.
+ */
+const SIXTEENTHS_BAR_A =
+  "5.5.16 7.5{h}.16 8.5.16 7.5.16 5.5.16 7.5.16 8.5.16 10.5.16 5.4.16 7.4.16 8.4.16 7.4.16 5.4.16 7.4.16 8.4.16 10.4.16 |";
+const SIXTEENTHS_BAR_B =
+  "3.5.16 5.5.16 7.5.16 5.5.16 3.5.16 5.5.16 7.5.16 8.5.16 3.4.16 5.4.16 7.4.16 5.4.16 3.4.16 5.4.16 7.4.16 8.4.16 |";
+
+const SHOT_SONG_SIXTEENTHS = `\\title "Sixteenths"
+\\artist "Written for the pictures"
+\\tempo 96
+.
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\section Run
+\\ts 4 4 ${SIXTEENTHS_BAR_A}
+${SIXTEENTHS_BAR_A}
+${SIXTEENTHS_BAR_B}
+${SIXTEENTHS_BAR_B}
+\\section Answer
+${SIXTEENTHS_BAR_A}
+${SIXTEENTHS_BAR_A}
+${SIXTEENTHS_BAR_B}
+${SIXTEENTHS_BAR_B}
+${SHOT_BAND_TEX}`;
+
+/**
+ * `?song=seven` — seven strings, and every small mark a tab can carry.
+ *
+ * W31: the tab has as many lines as the tuning has, and the letters in the
+ * gaps between notes have to fit around the numbers rather than instead of
+ * them. A hammer-on, a pull-off, a slide, a bend, a tie, a dead note, a ghost
+ * note, a palm-muted run and a let ring, in eight bars.
+ */
+const SHOT_SONG_SEVEN = `\\title "Seven strings"
+\\artist "Written for the pictures"
+\\tempo 96
+.
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3 b2
+\\section Riff
+\\ts 4 4 0.7{pm}.8 0.7{pm}.8 3.7{pm}.8 0.7{pm}.8 0.7.8 5.7{h}.8 3.7.8 0.7.8 |
+0.7{pm}.8 0.7{pm}.8 3.7{pm}.8 0.7{pm}.8 x.7.8 x.7.8 3.7{sl}.8 5.7.8 |
+7.6.8 9.6{h}.8 7.6.8 5.6.8 7.6{-}.4 9.6{b (0 4)}.4 |
+7.6.8 9.6.8 10.6{lr}.4 (7.5 9.4 9.3).4 (7.5 9.4 9.3).4 |
+\\section Answer
+12.3{lr}.4 14.3.4 12.3.8 14.3{h}.8 15.3.8 14.3.8 |
+12.3.4 14.3.4 12.3.8 10.3.8 12.3{g}.8 10.3.8 |
+0.7.8 0.7.8 3.7.8 0.7.8 5.6.8 3.6.8 0.6.8 0.6.8 |
+0.7.4 0.7.4 (0.7 0.6 0.5).2 |
+${SHOT_BAND_TEX}`;
+
 let songRecord: SongRecord | null = null;
+let songRecordFor = "";
+
+/**
+ * Which of the three songs a shot is about, off the page's own query.
+ *
+ * `?song=` rather than a field on the scene: the three differ only in the
+ * notes, every scene means the same thing with any of them, and a field would
+ * have been three copies of every Songs recipe in `scenarios.ts`.
+ */
+function songChoice(): "default" | "sixteenths" | "seven" {
+  const asked = new URLSearchParams(window.location.search).get("song");
+  return asked === "sixteenths" || asked === "seven" ? asked : "default";
+}
 
 /** Built once: parsing is the expensive half and the shot never changes it. */
 function songShotRecord(): SongRecord {
-  if (!songRecord) {
-    const bytes = new TextEncoder().encode(SHOT_SONG_TEX);
-    songRecord = newSongRecord(importSong(bytes, "Practice piece.alphatex", 0).score, bytes);
+  const choice = songChoice();
+  if (!songRecord || songRecordFor !== choice) {
+    const tex =
+      choice === "sixteenths"
+        ? SHOT_SONG_SIXTEENTHS
+        : choice === "seven"
+          ? SHOT_SONG_SEVEN
+          : SHOT_SONG_TEX;
+    const name =
+      choice === "default" ? "Practice piece.alphatex" : `${choice}.alphatex`;
+    const bytes = new TextEncoder().encode(tex);
+    songRecord = newSongRecord(importSong(bytes, name, 0).score, bytes);
+    songRecordFor = choice;
   }
   return songRecord;
 }
