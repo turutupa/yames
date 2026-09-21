@@ -13,10 +13,11 @@
  * Imported by `SongsView.tsx`, the way `jam.css` is imported by `JamView.tsx`,
  * so a mode nobody opens costs nothing to parse. */
 
-/* The stage band, the same expression the other modes use. */
-.main-content[data-view="songs"] {
-  --stage-band: 1176px;
-}
+/* No stage band here. The other modes centre a 1176px column because a tempo
+ * and a few controls look lost any wider; a page of music is the opposite, and
+ * the owner has said so more than once: "this is not a page where we want to
+ * give a max width, we want to use all we can" (2026-09-21, at a 2000px window
+ * where the cap left 190px dead on each side). Rail to window edge, always. */
 
 /* The stage does not scroll (W18).
  *
@@ -29,8 +30,8 @@
   align-self: flex-start;
   align-items: flex-start;
   width: 100%;
-  max-width: 1176px;
-  margin-left: max(0px, calc(50% - var(--stage-band) / 2));
+  max-width: none;
+  margin-left: 0;
   /* The gutters the rest of the app uses, not the forty-eight this stage had
      (W29 item 3): a page of music is the widest thing in Yames and it was
      giving up ninety-six pixels of a row to white. */
