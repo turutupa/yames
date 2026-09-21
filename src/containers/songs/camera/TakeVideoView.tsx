@@ -31,8 +31,19 @@
  * passage, cannot run at half speed and reports no position, and this screen
  * needs all four. The shelf's own play button is unchanged and still goes
  * through the engine with the band muted; only the review with a picture plays
- * the file here. See `songs/camera/src.ts` for the one user-visible
- * consequence (the output device).
+ * the file here.
+ *
+ * ## ...and out of the speaker the player chose (2026-09-20, W25)
+ *
+ * The one user-visible cost of that, which `src.ts` has been stating since
+ * W21: the engine plays out of the output device chosen in settings, and a
+ * media element plays out of the system default. On a machine with an
+ * interface — which is most of the people this app is for — the review came
+ * out of a different speaker from the band. `setSinkId` moves it, where the
+ * webview has one and the two namespaces can be joined on a label
+ * (`songs/camera/sink.ts` is that join, and is honest about being a match).
+ * Where they cannot, the note under the controls says which speaker it is
+ * using rather than leaving somebody to wonder why it sounds different.
  *
  * ## With no picture, none of this is on screen
  *
@@ -45,7 +56,14 @@ import { useTranslation } from "react-i18next";
 import { storeLoad, storeSave } from "../../../ipc";
 import { barLengthMs, slipJump } from "../../../songs/camera/tape";
 import type { Tape } from "../../../songs/camera/tape";
-import { cameraNudgeKey, NUDGE_LIMIT_MS, NUDGE_STEP_MS } from "../../../songs/camera/keys";
+import {
+  AUDIO_OUTPUT_KEY,
+  cameraNudgeKey,
+  NUDGE_LIMIT_MS,
+  NUDGE_STEP_MS,
+} from "../../../songs/camera/keys";
+import { followChosenOutput } from "../../../songs/camera/sink";
+import type { SinkDevice, SinkState } from "../../../songs/camera/sink";
 import { mediaSrc } from "../../../songs/camera/src";
 import { msAtBeat } from "../../../songs/camera/offset";
 import { clampRange, rangeTempoSteps } from "../../../songs/schedule";
@@ -180,6 +198,39 @@ export function TakeVideoView({
     const base = (chosen ?? 0) * tape.passMs;
     return { startMs: base + within.startMs, endMs: base + within.endMs };
   }, [loopBars, pass, review, tape.passMs]);
+
+  /**
+   * W25 — the take plays out of the speaker the player chose.
+   *
+   * Once, when the element exists: `setSinkId` sticks to the element, and
+   * re-running it on every render would be an enumeration a second. The
+   * chosen device's NAME comes from the same store key the engine was set
+   * from, so there is one answer to "which output" and this follows it.
+   */
+  const [sink, setSink] = useState<SinkState>({ kind: "systemDefault" });
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    let alive = true;
+    void storeLoad<string>(AUDIO_OUTPUT_KEY)
+      .catch(() => null)
+      .then(async (wanted) => {
+        if (!alive) return;
+        const state = await followChosenOutput({
+          element: audio,
+          wanted: typeof wanted === "string" ? wanted : null,
+          enumerate: async () =>
+            typeof navigator === "undefined" || !navigator.mediaDevices
+              ? []
+              : ((await navigator.mediaDevices.enumerateDevices()) as unknown as SinkDevice[]),
+        });
+        if (alive) setSink(state);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /** The nudge, remembered for this camera. */
   const nudgeKey = cameraNudgeKey(take.deviceId ?? null);
@@ -497,6 +548,19 @@ export function TakeVideoView({
         {bars ? t("songs.camera.watchingBars", { bars }) : t("songs.camera.watchingAll")}{" "}
         {pitchKept ? t("songs.camera.pitchKept") : t("songs.camera.pitchDropped")}{" "}
         {take.videoOffsetMs === undefined ? t("songs.camera.noOffset") : t("songs.camera.nudgeHow")}
+        {/* W25 — which speaker, but only when it is not the one they chose.
+            "It is coming out of the thing you picked" is not news; "it is
+            coming out of something else" is the only version worth a
+            sentence, and it is the one a player would otherwise have to
+            work out for themselves. */}
+        {sink.kind !== "following" && sink.kind !== "systemDefault" && (
+          <>
+            {" "}
+            {sink.kind === "unsupported"
+              ? t("songs.camera.sinkUnsupported", { device: sink.wanted })
+              : t("songs.camera.sinkUnmatched", { device: sink.wanted })}
+          </>
+        )}
       </p>
     </section>
   );

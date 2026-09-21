@@ -299,7 +299,9 @@
       "watchIt": "Zobacz to",
       "watchTitle": "Obejrzeć to",
       "watchingAll": "Całe przejście.",
-      "watchingBars": "Takty {{bars}}, w kółko."
+      "watchingBars": "Takty {{bars}}, w kółko.",
+      "sinkUnsupported": "Ta wersja potrafi odtworzyć nagranie tylko przez zwykłe głośniki komputera, nie przez {{device}}.",
+      "sinkUnmatched": "Gra przez zwykłe głośniki komputera — stąd nie udało się znaleźć {{device}}."
     },
     "clip": {
       "save": "Zapisz jako wideo",

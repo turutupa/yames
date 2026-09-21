@@ -362,6 +362,11 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.takes.noneFilmed",
   "songs.takes.was",
   "songs.takes.withPicture",
+  // W25 item 6 — which speaker the review is using, when it is not the one
+  // the player chose. Two sentences because they are two different facts:
+  // one is about this build and one is about this machine.
+  "songs.camera.sinkUnmatched",
+  "songs.camera.sinkUnsupported",
 ];
 
 /**

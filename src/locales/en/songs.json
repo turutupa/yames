@@ -281,7 +281,9 @@
       "watchIt": "Watch it",
       "watchTitle": "Watching it back",
       "watchingAll": "The whole pass.",
-      "watchingBars": "Bars {{bars}}, round and round."
+      "watchingBars": "Bars {{bars}}, round and round.",
+      "sinkUnsupported": "This version can only play the take through your computer's usual speakers, not through {{device}}.",
+      "sinkUnmatched": "It is playing through your computer's usual speakers — it could not find {{device}} from here."
     },
     "clip": {
       "save": "Save as a video",

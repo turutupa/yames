@@ -281,7 +281,9 @@
       "watchIt": "見てみる",
       "watchTitle": "見返す",
       "watchingAll": "一周ぜんぶ。",
-      "watchingBars": "{{bars}} 小節を、繰り返し。"
+      "watchingBars": "{{bars}} 小節を、繰り返し。",
+      "sinkUnsupported": "このバージョンではテイクをパソコンのいつものスピーカーからしか再生できません。{{device}} からは出せません。",
+      "sinkUnmatched": "パソコンのいつものスピーカーから鳴っています。ここからは {{device}} が見つかりませんでした。"
     },
     "clip": {
       "save": "動画として保存",

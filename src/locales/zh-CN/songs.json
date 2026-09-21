@@ -281,7 +281,9 @@
       "watchIt": "看一下",
       "watchTitle": "回看",
       "watchingAll": "整整一遍。",
-      "watchingBars": "第 {{bars}} 小节，一遍又一遍。"
+      "watchingBars": "第 {{bars}} 小节，一遍又一遍。",
+      "sinkUnsupported": "这个版本只能用电脑平时的扬声器播放录音，不能走 {{device}}。",
+      "sinkUnmatched": "正在用电脑平时的扬声器播放——这里找不到 {{device}}。"
     },
     "clip": {
       "save": "保存为视频",

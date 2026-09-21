@@ -281,7 +281,9 @@
       "watchIt": "Ansehen",
       "watchTitle": "Zurückschauen",
       "watchingAll": "Der ganze Durchgang.",
-      "watchingBars": "Takte {{bars}}, immer wieder."
+      "watchingBars": "Takte {{bars}}, immer wieder.",
+      "sinkUnsupported": "Diese Version kann die Aufnahme nur über die üblichen Lautsprecher des Rechners abspielen, nicht über {{device}}.",
+      "sinkUnmatched": "Es läuft über die üblichen Lautsprecher des Rechners — {{device}} war von hier aus nicht zu finden."
     },
     "clip": {
       "save": "Als Video speichern",

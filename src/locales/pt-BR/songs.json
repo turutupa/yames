@@ -290,7 +290,9 @@
       "watchIt": "Ver",
       "watchTitle": "Rever",
       "watchingAll": "A passada inteira.",
-      "watchingBars": "Compassos {{bars}}, sem parar."
+      "watchingBars": "Compassos {{bars}}, sem parar.",
+      "sinkUnsupported": "Esta versão só toca a gravação pelas caixas de som normais do computador, não por {{device}}.",
+      "sinkUnmatched": "Está tocando pelas caixas de som normais do computador — daqui não deu para achar {{device}}."
     },
     "clip": {
       "save": "Salvar como vídeo",
