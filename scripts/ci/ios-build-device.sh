@@ -2,74 +2,78 @@
 # Compile Yames for a real iPhone, unsigned.
 #
 # The point is to leave M06b with exactly one unknown — whether the owner's
-# certificate and profile work — rather than two. `CODE_SIGNING_ALLOWED=NO`
-# builds and links the arm64 binary, the frameworks and the asset catalogue
-# for `iphoneos` without any identity in the keychain, which is everything
-# except the signature itself.
+# certificate and profile work — rather than two. Building and linking the
+# arm64 binary, the Swift half and the asset catalogue for `iphoneos` is
+# everything except the signature itself, and none of it needs an identity in
+# a keychain.
 #
-# `xcodebuild archive` directly rather than `tauri ios build`: that command
-# exports an IPA, and exporting is the one step that cannot happen without a
-# signing identity. The archive is the part that can.
+# It goes through `tauri ios build` because nothing else can: the Xcode
+# project's Rust build phase reads its options over a socket from the CLI
+# process, so a hand-written `xcodebuild` line dies before it compiles
+# anything. Signing is switched off through the environment instead, the same
+# way the Swift library search path is (see ios-xcode-env.sh).
+#
+# The CLI archives first and *then* exports an IPA, and exporting is the one
+# step that genuinely cannot happen without a signing identity. So a non-zero
+# exit is expected here, and the thing this script actually checks is whether
+# the archive holds a built app. If it does, the compile is proven and only
+# the signature is missing — which is exactly the state M06b starts from.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
 bash scripts/ci/ios-ensure-assets.sh
+# shellcheck source=./ios-xcode-env.sh
+. scripts/ci/ios-xcode-env.sh
 
-PROJECT=$(find src-tauri/gen/apple -maxdepth 1 -name '*.xcodeproj' -print | sort | head -1)
-test -n "$PROJECT" || { echo "::error::no .xcodeproj under src-tauri/gen/apple"; exit 1; }
-echo "==> project: $PROJECT"
+export CODE_SIGNING_ALLOWED=NO
+export CODE_SIGNING_REQUIRED=NO
+export CODE_SIGN_IDENTITY=""
+export CODE_SIGN_ENTITLEMENTS=""
 
-# The scheme and configuration names come out of the project rather than being
-# hardcoded: they are cargo-mobile2's, not a promise. `-list -json` puts
-# warnings ahead of the JSON often enough that the payload has to be found
-# rather than parsed from the first byte.
-LIST=$(xcodebuild -project "$PROJECT" -list -json 2>/dev/null || true)
-read -r SCHEME CONFIG <<EOF
-$(printf '%s' "$LIST" | python3 -c "
-import json, sys
-text = sys.stdin.read()
-start = text.find('{')
-p = json.loads(text[start:])['project']
-schemes = p.get('schemes') or ['']
-ios = [s for s in schemes if s.endswith('_iOS')]
-configs = p.get('configurations') or ['release']
-config = next((c for c in ('release', 'Release') if c in configs), configs[-1])
-print((ios or schemes)[0], config)
-")
-EOF
-test -n "$SCHEME" || { echo "::error::could not read a scheme out of $PROJECT"; printf '%s\n' "$LIST"; exit 1; }
-echo "==> scheme: $SCHEME, configuration: $CONFIG"
+echo "==> building for a real iPhone (export is expected to fail: nothing here is signed)"
+if npm run tauri -- ios build --target aarch64 --export-method debugging; then
+  echo "==> the CLI got all the way through"
+else
+  echo "==> the CLI stopped, as expected without a signing identity; looking for the archive"
+fi
 
-ARCHIVE="$PWD/build/ios-device.xcarchive"
-rm -rf "$ARCHIVE"
+find_app() {
+  find "$1" -maxdepth "${2:-6}" -name 'Yames.app' -type d -print 2>/dev/null | sort | head -1
+}
 
-xcodebuild archive \
-  -project "$PROJECT" \
-  -scheme "$SCHEME" \
-  -configuration "$CONFIG" \
-  -sdk iphoneos \
-  -arch arm64 \
-  -archivePath "$ARCHIVE" \
-  -destination 'generic/platform=iOS' \
-  CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGN_IDENTITY="" \
-  CODE_SIGN_ENTITLEMENTS="" \
-  | tail -60
+APP=$(find_app src-tauri/gen/apple/build)
+[ -n "$APP" ] || APP=$(find_app "$HOME/Library/Developer/Xcode/DerivedData" 8)
+[ -n "$APP" ] || APP=$(find_app "$HOME/Library/Developer/Xcode/Archives" 8)
 
-APP=$(find "$ARCHIVE/Products/Applications" -maxdepth 1 -name '*.app' -type d -print | sort | head -1)
-test -n "$APP" || { echo "::error::the archive holds no .app"; find "$ARCHIVE" -maxdepth 4 | sort; exit 1; }
+if [ -z "$APP" ]; then
+  echo "::error::nothing was built for a real iPhone"
+  find src-tauri/gen/apple/build -maxdepth 5 2>/dev/null | sort | head -50 || true
+  exit 1
+fi
+echo "==> built app: $APP"
+
+BIN="$APP/Yames"
+test -f "$BIN" || BIN=$(find "$APP" -maxdepth 1 -type f -perm -111 -print | sort | head -1)
+
+# Refuse an app that is secretly a simulator build — the whole point of this
+# step is that the arm64 iPhone slice links.
+ARCHS=$(lipo -archs "$BIN" 2>/dev/null || echo '?')
+PLATFORM=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleSupportedPlatforms:0' "$APP/Info.plist" 2>/dev/null || echo '?')
+if [ "$PLATFORM" != "iPhoneOS" ]; then
+  echo "::error::this is a $PLATFORM build, not a real-iPhone one"
+  exit 1
+fi
 
 mkdir -p artifacts/ios-device
+rm -rf artifacts/ios-device/Yames.app
 cp -R "$APP" artifacts/ios-device/
 cp "$APP/Info.plist" artifacts/ios-device/Info.plist
 
 # ROADMAP 5.0.1 budgets 80 MB per platform, and on a phone the binary is
-# essentially all of it. An .app directory is not what a user downloads — the
+# essentially all of it. An .app directory is not what anyone downloads — the
 # App Store re-packages and thins it — so both numbers are reported and
 # neither is called "the download size".
-BIN=$(find "$APP" -maxdepth 1 -type f -perm -111 -print | sort | head -1)
 {
   echo "### The iPhone app, unsigned"
   echo
@@ -77,7 +81,8 @@ BIN=$(find "$APP" -maxdepth 1 -type f -perm -111 -print | sort | head -1)
   echo '|---|---|'
   echo "| .app on disk | $(du -sh "$APP" | cut -f1) |"
   [ -n "$BIN" ] && echo "| the binary inside it | $(du -h "$BIN" | cut -f1) |"
-  echo "| architectures | $(lipo -archs "$BIN" 2>/dev/null || echo '?') |"
+  echo "| architectures | $ARCHS |"
+  echo "| platform | $PLATFORM |"
   echo "| minimum iOS | $(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$APP/Info.plist" 2>/dev/null || echo '?') |"
   echo "| bundle id | $(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist" 2>/dev/null || echo '?') |"
   echo "| version | $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist" 2>/dev/null || echo '?') |"

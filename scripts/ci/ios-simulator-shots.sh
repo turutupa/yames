@@ -57,16 +57,27 @@ import json,sys
 rts = [r for r in json.load(sys.stdin)['runtimes'] if r.get('isAvailable') and 'iOS' in r.get('name','')]
 print(rts[-1]['identifier'] if rts else '')")
   test -n "$RUNTIME" || { echo "::error::this runner has no iOS runtime"; exit 1; }
+  # The named device first; failing that, the newest plain iPhone this Xcode
+  # knows about. Device-type names come and go with Xcode versions, and a
+  # screenshot of the wrong iPhone is worth more than no screenshot — what
+  # matters for the safe-area question is only that it has a notch or an
+  # island and a home indicator, which every iPhone since the X does.
   TYPE=$(xcrun simctl list devicetypes --json \
     | python3 -c "
-import json,sys
+import json, re, sys
 want = sys.argv[1]
-for t in json.load(sys.stdin)['devicetypes']:
+types = json.load(sys.stdin)['devicetypes']
+for t in types:
     if t['name'] == want:
-        print(t['identifier'])
-        break
+        print(t['identifier']); raise SystemExit
+plain = [t for t in types
+         if re.fullmatch(r'iPhone \d+', t['name'])]
+if plain:
+    plain.sort(key=lambda t: int(t['name'].split()[1]))
+    print(plain[-1]['identifier'])
 " "$DEVICE_NAME")
-  test -n "$TYPE" || { echo "::error::this runner has no '$DEVICE_NAME' device type"; exit 1; }
+  test -n "$TYPE" || { echo "::error::this runner has no iPhone device type at all"; exit 1; }
+  echo "==> creating a simulator from $TYPE on $RUNTIME"
   UDID=$(xcrun simctl create "$DEVICE_NAME" "$TYPE" "$RUNTIME")
 fi
 echo "==> $DEVICE_NAME is $UDID"
