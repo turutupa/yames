@@ -216,7 +216,8 @@
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionTitle": "{{name}} — at {{percent}}%",
+      "tabLabel": "The tab. Click a bar to go there, or drag across bars to choose a part."
     },
     "offer": {
       "justArrived": "just arrived in your downloads",
@@ -329,6 +330,22 @@
       "withPicture": "With picture",
       "noneFilmed": "None of these was filmed.",
       "was": "Bars {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Which part you are reading",
+      "percussion": "Drums — not one to follow",
+      "notTab": "Not written as tab",
+      "empty": "Nothing written on this one"
+    },
+    "strip": {
+      "more": "More"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + notes",
+      "notationNote": "Show the notation staff above the tab as well",
+      "bigger": "Bigger",
+      "smaller": "Smaller"
     }
   }
 }

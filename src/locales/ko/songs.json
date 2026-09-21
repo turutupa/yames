@@ -216,7 +216,8 @@
       "portionPlaceholder": "이 부분에 이름 붙이기",
       "renamePortion": "이름 바꾸기",
       "deletePortion": "이건 잊기",
-      "portionTitle": "{{name}} — {{percent}}%"
+      "portionTitle": "{{name}} — {{percent}}%",
+      "tabLabel": "탭입니다. 마디를 클릭하면 그 자리로 가고, 여러 마디를 끌면 한 부분을 고를 수 있어요."
     },
     "offer": {
       "justArrived": "이(가) 다운로드에 방금 도착했습니다",
@@ -329,6 +330,22 @@
       "withPicture": "영상 있음",
       "noneFilmed": "이 중에 촬영된 것은 없습니다.",
       "was": "{{bars}}마디 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "지금 보고 있는 파트",
+      "percussion": "드럼 — 따라갈 수 있는 파트가 아닙니다",
+      "notTab": "탭으로 적혀 있지 않습니다",
+      "empty": "여기에는 아무것도 적혀 있지 않습니다"
+    },
+    "strip": {
+      "more": "더 보기"
+    },
+    "view": {
+      "tabOnly": "탭",
+      "tabAndNotes": "탭 + 오선",
+      "notationNote": "탭 위에 오선보도 함께 표시합니다",
+      "bigger": "크게",
+      "smaller": "작게"
     }
   }
 }

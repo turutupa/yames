@@ -47,6 +47,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
+import { TrackMenu } from "./TrackMenu";
 /*
  * The review's hooks, from their own modules rather than through
  * `./review`.
@@ -82,6 +83,11 @@ import { SongCameraControl } from "./camera/SongCameraControl";
 import { CameraPreview } from "./camera/CameraPreview";
 import { CameraIntroDialog } from "./camera/CameraIntroDialog";
 import "../../styles/songs-camera.css";
+import { SongSpeed } from "./SongSpeed";
+import { SongStripMore } from "./SongStripMore";
+import { useStageIsNarrow } from "./useStageIsNarrow";
+import { useStageView } from "./useStageView";
+import { ZOOM_MAX, ZOOM_MIN } from "../../songs/stageView";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
 import { buildSchedule, meterAt, sectionRange } from "../../songs/schedule";
 import { portionRange } from "../../songs/selection";
@@ -169,8 +175,16 @@ function timeRoundKey(language: string, n: number): string {
 
 export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsViewProps) {
   const { t, i18n } = useTranslation();
-  const { score, source, song, range, loop, tempoPercent, tempo } = session;
+  /**
+   * `session.range` is what PLAYS — the portion with the playhead folded in.
+   * `bars` is what the player picked OUT. They part company the moment
+   * somebody clicks a bar (W29), and everything on the strip that says "what
+   * am I working on" reads `bars`.
+   */
+  const { score, source, song, range, portion: bars, loop, tempoPercent, tempo } = session;
   const fileRef = useRef<HTMLInputElement>(null);
+  /** Tab or tab-and-notes, and how big. This player's, not this song's. */
+  const stage = useStageView();
   /** The stage itself, so the band can fold when this column gets narrow. */
   const stageRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -190,7 +204,23 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     () => (score ? songPosition(score, range, currentBeat, { playing: isPlaying }) : null),
     [score, range, currentBeat, isPlaying],
   );
-  const tick = position?.tick ?? 0;
+  /**
+   * Where the cursor is drawn.
+   *
+   * The engine's position while it is running. Stopped, it is the playhead —
+   * the bar somebody clicked (W29 item 1). Those are the same answer whenever
+   * the repeat is off, because the playhead is then the range's own first
+   * bar; with a portion repeating they are not, and it is the CLICK that has
+   * to be honoured, or a click inside the portion would move nothing on
+   * screen at all.
+   */
+  const tick = useMemo(() => {
+    if (score && !isPlaying && session.playFrom !== null) {
+      const bar = score.bars[session.playFrom];
+      if (bar) return bar.startTick;
+    }
+    return position?.tick ?? 0;
+  }, [score, isPlaying, session.playFrom, position?.tick]);
 
   /**
    * The count, while one is being counted in.
@@ -497,14 +527,101 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     [onFiles],
   );
 
-  const meter = score ? meterAt(score, range.startBar) : null;
-  const barsInRange = range.endBar - range.startBar + 1;
+  const meter = score ? meterAt(score, bars.startBar) : null;
+  const barsInRange = bars.endBar - bars.startBar + 1;
+
+  /**
+   * What the strip has room for (W29 item 3).
+   *
+   * The STAGE's width and not the window's, the same question the stylesheet
+   * asks with `@container stage`: the rail and the coach dock both take from
+   * this column, so a 1500 px window can leave it at 700.
+   *
+   * Two thresholds, and both are measured rather than chosen: below 900 the
+   * section chips no longer fit beside the bars and the speed, so they move
+   * into "More"; below 820 six speed chips do not fit either, so the speed
+   * folds to one chip with the six behind it. It folds rather than moving,
+   * because the brief's rule for what sheds last is *"tempo percent and loop
+   * stay longest"* — the control keeps its place on the row, in a form that
+   * is one press instead of none. `songs.css` sheds the words (the captions,
+   * the facts, the sentence) at its own widths, which it can do without
+   * reparenting anything.
+   */
+  const sectionsInMore = useStageIsNarrow(stageRef, 900);
+  const tightStage = useStageIsNarrow(stageRef, 820);
+
+  /** How many players are turned down, for the mark on the "More" chip. */
+  const mutedCount = session.mixSetting.muted.length;
 
   /** The bar runs the player has already given a name of their own. */
   const named = useMemo(
     () => new Set(session.portions.map((p) => rangeKey(p.startBar, p.endBar))),
     [session.portions],
   );
+
+  /**
+   * The sections the file came with, and the portions the player named.
+   *
+   * Declared here rather than written into the strip because it moves: on
+   * a stage with room it is a group on the row, and on a narrow one it is
+   * in the "More" panel (W29 item 3). A container query cannot reparent,
+   * and rendering it twice would put two sets of chips for one passage
+   * into the accessibility tree.
+   */
+  const sectionsGroup =
+    score && (score.sections.length > 0 || session.portions.length > 0) ? (
+              <div className="songs-strip-group songs-strip-sections">
+                <span className="songs-strip-label">{t("songs.sections")}</span>
+                <div className="songs-section-chips">
+                  {score.sections.map((section, i) => {
+                    const chosen =
+                      bars.startBar === section.startBar &&
+                      bars.endBar === section.endBar &&
+                      // One chip lights for one set of bars. A player who
+                      // saved the chorus under a name of their own has two
+                      // chips over exactly those bars, and both used to come
+                      // on together — which says the range is two things.
+                      // The name they chose wins: it is the more particular
+                      // of the two, and it carries its own speed. The
+                      // section stays on the row, unlit, because it is still
+                      // a way in and it is what the file called the passage.
+                      !named.has(rangeKey(section.startBar, section.endBar));
+                    return (
+                      <button
+                        key={`${section.name}-${i}`}
+                        type="button"
+                        className="songs-chip"
+                        data-active={chosen ? "" : undefined}
+                        aria-pressed={chosen}
+                        onClick={() => session.setSelection(sectionRange(score, section.name))}
+                      >
+                        {section.name}
+                      </button>
+                    );
+                  })}
+                  {/* The portions the player named, beside the sections the
+                      file came with — because by the third week the passage
+                      you call "that run in the bridge" is more use than the
+                      section heading the engraver wrote. */}
+                  {session.portions.map((portion) => (
+                    <SongPortionChip
+                      key={portion.id}
+                      portion={portion}
+                      chosen={
+                        bars.startBar === portion.startBar && bars.endBar === portion.endBar
+                      }
+                      onChoose={() => {
+                        session.setSelection(portionRange(score, portion));
+                        session.setTempoPercent(portion.tempoPercent);
+                      }}
+                      onRename={(name) => session.renamePortion(portion.id, name)}
+                      onDelete={() => session.deletePortion(portion.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+    ) : null;
+
 
   return (
     <div
@@ -518,6 +635,11 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
          is on the transport — and it comes straight back when the review
          does. See `songs.css`. */
       data-review={reviewShowing ? "" : undefined}
+      /* W29 item 3 — while the transport runs, the facts and the strip stand
+         back so the music is the brightest thing on the screen. Faded, not
+         moved and not gone: one hover or one tap brings them back, and every
+         control keeps its box and its hit area. See `songs.css`. */
+      data-playing={isPlaying ? "" : undefined}
       data-dragging={dragging ? "" : undefined}
       onDragOver={(e) => {
         e.preventDefault();
@@ -592,13 +714,28 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
         </div>
       ) : (
         <>
+          {/* The head, on ONE line (W29 item 3).
+              It was a title block and a labelled table of facts, two rows
+              deep, above a tab that was getting under half the window. What
+              the song IS still all fits: the name, who wrote it, the part
+              you are reading, and the tuning, the meter and the tempo as
+              plain facts rather than a captioned list. The facts fade back
+              while the transport runs — see `songs.css`. */}
           <header className="songs-head">
-            <div className="songs-head-titles">
-              <h2 className="songs-title">{song?.name ?? score.title}</h2>
-              <p className="songs-sub">
-                {[score.artist, score.source.trackName].filter(Boolean).join(" · ")}
-              </p>
-            </div>
+            <h2 className="songs-title">{song?.name ?? score.title}</h2>
+            {/* Who wrote it, and WHICH PART OF IT YOU ARE READING — a menu
+                now, not a label (W29 item 2). It is a different question
+                from the band's faders on the strip: this one chooses what
+                you read and are scored on, those choose what you hear. */}
+            <p className="songs-sub">
+              {score.artist && <span className="songs-sub-artist">{score.artist}</span>}
+              <TrackMenu
+                tracks={session.tracks}
+                current={score.source.trackIndex}
+                currentName={score.source.trackName}
+                onChoose={(index) => void session.switchTrack(index)}
+              />
+            </p>
             <dl className="songs-facts">
               <div className="songs-fact">
                 <dt>{t("songs.tuning")}</dt>
@@ -623,6 +760,43 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 <dd>{t("songs.bpm", { bpm: tempo })}</dd>
               </div>
             </dl>
+            {/* How you READ it, at the end of the head where a reader's
+                controls go: tab, or tab with the notation staff over it, and
+                how big. Remembered for the player, not for the song. */}
+            <div className="songs-view-controls">
+              <button
+                type="button"
+                className="songs-chip songs-notation-chip"
+                data-active={stage.view.notation ? "" : undefined}
+                aria-pressed={stage.view.notation}
+                title={t("songs.view.notationNote")}
+                onClick={() => stage.setNotation(!stage.view.notation)}
+              >
+                {stage.view.notation ? t("songs.view.tabAndNotes") : t("songs.view.tabOnly")}
+              </button>
+              <div className="songs-zoom">
+                <button
+                  type="button"
+                  className="songs-chip songs-zoom-btn"
+                  aria-label={t("songs.view.smaller")}
+                  title={t("songs.view.smaller")}
+                  disabled={stage.view.zoom <= ZOOM_MIN}
+                  onClick={() => stage.zoom(-1)}
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  className="songs-chip songs-zoom-btn"
+                  aria-label={t("songs.view.bigger")}
+                  title={t("songs.view.bigger")}
+                  disabled={stage.view.zoom >= ZOOM_MAX}
+                  onClick={() => stage.zoom(1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
           </header>
 
           {session.warnings.length > 0 && (
@@ -687,6 +861,11 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   schedule={schedule}
                   selection={session.selection}
                   onSelect={session.setSelection}
+                  onSeek={session.seekTo}
+                  onClear={session.clearSelection}
+                  playhead={session.playFrom}
+                  view={stage.view}
+                  onZoom={stage.zoom}
                 />
               </Suspense>
             </div>
@@ -785,9 +964,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   min={1}
                   max={score.bars.length}
                   aria-label={t("songs.fromBar")}
-                  value={printedBarNumber(score, range.startBar)}
+                  value={printedBarNumber(score, bars.startBar)}
                   onChange={(e) =>
-                    session.setSelection({ ...range, startBar: Number(e.target.value) - 1 })
+                    session.setSelection({ ...bars, startBar: Number(e.target.value) - 1 })
                   }
                 />
               </label>
@@ -801,9 +980,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   min={1}
                   max={score.bars.length}
                   aria-label={t("songs.toBar")}
-                  value={printedBarNumber(score, range.endBar)}
+                  value={printedBarNumber(score, bars.endBar)}
                   onChange={(e) =>
-                    session.setSelection({ ...range, endBar: Number(e.target.value) - 1 })
+                    session.setSelection({ ...bars, endBar: Number(e.target.value) - 1 })
                   }
                 />
               </label>
@@ -843,126 +1022,94 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   am working on this", the other is "I am playing the piece". */}
               <button
                 type="button"
-                className="songs-chip"
+                className="songs-chip songs-portion-clear"
                 disabled={!session.selection}
                 onClick={session.clearSelection}
               >
                 {t("songs.wholeSong")}
               </button>
 
-              <SongPortionSave
-                canSave={session.selection !== null}
-                onSave={session.savePortion}
-              />
             </div>
 
-            {(score.sections.length > 0 || session.portions.length > 0) && (
-              <div className="songs-strip-group songs-strip-sections">
-                <span className="songs-strip-label">{t("songs.sections")}</span>
-                <div className="songs-section-chips">
-                  {score.sections.map((section, i) => {
-                    const chosen =
-                      range.startBar === section.startBar &&
-                      range.endBar === section.endBar &&
-                      // One chip lights for one set of bars. A player who
-                      // saved the chorus under a name of their own has two
-                      // chips over exactly those bars, and both used to come
-                      // on together — which says the range is two things.
-                      // The name they chose wins: it is the more particular
-                      // of the two, and it carries its own speed. The
-                      // section stays on the row, unlit, because it is still
-                      // a way in and it is what the file called the passage.
-                      !named.has(rangeKey(section.startBar, section.endBar));
-                    return (
-                      <button
-                        key={`${section.name}-${i}`}
-                        type="button"
-                        className="songs-chip"
-                        data-active={chosen ? "" : undefined}
-                        aria-pressed={chosen}
-                        onClick={() => session.setSelection(sectionRange(score, section.name))}
-                      >
-                        {section.name}
-                      </button>
-                    );
-                  })}
-                  {/* The portions the player named, beside the sections the
-                      file came with — because by the third week the passage
-                      you call "that run in the bridge" is more use than the
-                      section heading the engraver wrote. */}
-                  {session.portions.map((portion) => (
-                    <SongPortionChip
-                      key={portion.id}
-                      portion={portion}
-                      chosen={
-                        range.startBar === portion.startBar && range.endBar === portion.endBar
-                      }
-                      onChoose={() => {
-                        session.setSelection(portionRange(score, portion));
-                        session.setTempoPercent(portion.tempoPercent);
-                      }}
-                      onRename={(name) => session.renamePortion(portion.id, name)}
-                      onDelete={() => session.deletePortion(portion.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+            {!sectionsInMore && sectionsGroup}
 
-            <div className="songs-strip-group songs-strip-tempo">
-              <span className="songs-strip-label">{t("songs.speed")}</span>
-              <div className="songs-tempo-chips">
-                {TEMPO_STEPS.map((percent) => (
-                  <button
-                    key={percent}
-                    type="button"
-                    className="songs-chip"
-                    data-active={tempoPercent === percent ? "" : undefined}
-                    aria-pressed={tempoPercent === percent}
-                    /* The tempo the click will actually run at, which used to
-                       be a sentence under the chips. A number nobody has to
-                       read to use the control belongs in the tooltip. */
-                    title={t("songs.speedNote", { bpm: Math.round((tempo * percent) / tempoPercent) })}
-                    onClick={() => session.setTempoPercent(percent)}
-                  >
-                    {t("songs.percent", { percent })}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* How fast — the last thing to shed, with the repeat (W29 item
+                3). Six chips where there is room for six, and one chip with
+                the six behind it where there is not, so the speed is always
+                one press away even at the smallest window the app opens. */}
+            <SongSpeed
+              steps={TEMPO_STEPS}
+              percent={tempoPercent}
+              /* The tempo the click will actually run at, which used to be a
+                 sentence under the chips. A number nobody has to read to use
+                 the control belongs in the tooltip. */
+              bpmAt={(percent) => Math.round((tempo * percent) / tempoPercent)}
+              onChoose={session.setTempoPercent}
+              folded={tightStage}
+            />
 
-            <SongRecordControl
-              /* W21 — the camera's chip, inside the record switch's own group:
-                 one decision about this pass, in two parts. A group of its own
-                 cost the strip a row and the tab its height at 480px, which
-                 `songs.spec.ts` measures. */
-              camera={
-                <SongCameraControl camera={camera} disabled={takes.available === false} />
+            {/* And the rest, one press away. What is set once before you play
+                rather than changed while you are playing: recording, the
+                camera, and the file's own band. Every one of them is on a
+                footswitch as well (W25). */}
+            <SongStripMore
+              badge={
+                mutedCount > 0 ? (
+                  <span className="songs-band-opener-off">{mutedCount}</span>
+                ) : undefined
               }
-              available={takes.available}
-              takes={takes.takes}
-              /* W25 — what each take was a go at, and the score to print its
-                 bars the way the page does. */
-              details={takes.details}
-              score={score}
-              recording={takes.recording}
-              dirBytes={takes.dirBytes}
-              playingId={takes.playingId}
-              enabled={session.mixSetting.takes}
-              onRequestTakes={takes.requestTakes}
-              onPlay={takes.play}
-              onStop={takes.stopPlayback}
-              onDelete={takes.remove}
-            />
+            >
+              {sectionsInMore && sectionsGroup}
 
-            <SongBand
-              setting={session.mixSetting}
-              tracks={session.tracks}
-              onGain={session.setGain}
-              onMute={session.setMute}
-              onSolo={session.setSolo}
-              stageRef={stageRef}
-            />
+              {/* Naming a passage is something you do once, after you have
+                  dragged one out — not something you reach for mid-bar — so
+                  it moved in here with the rest and the row keeps the space
+                  for the speed (W29 item 3). */}
+              <div className="songs-strip-group">
+                <SongPortionSave
+                  canSave={session.selection !== null}
+                  onSave={session.savePortion}
+                />
+              </div>
+
+              <SongRecordControl
+                /* W21 — the camera's chip, inside the record switch's own
+                   group: one decision about this pass, in two parts. */
+                camera={
+                  <SongCameraControl camera={camera} disabled={takes.available === false} />
+                }
+                available={takes.available}
+                takes={takes.takes}
+                /* W25 — what each take was a go at, and the score to print its
+                   bars the way the page does. */
+                details={takes.details}
+                score={score}
+                recording={takes.recording}
+                dirBytes={takes.dirBytes}
+                playingId={takes.playingId}
+                enabled={session.mixSetting.takes}
+                onRequestTakes={takes.requestTakes}
+                onPlay={takes.play}
+                onStop={takes.stopPlayback}
+                onDelete={takes.remove}
+              />
+
+              {/* The band never takes a row of its own again (W29 item 3),
+                  and W28 put a fader in here for every track in the file. It
+                  is handed the same stage it always was, so it goes on
+                  deciding for itself whether it has room for lanes or folds
+                  into its own chip; in here the lanes are stacked down the
+                  panel rather than laid across a row — one column, as many
+                  players as the file has (`songs.css`). */}
+              <SongBand
+                setting={session.mixSetting}
+                tracks={session.band}
+                onGain={session.setGain}
+                onMute={session.setMute}
+                onSolo={session.setSolo}
+                stageRef={stageRef}
+              />
+            </SongStripMore>
           </div>
         </>
       )}

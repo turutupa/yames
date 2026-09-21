@@ -91,11 +91,16 @@ export interface SongEngine {
     patch: Partial<Pick<SongMixSetting, "selection" | "loop" | "tempoPercent" | "portions">>,
   ) => void;
   /**
-   * Every track of the file, in the file's own order, with its name, its
-   * role and whether it is the part being learned. The band strip draws one
-   * fader per entry, and `mixSetting.mix.tracks[n]` is that entry's level.
+   * The BAND: every track of the file, in the file's own order, with its
+   * name, its role and whether it is the part being learned. The band strip
+   * draws one fader per entry, and `mixSetting.mix.tracks[n]` is that
+   * entry's level.
+   *
+   * Not `tracks`, which on the session beside it is W29's list for the
+   * instrument menu — the same file read for a different question. This one
+   * has notes in it and is what the engine is playing.
    */
-  tracks: SongBackingTrack[];
+  band: SongBackingTrack[];
   /** Tracks in the file this band has nobody to play, by name. */
   leftOut: string[];
   /** What the engine made of the song, or null before it has been told. */
@@ -357,7 +362,7 @@ export function useSongEngine({
   // tracks are laid out by whoever wrote it and the tab is drawn in that
   // order, so a strip that sorted them would be a strip whose second fader is
   // not the tab's second staff.
-  const tracks = useMemo(() => band?.tracks ?? [], [band]);
+  const bandTracks = useMemo(() => band?.tracks ?? [], [band]);
 
   const setGain = useCallback(
     (lane: SongLane, value: number) =>
@@ -473,7 +478,7 @@ export function useSongEngine({
     setTakes,
     setCamera,
     setStageSetting,
-    tracks,
+    band: bandTracks,
     leftOut: band?.leftOut ?? [],
     loaded,
     engineError,

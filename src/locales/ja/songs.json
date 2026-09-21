@@ -216,7 +216,8 @@
       "portionPlaceholder": "この部分に名前を",
       "renamePortion": "名前を変更",
       "deletePortion": "これを忘れる",
-      "portionTitle": "{{name}} — {{percent}}%"
+      "portionTitle": "{{name}} — {{percent}}%",
+      "tabLabel": "タブ譜です。小節をクリックするとそこへ移り、ドラッグすると一部分を選べます。"
     },
     "offer": {
       "justArrived": "がダウンロードに届きました",
@@ -329,6 +330,22 @@
       "withPicture": "映像あり",
       "noneFilmed": "どれも撮影されていません。",
       "was": "{{bars}}小節 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "読んでいるパート",
+      "percussion": "ドラム — 追いかけられないパートです",
+      "notTab": "タブ譜で書かれていません",
+      "empty": "このパートには何も書かれていません"
+    },
+    "strip": {
+      "more": "その他"
+    },
+    "view": {
+      "tabOnly": "タブ",
+      "tabAndNotes": "タブ＋五線",
+      "notationNote": "タブの上に五線も表示します",
+      "bigger": "大きく",
+      "smaller": "小さく"
     }
   }
 }

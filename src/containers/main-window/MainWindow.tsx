@@ -572,14 +572,14 @@ export function MainWindow() {
           const bar = barNow();
           if (bar === null || !score) return;
           songsSession.setSelection(
-            setEdge(score, songsSession.selection ?? songsSession.range, "start", bar),
+            setEdge(score, songsSession.selection ?? songsSession.portion, "start", bar),
           );
         },
         loopEndsHere: () => {
           const bar = barNow();
           if (bar === null || !score) return;
           songsSession.setSelection(
-            setEdge(score, songsSession.selection ?? songsSession.range, "end", bar),
+            setEdge(score, songsSession.selection ?? songsSession.portion, "end", bar),
           );
         },
         toggleLoop: () => songsSession.setLoop(!songsSession.loop),
@@ -587,7 +587,7 @@ export function MainWindow() {
         nudge: (bars: number) => {
           if (!score) return;
           songsSession.setSelection(
-            nudgeRange(score, songsSession.selection ?? songsSession.range, bars),
+            nudgeRange(score, songsSession.selection ?? songsSession.portion, bars),
           );
         },
         /*
@@ -617,6 +617,7 @@ export function MainWindow() {
     [
       songsSession.score,
       songsSession.range,
+      songsSession.portion,
       songsSession.selection,
       songsSession.loop,
       songsSession.setSelection,

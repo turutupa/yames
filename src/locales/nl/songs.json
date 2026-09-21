@@ -216,7 +216,8 @@
       "portionPlaceholder": "Geef dit stuk een naam",
       "renamePortion": "Hernoemen",
       "deletePortion": "Deze vergeten",
-      "portionTitle": "{{name}} — op {{percent}}%"
+      "portionTitle": "{{name}} — op {{percent}}%",
+      "tabLabel": "De tab. Klik op een maat om daarheen te gaan, of sleep over maten om een stuk te kiezen."
     },
     "offer": {
       "justArrived": "staat net in je downloads",
@@ -329,6 +330,22 @@
       "withPicture": "Met beeld",
       "noneFilmed": "Hiervan is er geen gefilmd.",
       "was": "Maten {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Welke partij je leest",
+      "percussion": "Drums — niet om te volgen",
+      "notTab": "Niet als tab geschreven",
+      "empty": "Hier staat niets in"
+    },
+    "strip": {
+      "more": "Meer"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + noten",
+      "notationNote": "Laat ook de notenbalk boven de tab zien",
+      "bigger": "Groter",
+      "smaller": "Kleiner"
     }
   }
 }

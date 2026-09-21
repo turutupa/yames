@@ -216,7 +216,8 @@
       "portionPlaceholder": "Bu bölüme bir ad ver",
       "renamePortion": "Yeniden adlandır",
       "deletePortion": "Bunu unut",
-      "portionTitle": "{{name}} — %{{percent}}"
+      "portionTitle": "{{name}} — %{{percent}}",
+      "tabLabel": "Tab. Gitmek istediğin ölçüye tıkla ya da bir bölüm seçmek için ölçülerin üzerinde sürükle."
     },
     "offer": {
       "justArrived": "az önce indirilenlere düştü",
@@ -329,6 +330,22 @@
       "withPicture": "Görüntülü",
       "noneFilmed": "Bunların hiçbiri kaydedilmedi.",
       "was": "Ölçü {{bars}} · %{{percent}} · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Hangi partisyonu okuyorsun",
+      "percussion": "Davul — takip edilecek bir parti değil",
+      "notTab": "Tab olarak yazılmamış",
+      "empty": "Burada bir şey yazmıyor"
+    },
+    "strip": {
+      "more": "Daha fazla"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + nota",
+      "notationNote": "Tabın üstünde porteyi de göster",
+      "bigger": "Daha büyük",
+      "smaller": "Daha küçük"
     }
   }
 }

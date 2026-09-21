@@ -38,10 +38,12 @@ import {
   LayoutMode,
   LogLevel,
   Logger,
+  NotationElement,
   PlayerMode,
   ScrollMode,
   Settings,
   StaveProfile,
+  TabRhythmMode,
   model,
 } from "@coderline/alphatab";
 // woff2 only. The .woff beside it is another 550 KB in the installer and is
@@ -57,12 +59,15 @@ import {
   dragRange,
   dragTo,
   playedBarOfPrinted,
+  pressIsDrag,
   printedBarOfPlayed,
   printedRunsOfRange,
 } from "../../songs/selection";
-import type { SelectionDrag } from "../../songs/selection";
+import type { SelectionDrag, TabPress } from "../../songs/selection";
 import { MARK_GLYPH } from "./review/marks";
 import type { TimingMark } from "./review/marks";
+import { DEFAULT_STAGE_VIEW } from "../../songs/stageView";
+import type { StageView } from "../../songs/stageView";
 import type { BarRange } from "../../songs/schedule";
 import type { ScoreSchedule, SongScore } from "../../songs/types";
 
@@ -89,6 +94,32 @@ export interface TabStageProps {
    * mid-drag would restart the song once per bar the pointer passed over.
    */
   onSelect?: (range: BarRange) => void;
+  /**
+   * A bar was clicked: go there (W29 item 1).
+   *
+   * The played bar, not the printed one — the caller thinks in the bars the
+   * engine plays, like everything else that crosses this boundary. Called on
+   * a plain click and on the arrow keys; never on a drag, which is a portion.
+   */
+  onSeek?: (playedBar: number) => void;
+  /** Esc on the tab: put the portion away and play the whole piece again. */
+  onClear?: () => void;
+  /**
+   * Where the playhead stands, as a played bar, or null for "at the start".
+   *
+   * Drawn as a thin mark at the head of that bar. While the piece is stopped
+   * alphaTab's own cursor is there too and the mark is under it; while it is
+   * running the cursor is wherever the engine is, and the mark is the only
+   * thing that says where the next press of play will begin.
+   */
+  playhead?: number | null;
+  /**
+   * How this player likes to read a tab: notation on or off, and how big
+   * (W29 item 3). Changing either re-engraves the piece.
+   */
+  view?: StageView;
+  /** Ctrl/Cmd and the wheel over the music. The head has buttons for it too. */
+  onZoom?: (steps: number) => void;
   /**
    * How each expected onset has gone so far, while the pass runs
    * (`SONGS.md` A7). Empty — the default — costs nothing and draws nothing.
@@ -277,7 +308,34 @@ function printedBarsOf(atScore: model.Score, trackIndex: number) {
   return atScore.tracks[trackIndex]?.staves[0]?.bars ?? [];
 }
 
-function buildSettings(): Settings {
+/**
+ * What the ENGRAVING may say, and what the head says instead (W29 item 3).
+ *
+ * alphaTab prints the piece's title, subtitle, artist and tuning legend at
+ * the top of the page, as a sheet of music does. On a screen that costs about
+ * a hundred and twenty pixels of a nine-hundred-pixel window to repeat, in a
+ * serif face, three things the stage's own head is already saying in the
+ * theme's face — the title, who wrote it and what it is tuned to — plus a
+ * numbered list of six strings.
+ *
+ * So the page is the MUSIC, and the facts live in the head. Everything left
+ * on is something the head cannot say: the section names, which belong over
+ * the bar they start on, and every effect and marking that is part of the
+ * notes.
+ */
+const HIDDEN_ELEMENTS: NotationElement[] = [
+  NotationElement.ScoreTitle,
+  NotationElement.ScoreSubTitle,
+  NotationElement.ScoreArtist,
+  NotationElement.ScoreAlbum,
+  NotationElement.ScoreWords,
+  NotationElement.ScoreMusic,
+  NotationElement.ScoreWordsAndMusic,
+  NotationElement.ScoreCopyright,
+  NotationElement.GuitarTuning,
+];
+
+function buildSettings(view: StageView, fretted: boolean): Settings {
   const settings = new Settings();
   // Never true here. W4-FINDINGS §5: under vite the worker URL 404s and
   // rendering silently never finishes.
@@ -291,16 +349,81 @@ function buildSettings(): Settings {
   // We scroll the stage ourselves, against our own container.
   settings.player.scrollMode = ScrollMode.Off;
   /*
-   * alphaTab's own selecting and seek-on-click are off (2026-09-20).
+   * alphaTab's own selecting stays off — but a click DOES go there now
+   * (2026-09-20, W29).
    *
-   * Left on, dragging across bars paints alphaTab's playback-range highlight
-   * and a click seeks a player that is never started — two selections on one
-   * page, one of which does nothing. The `beatMouseDown` / `Move` / `Up`
-   * events still fire with it off (they are triggered before the flag is
-   * read), which is the whole of what this mode needs from the pointer.
+   * The note this replaces said seek-on-click was off because it would seek a
+   * player that is never started. That was true of alphaTab's player and
+   * beside the point about ours: the owner, after his first session, *"when i
+   * click on the tab its selecting it for loop instead of just going to that
+   * place — mimic songsterr click events, they are the common industry"*. So
+   * a click moves OUR playhead, which is the engine's, and this file's
+   * pointer handling is what does it (see "Going there, and choosing a
+   * portion" below).
+   *
+   * The flag stays false because what alphaTab does on top of that is still
+   * wrong for this stage. Looked up rather than remembered, in alphaTab's own
+   * source and docs: with `enableUserInteraction` on, a drag selects by BEAT
+   * and sets `api.playbackRange` — a second idea of what is chosen, on a
+   * player that never runs — and a plain click additionally nulls that range,
+   * so clicking anywhere would silently throw the portion away. Our portion
+   * snaps to whole bars, has handles, and is the engine's loop.
+   *
+   * What we keep from alphaTab is its hit testing (`boundsLookup`), which is
+   * the same lookup its own events use. Its listeners are `mousedown` /
+   * `mousemove` / `mouseup` only — no touch, no pointer — so the overlay's
+   * pointer events are also what makes a Windows touchscreen work at all.
    */
   settings.player.enableUserInteraction = false;
-  settings.display.staveProfile = StaveProfile.ScoreTab;
+
+  /*
+   * ── Tablature first (W29 item 3) ──────────────────────────────────────
+   *
+   * It was `ScoreTab`: a notation staff AND a tab staff for every system, so
+   * a screen held half the bars it could. The owner asked for the room back.
+   *
+   * `StaveProfile.Tab` is tab only. The rhythm comes back under it with
+   * `notation.rhythmMode` — `ShowWithBars` rather than `ShowWithBeams`,
+   * because bars connect across a beat the way a reader expects and beams
+   * per beat break a run of sixteenths into fours. (`Automatic`, the
+   * default, decides by whether notation is hidden, which is right here and
+   * is not right in the other mode — so it is said rather than inferred.)
+   * **Not `TabMixed`**, whatever its name suggests: what distinguishes that
+   * one is hiding rests and time signatures, which is a thing for rendering
+   * several tracks at once and would take the meter off a piece that changes
+   * it.
+   *
+   * A part with no strings is not written as tab at all, so it falls back to
+   * notation rather than being drawn as an empty six-line staff.
+   */
+  settings.display.staveProfile = fretted
+    ? view.notation
+      ? StaveProfile.ScoreTab
+      : StaveProfile.Tab
+    : StaveProfile.Score;
+  settings.notation.rhythmMode = TabRhythmMode.ShowWithBars;
+  for (const element of HIDDEN_ELEMENTS) settings.notation.elements.set(element, false);
+
+  /*
+   * ── The room a row takes ──────────────────────────────────────────────
+   *
+   * alphaTab's defaults are a printed page's: 35 px of margin all round, ten
+   * above and below every system. On a stage that is already the leftover
+   * room, that is two systems' worth of white per screen.
+   *
+   * `stretchForce` is the one to leave alone. It is the spring constant of
+   * the Gourlay spacing the engraving is built on, and turning it down packs
+   * more bars into a row by making a sixteenth-note run narrower than a
+   * reader can follow — which is exactly what the brief says not to trade
+   * away. The room comes from the margins, which cost nothing to read.
+   */
+  settings.display.scale = view.zoom;
+  settings.display.padding = [10, 8];
+  settings.display.firstSystemPaddingTop = 2;
+  settings.display.systemPaddingTop = 2;
+  settings.display.systemPaddingBottom = 4;
+  settings.display.lastSystemPaddingBottom = 2;
+
   settings.display.layoutMode = LayoutMode.Page;
   applyTheme(settings);
   return settings;
@@ -332,6 +455,11 @@ export function TabStage({
   schedule,
   selection = null,
   onSelect,
+  onSeek,
+  onClear,
+  playhead = null,
+  view = DEFAULT_STAGE_VIEW,
+  onZoom,
 }: TabStageProps) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -364,7 +492,7 @@ export function TabStage({
     try {
       const parsed = parseSongFile(source, score.source.fileName);
       barsRef.current = printedBarsOf(parsed.atScore, score.source.trackIndex);
-      api = new AlphaTabApi(host, buildSettings());
+      api = new AlphaTabApi(host, buildSettings(view, score.tuning.length > 0));
       api.error.on(() => setFailed(true));
       api.postRenderFinished.on(() => {
         setReady(true);
@@ -394,7 +522,40 @@ export function TabStage({
       delete (window as unknown as { __SONGS_TAB_API__?: AlphaTabApi }).__SONGS_TAB_API__;
       api?.destroy();
     };
-  }, [source, score.source.fileName, score.source.trackIndex, themeId]);
+    // `view` is a setting the whole engraving is built from, so a change to
+    // it is a fresh `AlphaTabApi` — the same as a theme change. Its two
+    // fields rather than the object, which is new on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    source,
+    score.source.fileName,
+    score.source.trackIndex,
+    themeId,
+    view.notation,
+    view.zoom,
+  ]);
+
+  /**
+   * Ctrl/Cmd and the wheel makes the music bigger (W29 item 3).
+   *
+   * On the viewport rather than the overlay, so it works over the margins
+   * too, and `passive: false` because the whole point is to take the
+   * gesture off the browser's own page zoom — which in a Tauri webview
+   * would scale the app's chrome and leave the score exactly as it was.
+   * A wheel with no modifier still scrolls the page.
+   */
+  useEffect(() => {
+    const viewport = hostRef.current?.closest<HTMLElement>(".songs-tab-viewport");
+    if (!viewport || !onZoom) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      if (e.deltaY === 0) return;
+      onZoom(e.deltaY < 0 ? 1 : -1);
+    };
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+    return () => viewport.removeEventListener("wheel", onWheel);
+  }, [onZoom, ready]);
 
   // The cursor. One property set per beat event, measured at 0.02 ms — this
   // is the whole of the "driven by the engine" requirement.
@@ -467,18 +628,43 @@ export function TabStage({
     }
   }, [lights, ticksByOnset, classByTick, ready, rendered]);
 
-  /* ── Choosing a portion on the tab ─────────────────────────────────────
+  /* ── Going there, and choosing a portion ───────────────────────────────
    *
-   * The owner, 2026-09-20: selecting a portion so it repeats is *"super
-   * critical for song learning"*. This is the pointer half of it; the model
-   * is `songs/selection.ts` and the arithmetic of where the band goes is
-   * `selectionBands.ts`, so what is here is only the wiring.
+   * **A click goes there. A drag chooses a portion.** That is the whole rule,
+   * and it is the one the owner asked for after his first session: *"when i
+   * click on the tab its selecting it for loop instead of just going to that
+   * place — mimic songsterr click events, they are the common industry"*.
    *
-   * Three things this has to get right:
+   * Looked up before it was written, in the players people already use
+   * (2026-09-20). alphaTab's own default — read off `AlphaTabApiBase`, and
+   * its docs say it in one line, "users can select the desired playback range
+   * with the mouse and also jump to individual beats by click" — is exactly
+   * this shape: mouse down on a beat opens a selection, a drag extends it
+   * beat by beat, and on release a multi-beat drag becomes the playback range
+   * while a click with no drag in it seeks and throws the range away.
+   * Songsterr's help pages and a session on one of their tabs agree about the
+   * click: it moves the cursor and does not start playing (their double-click
+   * is "play from beat"). Ultimate Guitar's players tap to move the cursor
+   * too, and both they and Guitar Pro keep the LOOP behind a button of its
+   * own that pre-selects whole bars with handles, which is the part we
+   * already had.
+   *
+   * So the two things this file takes from them are: a plain click seeks, and
+   * a portion is whole bars with handles. The one thing it does NOT take is
+   * alphaTab's "a click clears the loop": in Songsterr, Ultimate Guitar and
+   * Guitar Pro the repeat is a switch, and clearing it by touching the page
+   * is how you lose the passage you were working on.
+   *
+   * Five things this has to get right:
+   *
+   * **Click or drag, in pixels.** `pressIsDrag` decides, and it counts pixels
+   * rather than bars — two bars can be forty pixels apart, so a hand that
+   * shook while pressing would otherwise choose a portion.
    *
    * **Modifiers.** alphaTab's `beatMouseDown` hands over a beat and nothing
    * else, so shift-to-extend and which handle was grabbed are read off the
-   * real pointer event in a capture-phase listener that runs first.
+   * real pointer event. Shift-click is ours and not theirs — no tab player
+   * binds it — but it is what every text selection in the app does.
    *
    * **Printed, then played.** The page draws each bar once; the engine plays
    * an unrolled list. The pointer speaks printed bars and the selection is
@@ -488,13 +674,27 @@ export function TabStage({
    * start it again from the top, so nothing is pushed until the pointer comes
    * up — otherwise dragging across eight bars would restart the song eight
    * times.
+   *
+   * **No side effects inside a state updater.** The press is kept in a ref
+   * and the drag is mirrored into one, so `onSelect` and `onSeek` are called
+   * from the event handler itself. React may call an updater twice.
    */
   const [drag, setDrag] = useState<SelectionDrag | null>(null);
+  const dragRef = useRef<SelectionDrag | null>(null);
+  const pressRef = useRef<TabPress | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   // Read inside the pointer handlers, which are registered once and must not
   // be torn down and rebuilt every time the selection changes.
-  const latest = useRef({ selection, onSelect, score });
-  latest.current = { selection, onSelect, score };
+  const latest = useRef({ selection, onSelect, onSeek, onClear, score });
+  latest.current = { selection, onSelect, onSeek, onClear, score };
+  /** Where the arrows start counting from. Read, not depended on. */
+  const playheadRef = useRef<number | null>(playhead);
+  playheadRef.current = playhead;
+
+  const putDrag = useCallback((next: SelectionDrag | null) => {
+    dragRef.current = next;
+    setDrag(next);
+  }, []);
 
   /**
    * The played bar under a point on the page.
@@ -543,16 +743,35 @@ export function TabStage({
           : barAtPoint(e.clientX, e.clientY);
       if (bar === null) return;
       e.preventDefault();
+      // The tab takes the caret, so the arrow keys and Esc reach it without a
+      // second gesture. Not on a handle: that is a drag, not a place.
+      overlay.focus({ preventScroll: true });
       overlay.setPointerCapture?.(e.pointerId);
-      setDrag(beginDrag(bar, { shiftKey: e.shiftKey, handle, current }));
+      pressRef.current = {
+        bar,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        handle,
+        shiftKey: e.shiftKey,
+      };
+      // A handle and a shift-click are about the portion from the first
+      // pixel; a plain press is nothing yet, and becomes a drag only if the
+      // pointer travels (`pressIsDrag`).
+      if (handle || e.shiftKey) {
+        putDrag(beginDrag(bar, { shiftKey: e.shiftKey, handle, current }));
+      }
     };
 
     const onMove = (e: PointerEvent) => {
-      setDrag((current) => {
-        if (!current) return current;
-        const bar = barAtPoint(e.clientX, e.clientY);
-        return bar === null ? current : dragTo(current, bar);
-      });
+      const press = pressRef.current;
+      if (!press) return;
+      if (!dragRef.current) {
+        if (!pressIsDrag(press, e.clientX, e.clientY)) return;
+        putDrag(beginDrag(press.bar, { shiftKey: false, handle: null, current: null }));
+      }
+      const bar = barAtPoint(e.clientX, e.clientY);
+      if (bar === null || !dragRef.current) return;
+      putDrag(dragTo(dragRef.current, bar));
     };
 
     /**
@@ -561,12 +780,22 @@ export function TabStage({
      * A range change makes the engine recompile the piece and start it again
      * from the top of the new bars (`useSongEngine`), so a selection pushed
      * on every bar the pointer crossed would restart the song once per bar.
+     *
+     * A press that never became a drag is the click, and the click goes
+     * there. It touches the portion not at all — that is what the owner
+     * asked for, and what Songsterr, Ultimate Guitar and Guitar Pro all do:
+     * the repeat is a switch, not something the page takes off you.
      */
     const onUp = () => {
-      setDrag((current) => {
-        if (current) latest.current.onSelect?.(dragRange(current));
-        return null;
-      });
+      const press = pressRef.current;
+      const dragging = dragRef.current;
+      pressRef.current = null;
+      if (dragging) {
+        putDrag(null);
+        latest.current.onSelect?.(dragRange(dragging));
+        return;
+      }
+      if (press) latest.current.onSeek?.(press.bar);
     };
 
     overlay.addEventListener("pointerdown", onDown);
@@ -582,7 +811,47 @@ export function TabStage({
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
     };
-  }, [ready, rendered, barAtPoint]);
+  }, [ready, rendered, barAtPoint, putDrag]);
+
+  /**
+   * The keyboard, on the tab (W29 item 1).
+   *
+   * Bound to the overlay rather than to the window: Songsterr's own arrows
+   * move its cursor and its Esc closes whatever panel is open, and a page
+   * that swallowed the arrow keys wherever the caret happened to be would
+   * take them off the strip's number fields and off the rail. A click on the
+   * tab, or a Tab press, is what puts the caret here.
+   *
+   * ← / → move a bar and Home goes to the top, which is the brief's list.
+   * Guitar Pro spells the last one Ctrl+Home (its plain Home is the head of
+   * the current bar) and Songsterr spells it Backspace; neither is a thing a
+   * musician would guess, and Home is.
+   *
+   * Space is NOT here. It is the transport's, everywhere in this app, and
+   * `useKeybindings` already has it.
+   */
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const { score: current, selection: chosen, onSeek: seek, onClear: clear } = latest.current;
+      if (e.key === "Escape") {
+        if (!chosen) return;
+        e.preventDefault();
+        clear?.();
+        return;
+      }
+      if (!seek) return;
+      const last = Math.max(0, current.bars.length - 1);
+      const from = playheadRef.current ?? 0;
+      let next: number | null = null;
+      if (e.key === "ArrowLeft") next = Math.max(0, from - 1);
+      else if (e.key === "ArrowRight") next = Math.min(last, from + 1);
+      else if (e.key === "Home") next = 0;
+      if (next === null) return;
+      e.preventDefault();
+      seek(next);
+    },
+    [],
+  );
 
   /**
    * The band, and the two handles, in the engraving's own coordinates.
@@ -609,6 +878,30 @@ export function TabStage({
   }, [ready, rendered, score, shown?.startBar, shown?.endBar, shown === null]);
 
   const handles = useMemo(() => handleRects(bands), [bands]);
+
+  /**
+   * The playhead's own mark, at the head of the bar play will start from.
+   *
+   * Stopped, alphaTab's cursor is on that bar too and this sits under it —
+   * belt and braces, and the mark is a SHAPE, which survives the two
+   * lowest-contrast themes and a screenshot. Running, the cursor is wherever
+   * the engine is and this is the only thing on the page that says where the
+   * next press of play begins: the engine has no seek, so a click made while
+   * the band is playing is a promise about the next pass rather than a jump
+   * (reported with W29 — `set_song_range` recompiles and restarts).
+   */
+  const playheadMark = useMemo<Rect | null>(() => {
+    const lookup = apiRef.current?.renderer?.boundsLookup;
+    if (!ready || !lookup || playhead === null) return null;
+    const printed = printedBarOfPlayed(score, playhead);
+    if (printed === null) return null;
+    const bounds = lookup.findMasterBarByIndex(printed);
+    if (!bounds) return null;
+    const box = bounds.visualBounds;
+    return { x: box.x, y: box.y, w: 2, h: box.h };
+    // `rendered` is the engraving these coordinates belong to.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, rendered, score, playhead]);
 
   /** The bars the band covers, said in printed numbers for a screen reader. */
   const spoken = shown
@@ -694,9 +987,32 @@ export function TabStage({
             style={{ left: band.x, top: band.y, width: band.w, height: band.h }}
           />
         ))}
+        {playheadMark && (
+          <div
+            className="songs-tab-playhead"
+            style={{
+              left: playheadMark.x,
+              top: playheadMark.y,
+              width: playheadMark.w,
+              height: playheadMark.h,
+            }}
+          />
+        )}
       </div>
       <div className="songs-tab-host" ref={hostRef} data-ready={ready ? "" : undefined} />
-      <div className="songs-tab-overlay" ref={overlayRef} data-ready={ready ? "" : undefined}>
+      {/* The pointer surface, and the one thing on this screen that takes the
+          arrow keys. `tabIndex` rather than a button, because it is a page of
+          music: a reader arrives on it, moves a bar at a time and presses Esc
+          to put a portion away, and none of that is "activate me". */}
+      <div
+        className="songs-tab-overlay"
+        ref={overlayRef}
+        data-ready={ready ? "" : undefined}
+        tabIndex={0}
+        role="application"
+        aria-label={t("songs.stage.tabLabel")}
+        onKeyDown={onKeyDown}
+      >
         {handles && !drag && (
           <>
             <div
