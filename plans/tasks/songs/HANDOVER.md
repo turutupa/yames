@@ -15,6 +15,43 @@ W27, listed under "Since the first night"), and `songs-v1` **is pushed**
 app. Everything below is proven by tests, fixtures, the layout suite and
 the offline renderer — not by a guitar. The first thing to do is run it.
 
+## After your first session (night of 2026-09-20/21)
+
+You found four things in five minutes; all four are fixed on `songs-v1`
+(`git pull`, then `npm install` — the synth is a new dependency).
+
+1. **Play plays the song** (W28). The importer used to hand the engine only
+   what Jam's band could play; a two-guitar file produced zero tracks, so you
+   heard the click. Every part now sounds through a small General MIDI synth
+   in the engine (rendered ahead on its own thread, never on the audio
+   callback: 0 allocations, 0 dropouts in the probe). Your own part is the
+   first fader, a little under the rest, with its own mute; every part has a
+   fader, mute and solo (under **More**). The sounds are a 1.3 MB Apache set;
+   two A/B clips are in `song-ab-clips/` — if the guitars are too cheap, the
+   next step is a better set downloaded on first use (your call), and
+   Settings lets you point at your own `.sf2` today.
+2. **The instrument is a dropdown in the header** (W29). Switching keeps your
+   bar, your loop and your speed; takes and history were already per part.
+   Drum and vocal parts are listed but cannot be chosen yet.
+3. **The tab gets the stage** (W29): tab-first with a "Tab / Tab + notes"
+   switch, zoom, one-line header, one row of controls. 56 % -> 68 % of the
+   window's height at 1440x900 (74.7 % is the ceiling), 23 % -> 63 % at the
+   smallest window.
+4. **Click goes there, drag loops** (W29 + W28's engine seek). Click moves
+   the playhead, also while playing; drag chooses a looping portion in whole
+   bars, with handles; Shift-click extends it; Esc clears it. Bars you skip
+   by seeking are not scored as misses.
+
+Yours to decide from that night: **the guide bleeds into a microphone**
+through speakers (not through an interface or headphones). W28 recommends
+muting the guide while a take records; it is ON for now. And band fader
+levels saved before W28 return to default (the click's is kept).
+
+Being built while you slept: W30 (record a jam, with the picture, and with
+"everything this computer plays" as the sound so your plugin guitar is in it;
+save as a video with the Yames mark) and then W31 (the real tab, scrolling
+and coloured, in a Songs video).
+
 ## Try it (in this order)
 
 ```
