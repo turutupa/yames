@@ -53,6 +53,11 @@ const FORBIDDEN = [
   ["takes_dir_size", "the takes shelf"],
   ["pick_kit_folder", "the folder dialog for a kit of your own samples"],
   ["inspect_kit_folder", "reading a folder of your own samples"],
+  // The band's fourth row — you, and whether anything is listening to you.
+  // The class name exists in exactly one place (`BandLanes.tsx`) and survives
+  // minification, which is what makes it a usable signal; the row itself is
+  // about a microphone, and a phone has none (M09).
+  ["jam-band-you", "the band's “you” row, which reports a microphone a phone does not have"],
 ];
 
 /** Every file under `dist/assets`, recursively. */

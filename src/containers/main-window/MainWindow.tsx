@@ -1589,18 +1589,32 @@ export function MainWindow() {
           // The two sheets. One open at a time: they occupy the same 640px on
           // the right, and two of them stacked would be a screen with no jam
           // left on it.
+          //
+          // Not in a phone's context bar, though: forty pixels already hold a
+          // name, two volumes and an overflow, and both buttons were drawn
+          // off the end of it (M08-JAM-GAPS). Without a handler `JamSaveBar`
+          // draws neither, and the jam's own screen carries them instead —
+          // see the two `.jam-phone-doors` buttons at the top of `JamView`.
           jamSetupOpen={jamSession.screen.setupOpen}
-          onToggleJamSetup={() => {
-            const next = !jamSession.screen.setupOpen;
-            jamSession.screen.setSetupOpen(next);
-            if (next) jamSession.screen.setChordsOpen(false);
-          }}
+          onToggleJamSetup={
+            IS_MOBILE
+              ? undefined
+              : () => {
+                  const next = !jamSession.screen.setupOpen;
+                  jamSession.screen.setSetupOpen(next);
+                  if (next) jamSession.screen.setChordsOpen(false);
+                }
+          }
           jamChordsOpen={jamSession.screen.chordsOpen}
-          onToggleJamChords={() => {
-            const next = !jamSession.screen.chordsOpen;
-            jamSession.screen.setChordsOpen(next);
-            if (next) jamSession.screen.setSetupOpen(false);
-          }}
+          onToggleJamChords={
+            IS_MOBILE
+              ? undefined
+              : () => {
+                  const next = !jamSession.screen.chordsOpen;
+                  jamSession.screen.setChordsOpen(next);
+                  if (next) jamSession.screen.setSetupOpen(false);
+                }
+          }
           setlistsForJam={setlistSession.setlists}
           onAddJamToSetlist={(setlistId) => {
             const jam = jamSession.jam;

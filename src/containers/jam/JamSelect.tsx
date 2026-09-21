@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useMenuPlacement } from "./useMenuPlacement";
 import { useTranslation } from "react-i18next";
+import { IS_MOBILE } from "../../platform";
+import { useBackDismiss } from "../../mobile/backStack";
 
 export type JamSelectOption<T extends string> = {
   id: T;
@@ -60,6 +62,13 @@ export function JamSelect<T extends string>({
   const { wrapRef, menuRef, style } = useMenuPlacement(open);
   const { t } = useTranslation();
   const loadingLabel = t("jam.loading");
+
+  // A phone's Escape. The menu is the innermost thing on the screen while it
+  // is open, so it is the first thing Back puts away — the same order the
+  // Escape handler above keeps, through the app's one back stack rather than
+  // a second one of this menu's own. `IS_MOBILE` is a build constant, so the
+  // hook order never varies at runtime (platform.ts).
+  if (IS_MOBILE) useBackDismiss(open, () => setOpen(false));
 
   useEffect(() => {
     if (!open) return;

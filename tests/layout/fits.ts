@@ -1,6 +1,23 @@
 import { expect, type Page } from "@playwright/test";
 
 /**
+ * The harness, built for a phone (M09).
+ *
+ * A second Vite server, started by `playwright.config.ts` with
+ * `YAMES_MOBILE=1`, because `IS_MOBILE` is a build-time constant and the
+ * phone's layout hangs off the `.main-window.is-mobile` class that constant
+ * writes — a desktop build dragged to 360px is a different app with a rail in
+ * it. A describe block opts in with:
+ *
+ *     test.use({ baseURL: MOBILE_URL, viewport: { width: 360, height: 800 },
+ *                isMobile: true, hasTouch: true });
+ *
+ * `isMobile` + `hasTouch` are what make the page match `(pointer: coarse)`
+ * and `(hover: none)`, which is where every 44px touch target lives.
+ */
+export const MOBILE_URL = "http://localhost:5391";
+
+/**
  * Open one scene of the screenshot harness at one window size.
  *
  * `shots.html` is the same page the capture script drives: the real UI with a

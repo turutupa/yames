@@ -88,7 +88,11 @@ export function GeneralSettingsSection({
   const currentLang = languages.find((l) => l.code === language) ?? languages[0];
 
   return (
-    <section className="settings-section">
+    // `id` for the same reason Appearance, Devices and Coach carry one: it is
+    // how something outside this file names this section without counting to
+    // it. The screenshot harness did count, and a section that is null on a
+    // phone (Devices, M08) shifted every number after it by one (M09).
+    <section className="settings-section" id="settings-general">
       <h2>{t("settings.general.title")}</h2>
       <div className="setting-row">
         <div className="setting-label">
