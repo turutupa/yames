@@ -541,9 +541,20 @@ pub fn restore_beat_groups(
     (vec![ts], ts, stored_free_mode)
 }
 
+/// Set the bar's beat grouping.
+///
+/// `at_bar_line` is the setlist's, and nothing else's. A step switch is
+/// posted ON a bar line, and the engine used to restack the grid at the next
+/// tick instead — one beat late, which made the seam between two steps in
+/// different meters a one-beat bar and cost the step arriving a bar of real
+/// playing. Say `true` and the engine gives the meter to the bar that line
+/// opened. Leave it out and a hand-made change does what it has always done:
+/// the bar restarts under your fingers, which is what somebody dragging 4/4
+/// to 3/4 on the meter screen is asking for.
 #[tauri::command]
 pub fn set_beat_groups(
     groups: Vec<u8>,
+    at_bar_line: Option<bool>,
     state: State<SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
@@ -551,6 +562,7 @@ pub fn set_beat_groups(
     {
         let mut s = state.lock().unwrap();
         s.beat_groups = groups;
+        s.beat_groups_at_bar_line = at_bar_line.unwrap_or(false);
         s.time_signature = total;
     }
     emit_state_changed(&state, &app_handle);
@@ -582,6 +594,10 @@ pub fn set_free_mode(
         if enabled {
             let (groups, total) = collapse_to_free(&s.beat_groups);
             s.beat_groups = groups;
+            // A collapse is this command's own meter change, not the one the
+            // setlist posted a moment ago, so it does not inherit its bar
+            // line. See `set_beat_groups`.
+            s.beat_groups_at_bar_line = false;
             s.time_signature = total;
         }
     }

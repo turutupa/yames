@@ -447,25 +447,27 @@ describe("a bar is a bar, and never a beat", () => {
   it("counts a step's bars on its own meter, not on the one before it", () => {
     /*
      * A 7/8 step after a 4/4 one, with the stream `engine.rs` really emits
-     * across that seam. `beat_groups` changing resets `measure_beat` to 0 on
-     * the first tick that sees it, so the new grid starts there and its bar
-     * lines are seven beats apart — the old four-beat grid does not survive
-     * the switch, which is the thing U9.3 is built on.
+     * across that seam — and the seam is the point.
      *
-     * That reset tick arrives one beat AFTER the switch, because the config
-     * only goes out over IPC once the switch has landed and the engine cannot
-     * have seen it yet. The one-beat seam bar is the engine's, not this
-     * reducer's; `applySetlistStep` claims the reset "is a no-op there", and
-     * it is not. Said out loud in the worker report.
+     * The switch is posted ON the bar line it lands on, and the config only
+     * leaves the UI once that tick has already sounded. The engine used to
+     * restack its grid at the very next tick, so the seam bar was ONE BEAT
+     * long: two accents a beat apart, and the arriving step's bar one spent
+     * on a bar nobody played. It holds the meter now and gives it to the bar
+     * that line opened (`held_meter_due`), so the last bar of the 4/4 step is
+     * four beats, the first bar of the 7/8 step is seven, and there is no bar
+     * between them.
      */
     const setlist = setlistOf([
       step("four", { kind: "bars", bars: 1 }),
       step("seven", { kind: "bars", bars: 3 }),
       step("after", { kind: "manual" }),
     ]);
-    // Bar-local position per beat: 4/4 up to the switch at beat 4, the
-    // engine's restack at beat 5, then bars of seven.
-    const measureBeats = [0, 1, 2, 3, 0, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0];
+    // Written as the bars the player hears rather than as a list of
+    // positions, so a stub bar cannot be typed in here by accident: one bar
+    // of four, then bars of seven from the switch onwards.
+    const bars = [4, 7, 7, 7, 7];
+    const measureBeats = bars.flatMap((n) => Array.from({ length: n }, (_, i) => i));
     let state = setlistReduce(setlist, IDLE_SETLIST_RUN, { kind: "start", seconds: 0 }).state;
     const stepAt: number[] = [];
     measureBeats.forEach((measureBeat, i) => {
@@ -474,12 +476,17 @@ describe("a bar is a bar, and never a beat", () => {
       stepAt.push(state.stepIndex);
     });
 
-    // The switch lands on the 4/4 bar line, and the 7/8 step then counts
-    // sevens: bar lines at 5, 12 and 19, so its third comes due at beat 19.
+    // Bar lines at 0, 4, 11, 18 and 25. The switch lands on the 4/4 step's
+    // second bar line, which is the 7/8 step's bar one — so the 7/8 step
+    // counts sevens from there and its third bar ends at beat 25.
+    expect(stepAt[3]).toBe(0);
     expect(stepAt[4]).toBe(1);
     expect(stepAt[11]).toBe(1); // where a bar of FOUR would have ended it
-    expect(stepAt[18]).toBe(1);
-    expect(stepAt[19]).toBe(2);
+    expect(stepAt[24]).toBe(1);
+    expect(stepAt[25]).toBe(2);
+    // Three bars of seven, all of them played: the step arriving is not a
+    // bar short, and none of its bars is the one-beat one.
+    expect(measureBeats.slice(4, 25).filter((b) => b === 0)).toHaveLength(3);
   });
 });
 

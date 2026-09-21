@@ -5,11 +5,17 @@
  * a reducer: feed it beats, get back a state and a list of effects for
  * whoever owns the engine to carry out.
  *
- * The rule the whole file is built around is U9.3. `engine.rs` resets
- * `measure_beat` to 0 the instant `beat_groups` changes, so applying a step
- * anywhere but on a bar line cuts the bar in half — in 7/8, wherever the
- * trigger happened to land. So a fired trigger does not switch. It *arms* a
- * switch, and the switch lands on the next bar line.
+ * The rule the whole file is built around is U9.3: a fired trigger does not
+ * switch. It *arms* a switch, and the switch lands on the next bar line.
+ * Applying a step anywhere else moves the meter, the tempo and the sound
+ * into the middle of a bar the player is still counting — in 7/8, wherever
+ * the trigger happened to fall.
+ *
+ * The engine keeps the other half of that promise. A meter posted with
+ * `atBarLine` is given to the bar that line opened rather than restacking
+ * the grid at the next tick, so the step arriving owns a full first bar and
+ * the one leaving kept a full last one. It used to restack, one beat late,
+ * and the seam was a bar one beat long.
  *
  * That is why `armed` is a phase and not a boolean tucked inside an effect
  * handler: the gap between "the trigger fired" and "the step changed" is

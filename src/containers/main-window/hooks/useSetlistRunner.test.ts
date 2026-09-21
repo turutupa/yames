@@ -95,7 +95,10 @@ describe("useSetlistRunner", () => {
     // so it lands a microtask later than the tempo does.
     await settle();
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 80 });
-    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+    // `atBarLine` on every meter the RUNNER sends: the engine then gives it
+    // to the bar the switch landed on instead of restacking its grid a beat
+    // later, which is what used to leave a one-beat bar at every seam.
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4], atBarLine: true });
     expect(callsTo("set_sound_type")).toContainEqual({ soundType: "click" });
     expect(callsTo("set_volume")).toContainEqual({ volume: 0.5 });
   });
@@ -448,7 +451,7 @@ describe("a setlist step that is a jam", () => {
     expect(callsTo("set_jam")).toContainEqual({ config: null });
     // The plain step is about to set its own meter; handing back a remembered
     // one here would undo it on the beat it landed.
-    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4] }]);
+    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4], atBarLine: true }]);
   });
 
   it("gives the metronome its own meter back when the run stops", async () => {
@@ -533,7 +536,7 @@ describe("a setlist step that is a jam", () => {
     expect(result.current.jam).toBeNull();
     expect(callsTo("set_jam")).toEqual([{ config: null }]);
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 92 });
-    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4], atBarLine: true });
   });
 
   it("sends the next bar's bass at the bar line, and only when it moves", async () => {

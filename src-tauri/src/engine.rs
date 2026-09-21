@@ -3168,6 +3168,35 @@ fn is_pickup_beat(warming_up: bool, warmup_count: u8, warmup_beats: u8) -> bool 
         && warmup_count.saturating_add(2) >= warmup_beats
 }
 
+/// Does the tick about to sound still belong to the bar a HELD meter was
+/// posted on?
+///
+/// Pure, and beside [`is_pickup_beat`] for the same reason: it is a rule, it
+/// runs on the audio thread, and it has to be testable without a sound card.
+///
+/// A setlist's switch is posted at a bar line — the beat notification for
+/// that tick leaves the callback BEFORE the tick is heard, so "posted at bar
+/// line N" is the literal truth even though the engine has already worked
+/// that tick out. What it cannot do is un-sound it; what it can do is give
+/// the new meter to the bar that line opened, which is where the player
+/// hears the change begin.
+///
+/// So the held meter lands on the first tick that is still inside that bar's
+/// FIRST BEAT — `measure_beat` 0, any subdivision of it, plus the whole-beat
+/// tick of beat 1, which is the earliest the callback can see a change posted
+/// on an unsubdivided click. It lands WITHOUT touching `measure_beat`: the
+/// bar keeps the downbeat it already sounded and simply runs to its new
+/// length, which is why the seam has no stub bar in it.
+///
+/// Anything later — a slow round trip, a change posted mid-bar — is not that
+/// bar's any more and waits for `measure_beat` to wrap to 0, so the bar in
+/// progress finishes at its old length. Either way the bar line never moves,
+/// and the engine stays the one place that decides where a bar begins.
+#[inline]
+fn held_meter_due(measure_beat: u32, sub_count: u32) -> bool {
+    measure_beat == 0 || (measure_beat == 1 && sub_count == 0)
+}
+
 /// Move the form on by one bar: 0-based bar within the chorus, 1-based
 /// chorus. `form_bars` is validated to 1..=64 when the table is compiled, so
 /// this cannot spin and cannot divide by nothing.
@@ -3324,6 +3353,12 @@ struct CachedParams {
     /// `beat_groups.iter().sum()`, precomputed alongside `accent_mask`.
     beat_groups_total: u32,
     beat_groups_changed: bool,
+    /// A meter posted AT A BAR LINE, waiting for the bar line it was posted
+    /// on. Allocated once with capacity `MAX_BEAT_GROUPS` and only ever
+    /// refilled in place, exactly like `beat_groups` — see `held_meter_due`.
+    held_beat_groups: Vec<u8>,
+    /// True while `held_beat_groups` holds a change not yet made current.
+    beat_groups_held: bool,
     ramp_active: bool,
     ramp_beats_per_bar: u8,
     ramp_warming_up: bool,
@@ -5804,6 +5839,8 @@ impl MetronomeEngine {
                 beat_groups_total: 4,
                 beat_groups: initial_groups,
                 beat_groups_changed: false,
+                held_beat_groups: Vec::with_capacity(MAX_BEAT_GROUPS),
+                beat_groups_held: false,
                 ramp_active: false,
                 ramp_beats_per_bar: 4,
                 ramp_warming_up: false,
@@ -5918,12 +5955,33 @@ impl MetronomeEngine {
                         // is pre-reserved) and rebuild the accent mask +
                         // bar length only on an actual change.
                         if s.beat_groups.as_slice() != cached.beat_groups.as_slice() {
-                            cached.beat_groups.clear();
-                            cached.beat_groups.extend_from_slice(&s.beat_groups);
-                            cached.accent_mask = accent_mask(&cached.beat_groups);
-                            cached.beat_groups_total =
-                                cached.beat_groups.iter().map(|&g| g as u32).sum();
-                            cached.beat_groups_changed = true;
+                            // A meter posted AT A BAR LINE — the setlist's
+                            // switch, and nothing else — is HELD here and
+                            // made current by the tick loop, at the bar line
+                            // it was posted on. See `held_meter_due`. The
+                            // hold is only meaningful while the click is
+                            // running: stopped, there is no bar to wait for
+                            // and a held meter would be a meter the next
+                            // press of play would not have.
+                            if s.beat_groups_at_bar_line && is_playing {
+                                if s.beat_groups.as_slice()
+                                    != cached.held_beat_groups.as_slice()
+                                {
+                                    cached.held_beat_groups.clear();
+                                    cached.held_beat_groups.extend_from_slice(&s.beat_groups);
+                                }
+                                // Posted twice before the bar line: the last
+                                // one is the one that plays.
+                                cached.beat_groups_held = true;
+                            } else {
+                                cached.beat_groups.clear();
+                                cached.beat_groups.extend_from_slice(&s.beat_groups);
+                                cached.accent_mask = accent_mask(&cached.beat_groups);
+                                cached.beat_groups_total =
+                                    cached.beat_groups.iter().map(|&g| g as u32).sum();
+                                cached.beat_groups_changed = true;
+                                cached.beat_groups_held = false;
+                            }
                         }
                         cached.ramp_active = s.speed_ramp.active;
                         cached.ramp_beats_per_bar = s.speed_ramp.beats_per_bar;
@@ -6742,6 +6800,43 @@ impl MetronomeEngine {
                                 // starts again with it — and the table is
                                 // very likely the wrong width now, which the
                                 // mismatch check below will say out loud.
+                                let (bar, state, left) =
+                                    form_restart(cached.jam.as_deref(), cached.jam_position);
+                                cached.jam_position = left;
+                                jam_bar = bar;
+                                jam_chorus = 1;
+                                jam_bar_state = state;
+                                jam_start_bar = bar;
+                                jam_mismatch_reported = false;
+                            }
+
+                            // And the OTHER kind of meter change: one the
+                            // setlist posted at a bar line, held since the
+                            // buffer that saw it. It takes the bar it was
+                            // posted on rather than restacking the grid one
+                            // beat late — `measure_beat` is deliberately left
+                            // alone, so the bar that opened at the switch
+                            // keeps its downbeat and runs to the new meter's
+                            // length. No stub bar, and no bar of the new step
+                            // spent on it. See `held_meter_due`.
+                            //
+                            // A compare, a copy into capacity reserved when
+                            // the stream was built, and two integer sums over
+                            // at most six groups — the click stays sacred.
+                            if cached.beat_groups_held
+                                && held_meter_due(measure_beat, sub_count)
+                            {
+                                cached.beat_groups.clear();
+                                cached
+                                    .beat_groups
+                                    .extend_from_slice(&cached.held_beat_groups);
+                                cached.accent_mask = accent_mask(&cached.beat_groups);
+                                cached.beat_groups_total =
+                                    cached.beat_groups.iter().map(|&g| g as u32).sum();
+                                cached.beat_groups_held = false;
+                                // The form restarts with the meter and at the
+                                // same bar line it does, exactly as the
+                                // immediate branch above restarts it.
                                 let (bar, state, left) =
                                     form_restart(cached.jam.as_deref(), cached.jam_position);
                                 cached.jam_position = left;
@@ -10076,6 +10171,242 @@ mod tests {
         let mask = accent_mask(&[255, 255, 255]);
         assert!(mask_has_accent(mask, 0));
         assert!(!mask_has_accent(mask, 255));
+    }
+
+    // -----------------------------------------------------------------
+    // The seam between two meters
+    // -----------------------------------------------------------------
+
+    /// One tick, as the walk below reports it.
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    struct WalkTick {
+        measure_beat: u32,
+        sub_count: u32,
+        accent: AccentLevel,
+    }
+
+    impl WalkTick {
+        fn opens_a_bar(&self) -> bool {
+            self.measure_beat == 0 && self.sub_count == 0
+        }
+    }
+
+    /// The tick loop's METER bookkeeping, and nothing else.
+    ///
+    /// The callback is a closure inside a `cpal` stream, so it cannot be
+    /// driven from a test. This is the same arithmetic written out once:
+    /// the snapshot's hold-or-apply, [`held_meter_due`], the accent, and the
+    /// `measure_beat` wrap that closes a tick. Every decision calls the real
+    /// function rather than paraphrasing it, so a change to the rule that
+    /// did not mean to change the seam fails here.
+    struct MeterWalk {
+        groups: Vec<u8>,
+        mask: u32,
+        total: u32,
+        held: Vec<u8>,
+        is_held: bool,
+        /// The immediate branch's "restack at the next tick".
+        changed: bool,
+        measure_beat: u32,
+        sub_count: u32,
+        subdivision: u32,
+    }
+
+    impl MeterWalk {
+        fn new(groups: &[u8], subdivision: u32) -> Self {
+            Self {
+                groups: groups.to_vec(),
+                mask: accent_mask(groups),
+                total: groups.iter().map(|&g| g as u32).sum(),
+                held: Vec::new(),
+                is_held: false,
+                changed: false,
+                measure_beat: 0,
+                sub_count: 0,
+                subdivision,
+            }
+        }
+
+        /// What the snapshot block does with a meter arriving while playing.
+        fn post(&mut self, groups: &[u8], at_bar_line: bool) {
+            if groups == self.groups.as_slice() {
+                return;
+            }
+            if at_bar_line {
+                self.held.clear();
+                self.held.extend_from_slice(groups);
+                self.is_held = true;
+            } else {
+                self.groups.clear();
+                self.groups.extend_from_slice(groups);
+                self.mask = accent_mask(&self.groups);
+                self.total = self.groups.iter().map(|&g| g as u32).sum();
+                self.changed = true;
+                self.is_held = false;
+            }
+        }
+
+        fn tick(&mut self) -> WalkTick {
+            if self.changed {
+                self.measure_beat = 0;
+                self.sub_count = 0;
+                self.changed = false;
+            }
+            if self.is_held && held_meter_due(self.measure_beat, self.sub_count) {
+                self.groups = self.held.clone();
+                self.mask = accent_mask(&self.groups);
+                self.total = self.groups.iter().map(|&g| g as u32).sum();
+                self.is_held = false;
+            }
+            let is_downbeat = self.sub_count == 0;
+            let out = WalkTick {
+                measure_beat: self.measure_beat,
+                sub_count: self.sub_count,
+                accent: accent_for(
+                    AccentMode::Groups,
+                    false,
+                    4,
+                    self.mask,
+                    is_downbeat,
+                    self.measure_beat,
+                    self.measure_beat,
+                ),
+            };
+            self.sub_count += 1;
+            if self.sub_count >= self.subdivision {
+                self.sub_count = 0;
+                self.measure_beat += 1;
+                if self.measure_beat >= self.total.max(1) {
+                    self.measure_beat = 0;
+                }
+            }
+            out
+        }
+
+        /// Walk `n` ticks and hand back the whole beats among them.
+        fn beats(&mut self, n: usize) -> Vec<WalkTick> {
+            (0..n).map(|_| self.tick()).filter(|t| t.sub_count == 0).collect()
+        }
+    }
+
+    /// Bar lengths, in whole beats, from a stream of whole-beat ticks.
+    /// The last bar is dropped: it has not finished, so its length is not
+    /// a fact yet.
+    fn bar_lengths(beats: &[WalkTick]) -> Vec<usize> {
+        let mut bars: Vec<usize> = Vec::new();
+        for t in beats {
+            if t.opens_a_bar() {
+                bars.push(1);
+            } else if let Some(last) = bars.last_mut() {
+                *last += 1;
+            }
+        }
+        bars.pop();
+        bars
+    }
+
+    #[test]
+    fn a_held_meter_belongs_to_the_bar_it_was_posted_on() {
+        // Inside the bar's first beat, whatever subdivision of it.
+        assert!(held_meter_due(0, 0));
+        assert!(held_meter_due(0, 3));
+        // The whole-beat tick of beat 1 — the earliest an unsubdivided
+        // click can see a change posted on the bar line before it.
+        assert!(held_meter_due(1, 0));
+        // And nothing after that: the bar has sounded a second whole beat,
+        // so the change waits for the next bar line.
+        assert!(!held_meter_due(1, 1));
+        assert!(!held_meter_due(2, 0));
+        assert!(!held_meter_due(6, 3));
+    }
+
+    #[test]
+    fn a_setlist_switch_from_four_four_to_seven_eight_leaves_no_stub_bar() {
+        // Two bars of 4/4 and then the bar line that opens the third, which
+        // is where the runtime lands the switch. The post happens AFTER that
+        // tick, because the config only leaves the UI once the notification
+        // for it has — which is the whole reason the stub bar existed.
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(9);
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(21));
+
+        // 4, 4, then sevens. The one-beat bar this test exists for would
+        // show up as a `1` between them.
+        assert_eq!(bar_lengths(&beats), vec![4, 4, 7, 7, 7]);
+        // The switch's bar line is the new meter's bar one: the tick right
+        // after the post opens a bar and carries the bar's own accent.
+        assert_eq!(beats[8].measure_beat, 0);
+        assert_eq!(beats[8].accent, AccentLevel::Strong);
+        // And 2+2+3 is audible inside it — a group start is an accent and
+        // not a bar line.
+        assert_eq!(beats[10].accent, AccentLevel::Medium);
+        assert_eq!(beats[12].accent, AccentLevel::Medium);
+        assert_eq!(beats[11].accent, AccentLevel::None);
+    }
+
+    #[test]
+    fn a_setlist_switch_from_seven_eight_to_four_four_leaves_no_stub_bar() {
+        let mut w = MeterWalk::new(&[2, 2, 3], 1);
+        let mut beats = w.beats(15);
+        w.post(&[4], true);
+        beats.extend(w.beats(12));
+        assert_eq!(bar_lengths(&beats), vec![7, 7, 4, 4, 4]);
+        assert_eq!(beats[14].measure_beat, 0);
+        assert_eq!(beats[14].accent, AccentLevel::Strong);
+    }
+
+    #[test]
+    fn a_held_meter_lands_with_sixteenths_running() {
+        // Sixteenths on a quarter. Two bars of 4/4 and the bar line that
+        // opens the third, then one sixteenth of lag before the meter turns
+        // up — which is where a real round trip puts it.
+        let mut w = MeterWalk::new(&[4], 4);
+        let mut beats = w.beats(33);
+        w.tick();
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(4 * 21));
+        // The lagging tick is a subdivision, so the whole-beat stream is
+        // unbroken: the bar it belongs to is seven beats long.
+        assert_eq!(bar_lengths(&beats)[..4], [4, 4, 7, 7]);
+    }
+
+    #[test]
+    fn the_last_meter_posted_before_the_bar_line_is_the_one_that_plays() {
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(9);
+        w.post(&[3], true);
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(7));
+        assert_eq!(bar_lengths(&beats), vec![4, 4, 7]);
+    }
+
+    #[test]
+    fn a_held_meter_that_arrives_mid_bar_lets_the_bar_finish() {
+        // A slow round trip: the meter turns up two beats into a 4/4 bar.
+        // That bar is not the one it was posted on any more, so it plays out
+        // at its old length and the new meter opens the next one.
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(6);
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(17));
+        assert_eq!(bar_lengths(&beats), vec![4, 4, 7, 7]);
+    }
+
+    #[test]
+    fn a_meter_changed_by_hand_still_restarts_the_bar_at_once() {
+        // The metronome screen, mid-bar, with no `at_bar_line`: the bar
+        // restarts under the player's fingers, which is what dragging 4/4 to
+        // 3/4 is asking for. Unchanged, and the reason the setlist's change
+        // needed a flag of its own.
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(6);
+        w.post(&[3], false);
+        beats.extend(w.beats(7));
+        // The 4/4 bar in progress is cut to two beats — today's behaviour.
+        assert_eq!(bar_lengths(&beats), vec![4, 2, 3, 3]);
+        assert_eq!(beats[6].measure_beat, 0);
+        assert_eq!(beats[6].accent, AccentLevel::Strong);
     }
 
     #[test]
