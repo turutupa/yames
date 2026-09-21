@@ -2016,6 +2016,7 @@ export function MainWindow() {
             currentBeat={currentBeat}
             isPlaying={state.isPlaying}
             themeId={state.theme}
+            listening={evaluation.enabled}
           />
         ) : view === "drill" ? (
           <DrillView

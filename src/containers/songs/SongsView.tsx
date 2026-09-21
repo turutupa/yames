@@ -99,6 +99,14 @@ import type { BeatEvent } from "../../types";
 import "../../styles/songs.css";
 
 export interface SongsViewProps {
+  /**
+   * Whether the instrument input is on (the header's "Input off" chip).
+   *
+   * With it off nobody is listening, so there is nothing to listen back to
+   * when the song stops — and the half-second "Listening back..." that used to
+   * follow every stop was a wait for an answer that could not come.
+   */
+  listening: boolean;
   session: SongsSession;
   /** The engine's beat event, or null before the first one arrives. */
   currentBeat: BeatEvent | null;
@@ -175,7 +183,7 @@ function timeRoundKey(language: string, n: number): string {
   return `songs.stage.timeRound.${ORDINAL_KEYS.includes(rule) ? rule : "other"}`;
 }
 
-export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsViewProps) {
+export function SongsView({ session, currentBeat, isPlaying, themeId, listening }: SongsViewProps) {
   const { t, i18n } = useTranslation();
   /**
    * `session.range` is what PLAYS — the portion with the playhead folded in.
@@ -296,6 +304,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     tempoPercent,
     bpm: tempo,
     isPlaying,
+    listening,
   });
 
   /**

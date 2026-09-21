@@ -106,6 +106,11 @@ export type SongAttemptInput = {
   /** The tempo the click is actually running at. */
   bpm: number;
   isPlaying: boolean;
+  /**
+   * Whether the instrument input is on. Off means no pass can have been
+   * heard, so a stop has nothing to wait for and nothing to say.
+   */
+  listening: boolean;
 };
 
 export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
@@ -187,6 +192,17 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     const pass = passRef.current;
     passRef.current = null;
     if (!pass) return;
+    // Nobody was listening (2026-09-21, the owner: "when i hit pause it says
+    // 'listening back...' for like half a second and then re-renders the
+    // tabs"). With the input off no segment is ever produced, so the wait
+    // below always ran to its deadline and then concluded "nothing" — half a
+    // second of a status line for an answer that could not come. The schedule
+    // still has to be cleared; nothing else does.
+    if (!latest.current.listening && !runRef.current) {
+      generation.current += 1;
+      void clearScoreSchedule().catch(() => undefined);
+      return;
+    }
 
     const mine = ++generation.current;
     setWorking(true);

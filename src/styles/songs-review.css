@@ -310,10 +310,28 @@
 /* A4 and A3 together: the verdict has not happened yet and the coach is
    quiet, so this says one thing about what is happening and nothing about
    how it is going. */
+/* OVER the frame, never in it (2026-09-21).
+ *
+ * This line used to be an ordinary paragraph inside `.songs-stage-frame`. It
+ * appears the moment the song stops and goes half a second later, and for that
+ * half second it took a line's height from the tab's box — so alphaTab laid
+ * the whole piece out again when it came, and again when it went. The owner
+ * saw exactly that: "it says 'listening back...' for like half a second and
+ * then re-renders the tabs". A status line may not cost the music its room:
+ * it floats along the foot of the frame, like `.songs-stage-notice`. */
 .songs-review-working {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 2;
   margin: 0;
-  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  font-size: 12px;
   color: var(--text-tertiary);
+  pointer-events: none;
 }
 
 /* ── Narrow stages ────────────────────────────────────────────────────── */
