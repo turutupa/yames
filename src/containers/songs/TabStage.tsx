@@ -30,7 +30,7 @@
  * a group and one `<text>` inside it, and they never touch each other. An
  * empty map paints nothing and costs two map lookups.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   AlphaTabApi,
@@ -235,6 +235,31 @@ function applyTheme(settings: Settings): void {
    * list written here goes stale silently — a font nobody assigned is not an
    * error, it is just Georgia.
    *
+   * ## And the walk missed fifteen more, until W36 item 5
+   *
+   * The owner: *"I love that you change the font of the numbers to match the
+   * theme… can we also do that with other fonts like 'TAB' or the number for
+   * the bpm … it says 161 but in that weird font"*.
+   *
+   * He had spotted exactly where the walk stopped. `Object.keys` returns OWN
+   * properties, and in alphaTab 1.8 only four fonts are still own fields of
+   * `RenderingResources` — the tablature numbers among them, which is why the
+   * numbers were the part that looked right. Every other face moved into
+   * `elementFonts`, a `Map<NotationElement, Font>` filled in the constructor:
+   * the tempo marker, the section names, the bar numbers, the fingerings, the
+   * chord names, the tuning legend, "P.M." and the rest. A Map is not a
+   * `Font`, so the walk stepped straight over it and fifteen faces stayed
+   * Georgia and Arial.
+   *
+   * So the walk goes one level into any Map it finds, rather than naming
+   * `elementFonts`: the same reason the walk exists at all is the reason it
+   * should not know that name either.
+   *
+   * What this cannot reach is the music font. "TAB" at the head of the staff
+   * is `MusicFontSymbol.SixStringTabClef` — a Bravura glyph, the tab staff's
+   * clef, drawn the way a G clef is — and the quarter note in "♩ = 96" is
+   * another. They are notation, not text, and they stay alphaTab's.
+   *
    * Only the families change. The sizes and styles alphaTab chose are part of
    * the engraving, and a music renderer has better reasons for them than we
    * do.
@@ -243,8 +268,56 @@ function applyTheme(settings: Settings): void {
   for (const key of Object.keys(res)) {
     const value = (res as unknown as Record<string, unknown>)[key];
     if (value instanceof model.Font) value.families = families;
+    else if (value instanceof Map) {
+      // Per-instance clones — `RenderingResources`'s constructor copies each
+      // default with `withSize` — so writing to them cannot reach back into
+      // the statics every other score would then be drawn from.
+      for (const entry of (value as Map<unknown, unknown>).values()) {
+        if (entry instanceof model.Font) entry.families = families;
+      }
+    }
   }
 }
+
+/**
+ * The theme's faces, in the browser, before a note is engraved (W36 item 5).
+ *
+ * alphaTab measures every piece of text it draws and lays the page out from
+ * the answer. Asked to measure in a face the browser has not loaded, it
+ * measures the FALLBACK — and then the face arrives, the glyphs swap, and the
+ * spacing is the spacing of a font that is no longer on the page. Nine of the
+ * thirteen themes name a Google font (`index.html` fetches them all in one
+ * stylesheet), so this is the ordinary case rather than an edge one.
+ *
+ * `document.fonts.load` takes a CSS font shorthand and has to be asked for
+ * every WEIGHT and STYLE that will be drawn, or the italic effect text is the
+ * one that swaps.
+ *
+ * `null` means "there is nothing to wait for" — no `document.fonts` (happy-dom
+ * has none, and there are still a webview or two that do not), or a stack this
+ * file cannot make a shorthand out of. It is a separate answer from a promise
+ * that resolves immediately, because the caller can act on it in the same
+ * commit: a wait that costs a render is a blank frame nobody asked for.
+ */
+function warmFaces(families: string[]): Promise<unknown> | null {
+  const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+  const first = families[0];
+  if (!fonts || typeof fonts.load !== "function" || !first) return null;
+  try {
+    return Promise.all([
+      fonts.load(`400 14px ${first}`),
+      fonts.load(`700 14px ${first}`),
+      fonts.load(`italic 400 12px ${first}`),
+      // A family the browser will not resolve is a family it would have
+      // fallen back from anyway; the stack's next face is what gets drawn.
+    ]).catch(() => undefined);
+  } catch {
+    return null;
+  }
+}
+
+/** Themes whose faces this document has already been made to fetch. */
+const warmedThemes = new Set<string>();
 
 /** One map, shared, so "no lights" allocates nothing on every render. */
 const EMPTY_LIGHTS: ReadonlyMap<number, TimingMark> = new Map();
@@ -599,9 +672,41 @@ export function TabStage({
    * other half of the same promise: `TabStage.render.test.tsx` counts the
    * engravings across play, stop, play, a seek and a loop and finds ONE.
    */
+  /**
+   * The theme's faces are fetched before the first engrave (W36 item 5).
+   *
+   * `warmTheme` is which theme's faces are known to be in the browser, and
+   * the render effect below will not draw until it is this one — otherwise
+   * alphaTab measures in the fallback and lays the whole page out to
+   * somebody else's widths. A theme that has already been warmed once is
+   * answered in the same commit, so switching back and forth does not blank
+   * the page; `useLayoutEffect` is what makes that "same commit" rather than
+   * "one painted frame later".
+   */
+  const [warmTheme, setWarmTheme] = useState<string | null>(null);
+  useLayoutEffect(() => {
+    const warming = warmedThemes.has(themeId) ? null : warmFaces(themeFontFamilies());
+    if (!warming) {
+      warmedThemes.add(themeId);
+      setWarmTheme(themeId);
+      return;
+    }
+    let alive = true;
+    void warming.then(() => {
+      warmedThemes.add(themeId);
+      if (alive) setWarmTheme(themeId);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [themeId]);
+
   useEffect(() => {
     const host = hostRef.current;
-    if (!host) return;
+    // Nothing is engraved in a face the browser has not got yet — see
+    // `warmFaces`. Not a `setFailed`: it is a wait, and the "drawing…" line
+    // is already what is on screen.
+    if (!host || warmTheme !== themeId) return;
     setReady(false);
     setFailed(false);
 
@@ -647,9 +752,11 @@ export function TabStage({
     // array does not change it, and that is the whole point. `view` is a
     // setting the engraving is built from, so a change to it is a fresh
     // `AlphaTabApi`, the same as a theme change; its two fields rather than
-    // the object, which is new on every render.
+    // the object, which is new on every render. `warmTheme` is the gate on
+    // this theme's own faces having arrived (W36 item 5), not a fifth reason
+    // to re-engrave: it changes once per theme and never again.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [score.id, themeId, view.notation, view.zoom]);
+  }, [score.id, themeId, warmTheme, view.notation, view.zoom]);
 
   /**
    * Ctrl/Cmd and the wheel makes the music bigger (W29 item 3).
