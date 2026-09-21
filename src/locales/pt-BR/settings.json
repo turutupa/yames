@@ -227,7 +227,8 @@
         "songs-loop-earlier": "A parte um compasso antes",
         "songs-loop-later": "A parte um compasso depois",
         "songs-take": "Gravar a tomada",
-        "songs-camera": "Gravar a imagem"
+        "songs-camera": "Gravar a imagem",
+        "jam-camera": "Gravar a imagem"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "Deslizar os compassos escolhidos um compasso rumo ao começo, mantendo o tamanho",
         "songs-loop-later": "Deslizar os compassos escolhidos um compasso rumo ao fim, mantendo o tamanho",
         "songs-take": "Gravar na próxima vez que você tocar, ou parar de gravar",
-        "songs-camera": "Filmar na próxima vez que você tocar, ou desligar a câmera"
+        "songs-camera": "Filmar na próxima vez que você tocar, ou desligar a câmera",
+        "jam-camera": "Filmar na próxima vez que você tocar, ou desligar a câmera"
       }
     },
     "inputTest": {

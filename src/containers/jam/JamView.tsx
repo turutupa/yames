@@ -50,6 +50,7 @@ import { ChordSheet, cheatSheetTitle, pinnedShapeOf } from "./ChordSheet";
 import type { CheatTab, ChordPage } from "./ChordSheet";
 import type { ChordFlavour } from "../../jam/cheatSheet";
 import { JamSetupSheet, setupSheetSubtitle } from "./JamSetupSheet";
+import type { TakeCameraState } from "../../takes/useTakeCamera";
 import type { VibePreviewMark } from "./VibePicker";
 import { JamSheet } from "./JamSheet";
 import { GrooveEditorDrawer } from "./GrooveEditorDrawer";
@@ -154,6 +155,16 @@ interface JamViewProps {
    */
   takes: JamTakesState;
   onToggleTakes: (next: boolean) => void;
+  /**
+   * The camera on this tab (W32), or null on a build that has none.
+   *
+   * The window's, like the takes are: a picture belongs to the take it was
+   * filmed beside, and both end when the jam leaves the engine. Only the
+   * SWITCH is on this screen — the little mirror itself is drawn by the
+   * window, over the stage, because this stage is a column that scrolls and
+   * a picture anchored to the bottom of it is a picture below the fold.
+   */
+  camera?: TakeCameraState | null;
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit?: (kit: string) => void;
   previewingKit?: string | null;
@@ -249,6 +260,7 @@ export function JamView({
   listening,
   takes,
   onToggleTakes,
+  camera = null,
   onPreviewKit,
   previewingKit = null,
   onPreviewVibe = null,
@@ -940,6 +952,7 @@ export function JamView({
                   }}
                   takes={takes}
                   onToggleTakes={onToggleTakes}
+                  camera={camera}
                 />
               ) : (
                 <ChordSheet

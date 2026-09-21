@@ -227,7 +227,8 @@
         "songs-loop-earlier": "Đoạn sớm hơn một ô nhịp",
         "songs-loop-later": "Đoạn muộn hơn một ô nhịp",
         "songs-take": "Thu bản này",
-        "songs-camera": "Quay hình"
+        "songs-camera": "Quay hình",
+        "jam-camera": "Quay hình"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "Dời những ô nhịp đã chọn lùi một ô nhịp, giữ nguyên độ dài",
         "songs-loop-later": "Dời những ô nhịp đã chọn tới một ô nhịp, giữ nguyên độ dài",
         "songs-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
-        "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay"
+        "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay",
+        "jam-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay"
       }
     },
     "inputTest": {

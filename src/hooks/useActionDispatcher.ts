@@ -56,7 +56,14 @@ interface ActionDispatcherArgs {
     nextSection: () => void;
     prevSection: () => void;
     loopSection: () => void;
+    /**
+     * W25/W32 — what is KEPT of the jam, hands-free.
+     *
+     * Both go through the switches' own `request` doors rather than through
+     * the record behind them, so a first press still shows the promise.
+     */
     toggleTakes: () => void;
+    toggleCamera: () => void;
   };
   /** Whether the Songs tab has a song on it. An empty stage loops nothing. */
   songsLoaded: boolean;
@@ -245,6 +252,9 @@ export function useActionDispatcher({
             break;
           case "jam-take":
             jamActions.toggleTakes();
+            break;
+          case "jam-camera":
+            jamActions.toggleCamera();
             break;
         }
         return;

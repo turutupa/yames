@@ -217,6 +217,46 @@ async function drive() {
     }
 
     /**
+     * W32 — the camera on the jam stage.
+     *
+     * Record the take first and the picture second, which is the order a
+     * person does it in and the order the switches enforce: the camera's
+     * chip is disabled until recording is on. Each has its own promise
+     * the first time, and both are accepted here the way a person would.
+     */
+    if (shot!.jam.camera) {
+      const accept = async (what: string, id: string) => {
+        const where = `[aria-labelledby="${id}"] .unsaved-save`;
+        await until(what, () => !!document.querySelector(where));
+        (document.querySelector(where) as HTMLElement).click();
+        await until(`${what} to be answered`, () => !document.querySelector(where));
+      };
+      await until(
+        "the takes switch",
+        () => !!document.querySelector('.jam-sheet [data-player="takes"] .jam-switch'),
+      );
+      (
+        document.querySelector('.jam-sheet [data-player="takes"] .jam-switch') as HTMLElement
+      ).click();
+      await accept("the takes promise", "takes-intro-title");
+      await until(
+        "the camera switch",
+        () => !!document.querySelector(".jam-camera-row .songs-camera-switch"),
+      );
+      (
+        document.querySelector(".jam-camera-row .songs-camera-switch") as HTMLElement
+      ).click();
+      await accept("the camera promise", "camera-intro-title");
+      // The stream has to be open before anything is measured: the preview
+      // draws nothing at all until the camera actually answers.
+      await until(
+        "the camera preview",
+        () => !!document.querySelector(".jam-camera-preview"),
+        15000,
+      );
+    }
+
+    /**
      * The chord sheet's page, its reading and its filter (A10).
      *
      * By the label on the segment, not by an index: the four flavours are in

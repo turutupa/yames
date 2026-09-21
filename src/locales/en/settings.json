@@ -227,7 +227,8 @@
         "songs-loop-earlier": "Portion a bar earlier",
         "songs-loop-later": "Portion a bar later",
         "songs-take": "Record the take",
-        "songs-camera": "Record the picture"
+        "songs-camera": "Record the picture",
+        "jam-camera": "Record the picture"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
         "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length",
         "songs-take": "Record the next time you press play, or stop recording",
-        "songs-camera": "Film the next time you press play, or turn the camera off"
+        "songs-camera": "Film the next time you press play, or turn the camera off",
+        "jam-camera": "Film the next time you press play, or turn the camera off"
       }
     },
     "inputTest": {

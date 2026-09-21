@@ -227,7 +227,8 @@
         "songs-loop-earlier": "部分を1小節前へ",
         "songs-loop-later": "部分を1小節後ろへ",
         "songs-take": "テイクを録音",
-        "songs-camera": "映像を録画"
+        "songs-camera": "映像を録画",
+        "jam-camera": "映像を録画"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "選んだ小節を、長さはそのままで1小節ぶん先頭へずらす",
         "songs-loop-later": "選んだ小節を、長さはそのままで1小節ぶん終わりへずらす",
         "songs-take": "次に再生したときに録音する、または録音をやめる",
-        "songs-camera": "次に再生したときに撮影する、またはカメラを切る"
+        "songs-camera": "次に再生したときに撮影する、またはカメラを切る",
+        "jam-camera": "次に再生したときに撮影する、またはカメラを切る"
       }
     },
     "inputTest": {

@@ -740,7 +740,7 @@ pub struct JamTake {
     /// The one field here the disk cannot answer, so it is the one the sidecar
     /// is the record of. It is a MEASUREMENT, good to a few tens of
     /// milliseconds and no better — the webview's clock against the engine's,
-    /// fitted over a pass's beat events (`src/songs/camera/offset.ts`) — which
+    /// fitted over a pass's beat events (`src/takes/offset.ts`) — which
     /// is why the review has a nudge beside it and why spike K3 exists.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub video_offset_ms: Option<f64>,

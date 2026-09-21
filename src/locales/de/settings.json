@@ -227,7 +227,8 @@
         "songs-loop-earlier": "Teil einen Takt früher",
         "songs-loop-later": "Teil einen Takt später",
         "songs-take": "Take aufnehmen",
-        "songs-camera": "Bild aufnehmen"
+        "songs-camera": "Bild aufnehmen",
+        "jam-camera": "Bild aufnehmen"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "Die gewählten Takte um einen Takt Richtung Anfang schieben, gleich lang",
         "songs-loop-later": "Die gewählten Takte um einen Takt Richtung Ende schieben, gleich lang",
         "songs-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden",
-        "songs-camera": "Beim nächsten Play filmen, oder die Kamera ausschalten"
+        "songs-camera": "Beim nächsten Play filmen, oder die Kamera ausschalten",
+        "jam-camera": "Beim nächsten Play filmen, oder die Kamera ausschalten"
       }
     },
     "inputTest": {

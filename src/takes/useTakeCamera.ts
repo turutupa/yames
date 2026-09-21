@@ -1,12 +1,22 @@
 /**
- * The camera, on by choice, for one song.
+ * The camera, on by choice, for one song or one jam.
  *
- * `plans/SONGS.md` A9. Everything about it hangs off one rule: **the picture
- * may never cost the take.** The take is the engine's — its own threads, its
- * own clock, sample-exact against the click — and this hook is a webview
- * feature sitting beside it. So every path through here that goes wrong ends
- * in "no picture this pass", never in a throw the take's own hook has to
- * survive.
+ * `plans/SONGS.md` A9 and A10, and A9's "Songs only" ended by the owner's
+ * word in W30. Everything about it hangs off one rule: **the picture may
+ * never cost the take.** The take is the engine's — its own threads, its own
+ * clock, sample-exact against the click — and this hook is a webview feature
+ * sitting beside it. So every path through here that goes wrong ends in "no
+ * picture this pass", never in a throw the take's own hook has to survive.
+ *
+ * ## What it does NOT know
+ *
+ * Which mode it is serving. It was `useSongCamera` and knew about scores,
+ * ranges and tempo percentages; now the one thing that differed — how to
+ * turn a beat event into "how far into the music are we" — comes in as a
+ * CLOCK the caller opens at the start of each pass (`TakeClock` below).
+ * Songs builds one from the score; a jam builds one from its tempo, its
+ * meter and the bar of the form the engine is on (`jamClock.ts`). Everything
+ * else here was already about a camera and a file.
  *
  * ## The switch turns recording on with it
  *
@@ -56,21 +66,45 @@ import { recordVideo } from "./recorder";
 import type { Recording } from "./recorder";
 import { cameraConstraints, cameraSupport } from "./support";
 import type { CameraSupport } from "./support";
-import { fitTransportClock, sampleFor, videoOffsetMs } from "./offset";
+import { fitTransportClock, videoOffsetFrom } from "./offset";
 import type { ClockSample } from "./offset";
 import {
   CAMERA_DEVICE_KEY,
   CAMERA_INTRO_KEY,
   MAX_CLOCK_SAMPLES,
 } from "./keys";
-import type { BarRange } from "../songs/schedule";
-import type { SongScore } from "../songs/types";
+import type { BeatEvent } from "../types";
 import type { JamTake } from "../jam/types";
 
 /** What went wrong, in words the control can say. */
 export type CameraTrouble = "denied" | "noCamera" | "failed" | "lostPicture";
 
-export type SongCameraState = {
+/**
+ * How this pass's music is measured — the one thing the two modes differ on.
+ *
+ * Opened at the instant a pass starts and held for the whole of it, so a song
+ * whose range or speed is changed mid-pass is still lined up against the
+ * piece the recording is actually of. Null means "nothing to fit against this
+ * pass", which is not a failure: the picture is recorded anyway and the
+ * review starts it level with the sound.
+ */
+export type TakeClock = {
+  /**
+   * One beat event into one sample, or null where it is not one.
+   *
+   * May hold state of its own between calls — a jam's sampler uses that to
+   * drop the extra ticks a subdivided click sends (`jamClock.ts`) — which is
+   * why it is made per pass rather than kept.
+   */
+  sample: (beat: BeatEvent, arrivalMs: number) => ClockSample | null;
+  /**
+   * Where the finished take's FIRST SAMPLE sits on that same clock, in
+   * milliseconds, or null when the take has no position to say.
+   */
+  startMs: (take: JamTake) => number | null;
+};
+
+export type TakeCameraState = {
   /** What this webview can do at all. `ok: false` hides the switch. */
   support: CameraSupport;
   /** The switch, as this song's record has it. */
@@ -120,31 +154,34 @@ export type SongCameraState = {
   lastVideo: { takeId: string; path: string; offsetMs: number | null } | undefined;
 };
 
-export type SongCameraInput = {
-  songId: string | null;
-  /** The score on the stage — the clock fit needs it to place a beat in time. */
-  score: SongScore | null;
-  range: BarRange;
-  tempoPercent: number;
-  /** Which tab is showing. The camera closes when Songs is not the one. */
-  view: string;
+export type TakeCameraInput = {
+  /**
+   * The song or the jam the pending picture is filed under until the take is
+   * named. Null — nothing loaded — and the camera does not open.
+   */
+  ownerId: string | null;
+  /**
+   * This screen is the one showing. The camera closes when it is not, which
+   * is what makes the laptop's little light an honest signal.
+   */
+  active: boolean;
   isPlaying: boolean;
-  /** The switch, off this song's own record. */
+  /** The switch, off the song's or the jam's own record. */
   enabled: boolean;
   /** Write it back, and turn Record the take on with it. */
   onSetCamera: (next: boolean) => void;
+  /** See [`TakeClock`]. Called once, at the start of each pass. */
+  openClock: () => TakeClock | null;
 };
 
-export function useSongCamera({
-  songId,
-  score,
-  range,
-  tempoPercent,
-  view,
+export function useTakeCamera({
+  ownerId,
+  active,
   isPlaying,
   enabled,
   onSetCamera,
-}: SongCameraInput): SongCameraState {
+  openClock,
+}: TakeCameraInput): TakeCameraState {
   const support = useMemo(() => cameraSupport(), []);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [devices, setDevices] = useState<{ deviceId: string; label: string }[]>([]);
@@ -152,20 +189,29 @@ export function useSongCamera({
   const [trouble, setTrouble] = useState<CameraTrouble | null>(null);
   const [introOpen, setIntroOpen] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [lastCost, setLastCost] = useState<SongCameraState["lastCost"]>(null);
-  const [lastVideo, setLastVideo] = useState<SongCameraState["lastVideo"]>(undefined);
+  const [lastCost, setLastCost] = useState<TakeCameraState["lastCost"]>(null);
+  const [lastVideo, setLastVideo] = useState<TakeCameraState["lastVideo"]>(undefined);
 
   const introSeen = useRef(false);
   const streamRef = useRef<MediaStream | null>(null);
   const recordingRef = useRef<Recording | null>(null);
   /** The beat events of the pass being recorded, for the clock fit. */
   const samples = useRef<ClockSample[]>([]);
-  /** The score, range and speed the pass was started against. */
-  const against = useRef<{ score: SongScore; range: BarRange; tempoPercent: number } | null>(null);
+  /** The clock this pass was opened against. See [`TakeClock`]. */
+  const against = useRef<TakeClock | null>(null);
   /** The recorder's answer, once it has stopped. */
   const result = useRef<Awaited<ReturnType<Recording["stop"]>> | null>(null);
+  /**
+   * The live `openClock`, without re-arming the effect that starts a pass.
+   *
+   * A caller builds this from the jam or the song it is holding, so its
+   * identity changes whenever that does — and an effect keyed on it would
+   * restart the recording in the middle of a take.
+   */
+  const openClockRef = useRef(openClock);
+  openClockRef.current = openClock;
 
-  const armed = support.ok && enabled && view === "songs" && stream !== null;
+  const armed = support.ok && enabled && active && stream !== null;
 
   // ---- The switch, and the promise in front of it ------------------------
 
@@ -230,7 +276,7 @@ export function useSongCamera({
    * until the garbage collector gets round to it, which is not a promise
    * anybody would accept about a camera.
    */
-  const wanted = support.ok && enabled && view === "songs" && songId !== null;
+  const wanted = support.ok && enabled && active && ownerId !== null;
   useEffect(() => {
     if (!wanted) {
       const open = streamRef.current;
@@ -320,18 +366,7 @@ export function useSongCamera({
     const unlisten = onBeat((event) => {
       const held = against.current;
       if (!held) return;
-      const sample = sampleFor(
-        held.score,
-        held.range,
-        held.tempoPercent,
-        {
-          songBar: event.songBar,
-          songTick: event.songTick,
-          songPass: event.songPass,
-          songCountIn: event.songCountIn,
-        },
-        performance.now(),
-      );
+      const sample = held.sample(event, performance.now());
       if (!sample) return;
       if (samples.current.length >= MAX_CLOCK_SAMPLES) samples.current.shift();
       samples.current.push(sample);
@@ -353,16 +388,16 @@ export function useSongCamera({
    */
   useEffect(() => {
     if (!armed || !isPlaying || recordingRef.current !== null) return;
-    if (!support.ok || !score || !songId || !streamRef.current) return;
+    if (!support.ok || !ownerId || !streamRef.current) return;
     const media = streamRef.current;
     const startedMs = Date.now();
     samples.current = [];
     result.current = null;
     setLastVideo(undefined);
-    against.current = { score, range, tempoPercent };
+    against.current = openClockRef.current();
 
     let live: Recording | null = null;
-    void takeVideoBegin(songId, support.container, startedMs)
+    void takeVideoBegin(ownerId, support.container, startedMs)
       .then(() => {
         // The transport may have stopped while that crossed. A recording
         // nobody is going to stop is a camera file growing behind a stopped
@@ -384,12 +419,11 @@ export function useSongCamera({
         // already running and is not told.
         setTrouble("failed");
       });
-    // The effect's own inputs are the edge; `score`, `range` and
-    // `tempoPercent` are read once at the start of the pass on purpose — a
-    // range changed mid-pass would refit the clock against a piece the
-    // recording is not of.
+    // The effect's own inputs are the edge; the CLOCK is opened once at the
+    // start of the pass on purpose — a range or a tempo changed mid-pass
+    // would refit against a piece the recording is not of.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [armed, isPlaying, songId, support.ok]);
+  }, [armed, isPlaying, ownerId, support.ok]);
 
   /**
    * Stop the picture when the transport stops, and hold the answer.
@@ -505,10 +539,13 @@ export function useSongCamera({
       samples.current = [];
       const offset =
         fit && held
-          ? videoOffsetMs({
+          ? videoOffsetFrom({
               fit,
               firstFrameAt: answer.firstFrameAt,
-              startOffsetMs: take.position?.startOffsetMs ?? null,
+              // The clock that measured the beat events is the one that has
+              // to place the take's first sample, or the two ends of the
+              // subtraction are on different rulers.
+              takeStartMs: held.startMs(take),
             })
           : null;
       void takeVideoFinish(take.id, offset)

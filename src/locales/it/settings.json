@@ -227,7 +227,8 @@
         "songs-loop-earlier": "La parte una battuta prima",
         "songs-loop-later": "La parte una battuta dopo",
         "songs-take": "Registra la take",
-        "songs-camera": "Registra l'immagine"
+        "songs-camera": "Registra l'immagine",
+        "jam-camera": "Registra l'immagine"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "Spostare le battute scelte di una battuta verso l'inizio, mantenendo la stessa lunghezza",
         "songs-loop-later": "Spostare le battute scelte di una battuta verso la fine, mantenendo la stessa lunghezza",
         "songs-take": "Registra alla prossima riproduzione, oppure smetti di registrare",
-        "songs-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera"
+        "songs-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera",
+        "jam-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera"
       }
     },
     "inputTest": {

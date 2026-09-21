@@ -227,7 +227,8 @@
         "songs-loop-earlier": "Fragment o takt wcześniej",
         "songs-loop-later": "Fragment o takt później",
         "songs-take": "Nagraj takę",
-        "songs-camera": "Nagraj obraz"
+        "songs-camera": "Nagraj obraz",
+        "jam-camera": "Nagraj obraz"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "Przesunąć wybrane takty o jeden takt w stronę początku, nie zmieniając ich długości",
         "songs-loop-later": "Przesunąć wybrane takty o jeden takt w stronę końca, nie zmieniając ich długości",
         "songs-take": "Nagraj przy następnym starcie albo przerwij nagrywanie",
-        "songs-camera": "Filmuj przy następnym starcie albo wyłącz kamerę"
+        "songs-camera": "Filmuj przy następnym starcie albo wyłącz kamerę",
+        "jam-camera": "Filmuj przy następnym starcie albo wyłącz kamerę"
       }
     },
     "inputTest": {

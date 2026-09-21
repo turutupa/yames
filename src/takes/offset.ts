@@ -281,7 +281,31 @@ export function videoOffsetMs(args: {
 }): number | null {
   const { fit, firstFrameAt, startOffsetMs } = args;
   if (startOffsetMs === null || !Number.isFinite(startOffsetMs)) return null;
+  // `startOffsetMs` is where beat 0 sits INSIDE the file, so the file's first
+  // sample is at minus that much in the piece. Everything else is below.
+  return videoOffsetFrom({ fit, firstFrameAt, takeStartMs: -startOffsetMs });
+}
+
+/**
+ * The same number, for a take whose clock is not a score's (W32).
+ *
+ * `videoOffsetMs` above is the song's way of saying where the take's first
+ * sample falls in the music, and it is the only song-shaped thing about the
+ * arithmetic. A jam says it a different way — a bar of the form and a time
+ * round it (`jamClock.ts`) — and gets the same answer from here, so the two
+ * modes cannot end up with two subtly different alignments.
+ *
+ * `takeStartMs` is where the take's FIRST SAMPLE sits on whatever clock the
+ * fit was made against. Null when the take has no position to say.
+ */
+export function videoOffsetFrom(args: {
+  fit: ClockFit;
+  firstFrameAt: number;
+  takeStartMs: number | null;
+}): number | null {
+  const { fit, firstFrameAt, takeStartMs } = args;
+  if (takeStartMs === null || !Number.isFinite(takeStartMs)) return null;
   if (!Number.isFinite(firstFrameAt)) return null;
-  const offset = -startOffsetMs - transportAt(fit, firstFrameAt);
+  const offset = takeStartMs - transportAt(fit, firstFrameAt);
   return Number.isFinite(offset) ? offset : null;
 }

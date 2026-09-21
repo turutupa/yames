@@ -201,6 +201,16 @@ export interface Shot {
     sheet?: "setup" | "chords";
     /** Expand the setup sheet's MORE block: meter, what you read, takes. */
     more?: boolean;
+    /**
+     * Turn Record the take AND the camera on, and wait for the picture.
+     *
+     * Pressed rather than poked, like everything else here: the two
+     * switches are in the takes group of the setup sheet and a person has
+     * no other way to reach them. Chromium's fake device stands in for a
+     * camera (`playwright.config.ts` passes the two flags), so the scene
+     * arms the shipping code and gets a real `MediaStream`.
+     */
+    camera?: boolean;
     /** Tap this chord on the chord sheet (0-based) to expand its shapes. */
     chordCard?: number;
     /**
@@ -369,6 +379,20 @@ export const SHOTS: Shot[] = [
     // The groove editor, docked under a jam that is still playing. The way
     // in is the last card of the groove row, which lives on the setup sheet.
     jam: { row: 0, bar: 3, sheet: "setup", editor: true },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-camera",
+    suffix: "jam-camera",
+    window: "main",
+    tab: "jam",
+    // The stage with the camera armed: the little mirror in a corner of
+    // it, and the setup sheet's takes group with both switches on. What
+    // the layout suite measures on this scene is that the mirror covers
+    // neither the chord nor the form's bar grid.
+    jam: { row: 0, sheet: "setup", camera: true },
     width: 1400,
     height: 900,
     settleMs: 400,

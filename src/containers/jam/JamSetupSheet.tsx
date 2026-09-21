@@ -57,6 +57,8 @@ import { KitPicker } from "./KitPicker";
 import { Segmented } from "./Segmented";
 import { TakesSection } from "./TakesSection";
 import { TakeSoundControl } from "../../takes/TakeSoundControl";
+import { CameraControl } from "../../takes/CameraControl";
+import type { TakeCameraState } from "../../takes/useTakeCamera";
 import { VibePicker } from "./VibePicker";
 import type { VibePreviewMark } from "./VibePicker";
 
@@ -159,6 +161,13 @@ interface JamSetupSheetProps {
   onEditingChords: (on: boolean) => void;
   takes: JamTakesState;
   onToggleTakes: (next: boolean) => void;
+  /**
+   * The camera on this tab (W32), or null on a build that has none.
+   *
+   * Handed down rather than opened here: the camera is the window’s, like
+   * the takes are, because both end when the jam leaves the engine.
+   */
+  camera?: TakeCameraState | null;
 }
 
 /**
@@ -231,6 +240,7 @@ export function JamSetupSheet({
   onEditingChords,
   takes,
   onToggleTakes,
+  camera = null,
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
   /** Which roles' voices this sheet has already asked to be built. Once each. */
@@ -1267,6 +1277,21 @@ export function JamSetupSheet({
                 on, decide what goes in, see what came out. */}
             {takes.available !== false && (
               <TakeSoundControl state={takes.soundSource} disabled={!jam.takes} />
+            )}
+
+            {/* W32 — and whether you are IN it. One chip, in the same row the
+                sound choice is in, for the reason `CameraControl`'s header
+                gives: a control with a label and a note of its own costs this
+                group a line, and the sentence about what is recorded lives in
+                the promise the first press shows. Turning it on turns Record
+                the take on with it. */}
+            {camera && takes.available !== false && (
+              <div className="jam-camera-row">
+                {/* Greyed while recording is off rather than hidden: a switch
+                    that appears only once another switch is on is a switch
+                    nobody finds. */}
+                <CameraControl camera={camera} disabled={!jam.takes} />
+              </div>
             )}
 
             <TakesSection

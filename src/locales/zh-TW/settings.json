@@ -227,7 +227,8 @@
         "songs-loop-earlier": "這一段提前一小節",
         "songs-loop-later": "這一段延後一小節",
         "songs-take": "錄下這一遍",
-        "songs-camera": "錄下畫面"
+        "songs-camera": "錄下畫面",
+        "jam-camera": "錄下畫面"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -270,7 +271,8 @@
         "songs-loop-earlier": "把選取的小節整體往前挪一小節，長度不變",
         "songs-loop-later": "把選取的小節整體往後挪一小節，長度不變",
         "songs-take": "下次按播放時錄音，或停止錄音",
-        "songs-camera": "下次按播放時開始錄影，或關掉攝影機"
+        "songs-camera": "下次按播放時開始錄影，或關掉攝影機",
+        "jam-camera": "下次按播放時開始錄影，或關掉攝影機"
       }
     },
     "inputTest": {
