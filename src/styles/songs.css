@@ -143,6 +143,25 @@
   font-size: 14px;
 }
 
+/* A filled button stays filled under the pointer (2026-09-21).
+ *
+ * `.songs-btn:hover` above swaps the ground for `--surface-hover`, which is
+ * right for a quiet button and wrong for this one: the ink here is
+ * `--accent-text`, chosen to sit on the accent, so on hover "Import a song"
+ * became dark words on a dark ground — the owner sent the picture. The app's
+ * other filled button, Play, answers the pointer by lifting and glowing
+ * (`.transport-play:hover`); this says the same thing the same way. */
+.songs-btn-primary:hover {
+  background: var(--accent);
+  color: var(--accent-text);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -10px var(--accent-glow-strong);
+}
+
+.songs-btn-primary:active {
+  transform: translateY(0);
+}
+
 .songs-chip {
   border: 1px solid var(--border);
   background: var(--bg-raised);
@@ -1230,7 +1249,10 @@
 .songs-band-solo.on {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--accent-contrast, #fff);
+  /* `--accent-text`, the contract's ink for a filled accent. This said
+     `--accent-contrast`, which no theme defines, so it was always white —
+     unreadable on Ivory's and Manuscript's light accents. */
+  color: var(--accent-text);
 }
 
 /* ── Portions the player kept ─────────────────────────────────────────── */
