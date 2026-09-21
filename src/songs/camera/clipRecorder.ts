@@ -92,6 +92,8 @@ export type ClipFrameState = {
   nowMs: number;
   /** Whether the verdict is painted on the excerpt at all. */
   marks: boolean;
+  /** Whether there is a camera picture in this clip. The renderer is told. */
+  hasPicture: boolean;
   /** Whether the Yames mark is on the clip at all. Its own switch. */
   brand: boolean;
   /** What the mark says beside the tile. Not translated: it is an address. */
@@ -301,18 +303,38 @@ function sourceSize(source: CanvasImageSource): { width: number; height: number 
  * the marking.
  */
 function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void {
-  const { layout, palette, strip, nowMs, windowMs, marks } = state;
+  const { layout, palette, strip, nowMs, windowMs, marks, hasPicture } = state;
   const box = layout.strip;
+  // "Nothing under the picture" is one of the three things a player may ask
+  // for (W31 item 4), and it is a band of no height: no ground, no playhead.
+  if (box.height <= 0) return;
 
   ctx.save();
+
+  // Over the picture, the band needs a ground of its own — it is sitting on
+  // whatever the room was, and a fret number drawn straight onto a white wall
+  // is not a fret number. Dark, translucent and rounded, the same treatment
+  // the Yames mark gets and for the same reason; it covers the caption too,
+  // because the two are one panel to look at. Drawn BEFORE the clip region so
+  // it can reach up to the caption above the band.
+  if (layout.overPicture) {
+    const top = Math.min(layout.caption.y, box.y) - 10;
+    const bottom = Math.max(layout.caption.y + layout.caption.height, box.y + box.height) + 8;
+    roundedPath(ctx, box.x, top, box.width, bottom - top, 18);
+    ctx.fillStyle = "rgba(11, 10, 20, 0.62)";
+    ctx.fill();
+  }
+
   ctx.beginPath();
   ctx.rect(box.x, box.y, box.width, box.height);
   ctx.clip();
 
-  ctx.fillStyle = palette.line;
-  ctx.globalAlpha = 0.35;
-  ctx.fillRect(box.x, box.y, box.width, box.height);
-  ctx.globalAlpha = 1;
+  if (!layout.overPicture) {
+    ctx.fillStyle = palette.line;
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(box.x, box.y, box.width, box.height);
+    ctx.globalAlpha = 1;
+  }
 
   // WHAT MOVES is the renderer's, and the only part of a clip that differs
   // between a song and a jam. The ground under it, the clip region around it
@@ -320,11 +342,12 @@ function paintStrip(ctx: CanvasRenderingContext2D, state: ClipFrameState): void 
   // any of those subtly different. It is given a clean context and may leave
   // it however it likes: `restore` below puts it back.
   ctx.save();
-  strip.paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks });
+  strip.paintInto(ctx, { box, layout, palette, nowMs, windowMs, marks, hasPicture });
   ctx.restore();
 
-  // The playhead, last so nothing is drawn over it.
-  const head = box.x + box.width / 2;
+  // The playhead, last so nothing is drawn over it. In the middle for the
+  // dots and a jam; wherever the renderer's band asked for it otherwise.
+  const head = box.x + box.width * layout.head;
   ctx.strokeStyle = palette.accent;
   ctx.lineWidth = 3;
   ctx.beginPath();
@@ -453,7 +476,14 @@ export function recordClip(options: RecordClipOptions): ClipRun {
     onProgress,
   } = options;
 
-  const layout = clipLayout(shape);
+  // How much room the thing that scrolls needs, and how it wants to be driven
+  // (W31). Asked ONCE, before a frame is painted: a band that changed size
+  // half way through a clip would be a clip with a seam in it. The dots and a
+  // jam answer nothing and get the layout this file has always made.
+  const hasPicture = videoSrc !== null;
+  const band = strip.bandFor?.(shape, hasPicture) ?? null;
+  const layout = clipLayout(shape, band);
+  const window = band ? band.windowMs : windowMs;
   canvas.width = layout.width;
   canvas.height = layout.height;
   const ctx = canvas.getContext("2d", { alpha: false });
@@ -529,9 +559,10 @@ export function recordClip(options: RecordClipOptions): ClipRun {
         palette,
         picture: video && video.readyState >= 2 ? video : null,
         strip,
-        windowMs,
+        windowMs: window,
         nowMs,
         marks,
+        hasPicture,
         brand,
         wordmark,
         words,
