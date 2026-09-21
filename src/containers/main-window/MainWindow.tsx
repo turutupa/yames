@@ -140,6 +140,7 @@ import {
   IS_LINUX,
   FULLSCREEN_EXIT_DELAY,
   platformKey,
+  actionForCombo,
   eventToCombo,
   isTypingTarget,
 } from "../../hotkeys";
@@ -166,8 +167,6 @@ import "../../styles/audio-input-test.css";
  * obliged to keep. `tests/layout/jam-camera.spec.ts` measures it.
  */
 const JAM_PREVIEW_CORNERS: readonly PreviewCorner[] = ["bottomLeft", "bottomRight"];
-
-const MODE_ACTION_PREFIXES = ["jam-", "songs-"];
 
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
 
@@ -1415,29 +1414,10 @@ export function MainWindow() {
       }
       const combo = eventToCombo(e);
       if (!combo) return;
-      /*
-       * Which action this key means — and on which tab (2026-09-20).
-       *
-       * A combo can belong to more than one action now: `L` loops a section
-       * in Jam and a portion in Songs, and `[` and `]` step the metronome's
-       * subdivision everywhere except Songs, where they mark where a portion
-       * starts and stops. Those are the right keys in both places — a looper
-       * pedal taught everybody what the brackets mean — and they are only
-       * ambiguous if you ask the question without saying where you are.
-       *
-       * So the mode's own action wins on the mode's own tab, and the plain
-       * one wins everywhere else. Taking the first match, which is what this
-       * did, meant whichever was written higher up `hotkeys.ts` silently
-       * owned the key in every mode.
-       */
-      const bound = Object.entries(keyBindings)
-        .filter(([_, key]) => key === combo)
-        .map(([action]) => action);
-      /** An action that only means something on one tab, by its own prefix. */
-      const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
-      const actionId = (bound.find((action) => action.startsWith(`${view}-`)) ??
-        bound.find((action) => !modeOnly(action)) ??
-        bound[0]) as HotkeyAction | undefined;
+      // Which action this key means — and on which tab (2026-09-20). The rule
+      // and the reason for it are `hotkeys.ts`'s `actionForCombo`, which is
+      // where they can be tested (W34 item 3).
+      const actionId = actionForCombo(keyBindings, combo, view) as HotkeyAction | undefined;
       // Feed tester if open
       if (inputTestMode) {
         if (["Meta", "Control", "Alt", "Shift"].includes(e.key)) return;

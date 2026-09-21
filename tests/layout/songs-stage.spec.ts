@@ -275,6 +275,52 @@ test.describe("the tab uses all the room", () => {
   }
 
   /**
+   * The space bar plays the song and never scrolls the page of music
+   * (W34 item 3).
+   *
+   * The tab takes the caret so the arrow keys and Esc reach it, and a
+   * focusable box inside a scroller is exactly the thing a browser scrolls
+   * when you press Space on it. The window's handler calls `preventDefault`
+   * for a bound key, which is what stops that — and the dispatcher no longer
+   * takes the caret off a `role="application"` widget, so the arrows still
+   * work after you have pressed play.
+   */
+  test("plays with the space bar without scrolling the tab", async ({ page }) => {
+    await openShot(page, "songs", { width: 1440, height: 900 }, "ember", { song: "long" });
+    const overlay = page.locator(".songs-tab-overlay");
+    await overlay.click({ position: { x: 60, y: 60 } });
+    await expect
+      .poll(() => page.evaluate(() => document.activeElement?.className ?? ""))
+      .toContain("songs-tab-overlay");
+
+    const watching = page.evaluate(
+      () =>
+        new Promise<boolean>((resolve) => {
+          document.addEventListener(
+            "keydown",
+            (e) => {
+              if (e.key === " ") resolve(e.defaultPrevented);
+            },
+            { once: true },
+          );
+        }),
+    );
+    await page.keyboard.press("Space");
+    expect(
+      await watching,
+      "the space bar was left to the browser, which scrolls the page of music",
+    ).toBe(true);
+
+    // It played...
+    await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+    // ...and the tab still holds the keyboard, so the arrows still work.
+    expect(
+      await page.evaluate(() => document.activeElement?.className ?? ""),
+      "pressing play took the caret off the tab",
+    ).toContain("songs-tab-overlay");
+  });
+
+  /**
    * The pictures. Not an assertion — a thing to look at.
    *
    * Stopped and playing, at the two windows the brief names, plus the numbers
