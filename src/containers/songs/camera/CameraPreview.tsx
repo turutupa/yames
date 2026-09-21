@@ -86,6 +86,21 @@ export function CameraPreview({
     };
   }, []);
 
+  /**
+   * W25 — the element itself, to the hook.
+   *
+   * The thumbnail is one frame of the live picture, grabbed at the first
+   * downbeat, and the live picture is on this element. Handed over exactly as
+   * the frame callback's readings are, and taken back when the preview goes.
+   */
+  const holdPreview = camera.holdPreview;
+  useEffect(() => {
+    holdPreview(videoRef.current);
+    return () => {
+      holdPreview(null);
+    };
+  }, [holdPreview]);
+
   /** The stream, on the element. Set directly: `srcObject` is not an attribute. */
   useEffect(() => {
     const element = videoRef.current;

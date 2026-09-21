@@ -310,7 +310,22 @@ async function drive() {
     await until("the song library", () => document.querySelectorAll(rows).length >= wanted);
     (document.querySelectorAll(rows)[shot!.songs!.row] as HTMLElement).click();
     await until("the songs stage", () => !!document.querySelector(".songs-view"));
-    await until("the drawn tab", () => !!document.querySelector(".songs-tab-host[data-ready]"));
+    /*
+     * Thirty seconds rather than fifteen for the engraving (W25).
+     *
+     * alphaTab lays a score out on this thread, and the layout suite runs
+     * four workers at once — each of them engraving, and the camera scenes
+     * also filming and decoding video. Fifteen seconds was enough for one
+     * page at a time and failed about one run in twenty once there were four
+     * camera scenes. A flaky gate is a gate people stop believing, and the
+     * cost of waiting longer is nothing: a scene that IS going to build just
+     * builds.
+     */
+    await until(
+      "the drawn tab",
+      () => !!document.querySelector(".songs-tab-host[data-ready]"),
+      30000,
+    );
     /*
      * And the band, which arrives after the tab does.
      *
@@ -391,6 +406,55 @@ async function drive() {
           20000,
         );
       }
+      /**
+       * W25 — "Save as a video", opened and optionally made.
+       *
+       * Pressed, like everything else here. `make` then waits for the path
+       * the mocked save dialog answered with to appear on screen, which is
+       * the app's own way of saying the file is written — real time, so the
+       * wait is as long as the clip.
+       */
+      if (shot!.songs.clip) {
+        await pressUntil(
+          '"Save as a video"',
+          () => document.querySelector<HTMLElement>(".songs-clip-open")?.click(),
+          () => !!document.querySelector(".songs-clip-options"),
+        );
+        // ...and brought into view, the way pressing a disclosure at the
+        // bottom of a scrolling panel leaves it: the review's body scrolls,
+        // and the choices are under the whole video pane.
+        document.querySelector(".songs-clip")?.scrollIntoView({ block: "end" });
+        await new Promise((r) => requestAnimationFrame(r));
+        if (shot!.songs.clip === "make") {
+          (document.querySelector(".songs-clip-go") as HTMLButtonElement).click();
+          await until(
+            "the finished clip",
+            () => !!(window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__,
+            120000,
+          );
+          // The done state: where it went, and the places to put it.
+          await until("where it went", () => !!document.querySelector(".songs-clip-done"), 10000);
+          document.querySelector(".songs-clip-done")?.scrollIntoView({ block: "end" });
+          await new Promise((r) => requestAnimationFrame(r));
+        }
+      }
+
+      /**
+       * W25 — then and now, scrolled to.
+       *
+       * The two takes are a block of the coach's answer, and the answer is
+       * under the whole video pane inside a body that scrolls. Waited for
+       * rather than assumed: the pair comes from a read of the store and the
+       * shelf, so a scene that photographed before it landed would photograph
+       * a review with no comparison in it — which is a real state and not
+       * this one.
+       */
+      if (shot!.songs.compare) {
+        await until("the two takes", () => !!document.querySelector(".songs-compare"), 20000);
+        document.querySelector(".songs-compare")?.scrollIntoView({ block: "center" });
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+
       if (shot!.songs.openMore) {
         /*
          * Pressed until it takes, rather than pressed once and hoped for.

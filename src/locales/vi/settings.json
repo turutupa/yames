@@ -225,7 +225,9 @@
         "songs-loop": "Lặp lại đoạn",
         "songs-loop-clear": "Lại cả bài",
         "songs-loop-earlier": "Đoạn sớm hơn một ô nhịp",
-        "songs-loop-later": "Đoạn muộn hơn một ô nhịp"
+        "songs-loop-later": "Đoạn muộn hơn một ô nhịp",
+        "songs-take": "Thu bản này",
+        "songs-camera": "Quay hình"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -266,7 +268,9 @@
         "songs-loop": "Chơi đi chơi lại những ô nhịp đã chọn, hoặc dừng",
         "songs-loop-clear": "Quên đoạn đi và chơi cả bài từ đầu",
         "songs-loop-earlier": "Dời những ô nhịp đã chọn lùi một ô nhịp, giữ nguyên độ dài",
-        "songs-loop-later": "Dời những ô nhịp đã chọn tới một ô nhịp, giữ nguyên độ dài"
+        "songs-loop-later": "Dời những ô nhịp đã chọn tới một ô nhịp, giữ nguyên độ dài",
+        "songs-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
+        "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay"
       }
     },
     "inputTest": {

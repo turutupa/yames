@@ -95,6 +95,20 @@
   pointer-events: none;
 }
 
+/* ...and it is not drawn over the verdict (W25).
+ *
+ * The preview is `z-index: 3` inside the frame and the review is `2`, so with
+ * the camera still armed after a pass it sat on top of the review — over the
+ * tape's own controls at 480px, with its framing guide clipped to half a
+ * sentence. It is the mirror for while you PLAY; while you are watching the
+ * take back there are two pictures of the same person on one screen and only
+ * one of them is the one you came back for. It returns when the review does
+ * not, and the camera itself is untouched: `useSongCamera` still holds the
+ * stream, the light is still honestly on, and the switch still says so. */
+.songs-view[data-review] .songs-camera-preview {
+  display: none;
+}
+
 .songs-camera-preview[data-corner="topLeft"] { top: 10px; left: 10px; }
 .songs-camera-preview[data-corner="topRight"] { top: 10px; right: 10px; }
 .songs-camera-preview[data-corner="bottomLeft"] { bottom: 10px; left: 10px; }

@@ -919,6 +919,43 @@ pub fn list_calibration_cache(
     cal_cache.lock().unwrap().entries.clone()
 }
 
+/// Show a file the player just saved, in their own file manager.
+///
+/// W25, the owner's ask on "Save as a video": a player who has made a clip
+/// wants to put it somewhere, and the first thing they need is to find it.
+/// The path is one the app just WROTE — it came back from the save dialog —
+/// so there is nothing to validate here beyond its existing; revealing a file
+/// is a read-only act and the OS is what decides what the player may see.
+///
+/// Nothing is opened, played or uploaded: the folder is shown and the app is
+/// finished with the file.
+#[tauri::command]
+pub fn reveal_in_folder(path: String) {
+    let file = std::path::Path::new(&path);
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("open").args(["-R", &path]).spawn();
+    }
+    #[cfg(target_os = "windows")]
+    {
+        // `explorer /select,"<path>"` and NOT through `cmd /C start`: the
+        // shell's `start` treats a comma as an argument separator and would
+        // open the player's Documents folder instead of selecting the file.
+        let _ = std::process::Command::new("explorer")
+            .arg(format!("/select,{path}"))
+            .spawn();
+    }
+    #[cfg(target_os = "linux")]
+    {
+        // No portable "select this file", so the folder is what is opened.
+        // `xdg-open` on a file would launch a video player, which is not what
+        // "show me where it went" means.
+        let folder = file.parent().unwrap_or(file);
+        let _ = std::process::Command::new("xdg-open").arg(folder).spawn();
+    }
+    let _ = file;
+}
+
 #[tauri::command]
 pub fn open_url(url: String) {
     #[cfg(target_os = "macos")]

@@ -281,7 +281,49 @@
       "watchIt": "İzle",
       "watchTitle": "Geri izlemek",
       "watchingAll": "Turun tamamı.",
-      "watchingBars": "{{bars}} ölçüleri, döne döne."
+      "watchingBars": "{{bars}} ölçüleri, döne döne.",
+      "sinkUnsupported": "Bu sürüm kaydı yalnızca bilgisayarın her zamanki hoparlörlerinden çalabiliyor, {{device}} üzerinden değil.",
+      "sinkUnmatched": "Bilgisayarın her zamanki hoparlörlerinden çalıyor — buradan {{device}} bulunamadı."
+    },
+    "clip": {
+      "save": "Video olarak kaydet",
+      "go": "Videoyu oluştur",
+      "cancel": "Durdur",
+      "making": "Oluşturuluyor — %{{percent}}",
+      "whichBars": "Hangi ölçüler",
+      "chosenBars": "Bu ölçüler",
+      "wholeTake": "Kaydın tamamı",
+      "shape": "Biçim",
+      "wide": "Yatay",
+      "tall": "Dikey",
+      "withMarks": "İşaretleri göster",
+      "realTime": "Çalarken kaydediyor, yani müzik kadar sürüyor: {{length}}.",
+      "isMp4": "MP4 alırsın, her yere yüklenir.",
+      "isWebm": "WebM alırsın. Bazı yerler yalnızca MP4 kabul ediyor.",
+      "saved": "{{where}} konumuna kaydedildi",
+      "failed": "Video oluşturulamadı. Hiçbir şey kaydedilmedi.",
+      "unavailable": "Bu sürüm video kaydedemiyor.",
+      "bar": "Ölçü",
+      "bpmUnit": "BPM",
+      "brand": "Yames işareti",
+      "brandNote": "Köşede küçük bir Yames logosu ve yames.app. Videonu gören biri uygulamayı böyle buluyor.",
+      "showInFolder": "Klasörde göster",
+      "postItTo": "Şuraya yükle",
+      "dragItIn": "Birini aç ve dosyayı içine sürükle — Yames hiçbir şey yüklemez, hesap da istemez.",
+      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor."
+    },
+    "compare": {
+      "title": "{{bars}}. ölçüler, o zaman ve şimdi",
+      "then": "O zaman",
+      "now": "Şimdi",
+      "facts": "%{{percent}} · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Yalnızca ses — bunda kamera kapalıydı.",
+      "locked": "İkisi saate göre değil ölçüye göre tutuluyor, yani daha yavaş bir geçiş de denk düşüyor."
+    },
+    "takes": {
+      "withPicture": "Görüntülü",
+      "noneFilmed": "Bunların hiçbiri kaydedilmedi.",
+      "was": "Ölçü {{bars}} · %{{percent}} · {{goes}} · {{score}}"
     }
   }
 }

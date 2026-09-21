@@ -27,6 +27,30 @@ export const CAMERA_CORNER_KEY = "songs.cameraCorner";
 export const CAMERA_GUIDE_KEY = "songs.cameraGuideSeen";
 
 /**
+ * Whether a saved clip carries the Yames mark (W25, the owner's ask).
+ *
+ * ON by default and remembered, and its OWN switch rather than a part of the
+ * verdict marks: they answer different questions. "Show the marks" is about
+ * whether a player wants their mistakes painted on something they are about
+ * to post; this is about whether the clip says where it was made, which is
+ * the growth loop every shared clip is worth (`plans/ECHORA.md` D4) and not
+ * something to bury inside another control's meaning.
+ */
+export const CLIP_BRAND_KEY = "songs.clipBrand";
+
+/**
+ * The output device the player chose in settings, by cpal's name for it.
+ *
+ * NOT a camera key and not one this wave invented: it is the key
+ * `useAudioOutputDevices` already saves the engine's output under. It is
+ * spelled here so the review can point a media element at the SAME device
+ * (`sink.ts`), and spelled out loud rather than inline for the reason every
+ * other key in this file is — a store key written at two call sites is a
+ * store key that ends up spelled two ways.
+ */
+export const AUDIO_OUTPUT_KEY = "audioOutputDevice";
+
+/**
  * The nudge, per camera.
  *
  * Per camera and not per take: the thing being corrected is the camera's own

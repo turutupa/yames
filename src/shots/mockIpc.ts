@@ -103,15 +103,23 @@ const TAKES = [
 /**
  * W21 — the take the camera scene records, and the sound it plays back.
  *
- * One second of silence as a WAV, base64'd into a data URL: the review plays
- * the take's MIX in an `<audio>` element and reads the clock off it, so a
- * scene with no audio is a scene whose tape never moves. Built rather than
- * checked in because forty-four bytes of header and a run of zeros is shorter
- * to write than to explain.
+ * A WAV, base64'd into a data URL: the review plays the take's MIX in an
+ * `<audio>` element and reads the clock off it, so a scene with no audio is a
+ * scene whose tape never moves. Built rather than checked in because
+ * forty-four bytes of header and a run of samples is shorter to write than to
+ * explain.
+ *
+ * **It carries a quiet tone rather than silence (W25).** The clip export
+ * routes this file through a `MediaElementAudioSourceNode` into the recorder,
+ * and a graph that is not connected at all produces a perfectly valid audio
+ * track full of zeros — which is indistinguishable from a correct export of
+ * silence. With a tone in it, decoding the finished clip and looking at the
+ * peak is a real answer to "did the sound get in", which is the one question
+ * about a shared clip nobody can answer by looking.
  */
-const SILENT_WAV = (() => {
+function takeWav(seconds: number): string {
   const rate = 8000;
-  const samples = rate;
+  const samples = Math.round(rate * seconds);
   const bytes = new Uint8Array(44 + samples * 2);
   const view = new DataView(bytes.buffer);
   const ascii = (at: number, text: string) => {
@@ -129,12 +137,149 @@ const SILENT_WAV = (() => {
   view.setUint16(34, 16, true);
   ascii(36, "data");
   view.setUint32(40, samples * 2, true);
+  // A 220 Hz sine at about a tenth of full scale — loud enough to survive
+  // being encoded to AAC and measured, quiet enough that nobody running the
+  // harness with speakers on is startled.
+  for (let i = 0; i < samples; i++) {
+    view.setInt16(44 + i * 2, Math.round(Math.sin((2 * Math.PI * 220 * i) / rate) * 3200), true);
+  }
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return `data:audio/wav;base64,${btoa(binary)}`;
-})();
+}
+
+/**
+ * Long enough to be the whole pass, which W25 made it have to be.
+ *
+ * It used to be one second, which was plenty when the only thing reading it
+ * was the review's clock. "Save as a video" plays the take THROUGH — in real
+ * time, from wherever the chosen bars start — so a one-second file is a clip
+ * that ends before it begins. Twenty-two seconds covers the fixture's eight
+ * bars at 96 BPM (twenty) with headroom, and costs the harness half a
+ * megabyte of data URL that never leaves the browser.
+ */
+const TAKE_WAV = takeWav(22);
 
 const SHOT_TAKE_ID = "w21";
+/**
+ * W25 — the run from a month ago, for then-and-now.
+ *
+ * The take's PATH is the join between the store's row and the shelf's
+ * listing, which is how the real app pairs an attempt with its recording, so
+ * the mock has to be consistent about it in both places or the compare finds
+ * nothing and says nothing — which is exactly the failure it should have.
+ */
+const OLD_ATTEMPT_ID = "w25-then";
+const OLD_TAKE_ID = "w25then";
+/**
+ * The same tone as tonight's, because the older side has to PLAY: the
+ * comparison drives two media elements and the harness has no asset protocol
+ * behind it, so the "path" is the sound itself (`songs/camera/src.ts` hands
+ * anything that is already a URL straight to the element).
+ */
+const OLD_TAKE_PATH = TAKE_WAV;
+
+/**
+ * W25 — a thumbnail, drawn rather than checked in.
+ *
+ * The shelf's whole point is that a take LOOKS like a take, and an empty grey
+ * box proves nothing about that. The real one is a frame of the player's
+ * picture; this is a few hundred bytes of gradient with a shape on it, which
+ * is enough to show that the box holds an image, keeps its aspect and is
+ * cropped rather than squashed.
+ */
+function shotThumb(hue: number): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 180;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+  const sky = ctx.createLinearGradient(0, 0, 320, 180);
+  sky.addColorStop(0, `hsl(${String(hue)} 55% 38%)`);
+  sky.addColorStop(1, `hsl(${String((hue + 40) % 360)} 45% 18%)`);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 320, 180);
+  ctx.fillStyle = `hsl(${String((hue + 180) % 360)} 70% 62%)`;
+  ctx.beginPath();
+  ctx.ellipse(150, 120, 74, 46, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  return canvas.toDataURL("image/jpeg", 0.7);
+}
+
+/**
+ * Three goes at the song, for the shelf (W25 item 4).
+ *
+ * Two filmed and one not, which is the mix the filter exists for, and each
+ * with an attempt behind it so the row can say what it was a go AT. Built
+ * lazily because the thumbnails need a canvas and this file is evaluated
+ * before the page has one.
+ */
+type ShotSongTake = {
+  id: string;
+  createdAt: number;
+  durationSec: number;
+  path: string;
+  thumbPath?: string;
+  videoPath?: string;
+  videoBytes?: number;
+  startBar: number;
+  endBar: number;
+  tempoPercent: number;
+  passes: number;
+  score: number;
+};
+
+let shotSongTakes: ShotSongTake[] | null = null;
+function songShelfTakes(): ShotSongTake[] {
+  if (!shotSongTakes) {
+    const day = 24 * 60 * 60 * 1000;
+    shotSongTakes = [
+      {
+        id: "sh3",
+        createdAt: Date.now() - 2 * 60 * 60 * 1000,
+        durationSec: 21,
+        // A fragment on the data URL, so the three rows have three DIFFERENT
+        // paths: the shelf joins a take to its attempt on the WAV's path, and
+        // three takes at one path would all be the same go.
+        path: `${TAKE_WAV}#sh3`,
+        thumbPath: shotThumb(28),
+        videoPath: TAKE_WAV,
+        videoBytes: 4_100_000,
+        startBar: 4,
+        endBar: 7,
+        tempoPercent: 90,
+        passes: 3,
+        score: 88,
+      },
+      {
+        id: "sh2",
+        createdAt: Date.now() - 2 * day,
+        durationSec: 34,
+        path: `${TAKE_WAV}#sh2`,
+        startBar: 0,
+        endBar: 7,
+        tempoPercent: 100,
+        passes: 1,
+        score: 71,
+      },
+      {
+        id: "sh1",
+        createdAt: Date.now() - 9 * day,
+        durationSec: 48,
+        path: `${TAKE_WAV}#sh1`,
+        thumbPath: shotThumb(205),
+        videoPath: TAKE_WAV,
+        videoBytes: 9_400_000,
+        startBar: 4,
+        endBar: 7,
+        tempoPercent: 70,
+        passes: 4,
+        score: 54,
+      },
+    ];
+  }
+  return shotSongTakes;
+}
 const SHOT_TAKE_JAM = "shot-song";
 
 function baseState(theme: string) {
@@ -315,6 +460,16 @@ export function installShotMock(shot: Shot, theme: string): void {
   /** W21 — the bytes `MediaRecorder` handed over during the camera scene. */
   const cameraChunks: ArrayBuffer[] = [];
   const cameraMime = "video/webm";
+  /**
+   * W25 — the picture the fake camera made, once it has been filed.
+   *
+   * Held so the compare scene can put the SAME one on its older take: the
+   * harness can film once, and what then-and-now is a picture of is the
+   * layout and the bar-locking rather than two different faces.
+   */
+  let cameraVideoUrl: string | null = null;
+  /** ...and the chunks the canvas compositor handed over for a clip. */
+  const clipChunks: ArrayBuffer[] = [];
   /**
    * The id the take was STARTED with.
    *
@@ -696,7 +851,54 @@ export function installShotMock(shot: Shot, theme: string): void {
      * the empty shelf — the one a musician sees on every jam but the one they
      * recorded — could not be photographed at all.
      */
-    list_takes: (a) => TAKES.filter((take) => take.jamId === a?.jamId),
+    list_takes: (a) => [
+      ...TAKES.filter((take) => take.jamId === a?.jamId),
+      /*
+       * W25 — three goes at the song, for the shelf scene.
+       *
+       * Only when the scene is about the shelf: every other songs scene
+       * should photograph the shelf a player has before they have recorded
+       * anything, which is empty. Two of the three are filmed and one is not,
+       * which is the mix the "with picture" filter exists for.
+       */
+      ...(shot.songs?.takes && a?.jamId === songShotRecord().id
+        ? songShelfTakes().map((take) => ({
+            id: take.id,
+            jamId: a.jamId as string,
+            createdAt: take.createdAt,
+            durationSec: take.durationSec,
+            path: take.path,
+            ...(take.thumbPath ? { thumbPath: take.thumbPath } : {}),
+            ...(take.videoPath ? { videoPath: take.videoPath } : {}),
+            ...(take.videoBytes ? { videoBytes: take.videoBytes } : {}),
+          }))
+        : []),
+      /*
+       * W25 — the run from a month ago, on the shelf beside tonight's.
+       *
+       * Only for the compare scene, and only on the song: a second take on
+       * every other one would change the takes shelf's picture and the review
+       * scenes' behaviour for something none of them are about. Its PICTURE
+       * is the one the harness's own fake camera made a moment ago, reused —
+       * the harness can film once, and what then-and-now is a picture of is
+       * the layout and the bar-locking, not two different faces.
+       */
+      ...(shot.songs?.compare && a?.jamId === cameraTakeFor && cameraVideoUrl
+        ? [
+            {
+              id: OLD_TAKE_ID,
+              jamId: cameraTakeFor,
+              createdAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
+              durationSec: 22,
+              path: OLD_TAKE_PATH,
+              position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -40 },
+              videoPath: cameraVideoUrl,
+              videoBytes: 1_200_000,
+              videoOffsetMs: 120,
+            },
+          ]
+        : []),
+    ],
     /*
      * W21 — a take with a real picture on it, made by the harness's own fake
      * camera.
@@ -721,8 +923,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       id: SHOT_TAKE_ID,
       jamId: cameraTakeFor,
       createdAt: Date.now(),
-      durationSec: 3,
-      path: SILENT_WAV,
+      durationSec: 22,
+      path: TAKE_WAV,
       position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -40 },
     }),
     take_video_begin: () => {
@@ -748,9 +950,45 @@ export function installShotMock(shot: Shot, theme: string): void {
       // A blob URL rather than a path: the harness is an ordinary browser with
       // no asset protocol behind it, and `songs/camera/src.ts` hands anything
       // that is already a URL straight to the element.
-      return { path: URL.createObjectURL(blob), bytes: blob.size, offsetMs: 120 };
+      cameraVideoUrl = URL.createObjectURL(blob);
+      return { path: cameraVideoUrl, bytes: blob.size, offsetMs: 120 };
     },
     take_video_discard: () => null,
+    /*
+     * W25 — "Save as a video". The real commands put up a save dialog and
+     * stream the composited chunks to a file the player named; here the
+     * dialog is answered with a plausible path and the chunks are kept, so
+     * the SHIPPING compositor, the shipping `canvas.captureStream()`, the
+     * shipping audio graph and the shipping `MediaRecorder` all run for real
+     * and what is mocked is only the disk.
+     *
+     * The finished blob is hung on `window.__SHOT_CLIP__` so a test can pull
+     * the bytes out and put a real file in front of `ffprobe`. It is the only
+     * way to answer "is that a video?" — no assertion about a Blob's size can.
+     */
+    clip_save_begin: () => {
+      clipChunks.length = 0;
+      delete (window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__;
+      return "C:\\Users\\you\\Videos\\Practice piece.mp4";
+    },
+    clip_save_append: (a) => {
+      const bytes = a as unknown as Uint8Array | ArrayBuffer | undefined;
+      if (bytes instanceof Uint8Array) clipChunks.push(bytes.slice().buffer);
+      else if (bytes instanceof ArrayBuffer) clipChunks.push(bytes);
+      return clipChunks.reduce((n, c) => n + c.byteLength, 0);
+    },
+    clip_save_finish: () => {
+      const blob = new Blob(clipChunks as BlobPart[]);
+      (window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__ = {
+        url: URL.createObjectURL(blob),
+        bytes: blob.size,
+      };
+      return { path: "C:\\Users\\you\\Videos\\Practice piece.mp4", bytes: blob.size };
+    },
+    clip_save_discard: () => {
+      clipChunks.length = 0;
+      return null;
+    },
     delete_take: () => null,
     play_take: () => null,
     stop_take_playback: () => null,
@@ -939,8 +1177,70 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (cmd === "analyze_attempt") {
       return scripted()?.findings ?? [];
     }
-    if (cmd === "save_attempt" || cmd === "query_attempts") {
-      return cmd === "query_attempts" ? [] : null;
+    if (cmd === "save_attempt") return null;
+    /*
+     * W25 — the history then-and-now is built on.
+     *
+     * Empty for every scene but the compare one, because an empty history is
+     * what the app has for a song somebody has just imported and it is what
+     * every other review scene should photograph. For `songs-compare` it is
+     * one earlier run at the same bars, a month ago, slower and rougher —
+     * scripted by the same `scriptPass` the review itself uses, so the tape
+     * the old side draws is a real pass with real verdicts and not a row of
+     * decorative dots.
+     */
+    if (cmd === "query_attempts") {
+      // The shelf's rows say what each take was a go AT, and that comes from
+      // the store rather than from the file (W25 item 4).
+      if (shot.songs?.takes) {
+        const record = songShotRecord();
+        return songShelfTakes().map((take) => ({
+          id: `att-${take.id}`,
+          scoreId: record.id,
+          startedAt: take.createdAt,
+          rangeStartBar: take.startBar,
+          rangeEndBar: take.endBar,
+          tempoPercent: take.tempoPercent,
+          passes: take.passes,
+          score: take.score,
+          hits: 0,
+          misses: 0,
+          extras: 0,
+          meanDevMs: 0,
+          madMs: 0,
+          takePath: take.path,
+        }));
+      }
+      if (!shot.songs?.compare || !songSchedule) return [];
+      const record = songShotRecord();
+      const then = scriptPass(songSchedule, "rushing", { quarterMs: 60_000 / 67 });
+      return [
+        {
+          id: OLD_ATTEMPT_ID,
+          scoreId: record.id,
+          startedAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
+          rangeStartBar: 0,
+          rangeEndBar: Math.max(0, record.score.bars.length - 1),
+          // Seventy per cent of the song's own tempo — where a passage is
+          // practised before it is played.
+          tempoPercent: 70,
+          passes: 1,
+          score: then.score,
+          hits: then.results.filter((r) => r.state === "hit").length,
+          misses: then.results.filter((r) => r.state === "miss").length,
+          extras: then.extras.length,
+          meanDevMs: -34,
+          madMs: 22,
+          takePath: OLD_TAKE_PATH,
+          onsets: then.results.map((r) => ({
+            id: r.id,
+            state: r.state,
+            deviationMs: r.deviationMs,
+            pass: r.pass,
+          })),
+          extraOnsets: then.extras,
+        },
+      ];
     }
 
     if (cmd === "set_jam") {

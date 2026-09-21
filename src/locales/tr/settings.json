@@ -225,7 +225,9 @@
         "songs-loop": "Bölümü tekrarla",
         "songs-loop-clear": "Yine şarkının tamamı",
         "songs-loop-earlier": "Bölüm bir ölçü önce",
-        "songs-loop-later": "Bölüm bir ölçü sonra"
+        "songs-loop-later": "Bölüm bir ölçü sonra",
+        "songs-take": "Kaydı al",
+        "songs-camera": "Görüntüyü kaydet"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -266,7 +268,9 @@
         "songs-loop": "Seçilen ölçüleri tekrar tekrar çal ya da durdur",
         "songs-loop-clear": "Bölümü unut ve parçayı baştan çal",
         "songs-loop-earlier": "Seçilen ölçüleri, boyunu bozmadan bir ölçü başa doğru kaydır",
-        "songs-loop-later": "Seçilen ölçüleri, boyunu bozmadan bir ölçü sona doğru kaydır"
+        "songs-loop-later": "Seçilen ölçüleri, boyunu bozmadan bir ölçü sona doğru kaydır",
+        "songs-take": "Bir sonraki çalışında kaydet veya kaydı durdur",
+        "songs-camera": "Bir sonraki çalışında kameraya al veya kamerayı kapat"
       }
     },
     "inputTest": {

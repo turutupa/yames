@@ -281,7 +281,49 @@
       "watchIt": "見てみる",
       "watchTitle": "見返す",
       "watchingAll": "一周ぜんぶ。",
-      "watchingBars": "{{bars}} 小節を、繰り返し。"
+      "watchingBars": "{{bars}} 小節を、繰り返し。",
+      "sinkUnsupported": "このバージョンではテイクをパソコンのいつものスピーカーからしか再生できません。{{device}} からは出せません。",
+      "sinkUnmatched": "パソコンのいつものスピーカーから鳴っています。ここからは {{device}} が見つかりませんでした。"
+    },
+    "clip": {
+      "save": "動画として保存",
+      "go": "動画を作る",
+      "cancel": "中止",
+      "making": "作成中 — {{percent}}%",
+      "whichBars": "どの小節",
+      "chosenBars": "この小節",
+      "wholeTake": "テイク全体",
+      "shape": "形",
+      "wide": "横",
+      "tall": "縦",
+      "withMarks": "印を表示",
+      "realTime": "再生しながら録画するので、音楽と同じ長さ（{{length}}）かかります。",
+      "isMp4": "MP4 で保存されます。どこにでも投稿できます。",
+      "isWebm": "WebM で保存されます。MP4 しか受け付けない場所もあります。",
+      "saved": "{{where}} に保存しました",
+      "failed": "動画を作れませんでした。何も保存していません。",
+      "unavailable": "このバージョンでは動画を保存できません。",
+      "bar": "小節",
+      "bpmUnit": "BPM",
+      "brand": "Yames のマーク",
+      "brandNote": "隅に小さな Yames のロゴと yames.app。動画を見た人がアプリにたどり着く道です。",
+      "showInFolder": "フォルダーで表示",
+      "postItTo": "投稿先",
+      "dragItIn": "どれかを開いてファイルをドラッグしてください。Yames は何もアップロードせず、アカウントも要りません。",
+      "webmWarning": "どれかを開いてファイルをドラッグしてください。これは WebM で、ほとんどは MP4 しか受け付けません。無料の変換ソフトで MP4 にできます。"
+    },
+    "compare": {
+      "title": "{{bars}}小節、あの頃と今",
+      "then": "あの頃",
+      "now": "今",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "音だけです。こちらはカメラが切ってありました。",
+      "locked": "二つは時計ではなく小節でそろえてあるので、遅く弾いた回もぴたりと合います。"
+    },
+    "takes": {
+      "withPicture": "映像あり",
+      "noneFilmed": "どれも撮影されていません。",
+      "was": "{{bars}}小節 · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

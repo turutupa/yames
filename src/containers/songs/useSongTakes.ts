@@ -56,6 +56,7 @@ import {
   onTakeCapped,
   onTakePlaybackEnded,
   playTake,
+  queryAttempts,
   startTake,
   stopTake,
   stopTakePlayback,
@@ -66,6 +67,25 @@ import {
 import { sortTakes, TAKES_INTRO_KEY } from "../../jam/takes";
 import type { JamTake } from "../../jam/types";
 import type { SongTake } from "./review";
+
+/**
+ * W25 — what the shelf says about a take, beyond when it was made.
+ *
+ * "Takes look like takes" (addendum 10): a row of dates and lengths is a list
+ * of files, and what a player is looking for is the go at bars 17–24 where it
+ * finally held together. Bars, speed, times round and the score all come from
+ * the ATTEMPT the take belongs to — the store's row — and the two are joined
+ * on the WAV's own path, which is the only thing both of them know.
+ */
+export type TakeDetail = {
+  /** Played-bar indices, inclusive. The row prints them as the page does. */
+  startBar: number;
+  endBar: number;
+  tempoPercent: number;
+  passes: number;
+  /** 0–100, the number scoring gave the pass. */
+  score: number;
+};
 
 export type SongTakesState = {
   /** `null` before the first answer, `false` on a build that cannot record. */
@@ -83,6 +103,8 @@ export type SongTakesState = {
    * the coach name notes from a different go.
    */
   lastTake: SongTake | undefined;
+  /** What each take was a go AT, by take id. Empty until the store answers. */
+  details: Map<string, TakeDetail>;
   play: (id: string) => void;
   stopPlayback: () => void;
   remove: (id: string) => void;
@@ -136,6 +158,7 @@ export function useSongTakes({
   const [recordedSeconds, setRecordedSeconds] = useState(0);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [dirBytes, setDirBytes] = useState(0);
+  const [details, setDetails] = useState<Map<string, TakeDetail>>(() => new Map());
   const [introOpen, setIntroOpen] = useState(false);
   const [lastTake, setLastTake] = useState<SongTake | undefined>(undefined);
 
@@ -184,17 +207,57 @@ export function useSongTakes({
    */
   const refresh = useCallback(
     async (id: string) => {
+      let listed: JamTake[] = [];
       try {
         const list = await listTakes(id);
-        setTakes(sortTakes(Array.isArray(list) ? list : []));
+        listed = Array.isArray(list) ? list : [];
+        setTakes(sortTakes(listed));
         setAvailable(true);
       } catch {
         setTakes([]);
+        setDetails(new Map());
         setAvailable(false);
         setDirBytes(0);
         return;
       }
       await refreshSize();
+      /*
+       * W25 — and what each of them was a go AT.
+       *
+       * Its own read rather than a field on the take: the take shelf is the
+       * file system's and the attempt is the store's, and neither knows the
+       * other's id. What they both know is the WAV's path, so that is the
+       * join — compared with separators normalised and case folded, because
+       * the two came back through different round trips through Rust and a
+       * Windows path can be the same file and not the same string.
+       *
+       * A store that will not answer means rows with a date and a length,
+       * which is what they were before this existed.
+       */
+      try {
+        const rows = await queryAttempts({ scoreId: id, includeOnsets: false });
+        const key = (path: string) => path.replace(/\\/g, "/").toLowerCase();
+        const byPath = new Map(
+          (Array.isArray(rows) ? rows : [])
+            .filter((row) => row.takePath)
+            .map((row) => [key(row.takePath!), row]),
+        );
+        const found = new Map<string, TakeDetail>();
+        for (const take of listed) {
+          const row = byPath.get(key(take.path));
+          if (!row) continue;
+          found.set(take.id, {
+            startBar: row.rangeStartBar,
+            endBar: row.rangeEndBar,
+            tempoPercent: row.tempoPercent,
+            passes: row.passes,
+            score: row.score,
+          });
+        }
+        setDetails(found);
+      } catch {
+        setDetails(new Map());
+      }
     },
     [refreshSize],
   );
@@ -414,6 +477,7 @@ export function useSongTakes({
     playingId,
     dirBytes,
     lastTake,
+    details,
     play,
     stopPlayback,
     remove,

@@ -60,6 +60,7 @@ import { TrackPicker, tuningLabel } from "./TrackPicker";
 import { useLiveNoteLights } from "./review/useLiveNoteLights";
 import { useSongActions } from "./review/useSongActions";
 import { useSongAttempt } from "./review/useSongAttempt";
+import { useSongCompare } from "./review/useSongCompare";
 import { useSongProgress } from "./review/useSongProgress";
 import { useSongTakePitch } from "./review/useSongTakePitch";
 import { SongBand } from "./SongBand";
@@ -339,16 +340,22 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * before the camera existed (`SONGS.md` A9).
    */
   const reviewVideo = useMemo(() => {
-    const made = camera.lastVideo;
     const id = takes.lastTake?.takeId;
-    if (!made || !id || made.takeId !== id) return undefined;
+    if (!id) return undefined;
     const take = takes.takes.find((row) => row.id === id);
     if (!take) return undefined;
+    // W25 — the picture is now optional rather than the whole reason for
+    // this object. A take with none still reaches the review, where the
+    // watching half is not drawn (A9) and "Save as a video" is.
+    const made = camera.lastVideo;
+    const picture = made && made.takeId === id ? made : null;
     return {
       takeId: take.id,
       path: take.path,
-      videoPath: made.path,
-      ...(made.offsetMs === null ? {} : { videoOffsetMs: made.offsetMs }),
+      videoPath: picture?.path ?? null,
+      ...(picture?.offsetMs === undefined || picture.offsetMs === null
+        ? {}
+        : { videoOffsetMs: picture.offsetMs }),
       ...(take.position?.startOffsetMs === undefined
         ? {}
         : { startOffsetMs: take.position.startOffsetMs }),
@@ -364,6 +371,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * not a story and the block goes, which is `resolve.ts`'s own rule.
    */
   const progressFor = useSongProgress(attempt.review);
+
+  /**
+   * W25 — an older recording of these bars, to hold this one against
+   * (addendum 11, `plans/ECHORA.md` A2, `COACH_UX.md` C3).
+   *
+   * `undefined` until a player has come back to a passage with the recorder
+   * on twice, which is the honest state and the common one. The coach offers
+   * "see the difference" only when there is a pair AND it has just said the
+   * passage improved.
+   */
+  const compare = useSongCompare(attempt.review, song?.id ?? null, reviewVideo);
 
   /** Whether the verdict is the thing in the frame rather than the tab. */
   const reviewShowing = attempt.review !== null;
@@ -441,6 +459,27 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   }, []);
 
   /**
+   * W25 — the footswitch reaching the two switches, and their promises.
+   *
+   * `useActionDispatcher` cannot call `takes.requestTakes` or `camera.request`
+   * directly: they belong to hooks mounted on this screen, and the window has
+   * no handle on them. It raises an event instead, exactly as the library's
+   * "+" does to reach the file input above — and it goes through the REQUEST
+   * doors rather than the settings behind them, so a first press still shows
+   * the promise about what is recorded and where it is kept.
+   */
+  useEffect(() => {
+    const take = () => takes.requestTakes(!session.mixSetting.takes);
+    const film = () => camera.request(!session.mixSetting.camera);
+    window.addEventListener("yames:songs-take", take);
+    window.addEventListener("yames:songs-camera", film);
+    return () => {
+      window.removeEventListener("yames:songs-take", take);
+      window.removeEventListener("yames:songs-camera", film);
+    };
+  }, [takes.requestTakes, camera.request, session.mixSetting.takes, session.mixSetting.camera]);
+
+  /**
    * Drop a file on the window.
    *
    * Plain DOM drag events, not Tauri's. `tauri.conf.json` sets
@@ -471,6 +510,14 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     <div
       className="songs-view"
       ref={stageRef}
+      /* W25 — while the verdict is up, the strip stands down and the review
+         has the stage. At 480×780 the strip is 256 px of a 552 px column, so
+         the review got 181 px and the picture, the tape and everything the
+         coach pointed at were a scroll away. Nothing on the strip is reached
+         while reading a verdict — the fix is a button in the head, and play
+         is on the transport — and it comes straight back when the review
+         does. See `songs.css`. */
+      data-review={reviewShowing ? "" : undefined}
       data-dragging={dragging ? "" : undefined}
       onDragOver={(e) => {
         e.preventDefault();
@@ -714,6 +761,7 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                   onDismiss={dismissReview}
                   progressFor={progressFor}
                   video={reviewVideo}
+                  compare={compare}
                 />
               </Suspense>
             )}
@@ -892,6 +940,10 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               }
               available={takes.available}
               takes={takes.takes}
+              /* W25 — what each take was a go at, and the score to print its
+                 bars the way the page does. */
+              details={takes.details}
+              score={score}
               recording={takes.recording}
               dirBytes={takes.dirBytes}
               playingId={takes.playingId}

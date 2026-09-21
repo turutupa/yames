@@ -281,7 +281,49 @@
       "watchIt": "Bekijken",
       "watchTitle": "Terugkijken",
       "watchingAll": "De hele ronde.",
-      "watchingBars": "Maten {{bars}}, rondje na rondje."
+      "watchingBars": "Maten {{bars}}, rondje na rondje.",
+      "sinkUnsupported": "Deze versie kan de opname alleen via de gewone luidsprekers van de computer afspelen, niet via {{device}}.",
+      "sinkUnmatched": "Hij speelt via de gewone luidsprekers van de computer — {{device}} was hiervandaan niet te vinden."
+    },
+    "clip": {
+      "save": "Als video opslaan",
+      "go": "Video maken",
+      "cancel": "Stoppen",
+      "making": "Bezig — {{percent}}%",
+      "whichBars": "Welke maten",
+      "chosenBars": "Deze maten",
+      "wholeTake": "De hele opname",
+      "shape": "Vorm",
+      "wide": "Liggend",
+      "tall": "Staand",
+      "withMarks": "Markeringen tonen",
+      "realTime": "Hij neemt op terwijl hij speelt, dus het duurt net zo lang als de muziek: {{length}}.",
+      "isMp4": "Je krijgt een MP4, die overal te plaatsen is.",
+      "isWebm": "Je krijgt een WebM. Sommige plekken nemen alleen MP4.",
+      "saved": "Opgeslagen in {{where}}",
+      "failed": "De video kon niet gemaakt worden. Er is niets opgeslagen.",
+      "unavailable": "Deze versie kan geen video opslaan.",
+      "bar": "Maat",
+      "bpmUnit": "BPM",
+      "brand": "Yames-merk",
+      "brandNote": "Een klein Yames-logo en yames.app in de hoek. Zo vindt wie je video ziet de app.",
+      "showInFolder": "Toon in map",
+      "postItTo": "Plaatsen op",
+      "dragItIn": "Open er een en sleep het bestand erin — Yames uploadt niets en heeft geen account nodig.",
+      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van."
+    },
+    "compare": {
+      "title": "Maten {{bars}}, toen en nu",
+      "then": "Toen",
+      "now": "Nu",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Alleen geluid — bij deze stond de camera uit.",
+      "locked": "De twee lopen per maat gelijk, niet per klok, dus een tragere beurt past ook."
+    },
+    "takes": {
+      "withPicture": "Met beeld",
+      "noneFilmed": "Hiervan is er geen gefilmd.",
+      "was": "Maten {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

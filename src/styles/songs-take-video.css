@@ -283,3 +283,263 @@
     gap: 8px;
   }
 }
+
+/* ── "Save as a video" (W25, `plans/ECHORA.md` D4) ─────────────────────── */
+
+/* The clip the player sends somebody. Its own row under the tape, because it
+ * is a different act from watching: you have finished looking and are taking
+ * something away. */
+.songs-clip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* The canvas the recorder samples.
+ *
+ * It has to be IN the document and painted: `display: none` stops a canvas
+ * being composited and `captureStream` then hands the encoder frozen frames.
+ * So it is one pixel, transparent, out of the flow and out of the way — and
+ * it is still a real, drawn canvas, which is all the recorder needs. */
+.songs-clip-canvas {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.songs-clip-row,
+.songs-clip-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Wider between the questions than inside them, so six chips read as
+     "which bars", "which way up" and a switch rather than as six choices. */
+  gap: 8px 16px;
+  min-width: 0;
+}
+
+.songs-clip-choice {
+  display: flex;
+  gap: 4px;
+}
+
+/* The caption belongs to the group after it and must never be left on a line
+   of its own at the end of a row. */
+.songs-clip-options .songs-strip-label {
+  margin-right: -10px;
+}
+
+/* "Instagram, TikTok" under "Tall": which places want this shape. A second
+   line inside the chip rather than a row of its own, so the hint belongs to
+   the choice it is about and costs the panel no height. */
+.songs-clip-places:not(:empty) {
+  display: block;
+  margin-top: 1px;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+}
+
+.songs-clip-done {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.songs-clip-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.songs-clip-share-lead {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-left: 6px;
+}
+
+.songs-clip-note {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+  /* A path is a long unbreakable word on a 296px panel. */
+  overflow-wrap: anywhere;
+}
+
+.songs-clip-failed {
+  color: var(--feedback-miss);
+}
+
+.songs-clip-absent {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.songs-clip-progress {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The ring: an arc redrawn as the clip is made, not an animation. It is
+ * reporting a real number — a clip takes exactly as long as it lasts — and a
+ * spinner turning at its own speed would say nothing about how much longer. */
+.songs-clip-ring {
+  flex: 0 0 auto;
+  transform: rotate(-90deg);
+}
+
+.songs-clip-ring-track,
+.songs-clip-ring-arc {
+  fill: none;
+  stroke-width: 3;
+}
+
+.songs-clip-ring-track {
+  stroke: var(--border);
+}
+
+.songs-clip-ring-arc {
+  stroke: var(--accent);
+  stroke-linecap: round;
+}
+
+/* ── Then and now (W25, addendum 11) ───────────────────────────────────── */
+
+/* `align-self: stretch` and a width, because this is drawn INSIDE a
+ * `.coach-block`, which is a column with `align-items: flex-start` — so a
+ * child that does not say otherwise is sized to its own content, and a grid
+ * of two video panes sized to its content is two columns of single letters
+ * sixty pixels wide. It looked exactly like that. */
+.songs-compare {
+  align-self: stretch;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: compare;
+}
+
+/* Side by side where there is room, and one under the other where there is
+ * not. A CONTAINER query, not a media one: this block is drawn inside the
+ * review's body, which is a column of its own inside a stage that the rail
+ * and the coach dock both take from — the width that decides is the panel's,
+ * never the window's (`UI_DECISIONS`, and the rule the owner set on the Jam
+ * sheets). Stacked, the two are still a comparison: the dates say which is
+ * which and the two tapes are the same width. */
+.songs-compare-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-width: 0;
+}
+
+@container compare (min-width: 560px) {
+  .songs-compare-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.songs-compare-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.songs-compare-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+/* "Then" and "Now", which is the whole of what a reader needs to tell the
+   two apart before they have read a date. */
+.songs-compare-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.songs-compare-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.songs-compare-facts {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-compare-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.songs-compare-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* A take with sound alone, said rather than left as an empty box. Most takes
+   are this, and A9's rule says so in words wherever it would otherwise be a
+   silence somebody has to interpret. */
+.songs-compare-nopicture {
+  margin: 0;
+  padding: 0 12px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-faint);
+}
+
+.songs-compare-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+.songs-compare-at {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-compare-note {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+}

@@ -351,6 +351,67 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.camera.watchTitle",
   "songs.camera.watchingAll",
   "songs.camera.watchingBars",
+  // W25 — "Save as a video" (`plans/ECHORA.md` D4). Appended for the reason
+  // the camera's block was, and written under the same rule: not one of them
+  // is pluralised, because how long a clip takes is said as a LENGTH ("0:42")
+  // rather than as a count of seconds. A number governing a noun would drag
+  // the sentence into the `_few`/`_many` matrix the last check enforces, in
+  // two languages, for no gain to anybody reading it.
+  "songs.clip.bar",
+  "songs.clip.bpmUnit",
+  // ...and the owner's second pass on it: the mark is the app's own, said in
+  // words, and after a save the player gets the folder and four places to
+  // put it. The place NAMES are not keys — they are proper nouns and live in
+  // `songs/camera/share.ts`.
+  "songs.clip.brand",
+  "songs.clip.brandNote",
+  "songs.clip.dragItIn",
+  "songs.clip.postItTo",
+  "songs.clip.showInFolder",
+  "songs.clip.webmWarning",
+  "songs.clip.cancel",
+  "songs.clip.chosenBars",
+  "songs.clip.failed",
+  "songs.clip.go",
+  "songs.clip.isMp4",
+  "songs.clip.isWebm",
+  "songs.clip.making",
+  "songs.clip.realTime",
+  "songs.clip.save",
+  "songs.clip.saved",
+  "songs.clip.shape",
+  "songs.clip.tall",
+  "songs.clip.unavailable",
+  "songs.clip.whichBars",
+  "songs.clip.wholeTake",
+  "songs.clip.wide",
+  "songs.clip.withMarks",
+  // W25 — then and now (addendum 11, `plans/ECHORA.md` A2). Appended, and
+  // unpluralised for the same reason: nothing here counts anything.
+  "songs.compare.facts",
+  "songs.compare.locked",
+  "songs.compare.now",
+  "songs.compare.soundOnly",
+  "songs.compare.then",
+  "songs.compare.title",
+  // W25 — takes look like takes (addendum 10). `was` is three numbers and a
+  // count that `songs.review.goes` already pluralises, so nothing here is
+  // pluralised either.
+  "songs.takes.noneFilmed",
+  "songs.takes.was",
+  "songs.takes.withPicture",
+  // W25 item 6 — which speaker the review is using, when it is not the one
+  // the player chose. Two sentences because they are two different facts:
+  // one is about this build and one is about this machine.
+  "songs.camera.sinkUnmatched",
+  "songs.camera.sinkUnsupported",
+  // W25 item 5 — hands on the instrument. `songs-take` takes the wording
+  // `jam-take` already has in each language, because it is the same action:
+  // a player who learned what R does in Jam has learned it here.
+  "settings.hotkeys.actions.songs-camera",
+  "settings.hotkeys.actions.songs-take",
+  "settings.hotkeys.descs.songs-camera",
+  "settings.hotkeys.descs.songs-take",
 ];
 
 /**
@@ -372,6 +433,14 @@ const ALLOWED: { key: string; langs: string[]; why: string }[] = [
     key: "songs.camera.deviceNumbered",
     langs: ["nl"],
     why: "...and so the numbered one is identical as well",
+  },
+  // W25 — the clip's caption. The same unit as `songs.bpm`, painted on a
+  // canvas rather than set in HTML, which is why it is a key of its own.
+  { key: "songs.clip.bpmUnit", langs: LANGS, why: "BPM is the unit, everywhere" },
+  {
+    key: "songs.compare.facts",
+    langs: ["es", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "vi", "zh-CN", "zh-TW"],
+    why: "three numbers and two units, no words — de and fr space the %, tr puts the sign first",
   },
   { key: "songs.bpm", langs: LANGS, why: "BPM is the unit, everywhere" },
   { key: "songs.dismiss", langs: LANGS, why: '"OK" is OK in all fourteen' },

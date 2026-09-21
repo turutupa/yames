@@ -145,7 +145,7 @@ use commands::{
     clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
     // W12 — the bands the review colours a note by, from the scorer's own rule.
     score_timing_bands,
-    open_url, reorder_presets, save_drill_run, save_preset, save_session,
+    open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
     set_instrument,
@@ -168,8 +168,12 @@ use commands::{
 // W21 — the camera's recording. Its own module, because the file it writes
 // comes from the webview rather than from the engine, and nothing about it
 // touches a ring, a handoff or a callback.
+// W25 — and the clip the player saves out of one, which is the same module's
+// other half: the player's file, at a path they chose in a save dialog.
 use take_video::{
-    take_video_append, take_video_begin, take_video_discard, take_video_finish, VideoState,
+    clip_save_append, clip_save_begin, clip_save_discard, clip_save_finish, take_video_append,
+    take_thumb_write, take_video_begin, take_video_discard, take_video_finish, ClipState,
+    VideoState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -423,6 +427,10 @@ pub fn run() {
             // W21 — and the picture beside it, if the camera is on. See
             // `take_video.rs`.
             app.manage(VideoState::default());
+            // W25 — and the clip being saved out of one, if there is. A slot
+            // of its own: a clip is written at a path the player named and
+            // has nothing to do with the takes directory.
+            app.manage(ClipState::default());
             // W21 — and the camera's prompt is ours, asked once, in our own
             // words. See `camera_permission.rs`; a no-op off Windows.
             camera_permission::install(&app.handle().clone());
@@ -778,6 +786,14 @@ pub fn run() {
             take_video_append,
             take_video_finish,
             take_video_discard,
+            // W25 — "Save as a video": the same pipe, to a file the player
+            // named in a native save dialog.
+            clip_save_begin,
+            clip_save_append,
+            clip_save_finish,
+            clip_save_discard,
+            // W25 — one frame of the picture, so a take looks like a take.
+            take_thumb_write,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,
@@ -787,6 +803,8 @@ pub fn run() {
             clear_calibration_cache_entry,
             list_calibration_cache,
             open_url,
+            // W25 — "show me where that clip went", after a save.
+            reveal_in_folder,
             list_midi_devices,
             connect_midi_device,
             disconnect_midi_device,

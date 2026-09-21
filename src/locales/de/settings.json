@@ -225,7 +225,9 @@
         "songs-loop": "Teil wiederholen",
         "songs-loop-clear": "Wieder der ganze Song",
         "songs-loop-earlier": "Teil einen Takt früher",
-        "songs-loop-later": "Teil einen Takt später"
+        "songs-loop-later": "Teil einen Takt später",
+        "songs-take": "Take aufnehmen",
+        "songs-camera": "Bild aufnehmen"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -266,7 +268,9 @@
         "songs-loop": "Die gewählten Takte immer wieder spielen — oder aufhören",
         "songs-loop-clear": "Den Teil vergessen und das Stück von vorn spielen",
         "songs-loop-earlier": "Die gewählten Takte um einen Takt Richtung Anfang schieben, gleich lang",
-        "songs-loop-later": "Die gewählten Takte um einen Takt Richtung Ende schieben, gleich lang"
+        "songs-loop-later": "Die gewählten Takte um einen Takt Richtung Ende schieben, gleich lang",
+        "songs-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden",
+        "songs-camera": "Beim nächsten Play filmen, oder die Kamera ausschalten"
       }
     },
     "inputTest": {

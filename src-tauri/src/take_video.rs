@@ -56,7 +56,7 @@ use serde::{Deserialize, Serialize};
 use tauri::ipc::{InvokeBody, Request};
 use tauri::{AppHandle, Manager, State};
 
-use crate::take::{is_video_stem, take_dir, take_path, VIDEO_SUFFIX};
+use crate::take::{is_video_stem, take_dir, take_path, thumb_beside, VIDEO_SUFFIX};
 
 /// The most a single recording may grow to.
 ///
@@ -505,6 +505,285 @@ pub fn take_video_discard(video: State<VideoState>) -> Result<(), String> {
     discard(&mut slot)
 }
 
+// ---------------------------------------------------------------------------
+// The thumbnail (W25 item 4) — one frame, so a take looks like a take
+// ---------------------------------------------------------------------------
+
+/// The most a thumbnail may be.
+///
+/// It is 320 px of JPEG — twenty or thirty kilobytes — and the cap is two
+/// orders of magnitude past that. It is here because the bytes arrive from
+/// the webview and a size limit on a file the app writes without looking at
+/// it is the cheapest guard there is.
+const MAX_THUMB_BYTES: usize = 2 * 1024 * 1024;
+
+/// Write one frame of a take's picture beside it.
+///
+/// The frame is grabbed by the webview — it is the only thing that can decode
+/// the recording — at the first downbeat, which is the moment the player's
+/// hands are on the instrument and the count-in is over. It arrives as JPEG
+/// bytes in the request body, the way a chunk does, and is written under the
+/// take's own id through `take_path`: so a thumbnail can only ever be filed
+/// beside a WAV that is really there, and `safe_stem` refuses `.thumb` as an
+/// id exactly as it refuses `.dry` and `.video`.
+///
+/// A failure is never worth reporting up: a take with no thumbnail is a take,
+/// and the shelf draws a plain tile for it.
+#[tauri::command]
+pub fn take_thumb_write(
+    request: Request<'_>,
+    app_handle: AppHandle,
+) -> Result<String, String> {
+    let take_id = request
+        .headers()
+        .get("take")
+        .and_then(|v| v.to_str().ok())
+        .ok_or_else(|| "a thumbnail has to say which take it is of".to_string())?
+        .to_string();
+    let bytes = bytes_of(request.body())?;
+    if bytes.is_empty() {
+        return Err("that thumbnail has no picture in it".into());
+    }
+    if bytes.len() > MAX_THUMB_BYTES {
+        return Err("that thumbnail is larger than the app will write".into());
+    }
+    let app_data = home(&app_handle)?;
+    let wav = take_path(&app_data, &take_id)?;
+    let target = thumb_beside(&wav).ok_or_else(|| "that take has no name".to_string())?;
+    fs::write(&target, &bytes).map_err(|e| format!("could not write the thumbnail: {e}"))?;
+    Ok(target.to_string_lossy().into_owned())
+}
+
+// ---------------------------------------------------------------------------
+// A clip the player can send to somebody (W25 item 2, `plans/ECHORA.md` D4)
+// ---------------------------------------------------------------------------
+
+// The picture above is Yames's own file, kept under Yames's own rules. What
+// follows is the opposite in every respect, and the difference is the point:
+// a CLIP is the player's file, written where they say, and the app never
+// looks at it again.
+//
+// So this half knows nothing about takes, take directories or the app's data
+// folder. The webview composites the clip on a canvas and hands the bytes
+// over exactly as the camera does — a chunk at a time, numbered, straight to
+// disk — and the only path involved is the one the player picked in a native
+// save dialog. There is no command here that reads a clip back, lists one,
+// or remembers where one went: once it is written it is a file on somebody's
+// computer and none of the app's business.
+//
+// Nothing is uploaded. There is no network code in this module and no other
+// module is reachable from it.
+
+/// The most a clip may grow to.
+///
+/// A clip is bounded by the bars the player chose, at 4 Mbit/s — so a
+/// four-minute one is about 130 MB and this is far past anything the screen
+/// can ask for. It exists for the same reason `MAX_VIDEO_BYTES` does: a
+/// recorder that goes wrong must not be able to fill somebody's disk while
+/// they watch a progress ring.
+const MAX_CLIP_BYTES: u64 = 4 * 1024 * 1024 * 1024;
+
+/// A clip being written: one open file at a path the player named.
+struct ActiveClip {
+    path: PathBuf,
+    file: fs::File,
+    next_seq: u32,
+    pending: BTreeMap<u32, Vec<u8>>,
+    pending_bytes: usize,
+    bytes: u64,
+}
+
+/// The clip this window is writing, if any. Command thread only.
+#[derive(Default)]
+pub struct ClipState(Mutex<Option<ActiveClip>>);
+
+impl ClipState {
+    #[allow(clippy::type_complexity)]
+    fn slot(
+        &self,
+    ) -> Result<
+        std::sync::MutexGuard<'_, Option<ActiveClip>>,
+        std::sync::PoisonError<std::sync::MutexGuard<'_, Option<ActiveClip>>>,
+    > {
+        self.0.lock()
+    }
+}
+
+/// What the screen is told once a clip is on disk.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct SavedClip {
+    /// Where the player put it, so the screen can say so.
+    pub path: String,
+    pub bytes: u64,
+}
+
+/// Append one chunk of a clip, in its turn. The same rule as `append` above,
+/// in a separate function because the two recordings are separate files with
+/// separate lifetimes and sharing one would mean a camera and an export could
+/// interleave into each other.
+fn clip_append(seq: u32, chunk: Vec<u8>, slot: &mut Option<ActiveClip>) -> Result<u64, String> {
+    let active = slot
+        .as_mut()
+        .ok_or_else(|| "nothing is being saved".to_string())?;
+
+    if seq < active.next_seq {
+        return Ok(active.bytes);
+    }
+    if seq > active.next_seq {
+        if active.pending.len() >= MAX_PENDING_CHUNKS
+            || active.pending_bytes + chunk.len() > MAX_PENDING_BYTES
+        {
+            return Err(format!(
+                "clip chunk {seq} arrived too far ahead of {}",
+                active.next_seq
+            ));
+        }
+        active.pending_bytes += chunk.len();
+        active.pending.insert(seq, chunk);
+        return Ok(active.bytes);
+    }
+
+    let mut next = Some(chunk);
+    while let Some(bytes) = next.take() {
+        if active.bytes + bytes.len() as u64 > MAX_CLIP_BYTES {
+            return Err("this clip has grown further than the app will write".into());
+        }
+        active
+            .file
+            .write_all(&bytes)
+            .map_err(|e| format!("could not write the clip: {e}"))?;
+        active.bytes += bytes.len() as u64;
+        active.next_seq += 1;
+        if let Some(waiting) = active.pending.remove(&active.next_seq) {
+            active.pending_bytes -= waiting.len();
+            next = Some(waiting);
+        }
+    }
+    Ok(active.bytes)
+}
+
+/// Close the clip and hand its path back.
+fn clip_finish(slot: &mut Option<ActiveClip>) -> Result<SavedClip, String> {
+    let active = slot
+        .take()
+        .ok_or_else(|| "nothing is being saved".to_string())?;
+    let ActiveClip {
+        path, file, bytes, ..
+    } = active;
+    drop(file);
+    if bytes == 0 {
+        // An export that produced no video. Leaving a zero-byte file where
+        // the player asked for a clip is worse than leaving nothing: they
+        // would find it, double-click it, and learn nothing about why.
+        let _ = fs::remove_file(&path);
+        return Err("that clip came out empty".into());
+    }
+    Ok(SavedClip {
+        path: path.to_string_lossy().into_owned(),
+        bytes,
+    })
+}
+
+/// Throw a half-written clip away — the player pressed cancel, or something
+/// went wrong. Half a video at a name they chose is worse than no video.
+fn clip_discard(slot: &mut Option<ActiveClip>) -> Result<(), String> {
+    let Some(active) = slot.take() else {
+        return Ok(());
+    };
+    drop(active.file);
+    fs::remove_file(&active.path).map_err(|e| format!("could not remove the clip: {e}"))
+}
+
+/// Ask the player where the clip goes, and open the file.
+///
+/// `Ok(None)` is them cancelling the dialog, which is not a failure and must
+/// not put a sentence on their screen — the same shape `export_score_source`
+/// uses, and for the same reason.
+///
+/// `async fn` is not optional: a non-async command runs on the main thread,
+/// and asking the main thread to put up a modal dialog and then wait for the
+/// answer is a deadlock in one move (`commands.rs` says the same thing beside
+/// the folder picker, which is where this repo learnt it).
+#[tauri::command]
+pub async fn clip_save_begin(
+    suggested: String,
+    container: String,
+    clip: State<'_, ClipState>,
+    app: AppHandle,
+) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+
+    let container = Container::parse(&container)?;
+    // The suggested name is the player's song title and never reaches a path:
+    // the dialog puts it in an editable field and the PATH is whatever they
+    // then choose. Stripped of separators anyway, because a suggestion
+    // carrying one is a dialog opening somewhere surprising.
+    let suggested: String = suggested
+        .chars()
+        .filter(|c| !matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|'))
+        .collect();
+    let suggested = suggested.trim();
+    let name = if suggested.is_empty() {
+        format!("yames-clip.{}", container.extension())
+    } else {
+        format!("{suggested}.{}", container.extension())
+    };
+
+    let chosen = app
+        .dialog()
+        .file()
+        .set_file_name(&name)
+        .add_filter("Video", &[container.extension()])
+        .blocking_save_file();
+    let Some(chosen) = chosen else {
+        return Ok(None);
+    };
+    let path = chosen
+        .into_path()
+        .map_err(|e| format!("that is not a place Yames can write to: {e}"))?;
+    let file = fs::File::create(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+
+    let mut slot = clip.slot().unwrap_or_else(|e| e.into_inner());
+    // Anything already open is a clip nobody stopped, and its file is at a
+    // path the player chose — so it is closed and LEFT, not deleted: deleting
+    // a file somebody named because a second export started is a surprise the
+    // app has no right to spring.
+    slot.take();
+    *slot = Some(ActiveClip {
+        path: path.clone(),
+        file,
+        next_seq: 0,
+        pending: BTreeMap::new(),
+        pending_bytes: 0,
+        bytes: 0,
+    });
+    Ok(Some(path.to_string_lossy().into_owned()))
+}
+
+/// Append one composited chunk. The body is the bytes; `seq` says which.
+#[tauri::command]
+pub fn clip_save_append(request: Request<'_>, clip: State<ClipState>) -> Result<u64, String> {
+    let seq = seq_of(&request)?;
+    let chunk = bytes_of(request.body())?;
+    let mut slot = clip.slot().unwrap_or_else(|e| e.into_inner());
+    clip_append(seq, chunk, &mut slot)
+}
+
+/// Close the clip. The path comes back so the screen can say where it went.
+#[tauri::command]
+pub fn clip_save_finish(clip: State<ClipState>) -> Result<SavedClip, String> {
+    let mut slot = clip.slot().unwrap_or_else(|e| e.into_inner());
+    clip_finish(&mut slot)
+}
+
+/// Cancelled, or something went wrong. Nothing is left at the chosen name.
+#[tauri::command]
+pub fn clip_save_discard(clip: State<ClipState>) -> Result<(), String> {
+    let mut slot = clip.slot().unwrap_or_else(|e| e.into_inner());
+    clip_discard(&mut slot)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -761,5 +1040,111 @@ mod tests {
         let mut slot = None;
         assert!(append(0, b"x".to_vec(), &mut slot).is_err());
         assert!(finish(Path::new("."), "5000", None, &mut slot).is_err());
+    }
+
+    // ── The clip somebody can send to a friend (W25) ────────────────────
+
+    /// A clip being written to a path the player chose. The dialog is the
+    /// only part of `clip_save_begin` a test cannot reach — it is the OS's —
+    /// so the tests open the file the way the command does and exercise
+    /// everything after it.
+    fn a_clip(root: &Path, name: &str) -> (PathBuf, Option<ActiveClip>) {
+        let path = root.join(name);
+        let file = fs::File::create(&path).unwrap();
+        (
+            path.clone(),
+            Some(ActiveClip {
+                path,
+                file,
+                next_seq: 0,
+                pending: BTreeMap::new(),
+                pending_bytes: 0,
+                bytes: 0,
+            }),
+        )
+    }
+
+    #[test]
+    fn a_clip_is_written_in_order_and_says_where_it_went() {
+        let root = tmp_dir("clip-order");
+        let (path, mut slot) = a_clip(&root, "my take.mp4");
+
+        clip_append(0, b"aaa".to_vec(), &mut slot).unwrap();
+        // Out of order, and held rather than written into the gap — the same
+        // guarantee the camera's chunks get, because the failure is the same
+        // one: a video that plays for a while and then stops.
+        clip_append(2, b"ccc".to_vec(), &mut slot).unwrap();
+        clip_append(1, b"bbb".to_vec(), &mut slot).unwrap();
+        let saved = clip_finish(&mut slot).unwrap();
+
+        assert_eq!(saved.bytes, 9);
+        assert_eq!(saved.path, path.to_string_lossy());
+        assert_eq!(fs::read(&path).unwrap(), b"aaabbbccc");
+        assert!(slot.is_none());
+    }
+
+    /// Cancel leaves nothing at the name the player chose. Half a video under
+    /// a name somebody picked is worse than no video: they would find it.
+    #[test]
+    fn cancelling_a_clip_leaves_nothing_at_the_chosen_name() {
+        let root = tmp_dir("clip-cancel");
+        let (path, mut slot) = a_clip(&root, "half.mp4");
+        clip_append(0, b"half a clip".to_vec(), &mut slot).unwrap();
+
+        clip_discard(&mut slot).unwrap();
+        assert!(!path.exists());
+        assert!(slot.is_none());
+        // ...and discarding again is a UI making sure, not a failure.
+        assert!(clip_discard(&mut slot).is_ok());
+    }
+
+    /// An export that produced no video at all. The file is removed rather
+    /// than left as a zero-byte clip the player would double-click.
+    #[test]
+    fn an_empty_clip_is_not_left_on_disk() {
+        let root = tmp_dir("clip-empty");
+        let (path, mut slot) = a_clip(&root, "nothing.webm");
+        assert!(clip_finish(&mut slot).is_err());
+        assert!(!path.exists());
+    }
+
+    #[test]
+    fn a_chunk_far_ahead_of_a_clip_is_refused_rather_than_held() {
+        let root = tmp_dir("clip-ahead");
+        let (_, mut slot) = a_clip(&root, "ahead.webm");
+        clip_append(0, b"a".to_vec(), &mut slot).unwrap();
+        for seq in 2..(2 + MAX_PENDING_CHUNKS as u32) {
+            clip_append(seq, b"x".to_vec(), &mut slot).unwrap();
+        }
+        assert!(clip_append(99, b"x".to_vec(), &mut slot).is_err());
+    }
+
+    #[test]
+    fn saving_with_nothing_open_is_an_error_not_a_file() {
+        let mut slot = None;
+        assert!(clip_append(0, b"x".to_vec(), &mut slot).is_err());
+        assert!(clip_finish(&mut slot).is_err());
+    }
+
+    /// The two recordings are separate files with separate lifetimes. A
+    /// camera running while a clip is being saved must not interleave into
+    /// it — which is why they are two slots and two append functions rather
+    /// than one of each with a flag.
+    #[test]
+    fn a_camera_and_a_clip_do_not_write_into_each_other() {
+        let root = tmp_dir("clip-separate");
+        a_take(&root, "song1", "5000");
+        let mut camera = slot_of(&root, "song1");
+        let (clip_path, mut clip) = a_clip(&root, "beside.webm");
+
+        append(0, b"camera".to_vec(), &mut camera).unwrap();
+        clip_append(0, b"clip".to_vec(), &mut clip).unwrap();
+        append(1, b"-more".to_vec(), &mut camera).unwrap();
+
+        let made = finish(&root, "5000", None, &mut camera).unwrap();
+        let saved = clip_finish(&mut clip).unwrap();
+        assert_eq!(fs::read(&made.path).unwrap(), b"camera-more");
+        assert_eq!(fs::read(&clip_path).unwrap(), b"clip");
+        assert_eq!(saved.bytes, 4);
     }
 }

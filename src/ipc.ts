@@ -2198,6 +2198,63 @@ export async function takeVideoDiscard(): Promise<void> {
 }
 
 /**
+ * W25 — one frame of the picture, beside the take, so the shelf can show what
+ * a take is a picture of rather than a row of dates.
+ *
+ * Raw bytes for `takeVideoAppend`'s reason, and the take's id in a header for
+ * the same one: the body is the JPEG and nothing else.
+ */
+export async function takeThumbWrite(takeId: string, bytes: Uint8Array): Promise<string> {
+  return invoke("take_thumb_write", bytes, { headers: { take: takeId } });
+}
+
+// ---- W25: "Save as a video" — the clip the player sends somebody ----------
+//
+// The same four-step pipe as the camera's, pointed somewhere else entirely:
+// the file is the PLAYER'S, at a path they chose in a native save dialog, and
+// the app neither lists it nor reads it back. Nothing is uploaded; there is no
+// call here that could.
+
+/**
+ * Ask where the clip goes and open the file.
+ *
+ * Resolves to the path, or `null` when the player cancels the dialog — which
+ * is not a failure and must not put a sentence on their screen.
+ */
+export async function clipSaveBegin(
+  suggested: string,
+  container: "mp4" | "webm",
+): Promise<string | null> {
+  return invoke("clip_save_begin", { suggested, container });
+}
+
+/** Append one composited chunk. Raw bytes, for `takeVideoAppend`'s reasons. */
+export async function clipSaveAppend(seq: number, bytes: Uint8Array): Promise<number> {
+  return invoke("clip_save_append", bytes, { headers: { seq: String(seq) } });
+}
+
+/** Close it. The path comes back so the screen can say where it went. */
+export async function clipSaveFinish(): Promise<{ path: string; bytes: number }> {
+  return invoke("clip_save_finish");
+}
+
+/** Cancelled, or something went wrong. Nothing is left at the chosen name. */
+export async function clipSaveDiscard(): Promise<void> {
+  return invoke("clip_save_discard");
+}
+
+/**
+ * Show a file the player just saved, in their own file manager.
+ *
+ * The first thing somebody who has made a clip needs is to find it. Nothing
+ * is opened, played or sent anywhere: the folder is shown and the app is
+ * finished with the file.
+ */
+export async function revealInFolder(path: string): Promise<void> {
+  return invoke("reveal_in_folder", { path });
+}
+
+/**
  * Ask the user for a folder of drum samples (a native folder dialog). Resolves
  * to the folder path, or null when they cancel. The folder is read on this
  * machine and never copied or uploaded.

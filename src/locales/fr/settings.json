@@ -225,7 +225,9 @@
         "songs-loop": "Répéter le passage",
         "songs-loop-clear": "Tout le morceau à nouveau",
         "songs-loop-earlier": "Le passage une mesure plus tôt",
-        "songs-loop-later": "Le passage une mesure plus tard"
+        "songs-loop-later": "Le passage une mesure plus tard",
+        "songs-take": "Enregistrer la prise",
+        "songs-camera": "Enregistrer l'image"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -266,7 +268,9 @@
         "songs-loop": "Rejouer les mesures choisies encore et encore, ou arrêter",
         "songs-loop-clear": "Oublier le passage et jouer le morceau depuis le début",
         "songs-loop-earlier": "Décaler les mesures choisies d'une mesure vers le début, sans changer leur longueur",
-        "songs-loop-later": "Décaler les mesures choisies d'une mesure vers la fin, sans changer leur longueur"
+        "songs-loop-later": "Décaler les mesures choisies d'une mesure vers la fin, sans changer leur longueur",
+        "songs-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
+        "songs-camera": "Filmer au prochain lancement, ou éteindre la caméra"
       }
     },
     "inputTest": {

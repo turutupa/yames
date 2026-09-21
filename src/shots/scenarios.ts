@@ -73,14 +73,16 @@ export interface Shot {
      * shipping blocks, not a mock-up of one. The three recipes are the three
      * shapes a review takes (`review/reviewFixtures.ts`):
      *
-     *   `rushing` — a tendency, with a loop as its fix
-     *   `missed`  — a passage lost on every pass, three goes to step through
-     *   `clean`   — praise that names bars and a count of goes
+     *   `rushing`  — a tendency, with a loop as its fix
+     *   `missed`   — a passage lost on every pass, three goes to step through
+     *   `clean`    — praise that names bars and a count of goes
+     *   `improved` — the passage is better than it was, which is the one
+     *                finding that offers to show you the difference (W25)
      *
      * `openMore` opens "what else", which is the one part of A4 a screenshot
      * of the headline alone cannot show.
      */
-    review?: "rushing" | "missed" | "clean";
+    review?: "rushing" | "missed" | "clean" | "improved";
     openMore?: boolean;
     /**
      * W21 — turn the camera on before the pass, and film it.
@@ -96,6 +98,29 @@ export interface Shot {
      * pass is what the review is about.
      */
     camera?: boolean;
+    /**
+     * W25 — open "Save as a video" on the review, and optionally make one.
+     *
+     * `"open"` presses the button and photographs the choices: which bars,
+     * which way up, marks on or off, and how long it will take. `"make"` goes
+     * on to press Make the video and waits for the file — which runs the
+     * shipping compositor, the shipping `canvas.captureStream()` and the
+     * shipping `MediaRecorder` in real time, so it is only worth doing in a
+     * test that is going to look at the bytes afterwards.
+     *
+     * Only meaningful with `review`: a clip is made out of a take, and a take
+     * is what the review is about.
+     */
+    clip?: "open" | "make";
+    /**
+     * W25 — then and now (addendum 11).
+     *
+     * Puts one earlier run at these bars in the store and its recording on
+     * the shelf, so the coach's `improved` finding has a pair to offer. Only
+     * meaningful with `review: "improved"`, which is the one finding that
+     * offers to show the difference.
+     */
+    compare?: boolean;
     /**
      * Press play and photograph the stage with the transport running.
      *
@@ -234,6 +259,17 @@ export interface Shot {
   /** CSS pixels. Doubled by the capture's device scale factor. */
   width: number;
   height: number;
+  /**
+   * Build the scene at this size, then narrow to `width`×`height` (W25).
+   *
+   * The scenes here are driven the way a person drives the app — a library
+   * row is CLICKED — and below about 900 px the rail collapses and there is
+   * no library to click, so a scene born at 480 px never finishes building.
+   * `tests/layout/fits.ts` has always done this; a shot of the smallest
+   * window the app opens needs the same, and it is the truer test anyway: a
+   * window is a thing people drag.
+   */
+  buildAt?: { width: number; height: number };
   /**
    * Capture only this element's box rather than the viewport.
    *
@@ -614,6 +650,77 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 900,
+  },
+  {
+    id: "songs-camera-small",
+    suffix: "songs-camera-small",
+    window: "main",
+    tab: "songs",
+    // W25 item 1 — the same review, at the smallest window the app will open
+    // (`tauri.conf.json`: 480×780). The one the strip used to leave 181px of,
+    // and the picture the layout suite's restored rule is argued from.
+    songs: { row: 0, review: "rushing", camera: true },
+    buildAt: { width: 1440, height: 900 },
+    width: 480,
+    height: 780,
+    settleMs: 900,
+  },
+  {
+    id: "songs-compare",
+    suffix: "songs-compare",
+    window: "main",
+    tab: "songs",
+    // W25 item 3 — then and now. The coach says this passage has come on, and
+    // under the sentence are the two runs it is talking about: a month ago at
+    // 70 % and tonight, side by side, held together by the BAR rather than by
+    // the clock so the slower one still lines up.
+    songs: { row: 0, review: "improved", camera: true, compare: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-clip",
+    suffix: "songs-clip",
+    window: "main",
+    tab: "songs",
+    // W25 item 2 — "Save as a video", open on its choices: which bars, which
+    // way up, marks on or off, how long it will take and which container the
+    // player is going to get. The clip itself is not made here; that takes as
+    // long as the music does and belongs in a test that reads the bytes.
+    songs: { row: 0, review: "rushing", camera: true, clip: "open" },
+    width: 1100,
+    height: 720,
+    settleMs: 600,
+  },
+  {
+    id: "songs-clip-make",
+    suffix: "songs-clip-make",
+    window: "main",
+    tab: "songs",
+    // ...and the same screen with the clip actually MADE. It runs the
+    // compositor in real time, so it is here for `songs-camera.spec.ts` to
+    // pull the bytes off `window.__SHOT_CLIP__` and ask whether they are a
+    // video — which is the only question about a video worth asking, and one
+    // no assertion about a Blob can answer.
+    songs: { row: 0, review: "rushing", camera: true, clip: "make" },
+    width: 1100,
+    height: 720,
+    settleMs: 200,
+  },
+  {
+    id: "songs-camera-armed",
+    suffix: "songs-camera-armed",
+    window: "main",
+    tab: "songs",
+    // The stage with the camera OPEN and nothing recorded yet: the little
+    // mirror over the tab, the switch lit, the strip still a strip. It is
+    // what "the camera costs the strip no height" is measured against, now
+    // that a review takes the strip's room (W25 item 1).
+    songs: { row: 0, camera: true },
+    width: 1100,
+    height: 720,
+    settleMs: 600,
   },
   {
     id: "songs-picker",

@@ -31,8 +31,19 @@
  * passage, cannot run at half speed and reports no position, and this screen
  * needs all four. The shelf's own play button is unchanged and still goes
  * through the engine with the band muted; only the review with a picture plays
- * the file here. See `songs/camera/src.ts` for the one user-visible
- * consequence (the output device).
+ * the file here.
+ *
+ * ## ...and out of the speaker the player chose (2026-09-20, W25)
+ *
+ * The one user-visible cost of that, which `src.ts` has been stating since
+ * W21: the engine plays out of the output device chosen in settings, and a
+ * media element plays out of the system default. On a machine with an
+ * interface — which is most of the people this app is for — the review came
+ * out of a different speaker from the band. `setSinkId` moves it, where the
+ * webview has one and the two namespaces can be joined on a label
+ * (`songs/camera/sink.ts` is that join, and is honest about being a match).
+ * Where they cannot, the note under the controls says which speaker it is
+ * using rather than leaving somebody to wonder why it sounds different.
  *
  * ## With no picture, none of this is on screen
  *
@@ -43,8 +54,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { storeLoad, storeSave } from "../../../ipc";
-import { barLengthMs, buildTape, slipJump } from "../../../songs/camera/tape";
-import { cameraNudgeKey, NUDGE_LIMIT_MS, NUDGE_STEP_MS } from "../../../songs/camera/keys";
+import { barLengthMs, slipJump } from "../../../songs/camera/tape";
+import type { Tape } from "../../../songs/camera/tape";
+import {
+  AUDIO_OUTPUT_KEY,
+  cameraNudgeKey,
+  NUDGE_LIMIT_MS,
+  NUDGE_STEP_MS,
+} from "../../../songs/camera/keys";
+import { followChosenOutput } from "../../../songs/camera/sink";
+import type { SinkDevice, SinkState } from "../../../songs/camera/sink";
 import { mediaSrc } from "../../../songs/camera/src";
 import { msAtBeat } from "../../../songs/camera/offset";
 import { clampRange, rangeTempoSteps } from "../../../songs/schedule";
@@ -59,8 +78,17 @@ export type ReviewTakeVideo = {
   takeId: string;
   /** Absolute path (or already a URL) of the mix. */
   path: string;
-  /** Absolute path (or already a URL) of the picture. */
-  videoPath: string;
+  /**
+   * Absolute path (or already a URL) of the picture, or `null` for a take
+   * recorded with the camera off — which is every take until somebody turns
+   * it on.
+   *
+   * This view is not drawn at all in that case (`SongReview` checks), so A9
+   * still holds: with no picture the review is exactly what it was. What the
+   * null is FOR is "Save as a video", which works on a take with sound alone
+   * — the excerpt and the marks over a plain ground.
+   */
+  videoPath: string | null;
   /** What the fit measured, or null when it had too little to go on. */
   videoOffsetMs?: number;
   /** Where beat 0 sits in the WAV, from the take's own sidecar. */
@@ -87,6 +115,8 @@ const DRIFT_MS = 90;
 export type TakeVideoViewProps = {
   review: SongAttemptReview;
   take: ReviewTakeVideo;
+  /** The pass laid out in time. Built once by the host and shared. */
+  tape: Tape;
   /**
    * The bars to loop, counted as played-bar indices, or null for the whole
    * attempt. The coach's "Watch it" passes the finding's bars; the review
@@ -109,18 +139,30 @@ export type TakeVideoViewProps = {
   watchNonce?: number;
   /** The speed to open at, as a percentage. */
   startSpeed?: number;
+  /**
+   * Somewhere else needs the take to itself — "Save as a video" plays it
+   * again on its own clock, and two transports over one recording is two
+   * things a person has to keep in step by hand.
+   *
+   * A counter rather than a flag, for `watchNonce`'s reason: the second
+   * export has to pause this player too, and a boolean that was already true
+   * would do nothing.
+   */
+  pauseNonce?: number;
   className?: string;
 };
 
 export function TakeVideoView({
   review,
   take,
+  tape,
   loopBars = null,
   pass = null,
   onPass,
   onPosition,
   watchNonce = 0,
   startSpeed = 100,
+  pauseNonce = 0,
   className,
 }: TakeVideoViewProps) {
   const { t } = useTranslation();
@@ -135,20 +177,6 @@ export function TakeVideoView({
 
   const startOffsetMs = take.startOffsetMs ?? 0;
   const baseOffsetMs = take.videoOffsetMs ?? 0;
-
-  const tape = useMemo(
-    () =>
-      buildTape({
-        score: review.score,
-        schedule: review.schedule,
-        range: review.range,
-        tempoPercent: review.tempoPercent,
-        results: review.facts.results,
-        extras: review.facts.extras,
-        bands: review.bands,
-      }),
-    [review],
-  );
 
   /** The window being looped, in transport milliseconds. */
   const loop = useMemo(() => {
@@ -170,6 +198,39 @@ export function TakeVideoView({
     const base = (chosen ?? 0) * tape.passMs;
     return { startMs: base + within.startMs, endMs: base + within.endMs };
   }, [loopBars, pass, review, tape.passMs]);
+
+  /**
+   * W25 — the take plays out of the speaker the player chose.
+   *
+   * Once, when the element exists: `setSinkId` sticks to the element, and
+   * re-running it on every render would be an enumeration a second. The
+   * chosen device's NAME comes from the same store key the engine was set
+   * from, so there is one answer to "which output" and this follows it.
+   */
+  const [sink, setSink] = useState<SinkState>({ kind: "systemDefault" });
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    let alive = true;
+    void storeLoad<string>(AUDIO_OUTPUT_KEY)
+      .catch(() => null)
+      .then(async (wanted) => {
+        if (!alive) return;
+        const state = await followChosenOutput({
+          element: audio,
+          wanted: typeof wanted === "string" ? wanted : null,
+          enumerate: async () =>
+            typeof navigator === "undefined" || !navigator.mediaDevices
+              ? []
+              : ((await navigator.mediaDevices.enumerateDevices()) as unknown as SinkDevice[]),
+        });
+        if (alive) setSink(state);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /** The nudge, remembered for this camera. */
   const nudgeKey = cameraNudgeKey(take.deviceId ?? null);
@@ -332,6 +393,14 @@ export function TakeVideoView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchNonce]);
 
+  /** Something else has taken the take. Stand down rather than play over it. */
+  useEffect(() => {
+    if (pauseNonce <= 0) return;
+    pause();
+    // The press is the whole trigger; `pause` is read as it is at that moment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pauseNonce]);
+
   /** Half a bar of the bar the slip is in — a teacher rewinds to just before. */
   const leadMs = useMemo(() => {
     const bar = tape.ticks.find((tick) => tick.atMs >= nowMs)?.bar ?? review.range.startBar;
@@ -378,7 +447,7 @@ export function TakeVideoView({
         <video
           ref={videoRef}
           className="songs-take-video-picture"
-          src={mediaSrc(take.videoPath)}
+          src={mediaSrc(take.videoPath ?? "")}
           muted
           playsInline
           preload="auto"
@@ -479,6 +548,19 @@ export function TakeVideoView({
         {bars ? t("songs.camera.watchingBars", { bars }) : t("songs.camera.watchingAll")}{" "}
         {pitchKept ? t("songs.camera.pitchKept") : t("songs.camera.pitchDropped")}{" "}
         {take.videoOffsetMs === undefined ? t("songs.camera.noOffset") : t("songs.camera.nudgeHow")}
+        {/* W25 — which speaker, but only when it is not the one they chose.
+            "It is coming out of the thing you picked" is not news; "it is
+            coming out of something else" is the only version worth a
+            sentence, and it is the one a player would otherwise have to
+            work out for themselves. */}
+        {sink.kind !== "following" && sink.kind !== "systemDefault" && (
+          <>
+            {" "}
+            {sink.kind === "unsupported"
+              ? t("songs.camera.sinkUnsupported", { device: sink.wanted })
+              : t("songs.camera.sinkUnmatched", { device: sink.wanted })}
+          </>
+        )}
       </p>
     </section>
   );

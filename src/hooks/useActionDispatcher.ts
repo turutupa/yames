@@ -76,6 +76,16 @@ interface ActionDispatcherArgs {
     clearSelection: () => void;
     /** Slide the portion by whole bars, keeping its length. */
     nudge: (bars: number) => void;
+    /**
+     * W25 — what is KEPT of the pass, hands-free.
+     *
+     * Both go through the switches' own `request` doors rather than through
+     * the settings behind them, so a first press still shows the promise: a
+     * camera that came on from a footswitch without anybody having read what
+     * it records is the one thing this feature may not do.
+     */
+    toggleTakes: () => void;
+    toggleCamera: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -273,6 +283,12 @@ export function useActionDispatcher({
             break;
           case "songs-loop-later":
             songsActions.nudge(1);
+            break;
+          case "songs-take":
+            songsActions.toggleTakes();
+            break;
+          case "songs-camera":
+            songsActions.toggleCamera();
             break;
         }
         return;

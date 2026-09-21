@@ -290,7 +290,49 @@
       "watchIt": "Ver",
       "watchTitle": "Rever",
       "watchingAll": "A passada inteira.",
-      "watchingBars": "Compassos {{bars}}, sem parar."
+      "watchingBars": "Compassos {{bars}}, sem parar.",
+      "sinkUnsupported": "Esta versão só toca a gravação pelas caixas de som normais do computador, não por {{device}}.",
+      "sinkUnmatched": "Está tocando pelas caixas de som normais do computador — daqui não deu para achar {{device}}."
+    },
+    "clip": {
+      "save": "Salvar como vídeo",
+      "go": "Criar o vídeo",
+      "cancel": "Parar",
+      "making": "Criando — {{percent}}%",
+      "whichBars": "Quais compassos",
+      "chosenBars": "Estes compassos",
+      "wholeTake": "A gravação inteira",
+      "shape": "Formato",
+      "wide": "Deitado",
+      "tall": "Em pé",
+      "withMarks": "Mostrar as marcas",
+      "realTime": "Ele grava enquanto toca, então leva o mesmo tempo da música: {{length}}.",
+      "isMp4": "Você recebe um MP4, que sobe em qualquer lugar.",
+      "isWebm": "Você recebe um WebM. Alguns lugares só aceitam MP4.",
+      "saved": "Salvo em {{where}}",
+      "failed": "Não deu para criar o vídeo. Nada foi salvo.",
+      "unavailable": "Esta versão não consegue salvar um vídeo.",
+      "bar": "Compasso",
+      "bpmUnit": "BPM",
+      "brand": "Marca do Yames",
+      "brandNote": "Um pequeno logo do Yames e yames.app no canto. É assim que quem vê seu vídeo chega ao app.",
+      "showInFolder": "Mostrar na pasta",
+      "postItTo": "Publicar em",
+      "dragItIn": "Abra um e arraste o arquivo — o Yames não envia nada e não pede conta.",
+      "webmWarning": "Abra um e arraste o arquivo. Este é um WebM e a maioria só aceita MP4 — um conversor gratuito resolve."
+    },
+    "compare": {
+      "title": "Compassos {{bars}}, antes e agora",
+      "then": "Antes",
+      "now": "Agora",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Só som — nesta a câmera estava desligada.",
+      "locked": "As duas andam juntas por compasso, não por relógio, então uma passada mais devagar também encaixa."
+    },
+    "takes": {
+      "withPicture": "Com imagem",
+      "noneFilmed": "Nenhuma delas foi filmada.",
+      "was": "Compassos {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

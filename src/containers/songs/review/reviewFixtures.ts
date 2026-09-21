@@ -24,8 +24,15 @@ import type {
   SongScore,
 } from "../../../songs/types";
 
-/** Which pass to build. */
-export type ReviewRecipe = "rushing" | "missed" | "clean";
+/**
+ * Which pass to build.
+ *
+ * `improved` (W25) is `clean`'s pass under a different finding: the notes
+ * landed, and what the coach has to say about it is that this passage is
+ * better than it was — which is the one finding that offers "see the
+ * difference" (`COACH_UX.md` C3, `plans/ECHORA.md` A2).
+ */
+export type ReviewRecipe = "rushing" | "missed" | "clean" | "improved";
 
 export type ScriptedPass = {
   results: OnsetResult[];
@@ -93,7 +100,8 @@ export function scriptPass(
   return {
     results,
     extras,
-    score: recipe === "clean" ? 94 : recipe === "rushing" ? 71 : 58,
+    score:
+      recipe === "clean" ? 94 : recipe === "improved" ? 88 : recipe === "rushing" ? 71 : 58,
     passes,
   };
 }
@@ -168,6 +176,24 @@ export function scriptFindings(
           severity: 0.35,
           evidence: { ...base, extras: pass.extras.length },
           fix: { type: "loopBars", start: firstBar, end: lastBar, tempoPercent: 70 },
+        },
+      ];
+    case "improved":
+      // The passage is better than it was, and the evidence is two
+      // recordings of it. `bars` covers the whole passage, because "this has
+      // come on" is about the passage rather than about a moment in it.
+      return [
+        {
+          kind: "improved",
+          bars: [firstBar, lastBar],
+          noteIds,
+          severity: 0.4,
+          // `spreadDeltaMs` is how much steadier this go was than last, and
+          // the `improved` sentences quote it — without one the coach says
+          // "0 ms steadier", which is the shape of a fixture that forgot a
+          // field rather than of a finding.
+          evidence: { ...base, hitRate: 0.96, passesAffected: pass.passes, spreadDeltaMs: 14 },
+          fix: { type: "comeBack", days: 2 },
         },
       ];
     case "clean":

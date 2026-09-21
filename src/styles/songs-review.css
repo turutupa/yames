@@ -37,6 +37,29 @@
   min-width: 0;
 }
 
+/* The verdict itself, on a row of its own under the title (W25).
+ *
+ * `flex: 1 1 100%` puts it below the title and the back button rather than
+ * beside them: it is a sentence and it needs the width, and the two things
+ * above it are furniture. It is inside the PINNED head, so the one thing the
+ * coach said and the button that acts on it are on screen at every window
+ * height — A4's whole claim, made true by the layout rather than by the word
+ * order.
+ *
+ * The blocks inside are `CoachBlocks`', unchanged: a `text` with no frame and
+ * an `action` button under it. */
+.songs-review-said {
+  flex: 1 1 100%;
+  gap: 8px;
+}
+
+/* A verdict is one sentence and reads as one, so it is allowed the room the
+   body's blocks are not — the body's excerpt is a drawing and wants to stay
+   narrow, this is prose. */
+.songs-review-said .coach-block-sentence {
+  font-size: 13.5px;
+}
+
 .songs-review-title {
   margin: 0;
   font-size: 16px;
@@ -303,6 +326,27 @@
   .songs-review-head {
     flex-direction: column;
     align-items: stretch;
+    /* ...and NOT wrapping. A wrapping column puts the overflow in a second
+       COLUMN, which is how the verdict ended up as a 21px-wide ribbon of
+       single letters down the right-hand edge at 480px: `flex-basis: 100%`
+       on the row below is 100% of the HEIGHT once the direction turns, so it
+       never fits and the browser opened a new column for it. The wrap was
+       only ever there for the row. */
+    flex-wrap: nowrap;
+  }
+
+  /* One under the other, at their own heights. `flex: 1 1 100%` is a width
+     while the head is a row and a height the moment it is not. */
+  .songs-review-said {
+    flex: 0 0 auto;
+  }
+
+  /* The way out goes last, and stays the size of its own words.
+     Stretched across the panel between the summary and the coach's sentence
+     it read as the thing being offered, and it is not: the sentence is. */
+  .songs-review-back {
+    order: 1;
+    align-self: flex-end;
   }
 
   /* One bar per line below this width: two bars of sixteenths side by side is

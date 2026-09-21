@@ -299,7 +299,49 @@
       "watchIt": "Zobacz to",
       "watchTitle": "Obejrzeć to",
       "watchingAll": "Całe przejście.",
-      "watchingBars": "Takty {{bars}}, w kółko."
+      "watchingBars": "Takty {{bars}}, w kółko.",
+      "sinkUnsupported": "Ta wersja potrafi odtworzyć nagranie tylko przez zwykłe głośniki komputera, nie przez {{device}}.",
+      "sinkUnmatched": "Gra przez zwykłe głośniki komputera — stąd nie udało się znaleźć {{device}}."
+    },
+    "clip": {
+      "save": "Zapisz jako wideo",
+      "go": "Utwórz wideo",
+      "cancel": "Zatrzymaj",
+      "making": "Tworzenie — {{percent}}%",
+      "whichBars": "Które takty",
+      "chosenBars": "Te takty",
+      "wholeTake": "Całe nagranie",
+      "shape": "Format",
+      "wide": "Poziomo",
+      "tall": "Pionowo",
+      "withMarks": "Pokaż oznaczenia",
+      "realTime": "Nagrywa się w trakcie odtwarzania, więc trwa tyle co muzyka: {{length}}.",
+      "isMp4": "Dostajesz MP4, które wrzucisz wszędzie.",
+      "isWebm": "Dostajesz WebM. Niektóre miejsca przyjmują tylko MP4.",
+      "saved": "Zapisano w {{where}}",
+      "failed": "Nie udało się utworzyć wideo. Nic nie zostało zapisane.",
+      "unavailable": "Ta wersja nie potrafi zapisać wideo.",
+      "bar": "Takt",
+      "bpmUnit": "BPM",
+      "brand": "Znak Yames",
+      "brandNote": "Małe logo Yames i yames.app w rogu. Tak trafia do aplikacji każdy, kto zobaczy twoje wideo.",
+      "showInFolder": "Pokaż w folderze",
+      "postItTo": "Wrzuć na",
+      "dragItIn": "Otwórz jedno i przeciągnij plik — Yames nic nie wysyła i nie potrzebuje konta.",
+      "webmWarning": "Otwórz jedno i przeciągnij plik. To jest WebM, a większość przyjmuje tylko MP4 — darmowy konwerter to załatwi."
+    },
+    "compare": {
+      "title": "Takty {{bars}}, kiedyś i teraz",
+      "then": "Kiedyś",
+      "now": "Teraz",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Tylko dźwięk — przy tym podejściu kamera była wyłączona.",
+      "locked": "Oba są zgrane co takt, a nie co sekundę, więc wolniejsze podejście też pasuje."
+    },
+    "takes": {
+      "withPicture": "Z obrazem",
+      "noneFilmed": "Żadne z tych nie było nagrywane obrazem.",
+      "was": "Takty {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

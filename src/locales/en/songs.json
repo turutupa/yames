@@ -281,7 +281,49 @@
       "watchIt": "Watch it",
       "watchTitle": "Watching it back",
       "watchingAll": "The whole pass.",
-      "watchingBars": "Bars {{bars}}, round and round."
+      "watchingBars": "Bars {{bars}}, round and round.",
+      "sinkUnsupported": "This version can only play the take through your computer's usual speakers, not through {{device}}.",
+      "sinkUnmatched": "It is playing through your computer's usual speakers — it could not find {{device}} from here."
+    },
+    "clip": {
+      "save": "Save as a video",
+      "go": "Make the video",
+      "cancel": "Stop",
+      "making": "Making it — {{percent}}%",
+      "whichBars": "Which bars",
+      "chosenBars": "These bars",
+      "wholeTake": "The whole take",
+      "shape": "Shape",
+      "wide": "Wide",
+      "tall": "Tall",
+      "withMarks": "Show the marks",
+      "realTime": "It records as it plays, so it takes as long as the music: {{length}}.",
+      "isMp4": "You get an MP4, which posts anywhere.",
+      "isWebm": "You get a WebM. Some places only take MP4.",
+      "saved": "Saved to {{where}}",
+      "failed": "That video could not be made. Nothing was saved.",
+      "unavailable": "This version cannot save a video.",
+      "bar": "Bar",
+      "bpmUnit": "BPM",
+      "brand": "Yames mark",
+      "brandNote": "A small Yames logo and yames.app in the corner. It is how anybody who sees your clip finds the app.",
+      "showInFolder": "Show in folder",
+      "postItTo": "Post it to",
+      "dragItIn": "Open one and drag the file in — Yames uploads nothing and needs no account.",
+      "webmWarning": "Open one and drag the file in. This one is a WebM, and most of these take MP4 only — a free converter will turn it into one."
+    },
+    "compare": {
+      "title": "Bars {{bars}}, then and now",
+      "then": "Then",
+      "now": "Now",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Sound only — the camera was off for this one.",
+      "locked": "The two are held together by the bar, not by the clock, so a slower go still lines up."
+    },
+    "takes": {
+      "withPicture": "With picture",
+      "noneFilmed": "None of these was filmed.",
+      "was": "Bars {{bars}} · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }

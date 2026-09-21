@@ -281,7 +281,49 @@
       "watchIt": "看一下",
       "watchTitle": "回看",
       "watchingAll": "整整一遍。",
-      "watchingBars": "第 {{bars}} 小節，一遍又一遍。"
+      "watchingBars": "第 {{bars}} 小節，一遍又一遍。",
+      "sinkUnsupported": "這個版本只能用電腦平常的喇叭播放錄音，不能走 {{device}}。",
+      "sinkUnmatched": "正在用電腦平常的喇叭播放——這裡找不到 {{device}}。"
+    },
+    "clip": {
+      "save": "存成影片",
+      "go": "製作影片",
+      "cancel": "停止",
+      "making": "製作中 — {{percent}}%",
+      "whichBars": "哪幾個小節",
+      "chosenBars": "這幾個小節",
+      "wholeTake": "整段錄音",
+      "shape": "畫面比例",
+      "wide": "橫向",
+      "tall": "直向",
+      "withMarks": "顯示標記",
+      "realTime": "它一邊播放一邊錄製，所以和音樂一樣長：{{length}}。",
+      "isMp4": "你會得到一個 MP4，哪裡都能上傳。",
+      "isWebm": "你會得到一個 WebM。有些地方只收 MP4。",
+      "saved": "已儲存到 {{where}}",
+      "failed": "影片沒能做出來。什麼都沒有儲存。",
+      "unavailable": "這個版本無法儲存影片。",
+      "bar": "小節",
+      "bpmUnit": "BPM",
+      "brand": "Yames 標記",
+      "brandNote": "角落一個小小的 Yames 標誌和 yames.app。看到你影片的人就是這樣找到這個應用程式的。",
+      "showInFolder": "在資料夾中顯示",
+      "postItTo": "發到",
+      "dragItIn": "打開一個，把檔案拖進去——Yames 不上傳任何東西，也不需要帳號。",
+      "webmWarning": "打開一個，把檔案拖進去。這個是 WebM，大多數地方只收 MP4，用免費轉換工具轉一下就行。"
+    },
+    "compare": {
+      "title": "第 {{bars}} 小節，那時和現在",
+      "then": "那時",
+      "now": "現在",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "只有聲音——這一遍攝影機是關著的。",
+      "locked": "兩邊是按小節對齊的，不是按秒，所以彈得慢的那一遍也能對上。"
+    },
+    "takes": {
+      "withPicture": "有畫面",
+      "noneFilmed": "這些都沒有錄畫面。",
+      "was": "第 {{bars}} 小節 · {{percent}}% · {{goes}} · {{score}}"
     }
   }
 }
