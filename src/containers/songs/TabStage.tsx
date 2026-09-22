@@ -123,7 +123,13 @@ export interface TabStageProps {
    * engine plays, like everything else that crosses this boundary. Called on
    * a plain click and on the arrow keys; never on a drag, which is a portion.
    */
-  onSeek?: (playedBar: number) => void;
+  /**
+   * A click went there. `tickInBar` is how far into the bar the beat under
+   * the pointer starts (in the score's own ticks), so the playhead lands on
+   * the NOTE that was clicked and not on the bar line before it (the owner,
+   * 2026-09-21). Absent for the keyboard, which moves by whole bars.
+   */
+  onSeek?: (playedBar: number, tickInBar?: number) => void;
   /** Esc on the tab: put the portion away and play the whole piece again. */
   onClear?: () => void;
   /**
@@ -1040,8 +1046,8 @@ export function TabStage({
    * writer and one reader and nothing to keep in step. The pointer and the
    * arrow keys both come through here.
    */
-  const goTo = useCallback((playedBar: number) => {
-    latest.current.onSeek?.(playedBar);
+  const goTo = useCallback((playedBar: number, tickInBar?: number) => {
+    latest.current.onSeek?.(playedBar, tickInBar);
   }, []);
   const goToRef = useRef(goTo);
   goToRef.current = goTo;
@@ -1065,15 +1071,36 @@ export function TabStage({
    * same lookup alphaTab does for its own events, asked directly.
    */
   const barAtPoint = useCallback((clientX: number, clientY: number): number | null => {
-    const overlay = overlayRef.current;
-    const lookup = apiRef.current?.renderer?.boundsLookup;
-    if (!overlay || !lookup) return null;
-    const box = overlay.getBoundingClientRect();
-    const beat = lookup.getBeatAtPos(clientX - box.left, clientY - box.top);
-    const printed = printedBarOfBeat(beat);
-    if (printed === null) return null;
-    return playedBarOfPrinted(latest.current.score, printed);
+    return placeAtPoint(clientX, clientY)?.bar ?? null;
   }, []);
+
+  /**
+   * The bar AND the beat under a point (2026-09-21): the beat's offset into
+   * its bar, in the score's ticks, is what lets a click land on a note.
+   * alphaTab's `playbackStart` is in its own MIDI ticks (960 a quarter);
+   * the score's are whatever the file said, so it is scaled.
+   */
+  const placeAtPoint = useCallback(
+    (clientX: number, clientY: number): { bar: number; tickInBar: number } | null => {
+      const overlay = overlayRef.current;
+      const lookup = apiRef.current?.renderer?.boundsLookup;
+      if (!overlay || !lookup) return null;
+      const box = overlay.getBoundingClientRect();
+      const beat = lookup.getBeatAtPos(clientX - box.left, clientY - box.top);
+      const printed = printedBarOfBeat(beat);
+      if (printed === null) return null;
+      const bar = playedBarOfPrinted(latest.current.score, printed);
+      if (bar === null) return null;
+      const start = (beat as { playbackStart?: unknown } | null)?.playbackStart;
+      const tpq = latest.current.score.ticksPerQuarter || 960;
+      const tickInBar =
+        typeof start === "number" && Number.isFinite(start) && start > 0
+          ? Math.round((start * tpq) / 960)
+          : 0;
+      return { bar, tickInBar };
+    },
+    [],
+  );
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -1107,6 +1134,9 @@ export function TabStage({
       overlay.setPointerCapture?.(e.pointerId);
       pressRef.current = {
         bar,
+        // A press on a handle is a drag; a press on the page remembers the
+        // note it was on, in case it turns out to be a click.
+        tickInBar: handle ? 0 : (placeAtPoint(e.clientX, e.clientY)?.tickInBar ?? 0),
         clientX: e.clientX,
         clientY: e.clientY,
         handle,
@@ -1154,7 +1184,7 @@ export function TabStage({
         latest.current.onSelect?.(dragRange(dragging));
         return;
       }
-      if (press) goToRef.current(press.bar);
+      if (press) goToRef.current(press.bar, press.tickInBar);
     };
 
     overlay.addEventListener("pointerdown", onDown);
@@ -1170,7 +1200,7 @@ export function TabStage({
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
     };
-  }, [ready, rendered, barAtPoint, putDrag]);
+  }, [ready, rendered, barAtPoint, placeAtPoint, putDrag]);
 
   /**
    * The keyboard, on the tab (W29 item 1).

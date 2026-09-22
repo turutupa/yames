@@ -170,3 +170,42 @@ describe("opening a song with something due", () => {
     expect(result.current.range.endBar).toBeLessThanOrEqual(7);
   });
 });
+
+describe("a click on a note", () => {
+  beforeEach(() => {
+    promises = [];
+    stored = { ...DEFAULT_MIX_SETTING };
+  });
+
+  it("puts the playhead on the note, not on the bar line before it", async () => {
+    const result = await openTheSong();
+    await settle();
+    // Bar 2 starts at tick 7680; the third quarter of it is 1920 in.
+    await act(async () => {
+      result.current.seekTo(2, 1920);
+      await Promise.resolve();
+    });
+    expect(result.current.playheadTick).toBe(7680 + 1920);
+  });
+
+  it("never lands past the bar that was clicked", async () => {
+    const result = await openTheSong();
+    await settle();
+    await act(async () => {
+      result.current.seekTo(2, 99_999);
+      await Promise.resolve();
+    });
+    expect(result.current.playheadTick).toBeLessThan(7680 + 3840);
+    expect(result.current.playheadTick).toBeGreaterThanOrEqual(7680);
+  });
+
+  it("lands on the bar line when the keyboard moves by bars", async () => {
+    const result = await openTheSong();
+    await settle();
+    await act(async () => {
+      result.current.seekTo(3);
+      await Promise.resolve();
+    });
+    expect(result.current.playheadTick).toBe(3 * 3840);
+  });
+});

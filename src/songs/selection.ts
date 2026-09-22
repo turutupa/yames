@@ -70,6 +70,12 @@ export const CLICK_SLOP_PX = 4;
 export type TabPress = {
   /** The played bar under the press. */
   bar: number;
+  /**
+   * How far into that bar the beat under the press starts, in the score's
+   * ticks, so a click that stays a click lands on the note (2026-09-21).
+   * Zero when the press is on a handle or the lookup has no beat.
+   */
+  tickInBar?: number;
   clientX: number;
   clientY: number;
   /** Which handle was grabbed, when the press landed on one. */

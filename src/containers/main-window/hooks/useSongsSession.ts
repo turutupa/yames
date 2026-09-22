@@ -681,10 +681,14 @@ export function useSongsSession(
 
   /** The same thing, said in bars, which is what the tab reports. */
   const seekTo = useCallback(
-    (playedBar: number) => {
+    (playedBar: number, tickInBar = 0) => {
       if (!score) return;
       const bar = clampSelection(score, { startBar: playedBar, endBar: playedBar }).startBar;
-      seekToTick(tickOfBar(score, wholeSong(score), bar));
+      // Into the bar by the note that was clicked, never past it: a stray
+      // offset from another bar's length would land in the next one.
+      const length = score.bars[bar]?.lengthTicks ?? 0;
+      const into = Math.max(0, Math.min(tickInBar, Math.max(0, length - 1)));
+      seekToTick(tickOfBar(score, wholeSong(score), bar) + into);
     },
     [score, seekToTick],
   );
