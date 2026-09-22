@@ -222,8 +222,19 @@ function applyTheme(settings: Settings): void {
   res.mainGlyphColor = colour(ink, "#e8e8ea");
   res.secondaryGlyphColor = colour(quiet, "#9a9aa4");
   res.scoreInfoColor = colour(ink, "#e8e8ea");
-  res.staffLineColor = colour(faint, "#6a6a74");
-  res.barSeparatorColor = colour(faint, "#6a6a74");
+  /*
+   * The strings and the bar lines a step quieter than the faintest text
+   * (2026-09-21, the owner: "the lines ... very slightly more subtle than the
+   * notes, so the notes and numbers are easier to read"). `--text-faint` is
+   * the theme's dimmest INK, chosen to still be read as words; a line that
+   * runs through every fret number does not need to be read, it needs to be
+   * seen behind them. Sixty per cent of that ink over the page keeps the
+   * theme's hue and gives the numbers the contrast.
+   */
+  const dim = colour(faint, "#6a6a74");
+  const line = new model.Color(dim.r, dim.g, dim.b, Math.round(dim.a * 0.6));
+  res.staffLineColor = line;
+  res.barSeparatorColor = line;
   res.barNumberColor = colour(accent, "#e5732a");
 
   /*
