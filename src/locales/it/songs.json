@@ -1,0 +1,391 @@
+{
+  "songs": {
+    "import": "Importa un brano",
+    "dismiss": "OK",
+    "tuning": "Accordatura",
+    "capoLabel": "Capotasto",
+    "capo": "Capotasto al tasto {{fret}}",
+    "meter": "Metro",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Battute",
+    "fromBar": "Da",
+    "toBar": "A",
+    "wholeSong": "Tutto il brano",
+    "barsCount": "{{count}} battuta",
+    "barsCount_many": "{{count}} battute",
+    "barsCount_other": "{{count}} battute",
+    "sections": "Sezioni",
+    "speed": "Velocità",
+    "percent": "{{percent}}%",
+    "speedNote": "Il clic va a {{bpm}} BPM",
+    "loop": "Ripeti",
+    "loopNote": "Risuona le battute qui sopra una volta dopo l'altra",
+    "dropHere": "Lascia qui il file per aprirlo",
+    "band": {
+      "label": "Chi senti",
+      "click": "Clic",
+      "drums": "Batteria",
+      "bass": "Basso",
+      "keys": "Tastiere",
+      "levelFor": "Quanto suona {{lane}}",
+      "muteFor": "Spegni {{lane}}",
+      "note": "Regola l'equilibrio mentre suoni. Yames se lo ricorda per questo brano.",
+      "leftOut": "{{tracks}} è in questo file, ma Yames non ha nessuno che lo suoni.",
+      "leftOut_many": "{{tracks}} sono in questo file, ma Yames non ha nessuno che li suoni.",
+      "leftOut_other": "{{tracks}} sono in questo file, ma Yames non ha nessuno che li suoni.",
+      "droppedNotes": "{{count}} nota di questo file è per uno strumento che la band non ha.",
+      "droppedNotes_many": "{{count}} note di questo file sono per strumenti che la band non ha.",
+      "droppedNotes_other": "{{count}} note di questo file sono per strumenti che la band non ha.",
+      "myPart": "La mia parte",
+      "soloShort": "S",
+      "soloFor": "Ascolta solo {{lane}}",
+      "tooManyParts": "{{tracks}} resta in silenzio: questo file ha più parti di quante possano suonare insieme.",
+      "tooManyParts_many": "{{tracks}} restano in silenzio: questo file ha più parti di quante possano suonare insieme.",
+      "tooManyParts_other": "{{tracks}} restano in silenzio: questo file ha più parti di quante possano suonare insieme.",
+      "turnedDown": "{{count}} musicista abbassato",
+      "turnedDown_many": "{{count}} musicisti abbassati",
+      "turnedDown_other": "{{count}} musicisti abbassati",
+      "drumsLabel": "Batteria",
+      "drumsKit": "La batteria di Yames",
+      "drumsFile": "Quella del file"
+    },
+    "countIn": {
+      "counting": "Ti conta l'entrata"
+    },
+    "engine": {
+      "cannotPlay": "Yames non riesce a suonare questo brano con la band in questo momento. Il clic continua a tenere il tempo.",
+      "busy": "Qualcos'altro sta usando l'audio, così il brano si è fermato. Ripremi play quando sei pronto."
+    },
+    "empty": {
+      "title": "Porta dentro un brano che hai già",
+      "body": "Apri un file Guitar Pro o MusicXML e Yames ti mostra la tablatura, tiene il tempo e ti segue. Lascia il file in un punto qualsiasi di questa schermata, oppure scegline uno.",
+      "private": "Il file resta su questo computer. Non viene caricato nulla.",
+      "bodyShort": "Guitar Pro o MusicXML. Lascia il file in un punto qualsiasi di questa schermata, oppure scegline uno.",
+      "stays": "Resta su questo computer, e Yames ne conserva una copia sua."
+    },
+    "tab": {
+      "drawing": "Sto impaginando la musica...",
+      "failed": "Yames ha letto questo file ma non riesce a disegnarlo. Le battute e il tempo funzionano lo stesso."
+    },
+    "picker": {
+      "title": "Scegli la tua parte",
+      "which": "Quale parte suoni?",
+      "strings": "{{count}} corda",
+      "strings_many": "{{count}} corde",
+      "strings_other": "{{count}} corde",
+      "notTab": "Non è scritta in tablatura",
+      "cancel": "Non ora"
+    },
+    "warn": {
+      "tempoFlattened": "Il tempo scivola in {{count}} battuta. Yames lo cambia di scatto alla stanghetta.",
+      "tempoFlattened_many": "Il tempo scivola in {{count}} battute. Yames lo cambia di scatto alla stanghetta.",
+      "tempoFlattened_other": "Il tempo scivola in {{count}} battute. Yames lo cambia di scatto alla stanghetta.",
+      "barOverfilled": "La battuta {{bar}} contiene più di quanto il suo metro permetta. Viene suonata così com'è scritta."
+    },
+    "library": {
+      "add": "Importa un brano",
+      "empty": "Ancora nessun brano",
+      "remove": "Togli da Yames",
+      "due": "Da riprendere",
+      "dueTitle": "Hai chiesto di tornare su questo",
+      "starter": "Inclusa",
+      "starterTitle": "Arrivata con Yames. Cancellala quando vuoi.",
+      "removeTitle": "Togliere {{name}}?",
+      "removeBody": "Se ne va tutto il brano: ogni sua parte, tutto quello che Yames ricorda di lui e la copia del file che tiene. Non si torna indietro.",
+      "removeTakes": "Se ne va anche {{count}} registrazione.",
+      "removeTakes_many": "Se ne vanno anche {{count}} registrazioni.",
+      "removeTakes_other": "Se ne vanno anche {{count}} registrazioni.",
+      "removeNoTakes": "Non ne hai registrato niente.",
+      "removeConfirm": "Togli",
+      "removeCancel": "Tieni"
+    },
+    "review": {
+      "title": "Com'è andata",
+      "summary": "Battute {{bars}} al {{percent}}% — {{hits}} note su {{of}} a posto",
+      "again": "Di nuovo",
+      "working": "Riascolto in corso...",
+      "passes": "Quale giro",
+      "pass": "Giro {{n}}",
+      "nothingToSay": "In quello non è emerso niente. Risuonalo e il coach avrà più materiale.",
+      "chordsHonesty": "Non posso ancora controllare le note dentro gli accordi, solo quando cadono.",
+      "notSaved": "Yames non è riuscito a segnare questo, quindi la prossima volta non ci sarà da confrontare.",
+      "tooShort": "È stato troppo corto per giudicarlo. Suona almeno otto note del passaggio e il coach avrà qualcosa da dire.",
+      "moreLabel": "Cos'altro ({{count}})",
+      "moreLabel_many": "Cos'altro ({{count}})",
+      "moreLabel_other": "Cos'altro ({{count}})",
+      "lessLabel": "Nascondi il resto",
+      "tab": {
+        "nothing": "In queste battute non è stato suonato niente."
+      },
+      "mark": {
+        "onTime": "A posto",
+        "slightlyEarly": "Un filo in anticipo",
+        "early": "In anticipo",
+        "slightlyLate": "Un filo in ritardo",
+        "late": "In ritardo",
+        "missed": "Mancata",
+        "notAssessed": "Non valutata",
+        "extra": "Nota in più",
+        "accentQuiet": "È scritta con l'accento, ma non è uscita più forte"
+      },
+      "bars": {
+        "one": "alla battuta {{bar}}",
+        "range": "alle battute {{from}}–{{to}}",
+        "here": "in questo passaggio"
+      },
+      "amount": {
+        "hair": "di un soffio",
+        "thirtySecond": "di circa una biscroma",
+        "sixteenth": "di circa una semicroma",
+        "tripletEighth": "di circa un terzo di movimento",
+        "eighth": "di circa una croma",
+        "mostOfABeat": "di quasi un movimento intero",
+        "beat": "di un movimento intero"
+      },
+      "when": {
+        "early": "in anticipo",
+        "late": "in ritardo"
+      },
+      "goes": "{{count}} giro",
+      "goes_many": "{{count}} giri",
+      "goes_other": "{{count}} giri",
+      "notes": "{{count}} nota",
+      "notes_many": "{{count}} note",
+      "notes_other": "{{count}} note",
+      "say": {
+        "consistentMiss": {
+          "1": "Sempre nello stesso punto — ti si perde {{bars}} su {{affected}} giri di {{goes}}.",
+          "2": "Si sfalda {{bars}}: via {{affected}} volte su {{passes}}.",
+          "3": "Il resto regge. È {{bars}} che continua a sparire, su {{affected}} giri di {{goes}}."
+        },
+        "rushing": {
+          "1": "Sei davanti al clic {{bars}} — {{amount}} in anticipo, dall'inizio alla fine.",
+          "2": "C'è fretta {{bars}}: in media {{amount}} in anticipo.",
+          "3": "Siediti un po' più indietro {{bars}}. Lì stai cadendo {{amount}} in anticipo."
+        },
+        "dragging": {
+          "1": "Sei dietro al clic {{bars}} — {{amount}} in ritardo.",
+          "2": "Si trascina {{bars}}: le note cadono {{amount}} dopo il movimento.",
+          "3": "Sporgiti un po' in avanti {{bars}}. È appoggiato {{amount}} in ritardo."
+        },
+        "afterShift": {
+          "1": "Ogni volta che la mano si sposta {{bars}}, la nota dopo arriva {{amount}} {{when}}.",
+          "2": "Il cambio di posizione {{bars}} ti costa {{amount}} {{when}} sulla nota successiva.",
+          "3": "Fai atterrare bene lo spostamento {{bars}} e il resto viene dietro — adesso la nota dopo è {{amount}} {{when}}."
+        },
+        "fallsApart": {
+          "1": "Parti pulito {{bars}} e lo perdi verso la fine.",
+          "2": "È la seconda metà che cede {{bars}} — l'inizio sta in piedi.",
+          "3": "Tenuta, non note: {{bars}} più vai avanti più diventa sporco."
+        },
+        "extras": {
+          "1": "Ci sono note {{bars}} che nessuno ha chiesto — {{extras}}.",
+          "2": "Stai aggiungendo {{extras}} {{bars}}. Lascia che le pause siano pause.",
+          "3": "Si infila qualcosa {{bars}}: {{extras}} che non sono scritte."
+        },
+        "uneven": {
+          "1": "{{bars}} non è né in anticipo né in ritardo — è irregolare. Le note cadono dappertutto.",
+          "2": "Il tuo tempo vaga {{bars}} invece di pendere da una parte.",
+          "3": "Prima saldo, poi veloce: {{bars}} non c'è ancora niente di costante, in nessuna direzione."
+        },
+        "beatPositionBias": {
+          "1": "Il movimento {{beat}} della battuta è quello che scappa — {{amount}} {{when}}, battuta dopo battuta.",
+          "2": "Ti appoggi sul movimento {{beat}}: {{amount}} {{when}} ogni volta che torna.",
+          "3": "È il movimento {{beat}} a uscire, battuta dopo battuta — {{amount}} {{when}}."
+        },
+        "subdivisionWeak": {
+          "1": "La nota {{position}} di ogni {{outOf}} è quella che continui a lasciar cadere.",
+          "2": "In ogni gruppo di {{outOf}}, quella che manca è la nota {{position}}.",
+          "3": "Conta il gruppo ad alta voce — è sulla nota {{position}} di {{outOf}} che scivola."
+        },
+        "drift": {
+          "1": "Sei partito con il clic e alla fine sei {{amount}} {{when}}.",
+          "2": "Tira sempre di più andando avanti: sulle ultime battute, {{amount}} {{when}}.",
+          "3": "Il tempo sotto le tue mani scivola lungo tutto il tratto: alla fine sei {{when}}."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} tiene. A {{collapse}} si sfalda.",
+          "2": "Qui il tuo tetto è {{hold}} — {{collapse}} non è ancora tuo.",
+          "3": "{{hold}} è tuo. {{collapse}} è la prossima cosa da guadagnarsi, non il tempo di oggi."
+        },
+        "improved": {
+          "1": "Va meglio — {{bars}} è {{ms}} ms più saldo dell'ultima volta.",
+          "2": "Qualcosa si è mosso: tieni {{bars}} dove prima ti scappava.",
+          "3": "Progresso vero {{bars}} — {{ms}} ms più stretto dei tuoi giri precedenti."
+        },
+        "clean": {
+          "1": "Non c'è niente da sistemare {{bars}} — a posto su tutti i {{goes}}.",
+          "2": "Quella è tua: {{bars}}, {{goes}}, nessuna sbavatura.",
+          "3": "Hai suonato bene {{bars}} tutte le volte. Lasciala lì e tornaci più avanti."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "Torna alla tablatura",
+      "selectedBars": "Battute {{bars}} scelte",
+      "wholeSong": "Tutto il brano",
+      "portionSays": "{{count}} battuta · {{state}}",
+      "portionSays_many": "{{count}} battute · {{state}}",
+      "portionSays_other": "{{count}} battute · {{state}}",
+      "looping": "in ripetizione",
+      "once": "una volta sola",
+      "timeRound": {
+        "one": "Giro {{n}}",
+        "two": "Giro {{n}}",
+        "few": "Giro {{n}}",
+        "other": "Giro {{n}}"
+      },
+      "keepPortion": "Salva questa parte",
+      "keepPortionNote": "Scegli le battute sulla tablatura, poi dai loro un nome",
+      "portionPlaceholder": "Dai un nome a questa parte",
+      "renamePortion": "Rinomina",
+      "deletePortion": "Dimentica questa",
+      "portionTitle": "{{name}} — al {{percent}}%",
+      "tabLabel": "La tablatura. Clicca su una battuta per andarci, o trascina sulle battute per scegliere una parte."
+    },
+    "offer": {
+      "justArrived": "è appena arrivato nei tuoi download",
+      "justArrivedSized": "è appena arrivato nei tuoi download · {{size}}",
+      "more": "altri {{n}} in attesa",
+      "open": "Aprilo",
+      "opening": "Apertura...",
+      "notThisOne": "Non questo",
+      "failed": "Yames non è riuscito ad aprire quel file. Forse è ancora in download."
+    },
+    "keepsCopy": "Yames tiene una copia sua di ogni file che porti dentro, quindi svuotare i download non perde niente.",
+    "exportOriginal": "Salva il file da qualche parte",
+    "exporting": "Salvataggio...",
+    "exportDone": "Salvato.",
+    "exportFailed": "Yames non è riuscito a scrivere il file lì.",
+    "findTab": {
+      "what": "Brano e artista",
+      "link": "Cerca una tablatura",
+      "note": "Apre il tuo browser su una normale ricerca web. Yames non cerca niente per te.",
+      "ask": "Non hai ancora il file?"
+    },
+    "camera": {
+      "cannotPlay": "L'immagine non è partita.",
+      "corner": {
+        "bottomLeft": "In basso a sinistra",
+        "bottomRight": "In basso a destra",
+        "topLeft": "In alto a sinistra",
+        "topRight": "In alto a destra"
+      },
+      "denied": "La videocamera non è stata consentita. Dai il permesso a Yames nelle impostazioni di sistema, poi riaccendila.",
+      "device": "Quale videocamera",
+      "deviceNumbered": "Videocamera {{n}}",
+      "failed": "La videocamera non si è aperta.",
+      "guideBody": "Fai entrare tutte e due le mani: quella sul manico e quella sulle corde.",
+      "guideFlip": "Suono da mancino",
+      "guideGot": "Capito",
+      "introNotNow": "Non adesso",
+      "introPrivate": "Non viene caricato né mandato niente da nessuna parte. Eliminare una registrazione elimina anche la sua immagine.",
+      "introStart": "Accendi la videocamera",
+      "introTitle": "Sulla videocamera",
+      "introWhat": "La videocamera ti riprende mentre suoni, dal conteggio finché non ti fermi. Il suono è la registrazione: il tuo modo di suonare con la band, così com'è già.",
+      "introWhere": "Viene scritta come un file video accanto alla registrazione, nella cartella di questa app su questa macchina, e resta lì finché non la elimini.",
+      "label": "Videocamera",
+      "lead": "le tue mani, tenute accanto alle note — niente esce da questa macchina",
+      "lostPicture": "La videocamera si è fermata a metà. La registrazione è salva; l'immagine no.",
+      "move": "Sposta l'anteprima",
+      "nextSlip": "Errore successivo",
+      "noCamera": "Su questa macchina non c'è nessuna videocamera.",
+      "noOffset": "Su questa registrazione nessuno ha misurato quanto l'immagine stia avanti o indietro rispetto al suono, quindi partono pari. Spostala finché le mani cadono con le note.",
+      "nudge": "Allinea l'immagine",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "Immagine prima",
+      "nudgeHow": "Se le tue mani sembrano avanti o indietro rispetto al suono, sposta l'immagine finché cadono insieme. Viene ricordato per questa videocamera.",
+      "nudgeLater": "Immagine dopo",
+      "off": "Registra l'immagine",
+      "on": "Videocamera accesa",
+      "pause": "Pausa",
+      "pitchDropped": "Qui, più lentamente, l'intonazione scende con il tempo.",
+      "pitchKept": "L'intonazione resta dov'è anche più lentamente.",
+      "play": "Riproduci",
+      "prevSlip": "Errore precedente",
+      "preview": "Tu, come ti vede la videocamera",
+      "slips": "Salta a un errore",
+      "tape": "Il giro, nota per nota",
+      "tickOff": "Battuta {{bar}}, {{ms}} ms",
+      "tickPlain": "Battuta {{bar}}",
+      "unavailable": "Questa versione non può registrare l'immagine. Tutto il resto di questa schermata funziona come sempre.",
+      "watchIt": "Guardalo",
+      "watchTitle": "Riguardarlo",
+      "watchingAll": "Tutto il giro.",
+      "watchingBars": "Battute {{bars}}, in tondo.",
+      "sinkUnsupported": "Questa versione può riprodurre la registrazione solo dagli altoparlanti soliti del computer, non da {{device}}.",
+      "sinkUnmatched": "Sta suonando dagli altoparlanti soliti del computer: {{device}} non si trova da qui.",
+      "peek": "Vediti",
+      "peekNote": "Controlla l'inquadratura. Si chiude quando suoni."
+    },
+    "clip": {
+      "save": "Salva come video",
+      "go": "Crea il video",
+      "cancel": "Ferma",
+      "making": "In creazione — {{percent}}%",
+      "whichBars": "Quali battute",
+      "chosenBars": "Queste battute",
+      "wholeTake": "Tutta la registrazione",
+      "shape": "Formato",
+      "wide": "Orizzontale",
+      "tall": "Verticale",
+      "withMarks": "Mostra i segni",
+      "realTime": "Si registra mentre suona, quindi dura quanto la musica: {{length}}.",
+      "isMp4": "Ottieni un MP4, che si pubblica ovunque.",
+      "isWebm": "Ottieni un WebM. Alcuni siti accettano solo MP4.",
+      "saved": "Salvato in {{where}}",
+      "failed": "Non è stato possibile creare il video. Non è stato salvato nulla.",
+      "unavailable": "Questa versione non può salvare un video.",
+      "bar": "Battuta",
+      "bpmUnit": "BPM",
+      "brand": "Marchio Yames",
+      "brandNote": "Un piccolo logo Yames e yames.app nell'angolo. È così che chi vede il tuo video trova l'app.",
+      "showInFolder": "Mostra nella cartella",
+      "postItTo": "Pubblica su",
+      "dragItIn": "Aprine uno e trascina dentro il file — Yames non carica nulla e non chiede alcun account.",
+      "webmWarning": "Aprine uno e trascina dentro il file. Questo è un WebM e quasi tutti accettano solo MP4; un convertitore gratuito lo trasforma.",
+      "underPicture": "Sotto l’immagine",
+      "band": {
+        "tab": "L’intavolatura",
+        "marks": "Solo i segni",
+        "none": "Niente"
+      }
+    },
+    "compare": {
+      "title": "Battute {{bars}}, prima e adesso",
+      "then": "Prima",
+      "now": "Adesso",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Solo suono: la videocamera era spenta in questa.",
+      "locked": "Le due si allineano sulla battuta e non sull'orologio, così anche un giro più lento combacia."
+    },
+    "takes": {
+      "withPicture": "Con immagine",
+      "noneFilmed": "Nessuna di queste è stata ripresa.",
+      "was": "Battute {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Quale parte stai leggendo",
+      "percussion": "Batteria — non è una parte da seguire",
+      "notTab": "Non è scritta in tablatura",
+      "empty": "Qui non c'è scritto niente"
+    },
+    "strip": {
+      "more": "Altro"
+    },
+    "view": {
+      "tabOnly": "Tablatura",
+      "tabAndNotes": "Tablatura + note",
+      "notationNote": "Mostra anche il pentagramma sopra la tablatura",
+      "bigger": "Più grande",
+      "smaller": "Più piccolo",
+      "size": "Dimensione"
+    },
+    "clickChip": "Clic",
+    "clickNote": "Scandisce il tempo sul brano. Spento all'inizio se il file porta la sua band.",
+    "notes": {
+      "label": "Note su questo file"
+    }
+  }
+}

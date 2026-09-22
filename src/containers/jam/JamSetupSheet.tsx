@@ -56,6 +56,9 @@ import { JamSelect } from "./JamSelect";
 import { KitPicker } from "./KitPicker";
 import { Segmented } from "./Segmented";
 import { TakesSection } from "./TakesSection";
+import { TakeSoundControl } from "../../takes/TakeSoundControl";
+import { CameraControl } from "../../takes/CameraControl";
+import type { TakeCameraState } from "../../takes/useTakeCamera";
 import { VibePicker } from "./VibePicker";
 import type { VibePreviewMark } from "./VibePicker";
 
@@ -158,6 +161,20 @@ interface JamSetupSheetProps {
   onEditingChords: (on: boolean) => void;
   takes: JamTakesState;
   onToggleTakes: (next: boolean) => void;
+  /**
+   * The camera on this tab (W32), or null on a build that has none.
+   *
+   * Handed down rather than opened here: the camera is the window’s, like
+   * the takes are, because both end when the jam leaves the engine.
+   */
+  camera?: TakeCameraState | null;
+  /**
+   * The band is going (W33 §3).
+   *
+   * Only the camera's "see yourself" uses it, and only to shut: checking your
+   * framing is something you do before you play.
+   */
+  isPlaying?: boolean;
 }
 
 /**
@@ -230,6 +247,8 @@ export function JamSetupSheet({
   onEditingChords,
   takes,
   onToggleTakes,
+  camera = null,
+  isPlaying = false,
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
   /** Which roles' voices this sheet has already asked to be built. Once each. */
@@ -1261,12 +1280,45 @@ export function JamSetupSheet({
         }
       >
 
+            {/* What a take is made of, above the shelf it fills and below the
+                switch that starts it — the order a person reads in: turn it
+                on, decide what goes in, see what came out. */}
+            {takes.available !== false && (
+              <TakeSoundControl state={takes.soundSource} disabled={!jam.takes} />
+            )}
+
+            {/* W32 — and whether you are IN it. One chip, in the same row the
+                sound choice is in, for the reason `CameraControl`'s header
+                gives: a control with a label and a note of its own costs this
+                group a line, and the sentence about what is recorded lives in
+                the promise the first press shows. Turning it on turns Record
+                the take on with it. */}
+            {camera && takes.available !== false && (
+              <div className="jam-camera-row">
+                {/* Greyed while recording is off rather than hidden: a switch
+                    that appears only once another switch is on is a switch
+                    nobody finds. */}
+                {/* W33 §3 — and a way to LOOK at what it is filming. The
+                    stage's own mirror is not drawn below 900px (`jam.css`
+                    says why), so at a small window this is the only way a
+                    player sees their own framing before they play. */}
+                <CameraControl
+                  camera={camera}
+                  disabled={!jam.takes}
+                  canPeek
+                  playing={isPlaying}
+                />
+              </div>
+            )}
+
             <TakesSection
               available={takes.available}
               takes={takes.takes}
               recording={takes.recording}
               dirBytes={takes.dirBytes}
               playingId={takes.playingId}
+              jam={jam}
+              vibeLabel={jam.vibe ?? null}
               onPlay={takes.play}
               onStop={takes.stopPlayback}
               onDelete={takes.remove}

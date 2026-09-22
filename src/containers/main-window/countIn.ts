@@ -25,6 +25,15 @@ import type { AppState, Setlist } from "../../types";
  * setlist is part of that saved thing and stays part of it; the switch is
  * one place to reach four settings rather than a fifth copy of the state.
  *
+ * **Songs joined on 2026-09-20 (W18).** It had shipped with two: three chips
+ * on the stage AND this switch, which in Songs wrote the click's warm-up beats
+ * — a setting `load_song` clears, so the one in the bottom bar did nothing at
+ * all. Jam solved exactly this by dropping its own dropdown and letting the
+ * transport write the jam's stored count-in; Songs does the same, writing the
+ * song's `countInBars`. A song counts in BARS rather than beats because that
+ * is what the engine's `load_song` takes, and the bar it counts is the bar the
+ * chosen range is written in — a passage starting in 3/4 is counted in three.
+ *
  * It is a module and not four lines inside `MainWindow` because it is real
  * logic — a meter to read, a ceiling to respect, four stores to tell apart —
  * and `MainWindow` is the one file in this app that no test can render.
@@ -38,7 +47,7 @@ import type { AppState, Setlist } from "../../types";
  * Anything that is not the jam or the setlist falls to the click's setting,
  * which is what Settings would want anyway if it ever grew a transport.
  */
-export type CountInView = "beat" | "drill" | "setlist" | "jam" | "settings";
+export type CountInView = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
 
 /**
  * The engine counts at most eight beats (`arm_count_in` clamps to it, and so
@@ -51,6 +60,15 @@ export type CountInSubject = {
   view: CountInView;
   jam: Jam | null;
   setlist: Setlist | null;
+  /**
+   * The song on the stage, in BARS — `countInBars` off its mix setting.
+   *
+   * Bars and not beats because that is the unit the song engine takes:
+   * `load_song` is told how many bars to count and works the meter out from
+   * the score itself, which is the only thing that can, since a song may
+   * change time signature between the bar you chose and the bar before it.
+   */
+  song?: { bars: number } | null;
   /** The engine's own state, for the metronome's meter and the drill's ramp. */
   state: Pick<AppState, "beatGroups" | "timeSignature" | "speedRamp">;
 };
@@ -75,9 +93,10 @@ export function countInBeats(subject: CountInSubject): number {
 }
 
 /** Whether this mode is currently set to count in. */
-export function countInIsOn({ view, jam, setlist, state }: CountInSubject): boolean {
+export function countInIsOn({ view, jam, setlist, song, state }: CountInSubject): boolean {
   if (view === "jam") return (jam?.countIn ?? 0) > 0;
   if (view === "setlist") return (setlist?.countIn ?? 0) > 0;
+  if (view === "songs") return (song?.bars ?? 0) > 0;
   // The metronome and the drill are the same click and share the one setting
   // the drill has always kept.
   return state.speedRamp.warmupBeats > 0;
@@ -86,12 +105,17 @@ export function countInIsOn({ view, jam, setlist, state }: CountInSubject): bool
 /**
  * What the switch should write, and where.
  *
- * Returned rather than done, so the caller owns the four different ways of
- * writing it and this stays a function you can ask a question of.
+ * Returned rather than done, so the caller owns the different ways of writing
+ * it and this stays a function you can ask a question of. `beats` is beats
+ * everywhere except Songs, whose store counts BARS — `store` says which, and
+ * for `"songs"` the number is one bar or none.
  */
 export function countInToggle(
   subject: CountInSubject,
-): { store: "jam" | "setlist" | "ramp"; beats: number } {
+): { store: "jam" | "setlist" | "songs" | "ramp"; beats: number } {
+  if (subject.view === "songs") {
+    return { store: "songs", beats: countInIsOn(subject) ? 0 : 1 };
+  }
   const beats = countInIsOn(subject) ? 0 : countInBeats(subject);
   const store = subject.view === "jam" ? "jam" : subject.view === "setlist" ? "setlist" : "ramp";
   return { store, beats };

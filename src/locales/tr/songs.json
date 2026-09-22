@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "Bir şarkı içe aktar",
+    "dismiss": "OK",
+    "tuning": "Akort",
+    "capoLabel": "Kapo",
+    "capo": "Kapo {{fret}}. perdede",
+    "meter": "Ölçü",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Ölçüler",
+    "fromBar": "Başlangıç",
+    "toBar": "Bitiş",
+    "wholeSong": "Şarkının tamamı",
+    "barsCount": "{{count}} ölçü",
+    "barsCount_other": "{{count}} ölçü",
+    "sections": "Bölümler",
+    "speed": "Hız",
+    "percent": "%{{percent}}",
+    "speedNote": "Tık {{bpm}} BPM ile gidiyor",
+    "loop": "Tekrarla",
+    "loopNote": "Yukarıdaki ölçüleri tekrar tekrar çalar",
+    "dropHere": "Açmak için dosyayı buraya bırak",
+    "band": {
+      "label": "Kimi duyuyorsun",
+      "click": "Tık",
+      "drums": "Davul",
+      "bass": "Bas",
+      "keys": "Klavye",
+      "levelFor": "{{lane}} ne kadar yüksek",
+      "muteFor": "{{lane}} sesini kapat",
+      "note": "Dengeyi çalarken ayarla. Yames bunu bu şarkı için aklında tutar.",
+      "leftOut": "{{tracks}} bu dosyada var, ama Yames'te onu çalacak kimse yok.",
+      "leftOut_other": "{{tracks}} bu dosyada var, ama Yames'te onları çalacak kimse yok.",
+      "droppedNotes": "Bu dosyadaki {{count}} nota, grupta olmayan bir çalgıya ait.",
+      "droppedNotes_other": "Bu dosyadaki {{count}} nota, grupta olmayan çalgılara ait.",
+      "myPart": "Benim partim",
+      "soloShort": "S",
+      "soloFor": "Sadece {{lane}} dinle",
+      "tooManyParts": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
+      "tooManyParts_other": "{{tracks}} susuyor: bu dosyada aynı anda çalabilecek olandan fazla parti var.",
+      "turnedDown": "{{count}} çalgı kısıldı",
+      "turnedDown_other": "{{count}} çalgı kısıldı",
+      "drumsLabel": "Davul",
+      "drumsKit": "Yames'in seti",
+      "drumsFile": "Dosyanınki"
+    },
+    "countIn": {
+      "counting": "Girişini sayıyorum"
+    },
+    "engine": {
+      "cannotPlay": "Yames bu şarkıyı şu anda grupla çalamıyor. Tık zamanı tutmaya devam ediyor.",
+      "busy": "Sesi başka bir şey kullanıyor, bu yüzden şarkı durdu. Hazır olduğunda oynata tekrar bas."
+    },
+    "empty": {
+      "title": "Elinde zaten olan bir şarkıyı getir",
+      "body": "Bir Guitar Pro ya da MusicXML dosyası aç; Yames sana tabı gösterir, zamanı tutar ve nerede olduğunu takip eder. Dosyayı bu ekranın herhangi bir yerine bırak ya da birini seç.",
+      "private": "Dosya bu bilgisayarda kalır. Hiçbir şey yüklenmez.",
+      "bodyShort": "Guitar Pro veya MusicXML. Dosyayı bu ekranın herhangi bir yerine bırak ya da birini seç.",
+      "stays": "Bu bilgisayarda kalır, Yames de kendi kopyasını saklar."
+    },
+    "tab": {
+      "drawing": "Nota yerleşimi yapılıyor...",
+      "failed": "Yames bu dosyayı okudu ama çizemiyor. Ölçüler ve zamanlama yine de çalışıyor."
+    },
+    "picker": {
+      "title": "Partini seç",
+      "which": "Hangi partiyi çalıyorsun?",
+      "strings": "{{count}} tel",
+      "strings_other": "{{count}} tel",
+      "notTab": "Tab olarak yazılmamış",
+      "cancel": "Şimdi değil"
+    },
+    "warn": {
+      "tempoFlattened": "Tempo {{count}} ölçüde kayıyor. Yames bunun yerine ölçü çizgisinde bir anda değiştiriyor.",
+      "tempoFlattened_other": "Tempo {{count}} ölçüde kayıyor. Yames bunun yerine ölçü çizgisinde bir anda değiştiriyor.",
+      "barOverfilled": "{{bar}}. ölçü, ölçü sayısının izin verdiğinden fazlasını taşıyor. Yazıldığı gibi çalınıyor."
+    },
+    "library": {
+      "add": "Bir şarkı içe aktar",
+      "empty": "Henüz şarkı yok",
+      "remove": "Yames'ten çıkar",
+      "due": "Bugüne",
+      "dueTitle": "Buna geri dönmek istemiştin",
+      "starter": "Hazır gelen",
+      "starterTitle": "Yames ile birlikte geldi. İstediğin zaman silebilirsin.",
+      "removeTitle": "{{name}} çıkarılsın mı?",
+      "removeBody": "Şarkının tamamı gider: bütün partileri, Yames'in onunla ilgili hatırladığı her şey ve Yames'in tuttuğu dosya kopyası. Geri alınamıyor.",
+      "removeTakes": "Ona ait {{count}} kayıt da gider.",
+      "removeTakes_other": "Ona ait {{count}} kayıt da gider.",
+      "removeNoTakes": "Ondan hiç kayıt almadın.",
+      "removeConfirm": "Çıkar",
+      "removeCancel": "Kalsın"
+    },
+    "review": {
+      "title": "Nasıl gitti",
+      "summary": "{{bars}}. ölçüler, %{{percent}} — {{of}} notadan {{hits}} tanesi yerine oturdu",
+      "again": "Bir daha",
+      "working": "Geri dinleniyor...",
+      "passes": "Hangi tur",
+      "pass": "{{n}}. tur",
+      "nothingToSay": "Bunda öne çıkan bir şey olmadı. Bir daha çal, koçun elinde daha fazla şey olsun.",
+      "chordsHonesty": "Akorların içindeki notaları henüz kontrol edemiyorum, yalnızca ne zaman düştüklerini.",
+      "notSaved": "Yames bunu not edemedi, bu yüzden bir dahaki sefere karşılaştıracak bir şey olmayacak.",
+      "tooShort": "Bu, yargılamak için fazla kısaydı. Bölümden en az sekiz nota çal, koçun söyleyecek bir şeyi olsun.",
+      "moreLabel": "Başka ne var ({{count}})",
+      "moreLabel_other": "Başka ne var ({{count}})",
+      "lessLabel": "Geri kalanı gizle",
+      "tab": {
+        "nothing": "Bu ölçülerde hiçbir şey çalınmadı."
+      },
+      "mark": {
+        "onTime": "Yerinde",
+        "slightlyEarly": "Az erken",
+        "early": "Erken",
+        "slightlyLate": "Az geç",
+        "late": "Geç",
+        "missed": "Eksik",
+        "notAssessed": "Değerlendirilmedi",
+        "extra": "Fazladan nota",
+        "accentQuiet": "Aksanla yazılmış, ama daha yüksek çıkmadı"
+      },
+      "bars": {
+        "one": "{{bar}}. ölçüde",
+        "range": "{{from}}–{{to}}. ölçülerde",
+        "here": "bu bölümde"
+      },
+      "amount": {
+        "hair": "kıl payı",
+        "thirtySecond": "yaklaşık bir otuzikilik",
+        "sixteenth": "yaklaşık bir onaltılık",
+        "tripletEighth": "yaklaşık üçte bir vuruş",
+        "eighth": "yaklaşık bir sekizlik",
+        "mostOfABeat": "neredeyse tam bir vuruş",
+        "beat": "tam bir vuruş"
+      },
+      "when": {
+        "early": "erken",
+        "late": "geç"
+      },
+      "goes": "{{count}} tur",
+      "goes_other": "{{count}} tur",
+      "notes": "{{count}} nota",
+      "notes_other": "{{count}} nota",
+      "say": {
+        "consistentMiss": {
+          "1": "Her seferinde aynı yer — {{goes}} turun {{affected}} tanesinde {{bars}} kaybediyorsun.",
+          "2": "{{bars}} dağılıyor: {{passes}} turun {{affected}} tanesinde düşüyor.",
+          "3": "Geri kalanı duruyor. Sürekli kaybolan yer {{bars}}, {{goes}} turun {{affected}} tanesinde."
+        },
+        "rushing": {
+          "1": "{{bars}} tıkın önündesin — baştan sona {{amount}} erken.",
+          "2": "{{bars}} bir acele var: ortalama {{amount}} erken.",
+          "3": "{{bars}} biraz geriye yaslan. Orada {{amount}} erken düşüyorsun."
+        },
+        "dragging": {
+          "1": "{{bars}} tıkın gerisindesin — {{amount}} geç.",
+          "2": "{{bars}} sürükleniyor: notalar vuruştan {{amount}} sonra düşüyor.",
+          "3": "{{bars}} biraz öne yaslan. {{amount}} geç oturuyor."
+        },
+        "afterShift": {
+          "1": "{{bars}} elin her yer değiştirdiğinde, sonraki nota {{amount}} {{when}} geliyor.",
+          "2": "{{bars}} pozisyon değişimi, hemen sonraki notada sana {{amount}} {{when}} kaybettiriyor.",
+          "3": "{{bars}} geçişi yerine otursun, gerisi kendiliğinden gelir — şu an sonraki nota {{amount}} {{when}}."
+        },
+        "fallsApart": {
+          "1": "{{bars}} temiz başlıyorsun ve sona doğru kaybediyorsun.",
+          "2": "{{bars}} ikinci yarı bırakıyor — başı sağlam.",
+          "3": "Nota değil, dayanıklılık: {{bars}} ilerledikçe dağınıklaşıyor."
+        },
+        "extras": {
+          "1": "{{bars}} kimsenin istemediği notalar var — {{extras}}.",
+          "2": "{{bars}} fazladan {{extras}} ekliyorsun. Bırak sus susturak kalsın.",
+          "3": "{{bars}} araya bir şeyler karışıyor: yazılı olmayan {{extras}}."
+        },
+        "uneven": {
+          "1": "{{bars}} erken ya da geç değil — düzensiz. Notalar her yere düşüyor.",
+          "2": "{{bars}} zamanlaman bir yöne yatmak yerine dolaşıyor.",
+          "3": "Önce sağlam, sonra hızlı: {{bars}} henüz hiçbir yönde tutarlı bir şey yok."
+        },
+        "beatPositionBias": {
+          "1": "Ölçünün {{beat}}. vuruşu kaçan vuruş — her ölçüde {{amount}} {{when}}.",
+          "2": "{{beat}}. vuruşa yükleniyorsun: her geldiğinde {{amount}} {{when}}.",
+          "3": "Ölçü ölçü kayan şey {{beat}}. vuruş — {{amount}} {{when}}."
+        },
+        "subdivisionWeak": {
+          "1": "Her {{outOf}} notanın {{position}}. tanesi sürekli düşürdüğün nota.",
+          "2": "Her {{outOf}}'lük grupta kaybolan {{position}}. nota.",
+          "3": "Grubu yüksek sesle say — {{outOf}} notanın {{position}}. tanesinde kayıyor."
+        },
+        "drift": {
+          "1": "Tıkla birlikte başladın ve sona geldiğinde {{amount}} {{when}} kaldın.",
+          "2": "İlerledikçe çekiyor: son ölçülerde {{amount}} {{when}}.",
+          "3": "Ellerinin altındaki tempo bölüm boyunca kayıyor — sonunda {{when}} kalıyorsun."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} bir arada duruyor. {{collapse}} olunca dağılıyor.",
+          "2": "Buradaki tavanın {{hold}} — {{collapse}} henüz senin değil.",
+          "3": "{{hold}} senin. {{collapse}} kazanılacak bir sonraki şey, bugünün temposu değil."
+        },
+        "improved": {
+          "1": "Bu daha iyi — {{bars}} geçen seferden {{ms}} ms daha sağlam.",
+          "2": "Bir şey oynadı: eskiden kaydığın {{bars}} artık duruyor.",
+          "3": "{{bars}} gerçek ilerleme — önceki turlarından {{ms}} ms daha sıkı."
+        },
+        "clean": {
+          "1": "{{bars}} düzeltilecek bir şey yok — {{goes}} turun hepsinde yerinde.",
+          "2": "Bu senin: {{bars}}, {{goes}}, tek bir kayma yok.",
+          "3": "{{bars}} her seferinde doğru çaldın. Bırak ve sonra geri dön."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "Taba dön",
+      "selectedBars": "Seçilen ölçüler: {{bars}}",
+      "wholeSong": "Şarkının tamamı",
+      "portionSays": "{{count}} ölçü · {{state}}",
+      "portionSays_other": "{{count}} ölçü · {{state}}",
+      "looping": "tekrarda",
+      "once": "bir kez",
+      "timeRound": {
+        "one": "{{n}}. geçiş",
+        "two": "{{n}}. geçiş",
+        "few": "{{n}}. geçiş",
+        "other": "{{n}}. geçiş"
+      },
+      "keepPortion": "Bu bölümü kaydet",
+      "keepPortionNote": "Önce tabda ölçüleri seç, sonra onlara bir ad ver",
+      "portionPlaceholder": "Bu bölüme bir ad ver",
+      "renamePortion": "Yeniden adlandır",
+      "deletePortion": "Bunu unut",
+      "portionTitle": "{{name}} — %{{percent}}",
+      "tabLabel": "Tab. Gitmek istediğin ölçüye tıkla ya da bir bölüm seçmek için ölçülerin üzerinde sürükle."
+    },
+    "offer": {
+      "justArrived": "az önce indirilenlere düştü",
+      "justArrivedSized": "az önce indirilenlere düştü · {{size}}",
+      "more": "{{n}} tane daha bekliyor",
+      "open": "Aç",
+      "opening": "Açılıyor...",
+      "notThisOne": "Bu değil",
+      "failed": "Yames bu dosyayı açamadı. Hâlâ iniyor olabilir."
+    },
+    "keepsCopy": "Yames içeri aldığın her dosyanın kendi kopyasını saklar, indirilenleri temizlemen bir şey kaybettirmez.",
+    "exportOriginal": "Dosyayı bir yere kaydet",
+    "exporting": "Kaydediliyor...",
+    "exportDone": "Kaydedildi.",
+    "exportFailed": "Yames dosyayı oraya yazamadı.",
+    "findTab": {
+      "what": "Parça ve sanatçı",
+      "link": "Ona bir tab bul",
+      "note": "Kendi tarayıcını sıradan bir web aramasıyla açar. Yames senin yerine hiçbir şey aramaz.",
+      "ask": "Dosya henüz yok mu?"
+    },
+    "camera": {
+      "cannotPlay": "Görüntü oynatılamadı.",
+      "corner": {
+        "bottomLeft": "Sol alt",
+        "bottomRight": "Sağ alt",
+        "topLeft": "Sol üst",
+        "topRight": "Sağ üst"
+      },
+      "denied": "Kameraya izin verilmedi. Sistem ayarlarından Yames'e izin ver, sonra tekrar aç.",
+      "device": "Hangi kamera",
+      "deviceNumbered": "Kamera {{n}}",
+      "failed": "Kamera açılmadı.",
+      "guideBody": "İki elin de kadraja girsin — saptaki de, tellerdeki de.",
+      "guideFlip": "Solak çalıyorum",
+      "guideGot": "Anladım",
+      "introNotNow": "Şimdi değil",
+      "introPrivate": "Hiçbir yere yüklenmez, hiçbir yere gönderilmez. Bir kaydı silmek görüntüsünü de siler.",
+      "introStart": "Kamerayı aç",
+      "introTitle": "Kamera hakkında",
+      "introWhat": "Kamera, sayımdan durana kadar çalışını kaydeder. Ses zaten kaydın kendisi: grupla birlikte çaldığın hâli.",
+      "introWhere": "Kaydın yanına tek bir video dosyası olarak, bu makinede bu uygulamanın kendi klasörüne yazılır ve sen silene kadar orada kalır.",
+      "label": "Kamera",
+      "lead": "ellerin, notaların yanında duruyor — bu makineden hiçbir şey çıkmıyor",
+      "lostPicture": "Kamera yarıda durdu. Kayıt duruyor, görüntü durmuyor.",
+      "move": "Önizlemeyi taşı",
+      "nextSlip": "Sonraki hata",
+      "noCamera": "Bu makinede kamera yok.",
+      "noOffset": "Bu kayıtta görüntünün sese göre nerede durduğu ölçülmedi, o yüzden başa baş başlıyorlar. Ellerin notalarla birlikte düşene kadar kaydır.",
+      "nudge": "Görüntüyü hizala",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "Görüntü daha erken",
+      "nudgeHow": "Ellerin sesin önünde ya da arkasında görünüyorsa, ikisi birlikte düşene kadar görüntüyü kaydır. Bu kamera için hatırlanır.",
+      "nudgeLater": "Görüntü daha geç",
+      "off": "Görüntüyü de kaydet",
+      "on": "Kamera açık",
+      "pause": "Duraklat",
+      "pitchDropped": "Burada yavaşlatınca perde de tempoyla birlikte düşer.",
+      "pitchKept": "Yavaşlatınca da perde yerinde kalır.",
+      "play": "Çal",
+      "prevSlip": "Önceki hata",
+      "preview": "Kameranın gördüğü hâlinle sen",
+      "slips": "Bir hataya atla",
+      "tape": "Bu tur, nota nota",
+      "tickOff": "{{bar}}. ölçü, {{ms}} ms",
+      "tickPlain": "{{bar}}. ölçü",
+      "unavailable": "Bu sürüm görüntü kaydedemiyor. Bu ekrandaki her şey her zamanki gibi çalışıyor.",
+      "watchIt": "İzle",
+      "watchTitle": "Geri izlemek",
+      "watchingAll": "Turun tamamı.",
+      "watchingBars": "{{bars}} ölçüleri, döne döne.",
+      "sinkUnsupported": "Bu sürüm kaydı yalnızca bilgisayarın her zamanki hoparlörlerinden çalabiliyor, {{device}} üzerinden değil.",
+      "sinkUnmatched": "Bilgisayarın her zamanki hoparlörlerinden çalıyor — buradan {{device}} bulunamadı.",
+      "peek": "Kendini gör",
+      "peekNote": "Kadrajını kontrol et. Çalmaya başlayınca kapanır."
+    },
+    "clip": {
+      "save": "Video olarak kaydet",
+      "go": "Videoyu oluştur",
+      "cancel": "Durdur",
+      "making": "Oluşturuluyor — %{{percent}}",
+      "whichBars": "Hangi ölçüler",
+      "chosenBars": "Bu ölçüler",
+      "wholeTake": "Kaydın tamamı",
+      "shape": "Biçim",
+      "wide": "Yatay",
+      "tall": "Dikey",
+      "withMarks": "İşaretleri göster",
+      "realTime": "Çalarken kaydediyor, yani müzik kadar sürüyor: {{length}}.",
+      "isMp4": "MP4 alırsın, her yere yüklenir.",
+      "isWebm": "WebM alırsın. Bazı yerler yalnızca MP4 kabul ediyor.",
+      "saved": "{{where}} konumuna kaydedildi",
+      "failed": "Video oluşturulamadı. Hiçbir şey kaydedilmedi.",
+      "unavailable": "Bu sürüm video kaydedemiyor.",
+      "bar": "Ölçü",
+      "bpmUnit": "BPM",
+      "brand": "Yames işareti",
+      "brandNote": "Köşede küçük bir Yames logosu ve yames.app. Videonu gören biri uygulamayı böyle buluyor.",
+      "showInFolder": "Klasörde göster",
+      "postItTo": "Şuraya yükle",
+      "dragItIn": "Birini aç ve dosyayı içine sürükle — Yames hiçbir şey yüklemez, hesap da istemez.",
+      "webmWarning": "Birini aç ve dosyayı içine sürükle. Bu bir WebM ve çoğu yalnızca MP4 kabul ediyor; ücretsiz bir dönüştürücü hallediyor.",
+      "underPicture": "Görüntünün altında",
+      "band": {
+        "tab": "Tab",
+        "marks": "Sadece işaretler",
+        "none": "Hiçbiri"
+      }
+    },
+    "compare": {
+      "title": "{{bars}}. ölçüler, o zaman ve şimdi",
+      "then": "O zaman",
+      "now": "Şimdi",
+      "facts": "%{{percent}} · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Yalnızca ses — bunda kamera kapalıydı.",
+      "locked": "İkisi saate göre değil ölçüye göre tutuluyor, yani daha yavaş bir geçiş de denk düşüyor."
+    },
+    "takes": {
+      "withPicture": "Görüntülü",
+      "noneFilmed": "Bunların hiçbiri kaydedilmedi.",
+      "was": "Ölçü {{bars}} · %{{percent}} · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Hangi partisyonu okuyorsun",
+      "percussion": "Davul — takip edilecek bir parti değil",
+      "notTab": "Tab olarak yazılmamış",
+      "empty": "Burada bir şey yazmıyor"
+    },
+    "strip": {
+      "more": "Daha fazla"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + nota",
+      "notationNote": "Tabın üstünde porteyi de göster",
+      "bigger": "Daha büyük",
+      "smaller": "Daha küçük",
+      "size": "Boyut"
+    },
+    "clickChip": "Tık",
+    "clickNote": "Parçayla birlikte vuruşu sayar. Dosya kendi grubunu getiriyorsa başlangıçta kapalıdır.",
+    "notes": {
+      "label": "Bu dosyayla ilgili notlar"
+    }
+  }
+}

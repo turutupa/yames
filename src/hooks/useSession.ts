@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
+import { getFinalSessionReport, stopEvaluation, getSessionHistory, queryHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
 import type { AdaptiveEvalRequest } from "../ipc";
 import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
@@ -32,17 +32,19 @@ import {
   resetCooldowns,
   shouldDropForStaleness,
   type GatekeeperEvent,
+  type GatekeeperContext,
   type GatekeeperState,
   type ScenarioTag,
 } from "../coach/gatekeeper";
 import {
   createShuffleState,
   pickTemplate,
+  pickTemplateForSeverities,
   recordUtterance,
   type ShuffleState,
-  type Severity,
   type Vocabulary,
 } from "../coach/templates";
+import { severityPlan, type CoachStance } from "../coach/learningMode";
 import { TEMPLATE_CATALOG } from "../coach/templateCatalog";
 import {
   adaptiveScenario,
@@ -114,6 +116,13 @@ interface UseSessionOptions {
    *  "pro" grades against the full beat grid subdivision-by-subdivision.
    *  Defaults to "default" if absent. */
   coachMode?: "default" | "pro";
+  /** How hard the coach is on the player (ROADMAP 1.5). `"learning"`
+   *  widens every gatekeeper tolerance by half, keeps corrections out
+   *  of the player's ears, and asks the catalogue for an encouraging
+   *  phrasing first. It changes nothing about the score, which is
+   *  computed and stored exactly as strictly in either stance.
+   *  Defaults to `"strict"` — today's behaviour — if absent. */
+  coachStance?: CoachStance;
   /**
    * The user's brain-tier setting. `"off"` means no model is wanted, so
    * `startSession` does not load one — residency is a cost the user
@@ -166,7 +175,7 @@ interface UseSessionOptions {
   jamMode?: boolean;
 }
 
-export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false, jamMode = false }: UseSessionOptions) {
+export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", coachStance = "strict", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false, jamMode = false }: UseSessionOptions) {
   const instrumentLabel = instrument === "drums" ? "drums/percussion"
     : instrument === "electric-guitar" ? "electric guitar"
     : instrument === "acoustic-guitar" ? "acoustic guitar"
@@ -384,6 +393,16 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   useEffect(() => { instrumentLabelRef.current = instrumentLabel; }, [instrumentLabel]);
   const maybeSpeakRef = useRef(maybeSpeak);
   useEffect(() => { maybeSpeakRef.current = maybeSpeak; }, [maybeSpeak]);
+  // Learning vs strict, read from the same long-lived beat callback and
+  // so kept in a ref for the reason above. The player may flip it
+  // mid-session and the next tip should honour the new setting.
+  const stanceRef = useRef<CoachStance>(coachStance);
+  useEffect(() => { stanceRef.current = coachStance; }, [coachStance]);
+  // The tempo band this preset has stalled in before, loaded once from
+  // history at session start (ROADMAP 1.7). A fact about the player's
+  // past, so it does not change while they play — but the beat callback
+  // that reads it outlives the load, hence the ref.
+  const presetCeilingRef = useRef<GatekeeperContext["presetCeiling"]>(undefined);
 
   // ── inDrillRamp: stable ref for use in long-lived beat callbacks ──
   const inDrillRampRef = useRef(inDrillRamp);
@@ -474,6 +493,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       bpm: playBpmRef.current,
       window: realtimeWindowRef.current,
       beatsInSegment: beatsInSegmentRef.current,
+      stance: stanceRef.current,
       force: {
         scenario: "ramp_complete",
         context: { startBpm, endBpm },
@@ -593,6 +613,8 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         beatsInSegment: beatsInSegmentRef.current,
         inDrillRamp: inDrillRampRef.current,
         verbosity: coachVerbosity,
+        stance: stanceRef.current,
+        presetCeiling: presetCeilingRef.current,
         recentHitCompleteness: computeRecentHitCompleteness(segmentReportsRef.current),
       });
       gatekeeperRef.current = nextState;
@@ -618,17 +640,18 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         return;
       }
 
-      const severity = severityForEvent(event);
-      const template = pickTemplate(TEMPLATE_CATALOG, shuffleStateRef.current, {
+      const severities = severityPlan(event.scenario, event.tier, stanceRef.current);
+      const drawn = pickTemplateForSeverities(TEMPLATE_CATALOG, shuffleStateRef.current, {
         vocab: vocabRef.current,
         scenario: event.scenario,
-        severity,
+        severities,
         context: event.context,
       });
-      if (!template) {
-        coachDebug("event.drop-no-template", { scenario: event.scenario, severity, vocab: vocabRef.current });
+      if (!drawn) {
+        coachDebug("event.drop-no-template", { scenario: event.scenario, severities, vocab: vocabRef.current });
         return;
       }
+      const { text: template, severity } = drawn;
 
       // Phase 5 — intervention layer. If the event matches an
       // intervention (and rate-limits + cooldowns pass), we replace
@@ -1071,6 +1094,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         bpm: snapshot.bpm,
         window: realtimeWindowRef.current,
         beatsInSegment: beatsInSegmentRef.current,
+        stance: stanceRef.current,
         force: {
           scenario: "boundary_signal_a",
           context: {
@@ -1088,14 +1112,14 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       beatsInSegmentRef.current = 0;
       if (!event) return;
 
-      const severity = severityForEvent(event);
-      const template = pickTemplate(TEMPLATE_CATALOG, shuffleStateRef.current, {
+      const drawn = pickTemplateForSeverities(TEMPLATE_CATALOG, shuffleStateRef.current, {
         vocab,
         scenario: event.scenario,
-        severity,
+        severities: severityPlan(event.scenario, event.tier, stanceRef.current),
         context: event.context,
       });
-      if (!template) return;
+      if (!drawn) return;
+      const template = drawn.text;
 
       const msgId = crypto.randomUUID();
       const msg: FeedMessage = {
@@ -1152,6 +1176,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         window: realtimeWindowRef.current,
         beatsInSegment: beatsInSegmentRef.current,
         verbosity: coachVerbosity,
+        stance: stanceRef.current,
         force: {
           scenario: "grid_discontinuity",
           context: { score: Math.round(payload.score), bpm: payload.bpm },
@@ -1256,7 +1281,22 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // ship the tier-4 ("cold") greeting and DO NOT replace it once
     // history finally arrives (avoids "greeting flicker" bug).
     const greetingId = crypto.randomUUID();
-    const history = await loadHistoryWithBudget(() => getSessionHistory());
+    // Two reads, one budget. The greeting is about the last thing the player
+    // did, whatever they did it on, so it keeps the thirty-session slice.
+    // Everything in `presetAwareness` is about THIS preset, and the slice was
+    // starving it: thirty sessions across every preset in the app routinely
+    // hold one or two of any given one, and its gates need three at the
+    // preset and three inside a BPM band before they say anything at all. So
+    // a player who alternates two exercises could practise the same wall for
+    // a month and never be told it was a wall. `queryHistory` asks the store
+    // the question the coach is actually asking (W2, ROADMAP 1.1); both are
+    // started before either is awaited so the 500 ms budget is shared rather
+    // than spent twice.
+    const historyLoad = loadHistoryWithBudget(() => getSessionHistory());
+    const presetHistoryLoad = presetId
+      ? loadHistoryWithBudget(() => queryHistory({ presetId }))
+      : Promise.resolve(undefined);
+    const [history, presetHistory] = await Promise.all([historyLoad, presetHistoryLoad]);
 
     // Phase 5 — pull the best score from the most-recent saved session
     // (preset-matched when available) so chips like
@@ -1269,7 +1309,22 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // ── Real-time tip seed ────────────────────────────────────────
     // Arm stamina, pace-coaching, and grid-lost tips from history.
     // All state lives in useRealtimeTips; resets fired-gates too.
-    seedRealtimeTips(presetId, presetName, history);
+    // This preset's whole history, not the last thirty of everything —
+    // stamina needs five sessions at the preset and the pace line needs four
+    // in one BPM band.
+    seedRealtimeTips(presetId, presetName, presetHistory);
+
+    // ── Preset-ceiling seed (ROADMAP 1.7) ─────────────────────────
+    // Same source as the pace line, different half of the range: this
+    // is the observation the coach makes up to the third attempt at a
+    // band, where `useRealtimeTips` takes over with a suggestion. The
+    // gatekeeper applies the split (`PRESET_CEILING_MAX_SESSIONS`).
+    presetCeilingRef.current = (() => {
+      if (!presetId || !presetHistory) return undefined;
+      const summary = summarizePreset(presetId, presetName, presetHistory);
+      const { bpmCeiling } = detectRecurringIssues(summary);
+      return bpmCeiling ?? undefined;
+    })();
 
     const greeting = renderGreeting({
       presetId,
@@ -1284,7 +1339,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // prior-session summary when history is available; falls back to
     // a generic note. The seed line is always preserved across
     // truncation per the plan.
-    const priorSummary = buildPriorSummary(history, presetId, presetName);
+    const priorSummary = buildPriorSummary(history, presetHistory, presetId, presetName);
     narrativeRef.current = createNarrative({
       bpm: playBpmRef.current,
       presetId,
@@ -1714,7 +1769,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         let historyContext = "";
         if (presetId) {
           try {
-            const history = await getSessionHistory();
+            // This preset's whole history. The thirty-session slice used to
+            // be the source here, and a player asking "am I getting better
+            // at this?" was answered from whatever rows of it happened to
+            // belong to the exercise they were sitting at.
+            const history = await queryHistory({ presetId });
             const summary = summarizePreset(presetId, presetName, history);
             if (summary.sessionCount > 0) {
               const issues = detectRecurringIssues(summary);
@@ -1990,7 +2049,7 @@ function latestScoreFromWindow(window: BeatFeedback[]): number {
  * attaches the affordance.
  */
 function pickInterventionForEvent(
-  event: import("../coach/gatekeeper").GatekeeperEvent,
+  event: GatekeeperEvent,
   bpm: number,
   score: number,
   sessionStartMs: number,
@@ -2080,6 +2139,7 @@ function pickPreviousSessionScore(
  */
 function buildPriorSummary(
   history: import("../types").SavedSession[] | undefined,
+  presetHistory: import("../types").SavedSession[] | undefined,
   presetId?: string,
   presetName?: string,
 ): string | undefined {
@@ -2097,8 +2157,10 @@ function buildPriorSummary(
   const acc = scored > 0 ? accuracyPct(candidate.report) : null;
   const accFrag = acc != null ? `${acc}% ` : "";
   let line = `last session: ${accFrag}at ${candidate.bpm} BPM, score ${candidate.report.score}`;
-  if (presetId) {
-    const summary = summarizePreset(presetId, presetName, history);
+  // The hint half of the line reads the preset's own history, which is
+  // deeper than the thirty rows the "last session" half is drawn from.
+  if (presetId && presetHistory && presetHistory.length > 0) {
+    const summary = summarizePreset(presetId, presetName, presetHistory);
     const issues = detectRecurringIssues(summary);
     if (issues.bpmCeiling) {
       line += `; preset ceiling ~${issues.bpmCeiling.bpmLow}-${issues.bpmCeiling.bpmHigh - 1} BPM`;
@@ -2267,46 +2329,16 @@ function aggregateReports(reports: SessionReport[]): SessionReport {
   };
 }
 
-/**
- * Map a gatekeeper event to one of the three template severities.
- *
- * Heuristic per the plan's "voice rules":
- *   - Always-positive scenarios (personal best, recovery, milestones,
- *     new band locked) → `encouragement`.
- *   - Always-corrective scenarios (accuracy drop, fatigue) →
- *     `correction`.
- *   - Trend scenarios graduate: `neutral` while still being confirmed
- *     in the written channel, `correction` once the gatekeeper has
- *     promoted them to spoken (two consecutive confirmations).
- *   - Everything else → `neutral`.
- *
- * Kept inline so changes to scenario→severity mapping live next to
- * the wiring point rather than in a deep module.
+/*
+ * `severityForEvent` used to live here, "inline so changes to the
+ * scenario→severity mapping live next to the wiring point". Learning
+ * mode needed the same mapping to decide what counts as a correction,
+ * and two copies of that answer would have drifted within a release, so
+ * it moved to `src/coach/learningMode.ts` as `severityFor` — with a test
+ * file, which it never had here. Call `severityPlan` instead: it returns
+ * the same answer in strict stance and an ordered preference in
+ * learning stance.
  */
-function severityForEvent(event: GatekeeperEvent): Severity {
-  switch (event.scenario) {
-    case "personal_best_streak":
-    case "recovery":
-    case "recovery_confirmed":
-    case "tempo_milestone":
-    case "new_band_locked":
-      return "encouragement";
-    case "accuracy_drop":
-    case "fatigue":
-      return "correction";
-    case "bias_only":
-      return "neutral";
-    case "rushing_trend":
-    case "dragging_trend":
-      return event.tier === "spoken" ? "correction" : "neutral";
-    case "low_confidence":
-    case "check_in":
-    case "boundary_signal_a":
-    case "boundary_signal_b":
-    default:
-      return "neutral";
-  }
-}
 
 /**
  * Build the LLM rephrase prompt. The model never decides WHAT to say

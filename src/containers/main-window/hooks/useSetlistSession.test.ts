@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useSetlistSession } from "./useSetlistSession";
 import { DEFAULT_TEST_STATE, mockInvoke } from "../../../test/mocks";
+import { engineTick } from "../../../test/engineTicks";
 import * as ipc from "../../../ipc";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { jamToSetlistStep } from "../../../setlist";
@@ -430,17 +431,16 @@ describe("a run that ends on a plain step", () => {
     ],
   };
 
-  function downbeat(n: number): BeatEvent {
-    return {
-      beat: n,
-      measureBeat: 0,
-      subdivision: 0,
-      isDownbeat: true,
-      accentLevel: 2,
-      isAccent: true,
-      formBar: 0,
-      chorus: 1,
-    };
+  /**
+   * A tick that opens a bar of 4/4 — beat 0, 4, 8 and so on.
+   *
+   * `measureBeat` comes off the beat index rather than being pinned to 0,
+   * because the engine's `isDownbeat` is only "a whole beat, not a
+   * subdivision" and a fixture that sets `measureBeat: 0` on every tick
+   * cannot tell a runner counting BARS from one counting beats.
+   */
+  function barLine(n: number): BeatEvent {
+    return engineTick({ beat: n });
   }
 
   /** A step's own configuration, as the engine would report it back. */
@@ -521,13 +521,13 @@ describe("a run that ends on a plain step", () => {
     expect(result.current.dirty).toBe(false);
 
     act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: null }));
-    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: downbeat(0) }));
-    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: downbeat(4) }));
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: barLine(0) }));
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: barLine(4) }));
     await settle();
     expect(result.current.runningIndex).toBe(1);
 
     // The engine is on the plain step now, and says so.
-    act(() => rerender({ state: asState(plain), isPlaying: true, beat: downbeat(4) }));
+    act(() => rerender({ state: asState(plain), isPlaying: true, beat: barLine(4) }));
     mockInvoke.mockClear();
 
     act(() => rerender({ state: asState(plain), isPlaying: false, beat: null }));

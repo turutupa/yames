@@ -1,0 +1,13 @@
+{
+  "name": "100bpm_click_quarters_play_16ths",
+  "description": "Roadmap 1.3's own case. The metronome clicks quarters at 100 BPM (600 ms apart), the player plays clean 16ths (150 ms apart) with 5 ms of jitter, electric guitar. Keyed to the click the refractory is 450 ms and two notes in four are never heard; keyed to the player it is 112.5 ms and all of them are. 16 bars so the four beats the inference needs before it can lock are a small share of the pass.",
+  "bpm": 100,
+  "clickSubdivision": 1,
+  "playedDivisor": 4,
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260920,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "expectDivisor": 4
+}

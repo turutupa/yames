@@ -1,0 +1,65 @@
+# The coach's answer, as llama.cpp is held to it.
+#
+# GENERATED from src/coach/blocks/spec.ts by scripts/coach-blocks.mjs.
+# Edit the spec, run `node scripts/coach-blocks.mjs`, and commit both.
+# `npm run test` fails while this file and the spec disagree.
+
+root ::= answer
+answer ::= "{" ws "\"blocks\"" ws ":" ws blocks ws "}"
+blocks ::= "[" ws block (ws "," ws block){0,5} ws "]"
+block ::= block-text | block-fretboard | block-chord-shape | block-tab-excerpt | block-progress | block-take | block-compare | block-action
+
+block-text-type-value ::= "\"text\""
+sentence-240 ::= "\"" sentence-char{1,240} "\""
+block-text ::= "{" ws "\"type\"" ws ":" ws block-text-type-value ws "," ws "\"text\"" ws ":" ws sentence-240 ws "}"
+block-fretboard-type-value ::= "\"fretboard\""
+block-fretboard-show-scale-of-value ::= "\"scale\""
+block-fretboard-show-scale-root-value ::= "\"A#\"" | "\"Ab\"" | "\"Bb\"" | "\"C#\"" | "\"D#\"" | "\"Db\"" | "\"Eb\"" | "\"F#\"" | "\"G#\"" | "\"Gb\"" | "\"A\"" | "\"B\"" | "\"C\"" | "\"D\"" | "\"E\"" | "\"F\"" | "\"G\""
+block-fretboard-show-scale-scale-value ::= "\"major\"" | "\"naturalMinor\"" | "\"dorian\"" | "\"mixolydian\"" | "\"minorPentatonic\"" | "\"majorPentatonic\"" | "\"blues\"" | "\"harmonicMinor\"" | "\"lydian\"" | "\"phrygian\"" | "\"majorBlues\"" | "\"melodicMinor\"" | "\"altered\"" | "\"locrian\"" | "\"wholeTone\"" | "\"diminishedWholeHalf\"" | "\"diminishedHalfWhole\"" | "\"phrygianDominant\"" | "\"lydianDominant\"" | "\"harmonicMajor\"" | "\"hungarianMinor\"" | "\"augmentedScale\"" | "\"bebopDominant\"" | "\"bebopMajor\"" | "\"bebopMinor\"" | "\"chromatic\""
+block-fretboard-show-scale ::= "{" ws "\"of\"" ws ":" ws block-fretboard-show-scale-of-value ws "," ws "\"root\"" ws ":" ws block-fretboard-show-scale-root-value ws "," ws "\"scale\"" ws ":" ws block-fretboard-show-scale-scale-value ws "}"
+block-fretboard-show-chord-of-value ::= "\"chord\""
+block-fretboard-show-chord ::= "{" ws "\"of\"" ws ":" ws block-fretboard-show-chord-of-value ws "," ws "\"chord\"" ws ":" ws chord-name ws "}"
+block-fretboard-show ::= block-fretboard-show-scale | block-fretboard-show-chord
+block-fretboard-position-value ::= "\"open\"" | "\"rootOn6\"" | "\"rootOn5\"" | "\"rootOn4\"" | "\"rootOn3\""
+block-fretboard-instrument-value ::= "\"guitar\"" | "\"bass\""
+block-fretboard ::= "{" ws "\"type\"" ws ":" ws block-fretboard-type-value ws "," ws "\"show\"" ws ":" ws block-fretboard-show ws ("," ws "\"position\"" ws ":" ws block-fretboard-position-value ws)? ("," ws "\"instrument\"" ws ":" ws block-fretboard-instrument-value ws)? "}"
+block-chord-shape-type-value ::= "\"chordShape\""
+int-0-29 ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16" | "17" | "18" | "19" | "20" | "21" | "22" | "23" | "24" | "25" | "26" | "27" | "28" | "29"
+block-chord-shape-instrument-value ::= "\"guitar\"" | "\"bass\""
+block-chord-shape ::= "{" ws "\"type\"" ws ":" ws block-chord-shape-type-value ws "," ws "\"chord\"" ws ":" ws chord-name ws "," ws "\"shape\"" ws ":" ws int-0-29 ws ("," ws "\"instrument\"" ws ":" ws block-chord-shape-instrument-value ws)? "}"
+block-tab-excerpt-type-value ::= "\"tabExcerpt\""
+id-64 ::= "\"" [A-Za-z0-9_.:-]{1,64} "\""
+int-1-9999 ::= [1-9] [0-9]{0,3}
+block-tab-excerpt ::= "{" ws "\"type\"" ws ":" ws block-tab-excerpt-type-value ws "," ws "\"score\"" ws ":" ws id-64 ws "," ws "\"fromBar\"" ws ":" ws int-1-9999 ws "," ws "\"toBar\"" ws ":" ws int-1-9999 ws ("," ws "\"attempt\"" ws ":" ws id-64 ws)? "}"
+block-progress-type-value ::= "\"progress\""
+block-progress ::= "{" ws "\"type\"" ws ":" ws block-progress-type-value ws "," ws "\"score\"" ws ":" ws id-64 ws "," ws "\"fromBar\"" ws ":" ws int-1-9999 ws "," ws "\"toBar\"" ws ":" ws int-1-9999 ws "}"
+block-take-type-value ::= "\"take\""
+block-take ::= "{" ws "\"type\"" ws ":" ws block-take-type-value ws "," ws "\"attempt\"" ws ":" ws id-64 ws ("," ws "\"fromBar\"" ws ":" ws int-1-9999 ws)? ("," ws "\"toBar\"" ws ":" ws int-1-9999 ws)? "}"
+block-compare-type-value ::= "\"compare\""
+block-compare-attempts-list ::= "[" ws id-64 ws "," ws id-64 ws "]"
+block-compare ::= "{" ws "\"type\"" ws ":" ws block-compare-type-value ws "," ws "\"attempts\"" ws ":" ws block-compare-attempts-list ws "}"
+block-action-type-value ::= "\"action\""
+block-action-action-loop-bars-kind-value ::= "\"loopBars\""
+int-20-300 ::= [1-9] [0-9]{1,2}
+block-action-action-loop-bars ::= "{" ws "\"kind\"" ws ":" ws block-action-action-loop-bars-kind-value ws "," ws "\"score\"" ws ":" ws id-64 ws "," ws "\"fromBar\"" ws ":" ws int-1-9999 ws "," ws "\"toBar\"" ws ":" ws int-1-9999 ws ("," ws "\"bpm\"" ws ":" ws int-20-300 ws)? "}"
+block-action-action-ramp-kind-value ::= "\"ramp\""
+block-action-action-ramp ::= "{" ws "\"kind\"" ws ":" ws block-action-action-ramp-kind-value ws "," ws "\"fromBpm\"" ws ":" ws int-20-300 ws "," ws "\"toBpm\"" ws ":" ws int-20-300 ws "}"
+block-action-action-click-subdivision-kind-value ::= "\"clickSubdivision\""
+int-1-6 ::= "1" | "2" | "3" | "4" | "5" | "6"
+block-action-action-click-subdivision ::= "{" ws "\"kind\"" ws ":" ws block-action-action-click-subdivision-kind-value ws "," ws "\"subdivision\"" ws ":" ws int-1-6 ws "}"
+block-action-action-load-preset-kind-value ::= "\"loadPreset\""
+block-action-action-load-preset ::= "{" ws "\"kind\"" ws ":" ws block-action-action-load-preset-kind-value ws "," ws "\"preset\"" ws ":" ws id-64 ws "}"
+block-action-action-load-jam-kind-value ::= "\"loadJam\""
+block-action-action-load-jam ::= "{" ws "\"kind\"" ws ":" ws block-action-action-load-jam-kind-value ws "," ws "\"jam\"" ws ":" ws id-64 ws "}"
+block-action-action-come-back-kind-value ::= "\"comeBack\""
+int-1-14 ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14"
+block-action-action-come-back ::= "{" ws "\"kind\"" ws ":" ws block-action-action-come-back-kind-value ws "," ws "\"days\"" ws ":" ws int-1-14 ws "}"
+block-action-action ::= block-action-action-loop-bars | block-action-action-ramp | block-action-action-click-subdivision | block-action-action-load-preset | block-action-action-load-jam | block-action-action-come-back
+block-action ::= "{" ws "\"type\"" ws ":" ws block-action-type-value ws "," ws "\"action\"" ws ":" ws block-action-action ws "}"
+
+# Terminals.
+chord-name ::= "\"" chord-root chord-quality? "\""
+chord-root ::= "A#" | "Ab" | "Bb" | "C#" | "D#" | "Db" | "Eb" | "F#" | "G#" | "Gb" | "A" | "B" | "C" | "D" | "E" | "F" | "G"
+chord-quality ::= "m(add9)" | "m(maj7)" | "7sus2" | "7sus4" | "9sus4" | "maj13" | "add9" | "dim7" | "m7b5" | "maj7" | "maj9" | "sus2" | "sus4" | "6/9" | "7#5" | "7#9" | "7b9" | "aug" | "dim" | "m11" | "m13" | "11" | "13" | "m6" | "m7" | "m9" | "5" | "6" | "7" | "9" | "m"
+sentence-char ::= [^"\\\r\n]
+ws ::= [ \t\n]*

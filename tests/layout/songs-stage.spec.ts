@@ -1,0 +1,357 @@
+// The room the tab gets, measured — and photographed, because "is it using
+// all the space it could" is a question the owner asked by looking at his
+// window and no assertion in this folder was asking at all.
+//
+// The owner, 2026-09-21, at 2000x1124: *"the alpha tab area … is not using all
+// the space it could — why doesn't it go wider? this is not a page where we
+// want a max width, we want to use all we can"*. The cap came off on
+// `songs-v1`; what was left was a SECOND gutter — the app pads the content
+// region by 24px and `songs.css` was padding the stage by another 24 on top of
+// it — so the frame started 48px right of the rail and stopped 49px short of
+// the window.
+//
+// So the gate is a share of the room, not a pixel count: the tab's frame is
+// within ONE gutter of the content region at every width. A cap, a second
+// gutter or a centred column all fail it, whichever one somebody adds back.
+import { test, expect } from "@playwright/test";
+import * as fs from "fs";
+import * as path from "path";
+import { openShot, insideViewport, noSidewaysScroll } from "./fits";
+
+const OUT = path.resolve(process.cwd(), ".w34-shots");
+
+/** The app's own gutter, from `shell.css`'s `.main-content`. */
+const GUTTER = 24;
+
+/**
+ * The widths this is argued at.
+ *
+ * 1100 and 1440 are the suite's own; 2000x1124 is the owner's real window,
+ * which is where the dead air was visible enough to report.
+ */
+const WIDTHS = [
+  { name: "over the breakpoint", width: 1100, height: 900 },
+  { name: "wide", width: 1440, height: 900 },
+  { name: "the owner's window", width: 2000, height: 1124 },
+];
+
+test.slow();
+
+test.beforeAll(() => {
+  fs.mkdirSync(OUT, { recursive: true });
+});
+
+/** The stage's own room: the content region minus the rail and the dock. */
+async function room(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const wrapper = document.querySelector(
+      '.main-content[data-view="songs"] > .view-transition-wrapper',
+    );
+    const content = document.querySelector(".main-content");
+    const frame = document.querySelector(".songs-tab-viewport");
+    if (!wrapper || !content || !frame) return null;
+    const w = wrapper.getBoundingClientRect();
+    const c = content.getBoundingClientRect();
+    const f = frame.getBoundingClientRect();
+    return {
+      content: { left: c.left, right: c.right, width: c.width },
+      wrapper: { left: w.left, right: w.right, width: w.width },
+      frame: { left: f.left, right: f.right, width: f.width, height: f.height },
+    };
+  });
+}
+
+test.describe("the tab uses all the room", () => {
+  for (const size of WIDTHS) {
+    test(`runs rail to edge at ${size.name} (${String(size.width)}px)`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      const boxes = await room(page);
+      expect(boxes, `no songs stage at ${String(size.width)}px`).not.toBeNull();
+      const { content, frame } = boxes!;
+
+      // One gutter on the left, one on the right — and no more. The content
+      // region is the box the rail and the dock have already taken from, so
+      // this is the whole of "use all we can".
+      const leftAir = frame.left - content.left;
+      const rightAir = content.right - frame.right;
+      expect(
+        Math.round(leftAir),
+        `the tab starts ${String(Math.round(leftAir))}px right of the stage at ${String(size.width)}px — one ${String(GUTTER)}px gutter is all it may have`,
+      ).toBeLessThanOrEqual(GUTTER + 1);
+      expect(
+        Math.round(rightAir),
+        `the tab stops ${String(Math.round(rightAir))}px short of the window at ${String(size.width)}px`,
+      ).toBeLessThanOrEqual(GUTTER + 1);
+
+      // And said the other way round, as a share, so a future max-width fails
+      // loudly rather than by a few pixels.
+      const share = frame.width / content.width;
+      expect(
+        share,
+        `the tab is ${String(Math.round(frame.width))}px of the stage's ${String(Math.round(content.width))}px (${String(Math.round(share * 100))}%) at ${String(size.width)}px`,
+      ).toBeGreaterThan(1 - (2 * (GUTTER + 2)) / content.width);
+    });
+  }
+
+  /**
+   * No sideways scrollbar under the music, ever.
+   *
+   * The owner's screenshot had one under an eight-bar piece. alphaTab measures
+   * the host and engraves to it; the vertical scrollbar then appears, takes
+   * its width off the host, and the engraving no longer fits the box it was
+   * drawn for. `scrollbar-gutter: stable` is what stops that happening —
+   * the room is reserved whether or not the bar is showing.
+   */
+  for (const size of WIDTHS) {
+    test(`never scrolls the tab sideways at ${String(size.width)}px`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      const across = await page.evaluate(() => {
+        const el = document.querySelector(".songs-tab-viewport");
+        return el ? el.scrollWidth - el.clientWidth : null;
+      });
+      expect(across, `no tab viewport at ${String(size.width)}px`).not.toBeNull();
+      expect(
+        across!,
+        `the tab scrolls ${String(across)}px sideways at ${String(size.width)}px`,
+      ).toBeLessThanOrEqual(1);
+      await noSidewaysScroll(page, `songs at ${String(size.width)}px`);
+    });
+  }
+
+  /**
+   * What is written above the first bar does not sit on top of itself.
+   *
+   * The owner: *"the first row's tempo mark is drawn on top of the section
+   * name and the cursor"*. Before `effectBandPaddingBottom`, `♩ = 96` ended
+   * at y=183 and `Verse` began at y=183 — the same pixel — with the bar
+   * number's row starting one pixel after that.
+   *
+   * Read off the drawn SVG rather than off the settings, because what is
+   * being asked is whether two pieces of engraving touch.
+   */
+  test("keeps the tempo mark off the section name", async ({ page }) => {
+    await openShot(page, "songs", { width: 2000, height: 1124 });
+    const rows = await page.evaluate(() => {
+      const host = document.querySelector(".songs-tab-host");
+      if (!host) return null;
+      const find = (match: (s: string) => boolean) => {
+        for (const node of host.querySelectorAll("text")) {
+          const text = (node.textContent ?? "").trim();
+          if (!match(text)) continue;
+          const r = node.getBoundingClientRect();
+          return { text, top: r.top, bottom: r.bottom };
+        }
+        return null;
+      };
+      return {
+        tempo: find((s) => s.startsWith("= ")),
+        section: find((s) => s === "Verse"),
+      };
+    });
+    expect(rows, "no tab host").not.toBeNull();
+    expect(rows!.tempo, "the tempo mark is not drawn").not.toBeNull();
+    expect(rows!.section, "the section name is not drawn").not.toBeNull();
+    expect(
+      Math.round(rows!.section!.top - rows!.tempo!.bottom),
+      `the section name starts ${String(
+        Math.round(rows!.section!.top - rows!.tempo!.bottom),
+      )}px after the tempo mark ends — they are on top of each other`,
+    ).toBeGreaterThanOrEqual(2);
+  });
+
+  /**
+   * The line travels; it does not jump a block of notes at a time.
+   *
+   * The owner: *"there's a sweep picking section that it's not following note
+   * per note in a smooth movement, it's doing blocks at a time"*. The engine
+   * reports once per click tick — 625 ms at the fixture's 96 BPM — so before
+   * `songs/cursor.ts` the cursor had exactly ONE position over the half
+   * second sampled here, whatever was written in those bars.
+   *
+   * Measured on the cursor's own rectangle, on the page's own frames, because
+   * the question is what a player sees and not what a number says.
+   */
+  test("moves the cursor every frame while the song plays", async ({ page }) => {
+    await openShot(page, "songs-playing", { width: 1440, height: 900 });
+    await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+    await expect(page.locator(".songs-tab-host .at-cursor-beat")).toHaveCount(1);
+
+    const xs = await page.evaluate(
+      () =>
+        new Promise<number[]>((resolve) => {
+          const cursor = document.querySelector(".songs-tab-host .at-cursor-beat");
+          if (!cursor) {
+            resolve([]);
+            return;
+          }
+          const out: number[] = [];
+          const opened = performance.now();
+          const sample = () => {
+            out.push(cursor.getBoundingClientRect().x);
+            if (performance.now() - opened < 500) requestAnimationFrame(sample);
+            else resolve(out);
+          };
+          requestAnimationFrame(sample);
+        }),
+    );
+    expect(xs.length, "no frames were sampled").toBeGreaterThan(10);
+
+    // Half a second is less than one beat of the fixture, so at most one
+    // system wrap or loop seam can fall inside it; everything else must be a
+    // step forwards.
+    const backwards = xs.filter((x, i) => i > 0 && x < xs[i - 1] - 1);
+    expect(
+      backwards.length,
+      `the cursor went backwards ${String(backwards.length)} times in half a second`,
+    ).toBeLessThanOrEqual(1);
+
+    const distinct = new Set(xs.map((x) => Math.round(x * 10))).size;
+    expect(
+      distinct,
+      `the cursor took ${String(distinct)} positions across ${String(
+        xs.length,
+      )} frames of half a second — a report arrives every 625ms, so anything near 1 is the block-at-a-time bug`,
+    ).toBeGreaterThan(8);
+  });
+
+  /**
+   * And the same thing as pictures: six frames inside one beat.
+   *
+   * A number saying the cursor moved is not the same as seeing it stand
+   * between two notes of a beat, and that is what the owner reported on.
+   */
+  test("photographs the cursor between two notes of one beat", async ({ page }) => {
+    await openShot(page, "songs-playing", { width: 1440, height: 900 });
+    const host = page.locator(".songs-tab-host");
+    const box = (await host.boundingBox())!;
+    const xs: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      xs.push(
+        await page.evaluate(
+          () =>
+            document.querySelector(".songs-tab-host .at-cursor-beat")?.getBoundingClientRect().x ??
+            -1,
+        ),
+      );
+      await page.screenshot({
+        path: path.join(OUT, `cursor-frame-${String(i)}.png`),
+        clip: { x: box.x, y: box.y, width: Math.min(700, box.width), height: 160 },
+        scale: "css",
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.log(`[w34] cursor x across six frames: ${xs.map((x) => x.toFixed(1)).join(", ")}`);
+    expect(new Set(xs.map((x) => Math.round(x))).size).toBeGreaterThan(2);
+  });
+
+  /**
+   * The click starts off over a song that brings its own band, and its switch
+   * is on the row (W34 item 7).
+   *
+   * The owner: *"is the drums playing by default? i've played tabs with no
+   * drums and it still plays them"*. His click's sound is a kit — the chip in
+   * the header says Drum — so a click ticking through every bar of a song
+   * with its own drums is a drummer playing along.
+   */
+  for (const size of [
+    { name: "the smallest window", width: 480, height: 780 },
+    { name: "the pictures", width: 1440, height: 900 },
+    { name: "the owner's window", width: 2000, height: 1124 },
+  ]) {
+    test(`shows the click's switch on the strip at ${size.name}`, async ({ page }) => {
+      await openShot(page, "songs", size);
+      const chip = page.locator(".songs-strip > .songs-strip-click .songs-click-chip");
+      await expect(chip, "the click's switch is not on the strip").toHaveCount(1);
+      // On the row and inside the window, not folded away into "More".
+      await insideViewport(page, ".songs-click-chip", `the click chip at ${size.name}`, size);
+
+      // The shot song has drums and a bass, so the click starts off.
+      await expect(chip).toHaveAttribute("aria-pressed", "false");
+      await chip.click();
+      await expect(chip).toHaveAttribute("aria-pressed", "true");
+      await chip.click();
+      await expect(chip).toHaveAttribute("aria-pressed", "false");
+    });
+  }
+
+  /**
+   * The space bar plays the song and never scrolls the page of music
+   * (W34 item 3).
+   *
+   * The tab takes the caret so the arrow keys and Esc reach it, and a
+   * focusable box inside a scroller is exactly the thing a browser scrolls
+   * when you press Space on it. The window's handler calls `preventDefault`
+   * for a bound key, which is what stops that — and the dispatcher no longer
+   * takes the caret off a `role="application"` widget, so the arrows still
+   * work after you have pressed play.
+   */
+  test("plays with the space bar without scrolling the tab", async ({ page }) => {
+    await openShot(page, "songs", { width: 1440, height: 900 }, "ember", { song: "long" });
+    const overlay = page.locator(".songs-tab-overlay");
+    await overlay.click({ position: { x: 60, y: 60 } });
+    await expect
+      .poll(() => page.evaluate(() => document.activeElement?.className ?? ""))
+      .toContain("songs-tab-overlay");
+
+    const watching = page.evaluate(
+      () =>
+        new Promise<boolean>((resolve) => {
+          document.addEventListener(
+            "keydown",
+            (e) => {
+              if (e.key === " ") resolve(e.defaultPrevented);
+            },
+            { once: true },
+          );
+        }),
+    );
+    await page.keyboard.press("Space");
+    expect(
+      await watching,
+      "the space bar was left to the browser, which scrolls the page of music",
+    ).toBe(true);
+
+    // It played...
+    await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+    // ...and the tab still holds the keyboard, so the arrows still work.
+    expect(
+      await page.evaluate(() => document.activeElement?.className ?? ""),
+      "pressing play took the caret off the tab",
+    ).toContain("songs-tab-overlay");
+  });
+
+  /**
+   * The pictures. Not an assertion — a thing to look at.
+   *
+   * Stopped and playing, at the two windows the brief names, plus the numbers
+   * printed beside them so a report can quote what was measured rather than
+   * what was hoped for.
+   */
+  for (const shot of ["songs", "songs-playing"]) {
+    for (const size of [
+      { width: 1440, height: 900 },
+      { width: 2000, height: 1124 },
+    ]) {
+      test(`photographs ${shot} at ${String(size.width)}x${String(size.height)}`, async ({
+        page,
+      }) => {
+        await openShot(page, shot, size);
+        const boxes = (await room(page))!;
+        await page.screenshot({
+          path: path.join(OUT, `${shot}-${String(size.width)}x${String(size.height)}.png`),
+        });
+        // eslint-disable-next-line no-console
+        console.log(
+          `[w34] ${shot} ${String(size.width)}x${String(size.height)}: stage ${String(
+            Math.round(boxes.content.width),
+          )}px, tab frame ${String(Math.round(boxes.frame.width))}x${String(
+            Math.round(boxes.frame.height),
+          )} — ${String(Math.round((boxes.frame.width / boxes.content.width) * 100))}% of the stage's width, left air ${String(
+            Math.round(boxes.frame.left - boxes.content.left),
+          )}px, right air ${String(Math.round(boxes.content.right - boxes.frame.right))}px`,
+        );
+        expect(boxes.frame.width).toBeGreaterThan(200);
+      });
+    }
+  }
+});

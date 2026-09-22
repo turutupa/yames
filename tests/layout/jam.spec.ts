@@ -1,5 +1,22 @@
 import { test, expect } from "@playwright/test";
-import { openShot, fitsOnOneLine, noSidewaysScroll } from "./fits";
+import { openShot, fitsOnOneLine, insideViewport, noSidewaysScroll, IN_ENGLISH } from "./fits";
+
+/*
+ * English only, for now.
+ *
+ * Every jam scene is driven by pressing Jam's own labels — "set up", "cheat
+ * sheet", "edit changes", and a timeline that has to read "bar 5 of" before
+ * the scene is ready — and those strings are English literals in
+ * `src/shots/scenarios.ts`. Under `YAMES_LAYOUT_LOCALE` the buttons are still
+ * there but no longer answer to those names, and the whole file times out
+ * thirty seconds at a time saying nothing useful.
+ *
+ * Skipping is honest and cheap; making it run means giving the scenes locale
+ * keys instead of labels, which is Jam's own piece of work and not the Songs
+ * wave's. Songs, the review, the blocks gallery and Settings all run in every
+ * language.
+ */
+test.skip(!IN_ENGLISH, "jam scenes are driven by Jam's English labels (see the note in jam.spec.ts)");
 
 /**
  * The Jam playing screen, measured in a real browser.
@@ -20,6 +37,36 @@ const WIDTHS = [
   { name: "over the breakpoint", width: 1100, height: 900 },
   { name: "wide", width: 1400, height: 900 },
 ];
+
+/**
+ * Is it on screen while the band plays? (added 2026-09-20 with W18)
+ *
+ * Every test in this file asks whether a box fits its PARENT, and a row fits
+ * its parent perfectly while the parent sits below the bottom of the window.
+ * That is how Songs shipped with the faders A13 puts on the stage 28px under
+ * a 900px window, past a hundred and seven green tests — so the question gets
+ * asked here too, of the controls A13 names for Jam: what each player is
+ * doing, and how loud they are.
+ *
+ * The chord, the beat and the band, at the two window heights a person
+ * practises at. The rest of the Jam stage — the timeline, the practice tools —
+ * is below the fold by design and this does not claim otherwise
+ * (`jam.css`: "five stacked sections and a timeline, so it overflows a 900px
+ * window"); what may not be below it is the row you reach for mid-chorus.
+ */
+test.describe("what you reach for mid-chorus", () => {
+  for (const size of [
+    { name: "a laptop", width: 1100, height: 720 },
+    { name: "the pictures", width: 1400, height: 900 },
+  ]) {
+    test(`is on screen while the jam runs at ${size.name}`, async ({ page }) => {
+      await openShot(page, "jam", size);
+      await expect(page.locator(".transport-play.playing")).toHaveCount(1);
+      await insideViewport(page, ".jam-now", `the chord at ${size.name}`, size);
+      await insideViewport(page, ".jam-band .jam-band-lane", `the band at ${size.name}`, size);
+    });
+  }
+});
 
 test.describe("the band rows", () => {
   for (const size of WIDTHS) {
@@ -146,7 +193,21 @@ test.describe("a player's heading in the setup drawer", () => {
     const control = (await page.$(
       '.jam-sheet-group[data-player="drums"] .jam-sheet-group-control',
     ))!;
-    const before = (await control.boundingBox())!;
+    // The drawer slides in from the right, and the scene reports ready while
+    // it is still moving: `before` came back as 1234 one day and 1201 the
+    // next against an `after` that was always 1195, on every branch including
+    // `main` (2026-09-21). That is the drawer arriving, not the switch
+    // pushing anything. Wait until the control has stopped before asking
+    // where it is.
+    let before = (await control.boundingBox())!;
+    for (let still = 0; still < 3; ) {
+      await page.evaluate(
+        () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+      );
+      const now = (await control.boundingBox())!;
+      still = Math.round(now.x) === Math.round(before.x) ? still + 1 : 0;
+      before = now;
+    }
 
     await (await control.$('[role="switch"]'))!.click();
     await page.evaluate(

@@ -110,7 +110,13 @@
       "downloadVoices": "Tải giọng nói",
       "installed": "Huấn luyện viên {{tier}} đã cài ({{size}})",
       "removing": "Đang gỡ…",
-      "removeModels": "Gỡ mô hình"
+      "removeModels": "Gỡ mô hình",
+      "stance": "Lối huấn luyện",
+      "stanceHint": "Huấn luyện viên khắt khe với bạn đến đâu khi bạn đang chơi",
+      "stanceStrict": "Khắt khe",
+      "stanceLearning": "Đang học",
+      "stanceStrictDesc": "Gọi tên một thói quen ngay khi nó lộ ra, và nói thành lời. Đây là mức phù hợp khi bạn đang mài một đoạn mình đã thuộc.",
+      "stanceLearningDesc": "Cho bạn thêm một nửa khoảng dung sai trước khi nói bất cứ điều gì, giữ lời nhắc ra khỏi tai bạn trong lúc chơi, và bắt đầu từ chỗ đã ổn. Điểm của bạn vẫn được tính y hệt nhau ở cả hai cách."
     },
     "general": {
       "title": "Chung",
@@ -177,7 +183,8 @@
         "metronome": "Máy đếm nhịp",
         "view": "Chế độ xem",
         "navigation": "Điều hướng",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Bài hát"
       },
       "actions": {
         "play": "Phát / Dừng",
@@ -211,7 +218,17 @@
         "jam-next-section": "Đoạn kế tiếp",
         "jam-prev-section": "Đoạn trước",
         "jam-loop-section": "Lặp đoạn này",
-        "jam-take": "Thu bản này"
+        "jam-take": "Thu bản này",
+        "tab-5": "Trang Bài hát",
+        "songs-loop-start": "Bắt đầu lặp từ đây",
+        "songs-loop-end": "Kết thúc lặp ở đây",
+        "songs-loop": "Lặp lại đoạn",
+        "songs-loop-clear": "Lại cả bài",
+        "songs-loop-earlier": "Đoạn sớm hơn một ô nhịp",
+        "songs-loop-later": "Đoạn muộn hơn một ô nhịp",
+        "songs-take": "Thu bản này",
+        "songs-camera": "Quay hình",
+        "jam-camera": "Quay hình"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -245,7 +262,17 @@
         "jam-next-section": "Nhảy tới đầu đoạn kế tiếp ngay ở vạch nhịp",
         "jam-prev-section": "Quay về đầu đoạn trước ngay ở vạch nhịp",
         "jam-loop-section": "Lặp đoạn bạn đang chơi, hoặc bỏ lặp",
-        "jam-take": "Thu vào lần phát tiếp theo, hoặc dừng thu"
+        "jam-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
+        "tab-5": "Chuyển sang trang Bài hát",
+        "songs-loop-start": "Cho đoạn bắt đầu ở ô nhịp bạn đang chơi",
+        "songs-loop-end": "Cho đoạn kết thúc ở ô nhịp bạn đang chơi",
+        "songs-loop": "Chơi đi chơi lại những ô nhịp đã chọn, hoặc dừng",
+        "songs-loop-clear": "Quên đoạn đi và chơi cả bài từ đầu",
+        "songs-loop-earlier": "Dời những ô nhịp đã chọn lùi một ô nhịp, giữ nguyên độ dài",
+        "songs-loop-later": "Dời những ô nhịp đã chọn tới một ô nhịp, giữ nguyên độ dài",
+        "songs-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
+        "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay",
+        "jam-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Không kiểm tra được",
       "sounds": "Âm thanh",
       "soundsCredit": "Bộ Club là Virtuosity Drums của Versilian Studios và Karoryfer Samples, do Austin McMahon chơi (thuộc phạm vi công cộng). Bộ Studio là DRSKit của dự án DrumGizmo (CC BY 4.0).",
-      "madeWith": "Được làm bằng {{heart}} cho các nhạc sĩ"
+      "madeWith": "Được làm bằng {{heart}} cho các nhạc sĩ",
+      "soundsCreditSongs": "Các nhạc cụ còn lại lấy từ bộ tiếng General MIDI của Sonivox (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Bài hát",
+      "catchDownloads": "Mời mở bài bạn vừa tải",
+      "catchDownloadsHint": "Khi Bài hát đang mở, Yames nhìn vào thư mục tải xuống của bạn và luôn hỏi trước khi mở bất cứ thứ gì. Tệp của bạn không bao giờ bị di chuyển, đổi tên hay xoá.",
+      "folder": "Trông chừng thư mục này",
+      "folderUnknown": "Máy này chưa cho Yames biết tệp tải về nằm ở đâu",
+      "chooseFolder": "Chọn...",
+      "useDownloads": "Dùng thư mục tải xuống",
+      "turnedDown": "Bài bạn đã bỏ qua",
+      "turnedDownHint": "{{n}} tệp Yames sẽ không mời lại",
+      "forgetTurnedDown": "Mời lại",
+      "soundSet": "Bộ tiếng",
+      "soundSetBuiltIn": "Bộ đi kèm Yames",
+      "chooseSoundSet": "Chọn tệp .sf2",
+      "useBuiltInSoundSet": "Dùng bộ có sẵn"
     }
   },
   "keybindings": {

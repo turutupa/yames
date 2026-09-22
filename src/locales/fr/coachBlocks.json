@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "Boucler les mesures {{from}}–{{to}}",
+      "loopBarsAt": "Boucler les mesures {{from}}–{{to}} à {{bpm}} BPM",
+      "ramp": "Monte-la de {{from}} à {{to}}",
+      "click": {
+        "1": "Clic sur les noires",
+        "2": "Clic sur les croches",
+        "3": "Clic sur les triolets",
+        "4": "Clic sur les doubles-croches",
+        "5": "Clic sur les quintolets",
+        "6": "Clic sur les sextolets"
+      },
+      "loadPreset": "Préparer {{name}}",
+      "loadJam": "Jouer sur {{name}}",
+      "comeBack": {
+        "tomorrow": "Reviens-y demain",
+        "inDays": "Reviens-y dans {{days}} jours"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, sur le manche"
+    },
+    "position": {
+      "open": "position ouverte",
+      "rootOn6": "fondamentale sur la 6e corde",
+      "rootOn5": "fondamentale sur la 5e corde",
+      "rootOn4": "fondamentale sur la 4e corde",
+      "rootOn3": "fondamentale sur la 3e corde"
+    },
+    "shape": {
+      "which": "position {{index}} sur {{count}}"
+    },
+    "passage": {
+      "bars": "Mesures {{from}}–{{to}} de {{title}}"
+    },
+    "progress": {
+      "caption": "de {{first}} % à {{last}} %, sur {{goes}} essais",
+      "aria": "Comment se sont passées les mesures {{from}} à {{to}}"
+    },
+    "tab": {
+      "attempt": "coloré d'après cet essai",
+      "plain": "les notes telles qu'elles sont écrites",
+      "soon": "La tablature de ces mesures arrive bientôt."
+    },
+    "take": {
+      "whole": "Ta prise de {{title}}",
+      "any": "Ta prise",
+      "soon": "Réécouter une prise arrive bientôt."
+    },
+    "compare": {
+      "title": "Deux essais sur {{title}}, côte à côte",
+      "any": "Deux essais, côte à côte",
+      "soon": "Écouter deux essais côte à côte arrive bientôt."
+    }
+  }
+}

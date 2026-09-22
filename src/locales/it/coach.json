@@ -35,9 +35,6 @@
     "beatPlacement": "Posizionamento sul beat"
   },
   "coachReport": {
-    "cov": "Cop",
-    "eff": "Eff",
-    "grid": "Griglia",
     "segment": "Segmento",
     "thinkingAria": "Il coach si prepara a parlare",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "a tempo",
     "pocketEarly": "Hai suonato con una media di {{ms}} ms in anticipo",
     "pocketLate": "Hai suonato con una media di {{ms}} ms in ritardo",
-    "pocketCentred": "Il tuo timing era centrato sul beat (media di ±5 ms)"
+    "pocketCentred": "Il tuo timing era centrato sul beat (media di ±5 ms)",
+    "covLabel": "Movimenti suonati",
+    "covTitle": "Quanti dei movimenti che aspettavo sono stati davvero suonati",
+    "effLabel": "Note sul movimento",
+    "effTitle": "Di tutto quello che ho sentito, quanto è caduto su un movimento invece che fra due",
+    "gridLabel": "Attaccato al clic",
+    "gridTitle": "Quanto tutto il passaggio ha seguito il clic"
   },
   "eval": {
     "today": "Oggi",

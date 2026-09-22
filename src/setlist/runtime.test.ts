@@ -2,7 +2,16 @@
  * The setlist runtime is a state machine a player leaves running unattended,
  * so the tests are written against the rules rather than against the code:
  * U9.3's arming, U9.6's repeat counts, and the boundaries where a trigger
- * lands on the same downbeat that started the step.
+ * lands on the same bar line that started the step.
+ *
+ * `play` below drives the reducer with ticks shaped the way `engine.rs` emits
+ * them — a bar-local `measureBeat` that cycles and wraps, and subdivisions
+ * that share a beat — and works `barStart` out of them exactly as
+ * `useSetlistRunner` does. It used to hand the reducer
+ * `position % beatsPerBar === 0` under the name `isDownbeat`, which is a
+ * contract no engine supplies: the engine's `isDownbeat` is `sub == 0`, true
+ * on EVERY whole beat. That is why a green suite sat over a setlist whose
+ * "after 8 bars" moved on after 8 beats.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -15,7 +24,8 @@ import {
   type SetlistEvent,
   type SetlistRunState,
 } from "./runtime";
-import type { Setlist, SetlistStep, SetlistTransition, SetlistTrigger } from "../types";
+import { engineTick, isBarStart } from "../test/engineTicks";
+import type { BeatEvent, Setlist, SetlistStep, SetlistTransition, SetlistTrigger } from "../types";
 
 // --- fixtures --------------------------------------------------------------
 
@@ -42,10 +52,30 @@ function setlistOf(steps: SetlistStep[], repeat = 1): Setlist {
 }
 
 /**
- * A driver that plays a setlist the way the engine would: `bar` bars of
- * `beatsPerBar`, one beat at a time, collecting every effect. Seconds run
- * from the beat clock so a `seconds` trigger can be exercised without
- * touching wall time.
+ * What `useSetlistRunner` makes of one engine tick, written out here so the
+ * runtime's tests and the hook cannot drift apart.
+ *
+ * Subdivision ticks are not beats and are dropped; a bar opens on the pair
+ * the engine itself tests when it opens one, which `isBarStart` is. The
+ * ticks themselves come from `test/engineTicks.ts` — the one builder in the
+ * app that knows `isDownbeat` is `sub == 0` and true on every beat.
+ */
+function fromEngine(tick: BeatEvent, seconds: number): SetlistEvent | null {
+  if (tick.subdivision !== 0) return null;
+  return { kind: "beat", barStart: isBarStart(tick), seconds };
+}
+
+/**
+ * A driver that plays a setlist the way the engine plays one: `beats` whole
+ * beats of a bar `beatsPerBar` long, each split into `subdivisions` ticks,
+ * collecting every effect. `measureBeat` cycles and wraps exactly as the
+ * engine wraps it, so "which tick opens a bar" is a fact of the stream rather
+ * than something the test asserts by hand. Seconds run from the beat clock so
+ * a `seconds` trigger can be exercised without touching wall time.
+ *
+ * The log has one entry per WHOLE beat, because that is what reaches the
+ * reducer; a beat's subdivision ticks are generated and dropped, which is the
+ * point of generating them.
  */
 function play(
   setlist: Setlist,
@@ -53,12 +83,15 @@ function play(
     beats: number;
     beatsPerBar?: number;
     secondsPerBeat?: number;
+    /** Ticks per beat. 1 is no subdivision; 4 is sixteenths on a quarter. */
+    subdivisions?: number;
     /** Events injected before the beat of that index (0-based). */
     inject?: Record<number, SetlistEvent>;
     startAtBeatInBar?: number;
   },
 ) {
   const beatsPerBar = options.beatsPerBar ?? 4;
+  const subdivisions = options.subdivisions ?? 1;
   const secondsPerBeat = options.secondsPerBeat ?? 0.5;
   const log: { beat: number; state: SetlistRunState; effects: SetlistEffect[] }[] = [];
   const applied: number[] = [];
@@ -68,17 +101,24 @@ function play(
   state = startResult.state;
   for (const e of startResult.effects) if (e.kind === "applyStep") applied.push(e.index);
 
-  let position = options.startAtBeatInBar ?? 0;
+  let measureBeat = (options.startAtBeatInBar ?? 0) % beatsPerBar;
   for (let i = 0; i < options.beats; i++) {
     const injected = options.inject?.[i];
     if (injected) state = setlistReduce(setlist, state, injected).state;
-    const seconds = (i + 1) * secondsPerBeat;
-    const isDownbeat = position % beatsPerBar === 0;
-    const result = setlistReduce(setlist, state, { kind: "beat", isDownbeat, seconds });
-    state = result.state;
-    log.push({ beat: i, state, effects: result.effects });
-    for (const e of result.effects) if (e.kind === "applyStep") applied.push(e.index);
-    position += 1;
+    let effects: SetlistEffect[] = [];
+    for (let sub = 0; sub < subdivisions; sub++) {
+      // Seconds are wall time, so a subdivision tick is not free: the beat's
+      // own tick opens it and the rest fall inside it.
+      const seconds = (i + sub / subdivisions + 1) * secondsPerBeat;
+      const event = fromEngine(engineTick({ measureBeat, subdivision: sub }), seconds);
+      if (!event) continue;
+      const result = setlistReduce(setlist, state, event);
+      state = result.state;
+      effects = result.effects;
+    }
+    log.push({ beat: i, state, effects });
+    for (const e of effects) if (e.kind === "applyStep") applied.push(e.index);
+    measureBeat = (measureBeat + 1) % beatsPerBar;
   }
   return { state, log, applied };
 }
@@ -102,7 +142,7 @@ describe("triggerFired", () => {
   });
 
   it("treats a zero or nonsense count as a gap that never comes due", () => {
-    // A `bars: 0` step would switch on its own first downbeat and then on
+    // A `bars: 0` step would switch on its own first bar line and then on
     // the next, running a whole setlist through itself inside one bar.
     expect(triggerFired({ kind: "bars", bars: 0 }, 0, 0)).toBe(false);
     expect(triggerFired({ kind: "bars", bars: -2 }, 10, 0)).toBe(false);
@@ -173,11 +213,11 @@ describe("resolveNext", () => {
 
 // --- U9.3, the arming rule -------------------------------------------------
 
-describe("the switch arms and lands on a downbeat (U9.3)", () => {
+describe("the switch arms and lands on a bar line (U9.3)", () => {
   it("does not switch mid-bar when a seconds trigger fires", () => {
-    // 4/4 at 0.5 s a beat. The step's clock starts at its own downbeat, so
+    // 4/4 at 0.5 s a beat. The step's clock starts at its own bar line, so
     // the gap comes due 1.5 s in — the last beat of bar 1, and the switch
-    // must wait for the downbeat of bar 2.
+    // must wait for the bar line of bar 2.
     const setlist = setlistOf([
       step("a", { kind: "seconds", seconds: 1.2 }),
       step("b", { kind: "manual" }),
@@ -188,19 +228,19 @@ describe("the switch arms and lands on a downbeat (U9.3)", () => {
     expect(log[3].state.phase).toBe("armed");
     expect(log[3].state.stepIndex).toBe(0); // still playing step a
     expect(log[3].effects).toEqual([]);
-    // Beat index 4 is the downbeat of bar 2. The switch lands there.
+    // Beat index 4 opens bar 2. The switch lands there.
     expect(log[4].state.phase).toBe("switching");
     expect(log[4].state.stepIndex).toBe(1);
     expect(log[4].effects).toEqual([{ kind: "applyStep", index: 1, step: setlist.steps[1] }]);
   });
 
-  it("switches on the very downbeat a bars trigger comes due, not a bar later", () => {
+  it("switches on the very bar line a bars trigger comes due, not a bar later", () => {
     const setlist = setlistOf([
       step("a", { kind: "bars", bars: 2 }),
       step("b", { kind: "manual" }),
     ]);
     const { log } = play(setlist, { beats: 12 });
-    // Beat 0 anchors bar 1. Beats 4 and 8 are the next two downbeats, so
+    // Beat 0 anchors bar 1. Beats 4 and 8 are the next two bar lines, so
     // two bars have elapsed at beat 8 and the switch is due there.
     expect(log[4].state.barsInStep).toBe(1);
     expect(log[7].state.stepIndex).toBe(0);
@@ -208,7 +248,7 @@ describe("the switch arms and lands on a downbeat (U9.3)", () => {
     expect(log[8].state.phase).toBe("switching");
   });
 
-  it("holds a manual advance until the next downbeat", () => {
+  it("holds a manual advance until the next bar line", () => {
     const setlist = setlistOf([step("a", { kind: "manual" }), step("b", { kind: "manual" })]);
     // Pressed on beat 2 of bar 1 (index 1).
     const { log } = play(setlist, { beats: 8, inject: { 1: { kind: "advance" } } });
@@ -218,7 +258,7 @@ describe("the switch arms and lands on a downbeat (U9.3)", () => {
     expect(log[4].state.stepIndex).toBe(1);
   });
 
-  it("lands the advance on the first downbeat even when it is pressed before one", () => {
+  it("lands the advance on the first bar line even when it is pressed before one", () => {
     // The setlist was loaded mid-bar and skipped before bar one ever started.
     const setlist = setlistOf([step("a", { kind: "manual" }), step("b", { kind: "manual" })]);
     const { log } = play(setlist, {
@@ -228,7 +268,7 @@ describe("the switch arms and lands on a downbeat (U9.3)", () => {
     });
     expect(log[0].state.phase).toBe("armed");
     expect(log[1].state.phase).toBe("armed");
-    expect(log[2].state.stepIndex).toBe(1); // the downbeat two beats later
+    expect(log[2].state.stepIndex).toBe(1); // the bar line two beats later
   });
 
   it("does not arm twice, and a second press does not skip two steps", () => {
@@ -257,9 +297,9 @@ describe("the switch arms and lands on a downbeat (U9.3)", () => {
 
 // --- the shape of a step's own clock ---------------------------------------
 
-describe("a step's bars and seconds start at its own downbeat", () => {
+describe("a step's bars and seconds start at its own bar line", () => {
   it("does not count the half bar a setlist was started in", () => {
-    // Started two beats into a 4/4 bar: the first downbeat is bar one, and
+    // Started two beats into a 4/4 bar: the first bar line is bar one, and
     // a 1-bar gap must last a whole bar from there.
     const setlist = setlistOf([
       step("a", { kind: "bars", bars: 1 }),
@@ -267,10 +307,10 @@ describe("a step's bars and seconds start at its own downbeat", () => {
     ]);
     const { log } = play(setlist, { beats: 8, startAtBeatInBar: 2 });
     expect(log[1].state.anchored).toBe(false);
-    expect(log[2].state.anchored).toBe(true); // the downbeat two beats in
+    expect(log[2].state.anchored).toBe(true); // the bar line two beats in
     expect(log[2].state.barsInStep).toBe(0);
     expect(log[5].state.stepIndex).toBe(0); // still bar one of step a
-    expect(log[6].state.stepIndex).toBe(1); // the next downbeat, one bar later
+    expect(log[6].state.stepIndex).toBe(1); // the next bar line, one bar later
   });
 
   it("gives the second step a full bar too", () => {
@@ -299,6 +339,153 @@ describe("a step's bars and seconds start at its own downbeat", () => {
   });
 });
 
+// --- a bar is a bar ---------------------------------------------------------
+
+describe("a bar is a bar, and never a beat", () => {
+  /*
+   * The defect this file was rewritten around. The beat event carried the
+   * engine's `isDownbeat` — `sub == 0`, true on EVERY whole beat — under a
+   * name the reducer read as a bar line, so "after 8 bars" moved on after 8
+   * beats, two bars of rest were two beats of it, and an armed switch landed
+   * on the next beat instead of at the top of the bar U9.3 exists to protect.
+   * A musician who typed 32 into a 4/4 step to get eight bars was not wrong
+   * about the arithmetic.
+   */
+  const meters: [name: string, beatsPerBar: number][] = [
+    ["4/4", 4],
+    ["3/4", 3],
+    ["7/8 grouped 2+2+3", 7],
+    ["a FREE bar of one beat", 1],
+  ];
+
+  for (const [name, beatsPerBar] of meters) {
+    it(`gives a step of eight bars eight whole bars of ${name}`, () => {
+      const setlist = setlistOf([
+        step("a", { kind: "bars", bars: 8 }),
+        step("b", { kind: "manual" }),
+      ]);
+      const switchAt = 8 * beatsPerBar;
+      const { log } = play(setlist, { beats: switchAt + beatsPerBar + 2, beatsPerBar });
+
+      // Eight BEATS in, a step of eight bars is still playing — unless the
+      // bar really is one beat long, where eight beats is the honest answer.
+      if (beatsPerBar > 1) expect(log[8].state.stepIndex, "eight beats in").toBe(0);
+      expect(log[switchAt - 1].state.stepIndex, "the beat before").toBe(0);
+      expect(log[switchAt - 1].state.barsInStep).toBe(7);
+      expect(log[switchAt].state.stepIndex, "the eighth bar line").toBe(1);
+      expect(log[switchAt].state.phase).toBe("switching");
+    });
+  }
+
+  it("counts the same with sixteenths running underneath", () => {
+    // Four ticks to the beat, sixteen to the bar, and not one of them is a
+    // bar: a drill of sixteenths used to read a bar of 4/4 as sixteen.
+    const setlist = setlistOf([
+      step("a", { kind: "bars", bars: 2 }),
+      step("b", { kind: "manual" }),
+    ]);
+    const { log } = play(setlist, { beats: 12, subdivisions: 4 });
+    expect(log[7].state.stepIndex).toBe(0);
+    expect(log[8].state.stepIndex).toBe(1);
+    expect(log[8].state.barsInStep).toBe(0);
+  });
+
+  it("rests bars, not beats", () => {
+    // 3/4. Bar one of step a ends at beat 3; two bars of rest are six beats,
+    // so step b begins at beat 9 — not at beat 5, where two rest BEATS end.
+    const setlist = setlistOf([
+      step("a", { kind: "bars", bars: 1 }, { kind: "rest", bars: 2 }),
+      step("b", { kind: "manual" }),
+    ]);
+    const { log } = play(setlist, { beats: 14, beatsPerBar: 3 });
+    expect(log[3].state.phase).toBe("resting");
+    expect(log[3].effects).toEqual([{ kind: "rest", bars: 2 }]);
+    expect(log[5].state.phase).toBe("resting");
+    expect(log[8].state.stepIndex).toBe(0);
+    expect(log[9].state.stepIndex).toBe(1);
+  });
+
+  it("holds an armed switch for the rest of the bar, however long the bar is", () => {
+    // 7/8. Skip pressed on the third beat of bar two: the switch waits the
+    // five beats left of that bar. It used to land on the very next one,
+    // which is the cut-in-half bar U9.3 was written to prevent.
+    const setlist = setlistOf([step("a", { kind: "manual" }), step("b", { kind: "manual" })]);
+    const { log } = play(setlist, {
+      beats: 20,
+      beatsPerBar: 7,
+      inject: { 9: { kind: "advance" } },
+    });
+    for (let i = 9; i < 14; i++) {
+      expect(log[i].state.phase, `beat ${i}`).toBe("armed");
+      expect(log[i].state.stepIndex, `beat ${i}`).toBe(0);
+    }
+    expect(log[14].state.stepIndex).toBe(1);
+    expect(log[14].effects).toEqual([{ kind: "applyStep", index: 1, step: setlist.steps[1] }]);
+  });
+
+  it("counts a seconds gap in seconds and hands the switch a bar line", () => {
+    // Minutes-based triggers are untouched by any of this: the gap still comes
+    // due on wall time, and bars only decide where it lands. 7/8 at half a
+    // second a beat, and the step's clock starts at its own bar line — so the
+    // gap comes due on the sixth beat and waits the rest of the bar out.
+    const setlist = setlistOf([
+      step("a", { kind: "seconds", seconds: 2.2 }),
+      step("b", { kind: "manual" }),
+    ]);
+    const { log } = play(setlist, { beats: 16, beatsPerBar: 7, secondsPerBeat: 0.5 });
+    expect(log[4].state.phase).toBe("running"); // 2.0 s in, not yet due
+    expect(log[5].state.phase).toBe("armed"); // 2.5 s
+    expect(log[6].state.phase).toBe("armed");
+    expect(log[6].state.stepIndex).toBe(0);
+    expect(log[7].state.stepIndex).toBe(1); // the top of bar two
+  });
+
+  it("counts a step's bars on its own meter, not on the one before it", () => {
+    /*
+     * A 7/8 step after a 4/4 one, with the stream `engine.rs` really emits
+     * across that seam — and the seam is the point.
+     *
+     * The switch is posted ON the bar line it lands on, and the config only
+     * leaves the UI once that tick has already sounded. The engine used to
+     * restack its grid at the very next tick, so the seam bar was ONE BEAT
+     * long: two accents a beat apart, and the arriving step's bar one spent
+     * on a bar nobody played. It holds the meter now and gives it to the bar
+     * that line opened (`held_meter_due`), so the last bar of the 4/4 step is
+     * four beats, the first bar of the 7/8 step is seven, and there is no bar
+     * between them.
+     */
+    const setlist = setlistOf([
+      step("four", { kind: "bars", bars: 1 }),
+      step("seven", { kind: "bars", bars: 3 }),
+      step("after", { kind: "manual" }),
+    ]);
+    // Written as the bars the player hears rather than as a list of
+    // positions, so a stub bar cannot be typed in here by accident: one bar
+    // of four, then bars of seven from the switch onwards.
+    const bars = [4, 7, 7, 7, 7];
+    const measureBeats = bars.flatMap((n) => Array.from({ length: n }, (_, i) => i));
+    let state = setlistReduce(setlist, IDLE_SETLIST_RUN, { kind: "start", seconds: 0 }).state;
+    const stepAt: number[] = [];
+    measureBeats.forEach((measureBeat, i) => {
+      const event = fromEngine(engineTick({ measureBeat, beatGroups: [2, 2, 3] }), (i + 1) * 0.5);
+      state = setlistReduce(setlist, state, event!).state;
+      stepAt.push(state.stepIndex);
+    });
+
+    // Bar lines at 0, 4, 11, 18 and 25. The switch lands on the 4/4 step's
+    // second bar line, which is the 7/8 step's bar one — so the 7/8 step
+    // counts sevens from there and its third bar ends at beat 25.
+    expect(stepAt[3]).toBe(0);
+    expect(stepAt[4]).toBe(1);
+    expect(stepAt[11]).toBe(1); // where a bar of FOUR would have ended it
+    expect(stepAt[24]).toBe(1);
+    expect(stepAt[25]).toBe(2);
+    // Three bars of seven, all of them played: the step arriving is not a
+    // bar short, and none of its bars is the one-beat one.
+    expect(measureBeats.slice(4, 25).filter((b) => b === 0)).toHaveLength(3);
+  });
+});
+
 // --- ending (U9.6) ---------------------------------------------------------
 
 describe("a setlist ends", () => {
@@ -313,7 +500,7 @@ describe("a setlist ends", () => {
     expect(state.phase).toBe("finished");
   });
 
-  it("waits for the downbeat to end, too", () => {
+  it("waits for the bar line to end, too", () => {
     const setlist = setlistOf([step("a", { kind: "seconds", seconds: 1.2 })]);
     const { log } = play(setlist, { beats: 8, secondsPerBeat: 0.5 });
     expect(log[2].state.phase).toBe("running");
@@ -390,18 +577,60 @@ describe("transitions", () => {
     expect(log[12].state.stepIndex).toBe(1);
   });
 
-  it("treats countIn as a cut for now (U9.5)", () => {
+  it("counts a step in, and the count is not one of its bars (U9.5)", () => {
+    /*
+     * The step is entered on the bar line the switch landed on, and then a
+     * count runs before a note of it is played. The engine hands the count
+     * over by putting `measure_beat` back to 0 on the beat you start playing
+     * on (`is_last_warmup`), so the step gets a SECOND bar line — and an
+     * anchored step had already spent bar one on the count. "Two bars" after
+     * a count-in played one and a bit.
+     *
+     * Four beats of count at 4/4, so the switch is at beat 4, bar one of the
+     * new step opens at beat 8, and its two bars run 8..11 and 12..15.
+     */
+    const counted = setlistOf([
+      step("a", { kind: "bars", bars: 1 }, { kind: "countIn", bars: 1 }),
+      step("b", { kind: "bars", bars: 2 }),
+      step("c", { kind: "manual" }),
+    ]);
+    const { log } = play(counted, { beats: 20 });
+
+    expect(log[4].state.stepIndex).toBe(1);
+    expect(log[4].effects).toEqual([
+      { kind: "applyStep", index: 1, step: counted.steps[1] },
+      { kind: "countIn", beats: 4 },
+    ]);
+    // Entered, but belonging to no bar yet: the count is running.
+    expect(log[4].state.anchored).toBe(false);
+    expect(log[7].state.barsInStep).toBe(0);
+    // The beat the count hands over is bar one, and the seconds clock starts
+    // there too rather than a count earlier.
+    expect(log[8].state.anchored).toBe(true);
+    expect(log[8].state.barsInStep).toBe(0);
+    expect(log[8].state.stepStartedAt).toBe(4.5);
+    expect(log[4].state.stepStartedAt).toBe(2.5);
+    expect(log[12].state.barsInStep).toBe(1);
+    // Two whole bars of playing, then the move on. Anchored, the step would
+    // have gone at beat 12 with one bar and a count behind it.
+    expect(log[15].state.stepIndex).toBe(1);
+    expect(log[16].state.stepIndex).toBe(2);
+  });
+
+  it("a cut hands the step the bar line it landed on, and a count-in does not", () => {
     const cut = setlistOf([
       step("a", { kind: "bars", bars: 1 }, { kind: "cut" }),
-      step("b", { kind: "manual" }),
+      step("b", { kind: "bars", bars: 2 }),
+      step("c", { kind: "manual" }),
     ]);
     const counted = setlistOf([
-      step("a", { kind: "bars", bars: 1 }, { kind: "countIn", bars: 2 }),
-      step("b", { kind: "manual" }),
+      step("a", { kind: "bars", bars: 1 }, { kind: "countIn", bars: 1 }),
+      step("b", { kind: "bars", bars: 2 }),
+      step("c", { kind: "manual" }),
     ]);
-    const a = play(cut, { beats: 12 });
-    const b = play(counted, { beats: 12 });
-    expect(b.log.map((l) => l.state.stepIndex)).toEqual(a.log.map((l) => l.state.stepIndex));
+    // Same switch, one bar apart afterwards: the count is the bar between.
+    expect(play(cut, { beats: 20 }).log[12].state.stepIndex).toBe(2);
+    expect(play(counted, { beats: 20 }).log[12].state.stepIndex).toBe(1);
   });
 
   it("treats a rest of zero bars as a cut", () => {
@@ -478,12 +707,12 @@ describe("a setlist edited while it runs", () => {
       step("b", { kind: "manual" }),
     ]);
     let state = setlistReduce(setlist, IDLE_SETLIST_RUN, { kind: "start", seconds: 0 }).state;
-    state = setlistReduce(setlist, state, { kind: "beat", isDownbeat: true, seconds: 0.5 }).state;
+    state = setlistReduce(setlist, state, { kind: "beat", barStart: true, seconds: 0.5 }).state;
     state = setlistReduce(setlist, state, { kind: "advance" }).state;
     const shortened = setlistOf([setlist.steps[0]]);
     const landed = setlistReduce(shortened, state, {
       kind: "beat",
-      isDownbeat: true,
+      barStart: true,
       seconds: 2.5,
     });
     expect(landed.state.phase).toBe("finished");
@@ -498,7 +727,7 @@ describe("a setlist edited while it runs", () => {
     expect(stopped.effects).toEqual([]);
     // And a beat arriving after the stop changes nothing.
     expect(
-      setlistReduce(setlist, stopped.state, { kind: "beat", isDownbeat: true, seconds: 9 }).state,
+      setlistReduce(setlist, stopped.state, { kind: "beat", barStart: true, seconds: 9 }).state,
     ).toEqual(IDLE_SETLIST_RUN);
   });
 });
@@ -539,7 +768,7 @@ describe("the count-in at the top of a setlist", () => {
     let state = setlistReduce(setlist, IDLE_SETLIST_RUN, { kind: "start", seconds: 0 }).state;
     const seen: string[] = [];
     for (let i = 0; i < 200 && seen.length < 40; i++) {
-      const step = setlistReduce(setlist, state, { kind: "beat", isDownbeat: true, seconds: i });
+      const step = setlistReduce(setlist, state, { kind: "beat", barStart: true, seconds: i });
       state = step.state;
       for (const e of step.effects) seen.push(e.kind);
     }
@@ -599,7 +828,7 @@ describe("starting where you are looking", () => {
     let state = setlistReduce(three, IDLE_SETLIST_RUN, { kind: "start", seconds: 0, from: 1 }).state;
     const applied: number[] = [1];
     for (let i = 0; i < 400 && state.phase !== "finished"; i++) {
-      const r = setlistReduce(three, state, { kind: "beat", isDownbeat: true, seconds: i });
+      const r = setlistReduce(three, state, { kind: "beat", barStart: true, seconds: i });
       state = r.state;
       for (const e of r.effects) if (e.kind === "applyStep") applied.push(e.index);
     }

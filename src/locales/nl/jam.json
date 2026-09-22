@@ -711,6 +711,39 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Het geluid",
+      "yames": "Yames en mijn ingang",
+      "everything": "Alles wat deze computer speelt",
+      "warning": "Dit neemt alles op wat deze computer speelt, niet alleen Yames — een videogesprek, een melding, een nummer in de browser.",
+      "listensTo": "Het luistert naar {{device}}.",
+      "check": "Geluid controleren",
+      "listening": "Luistert…",
+      "level": "Niveau",
+      "silent": "Er kwam niets binnen. Controleer of het volume van deze computer open staat en niet gedempt is.",
+      "notHere": "Deze computer kan Yames niet geven wat zijn luidsprekers spelen, dus een opname is hier Yames en jouw ingang.",
+      "recordingEverything": "Neemt alles op wat deze computer speelt",
+      "recordingYames": "Neemt Yames en jouw ingang op",
+      "takeEverything": "alles wat deze computer speelde"
+    },
+    "takeVideo": {
+      "save": "Opslaan als video",
+      "chorus": "Ronde {{count}}",
+      "chorus_one": "Ronde {{count}}",
+      "chorus_other": "Ronde {{count}}",
+      "next": "dan"
+    },
+    "watch": {
+      "open": "Terugluisteren",
+      "where": "Maat {{bar}} · {{chorus}}",
+      "goToBar": "Naar maat {{bar}}",
+      "barBack": "Een maat terug",
+      "barOn": "Een maat verder",
+      "nudge": "Beeld",
+      "nudgeBack": "Beeld iets eerder",
+      "nudgeOn": "Beeld iets later",
+      "broken": "Deze take speelde niet af. Misschien is het bestand verplaatst of verwijderd."
     }
   },
   "scale": {

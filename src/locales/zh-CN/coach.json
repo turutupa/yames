@@ -35,9 +35,6 @@
     "beatPlacement": "落拍位置"
   },
   "coachReport": {
-    "cov": "覆盖",
-    "eff": "效率",
-    "grid": "网格",
     "segment": "段落",
     "thinkingAria": "教练正在准备发言",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "在拍上",
     "pocketEarly": "你平均提前 {{ms}} ms",
     "pocketLate": "你平均滞后 {{ms}} ms",
-    "pocketCentred": "你的节奏正好落在拍点上（平均 ±5ms）"
+    "pocketCentred": "你的节奏正好落在拍点上（平均 ±5ms）",
+    "covLabel": "弹到的拍",
+    "covTitle": "我等的那些拍里，真正弹出来了多少",
+    "effLabel": "落在拍上的音",
+    "effTitle": "我听到的所有音里，有多少落在拍上而不是拍与拍之间",
+    "gridLabel": "咬住滴答",
+    "gridTitle": "整段有多贴着滴答走"
   },
   "eval": {
     "today": "今天",

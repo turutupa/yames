@@ -41,6 +41,73 @@ pub struct JamKitState(pub crate::kit::KitCache);
 #[derive(Default)]
 pub struct JamVoiceState(pub crate::voices::VoiceCache);
 
+/// The song the engine is playing, as it arrived — before it was compiled.
+///
+/// Managed state, and it is here rather than on the engine for the reason
+/// `JamGainState` is: the engine holds the compiled table and nothing else,
+/// and this is what the COMMAND thread needs in order to compile a new one.
+///
+/// `set_song_range` is why it exists. Changing the range, the speed or the
+/// count-in changes where every sample of the piece sits, so there is nothing
+/// to patch — the table is built again from the same transport and the same
+/// backing. Asking the frontend to re-send a four-thousand-bar score to move a
+/// loop by one bar would be a megabyte of IPC for a button press.
+#[derive(Default)]
+pub struct SongSourceState(pub Mutex<Option<SongSource>>);
+
+/// What `set_song_range` needs to build the piece again.
+pub struct SongSource {
+    pub transport: crate::song::SongTransport,
+    pub backing: Option<crate::song::SongBacking>,
+}
+
+/// The thread making the song's guitars, and the sound set it is reading.
+///
+/// It lives HERE, on the command thread's side, and never inside the
+/// `SongTable` the audio callback holds: stopping it joins a thread, and
+/// joining a thread is not something an audio callback may do even by
+/// accident, even in a destructor. The callback's half is the ring, which is
+/// inside the table and retires with it.
+#[derive(Default)]
+pub struct SongSynthState {
+    pub player: Mutex<Option<crate::synth::SynthPlayer>>,
+    /// The `.sf2` the player pointed at in Settings, or `None` for the set
+    /// the app ships. Desktop only; the phone build has no Songs.
+    pub font_path: Mutex<Option<std::path::PathBuf>>,
+    /// The set, decoded. A SoundFont is read-only and every song of a session
+    /// wants the same one, so the second piece costs nothing.
+    pub font: Mutex<Option<(Option<std::path::PathBuf>, std::sync::Arc<rustysynth::SoundFont>)>>,
+}
+
+impl SongSynthState {
+    /// The sound set, decoded once. A set the player chose that will not
+    /// open falls back to the shipped one rather than leaving the song
+    /// silent — a bad file in Settings must not be a song that does not play.
+    fn font(&self) -> Result<std::sync::Arc<rustysynth::SoundFont>, String> {
+        let want = self
+            .font_path
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone();
+        let mut held = self.font.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some((path, font)) = held.as_ref() {
+            if *path == want {
+                return Ok(std::sync::Arc::clone(font));
+            }
+        }
+        let font = match crate::synth::load_font(want.as_deref()) {
+            Ok(f) => f,
+            Err(e) if want.is_some() => {
+                eprintln!("[song] {e}; falling back to the set the app ships");
+                crate::synth::load_font(None)?
+            }
+            Err(e) => return Err(e),
+        };
+        *held = Some((want, std::sync::Arc::clone(&font)));
+        Ok(font)
+    }
+}
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -521,9 +588,20 @@ pub fn restore_beat_groups(
     (vec![ts], ts, stored_free_mode)
 }
 
+/// Set the bar's beat grouping.
+///
+/// `at_bar_line` is the setlist's, and nothing else's. A step switch is
+/// posted ON a bar line, and the engine used to restack the grid at the next
+/// tick instead — one beat late, which made the seam between two steps in
+/// different meters a one-beat bar and cost the step arriving a bar of real
+/// playing. Say `true` and the engine gives the meter to the bar that line
+/// opened. Leave it out and a hand-made change does what it has always done:
+/// the bar restarts under your fingers, which is what somebody dragging 4/4
+/// to 3/4 on the meter screen is asking for.
 #[tauri::command]
 pub fn set_beat_groups(
     groups: Vec<u8>,
+    at_bar_line: Option<bool>,
     state: State<SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
@@ -531,6 +609,7 @@ pub fn set_beat_groups(
     {
         let mut s = state.lock().unwrap();
         s.beat_groups = groups;
+        s.beat_groups_at_bar_line = at_bar_line.unwrap_or(false);
         s.time_signature = total;
     }
     emit_state_changed(&state, &app_handle);
@@ -562,6 +641,10 @@ pub fn set_free_mode(
         if enabled {
             let (groups, total) = collapse_to_free(&s.beat_groups);
             s.beat_groups = groups;
+            // A collapse is this command's own meter change, not the one the
+            // setlist posted a moment ago, so it does not inherit its bar
+            // line. See `set_beat_groups`.
+            s.beat_groups_at_bar_line = false;
             s.time_signature = total;
         }
     }
@@ -881,6 +964,43 @@ pub fn list_calibration_cache(
     cal_cache: State<'_, crate::calibration_cache::SharedCalibrationCache>,
 ) -> Vec<crate::calibration_cache::CachedPair> {
     cal_cache.lock().unwrap().entries.clone()
+}
+
+/// Show a file the player just saved, in their own file manager.
+///
+/// W25, the owner's ask on "Save as a video": a player who has made a clip
+/// wants to put it somewhere, and the first thing they need is to find it.
+/// The path is one the app just WROTE — it came back from the save dialog —
+/// so there is nothing to validate here beyond its existing; revealing a file
+/// is a read-only act and the OS is what decides what the player may see.
+///
+/// Nothing is opened, played or uploaded: the folder is shown and the app is
+/// finished with the file.
+#[tauri::command]
+pub fn reveal_in_folder(path: String) {
+    let file = std::path::Path::new(&path);
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("open").args(["-R", &path]).spawn();
+    }
+    #[cfg(target_os = "windows")]
+    {
+        // `explorer /select,"<path>"` and NOT through `cmd /C start`: the
+        // shell's `start` treats a comma as an argument separator and would
+        // open the player's Documents folder instead of selecting the file.
+        let _ = std::process::Command::new("explorer")
+            .arg(format!("/select,{path}"))
+            .spawn();
+    }
+    #[cfg(target_os = "linux")]
+    {
+        // No portable "select this file", so the folder is what is opened.
+        // `xdg-open` on a file would launch a video player, which is not what
+        // "show me where it went" means.
+        let folder = file.parent().unwrap_or(file);
+        let _ = std::process::Command::new("xdg-open").arg(folder).spawn();
+    }
+    let _ = file;
 }
 
 #[tauri::command]
@@ -1205,6 +1325,12 @@ pub async fn start_evaluation(
     let app_for_segment = app_handle.clone();
     let session_for_segment = session_acc.inner().clone();
     let mut ta = timing_analyzer.lock().unwrap();
+    // Roadmap 1.3 — the analyzer publishes the divisor it locks into
+    // the same tempo context the onset detector reads, so the
+    // refractory follows the player instead of the click. Without this
+    // handle a quarter click at 100 BPM swallows every played 16th
+    // before the analyzer ever sees one.
+    ta.set_tempo_context(tempo_ctx.inner().clone());
     ta.start(
         ta_profile,
         ta_instrument,
@@ -1265,6 +1391,10 @@ pub async fn start_evaluation(
                     inferred_divisor_confidence: segment_end.inferred_divisor_confidence,
                     // D4c — forward raw IC errors for post-hoc debugging.
                     interval_errors: segment_end.interval_errors.clone(),
+                    // D4c — and where each burst starts in them, without
+                    // which the errors above cannot reproduce the IC
+                    // score they sit beside.
+                    burst_start_indices: segment_end.burst_start_indices.clone(),
                 });
             }
         },
@@ -1291,6 +1421,19 @@ pub async fn start_evaluation(
             let app_for_grid = app_handle.clone();
             move |grid: crate::timing::InferredGridChanged| {
                 let _ = app_for_grid.emit("inferred-grid-changed", &grid);
+            }
+        },
+        {
+            // `plans/SONGS.md` A7 — one provisional verdict per expected
+            // onset, as its matching window closes, so the page can light
+            // the note the player just picked instead of waiting for the
+            // review. The analyzer's thread decides; this forwards.
+            //
+            // Nothing is emitted in free play: with no schedule loaded the
+            // sweep that produces these does not run.
+            let app_for_score = app_handle.clone();
+            move |onset: crate::score::LiveOnset| {
+                let _ = app_for_score.emit("score-onset", &onset);
             }
         },
     );
@@ -1627,6 +1770,92 @@ pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Resul
     Ok(())
 }
 
+/// Roadmap 2.4 — tell the analyzer what the player is about to play.
+///
+/// From the next downbeat, matching runs against this score instead of
+/// against the grid the inference guessed: an expected note that does
+/// not arrive is a miss rather than a rest, and a note nobody asked for
+/// is an extra. The per-note verdicts come back on the existing
+/// `practice-segment-ended` event (`onsetResults` / `extraOnsets`) —
+/// there is deliberately no second channel for them, so the review
+/// never has to reconcile two sources for one pass.
+///
+/// Safe to call before or during a session. `schedule.onsets` must be
+/// sorted by `beat`; the importer that builds it
+/// (`src/songs/schedule.ts`) is where that is guaranteed.
+#[tauri::command]
+pub fn load_score_schedule(
+    schedule: crate::score::ScoreSchedule,
+    timing_analyzer: State<SharedTimingAnalyzer>,
+) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.load_score_schedule(schedule);
+    Ok(())
+}
+
+/// Roadmap 2.4 — back to free play. Whatever the current attempt had
+/// accumulated is dropped; the caller already has it from the last
+/// `practice-segment-ended`. Safe to call when nothing is loaded.
+#[tauri::command]
+pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.clear_score_schedule();
+    Ok(())
+}
+
+/// The bands the review colours a note by — the scorer's own, not the
+/// review's.
+///
+/// `score.rs` judges a deviation against `window_thresholds` of a
+/// `tempo_aware_window_ms` taken over the schedule's SMALLEST GAP: a piece of
+/// sixteenths is judged on a sixteenth's tolerance, at the tempo it was
+/// actually played. A review that drew its own boundaries would colour a note
+/// green that the same pass scored as an "ok", and the player would be right
+/// to believe neither.
+///
+/// So the numbers come from here, computed the one way they are computed
+/// anywhere. Nothing is decided in this function; it is `score.rs`'s two
+/// lines, reachable from the frontend.
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TimingBands {
+    /// The matching window itself, in ms — anything past it is a miss.
+    pub window_ms: f64,
+    /// Absolute deviation, in ms: inside this is dead on.
+    pub perfect: f64,
+    /// …inside this is a shade early or late…
+    pub good: f64,
+    /// …and inside this is early or late enough to feel.
+    pub ok: f64,
+    /// The gap the window was taken over, in quarter notes. Reported so a
+    /// caller can say "judged on sixteenths" rather than guess.
+    pub smallest_gap_beats: f64,
+}
+
+#[tauri::command]
+pub fn score_timing_bands(
+    schedule: crate::score::ScoreSchedule,
+    quarter_ms: f64,
+) -> Result<TimingBands, String> {
+    if !quarter_ms.is_finite() || quarter_ms <= 0.0 {
+        return Err("a pass cannot be judged against a beat of no length".into());
+    }
+    let gap = crate::score::smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
+    let window_ms = crate::timing::tempo_aware_window_ms(quarter_ms * gap);
+    let t = crate::timing::window_thresholds(window_ms);
+    Ok(TimingBands {
+        window_ms,
+        perfect: t.perfect,
+        good: t.good,
+        ok: t.ok,
+        smallest_gap_beats: gap,
+    })
+}
+
 #[tauri::command]
 pub async fn get_session_report(
     session_acc: State<'_, SharedSessionAccumulator>,
@@ -1682,77 +1911,770 @@ pub async fn clear_session(session_acc: State<'_, SharedSessionAccumulator>) -> 
     Ok(())
 }
 
-#[tauri::command]
-pub fn save_session(
-    session: crate::session::SavedSession,
-    app_handle: AppHandle,
-) -> Result<(), String> {
-    use tauri_plugin_store::StoreExt;
-    let store = app_handle
-        .store("settings.json")
-        .map_err(|e| e.to_string())?;
-    let mut history: Vec<crate::session::SavedSession> = store
-        .get("evalSessionHistory")
-        .and_then(|v| serde_json::from_value(v.clone()).ok())
-        .unwrap_or_default();
-    // Prepend new session at the front
-    history.insert(0, session);
-    // Cap at max
-    history.truncate(crate::session::MAX_SESSION_HISTORY);
-    store.set(
-        "evalSessionHistory",
-        serde_json::to_value(&history).unwrap(),
-    );
-    Ok(())
-}
+// ---------------------------------------------------------------------------
+// Session history — the practice store (ROADMAP 1.1)
+//
+// These four used to keep a thirty-entry JSON array inside `settings.json`.
+// They now read and write `practice.db` beside it; the wire shapes are
+// untouched, so nothing on the frontend had to move.
+//
+// Every one of them is `#[tauri::command(async)]`. Tauri runs a plain
+// `#[tauri::command]` on the main thread, which is the UI thread, and
+// W2's brief puts SQLite off it — `(async)` hands the (synchronous) body
+// to the async runtime's pool instead. The store itself is opened on a
+// thread spawned from `setup()`, so the disk is never touched on the way
+// to showing a window; see `db::PracticeStore` for how a command that
+// arrives before the open finishes is made to wait rather than lie.
+//
+// A store that will not open answers reads with nothing and refuses
+// writes out loud. It is never deleted or rewritten — see `db.rs`.
+// ---------------------------------------------------------------------------
 
-#[tauri::command]
-pub fn get_session_history(app_handle: AppHandle) -> Vec<crate::session::SavedSession> {
+/// Open the practice store and fold the legacy JSON history into it.
+/// Called once, from a thread spawned by `setup()`.
+pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPracticeStore) {
     use tauri_plugin_store::StoreExt;
-    app_handle
+
+    let data_dir = match app_handle.path().app_data_dir() {
+        Ok(d) => d,
+        Err(e) => {
+            store.unavailable(format!("no app data directory ({e})"));
+            return;
+        }
+    };
+    // The one-time import. `evalSessionHistory` is *read* and left exactly
+    // where it is: an older build must still find its history if the user
+    // ever goes back to one.
+    let legacy: Vec<crate::session::SavedSession> = app_handle
         .store("settings.json")
         .ok()
-        .and_then(|store| {
-            store
-                .get("evalSessionHistory")
+        .and_then(|s| {
+            s.get("evalSessionHistory")
                 .and_then(|v| serde_json::from_value(v.clone()).ok())
         })
-        .unwrap_or_default()
-}
-
-#[tauri::command]
-pub fn delete_session(id: String, app_handle: AppHandle) -> Result<(), String> {
-    use tauri_plugin_store::StoreExt;
-    let store = app_handle
-        .store("settings.json")
-        .map_err(|e| e.to_string())?;
-    let mut history: Vec<crate::session::SavedSession> = store
-        .get("evalSessionHistory")
-        .and_then(|v| serde_json::from_value(v.clone()).ok())
         .unwrap_or_default();
-    history.retain(|s| s.id != id);
-    store.set(
-        "evalSessionHistory",
-        serde_json::to_value(&history).unwrap(),
-    );
-    Ok(())
+
+    // Imported *before* the store becomes visible to any command, so the
+    // first history read of a fresh install cannot catch it half done.
+    store.open_at(&crate::db::db_path(&data_dir), |db| {
+        match db.import_json_history(&legacy) {
+            Ok(0) => {}
+            Ok(n) => eprintln!("[store] imported {n} session(s) from the JSON history"),
+            Err(e) => eprintln!("[store] could not import the JSON history: {e}"),
+        }
+    });
 }
 
-#[tauri::command]
-pub fn clear_all_sessions(app_handle: AppHandle) -> Result<(), String> {
+#[tauri::command(async)]
+pub fn save_session(
+    session: crate::session::SavedSession,
+    store: State<'_, crate::db::SharedPracticeStore>,
+    state: State<'_, SharedState>,
+) -> Result<(), String> {
+    // `SavedSession` has never carried an instrument and this wave does not
+    // change its shape, so the row is stamped with the one that is selected
+    // right now — which is the one that was just played.
+    let instrument = state.lock().ok().map(|s| s.instrument.id());
+    store.with(|db| db.save_session(&session, instrument))
+}
+
+/// The most recent `MAX_SESSION_HISTORY` sessions, newest first —
+/// deliberately the same slice the JSON array used to hold, so the history
+/// tab looks exactly as it did. The store keeps everything; `query_history`
+/// is the door to the rest of it.
+#[tauri::command(async)]
+pub fn get_session_history(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::session::SavedSession> {
+    store.read_or(Vec::new(), |db| {
+        db.session_history(crate::session::MAX_SESSION_HISTORY)
+    })
+}
+
+/// History narrowed by preset, exercise, instrument, date range or BPM
+/// band. Returns whole `SavedSession`s so `presetAwareness.ts` can be fed
+/// rows without changing a line of it.
+#[tauri::command(async)]
+pub fn query_history(
+    filter: crate::db::HistoryFilter,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::session::SavedSession> {
+    store.read_or(Vec::new(), |db| db.query_history(&filter))
+}
+
+#[tauri::command(async)]
+pub fn delete_session(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.delete_session(&id))
+}
+
+#[tauri::command(async)]
+pub fn clear_all_sessions(
+    app_handle: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
-    let store = app_handle
+    // Whether or not the database answers, the copy in `settings.json` has
+    // to go: a store that will not open is exactly the case where leaving
+    // an old history on disk after "forget what I played" would be worst.
+    let db_result = store.with(|db| db.clear_all_sessions());
+    let settings = app_handle
         .store("settings.json")
         .map_err(|e| e.to_string())?;
+    // The legacy array is emptied too. It is not read any more (the import
+    // flag has long since been set), but leaving a copy of the history
+    // behind after the user asked for it to be gone would be a lie.
     let empty: Vec<crate::session::SavedSession> = Vec::new();
-    store.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
+    settings.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
     // U3.3 — the drill-run history is practice history too. "Clear all
     // sessions" is the one gesture a user has for "forget what I played", and
     // leaving the runs behind would mean the climb still draws last month's
     // wall after they asked for it to be gone.
     let no_runs: Vec<crate::session::DrillRun> = Vec::new();
-    store.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
-    Ok(())
+    settings.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
+    db_result
+}
+
+// ---------------------------------------------------------------------------
+// Songs — the library, and what was played against it
+//
+// A `SongScore` (the first wave's contract, `plans/tasks/songs/BRIEF.md`)
+// travels through here as JSON and is stored whole. The store lifts out
+// only what a library list shows; `src-tauri/src/score.rs` owns the typed
+// form and the store has no business forking it.
+// ---------------------------------------------------------------------------
+
+/// Import (or re-import) a song. Returns the score's id.
+///
+/// `name` is what the player calls it and `source_base64` the bytes of the
+/// file it was read from (`SONGS.md` A2 — the tab is engraved from the
+/// source). Both are optional, and leaving one out says nothing about it
+/// rather than clearing it: a re-import of a song the player renamed keeps
+/// the name. `imported_at` is not a parameter because the moment a song
+/// entered the library is not the frontend's to assert — except on the
+/// one-time move out of `songs.json`, which passes the date it had there.
+#[tauri::command(async)]
+pub fn save_score(
+    score: serde_json::Value,
+    name: Option<String>,
+    source_base64: Option<String>,
+    imported_at: Option<i64>,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<String, String> {
+    let now = imported_at.unwrap_or_else(|| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as i64)
+            .unwrap_or(0)
+    });
+    store.with(|db| db.save_score(&score, name.as_deref(), source_base64.as_deref(), now))
+}
+
+#[tauri::command(async)]
+pub fn list_scores(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::ScoreSummary> {
+    store.read_or(Vec::new(), |db| db.list_scores())
+}
+
+#[tauri::command(async)]
+pub fn get_score(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Option<serde_json::Value> {
+    store.read_or(None, |db| db.get_score(&id))
+}
+
+/// The bytes of the file a song was read from, base64. Its own command
+/// because it is the biggest thing on the row and a library list never wants
+/// it — only the screen that is about to draw a tab does.
+#[tauri::command(async)]
+pub fn get_score_source(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Option<String> {
+    store.read_or(None, |db| db.get_score_source(&id))
+}
+
+/// The player opened this song: it goes to the top of the library, and the
+/// visit is counted (migration four).
+///
+/// The time is taken here rather than sent from the frontend for the reason
+/// `save_score`'s is: when a song was opened is a fact about this machine,
+/// not a claim the webview gets to make.
+#[tauri::command(async)]
+pub fn mark_score_opened(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0);
+    store.with(|db| db.mark_score_opened(&id, now))
+}
+
+/// Give the player their file back.
+///
+/// Yames keeps its own copy of every file it imports (`scores.source_b64`),
+/// so clearing the Downloads folder loses nothing — and this is the other
+/// half of that promise: what Yames kept, the player can have back, byte for
+/// byte, wherever they want it.
+///
+/// A Rust command and a native save dialog because the webview cannot write
+/// anywhere: `plugin-fs` is not installed and a browser download is inert
+/// inside a Tauri window. `Ok(None)` is the player cancelling the dialog,
+/// which is not a failure and must not put a sentence on their screen.
+///
+/// `async fn` for the reason `pick_kit_folder` is, and it is not optional: a
+/// non-async command runs on the main thread, and asking the main thread to
+/// put up a modal dialog and then wait for the answer is a deadlock in one
+/// move.
+#[tauri::command]
+pub async fn export_score_source(
+    id: String,
+    app: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Option<String>, String> {
+    use base64::Engine as _;
+    use tauri_plugin_dialog::DialogExt;
+
+    let summary = store
+        .read_or(Vec::new(), |db| db.list_scores())
+        .into_iter()
+        .find(|s| s.id == id)
+        .ok_or_else(|| "that song is not in the library any more".to_string())?;
+    let base64 = store
+        .read_or(None, |db| db.get_score_source(&id))
+        .ok_or_else(|| {
+            "Yames has no copy of the file this song came from. It was imported by a build \
+             that did not keep one."
+                .to_string()
+        })?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(base64.as_bytes())
+        .map_err(|e| format!("the stored copy could not be read back: {e}"))?;
+
+    // The name the file came in with, which is the name the player will look
+    // for. `file_name` on the summary is the source file, not the song's
+    // title: exporting "Blackbird.gp5" as "Blackbird (my version).gp5"
+    // because they renamed it in the library would be a surprise.
+    let suggested = std::path::Path::new(&summary.source_file)
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| summary.source_file.clone());
+
+    let chosen = app
+        .dialog()
+        .file()
+        .set_file_name(&suggested)
+        .blocking_save_file();
+    let Some(chosen) = chosen else {
+        return Ok(None);
+    };
+    let path = chosen
+        .into_path()
+        .map_err(|e| format!("that is not a place Yames can write to: {e}"))?;
+    std::fs::write(&path, &bytes).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(Some(path.to_string_lossy().into_owned()))
+}
+
+/// Forget a song, and with it every attempt at it.
+#[tauri::command(async)]
+pub fn delete_score(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.delete_score(&id))
+}
+
+#[tauri::command(async)]
+pub fn save_attempt(
+    attempt: crate::db::Attempt,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_attempt(&attempt))
+}
+
+/// Attempts at a song, oldest first — "every attempt at bars 17–24 of this
+/// song" is the question, and the order is the answer's point.
+#[tauri::command(async)]
+pub fn query_attempts(
+    query: crate::db::AttemptQuery,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::Attempt> {
+    store.read_or(Vec::new(), |db| db.query_attempts(&query))
+}
+
+// -- come back to this (COACH_UX A5) ---------------------------------------
+//
+// The promise the coach's fourth button makes. It lived in `settings.json`
+// until the store had a table for it, which `src/songs/due.ts` said at the
+// time was where it belonged until there was a schema; migration three is
+// that schema, and `due.ts` moves what it finds across once.
+
+/// Write a promise down, or move the day of one already made.
+#[tauri::command(async)]
+pub fn save_due(
+    due: crate::db::ScoreDue,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_due(&due))
+}
+
+/// Every promise on file, the soonest due first.
+///
+/// The whole list rather than "what is due today": the day is a question
+/// about the player's own calendar and the store would have to answer it in
+/// UTC. A player in Auckland practising at 09:00 is on a different day from
+/// one in Vancouver at the same instant, and it is their calendar the
+/// promise is about.
+#[tauri::command(async)]
+pub fn list_due(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::ScoreDue> {
+    store.read_or(Vec::new(), |db| db.list_due())
+}
+
+/// Forget one — the player played it, or does not want the reminder.
+#[tauri::command(async)]
+pub fn clear_due(
+    score_id: String,
+    start_bar: i64,
+    end_bar: i64,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.clear_due(&score_id, start_bar, end_bar))
+}
+
+// ---------------------------------------------------------------------------
+// The coach's judgement, and its ears — the door to `findings.rs` and
+// `pitch.rs`
+//
+// Registration and nothing else. Every rule lives in `findings.rs` and every
+// line of DSP in `pitch.rs`; what is here is the plumbing between them, the
+// store and the frontend — loading a score by its id, converting a stored
+// attempt into the shape the judgement takes, finding a take's dry stem, and
+// turning beats into the milliseconds the tracker thinks in.
+//
+// Both are `async` commands, so they run on Tauri's blocking pool and never
+// on the UI thread: a thirty-second take is most of a second of FFTs, and a
+// year of attempts is a SQLite read (AGENTS.md's post-session tier).
+// ---------------------------------------------------------------------------
+
+/// One attempt at a passage, as the frontend has it: every pass, as scoring
+/// reported it.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AttemptPasses {
+    pub results: Vec<crate::score::OnsetResult>,
+    #[serde(default)]
+    pub extras: Vec<crate::score::ExtraOnset>,
+    /// The tempo it was played at, as a share of the score's own tempo.
+    pub tempo_percent: u16,
+}
+
+/// What `analyze_attempt` is told.
+///
+/// The score comes either by `scoreId` (read out of the store) or whole in
+/// `score`; the schedule always comes from the frontend, because
+/// `src/songs/schedule.ts` is what derives it and deriving it twice, in two
+/// languages, is two answers to one question.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalyzeAttemptRequest {
+    #[serde(default)]
+    pub score_id: Option<String>,
+    #[serde(default)]
+    pub score: Option<crate::score::SongScore>,
+    pub schedule: crate::score::ScoreSchedule,
+    pub attempt: AttemptPasses,
+    /// Earlier attempts at the same passage, oldest first, given whole.
+    #[serde(default)]
+    pub earlier: Vec<AttemptPasses>,
+    /// …or asked of the store instead: every earlier attempt that overlaps
+    /// these bars. Needs `scoreId`. Both may be given; they are concatenated,
+    /// the store's first, because the store's are the older ones.
+    #[serde(default)]
+    pub earlier_bars: Option<crate::db::BarRange>,
+    /// The attempt being judged, when it has already been saved — so it is
+    /// not compared against itself.
+    #[serde(default)]
+    pub exclude_attempt_id: Option<String>,
+}
+
+/// What the coach found, ranked, headline first (`COACH_UX.md` A4).
+///
+/// Nothing here decides anything: `findings::analyze_attempt` is the whole
+/// of the judgement, and this loads what it needs.
+#[tauri::command(async)]
+pub fn analyze_attempt(
+    request: AnalyzeAttemptRequest,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Vec<crate::findings::Finding>, String> {
+    let score = resolve_score(request.score, request.score_id.as_deref(), &store)?;
+
+    // Earlier attempts, oldest first: the store's, then any the caller
+    // brought. `query_attempts` already answers oldest first.
+    let mut earlier_owned: Vec<AttemptPasses> = Vec::new();
+    if let (Some(bars), Some(score_id)) = (request.earlier_bars, request.score_id.as_deref()) {
+        let rows = store.read_or(Vec::new(), |db| {
+            db.query_attempts(&crate::db::AttemptQuery {
+                score_id: score_id.to_string(),
+                bar_range: Some(bars),
+                include_onsets: true,
+                limit: None,
+            })
+        });
+        for row in rows {
+            if Some(&row.id) == request.exclude_attempt_id.as_ref() {
+                continue;
+            }
+            earlier_owned.push(stored_attempt_to_passes(&row));
+        }
+    }
+    earlier_owned.extend(request.earlier);
+
+    let earlier: Vec<crate::findings::Attempt> = earlier_owned
+        .iter()
+        .map(|a| crate::findings::Attempt {
+            results: &a.results,
+            extras: &a.extras,
+            tempo_percent: a.tempo_percent,
+        })
+        .collect();
+
+    Ok(crate::findings::analyze_attempt(
+        &score,
+        &request.schedule,
+        &crate::findings::Attempt {
+            results: &request.attempt.results,
+            extras: &request.attempt.extras,
+            tempo_percent: request.attempt.tempo_percent,
+        },
+        &earlier,
+    ))
+}
+
+/// What `analyze_take_pitch` is told.
+///
+/// `startOffsetMs` is the one number that is easy to get wrong and that
+/// everything else rests on: where the FIRST BEAT of the played range sits
+/// inside the dry stem, measured from the instant that file starts. The
+/// contract's `OnsetResult` carries a deviation and not an absolute time
+/// (the matcher works in beats), so the moment a note was played has to be
+/// reconstructed as "where it was due, plus how far off it was" — and "where
+/// it was due" is only meaningful against the buffer's own clock. Get it
+/// wrong and every note moves by the same amount, which looks like a tracker
+/// that cannot segment rather than a clock that is out (`pitch.rs`,
+/// `MatchedOnset::from_result`).
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalyzeTakePitchRequest {
+    /// The take to listen to, and the jam it was recorded under. Its DRY
+    /// stem is what is read — the mix has the band in it, and a monophonic
+    /// tracker asked about a band answers about the bass (`SONGS.md` A8).
+    pub take_id: String,
+    pub jam_id: String,
+    #[serde(default)]
+    pub score_id: Option<String>,
+    #[serde(default)]
+    pub score: Option<crate::score::SongScore>,
+    pub schedule: crate::score::ScoreSchedule,
+    pub results: Vec<crate::score::OnsetResult>,
+    /// Onsets the player produced that the score did not ask for.
+    ///
+    /// No verdict is given on them — they are not notes of the score — but
+    /// they are where the tracker is CUT. Nothing in a pitch track tells one
+    /// note from the next; an onset does, and an extra note left out of this
+    /// list is one that gets folded into the written note before it and
+    /// drags its median off (`pitch.rs`, `notes_from`).
+    #[serde(default)]
+    pub extras: Vec<crate::score::ExtraOnset>,
+    /// The tempo the range was played at, in BPM — the click's tempo, not
+    /// the score's, when the player slowed it down.
+    ///
+    /// **One number, and a song has a map.** Kept because it is still right
+    /// for everything that has one tempo — a drill, a path step, a piece
+    /// that never changes speed — and because a frontend that has not been
+    /// rebuilt against `tempoMap` must go on working for a release. When
+    /// `tempoMap` is present this is only the fallback for a map that turns
+    /// out to be unusable.
+    pub bpm: f64,
+    /// The click's tempo ACROSS the played range, stepping where the score
+    /// steps (`plans/tasks/songs/W13-SONGS-ENGINE.md`, item 5).
+    ///
+    /// This exists because of a real, silent failure. `analyze_take_pitch`
+    /// reconstructs when a note was played as "where it was due, plus how
+    /// far off it was", and "where it was due" used to be `beat × 60000/bpm`
+    /// — a straight line. A song whose tempo steps from 100 to 140 at bar
+    /// nine is not a straight line, so every note after the step was read
+    /// out of the wrong part of the file: at 100 BPM a quarter is 600 ms and
+    /// at 140 it is 429, so by bar sixteen the window is nearly three
+    /// seconds adrift and the tracker is asked about somebody else's notes.
+    /// It does not look like a clock error. It looks like a tracker that
+    /// cannot hear.
+    ///
+    /// Empty means "one tempo", which is what `bpm` says.
+    #[serde(default)]
+    pub tempo_map: Vec<RangeTempo>,
+    #[serde(default)]
+    pub start_offset_ms: f64,
+}
+
+/// One step of the click's tempo inside a played range.
+///
+/// `beat` is quarter notes from the START OF THE RANGE, the same axis the
+/// schedule's onsets are on, so nothing here has to know where in the piece
+/// the range begins. `bpm` is what the click actually ran at — the score's
+/// tempo already through `tempoPercent`.
+#[derive(Debug, Clone, Copy, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RangeTempo {
+    pub beat: f64,
+    pub bpm: f64,
+}
+
+/// Beats to milliseconds across a range whose tempo steps, and round a loop.
+///
+/// **Why this is not `score::BeatMap`.** That type is indexed by whole
+/// quarter notes and its own doc says, at length, that it is built from where
+/// the engine's beats ACTUALLY FELL and is deliberately never read from a
+/// tempo map. Both halves matter here. A take has no beat log to read — the
+/// pitch pass runs over a file, after the fact — and a tempo step lands on a
+/// bar line, which in 7/8 is three and a half quarters in, exactly between
+/// two of `BeatMap`'s entries. So this integrates the map instead, which is
+/// a dozen lines and exact at every point rather than at every quarter.
+#[derive(Debug, Clone)]
+struct RangeClock {
+    /// `(beat the step starts at, ms per quarter from there)`, sorted, the
+    /// first at beat 0. Milliseconds per quarter rather than BPM because
+    /// that is the only thing it is ever asked for.
+    steps: Vec<(f64, f64)>,
+    /// One time round the range, in beats and in milliseconds.
+    pass_beats: f64,
+    pass_ms: f64,
+}
+
+impl RangeClock {
+    /// The map, or one flat tempo when there is no usable map.
+    fn new(map: &[RangeTempo], pass_beats: f64, fallback_bpm: f64) -> Self {
+        let flat = 60_000.0 / fallback_bpm;
+        let mut steps: Vec<(f64, f64)> = map
+            .iter()
+            // A step the file could not have meant is dropped rather than
+            // allowed to divide by nothing: one bad entry must not take the
+            // whole take's timing with it.
+            .filter(|t| t.beat.is_finite() && t.bpm.is_finite() && t.bpm > 0.0)
+            .map(|t| (t.beat.max(0.0), 60_000.0 / t.bpm))
+            .collect();
+        steps.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+        // The range starts somewhere, whatever the map says it starts at.
+        match steps.first() {
+            Some(&(beat, _)) if beat > 0.0 => steps.insert(0, (0.0, flat)),
+            None => steps.push((0.0, flat)),
+            _ => {}
+        }
+        let pass_beats = if pass_beats.is_finite() && pass_beats > 0.0 {
+            pass_beats
+        } else {
+            0.0
+        };
+        let mut clock = Self {
+            steps,
+            pass_beats,
+            pass_ms: 0.0,
+        };
+        clock.pass_ms = clock.within_pass_ms(pass_beats);
+        clock
+    }
+
+    /// Where a beat of one pass falls, in ms from the range's first beat.
+    fn within_pass_ms(&self, beat: f64) -> f64 {
+        if !beat.is_finite() || beat <= 0.0 {
+            return 0.0;
+        }
+        let mut ms = 0.0;
+        for (i, &(start, per_quarter)) in self.steps.iter().enumerate() {
+            if start >= beat {
+                break;
+            }
+            let end = self
+                .steps
+                .get(i + 1)
+                .map(|&(next, _)| next.min(beat))
+                .unwrap_or(beat);
+            ms += (end - start).max(0.0) * per_quarter;
+        }
+        ms
+    }
+
+    /// Where an onset falls: its beat inside the range, and which time round.
+    fn ms_at(&self, beat_in_pass: f64, pass: u32) -> f64 {
+        f64::from(pass) * self.pass_ms + self.within_pass_ms(beat_in_pass)
+    }
+}
+
+/// Which note was that, for every note of the score in the played range.
+#[tauri::command(async)]
+pub fn analyze_take_pitch(
+    request: AnalyzeTakePitchRequest,
+    app_handle: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Vec<crate::pitch::NoteVerdict>, String> {
+    if !request.bpm.is_finite() || request.bpm <= 0.0 {
+        return Err("a take cannot be read against a tempo of nothing".into());
+    }
+    let score = resolve_score(request.score, request.score_id.as_deref(), &store)?;
+
+    let dry = crate::take::list_takes(&takes_home(&app_handle)?, &request.jam_id)?
+        .into_iter()
+        .find(|t| t.id == request.take_id)
+        .ok_or_else(|| format!("there is no take {} on this machine", request.take_id))?
+        .dry_path
+        .ok_or_else(|| {
+            "that take was recorded without a microphone, so there is nothing of you in it to \
+             listen to"
+                .to_string()
+        })?;
+
+    // Beats to milliseconds on the buffer's own clock, following the tempo
+    // where it steps. A pass round a loop is one whole schedule later; the
+    // schedule's `lengthBeats` is what one is.
+    let clock = RangeClock::new(
+        &request.tempo_map,
+        request.schedule.length_beats,
+        request.bpm,
+    );
+    let by_id: std::collections::HashMap<u32, &crate::score::ExpectedOnset> = request
+        .schedule
+        .onsets
+        .iter()
+        .map(|o| (o.id, o))
+        .collect();
+
+    let mut matched: Vec<crate::pitch::MatchedOnset> = Vec::with_capacity(request.results.len());
+    for result in &request.results {
+        let Some(expected) = by_id.get(&result.id) else {
+            // An onset the schedule does not have is not this module's to
+            // guess at; the review draws nothing for it.
+            continue;
+        };
+        matched.push(crate::pitch::MatchedOnset::from_result(
+            result.id,
+            expected.note_ids.clone(),
+            match result.state {
+                crate::score::OnsetState::Hit => crate::pitch::OnsetState::Hit,
+                crate::score::OnsetState::Miss => crate::pitch::OnsetState::Miss,
+                crate::score::OnsetState::SoftAbsent => crate::pitch::OnsetState::SoftAbsent,
+            },
+            request.start_offset_ms + clock.ms_at(expected.beat, result.pass),
+            result.deviation_ms,
+        ));
+    }
+
+    // Only the notes the schedule asked for, and each of them once.
+    let wanted: std::collections::HashSet<u32> = matched
+        .iter()
+        .flat_map(|m| m.note_ids.iter().copied())
+        .collect();
+    let notes: Vec<crate::pitch::ScoreNote> = score
+        .notes
+        .iter()
+        .filter(|n| wanted.contains(&n.id))
+        .map(|n| crate::pitch::ScoreNote {
+            id: n.id,
+            midi: f64::from(n.midi),
+        })
+        .collect();
+
+    // The range the score's own tuning asks for, and not the default. The
+    // default spans a five-string bass to the top of a 24-fret guitar, and a
+    // window wide enough to hear a 31 Hz B cannot tell two sixteenths at 160
+    // BPM apart — so a guitar part asked for that way is unreadable at speed
+    // (`pitch.rs`, "the range you ask for buys the time resolution you get").
+    let tuning: Vec<i32> = score.tuning.iter().map(|&m| i32::from(m)).collect();
+    let cfg = crate::pitch::PitchConfig::for_tuning(&tuning);
+
+    let (samples, rate) = crate::pitch::decode_mono_file(std::path::Path::new(&dry))?;
+    // Every moment a note started, written or not. `notes_from` sorts them
+    // and drops the ones too close together to be two notes.
+    let mut onsets_ms: Vec<f64> = matched.iter().filter_map(|m| m.heard_at_ms).collect();
+    onsets_ms.extend(
+        request
+            .extras
+            .iter()
+            .map(|e| request.start_offset_ms + clock.ms_at(e.beat, e.pass)),
+    );
+    let events = crate::pitch::analyse(&samples, rate, &onsets_ms, &cfg);
+    Ok(crate::pitch::match_notes(
+        &events,
+        &notes,
+        &matched,
+        &crate::pitch::MatchConfig::default(),
+    ))
+}
+
+/// The score both commands work against: the one the caller brought, or the
+/// one the store holds under that id.
+fn resolve_score(
+    given: Option<crate::score::SongScore>,
+    id: Option<&str>,
+    store: &State<'_, crate::db::SharedPracticeStore>,
+) -> Result<crate::score::SongScore, String> {
+    if let Some(score) = given {
+        return Ok(score);
+    }
+    let id = id.ok_or_else(|| "no score was named, and none was given".to_string())?;
+    let json = store
+        .read_or(None, |db| db.get_score(id))
+        .ok_or_else(|| format!("there is no song {id} in the library"))?;
+    serde_json::from_value(json).map_err(|e| format!("song {id} is not a score this build reads: {e}"))
+}
+
+/// A stored attempt, as the judgement takes one.
+///
+/// The store keeps an onset's state as text so a state added by a later
+/// scoring pass survives a round trip through an older build; a row whose
+/// state this build does not know is dropped rather than guessed at, because
+/// counting it as a hit or a miss would be inventing evidence.
+fn stored_attempt_to_passes(row: &crate::db::Attempt) -> AttemptPasses {
+    AttemptPasses {
+        results: row
+            .onsets
+            .iter()
+            .filter_map(|o| {
+                let state = match o.state.as_str() {
+                    "hit" => crate::score::OnsetState::Hit,
+                    "miss" => crate::score::OnsetState::Miss,
+                    "softAbsent" => crate::score::OnsetState::SoftAbsent,
+                    _ => return None,
+                };
+                Some(crate::score::OnsetResult {
+                    id: o.id.max(0) as u32,
+                    state,
+                    deviation_ms: o.deviation_ms,
+                    pass: o.pass.max(0) as u32,
+                    // The store keeps accents from migration three on, so an
+                    // earlier attempt carries what was heard. `None` from a
+                    // row written before that column existed, which is the
+                    // same `None` as "there was nothing to say".
+                    accent_heard: o.accent_heard,
+                })
+            })
+            .collect(),
+        extras: row
+            .extra_onsets
+            .iter()
+            .map(|e| crate::score::ExtraOnset {
+                beat: e.beat,
+                pass: e.pass.max(0) as u32,
+            })
+            .collect(),
+        tempo_percent: row.tempo_percent.clamp(0.0, f64::from(u16::MAX)).round() as u16,
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2756,13 +3678,410 @@ fn build_and_install_jam(
         }
         None => None,
     };
-    app_handle
-        .state::<EngineState>()
-        .0
-        .lock()
-        .unwrap()
-        .set_jam_table(table);
+    {
+        let engine = app_handle.state::<EngineState>();
+        let engine = engine.0.lock().unwrap();
+        // ONE MODE AT A TIME. Starting a jam stops a song, which is what
+        // "Songs is its own engine mode beside the jam" has to mean on this
+        // side: the callback already prefers the song's table when both are
+        // loaded, so a band arriving over the top of a song would be a band
+        // nobody can hear and a piece nobody asked for.
+        //
+        // Only when a band actually arrives. `set_jam(null)` is the UI taking
+        // the band away, which happens on leaving the Jam tab, and that must
+        // not take a song with it.
+        if table.is_some() && engine.song_loaded() {
+            engine.set_song_table(None);
+            eprintln!("[song] a jam started, so the song was unloaded");
+            let _ = app_handle.emit("song-dropped", ());
+        }
+        engine.set_jam_table(table);
+    }
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Songs — the imported piece the engine plays
+// ---------------------------------------------------------------------------
+
+/// Load a song: its transport, and the file's own rhythm section.
+///
+/// The transport and the backing are compiled here, on a blocking thread,
+/// into the sample-indexed tables the callback walks — see `song.rs` for what
+/// that means and why. Nothing about a song reaches `AppState`: the UI owns
+/// the imported FILE, and the engine holds only the tables it plays, exactly
+/// as it does for a jam.
+///
+/// **Starting a song stops the others.** The band is taken away, a running
+/// drill is stopped, and a count-in the metronome had armed is spent: a song
+/// carries its own count-in, at its own tempo and in its own meter, and two
+/// of them running at once would be two clicks disagreeing about where the
+/// downbeat is.
+///
+/// `async`, with the work on a blocking thread, for the reason `set_jam` is:
+/// this decodes a kit, a percussion set and two melodic banks — tens of
+/// megabytes at the device's rate — and a synchronous command runs on the
+/// thread that draws the window.
+#[tauri::command]
+pub async fn load_song(
+    app_handle: AppHandle,
+    transport: crate::song::SongTransport,
+    backing: Option<crate::song::SongBacking>,
+) -> Result<SongLoaded, String> {
+    tokio::task::spawn_blocking(move || {
+        let loaded = build_and_install_song(&app_handle, &transport, backing.as_ref())?;
+        // Kept for `set_song_range`, and only once the compile succeeded: a
+        // transport that would not build is not one to rebuild later.
+        *app_handle
+            .state::<SongSourceState>()
+            .0
+            .lock()
+            .unwrap_or_else(|e| e.into_inner()) = Some(SongSource { transport, backing });
+        Ok(loaded)
+    })
+    .await
+    .map_err(|e| format!("load_song join failed: {e}"))?
+}
+
+/// What a song turned out to be, once it was compiled.
+///
+/// Reported so a file that came out thin is visible rather than mysterious —
+/// a drum track written for a General MIDI set this band has no voice for is
+/// the common case, and a player whose hand claps and splash cymbals silently
+/// vanished deserves to be told rather than left wondering what they imported.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct SongLoaded {
+    /// How many bars the range plays.
+    pub bars: u32,
+    /// How long one pass lasts, in milliseconds at the chosen speed.
+    #[serde(rename = "passMs")]
+    pub pass_ms: u64,
+    /// How many backing notes play.
+    #[serde(rename = "playedNotes")]
+    pub played_notes: u32,
+    /// And how many named something this band has no voice for.
+    #[serde(rename = "droppedNotes")]
+    pub dropped_notes: u32,
+    /// How many of them the General MIDI synthesiser plays — the guitars,
+    /// the horns, the strings and the player's own guide part.
+    #[serde(rename = "synthNotes")]
+    pub synth_notes: u32,
+}
+
+/// Compile a song at the rate the device is running at and hand it over.
+fn build_and_install_song(
+    app_handle: &AppHandle,
+    transport: &crate::song::SongTransport,
+    backing: Option<&crate::song::SongBacking>,
+) -> Result<SongLoaded, String> {
+    let rate = jam_rate(app_handle);
+    // The click's resolution while the song plays. The app's own, taken here
+    // on the command thread: the ticks are a table, so changing it is a
+    // recompile rather than a field the callback reads.
+    let subdivision = {
+        let s = app_handle.state::<SharedState>();
+        let s = s.lock().unwrap();
+        s.subdivision.max(1) as u32
+    };
+    let sounds = song_sounds(app_handle, rate)?;
+    let table = crate::song::compile(transport, backing, sounds, rate, subdivision)?;
+    let loaded = SongLoaded {
+        bars: table.bars().len() as u32,
+        pass_ms: table.pass_samples() * 1000 / rate.max(1) as u64,
+        played_notes: table.played_notes,
+        dropped_notes: table.dropped_notes,
+        synth_notes: table.synth_notes,
+    };
+
+    // ---- The guitars, and the thread that makes them ----
+    //
+    // Started BEFORE the table is installed, so the ring already has its lead
+    // by the time the callback is walking the piece and the first bar does
+    // not come in a tenth of a second late. Starting it is not fatal: a song
+    // whose synthesiser would not start is a song with its drums and its bass,
+    // which is what it had before W28, and that is better than a song that
+    // will not load.
+    let table = std::sync::Arc::new(table);
+    let synth = app_handle.state::<SongSynthState>();
+    {
+        // The mix the engine is already holding, so a band the player turned
+        // down stays turned down across a range change.
+        let gains = app_handle
+            .state::<EngineState>()
+            .0
+            .lock()
+            .unwrap()
+            .song_mix();
+        if let (Some(ring), Some(score)) = (table.synth(), table.synth_score.clone()) {
+            for (n, gain) in gains.tracks.iter().enumerate() {
+                ring.set_gain(n, *gain);
+            }
+            match synth.font().and_then(|font| {
+                crate::synth::SynthPlayer::start(
+                    std::sync::Arc::clone(ring),
+                    score,
+                    font,
+                    rate,
+                )
+            }) {
+                Ok(player) => {
+                    // The old one is stopped and joined here, on the command
+                    // thread, which is the only place a join belongs.
+                    *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = Some(player);
+                }
+                Err(e) => {
+                    eprintln!("[song] {e}; the song plays without its synthesised parts");
+                    *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
+                }
+            }
+        } else {
+            *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        }
+    }
+
+    {
+        let engine = app_handle.state::<EngineState>();
+        let engine = engine.0.lock().unwrap();
+        // The band goes before the song arrives, not after: for the one
+        // buffer between them the callback would otherwise be holding both,
+        // and the mixer prefers the song — which is the right answer, and
+        // still a window where the jam's bar line could fire under it.
+        engine.set_jam_table(None);
+        engine.set_song_table(Some(table));
+    }
+    // A drill climbing its own ladder under a song would be two things moving
+    // the tempo, and a count-in the metronome armed would be a second one
+    // counting. Both go, and the screen is told.
+    {
+        let state = app_handle.state::<SharedState>();
+        let mut s = state.lock().unwrap();
+        s.speed_ramp.active = false;
+        s.count_in = crate::state::CountIn::default();
+        let snapshot = s.clone();
+        drop(s);
+        let _ = app_handle.emit("state-changed", &snapshot);
+    }
+    Ok(loaded)
+}
+
+/// The kit, the percussion set and the melodic banks a song plays out of.
+///
+/// The defaults, and that is the whole of the decision: the contract's
+/// `SongBacking` names a role and a note and nothing about who is playing it,
+/// because a Guitar Pro file does not say which bass. `jam_sounds`'s caches do
+/// the work, so a song and a jam that want the same drums share one decode.
+fn song_sounds(app_handle: &AppHandle, rate: u32) -> Result<crate::song::SongSounds, String> {
+    use crate::engine::{BassVoice, KeysVoice};
+    let jam_kit = app_handle.state::<JamKitState>();
+    let jam_voices = app_handle.state::<JamVoiceState>();
+    let bank = jam_kit
+        .0
+        .shipped(crate::engine::JamKit::fallback().0, rate)?;
+    let perc = match crate::kit::perc_count() {
+        0 => None,
+        // A set that will not decode is a band with no shaker, not a song
+        // that will not load. `jam_sounds` makes the same call in the same
+        // words.
+        _ => match jam_kit.0.perc(0, rate) {
+            Ok(set) => Some(set),
+            Err(e) => {
+                eprintln!("[song] the shipped percussion set did not decode: {e}");
+                None
+            }
+        },
+    };
+    let recorded = |folder: Option<&'static str>| folder.and_then(crate::voices::shipped_index);
+    let bass = recorded(crate::jam::JamVoices::folder_for_bass(BassVoice::Fingered))
+        .map(|i| {
+            jam_voices.0.shipped(
+                i,
+                rate,
+                crate::engine::BASS_MIN_MIDI,
+                crate::engine::BASS_MAX_MIDI,
+            )
+        })
+        .transpose()?;
+    let keys = recorded(crate::jam::JamVoices::folder_for_keys(KeysVoice::Epiano))
+        .map(|i| {
+            jam_voices.0.shipped(
+                i,
+                rate,
+                crate::engine::KEYS_MIN_MIDI,
+                crate::engine::KEYS_MAX_MIDI,
+            )
+        })
+        .transpose()?;
+    Ok(crate::song::SongSounds {
+        bank,
+        perc,
+        voices: crate::jam::JamVoices { bass, keys },
+    })
+}
+
+/// Take the song away and leave the click.
+///
+/// Synchronous: it decodes nothing, and dropping the table here is a `free()`
+/// on the command thread, which is where one belongs.
+#[tauri::command]
+pub fn clear_song(
+    engine_state: State<EngineState>,
+    source: State<SongSourceState>,
+    synth: State<SongSynthState>,
+) {
+    engine_state.0.lock().unwrap().set_song_table(None);
+    *source.0.lock().unwrap_or_else(|e| e.into_inner()) = None;
+    // Stops the renderer and joins it. Here, on the command thread, for the
+    // reason `clear_song` is synchronous at all: the tidying up a song leaves
+    // behind belongs off the audio thread.
+    *synth.player.lock().unwrap_or_else(|e| e.into_inner()) = None;
+}
+
+/// Go to a bar of the song that is playing, without stopping it.
+///
+/// **The owner's own words, after his first session with Songs: "when i click
+/// on the tab [it should be] just going to that place".** W29 made the click
+/// move the playhead; until this existed the playhead only decided where the
+/// NEXT pass would begin, because `set_song_range` recompiles and restarts
+/// and there was nothing else to call. Stopping and starting again is not an
+/// answer: stopping ends the attempt and raises the review (`COACH_UX.md`
+/// A3), so a click on bar 34 would have thrown away the pass you were in the
+/// middle of.
+///
+/// So this moves a cursor inside the table the engine is already holding.
+/// Nothing is recompiled, the click does not miss a beat, the take goes on
+/// recording into the same file, and the band is cut over a few milliseconds
+/// rather than left ringing from somewhere the player no longer is.
+///
+/// `tick` is a position in the SONG's own ticks — the one unit the playhead
+/// is kept in everywhere above this (W37 item 1), so a click on the tab, the
+/// mark drawn on the page, the tick sent to the engine and the sample the
+/// band is cut at are all the same number. A tick outside the range being
+/// played is clamped into it: a click past the end of a portion means the end
+/// of the portion, not silence.
+#[tauri::command]
+pub fn seek_song(tick: u32, engine_state: State<EngineState>) -> Result<(), String> {
+    let engine = engine_state.0.lock().unwrap();
+    let Some(table) = engine.song_table() else {
+        return Err("there is no song loaded to seek in".to_string());
+    };
+    if table.bars().is_empty() {
+        return Err("the song has no bars in it".to_string());
+    }
+    // The tick's own sample, out of the table the callback is walking — so
+    // the two cannot disagree about where bar 34 beat 3 is, whatever the
+    // tempo map and the speed did to it.
+    engine.seek_song(table.sample_at_tick(tick));
+    Ok(())
+}
+
+/// Play the song's other parts out of a sound set of the player's own.
+///
+/// Desktop only, and a `.sf2`: the shipped set is 1.3 MB and small sets have
+/// small guitars, so a player who has a SoundFont they like can use it. An
+/// empty path is "go back to the one the app ships". Takes effect on the next
+/// song, because a sound set is decoded when a piece is compiled.
+#[tauri::command]
+pub fn set_song_sound_font(path: Option<String>, synth: State<SongSynthState>) {
+    let path = path
+        .map(|p| p.trim().to_string())
+        .filter(|p| !p.is_empty())
+        .map(std::path::PathBuf::from);
+    *synth.font_path.lock().unwrap_or_else(|e| e.into_inner()) = path;
+}
+
+/// Loop bars 17 to 24 at 70 %, or stop looping, or play the whole piece.
+///
+/// **It recompiles, and that is not an implementation detail.** A range and a
+/// speed decide how long a pass is, and how long a pass is decides where every
+/// sample of every click and every note sits. There is nothing to patch. The
+/// transport and the backing are the ones `load_song` was given — see
+/// `SongSourceState` — so this costs the compile and no IPC.
+///
+/// It takes effect when the table arrives, which is the next buffer, and the
+/// song starts again from the top of the new range: a range that changed under
+/// a playing cursor would be a cursor somewhere the range no longer is.
+#[tauri::command]
+pub async fn set_song_range(
+    app_handle: AppHandle,
+    range: crate::song::SongRange,
+    loops: bool,
+    tempo_percent: u32,
+    count_in_bars: Option<u32>,
+    start_tick: Option<u32>,
+) -> Result<SongLoaded, String> {
+    tokio::task::spawn_blocking(move || {
+        let source = app_handle.state::<SongSourceState>();
+        let mut held = source.0.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(src) = held.as_mut() else {
+            return Err("there is no song loaded to set a range on".to_string());
+        };
+        // Written back whatever happens next, so a rejected range does not
+        // leave the stored transport describing a table nobody built. The
+        // OLD values are put back on a failure, below.
+        let before = (
+            src.transport.range,
+            src.transport.loops,
+            src.transport.tempo_percent,
+            src.transport.count_in_bars,
+            src.transport.start_tick,
+        );
+        src.transport.range = range;
+        src.transport.loops = loops;
+        src.transport.tempo_percent = tempo_percent;
+        if let Some(bars) = count_in_bars {
+            src.transport.count_in_bars = bars;
+        }
+        // The playhead (W37 item 1). `None` leaves it where it was, for the
+        // same reason the count-in's `None` does: a caller with nothing to
+        // say about it is not a caller asking for the top of the range.
+        if let Some(tick) = start_tick {
+            src.transport.start_tick = tick;
+        }
+        match build_and_install_song(&app_handle, &src.transport, src.backing.as_ref()) {
+            Ok(loaded) => {
+                // AND A COUNT-IN THE CLICK HAD ARMED IS SPENT, exactly as
+                // `load_song` spends one (W37 item 2). A song's count-in is
+                // its own — one bar of its own meter at its own tempo — and
+                // the switch in the transport writes that and nothing else.
+                // `load_song` had this and this did not, so an armed
+                // `AppState::count_in` could outlive the only command a
+                // running Songs session sends.
+                let state = app_handle.state::<SharedState>();
+                let mut s = state.lock().unwrap();
+                if s.count_in.beats > 0 {
+                    s.count_in = crate::state::CountIn::default();
+                    let snapshot = s.clone();
+                    drop(s);
+                    let _ = app_handle.emit("state-changed", &snapshot);
+                }
+                Ok(loaded)
+            }
+            Err(e) => {
+                src.transport.range = before.0;
+                src.transport.loops = before.1;
+                src.transport.tempo_percent = before.2;
+                src.transport.count_in_bars = before.3;
+                src.transport.start_tick = before.4;
+                Err(e)
+            }
+        }
+    })
+    .await
+    .map_err(|e| format!("set_song_range join failed: {e}"))?
+}
+
+/// How loud the click, the drums, the bass and the keys are in the song.
+///
+/// Applies on the next buffer and recompiles nothing: the four dials are
+/// `Copy` and cross to the callback behind their own generation counter, the
+/// same handshake a jam's form position uses. A fader is not a musical event
+/// and does not wait for a bar line.
+///
+/// 0 is off and 1.5 is the ceiling; anything outside that is clamped rather
+/// than refused, because a fader that stops moving is better than a dialog.
+#[tauri::command]
+pub fn set_song_mix(mix: crate::song::SongMix, engine_state: State<EngineState>) {
+    engine_state.0.lock().unwrap().set_song_mix(mix.gains());
 }
 
 /// DECODE THE BAND BEFORE ANYBODY ASKS FOR IT.
@@ -2863,6 +4182,22 @@ pub async fn warm_jam(
 /// to run the dialog it was asked for. This is the shape
 /// `tauri-plugin-dialog` documents for the blocking pickers, and it is the
 /// shape the rest of this file's heavy commands already use.
+/// The sound set a song's other instruments are played out of (W28).
+///
+/// A native FILE dialog rather than a folder one, filtered to `.sf2`,
+/// because a SoundFont is one file. `async fn` for the reason
+/// `pick_kit_folder` below it is, and the reason is a deadlock.
+#[tauri::command]
+pub async fn pick_sound_font(app: AppHandle) -> Option<String> {
+    use tauri_plugin_dialog::DialogExt;
+    app.dialog()
+        .file()
+        .add_filter("SoundFont", &["sf2"])
+        .blocking_pick_file()
+        .and_then(|p| p.into_path().ok())
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
 #[tauri::command]
 pub async fn pick_kit_folder(app: AppHandle) -> Option<String> {
     use tauri_plugin_dialog::DialogExt;
@@ -2959,25 +4294,75 @@ fn takes_home(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
 #[tauri::command]
 pub fn start_take(
     jam_id: String,
+    // `sound` is what the take is made of (W30). Absent means the take Yames
+    // has always made — every caller that predates the choice keeps its
+    // behaviour, and so does every jam saved before the switch existed.
+    sound: Option<crate::take::TakeSound>,
     engine_state: State<EngineState>,
     audio_input: State<SharedAudioInput>,
     take_state: State<TakeState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let home = takes_home(&app_handle)?;
-    let (handoff, out_sr, out_sr_watch, output_latency_us) = {
+    let sound = sound.unwrap_or_default();
+    let everything = sound == crate::take::TakeSound::Everything;
+    let (handoff, out_sr, out_sr_watch, output_latency_us, song, output_device) = {
         let engine = engine_state.0.lock().unwrap();
         (
             engine.take_handoff(),
             engine.output_sample_rate(),
             engine.output_sample_rate_handle(),
             engine.output_latency_us(),
+            // The piece as it is compiled RIGHT NOW. A song that is replaced
+            // mid-take — a new range, a new speed — recompiles into a
+            // different table, and the take's opening bar was measured
+            // against this one.
+            engine.song_handoff().table(),
+            // The speaker Yames is playing to. `None` is "whatever the
+            // system calls default", which is what the loopback will then
+            // ask for as well, so the two agree by construction.
+            engine.device_name().map(str::to_owned),
         )
     };
     let out_sr = out_sr
         .ok_or_else(|| "the audio output has not started yet, so there is no band to record")?;
 
-    let (mic, owns_input, input_latency_us) = {
+    // ---- Everything this computer plays ----
+    //
+    // Opened HERE and nowhere else: after the checks that would refuse the
+    // take, before anything is on disk, and moved straight into the take so
+    // that it closes when the take does. Between one take and the next
+    // nothing in Yames is listening to the speakers.
+    //
+    // A failure here REFUSES the take rather than quietly falling back to
+    // Yames and the microphone. The two are different recordings and the
+    // musician asked for one of them; handing over the other under the same
+    // name is the kind of thing that is only discovered a week later.
+    let loopback = if everything {
+        let capture = crate::loopback::open(output_device.as_deref())?;
+        let f = capture.format().clone();
+        eprintln!(
+            "[take] recording everything {} is playing — {} Hz, {} channel(s)",
+            f.device, f.sample_rate, f.channels
+        );
+        Some(crate::take::TakeLoopback {
+            ring: capture.ring(),
+            sample_rate: f.sample_rate,
+            channels: f.channels,
+            device: f.device,
+            capture: Some(capture),
+        })
+    } else {
+        None
+    };
+
+    // The microphone is not opened at all for a take of everything this
+    // computer plays: the player is already in that stream, through whatever
+    // they are actually playing through, and a second copy of them arriving a
+    // round trip later is not a take anybody wants.
+    let (mic, owns_input, input_latency_us) = if everything {
+        (None, false, 0)
+    } else {
         let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
         // Whether the mic was ALREADY running matters beyond this line: an
         // input the coach or the drill had open is theirs and stays open,
@@ -2991,7 +4376,7 @@ pub fn start_take(
         }
         (ai.begin_take_capture(), owns_input, ai.input_latency_us())
     };
-    if mic.is_none() {
+    if mic.is_none() && !everything {
         eprintln!("[take] recording the band only — no input stream is running");
     }
 
@@ -3000,6 +4385,15 @@ pub fn start_take(
     // pulls the mic forward by this much at the start; see the comment on
     // the two offsets there.
     let round_trip_us = output_latency_us + input_latency_us;
+
+    // How the writer turns the callback's transport stamp into a bar and a
+    // tick. The closure owns the song rather than the engine lock: it runs on
+    // the take's writer thread, on its first chunk of band, and a writer that
+    // had to take the engine's lock to answer "where did this start?" would
+    // be a writer that can block.
+    let position: crate::take::TakePositionSource = std::sync::Arc::new(move |at| {
+        crate::song::take_position(song.as_deref(), at)
+    });
 
     let started = {
         let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
@@ -3012,6 +4406,8 @@ pub fn start_take(
             round_trip_us,
             out_sr_watch: Some(out_sr_watch),
             owns_input,
+            position: Some(position),
+            loopback,
         })
     };
     if started.is_err() {
@@ -3024,6 +4420,99 @@ pub fn start_take(
         }
     }
     started
+}
+
+/// What a listen to the speakers found — the answer to "is it going to hear
+/// anything, and how loud".
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TakeSoundCheck {
+    /// Can this machine record what it plays at all?
+    pub can: bool,
+    /// The speaker it listened to, as the operating system names it.
+    pub device: Option<String>,
+    pub sample_rate: Option<u32>,
+    pub channels: Option<u16>,
+    /// The loudest thing it heard, 0 to 1. Zero means silence, which is a
+    /// fact worth showing BEFORE a take rather than after one.
+    pub peak: f32,
+    /// Why it could not, in the words the screen will use.
+    pub trouble: Option<String>,
+}
+
+/// Can this machine record what it plays — and, if asked, how loud is it
+/// right now.
+///
+/// **This is the only thing in Yames that opens the capture outside a take**,
+/// and it comes in two sizes:
+///
+/// * `listen: false` (the default, and what the screen asks at start-up):
+///   open the endpoint, read what format it would hand over, close it. It
+///   takes no audio out of the ring at all — the ring is dropped unread —
+///   so the answer is "yes, this works" and nothing else. That is the honest
+///   way to decide whether to DRAW a switch: asking the machine, rather than
+///   guessing from the operating system's name and being wrong on a Linux
+///   box with no monitor source or a Windows box with no speaker.
+/// * `listen: true`: stay open for [`CHECK_MS`] and report the loudest thing
+///   heard. That is the musician pressing "check the sound", and it exists
+///   because the alternative is worse — turning the switch on, playing a
+///   take, and finding out afterwards that the machine was muted and the
+///   file is four minutes of silence.
+///
+/// Neither writes anything anywhere. What comes back is one number.
+#[tauri::command]
+pub fn check_take_sound(listen: Option<bool>, engine_state: State<EngineState>) -> TakeSoundCheck {
+    /// How long to listen when asked to. Two hundred milliseconds of a meter
+    /// is enough to see a strum and short enough that nobody would call it
+    /// recording.
+    const CHECK_MS: u64 = 200;
+    let listen = listen.unwrap_or(false);
+
+    if !crate::loopback::supported() {
+        return TakeSoundCheck {
+            can: false,
+            device: None,
+            sample_rate: None,
+            channels: None,
+            peak: 0.0,
+            trouble: Some(crate::loopback::unsupported_here().to_string()),
+        };
+    }
+    let device_name = {
+        let engine = engine_state.0.lock().unwrap();
+        engine.device_name().map(str::to_owned)
+    };
+    match crate::loopback::open(device_name.as_deref()) {
+        Ok(mut capture) => {
+            let f = capture.format().clone();
+            // Asked whether it WORKS, not what is playing: closed again
+            // without waiting, and the ring is dropped with nothing read out
+            // of it.
+            let peak = if listen {
+                std::thread::sleep(std::time::Duration::from_millis(CHECK_MS));
+                capture.take_peak()
+            } else {
+                0.0
+            };
+            capture.stop();
+            TakeSoundCheck {
+                can: true,
+                device: Some(f.device),
+                sample_rate: Some(f.sample_rate),
+                channels: Some(f.channels),
+                peak,
+                trouble: None,
+            }
+        }
+        Err(e) => TakeSoundCheck {
+            can: false,
+            device: device_name,
+            sample_rate: None,
+            channels: None,
+            peak: 0.0,
+            trouble: Some(e),
+        },
+    }
 }
 
 /// Stop recording and keep the take. `null` when nothing was recording, or
@@ -3129,11 +4618,454 @@ pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String
     handoff.drain_retired();
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// W19 — the download is caught (`plans/SONGS.md` S0.9)
+//
+// The Downloads folder is listed while Songs is the open mode, and a Guitar
+// Pro or MusicXML file that has finished arriving is OFFERED. Every rule is in
+// `downloads.rs`, which has no Tauri in it and is tested against a temp
+// directory; these four commands are the wiring.
+//
+// Nothing here makes a network request. Nothing here opens a file except
+// `read_offered_file`, which runs after the player has pressed the button.
+// ---------------------------------------------------------------------------
+
+/// Where this machine puts downloads, or `None` if the OS will not say.
+///
+/// Tauri's own path API rather than a guess at `~/Downloads`: it reads the
+/// XDG user-dirs / known-folder setting, so a player whose downloads go
+/// somewhere else is watched where their files actually land.
+#[tauri::command]
+pub fn default_downloads_dir(app_handle: AppHandle) -> Option<String> {
+    app_handle
+        .path()
+        .download_dir()
+        .ok()
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
+/// Start watching a folder. Replaces any watch already running.
+///
+/// `dir` is the folder the player chose, or `None` for this machine's own
+/// Downloads. Turning the offer off does not call this — it calls
+/// `stop_download_watch`, and then there is no thread at all.
+#[tauri::command]
+pub fn start_download_watch(
+    dir: Option<String>,
+    app_handle: AppHandle,
+    watch: State<'_, crate::downloads::WatchState>,
+) -> Result<String, String> {
+    let dir = match dir {
+        Some(d) if !d.trim().is_empty() => std::path::PathBuf::from(d),
+        _ => app_handle
+            .path()
+            .download_dir()
+            .map_err(|e| format!("this computer has no Downloads folder Yames can find: {e}"))?,
+    };
+    if !dir.is_dir() {
+        return Err(format!("{} is not a folder", dir.display()));
+    }
+    let mut held = watch.0.lock().unwrap();
+    if let Some(running) = held.take() {
+        running.stop();
+    }
+    let emitter = app_handle.clone();
+    let started = crate::downloads::spawn_watch(dir.clone(), move |offer| {
+        let _ = emitter.emit("songs-download-offer", &offer);
+    });
+    *held = Some(started);
+    Ok(dir.to_string_lossy().into_owned())
+}
+
+/// Stop watching. Idempotent: leaving Songs twice is not an error.
+#[tauri::command]
+pub fn stop_download_watch(watch: State<'_, crate::downloads::WatchState>) {
+    if let Some(running) = watch.0.lock().unwrap().take() {
+        running.stop();
+    }
+}
+
+/// "Not this one." The watch stops offering it for as long as it runs; the
+/// frontend remembers it across restarts.
+#[tauri::command]
+pub fn dismiss_download_offer(
+    file_name: String,
+    watch: State<'_, crate::downloads::WatchState>,
+) {
+    if let Some(running) = watch.0.lock().unwrap().as_ref() {
+        running.dismiss(&file_name);
+    }
+}
+
+/// The offered file's bytes, base64 — after the player has said yes.
+///
+/// The one place in this feature that opens a file, and it is guarded twice:
+/// the path has to be a direct child of the folder currently being watched
+/// (canonicalised on both sides, so `..` cannot walk out of it) and it has to
+/// be a name the watcher would have offered. Base64 rather than a byte array
+/// because Tauri serialises `Vec<u8>` as a JSON array of numbers, and a
+/// megabyte of Guitar Pro would cross the wire as a million decimal integers.
+#[tauri::command(async)]
+pub fn read_offered_file(
+    path: String,
+    watch: State<'_, crate::downloads::WatchState>,
+) -> Result<String, String> {
+    use base64::Engine as _;
+    let dir = {
+        let held = watch.0.lock().unwrap();
+        held.as_ref()
+            .map(|w| w.dir.clone())
+            // No watch means nothing was offered, so there is nothing to
+            // read. Refusing here is what stops this being a "read any file"
+            // command that happens to be called by the Songs screen.
+            .ok_or_else(|| "Yames is not watching for downloads right now".to_string())?
+    };
+    let bytes = crate::downloads::read_offered(&dir, std::path::Path::new(&path))
+        .map_err(|e| e.to_string())?;
+    Ok(base64::engine::general_purpose::STANDARD.encode(bytes))
+}
+
+// ---------------------------------------------------------------------------
+// W19 — the file opens with Yames
+//
+// Two ways in, and they are genuinely different: a COLD START, where the path
+// is in `std::env::args()` before a window exists, and a RUNNING app, where
+// Windows or the desktop hands the path to a second process and
+// `tauri-plugin-single-instance` forwards its argv to the one already open.
+// Both land here, and after that they are the same thing.
+//
+// The webview never supplies a path. It asks whether the OS handed one over,
+// and gets back the bytes of a file THIS PROCESS was told to open — which is
+// why there is no guard here like `downloads::check_offer`: there is nothing
+// for a caller to point somewhere else.
+// ---------------------------------------------------------------------------
+
+/// Files the OS asked Yames to open, oldest first, not yet collected.
+///
+/// A queue and not one slot: `yames.exe a.gp5 b.gp5` is a thing a file
+/// manager will do when two files are selected, and dropping one silently
+/// would be worse than asking twice.
+#[derive(Default)]
+pub struct PendingOpenState(pub Mutex<Vec<std::path::PathBuf>>);
+
+/// One file the OS handed over, on its way to the importer.
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenedFile {
+    pub file_name: String,
+    /// The bytes, base64 — the shape `decodeSource` on the other side takes.
+    pub base64: String,
+}
+
+/// Take the paths out of a command line and remember the ones we can open.
+///
+/// Returns how many were taken, so the caller knows whether to bring the
+/// window forward. `argv[0]` is the executable and is skipped; everything
+/// else is a candidate, and anything that is not a song file we understand is
+/// ignored rather than complained about — a flag or a stray argument is not
+/// the player asking for anything.
+pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
+    let mut queued = 0;
+    let mut held = state.0.lock().unwrap();
+    for arg in argv.iter().skip(1) {
+        let path = std::path::PathBuf::from(arg);
+        let openable = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .map(crate::downloads::is_openable)
+            .unwrap_or(false);
+        if !openable || !path.is_file() {
+            continue;
+        }
+        if held.iter().any(|p| p == &path) {
+            continue;
+        }
+        held.push(path);
+        queued += 1;
+    }
+    queued
+}
+
+/// A second Yames was launched on a file while one was already running, or
+/// this one was started with a path. Bring the window forward and say so.
+pub fn announce_opened_paths(app: &AppHandle, argv: &[String]) {
+    let queued = queue_opened_paths(&app.state::<PendingOpenState>(), argv);
+    if queued == 0 {
+        return;
+    }
+    // The player double-clicked a file: the window they expect to see is the
+    // main one, not the widget they left running in a corner.
+    if let Some(floating) = app.get_webview_window("floating") {
+        let _ = floating.hide();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.unminimize();
+        let _ = main.set_focus();
+    }
+    let _ = app.emit("songs-open-file", ());
+}
+
+/// The next file the OS asked Yames to open, read.
+///
+/// `None` when there is nothing waiting, which is the ordinary case on every
+/// launch that was not a double-click. The frontend asks once on mount and
+/// again whenever `songs-open-file` arrives.
+#[tauri::command(async)]
+pub fn take_pending_open(
+    pending: State<'_, PendingOpenState>,
+) -> Result<Option<OpenedFile>, String> {
+    use base64::Engine as _;
+    let path = {
+        let mut held = pending.0.lock().unwrap();
+        if held.is_empty() {
+            return Ok(None);
+        }
+        held.remove(0)
+    };
+    let file_name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    // Sixty-four megabytes, the same ceiling a caught download gets and for
+    // the same reason: a song is kilobytes, and a disk image is not a song.
+    let meta = std::fs::metadata(&path).map_err(|e| format!("{file_name}: {e}"))?;
+    if meta.len() > crate::downloads::MAX_OFFER_BYTES {
+        return Err(format!("{file_name} is too big to be a song"));
+    }
+    let bytes = std::fs::read(&path).map_err(|e| format!("{file_name}: {e}"))?;
+    Ok(Some(OpenedFile {
+        file_name,
+        base64: base64::engine::general_purpose::STANDARD.encode(bytes),
+    }))
+}
+
+#[cfg(test)]
+mod opened_paths_tests {
+    use super::{queue_opened_paths, PendingOpenState};
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    /// A temp directory of this test's own. Never a real data directory.
+    fn temp_dir(tag: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("yames-w19-open-{tag}-{nanos}"));
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn takes_the_song_files_off_a_command_line_and_nothing_else() {
+        let dir = temp_dir("argv");
+        for name in ["riff.gp5", "score.musicxml", "notes.txt"] {
+            std::fs::write(dir.join(name), b"bytes").unwrap();
+        }
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec![
+            dir.join("yames.exe").to_string_lossy().into_owned(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+            // Not a song file.
+            dir.join("notes.txt").to_string_lossy().into_owned(),
+            // A song file that is not there.
+            dir.join("ghost.gp5").to_string_lossy().into_owned(),
+            // A flag, which is not a path at all.
+            "--some-flag".into(),
+            dir.join("score.musicxml").to_string_lossy().into_owned(),
+        ];
+
+        assert_eq!(queue_opened_paths(&state, &argv), 2);
+        let held = state.0.lock().unwrap();
+        let names: Vec<_> = held
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(names, ["riff.gp5", "score.musicxml"]);
+        drop(held);
+
+        // `argv[0]` is the executable, and would be a song file only if
+        // somebody renamed Yames to `riff.gp5`. It is skipped either way.
+        let state = PendingOpenState::default();
+        assert_eq!(
+            queue_opened_paths(
+                &state,
+                &[dir.join("riff.gp5").to_string_lossy().into_owned()],
+            ),
+            0,
+        );
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn the_same_file_twice_is_queued_once() {
+        let dir = temp_dir("twice");
+        std::fs::write(dir.join("riff.gp5"), b"bytes").unwrap();
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec![
+            "yames.exe".into(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+        ];
+        assert_eq!(queue_opened_paths(&state, &argv), 1);
+        // And again from a second launch, while the first is still waiting to
+        // be collected: two double-clicks on one file are one file.
+        assert_eq!(queue_opened_paths(&state, &argv), 0);
+        assert_eq!(state.0.lock().unwrap().len(), 1);
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn an_ordinary_launch_queues_nothing() {
+        let state = PendingOpenState::default();
+        assert_eq!(queue_opened_paths(&state, &["yames.exe".to_string()]), 0);
+        assert!(state.0.lock().unwrap().is_empty());
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
 // validation and the FREE-mode invariant are extracted above and tested here.
 // ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod range_clock_tests {
+    use super::{RangeClock, RangeTempo};
+
+    /// Two numbers that have to be exact, quoted once so the arithmetic in
+    /// the tests below is readable: a quarter note at 100 BPM and at 140.
+    const AT_100: f64 = 600.0;
+    const AT_140: f64 = 60_000.0 / 140.0;
+
+    fn close(a: f64, b: f64) -> bool {
+        (a - b).abs() < 1e-6
+    }
+
+    #[test]
+    fn one_tempo_is_a_straight_line() {
+        let clock = RangeClock::new(&[], 16.0, 100.0);
+        assert!(close(clock.ms_at(0.0, 0), 0.0));
+        assert!(close(clock.ms_at(4.0, 0), 4.0 * AT_100));
+        // And a second time round is one whole pass later.
+        assert!(close(clock.ms_at(4.0, 1), 20.0 * AT_100));
+    }
+
+    /// The failure this whole thing exists for: a step at bar nine.
+    #[test]
+    fn a_tempo_step_moves_everything_after_it() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 8.0,
+                bpm: 140.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 16.0, 100.0);
+        // Before the step, nothing has changed.
+        assert!(close(clock.ms_at(7.0, 0), 7.0 * AT_100));
+        // On it, and after it, the beats are shorter.
+        assert!(close(clock.ms_at(8.0, 0), 8.0 * AT_100));
+        assert!(close(clock.ms_at(12.0, 0), 8.0 * AT_100 + 4.0 * AT_140));
+        // The old straight line would have put that last one here, which is
+        // most of a second out and reads as a tracker that cannot segment.
+        assert!((clock.ms_at(12.0, 0) - 12.0 * AT_100).abs() > 600.0);
+    }
+
+    #[test]
+    fn a_pass_round_the_loop_is_the_whole_map_again() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 8.0,
+                bpm: 140.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 16.0, 100.0);
+        let pass = 8.0 * AT_100 + 8.0 * AT_140;
+        assert!(close(clock.ms_at(0.0, 1), pass));
+        assert!(close(clock.ms_at(4.0, 2), 2.0 * pass + 4.0 * AT_100));
+    }
+
+    /// A step that lands between two quarter notes — a bar line in 7/8 —
+    /// which is exactly what `score::BeatMap` could not have represented.
+    #[test]
+    fn a_step_on_a_seven_eight_bar_line_lands_between_two_quarters() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 3.5,
+                bpm: 140.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 7.0, 100.0);
+        assert!(close(clock.ms_at(3.5, 0), 3.5 * AT_100));
+        assert!(close(clock.ms_at(4.0, 0), 3.5 * AT_100 + 0.5 * AT_140));
+    }
+
+    #[test]
+    fn a_map_that_starts_late_still_starts_at_the_range() {
+        let map = [RangeTempo {
+            beat: 4.0,
+            bpm: 140.0,
+        }];
+        let clock = RangeClock::new(&map, 8.0, 100.0);
+        // The first four beats run at the fallback rather than at nothing.
+        assert!(close(clock.ms_at(4.0, 0), 4.0 * AT_100));
+        assert!(close(clock.ms_at(6.0, 0), 4.0 * AT_100 + 2.0 * AT_140));
+    }
+
+    /// A hand-written or half-migrated request must not divide by nothing.
+    #[test]
+    fn a_step_that_makes_no_sense_is_dropped_not_obeyed() {
+        let map = [
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+            RangeTempo {
+                beat: 4.0,
+                bpm: 0.0,
+            },
+            RangeTempo {
+                beat: 6.0,
+                bpm: f64::NAN,
+            },
+        ];
+        let clock = RangeClock::new(&map, 8.0, 100.0);
+        assert!(close(clock.ms_at(8.0, 0), 8.0 * AT_100));
+        assert!(clock.ms_at(8.0, 3).is_finite());
+    }
+
+    /// An unordered map is put in order rather than walked as it arrives.
+    #[test]
+    fn the_steps_are_sorted_however_they_arrive() {
+        let map = [
+            RangeTempo {
+                beat: 8.0,
+                bpm: 140.0,
+            },
+            RangeTempo {
+                beat: 0.0,
+                bpm: 100.0,
+            },
+        ];
+        let clock = RangeClock::new(&map, 16.0, 100.0);
+        assert!(close(clock.ms_at(12.0, 0), 8.0 * AT_100 + 4.0 * AT_140));
+    }
+}
 
 #[cfg(test)]
 mod sound_type_tests {
@@ -3193,6 +5125,64 @@ mod sound_type_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A schedule of onsets `gap` quarter notes apart, which is all
+    /// `score_timing_bands` reads out of one.
+    fn evenly_spaced(count: u32, gap: f64) -> crate::score::ScoreSchedule {
+        crate::score::ScoreSchedule {
+            onsets: (0..count)
+                .map(|i| crate::score::ExpectedOnset {
+                    id: i,
+                    beat: f64::from(i) * gap,
+                    note_ids: vec![i],
+                    soft: false,
+                    accent: false,
+                })
+                .collect(),
+            length_beats: f64::from(count) * gap,
+            loops: false,
+        }
+    }
+
+    /// The review's colours are the scorer's, or they are a second opinion
+    /// the player has no way to reconcile with the number on screen.
+    #[test]
+    fn the_review_gets_the_same_bands_the_scorer_used() {
+        // 120 BPM, a piece of sixteenths: quarter 500 ms, gap 0.25.
+        let bands = score_timing_bands(evenly_spaced(8, 0.25), 500.0).unwrap();
+        let expected_window = crate::timing::tempo_aware_window_ms(500.0 * 0.25);
+        let expected = crate::timing::window_thresholds(expected_window);
+        assert!((bands.window_ms - expected_window).abs() < 1e-9);
+        assert!((bands.perfect - expected.perfect).abs() < 1e-9);
+        assert!((bands.good - expected.good).abs() < 1e-9);
+        assert!((bands.ok - expected.ok).abs() < 1e-9);
+        assert!((bands.smallest_gap_beats - 0.25).abs() < 1e-9);
+    }
+
+    /// A schedule of quarter notes is judged on a quarter's tolerance, and a
+    /// schedule of sixteenths on a sixteenth's. The two must differ, or the
+    /// "smallest gap" half of the rule is not being applied at all.
+    #[test]
+    fn a_denser_passage_is_judged_more_tightly() {
+        let quarters = score_timing_bands(evenly_spaced(8, 1.0), 500.0).unwrap();
+        let sixteenths = score_timing_bands(evenly_spaced(8, 0.25), 500.0).unwrap();
+        assert!(sixteenths.window_ms < quarters.window_ms);
+        assert!(sixteenths.ok < quarters.ok);
+    }
+
+    /// One onset has no gap. The fallback is a quarter note, which is what
+    /// `score.rs` falls back to, rather than a window of nothing.
+    #[test]
+    fn a_schedule_with_nothing_to_measure_falls_back_to_a_quarter() {
+        let bands = score_timing_bands(evenly_spaced(1, 1.0), 500.0).unwrap();
+        assert!((bands.smallest_gap_beats - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_tempo_of_nothing_is_refused_rather_than_divided_by() {
+        assert!(score_timing_bands(evenly_spaced(4, 0.5), 0.0).is_err());
+        assert!(score_timing_bands(evenly_spaced(4, 0.5), f64::NAN).is_err());
+    }
 
     #[test]
     fn validate_beat_groups_accepts_a_full_16_beat_free_bar() {

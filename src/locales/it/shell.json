@@ -3,7 +3,8 @@
     "metronome": "Metronomo",
     "setlist": "Scaletta",
     "drill": "Rampa",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Brani"
   },
   "tooltip": {
     "zen": "Zen",
@@ -45,7 +46,8 @@
     "save": "Salva preset",
     "delete": "Elimina",
     "newPreset": "Nuovo preset",
-    "newDrill": "Nuovo esercizio"
+    "newDrill": "Nuovo esercizio",
+    "titleSongs": "Brani"
   },
   "emptyStates": {
     "presets": {
@@ -73,7 +75,8 @@
     "inputOff": "Ingresso spento",
     "coachOnPlay": "Il coach ascolta quando avvii",
     "coachQuiet": "Il coach tace durante ogni step",
-    "countIn": "Conteggio iniziale"
+    "countIn": "Conteggio iniziale",
+    "backToStart": "Torna all'inizio"
   },
   "rail": {
     "label": "Modalità e libreria",

@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "Import a song",
+    "dismiss": "OK",
+    "tuning": "Tuning",
+    "capoLabel": "Capo",
+    "capo": "Capo at fret {{fret}}",
+    "meter": "Time",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Bars",
+    "fromBar": "From",
+    "toBar": "To",
+    "wholeSong": "Whole song",
+    "barsCount": "{{count}} bar",
+    "barsCount_other": "{{count}} bars",
+    "sections": "Sections",
+    "speed": "Speed",
+    "percent": "{{percent}}%",
+    "speedNote": "The click runs at {{bpm}} BPM",
+    "loop": "Loop",
+    "loopNote": "Play the bars above again and again",
+    "dropHere": "Drop the file to open it",
+    "band": {
+      "label": "Who you hear",
+      "click": "Click",
+      "drums": "Drums",
+      "bass": "Bass",
+      "keys": "Keys",
+      "levelFor": "How loud the {{lane}} is",
+      "muteFor": "Turn the {{lane}} off",
+      "note": "Set the balance while you play. Yames remembers it for this song.",
+      "leftOut": "{{tracks}} is in this file, but Yames has nobody to play it.",
+      "leftOut_other": "{{tracks}} are in this file, but Yames has nobody to play them.",
+      "droppedNotes": "{{count}} note in this file is for an instrument the band does not have.",
+      "droppedNotes_other": "{{count}} notes in this file are for instruments the band does not have.",
+      "myPart": "My part",
+      "soloShort": "S",
+      "soloFor": "Hear only {{lane}}",
+      "tooManyParts": "{{tracks}} stays silent: this file has more parts than can sound at once.",
+      "tooManyParts_other": "{{tracks}} stay silent: this file has more parts than can sound at once.",
+      "turnedDown": "{{count}} player turned down",
+      "turnedDown_other": "{{count}} players turned down",
+      "drumsLabel": "Drums",
+      "drumsKit": "Yames' kit",
+      "drumsFile": "The file's own"
+    },
+    "countIn": {
+      "counting": "Counting you in"
+    },
+    "engine": {
+      "cannotPlay": "Yames cannot play this song through the band right now. The click still keeps time.",
+      "busy": "Something else is using the sound, so the song stopped. Press play again when you are ready."
+    },
+    "empty": {
+      "title": "Bring in a song you already have",
+      "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
+      "private": "The file stays on this computer. Nothing is uploaded.",
+      "bodyShort": "Guitar Pro or MusicXML. Drop the file anywhere on this screen, or choose one.",
+      "stays": "It stays on this computer, and Yames keeps its own copy."
+    },
+    "tab": {
+      "drawing": "Laying out the music...",
+      "failed": "Yames read this file but cannot draw it. The bars and the timing still work."
+    },
+    "picker": {
+      "title": "Choose your part",
+      "which": "Which part are you playing?",
+      "strings": "{{count}} string",
+      "strings_other": "{{count}} strings",
+      "notTab": "Not written as tab",
+      "cancel": "Not now"
+    },
+    "warn": {
+      "tempoFlattened": "The tempo slides in {{count}} bar. Yames steps it at the bar line instead.",
+      "tempoFlattened_other": "The tempo slides in {{count}} bars. Yames steps it at the bar line instead.",
+      "barOverfilled": "Bar {{bar}} holds more than its time signature allows. It is played as written."
+    },
+    "library": {
+      "add": "Import a song",
+      "empty": "No songs yet",
+      "remove": "Remove from Yames",
+      "due": "Due",
+      "dueTitle": "You asked to come back to this one",
+      "starter": "Included",
+      "starterTitle": "Came with Yames. Delete it whenever you like.",
+      "removeTitle": "Remove {{name}}?",
+      "removeBody": "The whole song goes — every part of it, everything Yames remembers about it, and the copy of the file it keeps. There is no undo.",
+      "removeTakes": "{{count}} take of it goes too.",
+      "removeTakes_other": "{{count}} takes of it go too.",
+      "removeNoTakes": "You have not recorded anything of it.",
+      "removeConfirm": "Remove",
+      "removeCancel": "Keep it"
+    },
+    "review": {
+      "title": "How that went",
+      "summary": "Bars {{bars}} at {{percent}}% — {{hits}} of {{of}} notes landed",
+      "again": "Go again",
+      "working": "Listening back...",
+      "passes": "Which go",
+      "pass": "Go {{n}}",
+      "nothingToSay": "Nothing stood out in that one. Play it again and the coach will have more to go on.",
+      "chordsHonesty": "I can't check the notes inside chords yet, only their timing.",
+      "notSaved": "Yames could not write this one down, so it won't be there to compare against next time.",
+      "tooShort": "That was too short to judge. Play at least eight notes of the passage and the coach will have something to say about it.",
+      "moreLabel": "What else ({{count}})",
+      "moreLabel_other": "What else ({{count}})",
+      "lessLabel": "Hide the rest",
+      "tab": {
+        "nothing": "Nothing was played in these bars."
+      },
+      "mark": {
+        "onTime": "On time",
+        "slightlyEarly": "A shade early",
+        "early": "Early",
+        "slightlyLate": "A shade late",
+        "late": "Late",
+        "missed": "Missed",
+        "notAssessed": "Not assessed",
+        "extra": "Extra note",
+        "accentQuiet": "Written with an accent, but it did not come out louder"
+      },
+      "bars": {
+        "one": "bar {{bar}}",
+        "range": "bars {{from}}–{{to}}",
+        "here": "this passage"
+      },
+      "amount": {
+        "hair": "a hair",
+        "thirtySecond": "about a thirty-second",
+        "sixteenth": "about a sixteenth",
+        "tripletEighth": "about a third of a beat",
+        "eighth": "about an eighth",
+        "mostOfABeat": "most of a beat",
+        "beat": "a whole beat"
+      },
+      "when": {
+        "early": "early",
+        "late": "late"
+      },
+      "goes": "{{count}} go",
+      "goes_other": "{{count}} goes",
+      "notes": "{{count}} note",
+      "notes_other": "{{count}} notes",
+      "say": {
+        "consistentMiss": {
+          "1": "Same spot every time — you lost {{bars}} on {{affected}} of {{goes}}.",
+          "2": "It comes apart in {{bars}}: gone {{affected}} times out of {{passes}}.",
+          "3": "The rest holds up. It's {{bars}} that keeps going missing, on {{affected}} of {{goes}}."
+        },
+        "rushing": {
+          "1": "You're ahead of the click through {{bars}} — {{amount}} early, all the way through.",
+          "2": "There's a rush in {{bars}}: {{amount}} early on average.",
+          "3": "Sit back into {{bars}}. You're landing {{amount}} early in there."
+        },
+        "dragging": {
+          "1": "You're behind the click through {{bars}} — {{amount}} late.",
+          "2": "There's a drag in {{bars}}: the notes land {{amount}} after the beat.",
+          "3": "Lean into {{bars}} a little. It's sitting {{amount}} late."
+        },
+        "afterShift": {
+          "1": "Every time your hand moves in {{bars}}, the next note arrives {{amount}} {{when}}.",
+          "2": "The position change in {{bars}} is costing you {{amount}} {{when}} on the note after it.",
+          "3": "Land the shift in {{bars}} and the rest follows — right now the note after it is {{amount}} {{when}}."
+        },
+        "fallsApart": {
+          "1": "You start {{bars}} clean and lose it by the end.",
+          "2": "It's the back half of {{bars}} that goes — the front of it is fine.",
+          "3": "Stamina, not notes: {{bars}} gets scrappier the further in you get."
+        },
+        "extras": {
+          "1": "There are notes in {{bars}} nobody asked for — {{extras}} of them.",
+          "2": "You're adding {{extras}} in {{bars}}. Let the rests be rests.",
+          "3": "Something extra is creeping into {{bars}}: {{extras}} that aren't written."
+        },
+        "uneven": {
+          "1": "It's not early or late in {{bars}} — it's uneven. The notes land all over.",
+          "2": "Your timing wanders through {{bars}} rather than leaning one way.",
+          "3": "Steady before fast: nothing in {{bars}} is consistent yet, in either direction."
+        },
+        "beatPositionBias": {
+          "1": "Beat {{beat}} of the bar is the one that gets away — {{amount}} {{when}}, every bar.",
+          "2": "You lean on beat {{beat}}: {{amount}} {{when}} whenever it comes round.",
+          "3": "It's beat {{beat}} that's out, bar after bar — {{amount}} {{when}}."
+        },
+        "subdivisionWeak": {
+          "1": "Note {{position}} of every {{outOf}} is the one you keep dropping.",
+          "2": "In each group of {{outOf}}, it's note {{position}} that goes missing.",
+          "3": "Count the group out loud — note {{position}} of {{outOf}} is where it slips."
+        },
+        "drift": {
+          "1": "You started with the click and drifted {{amount}} {{when}} by the end.",
+          "2": "It pulls {{when}} as you go: {{amount}} adrift by the last bars.",
+          "3": "The tempo under your hands slides {{when}} across the segment."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} holds together. At {{collapse}} it comes apart.",
+          "2": "Your ceiling here is {{hold}} — {{collapse}} isn't yours yet.",
+          "3": "You own {{hold}}. {{collapse}} is the next thing to earn, not today's tempo."
+        },
+        "improved": {
+          "1": "That's better — {{bars}} is {{ms}} ms steadier than last time.",
+          "2": "Something moved: you held {{bars}} where it used to slip.",
+          "3": "Real progress in {{bars}} — tighter by {{ms}} ms than your earlier goes."
+        },
+        "clean": {
+          "1": "Nothing to fix in {{bars}} — right on all {{goes}}.",
+          "2": "That one's yours: {{bars}}, {{goes}}, no slips.",
+          "3": "You played {{bars}} right every time. Leave it and come back to it."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "Back to the tab",
+      "selectedBars": "Bars {{bars}} chosen",
+      "wholeSong": "The whole song",
+      "portionSays": "{{count}} bar · {{state}}",
+      "portionSays_other": "{{count}} bars · {{state}}",
+      "looping": "on repeat",
+      "once": "once through",
+      "timeRound": {
+        "one": "{{n}}st time round",
+        "two": "{{n}}nd time round",
+        "few": "{{n}}rd time round",
+        "other": "{{n}}th time round"
+      },
+      "keepPortion": "Save this part",
+      "keepPortionNote": "Choose bars on the tab first, then give them a name",
+      "portionPlaceholder": "Name this bit",
+      "renamePortion": "Rename",
+      "deletePortion": "Forget this one",
+      "portionTitle": "{{name}} — at {{percent}}%",
+      "tabLabel": "The tab. Click a bar to go there, or drag across bars to choose a part."
+    },
+    "offer": {
+      "justArrived": "just arrived in your downloads",
+      "justArrivedSized": "just arrived in your downloads · {{size}}",
+      "more": "{{n}} more waiting",
+      "open": "Open it",
+      "opening": "Opening...",
+      "notThisOne": "Not this one",
+      "failed": "Yames could not open that file. It may still be downloading."
+    },
+    "keepsCopy": "Yames keeps its own copy of every file you bring in, so clearing your downloads loses nothing.",
+    "exportOriginal": "Save the file somewhere",
+    "exporting": "Saving...",
+    "exportDone": "Saved.",
+    "exportFailed": "Yames could not write the file there.",
+    "findTab": {
+      "what": "Song and artist",
+      "link": "Find a tab for it",
+      "note": "Opens your own browser on an ordinary web search. Yames looks nothing up for you.",
+      "ask": "Haven't got the file?"
+    },
+    "camera": {
+      "cannotPlay": "The picture would not play.",
+      "corner": {
+        "bottomLeft": "Bottom left",
+        "bottomRight": "Bottom right",
+        "topLeft": "Top left",
+        "topRight": "Top right"
+      },
+      "denied": "The camera was not allowed. Let Yames use it in your system settings, then turn this on again.",
+      "device": "Which camera",
+      "deviceNumbered": "Camera {{n}}",
+      "failed": "The camera would not open.",
+      "guideBody": "Get both hands in the frame — the one on the neck and the one over the strings.",
+      "guideFlip": "I play left-handed",
+      "guideGot": "Got it",
+      "introNotNow": "Not now",
+      "introPrivate": "Nothing is uploaded and nothing is sent anywhere. Deleting a take deletes its picture with it.",
+      "introStart": "Turn the camera on",
+      "introTitle": "About the camera",
+      "introWhat": "The camera records you playing, from the count-in until you stop. The sound is the take — your playing with the band, as it already is.",
+      "introWhere": "It is written as one video file beside the take, in this app's own folder on this machine, and it stays there until you delete it.",
+      "label": "Camera",
+      "lead": "your hands, kept beside the notes — nothing leaves this machine",
+      "lostPicture": "The camera stopped part way through. The take was kept; the picture was not.",
+      "move": "Move the preview",
+      "nextSlip": "Next slip",
+      "noCamera": "There is no camera on this machine.",
+      "noOffset": "Nothing measured where the picture sits against the sound on this take, so it starts level. Nudge it until your hands land with the notes.",
+      "nudge": "Line the picture up",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "Picture earlier",
+      "nudgeHow": "If your hands look ahead of or behind the sound, nudge the picture until they land together. It is remembered for this camera.",
+      "nudgeLater": "Picture later",
+      "off": "Record the picture",
+      "on": "Camera on",
+      "pause": "Pause",
+      "pitchDropped": "At slower speeds the pitch drops with the tempo here.",
+      "pitchKept": "The pitch stays where it is at slower speeds.",
+      "play": "Play",
+      "prevSlip": "Previous slip",
+      "preview": "You, as the camera sees you",
+      "slips": "Jump to a mistake",
+      "tape": "The pass, note by note",
+      "tickOff": "Bar {{bar}}, {{ms}} ms",
+      "tickPlain": "Bar {{bar}}",
+      "unavailable": "This version cannot record a picture. Everything else on this screen works as it always did.",
+      "watchIt": "Watch it",
+      "watchTitle": "Watching it back",
+      "watchingAll": "The whole pass.",
+      "watchingBars": "Bars {{bars}}, round and round.",
+      "sinkUnsupported": "This version can only play the take through your computer's usual speakers, not through {{device}}.",
+      "sinkUnmatched": "It is playing through your computer's usual speakers — it could not find {{device}} from here.",
+      "peek": "See yourself",
+      "peekNote": "Check your framing. It closes when you play."
+    },
+    "clip": {
+      "save": "Save as a video",
+      "go": "Make the video",
+      "cancel": "Stop",
+      "making": "Making it — {{percent}}%",
+      "whichBars": "Which bars",
+      "chosenBars": "These bars",
+      "wholeTake": "The whole take",
+      "shape": "Shape",
+      "wide": "Wide",
+      "tall": "Tall",
+      "withMarks": "Show the marks",
+      "realTime": "It records as it plays, so it takes as long as the music: {{length}}.",
+      "isMp4": "You get an MP4, which posts anywhere.",
+      "isWebm": "You get a WebM. Some places only take MP4.",
+      "saved": "Saved to {{where}}",
+      "failed": "That video could not be made. Nothing was saved.",
+      "unavailable": "This version cannot save a video.",
+      "bar": "Bar",
+      "bpmUnit": "BPM",
+      "brand": "Yames mark",
+      "brandNote": "A small Yames logo and yames.app in the corner. It is how anybody who sees your clip finds the app.",
+      "showInFolder": "Show in folder",
+      "postItTo": "Post it to",
+      "dragItIn": "Open one and drag the file in — Yames uploads nothing and needs no account.",
+      "webmWarning": "Open one and drag the file in. This one is a WebM, and most of these take MP4 only — a free converter will turn it into one.",
+      "underPicture": "Under the picture",
+      "band": {
+        "tab": "The tab",
+        "marks": "Marks only",
+        "none": "Nothing"
+      }
+    },
+    "compare": {
+      "title": "Bars {{bars}}, then and now",
+      "then": "Then",
+      "now": "Now",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Sound only — the camera was off for this one.",
+      "locked": "The two are held together by the bar, not by the clock, so a slower go still lines up."
+    },
+    "takes": {
+      "withPicture": "With picture",
+      "noneFilmed": "None of these was filmed.",
+      "was": "Bars {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Which part you are reading",
+      "percussion": "Drums — not one to follow",
+      "notTab": "Not written as tab",
+      "empty": "Nothing written on this one"
+    },
+    "strip": {
+      "more": "More"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + notes",
+      "notationNote": "Show the notation staff above the tab as well",
+      "bigger": "Bigger",
+      "smaller": "Smaller",
+      "size": "How big"
+    },
+    "clickChip": "Click",
+    "clickNote": "Tick along with the song. Off to start with when the file brings its own band.",
+    "notes": {
+      "label": "Notes on this file"
+    }
+  }
+}

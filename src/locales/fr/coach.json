@@ -35,9 +35,6 @@
     "beatPlacement": "Placement sur le temps"
   },
   "coachReport": {
-    "cov": "Couv",
-    "eff": "Eff",
-    "grid": "Grille",
     "segment": "Segment",
     "thinkingAria": "Le Coach s'apprête à parler",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "Sur le temps",
     "pocketEarly": "Tu as joué en moyenne {{ms}} ms en avance",
     "pocketLate": "Tu as joué en moyenne {{ms}} ms en retard",
-    "pocketCentred": "Ton timing était centré sur le temps (±5 ms en moyenne)"
+    "pocketCentred": "Ton timing était centré sur le temps (±5 ms en moyenne)",
+    "covLabel": "Temps joués",
+    "covTitle": "Combien des temps que j'attendais ont vraiment été joués",
+    "effLabel": "Notes sur un temps",
+    "effTitle": "Sur tout ce que j'ai entendu, la part qui est tombée sur un temps plutôt qu'entre deux",
+    "gridLabel": "Collé au clic",
+    "gridTitle": "À quel point tout le passage a suivi le clic"
   },
   "eval": {
     "today": "Aujourd'hui",

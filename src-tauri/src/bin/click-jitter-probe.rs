@@ -26,6 +26,12 @@
 //!   --gguf <path>        loop coach::generate over this model
 //!   --no-llm             baseline; no model, no generation thread
 //!   --p99-ms <f>         jitter threshold, default 1.0
+//!   --volume <f>         0.0-1.0, default 0.8 (the app's own default).
+//!                        Changes the AMPLITUDE and nothing else: a voice's
+//!                        gain is worked out once when it is spawned, so the
+//!                        mixer does identical work at 0.01 and at 0.8. It
+//!                        exists so the gate can be re-run on a machine
+//!                        somebody is asleep next to
 //!   --json               emit a machine-readable summary line as well
 //!   --dump-csv <path>    write the raw per-callback capture for re-analysis
 //!   --jam                load the busiest plausible jam (16 ticks a bar,
@@ -53,6 +59,16 @@
 //!                        a writer thread resamples, mixes and writes it to
 //!                        a temporary WAV underneath the stream. Combines
 //!                        with the other two
+//!   --song               play an imported SONG rather than the click or the
+//!                        band: a tempo map with a step in it, a 7/8 bar, and
+//!                        the file's own drums, bass and keys. The one path
+//!                        where the callback walks a table of sample
+//!                        positions rather than counting ticks, so it is the
+//!                        one the gate has to cover on its own. Not with --jam
+//!   --song-loop          --song, looping the four bars that span the meter
+//!                        change and the tempo step — the seam every few
+//!                        seconds for the length of the run
+//!   --song-take          --song, and record a take of it
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -80,18 +96,97 @@
 //! * **Dropouts** — callbacks whose gap exceeded twice the buffer period,
 //!   i.e. the device provably ran dry. Reported for diagnosis; the gate
 //!   is on missed beats, which is what the musician perceives.
+//! * **Callback allocations / frees** — every `malloc`, `realloc` and
+//!   `free` made inside the body of the output callback, counted by this
+//!   binary's own global allocator (see below). Entry-to-entry gaps cannot
+//!   see these: an allocation on a warm heap is fast, and a rule that only
+//!   shows up when it is slow is a rule nobody is testing. Hard gate at
+//!   zero, both ways — a `free()` under the mixer is exactly what the
+//!   retirement machinery in `engine.rs`, `take.rs` and `speech_out.rs`
+//!   exists to prevent.
+//! * **Dropped notifications** — beats the callback could not hand to the
+//!   event loop. Hard gate at zero: `beat_log` is the only source
+//!   `TimingAnalyzer` has for where a beat fell, so one of these is an
+//!   expected onset the player is silently marked down for.
 
+use std::alloc::{GlobalAlloc, Layout, System};
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    compile_jam, compile_jam_with_voices, create_beat_log,
-    create_shared_state, load_kit, load_voice_bank, perc_ids, reference_bank, CallbackProbe, CallbackSample,
+    compile_jam, compile_jam_with_voices, compile_song, create_beat_log, load_font,
+    create_shared_state, in_callback, load_kit, load_voice_bank, perc_ids, reference_bank, reference_perc, CallbackProbe, CallbackSample,
     JamBassLine, JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, JamVoices, KitBank,
-    MelodicBank, MetronomeEngine, TakeRing, TakeSession, TakeStart,
+    MelodicBank, MetronomeEngine, SongBacking, SongBar, SongNote, SongRange, SongRole, SongSounds,
+    SynthPlayer, SynthRing,
+    SongTempo, SongTrack, SongTransport, TakeRing, TakeSession, TakeStart,
 };
+
+// ---------------------------------------------------------------------------
+// The counting allocator — AGENTS.md's "nothing on the callback allocates",
+// as a number instead of a promise
+// ---------------------------------------------------------------------------
+
+/// Allocations made inside the output callback's body during this run.
+static CB_ALLOCS: AtomicU64 = AtomicU64::new(0);
+/// Bytes those allocations asked for.
+static CB_ALLOC_BYTES: AtomicU64 = AtomicU64::new(0);
+/// Frees made inside it. A `free()` under the mixer is the fault the jam
+/// table's, the take's and the coach's retirement paths all exist to avoid,
+/// so it is counted separately and gated just as hard.
+static CB_FREES: AtomicU64 = AtomicU64::new(0);
+
+/// `System`, plus a count of what the audio thread did inside the callback.
+///
+/// **Probe-only by construction.** A `#[global_allocator]` applies to the
+/// binary that declares it, and this is declared in the probe, so the app's
+/// allocator is untouched — no branch, no atomic, nothing.
+///
+/// `yames_lib::probe::in_callback` is a thread-local `Cell<bool>` with a
+/// `const` initialiser and no destructor: reading it here is a TLS slot load
+/// that cannot allocate and so cannot recurse into this allocator. It is
+/// true only for the span of the callback body, not for the whole audio
+/// thread — cpal's own stream loop runs on that thread too, and a `malloc`
+/// in the backend is not a Yames defect and must not be reported as one.
+struct CountingAlloc;
+
+unsafe impl GlobalAlloc for CountingAlloc {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        if in_callback() {
+            CB_ALLOCS.fetch_add(1, Ordering::Relaxed);
+            CB_ALLOC_BYTES.fetch_add(layout.size() as u64, Ordering::Relaxed);
+        }
+        unsafe { System.alloc(layout) }
+    }
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        if in_callback() {
+            CB_ALLOCS.fetch_add(1, Ordering::Relaxed);
+            CB_ALLOC_BYTES.fetch_add(layout.size() as u64, Ordering::Relaxed);
+        }
+        unsafe { System.alloc_zeroed(layout) }
+    }
+
+    unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        if in_callback() {
+            CB_ALLOCS.fetch_add(1, Ordering::Relaxed);
+            CB_ALLOC_BYTES.fetch_add(new_size as u64, Ordering::Relaxed);
+        }
+        unsafe { System.realloc(ptr, layout, new_size) }
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        if in_callback() {
+            CB_FREES.fetch_add(1, Ordering::Relaxed);
+        }
+        unsafe { System.dealloc(ptr, layout) }
+    }
+}
+
+#[global_allocator]
+static ALLOCATOR: CountingAlloc = CountingAlloc;
 
 /// The bass's range, mirrored from `engine.rs`. The probe builds a melodic
 /// bank by hand, so it has to say which notes the band can ask for.
@@ -112,6 +207,15 @@ struct Args {
     gguf: Option<String>,
     no_llm: bool,
     p99_ms: f64,
+    /// Output level, 0.0-1.0. The app's own default unless asked otherwise.
+    ///
+    /// Every gain the mixer applies — the click's, each drum's, the bass's —
+    /// is multiplied by this ONCE, where the voice is spawned, and the
+    /// per-sample loop never sees it. So a run at 0.01 renders exactly the
+    /// same number of voices through exactly the same code as a run at 0.8
+    /// and the numbers are comparable; what changes is whether the room
+    /// hears it.
+    volume: f32,
     json: bool,
     dump_csv: Option<String>,
     jam: bool,
@@ -131,7 +235,36 @@ struct Args {
     /// both to disk while the measurement is running — which is the load a
     /// take actually puts on the machine, and the one path where the audio
     /// thread does work on behalf of the filesystem.
-    jam_take: bool,
+    /// `--jam-take` or `--song-take`: record a take of the whole run. The
+    /// output callback then copies every buffer into a ring, a synthetic
+    /// 44.1 kHz "mic" fills a second one, and a writer thread resamples,
+    /// mixes and writes both to disk while the measurement is running.
+    ///
+    /// One flag for both modes, because it is one path: `take.rs` does not
+    /// know whether it is recording a band or a song, and that is exactly the
+    /// claim `--song-take` is here to check.
+    take: bool,
+    /// Make that take out of everything this computer plays (W30).
+    ///
+    /// Opens a real loopback capture on the output device beside the engine's
+    /// own stream, so the run measures the output callback with a SECOND
+    /// device's callback running and a writer thread draining, resampling and
+    /// folding its ring. Off unless `--jam-loopback-take` asks for it: it
+    /// needs a sound card.
+    loopback: bool,
+    /// Play an imported SONG instead of the click or the band: a tempo map
+    /// with a step in it, a 7/8 bar, and the file's own drums, bass and keys
+    /// on every sixteenth.
+    ///
+    /// The one path where the callback walks a table of sample positions
+    /// rather than counting ticks, so it is the one the gate has to cover
+    /// separately: a different transport, a different table, a different
+    /// retirement list.
+    song: bool,
+    /// `--song`, and loop a four-bar range of it — so the seam, which is the
+    /// one moment a song's cursors all move at once, happens every few
+    /// seconds for the length of the run.
+    song_loop: bool,
     /// `--jam`, and play the bass and the keys out of this folder of
     /// recorded notes instead of the synthesised recipes.
     ///
@@ -158,17 +291,21 @@ impl Default for Args {
         Self {
             bpm: 200,
             subdivision: 4,
+            loopback: false,
             seconds: 60,
             warmup_ms: 1500,
             gguf: None,
             no_llm: false,
             p99_ms: 1.0,
+            volume: 0.8,
             json: false,
             dump_csv: None,
             jam: false,
             jam_swap: false,
             jam_move: false,
-            jam_take: false,
+            take: false,
+            song: false,
+            song_loop: false,
             jam_kit: None,
             jam_voice: None,
             bpm_set: false,
@@ -206,6 +343,7 @@ fn parse_args() -> Result<Args, String> {
             "--seconds" => a.seconds = num(i)? as u64,
             "--warmup-ms" => a.warmup_ms = num(i)? as u64,
             "--p99-ms" => a.p99_ms = num(i)?,
+            "--volume" => a.volume = (num(i)? as f32).clamp(0.0, 1.0),
             "--gguf" => a.gguf = Some(value(i)?.to_string()),
             "--dump-csv" => a.dump_csv = Some(value(i)?.to_string()),
             "--no-llm" => {
@@ -232,7 +370,34 @@ fn parse_args() -> Result<Args, String> {
             }
             "--jam-take" => {
                 a.jam = true;
-                a.jam_take = true;
+                a.take = true;
+                consumed = 1;
+            }
+            // W30 — the take is made of everything this computer plays, so a
+            // SECOND audio device is open and delivering into a ring that the
+            // same writer thread is draining, resampling and folding to
+            // stereo, under the same output callback. That is the arrangement
+            // `plans/SONGS.md` A12 has to be safe in, and this is how it is
+            // measured. Needs a real speaker; on a machine with none the
+            // capture refuses and the run says so rather than passing.
+            "--jam-loopback-take" => {
+                a.jam = true;
+                a.take = true;
+                a.loopback = true;
+                consumed = 1;
+            }
+            "--song" => {
+                a.song = true;
+                consumed = 1;
+            }
+            "--song-loop" => {
+                a.song = true;
+                a.song_loop = true;
+                consumed = 1;
+            }
+            "--song-take" => {
+                a.song = true;
+                a.take = true;
                 consumed = 1;
             }
             "--jam-voice" => {
@@ -254,6 +419,18 @@ fn parse_args() -> Result<Args, String> {
     }
     if a.bpm == 0 {
         return Err("--bpm must be >= 1".into());
+    }
+    // A SONG IS ITS OWN ENGINE MODE, and the callback prefers it over the
+    // band when both are loaded — so a run that asked for both would measure
+    // the song and report the jam. Refuse rather than measure the wrong thing
+    // quietly, which is the rule the `--jam --subdivision` check below is
+    // also written under.
+    if a.song && a.jam {
+        return Err(
+            "--song and --jam are different engine modes; the song wins and the jam \
+             would be silent, so this run would measure the song and call it a jam"
+                .into(),
+        );
     }
     // The band's own band: 240 BPM sixteenths is 16 ticks a bar at 16 ticks
     // a second, which is the top of what a jam can ask the mixer for.
@@ -293,6 +470,9 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      --features coach-llm | coach-llm-vulkan | coach-llm-metal)
   --no-llm           baseline run
   --p99-ms <f>       jitter threshold, default 1.0
+  --volume <f>       0.0-1.0, default 0.8. Amplitude only — the mixer does
+                     the same work at any level — so the gate can be run
+                     next to somebody who is asleep
   --json             also print a one-line JSON summary
   --dump-csv <path>  write the raw per-callback capture for re-analysis
   --jam              play the busiest plausible jam instead of the click
@@ -316,6 +496,20 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      stream is open, handed to the callback inside the
                      table, and swapped and retired with it. Combines
                      with all three above.
+  --song             play an imported SONG instead of the click or the
+                     band: twelve bars at 240 with a 7/8 at bar 4 and a
+                     tempo step at bar 5, every drum on every sixteenth,
+                     a bass on every eighth and a chord on every beat
+                     held a beat and a half. The one path where the
+                     callback walks a table of sample positions rather
+                     than counting ticks. Not with --jam
+  --song-loop        --song, looping the four bars that span the 7/8 and
+                     the tempo step, so the seam — both cursors back to
+                     nought with the voices left ringing — happens every
+                     few seconds for the whole run
+  --song-take        --song, and record a take of it. `take.rs` does not
+                     know whether it is recording a band or a song, and
+                     this is the flag that checks that
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -680,6 +874,193 @@ fn busiest_jam() -> JamConfig {
     }
 }
 
+/// Ticks to a quarter note, as `song.rs` fixes it.
+const SONG_TPQ: u32 = 960;
+
+/// The busiest song anyone could plausibly import, for `--song`.
+///
+/// Twelve bars at 240 BPM with a 7/8 at bar 4 and a tempo step to 180 on the
+/// bar line of bar 5 — so the run crosses a meter change and a tempo change
+/// over and over — with the file's own drums on every sixteenth, a bass note
+/// on every eighth and a four-note chord on every beat held for a beat and a
+/// half, so there is always a voicing still ringing when the next one lands.
+///
+/// It is the song shape of `busiest_jam` and it is written for the same
+/// reason: the gate is about what the mixer carries, not about music. What it
+/// adds over the jam is the thing only a song has — a table of absolute
+/// sample positions, two cursors walking it, a tempo step inside it, and
+/// (with `--song-loop`) a seam every four bars where both cursors go back to
+/// nought while the voices do not.
+fn probe_song(loops: bool) -> (SongTransport, SongBacking) {
+    let mut bars = Vec::new();
+    let mut tick = 0u32;
+    for i in 0..12u32 {
+        let (num, den) = if i == 4 { (7u32, 8u32) } else { (4, 4) };
+        let len = SONG_TPQ * 4 / den * num;
+        bars.push(SongBar {
+            start_tick: tick,
+            length_ticks: len,
+            numerator: num,
+            denominator: den,
+        });
+        tick += len;
+    }
+    let step_at = bars[5].start_tick;
+    let mut drums = Vec::new();
+    let mut bass = Vec::new();
+    let mut keys = Vec::new();
+    // Every drum this engine has a voice for, cycled over the sixteenths, so
+    // the choke masks, the percussion set and the fallback chain are all in
+    // the run rather than only the kick and the snare.
+    const GM: [u8; 12] = [36, 42, 38, 46, 41, 44, 47, 49, 51, 53, 54, 56];
+    // And a guitar, which is what W28 added and what a two-guitar tab is
+    // made of: six notes a bar through the synthesiser, ringing across the
+    // beat, so the ring the callback reads is never empty and the renderer
+    // has real work to do under the measurement.
+    let mut guitar = Vec::new();
+    for bar in bars.iter() {
+        let sixteenth = SONG_TPQ / 4;
+        let mut at = bar.start_tick;
+        let mut n = 0usize;
+        while at < bar.start_tick + bar.length_ticks {
+            drums.push(SongNote {
+                tick: at,
+                dur_ticks: sixteenth,
+                midi: GM[n % GM.len()],
+                velocity: 0.9,
+            });
+            // Two drums on most sixteenths: a kit plays a hand and a foot at
+            // once, and two onsets on one sample is the case the cursor walk
+            // has to get right.
+            drums.push(SongNote {
+                tick: at,
+                dur_ticks: sixteenth,
+                midi: GM[(n + 5) % GM.len()],
+                velocity: 0.6,
+            });
+            n += 1;
+            at += sixteenth;
+        }
+        let eighth = SONG_TPQ / 2;
+        let mut at = bar.start_tick;
+        while at < bar.start_tick + bar.length_ticks {
+            bass.push(SongNote {
+                tick: at,
+                dur_ticks: eighth,
+                midi: 40 + (at / eighth % 12) as u8,
+                velocity: 0.9,
+            });
+            at += eighth;
+        }
+        let beat = SONG_TPQ * 4 / bar.denominator;
+        let mut at = bar.start_tick;
+        while at < bar.start_tick + bar.length_ticks {
+            for note in [55u8, 60, 64, 67] {
+                keys.push(SongNote {
+                    tick: at,
+                    // A beat and a half: the chord is still ringing when the
+                    // next one starts, which is what makes the mixer carry
+                    // eight voices of keys instead of four.
+                    dur_ticks: beat + beat / 2,
+                    midi: note,
+                    velocity: 0.8,
+                });
+            }
+            at += beat;
+        }
+        let beat = SONG_TPQ * 4 / bar.denominator;
+        let mut at = bar.start_tick;
+        let mut n = 0usize;
+        while at < bar.start_tick + bar.length_ticks {
+            for note in [52u8, 59, 64] {
+                guitar.push(SongNote {
+                    tick: at,
+                    dur_ticks: beat + beat / 2,
+                    midi: note + (n % 3) as u8,
+                    velocity: 0.75,
+                });
+            }
+            n += 1;
+            at += beat;
+        }
+    }
+    (
+        SongTransport {
+            ticks_per_quarter: SONG_TPQ,
+            tempo_map: vec![
+                SongTempo { tick: 0, bpm: 240.0 },
+                SongTempo {
+                    tick: step_at,
+                    bpm: 180.0,
+                },
+            ],
+            bars,
+            // Four bars that span the 7/8 AND the tempo step, so a looping
+            // run crosses both on every pass.
+            range: if loops {
+                SongRange {
+                    start_bar: 3,
+                    end_bar: 6,
+                }
+            } else {
+                SongRange {
+                    start_bar: 0,
+                    end_bar: 11,
+                }
+            },
+            loops,
+            tempo_percent: 100,
+            // A count-in is a few clicks at the start and nothing the gate
+            // can see over sixty seconds; the run is about the piece.
+            count_in_bars: 0,
+            start_tick: 0,
+            drums_as_written: false,
+        },
+        SongBacking {
+            tracks: vec![
+                SongTrack {
+                    role: SongRole::Drums,
+                    name: "drums".into(),
+                    program: 0,
+                    guide: false,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: drums,
+                },
+                SongTrack {
+                    role: SongRole::Bass,
+                    name: "bass".into(),
+                    program: 0,
+                    guide: false,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: bass,
+                },
+                SongTrack {
+                    role: SongRole::Keys,
+                    name: "keys".into(),
+                    program: 0,
+                    guide: false,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: keys,
+                },
+                SongTrack {
+                    role: SongRole::Synth,
+                    name: "guitar".into(),
+                    // 30, overdriven guitar: the loudest, busiest voice in a
+                    // General MIDI set, which is the one to measure.
+                    program: 29,
+                    guide: true,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: guitar,
+                },
+            ],
+        },
+    )
+}
+
 fn main() -> ExitCode {
     let args = match parse_args() {
         Ok(a) => a,
@@ -730,6 +1111,7 @@ fn main() -> ExitCode {
         let mut s = state.lock().unwrap();
         s.bpm = args.bpm;
         s.subdivision = args.subdivision;
+        s.volume = args.volume;
         s.is_playing = true;
         // A 4/4 bar keeps the accent pattern (and therefore the voice mix)
         // representative; nothing here changes tick spacing.
@@ -761,7 +1143,26 @@ fn main() -> ExitCode {
             }
         }
     }
-    if let Err(e) = engine.start_headless(state) {
+    // THREE TRIES AT THE DEVICE, not one.
+    //
+    // `start_headless` waits `AUDIO_SETUP_TIMEOUT` — two seconds — for the
+    // audio thread to say whether it got a stream, and on a box where five
+    // other agents are running `cargo build` that is not always enough to
+    // enumerate the devices and decode the sound bank at the device's rate.
+    // The engine is left startable by a failed setup (that is what
+    // `AudioThreadExit` is for, and `a_failed_audio_setup_leaves_the_engine_
+    // startable_again` is the test), so asking again is the honest fix for a
+    // shared machine. A run that gets a stream on the second try is not a
+    // worse measurement — the window has not opened yet.
+    let mut started = Err("not attempted".to_string());
+    for attempt in 1..=3 {
+        started = engine.start_headless(state.clone());
+        match started {
+            Ok(()) => break,
+            Err(ref e) => eprintln!("[probe] audio setup attempt {attempt}/3 failed: {e}"),
+        }
+    }
+    if let Err(e) = started {
         eprintln!("error: audio engine did not start: {e}");
         return ExitCode::from(2);
     }
@@ -797,6 +1198,110 @@ fn main() -> ExitCode {
         }
         None => None,
     };
+
+    // `--song`: built HERE rather than before the stream, because a song's
+    // tables are sample positions at the OUTPUT rate and the output rate is
+    // not a thing anybody knows until the device has opened. Installing it
+    // now also makes this a live handoff into a running stream, which is more
+    // of a test than a table set before the first buffer, not less; it lands
+    // inside the warm-up window the measurement already excludes.
+    // The renderer thread and the ring it fills, held for the life of the
+    // run: dropping the player stops and joins the thread, which is a thing
+    // the end of `main` may do and the callback may not.
+    let mut song_synth: Option<(SynthPlayer, Arc<SynthRing>)> = None;
+    if args.song {
+        let rate = engine.output_sample_rate().unwrap_or(48_000);
+        let (transport, backing) = probe_song(args.song_loop);
+        let sounds = SongSounds {
+            // The reference decode, as `--jam` uses: it is built at
+            // `JAM_REFERENCE_SR` rather than at the device's rate, so on a
+            // 44.1 kHz box the probe's drums are a fraction of a semitone
+            // sharp. That is a pitch the gate does not measure — the mixer
+            // reads the same number of samples either way — and it saves the
+            // run a second decode of the whole kit.
+            bank: match reference_bank("brushes") {
+                Ok(b) => b,
+                Err(e) => {
+                    eprintln!("error: the probe's song kit did not decode: {e}");
+                    return ExitCode::from(2);
+                }
+            },
+            perc: reference_perc(),
+            // The synthesised recipes, as a checkout without the voice
+            // folders plays. `--jam-voice` is the flag that covers recorded
+            // banks, and it covers the same `SoundId::Voice` path.
+            voices: JamVoices::default(),
+        };
+        let table = match compile_song(
+            &transport,
+            Some(&backing),
+            sounds,
+            rate,
+            args.subdivision as u32,
+        ) {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("error: the probe's own song did not compile: {e}");
+                return ExitCode::from(2);
+            }
+        };
+        eprintln!(
+            "[probe] song loaded: {} bars of the range, one pass is {:.2} s at {} Hz, \
+             {} clicks and {} band notes a pass, {} dropped, band held at {:.2}, \
+             {}",
+            table.bars().len(),
+            table.pass_samples() as f64 / rate as f64,
+            rate,
+            table.ticks().len(),
+            table.band().len(),
+            table.dropped_notes,
+            table.band_trim,
+            if table.loops() {
+                "looping"
+            } else {
+                "one pass then the transport stops"
+            },
+        );
+        // ---- THE SYNTHESISER, AND THE THREAD FEEDING IT ----
+        //
+        // W28. This is the one thing on the callback that another thread
+        // fills, so the gate has to cover it: without a renderer running, the
+        // ring is empty and `ready()` returns 0 on every buffer, which is the
+        // one path that costs nothing and proves nothing. The player is held
+        // for the life of the run and dropped at the end, where joining a
+        // thread is allowed.
+        let table = Arc::new(table);
+        song_synth = match (table.synth(), table.synth_score.clone()) {
+            (Some(ring), Some(score)) => match load_font(None) {
+                Ok(font) => {
+                    // The callback has not run a buffer for this table yet,
+                    // so the renderer may begin as soon as it is started.
+                    match SynthPlayer::start(Arc::clone(ring), score, font, rate) {
+                        Ok(player) => {
+                            eprintln!(
+                                "[probe] the song's guitar is on the synthesiser: \
+                                 {} note-ons a pass, {} ms of lead into a {} frame ring",
+                                table.synth_notes,
+                                yames_lib::synth::SYNTH_LEAD_MS,
+                                ring.capacity(),
+                            );
+                            Some((player, Arc::clone(ring)))
+                        }
+                        Err(e) => {
+                            eprintln!("error: the probe's renderer would not start: {e}");
+                            return ExitCode::from(2);
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("error: the probe's sound set did not load: {e}");
+                    return ExitCode::from(2);
+                }
+            },
+            _ => None,
+        };
+        engine.set_song_table(Some(table));
+    }
 
     // WHICH PERCUSSION SET the band is playing, said out loud. The ten
     // rows in `busiest_jam` are silent on a checkout with no `sounds/perc`
@@ -883,11 +1388,13 @@ fn main() -> ExitCode {
     }
 
     eprintln!(
-        "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), warmup {} ms, window {} s",
+        "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), volume {:.2}, \
+         warmup {} ms, window {} s",
         args.bpm,
         args.subdivision,
         1.0 / tick_interval_s,
         tick_interval_s * 1000.0,
+        args.volume,
         args.warmup_ms,
         args.seconds,
     );
@@ -976,6 +1483,60 @@ fn main() -> ExitCode {
         None
     };
 
+    // ---- A HAND ON A FADER, AND A SEEK, WHILE THE SONG PLAYS ----
+    //
+    // The brief's own conditions for the W28 gate. They are two different
+    // things and both had to be in the run:
+    //
+    // * **A fader** is a gain the renderer picks up on its next block and
+    //   turns into a channel volume. It changes nothing on the callback and
+    //   invalidates nothing, so what it tests is that a write racing the
+    //   renderer's read costs the audio thread nothing at all.
+    // * **A seek** bumps the ring's epoch. The callback then throws the whole
+    //   queue away in constant time and mixes no synth until the renderer has
+    //   begun again — which is the one path where the callback does something
+    //   about the synthesiser beyond adding two numbers, and the one the
+    //   dropout count has to stay at zero across.
+    let song_hand = song_synth.as_ref().map(|(_, ring)| {
+        let ring = Arc::clone(ring);
+        // The transport's own seek, which is the whole of the path the
+        // owner's click on the tab takes: `SongHandoff::seek` posts a sample,
+        // the callback takes it with a swap, moves three cursors, cuts every
+        // voice the sampled band has ringing and bumps the synthesiser's
+        // ring. Driven from a thread here for the reason `--jam-move` is:
+        // there is no command surface in a headless run.
+        let handoff = engine.song_handoff();
+        let seam = engine
+            .song_handoff()
+            .table()
+            .map(|t| t.pass_samples())
+            .unwrap_or(0);
+        let stop = Arc::new(AtomicBool::new(false));
+        let flag = stop.clone();
+        let moves = Arc::new(AtomicU64::new(0));
+        let count = moves.clone();
+        let handle = std::thread::spawn(move || {
+            let mut n = 0u64;
+            while !flag.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_millis(250));
+                // The guitar's own fader, swept rather than stepped: a drag
+                // is what a musician actually does to one.
+                let gain = 0.2 + 0.8 * ((n % 8) as f32 / 8.0);
+                ring.set_gain(3, gain);
+                // And every three seconds, the cursor is dropped somewhere
+                // else in the piece — forwards and backwards by turns, so a
+                // seek that only ever went one way could not pass this.
+                if n % 12 == 11 && seam > 0 {
+                    let quarter = seam / 4;
+                    handoff.seek(quarter * ((n / 12) % 4 + 1).min(3));
+                }
+                n += 1;
+                count.fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        (handle, stop, moves)
+    });
+
     // `--jam-take`: record a take for the whole run.
     //
     // This is the one place the audio callback does work on behalf of the
@@ -986,7 +1547,7 @@ fn main() -> ExitCode {
     // is synthetic because the probe runs headless with no input stream;
     // what matters for the gate is that the writer is doing a take's real
     // work — the resampler, the mix and the disk — while the stream runs.
-    let taker = if args.jam_take {
+    let taker = if args.take {
         let handoff = engine.take_handoff();
         let out_sr = match engine.output_sample_rate() {
             Some(sr) => sr,
@@ -998,12 +1559,42 @@ fn main() -> ExitCode {
         };
         let dir = std::env::temp_dir().join(format!("yames-probe-takes-{}", std::process::id()));
         let mic = Arc::new(TakeRing::new(44_100 * 4));
+        // W30 — a take made of everything this computer plays. A REAL capture
+        // on a real endpoint, because the thing under test is what a second
+        // device's callback and a busier writer thread do to the first
+        // device's callback, and a synthetic ring would measure neither.
+        let loopback = if args.loopback {
+            match yames_lib::probe::open_loopback(None) {
+                Ok(capture) => {
+                    let f = capture.format().clone();
+                    eprintln!(
+                        "[probe] recording everything {} plays — {} Hz, {} channel(s)",
+                        f.device, f.sample_rate, f.channels
+                    );
+                    Some(yames_lib::probe::TakeLoopback {
+                        ring: capture.ring(),
+                        sample_rate: f.sample_rate,
+                        channels: f.channels,
+                        device: f.device,
+                        capture: Some(capture),
+                    })
+                }
+                Err(e) => {
+                    eprintln!("error: could not listen to this computer: {e}");
+                    return ExitCode::from(2);
+                }
+            }
+        } else {
+            None
+        };
+        let loopback_mic = if args.loopback { None } else { Some((mic.clone(), 44_100)) };
         let mut session = TakeSession::default();
         if let Err(e) = session.start(TakeStart {
             app_data: &dir,
             jam_id: "probe",
             handoff: &handoff,
-            mic: Some((mic.clone(), 44_100)),
+            loopback,
+            mic: loopback_mic,
             out_sr,
             // The probe measures the writer, not the alignment: a synthetic
             // mic has no round trip to correct and there is no device change
@@ -1011,6 +1602,10 @@ fn main() -> ExitCode {
             round_trip_us: 0,
             out_sr_watch: Some(engine.output_sample_rate_handle()),
             owns_input: false,
+            // The probe measures the callback and the writer, not the
+            // review. The stamp is still written — that is the thing under
+            // test — and nothing reads it back.
+            position: None,
         }) {
             eprintln!("error: could not start the probe's take: {e}");
             return ExitCode::from(2);
@@ -1084,10 +1679,28 @@ fn main() -> ExitCode {
         }
         None => 0,
     };
+    let song_moves = match song_hand {
+        Some((handle, stop, moves)) => {
+            stop.store(true, Ordering::Relaxed);
+            let _ = handle.join();
+            moves.load(Ordering::Relaxed)
+        }
+        None => 0,
+    };
+    // The renderer, stopped and joined HERE — on the way out, on a thread
+    // that may block — and not left to a destructor somewhere the stream is
+    // still running.
+    drop(song_synth);
 
     let samples = cb_probe.snapshot();
     let sample_rate = cb_probe.sample_rate();
     let overflow = cb_probe.overflow();
+    // Read AFTER `shutdown`, which joins the audio thread, so nothing can
+    // still be pushing while these are read.
+    let dropped_notifications = engine.dropped_notifications();
+    let cb_allocs = CB_ALLOCS.load(Ordering::Relaxed);
+    let cb_alloc_bytes = CB_ALLOC_BYTES.load(Ordering::Relaxed);
+    let cb_frees = CB_FREES.load(Ordering::Relaxed);
 
     // Joining can take one generation (up to a few seconds); do it after
     // the audio measurement is already captured.
@@ -1155,6 +1768,10 @@ fn main() -> ExitCode {
     // A pasted report has to say whether the band was playing. Two runs
     // whose only difference is `--jam` were otherwise indistinguishable on
     // the page, which is exactly the pair anyone compares.
+    // The level is on the line because a quiet run and a loud one are
+    // otherwise indistinguishable on the page, and somebody reading a
+    // pasted report deserves to know the band was turned down.
+    mode.push_str(&format!(" @ volume {:.2}", args.volume));
     if args.jam {
         mode.push_str(" + --jam");
     }
@@ -1168,8 +1785,23 @@ fn main() -> ExitCode {
             PROBE_LOOP.1 + 1
         ));
     }
+    if song_moves > 0 {
+        mode.push_str(&format!(
+            " + a fader moved {song_moves} times and a seek every three seconds"
+        ));
+    }
+    if args.song {
+        mode.push_str(if args.song_loop {
+            " + --song-loop (bars 4-7, a 7/8 and a tempo step, looping)"
+        } else {
+            " + --song (twelve bars, a 7/8 and a tempo step)"
+        });
+    }
     if let Some(ref t) = take_summary {
-        mode.push_str(&format!(" + --jam-take ({t})"));
+        mode.push_str(&format!(
+            " + --{}-take ({t})",
+            if args.song { "song" } else { "jam" }
+        ));
     }
     // Last, because `--jam-swap` is spelled by appending "-swap" to the
     // "--jam" above it and anything in between turns it into nonsense.
@@ -1201,6 +1833,17 @@ fn main() -> ExitCode {
         "ticks             {} rendered, {:.1} expected",
         report.ticks_rendered, report.ticks_expected
     );
+    if args.song {
+        // The expected figure above is `window / (60 / bpm / subdivision)`,
+        // and a song does not tick at `--bpm`: it ticks where its own map
+        // says, through a meter change and a tempo step. Say so rather than
+        // let somebody read a mismatch as a fault.
+        println!(
+            "                  (--song: the ticks come from the song's map, not from \
+             --bpm {}, so 'expected' does not apply)",
+            args.bpm
+        );
+    }
     println!("--- callback-to-callback jitter (|Δwall − buffer period|) ---");
     println!("p50               {:.4} ms", report.jitter_p50);
     println!("p95               {:.4} ms", report.jitter_p95);
@@ -1209,10 +1852,16 @@ fn main() -> ExitCode {
     println!("max gap           {:.4} ms", report.max_gap_ms);
     println!("dropouts (>2×buf) {}", report.dropouts);
     println!("missed beats      {}", report.missed_beats);
+    println!("--- inside the callback (this binary's global allocator) ---");
+    println!("allocations       {cb_allocs} ({cb_alloc_bytes} bytes)");
+    println!("frees             {cb_frees}");
+    println!("dropped beats     {dropped_notifications} (beat queue full)");
 
     let jitter_ok = report.jitter_p99 < args.p99_ms;
     let beats_ok = report.missed_beats == 0;
     let arena_ok = report.overflow == 0;
+    let alloc_ok = cb_allocs == 0 && cb_frees == 0;
+    let queue_ok = dropped_notifications == 0;
     println!("--- gate (ROADMAP §4) ---");
     println!(
         "p99 < {:.2} ms      {}",
@@ -1223,6 +1872,17 @@ fn main() -> ExitCode {
         "missed beats = 0  {}",
         if beats_ok { "PASS" } else { "FAIL" }
     );
+    println!(
+        "callback heap = 0 {}",
+        if alloc_ok { "PASS" } else { "FAIL" }
+    );
+    // Not folded into the line above: a dropped beat is a SCORING fault, not
+    // a timing one. The click was heard; the analyzer was not told about it,
+    // and the player is marked down for a beat they played.
+    println!(
+        "dropped beats = 0 {}",
+        if queue_ok { "PASS" } else { "FAIL" }
+    );
     if !arena_ok {
         println!("arena overflow    FAIL (statistics are truncated)");
     }
@@ -1231,7 +1891,9 @@ fn main() -> ExitCode {
         println!(
             "JSON {{\"mode\":\"{}\",\"sample_rate\":{},\"frames\":{},\"callbacks\":{},\
 \"p50_ms\":{:.5},\"p95_ms\":{:.5},\"p99_ms\":{:.5},\"max_ms\":{:.5},\
-\"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\"pass\":{}}}",
+\"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\
+\"callback_allocs\":{},\"callback_alloc_bytes\":{},\"callback_frees\":{},\
+\"dropped_notifications\":{},\"pass\":{}}}",
             mode,
             report.sample_rate,
             report.median_frames,
@@ -1243,11 +1905,15 @@ fn main() -> ExitCode {
             report.max_gap_ms,
             report.dropouts,
             report.missed_beats,
-            jitter_ok && beats_ok && arena_ok
+            cb_allocs,
+            cb_alloc_bytes,
+            cb_frees,
+            dropped_notifications,
+            jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok
         );
     }
 
-    if jitter_ok && beats_ok && arena_ok {
+    if jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok {
         println!("\nRESULT PASS");
         ExitCode::SUCCESS
     } else {

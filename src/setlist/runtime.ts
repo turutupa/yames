@@ -5,20 +5,35 @@
  * a reducer: feed it beats, get back a state and a list of effects for
  * whoever owns the engine to carry out.
  *
- * The rule the whole file is built around is U9.3. `engine.rs` resets
- * `measure_beat` to 0 the instant `beat_groups` changes, so applying a step
- * anywhere but on a downbeat cuts the bar in half — in 7/8, wherever the
- * trigger happened to land. So a fired trigger does not switch. It *arms* a
- * switch, and the switch lands on the next downbeat.
+ * The rule the whole file is built around is U9.3: a fired trigger does not
+ * switch. It *arms* a switch, and the switch lands on the next bar line.
+ * Applying a step anywhere else moves the meter, the tempo and the sound
+ * into the middle of a bar the player is still counting — in 7/8, wherever
+ * the trigger happened to fall.
+ *
+ * The engine keeps the other half of that promise. A meter posted with
+ * `atBarLine` is given to the bar that line opened rather than restacking
+ * the grid at the next tick, so the step arriving owns a full first bar and
+ * the one leaving kept a full last one. It used to restack, one beat late,
+ * and the seam was a bar one beat long.
  *
  * That is why `armed` is a phase and not a boolean tucked inside an effect
  * handler: the gap between "the trigger fired" and "the step changed" is
  * real time, up to a whole bar of it, during which the transport still has
  * to say something true and a second trigger must not fire.
  *
- *     running ──trigger fires──▶ armed ──downbeat──▶ switching ──▶ running
+ *     running ──trigger fires──▶ armed ──bar line──▶ switching ──▶ running
  *                                  └──rest bars──▶ resting ──▶ switching
  *                                  └──last pass──▶ finished
+ *
+ * A BAR LINE IS NOT A BEAT, and this file used to say it was. The beat event
+ * carried the engine's `isDownbeat`, which means "this tick is a whole beat
+ * and not a subdivision" and is true once per BEAT — so "after 8 bars" moved
+ * on after 8 beats, rest bars were rest beats, and an armed switch landed on
+ * the next beat rather than at the top of the bar the rule exists to protect.
+ * The event now carries `barStart`, and `useSetlistRunner` is the one place
+ * that works it out, from the pair the engine itself tests when it opens a
+ * bar: `isDownbeat && measureBeat === 0`.
  */
 import type { Setlist, SetlistStep, SetlistTrigger } from "../types";
 
@@ -27,7 +42,7 @@ export type SetlistPhase =
   | "idle"
   /** Playing a step; no trigger has fired. */
   | "running"
-  /** A trigger has fired. Waiting for the downbeat to switch on. (U9.3) */
+  /** A trigger has fired. Waiting for the bar line to switch on. (U9.3) */
   | "armed"
   /** Between steps, counting out a `rest` transition's bars. */
   | "resting"
@@ -42,7 +57,7 @@ export type SetlistRunState = {
   stepIndex: number;
   /** Passes completed so far. 0 while the first time through. (U9.6) */
   pass: number;
-  /** Downbeats counted since this step's own first downbeat. */
+  /** Bar lines counted since this step's own first bar line. */
   barsInStep: number;
   /** Wall seconds since this step began. */
   secondsInStep: number;
@@ -51,7 +66,7 @@ export type SetlistRunState = {
   /** Rest bars still owed before the armed switch may land. */
   restBarsLeft: number;
   /**
-   * False between `start` and the first downbeat. A setlist started mid-bar
+   * False between `start` and the first bar line. A setlist started mid-bar
    * belongs to no bar yet, and counting the half bar it landed in as bar one
    * would make the first step a bar shorter than every other.
    */
@@ -73,8 +88,18 @@ export type SetlistEvent =
    * back is a chore. Out of range or absent means the top.
    */
   | { kind: "start"; seconds: number; from?: number }
-  /** One engine beat. `seconds` is the run clock, from wall time. */
-  | { kind: "beat"; isDownbeat: boolean; seconds: number }
+  /**
+   * One whole engine beat. `seconds` is the run clock, from wall time.
+   *
+   * `barStart` is "this beat OPENS a bar" — the thing every bar count in
+   * here is made of. It is NOT the engine's `isDownbeat`, which is
+   * `sub == 0`, "a whole beat and not a subdivision", and true once per
+   * beat: reading that as a bar line is what made "after 8 bars" last 8
+   * beats. A bar opens where the engine says it opens, on
+   * `isDownbeat && measureBeat === 0`, and `useSetlistRunner` is the only
+   * place the two are put together.
+   */
+  | { kind: "beat"; barStart: boolean; seconds: number }
   /** A manual trigger, or the transport's skip-ahead. (U9.2, U9.7) */
   | { kind: "advance" }
   | { kind: "stop" };
@@ -115,7 +140,7 @@ export const IDLE_SETLIST_RUN: SetlistRunState = {
  * Has the gap after this step come due?
  *
  * A non-positive or non-finite count never fires. A `bars: 0` step would
- * otherwise switch on its own first downbeat and then on the next one, and
+ * otherwise switch on its own first bar line and then on the next one, and
  * a setlist of them would run through itself in a single bar.
  */
 export function triggerFired(
@@ -177,8 +202,8 @@ export function stepRemaining(
   if (state.phase === "idle" || state.phase === "finished") return null;
   const step = setlist.steps[state.stepIndex];
   if (!step) return null;
-  // Once armed the countdown is over; what is left is the wait for the
-  // downbeat, which is not a number the user can be given in advance.
+  // Once armed the countdown is over; what is left is the wait for the bar
+  // line, which is not a number the user can be given in advance.
   if (state.phase === "armed" || state.phase === "resting") return { kind: "bars", bars: 0 };
   switch (step.trigger.kind) {
     case "manual":
@@ -207,7 +232,7 @@ export function setlistReduce(
     case "advance":
       return advance(setlist, state);
     case "beat":
-      return beat(setlist, state, event.isDownbeat, event.seconds);
+      return beat(setlist, state, event.barStart, event.seconds);
   }
 }
 
@@ -233,7 +258,7 @@ function start(setlist: Setlist, seconds: number, from = 0): SetlistReduction {
       phase: "switching",
       stepIndex: index,
       stepStartedAt: seconds,
-      // The first downbeat anchors the step; until then no bar has elapsed.
+      // The first bar line anchors the step; until then no bar has elapsed.
       anchored: false,
     },
     effects,
@@ -259,7 +284,7 @@ function advance(setlist: Setlist, state: SetlistRunState): SetlistReduction {
 function beat(
   setlist: Setlist,
   state: SetlistRunState,
-  isDownbeat: boolean,
+  barStart: boolean,
   seconds: number,
 ): SetlistReduction {
   if (state.phase === "idle" || state.phase === "finished") return { state, effects: [] };
@@ -269,8 +294,8 @@ function beat(
   let next: SetlistRunState =
     state.phase === "switching" ? { ...state, phase: "running" } : { ...state };
 
-  if (isDownbeat) {
-    // The armed switch lands here, whatever else this downbeat would have
+  if (barStart) {
+    // The armed switch lands here, whatever else this bar line would have
     // meant. This is U9.3 in one line.
     if (next.phase === "armed") return land(setlist, next, seconds);
     if (next.phase === "resting") {
@@ -298,15 +323,15 @@ function beat(
   if (step && triggerFired(step.trigger, next.barsInStep, next.secondsInStep)) {
     next.phase = "armed";
     next.pending = resolveNext(setlist, next.stepIndex, next.pass);
-    // A bars trigger comes due *on* a downbeat, so the wait U9.3 asks for is
+    // A bars trigger comes due *on* a bar line, so the wait U9.3 asks for is
     // already over — arm and land in the same breath rather than giving the
     // step an extra bar it did not ask for.
-    if (isDownbeat) return land(setlist, next, seconds);
+    if (barStart) return land(setlist, next, seconds);
   }
   return { state: next, effects: [] };
 }
 
-/** The armed switch has reached a downbeat. Rest first, or enter the step. */
+/** The armed switch has reached a bar line. Rest first, or enter the step. */
 function land(setlist: Setlist, state: SetlistRunState, seconds: number): SetlistReduction {
   const pending = state.pending ?? resolveNext(setlist, state.stepIndex, state.pass);
   if (pending.kind === "end") {
@@ -324,7 +349,27 @@ function land(setlist: Setlist, state: SetlistRunState, seconds: number): Setlis
     const entered = enterStep(setlist, { ...state, pending }, seconds);
     const beats = countInBeats(setlist, pending, transition.bars);
     return beats > 0
-      ? { ...entered, effects: [...entered.effects, { kind: "countIn", beats }] }
+      ? {
+          /*
+           * AND THE COUNT IS NOT THE STEP'S TIME.
+           *
+           * `enterStep` anchors on the bar line it lands on, because normally
+           * that line IS the step's bar one. A count-in puts a count between
+           * the two: the engine hands the step a second bar line when it
+           * turns the count over (`is_last_warmup` puts `measure_beat` back
+           * to 0 on the beat you start playing on), and an anchored step had
+           * already spent its bar one on the count. "Eight bars" after a
+           * count-in played seven, and the seconds clock started a count too
+           * early.
+           *
+           * Unanchored, bar one and the seconds clock both begin on the beat
+           * the player actually plays on. `start()` has always done this for
+           * the count at the top of a run; this is the same rule between two
+           * steps.
+           */
+          state: { ...entered.state, anchored: false },
+          effects: [...entered.effects, { kind: "countIn", beats }],
+        }
       : entered;
   }
 
@@ -390,7 +435,7 @@ function enterStep(setlist: Setlist, state: SetlistRunState, seconds: number): S
       secondsInStep: 0,
       stepStartedAt: seconds,
       restBarsLeft: 0,
-      // This downbeat is bar one of the new step — nothing left to anchor.
+      // This bar line is bar one of the new step — nothing left to anchor.
       anchored: true,
       pending: null,
     },

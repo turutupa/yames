@@ -110,7 +110,13 @@
       "downloadVoices": "Download voices",
       "installed": "{{tier}} coach installed ({{size}})",
       "removing": "Removing…",
-      "removeModels": "Remove models"
+      "removeModels": "Remove models",
+      "stance": "Coaching Style",
+      "stanceHint": "How hard the coach is on you while you play",
+      "stanceStrict": "Strict",
+      "stanceLearning": "Learning",
+      "stanceStrictDesc": "Names a lean the moment it shows, and says it out loud. The right setting when you are drilling a passage you already know.",
+      "stanceLearningDesc": "Gives you half again as much room before it says anything, keeps corrections out of your ears while you play, and leads with what went right. Your score is worked out exactly the same either way."
     },
     "general": {
       "title": "General",
@@ -177,7 +183,8 @@
         "metronome": "Metronome",
         "view": "View",
         "navigation": "Navigation",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Songs"
       },
       "actions": {
         "play": "Play / Stop",
@@ -211,7 +218,17 @@
         "jam-next-section": "Next section",
         "jam-prev-section": "Previous section",
         "jam-loop-section": "Loop this section",
-        "jam-take": "Record the take"
+        "jam-take": "Record the take",
+        "tab-5": "Songs tab",
+        "songs-loop-start": "Loop starts here",
+        "songs-loop-end": "Loop ends here",
+        "songs-loop": "Repeat the portion",
+        "songs-loop-clear": "The whole song again",
+        "songs-loop-earlier": "Portion a bar earlier",
+        "songs-loop-later": "Portion a bar later",
+        "songs-take": "Record the take",
+        "songs-camera": "Record the picture",
+        "jam-camera": "Record the picture"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -245,7 +262,17 @@
         "jam-next-section": "Jump to the start of the next section at the bar line",
         "jam-prev-section": "Jump back to the start of the previous section at the bar line",
         "jam-loop-section": "Loop the section you are in, or stop looping it",
-        "jam-take": "Record the next time you press play, or stop recording"
+        "jam-take": "Record the next time you press play, or stop recording",
+        "tab-5": "Switch to Songs tab",
+        "songs-loop-start": "Start the portion at the bar you are playing",
+        "songs-loop-end": "End the portion at the bar you are playing",
+        "songs-loop": "Play the chosen bars round and round, or stop",
+        "songs-loop-clear": "Forget the portion and play the piece from the top",
+        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
+        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length",
+        "songs-take": "Record the next time you press play, or stop recording",
+        "songs-camera": "Film the next time you press play, or turn the camera off",
+        "jam-camera": "Film the next time you press play, or turn the camera off"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Check failed",
       "sounds": "Sounds",
       "soundsCredit": "The Club kit is Virtuosity Drums by Versilian Studios and Karoryfer Samples, performed by Austin McMahon (public domain). The Studio kit is DRSKit by the DrumGizmo project (CC BY 4.0).",
-      "madeWith": "Made with {{heart}} for musicians everywhere"
+      "madeWith": "Made with {{heart}} for musicians everywhere",
+      "soundsCreditSongs": "The other instruments come from the Sonivox General MIDI sound set (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Songs",
+      "catchDownloads": "Offer songs you download",
+      "catchDownloadsHint": "While Songs is open, Yames watches your downloads folder and asks before opening anything. Your file is never moved, renamed or deleted.",
+      "folder": "Watch this folder",
+      "folderUnknown": "This computer has not told Yames where downloads go",
+      "chooseFolder": "Choose...",
+      "useDownloads": "Use downloads",
+      "turnedDown": "Songs you turned down",
+      "turnedDownHint": "{{n}} files Yames will not offer again",
+      "forgetTurnedDown": "Offer them again",
+      "soundSet": "Sound set",
+      "soundSetBuiltIn": "The one Yames ships",
+      "chooseSoundSet": "Choose a .sf2",
+      "useBuiltInSoundSet": "Use the built-in one"
     }
   },
   "keybindings": {

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  macOS asks before an app may see through a camera, and it refuses to ask at
+  all unless the app has said why in its own bundle. Without this key
+  `getUserMedia` does not prompt and does not fail with a message — the app
+  is killed, which is the worst of the three outcomes and the one nobody can
+  debug from a bug report.
+
+  Tauri merges this file into the bundle's generated Info.plist at build time,
+  so it holds only what the generator does not already write.
+
+  The sentence is the one a macOS dialog puts after "Yames would like to access
+  the camera", so it is written the way every other promise in this app is
+  written: what it is for, and where it goes. `plans/WEBSITE_DECISIONS.md` —
+  the reader is a musician, never a developer.
+
+  No microphone key, deliberately, and it must stay that way: the webview never
+  opens a microphone. The sound of a take is the engine's, recorded through
+  cpal on its own threads (`src-tauri/src/take.rs`), and adding
+  NSMicrophoneUsageDescription here would tell macOS to offer a permission this
+  app's webview has no code to ask for.
+-->
+<plist version="1.0">
+  <dict>
+    <key>NSCameraUsageDescription</key>
+    <string>Yames records you playing, so you can watch it back beside the notes. The recording is kept on this Mac and is never uploaded.</string>
+  </dict>
+</plist>

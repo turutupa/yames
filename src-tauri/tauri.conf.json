@@ -51,7 +51,11 @@
       "tooltip": "Yames"
     },
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPDATA/takes/**"]
+      }
     }
   },
   "bundle": {
@@ -68,6 +72,37 @@
       "entitlements": null,
       "minimumSystemVersion": "10.15"
     },
+    "windows": {
+      "nsis": {
+        "installerHooks": "installer-hooks.nsh"
+      }
+    },
+    "fileAssociations": [
+      {
+        "ext": ["gp", "gp3", "gp4", "gp5", "gpx"],
+        "name": "YamesGuitarProTab",
+        "description": "Guitar Pro tab",
+        "mimeType": "application/x-guitar-pro",
+        "role": "Viewer",
+        "rank": "Alternate"
+      },
+      {
+        "ext": ["musicxml"],
+        "name": "YamesMusicXml",
+        "description": "MusicXML score",
+        "mimeType": "application/vnd.recordare.musicxml+xml",
+        "role": "Viewer",
+        "rank": "Alternate"
+      },
+      {
+        "ext": ["mxl"],
+        "name": "YamesMusicXmlZip",
+        "description": "MusicXML score",
+        "mimeType": "application/vnd.recordare.musicxml",
+        "role": "Viewer",
+        "rank": "Alternate"
+      }
+    ],
     "createUpdaterArtifacts": true
   },
   "plugins": {

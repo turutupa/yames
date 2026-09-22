@@ -110,7 +110,13 @@
       "downloadVoices": "음성 다운로드",
       "installed": "{{tier}} 코치 설치됨 ({{size}})",
       "removing": "제거 중…",
-      "removeModels": "모델 제거"
+      "removeModels": "모델 제거",
+      "stance": "코칭 방식",
+      "stanceHint": "연주하는 동안 코치가 얼마나 엄하게 볼지",
+      "stanceStrict": "엄격하게",
+      "stanceLearning": "익히는 중",
+      "stanceStrictDesc": "치우침이 보이는 순간 이름을 붙여 소리 내어 말합니다. 이미 칠 줄 아는 대목을 다듬을 때 맞는 설정입니다.",
+      "stanceLearningDesc": "무언가 말하기까지의 여유를 절반 더 주고, 연주 중에는 지적을 귀에 넣지 않으며, 잘된 것부터 이야기합니다. 점수는 어느 쪽이든 똑같이 계산됩니다."
     },
     "general": {
       "title": "일반",
@@ -177,7 +183,8 @@
         "metronome": "메트로놈",
         "view": "뷰",
         "navigation": "탐색",
-        "jam": "잼"
+        "jam": "잼",
+        "songs": "곡"
       },
       "actions": {
         "play": "재생 / 정지",
@@ -211,7 +218,17 @@
         "jam-next-section": "다음 섹션",
         "jam-prev-section": "이전 섹션",
         "jam-loop-section": "이 섹션 반복",
-        "jam-take": "테이크 녹음"
+        "jam-take": "테이크 녹음",
+        "tab-5": "곡 탭",
+        "songs-loop-start": "여기서 반복 시작",
+        "songs-loop-end": "여기서 반복 끝",
+        "songs-loop": "부분 반복",
+        "songs-loop-clear": "다시 곡 전체",
+        "songs-loop-earlier": "부분을 한 마디 앞으로",
+        "songs-loop-later": "부분을 한 마디 뒤로",
+        "songs-take": "테이크 녹음",
+        "songs-camera": "영상 녹화",
+        "jam-camera": "영상 녹화"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -245,7 +262,17 @@
         "jam-next-section": "마디선에서 다음 섹션의 첫 마디로 건너뛰기",
         "jam-prev-section": "마디선에서 이전 섹션의 첫 마디로 돌아가기",
         "jam-loop-section": "지금 있는 섹션을 반복하거나 반복을 끄기",
-        "jam-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다"
+        "jam-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다",
+        "tab-5": "곡 탭으로 전환합니다",
+        "songs-loop-start": "지금 연주하는 마디에서 부분을 시작하기",
+        "songs-loop-end": "지금 연주하는 마디에서 부분을 끝내기",
+        "songs-loop": "고른 마디를 몇 번이고 연주하거나 멈추기",
+        "songs-loop-clear": "부분을 잊고 곡을 처음부터 연주하기",
+        "songs-loop-earlier": "고른 마디를 길이는 그대로 한 마디 앞쪽으로 밀기",
+        "songs-loop-later": "고른 마디를 길이는 그대로 한 마디 뒤쪽으로 밀기",
+        "songs-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다",
+        "songs-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다",
+        "jam-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "확인하지 못했습니다",
       "sounds": "사운드",
       "soundsCredit": "클럽 드럼은 Versilian Studios와 Karoryfer Samples의 Virtuosity Drums이며 Austin McMahon이 연주했습니다(퍼블릭 도메인). 스튜디오 드럼은 DrumGizmo 프로젝트의 DRSKit입니다(CC BY 4.0).",
-      "madeWith": "전 세계 음악가들을 위해 {{heart}}로 만들었습니다"
+      "madeWith": "전 세계 음악가들을 위해 {{heart}}로 만들었습니다",
+      "soundsCreditSongs": "나머지 악기는 Sonivox General MIDI 사운드 세트입니다 (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "곡",
+      "catchDownloads": "내려받은 곡 알려주기",
+      "catchDownloadsHint": "곡 화면이 열려 있는 동안 Yames가 다운로드 폴더를 살피고, 무엇이든 열기 전에 먼저 물어봅니다. 파일을 옮기거나 이름을 바꾸거나 지우지 않습니다.",
+      "folder": "이 폴더 살피기",
+      "folderUnknown": "이 컴퓨터가 다운로드 위치를 Yames에게 알려주지 않았습니다",
+      "chooseFolder": "고르기...",
+      "useDownloads": "다운로드 폴더 쓰기",
+      "turnedDown": "지나친 곡",
+      "turnedDownHint": "Yames가 다시 알리지 않을 파일 {{n}}개",
+      "forgetTurnedDown": "다시 알려주기",
+      "soundSet": "사운드 세트",
+      "soundSetBuiltIn": "Yames에 들어 있는 것",
+      "chooseSoundSet": ".sf2 고르기",
+      "useBuiltInSoundSet": "기본 세트 쓰기"
     }
   },
   "keybindings": {

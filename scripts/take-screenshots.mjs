@@ -258,9 +258,13 @@ async function startVite(port) {
  * browser thinks it has.
  */
 async function capture(cdp, sessionId, { shot, theme, file }, port) {
+  // Built at `buildAt` where a scene asks for one, then narrowed below. A
+  // scene is driven the way a person drives the app, and below about 900px
+  // the rail collapses and there is no library row to click.
+  const born = shot.buildAt ?? { width: shot.width, height: shot.height };
   await cdp.send(
     "Emulation.setDeviceMetricsOverride",
-    { width: shot.width, height: shot.height, deviceScaleFactor: DEVICE_SCALE, mobile: false },
+    { width: born.width, height: born.height, deviceScaleFactor: DEVICE_SCALE, mobile: false },
     sessionId,
   );
 
@@ -283,6 +287,17 @@ async function capture(cdp, sessionId, { shot, theme, file }, port) {
     if (ready) break;
     if (Date.now() - started > 30000) throw new Error("the page never reported ready");
     await sleep(100);
+  }
+
+  // ...and narrowed to the size under test once it has built, with a moment
+  // for the reflow to land before the settle below.
+  if (shot.buildAt) {
+    await cdp.send(
+      "Emulation.setDeviceMetricsOverride",
+      { width: shot.width, height: shot.height, deviceScaleFactor: DEVICE_SCALE, mobile: false },
+      sessionId,
+    );
+    await sleep(250);
   }
 
   await sleep(shot.settleMs);
@@ -381,6 +396,21 @@ try {
       // The themes are the point of these pictures; nothing may tint them.
       "--force-color-profile=srgb",
       "--disable-lcd-text",
+      /*
+       * A camera, with no camera and nobody in front of it (W21, W25).
+       *
+       * Chromium's fake device hands the page a real `MediaStream` of a
+       * synthetic picture and the fake UI answers the permission prompt, so
+       * the `songs-camera*` scenes arm the shipping camera code and record
+       * with the shipping `MediaRecorder` on a build machine. The same two
+       * flags `playwright.config.ts` passes, for the same reason and to the
+       * same Chromium.
+       *
+       * They affect nothing else: every other scene opens no camera, and a
+       * flag that supplies a device nobody asks for supplies nothing.
+       */
+      "--use-fake-device-for-media-stream",
+      "--use-fake-ui-for-media-stream",
       "about:blank",
     ],
     { stdio: "ignore" },

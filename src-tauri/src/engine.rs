@@ -1746,6 +1746,19 @@ impl<'a> BandBanks<'a> {
         }
     }
 
+    /// What a SONG plays out of. The same three reads off the other table —
+    /// a song carries its kit, its percussion set and its melodic banks
+    /// inside itself for every reason a jam does.
+    #[inline]
+    fn of_song(table: &'a crate::song::SongTable) -> Self {
+        Self {
+            kit: Some(table.kit_bank()),
+            perc: table.perc_bank(),
+            bass: table.voice_bank(VoiceLine::Bass),
+            keys: table.voice_bank(VoiceLine::Keys),
+        }
+    }
+
     #[inline]
     fn melodic(&self, line: VoiceLine) -> Option<&'a crate::voices::MelodicBank> {
         match line {
@@ -1816,7 +1829,7 @@ impl AccentMode {
 /// wrote it.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u8)]
-enum AccentLevel {
+pub(crate) enum AccentLevel {
     /// A plain beat, or a subdivision tick. The beat click.
     None = 0,
     /// A group start that is not the bar's: the kit's MIDDLE STROKE, its own
@@ -2200,22 +2213,7 @@ fn spawn_band_voice(
     };
     let gain = slot.gain * wobble * volume;
 
-    // What this hit silences. The manifest said which drums close which
-    // (`choked_by`); `jam.rs` inverted it into `chokes` when the table was
-    // compiled, so this is a mask test per ringing voice and no more.
-    if slot.chokes != 0 {
-        for v in voices.iter_mut() {
-            if v.band && v.voice != NOT_A_DRUM && (slot.chokes & (1u32 << v.voice)) != 0 {
-                // Already fading: leave the shorter fade alone rather than
-                // restarting it, so two closed hats in a row do not make the
-                // open one last longer than one would.
-                if v.fade_len == 0 {
-                    v.fade_len = choke_frames.max(1);
-                    v.fade_left = v.fade_len;
-                }
-            }
-        }
-    }
+    choke_ringing(voices, slot.chokes, choke_frames);
 
     voices.push(Voice {
         sound_id,
@@ -2240,6 +2238,170 @@ fn spawn_band_voice(
         // copies a number. See `Voice::release`.
         release: slot.release,
     });
+}
+
+/// What a hit silences: start the fade on every ringing voice this one closes.
+///
+/// The manifest said which drums close which (`choked_by`); `jam.rs` inverted
+/// it into `chokes` when the table was compiled, so this is a mask test per
+/// ringing voice and no more. Bounded by `MAX_VOICES` and run once per hit
+/// rather than once per sample.
+///
+/// On its own so that a jam's slot and a song's event, which are spawned
+/// differently in every other respect, cannot end up choking differently.
+#[inline]
+fn choke_ringing(voices: &mut [Voice], chokes: u32, choke_frames: u32) {
+    if chokes == 0 {
+        return;
+    }
+    for v in voices.iter_mut() {
+        if v.band && v.voice != NOT_A_DRUM && (chokes & (1u32 << v.voice)) != 0 {
+            // Already fading: leave the shorter fade alone rather than
+            // restarting it, so two closed hats in a row do not make the open
+            // one last longer than one would.
+            if v.fade_len == 0 {
+                v.fade_len = choke_frames.max(1);
+                v.fade_left = v.fade_len;
+            }
+        }
+    }
+}
+
+/// One note of a SONG's band, spawned.
+///
+/// [`spawn_band_voice`]'s twin, and the differences between them are the
+/// difference between a jam and a song:
+///
+/// * **No drift.** A jam's drums are pushed and pulled a few milliseconds
+///   because a band that lands perfectly is a machine. A song's band is where
+///   the file put it, to the sample — the scorer's expected onsets come off
+///   the same map, and a drummer three milliseconds early is three
+///   milliseconds the player is measured against and did not hear.
+/// * **No round robin decided here.** A song's bar and tick are known when the
+///   table is compiled, so the robin is already in the `SoundId`. There is
+///   nothing left to work out.
+/// * **The cap is in FRAMES, not ticks.** A jam's tick length is the one
+///   number the callback always has; a song's is different in every bar, so
+///   the length of the note was resolved when the table was built.
+///
+/// What they share is everything that matters on this thread: no allocation,
+/// no lock, the same guard against `MAX_VOICES`, and the same choke walk.
+#[inline]
+fn spawn_song_voice(
+    voices: &mut Vec<Voice>,
+    event: &crate::song::SongEvent,
+    gain: f32,
+    choke_frames: u32,
+) {
+    if voices.len() >= MAX_VOICES {
+        return;
+    }
+    let slot = &event.slot;
+    choke_ringing(voices, slot.chokes, choke_frames);
+    voices.push(Voice {
+        sound_id: slot.sound,
+        position: 0,
+        delay: 0,
+        amp_l: gain * slot.pan_l,
+        amp_r: gain * slot.pan_r,
+        max_samples: event.cap_samples as usize,
+        voice: slot.voice,
+        fade_left: 0,
+        fade_len: 0,
+        band: true,
+        // A drum is a pair of samples a frame; the bass, the keys and a
+        // recorded melodic note are one. See `Voice::stereo`.
+        stereo: matches!(slot.sound, SoundId::Band { .. }),
+        release: slot.release,
+    });
+}
+
+/// One click of a song, spawned.
+///
+/// The metronome's own three cases, in the metronome's own words — an accent
+/// rings out uncapped at its tier's gain, a beat and a subdivision tick play
+/// the kit's low sound capped at nine tenths of the gap to the next one. What
+/// is different is only where the numbers came from: the tier off the bar's
+/// meter and the cap off the bar's tempo, both decided when the song was
+/// compiled, because a song's gap is different in every bar.
+///
+/// It goes down `Voice::click`, which is the metronome's own path: mono,
+/// centred, outside the drum bus, summed exactly where the click has always
+/// been summed. A song does not move the click.
+#[inline]
+fn spawn_song_click(
+    voices: &mut Vec<Voice>,
+    tick: &crate::song::SongTick,
+    level: AccentLevel,
+    kit: SoundKit,
+    volume: f32,
+) {
+    // Guarded like every other push. See `MAX_VOICES`.
+    if voices.len() >= MAX_VOICES {
+        return;
+    }
+    let (sound, gain, cap) = match level {
+        AccentLevel::Strong => (kit.high_id(), level.gain(), 0),
+        AccentLevel::Medium => (kit.mid_id(), level.gain(), 0),
+        AccentLevel::None => (
+            kit.low_id(),
+            if tick.sub == 0 { BEAT_GAIN } else { SUB_GAIN },
+            tick.cap_samples as usize,
+        ),
+    };
+    voices.push(Voice::click(sound, gain * volume, cap));
+}
+
+/// One click of a song, as the event loop will read it.
+///
+/// Every field comes off the compiled tick, which is the point: the callback
+/// works out the timestamp and nothing else. `expected_interval_ms` is the
+/// SONG's beat and not `AppState::bpm` — `TimingAnalyzer` sizes its matching
+/// window from it, and a window built on the metronome screen's tempo while a
+/// song plays at 70 % would be half the width the player is entitled to.
+///
+/// Pure, so the shape of a song's beat event can be tested without a device.
+#[inline]
+fn song_notification(
+    tick: &crate::song::SongTick,
+    session: u64,
+    ts_ns: u64,
+    delay_us: u64,
+    level: AccentLevel,
+    pass: u32,
+) -> BeatNotification {
+    BeatNotification {
+        session,
+        beat: tick.beat,
+        measure_beat: tick.measure_beat,
+        subdivision: tick.sub,
+        subdivision_total: tick.subdivision_total.max(1),
+        is_downbeat: tick.sub == 0,
+        accent: level as u8,
+        beats_per_bar: tick.beats_per_bar.max(1),
+        ts_ns,
+        expected_interval_ms: tick.interval_ms,
+        // A SONG'S COUNT-IN IS NOT `AppState::count_in`, and these two flags
+        // are what would tangle them. The engine's count-in counts beats at
+        // the metronome's tempo and knows nothing about a 7/8 at 70 %; the
+        // song's is in its own table at its own tempo, and `load_song` clears
+        // the other one so only one of them can ever be running. The event
+        // loop tells them apart by `song_bar` — see `song::COUNT_IN_BAR`.
+        is_warmup_beat: false,
+        is_warmup_transition: false,
+        bar_just_completed: tick.bar_complete,
+        delay_us,
+        // There is no form and no band state while a song plays: the
+        // contract's values for "there is no jam".
+        jam_bar: 0,
+        jam_chorus: 1,
+        jam_band_state: JamBandState::Full,
+        jam_bar_mismatch: false,
+        song_bar: tick.bar,
+        song_tick: tick.tick,
+        song_pass: pass,
+        jam_form_ended: false,
+    }
 }
 
 /// How long a choke takes.
@@ -2699,6 +2861,237 @@ fn band_state_of(table: Option<&JamTable>, bar: u32) -> JamBandState {
 /// into the Tauri command that fills it.
 pub type SharedJam = Arc<JamHandoff>;
 
+// ---------------------------------------------------------------------------
+// Song — the imported piece the engine plays instead of the click or the band
+// ---------------------------------------------------------------------------
+
+/// Where a compiled song waits for the audio thread.
+///
+/// [`JamHandoff`]'s shape, and deliberately so: one relaxed load per buffer on
+/// the common path, a `try_lock` and an `Arc` clone only when the generation
+/// moves, and a retirement list so the LAST reference to a table — which
+/// carries a decoded kit and two melodic banks, tens of megabytes — is dropped
+/// on a thread that may call `free()`.
+///
+/// What it does NOT carry is a position. A jam's `JamPosition` is a jump and a
+/// loop pending at the next bar line; a song's loop is baked into the table it
+/// is part of, because the range decides how long a pass is and how long a
+/// pass is decides where every sample in the table sits. Changing the range
+/// recompiles — that is what `set_song_range` does — and the audio thread
+/// swaps the whole thing at once rather than holding two ideas of where the
+/// seam is.
+///
+/// The mix is the exception, and it is here for exactly the reason
+/// `JamPosition` is on the jam: it is `Copy`, it owns nothing, and a musician
+/// moving a fader must not pay for a recompile of the piece.
+pub struct SongHandoff {
+    table: Mutex<Option<Arc<crate::song::SongTable>>>,
+    generation: AtomicU64,
+    mix: Mutex<crate::song::SongMixGains>,
+    mix_generation: AtomicU64,
+    retired: Mutex<Vec<Arc<crate::song::SongTable>>>,
+    /// Where the player just clicked, as `sample + 1` into the pass, or 0 for
+    /// "nowhere". One `u64`, written by the command thread and taken by the
+    /// callback with a swap.
+    ///
+    /// **`+ 1` so that zero can mean nothing**, which matters because a seek
+    /// to the top of the range is the commonest one there is — pressing Home,
+    /// or clicking bar one — and a sentinel that collided with it would make
+    /// exactly that gesture the one that does not work.
+    ///
+    /// Two seeks between two buffers is one swap after another, and the
+    /// callback reads the last: a player dragging across the tab gets where
+    /// they let go, not a stutter through everywhere they passed.
+    seek: AtomicU64,
+}
+
+/// How many replaced songs the command thread can be behind on. A song is
+/// replaced when the range, the speed or the mix of lanes changes, which is a
+/// button press rather than a bar line — four is generous.
+const SONG_RETIRED_CAP: usize = 4;
+
+impl SongHandoff {
+    fn new() -> Self {
+        Self {
+            table: Mutex::new(None),
+            generation: AtomicU64::new(0),
+            mix: Mutex::new(crate::song::SongMixGains::default()),
+            mix_generation: AtomicU64::new(0),
+            retired: Mutex::new(Vec::with_capacity(SONG_RETIRED_CAP)),
+            seek: AtomicU64::new(0),
+        }
+    }
+
+    /// Move the playhead inside the piece the engine is already holding.
+    ///
+    /// **Not a recompile.** `set_song_range` builds a new table and starts it
+    /// from the top, which is the right answer for a new range and the wrong
+    /// one for a click on bar 34 of the one that is playing: it would stop
+    /// the pass, and stopping a pass ends the attempt and raises the review
+    /// (`COACH_UX.md` A3). This moves a cursor and nothing else.
+    pub fn seek(&self, sample: u64) {
+        self.seek.store(sample.saturating_add(1), Ordering::Release);
+    }
+
+    /// The callback's half: take the seek, if there is one.
+    #[inline]
+    fn take_seek(&self) -> Option<u64> {
+        match self.seek.swap(0, Ordering::Acquire) {
+            0 => None,
+            n => Some(n - 1),
+        }
+    }
+
+    /// Hand the engine a song, or `None` to take it away. Called from
+    /// `load_song` / `clear_song`, never from the audio thread.
+    pub fn set(&self, table: Option<Arc<crate::song::SongTable>>) {
+        // Free what the audio thread has handed back, here, where freeing is
+        // allowed.
+        self.drain_retired();
+        if let Ok(mut slot) = self.table.lock() {
+            *slot = table;
+            // Bumped after the write, so a callback that sees the new
+            // generation is guaranteed to find the new table behind the lock.
+            drop(slot);
+            self.generation.fetch_add(1, Ordering::Release);
+        }
+    }
+
+    /// Move a fader. Applies on the next buffer; nothing is recompiled.
+    pub fn set_mix(&self, mix: crate::song::SongMixGains) {
+        if let Ok(mut slot) = self.mix.lock() {
+            if *slot == mix {
+                return;
+            }
+            *slot = mix;
+            drop(slot);
+            self.mix_generation.fetch_add(1, Ordering::Release);
+        }
+    }
+
+    /// The mix the engine is holding, for a command that has to report it.
+    pub fn mix(&self) -> crate::song::SongMixGains {
+        self.mix
+            .lock()
+            .map(|m| *m)
+            .unwrap_or_else(|e| *e.into_inner())
+    }
+
+    /// The song the engine is holding, for a command that has to read the
+    /// piece rather than change it — `start_take` is the one, which closes
+    /// over it so the take's writer can say which bar the recording opens on.
+    /// Command thread only; the audio thread has its own `Arc` already.
+    pub fn table(&self) -> Option<Arc<crate::song::SongTable>> {
+        self.table
+            .lock()
+            .map(|t| t.clone())
+            .unwrap_or_else(|e| e.into_inner().clone())
+    }
+
+    /// Is a song loaded at all? Asked by the commands that have to stop one
+    /// mode before starting another.
+    pub fn is_loaded(&self) -> bool {
+        self.table
+            .lock()
+            .map(|t| t.is_some())
+            .unwrap_or(false)
+    }
+
+    /// Drop every retired song. Command thread only.
+    pub(crate) fn drain_retired(&self) {
+        if let Ok(mut r) = self.retired.lock() {
+            r.clear();
+        }
+    }
+
+    /// Audio thread: hand back a table it no longer reads. Never blocks and
+    /// never allocates; a busy or full slot hands the table back in `Err` for
+    /// the caller to park.
+    fn try_retire(&self, table: Arc<crate::song::SongTable>) -> Result<(), Arc<crate::song::SongTable>> {
+        match self.retired.try_lock() {
+            Ok(mut r) if r.len() < r.capacity() => {
+                r.push(table);
+                Ok(())
+            }
+            _ => Err(table),
+        }
+    }
+}
+
+/// The audio thread's own parking spaces for replaced songs. [`JamRetirement`]
+/// applied to the other table, with the same rule at the end of it: if even
+/// these are full the table is leaked rather than freed here, because a
+/// `free()` on the audio thread is the thing the engine is built to avoid.
+struct SongRetirement {
+    parked: [Option<Arc<crate::song::SongTable>>; 2],
+}
+
+impl SongRetirement {
+    fn new() -> Self {
+        Self { parked: [None, None] }
+    }
+
+    fn retire(&mut self, handoff: &SongHandoff, table: Arc<crate::song::SongTable>) {
+        if let Err(table) = handoff.try_retire(table) {
+            match self.parked.iter_mut().find(|s| s.is_none()) {
+                Some(slot) => *slot = Some(table),
+                None => std::mem::forget(table),
+            }
+        }
+    }
+
+    fn flush(&mut self, handoff: &SongHandoff) {
+        for slot in self.parked.iter_mut() {
+            if let Some(table) = slot.take() {
+                if let Err(back) = handoff.try_retire(table) {
+                    *slot = Some(back);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+/// Shared handle to the engine's song slot.
+pub type SharedSong = Arc<SongHandoff>;
+
+/// WHICH DECODE a song's drums came from, or `None` with no song. [`bank_id`]
+/// for the other table, and it answers the same question for the same reason:
+/// a drum still ringing out of a kit the table no longer carries is a click.
+#[inline]
+fn song_bank_id(table: Option<&crate::song::SongTable>) -> Option<u64> {
+    table.map(|t| t.kit_bank().id)
+}
+
+/// How hard a song's click marks this tick, once the musician's accent MODE
+/// has had its say.
+///
+/// The tier in the table is the meter's: it was worked out when the song was
+/// compiled, because a bar's grouping cannot change under it. "Every beat" and
+/// "no accents" are live settings on the metronome screen, and a song is still
+/// the metronome — so they are applied here, on the tick, out of a `u8` the
+/// callback is already holding.
+///
+/// Pure, on the audio thread, for the reason [`accent_for`] is.
+#[inline]
+fn song_accent(mode: AccentMode, compiled: u8, is_downbeat: bool) -> AccentLevel {
+    match mode {
+        AccentMode::None => AccentLevel::None,
+        AccentMode::All => {
+            if is_downbeat {
+                AccentLevel::Strong
+            } else {
+                AccentLevel::None
+            }
+        }
+        AccentMode::Groups => match compiled {
+            x if x == AccentLevel::Strong as u8 => AccentLevel::Strong,
+            x if x == AccentLevel::Medium as u8 => AccentLevel::Medium,
+            _ => AccentLevel::None,
+        },
+    }
+}
+
 /// What sounds on one tick.
 #[derive(Debug, PartialEq)]
 enum JamPlay<'a> {
@@ -2807,6 +3200,35 @@ fn is_pickup_beat(warming_up: bool, warmup_count: u8, warmup_beats: u8) -> bool 
         && warmup_count.saturating_add(1) < warmup_beats
         // The one before it.
         && warmup_count.saturating_add(2) >= warmup_beats
+}
+
+/// Does the tick about to sound still belong to the bar a HELD meter was
+/// posted on?
+///
+/// Pure, and beside [`is_pickup_beat`] for the same reason: it is a rule, it
+/// runs on the audio thread, and it has to be testable without a sound card.
+///
+/// A setlist's switch is posted at a bar line — the beat notification for
+/// that tick leaves the callback BEFORE the tick is heard, so "posted at bar
+/// line N" is the literal truth even though the engine has already worked
+/// that tick out. What it cannot do is un-sound it; what it can do is give
+/// the new meter to the bar that line opened, which is where the player
+/// hears the change begin.
+///
+/// So the held meter lands on the first tick that is still inside that bar's
+/// FIRST BEAT — `measure_beat` 0, any subdivision of it, plus the whole-beat
+/// tick of beat 1, which is the earliest the callback can see a change posted
+/// on an unsubdivided click. It lands WITHOUT touching `measure_beat`: the
+/// bar keeps the downbeat it already sounded and simply runs to its new
+/// length, which is why the seam has no stub bar in it.
+///
+/// Anything later — a slow round trip, a change posted mid-bar — is not that
+/// bar's any more and waits for `measure_beat` to wrap to 0, so the bar in
+/// progress finishes at its old length. Either way the bar line never moves,
+/// and the engine stays the one place that decides where a bar begins.
+#[inline]
+fn held_meter_due(measure_beat: u32, sub_count: u32) -> bool {
+    measure_beat == 0 || (measure_beat == 1 && sub_count == 0)
 }
 
 /// Move the form on by one bar: 0-based bar within the chorus, 1-based
@@ -2965,6 +3387,12 @@ struct CachedParams {
     /// `beat_groups.iter().sum()`, precomputed alongside `accent_mask`.
     beat_groups_total: u32,
     beat_groups_changed: bool,
+    /// A meter posted AT A BAR LINE, waiting for the bar line it was posted
+    /// on. Allocated once with capacity `MAX_BEAT_GROUPS` and only ever
+    /// refilled in place, exactly like `beat_groups` — see `held_meter_due`.
+    held_beat_groups: Vec<u8>,
+    /// True while `held_beat_groups` holds a change not yet made current.
+    beat_groups_held: bool,
     ramp_active: bool,
     ramp_beats_per_bar: u8,
     ramp_warming_up: bool,
@@ -2996,10 +3424,33 @@ struct CachedParams {
     /// THE TABLE CHANGES and never per tick — that is the whole reason it is
     /// a field here rather than a call into `cached.jam` in the tick loop.
     count_in_slot: Option<crate::jam::JamSlot>,
+    /// THE SONG, when one is loaded. Cloned out of the shared slot only when
+    /// `song_generation` moves, exactly as the jam is — and when one is here
+    /// the jam does not play at all: a song is its own engine mode, and
+    /// `load_song` takes the band away on the command thread before the table
+    /// ever arrives.
+    song: Option<Arc<crate::song::SongTable>>,
+    song_generation: u64,
+    /// Set on the buffer that picked a new song up (or dropped one), so the
+    /// tick loop can put the cursor back to the top of the range.
+    song_changed: bool,
+    /// The musician's faders. `Copy`, four floats, behind their own
+    /// generation counter — the same handshake `jam_position` uses, for the
+    /// same reason: a fader move must not recompile the piece.
+    song_mix: crate::song::SongMixGains,
+    song_mix_generation: u64,
     /// Where the band is copied while a take records, or `None`. Cloned out
     /// of the shared slot only when its generation moves.
     take_record: Option<Arc<crate::take::TakeRing>>,
     take_record_generation: u64,
+    /// Does the ring above still need to be told where the transport was?
+    ///
+    /// Raised when a ring arrives, lowered by the one buffer that stamps it.
+    /// A plain bool in the callback's own cached state, so the cost on every
+    /// other buffer of a take is a branch on a value already in a register —
+    /// the stamp itself is four relaxed stores, once, of numbers the frame
+    /// loop is about to use anyway. See `take::TakeRing::stamp_start`.
+    take_stamp_pending: bool,
     /// The take being played back, if one is: the samples, the rate they
     /// were recorded at, and how far through them the callback is.
     take_play: Option<crate::take::TakePlayback>,
@@ -3138,12 +3589,26 @@ fn accent_for(
             AccentLevel::None
         };
     }
-    if !is_downbeat || !mask_has_accent(accent_mask, measure_beat) {
+    if !is_downbeat {
         return AccentLevel::None;
     }
-    // The bar's own opening against a group's. `trailing_zeros` is the lowest
-    // set bit and so the first group start; on an empty mask it answers 32,
-    // which `mask_has_accent` has already refused above.
+    group_accent(accent_mask, measure_beat)
+}
+
+/// How hard a BEAT is marked under a grouping — the last three lines of
+/// [`accent_for`], on their own so a song can ask the same question.
+///
+/// The bar's own opening against a group's inside it. `trailing_zeros` is the
+/// lowest set bit and so the first group start; on an empty mask it answers
+/// 32, which `mask_has_accent` refuses.
+///
+/// A subdivision tick is never an accent, and that rule stays with the
+/// callers: this is only ever asked about a beat.
+#[inline]
+pub(crate) fn group_accent(accent_mask: u32, measure_beat: u32) -> AccentLevel {
+    if !mask_has_accent(accent_mask, measure_beat) {
+        return AccentLevel::None;
+    }
     if accent_mask.trailing_zeros() == measure_beat {
         AccentLevel::Strong
     } else {
@@ -3162,7 +3627,7 @@ const MAX_BEAT_GROUPS: usize = 6;
 /// fits in a `u32` with room to spare; positions past bit 31 (only
 /// reachable from unvalidated input) are dropped rather than shifting
 /// out of range.
-fn accent_mask(groups: &[u8]) -> u32 {
+pub(crate) fn accent_mask(groups: &[u8]) -> u32 {
     let mut mask = 0u32;
     let mut cursor = 0u32;
     for &g in groups {
@@ -3223,6 +3688,29 @@ struct BeatNotification {
     /// played instead. True only on the first such tick after a table
     /// arrives — the event thread says so once, not thirteen times a second.
     jam_bar_mismatch: bool,
+    /// Which time round the range this is, from 0. 0 with no song, and 0
+    /// through a count-in.
+    ///
+    /// A COUNT AND NOT A "DID IT JUST LOOP" BIT, and the reason is the
+    /// contract: `OnsetResult.pass` and `ExtraOnset.pass` in
+    /// `plans/tasks/songs/BRIEF.md` are "times round a loop, from 0", and the
+    /// engine is the only thing that knows. Deriving it in the frontend from a
+    /// bar number that comes round would be a second implementation of a
+    /// number that has to agree with the one the scorer keeps.
+    song_pass: u32,
+    /// WHICH PLAYED BAR OF THE SONG this tick is in, or
+    /// [`crate::song::NO_SONG_BAR`] when no song is playing — and through a
+    /// song's count-in, which is not a bar of the piece.
+    ///
+    /// An index into the transport's `bars`, so it survives a range: loop bars
+    /// 17 to 24 and the first tick of every pass says 17, not 0. The tab's
+    /// cursor hangs off it, and so does the scorer's idea of which pass it is
+    /// scoring.
+    song_bar: u32,
+    /// And where in the song's own ticks it landed, 960 to the quarter. 0 with
+    /// no song. The pair is what makes a beat event addressable back into the
+    /// score: a bar and an offset inside it.
+    song_tick: u32,
     /// The bar that just completed carried `endsForm`, and the band has
     /// stopped.
     ///
@@ -3232,6 +3720,287 @@ struct BeatNotification {
     /// left for the event thread is the half that needs a lock: the app
     /// state, and the word.
     jam_form_ended: bool,
+}
+
+// ---------------------------------------------------------------------------
+// The beat queue — callback to event loop, preallocated
+// ---------------------------------------------------------------------------
+
+/// How many [`BeatNotification`]s the output callback may be ahead of the
+/// event loop.
+///
+/// **A dropped notification is not cosmetic.** `beat_log` is the only place
+/// [`crate::timing::TimingAnalyzer`] learns where a beat fell, so a
+/// notification the queue throws away is a beat the matcher never sees and a
+/// score the player did not earn (learned 2026-09-04). The drop path below
+/// exists because a full queue leaves an audio callback no other move — not
+/// because dropping is acceptable. So the queue is sized for the worst case
+/// the app can produce, several times over.
+///
+/// The worst case is bounded and small. `set_bpm` clamps the tempo to
+/// 20..=300 and `set_subdivision` clamps the resolution to 1..=6, so the
+/// fastest tick stream the engine can ever produce is 300 BPM sextuplets:
+/// **30 ticks a second**, one every 33 ms. 512 slots is **seventeen seconds**
+/// of that. The event loop wakes on every push and in any case at least every
+/// 50 ms, and the longest thing it does per notification is one
+/// `thread::sleep(delay_us)` of an output latency — a few milliseconds. For
+/// this to overflow the event thread would have to be off the CPU for
+/// seventeen seconds, which is not a full queue, it is a hung machine.
+///
+/// The cost is the memory: thirteen parallel arrays, 56 bytes a slot, ~29 KB,
+/// allocated once when the audio thread starts and never grown.
+const BEAT_QUEUE_SLOTS: usize = 512;
+
+/// The preallocated, lock-free hand-off from the cpal output callback to the
+/// engine's event loop.
+///
+/// It replaces a `std::sync::mpsc::channel`, which was the wrong shape twice
+/// over — and both faults were on the audio thread, once per metronome tick:
+///
+/// * **It allocated.** std's unbounded channel stores messages in blocks of
+///   31 and `Box`es a new one when the current block fills
+///   (`sync/mpmc/list.rs::start_send`). At 200 BPM sixteenths that is a
+///   `malloc` under the mixer every 2.3 seconds.
+/// * **It took a lock.** Every send ends in `self.receivers.notify()`, which
+///   locks a `Mutex` whenever a receiver is registered as sleeping
+///   (`sync/mpmc/waker.rs::SyncWaker::notify`) — and the event loop slept in
+///   `recv_timeout` between beats, so it was registered essentially always.
+///   A `Mutex` shared with a lower-priority thread, acquired from a
+///   `THREAD_PRIORITY_TIME_CRITICAL` callback, is a priority inversion: the
+///   click waits on the UI thread. T06 saw exactly the symptom — promoting
+///   the *event loop* improved *callback* jitter, which only makes sense if
+///   the callback depends on the loop.
+///
+/// The shape is [`crate::take::TakeRing`]'s, applied to a struct: one writer
+/// (the audio thread), one reader (the event loop), a power-of-two ring of
+/// preallocated slots, and monotonic `write` / `read` counts. A push is an
+/// acquire load, thirteen relaxed stores and one release store; there is no
+/// `unsafe` anywhere in it, because each field of a slot is its own atomic
+/// exactly the way [`CallbackProbe`] stores its arena. The nine small fields
+/// travel together in one `u32` — see [`pack_small_fields`], and note before
+/// adding a field that that word is full.
+pub struct BeatQueue {
+    session: Box<[AtomicU64]>,
+    ts_ns: Box<[AtomicU64]>,
+    delay_us: Box<[AtomicU64]>,
+    /// `expected_interval_ms` as `f64::to_bits`. Stored as bits for the same
+    /// reason `TakeRing` stores samples as bits: an `AtomicF64` does not
+    /// exist, and the alternative is `unsafe`.
+    interval_bits: Box<[AtomicU64]>,
+    beat: Box<[AtomicU32]>,
+    measure_beat: Box<[AtomicU32]>,
+    subdivision: Box<[AtomicU32]>,
+    jam_bar: Box<[AtomicU32]>,
+    jam_chorus: Box<[AtomicU32]>,
+    /// WHERE IN THE SONG. Three words of their own and not three more bits of
+    /// `small`, because `small` is FULL: nine fields, 24 + 2 + 6, exactly 32.
+    /// The next worker who needs a flag has to add a word here too, or repack
+    /// [`pack_small_fields`] and `unpack_small_fields` together.
+    song_bar: Box<[AtomicU32]>,
+    song_tick: Box<[AtomicU32]>,
+    song_pass: Box<[AtomicU32]>,
+    small: Box<[AtomicU32]>,
+    /// `slots - 1`; the capacity is a power of two so the wrap is a mask.
+    mask: usize,
+    /// Monotonic counts, not indices — a `u64` of 30-a-second ticks outlasts
+    /// the solar system, so the wrapping arithmetic is a formality.
+    write: AtomicU64,
+    read: AtomicU64,
+    /// Beats the callback had to throw away. Shared with the engine so it
+    /// survives the audio thread that recorded it: a device change spawns a
+    /// new thread and a new queue, and a diagnostic that reset itself there
+    /// would be a diagnostic nobody could trust.
+    dropped: Arc<AtomicU64>,
+}
+
+/// The nine small fields of a [`BeatNotification`], in one word.
+///
+/// Three `u8`s, a three-valued enum and six flags: 24 + 2 + 6 = exactly 32
+/// bits, which is why this is one array rather than nine.
+/// `the_small_fields_survive_the_round_trip` is the test that says the layout
+/// and [`unpack_small_fields`] still agree.
+///
+/// **THE WORD IS FULL.** Exactly 32 bits are spoken for, so the song's
+/// position travels in three `u32` arrays of its own rather than in here (see
+/// `BeatQueue::song_bar`). A worker who needs one more flag has the same two
+/// choices that pass had: another array, or narrowing one of the three `u8`s
+/// — `subdivision_total` is 1..=6 and `accent` is 0..=2, so there are bits to
+/// be had, at the cost of a packing nobody can read at a glance.
+#[inline]
+fn pack_small_fields(n: &BeatNotification) -> u32 {
+    let state: u32 = match n.jam_band_state {
+        JamBandState::Full => 0,
+        JamBandState::HatsOnly => 1,
+        JamBandState::Silent => 2,
+    };
+    n.subdivision_total as u32
+        | (n.accent as u32) << 8
+        | (n.beats_per_bar as u32) << 16
+        | state << 24
+        | (n.is_downbeat as u32) << 26
+        | (n.is_warmup_beat as u32) << 27
+        | (n.is_warmup_transition as u32) << 28
+        | (n.bar_just_completed as u32) << 29
+        | (n.jam_bar_mismatch as u32) << 30
+        | (n.jam_form_ended as u32) << 31
+}
+
+/// The inverse of [`pack_small_fields`], on the event thread.
+#[inline]
+fn unpack_small_fields(w: u32) -> (u8, u8, u8, JamBandState, [bool; 6]) {
+    let state = match (w >> 24) & 0b11 {
+        0 => JamBandState::Full,
+        1 => JamBandState::HatsOnly,
+        // Only 0, 1 and 2 are ever written; a third value would be a bug in
+        // `pack_small_fields`, and silence is the safest thing to guess.
+        _ => JamBandState::Silent,
+    };
+    (
+        (w & 0xFF) as u8,
+        ((w >> 8) & 0xFF) as u8,
+        ((w >> 16) & 0xFF) as u8,
+        state,
+        [
+            w & (1 << 26) != 0,
+            w & (1 << 27) != 0,
+            w & (1 << 28) != 0,
+            w & (1 << 29) != 0,
+            w & (1 << 30) != 0,
+            w & (1 << 31) != 0,
+        ],
+    )
+}
+
+impl BeatQueue {
+    /// Allocate `slots` (rounded up to a power of two) worth of room, and
+    /// share `dropped` with whoever reports it. Call it on the thread that
+    /// sets the audio thread up — never from a callback.
+    fn new(slots: usize, dropped: Arc<AtomicU64>) -> Self {
+        let cap = slots.max(2).next_power_of_two();
+        let u64s = || {
+            (0..cap)
+                .map(|_| AtomicU64::new(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+        };
+        let u32s = || {
+            (0..cap)
+                .map(|_| AtomicU32::new(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+        };
+        Self {
+            session: u64s(),
+            ts_ns: u64s(),
+            delay_us: u64s(),
+            interval_bits: u64s(),
+            beat: u32s(),
+            measure_beat: u32s(),
+            subdivision: u32s(),
+            jam_bar: u32s(),
+            jam_chorus: u32s(),
+            song_bar: u32s(),
+            song_tick: u32s(),
+            song_pass: u32s(),
+            small: u32s(),
+            mask: cap - 1,
+            write: AtomicU64::new(0),
+            read: AtomicU64::new(0),
+            dropped,
+        }
+    }
+
+    fn capacity(&self) -> usize {
+        self.session.len()
+    }
+
+    /// PRODUCER (the cpal output callback): queue one tick.
+    ///
+    /// Returns false when the queue is full, having counted the loss — the
+    /// only outcome available to a thread that may not wait. See
+    /// [`BEAT_QUEUE_SLOTS`] for why that cannot happen at any tempo the app
+    /// can be set to.
+    ///
+    /// Allocates nothing, locks nothing and branches on nothing but the
+    /// queue's own fill.
+    #[inline]
+    fn push(&self, n: &BeatNotification) -> bool {
+        let w = self.write.load(Ordering::Relaxed);
+        let r = self.read.load(Ordering::Acquire);
+        if w.wrapping_sub(r) >= self.capacity() as u64 {
+            self.dropped.fetch_add(1, Ordering::Relaxed);
+            return false;
+        }
+        let i = (w as usize) & self.mask;
+        self.session[i].store(n.session, Ordering::Relaxed);
+        self.ts_ns[i].store(n.ts_ns, Ordering::Relaxed);
+        self.delay_us[i].store(n.delay_us, Ordering::Relaxed);
+        self.interval_bits[i].store(n.expected_interval_ms.to_bits(), Ordering::Relaxed);
+        self.beat[i].store(n.beat, Ordering::Relaxed);
+        self.measure_beat[i].store(n.measure_beat, Ordering::Relaxed);
+        self.subdivision[i].store(n.subdivision, Ordering::Relaxed);
+        self.jam_bar[i].store(n.jam_bar, Ordering::Relaxed);
+        self.jam_chorus[i].store(n.jam_chorus, Ordering::Relaxed);
+        self.song_bar[i].store(n.song_bar, Ordering::Relaxed);
+        self.song_tick[i].store(n.song_tick, Ordering::Relaxed);
+        self.song_pass[i].store(n.song_pass, Ordering::Relaxed);
+        self.small[i].store(pack_small_fields(n), Ordering::Relaxed);
+        // The release is what publishes the thirteen stores above to the
+        // reader's acquire. One per tick, not one per field.
+        self.write.store(w.wrapping_add(1), Ordering::Release);
+        true
+    }
+
+    /// CONSUMER (the engine's event loop): the oldest tick, or `None` when
+    /// the callback has not produced one since the last call.
+    fn pop(&self) -> Option<BeatNotification> {
+        let r = self.read.load(Ordering::Relaxed);
+        let w = self.write.load(Ordering::Acquire);
+        if r == w {
+            return None;
+        }
+        let i = (r as usize) & self.mask;
+        let (subdivision_total, accent, beats_per_bar, jam_band_state, flags) =
+            unpack_small_fields(self.small[i].load(Ordering::Relaxed));
+        let n = BeatNotification {
+            session: self.session[i].load(Ordering::Relaxed),
+            beat: self.beat[i].load(Ordering::Relaxed),
+            measure_beat: self.measure_beat[i].load(Ordering::Relaxed),
+            subdivision: self.subdivision[i].load(Ordering::Relaxed),
+            subdivision_total,
+            is_downbeat: flags[0],
+            accent,
+            beats_per_bar,
+            ts_ns: self.ts_ns[i].load(Ordering::Relaxed),
+            expected_interval_ms: f64::from_bits(self.interval_bits[i].load(Ordering::Relaxed)),
+            is_warmup_beat: flags[1],
+            is_warmup_transition: flags[2],
+            bar_just_completed: flags[3],
+            delay_us: self.delay_us[i].load(Ordering::Relaxed),
+            jam_bar: self.jam_bar[i].load(Ordering::Relaxed),
+            jam_chorus: self.jam_chorus[i].load(Ordering::Relaxed),
+            jam_band_state,
+            jam_bar_mismatch: flags[4],
+            song_bar: self.song_bar[i].load(Ordering::Relaxed),
+            song_tick: self.song_tick[i].load(Ordering::Relaxed),
+            song_pass: self.song_pass[i].load(Ordering::Relaxed),
+            jam_form_ended: flags[5],
+        };
+        // Released only after the slot has been read out, so the producer
+        // cannot overwrite it underneath this.
+        self.read.store(r.wrapping_add(1), Ordering::Release);
+        Some(n)
+    }
+
+    /// CONSUMER: throw away everything waiting.
+    ///
+    /// The event loop does this while the transport is stopped — ticks that
+    /// arrived before a Stop are not news — and it is the one thing the old
+    /// `while rx.try_recv().is_ok() {}` did that has to be kept.
+    fn drain(&self) {
+        let w = self.write.load(Ordering::Acquire);
+        self.read.store(w, Ordering::Release);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -3440,6 +4209,26 @@ pub struct BeatEvent {
     /// nowhere else. See `src/jam/practice.ts` for the same rule drawn.
     #[serde(rename = "bandState")]
     pub band_state: JamBandState,
+    /// WHERE IN THE SONG, when one is playing: the played bar (an index into
+    /// the transport's `bars`, so it is the piece's bar and not the range's),
+    /// the tick inside it at 960 to the quarter, and which time round the
+    /// range this is, from 0.
+    ///
+    /// `songBar` is `null` when no song is playing and through a song's
+    /// count-in — which is not a bar of the piece, and a cursor that sat on
+    /// bar one for four beats before the music started would be a cursor
+    /// lying about where the player is.
+    #[serde(rename = "songBar")]
+    pub song_bar: Option<u32>,
+    #[serde(rename = "songTick")]
+    pub song_tick: u32,
+    #[serde(rename = "songPass")]
+    pub song_pass: u32,
+    /// This tick is a song's count-in: the click is running, the piece has
+    /// not started, and `songBar` is `null` for that reason rather than
+    /// because no song is loaded.
+    #[serde(rename = "songCountIn")]
+    pub song_count_in: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -4276,6 +5065,15 @@ pub struct MetronomeEngine {
     /// table — nothing about a jam belongs in the state blob that crosses to
     /// the frontend on every change.
     jam: SharedJam,
+    /// The song, for the same reasons the band is on the engine rather than on
+    /// one cpal stream: the UI owns the imported FILE, the engine holds only
+    /// the compiled table, and the table has to survive a device change the
+    /// way everything else in the audio path does.
+    ///
+    /// It does not survive it silently. A song's kit and banks are decoded at
+    /// the rate the device was running at, so `set_device` takes the song away
+    /// exactly as it takes a folder's drums away — see `set_device`.
+    song: SharedSong,
     /// Where a take waits to be recorded into or played back. On the engine
     /// for the reason the band is: it belongs to the audio path, survives a
     /// device change, and has no business in the state blob that crosses to
@@ -4295,6 +5093,17 @@ pub struct MetronomeEngine {
     /// a round trip late, and only the callback knows how long its buffer
     /// is. One relaxed store a buffer, which is one instruction and no lock.
     output_latency_us: Arc<AtomicU64>,
+    /// Beats the output callback could not hand to the event loop because
+    /// [`BeatQueue`] was full.
+    ///
+    /// **This number must be zero.** It is not a dropped frame or a missed
+    /// repaint: `beat_log` is the only source `TimingAnalyzer` has for where
+    /// a beat fell, so every count here is an expected onset the matcher
+    /// never gets to pair and a score the player did not earn. It lives on
+    /// the engine rather than inside the queue so it survives the audio
+    /// thread — a device change builds a new queue, and a counter that reset
+    /// there would be a counter nobody could believe.
+    dropped_notifications: Arc<AtomicU64>,
     /// Test-only: make the audio thread fail its setup without touching a
     /// real device, so the recovery path above can be exercised on a build
     /// machine that has a perfectly good sound card.
@@ -4317,12 +5126,25 @@ impl MetronomeEngine {
             callback_probe: None,
             tempo_ctx: None,
             jam: Arc::new(JamHandoff::new()),
+            song: Arc::new(SongHandoff::new()),
             take: Arc::new(crate::take::TakeHandoff::new()),
             sample_rate: Arc::new(AtomicU32::new(0)),
             output_latency_us: Arc::new(AtomicU64::new(0)),
+            dropped_notifications: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
         }
+    }
+
+    /// Beats the output callback had to throw away because the event loop
+    /// had not drained [`BeatQueue`].
+    ///
+    /// Cumulative for the life of the engine, across device changes. Any
+    /// value but zero is a scoring defect, not a performance note — see the
+    /// field. `click-jitter-probe` fails a run on it, and the event loop
+    /// says so on the console the moment it moves.
+    pub fn dropped_notifications(&self) -> u64 {
+        self.dropped_notifications.load(Ordering::Relaxed)
     }
 
     /// Load a jam, or `None` to take the band away.
@@ -4351,6 +5173,62 @@ impl MetronomeEngine {
             .lock()
             .ok()
             .and_then(|t| t.as_ref().map(|t| t.form_bars()))
+    }
+
+    /// Load a song, or `None` to take it away.
+    ///
+    /// The table lives on the engine rather than on one cpal stream for the
+    /// reason the jam's does. `pub` because the click-jitter probe calls it
+    /// directly — it runs the engine headless, with no command surface.
+    pub fn set_song_table(&self, table: Option<Arc<crate::song::SongTable>>) {
+        self.song.set(table);
+    }
+
+    /// Move the song's faders. Applied on the next buffer; nothing is
+    /// recompiled and nothing waits for a bar line, because a level is not a
+    /// musical event.
+    /// Go to a place in the song that is playing, without stopping it.
+    pub fn seek_song(&self, sample: u64) {
+        self.song.seek(sample);
+    }
+
+    /// The song the engine is holding, for a command that has to read the
+    /// piece rather than change it. Command thread only.
+    pub fn song_table(&self) -> Option<Arc<crate::song::SongTable>> {
+        self.song.table()
+    }
+
+    pub fn set_song_mix(&self, mix: crate::song::SongMixGains) {
+        self.song.set_mix(mix);
+        // And the half of the band a thread of its own is making. The
+        // renderer reads these once a block and turns them into channel
+        // volumes, so a fader is heard when the audio already queued ahead of
+        // it has drained — a tenth of a second, and no recompile. See
+        // `synth::SYNTH_LEAD_MS`.
+        if let Some(table) = self.song.table() {
+            if let Some(ring) = table.synth() {
+                for (n, gain) in mix.tracks.iter().enumerate() {
+                    ring.set_gain(n, *gain);
+                }
+            }
+        }
+    }
+
+    /// The faders as they stand.
+    pub fn song_mix(&self) -> crate::song::SongMixGains {
+        self.song.mix()
+    }
+
+    /// Is a song loaded? What `set_jam` asks before it takes the other mode
+    /// over.
+    pub fn song_loaded(&self) -> bool {
+        self.song.is_loaded()
+    }
+
+    /// The song handoff itself, for the probe's `--song`, which installs a
+    /// table into a running stream.
+    pub fn song_handoff(&self) -> SharedSong {
+        self.song.clone()
     }
 
     /// The handoff itself, for the click-jitter probe's `--jam-swap`, which
@@ -4450,6 +5328,24 @@ impl MetronomeEngine {
                 "[yames] the jam's drums came from a folder and were decoded for the \
                  old device; the band returns on the next bar"
             );
+        }
+        // AND THE SONG, for the same reason and with less to soften it.
+        //
+        // A song carries a decoded kit, a percussion set and two melodic banks,
+        // every one of them resampled to the rate the old device reported —
+        // and unlike a jam, nothing sends it again a bar later: there is no
+        // bar-ahead handshake for a song, because a song does not change from
+        // bar to bar. So this is where it stops, and the UI has to load it
+        // again at the new rate. A silent song is a smaller lie than a whole
+        // piece a semitone and a half flat, and `song-dropped` is how the
+        // screen is told rather than left wondering.
+        if self.song.is_loaded() {
+            self.song.set(None);
+            eprintln!(
+                "[yames] the song was decoded for the old device and has been taken \
+                 away; load it again to play it on this one"
+            );
+            let _ = app_handle.emit("song-dropped", ());
         }
         self.device_name = name;
         // Fully tear down the old thread/stream
@@ -4647,6 +5543,7 @@ impl MetronomeEngine {
         let adaptive_score = self.adaptive_score.clone();
         let callback_probe = self.callback_probe.clone();
         let jam_shared = self.jam.clone();
+        let song_shared = self.song.clone();
         let take_shared = self.take.clone();
         let take_event = self.take.clone();
         let take_sr_out = self.sample_rate.clone();
@@ -4654,6 +5551,7 @@ impl MetronomeEngine {
         let stream_channels_pub = self.stream_channels.clone();
         let speech_shared = self.speech.clone();
         let out_latency_pub = self.output_latency_us.clone();
+        let dropped_notifications = self.dropped_notifications.clone();
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
@@ -4839,8 +5737,28 @@ impl MetronomeEngine {
             // Pre-decode all sounds at the output sample rate
             let sounds = SoundBank::new(sample_rate);
 
-            // Callback -> event thread channel
-            let (tx, rx) = mpsc::channel::<BeatNotification>();
+            // Callback -> event thread. Preallocated here, on the setup path,
+            // and never grown: see `BeatQueue` for what the channel this
+            // replaced was doing on the audio thread, and `BEAT_QUEUE_SLOTS`
+            // for why a drop cannot happen at any tempo the app allows.
+            let beats = Arc::new(BeatQueue::new(
+                BEAT_QUEUE_SLOTS,
+                dropped_notifications.clone(),
+            ));
+            let beats_cb = beats.clone();
+            // And the thread to wake when something is in it. THIS thread:
+            // the closure below is built here and runs on the device's
+            // thread, so `current()` is the event loop's handle, taken once
+            // rather than looked up per beat.
+            //
+            // `Thread::unpark` is the one hand-off that is safe FROM an audio
+            // callback: on every platform Yames ships to it is a single
+            // atomic swap, and it only reaches the kernel when the loop is
+            // genuinely asleep (std `sys/sync/thread_parking`: futex on
+            // Windows and Linux, a dispatch semaphore on Apple). It also
+            // leaves a token behind when the loop is awake, so a wake can
+            // never be missed and there is no flag to keep in step.
+            let event_thread = thread::current();
 
             // Event thread -> callback: pending chime sound
             let pending_chime: Arc<Mutex<Option<SoundId>>> = Arc::new(Mutex::new(None));
@@ -4939,6 +5857,35 @@ impl MetronomeEngine {
             // tick and get the same answer. One bool, beside the two above.
             let mut jam_in_pickup = false;
             let mut jam_retire = JamRetirement::new();
+            // ---- Where the song is ----
+            //
+            // A CURSOR AND NOT A CLOCK. Everything about a song's timing was
+            // worked out when it was compiled, so these six numbers are the
+            // whole of the transport on this thread: how many frames into the
+            // pass we are, whether we are still counting in, which time round
+            // the range this is, and how far each of the three tables' walks
+            // has got. No tempo, no meter, no division.
+            let mut song_pos: u64 = 0;
+            // The count-in leads into the FIRST pass and no other. Raised when
+            // a song starts or is loaded, lowered the moment it is spent; a
+            // song with no count-in spends it on its own first frame, which is
+            // why there is no separate "has it got one" flag.
+            let mut song_counting_in = false;
+            let mut song_pass: u32 = 0;
+            let mut song_tick_at: usize = 0;
+            let mut song_band_at: usize = 0;
+            let mut song_count_in_at: usize = 0;
+            // FRAMES OF THE PIECE the callback has played, counting from the
+            // first frame of the first pass and never resetting at a seam.
+            //
+            // The transport's `song_pos` wraps every time round, and the
+            // renderer thread in `synth.rs` could not tell one pass from the
+            // next if it were handed that. This is the number both sides
+            // count, so a frame means the same thing to each of them, and the
+            // modulo lives on the renderer's side, where a division is
+            // allowed.
+            let mut song_play: u64 = 0;
+            let mut song_retire = SongRetirement::new();
             let mut take_retire = crate::take::TakeParking::new();
             let mut speech_retire = crate::speech_out::SpeechParking::new();
             // One report per loaded table, not one per tick.
@@ -4959,6 +5906,8 @@ impl MetronomeEngine {
                 beat_groups_total: 4,
                 beat_groups: initial_groups,
                 beat_groups_changed: false,
+                held_beat_groups: Vec::with_capacity(MAX_BEAT_GROUPS),
+                beat_groups_held: false,
                 ramp_active: false,
                 ramp_beats_per_bar: 4,
                 ramp_warming_up: false,
@@ -4971,8 +5920,14 @@ impl MetronomeEngine {
                 jam_position: JamPosition::default(),
                 jam_position_generation: 0,
                 count_in_slot: None,
+                song: None,
+                song_generation: 0,
+                song_changed: false,
+                song_mix: crate::song::SongMixGains::default(),
+                song_mix_generation: 0,
                 take_record: None,
                 take_record_generation: 0,
+                take_stamp_pending: false,
                 take_play: None,
                 take_play_generation: 0,
                 take_play_pos: 0.0,
@@ -5010,6 +5965,21 @@ impl MetronomeEngine {
                         Some(_) => crate::clock::now_ns(),
                         None => 0,
                     };
+
+                    // Audio-safety probe, the half the timings cannot see.
+                    // Entry-to-entry gaps do not show an allocation inside a
+                    // buffer unless it is slow enough to push the NEXT
+                    // callback late, and a warm heap is fast — which is
+                    // exactly when "the callback must not allocate" stops
+                    // being tested. This raises a thread-local for the body
+                    // of the callback and lowers it at every exit, including
+                    // the two early returns below; `click-jitter-probe`
+                    // installs a counting allocator that reads it and fails
+                    // the run on a single `malloc` or `free`. `None` in the
+                    // app, where it is the null check already paid above.
+                    let _alloc_span = probe_cb
+                        .as_ref()
+                        .map(|_| crate::alloc_probe::Span::new());
 
                     // Output latency compensation.
                     // CoreAudio device/safety/stream latency + one buffer of
@@ -5052,12 +6022,33 @@ impl MetronomeEngine {
                         // is pre-reserved) and rebuild the accent mask +
                         // bar length only on an actual change.
                         if s.beat_groups.as_slice() != cached.beat_groups.as_slice() {
-                            cached.beat_groups.clear();
-                            cached.beat_groups.extend_from_slice(&s.beat_groups);
-                            cached.accent_mask = accent_mask(&cached.beat_groups);
-                            cached.beat_groups_total =
-                                cached.beat_groups.iter().map(|&g| g as u32).sum();
-                            cached.beat_groups_changed = true;
+                            // A meter posted AT A BAR LINE — the setlist's
+                            // switch, and nothing else — is HELD here and
+                            // made current by the tick loop, at the bar line
+                            // it was posted on. See `held_meter_due`. The
+                            // hold is only meaningful while the click is
+                            // running: stopped, there is no bar to wait for
+                            // and a held meter would be a meter the next
+                            // press of play would not have.
+                            if s.beat_groups_at_bar_line && is_playing {
+                                if s.beat_groups.as_slice()
+                                    != cached.held_beat_groups.as_slice()
+                                {
+                                    cached.held_beat_groups.clear();
+                                    cached.held_beat_groups.extend_from_slice(&s.beat_groups);
+                                }
+                                // Posted twice before the bar line: the last
+                                // one is the one that plays.
+                                cached.beat_groups_held = true;
+                            } else {
+                                cached.beat_groups.clear();
+                                cached.beat_groups.extend_from_slice(&s.beat_groups);
+                                cached.accent_mask = accent_mask(&cached.beat_groups);
+                                cached.beat_groups_total =
+                                    cached.beat_groups.iter().map(|&g| g as u32).sum();
+                                cached.beat_groups_changed = true;
+                                cached.beat_groups_held = false;
+                            }
                         }
                         cached.ramp_active = s.speed_ramp.active;
                         cached.ramp_beats_per_bar = s.speed_ramp.beats_per_bar;
@@ -5133,6 +6124,64 @@ impl MetronomeEngine {
                     // the command thread was mid-drain at the wrong moment.
                     jam_retire.flush(&jam_shared);
 
+                    // ---- The song ----
+                    //
+                    // The same handshake, and it has to be the same: one
+                    // relaxed load per buffer, a `try_lock` and an `Arc` clone
+                    // only when something changed, and whatever it replaces
+                    // handed BACK rather than dropped here — a song carries a
+                    // decoded kit and two melodic banks, so dropping the last
+                    // reference under the mixer would be tens of megabytes of
+                    // `free()` on the audio thread.
+                    //
+                    // No bar-line deferral, unlike a jam. A jam is swapped
+                    // four to six times a chorus by the bar-ahead bass
+                    // handshake, and the whole point of `swap_defers` is that
+                    // the drummer does not change under a bar. A song arrives
+                    // when somebody presses a button, is the whole piece, and
+                    // brings its own idea of where every sample sits — there
+                    // is nothing to line it up with.
+                    let song_gen = song_shared.generation.load(Ordering::Acquire);
+                    if song_gen != cached.song_generation {
+                        if let Ok(slot) = song_shared.table.try_lock() {
+                            let incoming = slot.clone();
+                            drop(slot);
+                            cached.song_generation = song_gen;
+                            let before = song_bank_id(cached.song.as_deref());
+                            let after = song_bank_id(incoming.as_deref());
+                            if let Some(old) = cached.song.take() {
+                                song_retire.retire(&song_shared, old);
+                            }
+                            cached.song = incoming;
+                            stop_voices_on_kit_change(&mut voices, before, after);
+                            // The kit decides how hard the bus is driven, and
+                            // a song that just arrived may carry a different
+                            // one. Two floats on the one buffer it changed —
+                            // the `tanh` was computed when the table was
+                            // compiled. With no song and no jam the bus goes
+                            // back to unity, which is what the metronome runs
+                            // at and what `DrumBus::new` starts at.
+                            match (cached.song.as_deref(), cached.jam.as_deref()) {
+                                (Some(s), _) => bus.set_drive(s.bus_drive, s.bus_shape),
+                                (None, Some(t)) => bus.set_drive(t.bus_drive, t.bus_shape),
+                                (None, None) => bus.set_drive(1.0, 1.0 / 1.0f32.tanh()),
+                            }
+                            cached.song_changed = true;
+                        }
+                    }
+                    song_retire.flush(&song_shared);
+
+                    // And the faders. `Copy`, owns nothing, no retirement path
+                    // — the shape `jam_position` uses, for the same reason.
+                    let mix_gen = song_shared.mix_generation.load(Ordering::Acquire);
+                    if mix_gen != cached.song_mix_generation {
+                        if let Ok(m) = song_shared.mix.try_lock() {
+                            cached.song_mix = *m;
+                            drop(m);
+                            cached.song_mix_generation = mix_gen;
+                        }
+                    }
+
                     // ---- Where the form goes next ----
                     //
                     // The same handshake the table uses — one relaxed load
@@ -5170,6 +6219,10 @@ impl MetronomeEngine {
                         if let Some(old) = cached.take_record.take() {
                             take_retire.retire_ring(&take_shared, old);
                         }
+                        // A new ring has never been told where the piece is.
+                        // Raised even for `None` so a take that is taken away
+                        // leaves nothing armed behind it.
+                        cached.take_stamp_pending = incoming.is_some();
                         cached.take_record = incoming;
                     }
                     if let Some(incoming) = take_shared.poll_play(&mut cached.take_play_generation)
@@ -5239,6 +6292,102 @@ impl MetronomeEngine {
                                 }
                             }
                         };
+                    }
+
+                    // BACK TO THE PLAYHEAD.
+                    //
+                    // Six assignments, at the three moments a song starts
+                    // over: a press of Play, a song arriving or being taken
+                    // away, and the transport stopped. A macro rather than a
+                    // function because every one of them is a local of this
+                    // closure — a function would need six `&mut`s and would
+                    // read worse than the thing it replaced.
+                    //
+                    // **The top of the range is the PLAYHEAD now** (W37
+                    // item 1). The owner: *"i hit pause when it's on bar 3,
+                    // if i click on bar 6 and hit play again, it will resume
+                    // from bar 3 but then immediately go on from bar 6"*.
+                    // That was this line: the transport always started at
+                    // zero and the webview corrected it with a seek a buffer
+                    // or two later, so the first thing heard and seen was the
+                    // OLD place. `SongTable::start` is where the next press
+                    // begins, resolved when the piece was compiled — four
+                    // copies out of a table the callback is already holding,
+                    // no search, no allocation, no atomic.
+                    //
+                    // The CURSOR starts at the head of the count-in when
+                    // there is one and at the playhead when there is not;
+                    // everything else — the tick and band indices, and the
+                    // piece's own clock the synthesiser is told — is the
+                    // playhead either way, because a count-in leads into the
+                    // playhead's bar and nothing of the piece sounds during
+                    // it.
+                    //
+                    // `song_counting_in` starts TRUE whether or not the song
+                    // has a count-in: a song with none spends it on its own
+                    // first frame, where the seam check below finds a
+                    // count-in of nought samples already over. One flag, and
+                    // no second one asking whether there is anything to count.
+                    macro_rules! song_from_the_top {
+                        () => {{
+                            let at = match cached.song.as_deref() {
+                                Some(song) => song.start(),
+                                None => crate::song::SongSeek {
+                                    sample: 0,
+                                    tick_at: 0,
+                                    band_at: 0,
+                                    play: 0,
+                                },
+                            };
+                            let counting = cached
+                                .song
+                                .as_deref()
+                                .is_some_and(|s| s.count_in_samples() > 0);
+                            song_pos = if counting { 0 } else { at.sample };
+                            song_pass = 0;
+                            song_tick_at = at.tick_at;
+                            song_band_at = at.band_at;
+                            song_count_in_at = 0;
+                            song_counting_in = true;
+                            song_play = at.play;
+                        }};
+                    }
+
+                    // AND THE SYNTHESISER'S QUEUE, which is a tenth of a
+                    // second of wherever the piece last was.
+                    //
+                    // One atomic — `invalidate` is a `fetch_add` and frees
+                    // nothing — after which the callback throws the queue
+                    // away on its next buffer and the renderer begins again
+                    // at the `song_play` this buffer has just published.
+                    // Without it the ring's stream still begins where the
+                    // last pass did, `ready` refuses every frame of a
+                    // playhead behind it, and the file's guitars never
+                    // arrive. Only at the two edges that START something —
+                    // never on the stopped path, which runs every buffer and
+                    // would reset the renderer faster than it could build
+                    // its lead.
+                    macro_rules! song_stream_begins_again {
+                        () => {{
+                            if let Some(ring) = cached.song.as_deref().and_then(|s| s.synth()) {
+                                ring.invalidate();
+                            }
+                        }};
+                    }
+
+                    // A song that arrived, or one that was taken away.
+                    //
+                    // Handled here rather than beside the pickup above for
+                    // one plain reason: the macro has to be declared before
+                    // anything uses it. And it belongs BEFORE the transport
+                    // gate, so a song loaded while the metronome is stopped
+                    // is already at the top of its range when Play is
+                    // pressed, rather than being put there by the first
+                    // buffer of playback.
+                    if cached.song_changed {
+                        cached.song_changed = false;
+                        song_from_the_top!();
+                        song_stream_begins_again!();
                     }
 
                     // ---- A take playing back ----
@@ -5317,6 +6466,18 @@ impl MetronomeEngine {
                         // a buffer of mic audio that would slide forward
                         // against everything after it.
                         if let Some(ref ring) = cached.take_record {
+                            // AND A TAKE THAT BEGINS HERE BEGINS NOWHERE.
+                            // The transport is stopped, so the first sample
+                            // of the file is at no position in any piece —
+                            // whatever is loaded, the silence in front of the
+                            // count-in could be seconds long. Saying `Free`
+                            // is what makes the sidecar have no position at
+                            // all, which is the truth; the frontend's own
+                            // estimate is the fallback for exactly this.
+                            if cached.take_stamp_pending {
+                                cached.take_stamp_pending = false;
+                                ring.stamp_start(crate::take::TakeTransport::Free);
+                            }
                             ring.push_strided_at(data, channels, take_offset(channels, pair));
                         }
                         if was_playing {
@@ -5340,6 +6501,11 @@ impl MetronomeEngine {
                         jam_chorus = 1;
                         jam_bar_state = state;
                         jam_start_bar = bar;
+                        // And the song waits at the top of its range, counted
+                        // in again. Unlike the jam's peek above there is
+                        // nothing to work out — where a song starts is where
+                        // the range starts, always.
+                        song_from_the_top!();
                         // The usual case for the coach: a stopped metronome
                         // and a tip between exercises. Mixed AFTER the take
                         // ring above, so a take is the band and the player,
@@ -5382,6 +6548,10 @@ impl MetronomeEngine {
                         // a latch nobody clears is a latch somebody has to
                         // reason about.
                         jam_in_pickup = false;
+                        // A press of Play is a new pass of the song, counted
+                        // in to the bar the playhead stands on (W37 item 1).
+                        song_from_the_top!();
+                        song_stream_begins_again!();
                         voices.clear();
                     }
 
@@ -5416,6 +6586,46 @@ impl MetronomeEngine {
                         None => None,
                     };
 
+                    // ---- Where a take that starts now starts ----
+                    //
+                    // HERE, above the frame loop, and not beside the ring
+                    // push at the bottom: this is the only point in the
+                    // buffer where `song_pos`, `song_pass` and
+                    // `song_counting_in` still describe its FIRST sample.
+                    // The loop moves the cursor a frame at a time and can
+                    // cross a loop seam on the way, so read at the bottom
+                    // they describe the buffer's end — a bar and a bit out
+                    // on a small range, and the wrong pass across a seam.
+                    //
+                    // The cost on every buffer of every take after the first
+                    // is this branch on a bool the callback already holds.
+                    // The stamp itself happens once and is four relaxed
+                    // stores; nothing is allocated, locked or looked up.
+                    if cached.take_stamp_pending {
+                        if let Some(ref ring) = cached.take_record {
+                            cached.take_stamp_pending = false;
+                            ring.stamp_start(if cached.song.is_some() {
+                                if song_counting_in {
+                                    crate::take::TakeTransport::SongCountIn { frames: song_pos }
+                                } else {
+                                    crate::take::TakeTransport::Song {
+                                        frames: song_pos,
+                                        pass: song_pass,
+                                    }
+                                }
+                            } else if cached.jam.is_some() {
+                                crate::take::TakeTransport::Jam {
+                                    bar: jam_bar,
+                                    chorus: jam_chorus,
+                                }
+                            } else {
+                                // The plain click. There is no arranged
+                                // material, so there is no position in one.
+                                crate::take::TakeTransport::Free
+                            });
+                        }
+                    }
+
                     // ---- Check for pending chime from event thread ----
                     if let Ok(mut chime) = pending_chime_cb.try_lock() {
                         // Guarded like every other push: a chime that cannot
@@ -5442,11 +6652,342 @@ impl MetronomeEngine {
                     // buffer takes the silent path at the top.
                     let mut form_ended_here = false;
 
+                    // IS A SONG PLAYING? Asked once, here, because the answer
+                    // cannot change inside a buffer — the table is picked up
+                    // above the transport gate — and because the per-frame
+                    // branch below has to be a straight `if / else if`: the
+                    // song's arm borrows `cached.song`, the click's arm
+                    // MUTATES `cached`, and the two only coexist when each
+                    // borrow begins and ends inside its own arm.
+                    let song_active = cached.song.is_some();
+                    // Did the song run off the end of a range that does not
+                    // loop, inside THIS buffer? `form_ended_here`'s twin, and
+                    // the same rule: once it has, no further event of this
+                    // buffer sounds.
+                    let mut song_ended_here = false;
+
+                    // ---- WHERE THE PLAYER JUST CLICKED ----
+                    //
+                    // Taken once per buffer, at the top, and BEFORE the
+                    // synthesiser is asked what it has ready — so the whole
+                    // of a seek is one instant as far as the rest of this
+                    // callback is concerned, and a buffer is never half in
+                    // one place and half in another.
+                    //
+                    // One swap, a binary search over a table that is already
+                    // in cache, and a walk over the voices that are already
+                    // sounding. No allocation, no free, no lock, and nothing
+                    // that depends on how far the seek went.
+                    if song_active && !song_ended_here {
+                        if let Some(target) = song_shared.take_seek() {
+                            if let Some(song) = cached.song.as_deref() {
+                                // Clamped, because a seek posted against the
+                                // table before this one would otherwise put
+                                // the cursor past the end of this one. A
+                                // human cannot produce that race; a command
+                                // and a recompile arriving together can.
+                                let to = song.seek(target, song_pass);
+                                song_pos = to.sample;
+                                song_tick_at = to.tick_at;
+                                song_band_at = to.band_at;
+                                song_play = to.play;
+                                // A count-in leads into the FIRST pass, and a
+                                // seek is not that pass beginning — so a
+                                // click during the count-in lands in the
+                                // piece rather than counting again.
+                                song_counting_in = false;
+                                song_count_in_at = song.count_in().len();
+                                // Everything the band was sounding is cut,
+                                // over the same few milliseconds a choked hi
+                                // hat takes: a note left ringing through a
+                                // jump is a note from somewhere the player
+                                // is no longer, and cutting it dead would be
+                                // a click.
+                                for v in voices.iter_mut() {
+                                    if v.band && v.fade_len == 0 {
+                                        v.fade_len = choke_frames.max(1);
+                                        v.fade_left = v.fade_len;
+                                    }
+                                }
+                                // And the synthesiser's queue, which is a
+                                // tenth of a second of somewhere else.
+                                if let Some(ring) = song.synth() {
+                                    ring.invalidate();
+                                }
+                            }
+                        }
+                    }
+
+                    // ---- WHAT THE SYNTHESISER HAS READY ----
+                    //
+                    // Asked once per buffer, and it is the whole of what this
+                    // thread does about the guitars: one store of where the
+                    // playhead is, three loads, and a number saying how many
+                    // frames somebody else has already made. No render, no
+                    // lock, no wait, and nothing that grows with how busy the
+                    // arrangement is. `synth.rs` owns the proof.
+                    let synth_ready = match cached.song.as_deref().and_then(|s| s.synth()) {
+                        Some(ring) => ring.ready(song_play),
+                        None => 0,
+                    };
+                    let mut synth_used = 0u64;
+
                     // ---- Per-frame processing ----
                     for frame_idx in 0..frames {
-                        // Beat boundary
-                        if !form_ended_here && sample_counter >= next_beat_sample {
-                            // THIS IS THE DOWNBEAT THE SONG ENDED ON.
+                        // ---- The song, if there is one ----
+                        //
+                        // THE WHOLE TRANSPORT, and it is two comparisons and a
+                        // walk. Everything a tempo map, a meter and a range
+                        // mean was turned into sample positions on the command
+                        // thread (`song.rs`), so what is left here is "have we
+                        // reached the end of the section?" and "is the next
+                        // event's sample behind us?". Nothing divides, nothing
+                        // looks a tempo up, and nothing depends on how long
+                        // the buffer is — which is what makes a tempo step
+                        // land on its bar line to the sample rather than to
+                        // the nearest buffer.
+                        if song_active {
+                            if let Some(song) = cached.song.as_deref() {
+                                // IS THIS THE FRAME THE PIECE ENDED ON?
+                                //
+                                // Not `song_ended_here`, which stays up for
+                                // the rest of the buffer so nothing further
+                                // sounds. The end is one event and has to be
+                                // reported once: without this the block below
+                                // would push a notification on every
+                                // remaining frame of the buffer — up to a
+                                // whole buffer's worth of them, which is the
+                                // one way the engine can fill its own beat
+                                // queue.
+                                let mut ends_here = false;
+                                // ---- The seam ----
+                                //
+                                // Checked BEFORE this frame's events and after
+                                // the frame before it advanced the cursor, so
+                                // the first tick of a pass and the last frame
+                                // of the one before it are adjacent samples
+                                // with nothing between them.
+                                if !song_ended_here && song_counting_in {
+                                    if song_pos >= song.count_in_samples() {
+                                        // Spent, and it is spent for the whole
+                                        // of this song: a count-in leads into
+                                        // the first pass and a loop comes
+                                        // round without one, which is what
+                                        // being counted in means.
+                                        //
+                                        // AND THE FIRST PASS BEGINS AT THE
+                                        // PLAYHEAD (W37 item 1), not at the
+                                        // top of the range. The other three
+                                        // cursors are already there — see
+                                        // `song_from_the_top` — because a
+                                        // count-in leads into the playhead's
+                                        // own bar and no note of the piece
+                                        // sounds while it runs.
+                                        song_pos = song.start().sample;
+                                        song_counting_in = false;
+                                    }
+                                } else if !song_ended_here && song_pos >= song.pass_samples() {
+                                    if song.loops() {
+                                        // AND NOTHING IS CUT SHORT. The
+                                        // cursors go back and the voices do
+                                        // not: a chord still ringing at the
+                                        // end of bar 24 rings on into bar 17,
+                                        // which is what a loop pedal does and
+                                        // what a bar line that cleared the
+                                        // mixer would not.
+                                        song_pos = 0;
+                                        song_tick_at = 0;
+                                        song_band_at = 0;
+                                        song_pass = song_pass.saturating_add(1);
+                                    } else {
+                                        song_ended_here = true;
+                                        ends_here = true;
+                                    }
+                                }
+
+                                if ends_here {
+                                    // THE PIECE IS OVER.
+                                    //
+                                    // The same shape a jam's form ending has,
+                                    // and for the same reasons: the transport
+                                    // flag goes down HERE, on the audio
+                                    // thread, because the event loop sleeps
+                                    // the output latency before it says
+                                    // anything and a band playing through
+                                    // that would overrun the end of the song.
+                                    // The event thread's half is the state and
+                                    // the word, which is where a `lock()` and
+                                    // an `emit` belong.
+                                    //
+                                    // It rides out on `jam_form_ended`, which
+                                    // is the engine's "the arranged thing has
+                                    // finished" and already means exactly this
+                                    // to the event loop and to the UI. A
+                                    // second flag would be a second thing for
+                                    // every consumer to learn.
+                                    let frame_delay_us =
+                                        (frame_idx as u64 * 1_000_000) / sr as u64;
+                                    let total_delay_us = output_latency_us + frame_delay_us;
+                                    let notif = BeatNotification {
+                                        session,
+                                        beat: 0,
+                                        measure_beat: 0,
+                                        subdivision: 0,
+                                        subdivision_total: 1,
+                                        is_downbeat: false,
+                                        accent: 0,
+                                        beats_per_bar: 1,
+                                        ts_ns: crate::clock::now_ns() + total_delay_us * 1000,
+                                        expected_interval_ms: 0.0,
+                                        is_warmup_beat: false,
+                                        is_warmup_transition: false,
+                                        bar_just_completed: false,
+                                        delay_us: total_delay_us,
+                                        jam_bar: 0,
+                                        jam_chorus: 1,
+                                        jam_band_state: JamBandState::Full,
+                                        jam_bar_mismatch: false,
+                                        song_bar: crate::song::NO_SONG_BAR,
+                                        song_tick: 0,
+                                        song_pass,
+                                        jam_form_ended: true,
+                                    };
+                                    if beats_cb.push(&notif) {
+                                        event_thread.unpark();
+                                    }
+                                    playing_cb.store(false, Ordering::SeqCst);
+                                    // Nothing rings across the end of the
+                                    // piece: the buffer after this one takes
+                                    // the silent path and would write zeros
+                                    // over a decay anyway, so letting it ring
+                                    // here would be a tail whose length was
+                                    // whatever the buffer size happened to be.
+                                    voices.clear();
+                                } else if song_ended_here {
+                                    // The rest of the buffer after the piece
+                                    // ended: nothing sounds, nothing is
+                                    // reported. The cursors are already at the
+                                    // end of their tables, so the walks below
+                                    // would find nothing anyway — this says so
+                                    // rather than relying on it.
+                                } else if song_counting_in {
+                                    // The count-in's clicks. No band: the
+                                    // count leads into the music, it is not
+                                    // part of it.
+                                    while let Some(t) = song.count_in().get(song_count_in_at) {
+                                        if t.sample > song_pos {
+                                            break;
+                                        }
+                                        song_count_in_at += 1;
+                                        let frame_delay_us =
+                                            (frame_idx as u64 * 1_000_000) / sr as u64;
+                                        let total_delay_us = output_latency_us + frame_delay_us;
+                                        let level = song_accent(
+                                            cached.accent_mode,
+                                            t.accent,
+                                            t.sub == 0,
+                                        );
+                                        spawn_song_click(
+                                            &mut voices,
+                                            t,
+                                            level,
+                                            cached.kit,
+                                            // The COUNT-IN's own dial, not the
+                                            // click's (W34 item 7). Songs
+                                            // turns the click off by default
+                                            // over a song with a band — a
+                                            // click whose sound is a kit is a
+                                            // drummer playing along — and the
+                                            // count is the one thing that
+                                            // cannot go with it, because it is
+                                            // how you know when to come in.
+                                            cached.volume * cached.song_mix.count_in,
+                                        );
+                                        let notif = song_notification(
+                                            t,
+                                            session,
+                                            crate::clock::now_ns() + total_delay_us * 1000,
+                                            total_delay_us,
+                                            level,
+                                            song_pass,
+                                        );
+                                        if beats_cb.push(&notif) {
+                                            event_thread.unpark();
+                                        }
+                                        if let (Some(ref p), Some(slot)) = (&probe_cb, probe_slot) {
+                                            p.note_tick(slot);
+                                        }
+                                    }
+                                } else {
+                                    // The click, on the song's own grid.
+                                    while let Some(t) = song.ticks().get(song_tick_at) {
+                                        if t.sample > song_pos {
+                                            break;
+                                        }
+                                        song_tick_at += 1;
+                                        let frame_delay_us =
+                                            (frame_idx as u64 * 1_000_000) / sr as u64;
+                                        let total_delay_us = output_latency_us + frame_delay_us;
+                                        let level = song_accent(
+                                            cached.accent_mode,
+                                            t.accent,
+                                            t.sub == 0,
+                                        );
+                                        spawn_song_click(
+                                            &mut voices,
+                                            t,
+                                            level,
+                                            cached.kit,
+                                            cached.volume * cached.song_mix.click,
+                                        );
+                                        let notif = song_notification(
+                                            t,
+                                            session,
+                                            crate::clock::now_ns() + total_delay_us * 1000,
+                                            total_delay_us,
+                                            level,
+                                            song_pass,
+                                        );
+                                        if beats_cb.push(&notif) {
+                                            event_thread.unpark();
+                                        }
+                                        // Audio-safety probe: one audible tick
+                                        // rendered into this buffer, counted
+                                        // on the audio clock exactly as the
+                                        // click's own ticks are.
+                                        if let (Some(ref p), Some(slot)) = (&probe_cb, probe_slot) {
+                                            p.note_tick(slot);
+                                        }
+                                    }
+                                    // And the band. Two notes on the same
+                                    // sample are two entries, so this walks
+                                    // until the next one is in the future
+                                    // rather than firing one per frame.
+                                    while let Some(e) = song.band().get(song_band_at) {
+                                        if e.sample > song_pos {
+                                            break;
+                                        }
+                                        song_band_at += 1;
+                                        spawn_song_voice(
+                                            &mut voices,
+                                            e,
+                                            e.slot.gain
+                                                * cached.volume
+                                                * cached.song_mix.track(e.track),
+                                            choke_frames,
+                                        );
+                                    }
+                                }
+                            }
+                        } else if !form_ended_here && sample_counter >= next_beat_sample {
+                            // THIS IS THE DOWNBEAT THE FORM ENDED ON.
+                            //
+                            // "The form", and every "song" in the jam comments
+                            // below means a TUNE rather than an imported
+                            // piece: this arm is the click and the band, and
+                            // it does not run at all while a `song::SongTable`
+                            // is loaded. The two are different engine modes
+                            // and the word was here first.
                             //
                             // Armed at the bar line a tick ago, fired here,
                             // where the next bar would have begun. The tick
@@ -5468,6 +7009,43 @@ impl MetronomeEngine {
                                 // starts again with it — and the table is
                                 // very likely the wrong width now, which the
                                 // mismatch check below will say out loud.
+                                let (bar, state, left) =
+                                    form_restart(cached.jam.as_deref(), cached.jam_position);
+                                cached.jam_position = left;
+                                jam_bar = bar;
+                                jam_chorus = 1;
+                                jam_bar_state = state;
+                                jam_start_bar = bar;
+                                jam_mismatch_reported = false;
+                            }
+
+                            // And the OTHER kind of meter change: one the
+                            // setlist posted at a bar line, held since the
+                            // buffer that saw it. It takes the bar it was
+                            // posted on rather than restacking the grid one
+                            // beat late — `measure_beat` is deliberately left
+                            // alone, so the bar that opened at the switch
+                            // keeps its downbeat and runs to the new meter's
+                            // length. No stub bar, and no bar of the new step
+                            // spent on it. See `held_meter_due`.
+                            //
+                            // A compare, a copy into capacity reserved when
+                            // the stream was built, and two integer sums over
+                            // at most six groups — the click stays sacred.
+                            if cached.beat_groups_held
+                                && held_meter_due(measure_beat, sub_count)
+                            {
+                                cached.beat_groups.clear();
+                                cached
+                                    .beat_groups
+                                    .extend_from_slice(&cached.held_beat_groups);
+                                cached.accent_mask = accent_mask(&cached.beat_groups);
+                                cached.beat_groups_total =
+                                    cached.beat_groups.iter().map(|&g| g as u32).sum();
+                                cached.beat_groups_held = false;
+                                // The form restarts with the meter and at the
+                                // same bar line it does, exactly as the
+                                // immediate branch above restarts it.
                                 let (bar, state, left) =
                                     form_restart(cached.jam.as_deref(), cached.jam_position);
                                 cached.jam_position = left;
@@ -5994,7 +7572,19 @@ impl MetronomeEngine {
                                 }
                             }
 
-                            let _ = tx.send(BeatNotification {
+                            // INTO THE QUEUE, AND THEN WAKE THE LOOP.
+                            //
+                            // Built on the stack and copied field by field
+                            // into a slot that was allocated when the stream
+                            // opened. A full queue is the one case with no
+                            // good answer — a callback may not wait — so it
+                            // is counted and reported rather than passed off
+                            // as a dropped frame: the analyzer scores the
+                            // player against `beat_log`, and a beat that
+                            // never reaches it is a beat the player is
+                            // marked down for not playing. See
+                            // `BEAT_QUEUE_SLOTS` for why it cannot fill.
+                            let notif = BeatNotification {
                                 session,
                                 beat: notif_beat,
                                 measure_beat: notif_measure_beat,
@@ -6013,8 +7603,16 @@ impl MetronomeEngine {
                                 jam_chorus: notif_jam_chorus,
                                 jam_band_state: notif_band_state,
                                 jam_bar_mismatch: jam_mismatch,
+                                // No song on this path by construction — this
+                                // arm only runs when `song_active` is false.
+                                song_bar: crate::song::NO_SONG_BAR,
+                                song_tick: 0,
+                                song_pass: 0,
                                 jam_form_ended: form_ends_now,
-                            });
+                            };
+                            if beats_cb.push(&notif) {
+                                event_thread.unpark();
+                            }
 
                             // AND THE TUNE ENDS.
                             //
@@ -6072,7 +7670,16 @@ impl MetronomeEngine {
                         // table the callback is already holding, so it costs
                         // three `Option` reads per frame and cannot be out
                         // of step with the slots that name them.
-                        let band = BandBanks::of(cached.jam.as_deref());
+                        //
+                        // THE SONG'S TABLE WINS when there is one, and there
+                        // is never both: `load_song` takes the band away on
+                        // the command thread and `set_jam` clears the song.
+                        // The order here is what makes that a fact about this
+                        // line rather than a promise two commands are keeping.
+                        let band = match cached.song.as_deref() {
+                            Some(s) => BandBanks::of_song(s),
+                            None => BandBanks::of(cached.jam.as_deref()),
+                        };
                         let mut click = 0.0f32;
                         let mut band_l = 0.0f32;
                         let mut band_r = 0.0f32;
@@ -6133,6 +7740,36 @@ impl MetronomeEngine {
                             (0.0, 0.0)
                         };
 
+                        // ---- And the synthesised half of the band ----
+                        //
+                        // AFTER the bus and not through it: the bus is a
+                        // drum bus, tuned to hold a kit's transients down,
+                        // and a guitar driven into its tanh is a guitar with
+                        // a different tone than the file asked for. Two adds
+                        // and an index; the frames were made on another
+                        // thread minutes of CPU ago.
+                        //
+                        // It advances only on frames the PIECE advances on,
+                        // which is what keeps it on the renderer's sample:
+                        // a count-in frame and a frame after the end move
+                        // neither `song_play` nor this.
+                        let (bus_l, bus_r) = if song_active
+                            && !song_counting_in
+                            && !song_ended_here
+                            && synth_used < synth_ready
+                        {
+                            match cached.song.as_deref().and_then(|s| s.synth()) {
+                                Some(ring) => {
+                                    let (l, r) = ring.at(synth_used);
+                                    synth_used += 1;
+                                    (bus_l + l * cached.volume, bus_r + r * cached.volume)
+                                }
+                                None => (bus_l, bus_r),
+                            }
+                        } else {
+                            (bus_l, bus_r)
+                        };
+
                         // Write out. A stereo device gets the band where the
                         // kit was placed; a mono one gets both sides folded,
                         // which is the same band without the room.
@@ -6153,6 +7790,35 @@ impl MetronomeEngine {
                         }
 
                         sample_counter += 1;
+                        // AND THE SONG'S CURSOR, by exactly one frame, at the
+                        // bottom of the frame that used it. One add, no
+                        // borrow of `cached`, and the wrap is the seam check
+                        // at the top of the NEXT frame — which is what makes
+                        // the last sample of a pass and the first sample of
+                        // the one after it adjacent rather than a frame
+                        // apart.
+                        if song_active {
+                            song_pos += 1;
+                            // AND THE PIECE'S OWN CLOCK, which the count-in
+                            // and the frames after the end are not part of.
+                            // It is what the synthesiser's renderer is told,
+                            // and the one number both threads count.
+                            if !song_counting_in && !song_ended_here {
+                                song_play += 1;
+                            }
+                        }
+                    }
+
+                    // ---- Take the synthesised frames that were mixed ----
+                    //
+                    // One store, once per buffer, and only what was actually
+                    // heard: a buffer that ran out of them leaves the rest
+                    // where they are rather than throwing away audio the next
+                    // buffer is about to want.
+                    if synth_used > 0 {
+                        if let Some(ring) = cached.song.as_deref().and_then(|s| s.synth()) {
+                            ring.consume(synth_used);
+                        }
                     }
 
                     // ---- The take, if one is recording ----
@@ -6227,25 +7893,82 @@ impl MetronomeEngine {
                 let _ = app_handle.emit("audio-output-pair-fallback", effective_pair_now);
             }
 
-            // ROADMAP §0.5 — promote the event loop (not the cpal callback,
-            // which the backend already runs at TIME_CRITICAL). Failure is
-            // non-fatal: the loop just runs at normal priority.
-            let _rt_handle = match audio_thread_priority::promote_current_thread_to_real_time(
-                0,
-                sample_rate,
-            ) {
-                Ok(h) => Some(h),
-                Err(e) => {
-                    eprintln!("[yames] event loop stayed at normal priority: {e}");
-                    None
-                }
-            };
+            // THE EVENT LOOP RUNS AT NORMAL PRIORITY, and that is a decision
+            // rather than an omission.
+            //
+            // T06 (2026-09-02) promoted it to real time because doing so
+            // improved *callback* jitter under CPU inference — 1.2-2.3 ms
+            // down to 0.49-1.19 ms. That only ever made sense because the
+            // callback DEPENDED on this loop: it pushed every beat into a
+            // `std::sync::mpsc` channel whose send allocated every 31
+            // messages and locked the receiver's waker every time (see
+            // `BeatQueue`). Promoting the consumer shortened the lock the
+            // producer was waiting on. It treated the symptom.
+            //
+            // The queue below shares nothing with the callback but two
+            // atomics, so there is nothing left to invert — and what this
+            // loop does per beat is exactly what a real-time thread must not:
+            // `state.lock().unwrap()`, `app_handle.emit` (which allocates and
+            // serialises), and a `thread::sleep` of the output latency.
+            // Promoting all of that on a two-core machine is a UI thread
+            // holding a lock above the scheduler's other work.
+            //
+            // AND IT WAS MEASURED, not assumed. Ten 60 s runs on
+            // 2026-09-20, alternating promoted and not, eight of them on the
+            // busiest path the engine has — 240 BPM sixteenths, every lane,
+            // a table swapped in from another thread every 350 ms, a form
+            // jump every 2 s and a take being written to disk underneath:
+            //
+            //   p99 jitter, normal:     5.58  10.95  4.56  6.09 ms
+            //   p99 jitter, real-time:  95.10  8.13  3.22  8.15 ms
+            //   click only, normal 2.21 ms / 4 dropouts; real-time 7.11 ms
+            //   / 16 dropouts / 5 missed beats
+            //
+            // The distributions sit on top of each other and the two worst
+            // runs in the whole set are both promoted ones. There is no
+            // number here that buys the promotion its keep. (The box was at
+            // 100% with up to sixteen `rustc` on it the whole time, so none
+            // of these are the absolute figures ROADMAP §4 asks for — but
+            // heavy CPU load is exactly the condition the promotion was
+            // introduced to survive, and it did not help under it.)
+            //
+            // What did not move at all, in any of the ten: zero allocations
+            // and zero frees inside the callback, and zero dropped
+            // notifications.
+            //
+            // The analyzer's own promotion (`onset.rs`) is a different
+            // thread and a different question; this changes nothing there.
 
             // ---- Event loop (also keeps the cpal Stream alive) ----
             let mut pending_ramp_advance = false;
             let mut current_session: u64 = 0;
+            // The last drop count this loop said out loud, so a queue that
+            // overflows is reported when it happens and not once a beat
+            // forever after.
+            let mut dropped_said: u64 = 0;
 
             while alive.load(Ordering::SeqCst) {
+                // A BEAT THE CALLBACK COULD NOT HAND OVER.
+                //
+                // Said here because this is the thread that may print, and
+                // said at all because it is not a cosmetic loss: `beat_log`
+                // below is the only place the matcher learns where a beat
+                // fell, so every one of these is an expected onset the score
+                // is missing. One relaxed load per pass.
+                let dropped_now = dropped_notifications.load(Ordering::Relaxed);
+                if dropped_now != dropped_said {
+                    eprintln!(
+                        "[yames] BEAT QUEUE OVERFLOW: {} notification(s) dropped in total \
+                         ({} since the last report). The timing analyzer scores against \
+                         these, so this session's numbers are low by however many beats \
+                         it never saw. The event thread was off the CPU for more than \
+                         {} ticks.",
+                        dropped_now,
+                        dropped_now - dropped_said,
+                        BEAT_QUEUE_SLOTS,
+                    );
+                    dropped_said = dropped_now;
+                }
                 // A take that ran off its own end. Checked here, at the top
                 // of every pass — including the timeout pass, which is the
                 // only one that runs while a take plays with the band
@@ -6260,16 +7983,30 @@ impl MetronomeEngine {
                 if take_event.take_capped() {
                     let _ = app_handle.emit("take-capped", ());
                 }
-                let notif = match rx.recv_timeout(Duration::from_millis(50)) {
-                    Ok(n) => n,
-                    Err(mpsc::RecvTimeoutError::Timeout) => {
-                        // Drain stale notifications when not playing
+                // The callback unparks this thread on every push, so the
+                // common path is: park, wake, take the beat. The 50 ms is a
+                // backstop and the pace of the two take flags above — it is
+                // the same 50 ms `recv_timeout` used, and nothing about the
+                // engine's timing depends on it, because the tick's play
+                // time was stamped inside the callback (`ts_ns`).
+                //
+                // There is no `Disconnected` arm any more and nothing is
+                // lost with it: the sender lived in the stream, the stream is
+                // dropped after this loop, so the channel could only
+                // disconnect once the loop had already ended. `alive` is what
+                // ends it, as it always really was.
+                let notif = match beats.pop() {
+                    Some(n) => n,
+                    None => {
+                        thread::park_timeout(Duration::from_millis(50));
+                        // Ticks that landed while the transport was stopped
+                        // are stale. Same rule, same place in the pass, as
+                        // the `try_recv` drain this replaces.
                         if !playing.load(Ordering::Relaxed) {
-                            while rx.try_recv().is_ok() {}
+                            beats.drain();
                         }
                         continue;
                     }
-                    Err(mpsc::RecvTimeoutError::Disconnected) => break,
                 };
 
                 if !alive.load(Ordering::SeqCst) {
@@ -6366,6 +8103,21 @@ impl MetronomeEngine {
                     // Fall through to emit beat event for beat 0
                 }
 
+                // A SONG'S COUNT-IN.
+                //
+                // The click sounds and the screen sees it — somebody counting
+                // you in is something to watch — and that is all it does. No
+                // `beat_log`: that queue is where `TimingAnalyzer` learns
+                // where a beat fell, so a count-in beat in it is an expected
+                // onset the player is marked down for not playing, four times
+                // at the top of every session. And no ramp bookkeeping, for
+                // the same reason a warmup beat skips it: the count is not a
+                // bar of anything.
+                //
+                // Told apart from "no song at all" by the bar, not a flag; see
+                // `song::COUNT_IN_BAR`.
+                let song_counting_in = notif.song_bar == crate::song::COUNT_IN_BAR;
+
                 // ---- Emit beat event ----
                 // Sleep for the output latency so the visual fires when the
                 // audio actually reaches the speakers, not when the callback
@@ -6386,8 +8138,22 @@ impl MetronomeEngine {
                         form_bar: notif.jam_bar,
                         chorus: notif.jam_chorus,
                         band_state: notif.jam_band_state,
+                        // `null` for both sentinels — no song, and a song that
+                        // has not started — and the boolean beside it says
+                        // which. Derived here and nowhere else, so the wire
+                        // cannot disagree with itself.
+                        song_bar: match notif.song_bar {
+                            crate::song::NO_SONG_BAR | crate::song::COUNT_IN_BAR => None,
+                            bar => Some(bar),
+                        },
+                        song_tick: notif.song_tick,
+                        song_pass: notif.song_pass,
+                        song_count_in: song_counting_in,
                     },
                 );
+                if song_counting_in {
+                    continue;
+                }
 
                 // ---- Log BeatTick (Path B — every tick, not just downbeats) ----
                 //
@@ -6664,6 +8430,10 @@ impl MetronomeEngine {
         // reports `Interrupted`, which is what a device change is.
         self.speech.cut();
         if let Some(handle) = self.thread_handle.take() {
+            // The event loop sleeps in `park_timeout` between beats now, so
+            // it is woken rather than waited out: without this the join
+            // costs up to the 50 ms backstop on every device change.
+            handle.thread().unpark();
             let _ = handle.join();
         }
     }
@@ -6678,6 +8448,9 @@ impl Drop for MetronomeEngine {
         self.playing.store(false, Ordering::SeqCst);
         self.alive.store(false, Ordering::SeqCst);
         if let Some(handle) = self.thread_handle.take() {
+            // See `shutdown`: the loop is asleep in `park_timeout` and is
+            // woken rather than waited out.
+            handle.thread().unpark();
             let _ = handle.join();
         }
     }
@@ -6920,6 +8693,10 @@ mod tests {
                 form_bar: 0,
                 chorus: 1,
                 band_state: JamBandState::Full,
+                song_bar: None,
+                song_tick: 0,
+                song_pass: 0,
+                song_count_in: false,
             };
             serde_json::to_value(&e).expect("a beat event serialises")
         };
@@ -6928,6 +8705,58 @@ mod tests {
             assert_eq!(v["accentLevel"], serde_json::json!(accent));
             assert_eq!(v["isAccent"], serde_json::json!(expected_bit));
         }
+        // And with no song, the song fields are the contract's "there is no
+        // song": a null bar, nothing else set.
+        let v = event(0);
+        assert_eq!(v["songBar"], serde_json::json!(null));
+        assert_eq!(v["songTick"], serde_json::json!(0));
+        assert_eq!(v["songPass"], serde_json::json!(0));
+        assert_eq!(v["songCountIn"], serde_json::json!(false));
+    }
+
+    /// The wire while a SONG plays, and the difference between the two
+    /// reasons `songBar` can be null.
+    #[test]
+    fn a_beat_event_says_where_in_the_song_it_is() {
+        let of = |bar: u32| {
+            let count_in = bar == crate::song::COUNT_IN_BAR;
+            let e = BeatEvent {
+                beat: 3,
+                measure_beat: 3,
+                subdivision: 0,
+                is_downbeat: true,
+                accent: 0,
+                is_accent: false,
+                form_bar: 0,
+                chorus: 1,
+                band_state: JamBandState::Full,
+                song_bar: match bar {
+                    crate::song::NO_SONG_BAR | crate::song::COUNT_IN_BAR => None,
+                    b => Some(b),
+                },
+                song_tick: 2880,
+                song_pass: 2,
+                song_count_in: count_in,
+            };
+            serde_json::to_value(&e).expect("a beat event serialises")
+        };
+        let playing = of(17);
+        assert_eq!(playing["songBar"], serde_json::json!(17));
+        assert_eq!(playing["songTick"], serde_json::json!(2880));
+        assert_eq!(playing["songPass"], serde_json::json!(2));
+        assert_eq!(playing["songCountIn"], serde_json::json!(false));
+
+        let counting = of(crate::song::COUNT_IN_BAR);
+        assert_eq!(counting["songBar"], serde_json::json!(null));
+        assert_eq!(
+            counting["songCountIn"],
+            serde_json::json!(true),
+            "a song that has not started is not the same as no song"
+        );
+
+        let none = of(crate::song::NO_SONG_BAR);
+        assert_eq!(none["songBar"], serde_json::json!(null));
+        assert_eq!(none["songCountIn"], serde_json::json!(false));
     }
 
     /// The gains, in the order the ear has to hear them. `Strong` is 1.0
@@ -7513,6 +9342,46 @@ mod tests {
             for k in 0..LP {
                 lp[k] += lp_a * (v - lp[k]);
                 v = lp[k];
+            }
+            energy += v * v;
+        }
+        energy
+    }
+
+    /// Energy above 120 Hz — the band a laptop speaker radiates, for the two
+    /// instruments that live below it.
+    ///
+    /// [`laptop_band_energy`] starts at 200 Hz, and that is right for a drum:
+    /// it is what stops the kick's sub-bass from swamping a comparison of
+    /// transients. It is WRONG FOR A BASS, and wrong in a way that hid this
+    /// whole pass. A bass runs E1 to G3 (41 to 196 Hz), so a 200 Hz corner
+    /// measures a bass's harmonics and not one of its fundamentals — and two
+    /// basses that agree in their harmonics can be eight decibels apart in
+    /// the octave a listener hears the note in. `every_bass_voice_lands_at_
+    /// the_same_level` passed for a year on that band while an eight-bar line
+    /// measured above 120 Hz put the five voices ten decibels apart
+    /// (`plans/tasks/songs/W17-JAM-MIX.md`).
+    ///
+    /// 120 Hz is the brief's number and it is where a laptop's driver gives
+    /// up; the same four cascaded sections, for the same reason they are four
+    /// there — at 6 dB an octave the sub-bass is still in the answer.
+    ///
+    /// No low-pass: this is the band that reaches the ear, all of it, which
+    /// is also exactly what `ffmpeg -af highpass=f=120,ebur128` measured when
+    /// the trims below were derived. A ceiling here and none there would be
+    /// two different numbers wearing one name.
+    fn above_120_energy(buf: &[f32], sr: u32) -> f64 {
+        const HP: usize = 4;
+        let a = 1.0 / (1.0 + 2.0 * std::f64::consts::PI * 120.0 / sr as f64);
+        let (mut prev_in, mut prev_out) = ([0.0f64; HP], [0.0f64; HP]);
+        let mut energy = 0.0f64;
+        for &s in buf {
+            let mut v = s as f64;
+            for k in 0..HP {
+                let out = a * (prev_out[k] + v - prev_in[k]);
+                prev_in[k] = v;
+                prev_out[k] = out;
+                v = out;
             }
             energy += v * v;
         }
@@ -8562,6 +10431,242 @@ mod tests {
         assert!(!mask_has_accent(mask, 255));
     }
 
+    // -----------------------------------------------------------------
+    // The seam between two meters
+    // -----------------------------------------------------------------
+
+    /// One tick, as the walk below reports it.
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    struct WalkTick {
+        measure_beat: u32,
+        sub_count: u32,
+        accent: AccentLevel,
+    }
+
+    impl WalkTick {
+        fn opens_a_bar(&self) -> bool {
+            self.measure_beat == 0 && self.sub_count == 0
+        }
+    }
+
+    /// The tick loop's METER bookkeeping, and nothing else.
+    ///
+    /// The callback is a closure inside a `cpal` stream, so it cannot be
+    /// driven from a test. This is the same arithmetic written out once:
+    /// the snapshot's hold-or-apply, [`held_meter_due`], the accent, and the
+    /// `measure_beat` wrap that closes a tick. Every decision calls the real
+    /// function rather than paraphrasing it, so a change to the rule that
+    /// did not mean to change the seam fails here.
+    struct MeterWalk {
+        groups: Vec<u8>,
+        mask: u32,
+        total: u32,
+        held: Vec<u8>,
+        is_held: bool,
+        /// The immediate branch's "restack at the next tick".
+        changed: bool,
+        measure_beat: u32,
+        sub_count: u32,
+        subdivision: u32,
+    }
+
+    impl MeterWalk {
+        fn new(groups: &[u8], subdivision: u32) -> Self {
+            Self {
+                groups: groups.to_vec(),
+                mask: accent_mask(groups),
+                total: groups.iter().map(|&g| g as u32).sum(),
+                held: Vec::new(),
+                is_held: false,
+                changed: false,
+                measure_beat: 0,
+                sub_count: 0,
+                subdivision,
+            }
+        }
+
+        /// What the snapshot block does with a meter arriving while playing.
+        fn post(&mut self, groups: &[u8], at_bar_line: bool) {
+            if groups == self.groups.as_slice() {
+                return;
+            }
+            if at_bar_line {
+                self.held.clear();
+                self.held.extend_from_slice(groups);
+                self.is_held = true;
+            } else {
+                self.groups.clear();
+                self.groups.extend_from_slice(groups);
+                self.mask = accent_mask(&self.groups);
+                self.total = self.groups.iter().map(|&g| g as u32).sum();
+                self.changed = true;
+                self.is_held = false;
+            }
+        }
+
+        fn tick(&mut self) -> WalkTick {
+            if self.changed {
+                self.measure_beat = 0;
+                self.sub_count = 0;
+                self.changed = false;
+            }
+            if self.is_held && held_meter_due(self.measure_beat, self.sub_count) {
+                self.groups = self.held.clone();
+                self.mask = accent_mask(&self.groups);
+                self.total = self.groups.iter().map(|&g| g as u32).sum();
+                self.is_held = false;
+            }
+            let is_downbeat = self.sub_count == 0;
+            let out = WalkTick {
+                measure_beat: self.measure_beat,
+                sub_count: self.sub_count,
+                accent: accent_for(
+                    AccentMode::Groups,
+                    false,
+                    4,
+                    self.mask,
+                    is_downbeat,
+                    self.measure_beat,
+                    self.measure_beat,
+                ),
+            };
+            self.sub_count += 1;
+            if self.sub_count >= self.subdivision {
+                self.sub_count = 0;
+                self.measure_beat += 1;
+                if self.measure_beat >= self.total.max(1) {
+                    self.measure_beat = 0;
+                }
+            }
+            out
+        }
+
+        /// Walk `n` ticks and hand back the whole beats among them.
+        fn beats(&mut self, n: usize) -> Vec<WalkTick> {
+            (0..n).map(|_| self.tick()).filter(|t| t.sub_count == 0).collect()
+        }
+    }
+
+    /// Bar lengths, in whole beats, from a stream of whole-beat ticks.
+    /// The last bar is dropped: it has not finished, so its length is not
+    /// a fact yet.
+    fn bar_lengths(beats: &[WalkTick]) -> Vec<usize> {
+        let mut bars: Vec<usize> = Vec::new();
+        for t in beats {
+            if t.opens_a_bar() {
+                bars.push(1);
+            } else if let Some(last) = bars.last_mut() {
+                *last += 1;
+            }
+        }
+        bars.pop();
+        bars
+    }
+
+    #[test]
+    fn a_held_meter_belongs_to_the_bar_it_was_posted_on() {
+        // Inside the bar's first beat, whatever subdivision of it.
+        assert!(held_meter_due(0, 0));
+        assert!(held_meter_due(0, 3));
+        // The whole-beat tick of beat 1 — the earliest an unsubdivided
+        // click can see a change posted on the bar line before it.
+        assert!(held_meter_due(1, 0));
+        // And nothing after that: the bar has sounded a second whole beat,
+        // so the change waits for the next bar line.
+        assert!(!held_meter_due(1, 1));
+        assert!(!held_meter_due(2, 0));
+        assert!(!held_meter_due(6, 3));
+    }
+
+    #[test]
+    fn a_setlist_switch_from_four_four_to_seven_eight_leaves_no_stub_bar() {
+        // Two bars of 4/4 and then the bar line that opens the third, which
+        // is where the runtime lands the switch. The post happens AFTER that
+        // tick, because the config only leaves the UI once the notification
+        // for it has — which is the whole reason the stub bar existed.
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(9);
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(21));
+
+        // 4, 4, then sevens. The one-beat bar this test exists for would
+        // show up as a `1` between them.
+        assert_eq!(bar_lengths(&beats), vec![4, 4, 7, 7, 7]);
+        // The switch's bar line is the new meter's bar one: the tick right
+        // after the post opens a bar and carries the bar's own accent.
+        assert_eq!(beats[8].measure_beat, 0);
+        assert_eq!(beats[8].accent, AccentLevel::Strong);
+        // And 2+2+3 is audible inside it — a group start is an accent and
+        // not a bar line.
+        assert_eq!(beats[10].accent, AccentLevel::Medium);
+        assert_eq!(beats[12].accent, AccentLevel::Medium);
+        assert_eq!(beats[11].accent, AccentLevel::None);
+    }
+
+    #[test]
+    fn a_setlist_switch_from_seven_eight_to_four_four_leaves_no_stub_bar() {
+        let mut w = MeterWalk::new(&[2, 2, 3], 1);
+        let mut beats = w.beats(15);
+        w.post(&[4], true);
+        beats.extend(w.beats(12));
+        assert_eq!(bar_lengths(&beats), vec![7, 7, 4, 4, 4]);
+        assert_eq!(beats[14].measure_beat, 0);
+        assert_eq!(beats[14].accent, AccentLevel::Strong);
+    }
+
+    #[test]
+    fn a_held_meter_lands_with_sixteenths_running() {
+        // Sixteenths on a quarter. Two bars of 4/4 and the bar line that
+        // opens the third, then one sixteenth of lag before the meter turns
+        // up — which is where a real round trip puts it.
+        let mut w = MeterWalk::new(&[4], 4);
+        let mut beats = w.beats(33);
+        w.tick();
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(4 * 21));
+        // The lagging tick is a subdivision, so the whole-beat stream is
+        // unbroken: the bar it belongs to is seven beats long.
+        assert_eq!(bar_lengths(&beats)[..4], [4, 4, 7, 7]);
+    }
+
+    #[test]
+    fn the_last_meter_posted_before_the_bar_line_is_the_one_that_plays() {
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(9);
+        w.post(&[3], true);
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(7));
+        assert_eq!(bar_lengths(&beats), vec![4, 4, 7]);
+    }
+
+    #[test]
+    fn a_held_meter_that_arrives_mid_bar_lets_the_bar_finish() {
+        // A slow round trip: the meter turns up two beats into a 4/4 bar.
+        // That bar is not the one it was posted on any more, so it plays out
+        // at its old length and the new meter opens the next one.
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(6);
+        w.post(&[2, 2, 3], true);
+        beats.extend(w.beats(17));
+        assert_eq!(bar_lengths(&beats), vec![4, 4, 7, 7]);
+    }
+
+    #[test]
+    fn a_meter_changed_by_hand_still_restarts_the_bar_at_once() {
+        // The metronome screen, mid-bar, with no `at_bar_line`: the bar
+        // restarts under the player's fingers, which is what dragging 4/4 to
+        // 3/4 is asking for. Unchanged, and the reason the setlist's change
+        // needed a flag of its own.
+        let mut w = MeterWalk::new(&[4], 1);
+        let mut beats = w.beats(6);
+        w.post(&[3], false);
+        beats.extend(w.beats(7));
+        // The 4/4 bar in progress is cut to two beats — today's behaviour.
+        assert_eq!(bar_lengths(&beats), vec![4, 2, 3, 3]);
+        assert_eq!(beats[6].measure_beat, 0);
+        assert_eq!(beats[6].accent, AccentLevel::Strong);
+    }
+
     #[test]
     fn adaptive_thresholds_conservative_clamps_steps() {
         let (up, down, step_up, step_down) = adaptive_thresholds("conservative", 1, 1);
@@ -9401,7 +11506,20 @@ mod tests {
             }
             w.finalize().unwrap();
             let peak = left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs()));
-            println!("{} -> {} bars, peak {peak:.3}", wav.display(), tables.len());
+            // What the table measured of itself, worst bar of the eight. A
+            // demo that solos one lane is only comparable with the demo that
+            // solos another if NEITHER was scaled by `JAM_SAFETY_CLAMP` —
+            // that normalisation is worked out per table, so a loud one would
+            // be quiet here for a reason that has nothing to do with the
+            // voice. The two numbers being equal is what says it did not.
+            let (before, after) = tables.iter().fold((0.0f32, 0.0f32), |m, t| {
+                (m.0.max(t.peak_before), m.1.max(t.peak_after))
+            });
+            println!(
+                "{} -> {} bars, peak {peak:.3}, table {before:.3} before the clamp and {after:.3} after",
+                wav.display(),
+                tables.len()
+            );
         }
     }
 
@@ -9501,6 +11619,1375 @@ mod tests {
             jam_bar = b;
         }
         (left, right)
+    }
+
+    // ─── Songs — the engine plays an imported piece ──────────────────────
+
+    use crate::song::{
+        SongBacking, SongBar, SongLane, SongMixGains, SongNote, SongRange, SongRole, SongSounds,
+        SongTable, SongTempo, SongTrack, SongTransport, TICKS_PER_QUARTER,
+    };
+
+    /// THE TWELVE-BAR SONG THE GATE IS ABOUT.
+    ///
+    /// Twelve bars of 4/4 at 120 with a 7/8 at bar 4 and a step to 90 on the
+    /// bar line of bar 5 — the three things a tempo map has to survive, in one
+    /// piece, so a test that only ever saw one meter at one tempo cannot pass
+    /// this by accident.
+    fn gate_song() -> SongTransport {
+        let mut bars = Vec::new();
+        let mut tick = 0u32;
+        for i in 0..12u32 {
+            let (num, den) = if i == 4 { (7u32, 8u32) } else { (4, 4) };
+            let len = TICKS_PER_QUARTER * 4 / den * num;
+            bars.push(SongBar {
+                start_tick: tick,
+                length_ticks: len,
+                numerator: num,
+                denominator: den,
+            });
+            tick += len;
+        }
+        SongTransport {
+            tempo_map: vec![
+                SongTempo { tick: 0, bpm: 120.0 },
+                SongTempo {
+                    tick: bars[5].start_tick,
+                    bpm: 90.0,
+                },
+            ],
+            ticks_per_quarter: TICKS_PER_QUARTER,
+            bars,
+            range: SongRange {
+                start_bar: 0,
+                end_bar: 11,
+            },
+            loops: false,
+            tempo_percent: 100,
+            count_in_bars: 0,
+            start_tick: 0,
+            drums_as_written: false,
+        }
+    }
+
+    /// A rhythm section for it: a kick on every bar line, a snare halfway
+    /// through every bar, a bass note on every beat, and a chord per bar held
+    /// for a bar and a half — the last of which is there so a note is still
+    /// ringing when the loop comes round.
+    fn gate_backing(t: &SongTransport) -> SongBacking {
+        let mut drums = Vec::new();
+        let mut bass = Vec::new();
+        let mut keys = Vec::new();
+        for bar in t.bars.iter() {
+            let beat_ticks = TICKS_PER_QUARTER * 4 / bar.denominator;
+            drums.push(SongNote {
+                tick: bar.start_tick,
+                dur_ticks: beat_ticks,
+                midi: 36,
+                velocity: 0.9,
+            });
+            drums.push(SongNote {
+                tick: bar.start_tick + bar.length_ticks / 2,
+                dur_ticks: beat_ticks,
+                midi: 38,
+                velocity: 0.7,
+            });
+            // A CRASH ON THE LAST THIRTY-SECOND OF THE BAR, and it is there
+            // for the seam rather than for the music.
+            //
+            // Nothing else in this arrangement survives one. The room kit's
+            // kick and snare are 150 ms, its ride 350 and its crash 600; the
+            // synthesised bass is about 150 and the electric piano 700. A
+            // beat of this song is 667 ms at 100 % and 1333 at 50 %, so a
+            // cymbal even half a beat before the bar line has finished
+            // washing by the time the loop comes round at the slower speed —
+            // and the "nothing was cut short" check below would have been
+            // passing over silence, which is the one way this gate could lie.
+            // A thirty-second in is 83 ms at 100 % and 167 at 50 %, so the
+            // crash is still sounding across the seam at both.
+            drums.push(SongNote {
+                tick: bar.start_tick + bar.length_ticks - beat_ticks / 8,
+                dur_ticks: beat_ticks * 4,
+                midi: 49,
+                velocity: 0.8,
+            });
+            for b in 0..bar.numerator {
+                bass.push(SongNote {
+                    tick: bar.start_tick + b * beat_ticks,
+                    dur_ticks: beat_ticks,
+                    midi: 40,
+                    velocity: 0.8,
+                });
+            }
+            keys.push(SongNote {
+                tick: bar.start_tick,
+                // A bar and a half, so the last chord of a range runs past
+                // the seam and has to be allowed to ring across it.
+                dur_ticks: bar.length_ticks + bar.length_ticks / 2,
+                midi: 60,
+                velocity: 0.6,
+            });
+        }
+        SongBacking {
+            tracks: vec![
+                SongTrack {
+                    role: SongRole::Drums,
+                    name: "drums".into(),
+                    program: 0,
+                    guide: false,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: drums,
+                },
+                SongTrack {
+                    role: SongRole::Bass,
+                    name: "bass".into(),
+                    program: 0,
+                    guide: false,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: bass,
+                },
+                SongTrack {
+                    role: SongRole::Keys,
+                    name: "keys".into(),
+                    program: 0,
+                    guide: false,
+                    percussion: false,
+                    bends: Vec::new(),
+                    notes: keys,
+                },
+            ],
+        }
+    }
+
+    /// The drums and banks a song plays out of, built for a test at `sr`.
+    /// The shipped kit, and no recorded voices — the synthesised recipes are
+    /// what a checkout without the voice folders plays, and this gate is
+    /// about sample positions rather than about timbre.
+    fn gate_sounds(sr: u32) -> SongSounds {
+        let kits = crate::kit::KitCache::default();
+        SongSounds {
+            bank: kits
+                .shipped(JamKit::fallback().0, sr)
+                .expect("the fallback kit decodes"),
+            perc: kits.perc(0, sr).ok(),
+            voices: crate::jam::JamVoices::default(),
+        }
+    }
+
+    /// Where the map says each bar of a range starts, in seconds, worked out
+    /// from the transport and NOT from the compiled table.
+    ///
+    /// The whole value of the gate is that the two are computed twice and
+    /// agree; a helper that read `SongBarPlan::start_seconds` would be the
+    /// table agreeing with itself.
+    fn map_bar_seconds(t: &SongTransport) -> Vec<f64> {
+        let mut out = Vec::new();
+        let mut seconds = 0.0f64;
+        for i in t.range.start_bar..=t.range.end_bar {
+            let bar = t.bars[i as usize];
+            let bpm = t
+                .tempo_map
+                .iter()
+                .filter(|e| e.tick <= bar.start_tick)
+                .last()
+                .map(|e| e.bpm)
+                .unwrap_or(120.0)
+                * t.tempo_percent as f64
+                / 100.0;
+            out.push(seconds);
+            seconds += bar.length_ticks as f64 / TICKS_PER_QUARTER as f64 * 60.0 / bpm;
+        }
+        out
+    }
+
+    /// Every click of one pass, in frames, straight off the map.
+    fn map_click_frames(t: &SongTransport, sr: u32, subdivision: u32) -> Vec<u64> {
+        let starts = map_bar_seconds(t);
+        let mut out = Vec::new();
+        for (n, i) in (t.range.start_bar..=t.range.end_bar).enumerate() {
+            let bar = t.bars[i as usize];
+            let bpm = t
+                .tempo_map
+                .iter()
+                .filter(|e| e.tick <= bar.start_tick)
+                .last()
+                .map(|e| e.bpm)
+                .unwrap_or(120.0)
+                * t.tempo_percent as f64
+                / 100.0;
+            let beat = 60.0 / bpm * 4.0 / bar.denominator as f64;
+            for b in 0..bar.numerator {
+                for sub in 0..subdivision {
+                    let at = starts[n]
+                        + b as f64 * beat
+                        + sub as f64 * beat / subdivision as f64;
+                    out.push((at * sr as f64).round() as u64);
+                }
+            }
+        }
+        out
+    }
+
+    /// And every backing onset of one pass, sorted, straight off the map.
+    fn map_onset_frames(t: &SongTransport, backing: &SongBacking, sr: u32) -> Vec<u64> {
+        let starts = map_bar_seconds(t);
+        let mut out = Vec::new();
+        for track in backing.tracks.iter() {
+            for note in track.notes.iter() {
+                let Some((n, i)) = (t.range.start_bar..=t.range.end_bar)
+                    .enumerate()
+                    .find(|(_, i)| {
+                        let bar = t.bars[*i as usize];
+                        note.tick >= bar.start_tick
+                            && note.tick < bar.start_tick + bar.length_ticks
+                    })
+                else {
+                    continue;
+                };
+                let bar = t.bars[i as usize];
+                let bpm = t
+                    .tempo_map
+                    .iter()
+                    .filter(|e| e.tick <= bar.start_tick)
+                    .last()
+                    .map(|e| e.bpm)
+                    .unwrap_or(120.0)
+                    * t.tempo_percent as f64
+                    / 100.0;
+                let into = (note.tick - bar.start_tick) as f64 / TICKS_PER_QUARTER as f64
+                    * 60.0
+                    / bpm;
+                out.push(((starts[n] + into) * sr as f64).round() as u64);
+            }
+        }
+        out.sort_unstable();
+        out
+    }
+
+    /// What one render of a song came out as.
+    struct SongRender {
+        /// The frame each click fired on, and which played bar it said it was
+        /// in.
+        clicks: Vec<(u64, u32)>,
+        /// The frame each backing onset fired on, and which lane it was.
+        onsets: Vec<(u64, SongLane)>,
+        /// How many voices were still ringing at the instant the loop came
+        /// round, before anything of the new pass was spawned. Zero would
+        /// mean the seam cut the band off.
+        ringing_at_seam: usize,
+        /// How many passes the render got through.
+        passes: u32,
+        /// How many times the end of the piece was REPORTED. The engine
+        /// pushes a beat notification on it, so anything but one is either a
+        /// song that never ended or one that told the event loop it had
+        /// ended once a frame until the buffer ran out.
+        endings: u32,
+        /// The loudest sample of the whole mix, before the clamp — the only
+        /// way to see whether the callback would have clipped.
+        peak: f32,
+        /// And the two halves of it. The click is summed mono and added after
+        /// the bus; the band goes through it. Kept apart because the answer
+        /// to "too loud" is a different dial for each.
+        click_peak: f32,
+        band_peak: f32,
+        max_voices: usize,
+        /// The mix itself, so a render can be written out and listened to.
+        /// The click is summed mono into both, exactly as a stereo device
+        /// gets it — see the write-out at the bottom of the callback.
+        left: Vec<f32>,
+        right: Vec<f32>,
+        /// And the two halves again, kept apart, so the A/B clips can carry a
+        /// band with no click on it and a click with no band.
+        click_only: Vec<f32>,
+    }
+
+    /// A miniature of the callback's SONG path: the seam check at the top of
+    /// the frame, the two cursor walks, the mixer, the cursor advance at the
+    /// bottom.
+    ///
+    /// Deliberately a copy of the callback's arithmetic rather than a shared
+    /// helper, for the reason `render_jam` is one: a change in the callback
+    /// that this does not follow shows up as a failing assertion instead of
+    /// as a test that quietly moved with the bug.
+    fn render_song(table: &SongTable, bank: &SoundBank, frames: usize, sr: u32) -> SongRender {
+        let mut voices: Vec<Voice> = Vec::new();
+        let mut bus = DrumBus::new(sr);
+        bus.set_drive(table.bus_drive, table.bus_shape);
+        let choke_frames = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let banks = BandBanks::of_song(table);
+        let kit = SoundKit::Click;
+        let mix = SongMixGains::default();
+        let volume = 0.8f32;
+
+        let mut out = SongRender {
+            clicks: Vec::new(),
+            onsets: Vec::new(),
+            ringing_at_seam: 0,
+            passes: 0,
+            endings: 0,
+            peak: 0.0,
+            click_peak: 0.0,
+            band_peak: 0.0,
+            max_voices: 0,
+            left: Vec::with_capacity(frames),
+            right: Vec::with_capacity(frames),
+            click_only: Vec::with_capacity(frames),
+        };
+        let mut pos: u64 = 0;
+        let mut counting_in = true;
+        let mut tick_at = 0usize;
+        let mut band_at = 0usize;
+        let mut ci_at = 0usize;
+        let mut ended = false;
+        let mut seen_seam = false;
+
+        for frame in 0..frames as u64 {
+            // `ends_here` is the FRAME the piece ended on and `ended` is
+            // every frame after it — the callback's own two flags, copied
+            // because the difference between them is a beat notification
+            // pushed once and one pushed on every remaining frame of the
+            // buffer, and the second fills the queue.
+            let mut ends_here = false;
+            if !ended && counting_in {
+                if pos >= table.count_in_samples() {
+                    pos = 0;
+                    counting_in = false;
+                }
+            } else if !ended && pos >= table.pass_samples() {
+                if table.loops() {
+                    if !seen_seam {
+                        seen_seam = true;
+                        out.ringing_at_seam = voices.len();
+                    }
+                    pos = 0;
+                    tick_at = 0;
+                    band_at = 0;
+                    out.passes += 1;
+                } else {
+                    ended = true;
+                    ends_here = true;
+                }
+            }
+            if ends_here {
+                out.endings += 1;
+                voices.clear();
+            }
+            if !ended {
+                let ticks: &[crate::song::SongTick] = if counting_in {
+                    table.count_in()
+                } else {
+                    table.ticks()
+                };
+                let cursor = if counting_in { &mut ci_at } else { &mut tick_at };
+                while let Some(t) = ticks.get(*cursor) {
+                    if t.sample > pos {
+                        break;
+                    }
+                    *cursor += 1;
+                    let level = song_accent(AccentMode::Groups, t.accent, t.sub == 0);
+                    spawn_song_click(&mut voices, t, level, kit, volume * mix.click);
+                    out.clicks.push((frame, t.bar));
+                }
+                if !counting_in {
+                    while let Some(e) = table.band().get(band_at) {
+                        if e.sample > pos {
+                            break;
+                        }
+                        band_at += 1;
+                        spawn_song_voice(
+                            &mut voices,
+                            e,
+                            e.slot.gain * volume * mix.track(e.track),
+                            choke_frames,
+                        );
+                        out.onsets.push((frame, e.lane));
+                    }
+                }
+            }
+            out.max_voices = out.max_voices.max(voices.len());
+
+            // ---- The mixer, exactly as the callback runs it ----
+            let mut click = 0.0f32;
+            let mut band_l = 0.0f32;
+            let mut band_r = 0.0f32;
+            for v in voices.iter_mut() {
+                if v.delay > 0 {
+                    v.delay -= 1;
+                    continue;
+                }
+                let buf = jam_sample(bank, banks, v.sound_id);
+                let len = if v.stereo { buf.len() / 2 } else { buf.len() };
+                let limit = if v.max_samples > 0 {
+                    v.max_samples.min(len)
+                } else {
+                    len
+                };
+                if v.position < limit {
+                    if v.band {
+                        let g = v.choke_gain() * v.release_gain();
+                        let (l, r) = if v.stereo {
+                            (buf[2 * v.position], buf[2 * v.position + 1])
+                        } else {
+                            (buf[v.position], buf[v.position])
+                        };
+                        band_l += l * v.amp_l * g;
+                        band_r += r * v.amp_r * g;
+                    } else {
+                        click += buf[v.position] * v.amp_l;
+                    }
+                }
+                if v.band && v.fade_left > 0 {
+                    v.fade_left -= 1;
+                }
+                v.position += 1;
+            }
+            let (bus_l, bus_r) = if banks.any() {
+                bus.process(band_l, band_r)
+            } else {
+                (0.0, 0.0)
+            };
+            out.peak = out
+                .peak
+                .max((click + bus_l).abs())
+                .max((click + bus_r).abs());
+            out.click_peak = out.click_peak.max(click.abs());
+            out.band_peak = out.band_peak.max(bus_l.abs()).max(bus_r.abs());
+            out.left.push(bus_l);
+            out.right.push(bus_r);
+            out.click_only.push(click);
+
+            voices.retain(|v| {
+                let buf = jam_sample(bank, banks, v.sound_id);
+                let len = if v.stereo { buf.len() / 2 } else { buf.len() };
+                !v.done(len)
+            });
+            pos += 1;
+        }
+        out
+    }
+
+    /// Two seeks between two buffers is one seek, and it is the last one.
+    ///
+    /// A player dragging a finger across the tab posts a seek per bar it
+    /// crosses. What they want is where they let go; what a queue would give
+    /// them is a stutter through everywhere they passed, at a buffer each.
+    /// One slot and a swap is the whole mechanism, and this is the whole of
+    /// what it promises.
+    #[test]
+    fn two_seeks_between_two_buffers_are_the_last_one() {
+        let handoff = SongHandoff::new();
+        assert_eq!(handoff.take_seek(), None, "a transport nobody clicked");
+
+        handoff.seek(96_000);
+        handoff.seek(4_800);
+        handoff.seek(192_000);
+        assert_eq!(handoff.take_seek(), Some(192_000), "an earlier click won");
+        assert_eq!(
+            handoff.take_seek(),
+            None,
+            "the same seek was taken twice, so the cursor jumped back next buffer",
+        );
+
+        // And nought is a place, not a sentinel: seeking to the top of the
+        // range is the commonest seek there is.
+        handoff.seek(0);
+        assert_eq!(handoff.take_seek(), Some(0));
+        assert_eq!(handoff.take_seek(), None);
+    }
+
+    /// Eight bars of a two-guitar song, for the ear and for the meter.
+    ///
+    /// Written to be the shape of the file the owner actually opened: a part
+    /// being learned, a second guitar behind it, a bass and a kit. Before W28
+    /// three of those four were dropped and the fourth was a click, which is
+    /// the whole of what went wrong.
+    fn ab_song() -> (SongTransport, SongBacking) {
+        let mut bars = Vec::new();
+        let mut tick = 0u32;
+        for _ in 0..8u32 {
+            bars.push(SongBar {
+                start_tick: tick,
+                length_ticks: TICKS_PER_QUARTER * 4,
+                numerator: 4,
+                denominator: 4,
+            });
+            tick += TICKS_PER_QUARTER * 4;
+        }
+        let transport = SongTransport {
+            tempo_map: vec![SongTempo { tick: 0, bpm: 100.0 }],
+            ticks_per_quarter: TICKS_PER_QUARTER,
+            bars: bars.clone(),
+            range: SongRange { start_bar: 0, end_bar: 7 },
+            loops: false,
+            tempo_percent: 100,
+            count_in_bars: 0,
+            start_tick: 0,
+            drums_as_written: false,
+        };
+        let mut lead = Vec::new();
+        let mut rhythm = Vec::new();
+        let mut bass = Vec::new();
+        let mut drums = Vec::new();
+        // A minor pentatonic phrase over an A minor riff — nobody's music,
+        // and enough of a tune that a guitarist can tell whether the
+        // instrument playing it is one they would keep.
+        const PHRASE: [u8; 8] = [69, 72, 74, 76, 74, 72, 69, 67];
+        for (n, bar) in bars.iter().enumerate() {
+            for beat in 0..4u32 {
+                let at = bar.start_tick + beat * TICKS_PER_QUARTER;
+                lead.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER,
+                    midi: PHRASE[((n * 4 + beat as usize) % PHRASE.len())],
+                    velocity: 0.75,
+                });
+                // The rhythm part is a chord held for the bar, struck once.
+                if beat == 0 {
+                    for note in [45u8, 52, 57] {
+                        rhythm.push(SongNote {
+                            tick: at,
+                            dur_ticks: TICKS_PER_QUARTER * 4,
+                            midi: note,
+                            velocity: 0.62,
+                        });
+                    }
+                }
+                bass.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER,
+                    midi: if beat % 2 == 0 { 33 } else { 40 },
+                    velocity: 0.8,
+                });
+                // Kick, snare and a hat on every beat.
+                drums.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER / 2,
+                    midi: if beat % 2 == 0 { 36 } else { 38 },
+                    velocity: 0.85,
+                });
+                drums.push(SongNote {
+                    tick: at,
+                    dur_ticks: TICKS_PER_QUARTER / 2,
+                    midi: 42,
+                    velocity: 0.5,
+                });
+            }
+        }
+        let track = |role, name: &str, program, guide, notes| SongTrack {
+            role,
+            name: name.into(),
+            program,
+            guide,
+            percussion: false,
+            bends: Vec::new(),
+            notes,
+        };
+        (
+            transport,
+            SongBacking {
+                tracks: vec![
+                    track(SongRole::Synth, "Lead", 29, true, lead),
+                    track(SongRole::Synth, "Rhythm", 29, false, rhythm),
+                    track(SongRole::Bass, "Bass", 33, false, bass),
+                    track(SongRole::Drums, "Drums", 0, false, drums),
+                ],
+            },
+        )
+    }
+
+    /// The same eight bars, both ways, written out for the owner to judge.
+    ///
+    /// **W28 wants an ear, and this is how it gets one.** Nothing in this
+    /// repository can hear, so the two arrangements the brief asks about —
+    /// the recorded band with the guitars synthesised, against everything
+    /// through the synthesiser — are rendered to WAV and the levels are
+    /// printed beside them. The default is the first, and the clips are what
+    /// says whether that was right.
+    ///
+    ///   YAMES_SONG_AB=<folder> cargo test --lib --no-default-features \
+    ///       render_song_ab -- --ignored --nocapture
+    ///
+    /// Ignored by default for the reason `render_band_demos` beside it is: it
+    /// writes files, it takes seconds, and its output is a judgement rather
+    /// than an assertion.
+    #[test]
+    #[ignore]
+    fn render_song_ab() {
+        let Ok(dir) = std::env::var("YAMES_SONG_AB") else {
+            eprintln!("YAMES_SONG_AB is not set; nothing to render");
+            return;
+        };
+        std::fs::create_dir_all(&dir).expect("the clip folder");
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let font = crate::synth::load_font(None).expect("the shipped sound set");
+        let (transport, recorded) = ab_song();
+
+        // The second arrangement: the same eight bars with every part on the
+        // synthesiser, so the two clips differ in exactly one thing.
+        let mut all_synth = recorded.clone();
+        for t in all_synth.tracks.iter_mut() {
+            if t.role == SongRole::Drums {
+                // Channel 9's General MIDI kit. The numbers are already
+                // General MIDI percussion, which is what a drum track
+                // carries, so nothing has to be translated.
+                t.role = SongRole::Synth;
+                t.program = 0;
+            } else if t.role == SongRole::Bass || t.role == SongRole::Keys {
+                t.role = SongRole::Synth;
+            }
+        }
+
+        for (name, backing) in [("a-recorded-band", &recorded), ("b-all-synth", &all_synth)] {
+            let table = crate::song::compile(&transport, Some(backing), gate_sounds(sr), sr, 1)
+                .expect("the song compiles");
+            let frames = (table.pass_samples() + sr as u64) as usize;
+            let sampled = render_song(&table, &bank, frames, sr);
+            let (mut left, mut right) = (sampled.left.clone(), sampled.right.clone());
+            let mut synth_peak = 0.0f32;
+            if let Some(score) = table.synth_score.as_ref() {
+                // Every fader at the level a song arrives at, the guide a few
+                // dB under — which is what the player hears on the first
+                // press of play and so what these clips must be.
+                let gains: Vec<f32> = backing
+                    .tracks
+                    .iter()
+                    .map(|t| if t.guide { 0.7 } else { 1.0 })
+                    .collect();
+                let (sl, sr_) = crate::synth::render_offline(score, &font, sr, frames, &gains)
+                    .expect("the synth renders");
+                for n in 0..frames {
+                    synth_peak = synth_peak.max(sl[n].abs()).max(sr_[n].abs());
+                    left[n] += sl[n] * 0.8;
+                    right[n] += sr_[n] * 0.8;
+                }
+            }
+            // And the click over it, at the level a song arrives at.
+            let click_rms = rms(&sampled.click_only);
+            for n in 0..frames {
+                left[n] += sampled.click_only[n];
+                right[n] += sampled.click_only[n];
+            }
+            let path = std::path::Path::new(&dir).join(format!("{name}.wav"));
+            write_wav(&path, &left, &right, sr);
+            println!(
+                "{}\n  band RMS {:.4}  synth peak {:.4}  click RMS {:.4}  \
+                 mix peak {:.4}  band-to-click {:+.1} dB  trim {:.3}  \
+                 {} sampled notes, {} synth notes",
+                path.display(),
+                rms(&sampled.left),
+                synth_peak,
+                click_rms,
+                left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs())),
+                20.0 * (rms(&sampled.left).max(1e-9) / click_rms.max(1e-9)).log10(),
+                table.band_trim,
+                table.played_notes - table.synth_notes,
+                table.synth_notes,
+            );
+        }
+    }
+
+
+    /// A song from a FILE, sixteen bars of it, three ways, for the owner's ear.
+    ///
+    /// **W37 item 3 wants an ear and this is how it gets one.** The owner:
+    /// *"the 'drums' layer in a song i'm playing sounds AWFUL, the click sounds
+    /// very good tho"*. Nothing in this repository can hear, so the same
+    /// sixteen bars of the same file are rendered three ways and the numbers
+    /// are printed beside them:
+    ///
+    ///   a — the recorded kit as it was (every drum cut to its written note
+    ///       value, one recording per drum, three velocity layers);
+    ///   b — the recorded kit repaired (drums play out, the round robin
+    ///       rotates, every layer the kit recorded, a hat closes a hat);
+    ///   c — the file's drums through the General MIDI synthesiser instead.
+    ///
+    /// The transport and the backing come from a JSON file the importer wrote,
+    /// so what is rendered is exactly what the app would compile — no fixture
+    /// stands in for the player's own transcription.
+    ///
+    ///   YAMES_SONG_FILE=<transport+backing json> YAMES_SONG_AB=<folder> \
+    ///     node scripts/rust-test.mjs --lib --no-default-features \
+    ///     render_owner_song -- --ignored --nocapture
+    ///
+    /// Ignored by default for the reason `render_song_ab` beside it is: it
+    /// writes files, it takes seconds, and its output is a judgement rather
+    /// than an assertion.
+    #[test]
+    #[ignore]
+    fn render_owner_song() {
+        let (Ok(file), Ok(dir)) = (
+            std::env::var("YAMES_SONG_FILE"),
+            std::env::var("YAMES_SONG_AB"),
+        ) else {
+            eprintln!("YAMES_SONG_FILE / YAMES_SONG_AB are not set; nothing to render");
+            return;
+        };
+        std::fs::create_dir_all(&dir).expect("the clip folder");
+        let raw = std::fs::read(&file).expect("the song's transport");
+        let parsed: serde_json::Value = serde_json::from_slice(&raw).expect("valid json");
+        let mut transport: SongTransport =
+            serde_json::from_value(parsed["transport"].clone()).expect("a transport");
+        let backing: crate::song::SongBacking =
+            serde_json::from_value(parsed["backing"].clone()).expect("a backing");
+
+        // Sixteen bars from the top of the piece, which is where the drums
+        // are dense enough to judge and short enough to listen to twice.
+        let bars: u32 = std::env::var("YAMES_SONG_FROM")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(0);
+        transport.range = SongRange {
+            start_bar: bars,
+            end_bar: (bars + 15).min(transport.bars.len() as u32 - 1),
+        };
+        transport.loops = false;
+        transport.count_in_bars = 0;
+        transport.start_tick = transport.bars[bars as usize].start_tick;
+
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let font = crate::synth::load_font(None).expect("the shipped sound set");
+
+        // The file's drums through the synthesiser instead of the kit.
+        let mut through_the_synth = backing.clone();
+        for t in through_the_synth.tracks.iter_mut() {
+            if t.role == SongRole::Drums {
+                t.role = SongRole::Synth;
+                t.program = 0;
+                // Channel 9, or a kick drum plays as a note of whatever
+                // instrument the channel it landed on is set to.
+                t.percussion = true;
+            }
+        }
+
+        // What the drum track actually holds, counted once.
+        for t in backing.tracks.iter() {
+            if t.role != SongRole::Drums {
+                continue;
+            }
+            let inside: Vec<_> = t
+                .notes
+                .iter()
+                .filter(|n| {
+                    n.tick >= transport.bars[transport.range.start_bar as usize].start_tick
+                        && n.tick
+                            < transport.bars[transport.range.end_bar as usize].start_tick
+                                + transport.bars[transport.range.end_bar as usize].length_ticks
+                })
+                .collect();
+            println!(
+                "drum track \"{}\": {} notes in the piece, {} in these sixteen bars",
+                t.name,
+                t.notes.len(),
+                inside.len()
+            );
+        }
+
+        for (name, backing, as_written) in [
+            ("a-today", &backing, true),
+            ("b-repaired", &backing, false),
+            ("c-file-drums-through-the-synth", &through_the_synth, false),
+        ] {
+            transport.drums_as_written = as_written;
+            let table = crate::song::compile(&transport, Some(backing), song_sounds_for_clips(sr), sr, 1)
+                .expect("the song compiles");
+            let frames = (table.pass_samples() + sr as u64 * 2) as usize;
+            let sampled = render_song(&table, &bank, frames, sr);
+            let (mut left, mut right) = (sampled.left.clone(), sampled.right.clone());
+            let mut synth_peak = 0.0f32;
+            if let Some(score) = table.synth_score.as_ref() {
+                let gains: Vec<f32> = backing
+                    .tracks
+                    .iter()
+                    .map(|t| if t.guide { 0.7 } else { 1.0 })
+                    .collect();
+                let (sl, sr_) = crate::synth::render_offline(score, &font, sr, frames, &gains)
+                    .expect("the synth renders");
+                for n in 0..frames {
+                    synth_peak = synth_peak.max(sl[n].abs()).max(sr_[n].abs());
+                    left[n] += sl[n] * 0.8;
+                    right[n] += sr_[n] * 0.8;
+                }
+            }
+            let path = std::path::Path::new(&dir).join(format!("{name}.wav"));
+            write_wav(&path, &left, &right, sr);
+            println!(
+                "{}\n  sampled band RMS {:.4}  peak {:.4}  synth peak {:.4}  mix peak {:.4}\n  \
+                 band trim {:.3} ({:.1} dB)  {} sampled notes  {} synth notes  {} dropped\n  \
+                 most voices ringing at once: {}",
+                path.display(),
+                rms(&sampled.left),
+                sampled.band_peak,
+                synth_peak,
+                left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs())),
+                table.band_trim,
+                20.0 * table.band_trim.max(1e-6).log10(),
+                table.played_notes - table.synth_notes,
+                table.synth_notes,
+                table.dropped_notes,
+                sampled.max_voices,
+            );
+        }
+    }
+
+    /// The kit, the percussion set and the recorded bass and keys a song is
+    /// actually played with — `commands::song_sounds` without a Tauri handle.
+    fn song_sounds_for_clips(sr: u32) -> SongSounds {
+        let kits = crate::kit::KitCache::default();
+        let voices = crate::voices::VoiceCache::default();
+        let bass = crate::jam::JamVoices::folder_for_bass(BassVoice::Fingered)
+            .and_then(crate::voices::shipped_index)
+            .and_then(|i| voices.shipped(i, sr, BASS_MIN_MIDI, BASS_MAX_MIDI).ok());
+        let keys = crate::jam::JamVoices::folder_for_keys(KeysVoice::Epiano)
+            .and_then(crate::voices::shipped_index)
+            .and_then(|i| voices.shipped(i, sr, KEYS_MIN_MIDI, KEYS_MAX_MIDI).ok());
+        SongSounds {
+            bank: kits
+                .shipped(JamKit::fallback().0, sr)
+                .expect("the fallback kit decodes"),
+            perc: kits.perc(0, sr).ok(),
+            voices: crate::jam::JamVoices { bass, keys },
+        }
+    }
+
+    fn rms(buf: &[f32]) -> f32 {
+        if buf.is_empty() {
+            return 0.0;
+        }
+        (buf.iter().map(|s| s * s).sum::<f32>() / buf.len() as f32).sqrt()
+    }
+
+    fn write_wav(path: &std::path::Path, left: &[f32], right: &[f32], sr: u32) {
+        let spec = hound::WavSpec {
+            channels: 2,
+            sample_rate: sr,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut w = hound::WavWriter::create(path, spec).expect("a writable WAV");
+        for (l, r) in left.iter().zip(right.iter()) {
+            w.write_sample((l.clamp(-1.0, 1.0) * 32767.0) as i16).unwrap();
+            w.write_sample((r.clamp(-1.0, 1.0) * 32767.0) as i16).unwrap();
+        }
+        w.finalize().unwrap();
+    }
+
+    /// THE GATE (`plans/tasks/songs/W9-ENGINE-SONG.md`).
+    ///
+    /// Twelve bars with a 7/8 and a tempo step, looping bars 3 to 6 twice, at
+    /// 100 % and at 50 %: every click and every backing onset lands where the
+    /// map says, to within one sample, across the step and across the seam.
+    ///
+    /// Three claims, and they are separate on purpose:
+    ///
+    /// 1. **The compiler agrees with the map.** Every sample position in the
+    ///    table is re-derived here from the transport, by arithmetic that
+    ///    shares no code with `song.rs`.
+    /// 2. **The callback agrees with the compiler.** Every event fires on the
+    ///    frame the table put it on, first time round and again after the
+    ///    seam.
+    /// 3. **Nothing is cut short at the seam.** The chord from the last bar
+    ///    of the range is still ringing when the first bar comes back.
+    #[test]
+    fn a_song_plays_its_map_across_a_tempo_step_and_a_loop_seam() {
+        let sr = 44_100u32;
+        let bank = SoundBank::new(sr);
+        for percent in [100u32, 50] {
+            let mut t = gate_song();
+            // Bars 3 to 6: a 4/4, the 7/8, and the two bars after the step.
+            t.range = SongRange {
+                start_bar: 3,
+                end_bar: 6,
+            };
+            t.loops = true;
+            t.tempo_percent = percent;
+            let backing = gate_backing(&t);
+            let table = crate::song::compile(&t, Some(&backing), gate_sounds(sr), sr, 1)
+                .expect("the gate's song compiles");
+
+            // ---- 1. The compiler against the map ----
+            let want_clicks = map_click_frames(&t, sr, 1);
+            assert_eq!(
+                table.ticks().len(),
+                want_clicks.len(),
+                "{percent} %: one tick per beat of the range and no others"
+            );
+            for (i, (got, want)) in table
+                .ticks()
+                .iter()
+                .map(|x| x.sample)
+                .zip(want_clicks.iter().copied())
+                .enumerate()
+            {
+                assert!(
+                    got.abs_diff(want) <= 1,
+                    "{percent} %: click {i} compiled at {got}, the map says {want}"
+                );
+            }
+            let want_onsets = map_onset_frames(&t, &backing, sr);
+            let got_onsets: Vec<u64> = table.band().iter().map(|e| e.sample).collect();
+            assert_eq!(
+                got_onsets.len(),
+                want_onsets.len(),
+                "{percent} %: one event per note inside the range"
+            );
+            for (i, (got, want)) in got_onsets.iter().zip(want_onsets.iter()).enumerate() {
+                assert!(
+                    got.abs_diff(*want) <= 1,
+                    "{percent} %: onset {i} compiled at {got}, the map says {want}"
+                );
+            }
+            // THE STEP IS ON THE BAR LINE. Bar 6 is the second bar after the
+            // step, so its length is a whole bar of 4/4 at 90 × percent.
+            let bars = table.bars();
+            let at_90 =
+                (4.0 * 60.0 / (90.0 * percent as f64 / 100.0) * sr as f64).round() as u64;
+            assert_eq!(
+                table.pass_samples() - bars[3].start_sample,
+                at_90,
+                "{percent} %: the last bar of the range is a bar at the new tempo"
+            );
+
+            // ---- 2. The callback against the compiler ----
+            //
+            // Two whole passes and a little of a third, so the seam is
+            // crossed with the render still running.
+            let frames = (table.pass_samples() * 2 + sr as u64 / 4) as usize;
+            let r = render_song(&table, &bank, frames, sr);
+            assert!(r.passes >= 1, "{percent} %: the range came round");
+            let pass = table.pass_samples();
+            let per_pass = table.ticks().len();
+            for (i, (frame, bar)) in r.clicks.iter().enumerate() {
+                let round = (i / per_pass) as u64;
+                let tick = &table.ticks()[i % per_pass];
+                assert_eq!(
+                    *frame,
+                    tick.sample + round * pass,
+                    "{percent} %: click {i} fired late or early across the seam"
+                );
+                assert_eq!(*bar, tick.bar, "{percent} %: and in the wrong bar");
+            }
+            let per_pass_onsets = table.band().len();
+            for (i, (frame, lane)) in r.onsets.iter().enumerate() {
+                let round = (i / per_pass_onsets) as u64;
+                let event = &table.band()[i % per_pass_onsets];
+                assert_eq!(
+                    *frame,
+                    event.sample + round * pass,
+                    "{percent} %: onset {i} fired late or early across the seam"
+                );
+                assert_eq!(*lane, event.lane);
+            }
+            assert!(
+                r.clicks.len() > per_pass,
+                "{percent} %: the second pass played too"
+            );
+            assert!(
+                r.onsets.len() > per_pass_onsets,
+                "{percent} %: and its band did"
+            );
+
+            // ---- 3. Nothing is cut short ----
+            assert!(
+                r.ringing_at_seam > 0,
+                "{percent} %: the loop came round over silence — a voice was cut \
+                 at the bar line"
+            );
+            // And the band does not clip. A song is not normalised the way a
+            // jam is (`jam::worst_bar_peak`); what holds it down is the kit's
+            // own balance, the bus and the mixer's clamp, so the number is
+            // worth a look rather than an assumption.
+            println!(
+                "{percent} %: peak {:.3} (click {:.3} + band {:.3}), {} voices at worst",
+                r.peak, r.click_peak, r.band_peak, r.max_voices
+            );
+            assert!(
+                r.peak <= 1.0,
+                "{percent} %: the song rendered at {:.3} (click {:.3} + band {:.3}), \
+                 which the mixer would clamp",
+                r.peak,
+                r.click_peak,
+                r.band_peak
+            );
+            assert!(
+                r.max_voices < MAX_VOICES,
+                "{percent} %: {} voices, and the mixer holds {MAX_VOICES}",
+                r.max_voices
+            );
+        }
+    }
+
+    /// THE GATE for `plans/tasks/songs/W15-LIVE-AND-EXACT.md` item 2: a click
+    /// at a known tick, and the sidecar's position puts it within one output
+    /// buffer of where it actually is in the file.
+    ///
+    /// The whole of what item 2 is about is one number: the file's first
+    /// sample is at SOME position in the piece, and everything the pitch pass
+    /// does afterwards is measured from it. So this runs the real take
+    /// session, with the real writer thread and the real resolver, over a
+    /// real compiled song, and then goes and finds the click in the WAV.
+    ///
+    /// **The band here is impulses, not a mix.** Whether the mixer puts a
+    /// click on the sample the table says is
+    /// `a_song_plays_its_map_across_a_tempo_step_and_a_loop_seam`'s subject
+    /// and is already proved above; what is under test here is the
+    /// bookkeeping, and an impulse is the easiest thing in the world to
+    /// locate in a file.
+    #[test]
+    fn a_take_records_the_bar_and_the_tick_it_opened_on() {
+        let sr = 48_000u32;
+        // Bars 3 to 6 of the gate song: a 4/4, the 7/8, and the two bars
+        // after the tempo step. A take that opens inside this cannot be
+        // right by accident — the bar it lands in is not the first, its
+        // meter is not the range's, and its tempo is not the opening one.
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 3,
+            end_bar: 6,
+        };
+        t.loops = true;
+        t.count_in_bars = 0;
+        let table = Arc::new(
+            crate::song::compile(&t, None, gate_sounds(sr), sr, 1).expect("the gate's song"),
+        );
+
+        // The click to go looking for, and where the take opens: a hundred
+        // and one samples before it, which is nothing like a buffer boundary
+        // and nothing like a bar line.
+        let target = table.ticks()[5];
+        const LEAD_IN: u64 = 101;
+        let begin = target.sample - LEAD_IN;
+        // Two passes in, so `pass` has to be carried rather than assumed 0.
+        const PASS: u32 = 2;
+
+        let root = std::env::temp_dir().join(format!(
+            "yames-take-position-{}",
+            crate::clock::now_ns()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).expect("a directory to record into");
+
+        let handoff: SharedTake = Arc::new(crate::take::TakeHandoff::new());
+        let mut session = crate::take::TakeSession::default();
+        let for_resolver = table.clone();
+        session
+            .start(crate::take::TakeStart {
+                app_data: &root,
+                jam_id: "song-position",
+                handoff: &handoff,
+                mic: None,
+                out_sr: sr,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                // The same closure `start_take` builds, over the same table.
+                position: Some(Arc::new(move |at| {
+                    crate::song::take_position(Some(&for_resolver), at)
+                })),
+                loopback: None,
+            })
+            .expect("the take starts");
+        let ring = {
+            let mut seen = 0u64;
+            handoff
+                .poll_record(&mut seen)
+                .expect("the callback is handed a ring")
+                .expect("and it is not None")
+        };
+
+        // ---- The callback's own two lines, in order ----
+        //
+        // Stamp where the transport is at the FIRST sample of the first
+        // buffer, then push that buffer. Everything after it is just audio.
+        ring.stamp_start(crate::take::TakeTransport::Song {
+            frames: begin,
+            pass: PASS,
+        });
+        const BUFFER: usize = 512;
+        let total = (LEAD_IN as usize) + BUFFER * 8;
+        let mut band = vec![0.0f32; total];
+        // Every click of the pass that falls inside what is recorded, on the
+        // sample the compiled table put it on.
+        for tick in table.ticks() {
+            if tick.sample >= begin && ((tick.sample - begin) as usize) < total {
+                band[(tick.sample - begin) as usize] = 0.75;
+            }
+        }
+        for chunk in band.chunks(BUFFER) {
+            ring.push(chunk);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        // The writer drains every 25 ms; give it a few of those before the
+        // stop takes the ring away.
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        let take = session
+            .stop(&handoff)
+            .expect("the take stops")
+            .expect("and there is something in it");
+
+        // ---- 1. The sidecar says where the music was ----
+        let at = take.position.expect("the sidecar records a position");
+        assert_eq!(at.mode, crate::take::TakeMode::Song);
+        assert_eq!(at.pass, PASS, "and which time round the range it was");
+        assert!(!at.count_in);
+        assert_eq!(
+            at.bar, target.bar,
+            "the take opened 101 samples before a click in bar {}, and the \
+             sidecar says bar {}",
+            target.bar, at.bar
+        );
+        // A hundred and one samples at 48 kHz is two milliseconds, so the
+        // tick is just short of the click's own.
+        assert!(
+            at.tick <= target.tick && target.tick - at.tick < 20,
+            "the take opened two milliseconds before tick {} and the sidecar \
+             says tick {}",
+            target.tick,
+            at.tick
+        );
+
+        // ---- 2. And that position finds the click in the file ----
+        let offset_ms = at
+            .start_offset_ms
+            .expect("a song's position carries the offset the pitch pass needs");
+        let played = crate::take::load_take(&root, &take.id).expect("the take reads back");
+        let found = played
+            .pcm
+            .iter()
+            .position(|s| s.abs() > 0.5)
+            .expect("the click is in the file") as f64;
+        // Where the sidecar SAYS it should be: beat 0 of pass 0 sits
+        // `offset_ms` into the file, and the click is `target.sample` past
+        // that in its own pass.
+        let origin = offset_ms / 1000.0 * sr as f64;
+        let want = target.sample as f64
+            + PASS as f64 * table.pass_samples() as f64
+            + origin;
+        assert!(
+            (found - want).abs() <= BUFFER as f64,
+            "the sidecar puts the click at sample {want} of the file and it is \
+             actually at {found} — {} samples out, and one buffer is {BUFFER}",
+            (found - want).abs()
+        );
+        // Belt and braces: it is where the arithmetic said, to the sample.
+        assert_eq!(found as u64, LEAD_IN, "the impulse was written where it was placed");
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The other two things the writer can be handed, and what they resolve
+    /// to: a take that opens inside a count-in, and a take over a jam.
+    #[test]
+    fn a_count_in_and_a_jam_resolve_to_what_they_are() {
+        use crate::take::{TakeMode, TakeTransport};
+        let sr = 48_000u32;
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 3,
+            end_bar: 6,
+        };
+        t.count_in_bars = 1;
+        let table =
+            crate::song::compile(&t, None, gate_sounds(sr), sr, 1).expect("the gate's song");
+        assert!(table.count_in_samples() > 0, "the range asked to be counted in");
+
+        // Half way through the count-in. The piece has not started, so the
+        // position is the top of the range and the offset is POSITIVE: beat
+        // 0 is still to come, that far into the file.
+        let half = table.count_in_samples() / 2;
+        let at = crate::song::take_position(Some(&table), TakeTransport::SongCountIn {
+            frames: half,
+        })
+        .expect("a count-in has a position");
+        assert_eq!(at.mode, TakeMode::Song);
+        assert!(at.count_in, "and it says the piece had not started");
+        assert_eq!(at.bar, 3, "the top of the range is where a count-in leads");
+        assert_eq!(at.tick, table.bars()[0].start_tick);
+        assert_eq!(at.pass, 0);
+        let want_ms = (table.count_in_samples() - half) as f64 / sr as f64 * 1000.0;
+        assert!(
+            (at.start_offset_ms.expect("an offset") - want_ms).abs() < 0.001,
+            "beat 0 is {want_ms} ms into the file and the sidecar says {:?}",
+            at.start_offset_ms
+        );
+
+        // A jam needs no table at all: its bar IS its position, and there is
+        // no beat 0 of a range for an offset to be measured from.
+        let jam = crate::song::take_position(None, TakeTransport::Jam { bar: 5, chorus: 3 })
+            .expect("a jam has a position");
+        assert_eq!(jam.mode, TakeMode::Jam);
+        assert_eq!(jam.bar, 5);
+        assert_eq!(jam.tick, 0);
+        assert_eq!(jam.pass, 2, "a chorus counts from one and a pass from zero");
+        assert!(jam.start_offset_ms.is_none());
+
+        // And a song stamp with no table to read it against answers nothing
+        // rather than guessing — the song was taken off the engine.
+        assert!(crate::song::take_position(
+            None,
+            TakeTransport::Song { frames: 100, pass: 0 }
+        )
+        .is_none());
+    }
+
+    /// A take begun with the transport stopped has no position in any piece,
+    /// and the sidecar says nothing rather than guessing.
+    ///
+    /// This is the case the frontend's own `performance.now()` estimate still
+    /// exists for (`useSongTakes.ts`): arm the take, then press play, and the
+    /// file opens on however many seconds of silence the player took.
+    #[test]
+    fn a_take_that_began_before_the_music_records_no_position() {
+        let sr = 48_000u32;
+        let root = std::env::temp_dir()
+            .join(format!("yames-take-no-position-{}", crate::clock::now_ns()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).expect("a directory to record into");
+
+        let handoff: SharedTake = Arc::new(crate::take::TakeHandoff::new());
+        let mut session = crate::take::TakeSession::default();
+        session
+            .start(crate::take::TakeStart {
+                app_data: &root,
+                jam_id: "stopped",
+                handoff: &handoff,
+                mic: None,
+                out_sr: sr,
+                round_trip_us: 0,
+                out_sr_watch: None,
+                owns_input: false,
+                position: Some(Arc::new(|at| crate::song::take_position(None, at))),
+                loopback: None,
+            })
+            .expect("the take starts");
+        let ring = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+        ring.stamp_start(crate::take::TakeTransport::Free);
+        for _ in 0..8 {
+            ring.push(&[0.4f32; 512]);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        assert!(
+            take.position.is_none(),
+            "a take with no transport under it must record no position: {:?}",
+            take.position
+        );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A count-in leads into the FIRST pass and no other, at the range's own
+    /// tempo and meter — and it is not a bar of the piece, which is what the
+    /// timing analyzer depends on (`song::COUNT_IN_BAR`).
+    #[test]
+    fn a_count_in_plays_once_and_is_not_part_of_the_song() {
+        let sr = 44_100u32;
+        let bank = SoundBank::new(sr);
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 5,
+            end_bar: 6,
+        };
+        t.loops = true;
+        t.count_in_bars = 1;
+        let backing = gate_backing(&t);
+        let table = crate::song::compile(&t, Some(&backing), gate_sounds(sr), sr, 1)
+            .expect("the counted-in song compiles");
+
+        // One bar of 4/4 at 90.
+        assert_eq!(table.count_in().len(), 4);
+        let frames = (table.count_in_samples() + table.pass_samples() * 2) as usize;
+        let r = render_song(&table, &bank, frames, sr);
+
+        let counted: Vec<u64> = r
+            .clicks
+            .iter()
+            .filter(|(_, bar)| *bar == crate::song::COUNT_IN_BAR)
+            .map(|(f, _)| *f)
+            .collect();
+        assert_eq!(counted.len(), 4, "the count-in plays once, not once a pass");
+        let beat = (60.0 / 90.0 * sr as f64).round() as u64;
+        for (i, f) in counted.iter().enumerate() {
+            assert!(
+                f.abs_diff(i as u64 * beat) <= 1,
+                "count-in beat {i} landed at {f}, and a beat at 90 is {beat} frames"
+            );
+        }
+        // And the piece starts the sample after the count-in ends.
+        let first = r
+            .clicks
+            .iter()
+            .find(|(_, bar)| *bar != crate::song::COUNT_IN_BAR)
+            .expect("the song starts");
+        assert_eq!(first.0, table.count_in_samples());
+        assert_eq!(first.1, 5, "on the range's first bar, not the song's");
+        assert!(r.passes >= 1, "and it comes round");
+    }
+
+    /// A range that does not loop stops at the end of its last bar, and
+    /// nothing of it plays after that.
+    #[test]
+    fn a_song_that_does_not_loop_stops_where_it_ends() {
+        let sr = 44_100u32;
+        let bank = SoundBank::new(sr);
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 0,
+            end_bar: 1,
+        };
+        t.loops = false;
+        let backing = gate_backing(&t);
+        let table = crate::song::compile(&t, Some(&backing), gate_sounds(sr), sr, 1)
+            .expect("the short song compiles");
+        let frames = (table.pass_samples() * 2) as usize;
+        let r = render_song(&table, &bank, frames, sr);
+        assert_eq!(r.passes, 0);
+        assert_eq!(r.clicks.len(), table.ticks().len(), "one pass of clicks");
+        assert_eq!(r.onsets.len(), table.band().len(), "and one of the band");
+        assert!(r.clicks.iter().all(|(f, _)| *f < table.pass_samples()));
+        // AND IT SAYS SO EXACTLY ONCE.
+        //
+        // The end of a song rides out on a beat notification, and the flag
+        // that stops the rest of the buffer sounding stays up for the rest of
+        // the buffer — so an ending keyed on THAT rather than on the frame it
+        // happened would push one notification per remaining frame, up to a
+        // whole buffer of them into a queue sized for seventeen seconds of
+        // ticks. It did, before this assertion existed.
+        assert_eq!(r.endings, 1, "the piece ends once, not once a frame");
+    }
+
+    /// The faders are the audio thread's and apply live: the same table,
+    /// rendered twice, at two mixes.
+    #[test]
+    fn a_lane_turned_down_is_a_lane_turned_down() {
+        let sr = 44_100u32;
+        let mut t = gate_song();
+        t.range = SongRange {
+            start_bar: 0,
+            end_bar: 1,
+        };
+        let backing = gate_backing(&t);
+        let table = crate::song::compile(&t, Some(&backing), gate_sounds(sr), sr, 1)
+            .expect("the song compiles");
+        let full = SongMixGains::default();
+        let off = crate::song::SongMix {
+            click: 1.0,
+            count_in: 1.0,
+            tracks: vec![0.0, 0.0, 0.0],
+        }
+        .gains();
+        assert_eq!(off.track(0), 0.0);
+        assert_eq!(full.track(0), 1.0);
+        // The table is untouched by either: the dials are applied where the
+        // voice is spawned, which is what makes a fader move cost nothing.
+        let before: Vec<f32> = table.band().iter().map(|e| e.slot.gain).collect();
+        assert!(before.iter().all(|g| *g > 0.0));
     }
 
     /// How much of a sound's energy sits under 150 Hz.
@@ -12187,7 +15674,7 @@ mod tests {
             for (o, v) in out.iter_mut().zip(buf.iter()) {
                 *o += v * slot.gain * undo;
             }
-            laptop_band_energy(&out, sr)
+            above_120_energy(&out, sr)
         };
 
         // Measured first and judged afterwards, so a failure prints the
@@ -13164,7 +16651,7 @@ mod tests {
                     *o += v * slot.gain * undo;
                 }
             }
-            laptop_band_energy(&out, sr)
+            above_120_energy(&out, sr)
         };
 
         // Measured first, judged afterwards — see the bass's version.
@@ -13200,9 +16687,24 @@ mod tests {
     /// 120 BPM. A common window is the honest comparison: measuring each
     /// sound over its own length would reward the snare for being short.
     ///
-    /// The floor is the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
-    /// asks for, not today's margin, so the trim can be nudged by ear
-    /// without this test having to move.
+    /// The floor was the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
+    /// asks for. **It is 5 dB since 2026-09-20, and the ear is why.**
+    ///
+    /// The 6 dB was an engineering argument nobody had listened to. The owner
+    /// then listened — "what I can hear is mostly drum sound, the keys and
+    /// bass is very low in comparison" — and the measurement that matches
+    /// what he heard is the one this file could not make: every keys voice
+    /// rendered alone for eight bars against the same vibe's kit rendered
+    /// alone, above 120 Hz, over four vibes at three intensities. On that,
+    /// comping sat 7.5 to 10.7 dB under the kit and as far as 16.7 under in
+    /// funk at Loud. `KEYS_TRIM` went up 2.2 dB to put the section on the
+    /// brief's own 6 dB in THAT measurement, and a voicing against one snare
+    /// accent measures about −5.5 dB once it has.
+    ///
+    /// So the two numbers are the same contract read against two references,
+    /// and the floor here follows the one that was listened to. It is still
+    /// a floor: a comping part above it is a comping part that competes with
+    /// the backbeat, which is the thing this test exists to forbid.
     #[test]
     fn the_keys_sit_under_the_snare_on_a_small_speaker() {
         let sr = 48000u32;
@@ -13259,9 +16761,9 @@ mod tests {
         let db = 10.0 * (k / s.max(1e-30)).log10();
         eprintln!("[keys] a four-note voicing measures {db:.2} dB against the snare accent");
         assert!(
-            db <= -6.0,
+            db <= -5.0,
             "a four-note voicing is {db:.2} dB against the snare accent through a \
-             200 Hz-4 kHz band-pass; comping has to sit at least 6 dB under the \
+             200 Hz-4 kHz band-pass; comping has to sit at least 5 dB under the \
              band, and this is on top of it"
         );
         // And not so far under that the harmony is a rumour.
@@ -13915,5 +17417,320 @@ mod tests {
                 JamPlay::Click
             );
         }
+    }
+
+    // ─── The beat queue ──────────────────────────────────────────────────
+
+    use super::{BeatNotification, BeatQueue, BEAT_QUEUE_SLOTS};
+
+    /// A notification with every field set to something distinguishable, so
+    /// a field packed into the wrong bits cannot pass by coincidence.
+    fn a_notification(n: u64) -> BeatNotification {
+        BeatNotification {
+            session: 0xDEAD_BEEF_0000_0000 | n,
+            beat: 11 + n as u32,
+            measure_beat: 3,
+            subdivision: 2,
+            subdivision_total: 6,
+            is_downbeat: true,
+            accent: 2,
+            beats_per_bar: 7,
+            ts_ns: 1_234_567_890_123 + n,
+            expected_interval_ms: 200.0 / 3.0,
+            is_warmup_beat: false,
+            is_warmup_transition: true,
+            bar_just_completed: false,
+            delay_us: 12_345 + n,
+            jam_bar: 9,
+            jam_chorus: 4,
+            jam_band_state: JamBandState::HatsOnly,
+            jam_bar_mismatch: true,
+            song_bar: 17,
+            song_tick: 2_880 + n as u32,
+            song_pass: 5,
+            jam_form_ended: false,
+        }
+    }
+
+    fn assert_same(a: &BeatNotification, b: &BeatNotification) {
+        assert_eq!(a.session, b.session);
+        assert_eq!(a.beat, b.beat);
+        assert_eq!(a.measure_beat, b.measure_beat);
+        assert_eq!(a.subdivision, b.subdivision);
+        assert_eq!(a.subdivision_total, b.subdivision_total);
+        assert_eq!(a.is_downbeat, b.is_downbeat);
+        assert_eq!(a.accent, b.accent);
+        assert_eq!(a.beats_per_bar, b.beats_per_bar);
+        assert_eq!(a.ts_ns, b.ts_ns);
+        assert_eq!(a.expected_interval_ms, b.expected_interval_ms);
+        assert_eq!(a.is_warmup_beat, b.is_warmup_beat);
+        assert_eq!(a.is_warmup_transition, b.is_warmup_transition);
+        assert_eq!(a.bar_just_completed, b.bar_just_completed);
+        assert_eq!(a.delay_us, b.delay_us);
+        assert_eq!(a.jam_bar, b.jam_bar);
+        assert_eq!(a.jam_chorus, b.jam_chorus);
+        assert_eq!(a.jam_band_state, b.jam_band_state);
+        assert_eq!(a.jam_bar_mismatch, b.jam_bar_mismatch);
+        assert_eq!(a.song_bar, b.song_bar);
+        assert_eq!(a.song_tick, b.song_tick);
+        assert_eq!(a.song_pass, b.song_pass);
+        assert_eq!(a.jam_form_ended, b.jam_form_ended);
+    }
+
+    fn queue(slots: usize) -> (BeatQueue, Arc<AtomicU64>) {
+        let dropped = Arc::new(AtomicU64::new(0));
+        (BeatQueue::new(slots, dropped.clone()), dropped)
+    }
+
+    /// Twenty-two fields go in, twenty-two fields come out. The nine that
+    /// share a word are the reason this test exists.
+    #[test]
+    fn a_notification_survives_the_queue_whole() {
+        let (q, dropped) = queue(4);
+        let sent = a_notification(0);
+        assert!(q.push(&sent));
+        let got = q.pop().expect("one in, one out");
+        assert_same(&sent, &got);
+        assert_eq!(dropped.load(Ordering::Relaxed), 0);
+        assert!(q.pop().is_none(), "and nothing behind it");
+    }
+
+    /// Every combination of the six flags, the three-valued enum and the
+    /// extreme bytes, so a bit shifted into its neighbour is caught.
+    ///
+    /// **The word is full**: nine fields, 24 + 2 + 6, exactly 32 bits. W9's
+    /// song position therefore travels in three `u32` arrays of its own
+    /// rather than in here, and the second half of this test is what says so
+    /// — it drives the song fields to their extremes ALONGSIDE the packed
+    /// ones, so a future repacking that tried to steal a bit for them would
+    /// fail here rather than in somebody's session.
+    #[test]
+    fn the_small_fields_survive_the_round_trip() {
+        let (q, _) = queue(64);
+        let states = [
+            JamBandState::Full,
+            JamBandState::HatsOnly,
+            JamBandState::Silent,
+        ];
+        for bits in 0u32..64 {
+            for state in states {
+                let mut n = a_notification(0);
+                n.subdivision_total = 255;
+                n.accent = 254;
+                n.beats_per_bar = 253;
+                n.jam_band_state = state;
+                n.is_downbeat = bits & 1 != 0;
+                n.is_warmup_beat = bits & 2 != 0;
+                n.is_warmup_transition = bits & 4 != 0;
+                n.bar_just_completed = bits & 8 != 0;
+                n.jam_bar_mismatch = bits & 16 != 0;
+                n.jam_form_ended = bits & 32 != 0;
+                // The song's three words, at the values that would collide
+                // with a flag if anybody ever moved them into `small`: both
+                // sentinels, and a full 32 bits of tick and pass.
+                n.song_bar = match bits % 3 {
+                    0 => crate::song::NO_SONG_BAR,
+                    1 => crate::song::COUNT_IN_BAR,
+                    _ => bits,
+                };
+                n.song_tick = u32::MAX - bits;
+                n.song_pass = bits.wrapping_mul(0x8000_0001);
+                assert!(q.push(&n));
+                assert_same(&n, &q.pop().unwrap());
+            }
+        }
+    }
+
+    /// The packing has no room left, and the next worker has to know before
+    /// they reach for a bit rather than after.
+    #[test]
+    fn the_small_word_is_full() {
+        // Three `u8`s at 8 bits each, a three-valued enum in 2, six flags.
+        assert_eq!(8 * 3 + 2 + 6, 32);
+        // Every bit of it moves. The band state's two bits need two
+        // notifications to cover, because the enum has three values and not
+        // four: `HatsOnly` is 0b01 and `Silent` is 0b10, so neither on its
+        // own sets both — which is the only slack in the word, and it is
+        // half a bit.
+        let all = |state: JamBandState| {
+            let mut n = a_notification(0);
+            n.subdivision_total = 255;
+            n.accent = 255;
+            n.beats_per_bar = 255;
+            n.jam_band_state = state;
+            n.is_downbeat = true;
+            n.is_warmup_beat = true;
+            n.is_warmup_transition = true;
+            n.bar_just_completed = true;
+            n.jam_bar_mismatch = true;
+            n.jam_form_ended = true;
+            super::pack_small_fields(&n)
+        };
+        assert_eq!(
+            all(JamBandState::HatsOnly) | all(JamBandState::Silent),
+            u32::MAX,
+            "every bit of the word is spoken for"
+        );
+    }
+
+    /// Order is order: a queue is not a set, and the matcher reads these in
+    /// the order the beats were played.
+    #[test]
+    fn beats_come_back_in_the_order_they_were_played() {
+        let (q, _) = queue(8);
+        for i in 0..5 {
+            assert!(q.push(&a_notification(i)));
+        }
+        for i in 0..5 {
+            assert_eq!(q.pop().unwrap().session, a_notification(i).session);
+        }
+        assert!(q.pop().is_none());
+    }
+
+    /// The wrap. A ring that was only ever filled once would hide an index
+    /// that does not come back round.
+    #[test]
+    fn the_ring_goes_round_more_than_once() {
+        let (q, dropped) = queue(4);
+        for i in 0..40u64 {
+            assert!(q.push(&a_notification(i)), "room, because it is drained");
+            assert_eq!(q.pop().unwrap().session, a_notification(i).session);
+        }
+        assert_eq!(dropped.load(Ordering::Relaxed), 0);
+    }
+
+    /// A full queue drops and COUNTS, rather than allocating, blocking or
+    /// pretending. The count is what the probe fails on and what the event
+    /// loop prints.
+    #[test]
+    fn a_full_queue_drops_and_says_so() {
+        let (q, dropped) = queue(4);
+        for i in 0..4 {
+            assert!(q.push(&a_notification(i)));
+        }
+        assert!(!q.push(&a_notification(99)), "the fifth has nowhere to go");
+        assert!(!q.push(&a_notification(100)));
+        assert_eq!(dropped.load(Ordering::Relaxed), 2);
+
+        // And the four that DID fit are still the four that fit — a full
+        // queue keeps the oldest rather than overwriting it, because the
+        // matcher needs a run of beats and not the most recent one.
+        for i in 0..4 {
+            assert_eq!(q.pop().unwrap().session, a_notification(i).session);
+        }
+        assert!(q.pop().is_none());
+    }
+
+    /// A stop throws away what the transport left behind.
+    #[test]
+    fn draining_empties_it() {
+        let (q, _) = queue(8);
+        for i in 0..6 {
+            assert!(q.push(&a_notification(i)));
+        }
+        q.drain();
+        assert!(q.pop().is_none());
+        // And the room comes back, rather than the ring being wedged.
+        assert!(q.push(&a_notification(7)));
+        assert_eq!(q.pop().unwrap().session, a_notification(7).session);
+    }
+
+    /// A capacity that is not a power of two is rounded UP, never down: the
+    /// mask arithmetic needs it and the headroom argument must not shrink.
+    #[test]
+    fn capacity_rounds_up_to_a_power_of_two() {
+        let (q, _) = queue(5);
+        assert_eq!(q.capacity(), 8);
+        let (q, _) = queue(BEAT_QUEUE_SLOTS);
+        assert_eq!(q.capacity(), BEAT_QUEUE_SLOTS);
+    }
+
+    /// THE OTHER PRE-SIZED BUFFER IN THE CALLBACK, pinned the same way.
+    ///
+    /// `cached.beat_groups` is refilled in place on every buffer against a
+    /// capacity of `MAX_BEAT_GROUPS`, and the only thing keeping that from
+    /// being a `realloc` under the mixer is that `set_beat_groups` refuses
+    /// more groups than that. There are literally TWO constants called
+    /// `MAX_BEAT_GROUPS`, one here and one in `commands.rs`, both 6, with
+    /// nothing between them. This is the thing between them: loosen the
+    /// validator and this fails rather than the click.
+    #[test]
+    fn the_validator_cannot_hand_the_callback_more_groups_than_it_reserved() {
+        assert_eq!(
+            MAX_BEAT_GROUPS,
+            crate::commands::MAX_BEAT_GROUPS,
+            "the callback reserves one number and the command surface enforces another"
+        );
+        let longest: Vec<u8> = vec![1; MAX_BEAT_GROUPS];
+        assert!(
+            crate::commands::validate_beat_groups(&longest).is_ok(),
+            "the reservation should not be bigger than what is allowed"
+        );
+        let one_too_many: Vec<u8> = vec![1; MAX_BEAT_GROUPS + 1];
+        assert!(
+            crate::commands::validate_beat_groups(&one_too_many).is_err(),
+            "a bar of {} groups would reallocate `cached.beat_groups` on the audio thread",
+            MAX_BEAT_GROUPS + 1
+        );
+    }
+
+    /// THE SIZING ARGUMENT, AS A TEST.
+    ///
+    /// `set_bpm` clamps to 300 and `set_subdivision` to 6, so 30 ticks a
+    /// second is the fastest stream the app can produce. The queue must hold
+    /// seconds of that, because a dropped notification is a beat the score
+    /// is missing — see `BEAT_QUEUE_SLOTS`. Pinned so that anyone shrinking
+    /// it has to argue with this rather than with a comment.
+    #[test]
+    fn the_queue_holds_seconds_of_the_fastest_click_the_app_allows() {
+        const TICKS_PER_SEC: usize = 300 / 60 * 6;
+        assert_eq!(TICKS_PER_SEC, 30);
+        assert!(
+            BEAT_QUEUE_SLOTS >= TICKS_PER_SEC * 10,
+            "ten seconds is the floor; {BEAT_QUEUE_SLOTS} slots is {} s",
+            BEAT_QUEUE_SLOTS / TICKS_PER_SEC
+        );
+    }
+
+    /// One writer, one reader, both running — the shape the callback and the
+    /// event loop actually have. Not a proof of the memory ordering, but it
+    /// catches a lost, duplicated or reordered slot, which is what a wrong
+    /// index looks like in practice.
+    ///
+    /// The producer here goes as fast as it can and so DOES fill a 64-slot
+    /// queue, which the real callback cannot (`BEAT_QUEUE_SLOTS`); it retries
+    /// a refused push rather than losing the beat, so the drop counter climbs
+    /// and is not what this test is about. What it is about is that every
+    /// beat that went in comes out exactly once and in order.
+    #[test]
+    fn a_producer_and_a_consumer_agree_on_every_beat() {
+        const BEATS: u64 = 20_000;
+        let (q, _dropped) = queue(64);
+        let q = Arc::new(q);
+        let producer = {
+            let q = q.clone();
+            thread::spawn(move || {
+                let mut sent = 0u64;
+                while sent < BEATS {
+                    if q.push(&a_notification(sent)) {
+                        sent += 1;
+                    } else {
+                        thread::yield_now();
+                    }
+                }
+            })
+        };
+        let mut want = 0u64;
+        while want < BEATS {
+            match q.pop() {
+                Some(n) => {
+                    assert_eq!(n.session, a_notification(want).session, "in order, no gaps");
+                    want += 1;
+                }
+                None => thread::yield_now(),
+            }
+        }
+        producer.join().unwrap();
+        assert!(q.pop().is_none(), "and nothing left over");
     }
 }

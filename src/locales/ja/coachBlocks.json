@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "{{from}}–{{to}} 小節をループ",
+      "loopBarsAt": "{{from}}–{{to}} 小節を {{bpm}} BPM でループ",
+      "ramp": "{{from}} から {{to}} まで上げていく",
+      "click": {
+        "1": "クリックを4分音符に",
+        "2": "クリックを8分音符に",
+        "3": "クリックを3連符に",
+        "4": "クリックを16分音符に",
+        "5": "クリックを5連符に",
+        "6": "クリックを6連符に"
+      },
+      "loadPreset": "{{name}} を用意する",
+      "loadJam": "{{name}} に合わせて弾く",
+      "comeBack": {
+        "tomorrow": "明日もう一度ここへ",
+        "inDays": "{{days}}日後にもう一度"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}、指板の上"
+    },
+    "position": {
+      "open": "オープンポジション",
+      "rootOn6": "ルートは6弦",
+      "rootOn5": "ルートは5弦",
+      "rootOn4": "ルートは4弦",
+      "rootOn3": "ルートは3弦"
+    },
+    "shape": {
+      "which": "フォーム {{index}}／{{count}}"
+    },
+    "passage": {
+      "bars": "{{title}} の {{from}}–{{to}} 小節"
+    },
+    "progress": {
+      "caption": "{{first}}% から {{last}}% へ、{{goes}} 回で",
+      "aria": "{{from}} から {{to}} 小節がどう推移したか"
+    },
+    "tab": {
+      "attempt": "その回の演奏で色分け",
+      "plain": "譜面どおりの音",
+      "soon": "この小節のタブ譜は近日公開です。"
+    },
+    "take": {
+      "whole": "{{title}} のあなたのテイク",
+      "any": "あなたのテイク",
+      "soon": "テイクの聴き返しは近日公開です。"
+    },
+    "compare": {
+      "title": "{{title}} の2回を並べて",
+      "any": "2回を並べて",
+      "soon": "2回を並べて聴くのは近日公開です。"
+    }
+  }
+}

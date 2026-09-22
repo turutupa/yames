@@ -11,6 +11,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { DrillView } from "./DrillView";
 import { mockInvoke, DEFAULT_TEST_STATE } from "../../test/mocks";
+import { engineTick } from "../../test/engineTicks";
 import type { AppState } from "../../types";
 
 const drillState: AppState = {
@@ -390,6 +391,44 @@ describe("DrillView", () => {
         expect.objectContaining({ soundType: "beep" }),
       );
     });
+  });
+
+  it("lights the dot the engine is on after the grouping changes mid-play", () => {
+    /*
+     * `beat` is the click's own counter and does not reset when a bar does.
+     * The engine restarts the bar the moment the grouping changes, so from
+     * there on `beat % beatsPerBar` is out of phase with the bar and lights a
+     * dot the player is not on. `FloatingWidget` and the zen screen were both
+     * moved off that modulo for this reason; these dots were the last ones on
+     * it, and the fixtures that could have caught it were building ticks with
+     * `measureBeat` pinned to the beat index.
+     */
+    const running: AppState = {
+      ...drillState,
+      speedRamp: { ...drillState.speedRamp, active: true },
+    };
+    const lit = (el: HTMLElement) =>
+      Array.from(el.querySelectorAll(".drill-beat-dots .drill-dot")).findIndex((d) =>
+        d.classList.contains("active"),
+      );
+
+    // In phase: beat 8 is bar-local 0, and both readings agree.
+    const { container, rerender } = render(
+      <DrillView state={running} currentBeat={engineTick({ beat: 8 })} animations={false} />,
+    );
+    expect(lit(container)).toBe(0);
+
+    // The meter changed two beats ago, so the engine's bar restarted and the
+    // counter did not: beat 10 is bar-local 1. The modulo would say 2.
+    rerender(
+      <DrillView
+        state={running}
+        currentBeat={engineTick({ beat: 10, measureBeat: 1 })}
+        animations={false}
+      />,
+    );
+    expect(lit(container)).toBe(1);
+    expect(lit(container)).not.toBe(10 % running.speedRamp.beatsPerBar);
   });
 
   it("clicking the up-and-down toggle calls configure_speed_ramp with cyclic=true", async () => {

@@ -3,7 +3,8 @@
     "metronome": "メトロノーム",
     "setlist": "セットリスト",
     "drill": "テンポ練習",
-    "jam": "ジャム"
+    "jam": "ジャム",
+    "songs": "曲"
   },
   "tooltip": {
     "zen": "禅",
@@ -45,7 +46,8 @@
     "save": "プリセットを保存",
     "delete": "削除",
     "newPreset": "新しいプリセット",
-    "newDrill": "新しいドリル"
+    "newDrill": "新しいドリル",
+    "titleSongs": "曲"
   },
   "emptyStates": {
     "presets": {
@@ -73,7 +75,8 @@
     "inputOff": "入力オフ",
     "coachOnPlay": "再生するとコーチが聴き始めます",
     "coachQuiet": "ステップの途中ではコーチは黙っています",
-    "countIn": "カウントイン"
+    "countIn": "カウントイン",
+    "backToStart": "最初に戻る"
   },
   "rail": {
     "label": "モードとライブラリ",

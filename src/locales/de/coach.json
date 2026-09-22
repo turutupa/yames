@@ -35,9 +35,6 @@
     "beatPlacement": "Beat-Platzierung"
   },
   "coachReport": {
-    "cov": "Abdeck.",
-    "eff": "Eff.",
-    "grid": "Raster",
     "segment": "Abschnitt",
     "thinkingAria": "Der Coach bereitet sich vor, zu sprechen",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "auf dem Beat",
     "pocketEarly": "Du spielst im Schnitt {{ms}} ms zu früh",
     "pocketLate": "Du spielst im Schnitt {{ms}} ms zu spät",
-    "pocketCentred": "Dein Timing war auf den Beat zentriert (±5 ms im Schnitt)"
+    "pocketCentred": "Dein Timing war auf den Beat zentriert (±5 ms im Schnitt)",
+    "covLabel": "Gespielte Schläge",
+    "covTitle": "Wie viele der erwarteten Schläge tatsächlich gespielt wurden",
+    "effLabel": "Noten auf dem Schlag",
+    "effTitle": "Wie viel von allem, was ich gehört habe, auf einem Schlag lag statt dazwischen",
+    "gridLabel": "Am Klick",
+    "gridTitle": "Wie eng die ganze Passage am Klick lag"
   },
   "eval": {
     "today": "Heute",

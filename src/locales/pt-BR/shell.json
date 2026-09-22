@@ -3,7 +3,8 @@
     "metronome": "Metrônomo",
     "setlist": "Setlist",
     "drill": "Treino",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Músicas"
   },
   "tooltip": {
     "zen": "Modo Zen",
@@ -45,7 +46,8 @@
     "save": "Salvar predefinição",
     "delete": "Excluir",
     "newPreset": "Novo preset",
-    "newDrill": "Novo exercício"
+    "newDrill": "Novo exercício",
+    "titleSongs": "Músicas"
   },
   "emptyStates": {
     "presets": {
@@ -73,7 +75,8 @@
     "inputOff": "Entrada desligada",
     "coachOnPlay": "O coach escuta quando você toca",
     "coachQuiet": "O coach fica quieto durante o passo",
-    "countIn": "Contagem inicial"
+    "countIn": "Contagem inicial",
+    "backToStart": "Voltar ao início"
   },
   "rail": {
     "label": "Modos e biblioteca",

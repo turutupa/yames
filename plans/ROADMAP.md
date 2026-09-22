@@ -127,12 +127,16 @@ cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib   # o
 
 - **Audio-safety gate (Phase 0 introduces it):** `bun run
   yames:jitter-probe` runs the engine for 60 s while the LLM generates
-  continuously. Hard gate: **zero missed beats and zero dropouts**.
-  Target: p99 callback-to-callback jitter < 1 ms on an idle machine;
-  advisory on shared CI runners (T06 saw p99 2.5 ms from unrelated
-  local builds alone). Any phase that adds background compute re-runs
-  it. T06 results (2026-09-02, Qwen3-4B): GPU 0.30 ms, CPU 0.55 ms
-  with the event loop promoted, 0 missed beats in every run.
+  continuously. Hard gate: **zero missed beats, zero dropouts, zero
+  allocations or frees inside the output callback, and zero dropped beat
+  notifications**. Target: p99 callback-to-callback jitter < 1 ms on an
+  idle machine; advisory on shared CI runners (T06 saw p99 2.5 ms from
+  unrelated local builds alone). Any phase that adds background compute
+  re-runs it. T06 results (2026-09-02, Qwen3-4B): GPU 0.30 ms, CPU 0.55 ms
+  with the event loop promoted, 0 missed beats in every run. The last two
+  hard gates arrived with T06b (2026-09-20), which is also when the event
+  loop's promotion went away: it was compensating for a channel that
+  allocated and locked on the audio thread, and the channel is gone.
 - **Scoring gate:** any change to `onset.rs`, `timing.rs` or
   `instrument.rs` re-bakes nothing silently. Golden drift must be
   explained in the commit body and `INSTRUMENT_PROFILE_VERSION` bumped
@@ -500,6 +504,11 @@ pure Rust + React and fully unit-testable.
 - Per AGENTS.md tiers, pitch analysis never runs on the audio thread.
   On segment end (mid-session report tier) or session end, analyse the
   segment's audio.
+- **Superseded 2026-09-20 by `SONGS.md` A8:** pitch reads the dry stem a
+  take already keeps on disk under the take's own opt-in; the in-memory
+  ring below was designed before takes existed and is kept for the
+  record. The privacy rule is unchanged: nothing is recorded that the
+  player did not ask to record, and nothing is analysed unless they ask.
 - Requires an audio buffer for the *last segment* in release builds:
   keep a bounded in-memory PCM ring (≤ 60 s, never written to disk)
   gated behind an explicit "Analyse notes" opt-in in Coach settings.

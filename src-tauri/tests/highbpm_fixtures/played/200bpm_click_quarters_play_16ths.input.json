@@ -1,0 +1,13 @@
+{
+  "name": "200bpm_click_quarters_play_16ths",
+  "description": "The top of the synthetic cover. 200 BPM quarters clicking, 16ths played 75 ms apart — below the 80 ms window the raw-onset matcher above uses, so this is also where a matcher that starts stealing its neighbour's onset would show up.",
+  "bpm": 200,
+  "clickSubdivision": 1,
+  "playedDivisor": 4,
+  "bars": 16,
+  "jitterMs": 3.0,
+  "seed": 20260923,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "expectDivisor": 4
+}

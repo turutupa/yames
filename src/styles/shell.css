@@ -1516,6 +1516,41 @@ body[data-sheet-maximized] .rail {
   box-shadow: 0 0 0 6px var(--accent-glow);
 }
 
+/* Back to the start, beside Play (W37 item 1). Square, quiet, and the same
+   height as the switches next to it so the row stays one line of furniture.
+   The glyph is a stroked-and-filled SVG rather than a character, so it looks
+   the same in all thirteen themes' typefaces. */
+.transport-rewind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.transport-rewind svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.transport-rewind:hover,
+.transport-rewind:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
 .transport-key {
   font-family: inherit;
   font-size: 0.68rem;
@@ -1734,6 +1769,83 @@ body[data-sheet-maximized] .rail {
   align-items: center;
   min-width: 0;
   flex: 1;
+}
+
+/* ── The mode's own room on the bar (W36 item 2) ─────────────────────────
+ *
+ * `MainHeader` offers two slots — one on the row, one inside the overflow —
+ * and knows nothing about what a mode puts in them (`headerSlot.ts` says
+ * why). Songs fills them with the song's name, its part menu, its tuning and
+ * the two controls for how the tab is drawn, which is a whole row of the
+ * stage the music gets back.
+ *
+ * `:empty` and not a class: every other mode leaves these alone, and a slot
+ * with nothing in it must cost the bar nothing at all — no width, no gap, no
+ * flex line. The same rule on `.header-context` is what stops the half that
+ * takes the slack from taking it on a mode that has nothing to say there;
+ * `.header-actions` keeps its `margin-left: auto`, so the chips sit against
+ * the right edge either way and no other bar moves by a pixel.
+ *
+ * It is a container, so the mode inside it can ask about the room it actually
+ * has. `inline-size` containment also settles the slot's width from the flex
+ * line rather than from its contents, which is what makes that question
+ * answerable at all: a slot that grew with its own head would tell the head a
+ * width that depended on the head. */
+.header-mode-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: modebar;
+}
+
+.header-mode-slot:empty,
+.header-more-slot:empty,
+.header-context:empty {
+  display: none;
+}
+
+/* The overflow's slot is a block of the menu, above Share and Help. */
+.header-more-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 8px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* A bar that is sharing its row sheds its own words sooner.
+ *
+ * The labels are already the first thing this bar gives up (see the narrow
+ * rules at the foot of this file); with a mode's head beside them that has to
+ * happen earlier, because the alternative is the song's name ellipsised to
+ * three letters so that the word "Voice" can stay. Measured on the Songs bar:
+ * at a 1440px window the chips are 390px labelled and 313px not, and 77px is
+ * the difference between the title having room and not.
+ *
+ * Only `[data-mode-bar]`, so the metronome, drill, setlist and jam bars are
+ * exactly what they were. */
+@media (max-width: 1439px) {
+  .main-header[data-mode-bar] .context-chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .main-header[data-mode-bar] .context-chip {
+    padding: 0 9px;
+  }
+
+  .main-header[data-mode-bar] .header-actions {
+    gap: 6px;
+  }
 }
 
 /* =================== Playing: the chrome recedes =================== */

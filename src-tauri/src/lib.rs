@@ -1,15 +1,40 @@
+/// Where the output callback says it is inside itself, for the counting
+/// allocator `click-jitter-probe` installs. `pub` because the allocator
+/// lives in that binary, which can only see the crate's public surface.
+pub mod alloc_probe;
 mod audio_input;
 mod calibration_cache;
 mod clock;
 mod coach;
 mod commands;
+/// The practice store (ROADMAP 1.1). `pub` for the same reason `session`
+/// and `timing` are: the store's own types are what a future integration
+/// test would import.
+pub mod db;
+/// The Downloads folder, watched while Songs is open (`plans/SONGS.md` S0.9).
+/// `pub` for the reason `db` is: its rules are pure and its tests are its own.
+pub mod downloads;
 mod engine;
+// `findings`, `score` and `srs` are the coach's judgement, the score format
+// it judges against, and the schedule it reviews on. They are `pub` for the
+// same reason `timing` is: nothing in the command surface reaches them yet
+// (the review wave wires the IPC), and a private module of unused public
+// functions is a page of dead-code warnings.
+pub mod findings;
 pub mod instrument;
 mod jam;
 mod kit;
 mod midi;
 mod models;
 mod onset;
+/// The score a player is playing against, and — roadmap 2.4 — what came
+/// back from a pass at it. `pub` for the same reason the three below are.
+pub mod score;
+// `pitch` is `pub` for the same reason the three below are: the fixture
+// suite in `tests/pitch_fixtures.rs` and the `pitch-inspect` bin are
+// separate crates and can only see `pub` items. Nothing in the Tauri
+// command surface reaches it yet — the review screen is the next wave.
+pub mod pitch;
 // `session`, `session_log`, and `timing` are exposed `pub` so the
 // integration tests in `tests/dsp_fixtures.rs` can import
 // `score_feedbacks`, `BeatFeedback`, and `SessionReport` directly.
@@ -19,9 +44,26 @@ mod onset;
 pub mod session;
 mod session_audio;
 pub mod session_log;
+/// The song the engine plays — the tempo map, the range and the band from an
+/// imported file (`plans/SONGS.md` A1/A4/A6).
+mod song;
 mod speech_out;
+/// The General MIDI synthesiser every track the recorded band cannot play
+/// goes through, and the lock-free ring that keeps it off the audio callback
+/// (`plans/tasks/songs/W28-HEAR-THE-SONG.md`).
+pub mod synth;
+pub mod srs;
 mod state;
+/// Who asks for the camera, and how often (W21, item 5). Windows only; the
+/// other two platforms do it themselves and the module says how.
+mod camera_permission;
+/// Everything this computer plays, when that is what a take is made of
+/// (W30). Its own input stream, its own callback, nothing on the output one.
+mod loopback;
 mod take;
+/// The camera's recording, beside the take it belongs to (W21,
+/// `plans/SONGS.md` A9/A10). Nothing in it goes near the audio threads.
+mod take_video;
 pub mod timing;
 mod tts;
 mod voices;
@@ -34,6 +76,10 @@ mod voices;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    /// The other half of the audio-safety gate: the callback raises this for
+    /// the span of its own body and the probe's `#[global_allocator]` counts
+    /// every allocation and free made while it is up. See `alloc_probe`.
+    pub use crate::alloc_probe::in_callback;
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
     /// The jitter probe's `--jam` flag builds a table directly: it runs the
@@ -41,9 +87,9 @@ pub mod probe {
     /// through.
     pub use crate::jam::{
         band_state_for_bar, compile as compile_jam, compile_with_kit as compile_jam_with_kit,
-        compile_with_voices as compile_jam_with_voices, reference_bank, JamBandState, JamBassLine,
-        JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig,
-        JamTable, JamTrade, JamVoices,
+        compile_with_voices as compile_jam_with_voices, reference_bank, reference_perc,
+        JamBandState, JamBassLine, JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern,
+        JamPosition, JamPracticeConfig, JamTable, JamTrade, JamVoices,
     };
     /// The recorded bass and keys. `--jam-voice <dir>` plays a folder of
     /// notes, so the gate covers the path a melodic bank takes to the mixer:
@@ -61,6 +107,27 @@ pub mod probe {
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.
     pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
+    /// W30 — and the other kind of take. `--jam-loopback-take` opens a real
+    /// capture on the output endpoint, so the gate covers the output callback
+    /// with a SECOND device's callback running beside it and a writer thread
+    /// draining, resampling and folding its ring underneath.
+    pub use crate::loopback::{open as open_loopback, LoopbackCapture, LoopbackFormat};
+    pub use crate::take::TakeLoopback;
+    /// The song. `--song` builds a transport and a backing track directly and
+    /// hands the engine the compiled table, for the reason `--jam` compiles a
+    /// jam here: the probe runs headless and there is no `load_song` command
+    /// to call. The gate then covers the one path where the callback walks a
+    /// table of sample positions rather than counting ticks — the loop seam
+    /// and the tempo step included.
+    /// The General MIDI half of a song's band. `--song` builds a guitar
+    /// track and starts a renderer, so the gate covers the one thing on the
+    /// callback that another thread is feeding: `ready`, `at` and `consume`
+    /// on `SynthRing`, under a fader moving and a seek every few seconds.
+    pub use crate::synth::{load_font, SynthPlayer, SynthRing};
+    pub use crate::song::{
+        compile as compile_song, SongBacking, SongBar, SongMix, SongNote, SongRange, SongRole,
+        SongSounds, SongTable, SongTempo, SongTrack, SongTransport,
+    };
 
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;
@@ -77,16 +144,26 @@ use coach::create_shared_engine;
 use commands::{
     cancel_model_download, clear_all_sessions, clear_calibration_cache_entry, clear_midi_binding,
     clear_session, clear_session_logs, coach_generate, configure_speed_ramp, connect_midi_device,
-    delete_models, delete_preset, delete_session, discard_recording, disconnect_midi_device,
+    delete_models, delete_preset, delete_score, delete_session, discard_recording,
+    disconnect_midi_device,
     export_session_logs, get_active_tab, get_calibration_cache_entry, get_calibration_offset,
     get_coach_capabilities, get_evaluation_state, get_final_session_report, get_midi_bindings,
     get_model_status,
     get_drill_runs,
-    get_models_path, get_session_history, get_session_log, get_session_report, get_state,
+    get_models_path, get_score, get_session_history, get_session_log, get_session_report, get_state,
     get_system_memory_mb,
+    // W2 — the practice store (ROADMAP 1.1).
+    get_score_source, list_scores, query_attempts, query_history, save_attempt, save_score,
+    // W14 — "come back to this", off settings.json and onto migration three.
+    clear_due, list_due, save_due,
+    // W10 — the door to the coach's judgement (findings.rs) and its ears (pitch.rs).
+    analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
+    clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
+    // W12 — the bands the review colours a note by, from the scorer's own rule.
+    score_timing_bands,
+    open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
     set_instrument,
@@ -96,8 +173,28 @@ use commands::{
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
     arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
-    delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
-    EngineState, JamGainState, JamKitState, JamVoiceState, TakeState,
+    check_take_sound, delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback,
+    takes_dir_size,
+    // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
+    clear_song, load_song, pick_sound_font, seek_song, set_song_mix, set_song_range,
+    set_song_sound_font,
+    // W19 — the download is caught, and the file opens with Yames (S0.9).
+    default_downloads_dir, dismiss_download_offer, read_offered_file, start_download_watch,
+    stop_download_watch, take_pending_open,
+    // W19 — the library is "recently played", and the file comes back out.
+    export_score_source, mark_score_opened,
+    EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, SongSynthState,
+    TakeState,
+};
+// W21 — the camera's recording. Its own module, because the file it writes
+// comes from the webview rather than from the engine, and nothing about it
+// touches a ring, a handoff or a callback.
+// W25 — and the clip the player saves out of one, which is the same module's
+// other half: the player's file, at a path they chose in a save dialog.
+use take_video::{
+    clip_save_append, clip_save_begin, clip_save_discard, clip_save_finish, take_video_append,
+    take_thumb_write, take_video_begin, take_video_discard, take_video_finish, ClipState,
+    VideoState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -146,6 +243,16 @@ pub fn run() {
     // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        // W19 — one Yames at a time, and it MUST be the first plugin
+        // registered (the plugin's own documentation is explicit about it).
+        //
+        // Double-clicking a Guitar Pro file while Yames is open starts a
+        // second process; this hands that process's command line to the
+        // window already running and exits it, rather than letting two
+        // copies fight over the audio device and `settings.json`.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            commands::announce_opened_paths(app, &argv);
+        }))
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         // The native folder picker behind `pick_kit_folder`. Only the
@@ -332,8 +439,44 @@ pub fn run() {
             // ...and the decoded melodic banks, for the same reason and at a
             // higher price per miss. See `VoiceCache` in `voices.rs`.
             app.manage(JamVoiceState::default());
+            // The song as it arrived, so `set_song_range` can build it again
+            // without the frontend re-sending a whole score. See
+            // `SongSourceState`.
+            app.manage(SongSourceState::default());
+            // And the thread that makes the song's guitars, which is owned
+            // beside the piece rather than inside it (W28).
+            app.manage(SongSynthState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
+            // W21 — and the picture beside it, if the camera is on. See
+            // `take_video.rs`.
+            app.manage(VideoState::default());
+            // W25 — and the clip being saved out of one, if there is. A slot
+            // of its own: a clip is written at a path the player named and
+            // has nothing to do with the takes directory.
+            app.manage(ClipState::default());
+            // W21 — and the camera's prompt is ours, asked once, in our own
+            // words. See `camera_permission.rs`; a no-op off Windows.
+            camera_permission::install(&app.handle().clone());
+            // W19 — the Downloads watch, which exists only while Songs is
+            // open. `None` here is the whole of "off": no thread, no folder
+            // listed, and `read_offered_file` with nothing to read.
+            app.manage(downloads::WatchState::default());
+            // W19 — and the files the OS asked Yames to open. Managed before
+            // the cold-start command line is read into it, below.
+            app.manage(commands::PendingOpenState::default());
+
+            // The cold start: `yames.exe "C:\...\riff.gp5"`, which is what
+            // "Open with Yames" does when nothing is running yet. Read here
+            // rather than in the frontend because `std::env::args()` is the
+            // process's, and the webview has no process. The window is not
+            // brought forward — it is about to open anyway — so this only
+            // fills the queue; `take_pending_open` is what empties it, once
+            // React has mounted and can put the track picker up.
+            {
+                let argv: Vec<String> = std::env::args().collect();
+                commands::queue_opened_paths(&app.state::<commands::PendingOpenState>(), &argv);
+            }
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -341,6 +484,22 @@ pub fn run() {
             app.manage(create_shared_onset_detector());
             app.manage(Arc::new(Mutex::new(TimingAnalyzer::new(beat_log))));
             app.manage(create_shared_session_accumulator());
+
+            // The practice store (ROADMAP 1.1). Opened, migrated and
+            // back-filled from the JSON history on a thread of its own:
+            // `setup()` runs on the main thread and a window should not
+            // wait on a disk. Commands that arrive before it is ready wait
+            // on the store's condvar rather than being told, wrongly, that
+            // there is no history.
+            let practice_store = db::create_shared_practice_store();
+            app.manage(practice_store.clone());
+            {
+                let handle = app.handle().clone();
+                std::thread::spawn(move || {
+                    commands::open_practice_store(&handle, &practice_store);
+                });
+            }
+
             app.manage(create_shared_engine());
             // Per-instrument calibration cache (DSP plan §"Per-instrument
             // calibration cache"). Hydrated from the store with TTL
@@ -624,15 +783,45 @@ pub fn run() {
             set_jam,
             set_jam_position,
             warm_jam,
+            load_song,
+            clear_song,
+            set_song_range,
+            seek_song,
+            set_song_mix,
+            set_song_sound_font,
+            pick_sound_font,
+            // W19 — the download is caught (`plans/SONGS.md` S0.9).
+            default_downloads_dir,
+            start_download_watch,
+            stop_download_watch,
+            dismiss_download_offer,
+            read_offered_file,
+            take_pending_open,
+            mark_score_opened,
+            export_score_source,
             pick_kit_folder,
             inspect_kit_folder,
             start_take,
+            check_take_sound,
             stop_take,
             list_takes,
             delete_take,
             play_take,
             stop_take_playback,
             takes_dir_size,
+            // W21 — the camera's recording, streamed to disk beside the take.
+            take_video_begin,
+            take_video_append,
+            take_video_finish,
+            take_video_discard,
+            // W25 — "Save as a video": the same pipe, to a file the player
+            // named in a native save dialog.
+            clip_save_begin,
+            clip_save_append,
+            clip_save_finish,
+            clip_save_discard,
+            // W25 — one frame of the picture, so a take looks like a take.
+            take_thumb_write,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,
@@ -642,6 +831,8 @@ pub fn run() {
             clear_calibration_cache_entry,
             list_calibration_cache,
             open_url,
+            // W25 — "show me where that clip went", after a save.
+            reveal_in_folder,
             list_midi_devices,
             connect_midi_device,
             disconnect_midi_device,
@@ -658,6 +849,11 @@ pub fn run() {
             get_evaluation_state,
             notify_settings_change,
             close_open_segment,
+            // Roadmap 2.4 — the score the player is playing against.
+            load_score_schedule,
+            clear_score_schedule,
+            // W12 — the review's colours, from `timing::window_thresholds`.
+            score_timing_bands,
             get_session_report,
             get_final_session_report,
             clear_session,
@@ -667,6 +863,22 @@ pub fn run() {
             get_drill_runs,
             delete_session,
             clear_all_sessions,
+            // W2 — the practice store (ROADMAP 1.1).
+            query_history,
+            save_score,
+            list_scores,
+            get_score,
+            get_score_source,
+            delete_score,
+            save_attempt,
+            query_attempts,
+            // W14 — the promise the coach's fourth button makes.
+            save_due,
+            list_due,
+            clear_due,
+            // W10 — the coach's judgement and its ears.
+            analyze_attempt,
+            analyze_take_pitch,
             list_session_logs,
             get_session_log,
             export_session_logs,

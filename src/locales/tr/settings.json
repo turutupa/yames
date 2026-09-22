@@ -110,7 +110,13 @@
       "downloadVoices": "Sesleri indir",
       "installed": "{{tier}} koç kurulu ({{size}})",
       "removing": "Kaldırılıyor…",
-      "removeModels": "Modelleri kaldır"
+      "removeModels": "Modelleri kaldır",
+      "stance": "Koçluk tarzı",
+      "stanceHint": "Sen çalarken koçun sana ne kadar sert davranacağı",
+      "stanceStrict": "Sert",
+      "stanceLearning": "Öğrenirken",
+      "stanceStrictDesc": "Bir eğilim belirdiği anda adını koyar ve yüksek sesle söyler. Zaten bildiğin bir bölümü cilalarken doğru ayar budur.",
+      "stanceLearningDesc": "Bir şey söylemeden önce sana yarı yarıya daha fazla pay bırakır, sen çalarken düzeltmeleri kulağından uzak tutar ve iyi gidenden başlar. Puanın her iki durumda da tamamen aynı hesaplanır."
     },
     "general": {
       "title": "Genel",
@@ -177,7 +183,8 @@
         "metronome": "Metronom",
         "view": "Görünüm",
         "navigation": "Gezinme",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Şarkılar"
       },
       "actions": {
         "play": "Çal / Durdur",
@@ -211,7 +218,17 @@
         "jam-next-section": "Sonraki bölüm",
         "jam-prev-section": "Önceki bölüm",
         "jam-loop-section": "Bu bölümü döngüye al",
-        "jam-take": "Kaydı al"
+        "jam-take": "Kaydı al",
+        "tab-5": "Şarkılar sekmesi",
+        "songs-loop-start": "Tekrar burada başlar",
+        "songs-loop-end": "Tekrar burada biter",
+        "songs-loop": "Bölümü tekrarla",
+        "songs-loop-clear": "Yine şarkının tamamı",
+        "songs-loop-earlier": "Bölüm bir ölçü önce",
+        "songs-loop-later": "Bölüm bir ölçü sonra",
+        "songs-take": "Kaydı al",
+        "songs-camera": "Görüntüyü kaydet",
+        "jam-camera": "Görüntüyü kaydet"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -245,7 +262,17 @@
         "jam-next-section": "Ölçü çizgisinde sonraki bölümün başına atla",
         "jam-prev-section": "Ölçü çizgisinde önceki bölümün başına dön",
         "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar",
-        "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur"
+        "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur",
+        "tab-5": "Şarkılar sekmesine geç",
+        "songs-loop-start": "Bölümü çaldığın ölçüden başlat",
+        "songs-loop-end": "Bölümü çaldığın ölçüde bitir",
+        "songs-loop": "Seçilen ölçüleri tekrar tekrar çal ya da durdur",
+        "songs-loop-clear": "Bölümü unut ve parçayı baştan çal",
+        "songs-loop-earlier": "Seçilen ölçüleri, boyunu bozmadan bir ölçü başa doğru kaydır",
+        "songs-loop-later": "Seçilen ölçüleri, boyunu bozmadan bir ölçü sona doğru kaydır",
+        "songs-take": "Bir sonraki çalışında kaydet veya kaydı durdur",
+        "songs-camera": "Bir sonraki çalışında kameraya al veya kamerayı kapat",
+        "jam-camera": "Bir sonraki çalışında kameraya al veya kamerayı kapat"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Kontrol başarısız",
       "sounds": "Sesler",
       "soundsCredit": "Kulüp takımı, Versilian Studios ve Karoryfer Samples'ın Virtuosity Drums'ı; çalan Austin McMahon (kamu malı). Stüdyo takımı, DrumGizmo projesinin DRSKit'i (CC BY 4.0).",
-      "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı"
+      "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı",
+      "soundsCreditSongs": "Diğer enstrümanlar Sonivox General MIDI ses setinden gelir (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Parçalar",
+      "catchDownloads": "İndirdiğin parçaları öner",
+      "catchDownloadsHint": "Parçalar açıkken Yames indirilenler klasörüne bakar ve bir şeyi açmadan önce sorar. Dosyan asla taşınmaz, adı değişmez, silinmez.",
+      "folder": "Bu klasörü izle",
+      "folderUnknown": "Bu bilgisayar Yames'e indirilenlerin nereye gittiğini söylemedi",
+      "chooseFolder": "Seç...",
+      "useDownloads": "İndirilenleri kullan",
+      "turnedDown": "Geri çevirdiğin parçalar",
+      "turnedDownHint": "Yames'in bir daha önermeyeceği {{n}} dosya",
+      "forgetTurnedDown": "Yine önersin",
+      "soundSet": "Ses seti",
+      "soundSetBuiltIn": "Yames ile gelen",
+      "chooseSoundSet": "Bir .sf2 seç",
+      "useBuiltInSoundSet": "Yerleşik olanı kullan"
     }
   },
   "keybindings": {

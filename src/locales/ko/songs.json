@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "곡 가져오기",
+    "dismiss": "OK",
+    "tuning": "튜닝",
+    "capoLabel": "카포",
+    "capo": "카포 {{fret}}프렛",
+    "meter": "박자",
+    "tempo": "템포",
+    "bpm": "{{bpm}} BPM",
+    "range": "마디",
+    "fromBar": "시작",
+    "toBar": "끝",
+    "wholeSong": "곡 전체",
+    "barsCount": "{{count}}마디",
+    "barsCount_other": "{{count}}마디",
+    "sections": "섹션",
+    "speed": "속도",
+    "percent": "{{percent}}%",
+    "speedNote": "클릭은 {{bpm}} BPM으로 갑니다",
+    "loop": "반복",
+    "loopNote": "위의 마디를 몇 번이고 다시 연주합니다",
+    "dropHere": "파일을 놓으면 열립니다",
+    "band": {
+      "label": "무엇이 들릴지",
+      "click": "클릭",
+      "drums": "드럼",
+      "bass": "베이스",
+      "keys": "건반",
+      "levelFor": "{{lane}} 음량",
+      "muteFor": "{{lane}} 끄기",
+      "note": "연주하면서 밸런스를 잡으세요. Yames가 이 곡의 설정을 기억합니다.",
+      "leftOut": "{{tracks}}이(가) 이 파일에 있지만, Yames에는 연주할 사람이 없습니다.",
+      "leftOut_other": "{{tracks}}이(가) 이 파일에 있지만, Yames에는 연주할 사람이 없습니다.",
+      "droppedNotes": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다.",
+      "droppedNotes_other": "이 파일의 음 {{count}}개는 밴드에 없는 악기의 것입니다.",
+      "myPart": "내 파트",
+      "soloShort": "S",
+      "soloFor": "{{lane}}만 듣기",
+      "tooManyParts": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
+      "tooManyParts_other": "{{tracks}}은(는) 소리가 나지 않습니다. 이 파일은 한 번에 낼 수 있는 것보다 파트가 많습니다.",
+      "turnedDown": "{{count}}명의 소리를 줄였습니다",
+      "turnedDown_other": "{{count}}명의 소리를 줄였습니다",
+      "drumsLabel": "드럼",
+      "drumsKit": "Yames의 드럼",
+      "drumsFile": "파일의 드럼"
+    },
+    "countIn": {
+      "counting": "카운트 중"
+    },
+    "engine": {
+      "cannotPlay": "Yames가 지금은 이 곡을 밴드로 연주할 수 없습니다. 클릭은 그대로 박을 지킵니다.",
+      "busy": "다른 무언가가 소리를 쓰고 있어서 곡이 멈췄습니다. 준비되면 재생을 다시 누르세요."
+    },
+    "empty": {
+      "title": "이미 가지고 있는 곡을 가져오세요",
+      "body": "Guitar Pro나 MusicXML 파일을 열면 Yames가 타브 악보를 보여 주고, 박을 지키고, 지금 어디인지 따라갑니다. 이 화면 아무 곳에나 파일을 놓거나, 하나 고르세요.",
+      "private": "파일은 이 컴퓨터에 남습니다. 아무것도 올라가지 않습니다.",
+      "bodyShort": "Guitar Pro 또는 MusicXML. 이 화면 아무 곳에나 파일을 놓거나, 하나 고르세요.",
+      "stays": "파일은 이 컴퓨터에 남고, Yames가 따로 사본을 보관합니다."
+    },
+    "tab": {
+      "drawing": "악보를 짜는 중...",
+      "failed": "Yames가 이 파일을 읽었지만 그릴 수는 없습니다. 마디와 박은 그대로 동작합니다."
+    },
+    "picker": {
+      "title": "연주할 파트 고르기",
+      "which": "어느 파트를 연주하시나요?",
+      "strings": "{{count}}줄",
+      "strings_other": "{{count}}줄",
+      "notTab": "타브 악보로 적혀 있지 않음",
+      "cancel": "나중에"
+    },
+    "warn": {
+      "tempoFlattened": "{{count}}마디에서 템포가 이어서 변합니다. Yames는 대신 마딧줄에서 한 번에 바꿉니다.",
+      "tempoFlattened_other": "{{count}}마디에서 템포가 이어서 변합니다. Yames는 대신 마딧줄에서 한 번에 바꿉니다.",
+      "barOverfilled": "{{bar}}마디에 박자가 허용하는 것보다 많이 들어 있습니다. 적힌 그대로 연주합니다."
+    },
+    "library": {
+      "add": "곡 가져오기",
+      "empty": "아직 곡이 없습니다",
+      "remove": "Yames에서 빼기",
+      "due": "오늘 할 것",
+      "dueTitle": "이 곡으로 돌아오겠다고 했습니다",
+      "starter": "기본 제공",
+      "starterTitle": "Yames에 처음부터 들어 있습니다. 언제든 지워도 됩니다.",
+      "removeTitle": "{{name}}을(를) 뺄까요?",
+      "removeBody": "곡 전체가 사라집니다. 모든 파트, Yames가 기억하는 모든 것, 그리고 Yames가 가지고 있는 파일 사본까지. 되돌릴 수 없습니다.",
+      "removeTakes": "이 곡의 녹음 {{count}}개도 함께 사라집니다.",
+      "removeTakes_other": "이 곡의 녹음 {{count}}개도 함께 사라집니다.",
+      "removeNoTakes": "이 곡은 아직 녹음한 것이 없습니다.",
+      "removeConfirm": "빼기",
+      "removeCancel": "유지"
+    },
+    "review": {
+      "title": "방금은 어땠는지",
+      "summary": "{{bars}}마디, {{percent}}% — {{of}}개 중 {{hits}}개가 자리에 들어왔습니다",
+      "again": "한 번 더",
+      "working": "다시 듣는 중...",
+      "passes": "어느 번",
+      "pass": "{{n}}번째",
+      "nothingToSay": "방금 것에서는 눈에 띄는 게 없었습니다. 한 번 더 연주하면 코치가 볼 것이 늘어납니다.",
+      "chordsHonesty": "화음 안의 음은 아직 확인하지 못합니다. 언제 울렸는지만 봅니다.",
+      "notSaved": "Yames가 이번 것을 적어 두지 못했습니다. 다음에 견줘 볼 기록이 남지 않습니다.",
+      "tooShort": "판단하기에는 너무 짧았습니다. 이 대목을 여덟 음 이상 연주하면 코치가 할 말이 생깁니다.",
+      "moreLabel": "그 밖에 ({{count}})",
+      "moreLabel_other": "그 밖에 ({{count}})",
+      "lessLabel": "나머지 숨기기",
+      "tab": {
+        "nothing": "이 마디에서는 아무것도 연주되지 않았습니다."
+      },
+      "mark": {
+        "onTime": "제자리",
+        "slightlyEarly": "살짝 빠름",
+        "early": "빠름",
+        "slightlyLate": "살짝 늦음",
+        "late": "늦음",
+        "missed": "빠짐",
+        "notAssessed": "판정 없음",
+        "extra": "여분의 음",
+        "accentQuiet": "악센트로 적혀 있지만 더 세게 나오지 않았습니다"
+      },
+      "bars": {
+        "one": "{{bar}}마디",
+        "range": "{{from}}–{{to}}마디",
+        "here": "이 대목"
+      },
+      "amount": {
+        "hair": "아주 조금",
+        "thirtySecond": "32분음표쯤",
+        "sixteenth": "16분음표쯤",
+        "tripletEighth": "한 박의 3분의 1쯤",
+        "eighth": "8분음표쯤",
+        "mostOfABeat": "거의 한 박",
+        "beat": "한 박 통째로"
+      },
+      "when": {
+        "early": "빨리",
+        "late": "늦게"
+      },
+      "goes": "{{count}}번",
+      "goes_other": "{{count}}번",
+      "notes": "{{count}}개의 음",
+      "notes_other": "{{count}}개의 음",
+      "say": {
+        "consistentMiss": {
+          "1": "늘 같은 자리입니다. {{goes}} 가운데 {{affected}}번, {{bars}}에서 놓쳤습니다.",
+          "2": "{{bars}}에서 무너집니다. {{passes}}번 중 {{affected}}번 빠졌습니다.",
+          "3": "나머지는 버팁니다. 자꾸 사라지는 건 {{bars}}이고, {{goes}} 가운데 {{affected}}번입니다."
+        },
+        "rushing": {
+          "1": "{{bars}}에서 클릭보다 앞서 있습니다. 끝까지 {{amount}} 빠릅니다.",
+          "2": "{{bars}}에서 서두릅니다. 평균 {{amount}} 빠릅니다.",
+          "3": "{{bars}}에서는 조금 뒤에 앉으세요. 거기서 {{amount}} 빨리 떨어지고 있습니다."
+        },
+        "dragging": {
+          "1": "{{bars}}에서 클릭보다 뒤에 있습니다. {{amount}} 늦습니다.",
+          "2": "{{bars}}에서 끌립니다. 음이 박보다 {{amount}} 뒤에 떨어집니다.",
+          "3": "{{bars}}에서는 조금 앞으로 나오세요. {{amount}} 늦게 앉아 있습니다."
+        },
+        "afterShift": {
+          "1": "{{bars}}에서 손이 움직일 때마다, 다음 음이 {{amount}} {{when}} 나옵니다.",
+          "2": "{{bars}}의 포지션 이동이 다음 음을 {{amount}} {{when}} 만들고 있습니다.",
+          "3": "{{bars}}의 이동만 제자리에 놓으면 나머지는 따라옵니다. 지금은 다음 음이 {{amount}} {{when}} 나옵니다."
+        },
+        "fallsApart": {
+          "1": "{{bars}}는 깨끗하게 시작해서 끝으로 갈수록 흐트러집니다.",
+          "2": "{{bars}}의 뒷부분이 무너집니다. 앞부분은 괜찮습니다.",
+          "3": "음이 아니라 지구력입니다. {{bars}}는 갈수록 거칠어집니다."
+        },
+        "extras": {
+          "1": "{{bars}}에 아무도 부르지 않은 음이 있습니다. {{extras}}입니다.",
+          "2": "{{bars}}에서 {{extras}}를 더하고 있습니다. 쉼표는 쉼표로 두세요.",
+          "3": "{{bars}}에 뭔가가 끼어듭니다. 악보에 없는 {{extras}}입니다."
+        },
+        "uneven": {
+          "1": "{{bars}}는 빠르거나 늦은 게 아니라 고르지 않습니다. 음이 사방으로 떨어집니다.",
+          "2": "{{bars}}에서는 한쪽으로 기우는 대신 박자가 떠돕니다.",
+          "3": "빠르기보다 안정이 먼저입니다. {{bars}}는 아직 어느 쪽으로도 고르지 않습니다."
+        },
+        "beatPositionBias": {
+          "1": "한 마디의 {{beat}}번째 박이 달아납니다. 마디마다 {{amount}} {{when}}입니다.",
+          "2": "{{beat}}번째 박에 기대고 있습니다. 돌아올 때마다 {{amount}} {{when}}입니다.",
+          "3": "어긋나는 건 {{beat}}번째 박입니다. 마디마다 {{amount}} {{when}}입니다."
+        },
+        "subdivisionWeak": {
+          "1": "{{outOf}}개 가운데 {{position}}번째 음을 계속 흘리고 있습니다.",
+          "2": "{{outOf}}개씩 묶인 그룹에서 사라지는 건 {{position}}번째 음입니다.",
+          "3": "그룹을 소리 내어 세어 보세요. {{outOf}}개 중 {{position}}번째에서 미끄러집니다."
+        },
+        "drift": {
+          "1": "클릭과 함께 시작해서 끝에는 {{amount}} {{when}} 갔습니다.",
+          "2": "갈수록 끌려갑니다. 마지막 마디에서는 {{amount}} {{when}}입니다.",
+          "3": "손안의 템포가 구간 내내 미끄러집니다. 끝에 가면 {{when}} 갑니다."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}}에서는 버팁니다. {{collapse}}에서 무너집니다.",
+          "2": "여기서 천장은 {{hold}}입니다. {{collapse}}는 아직 내 것이 아닙니다.",
+          "3": "{{hold}}는 내 것입니다. {{collapse}}는 다음에 가져올 것이지, 오늘의 템포는 아닙니다."
+        },
+        "improved": {
+          "1": "나아졌습니다. {{bars}}가 지난번보다 {{ms}} ms 더 단단합니다.",
+          "2": "움직임이 있습니다. 전에는 흘리던 {{bars}}를 지금은 잡고 있습니다.",
+          "3": "{{bars}}는 진짜 진전입니다. 이전 번들보다 {{ms}} ms 더 조여졌습니다."
+        },
+        "clean": {
+          "1": "{{bars}}는 고칠 게 없습니다. {{goes}} 모두 제자리였습니다.",
+          "2": "이건 내 것입니다. {{bars}}, {{goes}}, 한 번도 미끄러지지 않았습니다.",
+          "3": "{{bars}}를 매번 제대로 쳤습니다. 잠시 두었다가 나중에 다시 오세요."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "탭으로 돌아가기",
+      "selectedBars": "{{bars}}마디 선택됨",
+      "wholeSong": "곡 전체",
+      "portionSays": "{{count}}마디 · {{state}}",
+      "portionSays_other": "{{count}}마디 · {{state}}",
+      "looping": "반복 중",
+      "once": "한 번만",
+      "timeRound": {
+        "one": "{{n}}번째",
+        "two": "{{n}}번째",
+        "few": "{{n}}번째",
+        "other": "{{n}}번째"
+      },
+      "keepPortion": "이 부분 저장",
+      "keepPortionNote": "탭에서 마디를 먼저 고른 다음 이름을 붙이세요",
+      "portionPlaceholder": "이 부분에 이름 붙이기",
+      "renamePortion": "이름 바꾸기",
+      "deletePortion": "이건 잊기",
+      "portionTitle": "{{name}} — {{percent}}%",
+      "tabLabel": "탭입니다. 마디를 클릭하면 그 자리로 가고, 여러 마디를 끌면 한 부분을 고를 수 있어요."
+    },
+    "offer": {
+      "justArrived": "이(가) 다운로드에 방금 도착했습니다",
+      "justArrivedSized": "이(가) 다운로드에 방금 도착했습니다 · {{size}}",
+      "more": "{{n}}개가 더 기다리고 있습니다",
+      "open": "열기",
+      "opening": "여는 중...",
+      "notThisOne": "이건 아니에요",
+      "failed": "이 파일을 열 수 없습니다. 아직 내려받는 중일 수 있습니다."
+    },
+    "keepsCopy": "가져온 파일은 Yames가 자체 사본을 보관합니다. 다운로드 폴더를 비워도 아무것도 잃지 않습니다.",
+    "exportOriginal": "파일을 어딘가에 저장",
+    "exporting": "저장하는 중...",
+    "exportDone": "저장했습니다.",
+    "exportFailed": "그곳에 파일을 쓸 수 없었습니다.",
+    "findTab": {
+      "what": "곡과 연주자",
+      "link": "탭 악보 찾기",
+      "note": "평소 쓰는 브라우저에서 평범한 웹 검색을 엽니다. Yames가 대신 찾아보지는 않습니다.",
+      "ask": "아직 파일이 없나요?"
+    },
+    "camera": {
+      "cannotPlay": "영상을 재생하지 못했습니다.",
+      "corner": {
+        "bottomLeft": "왼쪽 아래",
+        "bottomRight": "오른쪽 아래",
+        "topLeft": "왼쪽 위",
+        "topRight": "오른쪽 위"
+      },
+      "denied": "카메라가 허용되지 않았습니다. 시스템 설정에서 Yames에 권한을 주고 다시 켜 주세요.",
+      "device": "어느 카메라",
+      "deviceNumbered": "카메라 {{n}}",
+      "failed": "카메라를 열지 못했습니다.",
+      "guideBody": "두 손이 다 들어오게 하세요 — 넥을 짚는 손과 줄을 켜는 손.",
+      "guideFlip": "왼손으로 칩니다",
+      "guideGot": "알겠습니다",
+      "introNotNow": "나중에",
+      "introPrivate": "어디에도 올리지 않고 어디로도 보내지 않습니다. 테이크를 지우면 영상도 함께 지워집니다.",
+      "introStart": "카메라 켜기",
+      "introTitle": "카메라에 대하여",
+      "introWhat": "카운트인부터 멈출 때까지 연주하는 모습을 카메라가 담습니다. 소리는 테이크 그대로 — 밴드와 함께 친 그 소리입니다.",
+      "introWhere": "테이크 옆에 영상 파일 하나로, 이 컴퓨터의 앱 전용 폴더에 저장되며 지우기 전까지 그곳에 남습니다.",
+      "label": "카메라",
+      "lead": "악보 옆에 남는 두 손 — 이 컴퓨터를 벗어나는 것은 없습니다",
+      "lostPicture": "카메라가 도중에 멈췄습니다. 테이크는 남았지만 영상은 남지 않았습니다.",
+      "move": "미리보기 옮기기",
+      "nextSlip": "다음 실수",
+      "noCamera": "이 컴퓨터에는 카메라가 없습니다.",
+      "noOffset": "이 테이크는 영상과 소리의 간격을 재지 못해 같은 지점에서 시작합니다. 손과 음이 함께 떨어질 때까지 밀어 보세요.",
+      "nudge": "영상 맞추기",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "영상 앞으로",
+      "nudgeHow": "손이 소리보다 앞서거나 늦어 보이면 둘이 같이 떨어질 때까지 영상을 밀어 보세요. 이 카메라에 대해 기억해 둡니다.",
+      "nudgeLater": "영상 뒤로",
+      "off": "영상도 녹화",
+      "on": "카메라 켜짐",
+      "pause": "일시정지",
+      "pitchDropped": "여기서는 느리게 하면 음높이도 템포를 따라 내려갑니다.",
+      "pitchKept": "느리게 해도 음높이는 그대로입니다.",
+      "play": "재생",
+      "prevSlip": "이전 실수",
+      "preview": "카메라가 보는 당신",
+      "slips": "실수로 건너뛰기",
+      "tape": "이번 한 바퀴, 음표 하나씩",
+      "tickOff": "{{bar}}마디, {{ms}} ms",
+      "tickPlain": "{{bar}}마디",
+      "unavailable": "이 버전에서는 영상을 녹화할 수 없습니다. 이 화면의 나머지는 늘 그렇듯 동작합니다.",
+      "watchIt": "보기",
+      "watchTitle": "다시 보기",
+      "watchingAll": "한 바퀴 전부.",
+      "watchingBars": "{{bars}}마디를 돌고 돌며.",
+      "sinkUnsupported": "이 버전에서는 테이크를 컴퓨터의 기본 스피커로만 재생할 수 있습니다. {{device}} 로는 보낼 수 없습니다.",
+      "sinkUnmatched": "컴퓨터의 기본 스피커로 재생 중입니다. 여기서는 {{device}} 를 찾지 못했습니다.",
+      "peek": "내 모습 보기",
+      "peekNote": "화면에 어떻게 나오는지 확인하세요. 연주를 시작하면 닫힙니다."
+    },
+    "clip": {
+      "save": "영상으로 저장",
+      "go": "영상 만들기",
+      "cancel": "중지",
+      "making": "만드는 중 — {{percent}}%",
+      "whichBars": "어느 마디",
+      "chosenBars": "이 마디",
+      "wholeTake": "테이크 전체",
+      "shape": "형태",
+      "wide": "가로",
+      "tall": "세로",
+      "withMarks": "표시 보이기",
+      "realTime": "재생하면서 녹화하므로 음악과 같은 시간({{length}})이 걸립니다.",
+      "isMp4": "MP4 로 저장되며 어디에나 올릴 수 있습니다.",
+      "isWebm": "WebM 으로 저장됩니다. MP4 만 받는 곳도 있습니다.",
+      "saved": "{{where}} 에 저장했습니다",
+      "failed": "영상을 만들지 못했습니다. 아무것도 저장하지 않았습니다.",
+      "unavailable": "이 버전에서는 영상을 저장할 수 없습니다.",
+      "bar": "마디",
+      "bpmUnit": "BPM",
+      "brand": "Yames 마크",
+      "brandNote": "구석에 작은 Yames 로고와 yames.app. 영상을 본 사람이 앱을 찾아오는 길입니다.",
+      "showInFolder": "폴더에서 보기",
+      "postItTo": "올릴 곳",
+      "dragItIn": "하나를 열고 파일을 끌어다 놓으세요. Yames 는 아무것도 올리지 않고 계정도 필요 없습니다.",
+      "webmWarning": "하나를 열고 파일을 끌어다 놓으세요. 이건 WebM 이고 대부분은 MP4 만 받습니다. 무료 변환기로 바꿀 수 있습니다.",
+      "underPicture": "영상 아래",
+      "band": {
+        "tab": "탭 악보",
+        "marks": "표시만",
+        "none": "없음"
+      }
+    },
+    "compare": {
+      "title": "{{bars}}마디, 그때와 지금",
+      "then": "그때",
+      "now": "지금",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "소리만 있습니다. 이 연주는 카메라가 꺼져 있었습니다.",
+      "locked": "둘은 시계가 아니라 마디로 맞춰져 있어서, 느리게 친 연주도 그대로 들어맞습니다."
+    },
+    "takes": {
+      "withPicture": "영상 있음",
+      "noneFilmed": "이 중에 촬영된 것은 없습니다.",
+      "was": "{{bars}}마디 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "지금 보고 있는 파트",
+      "percussion": "드럼 — 따라갈 수 있는 파트가 아닙니다",
+      "notTab": "탭으로 적혀 있지 않습니다",
+      "empty": "여기에는 아무것도 적혀 있지 않습니다"
+    },
+    "strip": {
+      "more": "더 보기"
+    },
+    "view": {
+      "tabOnly": "탭",
+      "tabAndNotes": "탭 + 오선",
+      "notationNote": "탭 위에 오선보도 함께 표시합니다",
+      "bigger": "크게",
+      "smaller": "작게",
+      "size": "크기"
+    },
+    "clickChip": "클릭",
+    "clickNote": "곡에 맞춰 박을 칩니다. 파일에 자체 반주가 있으면 처음에는 꺼져 있습니다.",
+    "notes": {
+      "label": "이 파일에 대한 안내"
+    }
+  }
+}

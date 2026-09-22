@@ -35,9 +35,6 @@
     "beatPlacement": "Colocación del pulso"
   },
   "coachReport": {
-    "cov": "Cob",
-    "eff": "Efc",
-    "grid": "Rejilla",
     "segment": "Segmento",
     "thinkingAria": "El entrenador se está preparando para hablar",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "en el pulso",
     "pocketEarly": "Tocaste con una media de {{ms}} ms de adelanto",
     "pocketLate": "Tocaste con una media de {{ms}} ms de retraso",
-    "pocketCentred": "Tu tiempo quedó centrado en el pulso (media de ±5 ms)"
+    "pocketCentred": "Tu tiempo quedó centrado en el pulso (media de ±5 ms)",
+    "covLabel": "Pulsos tocados",
+    "covTitle": "Cuántos de los pulsos que esperaba se tocaron de verdad",
+    "effLabel": "Notas en el pulso",
+    "effTitle": "De todo lo que oí, cuánto cayó sobre un pulso en lugar de entre dos",
+    "gridLabel": "Pegado al clic",
+    "gridTitle": "Cuánto siguió al clic el pasaje entero"
   },
   "eval": {
     "today": "Hoy",

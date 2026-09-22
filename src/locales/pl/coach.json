@@ -35,9 +35,6 @@
     "beatPlacement": "Pozycja na bicie"
   },
   "coachReport": {
-    "cov": "Pokrycie",
-    "eff": "Efektywność",
-    "grid": "Siatka",
     "segment": "Segment",
     "thinkingAria": "Trener przygotowuje się do wypowiedzi",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "W rytmie",
     "pocketEarly": "Średnio grałeś {{ms}} ms za wcześnie",
     "pocketLate": "Średnio grałeś {{ms}} ms za późno",
-    "pocketCentred": "Twój rytm był wyśrodkowany na bicie (średnio ±5 ms)"
+    "pocketCentred": "Twój rytm był wyśrodkowany na bicie (średnio ±5 ms)",
+    "covLabel": "Zagrane miary",
+    "covTitle": "Ile z miar, na które czekałem, naprawdę zabrzmiało",
+    "effLabel": "Nuty na miarze",
+    "effTitle": "Z wszystkiego, co usłyszałem, ile trafiło na miarę, a nie pomiędzy",
+    "gridLabel": "Trzymanie klika",
+    "gridTitle": "Jak blisko klika trzymał się cały fragment"
   },
   "eval": {
     "today": "Dziś",

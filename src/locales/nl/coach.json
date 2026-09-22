@@ -35,9 +35,6 @@
     "beatPlacement": "Beatplaatsing"
   },
   "coachReport": {
-    "cov": "Dekking",
-    "eff": "Efficiëntie",
-    "grid": "Raster",
     "segment": "Segment",
     "thinkingAria": "De coach bereidt zich voor om te spreken",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "Op de beat",
     "pocketEarly": "Je speelde gemiddeld {{ms}}ms te vroeg",
     "pocketLate": "Je speelde gemiddeld {{ms}}ms te laat",
-    "pocketCentred": "Je timing viel precies op de beat (gemiddeld ±5ms)"
+    "pocketCentred": "Je timing viel precies op de beat (gemiddeld ±5ms)",
+    "covLabel": "Gespeelde tellen",
+    "covTitle": "Hoeveel van de tellen die ik verwachtte er echt gespeeld zijn",
+    "effLabel": "Noten op een tel",
+    "effTitle": "Van alles wat ik hoorde: hoeveel er op een tel landde in plaats van ertussen",
+    "gridLabel": "Vast op de klik",
+    "gridTitle": "Hoe strak de hele passage de klik volgde"
   },
   "eval": {
     "today": "Vandaag",

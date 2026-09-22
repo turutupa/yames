@@ -35,9 +35,6 @@
     "beatPlacement": "Độ bám phách"
   },
   "coachReport": {
-    "cov": "Độ phủ",
-    "eff": "Hiệu suất",
-    "grid": "Lưới",
     "segment": "Đoạn",
     "thinkingAria": "Huấn luyện viên đang chuẩn bị nói",
     "qualifier": {
@@ -68,7 +65,13 @@
     "pocketOnBeat": "đúng nhịp",
     "pocketEarly": "Trung bình bạn đánh sớm hơn {{ms}}ms",
     "pocketLate": "Trung bình bạn đánh muộn hơn {{ms}}ms",
-    "pocketCentred": "Nhịp của bạn bám đúng phách (trung bình ±5ms)"
+    "pocketCentred": "Nhịp của bạn bám đúng phách (trung bình ±5ms)",
+    "covLabel": "Phách đã chơi",
+    "covTitle": "Trong những phách tôi chờ, bao nhiêu thực sự vang lên",
+    "effLabel": "Nốt nằm trên phách",
+    "effTitle": "Trong tất cả những gì tôi nghe được, bao nhiêu rơi đúng vào phách thay vì giữa hai phách",
+    "gridLabel": "Bám tiếng gõ",
+    "gridTitle": "Cả đoạn bám theo tiếng gõ sát đến đâu"
   },
   "eval": {
     "today": "Hôm nay",

@@ -79,8 +79,24 @@ export async function setSoundType(soundType: string): Promise<void> {
   return invoke("set_sound_type", { soundType });
 }
 
-export async function setBeatGroups(groups: number[]): Promise<void> {
-  return invoke("set_beat_groups", { groups });
+/**
+ * Set the bar's beat grouping.
+ *
+ * `atBarLine` is the setlist's, and nothing else's: a step switch is posted
+ * ON a bar line, and the engine then gives the new meter to the bar that line
+ * opened rather than restacking its grid one tick later. Without it the seam
+ * between two steps in different meters was a one-beat bar — two accents a
+ * beat apart — and the step arriving lost a bar of real playing.
+ *
+ * Every other caller leaves it out. A meter changed by hand while the click
+ * runs restarts the bar under your fingers, which is what somebody dragging
+ * 4/4 to 3/4 on the meter screen is asking for.
+ */
+export async function setBeatGroups(groups: number[], atBarLine = false): Promise<void> {
+  // Sent only when it is true. Rust reads it as an `Option<bool>`, so a
+  // caller that has never heard of bar lines sends the payload it always
+  // sent and gets the behaviour it always got.
+  return invoke("set_beat_groups", atBarLine ? { groups, atBarLine } : { groups });
 }
 
 export async function setFreeMode(enabled: boolean): Promise<void> {
@@ -592,6 +608,80 @@ export async function closeOpenSegment(): Promise<void> {
   return invoke("close_open_segment");
 }
 
+/**
+ * Roadmap 2.4 — what the player is about to play.
+ *
+ * Until a schedule is loaded the analyzer matches against a grid it
+ * infers from the playing itself, so a note that never arrives is a
+ * rest: nothing knows a note was due. With one loaded, matching runs
+ * against the score — a missing note is a miss, a note nobody asked for
+ * is an extra, and each verdict comes back on the note's own id so the
+ * review can colour the tab from it.
+ *
+ * `beat` is quarter notes from the start of the played range. `soft`
+ * marks an attack that may be too quiet to detect (a hammer-on, a
+ * pull-off); absent, it costs nothing. `onsets` must be sorted by
+ * `beat` — `src/songs/schedule.ts` is where that is guaranteed.
+ */
+// The types themselves live in `src/songs/types.ts`, the contract's one home
+// on this side of the wire; they are re-exported here because this file is
+// where a caller of `loadScoreSchedule` looks for them.
+export type {
+  ExpectedOnset,
+  ScoreSchedule,
+  OnsetResult,
+  ExtraOnset,
+} from "./songs/types";
+
+/**
+ * Load a schedule. Takes effect from the next downbeat, so a count-in
+ * played before it belongs to nobody and is ignored rather than
+ * reported. Safe to call before or during a session.
+ *
+ * The results arrive on the existing `practice-segment-ended` event
+ * rather than a channel of their own — see `PracticeSegmentEndedPayload`.
+ */
+export async function loadScoreSchedule(schedule: ScoreSchedule): Promise<void> {
+  return invoke("load_score_schedule", { schedule });
+}
+
+/** Back to free play. Safe to call when nothing is loaded. */
+export async function clearScoreSchedule(): Promise<void> {
+  return invoke("clear_score_schedule");
+}
+
+/**
+ * The bands the review colours a note by — the scorer's own.
+ *
+ * `score.rs` judges a deviation against a window taken over the schedule's
+ * smallest gap, at the tempo the pass was actually played: a piece of
+ * sixteenths is judged on a sixteenth's tolerance. A review that drew its own
+ * boundaries would colour a note green that the same pass had already counted
+ * as merely "ok", and the player would be right to believe neither number.
+ *
+ * `quarterMs` is the length of a quarter note at the tempo the click ran at
+ * — 60000 / BPM — not at the score's written tempo.
+ */
+export type TimingBands = {
+  /** The matching window, ms. Past it is a miss. */
+  windowMs: number;
+  /** Absolute deviation, ms: inside this is dead on. */
+  perfect: number;
+  /** …inside this is a shade early or late… */
+  good: number;
+  /** …and inside this is early or late enough to feel. */
+  ok: number;
+  /** The gap the window was taken over, in quarter notes. */
+  smallestGapBeats: number;
+};
+
+export async function scoreTimingBands(
+  schedule: ScoreSchedule,
+  quarterMs: number,
+): Promise<TimingBands> {
+  return invoke<TimingBands>("score_timing_bands", { schedule, quarterMs });
+}
+
 export function onAudioSpectrum(callback: (spectrum: AudioSpectrum) => void) {
   return listen<AudioSpectrum>("audio-spectrum", (e) => callback(e.payload));
 }
@@ -644,7 +734,50 @@ export type PracticeSegmentEndedPayload = {
   inferredDivisor: number;
   inferredDivisorConfidence: number;
   playMode: "structured" | "noodling";
+  /**
+   * Roadmap 2.4 — one verdict per expected onset, present only when a
+   * `ScoreSchedule` was loaded. Absent in free play, where the fields
+   * are left off the wire entirely rather than sent empty. When these
+   * are present, `score` and `componentScores` were computed against
+   * the schedule rather than against the inferred grid.
+   */
+  onsetResults?: OnsetResult[];
+  extraOnsets?: ExtraOnset[];
+  /**
+   * How far the accents the score marked actually came out louder than
+   * their neighbours, 0–1, when there was enough signal to tell.
+   * Reported and not scored while LP C3 is open.
+   */
+  accentAgreement?: number;
 };
+
+/**
+ * One expected note's verdict, while the pass is still running
+ * (`plans/SONGS.md` A7).
+ *
+ * The same four facts an `OnsetResult` carries, and deliberately not that
+ * type: this is **provisional**. It is decided the moment the note's matching
+ * window closes, from what had arrived by then, and the alignment at the end
+ * of the attempt can still revise the last bar of it — a note not yet played
+ * can change which slot an earlier one belongs in. The review's
+ * `onsetResults` are the authority and always were.
+ *
+ * It arrives only while a `ScoreSchedule` is loaded. Free play emits none at
+ * all: the sweep that produces these does not run.
+ */
+export type LiveOnset = {
+  id: number;
+  /** Times round the loop, from 0 — the same axis `OnsetResult.pass` is on. */
+  pass: number;
+  state: OnsetResult["state"];
+  /** Negative is early. `null` when there was nothing to measure. */
+  deviationMs: number | null;
+};
+
+/** Subscribe to the live per-note verdicts. See {@link LiveOnset}. */
+export function onScoreOnset(callback: (onset: LiveOnset) => void) {
+  return listen<LiveOnset>("score-onset", (e) => callback(e.payload));
+}
 
 export function onPracticeSegmentEnded(
   callback: (payload: PracticeSegmentEndedPayload) => void,
@@ -677,7 +810,14 @@ export async function clearSession(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Session History
+// Session History — the practice store (ROADMAP 1.1)
+//
+// These four keep the shapes they have always had; underneath, history now
+// lives in `practice.db` beside `settings.json` instead of inside it. The
+// JSON array is imported once on first launch and then left alone.
+//
+// A store that will not open (corrupt, or written by a newer Yames) answers
+// reads with nothing and refuses writes — it is never deleted.
 // ---------------------------------------------------------------------------
 import type { SavedSession } from "./types";
 
@@ -685,6 +825,8 @@ export async function saveSession(session: SavedSession): Promise<void> {
   return invoke("save_session", { session });
 }
 
+/** The most recent thirty sessions, newest first — the same slice the
+ *  history tab has always shown. Use `queryHistory` for the rest. */
 export async function getSessionHistory(): Promise<SavedSession[]> {
   return invoke<SavedSession[]>("get_session_history");
 }
@@ -695,6 +837,580 @@ export async function deleteSession(id: string): Promise<void> {
 
 export async function clearAllSessions(): Promise<void> {
   return invoke("clear_all_sessions");
+}
+
+/**
+ * What `queryHistory` narrows by. Every field is optional; an empty filter
+ * is "everything, newest first".
+ */
+export type HistoryFilter = {
+  presetId?: string;
+  /** Reserved for the curriculum (ROADMAP 2.2). Nothing writes an exercise
+   *  key yet, so filtering by one matches nothing. */
+  exerciseKey?: string;
+  /** Instrument id, e.g. `"electric-guitar"`. */
+  instrument?: string;
+  /** Epoch ms, inclusive. */
+  since?: number;
+  /** Epoch ms, inclusive. */
+  until?: number;
+  bpmMin?: number;
+  bpmMax?: number;
+  limit?: number;
+};
+
+/**
+ * History beyond the last thirty sessions, narrowed. Returns whole
+ * `SavedSession`s, so everything in `src/coach/presetAwareness.ts` takes
+ * the rows as they come.
+ */
+export async function queryHistory(
+  filter: HistoryFilter = {},
+): Promise<SavedSession[]> {
+  return invoke<SavedSession[]>("query_history", { filter });
+}
+
+// ---------------------------------------------------------------------------
+// Songs — the library, and what was played against it
+// ---------------------------------------------------------------------------
+import type {
+  ExtraOnset,
+  Finding,
+  NoteVerdict,
+  OnsetResult,
+  ScoreSchedule,
+  SongScore,
+} from "./songs/types";
+
+/** One row of the song library — what a list shows, without the notes. */
+export type ScoreSummary = {
+  id: string;
+  title: string;
+  artist: string;
+  sourceFile: string;
+  format: string;
+  trackIndex: number;
+  trackName: string;
+  /** Epoch ms. */
+  importedAt: number;
+  /**
+   * What the player calls this song, when they have renamed it. Absent means
+   * "the title it came with" — renaming a song in the library never rewrites
+   * the title printed on the page.
+   */
+  name?: string;
+  /**
+   * When the player last opened it, epoch ms (migration four).
+   *
+   * Absent for a song nobody has opened since the counting started, which is
+   * every song that was in the library before it. The store sorts on
+   * `COALESCE(lastOpenedAt, importedAt)`, so a library from before the
+   * migration comes back in exactly the order it always did.
+   */
+  lastOpenedAt?: number;
+  /** How many times it has been opened since the counting started. */
+  openCount?: number;
+};
+
+/**
+ * One expected onset's verdict inside an attempt. Mirrors `OnsetResult` in
+ * the wave contract (`plans/tasks/songs/BRIEF.md`) field for field.
+ */
+export type AttemptOnset = {
+  /** `ExpectedOnset.id` — an index into the score's schedule. */
+  id: number;
+  state: "hit" | "miss" | "softAbsent";
+  deviationMs: number | null;
+  /** Times round the loop, from 0. */
+  pass: number;
+  /** See `OnsetResult.accentHeard`. Reported, never scored. */
+  accentHeard?: boolean;
+};
+
+/** An onset the player produced that the score did not ask for. */
+export type AttemptExtra = {
+  /** Quarter notes from the start of the played range. */
+  beat: number;
+  pass: number;
+};
+
+/** One pass at a range of bars of one song. */
+export type Attempt = {
+  id: string;
+  scoreId: string;
+  /** The practice session this attempt belonged to, when there was one. */
+  sessionId?: string;
+  /** Epoch ms. */
+  startedAt: number;
+  /** Inclusive, in played-bar indices (`SongScore.bars[].index`). */
+  rangeStartBar: number;
+  rangeEndBar: number;
+  /** Percentage of the score's own tempo it was played at. */
+  tempoPercent: number;
+  passes: number;
+  score: number;
+  hits: number;
+  misses: number;
+  extras: number;
+  meanDevMs: number;
+  madMs: number;
+  /** Recording of the attempt, when the player kept one. */
+  takePath?: string;
+  /** Empty unless the query asked for onsets. */
+  onsets?: AttemptOnset[];
+  extraOnsets?: AttemptExtra[];
+};
+
+/** A range of played bars, inclusive at both ends. */
+export type BarRange = { startBar: number; endBar: number };
+
+export type AttemptQuery = {
+  scoreId: string;
+  /** Selects attempts that *overlap* the range: a full run-through did
+   *  cover bars 17–24, and the coach comparing tonight against it should
+   *  see it. */
+  barRange?: BarRange;
+  /** Per-onset verdicts are the biggest thing in the store — ask for them
+   *  when you are about to colour a tab, not to list attempts. */
+  includeOnsets?: boolean;
+  limit?: number;
+};
+
+/** What `saveScore` may say about a song besides its score. */
+export type SaveScoreOptions = {
+  /** The player's name for it. Omitted says nothing rather than clearing it. */
+  name?: string;
+  /**
+   * The bytes of the file it was read from, base64. `SONGS.md` A2: the tab is
+   * engraved from the source, so the bytes outlive the import.
+   */
+  sourceBase64?: string;
+  /** Epoch ms. Omitted means now — pass one only to preserve a date. */
+  importedAt?: number;
+};
+
+/** Import (or re-import) a song. Resolves with the score's id. */
+export async function saveScore(
+  score: SongScore,
+  opts: SaveScoreOptions = {},
+): Promise<string> {
+  return invoke<string>("save_score", {
+    score,
+    name: opts.name ?? null,
+    sourceBase64: opts.sourceBase64 ?? null,
+    importedAt: opts.importedAt ?? null,
+  });
+}
+
+/** The library, most recently imported first. */
+export async function listScores(): Promise<ScoreSummary[]> {
+  return invoke<ScoreSummary[]>("list_scores");
+}
+
+export async function getScore(id: string): Promise<SongScore | null> {
+  return invoke<SongScore | null>("get_score", { id });
+}
+
+/**
+ * The bytes of the file a song was read from, base64, or `null`.
+ *
+ * Its own call because it is the biggest thing on the row and the library
+ * list never wants it — only the screen about to draw a tab does.
+ */
+export async function getScoreSource(id: string): Promise<string | null> {
+  return invoke<string | null>("get_score_source", { id });
+}
+
+/**
+ * The player opened this song: it goes to the top of the library.
+ *
+ * The time is the store's, not ours — when a song was opened is a fact about
+ * this machine rather than a claim the webview gets to make.
+ */
+export async function markScoreOpened(id: string): Promise<void> {
+  return invoke("mark_score_opened", { id });
+}
+
+/**
+ * Give the player their file back, through a native save dialog.
+ *
+ * Yames keeps its own copy of every file it imports, so clearing the
+ * Downloads folder loses nothing; this is the other half of that promise.
+ * Resolves with the path it was written to, or `null` when the player
+ * cancelled — which is not a failure and must not put a sentence on screen.
+ */
+export async function exportScoreSource(id: string): Promise<string | null> {
+  return invoke<string | null>("export_score_source", { id });
+}
+
+/** Forget a song, and with it every attempt at it. */
+export async function deleteScore(id: string): Promise<void> {
+  return invoke("delete_score", { id });
+}
+
+export async function saveAttempt(attempt: Attempt): Promise<void> {
+  return invoke("save_attempt", { attempt });
+}
+
+// ---------------------------------------------------------------------------
+// Songs on the engine — the piece the click walks, and the band from the file
+//
+// Songs is its own engine mode beside the metronome, the drill and the jam
+// (`plans/tasks/songs/W9-ENGINE-SONG.md`): while a song is loaded the click
+// follows the score's tempo map instead of `AppState.bpm`, and starting a jam
+// takes the song away. The engine holds only the compiled tables; the imported
+// file stays in the UI, exactly as a jam's record does.
+// ---------------------------------------------------------------------------
+
+import type { SongBacking, SongMixGains, SongTransport } from "./songs/types";
+
+/** What a song turned out to be, once the engine had compiled it. */
+export type SongLoaded = {
+  /** How many bars the range plays. */
+  bars: number;
+  /** How long one pass lasts, in milliseconds at the chosen speed. */
+  passMs: number;
+  /** How many backing notes play. */
+  playedNotes: number;
+  /** And how many named something this band has no voice for. */
+  droppedNotes: number;
+};
+
+/**
+ * Hand the engine a song: where it is in time, and the file's own band.
+ *
+ * Starting a song stops the others — the band goes, a running speed ramp
+ * stops, and a count-in the metronome had armed is spent, because a song
+ * carries its own. Rejects with a sentence when the transport describes
+ * something the engine cannot play.
+ */
+export async function loadSong(
+  transport: SongTransport,
+  backing: SongBacking | null = null,
+): Promise<SongLoaded> {
+  return invoke<SongLoaded>("load_song", { transport, backing });
+}
+
+/** Take the song away and leave the plain click. */
+export async function clearSong(): Promise<void> {
+  return invoke("clear_song");
+}
+
+/**
+ * Loop bars 17 to 24 at 70 %, or stop looping, or play the whole piece.
+ *
+ * It recompiles on the Rust side and starts the range again from the top,
+ * which is why the UI does not send one per keystroke of a number field.
+ */
+export async function setSongRange(
+  range: { startBar: number; endBar: number },
+  loops: boolean,
+  tempoPercent: number,
+  countInBars?: number,
+  startTick?: number,
+): Promise<SongLoaded> {
+  return invoke<SongLoaded>("set_song_range", {
+    range,
+    loops,
+    tempoPercent,
+    countInBars: countInBars ?? null,
+    // The playhead (W37 item 1). `null` leaves the engine's where it is, the
+    // same as the count-in beside it.
+    startTick: startTick === undefined ? null : Math.max(0, Math.round(startTick)),
+  });
+}
+
+/**
+ * How loud the click is, and each track of the file.
+ *
+ * Applies on the next buffer and recompiles nothing, so this is safe to send
+ * on every step of a fader drag. Out-of-range values are clamped rather than
+ * refused — a fader that stops moving is better than a dialog. A fader on a
+ * track the synthesiser plays is heard about a tenth of a second later, which
+ * is how long the audio already rendered ahead of the playhead takes to
+ * drain (`src-tauri/src/synth.rs`).
+ */
+export async function setSongMix(mix: SongMixGains): Promise<void> {
+  return invoke("set_song_mix", { mix });
+}
+
+/**
+ * Go to a place in the song that is playing, without stopping it.
+ *
+ * `set_song_range` recompiles the piece and starts it again, which is right
+ * for a new range and wrong for a click on bar 34 of the one that is
+ * sounding: it would end the pass, and ending a pass ends the attempt and
+ * raises the review (`COACH_UX.md` A3). This moves a cursor inside the table
+ * the engine already has. The click does not miss a beat, the take goes on
+ * recording, and the band is cut over a few milliseconds rather than left
+ * ringing from somewhere the player no longer is.
+ *
+ * `tick` is the SONG's own tick — the one unit the playhead is kept in
+ * everywhere above this (W37 item 1), so the mark on the page, the place the
+ * next press of Play begins and what this moves are the same number.
+ */
+export async function seekSong(tick: number): Promise<void> {
+  return invoke("seek_song", { tick: Math.max(0, Math.round(tick)) });
+}
+
+/**
+ * Play a song's other instruments out of a `.sf2` of the player's own.
+ *
+ * Desktop only; the phone build has no Songs. An empty path goes back to the
+ * set the app ships. It takes effect on the next song, because a sound set is
+ * decoded when a piece is compiled — and a set that will not open falls back
+ * to the shipped one rather than leaving the song silent.
+ */
+export async function setSongSoundFont(path: string | null): Promise<void> {
+  return invoke("set_song_sound_font", { path });
+}
+
+/** The native file dialog for one, filtered to `.sf2`. Null if they cancel. */
+export async function pickSoundFont(): Promise<string | null> {
+  return invoke("pick_sound_font");
+}
+
+/** Where the player's own sound set is remembered, if they chose one. */
+export const SONG_SOUND_FONT_KEY = "songSoundFont";
+
+/**
+ * The engine let go of the song: the audio device changed under it, or a jam
+ * started and took the band with it.
+ *
+ * It carries nothing, because there is nothing to say beyond that it
+ * happened — what to do about it is the mode's business, not the engine's.
+ */
+export function onSongDropped(callback: () => void) {
+  return listen<null>("song-dropped", () => callback());
+}
+
+// ---------------------------------------------------------------------------
+// The coach's judgement, and its ears
+//
+// Both run off the UI thread (`#[tauri::command(async)]`) and both belong to
+// the post-session tier (`AGENTS.md`): the pass is over, the player is
+// reading the timing score, and there are seconds to spend.
+// ---------------------------------------------------------------------------
+
+/** One attempt at a passage: every pass, as scoring reported it. */
+export type AttemptPasses = {
+  results: OnsetResult[];
+  extras?: ExtraOnset[];
+  /** The tempo it was played at, as a share of the score's own tempo. */
+  tempoPercent: number;
+};
+
+export type AnalyzeAttemptRequest = {
+  /** The score to judge against, by id in the library… */
+  scoreId?: string;
+  /** …or whole, for a passage that is not in the library yet. */
+  score?: SongScore;
+  /** Always from `src/songs/schedule.ts` — it is what derives one. */
+  schedule: ScoreSchedule;
+  attempt: AttemptPasses;
+  /** Earlier attempts at the same passage, oldest first, given whole. */
+  earlier?: AttemptPasses[];
+  /**
+   * …or asked of the store instead: every earlier attempt overlapping these
+   * bars. Needs `scoreId`. It is what makes "improved" and the tempo ceiling
+   * possible, and nothing else depends on it.
+   */
+  earlierBars?: BarRange;
+  /** The attempt being judged, when it is already saved — so it is not
+   *  compared against itself. */
+  excludeAttemptId?: string;
+};
+
+/** The coach's verdict, ranked, headline first (`COACH_UX.md` A4). */
+export async function analyzeAttempt(
+  request: AnalyzeAttemptRequest,
+): Promise<Finding[]> {
+  return invoke<Finding[]>("analyze_attempt", { request });
+}
+
+export type AnalyzeTakePitchRequest = {
+  /** The take to listen to, and the jam it was recorded under. Its DRY stem
+   *  is what is read — the mix has the band in it. */
+  takeId: string;
+  jamId: string;
+  scoreId?: string;
+  score?: SongScore;
+  schedule: ScoreSchedule;
+  results: OnsetResult[];
+  /**
+   * Onsets the player produced that the score did not ask for.
+   *
+   * No verdict is given on them — they are not notes of the score — but they
+   * are where the tracker is cut. Nothing in a pitch track tells one note
+   * from the next; an onset does, and an extra note left out here gets
+   * folded into the written note before it and drags its median off.
+   */
+  extras?: ExtraOnset[];
+  /**
+   * The tempo the range was played at — the click's, not the score's.
+   *
+   * One number, and a song has a map. Kept for everything that really does
+   * have one tempo, and as the fallback when `tempoMap` is absent.
+   */
+  bpm: number;
+  /**
+   * The click's tempo across the range, stepping where the score steps.
+   * `beat` is quarter notes from the range's start; `src/songs/schedule.ts`'s
+   * `rangeTempoSteps` is what derives it.
+   *
+   * Without this a tempo step puts every note after it in the wrong part of
+   * the take — at 100 BPM a quarter is 600 ms and at 140 it is 429, so eight
+   * bars past a step the window is seconds adrift and the tracker is asked
+   * about somebody else's notes.
+   */
+  tempoMap?: { beat: number; bpm: number }[];
+  /**
+   * Where the FIRST BEAT of the played range sits inside the dry stem, in ms
+   * from the instant that file starts.
+   *
+   * The one number everything else rests on. `OnsetResult` carries a
+   * deviation and not an absolute time, so when a note was played has to be
+   * reconstructed as "where it was due, plus how far off it was" — and
+   * "where it was due" only means anything against the buffer's own clock.
+   * Get this wrong and every note moves by the same amount, which looks like
+   * a tracker that cannot segment rather than a clock that is out.
+   */
+  startOffsetMs?: number;
+};
+
+/** Which note was that, for every note of the score in the played range. */
+export async function analyzeTakePitch(
+  request: AnalyzeTakePitchRequest,
+): Promise<NoteVerdict[]> {
+  return invoke<NoteVerdict[]>("analyze_take_pitch", { request });
+}
+
+/** Attempts at a song, oldest first. */
+export async function queryAttempts(query: AttemptQuery): Promise<Attempt[]> {
+  return invoke<Attempt[]>("query_attempts", { query });
+}
+
+// ---------------------------------------------------------------------------
+// The download is caught (W19, `plans/SONGS.md` S0.9)
+//
+// While Songs is the open mode, Rust lists the Downloads folder and says when
+// a Guitar Pro or MusicXML file has finished arriving. It offers; it never
+// imports, never moves the file and never opens it — `readOfferedFile` is the
+// only call that reads bytes, and it runs after the player has pressed the
+// button. No tab site is touched by any of this, by any route.
+// ---------------------------------------------------------------------------
+
+import type { DownloadOffer } from "./songs/downloadWatch";
+
+/** Where this machine puts downloads, or null if the OS will not say. */
+export async function defaultDownloadsDir(): Promise<string | null> {
+  return invoke<string | null>("default_downloads_dir");
+}
+
+/**
+ * Start watching. `folder` is null for this machine's own Downloads.
+ *
+ * Resolves with the folder actually being watched, so the setting can show it
+ * without having to work out what "the default" means on this OS. Rejects
+ * when the folder is not there, which is the case a player who moved a
+ * removable drive will hit.
+ */
+export async function startDownloadWatch(folder: string | null): Promise<string> {
+  return invoke<string>("start_download_watch", { dir: folder });
+}
+
+/** Stop watching. Idempotent. After this there is no watcher thread at all. */
+export async function stopDownloadWatch(): Promise<void> {
+  return invoke("stop_download_watch");
+}
+
+/** "Not this one", for as long as this watch runs. */
+export async function dismissDownloadOffer(fileName: string): Promise<void> {
+  return invoke("dismiss_download_offer", { fileName });
+}
+
+/** The offered file's bytes, base64 — after the player has said yes. */
+export async function readOfferedFile(path: string): Promise<string> {
+  return invoke<string>("read_offered_file", { path });
+}
+
+/** A file has finished arriving in the watched folder. */
+export function onDownloadOffer(callback: (offer: DownloadOffer) => void) {
+  return listen<DownloadOffer>("songs-download-offer", (e) => callback(e.payload));
+}
+
+// ---------------------------------------------------------------------------
+// The file opens with Yames (W19, `plans/SONGS.md` S0.9)
+//
+// "Open with Yames" on a Guitar Pro or MusicXML file, from a cold start or
+// while Yames is already running. The webview never names a path: it asks
+// whether the OS handed this process one, and gets the bytes back.
+// ---------------------------------------------------------------------------
+
+/** A file the OS asked Yames to open. */
+export type OpenedFile = {
+  fileName: string;
+  /** The bytes, base64 — `decodeSource` turns it back into a file. */
+  base64: string;
+};
+
+/**
+ * The next file the OS asked Yames to open, or null.
+ *
+ * Null on every launch that was not a double-click, which is nearly all of
+ * them. Taking it empties the queue, so a file is only ever opened once.
+ */
+export async function takePendingOpen(): Promise<OpenedFile | null> {
+  return invoke<OpenedFile | null>("take_pending_open");
+}
+
+/** Yames was asked to open a file while it was already running. */
+export function onOpenFile(callback: () => void) {
+  return listen("songs-open-file", () => callback());
+}
+
+// ---------------------------------------------------------------------------
+// "Come back to this" (COACH_UX A5)
+//
+// The promise the coach's fourth button makes. It was four keys in
+// `settings.json` until migration three gave it a table; `src/songs/due.ts`
+// moves what it finds across once and reads from here afterwards.
+// ---------------------------------------------------------------------------
+
+/** One passage of one song, and the day to look at it again. */
+export type ScoreDue = {
+  scoreId: string;
+  /** Played-bar indices, inclusive — the numbering the transport takes. */
+  rangeStartBar: number;
+  rangeEndBar: number;
+  /** Days since the Unix epoch, in the player's own local time. */
+  dueDay: number;
+  /** Why the coach asked, as the finding's own kind. */
+  reason?: string;
+};
+
+/** Write one down, or move the day of one already made. */
+export async function saveDue(due: ScoreDue): Promise<void> {
+  return invoke("save_due", { due });
+}
+
+/**
+ * Every promise on file, the soonest due first.
+ *
+ * The whole list rather than "what is due today": the day is a question about
+ * the player's own calendar, and a store that answered it would answer in UTC.
+ */
+export async function listDue(): Promise<ScoreDue[]> {
+  return invoke<ScoreDue[]>("list_due");
+}
+
+/** Forget one — the player played it, or does not want the reminder. */
+export async function clearDue(
+  scoreId: string,
+  startBar: number,
+  endBar: number,
+): Promise<void> {
+  return invoke("clear_due", { scoreId, startBar, endBar });
 }
 
 // ---------------------------------------------------------------------------
@@ -1173,7 +1889,8 @@ export function onPlaybackFinished(callback: () => void) {
 // Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
 // ---------------------------------------------------------------------------
 
-import type { Jam, JamEngineConfig, JamPositionCommand, JamTake } from "./jam/types";
+import type { Jam, JamEngineConfig, JamPositionCommand, JamTake, TakeSound } from "./jam/types";
+import type { SongRecord } from "./songs/library";
 
 /**
  * Jams live beside presets and setlists in the same `settings.json` store,
@@ -1195,6 +1912,70 @@ export async function listJams(): Promise<Jam[] | undefined> {
 /** The whole list, in order. The UI owns ordering, the store keeps it. */
 export async function saveJams(jams: Jam[]): Promise<void> {
   await storeSave(JAMS_KEY, jams);
+}
+
+// ---------------------------------------------------------------------------
+// Songs (plans/SONGS.md, plans/tasks/songs/W4-SONGS.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * `songs.json` — where the library used to live, and no longer does.
+ *
+ * Songs were given a store file of their own rather than `settings.json`,
+ * because a song carries the bytes of the file it came from (`SONGS.md` A2)
+ * and `settings.json` is rewritten whole every time anyone moves the volume
+ * slider. The right home was always W2's SQLite store, and that is where they
+ * are now: `src/songs/library.ts` reads and writes `scores` through
+ * `saveScore` / `listScores` / `getScore` / `deleteScore`.
+ *
+ * These three remain for the one-time move, which is the only thing that
+ * calls them. The file is left on disk with its songs taken out — not
+ * deleted, because a file the user can see disappearing is a worse surprise
+ * than an empty one, and because a downgrade to the previous build should
+ * find a store it recognises rather than a missing one.
+ *
+ * `loadScoreSchedule` used to live outside this file, in
+ * `src/songs/engineBridge.ts`, because `ipc.commands.test.ts` scrapes every
+ * `invoke("…")` here and W1's command did not exist yet. It exists now, so
+ * the bridge is gone and the wrapper is up with the rest of the scoring
+ * calls, where the gate can see it.
+ */
+const SONGS_KEY = "songs";
+
+/** Set once the songs in `songs.json` have been folded into the store. */
+const SONGS_MOVED_KEY = "movedToPracticeStore";
+
+let _songStore: Awaited<ReturnType<typeof load>> | null = null;
+async function getSongStore() {
+  if (!_songStore) _songStore = await load("songs.json", { autoSave: true, defaults: {} });
+  return _songStore;
+}
+
+/** `undefined` when nothing was ever saved. The app ships no songs to seed. */
+export async function listSongs(): Promise<SongRecord[] | undefined> {
+  const store = await getSongStore();
+  const songs = await store.get<SongRecord[]>(SONGS_KEY);
+  return Array.isArray(songs) ? songs : undefined;
+}
+
+export async function saveSongs(songs: SongRecord[]): Promise<void> {
+  const store = await getSongStore();
+  await store.set(SONGS_KEY, songs);
+}
+
+/**
+ * Whether the one-time move has already run. Recorded even when there was
+ * nothing to move — "we looked" is the fact worth keeping, the same way
+ * `db.rs` records the JSON history import.
+ */
+export async function songsMovedToStore(): Promise<boolean> {
+  const store = await getSongStore();
+  return (await store.get<boolean>(SONGS_MOVED_KEY)) === true;
+}
+
+export async function markSongsMovedToStore(): Promise<void> {
+  const store = await getSongStore();
+  await store.set(SONGS_MOVED_KEY, true);
 }
 
 /**
@@ -1374,9 +2155,56 @@ export function onJamEnded(callback: () => void) {
 // machine.
 // ---------------------------------------------------------------------------
 
-/** Start recording; the engine mixes the mic and the band into one WAV. */
-export async function startTake(jamId: string): Promise<void> {
-  return invoke("start_take", { jamId });
+/**
+ * Start recording.
+ *
+ * With no `sound`, or with `"yamesAndInput"`, the engine mixes your input and
+ * the band into one WAV, exactly as takes have always worked. With
+ * `"everything"` it instead records what comes out of the speaker Yames is
+ * playing through — your amp simulator and anything else that is making a
+ * sound, in stereo, with no microphone and no dry stem
+ * (`plans/SONGS.md` A12, `src-tauri/src/loopback.rs`).
+ *
+ * **The speakers are listened to only between this call and `stopTake`.** A
+ * failure to open that capture refuses the take rather than quietly recording
+ * the other thing under the same name.
+ */
+export async function startTake(jamId: string, sound?: TakeSound): Promise<void> {
+  return invoke("start_take", { jamId, sound: sound ?? null });
+}
+
+/** What `checkTakeSound` found. */
+export interface TakeSoundCheck {
+  /** Can this machine record what it plays at all? */
+  can: boolean;
+  /** The speaker it listened to, as the operating system names it. */
+  device?: string;
+  sampleRate?: number;
+  channels?: number;
+  /** The loudest thing it heard, 0 to 1. Zero means silence. */
+  peak: number;
+  /** Why it could not, in words that can go straight on screen. */
+  trouble?: string;
+}
+
+/**
+ * Can this machine record what it plays — and, with `listen`, how loud is it.
+ *
+ * The only thing in Yames that opens that capture outside a take, and it
+ * comes in two sizes. Without `listen` it opens the speaker, reads the format
+ * it would hand over and closes again, taking no audio at all: that is what
+ * the screen asks at start-up to decide whether to draw the switch, and it is
+ * asking the machine rather than guessing from the operating system's name.
+ * With `listen` it stays open for a fifth of a second and reports the loudest
+ * thing it heard — the musician pressing "check the sound", so they see the
+ * level BEFORE a take rather than finding silence after one. On Windows the
+ * mute and the volume slider sit before the tap, so a muted machine records
+ * nothing at all and this is the only warning of it there can be.
+ *
+ * Neither writes anything anywhere.
+ */
+export async function checkTakeSound(listen = false): Promise<TakeSoundCheck> {
+  return invoke("check_take_sound", { listen });
 }
 
 /** Stop and keep the take, or `null` when nothing was recording. */
@@ -1416,6 +2244,107 @@ export function onTakeCapped(callback: () => void) {
 /** Bytes the takes directory holds, across every jam. A fact about the disk, not about a take. */
 export async function takesDirSize(): Promise<number> {
   return invoke("takes_dir_size");
+}
+
+// ---- W21: the camera's recording, streamed to disk beside the take --------
+//
+// Four calls, in the order a pass uses them (`src-tauri/src/take_video.rs`).
+// The picture is the webview's — `MediaRecorder` hands it over a chunk at a
+// time — and everything about where it goes, what it may be called and who
+// may delete it is Rust's. Nothing here reads a video back: the review plays
+// it through the asset protocol, scoped to the takes directory.
+
+/** Open the file. `startedMs` only names it until the take has an id. */
+export async function takeVideoBegin(
+  jamId: string,
+  container: "mp4" | "webm",
+  startedMs: number,
+): Promise<void> {
+  return invoke("take_video_begin", { jamId, container, startedMs });
+}
+
+/**
+ * Append one chunk. **Raw bytes, never base64.**
+ *
+ * Tauri v2 carries a `Uint8Array` as the request's BODY rather than as JSON,
+ * so a third of a megabyte of video crosses as a third of a megabyte. The
+ * same chunk as a JSON array of numbers is four times the size and has to be
+ * parsed a number at a time, every second, for as long as somebody plays; as
+ * base64 it is a third bigger again and has to be decoded twice. The chunk's
+ * number rides in a header because the body is the video and nothing else.
+ */
+export async function takeVideoAppend(seq: number, bytes: Uint8Array): Promise<number> {
+  return invoke("take_video_append", bytes, { headers: { seq: String(seq) } });
+}
+
+/** Close it, file it under the take, and record how far it sits from the sound. */
+export async function takeVideoFinish(
+  takeId: string,
+  offsetMs: number | null,
+): Promise<{ path: string; bytes: number; offsetMs?: number }> {
+  return invoke("take_video_finish", { takeId, offsetMs });
+}
+
+/** Throw it away: the pass was abandoned, or the take turned out to be nothing. */
+export async function takeVideoDiscard(): Promise<void> {
+  return invoke("take_video_discard");
+}
+
+/**
+ * W25 — one frame of the picture, beside the take, so the shelf can show what
+ * a take is a picture of rather than a row of dates.
+ *
+ * Raw bytes for `takeVideoAppend`'s reason, and the take's id in a header for
+ * the same one: the body is the JPEG and nothing else.
+ */
+export async function takeThumbWrite(takeId: string, bytes: Uint8Array): Promise<string> {
+  return invoke("take_thumb_write", bytes, { headers: { take: takeId } });
+}
+
+// ---- W25: "Save as a video" — the clip the player sends somebody ----------
+//
+// The same four-step pipe as the camera's, pointed somewhere else entirely:
+// the file is the PLAYER'S, at a path they chose in a native save dialog, and
+// the app neither lists it nor reads it back. Nothing is uploaded; there is no
+// call here that could.
+
+/**
+ * Ask where the clip goes and open the file.
+ *
+ * Resolves to the path, or `null` when the player cancels the dialog — which
+ * is not a failure and must not put a sentence on their screen.
+ */
+export async function clipSaveBegin(
+  suggested: string,
+  container: "mp4" | "webm",
+): Promise<string | null> {
+  return invoke("clip_save_begin", { suggested, container });
+}
+
+/** Append one composited chunk. Raw bytes, for `takeVideoAppend`'s reasons. */
+export async function clipSaveAppend(seq: number, bytes: Uint8Array): Promise<number> {
+  return invoke("clip_save_append", bytes, { headers: { seq: String(seq) } });
+}
+
+/** Close it. The path comes back so the screen can say where it went. */
+export async function clipSaveFinish(): Promise<{ path: string; bytes: number }> {
+  return invoke("clip_save_finish");
+}
+
+/** Cancelled, or something went wrong. Nothing is left at the chosen name. */
+export async function clipSaveDiscard(): Promise<void> {
+  return invoke("clip_save_discard");
+}
+
+/**
+ * Show a file the player just saved, in their own file manager.
+ *
+ * The first thing somebody who has made a clip needs is to find it. Nothing
+ * is opened, played or sent anywhere: the folder is shown and the app is
+ * finished with the file.
+ */
+export async function revealInFolder(path: string): Promise<void> {
+  return invoke("reveal_in_folder", { path });
 }
 
 /**
