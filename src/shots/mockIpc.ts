@@ -879,7 +879,12 @@ export function installShotMock(shot: Shot, theme: string): void {
     const beatTicks = (transport.ticksPerQuarter * 4) / (first.denominator || 4);
     const countInBeats = (transport.countInBars || 0) * (first.numerator || 4);
     const into = Math.max(0, (transport.startTick ?? first.startTick) - first.startTick);
-    return countInBeats + Math.round(into / beatTicks);
+    // Not rounded. The engine starts at the exact sample of the playhead; a
+    // beat counter that rounds DOWN starts up to half a beat early, and the
+    // layout suite (rightly) reads that as a stop that rewound — it failed
+    // 1 in 4 runs on exactly that. A fractional beat is what `songAt`
+    // multiplies anyway.
+    return countInBeats + into / beatTicks;
   }
 
   /**
@@ -918,7 +923,9 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (!STATE.isPlaying) return;
     const groups = STATE.beatGroups as number[];
     const total = groups.reduce((a, b) => a + b, 0) || 4;
-    const measureBeat = beatCount % total;
+    // The counter may carry a fraction of a beat after a pause (see
+    // `beatAtPlayhead`); the accent and the bar are whole-beat facts.
+    const measureBeat = Math.floor(beatCount) % total;
     // The engine's accent rule, drawn again for the screenshot harness: the
     // beat that opens the bar is strong, every other group start is a middle.
     const opens = new Map<number, 1 | 2>();
@@ -961,7 +968,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     const song = songAt(beatCount);
 
     emit("beat", {
-      beat: beatCount,
+      beat: Math.floor(beatCount),
       measureBeat,
       subdivision: 0,
       isDownbeat: true,
