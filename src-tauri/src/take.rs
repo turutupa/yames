@@ -4304,26 +4304,51 @@ mod tests {
         let alive = Arc::new(AtomicBool::new(true));
         let filling = alive.clone();
         let feed = ring.clone();
+        // How many times the stand-in stream has pushed, so the test can say
+        // it was still talking while Stop ran.
+        let pushes = Arc::new(AtomicU64::new(0));
+        let pushed = pushes.clone();
         let pump = std::thread::spawn(move || {
             while filling.load(Ordering::Acquire) {
                 feed.push(&vec![0.1f32; 960 * 2]);
+                pushed.fetch_add(1, Ordering::Release);
                 std::thread::sleep(std::time::Duration::from_millis(5));
             }
         });
 
         wait_until("the take to be recording", || session.written_samples() > 0);
         // No `capture` to close, so `stop` cannot help itself here: only the
-        // writer's own bound can end this, and it has half a second to.
-        let began = std::time::Instant::now();
-        let take = session.stop(&handoff).expect("the take stops");
-        let took = began.elapsed();
+        // writer's own bound (`MAX_DRAIN_TICKS`) can end this.
+        //
+        // What is checked is THAT Stop comes back, not how fast — it used to
+        // be timed, and a loaded machine took 5.7 s over a bound of 5. So
+        // Stop runs on a thread of its own and is waited for with a
+        // HANG-CATCHER: the bug this guards is a join that never returns, and
+        // sixty seconds is two orders of magnitude past the writer's bound of
+        // twenty ticks, so only a hang can reach it.
+        let pushes_before = pushes.load(Ordering::Acquire);
+        let stop_handoff = handoff.clone();
+        let (tx, rx) = std::sync::mpsc::channel();
+        let stopper = std::thread::spawn(move || {
+            let _ = tx.send(session.stop(&stop_handoff));
+        });
+        let take = rx
+            .recv_timeout(std::time::Duration::from_secs(60))
+            .expect("Stop never came back against a speaker that would not stop")
+            .expect("the take stops");
+        // Read BEFORE the pump is told to stop: the stream was still being
+        // filled while Stop ran, which is the condition under test — a writer
+        // that only finished because the ring ran dry would prove nothing.
+        let pushed_during_stop = pushes.load(Ordering::Acquire) - pushes_before;
         alive.store(false, Ordering::Release);
         let _ = pump.join();
+        let _ = stopper.join();
 
         assert!(take.is_some(), "the take is kept");
         assert!(
-            took < std::time::Duration::from_secs(5),
-            "stopping took {took:?} against a stream that would not stop"
+            pushed_during_stop > 0,
+            "the stand-in speaker was quiet while Stop ran, so this did not test one \
+             that never stops talking"
         );
     }
 
