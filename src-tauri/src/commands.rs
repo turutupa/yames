@@ -3795,9 +3795,17 @@ fn build_and_install_song(
 
     // ---- The guitars, and the thread that makes them ----
     //
-    // Started BEFORE the table is installed, so the ring already has its lead
-    // by the time the callback is walking the piece and the first bar does
-    // not come in a tenth of a second late. Starting it is not fatal: a song
+    // Started BEFORE the table is installed, so the thread is up when the
+    // callback first asks. That is all it buys: it does NOT give the ring a
+    // lead. Nothing may be rendered until the callback has drained for the
+    // current epoch, and the callback only does that on a buffer where the
+    // song is PLAYING (`ready` runs after the transport gate) — so a song
+    // installed while stopped has an empty ring when Play is pressed. On that
+    // first buffer, and on the first buffer after every seek, the synth is
+    // silent; the renderer then begins at the playhead that buffer published,
+    // and the next buffer skips forward to where it has got to. The first
+    // 10-20 ms of the guitars at the landing point — the pick attack — is not
+    // heard (W38 item 5). Starting it is not fatal: a song
     // whose synthesiser would not start is a song with its drums and its bass,
     // which is what it had before W28, and that is better than a song that
     // will not load.
@@ -4291,6 +4299,13 @@ fn takes_home(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
 /// goes ahead as the band alone rather than being refused: half a take is
 /// worth more than none, and the UI can say which it got from the file.
 /// A stream started HERE is remembered, so `stop_take` can give it back.
+///
+/// **Still synchronous, on purpose** (W38 item 6). The capture open here is
+/// a device open on the window's thread, but moving it off would break the
+/// one thing that keeps a take under control: the webview sends `stop_take`
+/// without waiting for `start_take` to answer, and two synchronous commands
+/// run in the order they were sent. An `async` start could lose that race,
+/// and a take whose stop arrived first would record until the next one.
 #[tauri::command]
 pub fn start_take(
     jam_id: String,
@@ -4460,13 +4475,32 @@ pub struct TakeSoundCheck {
 ///   file is four minutes of silence.
 ///
 /// Neither writes anything anywhere. What comes back is one number.
+///
+/// `async`, with the work on a blocking thread: opening and closing an audio
+/// endpoint, and the two hundred milliseconds of listening, would otherwise
+/// run on the thread that draws the window, and the screen would freeze for
+/// them (W38 item 6).
 #[tauri::command]
-pub fn check_take_sound(listen: Option<bool>, engine_state: State<EngineState>) -> TakeSoundCheck {
+pub async fn check_take_sound(listen: Option<bool>, app_handle: AppHandle) -> TakeSoundCheck {
+    tokio::task::spawn_blocking(move || check_take_sound_blocking(listen, &app_handle))
+        .await
+        .unwrap_or_else(|e| TakeSoundCheck {
+            can: false,
+            device: None,
+            sample_rate: None,
+            channels: None,
+            peak: 0.0,
+            trouble: Some(format!("the sound check did not finish: {e}")),
+        })
+}
+
+fn check_take_sound_blocking(listen: Option<bool>, app_handle: &AppHandle) -> TakeSoundCheck {
     /// How long to listen when asked to. Two hundred milliseconds of a meter
     /// is enough to see a strum and short enough that nobody would call it
     /// recording.
     const CHECK_MS: u64 = 200;
     let listen = listen.unwrap_or(false);
+    let engine_state = app_handle.state::<EngineState>();
 
     if !crate::loopback::supported() {
         return TakeSoundCheck {
