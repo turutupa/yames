@@ -813,16 +813,22 @@ export async function clearSession(): Promise<void> {
 // Session History — the practice store (ROADMAP 1.1)
 //
 // These four keep the shapes they have always had; underneath, history now
-// lives in `practice.db` beside `settings.json` instead of inside it. The
-// JSON array is imported once on first launch and then left alone.
+// lives in `practice.db` beside `settings.json` instead of inside it. Each
+// launch imports whatever the JSON array holds that the store has not seen,
+// and leaves the array itself alone.
 //
 // A store that will not open (corrupt, or written by a newer Yames) answers
-// reads with nothing and refuses writes — it is never deleted.
+// reads with nothing — it is never deleted — and a finished session is then
+// kept in `settings.json` the way v1.2.1 kept it rather than lost.
 // ---------------------------------------------------------------------------
 import type { SavedSession } from "./types";
 
-export async function saveSession(session: SavedSession): Promise<void> {
-  return invoke("save_session", { session });
+/** Where a saved session went: the practice store, or — when the store could
+ *  not take it — `settings.json`, the way older builds kept history. */
+export type SaveSessionOutcome = "stored" | "keptInSettings";
+
+export async function saveSession(session: SavedSession): Promise<SaveSessionOutcome> {
+  return invoke<SaveSessionOutcome>("save_session", { session });
 }
 
 /** The most recent thirty sessions, newest first — the same slice the

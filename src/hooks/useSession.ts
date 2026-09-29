@@ -3,6 +3,7 @@ import { getFinalSessionReport, stopEvaluation, getSessionHistory, queryHistory,
 import type { AdaptiveEvalRequest } from "../ipc";
 import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
+import i18n from "../i18n";
 import {
   coachLoadPending,
   coachResident,
@@ -85,6 +86,18 @@ const MIN_BEATS_PER_EVAL_CHECK = 8;
 // Suppress all reactive tips (gatekeeper + realtime) for the first N ms
 // of each session so the player has time to warm up before feedback lands.
 const COACH_WARMUP_MS = 20_000;
+
+// ── History kept the old way ────────────────────────────────────────
+// When the practice store cannot take a finished session, Rust keeps it in
+// settings.json the way v1.2.1 did and says so (`keptInSettings`). The
+// player is told once per launch — module state, not hook state, because a
+// launch is what the sentence is about, and a remount must not repeat it.
+let historyKeptInSettingsNoticed = false;
+
+/** Tests only: forget that the notice was shown this launch. */
+export function __resetHistoryNoticeForTests(): void {
+  historyKeptInSettingsNoticed = false;
+}
 
 type Evaluation = ReturnType<typeof useEvaluation>;
 
@@ -1603,7 +1616,27 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         presetId: presetId,
         presetName: presetName,
         segments: miniReportSegments.length > 0 ? miniReportSegments : undefined,
-      }).catch(() => {});
+      })
+        .then((outcome) => {
+          // The store could not take it; it is safe in settings.json and
+          // comes into the history on a later launch. Say so, once.
+          if (outcome !== "keptInSettings" || historyKeptInSettingsNoticed) return;
+          historyKeptInSettingsNoticed = true;
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              type: "system",
+              timestamp: Date.now(),
+              content: i18n.t("coachCard.historyKeptInSettings"),
+            },
+          ]);
+        })
+        .catch((e) => {
+          // Both the store and settings.json refused it. Nothing more this
+          // hook can do, but it is not dropped without a word in the log.
+          console.error("[session] this session could not be saved anywhere:", e);
+        });
     }
 
     // Generate coach summary in the background, then patch the message.

@@ -1927,7 +1927,9 @@ pub async fn clear_session(session_acc: State<'_, SharedSessionAccumulator>) -> 
 // arrives before the open finishes is made to wait rather than lie.
 //
 // A store that will not open answers reads with nothing and refuses
-// writes out loud. It is never deleted or rewritten — see `db.rs`.
+// writes out loud — except a finished session, which is kept in
+// `settings.json` the way v1.2.1 kept it rather than lost (`save_session`).
+// The store is never deleted or rewritten — see `db.rs`.
 // ---------------------------------------------------------------------------
 
 /// Open the practice store and fold the legacy JSON history into it.
@@ -1942,22 +1944,20 @@ pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPrac
             return;
         }
     };
-    // The one-time import. `evalSessionHistory` is *read* and left exactly
-    // where it is: an older build must still find its history if the user
-    // ever goes back to one.
-    let legacy: Vec<crate::session::SavedSession> = app_handle
-        .store("settings.json")
-        .ok()
-        .and_then(|s| {
-            s.get("evalSessionHistory")
-                .and_then(|v| serde_json::from_value(v.clone()).ok())
-        })
-        .unwrap_or_default();
+    // The import, on every launch (it only takes what it has not seen —
+    // see `Db::import_json_history`). `evalSessionHistory` is *read* and left
+    // exactly where it is: an older build must still find its history if the
+    // user ever goes back to one. A `settings.json` that will not open is
+    // `Unreadable`, which imports nothing and does not mark the import done.
+    let legacy = match app_handle.store("settings.json") {
+        Ok(s) => crate::db::LegacyHistory::from_value(s.get("evalSessionHistory").as_ref()),
+        Err(e) => crate::db::LegacyHistory::Unreadable(e.to_string()),
+    };
 
     // Imported *before* the store becomes visible to any command, so the
     // first history read of a fresh install cannot catch it half done.
     store.open_at(&crate::db::db_path(&data_dir), |db| {
-        match db.import_json_history(&legacy) {
+        match db.import_legacy_history(&legacy) {
             Ok(0) => {}
             Ok(n) => eprintln!("[store] imported {n} session(s) from the JSON history"),
             Err(e) => eprintln!("[store] could not import the JSON history: {e}"),
@@ -1965,17 +1965,36 @@ pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPrac
     });
 }
 
+/// Save a finished session. `"stored"` when it went into the practice store;
+/// `"keptInSettings"` when the store could not take it and it was written
+/// into `settings.json` the way v1.2.1 wrote it instead — the frontend tells
+/// the player once, and the next launch's import brings it into the store.
 #[tauri::command(async)]
 pub fn save_session(
     session: crate::session::SavedSession,
+    app_handle: AppHandle,
     store: State<'_, crate::db::SharedPracticeStore>,
     state: State<'_, SharedState>,
-) -> Result<(), String> {
+) -> Result<crate::db::SaveOutcome, String> {
     // `SavedSession` has never carried an instrument and this wave does not
     // change its shape, so the row is stamped with the one that is selected
     // right now — which is the one that was just played.
     let instrument = state.lock().ok().map(|s| s.instrument.id());
-    store.with(|db| db.save_session(&session, instrument))
+    store.save_session_or_keep(&session, instrument, |s| {
+        use tauri_plugin_store::StoreExt;
+        let settings = app_handle
+            .store("settings.json")
+            .map_err(|e| e.to_string())?;
+        let history =
+            crate::db::legacy_history_with(settings.get("evalSessionHistory").as_ref(), s)?;
+        settings.set("evalSessionHistory", history);
+        // Written now rather than on the plugin's debounce: this is the one
+        // copy of the session there is.
+        if let Err(e) = settings.save() {
+            eprintln!("[store] settings.json did not flush the kept session yet: {e}");
+        }
+        Ok(())
+    })
 }
 
 /// The most recent `MAX_SESSION_HISTORY` sessions, newest first —
@@ -2023,9 +2042,9 @@ pub fn clear_all_sessions(
     let settings = app_handle
         .store("settings.json")
         .map_err(|e| e.to_string())?;
-    // The legacy array is emptied too. It is not read any more (the import
-    // flag has long since been set), but leaving a copy of the history
-    // behind after the user asked for it to be gone would be a lie.
+    // The legacy array is emptied too. Every launch's import reads it, and
+    // leaving a copy of the history behind after the user asked for it to be
+    // gone would be a lie.
     let empty: Vec<crate::session::SavedSession> = Vec::new();
     settings.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
     // U3.3 — the drill-run history is practice history too. "Clear all

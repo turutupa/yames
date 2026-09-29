@@ -26,7 +26,8 @@
     "send": "Senden",
     "today": "Heute",
     "yesterday": "Gestern",
-    "noteSpacingTrend": "Notenabstands-Trend"
+    "noteSpacingTrend": "Notenabstands-Trend",
+    "historyKeptInSettings": "Your practice history couldn't be opened, so Yames is saving your sessions the way earlier versions did. Nothing is lost — they'll move into your history the next time Yames opens it."
   },
   "coachDetail": {
     "exercises": "Übungen",
