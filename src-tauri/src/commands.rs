@@ -4784,11 +4784,21 @@ pub struct OpenedFile {
 /// else is a candidate, and anything that is not a song file we understand is
 /// ignored rather than complained about — a flag or a stray argument is not
 /// the player asking for anything.
-pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
+///
+/// Each argument is joined onto `cwd`, the folder the launching process was
+/// started in: `yames riff.gp5` from a terminal means the file in THAT
+/// folder, which is not the running app's when a second copy hands its
+/// command line over. An absolute argument replaces `cwd` in the join, so it
+/// is unchanged.
+pub fn queue_opened_paths(
+    state: &PendingOpenState,
+    argv: &[String],
+    cwd: &std::path::Path,
+) -> usize {
     let mut queued = 0;
-    let mut held = state.0.lock().unwrap();
+    let mut held = state.0.lock().unwrap_or_else(|p| p.into_inner());
     for arg in argv.iter().skip(1) {
-        let path = std::path::PathBuf::from(arg);
+        let path = cwd.join(arg);
         let openable = path
             .file_name()
             .and_then(|n| n.to_str())
@@ -4808,8 +4818,14 @@ pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
 
 /// A second Yames was launched on a file while one was already running, or
 /// this one was started with a path. Bring the window forward and say so.
-pub fn announce_opened_paths(app: &AppHandle, argv: &[String]) {
-    let queued = queue_opened_paths(&app.state::<PendingOpenState>(), argv);
+pub fn announce_opened_paths(app: &AppHandle, argv: &[String], cwd: &std::path::Path) {
+    // Managed on the Builder, so it is always there; `try_state` all the same,
+    // because a panic here is inside a window callback and takes the app down.
+    let Some(pending) = app.try_state::<PendingOpenState>() else {
+        eprintln!("[open] a file arrived before Yames could take it — ignoring it");
+        return;
+    };
+    let queued = queue_opened_paths(&pending, argv, cwd);
     if queued == 0 {
         return;
     }
@@ -4896,7 +4912,10 @@ mod opened_paths_tests {
             dir.join("score.musicxml").to_string_lossy().into_owned(),
         ];
 
-        assert_eq!(queue_opened_paths(&state, &argv), 2);
+        // Absolute paths, and a working folder somewhere else entirely: the
+        // join leaves an absolute argument exactly as it was.
+        let elsewhere = std::env::temp_dir();
+        assert_eq!(queue_opened_paths(&state, &argv, &elsewhere), 2);
         let held = state.0.lock().unwrap();
         let names: Vec<_> = held
             .iter()
@@ -4912,11 +4931,37 @@ mod opened_paths_tests {
             queue_opened_paths(
                 &state,
                 &[dir.join("riff.gp5").to_string_lossy().into_owned()],
+                &elsewhere,
             ),
             0,
         );
 
         std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn a_relative_path_is_the_file_in_the_launching_copys_folder() {
+        // `yames riff.gp5` typed in a terminal, while Yames is already open:
+        // the second copy hands over its argv AND its working folder, and the
+        // file is the one in that folder — not in the running app's.
+        let theirs = temp_dir("cwd-theirs");
+        std::fs::write(theirs.join("riff.gp5"), b"bytes").unwrap();
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec!["yames.exe".into(), "riff.gp5".into()];
+
+        assert_eq!(queue_opened_paths(&state, &argv, &theirs), 1);
+        let held = state.0.lock().unwrap();
+        assert_eq!(held.as_slice(), [theirs.join("riff.gp5")]);
+        assert!(held[0].is_absolute(), "queued as a path that still means the same file later");
+        drop(held);
+
+        // The same name against a folder where it is not: nothing queued.
+        let ours = temp_dir("cwd-ours");
+        let state = PendingOpenState::default();
+        assert_eq!(queue_opened_paths(&state, &argv, &ours), 0);
+
+        std::fs::remove_dir_all(&theirs).ok();
+        std::fs::remove_dir_all(&ours).ok();
     }
 
     #[test]
@@ -4929,10 +4974,10 @@ mod opened_paths_tests {
             dir.join("riff.gp5").to_string_lossy().into_owned(),
             dir.join("riff.gp5").to_string_lossy().into_owned(),
         ];
-        assert_eq!(queue_opened_paths(&state, &argv), 1);
+        assert_eq!(queue_opened_paths(&state, &argv, &dir), 1);
         // And again from a second launch, while the first is still waiting to
         // be collected: two double-clicks on one file are one file.
-        assert_eq!(queue_opened_paths(&state, &argv), 0);
+        assert_eq!(queue_opened_paths(&state, &argv, &dir), 0);
         assert_eq!(state.0.lock().unwrap().len(), 1);
         std::fs::remove_dir_all(&dir).ok();
     }
@@ -4940,7 +4985,10 @@ mod opened_paths_tests {
     #[test]
     fn an_ordinary_launch_queues_nothing() {
         let state = PendingOpenState::default();
-        assert_eq!(queue_opened_paths(&state, &["yames.exe".to_string()]), 0);
+        assert_eq!(
+            queue_opened_paths(&state, &["yames.exe".to_string()], &std::env::temp_dir()),
+            0
+        );
         assert!(state.0.lock().unwrap().is_empty());
     }
 }
