@@ -1606,6 +1606,19 @@ fn main() -> ExitCode {
                     let drained_before = ring.watch().drained;
                     handoff.seek(quarter * ((n / 12) % 4 + 1).min(3));
                     watch.after_seek(&ring, drained_before, seek_silence_limit, &flag);
+                    // And a second click the moment the guitars are back —
+                    // a player clicking along the tab, which is when the
+                    // review expected the wedge to be likeliest.
+                    //
+                    // This DETECTS a wedge; it does not reliably CAUSE one.
+                    // The race needs the seek to land while the renderer is
+                    // inside one 256-frame chunk, a few per cent of each
+                    // buffer here, and 60 seeks on the old ring (2026-09-29)
+                    // never hit it. `synth::tests` drives that interleaving
+                    // by hand, which is the proof; this is the net.
+                    let drained_before = ring.watch().drained;
+                    handoff.seek(quarter * ((n / 12 + 2) % 4));
+                    watch.after_seek(&ring, drained_before, seek_silence_limit, &flag);
                 }
                 n += 1;
                 count.fetch_add(1, Ordering::Relaxed);
@@ -1864,7 +1877,7 @@ fn main() -> ExitCode {
     }
     if song_moves > 0 {
         mode.push_str(&format!(
-            " + a fader moved {song_moves} times and a seek every three seconds"
+            " + a fader moved {song_moves} times and two quick seeks every three seconds"
         ));
     }
     if args.song {
