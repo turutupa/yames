@@ -252,14 +252,12 @@
       "aaba32": "AABA",
       "one": "1코드",
       "custom": "{{count}}마디",
-      "custom_one": "{{count}}마디",
       "custom_other": "{{count}}마디"
     },
     "countIn": {
       "label": "카운트인",
       "none": "없음",
       "barsAnd": "{{count}}마디 · {{sound}}",
-      "barsAnd_one": "{{count}}마디 · {{sound}}",
       "barsAnd_other": "{{count}}마디 · {{sound}}"
     },
     "fills": {
@@ -277,7 +275,6 @@
       "label": "지금",
       "aria": "{{chord}} 연주 중",
       "next": "{{count}}마디 뒤 {{chord}}",
-      "next_one": "{{count}}마디 뒤 {{chord}}",
       "next_other": "{{count}}마디 뒤 {{chord}}",
       "nextNow": "다음은 {{chord}}"
     },
@@ -301,7 +298,6 @@
       "scope": "보여줄 범위",
       "scopeKey": "이 조성",
       "scopeAll": "모든 조성",
-      "noteCount_one": "{{count}}음 스케일",
       "noteCount_other": "{{count}}음 스케일",
       "noteCount": "{{count}}음 스케일",
       "jump": "바로 가기",
@@ -409,7 +405,6 @@
       "dropOutEvery": "{{count}}마디마다 쉼",
       "dropOutBarsLabel": "밴드가 쉬는 길이",
       "forBars": "{{count}}마디 동안",
-      "forBars_one": "{{count}}마디 동안",
       "forBars_other": "{{count}}마디 동안",
       "trade": "주고받기",
       "tradeN": "{{count}}마디씩",
@@ -417,7 +412,6 @@
       "tempoUp": "템포 +{{step}}",
       "tempoEveryLabel": "템포가 오르는 주기",
       "everyChoruses": "{{count}}코러스마다",
-      "everyChoruses_one": "{{count}}코러스마다",
       "everyChoruses_other": "{{count}}코러스마다",
       "climbing": "{{from}}에서 오르는 중",
       "dropOutExplain": "가끔 밴드가 몇 마디 쉬고, 그동안 혼자 박을 지킵니다.",
@@ -521,7 +515,6 @@
       "lead": "각각 그루브, 킷, 필, 세기를 한 번에 정합니다",
       "aria": "이 바이브를 연주하는 방식",
       "count": "{{count}}가지 연주법",
-      "count_one": "{{count}}가지 연주법",
       "count_other": "{{count}}가지 연주법",
       "yours": "내 잼",
       "yoursEmpty": "아직 저장한 게 없습니다",
@@ -596,10 +589,8 @@
       "empty": "마디선, iReal 형식의 줄, 또는 가사 위에 코드를 적은 악보.",
       "none": "아직 코드가 없습니다.",
       "summary": "{{count}}마디 · {{key}} 조",
-      "summary_one": "{{count}}마디 · {{key}} 조",
       "summary_other": "{{count}}마디 · {{key}} 조",
       "check": "확인할 것 {{count}}개: {{list}}",
-      "check_one": "확인할 것 {{count}}개: {{list}}",
       "check_other": "확인할 것 {{count}}개: {{list}}"
     },
     "perc": {
@@ -711,6 +702,37 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "녹음할 소리",
+      "yames": "Yames와 내 입력",
+      "everything": "이 컴퓨터가 내는 모든 소리",
+      "warning": "Yames뿐 아니라 이 컴퓨터가 내는 모든 소리가 녹음됩니다. 화상 통화, 알림음, 브라우저의 노래까지 들어갑니다.",
+      "listensTo": "{{device}}을(를) 듣고 있습니다.",
+      "check": "소리 확인",
+      "listening": "듣는 중…",
+      "level": "레벨",
+      "silent": "아무 소리도 들어오지 않았습니다. 이 컴퓨터의 볼륨이 켜져 있고 음소거가 아닌지 확인하세요.",
+      "notHere": "이 컴퓨터는 스피커가 내는 소리를 Yames에 넘겨줄 수 없습니다. 여기서는 Yames와 내 입력이 녹음됩니다.",
+      "recordingEverything": "이 컴퓨터가 내는 모든 소리를 녹음 중",
+      "recordingYames": "Yames와 내 입력을 녹음 중",
+      "takeEverything": "이 컴퓨터가 냈던 모든 소리"
+    },
+    "takeVideo": {
+      "save": "영상으로 저장",
+      "chorus": "코러스 {{count}}",
+      "next": "다음"
+    },
+    "watch": {
+      "open": "다시 듣기",
+      "where": "{{bar}}마디 · {{chorus}}",
+      "goToBar": "{{bar}}마디로",
+      "barBack": "한 마디 뒤로",
+      "barOn": "한 마디 앞으로",
+      "nudge": "영상",
+      "nudgeBack": "영상을 조금 빠르게",
+      "nudgeOn": "영상을 조금 느리게",
+      "broken": "이 테이크를 재생할 수 없습니다. 파일이 옮겨졌거나 삭제되었을 수 있습니다."
     }
   },
   "scale": {

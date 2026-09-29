@@ -110,7 +110,13 @@
       "downloadVoices": "Stimmen herunterladen",
       "installed": "{{tier}}-Coach installiert ({{size}})",
       "removing": "Wird entfernt…",
-      "removeModels": "Modelle entfernen"
+      "removeModels": "Modelle entfernen",
+      "stance": "Coaching-Stil",
+      "stanceHint": "Wie streng der Coach beim Spielen mit dir ist",
+      "stanceStrict": "Streng",
+      "stanceLearning": "Lernen",
+      "stanceStrictDesc": "Benennt eine Tendenz, sobald sie auftaucht, und sagt sie laut. Die richtige Einstellung, wenn du eine Stelle übst, die du schon kannst.",
+      "stanceLearningDesc": "Lässt dir die Hälfte mehr Spielraum, bevor überhaupt etwas gesagt wird, hält Korrekturen beim Spielen aus deinen Ohren und fängt mit dem an, was gut lief. Deine Bewertung wird in beiden Fällen genau gleich gerechnet."
     },
     "general": {
       "title": "Allgemein",
@@ -177,7 +183,8 @@
         "metronome": "Metronom",
         "view": "Ansicht",
         "navigation": "Navigation",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Songs"
       },
       "actions": {
         "play": "Start / Stopp",
@@ -211,7 +218,17 @@
         "jam-next-section": "Nächster Teil",
         "jam-prev-section": "Vorheriger Teil",
         "jam-loop-section": "Diesen Teil loopen",
-        "jam-take": "Take aufnehmen"
+        "jam-take": "Take aufnehmen",
+        "tab-5": "Songs-Tab",
+        "songs-loop-start": "Wiederholung beginnt hier",
+        "songs-loop-end": "Wiederholung endet hier",
+        "songs-loop": "Teil wiederholen",
+        "songs-loop-clear": "Wieder der ganze Song",
+        "songs-loop-earlier": "Teil einen Takt früher",
+        "songs-loop-later": "Teil einen Takt später",
+        "songs-take": "Take aufnehmen",
+        "songs-camera": "Bild aufnehmen",
+        "jam-camera": "Bild aufnehmen"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -245,7 +262,17 @@
         "jam-next-section": "Am Taktstrich an den Anfang des nächsten Teils springen",
         "jam-prev-section": "Am Taktstrich zurück an den Anfang des vorherigen Teils",
         "jam-loop-section": "Den Teil, in dem du bist, in die Schleife nehmen oder wieder freigeben",
-        "jam-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden"
+        "jam-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden",
+        "tab-5": "Zum Songs-Tab wechseln",
+        "songs-loop-start": "Den Teil bei dem Takt beginnen lassen, den du gerade spielst",
+        "songs-loop-end": "Den Teil bei dem Takt enden lassen, den du gerade spielst",
+        "songs-loop": "Die gewählten Takte immer wieder spielen — oder aufhören",
+        "songs-loop-clear": "Den Teil vergessen und das Stück von vorn spielen",
+        "songs-loop-earlier": "Die gewählten Takte um einen Takt Richtung Anfang schieben, gleich lang",
+        "songs-loop-later": "Die gewählten Takte um einen Takt Richtung Ende schieben, gleich lang",
+        "songs-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden",
+        "songs-camera": "Beim nächsten Play filmen, oder die Kamera ausschalten",
+        "jam-camera": "Beim nächsten Play filmen, oder die Kamera ausschalten"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Suche fehlgeschlagen",
       "sounds": "Klänge",
       "soundsCredit": "Das Club-Kit ist Virtuosity Drums von Versilian Studios und Karoryfer Samples, eingespielt von Austin McMahon (gemeinfrei). Das Studio-Kit ist DRSKit vom DrumGizmo-Projekt (CC BY 4.0).",
-      "madeWith": "Mit {{heart}} für Musiker überall"
+      "madeWith": "Mit {{heart}} für Musiker überall",
+      "soundsCreditSongs": "Die übrigen Instrumente stammen aus dem Sonivox-General-MIDI-Klangsatz (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Songs",
+      "catchDownloads": "Heruntergeladene Songs anbieten",
+      "catchDownloadsHint": "Solange Songs offen ist, schaut Yames in deinen Download-Ordner und fragt, bevor es etwas öffnet. Deine Datei wird nie verschoben, umbenannt oder gelöscht.",
+      "folder": "Diesen Ordner beobachten",
+      "folderUnknown": "Dieser Rechner hat Yames nicht verraten, wohin Downloads gehen",
+      "chooseFolder": "Wählen ...",
+      "useDownloads": "Downloads nehmen",
+      "turnedDown": "Abgelehnte Songs",
+      "turnedDownHint": "{{n}} Dateien bietet Yames nicht noch einmal an",
+      "forgetTurnedDown": "Wieder anbieten",
+      "soundSet": "Klangsatz",
+      "soundSetBuiltIn": "Der von Yames mitgelieferte",
+      "chooseSoundSet": ".sf2 wählen",
+      "useBuiltInSoundSet": "Den eingebauten nehmen"
     }
   },
   "keybindings": {

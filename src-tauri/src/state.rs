@@ -127,6 +127,17 @@ pub struct AppState {
     pub time_signature: u8,
     #[serde(rename = "beatGroups", default = "default_beat_groups")]
     pub beat_groups: Vec<u8>,
+    /// True when the meter now in `beat_groups` was posted AT A BAR LINE —
+    /// the setlist's step switch, and nothing else. The audio callback then
+    /// gives it to the bar that line opened instead of restacking the grid
+    /// at the next tick, which is what used to leave a one-beat stub bar
+    /// between two steps in different meters. Every other caller leaves it
+    /// false and gets the behaviour it always had.
+    ///
+    /// Rust-internal, like `volume_real`: skipped in serde so it never
+    /// reaches the JS `AppState` and is never persisted.
+    #[serde(skip)]
+    pub beat_groups_at_bar_line: bool,
     #[serde(rename = "freeMode", default)]
     pub free_mode: bool,
     #[serde(rename = "speedRamp")]
@@ -174,6 +185,7 @@ impl Default for AppState {
             sound_type: "click".to_string(),
             time_signature: 4,
             beat_groups: vec![4],
+            beat_groups_at_bar_line: false,
             free_mode: false,
             speed_ramp: SpeedRamp::default(),
             accent_mode: default_accent_mode(),

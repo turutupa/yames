@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "{{from}}–{{to}}. ölçüyü döngüye al",
+      "loopBarsAt": "{{from}}–{{to}}. ölçüyü {{bpm}} BPM ile döngüye al",
+      "ramp": "{{from}} tempodan {{to}} tempoya çıkar",
+      "click": {
+        "1": "Tık dörtlüklerde",
+        "2": "Tık sekizliklerde",
+        "3": "Tık üçlemelerde",
+        "4": "Tık onaltılıklarda",
+        "5": "Tık beşlemelerde",
+        "6": "Tık altılemelerde"
+      },
+      "loadPreset": "{{name}} hazırla",
+      "loadJam": "{{name}} ile birlikte çal",
+      "comeBack": {
+        "tomorrow": "Yarın buna geri dön",
+        "inDays": "{{days}} gün sonra buna geri dön"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, klavye üzerinde"
+    },
+    "position": {
+      "open": "açık pozisyon",
+      "rootOn6": "kökü 6. telde",
+      "rootOn5": "kökü 5. telde",
+      "rootOn4": "kökü 4. telde",
+      "rootOn3": "kökü 3. telde"
+    },
+    "shape": {
+      "which": "{{count}} biçimden {{index}}."
+    },
+    "passage": {
+      "bars": "{{title}} parçasının {{from}}–{{to}}. ölçüleri"
+    },
+    "progress": {
+      "caption": "%{{first}}'ten %{{last}}'e, {{goes}} boyunca",
+      "aria": "{{from}}–{{to}}. ölçülerin nasıl gittiği"
+    },
+    "tab": {
+      "attempt": "o tura göre renklendirildi",
+      "plain": "notalar yazıldığı gibi",
+      "soon": "Bu ölçülerin tabı yakında geliyor."
+    },
+    "take": {
+      "whole": "{{title}} kaydın",
+      "any": "Kaydın",
+      "soon": "Bir kaydı geri dinlemek yakında geliyor."
+    },
+    "compare": {
+      "title": "{{title}} parçasından iki tur, yan yana",
+      "any": "İki tur, yan yana",
+      "soon": "İki turu yan yana dinlemek yakında geliyor."
+    }
+  }
+}

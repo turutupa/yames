@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "Zapętl takty {{from}}–{{to}}",
+      "loopBarsAt": "Zapętl takty {{from}}–{{to}} przy {{bpm}} BPM",
+      "ramp": "Podnieś to z {{from}} do {{to}}",
+      "click": {
+        "1": "Klik na ćwierćnutach",
+        "2": "Klik na ósemkach",
+        "3": "Klik na triolach",
+        "4": "Klik na szesnastkach",
+        "5": "Klik na kwintolach",
+        "6": "Klik na sekstolach"
+      },
+      "loadPreset": "Przygotuj {{name}}",
+      "loadJam": "Zagraj do {{name}}",
+      "comeBack": {
+        "tomorrow": "Wróć do tego jutro",
+        "inDays": "Wróć do tego za {{days}} dni"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, na gryfie"
+    },
+    "position": {
+      "open": "pozycja otwarta",
+      "rootOn6": "prymą na 6. strunie",
+      "rootOn5": "prymą na 5. strunie",
+      "rootOn4": "prymą na 4. strunie",
+      "rootOn3": "prymą na 3. strunie"
+    },
+    "shape": {
+      "which": "chwyt {{index}} z {{count}}"
+    },
+    "passage": {
+      "bars": "Takty {{from}}–{{to}} z {{title}}"
+    },
+    "progress": {
+      "caption": "z {{first}}% na {{last}}%, przez {{goes}}",
+      "aria": "Jak szły takty od {{from}} do {{to}}"
+    },
+    "tab": {
+      "attempt": "pokolorowane według tego podejścia",
+      "plain": "nuty tak, jak są zapisane",
+      "soon": "Tabulatura tych taktów będzie wkrótce."
+    },
+    "take": {
+      "whole": "Twoja taka {{title}}",
+      "any": "Twoja taka",
+      "soon": "Odsłuch taki będzie wkrótce."
+    },
+    "compare": {
+      "title": "Dwa podejścia do {{title}}, obok siebie",
+      "any": "Dwa podejścia, obok siebie",
+      "soon": "Słuchanie dwóch podejść obok siebie będzie wkrótce."
+    }
+  }
+}

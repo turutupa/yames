@@ -316,15 +316,19 @@ pub struct InstrumentProfile {
     /// Piano needs 25ms for chord voicings without flattening fast runs.
     pub cluster_window_ms: u32,
 
-    /// Cap on onsets-per-beat that count as "near a beat." Onsets beyond
-    /// this become spurious. Closes the tremolo/roll exploit: a guitarist
-    /// playing 8 onsets in one beat-window gets 3 counted near the beat
-    /// + 5 spurious, instead of 1.0 onset_efficiency for free.
+    /// How many onsets a quarter note may hold, on a quarter-note grid,
+    /// before the extras stop counting as notes. Closes the tremolo/roll
+    /// exploit: a guitarist smearing 8 picks across one beat gets 3
+    /// counted and 5 spurious, instead of 1.0 onset_efficiency for free.
     ///
-    /// Enforced by the live matcher in `timing.rs`: once
-    /// `max_onsets_per_beat` onsets have matched in a quarter-note window,
-    /// additional onsets are reclassified as spurious rather than counted
-    /// toward `onset_count`.
+    /// Enforced by the live matcher in `timing.rs`, which reads it as
+    /// headroom over the grid being scored rather than as an absolute
+    /// total — `timing::onsets_per_quarter_cap` is the rule and says
+    /// why. On a quarter-note grid the cap is still exactly this number;
+    /// on a grid of sixteenths it is this number plus three, because
+    /// four notes to the quarter is what sixteenths *are*. A constant
+    /// below the grid would throw away written music, which is what it
+    /// did between roadmap 1.3 and the fix.
     pub max_onsets_per_beat: u8,
 
     /// Expected typical onset density per beat. Used to scale

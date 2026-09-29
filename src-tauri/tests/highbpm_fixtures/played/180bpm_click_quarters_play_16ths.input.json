@@ -1,0 +1,13 @@
+{
+  "name": "180bpm_click_quarters_play_16ths",
+  "description": "The tempo roadmap 1.2 will capture for real. 180 BPM quarters clicking, 16ths played 83.3 ms apart. Until that capture exists this synthetic stands in, so a refractory regression at the tempo the owner actually plays is caught now rather than after the recording session.",
+  "bpm": 180,
+  "clickSubdivision": 1,
+  "playedDivisor": 4,
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260922,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "expectDivisor": 4
+}

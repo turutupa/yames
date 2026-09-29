@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "循环第 {{from}}–{{to}} 小节",
+      "loopBarsAt": "以 {{bpm}} BPM 循环第 {{from}}–{{to}} 小节",
+      "ramp": "从 {{from}} 练到 {{to}}",
+      "click": {
+        "1": "滴答走四分音符",
+        "2": "滴答走八分音符",
+        "3": "滴答走三连音",
+        "4": "滴答走十六分音符",
+        "5": "滴答走五连音",
+        "6": "滴答走六连音"
+      },
+      "loadPreset": "备好 {{name}}",
+      "loadJam": "跟着 {{name}} 弹",
+      "comeBack": {
+        "tomorrow": "明天再回到这里",
+        "inDays": "{{days}} 天后再练这里"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}，在指板上"
+    },
+    "position": {
+      "open": "开放把位",
+      "rootOn6": "根音在 6 弦",
+      "rootOn5": "根音在 5 弦",
+      "rootOn4": "根音在 4 弦",
+      "rootOn3": "根音在 3 弦"
+    },
+    "shape": {
+      "which": "第 {{index}} 个把位，共 {{count}} 个"
+    },
+    "passage": {
+      "bars": "{{title}} 的第 {{from}}–{{to}} 小节"
+    },
+    "progress": {
+      "caption": "从 {{first}}% 到 {{last}}%，共 {{goes}}",
+      "aria": "第 {{from}} 到 {{to}} 小节的变化"
+    },
+    "tab": {
+      "attempt": "按那一遍上色",
+      "plain": "谱面上写的音",
+      "soon": "这几小节的六线谱即将推出。"
+    },
+    "take": {
+      "whole": "你录的 {{title}}",
+      "any": "你的录音",
+      "soon": "回听录音即将推出。"
+    },
+    "compare": {
+      "title": "{{title}} 的两遍，并排放",
+      "any": "两遍并排放",
+      "soon": "并排听两遍即将推出。"
+    }
+  }
+}

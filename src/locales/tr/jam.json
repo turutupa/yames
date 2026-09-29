@@ -711,6 +711,39 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Ses",
+      "yames": "Yames ve girişim",
+      "everything": "Bu bilgisayarın çaldığı her şey",
+      "warning": "Bu, yalnızca Yames'i değil, bu bilgisayarın çaldığı her şeyi kaydeder — görüntülü görüşme, bildirim, tarayıcıdaki bir şarkı.",
+      "listensTo": "{{device}} dinleniyor.",
+      "check": "Sesi kontrol et",
+      "listening": "Dinleniyor…",
+      "level": "Seviye",
+      "silent": "Hiçbir şey gelmedi. Bu bilgisayarın sesinin açık ve sessize alınmamış olduğunu kontrol et.",
+      "notHere": "Bu bilgisayar hoparlörlerinin çaldığını Yames'e veremiyor, bu yüzden burada bir kayıt Yames ve senin girişindir.",
+      "recordingEverything": "Bu bilgisayarın çaldığı her şey kaydediliyor",
+      "recordingYames": "Yames ve girişin kaydediliyor",
+      "takeEverything": "bu bilgisayarın çaldığı her şey"
+    },
+    "takeVideo": {
+      "save": "Video olarak kaydet",
+      "chorus": "Tur {{count}}",
+      "chorus_one": "Tur {{count}}",
+      "chorus_other": "Tur {{count}}",
+      "next": "sonra"
+    },
+    "watch": {
+      "open": "Geri dinle",
+      "where": "Ölçü {{bar}} · {{chorus}}",
+      "goToBar": "{{bar}}. ölçüye git",
+      "barBack": "Bir ölçü geri",
+      "barOn": "Bir ölçü ileri",
+      "nudge": "Görüntü",
+      "nudgeBack": "Görüntü biraz önce",
+      "nudgeOn": "Görüntü biraz sonra",
+      "broken": "Bu kayıt çalmadı. Dosya taşınmış veya silinmiş olabilir."
     }
   },
   "scale": {

@@ -56,12 +56,28 @@ Status key: **decided** · **open** · **deferred**
   as its finish line. Does every step ask, or only milestone steps?
   Proposed default: milestone steps only (end of a section, a target
   tempo reached), so recording stays an event and never a chore.
-- **A2 — Single-player value first.** *open.* The take is kept on the
+- **A2 — Single-player value first.** *built as proposed 2026-09-20 (W25),
+  in Songs rather than in learning paths — it needed takes and a review,
+  and Songs had both first.* The take is kept on the
   player's machine and builds a progress reel: the same exercise on day
   1 and day 30, side by side. Works with an audience of zero, costs no
   hosting, needs no moderation, and is the local half of E0.3.
-  Proposed default: yes, and it ships inside learning paths, before any
-  server exists.
+
+  What shipped: the review's `compare` block draws the earliest kept run at
+  these bars beside the one that has just happened, each with its own tape
+  and its own colour boundaries, and the coach offers it only after an
+  `improved` finding (`COACH_UX.md` C3 — volunteered only when it is real).
+  The hard part was that **the two tempos differ**: a run at 70 % and one at
+  100 % are the same music at different speeds, so they are locked to BAR
+  POSITIONS rather than to seconds. Each side plays at its own natural rate —
+  an old take sped up to match is not the take — and the follower is put
+  back where it was at each bar line as the leader crosses it
+  (`src/songs/camera/align.ts`).
+
+- **A2b — And out as a file (2026-09-20, W25).** D4 below is built too, which
+  makes the reel shareable without a server: the same take composited to one
+  ordinary MP4. `SONGS.md` A10 has the detail and the licence question's
+  answer, which is that there is not one.
 - **A3 — Posting is a second, separate act.** *decided 2026-09-18*
   (follows from E0.5). Nothing leaves the machine until the player
   posts it. The site promise changes from "nothing you play leaves your

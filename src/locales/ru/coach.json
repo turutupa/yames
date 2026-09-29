@@ -26,7 +26,8 @@
     "send": "Отправить",
     "today": "Сегодня",
     "yesterday": "Вчера",
-    "noteSpacingTrend": "Тренд промежутков"
+    "noteSpacingTrend": "Тренд промежутков",
+    "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
   "coachDetail": {
     "exercises": "Упражнения",
@@ -35,9 +36,6 @@
     "beatPlacement": "Попадание в долю"
   },
   "coachReport": {
-    "cov": "Покр.",
-    "eff": "Эфф.",
-    "grid": "Сетка",
     "segment": "Отрезок",
     "thinkingAria": "Тренер готовится заговорить",
     "qualifier": {
@@ -68,7 +66,13 @@
     "pocketOnBeat": "в доле",
     "pocketEarly": "Ты играл в среднем на {{ms}} мс раньше",
     "pocketLate": "Ты играл в среднем на {{ms}} мс позже",
-    "pocketCentred": "Твой тайминг был точно в доле (в среднем ±5 мс)"
+    "pocketCentred": "Твой тайминг был точно в доле (в среднем ±5 мс)",
+    "covLabel": "Сыгранные доли",
+    "covTitle": "Сколько из долей, которых я ждал, действительно прозвучало",
+    "effLabel": "Ноты на доле",
+    "effTitle": "Из всего, что я услышал, сколько легло на долю, а не между долями",
+    "gridLabel": "Держит клик",
+    "gridTitle": "Насколько плотно весь отрывок шёл за кликом"
   },
   "eval": {
     "today": "Сегодня",

@@ -46,7 +46,7 @@ describe("useTabRouting — where the app reopens", () => {
   it("covers every mode the rail offers", () => {
     // The rail's modes and the tabs that can be restored are the same list.
     // A mode missing here is one the app forgets you were on.
-    expect([...PLAY_TABS].sort()).toEqual(["beat", "drill", "jam", "setlist"]);
+    expect([...PLAY_TABS].sort()).toEqual(["beat", "drill", "jam", "setlist", "songs"]);
   });
 
   it("ignores a stored value that is not a tab", async () => {

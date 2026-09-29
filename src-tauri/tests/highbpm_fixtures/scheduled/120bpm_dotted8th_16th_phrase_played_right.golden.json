@@ -1,0 +1,204 @@
+{
+  "results": [
+    {
+      "id": 0,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 1,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    },
+    {
+      "id": 2,
+      "state": "hit",
+      "deviationMs": 5.0,
+      "pass": 0
+    },
+    {
+      "id": 3,
+      "state": "hit",
+      "deviationMs": -2.0,
+      "pass": 0
+    },
+    {
+      "id": 4,
+      "state": "hit",
+      "deviationMs": 0.0,
+      "pass": 0
+    },
+    {
+      "id": 5,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 6,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    },
+    {
+      "id": 7,
+      "state": "hit",
+      "deviationMs": 5.0,
+      "pass": 0
+    },
+    {
+      "id": 8,
+      "state": "hit",
+      "deviationMs": -2.0,
+      "pass": 0
+    },
+    {
+      "id": 9,
+      "state": "hit",
+      "deviationMs": 0.0,
+      "pass": 0
+    },
+    {
+      "id": 10,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 11,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    },
+    {
+      "id": 12,
+      "state": "hit",
+      "deviationMs": 5.0,
+      "pass": 0
+    },
+    {
+      "id": 13,
+      "state": "hit",
+      "deviationMs": -2.0,
+      "pass": 0
+    },
+    {
+      "id": 14,
+      "state": "hit",
+      "deviationMs": 0.0,
+      "pass": 0
+    },
+    {
+      "id": 15,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 16,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    },
+    {
+      "id": 17,
+      "state": "hit",
+      "deviationMs": 5.0,
+      "pass": 0
+    },
+    {
+      "id": 18,
+      "state": "hit",
+      "deviationMs": -2.0,
+      "pass": 0
+    },
+    {
+      "id": 19,
+      "state": "hit",
+      "deviationMs": 0.0,
+      "pass": 0
+    },
+    {
+      "id": 20,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 21,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    },
+    {
+      "id": 22,
+      "state": "hit",
+      "deviationMs": 5.0,
+      "pass": 0
+    },
+    {
+      "id": 23,
+      "state": "hit",
+      "deviationMs": -2.0,
+      "pass": 0
+    },
+    {
+      "id": 24,
+      "state": "hit",
+      "deviationMs": 0.0,
+      "pass": 0
+    },
+    {
+      "id": 25,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 26,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    },
+    {
+      "id": 27,
+      "state": "hit",
+      "deviationMs": 5.0,
+      "pass": 0
+    },
+    {
+      "id": 28,
+      "state": "hit",
+      "deviationMs": -2.0,
+      "pass": 0
+    },
+    {
+      "id": 29,
+      "state": "hit",
+      "deviationMs": 0.0,
+      "pass": 0
+    },
+    {
+      "id": 30,
+      "state": "hit",
+      "deviationMs": -6.0,
+      "pass": 0
+    },
+    {
+      "id": 31,
+      "state": "hit",
+      "deviationMs": 3.0,
+      "pass": 0
+    }
+  ],
+  "extras": [],
+  "score": 99.0579,
+  "intervalConsistency": 0.9842982,
+  "gridAlignment": 1.0,
+  "hitCompleteness": 1.0,
+  "onsetEfficiency": 1.0,
+  "accentAgreement": null,
+  "passes": 1
+}

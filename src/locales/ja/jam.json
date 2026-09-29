@@ -252,14 +252,12 @@
       "aaba32": "AABA",
       "one": "1コード",
       "custom": "{{count}} 小節",
-      "custom_one": "{{count}} 小節",
       "custom_other": "{{count}} 小節"
     },
     "countIn": {
       "label": "カウントイン",
       "none": "なし",
       "barsAnd": "{{count}} 小節 · {{sound}}",
-      "barsAnd_one": "{{count}} 小節 · {{sound}}",
       "barsAnd_other": "{{count}} 小節 · {{sound}}"
     },
     "fills": {
@@ -277,7 +275,6 @@
       "label": "いま",
       "aria": "{{chord}} が鳴っています",
       "next": "{{count}} 小節後に {{chord}}",
-      "next_one": "{{count}} 小節後に {{chord}}",
       "next_other": "{{count}} 小節後に {{chord}}",
       "nextNow": "次は {{chord}}"
     },
@@ -301,7 +298,6 @@
       "scope": "表示する範囲",
       "scopeKey": "このキー",
       "scopeAll": "すべてのキー",
-      "noteCount_one": "{{count}}音スケール",
       "noteCount_other": "{{count}}音スケール",
       "noteCount": "{{count}}音スケール",
       "jump": "ジャンプ",
@@ -409,7 +405,6 @@
       "dropOutEvery": "{{count}} 小節ごとに休止",
       "dropOutBarsLabel": "バンドが休む長さ",
       "forBars": "{{count}} 小節のあいだ",
-      "forBars_one": "{{count}} 小節のあいだ",
       "forBars_other": "{{count}} 小節のあいだ",
       "trade": "4バース",
       "tradeN": "{{count}} 小節ずつ交替",
@@ -417,7 +412,6 @@
       "tempoUp": "テンポ +{{step}}",
       "tempoEveryLabel": "テンポが上がる頻度",
       "everyChoruses": "{{count}} コーラスごと",
-      "everyChoruses_one": "{{count}} コーラスごと",
       "everyChoruses_other": "{{count}} コーラスごと",
       "climbing": "{{from}} から上昇中",
       "dropOutExplain": "ときどきバンドが数小節止まり、あなたひとりでテンポを保ちます。",
@@ -521,7 +515,6 @@
       "lead": "どれもグルーヴ・キット・フィール・音量がセット",
       "aria": "このバイブの弾き方",
       "count": "{{count}} 通りの演り方",
-      "count_one": "{{count}} 通りの演り方",
       "count_other": "{{count}} 通りの演り方",
       "yours": "自分のジャム",
       "yoursEmpty": "まだ保存されていません",
@@ -596,10 +589,8 @@
       "empty": "小節線、iReal 形式の行、または歌詞の上にコードを書いた譜面。",
       "none": "まだコードが見つかりません。",
       "summary": "{{count}} 小節 · {{key}} のキー",
-      "summary_one": "{{count}} 小節 · {{key}} のキー",
       "summary_other": "{{count}} 小節 · {{key}} のキー",
       "check": "確認したいもの {{count}} 件: {{list}}",
-      "check_one": "確認したいもの {{count}} 件: {{list}}",
       "check_other": "確認したいもの {{count}} 件: {{list}}"
     },
     "perc": {
@@ -711,6 +702,37 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "録る音",
+      "yames": "Yames と自分の入力",
+      "everything": "このパソコンが鳴らす音すべて",
+      "warning": "Yames だけでなく、このパソコンが鳴らす音すべてを録ります。ビデオ通話も、通知音も、ブラウザの曲も入ります。",
+      "listensTo": "{{device}} を聴いています。",
+      "check": "音を確かめる",
+      "listening": "聴いています…",
+      "level": "レベル",
+      "silent": "何も届きませんでした。このパソコンの音量が上がっていて、ミュートになっていないか確かめてください。",
+      "notHere": "このパソコンはスピーカーが鳴らしている音を Yames に渡せません。ここでの録音は Yames と自分の入力になります。",
+      "recordingEverything": "このパソコンが鳴らす音すべてを録音中",
+      "recordingYames": "Yames と自分の入力を録音中",
+      "takeEverything": "このパソコンが鳴らした音すべて"
+    },
+    "takeVideo": {
+      "save": "動画にして保存",
+      "chorus": "コーラス {{count}}",
+      "next": "次は"
+    },
+    "watch": {
+      "open": "聴き返す",
+      "where": "{{bar}} 小節 · {{chorus}}",
+      "goToBar": "{{bar}} 小節へ",
+      "barBack": "1 小節戻る",
+      "barOn": "1 小節進む",
+      "nudge": "映像",
+      "nudgeBack": "映像を少し早く",
+      "nudgeOn": "映像を少し遅く",
+      "broken": "このテイクは再生できませんでした。ファイルが移動または削除された可能性があります。"
     }
   },
   "scale": {

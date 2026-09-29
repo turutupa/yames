@@ -1,13 +1,20 @@
 /**
  * The hook's own job is small — two clocks in, IPC calls out — so these
  * tests only cover the wiring the runtime tests cannot see: that a beat
- * proper is `subdivision === 0`, that a landed switch reaches the engine's
- * setters, and that a finished setlist stops the transport.
+ * proper is `subdivision === 0`, that a BAR is `isDownbeat && measureBeat
+ * === 0`, that a landed switch reaches the engine's setters, and that a
+ * finished setlist stops the transport.
+ *
+ * The events are the engine's own shape. They used to carry `measureBeat: 0`
+ * on every beat with `isDownbeat` set by hand, which is not a stream any
+ * engine emits — `isDownbeat` is `sub == 0`, true on every whole beat — and
+ * that is how a green suite sat over a setlist counting its bars in beats.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useSetlistRunner } from "./useSetlistRunner";
 import { mockInvoke } from "../../../test/mocks";
+import { engineTick } from "../../../test/engineTicks";
 import { jamToSetlistStep } from "../../../setlist";
 import { STARTER_JAMS } from "../../../jam/jams";
 import type { Jam } from "../../../jam/types";
@@ -36,9 +43,15 @@ const CHAIN: Setlist = {
   steps: [step("a", 80, { kind: "bars", bars: 1 }), step("b", 120, { kind: "manual" })],
 };
 
-function beat(n: number, isDownbeat: boolean, subdivision = 0): BeatEvent {
-  const accentLevel = isDownbeat ? 2 : 0;
-  return { beat: n, measureBeat: 0, subdivision, isDownbeat, accentLevel, isAccent: isDownbeat, formBar: 0, chorus: 1 };
+/**
+ * One engine tick.
+ *
+ * `measureBeat` is bar-local and defaults to a 4/4 cycle off the beat index,
+ * which is what the engine reports for a plain click in four. `isDownbeat` is
+ * the engine's own: a whole beat, subdivision zero — NOT a bar line.
+ */
+function beat(n: number, measureBeat = n % 4, subdivision = 0): BeatEvent {
+  return engineTick({ beat: n, measureBeat, subdivision });
 }
 
 /** Args of every invoke of `command` so far. */
@@ -71,7 +84,10 @@ describe("useSetlistRunner", () => {
     // so it lands a microtask later than the tempo does.
     await settle();
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 80 });
-    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+    // `atBarLine` on every meter the RUNNER sends: the engine then gives it
+    // to the bar the switch landed on instead of restacking its grid a beat
+    // later, which is what used to leave a one-beat bar at every seam.
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4], atBarLine: true });
     expect(callsTo("set_sound_type")).toContainEqual({ soundType: "click" });
     expect(callsTo("set_volume")).toContainEqual({ volume: 0.5 });
   });
@@ -110,7 +126,7 @@ describe("useSetlistRunner", () => {
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 80 });
 
     act(() => rerender({ b: null, playing: true, from: false }));
-    act(() => rerender({ b: beat(0, true), playing: true, from: false }));
+    act(() => rerender({ b: beat(0), playing: true, from: false }));
     expect(result.current.step?.name).toBe("a");
     expect(result.current.stepNumber).toBe(1);
   });
@@ -128,37 +144,118 @@ describe("useSetlistRunner", () => {
     expect(callsTo("set_bpm")).toEqual([]);
   });
 
-  it("counts bars from downbeats and drives the switch through the setters", () => {
+  it("counts bars from bar lines and drives the switch through the setters", () => {
     const { result, rerender } = mount();
     act(() => rerender({ b: null, playing: true }));
     mockInvoke.mockClear();
 
-    // Bar one: its own downbeat, then three beats.
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    act(() => rerender({ b: beat(1, false), playing: true }));
-    act(() => rerender({ b: beat(2, false), playing: true }));
-    act(() => rerender({ b: beat(3, false), playing: true }));
+    // Bar one: the beat that opens it, then three that do not. Every one of
+    // them is an `isDownbeat`; only the first is a bar.
+    act(() => rerender({ b: beat(0), playing: true }));
+    act(() => rerender({ b: beat(1), playing: true }));
+    act(() => rerender({ b: beat(2), playing: true }));
+    act(() => rerender({ b: beat(3), playing: true }));
     expect(result.current.stepNumber).toBe(1);
+    expect(result.current.state.barsInStep).toBe(0);
     expect(callsTo("set_bpm")).toEqual([]);
 
-    // The downbeat of bar two is where the one-bar gap comes due.
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    // The top of bar two is where the one-bar gap comes due.
+    act(() => rerender({ b: beat(4), playing: true }));
     expect(result.current.stepNumber).toBe(2);
     expect(result.current.step?.name).toBe("b");
     expect(callsTo("set_bpm")).toEqual([{ bpm: 120 }]);
   });
 
+  it("gives a step of eight bars eight bars, not eight beats", () => {
+    // The bug, end to end, in the only place it could have been caught: a
+    // step set to "after 8 bars" moved on after 8 BEATS, because the event
+    // handed the runtime `isDownbeat` — true on every whole beat — as if it
+    // meant a bar line. Somebody who typed 32 to get eight bars was right.
+    const eight: Setlist = {
+      ...CHAIN,
+      steps: [step("a", 80, { kind: "bars", bars: 8 }), CHAIN.steps[1]],
+    };
+    const { result, rerender } = renderHook(
+      ({ b, playing }: { b: BeatEvent | null; playing: boolean }) =>
+        useSetlistRunner(eight, playing, b),
+      { initialProps: { b: null as BeatEvent | null, playing: false } },
+    );
+    act(() => rerender({ b: null, playing: true }));
+    for (let n = 0; n < 32; n++) act(() => rerender({ b: beat(n), playing: true }));
+    // Eight beats ago this used to be on step two; 31 beats in it is still
+    // in bar eight of step one.
+    expect(result.current.stepNumber).toBe(1);
+    expect(result.current.state.barsInStep).toBe(7);
+    act(() => rerender({ b: beat(32), playing: true }));
+    expect(result.current.stepNumber).toBe(2);
+  });
+
+  it("does not take a group accent inside a 7/8 bar for a bar line", () => {
+    // 7/8 grouped 2+2+3 accents beats 0, 2 and 4 — `accentLevel` 2 on the
+    // bar's own and 1 on the other two group starts. A bar opens at
+    // `measureBeat === 0` and nowhere else, so the two middles are ordinary
+    // beats however loud they are.
+    const seven: Setlist = {
+      ...CHAIN,
+      steps: [
+        { ...step("odd", 90, { kind: "bars", bars: 2 }), beatGroups: [2, 2, 3] },
+        CHAIN.steps[1],
+      ],
+    };
+    const { result, rerender } = renderHook(
+      ({ b, playing }: { b: BeatEvent | null; playing: boolean }) =>
+        useSetlistRunner(seven, playing, b),
+      { initialProps: { b: null as BeatEvent | null, playing: false } },
+    );
+    act(() => rerender({ b: null, playing: true }));
+    for (let n = 0; n < 14; n++) {
+      const measureBeat = n % 7;
+      const accentLevel = measureBeat === 0 ? 2 : measureBeat === 2 || measureBeat === 4 ? 1 : 0;
+      const tick = { ...beat(n, measureBeat), accentLevel, isAccent: accentLevel > 0 } as BeatEvent;
+      act(() => rerender({ b: tick, playing: true }));
+    }
+    expect(result.current.stepNumber).toBe(1);
+    expect(result.current.state.barsInStep).toBe(1);
+    act(() => rerender({ b: beat(14, 0), playing: true }));
+    expect(result.current.stepNumber).toBe(2);
+  });
+
   it("ignores subdivisions and a re-emitted beat index", () => {
     const { result, rerender } = mount();
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    // Four subdivision ticks inside bar one, then the same downbeat again.
-    act(() => rerender({ b: beat(1, false, 1), playing: true }));
-    act(() => rerender({ b: beat(2, true, 2), playing: true }));
-    act(() => rerender({ b: beat(3, true, 1), playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
+    // Four subdivision ticks inside bar one, then the same beat again.
+    act(() => rerender({ b: beat(1, 1, 1), playing: true }));
+    act(() => rerender({ b: beat(2, 2, 2), playing: true }));
+    act(() => rerender({ b: beat(3, 3, 1), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
     expect(result.current.state.barsInStep).toBe(0);
     expect(result.current.stepNumber).toBe(1);
+  });
+
+  it("counts sixteenths as the four bars they are, not as sixteen", () => {
+    // Four ticks to the beat. Only `subdivision === 0` reaches the runtime,
+    // and of those only `measureBeat === 0` opens a bar — so a step of four
+    // bars lasts sixty-four ticks.
+    const four: Setlist = {
+      ...CHAIN,
+      steps: [step("a", 80, { kind: "bars", bars: 4 }), CHAIN.steps[1]],
+    };
+    const { result, rerender } = renderHook(
+      ({ b, playing }: { b: BeatEvent | null; playing: boolean }) =>
+        useSetlistRunner(four, playing, b),
+      { initialProps: { b: null as BeatEvent | null, playing: false } },
+    );
+    act(() => rerender({ b: null, playing: true }));
+    for (let n = 0; n < 16; n++) {
+      for (let sub = 0; sub < 4; sub++) {
+        act(() => rerender({ b: beat(n, n % 4, sub), playing: true }));
+      }
+    }
+    expect(result.current.stepNumber).toBe(1);
+    expect(result.current.state.barsInStep).toBe(3);
+    act(() => rerender({ b: beat(16, 0), playing: true }));
+    expect(result.current.stepNumber).toBe(2);
   });
 
   it("stops the transport when the setlist runs out (U9.6)", () => {
@@ -169,23 +266,23 @@ describe("useSetlistRunner", () => {
       { initialProps: { b: null as BeatEvent | null, playing: false } },
     );
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     expect(callsTo("set_playing")).toContainEqual({ playing: false });
     expect(result.current.state.phase).toBe("finished");
     expect(result.current.step).toBeNull();
   });
 
-  it("skips ahead on the next downbeat, not on the press (U9.3)", () => {
+  it("skips ahead on the next bar line, not on the press (U9.3)", () => {
     const { result, rerender } = mount();
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    act(() => rerender({ b: beat(1, false), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
+    act(() => rerender({ b: beat(1), playing: true }));
     act(() => result.current.skip());
     expect(result.current.stepNumber).toBe(1);
-    act(() => rerender({ b: beat(2, false), playing: true }));
+    act(() => rerender({ b: beat(2), playing: true }));
     expect(result.current.stepNumber).toBe(1);
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     expect(result.current.stepNumber).toBe(2);
   });
 
@@ -200,7 +297,7 @@ describe("useSetlistRunner", () => {
       { initialProps: { b: null as BeatEvent | null, playing: false } },
     );
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
     expect(result.current.remaining).toEqual({ kind: "seconds", seconds: 30 });
     // No beat arrives, but the number still moves.
     act(() => void vi.advanceTimersByTime(5000));
@@ -210,8 +307,8 @@ describe("useSetlistRunner", () => {
   it("forgets the run when the transport stops", () => {
     const { result, rerender } = mount();
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     expect(result.current.stepNumber).toBe(2);
     act(() => rerender({ b: null, playing: false }));
     expect(result.current.state.phase).toBe("idle");
@@ -232,8 +329,8 @@ describe("useSetlistRunner", () => {
       { initialProps: { b: null as BeatEvent | null, playing: false } },
     );
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     expect(callsTo("set_volume")).toContainEqual({ volume: 0 });
     mockInvoke.mockClear();
     act(() => rerender({ b: null, playing: false }));
@@ -331,11 +428,11 @@ describe("a setlist step that is a jam", () => {
   it("takes the band away when a plain step follows, and leaves its meter alone", async () => {
     const { result, rerender } = mountJammed(jammed());
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
     await settle();
     mockInvoke.mockClear();
     // The downbeat of bar two is where the one-bar gap comes due.
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     await settle();
 
     expect(result.current.stepNumber).toBe(2);
@@ -343,7 +440,7 @@ describe("a setlist step that is a jam", () => {
     expect(callsTo("set_jam")).toContainEqual({ config: null });
     // The plain step is about to set its own meter; handing back a remembered
     // one here would undo it on the beat it landed.
-    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4] }]);
+    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4], atBarLine: true }]);
   });
 
   it("gives the metronome its own meter back when the run stops", async () => {
@@ -370,11 +467,11 @@ describe("a setlist step that is a jam", () => {
     // by playing the plain click in the wrong bar length.
     const { rerender } = mountJammed(jammed());
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
     await settle();
     mockInvoke.mockClear();
 
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     await settle();
 
     const seen = order("set_jam", "set_subdivision", "set_beat_groups", "set_free_mode");
@@ -391,8 +488,8 @@ describe("a setlist step that is a jam", () => {
     // meter actually playing. The band still goes; the meter stays put.
     const { result, rerender } = mountJammed(jammed());
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
-    act(() => rerender({ b: beat(4, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
+    act(() => rerender({ b: beat(4), playing: true }));
     await settle();
     expect(result.current.stepNumber).toBe(2);
     mockInvoke.mockClear();
@@ -412,7 +509,7 @@ describe("a setlist step that is a jam", () => {
     // that never had a band in it.
     const { rerender } = mount();
     act(() => rerender({ b: null, playing: true }));
-    act(() => rerender({ b: beat(0, true), playing: true }));
+    act(() => rerender({ b: beat(0), playing: true }));
     mockInvoke.mockClear();
     act(() => rerender({ b: null, playing: false }));
     await settle();
@@ -428,7 +525,7 @@ describe("a setlist step that is a jam", () => {
     expect(result.current.jam).toBeNull();
     expect(callsTo("set_jam")).toEqual([{ config: null }]);
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 92 });
-    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4], atBarLine: true });
   });
 
   it("sends the next bar's bass at the bar line, and only when it moves", async () => {
@@ -443,14 +540,14 @@ describe("a setlist step that is a jam", () => {
 
     // Bar 0's config is already in flight from the load; this bar line says
     // nothing, which is what stops the table overtaking its own meter.
-    act(() => rerender({ b: { ...beat(0, true), formBar: 0 }, playing: true }));
+    act(() => rerender({ b: { ...beat(0), formBar: 0 }, playing: true }));
     expect(callsTo("set_jam")).toEqual([]);
 
     // Bars 1, 2 and 3 of a blues are all the I, so nothing has to be said
     // until the bar before the IV.
-    act(() => rerender({ b: { ...beat(4, true), formBar: 1 }, playing: true }));
-    act(() => rerender({ b: { ...beat(8, true), formBar: 2 }, playing: true }));
-    act(() => rerender({ b: { ...beat(12, true), formBar: 3 }, playing: true }));
+    act(() => rerender({ b: { ...beat(4), formBar: 1 }, playing: true }));
+    act(() => rerender({ b: { ...beat(8), formBar: 2 }, playing: true }));
+    act(() => rerender({ b: { ...beat(12), formBar: 3 }, playing: true }));
     const sends = callsTo("set_jam") as { config: unknown }[];
     expect(sends.every((s) => s.config !== null)).toBe(true);
     expect(sends.length).toBeGreaterThan(0);

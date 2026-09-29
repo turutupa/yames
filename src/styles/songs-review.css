@@ -1,0 +1,377 @@
+/* songs-review.css — what the coach shows when you stop (COACH_UX A3–A5).
+ *
+ * Its own file rather than more of songs.css, for the reason songs.css is its
+ * own file: it is imported by `SongReview.tsx`, so a player who never stops a
+ * pass never parses it, and a worker editing the review never opens the
+ * stage's stylesheet.
+ *
+ * Every colour is a token from themes.ts's TOKEN_CONTRACT. The four feedback
+ * tokens (`--feedback-perfect` / `-good` / `-ok` / `-miss`) exist in all
+ * thirteen themes and are the only place a verdict's colour comes from — and
+ * never the only place a verdict is READABLE from: every mark is a glyph too.
+ *
+ * The review borrows `.songs-btn`, `.songs-chip` and the stage's container
+ * query, which is why the file is only imported alongside songs.css. */
+
+.songs-review {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+.songs-review-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.songs-review-titles {
+  min-width: 0;
+}
+
+/* The verdict itself, on a row of its own under the title (W25).
+ *
+ * `flex: 1 1 100%` puts it below the title and the back button rather than
+ * beside them: it is a sentence and it needs the width, and the two things
+ * above it are furniture. It is inside the PINNED head, so the one thing the
+ * coach said and the button that acts on it are on screen at every window
+ * height — A4's whole claim, made true by the layout rather than by the word
+ * order.
+ *
+ * The blocks inside are `CoachBlocks`', unchanged: a `text` with no frame and
+ * an `action` button under it. */
+.songs-review-said {
+  flex: 1 1 100%;
+  gap: 8px;
+}
+
+/* A verdict is one sentence and reads as one, so it is allowed the room the
+   body's blocks are not — the body's excerpt is a drawing and wants to stay
+   narrow, this is prose. */
+.songs-review-said .coach-block-sentence {
+  font-size: 13.5px;
+}
+
+.songs-review-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.songs-review-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-review-quiet,
+.songs-review-honest {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+/* A link, not a button: "what else" opens something, it does not do
+   something, and A4 is emphatic that the rest is never pushed. */
+.songs-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.songs-review-more {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.songs-review-others {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.songs-review-passes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── The tab, coloured ────────────────────────────────────────────────── */
+
+/* Bars run left to right and wrap, so a long passage becomes several lines
+   rather than a sideways scrollbar on the window (`tests/layout/fits.ts`
+   treats one of those as always a mistake). A single bar of many notes is the
+   one thing that cannot wrap, and it gets a scroller of its own below. */
+.songs-review-tab {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  /* `--bg-card`, not `--bg-base`: there is no `--bg-base` in the token
+     contract and it silently resolves to nothing, which is the exact bug
+     songs.css's own header warns about and jam.css shipped twice. The tab
+     sits one step DOWN from the review's `--bg-raised`, the way the stage's
+     own tab viewport sits on `--bg-card`. */
+  background: var(--bg-card);
+}
+
+.songs-review-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+  padding-right: 8px;
+  border-right: 1px solid var(--border);
+}
+
+.songs-review-bar:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+
+.songs-review-barno {
+  font-size: 10px;
+  line-height: 1;
+  padding-top: 2px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-review-cols {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.songs-review-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.songs-review-strings {
+  display: flex;
+  flex-direction: column;
+}
+
+/* One cell per string, the highest on top, the way tab is printed. The line
+   under each cell is the string. */
+.songs-review-cell {
+  display: block;
+  min-width: 15px;
+  height: 13px;
+  line-height: 13px;
+  text-align: center;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.songs-review-mark {
+  font-size: 11px;
+  line-height: 1.2;
+  padding-top: 2px;
+  /* `color` is set inline from the theme's own feedback token, because which
+     token a mark wears is a decision `marks.ts` makes and not a class. */
+}
+
+/* The glyph is the signal; the colour only agrees with it. A mark with no
+   inline colour — the extras' "+" — reads as the page's own ink. */
+.songs-review-col-extra .songs-review-mark {
+  color: var(--feedback-ok);
+  font-weight: 700;
+}
+
+/* An accent that was written and did not come out louder. Reported, never
+   scored (LP C3), so it is a whisper rather than a warning. */
+.songs-review-accent {
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-faint);
+}
+
+/* The note that was actually heard, under a note that was not the written
+   one. Only ever on a single-note attack — a chord is not assessed. */
+.songs-review-heard {
+  font-size: 9px;
+  line-height: 1.2;
+  color: var(--feedback-ok);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-review-tab-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* The excerpt inside a coach block sits in a box that already has a border,
+   so it does not draw a second one. */
+.songs-review-excerpt {
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
+/* ── The key ──────────────────────────────────────────────────────────── */
+
+.songs-review-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.songs-review-key-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The glyph before the words, drawn from the same table the tab uses so the
+   key cannot drift from what is on the page. */
+.songs-review-key-item::before {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.songs-review-key-item[data-mark="onTime"]::before {
+  content: "●";
+  color: var(--feedback-perfect);
+}
+
+.songs-review-key-item[data-mark="slightlyEarly"]::before {
+  content: "‹";
+  color: var(--feedback-good);
+}
+
+.songs-review-key-item[data-mark="early"]::before {
+  content: "‹‹";
+  color: var(--feedback-ok);
+}
+
+.songs-review-key-item[data-mark="slightlyLate"]::before {
+  content: "›";
+  color: var(--feedback-good);
+}
+
+.songs-review-key-item[data-mark="late"]::before {
+  content: "››";
+  color: var(--feedback-ok);
+}
+
+.songs-review-key-item[data-mark="missed"]::before {
+  content: "✕";
+  color: var(--feedback-miss);
+}
+
+.songs-review-key-item[data-mark="notAssessed"]::before {
+  content: "–";
+  color: var(--text-faint);
+}
+
+/* ── While the pass is running ────────────────────────────────────────── */
+
+/* A4 and A3 together: the verdict has not happened yet and the coach is
+   quiet, so this says one thing about what is happening and nothing about
+   how it is going. */
+/* OVER the frame, never in it (2026-09-21).
+ *
+ * This line used to be an ordinary paragraph inside `.songs-stage-frame`. It
+ * appears the moment the song stops and goes half a second later, and for that
+ * half second it took a line's height from the tab's box — so alphaTab laid
+ * the whole piece out again when it came, and again when it went. The owner
+ * saw exactly that: "it says 'listening back...' for like half a second and
+ * then re-renders the tabs". A status line may not cost the music its room:
+ * it floats along the foot of the frame, like `.songs-stage-notice`. */
+.songs-review-working {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 2;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  font-size: 12px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* ── Narrow stages ────────────────────────────────────────────────────── */
+
+@container stage (max-width: 620px) {
+  .songs-review {
+    padding: 12px;
+  }
+
+  .songs-review-head {
+    flex-direction: column;
+    align-items: stretch;
+    /* ...and NOT wrapping. A wrapping column puts the overflow in a second
+       COLUMN, which is how the verdict ended up as a 21px-wide ribbon of
+       single letters down the right-hand edge at 480px: `flex-basis: 100%`
+       on the row below is 100% of the HEIGHT once the direction turns, so it
+       never fits and the browser opened a new column for it. The wrap was
+       only ever there for the row. */
+    flex-wrap: nowrap;
+  }
+
+  /* One under the other, at their own heights. `flex: 1 1 100%` is a width
+     while the head is a row and a height the moment it is not. */
+  .songs-review-said {
+    flex: 0 0 auto;
+  }
+
+  /* The way out goes last, and stays the size of its own words.
+     Stretched across the panel between the summary and the coach's sentence
+     it read as the thing being offered, and it is not: the sentence is. */
+  .songs-review-back {
+    order: 1;
+    align-self: flex-end;
+  }
+
+  /* One bar per line below this width: two bars of sixteenths side by side is
+     thirty-two columns, and they would each be scrolling. */
+  .songs-review-bar {
+    flex: 1 1 100%;
+    border-right: 0;
+    padding-right: 0;
+  }
+}

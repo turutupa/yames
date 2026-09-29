@@ -254,7 +254,9 @@
   padding: 10px 6px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--bg);
+  /* `--bg` is not a token: this tile has been drawing transparent since it
+     was written, next to a line that named `--text-primary` correctly. */
+  background: var(--bg-card);
   color: var(--text-primary);
   font-family: inherit;
   transition:

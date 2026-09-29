@@ -111,6 +111,33 @@ export type BeatEvent = {
    * bars) or "silent" (a drop-out). "full" when no jam is loaded.
    */
   bandState: "full" | "hatsOnly" | "silent";
+  /**
+   * Which played bar of the song this tick is on — an index into the score's
+   * `bars`, so it is the PIECE's bar and not the range's.
+   *
+   * `null` when no song is loaded, and `null` through a song's count-in:
+   * a count-in is not a bar of the piece, and a cursor sitting on bar one
+   * for four beats before the music starts is a cursor telling a lie.
+   */
+  songBar: number | null;
+  /**
+   * Where inside the piece this tick falls, in the score's own ticks (960 to
+   * the quarter). 0 when no song is loaded and through a count-in.
+   *
+   * **This, and never `beat`, is what moves the cursor in Songs.** `beat`
+   * counts the click's own beats, so in 7/8 it counts eighths and in a piece
+   * with a tempo step it counts them at two different lengths — neither of
+   * which is a position on the page.
+   */
+  songTick: number;
+  /** Which time round the range this is, from 0. */
+  songPass: number;
+  /**
+   * This tick is a song's count-in: the click is running and the piece has
+   * not started. `songBar` is `null` for that reason rather than because
+   * nothing is loaded.
+   */
+  songCountIn: boolean;
 };
 
 // ---------------------------------------------------------------------------

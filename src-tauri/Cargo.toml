@@ -23,7 +23,13 @@ crate-type = ["lib", "cdylib", "staticlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["macos-private-api", "tray-icon"] }
+# `protocol-asset` is W21's: the review plays a take's picture, and a webview
+# can only decode video from a URL it is allowed to fetch. The asset protocol
+# is scoped in `tauri.conf.json` to `$APPDATA/takes/**` and to nothing else, so
+# what it opens is exactly the directory the player can already see, play and
+# delete through the app. The feature and the scope have to agree or the build
+# script refuses, which is how this line came to be here.
+tauri = { version = "2", features = ["macos-private-api", "tray-icon", "protocol-asset"] }
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-store = "2"
 serde = { version = "1", features = ["derive"] }
@@ -42,6 +48,12 @@ tauri-plugin-dialog = "2"
 # does not implement, and a file the user chose must be REFUSED with a
 # message, never crash the command. Apache-2.0.
 hound = "3"
+# The General MIDI synthesiser behind Songs (W28). Pure Rust, MIT, and no
+# dependencies at all beyond std — so it adds one package to Cargo.lock and
+# nothing to the build toolchain, which matters on a crate that already needs
+# cmake for aubio. It renders on a thread of our own, never on the audio
+# callback: `src/synth.rs` says why and what stands between them.
+rustysynth = "1.3.6"
 tauri-plugin-process = "2"
 tauri-plugin-decorum = "1"
 midir = "0.10"
@@ -81,6 +93,37 @@ num_cpus = { version = "1", optional = true }
 # file it cannot read instead of panicking, and nothing in `kit.rs` may
 # panic on a file a musician chose. Apache-2.0.
 claxon = "0.4.3"
+# The practice store (ROADMAP 1.1). `bundled` compiles SQLite from the
+# amalgamation shipped inside libsqlite3-sys, so the app never depends on
+# whatever sqlite3 the machine happens to have — a metronome that loses a
+# year of practice because a system library moved is not a coach. SQLite
+# itself is public domain and rusqlite is MIT, so neither touches the
+# GPL-3 promise in ROADMAP §1 principle 5.
+rusqlite = { version = "0.37", features = ["bundled"] }
+# Base64, for the two places bytes cross the IPC boundary: the file a caught
+# download is read from (`downloads.rs`) and the copy of it the store kept,
+# on its way back out to a save dialog (`export_score_source`). Tauri
+# serialises a `Vec<u8>` as a JSON array of decimal numbers, so a megabyte of
+# Guitar Pro would cross as a million integers; base64 is the shape
+# `scores.source_b64` is already in on the other side. Already in the graph
+# under tauri itself, so this adds NO package to Cargo.lock and NOTHING to
+# the installer. MIT OR Apache-2.0.
+base64 = "0.22"
+# One Yames at a time, so that double-clicking a Guitar Pro file while the app
+# is already open hands the path to the running window instead of starting a
+# second copy — which would fight the first for the audio device and the
+# settings store. Apache-2.0 OR MIT, like Tauri itself.
+#
+# What it costs, per platform, because it is NOT the same on all three:
+# on Windows a named mutex plus a hidden window and WM_COPYDATA, over
+# `windows-sys`, which is already in this graph — a few kilobytes. On macOS
+# it is close to nothing; LaunchServices already forwards a second launch to
+# the running app. On LINUX it talks over D-Bus, and that pulls `zbus` and
+# its async stack: **thirty packages into Cargo.lock**, all of them behind
+# `cfg(target_os = "linux")` so nothing but the Linux build compiles them.
+# The lock file grew by thirty-one entries; the Windows and macOS binaries
+# did not.
+tauri-plugin-single-instance = "2"
 
 [features]
 default = []
@@ -104,6 +147,20 @@ core-foundation-sys = "0.8"
 # graph transitively, so declaring them adds no new downloads.
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_SystemInformation"] }
+# W21 — the camera's permission prompt on Windows.
+#
+# WebView2 asks for a camera the way a browser does: its own bar, per origin,
+# and by default it asks again next time. Yames has already asked, in its own
+# words, in a dialog the player answered before `getUserMedia` was ever called
+# (`CameraIntroDialog`), so a second prompt from the webview is the app asking
+# twice and looking like a web page while it does it.
+#
+# Both crates are ALREADY in Cargo.lock underneath wry at exactly these
+# versions, so declaring them adds no download and no new package — and pinning
+# the same minors is what keeps the COM types identical to the ones
+# `PlatformWebview::controller()` hands over. MIT/Apache-2.0, like Tauri.
+webview2-com = "0.38"
+windows = { version = "0.61", features = ["Win32_Foundation"] }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

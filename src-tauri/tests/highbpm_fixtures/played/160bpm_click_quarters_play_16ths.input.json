@@ -1,0 +1,13 @@
+{
+  "name": "160bpm_click_quarters_play_16ths",
+  "description": "Synthetic cover for the fast end, standing in until the owner records a real capture (roadmap 1.2). 160 BPM quarters clicking, 16ths played 93.75 ms apart — close enough to electric guitar's 40 ms refractory floor that a regression in either the floor or the multiplier shows up here first.",
+  "bpm": 160,
+  "clickSubdivision": 1,
+  "playedDivisor": 4,
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260921,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "expectDivisor": 4
+}

@@ -109,7 +109,11 @@ export function AboutSection({
       */}
       <p className="about-sounds">
         <span className="about-sounds-title">{t("settings.about.sounds")}</span>{" "}
-        {t("settings.about.soundsCredit")}
+        {t("settings.about.soundsCredit")}{" "}
+        {/* W28 — and the General MIDI set behind every other instrument in a
+            song. Apache-2.0, which asks for the notice to travel with it, so
+            it travels here beside the two kits and in `LICENSE`. */}
+        {t("settings.about.soundsCreditSongs")}
       </p>
       <p className="about-footer">
         {t("settings.about.madeWith", { heart: "♥" })}

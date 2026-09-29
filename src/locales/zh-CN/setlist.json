@@ -7,7 +7,6 @@
     "duplicateSetlist": "复制曲目单",
     "copyName": "{{name}} 副本",
     "librarySteps": "{{count}} 步",
-    "librarySteps_one": "{{count}} 步",
     "librarySteps_other": "{{count}} 步",
     "renameTooltip": "重命名此曲目单",
     "edited": "已修改",
@@ -27,10 +26,8 @@
     "reorderHint": "拖动以重新排序",
     "stopToReorder": "停止曲目单后才能重新排序",
     "duplicateSteps": "复制 {{count}} 步",
-    "duplicateSteps_one": "复制 {{count}} 步",
     "duplicateSteps_other": "复制 {{count}} 步",
     "removeSteps": "删除 {{count}} 步",
-    "removeSteps_one": "删除 {{count}} 步",
     "removeSteps_other": "删除 {{count}} 步",
     "barOf": "第 {{current}} / {{total}} 小节",
     "timeLeft": "还剩 {{duration}}",
@@ -38,7 +35,6 @@
     "switching": "正在切换",
     "summary": {
       "steps": "{{count}} 步",
-      "steps_one": "{{count}} 步",
       "steps_other": "{{count}} 步",
       "about": "约 {{duration}}",
       "ends": "会自己结束",
@@ -48,7 +44,6 @@
       "label": "重复",
       "once": "走一遍",
       "times": "走 {{count}} 遍",
-      "times_one": "走 {{count}} 遍",
       "times_other": "走 {{count}} 遍",
       "forever": "直到我停下",
       "fewer": "少重复几遍",
@@ -57,13 +52,10 @@
     "trigger": {
       "manualShort": "等我示意",
       "barsShort": "{{count}} 小节",
-      "barsShort_one": "{{count}} 小节",
       "barsShort_other": "{{count}} 小节",
       "secondsShort": "{{count}} 秒",
-      "secondsShort_one": "{{count}} 秒",
       "secondsShort_other": "{{count}} 秒",
       "minutesShort": "{{count}} 分钟",
-      "minutesShort_one": "{{count}} 分钟",
       "minutesShort_other": "{{count}} 分钟",
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
@@ -104,10 +96,8 @@
     "transition": {
       "cutShort": "直接切换",
       "countInShort": "预备 {{count}} 小节",
-      "countInShort_one": "预备 {{count}} 小节",
       "countInShort_other": "预备 {{count}} 小节",
       "restShort": "休息 {{count}} 小节",
-      "restShort_one": "休息 {{count}} 小节",
       "restShort_other": "休息 {{count}} 小节"
     },
     "said": {
@@ -137,7 +127,6 @@
       "addStep": "添加即兴伴奏",
       "addTo": "添加到曲目单…",
       "barsOfForm": "{{count}} 小节",
-      "barsOfForm_one": "{{count}} 小节",
       "barsOfForm_other": "{{count}} 小节",
       "said": "乐队",
       "goneShort": "即兴伴奏已不在",

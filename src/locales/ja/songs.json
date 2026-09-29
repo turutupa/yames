@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "曲を読み込む",
+    "dismiss": "OK",
+    "tuning": "チューニング",
+    "capoLabel": "カポ",
+    "capo": "カポは {{fret}} フレット",
+    "meter": "拍子",
+    "tempo": "テンポ",
+    "bpm": "{{bpm}} BPM",
+    "range": "小節",
+    "fromBar": "開始",
+    "toBar": "終了",
+    "wholeSong": "曲全体",
+    "barsCount": "{{count}} 小節",
+    "barsCount_other": "{{count}} 小節",
+    "sections": "セクション",
+    "speed": "速さ",
+    "percent": "{{percent}}%",
+    "speedNote": "クリックは {{bpm}} BPM で動きます",
+    "loop": "繰り返し",
+    "loopNote": "上の小節を何度も繰り返し弾きます",
+    "dropHere": "ファイルをここに落とすと開きます",
+    "band": {
+      "label": "誰が鳴るか",
+      "click": "クリック",
+      "drums": "ドラム",
+      "bass": "ベース",
+      "keys": "キーボード",
+      "levelFor": "{{lane}} の音量",
+      "muteFor": "{{lane}} を切る",
+      "note": "弾きながらバランスを決めてください。Yames はこの曲のぶんを覚えています。",
+      "leftOut": "{{tracks}} はこのファイルに入っていますが、Yames には弾ける相手がいません。",
+      "leftOut_other": "{{tracks}} はこのファイルに入っていますが、Yames には弾ける相手がいません。",
+      "droppedNotes": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。",
+      "droppedNotes_other": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。",
+      "myPart": "自分のパート",
+      "soloShort": "S",
+      "soloFor": "{{lane}} だけを聞く",
+      "tooManyParts": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
+      "tooManyParts_other": "{{tracks}} は鳴りません。このファイルは同時に鳴らせる数よりパートが多いためです。",
+      "turnedDown": "{{count}} 人の音量を下げています",
+      "turnedDown_other": "{{count}} 人の音量を下げています",
+      "drumsLabel": "ドラム",
+      "drumsKit": "Yamesのキット",
+      "drumsFile": "ファイルのもの"
+    },
+    "countIn": {
+      "counting": "カウント中"
+    },
+    "engine": {
+      "cannotPlay": "Yames は今この曲をバンドで鳴らせません。クリックは変わらず時間を刻みます。",
+      "busy": "ほかの何かが音を使っているので、曲が止まりました。用意ができたらもう一度再生を押してください。"
+    },
+    "empty": {
+      "title": "手元にある曲を持ち込んでください",
+      "body": "Guitar Pro か MusicXML のファイルを開くと、Yames がタブ譜を表示し、時間を刻み、今いる場所を追いかけます。この画面のどこにでもファイルを落とすか、選んでください。",
+      "private": "ファイルはこのパソコンに残ります。どこにも送られません。",
+      "bodyShort": "Guitar Pro か MusicXML。この画面のどこにでもファイルを落とすか、選んでください。",
+      "stays": "ファイルはこのコンピューターに残り、Yames も自分用のコピーを保管します。"
+    },
+    "tab": {
+      "drawing": "譜面を組んでいます...",
+      "failed": "Yames はこのファイルを読めましたが、描けません。小節と時間はそのまま使えます。"
+    },
+    "picker": {
+      "title": "弾くパートを選ぶ",
+      "which": "どのパートを弾きますか？",
+      "strings": "{{count}} 弦",
+      "strings_other": "{{count}} 弦",
+      "notTab": "タブ譜では書かれていません",
+      "cancel": "今はやめる"
+    },
+    "warn": {
+      "tempoFlattened": "{{count}} 小節でテンポが連続的に変わります。Yames は代わりに小節線で切り替えます。",
+      "tempoFlattened_other": "{{count}} 小節でテンポが連続的に変わります。Yames は代わりに小節線で切り替えます。",
+      "barOverfilled": "{{bar}} 小節目は拍子が許す量より多く入っています。書かれたとおりに鳴らします。"
+    },
+    "library": {
+      "add": "曲を読み込む",
+      "empty": "まだ曲がありません",
+      "remove": "Yames から外す",
+      "due": "今日の分",
+      "dueTitle": "この曲に戻ると決めていました",
+      "starter": "付属",
+      "starterTitle": "Yames に最初から入っています。いつでも消せます。",
+      "removeTitle": "{{name}} を外しますか？",
+      "removeBody": "曲ごと消えます。すべてのパート、Yames が覚えていること、そして Yames が持っているファイルのコピーも。元には戻せません。",
+      "removeTakes": "この曲の録音 {{count}} 件も一緒に消えます。",
+      "removeTakes_other": "この曲の録音 {{count}} 件も一緒に消えます。",
+      "removeNoTakes": "この曲はまだ録音していません。",
+      "removeConfirm": "外す",
+      "removeCancel": "残す"
+    },
+    "review": {
+      "title": "今のはどうだったか",
+      "summary": "{{bars}} 小節、{{percent}}% — {{of}} 音中 {{hits}} 音が決まりました",
+      "again": "もう一度",
+      "working": "聴き返しています...",
+      "passes": "どの回",
+      "pass": "{{n}} 回目",
+      "nothingToSay": "今のには目立つところがありませんでした。もう一度弾けば、コーチに見えるものが増えます。",
+      "chordsHonesty": "和音の中の音はまだ確認できません。タイミングだけです。",
+      "notSaved": "Yames はこれを書き留められなかったので、次回の比較には残りません。",
+      "tooShort": "短すぎて判断できませんでした。この箇所を8音以上弾けば、コーチが言えることが出てきます。",
+      "moreLabel": "ほかには（{{count}}）",
+      "moreLabel_other": "ほかには（{{count}}）",
+      "lessLabel": "残りを隠す",
+      "tab": {
+        "nothing": "この小節では何も鳴っていません。"
+      },
+      "mark": {
+        "onTime": "ぴったり",
+        "slightlyEarly": "やや早い",
+        "early": "早い",
+        "slightlyLate": "やや遅い",
+        "late": "遅い",
+        "missed": "抜け",
+        "notAssessed": "判定なし",
+        "extra": "余分な音",
+        "accentQuiet": "アクセント付きで書かれていますが、強く出ていません"
+      },
+      "bars": {
+        "one": "{{bar}} 小節目",
+        "range": "{{from}}–{{to}} 小節",
+        "here": "この箇所"
+      },
+      "amount": {
+        "hair": "ほんのわずか",
+        "thirtySecond": "32分音符ほど",
+        "sixteenth": "16分音符ほど",
+        "tripletEighth": "1拍の3分の1ほど",
+        "eighth": "8分音符ほど",
+        "mostOfABeat": "ほぼ1拍",
+        "beat": "まるまる1拍"
+      },
+      "when": {
+        "early": "早く",
+        "late": "遅く"
+      },
+      "goes": "{{count}} 回",
+      "goes_other": "{{count}} 回",
+      "notes": "{{count}} 音",
+      "notes_other": "{{count}} 音",
+      "say": {
+        "consistentMiss": {
+          "1": "毎回同じところです。{{goes}}のうち {{affected}} 回、{{bars}}が抜けています。",
+          "2": "{{bars}}で崩れます。{{passes}} 回中 {{affected}} 回、落ちています。",
+          "3": "ほかは持ちこたえています。毎回こぼれるのは{{bars}}で、{{goes}}のうち {{affected}} 回です。"
+        },
+        "rushing": {
+          "1": "{{bars}}でクリックより前に出ています。最後まで{{amount}}早いままです。",
+          "2": "{{bars}}で走っています。平均で{{amount}}早いです。",
+          "3": "{{bars}}では少し後ろに座ってください。そこで{{amount}}早く落ちています。"
+        },
+        "dragging": {
+          "1": "{{bars}}でクリックより後ろにいます。{{amount}}遅いです。",
+          "2": "{{bars}}でもたついています。音が拍より{{amount}}あとに落ちています。",
+          "3": "{{bars}}では少し前に出てください。{{amount}}遅く座っています。"
+        },
+        "afterShift": {
+          "1": "{{bars}}で手が動くたび、次の音が{{amount}}{{when}}出ます。",
+          "2": "{{bars}}のポジション移動が、次の音を{{amount}}{{when}}させています。",
+          "3": "{{bars}}の移動を決めれば、あとはついてきます。今は次の音が{{amount}}{{when}}出ています。"
+        },
+        "fallsApart": {
+          "1": "{{bars}}はきれいに入って、終わりに向けて崩れます。",
+          "2": "{{bars}}の後半が落ちます。前半は大丈夫です。",
+          "3": "音ではなく持久力です。{{bars}}は進むほど粗くなります。"
+        },
+        "extras": {
+          "1": "{{bars}}に、誰も頼んでいない音が入っています。{{extras}}です。",
+          "2": "{{bars}}で{{extras}}を足しています。休符は休符のままにしてください。",
+          "3": "{{bars}}に何かが入り込んでいます。譜面にない{{extras}}です。"
+        },
+        "uneven": {
+          "1": "{{bars}}は早い遅いではなく、ばらついています。音があちこちに落ちています。",
+          "2": "{{bars}}では、どちらかに寄るのではなくタイミングがさまよっています。",
+          "3": "速さより先に安定です。{{bars}}はまだどちらの向きにも揃っていません。"
+        },
+        "beatPositionBias": {
+          "1": "小節の {{beat}} 拍目が逃げています。毎小節、{{amount}}{{when}}です。",
+          "2": "{{beat}} 拍目に寄りかかっています。回ってくるたび{{amount}}{{when}}なります。",
+          "3": "外れているのは {{beat}} 拍目です。小節ごとに{{amount}}{{when}}なります。"
+        },
+        "subdivisionWeak": {
+          "1": "{{outOf}} 個のうち {{position}} 番目の音が、いつも抜け落ちます。",
+          "2": "{{outOf}} 個ずつのまとまりの中で、消えるのは {{position}} 番目の音です。",
+          "3": "声に出して数えてみてください。{{outOf}} 個中 {{position}} 番目でずれます。"
+        },
+        "drift": {
+          "1": "クリックと一緒に始めて、終わりには{{amount}}{{when}}なっていました。",
+          "2": "進むほど引っぱられます。最後の小節では{{amount}}{{when}}なります。",
+          "3": "手の中のテンポが区間を通して滑っています。終わりには{{when}}なっています。"
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} なら持ちます。{{collapse}} で崩れます。",
+          "2": "ここでの上限は {{hold}} です。{{collapse}} はまだ手に入っていません。",
+          "3": "{{hold}} は自分のものです。{{collapse}} は次に取りにいくもので、今日のテンポではありません。"
+        },
+        "improved": {
+          "1": "よくなっています。{{bars}}は前回より {{ms}} ms 安定しています。",
+          "2": "動きがありました。前は滑っていた{{bars}}を、今は保てています。",
+          "3": "{{bars}}は本物の前進です。前の回より {{ms}} ms 締まっています。"
+        },
+        "clean": {
+          "1": "{{bars}}に直すところはありません。{{goes}}とも決まっています。",
+          "2": "これは自分のものです。{{bars}}、{{goes}}、ひとつも崩れていません。",
+          "3": "{{bars}}は毎回きちんと弾けました。いったん置いて、また戻ってきてください。"
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "タブに戻る",
+      "selectedBars": "{{bars}}小節を選択",
+      "wholeSong": "曲全体",
+      "portionSays": "{{count}}小節 · {{state}}",
+      "portionSays_other": "{{count}}小節 · {{state}}",
+      "looping": "繰り返し",
+      "once": "一度だけ",
+      "timeRound": {
+        "one": "{{n}} 回目",
+        "two": "{{n}} 回目",
+        "few": "{{n}} 回目",
+        "other": "{{n}} 回目"
+      },
+      "keepPortion": "この部分を保存",
+      "keepPortionNote": "タブで小節を選んでから名前を付けます",
+      "portionPlaceholder": "この部分に名前を",
+      "renamePortion": "名前を変更",
+      "deletePortion": "これを忘れる",
+      "portionTitle": "{{name}} — {{percent}}%",
+      "tabLabel": "タブ譜です。小節をクリックするとそこへ移り、ドラッグすると一部分を選べます。"
+    },
+    "offer": {
+      "justArrived": "がダウンロードに届きました",
+      "justArrivedSized": "がダウンロードに届きました · {{size}}",
+      "more": "ほかに {{n}} 件あります",
+      "open": "開く",
+      "opening": "開いています...",
+      "notThisOne": "これはやめておく",
+      "failed": "このファイルを開けませんでした。まだダウンロード中かもしれません。"
+    },
+    "keepsCopy": "取り込んだファイルは Yames が自分のコピーを持ちます。ダウンロードフォルダーを片づけても何も失われません。",
+    "exportOriginal": "ファイルを保存する",
+    "exporting": "保存しています...",
+    "exportDone": "保存しました。",
+    "exportFailed": "そこにファイルを書き込めませんでした。",
+    "findTab": {
+      "what": "曲名とアーティスト",
+      "link": "タブ譜を探す",
+      "note": "いつものブラウザーで普通のウェブ検索を開きます。Yames が代わりに探すことはありません。",
+      "ask": "まだファイルがありませんか？"
+    },
+    "camera": {
+      "cannotPlay": "映像を再生できませんでした。",
+      "corner": {
+        "bottomLeft": "左下",
+        "bottomRight": "右下",
+        "topLeft": "左上",
+        "topRight": "右上"
+      },
+      "denied": "カメラが許可されませんでした。システム設定で Yames に許可してから、もう一度オンにしてください。",
+      "device": "どのカメラ",
+      "deviceNumbered": "カメラ {{n}}",
+      "failed": "カメラを開けませんでした。",
+      "guideBody": "両手を画面に入れてください — ネックを押さえる手と、弦を弾く手の両方です。",
+      "guideFlip": "左利きで弾きます",
+      "guideGot": "わかりました",
+      "introNotNow": "今はしない",
+      "introPrivate": "どこにもアップロードされず、どこにも送られません。テイクを削除すれば映像も一緒に消えます。",
+      "introStart": "カメラをオンにする",
+      "introTitle": "カメラについて",
+      "introWhat": "カウントインから止めるまで、演奏しているあなたをカメラが録ります。音はテイクそのもの — バンドと一緒に弾いたあの音です。",
+      "introWhere": "テイクのとなりに動画ファイル 1 つとして、このマシンにあるこのアプリ専用のフォルダへ保存され、削除するまでそこに残ります。",
+      "label": "カメラ",
+      "lead": "譜面のとなりに残るあなたの手。このマシンから何も出ていきません",
+      "lostPicture": "カメラが途中で止まりました。テイクは残っていますが、映像は残りませんでした。",
+      "move": "プレビューを動かす",
+      "nextSlip": "次のミス",
+      "noCamera": "このマシンにカメラがありません。",
+      "noOffset": "このテイクでは映像と音のずれを測れていないので、同じ位置から始まります。手と音符が合うまでずらしてください。",
+      "nudge": "映像を合わせる",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "映像を早める",
+      "nudgeHow": "手の動きが音より早く、または遅く見えるときは、ぴったり合うまで映像をずらしてください。このカメラの設定として覚えます。",
+      "nudgeLater": "映像を遅らせる",
+      "off": "映像も録る",
+      "on": "カメラ オン",
+      "pause": "一時停止",
+      "pitchDropped": "ここでは遅くすると音の高さもテンポと一緒に下がります。",
+      "pitchKept": "遅くしても音の高さはそのままです。",
+      "play": "再生",
+      "prevSlip": "前のミス",
+      "preview": "カメラから見たあなた",
+      "slips": "ミスへ飛ぶ",
+      "tape": "この一周を、音符ごとに",
+      "tickOff": "{{bar}} 小節目、{{ms}} ms",
+      "tickPlain": "{{bar}} 小節目",
+      "unavailable": "このバージョンでは映像を録れません。この画面のほかの機能はこれまでどおり動きます。",
+      "watchIt": "見てみる",
+      "watchTitle": "見返す",
+      "watchingAll": "一周ぜんぶ。",
+      "watchingBars": "{{bars}} 小節を、繰り返し。",
+      "sinkUnsupported": "このバージョンではテイクをパソコンのいつものスピーカーからしか再生できません。{{device}} からは出せません。",
+      "sinkUnmatched": "パソコンのいつものスピーカーから鳴っています。ここからは {{device}} が見つかりませんでした。",
+      "peek": "自分を見る",
+      "peekNote": "映り方を確認できます。演奏を始めると閉じます。"
+    },
+    "clip": {
+      "save": "動画として保存",
+      "go": "動画を作る",
+      "cancel": "中止",
+      "making": "作成中 — {{percent}}%",
+      "whichBars": "どの小節",
+      "chosenBars": "この小節",
+      "wholeTake": "テイク全体",
+      "shape": "形",
+      "wide": "横",
+      "tall": "縦",
+      "withMarks": "印を表示",
+      "realTime": "再生しながら録画するので、音楽と同じ長さ（{{length}}）かかります。",
+      "isMp4": "MP4 で保存されます。どこにでも投稿できます。",
+      "isWebm": "WebM で保存されます。MP4 しか受け付けない場所もあります。",
+      "saved": "{{where}} に保存しました",
+      "failed": "動画を作れませんでした。何も保存していません。",
+      "unavailable": "このバージョンでは動画を保存できません。",
+      "bar": "小節",
+      "bpmUnit": "BPM",
+      "brand": "Yames のマーク",
+      "brandNote": "隅に小さな Yames のロゴと yames.app。動画を見た人がアプリにたどり着く道です。",
+      "showInFolder": "フォルダーで表示",
+      "postItTo": "投稿先",
+      "dragItIn": "どれかを開いてファイルをドラッグしてください。Yames は何もアップロードせず、アカウントも要りません。",
+      "webmWarning": "どれかを開いてファイルをドラッグしてください。これは WebM で、ほとんどは MP4 しか受け付けません。無料の変換ソフトで MP4 にできます。",
+      "underPicture": "映像の下",
+      "band": {
+        "tab": "タブ譜",
+        "marks": "印だけ",
+        "none": "なし"
+      }
+    },
+    "compare": {
+      "title": "{{bars}}小節、あの頃と今",
+      "then": "あの頃",
+      "now": "今",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "音だけです。こちらはカメラが切ってありました。",
+      "locked": "二つは時計ではなく小節でそろえてあるので、遅く弾いた回もぴたりと合います。"
+    },
+    "takes": {
+      "withPicture": "映像あり",
+      "noneFilmed": "どれも撮影されていません。",
+      "was": "{{bars}}小節 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "読んでいるパート",
+      "percussion": "ドラム — 追いかけられないパートです",
+      "notTab": "タブ譜で書かれていません",
+      "empty": "このパートには何も書かれていません"
+    },
+    "strip": {
+      "more": "その他"
+    },
+    "view": {
+      "tabOnly": "タブ",
+      "tabAndNotes": "タブ＋五線",
+      "notationNote": "タブの上に五線も表示します",
+      "bigger": "大きく",
+      "smaller": "小さく",
+      "size": "大きさ"
+    },
+    "clickChip": "クリック",
+    "clickNote": "曲に合わせて刻みます。ファイルに伴奏が入っているときは最初はオフです。",
+    "notes": {
+      "label": "このファイルについて"
+    }
+  }
+}

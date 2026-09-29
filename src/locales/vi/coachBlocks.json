@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "Lặp ô nhịp {{from}}–{{to}}",
+      "loopBarsAt": "Lặp ô nhịp {{from}}–{{to}} ở {{bpm}} BPM",
+      "ramp": "Kéo từ {{from}} lên {{to}}",
+      "click": {
+        "1": "Tích tắc theo nốt đen",
+        "2": "Tích tắc theo nốt móc đơn",
+        "3": "Tích tắc theo chùm ba",
+        "4": "Tích tắc theo nốt móc kép",
+        "5": "Tích tắc theo chùm năm",
+        "6": "Tích tắc theo chùm sáu"
+      },
+      "loadPreset": "Dựng sẵn {{name}}",
+      "loadJam": "Chơi cùng {{name}}",
+      "comeBack": {
+        "tomorrow": "Mai quay lại phần này",
+        "inDays": "Quay lại phần này sau {{days}} ngày"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, trên cần đàn"
+    },
+    "position": {
+      "open": "thế mở",
+      "rootOn6": "nốt gốc ở dây 6",
+      "rootOn5": "nốt gốc ở dây 5",
+      "rootOn4": "nốt gốc ở dây 4",
+      "rootOn3": "nốt gốc ở dây 3"
+    },
+    "shape": {
+      "which": "thế bấm {{index}} trên {{count}}"
+    },
+    "passage": {
+      "bars": "Ô nhịp {{from}}–{{to}} của {{title}}"
+    },
+    "progress": {
+      "caption": "từ {{first}}% lên {{last}}%, qua {{goes}}",
+      "aria": "Ô nhịp {{from}} đến {{to}} đã đi thế nào"
+    },
+    "tab": {
+      "attempt": "tô màu theo lượt đó",
+      "plain": "các nốt đúng như bản ghi",
+      "soon": "Bản tab cho những ô nhịp này sắp có."
+    },
+    "take": {
+      "whole": "Bản thu {{title}} của bạn",
+      "any": "Bản thu của bạn",
+      "soon": "Nghe lại bản thu sắp có."
+    },
+    "compare": {
+      "title": "Hai lượt {{title}}, đặt cạnh nhau",
+      "any": "Hai lượt, đặt cạnh nhau",
+      "soon": "Nghe hai lượt cạnh nhau sắp có."
+    }
+  }
+}

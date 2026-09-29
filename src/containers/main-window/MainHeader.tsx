@@ -8,6 +8,7 @@ import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { SetlistSaveBar } from "../../components/setlist/SetlistSaveBar";
 import { JamSaveBar } from "../../components/jam/JamSaveBar";
 import { JamGlyph } from "../../components/jam/JamGlyph";
+import { putHeaderSlot } from "./headerSlot";
 import { IS_MAC } from "../../hotkeys";
 
 /**
@@ -208,7 +209,7 @@ function HelpGlyph() {
  * write a plan out as sentences and press Start, and it runs itself and
  * changes tempo as it goes. The metronome is knobs and a click.
  */
-export type MainView = "beat" | "drill" | "setlist" | "jam" | "settings";
+export type MainView = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
 
 interface MainHeaderProps {
   state: AppState;
@@ -277,6 +278,26 @@ interface MainHeaderProps {
   /** Audio input is on. Status only — what turns it on lives elsewhere. */
   listening?: boolean;
   /**
+   * Show the click's sound picker ("Wood", "Drum", …). W36 item 2.
+   *
+   * The owner, over a song: *"i don't think we need the audio preset dropdown
+   * (where it says drum) right now"*. On Songs the click starts OFF when the
+   * file brings a band of its own, and what it sounds like when it is on is a
+   * metronome setting — reachable from the metronome and from Settings. The
+   * room it was taking is the song's name's.
+   *
+   * A flag rather than a `view ===` test in here: which modes want a click
+   * picker is the shell's question, and this file is the bar.
+   */
+  soundPicker?: boolean;
+  /**
+   * The mode on the stage is filling the bar's slot (`headerSlot.ts`).
+   *
+   * The bar's own chips then shed sooner, because they are sharing the row
+   * with something. Nothing about WHAT is in the slot is known here.
+   */
+  modeBar?: boolean;
+  /**
    * The `?` button. O6 wires it straight to the spotlight tour; O8 will turn
    * it into the Help menu (tour / run setup again / shortcuts / …), so it is
    * deliberately a plain button with one callback and no menu state of its own.
@@ -344,6 +365,8 @@ export function MainHeader({
   setTtsVolume,
   voiceEnabled,
   listening = false,
+  soundPicker = true,
+  modeBar = false,
   onOpenHelp,
 }: MainHeaderProps) {
   const { t } = useTranslation();
@@ -388,8 +411,13 @@ export function MainHeader({
   return (
     <header
       className="main-header"
+      data-mode-bar={modeBar ? "" : undefined}
       {...(!IS_MAC && { "data-tauri-drag-region": "" })}
     >
+      {/* The mode's own room, at the head of the bar (W36 item 2). Empty on
+          every mode that does not use it, and `:empty` takes it out of the
+          layout entirely, so no other bar moves by a pixel. */}
+      <div className="header-mode-slot" ref={(node) => putHeaderSlot("bar", node)} />
       <div className="header-context">
         {/* Each tab's own object. The setlist tab answers "what am I looking
             at" with a setlist; the metronome and drill tabs answer with a
@@ -438,6 +466,7 @@ export function MainHeader({
         )}
       </div>
       <div className="header-actions">
+        {soundPicker && (
         <div className="header-sound-wrap" ref={soundDropdownRef}>
           <button
             className={`context-chip${soundOpen ? " context-chip-open" : ""}`}
@@ -469,6 +498,7 @@ export function MainHeader({
             </div>
           )}
         </div>
+        )}
 
         {/* Both volumes, on the bar. They were one chip and a hover popover;
             the owner's case for bringing the voice out was that dropping into
@@ -531,6 +561,11 @@ export function MainHeader({
           </button>
           {moreOpen && (
             <div className="header-more-menu" role="menu">
+              {/* The mode's own room in the overflow, at the top of it: what
+                  the stage put in the bar and the bar had no width for is
+                  still about the thing on the stage, so it comes before
+                  Share and Help. Empty on every mode that does not use it. */}
+              <div className="header-more-slot" ref={(node) => putHeaderSlot("more", node)} />
               {/* The jam, into a routine. First in the menu while a jam is
                   loaded, because it is the only item here that is about the
                   thing on the stage rather than about the app. */}

@@ -42,6 +42,84 @@
   width: 100%;
 }
 
+/* The mirror on the jam stage (W32).
+ *
+ * It wears Songs' own `.songs-camera-preview` — one picture-in-picture, one
+ * set of states, one stylesheet — and this only says what is different here:
+ * it is narrower, because the jam stage is a column of wide rows rather than
+ * an engraving with margins, and a fifth of the width at 1440 would be a
+ * 280 px face beside a 16-bar grid.
+ *
+ * The two bottom corners are the only ones offered (`JAM_PREVIEW_CORNERS`),
+ * so nothing here has to fight the chord for the top of the screen. */
+/* FIXED to the window, not absolute inside the stage.
+ *
+ * Two measurements made that decision and both are worth keeping:
+ *
+ * * At 480×780 the jam stage is 162 px taller than the room it has and
+ *   scrolls. A picture anchored to the bottom of that column is a picture
+ *   below the fold — the same bug as covering something, and harder to see.
+ * * `.jam-view` is a container-query container, and layout containment makes
+ *   it the containing block for anything `position: fixed` inside it. So the
+ *   mirror cannot be fixed to the window from in there at all; it is mounted
+ *   by `MainWindow` instead.
+ *
+ * It is narrower than the Songs one because the jam stage is a column of wide
+ * rows rather than an engraving with margins, and a fifth of the width at
+ * 1440 would be a 280 px face beside a 16-bar grid. */
+.jam-camera-preview {
+  position: fixed;
+  width: clamp(104px, 14vw, 168px);
+}
+
+/* Lifted clear of the transport.
+ *
+ * MEASURED: at 1100×720 the window's play button sits at y 658–704, over the
+ * last few pixels of the stage. A mirror ten pixels off the bottom of the
+ * window therefore landed on Stop — the one control a player reaches for with
+ * a guitar on, and exactly what the layout suite exists to protect.
+ *
+ * 96 px is the transport's own 76 px plus a finger's clearance. BOTH bottom
+ * corners get it: the play button is to the left at some sizes and the setup
+ * sheet narrows the stage from the right at others, so a rule that moved the
+ * picture sideways would only trade one collision for the other.
+ * `tests/layout/jam-camera.spec.ts` measures all six combinations. */
+.songs-camera-preview.jam-camera-preview[data-corner="bottomLeft"],
+.songs-camera-preview.jam-camera-preview[data-corner="bottomRight"] {
+  bottom: 96px;
+}
+
+/* At the smallest window there is no corner to be in, so there is no mirror.
+ *
+ * Also measured: at 480×780 the stage is 314 px wide and the form's bar grid
+ * runs from y 493 to 689 — the whole width, all the way down to the
+ * transport. There is no rectangle left over that a 123 px picture could sit
+ * in, and something has to give. What gives is the MIRROR, not the grid: a
+ * player reads a jam off the chord and the form, and a picture of their own
+ * face over either of them is worse than no picture of their own face.
+ *
+ * Nothing about the recording changes — the camera is open, the take is
+ * filmed, the thumbnail is grabbed at the first downbeat — and the chip in
+ * the setup sheet still says "Camera on" with its live dot, which is the
+ * signal that actually matters. The mirror comes back the moment the window
+ * has room for it. `tests/layout/jam-camera.spec.ts` asserts both halves. */
+@media (max-width: 899px) {
+  .jam-camera-preview {
+    display: none;
+  }
+}
+
+/* The camera's chip, under the sound choice in the takes group. Its own row
+   rather than inline with the sound control: the two are different questions
+   and the group reads as "turn it on, decide what goes in, decide whether you
+   are in it". */
+.jam-camera-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 /* The stage is aligned to the start so that a long jam can scroll, which
    leaves the empty state stranded at the top of an otherwise empty screen.
    Auto margins put it back in the middle and collapse to nothing the moment
@@ -749,10 +827,16 @@
 }
 
 /* Your bars in a trade. Amber, the colour the app already uses for "this one
-   is yours" in the context bar. */
+   is yours".
+
+   `--feedback-ok` is the amber-family token and every theme defines it —
+   settings.css reaches for the same one to say "that shortcut is already
+   taken". This was `var(--warning, #fbbf24)`, and `--warning` is defined by
+   no theme in this app, so all thirteen got the same hard-coded amber
+   whatever else was on the screen. */
 .jam-timeline-cell[data-band="hatsOnly"] {
-  border-color: color-mix(in srgb, var(--warning, #fbbf24) 45%, transparent);
-  background: color-mix(in srgb, var(--warning, #fbbf24) 9%, transparent);
+  border-color: color-mix(in srgb, var(--feedback-ok) 45%, transparent);
+  background: color-mix(in srgb, var(--feedback-ok) 9%, transparent);
 }
 
 /* ── The band, one row per player ──────────────────────────────────────── */
@@ -818,7 +902,7 @@
   column-gap: 16px;
   min-height: 42px;
   padding: 0 14px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
   background: color-mix(in srgb, var(--text-primary) 2%, transparent);
 }
@@ -894,8 +978,12 @@
   color: var(--text-faint);
 }
 
+/* The mic is on and the engine is hearing you. `--feedback-perfect` is the
+   theme's own "this is right" colour — it was `var(--success, #4ade80)`, and
+   `--success` is defined by no theme, so one hard-coded green appeared on
+   every one of them. */
 .jam-band-input[data-on] {
-  color: var(--success, #4ade80);
+  color: var(--feedback-perfect);
 }
 
 /* ── The practice tools ────────────────────────────────────────────────── */
@@ -956,7 +1044,7 @@
   gap: 8px;
   height: 34px;
   padding: 0 10px 0 14px;
-  border-radius: var(--radius-md, 9px);
+  border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
 }
 
@@ -1109,7 +1197,12 @@
   color: var(--accent);
 }
 
-/* ── The trading cue ───────────────────────────────────────────────────── */
+/* ── The trading cue ─────────────────────────────────────────────────────
+   Amber while the band is out and it is your turn, the accent while the band
+   is back in. Both sit on `--bg-raised`, the token the panel behind them is
+   painted with — it was `var(--bg-elevated, …)`, and `--bg-elevated` is
+   defined by no theme, so the cue carried a blue-black panel into all
+   thirteen. Same class of bug as the editor drawer's `--bg-base` below. */
 .jam-cue {
   position: fixed;
   right: 40px;
@@ -1120,8 +1213,8 @@
   gap: 12px;
   padding: 12px 18px 12px 14px;
   border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--warning, #fbbf24) 35%, transparent);
-  background: color-mix(in srgb, var(--warning, #fbbf24) 12%, var(--bg-elevated, #14131f));
+  border: 1px solid color-mix(in srgb, var(--feedback-ok) 35%, transparent);
+  background: color-mix(in srgb, var(--feedback-ok) 12%, var(--bg-raised));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
   animation: jam-cue-in 0.18s ease-out;
   pointer-events: none;
@@ -1129,12 +1222,12 @@
 
 .jam-cue[data-state="full"] {
   border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated, #14131f));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-raised));
   color: var(--accent);
 }
 
 .jam-cue:not([data-state="full"]) {
-  color: var(--warning, #fbbf24);
+  color: var(--feedback-ok);
 }
 
 .jam-cue-text {
@@ -1323,7 +1416,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   background: color-mix(in srgb, var(--accent) 4%, transparent);
 }
@@ -1672,6 +1765,154 @@
   color: var(--text-faint);
 }
 
+/* ---------------------------------------------------------------------------
+   What a take is made of (W30, `plans/SONGS.md` A12).
+
+   Between the switch that starts a take and the shelf that holds them, in the
+   order a person reads in: turn it on, decide what goes in, see what came out.
+   The warning and the device name are the honest half of the feature and are
+   drawn as plain sentences rather than as a tooltip nobody opens.
+   --------------------------------------------------------------------------- */
+
+.takes-sound {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 2px 0 10px;
+}
+
+.takes-sound .jam-segmented {
+  /* The segments carry the whole question, so the heading above them is for
+     screen readers' benefit and the eye's, not a second explanation. */
+  gap: 4px;
+}
+
+.takes-sound-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle, var(--border));
+  border-radius: 8px;
+  background: var(--surface-sunken, transparent);
+}
+
+.takes-sound-warning,
+.takes-sound-device,
+.takes-sound-silent,
+.takes-sound-absent {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+.takes-sound-warning {
+  /* The one sentence that answers "so you'll record ALL the audio coming from
+     the pc?". It is not a footnote. */
+  color: var(--text-muted, var(--text-faint));
+}
+
+.takes-sound-device {
+  font-variant-numeric: tabular-nums;
+}
+
+.takes-sound-silent {
+  color: var(--warning, var(--text-faint));
+}
+
+.takes-sound-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* A narrow drawer puts the meter under the button rather than squeezing it
+     to nothing; the meter is useless below about sixty pixels. */
+  flex-wrap: wrap;
+}
+
+.takes-sound-listen {
+  flex: 0 0 auto;
+  font-size: 0.76rem;
+  padding: 3px 10px;
+}
+
+.takes-sound-meter {
+  flex: 1 1 90px;
+  min-width: 90px;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--border-subtle, var(--border));
+}
+
+.takes-sound-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 120ms ease-out;
+}
+
+/* "Save as a video", and the panel it opens.
+
+   The panel is a full-width row of its own under the take it belongs to
+   rather than a popover: it holds a canvas, four chips and a share row, and
+   inside the 320 px menu cap a popover of that would be unreadable. The list
+   item becomes a two-row flex column when one is open, and goes back to a
+   single row when it closes. */
+/* A text button like Delete beside it, rather than the browser's own grey
+   slab — which is what it was, because nothing ever styled it. Always shown
+   and not revealed on hover the way Delete is: listening back is the thing
+   you came to the shelf FOR, and a way in that only appears under the mouse
+   is a way in a touch screen never finds. */
+.jam-take-share {
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.jam-take-share:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* The row becomes a column when a take is open in it. `height: auto` and not
+   only `flex-wrap`: the row is 34px tall by rule, and a panel inside a box
+   with a fixed height overflows it — the two rows below were drawn straight
+   over the picture. */
+.jam-take:has(> .jam-take-video) {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  height: auto;
+  padding-top: 4px;
+  padding-bottom: 8px;
+}
+
+.jam-take-video {
+  flex: 1 0 100%;
+  min-width: 0;
+  margin-top: 6px;
+}
+
+/* The badge on a take that is not the ordinary kind. Quiet, and allowed to
+   shrink away before the date and the length do: it is the third thing on the
+   row, not the first. */
+.jam-take-sound {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
 .jam-takes-list {
   display: flex;
   flex-direction: column;
@@ -1687,7 +1928,7 @@
   gap: 10px;
   height: 34px;
   padding: 0 10px;
-  border-radius: var(--radius-md, 9px);
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
 }
 
@@ -1787,10 +2028,17 @@
   color: var(--text-secondary);
 }
 
-/* There is no undo. The one button that destroys something says so in the
-   one colour on this screen that means "this is not reversible". */
+/* There is no undo, so the one button that destroys something is the one
+   that is coloured; the other says "no" in the ordinary text colour.
+
+   In the accent and not in a red, because the token contract has no red:
+   this was `var(--danger, #f87171)`, `--danger` is defined by no theme, and
+   the fallback was a soft red that no theme in the app contains and that a
+   light theme barely shows. songs.css settled the same question the same
+   way — a problem is said in the accent rather than in a colour this app
+   does not have. */
 .jam-take-confirm-yes {
-  color: var(--danger, #f87171);
+  color: var(--accent);
 }
 
 .jam-takes-note {
@@ -2366,7 +2614,11 @@
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--text-primary) 3%, transparent);
   color: var(--text-primary);
-  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  /* The chart is typed in columns, so it is set in a monospace stack — the
+     same one help.css uses. It was `var(--font-mono, …)`, and `--font-mono`
+     is defined by no theme; the fallback was doing all the work and the
+     indirection only suggested a token somebody could set. */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.76rem;
   line-height: 1.5;
   white-space: pre;
@@ -3416,4 +3668,281 @@
   .jam-sheet .jam-cards-groove {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/* ── Watching a jam back (W33) ────────────────────────────────────────────
+   The panel a take opens into, inside the setup drawer's 320 px cap. Every
+   measurement here is that cap: the picture is as wide as the panel and no
+   wider, the bar grid wraps rather than scrolling sideways, and the three
+   actions at the foot are a wrapping row rather than three fixed columns.
+
+   It replaces the "Save as a video" panel that used to open here, and that
+   panel is now one press further in — which is the right order: you listen
+   to a take before you decide to send it to somebody. */
+.jam-watch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+/* The picture, capped in HEIGHT as well as shaped.
+
+   The setup sheet is a 320px popover on a small window and a docked panel
+   nearly seven hundred wide on a laptop, and a full-width 16:9 picture in the
+   wide one is 388px tall — which put the chord eight pixels under the bottom
+   of a 1100x720 window, measured. So the height is capped and the picture is
+   LETTERBOXED rather than cropped: what a player is checking in a preview is
+   their own framing, and a preview that quietly cut the top off their hands
+   would be answering the wrong question. */
+.jam-watch-picture {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(260px, 30vh);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.jam-watch-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* The chord you were playing over, and where in the form that was. The same
+   three facts the clip's own furniture carries, in the same order. */
+.jam-watch-now {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.jam-watch-chord {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.jam-watch-next {
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.jam-watch-where {
+  flex: 1 1 auto;
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+/* One cell per bar of the take. Wrapped, because a take is minutes long and
+   a row that scrolls sideways inside a drawer is a row nobody finds the end
+   of; the bar that opens a chorus carries the heavier left edge, which is the
+   same signal the stage's own timeline gives. */
+.jam-watch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.jam-watch-bar {
+  flex: 0 0 auto;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.jam-watch-bar[data-opens] {
+  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.jam-watch-bar[data-current] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text-primary);
+}
+
+/* A bar of the form the take does not contain — before it started, or after
+   it stopped. Drawn so the grid is always the form's own width, and dead
+   because there is nothing there to go to. */
+.jam-watch-bar:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.jam-watch-transport {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.jam-watch-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.jam-watch-play.playing {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.jam-watch-step {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+
+.jam-watch-spacer {
+  flex: 1 1 auto;
+}
+
+/* The picture's own offset. The fit is good to a few tens of milliseconds and
+   no better, so this is how a player lines their own camera up by eye. */
+.jam-watch-nudge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.66rem;
+  color: var(--text-faint);
+}
+
+.jam-watch-nudge button {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+
+.jam-watch-nudge-value {
+  min-width: 34px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-watch-note {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+}
+
+.jam-watch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jam-watch-action {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* There is no undo, so the one press that destroys something is the one in
+   the accent — the same answer `.jam-take-confirm-yes` gives, and for the
+   same reason: the token contract has no red. */
+.jam-watch-delete {
+  color: var(--accent);
+}
+
+.jam-watch-export {
+  width: 100%;
+  min-width: 0;
+}
+
+/* The shelf's own head and its filter (W33). What every take here is a
+   recording OF, said once rather than on each of six rows. */
+.jam-takes-facts {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.jam-takes-filter {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.jam-takes-filter[data-active] {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* A frame of the take, so the shelf shows what it is a picture of. Fixed
+   width and an empty box on the takes with the camera off, so the rows all
+   line up and the eye can run down them. */
+.jam-take-thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 36px;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.jam-take-thumb[data-empty] {
+  border: 1px dashed var(--border);
+  background: transparent;
+}
+
+.jam-take-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }

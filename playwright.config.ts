@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -21,6 +22,37 @@ import { defineConfig, devices } from "@playwright/test";
  * see. The bugs being gated are "does it fit", not "does this engine round
  * sub-pixels the other way".
  */
+
+/**
+ * A port belonging to this checkout, and to no other.
+ *
+ * This used to be 5390 for everybody, with `reuseExistingServer` on outside
+ * CI — so a dev server left running by another worktree answered, and
+ * Playwright used it. The suite then ran the real tests against a DIFFERENT
+ * worker's source: twenty-four tests passing, every `songs` scene reporting
+ * "the scene did not build", and the harness listing shot ids that do not
+ * exist on this branch. Two people on one laptop is all it takes, and
+ * nothing in the output says so.
+ *
+ * Both halves of the fix are here. The port is derived from the absolute
+ * path of the checkout, so two worktrees never ask for the same one and the
+ * same worktree always asks for the one it asked for last time; and the
+ * server is never reused, so a port that is already answering is a loud
+ * failure ("is already used") rather than a quiet substitution. 500 ports
+ * above 5390 is far from anything a person runs by hand.
+ *
+ * `YAMES_LAYOUT_PORT` overrides it, for a run that has to be reachable at a
+ * number somebody typed.
+ */
+const PORT = (() => {
+  const asked = Number(process.env.YAMES_LAYOUT_PORT);
+  if (Number.isInteger(asked) && asked >= 1024 && asked <= 65_535) return asked;
+  const digest = createHash("sha1").update(process.cwd()).digest();
+  return 5390 + (digest.readUInt16BE(0) % 500);
+})();
+
+export const LAYOUT_ORIGIN = `http://localhost:${PORT}`;
+
 export default defineConfig({
   testDir: "tests/layout",
   fullyParallel: true,
@@ -28,27 +60,50 @@ export default defineConfig({
   retries: 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://localhost:5390",
+    baseURL: LAYOUT_ORIGIN,
     // A failure here is always "something is in the wrong place", so a picture
     // of the moment it failed is the whole of the debugging.
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        /*
+         * W21 — a camera, with no camera and nobody in front of it.
+         *
+         * Chromium's fake device hands the page a real `MediaStream` of a
+         * synthetic picture and the fake UI answers the permission prompt, so
+         * the `songs-camera` scene arms the shipping camera code, records with
+         * the shipping `MediaRecorder` and plays the result back in the
+         * shipping review. Without these two flags that scene cannot run at
+         * all on a build machine, and with them it needs no hardware and no
+         * person.
+         *
+         * They affect nothing else: every other scene here opens no camera, and
+         * a flag that supplies a device nobody asks for supplies nothing.
+         */
+        launchOptions: {
+          args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"],
+        },
+      },
+    },
+  ],
   /*
-   * Its own port, and its own server.
+   * Its own server, always.
    *
-   * 5173 and 5174 are Vite's defaults and are routinely somebody else's: the
-   * first run of this suite reused a server already listening on 5174 and
-   * spent thirty seconds waiting for a page belonging to an entirely
-   * different app to announce itself ready. `strictPort` means a clash is an
-   * error rather than a quiet move to the next port, which would leave
-   * `baseURL` pointing at nothing.
+   * `strictPort` means a clash is an error rather than a quiet move to the
+   * next port, which would leave `baseURL` pointing at nothing; and
+   * `reuseExistingServer: false` means this suite only ever measures a page
+   * served out of this checkout. See the comment on `PORT` for what the
+   * alternative cost.
    */
   webServer: {
-    command: "npx vite --port 5390 --strictPort",
-    url: "http://localhost:5390/shots.html?manifest=1",
-    reuseExistingServer: !process.env.CI,
+    command: `npx vite --port ${PORT} --strictPort`,
+    url: `${LAYOUT_ORIGIN}/shots.html?manifest=1`,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

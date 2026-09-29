@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "Nhập một bài hát",
+    "dismiss": "OK",
+    "tuning": "Lên dây",
+    "capoLabel": "Capo",
+    "capo": "Capo ở phím {{fret}}",
+    "meter": "Nhịp",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Ô nhịp",
+    "fromBar": "Từ",
+    "toBar": "Đến",
+    "wholeSong": "Cả bài",
+    "barsCount": "{{count}} ô nhịp",
+    "barsCount_other": "{{count}} ô nhịp",
+    "sections": "Các đoạn",
+    "speed": "Tốc độ",
+    "percent": "{{percent}}%",
+    "speedNote": "Tiếng gõ chạy ở {{bpm}} BPM",
+    "loop": "Lặp lại",
+    "loopNote": "Chơi đi chơi lại những ô nhịp ở trên",
+    "dropHere": "Thả tệp vào đây để mở",
+    "band": {
+      "label": "Bạn nghe thấy ai",
+      "click": "Tích tắc",
+      "drums": "Trống",
+      "bass": "Bass",
+      "keys": "Phím",
+      "levelFor": "{{lane}} to đến đâu",
+      "muteFor": "Tắt {{lane}}",
+      "note": "Chỉnh cân bằng ngay trong lúc chơi. Yames nhớ nó cho bài này.",
+      "leftOut": "{{tracks}} có trong tệp này, nhưng Yames không có ai chơi phần đó.",
+      "leftOut_other": "{{tracks}} có trong tệp này, nhưng Yames không có ai chơi những phần đó.",
+      "droppedNotes": "{{count}} nốt trong tệp này thuộc về một nhạc cụ mà ban nhạc không có.",
+      "droppedNotes_other": "{{count}} nốt trong tệp này thuộc về những nhạc cụ mà ban nhạc không có.",
+      "myPart": "Phần của tôi",
+      "soloShort": "S",
+      "soloFor": "Chỉ nghe {{lane}}",
+      "tooManyParts": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
+      "tooManyParts_other": "{{tracks}} sẽ im lặng: tệp này có nhiều bè hơn số có thể vang lên cùng lúc.",
+      "turnedDown": "Đã giảm {{count}} người chơi",
+      "turnedDown_other": "Đã giảm {{count}} người chơi",
+      "drumsLabel": "Trống",
+      "drumsKit": "Bộ trống Yames",
+      "drumsFile": "Của tệp"
+    },
+    "countIn": {
+      "counting": "Đang đếm vào"
+    },
+    "engine": {
+      "cannotPlay": "Yames chưa chơi được bài này cùng ban nhạc lúc này. Tiếng gõ vẫn giữ nhịp.",
+      "busy": "Có thứ khác đang dùng âm thanh nên bài hát đã dừng. Bấm phát lại khi bạn sẵn sàng."
+    },
+    "empty": {
+      "title": "Mang vào một bài bạn đã có sẵn",
+      "body": "Mở một tệp Guitar Pro hoặc MusicXML, Yames sẽ hiện bản tab, giữ nhịp và bám theo chỗ bạn đang chơi. Thả tệp vào bất cứ đâu trên màn hình này, hoặc chọn một tệp.",
+      "private": "Tệp ở lại trên máy này. Không có gì được tải lên.",
+      "bodyShort": "Guitar Pro hoặc MusicXML. Thả tệp vào bất cứ đâu trên màn hình này, hoặc chọn một tệp.",
+      "stays": "Tệp ở lại trên máy tính này, và Yames giữ một bản sao riêng."
+    },
+    "tab": {
+      "drawing": "Đang dàn bản nhạc...",
+      "failed": "Yames đọc được tệp này nhưng không vẽ được. Ô nhịp và nhịp vẫn hoạt động bình thường."
+    },
+    "picker": {
+      "title": "Chọn bè của bạn",
+      "which": "Bạn chơi bè nào?",
+      "strings": "{{count}} dây",
+      "strings_other": "{{count}} dây",
+      "notTab": "Không viết bằng tab",
+      "cancel": "Để sau"
+    },
+    "warn": {
+      "tempoFlattened": "Tempo trượt dần trong {{count}} ô nhịp. Yames đổi nó ngay tại vạch nhịp.",
+      "tempoFlattened_other": "Tempo trượt dần trong {{count}} ô nhịp. Yames đổi nó ngay tại vạch nhịp.",
+      "barOverfilled": "Ô nhịp {{bar}} chứa nhiều hơn số chỉ nhịp cho phép. Nó được chơi đúng như đã viết."
+    },
+    "library": {
+      "add": "Nhập một bài hát",
+      "empty": "Chưa có bài nào",
+      "remove": "Bỏ khỏi Yames",
+      "due": "Hôm nay",
+      "dueTitle": "Bạn đã hẹn quay lại bài này",
+      "starter": "Có sẵn",
+      "starterTitle": "Có sẵn cùng Yames. Xoá lúc nào cũng được.",
+      "removeTitle": "Bỏ {{name}}?",
+      "removeBody": "Cả bài sẽ mất: mọi bè của nó, mọi thứ Yames nhớ về nó, và bản sao tệp mà Yames giữ. Không hoàn tác được.",
+      "removeTakes": "{{count}} bản ghi của bài cũng mất theo.",
+      "removeTakes_other": "{{count}} bản ghi của bài cũng mất theo.",
+      "removeNoTakes": "Bạn chưa ghi gì của bài này.",
+      "removeConfirm": "Bỏ",
+      "removeCancel": "Giữ"
+    },
+    "review": {
+      "title": "Vừa rồi thế nào",
+      "summary": "Ô nhịp {{bars}} ở {{percent}}% — {{hits}} trên {{of}} nốt vào đúng chỗ",
+      "again": "Chơi lại",
+      "working": "Đang nghe lại...",
+      "passes": "Lượt nào",
+      "pass": "Lượt {{n}}",
+      "nothingToSay": "Lượt vừa rồi không có gì nổi lên. Chơi lại một lần nữa để huấn luyện viên có thêm cơ sở.",
+      "chordsHonesty": "Tôi chưa kiểm được các nốt bên trong hợp âm, chỉ kiểm được lúc chúng rơi.",
+      "notSaved": "Yames không ghi lại được lượt này, nên lần sau sẽ không có gì để đối chiếu.",
+      "tooShort": "Vừa rồi ngắn quá nên chưa đánh giá được. Chơi ít nhất tám nốt của đoạn này thì huấn luyện viên sẽ có điều để nói.",
+      "moreLabel": "Còn gì nữa ({{count}})",
+      "moreLabel_other": "Còn gì nữa ({{count}})",
+      "lessLabel": "Ẩn phần còn lại",
+      "tab": {
+        "nothing": "Không có gì được chơi trong những ô nhịp này."
+      },
+      "mark": {
+        "onTime": "Đúng chỗ",
+        "slightlyEarly": "Hơi sớm",
+        "early": "Sớm",
+        "slightlyLate": "Hơi trễ",
+        "late": "Trễ",
+        "missed": "Thiếu",
+        "notAssessed": "Chưa chấm",
+        "extra": "Nốt thừa",
+        "accentQuiet": "Ghi có dấu nhấn, nhưng không ra to hơn"
+      },
+      "bars": {
+        "one": "ở ô nhịp {{bar}}",
+        "range": "ở ô nhịp {{from}}–{{to}}",
+        "here": "ở đoạn này"
+      },
+      "amount": {
+        "hair": "một sợi tóc",
+        "thirtySecond": "khoảng một nốt móc ba",
+        "sixteenth": "khoảng một nốt móc kép",
+        "tripletEighth": "khoảng một phần ba phách",
+        "eighth": "khoảng một nốt móc đơn",
+        "mostOfABeat": "gần trọn một phách",
+        "beat": "trọn một phách"
+      },
+      "when": {
+        "early": "sớm",
+        "late": "trễ"
+      },
+      "goes": "{{count}} lượt",
+      "goes_other": "{{count}} lượt",
+      "notes": "{{count}} nốt",
+      "notes_other": "{{count}} nốt",
+      "say": {
+        "consistentMiss": {
+          "1": "Lần nào cũng đúng chỗ đó — bạn mất {{bars}} ở {{affected}} trên {{goes}}.",
+          "2": "Nó vỡ {{bars}}: rơi mất {{affected}} lần trên {{passes}}.",
+          "3": "Phần còn lại vẫn trụ. Chỗ cứ biến mất là {{bars}}, ở {{affected}} trên {{goes}}."
+        },
+        "rushing": {
+          "1": "Bạn đi trước tiếng gõ {{bars}} — sớm {{amount}}, suốt cả đoạn.",
+          "2": "Có sự vội {{bars}}: trung bình sớm {{amount}}.",
+          "3": "Ngồi lui lại một chút {{bars}}. Ở đó bạn đang rơi sớm {{amount}}."
+        },
+        "dragging": {
+          "1": "Bạn đi sau tiếng gõ {{bars}} — trễ {{amount}}.",
+          "2": "Nó bị kéo {{bars}}: các nốt rơi sau phách {{amount}}.",
+          "3": "Nghiêng tới một chút {{bars}}. Nó đang ngồi trễ {{amount}}."
+        },
+        "afterShift": {
+          "1": "Mỗi lần tay bạn đổi thế {{bars}}, nốt kế tiếp đến {{when}} {{amount}}.",
+          "2": "Cú đổi thế {{bars}} làm nốt ngay sau đó {{when}} {{amount}}.",
+          "3": "Đặt gọn cú đổi thế {{bars}} thì phần còn lại theo sau — hiện giờ nốt sau đó đang {{when}} {{amount}}."
+        },
+        "fallsApart": {
+          "1": "Bạn vào sạch {{bars}} rồi để tuột về cuối.",
+          "2": "Nửa sau mới là chỗ buông {{bars}} — phần đầu vẫn ổn.",
+          "3": "Sức bền, không phải nốt: {{bars}} càng về sau càng luộm thuộm."
+        },
+        "extras": {
+          "1": "Có những nốt {{bars}} mà không ai gọi — {{extras}}.",
+          "2": "Bạn đang thêm {{extras}} {{bars}}. Hãy để dấu lặng là dấu lặng.",
+          "3": "Có thứ len vào {{bars}}: {{extras}} không có trong bản ghi."
+        },
+        "uneven": {
+          "1": "{{bars}} không phải sớm hay trễ — mà là không đều. Nốt rơi tản mát.",
+          "2": "Nhịp tay bạn lang thang {{bars}} chứ không nghiêng hẳn về bên nào.",
+          "3": "Chắc trước, nhanh sau: {{bars}} vẫn chưa có gì đều, theo cả hai hướng."
+        },
+        "beatPositionBias": {
+          "1": "Phách {{beat}} của ô nhịp là phách bị tuột — {{when}} {{amount}}, ô nhịp nào cũng vậy.",
+          "2": "Bạn tì vào phách {{beat}}: {{when}} {{amount}} mỗi lần nó quay lại.",
+          "3": "Chính phách {{beat}} lệch ra, ô nhịp này qua ô nhịp khác — {{when}} {{amount}}."
+        },
+        "subdivisionWeak": {
+          "1": "Nốt thứ {{position}} trong mỗi {{outOf}} là nốt bạn cứ đánh rơi.",
+          "2": "Trong mỗi nhóm {{outOf}} nốt, nốt biến mất là nốt thứ {{position}}.",
+          "3": "Đếm to cả nhóm lên — chỗ trượt là nốt thứ {{position}} trên {{outOf}}."
+        },
+        "drift": {
+          "1": "Bạn vào cùng tiếng gõ rồi trôi {{when}} {{amount}} vào lúc kết.",
+          "2": "Càng đi càng kéo: ở những ô nhịp cuối, {{when}} {{amount}}.",
+          "3": "Tempo dưới tay bạn trượt dần suốt đoạn — đến cuối thì {{when}} hẳn."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} thì còn giữ được. Đến {{collapse}} là vỡ.",
+          "2": "Trần của bạn ở đây là {{hold}} — {{collapse}} chưa phải của bạn.",
+          "3": "{{hold}} là của bạn. {{collapse}} là thứ tiếp theo phải giành lấy, không phải tempo của hôm nay."
+        },
+        "improved": {
+          "1": "Khá hơn rồi — {{bars}} chắc hơn lần trước {{ms}} ms.",
+          "2": "Có thứ đã dịch chuyển: bạn giữ được {{bars}}, chỗ trước đây hay tuột.",
+          "3": "Tiến bộ thật {{bars}} — chặt hơn các lượt trước {{ms}} ms."
+        },
+        "clean": {
+          "1": "Không có gì phải sửa {{bars}} — đúng cả {{goes}}.",
+          "2": "Cái này là của bạn: {{bars}}, {{goes}}, không trượt lần nào.",
+          "3": "Bạn chơi đúng {{bars}} mọi lần. Để đó rồi quay lại sau."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "Quay lại tab",
+      "selectedBars": "Đã chọn ô nhịp {{bars}}",
+      "wholeSong": "Cả bài",
+      "portionSays": "{{count}} ô nhịp · {{state}}",
+      "portionSays_other": "{{count}} ô nhịp · {{state}}",
+      "looping": "đang lặp",
+      "once": "một lượt",
+      "timeRound": {
+        "one": "Lượt {{n}}",
+        "two": "Lượt {{n}}",
+        "few": "Lượt {{n}}",
+        "other": "Lượt {{n}}"
+      },
+      "keepPortion": "Lưu đoạn này",
+      "keepPortionNote": "Chọn ô nhịp trên tab trước, rồi đặt tên cho chúng",
+      "portionPlaceholder": "Đặt tên cho đoạn này",
+      "renamePortion": "Đổi tên",
+      "deletePortion": "Quên đoạn này",
+      "portionTitle": "{{name}} — ở {{percent}}%",
+      "tabLabel": "Bản tab. Nhấp vào một ô nhịp để tới đó, hoặc kéo qua các ô nhịp để chọn một đoạn."
+    },
+    "offer": {
+      "justArrived": "vừa về trong thư mục tải xuống của bạn",
+      "justArrivedSized": "vừa về trong thư mục tải xuống của bạn · {{size}}",
+      "more": "còn {{n}} tệp nữa đang chờ",
+      "open": "Mở tệp",
+      "opening": "Đang mở...",
+      "notThisOne": "Không phải tệp này",
+      "failed": "Yames không mở được tệp đó. Có thể tệp vẫn đang tải."
+    },
+    "keepsCopy": "Yames giữ bản sao riêng của mọi tệp bạn đưa vào, nên dọn thư mục tải xuống cũng không mất gì.",
+    "exportOriginal": "Lưu tệp ra ngoài",
+    "exporting": "Đang lưu...",
+    "exportDone": "Đã lưu.",
+    "exportFailed": "Yames không ghi được tệp vào đó.",
+    "findTab": {
+      "what": "Bài hát và nghệ sĩ",
+      "link": "Tìm bản tab cho bài này",
+      "note": "Mở trình duyệt của chính bạn với một tìm kiếm web bình thường. Yames không tra cứu gì thay bạn.",
+      "ask": "Chưa có tệp?"
+    },
+    "camera": {
+      "cannotPlay": "Không phát được hình.",
+      "corner": {
+        "bottomLeft": "Dưới trái",
+        "bottomRight": "Dưới phải",
+        "topLeft": "Trên trái",
+        "topRight": "Trên phải"
+      },
+      "denied": "Máy quay chưa được cho phép. Hãy cho Yames dùng nó trong cài đặt hệ thống, rồi bật lại.",
+      "device": "Máy quay nào",
+      "deviceNumbered": "Máy quay {{n}}",
+      "failed": "Không mở được máy quay.",
+      "guideBody": "Cho cả hai tay vào khung — tay bấm cần và tay gảy dây.",
+      "guideFlip": "Tôi chơi tay trái",
+      "guideGot": "Đã rõ",
+      "introNotNow": "Để sau",
+      "introPrivate": "Không có gì được tải lên hay gửi đi đâu cả. Xóa một bản thu là xóa luôn hình của nó.",
+      "introStart": "Bật máy quay",
+      "introTitle": "Về máy quay",
+      "introWhat": "Máy quay ghi lại lúc bạn chơi, từ nhịp đếm vào cho tới khi bạn dừng. Âm thanh chính là bản thu: tiếng đàn của bạn cùng ban nhạc, y như nó đang có.",
+      "introWhere": "Nó được ghi thành một tệp video nằm cạnh bản thu, trong thư mục riêng của ứng dụng trên máy này, và ở đó cho đến khi bạn xóa.",
+      "label": "Máy quay",
+      "lead": "đôi tay bạn, giữ cạnh khuông nhạc — không gì rời khỏi máy này",
+      "lostPicture": "Máy quay dừng giữa chừng. Bản thu còn, hình thì không.",
+      "move": "Dời khung xem trước",
+      "nextSlip": "Chỗ sai kế",
+      "noCamera": "Máy này không có máy quay nào.",
+      "noOffset": "Bản thu này chưa đo được hình lệch bao nhiêu so với tiếng, nên hai bên khởi đầu ngang nhau. Hãy dịch cho tới khi tay rơi cùng các nốt.",
+      "nudge": "Canh hình cho khớp",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "Hình sớm hơn",
+      "nudgeHow": "Nếu tay bạn trông sớm hoặc muộn hơn tiếng đàn, hãy dịch hình cho tới khi hai bên rơi cùng nhau. Máy quay này sẽ được nhớ.",
+      "nudgeLater": "Hình muộn hơn",
+      "off": "Ghi cả hình",
+      "on": "Máy quay đang bật",
+      "pause": "Tạm dừng",
+      "pitchDropped": "Ở đây chậm lại thì cao độ tụt theo nhịp độ.",
+      "pitchKept": "Chậm lại thì cao độ vẫn giữ nguyên.",
+      "play": "Phát",
+      "prevSlip": "Chỗ sai trước",
+      "preview": "Bạn, như máy quay thấy",
+      "slips": "Nhảy tới chỗ sai",
+      "tape": "Lượt này, từng nốt một",
+      "tickOff": "Ô nhịp {{bar}}, {{ms}} ms",
+      "tickPlain": "Ô nhịp {{bar}}",
+      "unavailable": "Bản này không ghi được hình. Mọi thứ khác trên màn hình vẫn chạy như trước.",
+      "watchIt": "Xem lại",
+      "watchTitle": "Xem lại",
+      "watchingAll": "Cả lượt.",
+      "watchingBars": "Ô nhịp {{bars}}, vòng đi vòng lại.",
+      "sinkUnsupported": "Bản này chỉ phát được bản thu qua loa thường của máy, không qua {{device}}.",
+      "sinkUnmatched": "Đang phát qua loa thường của máy — từ đây không tìm thấy {{device}}.",
+      "peek": "Xem bản thân",
+      "peekNote": "Kiểm tra khung hình. Nó đóng lại khi bạn bắt đầu chơi."
+    },
+    "clip": {
+      "save": "Lưu thành video",
+      "go": "Tạo video",
+      "cancel": "Dừng",
+      "making": "Đang tạo — {{percent}}%",
+      "whichBars": "Những ô nhịp nào",
+      "chosenBars": "Những ô nhịp này",
+      "wholeTake": "Toàn bộ bản thu",
+      "shape": "Khổ hình",
+      "wide": "Ngang",
+      "tall": "Dọc",
+      "withMarks": "Hiện các dấu",
+      "realTime": "Nó ghi trong lúc phát, nên mất đúng bằng thời lượng bản nhạc: {{length}}.",
+      "isMp4": "Bạn nhận được tệp MP4, đăng ở đâu cũng được.",
+      "isWebm": "Bạn nhận được tệp WebM. Một số nơi chỉ nhận MP4.",
+      "saved": "Đã lưu vào {{where}}",
+      "failed": "Không tạo được video. Chưa lưu gì cả.",
+      "unavailable": "Bản này không lưu được video.",
+      "bar": "Ô nhịp",
+      "bpmUnit": "BPM",
+      "brand": "Dấu Yames",
+      "brandNote": "Một logo Yames nhỏ và yames.app ở góc. Người xem video của bạn tìm ra ứng dụng nhờ nó.",
+      "showInFolder": "Mở thư mục chứa",
+      "postItTo": "Đăng lên",
+      "dragItIn": "Mở một nơi rồi kéo tệp vào — Yames không tải gì lên và không cần tài khoản.",
+      "webmWarning": "Mở một nơi rồi kéo tệp vào. Đây là tệp WebM, mà phần lớn chỉ nhận MP4 — một trình chuyển đổi miễn phí là xong.",
+      "underPicture": "Dưới hình",
+      "band": {
+        "tab": "Bản tab",
+        "marks": "Chỉ các dấu",
+        "none": "Không có gì"
+      }
+    },
+    "compare": {
+      "title": "Ô nhịp {{bars}}, hồi đó và bây giờ",
+      "then": "Hồi đó",
+      "now": "Bây giờ",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Chỉ có tiếng — lần này máy quay tắt.",
+      "locked": "Hai bên khớp theo ô nhịp chứ không theo đồng hồ, nên lần chơi chậm hơn vẫn ăn khớp."
+    },
+    "takes": {
+      "withPicture": "Có hình",
+      "noneFilmed": "Không có bản nào được quay hình.",
+      "was": "Ô nhịp {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Bè bạn đang đọc",
+      "percussion": "Trống — không phải bè để theo",
+      "notTab": "Không viết dưới dạng tab",
+      "empty": "Bè này không có gì cả"
+    },
+    "strip": {
+      "more": "Thêm"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + khuông nhạc",
+      "notationNote": "Hiện cả khuông nhạc phía trên bản tab",
+      "bigger": "To hơn",
+      "smaller": "Nhỏ hơn",
+      "size": "Kích cỡ"
+    },
+    "clickChip": "Tích tắc",
+    "clickNote": "Gõ nhịp cùng bài hát. Ban đầu tắt khi tệp đã có ban nhạc riêng.",
+    "notes": {
+      "label": "Ghi chú về tệp này"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "120bpm_alternating_8ths_triplets",
+  "description": "Roadmap 1.4's own case. 120 BPM clicking quarters; the player plays a bar of straight eighths, then a bar of eighth-note triplets, then eighths again, for 16 bars. Neither grid is the other's, so every bar line is a change of feel the analyzer has to follow. It does not follow it: the inference locks on eighths in bar 0 and stays there for all sixteen, because a refractory keyed to eighths is 187 ms and a triplet arrives 166 ms after its neighbour, so two notes in five are never heard at all and the evidence a refit would need is exactly what was swallowed. The roadmap's two gates — 85 and two grid changes per eight bars — are both met anyway, which is what this fixture is really here to say: they can be met without following the player at all. See minHeardRatio.",
+  "bpm": 120,
+  "clickSubdivision": 1,
+  "playedDivisor": 2,
+  "alternatingDivisors": [2, 3],
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260925,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "maxGridChangesPer8Bars": 2.0,
+  "minHeardRatio": 0.68
+}

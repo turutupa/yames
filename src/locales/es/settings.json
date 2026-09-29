@@ -110,7 +110,13 @@
       "downloadVoices": "Descargar voces",
       "installed": "Entrenador {{tier}} instalado ({{size}})",
       "removing": "Eliminando…",
-      "removeModels": "Eliminar modelos"
+      "removeModels": "Eliminar modelos",
+      "stance": "Estilo de entrenamiento",
+      "stanceHint": "Cuánto te aprieta el entrenador mientras tocas",
+      "stanceStrict": "Estricto",
+      "stanceLearning": "Aprendiendo",
+      "stanceStrictDesc": "Nombra una tendencia en cuanto aparece, y lo dice en voz alta. Es lo que quieres cuando estás puliendo un pasaje que ya te sabes.",
+      "stanceLearningDesc": "Te da la mitad más de margen antes de decir nada, te quita las correcciones del oído mientras tocas y empieza por lo que salió bien. Tu puntuación se calcula exactamente igual en los dos casos."
     },
     "general": {
       "title": "General",
@@ -177,7 +183,8 @@
         "metronome": "Metrónomo",
         "view": "Vista",
         "navigation": "Navegación",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Canciones"
       },
       "actions": {
         "play": "Reproducir / Detener",
@@ -211,7 +218,17 @@
         "jam-next-section": "Siguiente sección",
         "jam-prev-section": "Sección anterior",
         "jam-loop-section": "Repetir esta sección",
-        "jam-take": "Grabar la toma"
+        "jam-take": "Grabar la toma",
+        "tab-5": "Pestaña Canciones",
+        "songs-loop-start": "La repetición empieza aquí",
+        "songs-loop-end": "La repetición termina aquí",
+        "songs-loop": "Repetir la parte",
+        "songs-loop-clear": "Toda la canción otra vez",
+        "songs-loop-earlier": "La parte un compás antes",
+        "songs-loop-later": "La parte un compás después",
+        "songs-take": "Grabar la toma",
+        "songs-camera": "Grabar la imagen",
+        "jam-camera": "Grabar la imagen"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -245,7 +262,17 @@
         "jam-next-section": "Saltar al principio de la siguiente sección en la barra de compás",
         "jam-prev-section": "Volver al principio de la sección anterior en la barra de compás",
         "jam-loop-section": "Poner en bucle la sección en la que estás, o quitarlo",
-        "jam-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar"
+        "jam-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar",
+        "tab-5": "Cambia a la pestaña Canciones",
+        "songs-loop-start": "Empezar la parte en el compás que estás tocando",
+        "songs-loop-end": "Terminar la parte en el compás que estás tocando",
+        "songs-loop": "Tocar los compases elegidos una y otra vez, o parar",
+        "songs-loop-clear": "Olvidar la parte y tocar la pieza desde el principio",
+        "songs-loop-earlier": "Correr los compases elegidos un compás hacia el principio, sin cambiar su longitud",
+        "songs-loop-later": "Correr los compases elegidos un compás hacia el final, sin cambiar su longitud",
+        "songs-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar",
+        "songs-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara",
+        "jam-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "No se pudo comprobar",
       "sounds": "Sonidos",
       "soundsCredit": "La batería Club es Virtuosity Drums, de Versilian Studios y Karoryfer Samples, tocada por Austin McMahon (dominio público). La batería Estudio es DRSKit, del proyecto DrumGizmo (CC BY 4.0).",
-      "madeWith": "Hecho con {{heart}} para músicos de todo el mundo"
+      "madeWith": "Hecho con {{heart}} para músicos de todo el mundo",
+      "soundsCreditSongs": "Los demás instrumentos vienen del banco de sonidos General MIDI de Sonivox (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Canciones",
+      "catchDownloads": "Ofrecer las canciones que descargas",
+      "catchDownloadsHint": "Mientras Canciones está abierto, Yames mira tu carpeta de descargas y pregunta antes de abrir nada. Tu archivo nunca se mueve, renombra ni borra.",
+      "folder": "Vigilar esta carpeta",
+      "folderUnknown": "Este ordenador no le ha dicho a Yames dónde van las descargas",
+      "chooseFolder": "Elegir...",
+      "useDownloads": "Usar descargas",
+      "turnedDown": "Canciones que rechazaste",
+      "turnedDownHint": "{{n}} archivos que Yames no volverá a ofrecer",
+      "forgetTurnedDown": "Volver a ofrecerlos",
+      "soundSet": "Banco de sonidos",
+      "soundSetBuiltIn": "El que trae Yames",
+      "chooseSoundSet": "Elegir un .sf2",
+      "useBuiltInSoundSet": "Usar el integrado"
     }
   },
   "keybindings": {

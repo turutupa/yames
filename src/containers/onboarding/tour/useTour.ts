@@ -27,13 +27,13 @@ export type UseTourArgs = {
    * ignored, which is honest; coercing them to "beat" would make the tour
    * think it was on a screen it is not.
    */
-  view: TourView | "setlist" | "jam" | "settings";
+  view: TourView | "setlist" | "jam" | "songs" | "settings";
   /**
    * Wider than `TourView` on purpose. The tour's STOPS are only ever beat or
    * drill — there is no setlist or jam stop — but it has to be able to put you
    * back on the tab you opened it from, and that can be either.
    */
-  setView: (view: TourView | "setlist" | "jam") => void;
+  setView: (view: TourView | "setlist" | "jam" | "songs") => void;
   /**
    * O1's `migratedExistingUser`. When true and the tour has never been seen,
    * `offerVisible` turns on once.
@@ -53,7 +53,7 @@ export type UseTourResult = {
    * needed when the caller is leaving Settings in the same tick and the hook
    * would otherwise capture "settings".
    */
-  open: (restoreView?: TourView | "setlist" | "jam") => void;
+  open: (restoreView?: TourView | "setlist" | "jam" | "songs") => void;
   /** End the tour and record `tour.seenVersion`. */
   close: () => void;
   next: () => void;
@@ -85,7 +85,7 @@ export function useTour({
   const viewRef = useRef(view);
   viewRef.current = view;
   /** Tab to return to when the tour ends. */
-  const restoreRef = useRef<TourView | "setlist" | "jam" | null>(null);
+  const restoreRef = useRef<TourView | "setlist" | "jam" | "songs" | null>(null);
 
   const isOpen = index >= 0 && index < stops.length;
   const stop = isOpen ? stops[index] : null;
@@ -115,7 +115,7 @@ export function useTour({
   }, []);
 
   // --- Lifecycle -----------------------------------------------------------
-  const open = useCallback((restoreView?: TourView | "setlist" | "jam") => {
+  const open = useCallback((restoreView?: TourView | "setlist" | "jam" | "songs") => {
     const current = viewRef.current;
     restoreRef.current =
       restoreView ?? (current === "settings" ? "beat" : current);

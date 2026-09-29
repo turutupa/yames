@@ -1,0 +1,586 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yames.app/schemas/coach-answer.v1.schema.json",
+  "title": "CoachAnswer",
+  "description": "What the coach answers with: a short list of blocks from a fixed catalogue. Blocks carry references — a chord by name, a scale by root and name, bars by score and range — never frets, note lists or colours.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "blocks"
+  ],
+  "properties": {
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/block-text"
+          },
+          {
+            "$ref": "#/$defs/block-fretboard"
+          },
+          {
+            "$ref": "#/$defs/block-chordShape"
+          },
+          {
+            "$ref": "#/$defs/block-tabExcerpt"
+          },
+          {
+            "$ref": "#/$defs/block-progress"
+          },
+          {
+            "$ref": "#/$defs/block-take"
+          },
+          {
+            "$ref": "#/$defs/block-compare"
+          },
+          {
+            "$ref": "#/$defs/block-action"
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "chordName": {
+      "type": "string",
+      "description": "A chord as a musician writes it: a root, then a quality.",
+      "pattern": "^(?:A#|Ab|Bb|C#|D#|Db|Eb|F#|G#|Gb|A|B|C|D|E|F|G)(?:m\\(add9\\)|m\\(maj7\\)|7sus2|7sus4|9sus4|maj13|add9|dim7|m7b5|maj7|maj9|sus2|sus4|6/9|7#5|7#9|7b9|aug|dim|m11|m13|11|13|m6|m7|m9|5|6|7|9|m)?$",
+      "maxLength": 12
+    },
+    "block-text": {
+      "description": "One thing said in a sentence a teacher would say.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "text"
+          ],
+          "description": "Which block."
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "description": "The sentence itself, already in the player's language."
+        }
+      }
+    },
+    "block-fretboard": {
+      "description": "A scale or a chord's notes lit up on the neck.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "show"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "fretboard"
+          ],
+          "description": "Which block."
+        },
+        "show": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "of",
+                "root",
+                "scale"
+              ],
+              "properties": {
+                "of": {
+                  "type": "string",
+                  "enum": [
+                    "scale"
+                  ],
+                  "description": "A scale, by its root and its name."
+                },
+                "root": {
+                  "type": "string",
+                  "enum": [
+                    "A#",
+                    "Ab",
+                    "Bb",
+                    "C#",
+                    "D#",
+                    "Db",
+                    "Eb",
+                    "F#",
+                    "G#",
+                    "Gb",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G"
+                  ],
+                  "description": "The note the scale starts on."
+                },
+                "scale": {
+                  "type": "string",
+                  "enum": [
+                    "major",
+                    "naturalMinor",
+                    "dorian",
+                    "mixolydian",
+                    "minorPentatonic",
+                    "majorPentatonic",
+                    "blues",
+                    "harmonicMinor",
+                    "lydian",
+                    "phrygian",
+                    "majorBlues",
+                    "melodicMinor",
+                    "altered",
+                    "locrian",
+                    "wholeTone",
+                    "diminishedWholeHalf",
+                    "diminishedHalfWhole",
+                    "phrygianDominant",
+                    "lydianDominant",
+                    "harmonicMajor",
+                    "hungarianMinor",
+                    "augmentedScale",
+                    "bebopDominant",
+                    "bebopMajor",
+                    "bebopMinor",
+                    "chromatic"
+                  ],
+                  "description": "Which scale."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "of",
+                "chord"
+              ],
+              "properties": {
+                "of": {
+                  "type": "string",
+                  "enum": [
+                    "chord"
+                  ],
+                  "description": "A chord's notes, wherever they fall on the neck."
+                },
+                "chord": {
+                  "$ref": "#/$defs/chordName",
+                  "description": "The chord as it is written: \"Am7\", \"F#dim\", \"Bb\"."
+                }
+              }
+            }
+          ],
+          "description": "What to light up. Named, never listed note by note."
+        },
+        "position": {
+          "type": "string",
+          "enum": [
+            "open",
+            "rootOn6",
+            "rootOn5",
+            "rootOn4",
+            "rootOn3"
+          ],
+          "description": "Which position of the neck to show. Left out, the whole neck."
+        },
+        "instrument": {
+          "type": "string",
+          "enum": [
+            "guitar",
+            "bass"
+          ],
+          "description": "Whose neck. Left out, the guitar."
+        }
+      }
+    },
+    "block-chordShape": {
+      "description": "One grip, drawn as a chord box.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "chord",
+        "shape"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "chordShape"
+          ],
+          "description": "Which block."
+        },
+        "chord": {
+          "$ref": "#/$defs/chordName",
+          "description": "The chord as it is written: \"Am7\", \"F#dim\", \"Bb\"."
+        },
+        "shape": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 29,
+          "description": "Which of the chord's shapes, counting from the nut, starting at 0."
+        },
+        "instrument": {
+          "type": "string",
+          "enum": [
+            "guitar",
+            "bass"
+          ],
+          "description": "Whose grip. Left out, the guitar."
+        }
+      }
+    },
+    "block-tabExcerpt": {
+      "description": "Bars of a score, coloured by how they were played.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "score",
+        "fromBar",
+        "toBar"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "tabExcerpt"
+          ],
+          "description": "Which block."
+        },
+        "score": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "The id of a score the player has imported."
+        },
+        "fromBar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "The first bar of the passage, counting the bars as played."
+        },
+        "toBar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "The last bar of the passage, and not before the first."
+        },
+        "attempt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Which attempt to colour it by, by its id. Left out, the plain notes."
+        }
+      }
+    },
+    "block-progress": {
+      "description": "One passage, over the days it has been played.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "score",
+        "fromBar",
+        "toBar"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "progress"
+          ],
+          "description": "Which block."
+        },
+        "score": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "The id of a score the player has imported."
+        },
+        "fromBar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "The first bar of the passage, counting the bars as played."
+        },
+        "toBar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "The last bar of the passage, and not before the first."
+        }
+      }
+    },
+    "block-take": {
+      "description": "Play back a recorded take.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "attempt"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "take"
+          ],
+          "description": "Which block."
+        },
+        "attempt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Which attempt the take belongs to, by its id."
+        },
+        "fromBar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "The first bar to play. Left out, all of it."
+        },
+        "toBar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "The last bar to play. Left out, all of it."
+        }
+      }
+    },
+    "block-compare": {
+      "description": "Two takes side by side.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "attempts"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "compare"
+          ],
+          "description": "Which block."
+        },
+        "attempts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "description": "The ids of the two attempts, the older one first."
+        }
+      }
+    },
+    "block-action": {
+      "description": "The button. Every correction resolves to something the app can set up (A5).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "action"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "action"
+          ],
+          "description": "Which block."
+        },
+        "action": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "score",
+                "fromBar",
+                "toBar"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "loopBars"
+                  ],
+                  "description": "Loop a passage, optionally at a tempo."
+                },
+                "score": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "description": "The id of a score the player has imported."
+                },
+                "fromBar": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9999,
+                  "description": "The first bar of the passage, counting the bars as played."
+                },
+                "toBar": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9999,
+                  "description": "The last bar of the passage, and not before the first."
+                },
+                "bpm": {
+                  "type": "integer",
+                  "minimum": 20,
+                  "maximum": 300,
+                  "description": "The tempo to loop it at. Left out, the score's own."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "fromBpm",
+                "toBpm"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "ramp"
+                  ],
+                  "description": "Work a tempo up, or down, a step at a time."
+                },
+                "fromBpm": {
+                  "type": "integer",
+                  "minimum": 20,
+                  "maximum": 300,
+                  "description": "Where the climb starts."
+                },
+                "toBpm": {
+                  "type": "integer",
+                  "minimum": 20,
+                  "maximum": 300,
+                  "description": "Where it is headed. Below the start is a descending drill (U3.7)."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "subdivision"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "clickSubdivision"
+                  ],
+                  "description": "Put the click on a smaller note for this passage."
+                },
+                "subdivision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6,
+                  "description": "1 quarters, 2 eighths, 3 triplets, 4 sixteenths, 5 quintuplets, 6 sextuplets."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "preset"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "loadPreset"
+                  ],
+                  "description": "Set the metronome up the way a saved preset says."
+                },
+                "preset": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "description": "The id of one of the player's presets."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "jam"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "loadJam"
+                  ],
+                  "description": "Put a jam on the stage."
+                },
+                "jam": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "description": "The id of one of the player's jams."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "days"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "comeBack"
+                  ],
+                  "description": "Leave it for another day."
+                },
+                "days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 14,
+                  "description": "How many days from now to bring it up again."
+                }
+              }
+            }
+          ],
+          "description": "What the button does."
+        }
+      }
+    }
+  }
+}

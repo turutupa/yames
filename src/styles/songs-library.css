@@ -1,0 +1,137 @@
+/* songs-library.css — the sidebar's list of songs (W35).
+ *
+ * Its own file for the reason `songs-import.css` is its own file: `songs.css`
+ * is the STAGE — the tab, the transport row, the band — and this is the panel
+ * beside it. Nothing here is inside the stage's container query, and nothing
+ * here should ever need to be.
+ *
+ * The rule the whole file exists for: **a title gets the row**. The owner's
+ * screenshot had "Guitar · 8 bars" in a column on the right, wrapping to two
+ * lines, with the title squeezed to fifteen characters and an INCLUDED badge
+ * after it. The meta column is gone, the badge is a heading at the bottom of
+ * the list, and what is left is the song's name across the full width with
+ * the artist under it. `tests/layout/songs.spec.ts` measures it.
+ */
+
+/* Two lines, not two columns. `.preset-sidebar-item` is a row with
+   `justify-content: space-between`, which is what put the meta column
+   opposite the title in the first place. */
+.preset-sidebar-item.song-item {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 1px;
+  /* A flex item will not shrink below its content by default, and a long
+     title is content. Without this the row grows sideways instead of the
+     name ellipsising. */
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* The title, and the coach's mark when there is one. */
+.song-item-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.song-item-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* The full title is on the row's `title` and is its accessible name, so an
+     end cut off here loses nothing but the reading. */
+}
+
+/* Under it, small, and only when the file has an artist. A study written for
+   practice has none and the row is then one line. */
+.song-item-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+}
+
+.preset-sidebar-item.song-item.active .song-item-artist {
+  color: var(--text-secondary);
+}
+
+/* ── The shelf Yames ships with ───────────────────────────────────────── */
+
+/* A heading, at the bottom, under the player's own songs (W35). It used to be
+   the word INCLUDED on every starter row, which spent the row's width saying
+   something about where a song came from rather than which song it is.
+   Folding is remembered; it opens itself while the player has nothing of
+   their own, because then the shelf is the whole of the mode. */
+.song-shelf-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.song-shelf-heading:hover {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.song-shelf-caret {
+  flex: 0 0 auto;
+  transition: transform 0.15s ease;
+}
+
+.song-shelf-heading[aria-expanded="true"] .song-shelf-caret {
+  transform: rotate(90deg);
+}
+
+.song-shelf-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Removing a song ──────────────────────────────────────────────────── */
+
+/* The confirm borrows `UnsavedChangesDialog`'s card, because it is the same
+   question in the same voice: one thing is about to be lost, here is what,
+   and the way back is the button the focus is already on. */
+.song-remove-takes {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+/* The card's heading carries a song's NAME, and `.unsaved-title` shouts. A
+   name the player typed, or a title in a script with no capitals to make, is
+   not something to put through `text-transform`. */
+.song-remove-card .unsaved-title {
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--text-secondary);
+}
+
+/* The destructive half says what it does and looks like it. Written against
+   the card so it beats `.unsaved-discard` in shell.css, which is imported
+   after this file and is otherwise the same weight of selector. */
+.song-remove-card .song-remove-confirm {
+  border-color: color-mix(in srgb, var(--danger, #e5484d) 45%, transparent);
+  color: var(--danger, #e5484d);
+}

@@ -2,6 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} TAP",
+    "tapCount_other": "{{count}} TAP",
     "subdivision": "Alt Bölüm",
     "meter": "Zaman İmzası",
     "free": "FREE",
@@ -12,6 +13,7 @@
     "beatCount_one": "{{count}} vuruş",
     "beatCount_other": "{{count}} vuruş",
     "clicksPerBar": "{{count}} tık/ölçü",
+    "clicksPerBar_other": "{{count}} tık/ölçü",
     "addBeat": "Vuruş ekle",
     "removeBeat": "Vuruş çıkar",
     "prevMeter": "Önceki zaman imzası",

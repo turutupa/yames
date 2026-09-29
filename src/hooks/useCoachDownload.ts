@@ -15,6 +15,7 @@ import {
 } from "../ipc";
 import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc";
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
+import type { CoachStance } from "../coach/learningMode";
 import { needsBrainUpdate, standardAvailable, studioAvailable } from "../coach/brainTiers";
 import { unloadCoach } from "./coachLoader";
 
@@ -99,6 +100,11 @@ export function useCoachDownload() {
   // Scoring mode: "default" is musical-feel focused; "pro" grades against
   // the full beat grid for players pushing accuracy.
   const [coachMode, setCoachMode] = useState<CoachMode>("default");
+  // How hard the coach is on you (ROADMAP 1.5). Independent of
+  // `coachMode`: that one decides how the SCORE is computed, this one
+  // decides how the coach talks about it. Strict is what has always
+  // shipped.
+  const [coachStance, setCoachStance] = useState<CoachStance>("strict");
   const [availableVoices, setAvailableVoices] = useState<[string, string][]>(
     [],
   );
@@ -149,6 +155,9 @@ export function useCoachDownload() {
     });
     storeLoad<CoachMode>("coachMode").then((v) => {
       if (v === "default" || v === "pro") setCoachMode(v);
+    });
+    storeLoad<CoachStance>("coachStance").then((v) => {
+      if (v === "strict" || v === "learning") setCoachStance(v);
     });
     storeLoad<number>("coachTtsVolume").then((v) => {
       if (typeof v === "number" && Number.isFinite(v)) {
@@ -279,6 +288,8 @@ export function useCoachDownload() {
     setCoachVerbosity,
     coachMode,
     setCoachMode,
+    coachStance,
+    setCoachStance,
     availableVoices,
     voiceDiagnostics,
     ttsVolume,

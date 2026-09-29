@@ -9,7 +9,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     state: DEFAULT_TEST_STATE,
     view: "beat" as const,
     setView: vi.fn(),
-    prevTab: { current: "beat" as "beat" | "drill" | "setlist" | "jam" },
+    prevTab: { current: "beat" as "beat" | "drill" | "setlist" | "jam" | "songs" },
     libraryOpen: false,
     onToggleLibrary: vi.fn(),
     onLoadPreset: vi.fn(),
@@ -30,6 +30,12 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     onRenameJam: vi.fn(),
     onDuplicateJam: vi.fn(),
     onReorderJams: vi.fn(),
+    songs: [],
+    activeSongId: null,
+    onLoadSong: vi.fn(),
+    onImportSong: vi.fn(),
+    onDeleteSong: vi.fn(),
+    onRenameSong: vi.fn(),
     coachOpen: false,
     coachActive: false,
     coachListening: false,
@@ -52,7 +58,7 @@ describe("Rail", () => {
     // promise with no date. Pocket Check is gone (U1.7), Paths is not here yet.
     const { container } = setup();
     const labels = [...container.querySelectorAll(".rail-mode-label")].map((n) => n.textContent);
-    expect(labels).toEqual(["Metronome", "Setlist", "Drill", "Jam"]);
+    expect(labels).toEqual(["Metronome", "Setlist", "Drill", "Jam", "Songs"]);
   });
 
   it("switches mode and marks the current one for assistive tech", () => {
@@ -128,7 +134,7 @@ describe("Rail", () => {
   });
 
   it("remembers the mode it left when opening settings, and returns to it", () => {
-    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" };
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" | "songs" };
     const setView = vi.fn();
     const { props, rerender } = setup({ view: "drill", prevTab, setView });
 
@@ -148,7 +154,7 @@ describe("Rail", () => {
     // which sent anyone who opened Settings from the setlist or the jam back
     // to the metronome. Two modes were added under that line before anyone
     // noticed, so it is pinned here rather than left to be found a third time.
-    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" };
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" | "songs" };
     const setView = vi.fn();
     const { props, rerender } = setup({ view: "jam", prevTab, setView });
 
@@ -164,7 +170,7 @@ describe("Rail", () => {
   it("keeps the covered mode's library under Settings", () => {
     // It fell back to the metronome's presets whatever mode Settings was
     // opened from, which read as "Settings switched me to the metronome".
-    const prevTab = { current: "jam" as "beat" | "drill" | "setlist" | "jam" };
+    const prevTab = { current: "jam" as "beat" | "drill" | "setlist" | "jam" | "songs" };
     const { container } = setup({ view: "settings", mode: "jam", prevTab, libraryOpen: true });
     const sidebar = container.querySelector(".rail-library");
     expect(sidebar?.textContent ?? "").not.toMatch(/Presets/i);

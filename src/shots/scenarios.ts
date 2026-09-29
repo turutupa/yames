@@ -42,7 +42,7 @@ export interface Shot {
   /** Which of the app's two windows to mount. */
   window: "main" | "floating";
   /** The tab to open on. Absent for the widget, which has no tabs. */
-  tab?: "beat" | "drill" | "jam" | "setlist";
+  tab?: "beat" | "drill" | "jam" | "setlist" | "songs";
   /**
    * The Jam tab, with a jam actually on it.
    *
@@ -52,6 +52,134 @@ export interface Shot {
    * mode's whole subject is moving through a form, and bar one of chorus one
    * is the one bar that says nothing about it.
    */
+  /**
+   * The Songs tab, with a song drawn on it.
+   *
+   * Same shape as `jam`, and for the same reason: the tab opens on a library
+   * and a shot of the library says nothing about the mode. `section` presses
+   * one of the section chips; `picker` is alphaTex to bring in through the
+   * file input, which is the only door the track picker has.
+   */
+  songs?: {
+    row: number;
+    section?: string;
+    picker?: string;
+    /**
+     * Play a pass, stop it, and photograph the verdict.
+     *
+     * The harness presses the transport, hands the mocked analyzer a pass
+     * built from the schedule the app actually sent it, and presses stop —
+     * so the review in the picture is the shipping component drawing the
+     * shipping blocks, not a mock-up of one. The three recipes are the three
+     * shapes a review takes (`review/reviewFixtures.ts`):
+     *
+     *   `rushing`  — a tendency, with a loop as its fix
+     *   `missed`   — a passage lost on every pass, three goes to step through
+     *   `clean`    — praise that names bars and a count of goes
+     *   `improved` — the passage is better than it was, which is the one
+     *                finding that offers to show you the difference (W25)
+     *
+     * `openMore` opens "what else", which is the one part of A4 a screenshot
+     * of the headline alone cannot show.
+     */
+    review?: "rushing" | "missed" | "clean" | "improved";
+    openMore?: boolean;
+    /**
+     * W21 — turn the camera on before the pass, and film it.
+     *
+     * Chromium's `--use-fake-device-for-media-stream` gives the page a real
+     * `MediaStream` from a synthetic camera and
+     * `--use-fake-ui-for-media-stream` answers the permission prompt, so this
+     * scene records with the shipping `MediaRecorder`, streams the chunks the
+     * shipping way, and shows the shipping review playing a real video
+     * element — no camera, no person, no mock of anything but the disk.
+     *
+     * Only meaningful with `review`: the picture belongs to a pass, and a
+     * pass is what the review is about.
+     */
+    camera?: boolean;
+    /**
+     * W25 — open "Save as a video" on the review, and optionally make one.
+     *
+     * `"open"` presses the button and photographs the choices: which bars,
+     * which way up, marks on or off, and how long it will take. `"make"` goes
+     * on to press Make the video and waits for the file — which runs the
+     * shipping compositor, the shipping `canvas.captureStream()` and the
+     * shipping `MediaRecorder` in real time, so it is only worth doing in a
+     * test that is going to look at the bytes afterwards.
+     *
+     * Only meaningful with `review`: a clip is made out of a take, and a take
+     * is what the review is about.
+     */
+    clip?: "open" | "make";
+    /**
+     * W25 — then and now (addendum 11).
+     *
+     * Puts one earlier run at these bars in the store and its recording on
+     * the shelf, so the coach's `improved` finding has a pair to offer. Only
+     * meaningful with `review: "improved"`, which is the one finding that
+     * offers to show the difference.
+     */
+    compare?: boolean;
+    /**
+     * Press play and photograph the stage with the transport running.
+     *
+     * The state A13 is about: every control you might reach for mid-passage
+     * has to be on screen WHILE the band is playing, and a picture of a
+     * stopped stage cannot say whether it is. Pressed, not poked — the
+     * transport button, the way a person starts.
+     *
+     * Ignored when `review` is set: that recipe presses play itself, and
+     * what it photographs is the stop.
+     */
+    playing?: boolean;
+    /** Open the takes shelf — it is a popover now, not a section. */
+    takes?: boolean;
+    /**
+     * Choose a portion, by dragging across the tab.
+     *
+     * Printed bar numbers, 1-based, the way a person would say them. Dragged
+     * rather than poked: the band, the handles and the strip's sentence all
+     * come from one selection, and a scene that set the state directly would
+     * photograph a state the pointer might not actually be able to reach.
+     */
+    select?: { fromBar: number; toBar: number };
+    /** Save the chosen portion under this name before the capture. */
+    keepAs?: string;
+  };
+  /**
+   * A download that has just finished, offered on the Songs screen (S0.9).
+   *
+   * Driven the way the real thing is: the app starts the watch when Songs
+   * opens, the mocked backend answers that a file has arrived, and the
+   * shipping banner draws itself. Its own flag rather than a field of
+   * `songs` because it is not about a song being loaded — the offer appears
+   * over the empty state too, which is the screen most players will meet it
+   * on.
+   */
+  downloadOffer?: boolean;
+  /**
+   * The shelf Yames ships with, seeded into the library (W19, S0.9).
+   *
+   * Every other Songs scene has it turned OFF — `mockIpc` writes the "already
+   * seeded" flag into the store — because seven extra library rows would
+   * change which song row 0 is and quietly re-point every songs shot at a
+   * different piece. This is the one scene that lets the seeding run.
+   */
+  starterShelf?: boolean;
+  /**
+   * What the song library holds, for the scenes that are about the LIST (W35).
+   *
+   * Every other Songs scene gets the one song the stage is about, which is
+   * what `row: 0` opens. These two are pictures of the sidebar:
+   *
+   *   "three"      three songs of the player's own. With `starterShelf` as
+   *                well, the Included heading is under them — and folded,
+   *                because a player with songs of their own is what folds it.
+   *   "longTitle"  one song with a title far wider than the panel, which is
+   *                the case the row has to ellipsise rather than wrap.
+   */
+  songLibrary?: "three" | "longTitle";
   jam?: {
     row: number;
     bar?: number;
@@ -86,6 +214,24 @@ export interface Shot {
     sheet?: "setup" | "chords";
     /** Expand the setup sheet's MORE block: meter, what you read, takes. */
     more?: boolean;
+    /**
+     * Turn Record the take AND the camera on, and wait for the picture.
+     *
+     * Pressed rather than poked, like everything else here: the two
+     * switches are in the takes group of the setup sheet and a person has
+     * no other way to reach them. Chromium's fake device stands in for a
+     * camera (`playwright.config.ts` passes the two flags), so the scene
+     * arms the shipping code and gets a real `MediaStream`.
+     */
+    camera?: boolean;
+    /**
+     * Open a take's "Watch it back" panel, by its row in the shelf (W33).
+     *
+     * Pressed rather than poked, like everything else here: the button is on
+     * the row and a person has no other way in. The shelf is inside the setup
+     * sheet's takes group, so this goes with `sheet: "setup"`.
+     */
+    watchTake?: number;
     /** Tap this chord on the chord sheet (0-based) to expand its shapes. */
     chordCard?: number;
     /**
@@ -144,6 +290,17 @@ export interface Shot {
   /** CSS pixels. Doubled by the capture's device scale factor. */
   width: number;
   height: number;
+  /**
+   * Build the scene at this size, then narrow to `width`×`height` (W25).
+   *
+   * The scenes here are driven the way a person drives the app — a library
+   * row is CLICKED — and below about 900 px the rail collapses and there is
+   * no library to click, so a scene born at 480 px never finishes building.
+   * `tests/layout/fits.ts` has always done this; a shot of the smallest
+   * window the app opens needs the same, and it is the truer test anyway: a
+   * window is a thing people drag.
+   */
+  buildAt?: { width: number; height: number };
   /**
    * Capture only this element's box rather than the viewport.
    *
@@ -246,6 +403,59 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 400,
+  },
+  {
+    id: "jam-camera",
+    suffix: "jam-camera",
+    window: "main",
+    tab: "jam",
+    // The stage with the camera armed: the little mirror in a corner of
+    // it, and the setup sheet's takes group with both switches on. What
+    // the layout suite measures on this scene is that the mirror covers
+    // neither the chord nor the form's bar grid.
+    jam: { row: 0, sheet: "setup", camera: true },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-watch",
+    suffix: "jam-watch",
+    window: "main",
+    tab: "jam",
+    // W33 — a take opened to be watched back: the picture, the form going by
+    // under it, the transport and the three things you can then do with it,
+    // all inside the setup drawer's 320px cap. The first fixture take is the
+    // filmed one.
+    jam: { row: 0, sheet: "setup", watchTake: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 500,
+  },
+  {
+    id: "jam-watch-nopicture",
+    suffix: "jam-watch-nopicture",
+    window: "main",
+    tab: "jam",
+    // ...and the same panel on a take with no picture, which is most takes:
+    // the timeline is then the whole view.
+    jam: { row: 0, sheet: "setup", watchTake: 2 },
+    width: 1400,
+    height: 900,
+    settleMs: 500,
+  },
+  {
+    id: "jam-watch-midform",
+    suffix: "jam-watch-midform",
+    window: "main",
+    tab: "jam",
+    // ...and the take the engine stamped at bar eight of the form, which is
+    // what pressing record while the band is already going produces. The
+    // grid's first seven cells are bars nobody played.
+    jam: { row: 0, sheet: "setup", watchTake: 1 },
+    width: 1400,
+    height: 900,
+    settleMs: 500,
   },
   {
     id: "jam-setup",
@@ -403,6 +613,278 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 300,
+  },
+  {
+    id: "songs",
+    suffix: "songs",
+    window: "main",
+    tab: "songs",
+    // A song on the stage: the tab drawn, the facts about it above, and the
+    // bar range, sections, speed and repeat under it.
+    songs: { row: 0 },
+    width: 1400,
+    height: 900,
+    // alphaTab lays the score out on this thread; give it room to finish.
+    settleMs: 900,
+  },
+  {
+    id: "songs-playing",
+    suffix: "songs-playing",
+    window: "main",
+    tab: "songs",
+    // The stage with the band playing: the bars, the sections, the speed, the
+    // repeat, recording and the faders all on screen at once, under a tab that
+    // has the cursor on it. The picture A13 is argued from, and the one the
+    // layout suite measures "can you reach it while playing" against.
+    songs: { row: 0, playing: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-portion",
+    suffix: "songs-portion",
+    window: "main",
+    tab: "songs",
+    // The centre of the mode: four bars dragged out on the tab, the band
+    // drawn behind them with a handle at each end, the strip saying the same
+    // thing in words, and one portion already kept under a name beside the
+    // sections. Bars 5–8 of the fixture, which is the chorus — and the
+    // fixture's two systems mean bars 4–8 would cross a line break, which is
+    // the case `selectionBands` exists for.
+    songs: { row: 0, select: { fromBar: 5, toBar: 8 }, keepAs: "The chorus" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-takes",
+    suffix: "songs-takes",
+    window: "main",
+    tab: "songs",
+    // The shelf, open off its own switch. It is a popover now rather than a
+    // section under the stage, so this is the only way to photograph it.
+    songs: { row: 0, takes: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-empty",
+    suffix: "songs-empty",
+    window: "main",
+    tab: "songs",
+    // The mode before you have brought anything in. No `songs` block, so no
+    // library row is pressed and the empty state is what is on screen.
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "songs-review-rushing",
+    suffix: "songs-review-rushing",
+    window: "main",
+    tab: "songs",
+    // The coach's one thing, with its fix as a button: a tendency in the back
+    // half of the passage, the bars it is about drawn underneath the
+    // sentence, and a loop ready to press. The screen COACH_UX A4 is about.
+    songs: { row: 0, review: "rushing" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-review-missed",
+    suffix: "songs-review-missed",
+    window: "main",
+    tab: "songs",
+    // The same passage lost on every go: three goes to step through, extras
+    // between the notes where the hand kept going, and a second finding
+    // behind "what else" — which is the half of A4 that says everything
+    // else is there if you open it and never pushed.
+    songs: { row: 0, review: "missed", openMore: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-review-clean",
+    suffix: "songs-review-clean",
+    window: "main",
+    tab: "songs",
+    // Praise that is about something: the bars, the number of goes, and
+    // "come back to this" rather than a correction nobody needed. A4 again —
+    // never generic praise.
+    songs: { row: 0, review: "clean" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-camera",
+    suffix: "songs-camera",
+    window: "main",
+    tab: "songs",
+    // W21 — the whole of the camera, end to end: the switch on, the promise
+    // read, three seconds filmed by Chromium's fake device, and the review
+    // playing it back with the verdict painted on the tape underneath. The
+    // scene the layout suite measures for "does the review with a picture fit
+    // the frame W18 gives it".
+    songs: { row: 0, review: "rushing", camera: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-camera-small",
+    suffix: "songs-camera-small",
+    window: "main",
+    tab: "songs",
+    // W25 item 1 — the same review, at the smallest window the app will open
+    // (`tauri.conf.json`: 480×780). The one the strip used to leave 181px of,
+    // and the picture the layout suite's restored rule is argued from.
+    songs: { row: 0, review: "rushing", camera: true },
+    buildAt: { width: 1440, height: 900 },
+    width: 480,
+    height: 780,
+    settleMs: 900,
+  },
+  {
+    id: "songs-compare",
+    suffix: "songs-compare",
+    window: "main",
+    tab: "songs",
+    // W25 item 3 — then and now. The coach says this passage has come on, and
+    // under the sentence are the two runs it is talking about: a month ago at
+    // 70 % and tonight, side by side, held together by the BAR rather than by
+    // the clock so the slower one still lines up.
+    songs: { row: 0, review: "improved", camera: true, compare: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-clip",
+    suffix: "songs-clip",
+    window: "main",
+    tab: "songs",
+    // W25 item 2 — "Save as a video", open on its choices: which bars, which
+    // way up, marks on or off, how long it will take and which container the
+    // player is going to get. The clip itself is not made here; that takes as
+    // long as the music does and belongs in a test that reads the bytes.
+    songs: { row: 0, review: "rushing", camera: true, clip: "open" },
+    width: 1100,
+    height: 720,
+    settleMs: 600,
+  },
+  {
+    id: "songs-clip-make",
+    suffix: "songs-clip-make",
+    window: "main",
+    tab: "songs",
+    // ...and the same screen with the clip actually MADE. It runs the
+    // compositor in real time, so it is here for `songs-camera.spec.ts` to
+    // pull the bytes off `window.__SHOT_CLIP__` and ask whether they are a
+    // video — which is the only question about a video worth asking, and one
+    // no assertion about a Blob can answer.
+    songs: { row: 0, review: "rushing", camera: true, clip: "make" },
+    width: 1100,
+    height: 720,
+    settleMs: 200,
+  },
+  {
+    id: "songs-camera-armed",
+    suffix: "songs-camera-armed",
+    window: "main",
+    tab: "songs",
+    // The stage with the camera OPEN and nothing recorded yet: the little
+    // mirror over the tab, the switch lit, the strip still a strip. It is
+    // what "the camera costs the strip no height" is measured against, now
+    // that a review takes the strip's room (W25 item 1).
+    songs: { row: 0, camera: true },
+    width: 1100,
+    height: 720,
+    settleMs: 600,
+  },
+  {
+    id: "songs-picker",
+    suffix: "songs-picker",
+    window: "main",
+    tab: "songs",
+    // The track picker, over the stage. Two tracks, so the ordering (guitars
+    // before basses) and the tuning line are both visible.
+    songs: {
+      row: 0,
+      picker: `\\title "Two parts"
+\\tempo 120
+.
+\\track "Bass"
+\\tuning d3 a2 d2 g1
+\\ts 4 4 2.1.4 2.1.4 2.1.4 2.1.4 |
+\\track "Guitar"
+\\tuning e5 b4 g4 d4 a3 e3
+\\ts 4 4 3.3.4 3.3.4 3.3.4 3.3.4 |`,
+    },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-offer",
+    suffix: "songs-offer",
+    window: "main",
+    tab: "songs",
+    // A download caught, over the empty state — the screen a player meets
+    // this on the first time. Not a marketing picture: it is here so the
+    // layout suite can ask whether the strip and its two buttons fit at the
+    // smallest window the app opens.
+    downloadOffer: true,
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "songs-starter",
+    suffix: "songs-starter",
+    window: "main",
+    tab: "songs",
+    // The library on a fresh install: the seven pieces Yames ships with, each
+    // marked as having come with the app, and the first of them on the stage.
+    // The layout suite is what this is for — it asks whether the marker fits
+    // beside a song's name without pushing anything out of the row.
+    starterShelf: true,
+    songs: { row: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "songs-library",
+    suffix: "songs-library",
+    window: "main",
+    tab: "songs",
+    // The sidebar with three songs of the player's own and the shelf folded
+    // away under them (W35). No song on the stage: this scene is about the
+    // LIST, and the layout suite is what opens it — one row per file, the
+    // title across the whole row, no instrument and no bar count.
+    starterShelf: true,
+    songLibrary: "three",
+    width: 1400,
+    height: 900,
+    settleMs: 600,
+  },
+  {
+    id: "songs-long-title",
+    suffix: "songs-long-title",
+    window: "main",
+    tab: "songs",
+    // One song whose title is far wider than the panel. The row has to cut
+    // it at the end and keep the whole of it on the tooltip, rather than
+    // wrapping to two lines or pushing the panel sideways.
+    songLibrary: "longTitle",
+    width: 1400,
+    height: 900,
+    settleMs: 600,
   },
   {
     id: "widget",

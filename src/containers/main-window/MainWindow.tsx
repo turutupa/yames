@@ -58,6 +58,9 @@ import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
+import { SongsView } from "../songs/SongsView";
+import { useSongsDue } from "../songs/review/useSongsDue";
+import { useOpenedSong } from "../songs/useOpenedSong";
 import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
@@ -94,11 +97,23 @@ import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
+import { useSongsSession } from "./hooks/useSongsSession";
 import { useJamTakes } from "./hooks/useJamTakes";
+/* W32 — the camera comes to Jam. The hook and the preview are eager, like the
+   take's machinery is, because they run while a jam is happening; the
+   compositor behind "save as a video" is the only lazy thing on this tab. */
+import { useTakeCamera } from "../../takes/useTakeCamera";
+import { jamClockShape, jamSampler, jamTakeStartMs } from "../../takes/jamClock";
+import { CameraIntroDialog } from "../../takes/CameraIntroDialog";
+import { CameraPreview } from "../../takes/CameraPreview";
+import type { PreviewCorner } from "../../takes/CameraPreview";
+import "../../styles/songs-camera.css";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
 import { setSetlistCountIn } from "../../setlist/setlists";
 import { countInIsOn, countInToggle } from "./countIn";
+import { songPosition } from "../../songs/position";
+import { nudgeRange, setEdge } from "../../songs/selection";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
@@ -125,11 +140,33 @@ import {
   IS_LINUX,
   FULLSCREEN_EXIT_DELAY,
   platformKey,
+  actionForCombo,
   eventToCombo,
   isTypingTarget,
 } from "../../hotkeys";
 import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
+
+/**
+ * Action ids that only mean something on one tab.
+ *
+ * Read when a key belongs to more than one action — `L`, `[` and `]` all do
+ * since Songs grew a portion to loop — so that the mode's own action wins on
+ * the mode's own tab and the plain one wins everywhere else. By prefix rather
+ * than by looking the group up, because the prefix IS the convention: every
+ * action in a mode group is named after its mode, and one that is not would
+ * be the bug this would hide.
+ */
+/**
+ * The corners the jam stage offers the little mirror (W32).
+ *
+ * The two at the BOTTOM, and only those. The chord you are playing over and
+ * the form's bar grid are the top of the jam screen, and a picture of your
+ * own face over either of them would make the mode unusable with the camera
+ * on — so the choice is narrowed rather than left to a default nobody is
+ * obliged to keep. `tests/layout/jam-camera.spec.ts` measures it.
+ */
+const JAM_PREVIEW_CORNERS: readonly PreviewCorner[] = ["bottomLeft", "bottomRight"];
 
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
 
@@ -237,6 +274,7 @@ export function MainWindow() {
     voiceMode: coach.coachVoiceMode,
     coachVerbosity: coach.coachVerbosity,
     coachMode: coach.coachMode,
+    coachStance: coach.coachStance,
     // "off" means no model: `startSession` skips the load entirely.
     brainTier: coach.coachBrainTier,
     instrument,
@@ -413,6 +451,40 @@ export function MainWindow() {
     },
   });
 
+  /**
+   * The Songs library, the loaded song, and the song the engine is playing.
+   *
+   * It is given the tab for one reason: Songs is its own engine mode beside
+   * the jam, so walking away from it has to take the song off the engine —
+   * otherwise the Metronome tab would go on clicking through a score nobody
+   * is looking at. Inert with no song open, like the jam above it.
+   */
+  const songsSession = useSongsSession(undefined, {
+    view,
+    isPlaying: state.isPlaying,
+    // The session owns the one playhead (W37 item 1), so the engine's reports
+    // have to reach it and not only the screen.
+    beat: currentBeat,
+  });
+
+  /**
+   * "Open with Yames" on a Guitar Pro or MusicXML file (`SONGS.md` S0.9).
+   *
+   * Here and not in `SongsView`, because the whole point is that the player
+   * may be anywhere — or nowhere, on a cold start — when the file arrives.
+   * It walks them to Songs and hands the bytes to the same `offerFile` the
+   * picker uses, so the track picker opens exactly as it always does.
+   */
+  useOpenedSong({ setView, onFile: songsSession.offerFile });
+
+  /**
+   * The songs the coach promised to come back to, and the day has come round
+   * (`COACH_UX.md` C2). Read from the store rather than handed down from the
+   * Songs screen: the promise outlives the session that made it, and the rail
+   * shows it whether or not that screen is open.
+   */
+  const songsDue = useSongsDue();
+
   /*
    * Wrapped, because it is the root of a chain of fresh objects.
    *
@@ -427,6 +499,19 @@ export function MainWindow() {
   );
 
   /**
+   * W32 — and the camera's, on the same terms.
+   *
+   * Turning the picture off when recording goes off is done HERE rather than
+   * inside either hook, because it is the one rule that spans both: a picture
+   * with no sound is not a take, so the two switches move together and there
+   * is one promise rather than two states to reason about.
+   */
+  const setJamCamera = useCallback(
+    (camera: boolean) => jamSession.editJam(camera ? { camera, takes: true } : { camera }),
+    [jamSession.editJam],
+  );
+
+  /**
    * The loaded jam's takes (JAM_MODE §4.4).
    *
    * At the window level rather than inside `JamView` because both ends of
@@ -435,13 +520,79 @@ export function MainWindow() {
    * belongs to the jam on the engine and ends when that jam does, so leaving
    * the Jam tab ends it — see `useJamTakes`.
    */
+  /**
+   * W32 — the camera on the Jam tab, declared before the take's hook because
+   * the take's hook calls into it.
+   *
+   * The engine only NAMES a take when it stops, and the picture has to be
+   * filed under that name; everything the camera can fail at fails as "no
+   * picture this jam". It lives at the window level for the same reason the
+   * takes do: the tab is how it knows the jam has left the engine.
+   */
+  const countingInRef = useRef(false);
+  countingInRef.current = (state.countIn?.beats ?? 0) > 0;
+  const jamCamera = useTakeCamera({
+    ownerId: jamSession.jam?.id ?? null,
+    active: mode === "jam",
+    isPlaying: state.isPlaying,
+    enabled: jamSession.jam?.camera === true,
+    onSetCamera: setJamCamera,
+    // A jam's clock is its own tempo and meter against the bar of the form
+    // the engine is on — there is no score to count ticks in. Opened once per
+    // jam, so the take's opening bar and the beat events are measured from
+    // the same origin (`jamClock.ts`).
+    openClock: () => {
+      const jam = jamSession.jam;
+      if (!jam) return null;
+      const shape = jamClockShape(jam);
+      return {
+        sample: jamSampler(jam, () => countingInRef.current),
+        startMs: (take) => jamTakeStartMs(shape, take),
+      };
+    },
+  });
+
   const jamTakes = useJamTakes({
     jam: jamSession.jam,
     view: mode,
     isPlaying: state.isPlaying,
     countingIn: (state.countIn?.beats ?? 0) > 0,
     onSetTakes: setJamTakes,
+    onTakeStarted: jamCamera.onTakeStarted,
+    onTakeFinished: jamCamera.onTakeFinished,
   });
+
+  /**
+   * Recording off takes the picture with it.
+   *
+   * The other half of `setJamCamera`'s rule, and it has to be an effect
+   * rather than a line in `setJamTakes`: the switch is not the only way
+   * recording ends — loading another jam, leaving the tab, or a build whose
+   * engine cannot record all turn it off underneath, and a camera left open
+   * over a take nobody is making is the one lie this feature may not tell.
+   */
+  useEffect(() => {
+    if (jamSession.jam?.camera && !jamSession.jam.takes) setJamCamera(false);
+  }, [jamSession.jam?.camera, jamSession.jam?.takes, setJamCamera]);
+
+  /**
+   * The count over the picture, and when this take started — the preview's
+   * two numbers, exactly as Songs works them out.
+   *
+   * `jamRecordingSince` is read off the take's own elapsed count and only
+   * recomputed when recording starts or stops, because the preview is
+   * unmounted and remounted as the camera opens and closes and a clock that
+   * restarted at zero then would lie about how long you had been playing.
+   */
+  const jamCountIn =
+    state.isPlaying && (state.countIn?.beats ?? 0) > 0
+      ? Math.max(1, (state.countIn?.beats ?? 0) - (state.countIn?.done ?? 0))
+      : null;
+  const jamRecordingSince = useMemo(
+    () => (jamTakes.recording ? Date.now() - jamTakes.recordedSeconds * 1000 : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [jamTakes.recording],
+  );
 
   useEffect(() => {
     closeJamRef.current = jamSession.closeJam;
@@ -490,8 +641,109 @@ export function MainWindow() {
    * would rebuild it on every beat event.
    */
   const jamActions = useMemo(
-    () => ({ ...jamSession.actions, toggleTakes: () => jamTakes.requestTakes(!jamSession.jam?.takes) }),
-    [jamSession.actions, jamSession.jam?.takes, jamTakes.requestTakes],
+    () => ({
+      ...jamSession.actions,
+      toggleTakes: () => jamTakes.requestTakes(!jamSession.jam?.takes),
+      // W32 — `C`, and through the SWITCH rather than the record behind it,
+      // so a first press still shows the promise. A camera that came on from
+      // a footswitch without anybody having read what it records would be the
+      // one thing this feature may not do.
+      toggleCamera: () => jamCamera.request(!jamSession.jam?.camera),
+    }),
+    [
+      jamSession.actions,
+      jamSession.jam?.takes,
+      jamSession.jam?.camera,
+      jamTakes.requestTakes,
+      jamCamera.request,
+    ],
+  );
+
+  /**
+   * The portion, hands-free (W18).
+   *
+   * The owner: choosing a portion of a song so it repeats is *"super critical
+   * for song learning"*, and a player choosing one is holding a guitar. `[`
+   * and `]` mark where it starts and stops AT THE BAR BEING PLAYED, which is
+   * what every looper pedal already means by those two symbols — so the bars
+   * can be marked out from a footswitch while the music runs, with the whole
+   * hand staying on the neck.
+   *
+   * The bar being played comes from the engine's own beat event, through the
+   * one function that answers "where are we" (`songPosition`). Never
+   * `BeatEvent.beat`: that counts the CLICK's beats, so in 7/8 a loop marked
+   * with the footswitch would start twice as far into the piece as the player
+   * is. Stopped, it is the start of the current portion — a player who has
+   * not pressed play yet is at the top of what they chose.
+   */
+  const songsActions = useMemo(
+    () => {
+      const score = songsSession.score;
+      const barNow = () => {
+        if (!score) return null;
+        return songPosition(score, songsSession.range, currentBeat, {
+          playing: state.isPlaying,
+        }).bar;
+      };
+      return {
+        loopStartsHere: () => {
+          const bar = barNow();
+          if (bar === null || !score) return;
+          songsSession.setSelection(
+            setEdge(score, songsSession.selection ?? songsSession.portion, "start", bar),
+          );
+        },
+        loopEndsHere: () => {
+          const bar = barNow();
+          if (bar === null || !score) return;
+          songsSession.setSelection(
+            setEdge(score, songsSession.selection ?? songsSession.portion, "end", bar),
+          );
+        },
+        toggleLoop: () => songsSession.setLoop(!songsSession.loop),
+        clearSelection: songsSession.clearSelection,
+        nudge: (bars: number) => {
+          if (!score) return;
+          songsSession.setSelection(
+            nudgeRange(score, songsSession.selection ?? songsSession.portion, bars),
+          );
+        },
+        /*
+         * W25 — recording and the camera, hands-free.
+         *
+         * Through an EVENT and not through `songsSession.setTakes`, which is
+         * right there. The switches are not settings: pressing one for the
+         * first time shows a promise about what is recorded and where it is
+         * kept, and the hooks that own those promises
+         * (`useSongTakes.requestTakes`, `useSongCamera.request`) live inside
+         * the Songs screen. A footswitch that wrote the setting directly
+         * would turn a camera on without anybody having read what it does,
+         * which is the one thing this feature may not do.
+         *
+         * The same door the library's "+" already uses to reach this screen's
+         * file input, for the same reason: the window has no handle on a
+         * control that is not its own.
+         */
+        toggleTakes: () => window.dispatchEvent(new Event("yames:songs-take")),
+        toggleCamera: () => window.dispatchEvent(new Event("yames:songs-camera")),
+      };
+    },
+    // Picked apart rather than `songsSession`, which is a fresh object every
+    // render: with the whole session in here the dispatcher — and the key
+    // listener that depends on it — would be rebuilt on every beat event.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      songsSession.score,
+      songsSession.range,
+      songsSession.portion,
+      songsSession.selection,
+      songsSession.loop,
+      songsSession.setSelection,
+      songsSession.setLoop,
+      songsSession.clearSelection,
+      currentBeat,
+      state.isPlaying,
+    ],
   );
 
   const handleNewJam = useCallback(() => {
@@ -530,9 +782,10 @@ export function MainWindow() {
       view,
       jam: jamSession.jam ?? null,
       setlist: setlistSession.setlist ?? null,
+      song: { bars: songsSession.mixSetting.countInBars },
       state,
     }),
-    [view, jamSession.jam, setlistSession.setlist, state],
+    [view, jamSession.jam, setlistSession.setlist, songsSession.mixSetting.countInBars, state],
   );
 
   const countInOn = countInIsOn(countInSubject);
@@ -548,8 +801,15 @@ export function MainWindow() {
       if (setlist) setlistSession.setSetlist(setSetlistCountIn(setlist, beats));
       return;
     }
+    // Songs counts in bars, and the number is this song's own — the click's
+    // warm-up beats are cleared by `load_song`, so writing them here is the
+    // switch that did nothing that W18 was sent to fix.
+    if (store === "songs") {
+      songsSession.setCountInBars(beats);
+      return;
+    }
     void reconfigureRamp({ warmupBeats: beats });
-  }, [countInSubject, setlistSession.setlist]);
+  }, [countInSubject, setlistSession.setlist, songsSession.setCountInBars]);
 
   /**
    * Play, on the metronome.
@@ -1117,6 +1377,8 @@ export function MainWindow() {
     // including the first-time dialog — so a footswitch cannot start a
     // recording nobody has been told about.
     jamActions,
+    songsLoaded: !!songsSession.score,
+    songsActions,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1158,9 +1420,10 @@ export function MainWindow() {
       }
       const combo = eventToCombo(e);
       if (!combo) return;
-      const actionId = Object.entries(keyBindings).find(
-        ([_, key]) => key === combo,
-      )?.[0] as HotkeyAction | undefined;
+      // Which action this key means — and on which tab (2026-09-20). The rule
+      // and the reason for it are `hotkeys.ts`'s `actionForCombo`, which is
+      // where they can be tested (W34 item 3).
+      const actionId = actionForCombo(keyBindings, combo, view) as HotkeyAction | undefined;
       // Feed tester if open
       if (inputTestMode) {
         if (["Meta", "Control", "Alt", "Shift"].includes(e.key)) return;
@@ -1424,6 +1687,21 @@ export function MainWindow() {
             const jam = jamSession.jams.find((j) => j.id === jamId);
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
+          /* One row per FILE (W35). `activeSongId` is still the PART on the
+             stage; the row it lights is the file that part belongs to. */
+          songFiles={songsSession.songFiles}
+          activeSongId={songsSession.song?.id ?? null}
+          dueSongs={songsDue}
+          onLoadSong={songsSession.loadSong}
+          /* The library's "+" reaches the same file input the stage owns.
+             There is only one, on the view, so the picker and the drop
+             target cannot drift apart. */
+          onImportSong={() => {
+            setView("songs");
+            window.dispatchEvent(new CustomEvent("yames:songs-import"));
+          }}
+          onDeleteSong={songsSession.deleteSong}
+          onRenameSong={songsSession.renameSong}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -1511,6 +1789,13 @@ export function MainWindow() {
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
           listening={evaluation.enabled}
+          /* W36 item 2 — on Songs the bar carries the song, and the click's
+             sound picker is not part of it: over a file that brings its own
+             band the click starts off, and what it sounds like when it is on
+             is a metronome setting. Which modes want the picker is the
+             shell's question, so it is answered here. */
+          soundPicker={view !== "songs"}
+          modeBar={view === "songs"}
           soundOpen={soundOpen}
           setSoundOpen={setSoundOpen}
           soundDropdownRef={soundDropdownRef}
@@ -1560,6 +1845,42 @@ export function MainWindow() {
           <TakesIntroDialog
             onConfirm={jamTakes.confirmIntro}
             onCancel={jamTakes.cancelIntro}
+          />
+        )}
+
+        {/* W32 — and the camera's own, a different promise from the take's:
+            one is about a file of your playing, the other is about a picture
+            of you. Once per MACHINE and not once per mode, so a player who
+            read it on the Songs tab is not asked again here — the key is
+            `CAMERA_INTRO_KEY` and it is the same one. */}
+        {jamCamera.introOpen && (
+          <CameraIntroDialog
+            onConfirm={jamCamera.confirmIntro}
+            onCancel={jamCamera.cancelIntro}
+          />
+        )}
+
+        {/* W32 — the little mirror, over the jam stage.
+
+            Drawn by the WINDOW and fixed to it, not by `JamView`. The jam
+            stage is a column that scrolls — at 480×780 it is a hundred and
+            sixty pixels taller than the room it has — so a picture anchored
+            to the bottom of that column is a picture below the fold, which
+            is the same bug as covering something and harder to notice. It
+            also cannot be fixed to the window from inside the stage:
+            `.jam-view` is a container query container, and layout
+            containment makes it the containing block for anything fixed
+            inside it.
+
+            So it lives here, above the transport, in one of the two bottom
+            corners. It draws nothing at all unless the camera is open. */}
+        {mode === "jam" && (
+          <CameraPreview
+            camera={jamCamera}
+            countIn={jamCountIn}
+            recordingSince={jamCamera.recording ? jamRecordingSince : null}
+            corners={JAM_PREVIEW_CORNERS}
+            className="jam-camera-preview"
           />
         )}
 
@@ -1670,6 +1991,7 @@ export function MainWindow() {
               listening={evaluation.enabled}
               takes={jamTakes}
               onToggleTakes={jamTakes.requestTakes}
+              camera={jamCamera}
               onPreviewKit={jamSession.startKitPreview}
               previewingKit={jamSession.previewKit}
               onPreviewVibe={jamSession.previewVibe}
@@ -1701,6 +2023,14 @@ export function MainWindow() {
                renders now, not a screen anybody sits on. */
             null
           )
+        ) : view === "songs" ? (
+          <SongsView
+            session={songsSession}
+            currentBeat={currentBeat}
+            isPlaying={state.isPlaying}
+            themeId={state.theme}
+            listening={evaluation.enabled}
+          />
         ) : view === "drill" ? (
           <DrillView
             state={state}
@@ -1762,6 +2092,8 @@ export function MainWindow() {
             setCoachVerbosity={coach.setCoachVerbosity}
             coachMode={coach.coachMode}
             setCoachMode={coach.setCoachMode}
+            coachStance={coach.coachStance}
+            setCoachStance={coach.setCoachStance}
             modelStatus={coach.modelStatus}
             setModelStatus={coach.setModelStatus}
             modelDownloading={coach.modelDownloading}
@@ -1813,7 +2145,8 @@ export function MainWindow() {
         {(view === "beat" ||
           view === "drill" ||
           (view === "setlist" && !!setlistSession.setlist) ||
-          (view === "jam" && !!jamSession.jam)) && (
+          (view === "jam" && !!jamSession.jam) ||
+          (view === "songs" && !!songsSession.score)) && (
           <Transport
             view={view}
             isPlaying={state.isPlaying}
@@ -1827,6 +2160,12 @@ export function MainWindow() {
             startBpm={state.speedRamp.startBpm}
             countIn={countInOn}
             loop={state.speedRamp.cyclic}
+            /* Back to the start, beside Play — and only where there is a piece
+               to go back to the start OF (W37 item 1). A stop in Songs is a
+               pause now, so something visible has to rewind. */
+            onBackToStart={
+              view === "songs" && songsSession.score ? songsSession.backToStart : undefined
+            }
             onToggleCountIn={toggleCountIn}
             onToggleLoop={() => reconfigureRamp({ cyclic: !state.speedRamp.cyclic })}
             onTogglePlayback={() =>
@@ -1861,6 +2200,7 @@ export function MainWindow() {
             jamChorus={currentBeat?.chorus ?? 1}
             recording={jamTakes.recording}
             recordedSeconds={jamTakes.recordedSeconds}
+            recordingSound={jamTakes.recordingSound}
           />
         )}
       </div>

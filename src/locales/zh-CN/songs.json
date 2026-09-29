@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "导入一首曲子",
+    "dismiss": "OK",
+    "tuning": "调弦",
+    "capoLabel": "变调夹",
+    "capo": "变调夹在第 {{fret}} 品",
+    "meter": "拍号",
+    "tempo": "速度",
+    "bpm": "{{bpm}} BPM",
+    "range": "小节",
+    "fromBar": "从",
+    "toBar": "到",
+    "wholeSong": "整首",
+    "barsCount": "{{count}} 小节",
+    "barsCount_other": "{{count}} 小节",
+    "sections": "段落",
+    "speed": "倍速",
+    "percent": "{{percent}}%",
+    "speedNote": "滴答走 {{bpm}} BPM",
+    "loop": "重复",
+    "loopNote": "把上面这几小节一遍又一遍地弹",
+    "dropHere": "把文件放在这里就会打开",
+    "band": {
+      "label": "你会听到谁",
+      "click": "滴答",
+      "drums": "鼓",
+      "bass": "贝斯",
+      "keys": "键盘",
+      "levelFor": "{{lane}} 有多响",
+      "muteFor": "关掉 {{lane}}",
+      "note": "边弹边调平衡。Yames 会为这首曲子记住它。",
+      "leftOut": "这个文件里有 {{tracks}}，但 Yames 没人能弹。",
+      "leftOut_other": "这个文件里有 {{tracks}}，但 Yames 没人能弹。",
+      "droppedNotes": "这个文件里有 {{count}} 个音属于乐队没有的乐器。",
+      "droppedNotes_other": "这个文件里有 {{count}} 个音属于乐队没有的乐器。",
+      "myPart": "我的声部",
+      "soloShort": "S",
+      "soloFor": "只听 {{lane}}",
+      "tooManyParts": "{{tracks}} 不会发声：这个文件的声部比能同时响起的还多。",
+      "tooManyParts_other": "{{tracks}} 不会发声：这个文件的声部比能同时响起的还多。",
+      "turnedDown": "已调低 {{count}} 位乐手",
+      "turnedDown_other": "已调低 {{count}} 位乐手",
+      "drumsLabel": "鼓",
+      "drumsKit": "Yames 的鼓组",
+      "drumsFile": "文件自带的"
+    },
+    "countIn": {
+      "counting": "正在给你数拍"
+    },
+    "engine": {
+      "cannotPlay": "Yames 现在没法带着乐队弹这首曲子。滴答照样给你守时间。",
+      "busy": "别的东西正在用声音，所以曲子停了。你准备好就再按一次播放。"
+    },
+    "empty": {
+      "title": "把你手上已有的曲子拿进来",
+      "body": "打开一个 Guitar Pro 或 MusicXML 文件，Yames 就会给你显示六线谱、守住时间，并跟着你弹到哪里。把文件放到这个界面的任何地方，或者挑一个。",
+      "private": "文件留在这台电脑上。什么都不会上传。",
+      "bodyShort": "Guitar Pro 或 MusicXML。把文件放到这个界面的任何地方，或者挑一个。",
+      "stays": "文件留在这台电脑上，Yames 也会保存一份自己的副本。"
+    },
+    "tab": {
+      "drawing": "正在排谱...",
+      "failed": "Yames 读得了这个文件，却画不出来。小节和时间照常可用。"
+    },
+    "picker": {
+      "title": "选你要弹的声部",
+      "which": "你弹哪一个声部？",
+      "strings": "{{count}} 弦",
+      "strings_other": "{{count}} 弦",
+      "notTab": "不是用六线谱写的",
+      "cancel": "先不用"
+    },
+    "warn": {
+      "tempoFlattened": "速度在 {{count}} 个小节里是渐变的。Yames 改在小节线上一次换过去。",
+      "tempoFlattened_other": "速度在 {{count}} 个小节里是渐变的。Yames 改在小节线上一次换过去。",
+      "barOverfilled": "第 {{bar}} 小节装的比拍号允许的多。它照谱面原样弹。"
+    },
+    "library": {
+      "add": "导入一首曲子",
+      "empty": "还没有曲子",
+      "remove": "从 Yames 移除",
+      "due": "今天练",
+      "dueTitle": "你说过要回到这首",
+      "starter": "自带",
+      "starterTitle": "随 Yames 一起来的。想删就删。",
+      "removeTitle": "移除 {{name}}？",
+      "removeBody": "整首曲子都会没：每个声部、Yames 记下的一切，还有 Yames 保存的那份文件副本。无法撤销。",
+      "removeTakes": "它的 {{count}} 段录音也会一起没。",
+      "removeTakes_other": "它的 {{count}} 段录音也会一起没。",
+      "removeNoTakes": "你还没录过这首。",
+      "removeConfirm": "移除",
+      "removeCancel": "保留"
+    },
+    "review": {
+      "title": "刚才那遍如何",
+      "summary": "第 {{bars}} 小节，{{percent}}% — {{of}} 个音里有 {{hits}} 个落到位",
+      "again": "再来一遍",
+      "working": "正在回听...",
+      "passes": "哪一遍",
+      "pass": "第 {{n}} 遍",
+      "nothingToSay": "这一遍没什么突出的。再弹一遍，教练就有更多依据了。",
+      "chordsHonesty": "和弦里面的音我还查不了，只能看它们落在什么时候。",
+      "notSaved": "Yames 没能把这一遍记下来，所以下次没有东西可以对比。",
+      "tooShort": "刚才太短了，判断不了。把这一段弹满八个音，教练就有话可说。",
+      "moreLabel": "还有什么（{{count}}）",
+      "moreLabel_other": "还有什么（{{count}}）",
+      "lessLabel": "收起其余的",
+      "tab": {
+        "nothing": "这几小节里什么都没弹。"
+      },
+      "mark": {
+        "onTime": "到位",
+        "slightlyEarly": "略早",
+        "early": "早",
+        "slightlyLate": "略晚",
+        "late": "晚",
+        "missed": "漏掉",
+        "notAssessed": "未评判",
+        "extra": "多出的音",
+        "accentQuiet": "谱上写了重音，但没有弹得更响"
+      },
+      "bars": {
+        "one": "第 {{bar}} 小节",
+        "range": "第 {{from}}–{{to}} 小节",
+        "here": "这一段"
+      },
+      "amount": {
+        "hair": "一丝",
+        "thirtySecond": "大约一个三十二分音符",
+        "sixteenth": "大约一个十六分音符",
+        "tripletEighth": "大约三分之一拍",
+        "eighth": "大约一个八分音符",
+        "mostOfABeat": "将近一整拍",
+        "beat": "整整一拍"
+      },
+      "when": {
+        "early": "早了",
+        "late": "晚了"
+      },
+      "goes": "{{count}} 遍",
+      "goes_other": "{{count}} 遍",
+      "notes": "{{count}} 个音",
+      "notes_other": "{{count}} 个音",
+      "say": {
+        "consistentMiss": {
+          "1": "每次都是同一个地方 —— {{goes}}里有 {{affected}} 遍在{{bars}}丢了。",
+          "2": "在{{bars}}散掉：{{passes}} 遍里掉了 {{affected}} 遍。",
+          "3": "其余都撑得住。一直丢的是{{bars}}，{{goes}}里占了 {{affected}} 遍。"
+        },
+        "rushing": {
+          "1": "你在{{bars}}走在滴答前面 —— 从头到尾早了{{amount}}。",
+          "2": "{{bars}}有点赶：平均早了{{amount}}。",
+          "3": "在{{bars}}往后坐一点。你在那里早了{{amount}}落下去。"
+        },
+        "dragging": {
+          "1": "你在{{bars}}落在滴答后面 —— 晚了{{amount}}。",
+          "2": "{{bars}}拖了：音落在拍后{{amount}}。",
+          "3": "在{{bars}}往前靠一点。它坐得晚了{{amount}}。"
+        },
+        "afterShift": {
+          "1": "每次你的手在{{bars}}换把，下一个音就{{when}}{{amount}}。",
+          "2": "{{bars}}的换把让紧接着那个音{{when}}{{amount}}。",
+          "3": "把{{bars}}的换把落稳，后面就顺了 —— 现在它后面那个音{{when}}{{amount}}。"
+        },
+        "fallsApart": {
+          "1": "你在{{bars}}开头很干净，到后面就散了。",
+          "2": "散的是{{bars}}的后半段 —— 前半段没问题。",
+          "3": "是耐力，不是音：{{bars}}越往后越糙。"
+        },
+        "extras": {
+          "1": "{{bars}}有没人要的音 —— {{extras}}。",
+          "2": "你在{{bars}}多加了{{extras}}。让休止符就是休止符。",
+          "3": "有东西溜进了{{bars}}：谱上没有的{{extras}}。"
+        },
+        "uneven": {
+          "1": "{{bars}}不是早也不是晚 —— 是不匀。音落得到处都是。",
+          "2": "你在{{bars}}的时值在游走，而不是偏向某一边。",
+          "3": "先稳再快：{{bars}}还没有稳定的东西，两边都没有。"
+        },
+        "beatPositionBias": {
+          "1": "跑掉的是小节里的第 {{beat}} 拍 —— 每小节都{{when}}{{amount}}。",
+          "2": "你压在第 {{beat}} 拍上：每次轮到它都{{when}}{{amount}}。",
+          "3": "一小节接一小节偏出去的是第 {{beat}} 拍 —— {{when}}{{amount}}。"
+        },
+        "subdivisionWeak": {
+          "1": "每 {{outOf}} 个音里的第 {{position}} 个，是你一直丢掉的那个。",
+          "2": "每 {{outOf}} 个一组里，不见的是第 {{position}} 个音。",
+          "3": "把一组数出声 —— 是在 {{outOf}} 个里的第 {{position}} 个滑掉的。"
+        },
+        "drift": {
+          "1": "你跟着滴答起的头，到最后{{when}}{{amount}}。",
+          "2": "越往后拉得越多：到最后几小节{{when}}{{amount}}。",
+          "3": "你手上的速度在整段里一路滑 —— 到末尾就{{when}}。"
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} 撑得住。到 {{collapse}} 就散了。",
+          "2": "你在这里的上限是 {{hold}} —— {{collapse}} 还不是你的。",
+          "3": "{{hold}} 是你的。{{collapse}} 是下一个要拿下的，不是今天的速度。"
+        },
+        "improved": {
+          "1": "这次更好 —— {{bars}}比上次稳了 {{ms}} 毫秒。",
+          "2": "有东西动了：以前会滑的{{bars}}，这次你守住了。",
+          "3": "{{bars}}是真的进步 —— 比你之前几遍紧了 {{ms}} 毫秒。"
+        },
+        "clean": {
+          "1": "{{bars}}没什么要改的 —— {{goes}}都对。",
+          "2": "这一段是你的了：{{bars}}，{{goes}}，一次都没滑。",
+          "3": "{{bars}}你每一遍都弹对了。先放着，过阵子再回来。"
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "回到六线谱",
+      "selectedBars": "已选第 {{bars}} 小节",
+      "wholeSong": "整首",
+      "portionSays": "{{count}} 小节 · {{state}}",
+      "portionSays_other": "{{count}} 小节 · {{state}}",
+      "looping": "循环中",
+      "once": "只弹一遍",
+      "timeRound": {
+        "one": "第 {{n}} 遍",
+        "two": "第 {{n}} 遍",
+        "few": "第 {{n}} 遍",
+        "other": "第 {{n}} 遍"
+      },
+      "keepPortion": "保存这一段",
+      "keepPortionNote": "先在六线谱上选好小节，再给它起个名字",
+      "portionPlaceholder": "给这一段起个名字",
+      "renamePortion": "重命名",
+      "deletePortion": "忘掉这一段",
+      "portionTitle": "{{name}} — {{percent}}%",
+      "tabLabel": "六线谱。点一个小节就跳到那里，拖过几个小节就选出一段。"
+    },
+    "offer": {
+      "justArrived": "刚刚出现在你的下载里",
+      "justArrivedSized": "刚刚出现在你的下载里 · {{size}}",
+      "more": "还有 {{n}} 个在等着",
+      "open": "打开它",
+      "opening": "正在打开...",
+      "notThisOne": "不是这个",
+      "failed": "Yames 打不开这个文件，也许它还在下载。"
+    },
+    "keepsCopy": "你带进来的每个文件，Yames 都会自己留一份，所以清理下载不会丢东西。",
+    "exportOriginal": "把文件存到别处",
+    "exporting": "正在保存...",
+    "exportDone": "已保存。",
+    "exportFailed": "Yames 无法把文件写到那里。",
+    "findTab": {
+      "what": "歌名和演唱者",
+      "link": "去找一份谱",
+      "note": "会用你自己的浏览器打开一次普通的网页搜索。Yames 不替你查任何东西。",
+      "ask": "还没有文件？"
+    },
+    "camera": {
+      "cannotPlay": "画面放不出来。",
+      "corner": {
+        "bottomLeft": "左下",
+        "bottomRight": "右下",
+        "topLeft": "左上",
+        "topRight": "右上"
+      },
+      "denied": "摄像头没有被允许。在系统设置里让 Yames 用它，然后再打开一次。",
+      "device": "用哪个摄像头",
+      "deviceNumbered": "摄像头 {{n}}",
+      "failed": "摄像头打不开。",
+      "guideBody": "把两只手都放进画面 —— 按弦的那只和拨弦的那只。",
+      "guideFlip": "我是左手弹",
+      "guideGot": "知道了",
+      "introNotNow": "先不用",
+      "introPrivate": "什么都不会上传，也不会发到任何地方。删掉一段录音，画面也跟着一起删。",
+      "introStart": "打开摄像头",
+      "introTitle": "关于摄像头",
+      "introWhat": "从预备拍开始，一直到你停下，摄像头都在拍你弹。声音就是那段录音 —— 你和乐队一起弹的那份，本来就在。",
+      "introWhere": "它会作为一个视频文件写在录音旁边，放在这台机器上本应用自己的文件夹里，直到你删掉它。",
+      "label": "摄像头",
+      "lead": "你的双手，留在谱子旁边 —— 没有任何东西离开这台机器",
+      "lostPicture": "摄像头中途停了。录音留下了，画面没有。",
+      "move": "挪动预览",
+      "nextSlip": "下一处失误",
+      "noCamera": "这台机器上没有摄像头。",
+      "noOffset": "这一段没有量出画面和声音差多少，所以两边从同一处开始。挪到你的手和音符一起落下为止。",
+      "nudge": "把画面对上",
+      "nudgeAt": "{{ms}} 毫秒",
+      "nudgeEarlier": "画面提前",
+      "nudgeHow": "如果手看起来比声音早或晚，就挪动画面，直到两边一起落下。这个摄像头会记住。",
+      "nudgeLater": "画面延后",
+      "off": "把画面也录下来",
+      "on": "摄像头已开",
+      "pause": "暂停",
+      "pitchDropped": "在这里放慢，音高会跟着速度一起降。",
+      "pitchKept": "放慢时音高不会跟着变。",
+      "play": "播放",
+      "prevSlip": "上一处失误",
+      "preview": "摄像头看到的你",
+      "slips": "跳到出错的地方",
+      "tape": "这一遍，一个音一个音",
+      "tickOff": "第 {{bar}} 小节，{{ms}} 毫秒",
+      "tickPlain": "第 {{bar}} 小节",
+      "unavailable": "这个版本录不了画面。这个屏幕上的其他功能一切照旧。",
+      "watchIt": "看一下",
+      "watchTitle": "回看",
+      "watchingAll": "整整一遍。",
+      "watchingBars": "第 {{bars}} 小节，一遍又一遍。",
+      "sinkUnsupported": "这个版本只能用电脑平时的扬声器播放录音，不能走 {{device}}。",
+      "sinkUnmatched": "正在用电脑平时的扬声器播放——这里找不到 {{device}}。",
+      "peek": "看看自己",
+      "peekNote": "检查一下取景。开始演奏时会自动关闭。"
+    },
+    "clip": {
+      "save": "保存为视频",
+      "go": "生成视频",
+      "cancel": "停止",
+      "making": "生成中 — {{percent}}%",
+      "whichBars": "哪些小节",
+      "chosenBars": "这些小节",
+      "wholeTake": "整段录音",
+      "shape": "画幅",
+      "wide": "横向",
+      "tall": "竖向",
+      "withMarks": "显示标记",
+      "realTime": "它一边播放一边录制，所以和音乐一样长：{{length}}。",
+      "isMp4": "你会得到一个 MP4，哪里都能发。",
+      "isWebm": "你会得到一个 WebM。有些地方只收 MP4。",
+      "saved": "已保存到 {{where}}",
+      "failed": "视频没能生成。什么都没有保存。",
+      "unavailable": "此版本无法保存视频。",
+      "bar": "小节",
+      "bpmUnit": "BPM",
+      "brand": "Yames 标记",
+      "brandNote": "角上一个小小的 Yames 标志和 yames.app。看到你视频的人就是这样找到这个应用的。",
+      "showInFolder": "在文件夹中显示",
+      "postItTo": "发到",
+      "dragItIn": "打开一个，把文件拖进去——Yames 不上传任何东西，也不需要账号。",
+      "webmWarning": "打开一个，把文件拖进去。这个是 WebM，大多数地方只收 MP4，用免费转换工具转一下就行。",
+      "underPicture": "画面下方",
+      "band": {
+        "tab": "六线谱",
+        "marks": "只显示标记",
+        "none": "不显示"
+      }
+    },
+    "compare": {
+      "title": "第 {{bars}} 小节，那时和现在",
+      "then": "那时",
+      "now": "现在",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "只有声音——这一遍摄像头是关着的。",
+      "locked": "两边是按小节对齐的，不是按秒，所以弹得慢的那一遍也能对上。"
+    },
+    "takes": {
+      "withPicture": "有画面",
+      "noneFilmed": "这些都没有录画面。",
+      "was": "第 {{bars}} 小节 · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "你在看哪一个声部",
+      "percussion": "鼓 — 跟不了这一条",
+      "notTab": "不是用六线谱写的",
+      "empty": "这一条什么也没写"
+    },
+    "strip": {
+      "more": "更多"
+    },
+    "view": {
+      "tabOnly": "六线谱",
+      "tabAndNotes": "六线谱 + 五线谱",
+      "notationNote": "在六线谱上方也显示五线谱",
+      "bigger": "放大",
+      "smaller": "缩小",
+      "size": "大小"
+    },
+    "clickChip": "滴答",
+    "clickNote": "跟着曲子打拍子。文件自带伴奏时默认关闭。",
+    "notes": {
+      "label": "关于这个文件"
+    }
+  }
+}

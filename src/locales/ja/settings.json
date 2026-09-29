@@ -110,7 +110,13 @@
       "downloadVoices": "ボイスをダウンロード",
       "installed": "{{tier}}コーチをインストール済み（{{size}}）",
       "removing": "削除中…",
-      "removeModels": "モデルを削除"
+      "removeModels": "モデルを削除",
+      "stance": "コーチのスタイル",
+      "stanceHint": "演奏中にコーチがどれだけ厳しくするか",
+      "stanceStrict": "厳しめ",
+      "stanceLearning": "習得中",
+      "stanceStrictDesc": "偏りが出たらその場で名前を付けて、声に出して伝えます。すでに弾ける箇所を詰めるときに向いた設定です。",
+      "stanceLearningDesc": "何か言うまでの余裕を1.5倍にし、演奏中は指摘を耳に入れず、うまくいったところから話します。採点はどちらでもまったく同じに計算されます。"
     },
     "general": {
       "title": "一般",
@@ -177,7 +183,8 @@
         "metronome": "メトロノーム",
         "view": "ビュー",
         "navigation": "ナビゲーション",
-        "jam": "ジャム"
+        "jam": "ジャム",
+        "songs": "曲"
       },
       "actions": {
         "play": "再生 / 停止",
@@ -211,7 +218,17 @@
         "jam-next-section": "次のセクション",
         "jam-prev-section": "前のセクション",
         "jam-loop-section": "このセクションをループ",
-        "jam-take": "テイクを録音"
+        "jam-take": "テイクを録音",
+        "tab-5": "曲タブ",
+        "songs-loop-start": "ここから繰り返す",
+        "songs-loop-end": "ここまで繰り返す",
+        "songs-loop": "部分を繰り返す",
+        "songs-loop-clear": "また曲全体",
+        "songs-loop-earlier": "部分を1小節前へ",
+        "songs-loop-later": "部分を1小節後ろへ",
+        "songs-take": "テイクを録音",
+        "songs-camera": "映像を録画",
+        "jam-camera": "映像を録画"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -245,7 +262,17 @@
         "jam-next-section": "小節線で次のセクションの頭へ飛ぶ",
         "jam-prev-section": "小節線でひとつ前のセクションの頭へ戻る",
         "jam-loop-section": "いるセクションをループする、または解除する",
-        "jam-take": "次に再生したときに録音する、または録音をやめる"
+        "jam-take": "次に再生したときに録音する、または録音をやめる",
+        "tab-5": "曲タブへ切り替える",
+        "songs-loop-start": "いま弾いている小節を部分の始まりにする",
+        "songs-loop-end": "いま弾いている小節を部分の終わりにする",
+        "songs-loop": "選んだ小節を何度も弾く、または止める",
+        "songs-loop-clear": "部分を忘れて曲を頭から弾く",
+        "songs-loop-earlier": "選んだ小節を、長さはそのままで1小節ぶん先頭へずらす",
+        "songs-loop-later": "選んだ小節を、長さはそのままで1小節ぶん終わりへずらす",
+        "songs-take": "次に再生したときに録音する、または録音をやめる",
+        "songs-camera": "次に再生したときに撮影する、またはカメラを切る",
+        "jam-camera": "次に再生したときに撮影する、またはカメラを切る"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "確認できませんでした",
       "sounds": "音源",
       "soundsCredit": "クラブのキットは Versilian Studios と Karoryfer Samples による Virtuosity Drums、演奏は Austin McMahon（パブリックドメイン）。スタジオのキットは DrumGizmo プロジェクトの DRSKit（CC BY 4.0）。",
-      "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ"
+      "madeWith": "{{heart}} を込めて、世界中のミュージシャンへ",
+      "soundsCreditSongs": "ほかの楽器は Sonivox の General MIDI 音源です（Sonic Network Inc., Apache-2.0）。"
+    },
+    "songs": {
+      "title": "曲",
+      "catchDownloads": "ダウンロードした曲を知らせる",
+      "catchDownloadsHint": "「曲」を開いている間、Yames はダウンロードフォルダーを見て、開く前に必ず尋ねます。あなたのファイルを移動・改名・削除することはありません。",
+      "folder": "このフォルダーを見る",
+      "folderUnknown": "このコンピューターはダウンロード先を Yames に教えていません",
+      "chooseFolder": "選ぶ...",
+      "useDownloads": "ダウンロードを使う",
+      "turnedDown": "見送った曲",
+      "turnedDownHint": "Yames が二度と知らせないファイルが {{n}} 件",
+      "forgetTurnedDown": "もう一度知らせる",
+      "soundSet": "音色セット",
+      "soundSetBuiltIn": "Yames に付属のもの",
+      "chooseSoundSet": ".sf2 を選ぶ",
+      "useBuiltInSoundSet": "付属のものを使う"
     }
   },
   "keybindings": {

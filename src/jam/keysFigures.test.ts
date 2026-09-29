@@ -50,8 +50,28 @@ const hits = (line: { voicings: number[][] }) => line.voicings.flatMap((v, t) =>
 const pc = (n: number) => ((n % 12) + 12) % 12;
 
 describe("every style keeps the engine's contract", () => {
+  /*
+   * Every style, meter, family, bar and chord shape — about four thousand
+   * lines, and every tick of every one of them checked.
+   *
+   * The checks are collected and asserted ONCE at the end rather than
+   * through an `expect` per tick. The coverage is identical; what changes is
+   * that vitest's per-assertion bookkeeping is paid once instead of a
+   * million times, and this test went from fourteen seconds — against a
+   * global twenty-second timeout that exists to catch hangs — to well under
+   * one. A test that is two thirds of the way to the timeout on an idle
+   * machine fails on a busy one, and it fails saying "timeout" rather than
+   * saying what is wrong.
+   *
+   * Every failure still names its own case, and all of them are reported
+   * together instead of only the first.
+   */
   it("in every meter, family and place in the form", () => {
     const families: (GrooveFamily | null)[] = ["rock", "jazz", "latin", "pop", "metal", null];
+    const wrong: string[] = [];
+    const check = (ok: boolean, what: string) => {
+      if (!ok && wrong.length < 40) wrong.push(what);
+    };
     for (const style of JAM_KEYS_STYLES_ALL) {
       for (const [beats, tpb] of METERS) {
         for (const family of families) {
@@ -60,27 +80,32 @@ describe("every style keeps the engine's contract", () => {
               const where = `${style} ${beats}/${tpb} ${family} bar ${barIndex}`;
               const line = part(style, { meter: { beatsPerBar: beats, ticksPerBeat: tpb }, family, barIndex, chords });
               const n = beats * tpb;
-              expect(line.voicings, where).toHaveLength(n);
-              expect(line.velocities, where).toHaveLength(n);
-              expect(line.lengths, where).toHaveLength(n);
-              expect(hits(line).length, `${where}: nothing played`).toBeGreaterThan(0);
+              check(line.voicings.length === n, `${where}: ${line.voicings.length} voicings, expected ${n}`);
+              check(line.velocities?.length === n, `${where}: ${line.velocities?.length} velocities, expected ${n}`);
+              check(line.lengths?.length === n, `${where}: ${line.lengths?.length} lengths, expected ${n}`);
+              check(hits(line).length > 0, `${where}: nothing played`);
               line.voicings.forEach((v, t) => {
-                expect(v.length, where).toBeLessThanOrEqual(4);
+                check(v.length <= 4, `${where} tick ${t}: ${v.length} notes at once`);
                 for (const note of v) {
-                  expect(note, where).toBeGreaterThanOrEqual(48);
-                  expect(note, where).toBeLessThanOrEqual(84);
-                  expect(Number.isInteger(note), where).toBe(true);
+                  check(
+                    Number.isInteger(note) && note >= 48 && note <= 84,
+                    `${where} tick ${t}: note ${note} is outside the keys range`,
+                  );
                 }
                 if (v.length === 0) return;
-                expect(line.velocities![t], where).toBeGreaterThanOrEqual(0.3);
-                expect(line.velocities![t], where).toBeLessThanOrEqual(1.4);
-                expect(line.lengths![t], where).toBeGreaterThanOrEqual(0);
+                const velocity = line.velocities![t];
+                check(
+                  velocity >= 0.3 && velocity <= 1.4,
+                  `${where} tick ${t}: velocity ${velocity}`,
+                );
+                check(line.lengths![t] >= 0, `${where} tick ${t}: length ${line.lengths![t]}`);
               });
             }
           }
         }
       }
     }
+    expect(wrong).toEqual([]);
   });
 });
 

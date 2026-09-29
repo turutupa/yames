@@ -152,6 +152,24 @@ jobs:
           # shellcheck disable=SC2086
           cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG --test highbpm_fixtures
 
+      # The pitch gates (`test:pitch`). Not a golden suite like the two
+      # above: these carry the pitch each note actually was, so a change
+      # that makes the tracker worse fails here instead of being re-baked.
+      # `--nocapture` because the numbers ARE the result — a run that says
+      # only "ok" tells nobody whether the margin is a point or thirty.
+      #
+      # The run-time gate inside it asserts in release only, so this debug
+      # run measures and prints without failing on a slow runner.
+      - name: Pitch fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ARG=""
+          if [ -n "${{ matrix.target }}" ]; then TARGET_ARG="--target ${{ matrix.target }}"; fi
+          # shellcheck disable=SC2086
+          cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG \
+            --test pitch_fixtures -- --nocapture
+
   # ROADMAP §5.0.1 — the brain compiles and generates on every shipping
   # platform. Shared with `release.yml`, which gates publishing on it.
   llm-smoke:

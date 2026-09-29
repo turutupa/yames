@@ -1,7 +1,8 @@
 {
   "metronome": {
     "tap": "TAP",
-    "tapCount": "{{count}} Taps",
+    "tapCount": "{{count}} Tap",
+    "tapCount_other": "{{count}} Taps",
     "subdivision": "Unterteilung",
     "meter": "Taktart",
     "free": "FREE",
@@ -11,7 +12,8 @@
     "beatCount": "{{count}} Beats",
     "beatCount_one": "{{count}} Beat",
     "beatCount_other": "{{count}} Beats",
-    "clicksPerBar": "{{count}} Klicks/Takt",
+    "clicksPerBar": "{{count}} Klick/Takt",
+    "clicksPerBar_other": "{{count}} Klicks/Takt",
     "addBeat": "Beat hinzufügen",
     "removeBeat": "Beat entfernen",
     "prevMeter": "Vorherige Taktart",

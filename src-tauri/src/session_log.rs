@@ -276,6 +276,15 @@ pub struct PracticeSegment {
     /// historic logs (written before this field) deserializing cleanly.
     #[serde(rename = "intervalErrors", default)]
     pub interval_errors: Vec<f64>,
+    /// D4c — where each gap-separated phrase begins in `interval_errors`.
+    /// The other half of the field above, and the half that was missing:
+    /// IC is computed per burst and aggregated length-weighted, never
+    /// over the pooled errors, so a log carrying the errors alone cannot
+    /// be used to reproduce the number it sits beside. Empty means one
+    /// burst — continuous play — and historic logs deserialize to that,
+    /// which is what they were.
+    #[serde(rename = "burstStartIndices", default)]
+    pub burst_start_indices: Vec<usize>,
 }
 
 /// D3c — four-component scoring breakdown. Each component is in `[0, 1]`
@@ -1635,6 +1644,7 @@ mod tests {
             inferred_divisor: 0,
             inferred_divisor_confidence: 0.0,
             interval_errors: Vec::new(),
+            burst_start_indices: Vec::new(),
         }];
         let log = build_log_from_session(
             120,

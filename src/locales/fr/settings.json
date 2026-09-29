@@ -110,7 +110,13 @@
       "downloadVoices": "Télécharger les voix",
       "installed": "Coach {{tier}} installé ({{size}})",
       "removing": "Suppression…",
-      "removeModels": "Supprimer les modèles"
+      "removeModels": "Supprimer les modèles",
+      "stance": "Style de coaching",
+      "stanceHint": "À quel point le coach est dur avec toi pendant que tu joues",
+      "stanceStrict": "Strict",
+      "stanceLearning": "Apprentissage",
+      "stanceStrictDesc": "Nomme une tendance dès qu'elle se montre, et le dit à voix haute. C'est le bon réglage quand tu travailles un passage que tu connais déjà.",
+      "stanceLearningDesc": "Te laisse une fois et demie plus de marge avant de dire quoi que ce soit, garde les corrections hors de tes oreilles pendant que tu joues, et commence par ce qui a marché. Ta note est calculée exactement de la même façon dans les deux cas."
     },
     "general": {
       "title": "Général",
@@ -177,7 +183,8 @@
         "metronome": "Métronome",
         "view": "Affichage",
         "navigation": "Navigation",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Morceaux"
       },
       "actions": {
         "play": "Lecture / Arrêt",
@@ -211,7 +218,17 @@
         "jam-next-section": "Section suivante",
         "jam-prev-section": "Section précédente",
         "jam-loop-section": "Boucler cette section",
-        "jam-take": "Enregistrer la prise"
+        "jam-take": "Enregistrer la prise",
+        "tab-5": "Onglet Morceaux",
+        "songs-loop-start": "La boucle commence ici",
+        "songs-loop-end": "La boucle finit ici",
+        "songs-loop": "Répéter le passage",
+        "songs-loop-clear": "Tout le morceau à nouveau",
+        "songs-loop-earlier": "Le passage une mesure plus tôt",
+        "songs-loop-later": "Le passage une mesure plus tard",
+        "songs-take": "Enregistrer la prise",
+        "songs-camera": "Enregistrer l'image",
+        "jam-camera": "Enregistrer l'image"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -245,7 +262,17 @@
         "jam-next-section": "Sauter au début de la section suivante à la barre de mesure",
         "jam-prev-section": "Revenir au début de la section précédente à la barre de mesure",
         "jam-loop-section": "Mettre en boucle la section où tu es, ou l'en sortir",
-        "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement"
+        "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
+        "tab-5": "Passer à l'onglet Morceaux",
+        "songs-loop-start": "Faire commencer le passage à la mesure que vous jouez",
+        "songs-loop-end": "Faire finir le passage à la mesure que vous jouez",
+        "songs-loop": "Rejouer les mesures choisies encore et encore, ou arrêter",
+        "songs-loop-clear": "Oublier le passage et jouer le morceau depuis le début",
+        "songs-loop-earlier": "Décaler les mesures choisies d'une mesure vers le début, sans changer leur longueur",
+        "songs-loop-later": "Décaler les mesures choisies d'une mesure vers la fin, sans changer leur longueur",
+        "songs-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
+        "songs-camera": "Filmer au prochain lancement, ou éteindre la caméra",
+        "jam-camera": "Filmer au prochain lancement, ou éteindre la caméra"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Échec de la recherche",
       "sounds": "Sons",
       "soundsCredit": "La batterie Club, c'est Virtuosity Drums, de Versilian Studios et Karoryfer Samples, jouée par Austin McMahon (domaine public). La batterie Studio, c'est DRSKit, du projet DrumGizmo (CC BY 4.0).",
-      "madeWith": "Fait avec {{heart}} pour les musiciens du monde entier"
+      "madeWith": "Fait avec {{heart}} pour les musiciens du monde entier",
+      "soundsCreditSongs": "Les autres instruments viennent du jeu de sons General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Morceaux",
+      "catchDownloads": "Proposer les morceaux téléchargés",
+      "catchDownloadsHint": "Tant que Morceaux est ouvert, Yames regarde votre dossier de téléchargements et demande avant d'ouvrir quoi que ce soit. Votre fichier n'est jamais déplacé, renommé ni supprimé.",
+      "folder": "Surveiller ce dossier",
+      "folderUnknown": "Cet ordinateur n'a pas dit à Yames où vont les téléchargements",
+      "chooseFolder": "Choisir...",
+      "useDownloads": "Utiliser les téléchargements",
+      "turnedDown": "Morceaux refusés",
+      "turnedDownHint": "{{n}} fichiers que Yames ne proposera plus",
+      "forgetTurnedDown": "Les proposer à nouveau",
+      "soundSet": "Jeu de sons",
+      "soundSetBuiltIn": "Celui fourni avec Yames",
+      "chooseSoundSet": "Choisir un .sf2",
+      "useBuiltInSoundSet": "Utiliser celui d'origine"
     }
   },
   "keybindings": {

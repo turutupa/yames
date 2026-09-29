@@ -253,6 +253,8 @@
       "one": "1 akord",
       "custom": "{{count}} taktów",
       "custom_one": "{{count}} takt",
+      "custom_few": "{{count}} takty",
+      "custom_many": "{{count}} taktów",
       "custom_other": "{{count}} taktów"
     },
     "countIn": {
@@ -260,6 +262,8 @@
       "none": "Brak",
       "barsAnd": "{{count}} takty · {{sound}}",
       "barsAnd_one": "{{count}} takt · {{sound}}",
+      "barsAnd_few": "{{count}} takty · {{sound}}",
+      "barsAnd_many": "{{count}} taktów · {{sound}}",
       "barsAnd_other": "{{count}} takty · {{sound}}"
     },
     "fills": {
@@ -278,6 +282,8 @@
       "aria": "Gra {{chord}}",
       "next": "{{chord}} za {{count}} taktów",
       "next_one": "{{chord}} za {{count}} takt",
+      "next_few": "{{chord}} za {{count}} takty",
+      "next_many": "{{chord}} za {{count}} taktów",
       "next_other": "{{chord}} za {{count}} taktów",
       "nextNow": "Zaraz {{chord}}"
     },
@@ -302,6 +308,8 @@
       "scopeKey": "W tonacji",
       "scopeAll": "Wszystkie tonacje",
       "noteCount_one": "skala {{count}}-dźwiękowa",
+      "noteCount_few": "skala {{count}}-dźwiękowa",
+      "noteCount_many": "skala {{count}}-dźwiękowa",
       "noteCount_other": "skala {{count}}-dźwiękowa",
       "noteCount": "skala {{count}}-dźwiękowa",
       "jump": "Przejdź do",
@@ -410,6 +418,8 @@
       "dropOutBarsLabel": "Jak długo zespół milczy",
       "forBars": "przez {{count}} taktów",
       "forBars_one": "przez {{count}} takt",
+      "forBars_few": "przez {{count}} takty",
+      "forBars_many": "przez {{count}} taktów",
       "forBars_other": "przez {{count}} taktów",
       "trade": "Wymiana",
       "tradeN": "Po {{count}}",
@@ -418,6 +428,8 @@
       "tempoEveryLabel": "Jak często rośnie tempo",
       "everyChoruses": "co {{count}} przebiegów",
       "everyChoruses_one": "co {{count}} przebieg",
+      "everyChoruses_few": "co {{count}} przebiegi",
+      "everyChoruses_many": "co {{count}} przebiegów",
       "everyChoruses_other": "co {{count}} przebiegów",
       "climbing": "od {{from}} w górę",
       "dropOutExplain": "Zespół co jakiś czas milknie na kilka taktów, a ty trzymasz czas sam.",
@@ -522,6 +534,8 @@
       "aria": "Sposoby grania tego vibe'u",
       "count": "{{count}} sposobów grania",
       "count_one": "{{count}} sposób grania",
+      "count_few": "{{count}} sposoby grania",
+      "count_many": "{{count}} sposobów grania",
       "count_other": "{{count}} sposobów grania",
       "yours": "Jeden z twoich",
       "yoursEmpty": "nic jeszcze nie zapisano",
@@ -597,9 +611,13 @@
       "none": "Nie ma tam jeszcze akordów.",
       "summary": "{{count}} taktów · tonacja {{key}}",
       "summary_one": "{{count}} takt · tonacja {{key}}",
+      "summary_few": "{{count}} takty · tonacja {{key}}",
+      "summary_many": "{{count}} taktów · tonacja {{key}}",
       "summary_other": "{{count}} taktów · tonacja {{key}}",
       "check": "{{count}} do sprawdzenia: {{list}}",
       "check_one": "{{count}} do sprawdzenia: {{list}}",
+      "check_few": "{{count}} do sprawdzenia: {{list}}",
+      "check_many": "{{count}} do sprawdzenia: {{list}}",
       "check_other": "{{count}} do sprawdzenia: {{list}}"
     },
     "perc": {
@@ -711,6 +729,41 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Dźwięk",
+      "yames": "Yames i moje wejście",
+      "everything": "Wszystko, co gra ten komputer",
+      "warning": "To nagrywa wszystko, co gra ten komputer, nie tylko Yames — rozmowę wideo, powiadomienie, utwór w przeglądarce.",
+      "listensTo": "Słucha {{device}}.",
+      "check": "Sprawdź dźwięk",
+      "listening": "Słucha…",
+      "level": "Poziom",
+      "silent": "Nic nie dotarło. Sprawdź, czy głośność tego komputera jest podkręcona i czy nie jest wyciszony.",
+      "notHere": "Ten komputer nie może przekazać Yames tego, co grają jego głośniki, więc nagranie to tutaj Yames i twoje wejście.",
+      "recordingEverything": "Nagrywa wszystko, co gra ten komputer",
+      "recordingYames": "Nagrywa Yames i twoje wejście",
+      "takeEverything": "wszystko, co zagrał ten komputer"
+    },
+    "takeVideo": {
+      "save": "Zapisz jako wideo",
+      "chorus": "Przejście {{count}}",
+      "chorus_one": "Przejście {{count}}",
+      "chorus_few": "Przejście {{count}}",
+      "chorus_many": "Przejście {{count}}",
+      "chorus_other": "Przejście {{count}}",
+      "next": "dalej"
+    },
+    "watch": {
+      "open": "Odsłuchaj",
+      "where": "Takt {{bar}} · {{chorus}}",
+      "goToBar": "Do taktu {{bar}}",
+      "barBack": "Takt w tył",
+      "barOn": "Takt w przód",
+      "nudge": "Obraz",
+      "nudgeBack": "Obraz trochę wcześniej",
+      "nudgeOn": "Obraz trochę później",
+      "broken": "Tego nagrania nie udało się odtworzyć. Plik mógł zostać przeniesiony lub usunięty."
     }
   },
   "scale": {

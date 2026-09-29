@@ -496,6 +496,17 @@ export type Jam = {
   /** Record takes, opt-in. Absent: off. */
   takes?: boolean;
   /**
+   * Film the take as well, opt-in (W32, `plans/SONGS.md` A9 as the owner
+   * reopened it). Absent: off.
+   *
+   * On the jam rather than on the machine, for the reason the take switch is:
+   * whether you want to be filmed is a decision about the thing you are about
+   * to play, not a setting. Turning it on turns `takes` on with it — a
+   * picture with no sound is not a take — and turning `takes` off turns this
+   * off too, so there is one promise and one decision.
+   */
+  camera?: boolean;
+  /**
    * Second pass (plans/JAM_UX_DECISIONS.md). The vibe the jam started from
    * and its variation, the voices the bass and keys play with, a kit of your
    * own samples, and what the chord sheet keeps on the playing screen.
@@ -561,6 +572,121 @@ export type JamTake = {
   durationSec: number;
   /** Absolute path of the WAV in the app's data directory. */
   path: string;
+  /**
+   * Absolute path of the dry stem — you alone, without the band — when the
+   * take was recorded with a mic and there is one (`SONGS.md` A8).
+   *
+   * Nothing on screen shows it or ever should: it is not a second recording
+   * the player has to think about, it is the same take with the band taken
+   * out, written under the same opt-in and deleted with it (`take.rs`). It
+   * exists because pitch cannot be read off a mix — the review is what will
+   * use it.
+   *
+   * Optional because a take of the band alone has none, and because every
+   * sidecar written before the stem existed has none either; `take.rs`
+   * skips the field rather than writing a null into those files.
+   */
+  dryPath?: string;
+  /**
+   * Where the music was when the take's first sample was written
+   * (`take.rs`, `TakePosition`).
+   *
+   * Measured by the take's writer thread, which takes the band as its clock:
+   * its first chunk of band IS the first sample of the file, and the audio
+   * callback stamped where the transport was when it rendered that chunk. So
+   * this is exact to one output buffer, where the frontend's own
+   * `performance.now()` estimate is optimistic by however long the IPC
+   * crossing and the ring handover took.
+   *
+   * Optional: every sidecar written before this existed has none, and a take
+   * recorded with neither a song nor a jam on the engine has no position to
+   * record.
+   */
+  position?: TakePosition;
+  /**
+   * Absolute path of the picture, when the camera was on for this take
+   * (W21, `plans/SONGS.md` A9/A10, `src-tauri/src/take_video.rs`).
+   *
+   * Read off the disk by `list_takes`, like the dry stem: the container
+   * depends on what the webview could encode that day, so the record never
+   * names the file and cannot go stale when the app data directory moves.
+   * Absent for every take recorded with the camera off — which is every take
+   * in Jam, where the camera does not exist yet.
+   */
+  videoPath?: string;
+  /** How big that file is. An order of magnitude more than the sound. */
+  videoBytes?: number;
+  /**
+   * Milliseconds to ADD to a position in the take's audio to reach the same
+   * instant in the picture.
+   *
+   * A MEASUREMENT, good to a few tens of milliseconds and no better — the
+   * webview's clock fitted against the engine's beat events
+   * (`src/takes/offset.ts`) — which is why the review has a nudge
+   * beside the picture. Absent when the fit had too little to go on; the
+   * review then starts the two level, which is the honest state.
+   */
+  videoOffsetMs?: number;
+  /**
+   * Absolute path of the thumbnail — one frame of the picture, grabbed at the
+   * first downbeat and written as a small JPEG (W25, `take.rs`).
+   *
+   * Read off the disk like the picture and the dry stem: a take recorded
+   * before thumbnails existed has a picture and no frame, and it is the
+   * directory rather than the sidecar that knows which. Absent for every take
+   * with the camera off, which is every take in Jam.
+   */
+  thumbPath?: string;
+  /**
+   * What this take is a recording OF (W30, `plans/SONGS.md` A12).
+   *
+   * The one field here that is a promise rather than a description. A take
+   * made of everything this computer plays may hold a video call, a
+   * notification or a song in a browser tab, so a shelf of takes a week later
+   * has to be able to say which ones those are.
+   *
+   * Absent on every take recorded before there was a choice, and every one of
+   * those is `yamesAndInput`.
+   */
+  sound?: TakeSound;
+  /**
+   * The speaker it listened to, as the operating system names it. Absent for
+   * a take of Yames and your input, which listens to no speaker.
+   */
+  soundDevice?: string;
+};
+
+/**
+ * Where a take's sound comes from (`plans/SONGS.md` A12, `take.rs`).
+ *
+ * - `yamesAndInput` — the band Yames rendered with your input mixed under it,
+ *   and the dry stem beside it. What a take has always been, and the default.
+ * - `everything` — the speaker's own stream read back: your amp simulator,
+ *   Yames' band, and whatever else was making a sound.
+ */
+export type TakeSound = "yamesAndInput" | "everything";
+
+/** See `JamTake.position`. The mirror of `TakePosition` in `take.rs`. */
+export type TakePosition = {
+  mode: "song" | "jam";
+  /**
+   * A song: the PLAYED bar — the index into `SongScore.bars`, never the
+   * number printed on the page. A jam: the bar of the form.
+   */
+  bar: number;
+  /** Ticks into the piece at 960 to the quarter. 0 for a jam. */
+  tick: number;
+  /** Times round the range, from 0. A jam's chorus, less one. */
+  pass: number;
+  /** The first sample landed in the count-in rather than in the music. */
+  countIn?: boolean;
+  /**
+   * Where beat 0 of the first pass sits inside the file, in milliseconds from
+   * the instant it starts — exactly what `analyze_take_pitch` means by
+   * `startOffsetMs`. Negative when the file starts after that beat.
+   * Absent for a jam, which has no beat 0 to measure from.
+   */
+  startOffsetMs?: number;
 };
 
 export type JamCustomGroove = {

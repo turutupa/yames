@@ -26,7 +26,8 @@
     "send": "Envoyer",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
-    "noteSpacingTrend": "Tendance de l'espacement des notes"
+    "noteSpacingTrend": "Tendance de l'espacement des notes",
+    "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
   "coachDetail": {
     "exercises": "Exercices",
@@ -35,9 +36,6 @@
     "beatPlacement": "Placement sur le temps"
   },
   "coachReport": {
-    "cov": "Couv",
-    "eff": "Eff",
-    "grid": "Grille",
     "segment": "Segment",
     "thinkingAria": "Le Coach s'apprête à parler",
     "qualifier": {
@@ -68,7 +66,13 @@
     "pocketOnBeat": "Sur le temps",
     "pocketEarly": "Tu as joué en moyenne {{ms}} ms en avance",
     "pocketLate": "Tu as joué en moyenne {{ms}} ms en retard",
-    "pocketCentred": "Ton timing était centré sur le temps (±5 ms en moyenne)"
+    "pocketCentred": "Ton timing était centré sur le temps (±5 ms en moyenne)",
+    "covLabel": "Temps joués",
+    "covTitle": "Combien des temps que j'attendais ont vraiment été joués",
+    "effLabel": "Notes sur un temps",
+    "effTitle": "Sur tout ce que j'ai entendu, la part qui est tombée sur un temps plutôt qu'entre deux",
+    "gridLabel": "Collé au clic",
+    "gridTitle": "À quel point tout le passage a suivi le clic"
   },
   "eval": {
     "today": "Aujourd'hui",

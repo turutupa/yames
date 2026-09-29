@@ -1,7 +1,8 @@
 {
   "metronome": {
     "tap": "TAP",
-    "tapCount": "{{count}} taps",
+    "tapCount": "{{count}} tap",
+    "tapCount_other": "{{count}} taps",
     "subdivision": "Subdivision",
     "meter": "Meter",
     "free": "FREE",
@@ -11,7 +12,8 @@
     "beatCount": "{{count}} beats",
     "beatCount_one": "{{count}} beat",
     "beatCount_other": "{{count}} beats",
-    "clicksPerBar": "{{count}} clicks/bar",
+    "clicksPerBar": "{{count}} click/bar",
+    "clicksPerBar_other": "{{count}} clicks/bar",
     "addBeat": "Add beat",
     "removeBeat": "Remove beat",
     "prevMeter": "Previous meter",

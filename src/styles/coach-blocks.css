@@ -1,0 +1,182 @@
+/*
+ * The coach's answer, drawn as blocks (COACH_UX D3).
+ *
+ * Every colour is one of the app's own custom properties, so the answer
+ * follows all thirteen themes without a line of per-theme CSS — the same rule
+ * the chord boxes and the fretboard already keep. The coach's own accent
+ * (`--accent-2`, U5.2) carries the buttons and the progress line, so an
+ * answer reads as a different kind of thing from the metronome even in a
+ * theme whose accent is the same hue.
+ *
+ * Sized by CONTAINER queries, not media queries (UI_DECISIONS, and the rule
+ * the owner set on the Jam sheets): these blocks live inside a 380px dock
+ * that can be promoted to the middle of a 2000px window, so the width that
+ * decides the layout is the panel's, never the screen's.
+ */
+
+.coach-blocks {
+  container-type: inline-size;
+  container-name: coachblocks;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.coach-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* A sentence is the coach talking and carries no frame; everything else is a
+   thing it is pointing at, and sits on a card so the eye can tell them apart. */
+.coach-block:not(.coach-block-text):not(.coach-block-action) {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+  background: var(--bg-card);
+}
+
+.coach-block-sentence {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.coach-block-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.coach-block-title {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.coach-block-note {
+  color: var(--text-tertiary, var(--text-muted));
+  font-size: 11px;
+}
+
+.coach-block-caption {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+/* --- the neck and the grip, both borrowed whole ------------------------- */
+
+.coach-block-neck {
+  max-width: 100%;
+  height: auto;
+}
+
+.coach-block-grip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.coach-block-grip-name {
+  color: var(--text-secondary);
+  font-size: 11px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- progress ----------------------------------------------------------- */
+
+.coach-block-progress {
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.coach-block-progress-floor {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.coach-block-progress-line {
+  fill: none;
+  stroke: var(--accent-2, var(--accent));
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.coach-block-progress-dot {
+  fill: var(--accent-2, var(--accent));
+}
+
+/* --- the line where a drawing will be ----------------------------------- */
+
+.coach-block-soon {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* --- the button (A5) ---------------------------------------------------- */
+
+.coach-block-button {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 7px 12px;
+  border: 1px solid var(--accent-2, var(--accent));
+  border-radius: var(--radius, 6px);
+  background: var(--accent-2-subtle, var(--accent-subtle));
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.coach-block-button:hover {
+  background: var(--accent-2, var(--accent));
+  color: var(--accent-2-text, var(--accent-text));
+}
+
+.coach-block-button:focus-visible {
+  outline: 2px solid var(--accent-2, var(--accent));
+  outline-offset: 2px;
+}
+
+/*
+ * A narrow panel.
+ *
+ * The chord box is a fixed 132px and the grip's name sits beside it; below
+ * about 300px of panel the two stop fitting on a line, so the name goes
+ * under the box rather than squeezing it — a box squeezed to sixty pixels
+ * with six strings drawn in it is the bug the Jam chart already shipped once.
+ */
+@container coachblocks (max-width: 300px) {
+  .coach-block-grip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .coach-block:not(.coach-block-text):not(.coach-block-action) {
+    padding: 8px;
+  }
+}

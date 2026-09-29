@@ -110,7 +110,13 @@
       "downloadVoices": "Stemmen downloaden",
       "installed": "{{tier}}-coach geïnstalleerd ({{size}})",
       "removing": "Verwijderen…",
-      "removeModels": "Modellen verwijderen"
+      "removeModels": "Modellen verwijderen",
+      "stance": "Manier van coachen",
+      "stanceHint": "Hoe streng de coach voor je is terwijl je speelt",
+      "stanceStrict": "Streng",
+      "stanceLearning": "Lerend",
+      "stanceStrictDesc": "Benoemt een neiging zodra die zichtbaar wordt, en zegt het hardop. De juiste stand als je een passage slijpt die je al kent.",
+      "stanceLearningDesc": "Geeft je de helft meer ruimte voordat er iets gezegd wordt, houdt correcties uit je oren terwijl je speelt, en begint bij wat goed ging. Je score wordt in beide gevallen precies hetzelfde berekend."
     },
     "general": {
       "title": "Algemeen",
@@ -177,7 +183,8 @@
         "metronome": "Metronoom",
         "view": "Weergave",
         "navigation": "Navigatie",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Nummers"
       },
       "actions": {
         "play": "Afspelen / Stoppen",
@@ -211,7 +218,17 @@
         "jam-next-section": "Volgend deel",
         "jam-prev-section": "Vorig deel",
         "jam-loop-section": "Dit deel herhalen",
-        "jam-take": "Neem de take op"
+        "jam-take": "Neem de take op",
+        "tab-5": "Nummers-tabblad",
+        "songs-loop-start": "Herhaling begint hier",
+        "songs-loop-end": "Herhaling eindigt hier",
+        "songs-loop": "Het stuk herhalen",
+        "songs-loop-clear": "Weer het hele nummer",
+        "songs-loop-earlier": "Stuk een maat eerder",
+        "songs-loop-later": "Stuk een maat later",
+        "songs-take": "Neem de take op",
+        "songs-camera": "Neem het beeld op",
+        "jam-camera": "Neem het beeld op"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -245,7 +262,17 @@
         "jam-next-section": "Bij de maatstreep naar het begin van het volgende deel springen",
         "jam-prev-section": "Bij de maatstreep terug naar het begin van het vorige deel",
         "jam-loop-section": "Het deel waar je in zit herhalen, of daarmee stoppen",
-        "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen"
+        "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
+        "tab-5": "Naar het Nummers-tabblad",
+        "songs-loop-start": "Het stuk laten beginnen bij de maat die je speelt",
+        "songs-loop-end": "Het stuk laten eindigen bij de maat die je speelt",
+        "songs-loop": "De gekozen maten steeds opnieuw spelen, of stoppen",
+        "songs-loop-clear": "Het stuk vergeten en het nummer vanaf het begin spelen",
+        "songs-loop-earlier": "De gekozen maten een maat richting het begin schuiven, even lang",
+        "songs-loop-later": "De gekozen maten een maat richting het eind schuiven, even lang",
+        "songs-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
+        "songs-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten",
+        "jam-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Controle mislukt",
       "sounds": "Geluiden",
       "soundsCredit": "De Club-kit is Virtuosity Drums van Versilian Studios en Karoryfer Samples, gespeeld door Austin McMahon (publiek domein). De Studio-kit is DRSKit van het DrumGizmo-project (CC BY 4.0).",
-      "madeWith": "Gemaakt met {{heart}} voor muzikanten overal"
+      "madeWith": "Gemaakt met {{heart}} voor muzikanten overal",
+      "soundsCreditSongs": "De andere instrumenten komen uit de Sonivox General MIDI-klankset (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Nummers",
+      "catchDownloads": "Gedownloade nummers aanbieden",
+      "catchDownloadsHint": "Zolang Nummers openstaat kijkt Yames in je downloadmap en vraagt het voordat er iets wordt geopend. Je bestand wordt nooit verplaatst, hernoemd of verwijderd.",
+      "folder": "Deze map in de gaten houden",
+      "folderUnknown": "Deze computer heeft Yames niet verteld waar downloads terechtkomen",
+      "chooseFolder": "Kiezen...",
+      "useDownloads": "Downloads gebruiken",
+      "turnedDown": "Afgewezen nummers",
+      "turnedDownHint": "{{n}} bestanden die Yames niet opnieuw aanbiedt",
+      "forgetTurnedDown": "Opnieuw aanbieden",
+      "soundSet": "Klankset",
+      "soundSetBuiltIn": "Die bij Yames zit",
+      "chooseSoundSet": "Kies een .sf2",
+      "useBuiltInSoundSet": "Gebruik de ingebouwde"
     }
   },
   "keybindings": {

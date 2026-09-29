@@ -1,0 +1,391 @@
+{
+  "songs": {
+    "import": "Importer un morceau",
+    "dismiss": "OK",
+    "tuning": "Accordage",
+    "capoLabel": "Capo",
+    "capo": "Capo à la case {{fret}}",
+    "meter": "Mesure",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Mesures",
+    "fromBar": "De",
+    "toBar": "À",
+    "wholeSong": "Tout le morceau",
+    "barsCount": "{{count}} mesure",
+    "barsCount_many": "{{count}} mesures",
+    "barsCount_other": "{{count}} mesures",
+    "sections": "Sections",
+    "speed": "Vitesse",
+    "percent": "{{percent}} %",
+    "speedNote": "Le clic tourne à {{bpm}} BPM",
+    "loop": "Répéter",
+    "loopNote": "Rejoue les mesures ci-dessus encore et encore",
+    "dropHere": "Dépose le fichier pour l'ouvrir",
+    "band": {
+      "label": "Qui tu entends",
+      "click": "Clic",
+      "drums": "Batterie",
+      "bass": "Basse",
+      "keys": "Clavier",
+      "levelFor": "Le niveau de {{lane}}",
+      "muteFor": "Couper {{lane}}",
+      "note": "Règle l'équilibre pendant que tu joues. Yames le retient pour ce morceau.",
+      "leftOut": "{{tracks}} est dans ce fichier, mais Yames n'a personne pour le jouer.",
+      "leftOut_many": "{{tracks}} sont dans ce fichier, mais Yames n'a personne pour les jouer.",
+      "leftOut_other": "{{tracks}} sont dans ce fichier, mais Yames n'a personne pour les jouer.",
+      "droppedNotes": "{{count}} note de ce fichier est pour un instrument que le groupe n'a pas.",
+      "droppedNotes_many": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas.",
+      "droppedNotes_other": "{{count}} notes de ce fichier sont pour des instruments que le groupe n'a pas.",
+      "myPart": "Ma partie",
+      "soloShort": "S",
+      "soloFor": "N'entendre que {{lane}}",
+      "tooManyParts": "{{tracks}} reste muet : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
+      "tooManyParts_many": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
+      "tooManyParts_other": "{{tracks}} restent muets : ce fichier a plus de parties qu'il n'en peut sonner à la fois.",
+      "turnedDown": "{{count}} musicien baissé",
+      "turnedDown_many": "{{count}} musiciens baissés",
+      "turnedDown_other": "{{count}} musiciens baissés",
+      "drumsLabel": "Batterie",
+      "drumsKit": "La batterie de Yames",
+      "drumsFile": "Celle du fichier"
+    },
+    "countIn": {
+      "counting": "On te compte l'entrée"
+    },
+    "engine": {
+      "cannotPlay": "Yames ne peut pas jouer ce morceau avec le groupe pour l'instant. Le clic continue de tenir le temps.",
+      "busy": "Autre chose utilise le son, le morceau s'est donc arrêté. Rappuie sur lecture quand tu es prêt."
+    },
+    "empty": {
+      "title": "Apporte un morceau que tu as déjà",
+      "body": "Ouvre un fichier Guitar Pro ou MusicXML et Yames t'affiche la tablature, tient le temps et te suit. Dépose le fichier n'importe où sur cet écran, ou choisis-en un.",
+      "private": "Le fichier reste sur cet ordinateur. Rien n'est envoyé.",
+      "bodyShort": "Guitar Pro ou MusicXML. Dépose le fichier n'importe où sur cet écran, ou choisis-en un.",
+      "stays": "Il reste sur cet ordinateur, et Yames en garde sa propre copie."
+    },
+    "tab": {
+      "drawing": "Mise en page de la musique...",
+      "failed": "Yames a lu ce fichier mais ne peut pas le dessiner. Les mesures et le temps marchent quand même."
+    },
+    "picker": {
+      "title": "Choisis ta partie",
+      "which": "Quelle partie joues-tu ?",
+      "strings": "{{count}} corde",
+      "strings_many": "{{count}} cordes",
+      "strings_other": "{{count}} cordes",
+      "notTab": "Pas écrit en tablature",
+      "cancel": "Pas maintenant"
+    },
+    "warn": {
+      "tempoFlattened": "Le tempo glisse sur {{count}} mesure. Yames le change d'un coup à la barre de mesure.",
+      "tempoFlattened_many": "Le tempo glisse sur {{count}} mesures. Yames le change d'un coup à la barre de mesure.",
+      "tempoFlattened_other": "Le tempo glisse sur {{count}} mesures. Yames le change d'un coup à la barre de mesure.",
+      "barOverfilled": "La mesure {{bar}} contient plus que ce que son chiffrage autorise. Elle est jouée telle qu'elle est écrite."
+    },
+    "library": {
+      "add": "Importer un morceau",
+      "empty": "Pas encore de morceaux",
+      "remove": "Retirer de Yames",
+      "due": "À revoir",
+      "dueTitle": "Tu as demandé à y revenir",
+      "starter": "Fournie",
+      "starterTitle": "Fournie avec Yames. Supprimez-la quand vous voulez.",
+      "removeTitle": "Retirer {{name}} ?",
+      "removeBody": "Tout le morceau s'en va : chacune de ses parties, tout ce que Yames en retient, et la copie du fichier qu'il garde. C'est sans retour.",
+      "removeTakes": "{{count}} prise du morceau part avec.",
+      "removeTakes_many": "{{count}} prises du morceau partent avec.",
+      "removeTakes_other": "{{count}} prises du morceau partent avec.",
+      "removeNoTakes": "Vous n'en avez enregistré aucune prise.",
+      "removeConfirm": "Retirer",
+      "removeCancel": "Garder"
+    },
+    "review": {
+      "title": "Ce que ça a donné",
+      "summary": "Mesures {{bars}} à {{percent}} % — {{hits}} notes sur {{of}} sont tombées juste",
+      "again": "On y retourne",
+      "working": "Réécoute en cours...",
+      "passes": "Quel essai",
+      "pass": "Essai {{n}}",
+      "nothingToSay": "Rien ne ressort de celui-là. Rejoue-le et le coach aura de quoi travailler.",
+      "chordsHonesty": "Je ne peux pas encore vérifier les notes à l'intérieur des accords, seulement leur placement.",
+      "notSaved": "Yames n'a pas pu noter celui-là, il ne sera donc pas là pour comparer la prochaine fois.",
+      "tooShort": "C'était trop court pour juger. Joue au moins huit notes du passage et le coach aura quelque chose à en dire.",
+      "moreLabel": "Quoi d'autre ({{count}})",
+      "moreLabel_many": "Quoi d'autre ({{count}})",
+      "moreLabel_other": "Quoi d'autre ({{count}})",
+      "lessLabel": "Masquer le reste",
+      "tab": {
+        "nothing": "Rien n'a été joué dans ces mesures."
+      },
+      "mark": {
+        "onTime": "En place",
+        "slightlyEarly": "Un poil en avance",
+        "early": "En avance",
+        "slightlyLate": "Un poil en retard",
+        "late": "En retard",
+        "missed": "Manquée",
+        "notAssessed": "Non évaluée",
+        "extra": "Note en trop",
+        "accentQuiet": "Écrite avec un accent, mais elle n'est pas sortie plus fort"
+      },
+      "bars": {
+        "one": "dans la mesure {{bar}}",
+        "range": "dans les mesures {{from}}–{{to}}",
+        "here": "dans ce passage"
+      },
+      "amount": {
+        "hair": "d'un cheveu",
+        "thirtySecond": "d'environ une triple-croche",
+        "sixteenth": "d'environ une double-croche",
+        "tripletEighth": "d'environ un tiers de temps",
+        "eighth": "d'environ une croche",
+        "mostOfABeat": "de presque un temps entier",
+        "beat": "d'un temps entier"
+      },
+      "when": {
+        "early": "en avance",
+        "late": "en retard"
+      },
+      "goes": "{{count}} essai",
+      "goes_many": "{{count}} essais",
+      "goes_other": "{{count}} essais",
+      "notes": "{{count}} note",
+      "notes_many": "{{count}} notes",
+      "notes_other": "{{count}} notes",
+      "say": {
+        "consistentMiss": {
+          "1": "Toujours au même endroit — ça t'échappe {{bars}} sur {{affected}} essais sur {{goes}}.",
+          "2": "Ça se défait {{bars}} : parti {{affected}} fois sur {{passes}}.",
+          "3": "Le reste tient. C'est {{bars}} que ça disparaît, sur {{affected}} essais sur {{goes}}."
+        },
+        "rushing": {
+          "1": "Tu es devant le clic {{bars}} — {{amount}} en avance, d'un bout à l'autre.",
+          "2": "Ça se précipite {{bars}} : en moyenne {{amount}} en avance.",
+          "3": "Assieds-toi un peu en arrière {{bars}}. Là, tu tombes {{amount}} en avance."
+        },
+        "dragging": {
+          "1": "Tu es derrière le clic {{bars}} — {{amount}} en retard.",
+          "2": "Ça traîne {{bars}} : les notes tombent {{amount}} après le temps.",
+          "3": "Penche-toi un peu en avant {{bars}}. C'est posé {{amount}} en retard."
+        },
+        "afterShift": {
+          "1": "Chaque fois que ta main se déplace {{bars}}, la note suivante arrive {{amount}} {{when}}.",
+          "2": "Le changement de position {{bars}} te coûte {{amount}} {{when}} sur la note d'après.",
+          "3": "Réussis le déplacement {{bars}} et le reste suit — pour l'instant la note d'après est {{amount}} {{when}}."
+        },
+        "fallsApart": {
+          "1": "Tu commences propre {{bars}} et tu le perds sur la fin.",
+          "2": "C'est la seconde moitié qui lâche {{bars}} — le début va bien.",
+          "3": "De l'endurance, pas des notes : {{bars}}, plus tu avances, plus ça devient brouillon."
+        },
+        "extras": {
+          "1": "Il y a des notes {{bars}} que personne n'a demandées — {{extras}}.",
+          "2": "Tu ajoutes {{extras}} {{bars}}. Laisse les silences être des silences.",
+          "3": "Quelque chose se glisse {{bars}} : {{extras}} qui ne sont pas écrites."
+        },
+        "uneven": {
+          "1": "{{bars}}, ce n'est ni en avance ni en retard — c'est irrégulier. Les notes tombent un peu partout.",
+          "2": "Ton placement se balade {{bars}} au lieu de pencher d'un côté.",
+          "3": "Stable avant rapide : {{bars}}, rien n'est encore régulier, dans aucun sens."
+        },
+        "beatPositionBias": {
+          "1": "Le temps {{beat}} de la mesure est celui qui file — {{amount}} {{when}}, mesure après mesure.",
+          "2": "Tu t'appuies sur le temps {{beat}} : {{amount}} {{when}} chaque fois qu'il revient.",
+          "3": "C'est le temps {{beat}} qui sort, mesure après mesure — {{amount}} {{when}}."
+        },
+        "subdivisionWeak": {
+          "1": "La note {{position}} sur chaque {{outOf}} est celle que tu laisses tomber.",
+          "2": "Dans chaque groupe de {{outOf}}, c'est la note {{position}} qui manque.",
+          "3": "Compte le groupe à voix haute — c'est à la note {{position}} sur {{outOf}} que ça glisse."
+        },
+        "drift": {
+          "1": "Tu es parti avec le clic et tu as dérivé {{amount}} {{when}} à la fin.",
+          "2": "Ça tire au fil du morceau : sur les dernières mesures, {{amount}} {{when}}.",
+          "3": "Le tempo sous tes mains glisse tout au long du passage : à la fin tu es {{when}}."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} tient. À {{collapse}}, ça se défait.",
+          "2": "Ton plafond ici, c'est {{hold}} — {{collapse}} n'est pas encore à toi.",
+          "3": "{{hold}} est à toi. {{collapse}} est la prochaine chose à gagner, pas le tempo du jour."
+        },
+        "improved": {
+          "1": "C'est mieux — {{bars}}, c'est {{ms}} ms plus stable que la dernière fois.",
+          "2": "Quelque chose a bougé : tu tiens {{bars}} là où ça glissait avant.",
+          "3": "Du vrai progrès {{bars}} — {{ms}} ms plus serré que tes essais précédents."
+        },
+        "clean": {
+          "1": "Rien à corriger {{bars}} — juste sur les {{goes}}.",
+          "2": "Celle-là est à toi : {{bars}}, {{goes}}, aucun raté.",
+          "3": "Tu as joué juste {{bars}} à chaque fois. Laisse-la et reviens-y plus tard."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "Retour à la tablature",
+      "selectedBars": "Mesures {{bars}} choisies",
+      "wholeSong": "Tout le morceau",
+      "portionSays": "{{count}} mesure · {{state}}",
+      "portionSays_many": "{{count}} mesures · {{state}}",
+      "portionSays_other": "{{count}} mesures · {{state}}",
+      "looping": "en boucle",
+      "once": "une seule fois",
+      "timeRound": {
+        "one": "Passage {{n}}",
+        "two": "Passage {{n}}",
+        "few": "Passage {{n}}",
+        "other": "Passage {{n}}"
+      },
+      "keepPortion": "Enregistrer ce passage",
+      "keepPortionNote": "Choisissez des mesures sur la tablature, puis nommez-les",
+      "portionPlaceholder": "Nommez ce passage",
+      "renamePortion": "Renommer",
+      "deletePortion": "Oublier celui-ci",
+      "portionTitle": "{{name}} — à {{percent}} %",
+      "tabLabel": "La tablature. Clique sur une mesure pour y aller, ou fais glisser sur plusieurs mesures pour choisir un passage."
+    },
+    "offer": {
+      "justArrived": "vient d'arriver dans vos téléchargements",
+      "justArrivedSized": "vient d'arriver dans vos téléchargements · {{size}}",
+      "more": "{{n}} autres en attente",
+      "open": "L'ouvrir",
+      "opening": "Ouverture...",
+      "notThisOne": "Pas celui-ci",
+      "failed": "Yames n'a pas pu ouvrir ce fichier. Il est peut-être encore en cours de téléchargement."
+    },
+    "keepsCopy": "Yames garde sa propre copie de chaque fichier que vous apportez : vider vos téléchargements ne perd rien.",
+    "exportOriginal": "Enregistrer le fichier quelque part",
+    "exporting": "Enregistrement...",
+    "exportDone": "Enregistré.",
+    "exportFailed": "Yames n'a pas pu écrire le fichier là.",
+    "findTab": {
+      "what": "Morceau et artiste",
+      "link": "Chercher une tablature",
+      "note": "Ouvre votre propre navigateur sur une recherche web ordinaire. Yames ne cherche rien à votre place.",
+      "ask": "Pas encore le fichier ?"
+    },
+    "camera": {
+      "cannotPlay": "L'image n'a pas voulu se lire.",
+      "corner": {
+        "bottomLeft": "En bas à gauche",
+        "bottomRight": "En bas à droite",
+        "topLeft": "En haut à gauche",
+        "topRight": "En haut à droite"
+      },
+      "denied": "La caméra n'a pas été autorisée. Autorise Yames dans les réglages du système, puis rallume-la.",
+      "device": "Quelle caméra",
+      "deviceNumbered": "Caméra {{n}}",
+      "failed": "La caméra n'a pas voulu s'ouvrir.",
+      "guideBody": "Fais entrer les deux mains : celle du manche et celle des cordes.",
+      "guideFlip": "Je joue gaucher",
+      "guideGot": "Compris",
+      "introNotNow": "Pas maintenant",
+      "introPrivate": "Rien n'est envoyé nulle part. Supprimer une prise supprime son image avec elle.",
+      "introStart": "Allumer la caméra",
+      "introTitle": "À propos de la caméra",
+      "introWhat": "La caméra t'enregistre en train de jouer, du décompte jusqu'à ce que tu t'arrêtes. Le son, c'est la prise : ton jeu avec le groupe, tel qu'il est déjà.",
+      "introWhere": "Elle est écrite comme un fichier vidéo à côté de la prise, dans le dossier propre à cette application sur cette machine, et y reste jusqu'à ce que tu la supprimes.",
+      "label": "Caméra",
+      "lead": "tes mains, gardées à côté des notes — rien ne quitte cette machine",
+      "lostPicture": "La caméra s'est arrêtée en cours de route. La prise est gardée ; l'image non.",
+      "move": "Déplacer l'aperçu",
+      "nextSlip": "Faute suivante",
+      "noCamera": "Il n'y a pas de caméra sur cette machine.",
+      "noOffset": "Sur cette prise, rien n'a mesuré l'écart entre l'image et le son : les deux démarrent ensemble. Décale jusqu'à ce que tes mains tombent avec les notes.",
+      "nudge": "Caler l'image",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "Image plus tôt",
+      "nudgeHow": "Si tes mains semblent en avance ou en retard sur le son, décale l'image jusqu'à ce que les deux tombent ensemble. C'est retenu pour cette caméra.",
+      "nudgeLater": "Image plus tard",
+      "off": "Enregistrer l'image",
+      "on": "Caméra allumée",
+      "pause": "Pause",
+      "pitchDropped": "Ici, plus lentement, la hauteur descend avec le tempo.",
+      "pitchKept": "La hauteur reste en place même plus lentement.",
+      "play": "Lecture",
+      "prevSlip": "Faute précédente",
+      "preview": "Toi, comme la caméra te voit",
+      "slips": "Aller à une faute",
+      "tape": "Le passage, note par note",
+      "tickOff": "Mesure {{bar}}, {{ms}} ms",
+      "tickPlain": "Mesure {{bar}}",
+      "unavailable": "Cette version ne peut pas enregistrer d'image. Tout le reste de cet écran fonctionne comme avant.",
+      "watchIt": "Le revoir",
+      "watchTitle": "Le revoir",
+      "watchingAll": "Tout le passage.",
+      "watchingBars": "Mesures {{bars}}, en boucle.",
+      "sinkUnsupported": "Cette version ne peut lire la prise que par les haut-parleurs habituels de l'ordinateur, pas par {{device}}.",
+      "sinkUnmatched": "La lecture passe par les haut-parleurs habituels de l'ordinateur : {{device}} est introuvable d'ici.",
+      "peek": "Te voir",
+      "peekNote": "Vérifie ton cadrage. Ça se ferme quand tu joues."
+    },
+    "clip": {
+      "save": "Enregistrer en vidéo",
+      "go": "Créer la vidéo",
+      "cancel": "Arrêter",
+      "making": "Création — {{percent}} %",
+      "whichBars": "Quelles mesures",
+      "chosenBars": "Ces mesures",
+      "wholeTake": "La prise entière",
+      "shape": "Format",
+      "wide": "Paysage",
+      "tall": "Portrait",
+      "withMarks": "Afficher les repères",
+      "realTime": "L'enregistrement se fait en lecture : cela dure aussi longtemps que la musique, soit {{length}}.",
+      "isMp4": "Vous obtenez un MP4, qui se publie partout.",
+      "isWebm": "Vous obtenez un WebM. Certains sites n'acceptent que le MP4.",
+      "saved": "Enregistré dans {{where}}",
+      "failed": "La vidéo n'a pas pu être créée. Rien n'a été enregistré.",
+      "unavailable": "Cette version ne peut pas enregistrer de vidéo.",
+      "bar": "Mesure",
+      "bpmUnit": "BPM",
+      "brand": "Marque Yames",
+      "brandNote": "Un petit logo Yames et yames.app dans le coin. C'est ainsi que celui qui voit votre vidéo trouve l'appli.",
+      "showInFolder": "Afficher dans le dossier",
+      "postItTo": "Publier sur",
+      "dragItIn": "Ouvrez-en un et glissez le fichier dedans — Yames n'envoie rien et ne demande aucun compte.",
+      "webmWarning": "Ouvrez-en un et glissez le fichier dedans. Celui-ci est un WebM, et la plupart n'acceptent que le MP4 ; un convertisseur gratuit s'en charge.",
+      "underPicture": "Sous l’image",
+      "band": {
+        "tab": "La tablature",
+        "marks": "Les repères seuls",
+        "none": "Rien"
+      }
+    },
+    "compare": {
+      "title": "Mesures {{bars}}, avant et maintenant",
+      "then": "Avant",
+      "now": "Maintenant",
+      "facts": "{{percent}} % · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Son seul : la caméra était éteinte pour celle-ci.",
+      "locked": "Les deux sont calées à la mesure et non à l'horloge, donc une prise plus lente tombe juste elle aussi."
+    },
+    "takes": {
+      "withPicture": "Avec image",
+      "noneFilmed": "Aucune de celles-ci n'a été filmée.",
+      "was": "Mesures {{bars}} · {{percent}} % · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "La partie que tu lis",
+      "percussion": "Batterie — pas une partie à suivre",
+      "notTab": "Pas écrite en tablature",
+      "empty": "Rien d'écrit sur celle-ci"
+    },
+    "strip": {
+      "more": "Plus"
+    },
+    "view": {
+      "tabOnly": "Tablature",
+      "tabAndNotes": "Tablature + notes",
+      "notationNote": "Afficher aussi la portée au-dessus de la tablature",
+      "bigger": "Plus grand",
+      "smaller": "Plus petit",
+      "size": "Taille"
+    },
+    "clickChip": "Clic",
+    "clickNote": "Marque le tempo sur le morceau. Éteint au départ quand le fichier a son propre groupe.",
+    "notes": {
+      "label": "Remarques sur ce fichier"
+    }
+  }
+}

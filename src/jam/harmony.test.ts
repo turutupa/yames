@@ -3,6 +3,7 @@ import {
   barsForForm,
   chordName,
   chordNotes,
+  chordSuffix,
   chordsForForm,
   displayTransposition,
   keyName,
@@ -30,25 +31,51 @@ import { JAM_FORM_BARS, type JamFormKind } from "./types";
 
 const MODES: KeyMode[] = ["major", "minor", "blues"];
 const ALL_ROOTS: PitchClass[] = Array.from({ length: 12 }, (_unused, i) => i);
-/** Every quality the union has, so a new one fails the round trip rather than skipping it. */
-const ALL_QUALITIES: ChordQuality[] = [
-  "maj",
-  "min",
-  "5",
-  "dim",
-  "aug",
-  "7",
-  "maj7",
-  "m7",
-  "m7b5",
-  "dim7",
-  "sus2",
-  "sus4",
-  "6",
-  "m6",
-  "add9",
-  "9",
-];
+/**
+ * Every quality the union has, so a new one fails the round trip rather than
+ * skipping it.
+ *
+ * A `Record` and not an array, because an array was the whole problem: this
+ * list was written when there were sixteen qualities, fifteen more were added
+ * in September 2026, and nothing failed — so `6/9`, which the writer can
+ * produce and the parser could not read, went a wave without being noticed.
+ * A `Record<ChordQuality, true>` does not compile when the union grows.
+ */
+const EVERY_QUALITY: Record<ChordQuality, true> = {
+  maj: true,
+  min: true,
+  "5": true,
+  dim: true,
+  aug: true,
+  "7": true,
+  maj7: true,
+  m7: true,
+  m7b5: true,
+  dim7: true,
+  sus2: true,
+  sus4: true,
+  "6": true,
+  m6: true,
+  add9: true,
+  "9": true,
+  maj9: true,
+  m9: true,
+  "11": true,
+  "13": true,
+  m11: true,
+  m13: true,
+  "7sus4": true,
+  "7sus2": true,
+  "7sharp5": true,
+  "69": true,
+  madd9: true,
+  "7b9": true,
+  "7sharp9": true,
+  maj13: true,
+  "9sus4": true,
+  mMaj7: true,
+};
+const ALL_QUALITIES = Object.keys(EVERY_QUALITY) as ChordQuality[];
 const FORM_KINDS: JamFormKind[] = ["blues12", "loop8", "bars16", "aaba32", "one", "custom"];
 
 /** The chord symbols of a form, as they would be printed on the timeline. */
@@ -487,6 +514,39 @@ describe("parseChordName", () => {
   it("reads a slash chord as the chord over the slash", () => {
     expect(parseChordName("D/F#")).toEqual({ root: 2, quality: "maj" });
     expect(parseChordName("Dm7/G")).toEqual({ root: 2, quality: "m7" });
+  });
+
+  /**
+   * The six-nine chord, which is written with a slash that is not a bass
+   * note.
+   *
+   * `chordSuffix("69")` writes "6/9" — it is how the chord is spelt on every
+   * chart — and the parser used to cut at the slash and hand back a plain
+   * sixth: the right root and the wrong chord, which is worse than refusing
+   * it. `src/coach/blocks/spec.ts` carried a substitution to work around it.
+   */
+  it("reads the six-nine chord as a six-nine, not as a sixth over a ninth", () => {
+    expect(chordSuffix("69")).toBe("6/9");
+    expect(parseChordName("C6/9")).toEqual({ root: 0, quality: "69" });
+    expect(parseChordName("Eb6/9")).toEqual({ root: 3, quality: "69" });
+    // The compact spelling a chart may also use.
+    expect(parseChordName("C69")).toEqual({ root: 0, quality: "69" });
+    // And a six-nine that really does have a bass note under it.
+    expect(parseChordName("C6/9/G")).toEqual({ root: 0, quality: "69" });
+  });
+
+  it("still drops a bass note off a suffix nothing recognises whole", () => {
+    // The rule is "try the whole suffix, then cut at the last slash" — so a
+    // bass note never survives, and a suffix that happens to contain one
+    // is not mistaken for a chord the table does not have.
+    expect(parseChordName("Cmaj7/E")).toEqual({ root: 0, quality: "maj7" });
+    expect(parseChordName("C/E")).toEqual({ root: 0, quality: "maj" });
+    // "6/9" is in the table and is read whole; "7/9" is not a chord anyone
+    // writes, so it falls through to the bass-note rule and reads as a C7 —
+    // the same answer the parser has always given it.
+    expect(parseChordName("C7/9")).toEqual({ root: 0, quality: "7" });
+    // A bass note nothing recognises is still dropped rather than refused.
+    expect(parseChordName("Am7/banana")).toEqual({ root: 9, quality: "m7" });
   });
 
   it("is tolerant of the space either side, and of nothing at all", () => {

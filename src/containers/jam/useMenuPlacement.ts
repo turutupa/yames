@@ -24,7 +24,22 @@ import { useLayoutEffect, useRef, useState } from "react";
  * went on running off the bottom of a drawer that everything else had stopped
  * running off.
  */
-export function useMenuPlacement(open: boolean) {
+export type MenuPlacementOptions = {
+  /**
+   * Open upwards whenever there is room, rather than only when the menu does
+   * not fit below.
+   *
+   * For a chip on the last row above the transport (the Songs strip's takes
+   * shelf). A menu that fits below it still lands on Play and Stop, and a
+   * popover over the transport is the failure `jam.spec.ts` already tests the
+   * cheat sheet for. "Whenever there is room" and not "always": a window short
+   * enough to have nothing above the chip still gets a menu.
+   */
+  prefer?: "above" | "below";
+};
+
+export function useMenuPlacement(open: boolean, options: MenuPlacementOptions = {}) {
+  const prefer = options.prefer ?? "below";
   const wrapRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{
@@ -78,8 +93,10 @@ export function useMenuPlacement(open: boolean) {
       const below = window.innerHeight - chip.bottom - gap - edge;
       const above = chip.top - gap - edge;
       // Upwards only when it genuinely helps: flipping into a space just as
-      // short as the one it left is movement for nothing.
-      const up = natural > below && above > below;
+      // short as the one it left is movement for nothing. A caller that asked
+      // for "above" gets it whenever the room is there at all.
+      const up =
+        prefer === "above" ? above >= Math.min(natural, tallest) : natural > below && above > below;
       const room = Math.min(Math.max(0, up ? above : below), tallest);
       const height = Math.min(natural, room);
 
@@ -104,7 +121,7 @@ export function useMenuPlacement(open: boolean) {
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", place, true);
     };
-  }, [open]);
+  }, [open, prefer]);
 
   return {
     wrapRef,
