@@ -2942,13 +2942,42 @@ impl SongHandoff {
         }
     }
 
+    /// The callback's half when the transport is stopped: a seek posted as
+    /// playback stopped belongs to the pass that just ended.
+    ///
+    /// Left in place it survived to the next press of Play, landed AFTER
+    /// `song_from_the_top!` had put the song at the playhead on screen, and
+    /// cleared the count-in — so Play started silently at the old spot
+    /// (pre-merge review, W38 item 3). One swap; nothing else.
+    #[inline]
+    fn discard_seek(&self) {
+        self.seek.store(0, Ordering::Relaxed);
+    }
+
     /// Hand the engine a song, or `None` to take it away. Called from
     /// `load_song` / `clear_song`, never from the audio thread.
+    ///
+    /// **The song it replaces stops making sound here.** Its synthesiser
+    /// thread is told to stop — one store on the old table's ring, no join —
+    /// so a song taken away by a device change or by a jam starting does not
+    /// leave a renderer waking every two milliseconds for the rest of the
+    /// session (W38 item 4). `load_song` and `clear_song` also drop the
+    /// `SynthPlayer`, which joins; this is what covers every other path.
+    ///
+    /// And a seek posted against the old table is forgotten: it was a place
+    /// in THAT piece.
     pub fn set(&self, table: Option<Arc<crate::song::SongTable>>) {
         // Free what the audio thread has handed back, here, where freeing is
         // allowed.
         self.drain_retired();
         if let Ok(mut slot) = self.table.lock() {
+            let new_ring = table.as_ref().and_then(|t| t.synth());
+            if let Some(old_ring) = slot.as_ref().and_then(|t| t.synth()) {
+                if !new_ring.is_some_and(|r| Arc::ptr_eq(r, old_ring)) {
+                    old_ring.stop();
+                }
+            }
+            self.seek.store(0, Ordering::Release);
             *slot = table;
             // Bumped after the write, so a callback that sees the new
             // generation is guaranteed to find the new table behind the lock.
@@ -3054,6 +3083,13 @@ impl SongRetirement {
 
 /// Shared handle to the engine's song slot.
 pub type SharedSong = Arc<SongHandoff>;
+
+/// Does the transport go on across a device change? Only when no song was
+/// taken away by it: a song's transport is the song, and with the song gone
+/// the stream would come up playing the plain click instead.
+fn playing_survives_device_change(was_playing: bool, song_dropped: bool) -> bool {
+    was_playing && !song_dropped
+}
 
 /// WHICH DECODE a song's drums came from, or `None` with no song. [`bank_id`]
 /// for the other table, and it answers the same question for the same reason:
@@ -5339,13 +5375,31 @@ impl MetronomeEngine {
         // again at the new rate. A silent song is a smaller lie than a whole
         // piece a semitone and a half flat, and `song-dropped` is how the
         // screen is told rather than left wondering.
-        if self.song.is_loaded() {
-            self.song.set(None);
+        let song_dropped = self.drop_song_for_new_device();
+        if song_dropped {
             eprintln!(
                 "[yames] the song was decoded for the old device and has been taken \
                  away; load it again to play it on this one"
             );
             let _ = app_handle.emit("song-dropped", ());
+        }
+        // A SONG THAT WAS PLAYING DOES NOT GO ON PLAYING AS A METRONOME.
+        // Carried across, `playing` ran the plain click (logging beats as if
+        // it were practice) until the reload landed, and then the song began
+        // again with a count-in under a transport that was already running
+        // (W38 item 2). The transport stops with the song, and the screen is
+        // told the way `fail` tells it; the reloaded song waits for Play.
+        let keep_playing = playing_survives_device_change(was_playing, song_dropped);
+        if was_playing && !keep_playing {
+            let snapshot = {
+                let mut s = state.lock().unwrap_or_else(|e| e.into_inner());
+                s.is_playing = false;
+                s.clone()
+            };
+            if let Some(ref tempo) = self.tempo_ctx {
+                tempo.set_playing(false);
+            }
+            let _ = app_handle.emit("state-changed", &snapshot);
         }
         self.device_name = name;
         // Fully tear down the old thread/stream
@@ -5357,11 +5411,22 @@ impl MetronomeEngine {
         // that fails instantly would otherwise have its `playing = false`
         // overwritten by a restore running a moment later.
         self.alive = Arc::new(AtomicBool::new(false));
-        self.playing = Arc::new(AtomicBool::new(was_playing));
+        self.playing = Arc::new(AtomicBool::new(keep_playing));
         // Brief pause to let CoreAudio fully release the old device
         thread::sleep(Duration::from_millis(100));
         // Restart on the new device
         self.ensure_thread(state, Some(app_handle), SetupWait::No)
+    }
+
+    /// `set_device`'s half that needs no app: take a loaded song away, since
+    /// it was decoded at the old device's rate. `true` when there was one.
+    /// [`SongHandoff::set`] stops its synthesiser thread on the way.
+    fn drop_song_for_new_device(&self) -> bool {
+        if !self.song.is_loaded() {
+            return false;
+        }
+        self.song.set(None);
+        true
     }
 
     /// Set the device name without restarting (for startup/restore).
@@ -6436,6 +6501,9 @@ impl MetronomeEngine {
                             voices.clear();
                             was_playing = false;
                         }
+                        // The transport is stopped here too, so a pending
+                        // seek goes the way it does on the silent path below.
+                        song_shared.discard_seek();
                         sample_counter = 0;
                         next_beat_sample = 0;
                         beat_count = 0;
@@ -6506,6 +6574,11 @@ impl MetronomeEngine {
                         // nothing to work out — where a song starts is where
                         // the range starts, always.
                         song_from_the_top!();
+                        // And a seek that arrived as playback stopped is
+                        // spent here, not on the next press of Play, where it
+                        // would land after the line above and skip the
+                        // count-in. One store.
+                        song_shared.discard_seek();
                         // The usual case for the coach: a stopped metronome
                         // and a tip between exercises. Mixed AFTER the take
                         // ring above, so a take is the band and the player,
@@ -8436,6 +8509,14 @@ impl MetronomeEngine {
             handle.thread().unpark();
             let _ = handle.join();
         }
+        // AND NO RATE: it was the old device's. Left behind, a song reloaded
+        // after `song-dropped` read it before the new stream had published
+        // its own and was rebuilt at the OLD rate — 48k material on a 44.1k
+        // device plays about 9 % sharp and fast (pre-merge review, W38
+        // item 2). With nought here `jam_rate` asks the device the stream is
+        // about to open instead, which is the rate it will run at. After the
+        // join, so nothing of the old stream can publish over it.
+        self.sample_rate.store(0, Ordering::Release);
     }
 
     pub fn is_running(&self) -> bool {
@@ -12095,6 +12176,126 @@ mod tests {
         handoff.seek(0);
         assert_eq!(handoff.take_seek(), Some(0));
         assert_eq!(handoff.take_seek(), None);
+    }
+
+    /// A SEEK POSTED AS PLAYBACK STOPPED IS NOT THE NEXT PASS'S (W38 item 3).
+    ///
+    /// It used to survive the stop, land on the next press of Play after the
+    /// song had been put at the playhead on screen, and clear the count-in.
+    /// The stopped path spends it (`discard_seek`), and a new table forgets
+    /// any seek into the old one.
+    #[test]
+    fn a_seek_left_pending_across_a_stop_or_a_new_table_is_forgotten() {
+        let handoff = SongHandoff::new();
+        // Clicked on the tab just as Stop went down; the next buffer is a
+        // stopped one.
+        handoff.seek(96_000);
+        handoff.discard_seek();
+        assert_eq!(handoff.take_seek(), None, "the stopped path left the seek for Play");
+
+        // A seek into a table that is then replaced — or taken away.
+        let sr = 48_000u32;
+        let (transport, backing) = ab_song();
+        let table = crate::song::compile(&transport, Some(&backing), gate_sounds(sr), sr, 1)
+            .expect("the song compiles");
+        handoff.seek(96_000);
+        handoff.set(Some(Arc::new(table)));
+        assert_eq!(handoff.take_seek(), None, "a seek into the old table reached the new one");
+        handoff.seek(4_800);
+        handoff.set(None);
+        assert_eq!(handoff.take_seek(), None, "a seek outlived its song");
+    }
+
+    /// Wait for a renderer thread to return. Bounded so a thread that never
+    /// stops fails the test rather than hanging it; what is asserted is THAT
+    /// it stopped, not how fast.
+    fn renderer_stops(player: &crate::synth::SynthPlayer) -> bool {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        while std::time::Instant::now() < deadline {
+            if player.is_finished() {
+                return true;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        false
+    }
+
+    /// A song compiled with its synthesiser running, as `load_song` leaves it.
+    fn song_with_its_renderer(sr: u32) -> (Arc<SongTable>, crate::synth::SynthPlayer) {
+        let (transport, backing) = ab_song();
+        let table = Arc::new(
+            crate::song::compile(&transport, Some(&backing), gate_sounds(sr), sr, 1)
+                .expect("the song compiles"),
+        );
+        let ring = Arc::clone(table.synth().expect("the guitars are on the synthesiser"));
+        let score = table.synth_score.clone().expect("and there is a score for them");
+        let font = crate::synth::load_font(None).expect("the shipped sound set");
+        let player = crate::synth::SynthPlayer::start(ring, score, font, sr).expect("it starts");
+        (table, player)
+    }
+
+    /// THE SYNTHESISER STOPS WITH ITS SONG, however the song goes (W38 item 4).
+    ///
+    /// `load_song` and `clear_song` drop the player; a jam starting and a
+    /// device change only ever took the table away, and the renderer went on
+    /// waking every two milliseconds for the rest of the session beside the
+    /// band. Both go through `SongHandoff::set`, so that is where it stops.
+    #[test]
+    fn a_song_taken_away_stops_its_synthesiser() {
+        let sr = 48_000u32;
+        let engine = MetronomeEngine::new(crate::timing::create_beat_log());
+
+        // A jam starting: `build_and_install_jam` takes the song away.
+        let (table, player) = song_with_its_renderer(sr);
+        engine.set_song_table(Some(table));
+        assert!(!player.is_finished(), "the renderer is running while its song is loaded");
+        engine.set_song_table(None);
+        assert!(renderer_stops(&player), "the song went and its renderer did not");
+
+        // A new song replacing it stops the old one's too — and not its own.
+        let (first, first_player) = song_with_its_renderer(sr);
+        let (second, second_player) = song_with_its_renderer(sr);
+        engine.set_song_table(Some(first));
+        engine.set_song_table(Some(second));
+        assert!(renderer_stops(&first_player), "the replaced song's renderer ran on");
+        assert!(!second_player.is_finished(), "the new song's renderer was stopped");
+        engine.set_song_table(None);
+    }
+
+    /// A DEVICE CHANGE TAKES THE OLD RATE, THE SONG AND ITS TRANSPORT WITH IT
+    /// (W38 items 2 and 4). No device is opened: these are the three things
+    /// `set_device` decides before it spawns the new stream.
+    #[test]
+    fn a_device_change_leaves_no_old_rate_no_song_and_no_transport() {
+        let sr = 48_000u32;
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+
+        // (a) The rate. A song reloaded after `song-dropped` asks
+        // `output_sample_rate` first; the old device's answer there built it
+        // at the wrong rate. Gone with the stream, the command probes the new
+        // device instead.
+        engine.sample_rate.store(48_000, Ordering::Release);
+        engine.shutdown();
+        assert_eq!(
+            engine.output_sample_rate(),
+            None,
+            "the old device's rate outlived its stream",
+        );
+
+        // (4) The song goes, and its renderer stops with it.
+        let (table, player) = song_with_its_renderer(sr);
+        engine.set_song_table(Some(table));
+        assert!(engine.drop_song_for_new_device(), "a loaded song is dropped");
+        assert!(!engine.song_loaded());
+        assert!(renderer_stops(&player), "the device changed and the renderer ran on");
+        assert!(!engine.drop_song_for_new_device(), "and nothing is dropped twice");
+
+        // (b) The transport does not carry a song's playing across as a
+        // metronome; it does carry a metronome's.
+        assert!(!playing_survives_device_change(true, true));
+        assert!(playing_survives_device_change(true, false));
+        assert!(!playing_survives_device_change(false, true));
+        assert!(!playing_survives_device_change(false, false));
     }
 
     /// Eight bars of a two-guitar song, for the ear and for the meter.
