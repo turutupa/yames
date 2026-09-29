@@ -447,42 +447,6 @@ pub fn read_offered(watched: &Path, path: &Path) -> Result<Vec<u8>, OfferError> 
     std::fs::read(&file).map_err(|e| OfferError::Unreadable(e.to_string()))
 }
 
-/// The folder `start_download_watch` may watch, given what the webview asked
-/// for and where this machine keeps its downloads.
-///
-/// Only the Downloads folder. The webview names the folder, and a watcher
-/// that lists — and later reads song files out of — any folder the webview
-/// names is a door this module should not have. The Songs setting that lets
-/// the player choose another folder keeps that choice in `settings.json`,
-/// which the webview itself writes, so there is no record here of a folder
-/// the player picked in a dialog to accept it by; until there is, a chosen
-/// folder is refused. Compared canonically, so another spelling of the
-/// Downloads folder is still the Downloads folder.
-///
-/// Returns the Downloads folder as the OS spells it (not the `\\?\` form
-/// Windows canonicalises to), since that is the path offers are built from
-/// and shown with.
-pub fn allowed_watch_dir(asked: Option<&Path>, downloads: &Path) -> Result<PathBuf, String> {
-    let downloads_canon = downloads
-        .canonicalize()
-        .map_err(|e| format!("{} is not a folder Yames can watch: {e}", downloads.display()))?;
-    if !downloads_canon.is_dir() {
-        return Err(format!("{} is not a folder", downloads.display()));
-    }
-    if let Some(asked) = asked {
-        let asked_canon = asked
-            .canonicalize()
-            .map_err(|e| format!("{} is not a folder: {e}", asked.display()))?;
-        if asked_canon != downloads_canon {
-            return Err(format!(
-                "Yames only watches this computer's Downloads folder, not {}",
-                asked.display()
-            ));
-        }
-    }
-    Ok(downloads.to_path_buf())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -776,26 +740,28 @@ mod tests {
     }
 
     #[test]
-    fn only_the_downloads_folder_is_watched() {
-        let downloads = temp_dir("dl-home");
+    fn a_folder_the_player_chose_is_watched_and_its_song_is_offered() {
+        // Not Downloads: a folder picked in Songs settings, which is what
+        // `start_download_watch` is handed and watches as it is.
         let chosen = temp_dir("dl-chosen");
+        std::fs::write(chosen.join("solo.gp"), b"a guitar pro file").unwrap();
 
-        // Nothing asked for: Downloads, spelled the way the OS spelled it.
-        assert_eq!(allowed_watch_dir(None, &downloads), Ok(downloads.clone()));
-        // Downloads asked for by another spelling of the same folder.
-        let respelled = downloads.join("..").join(downloads.file_name().unwrap());
+        // The scanner offers the real Guitar Pro file in it…
+        let mut scanner = Scanner::with_rules(0, 0, 1);
+        let offered = scanner.poll(&list_dir(&chosen));
+        let names: Vec<_> = offered.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(names, ["solo.gp"]);
+        // …and the read after the player says yes gets its bytes: the
+        // symlink guard does not stand in the way of an ordinary file.
         assert_eq!(
-            allowed_watch_dir(Some(&respelled), &downloads),
-            Ok(downloads.clone())
+            check_offer(&chosen, &chosen.join("solo.gp")),
+            Ok(chosen.join("solo.gp").canonicalize().unwrap()),
         );
-        // Any other folder the webview names is refused.
-        assert!(allowed_watch_dir(Some(&chosen), &downloads).is_err());
-        assert!(allowed_watch_dir(Some(Path::new("C:/Windows/System32")), &downloads).is_err());
-        assert!(allowed_watch_dir(Some(&chosen.join("does-not-exist")), &downloads).is_err());
-        // And a Downloads folder that is not there cannot be watched at all.
-        assert!(allowed_watch_dir(None, &downloads.join("gone")).is_err());
+        assert_eq!(
+            read_offered(&chosen, &chosen.join("solo.gp")).unwrap(),
+            b"a guitar pro file"
+        );
 
-        std::fs::remove_dir_all(&downloads).ok();
         std::fs::remove_dir_all(&chosen).ok();
     }
 }
