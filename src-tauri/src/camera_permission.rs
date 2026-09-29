@@ -81,6 +81,17 @@ mod windows_impl {
                         // `DEFAULT`, so answering here is what replaces the
                         // prompt rather than adding to it.
                         if kind == COREWEBVIEW2_PERMISSION_KIND_CAMERA {
+                            // Only for the app's own pages. The consent the
+                            // player gave was to Yames; a page from anywhere
+                            // else that ended up in this window gets
+                            // WebView2's own prompt, and nothing is saved.
+                            let mut uri = windows::core::PWSTR::null();
+                            args.Uri(&mut uri)?;
+                            let uri = webview2_com::take_pwstr(uri);
+                            if !super::is_app_origin(&uri, cfg!(debug_assertions)) {
+                                eprintln!("[camera] {uri} asked for the camera — not ours, not answered");
+                                return Ok(());
+                            }
                             args.SetState(COREWEBVIEW2_PERMISSION_STATE_ALLOW)?;
                             // ...and remembered, so it is answered once rather
                             // than once per launch. Only on a runtime new
@@ -109,6 +120,75 @@ mod windows_impl {
                 eprintln!("[camera] could not reach the webview: {e}");
             }
         }
+    }
+}
+
+/// Whether a page's address is one of the app's own — the only pages the
+/// camera is granted to without asking.
+///
+/// Compared by origin (scheme, host and port), exactly: a path, query or
+/// fragment does not matter, and a look-alike such as
+/// `http://tauri.localhost.example.com` or `http://localhost:1420@evil` does
+/// not pass. The production origins are Tauri's own protocol:
+/// `http://tauri.localhost` on Windows (`https://` if the config ever turns on
+/// `useHttpsScheme`) and `tauri://localhost` elsewhere. The dev server,
+/// `devUrl` in `tauri.conf.json`, is accepted only when `allow_dev` — a debug
+/// build.
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+fn is_app_origin(uri: &str, allow_dev: bool) -> bool {
+    let Some((scheme, rest)) = uri.split_once("://") else {
+        return false;
+    };
+    let authority = rest.split(['/', '?', '#']).next().unwrap_or("");
+    if authority.contains('@') {
+        return false;
+    }
+    let origin = format!("{}://{}", scheme.to_ascii_lowercase(), authority.to_ascii_lowercase());
+    const PRODUCTION: [&str; 3] = [
+        "http://tauri.localhost",
+        "https://tauri.localhost",
+        "tauri://localhost",
+    ];
+    const DEV: &str = "http://localhost:1420";
+    PRODUCTION.contains(&origin.as_str()) || (allow_dev && origin == DEV)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_app_origin;
+
+    #[test]
+    fn the_apps_own_pages_are_its_own() {
+        for uri in [
+            "http://tauri.localhost/index.html?window=main",
+            "http://tauri.localhost",
+            "https://tauri.localhost/",
+            "tauri://localhost/index.html#songs",
+            "HTTP://Tauri.LocalHost/index.html",
+        ] {
+            assert!(is_app_origin(uri, false), "{uri}");
+        }
+        assert!(is_app_origin("http://localhost:1420/index.html?window=main", true));
+    }
+
+    #[test]
+    fn nobody_else_is_given_the_camera() {
+        for uri in [
+            "https://www.youtube.com/watch?v=x",
+            "http://tauri.localhost.example.com/",
+            "http://evil.example/tauri.localhost",
+            "http://tauri.localhost@evil.example/",
+            "http://localhost:1420@evil.example/",
+            "http://localhost:14200/",
+            "http://localhost/",
+            "file:///C:/Users/someone/page.html",
+            "about:blank",
+            "",
+        ] {
+            assert!(!is_app_origin(uri, true), "{uri}");
+        }
+        // The dev server is not the app in a release build.
+        assert!(!is_app_origin("http://localhost:1420/index.html", false));
     }
 }
 
