@@ -18,6 +18,22 @@ import { openShot, fitsOnOneLine, insideViewport, noSidewaysScroll, IN_ENGLISH }
  */
 test.skip(!IN_ENGLISH, "jam scenes are driven by Jam's English labels (see the note in jam.spec.ts)");
 
+/*
+ * Ninety seconds a test, not thirty.
+ *
+ * Most jam scenes are built by PLAYING to bar five (`jam: { bar: 5 }` in
+ * `scenarios.ts`): sixteen real beats of the mock's clock at the jam's own
+ * 92 BPM, ten and a half seconds that no machine can make shorter. On a busy
+ * box the page load in front of them took eight to ten seconds more, and the
+ * "take me to" and chord-chart tests ran out of the default thirty seconds
+ * with every step green — the trace showed nothing hung, the clock simply
+ * ran out between two measurements (W40). `openShot` alone allows itself
+ * forty-five. What these tests assert is shape, so the budget is not the
+ * thing under test; every other scene-driven spec in this folder already
+ * asks for the same.
+ */
+test.slow();
+
 /**
  * The Jam playing screen, measured in a real browser.
  *
