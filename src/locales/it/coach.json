@@ -27,7 +27,7 @@
     "today": "Oggi",
     "yesterday": "Ieri",
     "noteSpacingTrend": "Andamento della spaziatura delle note",
-    "historyKeptInSettings": "Your practice history couldn't be opened, so Yames is saving your sessions the way earlier versions did. Nothing is lost — they'll move into your history the next time Yames opens it."
+    "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
   "coachDetail": {
     "exercises": "Esercizi",
