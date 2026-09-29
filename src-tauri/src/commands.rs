@@ -2278,9 +2278,12 @@ pub fn clear_due(
 // attempt into the shape the judgement takes, finding a take's dry stem, and
 // turning beats into the milliseconds the tracker thinks in.
 //
-// Both are `async` commands, so they run on Tauri's blocking pool and never
-// on the UI thread: a thirty-second take is most of a second of FFTs, and a
-// year of attempts is a SQLite read (AGENTS.md's post-session tier).
+// Both are `#[tauri::command(async)]`, so they never run on the UI thread: a
+// thirty-second take is most of a second of FFTs, and a year of attempts is a
+// SQLite read (AGENTS.md's post-session tier). They run on one of the async
+// runtime's worker threads — a tokio worker, NOT a blocking pool — so that
+// second of FFTs holds a worker while it runs; `spawn_blocking` is the move
+// if that ever shows.
 // ---------------------------------------------------------------------------
 
 /// One attempt at a passage, as the frontend has it: every pass, as scoring
