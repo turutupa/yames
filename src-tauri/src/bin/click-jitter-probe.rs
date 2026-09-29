@@ -1226,6 +1226,25 @@ fn main() -> ExitCode {
         eprintln!("error: audio engine did not start: {e}");
         return ExitCode::from(2);
     }
+    // AND WAIT FOR THE STREAM ITSELF. A first attempt that timed out left its
+    // audio thread running — still opening the device, `alive` already up —
+    // so the second `start_headless` answers `Ok` at once ("a thread that is
+    // already running is Ok") before any stream exists. Everything below
+    // reads the output rate: the song and the kits are built at it and a
+    // take refuses to start without it. Read too early it was nought, and
+    // `--song-take` exited 2 ("the output device never reported a rate").
+    // The rate is published when the stream is up, so that is what this
+    // waits for; the bound only catches a device that never opens.
+    {
+        let give_up = std::time::Instant::now() + Duration::from_secs(30);
+        while engine.output_sample_rate().is_none() {
+            if std::time::Instant::now() > give_up {
+                eprintln!("error: the audio thread started but no output stream ever opened");
+                return ExitCode::from(2);
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
 
     // `--jam-kit`: the musician's own drums, decoded HERE rather than
     // above, because a folder is resampled to the output rate and the
