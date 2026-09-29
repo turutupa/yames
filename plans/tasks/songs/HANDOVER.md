@@ -89,6 +89,31 @@ stage is 258 px taller than its room (the bar grid's fourth row is cut), and at
 1100x720 Play overlaps the stage's corner. The first needs a decision about
 what gives at that size.
 
+## Before main: two reviews and a fix wave (2026-09-29, `a921e941`)
+
+Two read-only reviews (audio path; store + file boundaries) found one
+blocker — after a seek the synth ring could wedge and every guitar stayed
+silent until Stop/Play — and a handful of should-fixes. Fixed by W38
+(audio), W39 (store), W40 (a Presence bug that froze a card pressed while
+sliding in), each with tests; a third review of the fixes said "merge".
+Briefs in `plans/tasks/songs-premerge/`. Gates on the combined branch in a
+fresh checkout: build, vitest 5469, layout 352 (songs.spec re-run 106/106
+after a port clash), `test:rust` 968 (two wall-clock tests fail only under
+the full suite's own load, 3/3 alone), dsp, highbpm, pitch; jitter probe
+PASS in all three modes — plain, `--song-loop --song-take` (0 silent
+seeks), `--jam-swap --jam-move --jam-take` — p99 < 1 ms, 0 allocations,
+0 missed.
+
+Left for after main: wall-clock tests `synth::…renderer_thread_fills…` and
+`timing::…sixteenths_light_one_by_one…` should measure shape; a video
+chunk from one camera take can land in the next if Stop→Record is quick
+(give each recording an id); the first 10–20 ms after a seek is not heard
+(needs a two-phase seek); a same-rate device change is missed by a
+loopback take; `start_take` still runs on the window thread (needs a
+start/stop handshake); sessions kept in `settings.json` appear in History
+only at the next launch; the new history notice is English in every
+locale; tokio's `rt-multi-thread` should be named in `Cargo.toml`.
+
 ## Try it (in this order)
 
 ```
