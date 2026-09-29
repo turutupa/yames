@@ -33,7 +33,9 @@
 //! * **The reader never hears stale audio.** A seek, a range change or a new
 //!   table bumps [`SynthRing::invalidate`]; the callback throws away what is
 //!   queued in constant time, and the renderer does not begin the new stream
-//!   until it has.
+//!   until it has. A chunk of the old stream the renderer was already making
+//!   lands after that drain and before the new stream's first frame, where
+//!   the callback's skip forward steps over it.
 //!
 //! ## How the two threads stay in step, to the sample
 //!
@@ -177,6 +179,11 @@ pub struct SynthRing {
     play: AtomicU64,
     /// The epoch the callback has thrown the old stream away for.
     drained: AtomicU64,
+    /// Frames the callback has mixed, ever — `consume`'s running total, which
+    /// unlike `read` is not moved by a drain or a skip. Nobody on the audio
+    /// path reads it; it is what the click-jitter probe watches to prove the
+    /// guitars come back after a seek.
+    mixed: AtomicU64,
 
     // ---- the command thread ----
     /// Bumped whenever what is queued stopped being true.
@@ -186,6 +193,19 @@ pub struct SynthRing {
     gains: [AtomicU32; MAX_SONG_TRACKS],
     /// Set when the song goes away and the renderer should stop.
     stop: AtomicBool,
+}
+
+/// A snapshot of the callback's side of a [`SynthRing`], for an observer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SynthRingWatch {
+    /// The last epoch the callback drained for — it moves on the buffer that
+    /// takes a seek.
+    pub drained: u64,
+    /// The playhead the callback last published, in frames since the song
+    /// started.
+    pub play: u64,
+    /// Frames of synth the callback has mixed, ever.
+    pub mixed: u64,
 }
 
 // SAFETY: `buf` is written only by the producer, at indices at or past
@@ -227,6 +247,7 @@ impl SynthRing {
             read: AtomicU64::new(0),
             play: AtomicU64::new(0),
             drained: AtomicU64::new(u64::MAX),
+            mixed: AtomicU64::new(0),
             epoch: AtomicU64::new(0),
             gains: std::array::from_fn(|_| AtomicU32::new(1.0f32.to_bits())),
             stop: AtomicBool::new(false),
@@ -308,7 +329,9 @@ impl SynthRing {
         let read = self.read.load(Ordering::Relaxed);
         if read < want {
             // The stream began behind us — skip to where we actually are
-            // rather than play it late.
+            // rather than play it late. This is also what steps over a chunk
+            // of the OLD stream the renderer pushed after the drain: it sits
+            // before `base_write`, so before `want`.
             let to = want.min(write);
             self.read.store(to, Ordering::Release);
             return write.saturating_sub(to);
@@ -344,6 +367,22 @@ impl SynthRing {
         }
         let read = self.read.load(Ordering::Relaxed) + n;
         self.read.store(read, Ordering::Release);
+        // One more relaxed store on a field only this thread writes.
+        let mixed = self.mixed.load(Ordering::Relaxed) + n;
+        self.mixed.store(mixed, Ordering::Relaxed);
+    }
+
+    // ---- an observer ---------------------------------------------------------
+
+    /// What the callback has done with the ring, for a thread that only
+    /// watches: the click-jitter probe, which fails a run whose guitars do
+    /// not come back after a seek. Three loads; nothing is changed.
+    pub fn watch(&self) -> SynthRingWatch {
+        SynthRingWatch {
+            drained: self.drained.load(Ordering::Acquire),
+            play: self.play.load(Ordering::Acquire),
+            mixed: self.mixed.load(Ordering::Relaxed),
+        }
     }
 
     // ---- the renderer ------------------------------------------------------
@@ -354,12 +393,31 @@ impl SynthRing {
     }
 
     /// Has the callback thrown the old stream away for `epoch` yet?
+    ///
+    /// **The drain itself, and nothing about the queue.** This used to ask
+    /// for `read >= write` as well, and that wedged the ring for good after
+    /// a seek (pre-merge review, W38 item 1): a renderer already inside a
+    /// chunk of the old stream when the epoch moved pushes that chunk AFTER
+    /// the callback has drained, so `write` is past `read` again — and the
+    /// callback, having drained for this epoch, never drains again, while
+    /// `ready` answers 0 for as long as `live != epoch`. Every guitar in the
+    /// song stayed silent until the next seek.
+    ///
+    /// Frames pushed after the drain need no second drain to stay unheard:
+    /// [`SynthRing::begin`] is called on the same thread, after the push, so
+    /// the new stream's `base_write` is at or past every one of them, and
+    /// `ready` only ever offers frames at or after `base_write` — the skip
+    /// forward that already handles a stream that began behind the playhead
+    /// steps over them the same way. The callback stays exactly as it was.
     fn drained_for(&self, epoch: u64) -> bool {
         self.drained.load(Ordering::Acquire) == epoch
-            && self.read.load(Ordering::Acquire) >= self.write.load(Ordering::Relaxed)
     }
 
     /// Begin a new stream at the playhead the callback last published.
+    ///
+    /// Producer only, and after any push of the old stream: `base_write` is
+    /// read from `write` here, which is what puts a stale chunk pushed after
+    /// the drain behind the new stream rather than in it.
     fn begin(&self, epoch: u64) -> u64 {
         let play = self.play.load(Ordering::Acquire);
         self.base_write
@@ -468,6 +526,12 @@ impl SynthPlayer {
             ring,
             handle: Some(handle),
         })
+    }
+
+    /// Has the renderer thread returned? It does once its ring is stopped —
+    /// by dropping this, or by the song being taken away from the engine.
+    pub fn is_finished(&self) -> bool {
+        self.handle.as_ref().is_none_or(|h| h.is_finished())
     }
 }
 
