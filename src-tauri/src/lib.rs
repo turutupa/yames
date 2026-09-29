@@ -243,15 +243,25 @@ pub fn run() {
     // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        // W19 — the files the OS asked Yames to open. Managed on the Builder,
+        // BEFORE the single-instance plugin below, not in `setup()`: a second
+        // copy's hand-off can arrive before `setup()` has run, and the
+        // callback reads this state — unmanaged, that read is a panic inside
+        // a window callback, i.e. a crash at launch when two song files are
+        // opened at once. State managed here exists from the moment the app
+        // does.
+        .manage(commands::PendingOpenState::default())
         // W19 — one Yames at a time, and it MUST be the first plugin
         // registered (the plugin's own documentation is explicit about it).
         //
         // Double-clicking a Guitar Pro file while Yames is open starts a
         // second process; this hands that process's command line to the
         // window already running and exits it, rather than letting two
-        // copies fight over the audio device and `settings.json`.
-        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
-            commands::announce_opened_paths(app, &argv);
+        // copies fight over the audio device and `settings.json`. `cwd` is
+        // the second copy's working folder: a relative path typed in a
+        // terminal means a file there, not in ours.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            commands::announce_opened_paths(app, &argv, std::path::Path::new(&cwd));
         }))
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -462,9 +472,9 @@ pub fn run() {
             // open. `None` here is the whole of "off": no thread, no folder
             // listed, and `read_offered_file` with nothing to read.
             app.manage(downloads::WatchState::default());
-            // W19 — and the files the OS asked Yames to open. Managed before
-            // the cold-start command line is read into it, below.
-            app.manage(commands::PendingOpenState::default());
+            // W19 — the files the OS asked Yames to open are managed on the
+            // Builder (see the single-instance plugin), so the cold-start
+            // command line below has somewhere to go.
 
             // The cold start: `yames.exe "C:\...\riff.gp5"`, which is what
             // "Open with Yames" does when nothing is running yet. Read here
@@ -475,7 +485,12 @@ pub fn run() {
             // React has mounted and can put the track picker up.
             {
                 let argv: Vec<String> = std::env::args().collect();
-                commands::queue_opened_paths(&app.state::<commands::PendingOpenState>(), &argv);
+                let cwd = std::env::current_dir().unwrap_or_default();
+                commands::queue_opened_paths(
+                    &app.state::<commands::PendingOpenState>(),
+                    &argv,
+                    &cwd,
+                );
             }
 
             // Start audio output device polling

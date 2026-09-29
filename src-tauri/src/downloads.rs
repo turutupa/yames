@@ -401,7 +401,10 @@ impl std::fmt::Display for OfferError {
 /// opened. The path must be a direct child of the watched folder (no
 /// subdirectory, no `..` climbing out) and must be a name this module would
 /// have offered in the first place.
-pub fn check_offer(watched: &Path, path: &Path) -> Result<(), OfferError> {
+///
+/// Returns the canonical path of the file itself — the one `read_offered`
+/// then opens — so what was checked is what is read.
+pub fn check_offer(watched: &Path, path: &Path) -> Result<PathBuf, OfferError> {
     let name = path
         .file_name()
         .and_then(|n| n.to_str())
@@ -409,31 +412,39 @@ pub fn check_offer(watched: &Path, path: &Path) -> Result<(), OfferError> {
     if !is_watched(name) {
         return Err(OfferError::NotASong);
     }
-    let parent = path.parent().ok_or(OfferError::NotWatched)?;
     // Canonicalised on both sides, so a path with `..` in it, a different
     // spelling of the same drive, or a symlink pointing elsewhere cannot
-    // dress itself up as the watched folder. A folder that will not
-    // canonicalise (deleted, unmounted) fails closed.
+    // dress itself up as the watched folder. The FILE is canonicalised, not
+    // only its folder: a link named `riff.gp5` sitting in Downloads and
+    // pointing at a file somewhere else resolves to that somewhere else, and
+    // is refused. A folder or file that will not canonicalise (deleted,
+    // unmounted) fails closed.
     let watched = watched
         .canonicalize()
         .map_err(|_| OfferError::NotWatched)?;
-    let parent = parent.canonicalize().map_err(|_| OfferError::NotWatched)?;
-    if parent != watched {
+    let file = path.canonicalize().map_err(|_| OfferError::NotWatched)?;
+    if file.parent() != Some(watched.as_path()) {
         return Err(OfferError::NotWatched);
     }
-    Ok(())
+    // And what it resolves to has to be a name this module would offer, too.
+    let resolved_name = file.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    if !is_watched(resolved_name) {
+        return Err(OfferError::NotASong);
+    }
+    Ok(file)
 }
 
 /// The file's bytes, after the player has said yes.
 ///
-/// The only function in this module that opens anything.
+/// The only function in this module that opens anything, and what it opens
+/// is the canonical path `check_offer` approved.
 pub fn read_offered(watched: &Path, path: &Path) -> Result<Vec<u8>, OfferError> {
-    check_offer(watched, path)?;
-    let meta = std::fs::metadata(path).map_err(|e| OfferError::Unreadable(e.to_string()))?;
+    let file = check_offer(watched, path)?;
+    let meta = std::fs::metadata(&file).map_err(|e| OfferError::Unreadable(e.to_string()))?;
     if meta.len() > MAX_OFFER_BYTES {
         return Err(OfferError::TooBig(meta.len()));
     }
-    std::fs::read(path).map_err(|e| OfferError::Unreadable(e.to_string()))
+    std::fs::read(&file).map_err(|e| OfferError::Unreadable(e.to_string()))
 }
 
 #[cfg(test)]
@@ -650,7 +661,10 @@ mod tests {
         std::fs::write(other.join("elsewhere.gp5"), b"somewhere else entirely").unwrap();
         std::fs::write(dir.join("notes.txt"), b"not a song").unwrap();
 
-        assert_eq!(check_offer(&dir, &dir.join("riff.gp5")), Ok(()));
+        assert_eq!(
+            check_offer(&dir, &dir.join("riff.gp5")),
+            Ok(dir.join("riff.gp5").canonicalize().unwrap()),
+        );
         assert_eq!(
             check_offer(&dir, &other.join("elsewhere.gp5")),
             Err(OfferError::NotWatched),
@@ -674,5 +688,80 @@ mod tests {
 
         std::fs::remove_dir_all(&dir).ok();
         std::fs::remove_dir_all(&other).ok();
+    }
+
+    /// A symlink to a file, or `None` where this machine will not make one
+    /// (Windows without Developer Mode or elevation).
+    fn file_link(target: &Path, link: &Path) -> Option<()> {
+        #[cfg(unix)]
+        let made = std::os::unix::fs::symlink(target, link);
+        #[cfg(windows)]
+        let made = std::os::windows::fs::symlink_file(target, link);
+        match made {
+            Ok(()) => Some(()),
+            Err(e) => {
+                eprintln!("[test] cannot make a symlink here ({e}) — skipping that half");
+                None
+            }
+        }
+    }
+
+    #[test]
+    fn a_link_in_the_watched_folder_to_a_file_elsewhere_is_refused() {
+        let dir = temp_dir("link");
+        let other = temp_dir("link-target");
+        std::fs::write(other.join("secret.gp5"), b"not in Downloads").unwrap();
+        std::fs::write(other.join("secret.txt"), b"not a song either").unwrap();
+        let Some(()) = file_link(&other.join("secret.gp5"), &dir.join("riff.gp5")) else {
+            std::fs::remove_dir_all(&dir).ok();
+            std::fs::remove_dir_all(&other).ok();
+            return;
+        };
+        // The name is right and the folder it sits in is right; the file it
+        // IS lives somewhere else.
+        assert_eq!(
+            check_offer(&dir, &dir.join("riff.gp5")),
+            Err(OfferError::NotWatched)
+        );
+        assert!(read_offered(&dir, &dir.join("riff.gp5")).is_err());
+
+        // A song-named link to something that is not a song, even inside the
+        // folder, is not a song.
+        std::fs::write(dir.join("notes.txt"), b"a text file").unwrap();
+        if file_link(&dir.join("notes.txt"), &dir.join("tab.gp5")).is_some() {
+            assert_eq!(
+                check_offer(&dir, &dir.join("tab.gp5")),
+                Err(OfferError::NotASong)
+            );
+        }
+
+        std::fs::remove_dir_all(&dir).ok();
+        std::fs::remove_dir_all(&other).ok();
+    }
+
+    #[test]
+    fn a_folder_the_player_chose_is_watched_and_its_song_is_offered() {
+        // Not Downloads: a folder picked in Songs settings, which is what
+        // `start_download_watch` is handed and watches as it is.
+        let chosen = temp_dir("dl-chosen");
+        std::fs::write(chosen.join("solo.gp"), b"a guitar pro file").unwrap();
+
+        // The scanner offers the real Guitar Pro file in it…
+        let mut scanner = Scanner::with_rules(0, 0, 1);
+        let offered = scanner.poll(&list_dir(&chosen));
+        let names: Vec<_> = offered.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(names, ["solo.gp"]);
+        // …and the read after the player says yes gets its bytes: the
+        // symlink guard does not stand in the way of an ordinary file.
+        assert_eq!(
+            check_offer(&chosen, &chosen.join("solo.gp")),
+            Ok(chosen.join("solo.gp").canonicalize().unwrap()),
+        );
+        assert_eq!(
+            read_offered(&chosen, &chosen.join("solo.gp")).unwrap(),
+            b"a guitar pro file"
+        );
+
+        std::fs::remove_dir_all(&chosen).ok();
     }
 }

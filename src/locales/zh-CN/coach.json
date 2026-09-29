@@ -26,7 +26,8 @@
     "send": "发送",
     "today": "今天",
     "yesterday": "昨天",
-    "noteSpacingTrend": "音符间距趋势"
+    "noteSpacingTrend": "音符间距趋势",
+    "historyKeptInSettings": "Your practice history couldn't be opened, so Yames is saving your sessions the way earlier versions did. Nothing is lost — they'll move into your history the next time Yames opens it."
   },
   "coachDetail": {
     "exercises": "练习段落",

@@ -1927,7 +1927,9 @@ pub async fn clear_session(session_acc: State<'_, SharedSessionAccumulator>) -> 
 // arrives before the open finishes is made to wait rather than lie.
 //
 // A store that will not open answers reads with nothing and refuses
-// writes out loud. It is never deleted or rewritten — see `db.rs`.
+// writes out loud — except a finished session, which is kept in
+// `settings.json` the way v1.2.1 kept it rather than lost (`save_session`).
+// The store is never deleted or rewritten — see `db.rs`.
 // ---------------------------------------------------------------------------
 
 /// Open the practice store and fold the legacy JSON history into it.
@@ -1942,22 +1944,20 @@ pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPrac
             return;
         }
     };
-    // The one-time import. `evalSessionHistory` is *read* and left exactly
-    // where it is: an older build must still find its history if the user
-    // ever goes back to one.
-    let legacy: Vec<crate::session::SavedSession> = app_handle
-        .store("settings.json")
-        .ok()
-        .and_then(|s| {
-            s.get("evalSessionHistory")
-                .and_then(|v| serde_json::from_value(v.clone()).ok())
-        })
-        .unwrap_or_default();
+    // The import, on every launch (it only takes what it has not seen —
+    // see `Db::import_json_history`). `evalSessionHistory` is *read* and left
+    // exactly where it is: an older build must still find its history if the
+    // user ever goes back to one. A `settings.json` that will not open is
+    // `Unreadable`, which imports nothing and does not mark the import done.
+    let legacy = match app_handle.store("settings.json") {
+        Ok(s) => crate::db::LegacyHistory::from_value(s.get("evalSessionHistory").as_ref()),
+        Err(e) => crate::db::LegacyHistory::Unreadable(e.to_string()),
+    };
 
     // Imported *before* the store becomes visible to any command, so the
     // first history read of a fresh install cannot catch it half done.
     store.open_at(&crate::db::db_path(&data_dir), |db| {
-        match db.import_json_history(&legacy) {
+        match db.import_legacy_history(&legacy) {
             Ok(0) => {}
             Ok(n) => eprintln!("[store] imported {n} session(s) from the JSON history"),
             Err(e) => eprintln!("[store] could not import the JSON history: {e}"),
@@ -1965,17 +1965,36 @@ pub fn open_practice_store(app_handle: &AppHandle, store: &crate::db::SharedPrac
     });
 }
 
+/// Save a finished session. `"stored"` when it went into the practice store;
+/// `"keptInSettings"` when the store could not take it and it was written
+/// into `settings.json` the way v1.2.1 wrote it instead — the frontend tells
+/// the player once, and the next launch's import brings it into the store.
 #[tauri::command(async)]
 pub fn save_session(
     session: crate::session::SavedSession,
+    app_handle: AppHandle,
     store: State<'_, crate::db::SharedPracticeStore>,
     state: State<'_, SharedState>,
-) -> Result<(), String> {
+) -> Result<crate::db::SaveOutcome, String> {
     // `SavedSession` has never carried an instrument and this wave does not
     // change its shape, so the row is stamped with the one that is selected
     // right now — which is the one that was just played.
     let instrument = state.lock().ok().map(|s| s.instrument.id());
-    store.with(|db| db.save_session(&session, instrument))
+    store.save_session_or_keep(&session, instrument, |s| {
+        use tauri_plugin_store::StoreExt;
+        let settings = app_handle
+            .store("settings.json")
+            .map_err(|e| e.to_string())?;
+        let history =
+            crate::db::legacy_history_with(settings.get("evalSessionHistory").as_ref(), s)?;
+        settings.set("evalSessionHistory", history);
+        // Written now rather than on the plugin's debounce: this is the one
+        // copy of the session there is.
+        if let Err(e) = settings.save() {
+            eprintln!("[store] settings.json did not flush the kept session yet: {e}");
+        }
+        Ok(())
+    })
 }
 
 /// The most recent `MAX_SESSION_HISTORY` sessions, newest first —
@@ -2023,9 +2042,9 @@ pub fn clear_all_sessions(
     let settings = app_handle
         .store("settings.json")
         .map_err(|e| e.to_string())?;
-    // The legacy array is emptied too. It is not read any more (the import
-    // flag has long since been set), but leaving a copy of the history
-    // behind after the user asked for it to be gone would be a lie.
+    // The legacy array is emptied too. Every launch's import reads it, and
+    // leaving a copy of the history behind after the user asked for it to be
+    // gone would be a lie.
     let empty: Vec<crate::session::SavedSession> = Vec::new();
     settings.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
     // U3.3 — the drill-run history is practice history too. "Clear all
@@ -2259,9 +2278,12 @@ pub fn clear_due(
 // attempt into the shape the judgement takes, finding a take's dry stem, and
 // turning beats into the milliseconds the tracker thinks in.
 //
-// Both are `async` commands, so they run on Tauri's blocking pool and never
-// on the UI thread: a thirty-second take is most of a second of FFTs, and a
-// year of attempts is a SQLite read (AGENTS.md's post-session tier).
+// Both are `#[tauri::command(async)]`, so they never run on the UI thread: a
+// thirty-second take is most of a second of FFTs, and a year of attempts is a
+// SQLite read (AGENTS.md's post-session tier). They run on one of the async
+// runtime's worker threads — a tokio worker, NOT a blocking pool — so that
+// second of FFTs holds a worker while it runs; `spawn_blocking` is the move
+// if that ever shows.
 // ---------------------------------------------------------------------------
 
 /// One attempt at a passage, as the frontend has it: every pass, as scoring
@@ -4799,11 +4821,21 @@ pub struct OpenedFile {
 /// else is a candidate, and anything that is not a song file we understand is
 /// ignored rather than complained about — a flag or a stray argument is not
 /// the player asking for anything.
-pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
+///
+/// Each argument is joined onto `cwd`, the folder the launching process was
+/// started in: `yames riff.gp5` from a terminal means the file in THAT
+/// folder, which is not the running app's when a second copy hands its
+/// command line over. An absolute argument replaces `cwd` in the join, so it
+/// is unchanged.
+pub fn queue_opened_paths(
+    state: &PendingOpenState,
+    argv: &[String],
+    cwd: &std::path::Path,
+) -> usize {
     let mut queued = 0;
-    let mut held = state.0.lock().unwrap();
+    let mut held = state.0.lock().unwrap_or_else(|p| p.into_inner());
     for arg in argv.iter().skip(1) {
-        let path = std::path::PathBuf::from(arg);
+        let path = cwd.join(arg);
         let openable = path
             .file_name()
             .and_then(|n| n.to_str())
@@ -4823,8 +4855,14 @@ pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
 
 /// A second Yames was launched on a file while one was already running, or
 /// this one was started with a path. Bring the window forward and say so.
-pub fn announce_opened_paths(app: &AppHandle, argv: &[String]) {
-    let queued = queue_opened_paths(&app.state::<PendingOpenState>(), argv);
+pub fn announce_opened_paths(app: &AppHandle, argv: &[String], cwd: &std::path::Path) {
+    // Managed on the Builder, so it is always there; `try_state` all the same,
+    // because a panic here is inside a window callback and takes the app down.
+    let Some(pending) = app.try_state::<PendingOpenState>() else {
+        eprintln!("[open] a file arrived before Yames could take it — ignoring it");
+        return;
+    };
+    let queued = queue_opened_paths(&pending, argv, cwd);
     if queued == 0 {
         return;
     }
@@ -4911,7 +4949,10 @@ mod opened_paths_tests {
             dir.join("score.musicxml").to_string_lossy().into_owned(),
         ];
 
-        assert_eq!(queue_opened_paths(&state, &argv), 2);
+        // Absolute paths, and a working folder somewhere else entirely: the
+        // join leaves an absolute argument exactly as it was.
+        let elsewhere = std::env::temp_dir();
+        assert_eq!(queue_opened_paths(&state, &argv, &elsewhere), 2);
         let held = state.0.lock().unwrap();
         let names: Vec<_> = held
             .iter()
@@ -4927,11 +4968,37 @@ mod opened_paths_tests {
             queue_opened_paths(
                 &state,
                 &[dir.join("riff.gp5").to_string_lossy().into_owned()],
+                &elsewhere,
             ),
             0,
         );
 
         std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn a_relative_path_is_the_file_in_the_launching_copys_folder() {
+        // `yames riff.gp5` typed in a terminal, while Yames is already open:
+        // the second copy hands over its argv AND its working folder, and the
+        // file is the one in that folder — not in the running app's.
+        let theirs = temp_dir("cwd-theirs");
+        std::fs::write(theirs.join("riff.gp5"), b"bytes").unwrap();
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec!["yames.exe".into(), "riff.gp5".into()];
+
+        assert_eq!(queue_opened_paths(&state, &argv, &theirs), 1);
+        let held = state.0.lock().unwrap();
+        assert_eq!(held.as_slice(), [theirs.join("riff.gp5")]);
+        assert!(held[0].is_absolute(), "queued as a path that still means the same file later");
+        drop(held);
+
+        // The same name against a folder where it is not: nothing queued.
+        let ours = temp_dir("cwd-ours");
+        let state = PendingOpenState::default();
+        assert_eq!(queue_opened_paths(&state, &argv, &ours), 0);
+
+        std::fs::remove_dir_all(&theirs).ok();
+        std::fs::remove_dir_all(&ours).ok();
     }
 
     #[test]
@@ -4944,10 +5011,10 @@ mod opened_paths_tests {
             dir.join("riff.gp5").to_string_lossy().into_owned(),
             dir.join("riff.gp5").to_string_lossy().into_owned(),
         ];
-        assert_eq!(queue_opened_paths(&state, &argv), 1);
+        assert_eq!(queue_opened_paths(&state, &argv, &dir), 1);
         // And again from a second launch, while the first is still waiting to
         // be collected: two double-clicks on one file are one file.
-        assert_eq!(queue_opened_paths(&state, &argv), 0);
+        assert_eq!(queue_opened_paths(&state, &argv, &dir), 0);
         assert_eq!(state.0.lock().unwrap().len(), 1);
         std::fs::remove_dir_all(&dir).ok();
     }
@@ -4955,7 +5022,10 @@ mod opened_paths_tests {
     #[test]
     fn an_ordinary_launch_queues_nothing() {
         let state = PendingOpenState::default();
-        assert_eq!(queue_opened_paths(&state, &["yames.exe".to_string()]), 0);
+        assert_eq!(
+            queue_opened_paths(&state, &["yames.exe".to_string()], &std::env::temp_dir()),
+            0
+        );
         assert!(state.0.lock().unwrap().is_empty());
     }
 }

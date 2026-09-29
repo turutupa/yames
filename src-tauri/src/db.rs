@@ -34,11 +34,13 @@
 //!   year of practice to a failed `PRAGMA` is not a trade this app makes.
 //! * **It never runs on an audio thread**, and the Tauri layer keeps it
 //!   off the UI thread as well — see `PracticeStore`.
-//! * **The one-time import only reads.** It leaves `evalSessionHistory`
-//!   in `settings.json` exactly as it found it, so downgrading to an
-//!   older build still finds its history. The single place that array is
-//!   ever written after that is `clear_all_sessions`, where the user has
-//!   asked for all of it to be gone — see `commands.rs`.
+//! * **The import only reads.** It leaves `evalSessionHistory` in
+//!   `settings.json` exactly as it found it, so downgrading to an older
+//!   build still finds its history. That array is written in two places
+//!   only: `clear_all_sessions`, where the user has asked for all of it to
+//!   be gone, and `save_session` when the store cannot take a session — it
+//!   is then kept there the way v1.2.1 kept it, and the next launch's
+//!   import brings it in (`PracticeStore::save_session_or_keep`).
 
 use std::collections::HashMap;
 use std::fmt;
@@ -65,9 +67,17 @@ pub const SCHEMA_VERSION: i64 = 4;
 /// drive cannot freeze the app's history tab forever.
 const OPEN_WAIT: Duration = Duration::from_secs(5);
 
-/// `meta` key marking the one-time JSON import as done. Set even when the
-/// JSON history was empty — "we looked" is the fact worth recording.
+/// `meta` key marking the first JSON import as done. Set even when the JSON
+/// history was empty — "we looked" is the fact worth recording — but only
+/// when `settings.json` was actually read: see `LegacyHistory::Unreadable`.
 const META_JSON_IMPORTED: &str = "jsonHistoryImportedAt";
+
+/// `meta` key: the newest `timestamp` (epoch ms) of any JSON session an
+/// import has seen. Every later launch imports only JSON sessions newer than
+/// this, which is what brings back a session kept in `settings.json` while
+/// the store could not open, or a week spent on v1.2.1 — without bringing
+/// back one the player deleted from the store.
+const META_JSON_NEWEST: &str = "jsonHistoryNewestMs";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -891,24 +901,61 @@ impl Db {
         Ok(())
     }
 
-    // -- the one-time import ---------------------------------------------
+    // -- the JSON import -------------------------------------------------
+
+    /// Fold what `settings.json` held into the store, if it could be read.
+    ///
+    /// An unreadable file imports nothing and records nothing — in
+    /// particular not the "imported" flag, so the next launch that can read
+    /// it still does the import.
+    pub fn import_legacy_history(&mut self, legacy: &LegacyHistory) -> DbResult<usize> {
+        match legacy {
+            LegacyHistory::Read(sessions) => self.import_json_history(sessions),
+            LegacyHistory::Unreadable(why) => {
+                eprintln!("[store] the JSON history could not be read ({why}) — importing nothing this time");
+                Ok(0)
+            }
+        }
+    }
 
     /// Fold the `evalSessionHistory` array from `settings.json` into the
-    /// store, once.
+    /// store. Runs on every launch.
     ///
-    /// Idempotent twice over: it does nothing at all if the `meta` flag is
-    /// already set, and every insert is an `INSERT OR IGNORE` on the
-    /// session id, so even a flag lost to a crash mid-import cannot
-    /// duplicate a session. Returns how many rows it added.
+    /// The first run takes everything. Every run after it takes only the
+    /// sessions newer than the newest one an earlier run saw
+    /// (`META_JSON_NEWEST`): a session kept in the JSON because the store
+    /// would not open, or played on v1.2.1 after a downgrade, comes in; one
+    /// the player deleted from the store stays deleted, because it is older
+    /// than the mark. The JSON holds at most thirty, so this is cheap.
+    ///
+    /// Idempotent as well: a session whose id is already in the store is
+    /// skipped, so neither a mark lost to a crash mid-import nor two runs
+    /// over the same JSON can duplicate a session. Returns how many rows it
+    /// added.
     ///
     /// The caller passes the parsed array. Nothing here reads or writes
     /// `settings.json` — the JSON stays exactly as it was.
     pub fn import_json_history(&mut self, sessions: &[SavedSession]) -> DbResult<usize> {
-        if self.meta_get(META_JSON_IMPORTED)?.is_some() {
-            return Ok(0);
-        }
+        let imported_before = self.meta_get(META_JSON_IMPORTED)?.is_some();
+        let newest_seen: Option<u64> = match self.meta_get(META_JSON_NEWEST)? {
+            Some(v) => v.parse().ok(),
+            // A store imported by an earlier build of this branch has the
+            // flag and no mark. The newest session it holds stands in for
+            // one: everything the JSON had then is older than that.
+            None if imported_before => self
+                .conn
+                .query_row("SELECT MAX(started_at) FROM sessions", [], |r| {
+                    r.get::<_, Option<i64>>(0)
+                })
+                .map_err(DbError::from)?
+                .map(|ms| ms.max(0) as u64),
+            None => None,
+        };
         let mut added = 0usize;
         for session in sessions {
+            if newest_seen.is_some_and(|seen| session.timestamp <= seen) {
+                continue;
+            }
             let existing: Option<i64> = self
                 .conn
                 .query_row("SELECT 1 FROM sessions WHERE id = ?1", [&session.id], |r| {
@@ -923,10 +970,19 @@ impl Db {
             self.save_session(session, None)?;
             added += 1;
         }
-        self.meta_set(
-            META_JSON_IMPORTED,
-            &crate::clock::now_ns().to_string(),
-        )?;
+        // The mark only moves forward, and only after every row above is in:
+        // a crash before this line re-runs the import next launch, and the
+        // id check makes that harmless.
+        let newest_now = sessions.iter().map(|s| s.timestamp).max();
+        if let Some(newest) = newest_seen.max(newest_now) {
+            self.meta_set(META_JSON_NEWEST, &newest.to_string())?;
+        }
+        if !imported_before {
+            self.meta_set(
+                META_JSON_IMPORTED,
+                &crate::clock::now_ns().to_string(),
+            )?;
+        }
         Ok(added)
     }
 
@@ -1442,18 +1498,23 @@ enum Slot {
 /// W2's brief requires that opening, migrating and querying all happen off
 /// the UI thread. Tauri runs a non-`async` command on the main thread, so
 /// every command that touches the store is declared `#[tauri::command(async)]`
-/// and runs on the async runtime's pool instead; the open itself is handed
-/// to a background thread at startup so `setup()` — which *is* the main
-/// thread — returns without waiting for a disk.
+/// and runs on one of the async runtime's worker threads instead (tokio
+/// workers — not a blocking pool); the open itself is handed to a background
+/// thread at startup so `setup()` — which *is* the main thread — returns
+/// without waiting for a disk.
 ///
 /// That leaves a window in which a command can arrive before the file is
 /// open. Rather than answer "no history" and be wrong, a command waits on
-/// the condvar: it is already on a worker thread, so waiting there costs
-/// the UI nothing. The wait is bounded (`OPEN_WAIT`) so a pathological
-/// disk degrades to an empty history instead of a frozen tab.
+/// the condvar, off the worker (`off_the_async_workers`), so the wait costs
+/// neither the UI nor the other async commands anything. It is bounded
+/// (`OPEN_WAIT`) so a pathological disk degrades to an empty history
+/// instead of a frozen tab — and a session saved in that state is kept in
+/// `settings.json` rather than lost (`save_session_or_keep`).
 pub struct PracticeStore {
     slot: Mutex<Slot>,
     opened: Condvar,
+    /// `OPEN_WAIT`, except in a test that has no reason to sit through it.
+    open_wait: Duration,
 }
 
 impl Default for PracticeStore {
@@ -1467,6 +1528,17 @@ impl PracticeStore {
         PracticeStore {
             slot: Mutex::new(Slot::Opening),
             opened: Condvar::new(),
+            open_wait: OPEN_WAIT,
+        }
+    }
+
+    /// A store that gives up waiting for the open after `wait`. Tests only:
+    /// the give-up path is what they check, not the five seconds before it.
+    #[cfg(test)]
+    fn with_open_wait(wait: Duration) -> Self {
+        PracticeStore {
+            open_wait: wait,
+            ..Self::new()
         }
     }
 
@@ -1510,10 +1582,15 @@ impl PracticeStore {
     pub fn with<T>(&self, f: impl FnOnce(&mut Db) -> DbResult<T>) -> Result<T, String> {
         let mut guard = self.slot.lock().unwrap_or_else(|p| p.into_inner());
         if matches!(*guard, Slot::Opening) {
-            let (g, timeout) = self
-                .opened
-                .wait_timeout_while(guard, OPEN_WAIT, |s| matches!(s, Slot::Opening))
-                .unwrap_or_else(|p| p.into_inner());
+            // Up to five seconds of doing nothing. The store's commands run
+            // on the async runtime's worker threads, not on a blocking pool,
+            // so the wait is handed off the worker rather than holding one of
+            // the few the whole app's async commands share.
+            let (g, timeout) = off_the_async_workers(|| {
+                self.opened
+                    .wait_timeout_while(guard, self.open_wait, |s| matches!(s, Slot::Opening))
+                    .unwrap_or_else(|p| p.into_inner())
+            });
             guard = g;
             if timeout.timed_out() {
                 return Err("practice store is still opening".into());
@@ -1537,6 +1614,122 @@ impl PracticeStore {
             }
         }
     }
+
+    /// Save a finished session, and never lose it.
+    ///
+    /// When the store cannot take it — it would not open (corrupt, locked,
+    /// written by a newer build), it is still opening past `OPEN_WAIT`, or
+    /// the write itself failed (a full disk) — the session goes to
+    /// `keep_in_settings` instead, which writes it into `settings.json`
+    /// exactly the way v1.2.1 did (`legacy_history_with`). The next launch's
+    /// import brings it into the store. `Err` only when both refused.
+    pub fn save_session_or_keep(
+        &self,
+        session: &SavedSession,
+        instrument: Option<&str>,
+        keep_in_settings: impl FnOnce(&SavedSession) -> Result<(), String>,
+    ) -> Result<SaveOutcome, String> {
+        match self.with(|db| db.save_session(session, instrument)) {
+            Ok(()) => Ok(SaveOutcome::Stored),
+            Err(why) => {
+                eprintln!(
+                    "[store] could not save session {} ({why}) — keeping it in settings.json \
+                     the way older builds did",
+                    session.id
+                );
+                keep_in_settings(session)
+                    .map(|()| SaveOutcome::KeptInSettings)
+                    .map_err(|e| format!("{why}; and settings.json would not take it either: {e}"))
+            }
+        }
+    }
+}
+
+/// Run a blocking wait without holding one of the async runtime's workers.
+///
+/// On Tauri's (multi-threaded) runtime that is `block_in_place`, which moves
+/// the worker's other tasks elsewhere for the duration. Anywhere else — a
+/// plain thread, a test, a `spawn_blocking` thread — the wait simply runs:
+/// there is no worker to hold, and `block_in_place` would panic on a
+/// current-thread runtime.
+fn off_the_async_workers<R>(wait: impl FnOnce() -> R) -> R {
+    match tokio::runtime::Handle::try_current() {
+        Ok(h) if h.runtime_flavor() == tokio::runtime::RuntimeFlavor::MultiThread => {
+            tokio::task::block_in_place(wait)
+        }
+        _ => wait(),
+    }
+}
+
+/// What `save_session` did with a session. Crosses to the frontend as
+/// `"stored"` or `"keptInSettings"`; the second is what puts the notice up.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum SaveOutcome {
+    Stored,
+    KeptInSettings,
+}
+
+/// What reading `evalSessionHistory` out of `settings.json` found.
+#[derive(Debug)]
+pub enum LegacyHistory {
+    /// The key was read: the sessions in it, or none if it was never written
+    /// (a fresh install — "we looked and there was nothing" is still a read).
+    Read(Vec<SavedSession>),
+    /// `settings.json` would not open, or the key held something that is not
+    /// a history. Nothing is imported and nothing is marked as imported.
+    Unreadable(String),
+}
+
+impl LegacyHistory {
+    /// Read the raw value under `evalSessionHistory`.
+    ///
+    /// Entry by entry rather than all-or-nothing: one record this build
+    /// cannot parse must not make the other twenty-nine look like no history
+    /// at all, which is how v1.2.1's own read behaved.
+    pub fn from_value(value: Option<&serde_json::Value>) -> LegacyHistory {
+        match value {
+            None | Some(serde_json::Value::Null) => LegacyHistory::Read(Vec::new()),
+            Some(serde_json::Value::Array(items)) => {
+                let mut sessions = Vec::with_capacity(items.len());
+                let mut skipped = 0usize;
+                for item in items {
+                    match serde_json::from_value::<SavedSession>(item.clone()) {
+                        Ok(s) => sessions.push(s),
+                        Err(_) => skipped += 1,
+                    }
+                }
+                if skipped > 0 {
+                    eprintln!("[store] {skipped} JSON session(s) could not be read and were left out");
+                }
+                LegacyHistory::Read(sessions)
+            }
+            Some(_) => LegacyHistory::Unreadable("evalSessionHistory is not a list".into()),
+        }
+    }
+}
+
+/// `evalSessionHistory` with `session` added, the way v1.2.1 wrote it:
+/// newest first, capped at `MAX_SESSION_HISTORY`.
+///
+/// Works on the raw JSON rather than on parsed sessions, so an entry this
+/// build cannot read is carried along instead of silently dropped. A value
+/// that is not a list is refused rather than overwritten.
+pub fn legacy_history_with(
+    existing: Option<&serde_json::Value>,
+    session: &SavedSession,
+) -> Result<serde_json::Value, String> {
+    let mut items = match existing {
+        None | Some(serde_json::Value::Null) => Vec::new(),
+        Some(serde_json::Value::Array(items)) => items.clone(),
+        Some(_) => {
+            return Err("evalSessionHistory in settings.json is not a list; leaving it alone".into())
+        }
+    };
+    let entry = serde_json::to_value(session).map_err(|e| e.to_string())?;
+    items.insert(0, entry);
+    items.truncate(crate::session::MAX_SESSION_HISTORY);
+    Ok(serde_json::Value::Array(items))
 }
 
 /// Where the store lives, given the app's data directory.
@@ -1768,15 +1961,253 @@ mod tests {
 
     #[test]
     fn a_lost_import_flag_still_cannot_duplicate_a_session() {
-        // The crash-mid-import case: rows written, flag never set.
+        // The crash-mid-import case: rows written, neither flag nor mark set.
         let fixtures = fixture_sessions();
         let mut db = Db::open_in_memory().unwrap();
         db.import_json_history(&fixtures).unwrap();
         db.conn
-            .execute("DELETE FROM meta WHERE key = ?1", [META_JSON_IMPORTED])
+            .execute(
+                "DELETE FROM meta WHERE key IN (?1, ?2)",
+                [META_JSON_IMPORTED, META_JSON_NEWEST],
+            )
             .unwrap();
         assert_eq!(db.import_json_history(&fixtures).unwrap(), 0);
         assert_eq!(db.session_history(100).unwrap().len(), fixtures.len());
+    }
+
+    // -- W39: history is never lost on the way in -------------------------
+
+    #[test]
+    fn an_unreadable_settings_file_imports_nothing_and_does_not_mark_the_import_done() {
+        let mut db = Db::open_in_memory().unwrap();
+        // `settings.json` would not open at all.
+        let unreadable = LegacyHistory::Unreadable("settings.json: permission denied".into());
+        assert_eq!(db.import_legacy_history(&unreadable).unwrap(), 0);
+        assert!(!db.json_history_imported(), "a failed read is not an import");
+        // …or it opened and the key held something that is not a history.
+        let not_a_list = LegacyHistory::from_value(Some(&serde_json::json!({ "oops": 1 })));
+        assert!(matches!(not_a_list, LegacyHistory::Unreadable(_)));
+        assert_eq!(db.import_legacy_history(&not_a_list).unwrap(), 0);
+        assert!(!db.json_history_imported());
+
+        // The next launch that can read it does the whole import.
+        let fixtures = fixture_sessions();
+        let value = serde_json::to_value(&fixtures).unwrap();
+        let read = LegacyHistory::from_value(Some(&value));
+        assert_eq!(db.import_legacy_history(&read).unwrap(), fixtures.len());
+        assert!(db.json_history_imported());
+    }
+
+    #[test]
+    fn a_missing_key_is_a_read_of_nothing_and_marks_the_import_done() {
+        // A fresh install: settings.json opened, and there was no history in
+        // it. "We looked" is worth recording.
+        let mut db = Db::open_in_memory().unwrap();
+        let empty = LegacyHistory::from_value(None);
+        assert!(matches!(&empty, LegacyHistory::Read(v) if v.is_empty()));
+        assert_eq!(db.import_legacy_history(&empty).unwrap(), 0);
+        assert!(db.json_history_imported());
+    }
+
+    #[test]
+    fn one_unreadable_record_does_not_hide_the_rest() {
+        let fixtures = fixture_sessions();
+        let mut items: Vec<serde_json::Value> =
+            fixtures.iter().map(|s| serde_json::to_value(s).unwrap()).collect();
+        items.insert(1, serde_json::json!({ "id": "half-a-record" }));
+        let read = LegacyHistory::from_value(Some(&serde_json::Value::Array(items)));
+        let LegacyHistory::Read(sessions) = read else {
+            panic!("an array with one bad entry is still a history");
+        };
+        assert_eq!(sessions.len(), fixtures.len());
+    }
+
+    #[test]
+    fn a_session_added_to_the_json_after_the_first_import_comes_in_once() {
+        // The two ways the JSON grows after the first import: a session kept
+        // there while the store would not open, and a week on v1.2.1.
+        let mut json = vec![
+            sample_session("old-1", 1_700_000_000_000, 100, None),
+            sample_session("old-2", 1_700_000_100_000, 100, None),
+        ];
+        let mut db = Db::open_in_memory().unwrap();
+        assert_eq!(db.import_json_history(&json).unwrap(), 2);
+
+        // v1.2.1 prepends, newest first.
+        json.insert(0, sample_session("kept-later", 1_700_000_200_000, 120, None));
+        assert_eq!(db.import_json_history(&json).unwrap(), 1, "the new one comes in");
+        assert_eq!(db.import_json_history(&json).unwrap(), 0, "and only once");
+        let ids: Vec<String> = db.session_history(30).unwrap().into_iter().map(|s| s.id).collect();
+        assert_eq!(ids, ["kept-later", "old-2", "old-1"]);
+    }
+
+    #[test]
+    fn a_session_deleted_from_the_store_is_not_brought_back_by_the_json() {
+        let json = vec![
+            sample_session("keep", 1_700_000_100_000, 100, None),
+            sample_session("gone", 1_700_000_000_000, 100, None),
+        ];
+        let mut db = Db::open_in_memory().unwrap();
+        db.import_json_history(&json).unwrap();
+        db.delete_session("gone").unwrap();
+        // The JSON still has it — the import only ever reads — and every
+        // launch runs the import. It stays deleted.
+        assert_eq!(db.import_json_history(&json).unwrap(), 0);
+        let ids: Vec<String> = db.session_history(30).unwrap().into_iter().map(|s| s.id).collect();
+        assert_eq!(ids, ["keep"]);
+    }
+
+    #[test]
+    fn a_store_imported_before_the_mark_existed_still_takes_newer_json_sessions() {
+        // A store an earlier build of this branch imported: flag set, no mark.
+        let mut db = Db::open_in_memory().unwrap();
+        let json = vec![sample_session("old", 1_700_000_000_000, 100, None)];
+        db.import_json_history(&json).unwrap();
+        db.save_session(&sample_session("played-here", 1_700_000_100_000, 100, None), None)
+            .unwrap();
+        db.delete_session("old").unwrap();
+        db.conn
+            .execute("DELETE FROM meta WHERE key = ?1", [META_JSON_NEWEST])
+            .unwrap();
+
+        let mut later = json.clone();
+        later.insert(0, sample_session("kept-later", 1_700_000_200_000, 100, None));
+        assert_eq!(db.import_json_history(&later).unwrap(), 1);
+        let ids: Vec<String> = db.session_history(30).unwrap().into_iter().map(|s| s.id).collect();
+        assert_eq!(ids, ["kept-later", "played-here"], "the deleted one stays deleted");
+    }
+
+    #[test]
+    fn a_store_that_will_not_open_keeps_the_session_in_the_json_the_old_way() {
+        // Corrupt file: the store is unavailable for this whole launch.
+        let dir = temp_dir("keep-in-json");
+        let path = db_path(&dir);
+        std::fs::write(&path, b"this is not a sqlite database, it is a shopping list").unwrap();
+        let store = PracticeStore::new();
+        store.open_at(&path, |_| panic!("a store that did not open runs no import"));
+
+        // What settings.json held before: v1.2.1's shape, newest first.
+        let mut settings: Option<serde_json::Value> = Some(
+            serde_json::to_value(
+                (0..crate::session::MAX_SESSION_HISTORY as u64)
+                    .map(|i| sample_session(&format!("v121-{i}"), 1_700_000_000_000 - i, 100, None))
+                    .collect::<Vec<_>>(),
+            )
+            .unwrap(),
+        );
+        let session = sample_session("today", 1_800_000_000_000, 132, Some("wall"));
+        let outcome = store
+            .save_session_or_keep(&session, Some("guitar"), |s| {
+                settings = Some(legacy_history_with(settings.as_ref(), s)?);
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(outcome, SaveOutcome::KeptInSettings);
+        assert_eq!(
+            serde_json::to_value(outcome).unwrap(),
+            serde_json::json!("keptInSettings"),
+            "the wire name the frontend listens for",
+        );
+
+        // Exactly v1.2.1's write: prepended, capped at thirty, same shape.
+        let kept: Vec<SavedSession> = serde_json::from_value(settings.clone().unwrap()).unwrap();
+        assert_eq!(kept.len(), crate::session::MAX_SESSION_HISTORY);
+        assert_eq!(kept[0].id, "today");
+        assert_eq!(
+            serde_json::to_value(&kept[0]).unwrap(),
+            serde_json::to_value(&session).unwrap()
+        );
+        assert_eq!(kept.last().unwrap().id, "v121-28", "the oldest fell off the end");
+
+        // The file is still exactly as it was.
+        assert_eq!(
+            std::fs::read(&path).unwrap(),
+            b"this is not a sqlite database, it is a shopping list"
+        );
+
+        // And the next launch, with a store that works, brings it in.
+        let mut healthy = Db::open_in_memory().unwrap();
+        let read = LegacyHistory::from_value(settings.as_ref());
+        healthy.import_legacy_history(&read).unwrap();
+        assert!(healthy.session_history(30).unwrap().iter().any(|s| s.id == "today"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_store_still_opening_past_the_wait_keeps_the_session_too() {
+        // Nobody ever calls `open_at`: the save waits out the open and then
+        // must not drop the session on the floor. The wait is shortened; the
+        // path after it is the one under test.
+        let store = PracticeStore::with_open_wait(Duration::from_millis(1));
+        let mut kept = None;
+        let outcome = store
+            .save_session_or_keep(&sample_session("slow-disk", 1_800_000_000_000, 90, None), None, |s| {
+                kept = Some(s.id.clone());
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(outcome, SaveOutcome::KeptInSettings);
+        assert_eq!(kept.as_deref(), Some("slow-disk"));
+    }
+
+    #[test]
+    fn waiting_for_the_open_does_not_hold_an_async_worker() {
+        // The store's commands run on the runtime's workers. One worker, one
+        // command waiting for the open, and the thing that finishes the open
+        // queued behind it on the same worker: if the wait held the worker,
+        // the open could not happen until the wait gave up, and the command
+        // would answer "still opening". Off the worker, it sees the open.
+        let rt = tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(1)
+            .build()
+            .unwrap();
+        let store = std::sync::Arc::new(PracticeStore::with_open_wait(Duration::from_secs(30)));
+        let waiting = {
+            let store = store.clone();
+            rt.spawn(async move {
+                let opener = store.clone();
+                // Queued on this same worker, behind the task that is running.
+                tokio::spawn(async move { opener.unavailable("no data directory".into()) });
+                store.with(|db| db.session_history(30).map(|v| v.len()))
+            })
+        };
+        let answer = rt.block_on(waiting).unwrap();
+        assert_eq!(answer, Err("no data directory".to_string()));
+    }
+
+    #[test]
+    fn a_working_store_takes_the_session_and_leaves_the_json_alone() {
+        let store = PracticeStore::new();
+        let dir = temp_dir("stored");
+        store.open_at(&db_path(&dir), |_| {});
+        let outcome = store
+            .save_session_or_keep(&sample_session("s", 1_800_000_000_000, 90, None), None, |_| {
+                panic!("the JSON is not written when the store took the session")
+            })
+            .unwrap();
+        assert_eq!(outcome, SaveOutcome::Stored);
+        assert_eq!(store.read_or(0, |db| Ok(db.session_history(30)?.len())), 1);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_json_write_refuses_to_overwrite_something_that_is_not_a_history() {
+        let s = sample_session("s", 1, 90, None);
+        assert!(legacy_history_with(Some(&serde_json::json!("garbage")), &s).is_err());
+        // A value that is absent or null is a history of nothing yet.
+        assert_eq!(legacy_history_with(None, &s).unwrap().as_array().unwrap().len(), 1);
+        assert_eq!(
+            legacy_history_with(Some(&serde_json::Value::Null), &s)
+                .unwrap()
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+        // An entry this build cannot read is carried, not dropped.
+        let odd = serde_json::json!([{ "id": "from-somewhere-else" }]);
+        let out = legacy_history_with(Some(&odd), &s).unwrap();
+        assert_eq!(out[1]["id"], "from-somewhere-else");
     }
 
     #[test]

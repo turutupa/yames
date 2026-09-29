@@ -26,7 +26,8 @@
     "send": "送信",
     "today": "今日",
     "yesterday": "昨日",
-    "noteSpacingTrend": "音符間隔の推移"
+    "noteSpacingTrend": "音符間隔の推移",
+    "historyKeptInSettings": "Your practice history couldn't be opened, so Yames is saving your sessions the way earlier versions did. Nothing is lost — they'll move into your history the next time Yames opens it."
   },
   "coachDetail": {
     "exercises": "エクササイズ",

@@ -26,7 +26,8 @@
     "send": "Gönder",
     "today": "Bugün",
     "yesterday": "Dün",
-    "noteSpacingTrend": "Nota aralığı eğilimi"
+    "noteSpacingTrend": "Nota aralığı eğilimi",
+    "historyKeptInSettings": "Your practice history couldn't be opened, so Yames is saving your sessions the way earlier versions did. Nothing is lost — they'll move into your history the next time Yames opens it."
   },
   "coachDetail": {
     "exercises": "Alıştırmalar",

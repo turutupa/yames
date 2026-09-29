@@ -477,7 +477,12 @@ pub fn take_video_begin(
 
 /// Append one `MediaRecorder` chunk. The body is the bytes; the `seq` header
 /// is which chunk it is.
-#[tauri::command]
+///
+/// `(async)`, like every command here that writes: a plain command runs on
+/// the main thread, and a disk write there is the window not repainting. Off
+/// it, two appends could in principle run at once — `chunks.ts` keeps one in
+/// flight at a time, and `append` holds an early chunk back by `seq` anyway.
+#[tauri::command(async)]
 pub fn take_video_append(request: Request<'_>, video: State<VideoState>) -> Result<u64, String> {
     let seq = seq_of(&request)?;
     let chunk = bytes_of(request.body())?;
@@ -485,8 +490,9 @@ pub fn take_video_append(request: Request<'_>, video: State<VideoState>) -> Resu
     append(seq, chunk, &mut slot)
 }
 
-/// Close the recording and file it under the take it belongs to.
-#[tauri::command]
+/// Close the recording and file it under the take it belongs to. `(async)`:
+/// it flushes, renames and writes the sidecar — file I/O, off the main thread.
+#[tauri::command(async)]
 pub fn take_video_finish(
     take_id: String,
     offset_ms: Option<f64>,
@@ -528,8 +534,9 @@ const MAX_THUMB_BYTES: usize = 2 * 1024 * 1024;
 /// id exactly as it refuses `.dry` and `.video`.
 ///
 /// A failure is never worth reporting up: a take with no thumbnail is a take,
-/// and the shelf draws a plain tile for it.
-#[tauri::command]
+/// and the shelf draws a plain tile for it. `(async)`: a file write, off the
+/// main thread.
+#[tauri::command(async)]
 pub fn take_thumb_write(
     request: Request<'_>,
     app_handle: AppHandle,
@@ -762,8 +769,9 @@ pub async fn clip_save_begin(
 }
 
 /// Append one composited chunk. The body is the bytes; `seq` says which.
-#[tauri::command]
-pub fn clip_save_append(request: Request<'_>, clip: State<ClipState>) -> Result<u64, String> {
+/// `(async)` for the same reason as `take_video_append`.
+#[tauri::command(async)]
+pub fn clip_save_append(request: Request<'_>, clip: State<'_, ClipState>) -> Result<u64, String> {
     let seq = seq_of(&request)?;
     let chunk = bytes_of(request.body())?;
     let mut slot = clip.slot().unwrap_or_else(|e| e.into_inner());
@@ -771,8 +779,9 @@ pub fn clip_save_append(request: Request<'_>, clip: State<ClipState>) -> Result<
 }
 
 /// Close the clip. The path comes back so the screen can say where it went.
-#[tauri::command]
-pub fn clip_save_finish(clip: State<ClipState>) -> Result<SavedClip, String> {
+/// `(async)`: closing flushes the file.
+#[tauri::command(async)]
+pub fn clip_save_finish(clip: State<'_, ClipState>) -> Result<SavedClip, String> {
     let mut slot = clip.slot().unwrap_or_else(|e| e.into_inner());
     clip_finish(&mut slot)
 }
