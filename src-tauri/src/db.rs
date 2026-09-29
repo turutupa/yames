@@ -973,9 +973,20 @@ impl Db {
         // The mark only moves forward, and only after every row above is in:
         // a crash before this line re-runs the import next launch, and the
         // id check makes that harmless.
+        //
+        // The first import ALWAYS writes a mark, "0" when it read nothing: a
+        // flag with no mark is how a store imported by an earlier build of
+        // this branch looks, and that case reads the newest session in the
+        // store as its mark — which would skip, forever, a session kept in
+        // the JSON before a later one reached the store.
         let newest_now = sessions.iter().map(|s| s.timestamp).max();
-        if let Some(newest) = newest_seen.max(newest_now) {
-            self.meta_set(META_JSON_NEWEST, &newest.to_string())?;
+        let mark = match newest_seen.max(newest_now) {
+            Some(newest) => Some(newest),
+            None if !imported_before => Some(0),
+            None => None,
+        };
+        if let Some(mark) = mark {
+            self.meta_set(META_JSON_NEWEST, &mark.to_string())?;
         }
         if !imported_before {
             self.meta_set(
@@ -1678,6 +1689,12 @@ pub enum LegacyHistory {
     Read(Vec<SavedSession>),
     /// `settings.json` would not open, or the key held something that is not
     /// a history. Nothing is imported and nothing is marked as imported.
+    ///
+    /// Rarer than it looks: tauri-plugin-store 2.4 swallows a file it cannot
+    /// load or parse and hands back an empty store, which reads as `Read` of
+    /// nothing. That is why the first import's mark is "0" rather than absent
+    /// (see `import_json_history`): whatever that file later turns out to
+    /// hold still comes in.
     Unreadable(String),
 }
 
@@ -2039,6 +2056,31 @@ mod tests {
         assert_eq!(db.import_json_history(&json).unwrap(), 0, "and only once");
         let ids: Vec<String> = db.session_history(30).unwrap().into_iter().map(|s| s.id).collect();
         assert_eq!(ids, ["kept-later", "old-2", "old-1"]);
+    }
+
+    #[test]
+    fn a_session_kept_in_the_json_before_a_later_stored_one_still_comes_in() {
+        // A player with no history yet: the first launch imports nothing.
+        // (tauri-plugin-store swallows a settings.json it cannot parse, so an
+        // unreadable file looks exactly like this too.)
+        let mut db = Db::open_in_memory().unwrap();
+        assert_eq!(db.import_json_history(&[]).unwrap(), 0);
+        assert!(db.json_history_imported());
+
+        // A later launch: the store is still opening past its wait when S1
+        // ends, so S1 is kept in settings.json. Then the store opens and S2,
+        // played after it, goes straight into the store.
+        let s1 = sample_session("s1-kept-in-json", 1_800_000_000_000, 100, None);
+        let s2 = sample_session("s2-in-the-store", 1_800_000_600_000, 100, None);
+        let json = vec![s1];
+        db.save_session(&s2, None).unwrap();
+
+        // The next launch brings S1 in — once — even though the store's
+        // newest session is later than it.
+        assert_eq!(db.import_json_history(&json).unwrap(), 1);
+        assert_eq!(db.import_json_history(&json).unwrap(), 0);
+        let ids: Vec<String> = db.session_history(30).unwrap().into_iter().map(|s| s.id).collect();
+        assert_eq!(ids, ["s2-in-the-store", "s1-kept-in-json"]);
     }
 
     #[test]
