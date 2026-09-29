@@ -189,6 +189,32 @@ impl LoopbackCapture {
         self.ring.dropped()
     }
 
+    /// A way to close the stream from another thread, without joining.
+    ///
+    /// Storing `false` here makes the capture thread drop its stream within
+    /// one of its twenty-millisecond naps. The take's writer holds one: when
+    /// IT ends the take — the length cap, the output changing rate — the
+    /// speakers stop being listened to there and then, rather than when the
+    /// musician next presses Stop (W38 item 6). `stop` still joins the
+    /// thread afterwards.
+    pub fn closer(&self) -> Arc<AtomicBool> {
+        self.alive.clone()
+    }
+
+    /// A capture with no stream behind it, for the take's tests, which fill
+    /// the ring by hand. Holds the flag a real one would, so a test can see
+    /// that the writer closed it.
+    #[cfg(test)]
+    pub(crate) fn detached(ring: Arc<TakeRing>, format: LoopbackFormat) -> Self {
+        Self {
+            alive: Arc::new(AtomicBool::new(true)),
+            thread: None,
+            ring,
+            format,
+            peak: Arc::new(AtomicU32::new(0)),
+        }
+    }
+
     /// Stop capturing and close the stream. Called by `Drop` too, so a take
     /// that ends any way at all gives the endpoint back.
     pub fn stop(&mut self) {

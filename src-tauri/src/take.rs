@@ -1604,6 +1604,12 @@ struct EverythingWriter {
     position_slot: Arc<Mutex<Option<TakePosition>>>,
     position_fn: Option<TakePositionSource>,
     path: PathBuf,
+    /// The capture's own close flag ([`crate::loopback::LoopbackCapture::closer`]).
+    /// Lowered when this writer returns, however it ends: a take the writer
+    /// finished itself — the length cap, a rate change — stops listening to
+    /// the speakers then, not at the next press of Stop. `None` in tests
+    /// with no capture.
+    capture_alive: Option<Arc<AtomicBool>>,
 }
 
 /// Write a take made of everything this computer plays.
@@ -1644,7 +1650,20 @@ fn write_everything_this_computer_plays(w: EverythingWriter) {
         position_slot,
         position_fn,
         path,
+        capture_alive,
     } = w;
+    // Whatever way this function returns, the speakers stop being listened
+    // to on the way out. A guard rather than a line at the bottom, because
+    // the loop below has more than one way out.
+    struct CloseCapture(Option<Arc<AtomicBool>>);
+    impl Drop for CloseCapture {
+        fn drop(&mut self) {
+            if let Some(alive) = self.0.take() {
+                alive.store(false, Ordering::Release);
+            }
+        }
+    }
+    let _close_capture = CloseCapture(capture_alive);
 
     let mut fold = LoopbackFold::new(channels, in_sr, out_sr);
     let mut raw: Vec<f32> = Vec::with_capacity(in_sr as usize * channels.max(1) as usize);
@@ -1996,6 +2015,10 @@ impl TakeSession {
             ),
             None => (None, None, TakeSound::YamesAndInput, None),
         };
+        // The writer may not own the capture — it lives in the take, so Stop
+        // can close it before joining — but it may CLOSE it, which is what it
+        // needs when it is the one that ends the take.
+        let capture_alive = capture.as_ref().map(|c| c.closer());
         let writer = std::thread::Builder::new()
             .name("yames-take-writer".into())
             .spawn(move || {
@@ -2023,6 +2046,7 @@ impl TakeSession {
                         position_slot: position_for_writer,
                         position_fn: position_for_writer_fn,
                         path: path_for_writer,
+                        capture_alive,
                     });
                     return;
                 }
@@ -3676,6 +3700,65 @@ mod tests {
         );
     }
 
+    /// A TAKE OF EVERYTHING THIS COMPUTER PLAYS STOPS LISTENING WHEN IT ENDS,
+    /// not when Stop is pressed (W38 item 6).
+    ///
+    /// The writer ends a take itself at the length cap and when the output
+    /// changes rate. The capture lives in the take, where only `stop` closed
+    /// it, so the speakers went on being listened to until the musician next
+    /// pressed Stop — minutes, possibly. The rate change is the ending this
+    /// test can drive; the cap leaves the writer by the same return.
+    #[test]
+    fn a_take_the_writer_ends_closes_the_capture() {
+        let root = tmp_dir("lb-closes");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let watch = Arc::new(AtomicU32::new(48_000));
+        let ring = Arc::new(TakeRing::new(48_000));
+        let capture = crate::loopback::LoopbackCapture::detached(
+            ring.clone(),
+            crate::loopback::LoopbackFormat {
+                device: "a test speaker".into(),
+                sample_rate: 48_000,
+                channels: 2,
+            },
+        );
+        let alive = capture.closer();
+        let mut session = TakeSession::default();
+        session
+            .start(TakeStart {
+                app_data: &root,
+                jam_id: "loopback",
+                handoff: &handoff,
+                mic: None,
+                out_sr: 48_000,
+                round_trip_us: 0,
+                out_sr_watch: Some(watch.clone()),
+                owns_input: false,
+                position: None,
+                loopback: Some(TakeLoopback {
+                    ring: ring.clone(),
+                    sample_rate: 48_000,
+                    channels: 2,
+                    device: "a test speaker".into(),
+                    capture: Some(capture),
+                }),
+            })
+            .expect("the take starts");
+        ring.push(&[0.25f32; 9_600]);
+        // Short of the 4 800 frames pushed: the fold holds a frame back.
+        wait_until("the writer commits the speakers", || session.written_samples() >= 4_000);
+        assert!(alive.load(Ordering::Acquire), "the capture is open while the take runs");
+
+        // The output moves to a 44.1 kHz interface; the writer ends the take.
+        watch.store(44_100, Ordering::Release);
+        wait_until("the writer ends the take", || session.writer_finished());
+        wait_until("the capture is closed", || !alive.load(Ordering::Acquire));
+
+        // Nobody has pressed Stop yet — and when they do, it still works.
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        assert!(Path::new(&take.path).is_file());
+    }
+
     /// A take remembers whether it opened the microphone, because
     /// `stop_take` has to know whether to close it and by then there is no
     /// take left to ask.
@@ -4221,26 +4304,51 @@ mod tests {
         let alive = Arc::new(AtomicBool::new(true));
         let filling = alive.clone();
         let feed = ring.clone();
+        // How many times the stand-in stream has pushed, so the test can say
+        // it was still talking while Stop ran.
+        let pushes = Arc::new(AtomicU64::new(0));
+        let pushed = pushes.clone();
         let pump = std::thread::spawn(move || {
             while filling.load(Ordering::Acquire) {
                 feed.push(&vec![0.1f32; 960 * 2]);
+                pushed.fetch_add(1, Ordering::Release);
                 std::thread::sleep(std::time::Duration::from_millis(5));
             }
         });
 
         wait_until("the take to be recording", || session.written_samples() > 0);
         // No `capture` to close, so `stop` cannot help itself here: only the
-        // writer's own bound can end this, and it has half a second to.
-        let began = std::time::Instant::now();
-        let take = session.stop(&handoff).expect("the take stops");
-        let took = began.elapsed();
+        // writer's own bound (`MAX_DRAIN_TICKS`) can end this.
+        //
+        // What is checked is THAT Stop comes back, not how fast — it used to
+        // be timed, and a loaded machine took 5.7 s over a bound of 5. So
+        // Stop runs on a thread of its own and is waited for with a
+        // HANG-CATCHER: the bug this guards is a join that never returns, and
+        // sixty seconds is two orders of magnitude past the writer's bound of
+        // twenty ticks, so only a hang can reach it.
+        let pushes_before = pushes.load(Ordering::Acquire);
+        let stop_handoff = handoff.clone();
+        let (tx, rx) = std::sync::mpsc::channel();
+        let stopper = std::thread::spawn(move || {
+            let _ = tx.send(session.stop(&stop_handoff));
+        });
+        let take = rx
+            .recv_timeout(std::time::Duration::from_secs(60))
+            .expect("Stop never came back against a speaker that would not stop")
+            .expect("the take stops");
+        // Read BEFORE the pump is told to stop: the stream was still being
+        // filled while Stop ran, which is the condition under test — a writer
+        // that only finished because the ring ran dry would prove nothing.
+        let pushed_during_stop = pushes.load(Ordering::Acquire) - pushes_before;
         alive.store(false, Ordering::Release);
         let _ = pump.join();
+        let _ = stopper.join();
 
         assert!(take.is_some(), "the take is kept");
         assert!(
-            took < std::time::Duration::from_secs(5),
-            "stopping took {took:?} against a stream that would not stop"
+            pushed_during_stop > 0,
+            "the stand-in speaker was quiet while Stop ran, so this did not test one \
+             that never stops talking"
         );
     }
 

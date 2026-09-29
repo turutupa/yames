@@ -86,6 +86,101 @@ fn an_invalidation_never_replays_stale_audio() {
     );
 }
 
+/// THE SEEK THAT SILENCED EVERY GUITAR (pre-merge review, W38 item 1).
+///
+/// The renderer reads the epoch, sees its own, and starts rendering a chunk of
+/// the OLD stream. While it is inside `synth.render` a seek bumps the epoch;
+/// the callback's next buffer drains (`read = write`, `drained = epoch`); and
+/// only then does the renderer push the chunk it was holding, so `write` is
+/// past `read` again. The ring used to demand `read >= write` before a new
+/// stream could begin — which nobody would ever make true again, because the
+/// callback had already drained for that epoch and `ready` only answers 0
+/// while `live != epoch`. Every guitar in the song stayed silent until the next
+/// seek or a Stop and Play.
+///
+/// Driven by hand, one step at a time, in exactly that order, with the
+/// renderer's own loop step (`drained_for`, `begin`, `push`) and the callback's
+/// own (`ready`, `at`, `consume`). The stale chunk is `-1.0` throughout, and
+/// the new stream's frames carry their playhead position, so the test can say
+/// both that frames flow again and that none of them is the old chunk.
+#[test]
+fn a_chunk_pushed_across_a_seek_neither_wedges_the_ring_nor_is_heard() {
+    let r = ring(4096);
+    const BUFFER: u64 = 256;
+    // The old stream, playing from the top, with the renderer ahead of it.
+    produce(&r, 0, 1024);
+    let mut play = 0u64;
+    for _ in 0..2 {
+        let have = r.ready(play).min(BUFFER);
+        assert_eq!(have, BUFFER, "the old stream plays");
+        r.consume(have);
+        play += BUFFER;
+    }
+
+    // 1. The renderer reads the epoch — its own — and begins a chunk.
+    let renderer_epoch = r.epoch();
+    assert_eq!(r.live.load(Ordering::Acquire), renderer_epoch);
+
+    // 2. The player clicks on bar 9. The callback takes the seek, bumps the
+    //    epoch and drains on the same buffer, as `engine.rs` does.
+    let target = 9000u64;
+    r.invalidate();
+    play = target;
+    assert_eq!(r.ready(play), 0, "a seek's own buffer offers nothing");
+    play += BUFFER;
+
+    // 3. The renderer finishes the chunk it began before the seek, and pushes
+    //    it. This is the old stream, arriving after the drain.
+    let stale = vec![-1.0f32; 256];
+    r.push(&stale, &stale);
+
+    // 4. From here on, both sides run their ordinary loops. The renderer's
+    //    step is `render_loop`'s: a new epoch may begin only once the callback
+    //    has drained for it, and then it renders from the playhead it is told.
+    let mut my_epoch = renderer_epoch;
+    let mut heard = 0u64;
+    for _ in 0..8 {
+        // The renderer's turn.
+        let epoch = r.epoch();
+        if epoch != my_epoch && r.drained_for(epoch) {
+            let from = r.begin(epoch);
+            my_epoch = epoch;
+            let block: Vec<f32> = (0..2048).map(|n| (from + n) as f32).collect();
+            r.push(&block, &block);
+        }
+        // The callback's turn.
+        let have = r.ready(play).min(BUFFER);
+        for n in 0..have {
+            let (l, rr) = r.at(n);
+            assert!(
+                l >= 0.0 && rr >= 0.0,
+                "a frame of the chunk rendered before the seek was offered after it",
+            );
+            assert_eq!(
+                l,
+                (play + n) as f32,
+                "the frame offered for playhead {} is not that playhead's frame",
+                play + n,
+            );
+        }
+        r.consume(have);
+        heard += have;
+        play += BUFFER;
+    }
+    assert_eq!(
+        my_epoch,
+        r.epoch(),
+        "the renderer never began the stream for the seek: the ring is wedged",
+    );
+    assert!(
+        heard >= BUFFER * 4,
+        "only {heard} frames came out of the ring after the seek — the guitars went silent",
+    );
+    // And the observer the jitter probe reads counts what was mixed, not
+    // what a drain or a skip stepped over.
+    assert_eq!(r.watch().mixed, BUFFER * 2 + heard);
+}
+
 #[test]
 fn a_stream_that_began_behind_the_playhead_is_skipped_to() {
     // The renderer published a stream starting at playhead 1000 and the

@@ -877,6 +877,66 @@ fn busiest_jam() -> JamConfig {
 /// Ticks to a quarter note, as `song.rs` fixes it.
 const SONG_TPQ: u32 = 960;
 
+/// What `--song`'s seeks did to the synthesiser: how many were watched, how
+/// many were followed by more than the limit of silence from the ring, and
+/// the longest gap seen, in frames of audio.
+#[derive(Default)]
+struct SeekWatch {
+    checked: AtomicU64,
+    silent: AtomicU64,
+    worst_frames: AtomicU64,
+}
+
+impl SeekWatch {
+    /// Watch the ring after a seek was posted. `drained_before` is the epoch
+    /// the callback had drained for just before the post, so the buffer that
+    /// takes the seek is the one on which it moves.
+    ///
+    /// Two waits, each bounded by a wall clock only so a run that stops
+    /// (a song that does not loop runs out; the transport stops) cannot hang
+    /// the thread. Neither decides the verdict: that is the ring's playhead.
+    fn after_seek(&self, ring: &SynthRing, drained_before: u64, limit: u64, stop: &AtomicBool) {
+        use std::time::Instant;
+        let give_up = Instant::now() + Duration::from_secs(2);
+        // The buffer that takes the seek drains for the new epoch.
+        let taken = loop {
+            let w = ring.watch();
+            if w.drained != drained_before {
+                break w;
+            }
+            if stop.load(Ordering::Relaxed) || Instant::now() > give_up {
+                // The transport was not running to take it. Nothing to check.
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        };
+        self.checked.fetch_add(1, Ordering::Relaxed);
+        loop {
+            std::thread::sleep(Duration::from_millis(1));
+            let w = ring.watch();
+            let silent_for = w.play.saturating_sub(taken.play);
+            if w.mixed > taken.mixed {
+                self.worst_frames.fetch_max(silent_for, Ordering::Relaxed);
+                return;
+            }
+            if silent_for > limit {
+                self.worst_frames.fetch_max(silent_for, Ordering::Relaxed);
+                self.silent.fetch_add(1, Ordering::Relaxed);
+                eprintln!(
+                    "[probe] a seek was followed by {silent_for} frames of audio with no \
+                     synth mixed — the guitars did not come back"
+                );
+                return;
+            }
+            // The playhead went backwards (a Stop and Play, or another seek)
+            // or the run is ending: this seek's window is over.
+            if w.play < taken.play || stop.load(Ordering::Relaxed) || Instant::now() > give_up {
+                return;
+            }
+        }
+    }
+}
+
 /// The busiest song anyone could plausibly import, for `--song`.
 ///
 /// Twelve bars at 240 BPM with a 7/8 at bar 4 and a tempo step to 180 on the
@@ -1497,8 +1557,23 @@ fn main() -> ExitCode {
     //   begun again — which is the one path where the callback does something
     //   about the synthesiser beyond adding two numbers, and the one the
     //   dropout count has to stay at zero across.
+    //
+    // * **And the guitars come back after every seek.** A seek that left the
+    //   ring wedged (pre-merge review, W38 item 1) cost the callback nothing
+    //   at all — it simply mixed no synth for the rest of the run — so none
+    //   of the timing numbers could see it. After each seek this thread
+    //   watches the ring's own counters: when the callback takes the seek
+    //   (it drains for the new epoch), and when it next mixes a synth frame.
+    //   The gap is measured on the ring's PLAYHEAD, in frames of audio, not
+    //   on a wall clock, so a busy machine cannot fail it by being slow to
+    //   schedule this thread. The probe's guitar plays on every beat and rings
+    //   for a beat and a half, so there is a note everywhere a seek can land.
+    let seek_rate = engine.output_sample_rate().unwrap_or(48_000) as u64;
+    let seek_silence_limit = seek_rate / 10; // 100 ms of audio
+    let seek_watch = Arc::new(SeekWatch::default());
     let song_hand = song_synth.as_ref().map(|(_, ring)| {
         let ring = Arc::clone(ring);
+        let watch = Arc::clone(&seek_watch);
         // The transport's own seek, which is the whole of the path the
         // owner's click on the tab takes: `SongHandoff::seek` posts a sample,
         // the callback takes it with a swap, moves three cursors, cuts every
@@ -1528,7 +1603,22 @@ fn main() -> ExitCode {
                 // seek that only ever went one way could not pass this.
                 if n % 12 == 11 && seam > 0 {
                     let quarter = seam / 4;
+                    let drained_before = ring.watch().drained;
                     handoff.seek(quarter * ((n / 12) % 4 + 1).min(3));
+                    watch.after_seek(&ring, drained_before, seek_silence_limit, &flag);
+                    // And a second click the moment the guitars are back —
+                    // a player clicking along the tab, which is when the
+                    // review expected the wedge to be likeliest.
+                    //
+                    // This DETECTS a wedge; it does not reliably CAUSE one.
+                    // The race needs the seek to land while the renderer is
+                    // inside one 256-frame chunk, a few per cent of each
+                    // buffer here, and 60 seeks on the old ring (2026-09-29)
+                    // never hit it. `synth::tests` drives that interleaving
+                    // by hand, which is the proof; this is the net.
+                    let drained_before = ring.watch().drained;
+                    handoff.seek(quarter * ((n / 12 + 2) % 4));
+                    watch.after_seek(&ring, drained_before, seek_silence_limit, &flag);
                 }
                 n += 1;
                 count.fetch_add(1, Ordering::Relaxed);
@@ -1787,7 +1877,7 @@ fn main() -> ExitCode {
     }
     if song_moves > 0 {
         mode.push_str(&format!(
-            " + a fader moved {song_moves} times and a seek every three seconds"
+            " + a fader moved {song_moves} times and two quick seeks every three seconds"
         ));
     }
     if args.song {
@@ -1856,12 +1946,25 @@ fn main() -> ExitCode {
     println!("allocations       {cb_allocs} ({cb_alloc_bytes} bytes)");
     println!("frees             {cb_frees}");
     println!("dropped beats     {dropped_notifications} (beat queue full)");
+    let seeks_checked = seek_watch.checked.load(Ordering::Relaxed);
+    let silent_seeks = seek_watch.silent.load(Ordering::Relaxed);
+    if song_moves > 0 {
+        println!("--- the synthesiser after a seek (frames of audio, not wall time) ---");
+        println!(
+            "seeks watched     {seeks_checked}, longest wait for synth {:.1} ms of audio",
+            seek_watch.worst_frames.load(Ordering::Relaxed) as f64 * 1000.0 / seek_rate as f64
+        );
+        println!("silent seeks      {silent_seeks} (over {} ms with no synth)", seek_silence_limit * 1000 / seek_rate);
+    }
 
     let jitter_ok = report.jitter_p99 < args.p99_ms;
     let beats_ok = report.missed_beats == 0;
     let arena_ok = report.overflow == 0;
     let alloc_ok = cb_allocs == 0 && cb_frees == 0;
     let queue_ok = dropped_notifications == 0;
+    // Hard, like the three above: a seek that silences the guitars is a
+    // fault the timing numbers are blind to.
+    let seek_ok = silent_seeks == 0;
     println!("--- gate (ROADMAP §4) ---");
     println!(
         "p99 < {:.2} ms      {}",
@@ -1883,6 +1986,12 @@ fn main() -> ExitCode {
         "dropped beats = 0 {}",
         if queue_ok { "PASS" } else { "FAIL" }
     );
+    if song_moves > 0 {
+        println!(
+            "silent seeks = 0  {}",
+            if seek_ok { "PASS" } else { "FAIL" }
+        );
+    }
     if !arena_ok {
         println!("arena overflow    FAIL (statistics are truncated)");
     }
@@ -1893,7 +2002,7 @@ fn main() -> ExitCode {
 \"p50_ms\":{:.5},\"p95_ms\":{:.5},\"p99_ms\":{:.5},\"max_ms\":{:.5},\
 \"max_gap_ms\":{:.5},\"dropouts\":{},\"missed_beats\":{},\
 \"callback_allocs\":{},\"callback_alloc_bytes\":{},\"callback_frees\":{},\
-\"dropped_notifications\":{},\"pass\":{}}}",
+\"dropped_notifications\":{},\"silent_seeks\":{},\"pass\":{}}}",
             mode,
             report.sample_rate,
             report.median_frames,
@@ -1909,11 +2018,12 @@ fn main() -> ExitCode {
             cb_alloc_bytes,
             cb_frees,
             dropped_notifications,
-            jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok
+            silent_seeks,
+            jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok && seek_ok
         );
     }
 
-    if jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok {
+    if jitter_ok && beats_ok && arena_ok && alloc_ok && queue_ok && seek_ok {
         println!("\nRESULT PASS");
         ExitCode::SUCCESS
     } else {
