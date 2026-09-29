@@ -171,15 +171,26 @@ export function Presence({
   const reduced = useReducedMotion(off ? "off" : animationLevel);
   const still = reduced || theme === "mono";
 
-  const [phase, setPhase] = useState<Phase>(() => (open ? (still ? "open" : "entering") : "gone"));
+  const [phase, setPhaseState] = useState<Phase>(() =>
+    open ? (still ? "open" : "entering") : "gone",
+  );
 
   // The phase as the effects and the event handler see it. They fire outside
   // the render that produced the value, and a stale close over `phase` would
   // let a late `animationend` from a finished enter unmount a live surface.
+  //
+  // Written at the moment a phase is ASKED for, not mirrored from the render
+  // afterwards (W40). The mirror ran in a passive effect, so between a close
+  // and that effect the ref still said "entering" — and the enter's own
+  // `animationend`, or its fallback clock, landing in that gap set the phase
+  // back to "open" on a surface whose `open` was already false. Nothing ever
+  // closed it again: the takes promise stayed on the screen with both its
+  // buttons dead, because pressing one only repeats a `false` it already had.
   const phaseRef = useRef<Phase>(phase);
-  useEffect(() => {
-    phaseRef.current = phase;
-  }, [phase]);
+  const setPhase = useCallback((next: Phase) => {
+    phaseRef.current = next;
+    setPhaseState(next);
+  }, []);
 
   // The caller's callback, read at the moment it is needed rather than
   // captured — an inline arrow prop must not restart the exit's clock.
@@ -191,10 +202,8 @@ export function Presence({
   const finish = useCallback(() => {
     setPhase("gone");
     onExitedRef.current?.();
-  }, []);
+  }, [setPhase]);
 
-  // Declared after the mirror above so that within one commit `phaseRef` is
-  // already up to date when this reads it.
   useEffect(() => {
     const current = phaseRef.current;
     if (open) {
@@ -214,17 +223,21 @@ export function Presence({
       return;
     }
     if (current !== "exiting") setPhase("exiting");
-  }, [open, still, finish]);
+  }, [open, still, finish, setPhase]);
 
   useEffect(() => {
     if (phase !== "entering" && phase !== "exiting") return;
     const wait = (phase === "entering" ? enterMs : exitMs) + FALLBACK_SLACK_MS;
+    // Each clock ends only the phase it was started for. Its cleanup runs in a
+    // passive effect too, so an enter's clock can still fire after a close has
+    // been asked for — and must not cut the exit short when it does.
     const timer = window.setTimeout(() => {
-      if (phaseRef.current === "entering") setPhase("open");
-      else if (phaseRef.current === "exiting") finish();
+      if (phaseRef.current !== phase) return;
+      if (phase === "entering") setPhase("open");
+      else finish();
     }, wait);
     return () => window.clearTimeout(timer);
-  }, [phase, enterMs, exitMs, finish]);
+  }, [phase, enterMs, exitMs, finish, setPhase]);
 
   const handleAnimationEnd = useCallback<AnimationEventHandler<HTMLElement>>(
     (event) => {
@@ -235,7 +248,7 @@ export function Presence({
       if (phaseRef.current === "entering") setPhase("open");
       else if (phaseRef.current === "exiting") finish();
     },
-    [finish],
+    [finish, setPhase],
   );
 
   if (phase === "gone") return null;
