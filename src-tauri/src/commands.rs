@@ -4664,28 +4664,29 @@ pub fn default_downloads_dir(app_handle: AppHandle) -> Option<String> {
         .map(|p| p.to_string_lossy().into_owned())
 }
 
-/// Start watching a folder. Replaces any watch already running.
+/// Start watching the Downloads folder. Replaces any watch already running.
 ///
-/// `dir` is the folder the player chose, or `None` for this machine's own
-/// Downloads. Turning the offer off does not call this — it calls
-/// `stop_download_watch`, and then there is no thread at all.
+/// `dir` is what the webview asks for: `None` for this machine's own
+/// Downloads, or a folder. Only the Downloads folder is accepted — see
+/// `downloads::allowed_watch_dir` for why a chosen folder is refused until a
+/// dialog's answer is recorded somewhere the webview cannot write. Turning
+/// the offer off does not call this — it calls `stop_download_watch`, and
+/// then there is no thread at all.
 #[tauri::command]
 pub fn start_download_watch(
     dir: Option<String>,
     app_handle: AppHandle,
     watch: State<'_, crate::downloads::WatchState>,
 ) -> Result<String, String> {
-    let dir = match dir {
-        Some(d) if !d.trim().is_empty() => std::path::PathBuf::from(d),
-        _ => app_handle
-            .path()
-            .download_dir()
-            .map_err(|e| format!("this computer has no Downloads folder Yames can find: {e}"))?,
-    };
-    if !dir.is_dir() {
-        return Err(format!("{} is not a folder", dir.display()));
-    }
-    let mut held = watch.0.lock().unwrap();
+    let downloads = app_handle
+        .path()
+        .download_dir()
+        .map_err(|e| format!("this computer has no Downloads folder Yames can find: {e}"))?;
+    let asked = dir
+        .filter(|d| !d.trim().is_empty())
+        .map(std::path::PathBuf::from);
+    let dir = crate::downloads::allowed_watch_dir(asked.as_deref(), &downloads)?;
+    let mut held = watch.0.lock().unwrap_or_else(|p| p.into_inner());
     if let Some(running) = held.take() {
         running.stop();
     }
