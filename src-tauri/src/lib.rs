@@ -472,14 +472,7 @@ pub fn run() {
                 .tooltip("Yames")
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => {
-                        // Hide floating, show main
-                        if let Some(float_win) = app.get_webview_window("floating") {
-                            let _ = float_win.hide();
-                        }
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
+                        commands::show_main_window(app);
                     }
                     "quit" => {
                         app.exit(0);
@@ -506,7 +499,7 @@ pub fn run() {
                 // stays hidden until app_ready fires (see commands.rs), which re-applies
                 // the position and calls show() after macOS restoration has settled.
                 let aot = { app.state::<SharedState>().lock().unwrap().always_on_top };
-                let _ = main_win.set_always_on_top(aot);
+                commands::apply_main_window_behavior(&main_win, aot);
 
                 let store = app.store("settings.json")?;
                 if let Some(size) = store.get("window_size_main") {
@@ -564,8 +557,17 @@ pub fn run() {
 
             // Restore saved floating widget position (and visibility)
             if let Some(float_win) = app.get_webview_window("floating") {
+                // On Windows/Linux, hide the floating widget from the taskbar per-window.
+                // On macOS, `set_skip_taskbar(true)` mutates the entire process's
+                // `NSApplicationActivationPolicy` to `Accessory`, which hides the app
+                // from Dock/Spaces/Mission Control — so we never call it on macOS.
+                #[cfg(not(target_os = "macos"))]
+                {
+                    let _ = float_win.set_skip_taskbar(true);
+                }
+
                 let widget_aot = { app.state::<SharedState>().lock().unwrap().widget_always_on_top };
-                let _ = float_win.set_always_on_top(widget_aot);
+                commands::apply_floating_window_behavior(&float_win, widget_aot);
 
                 // Restore position before show() for the same reason as main_win.
                 let store = app.store("settings.json")?;
@@ -581,6 +583,8 @@ pub fn run() {
 
                 if last_window != "main" {
                     let _ = float_win.show();
+                    commands::apply_floating_window_behavior(&float_win, widget_aot);
+                    let _ = float_win.set_focus();
                 } else {
                     let _ = float_win.hide();
                 }
@@ -825,8 +829,29 @@ pub fn run() {
                 _ => {}
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running Yames");
+        .build(tauri::generate_context!())
+        .expect("error while building Yames")
+        .run(|app_handle, event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen {
+                has_visible_windows,
+                ..
+            } = event
+            {
+                let last_window = app_handle
+                    .store("settings.json")
+                    .ok()
+                    .and_then(|s| s.get("lastWindow"))
+                    .and_then(|v| v.as_str().map(String::from));
+                if !has_visible_windows || last_window.as_deref() != Some("floating") {
+                    commands::show_main_window(app_handle);
+                } else {
+                    commands::show_floating_window(app_handle);
+                }
+            }
+            #[cfg(not(target_os = "macos"))]
+            let _ = (app_handle, event);
+        });
 }
 
 /// Check if a window position is at least partially visible on any available monitor.

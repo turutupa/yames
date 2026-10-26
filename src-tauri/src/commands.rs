@@ -292,41 +292,116 @@ pub fn set_widget_mode(mode: String, state: State<SharedState>, app_handle: AppH
     persist_state(&state, &app_handle);
 }
 
-#[tauri::command]
-pub fn set_always_on_top(enabled: bool, state: State<SharedState>, app_handle: AppHandle) {
-    {
-        let mut s = state.lock().unwrap();
-        s.always_on_top = enabled;
+/// Configure macOS `NSWindowCollectionBehavior` so that both the main window
+/// and the floating widget remain visible in Mission Control / Spaces overview
+/// even when Always on Top (`NSFloatingWindowLevel`) is active.
+///
+/// On macOS AppKit (`NSWindow.h`), any window whose level is not
+/// `NSNormalWindowLevel` defaults to `NSWindowCollectionBehaviorTransient` +
+/// `NSWindowCollectionBehaviorIgnoresCycle`, which causes WindowServer to hide
+/// the window completely during Mission Control / Exposé / Spaces overview.
+/// Explicitly inserting `Managed` (and removing `Transient`) keeps the window
+/// visible and draggable across Spaces in Mission Control.
+#[cfg(target_os = "macos")]
+pub(crate) fn compute_macos_collection_behavior(
+    mut behavior: objc2_app_kit::NSWindowCollectionBehavior,
+    is_floating_widget: bool,
+) -> objc2_app_kit::NSWindowCollectionBehavior {
+    use objc2_app_kit::NSWindowCollectionBehavior;
+    // AppKit enforces mutual exclusion within each collectionBehavior group
+    // and throws NSInvalidArgumentException if conflicting flags coexist:
+    //   - Management group: Managed vs Transient vs Stationary
+    //   - Cycle group:      ParticipatesInCycle vs IgnoresCycle
+    //   - Spaces group:     CanJoinAllSpaces vs MoveToActiveSpace
+    //   - FullScreen group: FullScreenPrimary vs FullScreenAuxiliary vs FullScreenNone
+    behavior.remove(
+        NSWindowCollectionBehavior::Transient | NSWindowCollectionBehavior::Stationary,
+    );
+    behavior.insert(NSWindowCollectionBehavior::Managed);
+
+    if is_floating_widget {
+        behavior.remove(
+            NSWindowCollectionBehavior::MoveToActiveSpace
+                | NSWindowCollectionBehavior::FullScreenPrimary
+                | NSWindowCollectionBehavior::FullScreenNone,
+        );
+        behavior.insert(
+            NSWindowCollectionBehavior::CanJoinAllSpaces
+                | NSWindowCollectionBehavior::FullScreenAuxiliary,
+        );
+    } else {
+        behavior.remove(
+            NSWindowCollectionBehavior::CanJoinAllSpaces
+                | NSWindowCollectionBehavior::MoveToActiveSpace
+                | NSWindowCollectionBehavior::IgnoresCycle
+                | NSWindowCollectionBehavior::FullScreenAuxiliary
+                | NSWindowCollectionBehavior::FullScreenNone,
+        );
+        behavior.insert(
+            NSWindowCollectionBehavior::ParticipatesInCycle
+                | NSWindowCollectionBehavior::FullScreenPrimary,
+        );
     }
-    if let Some(main_win) = app_handle.get_webview_window("main") {
-        let _ = main_win.set_always_on_top(enabled);
-    }
-    emit_state_changed(&state, &app_handle);
-    persist_state(&state, &app_handle);
+    behavior
 }
 
-#[tauri::command]
-pub fn set_widget_always_on_top(enabled: bool, state: State<SharedState>, app_handle: AppHandle) {
-    {
-        let mut s = state.lock().unwrap();
-        s.widget_always_on_top = enabled;
-    }
-    if let Some(float_win) = app_handle.get_webview_window("floating") {
-        let _ = float_win.set_always_on_top(enabled);
-    }
-    emit_state_changed(&state, &app_handle);
-    persist_state(&state, &app_handle);
+#[cfg(target_os = "macos")]
+pub(crate) fn configure_macos_window_spaces(
+    window: &tauri::WebviewWindow,
+    is_floating_widget: bool,
+) {
+    let win = window.clone();
+    let _ = window.run_on_main_thread(move || {
+        if let Ok(ns_win_ptr) = win.ns_window() {
+            if !ns_win_ptr.is_null() {
+                unsafe {
+                    use objc2_app_kit::NSWindow;
+                    let ns_window = &*(ns_win_ptr as *const NSWindow);
+                    let next = compute_macos_collection_behavior(
+                        ns_window.collectionBehavior(),
+                        is_floating_widget,
+                    );
+                    ns_window.setCollectionBehavior(next);
+                }
+            }
+        }
+    });
 }
 
-#[tauri::command]
-pub fn show_main(app_handle: AppHandle, state: State<SharedState>) {
+#[cfg(not(target_os = "macos"))]
+pub(crate) fn configure_macos_window_spaces(
+    window: &tauri::WebviewWindow,
+    is_floating_widget: bool,
+) {
+    let _ = (window, is_floating_widget);
+}
+
+pub(crate) fn apply_main_window_behavior(main_win: &tauri::WebviewWindow, always_on_top: bool) {
+    let _ = main_win.set_always_on_top(always_on_top);
+    configure_macos_window_spaces(main_win, false);
+}
+
+pub(crate) fn apply_floating_window_behavior(
+    float_win: &tauri::WebviewWindow,
+    always_on_top: bool,
+) {
+    let _ = float_win.set_always_on_top(always_on_top);
+    let _ = float_win.set_visible_on_all_workspaces(true);
+    configure_macos_window_spaces(float_win, true);
+}
+
+pub(crate) fn show_main_window(app_handle: &AppHandle) {
     if let Some(float_win) = app_handle.get_webview_window("floating") {
         let _ = float_win.hide();
     }
     if let Some(main_win) = app_handle.get_webview_window("main") {
-        let aot = state.lock().unwrap().always_on_top;
-        let _ = main_win.set_always_on_top(aot);
+        let aot = app_handle
+            .try_state::<SharedState>()
+            .map(|s| s.lock().unwrap().always_on_top)
+            .unwrap_or(true);
+        let _ = main_win.unminimize();
         let _ = main_win.show();
+        apply_main_window_behavior(&main_win, aot);
         let _ = main_win.set_focus();
     }
     use tauri_plugin_store::StoreExt;
@@ -335,18 +410,70 @@ pub fn show_main(app_handle: AppHandle, state: State<SharedState>) {
     }
 }
 
-#[tauri::command]
-pub fn show_floating(app_handle: AppHandle) {
+pub(crate) fn show_floating_window(app_handle: &AppHandle) {
     if let Some(main_win) = app_handle.get_webview_window("main") {
+        if main_win.is_fullscreen().unwrap_or(false) {
+            let _ = main_win.set_fullscreen(false);
+        }
         let _ = main_win.hide();
     }
     if let Some(float_win) = app_handle.get_webview_window("floating") {
+        let widget_aot = app_handle
+            .try_state::<SharedState>()
+            .map(|s| s.lock().unwrap().widget_always_on_top)
+            .unwrap_or(true);
         let _ = float_win.show();
+        apply_floating_window_behavior(&float_win, widget_aot);
+        let _ = float_win.set_focus();
     }
     use tauri_plugin_store::StoreExt;
     if let Ok(store) = app_handle.store("settings.json") {
         store.set("lastWindow", serde_json::json!("floating"));
     }
+}
+
+#[tauri::command]
+pub fn set_always_on_top(enabled: bool, state: State<SharedState>, app_handle: AppHandle) {
+    let changed = {
+        let mut s = state.lock().unwrap();
+        let prev = s.always_on_top;
+        s.always_on_top = enabled;
+        prev != enabled
+    };
+    if let Some(main_win) = app_handle.get_webview_window("main") {
+        apply_main_window_behavior(&main_win, enabled);
+    }
+    if changed {
+        emit_state_changed(&state, &app_handle);
+        persist_state(&state, &app_handle);
+    }
+}
+
+#[tauri::command]
+pub fn set_widget_always_on_top(enabled: bool, state: State<SharedState>, app_handle: AppHandle) {
+    let changed = {
+        let mut s = state.lock().unwrap();
+        let prev = s.widget_always_on_top;
+        s.widget_always_on_top = enabled;
+        prev != enabled
+    };
+    if let Some(float_win) = app_handle.get_webview_window("floating") {
+        apply_floating_window_behavior(&float_win, enabled);
+    }
+    if changed {
+        emit_state_changed(&state, &app_handle);
+        persist_state(&state, &app_handle);
+    }
+}
+
+#[tauri::command]
+pub fn show_main(app_handle: AppHandle) {
+    show_main_window(&app_handle);
+}
+
+#[tauri::command]
+pub fn show_floating(app_handle: AppHandle) {
+    show_floating_window(&app_handle);
 }
 
 #[tauri::command]
@@ -2569,7 +2696,12 @@ pub fn app_ready(app_handle: AppHandle) {
         let _ = main_win.center();
     }
 
+    let aot = app_handle
+        .try_state::<SharedState>()
+        .map(|s| s.lock().unwrap().always_on_top)
+        .unwrap_or(true);
     let _ = main_win.show();
+    apply_main_window_behavior(&main_win, aot);
     let _ = main_win.set_focus();
 }
 
@@ -3458,6 +3590,42 @@ mod tests {
         // into `main` and stealing focus from a returning widget user.
         assert_eq!(resolve_startup_window(Some("widget")), "widget");
         assert_ne!(resolve_startup_window(Some("")), "main");
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn macos_collection_behavior_keeps_windows_managed_without_conflicting_flags() {
+        use objc2_app_kit::NSWindowCollectionBehavior;
+
+        let dirty_main = NSWindowCollectionBehavior::Transient
+            | NSWindowCollectionBehavior::Stationary
+            | NSWindowCollectionBehavior::IgnoresCycle
+            | NSWindowCollectionBehavior::FullScreenNone
+            | NSWindowCollectionBehavior::CanJoinAllSpaces;
+        let main_beh = compute_macos_collection_behavior(dirty_main, false);
+        assert!(main_beh.contains(NSWindowCollectionBehavior::Managed));
+        assert!(main_beh.contains(NSWindowCollectionBehavior::ParticipatesInCycle));
+        assert!(main_beh.contains(NSWindowCollectionBehavior::FullScreenPrimary));
+        assert!(!main_beh.contains(NSWindowCollectionBehavior::Transient));
+        assert!(!main_beh.contains(NSWindowCollectionBehavior::Stationary));
+        assert!(!main_beh.contains(NSWindowCollectionBehavior::IgnoresCycle));
+        assert!(!main_beh.contains(NSWindowCollectionBehavior::FullScreenAuxiliary));
+        assert!(!main_beh.contains(NSWindowCollectionBehavior::FullScreenNone));
+        assert!(!main_beh.contains(NSWindowCollectionBehavior::CanJoinAllSpaces));
+
+        let dirty_float = NSWindowCollectionBehavior::Transient
+            | NSWindowCollectionBehavior::MoveToActiveSpace
+            | NSWindowCollectionBehavior::FullScreenPrimary
+            | NSWindowCollectionBehavior::FullScreenNone;
+        let float_beh = compute_macos_collection_behavior(dirty_float, true);
+        assert!(float_beh.contains(NSWindowCollectionBehavior::Managed));
+        assert!(float_beh.contains(NSWindowCollectionBehavior::CanJoinAllSpaces));
+        assert!(float_beh.contains(NSWindowCollectionBehavior::FullScreenAuxiliary));
+        assert!(!float_beh.contains(NSWindowCollectionBehavior::Transient));
+        assert!(!float_beh.contains(NSWindowCollectionBehavior::Stationary));
+        assert!(!float_beh.contains(NSWindowCollectionBehavior::MoveToActiveSpace));
+        assert!(!float_beh.contains(NSWindowCollectionBehavior::FullScreenPrimary));
+        assert!(!float_beh.contains(NSWindowCollectionBehavior::FullScreenNone));
     }
 
     /// A drummer with a laptop and an interface keeps a pair of outputs for

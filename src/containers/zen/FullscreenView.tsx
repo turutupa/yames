@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
-import { setBpm, togglePlayback, setSubdivision, setBeatGroups, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
+import { setAlwaysOnTop, setBpm, togglePlayback, setSubdivision, setBeatGroups, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
 import { meterLabel, meterTotal, stepMeter } from "../../utils/meter";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -153,6 +153,7 @@ export function FullscreenView({
     if (isFull) {
       await new Promise(r => setTimeout(r, 500));
       await win.setAlwaysOnTop(state.alwaysOnTop);
+      await setAlwaysOnTop(state.alwaysOnTop);
       await win.setFocus();
       // Force webview keyboard focus via hidden-input trick
       for (let i = 0; i < 4; i++) {

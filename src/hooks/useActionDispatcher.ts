@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { MutableRefObject } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
+  setAlwaysOnTop,
   setBeatGroups,
   setBpm,
   setSubdivision,
@@ -294,6 +295,7 @@ export function useActionDispatcher({
               }
               setIsFullscreen(false);
               await win.setAlwaysOnTop(state.alwaysOnTop);
+              await setAlwaysOnTop(state.alwaysOnTop);
               await win.setFocus();
               await forceWebviewFocus();
             })();
@@ -310,6 +312,7 @@ export function useActionDispatcher({
             if (isFull) {
               await new Promise((r) => setTimeout(r, FULLSCREEN_EXIT_DELAY));
               await win.setAlwaysOnTop(state.alwaysOnTop);
+              await setAlwaysOnTop(state.alwaysOnTop);
               await win.setFocus();
               await forceWebviewFocus();
             }

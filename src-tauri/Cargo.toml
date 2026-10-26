@@ -96,6 +96,7 @@ coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 [target.'cfg(target_os = "macos")'.dependencies]
 coreaudio-sys = "0.2"
 core-foundation-sys = "0.8"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["NSWindow"] }
 
 # Thread-priority control for the LLM inference worker (ROADMAP §3: the
 # generation thread runs *below normal* so it can never starve the audio
