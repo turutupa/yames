@@ -65,7 +65,7 @@
     ],
     "macOS": {
       "signingIdentity": "Developer ID Application: Alberto Delgado Cabrera (BBG489SR42)",
-      "entitlements": null,
+      "entitlements": "entitlements.plist",
       "minimumSystemVersion": "10.15"
     },
     "createUpdaterArtifacts": true

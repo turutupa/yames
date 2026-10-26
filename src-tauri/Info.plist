@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  macOS only lets an app hear a microphone if the bundle says why it wants one.
+  Without this key the system does not show the permission dialog and does not
+  list the app under Privacy & Security > Microphone: it silently refuses, and
+  cpal hands back a stream of silence. That is the audio-input bug on macOS
+  release builds (#59). `tauri dev` never showed it, because a dev run borrows
+  the permission of the terminal or editor that launched it.
+
+  Tauri merges this file into the bundle's generated Info.plist at build time,
+  so it holds only what the generator does not already write.
+
+  The sentence is the one the dialog puts after "Yames would like to access the
+  microphone": what it is for, and where it goes.
+
+  The matching entitlement, `com.apple.security.device.audio-input`, lives in
+  `entitlements.plist`. A signed, notarized build runs with the hardened
+  runtime, and the hardened runtime refuses the microphone without it, whatever
+  this file says. Both are needed.
+-->
+<plist version="1.0">
+  <dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Yames listens to your instrument to score your timing and coach your practice. The sound is analysed on this Mac and is never uploaded.</string>
+  </dict>
+</plist>
