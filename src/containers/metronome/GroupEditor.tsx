@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import type { BeatFeedback } from "../../types";
-import { accentPositions, meterTotal } from "../../utils/meter";
+import type { AccentMode, BeatFeedback, MultiMeasurePattern, PatternAccentLevel } from "../../types";
+import { accentPositions, meterLabel, meterTotal } from "../../utils/meter";
+import { cycleAccent } from "./patternPresets";
 
 interface GroupEditorProps {
   beatGroups: number[];
@@ -11,13 +12,13 @@ interface GroupEditorProps {
   isDownbeat?: boolean;
   freeMode?: boolean;
   /** Which beats carry the accent — mirrors the engine (U2.3). */
-  accentMode?: "groups" | "all" | "none";
+  accentMode?: AccentMode;
   /**
    * `BeatEvent.accentLevel` for the beat currently lit — 0 none, 1 a group
-   * start inside the bar, 2 the bar's own opening. The engine decides it;
+   * start inside the bar, 2 the bar's own opening, 3 silent/rest. The engine decides it;
    * this component only draws it.
    */
-  accentBeat?: 0 | 1 | 2;
+  accentBeat?: 0 | 1 | 2 | 3;
   /**
    * Per-beat evaluation feedback, keyed by bar position. Renders the
    * `feedback-<classification>` tint the pre-grouping beat dots had —
@@ -27,12 +28,15 @@ interface GroupEditorProps {
   feedback?: Map<number, BeatFeedback>;
   /**
    * Called with the whole new grouping. Kept as a prop so this component
-   * stays presentational — the owner (`MetronomeView`) does the IPC. It takes
-   * an array rather than a count because a meter is a grouping and not a
-   * length: `[3, 2, 2]` and `[2, 2, 3]` are both 7. No-op default lets either
-   * branch render without wiring.
+   * stays presentational — the owner (`MetronomeView`) does the IPC.
    */
   onBeatGroupsChange?: (next: number[]) => void;
+  /** Active multi-measure pattern when in pattern accent mode */
+  pattern?: MultiMeasurePattern;
+  /** Current bar in multi-measure pattern (0-based) from `BeatEvent.formBar` */
+  activeBar?: number;
+  /** Callback when user clicks a tick to cycle its accent */
+  onPatternChange?: (next: MultiMeasurePattern) => void;
 }
 
 export function GroupEditor({
@@ -46,17 +50,129 @@ export function GroupEditor({
   accentMode = "groups",
   accentBeat = 0,
   feedback,
+  pattern,
+  activeBar = 0,
+  onPatternChange,
 }: GroupEditorProps) {
   const { t } = useTranslation();
   const total = meterTotal(beatGroups);
   // Static markers only — the LIVE accent comes from the engine via
   // `accentBeat`, so the two can never disagree.
-  const accents = accentPositions(beatGroups, accentMode);
+  const accents = accentPositions(beatGroups, accentMode as "groups" | "all" | "none");
   // Strong keeps the ring and the glow it always had; medium keeps the ring
   // and drops the glow, so a bar reads as one opening and a middle rather
   // than as two openings. Weak is a plain ring.
   const accentClass = (level: number) =>
     level === 2 ? "accent" : level === 1 ? "accent-medium" : "";
+
+  // Multi-Measure Pattern mode rendering
+  if (accentMode === "pattern" && pattern && pattern.measures.length > 0) {
+    const numBars = pattern.measures.length;
+    const normalizedActiveBar = ((activeBar % numBars) + numBars) % numBars;
+
+    return (
+      <div className="group-editor pattern-editor">
+        <div className="pattern-measures-grid">
+          {pattern.measures.map((measure, barIdx) => {
+            const isBarActive = isPlaying && normalizedActiveBar === barIdx;
+            const beats = measure.beats;
+            const sub = measure.subdivision;
+            const barMeterLabel =
+              beats === total && !freeMode ? meterLabel(beatGroups) : `${beats}/4`;
+
+            return (
+              <div
+                key={barIdx}
+                className={`pattern-measure-card ${isBarActive ? "bar-active" : ""}`}
+              >
+                <div className="pattern-measure-header">
+                  <div className="pattern-bar-meta">
+                    <span className="pattern-bar-pill">
+                      Bar {barIdx + 1}
+                    </span>
+                    {isBarActive && <span className="pattern-live-tag">LIVE</span>}
+                  </div>
+                  <span className="pattern-measure-meter">
+                    {barMeterLabel} • {sub > 1 ? `${sub} ticks` : "quarter"}
+                  </span>
+                </div>
+
+                <div
+                  className="pattern-uniform-cols"
+                  style={{
+                    gridTemplateColumns: `repeat(${beats}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {Array.from({ length: beats }, (_, beatIdx) => (
+                    <div key={beatIdx} className="pattern-beat-col">
+                      <div className="pattern-beat-num">Beat {beatIdx + 1}</div>
+                      <div className="pattern-sub-stack">
+                        {Array.from({ length: sub }, (_, subIdx) => {
+                          const tickIdx = beatIdx * sub + subIdx;
+                          const level = (measure.ticks[tickIdx] ?? 1) as PatternAccentLevel;
+                          const isTickPlaying =
+                            isPlaying &&
+                            isBarActive &&
+                            activeBeat === beatIdx &&
+                            activeSub === subIdx;
+
+                          let levelClass = "plain";
+                          if (level === 3) levelClass = "accent strong";
+                          else if (level === 2) levelClass = "accent-medium";
+                          else if (level === 0) levelClass = "rest";
+
+                          const fb = subIdx === 0 ? feedback?.get(beatIdx) : undefined;
+                          const feedbackClass = fb && isTickPlaying ? `feedback-${fb.classification}` : "";
+
+                          return (
+                            <button
+                              key={subIdx}
+                              type="button"
+                              className={`pattern-tick-cell ${levelClass} ${isTickPlaying ? "playing" : ""} ${feedbackClass}`}
+                              title={`Bar ${barIdx + 1}, Beat ${beatIdx + 1}.${subIdx + 1}: ${
+                                level === 3
+                                  ? "Strong Accent"
+                                  : level === 2
+                                  ? "Medium Accent"
+                                  : level === 1
+                                  ? "Plain Click"
+                                  : "Rest / Silent"
+                              } (Click to cycle)`}
+                              onClick={() => {
+                                if (!onPatternChange) return;
+                                const nextTicks = [...measure.ticks];
+                                nextTicks[tickIdx] = cycleAccent(level);
+                                const nextMeasures = pattern.measures.map((m, idx) =>
+                                  idx === barIdx ? { ...m, ticks: nextTicks } : m
+                                );
+                                onPatternChange({
+                                  ...pattern,
+                                  id: "custom",
+                                  name: "Custom Pattern",
+                                  measures: nextMeasures,
+                                });
+                              }}
+                            >
+                              <span className="pattern-tick-dot" />
+                              <span className="pattern-tick-sub-label">
+                                {sub === 1
+                                  ? level === 0 ? "Rest" : level === 3 ? "Strong" : level === 2 ? "Mid" : "Beat"
+                                  : `.${subIdx + 1}`}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   if (freeMode) {
     return (

@@ -29,7 +29,8 @@
       "label": "Accent",
       "groups": "Groepsbegin",
       "all": "Elke tel",
-      "none": "Geen"
+      "none": "Geen",
+      "pattern": "Patroon"
     },
     "soundLabel": "Geluid"
   },

@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { load } from "@tauri-apps/plugin-store";
-import type { AppState, BeatEvent, ComponentScores, InstrumentId, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
+import type { AccentMode, AppState, BeatEvent, ComponentScores, InstrumentId, MultiMeasurePattern, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
 
 // Shared store instance (lazy singleton)
 let _store: Awaited<ReturnType<typeof load>> | null = null;
@@ -427,8 +427,13 @@ const LEGACY_CHAINS_KEY = "chains";
  * caps it at 8.
  */
 /** Which beats carry the accent. See `AccentMode` in the engine. */
-export async function setAccentMode(mode: "groups" | "all" | "none"): Promise<void> {
+export async function setAccentMode(mode: AccentMode): Promise<void> {
   return invoke("set_accent_mode", { mode });
+}
+
+/** Set or clear the multi-measure accent pattern in the engine. */
+export async function setMeasurePattern(pattern: MultiMeasurePattern | null): Promise<void> {
+  return invoke("set_measure_pattern", { pattern });
 }
 
 export async function armCountIn(beats: number): Promise<void> {

@@ -118,6 +118,8 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
         store.set("timeSignature", serde_json::json!(s.time_signature));
         store.set("beatGroups", serde_json::json!(s.beat_groups));
         store.set("freeMode", serde_json::json!(s.free_mode));
+        store.set("accentMode", serde_json::json!(s.accent_mode));
+        store.set("pattern", serde_json::json!(s.pattern));
         store.set(
             "speedRamp",
             serde_json::json!({
@@ -170,6 +172,7 @@ pub fn set_bpm(
 pub fn set_subdivision(
     subdivision: u8,
     state: State<SharedState>,
+    engine_state: State<EngineState>,
     tempo_ctx: State<SharedTempoContext>,
     app_handle: AppHandle,
 ) {
@@ -177,6 +180,16 @@ pub fn set_subdivision(
     {
         let mut s = state.lock().unwrap();
         s.subdivision = valid;
+        if s.accent_mode == "pattern" {
+            let total_beats = s.time_signature.max(1);
+            let pat = s.pattern.get_or_insert_with(|| {
+                crate::models::MultiMeasurePattern::default_for(2, total_beats, valid)
+            });
+            pat.resample_subdivision(valid);
+            let compiled = std::sync::Arc::new(crate::engine::PatternTable::from_model(pat));
+            let engine = engine_state.0.lock().unwrap();
+            engine.set_pattern_table(Some(compiled));
+        }
     }
     // D2 — mirror into the shared tempo context (see set_bpm).
     tempo_ctx.set_subdivision(valid);
@@ -525,6 +538,7 @@ pub fn restore_beat_groups(
 pub fn set_beat_groups(
     groups: Vec<u8>,
     state: State<SharedState>,
+    engine_state: State<EngineState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let total = validate_beat_groups(&groups)?;
@@ -532,6 +546,16 @@ pub fn set_beat_groups(
         let mut s = state.lock().unwrap();
         s.beat_groups = groups;
         s.time_signature = total;
+        if s.accent_mode == "pattern" {
+            let sub = s.subdivision.max(1);
+            let pat = s.pattern.get_or_insert_with(|| {
+                crate::models::MultiMeasurePattern::default_for(2, total, sub)
+            });
+            pat.resample_meter(total);
+            let compiled = std::sync::Arc::new(crate::engine::PatternTable::from_model(pat));
+            let engine = engine_state.0.lock().unwrap();
+            engine.set_pattern_table(Some(compiled));
+        }
     }
     emit_state_changed(&state, &app_handle);
     persist_state(&state, &app_handle);
@@ -737,14 +761,60 @@ pub fn start_speed_ramp_from(
 /// An unknown value falls back to "groups" rather than erroring: this crosses
 /// from the frontend as a string, and a bad one should sound ordinary.
 #[tauri::command]
-pub fn set_accent_mode(mode: String, state: State<SharedState>, app_handle: AppHandle) {
+pub fn set_accent_mode(
+    mode: String,
+    state: State<SharedState>,
+    engine_state: State<EngineState>,
+    app_handle: AppHandle,
+) {
     let valid = match mode.as_str() {
-        "all" | "none" => mode,
+        "all" | "none" | "pattern" => mode,
         _ => "groups".to_string(),
     };
     {
         let mut s = state.lock().unwrap();
-        s.accent_mode = valid;
+        s.accent_mode = valid.clone();
+        if valid == "pattern" {
+            let total_beats = s.time_signature.max(1);
+            let sub = s.subdivision.max(1);
+            let pat = s.pattern.get_or_insert_with(|| {
+                crate::models::MultiMeasurePattern::default_for(2, total_beats, sub)
+            });
+            pat.resample_meter(total_beats);
+            pat.resample_subdivision(sub);
+            let compiled = std::sync::Arc::new(crate::engine::PatternTable::from_model(pat));
+            let engine = engine_state.0.lock().unwrap();
+            engine.set_pattern_table(Some(compiled));
+        }
+    }
+    emit_state_changed(&state, &app_handle);
+    persist_state(&state, &app_handle);
+}
+
+/// Set or clear the multi-measure accent pattern.
+///
+/// Compiles the pattern into an allocation-free `PatternTable` and sends it to the
+/// audio engine's handoff slot, and persists the pattern in `AppState`.
+#[tauri::command]
+pub fn set_measure_pattern(
+    mut pattern: Option<crate::models::MultiMeasurePattern>,
+    state: State<SharedState>,
+    engine_state: State<EngineState>,
+    app_handle: AppHandle,
+) {
+    {
+        let mut s = state.lock().unwrap();
+        let fallback_beats = s.time_signature.max(1);
+        let fallback_sub = s.subdivision.max(1);
+        if let Some(ref mut p) = pattern {
+            p.sanitize(fallback_beats, fallback_sub);
+        }
+        let compiled = pattern
+            .as_ref()
+            .map(|p| std::sync::Arc::new(crate::engine::PatternTable::from_model(p)));
+        let engine = engine_state.0.lock().unwrap();
+        engine.set_pattern_table(compiled);
+        s.pattern = pattern;
     }
     emit_state_changed(&state, &app_handle);
     persist_state(&state, &app_handle);

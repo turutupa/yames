@@ -59,10 +59,11 @@ export type AppState = {
   freeMode: boolean;
   /**
    * Which beats the click accents: where each group opens (the default), every
-   * beat, or none. "none" is what FREE mode does to accents, without giving up
-   * the grouping the dots draw.
+   * beat, none, or custom multi-measure pattern.
    */
-  accentMode: "groups" | "all" | "none";
+  accentMode: AccentMode;
+  /** Active multi-measure pattern if in pattern accent mode. */
+  pattern?: MultiMeasurePattern;
   speedRamp: SpeedRamp;
   /**
    * The live count-in, which belongs to the engine rather than to the drill
@@ -74,6 +75,30 @@ export type AppState = {
   instrument: InstrumentId;
 };
 
+export type AccentMode = "groups" | "all" | "none" | "pattern";
+
+/**
+ * Accent level for a tick in a multi-measure pattern:
+ * 0: Rest / Silent (no click)
+ * 1: Plain (regular click)
+ * 2: Medium accent
+ * 3: Strong accent
+ */
+export type PatternAccentLevel = 0 | 1 | 2 | 3;
+
+export interface PatternMeasure {
+  beats: number;
+  subdivision: number;
+  ticks: PatternAccentLevel[];
+}
+
+export interface MultiMeasurePattern {
+  id: string;
+  name: string;
+  loopBars: number;
+  measures: PatternMeasure[];
+}
+
 export type BeatEvent = {
   beat: number;
   measureBeat: number; // bar-local position (0..beatsPerMeasure), accurate after meter changes
@@ -81,17 +106,17 @@ export type BeatEvent = {
   isDownbeat: boolean;
   /**
    * How hard the engine accented this tick: 0 not at all, 1 a group start
-   * inside the bar — the middle of a 6/8 — and 2 the bar's own opening,
-   * which is also what a ramp's bar line and "every beat" report.
+   * inside the bar — the middle of a 6/8 — 2 the bar's own opening,
+   * and 3 a silent tick / rest in pattern mode.
    *
    * Read this for the LIVE accent state instead of re-deriving group starts
    * from `beatGroups`; the engine is the only thing that knows which rule
    * applied. `accentPositions` in `utils/meter.ts` mirrors the same rule for
    * the markers drawn while stopped.
    */
-  accentLevel: 0 | 1 | 2;
+  accentLevel: 0 | 1 | 2 | 3;
   /**
-   * `accentLevel > 0` — whether this tick was accented at all, which is what
+   * `accentLevel > 0 && accentLevel !== 3` — whether this tick was accented at all, which is what
    * an accent was before it had tiers.
    *
    * @deprecated Kept for one release so nothing reading the old field
@@ -100,9 +125,8 @@ export type BeatEvent = {
    */
   isAccent: boolean;
   /**
-   * Where this tick sits in a jam's form (plans/JAM_MODE.md). `formBar` is
-   * the 0-based bar within the chorus, `chorus` is 1-based. Both count only
-   * while a jam is loaded in the engine; otherwise 0 and 1.
+   * Where this tick sits in a jam's form or multi-measure pattern. `formBar` is
+   * the 0-based bar within the chorus/pattern, `chorus` is 1-based.
    */
   formBar: number;
   chorus: number;
@@ -152,6 +176,8 @@ export type Preset = {
   timeSignature: number;
   beatGroups?: number[];
   freeMode?: boolean;
+  accentMode?: AccentMode;
+  pattern?: MultiMeasurePattern;
   soundType: string;
   volume: number;
   view: "beat" | "drill";

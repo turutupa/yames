@@ -17,10 +17,10 @@
  * and refuses a table that disagrees, rather than guessing. Sending the table
  * first would hand it the PREVIOUS meter to check against.
  */
-import { setBeatGroups, setFreeMode, setJam, setSubdivision } from "../../../ipc";
+import { setBeatGroups, setFreeMode, setJam, setMeasurePattern, setSubdivision } from "../../../ipc";
 import { jamMeter } from "../../../jam";
 import type { Jam, JamEngineConfig } from "../../../jam";
-import type { Subdivision } from "../../../types";
+import type { MultiMeasurePattern, Subdivision } from "../../../types";
 import { coachDebug } from "../../../coach/debug";
 
 /** Said once per session, not once per beat: the command may not exist yet. */
@@ -69,7 +69,12 @@ export function clearJamSendRefusal(): void {
 }
 
 /** The metronome's own meter, remembered so the jam can hand it back. */
-export type MeterSnapshot = { subdivision: number; beatGroups: number[]; freeMode: boolean };
+export type MeterSnapshot = {
+  subdivision: number;
+  beatGroups: number[];
+  freeMode: boolean;
+  pattern?: MultiMeasurePattern | null;
+};
 
 /**
  * The last round trip `setJam` took, in milliseconds.
@@ -217,6 +222,9 @@ export function clearJam(restore: MeterSnapshot | null): Promise<void> {
       () => setBeatGroups(restore.beatGroups),
       () => setSubdivision(restore.subdivision as Subdivision),
     ];
+    if (restore.pattern !== undefined) {
+      steps.push(() => setMeasurePattern(restore.pattern ?? null));
+    }
     for (const run of steps) {
       try {
         await run();

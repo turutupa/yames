@@ -232,6 +232,7 @@ impl GenKind {
     }
 
     /// Per-call generation cap (ROADMAP §0.3 / T04).
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
     pub fn max_tokens(self) -> usize {
         if self.is_rephrase() {
             REPHRASE_MAX_TOKENS
@@ -633,7 +634,9 @@ pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<St
 /// inside the mid-session tip budget (AGENTS.md latency tiers) when the
 /// model decides to be chatty. Chat answers, mini-reports and session
 /// summaries get the full 256.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
 pub const REPHRASE_MAX_TOKENS: usize = 64;
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
 pub const CHAT_MAX_TOKENS: usize = 256;
 
 /// Verdict on one raw generation, before it can reach the feed.

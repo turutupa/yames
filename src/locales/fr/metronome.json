@@ -29,7 +29,8 @@
       "label": "Accent",
       "groups": "Débuts de groupe",
       "all": "Chaque temps",
-      "none": "Aucun"
+      "none": "Aucun",
+      "pattern": "Motif"
     },
     "soundLabel": "Son"
   },

@@ -29,7 +29,8 @@
       "label": "重音",
       "groups": "分组起始",
       "all": "每一拍",
-      "none": "无"
+      "none": "无",
+      "pattern": "节奏型"
     },
     "soundLabel": "音色"
   },

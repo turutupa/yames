@@ -24,7 +24,12 @@ import { useLayoutEffect, useRef, useState } from "react";
  * went on running off the bottom of a drawer that everything else had stopped
  * running off.
  */
-export function useMenuPlacement(open: boolean) {
+export function useMenuPlacement(
+  open: boolean,
+  options?: { tallest?: number; maxWidth?: number },
+) {
+  const tallestCap = options?.tallest ?? 320;
+  const maxWidthCap = options?.maxWidth ?? 320;
   const wrapRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{
@@ -60,7 +65,7 @@ export function useMenuPlacement(open: boolean) {
        * massive". The cap belongs here, where the measuring happens; the
        * stylesheet keeps its own for the frame before anything is measured.
        */
-      const tallest = 320;
+      const tallest = tallestCap;
       // Its natural height, asked for before anything has been imposed on it.
       const natural = menu.scrollHeight;
       /*
@@ -73,7 +78,7 @@ export function useMenuPlacement(open: boolean) {
        * capping; the stylesheet's own `max-width` cannot do it, because a
        * `min-width` set here would beat it.
        */
-      const width = Math.min(Math.max(menu.offsetWidth, chip.width), 320);
+      const width = Math.min(Math.max(menu.offsetWidth, chip.width), maxWidthCap);
 
       const below = window.innerHeight - chip.bottom - gap - edge;
       const above = chip.top - gap - edge;
@@ -95,16 +100,23 @@ export function useMenuPlacement(open: boolean) {
       });
     };
 
+    const onScroll = (e: Event) => {
+      if (menuRef.current && e.target instanceof Node && menuRef.current.contains(e.target)) {
+        return;
+      }
+      place();
+    };
+
     place();
     // The page can move under an open menu — the drawer scrolls, the window
     // resizes — and a menu left behind is worse than one that never opened.
     window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
+    window.addEventListener("scroll", onScroll, true);
     return () => {
       window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("scroll", onScroll, true);
     };
-  }, [open]);
+  }, [open, tallestCap, maxWidthCap]);
 
   return {
     wrapRef,

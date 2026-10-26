@@ -221,7 +221,8 @@ export function FloatingWidget() {
   // one, and it knows about the speed ramp's own bar. No local re-derive.
   // The widget's dots are 6px across and have one lit state, so the middle
   // tier does not reach them: accented or not is all they can say.
-  const isAccent = (currentBeat?.accentLevel ?? 0) > 0;
+  const accentLevel = currentBeat?.accentLevel ?? 0;
+  const isAccent = accentLevel === 1 || accentLevel === 2;
   const widgetBeats = beatsPerMeasure;
   const widgetActiveBeat = activeBeat;
 

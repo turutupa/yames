@@ -29,7 +29,8 @@
       "label": "Accento",
       "groups": "Inizio gruppo",
       "all": "Ogni movimento",
-      "none": "Nessuno"
+      "none": "Nessuno",
+      "pattern": "Pattern"
     },
     "soundLabel": "Suono"
   },

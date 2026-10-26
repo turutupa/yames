@@ -15,9 +15,11 @@ import {
   armCountIn,
   configureSpeedRamp,
   downloadAndInstallUpdate,
+  setAccentMode,
   setAlwaysOnTop,
   setBpm,
   setInstrument as setInstrumentBackend,
+  setMeasurePattern,
   setSoundType,
   setSubdivision,
   setTheme,
@@ -349,6 +351,7 @@ export function MainWindow() {
         subdivision: state.subdivision,
         beatGroups: state.beatGroups,
         freeMode: state.freeMode,
+        pattern: state.pattern,
       },
       countingIn: (state.countIn?.beats ?? 0) > 0,
     },
@@ -403,6 +406,7 @@ export function MainWindow() {
       subdivision: state.subdivision,
       beatGroups: state.beatGroups,
       freeMode: state.freeMode,
+      pattern: state.pattern,
     },
     onJamLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
@@ -1059,6 +1063,12 @@ export function MainWindow() {
       ["soundType", () => setSoundType(preset.soundType)],
       ["volume", () => setVolume(preset.volume)],
     ];
+    if (preset.pattern) {
+      steps.push(["pattern", () => setMeasurePattern(preset.pattern!)]);
+    } else if (preset.accentMode === "pattern") {
+      steps.push(["pattern", () => setMeasurePattern(null)]);
+    }
+    steps.push(["accentMode", () => setAccentMode(preset.accentMode ?? "groups")]);
     if (preset.view === "drill" && preset.speedRamp) {
       const ramp = preset.speedRamp;
       steps.push(["speedRamp", () => configureSpeedRamp({

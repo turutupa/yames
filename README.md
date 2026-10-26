@@ -31,7 +31,7 @@
 - [Screenshots](#screenshots)
 - [Install](#install)
 - [Built With](#built-with)
-- [Development](#development)
+- [Development & Local Testing](#development--local-testing)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -293,14 +293,80 @@ npm run tauri build
 
 Rust · Tauri v2 · React · TypeScript · cpal · rodio
 
-## Development
+## Development & Local Testing
 
+### Prerequisites
+- [Rust](https://rustup.rs/) (stable toolchain)
+- [Node.js](https://nodejs.org/) 18+ or [Bun](https://bun.sh/)
+- Platform build essentials:
+  - **macOS**: Xcode Command Line Tools (`xcode-select --install`), CMake
+  - **Windows**: Visual Studio 2022 C++ Build Tools (MSVC), CMake, LunarG Vulkan SDK
+  - **Linux**: `libvulkan-dev`, `glslc`, `libclang-dev`, CMake
+
+### Running Locally
 ```bash
+# Install dependencies
 npm install
+
+# Start Tauri development desktop app
 npm run tauri dev
 ```
+> **Tip**: Set `YAMES_DEV_NO_LLM=1 npm run tauri dev` when working on UI/frontend changes to skip compiling the local llama.cpp backend.
 
-Requires [Rust](https://rustup.rs/) (stable) and [Node.js](https://nodejs.org/) 18+.
+### Running Automated Tests
+
+#### 1. Rust Audio Engine & Backend Tests
+The audio engine test suite includes unit tests for real-time click scheduling, gain caching, allocations, and multi-measure pattern table generation:
+
+```bash
+# Run the full Rust library test suite (620+ tests)
+npm run test:rust
+# or directly with Cargo:
+cargo test --manifest-path src-tauri/Cargo.toml --lib --no-default-features
+
+# Run pattern metronome unit tests specifically
+cargo test --manifest-path src-tauri/Cargo.toml --lib --no-default-features pattern
+```
+
+#### 2. Sub-Millisecond Jitter Probe
+Yames includes a microsecond-accurate click jitter evaluation probe to verify that audio scheduling meets strict timing constraints:
+```bash
+npm run yames:jitter-probe
+```
+
+#### 3. DSP & High-BPM Regression Fixtures
+```bash
+npm run test:dsp        # Audio onset detection and timing analysis fixtures
+npm run test:highbpm    # High-tempo click rendering fixtures
+```
+
+#### 4. Frontend Typecheck & Unit Tests
+```bash
+# Typecheck TypeScript and run Vite production build
+npm run build
+
+# Run Vitest unit suite
+npm run test
+
+# Run layout regression tests (Playwright)
+npm run test:layout
+```
+
+### Testing Multi-Measure Patterns Manually
+1. Launch the app (`npm run tauri dev`).
+2. In the **Metronome** tab under the **Accent** control, click the **Pattern** pill.
+3. Observe the Multi-Measure Pattern Editor grid:
+   - Adjust the loop length with the **Loop Bars** stepper (`−` and `+` between 1 and 8 bars).
+   - Click preset buttons (e.g. **Son Clave (3:2)**, **3+1 Gap Practice**, **Funk 16ths Push**, **Hemiola / 3:2 Cross**) to load complex rhythmic structures.
+   - Click on individual subdivision dots to cycle through accent tiers:
+     - **Rest** (dashed circle, completely silent)
+     - **Plain** (regular tick)
+     - **Medium** (accent tier 2)
+     - **Strong** (downbeat accent tier 3)
+4. Press `Space` to start the metronome. Verify that:
+   - Audio clicks follow the accent levels accurately (including true silence on rests).
+   - The active measure card is highlighted with a glowing border and `LIVE` pill.
+   - The playhead tracks each beat and subdivision tick in real time.
 
 ## Contributing
 

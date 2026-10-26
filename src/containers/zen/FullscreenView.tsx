@@ -122,7 +122,8 @@ export function FullscreenView({
   // accented or not, without the metronome screen's middle tier: the bar's
   // shape is already in the `accent-marker` rings, and this row is read from
   // across a room.
-  const isAccent = (currentBeat?.accentLevel ?? 0) > 0;
+  const accentLevel = currentBeat?.accentLevel ?? 0;
+  const isAccent = accentLevel === 1 || accentLevel === 2;
 
   const exitFullscreen = () => onExit();
   const isWarmingUp = activeTab === "drill" && ramp.active && ramp.warmupCount < ramp.warmupBeats;

@@ -29,7 +29,8 @@
       "label": "Akcent",
       "groups": "Początki grup",
       "all": "Każda miara",
-      "none": "Brak"
+      "none": "Brak",
+      "pattern": "Wzorzec"
     },
     "soundLabel": "Dźwięk"
   },

@@ -29,7 +29,8 @@
       "label": "Accent",
       "groups": "Group starts",
       "all": "Every beat",
-      "none": "None"
+      "none": "None",
+      "pattern": "Pattern"
     },
     "soundLabel": "Sound"
   },

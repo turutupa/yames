@@ -1,7 +1,8 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
-import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
+import { meterLabel, meterTotal, presetBeatGroups, presetFreeMode } from "../../utils/meter";
+import { createDefaultPattern } from "../../containers/metronome/patternPresets";
 import { formBars } from "../../jam/forms";
 import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
@@ -94,6 +95,12 @@ function stateToPreset(
   state: AppState,
   view: "beat" | "drill",
 ): Preset {
+  const accentMode = state.accentMode ?? "groups";
+  const pattern = state.pattern
+    ? JSON.parse(JSON.stringify(state.pattern))
+    : accentMode === "pattern"
+      ? createDefaultPattern(2, meterTotal(state.beatGroups), state.subdivision)
+      : undefined;
   const preset: Preset = {
     id: generateId(),
     name,
@@ -103,6 +110,8 @@ function stateToPreset(
     timeSignature: state.timeSignature,
     beatGroups: state.beatGroups,
     freeMode: state.freeMode,
+    accentMode,
+    pattern,
     soundType: state.soundType,
     volume: state.volume,
     view,
@@ -123,6 +132,36 @@ function stateToPreset(
   return preset;
 }
 
+function patternsEqual(
+  a?: AppState["pattern"],
+  b?: Preset["pattern"],
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  if (
+    a.id !== b.id ||
+    a.loopBars !== b.loopBars ||
+    a.measures.length !== b.measures.length
+  ) {
+    return false;
+  }
+  for (let i = 0; i < a.measures.length; i++) {
+    const ma = a.measures[i];
+    const mb = b.measures[i];
+    if (
+      ma.beats !== mb.beats ||
+      ma.subdivision !== mb.subdivision ||
+      ma.ticks.length !== mb.ticks.length
+    ) {
+      return false;
+    }
+    for (let j = 0; j < ma.ticks.length; j++) {
+      if (ma.ticks[j] !== mb.ticks[j]) return false;
+    }
+  }
+  return true;
+}
+
 function isDirty(state: AppState, preset: Preset, view: string): boolean {
   if (state.bpm !== preset.bpm) return true;
   if (state.subdivision !== preset.subdivision) return true;
@@ -131,6 +170,10 @@ function isDirty(state: AppState, preset: Preset, view: string): boolean {
   if (state.soundType !== preset.soundType) return true;
   if (Math.abs(state.volume - preset.volume) > 0.01) return true;
   if ((state.freeMode ?? false) !== (preset.freeMode ?? false)) return true;
+  if ((state.accentMode ?? "groups") !== (preset.accentMode ?? "groups")) return true;
+  if ((preset.accentMode ?? "groups") === "pattern" && preset.pattern) {
+    if (!patternsEqual(state.pattern, preset.pattern)) return true;
+  }
   if (view === "drill" && preset.speedRamp && state.speedRamp) {
     const r = state.speedRamp;
     const p = preset.speedRamp;
@@ -459,7 +502,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   // Notify parent of active preset + dirty state changes
   useEffect(() => {
     onActiveChange(activePreset ?? null, dirty);
-  }, [activePreset?.id, dirty, onActiveChange]);
+  }, [activePreset, dirty, onActiveChange]);
 
   // Expose imperative actions to parent
   useImperativeHandle(ref, () => ({

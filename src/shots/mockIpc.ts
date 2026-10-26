@@ -489,6 +489,29 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
 
+    if (cmd === "set_free_mode" && typeof a?.enabled === "boolean") {
+      STATE.freeMode = a.enabled;
+      if (a.enabled && Array.isArray(STATE.beatGroups)) {
+        const total = (STATE.beatGroups as number[]).reduce((s, n) => s + n, 0) || 4;
+        STATE.beatGroups = [total];
+        STATE.timeSignature = total;
+      }
+      emit("state-changed", STATE);
+      return null;
+    }
+
+    if (cmd === "set_accent_mode" && typeof a?.mode === "string") {
+      STATE.accentMode = a.mode;
+      emit("state-changed", STATE);
+      return null;
+    }
+
+    if (cmd === "set_measure_pattern") {
+      STATE.pattern = a?.pattern ?? null;
+      emit("state-changed", STATE);
+      return null;
+    }
+
     return MAP[cmd]?.(a) ?? null;
   });
 

@@ -16,11 +16,12 @@ import { mockInvoke } from "../../test/mocks";
 afterEach(cleanup);
 
 describe("AccentControl", () => {
-  it("offers exactly the three the engine knows", () => {
+  it("offers all four modes the engine knows", () => {
     render(<AccentControl mode="groups" />);
     expect(screen.getByText("Group starts")).toBeInTheDocument();
     expect(screen.getByText("Every beat")).toBeInTheDocument();
     expect(screen.getByText("None")).toBeInTheDocument();
+    expect(screen.getByText("Pattern")).toBeInTheDocument();
   });
 
   it("sends the mode the engine parses", () => {
@@ -32,6 +33,8 @@ describe("AccentControl", () => {
     expect(mockInvoke).toHaveBeenCalledWith("set_accent_mode", { mode: "all" });
     fireEvent.click(screen.getByText("None"));
     expect(mockInvoke).toHaveBeenCalledWith("set_accent_mode", { mode: "none" });
+    fireEvent.click(screen.getByText("Pattern"));
+    expect(mockInvoke).toHaveBeenCalledWith("set_accent_mode", { mode: "pattern" });
     fireEvent.click(screen.getByText("Group starts"));
     expect(mockInvoke).toHaveBeenCalledWith("set_accent_mode", { mode: "groups" });
   });

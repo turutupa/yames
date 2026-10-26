@@ -29,7 +29,8 @@
       "label": "Betonung",
       "groups": "Gruppenanfänge",
       "all": "Jeder Schlag",
-      "none": "Keine"
+      "none": "Keine",
+      "pattern": "Muster"
     },
     "soundLabel": "Klang"
   },

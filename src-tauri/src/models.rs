@@ -14,6 +14,194 @@ pub enum PlayMode {
     Noodling,
 }
 
+/// Accent level for a tick in a multi-measure pattern.
+/// Matches frontend `PatternAccentLevel` (0 = Rest, 1 = Plain, 2 = Medium, 3 = Strong).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[serde(from = "u8", into = "u8")]
+#[repr(u8)]
+pub enum PatternAccent {
+    Rest = 0,
+    Plain = 1,
+    Medium = 2,
+    Strong = 3,
+}
+
+impl From<u8> for PatternAccent {
+    fn from(val: u8) -> Self {
+        match val {
+            3 => PatternAccent::Strong,
+            2 => PatternAccent::Medium,
+            1 => PatternAccent::Plain,
+            _ => PatternAccent::Rest,
+        }
+    }
+}
+
+impl From<PatternAccent> for u8 {
+    fn from(a: PatternAccent) -> Self {
+        a as u8
+    }
+}
+
+/// A single measure within a multi-measure pattern.
+#[derive(Debug, Clone, Serialize, serde::Deserialize)]
+pub struct MeasureDefinition {
+    pub beats: u8,
+    pub subdivision: u8,
+    pub ticks: Vec<PatternAccent>,
+}
+
+/// Multi-measure accent pattern defining a loop of measures with subdivision-level accents.
+#[derive(Debug, Clone, Serialize, serde::Deserialize)]
+pub struct MultiMeasurePattern {
+    pub id: String,
+    pub name: String,
+    #[serde(rename = "loopBars")]
+    pub loop_bars: u8,
+    pub measures: Vec<MeasureDefinition>,
+}
+
+impl MultiMeasurePattern {
+    /// Create a default multi-measure pattern with strong downbeat on bar 1,
+    /// medium downbeats on subsequent bars, and plain subdivision ticks.
+    pub fn default_for(loop_bars: u8, beats: u8, subdivision: u8) -> Self {
+        let bars = loop_bars.clamp(1, 16);
+        let b = beats.clamp(1, 16);
+        let sub = subdivision.clamp(1, 6);
+        let total_ticks = (b as usize) * (sub as usize);
+        let measures = (0..bars)
+            .map(|bar_idx| {
+                let mut ticks = vec![PatternAccent::Plain; total_ticks];
+                if !ticks.is_empty() {
+                    ticks[0] = if bar_idx == 0 {
+                        PatternAccent::Strong
+                    } else {
+                        PatternAccent::Medium
+                    };
+                }
+                MeasureDefinition {
+                    beats: b,
+                    subdivision: sub,
+                    ticks,
+                }
+            })
+            .collect();
+        Self {
+            id: "custom".to_string(),
+            name: "Custom Pattern".to_string(),
+            loop_bars: bars,
+            measures,
+        }
+    }
+
+    /// Ensure all invariants hold (`1..=16` measures, `loop_bars == measures.len()`,
+    /// `beats` in `1..=16`, `subdivision` in `1..=6`, and `ticks.len() == beats * subdivision`).
+    pub fn sanitize(&mut self, fallback_beats: u8, fallback_subdivision: u8) {
+        if self.measures.is_empty() {
+            *self = Self::default_for(2, fallback_beats, fallback_subdivision);
+            return;
+        }
+        self.measures.truncate(16);
+        self.loop_bars = self.measures.len() as u8;
+        for m in &mut self.measures {
+            m.beats = m.beats.clamp(1, 16);
+            m.subdivision = m.subdivision.clamp(1, 6);
+            let expected_len = (m.beats as usize) * (m.subdivision as usize);
+            m.ticks.resize(expected_len, PatternAccent::Plain);
+        }
+    }
+
+    /// Resample all measures in this pattern to a new subdivision, preserving downbeats
+    /// and mapping proportional subdivisions.
+    pub fn resample_subdivision(&mut self, new_subdivision: u8) {
+        let new_sub = new_subdivision.clamp(1, 6);
+        let mut changed = false;
+        for m in &mut self.measures {
+            if m.subdivision == new_sub {
+                continue;
+            }
+            changed = true;
+            let old_sub = m.subdivision.max(1) as usize;
+            let target_sub = new_sub as usize;
+            let beats = m.beats.max(1) as usize;
+            let mut new_ticks = Vec::with_capacity(beats * target_sub);
+
+            for b in 0..beats {
+                let start = b * old_sub;
+                let end = (start + old_sub).min(m.ticks.len());
+                let beat_ticks = if start < m.ticks.len() {
+                    &m.ticks[start..end]
+                } else {
+                    &[]
+                };
+                let downbeat = beat_ticks.first().copied().unwrap_or(PatternAccent::Plain);
+
+                for s in 0..target_sub {
+                    if s == 0 {
+                        new_ticks.push(downbeat);
+                    } else if old_sub > 1 && target_sub % old_sub == 0 {
+                        let ratio = target_sub / old_sub;
+                        if s % ratio == 0 && s / ratio < beat_ticks.len() {
+                            new_ticks.push(beat_ticks[s / ratio]);
+                        } else if downbeat == PatternAccent::Rest {
+                            new_ticks.push(PatternAccent::Rest);
+                        } else {
+                            new_ticks.push(PatternAccent::Plain);
+                        }
+                    } else if old_sub > 1 && old_sub % target_sub == 0 {
+                        let ratio = old_sub / target_sub;
+                        if s * ratio < beat_ticks.len() {
+                            new_ticks.push(beat_ticks[s * ratio]);
+                        } else {
+                            new_ticks.push(PatternAccent::Plain);
+                        }
+                    } else if downbeat == PatternAccent::Rest {
+                        new_ticks.push(PatternAccent::Rest);
+                    } else {
+                        new_ticks.push(PatternAccent::Plain);
+                    }
+                }
+            }
+            m.subdivision = new_sub;
+            m.ticks = new_ticks;
+        }
+        if changed {
+            self.id = "custom".to_string();
+            self.name = "Custom Pattern".to_string();
+        }
+    }
+
+    /// Resample all measures in this pattern to a new beat count (meter).
+    pub fn resample_meter(&mut self, new_beats: u8) {
+        let target_beats = new_beats.clamp(1, 16);
+        let mut changed = false;
+        for m in &mut self.measures {
+            if m.beats == target_beats {
+                continue;
+            }
+            changed = true;
+            let old_beats = m.beats.max(1) as usize;
+            let sub = m.subdivision.max(1) as usize;
+            let target_b = target_beats as usize;
+
+            if target_b > old_beats {
+                for _extra in old_beats..target_b {
+                    for _s in 0..sub {
+                        m.ticks.push(PatternAccent::Plain);
+                    }
+                }
+            } else {
+                m.ticks.truncate(target_b * sub);
+            }
+            m.beats = target_beats;
+        }
+        if changed {
+            self.id = "custom".to_string();
+            self.name = "Custom Pattern".to_string();
+        }
+    }
+}
+
 /// Status of model components on disk.
 #[derive(Debug, Clone, Serialize)]
 pub struct ModelStatus {
@@ -1671,6 +1859,84 @@ mod brain_family_tests {
         // on has at least 1 GB, so a real answer is > 1024 MB.
         let mb = system_memory_mb();
         assert!(mb == 0 || mb > 1024, "implausible system memory: {mb} MB");
+    }
+
+    #[test]
+    fn pattern_serde_roundtrip_and_defaults() {
+        use super::*;
+
+        let json = r#"{
+            "id": "clave",
+            "name": "Son Clave (3:2)",
+            "loopBars": 2,
+            "measures": [
+                { "beats": 4, "subdivision": 2, "ticks": [3, 0, 0, 3, 0, 0, 3, 0] },
+                { "beats": 4, "subdivision": 2, "ticks": [0, 0, 3, 0, 3, 0, 0, 0] }
+            ]
+        }"#;
+
+        let pattern: MultiMeasurePattern = serde_json::from_str(json).expect("should deserialize");
+        assert_eq!(pattern.id, "clave");
+        assert_eq!(pattern.loop_bars, 2);
+        assert_eq!(pattern.measures.len(), 2);
+        assert_eq!(pattern.measures[0].ticks[0], PatternAccent::Strong);
+        assert_eq!(pattern.measures[0].ticks[1], PatternAccent::Rest);
+
+        // Serialize back
+        let serialized = serde_json::to_string(&pattern).expect("should serialize");
+        assert!(serialized.contains("\"loopBars\":2"));
+        assert!(serialized.contains("\"ticks\":[3,0,0,3,0,0,3,0]"));
+    }
+
+    #[test]
+    fn pattern_resample_subdivision_and_meter() {
+        use super::*;
+
+        let mut pattern = MultiMeasurePattern {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            loop_bars: 2,
+            measures: vec![
+                MeasureDefinition {
+                    beats: 4,
+                    subdivision: 1,
+                    ticks: vec![
+                        PatternAccent::Strong,
+                        PatternAccent::Plain,
+                        PatternAccent::Plain,
+                        PatternAccent::Plain,
+                    ],
+                },
+                MeasureDefinition {
+                    beats: 4,
+                    subdivision: 1,
+                    ticks: vec![
+                        PatternAccent::Rest,
+                        PatternAccent::Rest,
+                        PatternAccent::Rest,
+                        PatternAccent::Rest,
+                    ],
+                },
+            ],
+        };
+
+        // Resample subdivision to 2 (8th notes)
+        pattern.resample_subdivision(2);
+        assert_eq!(pattern.measures[0].subdivision, 2);
+        assert_eq!(pattern.measures[0].ticks.len(), 8);
+        assert_eq!(pattern.measures[0].ticks[0], PatternAccent::Strong);
+        assert_eq!(pattern.measures[0].ticks[1], PatternAccent::Plain);
+
+        // Gap bar should preserve complete silence
+        assert_eq!(pattern.measures[1].subdivision, 2);
+        assert_eq!(pattern.measures[1].ticks.len(), 8);
+        assert_eq!(pattern.measures[1].ticks[0], PatternAccent::Rest);
+        assert_eq!(pattern.measures[1].ticks[1], PatternAccent::Rest);
+
+        // Resample meter to 3 beats
+        pattern.resample_meter(3);
+        assert_eq!(pattern.measures[0].beats, 3);
+        assert_eq!(pattern.measures[0].ticks.len(), 6);
     }
 }
 

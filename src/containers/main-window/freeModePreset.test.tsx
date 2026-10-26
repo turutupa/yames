@@ -102,4 +102,40 @@ describe("FREE mode — preset round trip", () => {
       groups: [9],
     });
   });
+
+  it("saves and restores accentMode and pattern when loading a pattern preset", async () => {
+    const customPattern = {
+      id: "custom",
+      name: "Custom Pattern",
+      loopBars: 2,
+      measures: [
+        { beats: 4, subdivision: 2, ticks: [3, 0, 1, 2, 1, 0, 2, 1] as (0 | 1 | 2 | 3)[] },
+        { beats: 4, subdivision: 2, ticks: [2, 1, 0, 1, 3, 1, 0, 1] as (0 | 1 | 2 | 3)[] },
+      ],
+    };
+    const preset = await savePresetFromState({
+      ...DEFAULT_TEST_STATE,
+      subdivision: 2,
+      accentMode: "pattern",
+      pattern: customPattern,
+    });
+    expect(preset.accentMode).toBe("pattern");
+    expect(preset.pattern).toEqual(customPattern);
+
+    setInvokeResponse("get_state", () => DEFAULT_TEST_STATE);
+    setInvokeResponse("list_presets", () => [preset]);
+    render(<MainWindow />);
+
+    const item = await screen.findByText("Free Nine");
+    fireEvent.click(item);
+
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith("set_accent_mode", {
+        mode: "pattern",
+      }),
+    );
+    expect(mockInvoke).toHaveBeenCalledWith("set_measure_pattern", {
+      pattern: customPattern,
+    });
+  });
 });

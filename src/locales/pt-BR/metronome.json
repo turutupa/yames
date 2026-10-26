@@ -29,7 +29,8 @@
       "label": "Acento",
       "groups": "Início de grupo",
       "all": "Cada tempo",
-      "none": "Nenhum"
+      "none": "Nenhum",
+      "pattern": "Padrão"
     },
     "soundLabel": "Som"
   },

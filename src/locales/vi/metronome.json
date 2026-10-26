@@ -29,7 +29,8 @@
       "label": "Nhấn",
       "groups": "Đầu nhóm",
       "all": "Mọi phách",
-      "none": "Không"
+      "none": "Không",
+      "pattern": "Mẫu nhịp"
     },
     "soundLabel": "Âm thanh"
   },

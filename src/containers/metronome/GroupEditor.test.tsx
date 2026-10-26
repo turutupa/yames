@@ -401,3 +401,86 @@ describe("GroupEditor — per-beat evaluation feedback", () => {
     for (const d of dots(container)) expect(d.className).not.toContain("feedback-");
   });
 });
+
+describe("GroupEditor — multi-measure pattern mode", () => {
+  it("renders measure cards, beat columns, and cycles tick accents on click", () => {
+    let captured = null as any;
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[4]}
+        subdivision={2}
+        accentMode="pattern"
+        isPlaying
+        activeBar={1}
+        activeBeat={0}
+        activeSub={1}
+        pattern={{
+          id: "son-clave-3-2",
+          name: "Son Clave (3:2)",
+          loopBars: 2,
+          measures: [
+            { beats: 4, subdivision: 2, ticks: [3, 0, 0, 3, 0, 0, 3, 0] },
+            { beats: 4, subdivision: 2, ticks: [0, 2, 3, 0, 3, 1, 0, 0] },
+          ],
+        }}
+        onPatternChange={(next) => {
+          captured = next;
+        }}
+      />,
+    );
+
+    const cards = container.querySelectorAll(".pattern-measure-card");
+    expect(cards).toHaveLength(2);
+    expect(cards[0].classList.contains("bar-active")).toBe(false);
+    expect(cards[1].classList.contains("bar-active")).toBe(true);
+
+    const cells = container.querySelectorAll<HTMLButtonElement>(".pattern-tick-cell");
+    expect(cells).toHaveLength(16);
+    // Bar 1, Beat 1.2 (index 9) is playing and medium accent (2)
+    expect(cells[9].classList.contains("playing")).toBe(true);
+    expect(cells[9].classList.contains("accent-medium")).toBe(true);
+
+    // Click Bar 1, Beat 1.1 (index 0, currently Strong = 3 -> cycles to Rest = 0)
+    fireEvent.click(cells[0]);
+    expect(captured).not.toBeNull();
+    expect(captured.id).toBe("custom");
+    expect(captured.measures[0].ticks[0]).toBe(0);
+  });
+
+  it("displays compound meter labels (e.g. 6/8 for [3,3]), wraps activeBar modulo measures.length, and applies feedback classes on downbeats", () => {
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[3, 3]}
+        subdivision={2}
+        accentMode="pattern"
+        isPlaying
+        activeBar={3}
+        activeBeat={1}
+        activeSub={0}
+        feedback={new Map([[1, fb("perfect")]])}
+        pattern={{
+          id: "afro-6-8-bell",
+          name: "Afro-Cuban 6/8 Bell",
+          loopBars: 1,
+          measures: [
+            { beats: 6, subdivision: 2, ticks: [3, 0, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2] },
+          ],
+        }}
+      />,
+    );
+
+    const card = container.querySelector(".pattern-measure-card");
+    expect(card?.classList.contains("bar-active")).toBe(true);
+    expect(container.querySelector(".pattern-measure-meter")?.textContent).toBe(
+      "6/8 • 2 ticks",
+    );
+
+    const cells = container.querySelectorAll<HTMLButtonElement>(".pattern-tick-cell");
+    // Beat index 1, sub 0 is cell index 2
+    expect(cells[2].classList.contains("playing")).toBe(true);
+    expect(cells[2].classList.contains("feedback-perfect")).toBe(true);
+    expect(cells[3].classList.contains("feedback-perfect")).toBe(false);
+  });
+});
+
+

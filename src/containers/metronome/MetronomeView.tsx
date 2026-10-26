@@ -1,9 +1,20 @@
-import { useMemo, type Ref } from "react";
+import { useState, useEffect, useMemo, useRef, type Ref } from "react";
 import { useTranslation } from "react-i18next";
-import type { AppState, BeatEvent, Subdivision } from "../../types";
+import type { AppState, BeatEvent, MultiMeasurePattern, PatternAccentLevel, Subdivision } from "../../types";
 // BeatEvent used for evaluation feedback; Subdivision for sub-row cast
 import type { useEvaluation } from "../../hooks/useEvaluation";
-import { setSubdivision, setBeatGroups } from "../../ipc";
+import { setSubdivision, setBeatGroups, setFreeMode, setMeasurePattern } from "../../ipc";
+import {
+  createDefaultPattern,
+  defaultBeatGroupsForBeats,
+  grooveToPattern,
+  PATTERN_PRESETS,
+  resamplePatternMeter,
+  resamplePatternSubdivision,
+  type PatternPreset,
+} from "./patternPresets";
+import { PatternPresetPicker } from "./PatternPresetPicker";
+import { meterTotal } from "../../utils/meter";
 import {
   getTempoMarking,
   getTempoScale,
@@ -92,6 +103,195 @@ export function MetronomeView({
   }, [evaluation.enabled, evaluation.dotFeedback, currentBeat]);
 
   const farFade = farTempoFade(state.bpm);
+
+  const isPatternMode = state.accentMode === "pattern";
+  const totalBeats = useMemo(() => meterTotal(state.beatGroups), [state.beatGroups]);
+
+  // Maintain local pattern state for instantaneous UI responsiveness
+  const [localPattern, setLocalPattern] = useState<MultiMeasurePattern | null>(null);
+
+  // Sync localPattern whenever state.pattern changes from IPC
+  useEffect(() => {
+    if (state.pattern !== undefined) {
+      setLocalPattern(state.pattern);
+    }
+  }, [state.pattern]);
+
+  const currentPattern = useMemo(() => {
+    const base = localPattern ?? state.pattern;
+    if (base && base.measures && base.measures.length > 0) {
+      return base;
+    }
+    return createDefaultPattern(2, totalBeats, state.subdivision);
+  }, [localPattern, state.pattern, totalBeats, state.subdivision]);
+
+  const currentPatternRef = useRef(currentPattern);
+  currentPatternRef.current = currentPattern;
+
+  // Resample localPattern when meter or subdivision changes from any external control
+  const prevBeatsRef = useRef(totalBeats);
+  const prevSubRef = useRef(state.subdivision);
+  useEffect(() => {
+    const beatsChanged = totalBeats !== prevBeatsRef.current;
+    const subChanged = state.subdivision !== prevSubRef.current;
+    prevBeatsRef.current = totalBeats;
+    prevSubRef.current = state.subdivision;
+    if (!isPatternMode || (!beatsChanged && !subChanged)) return;
+
+    let next = currentPatternRef.current;
+    let modified = false;
+    if (beatsChanged && next.measures.some((m) => m.beats !== totalBeats)) {
+      next = resamplePatternMeter(next, totalBeats);
+      modified = true;
+    }
+    if (subChanged && next.measures.some((m) => m.subdivision !== state.subdivision)) {
+      next = resamplePatternSubdivision(next, state.subdivision);
+      modified = true;
+    }
+    if (modified) {
+      setLocalPattern(next);
+    }
+  }, [isPatternMode, totalBeats, state.subdivision]);
+
+  // Ensure the backend engine has a compiled pattern when entering pattern mode for the first time
+  useEffect(() => {
+    if (isPatternMode && !state.pattern && !localPattern) {
+      const initial = createDefaultPattern(2, totalBeats, state.subdivision);
+      setLocalPattern(initial);
+      void setMeasurePattern(initial).catch((err) => {
+        console.error("[yames] setMeasurePattern failed", err);
+      });
+    }
+  }, [isPatternMode, state.pattern, localPattern, totalBeats, state.subdivision]);
+
+  const handleSubdivisionChange = async (sub: Subdivision) => {
+    if (isPatternMode) {
+      const updated = resamplePatternSubdivision(currentPatternRef.current, sub);
+      setLocalPattern(updated);
+      try {
+        await setMeasurePattern(updated);
+      } catch (err) {
+        console.error("[yames] setMeasurePattern failed", err);
+      }
+    }
+    void setSubdivision(sub);
+  };
+
+  const [includeGrooveFill, setIncludeGrooveFill] = useState(false);
+
+  const activePreset = useMemo(
+    () => PATTERN_PRESETS.find((p) => p.id === currentPattern.id),
+    [currentPattern.id]
+  );
+
+  const handleBarCountChange = (delta: number) => {
+    const currentBars = currentPattern.measures.length;
+    const nextBars = Math.max(1, Math.min(8, currentBars + delta));
+    if (nextBars === currentBars) return;
+
+    if (activePreset?.groove) {
+      const updated = grooveToPattern(
+        activePreset.groove,
+        nextBars,
+        includeGrooveFill
+      );
+      setLocalPattern(updated);
+      void setMeasurePattern(updated).catch((err) => {
+        console.error("[yames] setMeasurePattern failed", err);
+      });
+      return;
+    }
+
+    let nextMeasures = [...currentPattern.measures];
+    if (nextBars > currentBars) {
+      const last = nextMeasures[nextMeasures.length - 1];
+      for (let i = currentBars; i < nextBars; i++) {
+        const beats = last ? last.beats : totalBeats;
+        const sub = last ? last.subdivision : state.subdivision;
+        const ticks: PatternAccentLevel[] = [];
+        for (let b = 0; b < beats; b++) {
+          for (let s = 0; s < sub; s++) {
+            ticks.push(s === 0 ? (b === 0 ? 2 : 1) : 1);
+          }
+        }
+        nextMeasures.push({ beats, subdivision: sub, ticks });
+      }
+    } else {
+      nextMeasures = nextMeasures.slice(0, nextBars);
+    }
+
+    const updated = {
+      ...currentPattern,
+      loopBars: nextBars,
+      measures: nextMeasures,
+    };
+    setLocalPattern(updated);
+    void setMeasurePattern(updated).catch((err) => {
+      console.error("[yames] setMeasurePattern failed", err);
+    });
+  };
+
+  const handleSelectPreset = async (preset: PatternPreset) => {
+    const targetPattern = preset.groove
+      ? grooveToPattern(
+          preset.groove,
+          Math.max(1, currentPattern.measures.length || 2),
+          includeGrooveFill
+        )
+      : preset.pattern;
+
+    const targetBeats = targetPattern.measures[0]?.beats ?? totalBeats;
+    const targetSub = (targetPattern.measures[0]?.subdivision ??
+      state.subdivision) as Subdivision;
+
+    setLocalPattern(targetPattern);
+    try {
+      await setMeasurePattern(targetPattern);
+      if (state.freeMode) {
+        await setFreeMode(false);
+      }
+      if (state.freeMode || targetBeats !== totalBeats) {
+        await setBeatGroups(defaultBeatGroupsForBeats(targetBeats));
+      }
+      if (targetSub !== state.subdivision) {
+        await setSubdivision(targetSub);
+      }
+    } catch (err) {
+      console.error("[yames] handleSelectPreset failed", err);
+    }
+  };
+
+  const handleToggleGrooveFill = async () => {
+    const nextFill = !includeGrooveFill;
+    setIncludeGrooveFill(nextFill);
+    if (!activePreset?.groove) return;
+    const updated = grooveToPattern(
+      activePreset.groove,
+      currentPattern.measures.length || 2,
+      nextFill
+    );
+    setLocalPattern(updated);
+    try {
+      await setMeasurePattern(updated);
+    } catch (err) {
+      console.error("[yames] handleToggleGrooveFill failed", err);
+    }
+  };
+
+  const handleResetPattern = () => {
+    const reset = createDefaultPattern(currentPattern.measures.length || 2, totalBeats, state.subdivision);
+    setLocalPattern(reset);
+    void setMeasurePattern(reset).catch((err) => {
+      console.error("[yames] setMeasurePattern failed", err);
+    });
+  };
+
+  const handlePatternChange = (next: MultiMeasurePattern) => {
+    setLocalPattern(next);
+    void setMeasurePattern(next).catch((err) => {
+      console.error("[yames] onPatternChange failed", err);
+    });
+  };
 
   return (
     <>
@@ -292,6 +492,62 @@ export function MetronomeView({
           <AccentControl mode={state.accentMode} />
         </div>
 
+        {isPatternMode && (
+          <div className="pattern-toolbar">
+            <div className="pattern-bars-control">
+              <span className="pattern-label">Loop Bars</span>
+              <div className="pattern-stepper">
+                <button
+                  type="button"
+                  className="pattern-stepper-btn"
+                  onClick={() => handleBarCountChange(-1)}
+                  disabled={currentPattern.measures.length <= 1}
+                  aria-label="Decrease bars"
+                >
+                  −
+                </button>
+                <span className="pattern-bar-count">
+                  {currentPattern.measures.length} {currentPattern.measures.length === 1 ? "Bar" : "Bars"}
+                </span>
+                <button
+                  type="button"
+                  className="pattern-stepper-btn"
+                  onClick={() => handleBarCountChange(1)}
+                  disabled={currentPattern.measures.length >= 8}
+                  aria-label="Increase bars"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="pattern-presets-list">
+              <PatternPresetPicker
+                activePresetId={currentPattern.id}
+                onSelectPreset={(preset) => void handleSelectPreset(preset)}
+              />
+              {activePreset?.groove && currentPattern.measures.length >= 2 && (
+                <button
+                  type="button"
+                  className={`pattern-preset-chip ${includeGrooveFill ? "active" : ""}`}
+                  onClick={() => void handleToggleGrooveFill()}
+                  title="Use the groove's drum fill on the final bar of the loop"
+                >
+                  Fill on last bar
+                </button>
+              )}
+              <button
+                type="button"
+                className="pattern-preset-chip pattern-reset-chip"
+                onClick={handleResetPattern}
+                title="Reset to default accents"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        )}
+
         <GroupEditor
           beatGroups={state.beatGroups}
           subdivision={state.subdivision}
@@ -303,6 +559,9 @@ export function MetronomeView({
           accentMode={state.accentMode ?? "groups"}
           accentBeat={currentBeat?.accentLevel ?? 0}
           feedback={dotFeedback}
+          pattern={currentPattern}
+          activeBar={currentBeat?.formBar ?? 0}
+          onPatternChange={handlePatternChange}
           onBeatGroupsChange={(next) => {
             // No notifySettingsChange() — useSession watches the meter
             // and fires ONE debounced coach boundary for a burst of
@@ -333,7 +592,7 @@ export function MetronomeView({
               key={sub}
               className={`sub-row-btn view-stagger-item ${state.subdivision === sub ? "active" : ""}`}
               style={{ animationDelay: `${100 + i * 25}ms` }}
-              onClick={() => setSubdivision(sub)}
+              onClick={() => handleSubdivisionChange(sub)}
             >
               <SubdivisionIcon sub={sub} size={28} />
               {/* The six glyphs are near-identical at a glance and used to need

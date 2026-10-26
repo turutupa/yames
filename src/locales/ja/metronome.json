@@ -29,7 +29,8 @@
       "label": "アクセント",
       "groups": "グループの頭",
       "all": "すべての拍",
-      "none": "なし"
+      "none": "なし",
+      "pattern": "パターン"
     },
     "soundLabel": "音"
   },

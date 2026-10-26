@@ -8,6 +8,7 @@ const MODES: { id: Mode; labelKey: string }[] = [
   { id: "groups", labelKey: "metronome.accent.groups" },
   { id: "all", labelKey: "metronome.accent.all" },
   { id: "none", labelKey: "metronome.accent.none" },
+  { id: "pattern", labelKey: "metronome.accent.pattern" },
 ];
 
 /**

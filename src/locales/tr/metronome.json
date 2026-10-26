@@ -29,7 +29,8 @@
       "label": "Vurgu",
       "groups": "Grup başları",
       "all": "Her vuruş",
-      "none": "Yok"
+      "none": "Yok",
+      "pattern": "Desen"
     },
     "soundLabel": "Ses"
   },

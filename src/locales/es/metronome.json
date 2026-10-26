@@ -29,7 +29,8 @@
       "label": "Acento",
       "groups": "Inicio de grupo",
       "all": "Cada pulso",
-      "none": "Ninguno"
+      "none": "Ninguno",
+      "pattern": "Patrón"
     },
     "soundLabel": "Sonido"
   },

@@ -94,7 +94,7 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_measure_pattern, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
     EngineState, JamGainState, JamKitState, JamVoiceState, TakeState,
@@ -280,6 +280,23 @@ pub fn run() {
                     }
                     s.speed_ramp.current_bpm = s.speed_ramp.start_bpm;
                 }
+                if let Some(v) = store.get("accentMode").and_then(|v| v.as_str().map(String::from)) {
+                    s.accent_mode = match v.as_str() {
+                        "all" | "none" | "pattern" => v,
+                        _ => "groups".to_string(),
+                    };
+                }
+                if let Some(mut v) = store.get("pattern").and_then(|v| serde_json::from_value::<crate::models::MultiMeasurePattern>(v.clone()).ok()) {
+                    v.sanitize(s.time_signature.max(1), s.subdivision.max(1));
+                    s.pattern = Some(v);
+                }
+                if s.accent_mode == "pattern" && s.pattern.is_none() {
+                    s.pattern = Some(crate::models::MultiMeasurePattern::default_for(
+                        2,
+                        s.time_signature.max(1),
+                        s.subdivision.max(1),
+                    ));
+                }
             }
 
             // D2 — live tempo context shared with the onset detector so the
@@ -294,9 +311,16 @@ pub fn run() {
                 Arc::new(TempoContext::new(initial_bpm, initial_subdiv));
             app.manage(tempo_ctx.clone());
 
-            app.manage(shared_state);
             let beat_log = create_beat_log();
             let mut engine = MetronomeEngine::new(beat_log.clone());
+            // Restore pattern to engine if loaded
+            {
+                let s = shared_state.lock().unwrap();
+                if let Some(ref p) = s.pattern {
+                    engine.set_pattern_table(Some(Arc::new(crate::engine::PatternTable::from_model(p))));
+                }
+            }
+            app.manage(shared_state);
             // The audio thread clears this gate itself when the output device
             // will not open: `start` no longer waits long enough for the
             // command that called it to learn that and clear it.
@@ -621,6 +645,7 @@ pub fn run() {
             start_speed_ramp_from,
             arm_count_in,
             set_accent_mode,
+            set_measure_pattern,
             set_jam,
             set_jam_position,
             warm_jam,

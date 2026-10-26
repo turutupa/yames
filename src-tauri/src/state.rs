@@ -139,6 +139,10 @@ pub struct AppState {
     #[serde(rename = "accentMode", default = "default_accent_mode")]
     pub accent_mode: String,
 
+    /// Active multi-measure accent pattern if in pattern accent mode.
+    #[serde(rename = "pattern", default)]
+    pub pattern: Option<crate::models::MultiMeasurePattern>,
+
     /// The live count-in. See `CountIn` — it is not the ramp's any more.
     #[serde(rename = "countIn", default)]
     pub count_in: CountIn,
@@ -177,6 +181,7 @@ impl Default for AppState {
             free_mode: false,
             speed_ramp: SpeedRamp::default(),
             accent_mode: default_accent_mode(),
+            pattern: None,
             count_in: CountIn::default(),
             instrument: Instrument::default(),
         }

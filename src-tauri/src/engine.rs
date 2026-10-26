@@ -1780,21 +1780,24 @@ impl<'a> BandBanks<'a> {
 ///
 /// Parsed from `AppState::accent_mode` when the cached params are refreshed,
 /// so the audio thread compares an integer rather than a string once per beat.
-#[derive(Clone, Copy, PartialEq)]
-enum AccentMode {
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum AccentMode {
     /// Where each beat group opens — the default, and what the meter means.
     Groups,
     /// Every beat. Useful for hearing a bar as flat pulses rather than a shape.
     All,
     /// None at all: every click identical.
     None,
+    /// Multi-measure accent pattern with subdivision-level accents and rests.
+    Pattern,
 }
 
 impl AccentMode {
-    fn from_str(s: &str) -> Self {
+    pub fn from_str(s: &str) -> Self {
         match s {
             "all" => Self::All,
             "none" => Self::None,
+            "pattern" => Self::Pattern,
             _ => Self::Groups,
         }
     }
@@ -1816,7 +1819,7 @@ impl AccentMode {
 /// wrote it.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u8)]
-enum AccentLevel {
+pub enum AccentLevel {
     /// A plain beat, or a subdivision tick. The beat click.
     None = 0,
     /// A group start that is not the bar's: the kit's MIDDLE STROKE, its own
@@ -1825,17 +1828,19 @@ enum AccentLevel {
     /// Beat one, "every beat", the ramp's bar line: the accent click at full
     /// volume, exactly as loud as every accent was before there were tiers.
     Strong = 2,
+    /// Silent / Rest in pattern mode (no sound produced at all).
+    Silent = 3,
 }
 
 impl AccentLevel {
     /// Whether anything accented happened here — the old one-bit question.
     #[inline]
-    fn is_accent(self) -> bool {
-        self != Self::None
+    pub fn is_accent(self) -> bool {
+        self == Self::Medium || self == Self::Strong
     }
 
-    /// The gain this tier plays at. `None` never reaches the voice spawn, and
-    /// answers 0.0 rather than panicking so that a future caller cannot make a
+    /// The gain this tier plays at. `None` and `Silent` never reach the voice spawn, and
+    /// answer 0.0 rather than panicking so that a future caller cannot make a
     /// silent bug out of an exhaustive match.
     ///
     /// Strong and Medium both answer 1.0 since the middle became a file of its
@@ -1844,11 +1849,12 @@ impl AccentLevel {
     /// [`MEDIUM_GAIN`] says why the level moved out of this function and into
     /// the file, and `SoundKit::mid_id` is where the difference actually is.
     #[inline]
-    fn gain(self) -> f32 {
+    pub fn gain(self) -> f32 {
         match self {
             Self::None => 0.0,
             Self::Medium => MEDIUM_GAIN,
             Self::Strong => 1.0,
+            Self::Silent => 0.0,
         }
     }
 }
@@ -2649,6 +2655,163 @@ impl JamRetirement {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Pattern — multi-measure metronome accent patterns
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct MeasurePattern {
+    pub beats: u8,
+    pub subdivision: u8,
+    pub ticks: Vec<AccentLevel>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct PatternTable {
+    pub loop_bars: u8,
+    pub measures: Vec<MeasurePattern>,
+}
+
+impl PatternTable {
+    pub fn from_model(model: &crate::models::MultiMeasurePattern) -> Self {
+        let mut measures = Vec::with_capacity(model.measures.len());
+        for m in &model.measures {
+            let beats = m.beats.max(1);
+            let sub = m.subdivision.max(1);
+            let expected_ticks = (beats as usize) * (sub as usize);
+            let mut ticks = Vec::with_capacity(expected_ticks);
+            for t in &m.ticks {
+                let lvl = match t {
+                    crate::models::PatternAccent::Rest => AccentLevel::Silent,
+                    crate::models::PatternAccent::Plain => AccentLevel::None,
+                    crate::models::PatternAccent::Medium => AccentLevel::Medium,
+                    crate::models::PatternAccent::Strong => AccentLevel::Strong,
+                };
+                ticks.push(lvl);
+                if ticks.len() == expected_ticks {
+                    break;
+                }
+            }
+            while ticks.len() < expected_ticks {
+                ticks.push(AccentLevel::None);
+            }
+            measures.push(MeasurePattern {
+                beats,
+                subdivision: sub,
+                ticks,
+            });
+        }
+        if measures.is_empty() {
+            measures.push(MeasurePattern {
+                beats: 4,
+                subdivision: 1,
+                ticks: vec![
+                    AccentLevel::Strong,
+                    AccentLevel::None,
+                    AccentLevel::None,
+                    AccentLevel::None,
+                ],
+            });
+        }
+        let loop_bars = (measures.len().clamp(1, 16)) as u8;
+        Self {
+            loop_bars,
+            measures,
+        }
+    }
+
+    #[inline]
+    pub fn get_tick(&self, bar: usize, beat: usize, sub: usize) -> AccentLevel {
+        if self.measures.is_empty() {
+            return AccentLevel::None;
+        }
+        let m = &self.measures[bar % self.measures.len()];
+        let tick_idx = beat * (m.subdivision as usize) + sub;
+        if tick_idx < m.ticks.len() {
+            m.ticks[tick_idx]
+        } else {
+            AccentLevel::None
+        }
+    }
+}
+
+pub struct PatternHandoff {
+    pub table: Mutex<Option<Arc<PatternTable>>>,
+    pub generation: AtomicU64,
+    retired: Mutex<Vec<Arc<PatternTable>>>,
+}
+
+impl PatternHandoff {
+    pub fn new() -> Self {
+        Self {
+            table: Mutex::new(None),
+            generation: AtomicU64::new(0),
+            retired: Mutex::new(Vec::with_capacity(8)),
+        }
+    }
+
+    pub fn set(&self, table: Option<Arc<PatternTable>>) {
+        self.drain_retired();
+        let mut lock = self.table.lock().unwrap();
+        *lock = table;
+        self.generation.fetch_add(1, Ordering::Release);
+    }
+
+    fn try_retire(&self, table: Arc<PatternTable>) -> Result<(), Arc<PatternTable>> {
+        match self.retired.try_lock() {
+            Ok(mut r) => {
+                if r.len() < 8 {
+                    r.push(table);
+                    Ok(())
+                } else {
+                    Err(table)
+                }
+            }
+            Err(_) => Err(table),
+        }
+    }
+
+    pub fn drain_retired(&self) {
+        if let Ok(mut r) = self.retired.lock() {
+            r.clear();
+        }
+    }
+}
+
+struct PatternRetirement {
+    parked: [Option<Arc<PatternTable>>; 4],
+}
+
+impl PatternRetirement {
+    fn new() -> Self {
+        Self {
+            parked: [None, None, None, None],
+        }
+    }
+
+    fn retire(&mut self, handoff: &PatternHandoff, table: Arc<PatternTable>) {
+        if let Err(table) = handoff.try_retire(table) {
+            match self.parked.iter_mut().find(|s| s.is_none()) {
+                Some(slot) => *slot = Some(table),
+                None => std::mem::forget(table),
+            }
+        }
+    }
+
+    fn flush(&mut self, handoff: &PatternHandoff) {
+        for slot in self.parked.iter_mut() {
+            if let Some(table) = slot.take() {
+                if let Err(back) = handoff.try_retire(table) {
+                    *slot = Some(back);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+pub type SharedPattern = Arc<PatternHandoff>;
+
 /// WHICH DECODE a table's drums came from, or `None` when it has no band.
 ///
 /// `KitBank::id` and not the kit's name or the folder's path: a musician who
@@ -3028,6 +3191,9 @@ struct CachedParams {
     /// resampled to this device's rate before it ever gets here: the
     /// thread that asked for it had nothing else to do while Piper ran.
     speech_pos: usize,
+    /// Compiled multi-measure accent pattern, when pattern accent mode is active.
+    pattern: Option<Arc<PatternTable>>,
+    pattern_generation: u64,
 }
 
 /// The count-in sound a table asks for, or the beep when there is no table.
@@ -3111,7 +3277,7 @@ fn accent_for(
                 AccentLevel::None
             }
         }
-        AccentMode::Groups => {}
+        AccentMode::Groups | AccentMode::Pattern => {}
     }
     // FREE mode used to short-circuit to `false` here, because before the
     // accent control existed it was the only way to hear a bar with no accents
@@ -4276,6 +4442,8 @@ pub struct MetronomeEngine {
     /// table — nothing about a jam belongs in the state blob that crosses to
     /// the frontend on every change.
     jam: SharedJam,
+    /// Multi-measure accent pattern handoff.
+    pattern: SharedPattern,
     /// Where a take waits to be recorded into or played back. On the engine
     /// for the reason the band is: it belongs to the audio path, survives a
     /// device change, and has no business in the state blob that crosses to
@@ -4317,12 +4485,18 @@ impl MetronomeEngine {
             callback_probe: None,
             tempo_ctx: None,
             jam: Arc::new(JamHandoff::new()),
+            pattern: Arc::new(PatternHandoff::new()),
             take: Arc::new(crate::take::TakeHandoff::new()),
             sample_rate: Arc::new(AtomicU32::new(0)),
             output_latency_us: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
         }
+    }
+
+    /// Load a multi-measure pattern, or `None` to clear it.
+    pub fn set_pattern_table(&self, table: Option<Arc<PatternTable>>) {
+        self.pattern.set(table);
     }
 
     /// Load a jam, or `None` to take the band away.
@@ -4647,6 +4821,7 @@ impl MetronomeEngine {
         let adaptive_score = self.adaptive_score.clone();
         let callback_probe = self.callback_probe.clone();
         let jam_shared = self.jam.clone();
+        let pattern_shared = self.pattern.clone();
         let take_shared = self.take.clone();
         let take_event = self.take.clone();
         let take_sr_out = self.sample_rate.clone();
@@ -4939,6 +5114,8 @@ impl MetronomeEngine {
             // tick and get the same answer. One bool, beside the two above.
             let mut jam_in_pickup = false;
             let mut jam_retire = JamRetirement::new();
+            let mut pattern_retire = PatternRetirement::new();
+            let mut pattern_bar: u32 = 0;
             let mut take_retire = crate::take::TakeParking::new();
             let mut speech_retire = crate::speech_out::SpeechParking::new();
             // One report per loaded table, not one per tick.
@@ -4980,6 +5157,8 @@ impl MetronomeEngine {
                 speech: None,
                 speech_generation: 0,
                 speech_pos: 0,
+                pattern: None,
+                pattern_generation: 0,
             };
 
             // ---- Build output stream ----
@@ -5132,6 +5311,26 @@ impl MetronomeEngine {
                     // Cheap when nothing is parked, which is always, unless
                     // the command thread was mid-drain at the wrong moment.
                     jam_retire.flush(&jam_shared);
+
+                    // ---- Multi-measure pattern ----
+                    let pat_gen = pattern_shared.generation.load(Ordering::Acquire);
+                    if pat_gen != cached.pattern_generation {
+                        if let Ok(slot) = pattern_shared.table.try_lock() {
+                            let incoming = slot.clone();
+                            drop(slot);
+                            cached.pattern_generation = pat_gen;
+                            if let Some(old) = cached.pattern.take() {
+                                pattern_retire.retire(&pattern_shared, old);
+                            }
+                            cached.pattern = incoming;
+                            if let Some(ref p) = cached.pattern {
+                                pattern_bar %= p.loop_bars.max(1) as u32;
+                            } else {
+                                pattern_bar = 0;
+                            }
+                        }
+                    }
+                    pattern_retire.flush(&pattern_shared);
 
                     // ---- Where the form goes next ----
                     //
@@ -5340,6 +5539,7 @@ impl MetronomeEngine {
                         jam_chorus = 1;
                         jam_bar_state = state;
                         jam_start_bar = bar;
+                        pattern_bar = 0;
                         // The usual case for the coach: a stopped metronome
                         // and a tip between exercises. Mixed AFTER the take
                         // ring above, so a take is the band and the player,
@@ -5369,6 +5569,7 @@ impl MetronomeEngine {
                         jam_chorus = 1;
                         jam_bar_state = state;
                         jam_start_bar = bar;
+                        pattern_bar = 0;
                         jam_mismatch_reported = false;
                         // A press of Play is a new tune. An ending armed by
                         // the last one — which is how the transport went
@@ -5463,6 +5664,7 @@ impl MetronomeEngine {
                             if cached.beat_groups_changed {
                                 measure_beat = 0;
                                 sub_count = 0; // force current tick to be a downbeat
+                                pattern_bar = 0;
                                 cached.beat_groups_changed = false;
                                 // The bar just changed length, so the form
                                 // starts again with it — and the table is
@@ -5491,6 +5693,7 @@ impl MetronomeEngine {
                                 beat_count = 0;
                                 sub_count = 0;
                                 measure_beat = 0;
+                                pattern_bar = 0;
                                 is_warmup_transition = true;
                                 // ...and back to the bar this press of play
                                 // started on. The count-in beeps over the top
@@ -5527,15 +5730,40 @@ impl MetronomeEngine {
                             // "click is sacred" rule. The tier added one
                             // `trailing_zeros` to that handful and nothing
                             // else; see `accent_for`.
-                            let accent_level = accent_for(
-                                cached.accent_mode,
-                                cached.ramp_active,
-                                cached.ramp_beats_per_bar,
-                                cached.accent_mask,
-                                is_downbeat,
-                                beat_count,
-                                measure_beat,
-                            );
+                            let counting_in = cached.ramp_warming_up && !is_last_warmup;
+                            let accent_level = if counting_in {
+                                AccentLevel::None
+                            } else if cached.accent_mode == AccentMode::Pattern
+                                && !cached.ramp_active
+                            {
+                                if let Some(ref table) = cached.pattern {
+                                    table.get_tick(
+                                        pattern_bar as usize,
+                                        measure_beat as usize,
+                                        sub_count as usize,
+                                    )
+                                } else {
+                                    accent_for(
+                                        cached.accent_mode,
+                                        cached.ramp_active,
+                                        cached.ramp_beats_per_bar,
+                                        cached.accent_mask,
+                                        is_downbeat,
+                                        beat_count,
+                                        measure_beat,
+                                    )
+                                }
+                            } else {
+                                accent_for(
+                                    cached.accent_mode,
+                                    cached.ramp_active,
+                                    cached.ramp_beats_per_bar,
+                                    cached.accent_mask,
+                                    is_downbeat,
+                                    beat_count,
+                                    measure_beat,
+                                )
+                            };
 
                             // ---- The band, if there is one ----
                             //
@@ -5543,7 +5771,6 @@ impl MetronomeEngine {
                             // tick was going to be played anyway, and all
                             // that changes is which drums sound on it. The
                             // rules live in `jam_play`, which is pure.
-                            let counting_in = cached.ramp_warming_up && !is_last_warmup;
                             // THE PICKUP. The one beat of the count-in the
                             // drummer plays rather than counts — whether
                             // there is anything to play is `jam_play`'s
@@ -5818,6 +6045,8 @@ impl MetronomeEngine {
                                         }
                                     }
                                 }
+                            } else if accent_level == AccentLevel::Silent {
+                                // Silent / rest in pattern mode: no sound produced on this tick
                             } else {
                                 // Regular / subdivision
                                 let (sid, amp) = if is_downbeat {
@@ -5844,7 +6073,13 @@ impl MetronomeEngine {
                             let notif_measure_beat = measure_beat; // capture BEFORE counter advance
                             // Where in the form this tick was, not where the
                             // next one will be.
-                            let notif_jam_bar = jam_bar;
+                            let notif_jam_bar = if cached.jam.is_some() {
+                                jam_bar
+                            } else if cached.accent_mode == AccentMode::Pattern {
+                                pattern_bar
+                            } else {
+                                0
+                            };
                             let notif_jam_chorus = jam_chorus;
                             // While the band plays, a tick is accented when
                             // any drum on it is — so the UI's dots flash on
@@ -5991,6 +6226,14 @@ impl MetronomeEngine {
                                     jam_bar = b;
                                     jam_chorus = c;
                                     jam_bar_state = t.band_state(b);
+                                }
+                                if cached.accent_mode == AccentMode::Pattern && !counting_in {
+                                    if let Some(ref p) = cached.pattern {
+                                        let loop_bars = p.loop_bars.max(1) as u32;
+                                        pattern_bar = (pattern_bar + 1) % loop_bars;
+                                    } else {
+                                        pattern_bar = 0;
+                                    }
                                 }
                             }
 
@@ -6382,7 +6625,8 @@ impl MetronomeEngine {
                         // Derived here and nowhere else, so the two fields on
                         // the wire cannot drift: `isAccent` has always meant
                         // "was this tick accented at all".
-                        is_accent: notif.accent > 0,
+                        is_accent: notif.accent == AccentLevel::Strong as u8
+                            || notif.accent == AccentLevel::Medium as u8,
                         form_bar: notif.jam_bar,
                         chorus: notif.jam_chorus,
                         band_state: notif.jam_band_state,
@@ -6916,14 +7160,15 @@ mod tests {
                 subdivision: 0,
                 is_downbeat: true,
                 accent,
-                is_accent: accent > 0,
+                is_accent: accent == AccentLevel::Strong as u8
+                    || accent == AccentLevel::Medium as u8,
                 form_bar: 0,
                 chorus: 1,
                 band_state: JamBandState::Full,
             };
             serde_json::to_value(&e).expect("a beat event serialises")
         };
-        for (accent, expected_bit) in [(0u8, false), (1, true), (2, true)] {
+        for (accent, expected_bit) in [(0u8, false), (1, true), (2, true), (3, false)] {
             let v = event(accent);
             assert_eq!(v["accentLevel"], serde_json::json!(accent));
             assert_eq!(v["isAccent"], serde_json::json!(expected_bit));
@@ -6951,10 +7196,84 @@ mod tests {
         assert!(AccentLevel::Medium.gain() > BEAT_GAIN);
         assert!(AccentLevel::Medium.gain() <= AccentLevel::Strong.gain());
         assert_eq!(AccentLevel::None.gain(), 0.0);
+        assert_eq!(AccentLevel::Silent.gain(), 0.0);
+        assert!(!AccentLevel::Silent.is_accent());
         // And the numbers the frontend reads, which sort the same way.
         assert_eq!(AccentLevel::None as u8, 0);
         assert_eq!(AccentLevel::Medium as u8, 1);
         assert_eq!(AccentLevel::Strong as u8, 2);
+        assert_eq!(AccentLevel::Silent as u8, 3);
+    }
+
+    #[test]
+    fn pattern_table_compilation_and_indexing() {
+        use crate::models::{MeasureDefinition, MultiMeasurePattern, PatternAccent};
+
+        let pattern = MultiMeasurePattern {
+            id: "test-pattern".to_string(),
+            name: "Test 2-Bar Pattern".to_string(),
+            loop_bars: 2,
+            measures: vec![
+                MeasureDefinition {
+                    beats: 4,
+                    subdivision: 2,
+                    ticks: vec![
+                        PatternAccent::Strong, // bar 0 beat 0 sub 0
+                        PatternAccent::Rest,   // bar 0 beat 0 sub 1
+                        PatternAccent::Plain,  // bar 0 beat 1 sub 0
+                        PatternAccent::Medium, // bar 0 beat 1 sub 1
+                        PatternAccent::Rest,   // bar 0 beat 2 sub 0
+                        PatternAccent::Plain,  // bar 0 beat 2 sub 1
+                        PatternAccent::Medium, // bar 0 beat 3 sub 0
+                        PatternAccent::Strong, // bar 0 beat 3 sub 1
+                    ],
+                },
+                MeasureDefinition {
+                    beats: 4,
+                    subdivision: 2,
+                    ticks: vec![
+                        PatternAccent::Medium, // bar 1 beat 0 sub 0
+                        PatternAccent::Plain,  // bar 1 beat 0 sub 1
+                        PatternAccent::Rest,   // bar 1 beat 1 sub 0
+                        PatternAccent::Rest,   // bar 1 beat 1 sub 1
+                        PatternAccent::Strong, // bar 1 beat 2 sub 0
+                        PatternAccent::Plain,  // bar 1 beat 2 sub 1
+                        PatternAccent::Plain,  // bar 1 beat 3 sub 0
+                        PatternAccent::Rest,   // bar 1 beat 3 sub 1
+                    ],
+                },
+            ],
+        };
+
+        let table = PatternTable::from_model(&pattern);
+        assert_eq!(table.loop_bars, 2);
+        assert_eq!(table.measures.len(), 2);
+
+        // Bar 0 checks
+        assert_eq!(table.get_tick(0, 0, 0), AccentLevel::Strong);
+        assert_eq!(table.get_tick(0, 0, 1), AccentLevel::Silent);
+        assert_eq!(table.get_tick(0, 1, 0), AccentLevel::None);
+        assert_eq!(table.get_tick(0, 1, 1), AccentLevel::Medium);
+        assert_eq!(table.get_tick(0, 3, 1), AccentLevel::Strong);
+
+        // Bar 1 checks
+        assert_eq!(table.get_tick(1, 0, 0), AccentLevel::Medium);
+        assert_eq!(table.get_tick(1, 1, 0), AccentLevel::Silent);
+        assert_eq!(table.get_tick(1, 2, 0), AccentLevel::Strong);
+
+        // Looping checks (bar 2 wraps to bar 0, bar 3 wraps to bar 1)
+        assert_eq!(table.get_tick(2, 0, 0), AccentLevel::Strong);
+        assert_eq!(table.get_tick(3, 0, 0), AccentLevel::Medium);
+
+        // Out of bounds safety
+        assert_eq!(table.get_tick(0, 99, 99), AccentLevel::None);
+
+        // Mismatched loop_bars vs measures.len() still derives loop_bars from measures.len()
+        let mut mismatched = pattern.clone();
+        mismatched.loop_bars = 8;
+        let mismatched_table = PatternTable::from_model(&mismatched);
+        assert_eq!(mismatched_table.loop_bars, 2);
+        assert_eq!(mismatched_table.measures.len(), 2);
     }
 
     /// Every kit answers a middle stroke, and it is nobody else's file.
@@ -7344,7 +7663,7 @@ mod tests {
 
     #[test]
     fn a_stream_that_is_still_opening_is_not_a_place_to_speak() {
-        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        let engine = MetronomeEngine::new(crate::timing::create_beat_log());
         // What `ensure_thread` leaves behind between the spawn and `ready`:
         // alive up, a rate from the LAST stream, no width yet.
         engine.sample_rate.store(44_100, Ordering::Release);
