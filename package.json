@@ -33,6 +33,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coach:blocks": "node scripts/coach-blocks.mjs",
+    "paths": "node scripts/paths.mjs",
+    "test:paths:rust": "node scripts/rust-test.mjs --test path_exercises",
     "test:layout": "playwright test",
     "test:layout:ui": "playwright test --ui",
     "test:rust": "node scripts/rust-test.mjs --lib --no-default-features",
