@@ -580,7 +580,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -1245,7 +1245,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -1366,7 +1366,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -1397,7 +1397,7 @@
           "title": "Am at fret 12, the long reach",
           "purpose": "The classic shape, A, C, E and a five-fret hammer to A. Up here the frets are close enough that a five-fret reach is comfortable.",
           "howTo": [
-            "First finger on fret 12, little finger on 17. If the reach is too much, slide the first finger up instead for now, and say so to yourself: the sound is what counts."
+            "First finger on fret 12, little finger on 17. If the reach is too much for now, slide up to it instead: the sound is what counts."
           ],
           "coachLine": "A clean turn on this shape is a real milestone. Check it on a recording too.",
           "grading": "graded",
@@ -1487,7 +1487,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -1760,7 +1760,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -1914,7 +1914,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -2069,7 +2069,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -2347,7 +2347,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -2384,7 +2384,7 @@
       "howTo": [
         "Let the forearm carry the pick across. The wrist stays still.",
         "The palm mute now has to travel with the pick, and the fretting hand keeps releasing each note in turn.",
-        "Keep the turn at the bottom smooth: the last upward note and the first downward note are the same note. Repeat it only when the Exercise writes it."
+        "The bottom note is played once: you arrive on it with the upward push and leave it with a downstroke on the next string. Keep that change small."
       ],
       "payoff": "A sweep that sounds like a real chord being spelled out, at a tempo you can sing, in four shapes.",
       "prerequisites": ["qualities"],
@@ -2489,7 +2489,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -2615,7 +2615,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -2740,7 +2740,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -2911,7 +2911,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3045,7 +3045,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3164,7 +3164,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3194,7 +3194,7 @@
         {
           "id": "five-strings.g-five",
           "title": "G major, root in the shape's lowest note",
-          "purpose": "G, B, D, G, B with a three-fret reach on top. Ten notes and a rest, a good place to breathe and hear the arpeggio.",
+          "purpose": "G, B, D, G, B and a three-fret reach to D on top. Ten notes and a rest, a good place to breathe and hear the arpeggio.",
           "howTo": [
             "Ten triplets, then a rest for two. There is no bottom hammer here, so you turn with the pick. Use the rest to reset."
           ],
@@ -3284,7 +3284,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3318,7 +3318,7 @@
           "howTo": [
             "Slide up from fret 7 to 12 on the top string, and slide back. A slide is a good choice wherever the frets are too wide for a clean hammer."
           ],
-          "coachLine": "Slides can be too quiet for me to catch, and if so they won't count against you.",
+          "coachLine": "A slid-to note can be too quiet for me to catch, and the bar on this one allows for that. Judge the slide by ear.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3368,12 +3368,12 @@
           "passBars": [
             {
               "metric": "noteIdentity",
-              "min": 0.85,
+              "min": 0.8,
               "overBars": 4
             },
             {
               "metric": "notesHeard",
-              "min": 0.85,
+              "min": 0.75,
               "overBars": 4
             },
             {
@@ -3402,7 +3402,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3520,12 +3520,12 @@
           "passBars": [
             {
               "metric": "noteIdentity",
-              "min": 0.85,
+              "min": 0.8,
               "overBars": 4
             },
             {
               "metric": "notesHeard",
-              "min": 0.85,
+              "min": 0.75,
               "overBars": 4
             },
             {
@@ -3554,7 +3554,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3586,7 +3586,7 @@
           "howTo": [
             "F and G have ten notes and a rest of two. Use the rest to move. Am and C have twelve notes, so those moves come in the last note of the bar."
           ],
-          "coachLine": "I'd rather see it slower and clean. This one is worth repeating at a rung that stays even.",
+          "coachLine": "Slower and clean beats fast and rough. This one is worth repeating at a rung that stays even.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -3713,7 +3713,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -3885,7 +3885,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -4027,7 +4027,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -4155,7 +4155,7 @@
             "flags": ["fastSweep", "softLegato", "bendPitch"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing.",
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
               "A bend is one attack. The app can time it; it does not measure how far it travelled."
             ]
           },
@@ -4275,7 +4275,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -4397,7 +4397,7 @@
             "flags": ["fastSweep", "softLegato"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing."
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it."
             ]
           },
           "backing": {
@@ -4571,13 +4571,13 @@
             "flags": ["fastSweep", "softLegato", "bandBleed"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing.",
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
               "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
             ]
           },
           "backing": {
             "kind": "jam",
-            "grooveId": "rock8",
+            "grooveId": "rockTwelveEight",
             "feel": "straight",
             "key": "A minor",
             "chart": "Am | F | C | G"
@@ -4745,7 +4745,7 @@
             "flags": ["fastSweep", "softLegato", "bandBleed"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing.",
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
               "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
             ]
           },
@@ -4906,13 +4906,13 @@
             "flags": ["fastSweep", "softLegato", "bandBleed"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing.",
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
               "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
             ]
           },
           "backing": {
             "kind": "jam",
-            "grooveId": "rock8",
+            "grooveId": "rockTwelveEight",
             "feel": "straight",
             "key": "A minor",
             "chart": "Am | F | C | G"
@@ -5085,13 +5085,13 @@
             "flags": ["fastSweep", "softLegato", "bandBleed"],
             "notes": [
               "Swept notes have soft attacks and can ring into each other. Detection of them is unproven, so only slow rungs are graded and the fast ones are self-checked.",
-              "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing.",
+              "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
               "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested."
             ]
           },
           "backing": {
             "kind": "jam",
-            "grooveId": "rock8",
+            "grooveId": "rockTwelveEight",
             "feel": "straight",
             "key": "A minor",
             "chart": "Am | F | C | G | Am | F | C | G"

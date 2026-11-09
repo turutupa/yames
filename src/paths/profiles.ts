@@ -68,6 +68,12 @@ export const GRADING_PROFILES: Readonly<Record<GradeProfile, GradingProfile>> = 
     passBars: [identity(0.9), heard(0.9), extras(4)],
     feedback: "afterTake",
   },
+  attacksOnly: {
+    mode: "graded",
+    graded: ["notesHeard", "extraNotes"],
+    passBars: [heard(0.9), extras(4)],
+    feedback: "afterTake",
+  },
   writtenRhythm: {
     mode: "graded",
     graded: ["notesHeard", "scaleMembership"],

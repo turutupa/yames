@@ -298,6 +298,54 @@ export function sweepLoop(args: SweepArgs): string {
 }
 
 // ---------------------------------------------------------------------------
+// Feel
+// ---------------------------------------------------------------------------
+
+/**
+ * Turn the straight eighths of a tab into shuffle eighths: long on the beat,
+ * short off it, on the triplet grid. Over a shuffle band a written straight
+ * eighth is a sixth of a beat from where the player will put it, and at 90 BPM
+ * that is 110 ms, outside the matching window: a correct take would read as
+ * wrong. `backing.feel` in the validator refuses the straight version.
+ */
+export function swing(tab: string): string {
+  const out: string[] = [];
+  let inEighths = false;
+  let written = "";
+  let tick = 0;
+  let value = 960;
+  const write = (duration: string) => {
+    if (duration !== written) out.push(duration);
+    written = duration;
+  };
+  for (const item of tab.trim().split(/\s+/)) {
+    if (item === "|") {
+      out.push(item);
+    } else if (item.startsWith("/")) {
+      inEighths = item === "/8";
+      if (!inEighths) {
+        const match = /^\/(\d+)([.t]?)$/.exec(item)!;
+        const base = 3840 / Number(match[1]);
+        value = match[2] === "." ? (base * 3) / 2 : match[2] === "t" ? (base * 2) / 3 : base;
+        write(item);
+      }
+    } else if (item === "hold" || item === "rest") {
+      out.push(item);
+      tick += 3840 - (tick % 3840 || 3840);
+    } else if (inEighths) {
+      const onBeat = tick % 960 === 0;
+      write(onBeat ? "/4t" : "/8t");
+      out.push(item);
+      tick += 480;
+    } else {
+      out.push(item);
+      tick += value;
+    }
+  }
+  return out.join(" ");
+}
+
+// ---------------------------------------------------------------------------
 // Ladders
 // ---------------------------------------------------------------------------
 

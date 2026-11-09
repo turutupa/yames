@@ -21,6 +21,7 @@ import {
   REVIEW_STATUSES,
   STANDARD_TUNING,
   TECHNIQUES,
+  TICKS,
   barLengthTicks,
 } from "./format";
 import type { Exercise, Harmony, PathDoc, PathNote, Step } from "./format";
@@ -81,6 +82,7 @@ export const RULES = {
   "backing.key": "a key the Jam band cannot read",
   "backing.chart": "the chart does not parse to the same chords",
   "backing.meter": "the groove and the Exercise are in different meters",
+  "backing.feel": "straight eighths written over a shuffle or swing band",
   "ladder.rising": "the ladder must rise",
   "ladder.jump": "a rung more than 25% above the last one",
   "ladder.range": "a tempo outside 30 to 300 BPM",
@@ -105,6 +107,7 @@ export const RULES = {
   "honesty.notGradedId": "a not-graded id that is not in the controlled list",
   "honesty.notGradedRequired": "the not-graded list leaves out something this Exercise cannot grade",
   "honesty.overlap": "the same thing listed as graded and not graded",
+  "honesty.slideBar": "a notes-heard bar a correct take would fail if its slid-to notes go unheard",
   "honesty.flag": "a detection flag is missing, unknown, or has no sentence",
   "honesty.modeShape": "the grading mode and the rest of the Exercise disagree",
   "honesty.selfCheck": "a self-checked rung with no question for the player to answer",
@@ -489,7 +492,13 @@ function checkChords(ex: Exercise, report: Report) {
 
 function checkBacking(ex: Exercise, report: Report) {
   if (ex.backing.kind !== "jam") return;
-  const { grooveId, key, chart } = ex.backing;
+  const { grooveId, key, chart, feel } = ex.backing;
+  if (feel !== "straight") {
+    const straight = ex.notes.find((n) => n.tick % TICKS === TICKS / 2);
+    if (straight) {
+      report("backing.feel", `${ex.id} (tick ${straight.tick})`, `a straight eighth over a ${feel} band: the player will swing it and read as late. Use swing() in the spec`);
+    }
+  }
   const groove = GROOVES.find((g) => g.id === grooveId);
   if (!groove) report("backing.groove", ex.id, `the Jam band has no groove "${grooveId}"`);
   else if (groove.beatsPerBar !== ex.meter.numerator) {
@@ -585,6 +594,20 @@ function checkHonesty(ex: Exercise, report: Report) {
   for (const needed of requiredNotGraded(ex)) {
     if (!ex.notGraded.includes(needed)) {
       report("honesty.notGradedRequired", ex.id, `must say "${needed}" is not graded`);
+    }
+  }
+  // `schedule.ts` marks hammers and pulls soft, and not slid-to notes: a correct
+  // take whose slides are too quiet to detect loses those notes today.
+  const slidTo = ex.notes.filter((n, i) => {
+    const previous = ex.notes[i - 1];
+    return !!previous && previous.tech.includes("slide") && previous.string === n.string;
+  }).length;
+  const heardBar = ex.passBars.find((b) => b.metric === "notesHeard");
+  if (slidTo > 0 && heardBar?.min !== undefined) {
+    const countable = ex.notes.filter((n) => !n.tech.includes("hammer") && !n.tech.includes("pull")).length;
+    const worstCorrect = (countable - slidTo) / Math.max(countable, 1);
+    if (heardBar.min > worstCorrect) {
+      report("honesty.slideBar", ex.id, `the bar asks for ${heardBar.min}, and a correct take with unheard slides reaches ${worstCorrect.toFixed(2)}`);
     }
   }
   const required = requiredFlags(ex);
@@ -767,17 +790,22 @@ export function validatePath(doc: unknown): Issue[] {
   };
   if (!checkShape(doc, report)) return issues;
   checkEnums(doc, report);
+  // Everything after this reads those values as the types they claim to be.
+  if (issues.length > 0) return issues;
   checkIds(doc, report);
   checkPathText(doc, report);
   checkReview(doc, report);
   for (const step of doc.steps) {
     for (const ex of step.exercises) {
       checkTab(doc, ex, report);
-      if (issues.some((i) => i.rule.startsWith("tab.string") || i.rule.startsWith("tab.fret"))) continue;
+      // Off the neck, nothing further about these notes means anything.
+      if (issues.some((i) => i.rule === "tab.string" || i.rule === "tab.fret")) continue;
       checkLoop(ex, report);
       checkReach(doc, ex, report);
       checkPicks(ex, report);
       checkChords(ex, report);
+      // Everything below reads the chords, and an unreadable one has been said.
+      if (ex.chords?.some((c) => !parseChord(c))) continue;
       if (ex.harmony) checkHarmony(ex, ex.harmony, report);
       checkBacking(ex, report);
       checkLandings(ex, report);

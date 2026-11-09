@@ -39,6 +39,15 @@ const dm5 = sweepLoop({ chord: "Dm", strings: [5, 4, 3, 2, 1], near: 5, doubleLo
 
 const twoPerBar = (cell: string) => repeat(cell, 2);
 
+// A slid-to note the listening misses counts as missed today, so a shape with
+// slides at the top keeps a lower notes-heard bar (`honesty.slideBar`).
+const SLIDE_BARS = [
+  { metric: "noteIdentity", min: 0.8, overBars: 4 },
+  { metric: "notesHeard", min: 0.75, overBars: 4 },
+  { metric: "timingEvenness", min: 0.75, overBars: 4 },
+  { metric: "extraNotes", max: 4, overBars: 4 },
+];
+
 function sweepExercise(args: Omit<ExerciseSpec, "pick" | "grade"> & { grade?: ExerciseSpec["grade"] }): ExerciseSpec {
   return {
     pick: "sweep",
@@ -265,7 +274,7 @@ export default definePath({
           id: "minor-high",
           title: "Am at fret 12, the long reach",
           purpose: "The classic shape, A, C, E and a five-fret hammer to A. Up here the frets are close enough that a five-fret reach is comfortable.",
-          howTo: ["First finger on fret 12, little finger on 17. If the reach is too much, slide the first finger up instead for now, and say so to yourself: the sound is what counts."],
+          howTo: ["First finger on fret 12, little finger on 17. If the reach is too much for now, slide up to it instead: the sound is what counts."],
           coach: "A clean turn on this shape is a real milestone. Check it on a recording too.",
           tab: `/8t ${twoPerBar(am3)}`,
           position: 12,
@@ -388,7 +397,7 @@ export default definePath({
       howTo: [
         "Let the forearm carry the pick across. The wrist stays still.",
         "The palm mute now has to travel with the pick, and the fretting hand keeps releasing each note in turn.",
-        "Keep the turn at the bottom smooth: the last upward note and the first downward note are the same note. Repeat it only when the Exercise writes it.",
+        "The bottom note is played once: you arrive on it with the upward push and leave it with a downstroke on the next string. Keep that change small.",
       ],
       payoff: "A sweep that sounds like a real chord being spelled out, at a tempo you can sing, in four shapes.",
       exercises: [
@@ -494,7 +503,7 @@ export default definePath({
         sweepExercise({
           id: "g-five",
           title: "G major, root in the shape's lowest note",
-          purpose: "G, B, D, G, B with a three-fret reach on top. Ten notes and a rest, a good place to breathe and hear the arpeggio.",
+          purpose: "G, B, D, G, B and a three-fret reach to D on top. Ten notes and a rest, a good place to breathe and hear the arpeggio.",
           howTo: ["Ten triplets, then a rest for two. There is no bottom hammer here, so you turn with the pick. Use the rest to reset."],
           coach: "A rest at the end of each loop makes these notes easier to tell apart too.",
           tab: `/8t ${g5} r r`,
@@ -510,13 +519,14 @@ export default definePath({
           title: "E minor, lower down the neck",
           purpose: "The Am shape down at fret 7, where the top reach becomes a slide. Lower frets are wider, and you should know what to do when the hammer no longer reaches.",
           howTo: ["Slide up from fret 7 to 12 on the top string, and slide back. A slide is a good choice wherever the frets are too wide for a clean hammer."],
-          coach: "Slides can be too quiet for me to catch, and if so they won't count against you.",
+          coach: "A slid-to note can be too quiet for me to catch, and the bar on this one allows for that. Judge the slide by ear.",
           tab: `/8t ${em5}`,
           position: 7,
           shifts: true,
           harmony: { arpeggio: "Em", cover: true },
           rungs: ladder(50, 150, 10),
           passAt: 90,
+          pass: SLIDE_BARS,
           selfCheck: [ROLL_CHECK, NOISE_CHECK],
           minutes: 6,
         }),
@@ -547,6 +557,7 @@ export default definePath({
           harmony: { chordTones: true, cover: true },
           rungs: ladder(50, 120, 5),
           passAt: 90,
+          pass: SLIDE_BARS,
           selfCheck: [ROLL_CHECK],
           minutes: 6,
         }),
@@ -555,7 +566,7 @@ export default definePath({
           title: "Am, F, C, G",
           purpose: "The same progression as the last Step, on five strings, so you hear how much bigger the same chords sound.",
           howTo: ["F and G have ten notes and a rest of two. Use the rest to move. Am and C have twelve notes, so those moves come in the last note of the bar."],
-          coach: "I'd rather see it slower and clean. This one is worth repeating at a rung that stays even.",
+          coach: "Slower and clean beats fast and rough. This one is worth repeating at a rung that stays even.",
           tab: `/8t ${am5} | ${f5} r r | ${c5} | ${g5} r r`,
           position: 12,
           shifts: true,
@@ -678,7 +689,7 @@ export default definePath({
           position: 12,
           shifts: true,
           chords: "Am | F | C | G",
-          jam: { groove: "rock8", key: "A minor" },
+          jam: { groove: "rockTwelveEight", key: "A minor" },
           harmony: { chordTones: true, cover: true },
           rungs: ladder(60, 120, 5),
           passAt: 90,
@@ -711,7 +722,7 @@ export default definePath({
           position: 12,
           shifts: true,
           chords: "Am | F | C | G",
-          jam: { groove: "rock8", key: "A minor" },
+          jam: { groove: "rockTwelveEight", key: "A minor" },
           harmony: { chordTones: true, cover: true },
           rungs: ladder(60, 130, 5),
           passAt: 85,
@@ -728,7 +739,7 @@ export default definePath({
           position: 12,
           shifts: true,
           chords: "Am | F | C | G | Am | F | C | G",
-          jam: { groove: "rock8", key: "A minor" },
+          jam: { groove: "rockTwelveEight", key: "A minor" },
           harmony: { chordTones: true, cover: true },
           rungs: ladder(60, 120, 5),
           grade: "selfChecked",

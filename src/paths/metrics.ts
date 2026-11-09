@@ -154,7 +154,7 @@ export const DETECTION_FLAGS: Readonly<Record<string, string>> = {
   ringingNotes:
     "Notes that ring together are hard to separate: the note checks may give up, and the app says so rather than guessing.",
   softLegato:
-    "Hammer-ons, pull-offs and slides may be too quiet to detect. A soft note that is not heard costs nothing.",
+    "Hammer-ons, pull-offs and slides may be too quiet to detect. An unheard hammer-on or pull-off costs nothing. An unheard slid-to note still counts as missed today, so the bar here allows for it.",
   bandBleed:
     "With a microphone and speakers the band reaches the same input as you. Direct input or headphones are the honest way to grade this; without them it is untested.",
   fastPicking:

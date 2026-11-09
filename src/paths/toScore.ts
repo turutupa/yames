@@ -116,7 +116,7 @@ export function exerciseAlphaTex(ex: Exercise, bpm: number): string {
     `\\tempo ${bpm}`,
     ".",
     `\\track "Guitar"`,
-    `\\tuning e5 b4 g4 d4 a3 e3`,
+    `\\tuning e4 b3 g3 d3 a2 e2`,
     `\\ts ${ex.meter.numerator} ${ex.meter.denominator}`,
     body,
   ].join("\n");

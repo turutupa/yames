@@ -24,6 +24,7 @@ import type {
  * - `sweep`: slow-rung bars for swept notes.
  * - `stamina`: evenness over a long take and at its end.
  * - `written`: right notes after the take, for Theory lines.
+ * - `attacksOnly`: only that each note was attacked when written; for bends.
  * - `writtenRhythm`: the rhythm is written, the notes are the player's, in scale.
  * - `inScale`: free playing, notes in the scale.
  * - `rests`: phrases and silence: rests kept, notes in the scale.
@@ -37,6 +38,7 @@ export type GradeProfile =
   | "sweep"
   | "stamina"
   | "written"
+  | "attacksOnly"
   | "writtenRhythm"
   | "inScale"
   | "rests"
