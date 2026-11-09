@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  macOS asks before an app may see through a camera, and it refuses to ask at
-  all unless the app has said why in its own bundle. Without this key
-  `getUserMedia` does not prompt and does not fail with a message — the app
-  is killed, which is the worst of the three outcomes and the one nobody can
-  debug from a bug report.
+  macOS only lets an app hear a microphone or see through a camera if the bundle
+  says why it wants one. Tauri merges this file into the bundle's generated
+  Info.plist at build time, so it holds only what the generator does not already
+  write.
 
-  Tauri merges this file into the bundle's generated Info.plist at build time,
-  so it holds only what the generator does not already write.
+  Microphone: without this key the system does not show the permission dialog
+  and does not list the app under Privacy & Security > Microphone: it silently
+  refuses, and cpal hands back a stream of silence. That is the audio-input bug
+  on macOS release builds (#59). `tauri dev` never showed it, because a dev run
+  borrows the permission of the terminal or editor that launched it. The webview
+  never opens a microphone; the sound of a take is the engine's, through cpal,
+  and it is cpal that needs this key.
 
-  The sentence is the one a macOS dialog puts after "Yames would like to access
-  the camera", so it is written the way every other promise in this app is
-  written: what it is for, and where it goes. `plans/WEBSITE_DECISIONS.md` —
-  the reader is a musician, never a developer.
+  Camera: without this key `getUserMedia` does not prompt and does not fail with
+  a message. The app is killed, which is the worst of the three outcomes and the
+  one nobody can debug from a bug report.
 
-  No microphone key, deliberately, and it must stay that way: the webview never
-  opens a microphone. The sound of a take is the engine's, recorded through
-  cpal on its own threads (`src-tauri/src/take.rs`), and adding
-  NSMicrophoneUsageDescription here would tell macOS to offer a permission this
-  app's webview has no code to ask for.
+  Each sentence is the one a macOS dialog puts after "Yames would like to access
+  the ...": what it is for, and where it goes. `plans/WEBSITE_DECISIONS.md`: the
+  reader is a musician, never a developer.
+
+  The matching entitlements, `com.apple.security.device.audio-input` and
+  `com.apple.security.device.camera`, live in `entitlements.plist`. A signed,
+  notarized build runs with the hardened runtime, and the hardened runtime
+  refuses both without them, whatever this file says. Both files are needed.
 -->
 <plist version="1.0">
   <dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Yames listens to your instrument to score your timing and coach your practice. The sound is analysed on this Mac and is never uploaded.</string>
     <key>NSCameraUsageDescription</key>
     <string>Yames records you playing, so you can watch it back beside the notes. The recording is kept on this Mac and is never uploaded.</string>
   </dict>
