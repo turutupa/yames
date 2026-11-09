@@ -1,0 +1,74 @@
+{
+ "_comment": "A store from before setlists were called setlists: the routines are under the old key, and nothing is under the new one.",
+ "chains": [
+  {
+   "id": "setlist-gig",
+   "name": "Gig warm-up",
+   "createdAt": 1700000000100,
+   "repeat": 2,
+   "countIn": 4,
+   "steps": [
+    {
+     "id": "step-1",
+     "name": "Slow",
+     "bpm": 60,
+     "subdivision": 1,
+     "beatGroups": [
+      4
+     ],
+     "freeMode": false,
+     "soundType": "click",
+     "volume": 0.7,
+     "trigger": {
+      "kind": "bars",
+      "bars": 8
+     },
+     "transition": {
+      "kind": "countIn",
+      "bars": 1
+     }
+    },
+    {
+     "id": "step-2",
+     "name": "Rest",
+     "bpm": 80,
+     "subdivision": 2,
+     "beatGroups": [
+      3,
+      3
+     ],
+     "freeMode": false,
+     "soundType": "wood",
+     "volume": 0.5,
+     "trigger": {
+      "kind": "seconds",
+      "seconds": 30
+     },
+     "transition": {
+      "kind": "rest",
+      "bars": 2
+     }
+    },
+    {
+     "id": "step-3",
+     "name": "Over the band",
+     "bpm": 92,
+     "subdivision": 1,
+     "beatGroups": [
+      4
+     ],
+     "freeMode": false,
+     "soundType": "click",
+     "volume": 0.7,
+     "trigger": {
+      "kind": "manual"
+     },
+     "transition": {
+      "kind": "cut"
+     },
+     "jamId": "jam-saved"
+    }
+   ]
+  }
+ ]
+}

@@ -25,6 +25,9 @@ import { METER_PRESETS, SOUND_TYPES } from "../../constants/metronome";
 import { HINT_IDS } from "../../containers/onboarding/hints/types";
 import { TOUR_STOPS } from "../../containers/onboarding/tour/stops";
 import { PLAY_TABS } from "../../containers/main-window/hooks/useTabRouting";
+import { GROOVES } from "../../jam/grooves";
+import { STARTER_JAMS } from "../../jam/jams";
+import { JAM_KIT_IDS, VIBES } from "../../jam/vibes";
 import { TOOLS } from "./tools";
 import * as src from "./extract";
 
@@ -60,6 +63,10 @@ interface Manifest {
   sqliteTables: string[];
   fileAssociations: string[];
   windowLabels: string[];
+  jamGrooves: string[];
+  jamVibes: string[];
+  jamKits: string[];
+  starterJams: string[];
   whereEverythingLives: Record<string, string>;
 }
 
@@ -104,6 +111,10 @@ function current(): Manifest {
     sqliteTables: src.sqliteTables(),
     fileAssociations: src.fileAssociations(),
     windowLabels: src.windowLabels(),
+    jamGrooves: GROOVES.map((g) => g.id),
+    jamVibes: VIBES.map((v) => v.id),
+    jamKits: [...JAM_KIT_IDS],
+    starterJams: STARTER_JAMS.map((j) => j.id),
     whereEverythingLives: whereEverythingLives(),
   };
 }
@@ -121,7 +132,9 @@ function withAdditions(frozen: Manifest | null, now: Manifest): Manifest {
     // hand edit may bless one.
     if (field === "ipcWrappersWithoutCaller") continue;
     const held = out[field];
-    if (Array.isArray(value) && Array.isArray(held)) {
+    if (held === undefined) {
+      out[field] = value;
+    } else if (Array.isArray(value) && Array.isArray(held)) {
       const seen = new Set(held.map((v) => JSON.stringify(v)));
       const ids = new Set(held.map((v) => identity(v)));
       for (const v of value) {
@@ -175,6 +188,11 @@ const LISTS = [
   ["sqliteTables", "SQLite tables"],
   ["fileAssociations", "file associations"],
   ["windowLabels", "window labels"],
+  // Saved jams, and `lastJamId` and a setlist step's `jamId`, point at these.
+  ["jamGrooves", "jam grooves"],
+  ["jamVibes", "jam vibes"],
+  ["jamKits", "jam kits"],
+  ["starterJams", "built-in jams"],
 ] as const;
 
 describe("the frozen surface", () => {

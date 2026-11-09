@@ -1,0 +1,390 @@
+{
+ "_comment": "A settings.json of the shape v1.2.2 writes, by hand from the code: no real user's file. The stored names and shapes are what is frozen. Do not edit to make a test pass.",
+ "bpm": 96,
+ "subdivision": 2,
+ "mode": "comfortable",
+ "corner": "bottom-right",
+ "alwaysOnTop": false,
+ "widgetAlwaysOnTop": true,
+ "accentColor": "#88ccff",
+ "theme": "ember",
+ "volume": 0.6,
+ "soundType": "wood",
+ "timeSignature": 7,
+ "beatGroups": [
+  3,
+  2,
+  2
+ ],
+ "freeMode": false,
+ "instrument": "electric-guitar",
+ "activeTab": "drill",
+ "language": "en",
+ "speedRamp": {
+  "startBpm": 70,
+  "targetBpm": 140,
+  "increment": 4,
+  "decrement": 2,
+  "barsPerStep": 3,
+  "beatsPerBar": 4,
+  "subdivision": 2,
+  "mode": "zigzag",
+  "cyclic": true
+ },
+ "onboarding.version": 1,
+ "onboarding.completedAt": "2026-03-01T10:00:00.000Z",
+ "onboarding.skipped": [],
+ "onboarding.chipDismissed": 0,
+ "tour.seenVersion": 1,
+ "whatsNew.seenVersion": "1.2.2",
+ "appSessionCount": 41,
+ "widgetOpened": true,
+ "hints.lastShownSession": 40,
+ "hints.zen-first": true,
+ "autoCheckUpdates": false,
+ "buttonFlash": false,
+ "activeBorder": true,
+ "drillAutoCollapse": false,
+ "viewTransitions": "subtle",
+ "animationStyle": "blur",
+ "zenStyle": "radar",
+ "coachBrainTier": "standard",
+ "coachMode": "pro",
+ "coachStance": "kind",
+ "coachVerbosity": "more",
+ "coachVoiceMode": "voice",
+ "coachVoiceName": "amy",
+ "coachTtsVolume": 0.8,
+ "jamCues": true,
+ "evaluationDevice": "USB Interface",
+ "evaluationChannel": 1,
+ "evaluationShowRealtime": false,
+ "inputGain_USB Interface": 6,
+ "audioOutputDevice": "Headphones",
+ "audioOutputPairs": {
+  "Headphones": 2
+ },
+ "calibrationOffset": 12.5,
+ "midiDevice": "FS-1",
+ "midiBindings": [
+  {
+   "action": "play",
+   "channel": 0,
+   "msgType": "cc",
+   "number": 64
+  },
+  {
+   "action": "tab-3",
+   "channel": null,
+   "msgType": "note",
+   "number": 36
+  },
+  {
+   "action": "songs-take",
+   "channel": 1,
+   "msgType": "pc",
+   "number": 5
+  }
+ ],
+ "keyBindings": {
+  "play": "P",
+  "tab-1": "⌘1",
+  "tab-2": "⌘2",
+  "tab-3": "⌘3",
+  "tab-4": "⌘4",
+  "tab-5": "⌘5",
+  "songs-loop": "⇧L"
+ },
+ "globalBindings": {
+  "play": "⌘⇧Space"
+ },
+ "footBindings": {
+  "play": "button0",
+  "jam-next-groove": "button1"
+ },
+ "lastSetlistId": "setlist-gig",
+ "lastJamId": "jam-saved",
+ "lastWindow": "main",
+ "window_size_main": {
+  "width": 1100,
+  "height": 760
+ },
+ "window_position_main": {
+  "x": 10,
+  "y": 20
+ },
+ "window_position_floating": {
+  "x": 30,
+  "y": 40
+ },
+ "drillRunHistory": [],
+ "presets": [
+  {
+   "id": "preset-beat",
+   "name": "Warm up",
+   "createdAt": 1700000000000,
+   "bpm": 88,
+   "subdivision": 2,
+   "timeSignature": 7,
+   "beatGroups": [
+    3,
+    2,
+    2
+   ],
+   "freeMode": false,
+   "soundType": "sticks",
+   "volume": 0.5,
+   "view": "beat"
+  },
+  {
+   "id": "preset-never",
+   "name": "Never accent, from long ago",
+   "createdAt": 1600000000000,
+   "bpm": 100,
+   "subdivision": 1,
+   "timeSignature": 0,
+   "soundType": "click",
+   "volume": 0.7,
+   "view": "beat"
+  },
+  {
+   "id": "preset-free",
+   "name": "Free nine",
+   "createdAt": 1700000000001,
+   "bpm": 120,
+   "subdivision": 1,
+   "timeSignature": 9,
+   "beatGroups": [
+    9
+   ],
+   "freeMode": true,
+   "soundType": "click",
+   "volume": 0.7,
+   "view": "beat"
+  },
+  {
+   "id": "preset-drill",
+   "name": "Climb",
+   "createdAt": 1700000000002,
+   "bpm": 70,
+   "subdivision": 2,
+   "timeSignature": 4,
+   "beatGroups": [
+    4
+   ],
+   "freeMode": false,
+   "soundType": "beep",
+   "volume": 0.9,
+   "view": "drill",
+   "speedRamp": {
+    "startBpm": 70,
+    "targetBpm": 140,
+    "increment": 4,
+    "decrement": 2,
+    "barsPerStep": 3,
+    "beatsPerBar": 4,
+    "subdivision": 2,
+    "mode": "adaptive",
+    "cyclic": true
+   }
+  }
+ ],
+ "setlists": [
+  {
+   "id": "setlist-gig",
+   "name": "Gig warm-up",
+   "createdAt": 1700000000100,
+   "repeat": 2,
+   "countIn": 4,
+   "steps": [
+    {
+     "id": "step-1",
+     "name": "Slow",
+     "bpm": 60,
+     "subdivision": 1,
+     "beatGroups": [
+      4
+     ],
+     "freeMode": false,
+     "soundType": "click",
+     "volume": 0.7,
+     "trigger": {
+      "kind": "bars",
+      "bars": 8
+     },
+     "transition": {
+      "kind": "countIn",
+      "bars": 1
+     }
+    },
+    {
+     "id": "step-2",
+     "name": "Rest",
+     "bpm": 80,
+     "subdivision": 2,
+     "beatGroups": [
+      3,
+      3
+     ],
+     "freeMode": false,
+     "soundType": "wood",
+     "volume": 0.5,
+     "trigger": {
+      "kind": "seconds",
+      "seconds": 30
+     },
+     "transition": {
+      "kind": "rest",
+      "bars": 2
+     }
+    },
+    {
+     "id": "step-3",
+     "name": "Over the band",
+     "bpm": 92,
+     "subdivision": 1,
+     "beatGroups": [
+      4
+     ],
+     "freeMode": false,
+     "soundType": "click",
+     "volume": 0.7,
+     "trigger": {
+      "kind": "manual"
+     },
+     "transition": {
+      "kind": "cut"
+     },
+     "jamId": "jam-saved"
+    }
+   ]
+  }
+ ],
+ "jams": [
+  {
+   "id": "jam-saved",
+   "name": "Tuesday blues",
+   "createdAt": 1700000000200,
+   "bpm": 92,
+   "grooveId": "rock8",
+   "feel": "straight",
+   "intensity": "normal",
+   "kit": "studio",
+   "form": {
+    "kind": "blues12",
+    "bars": 12
+   },
+   "countIn": 4,
+   "fills": true,
+   "key": "A blues",
+   "chords": true,
+   "cues": true,
+   "band": {
+    "drums": true,
+    "bass": true
+   },
+   "fillEvery": 4,
+   "transposition": "Bb"
+  },
+  {
+   "id": "jam-charted",
+   "name": "Pasted chart",
+   "createdAt": 1700000000201,
+   "bpm": 120,
+   "grooveId": "rock8",
+   "feel": "swing",
+   "intensity": "soft",
+   "kit": "studio",
+   "form": {
+    "kind": "loop8",
+    "bars": 8
+   },
+   "countIn": 0,
+   "fills": false,
+   "key": "Dm",
+   "progression": [
+    "Dm7",
+    "Dm7",
+    "G7",
+    "G7",
+    "Cmaj7",
+    "Cmaj7",
+    "A7",
+    "A7"
+   ]
+  }
+ ],
+ "songMixes": {
+  "song-1": {
+   "mix": {
+    "click": 0.4,
+    "tracks": [
+     0.8,
+     0.5
+    ]
+   },
+   "muted": [
+    1
+   ],
+   "soloed": [
+    0
+   ],
+   "countInBars": 2,
+   "takes": true,
+   "camera": false,
+   "selection": {
+    "startBar": 4,
+    "endBar": 12
+   },
+   "loop": true,
+   "tempoPercent": 75,
+   "portions": [
+    {
+     "id": "portion-1",
+     "name": "Solo",
+     "startBar": 16,
+     "endBar": 24,
+     "tempoPercent": 85
+    }
+   ]
+  },
+  "song-2": {
+   "mix": {
+    "click": 1,
+    "tracks": []
+   },
+   "muted": [],
+   "soloed": [],
+   "countInBars": 0,
+   "takes": false,
+   "camera": false,
+   "selection": null,
+   "loop": false,
+   "tempoPercent": 100,
+   "portions": []
+  }
+ },
+ "songsStageView": "tab",
+ "songsStarterOpen": false,
+ "songsStarterShelf": {
+  "seeded": true,
+  "ids": [
+   "starter-a"
+  ]
+ },
+ "songsDownloadWatch": {
+  "enabled": false
+ },
+ "songSoundFont": "",
+ "songsNotesSeen": {},
+ "songs.cameraCorner": "bottomLeft",
+ "songs.cameraDeviceId": "cam-1",
+ "songs.cameraGuideSeen": true,
+ "songs.cameraIntroSeen": true,
+ "songs.clipBand": "both",
+ "songs.clipBrand": false,
+ "jam.takesIntroSeen": true,
+ "takes.soundSource": "everything",
+ "songs.dueMovedToStore": true,
+ "songs.dueTempo": {}
+}
