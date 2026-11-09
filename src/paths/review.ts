@@ -3,7 +3,7 @@
  * hear and mark. Everything is rendered here, so a page reads with scripts off;
  * only the play-along and the marks need `reviewClient.ts`.
  */
-import type { Exercise, PathDoc, PathNote, Step } from "./format";
+import type { Exercise, Level, PathDoc, PathNote, Step } from "./format";
 import { TICKS, barLengthTicks } from "./format";
 import { METRICS, NOT_GRADED } from "./metrics";
 import { REVIEW_CLIENT } from "./reviewClient";
@@ -12,6 +12,7 @@ import { SCALE_NAMES_EN } from "../jam/scales";
 import type { ScaleId } from "../jam/scales";
 import { chordPcs } from "./theory";
 import { runtimeNeeds } from "./validate";
+import { exerciseWithVariant } from "./variants";
 
 const esc = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -217,18 +218,23 @@ function chordEvents(ex: Exercise): ClientEvent[] {
   return out;
 }
 
+function concrete(ex: Exercise): Exercise[] {
+  return ex.variation?.variants.length ? ex.variation.variants.map((v) => exerciseWithVariant(ex, v)) : [ex];
+}
+
 function clientData(doc: PathDoc): string {
   const data: Record<string, unknown> = {};
-  for (const step of doc.steps) {
-    for (const ex of step.exercises) {
-      data[ex.id] = {
-        beatsPerBar: barLengthTicks(ex.meter) / TICKS,
-        bars: ex.bars,
-        events: clientEvents(ex.notes, true),
-        guide: clientEvents(ex.guide ?? [], false),
-        chords: chordEvents(ex),
-      };
-    }
+  const all = [...doc.steps.flatMap((s) => s.exercises), ...(doc.levels ?? []).flatMap((l) => l.warmups)];
+  for (const ex of all) {
+    data[ex.id] = {
+      variants: concrete(ex).map((one) => ({
+        beatsPerBar: barLengthTicks(one.meter) / TICKS,
+        bars: one.bars,
+        events: clientEvents(one.notes, true),
+        guide: clientEvents(one.guide ?? [], false),
+        chords: chordEvents(one),
+      })),
+    };
   }
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
@@ -282,6 +288,42 @@ function rhythmWords(ex: Exercise): string {
   return words[shortest] ?? "mixed";
 }
 
+/** The part of a card that changes from variant to variant. */
+function variantBody(ex: Exercise): string {
+  const harmony = harmonyText(ex);
+  const landing = ex.landings?.length
+    ? `<p class="line"><b>Graded moments:</b> ${ex.landings
+        .map((l) => `bar ${l.bar + 1} on ${esc(l.chord)}: ${esc(l.notes.join(" "))}`)
+        .join("; ")}. Circled in the tab.</p>`
+    : "";
+  const pass = ex.passBars.length
+    ? `<p class="line"><b>Pass bar at ${ex.tempo.passAtBpm} BPM:</b> ${ex.passBars.map(passBarText).join("; ")}.</p>`
+    : `<p class="line"><b>No metric pass bar.</b> ${ex.grading === "practiceOnly" ? "Nothing to pass." : "The player judges it."}</p>`;
+  return `${harmony ? `<p class="line"><b>Notes:</b> ${harmony}</p>` : ""}${landing}${tabHtml(ex)}${pass}
+  <p class="small dim">Fret ${ex.position.fret}${ex.position.shifts === "allowed" ? ", hand moves" : ""}. ${ex.computed.noteCount} notes, tightest gap ${ex.computed.minGapMsAtTop ?? "-"} ms at the top rung, ${ex.computed.handShifts} hand shift${ex.computed.handShifts === 1 ? "" : "s"}, playable by the reach check up to about ${ex.computed.maxPlayableBpm} BPM, difficulty ${ex.computed.difficulty}.</p>`;
+}
+
+/** Flip through the variants: every one is known notes, and can be played. */
+function variantControls(ex: Exercise): string {
+  const variation = ex.variation;
+  if (!variation) return "";
+  const options = variation.variants
+    .map((v, i) => `<option value="${i}">${i + 1}. ${esc(v.label)}${v.pool === "all" ? "" : ` (pool: ${esc(v.pool)})`}</option>`)
+    .join("");
+  const pooled = variation.pooled.length ? `Progress pools across ${variation.pooled.join(", ")}.` : "";
+  const split = variation.notPooled.map((n) => `Not across ${n.dimension}: ${esc(n.reason)}`).join(" ");
+  return `<div class="variants"><b>${variation.variants.length} variants</b>, by ${esc(variation.dimensions.join(", "))}. ${pooled} ${split}
+    <div class="flip"><button type="button" data-flip="-1" aria-label="Previous variant">Previous</button><select data-variant aria-label="Variant">${options}</select><button type="button" data-flip="1" aria-label="Next variant">Next</button></div></div>`;
+}
+
+/** Graded down to which BPM, in words: fast sweeps have to say so plainly. */
+function gradedLine(ex: Exercise): string {
+  const graded = ex.tempo.rungs.filter((r) => r.grading === "graded");
+  const selfChecked = ex.tempo.rungs.filter((r) => r.grading === "selfChecked");
+  if (graded.length === 0 || selfChecked.length === 0) return "";
+  return `<p class="note-box"><b>Grading stops at ${graded[graded.length - 1].bpm} BPM.</b> Rungs above it are self-checked: the app can't be trusted to separate notes that close.</p>`;
+}
+
 function exerciseCard(ex: Exercise, stepOrder: number, exOrder: number): string {
   const rungs = ex.tempo.rungs
     .map((rung, index) => {
@@ -302,21 +344,11 @@ function exerciseCard(ex: Exercise, stepOrder: number, exOrder: number): string 
         ? `<span class="chip">Swept</span>`
         : "",
     `<span class="chip">Rhythm: ${rhythmWords(ex)}</span>`,
-    `<span class="chip">Fret ${ex.position.fret}${ex.position.shifts === "allowed" ? ", hand moves" : ""}</span>`,
     `<span class="chip">${ex.backing.kind === "jam" ? `Band: ${esc(ex.backing.grooveId)}${ex.backing.feel === "straight" ? "" : `, ${ex.backing.feel}`}` : "Click"}</span>`,
     `<span class="chip">${ex.bars} bar${ex.bars === 1 ? "" : "s"}${ex.loops ? ", loops" : ""}</span>`,
     ex.holdSeconds ? `<span class="chip">Hold ${ex.holdSeconds} s</span>` : "",
     `<span class="chip">${ex.estimatedMinutes} min</span>`,
   ].join("");
-  const harmony = harmonyText(ex);
-  const landing = ex.landings?.length
-    ? `<p class="line"><b>Graded moments:</b> ${ex.landings
-        .map((l) => `bar ${l.bar + 1} on ${esc(l.chord)}: ${esc(l.notes.join(" "))}`)
-        .join("; ")}. Circled in the tab.</p>`
-    : "";
-  const pass = ex.passBars.length
-    ? `<p class="line"><b>Pass bar at ${ex.tempo.passAtBpm} BPM:</b> ${ex.passBars.map(passBarText).join("; ")}.</p>`
-    : `<p class="line"><b>No metric pass bar.</b> ${ex.grading === "practiceOnly" ? "Nothing to pass." : "The player judges it."}</p>`;
   const self = ex.selfCheck?.length
     ? `<div class="line"><b>Self-check:</b><ul>${ex.selfCheck.map((q) => `<li>${esc(q)}</li>`).join("")}</ul></div>`
     : "";
@@ -330,8 +362,13 @@ function exerciseCard(ex: Exercise, stepOrder: number, exOrder: number): string 
   return `<article class="ex" id="${esc(ex.id)}" data-ex="${esc(ex.id)}">
   <header><h3><span class="exnum">${stepOrder}.${exOrder}</span> ${esc(ex.title)}</h3><div class="chips">${chips}</div></header>
   <p class="purpose">${esc(ex.purpose)}</p>
-  ${harmony ? `<p class="line"><b>Notes:</b> ${harmony}</p>` : ""}
-  ${tabHtml(ex)}
+  ${warmupLine(ex)}${variantControls(ex)}
+  <div class="variant-slot">${variantBody(concrete(ex)[0])}</div>
+  ${concrete(ex)
+    .slice(1)
+    .map((one, i) => `<template data-v="${i + 1}">${variantBody(one)}</template>`)
+    .join("")}
+  ${gradedLine(ex)}
   <div class="player">
     <button type="button" class="play" data-act="play">Play</button>
     <div class="rungs" aria-label="Tempo ladder, BPM">${rungs}</div>
@@ -339,14 +376,32 @@ function exerciseCard(ex: Exercise, stepOrder: number, exOrder: number): string 
   </div>
   <div class="how"><b>How to play it</b><ul>${ex.howTo.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>
   <p class="coach"><b>Coach:</b> ${esc(ex.coachLine)}</p>
-  ${landing}${pass}${self}
+  ${self}
   <div class="grades">
     <div><b>Graded</b><ul>${ex.graded.length ? ex.graded.map((g) => `<li>${esc(metricLabel(g))}</li>`).join("") : "<li>Nothing</li>"}</ul></div>
     <div><b>Not graded</b><ul>${ex.notGraded.map((g) => `<li>${esc((NOT_GRADED[g] ?? g).split(":")[0])}</li>`).join("")}</ul></div>
   </div>
   ${detection}${feedbackNote}
-  <p class="small dim">${ex.computed.noteCount} notes, tightest gap ${ex.computed.minGapMsAtTop ?? "-"} ms at the top rung, ${ex.computed.handShifts} hand shift${ex.computed.handShifts === 1 ? "" : "s"}, playable by the reach check up to about ${ex.computed.maxPlayableBpm} BPM, difficulty ${ex.computed.difficulty}.</p>
 </article>`;
+}
+
+function warmupLine(ex: Exercise): string {
+  const plan = ex.warmup;
+  if (!plan) return "";
+  return `<p class="note-box warm"><b>Warm-up.</b> Starts at ${Math.round(plan.startAtCleanRatio * 100)}% of your recent clean tempo on ${esc(plan.referenceExercise)}, tops out at ${Math.round(plan.topAtCleanRatio * 100)}%, or ${plan.fallbackBpm} BPM with no history. It reports and never moves your progress.</p>`;
+}
+
+function levelSection(level: Level, doc: PathDoc): string {
+  const steps = level.stepIds
+    .map((id) => doc.steps.find((s) => s.id === id))
+    .filter((s): s is Step => !!s);
+  return `<section class="level" id="level-${level.id}">
+  <h2 class="lv">${esc(level.title)}</h2>
+  <p>${esc(level.summary)}</p>
+  <div class="placement"><b>Start here if:</b><ul>${level.placement.startHereIf.map((t) => `<li>${esc(t)}</li>`).join("")}</ul><p class="small dim">Advice, not a gate. Any Level is open.</p></div>
+  ${level.warmups.map((w, i) => exerciseCard(w, 0, i + 1).replace(/<span class="exnum">0\.\d+<\/span>/, '<span class="exnum">Warm-up</span>')).join("\n")}
+  ${steps.map(stepSection).join("\n")}
+</section>`;
 }
 
 function stepSection(step: Step): string {
@@ -368,15 +423,20 @@ function stepSection(step: Step): string {
 function reviewSheet(doc: PathDoc): string {
   const box = (id: string, field: string, label: string) =>
     `<td class="c"><label><input type="checkbox" data-mark="${esc(id)}" data-field="${field}" aria-label="${label}"> <span class="ml">${label}</span></label></td>`;
-  const rows = doc.steps
+  const warmupGroups = (doc.levels ?? []).map((l) => ({
+    order: 0,
+    title: `Warm-ups, ${l.id}`,
+    exercises: l.warmups,
+  }));
+  const rows = [...warmupGroups, ...doc.steps]
     .map((step) => {
-      const head = `<tr class="sh"><th colspan="7">Step ${step.order}: ${esc(step.title)}</th></tr>`;
+      const head = `<tr class="sh"><th colspan="7">${step.order ? `Step ${step.order}: ` : ""}${esc(step.title)}</th></tr>`;
       const lines = step.exercises
         .map((ex, i) => {
           const rungs = ex.tempo.rungs;
           const graded = rungs.filter((r) => r.grading === "graded");
           const tempo = `${rungs[0].bpm}-${rungs[rungs.length - 1].bpm}${ex.tempo.passAtBpm ? `, pass ${ex.tempo.passAtBpm}` : ""}${graded.length && graded.length < rungs.length ? `, graded to ${graded[graded.length - 1].bpm}` : ""}`;
-          return `<tr data-mark-row="${esc(ex.id)}"><td class="t"><a href="#${esc(ex.id)}">${step.order}.${i + 1} ${esc(ex.title)}</a><div class="small dim">${MODE_LABEL[ex.grading]}; ${tempo} BPM</div></td>${box(ex.id, "notes", "Notes right")}${box(ex.id, "playable", "Playable at the top")}${box(ex.id, "tempo", "Tempo realistic")}${box(ex.id, "useful", "Worth the time")}<td class="w"><input class="comment" type="text" data-mark="${esc(ex.id)}" data-field="comment" placeholder="Fix or note" aria-label="Comment"></td></tr>`;
+          return `<tr data-mark-row="${esc(ex.id)}"><td class="t"><a href="#${esc(ex.id)}">${step.order ? `${step.order}.${i + 1} ` : ""}${esc(ex.title)}</a><div class="small dim">${MODE_LABEL[ex.grading]}; ${tempo} BPM${ex.variation ? `; ${ex.variation.variants.length} variants: check a few` : ""}</div></td>${box(ex.id, "notes", "Notes right")}${box(ex.id, "playable", "Playable at the top")}${box(ex.id, "tempo", "Tempo realistic")}${box(ex.id, "useful", "Worth the time")}<td class="w"><input class="comment" type="text" data-mark="${esc(ex.id)}" data-field="comment" placeholder="Fix or note" aria-label="Comment"></td></tr>`;
         })
         .join("");
       return head + lines;
@@ -410,6 +470,12 @@ nav.steps{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:
 nav.steps a{flex:none;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);text-decoration:none}
 details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0}
 details summary{cursor:pointer;font-weight:600}
+.level{margin-top:44px;border-top:3px solid var(--ink);padding-top:10px}.lv{font-size:27px;margin:0 0 6px}
+.placement{background:#eef3f7;border-radius:8px;padding:8px 12px;margin:8px 0}.placement p{margin:4px 0 0}
+.variants{background:#f3f0f7;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:13.5px}.flip{display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.flip button{font:600 13px system-ui,sans-serif;padding:7px 10px;min-height:36px;border:1px solid #b9c2ca;border-radius:6px;background:#fff;cursor:pointer}
+.flip select{flex:1 1 180px;min-width:0;max-width:100%;font:inherit;padding:7px;min-height:36px;border:1px solid #b9c2ca;border-radius:6px;background:#fff}
+.warm{background:#e9f3ec}a.lvl{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
 .step{margin-top:32px}.step>h2{font-size:24px;line-height:1.2;margin:0 0 4px}
 .stepnum{color:var(--accent);font-weight:700;margin-right:4px}
 .goal{font-weight:600;margin:4px 0 10px}
@@ -482,7 +548,10 @@ export function renderReviewPage(doc: PathDoc): string {
   const needs = runtimeNeeds(doc)
     .map((n) => `<li>${esc(metricLabel(n.metric))}: ${n.status}, in ${n.exercises} Exercises</li>`)
     .join("");
-  const nav = doc.steps
+  const levelLinks = (doc.levels ?? [])
+    .map((l) => `<a class="lvl" href="#level-${l.id}">${esc(l.id[0].toUpperCase() + l.id.slice(1))}</a>`)
+    .join("");
+  const nav = levelLinks + doc.steps
     .map((s) => `<a href="#step-${s.order}">${s.order}. ${esc(s.title)}</a>`)
     .join("");
   const statusWords =
@@ -511,7 +580,7 @@ export function renderReviewPage(doc: PathDoc): string {
   <p class="key small"><b>Tempo ladder:</b> <span class="rung pass">pass</span> the rung the pass bars decide at; <span class="rung graded">graded</span> graded; <span class="rung self">self</span> dashed means self-checked. <b>Tab:</b> string 1 on top, first stave line highest. Blue numbers aren't picked (hammer, pull or slide). Marks above the stave are guidance strokes: square is down, V is up. Audio is a synthetic pluck for checking notes, not the app's sound.</p>
 </div>
 <nav class="steps" aria-label="Steps">${nav}<a href="#review-sheet"><b>Review sheet</b></a></nav>
-${doc.steps.map(stepSection).join("\n")}
+${doc.levels?.length ? doc.levels.map((l) => levelSection(l, doc)).join("\n") : doc.steps.map(stepSection).join("\n")}
 ${reviewSheet(doc)}
 </main>
 <script type="application/json" id="exercise-data">${clientData(doc)}</script>

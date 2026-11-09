@@ -9,6 +9,7 @@
  * from a table of frets, so a wrong shape is an impossible thing to type.
  */
 import { STANDARD_TUNING } from "./format";
+import { fretMm } from "./reach";
 import { chordPcs, pcOfName, scalePcs } from "./theory";
 import type { ScaleId } from "../jam/scales";
 
@@ -282,12 +283,14 @@ export function sweepLoop(args: SweepArgs): string {
   const { slideTop = false, ...shape } = args;
   const { up, top, low } = arpeggioCells({ ...shape, top: true });
   if (!top) throw new Error("a loop needs a top note");
+  // Too wide to hammer at the bottom: it slides there, and the return is picked.
+  const slideLow = !!low && fretMm(low.fret) - fretMm(up[0].fret) > 85;
   const inner = up.slice(1, -1).map((c) => token(c));
   const last = up[up.length - 1];
   const back = up.slice(1, -1).reverse().map((c) => token(c));
   return [
-    token(up[0]),
-    ...(low ? [token(low, "h")] : []),
+    token(up[0], slideLow ? "s" : ""),
+    ...(low ? [token(low, slideLow ? "" : "h")] : []),
     ...inner,
     token(last, slideTop ? "s" : ""),
     token(top, slideTop ? "s" : "h"),
@@ -295,6 +298,198 @@ export function sweepLoop(args: SweepArgs): string {
     ...back,
     ...(low ? [token(low)] : []),
   ].join(" ");
+}
+
+// ---------------------------------------------------------------------------
+// Linked arpeggios
+// ---------------------------------------------------------------------------
+
+const ROOTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"] as const;
+
+/** A chord symbol moved by semitones, spelled the way a chart would. */
+export function moveChord(symbol: string, semitones: number): string {
+  const match = /^([A-G][#b]?)(.*)$/.exec(symbol.trim());
+  if (!match) throw new Error(`not a chord symbol: ${symbol}`);
+  const pc = (pcOfName(match[1]) + semitones + 120) % 12;
+  // A dominant's leading tone reads better as a sharp in a minor key.
+  const name = match[2].startsWith("dim") && ROOTS[pc] === "Ab" ? "G#" : ROOTS[pc];
+  return `${name}${match[2]}`;
+}
+
+/** A chart moved by semitones. */
+export function moveChart(chart: string, semitones: number): string {
+  return chart
+    .split("|")
+    .map((chord) => moveChord(chord, semitones))
+    .join(" | ");
+}
+
+/** Move the hand up a loop's worth of frets without leaving the neck. */
+export function nearFret(base: number, semitones: number): number {
+  let fret = base + semitones;
+  while (fret > 17) fret -= 12;
+  while (fret < 3) fret += 12;
+  return fret;
+}
+
+/**
+ * Chained loops, one shape to a bar, each starting as close as it can to the last
+ * shape: the voice-led choice a player would make, so the hand barely moves and
+ * the bass of each shape walks. The upward push out of one shape carries on into
+ * the next, with no stop at the bar line. A top note too wide to hammer is a slide.
+ */
+export function sweepChain(args: {
+  chords: readonly string[];
+  strings: readonly number[];
+  /** Where the first shape sits on its lowest string. */
+  near: number;
+  /** Loops of a shape per bar. */
+  perBar?: number;
+  doubleLow?: boolean;
+  /** Fixed spots for each shape, overriding the walk. */
+  nears?: readonly number[];
+  rhythm: string;
+}): string {
+  const { chords, strings, near, perBar = 1, doubleLow = false, nears, rhythm } = args;
+  let at = near;
+  return chords
+    .map((chord, index) => {
+      const spot = nears?.[index] ?? at;
+      const shape = arpeggioCells({ chord, strings, near: spot, doubleLow, top: true });
+      at = shape.up[0].fret;
+      const last = shape.up[shape.up.length - 1];
+      const wide = fretMm(shape.top!.fret) - fretMm(last.fret) > 85;
+      const loop = sweepLoop({ chord, strings, near: spot, doubleLow, slideTop: wide });
+      return `${rhythm} ${repeat(loop, perBar)}`;
+    })
+    .join(" | ");
+}
+
+/**
+ * The link itself: one sweep up a chord, then a single legato step on the top
+ * string into the next chord, and one sweep down it; a step on the bottom string,
+ * and up the next. Each chord gets one pass, a bar long. No note is picked at a
+ * link, which is what lets the sweep keep going across the change.
+ *
+ * `extra` adds a second note on the string a pass ends on, for a pass that needs
+ * one more note to fill its bar.
+ */
+export function linkedSweep(args: {
+  chords: readonly string[];
+  /** Low to high. */
+  strings: readonly number[];
+  near: number;
+  rhythm: string;
+  extra?: boolean;
+  /** Add a second note on the string a pass begins on, too. */
+  doubleStart?: boolean;
+}): string {
+  const { chords, strings, near, rhythm, extra = false, doubleStart = false } = args;
+  const low = strings[0];
+  const high = strings[strings.length - 1];
+  const pcsOf = (chord: string) => new Set(chordPcs(chord));
+  const closest = (pcs: Set<number>, string: number, to: number, avoid: number | null) => {
+    let best = -1;
+    for (let fret = 1; fret <= 22; fret += 1) {
+      if (fret === avoid || !pcs.has((open(string) + fret) % 12)) continue;
+      if (best < 0 || Math.abs(fret - to) < Math.abs(best - to)) best = fret;
+    }
+    return best;
+  };
+  const step = (pcs: Set<number>, midi: number, direction: 1 | -1) => {
+    let next = midi + direction;
+    while (!pcs.has(((next % 12) + 12) % 12)) next += direction;
+    return next;
+  };
+  const bars: string[] = [];
+  let previous: FretCell | null = null;
+  chords.forEach((chord, index) => {
+    const pcs = pcsOf(chord);
+    const ascending = index % 2 === 0;
+    const order = ascending ? [...strings] : [...strings].reverse();
+    const direction: 1 | -1 = ascending ? 1 : -1;
+    const startString = ascending ? low : high;
+    const startFret: number = previous
+      ? closest(pcs, startString, previous.fret, previous.fret)
+      : closest(pcs, startString, near, null);
+    const tokensOut: string[] = [];
+    const arrive = (cell: FretCell, from: FretCell | null) => {
+      if (!from || from.string !== cell.string) return token(cell);
+      if (Math.abs(from.fret - cell.fret) > 3) {
+        // Too far to hammer: the last pass ends by sliding out to this note.
+        bars[bars.length - 1] = bars[bars.length - 1].replace(/(\S+)$/, "$1s");
+        return token(cell);
+      }
+      return token(cell, cell.fret > from.fret ? "h" : "p");
+    };
+    let cell: FretCell = { string: startString, fret: startFret };
+    tokensOut.push(arrive(cell, previous));
+    let midi = open(cell.string) + cell.fret;
+    if (doubleStart) {
+      midi = step(pcs, midi, direction);
+      const next = { string: startString, fret: midi - open(startString) };
+      tokensOut.push(token(next, direction > 0 ? "h" : "p"));
+      cell = next;
+    }
+    for (const string of order.slice(1)) {
+      midi = step(pcs, midi, direction);
+      cell = { string, fret: midi - open(string) };
+      if (cell.fret < 0) throw new Error(`${chord} falls off the neck on string ${string}`);
+      tokensOut.push(token(cell));
+    }
+    if (extra) {
+      midi = step(pcs, midi, direction);
+      const next = { string: cell.string, fret: midi - open(cell.string) };
+      tokensOut.push(token(next, direction > 0 ? "h" : "p"));
+      cell = next;
+    }
+    bars.push(`${rhythm} ${tokensOut.join(" ")}`);
+    previous = cell;
+  });
+  return bars.join(" | ");
+}
+
+/** Just the join: the last two notes of one pass and the first two of the next. */
+export function linkFragment(args: { chords: readonly [string, string]; strings: readonly number[]; near: number }): string {
+  const whole = linkedSweep({ ...args, rhythm: "" });
+  const [first, second] = whole.split("|").map((bar) => bar.trim().split(/\s+/));
+  return `/2 ${first.slice(-2).join(" ")} | ${second.slice(0, 2).join(" ")}`;
+}
+
+/** Index-finger fret for a tab: the lowest fretted note of its first bar. */
+export function handAt(tab: string): number {
+  const firstBar = tab.split("|")[0];
+  const frets = [...firstBar.matchAll(/\d:(\d+)/g)].map((m) => Number(m[1])).filter((f) => f > 0);
+  return frets.length ? Math.min(...frets) : 1;
+}
+
+/** A melody that climbs the scale on one string, a scale step higher each bar. */
+export function oneStringClimb(args: {
+  root: string;
+  scale: ScaleId;
+  string: number;
+  /** The lowest fret the climb may start from. */
+  from: number;
+  /** Scale steps of the cell, relative to where each bar starts. */
+  cell: readonly number[];
+  bars: number;
+}): string {
+  const { root, scale, string, from, cell, bars } = args;
+  const pcs = new Set(scalePcs(root, scale));
+  const tones: number[] = [];
+  for (let fret = 0; fret <= 22; fret += 1) {
+    if (pcs.has((open(string) + fret) % 12)) tones.push(fret);
+  }
+  const first = tones.findIndex((fret) => fret >= from);
+  return Array.from({ length: bars }, (_v, bar) =>
+    cell
+      .map((offset) => {
+        const fret = tones[first + bar + offset];
+        if (fret === undefined) throw new Error(`the climb runs off string ${string}`);
+        return `${string}:${fret}`;
+      })
+      .join(" "),
+  ).join(" | ");
 }
 
 // ---------------------------------------------------------------------------

@@ -6,12 +6,17 @@
 import { definePath } from "../spec";
 import {
   acrossStrings,
+  handAt,
   inPositions,
   ladder,
+  moveChart,
+  oneStringClimb,
   pentatonic,
   repeat,
+  shiftFrets,
   threeNps,
 } from "../templates";
+import type { VariantParams } from "../spec";
 
 const A_MINOR_LICK = "4:7 3:5 3:7 2:5 3:7 3:5 4:7 4:5";
 
@@ -37,6 +42,44 @@ const ETUDE_SIXTEENTHS = `/16
   4:7 3:5 2:6 1:5 2:6 3:5 4:7 3:5 4:7 3:5 2:6 1:5 2:6 3:5 3:7 3:5 |
   4:5 3:5 2:5 2:8 2:5 3:5 4:5 3:5 4:5 3:5 2:5 1:8 2:5 3:5 3:7 3:5 |
   2:8 2:6 2:5 3:7 3:5 3:7 2:5 2:6 2:8 2:6 2:5 3:7 3:5 3:4 4:7 4:5`;
+
+/** Semitones from A minor, and the notes the Exercises spell out there. */
+const KEY_SHIFT: Readonly<Record<string, number>> = { A: 0, B: 2, C: 3, D: 5, E: -5, G: -2 };
+
+/** The same tab, moved to other minor keys. Key doesn't change how hard it is. */
+function inKeys(tab: string, keys: readonly string[], chart?: string, shifts = false) {
+  return {
+    values: { key: keys },
+    pooled: ["key"] as const,
+    label: (p: VariantParams) => `${p.key} minor`,
+    build: (p: VariantParams) => {
+      const moved = shiftFrets(tab, KEY_SHIFT[p.key]);
+      return {
+        tab: moved,
+        position: handAt(moved),
+        shifts,
+        ...(chart ? { chords: moveChart(chart, KEY_SHIFT[p.key]) } : {}),
+        harmony: { scale: [p.key, "naturalMinor"] as [string, string] },
+      };
+    },
+  };
+}
+
+/** The same fret pattern, on other strings and further up the neck. */
+function onStrings(tab: string, strings: readonly string[], lowest: string) {
+  const fromFive = (text: string, string: string) => text.replace(/\b5:/g, `${string}:`);
+  return {
+    values: { stringSet: strings, position: ["fret 5", "fret 7", "fret 9", lowest] },
+    pooled: ["stringSet"] as const,
+    notPooled: { position: "The frets get wider toward the nut, so a low position is harder than a high one." },
+    label: (p: VariantParams) => `String ${p.stringSet}, ${p.position}`,
+    build: (p: VariantParams) => {
+      const fret = Number(p.position.replace("fret ", ""));
+      const moved = shiftFrets(fromFive(tab, p.stringSet), fret - 5);
+      return { tab: moved, position: fret };
+    },
+  };
+}
 
 const SAFETY =
   "Stop at any pain in the hand, wrist or forearm. A tired forearm is one thing and pain is another; pain ends the set.";
@@ -164,6 +207,7 @@ export default definePath({
           purpose: "The hands have to agree at a rate where they can no longer be managed one note at a time.",
           howTo: ["The same walk as before, at sixteenths. If the fingers run ahead of the pick, the notes come out as flams; make the fingers lazier."],
           coach: "Evenness is the number to watch on this one.",
+          vary: onStrings(`/16 ${repeat("5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6", 2)}`, ["5", "4", "3", "6"], "fret 3"),
           tab: `/16 ${repeat("5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6", 2)}`,
           position: 5,
           rungs: ladder(55, 110, 5),
@@ -355,6 +399,7 @@ export default definePath({
           purpose: "Eight notes that sound like a real lick and happen to contain only outside crossings. This is the Step's payoff.",
           howTo: ["Start on a downstroke on the D string. Every string change works out as outside; keep that going by never adding a stroke."],
           coach: "This is music now. Get it even, then speed it up one rung at a time.",
+          vary: inKeys(`/16 ${repeat(A_MINOR_LICK, 2)}`, ["A", "C", "D", "E", "G"]),
           tab: `/16 ${repeat(A_MINOR_LICK, 2)}`,
           position: 5,
           crossing: "outside",
@@ -384,8 +429,17 @@ export default definePath({
           id: "box-up-down",
           title: "Box 1, up and down",
           purpose: "The whole box in plain triplets, so the map and the crossings settle together.",
-          howTo: ["Six strings up and back. The turn on the top string lands the next downstroke on fret 5, so the descent is inside crossings too: the whole loop is one kind, and you get a long look at it."],
+          howTo: ["Six strings up and back. The turn on the top string lands the next downstroke on the box's lower fret, so the descent is inside crossings too: the whole loop is one kind, and you get a long look at it."],
           coach: "I'll say whether the notes were the box and how even they were.",
+          vary: {
+            values: { position: ["box 1", "box 2", "box 3", "box 4", "box 5"] },
+            pooled: ["position"],
+            label: (p) => `A minor pentatonic, ${p.position}`,
+            build: (p) => {
+              const tab = `/8t ${pentatonic({ root: "A", box: Number(p.position.slice(-1)), sequence: "updown" })} hold`;
+              return { tab, position: handAt(tab), shifts: true };
+            },
+          },
           tab: `/8t ${pentatonic({ root: "A", box: 1, sequence: "updown" })} hold`,
           position: 5,
           crossing: "inside",
@@ -476,6 +530,7 @@ export default definePath({
           purpose: "A classic six-note cell on the top two strings in which both crossings are inside. It is a real lick, not a drill.",
           howTo: ["C, B, A on the top string, then G, F, E on the B string, all in triplets. Start on a downstroke, and it stays down on each repeat."],
           coach: "Even triplets first. This one is worth owning at a slow tempo before it gets fast.",
+          vary: inKeys(`/8t ${repeat("1:8 1:7 1:5 2:8 2:6 2:5", 2)}`, ["A", "B", "C", "D", "E", "G"]),
           tab: `/8t ${repeat("1:8 1:7 1:5 2:8 2:6 2:5", 2)}`,
           position: 5,
           crossing: "inside",
@@ -491,6 +546,7 @@ export default definePath({
           purpose: "The mirror image, in which both crossings are outside, so the two versions tell you which hop you own.",
           howTo: ["E, F, G then A, B, C, starting on a downstroke. The pick stays outside the pair at each change."],
           coach: "Compare this with the descending take. A big difference is worth a note in your practice.",
+          vary: inKeys(`/8t ${repeat("2:5 2:6 2:8 1:5 1:7 1:8", 2)}`, ["A", "B", "C", "D", "E", "G"]),
           tab: `/8t ${repeat("2:5 2:6 2:8 1:5 1:7 1:8", 2)}`,
           position: 5,
           crossing: "outside",
@@ -552,8 +608,9 @@ export default definePath({
           id: "one-beat",
           title: "One beat on, one beat off",
           purpose: "The shortest honest burst: four notes and a landing, twice a bar.",
-          howTo: ["Four sixteenths, then a quarter note on fret 7. Everything relaxes during the quarter."],
+          howTo: ["Four sixteenths, then a quarter note on the third finger. Everything relaxes during the quarter."],
           coach: "Landing on time counts more than the run. Timing and missed notes are what I have here.",
+          vary: onStrings(`/16 5:5 5:6 5:7 5:8 /4 5:7 /16 5:5 5:6 5:7 5:8 /4 5:7`, ["5", "4", "3", "6"], "fret 12"),
           tab: `/16 5:5 5:6 5:7 5:8 /4 5:7 /16 5:5 5:6 5:7 5:8 /4 5:7`,
           position: 5,
           rungs: ladder(80, 170, 10),
@@ -682,6 +739,7 @@ export default definePath({
             "These are picked, not swept: every stroke alternates even though the notes run across strings.",
           ],
           coach: "I'll check the notes against the chords after the take. Whether it rings like a chord or sounds separated is yours to judge.",
+          vary: inKeys(`/8t ${repeat("4:7 3:5 2:5 1:5 2:5 3:5", 2)} | ${repeat("4:7 3:5 2:6 1:5 2:6 3:5", 2)} | ${repeat("4:5 3:5 2:5 1:8 2:5 3:5", 2)} | ${repeat("4:5 3:7 2:8 1:7 2:8 3:7", 2)}`, ["A", "C", "D", "G"], "Am | F | C | G"),
           tab: `/8t ${repeat("4:7 3:5 2:5 1:5 2:5 3:5", 2)} | ${repeat("4:7 3:5 2:6 1:5 2:6 3:5", 2)} | ${repeat("4:5 3:5 2:5 1:8 2:5 3:5", 2)} | ${repeat("4:5 3:7 2:8 1:7 2:8 3:7", 2)}`,
           position: 5,
           crossing: "both",
@@ -714,6 +772,7 @@ export default definePath({
           purpose: "Stamina without any other question: the four-finger walk for a whole minute.",
           howTo: ["The sixteenth-note walk, sixty seconds, no stops. If the time slips late in the take, the rung was too high."],
           coach: "If I stop catching notes on a long take, trust that report over your doubts about your hands. Long unbroken playing is something the listening has not been proven on.",
+          vary: onStrings(`/16 ${repeat("5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6", 2)}`, ["5", "4", "3", "2"], "fret 3"),
           tab: `/16 ${repeat("5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6", 2)}`,
           position: 5,
           holdSeconds: 60,
@@ -840,6 +899,122 @@ export default definePath({
             "Would you be happy for another guitarist to hear this take?",
           ],
           minutes: 5,
+        },
+      ],
+    },
+  ],
+  levels: [
+    {
+      id: "beginner",
+      title: "Beginner: one string, even",
+      summary: "Eighths, sixteenths and accents on a single string, so that time and control come before crossing strings.",
+      startHereIf: [
+        "You can fret single notes cleanly and you hold a pick.",
+        "You can play eighth notes with a click at 80 BPM, but sixteenths come out uneven.",
+        "An accent on an upstroke feels foreign, or you've never tried one.",
+      ],
+      steps: ["even-eighths", "even-sixteenths", "accents"],
+      warmups: [
+        {
+          id: "one-string-climb",
+          title: "A melody up one string",
+          purpose: "Eighths up one string in a minor key, climbing a scale step each bar. A different string and key each time, so there's a tune to follow and a reason to move.",
+          howTo: ["Start well under your clean tempo. Follow the tune and let the hand travel with it."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G"], stringSet: ["2", "3", "4"] },
+            pooled: ["key", "stringSet"],
+            label: (p) => `${p.key} minor on string ${p.stringSet}`,
+            build: (p) => {
+              const bars = oneStringClimb({
+                root: p.key,
+                scale: "naturalMinor",
+                string: Number(p.stringSet),
+                from: 3,
+                cell: [0, 1, 2, 3, 2, 1, 0, 1],
+                bars: 4,
+              });
+              const tab = bars.split(" | ").map((bar) => `/8 ${bar}`).join(" | ");
+              return { tab, position: handAt(tab), shifts: true, harmony: { scale: [p.key, "naturalMinor"] } };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "even-eighths.four-fingers", fallback: 70 },
+          rungs: ladder(60, 110, 10),
+          minutes: 3,
+        },
+      ],
+    },
+    {
+      id: "intermediate",
+      title: "Intermediate: across the strings",
+      summary: "Both kinds of crossing, then the two shapes that use them most: the pentatonic box and three notes per string.",
+      startHereIf: [
+        "You can hold even sixteenths on one string at about 85 BPM.",
+        "You can put an accent on any sixteenth, including on an upstroke, without the time moving.",
+        "Your line falls apart when it changes string.",
+      ],
+      steps: ["crossing", "pentatonic-patterns", "three-per-string"],
+      warmups: [
+        {
+          id: "lick-round",
+          title: "A lick around the chords",
+          purpose: "A short pentatonic lick moved through i, iv and v of a minor key, in a different key and with a different lick each time.",
+          howTo: ["Start well under your clean tempo. The hand moves at the bar line, and the strokes don't change."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G"], shapeOrder: ["outside lick", "inside lick"] },
+            pooled: ["key", "shapeOrder"],
+            label: (p) => `${p.key} minor, ${p.shapeOrder}`,
+            build: (p) => {
+              const lick = p.shapeOrder === "outside lick" ? A_MINOR_LICK : "3:5 3:7 2:5 2:8 2:5 3:7 3:5 3:7";
+              const shift = KEY_SHIFT[p.key];
+              const tab = `/16 ${inPositions(`${lick} ${lick}`, [shift, shift + 5, shift + 7, shift])}`;
+              return { tab, position: handAt(tab), shifts: true, chords: moveChart("Am | Dm | Em | Am", shift) };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "crossing.outside-lick", fallback: 55 },
+          rungs: ladder(50, 75, 5),
+          minutes: 4,
+        },
+      ],
+    },
+    {
+      id: "advanced",
+      title: "Advanced: speed, length and a band",
+      summary: "Bursts above your clean tempo, string skips and long lines, a full minute without letting up, then a composed run over a band.",
+      startHereIf: [
+        "You can run A minor three notes per string, across three strings, even at sixteenths 80 BPM.",
+        "You can name which crossing is your weaker one.",
+        "Clean is fine at a moderate tempo and you've hit a speed wall, or you've never played with a band.",
+      ],
+      steps: ["speed-bursts", "cross-string-runs", "stamina-minute", "over-the-band"],
+      warmups: [
+        {
+          id: "scale-round",
+          title: "A scale in two positions",
+          purpose: "Three strings of a minor scale, up and back from two positions on the neck, starting from a different root each time.",
+          howTo: ["Start well under your clean tempo. Change position at the bar line. Keep the shift as small as you can."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "B", "C", "D", "E", "G"], stringSet: ["low strings", "middle strings"] },
+            pooled: ["key", "stringSet"],
+            label: (p) => `${p.key} minor, ${p.stringSet}`,
+            build: (p) => {
+              const lowFret: Record<string, number> = { A: 5, B: 7, C: 8, D: 10, E: 12, G: 3 };
+              const string = p.stringSet === "low strings" ? 6 : 5;
+              const root = string === 6 ? lowFret[p.key] : (lowFret[p.key] + 7) % 12 || 12;
+              const first = threeNps({ root: p.key, scale: "naturalMinor", string, fret: root, strings: 3, sequence: "updown" });
+              const second = threeNps({ root: p.key, scale: "naturalMinor", string, fret: root + (root + 3 <= 15 ? 3 : -2), strings: 3, sequence: "updown" });
+              const tab = `/16 ${first} | ${second}`;
+              return { tab, position: handAt(tab), shifts: true, harmony: { scale: [p.key, "naturalMinor"] } };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "three-per-string.three-strings", fallback: 55 },
+          rungs: ladder(50, 80, 5),
+          minutes: 4,
         },
       ],
     },
