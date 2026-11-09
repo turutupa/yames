@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yames Coach: concept mocks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14100c;--panel:#1f1913;--panel2:#2a2015;--rail:#17120d;--line:#3a2f24;--ink:#f7f1e6;--quiet:#b5a895;--amber:#ffb454;--tone:#4ee08a;--tension:#5aa9ff;--clash:#ff5d6c;--display:'Barlow Condensed','Arial Narrow',sans-serif;--body:Inter,system-ui,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:12px}
+body{margin:0;background:#0b0806;color:var(--ink);font:500 15px/1.4 var(--body)}
+button{font:inherit;color:inherit;cursor:pointer}
+/* ── Gallery ── */
+#idx{position:fixed;left:0;top:0;bottom:0;width:204px;padding:18px 14px;background:var(--rail);border-right:1px solid var(--line);overflow:auto;z-index:5}
+#idx .brand{font:700 25px var(--display);letter-spacing:.14em}#idx .brand b{color:var(--amber)}
+#idx .sub{color:var(--quiet);font-size:12.5px;margin-bottom:14px}
+#idx a{display:block;padding:6px 8px;border-radius:8px;color:var(--ink);text-decoration:none;font:600 17px/1.2 var(--display);letter-spacing:.02em}
+#idx a:hover,#idx a.on{background:var(--panel2);color:var(--amber)}
+#idx a small{display:block;font:500 11.5px var(--body);color:var(--quiet);letter-spacing:0}
+#toggle{display:flex;gap:3px;margin:0 0 12px}
+#toggle button{flex:1;padding:6px 0;border:1px solid var(--line);border-radius:7px;background:var(--panel);font:600 14px var(--display);letter-spacing:.04em;color:var(--quiet)}
+#toggle button.on{background:var(--amber);border-color:var(--amber);color:#201507}
+#tour{width:100%;padding:9px;margin-bottom:12px;border-radius:9px;background:none;border:1px solid var(--amber);color:var(--amber);font:600 16px var(--display)}
+#gal{margin-left:204px;padding:22px 24px 80px;min-width:0}
+.intro{max-width:760px;color:var(--quiet);margin-bottom:10px;font-size:14px}.intro b{color:var(--ink)}
+section.sec>h2{font:700 34px/1.1 var(--display);margin:34px 0 2px;border-top:1px solid var(--line);padding-top:18px}
+section.sec>h2 b{color:var(--amber);margin-right:6px}
+.secnote{color:var(--quiet);font-size:14px;margin-bottom:12px;max-width:760px}
+.shot{margin:18px 0 30px}
+.shot h3{font:700 22px/1.15 var(--display);margin:0}
+.shot p{margin:1px 0 9px;color:var(--quiet);font-size:13.5px;max-width:820px}
+.frames{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.fw{position:relative;flex:none;border-radius:13px;box-shadow:0 0 0 2px #4b3e30,0 8px 26px rgba(0,0,0,.5);overflow:hidden;background:var(--bg)}
+.fw .dev{transform-origin:0 0}
+.fwc{flex:none;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.fwc .open{padding:1px 9px;font:600 12px var(--body);color:var(--quiet);background:none;border:1px solid var(--line);border-radius:6px}.fwc .open:hover{color:var(--amber);border-color:var(--amber)}
+body[data-view=desktop] .fwc.p,body[data-view=phone] .fwc.d{display:none}
+/* Player */
+#player{position:fixed;inset:0;background:#0b0806;z-index:20;display:flex;flex-direction:column}
+#player[hidden]{display:none}
+#pbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#pbar button{padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:600 16px var(--display)}
+#pbar button.on{border-color:var(--amber);color:var(--amber)}
+#plabel{flex:1;min-width:120px;font-size:12.5px;color:var(--quiet);line-height:1.25}#plabel b{display:block;color:var(--ink);font:700 17px var(--display)}
+#pstage{flex:1;min-height:0;display:grid;place-items:center;overflow:hidden;padding:10px}
+#pframe{position:relative;overflow:hidden;border-radius:13px;box-shadow:0 0 0 2px #4b3e30}
+#pframe .dev{transform-origin:0 0}
+@media(max-width:820px){
+ #idx{position:sticky;top:0;bottom:auto;width:auto;padding:7px 8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;border-right:0;border-bottom:1px solid var(--line)}
+ #idx .brand,#idx .sub{display:none}
+ #idx a{padding:5px 9px;font-size:16px;background:var(--panel)}#idx a small,#idx a span{display:none}
+ #toggle{order:-1;flex:1 0 100%;margin:0}#tour{order:-1;flex:1 0 100%;margin:0;padding:6px}
+ #gal{margin-left:0;padding:10px 12px 60px}
+ html{scroll-padding-top:140px}
+ #plabel{order:9;flex:1 0 100%;font-size:0}#plabel b{font-size:15px}
+ .frames{gap:14px}
+}
+
+/* ── The app inside a device ── */
+.dev{position:relative;overflow:hidden;background:var(--bg);color:var(--ink);text-align:left}
+.dev.d{width:1024px;height:640px;font-size:15px}
+.dev.p{width:300px;height:620px;font-size:13px}
+.dev,.dev *{line-height:1.32}
+.fill{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0}
+.app{position:absolute;inset:0;display:flex;min-height:0}
+.p .app{flex-direction:column}
+.rail{flex:none;width:176px;background:var(--rail);border-right:1px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:3px}
+.brand2{font:700 23px var(--display);letter-spacing:.14em;margin:0 6px 2px}.brand2 b{color:var(--amber)}
+.rail .brandsub{color:var(--quiet);font-size:12px;margin:0 6px 14px}
+.nav{display:block;width:100%;text-align:left;padding:9px 11px;border-radius:9px;background:none;border:1px solid transparent;font:600 19px var(--display)}
+.nav:hover{background:var(--panel)}.nav.on{border-color:var(--amber);background:var(--panel2);color:var(--amber)}
+.nav.q{color:var(--quiet);font-size:17px;padding:6px 11px}
+.spacer{flex:1}
+.main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:16px 22px;gap:10px;overflow:hidden}
+.p .main{padding:8px 12px;gap:7px}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--rail)}
+.tabs button{background:none;border:0;padding:8px 0 10px;font:600 15px var(--display);color:var(--quiet);letter-spacing:.03em}
+.tabs button.on{color:var(--amber)}
+.ptop{flex:none;display:flex;justify-content:space-between;align-items:center;padding:7px 12px 0}
+.ptop .brand2{font-size:17px;margin:0}
+.ptop button{background:none;border:1px solid var(--line);border-radius:7px;padding:2px 8px;font:600 13px var(--display);color:var(--quiet);margin-left:4px}
+.scroll{overflow:auto;min-height:0;flex:1 1 0;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.kick{font:600 14px var(--display);letter-spacing:.13em;color:var(--quiet);text-transform:uppercase}
+.p .kick{font-size:12px;letter-spacing:.1em}
+.h1{font:700 44px/1.02 var(--display)}.p .h1{font-size:30px}
+.h2{font:700 30px/1.05 var(--display)}.p .h2{font-size:23px}
+.h3{font:700 21px/1.1 var(--display)}.p .h3{font-size:18px}
+.mega{font:700 104px/.92 var(--display)}.p .mega{font-size:66px}
+.q{color:var(--quiet)}.sm{font-size:13px}.p .sm{font-size:11.5px}
+.amber{color:var(--amber)}.g{color:var(--tone)}.bl{color:var(--tension)}.r{color:var(--clash)}
+.row{display:flex;align-items:center;gap:10px;min-width:0}.row.top{align-items:flex-start}.row.wrap{flex-wrap:wrap}.row.base{align-items:baseline}.between{justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}.p .col{gap:7px}
+.grow{flex:1 1 0;min-width:0;min-height:0}.none{flex:none}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;flex:1;min-height:0}
+.split.w4060{grid-template-columns:minmax(0,4fr) minmax(0,6fr)}.split.w6040{grid-template-columns:minmax(0,6fr) minmax(0,4fr)}
+.p .split,.p .split.w4060,.p .split.w6040{display:flex;flex-direction:column;gap:7px}
+.p .donly{display:none!important}.d .ponly{display:none!important}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.p .card{padding:8px 10px;border-radius:10px}
+.card.hi{border-color:var(--amber);background:var(--panel2)}
+.btn{white-space:nowrap;min-height:44px;padding:7px 18px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font:600 20px var(--display);letter-spacing:.03em}
+.p .btn{min-height:38px;padding:5px 11px;font-size:17px}
+.btn:hover{border-color:var(--quiet)}.btn.pri{background:var(--amber);border-color:var(--amber);color:#201507}
+.btn.big{min-height:74px;font-size:36px;font-weight:700;width:100%;border-radius:14px}
+.p .btn.big{min-height:58px;font-size:25px;padding:5px}
+.link{align-self:flex-start;white-space:nowrap;background:none;border:0;padding:3px 0;color:var(--quiet);text-decoration:underline;text-underline-offset:3px;font-size:13px}.p .link{font-size:11.5px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:5px}
+.seg button{padding:8px 0;border-radius:9px;background:var(--panel);border:1px solid var(--line);font:600 20px var(--display)}
+.p .seg button{padding:5px 0;font-size:17px}
+.seg button.on{border-color:var(--amber);color:var(--amber);background:var(--panel2)}
+.tag{display:inline-block;flex:none;padding:0 7px;border-radius:5px;font:600 12.5px/1.5 var(--display);letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--line);color:var(--quiet)}
+.tag.t{color:var(--amber);border-color:#70522a}.tag.m{color:var(--tension);border-color:#2f5580}.tag.j{color:var(--quiet)}.tag.ok{color:var(--tone);border-color:#2a7a4b}
+.p .tag{font-size:11px}
+.why{color:var(--quiet);font-size:13.5px}.why b{color:var(--ink);font-weight:500}.p .why{font-size:11.5px}
+.item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.p .item{padding:7px 9px;gap:7px}
+.item .mins{flex:none;width:44px;font:700 25px/1 var(--display);text-align:right}.item .mins small{display:block;font:600 11px var(--display);color:var(--quiet);letter-spacing:.08em}
+.p .item .mins{width:28px;font-size:19px}
+.coach{flex:none;display:flex;gap:10px;align-items:center;padding:9px 13px;background:var(--panel);border:1px solid var(--line);border-radius:12px;font-size:17px}
+.p .coach{padding:7px 9px;font-size:12.5px;gap:7px;border-radius:10px}
+.lamp{flex:none;width:11px;height:11px;border-radius:50%;background:var(--amber)}.p .lamp{width:9px;height:9px}
+.lamp.g{background:var(--tone)}
+.bpm{font:700 50px/1 var(--display);white-space:nowrap}.bpm small{font-size:.42em;color:var(--quiet);margin-left:4px}.p .bpm{font-size:34px}
+.chord{font:700 112px/.92 var(--display)}.p .chord{font-size:64px}
+.nextc{font:600 32px var(--display);color:var(--quiet);white-space:nowrap}.p .nextc{font-size:21px}
+.beats{display:flex;gap:8px}.beats i{width:14px;height:14px;border-radius:50%;background:var(--line)}.beats i.on{background:var(--ink)}.p .beats i{width:10px;height:10px}.p .beats{gap:6px}
+.bars{flex:none;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.p .bars{grid-template-columns:repeat(8,minmax(0,1fr));gap:2px}
+.bar{padding:3px 6px;border:1px solid var(--line);border-radius:7px;background:var(--panel);display:flex;justify-content:space-between;gap:3px;align-items:baseline;font:600 16px var(--display);white-space:nowrap}
+.bar span:first-child{color:var(--quiet);font-size:13px}
+.p .bar{flex-direction:column;align-items:center;gap:0;font-size:14px;padding:1px 0;border-radius:5px}.p .bar span:first-child{font-size:10.5px}
+.bar.tone{background:#123824;border-color:var(--tone)}.bar.tens{background:#142a48;border-color:var(--tension)}.bar.clash{background:#431a20;border-color:var(--clash)}.bar.now{border-color:var(--ink)}
+.fbw{position:relative;flex:1 1 0;min-height:0;border-radius:12px;background:#0f0b08;overflow:hidden}
+.fbw svg{position:absolute;inset:0;width:100%;height:100%}
+.tabw{background:#0f0b08;border-radius:12px;padding:6px 8px}.tabw svg{display:block;width:100%;height:auto}
+.stat{min-width:0}.stat b{display:block;font:700 40px/1 var(--display)}.stat span{font-size:12.5px;color:var(--quiet)}
+.p .stat b{font-size:27px}.p .stat span{font-size:11px}
+.sbar{flex:none;display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line);background:var(--rail)}
+.p .sbar{padding:6px 10px;gap:7px}
+.sbar button{background:none;border:1px solid var(--line);border-radius:7px;padding:1px 9px;font:600 14px var(--display);color:var(--quiet)}
+.pips{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}.pips i{height:6px;border-radius:3px;background:var(--line)}.pips i.done{background:var(--tone)}.pips i.on{background:var(--amber)}
+.sbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:9px;padding:12px 20px}
+.p .sbody{padding:7px 10px;gap:6px}
+.choice{display:block;width:100%;text-align:left;padding:12px 15px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.p .choice{padding:8px 10px}
+.choice:hover,.choice.on{border-color:var(--amber)}.choice.on{background:var(--panel2)}
+.choice b{display:block;font:700 23px/1.1 var(--display)}.p .choice b{font-size:19px}.choice span{color:var(--quiet);font-size:13.5px}.p .choice span{font-size:11.5px}
+.center{flex:1;display:flex;flex-direction:column;justify-content:center;width:min(600px,100%);margin:0 auto;gap:11px;min-height:0;padding:14px}
+.p .center{gap:8px;padding:10px 12px}
+.check{display:flex;gap:9px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.p .check{padding:6px 9px;font-size:12px}
+.tick{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bg);background:var(--tone)}.tick.wait{background:none;border:2px solid var(--line);color:var(--quiet)}.tick.cur{background:none;border:2px solid var(--amber)}
+.step{display:flex;gap:9px;align-items:center;width:100%;text-align:left;padding:6px 10px;border:1px solid transparent;border-radius:9px;background:none}
+.step:hover{background:var(--panel)}.step.cur{border-color:var(--amber);background:var(--panel2)}
+.p .step{padding:3px 7px;gap:7px}
+.step .nm{font:600 18px/1.1 var(--display)}.p .step .nm{font-size:15.5px}.step small{display:block;font-size:12px;color:var(--quiet)}.p .step small{font-size:10.5px}
+.ex{display:flex;gap:9px;align-items:center;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.p .ex{padding:5px 8px;gap:7px}.ex.cur{border-color:var(--amber);background:var(--panel2)}
+.key{display:inline-block;padding:1px 9px;border-radius:7px;border:1px solid var(--amber);color:var(--amber);font:600 17px/1.4 var(--display);white-space:nowrap}.p .key{font-size:14px;padding:0 6px}
+.ped{display:inline-block;padding:1px 9px;border-radius:7px;border:1px solid var(--quiet);font:600 15px/1.4 var(--display);white-space:nowrap}.p .ped{font-size:13px;padding:0 6px}
+.say{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}.p .say{gap:3px 8px}
+.chip{flex:none;display:grid;place-items:center;padding:4px 0;border:1px solid var(--line);border-radius:7px;background:var(--panel);font:600 16px var(--display);color:var(--quiet)}.p .chip{font-size:13px;padding:2px 0}
+.chip.ok{background:#123824;border-color:var(--tone);color:var(--ink)}.chip.bad{background:#431a20;border-color:var(--clash);color:var(--ink)}.chip.cur{border-color:var(--amber);color:var(--amber);background:var(--panel2)}.chip.off{background:#0f0b08;border-style:dashed}
+.chips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:5px}.p .chips{gap:2px}
+.msg{padding:8px 12px;border-radius:11px;max-width:92%;font-size:14.5px}.p .msg{font-size:12.5px;padding:6px 9px}
+.msg.you{align-self:flex-end;background:var(--panel2);border:1px solid #6d5230}.msg.co{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
+.field{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}.p .field{font-size:12px;padding:4px 0}
+.field:first-of-type{border-top:0}
+.val{font:600 16px var(--display);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:1px 9px;white-space:nowrap;background:var(--bg)}.p .val{font-size:13px;padding:0 6px}
+.val.on{border-color:var(--amber);color:var(--amber)}
+input.typed{flex:1;min-width:0;background:var(--bg);color:var(--ink);border:1px solid var(--amber);border-radius:9px;padding:7px 11px;font:600 21px var(--display)}.p input.typed{font-size:16px;padding:4px 8px}
+.meter{height:12px;border-radius:6px;background:var(--panel);overflow:hidden;border:1px solid var(--line)}.meter i{display:block;height:100%;background:var(--tone)}
+.line{height:1px;background:var(--line);flex:none}
+.chart svg{display:block;width:100%;height:auto}
+</style>
+</head>
+<body data-view="all">
+<aside id="idx"></aside>
+<main id="gal"></main>
+<div id="player" hidden>
+  <div id="pbar"><button id="pback">Back</button><div id="plabel"></div><button id="pd">Desktop</button><button id="pp">Phone</button><button id="pclose">Close</button></div>
+  <div id="pstage"><div id="pframe"></div></div>
+</div>
+
+<script>
+/* ──────── Music helpers ──────── */
+const OPEN=[64,59,55,50,45,40], NOTE=['C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B'];
+const CH={A7:{r:9,t:[9,1,4,7]},D7:{r:2,t:[2,6,9,0]},E7:{r:4,t:[4,8,11,2]},G7:{r:7,t:[7,11,2,5]}};
+const pc=(s,f)=>(OPEN[s-1]+f)%12;
+const BOX=[[1,5],[1,8],[2,5],[2,8],[3,5],[3,7],[4,5],[4,7],[5,5],[5,7],[6,5],[6,8]];
+const inBox=(s,f)=>BOX.some(b=>b[0]===s&&b[1]===f);
+/* aim = this chord's tones (amber). Other box notes stay neutral. */
+function chordNotes(ch,lo=4,hi=9,kind='aim'){const o=[];for(let s=1;s<=6;s++)for(let f=lo;f<=hi;f++){if(CH[ch].t.includes(pc(s,f)))o.push([s,f,kind]);else if(inBox(s,f))o.push([s,f,'box'])}return o}
+function fb(m,{lo=4,hi=9,notes=[],arrow=null}={}){
+  const W=m==='p'?380:680,gap=m==='p'?31:34,top=18,H=top+gap*5+36,pad=14,cw=(W-2*pad)/(hi-lo+1),r=m==='p'?14:15;
+  const fx=f=>pad+(f-lo+.5)*cw, sy=s=>top+(s-1)*gap;let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Fretboard, frets ${lo} to ${hi}">`;
+  o+=`<rect x="${pad}" y="${top-10}" width="${W-2*pad}" height="${gap*5+20}" rx="4" fill="#2a1a10"/>`;
+  for(let f=lo;f<=hi+1;f++){const x=pad+(f-lo)*cw;o+=`<line x1="${x}" x2="${x}" y1="${top-10}" y2="${top+gap*5+10}" stroke="#8b6d48" stroke-width="3"/>`}
+  [3,5,7,9,12].filter(f=>f>=lo&&f<=hi).forEach(f=>o+=`<circle cx="${fx(f)}" cy="${top+gap*2.5}" r="5" fill="#8b6d48" opacity=".7"/>`);
+  for(let s=1;s<=6;s++)o+=`<line x1="${pad}" x2="${W-pad}" y1="${sy(s)}" y2="${sy(s)}" stroke="#a58a68" stroke-width="${.8+s*.3}"/>`;
+  for(let f=lo;f<=hi;f++)o+=`<text x="${fx(f)}" y="${H-7}" text-anchor="middle" font-size="15" font-weight="600" fill="#b5a895" font-family="Inter,sans-serif">${f}</text>`;
+  if(arrow){const [s,a,b]=arrow,y=sy(s)-r-5;o+=`<path d="M${fx(a)} ${y}Q${(fx(a)+fx(b))/2} ${y-11} ${fx(b)} ${y}" fill="none" stroke="#ffb454" stroke-width="2.5"/><circle cx="${fx(b)}" cy="${y}" r="3.5" fill="#ffb454"/>`}
+  const C={aim:['#ffb454','#ffb454','#201507'],box:['#1d1712','#6d5f50','#d8ccba'],tone:['#4ee08a','#4ee08a','#07190f'],tens:['#5aa9ff','#5aa9ff','#06162a'],clash:['#ff5d6c','#ff5d6c','#2a0509'],dim:['#1d1712','#3a2f24','#6d5f50']};
+  notes.forEach(([s,f,k,ring])=>{const c=C[k]||C.box;if(ring)o+=`<circle cx="${fx(f)}" cy="${sy(s)}" r="${r+4}" fill="none" stroke="#fff" stroke-width="2.5"/>`;o+=`<circle cx="${fx(f)}" cy="${sy(s)}" r="${r}" fill="${c[0]}" stroke="${c[1]}" stroke-width="2"/><text x="${fx(f)}" y="${sy(s)+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${c[2]}" font-family="Inter,sans-serif">${NOTE[pc(s,f)]}</text>`});
+  return o+'</svg>';
+}
+const fbw=(m,o,style='')=>`<div class="fbw" style="${style}">${fb(m,o)}</div>`;
+/* Tab of one bar per 16 notes. Colours show timing on notes already played. */
+function tab(m,{bars=m==='p'?1:2,now=11}={}){
+  const fr=[5,5,5,5,7,7,7,7,8,8,8,8,7,7,7,7],tm=['g','g','g','g','g','b','g','g','g','g','r','g','','','',''];
+  const n=fr.length*bars,step=m==='p'?20:24,W=44+n*step+(bars-1)*12,H=112;let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tab: fifth, seventh and eighth fret on the high E string, in sixteenths">`;
+  const lg=11,y0=26;for(let i=0;i<6;i++)o+=`<line x1="24" x2="${W-6}" y1="${y0+i*lg}" y2="${y0+i*lg}" stroke="#6d5f50"/>`;
+  'TAB'.split('').forEach((c,i)=>o+=`<text x="10" y="${y0+18+i*14}" font-size="12" font-weight="700" fill="#b5a895" font-family="Inter,sans-serif">${c}</text>`);
+  let x=32;for(let b=0;b<bars;b++){for(let i=0;i<16;i++){const col=b===0?{g:'#4ee08a',b:'#5aa9ff',r:'#ff5d6c','':'#f7f1e6'}[tm[i]]:'#f7f1e6',cx=x+i*step+step/2;
+    if(b===0&&i===now)o+=`<rect x="${cx-10}" y="4" width="20" height="${H-8}" rx="4" fill="#ffb454" opacity=".22"/>`;
+    o+=`<rect x="${cx-7}" y="${y0-7}" width="14" height="14" fill="#0f0b08"/><text x="${cx}" y="${y0+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${col}" font-family="Inter,sans-serif">${fr[i]}</text>`;
+    o+=`<text x="${cx}" y="16" text-anchor="middle" font-size="11" fill="#b5a895" font-family="Inter,sans-serif">${i%2?'V':'⊓'}</text>`;
+    if(i%4===0)o+=`<line x1="${cx-6}" x2="${cx+step*3+6}" y1="${y0+5*lg+12}" y2="${y0+5*lg+12}" stroke="#b5a895" stroke-width="3"/><text x="${cx}" y="${H-4}" font-size="11" text-anchor="middle" fill="#b5a895" font-family="Inter,sans-serif">${i/4+1}</text>`}
+    x+=16*step+12;if(b<bars-1)o+=`<line x1="${x-8}" x2="${x-8}" y1="${y0}" y2="${y0+5*lg}" stroke="#b5a895"/>`}
+  return `<div class="tabw">${o}</svg></div>`;
+}
+/* Timing strip: where each note landed around its grid slot */
+function timing(m){const off=[2,-3,1,4,-2,14,3,-1,5,-4,-26,2],W=m==='p'?276:460,H=64,step=(W-40)/16;let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Timing of the last notes, against the grid"><line x1="34" x2="${W}" y1="32" y2="32" stroke="#6d5f50"/><text x="0" y="14" font-size="11" fill="#b5a895" font-family="Inter,sans-serif">late</text><text x="0" y="60" font-size="11" fill="#b5a895" font-family="Inter,sans-serif">early</text>`;
+  for(let i=0;i<16;i++){const x=40+i*step;o+=`<line x1="${x}" x2="${x}" y1="${i%4?26:20}" y2="${i%4?38:44}" stroke="#3a2f24"/>`;if(i<off.length){const v=off[i],a=Math.abs(v),c=a<8?'#4ee08a':a<20?'#5aa9ff':'#ff5d6c';o+=`<circle cx="${x}" cy="${32-v*.85}" r="4.5" fill="${c}"/>`}}
+  return `<div class="chart">${o}</svg></div>`}
+/* One series, recessive grid, end label */
+function lineChart({vals,labels,W=560,H=210,unit='',min,max,color='#ffb454',step=false,marks=[]}){
+  const L=34,R=46,T=14,B=24,lo=min??Math.min(...vals),hi=max??Math.max(...vals),x=i=>L+i*(W-L-R)/(vals.length-1),y=v=>T+(hi-v)*(H-T-B)/(hi-lo||1);
+  let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Line chart">`;
+  [lo,(lo+hi)/2,hi].forEach(v=>o+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#3a2f24"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="#b5a895" font-family="Inter,sans-serif">${Math.round(v)}</text>`);
+  labels.forEach((t,i)=>{if(t)o+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="12" fill="#b5a895" font-family="Inter,sans-serif">${t}</text>`});
+  let d='';vals.forEach((v,i)=>{d+=i===0?`M${x(i)} ${y(v)}`:step?`H${x(i)}V${y(v)}`:`L${x(i)} ${y(v)}`});
+  o+=`<path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  marks.forEach(i=>o+=`<circle cx="${x(i)}" cy="${y(vals[i])}" r="5" fill="#ff5d6c" stroke="#14100c" stroke-width="2"/>`);
+  const e=vals.length-1;o+=`<circle cx="${x(e)}" cy="${y(vals[e])}" r="5" fill="${color}" stroke="#14100c" stroke-width="2"/><text x="${x(e)+9}" y="${y(vals[e])+5}" font-size="15" font-weight="700" fill="#f7f1e6" font-family="Inter,sans-serif">${vals[e]}${unit}</text>`;
+  vals.forEach((v,i)=>o+=`<circle cx="${x(i)}" cy="${y(v)}" r="10" fill="transparent"><title>${labels[i]||''} ${v}${unit}</title></circle>`);
+  return `<div class="chart">${o}</svg></div>`}
+function spark(vals,W=120,H=34){const lo=Math.min(...vals),hi=Math.max(...vals),x=i=>4+i*(W-12)/(vals.length-1),y=v=>4+(hi-v)*(H-8)/(hi-lo||1);const d=vals.map((v,i)=>(i?'L':'M')+x(i)+' '+y(v)).join('');const e=vals.length-1;return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Trend"><path d="${d}" fill="none" stroke="#ffb454" stroke-width="2" stroke-linejoin="round"/><circle cx="${x(e)}" cy="${y(vals[e])}" r="3.5" fill="#ffb454"/></svg>`}
+
+/* ──────── Shared UI ──────── */
+const pri=(t,go,c='')=>`<button class="btn pri ${c}" data-go="${go}">${t}</button>`;
+const sec=(t,go,c='')=>`<button class="btn ${c}" ${go?`data-go="${go}"`:''}>${t}</button>`;
+const lnk=(t,go)=>`<button class="link" data-go="${go}">${t}</button>`;
+const coach=(t,g)=>`<div class="coach"><i class="lamp ${g?'g':''}"></i><div>${t}</div></div>`;
+const tag=k=>({t:'<span class="tag t">Theory</span>',m:'<span class="tag m">Mechanics</span>',j:'<span class="tag j">Jam, not graded</span>',r:'<span class="tag m">Ramp up</span>'})[k]||'';
+const beats=n=>`<div class="beats">${[1,2,3,4].map(i=>`<i class="${i===n?'on':''}"></i>`).join('')}</div>`;
+const NAV=[['today','Today','b-return'],['paths','Paths','d-paths'],['progress','Progress','e-progress'],['tools','Tools','f-tools']];
+function app(m,tab,body){
+  if(m==='d')return `<div class="app"><nav class="rail"><div class="brand2">YAM<b>E</b>S</div><div class="brandsub">Coach</div>${NAV.map(n=>`<button class="nav ${n[0]===tab?'on':''}" data-go="${n[2]}">${n[1]}</button>`).join('')}<div class="spacer"></div><button class="nav q ${tab==='coach'?'on':''}" data-go="g-why">Ask the coach</button><button class="nav q ${tab==='settings'?'on':''}" data-go="h-settings">Settings</button></nav><div class="main">${body}</div></div>`;
+  return `<div class="app"><div class="ptop"><div class="brand2">YAM<b>E</b>S</div><div><button data-go="g-why">Ask</button><button data-go="h-settings">Settings</button></div></div><div class="main">${body}</div><nav class="tabs">${NAV.map(n=>`<button class="${n[0]===tab?'on':''}" data-go="${n[2]}">${n[1]}</button>`).join('')}</nav></div>`}
+/* Session view: no navigation, only progress through today and a way out */
+function sess(m,{at=1,of=3,left='',exit='b-return'},body){return `<div class="fill"><div class="sbar"><button data-go="${exit}">Exit</button><div class="pips">${Array.from({length:of},(_,i)=>`<i class="${i<at-1?'done':i===at-1?'on':''}"></i>`).join('')}</div><span class="sm q" style="white-space:nowrap">${left}</span></div><div class="sbody">${body}</div></div>`}
+const firstRun=(n,body)=>`<div class="fill"><div class="sbar"><div class="brand2" style="font-size:17px;margin:0">YAM<b style="color:var(--amber)">E</b>S</div><div class="pips">${[1,2,3,4,5].map(i=>`<i class="${i<n?'done':i===n?'on':''}"></i>`).join('')}</div></div><div class="center">${body}</div></div>`;
+
+/* ──────── Today ──────── */
+const PLAN={
+ first:{5:[['t','Pentatonic box 1',3,'Because the placement test found you know part of this box.'],['m','Even eighths on one string',2,'Because your eighths stayed even up to 78 BPM.']],
+  10:[['t','Pentatonic box 1',5,'Because the placement test found you know part of this box.'],['m','Even eighths on one string',3,'Because your eighths stayed even up to 78 BPM.'],['j','Jam over a blues',2,'So your first session ends on just playing.']],
+  15:[['t','Pentatonic box 1',6,'Because the placement test found you know part of this box.'],['m','Even eighths on one string',5,'Because your eighths stayed even up to 78 BPM.'],['j','Jam over a blues',4,'So your first session ends on just playing.']],
+  20:[['t','Pentatonic box 1',8,'Because the placement test found you know part of this box.'],['m','Even eighths on one string',7,'Because your eighths stayed even up to 78 BPM.'],['j','Jam over a blues',5,'So your first session ends on just playing.']]},
+ back:{5:[['t','Landing on chord tones, at 60',3,'You passed this tempo before the 12-day break.'],['m','Even sixteenths, at 68',2,'Lower than your 80, to get the feel back.']],
+  10:[['t','Landing on chord tones, at 60',5,'You passed this tempo before the 12-day break.'],['m','Even sixteenths, at 68',3,'Lower than your 80, to get the feel back.'],['j','Jam over a blues',2,'To end on just playing.']],
+  15:[['m','Even eighths, at 80',3,'An easy warm-up, because of the break.'],['t','Landing on chord tones, at 60',6,'You passed this tempo before the 12-day break.'],['m','Even sixteenths, at 68',4,'Lower than your 80, to get the feel back.'],['j','Jam over a blues',2,'To end on just playing.']],
+  20:[['m','Even eighths, at 80',4,'An easy warm-up, because of the break.'],['t','Landing on chord tones, at 60',8,'You passed this tempo before the 12-day break.'],['m','Even sixteenths, at 68',5,'Lower than your 80, to get the feel back.'],['j','Jam over a blues',3,'To end on just playing.']]},
+ ret:{5:[['t','Landing on chord tones',3,'Because you missed D7 yesterday.'],['m','Even sixteenths',2,'Because evenness was 78% at 80 BPM. The bar is 85%.']],
+  10:[['t','Landing on chord tones',5,'Because you missed D7 yesterday.'],['m','Even sixteenths',3,'Because evenness was 78% at 80 BPM. The bar is 85%.'],['j','Jam over a blues',2,'To end on just playing.']],
+  15:[['t','Landing on chord tones',5,'Because you missed D7 yesterday.'],['m','Even sixteenths',4,'Because evenness was 78% at 80 BPM. The bar is 85%.'],['t','Call and response',4,'New for you: the next step on the Blues path.'],['j','Jam over a blues',2,'To end on just playing.']],
+  20:[['t','Landing on chord tones',6,'Because you missed D7 yesterday.'],['m','Even sixteenths',5,'Because evenness was 78% at 80 BPM. The bar is 85%.'],['t','Call and response',4,'New for you: the next step on the Blues path.'],['r','Ramp up: Find my edge',3,'To check your clean tempo. Last week it was 88 BPM.'],['j','Jam over a blues',2,'To end on just playing.']]}};
+function today(m,o,{key,min=10,scr,lead,headExtra='',go='c-theory',sub}){
+  const list=PLAN[key][min];
+  const items=list.map(i=>`<div class="item"><div class="mins">${i[2]}<small>MIN</small></div><div class="grow"><div class="row wrap" style="gap:6px"><span class="h3">${i[1]}</span>${tag(i[0])}</div><div class="why">${i[3]}</div></div></div>`).join('');
+  const seg=`<div class="seg">${[5,10,15,20].map(n=>`<button class="${n===min?'on':''}" data-min="${n}">${n}</button>`).join('')}</div>`;
+  const hero=`<div class="col"><div class="kick">${lead}</div><div class="row base" style="gap:12px"><div class="mega" ${headExtra&&m==='p'?'style="font-size:46px"':''}>Today</div></div><div class="h2 amber">${min} min</div>${pri('Start',go,'big')}<div><div class="sm q" style="margin-bottom:3px">How long have you got? Minutes:</div>${seg}</div></div>`;
+  if(m==='d')return app(m,'today',`<div class="split w4060"><div class="col" style="justify-content:center">${hero}${sub?`<div class="sm q">${sub}</div>`:''}</div><div class="col" style="justify-content:center">${headExtra}<div class="kick">What's in it, and why</div>${items}</div></div>`);
+  return app(m,'today',`${hero}${headExtra}<div class="kick">What's in it, and why</div><div class="scroll col" style="gap:5px">${items}</div>`);
+}
+
+/* ──────── Screens ──────── */
+const LANDBARS=[['A7','A','tone'],['D7','D','tone'],['A7','A','tone'],['E7','E','tone'],['A7','C#','tone'],['D7','G','clash'],['A7','','now'],['E7','','']];
+const bars=b=>`<div class="bars">${b.map(x=>`<div class="bar ${x[2]}"><span>${x[0]}</span><span>${x[1]||'&nbsp;'}</span></div>`).join('')}</div>`;
+const BLUES=[['Pentatonic box 1','Passed. 80% of notes in the box at 85 BPM','done'],['Landing on chord tones','Exercise 2 of 4. Best 6 of 8 at 75 BPM','cur'],['Call and response','',''],['Blues scale and blue notes','',''],['Following the 12-bar','',''],['Bends that land','',''],['Question and answer phrases','',''],['Connecting box 1 and box 2','',''],['Guide tones through the changes','',''],['Slow blues','','']];
+const ALT=[['Even eighths on one string','Passed. Clean tempo 104 BPM','done'],['Even sixteenths','Exercise 3 of 4. Best 78% even at 80 BPM','cur'],['Accents where you want them','',''],['Crossing two strings','',''],['Three notes per string','',''],['Speed bursts','',''],['Pentatonic patterns','',''],['Cross-string runs','',''],['Stamina minute','',''],['Clean run over the band','','']];
+function pathView(m,kind){
+  const b=kind==='t'?BLUES:ALT,nm=kind==='t'?'Blues path':'Alternate Picking path',cur=kind==='t'?'d-land':'d-even';
+  const sub=kind==='t'?'What you choose to play, over a blues.':'How your hands play: notes, even timing, clean tempo.';
+  const steps=b.map((s,i)=>`<button class="step ${s[2]==='cur'?'cur':''}" ${s[2]==='cur'?`data-go="${cur}"`:''}><span class="tick ${s[2]==='done'?'':s[2]==='cur'?'cur':'wait'}">${s[2]==='done'?'✓':''}</span><span class="grow"><span class="nm">${i+1}. ${s[0]}</span>${s[1]?`<small>${s[1]}</small>`:''}</span></button>`).join('');
+  const side=kind==='t'
+   ?`<div class="card"><div class="kick">Where you are</div><div class="h2">Step 2 of 10</div><div class="why">1 passed. A step passes when all its exercises hit their bar.</div></div><div class="card"><div class="kick">How this path grades</div><div class="why">Which note you land on, per bar, against the chord. Only in exercises. Jam is never graded.</div></div>${fbw('p',{notes:chordNotes('A7')})}`
+   :`<div class="card"><div class="kick">Where you are</div><div class="h2">Step 2 of 10</div><div class="why">Clean tempo on sixteenths: 88 BPM.</div></div><div class="card"><div class="kick">What this path can measure</div><div class="why"><b>Notes, timing evenness and clean tempo.</b> It cannot tell pick direction. Down-up is written in the tab, and checking it is your job.</div></div><div class="grow"></div>`;
+  const head=`<div>${lnk('Paths','d-paths')}<div class="row wrap" style="gap:8px"><span class="h2">${nm}</span>${tag(kind)}</div><div class="why">${sub}</div></div>`;
+  if(m==='d')return app(m,'paths',`${head}<div class="split w6040"><div class="col" style="gap:3px">${steps}</div><div class="col">${side}</div></div>`);
+  return app(m,'paths',`${head}<div class="scroll col" style="gap:1px">${steps}</div><div class="why">${kind==='t'?'Graded in exercises only. Jam is never graded.':'Measures notes, evenness, clean tempo. Cannot tell pick direction.'}</div>`);
+}
+function stepView(m,kind){
+  const T=kind==='t';
+  const ex=T?[['Any chord tone, A7 D7 A7 E7, 60 BPM','7 of 8 landings','Passed','d'],['Same, 75 BPM','7 of 8 landings','Best 6 of 8','c'],['Same, 90 BPM','7 of 8 landings','',''],['Only the 3rd of each chord, 60 BPM','6 of 8 landings','','']]
+   :[['One string, 60 BPM','85% even, 8 bars','Passed','d'],['One string, 70 BPM','85% even, 8 bars','Passed','d'],['One string, 80 BPM','85% even, 8 bars','Best 78%','c'],['One string, 80 BPM, with the band','85% even, 16 bars','','']];
+  const exh=ex.map(e=>`<div class="ex ${e[3]==='c'?'cur':''}"><span class="tick ${e[3]==='d'?'':e[3]==='c'?'cur':'wait'}">${e[3]==='d'?'✓':''}</span><div class="grow"><div class="h3" style="font-size:${m==='p'?16:19}px">${e[0]}</div><div class="why">Pass bar: ${e[1]}${e[2]?` · <b>${e[2]}</b>`:''}</div></div></div>`).join('');
+  const why=T?`<b>Why this step:</b> chord tones are what make a chord sound like itself. Landing on one when the chord changes makes your solo follow the band.`
+   :`<b>Why this step:</b> sixteenths show up every timing wobble that eighths hide. Everything later on this path needs them even.`;
+  const whyyou=T?`<b>Why now, for you:</b> you passed Pentatonic box 1, and yesterday both misses were on D7.`:`<b>Why now, for you:</b> your eighths are clean to 104 BPM, and your sixteenths drop to 78% even at 80.`;
+  const head=`<div>${lnk(T?'Blues path':'Alternate Picking path',T?'d-blues':'d-alt')}<div class="kick">Step 2 of 10</div><div class="row wrap" style="gap:8px"><span class="h2">${T?'Landing on chord tones':'Even sixteenths'}</span>${tag(kind)}</div></div>`;
+  const vis=T?fbw('p',{notes:chordNotes('D7')}):`${tab(m,{now:-1,bars:1})}<div class="why">Tab is what to play. Down-up marks are guidance: I can't hear pick direction.</div><div class="grow"></div>`;
+  const go=T?'c-theory':'c-mech';
+  if(m==='d')return app(m,'paths',`${head}<div class="split"><div class="col"><div class="kick">Exercises</div>${exh}${pri('Play this exercise',go)}</div><div class="col"><div class="card"><div class="why">${why}</div><div class="why" style="margin-top:6px">${whyyou}</div></div>${vis}</div></div>`);
+  return app(m,'paths',`${head}<div class="card"><div class="why">${why}</div><div class="why" style="margin-top:4px">${whyyou}</div></div><div class="scroll col" style="gap:4px">${exh}</div>${pri('Play this exercise',go)}`);
+}
+function pathCard(m,kind,name,desc,prog,go){return `<button class="choice on" data-go="${go}"><div class="row between" style="gap:6px"><b>${name}</b><span class="tag ok" style="color:var(--tone)">Running</span></div><span>${desc}</span><div class="pips" style="margin-top:6px;grid-template-columns:repeat(10,1fr);grid-auto-flow:row">${Array.from({length:10},(_,i)=>`<i class="${i<1?'done':i===1?'on':''}"></i>`).join('')}</div><span>${prog}</span></button>`}
+const later=(a)=>a.map(n=>`<div class="row between" style="padding:${'4px'} 2px;border-top:1px solid var(--line)"><span class="h3" style="font-size:17px;color:var(--quiet)">${n}</span><span class="tag">Later</span></div>`).join('');
+function kindCol(m,k,title,sub,card,l){return `<div class="col" style="${m==='p'?'gap:4px':''}"><div>${tag(k)} <span class="why">${sub}</span></div>${card}<div>${later(l)}</div></div>`}
+
+const SCREENS=[
+/* ─── A ─── */
+{sec:'A',id:'a-welcome',t:'Welcome',n:'One sentence of promise and one button. No account, no tour.',r:m=>firstRun(1,`<div class="mega" style="font-size:${m==='p'?54:84}px">YAM<span class="amber">E</span>S <span class="q">Coach</span></div><div class="h3" style="font-weight:600">A band plays. You play. The coach hears your notes, and you get better along a path.</div>${pri("Let's play",'a-input','big')}<div class="why">About two minutes of setup, then you're playing.</div>`)},
+{sec:'A',id:'a-input',t:'Pick input',n:'How the coach hears you. Each option says plainly what it can do.',r:m=>firstRun(2,`<div class="h2">How will I hear you?</div><button class="choice on" data-go="a-check"><b>Microphone</b><span>Your guitar in the room. Single notes work best.</span></button><button class="choice" data-go="a-check"><b>MIDI</b><span>Keyboard or MIDI guitar. Exact notes and chords.</span></button><button class="choice" data-go="a-check"><b>Tap the fretboard</b><span>No instrument to hand. Notes count, but timing means less.</span></button>`)},
+{sec:'A',id:'a-check',t:'Soundcheck',n:'Proves the coach hears you before anything is graded. Only says what it actually heard.',r:m=>firstRun(3,`<div class="h2">Play your low E string</div><div class="row" style="gap:16px"><div class="mega g">E</div><div class="grow"><div class="sm q">Heard, in tune</div><div class="meter"><i style="width:68%"></i></div><div class="sm q" style="margin-top:4px">Level is good</div></div></div><div class="check"><span class="tick">✓</span>I can hear single notes</div><div class="check"><span class="tick">✓</span>Timing delay measured: 42 ms, I'll allow for it</div><div class="check"><span class="tick wait"></span><span>No headphones? The band plays drums only, so I don't mistake it for you.</span></div>${pri('Sounds good','a-goal')}`)},
+{sec:'A',id:'a-goal',t:'What do you want to get better at?',n:'The goal picks the paths: Theory, Mechanics, or one of each. Can change later.',r:m=>firstRun(4,`<div class="h2">What do you want to get better at?</div><button class="choice" data-go="a-place"><b>My hands</b><span>Mechanics: how your hands play. Starts the Alternate Picking path.</span></button><button class="choice" data-go="a-place"><b>What to play</b><span>Theory: what you choose to play. Starts the Blues path.</span></button><button class="choice on" data-go="a-place"><b>Both</b><span>One of each. A session can mix them.</span></button>`)},
+{sec:'A',id:'a-place',t:'Placement test',n:'Two minutes, played not answered. It sets the starting step and tempo. Can be skipped.',r:m=>firstRun(5,`<div class="kick">Placement, part 2 of 2. About 1 minute left</div><div class="h2">Pick even eighths on one string. I'll speed up until it wobbles.</div><div class="row between"><div class="bpm">78<small>BPM</small></div><div class="stat" style="text-align:right"><b class="g">84%</b><span>even so far</span></div></div>${timing(m)}${coach("Part 1: you found 6 of the 10 box notes I asked for. Now timing.")}<div class="row between">${pri('Finish','a-placed')}${lnk('Skip: start me at step 1','b-first')}</div>`)},
+{sec:'A',id:'a-placed',t:'Placement result',n:'Reports what it measured and where you start. The only way forward is to play.',r:m=>firstRun(5,`<div class="kick">Here's what I measured</div><div class="check"><span class="tick">✓</span><span><b>6 of 10</b> box notes found. <span class="q">Blues path, step 1: Pentatonic box 1</span></span></div><div class="check"><span class="tick">✓</span><span>Eighths even up to <b>78 BPM</b>. <span class="q">Alternate Picking path, step 1: Even eighths on one string</span></span></div><div class="why">That's two minutes of playing, so it's only a starting point. I'll adjust as I hear more.</div>${pri('Go to Today','b-first','big')}`)},
+/* ─── B ─── */
+{sec:'B',id:'b-first',t:'Today: first time',n:'The session is already built. Every line says why it is there, even on day one.',r:(m,o={})=>today(m,o,{key:'first',min:o.min||10,lead:'Your first session'})},
+{sec:'B',id:'b-return',t:'Today: returning',n:'The app opens here. One tap and you are playing. Choosing minutes rebuilds the session (try it).',r:(m,o={})=>today(m,o,{key:'ret',min:o.min||10,lead:'Sunday',sub:'Running: Blues path, step 2 · Alternate Picking path, step 2'})},
+{sec:'B',id:'b-break',t:'Today: back after a break',n:'Eases you in: recap, lower tempo, no guilt. Still one tap.',r:(m,o={})=>today(m,o,{key:'back',min:o.min||10,lead:'Welcome back. It has been 12 days',headExtra:`<div class="card"><div class="kick">Where you left off</div><div class="why"><b>7 of 8 landings at 75 BPM. Clean tempo 88 BPM.</b> Today starts slower.</div></div>`})},
+/* ─── C ─── */
+{sec:'C',id:'c-theory',t:'Running: Theory exercise',n:'Landing on chord tones. Big chord, per-bar results building live, the why always one line away.',r:m=>sess(m,{at:1,left:'9 min left'},`<div class="row between top"><div class="grow"><div class="kick">Theory · Blues path, step 2</div><div class="h2">Landing on chord tones</div><div class="why donly">Because you missed D7 yesterday. Pass bar: 7 of 8 landings.</div></div><div class="bpm">75<small>BPM</small></div></div><div class="why ponly">Because you missed D7 yesterday. Bar: 7 of 8.</div><div class="row between"><div><div class="row base" style="gap:14px"><div class="chord">A7</div><div class="nextc">then E7</div></div>${beats(2)}</div><div style="text-align:right"><div class="h1 r">G</div><div class="sm"><span class="r">Clash</span> over D7, bar 6</div></div></div>${fbw(m,{notes:chordNotes('A7')},m==='p'?'flex:1 1 0':'')}<div class="sm q">Amber: A7's chord tones, the notes to land on in bar 7.</div>${bars(LANDBARS)}<div class="row between"><span class="why">Say <span class="key">stop</span> or hold the pedal to end</span>${sec('End take','theory-end')}</div>`)},
+{sec:'C',id:'c-mech',t:'Running: Mechanics exercise',n:'Even sixteenths. Tab says what to play, the strip shows timing, one number for evenness. Never claims pick direction.',r:m=>sess(m,{at:2,left:'4 min left'},`<div class="row between top"><div class="grow"><div class="kick">Mechanics · Alternate Picking path, step 2</div><div class="h2">Even sixteenths</div><div class="why">Because evenness was 78% at 80 BPM. Pass bar: 85%.</div></div><div class="bpm">80<small>BPM</small></div></div>${tab(m,{bars:1})}<div class="${m==='d'?'split':'col'}" style="flex:none"><div class="row" style="gap:18px"><div class="stat"><b class="g">86%</b><span>even, this take</span></div><div class="stat"><b>98%</b><span>right notes</span></div><div class="stat"><b>5<span class="q" style="font-size:.6em"> / 8</span></b><span>bars</span></div></div>${timing(m)}</div><div class="grow"></div>${coach('Bar 5, beat 3 came in early. Otherwise tight.')}<div class="why">I hear notes and timing. Down-up is on you: I can't hear pick direction.</div><div class="row between wrap">${pri('End take','c-mechresult')}${lnk('Mock: what if it can\'t hear enough?','c-nocatch')}</div>`)},
+{sec:'C',id:'c-between',t:'Between takes',n:'Hands stay on the guitar. Voice and pedal do everything, one big next action.',r:m=>sess(m,{at:1,left:'8 min left'},`<div class="kick">Take 1 done · Landing on chord tones</div><div class="row base" style="gap:12px"><div class="mega" style="font-size:${m==='p'?52:76}px">6 <span class="q">of 8</span></div><div class="h3 q">landings</div></div>${coach('Both misses were on D7. Aim for F#, one fret below that G.')}${pri('Go again, 75 BPM','c-theory','big')}<div class="${m==='d'?'split':'col'}" style="flex:none"><div class="card"><div class="row between"><div class="kick">Just say it</div><div class="row sm q" style="gap:5px"><i class="lamp g"></i>Listening</div></div><div class="say" style="margin-top:6px"><span class="key">again</span><span class="why">Same tempo</span><span class="key">slower / faster</span><span class="why">Change tempo by 5 BPM</span><span class="key">why</span><span class="why">Coach explains the miss</span><span class="key">next</span><span class="why">Move on</span></div></div><div class="card"><div class="kick">Foot pedal</div><div class="say" style="margin-top:6px"><span class="ped">Tap</span><span class="why">Do the big action</span><span class="ped">Double tap</span><span class="why">Slower</span><span class="ped">Hold</span><span class="why">Next</span></div></div></div>`)},
+{sec:'C',id:'c-result',t:'Result of a take: Theory',n:'The number that moved, against the bar, then one next action. Everything else is small.',r:m=>sess(m,{at:1,left:'5 min left'},`<div class="kick">Take 2 · Landing on chord tones · 75 BPM</div><div class="row base wrap" style="gap:10px"><span class="h1 q">6 →</span><span class="mega g">7</span><span class="h2">of 8 landings</span><span class="tag ok">Pass bar met</span></div>${bars(LANDBARS.map((b,i)=>i===6?['A7','E','tone']:i===7?['E7','E','tone']:b))}${m==='d'?`<div class="split" style="flex:1"><div class="col">${coach('D7 is better: one of two landed. Bar 6 was G, which clashes. Next time try F#, one fret down.')}<div class="grow"></div></div>${fbw('p',{notes:chordNotes('D7',4,9,'tone').concat([[2,8,'clash',1]]),arrow:[2,8,7]})}</div>`:`${fbw(m,{notes:chordNotes('D7',4,9,'tone').concat([[2,8,'clash',1]]),arrow:[2,8,7]})}${coach('Bar 6 was G, which clashes. Next time try F#, one fret down.')}`}${pri('Next: Even sixteenths','c-mech','big')}<div class="row between wrap"><span class="why">Say <span class="key">next</span> or tap the pedal</span>${lnk('Why does that note clash?','g-clash')}</div>`)},
+{sec:'C',id:'c-mechresult',t:'Result of a take: Mechanics',n:'Shows evenness moving, and how coach and tools feed each other: "Ramp this from the tempo you reached".',r:m=>sess(m,{at:2,left:'2 min left'},`<div class="kick">Even sixteenths · 80 BPM · 8 bars</div><div class="row base wrap" style="gap:10px"><span class="h1 q">78 →</span><span class="mega g">86%</span><span class="h2">even</span><span class="tag ok">Pass bar met</span></div>${coach('98% right notes. Two notes off the grid, both on the move to the 8th fret.')}<div class="grow"></div>${pri('Next: Jam, 2 min','f-jam','big')}<button class="choice" data-go="f-ramp"><b class="amber">Ramp this from the tempo you reached</b><span>Starts Ramp up at 80 BPM, Find my edge. Uses your session time, or adds 2 minutes.</span></button><div class="why">Say <span class="key">next</span>, or <span class="key">ramp it</span></div>`)},
+{sec:'C',id:'c-nocatch',t:"\"I didn't catch enough\"",n:'Honest failure. No score is invented, and the coach says what might help.',r:m=>sess(m,{at:2,left:'3 min left'},`<div class="center" style="padding:0"><div class="kick">No grade for this take</div><div class="h1">I didn't catch enough. Play it again.</div><div class="row" style="gap:18px"><div class="stat"><b>22</b><span>of 128 notes heard</span></div></div><div class="why">I won't guess, so this take doesn't count against you. The signal was quiet: try moving closer to the mic, or turn the band down.</div>${pri('Play it again','c-mech','big')}<div class="why">Say <span class="key">again</span> or tap the pedal · ${lnk('Check my sound','a-check')}</div></div>`)},
+{sec:'C',id:'c-recap',t:'End of session',n:'What moved today, and a preview of tomorrow with reasons. Done in one tap.',r:m=>{const moved=`<div class="kick">What moved</div><div class="ex"><div class="grow"><div class="h3">Landing on chord tones</div><div class="why">75 BPM · Pass bar met</div></div><div class="h2"><span class="q">6 →</span> <span class="g">7</span><span class="q sm"> of 8</span></div></div><div class="ex"><div class="grow"><div class="h3">Even sixteenths</div><div class="why">80 BPM · Pass bar met</div></div><div class="h2"><span class="q">78 →</span> <span class="g">86%</span></div></div>`;const nxt=`<div class="kick">Next session, 10 min</div><div class="item"><div class="grow"><div class="row wrap" style="gap:6px"><span class="h3">Landing on chord tones, 90 BPM</span>${tag('t')}</div><div class="why">Because you passed 75 today.</div></div></div><div class="item"><div class="grow"><div class="row wrap" style="gap:6px"><span class="h3">Even sixteenths with the band</span>${tag('m')}</div><div class="why">Because you passed alone at 80.</div></div></div>`;return sess(m,{at:4,of:3,left:'10 min played',exit:'b-return'},`<div><div class="kick">Session done</div><div class="h1">Good one. 2 exercises passed.</div></div><div class="${m==='d'?'split':'col'}" style="flex:1"><div class="col">${moved}<div class="why">Jam wasn't graded.</div></div><div class="col">${nxt}</div></div>${pri('Done','b-return','big')}`)}},
+/* ─── D ─── */
+{sec:'D',id:'d-paths',t:'Paths',n:'Two kinds of path, one of each running. Later paths are simply "later", never locked or priced.',r:m=>app(m,'paths',`<div><div class="h2">Paths</div><div class="why">Pick a goal. You can run one of each kind, and a session can mix them.</div></div><div class="${m==='d'?'split':'scroll col'}">${kindCol(m,'t','Theory','What you choose to play',pathCard(m,'t','Blues path','10 steps','Step 2: Landing on chord tones','d-blues'),['Rock Soloing','Jazz Basics','Know the Neck'])}${kindCol(m,'m','Mechanics','How your hands play',pathCard(m,'m','Alternate Picking path','10 steps','Step 2: Even sixteenths','d-alt'),['Economy Picking','Sweep Picking','Legato and Hand Sync','Rhythm Playing'])}</div>`)},
+{sec:'D',id:'d-blues',t:'A path: Blues',n:'Ten steps in order, with where you are. Tap the current step for detail.',r:m=>pathView(m,'t')},
+{sec:'D',id:'d-alt',t:'A path: Alternate Picking',n:'Same shape, but says plainly what a mechanics path can and cannot measure.',r:m=>pathView(m,'m')},
+{sec:'D',id:'d-land',t:'A step: Landing on chord tones',n:'Exercises with their pass bars, why the step exists, and why it is here for you now.',r:m=>stepView(m,'t')},
+{sec:'D',id:'d-even',t:'A step: Even sixteenths',n:'Mechanics step. The tab tells you what to play; pick direction stays yours to check.',r:m=>stepView(m,'m')},
+/* ─── E ─── */
+{sec:'E',id:'e-progress',t:'Progress',n:'One chart for clean tempo, one line per skill. Only what was measured, and it says so.',r:m=>{const sk=[['Chord tones on beat 1',[50,62,62,75,75,88],'88%'],['Evenness, sixteenths at 80',[61,64,70,72,78,86],'86%'],['Box notes found',[60,60,70,70,80,80],'80%'],['Held time, click out',[70,74,72,80,82,86],'86%']].map(s=>`<div class="ex"><div class="grow"><div class="h3" style="font-size:${m==='p'?15:18}px">${s[0]}</div></div>${spark(s[1],m==='p'?70:120,m==='p'?26:34)}<div class="h3" style="width:${m==='p'?36:48}px;text-align:right">${s[2]}</div></div>`).join('');const ch=lineChart({vals:[72,74,74,80,84,84,88,92],labels:['Sep 20','','','','','','','Nov 8'],unit:'',min:70,max:95,H:m==='p'?170:220,W:m==='p'?340:520});return app(m,'progress',`<div><div class="h2">Progress</div><div class="why">Everything here was measured from your playing: notes, timing evenness, clean tempo.</div></div><div class="${m==='d'?'split':'col'}" style="${m==='d'?'':'flex:1;min-height:0'}"><div class="col"><div><div class="kick">Clean tempo</div><div class="row base" style="gap:8px"><span class="h1">92</span><span class="q">BPM, even sixteenths</span></div></div>${ch}<div class="why">The fastest you stayed even, from Find my edge and exercises.</div></div><div class="col" style="gap:5px"><div class="kick">Skills, last 6 weeks</div>${sk}</div></div>`)}},
+/* ─── F ─── */
+{sec:'F',id:'f-tools',t:'Tools',n:'Optional, behind Today. They all listen. Jam is never graded.',r:m=>{const t=[['Metronome','Can drop the click out and score how you held time.','f-metro'],['Ramp up','Find my edge: climbs while you stay tight, and reports your clean tempo.','f-ramp'],['Setlist','A routine you build yourself.','f-setedit'],['Jam','A band and your chords. Never graded.','f-jam']].map(x=>`<button class="choice" data-go="${x[2]}"><b>${x[0]}</b><span>${x[1]}</span></button>`).join('');return app(m,'tools',`<div><div class="h2">Tools</div><div class="why">Use them any time. Results can feed back into your paths.</div></div><div class="col">${t}</div>${coach('Your clean tempo was 88 BPM last week. Want to find today\'s edge?')}`)}},
+{sec:'F',id:'f-metro',t:'Metronome: click drop-out',n:'Click plays, then cuts out for bars. It listens to your notes and scores how you held time.',r:m=>{const seq=[['Click','ok'],['Click','ok'],['Out','ok off'],['Out','ok off'],['Click','ok'],['Click','cur'],['Out','off'],['Out','off']];return app(m,'tools',`<div class="row between">${lnk('Tools','f-tools')}<span class="tag ok">Listening</span></div><div class="row between"><div><div class="kick">Metronome</div><div class="h2">Click drop-out</div></div><div class="bpm" style="font-size:${m==='p'?46:72}px">90<small>BPM</small></div></div><div class="row between">${beats(3)}<span class="h3 amber">Silence next bar</span></div><div class="chips">${seq.map((s,i)=>`<div class="chip ${s[1]}">${m==='p'&&s[0]==='Click'?'On':s[0]}</div>`).join('')}</div><div class="${m==='d'?'split':'col'}" style="flex:none"><div class="card"><div class="kick">Drop-out</div><div class="field"><span>Click on</span><span class="val">2 bars</span></div><div class="field"><span>Click out</span><span class="val on">2 bars</span></div><div class="field"><span>Getting easier</span><span class="val">Add bars if tight</span></div></div><div class="card"><div class="kick">Last silence</div><div class="stat"><b class="g">Back within 9 ms</b><span>of the click when it returned</span></div></div></div><div class="grow"></div><div class="row between">${pri('Stop and score','f-metroresult')}<span class="why">Say <span class="key">stop</span></span></div>`)}},
+{sec:'F',id:'f-metroresult',t:'Metronome: result',n:'How well you held time, and which way you drifted. Measured, so it can be specific.',r:m=>app(m,'tools',`${lnk('Metronome','f-metro')}<div class="row base wrap" style="gap:10px"><span class="mega g">86%</span><span class="h2">time held</span></div><div class="why">6 silent stretches at 90 BPM, 112 notes heard.</div><div class="kick">How far you drifted, by the end of each silence</div><div class="chips">${['-9','-12','-6','-14','-9','-11'].map(v=>`<div class="chip ok">${v} ms</div>`).join('')}</div>${coach('You rush a little in the silence, about 10 ms early. Try leaning back. It\'s steady, not getting worse.')}<div class="grow"></div>${pri('Again, 4 bars out','f-metro','big')}<div class="why">Only scored on steady playing. Timing feedback is for exercises, not improvising.</div>`)},
+{sec:'F',id:'f-ramp',t:'Ramp up: Find my edge, running',n:'It climbs while you stay tight and holds when you slip, so you never need a hand on the app.',r:m=>{const l=[[80,'ok'],[84,'ok'],[88,'ok'],[92,'cur'],[96,'bad'],[100,''],[104,'']];return app(m,'tools',`<div class="row between">${lnk('Tools','f-tools')}<span class="tag ok">Listening</span></div><div class="row between top"><div class="grow"><div class="kick">Ramp up · Even sixteenths</div><div class="h2">Find my edge</div></div></div><div class="row between"><div class="mega">92<span class="h2 q"> BPM</span></div><div style="text-align:right"><div class="h1 amber">Holding</div><div class="sm q">You slipped at 96</div></div></div><div class="chips">${l.map(x=>`<div class="chip ${x[1]}">${x[0]}</div>`).join('')}</div><div class="${m==='d'?'split':'col'}" style="flex:none"><div class="row" style="gap:18px"><div class="stat"><b class="g">87%</b><span>even, last 4 bars</span></div><div class="stat"><b>2 <span class="q" style="font-size:.6em">of 4</span></b><span>tight bars until it climbs</span></div></div>${timing(m)}</div>${tab(m,{bars:1,now:5})}<div class="grow"></div><div class="row between wrap">${pri("I'm done",'f-rampresult')}<span class="why">Or set a range myself: 80 to 120</span></div>`)}},
+{sec:'F',id:'f-rampresult',t:'Ramp up: result',n:'Your clean tempo, the climb that got there, and where it goes next.',r:m=>app(m,'tools',`<div class="row between">${lnk('Tools','f-tools')}</div><div class="kick">Find my edge · Even sixteenths</div><div class="row base wrap" style="gap:10px"><span class="mega g">92</span><span class="h2">BPM clean tempo</span></div><div class="why">Up from 88 last week. You stayed at least 85% even at 92, and slipped twice at 96.</div>${lineChart({vals:[80,84,88,92,96,92,92,96,92],labels:['','','1 min','','','2 min','','','3 min'],min:76,max:100,step:true,marks:[4,7],H:m==='p'?170:190,W:m==='p'?340:760})}<div class="sm q">Red: where you slipped.</div><div class="grow"></div>${pri('Use 92 next session','b-return','big')}<div class="row between wrap"><span class="why">Say <span class="key">again</span> to go for it once more</span></div>`)},
+{sec:'F',id:'f-setedit',t:'Setlist: editing My setlist',n:'A routine you build yourself, from exercises and tools. The coach only estimates the time.',r:m=>{const rows=[['Ramp up','Even sixteenths, Find my edge','3 min'],['Exercise','Landing on chord tones, 75 BPM','3 min'],['Metronome','Click drop-out, 90 BPM','2 min'],['Jam','Over a blues in A, not graded','3 min']];return app(m,'tools',`${lnk('Tools','f-tools')}<div class="row between"><div class="h2">My setlist</div><span class="h3 q">About 11 min</span></div><div class="col" style="gap:5px">${rows.map((r,i)=>`<div class="ex"><span class="h2 amber" style="width:${m==='p'?14:22}px">${i+1}</span><div class="grow"><div class="h3">${r[0]}</div><div class="why">${r[1]}</div></div><span class="val">${r[2]}</span><span class="row" style="gap:3px"><span class="val">↑</span><span class="val">↓</span><span class="val">×</span></span></div>`).join('')}</div><div class="row wrap" style="gap:5px">${['+ Exercise','+ Metronome','+ Ramp up','+ Jam'].map(x=>`<span class="val" style="border-style:dashed;color:var(--quiet);padding:3px 9px">${x}</span>`).join('')}</div><div class="grow"></div>${pri('Start setlist','f-setrun','big')}`)}},
+{sec:'F',id:'f-setrun',t:'Setlist: running',n:'It runs itself in the order you set. Exercises and tools still listen; Jam stays ungraded.',r:m=>{const q=[['Ramp up','Clean tempo 92 BPM','d'],['Landing on chord tones','Now, 2 min left','c'],['Metronome','2 min',''],['Jam','3 min, not graded','']];return `<div class="fill"><div class="sbar"><button data-go="f-setedit">Exit</button><div class="pips">${[0,1,2,3].map(i=>`<i class="${i<1?'done':i===1?'on':''}"></i>`).join('')}</div><span class="sm q" style="white-space:nowrap">My setlist, 2 of 4</span></div><div class="sbody"><div class="row between"><div class="h2">Landing on chord tones</div><div class="bpm">75<small>BPM</small></div></div><div class="row base" style="gap:14px"><div class="chord" style="font-size:${m==='p'?54:92}px">D7</div><div class="nextc">then A7</div></div>${beats(1)}${fbw(m,{notes:chordNotes('D7')})}${bars(LANDBARS.slice(0,5).concat([['D7','','now'],['A7','',''],['E7','','']]))}<div class="col" style="gap:3px;flex:none">${q.map(x=>`<div class="row between sm ${x[2]==='c'?'amber':'q'}" style="${x[2]==='d'&&m==='p'?'display:none':''}"><span>${x[2]==='d'?'✓ ':x[2]==='c'?'▸ ':'· '}${x[0]}</span><span>${x[1]}</span></div>`).join('')}</div><div class="row between"><span class="why">Moves on by itself. Say <span class="key">skip</span></span>${sec('Skip','f-tools')}</div></div></div>`}},
+{sec:'F',id:'f-jam',t:'Jam: playing, typed chords',n:'Type any chords and the band plays them. Lit notes show what fits. Nothing is graded or stored.',r:m=>app(m,'tools',`<div class="row between"><div class="row" style="gap:8px"><span class="h2">Jam</span><span class="tag">Not graded</span></div><div class="bpm" style="font-size:${m==='p'?26:36}px">96<small>BPM</small></div></div><div class="row" style="gap:6px"><input class="typed" aria-label="Chords" value="A7 D7 A7 E7"><span class="val donly">Blues shuffle</span></div><div class="row base" style="gap:14px"><div class="chord">D7</div><div class="nextc">then A7</div></div>${beats(3)}${fbw(m,{notes:chordNotes('D7')})}<div class="sm q">Amber: tones of D7. Play anything. Nothing here is scored.</div><div class="row between">${pri('Done','jam-done')}<span class="why">Say <span class="key">done</span></span></div>`)},
+/* ─── G ─── */
+{sec:'G',id:'g-clash',t:'Coach: why does that note clash? + show me',n:'Answers from what it heard, then lights the fretboard rather than describing it. Theory is fact, not model guesswork.',r:m=>{const msgs=`<div class="msg you">Why does that note clash?</div><div class="msg co">In bar 6 you landed on <b class="r">G</b> over D7. D7 is D, F#, A and C. G sits a half step above F#, so the two rub.</div><div class="msg you">Show me</div><div class="msg co">Green is D7. Red is your G. One fret down is F#, a chord tone.</div>`;const inp=`<div class="row" style="gap:6px"><span class="val" style="flex:1;padding:5px 10px;color:var(--quiet)">Say or type a question</span><button class="btn pri" data-go="c-theory">Try it</button></div>`;const f=fbw('p',{notes:chordNotes('D7',4,9,'tone').concat([[2,8,'clash',1]]),arrow:[2,8,7]},m==='p'?'flex:none;height:150px':'');if(m==='d')return app(m,'coach',`<div class="h2">Ask the coach</div><div class="split"><div class="col"><div class="scroll col">${msgs}</div>${inp}</div><div class="col">${f}<div class="why">Show me plays D7 and the two notes, so you can hear the rub too.</div></div></div>`);return app(m,'coach',`${f}<div class="scroll col" style="gap:5px">${msgs}</div>${inp}`)}},
+{sec:'G',id:'g-why',t:'Coach: why this exercise?',n:'Every choice is explainable with your own numbers, and the coach can suggest a change.',r:m=>app(m,'coach',`<div class="h2">Ask the coach</div><div class="scroll col"><div class="msg you">Why this exercise?</div><div class="msg co">Yesterday at 75 BPM you landed on 6 of 8, and both misses were on D7. The bar is 7 of 8. It's step 2 on your Blues path, and passing it opens Call and response.</div><div class="msg you">Can I skip it today?</div><div class="msg co">Sure. Do you want Even sixteenths for the full 10 minutes instead?</div></div><div class="row wrap" style="gap:6px">${pri('Keep the plan','b-return')}${sec('Swap it','b-return')}</div><div class="row" style="gap:6px"><span class="val" style="flex:1;padding:5px 10px;color:var(--quiet)">Say or type a question</span></div>`)},
+{sec:'G',id:'g-honest',t:'Coach: what it will not claim',n:'Honest grading in conversation. It says what it cannot know, and what it can offer instead.',r:m=>app(m,'coach',`<div class="h2">Ask the coach</div><div class="scroll col"><div class="msg you">Am I alternate picking properly?</div><div class="msg co">I can't tell. I hear notes and timing, not pick direction, and I can't see your hands. What I can say: your sixteenths were 86% even at 80 BPM.</div><div class="msg you">How was my solo in Jam?</div><div class="msg co">I don't grade Jam, so I've got nothing to tell you. If you'd like a score, try an exercise from the Blues path.</div></div><div class="row" style="gap:6px"><span class="val" style="flex:1;padding:5px 10px;color:var(--quiet)">Say or type a question</span></div>`)},
+/* ─── H ─── */
+{sec:'H',id:'h-settings',t:'Settings',n:'Kept brief. Coach model: local or your own OpenRouter key. Grading itself never depends on the model.',r:m=>{const g=(t,rows)=>`<div class="card"><div class="kick">${t}</div>${rows.map(r=>`<div class="field"><span>${r[0]}</span><span class="val ${r[2]?'on':''}">${r[1]}</span></div>`).join('')}</div>`;const a=g('Input',[['Hears you by','Microphone',1]])+g('Audio',[['Band / click volume','70% / 50%'],['Delay allowance','42 ms']])+g('Foot pedal',[['Pedal','Connected',1],['Tap / Double / Hold','Big action / Slower / Next']]);const b=g('Coach voice',[['Voice','Warm, on',1],['Listens between takes','On',1]])+`<div class="card"><div class="kick">Coach model</div><div class="field"><span>Runs on</span><span class="row" style="gap:4px"><span class="val">Local</span><span class="val on">OpenRouter</span></span></div><div class="field"><span>Your key</span><span class="val">sk-or-••••••••4f2a</span></div><div class="why" style="margin-top:4px">Words the coach's explanations. Your grades come from measured notes and timing, on any setting.</div></div>`;return app(m,'settings',`<div class="h2">Settings</div>${m==='d'?`<div class="split"><div class="col">${a}</div><div class="col">${b}</div></div>`:`<div class="scroll col">${a}${b}</div>`}`)}},
+];
+const SECS={A:['First run','Two minutes from opening the app to playing.'],B:['Today','The home screen. The app opens here, not on a map or menu.'],C:['Session','Runs itself. Hands stay on the guitar.'],D:['Paths','Behind Today. Path, step, exercise.'],E:['Progress','Simple, and only what was measured.'],F:['Tools','Metronome, Ramp up, Setlist, Jam. They listen, and feed the coach.'],G:['Coach conversation','Ask at any time, by voice or typing.'],H:['Settings','Brief.']};
+
+/* ──────── Gallery + player ──────── */
+const byId=Object.fromEntries(SCREENS.map(s=>[s.id,s]));
+const SIZE={d:[1024,640],p:[300,620]};
+const dev=(id,m,o)=>`<div class="dev ${m}">${byId[id].r(m,o)}</div>`;
+function build(){
+  document.getElementById('idx').innerHTML=`<div class="brand">YAM<b>E</b>S</div><div class="sub">Coach concept mocks. ${SCREENS.length} screens.</div><button id="tour">▶ Tap through from Today</button><div id="toggle"><button data-v="all">All</button><button data-v="desktop">Desktop</button><button data-v="phone">Phone</button></div>`+Object.keys(SECS).map(k=>`<a href="#sec-${k}">${k}<span>. ${SECS[k][0]}</span><small>${SCREENS.filter(s=>s.sec===k).length} screens</small></a>`).join('');
+  document.getElementById('gal').innerHTML=`<div class="intro"><b>For judging the concept, not the polish.</b> Fake data and no audio. Any amber button or tab opens a tap-through, so you can walk Today, Session, Result and Recap. "Open" under a frame does the same from that screen.</div>`+Object.keys(SECS).map(k=>`<section class="sec" id="sec-${k}"><h2><b>${k}</b>${SECS[k][0]}</h2><div class="secnote">${SECS[k][1]}</div>${SCREENS.filter(s=>s.sec===k).map(s=>`<div class="shot" id="${s.id}" data-screen="${s.id}"><h3>${s.t}</h3><p>${s.n}</p><div class="frames">${['d','p'].map(m=>`<div class="fwc ${m}"><div class="fw" data-m="${m}">${dev(s.id,m)}</div><button class="open" data-open="${s.id}" data-m="${m}">Open ${m==='d'?'desktop':'phone'}</button></div>`).join('')}</div></div>`).join('')}</section>`).join('');
+}
+function fit(){
+  const view=document.body.dataset.view;
+  document.querySelectorAll('.frames').forEach(f=>{
+    const av=f.clientWidth;let ds,ps=Math.min(1,av/300);
+    if(view==='desktop')ds=Math.min(1.1,av/1024);
+    else ds=av>=720?Math.min(1,(av-300-24)/1024):av/1024;
+    f.querySelectorAll('.fw').forEach(w=>{const m=w.dataset.m,s=m==='d'?ds:ps,[W,H]=SIZE[m];w.style.width=W*s+'px';w.style.height=H*s+'px';w.firstElementChild.style.transform=`scale(${s})`});
+  });
+}
+function setView(v){document.body.dataset.view=v;document.querySelectorAll('#toggle button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));fit()}
+/* Player */
+const P={el:document.getElementById('player'),hist:[],m:'d'};
+function pshow(){const id=P.hist[P.hist.length-1],s=byId[id],F=document.getElementById('pframe');F.innerHTML=dev(id,P.m);document.getElementById('plabel').innerHTML=`<b>${s.t}</b>${s.n}`;document.getElementById('pback').disabled=P.hist.length<2;document.getElementById('pd').classList.toggle('on',P.m==='d');document.getElementById('pp').classList.toggle('on',P.m==='p');pfit()}
+function pfit(){const st=document.getElementById('pstage'),F=document.getElementById('pframe'),[W,H]=SIZE[P.m],s=Math.min((st.clientWidth-20)/W,(st.clientHeight-20)/H,P.m==='d'?1.4:1.25);F.style.width=W*s+'px';F.style.height=H*s+'px';F.firstElementChild.style.transform=`scale(${s})`}
+function popen(id,m){P.m=m;P.hist=[id];P.el.hidden=false;document.body.style.overflow='hidden';pshow()}
+function resolve(id){const h=P.el.hidden?[]:P.hist;if(id==='theory-end')return h.includes('c-between')?'c-result':'c-between';if(id==='jam-done')return h.includes('c-mechresult')?'c-recap':'f-tools';return id}
+document.addEventListener('click',e=>{
+  const v=e.target.closest('[data-v]');if(v)return setView(v.dataset.v);
+  if(e.target.closest('#tour'))return popen('b-return',innerWidth<820?'p':'d');
+  const mn=e.target.closest('[data-min]');if(mn){const d=mn.closest('.dev'),host=d.closest('[data-screen]');const id=host?host.dataset.screen:P.hist[P.hist.length-1],m=d.classList.contains('d')?'d':'p';d.innerHTML=byId[id].r(m,{min:+mn.dataset.min});return}
+  const op=e.target.closest('[data-open]');if(op){return popen(op.dataset.open,op.dataset.m)}
+  const g=e.target.closest('[data-go]');if(g){const id=resolve(g.dataset.go);if(!byId[id])return;const d=g.closest('.dev');const m=d.classList.contains('d')?'d':'p';if(P.el.hidden)popen(id,m);else{P.hist.push(id);pshow()}return}
+});
+document.getElementById('pback').onclick=()=>{if(P.hist.length>1){P.hist.pop();pshow()}};
+document.getElementById('pclose').onclick=()=>{P.el.hidden=true;document.body.style.overflow=''};
+document.getElementById('pd').onclick=()=>{P.m='d';pshow()};
+document.getElementById('pp').onclick=()=>{P.m='p';pshow()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!P.el.hidden)document.getElementById('pclose').click()});
+addEventListener('resize',()=>{fit();if(!P.el.hidden)pfit()});
+build();setView(innerWidth<820?'phone':'all');
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+</script>
+</body>
+</html>
