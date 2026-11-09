@@ -2269,6 +2269,55 @@ pub fn clear_due(
 }
 
 // ---------------------------------------------------------------------------
+// Learning paths: where a player is, and what their Takes came to. What any of
+// it means is decided in `src/session/`; this only keeps it.
+// ---------------------------------------------------------------------------
+
+/// Start a Path, or move a player along one.
+#[tauri::command(async)]
+pub fn save_path_state(
+    state: crate::db::PathState,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_path_state(&state))
+}
+
+/// Every Path this player has started.
+#[tauri::command(async)]
+pub fn list_path_states(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::PathState> {
+    store.read_or(Vec::new(), |db| db.list_path_states())
+}
+
+/// Keep a Take, and its clean tempo if it earned one.
+#[tauri::command(async)]
+pub fn save_path_take(
+    take: crate::db::PathTake,
+    clean_bpm: Option<i64>,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_path_take(&take, clean_bpm))
+}
+
+/// The most recent Takes, newest first.
+#[tauri::command(async)]
+pub fn list_path_takes(
+    limit: i64,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::PathTake> {
+    store.read_or(Vec::new(), |db| db.list_path_takes(limit))
+}
+
+/// Every clean tempo earned on a Path.
+#[tauri::command(async)]
+pub fn list_exercise_ceilings(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::ExerciseCeiling> {
+    store.read_or(Vec::new(), |db| db.list_exercise_ceilings())
+}
+
+// ---------------------------------------------------------------------------
 // The coach's judgement, and its ears — the door to `findings.rs` and
 // `pitch.rs`
 //

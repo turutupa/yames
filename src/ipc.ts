@@ -1410,6 +1410,67 @@ export async function listDue(): Promise<ScoreDue[]> {
   return invoke<ScoreDue[]>("list_due");
 }
 
+// --- learning paths ---------------------------------------------------------
+
+/** Which Path a player is on, and where (`db.rs` `PathState`). */
+export type PathStateRow = {
+  pathId: string;
+  /** The Level they chose. Absent until a pack has Levels. */
+  level?: string;
+  /** The Step they are on. Absent means the Path's first. */
+  currentStepId?: string;
+  startedAt: number;
+  updatedAt: number;
+};
+
+/** One graded go at an Exercise (`db.rs` `PathTake`). */
+export type PathTakeRow = {
+  id: string;
+  pathId: string;
+  stepId: string;
+  exerciseId: string;
+  startedAt: number;
+  bpm: number;
+  /** Bars the player got through. */
+  bars: number;
+  /** False is "I didn't catch enough": no grade, and it counts for nothing. */
+  caught: boolean;
+  passed: boolean;
+  /** Which notes these were, when the Exercise has variants. */
+  variantSeed?: number;
+  /** What was measured. See `src/session/takeMeasures.ts`. */
+  facts: unknown;
+};
+
+/** A clean tempo (`db.rs` `ExerciseCeiling`). */
+export type ExerciseCeilingRow = {
+  /** `<path id>/<exercise id>`. */
+  exerciseKey: string;
+  cleanBpm: number;
+  lastPracticed: number;
+};
+
+export async function savePathState(state: PathStateRow): Promise<void> {
+  return invoke("save_path_state", { state });
+}
+
+export async function listPathStates(): Promise<PathStateRow[]> {
+  return invoke<PathStateRow[]>("list_path_states");
+}
+
+/** Keep a Take, and its clean tempo if it earned one, in one transaction. */
+export async function savePathTake(take: PathTakeRow, cleanBpm: number | null): Promise<void> {
+  return invoke("save_path_take", { take, cleanBpm });
+}
+
+export async function listPathTakes(limit: number): Promise<PathTakeRow[]> {
+  return invoke<PathTakeRow[]>("list_path_takes", { limit });
+}
+
+export async function listExerciseCeilings(): Promise<ExerciseCeilingRow[]> {
+  return invoke<ExerciseCeilingRow[]>("list_exercise_ceilings");
+}
+
 /** Forget one — the player played it, or does not want the reminder. */
 export async function clearDue(
   scoreId: string,
