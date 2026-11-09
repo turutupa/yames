@@ -43,6 +43,11 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     (d as { level: string }).level = "godlike";
     return d;
   },
+  "schema.todo": () => {
+    const d = fresh();
+    ex(d, "scale").purpose = "TODO: say what this Exercise is for.";
+    return d;
+  },
   "schema.duplicateId": () => {
     const d = fresh();
     steps(d)[1].id = steps(d)[0].id;

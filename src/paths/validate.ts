@@ -45,6 +45,7 @@ export const RULES = {
   "schema.version": "schemaVersion must be the version this code speaks",
   "schema.shape": "a required field is missing or the wrong type",
   "schema.enum": "a value is not in its controlled list",
+  "schema.todo": "a TODO left in the text by the scaffold",
   "schema.duplicateId": "two Steps or two Exercises share an id",
   "schema.computedStale": "the computed block does not match the notes",
   "tab.string": "string out of range",
@@ -681,7 +682,13 @@ function checkPathText(doc: PathDoc, report: Report) {
     texts.push([`${step.id}.why`, step.why], [`${step.id}.goal`, step.goal], [`${step.id}.payoff`, step.payoff]);
     step.howTo.forEach((t, i) => texts.push([`${step.id}.howTo ${i + 1}`, t]));
   }
+  for (const step of doc.steps) {
+    for (const ex of step.exercises) {
+      texts.push([`${ex.id}.purpose`, ex.purpose], [`${ex.id}.coachLine`, ex.coachLine]);
+    }
+  }
   for (const [where, text] of texts) {
+    if (/\bTODO\b/.test(text)) report("schema.todo", where, "still says TODO");
     for (const claim of bannedClaimsIn(text, false)) {
       report("honesty.banned", where, `${claim.name}: "${text}"`);
     }
