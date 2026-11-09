@@ -22,7 +22,7 @@
  */
 
 import type { SessionReport } from "../types";
-import { accuracyRatio, scoredBeats } from "./reportStats";
+import { accuracyRatio, bandForScore, scoredBeats } from "./reportStats";
 
 /**
  * Output shape. Consumers can render each field independently (e.g. a
@@ -117,17 +117,23 @@ export function buildSessionNarrative(report: SessionReport): SessionNarrative {
   // ── Score-band headlines, with shape-aware qualifiers ─────────
   let headline = "";
 
-  if (score >= 95) {
+  // The band boundaries are `reportStats.bandForScore` — the same ones
+  // the letter grade, the end-report's one-word qualifier and the score
+  // ring use, so a session never gets two readings (ROADMAP 1.7,
+  // P3-COACH-3). What is said inside each band is this module's own
+  // business, and the shape-aware branches below are the point of it.
+  const band = bandForScore(score);
+  if (band === "flawless") {
     headline = "Near-perfect — your timing is essentially indistinguishable from the click.";
-  } else if (score >= 85) {
+  } else if (band === "strong") {
     headline = "Strong session — tight, consistent, and accurate.";
-  } else if (score >= 70) {
+  } else if (band === "solid") {
     if (stdMs <= TIGHT_CONSISTENCY_MS) {
       headline = `${score} is a solid score, and your consistency is excellent — you're closer to an A than the number suggests.`;
     } else {
       headline = `${score} is a real foundation. Your hits are landing, just not always cleanly on the grid.`;
     }
-  } else if (score >= 55) {
+  } else if (band === "fair") {
     if (stdMs <= TIGHT_CONSISTENCY_MS) {
       headline = `${score} looks middling, but your spacing is actually very tight — most of the drop is scatter from the grid, not lost consistency. A few cleaner passes and this jumps to 80+.`;
     } else if (hitFrac >= HIGH_HIT_RATE) {
@@ -135,7 +141,7 @@ export function buildSessionNarrative(report: SessionReport): SessionNarrative {
     } else {
       headline = `${score} — the foundation is there, but timing varies enough between beats that it's pulling the score down.`;
     }
-  } else if (score >= 40) {
+  } else if (band === "building") {
     headline = `${score} — work in progress. Most beats are landing, but the spread is wide; slow the tempo down and lock in.`;
   } else {
     headline = `${score} — early days for this passage. Try a slower BPM and shorter loops to build the muscle memory first.`;

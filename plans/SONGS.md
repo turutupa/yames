@@ -30,10 +30,63 @@ Status key: **decided** · **open** · **deferred**
   `jam-v5`; the work is on `jam-v6`. Paper work and research only until
   then.
 - **S0.4 The app ships no songs.** Players import their own files.
-  (`ECHORA.md` S2.)
+  (`ECHORA.md` S2.) **Narrowed by S0.9 (2026-09-20):** it ships no
+  SOMEBODY ELSE'S songs — no Guitar Pro or MusicXML file anybody sold or
+  transcribed, and nothing taken off a recording. It does ship a shelf of
+  seven short pieces, six written for Yames and one (the Ode to Joy theme)
+  public domain worldwide, so that the mode is not an empty screen on the
+  first launch. The rule the code keeps is unchanged and is the one worth
+  quoting: **no real song is ever committed to this repository.**
 - **S0.5 Honest scope for the first release.** Timing is scored on
   everything. Which note was played is checked on single-note lines
   only, and the review says so where it cannot tell.
+
+- **S0.6 The coach is the point, and Songs ships with its verdict.**
+  (Owner, 2026-09-20.) The smart coach is the main roadmap; every mode is
+  an instrument it plays. So the review after a pass does not stop at
+  colours: it says where it went wrong and what to do about it ("bars
+  17–20, you rush the sixteenths — loop them at 80 % and climb"), and one
+  tap sets that loop up. Computed by rule, no model. The talking,
+  model-written coach still comes last. The rule from here on: nothing
+  ships without saying what it hands the coach.
+- **S0.7 Heavier local models, and an optional paid tier.** (Owner,
+  2026-09-20.) The light models are not strong enough for where the coach
+  is going. Lean towards heavier local models; for players whose machine
+  cannot run one, an optional paid tier that only covers the cost of
+  running it for them. Same coach for everyone (`ECHORA.md` E0.5). Not
+  scheduled; ROADMAP §3 (tiers) and principles 5–6 are rewritten when it
+  is.
+- **S0.8 Two halves of coach work.** (Owner, 2026-09-20.) The technical
+  half — hearing, scoring, remembering — is this plan and runs first. The
+  other half is how the coach behaves with a person; that is
+  `plans/COACH_UX.md`, drafted by the orchestrator for the owner to react
+  to rather than designed by committee.
+
+- **S0.9 Getting a song in, without touching anybody's tab site.** (Owner,
+  2026-09-20.) No tab site is embedded, scraped or called from inside
+  Yames: they host mostly unlicensed transcriptions, and an app that
+  fetches them stops being a bystander. Instead: the Downloads folder is
+  watched while Songs is open and a new Guitar Pro or MusicXML file is
+  offered for import (the owner's favourite: "so users don't have to
+  browse manually"); the file types open with Yames; what is opened is
+  kept as Yames's own copy so clearing Downloads loses nothing, and the
+  library is ordered by what was played most recently; a neutral "find a
+  tab" link opens the player's own browser on an ordinary web search; and
+  a small shelf of original and public-domain pieces means the mode is
+  never empty. A licensed catalogue (mySongBook, Songsterr) is a
+  partnership conversation for when there is traction. Brief:
+  `plans/tasks/songs/W19-FRICTION.md`.
+
+- **S0.10 No hook into other platforms' paid content.** (Owner, 2026-09-20,
+  after asking whether a player's Songsterr or Guitar Pro subscription could
+  be connected.) A subscription is a licence to use that service on its
+  terms, not ownership of the tabs, and those terms forbid automated access;
+  an app that logs in and pulls them is the thing breaking the terms, with
+  customers' passwords in its hands. What is clean and already works: a file
+  the service lets its user export, imported like any other. What is clean
+  and later: an official partnership ("open in Yames"), a conversation for
+  when there is traction. Nothing in between — no reading a tab off a page.
+  The owner's call: "let's stick to our roadmap."
 
 ### State of the engine this stands on (checked 2026-09-18)
 
@@ -51,7 +104,9 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
 
 ## A. Questions that block the briefs
 
-- **A1 — What the player plays over.** *open.* alphaTab (MPL-2.0, reads
+- **A1 — What the player plays over.** *open, not critical (owner,
+  2026-09-20): aim for the engine if it is better, a MIDI-style player
+  like Songsterr's is acceptable, settle it when the spike reports.* alphaTab (MPL-2.0, reads
   Guitar Pro 3–7, MusicXML, alphaTex; renders a scrolling tab) can also
   play the file's other tracks, but from the webview, on a clock the
   scoring engine does not share.
@@ -72,18 +127,34 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   not a tempo map. Proposed default: v1 supports a tempo map in the
   engine (step changes on bar lines); gradual changes are flattened to
   steps; files that need more are flagged at import.
-- **A5 — Where Songs lives.** *open.* A rail mode of its own beside
+- **A5 — Where Songs lives.** *decided 2026-09-20: its own rail mode,
+  beside Jam and the others.* A rail mode of its own beside
   Metronome, Drill, Setlists and Jam, or inside one of them.
   Proposed default: its own mode. A song library is a place.
-- **A6 — Practice tools on a song.** *open.* Proposed default for v1:
+- **A6 — Practice tools on a song.** *decided 2026-09-20 (owner):
+  "being able to select a portion of a song so it plays that portion in
+  repeat is super critical for song learning. Make sure that is
+  included."* So looping a portion is not a pair of number fields: you
+  select it ON THE TAB (drag across bars, click and shift-click, handles
+  to adjust), the selection stays highlighted, it repeats seamlessly on
+  the bar line at the chosen tempo with the count-in before the first
+  pass only, it has keys and footswitch actions (eyes-free, roadmap
+  principle 2), it is remembered per song, and a portion can be saved
+  with a name. The bar fields remain as the precise path. Spec in
+  `plans/tasks/songs/W18-STAGE.md` item 0. Proposed default for v1:
   pick a section or a bar range, loop it, play it at a percentage of
   tempo, and let the existing speed ramp climb as passes are clean.
-- **A7 — Live feedback vs the review.** *open.* Proposed default: while
+- **A7 — Live feedback vs the review.** *decided 2026-09-20, as
+  proposed.* Proposed default: while
   playing, notes light as they are hit, on timing alone (the next note
   is known, so an onset is enough). Note identity, bends and the rest
   appear in the review after the pass. Nothing new runs on the audio
   thread.
-- **A8 — The take in the review.** *open.* A take today is you and the
+- **A8 — The take in the review.** *built as proposed 2026-09-20 (W5),
+  for the owner to confirm:* the dry stem is a file, `<id>.dry.wav`, under
+  the take's existing opt-in — no second switch — listed, sized and deleted
+  with its take. This supersedes ROADMAP 2.7's in-memory-only ring, which
+  was written before takes existed. A take today is you and the
   band already mixed (`take.rs`). Pitch needs you alone.
   Proposed default: the writer thread also keeps the dry input as a
   second file beside the mix, same opt-in, same delete.
@@ -98,13 +169,213 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   reopens. Which other parts of the app get a camera (Jam takes, Drill,
   path steps — `ECHORA.md` E0.7) is evaluated after Songs has shipped
   with it, not before.
-- **A10 — What a video recording is, on disk.** *open.* Proposed
-  default: the picture is recorded by the webview as its own file, the
-  sound stays the engine's take (mix + dry stem, A8), and a sidecar
-  holds the measured offset between them; the review plays them
-  together. Joining them into one ordinary video file for sharing is a
-  later step (`ECHORA.md` D4), and needs an encoder whose licence has
-  to be checked against GPL-3 before it is promised.
+- **A10 — What a video recording is, on disk.** *built as proposed
+  2026-09-20 (W21), for the owner to confirm.* The picture is recorded by
+  the webview as its own file, the sound stays the engine's take (mix +
+  dry stem, A8), and a sidecar holds the measured offset between them;
+  the review plays them together.
+
+  **Joining them into one ordinary video file is built (W25, 2026-09-20),
+  and the licence question turned out not to exist.** A10 said sharing
+  "needs an encoder whose licence has to be checked against GPL-3 before it
+  is promised". It needs no encoder: the webview already has the one it
+  recorded the picture with, and `canvas.captureStream()` plus a
+  `MediaStreamAudioDestinationNode` fed by the take's mix, into
+  `MediaRecorder`, is how you reach it. No dependency, nothing to license,
+  nothing uploaded — the player picks a place in a native save dialog and
+  the bytes stream to it a chunk at a time, exactly as the camera's do
+  (`clip_save_begin/append/finish/discard`).
+
+  What it costs instead is TIME: it is real, so a forty-second clip takes
+  forty seconds. That is a progress ring and a cancel rather than a
+  problem. The clip is MP4 (H.264 + AAC) where the webview can and WebM
+  otherwise, and the screen says which the player got, because several of
+  the places a musician posts a clip take MP4 and nothing else. Measured on
+  this machine through the harness: 1280×720 at 30 fps, AAC 48 kHz stereo,
+  10.3 s for a four-bar selection at 96 BPM, 977 kB; 9:16 comes out
+  720×1280. A take with NO picture makes a clip too — the scrolling
+  coloured excerpt, the bar, section and tempo and the Yames mark over a
+  plain ground — because a player without a camera should still have
+  something to show somebody.
+
+  On disk: `<takeId>.video.<mp4|webm>` beside the take's WAV, written a
+  chunk at a time through `take_video_begin/append/finish/discard`
+  (`src-tauri/src/take_video.rs`), listed, sized and deleted with its
+  take, and refused as a take id exactly as the dry stem is.
+  `videoOffsetMs` goes into the take's own sidecar and means: add this to
+  a position in the take's audio to reach the same instant in the
+  picture.
+
+  **How that offset is arrived at, and what it is worth.** The engine
+  already knows where beat 0 sits inside the WAV (`TakePosition.
+  startOffsetMs`, W15, exact to one output buffer). The webview knows
+  when its first frame landed, on `performance.now()`. What joins them is
+  the beat events: a least-squares line through `(arrival, position)`
+  pairs, lifted to the 90th percentile of its own residuals because the
+  delivery delay is ONE-SIDED — an event can be late and can never be
+  early, so the mean of the cloud is biased late by the mean delay and
+  the top edge of it is the truth (`src/songs/camera/offset.ts`, and
+  `offset.test.ts` measures both). Against synthetic events with 25 ms of
+  one-sided jitter and two 180 ms outliers the fit lands within 5 ms.
+
+  **What it cannot see, and therefore what K3 is for.** A delay that
+  never varies is invisible to it: if every beat event were exactly 20 ms
+  late, a constant delivery delay and a clock offset are the same
+  measurement. On top of that sits the camera's own capture-to-callback
+  latency, which is the camera's business and differs by an order of
+  magnitude between a built-in webcam and a capture card, and which
+  nothing in the webview reports. So the review has a NUDGE beside the
+  picture (10 ms steps, remembered per camera id), and the real number is
+  a hardware session:
+
+  > **K3, the measurement.** Point the camera at your own hands. Turn
+  > Record the picture on, press play, and on a bar line CLAP once,
+  > hard, in frame. Play four more bars and stop. Then, in the review,
+  > step the picture earlier or later until the clap you SEE and the clap
+  > you HEAR land together, and write down the nudge the screen shows.
+  > That number, plus whatever `videoOffsetMs` the sidecar already holds,
+  > is the camera's true latency. Do it three times over five minutes to
+  > see whether it holds still. Do it on each of the three platforms and
+  > on a USB camera as well as the built-in one: if the answer is a
+  > constant per device, it becomes a default the nudge starts at; if it
+  > drifts over five minutes, the review needs a re-fit mid-playback and
+  > this entry reopens.
+
+  Nothing in W21 fakes that measurement, and nothing in it claims a
+  number it did not measure — the review says outright when a take has no
+  fitted offset and starts the two level.
+
+  **A9's "Songs only" is over, on the owner's word (2026-09-21, W30).**
+  A9 said which other parts of the app get a camera "is evaluated after
+  Songs has shipped with it, not before". Songs shipped with it, and the
+  evaluation is one sentence from the owner, going to bed:
+
+  > "you think you could include video recording (and audio of course)
+  > for jam sessions too? I think this would be a killer feature … for
+  > making a recording of the app, and sharing on social media, but also
+  > cause folks can record themselves jamming … (in fact, i already
+  > wanted to record myself tonight to share with a friend). The video
+  > recorder, specially for jam, should record everything as it comes out
+  > from the pc ideally, cause im using guitar effects and distortion and
+  > stuff with plugins to play on top of the drums and keys and bass and
+  > it sounds really cool."
+
+  So Jam gets the camera, on the same terms Songs has it (opt in per
+  recording, kept on the machine, visible, playable, deletable, never
+  uploaded), and the shared half of it moves out of `src/songs/camera`
+  into a neutral home rather than being forked.
+
+- **A12 — What a take is a recording OF.** *decided 2026-09-21 (owner,
+  the sentence above), built in W30.* A take gets a **sound source**,
+  chosen where takes are switched on and remembered per machine rather
+  than per jam:
+
+  - **"Yames and my input"** — what a take has always been: the band the
+    output callback rendered with the microphone mixed under it, plus the
+    dry stem (A8). The default, because it records the one thing you
+    asked for and nothing you did not.
+  - **"Everything this computer plays"** — the speaker's own stream, read
+    back: his amp simulator, Yames' band, and whatever else was making a
+    sound. `src-tauri/src/loopback.rs`.
+
+  The second one is the answer to his actual problem: his guitar goes
+  through a plugin in another program, and until now nothing in Yames
+  could hear it. In that mode the take does **not** also mix Yames' own
+  band and microphone in — the loopback already contains both, and a
+  second copy a buffer later is a comb filter, not a thicker sound — so
+  there is no dry stem either and the review says pitch checking wants
+  the other source. The take is **stereo** in that mode and mono in the
+  other, because what came out of the speakers had two sides and an amp
+  simulator's is the one thing a guitarist would notice losing.
+
+  **It listens to the speaker Yames is playing through**, not to the
+  system default, when the two differ. Three reasons, in order of how
+  much they matter: a loopback of a device Yames is not playing to has no
+  band in it and is not a take of anything; the band being in it is what
+  makes mixing Yames' own copy unnecessary; and a loopback endpoint that
+  nothing is rendering to hands over nothing at all rather than silence,
+  so it needs a stream to keep it alive — and Yames' own output stream,
+  on that very endpoint, is already it. The screen names the device.
+
+  **His first question was "so you'll record ALL the audio coming from
+  the pc?"**, and that is the right question: this mode records a video
+  call, a notification, a song in a browser tab. So it is off by default,
+  the switch says in plain words what it does, the recording indicator
+  says which source is live for the whole length of the take, the sidecar
+  keeps it (`sound`, `soundDevice`) so a shelf of takes a week later
+  still says which are which, and **the capture stream is open only
+  between record and stop** — plus two hundred milliseconds when he asks
+  for the level check, and at no other time.
+
+  **What is not offered, and why.** Measured on the owner's Realtek
+  endpoint: with the speakers muted, a full-scale tone rendered into that
+  endpoint comes back through the loopback as exact zeroes. The mute and
+  the volume slider sit before the tap, so a take of everything this
+  computer plays is as loud as Windows was set to play it. Nothing
+  normalises that behind his back; instead the switch has a "listen for a
+  moment and show me the level" check, so silence is visible before a
+  take rather than after one.
+
+  **The latency of this mode, and how to measure it.** The two sources are
+  wrong in OPPOSITE directions, which is worth knowing before anybody
+  compares a nudge measured in one against a nudge measured in the other:
+
+  - *Yames and my input* is EARLY by the input buffer. The player answers
+    what they heard, which is the band a full output latency after it was
+    rendered, and their answer takes an input latency to arrive — so the
+    writer pulls the microphone forward by that round trip (`take.rs`).
+  - *Everything this computer plays* is LATE by the output buffer, and needs
+    no correction at all. Both halves of it — the band and the guitar —
+    come through one stream already mixed by the operating system at the
+    times the speakers got them, so nothing inside the take is out of step
+    with anything else in it. What IS a few milliseconds off is the take's
+    opening bar against the transport stamp: the stamp is taken when the
+    callback renders, the loopback hands that same audio over about one
+    device period later (10.7 ms at 512 frames and 48 kHz, measured on this
+    machine's endpoint). That is two per cent of a beat at 120 BPM, it is
+    not corrected, and the only thing that reads it is which bar a saved
+    video's grid opens on.
+
+  > **The clap, in this mode.** Turn Record the picture on and the sound to
+  > "Everything this computer plays", press play, and on a bar line CLAP
+  > once, hard, in frame and into whatever your guitar goes through, so the
+  > clap lands in the recording and in the picture. Then step the picture
+  > earlier or later in the review until the clap you SEE and the clap you
+  > HEAR land together — and write that number down separately from K3's,
+  > because it is the camera's latency against a recording that is LATE by
+  > the output buffer, where K3's was against one that was EARLY by the
+  > input buffer. The two will not agree, and both are right.
+
+  **Linux** looks for a PulseAudio or PipeWire monitor source and says so
+  honestly when there is none; nobody here has a Linux machine, so it is
+  compiled and fails safe rather than claimed. **macOS does not offer the
+  option at all.** Core Audio has no loopback without a third-party
+  driver; the two Apple APIs that can do it are ScreenCaptureKit audio
+  (13+, screen-recording permission) and Core Audio process taps (14.4+,
+  `NSAudioCaptureUsageDescription`), and cpal reaches the second of those
+  only from 0.17 with a macOS 14.6 floor. Yames is on cpal 0.15.3, under
+  the engine's own output stream. That upgrade is a task of its own and
+  this entry reopens when somebody does it.
+
+- **A11 — The refractory when a free player speeds up.** *open, the
+  owner's call (W11, 2026-09-20).* Roadmap 1.3 unpinned the detector's
+  refractory from the click and pinned it to the rhythm the app has
+  locked onto. A player who then moves to a FINER rhythm than the lock
+  is deafened again: locked on eighths at 120 BPM the refractory is
+  187 ms and an eighth-note triplet arrives 166 ms after its neighbour,
+  so two notes in five never reach the analyzer and the evidence a
+  re-lock needs is what was swallowed. Measured: alternating eighths and
+  triplets by the bar, heard 109/160 locked on eighths and 153/160
+  locked on triplets; both still score 86–87, so roadmap 1.4's gate
+  passes while the inference never moves. Per-beat voting cannot fix
+  notes that were never heard. **Songs is not affected**: a loaded score
+  sets the refractory from its own smallest gap. Free play is. The fix
+  is a smaller refractory factor than the 0.75 chosen on 2026-05-23 to
+  kill the 103–150 ms ghost band, which means re-running that forensic
+  work on real guitar audio — not something to decide unattended.
+  Proposed default: do it with the owner's 180 BPM capture in hand, and
+  raise `minHeardRatio` in the `played/` fixtures when it is settled;
+  that is what "1.4 is done" will look like.
 
 ## B. Spikes (throwaway code, a written answer each)
 
@@ -135,6 +406,14 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
 | T-E Engine | Tempo map (A4), note-event playback of imported tracks through Jam's voices (A1), T06b done alone and first | 0.5c | `engine.rs`, `jam.rs`. Serial with nothing else in these files |
 | T-G Camera | After K3: camera picker and preview, record with the pass, offset sidecar, list/play/delete beside takes | — | new `src/containers/song/camera/`, a thin addition to the take list. Never touches the audio threads |
 | T-F Paths | Owner and Claude work LP groups A–F on paper | — | the log only |
+
+**First wave launched 2026-09-20** on `songs-v1` (briefs in
+`plans/tasks/songs/`): W1 scoring (1.3, then matching against a known
+score), W2 store, W3 the allocation-free beat queue, W4 the importer and
+the Songs mode, W5 pitch and the dry stem. The camera spike (K3) waits for
+the owner: it needs a camera and a person in front of it. The second wave
+is the engine's tempo map and imported-track playback (after W3), and the
+review with its verdict (after W1, W2, W4).
 
 Then, in order: the review screen (take, colored notes, playback, and
 the picture when there is one) → section loop and tempo tools (A6) → release Songs →

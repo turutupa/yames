@@ -110,7 +110,13 @@
       "downloadVoices": "Pobierz głosy",
       "installed": "Zainstalowano trenera {{tier}} ({{size}})",
       "removing": "Usuwanie…",
-      "removeModels": "Usuń modele"
+      "removeModels": "Usuń modele",
+      "stance": "Styl prowadzenia",
+      "stanceHint": "Jak ostro trener traktuje cię podczas grania",
+      "stanceStrict": "Ostro",
+      "stanceLearning": "Nauka",
+      "stanceStrictDesc": "Nazywa skłonność w chwili, gdy się pojawia, i mówi to na głos. Dobre ustawienie, kiedy dopracowujesz fragment, który już umiesz.",
+      "stanceLearningDesc": "Daje ci o połowę więcej luzu, zanim cokolwiek powie, trzyma poprawki z dala od twoich uszu podczas grania i zaczyna od tego, co wyszło. Wynik liczony jest dokładnie tak samo w obu przypadkach."
     },
     "general": {
       "title": "Ogólne",
@@ -177,7 +183,8 @@
         "metronome": "Metronom",
         "view": "Widok",
         "navigation": "Nawigacja",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Utwory"
       },
       "actions": {
         "play": "Odtwarzaj / Zatrzymaj",
@@ -211,7 +218,17 @@
         "jam-next-section": "Następna część",
         "jam-prev-section": "Poprzednia część",
         "jam-loop-section": "Zapętl tę część",
-        "jam-take": "Nagraj takę"
+        "jam-take": "Nagraj takę",
+        "tab-5": "Zakładka Utwory",
+        "songs-loop-start": "Powtórka zaczyna się tu",
+        "songs-loop-end": "Powtórka kończy się tu",
+        "songs-loop": "Powtarzaj fragment",
+        "songs-loop-clear": "Znowu cały utwór",
+        "songs-loop-earlier": "Fragment o takt wcześniej",
+        "songs-loop-later": "Fragment o takt później",
+        "songs-take": "Nagraj takę",
+        "songs-camera": "Nagraj obraz",
+        "jam-camera": "Nagraj obraz"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -245,7 +262,17 @@
         "jam-next-section": "Skoczyć na kresce taktowej na początek następnej części",
         "jam-prev-section": "Wrócić na kresce taktowej na początek poprzedniej części",
         "jam-loop-section": "Zapętlić część, w której jesteś, albo pętlę wyłączyć",
-        "jam-take": "Nagraj przy następnym starcie albo przerwij nagrywanie"
+        "jam-take": "Nagraj przy następnym starcie albo przerwij nagrywanie",
+        "tab-5": "Przełącz na zakładkę Utwory",
+        "songs-loop-start": "Zacząć fragment na takcie, który właśnie grasz",
+        "songs-loop-end": "Zakończyć fragment na takcie, który właśnie grasz",
+        "songs-loop": "Grać wybrane takty raz za razem albo przestać",
+        "songs-loop-clear": "Zapomnieć fragment i zagrać utwór od początku",
+        "songs-loop-earlier": "Przesunąć wybrane takty o jeden takt w stronę początku, nie zmieniając ich długości",
+        "songs-loop-later": "Przesunąć wybrane takty o jeden takt w stronę końca, nie zmieniając ich długości",
+        "songs-take": "Nagraj przy następnym starcie albo przerwij nagrywanie",
+        "songs-camera": "Filmuj przy następnym starcie albo wyłącz kamerę",
+        "jam-camera": "Filmuj przy następnym starcie albo wyłącz kamerę"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Nie udało się sprawdzić",
       "sounds": "Dźwięki",
       "soundsCredit": "Zestaw Klub to Virtuosity Drums od Versilian Studios i Karoryfer Samples, zagrany przez Austina McMahona (domena publiczna). Zestaw Studio to DRSKit z projektu DrumGizmo (CC BY 4.0).",
-      "madeWith": "Stworzone z {{heart}} dla muzyków na całym świecie"
+      "madeWith": "Stworzone z {{heart}} dla muzyków na całym świecie",
+      "soundsCreditSongs": "Pozostałe instrumenty pochodzą z brzmień General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Utwory",
+      "catchDownloads": "Proponuj pobrane utwory",
+      "catchDownloadsHint": "Dopóki Utwory są otwarte, Yames zagląda do folderu pobranych i pyta, zanim cokolwiek otworzy. Twój plik nigdy nie jest przenoszony, zmieniany ani usuwany.",
+      "folder": "Pilnuj tego folderu",
+      "folderUnknown": "Ten komputer nie powiedział Yames, gdzie trafiają pobrane pliki",
+      "chooseFolder": "Wybierz...",
+      "useDownloads": "Użyj pobranych",
+      "turnedDown": "Odrzucone utwory",
+      "turnedDownHint": "{{n}} plików, których Yames już nie zaproponuje",
+      "forgetTurnedDown": "Zaproponuj je ponownie",
+      "soundSet": "Zestaw brzmień",
+      "soundSetBuiltIn": "Ten dołączony do Yames",
+      "chooseSoundSet": "Wybierz plik .sf2",
+      "useBuiltInSoundSet": "Użyj wbudowanego"
     }
   },
   "keybindings": {

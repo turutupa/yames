@@ -10,6 +10,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, cleanup } from "@testing-library/react";
+import { flushSync } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Presence, MotionProvider, MOTION_ENTER_MS, MOTION_EXIT_MS } from "./Presence";
 
 /** The surface under test: one div wearing whatever `Presence` hands it. */
@@ -129,6 +131,45 @@ describe("Presence", () => {
     act(() => void vi.advanceTimersByTime(1000));
     expect(surface()).toBeInTheDocument();
     expect(onExited).not.toHaveBeenCalled();
+  });
+
+  it("stays closed when the enter finishes just after a close was asked for", async () => {
+    /*
+     * W40. The takes promise stuck on the jam stage with both buttons dead:
+     * "Record takes" was pressed while the card was still arriving, and the
+     * card's own enter `animationend` landed before React had rendered the
+     * close. The ref it reads said "entering", so it set the phase to "open"
+     * on a surface whose `open` was already false — and nothing ever asked
+     * again. Under `act` every effect is flushed before an event can land,
+     * so this runs the way a browser does: the close is committed at once,
+     * as a click's is, and the render that starts the exit is left to the
+     * scheduler, with the animation ending in between.
+     */
+    vi.useRealTimers();
+    const g = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean };
+    const wasAct = g.IS_REACT_ACT_ENVIRONMENT;
+    g.IS_REACT_ACT_ENVIRONMENT = false;
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    const onExited = vi.fn();
+    try {
+      flushSync(() => root.render(<Surface open onExited={onExited} />));
+      const el = host.querySelector('[data-testid="surface"]')!;
+      expect(el).toHaveAttribute("data-state", "entering");
+
+      flushSync(() => root.render(<Surface open={false} onExited={onExited} />));
+      // The enter's own animation, ending before the exit has been drawn.
+      el.dispatchEvent(new Event("animationend", { bubbles: true }));
+
+      await new Promise((r) => setTimeout(r, MOTION_ENTER_MS + MOTION_EXIT_MS + 200));
+      expect(host.querySelector('[data-testid="surface"]')).toBeNull();
+      expect(onExited).toHaveBeenCalledTimes(1);
+    } finally {
+      flushSync(() => root.unmount());
+      host.remove();
+      g.IS_REACT_ACT_ENVIRONMENT = wasAct;
+    }
   });
 
   describe("when motion is off", () => {

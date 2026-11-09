@@ -26,7 +26,8 @@
     "send": "Enviar",
     "today": "Hoje",
     "yesterday": "Ontem",
-    "noteSpacingTrend": "Tendência do espaçamento das notas"
+    "noteSpacingTrend": "Tendência do espaçamento das notas",
+    "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
   "coachDetail": {
     "exercises": "Exercícios",
@@ -35,9 +36,6 @@
     "beatPlacement": "Posição no tempo"
   },
   "coachReport": {
-    "cov": "Cob",
-    "eff": "Efi",
-    "grid": "Grade",
     "segment": "Trecho",
     "thinkingAria": "O coach está se preparando para falar",
     "qualifier": {
@@ -68,7 +66,13 @@
     "pocketOnBeat": "no tempo",
     "pocketEarly": "Você tocou em média {{ms}}ms adiantado",
     "pocketLate": "Você tocou em média {{ms}}ms atrasado",
-    "pocketCentred": "Seu timing ficou centralizado na batida (média de ±5ms)"
+    "pocketCentred": "Seu timing ficou centralizado na batida (média de ±5ms)",
+    "covLabel": "Tempos tocados",
+    "covTitle": "Quantos dos tempos que eu esperava foram realmente tocados",
+    "effLabel": "Notas em cima do tempo",
+    "effTitle": "De tudo o que eu ouvi, quanto caiu em cima de um tempo em vez de entre dois",
+    "gridLabel": "Colado no clique",
+    "gridTitle": "O quanto o trecho inteiro acompanhou o clique"
   },
   "eval": {
     "today": "Hoje",

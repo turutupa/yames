@@ -1608,8 +1608,18 @@ mod tts_playback_tests {
         let _ = std::fs::remove_file(&path);
 
         assert_eq!(result, Ok(PlaybackEnd::Interrupted));
+        // The fact under test is "it did not play through", so the clip's own
+        // length is the number that means something and the ceiling is a
+        // share of it. Half was a performance gate wearing a correctness
+        // test's name: a laptop running four workers can spend five seconds
+        // decoding and resampling ten seconds of audio without anything
+        // being wrong, and then this failed for the one reason it was written
+        // not to. Four fifths still cannot be reached by a line that played
+        // out, because a line that played out takes all ten seconds and then
+        // some.
+        let ceiling = Duration::from_millis((CLIP_MS as u64) * 4 / 5);
         assert!(
-            elapsed < Duration::from_millis(CLIP_MS as u64 / 2),
+            elapsed < ceiling,
             "play_wav_path took {elapsed:?} for a {CLIP_MS} ms clip \u{2014} \
              it played through instead of stopping",
         );
@@ -1660,8 +1670,14 @@ mod tts_playback_tests {
             elapsed >= Duration::from_millis(1_100),
             "it gave up before the line could possibly have played: {elapsed:?}"
         );
+        // The regression is an UNBOUNDED wait — before the deadline this loop
+        // spun until the next line of coaching, which is minutes. So the
+        // ceiling only has to be finite, and the further it is from the 1.2 s
+        // budget the less a busy machine can spoil it. Eight seconds was
+        // under seven times the budget; thirty is twenty-five, and a wait
+        // that never ends still fails.
         assert!(
-            elapsed < Duration::from_secs(8),
+            elapsed < Duration::from_secs(30),
             "it waited far past the line's own length plus slack: {elapsed:?}"
         );
     }
@@ -1694,8 +1710,11 @@ mod tts_playback_tests {
         let _ = std::fs::remove_file(&path);
 
         assert_eq!(result, Ok(PlaybackEnd::Interrupted));
+        // Under the clip's own ten seconds, because a cut line that waited on
+        // something would have waited for the line — five was a share of a
+        // machine's speed rather than of the fact being tested.
         assert!(
-            elapsed < Duration::from_secs(5),
+            elapsed < Duration::from_secs(8),
             "a cut line waited on something: {elapsed:?}"
         );
     }

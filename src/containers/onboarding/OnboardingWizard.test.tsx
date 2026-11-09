@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useEffect, useState } from "react";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { mockInvoke } from "../../test/mocks";
+import { engineTick } from "../../test/engineTicks";
 import { useWizardEnv } from "./WizardContext";
 import { FinishSetupChip } from "./FinishSetupChip";
 import { PREVIEW_DEBOUNCE_MS } from "./steps/SoundLookStep";
@@ -237,7 +238,12 @@ describe("W0 — welcome", () => {
       <OnboardingWizard
         {...props}
         softClickPlaying
-        currentBeat={{ beat: 1, measureBeat: 1, subdivision: 0, isDownbeat: false }}
+        // Beat two of the bar, which the engine reports as a downbeat — the
+        // field means "a whole beat and not a subdivision". The mark pulses
+        // on the beat, so beat two is the one worth asking about; the tick
+        // this used to build, with `isDownbeat: false` on a whole beat, was
+        // one no engine emits.
+        currentBeat={engineTick({ beat: 1 })}
       />,
     );
     expect(container.querySelector(".onboarding-logo.pulsing")).not.toBeNull();

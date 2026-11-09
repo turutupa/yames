@@ -1,0 +1,545 @@
+/* songs-take-video.css — watching a take back (W21): the picture, the tape,
+ * and the mark it puts on the excerpt.
+ *
+ * Imported by `TakeVideoView`, which lives inside the review's own lazy chunk,
+ * so it is fetched when — and only when — a player who filmed a pass stops
+ * playing. The stage's half of the camera is `songs-camera.css`.
+ *
+ * Every colour is a token from themes.ts's TOKEN_CONTRACT. The four feedback
+ * tokens carry the verdict on the tape — and never on their own: every tick
+ * carries the same GLYPH the review draws beside a fret number, because two of
+ * the thirteen themes are deliberately low-contrast and some players cannot
+ * tell this theme's green from its amber.
+ *
+ * It borrows `.songs-btn` and `.songs-chip` from songs.css and sits inside
+ * `.songs-review`, so it is only ever parsed alongside both. */
+
+/* ---------------------------------------------------------------------------
+ * Watching it back
+ * ------------------------------------------------------------------------ */
+
+.songs-take-video {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* The frame the review lives in is a size container, so the picture can be
+ * measured against the space it actually has.
+ *
+ * Declared here rather than in W18's stylesheet because this is the only
+ * thing that needs it, and it arrives with the review's lazy chunk — which is
+ * also when the picture arrives, so the two can never be out of step. The
+ * element is `flex: 1 1 auto; min-height: 0` inside a fixed-height column, so
+ * its size comes from its parent and containing it changes nothing about the
+ * layout. */
+.songs-review-body {
+  container-type: size;
+  container-name: songs-review-frame;
+}
+
+.songs-take-video-stage {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+
+  /* Sized against the FRAME, not the window.
+   *
+   * The stage is one screen with no page scroll (W18), so the frame the review
+   * gets is whatever the header and the strip leave — which at 900px tall is
+   * under 400px, not the 46vh a viewport unit would have promised. A picture
+   * measured against the window was a picture you had to scroll to, and the
+   * reward you have to scroll to is not one.
+   *
+   * The `vh` line is the fallback for a webview with no container queries: it
+   * is a worse guess, and it is a guess that still fits. The `min()` below it
+   * is ignored wholesale by such a build, which is exactly the behaviour
+   * wanted.
+   *
+   * Letterboxed rather than cropped (`object-fit: contain` on the video), so a
+   * camera that negotiated 4:3 shows all of the player's hands rather than the
+   * middle of them. */
+  height: 32vh;
+  height: min(56cqh, 420px);
+  /* The floor is measured rather than chosen: the frame W18 gives the review
+   * is 160px tall at a 720px window, and the picture, the gap and the tape
+   * together have to come in under it so a player can see where the tape
+   * STARTS without scrolling. 104 + 8 + 47 is 159. */
+  min-height: 104px;
+}
+
+.songs-take-video-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--bg-card);
+}
+
+.songs-take-video-broken {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.songs-take-video-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.songs-take-video-slips,
+.songs-take-video-speeds,
+.songs-take-video-passes,
+.songs-take-video-nudge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.songs-take-video-nudge-at {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  min-width: 4.5ch;
+  text-align: center;
+}
+
+.songs-take-video-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+/* ---------------------------------------------------------------------------
+ * The tape
+ * ------------------------------------------------------------------------ */
+
+.songs-tape {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.songs-tape-heads {
+  position: relative;
+  height: 14px;
+}
+
+.songs-tape-barline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+  transform: translateX(-0.5px);
+}
+
+.songs-tape-barline[data-pass-start],
+.songs-tape-barline[data-section] {
+  background: var(--text-faint);
+}
+
+.songs-tape-section,
+.songs-tape-pass {
+  position: absolute;
+  left: 3px;
+  top: 0;
+  font-size: 10px;
+  line-height: 14px;
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+.songs-tape-strip {
+  position: relative;
+  height: 30px;
+  border-radius: calc(var(--radius) / 2);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.songs-tape-strip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.songs-tape-loop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.songs-tape-tick {
+  position: absolute;
+  top: 2px;
+  display: block;
+  width: 0;
+  /* `color` is set inline from MARK_TOKEN, so the glyph and the stem are
+   * always the same colour as the same mark in the excerpt above. */
+}
+
+.songs-tape-glyph {
+  position: absolute;
+  left: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  line-height: 1;
+  color: currentColor;
+}
+
+/* The stem under the glyph: a tick at the exact moment, so a dense bar reads
+ * as rhythm rather than as a row of symbols. */
+.songs-tape-tick::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 0;
+  width: 2px;
+  height: 12px;
+  transform: translateX(-1px);
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.songs-tape-extra {
+  position: absolute;
+  bottom: 2px;
+  width: 2px;
+  height: 7px;
+  transform: translateX(-1px);
+  border-radius: 1px;
+  background: var(--text-faint);
+}
+
+.songs-tape-head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-1px);
+  background: var(--accent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* The note the tape is over, in the excerpt above. It lifts rather than
+ * changes colour: the colour is the verdict and may not be borrowed. */
+.songs-review-col[data-now] {
+  transform: translateY(-2px);
+  border-radius: calc(var(--radius) / 2);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .songs-review-col[data-now] { transform: none; }
+}
+
+/* The coach's own clip, inside a block: the same component, smaller, because
+ * it is one line of an answer rather than the review's centrepiece. */
+.songs-review-tape .songs-take-video-stage {
+  max-height: 32vh;
+}
+
+/* The coach's "Watch it": the `take` block's whole drawing. A button in the
+ * answer's own row, pointing the one player this screen has rather than
+ * opening a second. */
+.songs-review-watch {
+  align-self: flex-start;
+}
+
+/* Narrow windows, for the half of the camera that is a video pane. */
+@media (max-width: 620px) {
+  .songs-take-video-stage {
+    max-height: 38vh;
+  }
+  .songs-take-video-controls {
+    gap: 8px;
+  }
+}
+
+/* ── "Save as a video" (W25, `plans/ECHORA.md` D4) ─────────────────────── */
+
+/* The clip the player sends somebody. Its own row under the tape, because it
+ * is a different act from watching: you have finished looking and are taking
+ * something away. */
+.songs-clip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* The canvas the recorder samples.
+ *
+ * It has to be IN the document and painted: `display: none` stops a canvas
+ * being composited and `captureStream` then hands the encoder frozen frames.
+ * So it is one pixel, transparent, out of the flow and out of the way — and
+ * it is still a real, drawn canvas, which is all the recorder needs. */
+.songs-clip-canvas {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.songs-clip-row,
+.songs-clip-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Wider between the questions than inside them, so six chips read as
+     "which bars", "which way up" and a switch rather than as six choices. */
+  gap: 8px 16px;
+  min-width: 0;
+}
+
+.songs-clip-choice {
+  display: flex;
+  gap: 4px;
+}
+
+/* The caption belongs to the group after it and must never be left on a line
+   of its own at the end of a row. */
+.songs-clip-options .songs-strip-label {
+  margin-right: -10px;
+}
+
+/* "Instagram, TikTok" under "Tall": which places want this shape. A second
+   line inside the chip rather than a row of its own, so the hint belongs to
+   the choice it is about and costs the panel no height. */
+.songs-clip-places:not(:empty) {
+  display: block;
+  margin-top: 1px;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+}
+
+.songs-clip-done {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.songs-clip-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.songs-clip-share-lead {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-left: 6px;
+}
+
+.songs-clip-note {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+  /* A path is a long unbreakable word on a 296px panel. */
+  overflow-wrap: anywhere;
+}
+
+.songs-clip-failed {
+  color: var(--feedback-miss);
+}
+
+.songs-clip-absent {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.songs-clip-progress {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The ring: an arc redrawn as the clip is made, not an animation. It is
+ * reporting a real number — a clip takes exactly as long as it lasts — and a
+ * spinner turning at its own speed would say nothing about how much longer. */
+.songs-clip-ring {
+  flex: 0 0 auto;
+  transform: rotate(-90deg);
+}
+
+.songs-clip-ring-track,
+.songs-clip-ring-arc {
+  fill: none;
+  stroke-width: 3;
+}
+
+.songs-clip-ring-track {
+  stroke: var(--border);
+}
+
+.songs-clip-ring-arc {
+  stroke: var(--accent);
+  stroke-linecap: round;
+}
+
+/* ── Then and now (W25, addendum 11) ───────────────────────────────────── */
+
+/* `align-self: stretch` and a width, because this is drawn INSIDE a
+ * `.coach-block`, which is a column with `align-items: flex-start` — so a
+ * child that does not say otherwise is sized to its own content, and a grid
+ * of two video panes sized to its content is two columns of single letters
+ * sixty pixels wide. It looked exactly like that. */
+.songs-compare {
+  align-self: stretch;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: compare;
+}
+
+/* Side by side where there is room, and one under the other where there is
+ * not. A CONTAINER query, not a media one: this block is drawn inside the
+ * review's body, which is a column of its own inside a stage that the rail
+ * and the coach dock both take from — the width that decides is the panel's,
+ * never the window's (`UI_DECISIONS`, and the rule the owner set on the Jam
+ * sheets). Stacked, the two are still a comparison: the dates say which is
+ * which and the two tapes are the same width. */
+.songs-compare-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-width: 0;
+}
+
+@container compare (min-width: 560px) {
+  .songs-compare-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.songs-compare-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.songs-compare-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+/* "Then" and "Now", which is the whole of what a reader needs to tell the
+   two apart before they have read a date. */
+.songs-compare-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.songs-compare-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.songs-compare-facts {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-compare-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.songs-compare-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* A take with sound alone, said rather than left as an empty box. Most takes
+   are this, and A9's rule says so in words wherever it would otherwise be a
+   silence somebody has to interpret. */
+.songs-compare-nopicture {
+  margin: 0;
+  padding: 0 12px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-faint);
+}
+
+.songs-compare-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+.songs-compare-at {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-compare-note {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+}

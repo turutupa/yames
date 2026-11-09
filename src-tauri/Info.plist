@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  macOS only lets an app hear a microphone if the bundle says why it wants one.
-  Without this key the system does not show the permission dialog and does not
-  list the app under Privacy & Security > Microphone: it silently refuses, and
-  cpal hands back a stream of silence. That is the audio-input bug on macOS
-  release builds (#59). `tauri dev` never showed it, because a dev run borrows
-  the permission of the terminal or editor that launched it.
+  macOS only lets an app hear a microphone or see through a camera if the bundle
+  says why it wants one. Tauri merges this file into the bundle's generated
+  Info.plist at build time, so it holds only what the generator does not already
+  write.
 
-  Tauri merges this file into the bundle's generated Info.plist at build time,
-  so it holds only what the generator does not already write.
+  Microphone: without this key the system does not show the permission dialog
+  and does not list the app under Privacy & Security > Microphone: it silently
+  refuses, and cpal hands back a stream of silence. That is the audio-input bug
+  on macOS release builds (#59). `tauri dev` never showed it, because a dev run
+  borrows the permission of the terminal or editor that launched it. The webview
+  never opens a microphone; the sound of a take is the engine's, through cpal,
+  and it is cpal that needs this key.
 
-  The sentence is the one the dialog puts after "Yames would like to access the
-  microphone": what it is for, and where it goes.
+  Camera: without this key `getUserMedia` does not prompt and does not fail with
+  a message. The app is killed, which is the worst of the three outcomes and the
+  one nobody can debug from a bug report.
 
-  The matching entitlement, `com.apple.security.device.audio-input`, lives in
-  `entitlements.plist`. A signed, notarized build runs with the hardened
-  runtime, and the hardened runtime refuses the microphone without it, whatever
-  this file says. Both are needed.
+  Each sentence is the one a macOS dialog puts after "Yames would like to access
+  the ...": what it is for, and where it goes. `plans/WEBSITE_DECISIONS.md`: the
+  reader is a musician, never a developer.
+
+  The matching entitlements, `com.apple.security.device.audio-input` and
+  `com.apple.security.device.camera`, live in `entitlements.plist`. A signed,
+  notarized build runs with the hardened runtime, and the hardened runtime
+  refuses both without them, whatever this file says. Both files are needed.
 -->
 <plist version="1.0">
   <dict>
     <key>NSMicrophoneUsageDescription</key>
     <string>Yames listens to your instrument to score your timing and coach your practice. The sound is analysed on this Mac and is never uploaded.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Yames records you playing, so you can watch it back beside the notes. The recording is kept on this Mac and is never uploaded.</string>
   </dict>
 </plist>

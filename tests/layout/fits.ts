@@ -1,6 +1,25 @@
 import { expect, type Page } from "@playwright/test";
 
 /**
+ * The language every scene in this run is built in.
+ *
+ * `YAMES_LAYOUT_LOCALE=de npm run test:layout` measures the German build.
+ * English is the default because it is the shortest of the fifteen and a
+ * suite that only ever passed in the longest one would be a suite nobody
+ * ran. "Does it fit" is a different question per locale: German runs about a
+ * third longer than English, Russian longer again, and a rail label or a
+ * fader name that fits at 480px in English can leave the window in either.
+ *
+ * Scenes are built through the harness's own `?lng=`, which fails the scene
+ * outright on a tag it does not have — a run that silently fell back to
+ * English would pass while measuring nothing.
+ */
+export const LAYOUT_LOCALE = process.env.YAMES_LAYOUT_LOCALE ?? "en";
+
+/** True when this run is measuring English, and may assert on English words. */
+export const IN_ENGLISH = LAYOUT_LOCALE === "en";
+
+/**
  * Open one scene of the screenshot harness at one window size.
  *
  * `shots.html` is the same page the capture script drives: the real UI with a
@@ -16,6 +35,15 @@ export async function openShot(
   shot: string,
   size: { width: number; height: number },
   theme = "ember",
+  /**
+   * Anything else the harness reads off its own query string.
+   *
+   * `{ song: "long" }` is the only user so far: the Songs scenes pick which
+   * of the written-for-the-pictures songs is on the stage from `?song=`, and
+   * a question about a page taller than the frame cannot be asked of the
+   * eight-bar one (W34 item 5).
+   */
+  query: Record<string, string> = {},
 ) {
   /*
    * Built wide, then narrowed to the size under test.
@@ -29,20 +57,30 @@ export async function openShot(
    */
   const BUILD_AT = { width: 1440, height: Math.max(size.height, 900) };
   await page.setViewportSize(BUILD_AT);
-  await page.goto(`/shots.html?shot=${shot}&theme=${theme}&window=main`);
+  const extra = Object.entries(query)
+    .map(([key, value]) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join("");
+  await page.goto(
+    `/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${LAYOUT_LOCALE}${extra}`,
+  );
 
   // That the page is the harness at all, before waiting thirty seconds for it
   // to say it is ready. The first run of this suite met a dev server for
   // another app on the port it asked for, and "timed out waiting for
   // __SHOT_READY__" is a poor way to be told you are looking at the wrong
   // website.
+  //
+  // `playwright.config.ts` now starts a server of its own on a port derived
+  // from this checkout and never reuses one, so this should be unreachable —
+  // it stays because the failure it describes cost an afternoon twice.
   await page
     .waitForFunction(() => typeof window.__SHOT_MANIFEST__ === "object", undefined, {
       timeout: 15_000,
     })
     .catch(() => {
+      const origin = new URL(page.url()).origin;
       throw new Error(
-        `http://localhost:5390 is not the Yames screenshot harness — the page that answered is "${shot}" on some other server. Stop whatever is on port 5390 and run again.`,
+        `${origin} is not the Yames screenshot harness — something else answered for the "${shot}" scene. Stop whatever is on that port and run again.`,
       );
     });
 
@@ -53,6 +91,13 @@ export async function openShot(
   );
   const failed = await page.evaluate(() => window.__SHOT_ERROR__);
   expect(failed, `the "${shot}" scene did not build`).toBeUndefined();
+
+  // And it is in the language this run asked for. A locale run that quietly
+  // fell back to English would report a clean suite having measured nothing.
+  const built = await page.evaluate(() => window.__SHOT_LOCALE__);
+  expect(built, `the "${shot}" scene was built in ${built}, not ${LAYOUT_LOCALE}`).toBe(
+    LAYOUT_LOCALE,
+  );
 
   if (size.width !== BUILD_AT.width || size.height !== BUILD_AT.height) {
     await page.setViewportSize(size);
@@ -145,6 +190,111 @@ export async function fitsOnOneLine(page: Page, selector: string, where: string)
   }
 }
 
+/**
+ * Every element matching `selector` is inside the window, on all four sides.
+ *
+ * The question none of the 107 tests in this folder asked, and the one that
+ * cost W18 a task: they all measured whether a thing fitted its PARENT, and a
+ * row fits its parent perfectly while the parent sits 28px below the bottom of
+ * the window. Measured at 1400×900 on 2026-09-20, the Songs band's faders
+ * started at y=928 and the verdict at y=1075 — both a scroll away, both green.
+ *
+ * Parts a layout chooses not to draw measure zero and are skipped: a control
+ * a container query has hidden is not off-screen, it is not there.
+ */
+export async function insideViewport(
+  page: Page,
+  selector: string,
+  where: string,
+  size: { width: number; height: number },
+) {
+  const boxes = await page.$$eval(selector, (nodes) =>
+    nodes.map((node) => {
+      const r = node.getBoundingClientRect();
+      return {
+        left: r.left,
+        right: r.right,
+        top: r.top,
+        bottom: r.bottom,
+        what: (node.className || node.tagName).toString().slice(0, 60),
+      };
+    }),
+  );
+  expect(boxes.length, `${where}: nothing matched ${selector}`).toBeGreaterThan(0);
+
+  for (const box of boxes) {
+    if (box.right - box.left === 0 && box.bottom - box.top === 0) continue;
+    expect(
+      Math.round(box.top),
+      `${where}: "${box.what}" starts at y=${Math.round(box.top)}, above the window`,
+    ).toBeGreaterThanOrEqual(-1);
+    expect(
+      Math.round(box.bottom),
+      `${where}: "${box.what}" ends at y=${Math.round(box.bottom)}, past the window's ${size.height} — it is under the fold`,
+    ).toBeLessThanOrEqual(size.height + 1);
+    expect(
+      Math.round(box.left),
+      `${where}: "${box.what}" starts at x=${Math.round(box.left)}, off the left`,
+    ).toBeGreaterThanOrEqual(-1);
+    expect(
+      Math.round(box.right),
+      `${where}: "${box.what}" ends at x=${Math.round(box.right)}, past the window's ${size.width}`,
+    ).toBeLessThanOrEqual(size.width + 1);
+  }
+}
+
+/**
+ * Inside `root`, only the elements named in `allowed` may scroll.
+ *
+ * A scroller inside a scroller is the shape of the bug: the Songs tab had its
+ * own 520px viewport, inside a stage that also scrolled, inside a window — so
+ * the wheel did something different depending on which pixel the pointer was
+ * over, and half the screen was reachable only by the outer one. Naming the
+ * few boxes that are ALLOWED to scroll is the only way to say that; asking
+ * "does the window scroll" misses every scroller between.
+ *
+ * Only boxes that can ACTUALLY scroll count, which means `overflow: auto` or
+ * `scroll` on the axis. Content bigger than an `overflow: visible` box simply
+ * spills — that is a different bug and `insideViewport` is what catches it —
+ * and `overflow: hidden` is a box with no bar and no wheel. Without this the
+ * first thing every run reported was `.sr-only`, which is a 1×1 clipped span
+ * holding a whole sentence, three times per fader.
+ *
+ * Two pixels of slack: a sub-pixel border or a rounded line height can leave
+ * `scrollHeight` one greater than `clientHeight` on a box nobody can scroll.
+ */
+export async function onlyTheseScroll(
+  page: Page,
+  root: string,
+  allowed: string[],
+  where: string,
+) {
+  const rogue = await page.evaluate(
+    ({ root, allowed }) => {
+      const host = document.querySelector(root);
+      if (!host) return null;
+      const out: { what: string; over: number; how: "down" | "across" }[] = [];
+      const scrolls = (value: string) => value === "auto" || value === "scroll";
+      for (const el of [host, ...host.querySelectorAll("*")]) {
+        if (allowed.some((sel) => el.matches(sel) || el.closest(sel))) continue;
+        const style = getComputedStyle(el);
+        const down = el.scrollHeight - el.clientHeight;
+        const across = el.scrollWidth - el.clientWidth;
+        const what = (el.className || el.tagName).toString().slice(0, 60);
+        if (down > 2 && scrolls(style.overflowY)) out.push({ what, over: down, how: "down" });
+        if (across > 2 && scrolls(style.overflowX)) out.push({ what, over: across, how: "across" });
+      }
+      return out;
+    },
+    { root, allowed },
+  );
+  expect(rogue, `${where}: nothing matched ${root}`).not.toBeNull();
+  expect(
+    rogue!.map((r) => `"${r.what}" scrolls ${r.how} by ${Math.round(r.over)}px`),
+    `${where}: only ${allowed.join(", ")} may scroll`,
+  ).toEqual([]);
+}
+
 /** The window never scrolls sideways. A horizontal bar is always a mistake. */
 export async function noSidewaysScroll(page: Page, where: string) {
   const overflow = await page.evaluate(() => {
@@ -159,5 +309,6 @@ declare global {
     __SHOT_READY__?: boolean;
     __SHOT_ERROR__?: string;
     __SHOT_MANIFEST__?: unknown;
+    __SHOT_LOCALE__?: string;
   }
 }

@@ -7,7 +7,6 @@
     "duplicateSetlist": "셋리스트 복제",
     "copyName": "{{name}} 복사본",
     "librarySteps": "{{count}}단계",
-    "librarySteps_one": "{{count}}단계",
     "librarySteps_other": "{{count}}단계",
     "renameTooltip": "이 셋리스트 이름 바꾸기",
     "edited": "수정됨",
@@ -27,10 +26,8 @@
     "reorderHint": "끌어서 순서 바꾸기",
     "stopToReorder": "순서를 바꾸려면 셋리스트를 멈추세요",
     "duplicateSteps": "{{count}}단계 복제",
-    "duplicateSteps_one": "{{count}}단계 복제",
     "duplicateSteps_other": "{{count}}단계 복제",
     "removeSteps": "{{count}}단계 삭제",
-    "removeSteps_one": "{{count}}단계 삭제",
     "removeSteps_other": "{{count}}단계 삭제",
     "barOf": "{{current}}/{{total}}마디",
     "timeLeft": "{{duration}} 남음",
@@ -38,7 +35,6 @@
     "switching": "전환 중",
     "summary": {
       "steps": "{{count}}단계",
-      "steps_one": "{{count}}단계",
       "steps_other": "{{count}}단계",
       "about": "약 {{duration}}",
       "ends": "저절로 끝납니다",
@@ -48,7 +44,6 @@
       "label": "반복",
       "once": "한 번만",
       "times": "{{count}}번 반복",
-      "times_one": "{{count}}번 반복",
       "times_other": "{{count}}번 반복",
       "forever": "멈출 때까지",
       "fewer": "반복 횟수 줄이기",
@@ -57,13 +52,10 @@
     "trigger": {
       "manualShort": "신호하면",
       "barsShort": "{{count}}마디",
-      "barsShort_one": "{{count}}마디",
       "barsShort_other": "{{count}}마디",
       "secondsShort": "{{count}}초",
-      "secondsShort_one": "{{count}}초",
       "secondsShort_other": "{{count}}초",
       "minutesShort": "{{count}}분",
-      "minutesShort_one": "{{count}}분",
       "minutesShort_other": "{{count}}분",
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
@@ -104,10 +96,8 @@
     "transition": {
       "cutShort": "바로 전환",
       "countInShort": "{{count}}마디 카운트",
-      "countInShort_one": "{{count}}마디 카운트",
       "countInShort_other": "{{count}}마디 카운트",
       "restShort": "{{count}}마디 쉼",
-      "restShort_one": "{{count}}마디 쉼",
       "restShort_other": "{{count}}마디 쉼"
     },
     "said": {
@@ -137,7 +127,6 @@
       "addStep": "잼 추가",
       "addTo": "셋리스트에 추가…",
       "barsOfForm": "{{count}}마디",
-      "barsOfForm_one": "{{count}}마디",
       "barsOfForm_other": "{{count}}마디",
       "said": "밴드",
       "goneShort": "잼이 없습니다",

@@ -35,6 +35,7 @@ export type HotkeyAction =
   | "tab-2"
   | "tab-3"
   | "tab-4"
+  | "tab-5"
   // Jam, hands-free (JAM_MODE §4.7). These exist so a MIDI footswitch can
   // reach them: your hands are on the instrument, which is the whole point of
   // playing over a band rather than setting one up.
@@ -47,6 +48,23 @@ export type HotkeyAction =
   | "jam-prev-section"
   | "jam-loop-section"
   | "jam-take"
+  | "jam-camera"
+  // Songs, hands-free (W18, 2026-09-20). Choosing the portion you are working
+  // on is the centre of the mode, and a player choosing it has a guitar in
+  // their hands: these exist so the bars can be set from a footswitch, while
+  // the music is running, without looking away from the page.
+  | "songs-loop-start"
+  | "songs-loop-end"
+  | "songs-loop"
+  | "songs-loop-clear"
+  | "songs-loop-earlier"
+  | "songs-loop-later"
+  // ...and the two that decide what is KEPT of the pass (W25). A player who
+  // wants the next go filmed is holding a guitar exactly as much as one
+  // marking out a portion, and reaching for a chip on the strip costs them
+  // the same hand.
+  | "songs-take"
+  | "songs-camera"
   | "settings";
 
 export interface HotkeyEntry {
@@ -56,7 +74,7 @@ export interface HotkeyEntry {
   id: HotkeyAction;
   desc: string;
   globalAllowed?: boolean;
-  group: "metronome" | "view" | "navigation" | "jam";
+  group: "metronome" | "view" | "navigation" | "jam" | "songs";
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -116,6 +134,32 @@ const NON_TEXT_INPUTS = new Set([
   "image",
 ]);
 
+/**
+ * What Shift does to a punctuation key, undone (W34 item 3).
+ *
+ * `⇧[` and `⇧]` nudge a song's portion a bar earlier or later, and neither of
+ * them worked: the browser reports `key: "{"` for Shift and the bracket, so
+ * the combo built here was `⇧{`, which is bound to nothing. Two hotkeys in
+ * the settings list that could not be pressed.
+ *
+ * `code` is the key's PHYSICAL position and is the only thing that can say
+ * "that was the bracket". It is used as a cross-check rather than as the
+ * answer, because a German keyboard's bracket position is `ü`: the mapping
+ * applies only when the character the browser reported is the one a US
+ * layout produces from that position, so a layout where it is not simply
+ * keeps what the browser said.
+ *
+ * Only the punctuation this app binds is listed. A letter needs nothing —
+ * Shift turns `t` into `T` and `T` is what `⇧T` already means.
+ */
+const SHIFTED_PUNCTUATION: Record<string, { shifted: string; plain: string }> = {
+  BracketLeft: { shifted: "{", plain: "[" },
+  BracketRight: { shifted: "}", plain: "]" },
+  Backslash: { shifted: "|", plain: "\\" },
+  Comma: { shifted: "<", plain: "," },
+  Period: { shifted: ">", plain: "." },
+};
+
 export function eventToCombo(e: KeyboardEvent): string {
   const parts: string[] = [];
   const cmdMod = IS_MAC ? e.metaKey : e.ctrlKey;
@@ -123,7 +167,8 @@ export function eventToCombo(e: KeyboardEvent): string {
   if (IS_MAC && e.ctrlKey) parts.push("⌃");
   if (e.altKey) parts.push("⌥");
   if (e.shiftKey) parts.push("⇧");
-  const key = e.key;
+  const unshifted = e.shiftKey ? SHIFTED_PUNCTUATION[e.code] : undefined;
+  const key = unshifted && e.key === unshifted.shifted ? unshifted.plain : e.key;
   if (["Meta", "Control", "Alt", "Shift"].includes(key)) return parts.join("");
   switch (key) {
     case " ":
@@ -146,6 +191,44 @@ export function eventToCombo(e: KeyboardEvent): string {
       break;
   }
   return parts.join("");
+}
+
+/**
+ * Actions that only mean anything on their own tab, by their own prefix.
+ *
+ * `L` loops a section in Jam and a portion in Songs; `[` and `]` step the
+ * metronome's subdivision everywhere except Songs, where they mark where a
+ * portion starts and stops. Both are the right key in both places.
+ */
+export const MODE_ACTION_PREFIXES = ["jam-", "songs-"];
+
+/**
+ * Which action a key press means, on the tab it was pressed on.
+ *
+ * One combo can belong to more than one action, and which one it means
+ * depends on where you are: the mode's own action wins on the mode's own tab,
+ * the plain one wins everywhere else. Taking the first match — which is what
+ * this did before 2026-09-20 — meant whichever action was written higher up
+ * the table below silently owned the key in every mode.
+ *
+ * Here rather than inside `MainWindow` since W34 item 3, so the question
+ * "does this key reach anything on the Songs tab" can be asked of a function
+ * instead of of a window.
+ */
+export function actionForCombo(
+  bindings: Record<string, string>,
+  combo: string,
+  view: string,
+): string | undefined {
+  const bound = Object.entries(bindings)
+    .filter(([, key]) => key === combo)
+    .map(([action]) => action);
+  const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
+  return (
+    bound.find((action) => action.startsWith(`${view}-`)) ??
+    bound.find((action) => !modeOnly(action)) ??
+    bound[0]
+  );
 }
 
 export const HOTKEYS: HotkeyEntry[] = [
@@ -310,6 +393,13 @@ export const HOTKEYS: HotkeyEntry[] = [
     group: "navigation",
   },
   {
+    id: "tab-5",
+    action: "Songs tab",
+    key: "⌘5",
+    desc: "Switch to Songs tab",
+    group: "navigation",
+  },
+  {
     id: "settings",
     action: "Settings",
     key: "⌘,",
@@ -419,6 +509,112 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Record the next time you press play, or stop recording",
     group: "jam",
   },
+  /**
+   * The picture, hands-free (W32).
+   *
+   * Exactly Songs' `C` and exactly its meaning, because a player who has
+   * learned what `C` does on one tab has learned it on the other. It arms the
+   * NEXT play for the same reason `R` does, and it goes through the switch
+   * rather than the record, so a first press still shows the promise.
+   */
+  {
+    id: "jam-camera",
+    action: "Record the picture",
+    key: "C",
+    desc: "Film the next time you press play, or turn the camera off",
+    group: "jam",
+  },
+  /**
+   * Songs, hands-free (W18, 2026-09-20).
+   *
+   * The owner: choosing a portion of a song so it repeats is *"super critical
+   * for song learning"*. A player choosing one has a guitar in their hands —
+   * so the bars can be set from a footswitch, while the music is running,
+   * without a hand leaving the neck. `[` and `]` mark where the loop starts
+   * and stops AT THE BAR YOU ARE IN, which is the gesture every looper pedal
+   * in the world already taught everybody.
+   *
+   * Three of these keys are the metronome's elsewhere (`[`, `]`, `L` is
+   * Jam's). That is deliberate and handled where a key is turned into an
+   * action: on the Songs tab the Songs meaning wins, everywhere else the old
+   * one does. A subdivision stepper on a screen whose click follows the
+   * score's own tempo map was not doing much anyway.
+   */
+  {
+    id: "songs-loop-start",
+    action: "Loop starts here",
+    key: "[",
+    desc: "Start the portion at the bar you are playing",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-end",
+    action: "Loop ends here",
+    key: "]",
+    desc: "End the portion at the bar you are playing",
+    group: "songs",
+  },
+  {
+    id: "songs-loop",
+    action: "Repeat the portion",
+    key: "L",
+    desc: "Play the chosen bars round and round, or stop",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-clear",
+    action: "The whole song again",
+    key: "\\",
+    desc: "Forget the portion and play the piece from the top",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-earlier",
+    action: "Portion a bar earlier",
+    key: "⇧[",
+    desc: "Slide the chosen bars one bar towards the start, keeping their length",
+    group: "songs",
+  },
+  {
+    id: "songs-loop-later",
+    action: "Portion a bar later",
+    key: "⇧]",
+    desc: "Slide the chosen bars one bar towards the end, keeping their length",
+    group: "songs",
+  },
+  /**
+   * Recording, hands-free, on a song (W25).
+   *
+   * Exactly Jam's `R` and exactly Jam's meaning — it arms the NEXT play
+   * rather than starting a take now, because a take begins after the
+   * count-in and a key that started one mid-chorus would produce a recording
+   * of the back half of a passage. Two actions can share `R`: the tab
+   * decides which one a press means (`MainWindow`'s `MODE_ACTION_PREFIXES`),
+   * and a player who has learned what R does in Jam has learned it here.
+   *
+   * `C` is the camera, and it is the coach's key everywhere else. Same rule,
+   * and the same reason it is worth the collision: `C` for camera is what
+   * somebody would guess, and the coach card is not on the Songs tab at all.
+   *
+   * Both go through the SWITCHES rather than the settings behind them, so a
+   * first press still shows the promise. A camera that came on from a
+   * footswitch without anybody having read what it records would be the one
+   * thing this feature may not do.
+   */
+  {
+    id: "songs-take",
+    action: "Record the take",
+    key: "R",
+    desc: "Record the next time you press play, or stop recording",
+    group: "songs",
+  },
+  {
+    id: "songs-camera",
+    action: "Record the picture",
+    key: "C",
+    desc: "Film the next time you press play, or turn the camera off",
+    group: "songs",
+  },
 ];
 
 export const HOTKEY_GROUPS: { key: string; label: string }[] = [
@@ -426,6 +622,7 @@ export const HOTKEY_GROUPS: { key: string; label: string }[] = [
   { key: "view", label: "View" },
   { key: "navigation", label: "Navigation" },
   { key: "jam", label: "Jam" },
+  { key: "songs", label: "Songs" },
 ];
 
 // Delay for macOS fullscreen exit animation to complete before restoring window state

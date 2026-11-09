@@ -40,8 +40,48 @@ export function megabytes(bytes: number): number {
   return Math.round(bytes / (1024 * 1024));
 }
 
+/**
+ * The store key that says the first-run dialog has been read.
+ *
+ * The APP's, not the jam's and not the song's: what a take is only has to be
+ * explained once, and a per-record flag would ask again for every jam in the
+ * library — which reads as the app not trusting the answer you already gave.
+ * It lives here rather than in either screen's hook because Songs records
+ * takes too, and the promise made by that dialog is one promise.
+ */
+export const TAKES_INTRO_KEY = "jam.takesIntroSeen";
+
 /** `4:07`. The same clock the transport writes, so the two agree on screen. */
 export function takeLength(durationSec: number): string {
   const s = Math.max(0, Math.round(durationSec));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+/**
+ * The store key holding what a take is made of (`plans/SONGS.md` A12).
+ *
+ * **The machine's, not the jam's and not the song's**, and that is the
+ * decision rather than an implementation detail. "Everything this computer
+ * plays" is an answer about how this room is wired — which speaker, which amp
+ * simulator, which interface — and none of that changes because you loaded a
+ * different tune. A per-jam switch would mean setting it again on every jam
+ * in the library, and worse, would mean a jam saved on the desk machine
+ * arriving on the laptop asking it to record a speaker that is not there.
+ *
+ * Absent means `yamesAndInput`, which is what every take before this was.
+ */
+export const TAKE_SOUND_KEY = "takes.soundSource";
+
+/**
+ * Is this a build and a machine where "everything this computer plays" can be
+ * offered at all?
+ *
+ * The answer is the engine's (`check_take_sound`), never a guess from the
+ * user agent: a Mac cannot do it, a Linux box can only do it when a monitor
+ * source is visible, and an older build has no such command. Anything other
+ * than a clear yes means the switch is not shown — a switch that would record
+ * silence is worse than no switch.
+ */
+export function canRecordEverything(check: { can: boolean } | null): boolean {
+  return check?.can === true;
 }

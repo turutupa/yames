@@ -110,7 +110,13 @@
       "downloadVoices": "Baixar vozes",
       "installed": "Coach {{tier}} instalado ({{size}})",
       "removing": "Removendo…",
-      "removeModels": "Remover modelos"
+      "removeModels": "Remover modelos",
+      "stance": "Estilo de treino",
+      "stanceHint": "O quanto o coach pega no seu pé enquanto você toca",
+      "stanceStrict": "Rigoroso",
+      "stanceLearning": "Aprendendo",
+      "stanceStrictDesc": "Dá nome a uma tendência assim que ela aparece, e fala em voz alta. É o ajuste certo para quando você está lapidando um trecho que já sabe.",
+      "stanceLearningDesc": "Dá metade a mais de folga antes de dizer qualquer coisa, mantém as correções longe dos seus ouvidos enquanto você toca e começa pelo que deu certo. Sua nota é calculada exatamente do mesmo jeito nos dois casos."
     },
     "general": {
       "title": "Geral",
@@ -177,7 +183,8 @@
         "metronome": "Metrônomo",
         "view": "Visualização",
         "navigation": "Navegação",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Músicas"
       },
       "actions": {
         "play": "Tocar / Parar",
@@ -211,7 +218,17 @@
         "jam-next-section": "Próxima seção",
         "jam-prev-section": "Seção anterior",
         "jam-loop-section": "Repetir esta seção",
-        "jam-take": "Gravar a tomada"
+        "jam-take": "Gravar a tomada",
+        "tab-5": "Aba Músicas",
+        "songs-loop-start": "A repetição começa aqui",
+        "songs-loop-end": "A repetição termina aqui",
+        "songs-loop": "Repetir a parte",
+        "songs-loop-clear": "A música inteira de novo",
+        "songs-loop-earlier": "A parte um compasso antes",
+        "songs-loop-later": "A parte um compasso depois",
+        "songs-take": "Gravar a tomada",
+        "songs-camera": "Gravar a imagem",
+        "jam-camera": "Gravar a imagem"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -245,7 +262,17 @@
         "jam-next-section": "Pular para o início da próxima seção na barra de compasso",
         "jam-prev-section": "Voltar ao início da seção anterior na barra de compasso",
         "jam-loop-section": "Pôr em loop a seção em que você está, ou tirar",
-        "jam-take": "Gravar na próxima vez que você tocar, ou parar de gravar"
+        "jam-take": "Gravar na próxima vez que você tocar, ou parar de gravar",
+        "tab-5": "Vai para a aba Músicas",
+        "songs-loop-start": "Começar a parte no compasso que você está tocando",
+        "songs-loop-end": "Terminar a parte no compasso que você está tocando",
+        "songs-loop": "Tocar os compassos escolhidos vez após vez, ou parar",
+        "songs-loop-clear": "Esquecer a parte e tocar a peça desde o começo",
+        "songs-loop-earlier": "Deslizar os compassos escolhidos um compasso rumo ao começo, mantendo o tamanho",
+        "songs-loop-later": "Deslizar os compassos escolhidos um compasso rumo ao fim, mantendo o tamanho",
+        "songs-take": "Gravar na próxima vez que você tocar, ou parar de gravar",
+        "songs-camera": "Filmar na próxima vez que você tocar, ou desligar a câmera",
+        "jam-camera": "Filmar na próxima vez que você tocar, ou desligar a câmera"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Falha ao verificar",
       "sounds": "Sons",
       "soundsCredit": "A bateria Club é a Virtuosity Drums, da Versilian Studios e da Karoryfer Samples, tocada por Austin McMahon (domínio público). A bateria Estúdio é a DRSKit, do projeto DrumGizmo (CC BY 4.0).",
-      "madeWith": "Feito com {{heart}} para músicos do mundo todo"
+      "madeWith": "Feito com {{heart}} para músicos do mundo todo",
+      "soundsCreditSongs": "Os outros instrumentos vêm do banco de sons General MIDI da Sonivox (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Músicas",
+      "catchDownloads": "Oferecer as músicas que você baixa",
+      "catchDownloadsHint": "Enquanto Músicas está aberto, o Yames olha a sua pasta de downloads e pergunta antes de abrir qualquer coisa. Seu arquivo nunca é movido, renomeado ou apagado.",
+      "folder": "Ficar de olho nesta pasta",
+      "folderUnknown": "Este computador não disse ao Yames onde ficam os downloads",
+      "chooseFolder": "Escolher...",
+      "useDownloads": "Usar downloads",
+      "turnedDown": "Músicas que você recusou",
+      "turnedDownHint": "{{n}} arquivos que o Yames não vai oferecer de novo",
+      "forgetTurnedDown": "Oferecer de novo",
+      "soundSet": "Banco de sons",
+      "soundSetBuiltIn": "O que vem no Yames",
+      "chooseSoundSet": "Escolher um .sf2",
+      "useBuiltInSoundSet": "Usar o que vem junto"
     }
   },
   "keybindings": {

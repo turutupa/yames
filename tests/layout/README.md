@@ -51,6 +51,48 @@ Playwright keeps a screenshot and a trace of the moment under `test-results/`:
 npx playwright show-trace test-results/<the-failing-test>/trace.zip
 ```
 
+## The server it drives
+
+`playwright.config.ts` starts its own Vite and never reuses one. The port is
+derived from the absolute path of the checkout — so two worktrees on one
+laptop never ask for the same number, and this worktree always asks for the
+same number — and a port that is already answering fails the run out loud
+rather than being borrowed. Set `YAMES_LAYOUT_PORT` to pin it.
+
+## Another language
+
+```bash
+YAMES_LAYOUT_LOCALE=de npm run test:layout
+```
+
+"Does it fit" is a different question in each of the fifteen languages: German
+runs about a third longer than English and Russian longer again, so a rail
+label, a fader name or a coach's sentence that sits comfortably at 480px in
+English can leave the window in either. The variable is passed to the harness
+as `?lng=`, which **fails the scene** on a tag it does not have rather than
+falling back to English — a run that quietly measured English again would pass
+while proving nothing.
+
+English is the default, because it is the shortest and a suite that only ever
+ran in the longest language is a suite nobody runs.
+
+Two limits, both deliberate:
+
+- `jam.spec.ts` skips itself outside English. Its scenes are driven by
+  pressing Jam's own labels ("set up", "cheat sheet", "edit changes"), which
+  are English literals in `src/shots/scenarios.ts`; under another locale the
+  buttons stop answering to those names. Songs, the review, the blocks gallery
+  and Settings all run in every language.
+- A handful of assertions about particular English words (the band's three
+  lane names, the picker's track names) relax or skip outside English. What a
+  string says is `src/test/i18n.songs-wave.test.ts`'s job; this suite measures
+  rectangles.
+
+It was one port for everybody, reused if something was already listening. A
+second worktree's dev server then answered, Vite served its `index.html` for
+every unknown scene, and the suite measured **another worker's source** while
+reporting twenty-four passes and a handful of scenes that "did not build".
+
 ## What is not here
 
 No visual-regression snapshots. A pixel-diff of the whole screen fails on a

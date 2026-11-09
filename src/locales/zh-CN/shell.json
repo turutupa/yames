@@ -3,7 +3,8 @@
     "metronome": "节拍器",
     "setlist": "曲目单",
     "drill": "变速练习",
-    "jam": "即兴伴奏"
+    "jam": "即兴伴奏",
+    "songs": "曲目"
   },
   "tooltip": {
     "zen": "禅意",
@@ -45,7 +46,8 @@
     "save": "保存预设",
     "delete": "删除",
     "newPreset": "新建预设",
-    "newDrill": "新建练习"
+    "newDrill": "新建练习",
+    "titleSongs": "曲目"
   },
   "emptyStates": {
     "presets": {
@@ -73,7 +75,8 @@
     "inputOff": "输入已关闭",
     "coachOnPlay": "按下播放后教练开始聆听",
     "coachQuiet": "教练在每一步中途保持安静",
-    "countIn": "预备拍"
+    "countIn": "预备拍",
+    "backToStart": "回到开头"
   },
   "rail": {
     "label": "模式与资料库",

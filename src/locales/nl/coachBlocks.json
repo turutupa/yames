@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "Maten {{from}}–{{to}} herhalen",
+      "loopBarsAt": "Maten {{from}}–{{to}} herhalen op {{bpm}} BPM",
+      "ramp": "Werk het op van {{from}} naar {{to}}",
+      "click": {
+        "1": "Klik op kwarten",
+        "2": "Klik op achtsten",
+        "3": "Klik op triolen",
+        "4": "Klik op zestienden",
+        "5": "Klik op kwintolen",
+        "6": "Klik op sextolen"
+      },
+      "loadPreset": "{{name}} klaarzetten",
+      "loadJam": "Meespelen met {{name}}",
+      "comeBack": {
+        "tomorrow": "Kom hier morgen op terug",
+        "inDays": "Kom hier over {{days}} dagen op terug"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, op de hals"
+    },
+    "position": {
+      "open": "open positie",
+      "rootOn6": "grondtoon op de 6e snaar",
+      "rootOn5": "grondtoon op de 5e snaar",
+      "rootOn4": "grondtoon op de 4e snaar",
+      "rootOn3": "grondtoon op de 3e snaar"
+    },
+    "shape": {
+      "which": "greep {{index}} van {{count}}"
+    },
+    "passage": {
+      "bars": "Maten {{from}}–{{to}} van {{title}}"
+    },
+    "progress": {
+      "caption": "van {{first}}% naar {{last}}%, over {{goes}} rondes",
+      "aria": "Hoe maat {{from}} tot {{to}} zijn gegaan"
+    },
+    "tab": {
+      "attempt": "gekleurd naar die ronde",
+      "plain": "de noten zoals ze er staan",
+      "soon": "De tab voor deze maten komt binnenkort."
+    },
+    "take": {
+      "whole": "Jouw take van {{title}}",
+      "any": "Jouw take",
+      "soon": "Een take terugluisteren komt binnenkort."
+    },
+    "compare": {
+      "title": "Twee rondes van {{title}}, naast elkaar",
+      "any": "Twee rondes, naast elkaar",
+      "soon": "Twee rondes naast elkaar horen komt binnenkort."
+    }
+  }
+}

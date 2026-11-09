@@ -252,14 +252,12 @@
       "aaba32": "AABA",
       "one": "1 hợp âm",
       "custom": "{{count}} ô nhịp",
-      "custom_one": "{{count}} ô nhịp",
       "custom_other": "{{count}} ô nhịp"
     },
     "countIn": {
       "label": "Đếm vào",
       "none": "Không",
       "barsAnd": "{{count}} ô nhịp · {{sound}}",
-      "barsAnd_one": "{{count}} ô nhịp · {{sound}}",
       "barsAnd_other": "{{count}} ô nhịp · {{sound}}"
     },
     "fills": {
@@ -277,7 +275,6 @@
       "label": "Bây giờ",
       "aria": "Đang là {{chord}}",
       "next": "{{chord}} sau {{count}} ô nhịp",
-      "next_one": "{{chord}} sau {{count}} ô nhịp",
       "next_other": "{{chord}} sau {{count}} ô nhịp",
       "nextNow": "Tiếp theo là {{chord}}"
     },
@@ -301,7 +298,6 @@
       "scope": "Hiển thị bao nhiêu",
       "scopeKey": "Trong giọng này",
       "scopeAll": "Mọi giọng",
-      "noteCount_one": "thang {{count}} nốt",
       "noteCount_other": "thang {{count}} nốt",
       "noteCount": "thang {{count}} nốt",
       "jump": "Đưa tôi tới",
@@ -409,7 +405,6 @@
       "dropOutEvery": "Lặng mỗi {{count}} ô",
       "dropOutBarsLabel": "Ban nhạc lặng bao lâu",
       "forBars": "trong {{count}} ô nhịp",
-      "forBars_one": "trong {{count}} ô nhịp",
       "forBars_other": "trong {{count}} ô nhịp",
       "trade": "Đổi phiên",
       "tradeN": "Mỗi {{count}} ô",
@@ -417,7 +412,6 @@
       "tempoUp": "Tốc độ +{{step}}",
       "tempoEveryLabel": "Bao lâu thì tăng tốc độ",
       "everyChoruses": "mỗi {{count}} vòng",
-      "everyChoruses_one": "mỗi {{count}} vòng",
       "everyChoruses_other": "mỗi {{count}} vòng",
       "climbing": "đang lên từ {{from}}",
       "dropOutExplain": "Thỉnh thoảng cả ban dừng vài ô nhịp, bạn tự giữ nhịp.",
@@ -521,7 +515,6 @@
       "lead": "mỗi kiểu gồm groove, bộ trống, feel và độ lớn cùng lúc",
       "aria": "Các cách chơi vibe này",
       "count": "{{count}} cách chơi",
-      "count_one": "{{count}} cách chơi",
       "count_other": "{{count}} cách chơi",
       "yours": "Một bản của bạn",
       "yoursEmpty": "chưa lưu bản nào",
@@ -596,10 +589,8 @@
       "empty": "Vạch nhịp, một dòng iReal, hoặc lời hát có hợp âm bên trên.",
       "none": "Chưa có hợp âm nào trong đó.",
       "summary": "{{count}} ô nhịp · giọng {{key}}",
-      "summary_one": "{{count}} ô nhịp · giọng {{key}}",
       "summary_other": "{{count}} ô nhịp · giọng {{key}}",
       "check": "{{count}} nên xem lại: {{list}}",
-      "check_one": "{{count}} nên xem lại: {{list}}",
       "check_other": "{{count}} nên xem lại: {{list}}"
     },
     "perc": {
@@ -711,6 +702,37 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Âm thanh",
+      "yames": "Yames và đầu vào của tôi",
+      "everything": "Mọi thứ máy tính này phát ra",
+      "warning": "Bản ghi này thu mọi thứ máy tính phát ra, không chỉ Yames — một cuộc gọi video, một thông báo, một bài hát trên trình duyệt.",
+      "listensTo": "Đang nghe {{device}}.",
+      "check": "Kiểm tra âm thanh",
+      "listening": "Đang nghe…",
+      "level": "Mức",
+      "silent": "Không có gì đến cả. Hãy kiểm tra âm lượng máy tính đã bật và không bị tắt tiếng.",
+      "notHere": "Máy tính này không thể đưa cho Yames thứ mà loa của nó đang phát, nên ở đây một bản ghi là Yames và đầu vào của bạn.",
+      "recordingEverything": "Đang thu mọi thứ máy tính này phát ra",
+      "recordingYames": "Đang thu Yames và đầu vào của bạn",
+      "takeEverything": "mọi thứ máy tính này đã phát"
+    },
+    "takeVideo": {
+      "save": "Lưu thành video",
+      "chorus": "Vòng {{count}}",
+      "next": "tiếp"
+    },
+    "watch": {
+      "open": "Nghe lại",
+      "where": "Ô nhịp {{bar}} · {{chorus}}",
+      "goToBar": "Tới ô nhịp {{bar}}",
+      "barBack": "Lùi một ô nhịp",
+      "barOn": "Tiến một ô nhịp",
+      "nudge": "Hình",
+      "nudgeBack": "Hình sớm hơn một chút",
+      "nudgeOn": "Hình muộn hơn một chút",
+      "broken": "Bản thu này không phát được. Có thể tệp đã bị di chuyển hoặc xóa."
     }
   },
   "scale": {

@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "循環第 {{from}}–{{to}} 小節",
+      "loopBarsAt": "以 {{bpm}} BPM 循環第 {{from}}–{{to}} 小節",
+      "ramp": "從 {{from}} 練到 {{to}}",
+      "click": {
+        "1": "滴答走四分音符",
+        "2": "滴答走八分音符",
+        "3": "滴答走三連音",
+        "4": "滴答走十六分音符",
+        "5": "滴答走五連音",
+        "6": "滴答走六連音"
+      },
+      "loadPreset": "備好 {{name}}",
+      "loadJam": "跟著 {{name}} 彈",
+      "comeBack": {
+        "tomorrow": "明天再回到這裡",
+        "inDays": "{{days}} 天後再練這裡"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}，在指板上"
+    },
+    "position": {
+      "open": "開放把位",
+      "rootOn6": "根音在第 6 弦",
+      "rootOn5": "根音在第 5 弦",
+      "rootOn4": "根音在第 4 弦",
+      "rootOn3": "根音在第 3 弦"
+    },
+    "shape": {
+      "which": "第 {{index}} 個把位，共 {{count}} 個"
+    },
+    "passage": {
+      "bars": "{{title}} 的第 {{from}}–{{to}} 小節"
+    },
+    "progress": {
+      "caption": "從 {{first}}% 到 {{last}}%，共 {{goes}}",
+      "aria": "第 {{from}} 到 {{to}} 小節的變化"
+    },
+    "tab": {
+      "attempt": "依那一遍上色",
+      "plain": "譜面上寫的音",
+      "soon": "這幾小節的六線譜即將推出。"
+    },
+    "take": {
+      "whole": "你錄的 {{title}}",
+      "any": "你的錄音",
+      "soon": "回聽錄音即將推出。"
+    },
+    "compare": {
+      "title": "{{title}} 的兩遍，並排擺",
+      "any": "兩遍並排擺",
+      "soon": "並排聽兩遍即將推出。"
+    }
+  }
+}

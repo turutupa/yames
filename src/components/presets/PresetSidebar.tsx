@@ -1,12 +1,22 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { deletePreset, listPresets, savePreset } from "../../ipc";
+import { deletePreset, exportScoreSource, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
 import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
+// W35 — the songs list is a list of FILES. `songFiles.ts` is arithmetic and a
+// grouping; it pulls no importer and no alphaTab with it.
+import { matchesQuery, partToOpen } from "../../songs/songFiles";
+import type { LibrarySong } from "../../songs/songFiles";
+// W19 — which library rows came with Yames. Ids from `settings.json`; this
+// module is a few dozen lines and pulls no importer with it.
+import { starterIds } from "../../songs/starter/shelf";
 import { JamGlyph } from "../jam/JamGlyph";
+import { DeleteSongDialog } from "./DeleteSongDialog";
+import { storeLoad, storeSave } from "../../ipc";
+import "../../styles/songs-library.css";
 
 export interface PresetSidebarHandle {
   triggerAdd: () => void;
@@ -14,13 +24,14 @@ export interface PresetSidebarHandle {
   triggerRename: (id: string) => void;
   triggerRenameSetlist: (id: string) => void;
   triggerRenameJam: (id: string) => void;
+  triggerRenameSong: (id: string) => void;
   /** Drop the loaded marker — a setlist has taken the context bar. */
   clearActive: () => void;
 }
 
 interface PresetSidebarProps {
   state: AppState;
-  view: "beat" | "drill" | "setlist" | "jam";
+  view: "beat" | "drill" | "setlist" | "jam" | "songs";
   isOpen: boolean;
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
@@ -71,6 +82,29 @@ interface PresetSidebarProps {
    * the library, not while you are playing it.
    */
   onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
+  /**
+   * The song library, one entry per FILE (W35). Recently played first and not
+   * reorderable, unlike jams: a song is a file you brought in rather than
+   * something you arranged.
+   */
+  songFiles?: LibrarySong[];
+  /** The PART on the stage. Its row is the file that part belongs to. */
+  activeSongId?: string | null;
+  /**
+   * Songs with a passage the coach promised to come back to, and the day has
+   * come round (`COACH_UX.md` C2). A quiet mark on the row and nothing else:
+   * never a badge with a number on it, never a backlog, never a streak.
+   *
+   * Keyed by PART, because a promise is about a passage of one part; the row
+   * shows the mark when any of its parts has one and opens that part.
+   */
+  dueSongs?: ReadonlySet<string>;
+  /** Open one PART — which one is `partToOpen`'s answer. */
+  onLoadSong?: (id: string) => void;
+  onImportSong?: () => void;
+  /** Rename and delete take a FILE's key: they are about the song. */
+  onDeleteSong?: (fileKey: string) => void;
+  onRenameSong?: (fileKey: string, name: string) => void;
 }
 
 /** What a jam row says on its right: the tempo and the shape. */
@@ -152,6 +186,9 @@ function isDirty(state: AppState, preset: Preset, view: string): boolean {
 
 const MAX_PRESETS = 20;
 
+/** `settings.json` — is the "Included" heading open? (W35) */
+const STARTER_OPEN_KEY = "songsStarterOpen";
+
 /**
  * The line at the right of a row: what the preset restores, in as few
  * characters as the column has room for.
@@ -196,6 +233,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onDuplicateJam,
   onReorderJams,
   onAddJamToSetlist,
+  songFiles,
+  activeSongId,
+  dueSongs,
+  onLoadSong,
+  onImportSong,
+  onDeleteSong,
+  onRenameSong,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -221,6 +265,26 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   const [setlistMenu, setSetlistMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [renamingJam, setRenamingJam] = useState<string | null>(null);
   const [jamMenu, setJamMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  /** A file key, not a record id: renaming a song renames the song. */
+  const [renamingSong, setRenamingSong] = useState<string | null>(null);
+  const [songMenu, setSongMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  /**
+   * The song the player has asked to delete, waiting on the confirm.
+   *
+   * The one destructive thing the library can do: it takes every part of the
+   * file, every attempt and take filed against them, and Yames's own copy of
+   * the file. That has to be said out loud before it happens.
+   */
+  const [deletingSong, setDeletingSong] = useState<LibrarySong | null>(null);
+  /**
+   * Is the "Included" heading open?
+   *
+   * `null` until the store answers, and then the player's own choice. The
+   * default is open only while they have nothing of their own — the pieces
+   * Yames ships with are what the mode has to show on the first launch, and
+   * they are the part of the list a player stops needing.
+   */
+  const [starterOpen, setStarterOpen] = useState<boolean | null>(null);
   /** The jam menu's "add to setlist" item, expanded into the setlists. */
   const [jamMenuSetlists, setJamMenuSetlists] = useState(false);
   /**
@@ -344,11 +408,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
   useEffect(() => {
-    if (renaming || renamingSetlist || renamingJam) {
+    if (renaming || renamingSetlist || renamingJam || renamingSong) {
       renameRef.current?.focus();
       renameRef.current?.select();
     }
-  }, [renaming, renamingSetlist, renamingJam]);
+  }, [renaming, renamingSetlist, renamingJam, renamingSong]);
 
   // Close the setlist context menu on an outside click, same rule as the
   // preset one above.
@@ -362,6 +426,49 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [setlistMenu]);
+
+  useEffect(() => {
+    if (!songMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
+        setSongMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [songMenu]);
+
+  /**
+   * W19 — which songs came with Yames rather than from the player.
+   *
+   * Read from the store rather than passed down, the way `dueSongs` is read
+   * by the window above: the list is written once, on the launch that seeded
+   * the shelf, and re-read whenever the library grows so a piece that was
+   * just seeded is marked without a reload. Ids only — no score, no alphaTab.
+   */
+  const [starterSongs, setStarterSongs] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    void starterIds().then((ids) => {
+      if (!cancelled) setStarterSongs(ids);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [songFiles?.length]);
+
+  /** And whether the player has the "Included" heading open (W35). */
+  useEffect(() => {
+    let cancelled = false;
+    void storeLoad<boolean>(STARTER_OPEN_KEY)
+      .then((open) => {
+        if (!cancelled && typeof open === "boolean") setStarterOpen(open);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!jamMenu) {
@@ -498,7 +605,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setRenameValue(jam.name);
       setRenamingJam(id);
     },
-  }), [activeId, allPresets, setlists, jams, state, view]);
+    triggerRenameSong: (fileKey: string) => {
+      const file = songFiles?.find((f) => f.key === fileKey);
+      if (!file) return;
+      setRenameValue(file.name);
+      setRenamingSong(fileKey);
+    },
+  }), [activeId, allPresets, setlists, jams, songFiles, state, view]);
 
   // The rail's setlist glyph at row size — lines with a play head, a list that
   // runs in order. Rail.tsx has the note on why it is no longer a chain.
@@ -580,6 +693,32 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     : [];
 
   /**
+   * The songs list, in two parts: the player's own, then the shelf (W35).
+   *
+   * "Included" used to be a word on every starter row, beside "Due", and with
+   * the instrument and the bar count on the same row it left the owner's
+   * titles fifteen characters wide. It is a heading now, at the bottom, under
+   * which the pieces Yames ships with sit — a player's own songs are what the
+   * list is for.
+   */
+  const showSongs = view === "songs" && !!songFiles;
+  const matchingSongs = showSongs ? songFiles!.filter((f) => matchesQuery(f, search)) : [];
+  const isStarter = (file: LibrarySong) => file.parts.some((p) => starterSongs.has(p.id));
+  const mySongs = matchingSongs.filter((f) => !isStarter(f));
+  const starterList = matchingSongs.filter(isStarter);
+  /**
+   * Until the store answers, and for a player with nothing of their own.
+   *
+   * A query opens it regardless: a search that hides its own results is a
+   * search that says the song is not there.
+   */
+  const starterSectionOpen = search.trim() ? true : (starterOpen ?? mySongs.length === 0);
+  const setStarterSection = (open: boolean) => {
+    setStarterOpen(open);
+    void storeSave(STARTER_OPEN_KEY, open).catch(() => {});
+  };
+
+  /**
    * Finish a drag: move the dragged jam to where it was dropped.
    *
    * The indices are looked up in the FULL list rather than the filtered one —
@@ -607,6 +746,80 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
    * A jam in flight leaves `dragSetlistId` null, so `from` is -1 and the drop
    * does nothing — a jam cannot land in the setlist library.
    */
+  /**
+   * One row of the songs list — a SONG, whatever parts of it exist (W35).
+   *
+   * The title gets the whole row and ellipsises at the end; the full one is
+   * the row's tooltip and its accessible name. Under it, small and only when
+   * the file has one, the artist. Nothing about the instrument, no part name
+   * and no bar count: the owner's screenshot had "Guitar · 8 bars" wrapping to
+   * two lines beside titles cut to fifteen characters, and which part you are
+   * reading is a question the stage asks and answers.
+   */
+  const songRow = (file: LibrarySong) => {
+    const due = !!dueSongs && file.parts.some((p) => dueSongs.has(p.id));
+    const active = !!activeSongId && file.parts.some((p) => p.id === activeSongId);
+    const open = () => onLoadSong?.(partToOpen(file, dueSongs));
+    return (
+      <div
+        key={file.key}
+        className={`preset-sidebar-item song-item ${active ? "active" : ""}`}
+        role="button"
+        tabIndex={0}
+        title={file.name}
+        aria-label={file.name}
+        onClick={open}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setSongMenu({ id: file.key, x: e.clientX, y: e.clientY });
+        }}
+      >
+        {renamingSong === file.key ? (
+          <input
+            ref={renameRef}
+            className="preset-sidebar-name-input"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={() => {
+              const name = renameValue.trim();
+              if (name) onRenameSong?.(file.key, name);
+              setRenamingSong(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const name = renameValue.trim();
+                if (name) onRenameSong?.(file.key, name);
+                setRenamingSong(null);
+              }
+              if (e.key === "Escape") setRenamingSong(null);
+              e.stopPropagation();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            maxLength={40}
+          />
+        ) : (
+          <>
+            <span className="song-item-head">
+              <span className="preset-item-name song-item-title">{file.name}</span>
+              {due && (
+                <span className="song-item-due" title={t("songs.library.dueTitle")}>
+                  {t("songs.library.due")}
+                </span>
+              )}
+            </span>
+            {file.artist && <span className="song-item-artist">{file.artist}</span>}
+          </>
+        )}
+      </div>
+    );
+  };
+
   const dropSetlist = (targetId: string) => {
     const from = setlists?.findIndex((c) => c.id === dragSetlistId) ?? -1;
     const to = setlists?.findIndex((c) => c.id === targetId) ?? -1;
@@ -643,7 +856,9 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                   ? "presets.titleSetlist"
                   : view === "jam"
                     ? "presets.titleJam"
-                    : "presets.title",
+                    : view === "songs"
+                      ? "presets.titleSongs"
+                      : "presets.title",
             )}
           </span>
           <div className="preset-sidebar-header-actions">
@@ -691,7 +906,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 {newIcon}
               </button>
             )}
-            {!showSetlists && !showJams && viewPresets.length < MAX_PRESETS && (
+            {/* On Songs the "+" opens the file picker. There is nothing to
+                save here — a song comes from a file the player already has,
+                so the only way to add one is to bring one in. */}
+            {showSongs && onImportSong && (
+              <button
+                className="preset-sidebar-head-btn preset-sidebar-new-song"
+                onClick={onImportSong}
+                aria-label={t("songs.library.add")}
+                data-tip={t("songs.library.add")}
+              >
+                {newIcon}
+              </button>
+            )}
+            {!showSetlists && !showJams && !showSongs && viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
@@ -941,13 +1169,63 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
           )}
 
+          {/* Songs. No drag: the order is when they were last played, and
+              there is nothing to arrange. Rename and remove are on the
+              context menu, the way they are for a jam. */}
+          {mySongs.map(songRow)}
+
+          {/* W19's shelf, under its own heading at the bottom (W35). The
+              pieces Yames ships with are what the mode shows on the first
+              launch and the part of the list a player stops needing, so they
+              sit below their own songs and fold away. */}
+          {showSongs && starterList.length > 0 && (
+            <>
+              <button
+                type="button"
+                className="song-shelf-heading"
+                aria-expanded={starterSectionOpen}
+                title={t("songs.library.starterTitle")}
+                onClick={() => setStarterSection(!starterSectionOpen)}
+              >
+                <svg
+                  className="song-shelf-caret"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m9 6 6 6-6 6" />
+                </svg>
+                <span className="song-shelf-label">{t("songs.library.starter")}</span>
+              </button>
+              {starterSectionOpen && starterList.map(songRow)}
+            </>
+          )}
+
+          {showSongs && matchingSongs.length === 0 && (
+            <div className="preset-sidebar-empty">
+              {search.trim() ? t("presets.noResults") : t("songs.library.empty")}
+            </div>
+          )}
+
           {/* The rule separates setlists from presets; on the setlist tab
               there are no presets under it to separate. */}
           {setlistList.length > 0 && !showSetlists && (
             <div className="setlist-item-rule" aria-hidden="true" />
           )}
 
-          {!showSetlists && !showJams && adding && (
+          {/* Songs joined the list of modes that keep their OWN library here,
+              and did not join the three guards below with it — so under a song
+              the panel went on drawing the metronome's presets, and under an
+              empty preset list it offered "No presets yet — save a tempo,
+              sound and meter", which means nothing about a piece of music you
+              imported. One list per mode, and on this tab the list is songs. */}
+          {!showSetlists && !showJams && !showSongs && adding && (
             <div className="preset-sidebar-item adding">
               <input
                 ref={inputRef}
@@ -968,7 +1246,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               />
             </div>
           )}
-          {!showSetlists && !showJams && presets.map((p) => (
+          {!showSetlists && !showJams && !showSongs && presets.map((p) => (
             <button
               key={p.id}
               className={`preset-sidebar-item ${activeId === p.id ? "active" : ""} ${activeId === p.id && dirty ? "dirty" : ""}`}
@@ -1008,7 +1286,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </button>
           ))}
-          {!showSetlists && !showJams && presets.length === 0 && !adding && (
+          {!showSetlists && !showJams && !showSongs && presets.length === 0 && !adding && (
             search.trim() ? (
               <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
             ) : (
@@ -1130,6 +1408,64 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             {t("jam.deleteJam")}
           </button>
         </div>
+      )}
+
+      {songMenu && (
+        <div
+          ref={contextRef}
+          className="preset-context-menu"
+          style={{ top: songMenu.y, left: songMenu.x }}
+        >
+          <button
+            onClick={() => {
+              const file = songFiles?.find((f) => f.key === songMenu.id);
+              if (file) {
+                setRenameValue(file.name);
+                setRenamingSong(songMenu.id);
+              }
+              setSongMenu(null);
+            }}
+          >
+            {t("presets.rename")}
+          </button>
+          {/* W19 — Yames keeps its own copy of the file a song was read
+              from, so this gives it back. A library action, in the library's
+              own menu: it is about the song rather than about the pass you
+              are in the middle of, and the stage has no height to spare. */}
+          <button
+            onClick={() => {
+              // One file, one copy — whichever part's row holds it.
+              const file = songFiles?.find((f) => f.key === songMenu.id);
+              if (file) void exportScoreSource(partToOpen(file)).catch(() => {});
+              setSongMenu(null);
+            }}
+          >
+            {t("songs.exportOriginal")}
+          </button>
+          {/* The one destructive thing in this panel, and the only one that
+              asks first: it takes every part of the song, every take of it
+              and Yames's copy of the file. */}
+          <button
+            className="preset-context-delete"
+            onClick={() => {
+              setDeletingSong(songFiles?.find((f) => f.key === songMenu.id) ?? null);
+              setSongMenu(null);
+            }}
+          >
+            {t("songs.library.remove")}
+          </button>
+        </div>
+      )}
+
+      {deletingSong && (
+        <DeleteSongDialog
+          song={deletingSong}
+          onCancel={() => setDeletingSong(null)}
+          onConfirm={() => {
+            onDeleteSong?.(deletingSong.key);
+            setDeletingSong(null);
+          }}
+        />
       )}
 
       {setlistMenu && (

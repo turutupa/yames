@@ -157,7 +157,7 @@ describe("the recording lifecycle", () => {
 
     act(() => rerender({ jam: JAM, isPlaying: true, countingIn: false }));
     await settle();
-    expect(ipc.startTake).toHaveBeenCalledWith("j1");
+    expect(ipc.startTake).toHaveBeenCalledWith("j1", "yamesAndInput");
     expect(result.current.recording).toBe(true);
   });
 
@@ -217,7 +217,7 @@ describe("the recording lifecycle", () => {
     ipc.stopTake.mockResolvedValue(take({ id: "fresh", jamId: "j1" }));
     const { result, rerender } = mount({ isPlaying: true });
     await settle();
-    expect(ipc.startTake).toHaveBeenCalledWith("j1");
+    expect(ipc.startTake).toHaveBeenCalledWith("j1", "yamesAndInput");
     expect(result.current.recording).toBe(true);
 
     act(() => rerender({ jam: other, isPlaying: true, countingIn: false }));

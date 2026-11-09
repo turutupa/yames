@@ -10,6 +10,7 @@ import { JamView } from "./JamView";
 import { STARTER_JAMS } from "../../jam/jams";
 import { CHORD_QUALITIES } from "../../jam/diatonic";
 import { CHORD_FAMILIES } from "../../jam/cheatSheet";
+import { engineTick } from "../../test/engineTicks";
 import type { Jam } from "../../jam/types";
 import type { BeatEvent } from "../../types";
 
@@ -18,18 +19,16 @@ const jamOf = (overrides: Partial<Jam> = {}): Jam => ({
   ...overrides,
 });
 
+/**
+ * One tick of a jam, in the shape `engine.rs` emits.
+ *
+ * Through `engineTick`, because this used to say `isDownbeat: measureBeat
+ * === 0` — a stream no engine produces. `isDownbeat` is "a whole beat and
+ * not a subdivision" and is true on every beat of the bar; the bar line is
+ * `isDownbeat && measureBeat === 0`.
+ */
 function beat(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
-  return {
-    beat: formBar * 4 + measureBeat,
-    measureBeat,
-    subdivision: 0,
-    isDownbeat: measureBeat === 0,
-    accentLevel: measureBeat === 0 ? 2 : 0,
-    isAccent: measureBeat === 0,
-    formBar,
-    chorus,
-    bandState: "full",
-  };
+  return engineTick({ beat: formBar * 4 + measureBeat, measureBeat, formBar, chorus });
 }
 
 /**
@@ -103,6 +102,7 @@ function takesState(
     takes: [],
     recording: false,
     recordedSeconds: 0,
+    recordingSound: "yamesAndInput",
     playingId: null,
     dirBytes: 0,
     play: vi.fn(),
@@ -112,6 +112,18 @@ function takesState(
     introOpen: false,
     confirmIntro: vi.fn(),
     cancelIntro: vi.fn(),
+    // A machine that cannot record what it plays, which is the picture in
+    // every test that is not about that: the source control draws nothing and
+    // the sheet looks exactly as it did before W30. The tests that ARE about
+    // it override this.
+    soundSource: {
+      sound: "yamesAndInput",
+      setSound: vi.fn(),
+      check: { can: false, peak: 0 },
+      recheck: vi.fn(),
+      checking: false,
+      canRecordEverything: false,
+    },
     ...overrides,
   };
 }

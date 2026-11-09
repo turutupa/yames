@@ -46,7 +46,16 @@ template engine. Turn it on with exactly one Cargo feature:
 The GPU features imply `coach-llm`; never enable two backends at once.
 The inference worker asks for all layers on a GPU build and llama.cpp
 keeps them on the CPU when it finds no usable device, so one binary serves
-both — set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+both — set `YAMES_LLM_GPU_LAYERS=0` to put every **layer** on the CPU on a
+GPU build.
+
+**That is not a CPU-only switch, whatever it looks like.** T06 measured it:
+a `coach-llm-vulkan` binary with `YAMES_LLM_GPU_LAYERS=0` still registers
+the Vulkan backend and still allocates a 630 MiB compute buffer, because
+the backend is chosen at compile time and the variable only moves layers.
+A run that must have no GPU in it at all — the CPU row of the audio-safety
+gate, or a machine whose driver is the thing under suspicion — needs a
+binary built with plain `coach-llm`.
 
 The model, its `LlamaContext` and the llama.cpp backend live on a single
 long-lived thread (`coach::llm::LlmWorker`), demoted to below-normal
@@ -228,7 +237,9 @@ bun run yames:jitter-probe -- --no-llm                  # baseline
 # LLM runs need the feature, so call cargo directly:
 cargo run --release --manifest-path src-tauri/Cargo.toml \
   --features coach-llm-vulkan --bin click-jitter-probe -- --gguf model.gguf
-YAMES_LLM_GPU_LAYERS=0 cargo run --release ... --gguf model.gguf   # force CPU
+# Layers on the CPU — but the Vulkan backend is still registered and still
+# takes its 630 MiB buffer. A run with no GPU in it needs `--features coach-llm`.
+YAMES_LLM_GPU_LAYERS=0 cargo run --release ... --gguf model.gguf
 ```
 
 The probe runs the real `MetronomeEngine` headless (`start_headless`,
@@ -237,6 +248,25 @@ no Tauri app) and times the cpal callback from inside it via
 built the engine, so the shipping callback pays one null check per
 buffer. `--dump-csv` writes the raw capture so a run can be re-analysed
 without re-running it. Exit 0 = pass, 1 = gate failure, 2 = setup error.
+
+**It gates on four numbers, not one.** Entry-to-entry gaps cannot see an
+allocation or a stall *inside* a buffer, so two of the four come from
+elsewhere:
+
+| Number | Where it comes from | Gate |
+|---|---|---|
+| p99 callback jitter | `CallbackProbe` timings | < 1 ms (advisory on a busy box) |
+| missed beats | audio clock vs wall clock | 0, hard |
+| callback allocations / frees | the probe's own `#[global_allocator]`, armed by `alloc_probe` for the span of the callback body | 0, hard |
+| dropped notifications | `MetronomeEngine::dropped_notifications` | 0, hard |
+
+The allocator counts `malloc`, `realloc` **and** `free` made while the
+callback body is running, and nothing cpal does around it — the flag covers
+our closure, not the whole stream thread, because a `malloc` in the backend
+is not a Yames defect. A dropped notification is a *scoring* failure rather
+than a timing one: `beat_log` is the only place `TimingAnalyzer` learns
+where a beat fell, so one of them is an expected onset the player is
+marked down for missing.
 
 Two things the numbers depend on, and one that is not a Yames bug:
 
@@ -252,6 +282,61 @@ Two things the numbers depend on, and one that is not a Yames bug:
   disables power throttling on them. llama-cpp-2 0.1.146 exposes no
   `GGML_SCHED_PRIO` knob, so CPU inference is measurably noisier than GPU
   inference.
+
+### What in the output callback must not be touched
+
+`engine.rs`'s cpal output callback is the one function in this repo where
+"it works" is not the standard. Before editing it, know these:
+
+- **The beat queue is the only way out of it.** `BeatQueue` is preallocated
+  when the stream opens and never grows; a push is an acquire load, thirteen
+  relaxed stores and a release store, then one `Thread::unpark`. Do not put
+  a channel back — `std::sync::mpsc` allocates a block every 31 messages
+  and locks the receiver's waker on every send, which is a `malloc` and a
+  priority inversion per tick and is what this replaced.
+  **Its packed flag word is full.** `pack_small_fields` spends exactly 32
+  bits (three `u8`s, a three-valued enum, six flags), which is why the song's
+  position travels in three `u32` arrays of its own rather than in it. A new
+  flag needs another array or a narrower packing;
+  `the_small_word_is_full` fails loudly either way.
+- **There are two schedulers in the frame loop, not one.** A jam is a lookup
+  on a tick the click was going to play anyway; a SONG (`song.rs`) is a cursor
+  walking a table of absolute sample positions, and while one is loaded the
+  click's own `next_beat_sample` branch never runs. The two arms exist as
+  `if / else if` rather than a `match` for a borrow reason worth knowing: the
+  song's arm borrows `cached.song`, the click's arm mutates `cached`, and NLL
+  only allows that when each borrow begins and ends inside its own arm.
+- **A song's end is keyed on the frame it happened on, not on the flag that
+  stops the buffer.** `song_ended_here` stays up for the rest of the buffer
+  so nothing further sounds; `ends_here` is the one frame. Keying the
+  notification on the former pushed one per remaining frame — up to a whole
+  buffer of them, and as many `jam-ended` emits behind them.
+- **Every lock in there is a `try_lock`, and every failure is survivable.**
+  The state snapshot, the jam table, the form position, the take slots, the
+  coach's clip and the three retirement lists all fail by leaving the
+  cached value alone and trying again next buffer. A `lock()` anywhere in
+  the callback is a bug however short the critical section looks.
+- **The callback never frees.** `JamRetirement`, `SongRetirement`,
+  `take::TakeParking` and `speech_out::SpeechParking` exist so the LAST `Arc`
+  to a table, a song, a take or a line of speech is dropped on a thread that
+  may call `free()`. A new owned value on this path needs the same treatment;
+  the probe's allocator counts frees and will fail the run.
+- **`voices` and `cached.beat_groups` are sized, not grown.** Every
+  `voices.push` is guarded by `voices.len() < MAX_VOICES`; `beat_groups`
+  is refilled in place against a capacity of `MAX_BEAT_GROUPS`, which
+  `commands::validate_beat_groups` is what keeps honest. Adding a push
+  without the guard, or letting a longer grouping through validation, is a
+  reallocation under the mixer.
+- **The event loop runs at normal priority on purpose** — see the comment
+  above it. Do not promote it again without first showing that the callback
+  depends on it, which since the queue landed it does not.
+- **Re-run the probe.** `--jam-swap --jam-move --jam-take` together is the
+  busiest path the engine has: the band on every tick, a live table
+  handoff, the form moving, and a take being written to disk underneath.
+  **And `--song-loop --song-take`**, which is the other scheduler entirely: a
+  tempo map with a step in it, a meter change, a loop seam every few seconds
+  with voices ringing across it, and a take over the top. Neither run covers
+  the other.
 
 ## Coaching pipeline — latency tiers
 
@@ -289,3 +374,43 @@ Key rules:
 - Never run destructive git on uncommitted work (`reset --hard`,
   `checkout .`, `restore .`, `clean -fd`). A day of work was lost to
   this on 2026-05-14.
+
+## When a worktree's work is merged, clean up after it
+
+On 2026-09-20 this repo was holding 176 GB it did not need: a 109 GB
+`src-tauri/target/debug` in the main checkout, 120 GB of per-worker build
+caches from one night, and forty worktrees nobody had looked at since
+their branch landed. Whoever merges a branch finishes the job, in the
+same session, before saying the work is done:
+
+1. **Only a worktree that is both merged and clean.** Merged means its
+   HEAD is an ancestor of the branch it was for (`git merge-base
+   --is-ancestor <head> <main|feature-branch>`). Clean means `git status
+   --porcelain` is empty, or shows only the two vitest snapshot files and
+   `git diff --numstat` on them is empty (a test run rewrites their line
+   endings and nothing else). Anything else — uncommitted work, an
+   unmerged branch, a long-lived one such as `mobile` — is left exactly
+   as it is and named in the report. When in doubt it stays.
+2. **Unlink before you remove.** If the worktree's `node_modules` is a
+   junction to another checkout's, remove the link first (`cmd /c rmdir
+   <path>\node_modules`). Deleting a tree through a junction empties the
+   folder it points at.
+3. **`git worktree remove <path>`, then `git worktree prune`.** Never
+   delete the folder by hand and never delete the branch: the branch is
+   the record and costs nothing.
+4. **Delete the build caches the work created**: the worktree's own
+   `src-tauri/target`, and any short `CARGO_TARGET_DIR` a brief handed
+   out (`C:\yt-*`). A worker's cache is 12–15 GB. Check nothing is running
+   out of it first. They rebuild; nothing else in them is worth keeping.
+5. **Leave what is not a cache.** `C:\yt06models` holds the GGUF models
+   the jitter probe and the LLM smoke tests need. Downloads, recordings,
+   fixtures and anything under a data directory are never clean-up.
+6. **Look at the main checkout's `src-tauri/target` while you are there.**
+   Past ~30 GB, delete `target/debug` (keep `release`) when nothing is
+   running from it, and say that the next `tauri dev` is a full rebuild.
+7. **Say what you freed and what you left**, with sizes, and why each
+   thing that was left was left.
+
+An orchestrator running several workers does steps 1–4 for each worker as
+its branch is merged and verified, not at the end of the night: ten idle
+caches are 120 GB.

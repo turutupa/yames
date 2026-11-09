@@ -266,7 +266,13 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
       : t("common.durationSec", { s: sec });
   };
 
-  const activeBeat = currentBeat ? currentBeat.beat % beatsPerBar : -1;
+  // `measureBeat`, not `beat % beatsPerBar`: `beat` is the click's own
+  // counter and it does not reset when the bar does, so after a grouping
+  // change mid-play the modulo runs out of phase with the bar and lights a
+  // dot the player is not on. The widget and the zen screen were both moved
+  // off this same modulo, for this same reason; the drill's dots were the
+  // last ones left on it.
+  const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
   // The live count-in is the engine's now, not the ramp's (U9.5). `ramp.active`
   // still gates the readout because this is the drill's screen and only a

@@ -3,7 +3,8 @@
     "metronome": "Máy đếm nhịp",
     "setlist": "Setlist",
     "drill": "Luyện tempo",
-    "jam": "Jam"
+    "jam": "Jam",
+    "songs": "Bài hát"
   },
   "tooltip": {
     "zen": "Thiền",
@@ -45,7 +46,8 @@
     "save": "Lưu cài đặt sẵn",
     "delete": "Xóa",
     "newPreset": "Cài đặt mới",
-    "newDrill": "Bài tập mới"
+    "newDrill": "Bài tập mới",
+    "titleSongs": "Bài hát"
   },
   "emptyStates": {
     "presets": {
@@ -73,7 +75,8 @@
     "inputOff": "Tắt đầu vào",
     "coachOnPlay": "Huấn luyện viên nghe khi bạn bấm phát",
     "coachQuiet": "Huấn luyện viên im lặng giữa mỗi bước",
-    "countIn": "Đếm vào"
+    "countIn": "Đếm vào",
+    "backToStart": "Về đầu bài"
   },
   "rail": {
     "label": "Chế độ và thư viện",

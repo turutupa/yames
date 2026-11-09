@@ -1,0 +1,379 @@
+{
+  "songs": {
+    "import": "Een nummer importeren",
+    "dismiss": "OK",
+    "tuning": "Stemming",
+    "capoLabel": "Capo",
+    "capo": "Capo op fret {{fret}}",
+    "meter": "Maatsoort",
+    "tempo": "Tempo",
+    "bpm": "{{bpm}} BPM",
+    "range": "Maten",
+    "fromBar": "Van",
+    "toBar": "Tot",
+    "wholeSong": "Hele nummer",
+    "barsCount": "{{count}} maat",
+    "barsCount_other": "{{count}} maten",
+    "sections": "Delen",
+    "speed": "Snelheid",
+    "percent": "{{percent}}%",
+    "speedNote": "De klik loopt op {{bpm}} BPM",
+    "loop": "Herhalen",
+    "loopNote": "Speelt de maten hierboven steeds opnieuw",
+    "dropHere": "Laat het bestand los om het te openen",
+    "band": {
+      "label": "Wie je hoort",
+      "click": "Klik",
+      "drums": "Drums",
+      "bass": "Bas",
+      "keys": "Toetsen",
+      "levelFor": "Hoe hard {{lane}} staat",
+      "muteFor": "{{lane}} uitzetten",
+      "note": "Zet de balans terwijl je speelt. Yames onthoudt hem voor dit nummer.",
+      "leftOut": "{{tracks}} zit in dit bestand, maar Yames heeft niemand die het speelt.",
+      "leftOut_other": "{{tracks}} zitten in dit bestand, maar Yames heeft niemand die ze speelt.",
+      "droppedNotes": "{{count}} noot in dit bestand is voor een instrument dat de band niet heeft.",
+      "droppedNotes_other": "{{count}} noten in dit bestand zijn voor instrumenten die de band niet heeft.",
+      "myPart": "Mijn partij",
+      "soloShort": "S",
+      "soloFor": "Alleen {{lane}} horen",
+      "tooManyParts": "{{tracks}} blijft stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
+      "tooManyParts_other": "{{tracks}} blijven stil: dit bestand heeft meer partijen dan er tegelijk kunnen klinken.",
+      "turnedDown": "{{count}} speler zachter gezet",
+      "turnedDown_other": "{{count}} spelers zachter gezet",
+      "drumsLabel": "Drums",
+      "drumsKit": "Yames' set",
+      "drumsFile": "Die van het bestand"
+    },
+    "countIn": {
+      "counting": "Je wordt ingeteld"
+    },
+    "engine": {
+      "cannotPlay": "Yames kan dit nummer nu niet met de band spelen. De klik houdt gewoon de tijd.",
+      "busy": "Iets anders gebruikt het geluid, dus het nummer is gestopt. Druk weer op afspelen als je zover bent."
+    },
+    "empty": {
+      "title": "Haal een nummer binnen dat je al hebt",
+      "body": "Open een Guitar Pro- of MusicXML-bestand en Yames laat je de tab zien, houdt de tijd en volgt waar je bent. Laat het bestand ergens op dit scherm los, of kies er een.",
+      "private": "Het bestand blijft op deze computer. Er wordt niets geüpload.",
+      "bodyShort": "Guitar Pro of MusicXML. Laat het bestand ergens op dit scherm los, of kies er een.",
+      "stays": "Het blijft op deze computer, en Yames bewaart een eigen kopie."
+    },
+    "tab": {
+      "drawing": "De muziek wordt opgemaakt...",
+      "failed": "Yames heeft dit bestand gelezen maar kan het niet tekenen. De maten en de tijd werken gewoon."
+    },
+    "picker": {
+      "title": "Kies je partij",
+      "which": "Welke partij speel je?",
+      "strings": "{{count}} snaar",
+      "strings_other": "{{count}} snaren",
+      "notTab": "Niet als tab geschreven",
+      "cancel": "Nu niet"
+    },
+    "warn": {
+      "tempoFlattened": "Het tempo glijdt in {{count}} maat. Yames zet het in plaats daarvan om op de maatstreep.",
+      "tempoFlattened_other": "Het tempo glijdt in {{count}} maten. Yames zet het in plaats daarvan om op de maatstreep.",
+      "barOverfilled": "Maat {{bar}} bevat meer dan de maatsoort toelaat. Hij wordt gespeeld zoals hij er staat."
+    },
+    "library": {
+      "add": "Een nummer importeren",
+      "empty": "Nog geen nummers",
+      "remove": "Uit Yames halen",
+      "due": "Aan de beurt",
+      "dueTitle": "Je wilde hierop terugkomen",
+      "starter": "Meegeleverd",
+      "starterTitle": "Kwam met Yames mee. Verwijder hem wanneer je wilt.",
+      "removeTitle": "{{name}} verwijderen?",
+      "removeBody": "Het hele nummer gaat weg: elke partij ervan, alles wat Yames erover onthoudt en de kopie van het bestand die Yames bewaart. Dit kan niet ongedaan worden gemaakt.",
+      "removeTakes": "{{count}} opname ervan gaat mee.",
+      "removeTakes_other": "{{count}} opnames ervan gaan mee.",
+      "removeNoTakes": "Je hebt er nog niets van opgenomen.",
+      "removeConfirm": "Verwijderen",
+      "removeCancel": "Bewaren"
+    },
+    "review": {
+      "title": "Hoe dat ging",
+      "summary": "Maten {{bars}} op {{percent}}% — {{hits}} van {{of}} noten zaten goed",
+      "again": "Nog een keer",
+      "working": "Aan het terugluisteren...",
+      "passes": "Welke ronde",
+      "pass": "Ronde {{n}}",
+      "nothingToSay": "Daar viel niets op. Speel het nog eens, dan heeft de coach meer om op af te gaan.",
+      "chordsHonesty": "Ik kan de noten binnen akkoorden nog niet controleren, alleen wanneer ze vallen.",
+      "notSaved": "Yames kon deze niet opschrijven, dus de volgende keer is er niets om mee te vergelijken.",
+      "tooShort": "Dat was te kort om te beoordelen. Speel minstens acht noten van de passage, dan heeft de coach er iets over te zeggen.",
+      "moreLabel": "Wat nog meer ({{count}})",
+      "moreLabel_other": "Wat nog meer ({{count}})",
+      "lessLabel": "Rest verbergen",
+      "tab": {
+        "nothing": "In deze maten is niets gespeeld."
+      },
+      "mark": {
+        "onTime": "Op tijd",
+        "slightlyEarly": "Iets te vroeg",
+        "early": "Te vroeg",
+        "slightlyLate": "Iets te laat",
+        "late": "Te laat",
+        "missed": "Gemist",
+        "notAssessed": "Niet beoordeeld",
+        "extra": "Extra noot",
+        "accentQuiet": "Staat met een accent, maar kwam er niet harder uit"
+      },
+      "bars": {
+        "one": "in maat {{bar}}",
+        "range": "in de maten {{from}}–{{to}}",
+        "here": "in deze passage"
+      },
+      "amount": {
+        "hair": "een haartje",
+        "thirtySecond": "ongeveer een tweeëndertigste",
+        "sixteenth": "ongeveer een zestiende",
+        "tripletEighth": "ongeveer een derde tel",
+        "eighth": "ongeveer een achtste",
+        "mostOfABeat": "bijna een hele tel",
+        "beat": "een hele tel"
+      },
+      "when": {
+        "early": "te vroeg",
+        "late": "te laat"
+      },
+      "goes": "{{count}} ronde",
+      "goes_other": "{{count}} rondes",
+      "notes": "{{count}} noot",
+      "notes_other": "{{count}} noten",
+      "say": {
+        "consistentMiss": {
+          "1": "Elke keer dezelfde plek — {{bars}} raak je het kwijt, bij {{affected}} van {{goes}}.",
+          "2": "Het valt uit elkaar {{bars}}: {{affected}} van de {{passes}} keer weg.",
+          "3": "De rest houdt stand. Het is {{bars}} dat steeds verdwijnt, bij {{affected}} van {{goes}}."
+        },
+        "rushing": {
+          "1": "Je loopt voor de klik uit {{bars}} — {{amount}} te vroeg, de hele weg.",
+          "2": "Er zit haast in {{bars}}: gemiddeld {{amount}} te vroeg.",
+          "3": "Ga wat verder achteroverzitten {{bars}}. Daar land je {{amount}} te vroeg."
+        },
+        "dragging": {
+          "1": "Je loopt achter de klik aan {{bars}} — {{amount}} te laat.",
+          "2": "Het sleept {{bars}}: de noten landen {{amount}} na de tel.",
+          "3": "Leun er wat meer in {{bars}}. Het zit {{amount}} te laat."
+        },
+        "afterShift": {
+          "1": "Elke keer dat je hand verschuift {{bars}}, komt de volgende noot {{amount}} {{when}}.",
+          "2": "De positiewissel {{bars}} kost je {{amount}} {{when}} op de noot erna.",
+          "3": "Laat de wissel {{bars}} landen en de rest volgt — nu is de noot erna {{amount}} {{when}}."
+        },
+        "fallsApart": {
+          "1": "Je begint schoon {{bars}} en raakt het tegen het eind kwijt.",
+          "2": "Het is de tweede helft die het begeeft {{bars}} — het begin staat.",
+          "3": "Uithoudingsvermogen, geen noten: {{bars}} wordt het rommeliger naarmate je verder komt."
+        },
+        "extras": {
+          "1": "Er staan noten {{bars}} waar niemand om vroeg — {{extras}}.",
+          "2": "Je legt er {{extras}} bij {{bars}}. Laat de rusten rusten zijn.",
+          "3": "Er sluipt iets binnen {{bars}}: {{extras}} die er niet staan."
+        },
+        "uneven": {
+          "1": "Het is {{bars}} niet te vroeg of te laat — het is ongelijk. De noten landen overal.",
+          "2": "Je timing dwaalt {{bars}} in plaats van één kant op te hellen.",
+          "3": "Eerst vast, dan snel: {{bars}} is nog niets gelijkmatig, in geen van beide richtingen."
+        },
+        "beatPositionBias": {
+          "1": "Tel {{beat}} van de maat is degene die wegglipt — {{amount}} {{when}}, maat na maat.",
+          "2": "Je leunt op tel {{beat}}: {{amount}} {{when}} elke keer dat hij terugkomt.",
+          "3": "Het is tel {{beat}} die eruit ligt, maat na maat — {{amount}} {{when}}."
+        },
+        "subdivisionWeak": {
+          "1": "Noot {{position}} van elke {{outOf}} is degene die je steeds laat vallen.",
+          "2": "In elke groep van {{outOf}} is het noot {{position}} die ontbreekt.",
+          "3": "Tel de groep hardop mee — bij noot {{position}} van {{outOf}} glipt het weg."
+        },
+        "drift": {
+          "1": "Je begon met de klik en zat aan het eind {{amount}} {{when}}.",
+          "2": "Het trekt naarmate je verder komt: bij de laatste maten {{amount}} {{when}}.",
+          "3": "Het tempo onder je handen glijdt over het hele stuk weg — aan het eind zit je {{when}}."
+        },
+        "tempoCeiling": {
+          "1": "{{hold}} houdt het. Op {{collapse}} valt het uit elkaar.",
+          "2": "Je plafond ligt hier op {{hold}} — {{collapse}} is nog niet van jou.",
+          "3": "{{hold}} is van jou. {{collapse}} is het volgende om te verdienen, niet het tempo van vandaag."
+        },
+        "improved": {
+          "1": "Dat is beter — {{bars}} is het {{ms}} ms vaster dan de vorige keer.",
+          "2": "Er is iets bewogen: je houdt {{bars}} waar het eerder wegglipte.",
+          "3": "Echte vooruitgang {{bars}} — {{ms}} ms strakker dan je eerdere rondes."
+        },
+        "clean": {
+          "1": "Er valt niets te repareren {{bars}} — goed in alle {{goes}}.",
+          "2": "Die is van jou: {{bars}}, {{goes}}, geen misser.",
+          "3": "Je speelde het {{bars}} elke keer goed. Laat het liggen en kom er later op terug."
+        }
+      }
+    },
+    "stage": {
+      "backToTab": "Terug naar de tab",
+      "selectedBars": "Maten {{bars}} gekozen",
+      "wholeSong": "Het hele nummer",
+      "portionSays": "{{count}} maat · {{state}}",
+      "portionSays_other": "{{count}} maten · {{state}}",
+      "looping": "op herhaling",
+      "once": "één keer door",
+      "timeRound": {
+        "one": "Keer {{n}}",
+        "two": "Keer {{n}}",
+        "few": "Keer {{n}}",
+        "other": "Keer {{n}}"
+      },
+      "keepPortion": "Dit stuk bewaren",
+      "keepPortionNote": "Kies eerst maten op de tab en geef ze dan een naam",
+      "portionPlaceholder": "Geef dit stuk een naam",
+      "renamePortion": "Hernoemen",
+      "deletePortion": "Deze vergeten",
+      "portionTitle": "{{name}} — op {{percent}}%",
+      "tabLabel": "De tab. Klik op een maat om daarheen te gaan, of sleep over maten om een stuk te kiezen."
+    },
+    "offer": {
+      "justArrived": "staat net in je downloads",
+      "justArrivedSized": "staat net in je downloads · {{size}}",
+      "more": "nog {{n}} in de wacht",
+      "open": "Openen",
+      "opening": "Bezig met openen...",
+      "notThisOne": "Deze niet",
+      "failed": "Yames kon dat bestand niet openen. Misschien wordt het nog gedownload."
+    },
+    "keepsCopy": "Yames bewaart een eigen kopie van elk bestand dat je binnenhaalt, dus je downloads opruimen kost je niets.",
+    "exportOriginal": "Bestand ergens opslaan",
+    "exporting": "Bezig met opslaan...",
+    "exportDone": "Opgeslagen.",
+    "exportFailed": "Yames kon het bestand daar niet schrijven.",
+    "findTab": {
+      "what": "Nummer en artiest",
+      "link": "Zoek er een tab bij",
+      "note": "Opent je eigen browser met een gewone zoekopdracht. Yames zoekt niets voor je op.",
+      "ask": "Heb je het bestand nog niet?"
+    },
+    "camera": {
+      "cannotPlay": "Het beeld speelde niet af.",
+      "corner": {
+        "bottomLeft": "Linksonder",
+        "bottomRight": "Rechtsonder",
+        "topLeft": "Linksboven",
+        "topRight": "Rechtsboven"
+      },
+      "denied": "De camera werd niet toegestaan. Geef Yames toestemming in je systeeminstellingen en zet hem daarna weer aan.",
+      "device": "Welke camera",
+      "deviceNumbered": "Camera {{n}}",
+      "failed": "De camera ging niet open.",
+      "guideBody": "Krijg allebei je handen in beeld — die op de hals en die bij de snaren.",
+      "guideFlip": "Ik speel linkshandig",
+      "guideGot": "Duidelijk",
+      "introNotNow": "Nu niet",
+      "introPrivate": "Er wordt niets geüpload en niets ergens naartoe gestuurd. Een opname verwijderen verwijdert het beeld mee.",
+      "introStart": "Camera aanzetten",
+      "introTitle": "Over de camera",
+      "introWhat": "De camera neemt je op terwijl je speelt, vanaf het aftellen tot je stopt. Het geluid is de opname — jouw spel met de band, zoals het er al is.",
+      "introWhere": "Het wordt als één videobestand naast de opname weggeschreven, in de eigen map van deze app op deze machine, en blijft daar tot je het verwijdert.",
+      "label": "Camera",
+      "lead": "je handen, bewaard naast de noten — er gaat niets van deze machine af",
+      "lostPicture": "De camera stopte halverwege. De opname is er nog, het beeld niet.",
+      "move": "Voorbeeld verplaatsen",
+      "nextSlip": "Volgende misser",
+      "noCamera": "Er zit geen camera op deze machine.",
+      "noOffset": "Bij deze opname is niet gemeten hoe beeld en geluid ten opzichte van elkaar staan, dus ze beginnen gelijk. Schuif tot je handen met de noten vallen.",
+      "nudge": "Beeld gelijkzetten",
+      "nudgeAt": "{{ms}} ms",
+      "nudgeEarlier": "Beeld eerder",
+      "nudgeHow": "Lijken je handen voor of achter het geluid te lopen, schuif het beeld dan tot ze samen vallen. Het wordt voor deze camera onthouden.",
+      "nudgeLater": "Beeld later",
+      "off": "Het beeld opnemen",
+      "on": "Camera aan",
+      "pause": "Pauze",
+      "pitchDropped": "Langzamer zakt hier de toonhoogte mee met het tempo.",
+      "pitchKept": "De toonhoogte blijft staan, ook langzamer.",
+      "play": "Afspelen",
+      "prevSlip": "Vorige misser",
+      "preview": "Jij, zoals de camera je ziet",
+      "slips": "Naar een fout springen",
+      "tape": "De ronde, noot voor noot",
+      "tickOff": "Maat {{bar}}, {{ms}} ms",
+      "tickPlain": "Maat {{bar}}",
+      "unavailable": "Deze versie kan geen beeld opnemen. Al het andere op dit scherm werkt zoals altijd.",
+      "watchIt": "Bekijken",
+      "watchTitle": "Terugkijken",
+      "watchingAll": "De hele ronde.",
+      "watchingBars": "Maten {{bars}}, rondje na rondje.",
+      "sinkUnsupported": "Deze versie kan de opname alleen via de gewone luidsprekers van de computer afspelen, niet via {{device}}.",
+      "sinkUnmatched": "Hij speelt via de gewone luidsprekers van de computer — {{device}} was hiervandaan niet te vinden.",
+      "peek": "Jezelf zien",
+      "peekNote": "Check je beeld. Het sluit zodra je speelt."
+    },
+    "clip": {
+      "save": "Als video opslaan",
+      "go": "Video maken",
+      "cancel": "Stoppen",
+      "making": "Bezig — {{percent}}%",
+      "whichBars": "Welke maten",
+      "chosenBars": "Deze maten",
+      "wholeTake": "De hele opname",
+      "shape": "Vorm",
+      "wide": "Liggend",
+      "tall": "Staand",
+      "withMarks": "Markeringen tonen",
+      "realTime": "Hij neemt op terwijl hij speelt, dus het duurt net zo lang als de muziek: {{length}}.",
+      "isMp4": "Je krijgt een MP4, die overal te plaatsen is.",
+      "isWebm": "Je krijgt een WebM. Sommige plekken nemen alleen MP4.",
+      "saved": "Opgeslagen in {{where}}",
+      "failed": "De video kon niet gemaakt worden. Er is niets opgeslagen.",
+      "unavailable": "Deze versie kan geen video opslaan.",
+      "bar": "Maat",
+      "bpmUnit": "BPM",
+      "brand": "Yames-merk",
+      "brandNote": "Een klein Yames-logo en yames.app in de hoek. Zo vindt wie je video ziet de app.",
+      "showInFolder": "Toon in map",
+      "postItTo": "Plaatsen op",
+      "dragItIn": "Open er een en sleep het bestand erin — Yames uploadt niets en heeft geen account nodig.",
+      "webmWarning": "Open er een en sleep het bestand erin. Dit is een WebM, en de meeste nemen alleen MP4 — een gratis omzetter maakt er een van.",
+      "underPicture": "Onder het beeld",
+      "band": {
+        "tab": "De tab",
+        "marks": "Alleen de tekens",
+        "none": "Niets"
+      }
+    },
+    "compare": {
+      "title": "Maten {{bars}}, toen en nu",
+      "then": "Toen",
+      "now": "Nu",
+      "facts": "{{percent}}% · {{bpm}} BPM · {{score}}",
+      "soundOnly": "Alleen geluid — bij deze stond de camera uit.",
+      "locked": "De twee lopen per maat gelijk, niet per klok, dus een tragere beurt past ook."
+    },
+    "takes": {
+      "withPicture": "Met beeld",
+      "noneFilmed": "Hiervan is er geen gefilmd.",
+      "was": "Maten {{bars}} · {{percent}}% · {{goes}} · {{score}}"
+    },
+    "track": {
+      "choose": "Welke partij je leest",
+      "percussion": "Drums — niet om te volgen",
+      "notTab": "Niet als tab geschreven",
+      "empty": "Hier staat niets in"
+    },
+    "strip": {
+      "more": "Meer"
+    },
+    "view": {
+      "tabOnly": "Tab",
+      "tabAndNotes": "Tab + noten",
+      "notationNote": "Laat ook de notenbalk boven de tab zien",
+      "bigger": "Groter",
+      "smaller": "Kleiner",
+      "size": "Grootte"
+    },
+    "clickChip": "Klik",
+    "clickNote": "Tikt mee met het nummer. Staat eerst uit als het bestand zijn eigen band meebrengt.",
+    "notes": {
+      "label": "Opmerkingen over dit bestand"
+    }
+  }
+}

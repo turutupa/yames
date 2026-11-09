@@ -13,7 +13,11 @@ import {
   takesDirSize,
 } from "../../../ipc";
 import { sortTakes } from "../../../jam";
+import { TAKES_INTRO_KEY } from "../../../jam/takes";
+import { useTakeSound } from "../../../takes/useTakeSound";
+import type { TakeSoundState } from "../../../takes/useTakeSound";
 import type { Jam, JamTake } from "../../../jam";
+import type { TakeSound } from "../../../jam/types";
 
 /**
  * The takes of the jam on the stage: what is on the shelf, what is being
@@ -56,6 +60,11 @@ export type JamTakesState = {
   recording: boolean;
   /** Seconds of the take so far, for the mark on the transport. */
   recordedSeconds: number;
+  /**
+   * What the take now recording is made of — fixed when it started, so the
+   * indicator says the same thing for the whole length of it.
+   */
+  recordingSound: TakeSound;
   /** The take playing back, or null. The band is silent while one plays. */
   playingId: string | null;
   /**
@@ -84,6 +93,15 @@ export type JamTakesState = {
   confirmIntro: () => void;
   /** "Not now" — nothing changes, and it will ask again next time. */
   cancelIntro: () => void;
+  /**
+   * What a take is made of, and whether this machine can record what it plays
+   * (`plans/SONGS.md` A12).
+   *
+   * Handed straight through from `useTakeSound` rather than re-modelled here:
+   * the answer belongs to the machine, not to the jam, and Songs asks the
+   * same hook the same question.
+   */
+  soundSource: TakeSoundState;
 };
 
 interface UseJamTakesArgs {
@@ -103,16 +121,23 @@ interface UseJamTakesArgs {
   countingIn: boolean;
   /** Write `Jam.takes` on the loaded jam. The record owns the switch. */
   onSetTakes: (next: boolean) => void;
+  /**
+   * W32 — the two moments the camera has to rendezvous with, exactly as
+   * `useSongTakes` has them.
+   *
+   * `onTakeStarted` fires on the first bar after the count-in, which is the
+   * frame worth keeping for the shelf's thumbnail; `onTakeFinished` fires
+   * with the take the engine handed back, or `null` when there was not one —
+   * and `null` is what tells the camera to throw its recording away rather
+   * than leave a file nothing lists.
+   *
+   * Optional, never awaited, and every call is inside a `try`: a camera that
+   * threw here would be a camera that lost somebody's take, which is the one
+   * thing `useTakeCamera`'s header says cannot happen.
+   */
+  onTakeStarted?: () => void;
+  onTakeFinished?: (take: JamTake | null) => void;
 }
-
-/**
- * The store key that says the dialog has been read.
- *
- * The APP's, not the jam's: what a take is only has to be explained once, and
- * a per-jam flag would ask again for every jam in the library — which reads
- * as the app not trusting the answer you already gave.
- */
-const TAKES_INTRO_KEY = "jam.takesIntroSeen";
 
 export function useJamTakes({
   jam,
@@ -120,6 +145,8 @@ export function useJamTakes({
   isPlaying,
   countingIn,
   onSetTakes,
+  onTakeStarted,
+  onTakeFinished,
 }: UseJamTakesArgs): JamTakesState {
   const [available, setAvailable] = useState<boolean | null>(null);
   const [takes, setTakes] = useState<JamTake[]>([]);
@@ -128,6 +155,19 @@ export function useJamTakes({
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [dirBytes, setDirBytes] = useState(0);
   const [introOpen, setIntroOpen] = useState(false);
+  const soundSource = useTakeSound();
+  /**
+   * The source the take now recording was STARTED with.
+   *
+   * Its own state rather than a read of the live switch, because the
+   * indicator has to say what is actually being recorded for the whole length
+   * of the take. If the musician moves the switch mid-take, the take does not
+   * change under them and the screen must not claim it did.
+   */
+  const [recordingSound, setRecordingSound] = useState<TakeSound>("yamesAndInput");
+  /** The live value for the effect below, without re-arming it on a change. */
+  const soundRef = useRef(soundSource.sound);
+  soundRef.current = soundSource.sound;
   /**
    * Whether the dialog has been read, as far as we know.
    *
@@ -137,6 +177,17 @@ export function useJamTakes({
    * means the worst a failed read can do is ask once more.
    */
   const introSeen = useRef(false);
+  /**
+   * The camera's two doors, behind refs.
+   *
+   * `useSongTakes` does the same and its comment says why: the effect below
+   * is keyed on the edges of recording, and re-arming it every time the
+   * camera's hook produced a new function identity would restart the take.
+   */
+  const startedDoor = useRef(onTakeStarted);
+  const finishedDoor = useRef(onTakeFinished);
+  startedDoor.current = onTakeStarted;
+  finishedDoor.current = onTakeFinished;
 
   /** So `stop` can tell "we started one" from "the transport merely stopped". */
   const recordingRef = useRef(false);
@@ -282,7 +333,17 @@ export function useJamTakes({
       startedAt.current = Date.now();
       setRecording(true);
       setRecordedSeconds(0);
-      void startTake(id).catch(() => {
+      // Fixed for the length of the take, here, at the one moment it is
+      // decided. See `recordingSound`.
+      const source = soundRef.current;
+      setRecordingSound(source);
+      // The first bar after the count-in, which is the frame the shelf wants.
+      try {
+        startedDoor.current?.();
+      } catch {
+        // The camera's problem, never the take's.
+      }
+      void startTake(id, source).catch(() => {
         // The engine said no. No mark on the transport, no phantom take, and
         // the section switches to saying this build cannot record — which is
         // the truth, and better than a red dot over nothing.
@@ -291,6 +352,12 @@ export function useJamTakes({
         startedAt.current = null;
         setRecording(false);
         setAvailable(false);
+        // No take, so nothing for a picture to be filed under.
+        try {
+          finishedDoor.current?.(null);
+        } catch {
+          /* the camera's problem */
+        }
       });
       return;
     }
@@ -303,6 +370,14 @@ export function useJamTakes({
       setRecordedSeconds(0);
       void stopTake()
         .then((take) => {
+          // The camera first, and with whatever the engine said — `null`
+          // included, because that is what tells it to throw its recording
+          // away rather than leave one nothing lists.
+          try {
+            finishedDoor.current?.(take ?? null);
+          } catch {
+            /* the camera's problem */
+          }
           // `null` is the engine saying nothing was recording, which is not a
           // failure and not a take.
           if (!take) return;
@@ -406,6 +481,8 @@ export function useJamTakes({
     takes,
     recording,
     recordedSeconds,
+    recordingSound,
+    soundSource,
     playingId,
     dirBytes,
     play,

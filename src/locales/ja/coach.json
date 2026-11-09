@@ -26,7 +26,8 @@
     "send": "送信",
     "today": "今日",
     "yesterday": "昨日",
-    "noteSpacingTrend": "音符間隔の推移"
+    "noteSpacingTrend": "音符間隔の推移",
+    "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
   "coachDetail": {
     "exercises": "エクササイズ",
@@ -35,9 +36,6 @@
     "beatPlacement": "ビートの位置"
   },
   "coachReport": {
-    "cov": "カバレッジ",
-    "eff": "効率",
-    "grid": "グリッド",
     "segment": "セグメント",
     "thinkingAria": "コーチが話す準備をしています",
     "qualifier": {
@@ -68,7 +66,13 @@
     "pocketOnBeat": "ジャスト",
     "pocketEarly": "平均 {{ms}}ms 早く演奏していました",
     "pocketLate": "平均 {{ms}}ms 遅く演奏していました",
-    "pocketCentred": "タイミングはビートのど真ん中でした（平均 ±5ms）"
+    "pocketCentred": "タイミングはビートのど真ん中でした（平均 ±5ms）",
+    "covLabel": "鳴った拍",
+    "covTitle": "こちらが待っていた拍のうち、実際に鳴ったのはどれだけか",
+    "effLabel": "拍に乗った音",
+    "effTitle": "聴こえた音のうち、拍と拍の間ではなく拍の上に落ちたのはどれだけか",
+    "gridLabel": "クリックへの密着",
+    "gridTitle": "この区間全体がどれだけクリックに沿っていたか"
   },
   "eval": {
     "today": "今日",

@@ -34,7 +34,7 @@ pub struct Onset {
 /// (`max(profile.refractory_floor_ms, subdivision_interval_ms × k)`)
 /// without coupling the detector to the engine module.
 ///
-/// Both fields are atomically writeable so the engine can update them
+/// Every field is atomically writeable so the engine can update them
 /// per-beat without re-acquiring the SharedState mutex.
 #[derive(Debug)]
 pub struct TempoContext {
@@ -47,6 +47,16 @@ pub struct TempoContext {
     /// The `detect_loop` gates analysis on this so onsets aren't
     /// accumulated when there's no beat grid to match against.
     is_playing: AtomicBool,
+    /// Roadmap 1.3 — the smallest inter-onset interval the PLAYER is
+    /// producing, in centi-milliseconds. 0 = unknown (nothing has told
+    /// us yet), which is the cold-start state and the state free play
+    /// stays in until `RhythmInference` locks.
+    ///
+    /// Written by the timing analyzer (from the locked divisor) and, when
+    /// a `ScoreSchedule` is loaded, from the schedule's smallest gap —
+    /// the score knows better than the inference. Read by `detect_loop`
+    /// every hop.
+    played_interval_cms: AtomicU32,
 }
 
 impl TempoContext {
@@ -55,6 +65,7 @@ impl TempoContext {
             bpm_x100: AtomicU32::new((bpm as u32) * 100),
             subdivision: AtomicU32::new(subdivision.max(1) as u32),
             is_playing: AtomicBool::new(false),
+            played_interval_cms: AtomicU32::new(0),
         }
     }
     pub fn set_bpm(&self, bpm: u16) {
@@ -83,6 +94,64 @@ impl TempoContext {
             return 500.0;
         }
         (60_000.0 / bpm) / subdiv
+    }
+
+    /// Roadmap 1.3 — tell the detector the smallest interval between
+    /// two notes the player is actually producing. `None` clears it
+    /// back to "unknown" (the detector then falls back to the audible
+    /// subdivision, which is what it always used before).
+    ///
+    /// Called from the timing-analysis thread, once per refit, and from
+    /// the schedule loader. Values are clamped to a sane band so a
+    /// pathological divisor or a corrupt schedule can never talk the
+    /// refractory down to zero or up past a whole note.
+    pub fn set_played_interval_ms(&self, interval_ms: Option<f32>) {
+        let cms = match interval_ms {
+            Some(ms) if ms.is_finite() && ms > 0.0 => {
+                (ms.clamp(1.0, 4_000.0) * 100.0).round() as u32
+            }
+            _ => 0,
+        };
+        self.played_interval_cms.store(cms, Ordering::Relaxed);
+    }
+
+    /// The played interval last published, or `None` while unknown.
+    pub fn played_interval_ms(&self) -> Option<f32> {
+        let cms = self.played_interval_cms.load(Ordering::Relaxed);
+        if cms == 0 {
+            None
+        } else {
+            Some(cms as f32 / 100.0)
+        }
+    }
+
+    /// Roadmap 1.3 — the interval the refractory and the ghost window
+    /// are keyed to: the FINER of the audible subdivision and what the
+    /// player is actually playing.
+    ///
+    /// Before this existed the detector only knew the click. A quarter
+    /// click at 100 BPM therefore gave a 450 ms refractory and swallowed
+    /// every played 16th before the analyzer ever saw it — the bug
+    /// roadmap 1.3 exists to fix, and the one thing that made Songs
+    /// impossible, since a song's rhythm is never the click's.
+    ///
+    /// It is the *minimum* of the two rather than the played interval
+    /// alone (which is the literal reading of 1.3) for a reason worth
+    /// keeping: taking the played value outright would RAISE the
+    /// refractory whenever somebody plays sparsely over a fine click —
+    /// quarters over a 16th click would widen it from 150 ms to 600 ms —
+    /// and the moment they went back to 16ths those onsets would be
+    /// swallowed again, with no way for the inference to notice, because
+    /// the evidence it needs is exactly what got swallowed. The
+    /// deadlock 1.3 removes, reintroduced from the other side. Taking
+    /// the finer of the two never blinds the detector; the instrument
+    /// floor still protects it from firing on its own resonance.
+    pub fn detection_interval_ms(&self) -> f32 {
+        let audible = self.subdivision_interval_ms();
+        match self.played_interval_ms() {
+            Some(played) => played.min(audible),
+            None => audible,
+        }
     }
 }
 
@@ -154,6 +223,84 @@ pub const REFRACTORY_SUBDIVISION_FACTOR: f32 = 0.75;
 /// retained for reference and potential future use.
 #[allow(dead_code)]
 pub const GHOST_AMPLITUDE_RATIO: f32 = 0.70;
+
+/// What the refractory gate decided about one candidate onset.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GateDecision {
+    /// Inside the refractory period — the detector's own echo, or a
+    /// resonance peak. Never emitted.
+    Blocked,
+    /// POSTMATCH_1's hard ghost window: past the refractory but still
+    /// closer than one expected note-to-note gap. Emitted for the
+    /// post-match best-candidate matcher to arbitrate, but it does NOT
+    /// move the refractory anchor, so the real next note is not blocked
+    /// behind somebody's pick decay.
+    Ghost,
+    /// A note. Emitted, and the refractory anchor moves to it.
+    Accepted,
+}
+
+/// The refractory rule, lifted out of `detect_loop` so it can be
+/// exercised without an audio device. The loop holds one of these and
+/// feeds it every hop that cleared aubio and the noise floor; the
+/// fixture suite holds one and feeds it a synthetic stream of played
+/// notes. One rule, both callers — a test of a second copy would prove
+/// nothing about what ships.
+#[derive(Debug, Default)]
+pub struct RefractoryGate {
+    last_onset_ns: u64,
+    /// GHOST_1: amplitude of the last accepted (non-ghost) onset. Only
+    /// its being non-zero still matters — see the ghost check below and
+    /// `GHOST_AMPLITUDE_RATIO` for why amplitude itself was abandoned
+    /// as a discriminator.
+    last_amplitude: f32,
+}
+
+impl RefractoryGate {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// The refractory period for a given expected note-to-note interval.
+    /// `max(instrument floor, interval × 0.75)` — the floor is physics
+    /// (how fast this instrument can articulate), the multiplier is the
+    /// resonance window measured in the forensics above.
+    pub fn refractory_ms(interval_ms: f32, floor_ms: u32) -> f32 {
+        (interval_ms * REFRACTORY_SUBDIVISION_FACTOR).max(floor_ms as f32)
+    }
+
+    /// Clear the anchor — used when the click stops, so the refractory
+    /// clock does not span the gap.
+    pub fn reset(&mut self) {
+        self.last_onset_ns = 0;
+        // `last_amplitude` deliberately survives: see the note on the
+        // first-onset guard in the ghost check.
+    }
+
+    /// Decide one candidate onset and update the anchor accordingly.
+    pub fn admit(&mut self, now_ns: u64, amplitude: f32, interval_ms: f32, floor_ms: u32) -> GateDecision {
+        let refractory_ns =
+            (Self::refractory_ms(interval_ms, floor_ms) as u64).saturating_mul(1_000_000);
+        if now_ns.saturating_sub(self.last_onset_ns) < refractory_ns {
+            return GateDecision::Blocked;
+        }
+        let since_last_ms = now_ns.saturating_sub(self.last_onset_ns) / 1_000_000;
+        // First-onset guard stays: with no accepted onset behind it the
+        // gap is enormous and this can never fire on the first note of
+        // a session.
+        if (since_last_ms as f32) < interval_ms && self.last_amplitude > 0.0 {
+            return GateDecision::Ghost;
+        }
+        self.last_onset_ns = now_ns;
+        self.last_amplitude = amplitude;
+        GateDecision::Accepted
+    }
+
+    /// Milliseconds since the anchor — for the diagnostic log only.
+    pub fn since_last_ms(&self, now_ns: u64) -> u64 {
+        now_ns.saturating_sub(self.last_onset_ns) / 1_000_000
+    }
+}
 
 /// Onset detector using spectral flux with adaptive threshold.
 ///
@@ -296,14 +443,9 @@ impl OnsetDetector {
         // (drum rolls, guitar tremolo) aren't blocked just because the
         // grid is quarter notes — see plan's "DO NOT key refractory off
         // the grid subdivision alone."
-        let mut last_onset_ns: u64 = 0;
-        // GHOST_1: amplitude of the last accepted (non-ghost) onset.
-        // Used to detect pick-decay resonances that land in the ghost
-        // window [refractory, sub_interval) and are significantly quieter
-        // than the original attack. No reset needed on playback stop:
-        // after the gap `since_last_ms` is huge, failing `< sub_interval_ms`
-        // so the ghost check never fires on the first real onset post-pause.
-        let mut last_onset_amplitude: f32 = 0.0;
+        // The rule itself lives in `RefractoryGate` so the fixture suite
+        // can drive the shipped decision without an audio device.
+        let mut gate = RefractoryGate::new();
 
         // Diagnostic logging — env-flag gated so logs don't ship in
         // production builds. Flip on by launching the dev shell with:
@@ -340,7 +482,7 @@ impl OnsetDetector {
                 if let Some(p) = pending.take() {
                     on_onset(p.flush());
                 }
-                last_onset_ns = 0;
+                gate.reset();
                 detector.reset();
                 continue;
             }
@@ -397,10 +539,15 @@ impl OnsetDetector {
             // tempo context. Floor (instrument physics) wins at fast
             // subdivisions; the multiplier wins at slow ones. Plan:
             // `max(profile.refractory_floor_ms, sub_interval × 0.55)`.
-            let sub_interval_ms = tempo_ctx.subdivision_interval_ms();
-            let adaptive_refractory_ms = (sub_interval_ms * REFRACTORY_SUBDIVISION_FACTOR)
-                .max(profile.refractory_floor_ms as f32);
-            let refractory_ns = (adaptive_refractory_ms as u64) * 1_000_000;
+            //
+            // Roadmap 1.3: the interval is no longer the click's. It is
+            // the finer of the click and what the player is playing —
+            // see `TempoContext::detection_interval_ms`. The ghost
+            // window below keys off the same value, so both move
+            // together and the band between them never inverts.
+            let sub_interval_ms = tempo_ctx.detection_interval_ms();
+            let adaptive_refractory_ms =
+                RefractoryGate::refractory_ms(sub_interval_ms, profile.refractory_floor_ms);
 
             // Periodic state dump — see DEBUG comment near loop start.
             // Useful diagnostic when the user says "I'm playing but no
@@ -428,22 +575,23 @@ impl OnsetDetector {
             // silence artefacts in the phase-vocoder don't fire.
             if onset_value > 0.0 && rms > noise_floor {
                 let now_ns = crate::clock::now_ns();
-                let since_last_ms = now_ns.saturating_sub(last_onset_ns) / 1_000_000;
+                let since_last_ms = gate.since_last_ms(now_ns);
 
                 // Refractory period check (skips spurious double-counts).
-                if now_ns.saturating_sub(last_onset_ns) >= refractory_ns {
-                    // POSTMATCH_1: Hard ghost window — any onset in
-                    // [refractory, sub_interval) is emitted for telemetry
-                    // but does NOT reset `last_onset_ns`. This lets the
-                    // real next note also pass the refractory and reach the
-                    // post-session best-candidate matcher, which picks the
-                    // closest onset per slot.
-                    //
-                    // The amplitude condition is removed: median ghost B/A
-                    // is 1.12 so amplitude cannot reliably distinguish
-                    // pick-decay ghosts from real notes.
-                    let is_ghost =
-                        (since_last_ms as f32) < sub_interval_ms && last_onset_amplitude > 0.0; // first-onset guard stays
+                // POSTMATCH_1: Hard ghost window — any onset in
+                // [refractory, sub_interval) is emitted for telemetry
+                // but does NOT reset the anchor. This lets the real
+                // next note also pass the refractory and reach the
+                // post-session best-candidate matcher, which picks the
+                // closest onset per slot.
+                //
+                // The amplitude condition is gone: median ghost B/A is
+                // 1.12 so amplitude cannot reliably distinguish
+                // pick-decay ghosts from real notes.
+                let decision =
+                    gate.admit(now_ns, rms, sub_interval_ms, profile.refractory_floor_ms);
+                let is_ghost = decision == GateDecision::Ghost;
+                if decision != GateDecision::Blocked {
                     if is_ghost {
                         if debug_enabled {
                             eprintln!(
@@ -451,18 +599,11 @@ impl OnsetDetector {
                                 since_last_ms, sub_interval_ms, rms,
                             );
                         }
-                        // Do NOT update last_onset_ns or last_onset_amplitude —
-                        // refractory stays anchored to the genuine preceding onset.
-                    } else {
-                        // Real onset — update refractory anchor.
-                        last_onset_ns = now_ns;
-                        last_onset_amplitude = rms;
-                        if debug_enabled {
-                            eprintln!(
+                    } else if debug_enabled {
+                        eprintln!(
                             "[onset] FIRED rms={:.4} onset_val={:.3} desc={:.3} floor={:.4} since_last={}ms",
                             rms, onset_value, detector.get_descriptor(), noise_floor, since_last_ms,
                         );
-                        }
                     }
                     // Emit onset for both ghost-window and real onsets.
                     // Ghost onsets appear in detected_onsets telemetry so the
@@ -679,6 +820,165 @@ mod tests {
         // permits 16ths at any tempo (legit hit must be 31ms early at 120 BPM
         // to be blocked — 4× the measured ±8.1ms timing spread).
         assert!(approx_eq(REFRACTORY_SUBDIVISION_FACTOR, 0.75, 1e-6));
+    }
+
+    // ── The refractory gate, lifted out of the detect loop ───────────
+
+    /// Electric guitar's floor. Every gate test uses it so the numbers
+    /// below are the ones a guitarist actually gets.
+    const GUITAR_FLOOR_MS: u32 = 40;
+
+    fn ms(n: u64) -> u64 {
+        n * 1_000_000
+    }
+
+    #[test]
+    fn the_gate_admits_the_first_note_of_a_session() {
+        let mut gate = RefractoryGate::new();
+        assert_eq!(
+            gate.admit(ms(1_000), 0.3, 150.0, GUITAR_FLOOR_MS),
+            GateDecision::Accepted,
+        );
+    }
+
+    #[test]
+    fn the_gate_blocks_the_instruments_own_echo() {
+        // 150 ms expected gap → 112.5 ms refractory. A resonance peak
+        // 60 ms after the pluck is inside it.
+        let mut gate = RefractoryGate::new();
+        gate.admit(ms(1_000), 0.3, 150.0, GUITAR_FLOOR_MS);
+        assert_eq!(
+            gate.admit(ms(1_060), 0.4, 150.0, GUITAR_FLOOR_MS),
+            GateDecision::Blocked,
+        );
+    }
+
+    #[test]
+    fn the_ghost_window_emits_without_moving_the_anchor() {
+        // POSTMATCH_1's whole point: something in [refractory, gap) is
+        // handed to the matcher, but the next real note must still get
+        // through rather than sitting behind the ghost's refractory.
+        let mut gate = RefractoryGate::new();
+        gate.admit(ms(1_000), 0.3, 150.0, GUITAR_FLOOR_MS);
+        assert_eq!(
+            gate.admit(ms(1_120), 0.3, 150.0, GUITAR_FLOOR_MS),
+            GateDecision::Ghost,
+        );
+        // Anchor never moved, so the note at +150 ms is 150 ms from the
+        // anchor and lands as a note, not as a second ghost.
+        assert_eq!(
+            gate.admit(ms(1_150), 0.3, 150.0, GUITAR_FLOOR_MS),
+            GateDecision::Accepted,
+        );
+    }
+
+    #[test]
+    fn a_quarter_click_used_to_swallow_three_sixteenths_in_four() {
+        // The bug, stated as a test. 100 BPM: 16ths are 150 ms apart.
+        // Told only the click's 600 ms, the gate accepts one note per
+        // 600 ms and ghosts one more; told the played interval, it
+        // accepts every note. This is roadmap 1.3 in one assertion.
+        let play: Vec<u64> = (0..16).map(|i| ms(1_000 + i * 150)).collect();
+
+        let mut blind = RefractoryGate::new();
+        let accepted_blind = play
+            .iter()
+            .filter(|&&t| blind.admit(t, 0.3, 600.0, GUITAR_FLOOR_MS) == GateDecision::Accepted)
+            .count();
+
+        let mut keyed = RefractoryGate::new();
+        let accepted_keyed = play
+            .iter()
+            .filter(|&&t| keyed.admit(t, 0.3, 150.0, GUITAR_FLOOR_MS) == GateDecision::Accepted)
+            .count();
+
+        assert_eq!(accepted_blind, 4, "the click-keyed gate kept one note in four");
+        assert_eq!(accepted_keyed, 16, "the player-keyed gate must keep them all");
+    }
+
+    #[test]
+    fn the_instrument_floor_still_wins_at_extreme_tempos() {
+        // 200 BPM 32nds would ask for a 28 ms refractory; guitar's
+        // 40 ms floor is physics and holds. The floor exists precisely
+        // to protect fast articulations, and 1.3 does not touch it.
+        assert!(approx_eq(
+            RefractoryGate::refractory_ms(37.5, GUITAR_FLOOR_MS),
+            40.0,
+            1e-4,
+        ));
+        assert!(approx_eq(
+            RefractoryGate::refractory_ms(150.0, GUITAR_FLOOR_MS),
+            112.5,
+            1e-4,
+        ));
+    }
+
+    // ── Roadmap 1.3 — the refractory follows the player ──────────────
+
+    #[test]
+    fn detection_interval_falls_back_to_the_click_until_somebody_says_otherwise() {
+        // 100 BPM quarters: 600ms between clicks, and nothing has told
+        // us what is being played. This is the pre-1.3 behaviour and it
+        // must survive untouched for free play.
+        let ctx = TempoContext::new(100, 1);
+        assert!(ctx.played_interval_ms().is_none());
+        assert!(approx_eq(ctx.detection_interval_ms(), 600.0, 0.01));
+    }
+
+    #[test]
+    fn sixteenths_over_a_quarter_click_pull_the_refractory_down() {
+        // The case that made Songs impossible. 100 BPM quarter click:
+        // the old refractory was 0.75 × 600 = 450ms, so three of every
+        // four played 16ths (150ms apart) never reached the analyzer.
+        let ctx = TempoContext::new(100, 1);
+        let old_refractory = ctx.subdivision_interval_ms() * REFRACTORY_SUBDIVISION_FACTOR;
+        assert!(approx_eq(old_refractory, 450.0, 0.01));
+        ctx.set_played_interval_ms(Some(150.0)); // 16ths at 100 BPM
+        assert!(approx_eq(ctx.detection_interval_ms(), 150.0, 0.01));
+        let new_refractory = ctx.detection_interval_ms() * REFRACTORY_SUBDIVISION_FACTOR;
+        // 112.5ms — a 150ms gap now clears it with room to spare.
+        assert!(new_refractory < 150.0);
+        assert!(approx_eq(new_refractory, 112.5, 0.01));
+    }
+
+    #[test]
+    fn playing_sparsely_over_a_fine_click_never_widens_the_refractory() {
+        // Quarters over a 16th click. The literal reading of 1.3 would
+        // widen the refractory to 0.75 × 600ms and swallow the player's
+        // next run of 16ths; the finer-of-the-two rule keeps it at the
+        // click's 150ms. See `detection_interval_ms` for why.
+        let ctx = TempoContext::new(100, 4);
+        assert!(approx_eq(ctx.subdivision_interval_ms(), 150.0, 0.01));
+        ctx.set_played_interval_ms(Some(600.0));
+        assert!(approx_eq(ctx.detection_interval_ms(), 150.0, 0.01));
+    }
+
+    #[test]
+    fn clearing_the_played_interval_restores_the_click() {
+        let ctx = TempoContext::new(120, 1);
+        ctx.set_played_interval_ms(Some(125.0));
+        assert!(approx_eq(ctx.detection_interval_ms(), 125.0, 0.01));
+        ctx.set_played_interval_ms(None);
+        assert!(ctx.played_interval_ms().is_none());
+        assert!(approx_eq(ctx.detection_interval_ms(), 500.0, 0.01));
+    }
+
+    #[test]
+    fn a_nonsense_played_interval_cannot_disarm_the_detector() {
+        // Defensive: a corrupt schedule or a divide-by-zero upstream
+        // must not talk the refractory to zero (every resonance becomes
+        // an onset) or past a whole note (nothing is ever heard).
+        let ctx = TempoContext::new(120, 1);
+        ctx.set_played_interval_ms(Some(0.0));
+        assert!(ctx.played_interval_ms().is_none());
+        ctx.set_played_interval_ms(Some(f32::NAN));
+        assert!(ctx.played_interval_ms().is_none());
+        ctx.set_played_interval_ms(Some(-20.0));
+        assert!(ctx.played_interval_ms().is_none());
+        ctx.set_played_interval_ms(Some(0.01));
+        assert!(approx_eq(ctx.played_interval_ms().unwrap(), 1.0, 1e-3));
+        ctx.set_played_interval_ms(Some(1_000_000.0));
+        assert!(approx_eq(ctx.played_interval_ms().unwrap(), 4_000.0, 1e-3));
     }
 
     fn mk_onset(ts_ns: u64, amp: f32, centroid: f32, conf: f32) -> Onset {

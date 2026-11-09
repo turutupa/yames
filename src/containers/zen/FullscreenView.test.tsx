@@ -12,6 +12,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent, waitFor } from "@testing-library/react";
 import { FullscreenView } from "./FullscreenView";
 import { DEFAULT_TEST_STATE } from "../../test/mocks";
+import { engineTick } from "../../test/engineTicks";
 
 const baseProps = {
   state: DEFAULT_TEST_STATE,
@@ -72,16 +73,14 @@ describe("FullscreenView", () => {
       beatGroups: [3, 2, 2],
       speedRamp: { ...DEFAULT_TEST_STATE.speedRamp, beatsPerBar: 4 },
     };
-    const beat = (measureBeat: number) => ({
-      beat: measureBeat,
-      measureBeat,
-      subdivision: 0,
-      isDownbeat: true,
-      accentLevel: (measureBeat === 0 ? 2 : 0) as 0 | 1 | 2,
-      isAccent: measureBeat === 0,
-      formBar: 0,
-      chorus: 1,
-    });
+    /*
+     * A tick in 7/8, grouped 2+2+3 — and the accents that grouping really
+     * produces. This fixture used to flatten them to "beat 0 or nothing",
+     * so the one thing this meter is here to exercise, that a group start
+     * inside a bar is an ACCENT and not a bar line, was never on screen.
+     */
+    const beat = (measureBeat: number) =>
+      engineTick({ beat: measureBeat, measureBeat, beatGroups: sevenEight.beatGroups });
 
     it("uses the meter total when the ramp is NOT active", () => {
       const { container } = render(
@@ -152,6 +151,26 @@ describe("FullscreenView", () => {
           unmount();
         }
       }
+    });
+
+    it("lights a group start inside the bar as an accent, and it is no bar line", () => {
+      /*
+       * 7/8 as 3+2+2: beat 3 opens the second group. The engine calls that a
+       * MIDDLE accent — `accentLevel` 1 — and the dot lights accented while
+       * the bar carries on. The fixture this file used to carry flattened
+       * every accent to "beat 0 or nothing", so the one thing this meter is
+       * on screen to show was never tried.
+       */
+      const live = beat(3);
+      expect(live.accentLevel).toBe(1);
+      expect(live.isDownbeat).toBe(true); // a whole beat...
+      expect(live.measureBeat === 0).toBe(false); // ...and not the bar's
+      const { container } = render(
+        <FullscreenView state={sevenEight} currentBeat={live} activeTab="beat" onExit={vi.fn()} />,
+      );
+      const active = container.querySelectorAll(".fs-beat.active");
+      expect(active).toHaveLength(1);
+      expect(active[0].classList.contains("accent")).toBe(true);
     });
   });
 });

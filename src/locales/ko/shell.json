@@ -3,7 +3,8 @@
     "metronome": "메트로놈",
     "setlist": "셋리스트",
     "drill": "템포 연습",
-    "jam": "잼"
+    "jam": "잼",
+    "songs": "곡"
   },
   "tooltip": {
     "zen": "젠 모드",
@@ -45,7 +46,8 @@
     "save": "프리셋 저장",
     "delete": "삭제",
     "newPreset": "새 프리셋",
-    "newDrill": "새 드릴"
+    "newDrill": "새 드릴",
+    "titleSongs": "곡"
   },
   "emptyStates": {
     "presets": {
@@ -73,7 +75,8 @@
     "inputOff": "입력 꺼짐",
     "coachOnPlay": "재생하면 코치가 듣습니다",
     "coachQuiet": "단계 진행 중에는 코치가 조용합니다",
-    "countIn": "카운트인"
+    "countIn": "카운트인",
+    "backToStart": "처음으로"
   },
   "rail": {
     "label": "모드 및 라이브러리",

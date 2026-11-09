@@ -14,6 +14,7 @@ import { compileJam } from "../../../jam/compile";
 import { applyVibe } from "../../../jam/vibes";
 import { grooveById } from "../../../jam/grooves";
 import { NO_PRACTICE } from "../../../containers/jam/PracticeRow";
+import { engineTick } from "../../../test/engineTicks";
 import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam/types";
 import type { BeatEvent } from "../../../types";
 
@@ -150,19 +151,16 @@ type Props = {
  */
 const LINEUP = { drums: true, bass: true };
 
-/** A tick, with only the two fields the jam cares about set apart. */
+/**
+ * A tick, with only the two fields the jam cares about set apart.
+ *
+ * Through `engineTick`, because this used to say `isDownbeat: measureBeat
+ * === 0` — a stream no engine produces. `isDownbeat` is "a whole beat and
+ * not a subdivision" and is true on every beat of the bar; the bar line is
+ * `isDownbeat && measureBeat === 0`.
+ */
 function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
-  return {
-    beat: 0,
-    measureBeat,
-    subdivision: 0,
-    isDownbeat: measureBeat === 0,
-    accentLevel: measureBeat === 0 ? 2 : 0,
-    isAccent: measureBeat === 0,
-    formBar,
-    chorus,
-    bandState: "full",
-  };
+  return engineTick({ measureBeat, formBar, chorus });
 }
 
 function mount(view = "jam", extra: Omit<Props, "v"> = {}) {

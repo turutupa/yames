@@ -2,6 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} keer getikt",
+    "tapCount_other": "{{count}} keer getikt",
     "subdivision": "Onderverdeling",
     "meter": "Maatsoort",
     "free": "FREE",
@@ -11,7 +12,8 @@
     "beatCount": "{{count}} beats",
     "beatCount_one": "{{count}} beat",
     "beatCount_other": "{{count}} beats",
-    "clicksPerBar": "{{count}} kliks/maat",
+    "clicksPerBar": "{{count}} klik/maat",
+    "clicksPerBar_other": "{{count}} kliks/maat",
     "addBeat": "Beat toevoegen",
     "removeBeat": "Beat verwijderen",
     "prevMeter": "Vorige maatsoort",

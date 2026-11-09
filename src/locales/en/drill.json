@@ -2,8 +2,10 @@
   "drill": {
     "startingIn": "Starting in",
     "stepBar": "Step {{step}} · Bar {{bar}}/{{bars}}",
-    "beatsSummary": "{{count}} beats per bar",
-    "everyBars": "every {{count}} bars",
+    "beatsSummary": "{{count}} beat per bar",
+    "beatsSummary_other": "{{count}} beats per bar",
+    "everyBars": "every bar",
+    "everyBars_other": "every {{count}} bars",
     "bpmUnit": "BPM",
     "soundPhrase": "{{sound}} sound",
     "mode": "Mode",

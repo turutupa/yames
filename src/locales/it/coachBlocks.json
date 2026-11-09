@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "Ripeti le battute {{from}}–{{to}}",
+      "loopBarsAt": "Ripeti le battute {{from}}–{{to}} a {{bpm}} BPM",
+      "ramp": "Portalo da {{from}} a {{to}}",
+      "click": {
+        "1": "Clic sulle semiminime",
+        "2": "Clic sulle crome",
+        "3": "Clic sulle terzine",
+        "4": "Clic sulle semicrome",
+        "5": "Clic sulle quintine",
+        "6": "Clic sulle sestine"
+      },
+      "loadPreset": "Prepara {{name}}",
+      "loadJam": "Suona su {{name}}",
+      "comeBack": {
+        "tomorrow": "Torna su questo domani",
+        "inDays": "Torna su questo tra {{days}} giorni"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, sul manico"
+    },
+    "position": {
+      "open": "posizione aperta",
+      "rootOn6": "fondamentale sulla 6ª corda",
+      "rootOn5": "fondamentale sulla 5ª corda",
+      "rootOn4": "fondamentale sulla 4ª corda",
+      "rootOn3": "fondamentale sulla 3ª corda"
+    },
+    "shape": {
+      "which": "posizione {{index}} di {{count}}"
+    },
+    "passage": {
+      "bars": "Battute {{from}}–{{to}} di {{title}}"
+    },
+    "progress": {
+      "caption": "dal {{first}}% al {{last}}%, su {{goes}} giri",
+      "aria": "Come sono andate le battute da {{from}} a {{to}}"
+    },
+    "tab": {
+      "attempt": "colorato su quel giro",
+      "plain": "le note come sono scritte",
+      "soon": "La tablatura di queste battute arriva presto."
+    },
+    "take": {
+      "whole": "La tua take di {{title}}",
+      "any": "La tua take",
+      "soon": "Riascoltare una take arriva presto."
+    },
+    "compare": {
+      "title": "Due giri di {{title}}, uno accanto all'altro",
+      "any": "Due giri, uno accanto all'altro",
+      "soon": "Ascoltare due giri affiancati arriva presto."
+    }
+  }
+}

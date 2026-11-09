@@ -16,12 +16,12 @@ import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
 import { meterKey, stepMeter } from "../utils/meter";
 
-export type ViewName = "beat" | "drill" | "setlist" | "jam" | "settings";
+export type ViewName = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
 
 interface ActionDispatcherArgs {
   view: ViewName;
   setView: (v: ViewName) => void;
-  prevTab: MutableRefObject<"beat" | "drill" | "setlist" | "jam">;
+  prevTab: MutableRefObject<"beat" | "drill" | "setlist" | "jam" | "songs">;
   /** Whether the setlist tab has one open — with none, there is nothing to start. */
   setlistLoaded: boolean;
   /** Same for the jam tab, and the same reason: an empty stage starts nothing. */
@@ -56,7 +56,43 @@ interface ActionDispatcherArgs {
     nextSection: () => void;
     prevSection: () => void;
     loopSection: () => void;
+    /**
+     * W25/W32 — what is KEPT of the jam, hands-free.
+     *
+     * Both go through the switches' own `request` doors rather than through
+     * the record behind them, so a first press still shows the promise.
+     */
     toggleTakes: () => void;
+    toggleCamera: () => void;
+  };
+  /** Whether the Songs tab has a song on it. An empty stage loops nothing. */
+  songsLoaded: boolean;
+  /**
+   * The hands-free Songs actions (W18), for a footswitch.
+   *
+   * One object for the same reason the jam's are: they are one feature — the
+   * portion you are working on — and the dispatcher's job is only to decide
+   * that the Songs tab is open and a song is loaded.
+   */
+  songsActions: {
+    /** The portion starts at the bar the cursor is in. */
+    loopStartsHere: () => void;
+    /** And ends there. */
+    loopEndsHere: () => void;
+    toggleLoop: () => void;
+    clearSelection: () => void;
+    /** Slide the portion by whole bars, keeping its length. */
+    nudge: (bars: number) => void;
+    /**
+     * W25 — what is KEPT of the pass, hands-free.
+     *
+     * Both go through the switches' own `request` doors rather than through
+     * the settings behind them, so a first press still shows the promise: a
+     * camera that came on from a footswitch without anybody having read what
+     * it records is the one thing this feature may not do.
+     */
+    toggleTakes: () => void;
+    toggleCamera: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -89,6 +125,8 @@ export function useActionDispatcher({
   jamEditorOpen,
   onToggleJam,
   jamActions,
+  songsLoaded,
+  songsActions,
   state,
   isFullscreen,
   setIsFullscreen,
@@ -110,13 +148,14 @@ export function useActionDispatcher({
         actionId === "tab-2" ||
         actionId === "tab-3" ||
         actionId === "tab-4" ||
+        actionId === "tab-5" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
         actionId === "toggle-coach"
       ) {
         switch (actionId) {
-          // In rail order: Metronome, Setlist, Drill, Jam.
+          // In rail order: Metronome, Setlist, Drill, Jam, Songs.
           case "tab-1":
             setView("beat");
             break;
@@ -129,6 +168,9 @@ export function useActionDispatcher({
           case "tab-4":
             setView("jam");
             break;
+          case "tab-5":
+            setView("songs");
+            break;
           case "settings":
             // `setView` remembers the mode Settings covers.
             setView(view === "settings" ? prevTab.current : "settings");
@@ -140,7 +182,7 @@ export function useActionDispatcher({
             showFloating();
             break;
           case "toggle-sidebar":
-            if (view === "beat" || view === "drill" || view === "jam")
+            if (view === "beat" || view === "drill" || view === "jam" || view === "songs")
               setSidebarOpen((o) => !o);
             break;
           case "toggle-coach":
@@ -211,12 +253,78 @@ export function useActionDispatcher({
           case "jam-take":
             jamActions.toggleTakes();
             break;
+          case "jam-camera":
+            jamActions.toggleCamera();
+            break;
         }
         return;
       }
 
-      if (document.activeElement instanceof HTMLElement)
-        document.activeElement.blur();
+      /**
+       * The Songs actions, on the same terms as the jam's.
+       *
+       * They only mean anything with a song on the stage, and they mean
+       * nothing anywhere else: `[` is the metronome's subdivision on every
+       * other tab, and a key that quietly re-looped a song you are not
+       * looking at would be worse than one that did nothing.
+       *
+       * They all work WHILE PLAYING, which is the point of them — the engine
+       * recompiles the piece and starts the new bars from the top, and a
+       * player marking out a passage with a footswitch never takes a hand off
+       * the neck.
+       */
+      if (actionId.startsWith("songs-")) {
+        if (view !== "songs" || !songsLoaded) return;
+        switch (actionId) {
+          case "songs-loop-start":
+            songsActions.loopStartsHere();
+            break;
+          case "songs-loop-end":
+            songsActions.loopEndsHere();
+            break;
+          case "songs-loop":
+            songsActions.toggleLoop();
+            break;
+          case "songs-loop-clear":
+            songsActions.clearSelection();
+            break;
+          case "songs-loop-earlier":
+            songsActions.nudge(-1);
+            break;
+          case "songs-loop-later":
+            songsActions.nudge(1);
+            break;
+          case "songs-take":
+            songsActions.toggleTakes();
+            break;
+          case "songs-camera":
+            songsActions.toggleCamera();
+            break;
+        }
+        return;
+      }
+
+      /*
+       * The caret is dropped before an app-wide action — except on a widget
+       * that owns its own keyboard (W34 item 3).
+       *
+       * The blur is here so that a control with focus does not ALSO take the
+       * key: a button that has been clicked and then hears Space would fire
+       * twice. But the Songs tab is `role="application"`: it is a page of
+       * music you arrive on, move a bar at a time with the arrows and press
+       * Esc on, and blurring it means pressing Space to start the song takes
+       * the arrow keys away until you click the page again. A player who
+       * presses play and then reaches for the arrows finds them dead, which
+       * is exactly the shape of the complaint this item is about.
+       *
+       * `role="application"` is the standard way of saying "this widget owns
+       * the keyboard", so the rule is written in those terms rather than
+       * naming the Songs tab.
+       */
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && focused.getAttribute("role") !== "application") {
+        focused.blur();
+      }
       switch (actionId) {
         case "play":
           if (view === "drill") {
@@ -242,6 +350,15 @@ export function useActionDispatcher({
             // the play key would do nothing at all on the setlist tab, which
             // is the shape of bug a new `view` value quietly introduces.
             togglePlayback();
+          } else if (view === "songs") {
+            // And here is that bug, a view later: Songs shipped with a Play
+            // button and a "Space" hint beside it, and the key did nothing,
+            // because this chain had no branch for it. The owner, 2026-09-21:
+            // "space not working for play pause is by far the most annoying
+            // thing ever". Same transport the on-screen button uses, and the
+            // same rule as the setlist and the jam: an empty stage plays
+            // nothing.
+            if (songsLoaded) togglePlayback();
           }
           break;
         case "bpm-up":
@@ -318,12 +435,37 @@ export function useActionDispatcher({
         }
       }
     },
+    /*
+     * Everything this callback READS is in here, and three things were not
+     * (W34 item 3).
+     *
+     * `songsLoaded`, `songsActions` and `setlistLoaded` were missing, and the
+     * consequence is the owner's complaint one layer down from where it was
+     * fixed. The play key on Songs got its branch on 2026-09-21 and still did
+     * nothing, because this callback is built once per `view` and a song is
+     * loaded WITHOUT the view changing: you are already on the Songs tab, you
+     * click a row in the library, and the dispatcher goes on holding the
+     * `songsLoaded: false` it was born with. Switching tabs and coming back
+     * fixed it, which is exactly the kind of "sometimes it works" that makes
+     * a bug like this survive a fix.
+     *
+     * Every `songs-` action was dead the same way (`if (view !== "songs" ||
+     * !songsLoaded) return`), and so was the play key on a setlist opened
+     * without leaving the Setlist tab.
+     *
+     * `songsActions` and `jamActions` are both `useMemo`s in `MainWindow`, so
+     * naming them here costs a rebuild when the song or the jam changes and
+     * not one per render.
+     */
     [
       view,
       jamLoaded,
       jamEditorOpen,
       onToggleJam,
       jamActions,
+      setlistLoaded,
+      songsLoaded,
+      songsActions,
       state.bpm,
       state.subdivision,
       // Stable key — `state.beatGroups` is a fresh array on every

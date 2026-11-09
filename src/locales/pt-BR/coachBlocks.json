@@ -1,0 +1,58 @@
+{
+  "coachBlocks": {
+    "action": {
+      "loopBars": "Repetir os compassos {{from}}–{{to}}",
+      "loopBarsAt": "Repetir os compassos {{from}}–{{to}} a {{bpm}} BPM",
+      "ramp": "Suba de {{from}} até {{to}}",
+      "click": {
+        "1": "Clique nas semínimas",
+        "2": "Clique nas colcheias",
+        "3": "Clique nas tercinas",
+        "4": "Clique nas semicolcheias",
+        "5": "Clique nas quintinas",
+        "6": "Clique nas sextinas"
+      },
+      "loadPreset": "Preparar {{name}}",
+      "loadJam": "Tocar junto com {{name}}",
+      "comeBack": {
+        "tomorrow": "Volte a isto amanhã",
+        "inDays": "Volte a isto em {{days}} dias"
+      }
+    },
+    "fretboard": {
+      "aria": "{{what}}, no braço"
+    },
+    "position": {
+      "open": "posição aberta",
+      "rootOn6": "com a fundamental na 6ª corda",
+      "rootOn5": "com a fundamental na 5ª corda",
+      "rootOn4": "com a fundamental na 4ª corda",
+      "rootOn3": "com a fundamental na 3ª corda"
+    },
+    "shape": {
+      "which": "desenho {{index}} de {{count}}"
+    },
+    "passage": {
+      "bars": "Compassos {{from}}–{{to}} de {{title}}"
+    },
+    "progress": {
+      "caption": "de {{first}}% para {{last}}%, ao longo de {{goes}}",
+      "aria": "Como foram os compassos {{from}} a {{to}}"
+    },
+    "tab": {
+      "attempt": "colorido por aquela passada",
+      "plain": "as notas como estão escritas",
+      "soon": "A tablatura destes compassos chega em breve."
+    },
+    "take": {
+      "whole": "Sua tomada de {{title}}",
+      "any": "Sua tomada",
+      "soon": "Ouvir uma tomada de novo chega em breve."
+    },
+    "compare": {
+      "title": "Duas passadas de {{title}}, lado a lado",
+      "any": "Duas passadas, lado a lado",
+      "soon": "Ouvir duas passadas lado a lado chega em breve."
+    }
+  }
+}

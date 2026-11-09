@@ -39,7 +39,7 @@
   font-size: 1.4rem;
   font-weight: 600;
   text-align: center;
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 .instrument-picker-subtitle {
@@ -58,7 +58,7 @@
 }
 
 .instrument-picker-card {
-  background: var(--bg);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 18px 12px;
@@ -67,7 +67,7 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: var(--text);
+  color: var(--text-primary);
   transition:
     border-color 120ms ease,
     background 120ms ease,
@@ -117,7 +117,7 @@
 }
 
 .instrument-picker-skip:hover {
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 @keyframes fade-in {

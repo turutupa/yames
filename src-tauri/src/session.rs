@@ -1175,6 +1175,7 @@ mod tests {
             inferred_divisor: 0,
             inferred_divisor_confidence: 0.0,
             interval_errors: Vec::new(),
+            burst_start_indices: Vec::new(),
         }
     }
 
@@ -1288,6 +1289,7 @@ mod tests {
             inferred_divisor: 0,
             inferred_divisor_confidence: 0.0,
             interval_errors: Vec::new(),
+            burst_start_indices: Vec::new(),
         });
         acc.clear_segment_window();
 
@@ -1397,6 +1399,7 @@ mod tests {
             inferred_divisor: 0,
             inferred_divisor_confidence: 0.0,
             interval_errors: Vec::new(),
+            burst_start_indices: Vec::new(),
         });
 
         acc.clear();

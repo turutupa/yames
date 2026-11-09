@@ -110,7 +110,13 @@
       "downloadVoices": "Scarica le voci",
       "installed": "Coach {{tier}} installato ({{size}})",
       "removing": "Rimozione in corso…",
-      "removeModels": "Rimuovi modelli"
+      "removeModels": "Rimuovi modelli",
+      "stance": "Stile di coaching",
+      "stanceHint": "Quanto il coach è duro con te mentre suoni",
+      "stanceStrict": "Severo",
+      "stanceLearning": "In apprendimento",
+      "stanceStrictDesc": "Nomina una tendenza appena si vede, e la dice ad alta voce. È l'impostazione giusta quando stai rifinendo un passaggio che già conosci.",
+      "stanceLearningDesc": "Ti lascia metà margine in più prima di dire qualcosa, tiene le correzioni fuori dalle orecchie mentre suoni e parte da quello che è andato bene. Il tuo punteggio viene calcolato esattamente allo stesso modo in entrambi i casi."
     },
     "general": {
       "title": "Generale",
@@ -177,7 +183,8 @@
         "metronome": "Metronomo",
         "view": "Vista",
         "navigation": "Navigazione",
-        "jam": "Jam"
+        "jam": "Jam",
+        "songs": "Brani"
       },
       "actions": {
         "play": "Avvia / Ferma",
@@ -211,7 +218,17 @@
         "jam-next-section": "Sezione successiva",
         "jam-prev-section": "Sezione precedente",
         "jam-loop-section": "Ripeti questa sezione",
-        "jam-take": "Registra la take"
+        "jam-take": "Registra la take",
+        "tab-5": "Scheda Brani",
+        "songs-loop-start": "La ripetizione inizia qui",
+        "songs-loop-end": "La ripetizione finisce qui",
+        "songs-loop": "Ripeti la parte",
+        "songs-loop-clear": "Di nuovo tutto il brano",
+        "songs-loop-earlier": "La parte una battuta prima",
+        "songs-loop-later": "La parte una battuta dopo",
+        "songs-take": "Registra la take",
+        "songs-camera": "Registra l'immagine",
+        "jam-camera": "Registra l'immagine"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -245,7 +262,17 @@
         "jam-next-section": "Saltare all'inizio della sezione successiva alla stanghetta",
         "jam-prev-section": "Tornare all'inizio della sezione precedente alla stanghetta",
         "jam-loop-section": "Mettere in loop la sezione in cui sei, o toglierla",
-        "jam-take": "Registra alla prossima riproduzione, oppure smetti di registrare"
+        "jam-take": "Registra alla prossima riproduzione, oppure smetti di registrare",
+        "tab-5": "Passa alla scheda Brani",
+        "songs-loop-start": "Far iniziare la parte alla battuta che stai suonando",
+        "songs-loop-end": "Far finire la parte alla battuta che stai suonando",
+        "songs-loop": "Suonare le battute scelte una volta dopo l'altra, o smettere",
+        "songs-loop-clear": "Dimenticare la parte e suonare il brano dall'inizio",
+        "songs-loop-earlier": "Spostare le battute scelte di una battuta verso l'inizio, mantenendo la stessa lunghezza",
+        "songs-loop-later": "Spostare le battute scelte di una battuta verso la fine, mantenendo la stessa lunghezza",
+        "songs-take": "Registra alla prossima riproduzione, oppure smetti di registrare",
+        "songs-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera",
+        "jam-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera"
       }
     },
     "inputTest": {
@@ -300,7 +327,24 @@
       "failed": "Controllo non riuscito",
       "sounds": "Suoni",
       "soundsCredit": "La batteria Club è Virtuosity Drums, di Versilian Studios e Karoryfer Samples, suonata da Austin McMahon (pubblico dominio). La batteria Studio è DRSKit, del progetto DrumGizmo (CC BY 4.0).",
-      "madeWith": "Fatto con {{heart}} per i musicisti di tutto il mondo"
+      "madeWith": "Fatto con {{heart}} per i musicisti di tutto il mondo",
+      "soundsCreditSongs": "Gli altri strumenti vengono dal set di suoni General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
+    },
+    "songs": {
+      "title": "Brani",
+      "catchDownloads": "Proponi i brani che scarichi",
+      "catchDownloadsHint": "Mentre Brani è aperto, Yames guarda la tua cartella dei download e chiede prima di aprire qualcosa. Il tuo file non viene mai spostato, rinominato o cancellato.",
+      "folder": "Tieni d'occhio questa cartella",
+      "folderUnknown": "Questo computer non ha detto a Yames dove finiscono i download",
+      "chooseFolder": "Scegli...",
+      "useDownloads": "Usa i download",
+      "turnedDown": "Brani che hai rifiutato",
+      "turnedDownHint": "{{n}} file che Yames non proporrà di nuovo",
+      "forgetTurnedDown": "Proponili di nuovo",
+      "soundSet": "Set di suoni",
+      "soundSetBuiltIn": "Quello incluso in Yames",
+      "chooseSoundSet": "Scegli un .sf2",
+      "useBuiltInSoundSet": "Usa quello incluso"
     }
   },
   "keybindings": {

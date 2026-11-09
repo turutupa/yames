@@ -1,0 +1,361 @@
+/* songs-camera.css — the camera on the STAGE (W21): the switch and the little
+ * mirror over the tab.
+ *
+ * Its own file for the reason songs-review.css is its own file: it is imported
+ * by `SongsView`, alongside the stage's own sheet, so nothing outside Songs
+ * parses it and a worker editing the camera never opens the stage's stylesheet.
+ *
+ * What is NOT here is everything about watching a take back — the video pane
+ * and the tape. That lives in `songs-take-video.css`, imported by
+ * `TakeVideoView`, which is inside the review's lazy chunk: a player who never
+ * turns the camera on should not download the stylesheet for a screen they
+ * will never see.
+ *
+ * Every colour is a token from themes.ts's TOKEN_CONTRACT. The four feedback
+ * tokens carry the verdict on the tape — and never on their own: every tick
+ * carries the same GLYPH the review draws beside a fret number, because two of
+ * the thirteen themes are deliberately low-contrast and some players cannot
+ * tell this theme's green from its amber.
+ *
+ * It borrows `.songs-btn`, `.songs-chip` and `.songs-control` from songs.css,
+ * which is why it is only ever imported alongside it. */
+
+/* ---------------------------------------------------------------------------
+ * The switch
+ * ------------------------------------------------------------------------ */
+
+.songs-camera-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* The same dot the record switch uses, in the theme's own accent rather than
+ * its miss colour: a camera that is open is a state, not a warning. */
+.songs-camera-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex: none;
+}
+
+.songs-camera-dot[data-live] {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* The picker, as a chip-sized control in the strip's own row rather than a
+ * labelled field: the strip is one row and every line it grows is a line the
+ * tab loses. */
+.songs-camera-device {
+  max-width: 12ch;
+  min-width: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 2);
+  padding: 3px 4px;
+}
+
+.songs-camera-trouble {
+  color: var(--feedback-miss);
+  border-color: color-mix(in srgb, var(--feedback-miss) 45%, transparent);
+}
+
+/* A build that cannot record a picture: a quiet line in the row, not a group
+ * of its own. */
+.songs-camera-absent {
+  font-size: 11px;
+  color: var(--text-faint);
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+ * The preview — a small mirror in a corner of the tab's frame
+ * ------------------------------------------------------------------------ */
+
+.songs-camera-preview {
+  position: absolute;
+  z-index: 3;
+  width: clamp(112px, 22%, 208px);
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.28);
+  /* It sits over the engraving, so it must never eat a click meant for the
+   * tab. Its own controls turn pointer events back on for themselves. */
+  pointer-events: none;
+}
+
+/* ...and it is not drawn over the verdict (W25).
+ *
+ * The preview is `z-index: 3` inside the frame and the review is `2`, so with
+ * the camera still armed after a pass it sat on top of the review — over the
+ * tape's own controls at 480px, with its framing guide clipped to half a
+ * sentence. It is the mirror for while you PLAY; while you are watching the
+ * take back there are two pictures of the same person on one screen and only
+ * one of them is the one you came back for. It returns when the review does
+ * not, and the camera itself is untouched: `useSongCamera` still holds the
+ * stream, the light is still honestly on, and the switch still says so. */
+.songs-view[data-review] .songs-camera-preview {
+  display: none;
+}
+
+.songs-camera-preview[data-corner="topLeft"] { top: 10px; left: 10px; }
+.songs-camera-preview[data-corner="topRight"] { top: 10px; right: 10px; }
+.songs-camera-preview[data-corner="bottomLeft"] { bottom: 10px; left: 10px; }
+.songs-camera-preview[data-corner="bottomRight"] { bottom: 10px; right: 10px; }
+
+/* While the transport runs it stops being a picture of your face and becomes
+ * a light: the tab is what you should be reading, and a live mirror beside it
+ * is the most distracting thing this app could draw. */
+.songs-camera-preview[data-running] {
+  width: auto;
+  aspect-ratio: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 8px;
+  background: var(--bg-raised);
+  box-shadow: none;
+}
+
+.songs-camera-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Mirrored, because a mirror is how a person knows which hand is which.
+   * The FILE is not: `transform` is a property of this element and nothing
+   * about it reaches MediaRecorder. */
+  transform: scaleX(-1);
+}
+
+.songs-camera-video[data-flipped] {
+  transform: none;
+}
+
+.songs-camera-preview[data-running] .songs-camera-video {
+  display: none;
+}
+
+.songs-camera-running {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.songs-camera-ring {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--feedback-miss);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--feedback-miss) 28%, transparent);
+  animation: songs-camera-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes songs-camera-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* A ring that pulses is decoration; a player who has asked for less of it
+ * gets a steady light that says the same thing. */
+@media (prefers-reduced-motion: reduce) {
+  .songs-camera-ring { animation: none; }
+}
+
+.songs-camera-elapsed {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.songs-camera-countin {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+}
+
+.songs-camera-count {
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.songs-camera-preview[data-running] .songs-camera-countin {
+  position: static;
+  background: none;
+}
+
+.songs-camera-preview[data-running] .songs-camera-count {
+  font-size: 15px;
+}
+
+.songs-camera-guide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  text-align: center;
+  background: color-mix(in srgb, var(--bg-card) 68%, transparent);
+  pointer-events: auto;
+}
+
+.songs-camera-guide-neck {
+  position: absolute;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+  color: var(--text-faint);
+  opacity: 0.55;
+}
+
+.songs-camera-guide-body {
+  position: relative;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.songs-camera-guide-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.songs-camera-corners {
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+}
+
+.songs-camera-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--bg-raised) 70%, transparent);
+  opacity: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 120ms ease;
+}
+
+.songs-camera-preview:hover .songs-camera-corner,
+.songs-camera-corner:focus-visible {
+  opacity: 1;
+}
+
+.songs-camera-corner[data-active] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.songs-camera-corner[data-corner="topLeft"] { top: 0; left: 0; }
+.songs-camera-corner[data-corner="topRight"] { top: 0; right: 0; }
+.songs-camera-corner[data-corner="bottomLeft"] { bottom: 0; left: 0; }
+.songs-camera-corner[data-corner="bottomRight"] { bottom: 0; right: 0; }
+
+/* Narrow windows. The stage's own container query is in songs.css; this is
+ * only what the camera adds to it. */
+@media (max-width: 620px) {
+  .songs-camera-preview {
+    width: clamp(96px, 30%, 140px);
+  }
+}
+
+/* ── "See yourself" (W33 §3) ──────────────────────────────────────────────
+   The stage draws no mirror below 900px — `jam.css` above says why, and it is
+   a measurement rather than a preference — so a player at a small window was
+   filming something they could never see. This is the look, once, before they
+   play: a small portalled picture off the camera chip, placed by the same
+   hook every menu on this screen uses, and gone the moment the band starts.
+
+   Portalled, because the chip is deep inside a drawer that scrolls and a
+   panel drawn as its child opens off the bottom of the window. It may cover
+   the grid while it is open, and that is the trade: you are not reading the
+   form while you are framing up. */
+/* The camera's controls, in a box of their OWN.
+
+   It was `display: contents`, which lays the children out exactly as before
+   and is therefore the tidy answer — and it is why the picture opened 185px
+   below the bottom of a 1100×720 window. `useMenuPlacement` places a portal
+   against its anchor's rectangle, and an element with `display: contents`
+   has no rectangle: every measurement came back zero and the hook placed the
+   panel against the top-left of the document. So it is a real inline box,
+   laid out the way both rows it lives in lay their children out. */
+.songs-camera-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* A FIXED size, both ways.
+
+   `useMenuPlacement` measures the panel the instant it is mounted and places
+   it against the chip from that one reading. A panel sized by its contents is
+   a panel that is measured empty and then grows — which put this one 185px
+   below the bottom of a 1100×720 window, because the video had no stream in
+   it yet when the hook asked how tall it was. So the box is the box before
+   anything arrives, and the picture fits itself into it. */
+.songs-camera-peek-pop {
+  /* FIXED, because `useMenuPlacement` hands back window coordinates and a
+     statically positioned element ignores them — the panel was drawn at the
+     foot of the document with a perfectly correct `top: 202px` on it. Every
+     other portal on this screen says the same word for the same reason. */
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 244px;
+  height: 182px;
+  overflow: hidden;
+  padding: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 38%);
+}
+
+.songs-camera-peek-pop video {
+  width: 228px;
+  height: 128px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: #000;
+  object-fit: cover;
+  /* Mirrored, like the stage's own preview: a mirror is how a person knows
+     which hand is which. Nothing about this reaches the recorder. */
+  transform: scaleX(-1);
+}
+
+.songs-camera-peek-pop p {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+}

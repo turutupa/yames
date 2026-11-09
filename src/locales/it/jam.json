@@ -253,6 +253,7 @@
       "one": "1 accordo",
       "custom": "{{count}} battute",
       "custom_one": "{{count}} battuta",
+      "custom_many": "{{count}} battute",
       "custom_other": "{{count}} battute"
     },
     "countIn": {
@@ -260,6 +261,7 @@
       "none": "Nessuna",
       "barsAnd": "{{count}} battute · {{sound}}",
       "barsAnd_one": "{{count}} battuta · {{sound}}",
+      "barsAnd_many": "{{count}} battute · {{sound}}",
       "barsAnd_other": "{{count}} battute · {{sound}}"
     },
     "fills": {
@@ -278,6 +280,7 @@
       "aria": "Sta suonando {{chord}}",
       "next": "{{chord}} fra {{count}} battute",
       "next_one": "{{chord}} fra {{count}} battuta",
+      "next_many": "{{chord}} fra {{count}} battute",
       "next_other": "{{chord}} fra {{count}} battute",
       "nextNow": "{{chord}} subito dopo"
     },
@@ -302,6 +305,7 @@
       "scopeKey": "Nella tonalità",
       "scopeAll": "Tutte le tonalità",
       "noteCount_one": "scala da {{count}} nota",
+      "noteCount_many": "scala da {{count}} note",
       "noteCount_other": "scala da {{count}} note",
       "noteCount": "scala da {{count}} note",
       "jump": "Portami a",
@@ -410,6 +414,7 @@
       "dropOutBarsLabel": "Per quanto la band tace",
       "forBars": "per {{count}} battute",
       "forBars_one": "per {{count}} battuta",
+      "forBars_many": "per {{count}} battute",
       "forBars_other": "per {{count}} battute",
       "trade": "Scambi",
       "tradeN": "A gruppi di {{count}}",
@@ -418,6 +423,7 @@
       "tempoEveryLabel": "Ogni quanto sale il tempo",
       "everyChoruses": "ogni {{count}} giri",
       "everyChoruses_one": "ogni {{count}} giro",
+      "everyChoruses_many": "ogni {{count}} giri",
       "everyChoruses_other": "ogni {{count}} giri",
       "climbing": "partendo da {{from}}",
       "dropOutExplain": "Ogni tanto la band si ferma per qualche battuta e tieni il tempo da solo.",
@@ -522,6 +528,7 @@
       "aria": "Modi di suonare questo vibe",
       "count": "{{count}} modi di suonarlo",
       "count_one": "{{count}} modo di suonarlo",
+      "count_many": "{{count}} modi di suonarlo",
       "count_other": "{{count}} modi di suonarlo",
       "yours": "Uno dei tuoi",
       "yoursEmpty": "nessuno salvato",
@@ -597,9 +604,11 @@
       "none": "Lì dentro non ci sono ancora accordi.",
       "summary": "{{count}} battute · tonalità di {{key}}",
       "summary_one": "{{count}} battuta · tonalità di {{key}}",
+      "summary_many": "{{count}} battute · tonalità di {{key}}",
       "summary_other": "{{count}} battute · tonalità di {{key}}",
       "check": "{{count}} da controllare: {{list}}",
       "check_one": "{{count}} da controllare: {{list}}",
+      "check_many": "{{count}} da controllare: {{list}}",
       "check_other": "{{count}} da controllare: {{list}}"
     },
     "perc": {
@@ -711,6 +720,40 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "Il suono",
+      "yames": "Yames e il mio ingresso",
+      "everything": "Tutto quello che suona questo computer",
+      "warning": "Registra tutto quello che suona questo computer, non solo Yames: una videochiamata, una notifica, una canzone nel browser.",
+      "listensTo": "Ascolta {{device}}.",
+      "check": "Controlla il suono",
+      "listening": "In ascolto…",
+      "level": "Livello",
+      "silent": "Non è arrivato nulla. Controlla che il volume di questo computer sia alzato e non silenziato.",
+      "notHere": "Questo computer non può dare a Yames quello che suonano i suoi altoparlanti, quindi qui una ripresa è Yames e il tuo ingresso.",
+      "recordingEverything": "Registra tutto quello che suona questo computer",
+      "recordingYames": "Registra Yames e il tuo ingresso",
+      "takeEverything": "tutto quello che ha suonato questo computer"
+    },
+    "takeVideo": {
+      "save": "Salva come video",
+      "chorus": "Giro {{count}}",
+      "chorus_one": "Giro {{count}}",
+      "chorus_many": "Giro {{count}}",
+      "chorus_other": "Giro {{count}}",
+      "next": "poi"
+    },
+    "watch": {
+      "open": "Riascoltalo",
+      "where": "Battuta {{bar}} · {{chorus}}",
+      "goToBar": "Vai alla battuta {{bar}}",
+      "barBack": "Una battuta indietro",
+      "barOn": "Una battuta avanti",
+      "nudge": "Immagine",
+      "nudgeBack": "Immagine un po' prima",
+      "nudgeOn": "Immagine un po' dopo",
+      "broken": "Questa take non si è riprodotta. Il file potrebbe essere stato spostato o eliminato."
     }
   },
   "scale": {

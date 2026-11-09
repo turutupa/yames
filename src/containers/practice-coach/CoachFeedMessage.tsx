@@ -4,7 +4,7 @@ import { FEEDBACK_COLORS } from "../../hooks/useEvaluation";
 import { SessionNarrativeView } from "../../coach/SessionNarrativeView";
 import type { FeedAffordance, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../../types";
 import { formatTime, formatDuration } from "./coachCardHelpers";
-import { accuracyPct, scoredBeats } from "../../coach/reportStats";
+import { accuracyPct, bandForScore, scoredBeats } from "../../coach/reportStats";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintCoachAsk } from "../onboarding/hints/triggers";
@@ -29,13 +29,25 @@ function MiniReportComponents({ report }: { report: SessionReport }) {
     : grid >= 0.30 ? "var(--feedback-ok)"
     : "var(--feedback-miss)";
 
+  // `Cov / Eff / Grid` shipped here for a year. Nobody outside this repo
+  // knows what they stand for, and the three of them together are the
+  // densest piece of jargon the coach card has. They are the same three
+  // numbers the segment timeline already describes in words, so they get
+  // the same treatment: a musician's name, and a tooltip that says what
+  // was measured — never more than was measured. See ROADMAP 1.6.
   return (
     <div className="coach-mini-report-components">
-      <span style={{ color: covColor }}>{t("coachReport.cov")} {cov !== undefined ? pct(cov) : "—"}</span>
+      <span style={{ color: covColor }} title={t("coachReport.covTitle")}>
+        {t("coachReport.covLabel")} {cov !== undefined ? pct(cov) : "—"}
+      </span>
       <span className="coach-mini-report-comp-sep">·</span>
-      <span style={{ color: effColor }}>{t("coachReport.eff")} {eff !== undefined ? pct(eff) : "—"}</span>
+      <span style={{ color: effColor }} title={t("coachReport.effTitle")}>
+        {t("coachReport.effLabel")} {eff !== undefined ? pct(eff) : "—"}
+      </span>
       <span className="coach-mini-report-comp-sep">·</span>
-      <span style={{ color: gridColor }}>{t("coachReport.grid")} {pct(grid)}</span>
+      <span style={{ color: gridColor }} title={t("coachReport.gridTitle")}>
+        {t("coachReport.gridLabel")} {pct(grid)}
+      </span>
     </div>
   );
 }
@@ -302,11 +314,20 @@ function TtsThinkingSpinner() {
 
 function EndReportSummary({ report }: { report: SessionReport }) {
   const { t } = useTranslation();
-  const scoreQualifier = (score: number): string =>
-    score >= 90 ? t("coachReport.qualifier.excellent") :
-    score >= 75 ? t("coachReport.qualifier.good") :
-    score >= 55 ? t("coachReport.qualifier.fair") :
-    t("coachReport.qualifier.keepPracticing");
+  // One word for the whole session, on the same boundaries as the ring
+  // beside it and the narrative below it. It used to break at 90/75/55
+  // of its own accord, so a 72 was called "Fair" under a ring coloured
+  // good and over a paragraph that began "72 is a real foundation".
+  // ROADMAP 1.7, P3-COACH-3.
+  const scoreQualifier = (score: number): string => {
+    switch (bandForScore(score)) {
+      case "flawless":
+      case "strong": return t("coachReport.qualifier.excellent");
+      case "solid": return t("coachReport.qualifier.good");
+      case "fair": return t("coachReport.qualifier.fair");
+      default: return t("coachReport.qualifier.keepPracticing");
+    }
+  };
 
   // In Default mode with subdivision > 1, show accent (downbeat) accuracy:
   // only the quarter-beat positions count toward the score. For Pro mode
@@ -382,18 +403,14 @@ function EndReportSummary({ report }: { report: SessionReport }) {
             <span className="coach-end-report-stat-value">{report.skippedBeats}</span>
           </div>
         )}
-        {report.intervalConsistency !== undefined && (
-          <div className="coach-end-report-stat">
-            <span className="coach-end-report-stat-label">{t("coachDetail.noteSpacing")}</span>
-            <span className="coach-end-report-stat-value">{report.intervalConsistency.toFixed(2)}</span>
-          </div>
-        )}
-        {report.gridAlignment !== undefined && (
-          <div className="coach-end-report-stat">
-            <span className="coach-end-report-stat-label">{t("coachDetail.beatPlacement")}</span>
-            <span className="coach-end-report-stat-value">{report.gridAlignment.toFixed(2)}</span>
-          </div>
-        )}
+        {/*
+          Note spacing and beat placement used to appear twice: here as
+          bare `0.42` / `0.71`, and again below as a labelled bar reading
+          "42 %" with a sublabel and a tooltip. Two renderings of one
+          number, one of them unreadable — a player could only conclude
+          they were different measurements. The bar rows win; these two
+          cells are gone. ROADMAP 1.6, problem 1.
+        */}
       </div>
       {report.intervalConsistency !== undefined && (
         <div className="end-report-components">

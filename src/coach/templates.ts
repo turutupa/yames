@@ -195,6 +195,42 @@ export function pickTemplate(
 }
 
 /**
+ * Draw a template for the first severity the catalogue can satisfy.
+ *
+ * Learning mode asks for an encouraging phrasing first and falls back
+ * to the strict one (`learningMode.severityPlan` builds the list), so
+ * the coach never goes silent for want of a cheerful variant. Returns
+ * which severity was actually used, because that is what the debug log
+ * and the tests want to know.
+ *
+ * A single-entry list behaves exactly like `pickTemplate`, so strict
+ * stance costs nothing.
+ */
+export function pickTemplateForSeverities(
+  catalog: TemplateCatalog,
+  state: ShuffleState,
+  args: {
+    vocab: Vocabulary;
+    scenario: ScenarioKey;
+    severities: Severity[];
+    context?: Record<string, string | number | boolean>;
+    rng?: () => number;
+  },
+  modeCatalog?: TemplateCatalog,
+): { text: string; severity: Severity } | null {
+  for (const severity of args.severities) {
+    const text = pickTemplate(
+      catalog,
+      state,
+      { vocab: args.vocab, scenario: args.scenario, severity, context: args.context, rng: args.rng },
+      modeCatalog,
+    );
+    if (text) return { text, severity };
+  }
+  return null;
+}
+
+/**
  * Push a directly-authored utterance (e.g. one the LLM produced or
  * a hand-picked fallback) into the similarity ring without going
  * through `pickTemplate`. Useful so an LLM rephrase still primes

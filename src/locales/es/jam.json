@@ -253,6 +253,7 @@
       "one": "1 acorde",
       "custom": "{{count}} compases",
       "custom_one": "{{count}} compás",
+      "custom_many": "{{count}} compases",
       "custom_other": "{{count}} compases"
     },
     "countIn": {
@@ -260,6 +261,7 @@
       "none": "Ninguna",
       "barsAnd": "{{count}} compases · {{sound}}",
       "barsAnd_one": "{{count}} compás · {{sound}}",
+      "barsAnd_many": "{{count}} compases · {{sound}}",
       "barsAnd_other": "{{count}} compases · {{sound}}"
     },
     "fills": {
@@ -278,6 +280,7 @@
       "aria": "Suena {{chord}}",
       "next": "{{chord}} en {{count}} compases",
       "next_one": "{{chord}} en {{count}} compás",
+      "next_many": "{{chord}} en {{count}} compases",
       "next_other": "{{chord}} en {{count}} compases",
       "nextNow": "{{chord}} a continuación"
     },
@@ -302,6 +305,7 @@
       "scopeKey": "En la tonalidad",
       "scopeAll": "Todas las tonalidades",
       "noteCount_one": "escala de {{count}} nota",
+      "noteCount_many": "escala de {{count}} notas",
       "noteCount_other": "escala de {{count}} notas",
       "noteCount": "escala de {{count}} notas",
       "jump": "Llévame a",
@@ -410,6 +414,7 @@
       "dropOutBarsLabel": "Cuánto calla la banda",
       "forBars": "durante {{count}} compases",
       "forBars_one": "durante {{count}} compás",
+      "forBars_many": "durante {{count}} compases",
       "forBars_other": "durante {{count}} compases",
       "trade": "Intercambios",
       "tradeN": "Grupos de {{count}}",
@@ -418,6 +423,7 @@
       "tempoEveryLabel": "Cada cuánto sube el tempo",
       "everyChoruses": "cada {{count}} vueltas",
       "everyChoruses_one": "cada {{count}} vuelta",
+      "everyChoruses_many": "cada {{count}} vueltas",
       "everyChoruses_other": "cada {{count}} vueltas",
       "climbing": "subiendo desde {{from}}",
       "dropOutExplain": "La banda para unos compases de vez en cuando y tú llevas el tiempo solo.",
@@ -522,6 +528,7 @@
       "aria": "Formas de tocar este vibe",
       "count": "{{count}} formas de tocarlo",
       "count_one": "{{count}} forma de tocarlo",
+      "count_many": "{{count}} formas de tocarlo",
       "count_other": "{{count}} formas de tocarlo",
       "yours": "Uno tuyo",
       "yoursEmpty": "aún no has guardado ninguno",
@@ -597,9 +604,11 @@
       "none": "Ahí no hay acordes todavía.",
       "summary": "{{count}} compases · tonalidad de {{key}}",
       "summary_one": "{{count}} compás · tonalidad de {{key}}",
+      "summary_many": "{{count}} compases · tonalidad de {{key}}",
       "summary_other": "{{count}} compases · tonalidad de {{key}}",
       "check": "{{count}} para revisar: {{list}}",
       "check_one": "{{count}} para revisar: {{list}}",
+      "check_many": "{{count}} para revisar: {{list}}",
       "check_other": "{{count}} para revisar: {{list}}"
     },
     "perc": {
@@ -711,6 +720,40 @@
       "sixth": "6",
       "flat7": "♭7",
       "seventh": "7"
+    },
+    "takeSound": {
+      "label": "El sonido",
+      "yames": "Yames y mi entrada",
+      "everything": "Todo lo que suena en este ordenador",
+      "warning": "Esto graba todo lo que suena en este ordenador, no solo Yames: una videollamada, una notificación, una canción en el navegador.",
+      "listensTo": "Escucha {{device}}.",
+      "check": "Comprobar el sonido",
+      "listening": "Escuchando…",
+      "level": "Nivel",
+      "silent": "No llegó nada. Comprueba que el volumen de este ordenador esté subido y sin silenciar.",
+      "notHere": "Este ordenador no puede darle a Yames lo que suena por sus altavoces, así que aquí una toma es Yames y tu entrada.",
+      "recordingEverything": "Grabando todo lo que suena en este ordenador",
+      "recordingYames": "Grabando Yames y tu entrada",
+      "takeEverything": "todo lo que sonó en este ordenador"
+    },
+    "takeVideo": {
+      "save": "Guardar como vídeo",
+      "chorus": "Vuelta {{count}}",
+      "chorus_one": "Vuelta {{count}}",
+      "chorus_many": "Vuelta {{count}}",
+      "chorus_other": "Vuelta {{count}}",
+      "next": "luego"
+    },
+    "watch": {
+      "open": "Escúchalo",
+      "where": "Compás {{bar}} · {{chorus}}",
+      "goToBar": "Ir al compás {{bar}}",
+      "barBack": "Un compás atrás",
+      "barOn": "Un compás adelante",
+      "nudge": "Imagen",
+      "nudgeBack": "Imagen un poco antes",
+      "nudgeOn": "Imagen un poco después",
+      "broken": "Ese take no se pudo reproducir. Puede que el archivo se haya movido o borrado."
     }
   },
   "scale": {

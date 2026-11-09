@@ -27,6 +27,7 @@ import {
   FIRST_BEATS_TTS_FLOOR,
   LOW_CONFIDENCE_SUSTAIN_MS,
   NEW_BAND_DURATION_MS,
+  PRESET_CEILING_MAX_SESSIONS,
   REPETITION_HISTORY_MAX,
   SPOKEN_COOLDOWN_CEILING_MS,
   SPOKEN_COOLDOWN_FLOOR_MS,
@@ -1960,5 +1961,60 @@ describe("checkDrillRampPreempt", () => {
     });
     // Should be suppressed by DRILL_RAMP_ACTIVE preempt.
     expect(r1.event).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// preset_ceiling_hit (ROADMAP 1.7, P1-COACH-3)
+// ---------------------------------------------------------------------------
+
+describe("evaluate — preset_ceiling_hit", () => {
+  const AFTER_WARMUP = T0 + WARMUP_GRACE_MS + 1_000;
+  const ceiling = { bpmLow: 130, bpmHigh: 140, sessions: 3, medianScore: 62 };
+  const base = { ...createGatekeeper(T0), bestStreak: HIGH_PB };
+  const quiet = { now: AFTER_WARMUP, window: manyHits(4), inStreak: false };
+
+  it("fires when the player is inside the band their history stalls in", () => {
+    const { event } = evaluate(base, { ...quiet, bpm: 134, presetCeiling: ceiling });
+    expect(event?.scenario).toBe("preset_ceiling_hit");
+    // An observation, not an alarm: it belongs in the feed, not in the
+    // player's ears mid-passage.
+    expect(event?.tier).toBe("written");
+    expect(event?.context).toMatchObject({
+      bpmLow: 130,
+      bpmHigh: 139,
+      attemptCount: 3,
+      score: 62,
+    });
+  });
+
+  it("stays quiet at a tempo outside the band", () => {
+    // `bpmHigh` is exclusive, matching `BpmCeiling`'s `bpmLow + 10`.
+    expect(evaluate(base, { ...quiet, bpm: 129, presetCeiling: ceiling }).event).toBeNull();
+    expect(evaluate(base, { ...quiet, bpm: 140, presetCeiling: ceiling }).event).toBeNull();
+  });
+
+  it("stays quiet when the preset has no known ceiling", () => {
+    expect(evaluate(base, { ...quiet, bpm: 134 }).event).toBeNull();
+  });
+
+  it("hands over to the pace line past the fourth attempt", () => {
+    // Up to three attempts the coach observes; from the fourth,
+    // `useRealtimeTips` suggests a plan instead. Both must never fire
+    // for the same band.
+    const fourth = { ...ceiling, sessions: PRESET_CEILING_MAX_SESSIONS + 1 };
+    expect(evaluate(base, { ...quiet, bpm: 134, presetCeiling: fourth }).event).toBeNull();
+  });
+
+  it("says it once, not every time the beat callback runs", () => {
+    const first = evaluate(base, { ...quiet, bpm: 134, presetCeiling: ceiling });
+    expect(first.event?.scenario).toBe("preset_ceiling_hit");
+    const again = evaluate(first.state, {
+      ...quiet,
+      now: AFTER_WARMUP + 60_000,
+      bpm: 134,
+      presetCeiling: ceiling,
+    });
+    expect(again.event).toBeNull();
   });
 });

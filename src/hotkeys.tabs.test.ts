@@ -26,12 +26,13 @@ describe("the tab hotkeys", () => {
   });
 
   it("numbers them in the order the rail lists them", () => {
-    // PLAY_TABS is the rail's order: Metronome, Setlist, Drill, Jam.
+    // PLAY_TABS is the rail's order: Metronome, Setlist, Drill, Jam, Songs.
     const names: Record<string, string> = {
       beat: "Metronome",
       setlist: "Setlist",
       drill: "Drill",
       jam: "Jam",
+      songs: "Songs",
     };
     expect(tabHotkeys().map((h) => h.action)).toEqual(
       PLAY_TABS.map((tab) => `${names[tab]} tab`),

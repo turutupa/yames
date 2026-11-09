@@ -16,6 +16,7 @@ import {
   type Vocabulary,
 } from "../../../coach/templates";
 import { TEMPLATE_CATALOG } from "../../../coach/templateCatalog";
+import { PRESET_CEILING_MAX_SESSIONS } from "../../../coach/gatekeeper";
 import { coachDebug } from "../../../coach/debug";
 
 export function useRealtimeTips(params: {
@@ -70,6 +71,15 @@ export function useRealtimeTips(params: {
   /**
    * Seed tip data from session history at the start of each session.
    * Resets all once-per-session / once-per-collapse gates.
+   *
+   * `history` is THIS preset's history, as deep as the store has it —
+   * `queryHistory({ presetId })`, not the thirty-session slice
+   * `getSessionHistory` returns. Both gates below count sessions at the
+   * preset (five for stamina, four in one BPM band for the pace line) and
+   * a slice shared with every other exercise in the app almost never
+   * carries enough of any one of them to reach either number. Rows for
+   * other presets are still filtered out here, so passing the wide slice
+   * is wrong rather than merely wasteful.
    */
   const seed = useCallback((
     presetId: string | null | undefined,
@@ -82,13 +92,17 @@ export function useRealtimeTips(params: {
       ? detectStaminaPattern(history, presetId)
       : null;
 
-    // Pace coaching seed
+    // Pace coaching seed. The four-attempt floor is the same line the
+    // gatekeeper's `preset_ceiling_hit` stops at — up to three attempts
+    // the coach only observes the ceiling, from the fourth it suggests
+    // dropping a band. Exactly one of the two fires for a given band,
+    // so the player never hears both. See `PRESET_CEILING_MAX_SESSIONS`.
     paceCoachingFiredRef.current = false;
     paceCoachingRef.current = (() => {
       if (!presetId || !history) return null;
       const summary = summarizePreset(presetId, presetName, history);
       const { bpmCeiling } = detectRecurringIssues(summary);
-      if (!bpmCeiling || bpmCeiling.sessions < 4) return null;
+      if (!bpmCeiling || bpmCeiling.sessions <= PRESET_CEILING_MAX_SESSIONS) return null;
       return {
         ceilingBpmLow: bpmCeiling.bpmLow,
         suggestedBpm: Math.max(bpmCeiling.bpmLow - BPM_BAND_WIDTH, 40),

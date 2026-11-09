@@ -50,6 +50,90 @@ Three reasons:
 3. The coach still does its job as the section that makes someone pick *this* metronome over the
    free one they already have — it just isn't the headline.
 
+### Decided — 2026-09-20 · The headline is the owner's: "Finally, an app for every practice session."
+
+After four rounds of the orchestrator's candidates (a slogan, two that leaned on Songs, a feature
+list, and "the free practice app"), the owner wrote the line himself. His reasons, which are the
+rule: it says WHEN you would use it rather than declaring a category the product has not settled
+("selling it as a practice app … is immediately putting us into a position we're not even clear
+about yet"); it is roomy on purpose; and it stays true when the attention later moves to the coach.
+It also continues the live "Finally, a metronome you won't skip." voice, and "every" sells coming
+back, which the download numbers say is the real problem.
+
+Because the headline is roomy, the eyebrow and the sub-line carry the concrete "what it does"
+immediately, with the metronome, the band and the tabs given equal weight. "Free, no account,
+offline" stays under the download button and in the price tile, not in the h1. No category word in
+titles or share text either. What did not change through any of this: the numbers, the timing (the
+new site goes live with Songs, not before), the landing pages for search, and not "toolkit".
+
+### Decided — 2026-09-20 · "It listens" is rejected. Say what the app does.
+
+The orchestrator proposed "it listens" / "the practice room that listens back" as the thread of the
+new site (the entry below). The owner: *"Nobody coming to the website for the first time would ever
+understand what it means and what the app does by saying listens."* He is right; it only makes sense
+to someone who already knows the product.
+
+**The rule:** every headline, kicker and section title must tell a stranger, in three seconds, what
+the app IS and what they would DO with it, in the words a guitarist would use to a friend. No
+metaphor, no concept, no slogan. Hearing the player is explained concretely where it applies ("marks
+every note on time, early, late or missed"), never made into a theme. Headline candidates for the
+draft: "Practise your songs with a band behind you — and see exactly what to fix." · "The free
+practice app for guitar and bass." · "Your tabs, a backing band and a metronome. One free app."
+Everything else in the entry below — the numbers, the timing, the landing pages, not "toolkit" —
+still stands; its headline candidates and "the thread" do not.
+
+### Superseded in part · 2026-09-20 · From "a metronome" to "practice that listens" — evaluation and recommendation
+
+The owner's question: the homepage sells a metronome, and the app is fast becoming a toolkit and a
+companion. Should the marketing shift? Recommendation below; nothing here is decided until the owner
+says so.
+
+**What the numbers say (GitHub, installers only, 2026-09-20).** 2,618 installer downloads across all
+releases; about three quarters Windows. v1.0.4: 444 in seven weeks. v1.1.0: 114 in nine days. The
+macOS auto-update file was fetched 6–7 times per release against ~50 macOS installs per release: most
+people who install do not seem to be around for the next version. That is the argument for the
+shift in one line — a metronome is opened for thirty seconds, a song you are learning brings you back
+tomorrow. The problem to solve is return visits at least as much as first visits.
+
+**Why not "toolkit".** A toolkit is a list, not a promise, and nobody installs a list from a name they
+have never heard: people adopt a tool for one job and discover the rest. Moises already owns the
+words ("The Musician's App", "the essential toolkit for musicians") with a budget to match.
+
+**What is actually different.** Every mode now listens: the metronome hears your timing, the drill
+adapts to it, Songs scores you against the tab and says one thing about it. Songsterr plays a tab and
+hears nothing; a backing track on YouTube cannot change key or wait for you; Yousician and Rocksmith+
+listen but are subscriptions around their own catalogue. Yames is free, works offline, uses the files
+you already have, and listens. "It listens" is the thread, and the coach is that thread rather than a
+fourth feature — which also keeps the claim true while the talking coach is still beta.
+
+**Recommendation.**
+1. *Position:* a practice companion that listens, guitar and bass first. The metronome becomes the
+   first proof, not the identity. Keep the name; stop leading with the backronym.
+2. *Timing:* do not flip the hero until Songs has shipped and been played by real people. The
+   2026-09-04 rule stands — sell what the app keeps completely. The flip is the v1.3 launch.
+3. *Shape of the page:* three rooms under one thread. Keep time (metronome, drill, setlists) · Play
+   with a band (Jam) · Learn a song (Songs) — and across all three, it listens and tells you the
+   truth. The fan, the claim tiles and the drawings stay.
+4. *Search does not have to lose:* the homepage sells the whole; three plain landing pages catch the
+   searches — `/metronome`, `/backing-tracks`, `/guitar-pro-player` — each leading with its own word
+   and ending at the same download. Static files in `docs/`, cheap.
+5. *Headline candidates* (the owner picks; 05 on the canvas was written for this day):
+   "The practice room that listens back." · "Practise with something that listens." · "Everything
+   you practise with. And it listens."
+6. *The promise about money,* written now so a paid tier later does not break it: everything that
+   runs on your computer is free, for good. No account, no subscription, your own files.
+7. *Everywhere else the word "metronome" lives:* winget, Homebrew, Flathub and Snap descriptions,
+   the README, the og-image, the store screenshots. Change them with the hero, not before.
+8. *One demo:* import a tab → the band plays → stop → the coach's one sentence and its button. Forty
+   seconds of screen recording does more than any headline, on the page and on Reddit.
+9. *Know whether it worked:* there is no way to tell today. Cookieless, no-consent site analytics on
+   yames.app only (never in the app) would show which page and which words bring installs. The
+   owner's call; it does not touch "nothing you play leaves your computer".
+
+**Risks.** Promising a teacher before there is one (say "listens", never "AI teacher"); becoming
+generic (stay guitar-first in pictures and examples); losing the people who came for a great
+metronome (it stays the first room, and `/metronome` stays a front door).
+
 ### Open · When does the coach become the headline?
 
 Trigger to agree on: what "polished" means for the coach (accuracy floor? a run of sessions with

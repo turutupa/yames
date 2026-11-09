@@ -14,6 +14,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { mockInvoke, setInvokeResponse } from "../../../test/mocks";
+import { engineTick } from "../../../test/engineTicks";
 import type { BeatEvent, BeatFeedback, SessionReport } from "../../../types";
 import { OnboardingWizard } from "../OnboardingWizard";
 import type { OnboardingContext, OnboardingState } from "../onboardingMachine";
@@ -34,17 +35,16 @@ function stateAt(context: Partial<OnboardingContext> = {}): OnboardingState {
   };
 }
 
+/**
+ * One tick of a plain click in four, in the shape `engine.rs` emits.
+ *
+ * Through `engineTick`, because this used to say `isDownbeat: n % 4 === 0` —
+ * a stream no engine produces. `isDownbeat` is "a whole beat and not a
+ * subdivision" and is true on every beat of the bar; the bar line is
+ * `isDownbeat && measureBeat === 0`.
+ */
 function beatEvent(n: number): BeatEvent {
-  return {
-    beat: n,
-    measureBeat: n % 4,
-    subdivision: 0,
-    isDownbeat: n % 4 === 0,
-    accentLevel: n % 4 === 0 ? 2 : 0,
-    isAccent: n % 4 === 0,
-    formBar: 0,
-    chorus: 1,
-  };
+  return engineTick({ beat: n });
 }
 
 function feedback(

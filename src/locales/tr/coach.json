@@ -26,7 +26,8 @@
     "send": "Gönder",
     "today": "Bugün",
     "yesterday": "Dün",
-    "noteSpacingTrend": "Nota aralığı eğilimi"
+    "noteSpacingTrend": "Nota aralığı eğilimi",
+    "historyKeptInSettings": "Your history couldn't be opened, so today's sessions are being kept separately. They'll join your history the next time it opens."
   },
   "coachDetail": {
     "exercises": "Alıştırmalar",
@@ -35,9 +36,6 @@
     "beatPlacement": "Vuruş yerleşimi"
   },
   "coachReport": {
-    "cov": "Kapsam",
-    "eff": "Verim",
-    "grid": "Izgara",
     "segment": "Bölüm",
     "thinkingAria": "Koç konuşmaya hazırlanıyor",
     "qualifier": {
@@ -68,7 +66,13 @@
     "pocketOnBeat": "vuruşta",
     "pocketEarly": "Ortalama {{ms}} ms erken çaldın",
     "pocketLate": "Ortalama {{ms}} ms geç çaldın",
-    "pocketCentred": "Zamanlaman vuruşun tam ortasındaydı (±5ms ortalama)"
+    "pocketCentred": "Zamanlaman vuruşun tam ortasındaydı (±5ms ortalama)",
+    "covLabel": "Çalınan vuruşlar",
+    "covTitle": "Beklediğim vuruşların kaçı gerçekten çalındı",
+    "effLabel": "Vuruşa oturan notalar",
+    "effTitle": "Duyduğum her şeyin ne kadarı iki vuruşun arasına değil, vuruşun üstüne düştü",
+    "gridLabel": "Tıka yapışıklık",
+    "gridTitle": "Bütün bölümün tıkı ne kadar yakından izlediği"
   },
   "eval": {
     "today": "Bugün",

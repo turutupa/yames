@@ -423,11 +423,14 @@
   width: 100%;
 }
 
-/* Component breakdown row in mini-report (Cov · Eff · Grid).
- * Small dim numbers after the sparkline — visible in screenshots for
- * debugging; low-contrast so they don't compete with the score text. */
+/* Component breakdown row in mini-report — beats covered, notes on a
+ * beat, locked to the click. Small dim numbers after the sparkline;
+ * low-contrast so they don't compete with the score text. The three
+ * labels were abbreviations until ROADMAP 1.6 spelled them out, which
+ * made the row long enough to need wrapping in a narrow card. */
 .coach-mini-report-components {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   margin-top: 5px;
@@ -888,7 +891,10 @@
   font-size: 12px;
   line-height: 1.5;
   margin-bottom: 10px;
-  color: var(--text);
+  /* `--text` is not a token anything defines, so this line has always been
+     dropped and the comment has inherited the report's ink. It is named now
+     rather than left to inherit by accident. */
+  color: var(--text-primary);
 }
 
 /* ─── Session Detail ─── */

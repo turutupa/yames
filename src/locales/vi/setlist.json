@@ -7,7 +7,6 @@
     "duplicateSetlist": "Nhân bản setlist",
     "copyName": "{{name}} bản sao",
     "librarySteps": "{{count}} bước",
-    "librarySteps_one": "{{count}} bước",
     "librarySteps_other": "{{count}} bước",
     "renameTooltip": "Đổi tên setlist này",
     "edited": "Đã sửa",
@@ -27,10 +26,8 @@
     "reorderHint": "Kéo để sắp xếp lại",
     "stopToReorder": "Dừng setlist để sắp xếp lại",
     "duplicateSteps": "Nhân đôi {{count}} bước",
-    "duplicateSteps_one": "Nhân đôi {{count}} bước",
     "duplicateSteps_other": "Nhân đôi {{count}} bước",
     "removeSteps": "Xóa {{count}} bước",
-    "removeSteps_one": "Xóa {{count}} bước",
     "removeSteps_other": "Xóa {{count}} bước",
     "barOf": "ô nhịp {{current}} trên {{total}}",
     "timeLeft": "còn {{duration}}",
@@ -38,7 +35,6 @@
     "switching": "đang chuyển",
     "summary": {
       "steps": "{{count}} bước",
-      "steps_one": "{{count}} bước",
       "steps_other": "{{count}} bước",
       "about": "khoảng {{duration}}",
       "ends": "tự dừng khi xong",
@@ -48,7 +44,6 @@
       "label": "Lặp lại",
       "once": "Một lượt",
       "times": "{{count}} lượt",
-      "times_one": "{{count}} lượt",
       "times_other": "{{count}} lượt",
       "forever": "Đến khi tôi dừng",
       "fewer": "Lặp ít lượt hơn",
@@ -57,13 +52,10 @@
     "trigger": {
       "manualShort": "khi tôi ra hiệu",
       "barsShort": "{{count}} ô nhịp",
-      "barsShort_one": "{{count}} ô nhịp",
       "barsShort_other": "{{count}} ô nhịp",
       "secondsShort": "{{count}} giây",
-      "secondsShort_one": "{{count}} giây",
       "secondsShort_other": "{{count}} giây",
       "minutesShort": "{{count}} phút",
-      "minutesShort_one": "{{count}} phút",
       "minutesShort_other": "{{count}} phút",
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
@@ -104,10 +96,8 @@
     "transition": {
       "cutShort": "cắt thẳng",
       "countInShort": "đếm vào {{count}} ô nhịp",
-      "countInShort_one": "đếm vào {{count}} ô nhịp",
       "countInShort_other": "đếm vào {{count}} ô nhịp",
       "restShort": "nghỉ {{count}} ô nhịp",
-      "restShort_one": "nghỉ {{count}} ô nhịp",
       "restShort_other": "nghỉ {{count}} ô nhịp"
     },
     "said": {
@@ -137,7 +127,6 @@
       "addStep": "Thêm một jam",
       "addTo": "Thêm vào setlist…",
       "barsOfForm": "{{count}} ô nhịp",
-      "barsOfForm_one": "{{count}} ô nhịp",
       "barsOfForm_other": "{{count}} ô nhịp",
       "said": "ban nhạc",
       "goneShort": "Jam không còn nữa",

@@ -1,0 +1,13 @@
+{
+  "name": "120bpm_click_8ths_play_triplets",
+  "description": "The other shape of the same bug: a grid the click cannot express at all. 120 BPM clicking 8ths, the player in quarter-note triplets of the beat (166.7 ms apart). Only the quarter is shared between the two grids, so every third of the beat has to be invented, and before 1.3 the divisor 3 was not even on the candidate list under an 8th click.",
+  "bpm": 120,
+  "clickSubdivision": 2,
+  "playedDivisor": 3,
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260924,
+  "minScore": 85,
+  "clickKeyedMaxScore": 84,
+  "expectDivisor": 3
+}
