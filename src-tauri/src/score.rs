@@ -1131,8 +1131,8 @@ pub fn estimate_constant_lag_ms(
     if expected_ms.is_empty() || played_ms.len() < MIN_NOTES_FOR_LAG {
         return None;
     }
-    // Nearest written note to `t`, moving a hint forward through both sorted
-    // lists so that each offset is one pass over the notes.
+    // Nearest entry of a sorted list to `t`, moving a hint forward through it
+    // so that each offset is one pass over the notes.
     fn nearest(expected: &[f64], hint: &mut usize, t: f64) -> f64 {
         while *hint + 1 < expected.len()
             && (expected[*hint + 1] - t).abs() <= (expected[*hint] - t).abs()
@@ -1143,43 +1143,75 @@ pub fn estimate_constant_lag_ms(
     }
 
     let tol = (smallest_gap_ms * 0.2).clamp(6.0, 15.0);
+    // Both ways round: each played note against its nearest written one, and
+    // each written note against its nearest played one. A shift by a whole
+    // gap then loses a note at both ends rather than at one, which is twice
+    // the evidence for telling the two apart.
     let fit_at = |offset: f64| -> f64 {
         let mut hint = 0usize;
-        played_ms
+        let played_side: f64 = played_ms
             .iter()
             .map(|p| {
                 let d = nearest(expected_ms, &mut hint, p - offset).abs();
                 (1.0 - d / tol).max(0.0)
             })
-            .sum()
+            .sum();
+        let mut hint = 0usize;
+        let written_side: f64 = expected_ms
+            .iter()
+            .map(|e| {
+                let d = nearest(played_ms, &mut hint, e + offset).abs();
+                (1.0 - d / tol).max(0.0)
+            })
+            .sum();
+        played_side + written_side
     };
     let candidates = (LAG_SEARCH_MS.0..=LAG_SEARCH_MS.1).step_by(LAG_SEARCH_STEP_MS);
     let fits: Vec<(f64, f64)> = candidates.map(|c| (c as f64, fit_at(c as f64))).collect();
     let best = fits.iter().map(|&(_, f)| f).fold(0.0, f64::max);
-    // A periodic run fits the same a whole gap away, except for the note at
-    // the end that then answers to nothing. Half of what an average note adds
-    // to the fit is what separates those (an absolute half a note is too
-    // much: a note seldom lands dead on, so the one at the end is worth less
-    // than one); among what is left, the prior decides.
-    let per_note = best / played_ms.len() as f64;
-    let coarse = fits
-        .iter()
-        .filter(|&&(_, f)| f >= best - 0.5 * per_note)
-        .min_by(|a, b| (a.0 - prior_ms).abs().total_cmp(&(b.0 - prior_ms).abs()))
-        .map(|&(c, _)| c)?;
+    // What one note adds to the fit, on average, counted on both sides.
+    let per_note = best / (played_ms.len() + expected_ms.len()) as f64;
 
+    // The offset that lines the notes up around `coarse`: the median of what
+    // is left over, among the notes close enough to be read from it.
     let reach = (smallest_gap_ms * 0.4).max(tol);
-    let mut hint = 0usize;
-    let mut residuals: Vec<f64> = played_ms
-        .iter()
-        .map(|p| nearest(expected_ms, &mut hint, p - coarse))
-        .filter(|d| d.abs() <= reach)
-        .collect();
-    if residuals.len() < MIN_NOTES_FOR_LAG {
-        return None;
+    let refine = |coarse: f64| -> Option<f64> {
+        let mut hint = 0usize;
+        let mut residuals: Vec<f64> = played_ms
+            .iter()
+            .map(|p| nearest(expected_ms, &mut hint, p - coarse))
+            .filter(|d| d.abs() <= reach)
+            .collect();
+        if residuals.len() < MIN_NOTES_FOR_LAG {
+            return None;
+        }
+        residuals.sort_by(|a, b| a.total_cmp(b));
+        Some(coarse + median(&residuals))
+    };
+
+    // A periodic run fits the same a whole gap away, except for the note at
+    // the end that then answers to nothing. So every peak of the coarse fit is
+    // refined first and compared at its own best offset: on the 2 ms grid one
+    // alignment can sit a millisecond nearer its peak than the other, and at
+    // speed that is worth as much as the lost end notes. Among the refined
+    // peaks within one average note of the best (a whole-gap shift costs about
+    // two), the prior decides.
+    let mut peaks: Vec<(f64, f64)> = Vec::new();
+    for (i, &(c, f)) in fits.iter().enumerate() {
+        let left = i == 0 || fits[i - 1].1 <= f;
+        let right = i + 1 == fits.len() || fits[i + 1].1 < f;
+        if left && right && f >= best - 4.0 * per_note {
+            if let Some(offset) = refine(c) {
+                peaks.push((offset, fit_at(offset)));
+            }
+        }
     }
-    residuals.sort_by(|a, b| a.total_cmp(b));
-    Some(coarse + median(&residuals))
+    let refined_best = peaks.iter().map(|&(_, f)| f).fold(0.0, f64::max);
+    peaks
+        .iter()
+        .filter(|&&(_, f)| f >= refined_best - per_note)
+        .min_by(|a, b| (a.0 - prior_ms).abs().total_cmp(&(b.0 - prior_ms).abs()))
+        .map(|&(offset, _)| offset)
 }
 
 /// Match a whole attempt — every pass — and score it.

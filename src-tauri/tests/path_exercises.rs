@@ -14,8 +14,10 @@ use std::fs;
 use std::path::PathBuf;
 
 use yames_lib::instrument::Instrument;
+use yames_lib::score::pass::CLEAN_TEMPO_MIN_BARS;
 use yames_lib::score::{
-    match_attempt, BeatMap, OnsetState, PlayedOnset, ScheduleReport, ScoreSchedule,
+    match_attempt, BeatMap, OnsetState, PassBar, PassVerdict, PlayedOnset, ScheduleReport,
+    ScheduleRun, ScoreSchedule,
 };
 use yames_lib::session_log::Xorshift64;
 
@@ -227,4 +229,87 @@ fn a_constant_input_delay_is_the_known_limit_at_speed() {
         "sixteenths at {} BPM with 60 ms of delay kept every note: calibration may have landed",
         fast.bpm
     );
+}
+
+/// An Exercise's `passBars`, read from the pack it ships in.
+fn pass_bars(path: &str, exercise: &str) -> Option<Vec<PassBar>> {
+    let file = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../src/paths/packs")
+        .join(format!("{path}.json"));
+    let pack: serde_json::Value = serde_json::from_str(&fs::read_to_string(&file).ok()?).ok()?;
+    fn find<'a>(v: &'a serde_json::Value, id: &str) -> Option<&'a serde_json::Value> {
+        match v {
+            serde_json::Value::Object(m) => {
+                if m.get("id").and_then(|i| i.as_str()) == Some(id) && m.contains_key("passBars") {
+                    return Some(v);
+                }
+                m.values().find_map(|x| find(x, id))
+            }
+            serde_json::Value::Array(a) => a.iter().find_map(|x| find(x, id)),
+            _ => None,
+        }
+    }
+    let exercise = find(&pack, exercise)?;
+    if exercise["grading"] != "graded" || exercise["loops"] != true {
+        return None;
+    }
+    serde_json::from_value(exercise["passBars"].clone()).ok()
+}
+
+/// Every looping graded Exercise, played right round its loop for longer than
+/// its longest `overBars` and the clean tempo's 8 bars, passes its own bars.
+/// A bar that a tidy player could not meet would be a content bug; one the
+/// app cannot measure must say so rather than pass silently.
+#[test]
+fn every_looping_exercise_played_right_passes_its_own_bars() {
+    let mut checked = 0;
+    for (index, row) in rows().iter().enumerate() {
+        let Some(bars) = pass_bars(&row.path, &row.exercise) else {
+            continue;
+        };
+        if bars.is_empty() || row.schedule.onsets.is_empty() {
+            continue;
+        }
+        let name = format!("{}/{}", row.path, row.exercise);
+        let length = row.schedule.length_beats;
+        let window = bars.iter().map(|b| b.over_bars).max().unwrap_or(1).max(CLEAN_TEMPO_MIN_BARS);
+        // Bars are four quarters in every pack today; round up to whole passes.
+        let passes = ((window as f64 * 4.0) / length).ceil() as usize;
+        let ms = 60_000.0 / row.bpm;
+        let mut rng = Xorshift64::new(500 + index as u64);
+        let mut notes = Vec::new();
+        for pass in 0..passes {
+            for onset in &row.schedule.onsets {
+                let jitter = ((rng.next_u64() % 2001) as f64 / 1000.0 - 1.0) * 2.0;
+                notes.push(PlayedOnset {
+                    time_ms: (pass as f64 * length + onset.beat) * ms + jitter,
+                    // The written accents, played clearly louder.
+                    amplitude: if onset.accent { 1.0 } else { 0.4 },
+                    confidence: 1.0,
+                });
+            }
+        }
+        let looped = ScoreSchedule {
+            loops: true,
+            ..row.schedule.clone()
+        };
+        let mut run = ScheduleRun::new(looped).with_pass_bars(bars.clone());
+        // The transport runs one bar past the last note, as a Take's does.
+        for i in 0..=(passes as f64 * length) as usize + 4 {
+            run.note_quarter_in_bar(i == 0, i as f64 * ms, 4);
+        }
+        for n in &notes {
+            run.note_onset(*n);
+        }
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        let grade = run.report(&weights).expect("a beat map").grade;
+        let pass = grade.pass.as_ref().expect("pass bars were loaded");
+        assert_eq!(pass.verdict, PassVerdict::Passed, "{name}: {pass:?}");
+        assert!(pass.counts_for_clean_tempo, "{name}: {pass:?}");
+        let unmeasured: Vec<&String> =
+            bars.iter().map(|b| &b.metric).filter(|m| *m == "noteIdentity").collect();
+        assert_eq!(pass.not_assessed.len(), unmeasured.len(), "{name}: {pass:?}");
+        checked += 1;
+    }
+    assert!(checked > 30, "only {checked} looping graded Exercises");
 }
