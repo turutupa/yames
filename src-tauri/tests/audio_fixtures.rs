@@ -36,9 +36,11 @@ use yames_lib::pitch::{
     identify_take_notes, note_identity, MatchedOnset, NoteIdentity, OnsetState as PitchState,
     PitchConfig, ScoreNote,
 };
+use yames_lib::score::pass::clean_tempo;
 use yames_lib::score::{
     evenness, match_attempt, smallest_gap_beats, BeatMap, CalibrationSource, ExpectedOnset,
-    NoCatchReason, OnsetState, PlayedOnset, ScheduleReport, ScheduleRun, ScoreSchedule, TakeVerdict,
+    NoCatchReason, OnsetState, PassBar, PassResult, PassVerdict, PlayedOnset, ScheduleReport,
+    ScheduleRun, ScoreSchedule, TakeVerdict,
 };
 
 const RATE: u32 = 48_000;
@@ -159,6 +161,12 @@ struct Take {
     wrong: Vec<usize>,
     /// What the calibration cache holds for this rig.
     cached_offset_ms: Option<f64>,
+    /// The schedule the scorer is handed, when it is not `schedule`: a looping
+    /// Exercise, played round several times. `schedule` is then what was
+    /// played, unrolled.
+    scored_as: Option<ScoreSchedule>,
+    /// The Exercise's pass bars, as `load_score_schedule` is handed them.
+    pass_bars: Vec<PassBar>,
     feed: Feed,
     seed: u64,
 }
@@ -179,6 +187,8 @@ impl Take {
             extra_beats: Vec::new(),
             wrong: Vec::new(),
             cached_offset_ms: None,
+            scored_as: None,
+            pass_bars: Vec::new(),
             feed: Feed::default(),
             seed: 42,
         }
@@ -312,6 +322,15 @@ impl GradingRun {
     }
 }
 
+/// The grade's number, which a graded Take always has. The report's own
+/// `score` is Songs' number and keeps its old rule; this is the one a Take is
+/// told.
+fn number(run: &GradingRun) -> f32 {
+    run.grade()
+        .score
+        .unwrap_or_else(|| panic!("{} was not graded: {}", run.name, run.line()))
+}
+
 /// Time onsets against a beat map through the same `ScheduleRun` the analyzer
 /// holds. Recordings come through here too.
 fn score_onsets(
@@ -320,8 +339,11 @@ fn score_onsets(
     beats_per_bar: u32,
     onsets: &[PlayedOnset],
     cached_offset_ms: Option<f64>,
+    pass_bars: &[PassBar],
 ) -> ScheduleReport {
-    let mut run = ScheduleRun::new(schedule.clone()).with_calibration_seed(cached_offset_ms);
+    let mut run = ScheduleRun::new(schedule.clone())
+        .with_calibration_seed(cached_offset_ms)
+        .with_pass_bars(pass_bars.to_vec());
     for (i, &t) in quarter_times_ms.iter().enumerate() {
         run.note_quarter_in_bar(i == 0, t, beats_per_bar);
     }
@@ -374,7 +396,8 @@ fn run_take(take: &Take) -> GradingRun {
     let quarters: Vec<f64> = (0..=(length.ceil() as usize + 1))
         .map(|i| t0 + i as f64 * q)
         .collect();
-    let report = score_onsets(&take.schedule, &quarters, 4, &onsets, take.cached_offset_ms);
+    let scored = take.scored_as.as_ref().unwrap_or(&take.schedule);
+    let report = score_onsets(scored, &quarters, 4, &onsets, take.cached_offset_ms, &take.pass_bars);
 
     // Against everything that was sounded, written or not.
     let mut sounded: Vec<f64> = truth.notes.iter().map(|n| n.at_ms).collect();
@@ -464,7 +487,6 @@ fn a_noise_floor_with_nobody_playing_hears_nothing() {
             assert_eq!(g.heard, 0, "{noise:?} {}", run.name);
             assert_eq!(g.verdict, TakeVerdict::DidntCatchEnough);
             assert_eq!(g.score, None, "silence must not score");
-            assert_eq!(run.report.score, 0.0, "silence must not score");
         }
     }
 }
@@ -503,7 +525,6 @@ fn nineteen_of_128_heard_never_scores_high() {
     println!("{}", run.line());
     let g = run.grade();
     assert_eq!(g.heard, 19);
-    assert!(run.report.score < 20.0, "score {}", run.report.score);
     assert_eq!(g.verdict, TakeVerdict::DidntCatchEnough);
     assert_eq!(g.no_catch_reason, Some(NoCatchReason::TooFewHeard));
     assert_eq!(g.score, None);
@@ -522,7 +543,7 @@ fn a_dropped_note_costs_what_it_should() {
     assert_eq!(g.missed, 13, "{}", run.line());
     assert_eq!(g.heard, 115);
     assert_eq!(g.verdict, TakeVerdict::Graded);
-    let (a, b) = (clean.report.score, run.report.score);
+    let (a, b) = (number(&clean), number(&run));
     assert!(a > 85.0, "clean take {a}");
     assert!((b / a - 115.0 / 128.0).abs() < 0.05, "{a} then {b}");
 }
@@ -568,11 +589,11 @@ fn extras_are_reported_and_cost_less_than_a_miss() {
     one_miss.drop = vec![10, 26, 40];
     let missed = run_take(&one_miss);
     assert!(
-        run.report.score > missed.report.score,
+        number(&run) > number(&missed),
         "three extras {} against three misses {}, clean {}",
-        run.report.score,
-        missed.report.score,
-        clean.report.score,
+        number(&run),
+        number(&missed),
+        number(&clean),
     );
 }
 
@@ -598,10 +619,10 @@ fn a_constant_lag_does_not_look_like_bad_playing() {
             let (even, base_even) = (g.evenness.unwrap(), base.grade().evenness.unwrap());
             assert!((even - base_even).abs() < 0.01, "evenness moved: {} vs {}", base_even, even);
             assert!(
-                (run.report.score - base.report.score).abs() < 3.0,
+                (number(&run) - number(&base)).abs() < 3.0,
                 "score moved with lag {lag}: {} vs {}",
-                base.report.score,
-                run.report.score
+                number(&base),
+                number(&run)
             );
             assert!(
                 (g.calibration.offset_ms - base.grade().calibration.offset_ms - lag).abs() < 3.0,
@@ -691,7 +712,12 @@ fn evenness_tracks_the_real_spread_of_the_playing() {
                     "{} jitter {jitter}: measured {measured} against {truth}",
                     run.name,
                 );
-                assert!(g.heard >= 125, "{}", run.line());
+                // A player good enough to pass is heard whole. One who is not
+                // (14 ms at 160 BPM is evenness 0.77) loses the odd note to
+                // the refractory and the matching window, and fails the
+                // evenness bar first either way.
+                let min_heard = if truth >= 0.85 { 125 } else { 120 };
+                assert!(g.heard >= min_heard, "{}", run.line());
             }
         }
     }
@@ -774,6 +800,155 @@ fn exercises_from_the_packs_come_through_the_detector() {
         checked += 1;
     }
     assert!(checked >= 8, "only {checked} Exercises");
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// The pass bar and the clean tempo, on Alternate Picking's own Exercises
+// ──────────────────────────────────────────────────────────────────────
+
+/// An Exercise's pass bars, read from the pack the app ships.
+fn pack_pass_bars(path: &str, exercise: &str) -> Vec<PassBar> {
+    let file = manifest().join(format!("../src/paths/packs/{path}.json"));
+    let pack: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&file).expect("the pack")).expect("pack JSON");
+    fn find<'a>(v: &'a serde_json::Value, id: &str) -> Option<&'a serde_json::Value> {
+        match v {
+            serde_json::Value::Object(m) => {
+                if m.get("id").and_then(|i| i.as_str()) == Some(id) && m.contains_key("passBars") {
+                    return Some(v);
+                }
+                m.values().find_map(|x| find(x, id))
+            }
+            serde_json::Value::Array(a) => a.iter().find_map(|x| find(x, id)),
+            _ => None,
+        }
+    }
+    let ex = find(&pack, exercise).unwrap_or_else(|| panic!("{exercise} in {path}"));
+    serde_json::from_value(ex["passBars"].clone()).expect("passBars as format.ts writes them")
+}
+
+/// A Take on a looping Exercise from the packs, `passes` times round, at
+/// `bpm`. The scorer is handed the loop; the audio is the loop unrolled.
+fn exercise_take(exercise: &str, bpm: f64, passes: usize) -> Take {
+    let row = path_rows()
+        .into_iter()
+        .find(|r| r.path == "alternate-picking" && r.exercise == exercise)
+        .unwrap_or_else(|| panic!("{exercise} in schedules.jsonl"));
+    let looped = ScoreSchedule {
+        loops: true,
+        ..row.schedule.clone()
+    };
+    let length = row.schedule.length_beats;
+    let mut onsets = Vec::new();
+    for pass in 0..passes {
+        for o in &row.schedule.onsets {
+            onsets.push(ExpectedOnset {
+                id: onsets.len() as u32,
+                beat: pass as f64 * length + o.beat,
+                ..o.clone()
+            });
+        }
+    }
+    let mut take = Take::new(Tone::Clean, bpm, 0);
+    take.schedule = ScoreSchedule {
+        onsets,
+        length_beats: length * passes as f64,
+        loops: false,
+    };
+    take.scored_as = Some(looped);
+    take.pass_bars = pack_pass_bars("alternate-picking", exercise);
+    take
+}
+
+fn pass_of(run: &GradingRun) -> &PassResult {
+    run.grade().pass.as_ref().expect("pass bars were loaded")
+}
+
+/// The first Exercise of the first build, the way a Session runs it: 2 bars
+/// round eight times, at the rung that decides it.
+#[test]
+fn a_tidy_take_passes_alternate_picking_and_counts_for_the_clean_tempo() {
+    for tone in [Tone::Clean, Tone::HighGain] {
+        let mut take = exercise_take("even-eighths.open-string", 100.0, 8);
+        take.tone = tone;
+        let run = run_take(&take);
+        let pass = pass_of(&run);
+        println!("{}\n  {pass:?}", run.line());
+        assert_eq!(pass.verdict, PassVerdict::Passed, "{pass:?}");
+        assert_eq!(pass.finished_bars, 16);
+        assert_eq!(pass.held_bars, 16);
+        assert!(pass.counts_for_clean_tempo);
+        assert!(pass.not_assessed.is_empty());
+        assert!((run.grade().bpm - 100.0).abs() < 0.5);
+    }
+}
+
+/// And each of its bars fails the Take on its own, saying which.
+#[test]
+fn each_alternate_picking_bar_fails_a_take_on_its_own() {
+    // Uneven: 25 ms of spread on eighths at 100 BPM is evenness 0.82.
+    let mut uneven = exercise_take("even-eighths.open-string", 100.0, 8);
+    uneven.jitter_ms = 25.0;
+    // A note dropped in every bar: 7 of 8 heard.
+    let mut dropping = exercise_take("even-eighths.open-string", 100.0, 8);
+    dropping.drop = (0..128).step_by(8).map(|i| i + 3).collect();
+    // A stray note in every bar, on the "and" of the "and".
+    let mut noisy = exercise_take("even-eighths.open-string", 100.0, 8);
+    noisy.extra_beats = (0..16).map(|b| b as f64 * 4.0 + 1.25).collect();
+
+    for (take, failing) in [
+        (uneven, "timingEvenness"),
+        (dropping, "notesHeard"),
+        (noisy, "extraNotes"),
+    ] {
+        let run = run_take(&take);
+        let pass = pass_of(&run);
+        println!("{failing}: {}\n  {pass:?}", run.line());
+        assert_eq!(pass.verdict, PassVerdict::Failed, "{failing}: {pass:?}");
+        assert!(!pass.counts_for_clean_tempo);
+        let check = pass.checks.iter().find(|c| c.metric == failing).unwrap();
+        assert!(!check.held, "{failing}: {pass:?}");
+    }
+}
+
+/// A Take that stopped before four bars is not a fail, nor is one the grade
+/// could not hear.
+#[test]
+fn a_short_take_or_a_silent_one_is_not_a_fail() {
+    let short = run_take(&exercise_take("even-eighths.open-string", 100.0, 1));
+    assert_eq!(pass_of(&short).verdict, PassVerdict::TooShort, "{:?}", pass_of(&short));
+    let mut silent = exercise_take("even-eighths.open-string", 100.0, 4);
+    silent.drop = (0..64).collect();
+    let silent = run_take(&silent);
+    assert_eq!(pass_of(&silent).verdict, PassVerdict::DidntCatchEnough);
+}
+
+/// Pitch is not timing: an Exercise whose bars name `noteIdentity` passes or
+/// fails on the rest, and says it did not check the notes.
+#[test]
+fn right_notes_are_said_to_be_unchecked_rather_than_assumed() {
+    let run = run_take(&exercise_take("even-eighths.a-minor-one-string", 100.0, 4));
+    let pass = pass_of(&run);
+    assert_eq!(pass.verdict, PassVerdict::Passed, "{pass:?}");
+    assert_eq!(pass.not_assessed, vec!["noteIdentity".to_string()]);
+    assert!(!pass.counts_for_clean_tempo, "8 bars, and only 8 is not under 8: {pass:?}");
+}
+
+/// The clean tempo (BRIEF.md "Decisions"): the fastest rung at which a Take
+/// passed over at least 8 bars. A player who holds together up to 85 BPM on
+/// the sixteenths Exercise and comes apart above it has a clean tempo of 85.
+#[test]
+fn the_clean_tempo_is_the_fastest_rung_that_held_for_eight_bars() {
+    let mut takes = Vec::new();
+    for bpm in [70.0, 75.0, 80.0, 85.0, 90.0, 95.0] {
+        let mut take = exercise_take("even-sixteenths.gear-change", bpm, 5);
+        take.jitter_ms = if bpm <= 85.0 { 6.0 } else { 30.0 };
+        let run = run_take(&take);
+        println!("{}\n  {:?}", run.line(), pass_of(&run).verdict);
+        takes.push((run.grade().bpm, pass_of(&run).clone()));
+    }
+    let clean = clean_tempo(takes.iter().map(|(bpm, p)| (*bpm, p))).expect("a clean tempo");
+    assert!((clean - 85.0).abs() < 0.5, "clean tempo {clean}");
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -921,7 +1096,7 @@ fn run_recording(sidecar_path: &Path) -> Result<(GradingRun, Vec<String>), Strin
     let quarters: Vec<f64> = (0..=(schedule.length_beats.ceil() as usize + 1))
         .map(|i| sidecar.first_beat_ms + i as f64 * q)
         .collect();
-    let report = score_onsets(&schedule, &quarters, sidecar.beats_per_bar, &onsets, None);
+    let report = score_onsets(&schedule, &quarters, sidecar.beats_per_bar, &onsets, None, &[]);
 
     let (mut truth_heard, mut truth_extra, mut mean, mut sd, mut true_evenness) =
         (0, 0, 0.0, 0.0, None);
@@ -1205,7 +1380,7 @@ fn measure_lag_table() {
                     g.heard,
                     g.due,
                     g.evenness.unwrap_or(0.0),
-                    run.report.score
+                    g.score.unwrap_or(0.0)
                 )
             })
             .collect();

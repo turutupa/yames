@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::instrument::{Instrument, InstrumentProfile, ScoreWeights};
 use crate::models::PlayMode;
 use crate::onset::Onset;
-use crate::score::{LiveOnset, PlayedOnset, ScheduleRun, ScoreSchedule, TakeGrade};
+use crate::score::{LiveOnset, PassBar, PlayedOnset, ScheduleRun, ScoreSchedule, TakeGrade};
 use crate::session::CoachMode;
 use crate::session_log::{
     ActivityTransition, Classification, ComponentScores, DetectedOnset, ExpectedBeat,
@@ -344,7 +344,7 @@ pub struct TimingAnalyzer {
     /// Roadmap 2.4 — the score the player is playing against, when
     /// there is one. `None` is free play, and free play is untouched
     /// by everything this field enables.
-    schedule: Arc<Mutex<Option<ScoreSchedule>>>,
+    schedule: Arc<Mutex<Option<(ScoreSchedule, Vec<PassBar>)>>>,
     /// Bumped whenever the slot above changes, so the analysis loop can
     /// tell "still the same schedule" from "a new one" without locking
     /// and cloning it every 5 ms.
@@ -397,7 +397,13 @@ impl TimingAnalyzer {
     /// all. Takes effect within one matcher pass; safe to call while a
     /// session is running.
     pub fn load_score_schedule(&self, schedule: ScoreSchedule) {
-        *self.schedule.lock().unwrap() = Some(schedule);
+        self.load_exercise_schedule(schedule, Vec::new());
+    }
+
+    /// [`Self::load_score_schedule`], for an Exercise: the Take's grade is
+    /// also judged against its pass bars (`score::pass`).
+    pub fn load_exercise_schedule(&self, schedule: ScoreSchedule, pass_bars: Vec<PassBar>) {
+        *self.schedule.lock().unwrap() = Some((schedule, pass_bars));
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -601,7 +607,7 @@ impl TimingAnalyzer {
         close_segment_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
-        schedule_slot: Arc<Mutex<Option<ScoreSchedule>>>,
+        schedule_slot: Arc<Mutex<Option<(ScoreSchedule, Vec<PassBar>)>>>,
         schedule_version: Arc<std::sync::atomic::AtomicU64>,
         take_grade: Arc<Mutex<Option<TakeGrade>>>,
         profile: InstrumentProfile,
@@ -848,8 +854,11 @@ impl TimingAnalyzer {
                         .lock()
                         .unwrap()
                         .clone()
-                        .map(ScheduleRun::new)
-                        .map(|run| run.with_calibration_seed(initial_calibration_offset_ms));
+                        .map(|(schedule, pass_bars)| {
+                            ScheduleRun::new(schedule)
+                                .with_calibration_seed(initial_calibration_offset_ms)
+                                .with_pass_bars(pass_bars)
+                        });
                 }
             }
 

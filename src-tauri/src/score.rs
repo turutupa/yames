@@ -386,6 +386,25 @@ impl BeatMap {
         }
     }
 
+    /// Bars the transport finished: those whose next downbeat was logged, so
+    /// that every note in them was reached. The bar the Take stopped in is not
+    /// one of them.
+    pub fn finished_bars(&self) -> u32 {
+        if self.bar_starts.is_empty() {
+            let per_bar = if self.beats_per_bar > 0 {
+                self.beats_per_bar
+            } else {
+                DEFAULT_BEATS_PER_BAR
+            } as usize;
+            // Quarter `i` is logged for every `i < len`; a bar of `per_bar`
+            // starting at `s` is finished once quarter `s + per_bar` is.
+            return (self.beats_ms.len().saturating_sub(1) / per_bar) as u32;
+        }
+        // Every bar but the last has had its successor's downbeat logged: that
+        // downbeat is what opened the successor.
+        (self.bar_starts.len() - 1) as u32
+    }
+
     pub fn len(&self) -> usize {
         self.beats_ms.len()
     }
@@ -830,17 +849,23 @@ pub struct ScheduleReport {
     /// How many times round the loop the player got.
     pub passes: u32,
     /// What to tell the player about this Take. See [`TakeGrade`].
+    ///
+    /// Not part of this report's own wire shape: Songs' goldens
+    /// (`tests/highbpm_fixtures`) pin that shape byte for byte, and the grade
+    /// reaches the screen on `PracticeSegmentEnded::take_grade` instead.
+    #[serde(skip)]
     pub grade: TakeGrade,
 }
 
 /// Whether a Take gave enough to grade.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TakeVerdict {
     Graded,
     /// Too little was heard, or too unreliably, to say anything about the
     /// playing. It is not a low mark: it may be the rig, and the honest thing
     /// to say is "I didn't catch enough". See [`didnt_catch_enough`].
+    #[default]
     DidntCatchEnough,
 }
 
@@ -860,11 +885,12 @@ pub enum NoCatchReason {
 }
 
 /// Where the number that removed the system's lag came from.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CalibrationSource {
     /// None applied: the clock was taken as given, or there was too little to
     /// measure and nothing remembered.
+    #[default]
     None,
     /// The `(instrument, device)` offset from `calibration_cache`. A lean is
     /// measurable against it, because it was learned in other sessions.
@@ -876,7 +902,7 @@ pub enum CalibrationSource {
 
 /// How a Take's clock was corrected. See [`CalibrationPolicy`] for the
 /// trade-off this is the result of.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TakeCalibration {
     /// What the reported deviations are measured from, ms. Positive means the
@@ -914,7 +940,10 @@ pub struct BarMetrics {
 /// `score` and `evenness` are `None` on [`TakeVerdict::DidntCatchEnough`], so
 /// a screen cannot show a number by accident. The counts are always there:
 /// they are facts, and "I heard 19 of 128" is the useful thing to say.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+///
+/// The default is a Take nothing was heard on, and exists only so that a
+/// stored [`ScheduleReport`], which does not carry its grade, can be read back.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TakeGrade {
     pub verdict: TakeVerdict,
@@ -941,6 +970,13 @@ pub struct TakeGrade {
     pub confidence: Option<f32>,
     pub calibration: TakeCalibration,
     pub bars: Vec<BarMetrics>,
+    /// The tempo the Take was played at: the median quarter of the beat map.
+    /// What a clean tempo is recorded as.
+    pub bpm: f64,
+    /// The Exercise's pass bars applied to this Take. `None` when no pass bars
+    /// were loaded with the schedule, which is every Song. See [`pass`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pass: Option<PassResult>,
 }
 
 /// Under this share of the notes due, the Take says "I didn't catch enough"
@@ -1121,11 +1157,14 @@ pub fn estimate_constant_lag_ms(
     let fits: Vec<(f64, f64)> = candidates.map(|c| (c as f64, fit_at(c as f64))).collect();
     let best = fits.iter().map(|&(_, f)| f).fold(0.0, f64::max);
     // A periodic run fits the same a whole gap away, except for the note at
-    // each end. Half a note's worth is what separates those; among what is
-    // left, the prior decides.
+    // the end that then answers to nothing. Half of what an average note adds
+    // to the fit is what separates those (an absolute half a note is too
+    // much: a note seldom lands dead on, so the one at the end is worth less
+    // than one); among what is left, the prior decides.
+    let per_note = best / played_ms.len() as f64;
     let coarse = fits
         .iter()
-        .filter(|&&(_, f)| f >= best - 0.5)
+        .filter(|&&(_, f)| f >= best - 0.5 * per_note)
         .min_by(|a, b| (a.0 - prior_ms).abs().total_cmp(&(b.0 - prior_ms).abs()))
         .map(|&(c, _)| c)?;
 
@@ -1160,17 +1199,19 @@ pub fn match_attempt(
     played: &[PlayedOnset],
     weights: &ScoreWeights,
 ) -> ScheduleReport {
-    match_attempt_calibrated(schedule, beats, played, weights, CalibrationPolicy::Off)
+    match_attempt_calibrated(schedule, beats, played, weights, CalibrationPolicy::Off, &[])
 }
 
 /// [`match_attempt`], with the system's constant lag dealt with as `policy`
-/// says.
+/// says, and the grade judged against an Exercise's `pass_bars` (none for a
+/// Song).
 pub fn match_attempt_calibrated(
     schedule: &ScoreSchedule,
     beats: &BeatMap,
     played: &[PlayedOnset],
     weights: &ScoreWeights,
     policy: CalibrationPolicy,
+    pass_bars: &[PassBar],
 ) -> ScheduleReport {
     let (matching_ms, mut calibration) = resolve_calibration(schedule, beats, played, policy);
     // Everything below sees the notes as if there were no lag. `played` is on
@@ -1278,6 +1319,13 @@ pub fn match_attempt_calibrated(
     }
 
     let accent_agreement = accent_agreement(schedule, &results, played, beats);
+    // The same lookup, kept per note for the pass bars' per-window accents.
+    // Only when there is an accent to judge: it is a search per hit.
+    let amplitudes = if schedule.onsets.iter().any(|o| o.accent) && !pass_bars.is_empty() {
+        hit_amplitudes(schedule, &results, played, beats)
+    } else {
+        Vec::new()
+    };
 
     // Matching is done. What gets reported is measured from the scoring
     // offset, which is where a lean shows (see `CalibrationPolicy`).
@@ -1301,8 +1349,43 @@ pub fn match_attempt_calibrated(
     // and a 180 BPM piece is not marked on a 120 BPM tolerance.
     let quarter_ms = median_interval_ms(beats);
     let tally = Tally::of(schedule, beats, &results, &extras);
-    let (score, ic, ga, hc, oe) = score_results(schedule, &results, &tally, weights, quarter_ms);
-    let grade = grade_take(schedule, beats, &results, &extras, &tally, played, score, calibration);
+    let (ic, ga) = timing_components(schedule, &results, quarter_ms);
+
+    // The report's own number is the one Songs has always shown, and its
+    // goldens pin it: completeness over every written note, efficiency over
+    // every extra, the instrument's weights as they are.
+    let hits = results.iter().filter(|r| r.deviation_ms.is_some()).count() as u32;
+    let due = results
+        .iter()
+        .filter(|r| r.state != OnsetState::SoftAbsent)
+        .count() as u32;
+    let hc = ratio(hits, due);
+    let oe = ratio(hits, hits + extras.len() as u32);
+    let score = (ic * weights.ic + ga * weights.ga + hc * weights.hc + oe * weights.oe) * 100.0;
+
+    // The grade's number: what was heard of what the Take reached, priced as
+    // `known_score_number` says.
+    let grade_score = known_score_number(
+        ic,
+        ga,
+        ratio(tally.heard, tally.due),
+        ratio(tally.heard, tally.heard + tally.extra),
+        weights,
+    );
+    let grade = grade_take(
+        GradeInputs {
+            schedule,
+            beats,
+            results: &results,
+            extras: &extras,
+            tally: &tally,
+            played,
+            amplitudes: &amplitudes,
+            pass_bars,
+        },
+        grade_score,
+        calibration,
+    );
 
     ScheduleReport {
         results,
@@ -1453,18 +1536,32 @@ fn counts_as_extra(schedule: &ScoreSchedule, extra: &ExtraOnset) -> bool {
     schedule.loops || extra.beat < pass_length(schedule)
 }
 
+/// What [`grade_take`] reads, all of it from one matched Take.
+struct GradeInputs<'a> {
+    schedule: &'a ScoreSchedule,
+    beats: &'a BeatMap,
+    results: &'a [OnsetResult],
+    extras: &'a [ExtraOnset],
+    tally: &'a Tally,
+    played: &'a [PlayedOnset],
+    /// In step with `results`: the hit's amplitude, or `None`. Empty when no
+    /// pass bar needs it.
+    amplitudes: &'a [Option<f32>],
+    pass_bars: &'a [PassBar],
+}
+
 /// What `match_attempt` tells the player and the screen.
-#[allow(clippy::too_many_arguments)]
-fn grade_take(
-    schedule: &ScoreSchedule,
-    beats: &BeatMap,
-    results: &[OnsetResult],
-    extras: &[ExtraOnset],
-    tally: &Tally,
-    played: &[PlayedOnset],
-    score: f32,
-    calibration: TakeCalibration,
-) -> TakeGrade {
+fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) -> TakeGrade {
+    let GradeInputs {
+        schedule,
+        beats,
+        results,
+        extras,
+        tally,
+        played,
+        amplitudes,
+        pass_bars,
+    } = input;
     let sub = smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
     let gap_ms = sub * median_interval_ms(beats);
     let deviations: Vec<f64> = results.iter().filter_map(|r| r.deviation_ms).collect();
@@ -1482,8 +1579,10 @@ fn grade_take(
     let confidence = (!confidences.is_empty()).then(|| median(&confidences) as f32);
 
     let reason = didnt_catch_enough(tally.due, tally.heard, tally.extra, confidence);
-    let bars = bar_metrics(schedule, beats, results, extras, tally, gap_ms);
+    let (bars, samples) = bar_metrics(schedule, beats, results, extras, tally, amplitudes, gap_ms);
     let graded = reason.is_none();
+    let finished = beats.finished_bars().min(samples.len() as u32) as usize;
+    let pass = pass::evaluate(&samples[..finished], pass_bars, gap_ms, graded);
     TakeGrade {
         verdict: if graded {
             TakeVerdict::Graded
@@ -1507,25 +1606,32 @@ fn grade_take(
         confidence,
         calibration,
         bars,
+        bpm: 60_000.0 / median_interval_ms(beats),
+        pass,
     }
 }
 
-/// One row per bar the Take reached. A bar with nothing due and nothing played
-/// still gets a row: the pass rule windows over bars, and a rest bar is a bar.
+/// One row per bar the Take reached, and the same bars as the pass rule reads
+/// them. A bar with nothing due and nothing played still gets a row: the pass
+/// rule windows over bars, and a rest bar is a bar. Rest bars after the last
+/// note are added up to every bar the transport finished.
 fn bar_metrics(
     schedule: &ScoreSchedule,
     beats: &BeatMap,
     results: &[OnsetResult],
     extras: &[ExtraOnset],
     tally: &Tally,
+    amplitudes: &[Option<f32>],
     gap_ms: f64,
-) -> Vec<BarMetrics> {
+) -> (Vec<BarMetrics>, Vec<pass::BarSample>) {
     let length = pass_length(schedule);
     let mut rows: Vec<BarMetrics> = Vec::new();
-    let mut devs: Vec<Vec<f64>> = Vec::new();
+    let mut devs: Vec<pass::BarSample> = Vec::new();
+    let accent_of: std::collections::HashMap<u32, bool> =
+        schedule.onsets.iter().map(|o| (o.id, o.accent)).collect();
     fn row<'a>(
         rows: &'a mut Vec<BarMetrics>,
-        devs: &mut Vec<Vec<f64>>,
+        devs: &mut Vec<pass::BarSample>,
         bar: u32,
     ) -> &'a mut BarMetrics {
         while rows.len() <= bar as usize {
@@ -1538,9 +1644,12 @@ fn bar_metrics(
                 evenness: None,
                 evenness_sigma_ms: None,
             });
-            devs.push(Vec::new());
+            devs.push(pass::BarSample::default());
         }
         &mut rows[bar as usize]
+    }
+    if let Some(last) = beats.finished_bars().checked_sub(1) {
+        row(&mut rows, &mut devs, last);
     }
     for (k, r) in results.iter().enumerate() {
         if !tally.reached[k] {
@@ -1552,8 +1661,16 @@ fn bar_metrics(
             OnsetState::Hit => {
                 cell.due += 1;
                 cell.heard += 1;
+                let sample = &mut devs[bar as usize];
                 if let Some(d) = r.deviation_ms {
-                    devs[bar as usize].push(d);
+                    sample.deviations_ms.push(d);
+                }
+                if let Some(Some(a)) = amplitudes.get(k) {
+                    if accent_of.get(&r.id).copied().unwrap_or(false) {
+                        sample.accented.push(*a);
+                    } else {
+                        sample.plain.push(*a);
+                    }
                 }
             }
             OnsetState::Miss => {
@@ -1567,13 +1684,14 @@ fn bar_metrics(
         let bar = beats.bar_at_beat(e.pass as f64 * length + e.beat);
         row(&mut rows, &mut devs, bar).extra += 1;
     }
-    for (cell, d) in rows.iter_mut().zip(devs.iter()) {
-        if let Some((e, s)) = evenness(d, gap_ms) {
+    for (cell, d) in rows.iter_mut().zip(devs.iter_mut()) {
+        if let Some((e, s)) = evenness(&d.deviations_ms, gap_ms) {
             cell.evenness = Some(e);
             cell.evenness_sigma_ms = Some(s);
         }
+        (d.due, d.heard, d.extra) = (cell.due, cell.heard, cell.extra);
     }
-    rows
+    (rows, devs)
 }
 
 /// The smallest gap between two consecutive expected onsets, in beats.
@@ -1676,6 +1794,34 @@ fn accent_agreement(
     Some((((a / p) - 1.0) / 1.0).clamp(0.0, 1.0))
 }
 
+/// The amplitude of the played note each hit came from, found as
+/// [`accent_agreement`] finds it. In step with `results`; `None` for anything
+/// that was not a hit.
+fn hit_amplitudes(
+    schedule: &ScoreSchedule,
+    results: &[OnsetResult],
+    played: &[PlayedOnset],
+    beats: &BeatMap,
+) -> Vec<Option<f32>> {
+    let beat_of: std::collections::HashMap<u32, f64> =
+        schedule.onsets.iter().map(|o| (o.id, o.beat)).collect();
+    results
+        .iter()
+        .map(|res| {
+            if res.state != OnsetState::Hit {
+                return None;
+            }
+            let origin = res.pass as f64 * schedule.length_beats;
+            let nominal = beats.time_at_beat(origin + *beat_of.get(&res.id)?)?;
+            let at = nominal + res.deviation_ms.unwrap_or(0.0);
+            played
+                .iter()
+                .min_by(|a, b| (a.time_ms - at).abs().total_cmp(&(b.time_ms - at).abs()))
+                .map(|p| p.amplitude)
+        })
+        .collect()
+}
+
 /// How much an extra note costs against a missed one, in [`known_score_number`].
 const EXTRA_NOTE_WEIGHT: f32 = 0.5;
 
@@ -1730,17 +1876,18 @@ fn known_score_number(
 /// * **grid alignment** — how close the hits are, on the same
 ///   perfect/good/ok bands the free-play matcher uses.
 /// * **hit completeness** — hits over notes that were genuinely due.
-///   Absent soft onsets are not due, and leave the denominator, as do
-///   notes past where the transport stopped.
-/// * **onset efficiency** — hits over everything the player played
-///   while the Exercise lasted. This is where extras cost something.
-fn score_results(
-    schedule: &ScoreSchedule,
-    results: &[OnsetResult],
-    tally: &Tally,
-    weights: &ScoreWeights,
-    quarter_ms: f64,
-) -> (f32, f32, f32, f32, f32) {
+///   Absent soft onsets are not due, and leave the denominator. The
+///   grade's count also leaves out notes past where the transport
+///   stopped; the report's keeps them, as it always has.
+/// * **onset efficiency** — hits over everything the player played.
+///   This is where extras cost something. The grade's count leaves out
+///   what was played after the last written bar of a schedule that does
+///   not loop.
+///
+/// This computes the first two, which do not depend on what is counted as
+/// due. The caller counts the other two, once for the report and once for the
+/// grade.
+fn timing_components(schedule: &ScoreSchedule, results: &[OnsetResult], quarter_ms: f64) -> (f32, f32) {
     let hits: Vec<f64> = results
         .iter()
         .filter_map(|r| r.deviation_ms)
@@ -1780,36 +1927,16 @@ fn score_results(
         ((sum / hits.len() as f64) / 100.0).clamp(0.0, 1.0) as f32
     };
 
-    let hit_completeness = if tally.due > 0 {
-        (tally.heard as f32 / tally.due as f32).clamp(0.0, 1.0)
+    (interval_consistency, grid_alignment)
+}
+
+/// `part / whole`, 0 when there is no whole.
+fn ratio(part: u32, whole: u32) -> f32 {
+    if whole > 0 {
+        (part as f32 / whole as f32).clamp(0.0, 1.0)
     } else {
         0.0
-    };
-
-    let onset_efficiency = {
-        let total = tally.heard + tally.extra;
-        if total > 0 {
-            (tally.heard as f32 / total as f32).clamp(0.0, 1.0)
-        } else {
-            0.0
-        }
-    };
-
-    let score = known_score_number(
-        interval_consistency,
-        grid_alignment,
-        hit_completeness,
-        onset_efficiency,
-        weights,
-    );
-
-    (
-        score,
-        interval_consistency,
-        grid_alignment,
-        hit_completeness,
-        onset_efficiency,
-    )
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1851,6 +1978,8 @@ pub struct ScheduleRun {
     live_lag_ms: f64,
     /// How many played notes `live_lag_ms` was last worked out over.
     live_lag_notes: usize,
+    /// The Exercise's pass bars, when an Exercise is what was loaded.
+    pass_bars: Vec<PassBar>,
 }
 
 /// How long after an expected onset's matching window closes its live verdict
@@ -1913,7 +2042,14 @@ impl ScheduleRun {
             calibration_seed_ms: None,
             live_lag_ms: 0.0,
             live_lag_notes: 0,
+            pass_bars: Vec::new(),
         }
+    }
+
+    /// The pass bars the report's grade is judged against. See [`pass`].
+    pub fn with_pass_bars(mut self, pass_bars: Vec<PassBar>) -> Self {
+        self.pass_bars = pass_bars;
+        self
     }
 
     /// The offset `calibration_cache` holds for this rig, when it holds one.
@@ -1989,6 +2125,7 @@ impl ScheduleRun {
             CalibrationPolicy::Auto {
                 seed_ms: self.calibration_seed_ms,
             },
+            &self.pass_bars,
         ))
     }
 
@@ -2236,6 +2373,9 @@ fn median(sorted: &[f64]) -> f64 {
         sorted[mid]
     }
 }
+
+pub mod pass;
+pub use pass::{PassBar, PassResult, PassVerdict};
 
 #[cfg(test)]
 mod tests;

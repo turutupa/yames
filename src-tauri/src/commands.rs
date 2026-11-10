@@ -1808,15 +1808,21 @@ pub fn get_take_grade(
 /// Safe to call before or during a session. `schedule.onsets` must be
 /// sorted by `beat`; the importer that builds it
 /// (`src/songs/schedule.ts`) is where that is guaranteed.
+///
+/// `passBars` is an Exercise's `passBars`, exactly as `src/paths/format.ts`
+/// writes them. With them, the Take's grade (`takeGrade.pass`) says whether it
+/// passed and whether it counts toward the clean tempo; without them (every
+/// Song), there is no `pass` and nothing else changes.
 #[tauri::command]
 pub fn load_score_schedule(
     schedule: crate::score::ScoreSchedule,
+    pass_bars: Option<Vec<crate::score::PassBar>>,
     timing_analyzer: State<SharedTimingAnalyzer>,
 ) -> Result<(), String> {
     let ta = timing_analyzer
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
-    ta.load_score_schedule(schedule);
+    ta.load_exercise_schedule(schedule, pass_bars.unwrap_or_default());
     Ok(())
 }
 
