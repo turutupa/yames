@@ -16,12 +16,22 @@ import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
 import { meterKey, stepMeter } from "../utils/meter";
 
-export type ViewName = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
+export type ViewName =
+  | "beat"
+  | "drill"
+  | "setlist"
+  | "jam"
+  | "songs"
+  | "settings"
+  | "today"
+  | "paths"
+  | "progress"
+  | "session";
 
 interface ActionDispatcherArgs {
   view: ViewName;
   setView: (v: ViewName) => void;
-  prevTab: MutableRefObject<"beat" | "drill" | "setlist" | "jam" | "songs">;
+  prevTab: MutableRefObject<Exclude<ViewName, "settings">>;
   /** Whether the setlist tab has one open — with none, there is nothing to start. */
   setlistLoaded: boolean;
   /** Same for the jam tab, and the same reason: an empty stage starts nothing. */
@@ -94,6 +104,21 @@ interface ActionDispatcherArgs {
     toggleTakes: () => void;
     toggleCamera: () => void;
   };
+  /**
+   * Today and the running Session. Optional so a caller that knows nothing of
+   * them, a test of the tools for one, sees exactly what it saw before.
+   */
+  sessionActions?: {
+    /** Space on Today: start today's Session. */
+    startToday: () => void;
+    /** The one big next action. */
+    go: () => void;
+    slower: () => void;
+    faster: () => void;
+    next: () => void;
+    /** A press of the single footswitch. Gestures are decided from these. */
+    pedalPress: () => void;
+  };
   state: AppState;
   isFullscreen: boolean;
   setIsFullscreen: (v: boolean) => void;
@@ -127,6 +152,7 @@ export function useActionDispatcher({
   jamActions,
   songsLoaded,
   songsActions,
+  sessionActions,
   state,
   isFullscreen,
   setIsFullscreen,
@@ -149,6 +175,7 @@ export function useActionDispatcher({
         actionId === "tab-3" ||
         actionId === "tab-4" ||
         actionId === "tab-5" ||
+        actionId === "tab-today" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
@@ -171,6 +198,9 @@ export function useActionDispatcher({
           case "tab-5":
             setView("songs");
             break;
+          case "tab-today":
+            setView("today");
+            break;
           case "settings":
             // `setView` remembers the mode Settings covers.
             setView(view === "settings" ? prevTab.current : "settings");
@@ -188,12 +218,64 @@ export function useActionDispatcher({
           case "toggle-coach":
             // The coach listens on a jam exactly as it does on the metronome,
             // so the key that opens it has to work there too.
-            if (view === "beat" || view === "drill" || view === "jam") toggleCard();
+            if (
+              view === "beat" ||
+              view === "drill" ||
+              view === "jam" ||
+              view === "today" ||
+              view === "paths" ||
+              view === "progress"
+            )
+              toggleCard();
             break;
         }
         return;
       }
       if (view === "settings") return;
+
+      /**
+       * The learning side, before anything else gets a look.
+       *
+       * Every other action in this file drives the metronome behind the screen.
+       * On Today, Paths or Progress nothing is running and the metronome is not
+       * in view, so a stray arrow must not move a tempo the player will find
+       * changed the next time they open it, and Z must not open a Zen with no
+       * face for this view. A view with no branch doing nothing is the bug
+       * further down this file; here doing nothing is the decision, one for
+       * every action (TOOLS_PARITY §3.1, item 6). On the running Session the
+       * Metronome's own keys mean the same idea in the Session's terms.
+       */
+      if (view === "today" || view === "paths" || view === "progress") {
+        if (view === "today" && actionId === "play") sessionActions?.startToday();
+        return;
+      }
+      if (view === "session") {
+        switch (actionId) {
+          case "play":
+          case "session-go":
+            sessionActions?.go();
+            break;
+          case "bpm-down":
+          case "bpm-down-1":
+          case "session-slower":
+            sessionActions?.slower();
+            break;
+          case "bpm-up":
+          case "bpm-up-1":
+          case "session-faster":
+            sessionActions?.faster();
+            break;
+          case "session-next":
+            sessionActions?.next();
+            break;
+          case "session-pedal":
+            sessionActions?.pedalPress();
+            break;
+        }
+        return;
+      }
+      // Outside a Session these keys mean nothing, and nothing else reads them.
+      if (actionId.startsWith("session-")) return;
 
       /**
        * On a jam, the groove owns the meter.

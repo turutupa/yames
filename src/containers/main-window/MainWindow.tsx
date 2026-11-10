@@ -13,6 +13,7 @@ import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import {
   armCountIn,
+  getActiveTab,
   configureSpeedRamp,
   downloadAndInstallUpdate,
   setAlwaysOnTop,
@@ -98,6 +99,13 @@ import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
+import { isLearnTab, isPlayTab, OPEN_ON_KEY } from "./hooks/useTabRouting";
+import { useSessionRun } from "../session/hooks/useSessionRun";
+import { useSessionPedal } from "../session/hooks/useSessionPedal";
+import { TodayView } from "../session/TodayView";
+import { SessionView } from "../session/SessionView";
+import { PathsView } from "../session/PathsView";
+import { ProgressView } from "../session/ProgressView";
 import { useJamTakes } from "./hooks/useJamTakes";
 /* W32 — the camera comes to Jam. The hook and the preview are eager, like the
    take's machinery is, because they run while a jam is happening; the
@@ -186,6 +194,8 @@ export function MainWindow() {
   const { view, mode, setView, prevTab, contentRef } = useTabRouting({
     isPlaying: state.isPlaying,
     speedRampActive: !!state.speedRamp?.active,
+    // Today is the front door, unless the player asked for their last tool.
+    frontDoor: true,
   });
   // Fullscreen / zen-mode lifecycle (intended state, OS-level state, and
   // the webview-focus restoration helper) — owned by a dedicated hook.
@@ -291,6 +301,7 @@ export function MainWindow() {
     drillTargetBpm: state.speedRamp?.targetBpm,
     drillCompleted: state.speedRamp?.completed ?? false,
     jamMode: jamModeActive,
+    hushed: view === "session",
   });
 
   /**
@@ -463,8 +474,29 @@ export function MainWindow() {
     view,
     isPlaying: state.isPlaying,
     // The session owns the one playhead (W37 item 1), so the engine's reports
-    // have to reach it and not only the screen.
+    // have to reach it and not only the screen. Not during a Session: those
+    // reports are an Exercise's position, and a song left open in the library
+    // would come back with its playhead moved.
+    beat: view === "session" ? null : currentBeat,
+  });
+
+  /**
+   * Today's Session, and everything that runs it (`src/session/`).
+   *
+   * After the hooks above because it reuses them: it runs through the coach
+   * session's call order so a Session is kept in the history, and a jam step
+   * plays from the jam library.
+   */
+  const sessionRun = useSessionRun({
+    view,
+    setView,
+    isPlaying: state.isPlaying,
     beat: currentBeat,
+    state,
+    coach: session,
+    listening: evaluation.enabled,
+    jams: jamSession.jams,
+    lineup: jamSession.lineup,
   });
 
   /**
@@ -973,6 +1005,12 @@ export function MainWindow() {
     }
   }, [setView]);
 
+  /** The tool this player last used, and the Metronome if there has been none. */
+  const openLastTool = useCallback(async () => {
+    const tab = await getActiveTab().catch(() => "beat");
+    setView(isPlayTab(tab) ? tab : "beat");
+  }, [setView]);
+
   // --- W2 → Settings → Appearance detour (O2) ------------------------------
   // "More themes in Settings" cannot open Settings *under* a full-window
   // overlay, so the wizard steps aside instead of ending: the machine keeps
@@ -1364,6 +1402,27 @@ export function MainWindow() {
     return () => document.removeEventListener("mousedown", handler);
   }, [soundOpen]);
 
+  // A press of the single footswitch. Through a ref because the pedal needs the
+  // MIDI bindings, which are built from the dispatcher this hands to.
+  const pedalPress = useRef<() => void>(() => {});
+  const sessionActions = useMemo(
+    () => ({
+      startToday: sessionRun.actions.startToday,
+      go: sessionRun.actions.go,
+      slower: sessionRun.actions.slower,
+      faster: sessionRun.actions.faster,
+      next: sessionRun.actions.next,
+      pedalPress: () => pedalPress.current(),
+    }),
+    [
+      sessionRun.actions.startToday,
+      sessionRun.actions.go,
+      sessionRun.actions.slower,
+      sessionRun.actions.faster,
+      sessionRun.actions.next,
+    ],
+  );
+
   // Shared action dispatcher — called by keyboard handler and gamepad hook
   const dispatchAction = useActionDispatcher({
     view,
@@ -1379,6 +1438,7 @@ export function MainWindow() {
     jamActions,
     songsLoaded: !!songsSession.score,
     songsActions,
+    sessionActions,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1477,6 +1537,20 @@ export function MainWindow() {
   }, [inputTestMode, midi.lastActivity]);
 
   // Gamepad / footswitch support (merged into MIDI column)
+  // One footswitch, three gestures. Live only on the running Session; every
+  // other action is one signal to one action, as it always was.
+  const sessionPedal = useSessionPedal({
+    active: view === "session",
+    midiBindings: midi.bindings,
+    keyBinding: keyBindings["session-pedal"],
+    onGesture: (gesture) => {
+      if (gesture === "tap") sessionRun.actions.go();
+      else if (gesture === "double") sessionRun.actions.slower();
+      else sessionRun.actions.next();
+    },
+  });
+  pedalPress.current = sessionPedal.press;
+
   useGamepad({
     enabled: true,
     onButtonPress:
@@ -1500,6 +1574,9 @@ export function MainWindow() {
     onAction: !midi.learnMode && !inputTestMode && !onboarding.isOpen
       ? (id) => dispatchAction(id as HotkeyAction)
       : undefined,
+    onActionRelease: (id) => {
+      if (id === "session-pedal") sessionPedal.release();
+    },
   });
 
   // Progressive first-time hints (ONBOARDING_PLAN §5). The hook owns the
@@ -1638,7 +1715,7 @@ export function MainWindow() {
         />
       )}
 
-      <div className="main-body">
+      <div className="main-body" data-session={view === "session" ? "" : undefined}>
         <Rail
           ref={sidebarRef}
           state={state}
@@ -1727,6 +1804,7 @@ export function MainWindow() {
           setIsFullscreen(true);
         }}
       >
+        {view !== "session" && (
         <MainHeader
           state={state}
           view={view}
@@ -1794,7 +1872,7 @@ export function MainWindow() {
              band the click starts off, and what it sounds like when it is on
              is a metronome setting. Which modes want the picker is the
              shell's question, so it is answered here. */
-          soundPicker={view !== "songs"}
+          soundPicker={view !== "songs" && !isLearnTab(view)}
           modeBar={view === "songs"}
           soundOpen={soundOpen}
           setSoundOpen={setSoundOpen}
@@ -1813,6 +1891,7 @@ export function MainWindow() {
           }
           onOpenHelp={help.openMenu}
         />
+        )}
 
         {/* Behind the stage, not inside it: the stage caps its own width, and
             the room this figure needs is the part of the content region that
@@ -2023,6 +2102,30 @@ export function MainWindow() {
                renders now, not a screen anybody sits on. */
             null
           )
+        ) : view === "today" ? (
+          <TodayView
+            session={sessionRun}
+            onOpenTools={() => void openLastTool()}
+            onOpenLastTool={() => {
+              void storeSave(OPEN_ON_KEY, "lastTool");
+              void openLastTool();
+            }}
+          />
+        ) : view === "paths" ? (
+          <PathsView session={sessionRun} />
+        ) : view === "progress" ? (
+          <ProgressView session={sessionRun} />
+        ) : view === "session" ? (
+          <SessionView
+            session={sessionRun}
+            themeId={state.theme}
+            beat={currentBeat}
+            isPlaying={state.isPlaying}
+            listening={evaluation.enabled}
+            hasSignal={evaluation.hasSignal}
+            bpmNow={state.bpm}
+            onCheckSound={openAudioSettings}
+          />
         ) : view === "songs" ? (
           <SongsView
             session={songsSession}
@@ -2204,7 +2307,13 @@ export function MainWindow() {
           />
         )}
       </div>
-      {(view === "beat" || view === "drill" || view === "setlist" || view === "jam") && (
+      {(view === "beat" ||
+        view === "drill" ||
+        view === "setlist" ||
+        view === "jam" ||
+        view === "today" ||
+        view === "paths" ||
+        view === "progress") && (
       <CoachCard
         open={session.cardOpen}
         active={session.active}

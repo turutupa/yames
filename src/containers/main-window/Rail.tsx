@@ -8,15 +8,16 @@ import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
 import type { LibrarySong } from "../../songs/songFiles";
 import type { MainView } from "./MainHeader";
-import type { PlayTab } from "./hooks/useTabRouting";
+import { isLearnTab } from "./hooks/useTabRouting";
+import type { AppTab, PlayTab } from "./hooks/useTabRouting";
 
 interface RailProps {
   state: AppState;
   view: MainView;
   setView: (v: MainView) => void;
-  prevTab: { current: PlayTab };
+  prevTab: { current: AppTab };
   /** The mode the app is in — under Settings, the one Settings covers. */
-  mode?: PlayTab;
+  mode?: AppTab;
   /** The library section — the rail itself is always visible. */
   libraryOpen: boolean;
   onToggleLibrary: () => void;
@@ -64,6 +65,53 @@ interface RailProps {
   onToggleCoach: () => void;
   onZen: () => void;
 }
+
+/**
+ * The learning side: where the app opens, and what it knows about you.
+ *
+ * Above the tools rather than among them, and `MODES` below is untouched: the
+ * five tools keep their order, because `tab-1` to `tab-5` count down that list.
+ */
+const LEARN = [
+  {
+    id: "today" as const,
+    labelKey: "session.nav.today",
+    /** A sun coming up: where the day starts, and nothing to do with a clock. */
+    icon: (
+      <>
+        <path d="M4 18h16" />
+        <path d="M7.5 18a4.5 4.5 0 0 1 9 0" />
+        <path d="M12 6v3" />
+        <path d="m5.6 10.6 2 2" />
+        <path d="m18.4 10.6-2 2" />
+      </>
+    ),
+  },
+  {
+    id: "paths" as const,
+    labelKey: "session.nav.paths",
+    /** Stops along a road: an order, with a place you are in it. */
+    icon: (
+      <>
+        <circle cx="6" cy="18" r="2.5" />
+        <circle cx="18" cy="6" r="2.5" />
+        <path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5" />
+      </>
+    ),
+  },
+  {
+    id: "progress" as const,
+    labelKey: "session.nav.progress",
+    /** A line going up, the shape of the one chart on that screen. */
+    icon: (
+      <>
+        <path d="M4 20V4" />
+        <path d="M4 20h16" />
+        <path d="m7 15 4-4 3 2 5-6" />
+      </>
+    ),
+  },
+];
 
 const MODES = [
   {
@@ -217,7 +265,10 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   // Settings is an overlay, not a library: it keeps whatever list was behind
   // it. This said "beat" under Settings whatever the comment claimed, so
   // opening Settings from the jam swapped the jam list for the presets.
-  const playView: PlayTab = view === "settings" ? (mode ?? prevTab.current) : view;
+  const covered: AppTab = view === "settings" ? (mode ?? prevTab.current) : view;
+  // The library is a list of what the tools play, so it has nothing to say on
+  // the learning side, and the room goes to the rail's own rows.
+  const playView: PlayTab | null = isLearnTab(covered) ? null : covered;
 
   // The mockup writes "Ready" at the right of the coach's row. Three words
   // rather than one, because the row already knows more than that: a session
@@ -237,7 +288,42 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       data-collapsed={libraryOpen ? undefined : ""}
       aria-label={t("rail.label")}
     >
-      <div className="rail-modes">
+      <div className="rail-modes rail-learn">
+        {LEARN.map((place) => (
+          <div
+            className="rail-mode-row"
+            key={place.id}
+            data-active={view === place.id ? "" : undefined}
+          >
+            <button
+              className={`rail-mode ${view === place.id ? "active" : ""}`}
+              aria-label={t(place.labelKey)}
+              onClick={() => setView(place.id)}
+              aria-current={view === place.id ? "page" : undefined}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {place.icon}
+              </svg>
+              <span className="rail-mode-label">{t(place.labelKey)}</span>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="rail-group-label" aria-hidden="true">
+        {t("session.nav.tools")}
+      </div>
+
+      <div className="rail-modes" role="group" aria-label={t("session.nav.tools")}>
         {MODES.map((mode) => (
           /* The row is the entry, highlight and all, so `data-active` puts the
              fill on the row rather than on the button inside it. It held a
@@ -287,7 +373,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       </div>
 
       <div className="rail-library" data-open={libraryOpen ? "" : undefined}>
-        {libraryOpen && (
+        {libraryOpen && playView && (
           <PresetSidebar
             ref={sidebarRef}
             state={state}
@@ -330,7 +416,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           // The status is in the name, not only beside it: below 620px the
           // rail is icons and every label here is `display: none`, which
           // would take the status with it.
-          aria-label={`${t("settings.coach.title")} — ${coachStatus}`}
+          aria-label={`${t("session.nav.askCoach")} — ${coachStatus}`}
           onClick={onToggleCoach}
         >
           <span className="rail-action-icon rail-action-coach">
@@ -350,7 +436,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
               <line x1="16" y1="11" x2="16" y2="13" />
             </svg>
           </span>
-          <span className="rail-action-label">{t("settings.coach.title")}</span>
+          <span className="rail-action-label">{t("session.nav.askCoach")}</span>
           <span className="rail-action-status" aria-hidden="true">
             {coachStatus}
           </span>
@@ -362,6 +448,8 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           )}
         </button>
 
+        {/* Zen has three faces, each a tool's. The learning side has none. */}
+        {playView && (
         <button
           className="rail-action"
           aria-label={t("tooltip.zen")}
@@ -386,6 +474,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           </span>
           <span className="rail-action-label">{t("tooltip.zen")}</span>
         </button>
+        )}
 
         <button
           className="rail-action"

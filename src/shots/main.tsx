@@ -157,6 +157,67 @@ async function drive() {
   await until(root, () => !!document.querySelector(root));
 
   /**
+   * The learning side, by pressing what a player presses. Each screen is one more
+   * press than the one before it, so a scene that reaches the recap has walked
+   * through the whole of a Session on the way.
+   */
+  if (shot!.session) {
+    const { stop } = shot!.session;
+    const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+    const rail = (name: string) =>
+      document.querySelector<HTMLElement>(`.rail button[aria-label="${name}"]`);
+    await until("Today", () => !!byId("today"));
+    await until("a plan", () => !!document.querySelector(".session-plan-item"));
+    if (stop === "paths" || stop === "path" || stop === "step") {
+      rail("Paths")?.click();
+      await until("the Paths list", () => !!byId("path-card-alternate-picking"));
+      if (stop !== "paths") {
+        byId("path-card-alternate-picking")?.click();
+        await until("the Path", () => !!byId("path-detail"));
+      }
+      if (stop === "step") {
+        byId("step-row-even-eighths")?.click();
+        await until("the Step", () => !!byId("step-detail"));
+      }
+    } else if (stop === "progress") {
+      rail("Progress")?.click();
+      await until("Progress", () => !!byId("progress"));
+    } else if (stop !== "today") {
+      byId("today-start")?.click();
+      await until("the Session", () => !!byId("session"));
+      if (stop === "timed") {
+        await until("the warm-up", () => !!byId("session-timed"));
+      } else {
+        const big = () => byId("session-big") as HTMLButtonElement | null;
+        const ready = () => !!big() && !big()!.disabled;
+        await until("the Take to be ready", ready, 20000);
+        if (stop !== "ready") {
+          big()?.click();
+          await until("the Take to run", () => !!byId("session-live"));
+          if (stop !== "playing") {
+            const outcome = stop === "noCatch" ? "session-no-catch" : stop === "between" ? "session-between" : "session-result";
+            await until("the verdict", () => !!byId(outcome), 30000);
+            if (stop === "recap") {
+              await pressUntil(
+                "the recap",
+                () => {
+                  // A pass below the pass rung offers to climb. Moving on is
+                  // the way to the end of a five-minute Session from there.
+                  const moveOn = [...document.querySelectorAll<HTMLElement>(".session-secondary")].find(
+                    (b) => b.textContent === i18n.t("session.result.moveOn"),
+                  );
+                  (moveOn ?? big())?.click();
+                },
+                () => !!byId("session-recap"),
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * A jam, loaded and part-way through its form.
    *
    * Driven by clicking, not by reaching into state: the library row and the

@@ -184,7 +184,8 @@
         "view": "뷰",
         "navigation": "탐색",
         "jam": "잼",
-        "songs": "곡"
+        "songs": "곡",
+        "session": "In a Session"
       },
       "actions": {
         "play": "재생 / 정지",
@@ -228,7 +229,13 @@
         "songs-loop-later": "부분을 한 마디 뒤로",
         "songs-take": "테이크 녹음",
         "songs-camera": "영상 녹화",
-        "jam-camera": "영상 녹화"
+        "jam-camera": "영상 녹화",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -272,7 +279,13 @@
         "songs-loop-later": "고른 마디를 길이는 그대로 한 마디 뒤쪽으로 밀기",
         "songs-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다",
         "songs-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다",
-        "jam-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다"
+        "jam-camera": "다음에 재생할 때 촬영하거나 카메라를 끕니다",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

@@ -184,7 +184,8 @@
         "view": "Affichage",
         "navigation": "Navigation",
         "jam": "Jam",
-        "songs": "Morceaux"
+        "songs": "Morceaux",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Lecture / Arrêt",
@@ -228,7 +229,13 @@
         "songs-loop-later": "Le passage une mesure plus tard",
         "songs-take": "Enregistrer la prise",
         "songs-camera": "Enregistrer l'image",
-        "jam-camera": "Enregistrer l'image"
+        "jam-camera": "Enregistrer l'image",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -272,7 +279,13 @@
         "songs-loop-later": "Décaler les mesures choisies d'une mesure vers la fin, sans changer leur longueur",
         "songs-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
         "songs-camera": "Filmer au prochain lancement, ou éteindre la caméra",
-        "jam-camera": "Filmer au prochain lancement, ou éteindre la caméra"
+        "jam-camera": "Filmer au prochain lancement, ou éteindre la caméra",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

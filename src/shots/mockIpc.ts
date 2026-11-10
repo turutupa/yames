@@ -633,6 +633,81 @@ function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
  * All four postdate the last time these screenshots were taken, and all four
  * would have landed on the homepage.
  */
+/** What the practice store holds for a scene on the learning side. */
+type PathStoreSeed = {
+  states: PathStateRow[];
+  takes: PathTakeRow[];
+  ceilings: ExerciseCeilingRow[];
+};
+
+const DAY_MS = 86_400_000;
+
+function seededTake(
+  exerciseId: string,
+  bpm: number,
+  value: number,
+  passed: boolean,
+  daysAgo: number,
+): PathTakeRow {
+  return {
+    id: `seed-${exerciseId}-${bpm}-${daysAgo}`,
+    pathId: "alternate-picking",
+    stepId: exerciseId.split(".")[0],
+    exerciseId,
+    startedAt: Date.now() - daysAgo * DAY_MS,
+    bpm,
+    bars: 8,
+    caught: true,
+    passed,
+    facts: {
+      verdict: passed ? "passed" : "belowBar",
+      headlineMetric: "timingEvenness",
+      headlineValue: value,
+      headlineMin: 0.85,
+      measures: { evenness: value, expected: 64, heard: 62, extras: 0, barsPlayed: 8 },
+    },
+  };
+}
+
+function sessionSeed(seed: "first" | "returning" | "back"): PathStoreSeed {
+  if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  const away = seed === "back" ? 12 : 1;
+  const open = "even-eighths.open-string";
+  const four = "even-eighths.four-fingers";
+  const takes = [
+    seededTake(four, 80, 0.78, false, away),
+    seededTake(four, 70, 0.86, true, away + 1),
+    seededTake(four, 60, 0.87, true, away + 2),
+    seededTake(open, 100, 0.88, true, away + 3),
+    seededTake(open, 80, 0.86, true, away + 5),
+    seededTake(open, 70, 0.82, false, away + 7),
+    seededTake(open, 60, 0.8, false, away + 9),
+  ];
+  return {
+    states: [
+      {
+        pathId: "alternate-picking",
+        currentStepId: "even-eighths",
+        startedAt: Date.now() - 30 * DAY_MS,
+        updatedAt: Date.now() - away * DAY_MS,
+      },
+    ],
+    takes,
+    ceilings: [
+      {
+        exerciseKey: `alternate-picking/${open}`,
+        cleanBpm: 100,
+        lastPracticed: Date.now() - (away + 3) * DAY_MS,
+      },
+      {
+        exerciseKey: `alternate-picking/${four}`,
+        cleanBpm: 70,
+        lastPracticed: Date.now() - (away + 1) * DAY_MS,
+      },
+    ],
+  };
+}
+
 function baseStore(
   theme: string,
   tab: string,
@@ -708,6 +783,12 @@ export function installShotMock(shot: Shot, theme: string): void {
   const STATE = baseState(theme) as Record<string, unknown>;
   if (shot.ramp) Object.assign(STATE.speedRamp as object, shot.ramp);
   const store = baseStore(theme, shot.tab ?? "beat", shot.zenStyle, shot.starterShelf);
+  // Every other scene opens on its own tool, the way a player who chose "open on
+  // my last tool" does. Only a scene about the learning side uses the front door.
+  if (!shot.session) store.set("openOn", "lastTool");
+  if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
+  const pathStore = sessionSeed(shot.session?.seed ?? "first");
+  (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 
   /** The song library, the way the practice store holds it. */
   const SCORES = new Map<string, SongRecord>();
@@ -918,9 +999,29 @@ export function installShotMock(shot: Shot, theme: string): void {
     }
   }
 
+  /**
+   * A Session's Take, played fast, ending the way the engine ends one: the
+   * transport stops itself on the last bar's line, and says so.
+   */
+  function takeIsOver(): boolean {
+    const transport = songTransport;
+    if (!shot.session || !transport) return false;
+    const first = transport.bars[transport.range.startBar];
+    if (!first) return false;
+    const beatTicks = (transport.ticksPerQuarter * 4) / (first.denominator || 4);
+    const countIn = (transport.countInBars || 0) * (first.numerator || 4);
+    const span = transport.bars.reduce((sum, bar) => sum + bar.lengthTicks, 0);
+    return beatCount >= countIn + span / beatTicks;
+  }
+
   function beatLoop() {
     clearTimeout(beatTimer);
     if (!STATE.isPlaying) return;
+    if (takeIsOver()) {
+      setPlaying(false);
+      emit("jam-ended", null);
+      return;
+    }
     const groups = STATE.beatGroups as number[];
     const total = groups.reduce((a, b) => a + b, 0) || 4;
     // The counter may carry a fraction of a beat after a pause (see
@@ -986,7 +1087,9 @@ export function installShotMock(shot: Shot, theme: string): void {
       sayOnsets((song.songTick - start) / tpq, song.songPass);
     }
     beatCount += 1;
-    beatTimer = setTimeout(beatLoop, 60000 / (STATE.bpm as number));
+    // A Take's verdict is the point of those scenes, not sitting through one.
+    const fast = shot.session && shot.session.stop !== "playing";
+    beatTimer = setTimeout(beatLoop, fast ? 15 : 60000 / (STATE.bpm as number));
   }
 
   function setPlaying(next: boolean) {
@@ -1009,6 +1112,27 @@ export function installShotMock(shot: Shot, theme: string): void {
     get_state: () => STATE,
     list_presets: () => [...PRESETS, ...DRILLS],
     get_active_tab: () => shot.tab ?? "beat",
+    list_path_states: () => pathStore.states,
+    list_path_takes: () => pathStore.takes,
+    list_exercise_ceilings: () => pathStore.ceilings,
+    save_path_state: (a) => {
+      const row = a?.state as PathStateRow;
+      pathStore.states = [...pathStore.states.filter((s) => s.pathId !== row.pathId), row];
+      return null;
+    },
+    save_path_take: (a) => {
+      const row = a?.take as PathTakeRow;
+      pathStore.takes = [row, ...pathStore.takes];
+      const clean = a?.cleanBpm as number | null;
+      if (clean !== null) {
+        const key = `${row.pathId}/${row.exerciseId}`;
+        pathStore.ceilings = [
+          ...pathStore.ceilings.filter((c) => c.exerciseKey !== key),
+          { exerciseKey: key, cleanBpm: clean, lastPracticed: row.startedAt },
+        ];
+      }
+      return null;
+    },
     app_ready: () => null,
     get_model_status: () => ({ voiceReady: false, downloaded: [], active: null }),
     get_system_memory_mb: () => 32768,
@@ -1455,6 +1579,49 @@ export function installShotMock(shot: Shot, theme: string): void {
       // scene with nothing to score photographs as a coach with nothing to
       // say. Only the "which notes have been reported" counter resets.
       onsetsSaid = 0;
+      return null;
+    }
+    if (cmd === "close_open_segment" && shot.session && songSchedule) {
+      const recipe = shot.session.take ?? "pass";
+      const onsets = songSchedule.onsets;
+      emit("practice-segment-ended", {
+        startMs: 0,
+        endMs: 30_000,
+        score: 90,
+        componentScores: {
+          // What each recipe is about. The scorer is not the subject here: what
+          // the app does with its report is.
+          intervalConsistency: recipe === "pass" ? 0.87 : recipe === "below" ? 0.74 : 0.5,
+          gridAlignment: 0.8,
+          hitCompleteness: 1,
+          onsetEfficiency: 1,
+        },
+        bpm: 80,
+        instrument: "electric-guitar",
+        endReason: "userStopped",
+        onsetCount: onsets.length,
+        beatCount: 32,
+        totalOnsets: onsets.length,
+        spuriousOnsets: 0,
+        onsetEfficiency: 1,
+        inferredDivisor: 2,
+        inferredDivisorConfidence: 0.9,
+        playMode: "structured",
+        onsetResults: onsets.map((onset, i) => {
+          const heard = recipe === "noCatch" ? i < 9 : true;
+          return {
+            id: onset.id,
+            state: heard ? "hit" : "miss",
+            deviationMs: heard ? ONSET_DEVIATIONS[i % ONSET_DEVIATIONS.length] ?? 2 : null,
+            pass: 0,
+          };
+        }),
+        extraOnsets: [],
+      });
+      return null;
+    }
+    if (cmd === "set_playing" && shot.session) {
+      setPlaying(a?.playing === true);
       return null;
     }
     if (cmd === "close_open_segment") {

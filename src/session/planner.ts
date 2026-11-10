@@ -76,7 +76,8 @@ export type ReasonCode =
   | "warmUp"
   | "warmUpClean"
   | "jam"
-  | "edge";
+  | "edge"
+  | "chosen";
 
 export type Reason = {
   code: ReasonCode;

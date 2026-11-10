@@ -1,0 +1,221 @@
+{
+  "session": {
+    "nav": {
+      "today": "Today",
+      "paths": "Paths",
+      "progress": "Progress",
+      "tools": "Tools",
+      "askCoach": "Ask the coach"
+    },
+    "kind": {
+      "mechanics": "Mechanics",
+      "theory": "Theory",
+      "jam": "Jam, not graded",
+      "warmUp": "Warm-up, not graded"
+    },
+    "step": {
+      "jam": "Play over the band",
+      "drill": "Ramp up"
+    },
+    "metric": {
+      "even": "even",
+      "heard": "of the notes heard",
+      "extras": "extra notes",
+      "accents": "accents landed"
+    },
+    "today": {
+      "title": "Today",
+      "leadFirst": "Your first session",
+      "leadBack": "Welcome back. It has been {{days}} days",
+      "minutes": "{{minutes}} min",
+      "start": "Start",
+      "howLong": "How long have you got? Minutes:",
+      "running": "Running: {{paths}}",
+      "leftOff": "Where you left off",
+      "leftOffValue": "{{value}} at {{bpm}} BPM. Today starts slower.",
+      "leftOffPlain": "{{bpm}} BPM. Today starts slower.",
+      "whatsIn": "What's in it, and why",
+      "min": "MIN",
+      "nothing": "There's nothing to play yet.",
+      "needsInput": "Grading needs a microphone or direct input.",
+      "toolsOffer": "Here for the tools? They're all still in the rail.",
+      "toolsOfferOpen": "Go to my last tool",
+      "toolsOfferAlways": "Always open there"
+    },
+    "why": {
+      "firstEver": "Your first one, so it starts at {{bpm}} BPM. This is about time, not speed.",
+      "newExercise": "You haven't played this one yet, so it starts at its first tempo.",
+      "newStep": "Next up: {{step}}. It starts at {{bpm}} BPM.",
+      "nextInStep": "Next in {{step}}. It starts at {{bpm}} BPM.",
+      "belowBar": {
+        "even": "Because evenness was {{value}}% at {{bpm}} BPM. The bar is {{bar}}%.",
+        "heard": "Because I heard {{value}}% of the notes at {{bpm}} BPM. The bar is {{bar}}%.",
+        "extras": "Because of extra notes at {{bpm}} BPM. The bar is {{bar}} over four bars.",
+        "accents": "Because {{value}}% of the accents landed at {{bpm}} BPM. The bar is {{bar}}%.",
+        "plain": "Because the last Take at {{bpm}} BPM didn't meet the bar."
+      },
+      "easing": {
+        "even": "Evenness was {{value}}% at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
+        "heard": "I heard {{value}}% of the notes at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
+        "extras": "There were extra notes at {{bpm}} BPM, so this is {{next}} BPM.",
+        "accents": "{{value}}% of the accents landed at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
+        "plain": "The last Takes at {{bpm}} BPM didn't meet the bar, so this is {{next}} BPM."
+      },
+      "climb": "Because you met the bar at {{bpm}} BPM. Next rung: {{next}}.",
+      "climbFast": "Because evenness was {{value}}% at {{bpm}} BPM, well over the bar. This skips to {{next}}.",
+      "notCaught": "Last time I didn't catch enough at {{bpm}} BPM, so that didn't count. Same tempo.",
+      "passedKeepGoing": "You've passed this at {{bpm}} BPM. This is to keep it.",
+      "review": "You haven't played this for a while.",
+      "recap": "A recap of where you left off.",
+      "backEased": "It has been {{days}} days, so this starts at {{bpm}} BPM. Your clean tempo is {{clean}}.",
+      "backEasedNoClean": "It has been {{days}} days, so this starts at {{bpm}} BPM.",
+      "warmUp": "Just you and the click at {{bpm}} BPM, before anything counts.",
+      "warmUpClean": "A warm-up at {{bpm}} BPM, under your clean tempo of {{clean}}.",
+      "jam": "Not graded. Ends the Session on some music.",
+      "edge": "From the tempo you reached, {{bpm}} BPM. Not graded yet.",
+      "chosen": "You picked this one, from {{step}}."
+    },
+    "bar": {
+      "summary": "The bar: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
+    },
+    "run": {
+      "exit": "Exit",
+      "stepOf": "Step {{n}} of {{of}}",
+      "minutesLeft": "{{minutes}} min left",
+      "timeUp": "Time's up",
+      "pathStep": "{{path}}, step {{step}}",
+      "bpm": "BPM",
+      "startTake": "Start take, {{bpm}} BPM",
+      "endTake": "End take",
+      "goAgain": "Go again, {{bpm}} BPM",
+      "next": "Next: {{title}}",
+      "finish": "See how it went",
+      "done": "Done",
+      "slower": "Slower",
+      "faster": "Faster",
+      "heardSoFar": "notes heard so far",
+      "bars": "bars",
+      "late": "late",
+      "early": "early",
+      "stripLabel": "The latest notes, against the grid",
+      "countIn": "Counting in",
+      "honest": "I hear notes and timing. Down-up is on you: I can't hear pick direction.",
+      "noInput": "I can't hear your guitar yet. Grading needs a microphone or direct input.",
+      "checkSound": "Check my sound",
+      "engineTrouble": "The sound engine wouldn't take this Exercise. Exit and start again.",
+      "hearing": "Hearing you",
+      "waitingForSignal": "Listening. Play a note to check.",
+      "listeningBack": "Listening back"
+    },
+    "result": {
+      "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
+      "barMet": "Pass bar met",
+      "barIs": "The bar is {{bar}}%",
+      "barIsCount": "The bar is {{bar}}",
+      "cleanFirst": "Clean tempo: {{bpm}} BPM.",
+      "cleanMoved": "Clean tempo: {{from}} to {{bpm}} BPM.",
+      "unmeasuredNotes": "I checked timing only. Whether they were the right notes isn't graded yet.",
+      "againSame": "Again, {{bpm}} BPM",
+      "moveOn": "Move on",
+      "rampTitle": "Ramp this from the tempo you reached",
+      "rampBody": "Starts Ramp up at {{bpm}} BPM for two minutes. It isn't graded, and the Session carries on after."
+    },
+    "coach": {
+      "passed": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars at {{bpm}} BPM.",
+      "passedExtras": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars, with {{extras}} extra.",
+      "heardNothing": "I didn't hear anything.",
+      "heardLittle": "I heard {{heard}} of {{expected}} notes.",
+      "tooShort": "That was {{bars}} bars, too short to judge. It takes the whole Take.",
+      "ungraded": "This one isn't graded. You're the judge.",
+      "below": {
+        "even": "Evenness was {{value}}%. Heard {{heard}} of {{expected}} notes. Same notes, same tempo.",
+        "heard": "I heard {{heard}} of {{expected}} notes, and timing can't pass without them.",
+        "extras": "{{extras}} notes I wasn't expecting. Keep the idle strings quiet if they're ringing.",
+        "accents": "{{value}}% of the marked accents came out louder than the notes around them."
+      }
+    },
+    "noCatch": {
+      "kick": "No grade for this take",
+      "title": "I didn't catch enough. Play it again.",
+      "heardOf": "of {{expected}} notes heard",
+      "noGuess": "I won't guess, so this take doesn't count against you.",
+      "hintNothing": "No signal reached me: check the input in Settings.",
+      "hintQuiet": "The signal may be quiet: try moving closer to the mic, or turn the input up."
+    },
+    "timed": {
+      "warmUpKick": "Warm-up · not graded",
+      "jamKick": "Jam · not graded",
+      "drillKick": "Ramp up · not graded",
+      "movesOn": "This moves on by itself."
+    },
+    "pedal": {
+      "title": "Foot pedal",
+      "tap": "Tap",
+      "tapDoes": "The big button",
+      "double": "Double tap",
+      "doubleDoes": "Slower",
+      "hold": "Hold",
+      "holdDoes": "Next"
+    },
+    "recap": {
+      "kick": "Session done",
+      "passed_one": "{{count}} exercise passed.",
+      "passed_other": "{{count}} exercises passed.",
+      "takes_one": "{{count}} take.",
+      "takes_other": "{{count}} takes.",
+      "none": "Nothing graded today.",
+      "moved": "What moved",
+      "takesAt_one": "{{count}} take, last at {{bpm}} BPM",
+      "takesAt_other": "{{count}} takes, last at {{bpm}} BPM",
+      "noTakes": "No Takes this Session.",
+      "notGraded": "The warm-up and the jam weren't graded.",
+      "nextSession": "Next session, {{minutes}} min"
+    },
+    "paths": {
+      "title": "Paths",
+      "intro": "Pick a goal. Nothing is locked: you can start any Step and change your mind.",
+      "theorySub": "What you choose to play",
+      "mechanicsSub": "How your hands play",
+      "later": "Later",
+      "laterWhy": "You can read this one now. The grading it needs comes later.",
+      "stepCount_one": "{{count}} step",
+      "stepCount_other": "{{count}} steps",
+      "draft": "Draft",
+      "back": "Paths",
+      "level": "Level",
+      "limits": "What this can and can't measure",
+      "exercisesPassed_one": "{{done}} of {{count}} exercise passed",
+      "exercisesPassed_other": "{{done}} of {{count}} exercises passed",
+      "stepOf": "Step {{n}} of {{of}}",
+      "why": "Why this Step",
+      "howTo": "How",
+      "payoff": "What you'll hear",
+      "exercises": "Exercises",
+      "workOnThis": "Work on this Step",
+      "yourStep": "This is the Step you're on.",
+      "passed": "Passed",
+      "notGradedYet": "Not graded yet.",
+      "playThis": "Play this",
+      "playedNoClean_one": "{{count}} take. No clean tempo yet.",
+      "playedNoClean_other": "{{count}} takes. No clean tempo yet.",
+      "playedClean_one": "{{count}} take. Clean tempo {{bpm}} BPM.",
+      "playedClean_other": "{{count}} takes. Clean tempo {{bpm}} BPM."
+    },
+    "progress": {
+      "title": "Progress",
+      "intro": "Everything here was measured from your playing: notes heard, timing evenness, clean tempo.",
+      "empty": "Nothing yet. Play a Session and what was measured shows up here.",
+      "cleanTempo": "Clean tempo",
+      "bpmOn": "BPM, {{title}}",
+      "chartLabel": "Clean tempo over time, {{title}}",
+      "cleanMeans": "The fastest you met the bar, over at least eight bars.",
+      "noClean": "No clean tempo yet. It takes a Take that meets the bar over eight bars.",
+      "exercises": "Exercises you've played",
+      "sparkLabel": "Evenness across Takes, {{title}}"
+    },
+    "settings": {
+      "openOnLastTool": "Open on my last tool",
+      "openOnLastToolHint": "Skip Today and open on whichever tool you used last. Takes effect the next time Yames opens."
+    }
+  }
+}

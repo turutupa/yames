@@ -83,6 +83,13 @@ export type SongAttemptReview = {
   findings: Finding[];
   /** Whether the row reached the store. A review still shows if it did not. */
   saved: boolean;
+  /**
+   * The analyzer's last word on the pass, whole.
+   *
+   * The review draws from `facts`; a Session's grading reads the rest of the
+   * report through its own adapter (`src/session/takeMeasures.ts`).
+   */
+  segment: PracticeSegmentEndedPayload;
 };
 
 export type SongAttemptState = {
@@ -94,6 +101,14 @@ export type SongAttemptState = {
   tooShort: boolean;
   /** Put the review away — the player is going again. */
   dismiss: () => void;
+  /**
+   * How many stops have finished being dealt with, however each one came out.
+   *
+   * `review`, `working` and `tooShort` between them cannot say "that stop is
+   * over and it found nothing", which is the case a caller who must always
+   * answer the player needs to tell from "still thinking".
+   */
+  settled: number;
 };
 
 export type SongAttemptInput = {
@@ -117,6 +132,7 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
   const [review, setReview] = useState<SongAttemptReview | null>(null);
   const [working, setWorking] = useState(false);
   const [tooShort, setTooShort] = useState(false);
+  const [settled, setSettled] = useState(0);
 
   /** The last run the analyzer reported. Replaced, never appended to. */
   const runRef = useRef<PracticeSegmentEndedPayload | null>(null);
@@ -200,7 +216,9 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     // still has to be cleared; nothing else does.
     if (!latest.current.listening && !runRef.current) {
       generation.current += 1;
-      void clearScoreSchedule().catch(() => undefined);
+      void clearScoreSchedule()
+        .catch(() => undefined)
+        .then(() => setSettled((n) => n + 1));
       return;
     }
 
@@ -209,6 +227,7 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     void finishAttempt(pass, runRef, waiterRef).then((result) => {
       if (generation.current !== mine) return;
       setWorking(false);
+      setSettled((n) => n + 1);
       if (result.kind === "tooShort") {
         setTooShort(true);
         return;
@@ -218,7 +237,7 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     });
   }, [input.isPlaying]);
 
-  return { review, working, tooShort, dismiss };
+  return { review, working, tooShort, dismiss, settled };
 }
 
 // ---------------------------------------------------------------------------
@@ -314,6 +333,8 @@ async function finishAttempt(
       bands,
       findings,
       saved,
+      // `payload` is known here: `run` above is built from it and is not null.
+      segment: payload as PracticeSegmentEndedPayload,
     },
   };
 }

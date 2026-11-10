@@ -186,9 +186,15 @@ interface UseSessionOptions {
    * score earned over the band is never read later as a clean one.
    */
   jamMode?: boolean;
+  /**
+   * Nothing spoken while this is true. A running Session (`COACH_UX.md` A3): a
+   * teacher who talks over your playing is a bad teacher, and speech during a
+   * Take ruins the Take. The coach's feed and its history carry on as usual.
+   */
+  hushed?: boolean;
 }
 
-export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", coachStance = "strict", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false, jamMode = false }: UseSessionOptions) {
+export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", coachStance = "strict", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false, jamMode = false, hushed = false }: UseSessionOptions) {
   const instrumentLabel = instrument === "drums" ? "drums/percussion"
     : instrument === "electric-guitar" ? "electric guitar"
     : instrument === "acoustic-guitar" ? "acoustic guitar"
@@ -316,9 +322,9 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   // silent. The `urgency` parameter is accepted for call-site clarity
   // ("urgent" vs "normal") but does not gate playback any more.
   const maybeSpeak = useCallback((text: string, _urgency: "urgent" | "normal" = "urgent") => {
-    if (voiceMode !== "voice") return;
+    if (voiceMode !== "voice" || hushed) return;
     ttsSpeak(text).catch(() => {});
-  }, [voiceMode]);
+  }, [voiceMode, hushed]);
 
   // ── Pending-speech sync (spinner-to-text on tts-speech-started) ──
   //
@@ -361,7 +367,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       pendingSpeechQueueRef.current = pendingSpeechQueueRef.current.filter(qid => qid !== messageId);
     };
 
-    if (voiceMode !== "voice") {
+    if (voiceMode !== "voice" || hushed) {
       forceReveal();
       return;
     }
@@ -385,7 +391,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         window.clearTimeout(safetyTimer);
         forceReveal();
       });
-  }, [voiceMode]);
+  }, [voiceMode, hushed]);
   const speakAndRevealRef = useRef(speakAndReveal);
   useEffect(() => { speakAndRevealRef.current = speakAndReveal; }, [speakAndReveal]);
 

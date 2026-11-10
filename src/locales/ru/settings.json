@@ -184,7 +184,8 @@
         "view": "Вид",
         "navigation": "Навигация",
         "jam": "Джем",
-        "songs": "Песни"
+        "songs": "Песни",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Старт / Стоп",
@@ -228,7 +229,13 @@
         "songs-loop-later": "Фрагмент на такт позже",
         "songs-take": "Записать дубль",
         "songs-camera": "Записать видео",
-        "jam-camera": "Записать видео"
+        "jam-camera": "Записать видео",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Запустить или остановить метроном",
@@ -272,7 +279,13 @@
         "songs-loop-later": "Сдвинуть выбранные такты на такт к концу, не меняя их длины",
         "songs-take": "Записать при следующем запуске или остановить запись",
         "songs-camera": "Снимать при следующем запуске или выключить камеру",
-        "jam-camera": "Снимать при следующем запуске или выключить камеру"
+        "jam-camera": "Снимать при следующем запуске или выключить камеру",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

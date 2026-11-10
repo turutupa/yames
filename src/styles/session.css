@@ -1,0 +1,824 @@
+/*
+ * Today, a running Session, Paths and Progress.
+ *
+ * The mocks' concept in the app's own theme system: tokens from TOKEN_CONTRACT
+ * only, so every one of the thirteen themes dresses these screens. Pass and
+ * "bar met" read in `--feedback-perfect` because that is what the rest of the app
+ * uses for a good result; they always come with a word, never colour alone.
+ */
+.main-content[data-view="today"],
+.main-content[data-view="paths"],
+.main-content[data-view="progress"],
+.main-content[data-view="session"] {
+  overflow-y: auto;
+}
+.main-content[data-view="today"] > .view-transition-wrapper,
+.main-content[data-view="paths"] > .view-transition-wrapper,
+.main-content[data-view="progress"] > .view-transition-wrapper,
+.main-content[data-view="session"] > .view-transition-wrapper {
+  width: 100%;
+  align-self: stretch;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* A running Session has the window to itself. The rail stays mounted, because
+   the library behind it holds state nobody should lose by starting a Session. */
+.main-body[data-session] > .rail {
+  display: none;
+}
+
+.session-page {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1120px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 28px 40px 32px;
+}
+
+.session-kick {
+  color: var(--text-tertiary);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.session-mega {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(3rem, 7vw, 4.75rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.session-h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.session-h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.35rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.session-h3 {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+.session-why {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.session-quiet {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.session-grow {
+  flex: 1 1 auto;
+}
+.session-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+.session-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.session-big {
+  width: 100%;
+  max-width: 520px;
+  min-height: 60px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 22px var(--accent-glow);
+  transition: filter 120ms ease, transform 120ms ease;
+}
+.session-big:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.session-big:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.session-big:disabled {
+  background: var(--surface-active);
+  color: var(--text-muted);
+  box-shadow: none;
+  cursor: default;
+}
+.session-big:focus-visible,
+.session-secondary:focus-visible,
+.session-link:focus-visible,
+.session-choice:focus-visible,
+.session-path-card:focus-visible,
+.session-step-row:focus-visible,
+.session-seg button:focus-visible,
+.session-exit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.session-secondary {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.session-secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+.session-secondary:disabled {
+  color: var(--text-faint);
+  cursor: default;
+}
+.session-link {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.session-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-subtle);
+  color: var(--accent-text);
+  font-size: 0.7rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.session-tag[data-quiet] {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+.session-tag[data-met] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--feedback-perfect);
+  color: var(--feedback-perfect);
+}
+.session-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+/* ── Today ─────────────────────────────────────────────────────────────── */
+.session-today {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  gap: 40px;
+  align-items: center;
+}
+.session-today-hero,
+.session-today-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.session-today-minutes {
+  color: var(--accent-text);
+  font-size: 1.6rem;
+  font-weight: 650;
+}
+.session-today-seg-label {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+.session-seg {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+.session-seg button {
+  min-width: 46px;
+  padding: 7px 10px;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.session-seg button:hover {
+  background: var(--surface-hover);
+}
+.session-seg button.on {
+  background: var(--accent-subtle);
+  color: var(--accent-text);
+}
+.session-plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.session-plan-item {
+  display: flex;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.session-plan-mins {
+  flex: none;
+  width: 34px;
+  color: var(--text-primary);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+}
+.session-plan-mins small {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 0.6rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+}
+.session-plan-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.session-plan-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 0.98rem;
+  font-weight: 650;
+}
+.session-footnote {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+/* ── The running Session ───────────────────────────────────────────────── */
+.session-run {
+  max-width: 1040px;
+  height: 100%;
+  padding-top: 14px;
+  padding-bottom: 22px;
+}
+.session-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 16px;
+}
+.session-exit {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.session-exit:hover {
+  background: var(--surface-hover);
+}
+.session-pips {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 6px;
+  max-width: 320px;
+}
+.session-pips i {
+  flex: 1 1 0;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--surface-active);
+}
+.session-pips i[data-state="done"] {
+  background: var(--text-tertiary);
+}
+.session-pips i[data-state="on"] {
+  background: var(--accent);
+}
+.session-bar-left {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.session-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.session-center {
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+.session-center .session-why {
+  max-width: 520px;
+}
+.session-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.session-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.session-bpm {
+  flex: none;
+  color: var(--text-primary);
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: right;
+}
+.session-bpm small {
+  margin-left: 4px;
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.session-stage {
+  position: relative;
+  flex: 1 1 200px;
+  min-height: 170px;
+  max-height: 46vh;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.session-stage .songs-tab-stage,
+.session-stage > * {
+  height: 100%;
+}
+.session-stage-wait {
+  height: 100%;
+}
+
+.session-brief {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.session-coach {
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+.session-live {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+.session-stats {
+  display: flex;
+  gap: 22px;
+}
+.session-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.session-stat b {
+  color: var(--text-primary);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.session-stat span {
+  color: var(--text-tertiary);
+  font-size: 0.76rem;
+}
+.session-stat .session-stat-of {
+  font-size: 0.65em;
+  font-weight: 600;
+}
+.session-strip {
+  flex: 1 1 260px;
+  min-width: 0;
+  max-width: 460px;
+  height: 64px;
+}
+.session-strip-label {
+  fill: var(--text-tertiary);
+  font-size: 11px;
+}
+.session-strip-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.session-strip-dot {
+  fill: var(--accent);
+  stroke: var(--bg-primary);
+  stroke-width: 2;
+}
+.session-count {
+  color: var(--accent-text);
+  font-size: 1rem;
+  font-weight: 650;
+}
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.session-actions .session-big {
+  flex: 1 1 280px;
+}
+.session-nudges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.session-center .session-nudges {
+  justify-content: center;
+  gap: 18px;
+}
+.session-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.session-signal i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--feedback-miss);
+}
+.session-signal[data-on] i {
+  background: var(--feedback-perfect);
+}
+
+/* ── A result ──────────────────────────────────────────────────────────── */
+.session-moved {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 14px;
+}
+.session-moved-before {
+  color: var(--text-tertiary);
+  font-size: 1.9rem;
+  font-weight: 650;
+}
+.session-moved-value[data-met] {
+  color: var(--feedback-perfect);
+}
+.session-clean {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 650;
+}
+.session-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 520px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+.session-choice:hover {
+  background: var(--surface-hover);
+}
+.session-choice b {
+  color: var(--accent-text);
+  font-size: 0.9rem;
+}
+.session-pedal-card {
+  max-width: 520px;
+}
+.session-legend {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 14px;
+  margin: 0;
+  font-size: 0.82rem;
+}
+.session-legend dt {
+  color: var(--text-primary);
+  font-weight: 650;
+}
+.session-legend dd {
+  margin: 0;
+  color: var(--text-secondary);
+}
+.session-countdown {
+  color: var(--text-primary);
+  font-size: 3.4rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The recap ─────────────────────────────────────────────────────────── */
+.session-recap-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.session-recap-text {
+  min-width: 0;
+}
+.session-recap-number {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  color: var(--text-tertiary);
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+.session-recap-number b {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+.session-recap-number small {
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+/* ── Paths ─────────────────────────────────────────────────────────────── */
+.session-path-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.session-path-card:hover {
+  background: var(--surface-hover);
+}
+.session-level {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.session-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.session-step-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.session-step-row:hover {
+  background: var(--surface-hover);
+}
+.session-step-row[data-current] {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+.session-step-num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 26px;
+  text-align: center;
+}
+.session-step-row[data-passed] .session-step-num {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--feedback-perfect);
+  color: var(--feedback-perfect);
+}
+.session-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.session-exercise {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.session-exercise-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* ── Progress ──────────────────────────────────────────────────────────── */
+.session-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.session-progress-row .session-exercise-text {
+  flex: 1 1 auto;
+}
+.session-progress-value {
+  flex: none;
+  width: 54px;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: right;
+}
+.session-progress-value small {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.session-spark {
+  flex: none;
+}
+.session-spark path {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.session-spark circle {
+  fill: var(--accent);
+  stroke: var(--bg-card);
+  stroke-width: 2;
+}
+.session-spark-none {
+  flex: none;
+  width: 120px;
+}
+.session-chart {
+  width: 100%;
+  height: auto;
+}
+.session-chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.session-chart-axis {
+  fill: var(--text-tertiary);
+  font-size: 11px;
+}
+.session-chart-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.session-chart-dot {
+  fill: var(--accent);
+  stroke: var(--bg-primary);
+  stroke-width: 2;
+}
+
+/* The rail's group heading, in the rail's own quiet voice. */
+.rail-learn {
+  padding-bottom: 2px;
+}
+.rail-group-label {
+  flex-shrink: 0;
+  padding: 8px 22px 0;
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rail-group-label + .rail-modes {
+  padding-top: 4px;
+}
+.rail[data-collapsed] .rail-group-label {
+  visibility: hidden;
+}
+
+/* ── Narrow windows ────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .session-page {
+    padding: 20px 20px 24px;
+  }
+  .session-today,
+  .session-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .session-today {
+    align-items: start;
+  }
+}
+@media (max-width: 620px) {
+  .rail-group-label {
+    visibility: hidden;
+  }
+}

@@ -184,7 +184,8 @@
         "view": "檢視",
         "navigation": "導航",
         "jam": "即興",
-        "songs": "曲目"
+        "songs": "曲目",
+        "session": "In a Session"
       },
       "actions": {
         "play": "播放／停止",
@@ -228,7 +229,13 @@
         "songs-loop-later": "這一段延後一小節",
         "songs-take": "錄下這一遍",
         "songs-camera": "錄下畫面",
-        "jam-camera": "錄下畫面"
+        "jam-camera": "錄下畫面",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -272,7 +279,13 @@
         "songs-loop-later": "把選取的小節整體往後挪一小節，長度不變",
         "songs-take": "下次按播放時錄音，或停止錄音",
         "songs-camera": "下次按播放時開始錄影，或關掉攝影機",
-        "jam-camera": "下次按播放時開始錄影，或關掉攝影機"
+        "jam-camera": "下次按播放時開始錄影，或關掉攝影機",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

@@ -5,6 +5,7 @@ import {
   setActiveTab,
   setPlaying,
   stopSpeedRamp,
+  storeLoad,
 } from "../../../ipc";
 import type { MainView } from "../MainHeader";
 
@@ -56,31 +57,64 @@ export const PLAY_TABS = ["beat", "setlist", "drill", "jam", "songs"] as const;
 
 export type PlayTab = (typeof PLAY_TABS)[number];
 
-function isPlayTab(tab: string): tab is PlayTab {
+/**
+ * The places that are not tools: the learning side of the app.
+ *
+ * Kept apart from `PLAY_TABS` on purpose. That list is what `activeTab` may
+ * hold, and it is what the positional `tab-1` to `tab-5` hotkeys count down, so
+ * adding to it would renumber nothing and change the meaning of a stored value.
+ * These are never persisted as `activeTab`: "my last tool" has to stay a tool,
+ * and an older build reading the setting must find a value it knows.
+ */
+export const LEARN_TABS = ["today", "paths", "progress", "session"] as const;
+
+export type LearnTab = (typeof LEARN_TABS)[number];
+
+/** Anywhere a mode can be, tools and learning alike. */
+export type AppTab = PlayTab | LearnTab;
+
+/** The setting that keeps a player who only wants tools on their tools. */
+export const OPEN_ON_KEY = "openOn";
+export type OpenOn = "today" | "lastTool";
+
+export function isPlayTab(tab: string): tab is PlayTab {
   return (PLAY_TABS as readonly string[]).includes(tab);
+}
+
+export function isLearnTab(tab: string): tab is LearnTab {
+  return (LEARN_TABS as readonly string[]).includes(tab);
 }
 
 export interface UseTabRoutingArgs {
   isPlaying: boolean;
   speedRampActive: boolean;
+  /**
+   * Open on Today unless the player asked for their last tool.
+   *
+   * A switch rather than the new behaviour outright so this hook can still be
+   * asked about tools alone; only the main window turns it on.
+   */
+  frontDoor?: boolean;
 }
 
 export interface TabRouting {
   view: MainView;
-  mode: PlayTab;
+  mode: AppTab;
   setView: (v: MainView) => void;
-  prevTab: MutableRefObject<PlayTab>;
+  prevTab: MutableRefObject<AppTab>;
   contentRef: RefObject<HTMLDivElement>;
 }
 
 export function useTabRouting({
   isPlaying,
   speedRampActive,
+  frontDoor = false,
 }: UseTabRoutingArgs): TabRouting {
-  const [view, setViewRaw] = useState<MainView>("beat");
-  const [mode, setMode] = useState<PlayTab>("beat");
-  const prevTab = useRef<PlayTab>("beat");
-  const viewRef = useRef<MainView>("beat");
+  const opening: AppTab = frontDoor ? "today" : "beat";
+  const [view, setViewRaw] = useState<MainView>(opening);
+  const [mode, setMode] = useState<AppTab>(opening);
+  const prevTab = useRef<AppTab>(opening);
+  const viewRef = useRef<MainView>(opening);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // The latest transport facts, read at the moment of a switch rather than
@@ -93,7 +127,7 @@ export function useTabRouting({
     const from = viewRef.current;
     if (from === v) return;
     // The mode being left: under Settings, the one Settings covers.
-    const leaving: PlayTab = from === "settings" ? prevTab.current : from;
+    const leaving: AppTab = from === "settings" ? prevTab.current : from;
     if (v === "settings") {
       // Opening Settings: remember what it covers, touch nothing else.
       prevTab.current = leaving;
@@ -105,7 +139,8 @@ export function useTabRouting({
       }
       prevTab.current = v;
       setMode(v);
-      setActiveTab(v);
+      // Only a tool is "my last tool". See `LEARN_TABS`.
+      if (isPlayTab(v)) setActiveTab(v);
     }
     viewRef.current = v;
     setViewRaw(v);
@@ -126,16 +161,31 @@ export function useTabRouting({
    *
    * `settings` is never persisted, so it can never arrive. And a restore that
    * lands after the user has already moved is dropped: their click wins.
+   *
+   * With the front door on, this only runs for a player who chose "open on my
+   * last tool". Everyone else stays on Today, with `activeTab` left exactly as
+   * it was, so choosing the setting later still finds the tool they last used.
    */
   useEffect(() => {
-    getActiveTab().then((tab) => {
-      if (!isPlayTab(tab)) return;
-      if (viewRef.current !== "beat" || prevTab.current !== "beat") return;
+    let cancelled = false;
+    void (async () => {
+      if (frontDoor) {
+        const openOn = await storeLoad<OpenOn>(OPEN_ON_KEY).catch(() => null);
+        if (openOn !== "lastTool") return;
+      }
+      const tab = await getActiveTab();
+      if (cancelled || !isPlayTab(tab)) return;
+      if (viewRef.current !== opening || prevTab.current !== opening) return;
       viewRef.current = tab;
       prevTab.current = tab;
       setViewRaw(tab);
       setMode(tab);
-    });
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Read once, at launch. `frontDoor` does not change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { view, mode, setView, prevTab, contentRef };
