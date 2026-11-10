@@ -7,6 +7,7 @@
 import type {
   Crossing,
   FeedbackTiming,
+  LevelId,
   LandingAccept,
   PassBar,
   PathKind,
@@ -15,6 +16,7 @@ import type {
   PickPlan,
   ReviewEvent,
   ReviewStatus,
+  VariationDimension,
 } from "./format";
 
 /**
@@ -29,6 +31,7 @@ import type {
  * - `inScale`: free playing, notes in the scale.
  * - `rests`: phrases and silence: rests kept, notes in the scale.
  * - `landing`: free playing, graded at the landing moments only.
+ * - `warmup`: a light bar that reports and decides nothing.
  * - `selfChecked`, `practiceOnly`: no metric at all.
  */
 export type GradeProfile =
@@ -43,6 +46,7 @@ export type GradeProfile =
   | "inScale"
   | "rests"
   | "landing"
+  | "warmup"
   | "selfChecked"
   | "practiceOnly";
 
@@ -52,18 +56,50 @@ export type HarmonySpec =
   | { chordTones: true; cover?: boolean }
   | { scaleOverChords: [root: string, scale: string]; allowed?: string[] };
 
+/** What one combination of a variation's values plays. */
+export type VariantBuild = {
+  tab: string;
+  guide?: string;
+  position?: number;
+  shifts?: boolean;
+  chords?: string;
+  harmony?: HarmonySpec;
+  jam?: ExerciseSpec["jam"];
+};
+
+export type VariantParams = Record<string, string>;
+
+/**
+ * The dimensions an Exercise may vary along. Every combination of the values
+ * becomes a variant, in order, each with known notes and the same validation.
+ * Say of each dimension whether it changes difficulty: `pooled` means progress
+ * and clean tempo carry across it; `notPooled` needs a reason and splits them.
+ */
+export type VarySpec = {
+  values: Partial<Record<VariationDimension, readonly string[]>>;
+  pooled?: readonly VariationDimension[];
+  notPooled?: Partial<Record<VariationDimension, string>>;
+  label?: (params: VariantParams) => string;
+  build: (params: VariantParams) => VariantBuild;
+};
+
 export type ExerciseSpec = {
   id: string;
   title: string;
   purpose: string;
   howTo: string[];
   coach: string;
-  /** The tab, written or from a template. See `tabDsl.ts`. */
-  tab: string;
+  /** The tab, written or from a template. See `tabDsl.ts`. Optional with `vary`. */
+  tab?: string;
+  vary?: VarySpec;
+  /** Marks a warm-up. Listed under a Level, not under a Step. */
+  warmup?: { start: number; top: number; reference: string; fallback: number };
+  /** Marks a chained-arpeggio Exercise, held to the chain rules. */
+  chain?: { maxJointFrets: number };
   /** Notes the app plays and the player does not. */
   guide?: string;
-  /** The index-finger fret where it starts. */
-  position: number;
+  /** The index-finger fret where it starts. Optional with `vary`. */
+  position?: number;
   /** Set when the hand moves. Default: it stays put. */
   shifts?: boolean;
   pick?: PickPlan;
@@ -112,6 +148,17 @@ export type StepSpec = {
   exercises: ExerciseSpec[];
 };
 
+export type LevelSpec = {
+  id: LevelId;
+  title: string;
+  summary: string;
+  reachLevel?: PathLevel;
+  startHereIf: string[];
+  /** Step ids, in the order they appear in `PathSpec.steps`. */
+  steps: string[];
+  warmups: ExerciseSpec[];
+};
+
 export type PathSpec = {
   id: string;
   title: string;
@@ -124,6 +171,7 @@ export type PathSpec = {
   orderRationale: string;
   gradingLimits: string;
   steps: StepSpec[];
+  levels?: LevelSpec[];
 };
 
 export function definePath(spec: PathSpec): PathSpec {

@@ -19,12 +19,17 @@ const ex = (doc: PathDoc, id: string): Exercise => {
 
 /** The minimal Path with one Exercise replaced by a differently built one. */
 function withExercise(id: string, overrides: Partial<ExerciseSpec> & { tab: string }): PathDoc {
-  const spec: PathSpec = JSON.parse(JSON.stringify(MINIMAL_SPEC));
-  for (const step of spec.steps) {
-    step.exercises = step.exercises.map((e) => (e.id === id ? exercise({ ...e, ...overrides, id }) : e));
-  }
+  const spec: PathSpec = {
+    ...MINIMAL_SPEC,
+    steps: MINIMAL_SPEC.steps.map((step) => ({
+      ...step,
+      exercises: step.exercises.map((e) => (e.id === id ? exercise({ ...e, ...overrides, id }) : e)),
+    })),
+  };
   return JSON.parse(JSON.stringify(buildPath(spec))) as PathDoc;
 }
+
+const warm = (doc: PathDoc): Exercise => doc.levels![0].warmups[0];
 
 const setFret = (n: Exercise["notes"][number], fret: number) => {
   n.midi += fret - n.fret;
@@ -371,8 +376,13 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     ex(d, "scale").notGraded.push("timingEvenness");
     return d;
   },
-  "honesty.slideBar": () =>
-    withExercise("outside", { tab: "/2 3:5s 3:7 3:5s 3:7", crossing: undefined, shifts: true, grade: "timingNotes" }),
+  "honesty.slideBar": () => {
+    // The generator lowers this bar to meet slides; a hand-edited pack might not.
+    const d = withExercise("outside", { tab: "/2 3:5s 3:7 3:5s 3:7", crossing: undefined, shifts: true, grade: "timingNotes" });
+    const bar = ex(d, "outside").passBars.find((b) => b.metric === "notesHeard")!;
+    bar.min = 0.95;
+    return d;
+  },
   "honesty.flag": () => {
     const d = fresh();
     ex(d, "arp").detection = { flags: [], notes: [] };
@@ -396,6 +406,136 @@ const FIXTURES: Record<RuleId, () => unknown> = {
   "honesty.reviewStatus": () => {
     const d = fresh();
     d.review = { status: "played", history: [] };
+    return d;
+  },
+  "level.missing": () => {
+    const d = fresh();
+    delete d.levels;
+    return d;
+  },
+  "level.order": () => {
+    const d = fresh();
+    d.levels!.reverse();
+    return d;
+  },
+  "level.steps": () => {
+    const d = fresh();
+    d.levels![0].stepIds = [];
+    return d;
+  },
+  "level.entry": () => {
+    const d = fresh();
+    (d.levels![1] as { entry: string }).entry = "locked";
+    return d;
+  },
+  "level.placement": () => {
+    const d = fresh();
+    d.levels![0].placement.startHereIf = ["You feel ready."];
+    return d;
+  },
+  "level.warmup": () => {
+    const d = fresh();
+    d.levels![2].warmups = [];
+    return d;
+  },
+  "variation.shape": () => {
+    const d = fresh();
+    const v = warm(d).variation!;
+    v.variants[1].id = v.variants[0].id;
+    return d;
+  },
+  "variation.declared": () => {
+    const d = fresh();
+    warm(d).variation!.pooled = [];
+    return d;
+  },
+  "variation.duplicate": () => {
+    const d = fresh();
+    const v = warm(d).variation!.variants;
+    v[1].notes = v[0].notes;
+    return d;
+  },
+  "variation.base": () => {
+    const d = fresh();
+    setFret(warm(d).notes[0], 9);
+    return d;
+  },
+  "variation.pool": () => {
+    const d = fresh();
+    warm(d).variation!.variants[2].pool = "somewhere";
+    return d;
+  },
+  "variation.pooledDifficulty": () => {
+    const d = fresh();
+    warm(d).variation!.variants[3].computed.difficulty = 40;
+    return d;
+  },
+  "warmup.variants": () => {
+    const d = fresh();
+    warm(d).variation!.variants.length = 3;
+    return d;
+  },
+  "warmup.moves": () => {
+    const d = fresh();
+    const v = warm(d).variation!.variants[1];
+    for (const note of v.notes) setFret(note, 7);
+    v.position.shifts = "none";
+    v.computed.handShifts = 0;
+    return d;
+  },
+  "warmup.short": () => {
+    const d = fresh();
+    warm(d).estimatedMinutes = 25;
+    return d;
+  },
+  "warmup.musical": () => {
+    const d = fresh();
+    const v = warm(d).variation!.variants[1];
+    delete v.chords;
+    return d;
+  },
+  "warmup.tempo": () => {
+    const d = fresh();
+    warm(d).warmup!.startAtCleanRatio = 1.1;
+    return d;
+  },
+  "warmup.reference": () => {
+    const d = fresh();
+    warm(d).warmup!.referenceExercise = "no.such";
+    return d;
+  },
+  "warmup.progress": () => {
+    const d = fresh();
+    (warm(d).warmup as { advancesProgress: boolean }).advancesProgress = true;
+    return d;
+  },
+  "warmup.placement": () => {
+    const d = fresh();
+    ex(d, "scale").warmup = { ...warm(d).warmup! };
+    return d;
+  },
+  "chain.changes": () => {
+    const d = fresh();
+    const e = ex(d, "chained");
+    e.chords = [e.chords![0], e.chords![0]];
+    return d;
+  },
+  "chain.harmony": () => {
+    const d = fresh();
+    delete ex(d, "chained").harmony;
+    return d;
+  },
+  "chain.continuous": () => {
+    const d = fresh();
+    const e = ex(d, "chained");
+    const last = e.notes.filter((n) => n.tick < 3840).pop()!;
+    e.notes = e.notes.filter((n) => n !== last);
+    e.rests.push({ tick: last.tick, dur: last.dur });
+    return d;
+  },
+  "chain.joint": () => {
+    const d = fresh();
+    ex(d, "chained").chain!.maxJointFrets = 0;
     return d;
   },
   "runtime.schedule": () => {

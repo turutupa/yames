@@ -203,6 +203,69 @@ export type ExerciseComputed = {
   difficulty: number;
 };
 
+/**
+ * The ways an Exercise may change from Take to Take. Added 2026-11, additive: a
+ * reader that only knows `notes` still gets a valid Exercise, the first variant.
+ */
+export const VARIATION_DIMENSIONS = ["key", "position", "stringSet", "shapeOrder", "progression"] as const;
+export type VariationDimension = (typeof VARIATION_DIMENSIONS)[number];
+
+/** One concrete set of known notes. Everything a Take needs to be graded. */
+export type ExerciseVariant = {
+  /** Stable. Store this on a Take: it is what makes the graded notes known. */
+  id: string;
+  label: string;
+  params: Partial<Record<VariationDimension, string>>;
+  /**
+   * Variants with the same pool are the same difficulty, so they share progress
+   * and clean tempo. Built from the values of the `notPooled` dimensions.
+   */
+  pool: string;
+  tab: string;
+  position: HandPosition;
+  crossing: Crossing;
+  notes: PathNote[];
+  rests: PathRest[];
+  guide?: PathNote[];
+  chords?: string[];
+  harmony?: Harmony;
+  landings?: Landing[];
+  backing: Backing;
+  /** Only when this variant's bars differ from the Exercise's: slides lower them. */
+  passBars?: PassBar[];
+  computed: ExerciseComputed;
+};
+
+export type Variation = {
+  /** Everything that changes between variants. */
+  dimensions: VariationDimension[];
+  /** Dimensions that do not change difficulty. Progress pools across them. */
+  pooled: VariationDimension[];
+  /** Dimensions that do, and why. Each value starts its own pool. */
+  notPooled: Array<{ dimension: VariationDimension; reason: string }>;
+  variants: ExerciseVariant[];
+};
+
+/** Set on a warm-up Exercise; such an Exercise lives in `Level.warmups`. */
+export type WarmupPlan = {
+  /** Start at this share of the reference Exercise's recent clean tempo. */
+  startAtCleanRatio: number;
+  /** Never go above this share of it. */
+  topAtCleanRatio: number;
+  /** Id of the Exercise whose clean tempo this reads. Same note grid. */
+  referenceExercise: string;
+  /** The tempo with no history yet. A rung on the ladder. */
+  fallbackBpm: number;
+  /** A warm-up reports and never decides anything about a Path. */
+  advancesProgress: false;
+};
+
+/** Set on a chained-arpeggio Exercise: the sweep keeps going across the changes. */
+export type ChainPlan = {
+  /** The most the first note of a shape may sit from the last note, in frets. */
+  maxJointFrets: number;
+};
+
 export type Exercise = {
   id: string;
   title: string;
@@ -254,6 +317,10 @@ export type Exercise = {
   /** The source tab in the compact notation of `tabDsl.ts`. */
   tab: string;
   computed: ExerciseComputed;
+  /** Present when notes change between Takes. `notes` above is variant 0. */
+  variation?: Variation;
+  warmup?: WarmupPlan;
+  chain?: ChainPlan;
 };
 
 export type Step = {
@@ -271,6 +338,28 @@ export type Step = {
   /** Required when this Step's difficulty is below the previous Step's. */
   difficultyException?: string;
   exercises: Exercise[];
+};
+
+export const LEVEL_IDS = ["beginner", "intermediate", "advanced"] as const;
+export type LevelId = (typeof LEVEL_IDS)[number];
+
+/**
+ * An ordered group of Steps. A player may start at any Level: there is no gate,
+ * and `Step.prerequisites` is guidance for the planner, never a lock.
+ */
+export type Level = {
+  id: LevelId;
+  title: string;
+  summary: string;
+  /** Always "open". Written down so no reader invents a gate. */
+  entry: "open";
+  /** The hand the reach check assumes on these Steps. Default: `PathDoc.level`. */
+  reachLevel?: PathLevel;
+  /** One screen: things a player can check on their own guitar. */
+  placement: { startHereIf: string[] };
+  /** Consecutive ids from `PathDoc.steps`, in order. */
+  stepIds: string[];
+  warmups: Exercise[];
 };
 
 export type ReviewEvent = {
@@ -297,7 +386,10 @@ export type PathDoc = {
   /** Where the grading can and cannot be trusted, for this Path. */
   gradingLimits: string;
   estimatedMinutes: number;
+  /** Every Step, in order, whatever Level it belongs to. */
   steps: Step[];
+  /** Absent only in packs written before Levels existed. */
+  levels?: Level[];
 };
 
 /** Quarter-note ticks, the same constant `src/songs/types.ts` fixes. */

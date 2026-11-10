@@ -10,7 +10,7 @@ import { parseChordChart } from "../jam/chart";
 import { parseKey, sameChord } from "../jam/harmony";
 import { buildSchedule } from "../songs/schedule";
 import type { ScaleId } from "../jam/scales";
-import { acceptedNotes } from "./generate";
+import { acceptedNotes, poolOf } from "./generate";
 import {
   CROSSINGS,
   FEEDBACK_TIMINGS,
@@ -21,21 +21,25 @@ import {
   REVIEW_STATUSES,
   STANDARD_TUNING,
   TECHNIQUES,
+  LEVEL_IDS,
   TICKS,
+  VARIATION_DIMENSIONS,
   barLengthTicks,
 } from "./format";
-import type { Exercise, Harmony, PathDoc, PathNote, Step } from "./format";
+import type { Exercise, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
 import {
   crossingsIn,
   gradedGapLimit,
   pickedPairs,
   requiredFlags,
   requiredNotGraded,
+  worstCorrectHeard,
 } from "./derive";
 import { exerciseDifficulty, minGapMs, stepDifficulty } from "./difficulty";
 import { bannedClaimsIn } from "./honesty";
 import { DETECTION_FLAGS, FORBIDDEN_METRICS, METRICS, METRIC_IDS, NOT_GRADED } from "./metrics";
 import { checkReachAt, maxPlayableBpm } from "./reach";
+import { exerciseWithVariant } from "./variants";
 import { isPicked, NOTATED_TICKS } from "./tabDsl";
 import { canSpellScale, chordPcs, parseChord, pcOfName, scaleIsKnown, scalePcs, spellChord, spellScale } from "./theory";
 import { exerciseScore } from "./toScore";
@@ -115,6 +119,30 @@ export const RULES = {
   "honesty.feedback": "feedback that promises more than the grading mode allows",
   "honesty.reviewStatus": "a status past draft with no record of who reviewed it",
   "runtime.schedule": "the Exercise does not produce a usable schedule for score.rs",
+  "level.missing": "a Path with no Levels",
+  "level.order": "Levels must be beginner, intermediate and advanced, in that order",
+  "level.steps": "every Step belongs to exactly one Level, in the Path's order",
+  "level.entry": "a Level that is not open: a player may start anywhere",
+  "level.placement": "a placement note a player can't check, or that won't fit on a screen",
+  "level.warmup": "a Level with no warm-up",
+  "variation.shape": "a variation that is not well formed",
+  "variation.declared": "a varying dimension not declared as pooled or not pooled",
+  "variation.duplicate": "two variants with the same notes",
+  "variation.base": "the Exercise's own notes are not its first variant",
+  "variation.pool": "a variant in the wrong pool for its values",
+  "variation.pooledDifficulty": "a pool whose variants differ too much in difficulty to share progress",
+  "warmup.variants": "a warm-up with too few variants",
+  "warmup.moves": "a warm-up variant that stays in one place",
+  "warmup.short": "a warm-up that is too long",
+  "warmup.musical": "a warm-up with no declared harmony",
+  "warmup.tempo": "a warm-up that doesn't start comfortably below the clean tempo",
+  "warmup.reference": "a warm-up whose reference Exercise is missing or on another note grid",
+  "warmup.progress": "a warm-up that advances progress",
+  "warmup.placement": "a warm-up outside a Level, or an Exercise in a Level's warm-ups that isn't one",
+  "chain.changes": "a chain with no chord changes",
+  "chain.harmony": "a chain whose bars aren't checked against their chords",
+  "chain.continuous": "a chain that stops at a bar line",
+  "chain.joint": "a link that jumps instead of connecting",
 } as const;
 
 export type RuleId = keyof typeof RULES;
@@ -336,15 +364,15 @@ function checkLoop(ex: Exercise, report: Report) {
   }
 }
 
-function checkReach(doc: PathDoc, ex: Exercise, report: Report) {
+function checkReach(level: PathLevel, ex: Exercise, report: Report) {
   const rungs = ex.tempo.rungs;
   if (rungs.length === 0) return;
   const top = rungs[rungs.length - 1].bpm;
-  const atLevel = (bpm: number) => checkReachAt(ex, doc.level, bpm);
+  const atLevel = (bpm: number) => checkReachAt(ex, level, bpm);
   const result = atLevel(top);
   if (!result.failure) return;
   const fails = result.failure;
-  const best = maxPlayableBpm(ex, doc.level);
+  const best = maxPlayableBpm(ex, level);
   const hint = best > 0 ? ` The fastest this can be fingered is about ${best} BPM.` : "";
   const at = `${ex.id} (top rung ${top} BPM)`;
   const rule = ({
@@ -597,19 +625,10 @@ function checkHonesty(ex: Exercise, report: Report) {
       report("honesty.notGradedRequired", ex.id, `must say "${needed}" is not graded`);
     }
   }
-  // `schedule.ts` marks hammers and pulls soft, and not slid-to notes: a correct
-  // take whose slides are too quiet to detect loses those notes today.
-  const slidTo = ex.notes.filter((n, i) => {
-    const previous = ex.notes[i - 1];
-    return !!previous && previous.tech.includes("slide") && previous.string === n.string;
-  }).length;
   const heardBar = ex.passBars.find((b) => b.metric === "notesHeard");
-  if (slidTo > 0 && heardBar?.min !== undefined) {
-    const countable = ex.notes.filter((n) => !n.tech.includes("hammer") && !n.tech.includes("pull")).length;
-    const worstCorrect = (countable - slidTo) / Math.max(countable, 1);
-    if (heardBar.min > worstCorrect) {
-      report("honesty.slideBar", ex.id, `the bar asks for ${heardBar.min}, and a correct take with unheard slides reaches ${worstCorrect.toFixed(2)}`);
-    }
+  const worstCorrect = worstCorrectHeard(ex.notes);
+  if (heardBar?.min !== undefined && heardBar.min > worstCorrect) {
+    report("honesty.slideBar", ex.id, `the bar asks for ${heardBar.min}, and a correct take with unheard slides reaches ${worstCorrect.toFixed(2)}`);
   }
   const required = requiredFlags(ex);
   for (const flag of required) {
@@ -682,10 +701,11 @@ function checkPathText(doc: PathDoc, report: Report) {
     texts.push([`${step.id}.why`, step.why], [`${step.id}.goal`, step.goal], [`${step.id}.payoff`, step.payoff]);
     step.howTo.forEach((t, i) => texts.push([`${step.id}.howTo ${i + 1}`, t]));
   }
-  for (const step of doc.steps) {
-    for (const ex of step.exercises) {
-      texts.push([`${ex.id}.purpose`, ex.purpose], [`${ex.id}.coachLine`, ex.coachLine]);
-    }
+  for (const ex of [...doc.steps.flatMap((s) => s.exercises), ...(doc.levels ?? []).flatMap((l) => l.warmups)]) {
+    texts.push([`${ex.id}.purpose`, ex.purpose], [`${ex.id}.coachLine`, ex.coachLine]);
+  }
+  for (const level of doc.levels ?? []) {
+    texts.push([`level ${level.id}.summary`, level.summary]);
   }
   for (const [where, text] of texts) {
     if (/\bTODO\b/.test(text)) report("schema.todo", where, "still says TODO");
@@ -756,9 +776,9 @@ function checkReview(doc: PathDoc, report: Report) {
   }
 }
 
-function checkComputed(doc: PathDoc, ex: Exercise, report: Report) {
+function checkComputed(doc: PathDoc, level: PathLevel, ex: Exercise, report: Report) {
   const top = ex.tempo.rungs[ex.tempo.rungs.length - 1]?.bpm ?? 60;
-  const reach = checkReachAt(ex, doc.level, top);
+  const reach = checkReachAt(ex, level, top);
   const shifts = reach.failure ? 0 : reach.shifts;
   const stale = (field: string, stored: unknown, actual: unknown) => {
     if (stored !== actual) report("schema.computedStale", ex.id, `computed.${field} says ${String(stored)}, the notes say ${String(actual)}. Regenerate`);
@@ -766,7 +786,7 @@ function checkComputed(doc: PathDoc, ex: Exercise, report: Report) {
   stale("noteCount", ex.computed.noteCount, ex.notes.length);
   stale("minGapMsAtTop", ex.computed.minGapMsAtTop, minGapMs(ex.notes, top));
   stale("handShifts", ex.computed.handShifts, shifts);
-  stale("maxPlayableBpm", ex.computed.maxPlayableBpm, maxPlayableBpm(ex, doc.level));
+  stale("maxPlayableBpm", ex.computed.maxPlayableBpm, maxPlayableBpm(ex, level));
   stale("difficulty", ex.computed.difficulty, exerciseDifficulty(ex, doc.kind, shifts));
 }
 
@@ -789,6 +809,193 @@ function checkRuntime(doc: PathDoc, ex: Exercise, report: Report) {
   }
 }
 
+function checkOne(doc: PathDoc, level: PathLevel, ex: Exercise, report: Report, issues: readonly Issue[]) {
+  checkTab(doc, ex, report);
+  // Off the neck, nothing further about these notes means anything.
+  if (issues.some((i) => (i.rule === "tab.string" || i.rule === "tab.fret") && i.where.startsWith(ex.id))) return;
+  checkLoop(ex, report);
+  checkReach(level, ex, report);
+  checkPicks(ex, report);
+  checkChords(ex, report);
+  // Everything below reads the chords, and an unreadable one has been said.
+  if (ex.chords?.some((c) => !parseChord(c))) return;
+  if (ex.harmony) checkHarmony(ex, ex.harmony, report);
+  checkBacking(ex, report);
+  checkLandings(ex, report);
+  checkLadder(ex, report);
+  checkHonesty(ex, report);
+  checkComputed(doc, level, ex, report);
+  checkRuntime(doc, ex, report);
+}
+
+/** Things a warm-up can't do without. Six is enough that it doesn't feel the same. */
+export const MIN_WARMUP_VARIANTS = 6;
+/** Variants this far apart in difficulty can't share a clean tempo. */
+export const POOL_DIFFICULTY_SPREAD = 1.3;
+
+function checkLevels(doc: PathDoc, report: Report) {
+  const levels = doc.levels;
+  if (!levels || levels.length === 0) {
+    report("level.missing", "path", "every Path has Beginner, Intermediate and Advanced Levels");
+    return;
+  }
+  if (levels.map((l) => l.id).join() !== LEVEL_IDS.join()) {
+    report("level.order", "path.levels", `found ${levels.map((l) => l.id).join(", ")}`);
+  }
+  const inOrder = levels.flatMap((l) => l.stepIds);
+  if (inOrder.join() !== doc.steps.map((s) => s.id).join()) {
+    report("level.steps", "path.levels", `Levels list ${inOrder.join(", ")}; the Path's Steps are ${doc.steps.map((s) => s.id).join(", ")}`);
+  }
+  for (const level of levels) {
+    const at = `level ${level.id}`;
+    if ((level.entry as string) !== "open") report("level.entry", at, `entry is "${level.entry}"`);
+    if (level.stepIds.length === 0) report("level.steps", at, "a Level with no Steps");
+    const items = level.placement?.startHereIf ?? [];
+    const words = items.join(" ");
+    if (items.length < 2) report("level.placement", at, "at least two things a player can check");
+    if (!items.some((t) => /\d/.test(t))) {
+      report("level.placement", at, "at least one check needs a number: a tempo, a count, a fret");
+    }
+    if (words.length > 700) report("level.placement", at, `${words.length} characters will not fit on one screen`);
+    if (/\b(must|required|unlock|locked|not allowed|can't start)\b/i.test(words)) {
+      report("level.placement", at, "placement is advice: it can't sound like a gate");
+    }
+    for (const claim of items.flatMap((t) => bannedClaimsIn(t, false))) {
+      report("honesty.banned", at, claim.name);
+    }
+    if (level.warmups.length === 0) report("level.warmup", at, "each Level needs a warm-up");
+  }
+}
+
+function noteKey(notes: readonly PathNote[]): string {
+  return notes.map((n) => `${n.tick}:${n.string}:${n.fret}`).join(" ");
+}
+
+function checkVariation(ex: Exercise, report: Report) {
+  const variation = ex.variation!;
+  if (variation.variants.length < 2) {
+    report("variation.shape", ex.id, "a variation needs at least two variants");
+    return;
+  }
+  const dims = variation.dimensions;
+  for (const d of dims) {
+    if (!VARIATION_DIMENSIONS.includes(d)) report("variation.shape", ex.id, `unknown dimension "${d}"`);
+  }
+  const notPooled = variation.notPooled.map((n) => n.dimension);
+  for (const d of dims) {
+    const inPooled = variation.pooled.includes(d);
+    const inNot = notPooled.includes(d);
+    if (inPooled === inNot) {
+      report("variation.declared", ex.id, `"${d}" must be either pooled or not pooled, and it is ${inPooled ? "both" : "neither"}`);
+    }
+  }
+  for (const entry of variation.notPooled) {
+    if (entry.reason.trim().length < 10) report("variation.declared", ex.id, `"${entry.dimension}" needs a reason`);
+  }
+  const ids = new Set<string>();
+  const keys = new Map<string, string>();
+  const pools = new Map<string, number[]>();
+  for (const v of variation.variants) {
+    if (ids.has(v.id)) report("variation.shape", ex.id, `variant id "${v.id}" is used twice`);
+    ids.add(v.id);
+    for (const d of dims) {
+      if (v.params[d] === undefined) report("variation.shape", `${ex.id}#${v.id}`, `no value for "${d}"`);
+    }
+    const key = noteKey(v.notes);
+    const twin = keys.get(key);
+    if (twin) report("variation.duplicate", `${ex.id}#${v.id}`, `the same notes as "${twin}"`);
+    keys.set(key, v.id);
+    if (v.pool !== poolOf(v.params, notPooled)) {
+      report("variation.pool", `${ex.id}#${v.id}`, `pool is "${v.pool}", its values say "${poolOf(v.params, notPooled)}"`);
+    }
+    pools.set(v.pool, [...(pools.get(v.pool) ?? []), v.computed.difficulty]);
+  }
+  if (noteKey(ex.notes) !== noteKey(variation.variants[0].notes)) {
+    report("variation.base", ex.id, "a reader that ignores variants must get a real variant: variant 0");
+  }
+  for (const [pool, values] of pools) {
+    const low = Math.min(...values);
+    const high = Math.max(...values);
+    if (low > 0 && high / low > POOL_DIFFICULTY_SPREAD) {
+      report("variation.pooledDifficulty", ex.id, `pool "${pool}" runs from ${low} to ${high} in difficulty, too far to share a clean tempo. Declare the dimension not pooled`);
+    }
+  }
+}
+
+function checkWarmup(doc: PathDoc, ex: Exercise, report: Report) {
+  const plan = ex.warmup!;
+  const variants = ex.variation?.variants ?? [];
+  if (variants.length < MIN_WARMUP_VARIANTS) {
+    report("warmup.variants", ex.id, `${variants.length} variants; a warm-up needs at least ${MIN_WARMUP_VARIANTS} so it never feels the same`);
+  }
+  if ((plan.advancesProgress as boolean) !== false) {
+    report("warmup.progress", ex.id, "a warm-up reports and decides nothing");
+  }
+  if (ex.estimatedMinutes > 5) report("warmup.short", ex.id, `${ex.estimatedMinutes} minutes is more than a warm-up`);
+  if (!(plan.startAtCleanRatio >= 0.4 && plan.startAtCleanRatio <= 0.8)) {
+    report("warmup.tempo", ex.id, `start at ${plan.startAtCleanRatio} of clean tempo; it belongs between 0.4 and 0.8`);
+  }
+  if (!(plan.topAtCleanRatio > plan.startAtCleanRatio && plan.topAtCleanRatio <= 0.95)) {
+    report("warmup.tempo", ex.id, `top at ${plan.topAtCleanRatio} of clean tempo; above the start and no more than 0.95`);
+  }
+  const fallback = ex.tempo.rungs.find((r) => r.bpm === plan.fallbackBpm);
+  if (!fallback || fallback.grading !== "graded") {
+    report("warmup.tempo", ex.id, `fallback ${plan.fallbackBpm} BPM has to be a graded rung`);
+  }
+  const all = doc.steps.flatMap((s) => s.exercises);
+  const reference = all.find((e) => e.id === plan.referenceExercise);
+  if (!reference) {
+    report("warmup.reference", ex.id, `no Exercise "${plan.referenceExercise}"`);
+  } else {
+    const grid = (notes: readonly PathNote[]) => {
+      let gap = Infinity;
+      for (let i = 1; i < notes.length; i += 1) {
+        const d = notes[i].tick - notes[i - 1].tick;
+        if (d > 0 && d < gap) gap = d;
+      }
+      return gap;
+    };
+    if (grid(reference.notes) !== grid(ex.notes)) {
+      report("warmup.reference", ex.id, `the reference moves in ${grid(reference.notes)}-tick notes, this in ${grid(ex.notes)}: a clean tempo on one means nothing on the other`);
+    }
+  }
+  const concrete = variants.length ? variants.map((v) => exerciseWithVariant(ex, v)) : [ex];
+  for (const one of concrete) {
+    if (one.bars > 8) report("warmup.short", one.id, `${one.bars} bars is more than a warm-up`);
+    if (!one.harmony && !one.chords) report("warmup.musical", one.id, "a warm-up is music: declare its scale or its chords");
+    const frets = one.notes.filter((n) => n.fret > 0).map((n) => n.fret);
+    const span = frets.length ? Math.max(...frets) - Math.min(...frets) : 0;
+    if (one.computed.handShifts === 0 && span < 5) {
+      report("warmup.moves", one.id, "this stays under one hand: a warm-up moves through positions");
+    }
+  }
+}
+
+function checkChain(ex: Exercise, report: Report) {
+  const chords = ex.chords ?? [];
+  if (new Set(chords).size < 2) report("chain.changes", ex.id, "a chain links different chords");
+  if (ex.harmony?.kind !== "chordTones") {
+    report("chain.harmony", ex.id, "a chain must be checked bar by bar against its chords");
+  }
+  const barTicks = barLengthTicks(ex.meter);
+  for (let bar = 1; bar < ex.bars; bar += 1) {
+    const line = bar * barTicks;
+    const before = [...ex.notes].reverse().find((n) => n.tick < line);
+    const after = ex.notes.find((n) => n.tick >= line);
+    if (!before || !after) continue;
+    if (before.tick + before.dur !== line || after.tick !== line) {
+      report("chain.continuous", `${ex.id} (bar ${bar + 1})`, "the notes stop at this bar line; a link keeps going");
+      continue;
+    }
+    if (Math.abs(before.string - after.string) > 1) {
+      report("chain.joint", `${ex.id} (bar ${bar + 1})`, `from string ${before.string} to ${after.string}: a link stays on the string or goes to the next one`);
+    }
+    if (before.fret > 0 && after.fret > 0 && Math.abs(before.fret - after.fret) > ex.chain!.maxJointFrets) {
+      report("chain.joint", `${ex.id} (bar ${bar + 1})`, `${Math.abs(before.fret - after.fret)} frets at the link; this chain allows ${ex.chain!.maxJointFrets}`);
+    }
+  }
+}
+
 /** Check a pack. Pass anything: the first thing it does is read the shape. */
 export function validatePath(doc: unknown): Issue[] {
   const issues: Issue[] = [];
@@ -802,24 +1009,33 @@ export function validatePath(doc: unknown): Issue[] {
   checkIds(doc, report);
   checkPathText(doc, report);
   checkReview(doc, report);
+  checkLevels(doc, report);
+  const levelOf = (stepId: string): PathLevel =>
+    doc.levels?.find((l) => l.stepIds.includes(stepId))?.reachLevel ?? doc.level;
+  const checkAll = (ex: Exercise, level: PathLevel) => {
+    if (ex.variation) checkVariation(ex, report);
+    const concrete = ex.variation?.variants.length
+      ? ex.variation.variants.map((v) => exerciseWithVariant(ex, v))
+      : [ex];
+    for (const one of concrete) {
+      checkOne(doc, level, one, report, issues);
+      if (ex.chain) checkChain(one, report);
+    }
+  };
   for (const step of doc.steps) {
     for (const ex of step.exercises) {
-      checkTab(doc, ex, report);
-      // Off the neck, nothing further about these notes means anything.
-      if (issues.some((i) => i.rule === "tab.string" || i.rule === "tab.fret")) continue;
-      checkLoop(ex, report);
-      checkReach(doc, ex, report);
-      checkPicks(ex, report);
-      checkChords(ex, report);
-      // Everything below reads the chords, and an unreadable one has been said.
-      if (ex.chords?.some((c) => !parseChord(c))) continue;
-      if (ex.harmony) checkHarmony(ex, ex.harmony, report);
-      checkBacking(ex, report);
-      checkLandings(ex, report);
-      checkLadder(ex, report);
-      checkHonesty(ex, report);
-      checkComputed(doc, ex, report);
-      checkRuntime(doc, ex, report);
+      if (ex.warmup) report("warmup.placement", ex.id, "a warm-up belongs under a Level, not a Step");
+      checkAll(ex, levelOf(step.id));
+    }
+  }
+  for (const level of doc.levels ?? []) {
+    for (const ex of level.warmups) {
+      if (!ex.warmup) {
+        report("warmup.placement", ex.id, "listed as a warm-up and has no warm-up plan");
+        continue;
+      }
+      checkWarmup(doc, ex, report);
+      checkAll(ex, level.reachLevel ?? doc.level);
     }
   }
   checkProgress(doc, report);

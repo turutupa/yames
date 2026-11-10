@@ -62,6 +62,33 @@ describe("the three Paths", () => {
     expect(readFileSync(file, "utf8")).toBe(scheduleFixtures(docs));
   });
 
+  it("every Path has three open Levels, each with a warm-up that varies", () => {
+    for (const doc of docs) {
+      expect(doc.levels?.map((l) => l.id)).toEqual(["beginner", "intermediate", "advanced"]);
+      for (const level of doc.levels!) {
+        expect(level.entry).toBe("open");
+        expect(level.warmups.length).toBeGreaterThan(0);
+        for (const w of level.warmups) {
+          expect(w.warmup?.advancesProgress).toBe(false);
+          expect(w.variation!.variants.length).toBeGreaterThanOrEqual(6);
+        }
+      }
+    }
+  });
+
+  it("linked arpeggios are the backbone of Intermediate Sweep Picking", () => {
+    const sweep = docs.find((d) => d.id === "sweep-picking")!;
+    const level = sweep.levels!.find((l) => l.id === "intermediate")!;
+    const chained = sweep.steps
+      .filter((s) => level.stepIds.includes(s.id))
+      .flatMap((s) => s.exercises)
+      .filter((e) => e.chain);
+    expect(chained.length).toBeGreaterThanOrEqual(10);
+    expect(level.stepIds.indexOf("the-link")).toBeLessThan(level.stepIds.indexOf("link-chains"));
+    const advanced = sweep.levels!.find((l) => l.id === "advanced")!;
+    expect(advanced.stepIds).toContain("six-strings");
+  });
+
   it("no pass bar anywhere uses a number the audit ruled out", () => {
     const metrics = docs.flatMap((d) => d.steps.flatMap((s) => s.exercises.flatMap((e) => e.passBars.map((b) => b.metric))));
     expect(metrics).not.toContain("score");

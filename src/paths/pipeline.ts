@@ -5,12 +5,13 @@
 import { buildSchedule } from "../songs/schedule";
 import type { ScoreSchedule } from "../songs/types";
 import { TICKS, barLengthTicks } from "./format";
-import type { PathDoc } from "./format";
+import type { Exercise, PathDoc } from "./format";
 import { buildPath, serializePath } from "./generate";
 import { renderReviewPage } from "./review";
 import type { PathSpec } from "./spec";
 import { SPECS } from "./specs/index";
 import { exerciseScore } from "./toScore";
+import { exerciseWithVariant } from "./variants";
 import { RULES, errorsIn, runtimeNeeds, validatePath } from "./validate";
 import type { Issue } from "./validate";
 
@@ -44,22 +45,32 @@ export type ScheduleFixture = {
 export function scheduleFixtures(docs: readonly PathDoc[]): string {
   const rows: ScheduleFixture[] = [];
   for (const doc of docs) {
-    for (const step of doc.steps) {
+    const groups = [...doc.steps, ...(doc.levels ?? []).map((l) => ({ exercises: l.warmups }))];
+    for (const step of groups) {
       for (const ex of step.exercises) {
         if (ex.notesRole !== "target") continue;
         const bpm = ex.tempo.passAtBpm ?? ex.tempo.rungs[0].bpm;
-        const score = exerciseScore(doc.id, ex, bpm);
-        const schedule = buildSchedule(score, undefined, { loops: false });
-        rows.push({ path: doc.id, exercise: ex.id, bpm, schedule });
+        for (const one of concreteExercises(ex)) {
+          const score = exerciseScore(doc.id, one, bpm);
+          const schedule = buildSchedule(score, undefined, { loops: false });
+          rows.push({ path: doc.id, exercise: one.id, bpm, schedule });
+        }
       }
     }
   }
   return `${rows.map((r) => JSON.stringify(r)).join("\n")}\n`;
 }
 
+/** An Exercise as every concrete set of notes it can be. */
+export function concreteExercises(ex: Exercise): Exercise[] {
+  return ex.variation?.variants.length ? ex.variation.variants.map((v) => exerciseWithVariant(ex, v)) : [ex];
+}
+
 /** A one-paragraph summary for the terminal and the reports. */
 export function summary(doc: PathDoc): string {
   const exercises = doc.steps.flatMap((s) => s.exercises);
+  const warmups = (doc.levels ?? []).flatMap((l) => l.warmups);
+  const variants = [...exercises, ...warmups].reduce((sum, e) => sum + (e.variation?.variants.length ?? 0), 0);
   const by = (mode: string) => exercises.filter((e) => e.grading === mode).length;
   const notes = exercises.reduce((sum, e) => sum + e.notes.length, 0);
   const bars = exercises.reduce((sum, e) => sum + e.bars, 0);
@@ -68,6 +79,6 @@ export function summary(doc: PathDoc): string {
     `${doc.id}: ${doc.steps.length} Steps, ${exercises.length} Exercises ` +
     `(${by("graded")} graded, ${by("landings")} landings, ${by("selfChecked")} self-checked, ` +
     `${by("practiceOnly")} practice-only), ${notes} notes in ${bars} bars of ${beatTicks}, ` +
-    `about ${Math.round(doc.estimatedMinutes / 60)} hours. Status: ${doc.review.status}.`
+    `about ${Math.round(doc.estimatedMinutes / 60)} hours, ${warmups.length} warm-ups, ${variants} variants. Status: ${doc.review.status}.`
   );
 }

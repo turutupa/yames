@@ -65,6 +65,20 @@ export function requiredNotGraded(ex: Content): string[] {
   return out;
 }
 
+/**
+ * The share of notes a correct take reaches if its slid-to notes go unheard.
+ * `schedule.ts` makes hammers and pulls soft and not slid-to notes, so those are
+ * still expected today. A notes-heard bar has to stay at or under this.
+ */
+export function worstCorrectHeard(notes: readonly PathNote[]): number {
+  const slidTo = notes.filter((n, i) => {
+    const previous = notes[i - 1];
+    return !!previous && previous.tech.includes("slide") && previous.string === n.string;
+  }).length;
+  const countable = notes.filter((n) => !n.tech.includes("hammer") && !n.tech.includes("pull")).length;
+  return countable > 0 ? (countable - slidTo) / countable : 1;
+}
+
 export type PickPair = { a: PathNote; b: PathNote; seam: boolean };
 
 /**

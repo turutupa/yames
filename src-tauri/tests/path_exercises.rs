@@ -197,6 +197,54 @@ fn an_unheard_hammer_on_costs_nothing() {
     );
 }
 
+/// A variant is a schedule like any other: its notes are known, so it scores.
+#[test]
+fn a_variant_and_a_chain_are_scored_like_anything_else() {
+    let rows = rows();
+    let variants: Vec<&Row> = rows.iter().filter(|r| r.exercise.contains('#')).collect();
+    assert!(variants.len() > 200, "only {} variant schedules", variants.len());
+
+    let chain = rows
+        .iter()
+        .find(|r| r.exercise == "link-chains.looped-chain#key=A,progression=i-VI-III-VII")
+        .expect("a chained-arpeggio Exercise, in one key and progression");
+    let other = rows
+        .iter()
+        .find(|r| r.exercise == "link-chains.looped-chain#key=E,progression=i-VII-VI-VII")
+        .expect("the same Exercise in another variant");
+    for row in [chain, other] {
+        assert!(row.schedule.onsets.iter().any(|o| o.soft), "a chain has hammers and pulls");
+        let clean = report(row, &played(row, 2.0, 31));
+        assert_eq!(hits(&clean), row.schedule.onsets.len());
+        assert_eq!(misses(&clean), 0);
+
+        // A picked note dropped in the middle of the chain is a miss, on that
+        // variant's own schedule, and only one.
+        let picked = row
+            .schedule
+            .onsets
+            .iter()
+            .position(|o| !o.soft && o.beat >= 8.0)
+            .expect("a picked note in the second half");
+        let mut notes = played(row, 2.0, 32);
+        notes.remove(picked);
+        let dropped = report(row, &notes);
+        assert_eq!(misses(&dropped), 1, "{}", row.exercise);
+        assert!(dropped.hit_completeness < 1.0);
+    }
+}
+
+/// Warm-ups are notes like any other, even though they decide nothing.
+#[test]
+fn every_level_has_a_warm_up_with_schedules() {
+    let rows = rows();
+    for level in ["beginner", "intermediate", "advanced"] {
+        let prefix = format!("warmup-{level}.");
+        let count = rows.iter().filter(|r| r.exercise.starts_with(&prefix)).count();
+        assert!(count >= 18, "{level}: {count} warm-up variants across three Paths");
+    }
+}
+
 #[test]
 fn a_constant_input_delay_is_the_known_limit_at_speed() {
     // The audit's defect 2, on one of our own Exercises: this pins it so whoever
@@ -217,7 +265,7 @@ fn a_constant_input_delay_is_the_known_limit_at_speed() {
 
     let fast = rows
         .iter()
-        .find(|r| r.exercise == "speed-bursts.one-beat")
+        .find(|r| r.exercise.starts_with("speed-bursts.one-beat#"))
         .unwrap();
     let mut late = played(fast, 2.0, 22);
     late.iter_mut().for_each(|n| n.time_ms += 60.0);
