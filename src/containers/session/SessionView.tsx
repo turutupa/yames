@@ -16,10 +16,12 @@ import {
   reasonLine,
   takeLine,
 } from "../../session/coachWords";
-import { planSession } from "../../session/planner";
+import { EDGE_MINUTES, planSession } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import {
   currentStep,
+  edgeOf,
+  isEdgeStep,
   minutesLeft,
   stepRemainingMs,
   tempoNudges,
@@ -199,7 +201,7 @@ function TakeScreen({
       <div className="session-head">
         <div className="session-head-text">
           <div className="session-kick">
-            {t("session.kind.mechanics")}
+            {isEdgeStep(step) ? t("session.edge.kick") : t("session.kind.mechanics")}
             {pathTitle &&
               ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
           </div>
@@ -336,6 +338,50 @@ function CleanTempoLine({ outcome }: { outcome: TakeOutcome }) {
   );
 }
 
+/**
+ * Find my edge, after a Take: the climb so far, and the edge once it is found.
+ *
+ * The edge is the fastest rung passed over eight bars, which is a clean tempo by
+ * the owner's definition, so `CleanTempoLine` above already says when it moved.
+ */
+function EdgePanel({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const edge = edgeOf(session.run, session.exercise);
+  return (
+    <div className="session-edge" data-testid="session-edge" data-done={edge.done ? "" : undefined}>
+      <div className="session-edge-head">
+        {edge.reached !== null ? (
+          <b>
+            {edge.done
+              ? t("session.edge.done", { bpm: edge.reached })
+              : t("session.edge.reached", { bpm: edge.reached })}
+          </b>
+        ) : (
+          edge.done && <b>{t("session.edge.none")}</b>
+        )}
+        {edge.slippedAt !== null && (
+          <span className="session-why">{t("session.edge.slipped", { bpm: edge.slippedAt })}</span>
+        )}
+      </div>
+      <div className="session-edge-climb" role="list" aria-label={t("session.edge.climb")}>
+        {edge.climb.map((rung, i) => (
+          <span
+            key={i}
+            role="listitem"
+            className="session-edge-rung"
+            data-state={
+              rung.verdict === "passed" ? "met" : rung.verdict === "belowBar" ? "missed" : "none"
+            }
+          >
+            {rung.bpm}
+          </span>
+        ))}
+      </div>
+      {!edge.done && <div className="session-why">{t("session.edge.how")}</div>}
+    </div>
+  );
+}
+
 /** A graded Take: passed reads as a result, below the bar as between Takes. */
 function ResultScreen({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
@@ -343,6 +389,7 @@ function ResultScreen({ session }: { session: SessionRun }) {
   const outcome = run.outcomes[run.outcomes.length - 1];
   if (!outcome) return null;
   const passed = outcome.grade.verdict === "passed";
+  const onEdge = isEdgeStep(currentStep(run));
   const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);
   return (
     <div
@@ -359,6 +406,7 @@ function ResultScreen({ session }: { session: SessionRun }) {
       </div>
       <MovedNumber outcome={outcome} />
       <CleanTempoLine outcome={outcome} />
+      {onEdge && <EdgePanel session={session} />}
       <div className="session-coach">{lineText(t, line)}</div>
       {outcome.grade.unmeasured.length > 0 && (
         <div className="session-why">{t("session.result.unmeasuredNotes")}</div>
@@ -380,10 +428,14 @@ function ResultScreen({ session }: { session: SessionRun }) {
           </button>
         )}
       </div>
-      {passed && (
-        <button className="session-choice" onClick={actions.rampFromHere}>
-          <b>{t("session.result.rampTitle")}</b>
-          <span>{t("session.result.rampBody", { bpm: outcome.bpm })}</span>
+      {passed && !onEdge && (
+        <button
+          className="session-choice"
+          onClick={actions.findEdgeFromHere}
+          data-testid="session-find-edge"
+        >
+          <b>{t("session.edge.offerTitle")}</b>
+          <span>{t("session.edge.offerBody", { bpm: outcome.bpm, minutes: EDGE_MINUTES })}</span>
         </button>
       )}
       {!passed && <PedalCard />}
@@ -495,6 +547,34 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
   if (outcomes.length === 0) return null;
   const first = outcomes[0];
   const last = outcomes[outcomes.length - 1];
+  if (isEdgeStep(step)) {
+    const reached = outcomes.reduce<number | null>(
+      (most, o) =>
+        o.grade.verdict === "passed" && o.grade.cleanBpm !== null
+          ? Math.max(most ?? 0, o.grade.cleanBpm)
+          : most,
+      null,
+    );
+    return (
+      <div className="session-recap-item">
+        <div className="session-recap-text">
+          <div className="session-plan-title">{`${t("session.edge.kick")} · ${first.title}`}</div>
+          <div className="session-why">
+            {t("session.recap.takesAt", { count: outcomes.length, bpm: last.bpm })}
+          </div>
+        </div>
+        {reached !== null && (
+          <div className="session-recap-number">
+            {first.cleanBefore !== null && first.cleanBefore !== reached && (
+              <span>{first.cleanBefore} → </span>
+            )}
+            <b>{reached}</b>
+            <small>{t("session.edge.recap")}</small>
+          </div>
+        )}
+      </div>
+    );
+  }
   const graded = outcomes.filter((o) => o.grade.headline && o.grade.verdict !== "notCaught");
   const head = graded[graded.length - 1]?.grade.headline ?? null;
   const metric = head ? metricKey(head.metric) : null;

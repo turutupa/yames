@@ -101,6 +101,17 @@ export function takeLine(grade: TakeGrade, measures: TakeMeasures, bpm: number):
 
 /** Why a Take was not graded, for "I didn't catch enough". */
 export function notCaughtHint(measures: TakeMeasures): Line {
+  // The scorer's own reason when it gave one; otherwise what the counts say.
+  switch (measures.noCatchReason) {
+    case "nothingHeard":
+      return { key: "session.noCatch.hintNothing", values: {} };
+    case "tooFewHeard":
+      return { key: "session.noCatch.hintQuiet", values: {} };
+    case "tooManyExtras":
+      return { key: "session.noCatch.hintExtras", values: {} };
+    case "lowConfidence":
+      return { key: "session.noCatch.hintUnsure", values: {} };
+  }
   return {
     key: measures.heard === 0 ? "session.noCatch.hintNothing" : "session.noCatch.hintQuiet",
     values: {},

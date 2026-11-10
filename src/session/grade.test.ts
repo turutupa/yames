@@ -4,6 +4,7 @@ import { CLEAN_TEMPO_MIN_BARS, gradeTake, takeBarsOf } from "./grade";
 import type { TakeMeasures } from "./takeMeasures";
 import { MIN_HEARD_NOTES, measureTake } from "./takeMeasures";
 import type { ScorerReport } from "./takeMeasures";
+import type { ScorerTakeGrade } from "../ipc";
 import { ALT } from "./testKit";
 
 const EX: Exercise = ALT.steps[0].exercises[0];
@@ -52,6 +53,28 @@ function report(hits: number, misses: number, extra: Partial<ScorerReport> = {})
   };
 }
 
+function scorerGrade(fields: Partial<ScorerTakeGrade> = {}): ScorerTakeGrade {
+  return {
+    verdict: "graded",
+    score: 80,
+    evenness: 0.88,
+    evennessSigmaMs: 6,
+    due: 64,
+    heard: 60,
+    missed: 4,
+    extra: 0,
+    notReached: 0,
+    heardRatio: 0.94,
+    confidence: 0.6,
+    calibration: { offsetMs: 0, source: "none" },
+    bars: [
+      { bar: 0, due: 8, heard: 8, missed: 0, extra: 0, evenness: 0.9, evennessSigmaMs: 4 },
+      { bar: 1, due: 8, heard: 8, missed: 0, extra: 0, evenness: 0.86, evennessSigmaMs: 5 },
+    ],
+    ...fields,
+  };
+}
+
 describe("the adapter", () => {
   it("reads today's report", () => {
     const m = measureTake(report(60, 4), { barsPlayed: 8 });
@@ -84,13 +107,35 @@ describe("the adapter", () => {
     expect(m.heard).toBe(22);
   });
 
-  it("a newer scorer's own fields slot in and win", () => {
-    const m = measureTake(report(60, 4, { caughtEnough: false, barEvenness: [0.9, 0.8] }), {
+  it("the scorer's own grade is the authority when a report carries one", () => {
+    const m = measureTake(report(60, 4, { takeGrade: scorerGrade({ heard: 50, due: 64, extra: 3 }) }), {
       barsPlayed: 8,
     });
-    expect(m.caught).toBe(false);
-    expect(m.barEvenness).toEqual([0.9, 0.8]);
-    expect(measureTake(report(3, 0, { caughtEnough: true }), { barsPlayed: 8 }).caught).toBe(true);
+    expect(m).toMatchObject({ expected: 64, heard: 50, extras: 3, evenness: 0.88, caught: true });
+    expect(m.barEvenness).toEqual([0.9, 0.86]);
+  });
+
+  it("the scorer's \"didn't catch enough\" stands, with its reason and no numbers", () => {
+    const grade = scorerGrade({
+      verdict: "didntCatchEnough",
+      noCatchReason: "tooFewHeard",
+      heard: 19,
+      evenness: null,
+    });
+    const m = measureTake(null, { barsPlayed: 8, grade });
+    expect(m).toMatchObject({ caught: false, heard: 19, evenness: null, barEvenness: null });
+    expect(m.noCatchReason).toBe("tooFewHeard");
+  });
+
+  it("a bar with notes due and no evenness counts as uneven, never as skipped", () => {
+    const bars = [
+      { bar: 0, due: 8, heard: 8, missed: 0, extra: 0, evenness: 0.9, evennessSigmaMs: 4 },
+      { bar: 1, due: 8, heard: 2, missed: 6, extra: 0, evenness: null, evennessSigmaMs: null },
+    ];
+    const m = measureTake(null, { barsPlayed: 2, grade: scorerGrade({ bars }) });
+    expect(m.barEvenness).toEqual([0.9, 0]);
+    const sparse = [{ ...bars[1], due: 2, heard: 2, missed: 0 }];
+    expect(measureTake(null, { barsPlayed: 1, grade: scorerGrade({ bars: sparse }) }).barEvenness).toBeNull();
   });
 });
 

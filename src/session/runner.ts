@@ -24,6 +24,12 @@
  * running over its minutes only changes what the big action offers. **Timed steps
  * move on:** a metronome or a jam is left by the clock, through `tick`.
  *
+ * **Find my edge** is an Exercise step with the role `edge`, and the same states:
+ * only the big action differs. It climbs a rung after every pass, holds after a
+ * slip, and is done at the second slip on one rung or the top of the ladder.
+ * What it found is `edgeOf`: the fastest rung passed over eight bars, which is
+ * exactly a clean tempo, so it moves the same number an Exercise does.
+ *
  * Any state can `cancel`. That goes to `idle` from wherever it is and the effects
  * hook tears down whatever was running; there is no state it has to wait for.
  */
@@ -96,8 +102,8 @@ export type RunEvent =
   | { type: "next"; now: number }
   /** The clock moved. Only a timed step cares. */
   | { type: "tick"; now: number }
-  /** Reached from a result: Ramp up, then back to the plan. */
-  | { type: "insertDrill"; step: Extract<PlanStep, { kind: "drill" }>; now: number }
+  /** Reached from a result: a step played next, then back to the plan. */
+  | { type: "insertStep"; step: PlanStep; now: number }
   /** Leave. From any state. */
   | { type: "cancel" }
   /** The recap has been read. */
@@ -210,7 +216,7 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           };
         case "next":
           return enter(state, state.stepIndex + 1, event.now);
-        case "insertDrill": {
+        case "insertStep": {
           const plan = state.plan;
           if (!plan) return state;
           const steps = [...plan.steps];
@@ -276,6 +282,76 @@ export type BigAction =
   | { kind: "finish" }
   | { kind: "close" };
 
+/** Slips on one rung that end Find my edge. One is a hold, not a verdict. */
+export const EDGE_SLIPS = 2;
+
+export type Edge = {
+  /** The fastest rung passed over eight bars on this step: the edge. */
+  reached: number | null;
+  /** The rung it slipped on last, when it has. */
+  slippedAt: number | null;
+  /** Every Take on this step, in order, for the climb to be drawn. */
+  climb: Array<{ bpm: number; verdict: TakeGrade["verdict"] }>;
+  /** Nothing further to climb: the second slip on a rung, or the top rung passed. */
+  done: boolean;
+};
+
+function stepOutcomes(state: RunState): TakeOutcome[] {
+  const step = currentStep(state);
+  return step ? state.outcomes.filter((o) => o.stepId === step.id) : [];
+}
+
+export function isEdgeStep(step: PlanStep | null): boolean {
+  return step?.kind === "exercise" && step.role === "edge";
+}
+
+/** What Find my edge has found on the current step. */
+export function edgeOf(state: RunState, exercise: Exercise | null): Edge {
+  const mine = stepOutcomes(state);
+  let reached: number | null = null;
+  let slippedAt: number | null = null;
+  for (const o of mine) {
+    if (o.grade.verdict === "passed" && o.grade.cleanBpm !== null) {
+      reached = Math.max(reached ?? 0, o.grade.cleanBpm);
+    }
+    if (o.grade.verdict === "belowBar") slippedAt = o.bpm;
+  }
+  const last = mine[mine.length - 1];
+  const slipsHere = last
+    ? mine.filter((o) => o.bpm === last.bpm && o.grade.verdict === "belowBar").length
+    : 0;
+  const topPassed =
+    !!last && last.grade.verdict === "passed" && (!exercise || !hasRungAbove(exercise, last.bpm));
+  return {
+    reached,
+    slippedAt,
+    climb: mine.map((o) => ({ bpm: o.bpm, verdict: o.grade.verdict })),
+    done: slipsHere >= EDGE_SLIPS || topPassed,
+  };
+}
+
+/** The big action on Find my edge, after a Take. */
+function edgeAction(state: RunState, exercise: Exercise | null, onward: () => BigAction): BigAction {
+  const last = state.outcomes[state.outcomes.length - 1];
+  if (!last) return onward();
+  const timeLeft = stepRemainingMs(state) > 0;
+  switch (last.grade.verdict) {
+    case "notCaught":
+      return { kind: "again", bpm: state.bpm };
+    case "ungraded":
+      return onward();
+    case "tooShort":
+      return timeLeft ? { kind: "again", bpm: state.bpm } : onward();
+    case "passed":
+    case "belowBar": {
+      if (!timeLeft || edgeOf(state, exercise).done) return onward();
+      return last.grade.verdict === "passed" && exercise
+        ? { kind: "again", bpm: rungAbove(exercise, state.bpm) }
+        : { kind: "again", bpm: state.bpm };
+    }
+  }
+}
+
 export function bigAction(state: RunState, exercise: Exercise | null): BigAction {
   const onward = (): BigAction => {
     const step = nextStep(state);
@@ -297,6 +373,7 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
       break;
   }
 
+  if (isEdgeStep(currentStep(state))) return edgeAction(state, exercise, onward);
   const last = state.outcomes[state.outcomes.length - 1];
   if (!last) return onward();
   const timeLeft = stepRemainingMs(state) > 0;

@@ -749,7 +749,64 @@ export type PracticeSegmentEndedPayload = {
    * Reported and not scored while LP C3 is open.
    */
   accentAgreement?: number;
+  /**
+   * What a Take on a known schedule came to (`score.rs` `TakeGrade`, W1 of the
+   * revamp wave). Absent in free play, and from a build without it.
+   */
+  takeGrade?: ScorerTakeGrade;
 };
+
+/** Why the scorer would not grade a Take (`score.rs` `NoCatchReason`). */
+export type NoCatchReason = "nothingHeard" | "tooFewHeard" | "tooManyExtras" | "lowConfidence";
+
+/** One played bar of a Take, counted from 0 in played order. */
+export type ScorerBarMetrics = {
+  bar: number;
+  due: number;
+  heard: number;
+  missed: number;
+  extra: number;
+  /** 0 to 1. Null under three heard. */
+  evenness: number | null;
+  evennessSigmaMs: number | null;
+};
+
+/**
+ * The scorer's facts about one Take (`score.rs` `TakeGrade`). A stable shape:
+ * fields are only ever added. `score` and `evenness` are null when the verdict
+ * is "didntCatchEnough", so nothing can show a number by accident. Named apart
+ * from `session/grade.ts`'s `TakeGrade`, which is the pass bar's verdict.
+ */
+export type ScorerTakeGrade = {
+  verdict: "graded" | "didntCatchEnough";
+  noCatchReason?: NoCatchReason;
+  score: number | null;
+  evenness: number | null;
+  evennessSigmaMs: number | null;
+  due: number;
+  heard: number;
+  missed: number;
+  extra: number;
+  notReached: number;
+  heardRatio: number;
+  confidence: number | null;
+  calibration: {
+    offsetMs: number;
+    source: "none" | "cached" | "take";
+    leanMs?: number;
+  };
+  bars: ScorerBarMetrics[];
+};
+
+/**
+ * The grade of the Take just closed, for one nothing was heard on: no segment
+ * opened, so `practice-segment-ended` never carried one. Call
+ * `closeOpenSegment` first and this before the schedule is cleared. Null when
+ * no schedule was loaded, or from a build without the command.
+ */
+export async function getTakeGrade(): Promise<ScorerTakeGrade | null> {
+  return invoke<ScorerTakeGrade | null>("get_take_grade");
+}
 
 /**
  * One expected note's verdict, while the pass is still running

@@ -18,6 +18,10 @@
  * | 15      | warm-up 2, focus 8, next 5      | recap 3, focus 7, next 5        |
  * | 20      | warm-up 2, focus 9, next 6, jam | recap 3, focus 8, next 6, jam 3 |
  *
+ * At twenty, once the focus Exercise has a clean tempo, three of the focus
+ * minutes go to Find my edge on it after the next Exercise: the one check of
+ * that number a Session makes by itself.
+ *
  * Five minutes is one thing rather than two thin slices: splitting it leaves no
  * time for a second Take of anything (the mocks' open question 12).
  *
@@ -77,6 +81,8 @@ export type ReasonCode =
   | "warmUpClean"
   | "jam"
   | "edge"
+  | "edgeCheck"
+  | "edgeFirst"
   | "chosen";
 
 export type Reason = {
@@ -85,7 +91,8 @@ export type Reason = {
   values: Record<string, string | number>;
 };
 
-export type ExerciseRole = "focus" | "next" | "recap";
+/** `edge` is Find my edge: the same Exercise, climbing while it passes. */
+export type ExerciseRole = "focus" | "next" | "recap" | "edge";
 
 export type PlanStep =
   | {
@@ -354,6 +361,30 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number): Pla
   };
 }
 
+/** Minutes Find my edge gets, planned or added from a result. */
+export const EDGE_MINUTES = 3;
+
+/**
+ * Find my edge on one Exercise, from `bpm`.
+ *
+ * Starts where the player is known to be clean when nothing else is said, so
+ * the first Take is one they can pass and the climb begins from a real number.
+ */
+export function edgeStep(
+  pick: { path: PathDoc; step: Step; exercise: Exercise },
+  progress: PlayerProgress,
+  options: { id?: string; bpm?: number; why?: Reason } = {},
+): PlanStep {
+  const clean = cleanTempoOf(progress, pick.path.id, pick.exercise.id);
+  const bpm = options.bpm ?? clean ?? tempoFor(pick.path, pick.exercise, progress).bpm;
+  const why: Reason =
+    options.why ??
+    (clean === null
+      ? { code: "edgeFirst", values: { bpm } }
+      : { code: "edgeCheck", values: { clean } });
+  return exerciseStep(pick, options.id ?? "edge", "edge", { bpm, why }, EDGE_MINUTES, progress);
+}
+
 function exerciseStep(
   pick: Pick,
   id: string,
@@ -464,6 +495,11 @@ export function planSession(input: PlannerInput): SessionPlan {
     }
   }
   if (!next) focusMinutes += row.next;
+  const checkEdge =
+    row.jam > 0 &&
+    mood === "returning" &&
+    cleanTempoOf(progress, focus.path.id, focus.exercise.id) !== null;
+  if (checkEdge) focusMinutes -= EDGE_MINUTES;
   steps.push(exerciseStep(focus, "focus", "focus", focusWhy, focusMinutes, progress));
 
   if (next && row.next > 0) {
@@ -478,6 +514,8 @@ export function planSession(input: PlannerInput): SessionPlan {
           };
     steps.push(exerciseStep(next, "next", "next", { bpm: tempo.bpm, why }, row.next, progress));
   }
+
+  if (checkEdge) steps.push(edgeStep(focus, progress));
 
   if (row.jam > 0) {
     steps.push({

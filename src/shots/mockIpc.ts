@@ -23,7 +23,7 @@ import { newSongRecord } from "../songs/library";
 import type { SongRecord } from "../songs/library";
 import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
 import type { ScoreSchedule, SongTransport } from "../songs/types";
-import type { ExerciseCeilingRow, PathStateRow, PathTakeRow } from "../ipc";
+import type { ExerciseCeilingRow, PathStateRow, PathTakeRow, ScorerTakeGrade } from "../ipc";
 
 /**
  * The library in the sidebar.
@@ -621,19 +621,50 @@ function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
 }
 
 /**
- * The store, settled.
- *
- * Everything a first-time user sees is a screen that must never reach a
- * marketing image, and each one has its own flag:
- *
- *   instrument / onboarding.*   the setup wizard, over the whole window
- *   tour.seenVersion            "New here? Take the 30-second tour"
- *   whatsNew.seenVersion        the release-notes modal, over everything
- *   hints.*                     a coach tip, popping in mid-capture
- *
- * All four postdate the last time these screenshots were taken, and all four
- * would have landed on the homepage.
+ * The scorer's grade of a Session Take (`score.rs` `TakeGrade`), per recipe.
+ * Bars are four beats: every Exercise a scene plays is in 4/4.
  */
+function mockTakeGrade(
+  recipe: "pass" | "below" | "noCatch",
+  onsets: ScoreSchedule["onsets"],
+): ScorerTakeGrade {
+  const even = recipe === "pass" ? 0.87 : 0.74;
+  const caught = recipe !== "noCatch";
+  const lastBeat = onsets.reduce((most, o) => Math.max(most, o.beat), 0);
+  const barCount = Math.floor(lastBeat / 4) + 1;
+  const bars = Array.from({ length: barCount }, (_, bar) => {
+    const mine = onsets.filter((o) => Math.floor(o.beat / 4) === bar);
+    const heard = caught ? mine.length : 0;
+    return {
+      bar,
+      due: mine.length,
+      heard,
+      missed: mine.length - heard,
+      extra: 0,
+      // A little life in it, so a chart of bars is not a ruler.
+      evenness: caught ? Math.min(1, even + ((bar % 3) - 1) * 0.02) : null,
+      evennessSigmaMs: caught ? 6 : null,
+    };
+  });
+  const heard = caught ? onsets.length : Math.min(9, onsets.length);
+  return {
+    verdict: caught ? "graded" : "didntCatchEnough",
+    ...(caught ? {} : { noCatchReason: "tooFewHeard" as const }),
+    score: caught ? Math.round(even * 100) : null,
+    evenness: caught ? even : null,
+    evennessSigmaMs: caught ? 6 : null,
+    due: onsets.length,
+    heard,
+    missed: onsets.length - heard,
+    extra: 0,
+    notReached: 0,
+    heardRatio: onsets.length > 0 ? heard / onsets.length : 0,
+    confidence: 0.6,
+    calibration: { offsetMs: 0, source: "none" },
+    bars,
+  };
+}
+
 /** What the practice store holds for a scene on the learning side. */
 type PathStoreSeed = {
   states: PathStateRow[];
@@ -709,6 +740,20 @@ function sessionSeed(seed: "first" | "returning" | "back"): PathStoreSeed {
   };
 }
 
+/**
+ * The store, settled.
+ *
+ * Everything a first-time user sees is a screen that must never reach a
+ * marketing image, and each one has its own flag:
+ *
+ *   instrument / onboarding.*   the setup wizard, over the whole window
+ *   tour.seenVersion            "New here? Take the 30-second tour"
+ *   whatsNew.seenVersion        the release-notes modal, over everything
+ *   hints.*                     a coach tip, popping in mid-capture
+ *
+ * All four postdate the last time these screenshots were taken, and all four
+ * would have landed on the homepage.
+ */
 function baseStore(
   theme: string,
   tab: string,
@@ -1618,6 +1663,7 @@ export function installShotMock(shot: Shot, theme: string): void {
           };
         }),
         extraOnsets: [],
+        takeGrade: mockTakeGrade(recipe, onsets),
       });
       return null;
     }

@@ -275,7 +275,7 @@ describe("the seam for Ramp up", () => {
 
   it("goes in after the Exercise and comes back to the plan", () => {
     const s = afterTake(atFocus(), "passed");
-    const during = run(s, { type: "insertDrill", step: drill, now: NOW });
+    const during = run(s, { type: "insertStep", step: drill, now: NOW });
     expect(during.phase).toBe("timed");
     expect(currentStep(during)?.id).toBe("edge");
     const after = run(during, { type: "tick", now: NOW + 2 * MIN });

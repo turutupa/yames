@@ -72,7 +72,9 @@
       "warmUp": "Just you and the click at {{bpm}} BPM, before anything counts.",
       "warmUpClean": "A warm-up at {{bpm}} BPM, under your clean tempo of {{clean}}.",
       "jam": "Not graded. Ends the Session on some music.",
-      "edge": "From the tempo you reached, {{bpm}} BPM. Not graded yet.",
+      "edge": "From the tempo you reached, {{bpm}} BPM. It goes up a step after every Take that meets the bar.",
+      "edgeCheck": "To check your clean tempo. Last time it was {{clean}} BPM.",
+      "edgeFirst": "To find your clean tempo. It starts at {{bpm}} BPM and goes up while you meet the bar.",
       "chosen": "You picked this one, from {{step}}."
     },
     "bar": {
@@ -116,9 +118,20 @@
       "cleanMoved": "Clean tempo: {{from}} to {{bpm}} BPM.",
       "unmeasuredNotes": "I checked timing only. Whether they were the right notes isn't graded yet.",
       "againSame": "Again, {{bpm}} BPM",
-      "moveOn": "Move on",
-      "rampTitle": "Ramp this from the tempo you reached",
-      "rampBody": "Starts Ramp up at {{bpm}} BPM for two minutes. It isn't graded, and the Session carries on after."
+      "moveOn": "Move on"
+    },
+    "edge": {
+      "kick": "Find my edge",
+      "how": "It goes up a step after every Take that meets the bar, and holds when one doesn't. Two misses at one tempo end it.",
+      "climb": "The climb so far",
+      "reached": "Your edge so far: {{bpm}} BPM",
+      "done": "Your edge today: {{bpm}} BPM",
+      "slipped": "The bar wasn't met at {{bpm}} BPM.",
+      "none": "No Take met the bar this time, so your clean tempo stays as it was.",
+      "offerTitle": "Find my edge from here",
+      "offerBody": "Goes up from {{bpm}} BPM while you meet the bar, and keeps your clean tempo. Adds {{minutes}} minutes.",
+      "start": "Find my edge",
+      "recap": "Edge"
     },
     "coach": {
       "passed": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars at {{bpm}} BPM.",
@@ -140,7 +153,9 @@
       "heardOf": "of {{expected}} notes heard",
       "noGuess": "I won't guess, so this take doesn't count against you.",
       "hintNothing": "No signal reached me: check the input in Settings.",
-      "hintQuiet": "The signal may be quiet: try moving closer to the mic, or turn the input up."
+      "hintQuiet": "The signal may be quiet: try moving closer to the mic, or turn the input up.",
+      "hintExtras": "I heard more notes than were written. Another sound may be reaching the input.",
+      "hintUnsure": "What I heard wasn't clear enough to be sure of. Try a cleaner tone, or turn the input up."
     },
     "timed": {
       "warmUpKick": "Warm-up · not graded",

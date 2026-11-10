@@ -62,7 +62,7 @@ import { gradeTake } from "../../../session/grade";
 import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
 import type { TakeMeasures } from "../../../session/takeMeasures";
-import { PLAN_MINUTES, planSession } from "../../../session/planner";
+import { PLAN_MINUTES, edgeStep, planSession } from "../../../session/planner";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../../session/planner";
 import {
   NO_PROGRESS,
@@ -460,6 +460,8 @@ export function useSessionRun(input: SessionRunInput) {
     const measures: TakeMeasures = measureTake(attempt.review?.segment ?? null, {
       // Played to the end: the engine stopped itself on the last bar's line.
       barsPlayed: Math.min(played, barsReached.current),
+      // A silent Take has no segment; the scorer still answers for it.
+      grade: attempt.lastGrade,
     });
     const bpm = state.bpm;
     const grade = gradeTake(current.exercise, bpm, measures);
@@ -727,23 +729,29 @@ export function useSessionRun(input: SessionRunInput) {
     dispatch({ type: "next", now: Date.now() });
   }, []);
 
-  /** Ramp up from the tempo reached, then back to the plan. */
-  const rampFromHere = useCallback(() => {
+  /** Find my edge on this Exercise, from the tempo reached, then back to the plan. */
+  const findEdgeFromHere = useCallback(() => {
+    if (!current) return;
     const bpm = runRef.current.bpm;
     dispatch({
-      type: "insertDrill",
+      type: "insertStep",
       now: Date.now(),
-      step: {
-        kind: "drill",
+      step: edgeStep(current, progress, {
         id: `edge-${runRef.current.stepIndex}`,
-        title: "",
-        startBpm: bpm,
-        targetBpm: Math.min(300, bpm + 40),
-        minutes: 2,
+        bpm,
         why: { code: "edge", values: { bpm } },
-      },
+      }),
     });
-  }, []);
+  }, [current, progress]);
+
+  /** Find my edge on one Exercise, as a Session of its own, from a Step page. */
+  const findEdge = useCallback(
+    (path: PathDoc, pathStep: Step, exercise: Exercise) => {
+      const step = edgeStep({ path, step: pathStep, exercise }, progress);
+      begin({ minutes: step.minutes, mood: "returning", daysAway: null, steps: [step] });
+    },
+    [begin, progress],
+  );
 
   const exit = useCallback(() => {
     teardown();
@@ -778,7 +786,8 @@ export function useSessionRun(input: SessionRunInput) {
       faster,
       again,
       next,
-      rampFromHere,
+      findEdgeFromHere,
+      findEdge,
       exit,
     },
   };

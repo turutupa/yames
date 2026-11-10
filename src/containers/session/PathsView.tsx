@@ -219,6 +219,15 @@ function ExerciseRow({
           {t("session.paths.playThis")}
         </button>
       )}
+      {gradable && isRunnable(path.id) && played > 0 && (
+        <button
+          className="session-secondary"
+          onClick={() => actions.findEdge(path, step, exercise)}
+          data-testid={`edge-${exercise.id}`}
+        >
+          {t("session.edge.start")}
+        </button>
+      )}
     </div>
   );
 }

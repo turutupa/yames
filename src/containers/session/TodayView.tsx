@@ -23,6 +23,7 @@ function StepTag({ step }: { step: PlanStep }) {
 export function stepTitle(step: PlanStep, t: (key: string) => string): string {
   if (step.kind === "jam") return t("session.step.jam");
   if (step.kind === "drill") return t("session.step.drill");
+  if (step.kind === "exercise" && step.role === "edge") return `${t("session.edge.kick")} · ${step.title}`;
   return step.title;
 }
 
