@@ -15,6 +15,7 @@ import App from "../../App";
 import { HOTKEYS } from "../../hotkeys";
 import i18n from "../../i18n";
 import { DEFAULT_TEST_STATE, mockInvoke, setInvokeResponse } from "../../test/mocks";
+import { onTool, openShell, wasInvoked } from "../../test/parity/shell";
 import { emitEvent, installSettings } from "../../test/parity/store";
 import {
   expectOnTool,
@@ -26,38 +27,15 @@ import {
   visibleToolLabels,
   type Tool,
 } from "../../test/parity/tools";
-import type { AppState } from "../../types";
 import { MainWindow } from "./MainWindow";
 
 const [METRONOME, SETLIST, DRILL, JAM, SONGS] = TOOLS as unknown as [Tool, Tool, Tool, Tool, Tool];
 
 const invoked = (command: string) => mockInvoke.mock.calls.filter(([c]) => c === command);
-const invokedWith = (command: string, args: unknown) =>
-  invoked(command).some(([, a]) => JSON.stringify(a) === JSON.stringify(args));
+const invokedWith = wasInvoked;
 
 function setSearch(search: string) {
   window.history.replaceState({}, "", `/${search}`);
-}
-
-/** The whole shell, for a returning player, once it has settled. */
-async function openShell(state: Partial<AppState> = {}, settings: Record<string, unknown> = {}) {
-  await installSettings({ ...RETURNING_PLAYER, ...settings });
-  setInvokeResponse("get_state", () => ({ ...DEFAULT_TEST_STATE, ...state }));
-  // The shared mock has no answer for this, and Settings cannot draw without one.
-  setInvokeResponse("tts_voice_diagnostics", () => []);
-  const view = render(<MainWindow />);
-  await waitFor(() => expect(document.querySelector(".rail")).not.toBeNull());
-  await act(async () => {
-    await new Promise((r) => setTimeout(r, 0));
-  });
-  return view;
-}
-
-/** Open a tool, wait for its screen, and start counting calls from there. */
-async function onTool(tool: Tool) {
-  await openTool(tool);
-  await expectOnTool(tool);
-  mockInvoke.mockClear();
 }
 
 beforeEach(() => setSearch(""));
