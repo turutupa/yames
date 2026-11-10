@@ -137,7 +137,7 @@ headless browser only proves it runs.
 
 | Where | Problem | Done |
 |---|---|---|
-| Pass bars | Lowering a bar for slides on the whole Exercise meant one sliding variant made every variant pass at 70%. A wrong take could get through | The bar now belongs to the variant: 208 of 263 keep 0.85 |
+| Pass bars | Lowering a bar for slides on the whole Exercise meant one sliding variant made every variant pass at 70%. A wrong take could get through | The bar now belongs to the variant: only the 20 variants of 271 whose slides need it carry a lower one |
 | Advanced Sweep | Self-checked rungs were visible only as dashed chips | The card now says "Grading stops at X BPM" in words |
 | Warm-up copy | Could read as if it were checking you | Coach line says it reports and decides nothing |
 | Audio on the review page | Nobody has heard it, and it now plays hundreds of variants | Still says so |
@@ -148,4 +148,4 @@ headless browser only proves it runs.
    really does carry across keys and progressions for a real player.
 2. Are six variants enough for a warm-up not to feel the same? Only playing it will tell.
 3. Whether a slid-to note should be `soft` in `schedule.ts` still matters more now, with so
-   many links. It would let 55 variants keep the full bar.
+   many links. It would let those 20 variants, and the sliding shapes, keep the full bar.
