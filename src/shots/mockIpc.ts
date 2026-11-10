@@ -23,6 +23,7 @@ import { newSongRecord } from "../songs/library";
 import type { SongRecord } from "../songs/library";
 import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
 import type { ScoreSchedule, SongTransport } from "../songs/types";
+import type { ExerciseCeilingRow, PathStateRow, PathTakeRow } from "../ipc";
 
 /**
  * The library in the sidebar.

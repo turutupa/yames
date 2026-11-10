@@ -136,6 +136,13 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   save_attempt: () => undefined,
   query_attempts: () => [],
 
+  // Learning paths (migration five)
+  save_path_state: () => undefined,
+  list_path_states: () => [],
+  save_path_take: () => undefined,
+  list_path_takes: () => [],
+  list_exercise_ceilings: () => [],
+
   // Diagnostic session logs (D1)
   list_session_logs: () => [],
   get_session_log: () => null,

@@ -325,9 +325,19 @@ describe("warm-ups", () => {
     const first = exercise(OPEN);
     const withOwn = {
       ...ALT,
-      warmups: [
-        { ...first, id: "w1", title: "One" },
-        { ...first, id: "w2", title: "Two" },
+      levels: [
+        {
+          id: "beginner",
+          title: "Beginner",
+          summary: "",
+          entry: "open",
+          placement: { startHereIf: [] },
+          stepIds: ALT.steps.map((s) => s.id),
+          warmups: [
+            { ...first, id: "w1", title: "One" },
+            { ...first, id: "w2", title: "Two" },
+          ],
+        },
       ],
     } as PathDoc;
     const a = plan(10, progress({ takes: [missed(OPEN, 80, 0.8)] }), [withOwn]).steps[0];
@@ -340,9 +350,18 @@ describe("warm-ups", () => {
   });
 });
 
+/** An Exercise with `count` variants; only how many there are matters here. */
+function withVariations(e: Exercise, count: number): Exercise {
+  const variants = Array.from({ length: count }, (_, i) => ({ id: `v${i}` }));
+  return {
+    ...e,
+    variation: { dimensions: ["key"], pooled: ["key"], notPooled: [], variants },
+  } as unknown as Exercise;
+}
+
 describe("variants, when a pack has them", () => {
   const plain = exercise(OPEN);
-  const varied = { ...plain, variants: 3 } as Exercise;
+  const varied = withVariations(plain, 3);
 
   it("a pack without them gets no seed", () => {
     expect(pickVariantSeed(plain, 4, undefined)).toBeNull();
@@ -368,7 +387,7 @@ describe("variants, when a pack has them", () => {
       ...ALT,
       steps: ALT.steps.map((s) => ({
         ...s,
-        exercises: s.exercises.map((e) => ({ ...e, variants: 3 }) as Exercise),
+        exercises: s.exercises.map((e) => withVariations(e, 3)),
       })),
     };
     const p = progress({

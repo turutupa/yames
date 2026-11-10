@@ -64,7 +64,7 @@ export type UseTourResult = {
    * needed when the caller is leaving Settings in the same tick and the hook
    * would otherwise capture "settings".
    */
-  open: (restoreView?: TourView | "setlist" | "jam" | "songs") => void;
+  open: (restoreView?: TourHome) => void;
   /** End the tour and record `tour.seenVersion`. */
   close: () => void;
   next: () => void;

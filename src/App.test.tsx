@@ -8,7 +8,7 @@
  * top-level role/title — not its internals.
  */
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 
 function setSearch(search: string) {
@@ -22,16 +22,18 @@ describe("App routing", () => {
 
   it("renders the main window app shell when no ?window param is present", async () => {
     render(<App />);
-    // MainWindow contains the BPM display — assert SOMETHING from it appears.
-    // Default state has bpm=120. Query the readout specifically: the tempo
-    // ruler is numbered now, so "120" also appears as a gradation under it.
+    // MainWindow opens on Today (the revamp's front door), and the Metronome
+    // is one rail click away. Default state has bpm=120. Query the readout
+    // specifically: the tempo ruler is numbered, so "120" is also a gradation.
+    expect(await screen.findByTestId("today")).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Metronome" }));
     expect(await screen.findByText("120", { selector: ".bpm-input" })).toBeInTheDocument();
   });
 
   it("renders the main window app shell when ?window=main is set", async () => {
     setSearch("?window=main");
     render(<App />);
-    expect(await screen.findByText("120", { selector: ".bpm-input" })).toBeInTheDocument();
+    expect(await screen.findByTestId("today")).toBeInTheDocument();
   });
 
   it("renders the floating widget when ?window=floating is set", async () => {

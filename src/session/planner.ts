@@ -336,7 +336,7 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number): Pla
   const backing = exercise.backing.kind === "click" ? exercise.backing.subdivision : 1;
   // A pack's own warm-ups go first, in turn, so the notes change from day to
   // day. Without them it is the focus Exercise, slower, and not graded.
-  const own = warmupsOf(path);
+  const own = warmupsOf(path, focus.step.id);
   const warmup = own.length > 0 ? own[progress.takes.length % own.length] : exercise;
   return {
     kind: "metronome",

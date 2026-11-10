@@ -1,34 +1,21 @@
 /**
  * Where Levels, Exercise variants and warm-up Exercises plug in.
  *
- * The Path format is gaining these as additive fields. A pack without them must
- * behave exactly as it does today, so everything here answers "none" for such a
- * pack, and the rest of the runtime asks only here, never reads the fields.
- * When the format lands, these readers are the part that changes.
+ * The Path format has these as additive fields (`paths/format.ts`: `levels`,
+ * `Exercise.variation`, `Level.warmups`). A pack without them must behave
+ * exactly as it did before, so everything here answers "none" for such a pack,
+ * and the rest of the runtime asks only here, never reads the fields.
  */
-import type { Exercise, PathDoc } from "../paths/format";
+import type { Exercise, Level, PathDoc } from "../paths/format";
 
-/** A Level a player may choose, with no lock on any of them. */
-export type PathLevel = { id: string; title: string };
-
-/** The Levels this Path offers. Empty: the Path has no such choice to make. */
-export function levelsOf(path: PathDoc): PathLevel[] {
-  const levels = (path as PathDoc & { levels?: unknown }).levels;
-  if (!Array.isArray(levels)) return [];
-  return levels.filter(
-    (level): level is PathLevel =>
-      typeof level === "object" &&
-      level !== null &&
-      typeof (level as PathLevel).id === "string" &&
-      typeof (level as PathLevel).title === "string",
-  );
+/** The Levels this Path offers, none of them locked. Empty: no choice to make. */
+export function levelsOf(path: PathDoc): Level[] {
+  return path.levels ?? [];
 }
 
 /** How many variants an Exercise has. Zero: its notes are its notes. */
 export function variantCountOf(exercise: Exercise): number {
-  const variants = (exercise as Exercise & { variants?: unknown }).variants;
-  if (Array.isArray(variants)) return variants.length;
-  return typeof variants === "number" && variants > 0 ? Math.floor(variants) : 0;
+  return exercise.variation?.variants.length ?? 0;
 }
 
 /**
@@ -50,8 +37,10 @@ export function pickVariantSeed(
   return seed;
 }
 
-/** The Path's own warm-ups. Empty: a warm-up borrows one of its Exercises. */
-export function warmupsOf(path: PathDoc): Exercise[] {
-  const warmups = (path as PathDoc & { warmups?: unknown }).warmups;
-  return Array.isArray(warmups) ? (warmups as Exercise[]) : [];
+/**
+ * The warm-ups of the Level a Step belongs to. Empty: a warm-up borrows one of
+ * the Path's Exercises, as in a pack written before Levels.
+ */
+export function warmupsOf(path: PathDoc, stepId: string): Exercise[] {
+  return levelsOf(path).find((level) => level.stepIds.includes(stepId))?.warmups ?? [];
 }
