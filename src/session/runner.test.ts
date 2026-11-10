@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { TakeGrade } from "./grade";
-import { planSession } from "./planner";
+import { edgeStep, planSession } from "./planner";
+import { gradedRungs } from "./ladder";
 import type { PlanStep, SessionPlan } from "./planner";
 import {
   IDLE,
   bigAction,
   currentStep,
+  edgeOf,
   eventForBigAction,
+  isEdgeStep,
   minutesLeft,
   runReducer,
   stepRemainingMs,
@@ -281,5 +284,84 @@ describe("the seam for Ramp up", () => {
     const after = run(during, { type: "tick", now: NOW + 2 * MIN });
     expect(currentStep(after)?.id).toBe("next");
     expect(after.phase).toBe("ready");
+  });
+});
+
+describe("Find my edge", () => {
+  const pick = { path: ALT, step: ALT.steps[0], exercise: EX };
+  const rungs = gradedRungs(EX);
+  const start = rungs[0];
+
+  function edgeRun(): RunState {
+    const step = edgeStep(pick, NO_PROGRESS, { bpm: start });
+    const edgePlan: SessionPlan = { minutes: 5, mood: "returning", daysAway: null, steps: [step] };
+    return run(IDLE, { type: "start", plan: edgePlan, now: NOW });
+  }
+
+  /** A Take on the edge at the runner's tempo, clean over eight bars when it passes. */
+  function edgeTake(state: RunState, verdict: TakeGrade["verdict"]): RunState {
+    const o = outcome(verdict);
+    return run(
+      state,
+      { type: "takeStarted", now: NOW },
+      { type: "takeStopped", now: NOW },
+      {
+        type: "takeResult",
+        outcome: {
+          ...o,
+          stepId: "edge",
+          bpm: state.bpm,
+          grade: { ...o.grade, cleanBpm: verdict === "passed" ? state.bpm : null },
+        },
+        now: NOW,
+      },
+    );
+  }
+
+  function goBig(state: RunState): RunState {
+    const event = eventForBigAction(bigAction(state, EX), NOW);
+    return event ? run(state, event) : state;
+  }
+
+  it("is an Exercise step that starts where it is told", () => {
+    const s = edgeRun();
+    expect(s.phase).toBe("ready");
+    expect(isEdgeStep(currentStep(s))).toBe(true);
+    expect(s.bpm).toBe(start);
+  });
+
+  it("climbs a rung after every pass, past the Exercise's own pass rung", () => {
+    let s = edgeTake(edgeRun(), "passed");
+    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: rungs[1] });
+    s = edgeTake(goBig(s), "passed");
+    expect(s.bpm).toBe(rungs[1]);
+    expect(edgeOf(s, EX).reached).toBe(rungs[1]);
+  });
+
+  it("holds after one miss, and is done at the second on the same rung", () => {
+    let s = edgeTake(edgeRun(), "passed");
+    s = edgeTake(goBig(s), "belowBar");
+    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: rungs[1] });
+    expect(edgeOf(s, EX).done).toBe(false);
+    s = edgeTake(goBig(s), "belowBar");
+    const edge = edgeOf(s, EX);
+    expect(edge).toMatchObject({ reached: start, slippedAt: rungs[1], done: true });
+    expect(bigAction(s, EX).kind).toBe("finish");
+  });
+
+  it("a Take it could not hear neither climbs nor counts as a miss", () => {
+    const s = edgeTake(edgeRun(), "notCaught");
+    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: start });
+    expect(edgeOf(s, EX)).toMatchObject({ reached: null, slippedAt: null, done: false });
+  });
+
+  it("can be put in after a result, and the plan carries on after it", () => {
+    const s = afterTake(atFocus(), "passed");
+    const step = edgeStep(pick, NO_PROGRESS, { id: "edge", bpm: 60 });
+    const during = run(s, { type: "insertStep", step, now: NOW });
+    expect(during.phase).toBe("ready");
+    expect(isEdgeStep(currentStep(during))).toBe(true);
+    const after = run(during, { type: "next", now: NOW });
+    expect(currentStep(after)?.id).toBe("next");
   });
 });

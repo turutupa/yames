@@ -397,3 +397,22 @@ describe("variants, when a pack has them", () => {
     expect(seed).toBe(2);
   });
 });
+
+describe("Find my edge in a plan", () => {
+  it("twenty minutes checks the focus Exercise's clean tempo once it has one", () => {
+    const p = progress({ takes: [missed(OPEN, 80, 0.8)], ceilings: [ceiling(OPEN, 70)] });
+    const s = plan(20, p);
+    const edge = exerciseSteps(s).find((x) => x.role === "edge");
+    expect(edge?.exerciseId).toBe(OPEN);
+    expect(edge?.bpm).toBe(70);
+    expect(edge?.why).toEqual({ code: "edgeCheck", values: { clean: 70 } });
+    expect(s.steps.reduce((sum, x) => sum + x.minutes, 0)).toBe(20);
+  });
+
+  it("not without a clean tempo, and not in a shorter Session", () => {
+    const p = progress({ takes: [missed(OPEN, 80, 0.8)], ceilings: [ceiling(OPEN, 70)] });
+    expect(exerciseSteps(plan(15, p)).some((x) => x.role === "edge")).toBe(false);
+    const none = progress({ takes: [missed(OPEN, 80, 0.8)] });
+    expect(exerciseSteps(plan(20, none)).some((x) => x.role === "edge")).toBe(false);
+  });
+});

@@ -748,7 +748,8 @@ export function useSessionRun(input: SessionRunInput) {
   const findEdge = useCallback(
     (path: PathDoc, pathStep: Step, exercise: Exercise) => {
       const step = edgeStep({ path, step: pathStep, exercise }, progress);
-      begin({ minutes: step.minutes, mood: "returning", daysAway: null, steps: [step] });
+      // Planned as the shortest Session; the step keeps its own minutes.
+      begin({ minutes: 5, mood: "returning", daysAway: null, steps: [step] });
     },
     [begin, progress],
   );

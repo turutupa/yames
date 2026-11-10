@@ -34,6 +34,9 @@ export const SHOT_THEMES = [
 
 export type ShotTheme = (typeof SHOT_THEMES)[number];
 
+/** What the mocked scorer reports for one Session Take. */
+export type TakeRecipe = "pass" | "below" | "noCatch";
+
 export interface Shot {
   /** `?shot=` value, and the folder under docs/img/. */
   id: string;
@@ -54,7 +57,8 @@ export interface Shot {
   session?: {
     seed: "first" | "returning" | "back";
     minutes?: 5 | 10 | 15 | 20;
-    take?: "pass" | "below" | "noCatch";
+    /** One recipe for every Take, or one per Take in order, the last repeating. */
+    take?: TakeRecipe | TakeRecipe[];
     stop:
       | "today"
       | "ready"
@@ -67,7 +71,11 @@ export interface Shot {
       | "paths"
       | "path"
       | "step"
-      | "progress";
+      | "progress"
+      /** Find my edge from the Step page, after its first Take. */
+      | "edge"
+      /** Find my edge, Taken until it has found the edge. */
+      | "edgeDone";
   };
   /**
    * The Jam tab, with a jam actually on it.
@@ -727,6 +735,24 @@ export const SHOTS: Shot[] = [
     suffix: "session-recap",
     window: "main",
     session: { seed: "returning", minutes: 5, take: "pass", stop: "recap" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-edge",
+    suffix: "session-edge",
+    window: "main",
+    session: { seed: "returning", take: "pass", stop: "edge" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-edge-result",
+    suffix: "session-edge-result",
+    window: "main",
+    session: { seed: "returning", take: ["pass", "pass", "below", "below"], stop: "edgeDone" },
     width: 1400,
     height: 900,
     settleMs: 300,

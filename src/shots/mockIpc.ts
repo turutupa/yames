@@ -927,6 +927,8 @@ export function installShotMock(shot: Shot, theme: string): void {
 
   /** Which onsets of the pushed schedule have already been reported. */
   let onsetsSaid = 0;
+  /** Session Takes the mocked scorer has answered, for a per-Take recipe. */
+  let takesScored = 0;
 
   const scripted = () => {
     const recipe = shot.songs?.review;
@@ -1628,7 +1630,11 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
     if (cmd === "close_open_segment" && shot.session && songSchedule) {
-      const recipe = shot.session.take ?? "pass";
+      const recipes = shot.session.take ?? "pass";
+      const recipe = Array.isArray(recipes)
+        ? recipes[Math.min(takesScored, recipes.length - 1)] ?? "pass"
+        : recipes;
+      takesScored += 1;
       const onsets = songSchedule.onsets;
       emit("practice-segment-ended", {
         startMs: 0,
