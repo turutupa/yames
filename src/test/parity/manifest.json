@@ -1,0 +1,1651 @@
+{
+  "commands": [
+    "analyze_attempt",
+    "analyze_take_pitch",
+    "app_ready",
+    "arm_count_in",
+    "cancel_model_download",
+    "check_take_sound",
+    "clear_all_sessions",
+    "clear_calibration_cache_entry",
+    "clear_due",
+    "clear_midi_binding",
+    "clear_score_schedule",
+    "clear_session",
+    "clear_session_logs",
+    "clear_song",
+    "clip_save_append",
+    "clip_save_begin",
+    "clip_save_discard",
+    "clip_save_finish",
+    "close_open_segment",
+    "coach_generate",
+    "configure_speed_ramp",
+    "connect_midi_device",
+    "default_downloads_dir",
+    "delete_models",
+    "delete_preset",
+    "delete_score",
+    "delete_session",
+    "delete_take",
+    "discard_recording",
+    "disconnect_midi_device",
+    "dismiss_download_offer",
+    "export_score_source",
+    "export_session_logs",
+    "get_active_tab",
+    "get_calibration_cache_entry",
+    "get_calibration_offset",
+    "get_coach_capabilities",
+    "get_drill_runs",
+    "get_evaluation_state",
+    "get_final_session_report",
+    "get_midi_bindings",
+    "get_model_status",
+    "get_models_path",
+    "get_score",
+    "get_score_source",
+    "get_session_history",
+    "get_session_log",
+    "get_session_report",
+    "get_state",
+    "get_system_memory_mb",
+    "get_waveform",
+    "inspect_kit_folder",
+    "is_coach_loaded",
+    "list_audio_input_devices",
+    "list_audio_output_devices",
+    "list_calibration_cache",
+    "list_due",
+    "list_midi_devices",
+    "list_presets",
+    "list_scores",
+    "list_session_logs",
+    "list_takes",
+    "load_coach_model",
+    "load_score_schedule",
+    "load_song",
+    "mark_score_opened",
+    "notify_settings_change",
+    "open_url",
+    "pick_kit_folder",
+    "pick_sound_font",
+    "play_take",
+    "query_attempts",
+    "query_history",
+    "read_offered_file",
+    "reorder_presets",
+    "reveal_in_folder",
+    "save_attempt",
+    "save_drill_run",
+    "save_due",
+    "save_preset",
+    "save_score",
+    "save_session",
+    "save_window_position",
+    "score_timing_bands",
+    "seek_song",
+    "set_accent_mode",
+    "set_active_tab",
+    "set_always_on_top",
+    "set_audio_output_device",
+    "set_audio_output_pair",
+    "set_beat_groups",
+    "set_bpm",
+    "set_calibration_offset",
+    "set_free_mode",
+    "set_input_gain",
+    "set_instrument",
+    "set_jam",
+    "set_jam_position",
+    "set_midi_binding",
+    "set_playing",
+    "set_song_mix",
+    "set_song_range",
+    "set_song_sound_font",
+    "set_sound_type",
+    "set_subdivision",
+    "set_theme",
+    "set_volume",
+    "set_widget_always_on_top",
+    "set_widget_mode",
+    "show_floating",
+    "show_main",
+    "start_download_watch",
+    "start_evaluation",
+    "start_model_download",
+    "start_playback",
+    "start_recording",
+    "start_speed_ramp",
+    "start_speed_ramp_from",
+    "start_take",
+    "start_voice_repair",
+    "stop_download_watch",
+    "stop_evaluation",
+    "stop_playback",
+    "stop_recording",
+    "stop_speed_ramp",
+    "stop_take",
+    "stop_take_playback",
+    "take_pending_open",
+    "take_thumb_write",
+    "take_video_append",
+    "take_video_begin",
+    "take_video_discard",
+    "take_video_finish",
+    "takes_dir_size",
+    "toggle_playback",
+    "tts_list_voices",
+    "tts_set_voice",
+    "tts_set_volume",
+    "tts_speak",
+    "tts_stop",
+    "tts_voice_diagnostics",
+    "unload_coach_model",
+    "warm_jam",
+    "write_model_chunk"
+  ],
+  "ipcCommands": [
+    "analyze_attempt",
+    "analyze_take_pitch",
+    "arm_count_in",
+    "cancel_model_download",
+    "check_take_sound",
+    "clear_all_sessions",
+    "clear_calibration_cache_entry",
+    "clear_due",
+    "clear_midi_binding",
+    "clear_score_schedule",
+    "clear_session",
+    "clear_session_logs",
+    "clear_song",
+    "clip_save_append",
+    "clip_save_begin",
+    "clip_save_discard",
+    "clip_save_finish",
+    "close_open_segment",
+    "coach_generate",
+    "configure_speed_ramp",
+    "connect_midi_device",
+    "default_downloads_dir",
+    "delete_models",
+    "delete_preset",
+    "delete_score",
+    "delete_session",
+    "delete_take",
+    "discard_recording",
+    "disconnect_midi_device",
+    "dismiss_download_offer",
+    "export_score_source",
+    "export_session_logs",
+    "get_active_tab",
+    "get_calibration_cache_entry",
+    "get_calibration_offset",
+    "get_coach_capabilities",
+    "get_drill_runs",
+    "get_evaluation_state",
+    "get_final_session_report",
+    "get_midi_bindings",
+    "get_model_status",
+    "get_models_path",
+    "get_score",
+    "get_score_source",
+    "get_session_history",
+    "get_session_log",
+    "get_session_report",
+    "get_state",
+    "get_system_memory_mb",
+    "get_waveform",
+    "inspect_kit_folder",
+    "is_coach_loaded",
+    "list_audio_input_devices",
+    "list_audio_output_devices",
+    "list_calibration_cache",
+    "list_due",
+    "list_midi_devices",
+    "list_presets",
+    "list_scores",
+    "list_session_logs",
+    "list_takes",
+    "load_coach_model",
+    "load_score_schedule",
+    "load_song",
+    "mark_score_opened",
+    "notify_settings_change",
+    "open_url",
+    "pick_kit_folder",
+    "pick_sound_font",
+    "play_take",
+    "query_attempts",
+    "query_history",
+    "read_offered_file",
+    "reorder_presets",
+    "reveal_in_folder",
+    "save_attempt",
+    "save_drill_run",
+    "save_due",
+    "save_preset",
+    "save_score",
+    "save_session",
+    "score_timing_bands",
+    "seek_song",
+    "set_accent_mode",
+    "set_active_tab",
+    "set_always_on_top",
+    "set_audio_output_device",
+    "set_audio_output_pair",
+    "set_beat_groups",
+    "set_bpm",
+    "set_calibration_offset",
+    "set_free_mode",
+    "set_input_gain",
+    "set_instrument",
+    "set_jam",
+    "set_jam_position",
+    "set_midi_binding",
+    "set_playing",
+    "set_song_mix",
+    "set_song_range",
+    "set_song_sound_font",
+    "set_sound_type",
+    "set_subdivision",
+    "set_theme",
+    "set_volume",
+    "set_widget_always_on_top",
+    "set_widget_mode",
+    "show_floating",
+    "show_main",
+    "start_download_watch",
+    "start_evaluation",
+    "start_model_download",
+    "start_playback",
+    "start_recording",
+    "start_speed_ramp",
+    "start_speed_ramp_from",
+    "start_take",
+    "start_voice_repair",
+    "stop_download_watch",
+    "stop_evaluation",
+    "stop_playback",
+    "stop_recording",
+    "stop_speed_ramp",
+    "stop_take",
+    "stop_take_playback",
+    "take_pending_open",
+    "take_thumb_write",
+    "take_video_append",
+    "take_video_begin",
+    "take_video_discard",
+    "take_video_finish",
+    "takes_dir_size",
+    "toggle_playback",
+    "tts_list_voices",
+    "tts_set_voice",
+    "tts_set_volume",
+    "tts_speak",
+    "tts_stop",
+    "tts_voice_diagnostics",
+    "unload_coach_model",
+    "warm_jam",
+    "write_model_chunk"
+  ],
+  "commandsInvokedOutsideIpc": [
+    "app_ready",
+    "save_window_position"
+  ],
+  "ipcWrappers": [
+    "analyzeAttempt",
+    "analyzeTakePitch",
+    "armCountIn",
+    "cancelModelDownload",
+    "checkForUpdate",
+    "checkTakeSound",
+    "clearAllSessions",
+    "clearCalibrationCacheEntry",
+    "clearDue",
+    "clearMidiBinding",
+    "clearScoreSchedule",
+    "clearSession",
+    "clearSessionLogs",
+    "clearSong",
+    "clipSaveAppend",
+    "clipSaveBegin",
+    "clipSaveDiscard",
+    "clipSaveFinish",
+    "closeOpenSegment",
+    "coachGenerate",
+    "configureSpeedRamp",
+    "connectMidiDevice",
+    "defaultDownloadsDir",
+    "deleteModels",
+    "deletePreset",
+    "deleteScore",
+    "deleteSession",
+    "deleteSetlist",
+    "deleteTake",
+    "discardRecording",
+    "disconnectMidiDevice",
+    "dismissDownloadOffer",
+    "downloadAndInstallUpdate",
+    "downloadModelFile",
+    "exportScoreSource",
+    "exportSessionLogs",
+    "getActiveTab",
+    "getCalibrationCacheEntry",
+    "getCalibrationOffset",
+    "getCoachCapabilities",
+    "getDrillRuns",
+    "getEvaluationState",
+    "getFinalSessionReport",
+    "getMidiBindings",
+    "getModelStatus",
+    "getModelsPath",
+    "getScore",
+    "getScoreSource",
+    "getSessionHistory",
+    "getSessionLog",
+    "getSessionReport",
+    "getState",
+    "getSystemMemoryMb",
+    "getWaveform",
+    "inspectKitFolder",
+    "isCoachLoaded",
+    "isJamLoading",
+    "listAudioInputDevices",
+    "listAudioOutputDevices",
+    "listCalibrationCache",
+    "listDue",
+    "listJams",
+    "listMidiDevices",
+    "listPresets",
+    "listScores",
+    "listSessionLogs",
+    "listSetlists",
+    "listSongs",
+    "listTakes",
+    "loadCoachModel",
+    "loadScoreSchedule",
+    "loadSong",
+    "markScoreOpened",
+    "markSongsMovedToStore",
+    "notifySettingsChange",
+    "onAdaptiveEval",
+    "onAudioDevicesChanged",
+    "onAudioError",
+    "onAudioInputDevicesChanged",
+    "onAudioOutputPairFallback",
+    "onAudioSpectrum",
+    "onBeat",
+    "onBeatFeedback",
+    "onDownloadComplete",
+    "onDownloadOffer",
+    "onDownloadProgress",
+    "onFullscreenChanged",
+    "onInferredGridChanged",
+    "onJamEnded",
+    "onMidiAction",
+    "onMidiActivity",
+    "onMidiDevicesChanged",
+    "onOpenFile",
+    "onPlaybackFinished",
+    "onPracticeSegmentEnded",
+    "onRampStep",
+    "onScoreOnset",
+    "onSongDropped",
+    "onStateChange",
+    "onTakeCapped",
+    "onTakePlaybackEnded",
+    "onTtsSpeechEnded",
+    "onTtsSpeechStarted",
+    "openUrl",
+    "pickKitFolder",
+    "pickSoundFont",
+    "playTake",
+    "queryAttempts",
+    "queryHistory",
+    "readOfferedFile",
+    "reorderPresets",
+    "reorderSetlists",
+    "revealInFolder",
+    "saveAttempt",
+    "saveDrillRun",
+    "saveDue",
+    "saveJams",
+    "savePreset",
+    "saveScore",
+    "saveSession",
+    "saveSetlist",
+    "saveSongs",
+    "scoreTimingBands",
+    "seekSong",
+    "setAccentMode",
+    "setActiveTab",
+    "setAlwaysOnTop",
+    "setAudioOutputDevice",
+    "setAudioOutputPair",
+    "setBeatGroups",
+    "setBpm",
+    "setCalibrationOffset",
+    "setFreeMode",
+    "setInputGain",
+    "setInstrument",
+    "setJam",
+    "setJamPosition",
+    "setMidiBinding",
+    "setPlaying",
+    "setSongMix",
+    "setSongRange",
+    "setSongSoundFont",
+    "setSoundType",
+    "setSubdivision",
+    "setTheme",
+    "setVolume",
+    "setWidgetAlwaysOnTop",
+    "setWidgetMode",
+    "showFloating",
+    "showMain",
+    "songsMovedToStore",
+    "startDownloadWatch",
+    "startEvaluation",
+    "startModelDownload",
+    "startPlayback",
+    "startRecording",
+    "startSpeedRamp",
+    "startSpeedRampFrom",
+    "startTake",
+    "startVoiceRepair",
+    "stopDownloadWatch",
+    "stopEvaluation",
+    "stopPlayback",
+    "stopRecording",
+    "stopSpeedRamp",
+    "stopTake",
+    "stopTakePlayback",
+    "storeLoad",
+    "storeSave",
+    "subscribeJamLoading",
+    "takePendingOpen",
+    "takeThumbWrite",
+    "takeVideoAppend",
+    "takeVideoBegin",
+    "takeVideoDiscard",
+    "takeVideoFinish",
+    "takesDirSize",
+    "togglePlayback",
+    "ttsListVoices",
+    "ttsSetVoice",
+    "ttsSetVolume",
+    "ttsSpeak",
+    "ttsStop",
+    "ttsVoiceDiagnostics",
+    "unloadCoachModel",
+    "warmJam",
+    "writeModelChunk"
+  ],
+  "ipcWrappersWithoutCaller": [
+    "clearSessionLogs",
+    "downloadModelFile",
+    "getCalibrationOffset",
+    "getModelsPath",
+    "getSessionLog",
+    "listCalibrationCache",
+    "listSessionLogs",
+    "reorderPresets",
+    "setCalibrationOffset",
+    "startVoiceRepair"
+  ],
+  "eventsListened": [
+    "adaptive-eval",
+    "audio-devices-changed",
+    "audio-error",
+    "audio-input-devices-changed",
+    "audio-output-pair-fallback",
+    "audio-spectrum",
+    "beat",
+    "beat-feedback",
+    "fullscreen-changed",
+    "inferred-grid-changed",
+    "jam-ended",
+    "midi-action",
+    "midi-activity",
+    "midi-devices-changed",
+    "model-download-complete",
+    "model-download-progress",
+    "playback-finished",
+    "practice-segment-ended",
+    "ramp-step",
+    "score-onset",
+    "song-dropped",
+    "songs-download-offer",
+    "songs-open-file",
+    "state-changed",
+    "take-capped",
+    "take-playback-ended",
+    "tts-speech-ended",
+    "tts-speech-started"
+  ],
+  "eventsEmitted": [
+    "adaptive-eval",
+    "audio-devices-changed",
+    "audio-error",
+    "audio-input-devices-changed",
+    "audio-output-pair-fallback",
+    "audio-spectrum",
+    "beat",
+    "beat-feedback",
+    "inferred-grid-changed",
+    "jam-ended",
+    "midi-action",
+    "midi-activity",
+    "midi-devices-changed",
+    "model-download-complete",
+    "model-download-progress",
+    "onset-detected",
+    "playback-finished",
+    "practice-segment-ended",
+    "ramp-step",
+    "score-onset",
+    "song-dropped",
+    "songs-download-offer",
+    "songs-open-file",
+    "state-changed",
+    "take-capped",
+    "take-playback-ended",
+    "tts-speech-ended",
+    "tts-speech-started"
+  ],
+  "hotkeys": [
+    {
+      "id": "play",
+      "key": "Space",
+      "globalKey": "⌘⇧Space",
+      "globalAllowed": true,
+      "group": "metronome"
+    },
+    {
+      "id": "bpm-up",
+      "key": "↑",
+      "globalKey": "⌘⇧↑",
+      "globalAllowed": true,
+      "group": "metronome"
+    },
+    {
+      "id": "bpm-down",
+      "key": "↓",
+      "globalKey": "⌘⇧↓",
+      "globalAllowed": true,
+      "group": "metronome"
+    },
+    {
+      "id": "bpm-up-1",
+      "key": "⇧↑",
+      "globalKey": "⌘⇧⌥↑",
+      "globalAllowed": true,
+      "group": "metronome"
+    },
+    {
+      "id": "bpm-down-1",
+      "key": "⇧↓",
+      "globalKey": "⌘⇧⌥↓",
+      "globalAllowed": true,
+      "group": "metronome"
+    },
+    {
+      "id": "sub-next",
+      "key": "]",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sub-prev",
+      "key": "[",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sub-1",
+      "key": "1",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sub-2",
+      "key": "2",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sub-3",
+      "key": "3",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sub-4",
+      "key": "4",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sig-next",
+      "key": "T",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "sig-prev",
+      "key": "⇧T",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "metronome"
+    },
+    {
+      "id": "fullscreen",
+      "key": "Z",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "view"
+    },
+    {
+      "id": "os-fullscreen",
+      "key": "F",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "view"
+    },
+    {
+      "id": "toggle-widget",
+      "key": "W",
+      "globalKey": "⌘⇧O",
+      "globalAllowed": true,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-1",
+      "key": "⌘1",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-2",
+      "key": "⌘2",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-3",
+      "key": "⌘3",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-4",
+      "key": "⌘4",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-5",
+      "key": "⌘5",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "settings",
+      "key": "⌘,",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "toggle-sidebar",
+      "key": "B",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "toggle-coach",
+      "key": "C",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "jam-next-groove",
+      "key": "G",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-prev-groove",
+      "key": "⇧G",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-trade",
+      "key": "X",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-dropout",
+      "key": "D",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-next-shape",
+      "key": "S",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-next-section",
+      "key": "N",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-prev-section",
+      "key": "⇧N",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-loop-section",
+      "key": "L",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-take",
+      "key": "R",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "jam-camera",
+      "key": "C",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "jam"
+    },
+    {
+      "id": "songs-loop-start",
+      "key": "[",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-loop-end",
+      "key": "]",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-loop",
+      "key": "L",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-loop-clear",
+      "key": "\\",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-loop-earlier",
+      "key": "⇧[",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-loop-later",
+      "key": "⇧]",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-take",
+      "key": "R",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    },
+    {
+      "id": "songs-camera",
+      "key": "C",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "songs"
+    }
+  ],
+  "settingsKeys": {
+    "accentColor": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "activeBorder": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "activeTab": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "alwaysOnTop": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "animationStyle": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "appSessionCount": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "audioOutputDevice": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "audioOutputPairs": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "autoCheckUpdates": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "beatGroups": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "bpm": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "buttonFlash": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "calibrationCache": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "calibrationOffset": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "chains": {
+      "store": "settings.json",
+      "read": true,
+      "written": false
+    },
+    "coach.chips.lastShownIds": {
+      "store": "localStorage",
+      "read": true,
+      "written": true
+    },
+    "coach.debug": {
+      "store": "localStorage",
+      "read": true,
+      "written": true
+    },
+    "coachBrainTier": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coachMode": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coachStance": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coachTtsVolume": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coachVerbosity": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coachVoiceMode": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "coachVoiceName": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "corner": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "drillAutoCollapse": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "drillRunHistory": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "evalSessionHistory": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "evaluationChannel": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "evaluationDevice": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "evaluationShowRealtime": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "footBindings": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "freeMode": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "globalBindings": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "hints.<id>": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "hints.lastShownSession": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "hintSetupHistory": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "inputGain_<device>": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "instrument": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "jam.takesIntroSeen": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "jamCues": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "jams": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "keyBindings": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "language": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "lastJamId": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "lastSetlistId": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "lastWindow": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "midiBindings": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "midiDevice": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "mode": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "movedToPracticeStore": {
+      "store": "songs.json",
+      "read": true,
+      "written": true
+    },
+    "onboarding.chipDismissed": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "onboarding.completedAt": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "onboarding.skipped": {
+      "store": "settings.json",
+      "read": false,
+      "written": true
+    },
+    "onboarding.version": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "presets": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "setlists": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songMixes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs": {
+      "store": "songs.json",
+      "read": true,
+      "written": true
+    },
+    "songs.cameraCorner": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.cameraDeviceId": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.cameraGuideSeen": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.cameraIntroSeen": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.cameraNudgeMs.<device>": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.clipBand": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.clipBrand": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.due": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.dueMovedToStore": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songs.dueTempo": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songsDownloadWatch": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songsNotesSeen": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songSoundFont": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songsStageView": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songsStarterOpen": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "songsStarterShelf": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "soundType": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "speedRamp": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "subdivision": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "takes.soundSource": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "theme": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "timeSignature": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "tour.seenVersion": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "viewTransitions": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "volume": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "whatsNew.pendingNotes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "whatsNew.seenVersion": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "widgetAlwaysOnTop": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "widgetOpened": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "window_position_floating": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "window_position_main": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "window_size_main": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "zenStyle": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    }
+  },
+  "tools": [
+    {
+      "mode": "beat",
+      "labelKey": "nav.metronome",
+      "action": "tab-1"
+    },
+    {
+      "mode": "setlist",
+      "labelKey": "nav.setlist",
+      "action": "tab-2"
+    },
+    {
+      "mode": "drill",
+      "labelKey": "nav.drill",
+      "action": "tab-3"
+    },
+    {
+      "mode": "jam",
+      "labelKey": "nav.jam",
+      "action": "tab-4"
+    },
+    {
+      "mode": "songs",
+      "labelKey": "nav.songs",
+      "action": "tab-5"
+    }
+  ],
+  "playTabs": [
+    "beat",
+    "setlist",
+    "drill",
+    "jam",
+    "songs"
+  ],
+  "themes": [
+    "mono",
+    "obsidian",
+    "velvet",
+    "neon",
+    "aurora",
+    "ash",
+    "ember",
+    "ivory",
+    "arctic",
+    "sand",
+    "lavender",
+    "prism",
+    "manuscript"
+  ],
+  "sounds": [
+    "click",
+    "sticks",
+    "wood",
+    "beep",
+    "drum",
+    "kit",
+    "snare",
+    "cowbell"
+  ],
+  "locales": [
+    "de",
+    "en",
+    "es",
+    "fr",
+    "it",
+    "ja",
+    "ko",
+    "nl",
+    "pl",
+    "pt-BR",
+    "ru",
+    "tr",
+    "vi",
+    "zh-CN",
+    "zh-TW"
+  ],
+  "hints": [
+    "drill-first-open",
+    "preset-suggest",
+    "coach-ask",
+    "zen-first",
+    "widget-discover",
+    "midi-plugged",
+    "jam-sheets",
+    "jam-live",
+    "jam-arrangement"
+  ],
+  "zenStyles": [
+    "cosmos",
+    "focus",
+    "gravity",
+    "pulse",
+    "radar",
+    "rain",
+    "warp"
+  ],
+  "meters": [
+    "2/4",
+    "3/4",
+    "4/4",
+    "5/4",
+    "6/8",
+    "7/8",
+    "8/8",
+    "9/8",
+    "12/8"
+  ],
+  "tourStops": [
+    "bpm",
+    "subdivision",
+    "presets",
+    "drill-tab",
+    "coach",
+    "zen-widget"
+  ],
+  "sqliteTables": [
+    "attempt_extras",
+    "attempt_onsets",
+    "attempts",
+    "events",
+    "exercise_ceilings",
+    "meta",
+    "routine_runs",
+    "routines",
+    "score_due",
+    "scores",
+    "segments",
+    "sessions"
+  ],
+  "fileAssociations": [
+    "gp",
+    "gp3",
+    "gp4",
+    "gp5",
+    "gpx",
+    "musicxml",
+    "mxl"
+  ],
+  "windowLabels": [
+    "floating",
+    "main"
+  ],
+  "whereEverythingLives": {
+    "identifier": "com.yames.metronome",
+    "updaterPubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJCODVBQzU2Q0NFRTI1MjMKUldRakplN01WcXlGSzBwd0NNazNtbXplOGtpdEREeDU4NTN1Vk9ZVFR4UUhZMmR2VzZpcWU1Z3UK",
+    "updaterEndpoint": "https://github.com/turutupa/yames/releases/latest/download/latest.json"
+  },
+  "jamGrooves": [
+    "rock8",
+    "rock16",
+    "halfTime",
+    "shuffle",
+    "waltz",
+    "sixEight",
+    "bossa",
+    "swingRide",
+    "funk",
+    "oneDrop",
+    "train",
+    "boomBap",
+    "fourOnFloor",
+    "hardRock",
+    "stomp",
+    "doubleKick",
+    "twoStep",
+    "samba",
+    "chaCha",
+    "secondLine",
+    "ballad",
+    "slowBlues",
+    "jazzWaltz",
+    "motown",
+    "mambo",
+    "rockQuarters",
+    "rockDriving",
+    "rockRide",
+    "rockAnthem",
+    "rockGrunge",
+    "rockMotorik",
+    "rockFunkRock",
+    "rockTwelveEight",
+    "rockHalfShuffle",
+    "rockGarage",
+    "rockBoogie",
+    "rockSurf",
+    "rockWaltz",
+    "bluesTexas",
+    "bluesChicago",
+    "bluesJump",
+    "bluesRhumba",
+    "bluesBoogie",
+    "bluesStraight",
+    "bluesStopTime",
+    "bluesSwamp",
+    "funkFunkyDrummer",
+    "funkPurdie",
+    "funkMeters",
+    "funkSoul",
+    "funkStax",
+    "funkBoogaloo",
+    "funkGoGo",
+    "funkNewJack",
+    "funkGospel",
+    "funkSlowJam",
+    "jazzBrushes",
+    "jazzUpTempo",
+    "jazzTwoFeel",
+    "jazzBallad",
+    "jazzFive",
+    "jazzBebop",
+    "jazzBigBand",
+    "jazzHardBop",
+    "jazzSoulJazz",
+    "jazzTrad",
+    "latinSon",
+    "latinGuaguanco",
+    "latinCascara",
+    "latinSongo",
+    "latinMerengue",
+    "latinBolero",
+    "latinBaiao",
+    "latinPartidoAlto",
+    "latinBossa23",
+    "latinAfro68",
+    "popDisco",
+    "popHouse",
+    "popElectro",
+    "popDnb",
+    "popBreakbeat",
+    "popTrap",
+    "popReggaeton",
+    "popSynthPop",
+    "popStadium",
+    "popUkGarage",
+    "popBallad",
+    "popIndie",
+    "metalGallop",
+    "metalBlast",
+    "metalThrash",
+    "metalDbeat",
+    "metalBreakdown",
+    "metalDoom",
+    "metalDjent",
+    "punkEighths",
+    "punkSkank",
+    "countryShuffle",
+    "countryBoomChick",
+    "countryBluegrass",
+    "countryRockabilly",
+    "countryBallad",
+    "countryOutlaw",
+    "worldAfrobeat",
+    "worldSteppers",
+    "worldRockers",
+    "worldRocksteady",
+    "worldSka",
+    "worldBhangra",
+    "worldRumbaFlamenca",
+    "worldTango",
+    "worldKlezmer",
+    "worldCumbia",
+    "worldHighlife",
+    "worldBalkan"
+  ],
+  "jamVibes": [
+    "rock",
+    "hardRock",
+    "blues",
+    "funk",
+    "jazz",
+    "latin",
+    "pop",
+    "metal",
+    "country"
+  ],
+  "jamKits": [
+    "club",
+    "studio",
+    "raw",
+    "room",
+    "tight",
+    "brushes",
+    "electronic"
+  ],
+  "starterJams": [
+    "jam-slow-blues-a",
+    "jam-funk-e",
+    "jam-bossa-dm",
+    "jam-swing-f",
+    "jam-rock-g",
+    "jam-waltz-c",
+    "jam-rock-hard-e",
+    "jam-rock-punk-c",
+    "jam-rock-alt-am",
+    "jam-rock-ballad-d",
+    "jam-rock-half-em",
+    "jam-hardrock-e",
+    "jam-hardrock-stomp-a",
+    "jam-hardrock-16-g",
+    "jam-hardrock-riff-d",
+    "jam-hardrock-big-b",
+    "jam-blues-shuffle-e",
+    "jam-blues-slow-g",
+    "jam-blues-texas-c",
+    "jam-blues-jump-bb",
+    "jam-blues-minor-dm",
+    "jam-funk-one-dm",
+    "jam-funk-nola-f",
+    "jam-funk-motown-c",
+    "jam-funk-gogo-eb",
+    "jam-funk-slowjam-bb",
+    "jam-jazz-rhythm-bb",
+    "jam-jazz-minor-gm",
+    "jam-jazz-ballad-eb",
+    "jam-jazz-bossa-am",
+    "jam-jazz-up-c",
+    "jam-latin-samba-c",
+    "jam-latin-chacha-am",
+    "jam-latin-son-g",
+    "jam-latin-mambo-fm",
+    "jam-latin-bolero-em",
+    "jam-pop-c",
+    "jam-pop-dance-am",
+    "jam-pop-disco-em",
+    "jam-pop-ballad-f",
+    "jam-pop-house-dm",
+    "jam-metal-em",
+    "jam-metal-gallop-dm",
+    "jam-metal-stomp-am",
+    "jam-metal-thrash-em",
+    "jam-metal-doom-bm",
+    "jam-country-train-g",
+    "jam-country-twostep-a",
+    "jam-country-shuffle-d",
+    "jam-country-ballad-c"
+  ]
+}
