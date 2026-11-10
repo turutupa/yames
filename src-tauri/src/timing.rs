@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::instrument::{Instrument, InstrumentProfile, ScoreWeights};
 use crate::models::PlayMode;
 use crate::onset::Onset;
-use crate::score::{LiveOnset, PlayedOnset, ScheduleRun, ScoreSchedule};
+use crate::score::{LiveOnset, PlayedOnset, ScheduleRun, ScoreSchedule, TakeGrade};
 use crate::session::CoachMode;
 use crate::session_log::{
     ActivityTransition, Classification, ComponentScores, DetectedOnset, ExpectedBeat,
@@ -216,6 +216,11 @@ pub struct PracticeSegmentEnded {
         skip_serializing_if = "Option::is_none"
     )]
     pub accent_agreement: Option<f32>,
+    /// What the player is told about this Take, when a schedule was loaded:
+    /// counts, evenness per bar and whole, and whether there was enough to
+    /// grade at all. Absent in free play, for the same reason as above.
+    #[serde(rename = "takeGrade", default, skip_serializing_if = "Option::is_none")]
+    pub take_grade: Option<TakeGrade>,
 }
 
 /// Path B — UI event emitted whenever the rhythm-inference's locked
@@ -344,6 +349,11 @@ pub struct TimingAnalyzer {
     /// tell "still the same schedule" from "a new one" without locking
     /// and cloning it every 5 ms.
     schedule_version: Arc<std::sync::atomic::AtomicU64>,
+    /// What `close_open_segment` last made of the loaded schedule. It exists
+    /// for the Take nothing was heard on: no onset means no segment, so no
+    /// `practice-segment-ended` with a grade on it, and a silent Take has to
+    /// be able to say "I didn't catch enough" too. See [`Self::take_grade_slot`].
+    take_grade: Arc<Mutex<Option<TakeGrade>>>,
 }
 
 /// How many live verdicts one sweep is expected to hand back.
@@ -368,7 +378,15 @@ impl TimingAnalyzer {
             tempo_ctx: None,
             schedule: Arc::new(Mutex::new(None)),
             schedule_version: Arc::new(std::sync::atomic::AtomicU64::new(0)),
+            take_grade: Arc::new(Mutex::new(None)),
         }
+    }
+
+    /// Where the grade of the Take that was just closed lands, within a
+    /// matcher pass of `close_open_segment`. `None` until then, and `None` if
+    /// no schedule was loaded or its first beat never came.
+    pub fn take_grade_slot(&self) -> Arc<Mutex<Option<TakeGrade>>> {
+        self.take_grade.clone()
     }
 
     /// Roadmap 2.4 — hand the analyzer the score the player is about to
@@ -443,6 +461,7 @@ impl TimingAnalyzer {
     /// report score so the score is correct from first display. Activity
     /// state is NOT reset — the player can resume after the fetch.
     pub fn close_open_segment(&self) {
+        *self.take_grade.lock().unwrap() = None;
         self.close_segment_now.store(true, Ordering::SeqCst);
     }
 
@@ -521,6 +540,7 @@ impl TimingAnalyzer {
         let tempo_ctx = self.tempo_ctx.clone();
         let schedule = self.schedule.clone();
         let schedule_version = self.schedule_version.clone();
+        let take_grade = self.take_grade.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             Self::analysis_loop(
@@ -533,6 +553,7 @@ impl TimingAnalyzer {
                 tempo_ctx,
                 schedule,
                 schedule_version,
+                take_grade,
                 profile,
                 instrument_id,
                 preset_id,
@@ -582,6 +603,7 @@ impl TimingAnalyzer {
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
         schedule_slot: Arc<Mutex<Option<ScoreSchedule>>>,
         schedule_version: Arc<std::sync::atomic::AtomicU64>,
+        take_grade: Arc<Mutex<Option<TakeGrade>>>,
         profile: InstrumentProfile,
         instrument_id: String,
         preset_id: Option<String>,
@@ -826,7 +848,8 @@ impl TimingAnalyzer {
                         .lock()
                         .unwrap()
                         .clone()
-                        .map(ScheduleRun::new);
+                        .map(ScheduleRun::new)
+                        .map(|run| run.with_calibration_seed(initial_calibration_offset_ms));
                 }
             }
 
@@ -878,6 +901,15 @@ impl TimingAnalyzer {
             // of the legacy-formula fallback. Activity state is preserved
             // (player can resume after the report is shown).
             if close_segment_now.swap(false, Ordering::SeqCst) {
+                if let Some(run) = schedule_run.as_ref() {
+                    // Before the segment, because there may not be one.
+                    let weights = if coach_mode == CoachMode::Default {
+                        profile.default_score_weights
+                    } else {
+                        profile.score_weights
+                    };
+                    *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
+                }
                 if let Some(seg) = segment.take() {
                     on_segment_end(
                         build_segment_ended(
@@ -1048,6 +1080,7 @@ impl TimingAnalyzer {
                     .as_ref()
                     .filter(|_| quarter_ms > 0.0)
                     .and_then(|run| run.smallest_gap_ms(quarter_ms));
+                ctx.set_known_score(from_schedule.is_some());
                 if let Some(gap_ms) = from_schedule {
                     ctx.set_played_interval_ms(Some(gap_ms as f32));
                 } else if rhythm_inference.is_locked() && quarter_ms > 0.0 {
@@ -1148,9 +1181,10 @@ impl TimingAnalyzer {
             // beat happened.
             if let Some(run) = schedule_run.as_mut() {
                 for beat in beats.iter().filter(|b| b.subdivision_index == 0) {
-                    run.note_quarter(
+                    run.note_quarter_in_bar(
                         beat.is_downbeat,
                         ts_ns_to_wall_ms(beat.ts_ns, beat_base_wall_ms, beat_base_ns) as f64,
+                        beat.beats_per_bar as u32,
                     );
                 }
 
@@ -2675,16 +2709,21 @@ fn build_segment_ended(
     // is what it has always been, down to the bytes: the three fields
     // below are skipped entirely when empty.
     let schedule_report = schedule_run.and_then(|run| run.report(&seg_weights));
-    let (onset_results, extra_onsets, accent_agreement) = match schedule_report {
+    let (onset_results, extra_onsets, accent_agreement, take_grade) = match schedule_report {
         Some(report) => {
             score = report.score;
             component_scores.interval_consistency = report.interval_consistency;
             component_scores.grid_alignment = report.grid_alignment;
             component_scores.hit_completeness = report.hit_completeness;
             component_scores.onset_efficiency = report.onset_efficiency;
-            (report.results, report.extras, report.accent_agreement)
+            (
+                report.results,
+                report.extras,
+                report.accent_agreement,
+                Some(report.grade),
+            )
         }
-        None => (Vec::new(), Vec::new(), None),
+        None => (Vec::new(), Vec::new(), None, None),
     };
     // D3b — onset_efficiency = matched / total. Floor the denominator
     // at 1 to avoid div-by-zero on truly empty segments.
@@ -2719,6 +2758,7 @@ fn build_segment_ended(
         onset_results,
         extra_onsets,
         accent_agreement,
+        take_grade,
     }
 }
 

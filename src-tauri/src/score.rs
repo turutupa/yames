@@ -48,6 +48,10 @@
 //!
 //! The pitch of a note is nobody's business here — timing only. Which
 //! note was played waits for `pitch.rs` (LP C2, S0.5).
+//!
+//! What the player and the UI are told about a Take is [`TakeGrade`], and
+//! `plans/revamp/GRADING_LIMITS.md` is what it has and has not been shown to
+//! get right.
 
 use serde::{Deserialize, Serialize};
 
@@ -308,14 +312,32 @@ pub struct PlayedOnset {
 #[derive(Debug, Clone, Default)]
 pub struct BeatMap {
     beats_ms: Vec<f64>,
+    /// Which logged quarter each bar opened on, as the engine counted them.
+    /// Empty when nobody said, which is only a fixture's beat map.
+    bar_starts: Vec<usize>,
+    /// How long the last bar is, in quarters. 0 until somebody says.
+    beats_per_bar: u32,
 }
+
+/// What a beat map with no bars logged assumes. Only reachable from a fixture
+/// or a direct caller: the live path logs the engine's own bar length.
+const DEFAULT_BEATS_PER_BAR: u32 = 4;
 
 impl BeatMap {
     /// `times_ms[i]` is when quarter note `i` of the played range fell.
     /// Beat 0 is the schedule's own origin: the count-in belongs before
     /// it and is not in here.
     pub fn from_quarter_times(times_ms: Vec<f64>) -> Self {
-        Self { beats_ms: times_ms }
+        Self {
+            beats_ms: times_ms,
+            ..Self::default()
+        }
+    }
+
+    /// The same map, with bars this many quarters long.
+    pub fn with_beats_per_bar(mut self, beats_per_bar: u32) -> Self {
+        self.beats_per_bar = beats_per_bar;
+        self
     }
 
     /// One more quarter note fell. The live path grows the map a beat at a
@@ -323,6 +345,45 @@ impl BeatMap {
     /// question at the end without anything having been copied.
     pub fn push_quarter(&mut self, time_ms: f64) {
         self.beats_ms.push(time_ms);
+    }
+
+    /// One more quarter note fell, in a bar `beats_per_bar` long. A bar line
+    /// is where the engine's own count says it is, so a meter change lands
+    /// where it happened rather than where a multiplication puts it.
+    pub fn push_quarter_in_bar(&mut self, time_ms: f64, beats_per_bar: u32) {
+        let index = self.beats_ms.len();
+        let opens_a_bar = match self.bar_starts.last() {
+            Some(&start) => index - start >= self.beats_per_bar.max(1) as usize,
+            None => true,
+        };
+        if opens_a_bar {
+            self.bar_starts.push(index);
+            self.beats_per_bar = beats_per_bar.max(1);
+        }
+        self.beats_ms.push(time_ms);
+    }
+
+    /// Which played bar a beat falls in, from 0. Before the first beat is the
+    /// first bar: a note a hair early belongs to the bar it was aiming at.
+    pub fn bar_at_beat(&self, beat: f64) -> u32 {
+        let beat = beat.max(0.0);
+        let per_bar = if self.beats_per_bar > 0 {
+            self.beats_per_bar
+        } else {
+            DEFAULT_BEATS_PER_BAR
+        } as f64;
+        let Some(&last_start) = self.bar_starts.last() else {
+            return (beat / per_bar).floor() as u32;
+        };
+        let logged = self.bar_starts.partition_point(|&s| (s as f64) <= beat);
+        let bar = logged.saturating_sub(1) as u32;
+        // Past the last bar the log knows about, its length carries on, just
+        // as the last logged interval does in `time_at_beat`.
+        if beat >= last_start as f64 + per_bar {
+            bar + ((beat - last_start as f64) / per_bar).floor() as u32
+        } else {
+            bar
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -768,6 +829,318 @@ pub struct ScheduleReport {
     pub accent_agreement: Option<f32>,
     /// How many times round the loop the player got.
     pub passes: u32,
+    /// What to tell the player about this Take. See [`TakeGrade`].
+    pub grade: TakeGrade,
+}
+
+/// Whether a Take gave enough to grade.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TakeVerdict {
+    Graded,
+    /// Too little was heard, or too unreliably, to say anything about the
+    /// playing. It is not a low mark: it may be the rig, and the honest thing
+    /// to say is "I didn't catch enough". See [`didnt_catch_enough`].
+    DidntCatchEnough,
+}
+
+/// Why [`TakeVerdict::DidntCatchEnough`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum NoCatchReason {
+    /// Nothing was heard at all.
+    NothingHeard,
+    /// Under [`MIN_HEARD_RATIO`] of the notes that were due were heard.
+    TooFewHeard,
+    /// More unwritten onsets than written ones: this is not a recording of
+    /// the Exercise, or the detector is hearing something else.
+    TooManyExtras,
+    /// The detector itself was unsure, on average, of what it reported.
+    LowConfidence,
+}
+
+/// Where the number that removed the system's lag came from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CalibrationSource {
+    /// None applied: the clock was taken as given, or there was too little to
+    /// measure and nothing remembered.
+    None,
+    /// The `(instrument, device)` offset from `calibration_cache`. A lean is
+    /// measurable against it, because it was learned in other sessions.
+    Cached,
+    /// This Take's own median, because nothing was remembered or what was
+    /// remembered is no longer believable. A lean cannot be told from lag.
+    Take,
+}
+
+/// How a Take's clock was corrected. See [`CalibrationPolicy`] for the
+/// trade-off this is the result of.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TakeCalibration {
+    /// What the reported deviations are measured from, ms. Positive means the
+    /// detector's clock runs behind the beat map's.
+    pub offset_ms: f64,
+    pub source: CalibrationSource,
+    /// How far behind (positive) or ahead of `offset_ms` the player sat, in
+    /// ms. `None` unless `source` is `Cached`: without a reference from
+    /// another session, a lean and a lag are the same number.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lean_ms: Option<f64>,
+}
+
+/// One played bar of a Take. Bars count from 0, in played order, and a loop
+/// keeps counting rather than starting again.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BarMetrics {
+    pub bar: u32,
+    /// Notes the score asked for that were reached. Absent soft notes leave.
+    pub due: u32,
+    pub heard: u32,
+    pub missed: u32,
+    pub extra: u32,
+    /// [`evenness`] over this bar's own notes. `None` under three heard.
+    pub evenness: Option<f32>,
+    pub evenness_sigma_ms: Option<f64>,
+}
+
+/// What Mechanics reads about one Take, and what the coach may state.
+///
+/// **A stable shape.** Add to it; do not rename what is here. Everything on it
+/// comes from the Exercise's known schedule and from no opinion.
+///
+/// `score` and `evenness` are `None` on [`TakeVerdict::DidntCatchEnough`], so
+/// a screen cannot show a number by accident. The counts are always there:
+/// they are facts, and "I heard 19 of 128" is the useful thing to say.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TakeGrade {
+    pub verdict: TakeVerdict,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub no_catch_reason: Option<NoCatchReason>,
+    /// 0–100, the timing of what was heard scaled by how much of the Exercise
+    /// was heard. See [`known_score_number`].
+    pub score: Option<f32>,
+    /// 0–1. See [`evenness`] for the definition and what 0.85 means in ms.
+    pub evenness: Option<f32>,
+    pub evenness_sigma_ms: Option<f64>,
+    /// Notes the score asked for that the transport reached. Absent soft notes
+    /// are not due. Notes past where the transport stopped are `not_reached`.
+    pub due: u32,
+    pub heard: u32,
+    pub missed: u32,
+    pub extra: u32,
+    /// Written notes the Take never got to, because the transport stopped.
+    pub not_reached: u32,
+    /// `heard / due`, 0–1.
+    pub heard_ratio: f32,
+    /// The detector's median confidence over the Take. `None` if it heard
+    /// nothing.
+    pub confidence: Option<f32>,
+    pub calibration: TakeCalibration,
+    pub bars: Vec<BarMetrics>,
+}
+
+/// Under this share of the notes due, the Take says "I didn't catch enough"
+/// rather than a number. A player really leaving out half the notes reads the
+/// same as a rig the detector cannot hear, and only one of those is theirs.
+pub const MIN_HEARD_RATIO: f32 = 0.5;
+
+/// Under this median detector confidence, likewise. Every synthetic tone in
+/// `tests/audio_fixtures` at a sane input level sits well above it, including
+/// high gain over a noisy floor; `plans/revamp/GRADING_LIMITS.md` has the
+/// measured values. A design value until a real rig has been through it.
+pub const MIN_MEDIAN_CONFIDENCE: f32 = 0.15;
+
+/// Fewer heard notes than this tells nothing about the spread of them.
+const MIN_NOTES_FOR_EVENNESS: usize = 3;
+
+/// The rule, in one place: can anything be said about this Take?
+///
+/// In order, because the first that holds is the most useful thing to say:
+/// nothing heard; under [`MIN_HEARD_RATIO`] heard; more extras than hits; or
+/// a detector that was not sure ([`MIN_MEDIAN_CONFIDENCE`]). A Take none of
+/// those apply to gets a number. `None` means graded.
+pub fn didnt_catch_enough(
+    due: u32,
+    heard: u32,
+    extra: u32,
+    confidence: Option<f32>,
+) -> Option<NoCatchReason> {
+    if heard == 0 {
+        return Some(NoCatchReason::NothingHeard);
+    }
+    if due == 0 || (heard as f32 / due as f32) < MIN_HEARD_RATIO {
+        return Some(NoCatchReason::TooFewHeard);
+    }
+    if extra > heard {
+        return Some(NoCatchReason::TooManyExtras);
+    }
+    if confidence.is_some_and(|c| c < MIN_MEDIAN_CONFIDENCE) {
+        return Some(NoCatchReason::LowConfidence);
+    }
+    None
+}
+
+/// Evenness, and the spread of timing it came from.
+///
+/// `exp(-σ² / 2k²)`, where:
+///
+/// * `σ` is the spread of the note deviations around their own median: the
+///   median absolute deviation × 1.4826, so one wild note does not decide it.
+///   A constant offset, whether lag or lean, has no effect on it at all.
+/// * `k` is half the matching window for the smallest gap the score asks for,
+///   so 0.2 × that gap for anything up to a 200 ms gap, where the 80 ms cap on
+///   the window takes over.
+///
+/// So "85% even" is `σ = 0.57 k`, which for straight sixteenths is:
+///
+/// | BPM | gap | k | σ at 85% |
+/// |---|---|---|---|
+/// | 80 | 187.5 ms | 37.5 ms | 21 ms |
+/// | 120 | 125 ms | 25 ms | 14 ms |
+/// | 160 | 93.75 ms | 18.75 ms | 11 ms |
+///
+/// It is a tolerance that tightens with the tempo. It is not a percentage of
+/// notes that were even, and no screen should word it as one.
+pub fn evenness(deviations_ms: &[f64], smallest_gap_ms: f64) -> Option<(f32, f64)> {
+    if deviations_ms.len() < MIN_NOTES_FOR_EVENNESS {
+        return None;
+    }
+    let mut sorted = deviations_ms.to_vec();
+    sorted.sort_by(|a, b| a.total_cmp(b));
+    let med = median(&sorted);
+    let mut devs: Vec<f64> = sorted.iter().map(|d| (d - med).abs()).collect();
+    devs.sort_by(|a, b| a.total_cmp(b));
+    // MAD → σ, the same estimator `score_segment` uses, for the
+    // same reason: one wild note should not decide the number.
+    let sigma = median(&devs) * 1.4826;
+    let k = (tempo_aware_window_ms(smallest_gap_ms) * 0.5).max(1.0);
+    Some(((-sigma * sigma / (2.0 * k * k)).exp() as f32, sigma))
+}
+
+/// How a Take's clock gets corrected for the system's constant lag.
+///
+/// The detector stamps a note after it has heard it, and between a string and
+/// that stamp are the peak picker's look-ahead, the driver's input buffer and
+/// the converter: 25 to 60 ms on an ordinary rig, nothing to do with the
+/// player, and more than half a sixteenth's matching window at speed. Taken as
+/// given it reads as everything late, and past the window as everything missed
+/// (70 of 128 at 120 BPM with 50 ms). So two different things are done with
+/// two different numbers:
+///
+/// * **Matching** always uses this Take's own measured lag. Which written note
+///   a played one answers is not a judgement, it is bookkeeping, and no plausible
+///   lag or lean should change it. Heard, missed, extra and evenness therefore
+///   do not move with a constant offset of either kind.
+/// * **Scoring** (`deviation_ms`, grid alignment, `lean_ms`) measures from the
+///   `calibration_cache` offset for this `(instrument, device)` when there is
+///   one, because that was learned in other sessions and a lean shows against
+///   it. Without one it can only be this Take's own median, clamped to the
+///   range a system lag can be ([`SYSTEM_LAG_RANGE_MS`]).
+///
+/// **The trade-off, stated.** One Take cannot tell a player who sits 20 ms
+/// behind from a rig that is 20 ms slower. On a first run with an empty cache
+/// that lean is absorbed, and the result says so by reporting no `lean_ms`;
+/// grid alignment is then a statement about steadiness, not about the click. A
+/// lean is only reported against a reference, and the reference itself holds
+/// the player's habitual offset from when it was learned, so `lean_ms` means
+/// "further from the click than you usually are". It was the honest choice
+/// against the two alternatives: subtracting nothing marks a rig as a player,
+/// and a fixed nominal lag does so by a smaller amount for no better reason.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum CalibrationPolicy {
+    /// Take the detector's clock as given. Fixtures, and `match_attempt`.
+    Off,
+    /// Measure and remove the system's lag, as above.
+    Auto {
+        /// The cached `(instrument, device)` offset, ms.
+        seed_ms: Option<f64>,
+    },
+}
+
+/// Where the lag search looks, ms. Wider than any rig on the low side so that
+/// a player rushing is still found, and past a Bluetooth output on the high.
+const LAG_SEARCH_MS: (i32, i32) = (-40, 160);
+const LAG_SEARCH_STEP_MS: usize = 2;
+/// What a system lag can plausibly be. Past this a constant offset is the
+/// player's, and with no reference it stays visible in the deviations.
+pub const SYSTEM_LAG_RANGE_MS: (f64, f64) = (0.0, 120.0);
+/// Where to start believing when the notes alone cannot pick: a periodic run
+/// fits equally well a whole note earlier or later. Roughly the detector's own
+/// lag plus one input buffer, measured in `tests/audio_fixtures`.
+const NOMINAL_LAG_MS: f64 = 30.0;
+/// A Take this far from the cached offset has moved rig, or the cache is
+/// stale. Reporting that gap as the player's lean would be inventing a fact,
+/// so the seed is set aside and `lean_ms` says nothing.
+const SEED_TRUST_MS: f64 = 40.0;
+/// How few notes a lag can be read off.
+const MIN_NOTES_FOR_LAG: usize = 8;
+
+/// The constant lag between what was written and what was played, ms.
+///
+/// Slides the played notes over the written ones and takes the offset that
+/// lines up the most of them, then the median of what is left. It does not
+/// assume a matching window, because a lag past the window is the failure it
+/// is here for. `None` when there are too few notes to tell. Both lists must
+/// be sorted.
+pub fn estimate_constant_lag_ms(
+    expected_ms: &[f64],
+    played_ms: &[f64],
+    smallest_gap_ms: f64,
+    prior_ms: f64,
+) -> Option<f64> {
+    if expected_ms.is_empty() || played_ms.len() < MIN_NOTES_FOR_LAG {
+        return None;
+    }
+    // Nearest written note to `t`, moving a hint forward through both sorted
+    // lists so that each offset is one pass over the notes.
+    fn nearest(expected: &[f64], hint: &mut usize, t: f64) -> f64 {
+        while *hint + 1 < expected.len()
+            && (expected[*hint + 1] - t).abs() <= (expected[*hint] - t).abs()
+        {
+            *hint += 1;
+        }
+        t - expected[*hint]
+    }
+
+    let tol = (smallest_gap_ms * 0.2).clamp(6.0, 15.0);
+    let fit_at = |offset: f64| -> f64 {
+        let mut hint = 0usize;
+        played_ms
+            .iter()
+            .map(|p| {
+                let d = nearest(expected_ms, &mut hint, p - offset).abs();
+                (1.0 - d / tol).max(0.0)
+            })
+            .sum()
+    };
+    let candidates = (LAG_SEARCH_MS.0..=LAG_SEARCH_MS.1).step_by(LAG_SEARCH_STEP_MS);
+    let fits: Vec<(f64, f64)> = candidates.map(|c| (c as f64, fit_at(c as f64))).collect();
+    let best = fits.iter().map(|&(_, f)| f).fold(0.0, f64::max);
+    // A periodic run fits the same a whole gap away, except for the note at
+    // each end. Half a note's worth is what separates those; among what is
+    // left, the prior decides.
+    let coarse = fits
+        .iter()
+        .filter(|&&(_, f)| f >= best - 0.5)
+        .min_by(|a, b| (a.0 - prior_ms).abs().total_cmp(&(b.0 - prior_ms).abs()))
+        .map(|&(c, _)| c)?;
+
+    let reach = (smallest_gap_ms * 0.4).max(tol);
+    let mut hint = 0usize;
+    let mut residuals: Vec<f64> = played_ms
+        .iter()
+        .map(|p| nearest(expected_ms, &mut hint, p - coarse))
+        .filter(|d| d.abs() <= reach)
+        .collect();
+    if residuals.len() < MIN_NOTES_FOR_LAG {
+        return None;
+    }
+    residuals.sort_by(|a, b| a.total_cmp(b));
+    Some(coarse + median(&residuals))
 }
 
 /// Match a whole attempt — every pass — and score it.
@@ -778,12 +1151,38 @@ pub struct ScheduleReport {
 /// (LP C4). A loop restarts the schedule and never the score, so
 /// results and extras accumulate across passes with `pass` recorded on
 /// each.
+///
+/// This takes the clock as given. The live path goes through
+/// [`match_attempt_calibrated`] with [`CalibrationPolicy::Auto`].
 pub fn match_attempt(
     schedule: &ScoreSchedule,
     beats: &BeatMap,
     played: &[PlayedOnset],
     weights: &ScoreWeights,
 ) -> ScheduleReport {
+    match_attempt_calibrated(schedule, beats, played, weights, CalibrationPolicy::Off)
+}
+
+/// [`match_attempt`], with the system's constant lag dealt with as `policy`
+/// says.
+pub fn match_attempt_calibrated(
+    schedule: &ScoreSchedule,
+    beats: &BeatMap,
+    played: &[PlayedOnset],
+    weights: &ScoreWeights,
+    policy: CalibrationPolicy,
+) -> ScheduleReport {
+    let (matching_ms, mut calibration) = resolve_calibration(schedule, beats, played, policy);
+    // Everything below sees the notes as if there were no lag. `played` is on
+    // the beat map's clock except for that one number.
+    let calibrated: Vec<PlayedOnset> = played
+        .iter()
+        .map(|p| PlayedOnset {
+            time_ms: p.time_ms - matching_ms,
+            ..*p
+        })
+        .collect();
+    let played = &calibrated[..];
     let length = pass_length(schedule);
 
     // How many times round. Without a loop there is exactly one pass,
@@ -879,13 +1278,31 @@ pub fn match_attempt(
     }
 
     let accent_agreement = accent_agreement(schedule, &results, played, beats);
+
+    // Matching is done. What gets reported is measured from the scoring
+    // offset, which is where a lean shows (see `CalibrationPolicy`).
+    let scoring_shift = matching_ms - calibration.offset_ms;
+    if scoring_shift != 0.0 {
+        for r in results.iter_mut() {
+            if let Some(d) = r.deviation_ms.as_mut() {
+                *d += scoring_shift;
+            }
+        }
+    }
+    if calibration.source == CalibrationSource::Cached {
+        let mut devs: Vec<f64> = results.iter().filter_map(|r| r.deviation_ms).collect();
+        devs.sort_by(|a, b| a.total_cmp(b));
+        calibration.lean_ms = (devs.len() >= MIN_NOTES_FOR_LAG).then(|| median(&devs));
+    }
+
     // The tempo the deviations are judged against. The median of the
     // quarters actually played, so a song that steps tempo is judged
     // around where it mostly sat rather than around where it opened,
     // and a 180 BPM piece is not marked on a 120 BPM tolerance.
     let quarter_ms = median_interval_ms(beats);
-    let (score, ic, ga, hc, oe) =
-        score_results(schedule, &results, &extras, weights, quarter_ms);
+    let tally = Tally::of(schedule, beats, &results, &extras);
+    let (score, ic, ga, hc, oe) = score_results(schedule, &results, &tally, weights, quarter_ms);
+    let grade = grade_take(schedule, beats, &results, &extras, &tally, played, score, calibration);
 
     ScheduleReport {
         results,
@@ -897,7 +1314,266 @@ pub fn match_attempt(
         onset_efficiency: oe,
         accent_agreement,
         passes,
+        grade,
     }
+}
+
+/// The offset to match with, and what the report will say it scored from.
+fn resolve_calibration(
+    schedule: &ScoreSchedule,
+    beats: &BeatMap,
+    played: &[PlayedOnset],
+    policy: CalibrationPolicy,
+) -> (f64, TakeCalibration) {
+    let CalibrationPolicy::Auto { seed_ms } = policy else {
+        let none = TakeCalibration {
+            offset_ms: 0.0,
+            source: CalibrationSource::None,
+            lean_ms: None,
+        };
+        return (0.0, none);
+    };
+    let seed_ms = seed_ms.filter(|s| s.is_finite());
+    let measured = measure_take_lag(schedule, beats, played, seed_ms);
+    let (matching, offset, source) = match (measured, seed_ms) {
+        (Some(m), Some(s)) if (m - s).abs() <= SEED_TRUST_MS => (m, s, CalibrationSource::Cached),
+        (Some(m), _) => (
+            m,
+            m.clamp(SYSTEM_LAG_RANGE_MS.0, SYSTEM_LAG_RANGE_MS.1),
+            CalibrationSource::Take,
+        ),
+        // Too few notes to measure anything, so the seed stands for both.
+        (None, Some(s)) => (s, s, CalibrationSource::Cached),
+        (None, None) => (0.0, 0.0, CalibrationSource::None),
+    };
+    (
+        matching,
+        TakeCalibration {
+            offset_ms: offset,
+            source,
+            lean_ms: None,
+        },
+    )
+}
+
+/// This Take's constant lag, from all of its notes and every pass of them.
+fn measure_take_lag(
+    schedule: &ScoreSchedule,
+    beats: &BeatMap,
+    played: &[PlayedOnset],
+    seed_ms: Option<f64>,
+) -> Option<f64> {
+    let length = pass_length(schedule);
+    let last_beat = played.last().and_then(|p| beats.beat_at_time(p.time_ms))?;
+    let passes = if schedule.loops {
+        ((last_beat / length).floor() as i64 + 1).clamp(1, 4096) as u32
+    } else {
+        1
+    };
+    let mut expected: Vec<f64> = Vec::new();
+    for pass in 0..passes {
+        let origin = pass as f64 * length;
+        expected.extend(
+            schedule
+                .onsets
+                .iter()
+                .filter(|o| o.beat >= 0.0 && (!schedule.loops || o.beat < length))
+                .filter_map(|o| beats.time_at_beat(origin + o.beat)),
+        );
+    }
+    let times: Vec<f64> = played.iter().map(|p| p.time_ms).collect();
+    let gap_ms = smallest_gap_beats(&schedule.onsets)? * median_interval_ms(beats);
+    estimate_constant_lag_ms(&expected, &times, gap_ms, seed_ms.unwrap_or(NOMINAL_LAG_MS))
+}
+
+/// What a Take comes to, counted once for everybody who needs it.
+struct Tally {
+    due: u32,
+    heard: u32,
+    missed: u32,
+    extra: u32,
+    not_reached: u32,
+    /// Absolute beat of each result, in step with `results`.
+    abs_beats: Vec<f64>,
+    /// In step with `results`: did the transport get there?
+    reached: Vec<bool>,
+}
+
+impl Tally {
+    fn of(
+        schedule: &ScoreSchedule,
+        beats: &BeatMap,
+        results: &[OnsetResult],
+        extras: &[ExtraOnset],
+    ) -> Self {
+        let length = pass_length(schedule);
+        // The last quarter the engine reported. A note past it was not played
+        // because the Take was over, which is not a miss, and with misses now
+        // costing the number it must not count as one. A stored beat map that
+        // has no quarters at all reaches nothing, and nothing is due.
+        let last_logged = beats.len().saturating_sub(1) as f64;
+        let beat_of: std::collections::HashMap<u32, f64> =
+            schedule.onsets.iter().map(|o| (o.id, o.beat)).collect();
+        let mut tally = Self {
+            due: 0,
+            heard: 0,
+            missed: 0,
+            extra: 0,
+            not_reached: 0,
+            abs_beats: Vec::with_capacity(results.len()),
+            reached: Vec::with_capacity(results.len()),
+        };
+        for r in results {
+            let abs = r.pass as f64 * length + beat_of.get(&r.id).copied().unwrap_or(0.0);
+            tally.abs_beats.push(abs);
+            let reached = r.state == OnsetState::Hit || abs <= last_logged + 1e-9;
+            tally.reached.push(reached);
+            match r.state {
+                OnsetState::Hit => {
+                    tally.due += 1;
+                    tally.heard += 1;
+                }
+                OnsetState::Miss if reached => {
+                    tally.due += 1;
+                    tally.missed += 1;
+                }
+                OnsetState::Miss => tally.not_reached += 1,
+                OnsetState::SoftAbsent => {}
+            }
+        }
+        tally.extra = extras.iter().filter(|e| counts_as_extra(schedule, e)).count() as u32;
+        tally
+    }
+}
+
+/// An onset after the last written bar is the player carrying on once the Take
+/// was over. It stays in `extras`, which is a record of what was heard, but it
+/// was not an error in the Exercise.
+fn counts_as_extra(schedule: &ScoreSchedule, extra: &ExtraOnset) -> bool {
+    schedule.loops || extra.beat < pass_length(schedule)
+}
+
+/// What `match_attempt` tells the player and the screen.
+#[allow(clippy::too_many_arguments)]
+fn grade_take(
+    schedule: &ScoreSchedule,
+    beats: &BeatMap,
+    results: &[OnsetResult],
+    extras: &[ExtraOnset],
+    tally: &Tally,
+    played: &[PlayedOnset],
+    score: f32,
+    calibration: TakeCalibration,
+) -> TakeGrade {
+    let sub = smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
+    let gap_ms = sub * median_interval_ms(beats);
+    let deviations: Vec<f64> = results.iter().filter_map(|r| r.deviation_ms).collect();
+    let spread = evenness(&deviations, gap_ms);
+
+    // The detector's own opinion, from the first beat on: a count-in that the
+    // player noodled through has nothing to do with this Take.
+    let first_beat_ms = beats.time_at_beat(0.0).unwrap_or(0.0);
+    let mut confidences: Vec<f64> = played
+        .iter()
+        .filter(|p| p.time_ms >= first_beat_ms - 100.0)
+        .map(|p| p.confidence as f64)
+        .collect();
+    confidences.sort_by(|a, b| a.total_cmp(b));
+    let confidence = (!confidences.is_empty()).then(|| median(&confidences) as f32);
+
+    let reason = didnt_catch_enough(tally.due, tally.heard, tally.extra, confidence);
+    let bars = bar_metrics(schedule, beats, results, extras, tally, gap_ms);
+    let graded = reason.is_none();
+    TakeGrade {
+        verdict: if graded {
+            TakeVerdict::Graded
+        } else {
+            TakeVerdict::DidntCatchEnough
+        },
+        no_catch_reason: reason,
+        score: graded.then_some(score),
+        evenness: spread.map(|(e, _)| e).filter(|_| graded),
+        evenness_sigma_ms: spread.map(|(_, s)| s).filter(|_| graded),
+        due: tally.due,
+        heard: tally.heard,
+        missed: tally.missed,
+        extra: tally.extra,
+        not_reached: tally.not_reached,
+        heard_ratio: if tally.due > 0 {
+            tally.heard as f32 / tally.due as f32
+        } else {
+            0.0
+        },
+        confidence,
+        calibration,
+        bars,
+    }
+}
+
+/// One row per bar the Take reached. A bar with nothing due and nothing played
+/// still gets a row: the pass rule windows over bars, and a rest bar is a bar.
+fn bar_metrics(
+    schedule: &ScoreSchedule,
+    beats: &BeatMap,
+    results: &[OnsetResult],
+    extras: &[ExtraOnset],
+    tally: &Tally,
+    gap_ms: f64,
+) -> Vec<BarMetrics> {
+    let length = pass_length(schedule);
+    let mut rows: Vec<BarMetrics> = Vec::new();
+    let mut devs: Vec<Vec<f64>> = Vec::new();
+    fn row<'a>(
+        rows: &'a mut Vec<BarMetrics>,
+        devs: &mut Vec<Vec<f64>>,
+        bar: u32,
+    ) -> &'a mut BarMetrics {
+        while rows.len() <= bar as usize {
+            rows.push(BarMetrics {
+                bar: rows.len() as u32,
+                due: 0,
+                heard: 0,
+                missed: 0,
+                extra: 0,
+                evenness: None,
+                evenness_sigma_ms: None,
+            });
+            devs.push(Vec::new());
+        }
+        &mut rows[bar as usize]
+    }
+    for (k, r) in results.iter().enumerate() {
+        if !tally.reached[k] {
+            continue;
+        }
+        let bar = beats.bar_at_beat(tally.abs_beats[k]);
+        let cell = row(&mut rows, &mut devs, bar);
+        match r.state {
+            OnsetState::Hit => {
+                cell.due += 1;
+                cell.heard += 1;
+                if let Some(d) = r.deviation_ms {
+                    devs[bar as usize].push(d);
+                }
+            }
+            OnsetState::Miss => {
+                cell.due += 1;
+                cell.missed += 1;
+            }
+            OnsetState::SoftAbsent => {}
+        }
+    }
+    for e in extras.iter().filter(|e| counts_as_extra(schedule, e)) {
+        let bar = beats.bar_at_beat(e.pass as f64 * length + e.beat);
+        row(&mut rows, &mut devs, bar).extra += 1;
+    }
+    for (cell, d) in rows.iter_mut().zip(devs.iter()) {
+        if let Some((e, s)) = evenness(d, gap_ms) {
+            cell.evenness = Some(e);
+            cell.evenness_sigma_ms = Some(s);
+        }
+    }
+    rows
 }
 
 /// The smallest gap between two consecutive expected onsets, in beats.
@@ -1000,6 +1676,47 @@ fn accent_agreement(
     Some((((a / p) - 1.0) / 1.0).clamp(0.0, 1.0))
 }
 
+/// How much an extra note costs against a missed one, in [`known_score_number`].
+const EXTRA_NOTE_WEIGHT: f32 = 0.5;
+
+/// The number, against a known score.
+///
+/// `timing × heard × extras`, and it is a product on purpose. On guitar the
+/// free-play weights give missed notes no say at all (`instrument.rs`, and
+/// rightly: with no score, an unplayed note is a rest), so a take with 19 of
+/// 128 notes heard used to score 98. A weighted sum would only move that to
+/// about 80, and "I heard one note in seven" is not a B. When the material is
+/// known, the timing of what was heard can only be credit for what was heard.
+///
+/// * `timing` is interval consistency and grid alignment, balanced by the
+///   instrument's own weights, so the two keep the proportion they have in
+///   free play. The instrument's `hc` and `oe` are not read: they answer "how
+///   much does completeness matter when you cannot know what was due", and
+///   here it is known.
+/// * `heard` is hit completeness. One note in a hundred costs one point in a
+///   hundred, whatever the tempo.
+/// * `extras` costs half what a miss does. The detector's ghosts land here as
+///   well as the player's own, and a ghost is not their fault.
+///
+/// Silence scores nothing, because `heard` is nought. A pass bar must still
+/// read [`TakeGrade`], whose counts and evenness come per-bar, not this.
+fn known_score_number(
+    interval_consistency: f32,
+    grid_alignment: f32,
+    hit_completeness: f32,
+    onset_efficiency: f32,
+    weights: &ScoreWeights,
+) -> f32 {
+    let balance = weights.ic + weights.ga;
+    let timing = if balance > 0.0 {
+        (interval_consistency * weights.ic + grid_alignment * weights.ga) / balance
+    } else {
+        (interval_consistency + grid_alignment) * 0.5
+    };
+    let extras = 1.0 - EXTRA_NOTE_WEIGHT * (1.0 - onset_efficiency);
+    (timing * hit_completeness * extras * 100.0).clamp(0.0, 100.0)
+}
+
 /// The four components, against a known score.
 ///
 /// The same four axes as free play, so the number means the same thing
@@ -1009,17 +1726,18 @@ fn accent_agreement(
 /// * **interval consistency** — the spread of the hits' deviations.
 ///   A player who is 20 ms behind the whole way through is playing
 ///   evenly and is not punished for it; a player whose deviation
-///   wanders is.
+///   wanders is. See [`evenness`].
 /// * **grid alignment** — how close the hits are, on the same
 ///   perfect/good/ok bands the free-play matcher uses.
 /// * **hit completeness** — hits over notes that were genuinely due.
-///   Absent soft onsets are not due, and leave the denominator.
-/// * **onset efficiency** — hits over everything the player played.
-///   This is where extras cost something.
+///   Absent soft onsets are not due, and leave the denominator, as do
+///   notes past where the transport stopped.
+/// * **onset efficiency** — hits over everything the player played
+///   while the Exercise lasted. This is where extras cost something.
 fn score_results(
     schedule: &ScoreSchedule,
     results: &[OnsetResult],
-    extras: &[ExtraOnset],
+    tally: &Tally,
     weights: &ScoreWeights,
     quarter_ms: f64,
 ) -> (f32, f32, f32, f32, f32) {
@@ -1027,10 +1745,6 @@ fn score_results(
         .iter()
         .filter_map(|r| r.deviation_ms)
         .collect();
-    let due = results
-        .iter()
-        .filter(|r| r.state != OnsetState::SoftAbsent)
-        .count();
 
     // A window to judge the deviations against. The schedule's own
     // smallest gap sets it, for the same reason it sets the detector's
@@ -1039,23 +1753,11 @@ fn score_results(
     // The same tempo-aware rule the free-play matcher uses, on the
     // schedule's own smallest gap: a piece of sixteenths is judged on a
     // sixteenth's tolerance, at the tempo it was actually played.
-    let window_ms = tempo_aware_window_ms(quarter_ms * sub);
+    let gap_ms = quarter_ms * sub;
+    let window_ms = tempo_aware_window_ms(gap_ms);
     let thresholds = window_thresholds(window_ms);
 
-    let interval_consistency = if hits.len() < 3 {
-        0.5
-    } else {
-        let mut sorted = hits.clone();
-        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-        let med = median(&sorted);
-        let mut devs: Vec<f64> = sorted.iter().map(|d| (d - med).abs()).collect();
-        devs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-        // MAD → σ, the same estimator `score_segment` uses, for the
-        // same reason: one wild note should not decide the number.
-        let sigma = median(&devs) * 1.4826;
-        let k = (window_ms * 0.5).max(1.0);
-        (-sigma * sigma / (2.0 * k * k)).exp() as f32
-    };
+    let interval_consistency = evenness(&hits, gap_ms).map(|(e, _)| e).unwrap_or(0.5);
 
     let grid_alignment = if hits.is_empty() {
         0.0
@@ -1078,26 +1780,28 @@ fn score_results(
         ((sum / hits.len() as f64) / 100.0).clamp(0.0, 1.0) as f32
     };
 
-    let hit_completeness = if due > 0 {
-        (hits.len() as f32 / due as f32).clamp(0.0, 1.0)
+    let hit_completeness = if tally.due > 0 {
+        (tally.heard as f32 / tally.due as f32).clamp(0.0, 1.0)
     } else {
         0.0
     };
 
     let onset_efficiency = {
-        let total = hits.len() + extras.len();
+        let total = tally.heard + tally.extra;
         if total > 0 {
-            (hits.len() as f32 / total as f32).clamp(0.0, 1.0)
+            (tally.heard as f32 / total as f32).clamp(0.0, 1.0)
         } else {
             0.0
         }
     };
 
-    let score = (interval_consistency * weights.ic
-        + grid_alignment * weights.ga
-        + hit_completeness * weights.hc
-        + onset_efficiency * weights.oe)
-        * 100.0;
+    let score = known_score_number(
+        interval_consistency,
+        grid_alignment,
+        hit_completeness,
+        onset_efficiency,
+        weights,
+    );
 
     (
         score,
@@ -1141,6 +1845,12 @@ pub struct ScheduleRun {
     settled: u64,
     /// When the last sweep ran, on the beat map's own clock. The rate limit.
     last_sweep_ms: f64,
+    /// The cached `(instrument, device)` offset, if this rig has one.
+    calibration_seed_ms: Option<f64>,
+    /// What the live sweep currently takes the system's lag to be.
+    live_lag_ms: f64,
+    /// How many played notes `live_lag_ms` was last worked out over.
+    live_lag_notes: usize,
 }
 
 /// How long after an expected onset's matching window closes its live verdict
@@ -1200,7 +1910,17 @@ impl ScheduleRun {
             smallest_gap,
             settled: 0,
             last_sweep_ms: f64::NEG_INFINITY,
+            calibration_seed_ms: None,
+            live_lag_ms: 0.0,
+            live_lag_notes: 0,
         }
+    }
+
+    /// The offset `calibration_cache` holds for this rig, when it holds one.
+    pub fn with_calibration_seed(mut self, seed_ms: Option<f64>) -> Self {
+        self.calibration_seed_ms = seed_ms.filter(|s| s.is_finite());
+        self.live_lag_ms = self.calibration_seed_ms.unwrap_or(0.0);
+        self
     }
 
     pub fn schedule(&self) -> &ScoreSchedule {
@@ -1212,13 +1932,19 @@ impl ScheduleRun {
     /// beat 0 landed mid-bar would put every bar line in the wrong
     /// place for the rest of the attempt.
     pub fn note_quarter(&mut self, is_downbeat: bool, wall_ms: f64) {
+        self.note_quarter_in_bar(is_downbeat, wall_ms, DEFAULT_BEATS_PER_BAR);
+    }
+
+    /// [`Self::note_quarter`], with the length of the bar the engine is
+    /// counting, which is what per-bar metrics are cut by.
+    pub fn note_quarter_in_bar(&mut self, is_downbeat: bool, wall_ms: f64, beats_per_bar: u32) {
         if !self.started {
             if !is_downbeat {
                 return;
             }
             self.started = true;
         }
-        self.beats.push_quarter(wall_ms);
+        self.beats.push_quarter_in_bar(wall_ms, beats_per_bar);
     }
 
     /// A note was heard. Everything the detector emitted goes in,
@@ -1248,18 +1974,21 @@ impl ScheduleRun {
         densest_quarter(&self.schedule.onsets)
     }
 
-    /// Match everything so far. `None` until there is a beat map to
-    /// match against — without one there is no honest way to turn a
-    /// beat into a time.
+    /// Match everything so far, with the system's lag taken out. `None`
+    /// until there is a beat map to match against — without one there is no
+    /// honest way to turn a beat into a time.
     pub fn report(&self, weights: &ScoreWeights) -> Option<ScheduleReport> {
         if self.beats.is_empty() {
             return None;
         }
-        Some(match_attempt(
+        Some(match_attempt_calibrated(
             &self.schedule,
             &self.beats,
             &self.played,
             weights,
+            CalibrationPolicy::Auto {
+                seed_ms: self.calibration_seed_ms,
+            },
         ))
     }
 
@@ -1291,6 +2020,7 @@ impl ScheduleRun {
             return;
         }
         self.last_sweep_ms = now_ms;
+        self.refresh_live_lag();
 
         let length = pass_length(&self.schedule);
         // The last quarter the engine actually reported. Nothing past it is
@@ -1313,7 +2043,7 @@ impl ScheduleRun {
             let Some(t) = self.beats.time_at_beat(abs) else {
                 break;
             };
-            if t + self.window_ms_at(abs) + LIVE_SETTLE_LAG_MS > now_ms {
+            if t + self.live_lag_ms + self.window_ms_at(abs) + LIVE_SETTLE_LAG_MS > now_ms {
                 break;
             }
             end += 1;
@@ -1336,6 +2066,54 @@ impl ScheduleRun {
             cursor = pass_end;
         }
         self.settled = end;
+    }
+
+    /// The live verdicts have the same lag to deal with as the report, and
+    /// less to go on: the recent notes rather than all of them. Until there
+    /// are enough to read one, the cached offset or nothing. Provisional, like
+    /// everything `settle` says: the report works it out again from the whole
+    /// Take at the end.
+    fn refresh_live_lag(&mut self) {
+        const RECENT: usize = 32;
+        if self.played.len() == self.live_lag_notes || self.played.len() < MIN_NOTES_FOR_LAG {
+            return;
+        }
+        self.live_lag_notes = self.played.len();
+        let recent = &self.played[self.played.len().saturating_sub(RECENT)..];
+        let (Some(first), Some(last)) = (recent.first(), recent.last()) else {
+            return;
+        };
+        let (Some(from), Some(to)) = (
+            self.beats.beat_at_time(first.time_ms - 200.0),
+            self.beats.beat_at_time(last.time_ms + 200.0),
+        ) else {
+            return;
+        };
+        let length = pass_length(&self.schedule);
+        let mut expected: Vec<f64> = Vec::with_capacity(RECENT * 2);
+        let first_pass = (from.max(0.0) / length).floor() as u32;
+        let last_pass = if self.schedule.loops {
+            (to.max(0.0) / length).floor() as u32
+        } else {
+            0
+        };
+        for pass in first_pass.min(last_pass)..=last_pass {
+            let origin = pass as f64 * length;
+            for o in &self.pass_onsets {
+                let abs = origin + o.beat;
+                if abs >= from && abs <= to {
+                    if let Some(t) = self.beats.time_at_beat(abs) {
+                        expected.push(t);
+                    }
+                }
+            }
+        }
+        let times: Vec<f64> = recent.iter().map(|p| p.time_ms).collect();
+        let gap_ms = self.smallest_gap * self.beats.interval_ms_at(from.max(0.0));
+        let prior = self.calibration_seed_ms.unwrap_or(NOMINAL_LAG_MS);
+        if let Some(lag) = estimate_constant_lag_ms(&expected, &times, gap_ms, prior) {
+            self.live_lag_ms = lag;
+        }
     }
 
     /// Verdicts for `first..=last` of one pass, aligned with context on both
@@ -1368,10 +2146,18 @@ impl ScheduleRun {
         // The notes that could pair with anything in the slice. `played` is
         // in arrival order, which is time order, so both ends are a binary
         // search rather than a scan of the whole attempt.
-        let from_ms = times[0] - windows[0];
-        let to_ms = times[times.len() - 1] + windows[windows.len() - 1];
+        let lag = self.live_lag_ms;
+        let from_ms = times[0] - windows[0] + lag;
+        let to_ms = times[times.len() - 1] + windows[windows.len() - 1] + lag;
         let from = self.played.partition_point(|p| p.time_ms < from_ms);
         let to = self.played.partition_point(|p| p.time_ms <= to_ms);
+        let notes: Vec<PlayedOnset> = self.played[from..to]
+            .iter()
+            .map(|p| PlayedOnset {
+                time_ms: p.time_ms - lag,
+                ..*p
+            })
+            .collect();
 
         // The extras are dropped here and the beat they fell on is never
         // computed: a note nobody asked for lights nothing on the page, and
@@ -1379,7 +2165,7 @@ impl ScheduleRun {
         let (results, _extras) = align_pass(
             expected,
             &times,
-            &self.played[from..to],
+            &notes,
             &|i| windows[i],
             pass,
             &|_| 0.0,

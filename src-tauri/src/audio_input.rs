@@ -103,7 +103,7 @@ pub struct RingBuffer {
 }
 
 impl RingBuffer {
-    fn new(capacity: usize) -> Self {
+    pub fn new(capacity: usize) -> Self {
         Self {
             buf: vec![0.0; capacity],
             write_pos: 0,
@@ -111,7 +111,7 @@ impl RingBuffer {
         }
     }
 
-    fn write(&mut self, samples: &[f32]) {
+    pub fn write(&mut self, samples: &[f32]) {
         for &s in samples {
             self.buf[self.write_pos] = s;
             self.write_pos = (self.write_pos + 1) % self.capacity;
@@ -127,6 +127,44 @@ impl RingBuffer {
             out.push(self.buf[(start + i) % self.capacity]);
         }
         out
+    }
+
+    /// Where the next sample will be written. Read with the lock held, so it
+    /// is a cursor into exactly what has been written so far.
+    pub fn write_pos(&self) -> usize {
+        self.write_pos
+    }
+
+    /// Append everything written since `cursor` to `out`, and move `cursor`
+    /// up to date.
+    ///
+    /// A reader polling a good deal faster than the ring's length (the onset
+    /// detector: 5 ms against 4 s) cannot be lapped, so the position alone is
+    /// a true cursor and the input callback has no new counter to maintain.
+    /// A reader further behind than `max_backlog` skips forward: audio that
+    /// old is no use to it, and `out` must not grow. `out` is the caller's
+    /// so that nothing here allocates with the lock held.
+    pub fn read_since(&self, cursor: &mut usize, out: &mut Vec<f32>, max_backlog: usize) {
+        // A device change swaps in a ring of another size under the reader.
+        let from = *cursor % self.capacity;
+        let new = (self.write_pos + self.capacity - from) % self.capacity;
+        let queued = new + out.len();
+        // Past the backlog, keep the newest audio. What is already queued in
+        // `out` is older than anything in the ring, so it goes first.
+        if queued > max_backlog {
+            let drop_queued = (queued - max_backlog).min(out.len());
+            out.drain(..drop_queued);
+        }
+        let room = max_backlog.saturating_sub(out.len());
+        let take = new.min(room);
+        let start = (self.write_pos + self.capacity - take) % self.capacity;
+        if start + take <= self.capacity {
+            out.extend_from_slice(&self.buf[start..start + take]);
+        } else {
+            out.extend_from_slice(&self.buf[start..]);
+            out.extend_from_slice(&self.buf[..start + take - self.capacity]);
+        }
+        *cursor = self.write_pos;
     }
 }
 

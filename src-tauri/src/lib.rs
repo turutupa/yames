@@ -2,7 +2,7 @@
 /// allocator `click-jitter-probe` installs. `pub` because the allocator
 /// lives in that binary, which can only see the crate's public surface.
 pub mod alloc_probe;
-mod audio_input;
+pub mod audio_input;
 mod calibration_cache;
 mod clock;
 mod coach;
@@ -26,7 +26,7 @@ mod jam;
 mod kit;
 mod midi;
 mod models;
-mod onset;
+pub mod onset;
 /// The score a player is playing against, and — roadmap 2.4 — what came
 /// back from a pass at it. `pub` for the same reason the three below are.
 pub mod score;
@@ -160,7 +160,7 @@ use commands::{
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
+    clear_score_schedule, close_open_segment, get_take_grade, load_score_schedule, notify_settings_change,
     // W12 — the bands the review colours a note by, from the scorer's own rule.
     score_timing_bands,
     open_url, reveal_in_folder, reorder_presets, save_drill_run, save_preset, save_session,
@@ -864,6 +864,7 @@ pub fn run() {
             get_evaluation_state,
             notify_settings_change,
             close_open_segment,
+            get_take_grade,
             // Roadmap 2.4 — the score the player is playing against.
             load_score_schedule,
             clear_score_schedule,
