@@ -12,7 +12,7 @@ const words = {
   coach: "I can time these notes.",
 };
 
-export function exercise(overrides: Partial<ExerciseSpec> & { id: string; tab: string }): ExerciseSpec {
+export function exercise(overrides: Partial<ExerciseSpec> & { id: string }): ExerciseSpec {
   return {
     title: overrides.id,
     ...words,
@@ -23,6 +23,29 @@ export function exercise(overrides: Partial<ExerciseSpec> & { id: string; tab: s
     ...overrides,
   };
 }
+
+const WARM: ExerciseSpec = exercise({
+  id: "warm",
+  tab: "",
+  grade: "warmup",
+  vary: {
+    values: { key: ["0", "2", "3", "5", "7", "9"] },
+    pooled: ["key"],
+    build: (p) => {
+      const up = Number(p.key);
+      const fret = 3 + up;
+      return {
+        tab: `/8 ${repeat(`5:${fret} 5:${fret + 2} 5:${fret + 3} 5:${fret + 2}`, 1)} ${repeat(`5:${fret + 5} 5:${fret + 7} 5:${fret + 8} 5:${fret + 7}`, 1)}`,
+        position: fret,
+        shifts: true,
+        chords: "A7",
+      };
+    },
+  },
+  warmup: { start: 0.6, top: 0.8, reference: "plain.scale", fallback: 60 },
+  rungs: [60, 70, 80],
+  minutes: 3,
+});
 
 /** Everything the validator needs to see, each thing once. */
 export const MINIMAL_SPEC: PathSpec = definePath({
@@ -82,12 +105,14 @@ export const MINIMAL_SPEC: PathSpec = definePath({
           selfCheck: ["Did notes ring?"],
         }),
         exercise({
-          id: "arp3",
+          id: "chained",
           pick: "sweep",
           grade: "sweep",
-          tab: `/8t ${repeat("3:14 2:13 1:12 1:17h 1:12p 2:13", 2)}`,
+          tab: `/8t ${repeat("3:14 2:13 1:12 1:17h 1:12p 2:13", 2)} | ${repeat("3:14 2:13 1:13 1:17h 1:13p 2:13", 2)}`,
           position: 12,
-          harmony: { arpeggio: "Am", cover: true },
+          chords: "Am | F",
+          chain: { maxJointFrets: 3 },
+          harmony: { chordTones: true },
           rungs: [60, 70, 80],
           selfCheck: ["Did notes ring?"],
         }),
@@ -134,5 +159,10 @@ export const MINIMAL_SPEC: PathSpec = definePath({
         }),
       ],
     },
+  ],
+  levels: [
+    { id: "beginner", title: "B", summary: "First.", startHereIf: ["You can play eighths at 60 BPM.", "Your sixteenths are uneven."], steps: ["plain"], warmups: [WARM] },
+    { id: "intermediate", title: "I", summary: "Next.", startHereIf: ["You can sweep 3 strings at 80 BPM.", "Your links stop."], steps: ["swept"], warmups: [WARM] },
+    { id: "advanced", title: "A", summary: "Last.", startHereIf: ["You can land on 4 chords in a row.", "You get lost in the form."], steps: ["band"], warmups: [WARM] },
   ],
 });

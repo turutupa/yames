@@ -8,6 +8,8 @@
 > (`LEARNING_PATHS_DECISIONS.md` D0.3, D0.4).
 
 A new Path is: write a short spec, run a command, read the errors, review the page.
+Every Path has three open **Levels**, its boring Exercises **vary**, and every Level
+has a **warm-up**. The validator refuses a Path without them.
 
 ```sh
 npm run paths -- new <id> "<Title>" <mechanics|theory>   # start a spec, registered
@@ -109,6 +111,89 @@ hear themselves gain), `prerequisites`, `difficulty`, optional
 Review status: `draft`, then `agent-reviewed`, `teacher-reviewed`, `played`. Past
 draft, the validator wants an entry in `review.history` with who and when.
 
+## Levels, variation and warm-ups
+
+Added 2026-11 from the owner's feedback ("all I have to do is the same sweep pick over
+and over... it's boring"). All of it is additive: `schemaVersion` stays 1, `steps`
+stays a flat list in order, and a reader that ignores the new fields still works.
+
+**Levels** (`PathDoc.levels`): Beginner, Intermediate, Advanced, in that order, each a
+run of consecutive Steps. A player can start at any of them: `entry` is always
+`"open"`, and `Step.prerequisites` is guidance for the planner and never a lock. Each
+Level has a one-screen `placement.startHereIf`, things a player can check on their own
+guitar, at least one with a number in it. `reachLevel` sets the hand the reach check
+assumes on those Steps, so Advanced can ask for what Beginner can't.
+
+**Variation** (`Exercise.variation`): an Exercise declares the dimensions it may vary
+along (`key`, `position`, `stringSet`, `shapeOrder`, `progression`), and every
+combination becomes a variant with its own known notes. Each one goes through every
+tab, reach, music, honesty and schedule rule, and through the real importer in the
+tests, so it is gradable. `notes` on the Exercise is always variant 0.
+
+- **Selection** is `notesForTake(exercise, seed, takeIndex)` in `variants.ts`: a seeded
+  shuffle, pure, the same on every machine. Every variant comes round before any
+  repeats, and no two Takes in a row play the same notes. Store the `variantId` on the
+  Take; `resolveVariant` brings the notes back.
+- **Pooling.** Each dimension is either `pooled` (it doesn't change difficulty, so
+  progress and clean tempo carry across it) or `notPooled` with a reason (each value
+  starts its own pool). `progressKey(exercise, variantId)` is the storage key. The
+  validator refuses a pool whose variants differ by more than 30% on the difficulty
+  metric. Fret position is the usual `notPooled`: low frets are wider.
+
+In a spec, `vary` gives the values and a `build` function from one combination to its
+notes:
+
+```ts
+vary: {
+  values: { progression: ["i-VI-III-VII", "i-iv-V-i"], key: ["A", "E", "D"] },
+  pooled: ["progression", "key"],
+  build: (p) => ({ tab: sweepChain({ ... }), position: 12, chords: chartFor(p) }),
+}
+```
+
+**Warm-ups** (`Level.warmups`, with `Exercise.warmup`) are short, musical, moving
+through positions, and at least six validated variants, so the first five minutes
+aren't yesterday's notes. They start at a share of the player's recent clean tempo on
+a named reference Exercise on the same note grid, with a fallback for no history
+(`warmupStartBpm`). They report, and `advancesProgress` is always false. Warm-ups sit
+under a Level, not in `steps`, so nothing that walks the Steps sees them by accident.
+
+**Chains** (`Exercise.chain`) are linked arpeggios: the notes carry on across every bar
+line, each bar is checked against its own chord, and the join stays on the string or
+the next one, within `maxJointFrets`. Templates: `linkedSweep` (one pass per chord, a
+legato step at each end), `sweepChain` (voice-led loops, each shape starting as near as
+it can to the last) and `linkFragment` (only the join, for practising it alone).
+
+Jam's grid is one chord to a bar, so chains change once a bar. Fast playing in this
+style often changes every two beats, and that isn't representable yet.
+
+**Sizes.** Variants carry their notes, so the packs are bigger: about 650 KB, 1.6 MB and
+420 KB. They compress well, but load them per Path and not at startup.
+
+### What the Session planner needs from this
+
+The planner (W3 on `revamp-w3-tracer`) can keep reading `steps` as it does. To use the
+new fields:
+
+| It needs to | Read or call |
+|---|---|
+| Offer a starting point | `doc.levels[].title`, `.summary`, `.placement.startHereIf` |
+| Know where a Step belongs | `levelOfStep(doc, stepId)`, or `level.stepIds` |
+| Suggest an order | `step.prerequisites`, as guidance: nothing may be locked |
+| Start a Session | `warmupsFor(doc, levelId)`, then `warmupStartBpm(warmup, cleanBpmOfReference)` |
+| Find the reference's clean tempo | `warmup.referenceExercise`, then `progressKey` on that Exercise |
+| Choose notes for a Take | `notesForTake(exercise, seed, takeIndex)`: use `.exercise` for scoring, the tab and the coach |
+| Remember what was played | Store `variantId` on the Take. `resolveVariant(exercise, variantId)` gets it back |
+| Track progress and clean tempo | `progressKey(exercise, variantId)`: one number per pool, not per variant |
+| Say what changes difficulty | `variation.notPooled[].reason` |
+| Score it | `exerciseScore(pathId, concreteExercise, bpm)`, as before |
+| Know it doesn't count | `exercise.warmup.advancesProgress === false`: report it, don't advance |
+
+Three rules: the Exercise you score is the concrete one, since its `chords`, `harmony`,
+`landings`, `passBars` and `position` can differ per variant. Key on ids, never on
+`step.order`, which moves as Steps are added. Keep `seed` stable for a player or a
+Session and advance `takeIndex`, or two Takes could land on the same variant.
+
 ## Writing a spec
 
 Compact tab, in `tabDsl.ts`: `/16 5:5 5:6> 3:7b2v | /4 r hold`. `/8` sets the value
@@ -170,6 +255,16 @@ also fails if a pack isn't what its spec generates.
   status past draft without a record, and no notes-heard bar a correct take could fail
   because its slides were too quiet.
 - **Runtime:** the Exercise produces a usable schedule through the real `buildSchedule`.
+- **Levels:** all three, in order, every Step in exactly one, always open, a placement
+  note that can be checked and fits a screen, a warm-up in each.
+- **Variation:** every dimension declared pooled or not pooled, no two variants with the
+  same notes, variant 0 is the Exercise's own notes, pools agree with their values and
+  stay within 30% on difficulty. Every variant also passes every rule above.
+- **Warm-ups:** at least six variants, moving through positions, at most 8 bars and 5
+  minutes, a declared scale or chords, a comfortable tempo share, a reference on the same
+  note grid, never advancing progress, and only under a Level.
+- **Chains:** different chords, checked bar by bar, no stop at a bar line, a join that
+  connects and doesn't jump.
 
 **The difficulty metric** (`difficulty.ts`) is notes per second at the pass tempo,
 times `1 + 0.4 crossings + 0.6 skips + 0.3 shifts (+ 0.25 if swept)`, plus 3 × the
@@ -237,8 +332,9 @@ no test behind it at all. Faster rungs must be self-checked.
 | 5. Teacher review | A real teacher, with the review page | Every row on the sheet marked, the fixes made. `teacher-reviewed` |
 | 6. Played | A real guitarist, on a real guitar, in the app | Each Step played at its pass tempo, with takes kept, the thresholds and trust limits revised from what the app actually heard. `played` |
 
-**Adding a Path:** `npm run paths -- new`, fill in the spec, `gen`, `check`, `review`,
-then stages 4 to 6. Add the JSON to the bundle when the runtime exists.
+**Adding a Path:** `npm run paths -- new` scaffolds the Levels and a warm-up per Level.
+Fill in the spec, decide what should vary (anything a player would repeat for weeks),
+then `gen`, `check`, `review` and stages 4 to 6. Add the JSON to the bundle when the runtime exists.
 
 **A change of mind about a bar or a limit:** edit `profiles.ts` or `metrics.ts`, run
 `gen`, and read the diff: every affected Exercise moves, and the validator says which
@@ -286,6 +382,11 @@ Paste one of these, with the Path's spec and pack paths, into a fresh session.
   Exercises become one line of tab.
 - Every mistake found so far became a rule, so it can't recur: reach, inside and
   outside, band feel, slide bars.
+- One `vary` block is many Takes. The sweep Path has 271 validated variants from about
+  60 lines of variation code.
+- Content is yours to write with care, not to copy: standard shapes, scales, progressions
+  and common drills are shared vocabulary and fair game. Phrases are original. Don't
+  reproduce a song's riff or solo, or a course's text or lesson sequence.
 - The review briefs are ready.
 
 An honest estimate: an agent writes and validates a ten-Step draft spec in about half

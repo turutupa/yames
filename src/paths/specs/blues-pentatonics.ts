@@ -4,7 +4,8 @@
  * play. Free playing is graded only at landing moments, or not at all.
  */
 import { definePath } from "../spec";
-import { ladder, pentatonic, swing } from "../templates";
+import { handAt, ladder, moveChart, pentatonic, shiftFrets, swing } from "../templates";
+import type { VariantParams } from "../spec";
 
 const TWELVE = "A7 | A7 | A7 | A7 | D7 | D7 | A7 | A7 | E7 | D7 | A7 | E7";
 const VAMP_A = "A7 | A7 | A7 | A7";
@@ -61,6 +62,40 @@ const REST_BARS = `/1 r | /1 r`;
 const THE_QUESTION = `/8 1:5 2:8 /4 2:5 3:7 /4 2:8 | /2 2:8v /2 r`;
 const THE_ANSWER = `/8 1:5 2:8 /4 2:5 3:7 /8 3:5 3:7 | /2 4:7v /2 r`;
 
+const KEY_SHIFT: Readonly<Record<string, number>> = { A: 0, B: 2, C: 3, D: 5, E: -5, G: -2 };
+
+/** The same written line, moved to other keys. The harmony moves with it. */
+function inKeys(tab: string, chart: string | undefined, scale: string | undefined, keys: readonly string[], allowed: string[] = []) {
+  return {
+    values: { key: keys },
+    pooled: ["key"] as const,
+    label: (p: VariantParams) => `In ${p.key}`,
+    build: (p: VariantParams) => {
+      const shift = KEY_SHIFT[p.key];
+      const moved = shiftFrets(tab, shift);
+      const movedAllowed = allowed.map((n) => moveChart(n, shift).trim());
+      return {
+        tab: moved,
+        position: handAt(moved),
+        shifts: true,
+        ...(chart
+          ? {
+              chords: moveChart(chart, shift),
+              jam: { groove: "bluesTexas", key: `${p.key} blues`, feel: "shuffle" as const },
+            }
+          : {}),
+        ...(scale
+          ? {
+              harmony: chart
+                ? { scaleOverChords: [p.key, scale] as [string, string], allowed: movedAllowed }
+                : { scale: [p.key, scale] as [string, string], cover: true },
+            }
+          : {}),
+      };
+    },
+  };
+}
+
 const CHORD_TONES_WHY =
   "Over A7 the chord tones are A, C#, E, G. Box 1 holds A, E and G of those. Its C is the blue third: it rubs against the band's C#, on purpose, and it is not a landing note yet.";
 
@@ -71,7 +106,7 @@ export default definePath({
   goal: "Solo over a twelve-bar blues in A, knowing where the changes are and landing on notes that belong to them.",
   level: "early-intermediate",
   assumes:
-    "You know the open chords and can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. Nothing about scales or blues is assumed. The Exercises are all in A, on purpose, so that theory is the only new thing.",
+    "You know the open chords and can fret and pick single notes, and you can play eighth notes with a click at 70 BPM. Nothing about scales or blues is assumed. The early Exercises are all in A, on purpose, so that theory is the only new thing; later ones move to other keys.",
   prerequisites: { skills: ["Clean single notes", "Eighth notes with a click at 70 BPM"] },
   orderRationale:
     "Close to the starting order, with one change of weight. Chord tones arrive in Step 2, before the blues scale, since landing on the right note matters more than knowing an extra one. Call and response is Step 3 because it is the fastest way to make any notes sound like music, and it needs almost no theory. The blues scale and bends both come after the player can land, so neither becomes a thing to sit on. Connecting a second box comes late on purpose: a second box is more notes, and more notes before good choices makes for faster bad solos. Guide tones are Step 9 because they're the most abstract idea here and are easiest once the form is in the ear. Slow blues comes last as it hides nothing.",
@@ -330,6 +365,7 @@ export default definePath({
           purpose: "The box with its one new note, so you can find the Eb without thinking.",
           howTo: ["Eighth notes up and down. The Eb gives the A string three frets in a row: first, second and third fingers."],
           coach: "Right notes after the take, the same as before.",
+          vary: inKeys(`/8 ${pentatonic({ root: "A", box: 1, scale: "blues", sequence: "updown" })} hold`, undefined, "blues", ["A", "C", "D", "E", "G"]),
           tab: `/8 ${pentatonic({ root: "A", box: 1, scale: "blues", sequence: "updown" })} hold`,
           position: 5,
           harmony: { scale: ["A", "blues"], cover: true },
@@ -420,6 +456,7 @@ export default definePath({
           purpose: "A walking shuffle line through the whole form, so you're playing the changes rather than following them. It is the same shape moved to three roots.",
           howTo: ["Root, third, fifth, sixth, flat seven, and back. Swing it: long, short, long, short. It's a stretch from fret 5 to 9 on one string, so let the hand move."],
           coach: "A lot of notes and long form, and I'll report them after the take. Getting all the way through is the win.",
+          vary: inKeys([walkA, walkA, walkA, walkA, walkD, walkD, walkA, walkA, walkE, walkD, walkA, walkE].join(" | "), TWELVE, undefined, ["A", "C", "E", "G"]),
           tab: swing([
             walkA, walkA, walkA, walkA, walkD, walkD, walkA, walkA, walkE, walkD, walkA, walkE,
           ].join(" | ")),
@@ -455,6 +492,7 @@ export default definePath({
           purpose: "A whole free chorus. You choose everything, and the only thing graded is the note on beat 1 at each chord change.",
           howTo: ["Six landings in twelve bars. Know the next chord before you get to it. If you lose the form, wait and rejoin at bar 5 or bar 9."],
           coach: "Only the changes count, which is six moments. Everything else in the chorus is yours.",
+          vary: inKeys(swing(`/2 4:7 /8 3:5 3:7 3:5 3:7 | /2 2:5 /2 r | /2 2:8 /8 2:5 3:7 3:5 3:7 | /2 4:7 /2 r | /2 3:7 /8 3:5 4:7 3:5 3:7 | /2 3:5 /2 r | /2 4:7 /8 3:5 3:7 2:5 3:7 | /2 2:5 /2 r | /2 2:5 /8 3:7 3:5 3:7 2:5 | /2 3:7 /8 3:5 3:7 3:5 4:7 | /2 4:7 /8 3:5 4:7 4:5 3:5 | /2 2:5 /2 r`), TWELVE, undefined, ["A", "C", "E", "G"]),
           tab: swing(`/2 4:7 /8 3:5 3:7 3:5 3:7 | /2 2:5 /2 r | /2 2:8 /8 2:5 3:7 3:5 3:7 | /2 4:7 /2 r | /2 3:7 /8 3:5 4:7 3:5 3:7 | /2 3:5 /2 r | /2 4:7 /8 3:5 3:7 2:5 3:7 | /2 2:5 /2 r | /2 2:5 /8 3:7 3:5 3:7 2:5 | /2 3:7 /8 3:5 3:7 3:5 4:7 | /2 4:7 /8 3:5 4:7 4:5 3:5 | /2 2:5 /2 r`),
           position: 5,
           chords: TWELVE,
@@ -768,6 +806,7 @@ export default definePath({
           purpose: "Two half notes per bar through the form: third, then seventh. The chord's identity comes through with nothing else played.",
           howTo: ["Stay in fifth position. Fingers fall on these two strings and barely have to move at each change, which is the whole point."],
           coach: "It's slow, but every note counts. I'll check each one after the take.",
+          vary: inKeys(`/2 3:6 2:8 | 3:6 2:8 | 3:6 2:8 | 3:6 2:8 | 3:5 2:7 | 3:5 2:7 | 3:6 2:8 | 3:6 2:8 | 4:6 3:7 | 3:5 2:7 | 3:6 2:8 | 4:6 3:7`, TWELVE, undefined, ["A", "C", "E", "G"]),
           tab: swing(`/2 3:6 2:8 | 3:6 2:8 | 3:6 2:8 | 3:6 2:8 | 3:5 2:7 | 3:5 2:7 | 3:6 2:8 | 3:6 2:8 | 4:6 3:7 | 3:5 2:7 | 3:6 2:8 | 4:6 3:7`),
           position: 5,
           chords: TWELVE,
@@ -895,6 +934,110 @@ export default definePath({
           rungs: ladder(50, 72, 4),
           grade: "practiceOnly",
           minutes: 8,
+        },
+      ],
+    },
+  ],
+  levels: [
+    {
+      id: "beginner",
+      title: "Beginner: one box, and where to land",
+      summary: "One pentatonic box, landing on notes that belong to the chord, and leaving space. All in A, so the theory is the only new thing.",
+      startHereIf: [
+        "You can play eighth notes with a click at 70 BPM.",
+        "You don't yet know box 1 from memory, or you know it and can't make it sound like a phrase.",
+        "You couldn't name the notes of A7 yet.",
+      ],
+      steps: ["box-one", "landing", "call-response"],
+      warmups: [
+        {
+          id: "box-around",
+          title: "A lick around the chords",
+          purpose: "A short shuffle lick in box 1, moved to follow i, IV, V and back. A new key and a new lick each time, so your hands wake up and your ears do too.",
+          howTo: ["Start well under your clean tempo. Swing it. Shift at the bar line and let the chord tell you where you are."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G"], shapeOrder: ["falling lick", "climbing lick"] },
+            pooled: ["key", "shapeOrder"],
+            label: (p) => `In ${p.key}, ${p.shapeOrder}`,
+            build: (p) => {
+              const lick = sh(p.shapeOrder === "falling lick" ? "1:5 2:8 2:5 3:7 3:5 3:7 2:5 3:7" : "4:7 3:5 3:7 2:5 2:8 2:5 3:7 3:5");
+              const shift = KEY_SHIFT[p.key];
+              const tab = [0, 5, 7, 0].map((up) => shiftFrets(lick, shift + up)).join(" | ");
+              return { tab, position: handAt(tab), shifts: true, chords: moveChart("A7 | D7 | E7 | A7", shift) };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.65, top: 0.85, reference: "landing.root-on-one", fallback: 70 },
+          rungs: ladder(60, 90, 5),
+          minutes: 3,
+        },
+      ],
+    },
+    {
+      id: "intermediate",
+      title: "Intermediate: the form and the voice",
+      summary: "The blues scale, all twelve bars, bends that land, and phrases that ask and answer.",
+      startHereIf: [
+        "You can play box 1 from memory, up and down, at 80 BPM eighths.",
+        "Over A7, D7 and E7 you can land on a chord tone on beat 1 for four bars running.",
+        "You get lost in the twelve-bar form, or your solos run together with no shape to them.",
+      ],
+      steps: ["blues-scale", "twelve-bar", "bends", "question-answer"],
+      warmups: [
+        {
+          id: "boogie-keys",
+          title: "A boogie line in a new key",
+          purpose: "A walking shuffle line round I, IV, V and back, in a key you didn't play yesterday. It's a warm-up and ear training at once.",
+          howTo: ["Start well under your clean tempo. Root, third, fifth, sixth, flat seven and back. Let the hand move."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "E", "G"], progression: ["I IV V I", "I V IV I"] },
+            pooled: ["key", "progression"],
+            label: (p) => `In ${p.key}, ${p.progression}`,
+            build: (p) => {
+              const shift = KEY_SHIFT[p.key];
+              const forward = p.progression === "I IV V I";
+              const line = forward ? [walkA, walkD, walkE, walkA] : [walkA, walkE, walkD, walkA];
+              const chart = forward ? "A7 | D7 | E7 | A7" : "A7 | E7 | D7 | A7";
+              const tab = line.map((bar) => shiftFrets(bar, shift)).join(" | ");
+              return { tab, position: handAt(tab), shifts: true, chords: moveChart(chart, shift) };
+            },
+          },
+          grade: "warmup",
+          warmup: { start: 0.65, top: 0.85, reference: "twelve-bar.walking", fallback: 70 },
+          rungs: ladder(60, 95, 5),
+          minutes: 4,
+        },
+      ],
+    },
+    {
+      id: "advanced",
+      title: "Advanced: more neck, more harmony, less noise",
+      summary: "A second box, guide tones through the changes, and slow blues with nothing to hide behind.",
+      startHereIf: [
+        "You can follow all 12 bars without losing your place.",
+        "You can bend a whole tone up to pitch by ear, and hold it there.",
+        "Your phrases work, and you're stuck in one box playing the same notes over every chord.",
+      ],
+      steps: ["two-boxes", "guide-tones", "slow-blues"],
+      warmups: [
+        {
+          id: "two-boxes-keys",
+          title: "Through both boxes",
+          purpose: "A four-bar line from box 1 into box 2 and home again, in a different key each time. The slide on the G string is what gets warmed up.",
+          howTo: ["Start well under your clean tempo. Take the slide slowly and let the line rise and come home."],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: inKeys(
+            swing(`/8 4:7 3:5 3:7 3:5 3:7s 3:9 /4 2:8 | /8 2:8 2:10 2:8 3:9 /2 2:8 | /8 2:10 1:8 1:10 1:8 /2 2:10 | /8 3:9 3:7 3:5 3:7 /2 4:7`),
+            VAMP_A,
+            "minorPentatonic",
+            ["A", "B", "C", "D", "E", "G"],
+          ),
+          grade: "warmup",
+          warmup: { start: 0.65, top: 0.85, reference: "two-boxes.there-and-back", fallback: 70 },
+          rungs: ladder(60, 90, 5),
+          minutes: 4,
         },
       ],
     },

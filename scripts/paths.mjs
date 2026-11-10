@@ -116,6 +116,57 @@ function scaffold(id, title, kind) {
   const file = path.join(specsDir, `${id}.ts`);
   if (existsSync(file)) fail(`${file} already exists`);
   const name = id.replace(/-([a-z0-9])/g, (_m, c) => c.toUpperCase());
+  const stepIds = ["first-step", "middle-step", "last-step"];
+  const stepStub = (id) => `    {
+      id: "${id}",
+      title: "TODO",
+      goal: "TODO",
+      why: "TODO: why this Step, in at least one real sentence for the player.",
+      howTo: ["TODO: technique, taught in words."],
+      payoff: "TODO: what they will hear themselves gain.",
+      exercises: [
+        // Three to five. Vary anything that would get boring: see plans/PATHS_PIPELINE.md.
+        {
+          id: "first",
+          title: "TODO",
+          purpose: "TODO: what this Exercise is for.",
+          howTo: ["TODO"],
+          coach: "TODO: what the Coach may say. Never claim to see or hear technique.",
+          tab: repeat("/16 5:5 5:6 5:7 5:8", 4),
+          position: 5,
+          rungs: ladder(60, 100, 10),
+          grade: "timing",
+          minutes: 5,
+        },
+      ],
+    },`;
+  const levelStub = (level, stepId) => `    {
+      id: "${level}",
+      title: "TODO",
+      summary: "TODO: what this Level is, in a sentence.",
+      startHereIf: ["TODO: something a player can check, with a number: a tempo or a count.", "TODO: another one."],
+      steps: ["${stepId}"],
+      warmups: [
+        {
+          id: "warm-${level}",
+          title: "TODO",
+          purpose: "TODO: short, musical, moving through positions.",
+          howTo: ["TODO"],
+          coach: "This is a warm-up. It tells you how it went, and it decides nothing.",
+          vary: {
+            values: { key: ["A", "C", "D", "E", "G", "B"] },
+            pooled: ["key"],
+            // TODO: return the notes for one value of each dimension. Declare any
+            // dimension that changes difficulty under notPooled, with the reason.
+            build: () => ({ tab: repeat("/8 5:5 5:7 5:8 5:7", 2), position: 5, shifts: true }),
+          },
+          grade: "warmup",
+          warmup: { start: 0.6, top: 0.8, reference: "${stepId}.first", fallback: 60 },
+          rungs: ladder(60, 100, 10),
+          minutes: 4,
+        },
+      ],
+    },`;
   writeFileSync(
     file,
     `/** ${title}. A draft until a teacher and a guitarist say otherwise. */
@@ -132,28 +183,10 @@ export default definePath({
   orderRationale: "TODO: why the Steps are in this order.",
   gradingLimits: "TODO: where grading stops being trustworthy on this Path.",
   steps: [
-    {
-      id: "first-step",
-      title: "TODO",
-      goal: "TODO",
-      why: "TODO: why this Step, in at least one real sentence for the player.",
-      howTo: ["TODO: technique, taught in words."],
-      payoff: "TODO: what they will hear themselves gain.",
-      exercises: [
-        {
-          id: "first",
-          title: "TODO",
-          purpose: "TODO: what this Exercise is for.",
-          howTo: ["TODO"],
-          coach: "TODO: what the Coach may say. Never claim to see or hear technique.",
-          tab: repeat("/16 5:5 5:6 5:7 5:8", 4),
-          position: 5,
-          rungs: ladder(60, 100, 10),
-          grade: "timing",
-          minutes: 5,
-        },
-      ],
-    },
+${stepIds.map(stepStub).join("\n")}
+  ],
+  levels: [
+${["beginner", "intermediate", "advanced"].map((level, i) => levelStub(level, stepIds[i])).join("\n")}
   ],
 });
 `,

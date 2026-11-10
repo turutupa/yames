@@ -105,6 +105,12 @@ export const GRADING_PROFILES: Readonly<Record<GradeProfile, GradingProfile>> = 
     feedback: "afterTake",
     example: true,
   },
+  warmup: {
+    mode: "graded",
+    graded: ["timingEvenness", "notesHeard"],
+    passBars: [evenness(0.7), heard(0.8)],
+    feedback: "afterTake",
+  },
   selfChecked: {
     mode: "selfChecked",
     graded: [],

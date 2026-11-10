@@ -115,7 +115,8 @@ export const REVIEW_CLIENT = `
 
   function start(card) {
     var id = card.getAttribute("data-ex");
-    var d = DATA[id];
+    var select = card.querySelector("[data-variant]");
+    var d = DATA[id].variants[select ? Number(select.value) : 0];
     var c = audio();
     var selected = card.querySelector(".rung.sel");
     var bpm = Number(selected.getAttribute("data-bpm"));
@@ -200,7 +201,36 @@ export const REVIEW_CLIENT = `
     current.raf = requestAnimationFrame(paint);
   }
 
+  // Variants arrive as inert templates; only the one being read is in the page.
+  function showVariant(card, index) {
+    var slot = card.querySelector(".variant-slot");
+    if (!card.firstBody) card.firstBody = slot.innerHTML;
+    var template = card.querySelector("template[data-v='" + index + "']");
+    slot.innerHTML = template ? template.innerHTML : card.firstBody;
+    var select = card.querySelector("[data-variant]");
+    select.value = String(index);
+  }
+  function flipTo(card, index) {
+    var playing = current && current.card === card;
+    stop();
+    showVariant(card, index);
+    if (playing) start(card);
+  }
+  document.addEventListener("change", function (event) {
+    if (event.target.matches && event.target.matches("[data-variant]")) {
+      flipTo(event.target.closest("[data-ex]"), Number(event.target.value));
+    }
+  });
+
   document.addEventListener("click", function (event) {
+    var flip = event.target.closest("[data-flip]");
+    if (flip) {
+      var flipCard = flip.closest("[data-ex]");
+      var options = flipCard.querySelector("[data-variant]");
+      var count = options.options.length;
+      flipTo(flipCard, (Number(options.value) + Number(flip.getAttribute("data-flip")) + count) % count);
+      return;
+    }
     var button = event.target.closest("[data-act]");
     if (button) {
       var card = button.closest("[data-ex]");
