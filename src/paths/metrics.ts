@@ -2,7 +2,7 @@
  * What may be graded, what is not, and what is hard to hear.
  *
  * Three controlled lists, and the validator holds every Exercise to them. The
- * evidence for each entry is `yames-concept/audit/CONVERSION_AUDIT.md` §3 and
+ * evidence for each entry is `plans/revamp/CONVERSION_AUDIT.md` §3 and
  * the code it cites. **Nothing here has met a real guitar**: the audit found
  * no real guitar audio in the repository, so every threshold below is a design
  * value waiting for that test, and no text may call it proven.

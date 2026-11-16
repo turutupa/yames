@@ -70,11 +70,28 @@ I18-02, I18-04, ZEN-04).
 
 ## Known gaps, pinned as `it.fails`
 
-Flip each to `it` when the product is fixed.
+Flip each to `it` when the product is fixed. None today: ONB-19 (the tour's Drill
+stop named `tab-2`, Setlist since the renumbering) was fixed in the revamp and is a
+plain test.
 
-| Row | Test | What is wrong today |
-|---|---|---|
-| ONB-19 | `helpAndTour.parity.test.tsx` "the Drill stop shows the Drill's own key" | The tour's Drill stop names `tab-2`, which is Setlist since the renumbering (section 6.1 item 8) |
+## The learning side (merged 2026-11-16)
+
+- **Frozen additions** in `manifest.json`: six commands and their wrappers
+  (`get_take_grade`, `list_exercise_ceilings`, `list_path_states`, `list_path_takes`,
+  `save_path_state`, `save_path_take`), the tables `path_state` and `path_takes`, six
+  hotkeys (`tab-today`, `session-go/slower/faster/next/pedal`), and the settings keys
+  `openOn` and `session.minutes`.
+- **The front door**, `shell.parity.test.tsx`: a returning player opens on Today with
+  their saved tool kept, and `app_ready` fires once on Today; with `openOn: "lastTool"`
+  every tool's saved tab comes back (SHL-07) as before.
+- **The action table** decides every action on `today`, `paths`, `progress` and
+  `session`: tool keys do nothing on the learning screens; Space and the tempo keys
+  drive a running Session.
+- **The doors**: the Session's own play and stop are `playTake`/`endTake`, so
+  `startTake`/`stopTake` still have only the two take hooks as callers.
+- **Not yet covered:** a Session writing the same `sessions`, `segments` and
+  `attempts` rows as the same practice through the tool's own tab (TOOLS_PARITY
+  section 5.3), and the wizard's landing after the front door (ONB-08).
 
 ## Pinned as they are, on purpose
 

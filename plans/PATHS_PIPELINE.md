@@ -276,7 +276,7 @@ exception, and those exceptions are worth a teacher's eye.
 
 ## Grading: what can be trusted
 
-From `metrics.ts`, on the evidence of `yames-concept/audit/CONVERSION_AUDIT.md` §3.
+From `metrics.ts`, on the evidence of `plans/revamp/CONVERSION_AUDIT.md` §3.
 **No real-guitar test exists, so every threshold is a design value.**
 
 | Metric | Source | Status |
@@ -302,24 +302,36 @@ no test behind it at all. Faster rungs must be self-checked.
 
 ## What the runtime still needs
 
-1. **A loader and a Session.** Nothing reads a pack yet. `audit` §4 has the plan.
-2. **The pass rule.** Bars over report fields, windowed by bars; the current `score`
-   can't be it.
-3. **Latency calibration on the known-score path** (audit defect 2), before any fast
-   rung is believed. `path_exercises.rs` pins the failure, so it will tell you when it
-   is fixed.
-4. **The noise-floor and poll-feed hazards** (audit §3) before stamina or high gain.
-5. **Slid-to notes as soft.** `schedule.ts` marks hammers and pulls soft, and not
+Done in the revamp (2026-11-16, `plans/tasks/revamp/STATUS.md`):
+
+- **A loader and a Session.** `src/session/packs.ts` reads the packs; the planner,
+  runner and screens are in `src/session/` and `src/containers/session/`.
+- **The pass rule.** `src-tauri/src/score/pass.rs`, over finished bars, windowed by
+  the longest `overBars`, with a window only as even as its worst bar. The Session
+  sends each Exercise's `passBars` with its schedule and the scorer's verdict
+  decides; `src/session/grade.ts` is the fallback reading.
+- **Latency calibration on the known-score path** for Session Takes (audit defect 2).
+  Songs keeps its uncorrected scoring.
+- **`evennessHold`** is measured by the pass rule.
+
+Still to do:
+
+1. **The noise-floor and poll-feed hazards** (audit §3) are rewritten in `onset.rs`
+   (a ring cursor, a noise floor that learns only from quiet hops), but proven on
+   synthetic audio only. They move the detector for every mode, so they need the
+   real-audio corpus before stamina or high gain is believed, and before main.
+2. **Slid-to notes as soft.** `schedule.ts` marks hammers and pulls soft, and not
    slides, so an unheard slid-to note is a miss. Small, but it moves song scoring, so
    it's not changed here. Until then `honesty.slideBar` keeps the bars forgiving.
-6. **`noteIdentity` wired** from `analyze_take_pitch` to an Exercise's notes.
-7. **The new graders:** `landingChordTone`, `scaleMembership`, `restsKept`, `evennessHold`.
-8. **Live per-bar pitch** for the four `livePerBar` Exercises in Blues (land-any-tone,
+3. **`noteIdentity` wired** from `analyze_take_pitch` to an Exercise's notes. Until
+   then the pass rule lists it as not assessed and the result says so.
+4. **The new graders:** `landingChordTone`, `scaleMembership`, `restsKept`.
+5. **Live per-bar pitch** for the four `livePerBar` Exercises in Blues (land-any-tone,
    two-chords, follow-the-form, free-guide-tones). They fall back to after the take.
    Everything else in Blues is after the take, or has no feedback.
-9. **Guide parts** played by the synth, for the call in Steps 3 and 7 of Blues.
-10. **Bend measurement.** Not built; every bend is self-checked until it is.
-11. **Band bleed.** Untested with a microphone. Direct input or headphones until then.
+6. **Guide parts** played by the synth, for the call in Steps 3 and 7 of Blues.
+7. **Bend measurement.** Not built; every bend is self-checked until it is.
+8. **Band bleed.** Untested with a microphone. Direct input or headphones until then.
 
 ## The authoring workflow, and what done means
 
@@ -334,7 +346,7 @@ no test behind it at all. Faster rungs must be self-checked.
 
 **Adding a Path:** `npm run paths -- new` scaffolds the Levels and a warm-up per Level.
 Fill in the spec, decide what should vary (anything a player would repeat for weeks),
-then `gen`, `check`, `review` and stages 4 to 6. Add the JSON to the bundle when the runtime exists.
+then `gen`, `check`, `review` and stages 4 to 6. Every pack in `src/paths/packs/` is bundled (`src/session/packs.ts`).
 
 **A change of mind about a bar or a limit:** edit `profiles.ts` or `metrics.ts`, run
 `gen`, and read the diff: every affected Exercise moves, and the validator says which
@@ -370,7 +382,7 @@ Paste one of these, with the Path's spec and pack paths, into a fresh session.
 > which hand caused a problem, and it doesn't reliably separate fast sweeps or
 > ringing notes. Read every sentence in `<spec>` that a player sees, especially
 > coach lines, pass bars and self-checks, against
-> `yames-concept/audit/CONVERSION_AUDIT.md`. Flag anything that implies more than
+> `plans/revamp/CONVERSION_AUDIT.md`. Flag anything that implies more than
 > that: a claim, a promise of feedback that isn't built, a pass bar a correct take
 > could fail, a bar a wrong take could pass, or a statement about accuracy. Then ask
 > what the validator's lint missed, and propose a rule for it.

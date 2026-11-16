@@ -2,7 +2,7 @@
  * Grading profiles: named sets of what is graded and how high the bar is.
  *
  * The bars are design values. Clean is the mock's "85% even for 4 bars" from
- * `yames-concept/mocks/README.md`, question 1, and nothing here has been tried
+ * `plans/revamp/mocks/README.md`, question 1, and nothing here has been tried
  * on a real guitar. Expect to move them when it has; move them here, regenerate
  * and every Exercise follows.
  */

@@ -179,3 +179,45 @@ Status key: **decided** · **open** · **deferred**
   reviewed for grounding, variety and tone, alongside tool selection.
 - **F4 — Roadmap rewrite.** *open.* Which items of Phases 1–3 survive,
   in what order, once groups A–E are decided.
+
+## Where the revamp landed (2026-11-16)
+
+The revamp (`plans/tasks/revamp/BRIEF.md`, started 2026-11-08) settled some of
+the entries above. The entries keep their text; this records what was decided,
+by whom, and what the code assumed without a decision.
+
+**Decided by the owner** (BRIEF.md, "Decisions taken so far", 2026-11-08):
+
+- **A5, overruled.** The proposed default was "no new tab". The owner chose a
+  learning-path-first app instead: the rail opens on **Today**, with **Paths**
+  and **Progress** above a **Tools** group that holds the existing five tools
+  unchanged. A setting, "open on my last tool", keeps the old front door.
+- **C5.** Clean tempo is the highest tempo at which a Take on that Exercise
+  passes its bar over at least 8 bars. One number per Exercise. The rule is
+  `src-tauri/src/score/pass.rs`.
+- **C1, in part.** First Mechanics grading needs a mic or direct input; tap
+  input is cut.
+- **E2, in part.** Plain code decides; the coach only narrates what was
+  measured (BRIEF rule 3).
+
+**Assumed by the code, for the owner to confirm:**
+
+- **A1.** Three draft Paths (Alternate Picking, Blues and Pentatonics, Sweep Picking in
+  `src/paths/packs/`); only Alternate Picking is runnable in the first build.
+  All three are `draft`: no teacher review, nothing played.
+- **A2.** A Path is Levels of linear Steps; progress is the clean tempo per
+  Exercise reaching the Step's pass tempo, plus spaced review in the planner.
+- **B2.** Bundled JSON packs, generated from specs (`plans/PATHS_PIPELINE.md`).
+- **B4.** SQLite migration five: `path_state`, `path_takes`, and the existing
+  `exercise_ceilings` table for clean tempos.
+- **B5.** The Path format in `src/paths/format.ts` (Levels, variants,
+  warm-ups, chains).
+- **C5, details.** A pass bar's window is its longest `overBars`; evenness in a
+  window is the worse of the pooled value and its worst bar; only bars the
+  transport finished count. Every threshold is a design value until played
+  (`plans/paths/REVIEW_NOTES.md`).
+- **D4, D5.** The Today, Paths, Step, Session, result and Progress screens; new
+  hotkeys `tab-today` (⌘0) and `session-go/slower/faster/next/pedal`, where
+  `session-pedal` ships unbound for a single footswitch (tap, double tap, hold).
+- **First run.** Finishing the wizard still lands on the Metronome at 80 BPM
+  (ONBOARDING_PLAN W7), not on Today. Open: should a new player land on Today?
