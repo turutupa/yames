@@ -1770,6 +1770,31 @@ pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Resul
     Ok(())
 }
 
+/// How a finished Take on a known schedule went. Call `close_open_segment`
+/// first, then this: the analyzer answers on its next pass, so this waits a
+/// moment for it. `None` means no schedule was loaded or its first beat never
+/// came.
+///
+/// The same grade rides on `practice-segment-ended`. This exists for a Take
+/// nothing was heard on, where no segment ever opened and that event does not
+/// fire, and which still has to be able to say "I didn't catch enough".
+#[tauri::command(async)]
+pub fn get_take_grade(
+    timing_analyzer: State<'_, SharedTimingAnalyzer>,
+) -> Result<Option<crate::score::TakeGrade>, String> {
+    let slot = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?
+        .take_grade_slot();
+    for _ in 0..20 {
+        if let Some(grade) = slot.lock().map_err(|e| format!("Lock failed: {e}"))?.clone() {
+            return Ok(Some(grade));
+        }
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    Ok(None)
+}
+
 /// Roadmap 2.4 — tell the analyzer what the player is about to play.
 ///
 /// From the next downbeat, matching runs against this score instead of
@@ -1783,15 +1808,21 @@ pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Resul
 /// Safe to call before or during a session. `schedule.onsets` must be
 /// sorted by `beat`; the importer that builds it
 /// (`src/songs/schedule.ts`) is where that is guaranteed.
+///
+/// `passBars` is an Exercise's `passBars`, exactly as `src/paths/format.ts`
+/// writes them. With them, the Take's grade (`takeGrade.pass`) says whether it
+/// passed and whether it counts toward the clean tempo; without them (every
+/// Song), there is no `pass` and nothing else changes.
 #[tauri::command]
 pub fn load_score_schedule(
     schedule: crate::score::ScoreSchedule,
+    pass_bars: Option<Vec<crate::score::PassBar>>,
     timing_analyzer: State<SharedTimingAnalyzer>,
 ) -> Result<(), String> {
     let ta = timing_analyzer
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
-    ta.load_score_schedule(schedule);
+    ta.load_exercise_schedule(schedule, pass_bars.unwrap_or_default());
     Ok(())
 }
 
@@ -2686,19 +2717,13 @@ pub fn analyze_take_pitch(
     let (samples, rate) = crate::pitch::decode_mono_file(std::path::Path::new(&dry))?;
     // Every moment a note started, written or not. `notes_from` sorts them
     // and drops the ones too close together to be two notes.
-    let mut onsets_ms: Vec<f64> = matched.iter().filter_map(|m| m.heard_at_ms).collect();
-    onsets_ms.extend(
-        request
-            .extras
-            .iter()
-            .map(|e| request.start_offset_ms + clock.ms_at(e.beat, e.pass)),
-    );
-    let events = crate::pitch::analyse(&samples, rate, &onsets_ms, &cfg);
-    Ok(crate::pitch::match_notes(
-        &events,
-        &notes,
-        &matched,
-        &crate::pitch::MatchConfig::default(),
+    let extras_ms: Vec<f64> = request
+        .extras
+        .iter()
+        .map(|e| request.start_offset_ms + clock.ms_at(e.beat, e.pass))
+        .collect();
+    Ok(crate::pitch::identify_take_notes(
+        &samples, rate, &notes, &matched, &extras_ms, &cfg,
     ))
 }
 

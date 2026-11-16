@@ -59,7 +59,7 @@ impl Rng {
 
     /// Uniform in `[-1, 1)`.
     pub fn bipolar(&mut self) -> f64 {
-        (self.next_u64() >> 11) as f64 / (1u64 << 52) as f64 * 2.0 - 1.0
+        (self.next_u64() >> 11) as f64 / (1u64 << 53) as f64 * 2.0 - 1.0
     }
 }
 
@@ -81,6 +81,8 @@ pub struct Pluck {
     /// Peak level of the note.
     pub level: f32,
     pub seed: u64,
+    /// How loud the pick's noise burst is, against a string at full swing.
+    pub pick_noise: f64,
 }
 
 impl Pluck {
@@ -91,6 +93,7 @@ impl Pluck {
             decay_secs: 2.2,
             level: 0.7,
             seed,
+            pick_noise: 0.55,
         }
     }
 }
@@ -155,7 +158,7 @@ pub fn pluck(p: &Pluck, rate: u32) -> Vec<f32> {
         let env = (-(i as f64) / burst_tau).exp();
         if env > 1e-4 {
             let n = out.len() - 1;
-            out[n] += 0.55 * env * burst_rng.bipolar();
+            out[n] += p.pick_noise * env * burst_rng.bipolar();
         }
     }
 

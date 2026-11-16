@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use crate::audio_input::SharedAudioInput;
+use crate::audio_input::{RingBuffer, SharedAudioInput};
 use crate::instrument::InstrumentProfile;
 
 // aubio onset detector — replaces the hand-rolled Goertzel FFT + spectral
@@ -57,6 +57,9 @@ pub struct TempoContext {
     /// the score knows better than the inference. Read by `detect_loop`
     /// every hop.
     played_interval_cms: AtomicU32,
+    /// A score is loaded, so what is due is known. See
+    /// [`KNOWN_SCORE_REFRACTORY_FACTOR`].
+    known_score: AtomicBool,
 }
 
 impl TempoContext {
@@ -66,6 +69,7 @@ impl TempoContext {
             subdivision: AtomicU32::new(subdivision.max(1) as u32),
             is_playing: AtomicBool::new(false),
             played_interval_cms: AtomicU32::new(0),
+            known_score: AtomicBool::new(false),
         }
     }
     pub fn set_bpm(&self, bpm: u16) {
@@ -122,6 +126,20 @@ impl TempoContext {
             None
         } else {
             Some(cms as f32 / 100.0)
+        }
+    }
+
+    /// Whether a score is loaded. Set by the analyzer, read every hop.
+    pub fn set_known_score(&self, known: bool) {
+        self.known_score.store(known, Ordering::Relaxed);
+    }
+
+    /// What share of the detection interval the refractory takes.
+    pub fn refractory_factor(&self) -> f32 {
+        if self.known_score.load(Ordering::Relaxed) {
+            KNOWN_SCORE_REFRACTORY_FACTOR
+        } else {
+            REFRACTORY_SUBDIVISION_FACTOR
         }
     }
 
@@ -202,6 +220,26 @@ pub type SharedTempoContext = Arc<TempoContext>;
 /// specifically to protect fast articulations.
 pub const REFRACTORY_SUBDIVISION_FACTOR: f32 = 0.75;
 
+/// The refractory's share of the gap when the score is known.
+///
+/// 0.75 blinds the detector to any real note that lands under three quarters of
+/// a gap after the last one, and a player's notes do. At 160 BPM sixteenths a
+/// player right on the 85% evenness bar has a spread of 11 ms, which puts about
+/// one note in twenty inside it: every note played, heard reported as 94%, and
+/// a failed bar that is the detector's fault. It only gets worse with tempo.
+///
+/// With a score loaded there is somewhere better for a doubtful onset to go.
+/// The alignment takes the nearest of two candidates and calls the other an
+/// extra, so a ghost that gets through costs half a miss instead of a real note
+/// being lost outright. Free play has no such arbiter and keeps 0.75.
+///
+/// **This is the one knob in this file that a real guitar may move.** The
+/// ghosts 0.75 was tuned against came from sessions on the overlapping feed, and
+/// whether they were the guitar's or the feed's is unknown: synthetic audio
+/// through the sequential feed has none. If the first real pass shows extras
+/// over the bar, in `plans/revamp/GRADING_LIMITS.md`, this goes back up.
+pub const KNOWN_SCORE_REFRACTORY_FACTOR: f32 = 0.5;
+
 /// Relative amplitude threshold for ghost-onset suppression (inactive).
 ///
 /// WAV forensic analysis (2026-05 session logs) showed that guitar pick
@@ -279,8 +317,20 @@ impl RefractoryGate {
 
     /// Decide one candidate onset and update the anchor accordingly.
     pub fn admit(&mut self, now_ns: u64, amplitude: f32, interval_ms: f32, floor_ms: u32) -> GateDecision {
-        let refractory_ns =
-            (Self::refractory_ms(interval_ms, floor_ms) as u64).saturating_mul(1_000_000);
+        self.admit_with_factor(now_ns, amplitude, interval_ms, floor_ms, REFRACTORY_SUBDIVISION_FACTOR)
+    }
+
+    /// [`Self::admit`], with the refractory's share of the interval given.
+    pub fn admit_with_factor(
+        &mut self,
+        now_ns: u64,
+        amplitude: f32,
+        interval_ms: f32,
+        floor_ms: u32,
+        factor: f32,
+    ) -> GateDecision {
+        let refractory_ms = (interval_ms * factor).max(floor_ms as f32);
+        let refractory_ns = (refractory_ms as u64).saturating_mul(1_000_000);
         if now_ns.saturating_sub(self.last_onset_ns) < refractory_ns {
             return GateDecision::Blocked;
         }
@@ -368,18 +418,13 @@ impl OnsetDetector {
         self.alive.load(Ordering::SeqCst)
     }
 
-    /// Main detection loop. Processes audio in hops, computes spectral flux,
-    /// applies adaptive threshold, and emits onsets.
-    ///
-    /// Consumes the `InstrumentProfile`:
-    ///   * `refractory_floor_ms` sets the lower bound on inter-onset gap.
-    ///   * `cluster_window_ms` collapses near-simultaneous onsets into
-    ///     one "musical event" (D2 chord/strum merge).
-    ///   * `spectral_weights` biases the per-band flux contribution
-    ///     toward the instrument's characteristic energy region.
+    /// Main detection loop: wake, pull whatever the input callback has
+    /// written since last time, and hand it to [`OnsetCore`]. Everything
+    /// that decides anything lives in the core, so the audio fixture suite
+    /// runs the same decisions over a WAV without an audio device.
     ///
     /// Consumes `tempo_ctx` to make the refractory period adaptive
-    /// (`max(floor, subdivision_interval × 0.55)`).
+    /// (`max(floor, detection interval × 0.75)`).
     fn detect_loop<F>(
         alive: Arc<AtomicBool>,
         audio_input: SharedAudioInput,
@@ -389,81 +434,12 @@ impl OnsetDetector {
     ) where
         F: Fn(Onset) + Send + 'static,
     {
-        // aubio parameters: 1024-sample analysis window, 512-sample hop
-        // (50% overlap). These match the old Goertzel frame size so the
-        // refractory-period timing math and ring-buffer read sizing are
-        // unchanged.
-        let fft_size: usize = 1024;
-        let hop_size: usize = fft_size / 2; // 512 — ~10.7 ms at 48 kHz
-
-        // Read sample rate first — needed both for aubio init and for
-        // the refractory / adaptive threshold math below.
         let sample_rate = {
             let ai = audio_input.lock().unwrap();
             ai.sample_rate()
         };
-
-        // Instrument-specific onset algorithm. `InstrumentProfile` carries
-        // `aubio_onset_method` ("hfc" / "complex" / "specflux") that maps
-        // directly to aubio's built-in detectors. Parse, falling back to
-        // SpecFlux if the string is unrecognised (should never happen in
-        // practice).
-        let aubio_mode = profile
-            .aubio_onset_method
-            .parse::<aubio::OnsetMode>()
-            .unwrap_or(aubio::OnsetMode::SpecFlux);
-        let mut detector = AubioOnset::new(aubio_mode, fft_size, hop_size, sample_rate)
-            .expect("aubio::Onset init failed — invalid parameters");
-        // Keep aubio's internal adaptive threshold; set the silence gate
-        // explicitly at −70 dBFS (aubio's default). Our own adaptive RMS
-        // noise floor is layered on top as a second guard.
-        detector.set_silence(-70.0);
-
-        // D2 adaptive noise floor — rolling 10th-percentile of RMS over
-        // ~5 seconds of recent audio. Replaces the old hardcoded 0.01.
-        // The 10th-percentile fix sidesteps the "user struck a note
-        // during the bootstrap window" failure mode that plagued the
-        // earlier "re-measure on signal drop" idea (which was circular
-        // anyway — the threshold IS what we were trying to set).
-        const RMS_HISTORY_LEN: usize = 500; // ~5s at 10ms/hop
-        const NOISE_FLOOR_MULTIPLIER: f32 = 3.0;
-        const MIN_NOISE_FLOOR: f32 = 0.002; // absolute lower bound
-        let mut rms_history = vec![0.0_f32; RMS_HISTORY_LEN];
-        let mut rms_write_pos = 0_usize;
-        let mut rms_samples_seen = 0_usize;
-
-        // D2 chord/strum merging — pending onset that's still inside
-        // the cluster window. Once the window expires (or a louder
-        // onset arrives), we forward the merged event.
-        let cluster_window_ns = (profile.cluster_window_ms as u64) * 1_000_000;
-        let mut pending: Option<PendingCluster> = None;
-
-        // Refractory period is now computed PER-HOP from the live tempo
-        // context (D2). Floor stays profile-driven so fast articulations
-        // (drum rolls, guitar tremolo) aren't blocked just because the
-        // grid is quarter notes — see plan's "DO NOT key refractory off
-        // the grid subdivision alone."
-        // The rule itself lives in `RefractoryGate` so the fixture suite
-        // can drive the shipped decision without an audio device.
-        let mut gate = RefractoryGate::new();
-
-        // Diagnostic logging — env-flag gated so logs don't ship in
-        // production builds. Flip on by launching the dev shell with:
-        //   YAMES_ONSET_DEBUG=1 npm run tauri dev
-        // The flag is read once here (not every hop — `std::env::var`
-        // is a syscall) so toggling it requires a restart. Two log
-        // channels:
-        //   * Periodic state dump every ~1s of hops — useful when no
-        //     onsets fire so you can see WHY (rms below floor, flux
-        //     below threshold, refractory blocking, …).
-        //   * Per-onset emission log — fires every time the detector
-        //     emits a raw onset (before chord clustering).
-        let debug_enabled = std::env::var("YAMES_ONSET_DEBUG").is_ok();
-        if debug_enabled {
-            eprintln!("[onset] debug logging enabled (sample_rate={sample_rate})");
-        }
-        let mut hops_since_log: u32 = 0;
-        const LOG_EVERY_HOPS: u32 = 100; // ~1s at hop_size=512 @ 48kHz
+        let mut core = OnsetCore::new(&profile, sample_rate);
+        let mut emit = |onset: Onset| on_onset(onset);
 
         while alive.load(Ordering::SeqCst) {
             // Sleep a bit between processing (don't spin-wait)
@@ -473,224 +449,515 @@ impl OnsetDetector {
             }
 
             // Gate: only run detection while the metronome click track is
-            // active. When stopped, flush any in-flight cluster so stale
-            // events don't leak into the next session, reset
-            // `last_onset_ns` so the refractory clock doesn't span the gap,
-            // and reset the aubio phase vocoder so stale buffered samples
-            // don't produce phantom onsets when playback resumes.
+            // active. No ring lock in here: the callback's `try_lock` on the
+            // ring has nothing to contend with while nobody is listening.
             if !tempo_ctx.is_playing() {
-                if let Some(p) = pending.take() {
-                    on_onset(p.flush());
-                }
-                gate.reset();
-                detector.reset();
+                core.idle(&mut emit);
                 continue;
             }
 
-            // Feed the most recent hop into aubio. Read 4× hop_size from
-            // the ring so we have enough samples even if the loop ran fast;
-            // take only the tail hop_size chunk. Because the ring exposes
-            // only `read_last` (no cursor-based advance), we may re-feed
-            // duplicate hops on fast iterations — aubio handles this
-            // gracefully via its internal phase-vocoder state; the
-            // refractory period below suppresses any resulting duplicates.
-            let new_samples = {
+            {
                 let ai = audio_input.lock().unwrap();
                 let ring = ai.ring();
                 let r = ring.lock().unwrap();
-                r.read_last(hop_size * 4)
-            };
-
-            if new_samples.len() < hop_size {
-                continue;
+                core.pull(&r);
             }
-
-            let offset = new_samples.len().saturating_sub(hop_size);
-            let hop_slice = &new_samples[offset..offset + hop_size];
-
-            // Run aubio onset detection on this hop.
-            // `do_result` returns > 0.0 when an onset is detected;
-            // the exact value is an offset ∈ (0, 1] within the hop.
-            let onset_value = match detector.do_result(hop_slice) {
-                Ok(v) => v,
-                Err(_) => continue,
-            };
-
-            // Compute RMS on the hop for amplitude and noise-floor gating.
-            let rms = (hop_slice.iter().map(|s| s * s).sum::<f32>() / hop_size as f32).sqrt();
-
-            // D2 adaptive noise floor — update rolling RMS history then
-            // take 10th percentile × NOISE_FLOOR_MULTIPLIER. Until the
-            // history is half full we use a conservative absolute floor
-            // so the bootstrap period doesn't admit junk onsets.
-            rms_history[rms_write_pos] = rms;
-            rms_write_pos = (rms_write_pos + 1) % RMS_HISTORY_LEN;
-            rms_samples_seen = (rms_samples_seen + 1).min(RMS_HISTORY_LEN);
-            let noise_floor = if rms_samples_seen >= RMS_HISTORY_LEN / 2 {
-                let mut sorted_rms = rms_history[..rms_samples_seen].to_vec();
-                sorted_rms.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-                let p10_idx = sorted_rms.len() / 10; // 10th percentile
-                (sorted_rms[p10_idx] * NOISE_FLOOR_MULTIPLIER).max(MIN_NOISE_FLOOR)
-            } else {
-                MIN_NOISE_FLOOR
-            };
-
-            // D2 adaptive refractory — recompute per-hop from the live
-            // tempo context. Floor (instrument physics) wins at fast
-            // subdivisions; the multiplier wins at slow ones. Plan:
-            // `max(profile.refractory_floor_ms, sub_interval × 0.55)`.
-            //
-            // Roadmap 1.3: the interval is no longer the click's. It is
-            // the finer of the click and what the player is playing —
-            // see `TempoContext::detection_interval_ms`. The ghost
-            // window below keys off the same value, so both move
-            // together and the band between them never inverts.
-            let sub_interval_ms = tempo_ctx.detection_interval_ms();
-            let adaptive_refractory_ms =
-                RefractoryGate::refractory_ms(sub_interval_ms, profile.refractory_floor_ms);
-
-            // Periodic state dump — see DEBUG comment near loop start.
-            // Useful diagnostic when the user says "I'm playing but no
-            // onsets fire": shows whether `rms > noise_floor` and the
-            // aubio onset value are passing.
-            if debug_enabled {
-                hops_since_log += 1;
-                if hops_since_log >= LOG_EVERY_HOPS {
-                    hops_since_log = 0;
-                    let rms_pass = rms > noise_floor;
-                    eprintln!(
-                        "[onset] state rms={:.4}{} onset_val={:.3} desc={:.3} floor={:.4} refrac={:.0}ms",
-                        rms,
-                        if rms_pass { ">floor" } else { "<floor" },
-                        onset_value,
-                        detector.get_descriptor(),
-                        noise_floor,
-                        adaptive_refractory_ms,
-                    );
-                }
-            }
-
-            // aubio signals an onset when do_result returns > 0.
-            // We layer our own RMS noise-floor gate on top so brief
-            // silence artefacts in the phase-vocoder don't fire.
-            if onset_value > 0.0 && rms > noise_floor {
-                let now_ns = crate::clock::now_ns();
-                let since_last_ms = gate.since_last_ms(now_ns);
-
-                // Refractory period check (skips spurious double-counts).
-                // POSTMATCH_1: Hard ghost window — any onset in
-                // [refractory, sub_interval) is emitted for telemetry
-                // but does NOT reset the anchor. This lets the real
-                // next note also pass the refractory and reach the
-                // post-session best-candidate matcher, which picks the
-                // closest onset per slot.
-                //
-                // The amplitude condition is gone: median ghost B/A is
-                // 1.12 so amplitude cannot reliably distinguish
-                // pick-decay ghosts from real notes.
-                let decision =
-                    gate.admit(now_ns, rms, sub_interval_ms, profile.refractory_floor_ms);
-                let is_ghost = decision == GateDecision::Ghost;
-                if decision != GateDecision::Blocked {
-                    if is_ghost {
-                        if debug_enabled {
-                            eprintln!(
-                                "[onset] GHOST-WINDOW emitting since_last={}ms sub_int={:.0}ms rms={:.4} (refractory NOT updated)",
-                                since_last_ms, sub_interval_ms, rms,
-                            );
-                        }
-                    } else if debug_enabled {
-                        eprintln!(
-                            "[onset] FIRED rms={:.4} onset_val={:.3} desc={:.3} floor={:.4} since_last={}ms",
-                            rms, onset_value, detector.get_descriptor(), noise_floor, since_last_ms,
-                        );
-                    }
-                    // Emit onset for both ghost-window and real onsets.
-                    // Ghost onsets appear in detected_onsets telemetry so the
-                    // post-session best-candidate matcher can assign the
-                    // closer-to-slot-center one per expected beat.
-                    //
-                    // D2 confidence — blend amplitude-to-noise ratio with
-                    // aubio's thresholded descriptor, which acts as a proxy
-                    // for peak sharpness (descriptor − threshold; clamped to
-                    // [0, 1] since the raw value can exceed 1 for strong
-                    // onsets — those saturate to max confidence).
-                    let amp_ratio = if noise_floor > 0.0 {
-                        (rms / noise_floor).min(8.0)
-                    } else {
-                        1.0
-                    };
-                    let conf_amp = ((amp_ratio - 1.0) / 4.0).clamp(0.0, 1.0);
-                    let conf_desc = detector.get_thresholded_descriptor().clamp(0.0, 1.0);
-                    let confidence = (conf_amp * 0.45 + conf_desc * 0.55).clamp(0.0, 1.0);
-
-                    let onset = Onset {
-                        ts_ns: now_ns,
-                        amplitude: rms.clamp(0.0, 1.0),
-                        // aubio doesn't expose spectral centroid directly;
-                        // field is preserved for schema compatibility and
-                        // future use (e.g. pitch/brightness from aubio's
-                        // pitch detector).
-                        centroid: 0.0,
-                        confidence,
-                    };
-
-                    // Ghost onsets bypass chord clustering — emitted directly
-                    // so they appear as standalone telemetry entries. This
-                    // prevents the real next note (~37ms later) from being
-                    // merged into a ghost-started cluster at wider cluster
-                    // windows (cluster_window_ms > 37ms).
-                    if is_ghost || cluster_window_ns == 0 {
-                        on_onset(onset);
-                    } else {
-                        // D2 chord/strum merging — if a pending onset is
-                        // still inside the cluster window, fold this one in
-                        // (keep the loudest's timestamp, sum amplitudes,
-                        // take the higher confidence). Drums opt out by
-                        // setting `cluster_window_ms = 0` in their profile.
-                        let still_open = match pending.as_ref() {
-                            Some(p) => {
-                                onset.ts_ns.saturating_sub(p.first_ts_ns) <= cluster_window_ns
-                            }
-                            None => false,
-                        };
-                        if still_open {
-                            // unwrap is safe — still_open ⇒ Some(_).
-                            pending.as_mut().unwrap().merge(onset);
-                        } else {
-                            if let Some(old) = pending.take() {
-                                on_onset(old.flush());
-                            }
-                            pending = Some(PendingCluster::from_onset(onset));
-                        }
-                    }
-                } else if debug_enabled {
-                    // aubio fired but the refractory guard blocked it.
-                    // Common during fast tremolo / drum rolls; flag in
-                    // logs so the user can tell whether a low onset count
-                    // is "didn't detect" vs "detected but merged".
-                    eprintln!(
-                        "[onset] blocked-by-refractory since_last={}ms < refrac={:.0}ms (rms={:.4})",
-                        since_last_ms, adaptive_refractory_ms, rms,
-                    );
-                }
-            }
-
-            // Flush any pending cluster whose window has closed (even if
-            // no new onset arrived this hop).
-            if let Some(ref p) = pending {
-                let now_ns = crate::clock::now_ns();
-                if now_ns.saturating_sub(p.first_ts_ns) > cluster_window_ns {
-                    let merged = pending.take().unwrap().flush();
-                    on_onset(merged);
-                }
-            }
+            core.process(crate::clock::now_ns(), &tempo_ctx, &mut emit);
         }
 
-        // Drain any final pending cluster on shutdown.
-        if let Some(p) = pending.take() {
+        core.finish(&mut emit);
+    }
+}
+
+/// The analysis window aubio's phase vocoder runs over.
+pub const ONSET_FFT_SIZE: usize = 1024;
+
+/// How far the window moves between two runs of the detector.
+///
+/// 256 samples is 5.3 ms at 48 kHz, and it is not an arbitrary change from
+/// the 512 this used to say. Until 2026-11 the loop woke every 5 ms and fed
+/// aubio the newest 512 samples it could see, whatever had been fed last
+/// time: about 240 new samples per call, each hop overlapping the previous
+/// one and butting up against it with a discontinuity. aubio's peak picker
+/// counts in hops, and it needs about 4.6 of them to call a peak, so in wall
+/// time the shipped detector was running a 5 ms hop all along. Sequential
+/// 256-sample hops keep that same latency (and so every timing deadline and
+/// every cached calibration built on it) while handing the phase vocoder the
+/// signal it thinks it is reading. See `plans/revamp/GRADING_LIMITS.md` for
+/// what the overlapping feed did to a sustained note.
+pub const ONSET_HOP_SIZE: usize = 256;
+
+/// `Onset::amplitude` and the noise floor read RMS over this many samples,
+/// which is what they always read: changing the hop must not move a number
+/// that session logs and accent verdicts have been comparing for a year.
+const AMPLITUDE_WINDOW: usize = 512;
+
+/// The most unprocessed audio the core will catch up on after a stall. Past
+/// this it drops the backlog rather than analysing stale audio on a
+/// real-time-priority thread.
+const MAX_BACKLOG_SECS: f64 = 0.25;
+
+/// The detector, without a thread or an audio device.
+///
+/// `OnsetDetector`'s thread owns one of these; so does the audio fixture
+/// suite. One rule, both callers: a harness over a second copy would prove
+/// nothing about what ships. It is handed a [`RingBuffer`] and the time, and
+/// it calls back with onsets.
+pub struct OnsetCore {
+    detector: AubioOnset,
+    hop_size: usize,
+    sample_rate: u32,
+    floor: NoiseFloor,
+    gate: RefractoryGate,
+    /// How far into the ring this core has read. `None` means "start from
+    /// wherever the ring is now": first run, or the click just restarted.
+    cursor: Option<usize>,
+    /// Samples pulled from the ring and not yet analysed.
+    fresh: Vec<f32>,
+    max_backlog: usize,
+    /// Signal energy of the last hops, for the amplitude window.
+    hop_energies: Vec<f32>,
+    hop_energy_pos: usize,
+    /// D2 chord/strum merging — pending onset that's still inside
+    /// the cluster window. Once the window expires (or a louder
+    /// onset arrives), we forward the merged event.
+    pending: Option<PendingCluster>,
+    cluster_window_ns: u64,
+    refractory_floor_ms: u32,
+    /// Diagnostic logging — env-flag gated so logs don't ship in production
+    /// builds. Launch the dev shell with `YAMES_ONSET_DEBUG=1`. Read once
+    /// here, not every hop: `std::env::var` is a syscall.
+    debug_enabled: bool,
+    hops_since_log: u32,
+}
+
+impl OnsetCore {
+    pub fn new(profile: &InstrumentProfile, sample_rate: u32) -> Self {
+        Self::with_hop(profile, sample_rate, ONSET_HOP_SIZE)
+    }
+
+    /// The fixture suite's way in, for measuring other hop sizes. The app
+    /// always runs [`ONSET_HOP_SIZE`].
+    pub fn with_hop(profile: &InstrumentProfile, sample_rate: u32, hop_size: usize) -> Self {
+        // Instrument-specific onset algorithm. `InstrumentProfile` carries
+        // `aubio_onset_method` ("hfc" / "complex" / "specflux") that maps
+        // directly to aubio's built-in detectors. Parse, falling back to
+        // SpecFlux if the string is unrecognised (should never happen in
+        // practice).
+        let aubio_mode = profile
+            .aubio_onset_method
+            .parse::<aubio::OnsetMode>()
+            .unwrap_or(aubio::OnsetMode::SpecFlux);
+        let mut detector = AubioOnset::new(aubio_mode, ONSET_FFT_SIZE, hop_size, sample_rate)
+            .expect("aubio::Onset init failed — invalid parameters");
+        // Keep aubio's internal adaptive threshold; set the silence gate
+        // explicitly at −70 dBFS (aubio's default). Our own adaptive RMS
+        // noise floor is layered on top as a second guard.
+        detector.set_silence(-70.0);
+
+        let hops_per_sec = sample_rate as f32 / hop_size as f32;
+        let max_backlog = (sample_rate as f64 * MAX_BACKLOG_SECS) as usize;
+        let debug_enabled = std::env::var("YAMES_ONSET_DEBUG").is_ok();
+        if debug_enabled {
+            eprintln!("[onset] debug logging enabled (sample_rate={sample_rate})");
+        }
+        Self {
+            detector,
+            hop_size,
+            sample_rate,
+            floor: NoiseFloor::new(hops_per_sec),
+            gate: RefractoryGate::new(),
+            cursor: None,
+            fresh: Vec::with_capacity(max_backlog + hop_size),
+            max_backlog,
+            hop_energies: vec![0.0; (AMPLITUDE_WINDOW / hop_size).max(1)],
+            hop_energy_pos: 0,
+            pending: None,
+            cluster_window_ns: (profile.cluster_window_ms as u64) * 1_000_000,
+            refractory_floor_ms: profile.refractory_floor_ms,
+            debug_enabled,
+            hops_since_log: 0,
+        }
+    }
+
+    /// The click stopped. Flush any in-flight cluster so stale events don't
+    /// leak into the next session, reset the refractory clock so it doesn't
+    /// span the gap, and reset aubio's frame count. The cursor is let go so
+    /// the audio of the gap is never analysed when the click comes back.
+    pub fn idle<F: FnMut(Onset)>(&mut self, on_onset: &mut F) {
+        if let Some(p) = self.pending.take() {
             on_onset(p.flush());
         }
+        self.gate.reset();
+        self.detector.reset();
+        self.cursor = None;
+        self.fresh.clear();
+    }
+
+    /// Copy what the input callback has written since the last pull. Holds
+    /// the ring's lock for a `memcpy` of the new samples, and the callback's
+    /// side of that lock is a `try_lock`: this replaced copying 2048 samples
+    /// on every wake, so it holds it for less than it ever did.
+    pub fn pull(&mut self, ring: &RingBuffer) {
+        let cursor = self.cursor.get_or_insert_with(|| ring.write_pos());
+        ring.read_since(cursor, &mut self.fresh, self.max_backlog);
+    }
+
+    /// Analyse every whole hop that has been pulled. `now_ns` is the moment
+    /// of the pull, and the newest sample is taken to have arrived then: a
+    /// hop further back in the backlog is stamped that much earlier, so a
+    /// large input buffer delivering several hops at once does not smear
+    /// them onto one timestamp.
+    pub fn process<F: FnMut(Onset)>(&mut self, now_ns: u64, tempo: &TempoContext, on_onset: &mut F) {
+        let interval_ms = tempo.detection_interval_ms();
+        let factor = tempo.refractory_factor();
+        let fresh = std::mem::take(&mut self.fresh);
+        let ns_per_sample = 1e9 / self.sample_rate as f64;
+        let mut start = 0;
+        while fresh.len() - start >= self.hop_size {
+            let end = start + self.hop_size;
+            let behind = (fresh.len() - end) as f64;
+            let hop_end_ns = now_ns.saturating_sub((behind * ns_per_sample) as u64);
+            self.analyse_hop(&fresh[start..end], hop_end_ns, interval_ms, factor, on_onset);
+            start = end;
+        }
+        self.fresh = fresh;
+        self.fresh.drain(..start);
+    }
+
+    /// Hand over anything still held back. The thread does this on shutdown,
+    /// a fixture at the end of its audio.
+    pub fn finish<F: FnMut(Onset)>(&mut self, on_onset: &mut F) {
+        if let Some(p) = self.pending.take() {
+            on_onset(p.flush());
+        }
+    }
+
+    fn analyse_hop<F: FnMut(Onset)>(
+        &mut self,
+        hop: &[f32],
+        now_ns: u64,
+        sub_interval_ms: f32,
+        refractory_factor: f32,
+        on_onset: &mut F,
+    ) {
+        // Run aubio onset detection on this hop.
+        // `do_result` returns > 0.0 when an onset is detected;
+        // the exact value is an offset ∈ (0, 1] within the hop.
+        let onset_value = match self.detector.do_result(hop) {
+            Ok(v) => v,
+            Err(_) => return,
+        };
+
+        // RMS for amplitude and noise-floor gating, over the amplitude
+        // window rather than one hop.
+        let energy = hop.iter().map(|s| s * s).sum::<f32>();
+        let slots = self.hop_energies.len();
+        self.hop_energies[self.hop_energy_pos] = energy;
+        self.hop_energy_pos = (self.hop_energy_pos + 1) % slots;
+        let rms = (self.hop_energies.iter().sum::<f32>() / (slots * hop.len()) as f32).sqrt();
+
+        let fired = onset_value > 0.0;
+        self.floor.observe(rms, fired, now_ns);
+        let noise_floor = self.floor.level(now_ns);
+
+        // Roadmap 1.3: the interval is the finer of the click and what the
+        // player is playing — see `TempoContext::detection_interval_ms`.
+        // The ghost window keys off the same value, so both move together
+        // and the band between them never inverts.
+        let refractory_floor_ms = self.refractory_floor_ms;
+        let adaptive_refractory_ms =
+            (sub_interval_ms * refractory_factor).max(refractory_floor_ms as f32);
+
+        // Periodic state dump. Useful when the user says "I'm playing but
+        // no onsets fire": shows whether `rms > noise_floor` and the aubio
+        // onset value are passing.
+        if self.debug_enabled {
+            self.hops_since_log += 1;
+            if self.hops_since_log >= self.sample_rate / self.hop_size as u32 {
+                self.hops_since_log = 0;
+                let rms_pass = rms > noise_floor;
+                eprintln!(
+                    "[onset] state rms={:.4}{} onset_val={:.3} desc={:.3} floor={:.4} refrac={:.0}ms",
+                    rms,
+                    if rms_pass { ">floor" } else { "<floor" },
+                    onset_value,
+                    self.detector.get_descriptor(),
+                    noise_floor,
+                    adaptive_refractory_ms,
+                );
+            }
+        }
+
+        // aubio signals an onset when do_result returns > 0.
+        // We layer our own RMS noise-floor gate on top so brief
+        // silence artefacts in the phase-vocoder don't fire.
+        if fired && rms > noise_floor {
+            let since_last_ms = self.gate.since_last_ms(now_ns);
+
+            // Refractory period check (skips spurious double-counts).
+            // POSTMATCH_1: Hard ghost window — any onset in
+            // [refractory, sub_interval) is emitted for telemetry
+            // but does NOT reset the anchor. This lets the real
+            // next note also pass the refractory and reach the
+            // post-session best-candidate matcher, which picks the
+            // closest onset per slot.
+            //
+            // The amplitude condition is gone: median ghost B/A is
+            // 1.12 so amplitude cannot reliably distinguish
+            // pick-decay ghosts from real notes.
+            let decision = self.gate.admit_with_factor(
+                now_ns,
+                rms,
+                sub_interval_ms,
+                refractory_floor_ms,
+                refractory_factor,
+            );
+            let is_ghost = decision == GateDecision::Ghost;
+            if decision != GateDecision::Blocked {
+                self.floor.note_heard(rms, now_ns);
+                if self.debug_enabled {
+                    if is_ghost {
+                        eprintln!(
+                            "[onset] GHOST-WINDOW emitting since_last={}ms sub_int={:.0}ms rms={:.4} (refractory NOT updated)",
+                            since_last_ms, sub_interval_ms, rms,
+                        );
+                    } else {
+                        eprintln!(
+                            "[onset] FIRED rms={:.4} onset_val={:.3} desc={:.3} floor={:.4} since_last={}ms",
+                            rms, onset_value, self.detector.get_descriptor(), noise_floor, since_last_ms,
+                        );
+                    }
+                }
+                // Emit onset for both ghost-window and real onsets.
+                // Ghost onsets appear in detected_onsets telemetry so the
+                // post-session best-candidate matcher can assign the
+                // closer-to-slot-center one per expected beat.
+                //
+                // D2 confidence — blend amplitude-to-noise ratio with
+                // aubio's thresholded descriptor, which acts as a proxy
+                // for peak sharpness (descriptor − threshold; clamped to
+                // [0, 1] since the raw value can exceed 1 for strong
+                // onsets — those saturate to max confidence).
+                let amp_ratio = if noise_floor > 0.0 {
+                    (rms / noise_floor).min(8.0)
+                } else {
+                    1.0
+                };
+                let conf_amp = ((amp_ratio - 1.0) / 4.0).clamp(0.0, 1.0);
+                let conf_desc = self.detector.get_thresholded_descriptor().clamp(0.0, 1.0);
+                let confidence = (conf_amp * 0.45 + conf_desc * 0.55).clamp(0.0, 1.0);
+
+                let onset = Onset {
+                    ts_ns: now_ns,
+                    amplitude: rms.clamp(0.0, 1.0),
+                    // aubio doesn't expose spectral centroid directly;
+                    // field is preserved for schema compatibility and
+                    // future use (e.g. pitch/brightness from aubio's
+                    // pitch detector).
+                    centroid: 0.0,
+                    confidence,
+                };
+
+                // Ghost onsets bypass chord clustering — emitted directly
+                // so they appear as standalone telemetry entries. This
+                // prevents the real next note (~37ms later) from being
+                // merged into a ghost-started cluster at wider cluster
+                // windows (cluster_window_ms > 37ms).
+                if is_ghost || self.cluster_window_ns == 0 {
+                    on_onset(onset);
+                } else {
+                    // D2 chord/strum merging — if a pending onset is
+                    // still inside the cluster window, fold this one in
+                    // (keep the loudest's timestamp, sum amplitudes,
+                    // take the higher confidence). Drums opt out by
+                    // setting `cluster_window_ms = 0` in their profile.
+                    let still_open = match self.pending.as_ref() {
+                        Some(p) => {
+                            onset.ts_ns.saturating_sub(p.first_ts_ns) <= self.cluster_window_ns
+                        }
+                        None => false,
+                    };
+                    if still_open {
+                        // unwrap is safe — still_open ⇒ Some(_).
+                        self.pending.as_mut().unwrap().merge(onset);
+                    } else {
+                        if let Some(old) = self.pending.take() {
+                            on_onset(old.flush());
+                        }
+                        self.pending = Some(PendingCluster::from_onset(onset));
+                    }
+                }
+            } else if self.debug_enabled {
+                // aubio fired but the refractory guard blocked it.
+                // Common during fast tremolo / drum rolls; flag in
+                // logs so the user can tell whether a low onset count
+                // is "didn't detect" vs "detected but merged".
+                eprintln!(
+                    "[onset] blocked-by-refractory since_last={}ms < refrac={:.0}ms (rms={:.4})",
+                    since_last_ms, adaptive_refractory_ms, rms,
+                );
+            }
+        }
+
+        // Flush any pending cluster whose window has closed (even if
+        // no new onset arrived this hop).
+        if let Some(ref p) = self.pending {
+            if now_ns.saturating_sub(p.first_ts_ns) > self.cluster_window_ns {
+                let merged = self.pending.take().unwrap().flush();
+                on_onset(merged);
+            }
+        }
+    }
+}
+
+/// How long after an aubio detection a hop is still taken to be the player's
+/// sound and not the room's.
+const NOISE_QUIET_AFTER_DETECTION_MS: u64 = 250;
+/// How much quiet audio the background estimate looks back over.
+const NOISE_HISTORY_SECS: f32 = 2.6;
+/// How much quiet audio it needs before it says anything at all. Until then
+/// the floor is [`MIN_NOISE_FLOOR`] and everything loud enough gets through,
+/// which is the right way round to be wrong when somebody starts playing the
+/// instant the click does.
+const NOISE_BOOTSTRAP_SECS: f32 = 0.5;
+/// A note has to be this many times the background.
+const NOISE_FLOOR_MULTIPLIER: f32 = 3.0;
+/// The absolute lower bound on the floor.
+const MIN_NOISE_FLOOR: f32 = 0.002;
+/// However the background got to where it is, the floor never climbs past
+/// this fraction of what the player's notes have recently measured.
+const NOISE_CAP_OF_RECENT_NOTES: f32 = 0.5;
+/// A note only vouches for itself if it stood at least this far above the
+/// background. Phantom detections on steady noise measure the noise, and
+/// must not talk the floor down to where they get through.
+const NOTE_MUST_CLEAR_BACKGROUND: f32 = 1.25;
+/// And the floor stays this far above the background, whatever the notes say.
+const NOISE_FLOOR_ABOVE_BACKGROUND: f32 = 1.15;
+/// How many notes the cap remembers, and for how long after the last.
+const RECENT_NOTES: usize = 8;
+const RECENT_NOTES_MEMORY_NS: u64 = 30_000_000_000;
+
+/// What a note has to clear before it counts as a note.
+///
+/// D2's original rule was three times the 10th percentile of ALL recent RMS,
+/// and that rule has a defect at the point that matters most. Play steadily
+/// for longer than its history, and the 10th percentile stops being the room
+/// and becomes the player's own sustain. If RMS then does not swing by three
+/// times between attack and tail, which compressed high gain never does and a
+/// ringing clean note often does not, the floor shuts and every note after it
+/// is refused. It measured 19 of 128 sixteenths heard at 120 BPM, on a take
+/// that still scored 98, and the audit's maths says it closes about 2.3 s in.
+///
+/// So the background is learned only from hops nobody is playing on: at least
+/// [`NOISE_QUIET_AFTER_DETECTION_MS`] from the last thing aubio called an
+/// onset. Steady playing freezes it where the room left it, because the next
+/// detection always arrives first. Steady noise still teaches it, because
+/// aubio has nothing to fire on.
+///
+/// That leaves the slow held note: long enough between picks for its tail to
+/// be learned as "background". So the floor is also capped at half of what the
+/// player's own recent notes measured, and that memory outlasts any held note.
+/// A pick that looks like the player's last eight picks is a note.
+#[derive(Debug)]
+pub struct NoiseFloor {
+    /// RMS of recent quiet hops, a ring.
+    history: Vec<f32>,
+    write_pos: usize,
+    seen: usize,
+    /// Preallocated so taking the percentile never allocates.
+    scratch: Vec<f32>,
+    bootstrap: usize,
+    pushes_since_estimate: u32,
+    background: Option<f32>,
+    /// When aubio last fired, whether or not anything came of it.
+    last_detection_ns: Option<u64>,
+    recent_notes: [f32; RECENT_NOTES],
+    recent_note_count: usize,
+    last_note_ns: u64,
+}
+
+impl NoiseFloor {
+    pub fn new(hops_per_sec: f32) -> Self {
+        let capacity = (hops_per_sec * NOISE_HISTORY_SECS).ceil().max(16.0) as usize;
+        Self {
+            history: vec![0.0; capacity],
+            write_pos: 0,
+            seen: 0,
+            scratch: Vec::with_capacity(capacity),
+            bootstrap: (hops_per_sec * NOISE_BOOTSTRAP_SECS).ceil().max(8.0) as usize,
+            pushes_since_estimate: 0,
+            background: None,
+            last_detection_ns: None,
+            recent_notes: [0.0; RECENT_NOTES],
+            recent_note_count: 0,
+            last_note_ns: 0,
+        }
+    }
+
+    /// One hop went by. `fired` is whether aubio called an onset on it.
+    pub fn observe(&mut self, rms: f32, fired: bool, now_ns: u64) {
+        if fired {
+            self.last_detection_ns = Some(now_ns);
+            return;
+        }
+        let quiet = match self.last_detection_ns {
+            Some(at) => now_ns.saturating_sub(at) >= NOISE_QUIET_AFTER_DETECTION_MS * 1_000_000,
+            None => true,
+        };
+        if !quiet {
+            return;
+        }
+        let capacity = self.history.len();
+        self.history[self.write_pos] = rms;
+        self.write_pos = (self.write_pos + 1) % capacity;
+        self.seen = (self.seen + 1).min(capacity);
+        self.pushes_since_estimate += 1;
+        // A percentile on every hop is wasted work on a real-time thread; the
+        // room does not change in 40 ms.
+        if self.seen >= self.bootstrap && self.pushes_since_estimate >= 8 {
+            self.pushes_since_estimate = 0;
+            self.scratch.clear();
+            self.scratch.extend_from_slice(&self.history[..self.seen]);
+            let p10 = self.scratch.len() / 10;
+            let (_, value, _) = self
+                .scratch
+                .select_nth_unstable_by(p10, |a, b| a.total_cmp(b));
+            self.background = Some(*value);
+        }
+    }
+
+    /// A note got through. Its level is what the cap reads.
+    pub fn note_heard(&mut self, rms: f32, now_ns: u64) {
+        self.recent_notes[self.recent_note_count % RECENT_NOTES] = rms;
+        self.recent_note_count += 1;
+        self.last_note_ns = now_ns;
+    }
+
+    /// The level RMS has to clear, right now.
+    pub fn level(&self, now_ns: u64) -> f32 {
+        let Some(background) = self.background else {
+            return MIN_NOISE_FLOOR;
+        };
+        let from_room = background * NOISE_FLOOR_MULTIPLIER;
+        let floor = match self.recent_note_level(now_ns) {
+            Some(notes) if notes >= background * NOTE_MUST_CLEAR_BACKGROUND => from_room
+                .min((notes * NOISE_CAP_OF_RECENT_NOTES).max(background * NOISE_FLOOR_ABOVE_BACKGROUND)),
+            _ => from_room,
+        };
+        floor.max(MIN_NOISE_FLOOR)
+    }
+
+    /// The median of the last few notes, while they are recent.
+    fn recent_note_level(&self, now_ns: u64) -> Option<f32> {
+        let count = self.recent_note_count.min(RECENT_NOTES);
+        if count == 0 || now_ns.saturating_sub(self.last_note_ns) > RECENT_NOTES_MEMORY_NS {
+            return None;
+        }
+        let mut sorted = self.recent_notes;
+        let window = &mut sorted[..count];
+        window.sort_unstable_by(|a, b| a.total_cmp(b));
+        Some(window[count / 2])
     }
 }
 

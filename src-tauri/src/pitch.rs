@@ -1410,6 +1410,68 @@ fn nearest_event(events: &[NoteEvent], at_ms: f64, window_ms: f64) -> Option<Not
 }
 
 // ---------------------------------------------------------------------------
+// A finished Take, as one result
+// ---------------------------------------------------------------------------
+
+/// Everything after the timing pass: track the buffer, cut it at the onsets,
+/// and say what each written note was. `analyze_take_pitch` is this with a file
+/// and a clock in front of it, and the audio fixture suite is this with neither.
+///
+/// `other_onsets_ms` are the played notes the score did not ask for. No verdict
+/// is given on them, but the tracker has to be cut there too.
+pub fn identify_take_notes(
+    samples: &[f32],
+    sample_rate: u32,
+    score_notes: &[ScoreNote],
+    onsets: &[MatchedOnset],
+    other_onsets_ms: &[f64],
+    cfg: &PitchConfig,
+) -> Vec<NoteVerdict> {
+    let mut onsets_ms: Vec<f64> = onsets.iter().filter_map(|m| m.heard_at_ms).collect();
+    onsets_ms.extend_from_slice(other_onsets_ms);
+    let events = analyse(samples, sample_rate, &onsets_ms, cfg);
+    match_notes(&events, score_notes, onsets, &MatchConfig::default())
+}
+
+/// Right notes on one Take: the `noteIdentity` metric of `src/paths/metrics.ts`.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NoteIdentity {
+    /// Notes a verdict was given on. Chords and absent soft notes are not.
+    pub assessed: u32,
+    pub right: u32,
+    pub wrong: u32,
+    pub octave: u32,
+    /// Played but nothing periodic came out, or not played at all.
+    pub unheard: u32,
+    /// `right / (right + wrong + octave)`: of the notes that had a pitch, how
+    /// many were the written one. Missed notes are `notesHeard`'s business, and
+    /// counting them here too would charge one mistake twice. `None` when
+    /// nothing had a pitch.
+    pub ratio: Option<f32>,
+}
+
+/// Sum a Take's verdicts into the one number a pass bar reads.
+pub fn note_identity(verdicts: &[NoteVerdict]) -> NoteIdentity {
+    let count = |state: NoteState| verdicts.iter().filter(|v| v.state == state).count() as u32;
+    let (right, wrong, octave, unheard) = (
+        count(NoteState::Right),
+        count(NoteState::Wrong),
+        count(NoteState::Octave),
+        count(NoteState::Unheard),
+    );
+    let pitched = right + wrong + octave;
+    NoteIdentity {
+        assessed: pitched + unheard,
+        right,
+        wrong,
+        octave,
+        unheard,
+        ratio: (pitched > 0).then(|| right as f32 / pitched as f32),
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Reading a file
 // ---------------------------------------------------------------------------
 
