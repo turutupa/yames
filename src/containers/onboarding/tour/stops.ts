@@ -40,7 +40,7 @@ export const TOUR_STOPS: TourStop[] = [
   },
   // Plan §4 says P; the sidebar is bound to B.
   { id: "presets", view: "beat", i18nKey: "presets", keys: ["toggle-sidebar"] },
-  { id: "drill-tab", view: "drill", i18nKey: "drill", keys: ["tab-2"] },
+  { id: "drill-tab", view: "drill", i18nKey: "drill", keys: ["tab-3"] },
   { id: "coach", view: "beat", i18nKey: "coach", keys: ["toggle-coach"] },
   // Plan §4 says F for zen; F is native fullscreen, zen is Z.
   {

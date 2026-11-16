@@ -203,9 +203,9 @@ describe("the tour", () => {
     expect(store.values.get("tour.seenVersion")).toBeDefined();
   });
 
-  // TOOLS_PARITY section 6.1 item 8: the Drill stop names `tab-2`, which has been
-  // Setlist since the tabs were renumbered. Flip to `it` when stops.ts says `tab-3`.
-  it.fails("ONB-19 (gap): the Drill stop shows the Drill's own key", async () => {
+  // TOOLS_PARITY section 6.1 item 8: the Drill stop named `tab-2`, which has been
+  // Setlist since the tabs were renumbered. Fixed in the revamp: it says `tab-3`.
+  it("ONB-19: the Drill stop shows the Drill's own key", async () => {
     await startTourFrom(METRONOME);
     await toDrillStop();
     const keys = [...document.querySelectorAll(".tour-key")].map((k) => k.textContent ?? "");

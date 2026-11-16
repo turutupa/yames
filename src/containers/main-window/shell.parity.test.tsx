@@ -52,6 +52,16 @@ describe("app_ready", () => {
     expect(invoked("app_ready")).toHaveLength(1);
   });
 
+  it("is called once when the main window opens on Today", async () => {
+    await installSettings(RETURNING_PLAYER);
+    render(<App />);
+    await waitFor(() => expect(screen.queryByTestId("today")).not.toBeNull());
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(invoked("app_ready")).toHaveLength(1);
+  });
+
   it("is called by the floating widget too", async () => {
     setSearch("?window=floating");
     await installSettings(RETURNING_PLAYER);
@@ -226,6 +236,20 @@ describe("setView", () => {
       setInvokeResponse("get_active_tab", () => mode);
       await openShell({}, OPEN_ON_LAST_TOOL);
       await expectOnTool(tool);
+    },
+  );
+
+  // The front door (BRIEF.md "Decisions"): a returning player who never chose
+  // "open on my last tool" opens on Today, and their saved tool is kept, not
+  // overwritten, so turning the setting on later still finds it.
+  it.each(TOOLS.map((t) => [t.mode, t] as const))(
+    "opens on Today with a saved activeTab of %s, and keeps it",
+    async (mode, tool) => {
+      setInvokeResponse("get_active_tab", () => mode);
+      await openShell();
+      await waitFor(() => expect(screen.queryByTestId("today")).not.toBeNull());
+      expect(document.querySelector(tool.landmark)).toBeNull();
+      expect(wasInvoked("set_active_tab")).toBe(false);
     },
   );
 
