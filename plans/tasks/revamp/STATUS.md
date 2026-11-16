@@ -20,7 +20,8 @@ the first playable build is in the owner's hands. The worker briefs (`W1`, `W2`,
   Linux box two layout tests also fail on `main` (`coach-blocks` at the
   380 px dock, `songs-seek` at zoom 0.8): font metrics, not the revamp.
   `timing::tests::restart_within_session_does_not_drop_post_resume_beats`
-  sleeps 150 ms and fails only on a loaded machine.
+  sleeps 150 ms and fails only on a loaded machine. `jam.spec.ts` "the cheat
+  sheet, maximized, never covers Stop" is flaky here on `main` as well.
 - **Review:** the `reviewer` pass on `audio_input.rs` (input side) and on
   `db.rs` migration five found both OK to merge; its two cheap fixes are in
   (`list_path_takes` clamps its limit, `save_path_take` refuses an
@@ -59,6 +60,14 @@ The Session:
 - Level warm-ups are found and planned from their own tempo plan and grid.
 - The variant the planner picks is the one played, drawn and recorded.
 - A Take's row records when it started.
+- A new Take can't be started on the last one's song. After Go again, the Start
+  button was enabled for a frame before the next Take was loaded, so a quick
+  press (or the pedal) began it on the old song with the new one loading
+  underneath. "Prepared" now belongs to one Take of one step.
+- The `?shot=` scenes are reliable: the mock engine handed every listener the
+  same state object (React saw no change and dropped a stop), and never
+  unregistered a listener (it matched the wrong id). The Find my edge climb
+  failed most runs before; 90 runs of the session scenes pass now.
 - Readable accent text on the learning screens (it was nearly invisible in the
   dark themes).
 

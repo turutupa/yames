@@ -185,13 +185,25 @@ function previousValueOf(
   return null;
 }
 
+/** What makes one Take a different one to load: its notes, tempo and length. */
+function takeKey(take: TakePlan, takeNumber: string): string {
+  return `${takeNumber}|${take.pathId}|${take.exercise.id}|${take.bpm}|${take.bars}|${take.source.length}`;
+}
+
 export function useSessionRun(input: SessionRunInput) {
   const { view, setView, isPlaying, beat, listening } = input;
   const [run, dispatch] = useReducer(runReducer, IDLE);
   const [paths, setPaths] = useState<PathDoc[]>([]);
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
-  const [prepared, setPrepared] = useState(false);
+  /**
+   * The Take the engine holds, once its song, mix and schedule are loaded.
+   * Kept as the Take itself rather than a flag: a new Take (Go again at a new
+   * tempo) is unprepared in the very render it appears in, so a quick press of
+   * Start or the pedal cannot begin it on the last Take's song while the new
+   * one is still loading.
+   */
+  const [preparedTake, setPreparedTake] = useState<string | null>(null);
   const [engineTrouble, setEngineTrouble] = useState<string | null>(null);
   const [live, setLive] = useState<LiveTake>(NO_LIVE);
   // Stamped once a view opens, so a plan does not rebuild on every second.
@@ -271,6 +283,10 @@ export function useSessionRun(input: SessionRunInput) {
     // `run.bpm`, the Exercise and its variant are the whole of what a Take is built from.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, run.bpm, step?.kind === "exercise" ? step.variantSeed : null]);
+  // Which Take of this step it is: Go again at the same tempo is the same
+  // notes, and still a new Take that has to be loaded before it can start.
+  const takeNumber = `${run.stepIndex}|${run.takes}`;
+  const prepared = take !== null && preparedTake === takeKey(take, takeNumber);
 
   const onExercise = step?.kind === "exercise";
 
@@ -311,7 +327,7 @@ export function useSessionRun(input: SessionRunInput) {
   useEffect(() => {
     if (run.phase !== "ready" || !take || !onExercise) return;
     const mine = ++prepareId.current;
-    setPrepared(false);
+    setPreparedTake(null);
     setEngineTrouble(null);
     setLive(NO_LIVE);
     void enqueue(async () => {
@@ -326,7 +342,7 @@ export function useSessionRun(input: SessionRunInput) {
         await loadSong(transport, null);
         await setSongMix(engineMix(DEFAULT_MIX_SETTING, 0));
         await loadScoreSchedule(take.schedule, take.exercise.passBars);
-        if (prepareId.current === mine) setPrepared(true);
+        if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {
         if (prepareId.current !== mine) return;
         setEngineTrouble(typeof err === "string" ? err : "load");
@@ -568,7 +584,7 @@ export function useSessionRun(input: SessionRunInput) {
     snapshot.current = null;
     const entered = lastEntered.current;
     lastEntered.current = null;
-    setPrepared(false);
+    setPreparedTake(null);
     void enqueue(async () => {
       await setPlaying(false).catch(() => {});
       if (entered?.kind === "drill") await stopSpeedRamp().catch(() => {});

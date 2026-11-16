@@ -187,7 +187,12 @@ async function drive() {
         byId("edge-even-eighths.four-fingers")?.click();
         await until("the Session", () => !!byId("session"));
         const big = () => byId("session-big") as HTMLButtonElement | null;
-        const ready = () => !!big() && !big()!.disabled;
+        // Ready means the Session is in its ready phase and the Take is loaded.
+        // An enabled button alone is not enough: the "Go again" one is enabled,
+        // and becomes a disabled Start until the next Take's song is loaded.
+        const phase = () =>
+          document.querySelector<HTMLElement>('[data-testid="session-take"]')?.dataset.phase;
+        const ready = () => phase() === "ready" && !!big() && !big()!.disabled;
         const verdict = () => !!byId("session-edge");
         const done = () => !!document.querySelector('[data-testid="session-edge"][data-done]');
         // One Take at a time: start it, let it end itself, read the verdict, and
@@ -212,7 +217,12 @@ async function drive() {
         await until("the warm-up", () => !!byId("session-timed"));
       } else {
         const big = () => byId("session-big") as HTMLButtonElement | null;
-        const ready = () => !!big() && !big()!.disabled;
+        // Ready means the Session is in its ready phase and the Take is loaded.
+        // An enabled button alone is not enough: the "Go again" one is enabled,
+        // and becomes a disabled Start until the next Take's song is loaded.
+        const phase = () =>
+          document.querySelector<HTMLElement>('[data-testid="session-take"]')?.dataset.phase;
+        const ready = () => phase() === "ready" && !!big() && !big()!.disabled;
         await until("the Take to be ready", ready, 20000);
         if (stop !== "ready") {
           big()?.click();

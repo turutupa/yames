@@ -888,14 +888,19 @@ export function installShotMock(shot: Shot, theme: string): void {
   mockWindows(shot.window === "floating" ? "floating" : "main");
 
   const listeners = new Map<string, number[]>();
+  /** The id `listen` handed back, to the callback it registered. */
+  const listenerIds = new Map<number, number>();
   let nextListenerId = 1;
 
   function emit(event: string, payload: unknown) {
     const internals = (window as unknown as {
       __TAURI_INTERNALS__?: { runCallback?: (id: number, p: unknown) => void };
     }).__TAURI_INTERNALS__;
+    // Each delivery gets its own copy, as it does through real IPC, where every
+    // event is deserialized afresh. Handing out the same STATE object every
+    // time let React see "no change" and drop a stop that followed a start.
     for (const handler of listeners.get(event) ?? []) {
-      internals?.runCallback?.(handler, { event, id: handler, payload });
+      internals?.runCallback?.(handler, { event, id: handler, payload: structuredClone(payload) });
     }
   }
 
@@ -1618,11 +1623,21 @@ export function installShotMock(shot: Shot, theme: string): void {
       const event = String(a?.event);
       const handler = Number(a?.handler);
       listeners.set(event, [...(listeners.get(event) ?? []), handler]);
-      return nextListenerId++;
+      const eventId = nextListenerId++;
+      listenerIds.set(eventId, handler);
+      return eventId;
     }
     if (cmd === "plugin:event|unlisten") {
-      for (const [event, ids] of listeners) {
-        listeners.set(event, ids.filter((id) => id !== Number(a?.handler)));
+      // `@tauri-apps/api` unlistens by the id `listen` returned (`eventId`),
+      // not by the callback. Matching on anything else left every listener a
+      // screen ever took registered, and an unmounted effect's handler went on
+      // firing into later Takes.
+      const handler = listenerIds.get(Number(a?.eventId));
+      listenerIds.delete(Number(a?.eventId));
+      if (handler !== undefined) {
+        for (const [event, ids] of listeners) {
+          listeners.set(event, ids.filter((id) => id !== handler));
+        }
       }
       return null;
     }
