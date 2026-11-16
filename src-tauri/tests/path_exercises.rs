@@ -17,7 +17,7 @@ use yames_lib::instrument::Instrument;
 use yames_lib::score::pass::CLEAN_TEMPO_MIN_BARS;
 use yames_lib::score::{
     match_attempt, BeatMap, OnsetState, PassBar, PassVerdict, PlayedOnset, ScheduleReport,
-    ScheduleRun, ScoreSchedule,
+    ExpectedOnset, ScheduleRun, ScoreSchedule,
 };
 use yames_lib::session_log::Xorshift64;
 
@@ -341,7 +341,7 @@ fn every_looping_exercise_played_right_passes_its_own_bars() {
             loops: true,
             ..row.schedule.clone()
         };
-        let mut run = ScheduleRun::new(looped).with_pass_bars(bars.clone());
+        let mut run = ScheduleRun::new(looped).with_lag_correction(true).with_pass_bars(bars.clone());
         // The transport runs one bar past the last note, as a Take's does.
         for i in 0..=(passes as f64 * length) as usize + 4 {
             run.note_quarter_in_bar(i == 0, i as f64 * ms, 4);
@@ -360,4 +360,102 @@ fn every_looping_exercise_played_right_passes_its_own_bars() {
         checked += 1;
     }
     assert!(checked > 30, "only {checked} looping graded Exercises");
+}
+
+/// A Session Take, exactly as the engine logs it: the Exercise written out
+/// to whole passes (`src/session/take.ts` `buildTake`), not looping, and the
+/// transport stopping on the line after the last bar. No downbeat follows that
+/// line, so the last bar has to count as finished from the pass length alone,
+/// or an 8-bar Take could never reach the clean tempo.
+#[test]
+fn a_take_played_to_its_end_finishes_every_bar() {
+    let row = rows()
+        .into_iter()
+        .find(|r| {
+            r.path == "alternate-picking"
+                && pass_bars(&r.path, &r.exercise).is_some_and(|b| !b.is_empty())
+                && !r.schedule.onsets.is_empty()
+        })
+        .expect("a graded Alternate Picking Exercise");
+    let bars = pass_bars(&row.path, &row.exercise).unwrap();
+    let length = row.schedule.length_beats;
+    let passes = ((CLEAN_TEMPO_MIN_BARS as f64 * 4.0) / length).ceil() as usize;
+    let total = passes as f64 * length;
+    let per_pass = row.schedule.onsets.len() as u32;
+    let written = ScoreSchedule {
+        onsets: (0..passes)
+            .flat_map(|p| {
+                row.schedule.onsets.iter().map(move |o| ExpectedOnset {
+                    id: o.id + p as u32 * per_pass,
+                    beat: o.beat + p as f64 * length,
+                    ..o.clone()
+                })
+            })
+            .collect(),
+        length_beats: total,
+        loops: false,
+    };
+    let ms = 60_000.0 / row.bpm;
+    let notes: Vec<PlayedOnset> = written
+        .onsets
+        .iter()
+        .map(|o| PlayedOnset {
+            time_ms: o.beat * ms,
+            amplitude: if o.accent { 1.0 } else { 0.4 },
+            confidence: 1.0,
+        })
+        .collect();
+    let weights = Instrument::ElectricGuitar.profile().score_weights;
+    let grade_after = |quarters: usize| {
+        let mut run = ScheduleRun::new(written.clone()).with_lag_correction(true).with_pass_bars(bars.clone());
+        for i in 0..quarters {
+            run.note_quarter_in_bar(i % 4 == 0, i as f64 * ms, 4);
+        }
+        for n in &notes {
+            run.note_onset(*n);
+        }
+        run.report(&weights).expect("a beat map").grade.pass.expect("pass bars were loaded")
+    };
+
+    let whole = grade_after(total as usize);
+    let name = format!("{}/{}", row.path, row.exercise);
+    assert_eq!(whole.finished_bars, (total / 4.0) as u32, "{name}: {whole:?}");
+    assert!(whole.counts_for_clean_tempo, "{name}: {whole:?}");
+
+    // Stopped inside the last bar: that bar is not finished.
+    let short = grade_after(total as usize - 1);
+    assert_eq!(short.finished_bars, (total / 4.0) as u32 - 1, "{name}: {short:?}");
+}
+
+/// Songs loads a schedule with no pass bars and no lag correction, and its
+/// report must be exactly what `match_attempt` gave before the revamp, lag
+/// and all: a tool's numbers do not move under it.
+#[test]
+fn a_run_without_lag_correction_scores_like_the_plain_matcher() {
+    let row = rows().into_iter().find(|r| !r.schedule.onsets.is_empty()).unwrap();
+    let ms = 60_000.0 / row.bpm;
+    // A constant 35 ms of rig lag: the correction would take it out; Songs does not.
+    let notes: Vec<PlayedOnset> = played(&row, 2.0, 7)
+        .into_iter()
+        .map(|n| PlayedOnset { time_ms: n.time_ms + 35.0, ..n })
+        .collect();
+    let quarters = row.schedule.length_beats.ceil() as usize + 2;
+    let mut run = ScheduleRun::new(row.schedule.clone()).with_calibration_seed(Some(35.0));
+    for i in 0..quarters {
+        run.note_quarter_in_bar(i % 4 == 0, i as f64 * ms, 4);
+    }
+    for n in &notes {
+        run.note_onset(*n);
+    }
+    let weights = Instrument::ElectricGuitar.profile().score_weights;
+    let from_run = run.report(&weights).expect("a beat map");
+    let plain = match_attempt(
+        &row.schedule,
+        &BeatMap::from_quarter_times((0..quarters).map(|i| i as f64 * ms).collect()),
+        &notes,
+        &weights,
+    );
+    assert_eq!(from_run.results, plain.results);
+    assert_eq!(from_run.score, plain.score);
+    assert_eq!(from_run.interval_consistency, plain.interval_consistency);
 }

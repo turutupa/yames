@@ -855,8 +855,12 @@ impl TimingAnalyzer {
                         .unwrap()
                         .clone()
                         .map(|(schedule, pass_bars)| {
+                            // A schedule loaded with pass bars is a Session
+                            // Take; only those get the lag correction.
+                            let session_take = !pass_bars.is_empty();
                             ScheduleRun::new(schedule)
                                 .with_calibration_seed(initial_calibration_offset_ms)
+                                .with_lag_correction(session_take)
                                 .with_pass_bars(pass_bars)
                         });
                 }

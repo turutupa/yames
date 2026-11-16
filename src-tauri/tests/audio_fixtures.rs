@@ -341,8 +341,10 @@ fn score_onsets(
     cached_offset_ms: Option<f64>,
     pass_bars: &[PassBar],
 ) -> ScheduleReport {
+    // These are Session Takes, which the analyzer corrects for the lag.
     let mut run = ScheduleRun::new(schedule.clone())
         .with_calibration_seed(cached_offset_ms)
+        .with_lag_correction(true)
         .with_pass_bars(pass_bars.to_vec());
     for (i, &t) in quarter_times_ms.iter().enumerate() {
         run.note_quarter_in_bar(i == 0, t, beats_per_bar);

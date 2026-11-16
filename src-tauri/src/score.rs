@@ -1613,7 +1613,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
     let reason = didnt_catch_enough(tally.due, tally.heard, tally.extra, confidence);
     let (bars, samples) = bar_metrics(schedule, beats, results, extras, tally, amplitudes, gap_ms);
     let graded = reason.is_none();
-    let finished = beats.finished_bars().min(samples.len() as u32) as usize;
+    let finished = finished_bars_of(beats, schedule).min(samples.len() as u32) as usize;
     let pass = pass::evaluate(&samples[..finished], pass_bars, gap_ms, graded);
     TakeGrade {
         verdict: if graded {
@@ -1680,7 +1680,7 @@ fn bar_metrics(
         }
         &mut rows[bar as usize]
     }
-    if let Some(last) = beats.finished_bars().checked_sub(1) {
+    if let Some(last) = finished_bars_of(beats, schedule).checked_sub(1) {
         row(&mut rows, &mut devs, last);
     }
     for (k, r) in results.iter().enumerate() {
@@ -2012,6 +2012,10 @@ pub struct ScheduleRun {
     live_lag_notes: usize,
     /// The Exercise's pass bars, when an Exercise is what was loaded.
     pass_bars: Vec<PassBar>,
+    /// Take the system's lag out of the report ([`CalibrationPolicy::Auto`]).
+    /// The learning side's: a Session Take turns it on, and Songs, which
+    /// never does, keeps the scoring it shipped with.
+    correct_lag: bool,
 }
 
 /// How long after an expected onset's matching window closes its live verdict
@@ -2075,12 +2079,19 @@ impl ScheduleRun {
             live_lag_ms: 0.0,
             live_lag_notes: 0,
             pass_bars: Vec::new(),
+            correct_lag: false,
         }
     }
 
     /// The pass bars the report's grade is judged against. See [`pass`].
     pub fn with_pass_bars(mut self, pass_bars: Vec<PassBar>) -> Self {
         self.pass_bars = pass_bars;
+        self
+    }
+
+    /// Correct the report for the system's lag. See the field.
+    pub fn with_lag_correction(mut self, on: bool) -> Self {
+        self.correct_lag = on;
         self
     }
 
@@ -2149,14 +2160,21 @@ impl ScheduleRun {
         if self.beats.is_empty() {
             return None;
         }
+        // Songs keeps the scoring it shipped with, uncorrected, so a tool's
+        // numbers do not move under it; a Session Take is corrected.
+        let policy = if self.correct_lag {
+            CalibrationPolicy::Auto {
+                seed_ms: self.calibration_seed_ms,
+            }
+        } else {
+            CalibrationPolicy::Off
+        };
         Some(match_attempt_calibrated(
             &self.schedule,
             &self.beats,
             &self.played,
             weights,
-            CalibrationPolicy::Auto {
-                seed_ms: self.calibration_seed_ms,
-            },
+            policy,
             &self.pass_bars,
         ))
     }
@@ -2368,6 +2386,23 @@ impl ScheduleRun {
 /// How long one pass of a schedule is, in quarter notes. A schedule that
 /// declares nothing is one beat long rather than zero, which is what
 /// `match_attempt` has always assumed and what keeps the loop cursor moving.
+/// Bars the Take finished, for the pass rule and the bar rows.
+///
+/// [`BeatMap::finished_bars`] needs the next bar's downbeat, and a non-looping
+/// song has none: the engine stops on the sample its pass ends and the
+/// end-of-song notification never reaches the beat log. So a Take played to
+/// the end would always come out one bar short, and an 8-bar Take could never
+/// count toward the clean tempo. Once every quarter of a non-looping pass was
+/// logged, its last bar was played out.
+fn finished_bars_of(beats: &BeatMap, schedule: &ScoreSchedule) -> u32 {
+    let finished = beats.finished_bars();
+    let length = pass_length(schedule);
+    if schedule.loops || beats.is_empty() || (beats.len() as f64) < length {
+        return finished;
+    }
+    finished.max(beats.bar_at_beat(length - 1e-6) + 1)
+}
+
 fn pass_length(schedule: &ScoreSchedule) -> f64 {
     if schedule.length_beats > 0.0 {
         schedule.length_beats
