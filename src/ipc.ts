@@ -641,8 +641,13 @@ export type {
  * The results arrive on the existing `practice-segment-ended` event
  * rather than a channel of their own — see `PracticeSegmentEndedPayload`.
  */
-export async function loadScoreSchedule(schedule: ScoreSchedule): Promise<void> {
-  return invoke("load_score_schedule", { schedule });
+export async function loadScoreSchedule(
+  schedule: ScoreSchedule,
+  passBars?: readonly ScorerPassBar[],
+): Promise<void> {
+  // Songs loads a schedule with no bars to judge against; a Session sends its
+  // Exercise's, and the scorer's grade then carries `pass` (score/pass.rs).
+  return invoke("load_score_schedule", passBars ? { schedule, passBars } : { schedule });
 }
 
 /** Back to free play. Safe to call when nothing is loaded. */
@@ -796,6 +801,39 @@ export type ScorerTakeGrade = {
     leanMs?: number;
   };
   bars: ScorerBarMetrics[];
+  /** The tempo the Take was graded at. */
+  bpm: number;
+  /** Judged against the pass bars the schedule was loaded with; absent without them. */
+  pass?: ScorerPassResult;
+};
+
+/** One entry of an Exercise's `passBars`, as `src/paths/format.ts` writes it. */
+export type ScorerPassBar = {
+  metric: string;
+  min?: number;
+  max?: number;
+  overBars: number;
+};
+
+/** One pass bar, in the window that explains the verdict (`score/pass.rs` `BarCheck`). */
+export type ScorerBarCheck = ScorerPassBar & {
+  /** Null: the window had nothing to measure it on, which does not hold. */
+  measured: number | null;
+  held: boolean;
+};
+
+/** What `score/pass.rs` `evaluate` says about one Take. */
+export type ScorerPassResult = {
+  verdict: "passed" | "failed" | "didntCatchEnough" | "tooShort";
+  windowBars: number;
+  finishedBars: number;
+  heldBars: number;
+  heldFromBar?: number;
+  countsForCleanTempo: boolean;
+  windowFromBar?: number;
+  checks: ScorerBarCheck[];
+  /** Metrics the bars named that timing cannot measure; not in the verdict. */
+  notAssessed: string[];
 };
 
 /**

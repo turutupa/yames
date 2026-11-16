@@ -10,6 +10,7 @@ import {
 } from "./planner";
 import type { PlanMinutes, PlanStep, SessionPlan } from "./planner";
 import { pickVariantSeed } from "./variants";
+import { findExercise } from "./packs";
 import { NO_PROGRESS } from "./progress";
 import { ALT, DAY, NOW, ceiling, missed, passed, progress, state, take } from "./testKit";
 
@@ -301,13 +302,16 @@ describe("coming back after a break", () => {
 });
 
 describe("warm-ups", () => {
-  it("starts comfortably below the clean tempo", () => {
-    const p = progress({ takes: [missed(OPEN, 100, 0.8)], ceilings: [ceiling(OPEN, 90)] });
+  // The pack's beginner warm-up reads "Four fingers" and starts at 60% of it.
+  it("starts at the pack's share of its reference Exercise's clean tempo", () => {
+    const FOUR = "even-eighths.four-fingers";
+    const p = progress({ takes: [missed(OPEN, 100, 0.8)], ceilings: [ceiling(FOUR, 100)] });
     const warm = plan(10, p).steps[0];
     expect(warm.kind).toBe("metronome");
     if (warm.kind !== "metronome") return;
-    expect(warm.bpm).toBe(70);
-    expect(warm.why).toEqual({ code: "warmUpClean", values: { bpm: 70, clean: 90 } });
+    expect(warm.exerciseId).toBe("warmup-beginner.one-string-climb");
+    expect(warm.bpm).toBe(60);
+    expect(warm.why).toEqual({ code: "warmUpClean", values: { bpm: 60, clean: 100 } });
   });
 
   it("may go under the first rung, since it is not graded", () => {
@@ -315,10 +319,16 @@ describe("warm-ups", () => {
     expect(warmupBpm(exercise(OPEN), 40)).toBe(40);
   });
 
-  it("uses the first rung with no clean tempo to go on", () => {
+  it("uses the pack's own tempo with no clean tempo to go on", () => {
     const warm = plan(10, { ...NO_PROGRESS }).steps[0];
     expect(warm.why.code).toBe("warmUp");
-    if (warm.kind === "metronome") expect(warm.bpm).toBe(60);
+    if (warm.kind === "metronome") expect(warm.bpm).toBe(70);
+  });
+
+  it("finds a Level's warm-up, which lives on the Level and not on a Step", () => {
+    const found = findExercise(ALT, "warmup-beginner.one-string-climb");
+    expect(found?.exercise.id).toBe("warmup-beginner.one-string-climb");
+    expect(found?.step.exercises.some((e) => e.id === "even-eighths.four-fingers")).toBe(true);
   });
 
   it("takes a pack's own warm-ups in turn, when it has them", () => {

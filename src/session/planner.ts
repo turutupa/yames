@@ -338,13 +338,21 @@ export function warmupBpm(exercise: Exercise, clean: number | null): number {
 
 function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number): PlanStep {
   const { path, exercise } = focus;
-  const clean = cleanTempoOf(progress, path.id, exercise.id);
-  const bpm = warmupBpm(exercise, clean);
-  const backing = exercise.backing.kind === "click" ? exercise.backing.subdivision : 1;
   // A pack's own warm-ups go first, in turn, so the notes change from day to
   // day. Without them it is the focus Exercise, slower, and not graded.
   const own = warmupsOf(path, focus.step.id);
   const warmup = own.length > 0 ? own[progress.takes.length % own.length] : exercise;
+  // A pack's warm-up says whose clean tempo it reads and what share of it to
+  // start at; with no history it has a tempo of its own.
+  const plan = warmup.warmup;
+  const clean = cleanTempoOf(progress, path.id, plan?.referenceExercise ?? exercise.id);
+  const bpm = plan
+    ? clean === null
+      ? plan.fallbackBpm
+      : Math.max(MIN_WARMUP_BPM, Math.round((clean * plan.startAtCleanRatio) / 5) * 5)
+    : warmupBpm(exercise, clean);
+  // Its own backing: a warm-up's grid need not be the focus Exercise's.
+  const backing = warmup.backing.kind === "click" ? warmup.backing.subdivision : 1;
   return {
     kind: "metronome",
     id: "warmup",

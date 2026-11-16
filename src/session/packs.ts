@@ -63,5 +63,16 @@ export function findExercise(
     const exercise = step.exercises.find((e) => e.id === exerciseId);
     if (exercise) return { step, exercise };
   }
+  // A Level's warm-ups live on the Level, not on a Step. They belong with the
+  // Step of the Exercise they read their tempo from, or the Level's first.
+  for (const level of path.levels ?? []) {
+    const exercise = level.warmups.find((e) => e.id === exerciseId);
+    if (!exercise) continue;
+    const reference = exercise.warmup?.referenceExercise;
+    const step =
+      (reference ? path.steps.find((s) => s.exercises.some((e) => e.id === reference)) : undefined) ??
+      path.steps.find((s) => level.stepIds.includes(s.id));
+    return step ? { step, exercise } : null;
+  }
   return null;
 }

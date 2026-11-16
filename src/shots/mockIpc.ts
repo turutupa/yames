@@ -23,7 +23,7 @@ import { newSongRecord } from "../songs/library";
 import type { SongRecord } from "../songs/library";
 import { scriptFindings, scriptPass } from "../containers/songs/review/reviewFixtures";
 import type { ScoreSchedule, SongTransport } from "../songs/types";
-import type { ExerciseCeilingRow, PathStateRow, PathTakeRow, ScorerTakeGrade } from "../ipc";
+import type { ExerciseCeilingRow, PathStateRow, PathTakeRow, ScorerPassBar, ScorerPassResult, ScorerTakeGrade } from "../ipc";
 
 /**
  * The library in the sidebar.
@@ -627,6 +627,7 @@ function songLibraryRecords(which: "three" | "longTitle"): SongRecord[] {
 function mockTakeGrade(
   recipe: "pass" | "below" | "noCatch",
   onsets: ScoreSchedule["onsets"],
+  passBars: readonly ScorerPassBar[] = [],
 ): ScorerTakeGrade {
   const even = recipe === "pass" ? 0.87 : 0.74;
   const caught = recipe !== "noCatch";
@@ -662,6 +663,40 @@ function mockTakeGrade(
     confidence: 0.6,
     calibration: { offsetMs: 0, source: "none" },
     bars,
+    bpm: 80,
+    ...(passBars.length > 0 ? { pass: mockPass(recipe, even, barCount, passBars) } : {}),
+  };
+}
+
+/** What `score/pass.rs` would say of a recipe's Take, for the bars it was loaded with. */
+function mockPass(
+  recipe: "pass" | "below" | "noCatch",
+  even: number,
+  finishedBars: number,
+  passBars: readonly ScorerPassBar[],
+): ScorerPassResult {
+  const windowBars = passBars.reduce((most, b) => Math.max(most, b.overBars, 1), 1);
+  const timing = new Set(["timingEvenness", "notesHeard", "extraNotes", "evennessHold"]);
+  const assessed = passBars.filter((b) => timing.has(b.metric));
+  const notAssessed = [...new Set(passBars.filter((b) => !timing.has(b.metric)).map((b) => b.metric))];
+  const base = { windowBars, finishedBars, heldBars: 0, countsForCleanTempo: false, notAssessed };
+  if (recipe === "noCatch") return { ...base, verdict: "didntCatchEnough", checks: [] };
+  const measuredOf = (metric: string) =>
+    metric === "notesHeard" ? 1 : metric === "extraNotes" ? 0 : even;
+  const checks = assessed.map((b) => {
+    const measured = measuredOf(b.metric);
+    const held = (b.min === undefined || measured >= b.min) && (b.max === undefined || measured <= b.max);
+    return { ...b, measured, held };
+  });
+  const passed = checks.every((c) => c.held);
+  return {
+    ...base,
+    verdict: passed ? "passed" : "failed",
+    checks,
+    windowFromBar: 0,
+    ...(passed
+      ? { heldBars: finishedBars, heldFromBar: 0, countsForCleanTempo: finishedBars >= 8 }
+      : {}),
   };
 }
 
@@ -905,6 +940,7 @@ export function installShotMock(shot: Shot, theme: string): void {
    * show up in the app.
    */
   let songSchedule: ScoreSchedule | null = null;
+  let songPassBars: ScorerPassBar[] = [];
 
   /**
    * The song the "engine" is carrying, as `load_song` was given it.
@@ -1618,6 +1654,7 @@ export function installShotMock(shot: Shot, theme: string): void {
      */
     if (cmd === "load_score_schedule") {
       songSchedule = a?.schedule as ScoreSchedule;
+      songPassBars = (a?.passBars as ScorerPassBar[] | undefined) ?? [];
       onsetsSaid = 0;
       return null;
     }
@@ -1669,7 +1706,7 @@ export function installShotMock(shot: Shot, theme: string): void {
           };
         }),
         extraOnsets: [],
-        takeGrade: mockTakeGrade(recipe, onsets),
+        takeGrade: mockTakeGrade(recipe, onsets, songPassBars),
       });
       return null;
     }

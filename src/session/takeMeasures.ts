@@ -10,7 +10,12 @@
  * It never invents a number. A value the report does not carry is `null`, and
  * `grade.ts` treats `null` as "not measured", never as zero and never as a pass.
  */
-import type { NoCatchReason, PracticeSegmentEndedPayload, ScorerTakeGrade } from "../ipc";
+import type {
+  NoCatchReason,
+  PracticeSegmentEndedPayload,
+  ScorerPassResult,
+  ScorerTakeGrade,
+} from "../ipc";
 
 export type ScorerReport = Pick<
   PracticeSegmentEndedPayload,
@@ -38,6 +43,12 @@ export type TakeMeasures = {
   caught: boolean;
   /** Why not, when the scorer said. Absent from a build that does not say. */
   noCatchReason?: NoCatchReason;
+  /**
+   * The scorer's own judgement against the Exercise's pass bars
+   * (`score/pass.rs`), when the schedule was loaded with them. When present it
+   * decides the verdict; `grade.ts` only falls back to its own reading without.
+   */
+  pass?: ScorerPassResult;
 };
 
 /**
@@ -96,6 +107,7 @@ function fromGrade(
     barEvenness: caught ? barsOf(grade) : null,
     caught,
     ...(grade.noCatchReason ? { noCatchReason: grade.noCatchReason } : {}),
+    ...(grade.pass ? { pass: grade.pass } : {}),
   };
 }
 

@@ -6,6 +6,8 @@ import { MIN_HEARD_NOTES, measureTake } from "./takeMeasures";
 import type { ScorerReport } from "./takeMeasures";
 import type { ScorerTakeGrade } from "../ipc";
 import { ALT } from "./testKit";
+import type { ScorerPassResult } from "../ipc";
+import { buildTake } from "./take";
 
 const EX: Exercise = ALT.steps[0].exercises[0];
 const WITH_PITCH: Exercise = ALT.steps[0].exercises[2];
@@ -67,6 +69,7 @@ function scorerGrade(fields: Partial<ScorerTakeGrade> = {}): ScorerTakeGrade {
     heardRatio: 0.94,
     confidence: 0.6,
     calibration: { offsetMs: 0, source: "none" },
+    bpm: 80,
     bars: [
       { bar: 0, due: 8, heard: 8, missed: 0, extra: 0, evenness: 0.9, evennessSigmaMs: 4 },
       { bar: 1, due: 8, heard: 8, missed: 0, extra: 0, evenness: 0.86, evennessSigmaMs: 5 },
@@ -233,5 +236,94 @@ describe("the pass rule", () => {
     const bars = [0.5, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9];
     const g = gradeTake(EX, 80, measures({ evenness: 0.7, barEvenness: bars }));
     expect(g.verdict).toBe("passed");
+  });
+});
+
+describe("the scorer's own verdict", () => {
+  const pass = (fields: Partial<ScorerPassResult> = {}): ScorerPassResult => ({
+    verdict: "passed",
+    windowBars: 4,
+    finishedBars: 8,
+    heldBars: 8,
+    heldFromBar: 0,
+    countsForCleanTempo: true,
+    windowFromBar: 0,
+    checks: EX.passBars.map((bar) => ({ ...bar, measured: bar.max === undefined ? 0.9 : 0, held: true })),
+    notAssessed: [],
+    ...fields,
+  });
+
+  it("decides the verdict and the clean tempo when it is there", () => {
+    const g = gradeTake(EX, 100, measures({ pass: pass() }));
+    expect(g.verdict).toBe("passed");
+    expect(g.cleanBpm).toBe(100);
+    expect(g.passesExercise).toBe(true);
+    expect(g.checks.map((c) => c.metric)).toEqual(EX.passBars.map((b) => b.metric));
+  });
+
+  it("does not give a clean tempo for a pass held under 8 bars", () => {
+    const g = gradeTake(EX, 100, measures({ pass: pass({ heldBars: 6, countsForCleanTempo: false }) }));
+    expect(g.verdict).toBe("passed");
+    expect(g.cleanBpm).toBeNull();
+    expect(g.passesExercise).toBe(false);
+  });
+
+  it("says which bar failed, overriding a reading that would pass", () => {
+    const failed = pass({
+      verdict: "failed",
+      heldBars: 0,
+      countsForCleanTempo: false,
+      checks: EX.passBars.map((bar) =>
+        bar.metric === "timingEvenness"
+          ? { ...bar, measured: 0.7, held: false }
+          : { ...bar, measured: bar.max === undefined ? 1 : 0, held: true },
+      ),
+    });
+    const g = gradeTake(EX, 100, measures({ evenness: 0.95, pass: failed }));
+    expect(g.verdict).toBe("belowBar");
+    expect(g.headline).toMatchObject({ metric: "timingEvenness", value: 0.7, met: false });
+  });
+
+  it("maps too short and didn't catch enough", () => {
+    expect(gradeTake(EX, 100, measures({ pass: pass({ verdict: "tooShort" }) })).verdict).toBe("tooShort");
+    expect(gradeTake(EX, 100, measures({ pass: pass({ verdict: "didntCatchEnough" }) })).verdict).toBe(
+      "notCaught",
+    );
+  });
+
+  it("reaches the measures from the scorer's grade", () => {
+    const m = measureTake(null, { barsPlayed: 8, grade: scorerGrade({ pass: pass() }) });
+    expect(m.pass?.verdict).toBe("passed");
+  });
+});
+
+describe("the fallback reading", () => {
+  it("is only as even as the worst bar of its best window", () => {
+    // Three good bars and a sloppy one in every window of four: an average
+    // would read 0.87 and pass a bar of 0.85.
+    const barEvenness = [0.95, 0.95, 0.95, 0.6, 0.95, 0.95, 0.95, 0.6];
+    const g = gradeTake(EX, 100, measures({ barEvenness }));
+    expect(g.verdict).toBe("belowBar");
+    expect(g.headline).toMatchObject({ metric: "timingEvenness", value: 0.6, met: false });
+  });
+});
+
+describe("a Take's length", () => {
+  it("covers the longest stretch a pass bar asks for", () => {
+    const stamina = ALT.steps
+      .flatMap((s) => s.exercises)
+      .find((e) => e.id === "stamina-minute.chromatic-minute")!;
+    expect(takeBarsOf(stamina)).toBe(16);
+  });
+
+  it("plays the variant the planner chose, under the Exercise's own id", () => {
+    const varied = ALT.steps.flatMap((s) => s.exercises).find((e) => (e.variation?.variants.length ?? 0) > 1)!;
+    const first = buildTake(ALT, varied, 80, 0);
+    const second = buildTake(ALT, varied, 80, 1);
+    expect(first.exercise.id).toBe(varied.id);
+    expect(second.exercise.id).toBe(varied.id);
+    expect(second.exercise.notes).toEqual(varied.variation!.variants[1].notes);
+    // Variants move the notes, not the rhythm: the tab differs, the timing schedule need not.
+    expect(new TextDecoder().decode(first.source)).not.toBe(new TextDecoder().decode(second.source));
   });
 });

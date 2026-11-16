@@ -13,6 +13,7 @@
  * block a pass and does not count towards one, and the result says so.
  */
 import type { Exercise, PassBar } from "../paths/format";
+import type { ScorerPassResult } from "../ipc";
 import type { TakeMeasures } from "./takeMeasures";
 
 /**
@@ -26,7 +27,10 @@ export const CLEAN_TEMPO_MIN_BARS = 8;
 /** How many bars a full Take of this Exercise is, in whole passes. */
 export function takeBarsOf(exercise: Exercise): number {
   const bars = Math.max(1, exercise.bars);
-  return Math.ceil(CLEAN_TEMPO_MIN_BARS / bars) * bars;
+  // Long enough for the clean tempo and for the longest stretch a pass bar asks
+  // to hold over (the Stamina minutes ask for 16): shorter, it could never pass.
+  const needed = Math.max(CLEAN_TEMPO_MIN_BARS, barsAskedFor(exercise));
+  return Math.ceil(needed / bars) * bars;
 }
 
 export type BarCheck = {
@@ -80,13 +84,56 @@ function barsAskedFor(exercise: Exercise): number {
 function evennessOver(measures: TakeMeasures, overBars: number): number | null {
   const bars = measures.barEvenness;
   if (!bars || bars.length < overBars || overBars < 1) return measures.evenness;
+  // A window is only as even as its worst bar, as in `score/pass.rs`: an
+  // average would let one sloppy bar hide among good ones.
   let best = -1;
   for (let at = 0; at + overBars <= bars.length; at += 1) {
-    let sum = 0;
-    for (let i = at; i < at + overBars; i += 1) sum += bars[i];
-    best = Math.max(best, sum / overBars);
+    best = Math.max(best, Math.min(...bars.slice(at, at + overBars)));
   }
   return best;
+}
+
+/**
+ * The scorer's verdict, in this file's terms. `score/pass.rs` judges every
+ * window of finished bars, so it is the rule; the reading in `gradeTake` is the
+ * fallback for a build or a Take that came back without it.
+ */
+function fromScorer(
+  exercise: Exercise,
+  bpm: number,
+  pass: ScorerPassResult,
+  nothing: Omit<TakeGrade, "verdict">,
+): TakeGrade {
+  if (pass.verdict === "didntCatchEnough") return { ...nothing, verdict: "notCaught" };
+  // In the Exercise's order: the scorer's check for each assessed bar, and an
+  // unmeasured one for what timing cannot judge.
+  const remaining = [...pass.checks];
+  const checks: BarCheck[] = exercise.passBars.map((bar) => {
+    const at = remaining.findIndex((c) => c.metric === bar.metric && c.overBars === bar.overBars);
+    const scorer = at >= 0 ? remaining.splice(at, 1)[0] : undefined;
+    return {
+      metric: bar.metric,
+      value: scorer ? scorer.measured : null,
+      ...(bar.min === undefined ? {} : { min: bar.min }),
+      ...(bar.max === undefined ? {} : { max: bar.max }),
+      met: scorer ? scorer.held : null,
+    };
+  });
+  const unmeasured = checks.filter((c) => c.met === null).map((c) => c.metric);
+  const failed = checks.find((c) => c.met === false) ?? null;
+  const headline = failed ?? checks.find((c) => c.met === true) ?? null;
+  const measurable = checks.some((c) => c.met !== null);
+  const judged = { ...nothing, checks, headline, unmeasured };
+  if (pass.verdict === "tooShort") return { ...judged, verdict: "tooShort" };
+  if (pass.verdict === "failed" || !measurable) return { ...judged, verdict: "belowBar" };
+  const clean = pass.countsForCleanTempo;
+  const passAt = exercise.tempo.passAtBpm;
+  return {
+    ...judged,
+    verdict: "passed",
+    cleanBpm: clean ? bpm : null,
+    passesExercise: clean && passAt !== null && bpm >= passAt,
+  };
 }
 
 function valueOf(bar: PassBar, measures: TakeMeasures): number | null {
@@ -138,6 +185,7 @@ export function gradeTake(exercise: Exercise, bpm: number, measures: TakeMeasure
     return { ...nothing, verdict: "ungraded" };
   }
   if (!measures.caught) return { ...nothing, verdict: "notCaught" };
+  if (measures.pass) return fromScorer(exercise, bpm, measures.pass, nothing);
 
   const checks = exercise.passBars.map((bar) => check(bar, measures));
   const unmeasured = checks.filter((c) => c.met === null).map((c) => c.metric);

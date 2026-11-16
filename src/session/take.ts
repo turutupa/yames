@@ -17,6 +17,7 @@
  */
 import { exerciseAlphaTex, exerciseScore } from "../paths/toScore";
 import { barLengthTicks } from "../paths/format";
+import { exerciseWithVariant } from "../paths/variants";
 import type { Exercise, PathDoc } from "../paths/format";
 import { buildSchedule, wholeSong } from "../songs/schedule";
 import type { BarRange } from "../songs/schedule";
@@ -57,7 +58,25 @@ export function writtenOut(exercise: Exercise, times: number): Exercise {
   };
 }
 
-export function buildTake(path: PathDoc, exercise: Exercise, bpm: number): TakePlan {
+/**
+ * The notes a Take plays: the variant the planner picked (`variantSeed`, an
+ * index into the Exercise's variants), or the Exercise as written. The id stays
+ * the Exercise's own, so progress and the clean tempo pool across its variants.
+ */
+export function withVariant(exercise: Exercise, variantSeed: number | null | undefined): Exercise {
+  const variants = exercise.variation?.variants;
+  if (variantSeed === null || variantSeed === undefined || !variants?.length) return exercise;
+  const variant = variants[((variantSeed % variants.length) + variants.length) % variants.length];
+  return { ...exerciseWithVariant(exercise, variant), id: exercise.id };
+}
+
+export function buildTake(
+  path: PathDoc,
+  base: Exercise,
+  bpm: number,
+  variantSeed?: number | null,
+): TakePlan {
+  const exercise = withVariant(base, variantSeed);
   const bars = takeBarsOf(exercise);
   const whole = writtenOut(exercise, Math.round(bars / Math.max(1, exercise.bars)));
   const score = exerciseScore(path.id, whole, bpm);

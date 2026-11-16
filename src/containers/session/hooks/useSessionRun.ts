@@ -214,6 +214,12 @@ export function useSessionRun(input: SessionRunInput) {
 
   const snapshot = useRef<EngineSnapshot | null>(null);
   const cardWasOpen = useRef(false);
+  /**
+   * A coach session the player already had running. It is theirs: the Session
+   * rides along in it and leaves it running, rather than ending it and writing
+   * their own practice into the Session's history row.
+   */
+  const coachWasActive = useRef(false);
 
   // --- what the store knows ------------------------------------------------
   const loadedRef = useRef(false);
@@ -260,10 +266,11 @@ export function useSessionRun(input: SessionRunInput) {
     if (!current) return null;
     // A metronome step shows its Exercise at its own tempo, and is not a Take.
     const bpm = run.bpm || (step?.kind === "metronome" ? step.bpm : 0);
-    return bpm > 0 ? buildTake(current.path, current.exercise, bpm) : null;
-    // `run.bpm` and the Exercise are the whole of what a Take is built from.
+    const variantSeed = step?.kind === "exercise" ? step.variantSeed : null;
+    return bpm > 0 ? buildTake(current.path, current.exercise, bpm, variantSeed) : null;
+    // `run.bpm`, the Exercise and its variant are the whole of what a Take is built from.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, run.bpm]);
+  }, [current, run.bpm, step?.kind === "exercise" ? step.variantSeed : null]);
 
   const onExercise = step?.kind === "exercise";
 
@@ -318,7 +325,7 @@ export function useSessionRun(input: SessionRunInput) {
         });
         await loadSong(transport, null);
         await setSongMix(engineMix(DEFAULT_MIX_SETTING, 0));
-        await loadScoreSchedule(take.schedule);
+        await loadScoreSchedule(take.schedule, take.exercise.passBars);
         if (prepareId.current === mine) setPrepared(true);
       } catch (err) {
         if (prepareId.current !== mine) return;
@@ -389,12 +396,18 @@ export function useSessionRun(input: SessionRunInput) {
   // --- a Take's edges ------------------------------------------------------
   const wasPlaying = useRef(false);
   const barsReached = useRef(0);
+  /** The piece played to its end and stopped itself, rather than being stopped. */
+  const playedOut = useRef(false);
+  /** When the Take on the stage started, for its row in the history. */
+  const takeStartedAt = useRef(0);
   useEffect(() => {
     const was = wasPlaying.current;
     wasPlaying.current = isPlaying;
     if (isPlaying && !was && run.phase === "ready" && onExercise) {
       barsReached.current = 0;
-      dispatch({ type: "takeStarted", now: Date.now() });
+      playedOut.current = false;
+      takeStartedAt.current = Date.now();
+      dispatch({ type: "takeStarted", now: takeStartedAt.current });
     } else if (!isPlaying && was && run.phase === "playing") {
       dispatch({ type: "takeStopped", now: Date.now() });
     }
@@ -405,6 +418,7 @@ export function useSessionRun(input: SessionRunInput) {
   useEffect(() => {
     if (run.phase !== "playing") return;
     const off = onJamEnded(() => {
+      playedOut.current = true;
       void setPlaying(false).catch(() => {});
     });
     return () => {
@@ -458,8 +472,11 @@ export function useSessionRun(input: SessionRunInput) {
 
     const played = take?.bars ?? 0;
     const measures: TakeMeasures = measureTake(attempt.review?.segment ?? null, {
-      // Played to the end: the engine stopped itself on the last bar's line.
-      barsPlayed: Math.min(played, barsReached.current),
+      // Played to the end, the engine stopped itself on the last bar's line and
+      // every bar is finished. Stopped early, the bar it stopped in is not.
+      barsPlayed: playedOut.current
+        ? played
+        : Math.min(played, Math.max(0, barsReached.current - 1)),
       // A silent Take has no segment; the scorer still answers for it.
       grade: attempt.lastGrade,
     });
@@ -476,7 +493,7 @@ export function useSessionRun(input: SessionRunInput) {
       pathId: path.id,
       stepId: pathStep.id,
       exerciseId: exercise.id,
-      startedAt: now,
+      startedAt: takeStartedAt.current || now,
       bpm,
       bars: measures.barsPlayed,
       caught: measures.caught,
@@ -566,7 +583,7 @@ export function useSessionRun(input: SessionRunInput) {
     });
     const { coach } = latest.current;
     // Through `useSession`: this is what writes the Session into the history.
-    if (coach.active) void coach.endSession().catch(() => {});
+    if (coach.active && !coachWasActive.current) void coach.endSession().catch(() => {});
     if (!cardWasOpen.current && coach.cardOpen) coach.toggleCard();
   }, [enqueue]);
 
@@ -600,6 +617,7 @@ export function useSessionRun(input: SessionRunInput) {
         freeMode: state.freeMode,
       };
       cardWasOpen.current = coach.cardOpen;
+      coachWasActive.current = coach.active;
       const now = Date.now();
       // A Path is started the first time it is played, not the first time it is
       // shown, so looking at Today writes nothing.
