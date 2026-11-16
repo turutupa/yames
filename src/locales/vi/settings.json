@@ -185,7 +185,7 @@
         "navigation": "Điều hướng",
         "jam": "Jam",
         "songs": "Bài hát",
-        "session": "In a Session"
+        "session": "Trong buổi tập"
       },
       "actions": {
         "play": "Phát / Dừng",
@@ -230,12 +230,12 @@
         "songs-take": "Thu bản này",
         "songs-camera": "Quay hình",
         "jam-camera": "Quay hình",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "Hôm nay",
+        "session-go": "Việc tiếp theo",
+        "session-slower": "Chậm hơn",
+        "session-faster": "Nhanh hơn",
+        "session-next": "Bước tiếp theo",
+        "session-pedal": "Một pedal"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -280,12 +280,12 @@
         "songs-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
         "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay",
         "jam-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "Chuyển sang Hôm nay",
+        "session-go": "Trong buổi tập: bắt đầu lượt, dừng lượt, hoặc làm theo nút lớn",
+        "session-slower": "Giữa các lượt: chậm hơn một nấc",
+        "session-faster": "Giữa các lượt: nhanh hơn một nấc",
+        "session-next": "Giữa các lượt: chuyển sang việc tiếp theo trong buổi tập",
+        "session-pedal": "Cho một công tắc chân. Nhấn: việc tiếp theo. Nhấn đúp: chậm hơn. Giữ: bước tiếp theo"
       }
     },
     "inputTest": {

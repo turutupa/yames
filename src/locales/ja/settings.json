@@ -185,7 +185,7 @@
         "navigation": "ナビゲーション",
         "jam": "ジャム",
         "songs": "曲",
-        "session": "In a Session"
+        "session": "セッション中"
       },
       "actions": {
         "play": "再生 / 停止",
@@ -230,12 +230,12 @@
         "songs-take": "テイクを録音",
         "songs-camera": "映像を録画",
         "jam-camera": "映像を録画",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "今日",
+        "session-go": "次の操作",
+        "session-slower": "遅く",
+        "session-faster": "速く",
+        "session-next": "次のステップ",
+        "session-pedal": "ペダル 1 つ"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -280,12 +280,12 @@
         "songs-take": "次に再生したときに録音する、または録音をやめる",
         "songs-camera": "次に再生したときに撮影する、またはカメラを切る",
         "jam-camera": "次に再生したときに撮影する、またはカメラを切る",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "「今日」へ移動",
+        "session-go": "セッション中：テイクを開始・停止する、または大きいボタンの操作を行う",
+        "session-slower": "テイクの合間：1 段階遅く",
+        "session-faster": "テイクの合間：1 段階速く",
+        "session-next": "テイクの合間：セッションの次へ進む",
+        "session-pedal": "フットスイッチ 1 つ用。タップ：次の操作。ダブルタップ：遅く。長押し：次のステップ"
       }
     },
     "inputTest": {

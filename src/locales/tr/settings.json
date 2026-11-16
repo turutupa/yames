@@ -185,7 +185,7 @@
         "navigation": "Gezinme",
         "jam": "Jam",
         "songs": "Şarkılar",
-        "session": "In a Session"
+        "session": "Seans sırasında"
       },
       "actions": {
         "play": "Çal / Durdur",
@@ -230,12 +230,12 @@
         "songs-take": "Kaydı al",
         "songs-camera": "Görüntüyü kaydet",
         "jam-camera": "Görüntüyü kaydet",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "Bugün",
+        "session-go": "Sıradaki şey",
+        "session-slower": "Daha yavaş",
+        "session-faster": "Daha hızlı",
+        "session-next": "Sonraki adım",
+        "session-pedal": "Tek pedal"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -280,12 +280,12 @@
         "songs-take": "Bir sonraki çalışında kaydet veya kaydı durdur",
         "songs-camera": "Bir sonraki çalışında kameraya al veya kamerayı kapat",
         "jam-camera": "Bir sonraki çalışında kameraya al veya kamerayı kapat",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "Bugün'e git",
+        "session-go": "Seans sırasında: denemeyi başlat, durdur ya da büyük düğme ne diyorsa onu yap",
+        "session-slower": "Denemeler arasında: bir basamak yavaş",
+        "session-faster": "Denemeler arasında: bir basamak hızlı",
+        "session-next": "Denemeler arasında: seansta sıradaki şeye geç",
+        "session-pedal": "Tek bir ayak anahtarı için. Dokun: sıradaki şey. Çift dokun: daha yavaş. Basılı tut: sonraki adım"
       }
     },
     "inputTest": {

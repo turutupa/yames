@@ -185,7 +185,7 @@
         "navigation": "Navigazione",
         "jam": "Jam",
         "songs": "Brani",
-        "session": "In a Session"
+        "session": "In una sessione"
       },
       "actions": {
         "play": "Avvia / Ferma",
@@ -230,12 +230,12 @@
         "songs-take": "Registra la take",
         "songs-camera": "Registra l'immagine",
         "jam-camera": "Registra l'immagine",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "Oggi",
+        "session-go": "La prossima cosa",
+        "session-slower": "Più lento",
+        "session-faster": "Più veloce",
+        "session-next": "Tappa successiva",
+        "session-pedal": "Un solo pedale"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -280,12 +280,12 @@
         "songs-take": "Registra alla prossima riproduzione, oppure smetti di registrare",
         "songs-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera",
         "jam-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "Vai a Oggi",
+        "session-go": "In una sessione: avvia la take, fermala o fai quello che dice il pulsante grande",
+        "session-slower": "Tra una take e l'altra: un gradino più lento",
+        "session-faster": "Tra una take e l'altra: un gradino più veloce",
+        "session-next": "Tra una take e l'altra: passa alla prossima cosa della sessione",
+        "session-pedal": "Per un solo footswitch. Tocco: la prossima cosa. Doppio tocco: più lento. Tieni premuto: tappa successiva"
       }
     },
     "inputTest": {

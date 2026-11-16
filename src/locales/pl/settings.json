@@ -185,7 +185,7 @@
         "navigation": "Nawigacja",
         "jam": "Jam",
         "songs": "Utwory",
-        "session": "In a Session"
+        "session": "W sesji"
       },
       "actions": {
         "play": "Odtwarzaj / Zatrzymaj",
@@ -230,12 +230,12 @@
         "songs-take": "Nagraj takę",
         "songs-camera": "Nagraj obraz",
         "jam-camera": "Nagraj obraz",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "Dzisiaj",
+        "session-go": "Co dalej",
+        "session-slower": "Wolniej",
+        "session-faster": "Szybciej",
+        "session-next": "Następny krok",
+        "session-pedal": "Jeden pedał"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -280,12 +280,12 @@
         "songs-take": "Nagraj przy następnym starcie albo przerwij nagrywanie",
         "songs-camera": "Filmuj przy następnym starcie albo wyłącz kamerę",
         "jam-camera": "Filmuj przy następnym starcie albo wyłącz kamerę",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "Przejdź do zakładki Dzisiaj",
+        "session-go": "W sesji: zacznij podejście, zatrzymaj je albo zrób to, co mówi duży przycisk",
+        "session-slower": "Między podejściami: szczebel wolniej",
+        "session-faster": "Między podejściami: szczebel szybciej",
+        "session-next": "Między podejściami: przejdź do następnej rzeczy w sesji",
+        "session-pedal": "Dla jednego przełącznika nożnego. Stuknięcie: co dalej. Podwójne stuknięcie: wolniej. Przytrzymanie: następny krok"
       }
     },
     "inputTest": {

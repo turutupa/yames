@@ -185,7 +185,7 @@
         "navigation": "Navigation",
         "jam": "Jam",
         "songs": "Morceaux",
-        "session": "In a Session"
+        "session": "Pendant une séance"
       },
       "actions": {
         "play": "Lecture / Arrêt",
@@ -230,12 +230,12 @@
         "songs-take": "Enregistrer la prise",
         "songs-camera": "Enregistrer l'image",
         "jam-camera": "Enregistrer l'image",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "Aujourd'hui",
+        "session-go": "La suite",
+        "session-slower": "Plus lent",
+        "session-faster": "Plus vite",
+        "session-next": "Étape suivante",
+        "session-pedal": "Une seule pédale"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -280,12 +280,12 @@
         "songs-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
         "songs-camera": "Filmer au prochain lancement, ou éteindre la caméra",
         "jam-camera": "Filmer au prochain lancement, ou éteindre la caméra",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "Aller à Aujourd'hui",
+        "session-go": "Pendant une séance : lancer la prise, l'arrêter, ou faire ce qu'indique le grand bouton",
+        "session-slower": "Entre deux prises : un cran plus lent",
+        "session-faster": "Entre deux prises : un cran plus vite",
+        "session-next": "Entre deux prises : passer à la suite de la séance",
+        "session-pedal": "Pour un seul footswitch. Appui : la suite. Double appui : plus lent. Appui long : étape suivante"
       }
     },
     "inputTest": {

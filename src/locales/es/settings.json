@@ -185,7 +185,7 @@
         "navigation": "Navegación",
         "jam": "Jam",
         "songs": "Canciones",
-        "session": "In a Session"
+        "session": "En una sesión"
       },
       "actions": {
         "play": "Reproducir / Detener",
@@ -230,12 +230,12 @@
         "songs-take": "Grabar la toma",
         "songs-camera": "Grabar la imagen",
         "jam-camera": "Grabar la imagen",
-        "tab-today": "Today",
-        "session-go": "The next thing",
-        "session-slower": "Slower",
-        "session-faster": "Faster",
-        "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "tab-today": "Hoy",
+        "session-go": "Lo siguiente",
+        "session-slower": "Más lento",
+        "session-faster": "Más rápido",
+        "session-next": "Siguiente paso",
+        "session-pedal": "Un solo pedal"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -280,12 +280,12 @@
         "songs-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar",
         "songs-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara",
         "jam-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara",
-        "tab-today": "Go to Today",
-        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
-        "session-slower": "Between Takes: one rung slower",
-        "session-faster": "Between Takes: one rung faster",
-        "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "tab-today": "Ir a Hoy",
+        "session-go": "En una sesión: empezar la toma, pararla o hacer lo que diga el botón grande",
+        "session-slower": "Entre tomas: un peldaño más lento",
+        "session-faster": "Entre tomas: un peldaño más rápido",
+        "session-next": "Entre tomas: pasar a lo siguiente de la sesión",
+        "session-pedal": "Para un solo pedal. Pulsar: lo siguiente. Doble pulsación: más lento. Mantener: siguiente paso"
       }
     },
     "inputTest": {
