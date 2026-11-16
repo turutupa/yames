@@ -693,24 +693,24 @@ export function useSessionRun(input: SessionRunInput) {
   const exercise = current?.exercise ?? null;
   const big: BigAction = useMemo(() => bigAction(run, exercise), [run, exercise]);
 
-  const startTake = useCallback(() => {
+  const playTake = useCallback(() => {
     if (!prepared || !listening) return;
     void enqueue(() => setPlaying(true));
   }, [prepared, listening, enqueue]);
 
-  const stopTake = useCallback(() => {
+  const endTake = useCallback(() => {
     void enqueue(() => setPlaying(false));
   }, [enqueue]);
 
   /** The one big next action, from the button, the keyboard or the pedal. */
   const go = useCallback(() => {
-    if (big.kind === "startTake") return startTake();
-    if (big.kind === "stopTake") return stopTake();
+    if (big.kind === "playTake") return playTake();
+    if (big.kind === "endTake") return endTake();
     const event = eventForBigAction(big, Date.now());
     if (!event) return;
     dispatch(event);
     if (event.type === "close") setView("today");
-  }, [big, startTake, stopTake, setView]);
+  }, [big, playTake, endTake, setView]);
 
   const slower = useCallback(() => {
     if (exercise) dispatch({ type: "slower", exercise, now: Date.now() });

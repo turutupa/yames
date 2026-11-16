@@ -181,8 +181,8 @@ describe("leaving", () => {
 describe("the one big next action", () => {
   it("starts a Take from ready, stops it while playing", () => {
     const s = atFocus();
-    expect(bigAction(s, EX)).toEqual({ kind: "startTake", bpm: s.bpm });
-    expect(bigAction(run(s, { type: "takeStarted", now: NOW }), EX)).toEqual({ kind: "stopTake" });
+    expect(bigAction(s, EX)).toEqual({ kind: "playTake", bpm: s.bpm });
+    expect(bigAction(run(s, { type: "takeStarted", now: NOW }), EX)).toEqual({ kind: "endTake" });
   });
 
   it("offers nothing while listening", () => {
@@ -227,8 +227,8 @@ describe("the one big next action", () => {
   });
 
   it("starting and stopping are left to the engine", () => {
-    expect(eventForBigAction({ kind: "startTake", bpm: 60 }, NOW)).toBeNull();
-    expect(eventForBigAction({ kind: "stopTake" }, NOW)).toBeNull();
+    expect(eventForBigAction({ kind: "playTake", bpm: 60 }, NOW)).toBeNull();
+    expect(eventForBigAction({ kind: "endTake" }, NOW)).toBeNull();
   });
 });
 

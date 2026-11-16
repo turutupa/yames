@@ -244,7 +244,8 @@ describe("Hotkeys (KEY-01 to KEY-13, MID-08)", () => {
     await inSettings();
     const hk = HOTKEYS.find((h) => h.id === id)!;
     const { key, midi } = hotkeyRow(id);
-    expect(key.textContent).toBe(platformKey(hk.key));
+    // An action that ships unbound (session-pedal, for a footswitch) shows a dash.
+    expect(key.textContent).toBe(platformKey(hk.key || "—"));
     expect(key.disabled).toBe(false);
     expect(midi.disabled).toBe(false);
   });

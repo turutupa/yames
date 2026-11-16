@@ -143,7 +143,13 @@
     "tts_voice_diagnostics",
     "unload_coach_model",
     "warm_jam",
-    "write_model_chunk"
+    "write_model_chunk",
+    "get_take_grade",
+    "list_exercise_ceilings",
+    "list_path_states",
+    "list_path_takes",
+    "save_path_state",
+    "save_path_take"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -287,7 +293,13 @@
     "tts_voice_diagnostics",
     "unload_coach_model",
     "warm_jam",
-    "write_model_chunk"
+    "write_model_chunk",
+    "get_take_grade",
+    "list_exercise_ceilings",
+    "list_path_states",
+    "list_path_takes",
+    "save_path_state",
+    "save_path_take"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -480,7 +492,13 @@
     "ttsVoiceDiagnostics",
     "unloadCoachModel",
     "warmJam",
-    "writeModelChunk"
+    "writeModelChunk",
+    "getTakeGrade",
+    "listExerciseCeilings",
+    "listPathStates",
+    "listPathTakes",
+    "savePathState",
+    "savePathTake"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -848,6 +866,48 @@
       "globalKey": null,
       "globalAllowed": false,
       "group": "songs"
+    },
+    {
+      "id": "tab-today",
+      "key": "⌘0",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "session-go",
+      "key": "Enter",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
+    },
+    {
+      "id": "session-slower",
+      "key": "↓",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
+    },
+    {
+      "id": "session-faster",
+      "key": "↑",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
+    },
+    {
+      "id": "session-next",
+      "key": "N",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
+    },
+    {
+      "id": "session-pedal",
+      "key": "",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
     }
   ],
   "settingsKeys": {
@@ -1310,6 +1370,16 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "openOn": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.minutes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [
@@ -1439,7 +1509,9 @@
     "score_due",
     "scores",
     "segments",
-    "sessions"
+    "sessions",
+    "path_state",
+    "path_takes"
   ],
   "fileAssociations": [
     "gp",

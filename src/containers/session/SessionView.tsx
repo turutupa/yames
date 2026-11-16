@@ -38,9 +38,9 @@ type T = ReturnType<typeof useTranslation>["t"];
 
 function bigLabel(action: BigAction, t: T): string {
   switch (action.kind) {
-    case "startTake":
-      return t("session.run.startTake", { bpm: action.bpm });
-    case "stopTake":
+    case "playTake":
+      return t("session.run.playTake", { bpm: action.bpm });
+    case "endTake":
       return t("session.run.endTake");
     case "again":
       return t("session.run.goAgain", { bpm: action.bpm });

@@ -35,10 +35,11 @@ export const TOOLS: readonly Tool[] = [
 /**
  * Settings that make the app open on the last tool rather than on the front door.
  *
- * Empty today, when it always does. Today-first shells put "open on my last tool"
- * here, so the tests that say a stored `activeTab` comes back still mean something.
+ * The shell opens on Today unless the player turned on "open on my last tool"
+ * (Settings, `OpenOnRow`), which stores `openOn: "lastTool"`. With it on, a
+ * stored `activeTab` comes back exactly as it did before the revamp.
  */
-export const OPEN_ON_LAST_TOOL: Record<string, unknown> = {};
+export const OPEN_ON_LAST_TOOL: Record<string, unknown> = { openOn: "lastTool" };
 
 /** The settings of someone who has used the app before: no wizard, no tour. */
 export const RETURNING_PLAYER: Record<string, unknown> = {
@@ -62,7 +63,10 @@ function revealTools(): void {
 /** The names of the tools a player can see, in order. */
 export function visibleToolLabels(root: ParentNode = document): string[] {
   revealTools();
-  return [...root.querySelectorAll(".rail-mode-label")].map((n) => n.textContent ?? "");
+  // The tools' own group: Today, Paths and Progress sit above it in the rail
+  // and are not tools.
+  const group = root.querySelector(".rail-modes[role='group']:not(.rail-learn)") ?? root;
+  return [...group.querySelectorAll(".rail-mode-label")].map((n) => n.textContent ?? "");
 }
 
 /** Open a tool the way a player does: by clicking its name. */

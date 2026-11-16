@@ -54,16 +54,31 @@ const SITUATIONS = {
   songs: { view: "songs", songsLoaded: true },
   songsEmpty: { view: "songs" },
   settings: { view: "settings" },
+  today: { view: "today" },
+  paths: { view: "paths" },
+  progress: { view: "progress" },
+  session: { view: "session" },
 } as const satisfies Record<string, Situation>;
 
 type Where = keyof typeof SITUATIONS;
 const EVERYWHERE = Object.keys(SITUATIONS) as Where[];
 const without = (...not: Where[]) => EVERYWHERE.filter((w) => !not.includes(w));
 
-/** The meter and tempo actions work everywhere except Settings. */
-const NOT_SETTINGS = without("settings");
+/**
+ * The learning side. Nothing drives the metronome behind these screens, so the
+ * tools' keys do nothing there (useActionDispatcher, "The learning side"); in a
+ * running Session the tempo keys and Space mean the same idea in its terms.
+ */
+const LEARNING = ["today", "paths", "progress", "session"] as const satisfies readonly Where[];
+/** The meter and tempo actions work on every tool, not on Settings. */
+const NOT_SETTINGS = without("settings", ...LEARNING);
 /** And the meter ones not on a loaded jam, where the groove owns the meter. */
-const METER = without("settings", "jam", "jamEditor");
+const METER = without("settings", "jam", "jamEditor", ...LEARNING);
+/** A tempo key: its tool meaning everywhere it has one, and `does` in a Session. */
+const tempo = (bpm: number, inSession: string): Partial<Record<Where, readonly string[]>> => ({
+  ...Object.fromEntries(NOT_SETTINGS.map((w) => [w, bpmTo(bpm)])),
+  session: [`session ${inSession}`],
+});
 
 const STATE: AppState = {
   ...DEFAULT_TEST_STATE,
@@ -96,11 +111,13 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
     jam: ["onToggleJam"],
     jamEditor: ["onToggleJam"],
     songs: ["invoke toggle_playback"],
+    today: ["session startToday"],
+    session: ["session go"],
   },
-  "bpm-up": { where: NOT_SETTINGS, does: bpmTo(105) },
-  "bpm-down": { where: NOT_SETTINGS, does: bpmTo(95) },
-  "bpm-up-1": { where: NOT_SETTINGS, does: bpmTo(101) },
-  "bpm-down-1": { where: NOT_SETTINGS, does: bpmTo(99) },
+  "bpm-up": tempo(105, "faster"),
+  "bpm-down": tempo(95, "slower"),
+  "bpm-up-1": tempo(101, "faster"),
+  "bpm-down-1": tempo(99, "slower"),
   "sub-next": { where: METER, does: sub(2) },
   "sub-prev": { where: METER, does: sub(6) },
   "sub-1": { where: METER, does: sub(1) },
@@ -117,7 +134,7 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
     does: ["setSidebarOpen"],
   },
   "toggle-coach": {
-    where: ["beat", "drill", "drillRamping", "jam", "jamEmpty", "jamEditor"],
+    where: ["beat", "drill", "drillRamping", "jam", "jamEmpty", "jamEditor", "today", "paths", "progress"],
     does: ["toggleCard"],
   },
   // The saved meaning of these five is exactly this, whatever else the rail grows.
@@ -126,6 +143,13 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
   "tab-3": { where: EVERYWHERE, does: ["setView drill"] },
   "tab-4": { where: EVERYWHERE, does: ["setView jam"] },
   "tab-5": { where: EVERYWHERE, does: ["setView songs"] },
+  "tab-today": { where: EVERYWHERE, does: ["setView today"] },
+  // Only a running Session reads these; everywhere else they mean nothing.
+  "session-go": { where: ["session"], does: ["session go"] },
+  "session-slower": { where: ["session"], does: ["session slower"] },
+  "session-faster": { where: ["session"], does: ["session faster"] },
+  "session-next": { where: ["session"], does: ["session next"] },
+  "session-pedal": { where: ["session"], does: ["session pedalPress"] },
   // Settings is a layer: closing it returns to the mode it covered.
   settings: {
     ...Object.fromEntries(without("settings").map((w) => [w, ["setView settings"]])),
@@ -206,6 +230,14 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
       setIsOsFullscreen: () => {},
       setSidebarOpen: spy("setSidebarOpen") as never,
       toggleCard: spy("toggleCard"),
+      sessionActions: named("session", [
+        "startToday",
+        "go",
+        "slower",
+        "faster",
+        "next",
+        "pedalPress",
+      ]) as never,
       forceWebviewFocus: () => Promise.resolve(),
     }),
   );

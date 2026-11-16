@@ -87,7 +87,7 @@
       "timeUp": "Time's up",
       "pathStep": "{{path}}, step {{step}}",
       "bpm": "BPM",
-      "startTake": "Start take, {{bpm}} BPM",
+      "playTake": "Start take, {{bpm}} BPM",
       "endTake": "End take",
       "goAgain": "Go again, {{bpm}} BPM",
       "next": "Next: {{title}}",

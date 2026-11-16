@@ -275,8 +275,8 @@ export function minutesLeft(state: RunState): number {
  */
 export type BigAction =
   | { kind: "none" }
-  | { kind: "startTake"; bpm: number }
-  | { kind: "stopTake" }
+  | { kind: "playTake"; bpm: number }
+  | { kind: "endTake" }
   | { kind: "again"; bpm: number }
   | { kind: "next"; step: PlanStep }
   | { kind: "finish" }
@@ -362,9 +362,9 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
     case "listening":
       return { kind: "none" };
     case "ready":
-      return { kind: "startTake", bpm: state.bpm };
+      return { kind: "playTake", bpm: state.bpm };
     case "playing":
-      return { kind: "stopTake" };
+      return { kind: "endTake" };
     case "timed":
       return onward();
     case "recap":
@@ -414,8 +414,8 @@ export function eventForBigAction(action: BigAction, now: number): RunEvent | nu
     case "close":
       return { type: "close" };
     // Starting and stopping a Take are the engine's to do; its edge is the event.
-    case "startTake":
-    case "stopTake":
+    case "playTake":
+    case "endTake":
     case "none":
       return null;
   }

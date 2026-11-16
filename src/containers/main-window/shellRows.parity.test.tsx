@@ -164,7 +164,7 @@ describe("the coach card, from the shell", () => {
     const was = cardOpen();
     const coach = () =>
       [...document.querySelectorAll<HTMLElement>(".rail button")].find((b) =>
-        b.getAttribute("aria-label")?.startsWith(t("settings.coach.title")),
+        b.getAttribute("aria-label")?.startsWith(t("session.nav.askCoach")),
       )!;
     expect(coach()).toBeDefined();
     fireEvent.click(coach());
@@ -176,9 +176,9 @@ describe("the coach card, from the shell", () => {
   it("SHL-12: says its state in the rail button's name", async () => {
     await openShell();
     const coach = [...document.querySelectorAll<HTMLElement>(".rail button")].find((b) =>
-      b.getAttribute("aria-label")?.startsWith(t("settings.coach.title")),
+      b.getAttribute("aria-label")?.startsWith(t("session.nav.askCoach")),
     )!;
-    expect(coach.getAttribute("aria-label")).toMatch(new RegExp(`^${t("settings.coach.title")} — .+`));
+    expect(coach.getAttribute("aria-label")).toMatch(new RegExp(`^${t("session.nav.askCoach")} — .+`));
   });
 
   it("SHL-12: C opens it from the Metronome", async () => {
