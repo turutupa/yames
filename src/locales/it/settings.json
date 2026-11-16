@@ -184,7 +184,8 @@
         "view": "Vista",
         "navigation": "Navigazione",
         "jam": "Jam",
-        "songs": "Brani"
+        "songs": "Brani",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Avvia / Ferma",
@@ -228,7 +229,13 @@
         "songs-loop-later": "La parte una battuta dopo",
         "songs-take": "Registra la take",
         "songs-camera": "Registra l'immagine",
-        "jam-camera": "Registra l'immagine"
+        "jam-camera": "Registra l'immagine",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -272,7 +279,13 @@
         "songs-loop-later": "Spostare le battute scelte di una battuta verso la fine, mantenendo la stessa lunghezza",
         "songs-take": "Registra alla prossima riproduzione, oppure smetti di registrare",
         "songs-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera",
-        "jam-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera"
+        "jam-camera": "Riprendi alla prossima riproduzione, oppure spegni la videocamera",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

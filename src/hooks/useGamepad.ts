@@ -30,11 +30,13 @@ interface UseGamepadOptions {
   bindings?: Record<string, string>;
   /** Called when a bound action should fire */
   onAction?: (actionId: string) => void;
+  /** Called when a bound button comes back up. Only a gesture needs this. */
+  onActionRelease?: (actionId: string) => void;
   /** Disable polling (e.g. when not needed) */
   enabled?: boolean;
 }
 
-export function useGamepad({ onButtonPress, bindings, onAction, enabled = true }: UseGamepadOptions) {
+export function useGamepad({ onButtonPress, bindings, onAction, onActionRelease, enabled = true }: UseGamepadOptions) {
   const prevPressed = useRef<Set<string>>(new Set());
   const rafId = useRef<number>(0);
 
@@ -72,9 +74,17 @@ export function useGamepad({ onButtonPress, bindings, onAction, enabled = true }
       }
     }
 
+    if (bindings && onActionRelease) {
+      for (const id of prevPressed.current) {
+        if (nowPressed.has(id)) continue;
+        const actionId = Object.entries(bindings).find(([_, bid]) => bid === id)?.[0];
+        if (actionId) onActionRelease(actionId);
+      }
+    }
+
     prevPressed.current = nowPressed;
     rafId.current = requestAnimationFrame(poll);
-  }, [onButtonPress, bindings, onAction]);
+  }, [onButtonPress, bindings, onAction, onActionRelease]);
 
   useEffect(() => {
     if (!enabled) return;

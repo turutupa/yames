@@ -34,6 +34,9 @@ export const SHOT_THEMES = [
 
 export type ShotTheme = (typeof SHOT_THEMES)[number];
 
+/** What the mocked scorer reports for one Session Take. */
+export type TakeRecipe = "pass" | "below" | "noCatch";
+
 export interface Shot {
   /** `?shot=` value, and the folder under docs/img/. */
   id: string;
@@ -43,6 +46,37 @@ export interface Shot {
   window: "main" | "floating";
   /** The tab to open on. Absent for the widget, which has no tabs. */
   tab?: "beat" | "drill" | "jam" | "setlist" | "songs";
+  /**
+   * The learning side, driven to one screen by pressing what a player presses.
+   *
+   * `seed` is what the practice store holds, `take` is what the mocked analyzer
+   * reports, and `stop` is the screen to photograph. A scene with this set opens
+   * on Today; every other scene opens on its tool, as a player with "open on my
+   * last tool" does, so none of them changed when Today became the front door.
+   */
+  session?: {
+    seed: "first" | "returning" | "back";
+    minutes?: 5 | 10 | 15 | 20;
+    /** One recipe for every Take, or one per Take in order, the last repeating. */
+    take?: TakeRecipe | TakeRecipe[];
+    stop:
+      | "today"
+      | "ready"
+      | "playing"
+      | "between"
+      | "result"
+      | "noCatch"
+      | "timed"
+      | "recap"
+      | "paths"
+      | "path"
+      | "step"
+      | "progress"
+      /** Find my edge from the Step page, after its first Take. */
+      | "edge"
+      /** Find my edge, Taken until it has found the edge. */
+      | "edgeDone";
+  };
   /**
    * The Jam tab, with a jam actually on it.
    *
@@ -610,6 +644,160 @@ export const SHOTS: Shot[] = [
     window: "main",
     tab: "beat",
     settings: { update: "available" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  // The learning side. Not on the site yet: the layout suite is what opens them.
+  {
+    id: "today-first",
+    suffix: "today-first",
+    window: "main",
+    session: { seed: "first", stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-returning",
+    suffix: "today-returning",
+    window: "main",
+    session: { seed: "returning", minutes: 15, stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "today-back",
+    suffix: "today-back",
+    window: "main",
+    session: { seed: "back", stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-ready",
+    suffix: "session-ready",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-playing",
+    suffix: "session-playing",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "playing" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-between",
+    suffix: "session-between",
+    window: "main",
+    session: { seed: "returning", minutes: 5, take: "below", stop: "between" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-result",
+    suffix: "session-result",
+    window: "main",
+    session: { seed: "returning", minutes: 5, take: "pass", stop: "result" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-no-catch",
+    suffix: "session-no-catch",
+    window: "main",
+    session: { seed: "returning", minutes: 5, take: "noCatch", stop: "noCatch" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-warmup",
+    suffix: "session-warmup",
+    window: "main",
+    session: { seed: "returning", minutes: 10, stop: "timed" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-recap",
+    suffix: "session-recap",
+    window: "main",
+    session: { seed: "returning", minutes: 5, take: "pass", stop: "recap" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-edge",
+    suffix: "session-edge",
+    window: "main",
+    session: { seed: "returning", take: "pass", stop: "edge" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-edge-result",
+    suffix: "session-edge-result",
+    window: "main",
+    session: { seed: "returning", take: ["pass", "pass", "below", "below"], stop: "edgeDone" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "paths",
+    suffix: "paths",
+    window: "main",
+    session: { seed: "returning", stop: "paths" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "path-alternate",
+    suffix: "path-alternate",
+    window: "main",
+    session: { seed: "returning", stop: "path" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "step-detail",
+    suffix: "step-detail",
+    window: "main",
+    session: { seed: "returning", stop: "step" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "progress",
+    suffix: "progress",
+    window: "main",
+    session: { seed: "returning", stop: "progress" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "progress-empty",
+    suffix: "progress-empty",
+    window: "main",
+    session: { seed: "first", stop: "progress" },
     width: 1400,
     height: 900,
     settleMs: 300,

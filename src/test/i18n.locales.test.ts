@@ -36,6 +36,9 @@ const NAMESPACES = [
   "jam",
   "metronome",
   "onboarding",
+  // Today, a Session, Paths and Progress: a whole side of the app in one file,
+  // so its strings can be translated in one sitting.
+  "session",
   "setlist",
   "settings",
   "shell",

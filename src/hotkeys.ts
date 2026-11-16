@@ -65,6 +65,17 @@ export type HotkeyAction =
   // the same hand.
   | "songs-take"
   | "songs-camera"
+  // The new front door. A new id rather than a sixth number: `tab-1` to `tab-5`
+  // are positional and stored, and Today sits above them.
+  | "tab-today"
+  // A Session, hands-free. A player between Takes has a guitar in their hands.
+  // `session-pedal` is the one to bind to a single footswitch: tap, double tap
+  // and hold are decided from its presses (`src/session/pedalGesture.ts`).
+  | "session-go"
+  | "session-slower"
+  | "session-faster"
+  | "session-next"
+  | "session-pedal"
   | "settings";
 
 export interface HotkeyEntry {
@@ -74,7 +85,7 @@ export interface HotkeyEntry {
   id: HotkeyAction;
   desc: string;
   globalAllowed?: boolean;
-  group: "metronome" | "view" | "navigation" | "jam" | "songs";
+  group: "metronome" | "view" | "navigation" | "jam" | "songs" | "session";
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -200,7 +211,7 @@ export function eventToCombo(e: KeyboardEvent): string {
  * metronome's subdivision everywhere except Songs, where they mark where a
  * portion starts and stops. Both are the right key in both places.
  */
-export const MODE_ACTION_PREFIXES = ["jam-", "songs-"];
+export const MODE_ACTION_PREFIXES = ["jam-", "songs-", "session-"];
 
 /**
  * Which action a key press means, on the tab it was pressed on.
@@ -615,6 +626,51 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Film the next time you press play, or turn the camera off",
     group: "songs",
   },
+  {
+    id: "tab-today",
+    action: "Today",
+    key: "⌘0",
+    desc: "Go to Today",
+    group: "navigation",
+  },
+  // The Session's own keys. By the prefix rule in `actionForCombo` these only
+  // mean this on the running Session, so the arrows go on being the tempo
+  // everywhere else and N goes on being the jam's.
+  {
+    id: "session-go",
+    action: "The next thing",
+    key: "Enter",
+    desc: "In a Session: start the Take, stop it, or do whatever the big button says",
+    group: "session",
+  },
+  {
+    id: "session-slower",
+    action: "Slower",
+    key: "↓",
+    desc: "Between Takes: one rung slower",
+    group: "session",
+  },
+  {
+    id: "session-faster",
+    action: "Faster",
+    key: "↑",
+    desc: "Between Takes: one rung faster",
+    group: "session",
+  },
+  {
+    id: "session-next",
+    action: "Next step",
+    key: "N",
+    desc: "Between Takes: move on to the next thing in the Session",
+    group: "session",
+  },
+  {
+    id: "session-pedal",
+    action: "One pedal",
+    key: "",
+    desc: "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step",
+    group: "session",
+  },
 ];
 
 export const HOTKEY_GROUPS: { key: string; label: string }[] = [
@@ -623,6 +679,7 @@ export const HOTKEY_GROUPS: { key: string; label: string }[] = [
   { key: "navigation", label: "Navigation" },
   { key: "jam", label: "Jam" },
   { key: "songs", label: "Songs" },
+  { key: "session", label: "In a Session" },
 ];
 
 // Delay for macOS fullscreen exit animation to complete before restoring window state

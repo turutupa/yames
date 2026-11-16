@@ -184,7 +184,8 @@
         "view": "View",
         "navigation": "Navigation",
         "jam": "Jam",
-        "songs": "Songs"
+        "songs": "Songs",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Play / Stop",
@@ -228,7 +229,13 @@
         "songs-loop-later": "Portion a bar later",
         "songs-take": "Record the take",
         "songs-camera": "Record the picture",
-        "jam-camera": "Record the picture"
+        "jam-camera": "Record the picture",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -272,7 +279,13 @@
         "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length",
         "songs-take": "Record the next time you press play, or stop recording",
         "songs-camera": "Film the next time you press play, or turn the camera off",
-        "jam-camera": "Film the next time you press play, or turn the camera off"
+        "jam-camera": "Film the next time you press play, or turn the camera off",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

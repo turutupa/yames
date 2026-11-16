@@ -47,7 +47,17 @@ import type { AppState, Setlist } from "../../types";
  * Anything that is not the jam or the setlist falls to the click's setting,
  * which is what Settings would want anyway if it ever grew a transport.
  */
-export type CountInView = "beat" | "drill" | "setlist" | "jam" | "songs" | "settings";
+export type CountInView =
+  | "beat"
+  | "drill"
+  | "setlist"
+  | "jam"
+  | "songs"
+  | "settings"
+  | "today"
+  | "paths"
+  | "progress"
+  | "session";
 
 /**
  * The engine counts at most eight beats (`arm_count_in` clamps to it, and so

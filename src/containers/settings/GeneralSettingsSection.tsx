@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
+import { OpenOnRow } from "../session/OpenOnRow";
 import { storeLoad, storeSave } from "../../ipc";
 import { getLanguages } from "../../i18n";
 import { resetHints } from "../onboarding/hints/hintRuntime";
@@ -230,6 +231,7 @@ export function GeneralSettingsSection({
           {drillAutoCollapse ? t("common.on") : t("common.off")}
         </button>
       </div>
+      <OpenOnRow />
       {onRunSetupAgain && (
         <div className="setting-row">
           <div className="setting-label">

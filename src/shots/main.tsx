@@ -137,12 +137,16 @@ const WEB_FONTS = new Set([
   "Orbitron", "Quicksand", "Rajdhani", "Source Serif 4",
 ]);
 
-function assertThemeFontLoaded() {
+async function assertThemeFontLoaded() {
   const stack = getComputedStyle(document.documentElement)
     .getPropertyValue("--font-family")
     .trim();
   const first = stack.split(",")[0].trim().replace(/^['"]|['"]$/g, "");
   if (!WEB_FONTS.has(first)) return;
+  // Ask for the regular face rather than hope a screen used it. The learning
+  // side sets nothing at weight 400, so on those scenes the browser never
+  // fetched it and the check below failed with every font on the network fine.
+  await document.fonts.load(`16px "${first}"`).catch(() => []);
   if (!document.fonts.check(`16px "${first}"`)) {
     throw new Error(
       `the theme's font "${first}" did not load — the shot would be of the fallback stack`,
@@ -155,6 +159,86 @@ async function drive() {
   // is the pill; for the main window it is the frame the rail sits in.
   const root = shot!.window === "floating" ? ".floating-widget" : ".main-window";
   await until(root, () => !!document.querySelector(root));
+
+  /**
+   * The learning side, by pressing what a player presses. Each screen is one more
+   * press than the one before it, so a scene that reaches the recap has walked
+   * through the whole of a Session on the way.
+   */
+  if (shot!.session) {
+    const { stop } = shot!.session;
+    const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+    const rail = (name: string) =>
+      document.querySelector<HTMLElement>(`.rail button[aria-label="${name}"]`);
+    await until("Today", () => !!byId("today"));
+    await until("a plan", () => !!document.querySelector(".session-plan-item"));
+    if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
+      rail("Paths")?.click();
+      await until("the Paths list", () => !!byId("path-card-alternate-picking"));
+      if (stop !== "paths") {
+        byId("path-card-alternate-picking")?.click();
+        await until("the Path", () => !!byId("path-detail"));
+      }
+      if (stop !== "paths" && stop !== "path") {
+        byId("step-row-even-eighths")?.click();
+        await until("the Step", () => !!byId("step-detail"));
+      }
+      if (stop === "edge" || stop === "edgeDone") {
+        byId("edge-even-eighths.four-fingers")?.click();
+        await until("the Session", () => !!byId("session"));
+        const big = () => byId("session-big") as HTMLButtonElement | null;
+        const ready = () => !!big() && !big()!.disabled;
+        const verdict = () => !!byId("session-edge");
+        const done = () => !!document.querySelector('[data-testid="session-edge"][data-done]');
+        // One Take at a time: start it, let it end itself, read the verdict, and
+        // only then press again. A press while a Take runs would stop it short.
+        for (let take = 0; take < 8; take += 1) {
+          await until("the Take to be ready", ready, 20000);
+          big()?.click();
+          await until("the Take to run", () => !!byId("session-live"));
+          await until("the verdict", verdict, 30000);
+          if (stop === "edge" || done()) break;
+          big()?.click();
+        }
+        if (stop === "edgeDone") await until("the edge", done);
+      }
+    } else if (stop === "progress") {
+      rail("Progress")?.click();
+      await until("Progress", () => !!byId("progress"));
+    } else if (stop !== "today") {
+      byId("today-start")?.click();
+      await until("the Session", () => !!byId("session"));
+      if (stop === "timed") {
+        await until("the warm-up", () => !!byId("session-timed"));
+      } else {
+        const big = () => byId("session-big") as HTMLButtonElement | null;
+        const ready = () => !!big() && !big()!.disabled;
+        await until("the Take to be ready", ready, 20000);
+        if (stop !== "ready") {
+          big()?.click();
+          await until("the Take to run", () => !!byId("session-live"));
+          if (stop !== "playing") {
+            const outcome = stop === "noCatch" ? "session-no-catch" : stop === "between" ? "session-between" : "session-result";
+            await until("the verdict", () => !!byId(outcome), 30000);
+            if (stop === "recap") {
+              await pressUntil(
+                "the recap",
+                () => {
+                  // A pass below the pass rung offers to climb. Moving on is
+                  // the way to the end of a five-minute Session from there.
+                  const moveOn = [...document.querySelectorAll<HTMLElement>(".session-secondary")].find(
+                    (b) => b.textContent === i18n.t("session.result.moveOn"),
+                  );
+                  (moveOn ?? big())?.click();
+                },
+                () => !!byId("session-recap"),
+              );
+            }
+          }
+        }
+      }
+    }
+  }
 
   /**
    * A jam, loaded and part-way through its form.
@@ -845,7 +929,7 @@ async function drive() {
   // Web fonts decide the metrics of every label in the picture, and a capture
   // taken before they land is a screenshot of the fallback stack.
   await document.fonts.ready;
-  assertThemeFontLoaded();
+  await assertThemeFontLoaded();
 
   // Two frames after the last mutation: one for React to commit, one for the
   // compositor to paint it.

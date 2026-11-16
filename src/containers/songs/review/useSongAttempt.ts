@@ -37,11 +37,12 @@ import {
   analyzeAttempt,
   clearScoreSchedule,
   closeOpenSegment,
+  getTakeGrade,
   onPracticeSegmentEnded,
   saveAttempt,
   scoreTimingBands,
 } from "../../../ipc";
-import type { PracticeSegmentEndedPayload, TimingBands } from "../../../ipc";
+import type { PracticeSegmentEndedPayload, ScorerTakeGrade, TimingBands } from "../../../ipc";
 import {
   attemptFacts,
   attemptRecord,
@@ -83,6 +84,13 @@ export type SongAttemptReview = {
   findings: Finding[];
   /** Whether the row reached the store. A review still shows if it did not. */
   saved: boolean;
+  /**
+   * The analyzer's last word on the pass, whole.
+   *
+   * The review draws from `facts`; a Session's grading reads the rest of the
+   * report through its own adapter (`src/session/takeMeasures.ts`).
+   */
+  segment: PracticeSegmentEndedPayload;
 };
 
 export type SongAttemptState = {
@@ -94,6 +102,21 @@ export type SongAttemptState = {
   tooShort: boolean;
   /** Put the review away — the player is going again. */
   dismiss: () => void;
+  /**
+   * How many stops have finished being dealt with, however each one came out.
+   *
+   * `review`, `working` and `tooShort` between them cannot say "that stop is
+   * over and it found nothing", which is the case a caller who must always
+   * answer the player needs to tell from "still thinking".
+   */
+  settled: number;
+  /**
+   * The scorer's grade of the stop `settled` last counted, when it had one:
+   * off the segment, or asked for when no segment came (a silent Take). Null
+   * from a build that does not grade, and when nobody was listening. A Session
+   * reads it; the Songs review does not.
+   */
+  lastGrade: ScorerTakeGrade | null;
 };
 
 export type SongAttemptInput = {
@@ -117,6 +140,8 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
   const [review, setReview] = useState<SongAttemptReview | null>(null);
   const [working, setWorking] = useState(false);
   const [tooShort, setTooShort] = useState(false);
+  const [settled, setSettled] = useState(0);
+  const [lastGrade, setLastGrade] = useState<ScorerTakeGrade | null>(null);
 
   /** The last run the analyzer reported. Replaced, never appended to. */
   const runRef = useRef<PracticeSegmentEndedPayload | null>(null);
@@ -200,7 +225,12 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     // still has to be cleared; nothing else does.
     if (!latest.current.listening && !runRef.current) {
       generation.current += 1;
-      void clearScoreSchedule().catch(() => undefined);
+      void clearScoreSchedule()
+        .catch(() => undefined)
+        .then(() => {
+          setLastGrade(null);
+          setSettled((n) => n + 1);
+        });
       return;
     }
 
@@ -209,6 +239,8 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     void finishAttempt(pass, runRef, waiterRef).then((result) => {
       if (generation.current !== mine) return;
       setWorking(false);
+      setLastGrade(result.kind === "review" ? (result.review.segment.takeGrade ?? null) : result.grade);
+      setSettled((n) => n + 1);
       if (result.kind === "tooShort") {
         setTooShort(true);
         return;
@@ -218,7 +250,7 @@ export function useSongAttempt(input: SongAttemptInput): SongAttemptState {
     });
   }, [input.isPlaying]);
 
-  return { review, working, tooShort, dismiss };
+  return { review, working, tooShort, dismiss, settled, lastGrade };
 }
 
 // ---------------------------------------------------------------------------
@@ -238,8 +270,8 @@ export type Pass = {
 
 type FinishResult =
   | { kind: "review"; review: SongAttemptReview }
-  | { kind: "tooShort" }
-  | { kind: "nothing" };
+  | { kind: "tooShort"; grade: ScorerTakeGrade | null }
+  | { kind: "nothing"; grade: ScorerTakeGrade | null };
 
 async function finishAttempt(
   pass: Pass,
@@ -254,12 +286,17 @@ async function finishAttempt(
 
   const payload = runRef.current;
   runRef.current = null;
+  // No segment, so no grade rode on one: ask for it while the schedule it was
+  // graded against is still loaded. A build without the command answers null.
+  const grade = payload
+    ? (payload.takeGrade ?? null)
+    : ((await getTakeGrade().catch(() => null)) ?? null);
   // An attempt is play-to-stop: the run is cleared here and nowhere else.
   await clearScoreSchedule().catch(() => undefined);
 
   const run = payload ? resultsFromSegment(payload) : null;
-  if (!run) return { kind: "nothing" };
-  if (!isAttemptWorthKeeping(run.results)) return { kind: "tooShort" };
+  if (!run) return { kind: "nothing", grade };
+  if (!isAttemptWorthKeeping(run.results)) return { kind: "tooShort", grade };
 
   const facts = attemptFacts(run);
   const attemptId = newAttemptId();
@@ -314,6 +351,8 @@ async function finishAttempt(
       bands,
       findings,
       saved,
+      // `payload` is known here: `run` above is built from it and is not null.
+      segment: payload as PracticeSegmentEndedPayload,
     },
   };
 }

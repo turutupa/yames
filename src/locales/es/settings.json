@@ -184,7 +184,8 @@
         "view": "Vista",
         "navigation": "Navegación",
         "jam": "Jam",
-        "songs": "Canciones"
+        "songs": "Canciones",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Reproducir / Detener",
@@ -228,7 +229,13 @@
         "songs-loop-later": "La parte un compás después",
         "songs-take": "Grabar la toma",
         "songs-camera": "Grabar la imagen",
-        "jam-camera": "Grabar la imagen"
+        "jam-camera": "Grabar la imagen",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -272,7 +279,13 @@
         "songs-loop-later": "Correr los compases elegidos un compás hacia el final, sin cambiar su longitud",
         "songs-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar",
         "songs-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara",
-        "jam-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara"
+        "jam-camera": "Grabar en vídeo la próxima vez que le des a tocar, o apagar la cámara",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

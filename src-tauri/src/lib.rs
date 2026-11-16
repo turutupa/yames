@@ -156,6 +156,8 @@ use commands::{
     get_score_source, list_scores, query_attempts, query_history, save_attempt, save_score,
     // W14 — "come back to this", off settings.json and onto migration three.
     clear_due, list_due, save_due,
+    // The learning paths' store: migration five.
+    list_exercise_ceilings, list_path_states, list_path_takes, save_path_state, save_path_take,
     // W10 — the door to the coach's judgement (findings.rs) and its ears (pitch.rs).
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
@@ -891,6 +893,12 @@ pub fn run() {
             save_due,
             list_due,
             clear_due,
+            // The learning paths: position, Takes, clean tempo.
+            save_path_state,
+            list_path_states,
+            save_path_take,
+            list_path_takes,
+            list_exercise_ceilings,
             // W10 — the coach's judgement and its ears.
             analyze_attempt,
             analyze_take_pitch,

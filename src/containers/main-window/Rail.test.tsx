@@ -3,6 +3,7 @@ import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { Rail } from "./Rail";
 import { DEFAULT_TEST_STATE } from "../../test/mocks";
 import { readStylesheet } from "../../test/readStyles";
+import { HOTKEYS } from "../../hotkeys";
 
 function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
   const props = {
@@ -53,12 +54,39 @@ afterEach(() => {
 });
 
 describe("Rail", () => {
-  it("offers exactly the modes that exist — Paths is not shipped yet", () => {
-    // UI_DECISIONS U1.8: the rail is built to grow, but a greyed-out item is a
-    // promise with no date. Pocket Check is gone (U1.7), Paths is not here yet.
+  it("offers the learning side above the tools, and the tools in hotkey order", () => {
+    // UI_DECISIONS U1.8: no greyed-out promises, only what exists. The revamp
+    // puts Today, Paths and Progress above the tools; the tools keep their own
+    // group and their order, because `tab-1` to `tab-5` count down it.
     const { container } = setup();
     const labels = [...container.querySelectorAll(".rail-mode-label")].map((n) => n.textContent);
-    expect(labels).toEqual(["Metronome", "Setlist", "Drill", "Jam", "Songs"]);
+    expect(labels).toEqual([
+      "Today",
+      "Paths",
+      "Progress",
+      "Metronome",
+      "Setlist",
+      "Drill",
+      "Jam",
+      "Songs",
+    ]);
+  });
+
+  it("keeps tab-1 to tab-5 on the five tools, in the order the rail shows them", () => {
+    const { container, props } = setup();
+    const tools = [...container.querySelectorAll('[role="group"] .rail-mode')];
+    expect(tools).toHaveLength(5);
+    tools.forEach((button) => fireEvent.click(button));
+    // The views the positional hotkeys open (useActionDispatcher), one to five.
+    expect(props.setView.mock.calls.map((c) => c[0])).toEqual([
+      "beat",
+      "setlist",
+      "drill",
+      "jam",
+      "songs",
+    ]);
+    const keys = HOTKEYS.filter((h) => /^tab-[1-5]$/.test(h.id)).map((h) => h.id);
+    expect(keys).toEqual(["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"]);
   });
 
   it("switches mode and marks the current one for assistive tech", () => {

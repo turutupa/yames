@@ -2269,6 +2269,69 @@ pub fn clear_due(
 }
 
 // ---------------------------------------------------------------------------
+// Learning paths: where a player is, and what their Takes came to. What any of
+// it means is decided in `src/session/`; this only keeps it.
+// ---------------------------------------------------------------------------
+
+/// Start a Path, or move a player along one.
+#[tauri::command(async)]
+pub fn save_path_state(
+    state: crate::db::PathState,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_path_state(&state))
+}
+
+/// Every Path this player has started.
+#[tauri::command(async)]
+pub fn list_path_states(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::PathState> {
+    store.read_or(Vec::new(), |db| db.list_path_states())
+}
+
+/// Keep a Take, and its clean tempo if it earned one.
+#[tauri::command(async)]
+pub fn save_path_take(
+    take: crate::db::PathTake,
+    clean_bpm: Option<i64>,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    // A clean tempo is a metronome tempo; anything outside that is a bug upstream,
+    // and the store's reader models it as a `u16`.
+    if let Some(bpm) = clean_bpm {
+        if !(PATH_BPM_MIN..=PATH_BPM_MAX).contains(&bpm) {
+            return Err(format!("clean tempo {bpm} BPM is out of range"));
+        }
+    }
+    store.with(|db| db.save_path_take(&take, clean_bpm))
+}
+
+/// The range a clean tempo may be saved in.
+const PATH_BPM_MIN: i64 = 1;
+const PATH_BPM_MAX: i64 = 1000;
+
+/// The most Takes one read returns; the planner asks for 500.
+const PATH_TAKES_MAX_READ: i64 = 2000;
+
+/// The most recent Takes, newest first.
+#[tauri::command(async)]
+pub fn list_path_takes(
+    limit: i64,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::PathTake> {
+    store.read_or(Vec::new(), |db| db.list_path_takes(limit.clamp(1, PATH_TAKES_MAX_READ)))
+}
+
+/// Every clean tempo earned on a Path.
+#[tauri::command(async)]
+pub fn list_exercise_ceilings(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::ExerciseCeiling> {
+    store.read_or(Vec::new(), |db| db.list_exercise_ceilings())
+}
+
+// ---------------------------------------------------------------------------
 // The coach's judgement, and its ears — the door to `findings.rs` and
 // `pitch.rs`
 //

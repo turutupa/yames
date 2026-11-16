@@ -24,6 +24,9 @@
 //!   A `scores` row is one imported song (the `SongScore` of the wave's
 //!   contract, stored whole); an `attempts` row is one pass at a range of
 //!   its bars, with a per-expected-onset verdict beside it.
+//! * `path_state` / `path_takes` — the learning paths: which Paths a player
+//!   is on and where, and one row per graded Take. The clean tempo itself
+//!   goes in the reserved `exercise_ceilings`, not in a twin of it.
 //!
 //! # Rules this module keeps
 //!
@@ -59,7 +62,7 @@ pub const DB_FILE_NAME: &str = "practice.db";
 /// Schema version this build writes and understands. A database whose
 /// `PRAGMA user_version` is higher was written by a newer Yames: refuse
 /// it (see `DbError::Newer`) rather than guess at columns that moved.
-pub const SCHEMA_VERSION: i64 = 4;
+pub const SCHEMA_VERSION: i64 = 5;
 
 /// How long a command waits for the store to finish opening before it
 /// gives up and answers as though there were no history. Opening is a
@@ -251,6 +254,62 @@ pub struct ScoreDue {
     /// said — an older row, or a promise made by hand.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
+}
+
+/// The `instrument` a Path's clean tempo is filed under in `exercise_ceilings`.
+///
+/// That table's key is (instrument, exercise), from a roadmap that imagined
+/// one exercise played on several instruments. A pack is written for one, and
+/// the clean tempo is one number per Exercise, so this is a constant rather
+/// than the player's instrument setting: changing that setting must not
+/// orphan what they have earned.
+pub const PATH_CEILING_INSTRUMENT: &str = "guitar";
+
+/// Which Path a player is on, and where.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PathState {
+    pub path_id: String,
+    /// The Level they chose. `None` until a pack has Levels.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<String>,
+    /// The Step they are on. `None` means the Path's first.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_step_id: Option<String>,
+    pub started_at: i64,
+    pub updated_at: i64,
+}
+
+/// One graded go at an Exercise.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PathTake {
+    pub id: String,
+    pub path_id: String,
+    pub step_id: String,
+    pub exercise_id: String,
+    pub started_at: i64,
+    pub bpm: i64,
+    /// Bars the player actually got through.
+    pub bars: i64,
+    /// False is "I didn't catch enough": no grade, and it counts for nothing.
+    pub caught: bool,
+    pub passed: bool,
+    /// Which notes these were, when the Exercise has variants.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variant_seed: Option<i64>,
+    /// What was measured. Opaque to the store; see `MIGRATION_V5`.
+    pub facts: serde_json::Value,
+}
+
+/// A clean tempo: the highest tempo a Take on this Exercise passed its bar.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExerciseCeiling {
+    /// `<path id>/<exercise id>`.
+    pub exercise_key: String,
+    pub clean_bpm: i64,
+    pub last_practiced: i64,
 }
 
 /// An onset the player produced that the score did not ask for.
@@ -584,6 +643,56 @@ CREATE INDEX scores_last_opened
     ON scores(COALESCE(last_opened_at, imported_at) DESC, title ASC);
 "#;
 
+/// v5 — learning paths (`plans/tasks/revamp/BRIEF.md`).
+///
+/// Two new tables and nothing else: no existing table is altered and no row
+/// is touched, so a v4 database comes through with every session, song and
+/// attempt exactly as it was.
+///
+/// `path_takes` is not `attempts`, on purpose. An `attempts` row has a foreign
+/// key into `scores`, and a `scores` row is a song in the player's library:
+/// keeping Exercises there would put forty drills on their Songs shelf.
+///
+/// `facts_json` holds what was measured as the frontend's adapter saw it. It
+/// is opaque here because the scorer's fields are still growing, and the
+/// columns beside it are the ones the planner actually asks questions of.
+/// `variant_seed` is NULL until a pack has variants; when one does, it is what
+/// makes history and grading exact, because the seed says which notes these
+/// were. `level` is the player's own choice per Path and is NULL until a pack
+/// has Levels; changing it touches nothing else in the row.
+///
+/// The clean tempo is not here. `exercise_ceilings` was reserved for it, so
+/// `comfortable_bpm` holds it, keyed `<path id>/<exercise id>`.
+///
+/// Its own migration. One to four are left exactly as they shipped.
+const MIGRATION_V5: &str = r#"
+CREATE TABLE path_state (
+    path_id         TEXT PRIMARY KEY,
+    level           TEXT,
+    current_step_id TEXT,
+    started_at      INTEGER NOT NULL,
+    updated_at      INTEGER NOT NULL
+);
+
+CREATE TABLE path_takes (
+    id           TEXT PRIMARY KEY,
+    path_id      TEXT NOT NULL,
+    step_id      TEXT NOT NULL,
+    exercise_id  TEXT NOT NULL,
+    started_at   INTEGER NOT NULL,
+    bpm          INTEGER NOT NULL,
+    bars         INTEGER NOT NULL,
+    caught       INTEGER NOT NULL,
+    passed       INTEGER NOT NULL,
+    variant_seed INTEGER,
+    facts_json   TEXT NOT NULL
+);
+-- "How did this Exercise go, most recent first", which is what the planner asks.
+CREATE INDEX path_takes_exercise ON path_takes(exercise_id, started_at DESC);
+-- "When did this player last play at all", which is what a break is.
+CREATE INDEX path_takes_time ON path_takes(started_at DESC);
+"#;
+
 // ---------------------------------------------------------------------------
 // The store
 // ---------------------------------------------------------------------------
@@ -660,6 +769,9 @@ impl Db {
         }
         if from < 4 {
             tx.execute_batch(MIGRATION_V4).map_err(DbError::from)?;
+        }
+        if from < 5 {
+            tx.execute_batch(MIGRATION_V5).map_err(DbError::from)?;
         }
         // `user_version` is a pragma, not a statement, so it is set on the
         // connection rather than inside the batch — but still before the
@@ -1418,6 +1530,162 @@ impl Db {
             )
             .map(|_| ())
             .map_err(DbError::from)
+    }
+
+    // ----- learning paths ----------------------------------------------------
+
+    /// Start a Path, or move a player along one. Their history is not in this
+    /// row, so changing a Level or a Step here cannot lose any of it.
+    pub fn save_path_state(&mut self, state: &PathState) -> DbResult<()> {
+        self.conn
+            .execute(
+                "INSERT INTO path_state
+                     (path_id, level, current_step_id, started_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5)
+                 ON CONFLICT(path_id) DO UPDATE SET
+                     level = excluded.level,
+                     current_step_id = excluded.current_step_id,
+                     updated_at = excluded.updated_at",
+                rusqlite::params![
+                    state.path_id,
+                    state.level,
+                    state.current_step_id,
+                    state.started_at,
+                    state.updated_at,
+                ],
+            )
+            .map(|_| ())
+            .map_err(DbError::from)
+    }
+
+    /// Every Path this player has started, the oldest first.
+    pub fn list_path_states(&self) -> DbResult<Vec<PathState>> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT path_id, level, current_step_id, started_at, updated_at
+                 FROM path_state ORDER BY started_at ASC, path_id ASC",
+            )
+            .map_err(DbError::from)?;
+        let rows = stmt
+            .query_map([], |r| {
+                Ok(PathState {
+                    path_id: r.get(0)?,
+                    level: r.get(1)?,
+                    current_step_id: r.get(2)?,
+                    started_at: r.get(3)?,
+                    updated_at: r.get(4)?,
+                })
+            })
+            .map_err(DbError::from)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    /// Keep a Take and, when it earned one, its clean tempo, together.
+    ///
+    /// One transaction, so a crash between the two cannot leave a clean tempo
+    /// with no Take behind it. The tempo only ever rises here: a later Take
+    /// that passes slower has not taken anything away from the one that
+    /// passed faster, and a Take saved twice changes nothing.
+    pub fn save_path_take(&mut self, take: &PathTake, clean_bpm: Option<i64>) -> DbResult<()> {
+        let facts = serde_json::to_string(&take.facts)
+            .map_err(|e| DbError::Sqlite(format!("path take facts: {e}")))?;
+        let tx = self.conn.transaction().map_err(DbError::from)?;
+        tx.execute(
+            "INSERT OR REPLACE INTO path_takes
+                 (id, path_id, step_id, exercise_id, started_at, bpm, bars,
+                  caught, passed, variant_seed, facts_json)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            rusqlite::params![
+                take.id,
+                take.path_id,
+                take.step_id,
+                take.exercise_id,
+                take.started_at,
+                take.bpm,
+                take.bars,
+                take.caught,
+                take.passed,
+                take.variant_seed,
+                facts,
+            ],
+        )
+        .map_err(DbError::from)?;
+        if let Some(bpm) = clean_bpm {
+            tx.execute(
+                "INSERT INTO exercise_ceilings
+                     (instrument, exercise_key, comfortable_bpm, last_practiced)
+                 VALUES (?1, ?2, ?3, ?4)
+                 ON CONFLICT(instrument, exercise_key) DO UPDATE SET
+                     comfortable_bpm = MAX(COALESCE(comfortable_bpm, 0), excluded.comfortable_bpm),
+                     last_practiced = MAX(COALESCE(last_practiced, 0), excluded.last_practiced)",
+                rusqlite::params![
+                    PATH_CEILING_INSTRUMENT,
+                    format!("{}/{}", take.path_id, take.exercise_id),
+                    bpm,
+                    take.started_at,
+                ],
+            )
+            .map_err(DbError::from)?;
+        }
+        tx.commit().map_err(DbError::from)
+    }
+
+    /// The most recent Takes, newest first, across every Path.
+    pub fn list_path_takes(&self, limit: i64) -> DbResult<Vec<PathTake>> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT id, path_id, step_id, exercise_id, started_at, bpm, bars,
+                        caught, passed, variant_seed, facts_json
+                 FROM path_takes ORDER BY started_at DESC, id ASC LIMIT ?1",
+            )
+            .map_err(DbError::from)?;
+        let rows = stmt
+            .query_map([limit], |r| {
+                let facts: String = r.get(10)?;
+                Ok(PathTake {
+                    id: r.get(0)?,
+                    path_id: r.get(1)?,
+                    step_id: r.get(2)?,
+                    exercise_id: r.get(3)?,
+                    started_at: r.get(4)?,
+                    bpm: r.get(5)?,
+                    bars: r.get(6)?,
+                    caught: r.get(7)?,
+                    passed: r.get(8)?,
+                    variant_seed: r.get(9)?,
+                    // A row whose facts cannot be read is still a Take that
+                    // happened: it keeps its tempo and its verdict.
+                    facts: serde_json::from_str(&facts).unwrap_or(serde_json::Value::Null),
+                })
+            })
+            .map_err(DbError::from)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    /// Every clean tempo a Path has earned. Rows the reserved table might hold
+    /// with no tempo in them are not clean tempos, so they are left out.
+    pub fn list_exercise_ceilings(&self) -> DbResult<Vec<ExerciseCeiling>> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT exercise_key, comfortable_bpm, COALESCE(last_practiced, 0)
+                 FROM exercise_ceilings
+                 WHERE instrument = ?1 AND comfortable_bpm IS NOT NULL
+                 ORDER BY exercise_key ASC",
+            )
+            .map_err(DbError::from)?;
+        let rows = stmt
+            .query_map([PATH_CEILING_INSTRUMENT], |r| {
+                Ok(ExerciseCeiling {
+                    exercise_key: r.get(0)?,
+                    clean_bpm: r.get(1)?,
+                    last_practiced: r.get(2)?,
+                })
+            })
+            .map_err(DbError::from)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
     }
 }
 
@@ -2546,6 +2814,141 @@ mod tests {
         })
         .unwrap();
         assert_eq!(db.list_due().unwrap().len(), 1);
+    }
+
+    /// v4 to v5 is only two new tables. Everything a player had on the day
+    /// before the upgrade is there the day after, row for row.
+    #[test]
+    fn a_v4_database_keeps_everything_and_gains_the_path_tables() {
+        let dir = temp_dir("v4-to-v5");
+        let path = dir.join(DB_FILE_NAME);
+        {
+            let conn = Connection::open(&path).unwrap();
+            for m in [MIGRATION_V1, MIGRATION_V2, MIGRATION_V3, MIGRATION_V4] {
+                conn.execute_batch(m).unwrap();
+            }
+            conn.pragma_update(None, "user_version", 4).unwrap();
+            conn.execute(
+                "INSERT INTO scores (id, title, artist, source_file, format,
+                                     track_index, track_name, imported_at, json)
+                 VALUES ('song', 'Anji', 'somebody', 'x.gp5', 'gp', 0, 'Acoustic', 5, ?1)",
+                rusqlite::params![sample_score("song").to_string()],
+            )
+            .unwrap();
+            conn.execute(
+                "INSERT INTO score_due (score_id, range_start_bar, range_end_bar, due_day)
+                 VALUES ('song', 2, 4, 900)",
+                [],
+            )
+            .unwrap();
+            conn.execute(
+                "INSERT INTO exercise_ceilings (instrument, exercise_key, comfortable_bpm)
+                 VALUES ('bass', 'someone-elses', 90)",
+                [],
+            )
+            .unwrap();
+        }
+
+        let mut db = Db::open(&path).unwrap();
+        let v: i64 = db
+            .conn
+            .pragma_query_value(None, "user_version", |r| r.get(0))
+            .unwrap();
+        assert_eq!(v, SCHEMA_VERSION);
+        assert_eq!(db.list_scores().unwrap().len(), 1);
+        assert_eq!(db.list_due().unwrap().len(), 1);
+        assert_eq!(db.list_path_states().unwrap().len(), 0);
+        assert_eq!(db.list_path_takes(10).unwrap().len(), 0);
+        // A reserved table's row that is not ours is not read as ours.
+        assert!(db.list_exercise_ceilings().unwrap().is_empty());
+
+        // And what is written survives a reopen, which is a second run of the
+        // migration check against a file already at this version.
+        db.save_path_state(&PathState {
+            path_id: "alternate-picking".into(),
+            level: None,
+            current_step_id: Some("even-eighths".into()),
+            started_at: 10,
+            updated_at: 10,
+        })
+        .unwrap();
+        drop(db);
+        let db = Db::open(&path).unwrap();
+        assert_eq!(db.list_path_states().unwrap()[0].path_id, "alternate-picking");
+        assert_eq!(db.list_scores().unwrap().len(), 1);
+        drop(db);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    fn sample_take(id: &str, at: i64, bpm: i64) -> PathTake {
+        PathTake {
+            id: id.into(),
+            path_id: "alternate-picking".into(),
+            step_id: "even-eighths".into(),
+            exercise_id: "even-eighths.open-string".into(),
+            started_at: at,
+            bpm,
+            bars: 8,
+            caught: true,
+            passed: true,
+            variant_seed: Some(7),
+            facts: serde_json::json!({ "evenness": 0.9 }),
+        }
+    }
+
+    #[test]
+    fn a_take_and_its_clean_tempo_are_kept_together() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.save_path_take(&sample_take("a", 100, 80), Some(80)).unwrap();
+        db.save_path_take(&sample_take("b", 200, 90), None).unwrap();
+
+        let takes = db.list_path_takes(10).unwrap();
+        assert_eq!(takes.iter().map(|t| t.id.as_str()).collect::<Vec<_>>(), ["b", "a"]);
+        assert_eq!(takes[1].variant_seed, Some(7));
+        assert_eq!(takes[1].facts["evenness"], serde_json::json!(0.9));
+
+        let ceilings = db.list_exercise_ceilings().unwrap();
+        assert_eq!(ceilings.len(), 1);
+        assert_eq!(ceilings[0].exercise_key, "alternate-picking/even-eighths.open-string");
+        assert_eq!(ceilings[0].clean_bpm, 80);
+    }
+
+    /// A slower pass adds a Take. It does not take back the faster one.
+    #[test]
+    fn a_clean_tempo_only_rises() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.save_path_take(&sample_take("a", 100, 100), Some(100)).unwrap();
+        db.save_path_take(&sample_take("b", 200, 70), Some(70)).unwrap();
+        let ceilings = db.list_exercise_ceilings().unwrap();
+        assert_eq!(ceilings[0].clean_bpm, 100);
+        assert_eq!(ceilings[0].last_practiced, 200);
+    }
+
+    #[test]
+    fn a_new_level_or_step_keeps_the_start_date_and_the_takes() {
+        let mut db = Db::open_in_memory().unwrap();
+        let mut state = PathState {
+            path_id: "p".into(),
+            level: None,
+            current_step_id: None,
+            started_at: 10,
+            updated_at: 10,
+        };
+        db.save_path_state(&state).unwrap();
+        db.save_path_take(&sample_take("a", 100, 80), Some(80)).unwrap();
+        state.level = Some("advanced".into());
+        state.current_step_id = Some("s2".into());
+        state.started_at = 999;
+        state.updated_at = 20;
+        db.save_path_state(&state).unwrap();
+
+        let saved = db.list_path_states().unwrap();
+        assert_eq!(saved.len(), 1);
+        assert_eq!(saved[0].started_at, 10);
+        assert_eq!(saved[0].updated_at, 20);
+        assert_eq!(saved[0].level.as_deref(), Some("advanced"));
+        assert_eq!(db.list_path_takes(10).unwrap().len(), 1);
+        assert_eq!(db.list_exercise_ceilings().unwrap().len(), 1);
     }
 
     /// Migration four on a database that already has a library in it.

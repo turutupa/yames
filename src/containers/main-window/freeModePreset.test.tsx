@@ -87,6 +87,8 @@ describe("FREE mode — preset round trip", () => {
     setInvokeResponse("get_state", () => DEFAULT_TEST_STATE);
     setInvokeResponse("list_presets", () => [preset]);
     render(<MainWindow />);
+    // The window opens on Today, which has no preset library; the Metronome does.
+    fireEvent.click(await screen.findByRole("button", { name: "Metronome" }));
 
     // The library lives in the rail and is open by default (UI_DECISIONS
     // U1.1), so there is no drawer to open first — the preset is just there.

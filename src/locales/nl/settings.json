@@ -184,7 +184,8 @@
         "view": "Weergave",
         "navigation": "Navigatie",
         "jam": "Jam",
-        "songs": "Nummers"
+        "songs": "Nummers",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Afspelen / Stoppen",
@@ -228,7 +229,13 @@
         "songs-loop-later": "Stuk een maat later",
         "songs-take": "Neem de take op",
         "songs-camera": "Neem het beeld op",
-        "jam-camera": "Neem het beeld op"
+        "jam-camera": "Neem het beeld op",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -272,7 +279,13 @@
         "songs-loop-later": "De gekozen maten een maat richting het eind schuiven, even lang",
         "songs-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
         "songs-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten",
-        "jam-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten"
+        "jam-camera": "Filmen zodra je de volgende keer op afspelen drukt, of de camera uitzetten",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

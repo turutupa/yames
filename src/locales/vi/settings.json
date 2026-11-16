@@ -184,7 +184,8 @@
         "view": "Chế độ xem",
         "navigation": "Điều hướng",
         "jam": "Jam",
-        "songs": "Bài hát"
+        "songs": "Bài hát",
+        "session": "In a Session"
       },
       "actions": {
         "play": "Phát / Dừng",
@@ -228,7 +229,13 @@
         "songs-loop-later": "Đoạn muộn hơn một ô nhịp",
         "songs-take": "Thu bản này",
         "songs-camera": "Quay hình",
-        "jam-camera": "Quay hình"
+        "jam-camera": "Quay hình",
+        "tab-today": "Today",
+        "session-go": "The next thing",
+        "session-slower": "Slower",
+        "session-faster": "Faster",
+        "session-next": "Next step",
+        "session-pedal": "One pedal"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -272,7 +279,13 @@
         "songs-loop-later": "Dời những ô nhịp đã chọn tới một ô nhịp, giữ nguyên độ dài",
         "songs-take": "Thu vào lần phát tiếp theo, hoặc dừng thu",
         "songs-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay",
-        "jam-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay"
+        "jam-camera": "Quay vào lần phát tiếp theo, hoặc tắt máy quay",
+        "tab-today": "Go to Today",
+        "session-go": "In a Session: start the Take, stop it, or do whatever the big button says",
+        "session-slower": "Between Takes: one rung slower",
+        "session-faster": "Between Takes: one rung faster",
+        "session-next": "Between Takes: move on to the next thing in the Session",
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
       }
     },
     "inputTest": {

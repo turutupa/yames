@@ -749,7 +749,64 @@ export type PracticeSegmentEndedPayload = {
    * Reported and not scored while LP C3 is open.
    */
   accentAgreement?: number;
+  /**
+   * What a Take on a known schedule came to (`score.rs` `TakeGrade`, W1 of the
+   * revamp wave). Absent in free play, and from a build without it.
+   */
+  takeGrade?: ScorerTakeGrade;
 };
+
+/** Why the scorer would not grade a Take (`score.rs` `NoCatchReason`). */
+export type NoCatchReason = "nothingHeard" | "tooFewHeard" | "tooManyExtras" | "lowConfidence";
+
+/** One played bar of a Take, counted from 0 in played order. */
+export type ScorerBarMetrics = {
+  bar: number;
+  due: number;
+  heard: number;
+  missed: number;
+  extra: number;
+  /** 0 to 1. Null under three heard. */
+  evenness: number | null;
+  evennessSigmaMs: number | null;
+};
+
+/**
+ * The scorer's facts about one Take (`score.rs` `TakeGrade`). A stable shape:
+ * fields are only ever added. `score` and `evenness` are null when the verdict
+ * is "didntCatchEnough", so nothing can show a number by accident. Named apart
+ * from `session/grade.ts`'s `TakeGrade`, which is the pass bar's verdict.
+ */
+export type ScorerTakeGrade = {
+  verdict: "graded" | "didntCatchEnough";
+  noCatchReason?: NoCatchReason;
+  score: number | null;
+  evenness: number | null;
+  evennessSigmaMs: number | null;
+  due: number;
+  heard: number;
+  missed: number;
+  extra: number;
+  notReached: number;
+  heardRatio: number;
+  confidence: number | null;
+  calibration: {
+    offsetMs: number;
+    source: "none" | "cached" | "take";
+    leanMs?: number;
+  };
+  bars: ScorerBarMetrics[];
+};
+
+/**
+ * The grade of the Take just closed, for one nothing was heard on: no segment
+ * opened, so `practice-segment-ended` never carried one. Call
+ * `closeOpenSegment` first and this before the schedule is cleared. Null when
+ * no schedule was loaded, or from a build without the command.
+ */
+export async function getTakeGrade(): Promise<ScorerTakeGrade | null> {
+  return invoke<ScorerTakeGrade | null>("get_take_grade");
+}
 
 /**
  * One expected note's verdict, while the pass is still running
@@ -1408,6 +1465,67 @@ export async function saveDue(due: ScoreDue): Promise<void> {
  */
 export async function listDue(): Promise<ScoreDue[]> {
   return invoke<ScoreDue[]>("list_due");
+}
+
+// --- learning paths ---------------------------------------------------------
+
+/** Which Path a player is on, and where (`db.rs` `PathState`). */
+export type PathStateRow = {
+  pathId: string;
+  /** The Level they chose. Absent until a pack has Levels. */
+  level?: string;
+  /** The Step they are on. Absent means the Path's first. */
+  currentStepId?: string;
+  startedAt: number;
+  updatedAt: number;
+};
+
+/** One graded go at an Exercise (`db.rs` `PathTake`). */
+export type PathTakeRow = {
+  id: string;
+  pathId: string;
+  stepId: string;
+  exerciseId: string;
+  startedAt: number;
+  bpm: number;
+  /** Bars the player got through. */
+  bars: number;
+  /** False is "I didn't catch enough": no grade, and it counts for nothing. */
+  caught: boolean;
+  passed: boolean;
+  /** Which notes these were, when the Exercise has variants. */
+  variantSeed?: number;
+  /** What was measured. See `src/session/takeMeasures.ts`. */
+  facts: unknown;
+};
+
+/** A clean tempo (`db.rs` `ExerciseCeiling`). */
+export type ExerciseCeilingRow = {
+  /** `<path id>/<exercise id>`. */
+  exerciseKey: string;
+  cleanBpm: number;
+  lastPracticed: number;
+};
+
+export async function savePathState(state: PathStateRow): Promise<void> {
+  return invoke("save_path_state", { state });
+}
+
+export async function listPathStates(): Promise<PathStateRow[]> {
+  return invoke<PathStateRow[]>("list_path_states");
+}
+
+/** Keep a Take, and its clean tempo if it earned one, in one transaction. */
+export async function savePathTake(take: PathTakeRow, cleanBpm: number | null): Promise<void> {
+  return invoke("save_path_take", { take, cleanBpm });
+}
+
+export async function listPathTakes(limit: number): Promise<PathTakeRow[]> {
+  return invoke<PathTakeRow[]>("list_path_takes", { limit });
+}
+
+export async function listExerciseCeilings(): Promise<ExerciseCeilingRow[]> {
+  return invoke<ExerciseCeilingRow[]>("list_exercise_ceilings");
 }
 
 /** Forget one — the player played it, or does not want the reminder. */
