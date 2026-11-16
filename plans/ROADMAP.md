@@ -16,6 +16,15 @@
 > **How to use:** read §1–§4 once. Then work a phase top to bottom. Do
 > not start a later phase's items while an earlier phase's gate is red,
 > except where an item is explicitly marked *parallel-safe*.
+>
+> **The revamp (2026-11-08 onward).** The owner decided to make the app
+> learning-path-first (Today, Paths, Progress, Sessions graded against an
+> Exercise's pass bars), with every existing tool kept under Tools. That work
+> is on the `revamp` branch and is not on `main`. Its contract is
+> `plans/tasks/revamp/BRIEF.md`, its state `plans/tasks/revamp/STATUS.md`, and
+> the work breakdown and estimates `plans/revamp/CONVERSION_AUDIT.md` §10. It
+> takes over Phase 2 (§7) for guitar; the phases below are still the plan for
+> what the revamp does not cover.
 
 ---
 

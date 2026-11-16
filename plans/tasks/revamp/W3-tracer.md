@@ -1,5 +1,8 @@
 # W3 tracer: continuation (2026-11-10)
 
+> **Done.** Merged into `revamp`, gated and audited on 2026-11-16. This brief is
+> the record of its state on 2026-11-10; for where things stand, read `STATUS.md`.
+
 Read `CLAUDE.md`, then `plans/tasks/revamp/BRIEF.md`, then this. The target
 screens are `plans/revamp/mocks/index.html` (+ README).
 
