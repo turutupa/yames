@@ -165,7 +165,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--accent-text);
+  color: var(--accent);
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 600;
@@ -179,7 +179,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--accent-subtle);
-  color: var(--accent-text);
+  color: var(--accent);
   font-size: 0.7rem;
   font-weight: 650;
   white-space: nowrap;
@@ -218,7 +218,7 @@
   min-width: 0;
 }
 .session-today-minutes {
-  color: var(--accent-text);
+  color: var(--accent);
   font-size: 1.6rem;
   font-weight: 650;
 }
@@ -252,7 +252,7 @@
 }
 .session-seg button.on {
   background: var(--accent-subtle);
-  color: var(--accent-text);
+  color: var(--accent);
 }
 .session-plan-list {
   display: flex;
@@ -480,7 +480,7 @@
   stroke-width: 2;
 }
 .session-count {
-  color: var(--accent-text);
+  color: var(--accent);
   font-size: 1rem;
   font-weight: 650;
 }
@@ -561,7 +561,7 @@
   background: var(--surface-hover);
 }
 .session-choice b {
-  color: var(--accent-text);
+  color: var(--accent);
   font-size: 0.9rem;
 }
 .session-pedal-card {

@@ -2297,8 +2297,22 @@ pub fn save_path_take(
     clean_bpm: Option<i64>,
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Result<(), String> {
+    // A clean tempo is a metronome tempo; anything outside that is a bug upstream,
+    // and the store's reader models it as a `u16`.
+    if let Some(bpm) = clean_bpm {
+        if !(PATH_BPM_MIN..=PATH_BPM_MAX).contains(&bpm) {
+            return Err(format!("clean tempo {bpm} BPM is out of range"));
+        }
+    }
     store.with(|db| db.save_path_take(&take, clean_bpm))
 }
+
+/// The range a clean tempo may be saved in.
+const PATH_BPM_MIN: i64 = 1;
+const PATH_BPM_MAX: i64 = 1000;
+
+/// The most Takes one read returns; the planner asks for 500.
+const PATH_TAKES_MAX_READ: i64 = 2000;
 
 /// The most recent Takes, newest first.
 #[tauri::command(async)]
@@ -2306,7 +2320,7 @@ pub fn list_path_takes(
     limit: i64,
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Vec<crate::db::PathTake> {
-    store.read_or(Vec::new(), |db| db.list_path_takes(limit))
+    store.read_or(Vec::new(), |db| db.list_path_takes(limit.clamp(1, PATH_TAKES_MAX_READ)))
 }
 
 /// Every clean tempo earned on a Path.
