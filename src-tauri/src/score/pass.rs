@@ -15,6 +15,9 @@
 //!   measured over the same `W` consecutive bars, pooled: evenness over all the
 //!   notes of the window, notes heard over everything due in it, extras per
 //!   four bars of it. A window *holds* when every assessed bar is met in it.
+//!   Evenness is a median, so one sloppy bar could hide in a pooled window:
+//!   `timingEvenness` in a window is the lower of the pooled value and the
+//!   worst single bar in it that has enough notes to measure.
 //! * The Take **passes** when at least one window holds. A Take shorter than
 //!   `W` finished bars is [`PassVerdict::TooShort`], and a Take the grade could
 //!   not catch is [`PassVerdict::DidntCatchEnough`]: neither is a fail.
@@ -235,7 +238,15 @@ pub fn evaluate(
 /// metric that reads the end of the Take rather than the window.
 fn check(bar: &PassBar, window: &[BarSample], take: &[BarSample], gap_ms: f64) -> BarCheck {
     let measured = match bar.metric.as_str() {
-        TIMING_EVENNESS => pooled_evenness(window, gap_ms),
+        // Pooled evenness is a median, so one sloppy bar can hide inside a
+        // window. The window's value is therefore the lower of the pooled
+        // number and the worst single bar that has enough notes to measure.
+        TIMING_EVENNESS => pooled_evenness(window, gap_ms).map(|pooled| {
+            window
+                .iter()
+                .filter_map(|b| pooled_evenness(std::slice::from_ref(b), gap_ms))
+                .fold(pooled, f64::min)
+        }),
         NOTES_HEARD => {
             let due: u32 = window.iter().map(|b| b.due).sum();
             let heard: u32 = window.iter().map(|b| b.heard).sum();
@@ -357,6 +368,16 @@ mod tests {
         assert_eq!(r.verdict, PassVerdict::Passed);
         assert_eq!((r.held_bars, r.held_from_bar), (4, Some(2)));
         assert!(!r.counts_for_clean_tempo);
+    }
+
+    #[test]
+    fn one_sloppy_bar_among_clean_ones_breaks_the_held_stretch() {
+        let mut bars = vec![clean(3.0); 9];
+        bars[4] = sloppy();
+        let r = evaluate(&bars, &alternate_picking(), GAP, true).unwrap();
+        assert_eq!(r.verdict, PassVerdict::Passed);
+        assert_eq!((r.held_bars, r.held_from_bar), (4, Some(0)));
+        assert!(!r.counts_for_clean_tempo, "a sloppy bar must not hide inside the clean tempo");
     }
 
     #[test]
