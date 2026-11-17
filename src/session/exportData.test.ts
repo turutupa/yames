@@ -40,6 +40,13 @@ describe("the practice-data export", () => {
 
   it("is JSON, and names itself by the day", () => {
     expect(() => JSON.parse(JSON.stringify(data))).not.toThrow();
-    expect(exportFileName(Date.UTC(2026, 10, 16))).toBe("yames-practice-2026-11-16.json");
+    expect(exportFileName(new Date(2026, 10, 16, 12).getTime())).toBe("yames-practice-2026-11-16.json");
+  });
+
+  it("uses the local date, not the UTC one (QA 2026-11-17 #23)", () => {
+    // Late evening and just after midnight, local time: whatever UTC says.
+    expect(exportFileName(new Date(2026, 10, 16, 23, 30).getTime())).toBe("yames-practice-2026-11-16.json");
+    expect(exportFileName(new Date(2026, 10, 17, 0, 15).getTime())).toBe("yames-practice-2026-11-17.json");
+    expect(exportFileName(new Date(2026, 0, 5, 9).getTime())).toBe("yames-practice-2026-01-05.json");
   });
 });
