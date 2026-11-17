@@ -333,11 +333,13 @@
   min-height: 82px;
   padding: 8px 22px;
   border-radius: 16px;
-  font: 700 42px/1.1 var(--l-display);
+  font: 700 42px/1.05 var(--l-display);
   letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Two balanced lines, never an ellipsis: "Закончить дубль" is the whole
+     instruction (QA 2026-11-17 #11). */
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
   transition: transform 0.12s, filter 0.2s;
 }
 .session-page .session-big[data-size="mid"] {
@@ -360,7 +362,12 @@
   box-shadow: 0 0 0 1px var(--l-line2) inset;
 }
 .session-page .session-secondary {
-  white-space: nowrap;
+  /* One line where it fits, two balanced ones where a translation needs
+     them ("Экспортировать данные занятий", QA #11); never past its card. */
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  max-width: 100%;
   min-height: 40px;
   padding: 6px 16px;
   border-radius: 10px;
@@ -439,7 +446,11 @@
   text-transform: uppercase;
   border: 1px solid var(--l-line2);
   color: var(--l-quiet);
-  white-space: nowrap;
+  /* One line where it fits; never wider than what holds it ("РАЗМИНКА, БЕЗ
+     ОЦЕНКИ" ran past its card at 1024, QA 2026-11-17 #11). */
+  max-width: 100%;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 .session-tag[data-kind="theory"] {
   color: var(--l-amber);

@@ -75,11 +75,14 @@ export async function openShot(
    */
   const BUILD_AT = { width: 1440, height: Math.max(size.height, 900) };
   await page.setViewportSize(BUILD_AT);
-  const extra = Object.entries(query)
+  // `{ lng }` builds this one scene in another language than the run's: the
+  // checks on long translations (QA 2026-11-17 #11) ask for ru, de, pt-BR, ja.
+  const { lng = LAYOUT_LOCALE, ...rest } = query;
+  const extra = Object.entries(rest)
     .map(([key, value]) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join("");
   await page.goto(
-    `/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${LAYOUT_LOCALE}${extra}`,
+    `/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${lng}${extra}`,
   );
 
   // That the page is the harness at all, before waiting thirty seconds for it
@@ -116,9 +119,7 @@ export async function openShot(
   // And it is in the language this run asked for. A locale run that quietly
   // fell back to English would report a clean suite having measured nothing.
   const built = await page.evaluate(() => window.__SHOT_LOCALE__);
-  expect(built, `the "${shot}" scene was built in ${built}, not ${LAYOUT_LOCALE}`).toBe(
-    LAYOUT_LOCALE,
-  );
+  expect(built, `the "${shot}" scene was built in ${built}, not ${lng}`).toBe(lng);
 
   if (size.width !== BUILD_AT.width || size.height !== BUILD_AT.height) {
     await page.setViewportSize(size);
@@ -498,4 +499,56 @@ export async function notHitTestable(page: Page, selector: string): Promise<stri
     }
     return out;
   }, selector);
+}
+
+/**
+ * Labels that do not fit what holds them (QA 2026-11-17 #11): a button, a
+ * tag or a rail label whose text is cut (an ellipsis, a clamp, a hidden
+ * overflow), or that runs past its card or its button. Long translations are
+ * what find these: Russian, German, Brazilian Portuguese, Japanese.
+ */
+export async function spillingLabels(page: Page, root = ".session-page, .rail"): Promise<string[]> {
+  await settleAnimations(page);
+  return page.evaluate((rootSel) => {
+    const scopes = [...document.querySelectorAll(rootSel)];
+    if (scopes.length === 0) return [`no ${rootSel}`];
+    const out: string[] = [];
+    const name = (el: Element) =>
+      `${el.tagName.toLowerCase()}.${String(el.getAttribute("class") ?? "").split(" ")[0]} "${(el.textContent ?? "").trim().slice(0, 30)}"`;
+    const shown = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return false;
+      for (let e: HTMLElement | null = el; e; e = e.parentElement) {
+        const cs = getComputedStyle(e);
+        if (cs.display === "none" || cs.visibility === "hidden") return false;
+      }
+      return true;
+    };
+    const sel = "button, .session-tag, .rail-mode-label, .rail-action-label, .session-kick";
+    for (const el of scopes.flatMap((scope) => [...scope.querySelectorAll<HTMLElement>(sel)])) {
+      if (!shown(el) || el.closest("svg")) continue;
+      // Cut: the text is wider or taller than the box that shows it.
+      if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2) {
+        const cs = getComputedStyle(el);
+        if (cs.overflow !== "visible" || cs.textOverflow === "ellipsis") {
+          out.push(`${name(el)} is cut (${el.scrollWidth}×${el.scrollHeight} in ${el.clientWidth}×${el.clientHeight})`);
+          continue;
+        }
+      }
+      // Spilt: drawn past the card, button or rail it sits in.
+      const r = el.getBoundingClientRect();
+      const box = el.parentElement?.closest<HTMLElement>(".session-glass, button, .rail, .session-card");
+      if (box) {
+        const b = box.getBoundingClientRect();
+        if (r.left < b.left - 1 || r.right > b.right + 1) {
+          out.push(`${name(el)} runs past ${name(box)} (${Math.round(r.left)}–${Math.round(r.right)} in ${Math.round(b.left)}–${Math.round(b.right)})`);
+        }
+      }
+      // A button's own text past its edge.
+      if (el.tagName === "BUTTON" && el.scrollWidth > el.clientWidth + 1) {
+        out.push(`${name(el)} text runs past its edge (${el.scrollWidth} in ${el.clientWidth})`);
+      }
+    }
+    return out;
+  }, root);
 }
