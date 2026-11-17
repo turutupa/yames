@@ -74,3 +74,20 @@ describe("Test out on a Step's page", () => {
     expect(actions.testOut).toHaveBeenCalledWith(ALT, ALT.steps[1]);
   });
 });
+
+describe("badges on the Paths list (QA 2026-11-17 #13)", () => {
+  it("never shows the pack's Draft status; a subscribed Path says Subscribed", () => {
+    const { session } = fake(started);
+    render(<PathsView session={session} />);
+    const card = screen.getByTestId(`path-card-${ALT.id}`);
+    expect(ALT.review.status).toBe("draft");
+    expect(card).not.toHaveTextContent(/draft/i);
+    expect(card).toHaveTextContent("Subscribed");
+  });
+
+  it("an unsubscribed runnable Path has no badge", () => {
+    const { session } = fake({ states: [], takes: [], ceilings: [] });
+    render(<PathsView session={session} />);
+    expect(screen.getByTestId(`path-card-${ALT.id}`).querySelector("[data-badge]")).toBeNull();
+  });
+});
