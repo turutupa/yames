@@ -55,7 +55,13 @@ export interface Shot {
    * last tool" does, so none of them changed when Today became the front door.
    */
   session?: {
-    seed: "first" | "returning" | "back";
+    /**
+     * `three`: subscribed to three Paths (Alternate Picking, Sweep Picking and
+     * Blues, made runnable for the scene), each played in the last days.
+     */
+    seed: "first" | "returning" | "back" | "three";
+    /** On a result, answer "Was this grade fair?" before the photograph. */
+    fair?: "yes" | "no";
     minutes?: 5 | 10 | 15 | 20;
     /** One recipe for every Take, or one per Take in order, the last repeating. */
     take?: TakeRecipe | TakeRecipe[];
@@ -781,6 +787,37 @@ export const SHOTS: Shot[] = [
     width: 390,
     height: 844,
     settleMs: 900,
+  },
+  // Play now across every subscribed Path: three of them, ten minutes, so one
+  // rests and the footer says when it was played.
+  {
+    id: "today-three-paths",
+    suffix: "today-three-paths",
+    window: "main",
+    session: { seed: "three", minutes: 10, stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  // A Step's page with Test out.
+  {
+    id: "step-test-out",
+    suffix: "step-test-out",
+    window: "main",
+    session: { seed: "returning", stop: "step" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  // The result with "Was this grade fair?" answered.
+  {
+    id: "session-result-fair",
+    suffix: "session-result-fair",
+    window: "main",
+    session: { seed: "returning", minutes: 5, take: "pass", stop: "result", fair: "yes" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
   },
   {
     id: "session-between",

@@ -611,6 +611,7 @@
 .session-skipped {
   flex-direction: column;
   align-items: flex-start;
+  margin-top: 10px;
 }
 .session-context {
   margin-bottom: 2px;

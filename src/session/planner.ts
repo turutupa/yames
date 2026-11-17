@@ -9,18 +9,31 @@
  *
  * ## How the time is spent
  *
- * The total always equals what the player chose.
+ * The total always equals what the player chose (`shape`).
  *
- * | Minutes | Coming back as usual            | After a break                   |
- * |---------|---------------------------------|---------------------------------|
- * | 5       | focus 5                         | recap 5                         |
- * | 10      | warm-up 2, focus 8              | recap 3, focus 7                |
- * | 15      | warm-up 2, focus 8, next 5      | recap 3, focus 7, next 5        |
- * | 20      | warm-up 2, focus 9, next 6, jam | recap 3, focus 8, next 6, jam 3 |
+ * | Minutes | Coming back as usual              | After a break                    |
+ * |---------|-----------------------------------|----------------------------------|
+ * | 5       | lead 5                            | recap 5                          |
+ * | 10      | warm-up 2, lead 4, other 4        | recap 3, lead 3, other 4         |
+ * | 15      | warm-up 2, lead 5, 4, 4           | recap 3, lead 4, 4, 4            |
+ * | 20      | warm-up 2, lead 6, 4, 4, last 4   | recap 3, lead 5, 4, 4, last 4    |
  *
- * At twenty, once the focus Exercise has a clean tempo, three of the focus
- * minutes go to Find my edge on it after the next Exercise: the one check of
- * that number a Session makes by itself.
+ * Across every subscribed Path (`plans/tasks/mvp/CONTENT.md`, the adopted
+ * algorithm; the questions it asks of the history are in `rotation.ts`):
+ *
+ * - One Path leads: the one that has waited longest to lead, ties to the
+ *   player's order; a Path unplayed four days or more jumps the queue.
+ * - The warm-up slot is a benchmark Take on days 1, 7, 14 and 21 of a Path.
+ * - Each other Path gets one block, the one played longest ago first; then
+ *   reviews that are due (1, 3, 7, 14, 30 days); then the lead's next Exercise.
+ * - At twenty the last block is a finisher with the band (a jam-backed
+ *   Exercise at a tempo already passed), else a review, else Find my edge, else
+ *   the band.
+ * - At most four graded, blocks of three minutes or more, one Session in three
+ *   (from fifteen minutes) gives two of the lead's minutes to a self-checked
+ *   "your turn" item. A new Path's first block is placement; an Exercise three
+ *   Sessions without a new clean rung is parked for two days. A Path with
+ *   nothing today says why in `skipped`.
  *
  * Five minutes is one thing rather than two thin slices: splitting it leaves no
  * time for a second Take of anything (the mocks' open question 12).
