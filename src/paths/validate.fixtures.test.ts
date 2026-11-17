@@ -99,6 +99,11 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     ex(d, "scale").notes[0].tech.push("bend");
     return d;
   },
+  "tab.subdivision": () => {
+    const d = fresh();
+    ex(d, "scale").subdivision = "sextuplets";
+    return d;
+  },
   "loop.firstNote": () => {
     const d = fresh();
     const e = ex(d, "outside");

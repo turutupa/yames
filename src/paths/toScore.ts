@@ -74,6 +74,7 @@ function durationToken(ticks: number): string {
     360: "16{d}",
     320: "8{tu 3}",
     240: "16",
+    192: "16{tu 5}",
     180: "32{d}",
     160: "16{tu 3}",
     120: "32",
@@ -104,7 +105,9 @@ export function exerciseAlphaTex(ex: Exercise, bpm: number): string {
   const items: Item[] = [];
   ex.rests.forEach((r) => items.push({ tick: r.tick, text: `r.${durationToken(r.dur)}` }));
   ex.notes.forEach((note, index) => {
-    const text = `${note.fret}.${note.string}${noteEffects(note, ex.notes[index + 1])}.${durationToken(note.dur)}`;
+    // A tap is a beat effect in alphaTex, so it follows the duration.
+    const tap = note.tech.includes("tap") ? "{tt}" : "";
+    const text = `${note.fret}.${note.string}${noteEffects(note, ex.notes[index + 1])}.${durationToken(note.dur)}${tap}`;
     items.push({ tick: note.tick, text });
   });
   items.sort((a, b) => a.tick - b.tick);

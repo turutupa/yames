@@ -4,11 +4,14 @@
  * Example: `/16 5:5 5:6 5:7 5:8 | /4 3:7b2v> r /2 hold`
  *
  * - `/8` sets the note value until the next one: `/1 /2 /4 /8 /16 /32`, then an
- *   optional `.` (dotted) or `t` (triplet). `/16t` is a sextuplet note.
+ *   optional `.` (dotted), `t` (triplet) or `q` (quintuplet: five in the time
+ *   of four). `/16t` is a sextuplet note, `/16q` a sixteenth quintuplet, five
+ *   to the beat.
  * - `s:f` is string and fret, string 1 the highest. Suffixes, in any order:
  *   `h` hammer-on, `p` pull-off (on the note arrived at), `s` slides out to the
  *   next note, `b2` bends two semitones, `v` vibrato, `>` accent, `m` palm
- *   mute, `l` let ring, `d` or `u` a printed stroke.
+ *   mute, `l` let ring, `t` tapped with the picking hand (a loud attack with
+ *   no stroke), `d` or `u` a printed stroke.
  * - `r` is a rest of the current value.
  * - `hold` lengthens the last note to the bar line, as far as one notated value
  *   can, and rests the remainder. `rest` rests to the bar line.
@@ -19,17 +22,21 @@ import type { PathNote, PathRest, PathTechnique, PickMark } from "./format";
 
 /** Note values `toScore.ts` can write back out, longest first. */
 export const NOTATED_TICKS: readonly number[] = [
-  3840, 2880, 1920, 1440, 1280, 960, 720, 640, 480, 360, 320, 240, 180, 160, 120,
+  3840, 2880, 1920, 1440, 1280, 960, 720, 640, 480, 360, 320, 240, 192, 180, 160, 120,
 ];
 
 export type ParsedTab = { notes: PathNote[]; rests: PathRest[]; totalTicks: number };
 
 function durationOf(token: string): number {
-  const match = /^\/(1|2|4|8|16|32)([.t]?)$/.exec(token);
+  const match = /^\/(1|2|4|8|16|32)([.tq]?)$/.exec(token);
   if (!match) throw new Error(`bad note value: ${token}`);
   const base = (TICKS * 4) / Number(match[1]);
   if (match[2] === ".") return (base * 3) / 2;
   if (match[2] === "t") return (base * 2) / 3;
+  if (match[2] === "q") {
+    if (match[1] !== "16") throw new Error(`only sixteenth quintuplets are notatable: ${token}`);
+    return (base * 4) / 5;
+  }
   return base;
 }
 
@@ -119,6 +126,7 @@ export function parseTab(tab: string, tuning: readonly number[], barTicks: numbe
       else if (c === "v") tech.push("vibrato");
       else if (c === "m") tech.push("palmMute");
       else if (c === "l") tech.push("letRing");
+      else if (c === "t") tech.push("tap");
       else if (c === ">") accent = true;
       else if (c === "d" || c === "u") pick = c;
       else if (c === "b") {
@@ -147,9 +155,10 @@ export function parseTab(tab: string, tuning: readonly number[], barTicks: numbe
 
 const isLegatoArrival = (n: PathNote) => n.tech.includes("hammer") || n.tech.includes("pull");
 
-/** Is this note picked? A hammer, a pull or a slid-to note is not. */
+/** Is this note picked? A hammer, a pull, a tap or a slid-to note is not. */
 export function isPicked(note: PathNote, previous: PathNote | undefined): boolean {
   if (isLegatoArrival(note)) return false;
+  if (note.tech.includes("tap")) return false;
   if (previous && previous.tech.includes("slide") && previous.string === note.string) return false;
   return true;
 }

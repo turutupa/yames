@@ -52,6 +52,12 @@ export const GRADING_PROFILES: Readonly<Record<GradeProfile, GradingProfile>> = 
     passBars: [identity(0.85), heard(0.85), evenness(0.75), extras(4)],
     feedback: "afterTake",
   },
+  sweepTiming: {
+    mode: "graded",
+    graded: ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+    passBars: [evenness(0.8), heard(0.85), extras(3)],
+    feedback: "afterTake",
+  },
   stamina: {
     mode: "graded",
     graded: ["timingEvenness", "notesHeard", "evennessHold", "extraNotes"],

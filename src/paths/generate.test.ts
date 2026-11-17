@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { MINIMAL_SPEC } from "./fixtures/minimal";
-import { PATH_SCHEMA_VERSION, REVIEW_STATUSES } from "./format";
+import { PATH_SCHEMA_VERSION, REVIEW_STATUSES, subdivisionOf } from "./format";
 import type { PathDoc } from "./format";
 import { buildPath, serializePath } from "./generate";
 import { packBytes, renderReviewPage, scheduleFixtures } from "./pipeline";
@@ -99,6 +99,17 @@ describe("the three Paths", () => {
     const needs = runtimeNeeds(docs[2]);
     expect(needs.map((n) => n.metric)).toContain("landingChordTone");
     expect(needs.find((n) => n.metric === "landingChordTone")?.status).toBe("new-grader");
+  });
+});
+
+describe("subdivisions", () => {
+  it("are written only for a Path that asks, from the tightest gap", () => {
+    expect(buildPath(MINIMAL_SPEC).steps[0].exercises[0].subdivision).toBeUndefined();
+    const labelled = buildPath({ ...MINIMAL_SPEC, labelSubdivisions: true });
+    for (const ex of labelled.steps.flatMap((s) => s.exercises)) {
+      expect(ex.subdivision).toBe(subdivisionOf(ex.notes));
+    }
+    expect(validatePath(labelled).filter((i) => i.rule === "tab.subdivision")).toEqual([]);
   });
 });
 

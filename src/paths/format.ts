@@ -46,6 +46,8 @@ export const TECHNIQUES = [
   "vibrato",
   "palmMute",
   "letRing",
+  /** Tapped with the picking hand: a loud attack, so never soft, and no stroke. */
+  "tap",
 ] as const;
 export type PathTechnique = (typeof TECHNIQUES)[number];
 
@@ -191,6 +193,66 @@ export type HandPosition = {
   shifts: "none" | "allowed";
 };
 
+/**
+ * The note grid an Exercise counts in, named for the player: the tightest gap
+ * between two onsets. Added 2026-11 (the Shred Path), additive: a Path opts in
+ * with `labelSubdivisions` and its Exercises carry `subdivision`, so a tempo is
+ * never shown without what it is a tempo of.
+ */
+export const SUBDIVISIONS = [
+  "wholes",
+  "halves",
+  "quarters",
+  "eighths",
+  "eighthTriplets",
+  "sixteenths",
+  "quintuplets",
+  "sextuplets",
+  "thirtySeconds",
+] as const;
+export type Subdivision = (typeof SUBDIVISIONS)[number];
+
+/** Ticks between onsets for each subdivision. */
+export const SUBDIVISION_TICKS: Readonly<Record<Subdivision, number>> = {
+  wholes: 3840,
+  halves: 1920,
+  quarters: 960,
+  eighths: 480,
+  eighthTriplets: 320,
+  sixteenths: 240,
+  quintuplets: 192,
+  sextuplets: 160,
+  thirtySeconds: 120,
+};
+
+/** Notes per click, in words, for a page or a screen. */
+export const SUBDIVISION_WORDS: Readonly<Record<Subdivision, string>> = {
+  wholes: "whole notes (1 per bar)",
+  halves: "half notes (2 per bar)",
+  quarters: "quarter notes (1 per beat)",
+  eighths: "eighth notes (2 per beat)",
+  eighthTriplets: "eighth-note triplets (3 per beat)",
+  sixteenths: "sixteenth notes (4 per beat)",
+  quintuplets: "sixteenth quintuplets (5 per beat)",
+  sextuplets: "sextuplets, or sixteenth triplets (6 per beat)",
+  thirtySeconds: "thirty-second notes (8 per beat)",
+};
+
+/**
+ * The subdivision of a set of notes: the grid of the tightest onset gap, or of
+ * the shortest note when there is only one onset.
+ */
+export function subdivisionOf(notes: readonly { tick: number; dur: number }[]): Subdivision | null {
+  let gap = Infinity;
+  for (let i = 1; i < notes.length; i += 1) {
+    const d = notes[i].tick - notes[i - 1].tick;
+    if (d > 0 && d < gap) gap = d;
+  }
+  if (!Number.isFinite(gap)) gap = Math.min(...notes.map((n) => n.dur));
+  const found = SUBDIVISIONS.find((s) => SUBDIVISION_TICKS[s] === gap);
+  return found ?? null;
+}
+
 export type ExerciseComputed = {
   /** Picked and legato notes the player plays. */
   noteCount: number;
@@ -316,6 +378,11 @@ export type Exercise = {
   estimatedMinutes: number;
   /** The source tab in the compact notation of `tabDsl.ts`. */
   tab: string;
+  /**
+   * What the tempo counts: the note grid, the same for every variant. Present
+   * on Paths that opt in (`labelSubdivisions`); checked against the notes.
+   */
+  subdivision?: Subdivision;
   computed: ExerciseComputed;
   /** Present when notes change between Takes. `notes` above is variant 0. */
   variation?: Variation;

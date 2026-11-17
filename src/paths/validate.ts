@@ -24,7 +24,9 @@ import {
   LEVEL_IDS,
   TICKS,
   VARIATION_DIMENSIONS,
+  SUBDIVISIONS,
   barLengthTicks,
+  subdivisionOf,
 } from "./format";
 import type { Exercise, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
 import {
@@ -59,6 +61,7 @@ export const RULES = {
   "tab.barFill": "the notes and rests do not fill the bars exactly",
   "tab.barline": "a note crosses a bar line",
   "tab.bend": "a bend must carry both the technique and a distance",
+  "tab.subdivision": "the named subdivision is not the grid the notes move in",
   "loop.firstNote": "a looping Exercise should start on its first beat",
   "loop.seamLeap": "the leap from the last note back to the first is not musical",
   "loop.seamRepeat": "the last note and the first are the same note, back to back",
@@ -809,8 +812,21 @@ function checkRuntime(doc: PathDoc, ex: Exercise, report: Report) {
   }
 }
 
+function checkSubdivision(ex: Exercise, report: Report) {
+  if (ex.subdivision === undefined) return;
+  if (!(SUBDIVISIONS as readonly string[]).includes(ex.subdivision)) {
+    report("tab.subdivision", ex.id, `"${ex.subdivision}" is not a subdivision this format names`);
+    return;
+  }
+  const grid = subdivisionOf(ex.notes);
+  if (grid !== ex.subdivision) {
+    report("tab.subdivision", ex.id, `says ${ex.subdivision}, and the notes move in ${grid ?? "no nameable grid"}`);
+  }
+}
+
 function checkOne(doc: PathDoc, level: PathLevel, ex: Exercise, report: Report, issues: readonly Issue[]) {
   checkTab(doc, ex, report);
+  checkSubdivision(ex, report);
   // Off the neck, nothing further about these notes means anything.
   if (issues.some((i) => (i.rule === "tab.string" || i.rule === "tab.fret") && i.where.startsWith(ex.id))) return;
   checkLoop(ex, report);

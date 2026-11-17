@@ -4,7 +4,7 @@
  * only the play-along and the marks need `reviewClient.ts`.
  */
 import type { Exercise, Level, PathDoc, PathNote, Step } from "./format";
-import { TICKS, barLengthTicks } from "./format";
+import { SUBDIVISION_WORDS, TICKS, barLengthTicks } from "./format";
 import { METRICS, NOT_GRADED } from "./metrics";
 import { REVIEW_CLIENT } from "./reviewClient";
 import { isPicked } from "./tabDsl";
@@ -123,6 +123,7 @@ function barSvg(
     if (note.accent) marks.push(`<text class="acc" x="${x}" y="${STAFF_TOP - 19}">&gt;</text>`);
     if (note.tech.includes("palmMute")) marks.push(`<text class="tag" x="${x}" y="${STAFF_TOP - 4}">PM</text>`);
     if (note.tech.includes("letRing")) marks.push(`<text class="tag" x="${x}" y="${STAFF_TOP - 4}">ring</text>`);
+    if (note.tech.includes("tap")) marks.push(`<text class="tag" x="${x}" y="${STAFF_TOP - 4}">T</text>`);
     if (note.tech.includes("vibrato")) marks.push(`<text class="tag vib" x="${x + 12}" y="${y - 4}">~</text>`);
     if (note.tech.includes("bend")) {
       const distance = note.bend === 1 ? "½" : note.bend === 2 ? "full" : `+${note.bend ?? 0}`;
@@ -266,6 +267,7 @@ function harmonyText(ex: Exercise): string {
 
 /** The note values an Exercise moves in, in words. */
 function rhythmWords(ex: Exercise): string {
+  if (ex.subdivision) return SUBDIVISION_WORDS[ex.subdivision];
   const words: Record<number, string> = {
     160: "sextuplets",
     240: "sixteenths",

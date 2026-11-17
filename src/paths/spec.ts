@@ -24,6 +24,9 @@ import type {
  * - `timingNotes`: the same, plus right notes after the take.
  * - `accents`: timing plus rough accent placement.
  * - `sweep`: slow-rung bars for swept notes.
+ * - `sweepTiming`: swept notes graded on timing only (evenness, notes heard,
+ *   extras): right notes on a sweep mostly read "not checked", so they are not
+ *   promised. Extras are what catch a note left ringing into the next.
  * - `stamina`: evenness over a long take and at its end.
  * - `written`: right notes after the take, for Theory lines.
  * - `attacksOnly`: only that each note was attacked when written; for bends.
@@ -39,6 +42,7 @@ export type GradeProfile =
   | "timingNotes"
   | "accents"
   | "sweep"
+  | "sweepTiming"
   | "stamina"
   | "written"
   | "attacksOnly"
@@ -172,6 +176,11 @@ export type PathSpec = {
   gradingLimits: string;
   steps: StepSpec[];
   levels?: LevelSpec[];
+  /**
+   * Write each Exercise's `subdivision` into the pack, from its notes. Opt-in so
+   * Paths written before it generate the same bytes.
+   */
+  labelSubdivisions?: boolean;
 };
 
 export function definePath(spec: PathSpec): PathSpec {

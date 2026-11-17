@@ -519,9 +519,9 @@ export function swing(tab: string): string {
     } else if (item.startsWith("/")) {
       inEighths = item === "/8";
       if (!inEighths) {
-        const match = /^\/(\d+)([.t]?)$/.exec(item)!;
+        const match = /^\/(\d+)([.tq]?)$/.exec(item)!;
         const base = 3840 / Number(match[1]);
-        value = match[2] === "." ? (base * 3) / 2 : match[2] === "t" ? (base * 2) / 3 : base;
+        value = match[2] === "." ? (base * 3) / 2 : match[2] === "t" ? (base * 2) / 3 : match[2] === "q" ? (base * 4) / 5 : base;
         write(item);
       }
     } else if (item === "hold" || item === "rest") {
