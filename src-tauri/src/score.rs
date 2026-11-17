@@ -2064,6 +2064,10 @@ pub struct ScheduleRun {
     live_lag_ms: f64,
     /// How many played notes `live_lag_ms` was last worked out over.
     live_lag_notes: usize,
+    /// Whether `live_lag_ms` is worth judging by yet: there is a cached
+    /// offset for this rig, the recent notes gave one, or the hold below ran
+    /// out. Until then the live sweep says nothing ([`LIVE_HOLD_ONSETS`]).
+    live_lag_settled: bool,
     /// The Exercise's pass bars, when an Exercise is what was loaded.
     pass_bars: Vec<PassBar>,
     /// Take the system's lag out of the report ([`CalibrationPolicy::Auto`]).
@@ -2117,6 +2121,26 @@ const LIVE_SWEEP_CAP: usize = 64;
 /// around a drop, and small enough that a sweep is a few dozen cells.
 const LIVE_CONTEXT: usize = 8;
 
+/// How many due onsets the live sweep holds back while it does not yet know
+/// the system's lag.
+///
+/// With no cached offset the sweep starts out taking the lag to be nothing,
+/// and on a rig whose input arrives later than the matching window that made
+/// the first notes of every Take read as missed on the running screen (the
+/// report, which reads the lag off the whole Take, was right). So until the
+/// lag has been read off the first [`MIN_NOTES_FOR_LAG`] notes, verdicts are
+/// held, then given all at once against the lag that was read. A Take that
+/// never gives enough notes to read one (silence, or nothing like the
+/// written part) is not held for ever: past this many due onsets the sweep
+/// goes on with what it has, which is what it always did. Sixteen is a bar of
+/// sixteenths, a few beats of anything slower.
+const LIVE_HOLD_ONSETS: u64 = 16;
+
+/// While the lag is unknown, an onset is only due once even the latest lag
+/// the estimator would pick has passed: no note is waited for past its
+/// window on the assumption that the rig is fast.
+const LIVE_UNKNOWN_LAG_MS: f64 = LAG_SEARCH_MS.1 as f64;
+
 impl ScheduleRun {
     pub fn new(schedule: ScoreSchedule) -> Self {
         let pass_onsets: Vec<ExpectedOnset> = schedule
@@ -2138,6 +2162,7 @@ impl ScheduleRun {
             calibration_seed_ms: None,
             live_lag_ms: 0.0,
             live_lag_notes: 0,
+            live_lag_settled: false,
             pass_bars: Vec::new(),
             correct_lag: false,
             pitches: Vec::new(),
@@ -2211,6 +2236,7 @@ impl ScheduleRun {
     pub fn with_calibration_seed(mut self, seed_ms: Option<f64>) -> Self {
         self.calibration_seed_ms = seed_ms.filter(|s| s.is_finite());
         self.live_lag_ms = self.calibration_seed_ms.unwrap_or(0.0);
+        self.live_lag_settled = self.calibration_seed_ms.is_some();
         self
     }
 
@@ -2323,9 +2349,16 @@ impl ScheduleRun {
         // ── How far the cursor can go ──────────────────────────────────
         let start = self.settled;
         let mut end = start;
+        let due_lag = if self.live_lag_settled {
+            self.live_lag_ms
+        } else {
+            LIVE_UNKNOWN_LAG_MS
+        };
+        let mut reached_end = false;
         while (end - start) < LIVE_SWEEP_CAP as u64 {
             let pass = (end / n as u64) as u32;
             if pass > 0 && !self.schedule.loops {
+                reached_end = true;
                 break;
             }
             let i = (end % n as u64) as usize;
@@ -2336,13 +2369,22 @@ impl ScheduleRun {
             let Some(t) = self.beats.time_at_beat(abs) else {
                 break;
             };
-            if t + self.live_lag_ms + self.window_ms_at(abs) + LIVE_SETTLE_LAG_MS > now_ms {
+            if t + due_lag + self.window_ms_at(abs) + LIVE_SETTLE_LAG_MS > now_ms {
                 break;
             }
             end += 1;
         }
         if end == start {
             return;
+        }
+        // ── Hold, while the lag is not known ───────────────────────────
+        // A short schedule played out is released too: there is nothing
+        // further to wait for.
+        if !self.live_lag_settled {
+            if end - start < LIVE_HOLD_ONSETS && !reached_end {
+                return;
+            }
+            self.live_lag_settled = true;
         }
 
         // ── Align, one pass of the loop at a time ──────────────────────
@@ -2406,6 +2448,7 @@ impl ScheduleRun {
         let prior = self.calibration_seed_ms.unwrap_or(NOMINAL_LAG_MS);
         if let Some(lag) = estimate_constant_lag_ms(&expected, &times, gap_ms, prior) {
             self.live_lag_ms = lag;
+            self.live_lag_settled = true;
         }
     }
 

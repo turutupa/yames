@@ -494,6 +494,34 @@ describe("the live lights, per note, while the pass runs", () => {
     expect(result.current.get(1)).toBe("missed");
   });
 
+  it("never smears a beat's miss over its notes: only a note's own verdict says missed", async () => {
+    const schedule = sixteenthsSchedule();
+    const { result } = renderHook(() =>
+      useLiveNoteLights({ schedule, beatInRange: 0.3, isPlaying: true, bpm: 120 }),
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const beat = {
+      beatIndex: 0,
+      intervalErrorMs: 0,
+      amplitude: 1,
+      calibrationOffsetMs: 0,
+      calibrationConfidence: 1,
+      gridCorrelation: 1,
+      classification: "miss",
+      deviationMs: 0,
+    };
+    act(() => {
+      listenerFor("beat-feedback")?.({ payload: beat });
+    });
+    expect(result.current.size).toBe(0);
+    act(() => {
+      listenerFor("score-onset")?.({ payload: { id: 1, pass: 0, state: "miss", deviationMs: null } });
+    });
+    expect(result.current.get(1)).toBe("missed");
+  });
+
   it("clears the page when the transport stops", async () => {
     const schedule = sixteenthsSchedule();
     const { result, rerender } = renderHook(
