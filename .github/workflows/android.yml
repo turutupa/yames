@@ -320,8 +320,13 @@ jobs:
             echo
             echo '| Entry | Uncompressed |'
             echo '|---|---|'
-            [ -f "${{ steps.outputs.outputs.aab }}" ] && unzip -l "${{ steps.outputs.outputs.aab }}" \
-              | awk '/\.so$/ { printf "| %s | %s bytes |\n", $4, $1 }'
+            # A branch push builds no AAB; a missing one must not fail the step.
+            if [ -f "${{ steps.outputs.outputs.aab }}" ]; then
+              unzip -l "${{ steps.outputs.outputs.aab }}" \
+                | awk '/\.so$/ { printf "| %s | %s bytes |\n", $4, $1 }'
+            else
+              echo "| (no AAB on a branch build) | |"
+            fi
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
       # `apksigner verify` is the only thing that answers "would a phone
