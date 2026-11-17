@@ -438,6 +438,14 @@
   }
 }
 
+/* Test builds only: "test build X is ready". The audio-error pill's slot and
+   shape, tinted with the accent rather than the miss colour — it is news, not
+   a fault. */
+.beta-update-notice {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
+}
+
 /* ─── Download Confirmation Dialog ─── */
 .download-confirm-overlay {
   position: fixed;

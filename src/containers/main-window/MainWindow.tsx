@@ -11,7 +11,10 @@ import { useMetronome } from "../../hooks/useMetronome";
 import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
-import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
+import { IS_BETA, IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
+import { NO_ANDROID_BETA, useAndroidBetaUpdate } from "../../beta/useAndroidBetaUpdate";
+import { NO_BETA_PROMPT, useBetaPrompt } from "../../beta/useBetaPrompt";
+import { BetaUpdateNotice } from "../../beta/BetaUpdateNotice";
 import { getThemeById } from "../../themes";
 import { useAndroidNative } from "./hooks/useAndroidNative";
 import { useInputRoute } from "../../mobile/inputRoute";
@@ -1009,6 +1012,39 @@ export function MainWindow() {
     ? useNewerVersion({ appVersion, isPlaying: state.isPlaying })
     : NEVER_NEWER;
 
+  // Test builds (`IS_BETA`, .github/workflows/beta.yml) offer the next beta.
+  // The desktop's updater is the one above, already pointed at the beta feed
+  // at build time; Android's is its own (it installs an APK). Both say so at
+  // most once a day in a pill under the header. The `? … :` form folds away
+  // in a stable build, as the newer-version hook does.
+  const androidBeta =
+    IS_BETA && IS_MOBILE
+      ? useAndroidBetaUpdate({ appVersion, isPlaying: state.isPlaying })
+      : NO_ANDROID_BETA;
+  const betaBusy = IS_MOBILE
+    ? androidBeta.status === "downloading" || androidBeta.status === "installing"
+    : updateStatus === "downloading";
+  const betaPrompt = IS_BETA
+    ? useBetaPrompt({
+        available:
+          betaBusy ||
+          (IS_MOBILE
+            ? androidBeta.status === "available" || androidBeta.status === "needs-permission"
+            : updateStatus === "available"),
+        isPlaying: state.isPlaying,
+      })
+    : NO_BETA_PROMPT;
+  const installBetaFromPrompt = useCallback(() => {
+    if (IS_MOBILE) {
+      androidBeta.update();
+      return;
+    }
+    setUpdateStatus("downloading");
+    // The updater exits the app and NSIS (passive) relaunches it; a failure
+    // lands in the Settings banner, which says why.
+    downloadAndInstallUpdate().catch(() => setUpdateStatus("failed"));
+  }, [androidBeta, setUpdateStatus]);
+
   // Motion gate (O8): the OS `prefers-reduced-motion` setting OR the app's own
   // `viewTransitions === "off"`. One value, passed to every animated overlay,
   // so "no motion" means the same thing everywhere.
@@ -1837,6 +1873,16 @@ export function MainWindow() {
         </button>
       )}
 
+      {IS_BETA && betaPrompt.show && !audioError.notice && (
+        <BetaUpdateNotice
+          version={IS_MOBILE ? androidBeta.version : latestVersion}
+          busy={betaBusy}
+          progress={IS_MOBILE ? androidBeta.progress : null}
+          onUpdate={installBetaFromPrompt}
+          onDismiss={betaPrompt.dismiss}
+        />
+      )}
+
       {audioError.notice && (
         <AudioErrorNotice
           notice={audioError.notice}
@@ -2349,6 +2395,7 @@ export function MainWindow() {
             latestVersion={latestVersion}
             appVersion={appVersion}
             newerVersion={newerVersion}
+            androidBeta={androidBeta}
             doUpdateCheck={doUpdateCheck}
             downloadAndInstallUpdate={
               IS_MOBILE ? undefined : downloadAndInstallUpdate

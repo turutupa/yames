@@ -357,6 +357,16 @@
       "newerOut": "Versie {{version}} is er",
       "getIt": "Ophalen",
       "notNow": "Nu niet",
+      "channel": "Kanaal",
+      "channelBeta": "Testversie (bèta)",
+      "betaReady": "Testversie {{version}} staat klaar",
+      "betaUpdate": "Bijwerken",
+      "betaLater": "Later",
+      "betaDownloading": "Downloaden…",
+      "betaDownloadingPercent": "Downloaden… {{percent}}%",
+      "betaInstalling": "Installatieprogramma openen…",
+      "betaAllowInstalls": "Sta Yames toe apps te installeren en tik daarna opnieuw op Bijwerken",
+      "betaFailed": "Het bijwerken is niet gelukt",
       "soundsCreditSongs": "De andere instrumenten komen uit de Sonivox General MIDI-klankset (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

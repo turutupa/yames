@@ -357,6 +357,16 @@
       "newerOut": "{{version}} 版本已推出",
       "getIt": "去下載",
       "notNow": "以後再說",
+      "channel": "頻道",
+      "channelBeta": "測試版（beta）",
+      "betaReady": "測試版 {{version}} 已就緒",
+      "betaUpdate": "更新",
+      "betaLater": "稍後",
+      "betaDownloading": "正在下載…",
+      "betaDownloadingPercent": "正在下載… {{percent}}%",
+      "betaInstalling": "正在開啟安裝程式…",
+      "betaAllowInstalls": "請允許 Yames 安裝應用程式，然後再點一次「更新」",
+      "betaFailed": "更新未成功",
       "soundsCreditSongs": "其他樂器來自 Sonivox 的 General MIDI 音色庫（Sonic Network Inc.，Apache-2.0）。"
     },
     "songs": {

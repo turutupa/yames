@@ -357,6 +357,16 @@
       "newerOut": "{{version}} sürümü çıktı",
       "getIt": "İndir",
       "notNow": "Şimdi değil",
+      "channel": "Kanal",
+      "channelBeta": "Test sürümü (beta)",
+      "betaReady": "Test sürümü {{version}} hazır",
+      "betaUpdate": "Güncelle",
+      "betaLater": "Sonra",
+      "betaDownloading": "İndiriliyor…",
+      "betaDownloadingPercent": "İndiriliyor… %{{percent}}",
+      "betaInstalling": "Yükleyici açılıyor…",
+      "betaAllowInstalls": "Yames'in uygulama yüklemesine izin verin, sonra Güncelle'ye yeniden dokunun",
+      "betaFailed": "Güncelleme olmadı",
       "soundsCreditSongs": "Diğer enstrümanlar Sonivox General MIDI ses setinden gelir (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

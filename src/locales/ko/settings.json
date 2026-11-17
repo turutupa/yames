@@ -357,6 +357,16 @@
       "newerOut": "버전 {{version}}이 나왔어요",
       "getIt": "받기",
       "notNow": "나중에",
+      "channel": "채널",
+      "channelBeta": "테스트 버전(베타)",
+      "betaReady": "테스트 버전 {{version}}이 준비됐어요",
+      "betaUpdate": "업데이트",
+      "betaLater": "나중에",
+      "betaDownloading": "다운로드 중…",
+      "betaDownloadingPercent": "다운로드 중… {{percent}}%",
+      "betaInstalling": "설치 프로그램을 여는 중…",
+      "betaAllowInstalls": "Yames가 앱을 설치할 수 있게 허용한 뒤 업데이트를 다시 탭하세요",
+      "betaFailed": "업데이트하지 못했어요",
       "soundsCreditSongs": "나머지 악기는 Sonivox General MIDI 사운드 세트입니다 (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

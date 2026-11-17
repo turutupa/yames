@@ -34,6 +34,7 @@ type AnimationStyle = "fade" | "scale" | "blur" | "slide" | "reveal";
 // The union lives with the hook that owns the state.
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
 import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
+import { NO_ANDROID_BETA, type AndroidBetaUpdate } from "../../beta/useAndroidBetaUpdate";
 type Evaluation = ReturnType<typeof useEvaluation>;
 
 interface SettingsViewProps {
@@ -48,6 +49,8 @@ interface SettingsViewProps {
    * download from the website, which nothing else keeps current (M11).
    */
   newerVersion?: NewerVersion;
+  /** The Android test build's own updater (`IS_BETA && IS_MOBILE` only). */
+  androidBeta?: AndroidBetaUpdate;
   /** Absent on a phone: the in-app updater is desktop-only. */
   downloadAndInstallUpdate?: () => Promise<void>;
 
@@ -156,6 +159,7 @@ export function SettingsView({
   doUpdateCheck,
   downloadAndInstallUpdate,
   newerVersion = NEVER_NEWER,
+  androidBeta = NO_ANDROID_BETA,
   autoCheckUpdates,
   setAutoCheckUpdates,
   alwaysOnTop,
@@ -362,6 +366,7 @@ export function SettingsView({
       <AboutSection
         appVersion={appVersion}
         newerVersion={newerVersion}
+        androidBeta={androidBeta}
         updateStatus={updateStatus}
         latestVersion={latestVersion}
         onInstallUpdate={handleInstallUpdate}

@@ -357,6 +357,16 @@
       "newerOut": "È uscita la versione {{version}}",
       "getIt": "Scarica",
       "notNow": "Non ora",
+      "channel": "Canale",
+      "channelBeta": "Versione di prova (beta)",
+      "betaReady": "La versione di prova {{version}} è pronta",
+      "betaUpdate": "Aggiorna",
+      "betaLater": "Più tardi",
+      "betaDownloading": "Download in corso…",
+      "betaDownloadingPercent": "Download in corso… {{percent}}%",
+      "betaInstalling": "Apertura del programma di installazione…",
+      "betaAllowInstalls": "Consenti a Yames di installare app, poi tocca di nuovo Aggiorna",
+      "betaFailed": "L'aggiornamento non è riuscito",
       "soundsCreditSongs": "Gli altri strumenti vengono dal set di suoni General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

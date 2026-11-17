@@ -518,7 +518,10 @@
     "refreshAudioDevices",
     "callbackProbeReport",
     "exportPracticeData",
-    "setAppInBackground"
+    "setAppInBackground",
+    "androidBetaDownload",
+    "androidBetaInstall",
+    "androidBetaProbe"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -1440,6 +1443,21 @@
       "written": true
     },
     "session.bandVolume": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "betaUpdate.checkedAt": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "betaUpdate.feed": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "betaUpdate.promptedAt": {
       "store": "settings.json",
       "read": true,
       "written": true
