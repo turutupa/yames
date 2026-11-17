@@ -977,6 +977,12 @@ pub struct TakeGrade {
     /// were loaded with the schedule, which is every Song. See [`pass`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pass: Option<PassResult>,
+    /// The pitch pass over this Take's audio is still running, and the grade
+    /// with right notes in it will follow (`get_take_grade_with_notes`). Until
+    /// it does, `noteIdentity` is in `pass.notAssessed` with status `notRun`.
+    /// See [`notes`].
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub notes_pending: bool,
 }
 
 /// Under this share of the notes due, the Take says "I didn't catch enough"
@@ -1245,6 +1251,21 @@ pub fn match_attempt_calibrated(
     policy: CalibrationPolicy,
     pass_bars: &[PassBar],
 ) -> ScheduleReport {
+    match_attempt_graded(schedule, beats, played, weights, policy, pass_bars, None)
+}
+
+/// [`match_attempt_calibrated`], with the pitch pass's verdict on each result,
+/// in step with `results`, when it ran (`notes`). The matching is the same
+/// either way: only the grade reads them.
+fn match_attempt_graded(
+    schedule: &ScoreSchedule,
+    beats: &BeatMap,
+    played: &[PlayedOnset],
+    weights: &ScoreWeights,
+    policy: CalibrationPolicy,
+    pass_bars: &[PassBar],
+    notes: Option<&[Option<crate::pitch::NoteState>]>,
+) -> ScheduleReport {
     let (matching_ms, mut calibration) = resolve_calibration(schedule, beats, played, policy);
     // Everything below sees the notes as if there were no lag. `played` is on
     // the beat map's clock except for that one number.
@@ -1414,6 +1435,7 @@ pub fn match_attempt_calibrated(
             played,
             amplitudes: &amplitudes,
             pass_bars,
+            notes,
         },
         grade_score,
         calibration,
@@ -1580,6 +1602,9 @@ struct GradeInputs<'a> {
     /// pass bar needs it.
     amplitudes: &'a [Option<f32>],
     pass_bars: &'a [PassBar],
+    /// In step with `results`: what the pitch pass said of a hit's note.
+    /// `None` when it did not run.
+    notes: Option<&'a [Option<crate::pitch::NoteState>]>,
 }
 
 /// What `match_attempt` tells the player and the screen.
@@ -1593,6 +1618,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         played,
         amplitudes,
         pass_bars,
+        notes,
     } = input;
     let sub = smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
     let gap_ms = sub * median_interval_ms(beats);
@@ -1611,10 +1637,19 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
     let confidence = (!confidences.is_empty()).then(|| median(&confidences) as f32);
 
     let reason = didnt_catch_enough(tally.due, tally.heard, tally.extra, confidence);
-    let (bars, samples) = bar_metrics(schedule, beats, results, extras, tally, amplitudes, gap_ms);
+    let (bars, samples) = bar_metrics(
+        schedule,
+        beats,
+        results,
+        extras,
+        tally,
+        amplitudes,
+        notes.unwrap_or(&[]),
+        gap_ms,
+    );
     let graded = reason.is_none();
     let finished = finished_bars_of(beats, schedule).min(samples.len() as u32) as usize;
-    let pass = pass::evaluate(&samples[..finished], pass_bars, gap_ms, graded);
+    let pass = pass::evaluate(&samples[..finished], pass_bars, gap_ms, graded, notes.is_some());
     TakeGrade {
         verdict: if graded {
             TakeVerdict::Graded
@@ -1640,6 +1675,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         bars,
         bpm: 60_000.0 / median_interval_ms(beats),
         pass,
+        notes_pending: false,
     }
 }
 
@@ -1654,6 +1690,7 @@ fn bar_metrics(
     extras: &[ExtraOnset],
     tally: &Tally,
     amplitudes: &[Option<f32>],
+    notes: &[Option<crate::pitch::NoteState>],
     gap_ms: f64,
 ) -> (Vec<BarMetrics>, Vec<pass::BarSample>) {
     let length = pass_length(schedule);
@@ -1703,6 +1740,17 @@ fn bar_metrics(
                     } else {
                         sample.plain.push(*a);
                     }
+                }
+                // Only a heard note has a pitch verdict: a miss is
+                // `notesHeard`'s, and charging it here too would count one
+                // mistake twice.
+                use crate::pitch::NoteState as N;
+                match notes.get(k).copied().flatten() {
+                    Some(N::Right) => sample.pitch.right += 1,
+                    Some(N::Wrong) => sample.pitch.wrong += 1,
+                    Some(N::Octave) => sample.pitch.octave += 1,
+                    Some(N::Unheard) => sample.pitch.unpitched += 1,
+                    Some(N::NotAssessed) | None => {}
                 }
             }
             OnsetState::Miss => {
@@ -2016,6 +2064,11 @@ pub struct ScheduleRun {
     /// The learning side's: a Session Take turns it on, and Songs, which
     /// never does, keeps the scoring it shipped with.
     correct_lag: bool,
+    /// The written pitch of every note the schedule names, when the Exercise
+    /// has a `noteIdentity` bar for the pitch pass to check (`notes`).
+    pitches: Vec<crate::pitch::ScoreNote>,
+    /// Said on the grade: the pitch pass is running and its grade will follow.
+    notes_pending: bool,
 }
 
 /// How long after an expected onset's matching window closes its live verdict
@@ -2080,6 +2133,57 @@ impl ScheduleRun {
             live_lag_notes: 0,
             pass_bars: Vec::new(),
             correct_lag: false,
+            pitches: Vec::new(),
+            notes_pending: false,
+        }
+    }
+
+    /// The written pitches the pitch pass checks the notes against: one per
+    /// `SongNote` id the schedule names, as `src/session/take.ts` sends them.
+    pub fn with_note_pitches(mut self, pitches: Vec<crate::pitch::ScoreNote>) -> Self {
+        self.pitches = pitches;
+        self
+    }
+
+    /// Whether right notes can be checked on this run at all: there are pass
+    /// bars naming `noteIdentity` and the pitches to check them against.
+    pub fn wants_notes(&self) -> bool {
+        !self.pitches.is_empty() && self.pass_bars.iter().any(|b| b.metric == "noteIdentity")
+    }
+
+    /// The grades this run reports from now on say the pitch pass is running.
+    pub fn set_notes_pending(&mut self, pending: bool) {
+        self.notes_pending = pending;
+    }
+
+    /// [`Self::report`], with right notes: the pitch pass over the Take's own
+    /// audio, each heard note checked against its written pitch, and the pass
+    /// bars judged with `noteIdentity` in them when it can be believed
+    /// (`pass::notes_status`). Seconds of work on a long Take in a debug
+    /// build: never on the analyzer's 5 ms loop, and never on audio.
+    pub fn report_with_notes(&self, weights: &ScoreWeights, audio: &notes::TakeAudio<'_>) -> Option<ScheduleReport> {
+        let timed = self.report(weights)?;
+        let states = notes::identify(self, &timed, audio);
+        Some(match_attempt_graded(
+            &self.schedule,
+            &self.beats,
+            &self.played,
+            weights,
+            self.policy(),
+            &self.pass_bars,
+            Some(&states),
+        ))
+    }
+
+    fn policy(&self) -> CalibrationPolicy {
+        // Songs keeps the scoring it shipped with, uncorrected, so a tool's
+        // numbers do not move under it; a Session Take is corrected.
+        if self.correct_lag {
+            CalibrationPolicy::Auto {
+                seed_ms: self.calibration_seed_ms,
+            }
+        } else {
+            CalibrationPolicy::Off
         }
     }
 
@@ -2160,23 +2264,16 @@ impl ScheduleRun {
         if self.beats.is_empty() {
             return None;
         }
-        // Songs keeps the scoring it shipped with, uncorrected, so a tool's
-        // numbers do not move under it; a Session Take is corrected.
-        let policy = if self.correct_lag {
-            CalibrationPolicy::Auto {
-                seed_ms: self.calibration_seed_ms,
-            }
-        } else {
-            CalibrationPolicy::Off
-        };
-        Some(match_attempt_calibrated(
+        let mut report = match_attempt_calibrated(
             &self.schedule,
             &self.beats,
             &self.played,
             weights,
-            policy,
+            self.policy(),
             &self.pass_bars,
-        ))
+        );
+        report.grade.notes_pending = self.notes_pending;
+        Some(report)
     }
 
     /// `plans/SONGS.md` A7 — the verdicts that can be given NOW, appended to
@@ -2441,8 +2538,9 @@ fn median(sorted: &[f64]) -> f64 {
     }
 }
 
+pub mod notes;
 pub mod pass;
-pub use pass::{PassBar, PassResult, PassVerdict};
+pub use pass::{NotesCheck, NotesStatus, PassBar, PassResult, PassVerdict};
 
 #[cfg(test)]
 mod tests;

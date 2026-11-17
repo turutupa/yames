@@ -344,7 +344,7 @@ pub struct TimingAnalyzer {
     /// Roadmap 2.4 — the score the player is playing against, when
     /// there is one. `None` is free play, and free play is untouched
     /// by everything this field enables.
-    schedule: Arc<Mutex<Option<(ScoreSchedule, Vec<PassBar>)>>>,
+    schedule: Arc<Mutex<Option<LoadedSchedule>>>,
     /// Bumped whenever the slot above changes, so the analysis loop can
     /// tell "still the same schedule" from "a new one" without locking
     /// and cloning it every 5 ms.
@@ -354,6 +354,39 @@ pub struct TimingAnalyzer {
     /// `practice-segment-ended` with a grade on it, and a silent Take has to
     /// be able to say "I didn't catch enough" too. See [`Self::take_grade_slot`].
     take_grade: Arc<Mutex<Option<TakeGrade>>>,
+    /// The Take's audio and the grade the pitch pass makes of it. See
+    /// [`NotesPass`].
+    notes: NotesPass,
+}
+
+/// What `load_exercise_schedule` was handed: the schedule, the Exercise's pass
+/// bars, and the written pitch of each note for the pitch pass.
+type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>);
+
+/// Right notes on a Session Take (`score::notes`), the second half of its
+/// grade.
+///
+/// The timing grade goes out as it always has, the moment the Take is closed,
+/// with `notesPending` on it. The pitch pass then runs on a thread of its own
+/// over the audio the onset detector kept (`take_audio`), and leaves the whole
+/// grade, right notes in it, in `slot`; `get_take_grade_with_notes` waits for
+/// it. A release build takes well under a second for a Take; the screen waits
+/// a few at most and keeps the timing grade, `noteIdentity` not assessed, past
+/// that.
+#[derive(Clone)]
+pub struct NotesPass {
+    pub tap: crate::take_audio::SharedTakeAudioTap,
+    pub slot: Arc<Mutex<NotesSlot>>,
+}
+
+/// The grade with right notes, for the Take that was closed last.
+#[derive(Debug, Default)]
+pub struct NotesSlot {
+    /// Which close this belongs to. A pass for an earlier close that finishes
+    /// late leaves nothing here.
+    pub serial: u64,
+    pub pending: bool,
+    pub grade: Option<TakeGrade>,
 }
 
 /// How many live verdicts one sweep is expected to hand back.
@@ -379,7 +412,22 @@ impl TimingAnalyzer {
             schedule: Arc::new(Mutex::new(None)),
             schedule_version: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             take_grade: Arc::new(Mutex::new(None)),
+            notes: NotesPass {
+                tap: crate::take_audio::TakeAudioTap::new(),
+                slot: Arc::new(Mutex::new(NotesSlot::default())),
+            },
         }
+    }
+
+    /// Where the onset detector keeps a Session Take's audio. Handed to it
+    /// before it starts (`OnsetDetector::set_take_tap`).
+    pub fn take_audio_tap(&self) -> crate::take_audio::SharedTakeAudioTap {
+        self.notes.tap.clone()
+    }
+
+    /// Where the grade with right notes lands. See [`NotesPass`].
+    pub fn notes_slot(&self) -> Arc<Mutex<NotesSlot>> {
+        self.notes.slot.clone()
     }
 
     /// Where the grade of the Take that was just closed lands, within a
@@ -403,7 +451,24 @@ impl TimingAnalyzer {
     /// [`Self::load_score_schedule`], for an Exercise: the Take's grade is
     /// also judged against its pass bars (`score::pass`).
     pub fn load_exercise_schedule(&self, schedule: ScoreSchedule, pass_bars: Vec<PassBar>) {
-        *self.schedule.lock().unwrap() = Some((schedule, pass_bars));
+        self.load_exercise_with_notes(schedule, pass_bars, Vec::new());
+    }
+
+    /// [`Self::load_exercise_schedule`], with the written pitch of every note.
+    /// When a pass bar names `noteIdentity`, the Take's audio is kept for the
+    /// pitch pass from the next time the transport runs.
+    pub fn load_exercise_with_notes(
+        &self,
+        schedule: ScoreSchedule,
+        pass_bars: Vec<PassBar>,
+        pitches: Vec<crate::pitch::ScoreNote>,
+    ) {
+        if !pitches.is_empty() && pass_bars.iter().any(|b| b.metric == "noteIdentity") {
+            self.notes.tap.arm();
+        } else {
+            self.notes.tap.disarm();
+        }
+        *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches));
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -412,6 +477,7 @@ impl TimingAnalyzer {
     /// is dropped — the caller has already been given it on the last
     /// segment-ended event.
     pub fn clear_score_schedule(&self) {
+        self.notes.tap.disarm();
         *self.schedule.lock().unwrap() = None;
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
@@ -468,6 +534,12 @@ impl TimingAnalyzer {
     /// state is NOT reset — the player can resume after the fetch.
     pub fn close_open_segment(&self) {
         *self.take_grade.lock().unwrap() = None;
+        {
+            let mut slot = self.notes.slot.lock().unwrap();
+            slot.serial += 1;
+            slot.pending = false;
+            slot.grade = None;
+        }
         self.close_segment_now.store(true, Ordering::SeqCst);
     }
 
@@ -547,6 +619,7 @@ impl TimingAnalyzer {
         let schedule = self.schedule.clone();
         let schedule_version = self.schedule_version.clone();
         let take_grade = self.take_grade.clone();
+        let notes = self.notes.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             Self::analysis_loop(
@@ -560,6 +633,7 @@ impl TimingAnalyzer {
                 schedule,
                 schedule_version,
                 take_grade,
+                notes,
                 profile,
                 instrument_id,
                 preset_id,
@@ -607,9 +681,10 @@ impl TimingAnalyzer {
         close_segment_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
-        schedule_slot: Arc<Mutex<Option<(ScoreSchedule, Vec<PassBar>)>>>,
+        schedule_slot: Arc<Mutex<Option<LoadedSchedule>>>,
         schedule_version: Arc<std::sync::atomic::AtomicU64>,
         take_grade: Arc<Mutex<Option<TakeGrade>>>,
+        notes: NotesPass,
         profile: InstrumentProfile,
         instrument_id: String,
         preset_id: Option<String>,
@@ -854,7 +929,7 @@ impl TimingAnalyzer {
                         .lock()
                         .unwrap()
                         .clone()
-                        .map(|(schedule, pass_bars)| {
+                        .map(|(schedule, pass_bars, pitches)| {
                             // A schedule loaded with pass bars is a Session
                             // Take; only those get the lag correction.
                             let session_take = !pass_bars.is_empty();
@@ -862,6 +937,7 @@ impl TimingAnalyzer {
                                 .with_calibration_seed(initial_calibration_offset_ms)
                                 .with_lag_correction(session_take)
                                 .with_pass_bars(pass_bars)
+                                .with_note_pitches(pitches)
                         });
                 }
             }
@@ -914,13 +990,17 @@ impl TimingAnalyzer {
             // of the legacy-formula fallback. Activity state is preserved
             // (player can resume after the report is shown).
             if close_segment_now.swap(false, Ordering::SeqCst) {
-                if let Some(run) = schedule_run.as_ref() {
+                if let Some(run) = schedule_run.as_mut() {
                     // Before the segment, because there may not be one.
                     let weights = if coach_mode == CoachMode::Default {
                         profile.default_score_weights
                     } else {
                         profile.score_weights
                     };
+                    // Right notes take a pitch pass, off this loop. The grade
+                    // below and the segment's say it is coming.
+                    let pending = run.wants_notes() && start_notes_pass(run, weights, &notes);
+                    run.set_notes_pending(pending);
                     *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
                 }
                 if let Some(seg) = segment.take() {
@@ -2588,6 +2668,51 @@ pub fn window_thresholds(window_ms: f64) -> WindowThresholds {
 /// Used by the telemetry buffer (`SessionTelemetry`) to produce
 /// portable `timestamp_ms` values without storing both clock bases in
 /// every event.
+/// Hand the Take's audio and a copy of the run to a thread that grades it with
+/// right notes, into `notes.slot`. False, and nothing started, when no usable
+/// audio was kept. Called on the analyzer's thread; the pitch pass is never
+/// run on it.
+fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass) -> bool {
+    let Some(audio) = notes.tap.capture() else {
+        return false;
+    };
+    // `clock::now_ns` to the wall milliseconds the beat map is in, the way
+    // every onset and beat is converted.
+    let start_ms =
+        now_wall_ms() as f64 + (audio.first_ns as f64 - crate::clock::now_ns() as f64) / 1e6;
+    let serial = {
+        let mut slot = notes.slot.lock().unwrap();
+        slot.serial += 1;
+        slot.pending = true;
+        slot.grade = None;
+        slot.serial
+    };
+    let run = run.clone();
+    let slot = notes.slot.clone();
+    let spawned = thread::Builder::new()
+        .name("yames-take-notes".into())
+        .spawn(move || {
+            let graded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                let take = crate::score::notes::TakeAudio {
+                    samples: &audio.samples,
+                    rate: audio.rate,
+                    start_ms,
+                };
+                run.report_with_notes(&weights, &take).map(|r| r.grade)
+            }));
+            let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
+            if slot.serial == serial {
+                slot.pending = false;
+                slot.grade = graded.ok().flatten();
+            }
+        });
+    if spawned.is_err() {
+        notes.slot.lock().unwrap().pending = false;
+        return false;
+    }
+    true
+}
+
 fn ts_ns_to_wall_ms(ts_ns: u64, base_wall_ms: u64, base_ns: u64) -> u64 {
     if ts_ns >= base_ns {
         let delta_ms = ((ts_ns - base_ns) / 1_000_000) as u64;
