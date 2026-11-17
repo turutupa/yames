@@ -21,7 +21,8 @@
       "even": "równo",
       "heard": "nut usłyszanych",
       "extras": "dodatkowe nuty",
-      "accents": "trafione akcenty"
+      "accents": "trafione akcenty",
+      "notes": "właściwe nuty"
     },
     "today": {
       "title": "Dzisiaj",
@@ -52,14 +53,16 @@
         "heard": "Bo przy {{bpm}} BPM usłyszałem {{value}}% nut. Poprzeczka to {{bar}}%.",
         "extras": "Przez dodatkowe nuty przy {{bpm}} BPM. Poprzeczka to {{bar}} na cztery takty.",
         "accents": "Bo przy {{bpm}} BPM trafiło {{value}}% akcentów. Poprzeczka to {{bar}}%.",
-        "plain": "Bo ostatnie podejście przy {{bpm}} BPM nie przeskoczyło poprzeczki."
+        "plain": "Bo ostatnie podejście przy {{bpm}} BPM nie przeskoczyło poprzeczki.",
+        "notes": "Bo {{value}}% nut, których wysokość rozpoznałem, było zapisanymi przy {{bpm}} BPM. Poprzeczka to {{bar}}%."
       },
       "easing": {
         "even": "Równość wyniosła {{value}}% przy {{bpm}} BPM, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
         "heard": "Przy {{bpm}} BPM usłyszałem {{value}}% nut, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
         "extras": "Przy {{bpm}} BPM były dodatkowe nuty, więc teraz {{next}} BPM.",
         "accents": "Przy {{bpm}} BPM trafiło {{value}}% akcentów, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM.",
-        "plain": "Ostatnie podejścia przy {{bpm}} BPM nie przeskoczyły poprzeczki, więc teraz {{next}} BPM."
+        "plain": "Ostatnie podejścia przy {{bpm}} BPM nie przeskoczyły poprzeczki, więc teraz {{next}} BPM.",
+        "notes": "{{value}}% rozpoznanych nut było zapisanymi przy {{bpm}} BPM, a poprzeczka to {{bar}}%, więc teraz {{next}} BPM."
       },
       "climb": "Bo przeskoczyłeś poprzeczkę przy {{bpm}} BPM. Następny szczebel: {{next}}.",
       "climbFast": "Bo równość wyniosła {{value}}% przy {{bpm}} BPM, wysoko ponad poprzeczką. Przeskakujemy na {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "Poprzeczka to {{bar}}",
       "cleanFirst": "Czyste tempo: {{bpm}} BPM.",
       "cleanMoved": "Czyste tempo: z {{from}} na {{bpm}} BPM.",
-      "unmeasuredNotes": "Sprawdziłem tylko rytm. To, czy były to właściwe nuty, nie jest jeszcze oceniane.",
+      "unmeasuredNotes": "Sprawdziłem rytm. Nie słyszałem nut dość wyraźnie, żeby powiedzieć, czy były właściwe, więc tym razem nie było to oceniane.",
       "againSame": "Jeszcze raz, {{bpm}} BPM",
       "moveOn": "Idź dalej"
     },
@@ -144,7 +147,8 @@
         "even": "Równość wyniosła {{value}}%. Usłyszane nuty: {{heard}} z {{expected}}. Te same nuty, to samo tempo.",
         "heard": "Usłyszałem {{heard}} z {{expected}} nut, a bez nich rytm nie może zaliczyć.",
         "extras": "Nuty, których się nie spodziewałem: {{extras}}. Wycisz wolne struny, jeśli dzwonią.",
-        "accents": "{{value}}% zaznaczonych akcentów zabrzmiało głośniej niż nuty wokół nich."
+        "accents": "{{value}}% zaznaczonych akcentów zabrzmiało głośniej niż nuty wokół nich.",
+        "notes": "{{value}}% nut, których wysokość rozpoznałem, było zapisanymi. Te same nuty, to samo tempo, i uważaj na progi."
       }
     },
     "noCatch": {
@@ -199,6 +203,7 @@
       "mechanicsSub": "Jak grają twoje ręce",
       "later": "Później",
       "laterWhy": "Możesz to przeczytać już teraz. Ocena, której to wymaga, pojawi się później.",
+      "laterWhyLanding": "Możesz już to przeczytać. Ocenia się tu nuty, na których lądujesz nad akordami, a aplikacja jeszcze nie umie ich ocenić, więc nie ma tego w twoich sesjach.",
       "stepCount": "{{count}} krok",
       "stepCount_few": "{{count}} kroki",
       "stepCount_many": "{{count}} kroków",

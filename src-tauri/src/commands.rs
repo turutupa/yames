@@ -1468,6 +1468,10 @@ pub async fn start_evaluation(
     }
     let tempo_for_onset = tempo_ctx.inner().clone();
     let mut od = onset_detector.lock().unwrap();
+    // A Session Take's audio, for the pitch pass after it (`take_audio`).
+    // `ta` is still held from above: locking the analyzer again here would
+    // deadlock.
+    od.set_take_tap(ta.take_audio_tap());
     od.start(ai_shared, profile, tempo_for_onset, move |onset| {
         let _ = app_for_onset.emit("onset-detected", &onset);
         // Feed into timing analyzer for beat matching
@@ -1541,11 +1545,11 @@ pub async fn stop_evaluation(
     //
     // Drain audio levels first — the comment "BEFORE stop()" still holds since
     // we call take_audio_levels() immediately before stop() in the same block.
-    let captured_audio_levels = {
+    let (captured_audio_levels, input_ring_drops) = {
         let ai = audio_input
             .lock()
             .map_err(|e| format!("Lock failed: {e}"))?;
-        ai.take_audio_levels()
+        (ai.take_audio_levels(), ai.ring_drops())
     };
     audio_input
         .lock()
@@ -1565,6 +1569,7 @@ pub async fn stop_evaluation(
         ta.drain_telemetry()
     };
     telemetry.audio_levels = captured_audio_levels;
+    telemetry.input_ring_drops = input_ring_drops;
 
     // POSTMATCH_1: Post-session best-candidate matching. Run on the raw
     // telemetry before it's consumed by persist_session_log. Results are
@@ -1824,17 +1829,70 @@ pub fn get_take_grade(
 /// writes them. With them, the Take's grade (`takeGrade.pass`) says whether it
 /// passed and whether it counts toward the clean tempo; without them (every
 /// Song), there is no `pass` and nothing else changes.
+///
+/// `notes` is the written pitch of each note (`{ id, midi }`, the `SongNote`
+/// ids the schedule names). With them and a `noteIdentity` bar, the Take's
+/// audio is kept and right notes are checked after it (`score::notes`); the
+/// timing grade then says `notesPending`, and `get_take_grade_with_notes`
+/// brings the grade with them in.
 #[tauri::command]
 pub fn load_score_schedule(
     schedule: crate::score::ScoreSchedule,
     pass_bars: Option<Vec<crate::score::PassBar>>,
+    notes: Option<Vec<crate::pitch::ScoreNote>>,
     timing_analyzer: State<SharedTimingAnalyzer>,
+    audio_input: State<SharedAudioInput>,
 ) -> Result<(), String> {
+    // The device's rate sizes the buffer a Take's audio is kept in. Read
+    // before the analyzer is locked, so the two locks are never held together.
+    let input_rate = audio_input.lock().ok().map(|ai| ai.sample_rate());
     let ta = timing_analyzer
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
-    ta.load_exercise_schedule(schedule, pass_bars.unwrap_or_default());
+    ta.load_exercise_with_notes(
+        schedule,
+        pass_bars.unwrap_or_default(),
+        notes.unwrap_or_default(),
+        input_rate,
+    );
     Ok(())
+}
+
+/// The grade of the Take just closed, with right notes checked, once the pitch
+/// pass over its audio has finished. Call it after the timing grade said
+/// `notesPending`. Waits at most `timeoutMs` (capped at 8 s, the end of the
+/// "mid-session report" tier in AGENTS.md); `None` when it has not finished by
+/// then, or nothing was started, and the timing grade stands.
+///
+/// The grade carries `notesSerial`: the caller checks it against the one on the
+/// timing grade it is answering.
+#[tauri::command]
+pub async fn get_take_grade_with_notes(
+    timeout_ms: Option<u64>,
+    timing_analyzer: State<'_, SharedTimingAnalyzer>,
+) -> Result<Option<crate::score::TakeGrade>, String> {
+    let slot = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?
+        .notes_slot();
+    let deadline = std::time::Instant::now()
+        + std::time::Duration::from_millis(timeout_ms.unwrap_or(4_000).min(8_000));
+    // The wait is on the blocking pool, not on one of the runtime's async
+    // threads, which other commands share.
+    tauri::async_runtime::spawn_blocking(move || loop {
+        {
+            let s = slot.lock().map_err(|e| format!("Lock failed: {e}"))?;
+            if !s.pending {
+                return Ok(s.grade.clone());
+            }
+        }
+        if std::time::Instant::now() >= deadline {
+            return Ok(None);
+        }
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    })
+    .await
+    .map_err(|e| format!("the wait for right notes failed: {e}"))?
 }
 
 /// Roadmap 2.4 — back to free play. Whatever the current attempt had

@@ -654,11 +654,21 @@ export type {
 export async function loadScoreSchedule(
   schedule: ScoreSchedule,
   passBars?: readonly ScorerPassBar[],
+  notes?: readonly ScorerNotePitch[],
 ): Promise<void> {
   // Songs loads a schedule with no bars to judge against; a Session sends its
   // Exercise's, and the scorer's grade then carries `pass` (score/pass.rs).
-  return invoke("load_score_schedule", passBars ? { schedule, passBars } : { schedule });
+  // With the written pitches too, a `noteIdentity` bar is checked from the
+  // Take's own audio after it (`score/notes.rs`).
+  if (!passBars) return invoke("load_score_schedule", { schedule });
+  return invoke(
+    "load_score_schedule",
+    notes && notes.length > 0 ? { schedule, passBars, notes } : { schedule, passBars },
+  );
 }
+
+/** The written pitch of one note a schedule names (`pitch.rs` `ScoreNote`). */
+export type ScorerNotePitch = { id: number; midi: number };
 
 /** Back to free play. Safe to call when nothing is loaded. */
 export async function clearScoreSchedule(): Promise<void> {
@@ -815,6 +825,36 @@ export type ScorerTakeGrade = {
   bpm: number;
   /** Judged against the pass bars the schedule was loaded with; absent without them. */
   pass?: ScorerPassResult;
+  /**
+   * The pitch pass over this Take's audio is still running: `noteIdentity` is
+   * not assessed in `pass` yet, and `getTakeGradeWithNotes` brings the grade
+   * with it in.
+   */
+  notesPending?: boolean;
+  /**
+   * Which pitch pass this grade belongs to: the one coming, on a grade with
+   * `notesPending`; the one that made it, on the grade with right notes.
+   */
+  notesSerial?: number;
+};
+
+/** Whether right notes could be measured on a Take (`score/pass.rs` `NotesStatus`). */
+export type ScorerNotesStatus =
+  | "measured"
+  | "notRun"
+  | "tooFast"
+  | "tooFew"
+  | "notesRing"
+  | "octaveUnsure";
+
+/** The pitch pass over a Take's finished bars (`score/pass.rs` `NotesCheck`). */
+export type ScorerNotesCheck = {
+  status: ScorerNotesStatus;
+  right: number;
+  wrong: number;
+  octave: number;
+  /** Heard, but no pitch came out of it. */
+  unpitched: number;
 };
 
 /** One entry of an Exercise's `passBars`, as `src/paths/format.ts` writes it. */
@@ -842,8 +882,10 @@ export type ScorerPassResult = {
   countsForCleanTempo: boolean;
   windowFromBar?: number;
   checks: ScorerBarCheck[];
-  /** Metrics the bars named that timing cannot measure; not in the verdict. */
+  /** Metrics the bars named that this Take could not measure; not in the verdict. */
   notAssessed: string[];
+  /** What the pitch pass made of the notes, when a bar names `noteIdentity`. */
+  notes?: ScorerNotesCheck;
 };
 
 /**
@@ -854,6 +896,16 @@ export type ScorerPassResult = {
  */
 export async function getTakeGrade(): Promise<ScorerTakeGrade | null> {
   return invoke<ScorerTakeGrade | null>("get_take_grade");
+}
+
+/**
+ * The grade of the Take just closed with right notes in it, once the pitch pass
+ * over its audio is done. Ask after a grade said `notesPending`. Waits up to
+ * `timeoutMs` (the scorer caps it at 8 s); null when it was not done by then,
+ * and the timing grade stands with `noteIdentity` not assessed.
+ */
+export async function getTakeGradeWithNotes(timeoutMs: number): Promise<ScorerTakeGrade | null> {
+  return invoke<ScorerTakeGrade | null>("get_take_grade_with_notes", { timeoutMs });
 }
 
 /**

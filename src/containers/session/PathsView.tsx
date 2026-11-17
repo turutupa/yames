@@ -10,7 +10,7 @@ import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
 import { barLine } from "../../session/coachWords";
-import { isRunnable } from "../../session/packs";
+import { isRunnable, laterWhyKey } from "../../session/packs";
 import {
   cleanTempoOf,
   currentStepOf,
@@ -184,7 +184,7 @@ function PathDetail({
           <DraftNote path={path} />
         </div>
         <div className="session-why">{path.goal}</div>
-        {!runnable && <div className="session-why">{t("session.paths.laterWhy")}</div>}
+        {!runnable && <div className="session-why">{t(laterWhyKey(path.id))}</div>}
       </div>
       <div className="session-slot" data-band="" ref={slot} aria-hidden="true" />
       <div className="session-pathgrid">

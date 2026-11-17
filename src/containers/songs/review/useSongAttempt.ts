@@ -54,6 +54,7 @@ import type { AttemptFacts } from "../../../songs/attempt";
 import { buildSchedule } from "../../../songs/schedule";
 import type { BarRange } from "../../../songs/schedule";
 import type { Finding, ScoreSchedule, SongScore } from "../../../songs/types";
+import { withRightNotes } from "../../../session/takeMeasures";
 
 /**
  * How long to wait for the forced segment close to come back.
@@ -284,13 +285,17 @@ async function finishAttempt(
   await closeOpenSegment().catch(() => undefined);
   await waitForSegment(waiterRef, SEGMENT_CLOSE_DEADLINE_MS);
 
-  const payload = runRef.current;
+  const segment = runRef.current;
   runRef.current = null;
   // No segment, so no grade rode on one: ask for it while the schedule it was
   // graded against is still loaded. A build without the command answers null.
-  const grade = payload
-    ? (payload.takeGrade ?? null)
+  const timed = segment
+    ? (segment.takeGrade ?? null)
     : ((await getTakeGrade().catch(() => null)) ?? null);
+  // A Session Take whose notes are checked: the grade with right notes follows
+  // the timing one off the pitch pass. Songs never asks for it.
+  const grade = await withRightNotes(timed);
+  const payload = segment && grade !== timed ? { ...segment, takeGrade: grade ?? undefined } : segment;
   // An attempt is play-to-stop: the run is cleared here and nowhere else.
   await clearScoreSchedule().catch(() => undefined);
 

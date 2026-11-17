@@ -14,11 +14,28 @@ const PACK_FILES = import.meta.glob("../paths/packs/*.json");
 /**
  * The Paths a Session can run today.
  *
- * Alternate Picking needs nothing but timing. Blues needs the landing grader
- * and Sweep Picking's rungs are nearly all past the trust limit, so both are
- * listed as "later" rather than offered and then not graded.
+ * Alternate Picking and Sweep Picking are graded on timing, notes heard and
+ * extra notes, and on right notes where the pitch pass can believe what it
+ * heard (`src-tauri/src/score/pass.rs` `notes_status`); every graded Exercise of
+ * both passes as a Session Take when played right (`path_exercises.rs`). On
+ * sweeps the notes usually ring into each other, so right notes are mostly
+ * "not checked" there, and the result says so.
+ *
+ * Blues is graded on the notes you land on over the chords, which needs a
+ * grader that does not exist yet, so it is listed as "later" rather than
+ * offered and then not graded. `laterWhyKey` says that on its page.
  */
-export const RUNNABLE_PATH_IDS: readonly string[] = ["alternate-picking"];
+export const RUNNABLE_PATH_IDS: readonly string[] = ["alternate-picking", "sweep-picking"];
+
+/** Why a Path is not runnable yet, as a `session.paths.*` key. */
+const LATER_BECAUSE: Readonly<Record<string, string>> = {
+  "blues-pentatonics": "session.paths.laterWhyLanding",
+};
+
+/** The sentence a "later" Path's page says, naming what it waits for when known. */
+export function laterWhyKey(pathId: string): string {
+  return LATER_BECAUSE[pathId] ?? "session.paths.laterWhy";
+}
 
 /** The Path a player with none yet starts on. */
 export const FIRST_PATH_ID = "alternate-picking";

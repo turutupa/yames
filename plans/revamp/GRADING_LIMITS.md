@@ -38,10 +38,17 @@ new behaviour.
   Session Take): up to 110 ms, every note is matched at 80 to 120 BPM and the
   evenness is unchanged; at 160 BPM one note of 128 is lost from 60 ms. The
   headline score starts to dip at 110 ms; the pass rule does not read it.
-- **Note identity** (not yet wired to a pass bar) is right on damped, clean and
-  high-gain tones to about 200 BPM, and mostly **unheard** on ringing and swept
-  tones, where the next note starts over the last one. `noteIdentity` stays
-  "not assessed" until a real rig says otherwise.
+- **Note identity** is right on damped, clean and high-gain tones to about
+  200 BPM, and mostly **unheard** on ringing and swept tones, where the next
+  note starts over the last one. Since 2026-11-16 a Session Take's pass rule
+  measures `noteIdentity` from these numbers, and only where they hold
+  (`score/pass.rs` `notes_status`): notes at least 75 ms apart, at least 12
+  heard notes with a pitch, a pitch for at least 60% of the heard notes (which
+  is what rules out the ringing and swept rows), and no more than a quarter of
+  them an octave out. Anywhere else it stays "not assessed", with the reason.
+  On the swept tone the tracker also calls octaves (13 of 32 on a two-string
+  sweep at 80 BPM), so sweeps read "not checked" either way. All of it is
+  synthetic until a real rig says otherwise.
 - **`MIN_MEDIAN_CONFIDENCE` (0.15)** and **`MIN_HEARD_RATIO` (0.5)** are not
   approached by any tone here at a sane input level. They are design values
   until a real rig has been through them.

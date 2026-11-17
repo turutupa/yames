@@ -21,7 +21,8 @@
       "even": "regular",
       "heard": "de las notas oídas",
       "extras": "notas de más",
-      "accents": "acentos clavados"
+      "accents": "acentos clavados",
+      "notes": "notas correctas"
     },
     "today": {
       "title": "Hoy",
@@ -52,14 +53,16 @@
         "heard": "Porque oí el {{value}}% de las notas a {{bpm}} BPM. El listón está en el {{bar}}%.",
         "extras": "Por las notas de más a {{bpm}} BPM. El listón está en {{bar}} cada cuatro compases.",
         "accents": "Porque el {{value}}% de los acentos cayó en su sitio a {{bpm}} BPM. El listón está en el {{bar}}%.",
-        "plain": "Porque la última toma a {{bpm}} BPM no llegó al listón."
+        "plain": "Porque la última toma a {{bpm}} BPM no llegó al listón.",
+        "notes": "Porque el {{value}}% de las notas que pude identificar eran las escritas a {{bpm}} BPM. El listón está en el {{bar}}%."
       },
       "easing": {
         "even": "La regularidad fue del {{value}}% a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
         "heard": "Oí el {{value}}% de las notas a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
         "extras": "Hubo notas de más a {{bpm}} BPM, así que esto va a {{next}} BPM.",
         "accents": "El {{value}}% de los acentos cayó en su sitio a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM.",
-        "plain": "Las últimas tomas a {{bpm}} BPM no llegaron al listón, así que esto va a {{next}} BPM."
+        "plain": "Las últimas tomas a {{bpm}} BPM no llegaron al listón, así que esto va a {{next}} BPM.",
+        "notes": "El {{value}}% de las notas que pude identificar eran las escritas a {{bpm}} BPM y el listón está en el {{bar}}%, así que esto va a {{next}} BPM."
       },
       "climb": "Porque llegaste al listón a {{bpm}} BPM. Siguiente peldaño: {{next}}.",
       "climbFast": "Porque la regularidad fue del {{value}}% a {{bpm}} BPM, muy por encima del listón. Esto salta a {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "El listón está en {{bar}}",
       "cleanFirst": "Tempo limpio: {{bpm}} BPM.",
       "cleanMoved": "Tempo limpio: de {{from}} a {{bpm}} BPM.",
-      "unmeasuredNotes": "Solo he comprobado el tiempo. Si eran las notas correctas todavía no se puntúa.",
+      "unmeasuredNotes": "He comprobado el tiempo. No oí las notas con claridad suficiente para decir si eran las correctas, así que esta vez no se ha puntuado.",
       "againSame": "Otra vez, {{bpm}} BPM",
       "moveOn": "Seguir"
     },
@@ -144,7 +147,8 @@
         "even": "La regularidad fue del {{value}}%. Oí {{heard}} de {{expected}} notas. Mismas notas, mismo tempo.",
         "heard": "Oí {{heard}} de {{expected}} notas, y el tiempo no puede aprobar sin ellas.",
         "extras": "{{extras}} notas que no esperaba. Apaga las cuerdas al aire si están sonando.",
-        "accents": "El {{value}}% de los acentos marcados sonó más fuerte que las notas de alrededor."
+        "accents": "El {{value}}% de los acentos marcados sonó más fuerte que las notas de alrededor.",
+        "notes": "El {{value}}% de las notas que pude identificar eran las escritas. Mismas notas, mismo tempo, y atento a los trastes."
       }
     },
     "noCatch": {
@@ -196,6 +200,7 @@
       "mechanicsSub": "Cómo tocan tus manos",
       "later": "Más adelante",
       "laterWhy": "Esta ya la puedes leer. La puntuación que necesita llegará más adelante.",
+      "laterWhyLanding": "Ya puedes leer esta. Se puntúa por las notas en las que caes sobre los acordes, y la app todavía no sabe juzgarlas, así que no entra en tus sesiones.",
       "stepCount": "{{count}} paso",
       "stepCount_many": "{{count}} pasos",
       "stepCount_other": "{{count}} pasos",

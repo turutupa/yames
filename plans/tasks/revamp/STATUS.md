@@ -97,8 +97,12 @@ Shell and parity:
 
 ## Known, not built in this wave
 
-- `noteIdentity` is not measured: pass bars naming it are "not assessed", and
-  the result says so.
+- `noteIdentity` is measured since `mvp-paths` (M2): the onset detector's
+  thread keeps a Session Take's input (`take_audio.rs`), the pitch pass runs on
+  its own thread after the Take, and the pass rule counts right notes per window
+  where the pitch pass can be believed (`score/pass.rs` `notes_status`).
+  Ringing, swept, too fast or too few: "not assessed", and the result says so.
+  Sweep Picking is runnable; Blues waits for the landing grader.
 - No Tools list screen; the tools sit in the rail's Tools group.
 - The planner does not read the chosen Level yet.
 - No component tests drive `useSessionRun`, `SessionView` or `TodayView`

@@ -341,7 +341,7 @@ export function useSessionRun(input: SessionRunInput) {
         });
         await loadSong(transport, null);
         await setSongMix(engineMix(DEFAULT_MIX_SETTING, 0));
-        await loadScoreSchedule(take.schedule, take.exercise.passBars);
+        await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches);
         if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {
         if (prepareId.current !== mine) return;
