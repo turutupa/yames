@@ -502,6 +502,8 @@ async function scenarioSession() {
     check("fluffed first bar: the clean tempo moved up to its tempo",
       cleanTempo(ceilingKey) === fluffed.bpm && fluffed.bpm > good.bpm, `clean tempo ${cleanTempo(ceilingKey)}, take ${fluffed.bpm} BPM`);
     info.fluffedTake = fluffedRow?.facts?.measures;
+    // What Progress must show after a restart: the clean tempo as it now stands.
+    info.session.cleanBpm = cleanTempo(ceilingKey);
 
     await d.clickText(/^Exit$/);
     await d.waitText(/How long have you got/, 15000);
