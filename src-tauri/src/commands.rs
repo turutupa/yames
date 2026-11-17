@@ -1229,6 +1229,18 @@ pub fn reorder_presets(ids: Vec<String>, app_handle: AppHandle) -> Result<(), St
 // Audio Input / Evaluation Commands
 // ---------------------------------------------------------------------------
 
+/// The phone's activity went off the screen (`hidden`) or came back. On
+/// Android the engine pauses its output stream while the app is away and
+/// nothing is playing, and starts it again on return; see
+/// `android_audio::APP_IN_BACKGROUND`. A no-op everywhere else.
+#[tauri::command]
+pub fn set_app_in_background(hidden: bool) {
+    #[cfg(target_os = "android")]
+    crate::android_audio::set_app_in_background(hidden);
+    #[cfg(not(target_os = "android"))]
+    let _ = hidden;
+}
+
 /// Send both device lists again, as the desktop's device poll does when
 /// something is plugged in (`audio-devices-changed`,
 /// `audio-input-devices-changed`). A phone has no poll: its Kotlin side's

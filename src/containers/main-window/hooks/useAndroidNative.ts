@@ -36,7 +36,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { refreshAudioDevices, setPlaying } from "../../../ipc";
+import { refreshAudioDevices, setAppInBackground, setPlaying } from "../../../ipc";
 import { appVisibilityChanged, memoryTrimmed } from "../../../mobile/bandMemory";
 import { dismissTop } from "../../../mobile/backStack";
 import type { WindowInsets } from "../../../mobile/native";
@@ -146,6 +146,9 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn, lightTheme }: O
           // go, and back on screen is when it comes back. The decision is
           // `bandMemory.ts`'s; this is only the wire.
           appVisibilityChanged(event.visible);
+          // And the engine's output stream: paused while away with nothing
+          // playing, so a stopped metronome on Home is not an open stream.
+          setAppInBackground(!event.visible).catch(() => {});
           break;
         case "memory_trim":
           memoryTrimmed(event.level);
