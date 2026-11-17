@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TEST BUILDS ONLY (the `beta` channel). Merged on top of src/main's manifest
+  by app/build.gradle.kts, and only when gradle runs with YAMES_CHANNEL=beta
+  (.github/workflows/beta.yml). The stable APK and the Play bundle never see
+  this file, so they never declare REQUEST_INSTALL_PACKAGES — Play restricts
+  that permission to apps whose core purpose is installing packages.
+
+  It is what lets the app hand the APK it downloaded from the rolling `beta`
+  pre-release to the system installer (yames-mobile's BetaUpdate.kt). The
+  FileProvider that installer reads through is `${applicationId}.fileprovider`,
+  which src/main already declares (the Tauri template's, cache-path ".").
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+</manifest>

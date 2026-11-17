@@ -295,6 +295,42 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the beta_update_download command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-beta-update-download",
+          "markdownDescription": "Enables the beta_update_download command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the beta_update_download command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-beta-update-download",
+          "markdownDescription": "Denies the beta_update_download command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the beta_update_install command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-beta-update-install",
+          "markdownDescription": "Enables the beta_update_install command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the beta_update_install command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-beta-update-install",
+          "markdownDescription": "Denies the beta_update_install command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the beta_update_probe command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-beta-update-probe",
+          "markdownDescription": "Enables the beta_update_probe command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the beta_update_probe command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-beta-update-probe",
+          "markdownDescription": "Denies the beta_update_probe command without any pre-configured scope."
+        },
+        {
           "description": "Enables the keep_awake command without any pre-configured scope.",
           "type": "string",
           "const": "allow-keep-awake",
@@ -379,10 +415,10 @@
           "markdownDescription": "Denies the set_light_system_bars command without any pre-configured scope."
         },
         {
-          "description": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme. All of the commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`",
+          "description": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme, and, in a test build only, updating itself to\nthe newest beta APK (the native side refuses on any build whose manifest does\nnot declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of\nthe commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`\n- `allow-beta-update-probe`\n- `allow-beta-update-download`\n- `allow-beta-update-install`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme. All of the commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`"
+          "markdownDescription": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from, and matching the status and navigation\nbar icons to the app's theme, and, in a test build only, updating itself to\nthe newest beta APK (the native side refuses on any build whose manifest does\nnot declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of\nthe commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`\n- `allow-set-light-system-bars`\n- `allow-beta-update-probe`\n- `allow-beta-update-download`\n- `allow-beta-update-install`"
         }
       ]
     }

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-beta-update-install"
+description = "Enables the beta_update_install command without any pre-configured scope."
+commands.allow = ["beta_update_install"]
+
+[[permission]]
+identifier = "deny-beta-update-install"
+description = "Denies the beta_update_install command without any pre-configured scope."
+commands.deny = ["beta_update_install"]

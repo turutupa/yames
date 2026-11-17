@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-beta-update-probe"
+description = "Enables the beta_update_probe command without any pre-configured scope."
+commands.allow = ["beta_update_probe"]
+
+[[permission]]
+identifier = "deny-beta-update-probe"
+description = "Denies the beta_update_probe command without any pre-configured scope."
+commands.deny = ["beta_update_probe"]

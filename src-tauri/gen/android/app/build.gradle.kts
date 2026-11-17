@@ -59,6 +59,45 @@ val yamesVersionCode: Int = run {
 }
 
 /**
+ * The test channel (`YAMES_CHANNEL=beta`, set only by .github/workflows/beta.yml).
+ *
+ * A beta is `X.Y.Z-beta.N`, where X.Y.Z is the minor after the current stable
+ * and N is the workflow's run number, so every build is a new N. Its
+ * versionCode is the stable code of X.Y.Z times 10000, plus N:
+ *
+ *     1.3.0-beta.57  ->  10300 * 10000 + 57  =  103000057
+ *
+ * That increases with every run (N always does, and X.Y.Z never goes down),
+ * stays far above every stable code there will be for years (1.2.2 is
+ * 10202), and is below Play's 2100000000 ceiling for any major under 21.
+ * The two channels never update into each other anyway: betas are signed
+ * with the test key, stable with the upload key.
+ *
+ * With the variable unset nothing below changes: stable's code, name and
+ * manifest are exactly what they were.
+ */
+val yamesChannel: String = System.getenv("YAMES_CHANNEL")?.trim()?.lowercase().orEmpty()
+val isBetaBuild: Boolean = yamesChannel == "beta"
+
+val yamesBetaVersionName: String? =
+    if (isBetaBuild) System.getenv("YAMES_VERSION")?.trim()?.takeIf { it.isNotEmpty() } ?: yamesVersionName else null
+
+val yamesBetaVersionCode: Int? = if (!isBetaBuild) null else run {
+    val name = yamesBetaVersionName!!
+    val n = Regex("-beta\\.(\\d+)$").find(name)?.groupValues?.get(1)?.toIntOrNull()
+    require(n != null && n in 1..9999) {
+        "YAMES_CHANNEL=beta needs a version X.Y.Z-beta.N with N in 1..9999, got $name"
+    }
+    val parts = name.substringBefore('-').split('.')
+    val base = (parts.getOrNull(0)?.toIntOrNull() ?: 0) * 10000 +
+        (parts.getOrNull(1)?.toIntOrNull() ?: 0) * 100 +
+        (parts.getOrNull(2)?.toIntOrNull() ?: 0)
+    val code = base.toLong() * 10000 + n
+    require(code in 10203..2_100_000_000L) { "beta versionCode $code is out of range" }
+    code.toInt()
+}
+
+/**
  * Release signing, entirely from the environment — nothing about the upload
  * key lives in the repo, not the keystore, not a path to it, not a password.
  * CI decodes `ANDROID_KEYSTORE_BASE64` into a temp file and exports these
@@ -84,8 +123,15 @@ android {
         applicationId = "com.yames.metronome"
         minSdk = 24
         targetSdk = 36
-        versionCode = yamesVersionCode
-        versionName = yamesVersionName
+        versionCode = yamesBetaVersionCode ?: yamesVersionCode
+        versionName = yamesBetaVersionName ?: yamesVersionName
+    }
+    // A test build only: REQUEST_INSTALL_PACKAGES, so it can install the next
+    // beta it downloads. Merged on top of src/main for both build types; a
+    // stable or Play build never reads this file.
+    if (isBetaBuild) {
+        sourceSets.getByName("release").manifest.srcFile("src/beta/AndroidManifest.xml")
+        sourceSets.getByName("debug").manifest.srcFile("src/beta/AndroidManifest.xml")
     }
     signingConfigs {
         if (hasReleaseSigning) {
