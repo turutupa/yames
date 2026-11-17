@@ -11,7 +11,13 @@
       "mechanics": "Technika",
       "theory": "Teoria",
       "jam": "Jam, bez oceny",
-      "warmUp": "Rozgrzewka, bez oceny"
+      "warmUp": "Rozgrzewka, bez oceny",
+      "review": "Powtórka",
+      "placement": "Poziom",
+      "benchmark": "Punkt odniesienia",
+      "test": "Zaliczenie",
+      "finisher": "Z zespołem, bez oceny",
+      "yourTurn": "Twoja kolej, niesprawdzane"
     },
     "step": {
       "jam": "Zagraj z zespołem",
@@ -41,7 +47,8 @@
       "needsInput": "Do oceny potrzebny jest mikrofon albo wejście bezpośrednie.",
       "toolsOffer": "Przyszedłeś po narzędzia? Wszystkie są w Narzędziach.",
       "toolsOfferOpen": "Do mojego ostatniego narzędzia",
-      "toolsOfferAlways": "Zawsze otwieraj tam"
+      "toolsOfferAlways": "Zawsze otwieraj tam",
+      "resting": "Dziś odpoczywają"
     },
     "why": {
       "firstEver": "To twoja pierwsza, więc zaczyna się od {{bpm}} BPM. Chodzi o rytm, nie o szybkość.",
@@ -78,7 +85,26 @@
       "edge": "Od tempa, do którego doszedłeś: {{bpm}} BPM. Idzie o szczebel w górę po każdym podejściu, które przeskoczy poprzeczkę.",
       "edgeCheck": "Żeby sprawdzić twoje czyste tempo. Ostatnio było to {{clean}} BPM.",
       "edgeFirst": "Żeby znaleźć twoje czyste tempo. Zaczyna od {{bpm}} BPM i rośnie, dopóki przeskakujesz poprzeczkę.",
-      "chosen": "Sam to wybrałeś, z: {{step}}."
+      "chosen": "Sam to wybrałeś, z: {{step}}.",
+      "focusTurn": "Dziś prowadzi {{path}}: jego kolej.",
+      "focusTurnAway": "Dziś prowadzi {{path}}: nie grałeś go od {{days}} dni.",
+      "keepWarm": "{{path}}, żeby nie wystygło: grane {{days}} dni temu.",
+      "keepWarmYesterday": "{{path}}, żeby nie wystygło: grane wczoraj.",
+      "keepWarmToday": "{{path}}, żeby nie wystygło: grane już dziś.",
+      "keepWarmNew": "{{path}}: pierwszy blok.",
+      "reviewDue": "Powtórka: zaliczone {{days}} dni temu. Dwa podejścia w twoim czystym tempie, {{bpm}} BPM.",
+      "reviewDueSlipped": "Powtórka, która ostatnio się wymknęła, więc stopień niżej: {{bpm}} BPM.",
+      "reviewDueLeft": "Zostało z {{step}}, który jest ukończony. Powtórka w {{bpm}} BPM.",
+      "parked": "{{exercise}} odpoczywa {{days}} dni po trzech sesjach bez nowego czystego tempa. Wróci na świeżo.",
+      "skippedToday": "{{path}} dziś odpoczywa: grane {{days}} dni temu.",
+      "skippedTodayToday": "{{path}} odpoczywa: grane już dziś.",
+      "skippedTodayYesterday": "{{path}} dziś odpoczywa: grane wczoraj.",
+      "skippedTodayNever": "{{path}} dziś odpoczywa: jeszcze nie grane.",
+      "finisher": "Na koniec: {{exercise}} z zespołem w {{bpm}} BPM, tempie już zaliczonym. Bez oceny.",
+      "placement": "Nowy tutaj? Jedno łatwe podejście w {{bpm}} BPM, potem jedno w {{pass}}. Zalicz oba, a przeskoczysz do następnego kroku.",
+      "testOut": "Zalicz {{step}}: jedno podejście w tempie zaliczenia, {{bpm}} BPM.",
+      "benchmark": "Punkt odniesienia, dzień {{day}}: za każdym razem to samo ćwiczenie w {{bpm}} BPM, do porównania.",
+      "yourTurn": "Twoja kolej: {{exercise}}. Jeszcze niesprawdzane, więc oceniasz sam."
     },
     "bar": {
       "summary": "Poprzeczka: {{even}}% równości i {{heard}}% usłyszanych nut, przy {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Czyste tempo: z {{from}} na {{bpm}} BPM.",
       "unmeasuredNotes": "Sprawdziłem rytm. Nie słyszałem nut dość wyraźnie, żeby powiedzieć, czy były właściwe, więc tym razem nie było to oceniane.",
       "againSame": "Jeszcze raz, {{bpm}} BPM",
-      "moveOn": "Idź dalej"
+      "moveOn": "Idź dalej",
+      "fairAsk": "Czy ta ocena była uczciwa?",
+      "fairYes": "Tak",
+      "fairNo": "Nie",
+      "fairThanks": "Dzięki. Zapisano z twoimi danymi ćwiczeń."
     },
     "edge": {
       "kick": "Znajdź mój limit",
@@ -165,7 +195,9 @@
       "warmUpKick": "Rozgrzewka · bez oceny",
       "jamKick": "Jam · bez oceny",
       "drillKick": "Podkręć tempo · bez oceny",
-      "movesOn": "To przechodzi dalej samo."
+      "movesOn": "To przechodzi dalej samo.",
+      "finisherKick": "Finał · bez oceny",
+      "yourTurnKick": "Twoja kolej · niesprawdzane"
     },
     "pedal": {
       "title": "Pedał nożny",
@@ -236,7 +268,15 @@
       "playedClean_other": "{{count}} podejścia. Czyste tempo: {{bpm}} BPM.",
       "running": "W toku",
       "whereYouAre": "Gdzie jesteś",
-      "openStep": "Przejdź do kroku {{n}}"
+      "openStep": "Przejdź do kroku {{n}}",
+      "subscribe": "Subskrybuj",
+      "unsubscribe": "Anuluj subskrypcję",
+      "subscribed": "Subskrybowane",
+      "subscribeHow": "Dziś planuje z każdej ścieżki, którą subskrybujesz, do {{cap}}.",
+      "subscribeCap": "W tym teście możesz śledzić do {{cap}} ścieżek. Najpierw anuluj jedną; jej historia zostanie.",
+      "unsubscribedNote": "Nie ma w dzisiejszym planie. Historia zostaje; subskrybuj ponownie w każdej chwili.",
+      "testOut": "Zalicz krok",
+      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia. Zalicz około trzech z czterech i krok jest ukończony."
     },
     "progress": {
       "title": "Postępy",
@@ -270,6 +310,12 @@
     },
     "runway": {
       "label": "Kolejne nuty zbliżające się do linii"
+    },
+    "export": {
+      "button": "Eksportuj moje dane ćwiczeń",
+      "note": "Plik JSON z twoimi podejściami, czystymi tempami i powodami planisty. Dołącz go do zgłoszenia, jeśli chcesz; nic nie jest wysyłane.",
+      "done": "Zapisano w {{path}}.",
+      "failed": "Nie udało się zapisać pliku."
     }
   }
 }

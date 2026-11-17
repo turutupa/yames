@@ -17,8 +17,10 @@ import {
   isExercisePassed,
   isGradable,
   isStepPassed,
+  isSubscribed,
   takesOf,
 } from "../../session/progress";
+import { SUBSCRIPTION_CAP } from "../../session/rotation";
 import { levelsOf } from "../../session/variants";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
@@ -87,7 +89,7 @@ function PathList({
           <span className="session-why">{sub}</span>
         </div>
         {runnable.map((path) => {
-          const started = progress.states.some((s) => s.pathId === path.id);
+          const started = isSubscribed(progress, path.id);
           const current = currentStepOf(progress, path);
           return (
             <button
@@ -172,6 +174,9 @@ function PathDetail({
   const runnable = isRunnable(path.id);
   const gradableNow = current.exercises.filter(isGradable);
   const doneNow = gradableNow.filter((e) => isExercisePassed(progress, path.id, e)).length;
+  const subscribed = isSubscribed(progress, path.id);
+  const started = progress.states.some((s) => s.pathId === path.id);
+  const [refused, setRefused] = useState(false);
   return (
     <div className="session-page" data-testid="path-detail" data-neck3d={neck3d}>
       <div className="session-rise">
@@ -229,6 +234,46 @@ function PathDetail({
                 {gradableNow.length > 0 &&
                   ` · ${t("session.paths.exercisesPassed", { done: doneNow, count: gradableNow.length })}`}
               </div>
+            </div>
+          )}
+          {runnable && (
+            <div
+              className="session-glass session-card session-rise session-col"
+              style={{ gap: 6 }}
+              data-testid="path-subscription"
+            >
+              <div className="session-subscribe">
+                {subscribed && (
+                  <span className="session-tag" data-met="">
+                    {t("session.paths.subscribed")}
+                  </span>
+                )}
+                <button
+                  className="session-secondary"
+                  data-testid={subscribed ? "path-unsubscribe" : "path-subscribe"}
+                  onClick={() => {
+                    if (subscribed) {
+                      setRefused(false);
+                      actions.unsubscribe(path);
+                    } else {
+                      setRefused(actions.subscribe(path) === "cap");
+                    }
+                  }}
+                >
+                  {t(subscribed ? "session.paths.unsubscribe" : "session.paths.subscribe")}
+                </button>
+              </div>
+              <div className="session-why">
+                {t("session.paths.subscribeHow", { cap: SUBSCRIPTION_CAP })}
+              </div>
+              {!subscribed && started && (
+                <div className="session-why">{t("session.paths.unsubscribedNote")}</div>
+              )}
+              {refused && (
+                <div className="session-why session-bad" role="alert" data-testid="path-subscribe-cap">
+                  {t("session.paths.subscribeCap", { cap: SUBSCRIPTION_CAP })}
+                </div>
+              )}
             </div>
           )}
           {levels.length > 0 && (
@@ -435,6 +480,18 @@ function StepDetail({
           )}
           {isCurrent && isRunnable(path.id) && (
             <div className="session-quiet">{t("session.paths.yourStep")}</div>
+          )}
+          {isRunnable(path.id) && step.exercises.some(isGradable) && (
+            <div className="session-glass session-card session-rise session-col" style={{ gap: 6 }}>
+              <button
+                className="session-secondary"
+                onClick={() => actions.testOut(path, step)}
+                data-testid="step-test-out"
+              >
+                {t("session.paths.testOut")}
+              </button>
+              <div className="session-why">{t("session.paths.testOutHow")}</div>
+            </div>
           )}
         </div>
         <div className="session-col">

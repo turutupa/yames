@@ -23,22 +23,51 @@ export function rise(i: number): CSSProperties {
   return { "--i": i } as CSSProperties;
 }
 
-function StepTag({ step }: { step: PlanStep }) {
+/** The roles that have a tag of their own; the rest read as Mechanics. */
+const ROLE_TAG: Partial<Record<string, string>> = {
+  review: "session.kind.review",
+  placement: "session.kind.placement",
+  benchmark: "session.kind.benchmark",
+  test: "session.kind.test",
+};
+
+export function StepTag({ step }: { step: PlanStep }) {
   const { t } = useTranslation();
   if (step.kind === "exercise") {
+    const own = ROLE_TAG[step.role];
     return (
-      <span className="session-tag" data-kind="mechanics">
-        {t("session.kind.mechanics")}
+      <span className="session-tag" data-kind="mechanics" data-role={step.role}>
+        {t(own ?? "session.kind.mechanics")}
       </span>
     );
   }
-  if (step.kind === "jam") return <span className="session-tag">{t("session.kind.jam")}</span>;
+  if (step.kind === "jam") {
+    return (
+      <span className="session-tag">
+        {t(step.exerciseId ? "session.kind.finisher" : "session.kind.jam")}
+      </span>
+    );
+  }
+  if (step.kind === "metronome" && step.why.code === "yourTurn") {
+    return <span className="session-tag">{t("session.kind.yourTurn")}</span>;
+  }
   return <span className="session-tag">{t("session.kind.warmUp")}</span>;
+}
+
+/** Whose turn it is, above why this tempo. Only an Exercise step has one. */
+export function ContextLine({ step }: { step: PlanStep | null }) {
+  const { t } = useTranslation();
+  if (!step || step.kind !== "exercise" || !step.context) return null;
+  return (
+    <div className="session-why session-context" data-code={step.context.code}>
+      <b>{lineText(t, reasonLine(step.context))}</b>
+    </div>
+  );
 }
 
 /** A jam step has no title of its own; a warm-up names its Exercise. */
 export function stepTitle(step: PlanStep, t: (key: string) => string): string {
-  if (step.kind === "jam") return t("session.step.jam");
+  if (step.kind === "jam") return step.title ? `${t("session.step.jam")} · ${step.title}` : t("session.step.jam");
   if (step.kind === "drill") return t("session.step.drill");
   if (step.kind === "exercise" && step.role === "edge") return `${t("session.edge.kick")} · ${step.title}`;
   return step.title;
@@ -162,12 +191,23 @@ export function TodayView({
                       <span>{stepTitle(step, t)}</span>
                       <StepTag step={step} />
                     </div>
+                    <ContextLine step={step} />
                     <div className="session-why">{lineText(t, why)}</div>
                   </div>
                 </li>
               );
             })}
           </ol>
+          {(plan.skipped ?? []).length > 0 && (
+            <div className="session-footnote session-skipped" data-testid="today-skipped">
+              <span className="session-kick">{t("session.today.resting")}</span>
+              {(plan.skipped ?? []).map((skip) => (
+                <span key={skip.pathId} className="session-why">
+                  {lineText(t, reasonLine(skip.why))}
+                </span>
+              ))}
+            </div>
+          )}
           {plan.steps.length === 0 && (
             <div className="session-why">{t("session.today.nothing")}</div>
           )}

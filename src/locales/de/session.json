@@ -11,7 +11,13 @@
       "mechanics": "Technik",
       "theory": "Theorie",
       "jam": "Jam, ohne Wertung",
-      "warmUp": "Aufwärmen, ohne Wertung"
+      "warmUp": "Aufwärmen, ohne Wertung",
+      "review": "Wiederholung",
+      "placement": "Einstufung",
+      "benchmark": "Benchmark",
+      "test": "Austesten",
+      "finisher": "Mit der Band, nicht bewertet",
+      "yourTurn": "Du bist dran, nicht geprüft"
     },
     "step": {
       "jam": "Mit der Band spielen",
@@ -41,7 +47,8 @@
       "needsInput": "Für die Bewertung braucht es ein Mikrofon oder einen direkten Eingang.",
       "toolsOffer": "Wegen der Werkzeuge hier? Die sind alle unter Werkzeuge.",
       "toolsOfferOpen": "Zu meinem letzten Werkzeug",
-      "toolsOfferAlways": "Immer dort öffnen"
+      "toolsOfferAlways": "Immer dort öffnen",
+      "resting": "Heute Pause"
     },
     "why": {
       "firstEver": "Deine erste, deshalb geht es bei {{bpm}} BPM los. Hier geht es ums Timing, nicht ums Tempo.",
@@ -78,7 +85,26 @@
       "edge": "Ab dem Tempo, das du erreicht hast: {{bpm}} BPM. Nach jedem Take, der die Messlatte erreicht, geht es eine Stufe hoch.",
       "edgeCheck": "Um dein sauberes Tempo zu prüfen. Letztes Mal waren es {{clean}} BPM.",
       "edgeFirst": "Um dein sauberes Tempo zu finden. Es beginnt bei {{bpm}} BPM und steigt, solange du die Messlatte erreichst.",
-      "chosen": "Die hast du ausgesucht, aus {{step}}."
+      "chosen": "Die hast du ausgesucht, aus {{step}}.",
+      "focusTurn": "{{path}} führt heute: Es ist an der Reihe.",
+      "focusTurnAway": "{{path}} führt heute: Du hast es seit {{days}} Tagen nicht gespielt.",
+      "keepWarm": "{{path}}, warm gehalten: zuletzt vor {{days}} Tagen gespielt.",
+      "keepWarmYesterday": "{{path}}, warm gehalten: zuletzt gestern gespielt.",
+      "keepWarmToday": "{{path}}, warm gehalten: heute schon gespielt.",
+      "keepWarmNew": "{{path}}: der erste Block.",
+      "reviewDue": "Eine Wiederholung: vor {{days}} Tagen bestanden. Zwei Takes in deinem sauberen Tempo, {{bpm}} BPM.",
+      "reviewDueSlipped": "Eine Wiederholung, die letztes Mal gerutscht ist, deshalb eine Stufe tiefer: {{bpm}} BPM.",
+      "reviewDueLeft": "Übrig aus {{step}}, das erledigt ist. Eine Wiederholung bei {{bpm}} BPM.",
+      "parked": "{{exercise}} pausiert {{days}} Tage nach drei Sessions ohne neues sauberes Tempo. Es kommt frisch zurück.",
+      "skippedToday": "{{path}} pausiert heute: vor {{days}} Tagen gespielt.",
+      "skippedTodayToday": "{{path}} pausiert: heute schon gespielt.",
+      "skippedTodayYesterday": "{{path}} pausiert heute: gestern gespielt.",
+      "skippedTodayNever": "{{path}} pausiert heute: noch nicht gespielt.",
+      "finisher": "Zum Schluss: {{exercise}} mit der Band bei {{bpm}} BPM, einem Tempo, das du schon bestanden hast. Nicht bewertet.",
+      "placement": "Neu hier? Ein leichter Take bei {{bpm}} BPM, dann einer bei {{pass}}. Besteh beide und du springst zum nächsten Schritt.",
+      "testOut": "Teste dich aus {{step}} heraus: ein Take im Bestehenstempo, {{bpm}} BPM.",
+      "benchmark": "Benchmark, Tag {{day}}: jedes Mal dieselbe Übung bei {{bpm}} BPM, zum Vergleichen.",
+      "yourTurn": "Du bist dran: {{exercise}}. Noch nicht geprüft, also beurteilst du es selbst."
     },
     "bar": {
       "summary": "Die Messlatte: {{even}} % gleichmäßig und {{heard}} % der Töne gehört, bei {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Sauberes Tempo: von {{from}} auf {{bpm}} BPM.",
       "unmeasuredNotes": "Ich habe das Timing geprüft. Die Töne waren nicht klar genug zu hören, um zu sagen, ob es die richtigen waren, deshalb wurde das diesmal nicht bewertet.",
       "againSame": "Noch mal, {{bpm}} BPM",
-      "moveOn": "Weiter"
+      "moveOn": "Weiter",
+      "fairAsk": "War diese Bewertung fair?",
+      "fairYes": "Ja",
+      "fairNo": "Nein",
+      "fairThanks": "Danke. Das wird bei deinen Übungsdaten gespeichert."
     },
     "edge": {
       "kick": "Mein Limit finden",
@@ -165,7 +195,9 @@
       "warmUpKick": "Aufwärmen · ohne Wertung",
       "jamKick": "Jam · ohne Wertung",
       "drillKick": "Tempo steigern · ohne Wertung",
-      "movesOn": "Das geht von selbst weiter."
+      "movesOn": "Das geht von selbst weiter.",
+      "finisherKick": "Abschluss · nicht bewertet",
+      "yourTurnKick": "Du bist dran · nicht geprüft"
     },
     "pedal": {
       "title": "Fußpedal",
@@ -222,7 +254,15 @@
       "playedClean_other": "{{count}} Takes. Sauberes Tempo {{bpm}} BPM.",
       "running": "Läuft",
       "whereYouAre": "Wo du stehst",
-      "openStep": "Zu Schritt {{n}}"
+      "openStep": "Zu Schritt {{n}}",
+      "subscribe": "Abonnieren",
+      "unsubscribe": "Abo beenden",
+      "subscribed": "Abonniert",
+      "subscribeHow": "Heute plant aus jedem Pfad, den du abonnierst, bis zu {{cap}}.",
+      "subscribeCap": "In diesem Test kannst du bis zu {{cap}} Pfaden folgen. Beende erst ein Abo; sein Verlauf bleibt erhalten.",
+      "unsubscribedNote": "Nicht im heutigen Plan. Dein Verlauf bleibt; du kannst jederzeit wieder abonnieren.",
+      "testOut": "Austesten",
+      "testOutHow": "Ein Take im Bestehenstempo jeder Übung. Besteh etwa drei von vier, und der Schritt ist erledigt."
     },
     "progress": {
       "title": "Fortschritt",
@@ -256,6 +296,12 @@
     },
     "runway": {
       "label": "Die nächsten Noten, die auf die Linie zulaufen"
+    },
+    "export": {
+      "button": "Meine Übungsdaten exportieren",
+      "note": "Eine JSON-Datei mit deinen Takes, sauberen Tempi und den Gründen des Planers. Häng sie an ein Feedback-Issue, wenn du magst; nichts wird gesendet.",
+      "done": "Gespeichert unter {{path}}.",
+      "failed": "Die Datei konnte nicht gespeichert werden."
     }
   }
 }

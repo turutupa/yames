@@ -11,7 +11,13 @@
       "mechanics": "Mechanics",
       "theory": "Theory",
       "jam": "Jam, not graded",
-      "warmUp": "Warm-up, not graded"
+      "warmUp": "Warm-up, not graded",
+      "review": "Review",
+      "placement": "Placement",
+      "benchmark": "Benchmark",
+      "test": "Test out",
+      "finisher": "With the band, not graded",
+      "yourTurn": "Your turn, not checked"
     },
     "step": {
       "jam": "Play over the band",
@@ -41,7 +47,8 @@
       "needsInput": "Grading needs a microphone or direct input.",
       "toolsOffer": "Here for the tools? They're all under Tools.",
       "toolsOfferOpen": "Go to my last tool",
-      "toolsOfferAlways": "Always open there"
+      "toolsOfferAlways": "Always open there",
+      "resting": "Resting today"
     },
     "why": {
       "firstEver": "Your first one, so it starts at {{bpm}} BPM. This is about time, not speed.",
@@ -78,7 +85,26 @@
       "edge": "From the tempo you reached, {{bpm}} BPM. It goes up a step after every Take that meets the bar.",
       "edgeCheck": "To check your clean tempo. Last time it was {{clean}} BPM.",
       "edgeFirst": "To find your clean tempo. It starts at {{bpm}} BPM and goes up while you meet the bar.",
-      "chosen": "You picked this one, from {{step}}."
+      "chosen": "You picked this one, from {{step}}.",
+      "focusTurn": "{{path}} leads today: its turn.",
+      "focusTurnAway": "{{path}} leads today: you haven't played it for {{days}} days.",
+      "keepWarm": "{{path}}, kept warm: last played {{days}} days ago.",
+      "keepWarmYesterday": "{{path}}, kept warm: last played yesterday.",
+      "keepWarmToday": "{{path}}, kept warm: played earlier today.",
+      "keepWarmNew": "{{path}}: its first block.",
+      "reviewDue": "A review: passed {{days}} days ago. Two Takes at your clean tempo, {{bpm}} BPM.",
+      "reviewDueSlipped": "A review that slipped last time, so it's one step lower: {{bpm}} BPM.",
+      "reviewDueLeft": "Left over from {{step}}, which is done. A review at {{bpm}} BPM.",
+      "parked": "{{exercise}} is parked for {{days}} days after three Sessions without a new clean tempo. It comes back fresh.",
+      "skippedToday": "{{path}} rests today: played {{days}} days ago.",
+      "skippedTodayToday": "{{path}} rests: played earlier today.",
+      "skippedTodayYesterday": "{{path}} rests today: played yesterday.",
+      "skippedTodayNever": "{{path}} rests today: not played yet.",
+      "finisher": "To finish: {{exercise}} with the band at {{bpm}} BPM, a tempo you've passed. Not graded.",
+      "placement": "New here? One easy Take at {{bpm}} BPM, then one at {{pass}}. Pass both and you skip ahead to the next Step.",
+      "testOut": "Test out of {{step}}: one Take at the pass tempo, {{bpm}} BPM.",
+      "benchmark": "Benchmark, day {{day}}: the same Exercise at {{bpm}} BPM each time, to compare.",
+      "yourTurn": "Your turn: {{exercise}}. Not checked yet, so you judge it."
     },
     "bar": {
       "summary": "The bar: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Clean tempo: {{from}} to {{bpm}} BPM.",
       "unmeasuredNotes": "I checked the timing. I couldn't hear the notes clearly enough to say whether they were the right ones, so that wasn't graded this time.",
       "againSame": "Again, {{bpm}} BPM",
-      "moveOn": "Move on"
+      "moveOn": "Move on",
+      "fairAsk": "Was this grade fair?",
+      "fairYes": "Yes",
+      "fairNo": "No",
+      "fairThanks": "Thanks. It's kept with your practice data."
     },
     "edge": {
       "kick": "Find my edge",
@@ -165,7 +195,9 @@
       "warmUpKick": "Warm-up · not graded",
       "jamKick": "Jam · not graded",
       "drillKick": "Ramp up · not graded",
-      "movesOn": "This moves on by itself."
+      "movesOn": "This moves on by itself.",
+      "finisherKick": "Finisher · not graded",
+      "yourTurnKick": "Your turn · not checked"
     },
     "pedal": {
       "title": "Foot pedal",
@@ -222,7 +254,15 @@
       "playedClean_other": "{{count}} takes. Clean tempo {{bpm}} BPM.",
       "running": "Running",
       "whereYouAre": "Where you are",
-      "openStep": "Go to step {{n}}"
+      "openStep": "Go to step {{n}}",
+      "subscribe": "Subscribe",
+      "unsubscribe": "Unsubscribe",
+      "subscribed": "Subscribed",
+      "subscribeHow": "Today plans from every Path you subscribe to, up to {{cap}}.",
+      "subscribeCap": "You can follow up to {{cap}} Paths in this test. Unsubscribe from one first; its history stays.",
+      "unsubscribedNote": "Not in Today's plan. Your history is kept; subscribe again any time.",
+      "testOut": "Test out",
+      "testOutHow": "One Take at each Exercise's pass tempo. Pass about three of four and the Step is done."
     },
     "progress": {
       "title": "Progress",
@@ -256,6 +296,12 @@
     },
     "runway": {
       "label": "The next notes, arriving at the line"
+    },
+    "export": {
+      "button": "Export my practice data",
+      "note": "A JSON file with your Takes, clean tempos and the planner's reasons. Attach it to a feedback issue if you like; nothing is sent.",
+      "done": "Saved to {{path}}.",
+      "failed": "Couldn't save the file."
     }
   }
 }

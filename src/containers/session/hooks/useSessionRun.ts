@@ -63,11 +63,14 @@ import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
 import type { TakeMeasures } from "../../../session/takeMeasures";
 import { PLAN_MINUTES, edgeStep, planSession } from "../../../session/planner";
+import { SUBSCRIPTION_CAP } from "../../../session/rotation";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../../session/planner";
 import {
   NO_PROGRESS,
   cleanTempoOf,
   factsOf,
+  isGradable,
+  isSubscribed,
   lastCaughtTake,
   nextStepAfterPass,
   takesOf,
@@ -89,9 +92,13 @@ import type { TakePlan } from "../../../session/take";
 /** How many Takes are read back for planning. More than any plan looks at. */
 const TAKES_TO_READ = 500;
 const MINUTES_KEY = "session.minutes";
+/** Paths the player unsubscribed from; their rows and Takes stay (`PlayerProgress.unsubscribed`). */
+const UNSUBSCRIBED_KEY = "session.unsubscribed";
 /** Neck or runway on the Take screen (plans/tasks/mvp/RUNWAY.md). A tester's own A/B switch. */
 const PRACTICE_VIEW_KEY = "practiceView";
 const TICK_MS = 1000;
+/** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
+const TEST_OUT_MINUTES = 2;
 /** How many recent timing deviations the running screen's strip shows. */
 const STRIP_NOTES = 24;
 
@@ -140,7 +147,7 @@ function exerciseOf(
   step: PlanStep | null,
   paths: readonly PathDoc[],
 ): { path: PathDoc; step: Step; exercise: Exercise } | null {
-  if (!step || (step.kind !== "exercise" && step.kind !== "metronome")) return null;
+  if (!step || step.kind === "drill") return null;
   if (!step.pathId || !step.exerciseId) return null;
   const path = paths.find((p) => p.id === step.pathId);
   if (!path) return null;
@@ -148,15 +155,23 @@ function exerciseOf(
   return found ? { path, ...found } : null;
 }
 
-/** The player's Paths: the ones started, or the one everybody starts on. */
+/**
+ * The player's Paths, in their order: the ones subscribed (started, and not
+ * unsubscribed since), or, for a player who has started none, the one
+ * everybody starts on.
+ */
 export function playerPaths(paths: readonly PathDoc[], progress: PlayerProgress): PathDoc[] {
   const mine = progress.states
+    .filter((state) => isSubscribed(progress, state.pathId))
     .map((state) => paths.find((p) => p.id === state.pathId))
     .filter((path): path is PathDoc => !!path && isRunnable(path.id));
-  if (mine.length > 0) return mine;
+  if (mine.length > 0 || progress.states.length > 0) return mine;
   const first = paths.find((p) => p.id === FIRST_PATH_ID);
   return first ? [first] : [];
 }
+
+/** Why a subscribe did not happen. */
+export type SubscribeRefusal = "cap" | null;
 
 /** The number a result is about, on the scale it is written in. */
 function headlineFacts(grade: TakeGrade): Pick<
@@ -243,12 +258,18 @@ export function useSessionRun(input: SessionRunInput) {
   // --- what the store knows ------------------------------------------------
   const loadedRef = useRef(false);
   const refresh = useCallback(async () => {
-    const [states, takes, ceilings] = await Promise.all([
+    const [states, takes, ceilings, unsubscribed] = await Promise.all([
       listPathStates().catch(() => [] as PathStateRow[]),
       listPathTakes(TAKES_TO_READ).catch(() => [] as PathTakeRow[]),
       listExerciseCeilings().catch(() => []),
+      storeLoad<string[]>(UNSUBSCRIBED_KEY).catch(() => undefined),
     ]);
-    setProgress({ states, takes, ceilings });
+    setProgress({
+      states,
+      takes,
+      ceilings,
+      unsubscribed: Array.isArray(unsubscribed) ? unsubscribed.filter((id) => typeof id === "string") : [],
+    });
   }, []);
 
   const onLearningSide =
@@ -292,7 +313,8 @@ export function useSessionRun(input: SessionRunInput) {
   const take: TakePlan | null = useMemo(() => {
     if (!current) return null;
     // A metronome step shows its Exercise at its own tempo, and is not a Take.
-    const bpm = run.bpm || (step?.kind === "metronome" ? step.bpm : 0);
+    const bpm =
+      run.bpm || (step?.kind === "metronome" ? step.bpm : step?.kind === "jam" ? (step.bpm ?? 0) : 0);
     const variantSeed = step?.kind === "exercise" ? step.variantSeed : null;
     return bpm > 0 ? buildTake(current.path, current.exercise, bpm, variantSeed) : null;
     // `run.bpm`, the Exercise and its variant are the whole of what a Take is built from.
@@ -384,8 +406,10 @@ export function useSessionRun(input: SessionRunInput) {
         await setSubdivision(step.subdivision as Subdivision).catch(() => {});
         await setPlaying(true).catch(() => {});
       } else if (step.kind === "jam") {
-        const jam = jams[0];
-        if (!jam) return;
+        const first = jams[0];
+        if (!first) return;
+        // The finisher plays at a tempo already passed on its Exercise.
+        const jam = step.bpm ? { ...first, bpm: step.bpm } : first;
         pushJam(jam, compileJam(jam, { formBar: 0, lineup }));
         await setPlaying(true).catch(() => {});
       } else if (step.kind === "drill") {
@@ -518,7 +542,22 @@ export function useSessionRun(input: SessionRunInput) {
     const metric = grade.headline?.metric;
     const cleanBefore = cleanTempoOf(progress, path.id, exercise.id);
     const now = Date.now();
-    const facts: TakeFacts = { measures, verdict: grade.verdict, ...headlineFacts(grade) };
+    const raised =
+      grade.cleanBpm !== null && (cleanBefore === null || grade.cleanBpm > cleanBefore);
+    const facts: TakeFacts = {
+      measures,
+      verdict: grade.verdict,
+      ...headlineFacts(grade),
+      // What the planner reads back: which Session, which role, why, and
+      // whether this raised the clean tempo (parking counts that).
+      session: state.startedAt,
+      role: stepNow.role,
+      reason: stepNow.why.code,
+      newClean: raised,
+      ...(stepNow.benchmark
+        ? { benchmark: { day: stepNow.benchmark.day, exerciseId: exercise.id, bpm } }
+        : {}),
+    };
     const row: PathTakeRow = {
       id: newAttemptId(),
       pathId: path.id,
@@ -545,16 +584,14 @@ export function useSessionRun(input: SessionRunInput) {
       grade,
       previousValue: previousValueOf(earlier, metric),
       cleanBefore,
+      takeId: row.id,
     };
     dispatch({ type: "takeResult", outcome, now });
 
     // What the Session goes on to read: kept in memory at once, in the store as
     // it will be. A save that fails loses this one row, and is not the player's
     // problem in the middle of a Session.
-    const cleanBpm =
-      grade.cleanBpm !== null && (cleanBefore === null || grade.cleanBpm > cleanBefore)
-        ? grade.cleanBpm
-        : null;
+    const cleanBpm = raised ? grade.cleanBpm : null;
     const nextProgress: PlayerProgress = {
       ...progress,
       takes: [row, ...progress.takes],
@@ -566,7 +603,18 @@ export function useSessionRun(input: SessionRunInput) {
               { exerciseKey: `${path.id}/${exercise.id}`, cleanBpm, lastPracticed: now },
             ],
     };
-    const moved = nextStepAfterPass(nextProgress, path);
+    // Placement that passed at the pass tempo skips the Step it tried; anything
+    // else moves on when about three of four in the Step are passed.
+    const placedPast =
+      stepNow.role === "placement" && grade.passesExercise
+        ? path.steps[path.steps.findIndex((s) => s.id === pathStep.id) + 1] ?? null
+        : null;
+    const currentAt = (id: string | undefined) => path.steps.findIndex((s) => s.id === id);
+    const storedStep = progress.states.find((s) => s.pathId === path.id)?.currentStepId ?? path.steps[0]?.id;
+    const moved =
+      placedPast && currentAt(placedPast.id) > currentAt(storedStep)
+        ? placedPast
+        : nextStepAfterPass(nextProgress, path);
     const state0 = progress.states.find((s) => s.pathId === path.id);
     const nextState: PathStateRow | null = moved
       ? {
@@ -652,10 +700,13 @@ export function useSessionRun(input: SessionRunInput) {
       cardWasOpen.current = coach.cardOpen;
       coachWasActive.current = coach.active;
       const now = Date.now();
-      // A Path is started the first time it is played, not the first time it is
-      // shown, so looking at Today writes nothing.
+      // A Path is started (subscribed) the first time it is played, not the
+      // first time it is shown, so looking at Today writes nothing. Past the cap
+      // it is played without subscribing; its Takes are kept all the same.
+      let subscribed = progress.states.filter((s) => isSubscribed(progress, s.pathId)).length;
       for (const pathId of new Set(next.steps.flatMap((s) => ("pathId" in s && s.pathId ? [s.pathId] : [])))) {
-        if (!progress.states.some((s) => s.pathId === pathId)) {
+        if (!progress.states.some((s) => s.pathId === pathId) && subscribed < SUBSCRIPTION_CAP) {
+          subscribed += 1;
           const row: PathStateRow = { pathId, startedAt: now, updatedAt: now };
           setProgress((p) => ({ ...p, states: [...p.states, row] }));
           void savePathState(row).catch(() => {});
@@ -665,7 +716,7 @@ export function useSessionRun(input: SessionRunInput) {
       setView("session");
       if (!coach.active) void coach.startSession().catch(() => {});
     },
-    [progress.states, setView],
+    [progress, setView],
   );
 
   const startToday = useCallback(() => begin(plan), [begin, plan]);
@@ -739,6 +790,81 @@ export function useSessionRun(input: SessionRunInput) {
       void savePathState(row).catch(() => {});
     },
     [progress.states],
+  );
+
+  /**
+   * Subscribe to a Path: start it (its `path_state` row), or take it off the
+   * unsubscribed list. Refused at the cap, and says so.
+   */
+  const subscribe = useCallback(
+    (path: PathDoc): SubscribeRefusal => {
+      if (isSubscribed(progress, path.id)) return null;
+      const count = progress.states.filter((s) => isSubscribed(progress, s.pathId)).length;
+      if (count >= SUBSCRIPTION_CAP) return "cap";
+      const now = Date.now();
+      const unsubscribed = (progress.unsubscribed ?? []).filter((id) => id !== path.id);
+      const has = progress.states.some((s) => s.pathId === path.id);
+      const row: PathStateRow = { pathId: path.id, startedAt: now, updatedAt: now };
+      setProgress((p) => ({
+        ...p,
+        unsubscribed,
+        states: has ? p.states : [...p.states, row],
+      }));
+      if (!has) void savePathState(row).catch(() => {});
+      void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
+      return null;
+    },
+    [progress],
+  );
+
+  /** Unsubscribe: Today stops planning it. Its row and every Take stay. */
+  const unsubscribe = useCallback(
+    (path: PathDoc) => {
+      const unsubscribed = [...new Set([...(progress.unsubscribed ?? []), path.id])];
+      setProgress((p) => ({ ...p, unsubscribed }));
+      void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
+    },
+    [progress.unsubscribed],
+  );
+
+  /** Test out of a Step: one Take at each graded Exercise's pass tempo. */
+  const testOut = useCallback(
+    (path: PathDoc, pathStep: Step) => {
+      const steps: PlanStep[] = pathStep.exercises.filter(isGradable).map((exercise, i) => {
+        const bpm = exercise.tempo.passAtBpm ?? exercise.tempo.rungs[0]?.bpm ?? 60;
+        return {
+          kind: "exercise",
+          id: `test-${i}`,
+          role: "test",
+          pathId: path.id,
+          stepId: pathStep.id,
+          exerciseId: exercise.id,
+          title: exercise.title,
+          bpm,
+          minutes: TEST_OUT_MINUTES,
+          variantSeed: null,
+          why: { code: "testOut", values: { step: pathStep.title, bpm } },
+        };
+      });
+      if (steps.length === 0) return;
+      const total = steps.length * TEST_OUT_MINUTES;
+      const minutes = PLAN_MINUTES.find((m) => m >= total) ?? 20;
+      begin({ minutes, mood: "returning", daysAway: null, steps });
+    },
+    [begin],
+  );
+
+  /** "Was this grade fair?": kept in the Take's facts, and in the export. */
+  const answerFair = useCallback(
+    (takeId: string, fair: "yes" | "no") => {
+      const row = progress.takes.find((t) => t.id === takeId);
+      if (!row) return;
+      const next: PathTakeRow = { ...row, facts: { ...factsOf(row), fair } };
+      setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? next : t)) }));
+      // The same row again: `INSERT OR REPLACE`, and no clean tempo with it.
+      void savePathTake(next, null).catch(() => {});
+    },
+    [progress.takes],
   );
 
   const exercise = current?.exercise ?? null;
@@ -843,6 +969,10 @@ export function useSessionRun(input: SessionRunInput) {
       findEdgeFromHere,
       findEdge,
       exit,
+      subscribe,
+      unsubscribe,
+      testOut,
+      answerFair,
     },
   };
 }

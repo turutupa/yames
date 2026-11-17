@@ -34,6 +34,16 @@ export async function openFeedback(version: string, language?: string): Promise<
   return openUrl(feedbackUrl(currentFacts(version, language)));
 }
 
+/**
+ * "Export my practice data": the JSON `src/session/exportData.ts` built, written
+ * where the player chooses in a native save dialog. Resolves with the path, or
+ * null when they cancel. Nothing is sent anywhere; they attach the file to a
+ * feedback issue themselves, or don't.
+ */
+export async function exportPracticeData(suggested: string, json: string): Promise<string | null> {
+  return invoke<string | null>("export_practice_data", { suggested, json });
+}
+
 export async function getState(): Promise<AppState> {
   return invoke<AppState>("get_state");
 }

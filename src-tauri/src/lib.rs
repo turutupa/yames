@@ -185,7 +185,7 @@ use commands::{
     default_downloads_dir, dismiss_download_offer, read_offered_file, start_download_watch,
     stop_download_watch, take_pending_open,
     // W19 — the library is "recently played", and the file comes back out.
-    export_score_source, mark_score_opened,
+    export_practice_data, export_score_source, mark_score_opened,
     EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, SongSynthState,
     TakeState,
 };
@@ -817,6 +817,7 @@ pub fn run() {
             take_pending_open,
             mark_score_opened,
             export_score_source,
+            export_practice_data,
             pick_kit_folder,
             inspect_kit_folder,
             start_take,

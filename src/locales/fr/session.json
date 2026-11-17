@@ -11,7 +11,13 @@
       "mechanics": "Technique",
       "theory": "Théorie",
       "jam": "Jam, non noté",
-      "warmUp": "Échauffement, non noté"
+      "warmUp": "Échauffement, non noté",
+      "review": "Révision",
+      "placement": "Placement",
+      "benchmark": "Repère",
+      "test": "Validation",
+      "finisher": "Avec le groupe, non noté",
+      "yourTurn": "À toi, non vérifié"
     },
     "step": {
       "jam": "Joue avec le groupe",
@@ -41,7 +47,8 @@
       "needsInput": "La notation a besoin d'un micro ou d'une entrée directe.",
       "toolsOffer": "Tu viens pour les outils ? Ils sont tous sous Outils.",
       "toolsOfferOpen": "Aller à mon dernier outil",
-      "toolsOfferAlways": "Toujours ouvrir là"
+      "toolsOfferAlways": "Toujours ouvrir là",
+      "resting": "Au repos aujourd'hui"
     },
     "why": {
       "firstEver": "C'est ta première, donc on commence à {{bpm}} BPM. Ici, c'est le placement qui compte, pas la vitesse.",
@@ -78,7 +85,26 @@
       "edge": "Depuis le tempo que tu as atteint, {{bpm}} BPM. On monte d'un cran après chaque prise qui atteint le seuil.",
       "edgeCheck": "Pour vérifier ton tempo propre. La dernière fois, c'était {{clean}} BPM.",
       "edgeFirst": "Pour trouver ton tempo propre. On commence à {{bpm}} BPM et on monte tant que tu atteins le seuil.",
-      "chosen": "Tu as choisi celui-ci, dans {{step}}."
+      "chosen": "Tu as choisi celui-ci, dans {{step}}.",
+      "focusTurn": "{{path}} mène aujourd'hui : c'est son tour.",
+      "focusTurnAway": "{{path}} mène aujourd'hui : tu ne l'as pas joué depuis {{days}} jours.",
+      "keepWarm": "{{path}}, pour garder la main : joué il y a {{days}} jours.",
+      "keepWarmYesterday": "{{path}}, pour garder la main : joué hier.",
+      "keepWarmToday": "{{path}}, pour garder la main : déjà joué aujourd'hui.",
+      "keepWarmNew": "{{path}} : son premier bloc.",
+      "reviewDue": "Une révision : réussi il y a {{days}} jours. Deux prises à ton tempo propre, {{bpm}} BPM.",
+      "reviewDueSlipped": "Une révision qui a glissé la dernière fois, donc un cran plus bas : {{bpm}} BPM.",
+      "reviewDueLeft": "Reste de {{step}}, qui est terminé. Une révision à {{bpm}} BPM.",
+      "parked": "{{exercise}} est mis de côté {{days}} jours après trois sessions sans nouveau tempo propre. Il revient à neuf.",
+      "skippedToday": "{{path}} se repose aujourd'hui : joué il y a {{days}} jours.",
+      "skippedTodayToday": "{{path}} se repose : déjà joué aujourd'hui.",
+      "skippedTodayYesterday": "{{path}} se repose aujourd'hui : joué hier.",
+      "skippedTodayNever": "{{path}} se repose aujourd'hui : pas encore joué.",
+      "finisher": "Pour finir : {{exercise}} avec le groupe à {{bpm}} BPM, un tempo déjà réussi. Non noté.",
+      "placement": "Nouveau ici ? Une prise facile à {{bpm}} BPM, puis une à {{pass}}. Réussis les deux et tu passes à l'étape suivante.",
+      "testOut": "Valider {{step}} : une prise au tempo de réussite, {{bpm}} BPM.",
+      "benchmark": "Repère, jour {{day}} : le même exercice à {{bpm}} BPM à chaque fois, pour comparer.",
+      "yourTurn": "À toi : {{exercise}}. Pas encore vérifié, c'est toi qui juges."
     },
     "bar": {
       "summary": "Le seuil : {{even}} % de régularité et {{heard}} % des notes entendues, à {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Tempo propre : de {{from}} à {{bpm}} BPM.",
       "unmeasuredNotes": "J'ai vérifié le placement. Je n'ai pas entendu les notes assez nettement pour dire si c'étaient les bonnes, donc ce n'est pas noté cette fois.",
       "againSame": "Encore, {{bpm}} BPM",
-      "moveOn": "Passer à la suite"
+      "moveOn": "Passer à la suite",
+      "fairAsk": "Cette note était-elle juste ?",
+      "fairYes": "Oui",
+      "fairNo": "Non",
+      "fairThanks": "Merci. C'est gardé avec tes données de pratique."
     },
     "edge": {
       "kick": "Trouver ma limite",
@@ -165,7 +195,9 @@
       "warmUpKick": "Échauffement · non noté",
       "jamKick": "Jam · non noté",
       "drillKick": "Monte le tempo · non noté",
-      "movesOn": "Ça avance tout seul."
+      "movesOn": "Ça avance tout seul.",
+      "finisherKick": "Final · non noté",
+      "yourTurnKick": "À toi · non vérifié"
     },
     "pedal": {
       "title": "Pédale",
@@ -229,7 +261,15 @@
       "playedClean_other": "{{count}} prises. Tempo propre : {{bpm}} BPM.",
       "running": "En cours",
       "whereYouAre": "Où tu en es",
-      "openStep": "Aller à l'étape {{n}}"
+      "openStep": "Aller à l'étape {{n}}",
+      "subscribe": "S'abonner",
+      "unsubscribe": "Se désabonner",
+      "subscribed": "Abonné",
+      "subscribeHow": "Aujourd'hui puise dans chaque parcours auquel tu t'abonnes, jusqu'à {{cap}}.",
+      "subscribeCap": "Dans ce test, tu peux suivre jusqu'à {{cap}} parcours. Désabonne-toi d'abord d'un parcours ; son historique est conservé.",
+      "unsubscribedNote": "Absent du plan du jour. Ton historique est conservé ; réabonne-toi quand tu veux.",
+      "testOut": "Valider l'étape",
+      "testOutHow": "Une prise au tempo de réussite de chaque exercice. Réussis environ trois sur quatre et l'étape est faite."
     },
     "progress": {
       "title": "Progrès",
@@ -263,6 +303,12 @@
     },
     "runway": {
       "label": "Les prochaines notes, qui arrivent sur la ligne"
+    },
+    "export": {
+      "button": "Exporter mes données de pratique",
+      "note": "Un fichier JSON avec tes prises, tes tempos propres et les raisons du planificateur. Joins-le à un retour si tu veux ; rien n'est envoyé.",
+      "done": "Enregistré dans {{path}}.",
+      "failed": "Impossible d'enregistrer le fichier."
     }
   }
 }

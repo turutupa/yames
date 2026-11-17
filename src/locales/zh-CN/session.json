@@ -11,7 +11,13 @@
       "mechanics": "技术",
       "theory": "乐理",
       "jam": "即兴伴奏，不打分",
-      "warmUp": "热身，不打分"
+      "warmUp": "热身，不打分",
+      "review": "复习",
+      "placement": "定级",
+      "benchmark": "基准",
+      "test": "测试",
+      "finisher": "和乐队一起，不评分",
+      "yourTurn": "轮到你，不检查"
     },
     "step": {
       "jam": "跟着乐队弹",
@@ -41,7 +47,8 @@
       "needsInput": "打分需要麦克风或直连输入。",
       "toolsOffer": "只是来用工具？它们都在“工具”里。",
       "toolsOfferOpen": "去我上次用的工具",
-      "toolsOfferAlways": "总是在那里打开"
+      "toolsOfferAlways": "总是在那里打开",
+      "resting": "今天休息"
     },
     "why": {
       "firstEver": "这是你的第一次，所以从 {{bpm}} BPM 开始。练的是节奏，不是速度。",
@@ -78,7 +85,26 @@
       "edge": "从你达到的速度 {{bpm}} BPM 开始。每过一遍及格线就升一档。",
       "edgeCheck": "检查你的干净速度。上次是 {{clean}} BPM。",
       "edgeFirst": "找出你的干净速度。从 {{bpm}} BPM 开始，只要过及格线就一直往上升。",
-      "chosen": "这是你从 {{step}} 里选的。"
+      "chosen": "这是你从 {{step}} 里选的。",
+      "focusTurn": "今天以{{path}}为主：轮到它了。",
+      "focusTurnAway": "今天以{{path}}为主：你已经{{days}}天没练了。",
+      "keepWarm": "{{path}}，保持手感：上次练习是{{days}}天前。",
+      "keepWarmYesterday": "{{path}}，保持手感：上次练习是昨天。",
+      "keepWarmToday": "{{path}}，保持手感：今天已经练过。",
+      "keepWarmNew": "{{path}}：第一段练习。",
+      "reviewDue": "复习：{{days}}天前已通过。用你的干净速度 {{bpm}} BPM 练两遍。",
+      "reviewDueSlipped": "上次复习没过，所以降一级：{{bpm}} BPM。",
+      "reviewDueLeft": "来自已完成的{{step}}的剩余练习。以 {{bpm}} BPM 复习。",
+      "parked": "{{exercise}}连续三次练习没有新的干净速度，暂停{{days}}天，之后重新开始。",
+      "skippedToday": "{{path}}今天休息：{{days}}天前练过。",
+      "skippedTodayToday": "{{path}}休息：今天已经练过。",
+      "skippedTodayYesterday": "{{path}}今天休息：昨天练过。",
+      "skippedTodayNever": "{{path}}今天休息：还没练过。",
+      "finisher": "收尾：和乐队一起以 {{bpm}} BPM 演奏{{exercise}}，这是你已经通过的速度。不评分。",
+      "placement": "刚来？先以 {{bpm}} BPM 轻松练一遍，再以 {{pass}} 练一遍。两遍都通过就直接跳到下一步。",
+      "testOut": "{{step}}测试：以通过速度 {{bpm}} BPM 练一遍。",
+      "benchmark": "基准测试，第{{day}}天：每次都以 {{bpm}} BPM 练同一个练习，用来对比。",
+      "yourTurn": "轮到你：{{exercise}}。暂不检查，由你自己判断。"
     },
     "bar": {
       "summary": "及格线：{{bpm}} BPM 时均匀度 {{even}}%，听到 {{heard}}% 的音。"
@@ -121,7 +147,11 @@
       "cleanMoved": "干净速度：从 {{from}} 到 {{bpm}} BPM。",
       "unmeasuredNotes": "节奏我检查过了。音听得不够清楚，没法判断弹得对不对，所以这次没有打分。",
       "againSame": "再来一遍，{{bpm}} BPM",
-      "moveOn": "继续"
+      "moveOn": "继续",
+      "fairAsk": "这个评分公平吗？",
+      "fairYes": "是",
+      "fairNo": "否",
+      "fairThanks": "谢谢。已和你的练习数据一起保存。"
     },
     "edge": {
       "kick": "挑战极限",
@@ -165,7 +195,9 @@
       "warmUpKick": "热身 · 不打分",
       "jamKick": "即兴伴奏 · 不打分",
       "drillKick": "逐步提速 · 不打分",
-      "movesOn": "这一段会自动继续。"
+      "movesOn": "这一段会自动继续。",
+      "finisherKick": "收尾 · 不评分",
+      "yourTurnKick": "轮到你 · 不检查"
     },
     "pedal": {
       "title": "脚踏板",
@@ -222,7 +254,15 @@
       "playedClean_other": "{{count}} 遍。干净速度 {{bpm}} BPM。",
       "running": "进行中",
       "whereYouAre": "你所在的位置",
-      "openStep": "前往第 {{n}} 步"
+      "openStep": "前往第 {{n}} 步",
+      "subscribe": "订阅",
+      "unsubscribe": "取消订阅",
+      "subscribed": "已订阅",
+      "subscribeHow": "“今天”会从你订阅的每条路径中安排练习，最多{{cap}}条。",
+      "subscribeCap": "本次测试最多可订阅{{cap}}条路径。请先取消一条；它的记录会保留。",
+      "unsubscribedNote": "不在今天的计划里。你的记录会保留，随时可以重新订阅。",
+      "testOut": "测试跳过",
+      "testOutHow": "每个练习以通过速度练一遍。大约四个通过三个，这一步就完成了。"
     },
     "progress": {
       "title": "进度",
@@ -256,6 +296,12 @@
     },
     "runway": {
       "label": "即将到达判定线的下一组音符"
+    },
+    "export": {
+      "button": "导出我的练习数据",
+      "note": "包含你的练习记录、干净速度和计划理由的 JSON 文件。愿意的话可以附在反馈里；不会发送任何内容。",
+      "done": "已保存到 {{path}}。",
+      "failed": "无法保存文件。"
     }
   }
 }

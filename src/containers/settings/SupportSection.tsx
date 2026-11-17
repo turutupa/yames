@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { SHARE_OPTIONS, SHARE_URL } from "../../constants/metronome";
 import { openFeedback, openUrl } from "../../ipc";
 import { ShareIcon } from "../main-window/ShareMenuPopover";
+import { ExportPracticeButton } from "../session/ExportPracticeButton";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
 
@@ -44,6 +45,9 @@ export function SupportSection({
         <p className="about-text feedback-note">
           {t("settings.feedback.note", { version: appVersion })}
         </p>
+        {/* The practice data a tester can attach to that issue: a file they
+            save and choose to attach, never sent from here. */}
+        <ExportPracticeButton appVersion={appVersion} className="about-link-btn" />
       </div>
       <p className="about-text">
         {t("settings.support.blurb")}

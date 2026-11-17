@@ -11,7 +11,13 @@
       "mechanics": "Técnica",
       "theory": "Teoria",
       "jam": "Jam, sem nota",
-      "warmUp": "Aquecimento, sem nota"
+      "warmUp": "Aquecimento, sem nota",
+      "review": "Revisão",
+      "placement": "Nivelamento",
+      "benchmark": "Referência",
+      "test": "Teste",
+      "finisher": "Com a banda, sem nota",
+      "yourTurn": "Sua vez, não verificado"
     },
     "step": {
       "jam": "Toque com a banda",
@@ -41,7 +47,8 @@
       "needsInput": "Para dar nota é preciso um microfone ou uma entrada direta.",
       "toolsOffer": "Veio pelas ferramentas? Estão todas em Ferramentas.",
       "toolsOfferOpen": "Ir para minha última ferramenta",
-      "toolsOfferAlways": "Sempre abrir lá"
+      "toolsOfferAlways": "Sempre abrir lá",
+      "resting": "Descansam hoje"
     },
     "why": {
       "firstEver": "É a sua primeira, então começa a {{bpm}} BPM. Aqui o que conta é o tempo, não a velocidade.",
@@ -78,7 +85,26 @@
       "edge": "A partir do andamento que você alcançou, {{bpm}} BPM. Sobe um degrau depois de cada tomada que bate a meta.",
       "edgeCheck": "Para conferir seu andamento limpo. Da última vez foi {{clean}} BPM.",
       "edgeFirst": "Para achar seu andamento limpo. Começa a {{bpm}} BPM e sobe enquanto você bater a meta.",
-      "chosen": "Você escolheu este, de {{step}}."
+      "chosen": "Você escolheu este, de {{step}}.",
+      "focusTurn": "{{path}} lidera hoje: é a vez dele.",
+      "focusTurnAway": "{{path}} lidera hoje: você não toca há {{days}} dias.",
+      "keepWarm": "{{path}}, para manter: tocado há {{days}} dias.",
+      "keepWarmYesterday": "{{path}}, para manter: tocado ontem.",
+      "keepWarmToday": "{{path}}, para manter: já tocado hoje.",
+      "keepWarmNew": "{{path}}: o primeiro bloco.",
+      "reviewDue": "Uma revisão: você passou há {{days}} dias. Dois takes no seu tempo limpo, {{bpm}} BPM.",
+      "reviewDueSlipped": "Uma revisão que escapou da última vez, então um degrau abaixo: {{bpm}} BPM.",
+      "reviewDueLeft": "Sobrou de {{step}}, que está concluído. Uma revisão a {{bpm}} BPM.",
+      "parked": "{{exercise}} fica estacionado por {{days}} dias após três sessões sem um novo tempo limpo. Volta renovado.",
+      "skippedToday": "{{path}} descansa hoje: tocado há {{days}} dias.",
+      "skippedTodayToday": "{{path}} descansa: já tocado hoje.",
+      "skippedTodayYesterday": "{{path}} descansa hoje: tocado ontem.",
+      "skippedTodayNever": "{{path}} descansa hoje: ainda não tocado.",
+      "finisher": "Para fechar: {{exercise}} com a banda a {{bpm}} BPM, um tempo que você já passou. Sem nota.",
+      "placement": "Novo aqui? Um take fácil a {{bpm}} BPM, depois um a {{pass}}. Passe nos dois e você pula para o próximo passo.",
+      "testOut": "Teste para pular {{step}}: um take no tempo de aprovação, {{bpm}} BPM.",
+      "benchmark": "Referência, dia {{day}}: o mesmo exercício a {{bpm}} BPM toda vez, para comparar.",
+      "yourTurn": "Sua vez: {{exercise}}. Ainda não verificado, então você avalia."
     },
     "bar": {
       "summary": "A meta: {{even}}% de regularidade e {{heard}}% das notas ouvidas, a {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Andamento limpo: de {{from}} para {{bpm}} BPM.",
       "unmeasuredNotes": "Conferi o tempo. Não ouvi as notas com clareza suficiente para dizer se eram as certas, então isso não foi avaliado desta vez.",
       "againSame": "De novo, {{bpm}} BPM",
-      "moveOn": "Seguir em frente"
+      "moveOn": "Seguir em frente",
+      "fairAsk": "Esta nota foi justa?",
+      "fairYes": "Sim",
+      "fairNo": "Não",
+      "fairThanks": "Obrigado. Fica guardado com seus dados de prática."
     },
     "edge": {
       "kick": "Achar meu limite",
@@ -165,7 +195,9 @@
       "warmUpKick": "Aquecimento · sem nota",
       "jamKick": "Jam · sem nota",
       "drillKick": "Suba o andamento · sem nota",
-      "movesOn": "Isto avança sozinho."
+      "movesOn": "Isto avança sozinho.",
+      "finisherKick": "Final · sem nota",
+      "yourTurnKick": "Sua vez · não verificado"
     },
     "pedal": {
       "title": "Pedal",
@@ -229,7 +261,15 @@
       "playedClean_other": "{{count}} tomadas. Andamento limpo: {{bpm}} BPM.",
       "running": "Em andamento",
       "whereYouAre": "Onde você está",
-      "openStep": "Ir para a etapa {{n}}"
+      "openStep": "Ir para a etapa {{n}}",
+      "subscribe": "Inscrever-se",
+      "unsubscribe": "Cancelar inscrição",
+      "subscribed": "Inscrito",
+      "subscribeHow": "Hoje planeja com cada trilha em que você se inscrever, até {{cap}}.",
+      "subscribeCap": "Neste teste você pode seguir até {{cap}} trilhas. Cancele uma primeiro; o histórico fica.",
+      "unsubscribedNote": "Fora do plano de hoje. Seu histórico fica; inscreva-se de novo quando quiser.",
+      "testOut": "Fazer teste",
+      "testOutHow": "Um take no tempo de aprovação de cada exercício. Passe em cerca de três de quatro e o passo está feito."
     },
     "progress": {
       "title": "Progresso",
@@ -263,6 +303,12 @@
     },
     "runway": {
       "label": "As próximas notas, chegando à linha"
+    },
+    "export": {
+      "button": "Exportar meus dados de prática",
+      "note": "Um arquivo JSON com seus takes, tempos limpos e os motivos do planejador. Anexe a um feedback se quiser; nada é enviado.",
+      "done": "Salvo em {{path}}.",
+      "failed": "Não foi possível salvar o arquivo."
     }
   }
 }

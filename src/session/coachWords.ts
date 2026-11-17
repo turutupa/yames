@@ -31,6 +31,20 @@ export function reasonLine(reason: Reason): Line {
   if (code === "backEased" && values.clean === undefined) {
     return { key: "session.why.backEasedNoClean", values };
   }
+  // Rotation reasons: a variant per what was measured, never a guessed number.
+  if (code === "focusTurn" && typeof values.days === "number") {
+    return { key: "session.why.focusTurnAway", values };
+  }
+  if (code === "keepWarm" || code === "skippedToday") {
+    const days = values.days;
+    const suffix =
+      typeof days !== "number" ? (code === "keepWarm" ? "New" : "Never") : days === 0 ? "Today" : days === 1 ? "Yesterday" : "";
+    return { key: `session.why.${code}${suffix}`, values };
+  }
+  if (code === "reviewDue" && values.left !== undefined) return { key: "session.why.reviewDueLeft", values };
+  if (code === "reviewDue" && values.slipped !== undefined) {
+    return { key: "session.why.reviewDueSlipped", values };
+  }
   return { key: `session.why.${code}`, values };
 }
 

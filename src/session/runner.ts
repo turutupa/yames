@@ -68,6 +68,8 @@ export type TakeOutcome = {
   previousValue: number | null;
   /** The clean tempo before this Take. */
   cleanBefore: number | null;
+  /** The stored row's id, so an answer to "was this fair?" can be kept on it. */
+  takeId?: string;
 };
 
 export type RunState = {
@@ -139,7 +141,12 @@ function enter(state: RunState, index: number, now: number): RunState {
   return {
     ...base,
     phase: "timed",
-    bpm: step.kind === "drill" ? step.startBpm : step.kind === "metronome" ? step.bpm : 0,
+    bpm:
+      step.kind === "drill"
+        ? step.startBpm
+        : step.kind === "metronome"
+          ? step.bpm
+          : (step.bpm ?? 0),
     timedSteps: [...state.timedSteps, step],
   };
 }
