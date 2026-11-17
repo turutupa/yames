@@ -5,8 +5,8 @@
  */
 import "../test/mobileFlag"; // MUST be first — see the file.
 
-import { describe, it, expect } from "vitest";
-import { MIC_PERMISSION_DENIED, startEvaluation } from "../ipc";
+import { describe, it, expect, vi } from "vitest";
+import { MIC_PERMISSION_DENIED, MIC_PERMISSION_TIMEOUT_MS, MIC_PERMISSION_UNANSWERED, startEvaluation } from "../ipc";
 import { mockInvoke, setInvokeResponse } from "../test/mocks";
 
 const calls = () => mockInvoke.mock.calls.map(([cmd]) => cmd);
@@ -27,5 +27,20 @@ describe("the microphone on a phone", () => {
     setInvokeResponse("plugin:yames-mobile|request_microphone", () => false);
     await expect(startEvaluation()).rejects.toThrow(MIC_PERMISSION_DENIED);
     expect(calls()).not.toContain("start_evaluation");
+  });
+
+  it("unanswered, gives up after a minute as refused, and says so", async () => {
+    vi.useFakeTimers();
+    try {
+      mockInvoke.mockClear();
+      setInvokeResponse("plugin:yames-mobile|request_microphone", () => new Promise<boolean>(() => {}));
+      const started = startEvaluation();
+      const outcome = expect(started).rejects.toThrow(MIC_PERMISSION_UNANSWERED);
+      await vi.advanceTimersByTimeAsync(MIC_PERMISSION_TIMEOUT_MS);
+      await outcome;
+      expect(calls()).not.toContain("start_evaluation");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
