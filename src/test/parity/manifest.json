@@ -1389,6 +1389,16 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "stage.forceFlat": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "stage.neck3d": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [
