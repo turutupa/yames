@@ -55,9 +55,9 @@
     "empty": {
       "title": "Hol dir einen Song rein, den du schon hast",
       "body": "Öffne eine Guitar-Pro- oder MusicXML-Datei, und Yames zeigt dir die Tabulatur, hält die Zeit und folgt dir. Zieh die Datei irgendwo auf diesen Bildschirm oder such eine aus.",
-      "private": "Die Datei bleibt auf diesem Computer. Es wird nichts hochgeladen.",
+      "private": "Die Datei bleibt auf diesem Gerät. Es wird nichts hochgeladen.",
       "bodyShort": "Guitar Pro oder MusicXML. Zieh die Datei irgendwo auf diesen Bildschirm oder such eine aus.",
-      "stays": "Sie bleibt auf diesem Computer, und Yames behält eine eigene Kopie."
+      "stays": "Sie bleibt auf diesem Gerät, und Yames behält eine eigene Kopie."
     },
     "tab": {
       "drawing": "Die Noten werden gesetzt ...",

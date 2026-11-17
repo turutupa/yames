@@ -55,9 +55,9 @@
     "empty": {
       "title": "Bring in a song you already have",
       "body": "Open a Guitar Pro or MusicXML file and Yames shows you the tab, keeps time, and follows where you are. Drop the file anywhere on this screen, or choose one.",
-      "private": "The file stays on this computer. Nothing is uploaded.",
+      "private": "The file stays on this device. Nothing is uploaded.",
       "bodyShort": "Guitar Pro or MusicXML. Drop the file anywhere on this screen, or choose one.",
-      "stays": "It stays on this computer, and Yames keeps its own copy."
+      "stays": "It stays on this device, and Yames keeps its own copy."
     },
     "tab": {
       "drawing": "Laying out the music...",

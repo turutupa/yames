@@ -60,9 +60,9 @@
     "empty": {
       "title": "Apporte un morceau que tu as déjà",
       "body": "Ouvre un fichier Guitar Pro ou MusicXML et Yames t'affiche la tablature, tient le temps et te suit. Dépose le fichier n'importe où sur cet écran, ou choisis-en un.",
-      "private": "Le fichier reste sur cet ordinateur. Rien n'est envoyé.",
+      "private": "Le fichier reste sur cet appareil. Rien n'est envoyé.",
       "bodyShort": "Guitar Pro ou MusicXML. Dépose le fichier n'importe où sur cet écran, ou choisis-en un.",
-      "stays": "Il reste sur cet ordinateur, et Yames en garde sa propre copie."
+      "stays": "Il reste sur cet appareil, et Yames en garde sa propre copie."
     },
     "tab": {
       "drawing": "Mise en page de la musique...",

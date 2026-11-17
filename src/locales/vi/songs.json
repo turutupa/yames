@@ -55,9 +55,9 @@
     "empty": {
       "title": "Mang vào một bài bạn đã có sẵn",
       "body": "Mở một tệp Guitar Pro hoặc MusicXML, Yames sẽ hiện bản tab, giữ nhịp và bám theo chỗ bạn đang chơi. Thả tệp vào bất cứ đâu trên màn hình này, hoặc chọn một tệp.",
-      "private": "Tệp ở lại trên máy này. Không có gì được tải lên.",
+      "private": "Tệp ở lại trên thiết bị này. Không có gì được tải lên.",
       "bodyShort": "Guitar Pro hoặc MusicXML. Thả tệp vào bất cứ đâu trên màn hình này, hoặc chọn một tệp.",
-      "stays": "Tệp ở lại trên máy tính này, và Yames giữ một bản sao riêng."
+      "stays": "Tệp ở lại trên thiết bị này, và Yames giữ một bản sao riêng."
     },
     "tab": {
       "drawing": "Đang dàn bản nhạc...",
