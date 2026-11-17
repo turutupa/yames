@@ -156,6 +156,48 @@ export function DownloadProgressBar({
   );
 }
 
+/**
+ * The same download, out of the way: a Session is on screen.
+ *
+ * The full bar sits across the bottom of the window with its label and Cancel,
+ * which in a Session is exactly where the big button and the tab are (owner,
+ * 2026-11-17: "Studio — brain 59%" over a warm-up). Here it is a hairline on
+ * the window's bottom edge that nothing can be pressed through to, with the
+ * label for anyone who points at it. The download itself goes on; Cancel and
+ * the label come back with the full bar when the Session ends.
+ */
+export function DownloadHairline({
+  downloadProgress,
+  downloadingTier,
+}: {
+  downloadProgress: DownloadProgress | null;
+  downloadingTier: "standard" | "full" | null;
+}) {
+  const { t } = useTranslation();
+  const pct = downloadProgress ? Math.round(downloadProgress.fraction * 100) : 0;
+  const tierLabel = downloadingTier === null ? "" : t(brainTierLabelKey(downloadingTier));
+  const label = t("coachDownload.progress", {
+    tier: tierLabel,
+    model: downloadProgress?.component ?? "model",
+    bytes: "",
+    pct,
+  });
+  return (
+    <div
+      className="global-download-hairline"
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct}
+      title={label}
+      data-testid="download-hairline"
+    >
+      <div className="global-download-hairline-fill" style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
 /** Sticky bottom bar shown when a model download fails. */
 export function DownloadErrorBar({
   error,
