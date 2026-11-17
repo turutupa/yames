@@ -1712,4 +1712,5 @@
 .session-band input[type="range"] {
   width: clamp(90px, 14vw, 160px);
   min-width: 0;
+  accent-color: var(--l-amber);
 }

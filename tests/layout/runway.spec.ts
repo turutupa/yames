@@ -29,6 +29,7 @@ const SCENES: Array<[string, Array<{ width: number; height: number }>]> = [
   ["session-runway-playing", [WIDE, NARROW]],
   ["session-runway-theory", [WIDE, NARROW]],
   ["session-theory-playing", [WIDE]],
+  ["session-band-playing", [WIDE, NARROW, PHONE]],
   ["session-runway-phone", [PHONE]],
 ];
 
@@ -58,6 +59,10 @@ for (const [scene, sizes] of SCENES) {
         expect(neck, "the neck is on the screen").not.toBeNull();
         expect(neck!.height).toBeGreaterThan(150);
         await expect(page.locator('[data-testid="runway"]'), "one picture: no runway beside the neck").toHaveCount(0);
+      }
+      if (scene === "session-band-playing") {
+        await expect(page.locator('[data-testid="session-band"]'), "the band's slider").toBeVisible();
+        await insideViewport(page, '[data-testid="session-band"]', `${scene} at ${size.width}px`, size);
       }
       if (scene === "session-theory-playing") {
         await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
