@@ -121,8 +121,13 @@ function normalFrom(H: Float32Array, w: number, h: number, strength: number, wra
 
 export type WoodSet = { map: THREE.Texture; normalMap: THREE.Texture; roughnessMap: THREE.Texture };
 
-/** A wood set. Grain runs along U. */
-export function wood(o: {
+/**
+ * A wood set. Grain runs along U.
+ *
+ * Computed in slices: `yieldNow` is awaited whenever a slice has run for about
+ * 10 ms, so a desktop-sized board does not hold the page for half a second.
+ */
+export async function wood(o: {
   w: number;
   h: number;
   dark: string;
@@ -135,7 +140,14 @@ export function wood(o: {
   rough?: [number, number];
   seed?: number;
   purple?: number;
-}): WoodSet {
+}, yieldNow: () => Promise<void> = async () => {}): Promise<WoodSet> {
+  let t0 = performance.now();
+  const slice = async () => {
+    if (performance.now() - t0 > 10) {
+      await yieldNow();
+      t0 = performance.now();
+    }
+  };
   const { w, h, gf = 16, streak = 0.55, pores = 2600, normal = 3.2, rough = [0.42, 0.7], seed = 0, purple = 0 } = o;
   const D = hex(o.dark);
   const M = hex(o.mid);
@@ -144,6 +156,7 @@ export function wood(o: {
   const C = new Float32Array(w * h * 3);
   const Ro = new Float32Array(w * h);
   for (let y = 0, i = 0; y < h; y++) {
+    await slice();
     const v = y / h;
     for (let x = 0; x < w; x++, i++) {
       const u = x / w;
@@ -212,13 +225,16 @@ export function wood(o: {
       }
     }
   }
+  await slice();
   const map = write(w, h, (x, y, px) => {
     const i = y * w + x;
     px[0] = C[i * 3];
     px[1] = C[i * 3 + 1];
     px[2] = C[i * 3 + 2];
   });
+  await slice();
   const nor = normalFrom(H, w, h, normal);
+  await slice();
   const ro = write(w, h, (x, y, px) => {
     const v = Ro[y * w + x] * 255;
     px[0] = 0;

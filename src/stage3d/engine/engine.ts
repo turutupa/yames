@@ -185,7 +185,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
   // Textures, sized to the tier and computed once. A frame between each keeps the page answering.
   const S = (n: number) => Math.max(128, Math.round(n * settings.textureScale));
   await nextFrame();
-  const rosewood = T.wood({ w: S(2048), h: S(512), dark: "#1e0f0a", mid: "#4a2a1b", light: "#74452a", gf: 15, streak: 0.62, pores: S(3200), purple: 0.22, seed: 1, normal: 3 });
+  const rosewood = await T.wood({ w: S(2048), h: S(512), dark: "#1e0f0a", mid: "#4a2a1b", light: "#74452a", gf: 15, streak: 0.62, pores: S(3200), purple: 0.22, seed: 1, normal: 3 }, nextFrame);
   await nextFrame();
   const tex = { rosewood, pearl: T.pearl(tier >= 1 ? 128 : 64), wind: T.windings() };
 
@@ -385,6 +385,16 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       to = target(shotFor(current.view, current.rect, guitar), current.rect);
       if (!flight) Object.assign(R, cloneRig(to));
     }
+  }
+
+  // Compile the programs off the main thread where the driver can (KHR_parallel_shader_compile), so the
+  // first frame does not stall the page. One frame per scene, the overlay included.
+  try {
+    applyRig();
+    await renderer.compileAsync(scene, camera);
+    await renderer.compileAsync(overlay, camera);
+  } catch {
+    /* compiled on first use instead */
   }
 
   const KINDS: ReadonlySet<string> = new Set(["aim", "tone", "tens", "clash", "box", "dim"]);
