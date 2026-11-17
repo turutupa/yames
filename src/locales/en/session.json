@@ -247,6 +247,15 @@
       "drill": "Climbs the tempo while you play, and drills a plan you write.",
       "jam": "A band and your chords. Never graded.",
       "songs": "Read a song's tab and play along with it."
+    },
+    "view": {
+      "label": "Practice view",
+      "neck": "Neck",
+      "runway": "Runway",
+      "between": "Switch views between Takes"
+    },
+    "runway": {
+      "label": "The next notes, arriving at the line"
     }
   }
 }

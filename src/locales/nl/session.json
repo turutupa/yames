@@ -247,6 +247,15 @@
       "drill": "Voert het tempo op terwijl je speelt, en oefent een plan dat je zelf schrijft.",
       "jam": "Een band en jouw akkoorden. Nooit beoordeeld.",
       "songs": "Lees de tab van een nummer en speel mee."
+    },
+    "view": {
+      "label": "Oefenweergave",
+      "neck": "Hals",
+      "runway": "Baan",
+      "between": "Wissel van weergave tussen takes"
+    },
+    "runway": {
+      "label": "De volgende noten, op weg naar de lijn"
     }
   }
 }

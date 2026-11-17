@@ -247,6 +247,15 @@
       "drill": "Steigert das Tempo, während du spielst, und übt einen Plan, den du schreibst.",
       "jam": "Eine Band und deine Akkorde. Nie bewertet.",
       "songs": "Lies die Tabulatur eines Songs und spiel dazu."
+    },
+    "view": {
+      "label": "Übungsansicht",
+      "neck": "Hals",
+      "runway": "Laufband",
+      "between": "Ansicht zwischen den Takes wechseln"
+    },
+    "runway": {
+      "label": "Die nächsten Noten, die auf die Linie zulaufen"
     }
   }
 }

@@ -254,6 +254,15 @@
       "drill": "Alza il tempo mentre suoni e allena un piano che scrivi tu.",
       "jam": "Una band e i tuoi accordi. Mai valutato.",
       "songs": "Leggi la tablatura di un brano e suonaci sopra."
+    },
+    "view": {
+      "label": "Vista di pratica",
+      "neck": "Manico",
+      "runway": "Pista",
+      "between": "Cambia vista tra una ripresa e l'altra"
+    },
+    "runway": {
+      "label": "Le prossime note, in arrivo sulla linea"
     }
   }
 }

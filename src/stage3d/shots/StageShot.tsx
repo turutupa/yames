@@ -40,7 +40,7 @@ export function d7Notes(lo = 4, hi = 10): NeckNote[] {
   return [...at.values()];
 }
 
-function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" }) {
+function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" | "flat" }) {
   const neck = useNeck();
   const slot = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -48,7 +48,7 @@ function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" }) {
       neck.setView({ kind: "whole" }, slot.current, { instant: true });
       neck.setNotes([]);
     } else {
-      neck.setView({ kind: "zoom", from: 4, to: 10 }, slot.current, { instant: true });
+      neck.setView({ kind: "zoom", from: 4, to: 10, flat: kind === "flat" }, slot.current, { instant: true });
       neck.setNotes(d7Notes(), { fade: 0 });
     }
     return () => neck.setView({ kind: "hidden" }, null);
@@ -76,7 +76,7 @@ body{background:#0a0705;}
 .stage-shot-whole{flex-direction:column-reverse;justify-content:flex-end}
 .stage-shot-whole .stage-shot-slot{flex:none;height:300px;margin:30px -28px 20px}
 .stage-shot-whole .stage-shot-title{font:500 120px/1 Fraunces,Georgia,serif}
-.stage-shot-zoom .stage-shot-slot,.stage-shot-pluck .stage-shot-slot{flex:1 1 auto;min-height:0;margin:12px -28px 80px}
+.stage-shot-zoom .stage-shot-slot,.stage-shot-pluck .stage-shot-slot,.stage-shot-flat .stage-shot-slot{flex:1 1 auto;min-height:0;margin:12px -28px 80px}
 `;
 
 async function waitFor(what: string, check: () => boolean, ms = 30000) {
@@ -87,7 +87,7 @@ async function waitFor(what: string, check: () => boolean, ms = 30000) {
   }
 }
 
-export function mountStageShot(kind: "whole" | "zoom" | "pluck") {
+export function mountStageShot(kind: "whole" | "zoom" | "pluck" | "flat") {
   const style = document.createElement("style");
   style.textContent = CSS;
   document.head.appendChild(style);

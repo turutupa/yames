@@ -78,6 +78,17 @@ export interface Shot {
       | "edge"
       /** Find my edge, Taken until it has found the edge. */
       | "edgeDone";
+    /**
+     * Neck or runway on the Take screen: what the `practiceView` setting holds
+     * (plans/tasks/mvp/RUNWAY.md). Absent is the app's default, the neck.
+     */
+    practiceView?: "neck" | "runway";
+    /**
+     * Play this Path's first Exercise from its Step page instead of starting
+     * Today's plan. The harness makes it runnable for the scene, so a Theory
+     * Take can be photographed before any Theory Path ships as runnable.
+     */
+    path?: "blues-pentatonics";
   };
   /**
    * The Jam tab, with a jam actually on it.
@@ -368,7 +379,7 @@ export interface Shot {
    * zoom with notes and the overview strip, `pluck` the same caught while a
    * string rings. `?nogl=1` on any of them draws the SVG fallback instead.
    */
-  stage?: "whole" | "zoom" | "pluck";
+  stage?: "whole" | "zoom" | "pluck" | "flat";
 }
 
 /**
@@ -723,6 +734,52 @@ export const SHOTS: Shot[] = [
     session: { seed: "returning", minutes: 5, stop: "playing" },
     width: 1400,
     height: 900,
+    settleMs: 900,
+  },
+  // The runway view (M6): the same Take, straight-on neck and lanes.
+  {
+    id: "session-runway-ready",
+    suffix: "session-runway-ready",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", practiceView: "runway" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-runway-playing",
+    suffix: "session-runway-playing",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "playing", practiceView: "runway" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-runway-theory",
+    suffix: "session-runway-theory",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "runway", path: "blues-pentatonics" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-theory-playing",
+    suffix: "session-theory-playing",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "blues-pentatonics" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-runway-phone",
+    suffix: "session-runway-phone",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "playing", practiceView: "runway" },
+    width: 390,
+    height: 844,
     settleMs: 900,
   },
   {
@@ -1130,6 +1187,8 @@ export const SHOTS: Shot[] = [
   { id: "stage-whole", suffix: "stage-whole", window: "main", stage: "whole", width: 1400, height: 900, settleMs: 200 },
   { id: "stage-zoom", suffix: "stage-zoom", window: "main", stage: "zoom", width: 1400, height: 900, settleMs: 200 },
   { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
+  // The straight-on neck the practice runway sits under (M6).
+  { id: "stage-flat", suffix: "stage-flat", window: "main", stage: "flat", width: 1400, height: 900, settleMs: 200 },
 ];
 
 export function shotById(id: string): Shot | undefined {

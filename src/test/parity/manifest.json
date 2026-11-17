@@ -1384,6 +1384,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "practiceView": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

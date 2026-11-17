@@ -1365,3 +1365,308 @@
     transition: none;
   }
 }
+
+/* ── The Take in the runway view (plans/tasks/mvp/RUNWAY.md) ─────────────
+   The neck straight-on over about 45% of the height, six lanes of what is
+   next under it over about 22%, the numbers in one compact row. */
+.session-viewswitch {
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--l-line2);
+  border-radius: 9px;
+  background: rgba(10, 7, 5, 0.6);
+}
+.session-viewswitch button {
+  padding: 3px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--l-quiet);
+  font: 600 14px/1.2 var(--l-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.session-viewswitch button[data-on] {
+  background: rgba(255, 180, 84, 0.18);
+  color: var(--l-amber);
+}
+.session-viewswitch button:disabled {
+  cursor: default;
+}
+.session-viewswitch button:disabled:not([data-on]) {
+  opacity: 0.45;
+}
+
+.session-body[data-view="runway"] {
+  /* One colour per string, clear of the verdict colours (green, blue, red),
+     which fill a note rather than outline it. */
+  --lane-1: #d59bff;
+  --lane-2: #ffd36b;
+  --lane-3: #ff9f5a;
+  --lane-4: #f1e3c4;
+  --lane-5: #7fd6d0;
+  --lane-6: #ff8fa3;
+}
+.session-body[data-view="runway"] > .session-slot {
+  flex: 45 1 0;
+  min-height: 110px;
+  margin: 0 -14px;
+}
+.session-body[data-view="runway"] > .runway {
+  flex: 22 1 0;
+  min-height: 120px;
+}
+.session-body[data-view="runway"][data-theory] > .session-slot {
+  flex: 62 1 0;
+}
+.session-body[data-view="runway"][data-theory] > .runway {
+  flex: none;
+  height: 46px;
+  min-height: 0;
+}
+.session-compact {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.2vw, 30px);
+  min-height: 44px;
+}
+.session-compact .session-brief {
+  flex: 1 1 0;
+}
+.session-compact-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+.session-compact-stat b {
+  font: 700 clamp(28px, 4.6vh, 42px) / 1 var(--l-display);
+  font-variant-numeric: tabular-nums;
+}
+.session-compact-stat > span {
+  font-size: 13px;
+  color: var(--l-quiet);
+}
+.session-compact-coach {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.session-compact-bpm {
+  margin-left: auto;
+}
+.session-runway-notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  min-width: 0;
+  flex: 1 1 260px;
+}
+.session-body[data-view="runway"] .session-count {
+  inset: auto 0 auto auto;
+  top: 0;
+  padding: 0 4px;
+  font-size: clamp(30px, 5vh, 46px);
+  text-shadow: 0 0 30px rgba(255, 170, 70, 0.55);
+}
+
+.runway {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  padding: 0;
+  contain: layout paint;
+}
+.runway-names {
+  flex: none;
+  position: relative;
+  width: 34px;
+  border-right: 1px solid var(--l-line);
+}
+.runway-names span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(100% / 6);
+  display: grid;
+  place-items: center;
+  font: 700 14px/1 var(--l-display);
+  color: var(--lane, var(--l-quiet));
+}
+.runway-names span[data-string="1"] { top: 0; --lane: var(--lane-1); }
+.runway-names span[data-string="2"] { top: calc(100% / 6); --lane: var(--lane-2); }
+.runway-names span[data-string="3"] { top: calc(200% / 6); --lane: var(--lane-3); }
+.runway-names span[data-string="4"] { top: calc(300% / 6); --lane: var(--lane-4); }
+.runway-names span[data-string="5"] { top: calc(400% / 6); --lane: var(--lane-5); }
+.runway-names span[data-string="6"] { top: calc(500% / 6); --lane: var(--lane-6); }
+.runway-lanes {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+.runway-lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid color-mix(in srgb, var(--lane) 40%, transparent);
+}
+.runway [data-string="1"] { --lane: var(--lane-1); }
+.runway [data-string="2"] { --lane: var(--lane-2); }
+.runway [data-string="3"] { --lane: var(--lane-3); }
+.runway [data-string="4"] { --lane: var(--lane-4); }
+.runway [data-string="5"] { --lane: var(--lane-5); }
+.runway [data-string="6"] { --lane: var(--lane-6); }
+.runway-past {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, rgba(10, 7, 5, 0.55), rgba(10, 7, 5, 0.15));
+  pointer-events: none;
+  z-index: 2;
+}
+/* The one thing that moves: a transform per frame on its own layer. */
+.runway-strip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  will-change: transform;
+}
+.runway-barline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid rgba(255, 232, 200, 0.16);
+}
+.runway-note {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--lane);
+  background: rgba(14, 10, 7, 0.92);
+  color: var(--l-ink);
+  font: 700 14px/1 var(--l-display);
+  font-variant-numeric: tabular-nums;
+  z-index: 1;
+}
+.runway-note[data-state="tone"] {
+  background: var(--l-tone);
+  border-color: var(--l-tone);
+  color: #07190f;
+}
+.runway-note[data-state="tens"] {
+  background: var(--l-tens);
+  border-color: var(--l-tens);
+  color: #06162a;
+}
+.runway-note[data-state="clash"] {
+  background: transparent;
+  border-color: var(--l-clash);
+  color: var(--l-clash);
+}
+/* Early/late: a dot under the note, left for early, right for late. */
+.runway-dot {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 3px);
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translateX(var(--dev, 0px));
+}
+.runway-note[data-timed] .runway-dot {
+  opacity: 1;
+  background: var(--l-ink);
+}
+.runway-note[data-timed][data-state="tens"] .runway-dot {
+  background: var(--l-tens);
+}
+.runway-note[data-timed][data-state="tone"] .runway-dot {
+  background: var(--l-tone);
+}
+.runway-hit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px solid var(--l-amber);
+  box-shadow: 0 0 14px rgba(255, 180, 84, 0.7);
+  z-index: 3;
+}
+.runway-legend {
+  position: absolute;
+  right: 8px;
+  bottom: 3px;
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--l-faint);
+  z-index: 3;
+  pointer-events: none;
+}
+/* A Theory Exercise: one lane, the neck takes the room. */
+.runway[data-collapsed] .runway-note {
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  font-size: 12px;
+}
+.runway[data-collapsed] .runway-dot {
+  top: calc(100% + 1px);
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+}
+.runway[data-collapsed] .runway-legend {
+  display: none;
+}
+
+/* A phone, or any tall window: the runway takes the height, a small neck
+   window above it (straight-on, no perspective). */
+@media (orientation: portrait) and (max-width: 700px) {
+  .session-body[data-view="runway"] > .session-slot {
+    flex: 20 1 0;
+    min-height: 90px;
+    margin: 0 -8px;
+  }
+  .session-body[data-view="runway"] > .runway {
+    flex: 40 1 0;
+    min-height: 170px;
+  }
+  .session-body[data-view="runway"][data-theory] > .session-slot {
+    flex: 50 1 0;
+  }
+  .session-body[data-view="runway"] .session-takeinfo .session-why {
+    display: none;
+  }
+  .session-body[data-view="runway"] .session-compact-coach {
+    display: none;
+  }
+  .session-compact {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .session-compact .session-brief {
+    flex-basis: 100%;
+    order: 9;
+  }
+}

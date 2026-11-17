@@ -110,7 +110,7 @@ const slotRect = (page: Page) =>
     return { left: r.left, top: r.top, width: r.width, height: r.height };
   });
 
-for (const scene of ["stage-whole", "stage-zoom", "stage-pluck"]) {
+for (const scene of ["stage-whole", "stage-zoom", "stage-pluck", "stage-flat"]) {
   for (const size of SIZES) {
     test(`${scene} paints the neck inside its slot at ${size.name} (${size.width}px)`, async ({ page }) => {
       await openShot(page, scene, size);

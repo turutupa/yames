@@ -261,6 +261,15 @@
       "drill": "Podnosi tempo, gdy grasz, i ćwiczy plan, który sam piszesz.",
       "jam": "Zespół i twoje akordy. Nigdy nieoceniane.",
       "songs": "Czytaj tabulaturę utworu i graj razem z nią."
+    },
+    "view": {
+      "label": "Widok ćwiczenia",
+      "neck": "Gryf",
+      "runway": "Pas",
+      "between": "Zmieniaj widok między podejściami"
+    },
+    "runway": {
+      "label": "Kolejne nuty zbliżające się do linii"
     }
   }
 }
