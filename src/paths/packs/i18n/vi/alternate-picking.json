@@ -3,7 +3,7 @@
   "path": "alternate-picking",
   "lng": "vi",
   "strings": {
-    "path.title": "Alternate Picking",
+    "path.title": "Alternate picking",
     "path.goal": "Gảy một câu nhạc sạch, đều ở giọng A thứ qua cả sáu dây, và giữ được nó cùng ban nhạc trong tám ô nhịp.",
     "path.assumes": "Bạn bấm được từng nốt đơn sạch, biết cầm pick, và chơi được nốt móc đơn theo click ở 80 BPM. Không yêu cầu tốc độ nào. Số phút ghi ở đây là cho một lượt qua tài liệu; hãy dự tính quay lại mỗi bước trong nhiều ngày hoặc nhiều tuần.",
     "path.gradingLimits": "Mọi thứ ở đây được chấm theo nhịp và nốt với các nốt gảy đơn, đúng thứ ứng dụng được xây dựng để làm, và chưa có phần nào được thử trên đàn guitar thật. Câu nhạc càng nhanh, điểm chấm càng kém chắc chắn. Bộ thiết bị của bạn tạo ra một độ trễ nhỏ giữa lúc bạn chơi nốt và lúc ứng dụng nghe thấy; đến nốt móc kép ở 100 BPM thì không ảnh hưởng gì, còn trên đó hãy coi điểm độ đều là tạm thời. Distortion và compression nặng làm nhòe điểm bắt đầu của mỗi nốt, nên âm sạch hoặc crunch nhẹ là thiết lập trung thực cho một lượt được chấm. Không có gì nhanh hơn nốt móc kép ở 200 BPM được chấm, và không bài tập nào ở đây đi xa đến thế.",

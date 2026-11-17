@@ -3,9 +3,9 @@
   "path": "sweep-picking",
   "lng": "pl",
   "strings": {
-    "path.title": "Sweep Picking",
+    "path.title": "Sweep picking",
     "path.goal": "Graj czyste, rozdzielone arpeggia sweepem od dwóch strun do sześciu i łącz je w progresjach molowych tak, żeby brzmiały jak solówka.",
-    "path.assumes": "Umiesz równo grać pojedyncze nuty kostkowaniem naprzemiennym w szesnastkach przy około 80 BPM (ścieżka Alternate Picking do poziomu średniozaawansowanego to obejmuje) i czysto grasz hammer-on i pull-off. Nie musisz jeszcze umieć sweepu i możesz zacząć od poziomu, który ci pasuje.",
+    "path.assumes": "Umiesz równo grać pojedyncze nuty kostkowaniem naprzemiennym w szesnastkach przy około 80 BPM (ścieżka Alternate picking do poziomu średniozaawansowanego to obejmuje) i czysto grasz hammer-on i pull-off. Nie musisz jeszcze umieć sweepu i możesz zacząć od poziomu, który ci pasuje.",
     "path.gradingLimits": "Ocena przestaje być wiarygodna przy około 150 ms między nutami: szesnastki przy 100 BPM, triole ósemkowe przy 133, sekstole przy 66. Szybsze szczeble sprawdzasz sam, niezależnie od tego, jak wyglądają, a karta mówi, gdzie kończy się ocena. Ta granica to ostrożna zasada, a nie pomiar. Żaden test nie obejmuje nut granych sweepem, których atak jest łagodniejszy niż przy kostkowaniu i które mogą dzwonić na sąsiednich strunach, więc nawet oceniane szczeble są tymczasowe, dopóki nie przejdą testu na prawdziwej gitarze. Łączniki niosą własne ryzyko: nuta po slajdzie liczy się jako pominięta, jeśli jej nie usłyszę, dlatego poprzeczki przy kształtach ze slajdem są niższe. W praktyce: poziom początkujący jest prawie cały oceniany. Na poziomie średniozaawansowanym kształty w szesnastkach kończą się na 100 BPM, kształty w triolach na 130, a przednutka w sekstolach na 65. Na poziomie zaawansowanym większości tego, co sprawia, że gra jest trudna, nie da się ocenić: przebiegi w sekstolach kończą się na 65 BPM, kształty na sześciu strunach w szesnastkach na 100. Dźwięk nigdy nie mówi nam dwóch rzeczy, które są tu najważniejsze, czyli tłumienia i toru kostki, i ćwiczenia mówią o tym wprost.",
     "path.skills.0": "Równe kostkowanie naprzemienne w szesnastkach, 80 BPM",
     "path.skills.1": "Czyste hammer-ony i pull-offy",

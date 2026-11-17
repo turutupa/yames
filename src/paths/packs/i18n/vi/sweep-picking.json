@@ -3,9 +3,9 @@
   "path": "sweep-picking",
   "lng": "vi",
   "strings": {
-    "path.title": "Sweep Picking",
+    "path.title": "Sweep picking",
     "path.goal": "Sweep các arpeggio sạch, tách bạch từ hai dây đến sáu dây, rồi nối chúng qua các vòng hợp âm giọng thứ để nghe như một đoạn solo.",
-    "path.assumes": "Bạn đã alternate picking từng nốt đều đặn ở nốt móc kép khoảng 80 BPM (lộ trình Alternate Picking đến hết cấp độ Trung cấp có dạy phần này) và làm hammer-on, pull-off sạch. Bạn chưa cần biết sweep, và có thể bắt đầu ở cấp độ nào hợp với mình.",
+    "path.assumes": "Bạn đã alternate picking từng nốt đều đặn ở nốt móc kép khoảng 80 BPM (lộ trình Alternate picking đến hết cấp độ Trung cấp có dạy phần này) và làm hammer-on, pull-off sạch. Bạn chưa cần biết sweep, và có thể bắt đầu ở cấp độ nào hợp với mình.",
     "path.gradingLimits": "Việc chấm điểm không còn đáng tin khi khoảng cách giữa các nốt dưới khoảng 150 ms: nốt móc kép ở 100 BPM, chùm ba móc đơn ở 133, chùm sáu ở 66. Các nấc nhanh hơn mức đó là tự kiểm tra, dù trông thế nào, và thẻ bài sẽ ghi rõ chỗ dừng chấm điểm. Ranh giới đó là một quy ước thận trọng, không phải kết quả đo. Chưa có bài kiểm tra nào cho nốt sweep, vốn có tiếng bật nhẹ hơn nốt gảy và có thể ngân sang dây bên cạnh, nên ngay cả các nấc được chấm cũng chỉ là tạm thời cho đến khi thử với đàn thật. Các đoạn nối có rủi ro riêng: nốt sau một cú slide bị tính là trượt nếu không nghe thấy, nên mức đạt ở các thế có slide thấp hơn. Trên thực tế: Cơ bản gần như được chấm hết. Ở Trung cấp, các thế nốt móc kép dừng chấm ở 100 BPM, thế chùm ba ở 130, và đoạn lấy đà chùm sáu ở 65. Ở Nâng cao, phần lớn những gì làm bài khó không chấm được: chuỗi chùm sáu dừng ở 65 BPM, thế sáu dây nốt móc kép dừng ở 100. Âm thanh không bao giờ cho chúng tôi biết hai điều quan trọng nhất ở đây là chặn tiếng và đường đi của pick, và các bài tập đều nói rõ điều đó.",
     "path.skills.0": "Alternate picking đều ở nốt móc kép, 80 BPM",
     "path.skills.1": "Hammer-on và pull-off sạch",

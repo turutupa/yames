@@ -3,7 +3,7 @@
   "path": "alternate-picking",
   "lng": "nl",
   "strings": {
-    "path.title": "Alternate Picking",
+    "path.title": "Alternate picking",
     "path.goal": "Sla een schone, gelijkmatige lijn in A mineur aan over alle zes snaren, en houd die acht maten vol over een band.",
     "path.assumes": "Je grijpt losse noten schoon, je houdt een plectrum vast, en je kunt achtste noten spelen met een klik op 80 BPM. Er wordt geen snelheid verondersteld. De vermelde minuten zijn één keer door het materiaal; reken erop dat je dagen of weken naar elke stap terugkomt.",
     "path.gradingLimits": "Alles hier wordt beoordeeld op timing en noten voor losse aangeslagen noten, en daarvoor is de app gebouwd, maar niets ervan is al op een echte gitaar uitgeprobeerd. Hoe sneller de lijn, hoe minder zeker het oordeel. Je opstelling voegt een kleine vertraging toe tussen het spelen van een noot en het moment dat de app hem hoort; tot zestienden op 100 BPM maakt dat niets uit, en daarboven moet je de gelijkmatigheidsscore als voorlopig lezen. Zware distortion en compressie maken onduidelijk waar elke noot begint, dus een cleane klank of lichte crunch is de eerlijke instelling voor een beoordeelde take. Niets sneller dan zestienden op 200 BPM wordt beoordeeld, en geen enkele oefening hier gaat zo ver.",
