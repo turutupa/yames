@@ -206,6 +206,8 @@
       "takeTour": "看看导览",
       "runSetup": "重新运行设置",
       "shortcuts": "键盘快捷键",
+      "sendFeedback": "发送反馈",
+      "sendFeedbackNote": "在浏览器中打开一个 GitHub issue，版本和系统已填好。在你提交之前不会发送任何内容。",
       "reportProblem": "反馈问题",
       "reportWorking": "正在收集日志…",
       "reportDone": "诊断信息已保存。请把这个文件附在反馈里：",

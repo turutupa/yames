@@ -206,6 +206,8 @@
       "takeTour": "Rundgang starten",
       "runSetup": "Einrichtung erneut starten",
       "shortcuts": "Tastenkürzel",
+      "sendFeedback": "Feedback senden",
+      "sendFeedbackNote": "Öffnet ein GitHub-Issue in deinem Browser, Version und System sind schon eingetragen. Gesendet wird erst, wenn du es abschickst.",
       "reportProblem": "Problem melden",
       "reportWorking": "Protokolle werden gesammelt …",
       "reportDone": "Diagnose gespeichert. Hänge diese Datei an deine Meldung an:",

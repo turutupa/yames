@@ -318,6 +318,11 @@
         "gamepad": "PAD"
       }
     },
+    "feedback": {
+      "blurb": "Test je Yames? Vertel ons in je eigen woorden wat werkte en wat niet.",
+      "button": "Feedback sturen",
+      "note": "Yames {{version}}. Opent een nieuw GitHub-issue in je browser met de versie en je systeem al ingevuld; er wordt niets verstuurd tot je het daar indient."
+    },
     "support": {
       "title": "Steun",
       "blurb": "Yames is gratis en open source. Helpt het jouw oefenen? Overweeg dan om de ontwikkeling te steunen!",

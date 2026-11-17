@@ -206,6 +206,8 @@
       "takeTour": "ツアーを見る",
       "runSetup": "セットアップをやり直す",
       "shortcuts": "キーボードショートカット",
+      "sendFeedback": "フィードバックを送る",
+      "sendFeedbackNote": "ブラウザで GitHub の Issue を開きます。バージョンとシステムは入力済みです。送信するまで何も送られません。",
       "reportProblem": "問題を報告",
       "reportWorking": "ログを収集中…",
       "reportDone": "診断情報を保存しました。このファイルを報告に添付してください:",

@@ -318,6 +318,11 @@
         "gamepad": "Tay cầm"
       }
     },
+    "feedback": {
+      "blurb": "Bạn đang thử Yames? Hãy kể bằng lời của bạn điều gì chạy tốt và điều gì không.",
+      "button": "Gửi góp ý",
+      "note": "Yames {{version}}. Mở một issue GitHub mới trong trình duyệt, đã điền sẵn phiên bản và hệ thống; không có gì được gửi cho đến khi bạn bấm gửi ở đó."
+    },
     "support": {
       "title": "Hỗ trợ",
       "blurb": "Yames miễn phí và mã nguồn mở. Nếu nó giúp ích cho việc luyện tập của bạn, hãy cân nhắc ủng hộ dự án!",

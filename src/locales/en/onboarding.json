@@ -206,6 +206,8 @@
       "takeTour": "Take the tour",
       "runSetup": "Run setup again",
       "shortcuts": "Keyboard shortcuts",
+      "sendFeedback": "Send feedback",
+      "sendFeedbackNote": "Opens a GitHub issue in your browser with the version and system filled in. Nothing is sent until you submit it.",
       "reportProblem": "Report a problem",
       "reportWorking": "Collecting logs…",
       "reportDone": "Diagnostics saved. Attach this file to your report:",

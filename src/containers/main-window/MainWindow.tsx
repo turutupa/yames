@@ -33,6 +33,7 @@ import {
   storeLoad,
   storeSave,
   togglePlayback,
+  openFeedback,
 } from "../../ipc";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
@@ -181,7 +182,7 @@ const JAM_PREVIEW_CORNERS: readonly PreviewCorner[] = ["bottomLeft", "bottomRigh
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
 
 export function MainWindow() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useDrag();
   const { state, currentBeat } = useMetronome();
   // Practice Coach model + voice state (must come before useEvaluation so
@@ -1130,6 +1131,12 @@ export function MainWindow() {
    * set either way, and land a completed run on the metronome at 80 BPM
    * (ONBOARDING_PLAN §3, W7).
    */
+  // "Send feedback" (Help menu, Settings): a prefilled GitHub issue in the
+  // browser. Nothing is sent from the app.
+  const sendFeedback = useCallback(() => {
+    void openFeedback(appVersion, i18n.language).catch(() => {});
+  }, [appVersion, i18n.language]);
+
   const handleWizardFinish = useCallback(
     (outcome: "completed" | "skipped" | "closed") => {
       void stopSoftClick().then(() => {
@@ -2484,6 +2491,7 @@ export function MainWindow() {
       }}
       onShowShortcuts={help.openShortcuts}
       onReportProblem={help.reportProblem}
+      onSendFeedback={sendFeedback}
       animate={!reducedMotion}
     />
     <ShortcutsSheet

@@ -206,6 +206,8 @@
       "takeTour": "Xem hướng dẫn nhanh",
       "runSetup": "Chạy lại phần thiết lập",
       "shortcuts": "Phím tắt",
+      "sendFeedback": "Gửi góp ý",
+      "sendFeedbackNote": "Mở một issue GitHub trong trình duyệt, đã điền sẵn phiên bản và hệ thống. Không có gì được gửi cho đến khi bạn bấm gửi.",
       "reportProblem": "Báo lỗi",
       "reportWorking": "Đang thu thập nhật ký…",
       "reportDone": "Đã lưu tệp chẩn đoán. Hãy đính kèm tệp này vào báo cáo:",

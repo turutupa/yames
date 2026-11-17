@@ -206,6 +206,8 @@
       "takeTour": "Zobacz przewodnik",
       "runSetup": "Uruchom konfigurację ponownie",
       "shortcuts": "Skróty klawiszowe",
+      "sendFeedback": "Wyślij opinię",
+      "sendFeedbackNote": "Otwiera zgłoszenie na GitHubie w przeglądarce, z wersją i systemem już wpisanymi. Nic nie zostanie wysłane, dopóki go nie zatwierdzisz.",
       "reportProblem": "Zgłoś problem",
       "reportWorking": "Zbieranie logów…",
       "reportDone": "Zapisano diagnostykę. Dołącz ten plik do zgłoszenia:",

@@ -206,6 +206,8 @@
       "takeTour": "Turu başlat",
       "runSetup": "Kurulumu yeniden çalıştır",
       "shortcuts": "Klavye kısayolları",
+      "sendFeedback": "Geri bildirim gönder",
+      "sendFeedbackNote": "Tarayıcında sürüm ve sistem bilgisi doldurulmuş bir GitHub kaydı açar. Sen gönderene kadar hiçbir şey gönderilmez.",
       "reportProblem": "Sorun bildir",
       "reportWorking": "Günlükler toplanıyor…",
       "reportDone": "Tanılama kaydedildi. Bu dosyayı bildiriminize ekleyin:",

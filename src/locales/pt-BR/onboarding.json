@@ -206,6 +206,8 @@
       "takeTour": "Fazer o tour",
       "runSetup": "Refazer a configuração",
       "shortcuts": "Atalhos de teclado",
+      "sendFeedback": "Enviar feedback",
+      "sendFeedbackNote": "Abre uma issue do GitHub no navegador com a versão e o sistema já preenchidos. Nada é enviado até você publicar.",
       "reportProblem": "Relatar um problema",
       "reportWorking": "Coletando registros…",
       "reportDone": "Diagnóstico salvo. Anexe este arquivo ao seu relato:",

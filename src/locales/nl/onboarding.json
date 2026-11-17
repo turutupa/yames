@@ -206,6 +206,8 @@
       "takeTour": "Rondleiding starten",
       "runSetup": "Setup opnieuw doorlopen",
       "shortcuts": "Sneltoetsen",
+      "sendFeedback": "Feedback sturen",
+      "sendFeedbackNote": "Opent een GitHub-issue in je browser met de versie en het systeem al ingevuld. Er wordt niets verstuurd tot je het indient.",
       "reportProblem": "Probleem melden",
       "reportWorking": "Logs verzamelen…",
       "reportDone": "Diagnose opgeslagen. Voeg dit bestand toe aan je melding:",

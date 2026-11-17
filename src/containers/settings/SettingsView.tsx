@@ -336,6 +336,7 @@ export function SettingsView({
       <SupportSection
         shareTooltip={shareTooltip}
         onShareOption={onShareOption}
+        appVersion={appVersion}
       />
 
       <AboutSection

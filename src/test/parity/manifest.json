@@ -498,7 +498,8 @@
     "listPathStates",
     "listPathTakes",
     "savePathState",
-    "savePathTake"
+    "savePathTake",
+    "openFeedback"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
