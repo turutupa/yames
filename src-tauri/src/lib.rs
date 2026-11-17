@@ -142,6 +142,7 @@ pub mod probe {
 }
 
 use audio_input::create_shared_audio_input;
+use app_probe::callback_probe_report;
 use calibration_cache::create_shared_calibration_cache;
 use coach::create_shared_engine;
 use commands::{
@@ -946,7 +947,7 @@ pub fn run() {
             tts_list_voices,
             tts_voice_diagnostics,
             start_voice_repair,
-            app_probe::callback_probe_report,
+            callback_probe_report,
         ])
         .on_window_event(move |window, event| {
             match event {
