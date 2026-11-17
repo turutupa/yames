@@ -376,6 +376,10 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  /* Centred with left: 50%, an absolute box shrinks to the half of the
+     window right of that line: on a phone the text stood one word a line.
+     Size it to its text, up to the cap. */
+  width: max-content;
   max-width: min(460px, calc(100vw - 24px));
   padding: 8px 8px 8px 14px;
   border: 1px solid color-mix(in srgb, var(--feedback-miss) 45%, transparent);

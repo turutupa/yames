@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { WHATS_NEW_NOTES_KEY } from "../containers/onboarding/whats-new/whatsNew";
 import {
   androidBetaDownload,
   androidBetaInstall,
@@ -168,6 +169,11 @@ export function useAndroidBetaUpdate({
       }
       if (!live.current) return;
       setStatus("installing");
+      // What the new build says it changed, for its What's new on first open
+      // (the desktop updater does the same in useAppUpdates).
+      if (target.notes) {
+        await storeSave(WHATS_NEW_NOTES_KEY, { version: target.version, notes: target.notes }).catch(() => {});
+      }
       const result = await androidBetaInstall();
       if (!live.current) return;
       // The installer is on screen now, or Android's "Install unknown apps"

@@ -30,7 +30,7 @@ const FEED = {
   url: "https://github.com/turutupa/yames/releases/download/beta/Yames_1.3.0-beta.58_aarch64.apk",
   sha256: "b".repeat(64),
   size: 10,
-  notes: "",
+  notes: "Clearer update messages",
 };
 
 beforeEach(() => {
@@ -98,6 +98,14 @@ describe("useAndroidBetaUpdate", () => {
     act(() => result.current.check());
     await waitFor(() => expect(result.current.status).toBe("check-failed"));
     expect(result.current.error).toMatch(/resolve host/);
+  });
+
+  it("leaves the new build's notes for its What's new before the installer opens", async () => {
+    const { result } = mount();
+    await waitFor(() => expect(result.current.status).toBe("available"));
+    act(() => result.current.update());
+    await waitFor(() => expect(install).toHaveBeenCalled());
+    expect(store.get("whatsNew.pendingNotes")).toEqual({ version: FEED.version, notes: FEED.notes });
   });
 
   it("reports a failed download", async () => {

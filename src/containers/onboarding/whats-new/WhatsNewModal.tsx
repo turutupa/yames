@@ -14,10 +14,15 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { openUrl } from "../../../ipc";
+import { IS_BETA } from "../../../platform";
 import "../../../styles/help.css";
 
 /** GitHub's "latest release" page — same target the update banner links to. */
 export const RELEASE_NOTES_URL = "https://github.com/turutupa/yames/releases/latest";
+
+/** A test build's notes live on the rolling `beta` pre-release, which the
+ *  "latest" page (and the website) never show. */
+export const BETA_NOTES_URL = "https://github.com/turutupa/yames/releases/tag/beta";
 
 export type WhatsNewModalProps = {
   open: boolean;
@@ -108,7 +113,7 @@ export function WhatsNewModal({
             type="button"
             className="help-btn help-btn-ghost"
             onClick={() => {
-              openUrl(RELEASE_NOTES_URL).catch(() => {});
+              openUrl(IS_BETA ? BETA_NOTES_URL : RELEASE_NOTES_URL).catch(() => {});
             }}
           >
             {t("whatsNew.fullNotes")}
