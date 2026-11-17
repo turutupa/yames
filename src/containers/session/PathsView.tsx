@@ -12,6 +12,7 @@ import type { Exercise, PathDoc, Step } from "../../paths/format";
 import { barLine, tempoRange } from "../../session/coachWords";
 import { isRunnable, laterWhyKey } from "../../session/packs";
 import { stepPickDirectionMatters } from "../../session/caveats";
+import { testOutRetests } from "../../session/planner";
 import { PATH_BADGE_KEY, exerciseGradingKey, pathBadge } from "../../session/badges";
 import {
   cleanTempoOf,
@@ -506,7 +507,9 @@ function StepDetail({
               >
                 {t("session.paths.testOut")}
               </button>
-              <div className="session-why">{t("session.paths.testOutHow")}</div>
+              <div className="session-why" data-testid="step-test-out-how">
+                {t(testOutRetests(path, step, progress) ? "session.paths.testOutRetests" : "session.paths.testOutHow")}
+              </div>
             </div>
           )}
         </div>

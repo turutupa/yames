@@ -267,7 +267,8 @@
       "subscribeCap": "You can follow up to {{cap}} Paths in this test. Unsubscribe from one first; its history stays.",
       "unsubscribedNote": "Not in Today's plan. Your history is kept; subscribe again any time.",
       "testOut": "Test out",
-      "testOutHow": "One Take at each Exercise's pass tempo. Pass about three of four and the Step is done."
+      "testOutHow": "One Take at the pass tempo of each Exercise you haven't passed yet. Pass about three of four and the Step is done.",
+      "testOutRetests": "You've passed every Exercise here, so this re-tests them all: one Take each at the pass tempo."
     },
     "progress": {
       "title": "Progress",

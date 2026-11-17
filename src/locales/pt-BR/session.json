@@ -274,7 +274,8 @@
       "subscribeCap": "Neste teste você pode seguir até {{cap}} trilhas. Cancele uma primeiro; o histórico fica.",
       "unsubscribedNote": "Fora do plano de hoje. Seu histórico fica; inscreva-se de novo quando quiser.",
       "testOut": "Fazer teste",
-      "testOutHow": "Um take no tempo de aprovação de cada exercício. Passe em cerca de três de quatro e o passo está feito."
+      "testOutHow": "Um take no tempo de aprovação de cada exercício em que você ainda não passou. Passe em cerca de três de quatro e o passo está feito.",
+      "testOutRetests": "Você já passou em todos os exercícios daqui, então isto testa todos de novo: um take de cada no tempo de aprovação."
     },
     "progress": {
       "title": "Progresso",

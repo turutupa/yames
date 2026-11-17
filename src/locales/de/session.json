@@ -267,7 +267,8 @@
       "subscribeCap": "In diesem Test kannst du bis zu {{cap}} Pfaden folgen. Beende erst ein Abo; sein Verlauf bleibt erhalten.",
       "unsubscribedNote": "Nicht im heutigen Plan. Dein Verlauf bleibt; du kannst jederzeit wieder abonnieren.",
       "testOut": "Austesten",
-      "testOutHow": "Ein Take im Bestehenstempo jeder Übung. Besteh etwa drei von vier, und der Schritt ist erledigt."
+      "testOutHow": "Ein Take im Bestehenstempo jeder Übung, die du noch nicht bestanden hast. Besteh etwa drei von vier, und der Schritt ist erledigt.",
+      "testOutRetests": "Du hast hier jede Übung bestanden, also prüft das alle noch einmal: je ein Take im Bestehenstempo."
     },
     "progress": {
       "title": "Fortschritt",

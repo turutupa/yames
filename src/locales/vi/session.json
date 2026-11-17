@@ -267,7 +267,8 @@
       "subscribeCap": "Trong bản thử này bạn theo được tối đa {{cap}} lộ trình. Hãy hủy một cái trước; lịch sử vẫn được giữ.",
       "unsubscribedNote": "Không có trong kế hoạch hôm nay. Lịch sử vẫn còn; đăng ký lại bất cứ lúc nào.",
       "testOut": "Kiểm tra vượt",
-      "testOutHow": "Một lượt ở tempo đạt của mỗi bài. Đạt khoảng ba trên bốn là bước hoàn thành."
+      "testOutHow": "Một lượt ở tempo đạt cho mỗi bài bạn chưa đạt. Đạt khoảng ba trên bốn là bước hoàn thành.",
+      "testOutRetests": "Bạn đã đạt mọi bài ở đây, nên lần này kiểm tra lại tất cả: mỗi bài một lượt ở tempo đạt."
     },
     "progress": {
       "title": "Tiến bộ",

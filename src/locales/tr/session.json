@@ -267,7 +267,8 @@
       "subscribeCap": "Bu testte en fazla {{cap}} yol takip edebilirsin. Önce birinden çık; geçmişi kalır.",
       "unsubscribedNote": "Bugünün planında yok. Geçmişin duruyor; istediğin zaman yeniden abone ol.",
       "testOut": "Sınava gir",
-      "testOutHow": "Her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam."
+      "testOutHow": "Henüz geçmediğin her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam.",
+      "testOutRetests": "Buradaki her egzersizi geçtin, bu yüzden hepsini yeniden sınar: her biri için geçme temposunda bir kayıt."
     },
     "progress": {
       "title": "İlerleme",

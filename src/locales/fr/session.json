@@ -274,7 +274,8 @@
       "subscribeCap": "Dans ce test, tu peux suivre jusqu'à {{cap}} parcours. Désabonne-toi d'abord d'un parcours ; son historique est conservé.",
       "unsubscribedNote": "Absent du plan du jour. Ton historique est conservé ; réabonne-toi quand tu veux.",
       "testOut": "Valider l'étape",
-      "testOutHow": "Une prise au tempo de réussite de chaque exercice. Réussis environ trois sur quatre et l'étape est faite."
+      "testOutHow": "Une prise au tempo de réussite de chaque exercice pas encore réussi. Réussis environ trois sur quatre et l'étape est faite.",
+      "testOutRetests": "Tu as réussi tous les exercices ici, alors ceci les reteste tous : une prise chacun au tempo de réussite."
     },
     "progress": {
       "title": "Progrès",

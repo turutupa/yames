@@ -281,7 +281,8 @@
       "subscribeCap": "W tym teście możesz śledzić do {{cap}} ścieżek. Najpierw anuluj jedną; jej historia zostanie.",
       "unsubscribedNote": "Nie ma w dzisiejszym planie. Historia zostaje; subskrybuj ponownie w każdej chwili.",
       "testOut": "Zalicz krok",
-      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia. Zalicz około trzech z czterech i krok jest ukończony."
+      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia, którego jeszcze nie zaliczyłeś. Zalicz około trzech z czterech i krok jest ukończony.",
+      "testOutRetests": "Zaliczyłeś tu każde ćwiczenie, więc to sprawdzi je wszystkie ponownie: po jednym podejściu w tempie zaliczenia."
     },
     "progress": {
       "title": "Postępy",

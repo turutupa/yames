@@ -908,3 +908,39 @@ function skippedOf(
       };
     });
 }
+
+/** Minutes a Test out gives each Exercise: one Take at the pass tempo. */
+export const TEST_OUT_MINUTES = 2;
+
+/**
+ * Test out of a Step: one Take at the pass tempo for each gradable Exercise
+ * not passed yet (QA 2026-11-17 #18). When every one is passed already there is
+ * nothing left to prove, so it re-tests them all, and the Step page says so
+ * (`testOutRetests`).
+ */
+export function testOutSteps(path: PathDoc, step: Step, progress: PlayerProgress): PlanStep[] {
+  const gradable = step.exercises.filter(isGradable);
+  const open = gradable.filter((e) => !isExercisePassed(progress, path.id, e));
+  return (open.length > 0 ? open : gradable).map((exercise, i) => {
+    const bpm = exercise.tempo.passAtBpm ?? exercise.tempo.rungs[0]?.bpm ?? 60;
+    return {
+      kind: "exercise",
+      id: `test-${i}`,
+      role: "test",
+      pathId: path.id,
+      stepId: step.id,
+      exerciseId: exercise.id,
+      title: exercise.title,
+      bpm,
+      minutes: TEST_OUT_MINUTES,
+      variantSeed: null,
+      why: { code: "testOut", values: { step: step.title, bpm } },
+    };
+  });
+}
+
+/** Whether Test out on this Step would re-test Exercises already passed: all of them are. */
+export function testOutRetests(path: PathDoc, step: Step, progress: PlayerProgress): boolean {
+  const gradable = step.exercises.filter(isGradable);
+  return gradable.length > 0 && gradable.every((e) => isExercisePassed(progress, path.id, e));
+}

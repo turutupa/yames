@@ -6,6 +6,8 @@ import {
   planSession,
   rungsToDrop,
   tempoFor,
+  testOutRetests,
+  testOutSteps,
   warmupBpm,
 } from "./planner";
 import type { PlanMinutes, PlanStep, SessionPlan } from "./planner";
@@ -514,5 +516,30 @@ describe("two runnable Paths", () => {
     const steps = exerciseSteps(plan(10, p, [SWEEP]));
     expect(steps.length).toBeGreaterThan(0);
     expect(steps.every((x) => x.pathId === SWEEP.id)).toBe(true);
+  });
+});
+
+describe("Test out (QA 2026-11-17 #18)", () => {
+  const step = ALT.steps[0];
+  const gradable = step.exercises.filter((e) => e.grading === "graded" && e.tempo.passAtBpm !== null);
+  const passAt = (e: Exercise) => e.tempo.passAtBpm!;
+
+  it("skips the Exercises already passed, each other one a Take at its pass tempo", () => {
+    const first = gradable[0];
+    const p = progress({ ceilings: [ceiling(first.id, passAt(first))] });
+    const steps = testOutSteps(ALT, step, p);
+    expect(steps.map((s) => s.kind === "exercise" && s.exerciseId)).toEqual(gradable.slice(1).map((e) => e.id));
+    for (const s of steps) {
+      if (s.kind !== "exercise") throw new Error("not an exercise");
+      expect(s.role).toBe("test");
+      expect(s.bpm).toBe(passAt(gradable.find((e) => e.id === s.exerciseId)!));
+    }
+    expect(testOutRetests(ALT, step, p)).toBe(false);
+  });
+
+  it("with every one passed, re-tests them all, and says so", () => {
+    const p = progress({ ceilings: gradable.map((e) => ceiling(e.id, passAt(e))) });
+    expect(testOutSteps(ALT, step, p)).toHaveLength(gradable.length);
+    expect(testOutRetests(ALT, step, p)).toBe(true);
   });
 });

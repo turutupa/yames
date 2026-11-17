@@ -62,14 +62,13 @@ import { gradeTake } from "../../../session/grade";
 import type { BarCheck, TakeGrade } from "../../../session/grade";
 import { measureTake } from "../../../session/takeMeasures";
 import type { TakeMeasures } from "../../../session/takeMeasures";
-import { PLAN_MINUTES, edgeStep, planSession } from "../../../session/planner";
+import { PLAN_MINUTES, TEST_OUT_MINUTES, edgeStep, planSession, testOutSteps } from "../../../session/planner";
 import { SUBSCRIPTION_CAP } from "../../../session/rotation";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../../session/planner";
 import {
   NO_PROGRESS,
   cleanTempoOf,
   factsOf,
-  isGradable,
   isSubscribed,
   lastCaughtTake,
   nextStepAfterPass,
@@ -102,7 +101,6 @@ const PRACTICE_VIEW_KEY = "practiceView";
 const BAND_VOLUME_KEY = "session.bandVolume";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
-const TEST_OUT_MINUTES = 2;
 /** How many recent timing deviations the running screen's strip shows. */
 const STRIP_NOTES = 24;
 
@@ -919,28 +917,13 @@ export function useSessionRun(input: SessionRunInput) {
   /** Test out of a Step: one Take at each graded Exercise's pass tempo. */
   const testOut = useCallback(
     (path: PathDoc, pathStep: Step) => {
-      const steps: PlanStep[] = pathStep.exercises.filter(isGradable).map((exercise, i) => {
-        const bpm = exercise.tempo.passAtBpm ?? exercise.tempo.rungs[0]?.bpm ?? 60;
-        return {
-          kind: "exercise",
-          id: `test-${i}`,
-          role: "test",
-          pathId: path.id,
-          stepId: pathStep.id,
-          exerciseId: exercise.id,
-          title: exercise.title,
-          bpm,
-          minutes: TEST_OUT_MINUTES,
-          variantSeed: null,
-          why: { code: "testOut", values: { step: pathStep.title, bpm } },
-        };
-      });
+      const steps = testOutSteps(path, pathStep, progress);
       if (steps.length === 0) return;
       const total = steps.length * TEST_OUT_MINUTES;
       const minutes = PLAN_MINUTES.find((m) => m >= total) ?? 20;
       begin({ minutes, mood: "returning", daysAway: null, steps });
     },
-    [begin],
+    [begin, progress],
   );
 
   /**
