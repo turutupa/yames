@@ -21,10 +21,14 @@ const NOTE_R = 0.05;
 export const noteX = (f: number) => (f <= 0 ? -0.07 : fretX(f) - NOTE_R - 0.021);
 const INLAY_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const DOUBLE = (f: number) => f === 12 || f === 24;
-const span = (x: number) => (0.36 + (0.16 * x) / L) * NW;
+// The taper, nut to the 24th fret. A real neck goes about 43 mm to 56 mm (0.77),
+// but seen whole on a wide, short stage that reads as a wedge with the nut end
+// pinched. The board runs 0.46 to 0.545 (0.84; about 0.87 on screen, nut piece to
+// end bar) and the strings keep the same margin to its edges all the way up.
+const span = (x: number) => (0.375 + (0.11 * x) / L) * NW;
 export const strZ = (s: number, x: number) => ((s - 3.5) * span(x)) / 5;
 export const XEND = fretX(24) + 0.14;
-export const boardW = (x: number) => (0.43 + ((0.565 - 0.43) * Math.max(0, x)) / XEND) * NW;
+export const boardW = (x: number) => (0.46 + ((0.545 - 0.46) * Math.max(0, x)) / XEND) * NW;
 const crown = (z: number) => (-z * z) / (2 * RAD);
 const strH = (x: number) => 0.05 + (0.018 * x) / L;
 const GAUGE = [0.0034, 0.0043, 0.0056, 0.0074, 0.0092, 0.0112];
