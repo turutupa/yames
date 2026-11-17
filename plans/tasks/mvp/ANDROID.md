@@ -96,7 +96,7 @@ calibration (the first run's "hear it work") applies as on a desktop.
 ## Installing a test APK on a phone
 
 1. A push to `mvp-android` builds it (or, once `android.yml` is on `main`,
-   **Actions › Android (signed release) › Run workflow**
+   **Actions › Android (signed release) › Run workflow**)
    on the branch, with an empty tag. Without the `ANDROID_KEYSTORE_*` secrets
    the APK is signed with a throwaway key made in that run (`*-test-signed.apk`
    in the `yames-android-<version>` artifact); with them, it is signed with the
