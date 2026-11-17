@@ -143,6 +143,14 @@ impl RingBuffer {
         self.write_pos
     }
 
+    /// How many samples have been written since `cursor`, without reading
+    /// them. A reader more than a whole ring behind cannot be told from one
+    /// that is not, which a reader polling every few ms never is.
+    pub fn pending_since(&self, cursor: usize) -> usize {
+        let from = cursor % self.capacity;
+        (self.write_pos + self.capacity - from) % self.capacity
+    }
+
     /// Append everything written since `cursor` to `out`, and move `cursor`
     /// up to date.
     ///
@@ -246,6 +254,11 @@ pub struct AudioInput {
     /// time, which is the part of the input path that dominates on every
     /// machine anyone runs this on. See [`Self::input_latency_us`].
     input_frames: Arc<AtomicU32>,
+    /// Input buffers the callback could not write to the ring because its
+    /// `try_lock` failed: audio the onset detector never saw. One relaxed
+    /// increment on the failure path and nothing else; read by the session
+    /// log and the probes. Reset when a stream starts.
+    ring_drops: Arc<AtomicU64>,
 }
 
 // Safety: AudioInput doesn't hold cpal::Stream — it lives on its own thread.
@@ -275,6 +288,7 @@ impl AudioInput {
             take_ring: Arc::new(Mutex::new(None)),
             take_recording: Arc::new(AtomicBool::new(false)),
             input_frames: Arc::new(AtomicU32::new(0)),
+            ring_drops: Arc::new(AtomicU64::new(0)),
         }
     }
 
@@ -426,6 +440,8 @@ impl AudioInput {
         // A new stream is a new buffer size; the old one is not evidence
         // about this device.
         self.input_frames.store(0, Ordering::SeqCst);
+        let ring_drops_cb = self.ring_drops.clone();
+        self.ring_drops.store(0, Ordering::SeqCst);
 
         // Optional session-audio recording (dev-only, env-gated). Initialize
         // BEFORE the capture thread launches so the cpal callback can see
@@ -593,6 +609,7 @@ impl AudioInput {
                     let take_ring_f32 = take_ring_cb.clone();
                     let take_on_f32 = take_recording_cb.clone();
                     let frames_f32 = input_frames_cb.clone();
+                    let drops_f32 = ring_drops_cb.clone();
                     device.build_input_stream(
                     &config,
                     move |data: &[f32], _: &cpal::InputCallbackInfo| {
@@ -600,6 +617,8 @@ impl AudioInput {
                         let mono: Vec<f32> = data.chunks(channels).map(|f| f[ch] * g).collect();
                         if let Ok(mut r) = ring_for_callback.try_lock() {
                             r.write(&mono);
+                        } else {
+                            drops_f32.fetch_add(1, Ordering::Relaxed);
                         }
                         // A jam take, if one is running. Lock-free and
                         // unconditional apart from one relaxed load, so the
@@ -676,6 +695,7 @@ impl AudioInput {
                     let take_ring_i16 = take_ring_cb.clone();
                     let take_on_i16 = take_recording_cb.clone();
                     let frames_i16 = input_frames_cb.clone();
+                    let drops_i16 = ring_drops_cb.clone();
                     device.build_input_stream(
                     &config,
                     move |data: &[i16], _: &cpal::InputCallbackInfo| {
@@ -685,6 +705,8 @@ impl AudioInput {
                             .collect();
                         if let Ok(mut r) = ring_for_callback.try_lock() {
                             r.write(&mono);
+                        } else {
+                            drops_i16.fetch_add(1, Ordering::Relaxed);
                         }
                         if take_on_i16.load(Ordering::Relaxed) {
                             take_ring_i16.push(&mono);
@@ -868,6 +890,12 @@ impl AudioInput {
     /// that leaves the mic fractionally late, which is the right way round
     /// to be wrong, because over-correcting would put the player's response
     /// AHEAD of the beat they were responding to.
+    /// Input buffers dropped since the stream started because the ring was
+    /// locked when the callback came. See the field.
+    pub fn ring_drops(&self) -> u64 {
+        self.ring_drops.load(Ordering::Relaxed)
+    }
+
     pub fn input_latency_us(&self) -> u64 {
         let frames = self.input_frames.load(Ordering::Relaxed) as u64;
         let sr = self.sample_rate().max(1) as u64;

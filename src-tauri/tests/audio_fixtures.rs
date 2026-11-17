@@ -36,10 +36,11 @@ use yames_lib::pitch::{
     identify_take_notes, note_identity, MatchedOnset, NoteIdentity, OnsetState as PitchState,
     PitchConfig, ScoreNote,
 };
+use yames_lib::score::notes::TakeAudio;
 use yames_lib::score::pass::clean_tempo;
 use yames_lib::score::{
     evenness, match_attempt, smallest_gap_beats, BeatMap, CalibrationSource, ExpectedOnset,
-    NoCatchReason, OnsetState, PassBar, PassResult, PassVerdict, PlayedOnset, ScheduleReport,
+    NoCatchReason, NotesCheck, NotesStatus, OnsetState, PassBar, PassResult, PassVerdict, PlayedOnset, ScheduleReport,
     ScheduleRun, ScoreSchedule, TakeVerdict,
 };
 
@@ -167,6 +168,12 @@ struct Take {
     scored_as: Option<ScoreSchedule>,
     /// The Exercise's pass bars, as `load_score_schedule` is handed them.
     pass_bars: Vec<PassBar>,
+    /// The written pitch of each played onset, when it is not `pattern`'s: an
+    /// Exercise from the packs, its own notes.
+    midis: Option<Vec<f64>>,
+    /// The written pitch of every note id the scored schedule names, as
+    /// `load_score_schedule` is handed them for the pitch pass.
+    pitches: Vec<ScoreNote>,
     feed: Feed,
     seed: u64,
 }
@@ -189,6 +196,8 @@ impl Take {
             cached_offset_ms: None,
             scored_as: None,
             pass_bars: Vec::new(),
+            midis: None,
+            pitches: Vec::new(),
             feed: Feed::default(),
             seed: 42,
         }
@@ -237,7 +246,7 @@ fn plan(take: &Take) -> Truth {
     let mut devs = Vec::new();
     let mut midi_written = Vec::new();
     for (i, onset) in take.schedule.onsets.iter().enumerate() {
-        let midi = take.pattern.midi(i);
+        let midi = take.midis.as_ref().map_or_else(|| take.pattern.midi(i), |m| m[i]);
         midi_written.push(midi);
         let dev = gaussian(&mut rng) * take.jitter_ms + take.lean_ms;
         // Down and up strokes are not the same size, and no two are.
@@ -763,6 +772,7 @@ struct PathRow {
     exercise: String,
     bpm: f64,
     schedule: ScoreSchedule,
+    pitches: Vec<ScoreNote>,
 }
 
 fn path_rows() -> Vec<PathRow> {
@@ -844,10 +854,16 @@ fn pack_pass_bars(path: &str, exercise: &str) -> Vec<PassBar> {
 /// A Take on a looping Exercise from the packs, `passes` times round, at
 /// `bpm`. The scorer is handed the loop; the audio is the loop unrolled.
 fn exercise_take(exercise: &str, bpm: f64, passes: usize) -> Take {
+    path_take("alternate-picking", exercise, bpm, passes)
+}
+
+/// [`exercise_take`] on any Path, its own notes played at their own pitches.
+fn path_take(path: &str, exercise: &str, bpm: f64, passes: usize) -> Take {
     let row = path_rows()
         .into_iter()
-        .find(|r| r.path == "alternate-picking" && r.exercise == exercise)
-        .unwrap_or_else(|| panic!("{exercise} in schedules.jsonl"));
+        .find(|r| r.path == path && r.exercise == exercise)
+        .unwrap_or_else(|| panic!("{path}/{exercise} in schedules.jsonl"));
+    let pitch_of = |id: u32| row.pitches.iter().find(|n| n.id == id).map(|n| n.midi).unwrap_or(52.0);
     let looped = ScoreSchedule {
         loops: true,
         ..row.schedule.clone()
@@ -864,13 +880,20 @@ fn exercise_take(exercise: &str, bpm: f64, passes: usize) -> Take {
         }
     }
     let mut take = Take::new(Tone::Clean, bpm, 0);
+    take.midis = Some(
+        onsets
+            .iter()
+            .map(|o| o.note_ids.first().copied().map_or(52.0, pitch_of))
+            .collect(),
+    );
     take.schedule = ScoreSchedule {
         onsets,
         length_beats: length * passes as f64,
         loops: false,
     };
     take.scored_as = Some(looped);
-    take.pass_bars = pack_pass_bars("alternate-picking", exercise);
+    take.pass_bars = pack_pass_bars(path, exercise);
+    take.pitches = row.pitches.clone();
     take
 }
 
@@ -1028,6 +1051,133 @@ fn a_finished_take_says_which_notes_were_right() {
         println!("{} with 12 wrong: {id:?}", wrong.name);
         assert!(id.wrong >= 10 && id.wrong <= 15, "{}: {id:?}", wrong.name);
     }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Right notes in the pass rule: the pitch pass a Session Take gets
+// ──────────────────────────────────────────────────────────────────────
+
+/// A Take the way the analyzer grades it once its audio has been through the
+/// pitch pass (`ScheduleRun::report_with_notes`): the same run as `run_take`,
+/// with the written pitches loaded and the Take's own audio, whose first
+/// sample is the detector clock's zero.
+fn run_take_with_notes(take: &Take) -> (GradingRun, ScheduleReport) {
+    let run = run_take(take);
+    let length = take.schedule.length_beats;
+    let quarters: Vec<f64> = (0..=(length.ceil() as usize + 1))
+        .map(|i| run.first_beat_ms + i as f64 * run.quarter_ms)
+        .collect();
+    let scored = take.scored_as.as_ref().unwrap_or(&take.schedule);
+    let mut sr = ScheduleRun::new(scored.clone())
+        .with_calibration_seed(take.cached_offset_ms)
+        .with_lag_correction(true)
+        .with_pass_bars(take.pass_bars.clone())
+        .with_note_pitches(take.pitches.clone());
+    assert!(sr.wants_notes(), "{}: a noteIdentity bar and pitches", run.name);
+    for (i, &t) in quarters.iter().enumerate() {
+        sr.note_quarter_in_bar(i == 0, t, 4);
+    }
+    for o in &run.onsets {
+        sr.note_onset(*o);
+    }
+    let weights = Instrument::ElectricGuitar.profile().score_weights;
+    let audio = TakeAudio {
+        samples: &run.audio,
+        rate: RATE,
+        start_ms: 0.0,
+    };
+    let t = std::time::Instant::now();
+    let report = sr.report_with_notes(&weights, &audio).expect("a beat map");
+    println!("{}: pitch pass {:?} over {:.1} s", run.name, t.elapsed(), run.audio.len() as f64 / RATE as f64);
+    (run, report)
+}
+
+fn notes_of(pass: &PassResult) -> NotesCheck {
+    pass.notes.expect("a noteIdentity bar")
+}
+
+/// The Alternate Picking Exercise that names `noteIdentity`, played right on a
+/// clean tone and on high gain: right notes are measured, held and in the
+/// verdict, where before this they were "not checked".
+#[test]
+fn right_notes_are_measured_on_a_take_played_right() {
+    for tone in [Tone::Clean, Tone::HighGain, Tone::Damped] {
+        let mut take = exercise_take("even-eighths.a-minor-one-string", 100.0, 4);
+        take.tone = tone;
+        let (run, report) = run_take_with_notes(&take);
+        let pass = report.grade.pass.as_ref().unwrap();
+        println!("{}\n  {pass:?}", run.line());
+        assert_eq!(notes_of(pass).status, NotesStatus::Measured, "{pass:?}");
+        assert!(pass.not_assessed.is_empty(), "{pass:?}");
+        let check = pass.checks.iter().find(|c| c.metric == "noteIdentity").unwrap();
+        assert!(check.held && check.measured.unwrap() >= 0.95, "{check:?}");
+        assert_eq!(pass.verdict, PassVerdict::Passed);
+        assert!(pass.counts_for_clean_tempo);
+        // The timing is the same grade it was without the notes.
+        let timed = run.grade().pass.as_ref().unwrap();
+        assert_eq!(timed.not_assessed, vec!["noteIdentity".to_string()]);
+        assert_eq!(&pass.checks[..3], &timed.checks[..]);
+    }
+}
+
+/// Every fourth note a semitone off: a quarter of them wrong, against a bar
+/// of 0.9. The Take fails on right notes, and only on them.
+#[test]
+fn wrong_notes_fail_the_take_on_note_identity_alone() {
+    let mut take = exercise_take("even-eighths.a-minor-one-string", 100.0, 4);
+    take.wrong = (0..64).step_by(4).collect();
+    let (run, report) = run_take_with_notes(&take);
+    let pass = report.grade.pass.as_ref().unwrap();
+    println!("{}\n  {pass:?}", run.line());
+    assert_eq!(notes_of(pass).status, NotesStatus::Measured);
+    assert_eq!(pass.verdict, PassVerdict::Failed, "{pass:?}");
+    let check = pass.checks.iter().find(|c| c.metric == "noteIdentity").unwrap();
+    assert!(!check.held);
+    let v = check.measured.unwrap();
+    assert!((0.65..=0.85).contains(&v), "about three in four right: {v}");
+    assert!(pass.checks.iter().filter(|c| c.metric != "noteIdentity").all(|c| c.held));
+    assert!(!pass.counts_for_clean_tempo);
+}
+
+/// Notes left ringing under the next, closer together than they ring
+/// (GRADING_LIMITS.md: sixteenths at 120 on the ringing tone give a pitch for
+/// one note in six). Right notes are not assessed, and timing decides. At
+/// eighths on one string the same tone is measured, and right: it is the
+/// overlap that spoils it, not the tone.
+#[test]
+fn notes_that_ring_into_each_other_leave_right_notes_unassessed() {
+    let mut take = Take::new(Tone::Ringing, 120.0, 96);
+    take.jitter_ms = 3.0;
+    take.pass_bars = pack_pass_bars("alternate-picking", "even-eighths.a-minor-one-string");
+    take.pitches = (0..96)
+        .map(|i| ScoreNote {
+            id: i as u32,
+            midi: take.pattern.midi(i),
+        })
+        .collect();
+    let (run, report) = run_take_with_notes(&take);
+    let pass = report.grade.pass.as_ref().unwrap();
+    println!("{}\n  {pass:?}", run.line());
+    assert_eq!(notes_of(pass).status, NotesStatus::NotesRing, "{pass:?}");
+    assert_eq!(pass.not_assessed, vec!["noteIdentity".to_string()]);
+    assert_eq!(pass.verdict, PassVerdict::Passed);
+}
+
+/// A sweep, on the swept tone: every Sweep Picking Exercise names
+/// `noteIdentity`, and on notes that ring across strings the honest answer is
+/// that they were not checked. The Take is still graded on its timing.
+#[test]
+fn a_sweep_played_right_passes_on_timing_and_says_the_notes_were_not_checked() {
+    let mut take = path_take("sweep-picking", "two-strings.down-two", 80.0, 8);
+    take.tone = Tone::Swept;
+    take.jitter_ms = 3.0;
+    let (run, report) = run_take_with_notes(&take);
+    let pass = report.grade.pass.as_ref().unwrap();
+    println!("{}\n  {pass:?}", run.line());
+    assert_ne!(notes_of(pass).status, NotesStatus::Measured, "{pass:?}");
+    assert_eq!(pass.not_assessed, vec!["noteIdentity".to_string()]);
+    assert_eq!(pass.verdict, PassVerdict::Passed, "{pass:?}");
+    assert!(pass.counts_for_clean_tempo);
 }
 
 // ──────────────────────────────────────────────────────────────────────

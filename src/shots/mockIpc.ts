@@ -889,6 +889,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     store.delete("presets");
   }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
+  if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 

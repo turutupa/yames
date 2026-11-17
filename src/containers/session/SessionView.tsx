@@ -6,7 +6,6 @@
  * `bigAction`, so they cannot disagree.
  */
 import { useTranslation } from "react-i18next";
-import type { Exercise } from "../../paths/format";
 import {
   barLine,
   displayBar,
@@ -24,11 +23,12 @@ import {
   isEdgeStep,
   minutesLeft,
   stepRemainingMs,
-  tempoNudges,
 } from "../../session/runner";
-import type { BigAction, RunState, TakeOutcome } from "../../session/runner";
+import type { RunState, TakeOutcome } from "../../session/runner";
 import type { BeatPosition } from "../../songs/position";
 import { ExerciseStage } from "./ExerciseStage";
+import { CoachLine, TempoNudges, bigLabel } from "./parts";
+import { PracticeViewSwitch, RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
 import type { NeckKind, NeckView } from "../../stage3d/api";
@@ -47,39 +47,6 @@ function playedNotes(session: SessionRun) {
 function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
   const { view, notes } = exerciseNeck(playedNotes(session), kind);
   return useNeckSlot(view, notes, { sweep });
-}
-
-/** One line from the coach, with its lamp. */
-function CoachLine({ children, good }: { children: React.ReactNode; good?: boolean }) {
-  return (
-    <div className="session-coach session-glass">
-      <i className="session-lamp" data-good={good ? "" : undefined} />
-      <div>{children}</div>
-    </div>
-  );
-}
-
-type T = ReturnType<typeof useTranslation>["t"];
-
-function bigLabel(action: BigAction, t: T): string {
-  switch (action.kind) {
-    case "playTake":
-      return t("session.run.playTake", { bpm: action.bpm });
-    case "endTake":
-      return t("session.run.endTake");
-    case "again":
-      return t("session.run.goAgain", { bpm: action.bpm });
-    case "next":
-      return t("session.run.next", {
-        title: stepTitle(action.step, t),
-      });
-    case "finish":
-      return t("session.run.finish");
-    case "close":
-      return t("session.run.done");
-    case "none":
-      return "";
-  }
 }
 
 /** Exit, how far along, and how long is left. The mocks' session bar. */
@@ -141,37 +108,6 @@ function TimingStrip({ deviations }: { deviations: readonly number[] }) {
   );
 }
 
-function TempoNudges({
-  run,
-  exercise,
-  session,
-}: {
-  run: RunState;
-  exercise: Exercise | null;
-  session: SessionRun;
-}) {
-  const { t } = useTranslation();
-  const can = tempoNudges(run, exercise);
-  return (
-    <div className="session-nudges">
-      <button
-        className="session-secondary"
-        disabled={!can.slower}
-        onClick={session.actions.slower}
-      >
-        {t("session.run.slower")}
-      </button>
-      <button
-        className="session-secondary"
-        disabled={!can.faster}
-        onClick={session.actions.faster}
-      >
-        {t("session.run.faster")}
-      </button>
-    </div>
-  );
-}
-
 /** One line for each thing the pedal does, so nobody has to remember. */
 function PedalCard() {
   const { t } = useTranslation();
@@ -194,7 +130,6 @@ function PedalCard() {
 function TakeScreen({
   session,
   themeId,
-  beat,
   isPlaying,
   listening,
   hasSignal,
@@ -202,7 +137,6 @@ function TakeScreen({
 }: {
   session: SessionRun;
   themeId: string;
-  beat: BeatPosition | null;
   isPlaying: boolean;
   listening: boolean;
   hasSignal: boolean;
@@ -228,12 +162,17 @@ function TakeScreen({
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
       <div className="session-takeinfo">
         <span className="session-kick">
-          {isEdgeStep(step) ? t("session.edge.kick") : t("session.kind.mechanics")}
+          {isEdgeStep(step)
+            ? t("session.edge.kick")
+            : isTheoryTake(session)
+              ? t("session.kind.theory")
+              : t("session.kind.mechanics")}
           {pathTitle &&
             ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
         </span>
         <h2 className="session-h3">{exercise.title}</h2>
         <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
+        <PracticeViewSwitch session={session} locked={running} />
       </div>
 
       <div className="session-takerow">
@@ -268,15 +207,19 @@ function TakeScreen({
       <div className="session-slot" ref={slot} aria-hidden="true" />
 
       <div className="session-mechlow">
-        <div className="session-glass">
-          <ExerciseStage
-            take={take}
-            tick={running && beat && !beat.songCountIn ? beat.songTick : 0}
-            playing={running && isPlaying && !beat?.songCountIn}
-            themeId={themeId}
-            lights={lights}
-          />
-        </div>
+        {/* The tab is for reading the Exercise before it starts; while it
+            runs the neck is the one picture (one pair of eyes). */}
+        {!running && (
+          <div className="session-glass">
+            <ExerciseStage
+              take={take}
+              tick={0}
+              playing={false}
+              themeId={themeId}
+              lights={lights}
+            />
+          </div>
+        )}
         <div className="session-col">
           {running && <CoachLine>{exercise.coachLine}</CoachLine>}
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
@@ -819,11 +762,20 @@ export function SessionView({
   return (
     <div className="session-page session-run" data-testid="session" data-neck3d={neck3d}>
       {run.phase !== "recap" && <SessionBar run={run} onExit={actions.exit} />}
-      {(run.phase === "ready" || run.phase === "playing") && (
+      {(run.phase === "ready" || run.phase === "playing") && session.practiceView === "runway" && (
+        <RunwayTakeScreen
+          session={session}
+          beat={beat}
+          isPlaying={isPlaying}
+          listening={listening}
+          hasSignal={hasSignal}
+          onCheckSound={onCheckSound}
+        />
+      )}
+      {(run.phase === "ready" || run.phase === "playing") && session.practiceView !== "runway" && (
         <TakeScreen
           session={session}
           themeId={themeId}
-          beat={beat}
           isPlaying={isPlaying}
           listening={listening}
           hasSignal={hasSignal}

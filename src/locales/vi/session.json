@@ -21,7 +21,8 @@
       "even": "độ đều",
       "heard": "số nốt nghe được",
       "extras": "nốt thừa",
-      "accents": "nhấn đúng"
+      "accents": "nhấn đúng",
+      "notes": "đúng nốt"
     },
     "today": {
       "title": "Hôm nay",
@@ -52,14 +53,16 @@
         "heard": "Vì tôi nghe được {{value}}% số nốt ở {{bpm}} BPM. Mức đạt là {{bar}}%.",
         "extras": "Vì có nốt thừa ở {{bpm}} BPM. Mức đạt là {{bar}} trong bốn ô nhịp.",
         "accents": "Vì {{value}}% số nhấn rơi đúng ở {{bpm}} BPM. Mức đạt là {{bar}}%.",
-        "plain": "Vì lượt gần nhất ở {{bpm}} BPM chưa đạt mức."
+        "plain": "Vì lượt gần nhất ở {{bpm}} BPM chưa đạt mức.",
+        "notes": "Vì ở {{bpm}} BPM, {{value}}% số nốt tôi nhận ra cao độ là đúng nốt đã viết. Mức đạt là {{bar}}%."
       },
       "easing": {
         "even": "Độ đều là {{value}}% ở {{bpm}} BPM và mức đạt là {{bar}}%, nên lần này là {{next}} BPM.",
         "heard": "Tôi nghe được {{value}}% số nốt ở {{bpm}} BPM và mức đạt là {{bar}}%, nên lần này là {{next}} BPM.",
         "extras": "Có nốt thừa ở {{bpm}} BPM, nên lần này là {{next}} BPM.",
         "accents": "{{value}}% số nhấn rơi đúng ở {{bpm}} BPM và mức đạt là {{bar}}%, nên lần này là {{next}} BPM.",
-        "plain": "Các lượt gần nhất ở {{bpm}} BPM chưa đạt mức, nên lần này là {{next}} BPM."
+        "plain": "Các lượt gần nhất ở {{bpm}} BPM chưa đạt mức, nên lần này là {{next}} BPM.",
+        "notes": "Ở {{bpm}} BPM, {{value}}% số nốt nhận ra được là đúng nốt đã viết và mức đạt là {{bar}}%, nên lần này là {{next}} BPM."
       },
       "climb": "Vì bạn đã đạt mức ở {{bpm}} BPM. Nấc tiếp theo: {{next}}.",
       "climbFast": "Vì độ đều là {{value}}% ở {{bpm}} BPM, vượt xa mức đạt. Lần này nhảy lên {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "Mức đạt là {{bar}}",
       "cleanFirst": "Tempo sạch: {{bpm}} BPM.",
       "cleanMoved": "Tempo sạch: từ {{from}} lên {{bpm}} BPM.",
-      "unmeasuredNotes": "Tôi chỉ kiểm tra nhịp. Chơi đúng nốt hay không thì chưa được chấm.",
+      "unmeasuredNotes": "Tôi đã kiểm tra nhịp. Tôi không nghe các nốt đủ rõ để nói chúng có đúng không, nên lần này phần đó không được chấm.",
       "againSame": "Lại lần nữa, {{bpm}} BPM",
       "moveOn": "Đi tiếp"
     },
@@ -144,7 +147,8 @@
         "even": "Độ đều là {{value}}%. Nghe được {{heard}} trên {{expected}} nốt. Cùng nốt, cùng tempo.",
         "heard": "Tôi nghe được {{heard}} trên {{expected}} nốt, mà thiếu nốt thì nhịp không thể đạt.",
         "extras": "{{extras}} nốt tôi không chờ đợi. Nếu dây không chơi đang ngân, hãy chặn chúng lại.",
-        "accents": "{{value}}% số nhấn được đánh dấu vang to hơn các nốt xung quanh."
+        "accents": "{{value}}% số nhấn được đánh dấu vang to hơn các nốt xung quanh.",
+        "notes": "{{value}}% số nốt tôi nhận ra cao độ là đúng nốt đã viết. Cùng nốt, cùng tempo, và để ý phím đàn."
       }
     },
     "noCatch": {
@@ -193,6 +197,7 @@
       "mechanicsSub": "Tay bạn chơi thế nào",
       "later": "Để sau",
       "laterWhy": "Bạn có thể đọc phần này ngay. Phần chấm điểm nó cần sẽ có sau.",
+      "laterWhyLanding": "Bạn có thể đọc lộ trình này ngay. Nó được chấm theo các nốt bạn dừng lên trên hợp âm, mà ứng dụng chưa đánh giá được, nên nó chưa có trong các buổi tập của bạn.",
       "stepCount": "{{count}} bước",
       "stepCount_other": "{{count}} bước",
       "draft": "Bản nháp",
@@ -242,6 +247,15 @@
       "drill": "Tăng tốc độ khi bạn chơi, và luyện một kế hoạch bạn tự viết.",
       "jam": "Một ban nhạc và hợp âm của bạn. Không bao giờ chấm điểm.",
       "songs": "Đọc tab của một bài hát và chơi theo."
+    },
+    "view": {
+      "label": "Chế độ xem luyện tập",
+      "neck": "Cần đàn",
+      "runway": "Đường băng",
+      "between": "Đổi chế độ xem giữa các lượt chơi"
+    },
+    "runway": {
+      "label": "Những nốt tiếp theo đang tiến đến vạch"
     }
   }
 }

@@ -177,6 +177,11 @@ struct Capture {
     scratch: Vec<f32>,
     gain: Arc<AtomicU32>,
     ring: Arc<Mutex<RingBuffer>>,
+    /// Buffers the ring's `try_lock` turned away (the detector thread held
+    /// it). Read at session stop into the log's `input_ring_drops`, as on a
+    /// desktop; the right-notes capture reads that ring, so a drop is audio
+    /// the note grader never saw.
+    ring_drops: Arc<AtomicU64>,
     take_ring: Arc<TakeRing>,
     take_on: Arc<AtomicBool>,
     frames_seen: Arc<AtomicU32>,
@@ -212,6 +217,8 @@ impl Capture {
             let mono = &self.scratch[..];
             if let Ok(mut r) = self.ring.try_lock() {
                 r.write(mono);
+            } else {
+                self.ring_drops.fetch_add(1, Ordering::Relaxed);
             }
             if self.take_on.load(Ordering::Relaxed) {
                 self.take_ring.push(mono);
@@ -351,6 +358,7 @@ impl AudioInput {
         *self.session_recorder.lock().unwrap() = None;
         self.audio_levels.lock().unwrap().clear();
         self.input_frames.store(0, Ordering::SeqCst);
+        self.ring_drops.store(0, Ordering::SeqCst);
 
         self.stream_generation.fetch_add(1, Ordering::SeqCst);
         let my_gen = self.stream_generation.load(Ordering::SeqCst);
@@ -358,6 +366,7 @@ impl AudioInput {
         let alive = self.alive.clone();
         alive.store(true, Ordering::SeqCst);
         let ring = self.ring.clone();
+        let ring_drops = self.ring_drops.clone();
         let sample_rate_slot = self.sample_rate.clone();
         let take_ring_slot = self.take_ring.clone();
         let take_on = self.take_recording.clone();
@@ -427,6 +436,7 @@ impl AudioInput {
                     scratch: Vec::with_capacity(SCRATCH_FRAMES),
                     gain: gain.clone(),
                     ring: ring.clone(),
+                    ring_drops: ring_drops.clone(),
                     take_ring,
                     take_on: take_on.clone(),
                     frames_seen: frames_seen.clone(),

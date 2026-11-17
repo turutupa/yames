@@ -150,6 +150,7 @@
     "list_path_takes",
     "save_path_state",
     "save_path_take",
+    "get_take_grade_with_notes",
     "release_jam_sounds"
   ],
   "ipcCommands": [
@@ -301,6 +302,7 @@
     "list_path_takes",
     "save_path_state",
     "save_path_take",
+    "get_take_grade_with_notes",
     "release_jam_sounds"
   ],
   "commandsInvokedOutsideIpc": [
@@ -502,6 +504,7 @@
     "savePathState",
     "savePathTake",
     "openFeedback",
+    "getTakeGradeWithNotes",
     "releaseJamSounds"
   ],
   "ipcWrappersWithoutCaller": [
@@ -1381,6 +1384,11 @@
       "written": true
     },
     "session.minutes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "practiceView": {
       "store": "settings.json",
       "read": true,
       "written": true

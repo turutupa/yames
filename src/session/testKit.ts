@@ -5,6 +5,9 @@ import type { PlayerProgress, TakeFacts } from "./progress";
 
 const PACKS = import.meta.glob("../paths/packs/alternate-picking.json", { eager: true });
 export const ALT = (Object.values(PACKS)[0] as { default: unknown }).default as PathDoc;
+const SWEEP_PACK = import.meta.glob("../paths/packs/sweep-picking.json", { eager: true });
+/** The second runnable Path. */
+export const SWEEP = (Object.values(SWEEP_PACK)[0] as { default: unknown }).default as PathDoc;
 export const DAY = 86_400_000;
 /** A Sunday, far enough from zero that nothing rounds to the epoch. */
 export const NOW = 1_794_000_000_000;

@@ -35,10 +35,12 @@ export function reasonLine(reason: Reason): Line {
 }
 
 /** The words for a metric, in `session.metric.*`. */
-export function metricKey(metric: string): "even" | "heard" | "extras" | "accents" {
+export function metricKey(metric: string): "even" | "heard" | "extras" | "accents" | "notes" {
   switch (metric) {
     case "notesHeard":
       return "heard";
+    case "noteIdentity":
+      return "notes";
     case "extraNotes":
       return "extras";
     case "accentPlacement":

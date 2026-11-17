@@ -1126,6 +1126,54 @@ fn extract_int(text: &str, prefix: &str) -> Option<u32> {
 // LLM backend (only compiled with coach-llm feature)
 // ---------------------------------------------------------------------------
 
+// -----------------------------------------------------------------
+// Thread priority (lowered once, at spawn — never restored). The LLM worker
+// and the Take's pitch pass (`timing.rs`) both run below normal.
+// -----------------------------------------------------------------
+
+#[cfg(windows)]
+pub(crate) fn lower_current_thread_priority() {
+    use windows_sys::Win32::System::Threading::{
+        GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_BELOW_NORMAL,
+    };
+    // SAFETY: `GetCurrentThread` returns a pseudo-handle that needs no
+    // close, and `SetThreadPriority` only mutates this thread's
+    // scheduling class.
+    let ok =
+        unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL) } != 0;
+    if !ok {
+        eprintln!("[yames] could not lower a background thread's priority");
+    }
+}
+
+#[cfg(unix)]
+pub(crate) fn lower_current_thread_priority() {
+    // On macOS `PRIO_DARWIN_THREAD` scopes `setpriority` to the calling
+    // thread. On Linux `PRIO_PROCESS` with `who == 0` is already
+    // per-thread (a documented Linux divergence from POSIX), which is
+    // exactly what we want here — a process-wide nice bump would also
+    // slow the audio threads.
+    #[cfg(target_os = "macos")]
+    let which = libc::PRIO_DARWIN_THREAD;
+    #[cfg(not(target_os = "macos"))]
+    let which = libc::PRIO_PROCESS;
+
+    // SAFETY: plain libc scheduling calls scoped to the current thread.
+    // `getpriority` overloads -1 as both "nice -1" and "error"; the only
+    // consequence of guessing wrong is nicing from the wrong base, so
+    // treat it as 0.
+    let previous = match unsafe { libc::getpriority(which, 0) } {
+        -1 => 0,
+        n => n,
+    };
+    if unsafe { libc::setpriority(which, 0, previous.saturating_add(5)) } != 0 {
+        eprintln!("[yames] could not lower a background thread's priority");
+    }
+}
+
+#[cfg(not(any(windows, unix)))]
+pub(crate) fn lower_current_thread_priority() {}
+
 #[cfg(feature = "coach-llm")]
 mod llm {
     use std::path::{Path, PathBuf};
@@ -1832,52 +1880,7 @@ mod llm {
         })
     }
 
-    // -----------------------------------------------------------------
-    // Thread priority (lowered once, at spawn — never restored)
-    // -----------------------------------------------------------------
-
-    #[cfg(windows)]
-    fn lower_current_thread_priority() {
-        use windows_sys::Win32::System::Threading::{
-            GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_BELOW_NORMAL,
-        };
-        // SAFETY: `GetCurrentThread` returns a pseudo-handle that needs no
-        // close, and `SetThreadPriority` only mutates this thread's
-        // scheduling class.
-        let ok =
-            unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL) } != 0;
-        if !ok {
-            eprintln!("[coach] could not lower inference thread priority");
-        }
-    }
-
-    #[cfg(unix)]
-    fn lower_current_thread_priority() {
-        // On macOS `PRIO_DARWIN_THREAD` scopes `setpriority` to the calling
-        // thread. On Linux `PRIO_PROCESS` with `who == 0` is already
-        // per-thread (a documented Linux divergence from POSIX), which is
-        // exactly what we want here — a process-wide nice bump would also
-        // slow the audio threads.
-        #[cfg(target_os = "macos")]
-        let which = libc::PRIO_DARWIN_THREAD;
-        #[cfg(not(target_os = "macos"))]
-        let which = libc::PRIO_PROCESS;
-
-        // SAFETY: plain libc scheduling calls scoped to the current thread.
-        // `getpriority` overloads -1 as both "nice -1" and "error"; the only
-        // consequence of guessing wrong is nicing from the wrong base, so
-        // treat it as 0.
-        let previous = match unsafe { libc::getpriority(which, 0) } {
-            -1 => 0,
-            n => n,
-        };
-        if unsafe { libc::setpriority(which, 0, previous.saturating_add(5)) } != 0 {
-            eprintln!("[coach] could not lower inference thread priority");
-        }
-    }
-
-    #[cfg(not(any(windows, unix)))]
-    fn lower_current_thread_priority() {}
+    use super::lower_current_thread_priority;
 }
 
 // ---------------------------------------------------------------------------

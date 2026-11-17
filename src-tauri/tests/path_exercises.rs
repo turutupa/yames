@@ -281,6 +281,18 @@ fn a_constant_input_delay_is_the_known_limit_at_speed() {
 
 /// An Exercise's `passBars`, read from the pack it ships in.
 fn pass_bars(path: &str, exercise: &str) -> Option<Vec<PassBar>> {
+    exercise_bars(path, exercise, true)
+}
+
+/// An Exercise's `passBars` when it is graded, looping or not.
+fn graded_bars(path: &str, exercise: &str) -> Option<Vec<PassBar>> {
+    exercise_bars(path, exercise, false)
+}
+
+fn exercise_bars(path: &str, exercise: &str, looping_only: bool) -> Option<Vec<PassBar>> {
+    // A variant (`id#key=A,…`) is graded by its own bars when it has them,
+    // and its Exercise's otherwise; grading and looping are the Exercise's.
+    let (base, variant) = (exercise.split('#').next().unwrap_or(exercise), exercise);
     let file = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../src/paths/packs")
         .join(format!("{path}.json"));
@@ -297,11 +309,12 @@ fn pass_bars(path: &str, exercise: &str) -> Option<Vec<PassBar>> {
             _ => None,
         }
     }
-    let exercise = find(&pack, exercise)?;
-    if exercise["grading"] != "graded" || exercise["loops"] != true {
+    let exercise = find(&pack, base)?;
+    if exercise["grading"] != "graded" || (looping_only && exercise["loops"] != true) {
         return None;
     }
-    serde_json::from_value(exercise["passBars"].clone()).ok()
+    let own = (variant != base).then(|| find(exercise, variant)).flatten().unwrap_or(exercise);
+    serde_json::from_value(own["passBars"].clone()).ok()
 }
 
 /// Every looping graded Exercise, played right round its loop for longer than
@@ -458,4 +471,69 @@ fn a_run_without_lag_correction_scores_like_the_plain_matcher() {
     assert_eq!(from_run.results, plain.results);
     assert_eq!(from_run.score, plain.score);
     assert_eq!(from_run.interval_consistency, plain.interval_consistency);
+}
+
+/// Every graded Exercise of every runnable Path, as a Session plays it: written
+/// out to whole passes for at least the clean tempo's 8 bars and its longest
+/// `overBars` (`src/session/grade.ts` `takeBarsOf`, `take.ts` `buildTake`), not
+/// looping, the transport stopping on the last bar line. Played right, each
+/// passes its own bars and counts toward the clean tempo. Looping or not, and
+/// every variant: this is the check that a Path is fit to be runnable.
+#[test]
+fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
+    let mut checked = std::collections::BTreeMap::<String, usize>::new();
+    for (index, row) in rows().iter().enumerate() {
+        if row.path == "blues-pentatonics" {
+            continue; // Not runnable: it needs the landing grader.
+        }
+        let Some(bars) = graded_bars(&row.path, &row.exercise) else {
+            continue;
+        };
+        if bars.is_empty() || row.schedule.onsets.is_empty() {
+            continue;
+        }
+        let name = format!("{}/{}", row.path, row.exercise);
+        let length = row.schedule.length_beats;
+        let ex_bars = (length / 4.0).round().max(1.0) as u32;
+        let needed = bars.iter().map(|b| b.over_bars).max().unwrap_or(1).max(CLEAN_TEMPO_MIN_BARS);
+        let passes = needed.div_ceil(ex_bars) as usize;
+        let per_pass = row.schedule.onsets.len() as u32;
+        let written = ScoreSchedule {
+            onsets: (0..passes)
+                .flat_map(|p| {
+                    row.schedule.onsets.iter().map(move |o| ExpectedOnset {
+                        id: o.id + p as u32 * per_pass,
+                        beat: o.beat + p as f64 * length,
+                        ..o.clone()
+                    })
+                })
+                .collect(),
+            length_beats: passes as f64 * length,
+            loops: false,
+        };
+        let ms = 60_000.0 / row.bpm;
+        let mut rng = Xorshift64::new(900 + index as u64);
+        let mut run = ScheduleRun::new(written.clone()).with_lag_correction(true).with_pass_bars(bars.clone());
+        for i in 0..(written.length_beats as usize) {
+            run.note_quarter_in_bar(i % 4 == 0, i as f64 * ms, 4);
+        }
+        for o in &written.onsets {
+            let jitter = ((rng.next_u64() % 2001) as f64 / 1000.0 - 1.0) * 2.0;
+            run.note_onset(PlayedOnset {
+                time_ms: o.beat * ms + jitter,
+                amplitude: if o.accent { 1.0 } else { 0.4 },
+                confidence: 1.0,
+            });
+        }
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        let grade = run.report(&weights).expect("a beat map").grade;
+        let pass = grade.pass.as_ref().expect("pass bars were loaded");
+        assert_eq!(pass.verdict, PassVerdict::Passed, "{name}: {pass:?}");
+        assert!(pass.counts_for_clean_tempo, "{name}: {pass:?}");
+        assert_eq!(pass.finished_bars, passes as u32 * ex_bars, "{name}");
+        *checked.entry(row.path.clone()).or_default() += 1;
+    }
+    println!("{checked:?}");
+    assert!(checked.get("alternate-picking").copied().unwrap_or(0) > 30, "{checked:?}");
+    assert!(checked.get("sweep-picking").copied().unwrap_or(0) > 100, "{checked:?}");
 }

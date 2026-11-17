@@ -82,11 +82,15 @@ import {
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
+import { DEFAULT_PRACTICE_VIEW, isPracticeView } from "../highway/runwayModel";
+import type { PracticeView } from "../highway/runwayModel";
 import type { TakePlan } from "../../../session/take";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
 const TAKES_TO_READ = 500;
 const MINUTES_KEY = "session.minutes";
+/** Neck or runway on the Take screen (plans/tasks/mvp/RUNWAY.md). A tester's own A/B switch. */
+const PRACTICE_VIEW_KEY = "practiceView";
 const TICK_MS = 1000;
 /** How many recent timing deviations the running screen's strip shows. */
 const STRIP_NOTES = 24;
@@ -196,6 +200,9 @@ export function useSessionRun(input: SessionRunInput) {
   const [paths, setPaths] = useState<PathDoc[]>([]);
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
+  const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
+  const practiceViewRef = useRef(practiceView);
+  practiceViewRef.current = practiceView;
   /**
    * The Take the engine holds, once its song, mix and schedule are loaded.
    * Kept as the Take itself rather than a flag: a new Take (Go again at a new
@@ -256,11 +263,19 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<number>(MINUTES_KEY).then((saved) => {
       if (PLAN_MINUTES.includes(saved as PlanMinutes)) setMinutesState(saved as PlanMinutes);
     });
+    void storeLoad<string>(PRACTICE_VIEW_KEY).then((saved) => {
+      if (isPracticeView(saved)) setPracticeViewState(saved);
+    });
   }, [onLearningSide, refresh]);
 
   const setMinutes = useCallback((next: PlanMinutes) => {
     setMinutesState(next);
     void storeSave(MINUTES_KEY, next).catch(() => {});
+  }, []);
+
+  const setPracticeView = useCallback((next: PracticeView) => {
+    setPracticeViewState(next);
+    void storeSave(PRACTICE_VIEW_KEY, next).catch(() => {});
   }, []);
 
   const myPaths = useMemo(() => playerPaths(paths, progress), [paths, progress]);
@@ -341,7 +356,7 @@ export function useSessionRun(input: SessionRunInput) {
         });
         await loadSong(transport, null);
         await setSongMix(engineMix(DEFAULT_MIX_SETTING, 0));
-        await loadScoreSchedule(take.schedule, take.exercise.passBars);
+        await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches);
         if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {
         if (prepareId.current !== mine) return;
@@ -515,7 +530,9 @@ export function useSessionRun(input: SessionRunInput) {
       caught: measures.caught,
       passed: grade.verdict === "passed",
       ...(stepNow.variantSeed === null ? {} : { variantSeed: stepNow.variantSeed }),
-      facts,
+      // Which view the Take was played in, so the testers' A/B can be compared.
+      // The switch is locked while a Take runs, so this is the view it started in.
+      facts: { ...facts, view: practiceViewRef.current },
     };
 
     const outcome: TakeOutcome = {
@@ -799,6 +816,8 @@ export function useSessionRun(input: SessionRunInput) {
     plan,
     minutes,
     setMinutes,
+    practiceView,
+    setPracticeView,
     paths,
     myPaths,
     progress,
