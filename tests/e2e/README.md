@@ -10,7 +10,7 @@ restart; and does the click hold while the 3D neck draws.
 ```sh
 npm run test:e2e                         # build, then session, relaunch, four-fingers, gpu-info
 npm run test:e2e -- --no-build           # use the binary already built
-npm run test:e2e -- --scenarios neck,baseline --gpu   # the click with the neck, on the GPU
+npm run test:e2e:probe                   # the click with the neck vs the headless probe
 node tests/e2e/run.mjs --help
 ```
 
@@ -26,7 +26,7 @@ the end).
 | `session` | Today, 5 minutes, Start. The plan's first Exercise (Open A, pick hand alone, 60 BPM for a new player). A good take, then Go again with a sloppy one, then a silent one. Exit. | The Take ends by itself at its last bar. Good: "PASS BAR MET", a `path_takes` row passed and caught, `countsForCleanTempo`, the clean tempo stored at 60. Sloppy: "THE BAR IS 85% / Evenness was …", row caught and not passed, the evenness check not held, the clean tempo unmoved. Silent: "I didn't catch enough", row not caught. |
 | `relaunch` | Quit with the window's Close, start the app again on the same profile. | Today no longer plans a first Session; Progress shows the Exercise and its clean tempo. |
 | `four-fingers` | Paths, Alternate Picking, Step 1, "Four fingers, one string", Play this, Faster to 80 BPM, a good take. | The Take is at 80, passes, and the clean tempo 80 is stored. |
-| `gpu-info` | `webkit://gpu`, the GL libraries mapped into the app, and what the page's WebGL says its renderer is. | Recorded, not checked. |
+| `gpu-info` | `webkit://gpu`, the GL libraries mapped into the app, and what the page's WebGL says its renderer is. | Recorded, not checked. Under Xvfb WebKit reports policy "never" (software compositing) but WebGL still runs on the GPU through NVIDIA's EGL; with `--gpu`, policy "always". |
 | `neck` | Four fingers, three good Takes back to back (60, 70, 80 BPM) with the neck on screen and the in-app probe armed. | Every Take passes; the probe's hard gates (missed beats, callback allocations/frees, dropped notifications) are 0; p99 jitter < 1 ms is advisory, as in `AGENTS.md`. Also records which neck was drawn (WebGL2 canvas or not), CPU cores per process while playing, and whether `nvidia-smi` lists the web process. |
 | `baseline` | `click-jitter-probe --no-llm` in the same PipeWire, for comparison. | The same gates. |
 
@@ -108,9 +108,25 @@ build. `--gpu` also needs `xserver-xorg-video-nvidia-*` and passwordless sudo.
    bar it stopped in is not counted, and the clean-tempo checks fail.
 2. **The stage cannot tell a software renderer on WebKitGTK.** WebKitGTK
    masks `WEBGL_debug_renderer_info` and answers "Apple GPU" whatever draws, so
-   `src/stage3d/webgl.ts` never refuses llvmpipe and the 3D neck is drawn on
-   the CPU wherever there is no GPU (Xvfb here; a VM or a machine without
-   drivers for a tester).
+   `isSoftwareRenderer` in `src/stage3d/webgl.ts` can never match on Linux and
+   the 3D neck is never refused there, llvmpipe or not. (Here it happens not to
+   matter: even under Xvfb, WebKit's WebGL goes through NVIDIA's EGL and
+   `nvidia-smi` lists the web process; only the compositing is in software.
+   A tester on a VM or without GPU drivers would get the neck on llvmpipe.)
+
+## Measuring the click with the neck
+
+```sh
+npm run test:e2e:probe            # = bash tests/e2e/probe.sh; add -- --no-build to skip the build
+```
+
+Runs the headless `click-jitter-probe` (60 s) and the app with the neck for
+three Takes on Xvfb, then, when there is an NVIDIA GPU and passwordless sudo,
+the same three Takes on an X server on the GPU. Writes `summary.md` (one row
+per run: the four numbers, CPU per process while playing, the load average)
+and `load.txt` (`uptime` and the top CPU users before and after each part).
+The numbers are a gate result only on a quiet machine; the load is beside
+them so a reader can tell.
 
 ## The in-app click probe
 
