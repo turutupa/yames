@@ -103,10 +103,20 @@ export function exerciseAlphaTex(ex: Exercise, bpm: number): string {
   type Item = { tick: number; text: string };
   const items: Item[] = [];
   ex.rests.forEach((r) => items.push({ tick: r.tick, text: `r.${durationToken(r.dur)}` }));
-  ex.notes.forEach((note, index) => {
-    const text = `${note.fret}.${note.string}${noteEffects(note, ex.notes[index + 1])}.${durationToken(note.dur)}`;
-    items.push({ tick: note.tick, text });
-  });
+  // Notes sharing a tick are one beat: a double stop is `(5.3 5.2).8`. The
+  // note a hammer or pull arrives at is on the same string at the next onset.
+  const nextOnString = (index: number) => {
+    const note = ex.notes[index];
+    const later = ex.notes.slice(index + 1).filter((n) => n.tick > note.tick);
+    return later.find((n) => n.tick === later[0].tick && n.string === note.string) ?? later[0];
+  };
+  const byTick = new Map<number, number[]>();
+  ex.notes.forEach((note, index) => byTick.set(note.tick, [...(byTick.get(note.tick) ?? []), index]));
+  for (const [tick, indexes] of byTick) {
+    const parts = indexes.map((i) => `${ex.notes[i].fret}.${ex.notes[i].string}${noteEffects(ex.notes[i], nextOnString(i))}`);
+    const value = durationToken(ex.notes[indexes[0]].dur);
+    items.push({ tick, text: parts.length === 1 ? `${parts[0]}.${value}` : `(${parts.join(" ")}).${value}` });
+  }
   items.sort((a, b) => a.tick - b.tick);
   const bars: string[][] = Array.from({ length: ex.bars }, () => []);
   for (const item of items) bars[Math.floor(item.tick / barTicks)]?.push(item.text);
