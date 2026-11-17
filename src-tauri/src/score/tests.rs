@@ -1012,6 +1012,61 @@ fn a_silent_take_still_reads_as_missed_live_once_the_hold_runs_out() {
 }
 
 #[test]
+fn a_sparse_part_is_not_held_dark_past_the_time_limit() {
+    // Whole notes at 80 BPM: eight of them, the count a lag is read from,
+    // take twenty-four seconds, and the sixteen-onset hold longer still. The
+    // hold ends LIVE_HOLD_MS after the first due note instead, so the first
+    // lights come a few seconds in, not at the end of the part.
+    let quarter = 750.0;
+    let bars = 10usize;
+    let schedule = ScoreSchedule {
+        onsets: (0..bars as u32).map(|i| onset(i, i as f64 * 4.0)).collect(),
+        length_beats: (bars * 4) as f64,
+        loops: false,
+    };
+    let quarters = bars * 4 + 2;
+    let beats = steady(80.0, quarters);
+    let played = perfect_play(&schedule, &beats);
+    let mut run = ScheduleRun::new(schedule.clone());
+    let mut first_at: Option<f64> = None;
+    let mut out: Vec<LiveOnset> = Vec::new();
+    let (mut next_beat, mut next_note, mut now) = (0usize, 0usize, 0.0f64);
+    while now <= quarters as f64 * quarter {
+        while next_beat < quarters && next_beat as f64 * quarter <= now {
+            run.note_quarter(next_beat == 0, next_beat as f64 * quarter);
+            next_beat += 1;
+        }
+        while next_note < played.len() && played[next_note].time_ms <= now {
+            run.note_onset(played[next_note]);
+            next_note += 1;
+        }
+        run.settle(now, &mut out);
+        if first_at.is_none() && !out.is_empty() {
+            first_at = Some(now);
+        }
+        now += LIVE_SWEEP_MS;
+    }
+    let first_at = first_at.expect("something was said");
+    assert!(
+        first_at <= LIVE_HOLD_MS + 2.0 * LIVE_SWEEP_MS,
+        "the first verdict came {first_at} ms in"
+    );
+    assert!(first_at >= LIVE_HOLD_MS, "released at {first_at} ms, before the limit");
+    assert_eq!(out.len(), bars, "one verdict per note: {out:?}");
+    assert!(out.iter().all(|v| v.state == OnsetState::Hit), "{out:?}");
+
+    // The report is untouched by the hold, however it ended.
+    let mut quiet = ScheduleRun::new(schedule);
+    for i in 0..quarters {
+        quiet.note_quarter(i == 0, i as f64 * quarter);
+    }
+    for p in &played {
+        quiet.note_onset(*p);
+    }
+    assert_eq!(run.report(&weights()), quiet.report(&weights()));
+}
+
+#[test]
 fn a_short_part_played_out_is_judged_live_even_without_the_lag() {
     // Four notes are too few to read a lag from and fewer than the hold:
     // once the part is over there is nothing left to wait for.
