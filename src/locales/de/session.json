@@ -197,6 +197,7 @@
       "mechanicsSub": "Wie deine Hände spielen",
       "later": "Später",
       "laterWhy": "Lesen kannst du das schon jetzt. Die Bewertung dafür kommt später.",
+      "laterWhyLanding": "Diesen Pfad kannst du jetzt schon lesen. Bewertet wird, auf welchen Tönen du über den Akkorden landest, und das kann die App noch nicht beurteilen, deshalb ist er nicht in deinen Sessions.",
       "stepCount": "{{count}} Schritt",
       "stepCount_other": "{{count}} Schritte",
       "draft": "Entwurf",

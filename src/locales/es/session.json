@@ -200,6 +200,7 @@
       "mechanicsSub": "Cómo tocan tus manos",
       "later": "Más adelante",
       "laterWhy": "Esta ya la puedes leer. La puntuación que necesita llegará más adelante.",
+      "laterWhyLanding": "Ya puedes leer esta. Se puntúa por las notas en las que caes sobre los acordes, y la app todavía no sabe juzgarlas, así que no entra en tus sesiones.",
       "stepCount": "{{count}} paso",
       "stepCount_many": "{{count}} pasos",
       "stepCount_other": "{{count}} pasos",

@@ -197,6 +197,7 @@
       "mechanicsSub": "Ellerinin nasıl çaldığı",
       "later": "Sonra",
       "laterWhy": "Bunu şimdi okuyabilirsin. Gerektirdiği notlama daha sonra gelecek.",
+      "laterWhyLanding": "Bunu şimdiden okuyabilirsin. Akorların üzerinde hangi notalara indiğine göre notlanıyor ve uygulama bunu henüz değerlendiremiyor, o yüzden seanslarında yok.",
       "stepCount": "{{count}} adım",
       "stepCount_other": "{{count}} adım",
       "draft": "Taslak",

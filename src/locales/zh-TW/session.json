@@ -197,6 +197,7 @@
       "mechanicsSub": "你的手怎麼彈",
       "later": "稍後",
       "laterWhy": "現在就可以閱讀。它需要的評分功能以後才有。",
+      "laterWhyLanding": "現在可以先閱讀。它依你在和弦上落在哪些音來評分，而應用程式還不能判斷這一點，所以它不在你的練習裡。",
       "stepCount": "{{count}} 步",
       "stepCount_other": "{{count}} 步",
       "draft": "草稿",

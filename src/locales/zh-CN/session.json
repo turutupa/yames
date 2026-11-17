@@ -197,6 +197,7 @@
       "mechanicsSub": "你的手怎么弹",
       "later": "稍后",
       "laterWhy": "现在就可以阅读。它需要的打分功能以后才有。",
+      "laterWhyLanding": "现在可以先阅读。它按你在和弦上落在哪些音来打分，而应用还不能判断这一点，所以它不在你的练习里。",
       "stepCount": "{{count}} 步",
       "stepCount_other": "{{count}} 步",
       "draft": "草稿",

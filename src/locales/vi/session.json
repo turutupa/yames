@@ -197,6 +197,7 @@
       "mechanicsSub": "Tay bạn chơi thế nào",
       "later": "Để sau",
       "laterWhy": "Bạn có thể đọc phần này ngay. Phần chấm điểm nó cần sẽ có sau.",
+      "laterWhyLanding": "Bạn có thể đọc lộ trình này ngay. Nó được chấm theo các nốt bạn dừng lên trên hợp âm, mà ứng dụng chưa đánh giá được, nên nó chưa có trong các buổi tập của bạn.",
       "stepCount": "{{count}} bước",
       "stepCount_other": "{{count}} bước",
       "draft": "Bản nháp",

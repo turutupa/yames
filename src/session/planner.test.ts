@@ -10,9 +10,10 @@ import {
 } from "./planner";
 import type { PlanMinutes, PlanStep, SessionPlan } from "./planner";
 import { pickVariantSeed } from "./variants";
-import { findExercise } from "./packs";
+import { RUNNABLE_PATH_IDS, findExercise, isRunnable, laterWhyKey } from "./packs";
+import { buildTake } from "./take";
 import { NO_PROGRESS } from "./progress";
-import { ALT, DAY, NOW, ceiling, missed, passed, progress, state, take } from "./testKit";
+import { ALT, DAY, NOW, SWEEP, ceiling, missed, passed, progress, state, take } from "./testKit";
 
 const OPEN = "even-eighths.open-string";
 const FOUR = "even-eighths.four-fingers";
@@ -424,5 +425,60 @@ describe("Find my edge in a plan", () => {
     expect(exerciseSteps(plan(15, p)).some((x) => x.role === "edge")).toBe(false);
     const none = progress({ takes: [missed(OPEN, 80, 0.8)] });
     expect(exerciseSteps(plan(20, none)).some((x) => x.role === "edge")).toBe(false);
+  });
+});
+
+describe("two runnable Paths", () => {
+  it("Alternate Picking and Sweep Picking run; Blues waits for the landing grader, and says so", () => {
+    expect([...RUNNABLE_PATH_IDS].sort()).toEqual(["alternate-picking", "sweep-picking"]);
+    expect(isRunnable(SWEEP.id)).toBe(true);
+    expect(isRunnable("blues-pentatonics")).toBe(false);
+    expect(laterWhyKey("blues-pentatonics")).toBe("session.paths.laterWhyLanding");
+    expect(laterWhyKey("some-future-path")).toBe("session.paths.laterWhy");
+  });
+
+  const both = (takes = [missed(OPEN, 80, 0.78)]) =>
+    progress({
+      states: [state(), state({ pathId: SWEEP.id })],
+      takes,
+    });
+
+  it("a Session for a player on both mixes them, the one played longest ago first", () => {
+    const s = plan(15, both(), [ALT, SWEEP]);
+    const steps = exerciseSteps(s);
+    expect(steps.map((x) => x.pathId)).toEqual([SWEEP.id, ALT.id]);
+    // Sweep has never been played: its first Exercise, at its first rung.
+    const first = SWEEP.steps[0].exercises[0];
+    expect(steps[0]).toMatchObject({ exerciseId: first.id, bpm: first.tempo.rungs[0].bpm });
+    expect(steps[0].why.code).not.toBe("firstEver");
+  });
+
+  it("five minutes is still one thing, from one Path", () => {
+    const steps = exerciseSteps(plan(5, both(), [ALT, SWEEP]));
+    expect(steps.length).toBe(1);
+  });
+
+  it("every Exercise the planner hands out from either Path becomes a Take to grade", () => {
+    for (const minutes of PLAN_MINUTES) {
+      for (const takes of [[], [missed(OPEN, 80, 0.78)]]) {
+        const s = plan(minutes, both(takes), [ALT, SWEEP]);
+        for (const step of exerciseSteps(s)) {
+          const path = step.pathId === SWEEP.id ? SWEEP : ALT;
+          const found = findExercise(path, step.exerciseId);
+          expect(found, step.exerciseId).not.toBeNull();
+          const t = buildTake(path, found!.exercise, step.bpm, step.variantSeed);
+          expect(t.schedule.onsets.length, step.exerciseId).toBeGreaterThan(0);
+          expect(t.pitches.length).toBe(t.score.notes.length);
+          expect(t.exercise.passBars.length).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+
+  it("a player who has only started Sweep Picking gets Sweep Picking", () => {
+    const p = progress({ states: [state({ pathId: SWEEP.id })], takes: [] });
+    const steps = exerciseSteps(plan(10, p, [SWEEP]));
+    expect(steps.length).toBeGreaterThan(0);
+    expect(steps.every((x) => x.pathId === SWEEP.id)).toBe(true);
   });
 });

@@ -200,6 +200,7 @@
       "mechanicsSub": "Comment tes mains jouent",
       "later": "Plus tard",
       "laterWhy": "Tu peux déjà lire celui-ci. La notation dont il a besoin viendra plus tard.",
+      "laterWhyLanding": "Tu peux déjà le lire. Il se note sur les notes où tu retombes sur les accords, et l'appli ne sait pas encore les juger, donc il n'est pas dans tes séances.",
       "stepCount": "{{count}} étape",
       "stepCount_many": "{{count}} étapes",
       "stepCount_other": "{{count}} étapes",
