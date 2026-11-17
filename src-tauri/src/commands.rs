@@ -1251,6 +1251,7 @@ pub async fn refresh_audio_devices(app_handle: AppHandle) {
 
 #[tauri::command]
 pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
+    let _slow = SlowInputCall::new("list_audio_input_devices");
     tauri::async_runtime::spawn_blocking(|| crate::audio_input::AudioInput::list_devices())
         .await
         .unwrap_or_default()
@@ -1273,6 +1274,36 @@ pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
 /// command shares. The synchronous take commands, which must stay synchronous
 /// (see `start_take`), wait for it with [`evaluation_turn_blocking`].
 static EVALUATION_TURN: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
+/// Says in the log when the input was started or stopped, and when listing
+/// the devices took long, with how long each waited for its turn: a Session
+/// that cannot hear after Exit shows here, and the log is all a tester's
+/// report has.
+struct SlowInputCall {
+    what: &'static str,
+    started: std::time::Instant,
+    turn_ms: u128,
+}
+
+impl SlowInputCall {
+    fn new(what: &'static str) -> Self {
+        Self { what, started: std::time::Instant::now(), turn_ms: 0 }
+    }
+    fn got_turn(&mut self) {
+        self.turn_ms = self.started.elapsed().as_millis();
+    }
+}
+
+impl Drop for SlowInputCall {
+    fn drop(&mut self) {
+        let ms = self.started.elapsed().as_millis();
+        // Starts and stops are a handful a Session: each is logged, so a
+        // tester's log says when the input went on and off.
+        if ms >= 500 || self.what != "list_audio_input_devices" {
+            eprintln!("[yames] {} took {ms} ms ({} ms of it waiting its turn)", self.what, self.turn_ms);
+        }
+    }
+}
 
 /// [`EVALUATION_TURN`] from a synchronous command, on the window's thread.
 /// `blocking_lock` would panic if that thread were ever inside the runtime, so
@@ -1310,7 +1341,9 @@ pub async fn start_evaluation(
     cal_cache: State<'_, crate::calibration_cache::SharedCalibrationCache>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
+    let mut slow = SlowInputCall::new("start_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
+    slow.got_turn();
     let coach_mode = match coach_mode.as_deref().unwrap_or("default") {
         "pro" => CoachMode::Pro,
         _ => CoachMode::Default,
@@ -1586,7 +1619,9 @@ pub async fn stop_evaluation(
     state: State<'_, SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
+    let mut slow = SlowInputCall::new("stop_evaluation");
     let _turn = EVALUATION_TURN.lock().await;
+    slow.got_turn();
     // Idempotency guard — if the analyzer is already stopped (e.g. double-call
     // from a device change racing an explicit Stop), skip silently. The first
     // call already drained telemetry and persisted the log.
