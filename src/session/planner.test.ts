@@ -52,10 +52,20 @@ describe("how the minutes are spent", () => {
     expect(plan(5).steps.map((s) => s.kind)).toEqual(["exercise"]);
   });
 
-  it("more time adds steps, and only twenty brings a band", () => {
-    expect(plan(10).steps.map((s) => s.kind)).toEqual(["metronome", "exercise"]);
-    expect(plan(15).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise"]);
-    expect(plan(20).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise", "jam"]);
+  it("more time adds blocks, and only twenty ends on the band", () => {
+    expect(plan(10).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise"]);
+    expect(plan(15).steps.map((s) => s.kind)).toEqual(["metronome", "exercise", "exercise", "exercise"]);
+    expect(plan(20).steps.map((s) => s.kind)).toEqual([
+      "metronome",
+      "exercise",
+      "exercise",
+      "exercise",
+      "jam",
+    ]);
+    // warm 2, then 4 4 / 5 4 4 / 6 4 4 4.
+    expect(plan(10).steps.map((s) => s.minutes)).toEqual([2, 4, 4]);
+    expect(plan(15).steps.map((s) => s.minutes)).toEqual([2, 5, 4, 4]);
+    expect(plan(20).steps.map((s) => s.minutes)).toEqual([2, 6, 4, 4, 4]);
   });
 
   it("gives no Session with no Path that can be graded", () => {
@@ -104,11 +114,21 @@ describe("the mood", () => {
 });
 
 describe("what gets chosen", () => {
-  it("a first Session starts the first Exercise at its first rung, and says so", () => {
+  it("a first Session is placement: the first Exercise at its first rung, then its pass tempo", () => {
     const [focus] = exerciseSteps(plan(5, { ...NO_PROGRESS }));
     expect(focus.exerciseId).toBe(OPEN);
+    expect(focus.role).toBe("placement");
     expect(focus.bpm).toBe(60);
-    expect(focus.why.code).toBe("firstEver");
+    expect(focus.why.code).toBe("placement");
+    expect(focus.placement?.passAtBpm).toBe(100);
+  });
+
+  it("a first Take on a Path already started (no placement) says it is the first", () => {
+    const p = progress({ takes: [take("even-sixteenths.gear-change", { caught: false })] });
+    const [focus] = exerciseSteps(plan(5, { ...p, takes: [] }));
+    expect(focus.role).toBe("placement");
+    const after = exerciseSteps(plan(5, p))[0];
+    expect(after.role).toBe("focus");
   });
 
   it("the worked example: evenness was 78% at 80, the bar is 85%", () => {
@@ -150,8 +170,18 @@ describe("what gets chosen", () => {
     });
     const steps = exerciseSteps(plan(15, p));
     expect(steps[0].exerciseId).toBe(ids[3]);
-    expect(steps[1].stepId).toBe(ALT.steps[1].id);
-    expect(steps[1].why.code).toBe("newStep");
+    // Passed a day ago: their first review (1 day) has come, and takes the time.
+    expect(steps[1].role).toBe("review");
+    expect(steps[1].why.code).toBe("reviewDue");
+    // With no review due, the next Step.
+    const fresh = progress({
+      takes: ids.slice(0, 3).map((id) => passed(id, 100, 0.87, 60_000)),
+      ceilings: ids.slice(0, 3).map((id) => ceiling(id, 100)),
+    });
+    const later = exerciseSteps(plan(15, fresh));
+    expect(later[0].exerciseId).toBe(ids[3]);
+    expect(later[1].stepId).toBe(ALT.steps[1].id);
+    expect(later[1].why.code).toBe("newStep");
   });
 
   it("with everything passed, goes back over what was played longest ago", () => {
@@ -167,7 +197,7 @@ describe("what gets chosen", () => {
     const other: PathDoc = { ...ALT, id: "other" };
     const p = progress({ takes: [missed(OPEN, 80, 0.78)] });
     const steps = exerciseSteps(plan(15, p, [ALT, other]));
-    expect(steps.map((s) => s.pathId)).toEqual(["other", ALT.id]);
+    expect(steps.map((s) => s.pathId).slice(0, 2)).toEqual(["other", ALT.id]);
     expect(exerciseSteps(plan(5, p, [ALT, other])).length).toBe(1);
   });
 });
@@ -278,15 +308,15 @@ describe("coming back after a break", () => {
       ],
     });
     const steps = exerciseSteps(plan(15, again));
-    expect(steps.length).toBeGreaterThan(1);
-    for (const step of steps) expect(step.why.code).toBe("backEased");
+    const played = steps.filter((x) => again.takes.some((t) => t.exerciseId === x.exerciseId));
+    expect(played.length).toBeGreaterThan(1);
+    for (const step of played) expect(step.why.code).toBe("backEased");
   });
 
   it("something never played starts at its first rung, with nothing to ease", () => {
     const steps = exerciseSteps(plan(15, away));
-    const fresh = steps[steps.length - 1];
-    expect(fresh.why.code).toBe("nextInStep");
-    expect(fresh.bpm).toBe(60);
+    const fresh = steps.find((x) => x.why.code === "nextInStep")!;
+    expect(fresh.bpm).toBe(exercise(fresh.exerciseId).tempo.rungs[0].bpm);
   });
 
   it("never goes below the first rung", () => {
@@ -295,10 +325,13 @@ describe("coming back after a break", () => {
   });
 
   it("warms up on the recap and gives the focus less", () => {
-    const s = plan(10, away);
+    const again = progress({
+      takes: [missed(FOUR, 90, 0.8, 20 * DAY), missed(OPEN, 90, 0.8, 21 * DAY)],
+    });
+    const s = plan(10, again);
     const focus = exerciseSteps(s).find((x) => x.role === "focus");
-    expect(s.steps[0].minutes).toBe(3);
-    expect(focus?.minutes).toBe(7);
+    expect(s.steps[0]).toMatchObject({ kind: "exercise", role: "recap", minutes: 3 });
+    expect(focus?.minutes).toBe(3);
   });
 });
 
@@ -446,7 +479,7 @@ describe("two runnable Paths", () => {
   it("a Session for a player on both mixes them, the one played longest ago first", () => {
     const s = plan(15, both(), [ALT, SWEEP]);
     const steps = exerciseSteps(s);
-    expect(steps.map((x) => x.pathId)).toEqual([SWEEP.id, ALT.id]);
+    expect(steps.map((x) => x.pathId).slice(0, 2)).toEqual([SWEEP.id, ALT.id]);
     // Sweep has never been played: its first Exercise, at its first rung.
     const first = SWEEP.steps[0].exercises[0];
     expect(steps[0]).toMatchObject({ exerciseId: first.id, bpm: first.tempo.rungs[0].bpm });
