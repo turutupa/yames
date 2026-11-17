@@ -2,7 +2,7 @@
 // The real app, end to end, on Linux with no screen and no guitar.
 // See tests/e2e/README.md for what it covers and how to run it.
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { accessSync, constants, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,20 +30,29 @@ if (flag("--help")) {
   console.log(`usage: node tests/e2e/run.mjs [options]
   --no-build          use the binary already built (default: build it first)
   --app <path>        the app binary (default: $CARGO_TARGET_DIR or src-tauri/target, release/yames)
-  --scenarios <list>  comma list of: session,relaunch,four-fingers (default: all)
+  --scenarios <list>  comma list of: session,relaunch,four-fingers,gpu-info,neck,baseline
+                      (default: session,relaunch,four-fingers,gpu-info)
+  --neck-takes <n>    Takes the neck scenario plays back to back (default 3)
+  --baseline-seconds <n>  length of the headless probe run (default 60)
   --out <dir>         where results, screenshots and the probe reports go
                       (default: a new temp dir, printed at the end)
   --gpu-display <:n>  run on an existing X server (e.g. a GPU one, see README)
                       instead of starting Xvfb
+  --app-env K=V       an extra variable for the app (repeatable), e.g.
+                      WEBKIT_DMABUF_RENDERER_FORCE_SHM=1 for WebGL on the
+                      NVIDIA X server (see README)
   --keep              leave the profile and logs behind`);
   process.exit(0);
 }
-const scenarios = new Set(opt("--scenarios", "session,relaunch,four-fingers").split(","));
+const scenarios = new Set(opt("--scenarios", "session,relaunch,four-fingers,gpu-info").split(","));
 const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "target");
 const app = resolve(opt("--app", join(targetDir, "release", "yames")));
 const out = resolve(opt("--out", mkdtempSync(join(tmpdir(), "yames-e2e-out-"))));
 mkdirSync(out, { recursive: true });
 const gpuDisplay = opt("--gpu-display", null);
+const appEnv = Object.fromEntries(
+  argv.flatMap((a, i) => (a === "--app-env" && argv[i + 1] ? [argv[i + 1].split(/=(.*)/s).slice(0, 2)] : [])),
+);
 
 // ---------------------------------------------------------------------------
 // Results
@@ -81,6 +90,16 @@ if (!flag("--no-build")) {
     console.error("build failed");
     process.exit(2);
   }
+  if (scenarios.has("baseline")) {
+    const p = spawnSync("cargo", ["build", "--release", "--manifest-path", join(repo, "src-tauri", "Cargo.toml"), "--bin", "click-jitter-probe"], {
+      cwd: repo,
+      stdio: "inherit",
+    });
+    if (p.status !== 0) {
+      console.error("probe build failed");
+      process.exit(2);
+    }
+  }
 }
 if (!existsSync(app)) {
   console.error(`no app at ${app} (build it, or pass --app)`);
@@ -97,17 +116,44 @@ const probeOut = (n) => join(out, `callback-probe-${n}.json`);
 let launch = 0;
 let driverProc = null;
 
+/**
+ * WebKit renders on the GPU only if it can open the DRM render node, which
+ * belongs to the `render` group. When we cannot and passwordless sudo is
+ * there, start tauri-driver (and so the app) as ourselves plus that group,
+ * which is what a desktop session's seat ACL gives a logged-in user.
+ */
+function driverCommand(vars) {
+  const node = "/dev/dri/renderD128";
+  let readable = true;
+  try {
+    accessSync(node, constants.R_OK | constants.W_OK);
+  } catch {
+    readable = !existsSync(node);
+  }
+  const group = spawnSync("getent", ["group", "render"], { encoding: "utf8" }).stdout?.split(":")[2];
+  if (readable || !group || spawnSync("sudo", ["-n", "true"]).status !== 0) {
+    return { cmd: tauriDriver, args: ["--port", "4444"], render: readable };
+  }
+  const full = env.env(vars);
+  return {
+    cmd: "sudo",
+    args: [
+      "-n", "setpriv", `--reuid=${process.getuid()}`, `--regid=${process.getgid()}`,
+      `--groups=${group},${process.getgid()}`, "--inh-caps=-all",
+      "env", "-i", ...Object.entries(full).map(([k, v]) => `${k}=${v}`),
+      tauriDriver, "--port", "4444",
+    ],
+    render: true,
+  };
+}
+
 async function startDriver() {
   if (driverProc && driverProc.exitCode === null) return;
-  driverProc = env.spawnLogged("tauri-driver", tauriDriver, ["--port", "4444"], {
-    env: {
-      // The in-app click probe, armed for every launch. The report path is
-      // set per launch below through the app's args-less env, so restart
-      // the driver when it changes.
-      YAMES_CALLBACK_PROBE: "1",
-      YAMES_CALLBACK_PROBE_OUT: probeOut(launch),
-    },
-  });
+  // The in-app click probe, armed for every launch, its report per launch.
+  const vars = { ...appEnv, YAMES_CALLBACK_PROBE: "1", YAMES_CALLBACK_PROBE_OUT: probeOut(launch) };
+  const { cmd, args, render } = driverCommand(vars);
+  info.renderNode = render;
+  driverProc = env.spawnLogged("tauri-driver", cmd, args, { env: vars });
   await env.waitFor(async () => {
     const r = await fetch("http://127.0.0.1:4444/status").catch(() => null);
     return !!r;
@@ -362,6 +408,158 @@ async function scenarioFourFingers() {
   }
 }
 
+/** What WebKit itself says about its rendering, from webkit://gpu. */
+async function scenarioGpuInfo() {
+  const d = await launchApp();
+  try {
+    // WebKitGTK masks WEBGL_debug_renderer_info ("Apple GPU"), so the page's
+    // own view of the renderer is recorded but cannot be trusted.
+    info.webglAsThePageSeesIt = await d.exec(`
+      const gl = document.createElement('canvas').getContext('webgl2');
+      if (!gl) return null;
+      const x = gl.getExtension('WEBGL_debug_renderer_info');
+      return { version: gl.getParameter(gl.VERSION), renderer: x ? gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) };`);
+    await d.call("POST", d.s("/url"), { url: "webkit://gpu" });
+    await sleep(2000);
+    const html = await d.exec("return document.documentElement.outerHTML");
+    const m = html.match(/JSON\.stringify\((\{.*?\}), null, 4\)/s);
+    info.webkitGpu = m ? JSON.parse(m[1])["Hardware Acceleration Information"] : null;
+    info.glLibraries = glLibraries();
+    console.log(`webkit://gpu: ${JSON.stringify(info.webkitGpu)}`);
+    console.log(`the page's WebGL2 renderer string: ${JSON.stringify(info.webglAsThePageSeesIt)}`);
+  } finally {
+    await d.quit();
+  }
+}
+
+/** The GL implementations mapped into the app's processes (ours only). */
+function glLibraries() {
+  const seen = {};
+  for (const { pid, comm } of ourProcesses()) {
+    try {
+      const maps = readFileSync(`/proc/${pid}/maps`, "utf8");
+      const libs = [...new Set(maps.match(/lib(gallium|nvidia-eglcore|nvidia-glcore|EGL_nvidia|EGL_mesa|GLX_nvidia|GLX_mesa)[^\s/]*/g) ?? [])];
+      if (libs.length) seen[comm] = libs;
+    } catch {
+      /* gone */
+    }
+  }
+  return seen;
+}
+
+function ourProcesses() {
+  const out = [];
+  for (const pid of readdirSync("/proc")) {
+    if (!/^\d+$/.test(pid)) continue;
+    try {
+      if (!readFileSync(`/proc/${pid}/environ`, "utf8").includes(`XDG_RUNTIME_DIR=${env.dirs.run}`)) continue;
+      out.push({ pid, comm: readFileSync(`/proc/${pid}/comm`, "utf8").trim() });
+    } catch {
+      /* gone */
+    }
+  }
+  return out;
+}
+
+/** CPU seconds used so far by each of our processes, by name. */
+function cpuByName() {
+  const tick = 100; // USER_HZ
+  const out = {};
+  for (const { pid, comm } of ourProcesses()) {
+    try {
+      const f = readFileSync(`/proc/${pid}/stat`, "utf8").split(") ")[1].split(" ");
+      out[comm] = (out[comm] ?? 0) + (Number(f[11]) + Number(f[12])) / tick;
+    } catch {
+      /* gone */
+    }
+  }
+  return out;
+}
+
+/**
+ * The click with the neck drawing: Four fingers at 80 BPM, several Takes back
+ * to back, the in-app probe armed. Records which neck was drawn, what the
+ * webview cost in CPU while it played, and the probe's four numbers.
+ */
+async function scenarioNeck() {
+  const takes = Number(opt("--neck-takes", "3"));
+  const d = await launchApp();
+  try {
+    const { exercise } = exerciseByTitle("Four fingers, one string");
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Alternate Picking/);
+    await d.clickText(/Even eighths on one string/);
+    await d.clickIn(/Four fingers, one string/, /^Play this$/);
+    await d.waitText(/Start take, (\d+) BPM/, 20000);
+    info.neck = { kind: await neckKind(d), takes: [] };
+    const before = cpuByName();
+    const t0 = Date.now();
+    for (let i = 0; i < takes; i++) {
+      if (i > 0) await d.clickText(/^Go again/);
+      const r = await playTake(d, exercise, "good", `neck take ${i + 1}`);
+      info.neck.takes.push({ bpm: r.bpm, passed: /PASS BAR MET/i.test(r.text) });
+    }
+    const wall = (Date.now() - t0) / 1000;
+    const after = cpuByName();
+    info.neck.cpuCoresWhilePlaying = Object.fromEntries(
+      Object.keys(after).map((k) => [k, Number(((after[k] - (before[k] ?? 0)) / wall).toFixed(2))]).filter(([, v]) => v > 0.01),
+    );
+    info.neck.glLibraries = glLibraries();
+    // Which of our processes the NVIDIA driver has a graphics context for.
+    const smi = spawnSync("nvidia-smi", ["--query-compute-apps=pid,process_name", "--format=csv,noheader"], { encoding: "utf8" });
+    const pids = new Set(ourProcesses().map((p) => p.pid));
+    const gfx = spawnSync("nvidia-smi", [], { encoding: "utf8" }).stdout ?? "";
+    info.neck.onTheGpu = gfx.split("\n").filter((l) => [...pids].some((p) => new RegExp(`\\b${p}\\b`).test(l))).map((l) => l.trim());
+    void smi;
+    console.log(`neck: ${info.neck.kind}; CPU cores while playing: ${JSON.stringify(info.neck.cpuCoresWhilePlaying)}`);
+    console.log(`neck: processes of ours nvidia-smi lists: ${JSON.stringify(info.neck.onTheGpu)}`);
+    check("neck: every Take passed while the neck drew", info.neck.takes.every((t) => t.passed), JSON.stringify(info.neck.takes));
+    await d.clickText(/^Exit$/);
+  } finally {
+    const report = await quitApp(d, "neck");
+    if (report) {
+      printProbe(`with the neck (${info.neck?.kind})`, report);
+      gate("in-app, neck drawing", report);
+    }
+  }
+}
+
+/** The headless probe, in the same audio world, for comparison. */
+async function scenarioBaseline() {
+  const seconds = opt("--baseline-seconds", "60");
+  const bin = join(targetDir, "release", "click-jitter-probe");
+  if (!existsSync(bin)) {
+    check("headless baseline ran", false, `no ${bin}; build it with cargo build --release --bin click-jitter-probe`);
+    return;
+  }
+  env.promoteAudioThreads();
+  const r = spawnSync(bin, ["--no-llm", "--json", "--seconds", seconds], { env: env.env(), encoding: "utf8" });
+  const line = (r.stdout ?? "").split("\n").find((l) => l.startsWith("JSON "));
+  if (!line) {
+    check("headless baseline ran", false, (r.stderr ?? "").slice(-400));
+    return;
+  }
+  const j = JSON.parse(line.slice(5));
+  info.baseline = j;
+  writeFileSync(join(out, "baseline.txt"), r.stdout);
+  console.log(
+    `probe headless baseline: p99 jitter ${j.p99_ms} ms (max ${j.max_ms}), missed beats ${j.missed_beats}, ` +
+      `callback allocs/frees ${j.callback_allocs}/${j.callback_frees}, dropped notifications ${j.dropped_notifications}; ` +
+      `${j.callbacks} callbacks, ${j.frames} frames at ${j.sample_rate} Hz`,
+  );
+  gate("headless baseline", { jitter_p99_ms: j.p99_ms, missed_beats: j.missed_beats, callback_allocs: j.callback_allocs, callback_frees: j.callback_frees, dropped_notifications: j.dropped_notifications });
+}
+
+/** The audio-safety gate's four numbers, as checks. p99 is advisory (AGENTS.md). */
+function gate(label, r) {
+  check(`${label}: missed beats = 0`, r.missed_beats === 0, `${r.missed_beats}`);
+  check(`${label}: callback allocations and frees = 0`, r.callback_allocs === 0 && r.callback_frees === 0, `${r.callback_allocs}/${r.callback_frees}`);
+  check(`${label}: dropped notifications = 0`, r.dropped_notifications === 0, `${r.dropped_notifications}`);
+  const ok = r.jitter_p99_ms < 1;
+  console.log(`${ok ? "PASS" : "WARN"}  ${label}: p99 callback jitter < 1 ms (advisory)  (${r.jitter_p99_ms} ms)`);
+  results.push({ name: `${label}: p99 callback jitter < 1 ms (advisory)`, ok: true, advisory: !ok, detail: `${r.jitter_p99_ms} ms` });
+}
+
 // ---------------------------------------------------------------------------
 
 function fmt(x) {
@@ -388,9 +586,15 @@ try {
   if (!env.rtThreads) console.warn("PipeWire is not real-time (no passwordless sudo): a busy machine will glitch the audio");
   info.calibration = await player.calibrate();
   console.log(`player calibrated: ${fmt(info.calibration.offsetMs)} ms write-to-capture`);
+  info.loadAtStart = readFileSync("/proc/loadavg", "utf8").trim();
+  info.appEnv = appEnv;
+  if (scenarios.has("gpu-info")) await scenarioGpuInfo();
   if (scenarios.has("session")) await scenarioSession();
   if (scenarios.has("relaunch")) await scenarioRelaunch();
   if (scenarios.has("four-fingers")) await scenarioFourFingers();
+  if (scenarios.has("neck")) await scenarioNeck();
+  if (scenarios.has("baseline")) await scenarioBaseline();
+  info.loadAtEnd = readFileSync("/proc/loadavg", "utf8").trim();
 } catch (e) {
   check("the run finished", false, e.message.split("\n").slice(0, 6).join(" | "));
   exitCode = 1;
