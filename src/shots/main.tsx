@@ -17,6 +17,7 @@ import ReactDOM from "react-dom/client";
 window.__YAMES_ALLOW_SOFTWARE_GL__ = true;
 import App from "../App";
 import i18n from "../i18n";
+import "../styles/fonts.css";
 import "../styles/global.css";
 import "../styles/session-narrative.css";
 import { installShotMock } from "./mockIpc";
@@ -140,16 +141,16 @@ function until(what: string, check: () => boolean, timeoutMs = 15000): Promise<v
 }
 
 /**
- * The faces shots.html pulls from Google. A theme naming one of these as its
+ * The faces bundled in styles/fonts.css. A theme naming one of these as its
  * first choice must actually get it.
  *
  * Anything else in a theme's stack is a system font — 'Avenir Next', 'SF Mono'
  * — which is absent on Windows on purpose and falls back by design. Only a
- * *web* font going missing means the network failed and the picture is wrong.
+ * *bundled* font going missing means its @font-face broke and the picture is wrong.
  */
 const WEB_FONTS = new Set([
-  "Archivo", "Comfortaa", "Inter", "Nunito", "Outfit",
-  "Orbitron", "Quicksand", "Rajdhani", "Source Serif 4",
+  "Archivo", "Comfortaa", "Inter", "Outfit",
+  "Orbitron", "Quicksand", "Source Serif 4",
 ]);
 
 async function assertThemeFontLoaded() {

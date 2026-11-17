@@ -12,6 +12,7 @@ import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
+import { getThemeById } from "../../themes";
 import { useAndroidNative } from "./hooks/useAndroidNative";
 import { useInputRoute } from "../../mobile/inputRoute";
 import { useBackDismiss } from "../../mobile/backStack";
@@ -1766,6 +1767,7 @@ export function MainWindow() {
       bpm: state.speedRamp?.active ? state.speedRamp.currentBpm : state.bpm,
       keepScreenOn:
         state.isPlaying || isFullscreen || (state.speedRamp?.active ?? false),
+      lightTheme: getThemeById(state.theme).group === "light",
     });
   // What the system Back gesture closes, outermost last. Sheets register
   // themselves (see components/Sheet.tsx); these two are the app's own

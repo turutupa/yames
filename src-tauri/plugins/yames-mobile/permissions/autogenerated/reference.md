@@ -3,7 +3,8 @@
 Everything the phone build of Yames needs from its own native half: keeping
 the click playing with the screen off, keeping the screen awake, answering the
 system Back gesture, opening a link in the browser, and asking for the
-microphone the Session grades from. All four commands, and
+microphone the Session grades from, and matching the status and navigation
+bar icons to the app's theme. All of the commands, and
 no scope — there is nothing here to narrow, and the frontend calls all of them.
 
 #### This default permission set includes the following:
@@ -14,6 +15,7 @@ no scope — there is nothing here to narrow, and the frontend calls all of them
 - `allow-open-url`
 - `allow-set-back-intercept`
 - `allow-set-event-channel`
+- `allow-set-light-system-bars`
 
 ## Permission Table
 
@@ -176,6 +178,32 @@ Enables the set_event_channel command without any pre-configured scope.
 <td>
 
 Denies the set_event_channel command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:allow-set-light-system-bars`
+
+</td>
+<td>
+
+Enables the set_light_system_bars command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:deny-set-light-system-bars`
+
+</td>
+<td>
+
+Denies the set_light_system_bars command without any pre-configured scope.
 
 </td>
 </tr>

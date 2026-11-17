@@ -63,6 +63,15 @@ export function openUrlNative(url: string): Promise<void> {
 }
 
 /**
+ * Dark status and navigation bar icons (`light` theme) or light ones (a dark
+ * theme). Android's own default follows the system's dark mode, which is not
+ * the app's: a dark Yames on a phone in light mode drew dark icons on black.
+ */
+export function setLightSystemBars(light: boolean): Promise<void> {
+  return invoke(`plugin:${PLUGIN}|set_light_system_bars`, { payload: { active: light } });
+}
+
+/**
  * Tell the Android side whether the app currently has something open that Back
  * should close.
  *

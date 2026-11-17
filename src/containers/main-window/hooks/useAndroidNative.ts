@@ -28,6 +28,8 @@
  *    `onTrimMemory` are forwarded to `mobile/bandMemory.ts`, which lets the
  *    band go once the app has been out of sight and stopped for a while, and
  *    brings it back when the musician does (M10).
+ * 6. **The system bars' icons follow the theme**: dark on a light theme,
+ *    light on a dark one.
  *
  * Mounted only on a phone (`IS_MOBILE`), so none of `src/mobile/` reaches a
  * desktop bundle.
@@ -38,7 +40,7 @@ import { refreshAudioDevices, setPlaying } from "../../../ipc";
 import { appVisibilityChanged, memoryTrimmed } from "../../../mobile/bandMemory";
 import { dismissTop } from "../../../mobile/backStack";
 import type { WindowInsets } from "../../../mobile/native";
-import { keepAwake, listenToNative, setBackgroundAudio } from "../../../mobile/native";
+import { keepAwake, listenToNative, setBackgroundAudio, setLightSystemBars } from "../../../mobile/native";
 
 /**
  * How long the transport has to stay live before the foreground service is
@@ -85,9 +87,11 @@ interface Options {
   bpm: number;
   /** Playing, in zen, or running a drill — the hands-free screens. */
   keepScreenOn: boolean;
+  /** The theme is a light one: the system bars' icons are drawn dark. */
+  lightTheme: boolean;
 }
 
-export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
+export function useAndroidNative({ isPlaying, bpm, keepScreenOn, lightTheme }: Options) {
   const { t } = useTranslation();
 
   // The event channel is opened once and lives for the app's lifetime, so its
@@ -240,4 +244,8 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
   useEffect(() => {
     keepAwake(keepScreenOn).catch(() => {});
   }, [keepScreenOn]);
+
+  useEffect(() => {
+    setLightSystemBars(lightTheme).catch(() => {});
+  }, [lightTheme]);
 }

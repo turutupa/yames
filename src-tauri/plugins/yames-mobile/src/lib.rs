@@ -12,6 +12,9 @@
 //!   reading while both hands are busy.
 //! * **`open_url`** — `Intent.ACTION_VIEW`. The Rust `open_url` command spawns
 //!   a process, and there is nothing to spawn on a phone.
+//! * **`set_light_system_bars`** — dark status and navigation bar icons for a
+//!   light theme, light ones for a dark theme. `enableEdgeToEdge` follows the
+//!   *system's* dark mode, which says nothing about the app's own theme.
 //! * **`set_back_intercept`** — M00 found the Back gesture *finishing the
 //!   activity mid-click*: one stray edge-swipe and the metronome is gone. Back
 //!   now closes whatever the app has open, or puts the app in the background
@@ -181,6 +184,14 @@ async fn set_back_intercept<R: Runtime>(app: AppHandle<R>, payload: Toggle) -> R
 }
 
 #[tauri::command]
+async fn set_light_system_bars<R: Runtime>(
+    app: AppHandle<R>,
+    payload: Toggle,
+) -> Result<(), String> {
+    call(&app, "setLightSystemBars", payload)
+}
+
+#[tauri::command]
 async fn set_event_channel<R: Runtime>(
     app: AppHandle<R>,
     channel: tauri::ipc::Channel<serde_json::Value>,
@@ -196,7 +207,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             keep_awake,
             open_url,
             set_back_intercept,
-            set_event_channel
+            set_event_channel,
+            set_light_system_bars
         ])
         .setup(|_app, _api| {
             #[cfg(target_os = "android")]

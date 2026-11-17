@@ -1498,6 +1498,48 @@
     min-width: 0;
   }
 }
+/* A phone in portrait (480 px and under, so a narrow desktop window keeps its
+   own layout): the Take's big button stays on the screen.
+   On a 360×640 phone "Start take" sat 80 px below the fold under the tab and
+   the how-to, and the one thing the screen is for needed a scroll to find
+   (Android smoke test, 2026-11-17). The actions row lets its children into
+   the page's column (`display: contents`), so the signal and the tempo
+   nudges keep their place in the flow and only the button sticks to the
+   bottom of the window, over a fade of the page's own colour. Not while a
+   Take runs: the running screen is held to the window's height and already
+   ends on its button, and the runway there needs every pixel. Nothing about
+   which picture is showing changes: the neck or the runway, never both. */
+@media (orientation: portrait) and (max-width: 480px) {
+  .session-body:not([data-phase="playing"]) > .session-actions {
+    display: contents;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-signal {
+    align-self: flex-start;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-nudges {
+    align-self: flex-end;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-big {
+    position: sticky;
+    bottom: calc(10px + var(--safe-bottom, 0px));
+    z-index: 4;
+    box-shadow:
+      0 1px 0 rgba(255, 245, 220, 0.75) inset,
+      0 -2px 0 rgba(120, 66, 10, 0.45) inset,
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 0 0 10px var(--l-bg),
+      0 -18px 22px 10px var(--l-bg);
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-big:disabled {
+    background:
+      linear-gradient(rgba(40, 30, 20, 0.7), rgba(40, 30, 20, 0.7)),
+      var(--l-bg);
+    box-shadow:
+      0 0 0 1px var(--l-line2) inset,
+      0 0 0 10px var(--l-bg),
+      0 -18px 22px 10px var(--l-bg);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .session-rise,
   .session-fade,

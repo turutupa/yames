@@ -4,8 +4,10 @@
 
   FOREGROUND_SERVICE + FOREGROUND_SERVICE_MEDIA_PLAYBACK are what let the
   click keep running once the screen goes off; POST_NOTIFICATIONS (Android 13
-  and up, prompted at runtime the first time you press play) is what lets the
-  notification that comes with it be seen. If the user says no to the prompt
+  and up) is what lets the
+  notification that comes with it be seen. It is asked once, the first time
+  the click stops with the app on screen after the app went to the background
+  mid-click (never on first play, so never over a Take). If the user says no
   the service still runs and the metronome still plays — they just do not get
   the row in the shade.
 

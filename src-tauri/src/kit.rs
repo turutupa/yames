@@ -1138,8 +1138,11 @@ pub(crate) struct Entry {
 ///
 /// A sample that WAS cut is faded out over [`CAP_FADE_SECS`] on the way, so
 /// the cap is a decision about length and not a click.
-fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32), String> {
-    decode_capped(name, source, MAX_VOICE_SECS).map(|(buf, rate, _)| (buf, rate))
+///
+/// Also returns the channel count the FILE carried, before the fold, which is
+/// what a kit's manifest describes.
+fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32, u16), String> {
+    decode_capped(name, source, MAX_VOICE_SECS)
 }
 
 /// [`decode_stereo`] with the length cap as an argument, and the channel
@@ -1151,10 +1154,10 @@ fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32), String>
 /// can hold, and one place for all of it to be wrong.
 ///
 /// The channel count is the source's own, and it is returned rather than
-/// assumed because the two formats describe themselves differently: a kit
-/// says it is stereo and is checked against the pair this guarantees, and a
-/// melodic bank says it is mono and would be wrong about it on every correct
-/// file if it were checked against the same thing.
+/// assumed: a manifest (a kit's or a melodic bank's) describes the files its
+/// render tool wrote, and the synthesised kits are mono files that become a
+/// pair only here. Checked against the pair, every correct mono kit logged
+/// "says its files are 1-channel and they are 2-channel" on every load.
 pub(crate) fn decode_capped(
     name: &str,
     source: &Source,
@@ -1710,15 +1713,15 @@ fn build_bank(
         let Some((voice, layer, robin)) = parse_file_name(stem, has_soft) else {
             continue;
         };
-        let (mut buf, src_rate) = decode_stereo(&entry.name, &entry.source)?;
+        let (mut buf, src_rate, src_channels) = decode_stereo(&entry.name, &entry.source)?;
         if !declared_once {
             declared_once = true;
             if let Some(ref m) = manifest {
-                // Two, because `decode_stereo` has already folded whatever
-                // the file was into a pair — the manifest is being checked
-                // against the format the loader guarantees, which is the
-                // only thing a kit can be described as.
-                check_declaration(m, src_rate, 2);
+                // The FILE's channel count, not the pair `decode_stereo`
+                // folded it into: `kit.json` says what the render tool wrote
+                // (mono for the synthesised kits, stereo for the recorded
+                // ones), the same thing `voices::check_declaration` checks.
+                check_declaration(m, src_rate, src_channels);
             }
         }
         let before = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
