@@ -2131,6 +2131,7 @@ export function MainWindow() {
         ) : view === "today" ? (
           <TodayView
             session={sessionRun}
+            listening={evaluation.enabled}
             onOpenTools={() => void openLastTool()}
             onOpenLastTool={() => {
               void storeSave(OPEN_ON_KEY, "lastTool");
