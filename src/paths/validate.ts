@@ -52,6 +52,7 @@ export const RULES = {
   "schema.shape": "a required field is missing or the wrong type",
   "schema.enum": "a value is not in its controlled list",
   "schema.todo": "a TODO left in the text by the scaffold",
+  "text.jargon": "player-facing text names a source file, the audit or an internal part of the grader",
   "schema.duplicateId": "two Steps or two Exercises share an id",
   "schema.computedStale": "the computed block does not match the notes",
   "tab.string": "string out of range",
@@ -709,6 +710,18 @@ function checkHonesty(ex: Exercise, report: Report) {
   }
 }
 
+/**
+ * Words from the code and the audits that a player can't read: a file name, the
+ * audit itself, the grader's internal parts. Player-facing text says what they
+ * mean instead ("the right-note check", "where each note starts").
+ */
+const INTERNAL_JARGON =
+  /\b[\w-]+\.(?:rs|ts|tsx)\b|\baudit(?:'s)?\b|\bknown-score\b|\bonset (?:noise )?floor\b|\bsynthetic guitars?\b|\bNoteVerdict\b|§/i;
+
+export function internalJargonIn(text: string): string | null {
+  return INTERNAL_JARGON.exec(text)?.[0] ?? null;
+}
+
 function checkPathText(doc: PathDoc, report: Report) {
   const texts: Array<[string, string]> = [
     ["path.goal", doc.goal],
@@ -726,8 +739,13 @@ function checkPathText(doc: PathDoc, report: Report) {
   for (const level of doc.levels ?? []) {
     texts.push([`level ${level.id}.summary`, level.summary]);
   }
+  for (const ex of [...doc.steps.flatMap((s) => s.exercises), ...(doc.levels ?? []).flatMap((l) => l.warmups)]) {
+    (ex.detection?.notes ?? []).forEach((t, i) => texts.push([`${ex.id}.detection ${i + 1}`, t]));
+  }
   for (const [where, text] of texts) {
     if (/\bTODO\b/.test(text)) report("schema.todo", where, "still says TODO");
+    const jargon = internalJargonIn(text);
+    if (jargon) report("text.jargon", where, `player-facing text names "${jargon}", an internal term`);
     for (const claim of bannedClaimsIn(text, false)) {
       report("honesty.banned", where, `${claim.name}: "${text}"`);
     }

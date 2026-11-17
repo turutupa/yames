@@ -16,7 +16,7 @@
     "history": []
   },
   "orderRationale": "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that.",
-  "gradingLimits": "Everything here is timing and notes on single picked notes, the case the app is built for, and none of it has been tried on a real guitar. Trust falls with speed. Evenness holds at a constant input delay until notes leave their matching window, which with a 50 ms delay is sixteenths at 120 BPM on the audit's table; until the known-score path is calibrated, read anything above sixteenths at 100 BPM as provisional. High-gain, compressed tone is the likely worst case for the onset floor, so a clean or light-crunch tone is the honest setting for a take. No rung past sixteenths at 200 BPM may be graded at all, and no Exercise here goes that far.",
+  "gradingLimits": "Everything here is graded on timing and notes for single picked notes, which is what the app is built for, and none of it has been tried on a real guitar yet. The faster the line, the less sure the grade. Your setup adds a small delay between playing a note and the app hearing it; up to sixteenths at 100 BPM that makes no difference, and above that, read the evenness score as provisional. Heavy distortion and compression blur where each note starts, so a clean or light-crunch tone is the honest setting for a graded take. Nothing faster than sixteenths at 200 BPM is graded, and no Exercise here goes that far.",
   "estimatedMinutes": 230,
   "steps": [
     {
@@ -7228,7 +7228,7 @@
           "detection": {
             "flags": ["sustainedPlaying"],
             "notes": [
-              "Long unbroken playing, especially high-gain, is where the onset noise floor may close and stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
+              "Long unbroken playing, especially high-gain, can drown out where each note starts, so the app may stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
             ]
           },
           "backing": {
@@ -8072,7 +8072,7 @@
           "detection": {
             "flags": ["sustainedPlaying"],
             "notes": [
-              "Long unbroken playing, especially high-gain, is where the onset noise floor may close and stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
+              "Long unbroken playing, especially high-gain, can drown out where each note starts, so the app may stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
             ]
           },
           "backing": {
@@ -8184,7 +8184,7 @@
           "detection": {
             "flags": ["sustainedPlaying"],
             "notes": [
-              "Long unbroken playing, especially high-gain, is where the onset noise floor may close and stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
+              "Long unbroken playing, especially high-gain, can drown out where each note starts, so the app may stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
             ]
           },
           "backing": {

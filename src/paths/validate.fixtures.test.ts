@@ -6,7 +6,7 @@ import { MINIMAL_SPEC, exercise } from "./fixtures/minimal";
 import type { Exercise, PathDoc, Step } from "./format";
 import { buildPath } from "./generate";
 import type { ExerciseSpec, PathSpec } from "./spec";
-import { RULES, errorsIn, validatePath } from "./validate";
+import { RULES, errorsIn, internalJargonIn, validatePath } from "./validate";
 import type { RuleId } from "./validate";
 
 const fresh = (): PathDoc => JSON.parse(JSON.stringify(buildPath(MINIMAL_SPEC))) as PathDoc;
@@ -51,6 +51,11 @@ const FIXTURES: Record<RuleId, () => unknown> = {
   "schema.todo": () => {
     const d = fresh();
     ex(d, "scale").purpose = "TODO: say what this Exercise is for.";
+    return d;
+  },
+  "text.jargon": () => {
+    const d = fresh();
+    d.gradingLimits = "Right notes come from pitch.rs on synthetic guitars only.";
     return d;
   },
   "schema.duplicateId": () => {
@@ -640,5 +645,26 @@ describe("the honesty lint", () => {
     const d = fresh();
     ex(d, "scale").howTo = ["Mute with your palm, use a downstroke, and keep your hand relaxed."];
     expect(validatePath(d).filter((i) => i.rule === "honesty.banned")).toEqual([]);
+  });
+});
+
+describe("the jargon lint (QA 2026-11-17 #12)", () => {
+  it.each([
+    "Right notes come from pitch.rs.",
+    "sixteenths at 120 BPM on the audit's table",
+    "until the known-score path is calibrated",
+    "the likely worst case for the onset floor",
+    "on synthetic guitars only",
+    "(audit §3)",
+  ])("catches %s", (text) => {
+    expect(internalJargonIn(text)).not.toBeNull();
+  });
+
+  it.each([
+    "The right-note check has only been tried on computer-made guitar sound.",
+    "Heavy distortion blurs where each note starts.",
+    "Played 3.5 times as fast.",
+  ])("lets plain words through: %s", (text) => {
+    expect(internalJargonIn(text)).toBeNull();
   });
 });
