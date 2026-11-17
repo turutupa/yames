@@ -90,6 +90,14 @@
   right: 0;
   bottom: 0;
 }
+/* A dark backing, so the strip reads where a portrait neck runs on under it. */
+.neck-strip::before {
+  content: "";
+  position: absolute;
+  inset: -10px -2px -4px;
+  background: linear-gradient(180deg, transparent, rgba(8, 5, 3, 0.94) 10px);
+  border-radius: 6px;
+}
 .neck-strip svg {
   display: block;
   position: absolute;
