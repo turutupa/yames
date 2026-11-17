@@ -9,7 +9,7 @@ afterEach(cleanup);
 describe("TitleBar", () => {
   it("names the app in its own window", () => {
     const { container } = render(<TitleBar />);
-    expect(container.querySelector(".app-wordmark")?.textContent).toBe("yames");
+    expect(container.querySelector(".app-wordmark")?.textContent).toBe("Yames");
   });
 
   it("is a drag region wherever the frame is ours", () => {

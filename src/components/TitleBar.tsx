@@ -1,4 +1,5 @@
 import { IS_MAC, IS_WINDOWS, IS_LINUX } from "../hotkeys";
+import { APP_NAME } from "../brand";
 import { AppMark } from "./AppMark";
 import { WindowControls } from "./WindowControls";
 
@@ -9,7 +10,8 @@ import { WindowControls } from "./WindowControls";
  * Before this the app had no titlebar at all. The window controls floated at
  * the top-left over the rail and the rail reserved 42px of empty padding for
  * them, so the app's name appeared nowhere in its own window — the mockups
- * put a mark and "yames" there, and a window that never says what it is is a
+ * put a mark and the name there (`APP_NAME`, capitalised: the owner read the
+ * lower-case "yames" as the window title on Windows, 2026-11-17), and a window that never says what it is is a
  * window you cannot identify in a screenshot or a bug report.
  *
  * The controls go where the platform puts them, which on Windows and Linux is
@@ -34,7 +36,7 @@ export function TitleBar() {
   return (
     <div className="app-titlebar" {...(!IS_MAC && { "data-tauri-drag-region": "" })}>
       <AppMark />
-      <span className="app-wordmark">yames</span>
+      <span className="app-wordmark">{APP_NAME}</span>
       {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
     </div>
   );
