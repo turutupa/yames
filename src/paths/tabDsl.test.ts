@@ -118,6 +118,22 @@ describe("strokes", () => {
     expect(notes.map((n) => n.pick)).toEqual(["d", "d", "d", undefined, undefined, "u", "u"]);
   });
 
+  it("a sweep's picked note after a hammer and a pull follows the string it leaves", () => {
+    // The loop's last note is a full beat after the last picked note, with
+    // the turn between: the pick is coming back up, not starting a new push.
+    const { notes } = parse("/8t 3:9 2:10 1:8 1:12h 1:8p 2:10 3:9 2:10 1:8 1:12h 1:8p 2:10");
+    markSweep(notes);
+    expect(notes.map((n) => n.pick)).toEqual([
+      "d", "d", "d", undefined, undefined, "u", "u", "d", "d", undefined, undefined, "u",
+    ]);
+  });
+
+  it("a sweep after a beat of silence starts afresh", () => {
+    const { notes } = parse("/8t 3:9 2:10 1:8 /4 r /8t 2:10 3:9");
+    markSweep(notes);
+    expect(notes.map((n) => n.pick)).toEqual(["d", "d", "d", "u", "u"]);
+  });
+
   it("a slid-to note is not picked", () => {
     const { notes } = parse("/8 3:7s 3:9 3:7");
     expect(isPicked(notes[1], notes[0])).toBe(false);

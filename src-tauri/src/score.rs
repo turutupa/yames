@@ -2074,7 +2074,8 @@ pub struct ScheduleRun {
     live_lag_notes: usize,
     /// Whether `live_lag_ms` is worth judging by yet: there is a cached
     /// offset for this rig, the recent notes gave one, or the hold below ran
-    /// out. Until then the live sweep says nothing ([`LIVE_HOLD_ONSETS`]).
+    /// out. Until then the live sweep says nothing ([`LIVE_HOLD_ONSETS`],
+    /// [`LIVE_HOLD_MS`]).
     live_lag_settled: bool,
     /// The Exercise's pass bars, when an Exercise is what was loaded.
     pass_bars: Vec<PassBar>,
@@ -2143,6 +2144,17 @@ const LIVE_CONTEXT: usize = 8;
 /// goes on with what it has, which is what it always did. Sixteen is a bar of
 /// sixteenths, a few beats of anything slower.
 const LIVE_HOLD_ONSETS: u64 = 16;
+
+/// How long the live sweep holds verdicts back, at most, while it does not yet
+/// know the system's lag: from the nominal time of the first held onset.
+///
+/// [`LIVE_HOLD_ONSETS`] and [`MIN_NOTES_FOR_LAG`] are counts, and on a sparse
+/// part counts are slow: whole notes at 80 BPM take eight bars, twenty-four
+/// seconds, to give the eight notes a lag is read from, and that long without
+/// a light on the page reads as broken. Four seconds is two bars at 120 and a
+/// note or two of anything sparse; past it the sweep goes on with what it
+/// has, as it does when the count runs out. The report is not affected.
+const LIVE_HOLD_MS: f64 = 4000.0;
 
 /// While the lag is unknown, an onset is only due once even the latest lag
 /// the estimator would pick has passed: no note is waited for past its
@@ -2387,9 +2399,15 @@ impl ScheduleRun {
         }
         // ── Hold, while the lag is not known ───────────────────────────
         // A short schedule played out is released too: there is nothing
-        // further to wait for.
+        // further to wait for. So is a sparse one held for LIVE_HOLD_MS.
         if !self.live_lag_settled {
-            if end - start < LIVE_HOLD_ONSETS && !reached_end {
+            let first_abs = (start / n as u64) as f64 * length
+                + self.pass_onsets[(start % n as u64) as usize].beat;
+            let timed_out = self
+                .beats
+                .time_at_beat(first_abs)
+                .is_some_and(|t| now_ms - t >= LIVE_HOLD_MS);
+            if end - start < LIVE_HOLD_ONSETS && !reached_end && !timed_out {
                 return;
             }
             self.live_lag_settled = true;

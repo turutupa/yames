@@ -61,6 +61,19 @@ if (isMobile) {
   console.log(`[tauri] YAMES_MOBILE=1 for \`tauri ${subcommand}\` (no coach in a phone build)`);
 }
 
+if (subcommand === "android" && !env.CARGO_PROFILE_RELEASE_STRIP) {
+  // The phone's release library ships without its symbol table: 52 MB of
+  // `libyames_lib.so` was 7 MB of `.symtab`/`.strtab`, and the APK stores
+  // native libraries uncompressed, so every byte of it was a byte of
+  // download. Through the environment because a Cargo profile cannot be set
+  // per target, and the desktop's release profile is left as it is. Gradle
+  // would strip with the NDK's llvm-strip, but only when it finds the NDK
+  // version AGP defaults to, which CI does not install. A debug build
+  // (`tauri android dev`) is untouched: this is the release profile only.
+  env.CARGO_PROFILE_RELEASE_STRIP = "symbols";
+  console.log("[tauri] CARGO_PROFILE_RELEASE_STRIP=symbols for the Android release library");
+}
+
 if (wantsFeatureInjection) {
   // Insert straight after the subcommand: everything after a `--` is
   // forwarded to cargo by the CLI, so appending would land in the wrong
