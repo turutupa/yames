@@ -38,7 +38,7 @@
       "min": "PHÚT",
       "nothing": "Chưa có gì để chơi.",
       "needsInput": "Chấm điểm cần micro hoặc cắm trực tiếp.",
-      "toolsOffer": "Bạn đến để dùng công cụ? Tất cả vẫn ở thanh bên.",
+      "toolsOffer": "Bạn đến để dùng công cụ? Tất cả đều nằm trong Công cụ.",
       "toolsOfferOpen": "Tới công cụ tôi dùng lần cuối",
       "toolsOfferAlways": "Luôn mở ở đó"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "{{count}} lượt. Chưa có tempo sạch.",
       "playedNoClean_other": "{{count}} lượt. Chưa có tempo sạch.",
       "playedClean": "{{count}} lượt. Tempo sạch {{bpm}} BPM.",
-      "playedClean_other": "{{count}} lượt. Tempo sạch {{bpm}} BPM."
+      "playedClean_other": "{{count}} lượt. Tempo sạch {{bpm}} BPM.",
+      "running": "Đang chạy",
+      "whereYouAre": "Bạn đang ở đâu",
+      "openStep": "Đến bước {{n}}"
     },
     "progress": {
       "title": "Tiến bộ",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "Mở ở công cụ dùng lần cuối",
       "openOnLastToolHint": "Bỏ qua Hôm nay và mở thẳng công cụ bạn dùng lần cuối. Có hiệu lực từ lần mở Yames tiếp theo."
+    },
+    "tools": {
+      "intro": "Dùng bất cứ lúc nào. Những gì bạn chơi trong đó vẫn là của bạn.",
+      "beat": "Tiếng gõ nhịp để chơi theo, có huấn luyện viên lắng nghe nếu bạn muốn.",
+      "setlist": "Một lộ trình bạn tự xây và chơi theo thứ tự.",
+      "drill": "Tăng tốc độ khi bạn chơi, và luyện một kế hoạch bạn tự viết.",
+      "jam": "Một ban nhạc và hợp âm của bạn. Không bao giờ chấm điểm.",
+      "songs": "Đọc tab của một bài hát và chơi theo."
     }
   }
 }

@@ -38,7 +38,7 @@
       "min": "MIN",
       "nothing": "Na razie nie ma nic do zagrania.",
       "needsInput": "Do oceny potrzebny jest mikrofon albo wejście bezpośrednie.",
-      "toolsOffer": "Przyszedłeś po narzędzia? Wszystkie są nadal na pasku bocznym.",
+      "toolsOffer": "Przyszedłeś po narzędzia? Wszystkie są w Narzędziach.",
       "toolsOfferOpen": "Do mojego ostatniego narzędzia",
       "toolsOfferAlways": "Zawsze otwieraj tam"
     },
@@ -228,7 +228,10 @@
       "playedClean": "{{count}} podejście. Czyste tempo: {{bpm}} BPM.",
       "playedClean_few": "{{count}} podejścia. Czyste tempo: {{bpm}} BPM.",
       "playedClean_many": "{{count}} podejść. Czyste tempo: {{bpm}} BPM.",
-      "playedClean_other": "{{count}} podejścia. Czyste tempo: {{bpm}} BPM."
+      "playedClean_other": "{{count}} podejścia. Czyste tempo: {{bpm}} BPM.",
+      "running": "W toku",
+      "whereYouAre": "Gdzie jesteś",
+      "openStep": "Przejdź do kroku {{n}}"
     },
     "progress": {
       "title": "Postępy",
@@ -245,6 +248,14 @@
     "settings": {
       "openOnLastTool": "Otwieraj na ostatnim narzędziu",
       "openOnLastToolHint": "Pomiń Dzisiaj i otwieraj na narzędziu, którego używałeś ostatnio. Działa od następnego uruchomienia Yames."
+    },
+    "tools": {
+      "intro": "Używaj ich, kiedy chcesz. To, co w nich zagrasz, zostaje twoje.",
+      "beat": "Klik do grania, a jeśli chcesz, trener słucha.",
+      "setlist": "Rutyna, którą budujesz sam i grasz po kolei.",
+      "drill": "Podnosi tempo, gdy grasz, i ćwiczy plan, który sam piszesz.",
+      "jam": "Zespół i twoje akordy. Nigdy nieoceniane.",
+      "songs": "Czytaj tabulaturę utworu i graj razem z nią."
     }
   }
 }

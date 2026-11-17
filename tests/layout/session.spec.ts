@@ -29,6 +29,7 @@ const SCENES = [
   "step-detail",
   "progress",
   "progress-empty",
+  "tools",
 ];
 
 const SIZES = [

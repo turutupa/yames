@@ -57,7 +57,8 @@ export type CountInView =
   | "today"
   | "paths"
   | "progress"
-  | "session";
+  | "session"
+  | "tools";
 
 /**
  * The engine counts at most eight beats (`arm_count_in` clamps to it, and so

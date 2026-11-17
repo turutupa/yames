@@ -64,12 +64,24 @@ describe("Rail", () => {
       "Today",
       "Paths",
       "Progress",
+      "Tools",
       "Metronome",
       "Setlist",
       "Drill",
       "Jam",
       "Songs",
     ]);
+  });
+
+  it("shows the tools under Tools only while a tool or the Tools list is open", () => {
+    const { container, props, rerender } = setup({ view: "today" });
+    expect(container.querySelector('[role="group"]')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Tools" }));
+    expect(props.setView).toHaveBeenCalledWith("tools");
+    rerender(<Rail {...props} view="tools" />);
+    expect(container.querySelectorAll('[role="group"] .rail-mode')).toHaveLength(5);
+    rerender(<Rail {...props} view="jam" />);
+    expect(container.querySelectorAll('[role="group"] .rail-mode')).toHaveLength(5);
   });
 
   it("keeps tab-1 to tab-5 on the five tools, in the order the rail shows them", () => {

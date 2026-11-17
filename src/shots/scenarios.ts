@@ -72,6 +72,8 @@ export interface Shot {
       | "path"
       | "step"
       | "progress"
+      /** The Tools list, opened from the rail's Tools door. */
+      | "tools"
       /** Find my edge from the Step page, after its first Take. */
       | "edge"
       /** Find my edge, Taken until it has found the edge. */
@@ -798,6 +800,15 @@ export const SHOTS: Shot[] = [
     suffix: "progress-empty",
     window: "main",
     session: { seed: "first", stop: "progress" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "tools",
+    suffix: "tools",
+    window: "main",
+    session: { seed: "returning", stop: "tools" },
     width: 1400,
     height: 900,
     settleMs: 300,

@@ -38,7 +38,7 @@
       "min": "DK",
       "nothing": "Henüz çalınacak bir şey yok.",
       "needsInput": "Notlama için mikrofon ya da doğrudan giriş gerekir.",
-      "toolsOffer": "Araçlar için mi geldin? Hepsi hâlâ kenar çubuğunda.",
+      "toolsOffer": "Araçlar için mi geldin? Hepsi Araçlar altında.",
       "toolsOfferOpen": "Son aracıma git",
       "toolsOfferAlways": "Hep orada aç"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "{{count}} deneme. Henüz temiz tempo yok.",
       "playedNoClean_other": "{{count}} deneme. Henüz temiz tempo yok.",
       "playedClean": "{{count}} deneme. Temiz tempo {{bpm}} BPM.",
-      "playedClean_other": "{{count}} deneme. Temiz tempo {{bpm}} BPM."
+      "playedClean_other": "{{count}} deneme. Temiz tempo {{bpm}} BPM.",
+      "running": "Sürüyor",
+      "whereYouAre": "Neredesin",
+      "openStep": "{{n}}. adıma git"
     },
     "progress": {
       "title": "İlerleme",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "Son aracımda aç",
       "openOnLastToolHint": "Bugün'ü atla ve en son kullandığın araçta aç. Yames bir sonraki açılışında geçerli olur."
+    },
+    "tools": {
+      "intro": "İstediğin zaman kullan. Bunlarda çaldıkların sende kalır.",
+      "beat": "Üstüne çalmak için bir klik; istersen koç da dinler.",
+      "setlist": "Kendin kurduğun, sırayla çalınan bir rutin.",
+      "drill": "Sen çalarken tempoyu yükseltir ve yazdığın bir planı çalıştırır.",
+      "jam": "Bir grup ve senin akorların. Asla notlanmaz.",
+      "songs": "Bir şarkının tabını oku ve onunla birlikte çal."
     }
   }
 }

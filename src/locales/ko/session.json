@@ -38,7 +38,7 @@
       "min": "분",
       "nothing": "아직 연주할 것이 없습니다.",
       "needsInput": "채점하려면 마이크나 다이렉트 입력이 필요합니다.",
-      "toolsOffer": "도구만 쓰러 오셨나요? 모두 사이드바에 그대로 있습니다.",
+      "toolsOffer": "도구만 쓰러 오셨나요? 모두 도구 안에 있습니다.",
       "toolsOfferOpen": "마지막 도구로 가기",
       "toolsOfferAlways": "항상 거기서 열기"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "테이크 {{count}}개. 아직 클린 템포가 없습니다.",
       "playedNoClean_other": "테이크 {{count}}개. 아직 클린 템포가 없습니다.",
       "playedClean": "테이크 {{count}}개. 클린 템포 {{bpm}} BPM.",
-      "playedClean_other": "테이크 {{count}}개. 클린 템포 {{bpm}} BPM."
+      "playedClean_other": "테이크 {{count}}개. 클린 템포 {{bpm}} BPM.",
+      "running": "진행 중",
+      "whereYouAre": "현재 위치",
+      "openStep": "{{n}}단계로 가기"
     },
     "progress": {
       "title": "진도",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "마지막 도구로 열기",
       "openOnLastToolHint": "오늘 화면을 건너뛰고 마지막으로 쓴 도구로 엽니다. 다음에 Yames를 열 때부터 적용됩니다."
+    },
+    "tools": {
+      "intro": "언제든 쓰세요. 여기서 연주한 것은 당신의 것입니다.",
+      "beat": "맞춰 연주할 클릭. 원하면 코치가 들어 줍니다.",
+      "setlist": "직접 짜서 순서대로 연주하는 루틴.",
+      "drill": "연주하는 동안 템포를 올리고, 직접 쓴 계획을 연습합니다.",
+      "jam": "밴드와 당신의 코드. 채점하지 않습니다.",
+      "songs": "곡의 타브를 보며 함께 연주합니다."
     }
   }
 }

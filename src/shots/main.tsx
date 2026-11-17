@@ -210,6 +210,9 @@ async function drive() {
     } else if (stop === "progress") {
       rail("Progress")?.click();
       await until("Progress", () => !!byId("progress"));
+    } else if (stop === "tools") {
+      rail("Tools")?.click();
+      await until("the Tools list", () => !!byId("tools"));
     } else if (stop !== "today") {
       byId("today-start")?.click();
       await until("the Session", () => !!byId("session"));

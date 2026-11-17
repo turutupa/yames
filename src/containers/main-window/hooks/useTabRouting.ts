@@ -65,8 +65,11 @@ export type PlayTab = (typeof PLAY_TABS)[number];
  * adding to it would renumber nothing and change the meaning of a stored value.
  * These are never persisted as `activeTab`: "my last tool" has to stay a tool,
  * and an older build reading the setting must find a value it knows.
+ *
+ * `tools` is the Tools list: the door to the five tools, not one of them, so it
+ * is never "my last tool" either.
  */
-export const LEARN_TABS = ["today", "paths", "progress", "session"] as const;
+export const LEARN_TABS = ["today", "paths", "progress", "session", "tools"] as const;
 
 export type LearnTab = (typeof LEARN_TABS)[number];
 
