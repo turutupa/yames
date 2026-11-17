@@ -12,7 +12,8 @@
  * load: the provider `import()`s it the first time a view other than `hidden`
  * is asked for.
  */
-import { createContext, createElement, useContext, type ReactNode } from "react";
+import { useContext } from "react";
+import { NeckStageContext } from "./context";
 
 export type NeckKind = "aim" | "tone" | "tens" | "clash" | "box" | "dim";
 
@@ -39,29 +40,10 @@ export interface NeckStage {
   readonly is3d: boolean;
 }
 
-/** The stage when no provider is mounted: every call is accepted and does nothing. */
-export const NOOP_STAGE: NeckStage = Object.freeze({
-  setView() {},
-  setNotes() {},
-  pluck() {},
-  sweep() {},
-  setTakeRunning() {},
-  is3d: false,
-});
-
-/** Internal: the provider puts its stage here. Screens use `useNeck`. */
-export const NeckStageContext = createContext<NeckStage>(NOOP_STAGE);
+export { NOOP_STAGE, NeckStageContext } from "./context";
+export { NeckStageProvider } from "./NeckStageProvider";
 
 /** The stage, or a no-op stage when none is mounted. */
 export function useNeck(): NeckStage {
   return useContext(NeckStageContext);
-}
-
-/**
- * Mount once, around the learning screens (or the whole app). Renders a fixed,
- * full-window canvas behind its children; nothing is drawn, and three.js is not
- * loaded, until a screen asks for a view other than `hidden`.
- */
-export function NeckStageProvider(props: { children: ReactNode }): JSX.Element {
-  return createElement(NeckStageContext.Provider, { value: NOOP_STAGE }, props.children);
 }
