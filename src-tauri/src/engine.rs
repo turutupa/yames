@@ -5136,6 +5136,12 @@ impl Drop for AudioThreadExit {
 pub struct MetronomeEngine {
     alive: Arc<AtomicBool>,
     playing: Arc<AtomicBool>,
+    /// The live Oboe stream is gone — closed by the system, or it would not
+    /// start again after being parked — and is `android_route`'s to replace.
+    /// A fresh `Arc` per spawn, like `alive`, so a report about a stream that
+    /// has already been replaced reopens nothing. See `output_park`.
+    #[cfg(target_os = "android")]
+    output_dead: Arc<AtomicBool>,
     thread_handle: Option<thread::JoinHandle<()>>,
     beat_log: BeatLog,
     device_name: Option<String>,
@@ -5224,6 +5230,8 @@ impl MetronomeEngine {
         Self {
             alive: Arc::new(AtomicBool::new(false)),
             playing: Arc::new(AtomicBool::new(false)),
+            #[cfg(target_os = "android")]
+            output_dead: Arc::new(AtomicBool::new(false)),
             thread_handle: None,
             beat_log,
             device_name: None,
@@ -5662,6 +5670,11 @@ impl MetronomeEngine {
         // silence, with `start` having reported success. Same idiom as
         // `set_device`.
         self.alive = Arc::new(AtomicBool::new(true));
+        // And a fresh "dead" flag for the stream this spawn opens.
+        #[cfg(target_os = "android")]
+        {
+            self.output_dead = Arc::new(AtomicBool::new(false));
+        }
         // No stream yet, whatever the last one was. Written HERE, on the
         // command thread and before the spawn, rather than by the outgoing
         // thread: a thread that is unwinding must never write a slot the
@@ -5676,6 +5689,8 @@ impl MetronomeEngine {
         self.stream_channels.store(0, Ordering::Release);
         let alive = self.alive.clone();
         let playing = self.playing.clone();
+        #[cfg(target_os = "android")]
+        let output_dead = self.output_dead.clone();
         let beat_log = self.beat_log.clone();
         let device_name = self.device_name.clone();
         let adaptive_score = self.adaptive_score.clone();
@@ -5688,6 +5703,8 @@ impl MetronomeEngine {
         let output_pair = self.output_pair.clone();
         let stream_channels_pub = self.stream_channels.clone();
         let speech_shared = self.speech.clone();
+        #[cfg(target_os = "android")]
+        let speech_event = self.speech.clone();
         let out_latency_pub = self.output_latency_us.clone();
         let dropped_notifications = self.dropped_notifications.clone();
         let app_handle = EventSink(app_handle);
@@ -8084,8 +8101,11 @@ impl MetronomeEngine {
             };
 
             #[cfg(target_os = "android")]
-            let mut stream = match crate::android_audio::open_output_stream(&android_format, render)
-            {
+            let mut stream = match crate::android_audio::open_output_stream(
+                &android_format,
+                render,
+                output_dead.clone(),
+            ) {
                 Ok(s) => s,
                 Err(e) => {
                     exit.fail(e);
@@ -8170,8 +8190,83 @@ impl MetronomeEngine {
             // overflows is reported when it happens and not once a beat
             // forever after.
             let mut dropped_said: u64 = 0;
+            // Whether this loop has paused the output stream because the app
+            // is away with nothing needing it, and the playback generation
+            // whose end it has already seen (a take that ran off its end
+            // keeps its slot until the screen stops it, and the screen may be
+            // asleep). See `output_park`.
+            #[cfg(target_os = "android")]
+            let mut output_parked = false;
+            #[cfg(target_os = "android")]
+            let mut take_ended_generation: Option<u64> = None;
+            #[cfg(target_os = "android")]
+            crate::output_park::register_event_loop();
 
             while alive.load(Ordering::SeqCst) {
+                // THE OUTPUT STREAM SLEEPS WHILE THE APP IS AWAY AND NOTHING
+                // NEEDS IT.
+                //
+                // This thread, not the callback, and nothing in the callback
+                // changed for it: the callback is simply not called while the
+                // stream is paused. Checked once a pass; every resume trigger
+                // (start, the app coming back, a take, a line of speech)
+                // unparks this thread, so the pass runs at once. On screen
+                // and not parked, it costs one atomic load.
+                #[cfg(target_os = "android")]
+                {
+                    use crate::output_park::{
+                        park_step, resume_outcome, should_park, ParkStep, ResumeOutcome,
+                    };
+                    let away = crate::output_park::app_in_background();
+                    if away || output_parked {
+                        let needs = || crate::output_park::OutputNeeds {
+                            app_in_background: crate::output_park::app_in_background(),
+                            transport_playing: playing.load(Ordering::SeqCst),
+                            take_playing_back: take_event.is_playing_back()
+                                && take_ended_generation != Some(take_event.play_generation()),
+                            take_recording: take_event.is_recording(),
+                            speech_in_flight: speech_event.in_flight(),
+                        };
+                        let dead = output_dead.load(Ordering::SeqCst);
+                        let step = park_step(output_parked, should_park(needs()), dead);
+                        let mut resume = step == ParkStep::Resume;
+                        if step == ParkStep::Pause {
+                            // Recorded either way, so a refusal is said once
+                            // and not every pass; a stream that will not
+                            // pause and then will not start is the resume
+                            // path's to recover.
+                            if let Err(e) = stream.pause() {
+                                eprintln!("[yames][android] {e}");
+                            }
+                            output_parked = true;
+                            // Something may have wanted the stream between
+                            // the read above and the pause: read again now
+                            // that it is paused, and take it straight back. A
+                            // trigger after this read unparks the loop, so
+                            // the next pass sees it.
+                            resume = !should_park(needs());
+                        }
+                        if resume {
+                            output_parked = false;
+                            let started = stream.play();
+                            if let Err(ref e) = started {
+                                eprintln!("[yames][android] {e}");
+                            }
+                            // A stream that will not start again is a dead
+                            // stream: mark it so nothing more is asked of it,
+                            // and hand it to the route thread, which reopens a
+                            // dead stream whether or not the transport is
+                            // running. Unless the system closed it, in which
+                            // case its error callback has already done both
+                            // (asking again would be the double reopen).
+                            let closed = output_dead.load(Ordering::SeqCst);
+                            if resume_outcome(started.is_ok(), closed) == ResumeOutcome::Reopen {
+                                output_dead.store(true, Ordering::SeqCst);
+                                crate::android_route::output_lost();
+                            }
+                        }
+                    }
+                }
                 // A BEAT THE CALLBACK COULD NOT HAND OVER.
                 //
                 // Said here because this is the thread that may print, and
@@ -8198,7 +8293,15 @@ impl MetronomeEngine {
                 // only one that runs while a take plays with the band
                 // stopped — because the audio thread cannot emit: an
                 // `emit` locks and allocates.
+                // The generation is read BEFORE the flag, so an ending is
+                // never pinned on a playback started after it.
+                #[cfg(target_os = "android")]
+                let play_generation = take_event.play_generation();
                 if take_event.take_ended() {
+                    #[cfg(target_os = "android")]
+                    {
+                        take_ended_generation = Some(play_generation);
+                    }
                     let _ = app_handle.emit("take-playback-ended", ());
                 }
                 // And a take that ran into the twenty-minute cap. Raised by
@@ -8632,7 +8735,41 @@ impl MetronomeEngine {
         // any moment once `ensure_thread` returns, and a raise running after
         // that correction would put the engine back to claiming playback.
         self.playing.store(true, Ordering::SeqCst);
-        self.ensure_thread(state, Some(app_handle), SetupWait::No)
+        let r = self.ensure_thread(state, Some(app_handle), SetupWait::No);
+        #[cfg(target_os = "android")]
+        self.wake_output();
+        r
+    }
+
+    /// Android: something needs the output now. Wake the event loop, which
+    /// resumes a parked stream on its next pass (`output_park`), and hand a
+    /// stream that is dead under a live thread to `android_route` again —
+    /// deduplicated there by the per-stream dead flag, so this never doubles
+    /// a reopen already on its way.
+    #[cfg(target_os = "android")]
+    pub fn wake_output(&self) {
+        if let Some(handle) = self.thread_handle.as_ref() {
+            handle.thread().unpark();
+        }
+        crate::output_park::wake();
+        if crate::output_park::start_must_report_dead(
+            self.alive.load(Ordering::SeqCst),
+            self.output_dead.load(Ordering::SeqCst),
+        ) {
+            crate::android_route::output_lost();
+        }
+    }
+
+    /// Android: `android_route`'s question after a lost output — is there a
+    /// live audio thread whose stream is dead? Asked regardless of the
+    /// transport, so a stream lost while stopped (or parked) is reopened
+    /// before the next Play rather than found dead by it.
+    #[cfg(target_os = "android")]
+    pub fn output_needs_reopen(&self) -> bool {
+        crate::output_park::route_should_reopen(
+            self.alive.load(Ordering::SeqCst),
+            self.output_dead.load(Ordering::SeqCst),
+        )
     }
 
     /// Start the engine with no Tauri application attached — the audio path

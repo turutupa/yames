@@ -1229,6 +1229,29 @@ pub fn reorder_presets(ids: Vec<String>, app_handle: AppHandle) -> Result<(), St
 // Audio Input / Evaluation Commands
 // ---------------------------------------------------------------------------
 
+/// The phone's activity went off the screen (`hidden`) or came back. On
+/// Android the engine parks its output stream while the app is away and
+/// nothing needs it, and starts it again on return or when something does;
+/// see `output_park`. A no-op everywhere else.
+#[tauri::command]
+pub fn set_app_in_background(hidden: bool, engine_state: State<EngineState>) {
+    #[cfg(target_os = "android")]
+    {
+        crate::output_park::set_app_in_background(hidden);
+        if !hidden {
+            // Back on screen: resume now, and recover a stream that died
+            // while away. `try_lock`: this runs on the main thread, and an
+            // engine held by a reopen is already recovering; the wake above
+            // has reached the event loop either way.
+            if let Ok(engine) = engine_state.0.try_lock() {
+                engine.wake_output();
+            }
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    let _ = (hidden, engine_state);
+}
+
 /// Send both device lists again, as the desktop's device poll does when
 /// something is plugged in (`audio-devices-changed`,
 /// `audio-input-devices-changed`). A phone has no poll: its Kotlin side's
