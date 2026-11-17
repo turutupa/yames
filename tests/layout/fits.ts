@@ -84,10 +84,13 @@ export async function openShot(
       );
     });
 
+  // Bounded by the test's own timeout, not a fixed 30 s: a scene that plays
+  // Takes in real time (Find my edge, four of them, with the neck stage
+  // drawing) is marked slow by its spec and needs the room.
   await page.waitForFunction(
     () => window.__SHOT_READY__ === true || typeof window.__SHOT_ERROR__ === "string",
     undefined,
-    { timeout: 30_000 },
+    { timeout: 0 },
   );
   const failed = await page.evaluate(() => window.__SHOT_ERROR__);
   expect(failed, `the "${shot}" scene did not build`).toBeUndefined();
