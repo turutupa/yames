@@ -1006,6 +1006,11 @@
   text-shadow: 0 0 44px rgba(255, 170, 70, 0.34);
   font-variant-numeric: tabular-nums;
 }
+/* Held at full until Start: the minutes it will take, not a clock running. */
+.session-countdown[data-ready] {
+  opacity: 0.55;
+  text-shadow: none;
+}
 .session-recap-head .session-h1 {
   font-size: clamp(40px, 8vh, 76px);
 }

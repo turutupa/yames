@@ -208,7 +208,23 @@
       "drillKick": "Ramp up · not graded",
       "movesOn": "This moves on by itself.",
       "finisherKick": "Finisher · not graded",
-      "yourTurnKick": "Your turn · not checked"
+      "yourTurnKick": "Your turn · not checked",
+      "start": {
+        "warmUp": "Start warm-up",
+        "yourTurn": "Start your turn",
+        "jam": "Start the jam",
+        "finisher": "Start the finisher",
+        "drill": "Start the ramp"
+      },
+      "how": {
+        "warmUp": "Play it along with the click. Nothing here is graded, so loosen up.",
+        "yourTurn": "Play it your way, along with the click. Nothing here is checked.",
+        "jam": "Play along with the band. Nothing here is graded.",
+        "finisher": "Play it over the band, on a loop. Nothing here is graded.",
+        "drill": "The click speeds up as you go. Nothing here is graded."
+      },
+      "skip": "Skip",
+      "startKeys": "Enter, Space or the pedal starts it."
     },
     "pedal": {
       "title": "Foot pedal",

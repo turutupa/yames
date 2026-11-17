@@ -208,7 +208,23 @@
       "drillKick": "Alza il tempo · senza voto",
       "movesOn": "Va avanti da solo.",
       "finisherKick": "Finale · senza voto",
-      "yourTurnKick": "Tocca a te · non controllato"
+      "yourTurnKick": "Tocca a te · non controllato",
+      "start": {
+        "warmUp": "Inizia il riscaldamento",
+        "yourTurn": "Inizia il tuo turno",
+        "jam": "Inizia la jam",
+        "finisher": "Inizia il finale",
+        "drill": "Inizia la rampa"
+      },
+      "how": {
+        "warmUp": "Suonalo con il clic. Qui non si valuta niente, quindi sciogliti.",
+        "yourTurn": "Suonalo a modo tuo, con il clic. Qui non si controlla niente.",
+        "jam": "Suona con la band. Qui non si valuta niente.",
+        "finisher": "Suonalo sulla band, in loop. Qui non si valuta niente.",
+        "drill": "Il clic accelera mentre suoni. Qui non si valuta niente."
+      },
+      "skip": "Salta",
+      "startKeys": "Invio, Spazio o il pedale lo avviano."
     },
     "pedal": {
       "title": "Pedale",
