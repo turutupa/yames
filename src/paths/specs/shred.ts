@@ -1231,7 +1231,7 @@ const ADVANCED: StepSpec[] = [
           "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked T).",
           "Fingers 1-3-4 on the low E (5, 7, 8) and 1-3-4 on the A (5, 7, 8); 1-3-4 on the D and G (5, 7, 9).",
         ],
-        coach: "The hammer-ons from nowhere count as attacks here, so a quiet one shows up as missed. That is a fair reading of a hammer that didn't sound.",
+        coach: "The hammer-ons from nowhere count as attacks here, so one too quiet for me to catch shows up as missed. Make them loud; the bar allows for a few.",
         vary: {
           values: { key: ["A", "B", "C", "D", "E"] },
           pooled: ["key"],
