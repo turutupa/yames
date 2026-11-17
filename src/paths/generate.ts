@@ -4,7 +4,7 @@
  */
 import { GRADING_PROFILES } from "./profiles";
 import type { GradingProfile } from "./profiles";
-import { PATH_SCHEMA_VERSION, STANDARD_TUNING, VARIATION_DIMENSIONS, barLengthTicks } from "./format";
+import { PATH_SCHEMA_VERSION, STANDARD_TUNING, VARIATION_DIMENSIONS, barLengthTicks, subdivisionOf } from "./format";
 import type {
   Backing,
   Crossing,
@@ -36,7 +36,7 @@ import {
 import { DETECTION_FLAGS } from "./metrics";
 import { checkReachAt, maxPlayableBpm } from "./reach";
 import type { ExerciseSpec, HarmonySpec, PathSpec, VariantBuild, VariantParams, VarySpec } from "./spec";
-import { markAlternate, markSweep, parseTab } from "./tabDsl";
+import { markAlternate, markEconomy, markSweep, parseTab } from "./tabDsl";
 import { canSpellScale, chordRootName, guideTones, spellChord, spellScale } from "./theory";
 import type { ScaleId } from "../jam/scales";
 
@@ -195,6 +195,7 @@ function buildExercise(
     const part = compile(spec, build, `${where}#${variantId(paramsList[index])}`);
     if (pickPlan === "alternate") markAlternate(part.notes, spec.pickStart ?? "d");
     if (pickPlan === "sweep") markSweep(part.notes);
+    if (pickPlan === "economy") markEconomy(part.notes, spec.pickStart ?? "d");
     return part;
   });
 
@@ -270,6 +271,8 @@ function buildExercise(
   const passBars = barsFor(concrete[0].part.notes);
 
   const first = concrete[0];
+  const grid = pathSpec.labelSubdivisions ? subdivisionOf(first.part.notes) : undefined;
+  if (grid === null) throw new Error(`${where}: no nameable subdivision in its notes`);
   const exercise: Exercise = {
     id: `${groupId}.${spec.id}`,
     title: spec.title,
@@ -295,6 +298,8 @@ function buildExercise(
     backing: first.backing,
     estimatedMinutes: spec.minutes,
     tab: first.part.tab,
+    // Undefined unless the Path opts in; the serializer leaves it out then.
+    subdivision: grid,
     computed: first.computed,
   };
   if (spec.feedbackNote) exercise.feedbackNote = spec.feedbackNote;

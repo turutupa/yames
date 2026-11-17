@@ -2,6 +2,7 @@
 import alternatePicking from "./alternate-picking";
 import bluesPentatonics from "./blues-pentatonics";
 import classicRock from "./classic-rock";
+import shred from "./shred";
 import sweepPicking from "./sweep-picking";
 import type { PathSpec } from "../spec";
 
@@ -10,5 +11,6 @@ export const SPECS: readonly PathSpec[] = [
   sweepPicking,
   bluesPentatonics,
   classicRock,
+  shred,
   // new paths go above this line
 ];

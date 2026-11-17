@@ -115,6 +115,13 @@ export const METRICS: readonly Metric[] = [
 
 export const METRIC_IDS: readonly string[] = METRICS.map((m) => m.id);
 
+/**
+ * New graders the Session's pass rule already measures (`score/pass.rs`), so a
+ * graded Exercise may lean on them. Every other `new-grader` metric is not
+ * built: a graded pass bar on it would decide on a number nobody computes.
+ */
+export const BUILT_NEW_GRADERS: readonly string[] = ["evennessHold"];
+
 /** Numbers in the report a pass bar must not use, and why. */
 export const FORBIDDEN_METRICS: Readonly<Record<string, string>> = {
   score: "`score` ignores missed notes on guitar: hc and oe weigh 0 (audit §3 defect 1).",

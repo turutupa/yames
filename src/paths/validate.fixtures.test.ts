@@ -99,6 +99,11 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     ex(d, "scale").notes[0].tech.push("bend");
     return d;
   },
+  "tab.subdivision": () => {
+    const d = fresh();
+    ex(d, "scale").subdivision = "sextuplets";
+    return d;
+  },
   "loop.firstNote": () => {
     const d = fresh();
     const e = ex(d, "outside");
@@ -152,6 +157,14 @@ const FIXTURES: Record<RuleId, () => unknown> = {
   "pick.sweep": () => {
     const d = fresh();
     ex(d, "arp").notes[1].pick = "u";
+    return d;
+  },
+  "pick.economy": () => {
+    const d = fresh();
+    const e = ex(d, "scale");
+    e.pickPlan = "economy";
+    e.crossing = "none";
+    e.notes[1].pick = e.notes[0].pick;
     return d;
   },
   "pick.legatoMarked": () => {
@@ -352,6 +365,13 @@ const FIXTURES: Record<RuleId, () => unknown> = {
   "honesty.metric": () => {
     const d = fresh();
     ex(d, "scale").passBars.push({ metric: "score", min: 90, overBars: 4 });
+    return d;
+  },
+  "honesty.unbuiltMetric": () => {
+    const d = fresh();
+    const e = ex(d, "scale");
+    e.graded.push("restsKept");
+    e.passBars.push({ metric: "restsKept", min: 0.9, overBars: 4 });
     return d;
   },
   "honesty.passNotGraded": () => {

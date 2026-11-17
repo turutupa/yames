@@ -4,11 +4,14 @@
  * Example: `/16 5:5 5:6 5:7 5:8 | /4 3:7b2v> r /2 hold`
  *
  * - `/8` sets the note value until the next one: `/1 /2 /4 /8 /16 /32`, then an
- *   optional `.` (dotted) or `t` (triplet). `/16t` is a sextuplet note.
+ *   optional `.` (dotted), `t` (triplet) or `q` (quintuplet: five in the time
+ *   of four). `/16t` is a sextuplet note, `/16q` a sixteenth quintuplet, five
+ *   to the beat.
  * - `s:f` is string and fret, string 1 the highest. Suffixes, in any order:
  *   `h` hammer-on, `p` pull-off (on the note arrived at), `s` slides out to the
  *   next note, `b2` bends two semitones, `v` vibrato, `>` accent, `m` palm
- *   mute, `l` let ring, `d` or `u` a printed stroke.
+ *   mute, `l` let ring, `t` tapped with the picking hand (a loud attack with
+ *   no stroke), `d` or `u` a printed stroke.
  * - `a+b` sounds two notes together, a double stop: `3:7b2+2:5` is a unison
  *   bend. Both take the current value; the score hears one attack.
  * - `r` is a rest of the current value.
@@ -21,17 +24,21 @@ import type { PathNote, PathRest, PathTechnique, PickMark } from "./format";
 
 /** Note values `toScore.ts` can write back out, longest first. */
 export const NOTATED_TICKS: readonly number[] = [
-  3840, 2880, 1920, 1440, 1280, 960, 720, 640, 480, 360, 320, 240, 180, 160, 120,
+  3840, 2880, 1920, 1440, 1280, 960, 720, 640, 480, 360, 320, 240, 192, 180, 160, 120,
 ];
 
 export type ParsedTab = { notes: PathNote[]; rests: PathRest[]; totalTicks: number };
 
 function durationOf(token: string): number {
-  const match = /^\/(1|2|4|8|16|32)([.t]?)$/.exec(token);
+  const match = /^\/(1|2|4|8|16|32)([.tq]?)$/.exec(token);
   if (!match) throw new Error(`bad note value: ${token}`);
   const base = (TICKS * 4) / Number(match[1]);
   if (match[2] === ".") return (base * 3) / 2;
   if (match[2] === "t") return (base * 2) / 3;
+  if (match[2] === "q") {
+    if (match[1] !== "16") throw new Error(`only sixteenth quintuplets are notatable: ${token}`);
+    return (base * 4) / 5;
+  }
   return base;
 }
 
@@ -76,6 +83,7 @@ function parseNote(part: string, token: string, tuning: readonly number[], tick:
     else if (c === "v") tech.push("vibrato");
     else if (c === "m") tech.push("palmMute");
     else if (c === "l") tech.push("letRing");
+    else if (c === "t") tech.push("tap");
     else if (c === ">") accent = true;
     else if (c === "d" || c === "u") pick = c;
     else if (c === "b") {
@@ -158,9 +166,10 @@ export function parseTab(tab: string, tuning: readonly number[], barTicks: numbe
 
 const isLegatoArrival = (n: PathNote) => n.tech.includes("hammer") || n.tech.includes("pull");
 
-/** Is this note picked? A hammer, a pull or a slid-to note is not. */
+/** Is this note picked? A hammer, a pull, a tap or a slid-to note is not. */
 export function isPicked(note: PathNote, previous: PathNote | undefined): boolean {
   if (isLegatoArrival(note)) return false;
+  if (note.tech.includes("tap")) return false;
   if (previous && previous.tech.includes("slide") && previous.string === note.string) return false;
   return true;
 }
@@ -178,6 +187,27 @@ export function markAlternate(notes: PathNote[], start: PickMark = "d"): void {
     if (!isPicked(note, previous)) return;
     note.pick = note.pick ?? next;
     next = note.pick === "d" ? "u" : "d";
+  });
+}
+
+/**
+ * Economy strokes: alternate on a string, and a string change takes the stroke
+ * the pick is travelling in (down toward the higher strings, up toward the
+ * lower), so a stroke that ends one string carries on through the next. A beat
+ * or more between onsets resets to `start`, as `markAlternate` does. Marks the
+ * spec already wrote are kept.
+ */
+export function markEconomy(notes: PathNote[], start: PickMark = "d"): void {
+  let last: PathNote | undefined;
+  notes.forEach((note, index) => {
+    if (!isPicked(note, notes[index - 1])) return;
+    const near = last && note.tick - last.tick < TICKS ? last : undefined;
+    if (!note.pick) {
+      if (!near?.pick) note.pick = start;
+      else if (near.string !== note.string) note.pick = note.string < near.string ? "d" : "u";
+      else note.pick = near.pick === "d" ? "u" : "d";
+    }
+    last = note;
   });
 }
 

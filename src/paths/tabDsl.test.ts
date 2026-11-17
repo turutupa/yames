@@ -26,6 +26,27 @@ describe("parseTab", () => {
     expect(parse("/4 3:5s 3:7").notes[0].tech).toEqual(["slide"]);
   });
 
+  it("sixteenth quintuplets are five to the beat, and only sixteenths can be", () => {
+    const { notes, totalTicks } = parse("/16q 1:5 1:8 2:5 2:6 2:8");
+    expect(notes.map((n) => [n.tick, n.dur])).toEqual([
+      [0, 192],
+      [192, 192],
+      [384, 192],
+      [576, 192],
+      [768, 192],
+    ]);
+    expect(totalTicks).toBe(960);
+    expect(() => parse("/8q 1:5")).toThrow(/quintuplets/);
+  });
+
+  it("a tapped note is a loud attack with no stroke", () => {
+    const notes = parse("/8t 1:12t 1:5p 1:8h").notes;
+    expect(notes[0].tech).toEqual(["tap"]);
+    expect(isPicked(notes[0], undefined)).toBe(false);
+    markAlternate(notes);
+    expect(notes.map((n) => n.pick)).toEqual([undefined, undefined, undefined]);
+  });
+
   it("dotted values and rests", () => {
     const { notes, rests } = parse("/4. 5:5 /8 r");
     expect(notes[0].dur).toBe(1440);

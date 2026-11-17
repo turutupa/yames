@@ -24,7 +24,9 @@ import {
   LEVEL_IDS,
   TICKS,
   VARIATION_DIMENSIONS,
+  SUBDIVISIONS,
   barLengthTicks,
+  subdivisionOf,
 } from "./format";
 import type { Exercise, Harmony, PathDoc, PathLevel, PathNote, Step } from "./format";
 import {
@@ -37,7 +39,7 @@ import {
 } from "./derive";
 import { exerciseDifficulty, minGapMs, stepDifficulty } from "./difficulty";
 import { bannedClaimsIn } from "./honesty";
-import { DETECTION_FLAGS, FORBIDDEN_METRICS, METRICS, METRIC_IDS, NOT_GRADED } from "./metrics";
+import { BUILT_NEW_GRADERS, DETECTION_FLAGS, FORBIDDEN_METRICS, METRICS, METRIC_IDS, NOT_GRADED } from "./metrics";
 import { checkReachAt, maxPlayableBpm } from "./reach";
 import { exerciseWithVariant } from "./variants";
 import { isPicked, NOTATED_TICKS } from "./tabDsl";
@@ -59,6 +61,7 @@ export const RULES = {
   "tab.barFill": "the notes and rests do not fill the bars exactly",
   "tab.barline": "a note crosses a bar line",
   "tab.bend": "a bend must carry both the technique and a distance",
+  "tab.subdivision": "the named subdivision is not the grid the notes move in",
   "loop.firstNote": "a looping Exercise should start on its first beat",
   "loop.seamLeap": "the leap from the last note back to the first is not musical",
   "loop.seamRepeat": "the last note and the first are the same note, back to back",
@@ -71,6 +74,7 @@ export const RULES = {
   "pick.alternate": "the marks do not alternate",
   "pick.sweep": "the marks do not sweep with the strings",
   "pick.legatoMarked": "a hammer-on or pull-off has a stroke on it",
+  "pick.economy": "economy marks that do not alternate on one string",
   "pick.freeMarked": "a free pick plan prints strokes",
   "pick.crossing": "the declared crossing is not what the strokes produce",
   "music.unknownScale": "a scale the theory data does not have",
@@ -109,6 +113,7 @@ export const RULES = {
   "honesty.banned": "a banned claim in the text",
   "honesty.metric": "a metric that is not in the controlled list",
   "honesty.passNotGraded": "a pass bar on a metric the Exercise does not declare graded",
+  "honesty.unbuiltMetric": "a graded Exercise with a pass bar on a metric that isn't measured yet",
   "honesty.notGradedId": "a not-graded id that is not in the controlled list",
   "honesty.notGradedRequired": "the not-graded list leaves out something this Exercise cannot grade",
   "honesty.overlap": "the same thing listed as graded and not graded",
@@ -417,15 +422,25 @@ function checkPicks(ex: Exercise, report: Report) {
       report("pick.crossing", ex.id, `declared "${ex.crossing}", the strokes produce "${actual}"`);
     }
   }
-  if (ex.pickPlan === "sweep") {
+  if (ex.pickPlan === "economy") {
+    for (const { a, b, seam } of pairs) {
+      if (seam || a.string !== b.string || !a.pick || !b.pick) continue;
+      if (a.pick === b.pick) {
+        report("pick.economy", `${ex.id} (tick ${b.tick})`, `two ${a.pick === "d" ? "down" : "up"}strokes in a row on one string`);
+      }
+    }
+  }
+  if (ex.pickPlan === "sweep" || ex.pickPlan === "economy") {
     for (const { a, b, seam } of pairs) {
       if (seam || a.string === b.string || !b.pick) continue;
       const wanted = b.string < a.string ? "d" : "u";
-      if (b.pick !== wanted) {
+      // Economy may also alternate at a change; it may never repeat a stroke against the way it travels.
+      const alternates = ex.pickPlan === "economy" && a.pick !== undefined && b.pick !== a.pick;
+      if (b.pick !== wanted && !alternates) {
         report("pick.sweep", `${ex.id} (tick ${b.tick})`, `crossing from string ${a.string} to ${b.string} wants a ${wanted === "d" ? "down" : "up"}stroke`);
       }
     }
-    if (ex.crossing !== "none") report("pick.crossing", ex.id, "a sweep plan has no declared crossing");
+    if (ex.crossing !== "none") report("pick.crossing", ex.id, `a ${ex.pickPlan} plan has no declared crossing`);
   }
 }
 
@@ -614,6 +629,10 @@ function checkHonesty(ex: Exercise, report: Report) {
       report("honesty.metric", ex.id, `pass bar on "${bar.metric}": not a controlled metric${why ? `. ${why}` : ""}`);
     } else if (!ex.graded.includes(bar.metric)) {
       report("honesty.passNotGraded", ex.id, `a pass bar uses ${bar.metric}, which is not in the graded list`);
+    }
+    const metric = METRICS.find((m) => m.id === bar.metric);
+    if (ex.grading === "graded" && metric?.status === "new-grader" && !BUILT_NEW_GRADERS.includes(bar.metric)) {
+      report("honesty.unbuiltMetric", ex.id, `a pass bar on ${bar.metric}, which no grader measures yet: make it self-checked or drop the bar`);
     }
   }
   for (const id of ex.notGraded) {
@@ -809,8 +828,21 @@ function checkRuntime(doc: PathDoc, ex: Exercise, report: Report) {
   }
 }
 
+function checkSubdivision(ex: Exercise, report: Report) {
+  if (ex.subdivision === undefined) return;
+  if (!(SUBDIVISIONS as readonly string[]).includes(ex.subdivision)) {
+    report("tab.subdivision", ex.id, `"${ex.subdivision}" is not a subdivision this format names`);
+    return;
+  }
+  const grid = subdivisionOf(ex.notes);
+  if (grid !== ex.subdivision) {
+    report("tab.subdivision", ex.id, `says ${ex.subdivision}, and the notes move in ${grid ?? "no nameable grid"}`);
+  }
+}
+
 function checkOne(doc: PathDoc, level: PathLevel, ex: Exercise, report: Report, issues: readonly Issue[]) {
   checkTab(doc, ex, report);
+  checkSubdivision(ex, report);
   // Off the neck, nothing further about these notes means anything.
   if (issues.some((i) => (i.rule === "tab.string" || i.rule === "tab.fret") && i.where.startsWith(ex.id))) return;
   checkLoop(ex, report);

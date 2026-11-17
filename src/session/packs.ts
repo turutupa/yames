@@ -14,10 +14,10 @@ const PACK_FILES = import.meta.glob("../paths/packs/*.json");
 /**
  * The Paths a Session can run today.
  *
- * Alternate Picking and Sweep Picking are graded on timing, notes heard and
+ * Shred, Alternate Picking and Sweep Picking are graded on timing, notes heard and
  * extra notes, and on right notes where the pitch pass can believe what it
  * heard (`src-tauri/src/score/pass.rs` `notes_status`); every graded Exercise of
- * both passes as a Session Take when played right (`path_exercises.rs`). On
+ * all three passes as a Session Take when played right (`path_exercises.rs`). On
  * sweeps the notes usually ring into each other, so right notes are mostly
  * "not checked" there, and the result says so.
  *
@@ -29,6 +29,7 @@ const PACK_FILES = import.meta.glob("../paths/packs/*.json");
  * them and the Path page shows them as not graded yet.
  */
 export const RUNNABLE_PATH_IDS: readonly string[] = [
+  "shred",
   "alternate-picking",
   "sweep-picking",
   "blues-pentatonics",
@@ -43,8 +44,12 @@ export function laterWhyKey(pathId: string): string {
   return LATER_BECAUSE[pathId] ?? "session.paths.laterWhy";
 }
 
-/** The Path a player with none yet starts on. */
-export const FIRST_PATH_ID = "alternate-picking";
+/**
+ * The Path a player with none yet starts on: Shred, the base Mechanics Path for
+ * the first testers (`plans/tasks/mvp/CONTENT.md`). Alternate Picking and Sweep
+ * Picking stay as optional deep dives.
+ */
+export const FIRST_PATH_ID = "shred";
 
 export function isRunnable(pathId: string): boolean {
   return RUNNABLE_PATH_IDS.includes(pathId);

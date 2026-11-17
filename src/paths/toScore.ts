@@ -74,6 +74,7 @@ function durationToken(ticks: number): string {
     360: "16{d}",
     320: "8{tu 3}",
     240: "16",
+    192: "16{tu 5}",
     180: "32{d}",
     160: "16{tu 3}",
     120: "32",
@@ -114,7 +115,10 @@ export function exerciseAlphaTex(ex: Exercise, bpm: number): string {
   ex.notes.forEach((note, index) => byTick.set(note.tick, [...(byTick.get(note.tick) ?? []), index]));
   for (const [tick, indexes] of byTick) {
     const parts = indexes.map((i) => `${ex.notes[i].fret}.${ex.notes[i].string}${noteEffects(ex.notes[i], nextOnString(i))}`);
-    const value = durationToken(ex.notes[indexes[0]].dur);
+    // A tap is a beat effect in alphaTex: it joins the duration's braces.
+    const tapped = indexes.some((i) => ex.notes[i].tech.includes("tap"));
+    const plain = durationToken(ex.notes[indexes[0]].dur);
+    const value = !tapped ? plain : plain.includes("{") ? plain.replace("}", " tt}") : `${plain}{tt}`;
     items.push({ tick, text: parts.length === 1 ? `${parts[0]}.${value}` : `(${parts.join(" ")}).${value}` });
   }
   items.sort((a, b) => a.tick - b.tick);

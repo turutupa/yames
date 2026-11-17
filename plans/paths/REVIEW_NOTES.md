@@ -236,3 +236,78 @@ headless browser only proves it runs.
 - Proposed rule, not written (it is `validate.ts`, C1's): an Exercise in `graded` mode
   may not carry a pass bar on a `new-grader` metric. The draft had four; the new test
   holds the Theory Paths to it, but a validator rule would hold every Path.
+
+---
+
+# The Shred Path (2026-11-16, `mvp-shred`)
+
+> One agent wrote it from the teacher's outline in `plans/tasks/mvp/CONTENT.md`; a second
+> agent, with no part in writing it, ran the demanding-teacher brief (A) against the spec
+> and the pack, note by note. **Not a teacher review, and nobody has played it.** Status
+> stays `draft`.
+
+## What the validator caught while it was written
+
+- Economy strokes printed by the sweep rule put two downstrokes in a row on one string
+  (it looks ahead to the next string change). It became its own marker, `markEconomy`,
+  and a rule, `pick.economy`.
+- Loop seams: runs that ended two octaves from where they started (the economy runs, a
+  pull-off waterfall), and a held-note trick (a trailing rest) where the last note is
+  the first.
+- Reach: a tapped note is not under the fretting hand; `reach.ts` now leaves taps out
+  of the span, and the note after a tap may move the hand.
+- `markSweep` prints a downstroke on a loop's last note when a hammer and a pull put a
+  full beat between it and the last picked note. The pick is travelling up there. Shred
+  prints the upstroke itself (`endsUp`). **The same fault is in the Sweep Picking pack**
+  (`turnaround.minor-mid` and others); fixing `markSweep` would change that pack, so it
+  is left for whoever owns it.
+
+## Teacher brief: findings and what was done
+
+| Exercise | Problem | Done |
+|---|---|---|
+| `accents.*` sextuplets | Passed at 85 to 90, which is 9 notes a second against Step 1's 7.3, with an exception that said the tempo drops | Pass at 75; the exception says what really happens |
+| `gilbert.six-loop`, `mirror-loop`, `down-the-box` | Sextuplets at 90 for a Beginner whose placement says sixteenths fall apart above 90 | Pass at 80 (75 for down-the-box); the ladder still goes to 100 |
+| `gilbert.four-note` | Coach line said it was faster than the six-note loop. It isn't | Rewritten |
+| `gilbert.down-the-box` | Said the move between pairs is outside; that's bar 1 only, bar 2's is inside. Fret 7 named for G only | Rewritten |
+| `string-skipping.skipped-triad` | Said every change skips a string; only the D-B ones do | Rewritten |
+| `string-skipping.pentatonic-skip` | Never said its skips are inside crossings; bar 2 isn't "the same way back" | Rewritten |
+| `string-skipping.octaves` | Nothing about muting the skipped string, which is the technique | Added |
+| `economy.quintuplet-group` | Written descending, against the outline, with an inside crossing on every return | Ascending, B5-6-8 then e5-8: down-up-down, down through, up, and an outside return. The economy rule now lets a change alternate as well as carry through |
+| `sequences.fours-down` | All three variant labels named the wrong first note | Relabelled |
+| `three-per-string.three-strings`, `legato-two.hammer-ascent` | 5-7-9 fingered 1-3-4: the stretch between ring and little finger, the weakest hammer there is | 1-2-4, said why |
+| `three-per-string.three-strings`, `six-strings` | A fingering that never occurs, and shifts not mentioned | Rewritten against the variants |
+| `legato-one.five-seven-eight` | Implied lifting the middle finger before the pull | Keep it down; only the top finger moves |
+| `tapping-etude.tap-triplets` | The B variant spelled C major; mute advice couldn't mute the wound strings | All variants on A minor tones (B: 17-10-13); palm on the low strings |
+| `five-string-sweeps.am-five` | No fingering, no roll named; the text described a pull-off that isn't there | Fingering and the roll; the loop's end said as it is |
+| `five-string-sweeps.one-pass-each` | 60 to 160 in quarter-note triplets: 2 notes a second is not a sweep. Bar 1's first note is picked, not a link | 100 to 190, pass 150 (eighth-triplets at 75), said in words; text fixed; the barre roll in bar 4 named |
+| `five-string-sweeps.the-link` | The G-string turn looked like two different turnarounds | Explained: after the first note every G-string note is the up-turn |
+| `five-string-sweeps.chain-five` | 5-fret slides at both ends of a shape in one triplet. Not a technique to teach | Removed (the outline has three items in this Step) |
+| `speed-bursts.one-beat`, `two-beats`, `expanding` | Chromatic D-Eb-E-F bursts: not music | On Step 1's fret-12 figure (E-F-G, B-C-D), landing on its first note |
+| `chromatic.spider` | The outline says crawling; it stayed at one fret | Up a fret each bar, four bars |
+| `tapping-etude.stamina-minute` | Sixteen bars at 75 is 51 seconds | Pass bars over 20 bars |
+| `tapping-etude.the-run` | The finale used none of the Advanced Steps | Bar 6 is the tap figure over F, bar 7 the six-note lick as pull-offs in sextuplets; the ladder starts at 70 |
+
+## Left as they are, for the owner or a teacher
+
+1. **`economy.picked-arpeggios`** is alternate picking inside the economy Step. The outline
+   puts it there ("picked Am-F-C-G arpeggios (AP8)"); the reviewer would move it. It stays,
+   labelled as the contrast.
+2. **The stamina minute is 3nps in the tapping Step**, as the outline orders it. A tapping
+   stamina minute is a better fit for the Step and a worse one for stamina.
+3. **The finale has no sweep bar.** An Exercise has one pick plan, and a swept bar inside an
+   alternate one would print the wrong strokes. A mixed plan is a format change for later.
+4. **Sextuplet and quintuplet tempos** are teacher's estimates for an intermediate shredder;
+   only playing will say whether 75 to 80 is right.
+5. **Hammer-ons from nowhere count as attacks** (the `tap` technique), so a quiet one is a
+   miss. That is the honest reading, and it is also the strictest bar in the Path.
+
+## Honesty, checked by the author
+
+- Sweeps say "timing only" in every title; their profile (`sweepTiming`) grades evenness,
+  notes heard and extras, and never right notes.
+- Legato: every legato Exercise is a picked bar and then the same notes legato; a
+  self-check asks whether the third note was as loud as the first.
+- Pick direction appears only in checklists ("watch the pick, or film it").
+- One coach line said a missed hammer-on from nowhere was "a fair reading"; it now says
+  only what the bar does.
