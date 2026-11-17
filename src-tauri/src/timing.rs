@@ -5882,3 +5882,118 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod notes_pass_tests {
+    use super::*;
+    use crate::audio_input::RingBuffer;
+    use crate::pitch::ScoreNote;
+    use crate::score::{ExpectedOnset, NotesStatus};
+
+    /// The glue between the Take's kept audio and the pitch pass: the tap is
+    /// pulled the way the detector's thread pulls it, on the real clock, the
+    /// run is fed on the wall clock the analyzer converts everything to, and
+    /// the grade with right notes lands in the slot off this thread.
+    #[test]
+    fn a_closed_take_gets_its_right_notes_from_a_thread_of_its_own() {
+        const RATE: u32 = 22_050;
+        let notes_n = 32usize;
+        let midis = [57.0, 60.0, 64.0, 60.0];
+        let t0_wall = now_wall_ms() as f64;
+        let t0_ns = crate::clock::now_ns();
+        let first_beat = 500.0;
+        let eighth = 250.0;
+        let len_ms = first_beat + notes_n as f64 * eighth + 500.0;
+
+        // Plucked sines, each cut by the next.
+        let total = (len_ms / 1000.0 * RATE as f64) as usize;
+        let mut audio = vec![0.0f32; total];
+        for i in 0..notes_n {
+            let hz = 440.0 * 2f64.powf((midis[i % 4] - 69.0) / 12.0);
+            let start = ((first_beat + i as f64 * eighth) / 1000.0 * RATE as f64) as usize;
+            let n = (eighth / 1000.0 * RATE as f64) as usize;
+            for k in 0..n {
+                let t = k as f64 / RATE as f64;
+                audio[start + k] = (0.5 * (-t * 6.0).exp() * (2.0 * std::f64::consts::PI * hz * t).sin()) as f32;
+            }
+        }
+
+        let notes = NotesPass {
+            tap: crate::take_audio::TakeAudioTap::new(),
+            slot: Arc::new(Mutex::new(NotesSlot::default())),
+        };
+        notes.tap.set_rate(RATE);
+        notes.tap.arm();
+        let mut ring = RingBuffer::new(RATE as usize * 4);
+        notes.tap.pull(&ring, t0_ns);
+        let chunk = RATE as usize / 10;
+        for (c, part) in audio.chunks(chunk).enumerate() {
+            ring.write(part);
+            let end = (c * chunk + part.len()) as f64 / RATE as f64;
+            notes.tap.pull(&ring, t0_ns + (end * 1e9) as u64);
+        }
+
+        let schedule = ScoreSchedule {
+            onsets: (0..notes_n)
+                .map(|i| ExpectedOnset {
+                    id: i as u32,
+                    beat: i as f64 * 0.5,
+                    note_ids: vec![i as u32],
+                    soft: false,
+                    accent: false,
+                })
+                .collect(),
+            length_beats: notes_n as f64 * 0.5,
+            loops: false,
+        };
+        let pitches: Vec<ScoreNote> =
+            (0..notes_n).map(|i| ScoreNote { id: i as u32, midi: midis[i % 4] }).collect();
+        let bars = vec![
+            PassBar { metric: "notesHeard".into(), min: Some(0.9), max: None, over_bars: 4 },
+            PassBar { metric: "noteIdentity".into(), min: Some(0.9), max: None, over_bars: 4 },
+        ];
+        let mut run = ScheduleRun::new(schedule)
+            .with_lag_correction(true)
+            .with_pass_bars(bars)
+            .with_note_pitches(pitches);
+        for q in 0..=(notes_n / 2 + 1) {
+            run.note_quarter_in_bar(q % 4 == 0, t0_wall + first_beat + q as f64 * 500.0, 4);
+        }
+        for i in 0..notes_n {
+            run.note_onset(PlayedOnset {
+                time_ms: t0_wall + first_beat + i as f64 * eighth + 8.0,
+                amplitude: 0.5,
+                confidence: 0.9,
+            });
+        }
+        assert!(run.wants_notes());
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        assert!(start_notes_pass(&run, weights, &notes));
+        // The timing grade says the notes are coming, and does not count them.
+        run.set_notes_pending(true);
+        let timed = run.report(&weights).unwrap().grade;
+        assert!(timed.notes_pending);
+        let timed_pass = timed.pass.unwrap();
+        assert_eq!(timed_pass.not_assessed, vec!["noteIdentity".to_string()]);
+        assert_eq!(timed_pass.notes.unwrap().status, NotesStatus::NotRun);
+
+        let deadline = std::time::Instant::now() + Duration::from_secs(30);
+        let grade = loop {
+            {
+                let slot = notes.slot.lock().unwrap();
+                if !slot.pending {
+                    break slot.grade.clone().expect("a grade with right notes");
+                }
+            }
+            assert!(std::time::Instant::now() < deadline, "the pitch pass never finished");
+            thread::sleep(Duration::from_millis(10));
+        };
+        let pass = grade.pass.unwrap();
+        let check = pass.notes.unwrap();
+        assert_eq!(check.status, NotesStatus::Measured, "{pass:?}");
+        assert!(check.right >= 30, "{check:?}");
+        assert!(pass.not_assessed.is_empty());
+        assert!(pass.checks.iter().any(|c| c.metric == "noteIdentity" && c.held));
+        assert!(!grade.notes_pending);
+    }
+}

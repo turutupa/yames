@@ -36,6 +36,8 @@ export type ScheduleFixture = {
   bpm: number;
   /** Bars of played notes the Rust test should drop one from. */
   schedule: ScoreSchedule;
+  /** The written pitch of every note the schedule names, for the pitch pass. */
+  pitches: { id: number; midi: number }[];
 };
 
 /**
@@ -53,7 +55,8 @@ export function scheduleFixtures(docs: readonly PathDoc[]): string {
         for (const one of concreteExercises(ex)) {
           const score = exerciseScore(doc.id, one, bpm);
           const schedule = buildSchedule(score, undefined, { loops: false });
-          rows.push({ path: doc.id, exercise: one.id, bpm, schedule });
+          const pitches = score.notes.map((n) => ({ id: n.id, midi: n.midi }));
+          rows.push({ path: doc.id, exercise: one.id, bpm, schedule, pitches });
         }
       }
     }
