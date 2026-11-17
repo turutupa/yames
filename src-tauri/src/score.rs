@@ -1554,6 +1554,12 @@ impl Tally {
         // costing the number it must not count as one. A stored beat map that
         // has no quarters at all reaches nothing, and nothing is due.
         let last_logged = beats.len().saturating_sub(1) as f64;
+        // Except at the end of a non-looping pass, which leaves no quarter
+        // after it to log: the engine stops on the pass's last sample, so the
+        // notes inside the last quarter (an eighth on its "and") were played
+        // out, not cut off. A silent 64-note Take said "of 63 notes" for it.
+        // The same rule as `finished_bars_of`.
+        let played_out = !schedule.loops && !beats.is_empty() && beats.len() as f64 >= length;
         let beat_of: std::collections::HashMap<u32, f64> =
             schedule.onsets.iter().map(|o| (o.id, o.beat)).collect();
         let mut tally = Self {
@@ -1568,7 +1574,9 @@ impl Tally {
         for r in results {
             let abs = r.pass as f64 * length + beat_of.get(&r.id).copied().unwrap_or(0.0);
             tally.abs_beats.push(abs);
-            let reached = r.state == OnsetState::Hit || abs <= last_logged + 1e-9;
+            let reached = r.state == OnsetState::Hit
+                || abs <= last_logged + 1e-9
+                || (played_out && r.pass == 0 && abs < length);
             tally.reached.push(reached);
             match r.state {
                 OnsetState::Hit => {

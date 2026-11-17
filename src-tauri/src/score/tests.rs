@@ -1198,3 +1198,32 @@ fn a_schedule_with_nothing_in_it_settles_nothing() {
     }
     assert!(out.is_empty(), "nothing was due, so nothing can be judged");
 }
+
+#[test]
+fn a_part_played_to_its_end_owes_every_note_even_in_its_last_quarter() {
+    // The e2e's silent Take: 64 notes written, "of 63 notes heard". Eighths
+    // over eight bars end on the "and" of beat 31, and a non-looping Take
+    // stops on its last sample, so the beat log ends at beat 31 with nothing
+    // after it: that last eighth was reached, and is owed.
+    let onsets: Vec<ExpectedOnset> = (0..64).map(|i| onset(i, i as f64 * 0.5)).collect();
+    let schedule = ScoreSchedule {
+        onsets,
+        length_beats: 32.0,
+        loops: false,
+    };
+    let mut run = ScheduleRun::new(schedule.clone()).with_lag_correction(true);
+    for i in 0..32 {
+        run.note_quarter(i % 4 == 0, i as f64 * 500.0);
+    }
+    let g = run.report(&weights()).expect("a report").grade;
+    assert_eq!((g.due, g.heard, g.missed, g.not_reached), (64, 0, 64, 0), "{g:?}");
+
+    // Stopped early, the notes past the stop are still not reached.
+    let mut stopped = ScheduleRun::new(schedule).with_lag_correction(true);
+    for i in 0..20 {
+        stopped.note_quarter(i % 4 == 0, i as f64 * 500.0);
+    }
+    let g = stopped.report(&weights()).expect("a report").grade;
+    assert_eq!(g.due, 39, "beats 0 to 19 logged: eighths up to 19.0 are due; {g:?}");
+    assert_eq!(g.not_reached, 25);
+}
