@@ -136,7 +136,10 @@
       "engineTrouble": "Silnik dźwięku nie przyjął tego ćwiczenia. Wyjdź i zacznij od nowa.",
       "hearing": "Słyszę cię",
       "waitingForSignal": "Słucham. Zagraj nutę, żeby sprawdzić.",
-      "listeningBack": "Odsłuch"
+      "listeningBack": "Odsłuch",
+      "band": "Zespół",
+      "bandHint": "Zespół nie jest oceniany. Przy mikrofonie ścisz go albo użyj słuchawek.",
+      "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go."
     },
     "result": {
       "kick": "Podejście {{take}} · {{title}} · {{bpm}} BPM · takty: {{bars}}",

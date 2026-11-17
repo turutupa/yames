@@ -95,6 +95,8 @@ export interface Shot {
      * Take can be photographed before any Theory Path ships as runnable.
      */
     path?: "blues-pentatonics";
+    /** With `path`: play this Exercise rather than the first Step's first. */
+    exercise?: string;
   };
   /**
    * The Jam tab, with a jam actually on it.
@@ -788,6 +790,16 @@ export const SHOTS: Shot[] = [
     suffix: "session-theory-playing",
     window: "main",
     session: { seed: "returning", stop: "playing", practiceView: "neck", path: "blues-pentatonics" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  // A jam-backed Take (the Blues shuffle), playing over its band.
+  {
+    id: "session-band-playing",
+    suffix: "session-band-playing",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "blues-pentatonics", exercise: "landing.root-on-one" },
     width: 1400,
     height: 900,
     settleMs: 900,

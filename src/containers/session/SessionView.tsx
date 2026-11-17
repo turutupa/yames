@@ -227,6 +227,7 @@ function TakeScreen({
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
           <div className="session-why">{t("session.run.honest")}</div>
+          <BandVolume session={session} hint={!running} />
           {!running && !inputReady && (
             <div className="session-glass session-card" role="status" data-testid="session-no-input">
               <div className="session-why">{t("session.run.noInput")}</div>
@@ -555,6 +556,32 @@ function clock(ms: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/** How loud the band under this Exercise is. Only when there is one. */
+export function BandVolume({ session, hint }: { session: SessionRun; hint: boolean }) {
+  const { t } = useTranslation();
+  if (!session.hasBand) return null;
+  return (
+    <>
+      <label className="session-band" data-testid="session-band">
+        <span>{t("session.run.band")}</span>
+        <input
+          type="range"
+          min={0}
+          max={1.5}
+          step={0.05}
+          value={session.bandVolume}
+          onChange={(e) => session.setBandVolume(Number(e.target.value))}
+        />
+      </label>
+      {hint && (
+        <div className="session-why">
+          {t(session.directInput ? "session.run.bandHint" : "session.run.bandMicHint")}
+        </div>
+      )}
+    </>
+  );
+}
+
 /** A metronome, a jam or a drill: not graded, and it moves on by itself. */
 function TimedScreen({
   session,
@@ -607,6 +634,7 @@ function TimedScreen({
         </div>
       )}
       <div className="session-actions">
+        {step.kind === "jam" && step.exerciseId && <BandVolume session={session} hint={false} />}
         <span className="session-why">{t("session.timed.movesOn")}</span>
         <button
           className="session-big"

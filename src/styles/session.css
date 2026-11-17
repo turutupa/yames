@@ -1698,3 +1698,19 @@
     order: 9;
   }
 }
+
+/* The band's level under a jam-backed Take (and the finisher). */
+.session-band {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--l-quiet);
+  font-size: 13px;
+  min-width: 0;
+  max-width: 100%;
+}
+.session-band input[type="range"] {
+  width: clamp(90px, 14vw, 160px);
+  min-width: 0;
+  accent-color: var(--l-amber);
+}
