@@ -52,7 +52,7 @@ fn main() {
     // setting it for that invocation alone is safe.
     #[cfg(all(windows, target_env = "msvc"))]
     {
-        let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        let manifest = std::path::Path::new(&manifest_dir())
             .join("tests-common-controls-v6.manifest");
         println!("cargo:rerun-if-changed=tests-common-controls-v6.manifest");
         println!("cargo:rustc-link-arg-tests=/MANIFEST:EMBED");
@@ -109,7 +109,7 @@ fn embed_folders(root: &str, manifest: &str, constant: &str) {
 /// `required` is the difference between the kits, which the app cannot run
 /// without, and the voices, which it can.
 fn walk(root: &str, manifest: &str, constant: &str, required: bool) -> String {
-    let base = Path::new(env!("CARGO_MANIFEST_DIR")).join(root);
+    let base = Path::new(&manifest_dir()).join(root);
     // A new folder, a new WAV in one, or an edited manifest all have to
     // re-run this. Watching the directory itself is what notices a folder
     // appearing; watching each folder is what notices a file inside one.
@@ -189,4 +189,13 @@ fn write_generated(text: &str, append: bool) {
     };
     std::fs::write(&dest, body)
         .unwrap_or_else(|e| panic!("could not write {}: {e}", dest.display()));
+}
+
+/// Where this crate is, read when the script RUNS, not when it was compiled.
+/// `env!` bakes the path into the build-script binary, and cargo reuses that
+/// binary from a shared `CARGO_TARGET_DIR` for another checkout of the same
+/// source: a removed worktree's path then panicked with "sounds/kits is not
+/// readable". Cargo always sets this variable for a build script.
+fn manifest_dir() -> String {
+    std::env::var("CARGO_MANIFEST_DIR").expect("cargo sets CARGO_MANIFEST_DIR for build scripts")
 }
