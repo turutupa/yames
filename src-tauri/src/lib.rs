@@ -16,6 +16,8 @@ mod calibration_cache;
 /// body is shared and unchanged.
 #[cfg(target_os = "android")]
 mod android_audio;
+// The phone's INPUT stream lives in `android_input.rs`, as a child module of
+// `audio_input` (it fills the same private ring and slots).
 mod clock;
 mod coach;
 mod commands;

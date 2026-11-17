@@ -1698,6 +1698,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     // so About's "Version" row photographed empty in every shot and nothing
     // that compares against the running version could be photographed at all.
     if (cmd === "plugin:app|version") return APP_VERSION;
+    // The phone build's microphone prompt (M7): the harness has said yes.
+    if (cmd === "plugin:yames-mobile|request_microphone") return true;
 
     if (cmd.startsWith("plugin:")) return null;
 

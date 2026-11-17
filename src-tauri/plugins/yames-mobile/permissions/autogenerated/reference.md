@@ -2,12 +2,14 @@
 
 Everything the phone build of Yames needs from its own native half: keeping
 the click playing with the screen off, keeping the screen awake, answering the
-system Back gesture, and opening a link in the browser. All four commands, and
+system Back gesture, opening a link in the browser, and asking for the
+microphone the Session grades from. All four commands, and
 no scope — there is nothing here to narrow, and the frontend calls all of them.
 
 #### This default permission set includes the following:
 
 - `allow-set-background-audio`
+- `allow-request-microphone`
 - `allow-keep-awake`
 - `allow-open-url`
 - `allow-set-back-intercept`
@@ -70,6 +72,32 @@ Enables the open_url command without any pre-configured scope.
 <td>
 
 Denies the open_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:allow-request-microphone`
+
+</td>
+<td>
+
+Enables the request_microphone command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:deny-request-microphone`
+
+</td>
+<td>
+
+Denies the request_microphone command without any pre-configured scope.
 
 </td>
 </tr>

@@ -67,6 +67,11 @@ class EventChannelArgs {
 @TauriPlugin(
     permissions = [
         Permission(strings = [Manifest.permission.POST_NOTIFICATIONS], alias = "notifications"),
+        // M7: the Session is graded from the guitar, through the built-in mic,
+        // a USB-C interface or a headset-jack adapter. Asked for when the
+        // first-run input step or a Session first opens the input, never at
+        // launch.
+        Permission(strings = [Manifest.permission.RECORD_AUDIO], alias = "microphone"),
     ],
 )
 class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
@@ -243,6 +248,34 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
         pendingStart?.let { startPlayback(it) }
         pendingStart = null
         invoke.resolve()
+    }
+
+    /**
+     * Ask for the microphone, once, and say whether it is allowed.
+     *
+     * Resolves `{ granted }`. Already granted: no prompt. Denied for good
+     * (the user ticked "don't ask again", or said no twice on Android 11+):
+     * the system shows nothing and this answers `false`, and the input step
+     * says where in Android's settings to allow it.
+     */
+    @Command
+    fun requestMicrophone(invoke: Invoke) {
+        if (getPermissionState("microphone") == PermissionState.GRANTED) {
+            resolveMicrophone(invoke)
+            return
+        }
+        requestPermissionForAlias("microphone", invoke, "microphonePermissionResult")
+    }
+
+    @PermissionCallback
+    fun microphonePermissionResult(invoke: Invoke) {
+        resolveMicrophone(invoke)
+    }
+
+    private fun resolveMicrophone(invoke: Invoke) {
+        val result = JSObject()
+        result.put("granted", getPermissionState("microphone") == PermissionState.GRANTED)
+        invoke.resolve(result)
     }
 
     @Command

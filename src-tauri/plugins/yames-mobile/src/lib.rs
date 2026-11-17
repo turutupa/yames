@@ -139,6 +139,32 @@ async fn set_background_audio<R: Runtime>(
     call(&app, "setBackgroundAudio", payload)
 }
 
+/// Whether the microphone may be used, asking the first time (M7).
+#[derive(Deserialize, Serialize)]
+struct MicrophoneAnswer {
+    granted: bool,
+}
+
+#[tauri::command]
+async fn request_microphone<R: Runtime>(app: AppHandle<R>) -> Result<bool, String> {
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+        let handle = app
+            .try_state::<YamesMobile<R>>()
+            .ok_or_else(|| "the phone side of Yames did not start".to_string())?;
+        return handle
+            .0
+            .run_mobile_plugin::<MicrophoneAnswer>("requestMicrophone", ())
+            .map(|a| a.granted)
+            .map_err(|e| e.to_string());
+    }
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        let _ = app;
+        Ok(true)
+    }
+}
+
 #[tauri::command]
 async fn keep_awake<R: Runtime>(app: AppHandle<R>, payload: Toggle) -> Result<(), String> {
     call(&app, "keepAwake", payload)
@@ -166,6 +192,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("yames-mobile")
         .invoke_handler(tauri::generate_handler![
             set_background_audio,
+            request_microphone,
             keep_awake,
             open_url,
             set_back_intercept,

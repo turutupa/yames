@@ -44,6 +44,15 @@ export function setBackgroundAudio(
 }
 
 /** `FLAG_KEEP_SCREEN_ON`, for the screens you read with both hands busy. */
+/**
+ * Ask for the microphone the first time, and say whether it is allowed (M7).
+ * No prompt when it already is; `false` without a prompt when the user has
+ * refused for good, which only Android's own settings can undo.
+ */
+export function requestMicrophone(): Promise<boolean> {
+  return invoke<boolean>(`plugin:${PLUGIN}|request_microphone`);
+}
+
 export function keepAwake(active: boolean): Promise<void> {
   return invoke(`plugin:${PLUGIN}|keep_awake`, { payload: { active } });
 }

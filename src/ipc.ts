@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { currentFacts, feedbackUrl } from "./feedback/feedbackUrl";
 import { listen } from "@tauri-apps/api/event";
 import { IS_MOBILE } from "./platform";
-import { openUrlNative } from "./mobile/native";
+import { openUrlNative, requestMicrophone } from "./mobile/native";
 import { load } from "@tauri-apps/plugin-store";
 import type { AppState, BeatEvent, ComponentScores, InstrumentId, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
 
@@ -581,7 +581,18 @@ export function onAudioInputDevicesChanged(callback: (devices: AudioInputDevice[
   return listen<AudioInputDevice[]>("audio-input-devices-changed", (e) => callback(e.payload));
 }
 
+/** What `startEvaluation` rejects with on a phone whose microphone is refused. */
+export const MIC_PERMISSION_DENIED =
+  "Yames is not allowed to use the microphone. Allow it in Android's settings: Apps, Yames, Permissions, Microphone.";
+
 export async function startEvaluation(deviceName?: string, inputChannel?: number, coachMode?: "default" | "pro"): Promise<void> {
+  // A phone asks for the microphone at the moment the input is first opened
+  // — the first-run input step, a Session, or Settings' test — and every one
+  // of those comes through here. A USB interface or a jack adapter is the
+  // same permission on Android. Build-time constant: not in a desktop bundle.
+  if (IS_MOBILE && !(await requestMicrophone())) {
+    throw new Error(MIC_PERMISSION_DENIED);
+  }
   return invoke("start_evaluation", {
     deviceName: deviceName ?? null,
     inputChannel: inputChannel ?? null,

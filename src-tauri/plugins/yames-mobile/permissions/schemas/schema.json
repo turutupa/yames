@@ -319,6 +319,18 @@
           "markdownDescription": "Denies the open_url command without any pre-configured scope."
         },
         {
+          "description": "Enables the request_microphone command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-request-microphone",
+          "markdownDescription": "Enables the request_microphone command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the request_microphone command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-request-microphone",
+          "markdownDescription": "Denies the request_microphone command without any pre-configured scope."
+        },
+        {
           "description": "Enables the set_back_intercept command without any pre-configured scope.",
           "type": "string",
           "const": "allow-set-back-intercept",
@@ -355,10 +367,10 @@
           "markdownDescription": "Denies the set_event_channel command without any pre-configured scope."
         },
         {
-          "description": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, and opening a link in the browser. All four commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`",
+          "description": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from. All four commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, and opening a link in the browser. All four commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`"
+          "markdownDescription": "Everything the phone build of Yames needs from its own native half: keeping\nthe click playing with the screen off, keeping the screen awake, answering the\nsystem Back gesture, opening a link in the browser, and asking for the\nmicrophone the Session grades from. All four commands, and\nno scope — there is nothing here to narrow, and the frontend calls all of them.\n\n#### This default permission set includes:\n\n- `allow-set-background-audio`\n- `allow-request-microphone`\n- `allow-keep-awake`\n- `allow-open-url`\n- `allow-set-back-intercept`\n- `allow-set-event-channel`"
         }
       ]
     }

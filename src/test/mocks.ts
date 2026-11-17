@@ -61,6 +61,8 @@ type InvokeFn = (args?: Record<string, unknown>) => unknown | Promise<unknown>;
 const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   // App state
   get_state: () => DEFAULT_TEST_STATE,
+  // The phone's microphone prompt (M7): allowed, unless a test says not.
+  "plugin:yames-mobile|request_microphone": () => true,
   set_bpm: () => undefined,
   set_subdivision: () => undefined,
   toggle_playback: () => undefined,

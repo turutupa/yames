@@ -12,6 +12,14 @@ use crate::session_audio::{self, SessionAudioRecorder};
 use crate::session_log::AudioLevelSnapshot;
 use crate::take::TakeRing;
 
+/// The phone's input stream (M7): the built-in mic, a USB-C class-compliant
+/// interface or a TRRS adapter, opened at `oboe` directly. A child module so
+/// it fills the same private ring, take ring and recording slots the cpal
+/// callback below fills; nothing in this file changes on a desktop.
+#[cfg(target_os = "android")]
+#[path = "android_input.rs"]
+mod android;
+
 /// Monotonically increasing stream instance counter. Each call to
 /// `AudioInput::start()` increments this before spawning the capture thread,
 /// baking the resulting ID into the F32/I16 closures. Two cap-hit log lines
@@ -271,7 +279,12 @@ impl AudioInput {
     }
 
     /// Enumerate all audio input devices.
+    #[cfg_attr(target_os = "android", allow(unreachable_code))]
     pub fn list_devices() -> Vec<AudioDevice> {
+        // Android: cpal's enumeration names every device by its product name
+        // and cannot open one by id with the input preset grading needs.
+        #[cfg(target_os = "android")]
+        return android::list_devices();
         let host = cpal::default_host();
         let default_name = host
             .default_input_device()
@@ -313,6 +326,7 @@ impl AudioInput {
     /// Start capturing audio from the given device.
     /// Spawns a dedicated thread that owns the cpal stream.
     /// `input_channel` is 0-indexed; it is clamped to the device's valid range.
+    #[cfg_attr(target_os = "android", allow(unreachable_code, unused_variables))]
     pub fn start(
         &mut self,
         device_name: Option<&str>,
@@ -320,6 +334,11 @@ impl AudioInput {
         app_handle: AppHandle,
     ) -> Result<(), String> {
         self.stop();
+
+        // Android opens its own stream (see `android_input.rs`); everything
+        // below is the desktop's cpal path, unchanged.
+        #[cfg(target_os = "android")]
+        return self.start_android(device_name, input_channel, app_handle);
 
         // Resolve device and config on the current thread (for error reporting)
         let host = cpal::default_host();

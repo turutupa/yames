@@ -3,6 +3,7 @@
 /// `permissions/default.toml` is what `capabilities/mobile.json` grants.
 const COMMANDS: &[&str] = &[
     "set_background_audio",
+    "request_microphone",
     "keep_awake",
     "open_url",
     "set_back_intercept",
