@@ -1067,6 +1067,27 @@ fn a_sparse_part_is_not_held_dark_past_the_time_limit() {
 }
 
 #[test]
+fn eighths_at_sixty_on_a_slow_rig_still_wait_for_the_lag() {
+    // The time limit must not undo what the hold is for on an ordinary part:
+    // eighths at 60 give eight notes in four seconds, and a rig 140 ms late
+    // still gets its first notes judged against the lag read off them.
+    for lag in [60.0, 100.0, 140.0] {
+        let schedule = ScoreSchedule {
+            onsets: (0..32u32).map(|i| onset(i, i as f64 * 0.5)).collect(),
+            length_beats: 16.0,
+            loops: false,
+        };
+        let beats = steady(60.0, 20);
+        let played = late_by(&perfect_play(&schedule, &beats), lag);
+        let mut run = ScheduleRun::new(schedule);
+        let live = replay(&mut run, 1000.0, 20, &played, 20_000.0);
+        let wrong: Vec<(u32, OnsetState)> =
+            live.iter().filter(|v| v.state != OnsetState::Hit).map(|v| (v.id, v.state)).collect();
+        assert!(wrong.is_empty(), "lag {lag}: {wrong:?}");
+    }
+}
+
+#[test]
 fn a_short_part_played_out_is_judged_live_even_without_the_lag() {
     // Four notes are too few to read a lag from and fewer than the hold:
     // once the part is over there is nothing left to wait for.
