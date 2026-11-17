@@ -337,6 +337,12 @@
       "quintuplets": "Quintillos",
       "sextuplets": "Seisillos",
       "thirtySeconds": "Fusas"
+    },
+    "instrumentNote": {
+      "other": "Las Rutas están escritas para guitarra, por ahora. Las herramientas funcionan con tu instrumento.",
+      "bass": "Las Rutas están escritas para guitarra, por ahora, y hay Rutas de bajo en camino. Las herramientas ya funcionan con el bajo.",
+      "openTools": "Abrir las herramientas",
+      "change": "Cambiar de instrumento"
     }
   }
 }

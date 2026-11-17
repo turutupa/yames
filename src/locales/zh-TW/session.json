@@ -330,6 +330,12 @@
       "quintuplets": "五連音",
       "sextuplets": "六連音",
       "thirtySeconds": "三十二分音符"
+    },
+    "instrumentNote": {
+      "other": "路線目前是為吉他編寫的。工具適用於你的樂器。",
+      "bass": "路線目前是為吉他編寫的，貝斯路線已在規劃中。工具現在就適用於貝斯。",
+      "openTools": "開啟工具",
+      "change": "更換樂器"
     }
   }
 }

@@ -229,6 +229,18 @@ export function useActionDispatcher({
       if (view === "settings") return;
 
       /**
+       * One pedal for both halves of the app (2026-11-17).
+       *
+       * The first run maps a single footswitch to `session-pedal`, because the
+       * Session is the main experience now. Its gestures (tap, double, hold)
+       * only mean something on the running Session; everywhere else a press of
+       * that pedal is Play/Stop, exactly as the pedal did when the wizard
+       * mapped it to `play`. So nobody with one pedal has to choose between
+       * the Sessions and the tools.
+       */
+      if (actionId === "session-pedal" && view !== "session") actionId = "play";
+
+      /**
        * The learning side, before anything else gets a look.
        *
        * Every other action in this file drives the metronome behind the screen.

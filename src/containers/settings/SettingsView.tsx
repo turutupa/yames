@@ -294,6 +294,7 @@ export function SettingsView({
         midi={midi}
         onOpenInputTest={onOpenInputTest}
         instrument={instrument}
+        setInstrument={setInstrument}
       />
 
       {/* The coach's model, Songs' download watch, the floating widget and
@@ -322,8 +323,6 @@ export function SettingsView({
           brainUpdateAvailable={brainUpdateAvailable}
           availableVoices={availableVoices}
           voiceDiagnostics={voiceDiagnostics}
-          instrument={instrument}
-          setInstrument={setInstrument}
           jamCues={jamCues}
           setJamCues={setJamCues}
           onStartDownload={onStartDownload}

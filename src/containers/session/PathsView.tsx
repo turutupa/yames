@@ -30,6 +30,7 @@ import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
 import type { NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
 import { rise } from "./TodayView";
+import { InstrumentNote } from "./InstrumentNote";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -79,9 +80,11 @@ function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc })
 function PathList({
   session,
   onOpen,
+  note,
 }: {
   session: SessionRun;
   onOpen: (path: PathDoc) => void;
+  note?: InstrumentNoteProps;
 }) {
   const { t } = useTranslation();
   const { paths, progress } = session;
@@ -149,6 +152,7 @@ function PathList({
         <h1 className="session-h1">{t("session.paths.title")}</h1>
         <div className="session-why">{t("session.paths.intro")}</div>
       </div>
+      {note && <InstrumentNote {...note} />}
       <div className="session-slot" data-band="" ref={slot} aria-hidden="true" />
       {group("theory", t("session.paths.theorySub"), 1)}
       {group("mechanics", t("session.paths.mechanicsSub"), 4)}
@@ -524,7 +528,16 @@ function StepDetail({
   );
 }
 
-export function PathsView({ session }: { session: SessionRun }) {
+type InstrumentNoteProps = Parameters<typeof InstrumentNote>[0];
+
+export function PathsView({
+  session,
+  instrumentNote,
+}: {
+  session: SessionRun;
+  /** Guitar first: the same note Today shows, on the list of Paths only. */
+  instrumentNote?: InstrumentNoteProps;
+}) {
   const [pathId, setPathId] = useState<string | null>(null);
   const [stepId, setStepId] = useState<string | null>(null);
   const path = session.paths.find((p) => p.id === pathId) ?? null;
@@ -543,5 +556,5 @@ export function PathsView({ session }: { session: SessionRun }) {
       />
     );
   }
-  return <PathList session={session} onOpen={(p) => setPathId(p.id)} />;
+  return <PathList session={session} onOpen={(p) => setPathId(p.id)} note={instrumentNote} />;
 }

@@ -431,9 +431,11 @@
     "other": "Sonstiges"
   },
   "instrumentPicker": {
-    "title": "Womit übst du?",
-    "subtitle": "Yames stimmt Anschlagerkennung und Coaching auf dein Instrument ab. Du kannst das später in den Einstellungen ändern.",
-    "subtitleMobile": "Damit Yames weiß, worauf du übst. Du kannst das später in den Einstellungen ändern.",
-    "skip": "Überspringen — wähle ich später"
+    "title": "Welche Gitarre spielst du?",
+    "subtitle": "Pfade und Sessions sind vorerst für Gitarre geschrieben. Wähl deine, und Yames stimmt das Zuhören darauf ab.",
+    "subtitleMobile": "Pfade und Sessions sind vorerst für Gitarre geschrieben. Wähl die, die du spielst.",
+    "skip": "Überspringen — wähle ich später",
+    "otherInstruments": "Bass, Schlagzeug oder Klavier? Stell es in den Einstellungen ein: Metronom, Drills und Jam funktionieren mit jedem Instrument.",
+    "keepCurrent": "Dein Instrument gerade: {{instrument}}. Wähl eine Gitarre zum Wechseln oder mach weiter, um es zu behalten."
   }
 }

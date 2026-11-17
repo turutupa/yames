@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "Las manos siguen en el instrumento",
-      "subtitle": "Estas teclas ya funcionan. Si tienes un pedal o un mando, asígnalo aquí mismo a Reproducir/Detener.",
+      "subtitle": "En una Sesión estas teclas ya funcionan. Un pedal también puede llevar una Sesión, y sigue iniciando y deteniendo las herramientas.",
       "cancel": "Cancelar",
       "keyboard": {
-        "title": "Teclado",
         "hint": "Puedes reasignar cualquier tecla en Ajustes → Atajos."
       },
       "midi": {
         "title": "Pedal MIDI",
         "none": "Conéctalo cuando quieras: Yames te ofrecerá asignarlo.",
-        "map": "Asignar Reproducir/Detener",
+        "map": "Asignar el pedal",
         "remap": "Asignar otro pedal",
-        "listening": "Pisa el pedal que quieras para Reproducir/Detener.",
-        "mapped": "Reproducir/Detener → {{signal}} · canal {{channel}}"
+        "listening": "Pisa el pedal que quieres usar.",
+        "mapped": "Pedal → {{signal}} · canal {{channel}}"
       },
       "gamepad": {
         "title": "Mando",
         "none": "Conecta un mando cuando quieras: pulsa un botón y Yames lo detectará.",
-        "map": "Asignar Reproducir/Detener",
+        "map": "Asignar un botón",
         "remap": "Asignar otro botón",
-        "listening": "Pulsa el botón que quieras para Reproducir/Detener.",
-        "mapped": "Reproducir/Detener → {{button}}"
+        "listening": "Pulsa el botón que quieres usar como pedal.",
+        "mapped": "Pedal → {{button}}"
+      },
+      "session": {
+        "title": "En una Sesión",
+        "go": "Empezar o terminar la toma: el botón grande",
+        "faster": "Más rápido, entre tomas",
+        "slower": "Más lento, entre tomas",
+        "next": "Siguiente paso",
+        "or": "o"
+      },
+      "pedal": {
+        "title": "Un solo pedal",
+        "tools": "Fuera de una Sesión, un toque inicia y detiene las herramientas."
+      },
+      "tools": {
+        "title": "En las herramientas"
       }
     },
     "coach": {

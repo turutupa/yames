@@ -82,37 +82,34 @@ export const INSTRUMENT_ICONS: Record<string, JSX.Element> = {
     </svg>
   ),
   "electric-guitar": (
-    // Stratocaster-style silhouette: angular double-cutaway body with
-    // two horns + a slanted headstock with visible tuners. The neck
-    // runs diagonally from the body up to the headstock so the shape
-    // reads as "electric guitar" at 16px instead of an abstract blob.
+    // Upright, like a guitar on a stand: a double-cutaway body with two
+    // horns, a neck, a six-tuner headstock and two pickups. The diagonal
+    // drawing this replaced shrank the body to a blob under a long stick and
+    // read as a shovel or a key at card size (owner, 2026-11-17).
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       {/* Headstock */}
-      <path d="M18.5 2.5 L22 4.5 L20.5 7 L17 5 Z" />
-      {/* Tuning pegs */}
-      <circle cx="18.2" cy="3.6" r="0.4" fill="currentColor" stroke="none" />
-      <circle cx="20.3" cy="4.8" r="0.4" fill="currentColor" stroke="none" />
+      <path d="M10.6 1.2h2.8l-.4 3.3h-2z" />
       {/* Neck */}
-      <line x1="17.5" y1="6" x2="10.5" y2="13" />
-      {/* Strat body — upper horn, lower horn, bottom bout */}
-      <path d="M10.5 13 Q12 12 13.5 13 L14.5 14 Q16.5 13.5 18 15.5 Q19.5 18.5 17.5 20.5 Q15 22 12.5 20 L11 18.5 Q9 22 6 21 Q3 19.5 3.5 16.5 Q4.5 13.5 7.5 13 Q9 13 10.5 13 Z" />
-      {/* Single-coil pickup */}
-      <rect x="10.5" y="16.5" width="3.5" height="1.1" rx="0.2" fill="currentColor" stroke="none" />
+      <path d="M11 4.5v7.6M13 4.5v7.6" />
+      {/* Body: the bass-side horn reaches higher than the treble side */}
+      <path d="M11 12.1C10.2 11.4 9.4 9.4 8 9.3 6.7 9.2 6.4 10.6 6.9 12c.5 1.4-.3 2.3-.9 3.6-1.3 3 .2 6.9 4.4 7h3.2c4.2-.1 5.7-4 4.4-7-.6-1.3-1.3-2.1-1-3.3.3-1.1-.3-1.9-1.3-1.7-1 .2-1.6 1.3-2.7 1.5" />
+      {/* Pickups and bridge */}
+      <path d="M10 14.6h4M10 16.8h4M10.2 19.4h3.6" />
     </svg>
   ),
   "acoustic-guitar": (
-    // Dreadnought-style silhouette: rounded figure-8 body with a clear
-    // sound hole, slim headstock at the top of a diagonal neck. The
-    // sound hole is the strongest "this is acoustic" cue at 16px.
+    // Upright too: a figure-eight body, the sound hole just under the neck
+    // (the clearest "acoustic" cue) and the bridge below it.
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       {/* Headstock */}
-      <path d="M19 2 L22 3.5 L21 6.5 L18 5 Z" />
+      <path d="M10.6 1.2h2.8l-.4 3.3h-2z" />
       {/* Neck */}
-      <line x1="18" y1="6" x2="11" y2="13" />
-      {/* Hourglass body — upper bout (smaller), waist, lower bout (larger) */}
-      <path d="M11 13 Q13 12 14.5 13.5 Q16 15 15.5 16.5 Q17.5 18 17 20.5 Q15.5 22.5 12 22 Q8 22.5 6 20.5 Q4.5 18 6.5 16 Q6 14.5 7.5 13 Q9.5 11.5 11 13 Z" />
-      {/* Sound hole */}
-      <circle cx="11" cy="18" r="2" />
+      <path d="M11 4.5v6M13 4.5v6" />
+      {/* Body: smaller upper bout, waist, wider lower bout */}
+      <path d="M12 10.5c-3 0-4.6 1-4.6 3 0 1.5 1.2 2.1 1.2 2.8S6.4 17.8 6.4 20c0 2 2.6 3 5.6 3s5.6-1 5.6-3c0-2.2-2.2-3-2.2-3.7s1.2-1.3 1.2-2.8c0-2-1.6-3-4.6-3z" />
+      {/* Sound hole and bridge */}
+      <circle cx="12" cy="15" r="1.7" />
+      <path d="M10.3 19.8h3.4" />
     </svg>
   ),
   bass: (

@@ -338,7 +338,22 @@ export interface Shot {
    * machine with no input device at all; `ready` is W7, after the input was
    * heard and the rest skipped.
    */
-  firstRun?: { stop: "welcome" | "input" | "inputSilent" | "inputNone" | "ready" };
+  /** The stored instrument, for the guitar-first note on Today (drums, say). */
+  instrument?: string;
+  firstRun?: {
+    stop:
+      | "welcome"
+      /** W1, before anything is picked: what a new player first sees. */
+      | "instrument"
+      | "input"
+      | "inputSilent"
+      | "inputNone"
+      /** W2, reached by skipping the steps before it. */
+      | "soundLook"
+      /** W3, reached by skipping the steps before it. */
+      | "handsFree"
+      | "ready";
+  };
 
   /**
    * A version newer than this build's, already known.
@@ -707,7 +722,7 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   // The first run (MVP). Not on the site: the layout suite opens them.
-  ...(["welcome", "input", "inputSilent", "inputNone", "ready"] as const).map(
+  ...(["welcome", "instrument", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "ready"] as const).map(
     (stop): Shot => ({
       id: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
       suffix: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
@@ -723,6 +738,17 @@ export const SHOTS: Shot[] = [
     id: "today-first",
     suffix: "today-first",
     window: "main",
+    session: { seed: "first", stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    // Guitar first: a drummer's Today, with the note at the top.
+    id: "today-drums",
+    suffix: "today-drums",
+    window: "main",
+    instrument: "drums",
     session: { seed: "first", stop: "today" },
     width: 1400,
     height: 900,
@@ -1295,9 +1321,12 @@ export const SHOTS: Shot[] = [
  */
 export const PHONE_LEARNING_SCENES = [
   "firstrun-welcome",
+  "firstrun-instrument",
   "firstrun-input",
+  "firstrun-sound-look",
   "firstrun-ready",
   "today-first",
+  "today-drums",
   "today-returning",
   "today-no-paths",
   "session-ready",

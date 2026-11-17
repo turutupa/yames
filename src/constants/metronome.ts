@@ -83,11 +83,14 @@ export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
   { id: "electric-guitar" },
   { id: "acoustic-guitar" },
   { id: "bass" },
-  // Coming soon: drums are non-pitched (pitch pipeline adds no value today);
-  // piano is polyphonic by nature and requires ONNX-based chord detection
-  // rather than YINFFT. "Other" is too generic to calibrate pitch feedback for.
-  { id: "drums", soon: true },
-  { id: "piano", soon: true },
+  // Onset profiles only: drums are non-pitched and piano is polyphonic, so the
+  // pitch side adds nothing yet, but the timing tools (metronome, drills, jam)
+  // work for both. Selectable in Settings since guitar first (2026-11-17):
+  // the first run offers only the guitars, and before that change these two
+  // were reachable only from the first run, so Settings is now where a
+  // drummer or a pianist says so. "Other" is too generic to calibrate.
+  { id: "drums" },
+  { id: "piano" },
   { id: "other", soon: true },
 ];
 

@@ -431,9 +431,11 @@
     "other": "Anders"
   },
   "instrumentPicker": {
-    "title": "Op welk instrument oefen je?",
-    "subtitle": "Yames stemt de detectie en coachingsfeedback af op je instrument. Je kunt dit later wijzigen in Instellingen.",
-    "subtitleMobile": "Zodat Yames weet waarop je oefent. Je kunt dit later wijzigen in Instellingen.",
-    "skip": "Overslaan — kies ik later wel"
+    "title": "Welke gitaar speel je?",
+    "subtitle": "Leerpaden en sessies zijn voorlopig voor gitaar geschreven. Kies de jouwe en Yames stemt het luisteren erop af.",
+    "subtitleMobile": "Leerpaden en sessies zijn voorlopig voor gitaar geschreven. Kies de gitaar die je speelt.",
+    "skip": "Overslaan — kies ik later wel",
+    "otherInstruments": "Bas, drums of piano? Kies het in Instellingen: de metronoom, oefeningen en jam werken met elk instrument.",
+    "keepCurrent": "Je instrument nu: {{instrument}}. Kies een gitaar om te wisselen, of ga verder om het te houden."
   }
 }

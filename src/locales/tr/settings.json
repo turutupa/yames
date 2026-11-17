@@ -431,9 +431,11 @@
     "other": "Diğer"
   },
   "instrumentPicker": {
-    "title": "Hangi enstrümanla çalışıyorsun?",
-    "subtitle": "Yames, vuruş algılamayı ve koç geri bildirimini enstrümanına göre ayarlar. Bunu daha sonra Ayarlar'dan değiştirebilirsin.",
-    "subtitleMobile": "Yames neyle çalıştığını bilsin diye. Bunu sonra Ayarlar'dan değiştirebilirsin.",
-    "skip": "Atla — daha sonra seçerim"
+    "title": "Hangi gitarı çalıyorsun?",
+    "subtitle": "Yollar ve Seanslar şimdilik gitar için yazıldı. Kendi gitarını seç, Yames dinlemeyi ona göre ayarlasın.",
+    "subtitleMobile": "Yollar ve Seanslar şimdilik gitar için yazıldı. Çaldığın gitarı seç.",
+    "skip": "Atla — daha sonra seçerim",
+    "otherInstruments": "Bas, bateri ya da piyano mu? Ayarlar'dan seç: metronom, alıştırmalar ve jam her enstrümanla çalışır.",
+    "keepCurrent": "Şu anki enstrümanın: {{instrument}}. Değiştirmek için bir gitar seç ya da korumak için devam et."
   }
 }

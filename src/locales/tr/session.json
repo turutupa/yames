@@ -330,6 +330,12 @@
       "quintuplets": "Beşleme",
       "sextuplets": "Altılama",
       "thirtySeconds": "Otuz ikilikler"
+    },
+    "instrumentNote": {
+      "other": "Yollar şimdilik gitar için yazıldı. Araçlar senin enstrümanınla çalışır.",
+      "bass": "Yollar şimdilik gitar için yazıldı; bas için Yollar planlanıyor. Araçlar bas ile bugün de çalışır.",
+      "openTools": "Araçları aç",
+      "change": "Enstrümanı değiştir"
     }
   }
 }

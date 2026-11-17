@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "Le mani restano sullo strumento",
-      "subtitle": "Questi tasti funzionano già. Se hai un pedale o un controller, assegnalo qui ad Avvia/Ferma.",
+      "subtitle": "In una Sessione questi tasti funzionano già. Un pedale può guidare anche una Sessione, e continua ad avviare e fermare gli strumenti.",
       "cancel": "Annulla",
       "keyboard": {
-        "title": "Tastiera",
         "hint": "Ogni tasto si può cambiare in Impostazioni → Scorciatoie."
       },
       "midi": {
         "title": "Pedale MIDI",
         "none": "Collegane uno quando vuoi: Yames proporrà di assegnarlo.",
-        "map": "Assegna Avvia/Ferma",
+        "map": "Assegna il pedale",
         "remap": "Assegna un altro pedale",
-        "listening": "Premi il pedale che vuoi usare per Avvia/Ferma.",
-        "mapped": "Avvia/Ferma → {{signal}} · canale {{channel}}"
+        "listening": "Premi il pedale che vuoi usare.",
+        "mapped": "Pedale → {{signal}} · canale {{channel}}"
       },
       "gamepad": {
         "title": "Controller",
         "none": "Collega un controller quando vuoi: premi un tasto e Yames lo rileverà.",
-        "map": "Assegna Avvia/Ferma",
+        "map": "Assegna un pulsante",
         "remap": "Assegna un altro tasto",
-        "listening": "Premi il tasto che vuoi usare per Avvia/Ferma.",
-        "mapped": "Avvia/Ferma → {{button}}"
+        "listening": "Premi il pulsante da usare come pedale.",
+        "mapped": "Pedale → {{button}}"
+      },
+      "session": {
+        "title": "In una Sessione",
+        "go": "Avvia o chiudi la ripresa: il pulsante grande",
+        "faster": "Più veloce, tra una ripresa e l'altra",
+        "slower": "Più lento, tra una ripresa e l'altra",
+        "next": "Passo successivo",
+        "or": "o"
+      },
+      "pedal": {
+        "title": "Un solo pedale",
+        "tools": "Fuori da una Sessione, un tocco avvia e ferma gli strumenti."
+      },
+      "tools": {
+        "title": "Negli strumenti"
       }
     },
     "coach": {

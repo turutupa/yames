@@ -431,9 +431,11 @@
     "other": "Other"
   },
   "instrumentPicker": {
-    "title": "What are you practicing on?",
-    "subtitle": "Yames tunes onset detection and coaching feedback for your instrument. You can change this later in Settings.",
-    "subtitleMobile": "So Yames knows what you're practising on. You can change this later in Settings.",
-    "skip": "Skip — I'll pick later"
+    "title": "Which guitar do you play?",
+    "subtitle": "Paths and Sessions are written for guitar for now. Pick yours and Yames tunes how it listens.",
+    "subtitleMobile": "Paths and Sessions are written for guitar for now. Pick the one you play.",
+    "skip": "Skip — I'll pick later",
+    "otherInstruments": "Bass, drums or piano? Choose it in Settings: the metronome, drills and jam work for every instrument.",
+    "keepCurrent": "Your instrument now: {{instrument}}. Pick a guitar to switch, or go on to keep it."
   }
 }

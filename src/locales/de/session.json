@@ -330,6 +330,12 @@
       "quintuplets": "Quintolen",
       "sextuplets": "Sextolen",
       "thirtySeconds": "Zweiunddreißigstel"
+    },
+    "instrumentNote": {
+      "other": "Pfade sind vorerst für Gitarre geschrieben. Die Werkzeuge funktionieren mit deinem Instrument.",
+      "bass": "Pfade sind vorerst für Gitarre geschrieben, Pfade für Bass sind geplant. Die Werkzeuge funktionieren schon jetzt mit Bass.",
+      "openTools": "Zu den Werkzeugen",
+      "change": "Instrument ändern"
     }
   }
 }
