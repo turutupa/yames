@@ -38,6 +38,12 @@ name: Beta (test builds)
 # Frugal on purpose: no LLM smoke job, no notes job, no AAB. Same features
 # as release.yml (coach-llm-vulkan on Windows/Linux, -metal on macOS).
 on:
+  # `gh workflow run` only finds workflows that exist on the default branch.
+  # Until this file is on main, a push to `beta-build` starts a run with the
+  # defaults (windows,android; the pushed commit's message as the notes):
+  #   git push -f origin <branch>:beta-build
+  push:
+    branches: [beta-build]
   workflow_dispatch:
     inputs:
       platforms:
@@ -83,7 +89,7 @@ jobs:
         id: p
         env:
           # Through the environment, never interpolated into the script.
-          PLATFORMS: ${{ inputs.platforms }}
+          PLATFORMS: ${{ inputs.platforms || 'windows,android' }}
         run: |
           set -euo pipefail
           node - <<'EOF' >> "$GITHUB_OUTPUT"
@@ -315,7 +321,7 @@ jobs:
       - name: Collect, verify, describe
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
-          NOTES: ${{ inputs.notes }}
+          NOTES: ${{ inputs.notes || github.event.head_commit.message }}
         run: |
           set -euo pipefail
           OUT=src-tauri/gen/android/app/build/outputs/apk
@@ -361,7 +367,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
       VERSION: ${{ needs.prepare.outputs.version }}
-      NOTES: ${{ inputs.notes }}
+      NOTES: ${{ inputs.notes || github.event.head_commit.message }}
       HAS_DESKTOP: ${{ needs.prepare.outputs.has_desktop }}
       HAS_ANDROID: ${{ needs.prepare.outputs.android }}
     steps:
