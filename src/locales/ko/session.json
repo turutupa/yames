@@ -197,7 +197,6 @@
       "mechanicsSub": "손이 어떻게 연주하는지",
       "later": "나중에",
       "laterWhy": "지금 읽을 수는 있습니다. 필요한 채점 기능은 나중에 추가됩니다.",
-      "laterWhyLanding": "지금은 읽어 볼 수 있습니다. 코드 위에서 어떤 음에 착지하는지로 채점하는데, 앱이 아직 그걸 판단하지 못해서 세션에는 들어가지 않습니다.",
       "stepCount": "{{count}}단계",
       "stepCount_other": "{{count}}단계",
       "draft": "초안",
