@@ -1266,7 +1266,33 @@ pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
 /// B1). The JS side now awaits each before sending the next
 /// (`useEvaluation`'s `serial`); this keeps the two from interleaving even if
 /// something does not. Taken first, before any other lock, and never inside one.
-static EVALUATION_TURN: std::sync::Mutex<()> = std::sync::Mutex::new(());
+///
+/// A `tokio` mutex, awaited: the Settings tester calls the commands directly,
+/// and a start can take seconds (Android's open waits up to 5 s), so a
+/// blocking lock here would hold a runtime worker that every other async
+/// command shares. The synchronous take commands, which must stay synchronous
+/// (see `start_take`), wait for it with [`evaluation_turn_blocking`].
+static EVALUATION_TURN: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
+/// [`EVALUATION_TURN`] from a synchronous command, on the window's thread.
+/// `blocking_lock` would panic if that thread were ever inside the runtime, so
+/// it polls instead: the wait is as long as an input start or stop already in
+/// progress, which is the wait the take's own device open costs anyway.
+fn evaluation_turn_blocking() -> tokio::sync::MutexGuard<'static, ()> {
+    loop {
+        if let Ok(turn) = EVALUATION_TURN.try_lock() {
+            return turn;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(2));
+    }
+}
+
+/// Whether a take that is stopping should close the input: only one it opened
+/// itself, and not if a Session (the evaluation) has started listening on it
+/// since. That one is the Session's now, and closing it left the Session deaf.
+fn take_closes_input(take_opened_it: bool, evaluation_listening: bool) -> bool {
+    take_opened_it && !evaluation_listening
+}
 
 #[tauri::command]
 pub async fn start_evaluation(
@@ -1284,7 +1310,7 @@ pub async fn start_evaluation(
     cal_cache: State<'_, crate::calibration_cache::SharedCalibrationCache>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    let _turn = EVALUATION_TURN.lock().unwrap_or_else(|e| e.into_inner());
+    let _turn = EVALUATION_TURN.lock().await;
     let coach_mode = match coach_mode.as_deref().unwrap_or("default") {
         "pro" => CoachMode::Pro,
         _ => CoachMode::Default,
@@ -1560,7 +1586,7 @@ pub async fn stop_evaluation(
     state: State<'_, SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    let _turn = EVALUATION_TURN.lock().unwrap_or_else(|e| e.into_inner());
+    let _turn = EVALUATION_TURN.lock().await;
     // Idempotency guard — if the analyzer is already stopped (e.g. double-call
     // from a device change racing an explicit Stop), skip silently. The first
     // call already drained telemetry and persisted the log.
@@ -4698,6 +4724,8 @@ pub fn start_take(
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let home = takes_home(&app_handle)?;
+    // The take may open the input: in turn with the evaluation's start and stop.
+    let _turn = evaluation_turn_blocking();
     let sound = sound.unwrap_or_default();
     let everything = sound == crate::take::TakeSound::Everything;
     let (handoff, out_sr, out_sr_watch, output_latency_us, song, output_device) = {
@@ -4937,7 +4965,11 @@ pub fn stop_take(
     engine_state: State<EngineState>,
     audio_input: State<SharedAudioInput>,
     take_state: State<TakeState>,
+    timing_analyzer: State<SharedTimingAnalyzer>,
 ) -> Result<Option<crate::take::JamTake>, String> {
+    // In turn with the evaluation's start and stop: a Session starting while
+    // this runs must not have its input closed under it.
+    let _turn = evaluation_turn_blocking();
     let handoff = engine_state.0.lock().unwrap().take_handoff();
     // THE MIC KEEPS CAPTURING UNTIL THE BAND IS ON DISK.
     //
@@ -4952,12 +4984,15 @@ pub fn stop_take(
         let owns_input = session.owns_input();
         (session.stop(&handoff), owns_input)
     };
+    // Read before the input's lock, so the two are never held together.
+    let listening = timing_analyzer.lock().map(|ta| ta.is_active()).unwrap_or(true);
     {
         let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
         ai.end_take_capture();
         // And a stream this take opened closes with it. One that was
-        // already running belongs to whoever opened it.
-        if owns_input {
+        // already running belongs to whoever opened it, and so does one a
+        // Session has started listening on since.
+        if take_closes_input(owns_input, listening) {
             ai.stop();
         }
     }
@@ -5962,3 +5997,32 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod evaluation_turn_tests {
+    use super::*;
+
+    #[test]
+    fn a_take_closes_only_an_input_it_opened_and_no_session_listens_on() {
+        assert!(take_closes_input(true, false));
+        assert!(!take_closes_input(false, false), "someone else's input");
+        assert!(!take_closes_input(true, true), "a Session started listening on it since");
+        assert!(!take_closes_input(false, true));
+    }
+
+    #[test]
+    fn the_synchronous_take_commands_wait_for_an_input_start_in_progress() {
+        let rt = tokio::runtime::Builder::new_current_thread().build().unwrap();
+        let held = rt.block_on(EVALUATION_TURN.lock());
+        let (tx, rx) = std::sync::mpsc::channel();
+        let waiter = std::thread::spawn(move || {
+            let _turn = evaluation_turn_blocking();
+            tx.send(()).unwrap();
+        });
+        assert!(rx.recv_timeout(std::time::Duration::from_millis(100)).is_err(), "it waited");
+        drop(held);
+        rx.recv_timeout(std::time::Duration::from_secs(5)).expect("and went once it was free");
+        waiter.join().unwrap();
+    }
+}
+

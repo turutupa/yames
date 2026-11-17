@@ -54,7 +54,7 @@ hound = "3"
 rustysynth = "1.3.6"
 # Tauri already pulls tokio in transitively; declared explicitly so we can
 # use `tokio::task::spawn_blocking` from blocking command handlers.
-tokio = { version = "1", features = ["rt"] }
+tokio = { version = "1", features = ["rt", "sync"] }
 # aubio — GPL-2+ MIR library for onset detection. The `static` feature
 # bundles the C source via aubio-sys (cmake required at build time) so
 # there is no runtime .dylib dependency. Requires cmake; on macOS:
