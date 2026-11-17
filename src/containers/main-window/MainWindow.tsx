@@ -1149,8 +1149,16 @@ export function MainWindow() {
     (outcome: "completed" | "skipped" | "closed") => {
       void stopSoftClick().then(() => {
         if (!instrumentChosenRef.current) applyInstrument("electric-guitar");
+        // ONB-08, changed for the MVP (owner, 2026-11-16): a finished setup
+        // lands on Today, the learning side's front door, rather than on the
+        // Metronome. The click keeps the 80 BPM it was set up at, so the
+        // Metronome opens where the wizard left it. "Just give me the click"
+        // still means the click: it lands on the Metronome. A run closed
+        // early stays where it was.
         if (outcome === "completed") {
           setBpm(SOFT_CLICK_BPM);
+          setView("today");
+        } else if (outcome === "skipped") {
           setView("beat");
         }
       });
