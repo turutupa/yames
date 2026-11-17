@@ -586,6 +586,17 @@ function placementStep(
   return build(0);
 }
 
+/**
+ * Whether a benchmark can take the warm-up slot without the Session playing an
+ * Exercise twice: when it is the focus Path's head, the Path needs another open
+ * Exercise for the focus block. Otherwise the warm-up is the click as usual and
+ * the benchmark waits for the next Session in its window.
+ */
+function benchmarkFits(bench: Pick, focus: Pick | undefined, focusList: readonly Pick[]): boolean {
+  if (!focus || key(bench) !== key(focus)) return true;
+  return focusList.some((p) => key(p) !== key(bench));
+}
+
 /** Calendar days since, for a sentence ("yesterday", "3 days ago"). */
 function daysSince(at: number | null, now: number): number | null {
   return at === null ? null : Math.max(0, calendarDaysBetween(at, now));
@@ -618,7 +629,7 @@ export function planSession(input: PlannerInput): SessionPlan {
 
   const work = new Map(paths.map((path) => [path.id, openWork(path, progress, now)]));
   const focusWork = work.get(focusPath.id)!;
-  const focus = focusWork.list[0];
+  let focus = focusWork.list[0];
   const row = shape(minutes, back);
   const used = new Set<string>();
   const firstEver = mood === "first";
@@ -665,7 +676,8 @@ export function planSession(input: PlannerInput): SessionPlan {
     if (back && recap && recap.exercise.id !== focus.exercise.id) {
       steps.push(exerciseStep(recap, "recap", "recap", tempoOf(recap), row.warm, progress));
       used.add(key(recap));
-    } else if (bench && !back) {
+    } else if (bench && !back && benchmarkFits(bench, focus, focusWork.list)) {
+      used.add(key(bench));
       const step = exerciseStep(
         bench,
         "benchmark",
@@ -679,6 +691,10 @@ export function planSession(input: PlannerInput): SessionPlan {
       steps.push(warmupStep(focus, progress, row.warm));
     }
   }
+
+  // One Exercise once per Session: a benchmark on the focus Path's head moves
+  // the focus block on to its next open Exercise.
+  if (used.has(key(focus))) focus = focusWork.list.find((p) => !used.has(key(p))) ?? focus;
 
   // --- the focus block ---
   let focusMinutes = row.blocks[0];
@@ -774,7 +790,7 @@ export function planSession(input: PlannerInput): SessionPlan {
     const id = `block-${i + 1}`;
     const last = i === rest.length - 1;
     if (minutes === 20 && last) {
-      const fun = finisherPick(paths, progress);
+      const fun = finisherPick(paths, progress, used);
       const full = steps.filter((x) => x.kind === "exercise").length >= MAX_GRADED;
       if (fun && !back) {
         const backing = fun.exercise.backing;

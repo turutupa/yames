@@ -9,6 +9,8 @@ import type { PlanStep } from "../../session/planner";
 import { reasonLine } from "../../session/coachWords";
 import { currentStepOf, factsOf } from "../../session/progress";
 import { FIRST_PATH_ID } from "../../session/packs";
+import { kindOfPath } from "../../session/kind";
+import type { PathDoc } from "../../paths/format";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { lineText } from "./lineText";
 import { useNeckSlot, useNeck3d } from "./hooks/useNeck";
@@ -23,7 +25,7 @@ export function rise(i: number): CSSProperties {
   return { "--i": i } as CSSProperties;
 }
 
-/** The roles that have a tag of their own; the rest read as Mechanics. */
+/** The roles that have a tag of their own; the rest read as their Path's kind. */
 const ROLE_TAG: Partial<Record<string, string>> = {
   review: "session.kind.review",
   placement: "session.kind.placement",
@@ -31,13 +33,14 @@ const ROLE_TAG: Partial<Record<string, string>> = {
   test: "session.kind.test",
 };
 
-export function StepTag({ step }: { step: PlanStep }) {
+export function StepTag({ step, paths }: { step: PlanStep; paths: readonly PathDoc[] }) {
   const { t } = useTranslation();
   if (step.kind === "exercise") {
     const own = ROLE_TAG[step.role];
+    const kind = kindOfPath(paths, step.pathId);
     return (
-      <span className="session-tag" data-kind="mechanics" data-role={step.role}>
-        {t(own ?? "session.kind.mechanics")}
+      <span className="session-tag" data-kind={kind} data-role={step.role}>
+        {t(own ?? `session.kind.${kind}`)}
       </span>
     );
   }
@@ -192,7 +195,7 @@ export function TodayView({
                   <div className="session-plan-body">
                     <div className="session-plan-title">
                       <span>{stepTitle(step, t)}</span>
-                      <StepTag step={step} />
+                      <StepTag step={step} paths={session.paths} />
                     </div>
                     <ContextLine step={step} />
                     <div className="session-why">{lineText(t, why)}</div>

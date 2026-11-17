@@ -33,7 +33,7 @@ import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
-import { ContextLine, rise, stepTitle } from "./TodayView";
+import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
 import "../../styles/session.css";
 
@@ -764,9 +764,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
                 <div className="session-plan-body">
                   <div className="session-plan-title">
                     <span>{stepTitle(step, t)}</span>
-                    <span className="session-tag" data-kind="mechanics">
-                      {t("session.kind.mechanics")}
-                    </span>
+                    <StepTag step={step} paths={session.paths} />
                   </div>
                   <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
                 </div>

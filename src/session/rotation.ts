@@ -360,11 +360,14 @@ export function yourTurnPicks(path: PathDoc, progress: PlayerProgress): Exercise
 export function finisherPick(
   paths: readonly PathDoc[],
   progress: PlayerProgress,
+  /** `path/exercise` keys already in the Session: one Exercise is played once. */
+  exclude: ReadonlySet<string> = new Set(),
 ): (ExercisePick & { bpm: number }) | null {
   const out: Array<ExercisePick & { bpm: number; last: number }> = [];
   for (const path of paths) {
     for (const pick of everyExercise(path)) {
       if (pick.exercise.backing.kind !== "jam") continue;
+      if (exclude.has(`${path.id}/${pick.exercise.id}`)) continue;
       const clean = cleanTempoOf(progress, path.id, pick.exercise.id);
       if (clean === null) continue;
       const last = takesOf(progress, path.id, pick.exercise.id)[0]?.startedAt ?? 0;
