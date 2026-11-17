@@ -787,11 +787,24 @@ async function scenarioRestart() {
     await d.clickText(/^Start$/);
     await goodTakeHeard(d, "restart: a tab hotkey out and back");
 
-    // 4. Open Tools mid-Session, then back to Today and start again.
-    await d.clickText(/^Tools$/);
+    // 4. Settings mid-Session (it keeps the Session) and back: still heard.
+    await d.clickText(/^(Go again|Again,)/);
+    await d.waitText(/Start take, (\d+) BPM/, 20000);
+    await key(",", "Comma");
     await sleep(1500);
-    check("restart: Tools leaves the Session", !/Start take|End take/.test(await d.text()));
-    await d.clickText(/^Today$/);
+    await key(",", "Comma");
+    await goodTakeHeard(d, "restart: Settings open and closed mid-Session");
+
+    // 5. The Session screen has no rail: Tools is reached after Exit. Open a
+    // tool, play nothing, come back to Today and start again.
+    await d.clickText(/^Exit$/);
+    await backToToday();
+    await d.clickText(/^Tools$/);
+    await sleep(800);
+    await d.clickText(/^Metronome$/).catch(() => {});
+    await sleep(1500);
+    check("restart: Tools opens from Today", !/Start take|End take/.test(await d.text()));
+    await key("0", "Digit0");
     await backToToday();
     await d.clickText(/^Start$/);
     await goodTakeHeard(d, "restart: Tools out and back");
