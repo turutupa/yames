@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Gerçek çalışma için yapılmış bir metronom. Eller enstrümanda kalır.",
-      "setup": "Benim için ayarla (yaklaşık bir dakika)",
+      "tagline": "Bir grup çalar, sen çalarsın, Yames gitarını duyar. Elindeki dakikalara sığan çalışma.",
+      "setup": "Kur (yaklaşık iki dakika)",
       "skip": "Sadece klik yeter",
       "footer": "Ücretsiz · yerel · açık kaynak · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Kapat"
     },
     "audioInput": {
-      "title": "Girişini ayarla",
-      "subtitle": "Yames zamanlamanı buradan dinleyerek puanlar. Bir şeyler çal ve göstergeye bak.",
+      "title": "Seni nasıl duyayım?",
+      "subtitle": "Gitarının bilgisayara nasıl bağlandığını seç, sonra birkaç nota çal. Gösterge Yames'in ne duyduğunu gösterir.",
+      "mode": {
+        "label": "Gitarın nasıl bağlı",
+        "mic": {
+          "title": "Mikrofon",
+          "desc": "Odadaki gitarın, bilgisayarın mikrofonu ya da bir USB mikrofonla. Tek notalar en iyi sonucu verir."
+        },
+        "direct": {
+          "title": "Doğrudan giriş",
+          "desc": "Gitardan bir ses kartına kablo. En temiz sinyal."
+        }
+      },
+      "noInterface": "Ses kartı bulunamadı. Takarsan aşağıdaki listede görünür; ya da mikrofonu kullan.",
       "device": "Giriş aygıtı",
       "guidance": {
         "electric-guitar": "Bir arayüze bağlan ya da dizüstünün mikrofonunun önünde çal — mikrofon iş görür, arayüz daha iyidir.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Bir şeyler çal — göstergenin bir saniyelik sinyale ihtiyacı var.",
       "heard": "Tamam. Yames seni duyuyor.",
-      "skip": "Atla, sonra ayarlarım"
+      "skip": "Atla, sonra ayarlarım",
+      "noDevices": {
+        "title": "Giriş bulunamadı",
+        "body": "Bir mikrofon ya da ses kartı tak; liste kendiliğinden güncellenir. Dizüstünde dahili mikrofonun kapalı olmadığını kontrol et."
+      },
+      "openFailed": {
+        "title": "Bu giriş açılamadı",
+        "body": "Başka bir uygulama kullanıyor olabilir ya da Yames'in mikrofonu kullanma izni olmayabilir. O uygulamayı kapat ya da izin ver, sonra tekrar dene."
+      },
+      "silent": {
+        "title": "Henüz bir şey duyulmadı",
+        "mic": "Mikrofona daha yakın ve biraz daha yüksek çal.",
+        "direct": "Gitarın ses düğmesini ve ses kartının kazancını aç, kablonun takılı olduğu giriş kanalını seç.",
+        "permission": "Mikrofon erişimi: macOS'ta Sistem Ayarları › Gizlilik ve Güvenlik › Mikrofon, Yames'i aç; Windows'ta Ayarlar › Gizlilik › Mikrofon, masaüstü uygulamalarına izin ver. Sonra Yames'i yeniden başlat.",
+        "other": "Hâlâ bir şey yok mu? Listeden başka bir cihaz dene ya da atla: araçlar giriş olmadan da çalışır."
+      },
+      "retry": "Tekrar dene"
     },
     "hearItWork": {
       "title": "Çalıştığını duy",
@@ -128,7 +156,7 @@
       "coachOn": "Açık",
       "inputNone": "Ayarlanmadı",
       "alwaysOnTop": "Her zaman üstte",
-      "start": "Çalışmaya başla",
+      "start": "Bugün'e git",
       "tour": "Bana etrafı gezdir (30 sn)"
     },
     "hints": {

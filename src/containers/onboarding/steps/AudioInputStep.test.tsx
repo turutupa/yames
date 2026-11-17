@@ -14,7 +14,7 @@ import { OnboardingWizard } from "../OnboardingWizard";
 import type { OnboardingContext, OnboardingState } from "../onboardingMachine";
 import type { WizardEvaluationEnv } from "../WizardContext";
 import { ONBOARDING_STEPS } from "./index";
-import { SIGNAL_HOLD_MS } from "./AudioInputStep";
+import { deviceForMode, NOTHING_HEARD_MS, SIGNAL_HOLD_MS } from "./AudioInputStep";
 
 const MIC: AudioInputDevice = {
   name: "MacBook Pro Microphone",
@@ -50,6 +50,8 @@ function stateAt(
 
 type Options = {
   devices?: AudioInputDevice[];
+  startError?: string | null;
+  listening?: boolean;
   selectedDevice?: string;
   selectedChannel?: number;
   spectrum?: AudioSpectrum | null;
@@ -63,8 +65,9 @@ function makeEvaluation(options: Options = {}): WizardEvaluationEnv {
     selectDevice: vi.fn(),
     selectedChannel: options.selectedChannel ?? 0,
     selectChannel: vi.fn(),
-    listening: true,
+    listening: options.listening ?? true,
     setListening: vi.fn(),
+    startError: options.startError ?? null,
     spectrum: options.spectrum ?? null,
     lastFeedback: null,
     avgDeviation: 0,
@@ -283,15 +286,18 @@ describe("W5/W6 — the isEnabled matrix", () => {
     ...patch,
   });
 
+  // MVP, 2026-11-16: the learning side grades from the guitar, so W5 is on
+  // every run. It used to be off for a timing-only run that did not opt in
+  // (plan decision 3); whatever the coach tier, the question is now asked.
   it.each([
-    ["a run that never reached W4", {}, false],
-    ["timing-only, no opt-in", { coachTier: "off" as const }, false],
-    ["timing-only who opted in", { coachTier: "off" as const, tryListening: true }, true],
-    ["standard brain", { coachTier: "standard" as const }, true],
-    ["studio brain", { coachTier: "full" as const }, true],
-    ["opt-in without a tier yet", { tryListening: true }, true],
-  ])("audio-input: %s → %s", (_name, patch, expected) => {
-    expect(gate("audio-input")(ctx(patch))).toBe(expected);
+    ["a run that never reached W4", {}],
+    ["timing-only, no opt-in", { coachTier: "off" as const }],
+    ["timing-only who opted in", { coachTier: "off" as const, tryListening: true }],
+    ["standard brain", { coachTier: "standard" as const }],
+    ["studio brain", { coachTier: "full" as const }],
+  ])("audio-input is on every run: %s", (_name, patch) => {
+    const step = ONBOARDING_STEPS.find((s) => s.id === "audio-input")!;
+    expect(step.isEnabled ? step.isEnabled(ctx(patch)) : true).toBe(true);
   });
 
   it.each([
@@ -347,16 +353,119 @@ describe("W5/W6 — the isEnabled matrix", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "JUMP", stepId: "audio-input" });
   });
 
-  it("keeps both steps in flow order between the coach step and W7", () => {
+  // MVP, 2026-11-16: hearing the guitar comes straight after the instrument,
+  // before the steps that only tune the tools.
+  it("puts both steps straight after the instrument, before the coach", () => {
     expect(ONBOARDING_STEPS.map((s) => s.id)).toEqual([
       "welcome",
       "instrument",
-      "sound-look",
-      "hands-free",
-      "coach",
       "audio-input",
       "hear-it-work",
+      "coach",
+      "sound-look",
+      "hands-free",
       "ready",
     ]);
+  });
+});
+
+// ── MVP first run (2026-11-16): microphone or direct input, and what to do
+//    when nothing works ──────────────────────────────────────────────────
+describe("W5 — microphone or direct input", () => {
+  it("names the device each choice means", () => {
+    const usbMic: AudioInputDevice = { name: "USB Mic", isDefault: false, isInterface: false, channels: 1 };
+    expect(deviceForMode([INTERFACE, usbMic, MIC], "mic")).toBe(MIC.name);
+    expect(deviceForMode([INTERFACE, usbMic], "mic")).toBe("USB Mic");
+    expect(deviceForMode([INTERFACE], "mic")).toBe("");
+    expect(deviceForMode([MIC, INTERFACE], "direct")).toBe(INTERFACE.name);
+    expect(deviceForMode([MIC], "direct")).toBeNull();
+  });
+
+  it("follows the device: an interface reads as direct input", () => {
+    mount({ devices: [MIC, INTERFACE], selectedDevice: INTERFACE.name });
+    expect(screen.getByTestId("audio-input-mode-direct")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("audio-input-mode-mic")).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("choosing direct input picks the interface, and never advances", () => {
+    const { evaluation, dispatch } = mount({ devices: [MIC, INTERFACE], selectedDevice: MIC.name });
+    act(() => {
+      screen.getByTestId("audio-input-mode-direct").click();
+    });
+    expect(evaluation.selectDevice).toHaveBeenCalledWith(INTERFACE.name);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it("says so when direct input is asked for and no interface is plugged in", () => {
+    const { evaluation } = mount({ devices: [MIC], selectedDevice: MIC.name });
+    act(() => {
+      screen.getByTestId("audio-input-mode-direct").click();
+    });
+    expect(evaluation.selectDevice).not.toHaveBeenCalled();
+    expect(screen.getByTestId("audio-input-no-interface")).toHaveTextContent(
+      "No audio interface found.",
+    );
+  });
+});
+
+describe("W5 — when the guitar is not heard", () => {
+  it("with no input at all, says what to plug in", () => {
+    mount({ devices: [] });
+    expect(screen.getByTestId("audio-input-trouble")).toHaveTextContent("No input found");
+    expect(screen.queryByTestId("audio-input-retry")).toBeNull();
+  });
+
+  it("when the input will not open, says why it may be and offers to try again", () => {
+    const { evaluation } = mount({ startError: "device busy", listening: false });
+    const trouble = screen.getByTestId("audio-input-trouble");
+    expect(trouble).toHaveTextContent("This input would not open");
+    expect(trouble).toHaveTextContent("Privacy");
+    act(() => {
+      within(trouble).getByTestId("audio-input-retry").click();
+    });
+    expect(evaluation.setListening).toHaveBeenCalledWith(false);
+  });
+
+  it("after a while of silence, lists what to check for the way it is connected", () => {
+    const { feed } = mount({ devices: [MIC, INTERFACE], selectedDevice: INTERFACE.name });
+    feed(SILENT);
+    act(() => {
+      vi.advanceTimersByTime(NOTHING_HEARD_MS - 500);
+    });
+    expect(screen.queryByTestId("audio-input-trouble")).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    const trouble = screen.getByTestId("audio-input-trouble");
+    expect(trouble).toHaveTextContent("Nothing heard yet");
+    expect(trouble).toHaveTextContent("interface's gain");
+    expect(trouble).toHaveTextContent("macOS");
+    // Still only advice: Next stays off, Skip stays there.
+    expect(next()).toBeDisabled();
+    expect(screen.getByTestId("audio-input-skip")).toBeInTheDocument();
+  });
+
+  it("does not call a stream that never opened silent", () => {
+    const { feed } = mount({ listening: false });
+    feed(SILENT);
+    act(() => {
+      vi.advanceTimersByTime(NOTHING_HEARD_MS * 2);
+    });
+    expect(screen.queryByTestId("audio-input-trouble")).toBeNull();
+  });
+
+  it("puts the advice away once the guitar is heard", () => {
+    const { feed } = mount();
+    feed(SILENT);
+    act(() => {
+      vi.advanceTimersByTime(NOTHING_HEARD_MS + 200);
+    });
+    expect(screen.getByTestId("audio-input-trouble")).toBeInTheDocument();
+    feed(LOUD);
+    act(() => {
+      vi.advanceTimersByTime(SIGNAL_HOLD_MS + 200);
+    });
+    expect(screen.queryByTestId("audio-input-trouble")).toBeNull();
+    expect(next()).toBeEnabled();
   });
 });

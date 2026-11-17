@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Máy đếm nhịp dành cho việc luyện tập thật sự. Tay vẫn ở trên nhạc cụ.",
-      "setup": "Thiết lập giúp tôi (khoảng một phút)",
+      "tagline": "Ban nhạc chơi, bạn chơi, và Yames nghe tiếng guitar của bạn. Luyện tập vừa với số phút bạn có.",
+      "setup": "Thiết lập (khoảng hai phút)",
       "skip": "Chỉ cần tiếng click",
       "footer": "Miễn phí · cục bộ · mã nguồn mở · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Bỏ qua"
     },
     "audioInput": {
-      "title": "Thiết lập đầu vào",
-      "subtitle": "Yames nghe qua đây để chấm nhịp của bạn. Chơi thử và nhìn vạch mức tín hiệu.",
+      "title": "Mình sẽ nghe bạn bằng cách nào?",
+      "subtitle": "Chọn cách guitar của bạn vào máy tính, rồi chơi vài nốt. Đồng hồ cho thấy Yames nghe được gì.",
+      "mode": {
+        "label": "Guitar của bạn được kết nối thế nào",
+        "mic": {
+          "title": "Micro",
+          "desc": "Guitar trong phòng, qua micro của máy tính hoặc micro USB. Nốt đơn cho kết quả tốt nhất."
+        },
+        "direct": {
+          "title": "Cắm trực tiếp",
+          "desc": "Dây cáp từ guitar vào sound card (audio interface). Tín hiệu sạch nhất."
+        }
+      },
+      "noInterface": "Không tìm thấy sound card. Cắm vào là nó hiện trong danh sách bên dưới, hoặc dùng micro.",
       "device": "Thiết bị đầu vào",
       "guidance": {
         "electric-guitar": "Cắm vào sound card, hoặc chơi trước micro laptop — micro vẫn được, sound card thì tốt hơn.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Chơi thử đi — vạch mức cần một giây có tín hiệu.",
       "heard": "Được rồi. Yames nghe thấy bạn.",
-      "skip": "Bỏ qua, để sau tôi thiết lập"
+      "skip": "Bỏ qua, để sau tôi thiết lập",
+      "noDevices": {
+        "title": "Không tìm thấy đầu vào",
+        "body": "Cắm micro hoặc sound card; danh sách tự cập nhật. Trên laptop, kiểm tra xem micro tích hợp có bị tắt không."
+      },
+      "openFailed": {
+        "title": "Không mở được đầu vào này",
+        "body": "Có thể ứng dụng khác đang dùng nó, hoặc Yames chưa được phép dùng micro. Đóng ứng dụng kia hoặc cấp quyền, rồi thử lại."
+      },
+      "silent": {
+        "title": "Chưa nghe thấy gì",
+        "mic": "Chơi gần micro hơn, và to hơn một chút.",
+        "direct": "Vặn to núm âm lượng trên guitar và gain trên sound card, rồi chọn kênh đầu vào mà dây cáp đang cắm.",
+        "permission": "Quyền dùng micro: trên macOS, Cài đặt hệ thống › Quyền riêng tư & Bảo mật › Micro, bật Yames; trên Windows, Cài đặt › Quyền riêng tư › Micro, cho phép ứng dụng máy tính. Sau đó khởi động lại Yames.",
+        "other": "Vẫn không được? Thử thiết bị khác trong danh sách, hoặc bỏ qua: các công cụ vẫn chạy mà không cần đầu vào."
+      },
+      "retry": "Thử lại"
     },
     "hearItWork": {
       "title": "Nghe thử xem nó chạy",
@@ -128,7 +156,7 @@
       "coachOn": "Bật",
       "inputNone": "Chưa thiết lập",
       "alwaysOnTop": "Luôn ở trên cùng",
-      "start": "Bắt đầu luyện tập",
+      "start": "Đến Hôm nay",
       "tour": "Giới thiệu nhanh (30 giây)"
     },
     "hints": {

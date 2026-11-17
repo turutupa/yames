@@ -1075,6 +1075,7 @@ export function MainWindow() {
   // drives the single `useMidi`: the device picked in the wizard is the device
   // the rest of the app uses, and W6's eight beats go through the normal
   // analyzer — the only path that leaves a real calibration seed behind.
+  const [wizardInputError, setWizardInputError] = useState<string | null>(null);
   const wizardEvaluation: WizardEvaluationEnv = useMemo(
     () => ({
       devices: evaluation.devices,
@@ -1087,12 +1088,18 @@ export function MainWindow() {
         void evaluation.selectChannel(channel);
       },
       listening: evaluation.enabled,
-      setListening: (on: boolean) => {
-        void evaluation.setListening(on);
-      },
+      // The wizard's W5 says what went wrong when the stream will not open
+      // (busy, unplugged, or the OS refused the microphone), so the rejection
+      // is kept rather than dropped.
+      setListening: (on: boolean) =>
+        evaluation.setListening(on).then(
+          () => setWizardInputError(null),
+          (err: unknown) => setWizardInputError(on ? String(err) : null),
+        ),
       spectrum: evaluation.spectrum,
       lastFeedback: evaluation.lastFeedback,
       avgDeviation: evaluation.avgDeviation,
+      startError: wizardInputError,
     }),
     [
       evaluation.devices,
@@ -1105,6 +1112,7 @@ export function MainWindow() {
       evaluation.spectrum,
       evaluation.lastFeedback,
       evaluation.avgDeviation,
+      wizardInputError,
     ],
   );
 

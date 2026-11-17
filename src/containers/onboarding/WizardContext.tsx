@@ -60,13 +60,20 @@ export type WizardEvaluationEnv = {
   /** True while the shared input stream is running. */
   listening: boolean;
   /** Idempotent "make sure it is on/off" — never a flip; see `setListening`. */
-  setListening: (on: boolean) => void;
+  setListening: (on: boolean) => void | Promise<void>;
   /** Latest `audio-spectrum` payload, or null when nothing is listening. */
   spectrum: AudioSpectrum | null;
   /** Latest `beat-feedback` payload — W6's onset dots and drift needle. */
   lastFeedback: BeatFeedback | null;
   /** Rolling mean deviation in ms over the last 16 scored beats. */
   avgDeviation: number;
+  /**
+   * Why the input stream would not open (`start_evaluation` rejected: the
+   * device is busy, gone, or the OS refused the microphone), or null. W5 says
+   * so with next steps instead of waiting on a meter that will never move.
+   * Optional: a host that cannot tell leaves it undefined.
+   */
+  startError?: string | null;
 };
 
 export type WizardEnv = {

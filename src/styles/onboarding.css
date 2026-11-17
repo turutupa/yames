@@ -1033,3 +1033,201 @@ button.onboarding-summary-row:hover {
     padding: 9px 12px;
   }
 }
+
+/* ===================== The learning side's look (MVP, 2026-11-16) =====================
+ *
+ * The first run is the front door to the learning side, so it wears that
+ * side's design (`session.css`, from `plans/revamp/concept/mocks-3d-v2/`):
+ * the warm dark palette, Barlow Condensed for kicks and buttons, Fraunces for
+ * the headings, amber for the one thing to press. Done by re-pointing the
+ * theme variables the steps already use, inside the overlay only, so every
+ * step (and every control the steps borrow from Settings) follows without a
+ * rule of its own, and nothing outside the wizard changes.
+ *
+ * The backdrop stays see-through: W2 previews a theme on the window behind it.
+ */
+.onboarding-overlay {
+  --l-ink: #fbf5ea;
+  --l-quiet: #c9bba6;
+  --l-faint: #94866f;
+  --l-line: rgba(255, 232, 200, 0.13);
+  --l-line2: rgba(255, 232, 200, 0.24);
+  --l-panel: rgba(22, 16, 11, 0.86);
+  --l-amber: #ffb454;
+  --l-tone: #4ee08a;
+  --l-clash: #ff5d6c;
+  --l-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --l-serif: Fraunces, Georgia, "Times New Roman", serif;
+  --l-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --bg-secondary: #16100b;
+  --bg-tertiary: #20170f;
+  --bg-hover: #2a1e14;
+  --border: var(--l-line2);
+  --text-primary: var(--l-ink);
+  --text-secondary: var(--l-quiet);
+  --text-tertiary: var(--l-faint);
+  --text-muted: var(--l-faint);
+  --accent: var(--l-amber);
+  --accent-text: #1c1206;
+
+  background:
+    radial-gradient(90% 70% at 60% 45%, rgba(42, 26, 16, 0.82) 0, rgba(18, 11, 7, 0.86) 55%, rgba(10, 7, 5, 0.92) 100%);
+  color: var(--l-ink);
+  font-family: var(--l-body);
+}
+
+.onboarding-overlay .onboarding-card {
+  background: var(--l-panel);
+  border: 1px solid var(--l-line);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 240, 215, 0.05) inset,
+    0 24px 64px rgba(0, 0, 0, 0.55);
+  max-width: 560px;
+}
+
+.onboarding-overlay .onboarding-step-title,
+.onboarding-overlay .onboarding-welcome-title {
+  font-family: var(--l-serif);
+  font-optical-sizing: auto;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+.onboarding-overlay .onboarding-step-title {
+  font-size: clamp(26px, 3.6vh, 34px);
+  line-height: 1.08;
+}
+
+/* W0: the mock's wordmark. "Yames" in the display face, wide and tall. */
+.onboarding-overlay .onboarding-welcome-title {
+  font: 700 clamp(56px, 11vh, 96px) / 0.95 var(--l-display);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.onboarding-overlay .onboarding-welcome-tagline {
+  font: 500 clamp(17px, 2.4vh, 21px) / 1.35 var(--l-serif);
+  color: var(--l-quiet);
+  max-width: 30ch;
+}
+.onboarding-overlay .onboarding-logo {
+  color: var(--l-amber);
+}
+
+.onboarding-overlay .onboarding-btn {
+  font: 600 17px/1.1 var(--l-display);
+  letter-spacing: 0.04em;
+  border-radius: 10px;
+}
+.onboarding-overlay .onboarding-btn-primary {
+  background: var(--l-amber);
+  color: #1c1206;
+  box-shadow: 0 6px 20px rgba(255, 180, 84, 0.18);
+}
+.onboarding-overlay .onboarding-welcome-actions .onboarding-btn-primary,
+.onboarding-overlay .onboarding-ready-actions .onboarding-btn-primary {
+  font-size: 24px;
+  padding: 14px 22px;
+}
+.onboarding-overlay .onboarding-dot.active {
+  background: var(--l-amber);
+}
+.onboarding-overlay .onboarding-input-label,
+.onboarding-overlay .onboarding-summary-label {
+  font: 600 13px/1.1 var(--l-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--l-quiet);
+}
+.onboarding-overlay .onboarding-input-gate.proven {
+  color: var(--l-tone);
+}
+.onboarding-overlay .onboarding-input-gate.proven .onboarding-input-gate-dot {
+  background: var(--l-tone);
+}
+
+/* ---- W5: microphone or direct input ---- */
+.onboarding-input-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.onboarding-input-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.onboarding-input-mode b {
+  font: 600 20px/1.1 var(--l-display, inherit);
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+.onboarding-input-mode:hover {
+  border-color: var(--accent);
+}
+.onboarding-input-mode:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.onboarding-input-mode.selected {
+  border-color: var(--accent);
+  background: rgba(255, 180, 84, 0.1);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.onboarding-input-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+/* What to do when the input does not work: said, not implied. */
+.onboarding-input-trouble {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 180, 84, 0.35);
+  background: rgba(255, 180, 84, 0.07);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.onboarding-input-trouble p {
+  margin: 0;
+}
+.onboarding-input-trouble ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.onboarding-input-trouble-title {
+  font: 600 17px/1.15 var(--l-display, inherit);
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+}
+.onboarding-input-trouble-small {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 520px) {
+  .onboarding-input-modes {
+    grid-template-columns: 1fr;
+  }
+}

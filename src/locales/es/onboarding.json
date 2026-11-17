@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Un metrónomo hecho para practicar de verdad. Las manos siguen en el instrumento.",
-      "setup": "Configúralo por mí (un minuto)",
+      "tagline": "Una banda toca, tú tocas y Yames escucha tu guitarra. Práctica que cabe en los minutos que tienes.",
+      "setup": "Configurarlo (unos dos minutos)",
       "skip": "Solo dame el clic",
       "footer": "Gratis · local · código abierto · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Descartar"
     },
     "audioInput": {
-      "title": "Configura tu entrada",
-      "subtitle": "Yames escucha por aquí para puntuar tu ritmo. Toca algo y mira cómo se mueve el medidor.",
+      "title": "¿Cómo te voy a escuchar?",
+      "subtitle": "Elige cómo llega tu guitarra al ordenador y toca unas notas. El medidor muestra lo que oye Yames.",
+      "mode": {
+        "label": "Cómo está conectada tu guitarra",
+        "mic": {
+          "title": "Micrófono",
+          "desc": "Tu guitarra en la habitación, por el micrófono del ordenador o uno USB. Las notas sueltas funcionan mejor."
+        },
+        "direct": {
+          "title": "Entrada directa",
+          "desc": "Un cable de la guitarra a una interfaz de audio. La señal más limpia."
+        }
+      },
+      "noInterface": "No se encontró ninguna interfaz de audio. Conéctala y aparecerá en la lista de abajo, o usa el micrófono.",
       "device": "Dispositivo de entrada",
       "guidance": {
         "electric-guitar": "Conéctate a una interfaz o toca delante del micrófono del portátil: el micro sirve, la interfaz es mejor.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Toca algo: el medidor necesita un segundo de señal.",
       "heard": "Listo. Yames te oye.",
-      "skip": "Saltar, lo configuro más tarde"
+      "skip": "Saltar, lo configuro más tarde",
+      "noDevices": {
+        "title": "No se encontró ninguna entrada",
+        "body": "Conecta un micrófono o una interfaz de audio; la lista se actualiza sola. En un portátil, comprueba que el micrófono integrado no esté desactivado."
+      },
+      "openFailed": {
+        "title": "No se pudo abrir esta entrada",
+        "body": "Puede que otra app la esté usando, o que Yames no tenga permiso para usar el micrófono. Cierra la otra app o da el permiso y vuelve a intentarlo."
+      },
+      "silent": {
+        "title": "Todavía no se oye nada",
+        "mic": "Toca más cerca del micrófono y un poco más fuerte.",
+        "direct": "Sube el volumen de la guitarra y la ganancia de la interfaz, y elige el canal de entrada donde está conectado el cable.",
+        "permission": "Acceso al micrófono: en macOS, Ajustes del Sistema › Privacidad y seguridad › Micrófono, activa Yames; en Windows, Configuración › Privacidad › Micrófono, permite las apps de escritorio. Después reinicia Yames.",
+        "other": "¿Sigue sin oírse nada? Prueba otro dispositivo de la lista, o sáltalo: las herramientas funcionan sin entrada."
+      },
+      "retry": "Reintentar"
     },
     "hearItWork": {
       "title": "Escúchalo funcionar",
@@ -128,7 +156,7 @@
       "coachOn": "Activado",
       "inputNone": "Sin configurar",
       "alwaysOnTop": "Siempre visible",
-      "start": "Empezar a practicar",
+      "start": "Ir a Hoy",
       "tour": "Enséñame la app (30 s)"
     },
     "hints": {

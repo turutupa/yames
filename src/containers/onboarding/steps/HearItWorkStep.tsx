@@ -91,7 +91,12 @@ export function HearItWorkStep({ onBack, isActive }: WizardStepProps) {
 
   // Never leave the input open behind us, however the step is left (Next,
   // Back, Skip, or the whole wizard closing mid-take).
-  useEffect(() => () => setListeningRef.current(false), []);
+  useEffect(
+    () => () => {
+      void setListeningRef.current(false);
+    },
+    [],
+  );
 
   // --- Collecting the dots -------------------------------------------------
   // `lastFeedback` is one event per beat at 80 BPM (750 ms apart), so reading

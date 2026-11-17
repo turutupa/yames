@@ -5,9 +5,15 @@
  * the flow. The shell reads this array for rendering and the machine reads
  * `{ id, isEnabled }` from it for navigation; neither needs editing.
  *
- * Flow (ONBOARDING_PLAN §3):
- *   W0 welcome → W1 instrument → W2 sound-look → W3 hands-free → W4 coach →
- *   W5 audio-input → W6 hear-it-work → W7 ready
+ * Flow (ONBOARDING_PLAN §3, reordered for the MVP on 2026-11-16):
+ *   W0 welcome → W1 instrument → W5 audio-input → W6 hear-it-work →
+ *   W4 coach → W2 sound-look → W3 hands-free → W7 ready
+ *
+ * The learning side grades from the guitar (revamp BRIEF: "First Mechanics
+ * grading needs a mic or direct input"), so hearing the guitar comes right
+ * after the instrument and is on every run, whatever the coach tier. The
+ * steps that only tune the tools (click sound, theme, pedal) come after it,
+ * where a tester who already hears themselves can skip them.
  */
 import type { StepGate } from "../onboardingMachine";
 import type { WizardStepDef } from "./types";
@@ -23,17 +29,12 @@ import { ReadyStep } from "./ReadyStep";
 export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "welcome", Component: WelcomeStep, hideInProgress: true },
   { id: "instrument", Component: InstrumentStep },
-  { id: "sound-look", Component: SoundLookStep },
-  { id: "hands-free", Component: HandsFreeStep },
-  { id: "coach", Component: CoachStep },
-  // `tryListening` is W4's optional branch for timing-only users (plan
-  // decision 3). `coachTier` is undefined until W4 commits — a run that
-  // skipped W4 must read as "off", hence the `??`.
-  {
-    id: "audio-input",
-    Component: AudioInputStep,
-    isEnabled: (ctx) => (ctx.coachTier ?? "off") !== "off" || ctx.tryListening === true,
-  },
+  // On every run (MVP, 2026-11-16). It used to be gated on the coach tier,
+  // with an opt-in for timing-only users (plan decision 3); the learning side
+  // cannot grade without an input, so the question is now asked of everyone,
+  // and "Skip, I'll set this up later" is still there for a player who only
+  // wants the click.
+  { id: "audio-input", Component: AudioInputStep },
   // W6 gates on the *outcome* of W5, not on the intent: an input that never
   // produced signal (skipped W5, or a dead interface) has nothing to
   // demonstrate, and "hear it work" with nothing to hear is the fake result
@@ -44,6 +45,9 @@ export const ONBOARDING_STEPS: WizardStepDef[] = [
     Component: HearItWorkStep,
     isEnabled: (ctx) => ctx.inputConfigured === true,
   },
+  { id: "coach", Component: CoachStep },
+  { id: "sound-look", Component: SoundLookStep },
+  { id: "hands-free", Component: HandsFreeStep },
   { id: "ready", Component: ReadyStep },
 ];
 
