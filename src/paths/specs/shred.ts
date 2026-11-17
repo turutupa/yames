@@ -122,8 +122,9 @@ const ETUDE = `/16
   4:5 3:5 2:5 2:8 2:5 3:5 4:5 3:5 4:5 3:5 2:5 1:8 2:5 3:5 3:7 3:5 |
   2:8 2:6 2:5 3:7 3:5 3:7 2:5 2:6 2:8 2:6 2:5 3:7 3:5 3:4 4:7 4:5 |
   2:5 2:8 1:5 1:8 2:5 2:8 1:5 1:8 1:7 1:5 2:8 2:6 2:5 3:7 3:5 3:4 |
-  3:5 2:6 1:5 1:8 1:5 2:6 3:5 2:6 1:5 1:8 1:7 1:5 2:6 2:8 2:6 2:5 |
-  1:8 1:7 1:5 2:8 2:6 2:5 1:8 1:7 1:5 2:8 2:6 2:5 3:7 3:5 2:5 2:8 |
+  /8t ${repeat("1:13t 1:5p 1:8h", 4)} |
+  /16t ${repeat("1:8 1:7p 1:5p 2:8 2:6p 2:5p", 4)} |
+  /16
   2:8 2:6 2:5 3:7 3:5 3:4 4:7 4:5 3:4 3:5 3:7 3:5 3:4 3:5 4:7 4:5`;
 
 // ---------------------------------------------------------------------------
@@ -271,7 +272,7 @@ const BEGINNER: StepSpec[] = [
     ],
     payoff: "The same notes that sounded like a typewriter now have a pulse, and a six-note figure rolls against the beat the way it does on the records.",
     difficultyException:
-      "The tempo drops on purpose: an accent is a control problem, and the note-rate metric only counts speed.",
+      "Accents are a control problem and the sixteenth tempos drop to 85 to 90; the sextuplet Exercises pass at 75, which is about the note rate of Step 1. The note-rate metric only counts speed.",
     exercises: [
       {
         id: "sextuplet-accent",
@@ -297,8 +298,8 @@ const BEGINNER: StepSpec[] = [
         tab: `/16t ${repeat("1:8> 1:7 1:5 1:7 1:8 1:7", 4)}`,
         position: 5,
         harmony: { scale: ["A", "naturalMinor"] },
-        rungs: ladder(50, 100, 5),
-        passAt: 90,
+        rungs: ladder(50, 90, 5),
+        passAt: 75,
         grade: "accents",
         pass: ACCENTS,
         minutes: 5,
@@ -332,8 +333,8 @@ const BEGINNER: StepSpec[] = [
         coach: "Accent checks are rough. If the upstroke accents disappear on the recording, that is the thing to work on.",
         tab: `/16t ${repeat("5:0> 5:0 5:0 5:0> 5:0 5:0", 4)}`,
         position: 5,
-        rungs: ladder(50, 95, 5),
-        passAt: 85,
+        rungs: ladder(50, 90, 5),
+        passAt: 75,
         grade: "accents",
         pass: ACCENTS,
         minutes: 5,
@@ -400,7 +401,7 @@ const BEGINNER: StepSpec[] = [
         purpose: "Two fingers on one string while two work on the next, so the fingers move in pairs and never all at once. It is the best cure there is for a hand that collapses.",
         howTo: [
           "Sixteenths, a pair of strings to each beat. On the low E and A: finger 1 at fret 5 on the E, finger 3 at fret 7 on the A, then finger 2 at fret 6 on the E, finger 4 at fret 8 on the A.",
-          "Bar 1 crawls up a string pair each beat (E-A, A-D, D-G, G-B); bar 2 goes on to B-E and crawls back (G-B, D-G, A-D).",
+          "Bar 1 crawls up a string pair each beat (E-A, A-D, D-G, G-B); bar 2 moves the hand up a fret, goes on to B-E and crawls back (G-B, D-G, A-D). Bars 3 and 4 do the same a fret higher again, and then it starts over at the first fret.",
           "Lift each finger only when its partner on the other string has landed.",
         ],
         coach: "This is a diagnostic, so play it slowly enough to hear the weakest change. I'll check the timing and the notes.",
@@ -410,11 +411,12 @@ const BEGINNER: StepSpec[] = [
           label: (p) => `At ${p.position}`,
           build: (p) => {
             const fret = Number(p.position.replace("fret ", ""));
-            return { tab: spider(fret), position: fret };
+            return { tab: spider(fret), position: fret, shifts: true };
           },
         },
         tab: spider(5),
         position: 5,
+        shifts: true,
         rungs: ladder(50, 100, 5),
         passAt: 90,
         grade: "timingNotes",
@@ -543,7 +545,7 @@ const BEGINNER: StepSpec[] = [
         crossing: "inside",
         harmony: { scale: ["A", "minorPentatonic"] },
         rungs: ladder(50, 100, 5),
-        passAt: 90,
+        passAt: 80,
         grade: "timingNotes",
         selfCheck: ["Watch the pick for one loop: did every loop start with a downstroke on the B string?"],
         minutes: 6,
@@ -551,11 +553,11 @@ const BEGINNER: StepSpec[] = [
       {
         id: "down-the-box",
         title: "The same loop down the box",
-        purpose: "One loop on each pair of strings: B and E, G and B, D and G, A and D, then back up. The pick path is the same; the fretting hand has to find each pair in time.",
+        purpose: "One loop on each pair of strings: B and E, G and B, D and G, A and D, then back up. The pick path inside a loop is the same; the fretting hand has to find each pair in time.",
         howTo: [
           "Sextuplets, one loop to a beat. Bar 1 moves down a string pair each beat; bar 2 comes back up from A and D to B and E.",
-          "Inside each loop every crossing is inside, as before. The move from one pair to the next (an upstroke, then a downstroke on the string below) is an outside crossing, so this one has both.",
-          "On G and B the lower string's upper note is fret 7, not 8: the box's shape changes there, the picking doesn't.",
+          "Inside each loop every crossing is inside, as before. In bar 1 the move down to the next pair (an upstroke, then a downstroke on the string below) is an outside crossing; in bar 2 the move up to the next pair is inside. So this one has both.",
+          "From G and B down, the lower string's upper note is fret 7, not 8 (G, D and A are 5-7; B and the top E are 5-8): the box's shape changes, the picking doesn't.",
         ],
         coach: "The change of string pair is the risk. If a note goes missing, look at the beat it changed on.",
         vary: inKeys(downTheBox(), ["A", "B", "C", "D", "E"], "minorPentatonic"),
@@ -564,7 +566,7 @@ const BEGINNER: StepSpec[] = [
         crossing: "both",
         harmony: { scale: ["A", "minorPentatonic"], cover: true },
         rungs: ladder(50, 95, 5),
-        passAt: 85,
+        passAt: 75,
         grade: "timingNotes",
         minutes: 6,
       },
@@ -573,10 +575,10 @@ const BEGINNER: StepSpec[] = [
         title: "Four notes: B5-B8-e5-e8 in sixteenths",
         purpose: "The four-note version, four to the click: one inside crossing and one outside in every loop, so it is the two kinds taking turns at speed.",
         howTo: [
-          "Sixteenths. B string 5 and 8, top string 5 and 8, round again. Down, up, down, up.",
-          "Going up the crossing is inside (upstroke on B, downstroke on E); coming round from the top E's 8 to the B string's 5 it is outside.",
+          "Sixteenths. Two notes on the lower string of the pair, two on the higher (B 5 and 8, top E 5 and 8 to start), round again. Down, up, down, up.",
+          "Going up, the crossing is inside (upstroke on the lower string, downstroke on the higher); coming round from the higher string's top note to the lower string's first it is outside.",
         ],
-        coach: "Faster than the six-note loop, and the turn back to the B string is the place to listen to.",
+        coach: "Four to the click at 110 is a little slower than the six-note loop at 80. The turn back to the lower string is the place to listen to.",
         vary: {
           values: { stringSet: ["B and E", "G and B", "D and G", "A and D"] },
           pooled: ["stringSet"],
@@ -615,7 +617,7 @@ const BEGINNER: StepSpec[] = [
         crossing: "outside",
         harmony: { scale: ["A", "minorPentatonic"] },
         rungs: ladder(50, 100, 5),
-        passAt: 90,
+        passAt: 80,
         grade: "timingNotes",
         minutes: 5,
       },
@@ -679,7 +681,8 @@ const INTERMEDIATE: StepSpec[] = [
         purpose: "Both kinds of crossing in one line, one straight after the other: nine notes up, seven back, one bar.",
         howTo: [
           "Sixteenths. From the start note, three notes on each of three strings going up, then back down without repeating the top note.",
-          "Two frets then one (5, 7, 8): fingers 1, 3, 4. Two then two (5, 7, 9): fingers 1, 3, 4 with the hand opened a little. One then two (5, 6, 8): fingers 1, 2, 4.",
+          "Two frets then one (5, 7, 8): fingers 1, 3, 4. Two then two (5, 7, 9): fingers 1, 2, 4, so the stretch is between the first and second fingers and not between the third and little.",
+          "Starting from G on the D string, the B string's notes are a fret higher (6, 8, 10): move the hand up a fret at that string change.",
         ],
         coach: "When it is even both ways, the whole neck is the same idea with more strings.",
         vary: {
@@ -708,7 +711,7 @@ const INTERMEDIATE: StepSpec[] = [
         purpose: "The whole shape up and down in sixteenths, with the small hand shift where the top two strings move up a fret.",
         howTo: [
           "Sixteenths: eighteen notes up from the low E's fret 5, sixteen back down, and the A held to the end of bar 3.",
-          "The hand moves up one fret when you reach the B string, and back when you return to the G. Do it during the string change, not after it.",
+          "The hand moves up one fret when you reach the B string (6, 8, 10) and again for the top string (7, 8, 10), and back down the same way. Do each move during the string change, not after it.",
         ],
         coach: "Long lines are where the time drifts. Evenness across the whole take is the number.",
         tab: `/16 ${threeNps({ root: "A", scale: "naturalMinor", string: 6, fret: 5, strings: 6, sequence: "updown" })} 6:5 hold`,
@@ -828,7 +831,7 @@ const INTERMEDIATE: StepSpec[] = [
         ],
         coach: "Land on time and the run was fine. I'll check the notes after the take.",
         vary: {
-          values: { stringSet: ["top three, from C", "middle three, from G", "low middle, from E"] },
+          values: { stringSet: ["top three, down from D", "middle three, down from A", "low middle, down from F"] },
           pooled: ["stringSet"],
           label: (p) => `A minor, ${p.stringSet}`,
           build: (p) => {
@@ -836,7 +839,7 @@ const INTERMEDIATE: StepSpec[] = [
             return { tab, position: FOURS_DOWN_AT[p.stringSet], shifts: true };
           },
         },
-        tab: foursDownTab("top three, from C"),
+        tab: foursDownTab("top three, down from D"),
         position: 7,
         shifts: true,
         harmony: { scale: ["A", "naturalMinor"] },
@@ -864,12 +867,13 @@ const INTERMEDIATE: StepSpec[] = [
       {
         id: "one-beat",
         title: "One beat on, one beat off",
-        purpose: "The shortest honest burst: four sixteenths and a quarter-note landing, twice a bar.",
-        howTo: ["Four sixteenths with fingers 1-2-3-4, then a quarter note on the third finger. Everything relaxes during the quarter."],
+        purpose: "The shortest honest burst: Step 1's fret-12 figure once at speed, then a quarter-note landing on the note it started from, twice a bar.",
+        howTo: ["Sixteenths: the fret-12 figure from its top, 15, 13, 12, 13 on the top string (fingers 4, 2, 1, 2), then a quarter note on 12, the E. Everything relaxes during the quarter."],
         coach: "Landing on time counts more than the run. Timing and missed notes are what I have here.",
-        vary: burstsOn(`/16 5:5 5:6 5:7 5:8 /4 5:7 /16 5:5 5:6 5:7 5:8 /4 5:7`),
-        tab: `/16 5:5 5:6 5:7 5:8 /4 5:7 /16 5:5 5:6 5:7 5:8 /4 5:7`,
-        position: 5,
+        vary: burstsOn((a, b, c) => `/16 ${c} ${b} ${a} ${b} /4 ${a} /16 ${c} ${b} ${a} ${b} /4 ${a}`),
+        tab: burstTab(1, (a, b, c) => `/16 ${c} ${b} ${a} ${b} /4 ${a} /16 ${c} ${b} ${a} ${b} /4 ${a}`),
+        position: 12,
+        harmony: { scale: ["A", "naturalMinor"] },
         rungs: ladder(80, 160, 10),
         passAt: 130,
         grade: "timing",
@@ -881,11 +885,12 @@ const INTERMEDIATE: StepSpec[] = [
         id: "two-beats",
         title: "Two beats on, two off",
         purpose: "Twice the length with the same rest, so you find out how much of the speed survives eight notes.",
-        howTo: ["Eight sixteenths up and back on one string, then a half note. The halfway point of the run is where the time usually moves."],
+        howTo: ["Sixteenths: the fret-12 figure twice (12, 13, 15, 13, 12, 13, 15, 13), then a half note on 12. The halfway point of the run is where the time usually moves."],
         coach: "If one beat was clean and two is not, that is a stamina question and not a speed one.",
-        vary: burstsOn(`/16 5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6 /2 5:7`),
-        tab: `/16 5:5 5:6 5:7 5:8 5:7 5:6 5:5 5:6 /2 5:7`,
-        position: 5,
+        vary: burstsOn((a, b, c) => `/16 ${a} ${b} ${c} ${b} ${a} ${b} ${c} ${b} /2 ${a}`),
+        tab: burstTab(1, (a, b, c) => `/16 ${a} ${b} ${c} ${b} ${a} ${b} ${c} ${b} /2 ${a}`),
+        position: 12,
+        harmony: { scale: ["A", "naturalMinor"] },
         rungs: ladder(80, 150, 10),
         passAt: 120,
         grade: "timing",
@@ -896,10 +901,12 @@ const INTERMEDIATE: StepSpec[] = [
         id: "expanding",
         title: "Expanding bursts",
         purpose: "One beat, then two, three and four beats on: the classic way of walking a burst into a line.",
-        howTo: ["Sixteenths. The bar tells you how long to keep going: bar 1 one beat, bar 2 two, bar 3 three, bar 4 no rest at all, so the hand has to stay loose while moving."],
+        howTo: ["Sixteenths on the fret-12 figure. The bar tells you how long to keep going: bar 1 one beat, bar 2 two, bar 3 three, each landing on 12; bar 4 has no rest at all, so the hand has to stay loose while moving."],
         coach: "Most people slip somewhere in the third bar. It helps to know which one is yours.",
-        tab: `/16 5:5 5:6 5:7 5:8 /4 5:7 r r | /16 ${repeat("5:5 5:6 5:7 5:8", 2)} /4 5:7 r | /16 ${repeat("5:5 5:6 5:7 5:8", 3)} /4 5:7 | /16 ${repeat("5:5 5:6 5:7 5:8", 4)}`,
-        position: 5,
+        vary: burstsOn((a, b, c) => expanding(a, b, c)),
+        tab: burstTab(1, expanding),
+        position: 12,
+        harmony: { scale: ["A", "naturalMinor"] },
         rungs: ladder(70, 130, 10),
         passAt: 110,
         grade: "timing",
@@ -944,6 +951,7 @@ const INTERMEDIATE: StepSpec[] = [
         howTo: [
           "Sixteenths, each octave twice. First finger on the lower string, third or little finger two strings up. Down on the low note, up on the high one: every crossing is outside.",
           "A small shift each beat, up the scale in bar 1 and back in bar 2.",
+          "Muting is the technique here: the underside of the first finger damps the string between the octave notes, and the picking hand's palm damps the strings below.",
         ],
         coach: "If notes go missing here it is usually the skip or the shift. Slow down until neither is a surprise.",
         vary: {
@@ -971,7 +979,8 @@ const INTERMEDIATE: StepSpec[] = [
         purpose: "Box 1 in pairs, every other pair a string further on: low E, D, A, G, D, B, G, E going up. It is the box you know, made to sound wide.",
         howTo: [
           "Sixteenths, two notes to a string. Bar 1 climbs: low E 5-8, D 5-7, A 5-7, G 5-7, D 7-5, B 5-8, G 7-5, top E 5-8. Bar 2 comes back down the same way.",
-          "Each pair is down-up, so every string change is a fresh downstroke after an upstroke.",
+          "Each pair is down-up, so every string change is a downstroke after an upstroke: going up the strings that is an inside crossing, and on the skips an inside crossing over a string.",
+          "Bar 2 comes down in pairs (top E 8-5, G 7-5, B 8-5, D 7-5, G 7-5, A 7-5, D 7-5) and ends low E 5-8, which leads back to the 5 at the start.",
         ],
         coach: "Skips are where noise starts. If extra notes show up in the report, the skipped string is the likely source.",
         vary: inKeys(pentSkipTab(), ["A", "C", "D", "E"], "minorPentatonic"),
@@ -991,7 +1000,7 @@ const INTERMEDIATE: StepSpec[] = [
         howTo: [
           "Sixteenths, the eight notes twice a bar: D string 7 and 10, B string 10 and 13, top string 12, then B 13, B 10, D 10.",
           "First finger on the D string's 7, then let the hand sit at fret 10: little finger for 13, ring for 12.",
-          "Every string change here is an inside crossing over a skipped string, the hardest kind: the pick has to escape the strings and clear one.",
+          "Every string change is an inside crossing. The two between the D and B strings also skip the G string, the hardest kind: the pick has to escape the strings and clear one.",
         ],
         coach: "I'll check the notes against the chord and the timing after the take.",
         vary: {
@@ -1052,14 +1061,14 @@ const INTERMEDIATE: StepSpec[] = [
       {
         id: "quintuplet-group",
         title: "A five-note group in quintuplets",
-        purpose: "C, A on the top string, G, F, E on the B string: five notes to the click. With economy strokes the group starts on a downstroke every time, which is exactly why players use it.",
+        purpose: "E, F, G on the B string, A, C on the top string: five notes to the click. Economy going up, so every group starts on a downstroke, which is exactly why players use a five-note group.",
         howTo: [
           "Quintuplets: five notes to the click. Count 'one-two-three-four-five' evenly against the beat; it should feel slightly lopsided at first.",
-          "Top string 8, 5; B string 8, 6, 5. Strokes: down, up, then up again straight through to the B string, down, up. The next group's first note is a downstroke back onto the top string.",
+          "B string 5, 6, 8 (fingers 1, 2, 4), top string 5, 8 (fingers 1, 4). Strokes: down, up, down, then down again straight through to the top string, up. The return to the B string is a downstroke after that upstroke: an outside crossing, so the next group starts down again.",
         ],
         coach: "Quintuplets are a feel thing, so the evenness bar here is a little looser. I'll check the notes after the take.",
-        vary: inKeys(`/16q ${repeat("1:8 1:5 2:8 2:6 2:5", 4)}`, ["A", "B", "C", "D", "E", "G"]),
-        tab: `/16q ${repeat("1:8 1:5 2:8 2:6 2:5", 4)}`,
+        vary: inKeys(`/16q ${repeat("2:5d 2:6 2:8 1:5 1:8", 4)}`, ["A", "B", "C", "D", "E", "G"]),
+        tab: `/16q ${repeat("2:5d 2:6 2:8 1:5 1:8", 4)}`,
         position: 5,
         pick: "economy",
         harmony: { scale: ["A", "naturalMinor"] },
@@ -1067,7 +1076,7 @@ const INTERMEDIATE: StepSpec[] = [
         passAt: 80,
         grade: "timingNotes",
         pass: LOOSE_NOTES,
-        selfCheck: ["Did every group of five start on a downstroke on the top string?"],
+        selfCheck: ["Did every group of five start on a downstroke on the B string, with the push carrying straight through to the top string?"],
         minutes: 6,
       },
       {
@@ -1132,7 +1141,7 @@ const ADVANCED: StepSpec[] = [
         title: "Trill: picked, then hammered",
         purpose: "Two notes a tone apart, sixteenths: one bar picked, one bar with only the first note of each beat picked and the rest hammered and pulled. Sixteen bars, for stamina in the fretting hand.",
         howTo: [
-          "Sixteenths. Bar 1: alternate-pick G string 5, 7, 5, 7 for the whole bar. Bar 2: pick fret 5 on each beat with an accent, then hammer 7, pull to 5, hammer 7.",
+          "Sixteenths. Bar 1: alternate-pick the two notes for the whole bar (G string 5 and 7 to start; the variants move it). Bar 2: pick the lower note on each beat with an accent, then hammer the upper, pull to the lower, hammer the upper.",
           "First finger on the lower note, third finger a tone up (second finger where the variant is a semitone). The first finger stays down for the whole trill; only the upper finger moves.",
         ],
         coach: "Hammers and pulls I can't hear cost nothing here, so the picked notes carry the timing. Listen to the legato bar for volume.",
@@ -1163,7 +1172,7 @@ const ADVANCED: StepSpec[] = [
         purpose: "A, B, C, B: three fingers, one string. One bar picked, then one bar where only the first note of each beat is picked and the other three are hammered and pulled.",
         howTo: [
           "Sixteenths. Bar 1: alternate-pick top string 5, 7, 8, 7 four times. Bar 2: pick 5 on each beat, hammer 7, hammer 8, pull to 7, and pick 5 again on the next beat.",
-          "The pull from the top note back to the middle one needs that finger already down. Place it while the top note sounds.",
+          "Keep the middle finger down on its note when you hammer the top one, so the pull back has somewhere to land. Only the top finger moves.",
         ],
         coach: "The picked notes on the beat are the anchor I time against most firmly. The volume of the legato notes is for your ear.",
         vary: {
@@ -1229,7 +1238,7 @@ const ADVANCED: StepSpec[] = [
         purpose: "Twelve notes up four strings, held at the top. Bar 1 picked; bar 2 picks the first note only, then hammers everything, the first note of each string from nowhere.",
         howTo: [
           "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked T).",
-          "Fingers 1-3-4 on the low E (5, 7, 8) and 1-3-4 on the A (5, 7, 8); 1-3-4 on the D and G (5, 7, 9).",
+          "Fingers 1-3-4 on the low E (5, 7, 8) and the A (5, 7, 8); 1-2-4 on the D and G (5, 7, 9), so each hammer to the little finger comes from the second finger with the stretch in front of it.",
         ],
         coach: "The hammer-ons from nowhere count as attacks here, so one too quiet for me to catch shows up as missed. Make them loud; the bar allows for a few.",
         vary: {
@@ -1419,6 +1428,7 @@ const ADVANCED: StepSpec[] = [
         purpose: "A, C, E, A, C, E, A on five strings from the A string's fret 12, with a turn at each end. The most-used sweep shape there is.",
         howTo: [
           "Eighth-note triplets, one loop a bar. Hammer 12 to 15 on the A string at the bottom, one note a string up to the top, hammer and pull at the top, and down. The last note, back on the A string's 15, is an upstroke; the next loop starts with a downstroke on 12.",
+          "Fingers on the A minor shape: first finger 12 on the A and top E, little finger 15 on the A and 17 on the top E, ring finger rolling from the D string's 14 to the G string's 14, middle finger 13 on the B.",
         ],
         coach: "Timing only, and only up to the graded rungs. Above them the tempo is yours to judge on a recording.",
         vary: {
@@ -1443,7 +1453,7 @@ const ADVANCED: StepSpec[] = [
         title: "The link: one shape into the next (timing only)",
         purpose: "Two loops of one three-string shape, then two of the next, carried straight across the bar line: the link on its own, where it is easiest to hear.",
         howTo: [
-          "Eighth-note triplets, two loops a bar. The upward push that finishes the last loop of bar 1 carries straight on into the first note of bar 2's shape: don't stop it and don't restart it.",
+          "Eighth-note triplets, two loops a bar. After the very first note, every G-string note is an upstroke that turns the sweep round, inside the bar and across the bar line alike: the upward push that finishes bar 1 carries straight on into bar 2's shape. Don't stop it and don't restart it.",
           "Choose the nearest note of the new chord, not its root. Good links barely move the hand.",
         ],
         coach: "Timing only. Listen for a gap at the bar line: it is the one thing a recording shows at once.",
@@ -1473,7 +1483,8 @@ const ADVANCED: StepSpec[] = [
         title: "Am, F, C, G: one pass a chord (timing only)",
         purpose: "Up five strings on Am, link, down F, link, up C, link, down G: every chord change is a single small step on an outer string.",
         howTo: [
-          "Quarter-note triplets, six notes a bar: one pass across five strings and one more note on the last string. The first note of each bar is a hammer, pull or slide from the last bar's final note, not a pick.",
+          "Quarter-note triplets, six notes a bar, three to every two clicks: one pass across five strings and one more note on the last string. In bars 2 to 4 the first note is a hammer or pull from the last bar's final note, not a pick; bar 1's first note is picked each time round.",
+          "At 150 this is the note rate of eighth-note triplets at 75: slow on purpose, because the links are what you are learning. Bar 4's G rolls a barre across the D, G and B strings at fret 12.",
           "Sing the top notes if you can. They make a tune, and the tune is how you keep your place.",
         ],
         coach: "Timing only. Four links a round; whether a link was picked is up to your ear.",
@@ -1495,39 +1506,9 @@ const ADVANCED: StepSpec[] = [
         shifts: true,
         chords: "Am | F | C | G",
         harmony: { chordTones: true },
-        rungs: ladder(60, 160, 10),
-        passAt: 130,
+        rungs: ladder(100, 190, 10),
+        passAt: 150,
         minutes: 6,
-      }),
-      sweep({
-        id: "chain-five",
-        title: "Five-string loops in a chain (timing only)",
-        purpose: "One big loop to a chord through a minor progression, each shape starting as close as it can to the last, so most links are a fret or two.",
-        howTo: [
-          "Eighth-note triplets, one loop a bar. Watch the first note of each bar: it hardly moves, even though the chord does.",
-          "Where a top note is too wide to hammer, the tab slides to it. A slide is fine; the sound is what counts.",
-        ],
-        coach: "Timing only. This is the big one: keep it where every note is separate.",
-        vary: {
-          values: { progression: ["i-VI-III-VII", "i-VII-VI-VII"], key: ["A", "E"] },
-          pooled: ["progression", "key"],
-          label: (p) => `${p.key} minor, ${p.progression}`,
-          build: (p) => {
-            const chart = moveChart(p.progression === "i-VI-III-VII" ? "Am | F | C | G" : "Am | G | F | G", SWEEP_SHIFT[p.key]);
-            const chords = chart.split("|").map((c) => c.trim());
-            const tab = sweepChain({ chords, strings: [5, 4, 3, 2, 1], near: p.key === "A" ? 12 : 7, doubleLow: true, rhythm: "/8t" });
-            return { tab, position: handAt(tab), shifts: true, chords: chart };
-          },
-        },
-        tab: sweepChain({ chords: ["Am", "F", "C", "G"], strings: [5, 4, 3, 2, 1], near: 12, doubleLow: true, rhythm: "/8t" }),
-        chain: { maxJointFrets: 6 },
-        position: 12,
-        shifts: true,
-        chords: "Am | F | C | G",
-        harmony: { chordTones: true },
-        rungs: ladder(50, 110, 5),
-        passAt: 85,
-        minutes: 7,
       }),
     ],
   },
@@ -1545,22 +1526,22 @@ const ADVANCED: StepSpec[] = [
     exercises: [
       {
         id: "tap-triplets",
-        title: "Tap 12, pull to 5, hammer 8",
-        purpose: "The tapping cell: E tapped at fret 12, pull off to the A at 5, hammer the C at 8. Eighth-note triplets, one tap to every click.",
+        title: "Tap, pull, hammer: A minor in triplets",
+        purpose: "The tapping cell on A minor's notes: tap the high note, pull off to the low fretted note, hammer the middle one. On the top string: E tapped at 12, A at 5, C at 8. One tap to every click.",
         howTo: [
-          "Eighth-note triplets, three to the click. The fretting hand holds fret 5 with the first finger and hammers 8 with the little finger. The picking hand taps 12 on every click.",
-          "Mute the other strings with the side of the fretting hand's first finger.",
+          "Eighth-note triplets, three to the click. The picking hand taps on every click; the fretting hand holds the low note with the first finger and hammers the middle note with the ring or little finger (top string 12-5-8, B string 17-10-13, G string 14-5-9).",
+          "Mute: the fretting hand's first finger lies lightly across the higher strings, and the picking hand's palm rests on the low strings while it taps.",
         ],
         coach: "The taps carry the timing. Pull-offs and hammers I can't hear cost nothing.",
         vary: {
-          values: { stringSet: ["top E: 12-5-8", "B: 13-5-8", "G: 14-5-9"] },
+          values: { stringSet: ["top E: 12-5-8", "B: 17-10-13", "G: 14-5-9"] },
           pooled: ["stringSet"],
           label: (p) => p.stringSet,
           build: (p) => {
             const [name, frets] = p.stringSet.split(": ");
             const string = { "top E": 1, B: 2, G: 3 }[name] ?? 1;
             const [t, a, b] = frets.split("-").map(Number);
-            const chord = name === "B" ? "C" : "Am";
+            const chord = "Am";
             return {
               tab: `/8t ${repeat(`${string}:${t}t ${string}:${a}p ${string}:${b}h`, 4)}`,
               position: a,
@@ -1575,7 +1556,7 @@ const ADVANCED: StepSpec[] = [
         passAt: 110,
         grade: "timing",
         pass: [even(0.8), heard(0.9), extras(3)],
-        selfCheck: ["Was the pulled-off A as loud as the tapped E?"],
+        selfCheck: ["Was the pulled-off note as loud as the tapped one?"],
         minutes: 5,
       },
       {
@@ -1628,14 +1609,16 @@ const ADVANCED: StepSpec[] = [
         rungs: ladder(50, 90, 5),
         passAt: 75,
         grade: "stamina",
+        // Twenty bars at 75 is just over the minute; the profile's sixteen is 51 seconds.
+        pass: [even(0.8, 20), heard(0.9, 20), { metric: "evennessHold", min: 0.75, overBars: 4 }],
         minutes: 4,
       },
       {
         id: "the-run",
         title: "The eight-bar run over the band",
-        purpose: "Eight bars of sixteenths over Am, F, C, G twice: the outside lick, a picked arpeggio, a C line, a scale run home, then the Gilbert four-note loop, an F line, the six-note lick and a run back to A.",
+        purpose: "Eight bars over Am, F, C, G twice, using the whole Path: the outside lick, a picked arpeggio, a C line and a scale run home in sixteenths, then the Gilbert four-note loop, the tap figure over F, the six-note lick as pull-offs in sextuplets, and a run back to A.",
         howTo: [
-          "Sixteenths throughout, one idea a bar, and every bar lands on a tone of its chord on beat 1. Play it dry first and hear that happen.",
+          "Sixteenths, except bar 6 (eighth-note triplets: tap 13, pull to 5, hammer 8, the F chord) and bar 7 (sextuplets: pick the top string's 8 and pull to 7 and 5, pick the B string's 8 and pull to 6 and 5). One idea a bar, and every bar lands on a tone of its chord on beat 1. Play it dry first and hear that happen.",
           "Listen to the snare, not to your own fingers. If you get lost, catch the next bar line and carry on.",
           "Use direct input or headphones for a graded take: the band reaching a microphone has not been tested.",
         ],
@@ -1646,7 +1629,7 @@ const ADVANCED: StepSpec[] = [
         chords: "Am | F | C | G | Am | F | C | G",
         jam: { groove: "rock8", key: "A minor" },
         harmony: { scaleOverChords: ["A", "naturalMinor"] },
-        rungs: ladder(60, 110, 5),
+        rungs: ladder(70, 110, 5),
         passAt: 100,
         grade: "timingNotes",
         pass: FINALE_NOTES,
@@ -1669,10 +1652,10 @@ function petrucci(fret: number): string {
 
 /** The spider, a string pair to each beat, crawling across and back. */
 function spider(fret: number): string {
-  const pair = (low: number, high: number) => `${low}:${fret} ${high}:${fret + 2} ${low}:${fret + 1} ${high}:${fret + 3}`;
-  const bar1 = [pair(6, 5), pair(5, 4), pair(4, 3), pair(3, 2)].join(" ");
-  const bar2 = [pair(2, 1), pair(3, 2), pair(4, 3), pair(5, 4)].join(" ");
-  return `/16 ${bar1} | ${bar2}`;
+  const pair = (f: number, low: number, high: number) => `${low}:${f} ${high}:${f + 2} ${low}:${f + 1} ${high}:${f + 3}`;
+  const up = (f: number) => [pair(f, 6, 5), pair(f, 5, 4), pair(f, 4, 3), pair(f, 3, 2)].join(" ");
+  const back = (f: number) => [pair(f, 2, 1), pair(f, 3, 2), pair(f, 4, 3), pair(f, 5, 4)].join(" ");
+  return `/16 ${up(fret)} | ${back(fret + 1)} | ${up(fret + 2)} | ${back(fret + 3)}`;
 }
 
 /** 1-3-2-4 up six strings, then up a fret and 4-2-3-1 down. Three bars. */
@@ -1708,33 +1691,48 @@ function sixesTab(string: number, fret: number): string {
 
 /** Where the hand starts for each descending-fours set: over its first, highest note. */
 const FOURS_DOWN_AT: Readonly<Record<string, number>> = {
-  "top three, from C": 7,
-  "middle three, from G": 6,
-  "low middle, from E": 7,
+  "top three, down from D": 7,
+  "middle three, down from A": 6,
+  "low middle, down from F": 7,
 };
 
 /** Descending fours on three strings, then a half note two scale steps below. */
 function foursDownTab(set: string): string {
   const starts: Record<string, { string: number; fret: number; land: string }> = {
-    "top three, from C": { string: 3, fret: 5, land: "4:7" },
-    "middle three, from G": { string: 4, fret: 5, land: "5:7" },
-    "low middle, from E": { string: 5, fret: 7, land: "6:8" },
+    "top three, down from D": { string: 3, fret: 5, land: "4:7" },
+    "middle three, down from A": { string: 4, fret: 5, land: "5:7" },
+    "low middle, down from F": { string: 5, fret: 7, land: "6:8" },
   };
   const { string, fret, land } = starts[set];
   return `/16 ${threeNps({ root: "A", scale: "naturalMinor", string, fret, strings: 3, sequence: "foursDown" })} /2 ${land}`;
 }
 
-/** Bursts on other strings and further up the neck. */
-function burstsOn(tab: string) {
+/** Where Step 1's semitone-tone figure (E-F-G or B-C-D) sits on each string. */
+function figureAt(string: number | string): number {
+  return Number(string) <= 2 ? 12 : 9;
+}
+
+type Figure = (a: string, b: string, c: string) => string;
+
+/** A burst on the figure: `a`, `b` a fret up, `c` two frets above that. */
+function burstTab(string: number, figure: Figure): string {
+  const f = figureAt(string);
+  return figure(`${string}:${f}`, `${string}:${f + 1}`, `${string}:${f + 3}`);
+}
+
+/** One, two, three bursts landing on the figure's first note, then a full bar. */
+function expanding(a: string, b: string, c: string): string {
+  const cell = `${a} ${b} ${c} ${b}`;
+  return `/16 ${cell} /4 ${a} r r | /16 ${repeat(cell, 2)} /4 ${a} r | /16 ${repeat(cell, 3)} /4 ${a} | /16 ${repeat(cell, 4)}`;
+}
+
+/** Bursts on the four strings where the figure stays in A minor. */
+function burstsOn(figure: Figure) {
   return {
-    values: { stringSet: ["5", "4", "3", "6"], position: ["fret 5", "fret 7", "fret 9", "fret 12"] },
+    values: { stringSet: ["1", "2", "3", "4"] },
     pooled: ["stringSet"] as const,
-    notPooled: { position: "The frets get wider toward the nut, so a low position is harder than a high one." },
-    label: (p: VariantParams) => `String ${p.stringSet}, ${p.position}`,
-    build: (p: VariantParams) => {
-      const fret = Number(p.position.replace("fret ", ""));
-      return { tab: shiftFrets(tab.replace(/\b5:/g, `${p.stringSet}:`), fret - 5), position: fret };
-    },
+    label: (p: VariantParams) => `String ${p.stringSet}, fret ${figureAt(p.stringSet)}`,
+    build: (p: VariantParams) => ({ tab: burstTab(Number(p.stringSet), figure), position: figureAt(p.stringSet) }),
   };
 }
 

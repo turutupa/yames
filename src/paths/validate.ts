@@ -434,7 +434,9 @@ function checkPicks(ex: Exercise, report: Report) {
     for (const { a, b, seam } of pairs) {
       if (seam || a.string === b.string || !b.pick) continue;
       const wanted = b.string < a.string ? "d" : "u";
-      if (b.pick !== wanted) {
+      // Economy may also alternate at a change; it may never repeat a stroke against the way it travels.
+      const alternates = ex.pickPlan === "economy" && a.pick !== undefined && b.pick !== a.pick;
+      if (b.pick !== wanted && !alternates) {
         report("pick.sweep", `${ex.id} (tick ${b.tick})`, `crossing from string ${a.string} to ${b.string} wants a ${wanted === "d" ? "down" : "up"}stroke`);
       }
     }
