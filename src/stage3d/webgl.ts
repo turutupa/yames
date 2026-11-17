@@ -17,6 +17,10 @@ declare global {
  * WebGL2, on a real GPU. A software renderer is refused on purpose: measured on
  * a running Take it costs about nine CPU cores (against a fifth of one on a GPU),
  * and the click shares that CPU. Those machines get the SVG neck instead.
+ *
+ * The name is not always there to read (WebKitGTK reports "Apple GPU" on every
+ * Linux machine), so this is the first of two checks: the controller also
+ * times a few frames once the engine has compiled (`speed.ts`).
  */
 export function webgl2Available(): boolean {
   if (cached !== null) return cached;

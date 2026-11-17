@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Anima los elementos al cambiar de vista",
       "animationStyle": "Estilo de animación",
       "animationStyleHint": "Efecto usado al cambiar de vista",
+      "neck3d": "Diapasón 3D",
+      "neck3dHint": "Auto dibuja el mástil en 3D si la gráfica de tu ordenador puede; Desactivado dibuja siempre el plano",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Desactivado"
+      },
+      "neck3dSlow": "Este ordenador dibujaba el mástil 3D demasiado despacio, así que Yames muestra el plano.",
+      "neck3dRetry": "Probar 3D otra vez",
       "transitions": {
         "off": "Ninguna",
         "subtle": "Sutil",

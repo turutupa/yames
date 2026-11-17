@@ -11,6 +11,7 @@ import type { NeckKind, NeckNote, NeckStage, NeckView } from "./api";
 import type { EngineModule, SlotRect, StageEngine } from "./engineTypes";
 import { Adaptive } from "./quality";
 import { FrameScheduler, type SchedulerDeps } from "./scheduler";
+import { PROBE_FRAMES, judgeProbe, type ProbeVerdict } from "./speed";
 
 export type StageMode = "idle" | "loading" | "3d" | "fallback";
 
@@ -44,6 +45,14 @@ export type ControllerDeps = {
   scheduler?: SchedulerDeps;
   reduced?: boolean;
   forcedTier?: number | null;
+  /** The player's prefs (`prefs.ts`) are known. Awaited before the engine is built. */
+  ready?: () => Promise<void>;
+  /** The flat neck is wanted (Settings said Off, or an earlier probe found this machine too slow). */
+  flat?: () => boolean;
+  /** Time a few frames after the engine compiles and refuse a renderer too slow for a GPU (`speed.ts`). */
+  probe?: boolean;
+  /** The probe found the frames too slow: remember it. */
+  onSlow?: (v: ProbeVerdict) => void;
 };
 
 /** The last controller built, for the `?shot=` scenes and their tests. */
@@ -66,6 +75,10 @@ export class StageController {
   private rectCheck: number | null = null;
   private takeRunning = false;
   private pluckSeq = 0;
+  /** The fallback is drawing because of the prefs (or the probe), so a change of prefs can undo it. */
+  private flatFallback = false;
+  /** The last probe's verdict, for the shot scenes and the e2e. */
+  lastProbe: ProbeVerdict | null = null;
   readonly scheduler: FrameScheduler;
   private readonly adaptive: Adaptive;
   /** Errors from loading or running the engine, newest last (for the shot scenes). */
@@ -241,8 +254,44 @@ export class StageController {
     this.scheduler.setPaused(off);
   }
 
+  /**
+   * The prefs changed (Settings, or the probe's verdict): go flat, or leave a
+   * flat neck the prefs put there and try 3D again.
+   */
+  prefsChanged(): void {
+    const flat = !!this.deps.flat?.();
+    if (flat && (this.snap.mode === "3d" || this.snap.mode === "loading")) {
+      this.gen += 1; // an engine still loading is thrown away when it arrives
+      this.engine?.dispose();
+      this.engine = null;
+      this.replaceCanvas();
+      this.flatFallback = true;
+      this.set({ mode: "fallback" });
+    } else if (!flat && this.snap.mode === "fallback" && this.flatFallback) {
+      this.flatFallback = false;
+      this.set({ mode: "idle" });
+      if (this.snap.view.kind !== "hidden") this.ensureBackend();
+    }
+  }
+
+  /** A canvas an engine was built on cannot get a second context of another kind: give the next engine a fresh one. */
+  private replaceCanvas() {
+    const old = this.canvas;
+    if (!old || !old.parentElement) return;
+    const canvas = document.createElement("canvas");
+    canvas.className = old.className;
+    canvas.setAttribute("aria-hidden", "true");
+    old.replaceWith(canvas);
+    this.canvas = canvas;
+  }
+
   private ensureBackend() {
     if (this.snap.mode !== "idle" || !this.canvas || !this.attached) return;
+    if (this.deps.flat?.()) {
+      this.flatFallback = true;
+      this.set({ mode: "fallback" });
+      return;
+    }
     if (!this.deps.webgl2()) {
       this.set({ mode: "fallback" });
       return;
@@ -251,10 +300,15 @@ export class StageController {
     const canvas = this.canvas;
     const gen = this.gen;
     const stale = () => gen !== this.gen;
-    this.deps
-      .loadEngine()
-      .then((m) => {
+    const ready = this.deps.ready ? this.deps.ready().catch(() => {}) : Promise.resolve();
+    Promise.all([this.deps.loadEngine(), ready])
+      .then(([m]) => {
         if (stale()) return null;
+        if (this.deps.flat?.()) {
+          this.flatFallback = true;
+          this.set({ mode: "fallback" });
+          return null;
+        }
         return m.createEngine({
           canvas,
           reduced: !!this.deps.reduced,
@@ -269,18 +323,39 @@ export class StageController {
           engine.dispose();
           return;
         }
-        this.engine = engine;
         engine.setNotes(this.snap.notes.slice(), 0);
         if (this.snap.view.kind !== "hidden") {
           this.lastRect = this.frameRect();
           engine.setView(this.snap.view, this.lastRect, true);
         }
+        if (this.deps.probe && !this.passesProbe(engine, canvas)) {
+          engine.dispose();
+          this.replaceCanvas();
+          this.flatFallback = true;
+          this.set({ mode: "fallback" });
+          if (this.lastProbe) this.deps.onSlow?.(this.lastProbe);
+          return;
+        }
+        this.engine = engine;
         this.set({ mode: "3d" });
         this.scheduler.invalidate();
       })
       .catch((e: unknown) => {
         if (!stale()) this.toFallback(e);
       });
+  }
+
+  /** The frame-time guard (`speed.ts`): false when this renderer is too slow to be a GPU. */
+  private passesProbe(engine: StageEngine, canvas: HTMLCanvasElement): boolean {
+    let times: number[];
+    try {
+      times = engine.probe(PROBE_FRAMES);
+    } catch {
+      return true; // a probe that cannot run says nothing; the adaptive step-down still watches
+    }
+    const v = judgeProbe(times, Math.max(1, canvas.width * canvas.height));
+    this.lastProbe = v;
+    return !v.slow;
   }
 
   private toFallback(e: unknown) {

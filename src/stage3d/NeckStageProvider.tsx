@@ -12,12 +12,13 @@
  * overview strip under a zoom, and the whole SVG neck when WebGL2 is not
  * there.
  */
-import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { NeckStageContext } from "./context";
 import { StageController, stripHeight } from "./controller";
 import { FallbackNeck } from "./FallbackNeck";
 import { OverviewStrip } from "./OverviewStrip";
+import { setForceFlat, stagePrefsReady, subscribeStagePrefs, wantsFlat } from "./prefs";
 import { webgl2Available } from "./webgl";
 import "./stage.css";
 
@@ -38,6 +39,13 @@ function reducedMotion(): boolean {
   }
 }
 
+/** The prefs, or the defaults if the store has not answered in this long. */
+const PREFS_WAIT_MS = 1500;
+
+function prefsReady(): Promise<void> {
+  return Promise.race([stagePrefsReady(), new Promise<void>((r) => setTimeout(r, PREFS_WAIT_MS))]);
+}
+
 /** For tests: build the controller with other dependencies. */
 export function createStageController(): StageController {
   return new StageController({
@@ -45,6 +53,15 @@ export function createStageController(): StageController {
     webgl2: () => new URLSearchParams(window.location.search).get("nogl") !== "1" && webgl2Available(),
     reduced: reducedMotion(),
     forcedTier: forcedTier(),
+    ready: prefsReady,
+    flat: () => wantsFlat(),
+    // The `?shot=` harness and the layout suite run on SwiftShader on purpose; `?probe=1` puts the
+    // guard back there, which is a WebKitGTK machine exactly: a renderer whose name says nothing.
+    probe: !window.__YAMES_ALLOW_SOFTWARE_GL__ || new URLSearchParams(window.location.search).get("probe") === "1",
+    onSlow: (v) => {
+      console.warn(`[stage] ${v.medianMs.toFixed(0)} ms a frame (a GPU takes under ${v.budgetMs.toFixed(0)}): the flat neck from now on`);
+      setForceFlat(true);
+    },
   });
 }
 
@@ -64,6 +81,7 @@ export function NeckStageHost({ children, controllerFactory }: { children: React
     controller.attach(hostRef.current!);
     return () => controller.detach();
   }, [controller]);
+  useEffect(() => subscribeStagePrefs(() => controller.prefsChanged()), [controller]);
 
   const visible = snap.view.kind !== "hidden";
   const fallback = visible && snap.mode === "fallback";

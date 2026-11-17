@@ -6,11 +6,12 @@ import { CALM_FPS, HIDE_DELAY_MS, LOST_GRACE_MS, StageController, TAKE_FPS, stri
 import type { EngineModule, EngineOptions, StageEngine } from "./engineTypes";
 import { fallbackRange, pitchOf } from "./FallbackNeck";
 import { NeckStageHost, NeckStageProvider } from "./NeckStageProvider";
+import { getStagePrefs, resetStagePrefsForTest, setForceFlat, setNeck3d, subscribeStagePrefs, wantsFlat } from "./prefs";
 import { webgl2Available } from "./webgl";
 
 type FakeEngine = StageEngine & { calls: string[]; opts: EngineOptions; busyFrames: number; disposed: boolean };
 
-function fakeEngineModule(): { mod: EngineModule; engines: FakeEngine[] } {
+function fakeEngineModule(probeTimes: number[] = [6, 1, 1, 1, 1]): { mod: EngineModule; engines: FakeEngine[] } {
   const engines: FakeEngine[] = [];
   const mod: EngineModule = {
     createEngine: async (opts) => {
@@ -31,6 +32,10 @@ function fakeEngineModule(): { mod: EngineModule; engines: FakeEngine[] } {
           return e.busyFrames-- > 0;
         },
         lowerQuality: () => false,
+        probe: (n) => {
+          e.calls.push(`probe:${n}`);
+          return probeTimes.slice();
+        },
         dispose: () => {
           e.disposed = true;
         },
@@ -337,5 +342,100 @@ describe("the stage with an engine", () => {
     expect(stripHeight(120)).toBe(0);
     expect(stripHeight(200)).toBe(42);
     expect(stripHeight(400)).toBe(54);
+  });
+});
+
+describe("the frame-time guard and the 3D fretboard setting", () => {
+  afterEach(() => resetStagePrefsForTest());
+
+  /** A controller wired to the real prefs, the way the provider wires it. */
+  function wired(probeTimes: number[]) {
+    const fake = fakeEngineModule(probeTimes);
+    const slow: number[] = [];
+    const c = new StageController({
+      loadEngine: async () => fake.mod,
+      webgl2: () => true,
+      ready: async () => {},
+      flat: () => wantsFlat(),
+      probe: true,
+      onSlow: (v) => {
+        slow.push(v.medianMs);
+        setForceFlat(true);
+      },
+    });
+    const host = document.createElement("div");
+    c.attach(host);
+    const unsub = subscribeStagePrefs(() => c.prefsChanged());
+    return { c, fake, slow, host, done: () => (unsub(), c.detach()) };
+  }
+
+  it("keeps the 3D neck when the probe's frames are GPU-fast", async () => {
+    const w = wired([40, 2, 2, 3, 2]);
+    w.c.setView({ kind: "whole" }, null);
+    await flush();
+    expect(w.c.mode).toBe("3d");
+    expect(w.fake.engines[0].calls).toContain("probe:5");
+    expect(w.c.lastProbe!.slow).toBe(false);
+    expect(getStagePrefs().forceFlat).toBe(false);
+    w.done();
+  });
+
+  it("drops to the SVG neck for good when the frames are too slow, and Settings can try again", async () => {
+    const w = wired([2500, 60, 70, 55, 65]);
+    w.c.setView({ kind: "whole" }, null);
+    await flush();
+    expect(w.c.mode).toBe("fallback");
+    expect(w.fake.engines[0].disposed).toBe(true);
+    expect(w.slow).toEqual([62.5]);
+    expect(getStagePrefs().forceFlat).toBe(true);
+    // A fresh canvas for whatever comes next: the old one's context is gone.
+    expect(w.host.querySelectorAll("canvas").length).toBe(1);
+
+    // "Try the 3D neck again": the probe runs again on a new engine.
+    setForceFlat(false);
+    await flush();
+    expect(w.fake.engines.length).toBe(2);
+    expect(w.c.mode).toBe("fallback"); // still too slow, and remembered again
+    expect(getStagePrefs().forceFlat).toBe(true);
+    w.done();
+  });
+
+  it("Off draws the SVG neck without loading three.js, and Auto brings the 3D neck back", async () => {
+    resetStagePrefsForTest({ neck3d: "off" });
+    const w = wired([5, 1, 1, 1, 1]);
+    w.c.setView({ kind: "zoom", from: 3, to: 7 }, null);
+    await flush();
+    expect(w.c.mode).toBe("fallback");
+    expect(w.fake.engines.length).toBe(0);
+    setNeck3d("auto");
+    await flush();
+    expect(w.c.mode).toBe("3d");
+    setNeck3d("off");
+    await flush();
+    expect(w.c.mode).toBe("fallback");
+    expect(w.fake.engines[0].disposed).toBe(true);
+    w.done();
+  });
+
+  it("an Off that arrives while the engine loads wins", async () => {
+    const w = wired([5, 1, 1, 1, 1]);
+    w.c.setView({ kind: "whole" }, null);
+    expect(w.c.mode).toBe("loading");
+    setNeck3d("off");
+    await flush();
+    expect(w.c.mode).toBe("fallback");
+    expect(w.fake.engines.every((e) => e.disposed)).toBe(true);
+    w.done();
+  });
+
+  it("does not probe when the caller did not ask (the shots harness on SwiftShader)", async () => {
+    const fake = fakeEngineModule([2500, 400, 400, 400, 400]);
+    const c = new StageController({ loadEngine: async () => fake.mod, webgl2: () => true });
+    c.attach(document.createElement("div"));
+    c.setView({ kind: "whole" }, null);
+    await flush();
+    expect(c.mode).toBe("3d");
+    expect(fake.engines[0].calls.some((x) => x.startsWith("probe"))).toBe(false);
+    c.detach();
   });
 });

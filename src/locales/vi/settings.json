@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Chạy hiệu ứng khi chuyển trang",
       "animationStyle": "Kiểu hiệu ứng",
       "animationStyleHint": "Hiệu ứng dùng khi chuyển trang",
+      "neck3d": "Cần đàn 3D",
+      "neck3dHint": "Tự động vẽ cần đàn 3D nếu card đồ họa đủ sức; Tắt luôn vẽ cần đàn phẳng",
+      "neck3dModes": {
+        "auto": "Tự động",
+        "off": "Tắt"
+      },
+      "neck3dSlow": "Máy tính này vẽ cần đàn 3D quá chậm, nên Yames hiển thị cần đàn phẳng.",
+      "neck3dRetry": "Thử lại 3D",
       "transitions": {
         "off": "Tắt",
         "subtle": "Tinh tế",

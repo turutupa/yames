@@ -16,6 +16,14 @@
       "viewAnimationsHint": "切換檢視時播放動畫",
       "animationStyle": "動畫樣式",
       "animationStyleHint": "切換檢視時使用的效果",
+      "neck3d": "3D 指板",
+      "neck3dHint": "自動：顯示卡能勝任時顯示 3D 琴頸；關閉：一律顯示平面琴頸",
+      "neck3dModes": {
+        "auto": "自動",
+        "off": "關閉"
+      },
+      "neck3dSlow": "這台電腦繪製 3D 琴頸太慢，因此 Yames 顯示平面琴頸。",
+      "neck3dRetry": "重新嘗試 3D",
       "transitions": {
         "off": "關閉",
         "subtle": "細膩",

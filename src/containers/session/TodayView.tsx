@@ -77,8 +77,11 @@ export function TodayView({
   session,
   onOpenLastTool,
   onOpenTools,
+  listening = false,
 }: {
   session: SessionRun;
+  /** The input is on and listening: grading needs nothing more, so Today does not ask for it. */
+  listening?: boolean;
   /** "Open on my last tool": the setting, and going there now. */
   onOpenLastTool: () => void;
   onOpenTools: () => void;
@@ -213,7 +216,7 @@ export function TodayView({
           )}
           {plan.mood === "first" && (
             <div className="session-footnote">
-              <span>{t("session.today.needsInput")}</span>
+              {!listening && <span>{t("session.today.needsInput")}</span>}
               {myPaths.some((p) => p.id === FIRST_PATH_ID) && (
                 <>
                   <span>{t("session.today.toolsOffer")}</span>

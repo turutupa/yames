@@ -864,11 +864,15 @@ fn a_live_verdict_lands_within_a_beat_of_the_note_it_is_about() {
     // wait is a fraction of a sixteenth plus one sweep — comfortably inside
     // the beat the note was played in, which is what "live" has to mean for
     // a page a player is reading.
+    //
+    // On a rig whose lag is cached, that holds from the first note. Without
+    // one, the first notes wait until the lag has been read off them
+    // (`LIVE_HOLD_ONSETS`); that is `the_first_notes_wait_for_the_lag_rather_than_read_as_missed`.
     let quarter = 500.0;
     let schedule = sixteenths(1, false);
     let beats = steady(120.0, 6);
     let played = perfect_play(&schedule, &beats);
-    let mut run = ScheduleRun::new(schedule);
+    let mut run = ScheduleRun::new(schedule).with_calibration_seed(Some(0.0));
 
     let mut judged_at: Vec<Option<f64>> = vec![None; 16];
     let mut out: Vec<LiveOnset> = Vec::new();
@@ -902,6 +906,126 @@ fn a_live_verdict_lands_within_a_beat_of_the_note_it_is_about() {
              {lag} ms later, which is past the beat it was played in"
         );
     }
+}
+
+/// `played`, every note `lag_ms` late: a rig's input path, not the player.
+fn late_by(played: &[PlayedOnset], lag_ms: f64) -> Vec<PlayedOnset> {
+    played
+        .iter()
+        .map(|p| PlayedOnset {
+            time_ms: p.time_ms + lag_ms,
+            ..*p
+        })
+        .collect()
+}
+
+#[test]
+fn the_first_notes_wait_for_the_lag_rather_than_read_as_missed() {
+    // The e2e's finding: a perfect Take on a rig with no cached offset showed
+    // its first notes as misses on the running screen, because the sweep took
+    // the lag to be nothing until eight notes had been heard, and 90 ms is
+    // past a sixteenth's 50 ms window at 120. Every one of them is a hit, live
+    // as at the end, and the hold costs about a beat at the start only.
+    let schedule = sixteenths(2, false);
+    let beats = steady(120.0, 10);
+    let played = late_by(&perfect_play(&schedule, &beats), 90.0);
+    let mut run = ScheduleRun::new(schedule.clone());
+    let mut judged_at: Vec<Option<f64>> = vec![None; 32];
+    let mut out: Vec<LiveOnset> = Vec::new();
+    let (mut next_beat, mut next_note, mut now) = (0usize, 0usize, 0.0f64);
+    while now <= 6000.0 {
+        while next_beat < 10 && next_beat as f64 * 500.0 <= now {
+            run.note_quarter(next_beat == 0, next_beat as f64 * 500.0);
+            next_beat += 1;
+        }
+        while next_note < played.len() && played[next_note].time_ms <= now {
+            run.note_onset(played[next_note]);
+            next_note += 1;
+        }
+        let before = out.len();
+        run.settle(now, &mut out);
+        for v in &out[before..] {
+            judged_at[v.id as usize] = Some(now);
+        }
+        now += LIVE_SWEEP_MS;
+    }
+
+    assert_eq!(out.len(), 32, "one verdict per onset: {out:?}");
+    let wrong: Vec<(u32, OnsetState)> = out
+        .iter()
+        .filter(|v| v.state != OnsetState::Hit)
+        .map(|v| (v.id, v.state))
+        .collect();
+    assert!(wrong.is_empty(), "a perfect Take read live as {wrong:?}");
+    assert!(
+        out.iter().all(|v| v.deviation_ms.is_some_and(|d| d.abs() < 3.0)),
+        "the lag is the rig's and is taken out: {:?}",
+        out.iter().map(|v| v.deviation_ms).collect::<Vec<_>>()
+    );
+    // The hold is the first notes only: everything from the ninth on is
+    // judged inside the beat it was played in.
+    for (i, at) in judged_at.iter().enumerate() {
+        let at = at.expect("judged");
+        let played_at = i as f64 * 125.0 + 90.0;
+        let limit = if i < MIN_NOTES_FOR_LAG { 8.0 * 125.0 + 500.0 } else { played_at + 500.0 };
+        assert!(at <= limit, "onset {i}, played at {played_at} ms, judged at {at} ms");
+    }
+
+    // And the report is what it was: the hold is the live sweep's alone.
+    let mut quiet = ScheduleRun::new(schedule);
+    for i in 0..10 {
+        quiet.note_quarter(i == 0, i as f64 * 500.0);
+    }
+    for p in &played {
+        quiet.note_onset(*p);
+    }
+    assert_eq!(run.report(&weights()), quiet.report(&weights()));
+}
+
+#[test]
+fn a_silent_take_still_reads_as_missed_live_once_the_hold_runs_out() {
+    // Nothing is ever heard, so the lag is never read; the hold must not
+    // turn into silence on the running screen for the whole Take.
+    let schedule = sixteenths(2, false);
+    let mut run = ScheduleRun::new(schedule);
+    let mut first_at: Option<f64> = None;
+    let mut out: Vec<LiveOnset> = Vec::new();
+    let (mut next_beat, mut now) = (0usize, 0.0f64);
+    while now <= 6000.0 {
+        while next_beat < 10 && next_beat as f64 * 500.0 <= now {
+            run.note_quarter(next_beat == 0, next_beat as f64 * 500.0);
+            next_beat += 1;
+        }
+        run.settle(now, &mut out);
+        if first_at.is_none() && !out.is_empty() {
+            first_at = Some(now);
+        }
+        now += LIVE_SWEEP_MS;
+    }
+    assert_eq!(out.len(), 32);
+    assert!(out.iter().all(|v| v.state == OnsetState::Miss));
+    let first_at = first_at.expect("something was said");
+    // Held for the first bar of sixteenths, then said: within two beats of
+    // the sixteenth that ran the hold out.
+    assert!(first_at <= 15.0 * 125.0 + 1000.0, "the first miss came at {first_at} ms");
+    assert!(first_at >= 15.0 * 125.0, "the first miss came at {first_at} ms, before the hold ran out");
+}
+
+#[test]
+fn a_short_part_played_out_is_judged_live_even_without_the_lag() {
+    // Four notes are too few to read a lag from and fewer than the hold:
+    // once the part is over there is nothing left to wait for.
+    let schedule = ScoreSchedule {
+        onsets: vec![onset(0, 0.0), onset(1, 1.0), onset(2, 2.0), onset(3, 3.0)],
+        length_beats: 4.0,
+        loops: false,
+    };
+    let beats = steady(120.0, 6);
+    let played = perfect_play(&schedule, &beats);
+    let mut run = ScheduleRun::new(schedule);
+    let live = replay(&mut run, 500.0, 6, &played, 4000.0);
+    assert_eq!(live.len(), 4, "{live:?}");
+    assert!(live.iter().all(|v| v.state == OnsetState::Hit));
 }
 
 #[test]
@@ -1073,4 +1197,33 @@ fn a_schedule_with_nothing_in_it_settles_nothing() {
         now += LIVE_SWEEP_MS;
     }
     assert!(out.is_empty(), "nothing was due, so nothing can be judged");
+}
+
+#[test]
+fn a_part_played_to_its_end_owes_every_note_even_in_its_last_quarter() {
+    // The e2e's silent Take: 64 notes written, "of 63 notes heard". Eighths
+    // over eight bars end on the "and" of beat 31, and a non-looping Take
+    // stops on its last sample, so the beat log ends at beat 31 with nothing
+    // after it: that last eighth was reached, and is owed.
+    let onsets: Vec<ExpectedOnset> = (0..64).map(|i| onset(i, i as f64 * 0.5)).collect();
+    let schedule = ScoreSchedule {
+        onsets,
+        length_beats: 32.0,
+        loops: false,
+    };
+    let mut run = ScheduleRun::new(schedule.clone()).with_lag_correction(true);
+    for i in 0..32 {
+        run.note_quarter(i % 4 == 0, i as f64 * 500.0);
+    }
+    let g = run.report(&weights()).expect("a report").grade;
+    assert_eq!((g.due, g.heard, g.missed, g.not_reached), (64, 0, 64, 0), "{g:?}");
+
+    // Stopped early, the notes past the stop are still not reached.
+    let mut stopped = ScheduleRun::new(schedule).with_lag_correction(true);
+    for i in 0..20 {
+        stopped.note_quarter(i % 4 == 0, i as f64 * 500.0);
+    }
+    let g = stopped.report(&weights()).expect("a report").grade;
+    assert_eq!(g.due, 39, "beats 0 to 19 logged: eighths up to 19.0 are due; {g:?}");
+    assert_eq!(g.not_reached, 25);
 }

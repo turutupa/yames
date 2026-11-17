@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Anima gli elementi quando cambi schermata",
       "animationStyle": "Stile di animazione",
       "animationStyleHint": "Effetto usato quando cambi schermata",
+      "neck3d": "Tastiera 3D",
+      "neck3dHint": "Auto mostra il manico in 3D dove la grafica del computer ce la fa; Off mostra sempre quello piatto",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Off"
+      },
+      "neck3dSlow": "Questo computer disegnava il manico 3D troppo lentamente, quindi Yames mostra quello piatto.",
+      "neck3dRetry": "Riprova il 3D",
       "transitions": {
         "off": "Nessuno",
         "subtle": "Sottile",

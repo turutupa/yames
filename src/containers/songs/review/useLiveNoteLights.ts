@@ -153,7 +153,12 @@ export function useLiveNoteLights(input: LiveLightsInput): LiveLights {
       const { schedule, beatInRange } = latest.current;
       if (!schedule) return;
       const mark = markFromFeedback(feedback);
-      if (!mark) return;
+      // Not a miss, though: the beat's matcher has not taken the rig's lag
+      // out, and the per-note verdicts are held at the start of a Take until
+      // the lag is known (`score.rs`, LIVE_HOLD_ONSETS), which is exactly
+      // when this smear is all there is. A late rig would paint the first
+      // beats of a perfect Take red. The note's own verdict says "missed".
+      if (!mark || mark === "missed") return;
       const ids = onsetsInBeat(schedule, beatInRange);
       if (ids.length === 0) return;
       setLights((previous) => {
