@@ -251,6 +251,8 @@
       "selfChecked": "Selbstkontrolle: Das beurteilst du.",
       "practiceOnly": "Nur zum Üben, wird nicht bewertet.",
       "playThis": "Spielen",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Ab {{from}} BPM",
       "playedNoClean": "{{count}} Take. Noch kein sauberes Tempo.",
       "playedNoClean_other": "{{count}} Takes. Noch kein sauberes Tempo.",
       "playedClean": "{{count}} Take. Sauberes Tempo {{bpm}} BPM.",
@@ -305,6 +307,19 @@
       "note": "Eine JSON-Datei mit deinen Takes, sauberen Tempi und den Gründen des Planers. Häng sie an ein Feedback-Issue, wenn du magst; nichts wird gesendet.",
       "done": "Gespeichert unter {{path}}.",
       "failed": "Die Datei konnte nicht gespeichert werden."
+    },
+    "subdivision": {
+      "wholes": "Ganze",
+      "halves": "Halbe",
+      "halfTriplets": "Halbe-Triolen",
+      "quarters": "Viertel",
+      "quarterTriplets": "Viertel-Triolen",
+      "eighths": "Achtel",
+      "eighthTriplets": "Achteltriolen",
+      "sixteenths": "Sechzehntel",
+      "quintuplets": "Quintolen",
+      "sextuplets": "Sextolen",
+      "thirtySeconds": "Zweiunddreißigstel"
     }
   }
 }

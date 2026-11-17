@@ -251,6 +251,8 @@
       "selfChecked": "Self-checked: you judge this one.",
       "practiceOnly": "Practice only, not graded.",
       "playThis": "Play this",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "From {{from}} BPM",
       "playedNoClean": "{{count}} take. No clean tempo yet.",
       "playedNoClean_other": "{{count}} takes. No clean tempo yet.",
       "playedClean": "{{count}} take. Clean tempo {{bpm}} BPM.",
@@ -305,6 +307,19 @@
       "note": "A JSON file with your Takes, clean tempos and the planner's reasons. Attach it to a feedback issue if you like; nothing is sent.",
       "done": "Saved to {{path}}.",
       "failed": "Couldn't save the file."
+    },
+    "subdivision": {
+      "wholes": "Whole notes",
+      "halves": "Half notes",
+      "halfTriplets": "Half-note triplets",
+      "quarters": "Quarter notes",
+      "quarterTriplets": "Quarter-note triplets",
+      "eighths": "8ths",
+      "eighthTriplets": "8th-note triplets",
+      "sixteenths": "16ths",
+      "quintuplets": "Quintuplets",
+      "sextuplets": "Sextuplets",
+      "thirtySeconds": "32nds"
     }
   }
 }

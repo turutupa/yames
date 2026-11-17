@@ -251,6 +251,8 @@
       "selfChecked": "셀프 체크: 직접 판단하세요.",
       "practiceOnly": "연습용, 채점하지 않습니다.",
       "playThis": "이것 연주하기",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "{{from}} BPM부터",
       "playedNoClean": "테이크 {{count}}개. 아직 클린 템포가 없습니다.",
       "playedNoClean_other": "테이크 {{count}}개. 아직 클린 템포가 없습니다.",
       "playedClean": "테이크 {{count}}개. 클린 템포 {{bpm}} BPM.",
@@ -305,6 +307,19 @@
       "note": "테이크, 클린 템포, 플래너의 이유가 담긴 JSON 파일입니다. 원하면 피드백 이슈에 첨부하세요. 아무것도 전송되지 않습니다.",
       "done": "{{path}}에 저장했어요.",
       "failed": "파일을 저장하지 못했어요."
+    },
+    "subdivision": {
+      "wholes": "온음표",
+      "halves": "2분음표",
+      "halfTriplets": "2분음표 셋잇단",
+      "quarters": "4분음표",
+      "quarterTriplets": "4분음표 셋잇단",
+      "eighths": "8분음표",
+      "eighthTriplets": "8분음표 셋잇단",
+      "sixteenths": "16분음표",
+      "quintuplets": "다섯잇단음표",
+      "sextuplets": "여섯잇단음표",
+      "thirtySeconds": "32분음표"
     }
   }
 }

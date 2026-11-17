@@ -261,6 +261,8 @@
       "selfChecked": "Samoocena: tu oceniasz sam.",
       "practiceOnly": "Tylko ćwiczenie, bez oceny.",
       "playThis": "Zagraj to",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Od {{from}} BPM",
       "playedNoClean": "{{count}} podejście. Jeszcze bez czystego tempa.",
       "playedNoClean_few": "{{count}} podejścia. Jeszcze bez czystego tempa.",
       "playedNoClean_many": "{{count}} podejść. Jeszcze bez czystego tempa.",
@@ -319,6 +321,19 @@
       "note": "Plik JSON z twoimi podejściami, czystymi tempami i powodami planisty. Dołącz go do zgłoszenia, jeśli chcesz; nic nie jest wysyłane.",
       "done": "Zapisano w {{path}}.",
       "failed": "Nie udało się zapisać pliku."
+    },
+    "subdivision": {
+      "wholes": "Całe nuty",
+      "halves": "Półnuty",
+      "halfTriplets": "Triole półnutowe",
+      "quarters": "Ćwierćnuty",
+      "quarterTriplets": "Triole ćwierćnutowe",
+      "eighths": "Ósemki",
+      "eighthTriplets": "Triole ósemkowe",
+      "sixteenths": "Szesnastki",
+      "quintuplets": "Kwintole",
+      "sextuplets": "Sekstole",
+      "thirtySeconds": "Trzydziestodwójki"
     }
   }
 }

@@ -251,6 +251,8 @@
       "selfChecked": "Kendin kontrol et: Bunu sen değerlendiriyorsun.",
       "practiceOnly": "Yalnızca pratik, notlanmaz.",
       "playThis": "Bunu çal",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "{{from}} BPM'den",
       "playedNoClean": "{{count}} deneme. Henüz temiz tempo yok.",
       "playedNoClean_other": "{{count}} deneme. Henüz temiz tempo yok.",
       "playedClean": "{{count}} deneme. Temiz tempo {{bpm}} BPM.",
@@ -305,6 +307,19 @@
       "note": "Kayıtların, temiz tempoların ve planlayıcının gerekçelerini içeren bir JSON dosyası. İstersen bir geri bildirime ekle; hiçbir şey gönderilmez.",
       "done": "{{path}} konumuna kaydedildi.",
       "failed": "Dosya kaydedilemedi."
+    },
+    "subdivision": {
+      "wholes": "Birlik notalar",
+      "halves": "İkilik notalar",
+      "halfTriplets": "İkilik triole",
+      "quarters": "Dörtlük notalar",
+      "quarterTriplets": "Dörtlük triole",
+      "eighths": "Sekizlikler",
+      "eighthTriplets": "Sekizlik triole",
+      "sixteenths": "On altılıklar",
+      "quintuplets": "Beşleme",
+      "sextuplets": "Altılama",
+      "thirtySeconds": "Otuz ikilikler"
     }
   }
 }

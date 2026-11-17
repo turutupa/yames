@@ -251,6 +251,8 @@
       "selfChecked": "自行檢查：由你來判斷。",
       "practiceOnly": "僅供練習，不評分。",
       "playThis": "彈這個",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "從 {{from}} BPM 起",
       "playedNoClean": "{{count}} 遍。還沒有乾淨速度。",
       "playedNoClean_other": "{{count}} 遍。還沒有乾淨速度。",
       "playedClean": "{{count}} 遍。乾淨速度 {{bpm}} BPM。",
@@ -305,6 +307,19 @@
       "note": "包含你的練習紀錄、乾淨速度和計畫理由的 JSON 檔案。願意的話可以附在回饋裡；不會傳送任何內容。",
       "done": "已儲存到 {{path}}。",
       "failed": "無法儲存檔案。"
+    },
+    "subdivision": {
+      "wholes": "全音符",
+      "halves": "二分音符",
+      "halfTriplets": "二分音符三連音",
+      "quarters": "四分音符",
+      "quarterTriplets": "四分音符三連音",
+      "eighths": "八分音符",
+      "eighthTriplets": "八分音符三連音",
+      "sixteenths": "十六分音符",
+      "quintuplets": "五連音",
+      "sextuplets": "六連音",
+      "thirtySeconds": "三十二分音符"
     }
   }
 }

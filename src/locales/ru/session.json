@@ -261,6 +261,8 @@
       "selfChecked": "Самопроверка: оцениваете вы сами.",
       "practiceOnly": "Только практика, без оценки.",
       "playThis": "Сыграть это",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "От {{from}} BPM",
       "playedNoClean": "{{count}} дубль. Чистого темпа пока нет.",
       "playedNoClean_few": "{{count}} дубля. Чистого темпа пока нет.",
       "playedNoClean_many": "{{count}} дублей. Чистого темпа пока нет.",
@@ -319,6 +321,19 @@
       "note": "Файл JSON с вашими дублями, чистыми темпами и причинами планировщика. Приложите его к отзыву, если хотите; ничего не отправляется.",
       "done": "Сохранено: {{path}}.",
       "failed": "Не удалось сохранить файл."
+    },
+    "subdivision": {
+      "wholes": "Целые",
+      "halves": "Половинные",
+      "halfTriplets": "Триоли половинными",
+      "quarters": "Четверти",
+      "quarterTriplets": "Триоли четвертями",
+      "eighths": "Восьмые",
+      "eighthTriplets": "Триоли восьмыми",
+      "sixteenths": "Шестнадцатые",
+      "quintuplets": "Квинтоли",
+      "sextuplets": "Секстоли",
+      "thirtySeconds": "Тридцать вторые"
     }
   }
 }

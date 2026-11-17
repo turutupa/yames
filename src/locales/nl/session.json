@@ -251,6 +251,8 @@
       "selfChecked": "Zelf beoordelen: dit oordeel is aan jou.",
       "practiceOnly": "Alleen oefenen, niet beoordeeld.",
       "playThis": "Speel dit",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Vanaf {{from}} BPM",
       "playedNoClean": "{{count}} take. Nog geen schoon tempo.",
       "playedNoClean_other": "{{count}} takes. Nog geen schoon tempo.",
       "playedClean": "{{count}} take. Schoon tempo {{bpm}} BPM.",
@@ -305,6 +307,19 @@
       "note": "Een JSON-bestand met je takes, schone tempo's en de redenen van de planner. Voeg het toe aan een feedbackmelding als je wilt; er wordt niets verstuurd.",
       "done": "Opgeslagen in {{path}}.",
       "failed": "Het bestand kon niet worden opgeslagen."
+    },
+    "subdivision": {
+      "wholes": "Hele noten",
+      "halves": "Halve noten",
+      "halfTriplets": "Halve triolen",
+      "quarters": "Kwartnoten",
+      "quarterTriplets": "Kwarttriolen",
+      "eighths": "Achtsten",
+      "eighthTriplets": "Achtste triolen",
+      "sixteenths": "Zestienden",
+      "quintuplets": "Kwintolen",
+      "sextuplets": "Sextolen",
+      "thirtySeconds": "Tweeëndertigsten"
     }
   }
 }

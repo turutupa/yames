@@ -256,6 +256,8 @@
       "selfChecked": "Auto-évalué : c'est toi qui juges.",
       "practiceOnly": "Pour s'entraîner, non noté.",
       "playThis": "Jouer ça",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "À partir de {{from}} BPM",
       "playedNoClean": "{{count}} prise. Pas encore de tempo propre.",
       "playedNoClean_many": "{{count}} prises. Pas encore de tempo propre.",
       "playedNoClean_other": "{{count}} prises. Pas encore de tempo propre.",
@@ -312,6 +314,19 @@
       "note": "Un fichier JSON avec tes prises, tes tempos propres et les raisons du planificateur. Joins-le à un retour si tu veux ; rien n'est envoyé.",
       "done": "Enregistré dans {{path}}.",
       "failed": "Impossible d'enregistrer le fichier."
+    },
+    "subdivision": {
+      "wholes": "Rondes",
+      "halves": "Blanches",
+      "halfTriplets": "Triolets de blanches",
+      "quarters": "Noires",
+      "quarterTriplets": "Triolets de noires",
+      "eighths": "Croches",
+      "eighthTriplets": "Triolets de croches",
+      "sixteenths": "Doubles croches",
+      "quintuplets": "Quintolets",
+      "sextuplets": "Sextolets",
+      "thirtySeconds": "Triples croches"
     }
   }
 }

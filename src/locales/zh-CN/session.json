@@ -251,6 +251,8 @@
       "selfChecked": "自行检查：由你来判断。",
       "practiceOnly": "仅供练习，不打分。",
       "playThis": "弹这个",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "从 {{from}} BPM 起",
       "playedNoClean": "{{count}} 遍。还没有干净速度。",
       "playedNoClean_other": "{{count}} 遍。还没有干净速度。",
       "playedClean": "{{count}} 遍。干净速度 {{bpm}} BPM。",
@@ -305,6 +307,19 @@
       "note": "包含你的练习记录、干净速度和计划理由的 JSON 文件。愿意的话可以附在反馈里；不会发送任何内容。",
       "done": "已保存到 {{path}}。",
       "failed": "无法保存文件。"
+    },
+    "subdivision": {
+      "wholes": "全音符",
+      "halves": "二分音符",
+      "halfTriplets": "二分音符三连音",
+      "quarters": "四分音符",
+      "quarterTriplets": "四分音符三连音",
+      "eighths": "八分音符",
+      "eighthTriplets": "八分音符三连音",
+      "sixteenths": "十六分音符",
+      "quintuplets": "五连音",
+      "sextuplets": "六连音",
+      "thirtySeconds": "三十二分音符"
     }
   }
 }

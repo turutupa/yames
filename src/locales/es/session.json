@@ -256,6 +256,8 @@
       "selfChecked": "Autoevaluado: este lo juzgas tú.",
       "practiceOnly": "Solo práctica, no se puntúa.",
       "playThis": "Tocar esto",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Desde {{from}} BPM",
       "playedNoClean": "{{count}} toma. Aún sin tempo limpio.",
       "playedNoClean_many": "{{count}} tomas. Aún sin tempo limpio.",
       "playedNoClean_other": "{{count}} tomas. Aún sin tempo limpio.",
@@ -312,6 +314,19 @@
       "note": "Un archivo JSON con tus tomas, tempos limpios y los motivos del planificador. Adjúntalo a un informe si quieres; no se envía nada.",
       "done": "Guardado en {{path}}.",
       "failed": "No se pudo guardar el archivo."
+    },
+    "subdivision": {
+      "wholes": "Redondas",
+      "halves": "Blancas",
+      "halfTriplets": "Tresillos de blanca",
+      "quarters": "Negras",
+      "quarterTriplets": "Tresillos de negra",
+      "eighths": "Corcheas",
+      "eighthTriplets": "Tresillos de corchea",
+      "sixteenths": "Semicorcheas",
+      "quintuplets": "Quintillos",
+      "sextuplets": "Seisillos",
+      "thirtySeconds": "Fusas"
     }
   }
 }

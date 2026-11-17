@@ -256,6 +256,8 @@
       "selfChecked": "Autovalutato: questo lo giudichi tu.",
       "practiceOnly": "Solo pratica, non valutato.",
       "playThis": "Suona questo",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Da {{from}} BPM",
       "playedNoClean": "{{count}} take. Ancora nessun tempo pulito.",
       "playedNoClean_many": "{{count}} take. Ancora nessun tempo pulito.",
       "playedNoClean_other": "{{count}} take. Ancora nessun tempo pulito.",
@@ -312,6 +314,19 @@
       "note": "Un file JSON con le tue take, i tempi puliti e i motivi del pianificatore. Allegalo a un feedback se vuoi; non viene inviato nulla.",
       "done": "Salvato in {{path}}.",
       "failed": "Impossibile salvare il file."
+    },
+    "subdivision": {
+      "wholes": "Semibrevi",
+      "halves": "Minime",
+      "halfTriplets": "Terzine di minime",
+      "quarters": "Semiminime",
+      "quarterTriplets": "Terzine di semiminime",
+      "eighths": "Crome",
+      "eighthTriplets": "Terzine di crome",
+      "sixteenths": "Semicrome",
+      "quintuplets": "Quintine",
+      "sextuplets": "Sestine",
+      "thirtySeconds": "Biscrome"
     }
   }
 }

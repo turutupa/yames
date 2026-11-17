@@ -251,6 +251,8 @@
       "selfChecked": "セルフチェック：判断はあなたです。",
       "practiceOnly": "練習用・採点なし。",
       "playThis": "これを弾く",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "{{from}} BPMから",
       "playedNoClean": "{{count}} テイク。クリーンテンポはまだありません。",
       "playedNoClean_other": "{{count}} テイク。クリーンテンポはまだありません。",
       "playedClean": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。",
@@ -305,6 +307,19 @@
       "note": "テイク、クリーンテンポ、プランナーの理由を含むJSONファイルです。必要ならフィードバックに添付してください。何も送信されません。",
       "done": "{{path}} に保存しました。",
       "failed": "ファイルを保存できませんでした。"
+    },
+    "subdivision": {
+      "wholes": "全音符",
+      "halves": "2分音符",
+      "halfTriplets": "2分3連符",
+      "quarters": "4分音符",
+      "quarterTriplets": "4分3連符",
+      "eighths": "8分音符",
+      "eighthTriplets": "8分3連符",
+      "sixteenths": "16分音符",
+      "quintuplets": "5連符",
+      "sextuplets": "6連符",
+      "thirtySeconds": "32分音符"
     }
   }
 }

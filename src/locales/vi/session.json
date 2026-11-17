@@ -251,6 +251,8 @@
       "selfChecked": "Tự kiểm tra: bạn tự đánh giá bài này.",
       "practiceOnly": "Chỉ để luyện, không chấm.",
       "playThis": "Chơi bài này",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Từ {{from}} BPM",
       "playedNoClean": "{{count}} lượt. Chưa có tempo sạch.",
       "playedNoClean_other": "{{count}} lượt. Chưa có tempo sạch.",
       "playedClean": "{{count}} lượt. Tempo sạch {{bpm}} BPM.",
@@ -305,6 +307,19 @@
       "note": "Một tệp JSON gồm các lượt chơi, tempo sạch và lý do của bộ lập kế hoạch. Đính kèm vào phản hồi nếu muốn; không gì được gửi đi.",
       "done": "Đã lưu vào {{path}}.",
       "failed": "Không lưu được tệp."
+    },
+    "subdivision": {
+      "wholes": "Nốt tròn",
+      "halves": "Nốt trắng",
+      "halfTriplets": "Liên ba nốt trắng",
+      "quarters": "Nốt đen",
+      "quarterTriplets": "Liên ba nốt đen",
+      "eighths": "Móc đơn",
+      "eighthTriplets": "Liên ba móc đơn",
+      "sixteenths": "Móc kép",
+      "quintuplets": "Liên năm",
+      "sextuplets": "Liên sáu",
+      "thirtySeconds": "Móc ba"
     }
   }
 }

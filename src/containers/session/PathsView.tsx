@@ -9,7 +9,7 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
-import { barLine } from "../../session/coachWords";
+import { barLine, tempoRange } from "../../session/coachWords";
 import { isRunnable, laterWhyKey } from "../../session/packs";
 import { PATH_BADGE_KEY, exerciseGradingKey, pathBadge } from "../../session/badges";
 import {
@@ -347,6 +347,7 @@ function ExerciseRow({
   const bar = barLine(exercise, exercise.tempo.passAtBpm);
   const gradable = isGradable(exercise);
   const gradingKey = exerciseGradingKey(exercise, isRunnable(path.id));
+  const range = tempoRange(exercise);
   return (
     <div
       className="session-exercise session-glass session-rise"
@@ -367,6 +368,18 @@ function ExerciseRow({
           {passed && <span className="session-tag" data-met="">{t("session.paths.passed")}</span>}
         </div>
         <div className="session-why">{exercise.purpose}</div>
+        {range && (
+          <div className="session-quiet" data-testid={`tempo-${exercise.id}`}>
+            {[
+              range.subdivision ? t(`session.subdivision.${range.subdivision}`) : null,
+              range.to === null
+                ? t("session.paths.tempoFrom", { from: range.from })
+                : t("session.paths.tempoRange", { from: range.from, to: range.to }),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </div>
+        )}
         {gradable && bar && <div className="session-quiet">{lineText(t, bar)}</div>}
         {gradingKey && <div className="session-quiet">{t(gradingKey)}</div>}
         {played > 0 && (

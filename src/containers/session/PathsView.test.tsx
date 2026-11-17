@@ -91,3 +91,29 @@ describe("badges on the Paths list (QA 2026-11-17 #13)", () => {
     expect(screen.getByTestId(`path-card-${ALT.id}`).querySelector("[data-badge]")).toBeNull();
   });
 });
+
+describe("Exercise cards show their tempo (QA 2026-11-17 #14)", () => {
+  it("start→pass BPM on each card", () => {
+    const { session } = fake(started);
+    render(<PathsView session={session} />);
+    openPath();
+    fireEvent.click(screen.getByTestId(`step-row-${ALT.steps[0].id}`));
+    const ex = ALT.steps[0].exercises.find((e) => e.tempo.passAtBpm !== null && e.tempo.passAtBpm !== e.tempo.rungs[0].bpm)!;
+    expect(screen.getByTestId(`tempo-${ex.id}`)).toHaveTextContent(`${ex.tempo.rungs[0].bpm}→${ex.tempo.passAtBpm} BPM`);
+  });
+});
+
+describe("a Path whose pack names its subdivisions", () => {
+  it("reads e.g. '16ths · 60→110 BPM'", () => {
+    const pack = import.meta.glob("../../paths/packs/shred.json", { eager: true });
+    const SHRED = (Object.values(pack)[0] as { default: unknown }).default as typeof ALT;
+    const session = { paths: [SHRED], progress: { states: [], takes: [], ceilings: [] }, actions: {} } as unknown as SessionRun;
+    render(<PathsView session={session} />);
+    fireEvent.click(screen.getByTestId(`path-card-${SHRED.id}`));
+    fireEvent.click(screen.getByTestId(`step-row-${SHRED.steps[0].id}`));
+    const ex = SHRED.steps[0].exercises[0];
+    expect(screen.getByTestId(`tempo-${ex.id}`)).toHaveTextContent(
+      `16ths · ${ex.tempo.rungs[0].bpm}→${ex.tempo.passAtBpm} BPM`,
+    );
+  });
+});
