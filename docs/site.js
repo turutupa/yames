@@ -566,7 +566,13 @@
     try {
       const res = await fetch(RELEASES_URL + "?per_page=30");
       if (!res.ok) throw new Error(String(res.status));
-      const releases = await res.json();
+      // Test builds live on one rolling pre-release tagged `beta`
+      // (.github/workflows/beta.yml). They are not releases: never in the
+      // changelog, and never the version the page announces.
+      const all = await res.json();
+      const releases = Array.isArray(all)
+        ? all.filter((rel) => rel && !rel.prerelease && !rel.draft)
+        : all;
       if (!Array.isArray(releases) || !releases.length) {
         changelogBody.innerHTML =
           '<div class="changelog-empty">No releases found.</div>';
