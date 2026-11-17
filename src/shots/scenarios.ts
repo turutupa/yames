@@ -358,7 +358,7 @@ export interface Shot {
    * zoom with notes and the overview strip, `pluck` the same caught while a
    * string rings. `?nogl=1` on any of them draws the SVG fallback instead.
    */
-  stage?: "whole" | "zoom" | "pluck";
+  stage?: "whole" | "zoom" | "pluck" | "flat";
 }
 
 /**
@@ -1108,6 +1108,8 @@ export const SHOTS: Shot[] = [
   { id: "stage-whole", suffix: "stage-whole", window: "main", stage: "whole", width: 1400, height: 900, settleMs: 200 },
   { id: "stage-zoom", suffix: "stage-zoom", window: "main", stage: "zoom", width: 1400, height: 900, settleMs: 200 },
   { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
+  // The straight-on neck the practice runway sits under (M6).
+  { id: "stage-flat", suffix: "stage-flat", window: "main", stage: "flat", width: 1400, height: 900, settleMs: 200 },
 ];
 
 export function shotById(id: string): Shot | undefined {
