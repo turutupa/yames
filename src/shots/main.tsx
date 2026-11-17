@@ -271,11 +271,15 @@ async function drive() {
         await until("the Paths list", () => !!byId(`path-card-${path}`));
         byId(`path-card-${path}`)?.click();
         await until("the Path", () => !!byId("path-detail"));
-        const stepRow = document.querySelector<HTMLElement>('[data-testid^="step-row-"]');
+        const wanted = shot!.session.exercise;
+        const stepRow = wanted
+          ? byId(`step-row-${wanted.split(".")[0]}`)
+          : document.querySelector<HTMLElement>('[data-testid^="step-row-"]');
         stepRow?.click();
         await until("the Step", () => !!byId("step-detail"));
-        await until("an Exercise to play", () => !!document.querySelector('[data-testid^="play-"]'));
-        document.querySelector<HTMLElement>('[data-testid^="play-"]')?.click();
+        const play = wanted ? `[data-testid="play-${wanted}"]` : '[data-testid^="play-"]';
+        await until("an Exercise to play", () => !!document.querySelector(play));
+        document.querySelector<HTMLElement>(play)?.click();
       } else {
         byId("today-start")?.click();
       }
@@ -294,6 +298,7 @@ async function drive() {
         if (stop !== "ready") {
           big()?.click();
           await until("the Take to run", () => !!byId("session-live"));
+          if (shot!.session.exercise) await until("the band", () => !!byId("session-band"));
           if (stop !== "playing") {
             const outcome = stop === "noCatch" ? "session-no-catch" : stop === "between" ? "session-between" : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);

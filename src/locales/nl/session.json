@@ -136,7 +136,10 @@
       "engineTrouble": "De geluidsengine accepteerde deze oefening niet. Stop en begin opnieuw.",
       "hearing": "Ik hoor je",
       "waitingForSignal": "Aan het luisteren. Speel een noot om te testen.",
-      "listeningBack": "Terugluisteren"
+      "listeningBack": "Terugluisteren",
+      "band": "Band",
+      "bandHint": "De band wordt niet beoordeeld. Met een microfoon: zacht houden of koptelefoon op.",
+      "bandMicHint": "Met een microfoon zou ik de band als jouw noten horen, dus hij begint uit. Met een koptelefoon op: zet hem hoger."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} maten",

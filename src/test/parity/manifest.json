@@ -1435,6 +1435,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "session.bandVolume": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

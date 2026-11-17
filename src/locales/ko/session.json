@@ -136,7 +136,10 @@
       "engineTrouble": "사운드 엔진이 이 과제를 불러오지 못했습니다. 나갔다가 다시 시작하세요.",
       "hearing": "듣고 있습니다",
       "waitingForSignal": "듣는 중. 음을 하나 쳐서 확인하세요.",
-      "listeningBack": "다시 듣는 중"
+      "listeningBack": "다시 듣는 중",
+      "band": "밴드",
+      "bandHint": "밴드는 채점되지 않습니다. 마이크를 쓸 때는 작게 하거나 헤드폰을 쓰세요.",
+      "bandMicHint": "마이크로는 밴드 소리를 당신의 음으로 듣게 되므로 꺼진 채 시작합니다. 헤드폰을 쓰면 올리세요."
     },
     "result": {
       "kick": "테이크 {{take}} · {{title}} · {{bpm}} BPM · {{bars}}마디",

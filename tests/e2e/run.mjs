@@ -10,7 +10,7 @@ import { DatabaseSync } from "node:sqlite";
 import { Env, appDataDir, freeDisplay, seedSettings, startNvidiaX } from "./lib/env.mjs";
 import { Driver } from "./lib/webdriver.mjs";
 import { Player, renderTake } from "./lib/player.mjs";
-import { barTicks, exerciseByTitle, takeBars } from "./lib/exercises.mjs";
+import { barTicks, exerciseByTitle, loadPath, takeBars } from "./lib/exercises.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..");
@@ -30,8 +30,10 @@ if (flag("--help")) {
   console.log(`usage: node tests/e2e/run.mjs [options]
   --no-build          use the binary already built (default: build it first)
   --app <path>        the app binary (default: $CARGO_TARGET_DIR or src-tauri/target, release/yames)
-  --scenarios <list>  comma list of: session,relaunch,four-fingers,gpu-info,neck,baseline
+  --scenarios <list>  comma list of: session,relaunch,four-fingers,blues-band,gpu-info,neck,baseline
                       (default: session,relaunch,four-fingers,gpu-info)
+  --bleed <dB>        blues-band: also feed the app's output back into its input at this
+                      level (e.g. -20), as speakers into a microphone would
   --neck-takes <n>    Takes the neck scenario plays back to back (default 3)
   --baseline-seconds <n>  length of the headless probe run (default 60)
   --out <dir>         where results, screenshots and the probe reports go
@@ -264,7 +266,7 @@ const player = new Player(env);
  * Arm the player, press Start take, play `style`, and wait for the result.
  * Returns the result screen's text, and whether the Take ended by itself.
  */
-async function playTake(d, exercise, style, label) {
+async function playTake(d, exercise, style, label, { band = false } = {}) {
   const m = await d.waitText(/Start take, (\d+) BPM/);
   const bpm = Number(m[1]);
   const take = renderTake({
@@ -274,17 +276,27 @@ async function playTake(d, exercise, style, label) {
     exerciseBars: exercise.bars,
     bars: takeBars(exercise),
     style,
-    seed: style === "sloppy" ? 11 : 7,
+    seed: style === "sloppy" || style === "sloppier" ? 11 : 7,
   });
   // What the scorer said about each note as it went, for the record: a
   // step in these is a stall somewhere in the audio path.
   await d.exec(`window.__e2eOnsets = [];
     window.__e2eOff?.then?.((f) => f());
     window.__e2eOff = window.__TAURI__.event.listen('score-onset', (e) => window.__e2eOnsets.push(e.payload));`);
-  const playing = player.playOnCountIn(take);
+  const playing = band ? player.playOverBand(take) : player.playOnCountIn(take);
+  playing.catch(() => {}); // awaited below; a Take that never started must not crash the run
   // The app's PipeWire threads exist once its streams are open (see Env).
   env.promoteAudioThreads();
-  await d.clickText(/^Start take/);
+  try {
+    await d.clickText(/^Start take/, { timeoutMs: 20000 });
+  } catch (e) {
+    const why = await d.exec(`const b = document.querySelector('[data-testid="session-big"]');
+      return { phase: document.querySelector('[data-testid="session-take"]')?.dataset.phase ?? null, big: b?.innerText,
+        disabled: b?.disabled, noInput: !!document.querySelector('[data-testid="session-no-input"]'),
+        alert: document.querySelector('[role="alert"]')?.innerText ?? null }`).catch(() => null);
+    await shot(d, `no-start-${label}`);
+    throw new Error(`${e.message}; the Take screen: ${JSON.stringify(why)}`);
+  }
   const heard = await playing;
   // Played out, the engine stops the Take on its last bar line by itself.
   // `take` holds 1.5 s of tail after the last bar, so the end has passed.
@@ -300,7 +312,12 @@ async function playTake(d, exercise, style, label) {
   check(`${label}: the Take ends by itself at its last bar`, endedItself,
     endedItself ? "" : "still playing 6 s after the last bar; pressing End take (see README, known bugs)");
   if (!endedItself) await d.clickText(/^End take$/).catch(() => {});
-  await d.waitText(/Go again|Move on|Next/i, 30000);
+  try {
+    await d.waitText(/Go again|Move on|Next|Again, \d+ BPM|See how it went/i, 30000);
+  } catch (e) {
+    await shot(d, `stuck-${label}`);
+    throw e;
+  }
   await sleep(800);
   const text = await d.text();
   await shot(d, `result-${label}`);
@@ -344,7 +361,7 @@ async function scenarioSession() {
     info.goodTake = goodRow?.facts?.measures;
 
     // 2. A sloppy take at the next tempo: fails on evenness.
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const sloppy = await playTake(d, exercise, "sloppy", "sloppy take");
     const sloppyRow = takesOf(exercise.id).at(-1);
     const evenCheck = sloppyRow?.facts?.measures?.pass?.checks?.find((c) => c.metric === "timingEvenness");
@@ -357,7 +374,7 @@ async function scenarioSession() {
     info.sloppyTake = sloppyRow?.facts?.measures;
 
     // 3. Silence: "didn't catch enough", and it does not count.
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const silent = await playTake(d, exercise, "silent", "silent take");
     const silentRow = takesOf(exercise.id).at(-1);
     check("silent take: the result says it didn't catch enough", /didn.t catch enough/i.test(silent.text), firstLines(silent.text, /catch/));
@@ -423,6 +440,129 @@ async function scenarioFourFingers() {
     const report = await quitApp(d, "four-fingers");
     if (report) printProbe("four fingers (3D neck on screen)", report);
   }
+}
+
+/**
+ * A jam-backed Take: Blues and Pentatonics, "A on every downbeat", a Texas
+ * shuffle with drums and bass under it (src/session/takeBand.ts). The click
+ * stops after the count-in, so the player keeps time with the band. Graded on
+ * notes heard, extras, evenness and note identity, with the band not graded.
+ */
+async function scenarioBluesBand() {
+  const bleed = opt("--bleed", null);
+  let loopback = null;
+  if (bleed !== null) {
+    // Speakers into a microphone: the app's output, back into its input.
+    const r = spawnSync("pactl", ["load-module", "module-loopback", "source=yames_out.monitor", "sink=guitar", "latency_msec=5"], {
+      env: env.env(),
+      encoding: "utf8",
+    });
+    loopback = r.stdout.trim();
+    const pct = Math.round(100 * 10 ** (Number(bleed) / 20));
+    // The loopback's own sink input carries the level.
+    const inputs = spawnSync("pactl", ["list", "short", "sink-inputs"], { env: env.env(), encoding: "utf8" }).stdout;
+    for (const line of inputs.split("\n")) {
+      const [id, , module] = line.split("\t");
+      if (module === loopback) spawnSync("pactl", ["set-sink-input-volume", id, `${pct}%`], { env: env.env() });
+    }
+    info.bluesBandBleed = { dB: Number(bleed), percent: pct, module: loopback };
+  }
+  let d = await launchApp();
+  const title = "A on every downbeat";
+  const path = loadPath("blues-pentatonics");
+  const key = `blues-pentatonics/${"landing.root-on-one"}`;
+  try {
+    const { exercise } = exerciseByTitle(title, path);
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Blues and Pentatonics/);
+    await d.clickText(/Chord tones: A7, D7 and E7/);
+    await d.clickIn(/A on every downbeat/, /^Play this$/);
+    await d.waitText(/Start take, (\d+) BPM/, 20000);
+    const banded = await d.exec(`return document.querySelector('[data-testid="session-band"] input')?.value ?? null`);
+    check(`${title}: the Take shows its band`, banded !== null);
+    // The virtual sound card is not an interface the app knows, so it is a
+    // microphone to the app, and a graded Take on a microphone starts with the
+    // band off (src/session/takeBand.ts bandVolumeFor). The player has
+    // headphones on, and turns it up.
+    check(`${title}: on a microphone the band starts off`, banded === "0", `slider at ${banded}`);
+    await setBand(d, "0.8");
+    info.bluesBand = { takes: [] };
+    const row = () => takesOf(exercise.id).at(-1);
+    const summary = (r) =>
+      r ? `passed ${r.passed}, evenness ${fmt(r.facts.measures.evenness)}, heard ${r.facts.measures.heard}/${r.facts.measures.expected}, extras ${r.facts.measures.extras}, notes ${fmt(r.facts.measures.noteIdentity)}` : "no row";
+    const tag = bleed !== null ? ` (bleed ${bleed} dB)` : "";
+
+    const good = await playTake(d, exercise, "good", `blues good${tag}`, { band: true });
+    const goodRow = row();
+    info.bluesBand.takes.push({ style: "good", bpm: good.bpm, heard: good.heard, measures: goodRow?.facts?.measures });
+    check(`${title}${tag}: a good take over the band passes`, /PASS BAR MET/i.test(good.text) && goodRow?.passed === 1, summary(goodRow));
+    check(`${title}${tag}: the player kept time with the band (beats it heard from the drums)`, (good.heard?.beatsHeardFromTheBand ?? 0) >= 16,
+      `${good.heard?.beatsHeardFromTheBand} of ${takeBars(exercise) * 4}`);
+    check(`${title}${tag}: clean tempo stored`, cleanTempo(key) === good.bpm, `clean tempo ${cleanTempo(key)}`);
+
+    await d.clickText(/^(Go again|Again,)/);
+    const sloppy = await playTake(d, exercise, "sloppy", `blues sloppy${tag}`, { band: true });
+    const sloppyRow = row();
+    info.bluesBand.takes.push({ style: "sloppy", bpm: sloppy.bpm, measures: sloppyRow?.facts?.measures });
+    // Recorded, not checked: 35 ms of scatter is inside this Exercise's own
+    // evenness bar (0.6) at 70 BPM, band or no band (the control below).
+    console.log(`      sloppy (35 ms) over the band: ${summary(sloppyRow)}`);
+
+    await d.clickText(/^(Go again|Again,)/);
+    const sloppier = await playTake(d, exercise, "sloppier", `blues sloppier${tag}`, { band: true });
+    const sloppierRow = row();
+    info.bluesBand.takes.push({ style: "sloppier", bpm: sloppier.bpm, measures: sloppierRow?.facts?.measures });
+    check(`${title}${tag}: a sloppy (80 ms) take over the band does not pass`, sloppierRow?.passed === 0 && !/PASS BAR MET/i.test(sloppier.text), summary(sloppierRow));
+
+    await d.clickText(/^(Go again|Again,)/);
+    const wrong = await playTake(d, exercise, "wrong", `blues wrong notes${tag}`, { band: true });
+    const wrongRow = row();
+    info.bluesBand.takes.push({ style: "wrong", bpm: wrong.bpm, measures: wrongRow?.facts?.measures });
+    check(`${title}${tag}: wrong notes over the band do not pass`, wrongRow?.passed === 0 && !/PASS BAR MET/i.test(wrong.text), summary(wrongRow));
+
+    // The control: the same Takes with the band turned all the way down (the
+    // click comes back), so a difference above is the band's and not the take's.
+    // A fresh Session: "Play this" is a five-minute one, and seven Takes outrun
+    // it. In a fresh app: a Session started again after Exit in the same run
+    // could not hear the input (see the report of 2026-11-16, B1).
+    await d.clickText(/^Exit$/);
+    const first = await quitApp(d, "blues-band");
+    if (first) printProbe("blues over the band", first);
+    d = await launchApp();
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Blues and Pentatonics/);
+    await d.clickText(/Chord tones: A7, D7 and E7/);
+    await d.clickIn(/A on every downbeat/, /^Play this$/);
+    // At the tempo of the Takes above, so the two sets compare.
+    let m = await d.waitText(/Start take, (\d+) BPM/, 20000);
+    for (let i = 0; i < 10 && Number(m[1]) > good.bpm; i++) {
+      await d.clickText(/^Slower$/);
+      await sleep(400);
+      m = await d.waitText(/Start take, (\d+) BPM/);
+    }
+    await setBand(d, "0");
+
+    for (const [i, style] of ["good", "sloppy", "sloppier"].entries()) {
+      if (i > 0) await d.clickText(/^(Go again|Again,)/);
+      const r = await playTake(d, exercise, style, `blues ${style}, band at 0${tag}`, { band: true });
+      const rr = row();
+      info.bluesBand.takes.push({ style, band: 0, bpm: r.bpm, measures: rr?.facts?.measures });
+      console.log(`      control, band at 0, ${style}: ${summary(rr)}`);
+    }
+    await d.clickText(/^Exit$/);
+  } finally {
+    const report = await quitApp(d, "blues-band-control");
+    if (report) printProbe("blues, band at 0 (the control)", report);
+    if (loopback) spawnSync("pactl", ["unload-module", loopback], { env: env.env() });
+  }
+}
+
+/** Move the Take screen's band slider, as a hand on it would. */
+async function setBand(d, value) {
+  await d.exec(`const el = document.querySelector('[data-testid="session-band"] input');
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    set.call(el, arguments[0]); el.dispatchEvent(new Event('input', { bubbles: true }));`, [value]);
+  await sleep(300);
 }
 
 /** What WebKit itself says about its rendering, from webkit://gpu. */
@@ -512,7 +652,7 @@ async function scenarioNeck() {
     const before = cpuByName();
     const t0 = Date.now();
     for (let i = 0; i < takes; i++) {
-      if (i > 0) await d.clickText(/^Go again/);
+      if (i > 0) await d.clickText(/^(Go again|Again,)/);
       const r = await playTake(d, exercise, "good", `neck take ${i + 1}`);
       info.neck.takes.push({ bpm: r.bpm, passed: /PASS BAR MET/i.test(r.text) });
     }
@@ -618,6 +758,7 @@ try {
   if (scenarios.has("session")) await scenarioSession();
   if (scenarios.has("relaunch")) await scenarioRelaunch();
   if (scenarios.has("four-fingers")) await scenarioFourFingers();
+  if (scenarios.has("blues-band")) await scenarioBluesBand();
   if (scenarios.has("neck")) await scenarioNeck();
   if (scenarios.has("baseline")) await scenarioBaseline();
   info.loadAtEnd = readFileSync("/proc/loadavg", "utf8").trim();

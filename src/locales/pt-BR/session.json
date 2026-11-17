@@ -136,7 +136,10 @@
       "engineTrouble": "O motor de áudio não aceitou este exercício. Saia e comece de novo.",
       "hearing": "Estou ouvindo você",
       "waitingForSignal": "Ouvindo. Toque uma nota para testar.",
-      "listeningBack": "Reproduzindo"
+      "listeningBack": "Reproduzindo",
+      "band": "Banda",
+      "bandHint": "A banda não é avaliada. No microfone, deixe baixo ou use fones.",
+      "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente."
     },
     "result": {
       "kick": "Tomada {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compassos",
