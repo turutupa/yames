@@ -178,8 +178,8 @@
       "recap": "한계"
     },
     "coach": {
-      "passed": "{{expected}}음 중 {{heard}}음이 들렸고, {{bpm}} BPM에서 {{bars}}마디 내내 고릅니다.",
-      "passedExtras": "{{expected}}음 중 {{heard}}음이 들렸고 {{bars}}마디 내내 고르지만, 불필요한 음이 {{extras}}개 있었습니다.",
+      "passed": "{{expected}}음 중 {{heard}}음이 들렸고, {{bpm}} BPM에서 {{bars}}마디 연속으로 고릅니다.",
+      "passedExtras": "{{expected}}음 중 {{heard}}음이 들렸고 {{bars}}마디 연속으로 고르지만, 불필요한 음이 {{extras}}개 있었습니다.",
       "heardNothing": "아무것도 들리지 않았습니다.",
       "heardLittle": "{{expected}}음 중 {{heard}}음만 들렸습니다.",
       "tooShort": "{{bars}}마디는 판단하기에 너무 짧습니다. 테이크를 끝까지 연주해야 합니다.",
@@ -284,8 +284,8 @@
       "cleanTempo": "클린 템포",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "시간에 따른 클린 템포, {{title}}",
-      "cleanMeans": "여덟 마디 이상 통과 기준을 넘은 가장 빠른 템포입니다.",
-      "noClean": "아직 클린 템포가 없습니다. 여덟 마디 동안 통과 기준을 넘는 테이크가 필요합니다.",
+      "cleanMeans": "어느 구간이든 여덟 마디 연속으로 통과 기준을 넘은 가장 빠른 템포입니다.",
+      "noClean": "아직 클린 템포가 없습니다. 어느 구간이든 여덟 마디 연속으로 통과 기준을 넘는 테이크가 필요합니다.",
       "exercises": "연주한 과제",
       "sparkLabel": "테이크별 고르기, {{title}}"
     },

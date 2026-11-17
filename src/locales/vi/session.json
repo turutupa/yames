@@ -178,8 +178,8 @@
       "recap": "Giới hạn"
     },
     "coach": {
-      "passed": "Nghe được {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp ở {{bpm}} BPM.",
-      "passedExtras": "Nghe được {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp, có {{extras}} nốt thừa.",
+      "passed": "Nghe được {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp liền ở {{bpm}} BPM.",
+      "passedExtras": "Nghe được {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp liền, có {{extras}} nốt thừa.",
       "heardNothing": "Tôi không nghe thấy gì.",
       "heardLittle": "Tôi nghe được {{heard}} trên {{expected}} nốt.",
       "tooShort": "Mới {{bars}} ô nhịp, quá ngắn để đánh giá. Cần cả lượt.",
@@ -284,8 +284,8 @@
       "cleanTempo": "Tempo sạch",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Tempo sạch theo thời gian, {{title}}",
-      "cleanMeans": "Tempo nhanh nhất bạn đạt mức, trong ít nhất tám ô nhịp.",
-      "noClean": "Chưa có tempo sạch. Cần một lượt đạt mức trong tám ô nhịp.",
+      "cleanMeans": "Tempo nhanh nhất bạn đạt mức trong tám ô nhịp liền bất kỳ.",
+      "noClean": "Chưa có tempo sạch. Cần một lượt đạt mức trong tám ô nhịp liền bất kỳ.",
       "exercises": "Các bài tập bạn đã chơi",
       "sparkLabel": "Độ đều qua các lượt, {{title}}"
     },

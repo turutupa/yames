@@ -178,8 +178,8 @@
       "recap": "Limite"
     },
     "coach": {
-      "passed": "Ouvi {{heard}} de {{expected}} notas, regulares ao longo de {{bars}} compassos a {{bpm}} BPM.",
-      "passedExtras": "Ouvi {{heard}} de {{expected}} notas, regulares ao longo de {{bars}} compassos, com {{extras}} a mais.",
+      "passed": "Ouvi {{heard}} de {{expected}} notas, regulares ao longo de {{bars}} compassos seguidos a {{bpm}} BPM.",
+      "passedExtras": "Ouvi {{heard}} de {{expected}} notas, regulares ao longo de {{bars}} compassos seguidos, com {{extras}} a mais.",
       "heardNothing": "Não ouvi nada.",
       "heardLittle": "Ouvi {{heard}} de {{expected}} notas.",
       "tooShort": "Foram {{bars}} compassos, curto demais para avaliar. Precisa da tomada inteira.",
@@ -291,8 +291,8 @@
       "cleanTempo": "Andamento limpo",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Andamento limpo ao longo do tempo, {{title}}",
-      "cleanMeans": "O mais rápido em que você bateu a meta, por pelo menos oito compassos.",
-      "noClean": "Ainda sem andamento limpo. É preciso uma tomada que bata a meta por oito compassos.",
+      "cleanMeans": "O mais rápido em que você bateu a meta, em quaisquer oito compassos seguidos.",
+      "noClean": "Ainda sem andamento limpo. É preciso uma tomada que bata a meta em quaisquer oito compassos seguidos.",
       "exercises": "Exercícios que você tocou",
       "sparkLabel": "Regularidade ao longo das tomadas, {{title}}"
     },

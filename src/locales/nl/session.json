@@ -178,8 +178,8 @@
       "recap": "Grens"
     },
     "coach": {
-      "passed": "{{heard}} van de {{expected}} noten gehoord, gelijkmatig over {{bars}} maten op {{bpm}} BPM.",
-      "passedExtras": "{{heard}} van de {{expected}} noten gehoord, gelijkmatig over {{bars}} maten, met {{extras}} extra.",
+      "passed": "{{heard}} van de {{expected}} noten gehoord, gelijkmatig over {{bars}} maten achter elkaar op {{bpm}} BPM.",
+      "passedExtras": "{{heard}} van de {{expected}} noten gehoord, gelijkmatig over {{bars}} maten achter elkaar, met {{extras}} extra.",
       "heardNothing": "Ik heb niets gehoord.",
       "heardLittle": "Ik hoorde {{heard}} van de {{expected}} noten.",
       "tooShort": "Dat waren {{bars}} maten, te kort om te beoordelen. Er is een hele take voor nodig.",
@@ -284,8 +284,8 @@
       "cleanTempo": "Schoon tempo",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Schoon tempo door de tijd, {{title}}",
-      "cleanMeans": "Het snelste tempo waarop je de lat haalde, over minstens acht maten.",
-      "noClean": "Nog geen schoon tempo. Daarvoor is een take nodig die de lat haalt over acht maten.",
+      "cleanMeans": "Het snelste tempo waarop je de lat haalde, over willekeurige acht maten achter elkaar.",
+      "noClean": "Nog geen schoon tempo. Daarvoor is een take nodig die de lat haalt over willekeurige acht maten achter elkaar.",
       "exercises": "Oefeningen die je gespeeld hebt",
       "sparkLabel": "Gelijkmatigheid over de takes, {{title}}"
     },

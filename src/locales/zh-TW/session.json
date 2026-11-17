@@ -178,8 +178,8 @@
       "recap": "極限"
     },
     "coach": {
-      "passed": "聽到 {{expected}} 個音中的 {{heard}} 個，{{bpm}} BPM 下 {{bars}} 小節都很均勻。",
-      "passedExtras": "聽到 {{expected}} 個音中的 {{heard}} 個，{{bars}} 小節都很均勻，多了 {{extras}} 個音。",
+      "passed": "聽到 {{expected}} 個音中的 {{heard}} 個，{{bpm}} BPM 下連續 {{bars}} 小節都很均勻。",
+      "passedExtras": "聽到 {{expected}} 個音中的 {{heard}} 個，連續 {{bars}} 小節都很均勻，多了 {{extras}} 個音。",
       "heardNothing": "我什麼都沒聽到。",
       "heardLittle": "我聽到 {{expected}} 個音中的 {{heard}} 個。",
       "tooShort": "只有 {{bars}} 小節，太短，沒法判斷。需要彈完整一遍。",
@@ -284,8 +284,8 @@
       "cleanTempo": "乾淨速度",
       "bpmOn": "BPM，{{title}}",
       "chartLabel": "乾淨速度隨時間的變化，{{title}}",
-      "cleanMeans": "在至少八個小節內過及格線的最快速度。",
-      "noClean": "還沒有乾淨速度。需要有一遍在八個小節內過及格線。",
+      "cleanMeans": "在任意連續八個小節內過及格線的最快速度。",
+      "noClean": "還沒有乾淨速度。需要有一遍在任意連續八個小節內過及格線。",
       "exercises": "你彈過的練習",
       "sparkLabel": "各遍的均勻度，{{title}}"
     },

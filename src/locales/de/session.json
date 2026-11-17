@@ -178,8 +178,8 @@
       "recap": "Limit"
     },
     "coach": {
-      "passed": "{{heard}} von {{expected}} Tönen gehört, gleichmäßig über {{bars}} Takte bei {{bpm}} BPM.",
-      "passedExtras": "{{heard}} von {{expected}} Tönen gehört, gleichmäßig über {{bars}} Takte, mit {{extras}} zusätzlichen.",
+      "passed": "{{heard}} von {{expected}} Tönen gehört, gleichmäßig über {{bars}} Takte am Stück bei {{bpm}} BPM.",
+      "passedExtras": "{{heard}} von {{expected}} Tönen gehört, gleichmäßig über {{bars}} Takte am Stück, mit {{extras}} zusätzlichen.",
       "heardNothing": "Ich habe nichts gehört.",
       "heardLittle": "Ich habe {{heard}} von {{expected}} Tönen gehört.",
       "tooShort": "Das waren {{bars}} Takte, zu kurz für eine Bewertung. Es braucht den ganzen Take.",
@@ -284,8 +284,8 @@
       "cleanTempo": "Sauberes Tempo",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Sauberes Tempo im Verlauf, {{title}}",
-      "cleanMeans": "Das schnellste Tempo, bei dem du die Messlatte erreicht hast, über mindestens acht Takte.",
-      "noClean": "Noch kein sauberes Tempo. Dafür braucht es einen Take, der die Messlatte über acht Takte erreicht.",
+      "cleanMeans": "Das schnellste Tempo, bei dem du die Messlatte über beliebige acht Takte am Stück erreicht hast.",
+      "noClean": "Noch kein sauberes Tempo. Dafür braucht es einen Take, der die Messlatte über beliebige acht Takte am Stück erreicht.",
       "exercises": "Übungen, die du gespielt hast",
       "sparkLabel": "Gleichmäßigkeit über die Takes, {{title}}"
     },
