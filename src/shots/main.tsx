@@ -22,6 +22,7 @@ import "../styles/session-narrative.css";
 import { installShotMock } from "./mockIpc";
 import { shotById, SHOTS, SHOT_THEMES } from "./scenarios";
 import { RUNNABLE_PATH_IDS } from "../session/packs";
+import { stageDebug } from "../stage3d/controller";
 
 declare global {
   interface Window {
@@ -981,6 +982,9 @@ async function drive() {
 }
 
 if (shot && !shot.stage) {
+  // The neck stage's live controller, for the layout specs that ask what view
+  // a screen gave it (the runway's straight-on neck).
+  (window as unknown as { __NECK__?: typeof stageDebug }).__NECK__ = stageDebug;
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     // No StrictMode: its double-invoked effects make the transport fire twice,
     // and a screenshot wants one pass through the app's startup, not two.
