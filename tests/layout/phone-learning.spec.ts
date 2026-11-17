@@ -83,8 +83,10 @@ test.describe("the learning side on a phone", () => {
         const first = await smallTargets(page);
         // A sweep that finds nothing looks exactly like one that cannot find
         // anything: every one of these screens has a control to press (the
-        // welcome card has two; the rest have the tab bar as well).
-        expect(first.seen, "no controls measured at all").toBeGreaterThan(1);
+        // welcome card has two; the rest have the tab bar as well, except a
+        // running Session, which has no tab bar (QA 2026-11-17 #3) and whose
+        // recap has only "Done").
+        expect(first.seen, "no controls measured at all").toBeGreaterThan(scene.startsWith("session-") ? 0 : 1);
         expect(first.small, "controls smaller than 44×44 px").toEqual([]);
 
         // And again at the bottom of the screen, where the last card meets

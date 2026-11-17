@@ -80,7 +80,8 @@ for (const size of QA_SIZES) {
   // #2: the "TAKE n · …" heading was drawn over Exit.
   for (const scene of ["session-between", "session-edge-result"]) {
     test(`${scene}: Exit takes a tap, and nothing overlaps, at ${size.name}`, async ({ page }) => {
-      if (scene === "session-edge-result") test.slow();
+      // Both play a Take (edge-result up to four) in real time first.
+      test.slow();
       await openShot(page, scene, size);
       expect(await notHitTestable(page, '[data-testid="session-exit"]')).toEqual([]);
       expect(await overlapping(page)).toEqual([]);
@@ -139,6 +140,8 @@ const LOCALE_SCENES: { scene: string; size: { width: number; height: number } }[
 for (const lng of LONG_LOCALES) {
   for (const { scene, size } of LOCALE_SCENES) {
     test(`${scene} in ${lng}: every label fits, nothing overlaps, at ${size.width}x${size.height}`, async ({ page }) => {
+      // A result scene plays its Take in real time first.
+      if (scene !== "today-returning") test.slow();
       await openShot(page, scene, size, "ember", { lng });
       await noSidewaysScroll(page, `${scene} in ${lng} at ${size.width}px`);
       expect(await spillingLabels(page)).toEqual([]);
