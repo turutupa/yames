@@ -2013,6 +2013,7 @@ export function MainWindow() {
           coachListening={evaluation.enabled}
           onToggleCoach={session.toggleCard}
           onZen={() => setIsFullscreen(true)}
+          keyBindings={keyBindings}
         />
         )}
       <div

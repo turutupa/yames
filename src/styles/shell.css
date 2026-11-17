@@ -1341,6 +1341,39 @@ button.jam-vibe-chip {
   overflow-wrap: anywhere;
 }
 
+/* The key an entry answers to, at the right of its row (owner, 2026-11-17).
+   Dim until the row is pointed at or is the one open: it is a reminder, not a
+   second label. It never shrinks; a long name (ru, de) gives way first, to
+   its two clamped lines. */
+.rail-key {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--text-faint);
+  opacity: 0.7;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) {
+  :is(.rail-mode, .rail-action):hover .rail-key {
+    opacity: 1;
+    color: var(--text-secondary);
+  }
+}
+
+:is(.rail-mode, .rail-action).active .rail-key {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
 /* ── Jam now, on the rail (JAM_KILLER A4) ──────────────────────────────────
  *
  * A play glyph beside the Jam entry while no jam is open. It sits in a row
@@ -2069,7 +2102,8 @@ body[data-sheet-maximized] .rail {
   .rail-action-label,
   .rail-action-status,
   .rail-library,
-  .rail-action-dot {
+  .rail-action-dot,
+  .rail-key {
     display: none;
   }
 
@@ -2106,7 +2140,8 @@ body[data-sheet-maximized] .rail {
   .rail[data-library-open] .rail-action-label,
   .rail[data-library-open] .rail-action-status,
   .rail[data-library-open] .rail-library,
-  .rail[data-library-open] .rail-action-dot {
+  .rail[data-library-open] .rail-action-dot,
+  .rail[data-library-open] .rail-key {
     display: revert;
   }
 
@@ -2560,7 +2595,8 @@ body[data-sheet-maximized] .rail {
 .rail[data-collapsed] .rail-mode-badge,
 .rail[data-collapsed] .rail-action-label,
 .rail[data-collapsed] .rail-action-status,
-.rail[data-collapsed] .rail-library {
+.rail[data-collapsed] .rail-library,
+.rail[data-collapsed] .rail-key {
   display: none;
 }
 

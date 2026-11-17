@@ -1404,7 +1404,7 @@
   }
   .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
     > .rail
-    :is(.rail-mode-label, .rail-mode-badge, .rail-action-label, .rail-action-status, .rail-library, .rail-action-dot, .rail-mode-now) {
+    :is(.rail-mode-label, .rail-mode-badge, .rail-action-label, .rail-action-status, .rail-library, .rail-action-dot, .rail-mode-now, .rail-key) {
     display: none;
   }
   .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
