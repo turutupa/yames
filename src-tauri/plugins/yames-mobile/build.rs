@@ -9,6 +9,10 @@ const COMMANDS: &[&str] = &[
     "set_back_intercept",
     "set_event_channel",
     "set_light_system_bars",
+    // Test builds only (the Kotlin side refuses anywhere else); see lib.rs.
+    "beta_update_probe",
+    "beta_update_download",
+    "beta_update_install",
 ];
 
 fn main() {

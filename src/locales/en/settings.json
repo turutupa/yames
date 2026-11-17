@@ -357,6 +357,16 @@
       "newerOut": "Version {{version}} is out",
       "getIt": "Get it",
       "notNow": "Not now",
+      "channel": "Channel",
+      "channelBeta": "Test build (beta)",
+      "betaReady": "Test build {{version}} is ready",
+      "betaUpdate": "Update",
+      "betaLater": "Later",
+      "betaDownloading": "Downloading…",
+      "betaDownloadingPercent": "Downloading… {{percent}}%",
+      "betaInstalling": "Opening the installer…",
+      "betaAllowInstalls": "Allow Yames to install apps, then tap Update again",
+      "betaFailed": "The update did not work",
       "soundsCreditSongs": "The other instruments come from the Sonivox General MIDI sound set (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

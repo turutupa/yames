@@ -4,7 +4,10 @@ Everything the phone build of Yames needs from its own native half: keeping
 the click playing with the screen off, keeping the screen awake, answering the
 system Back gesture, opening a link in the browser, and asking for the
 microphone the Session grades from, and matching the status and navigation
-bar icons to the app's theme. All of the commands, and
+bar icons to the app's theme, and, in a test build only, updating itself to
+the newest beta APK (the native side refuses on any build whose manifest does
+not declare REQUEST_INSTALL_PACKAGES, which only the beta build's does). All of
+the commands, and
 no scope — there is nothing here to narrow, and the frontend calls all of them.
 
 #### This default permission set includes the following:
@@ -16,6 +19,9 @@ no scope — there is nothing here to narrow, and the frontend calls all of them
 - `allow-set-back-intercept`
 - `allow-set-event-channel`
 - `allow-set-light-system-bars`
+- `allow-beta-update-probe`
+- `allow-beta-update-download`
+- `allow-beta-update-install`
 
 ## Permission Table
 
@@ -25,6 +31,84 @@ no scope — there is nothing here to narrow, and the frontend calls all of them
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`yames-mobile:allow-beta-update-download`
+
+</td>
+<td>
+
+Enables the beta_update_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:deny-beta-update-download`
+
+</td>
+<td>
+
+Denies the beta_update_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:allow-beta-update-install`
+
+</td>
+<td>
+
+Enables the beta_update_install command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:deny-beta-update-install`
+
+</td>
+<td>
+
+Denies the beta_update_install command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:allow-beta-update-probe`
+
+</td>
+<td>
+
+Enables the beta_update_probe command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`yames-mobile:deny-beta-update-probe`
+
+</td>
+<td>
+
+Denies the beta_update_probe command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>

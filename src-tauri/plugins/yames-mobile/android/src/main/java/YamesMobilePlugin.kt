@@ -60,6 +60,20 @@ class EventChannelArgs {
     lateinit var channel: Channel
 }
 
+@InvokeArg
+class BetaProbeArgs {
+    var url: String = ""
+}
+
+@InvokeArg
+class BetaDownloadArgs {
+    var url: String = ""
+    var sha256: String = ""
+    var size: Long = 0
+    var versionCode: Long = 0
+    var onProgress: Channel? = null
+}
+
 /**
  * The Android half of the `yames-mobile` plugin.
  *
@@ -88,6 +102,9 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
         const val PREF_ASKED_NOTIFICATIONS = "asked_notifications"
         const val NOTIFICATIONS_REQUEST_CODE = 0x7a01
     }
+
+    /** Test builds only; every entry point refuses elsewhere. See BetaUpdate.kt. */
+    private val beta by lazy { BetaUpdate(activity) }
 
     private val audioManager: AudioManager
         get() = activity.getSystemService(Activity.AUDIO_SERVICE) as AudioManager
@@ -407,6 +424,55 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
         lastInsets?.let { emit(it) }
         activity.runOnUiThread { ViewCompat.requestApplyInsets(activity.window.decorView) }
         invoke.resolve()
+    }
+
+    // -----------------------------------------------------------------------
+    // Test builds: the in-app update to the newest beta APK
+    // -----------------------------------------------------------------------
+
+    /** Network and disk on a thread of their own; the main thread only for startActivity. */
+    private fun betaOffMainThread(invoke: Invoke, block: () -> JSObject) {
+        if (!beta.isTestBuild()) {
+            invoke.reject("in-app updates exist in test builds only")
+            return
+        }
+        Thread {
+            try {
+                invoke.resolve(block())
+            } catch (e: Exception) {
+                Log.w(TAG, "beta update: ${e.message}")
+                invoke.reject(e.message ?: e.toString())
+            }
+        }.apply { name = "yames-beta-update" }.start()
+    }
+
+    @Command
+    fun betaUpdateProbe(invoke: Invoke) {
+        val args = invoke.parseArgs(BetaProbeArgs::class.java)
+        betaOffMainThread(invoke) { beta.probe(args.url).put("downloaded", beta.hasDownload()) }
+    }
+
+    @Command
+    fun betaUpdateDownload(invoke: Invoke) {
+        val args = invoke.parseArgs(BetaDownloadArgs::class.java)
+        betaOffMainThread(invoke) {
+            beta.download(args.url, args.sha256, args.size, args.versionCode, args.onProgress)
+        }
+    }
+
+    @Command
+    fun betaUpdateInstall(invoke: Invoke) {
+        if (!beta.isTestBuild()) {
+            invoke.reject("in-app updates exist in test builds only")
+            return
+        }
+        activity.runOnUiThread {
+            try {
+                invoke.resolve(beta.install())
+            } catch (e: Exception) {
+                invoke.reject(e.message ?: e.toString())
+            }
+        }
     }
 
     // -----------------------------------------------------------------------

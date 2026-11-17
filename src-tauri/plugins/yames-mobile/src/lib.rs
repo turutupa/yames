@@ -199,6 +199,119 @@ async fn set_event_channel<R: Runtime>(
     call(&app, "setEventChannel", EventChannel { channel })
 }
 
+// ---------------------------------------------------------------------------
+// Test builds only: the in-app update of the beta APK
+// ---------------------------------------------------------------------------
+//
+// Three steps, each a command, so the frontend can show where it is:
+//
+// * **`beta_update_probe`** — fetch `android-beta.json` from the rolling
+//   `beta` pre-release and say what is installed (`versionCode`) and whether
+//   Android already lets this app install packages. The fetch is native
+//   because GitHub's release downloads redirect to a host that sends no CORS
+//   headers, so the webview could not read the answer.
+// * **`beta_update_download`** — the APK into the app's cache, with progress
+//   through a channel, checked against the sha256 and size the JSON gave.
+// * **`beta_update_install`** — hand it to the system's package installer
+//   through the app's `FileProvider`, or open "Install unknown apps" for
+//   Yames when that is not allowed yet.
+//
+// Only a test build can do any of it: the Kotlin side refuses unless the
+// running package declares `REQUEST_INSTALL_PACKAGES`, which only the beta
+// build's manifest does (`gen/android/app/src/beta/AndroidManifest.xml`).
+// The stable and Play builds carry the commands and none of the permission.
+
+/// Where to read the beta feed from. The frontend passes the URL so this side
+/// holds no address of its own.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BetaProbe {
+    pub url: String,
+}
+
+/// What to download and what it must turn out to be.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BetaDownload {
+    pub url: String,
+    /// Lowercase hex. Required: an APK that cannot be checked is not offered.
+    pub sha256: String,
+    /// Bytes, or 0 when the feed did not say.
+    #[serde(default)]
+    pub size: u64,
+    /// The versionCode the feed promised, checked against the downloaded
+    /// APK's own before the installer is opened.
+    #[serde(default)]
+    pub version_code: u64,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct BetaDownloadWithProgress {
+    url: String,
+    sha256: String,
+    size: u64,
+    version_code: u64,
+    on_progress: tauri::ipc::Channel<serde_json::Value>,
+}
+
+#[cfg(target_os = "android")]
+fn call_value<R: Runtime>(
+    app: &AppHandle<R>,
+    command: &str,
+    payload: impl Serialize,
+) -> Result<serde_json::Value, String> {
+    let handle = app
+        .try_state::<YamesMobile<R>>()
+        .ok_or_else(|| "the phone side of Yames did not start".to_string())?;
+    handle
+        .0
+        .run_mobile_plugin::<serde_json::Value>(command, payload)
+        .map_err(|e| e.to_string())
+}
+
+/// iOS and desktop have no APK to install; their update path is a store or
+/// `tauri-plugin-updater`.
+#[cfg(not(target_os = "android"))]
+fn call_value<R: Runtime>(
+    _app: &AppHandle<R>,
+    _command: &str,
+    _payload: impl Serialize,
+) -> Result<serde_json::Value, String> {
+    Err("in-app APK updates exist on Android test builds only".to_string())
+}
+
+#[tauri::command]
+async fn beta_update_probe<R: Runtime>(
+    app: AppHandle<R>,
+    payload: BetaProbe,
+) -> Result<serde_json::Value, String> {
+    call_value(&app, "betaUpdateProbe", payload)
+}
+
+#[tauri::command]
+async fn beta_update_download<R: Runtime>(
+    app: AppHandle<R>,
+    payload: BetaDownload,
+    on_progress: tauri::ipc::Channel<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+    call_value(
+        &app,
+        "betaUpdateDownload",
+        BetaDownloadWithProgress {
+            url: payload.url,
+            sha256: payload.sha256,
+            size: payload.size,
+            version_code: payload.version_code,
+            on_progress,
+        },
+    )
+}
+
+#[tauri::command]
+async fn beta_update_install<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
+    call_value(&app, "betaUpdateInstall", ())
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("yames-mobile")
         .invoke_handler(tauri::generate_handler![
@@ -208,7 +321,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             open_url,
             set_back_intercept,
             set_event_channel,
-            set_light_system_bars
+            set_light_system_bars,
+            beta_update_probe,
+            beta_update_download,
+            beta_update_install
         ])
         .setup(|_app, _api| {
             #[cfg(target_os = "android")]

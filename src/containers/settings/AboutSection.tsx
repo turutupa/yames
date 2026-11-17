@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
+import { IS_BETA, IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
+import { NO_ANDROID_BETA, type AndroidBetaUpdate } from "../../beta/useAndroidBetaUpdate";
 
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
 import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
@@ -14,6 +15,7 @@ export function AboutSection({
   updateStatus,
   latestVersion,
   newerVersion = NEVER_NEWER,
+  androidBeta = NO_ANDROID_BETA,
   onInstallUpdate,
   onCheckUpdate,
 }: {
@@ -22,6 +24,8 @@ export function AboutSection({
   latestVersion: string;
   /** Empty on every build but the phone one from yames.app (M11). */
   newerVersion?: NewerVersion;
+  /** The Android test build's own updater; idle everywhere else. */
+  androidBeta?: AndroidBetaUpdate;
   onInstallUpdate: () => void;
   onCheckUpdate: () => void;
 }) {
@@ -67,6 +71,68 @@ export function AboutSection({
           <span className="about-label">{t("settings.about.version")}</span>
           <span className="about-value">{appVersion}</span>
         </div>
+        {/* A test build says so, next to its version, on every platform:
+            "which build are you on" is the first question about a bug. */}
+        {IS_BETA && (
+          <div className="about-row" data-testid="about-channel">
+            <span className="about-label">{t("settings.about.channel")}</span>
+            <span className="about-value">{t("settings.about.channelBeta")}</span>
+          </div>
+        )}
+        {/* The Android test build updates itself from the beta feed; a store
+            build has the store, and the website's build the line above. */}
+        {IS_BETA && IS_MOBILE && (
+          <div className="about-row" data-testid="about-beta-updates">
+            <span className="about-label">{t("settings.about.updates")}</span>
+            <span className="about-value">
+              {androidBeta.status === "checking" && (
+                <span className="update-status">{t("settings.about.checking")}</span>
+              )}
+              {androidBeta.status === "downloading" && (
+                <span className="update-status">
+                  {typeof androidBeta.progress === "number"
+                    ? t("settings.about.betaDownloadingPercent", {
+                        percent: Math.round(androidBeta.progress * 100),
+                      })
+                    : t("settings.about.betaDownloading")}
+                </span>
+              )}
+              {androidBeta.status === "installing" && (
+                <span className="update-status">{t("settings.about.betaInstalling")}</span>
+              )}
+              {androidBeta.status === "needs-permission" && (
+                <span className="update-status">{t("settings.about.betaAllowInstalls")}</span>
+              )}
+              {androidBeta.status === "up-to-date" && (
+                <span className="update-status up-to-date">{t("settings.about.upToDate")}</span>
+              )}
+              {androidBeta.status === "failed" && (
+                <span className="update-status" title={androidBeta.error ?? undefined}>
+                  {t("settings.about.betaFailed")}
+                </span>
+              )}
+              {androidBeta.version &&
+                (androidBeta.status === "available" ||
+                  androidBeta.status === "needs-permission" ||
+                  androidBeta.status === "failed") && (
+                  <button className="update-available-btn" onClick={androidBeta.update}>
+                    {t("settings.about.available", { version: androidBeta.version })}
+                  </button>
+                )}
+              {(androidBeta.status === "idle" ||
+                androidBeta.status === "up-to-date" ||
+                (androidBeta.status === "failed" && !androidBeta.version)) && (
+                <button className="update-check-btn" onClick={androidBeta.check}>
+                  {t(
+                    androidBeta.status === "idle"
+                      ? "settings.about.checkUpdates"
+                      : "settings.about.checkAgain",
+                  )}
+                </button>
+              )}
+            </span>
+          </div>
+        )}
         {/* The store updates a phone app; there is no in-app check. */}
         {!IS_MOBILE && (
           <div className="about-row">

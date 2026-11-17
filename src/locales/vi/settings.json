@@ -357,6 +357,16 @@
       "newerOut": "Đã có phiên bản {{version}}",
       "getIt": "Tải về",
       "notNow": "Để sau",
+      "channel": "Kênh",
+      "channelBeta": "Bản thử nghiệm (beta)",
+      "betaReady": "Bản thử nghiệm {{version}} đã sẵn sàng",
+      "betaUpdate": "Cập nhật",
+      "betaLater": "Để sau",
+      "betaDownloading": "Đang tải…",
+      "betaDownloadingPercent": "Đang tải… {{percent}}%",
+      "betaInstalling": "Đang mở trình cài đặt…",
+      "betaAllowInstalls": "Hãy cho phép Yames cài ứng dụng, rồi chạm Cập nhật lần nữa",
+      "betaFailed": "Cập nhật không thành công",
       "soundsCreditSongs": "Các nhạc cụ còn lại lấy từ bộ tiếng General MIDI của Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

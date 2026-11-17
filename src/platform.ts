@@ -87,3 +87,23 @@ declare const __YAMES_SIDELOAD__: boolean;
 
 export const SAYS_WHEN_NEWER: boolean =
   typeof __YAMES_SIDELOAD__ !== "undefined" && __YAMES_SIDELOAD__;
+
+/**
+ * Whether this is a TEST build — the `beta` channel, made by
+ * `.github/workflows/beta.yml` with `YAMES_CHANNEL=beta` (see
+ * `vite.config.ts`).
+ *
+ * A beta carries the version `X.Y.Z-beta.N` and updates from the rolling
+ * `beta` pre-release rather than from `releases/latest`: on the desktop the
+ * updater's endpoint is swapped by a `--config` overlay at build time, on
+ * Android `src/beta/useAndroidBetaUpdate.ts` reads `android-beta.json` and
+ * installs the APK through the yames-mobile plugin. About says which channel
+ * is running.
+ *
+ * Every read is inside `IS_BETA ? … :` or `IS_BETA &&`, so a stable build has
+ * none of it; `scripts/check-mobile-bundle.mjs` (and `--beta`) checks that
+ * for the phone.
+ */
+declare const __YAMES_BETA__: boolean;
+
+export const IS_BETA: boolean = typeof __YAMES_BETA__ !== "undefined" && __YAMES_BETA__;

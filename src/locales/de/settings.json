@@ -357,6 +357,16 @@
       "newerOut": "Version {{version}} ist da",
       "getIt": "Holen",
       "notNow": "Jetzt nicht",
+      "channel": "Kanal",
+      "channelBeta": "Testversion (Beta)",
+      "betaReady": "Testversion {{version}} ist bereit",
+      "betaUpdate": "Aktualisieren",
+      "betaLater": "Später",
+      "betaDownloading": "Wird heruntergeladen…",
+      "betaDownloadingPercent": "Wird heruntergeladen… {{percent}} %",
+      "betaInstalling": "Installer wird geöffnet…",
+      "betaAllowInstalls": "Erlaube Yames, Apps zu installieren, und tippe dann erneut auf Aktualisieren",
+      "betaFailed": "Die Aktualisierung hat nicht geklappt",
       "soundsCreditSongs": "Die übrigen Instrumente stammen aus dem Sonivox-General-MIDI-Klangsatz (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

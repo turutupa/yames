@@ -357,6 +357,16 @@
       "newerOut": "バージョン {{version}} が出ています",
       "getIt": "入手する",
       "notNow": "あとで",
+      "channel": "チャンネル",
+      "channelBeta": "テスト版（ベータ）",
+      "betaReady": "テスト版 {{version}} の準備ができました",
+      "betaUpdate": "アップデート",
+      "betaLater": "あとで",
+      "betaDownloading": "ダウンロード中…",
+      "betaDownloadingPercent": "ダウンロード中… {{percent}}%",
+      "betaInstalling": "インストーラーを開いています…",
+      "betaAllowInstalls": "Yames にアプリのインストールを許可してから、もう一度「アップデート」をタップしてください",
+      "betaFailed": "アップデートできませんでした",
       "soundsCreditSongs": "ほかの楽器は Sonivox の General MIDI 音源です（Sonic Network Inc., Apache-2.0）。"
     },
     "songs": {

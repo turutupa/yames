@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { Channel, invoke } from "@tauri-apps/api/core";
 import { currentFacts, feedbackUrl } from "./feedback/feedbackUrl";
 import { listen } from "@tauri-apps/api/event";
 import { IS_MOBILE } from "./platform";
@@ -366,6 +366,70 @@ export async function downloadAndInstallUpdate(): Promise<void> {
   if (!update) throw new Error("no update available — could not reach the update server");
   await update.downloadAndInstall();
   await relaunch();
+}
+
+// ---------------------------------------------------------------------------
+// Android test builds: the in-app update to the newest beta APK
+// ---------------------------------------------------------------------------
+//
+// The yames-mobile plugin does the work (`BetaUpdate.kt`): it reads the feed
+// natively (GitHub's asset host sends no CORS headers), downloads the APK into
+// the cache and opens the system installer. It refuses on any build whose
+// manifest does not declare REQUEST_INSTALL_PACKAGES, which only the beta
+// build's does. Callers are behind `IS_BETA && IS_MOBILE`.
+
+/** `android-beta.json`, as the plugin read it, and what is installed. */
+export interface AndroidBetaProbe {
+  installedVersionCode: number;
+  installedVersionName: string;
+  /** Android already lets Yames install packages. */
+  canInstall: boolean;
+  /** A verified APK for some version is already in the cache. */
+  downloaded: boolean;
+  version: string;
+  versionCode: number;
+  url: string;
+  sha256: string;
+  size: number;
+  notes: string;
+}
+
+export interface AndroidBetaProgress {
+  received: number;
+  /** Bytes, or -1/0 when unknown. */
+  total: number;
+}
+
+export async function androidBetaProbe(url: string): Promise<AndroidBetaProbe> {
+  return invoke<AndroidBetaProbe>("plugin:yames-mobile|beta_update_probe", {
+    payload: { url },
+  });
+}
+
+export async function androidBetaDownload(
+  feed: Pick<AndroidBetaProbe, "url" | "sha256" | "size" | "versionCode">,
+  onProgress: (p: AndroidBetaProgress) => void,
+): Promise<void> {
+  const channel = new Channel<AndroidBetaProgress>();
+  channel.onmessage = onProgress;
+  await invoke("plugin:yames-mobile|beta_update_download", {
+    payload: {
+      url: feed.url,
+      sha256: feed.sha256,
+      size: feed.size,
+      versionCode: feed.versionCode,
+    },
+    onProgress: channel,
+  });
+}
+
+/**
+ * Open the system installer on the downloaded APK. `needsPermission` means
+ * Android's "Install unknown apps" page for Yames was opened instead; the
+ * user allows it, comes back, and installs again.
+ */
+export async function androidBetaInstall(): Promise<{ started: boolean; needsPermission: boolean }> {
+  return invoke("plugin:yames-mobile|beta_update_install");
 }
 
 // ---------------------------------------------------------------------------

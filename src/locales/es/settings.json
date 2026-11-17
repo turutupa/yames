@@ -357,6 +357,16 @@
       "newerOut": "Ya está la versión {{version}}",
       "getIt": "Descargar",
       "notNow": "Ahora no",
+      "channel": "Canal",
+      "channelBeta": "Versión de prueba (beta)",
+      "betaReady": "La versión de prueba {{version}} está lista",
+      "betaUpdate": "Actualizar",
+      "betaLater": "Más tarde",
+      "betaDownloading": "Descargando…",
+      "betaDownloadingPercent": "Descargando… {{percent}} %",
+      "betaInstalling": "Abriendo el instalador…",
+      "betaAllowInstalls": "Permite que Yames instale apps y vuelve a tocar Actualizar",
+      "betaFailed": "La actualización no ha funcionado",
       "soundsCreditSongs": "Los demás instrumentos vienen del banco de sonidos General MIDI de Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

@@ -357,6 +357,16 @@
       "newerOut": "Вышла версия {{version}}",
       "getIt": "Скачать",
       "notNow": "Не сейчас",
+      "channel": "Канал",
+      "channelBeta": "Тестовая версия (бета)",
+      "betaReady": "Тестовая версия {{version}} готова",
+      "betaUpdate": "Обновить",
+      "betaLater": "Позже",
+      "betaDownloading": "Загрузка…",
+      "betaDownloadingPercent": "Загрузка… {{percent}}%",
+      "betaInstalling": "Открываем установщик…",
+      "betaAllowInstalls": "Разрешите Yames устанавливать приложения и снова нажмите «Обновить»",
+      "betaFailed": "Обновить не получилось",
       "soundsCreditSongs": "Остальные инструменты — из набора звуков General MIDI от Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {

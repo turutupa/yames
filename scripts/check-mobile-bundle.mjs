@@ -19,6 +19,7 @@
  *
  *   node scripts/check-mobile-bundle.mjs [dist-dir]
  *   node scripts/check-mobile-bundle.mjs --sideload [dist-dir]
+ *   node scripts/check-mobile-bundle.mjs --beta [dist-dir]
  *
  * There are two phone bundles and they are not the same app (M11). The one a
  * store gets must not be able to tell you a newer version exists: a store
@@ -43,6 +44,9 @@ import { fileURLToPath } from "node:url";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const sideload = args.includes("--sideload");
+// The TEST build (`YAMES_CHANNEL=beta`, .github/workflows/beta.yml): it must
+// carry the beta feed and its updater, and every other phone build must not.
+const beta = args.includes("--beta");
 const distDir = resolve(args.find((a) => !a.startsWith("--")) ?? join(repoRoot, "dist"));
 
 /**
@@ -92,6 +96,16 @@ const SIDELOAD_ONLY = [
   ],
 ];
 
+/**
+ * What only a test build may carry: the beta feed's address and the command
+ * that reads it. Forbidden in the store and website builds — neither must be
+ * able to wander onto the beta channel — and REQUIRED with `--beta`.
+ */
+const BETA_ONLY = [
+  ["releases/download/beta/android-beta.json", "the test channel's feed"],
+  ["beta_update_probe", "the test build's in-app APK update"],
+];
+
 /** Every file under `dist/assets`, recursively. */
 function assetFiles(dir) {
   let out = [];
@@ -119,7 +133,11 @@ if (files.length === 0) {
   process.exit(2);
 }
 
-const forbidden = sideload ? FORBIDDEN : [...FORBIDDEN, ...SIDELOAD_ONLY];
+const forbidden = [
+  ...FORBIDDEN,
+  ...(sideload ? [] : SIDELOAD_ONLY),
+  ...(beta ? [] : BETA_ONLY),
+];
 const hits = [];
 /** Needles the sideload flavour must CARRY, and where each was seen. */
 const found = new Set();
@@ -135,6 +153,21 @@ for (const file of files) {
     for (const [needle] of SIDELOAD_ONLY) {
       if (text.includes(needle)) found.add(needle);
     }
+  }
+  if (beta) {
+    for (const [needle] of BETA_ONLY) {
+      if (text.includes(needle)) found.add(needle);
+    }
+  }
+}
+
+if (beta) {
+  const missing = BETA_ONLY.filter(([needle]) => !found.has(needle));
+  if (missing.length > 0) {
+    console.error("This was built as a test build and cannot update itself — missing:\n");
+    for (const [needle, what] of missing) console.error(`  ${needle}  — ${what}`);
+    console.error("\nThe build was missing YAMES_CHANNEL=beta, or the `IS_BETA && IS_MOBILE` call site was folded away.");
+    process.exit(1);
   }
 }
 
@@ -172,7 +205,7 @@ if (hits.length > 0) {
 }
 
 console.log(
-  `Mobile bundle is clean (${sideload ? "the website's build" : "a store's build"}): ` +
+  `Mobile bundle is clean (${beta ? "a test build" : sideload ? "the website's build" : "a store's build"}): ` +
     `${files.length} file${files.length === 1 ? "" : "s"} checked, ` +
     `none of the ${forbidden.length} cut features found` +
     (sideload

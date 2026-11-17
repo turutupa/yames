@@ -31,6 +31,11 @@ export default defineConfig(async () => ({
     __YAMES_SIDELOAD__: JSON.stringify(
       process.env.YAMES_MOBILE === "1" && process.env.YAMES_SIDELOAD === "1",
     ),
+    // `YAMES_CHANNEL=beta` is the test build (.github/workflows/beta.yml),
+    // desktop and phone. It says "test build" in About and offers the next
+    // beta from inside the app. Off, every `IS_BETA` branch folds away and
+    // the beta feed's address is not in dist/ (src/platform.ts).
+    __YAMES_BETA__: JSON.stringify(process.env.YAMES_CHANNEL === "beta"),
   },
   clearScreen: false,
   server: {

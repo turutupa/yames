@@ -152,3 +152,54 @@ that file into the GitHub issue.
 
 No GitHub account? Tell whoever sent you the build, and include the version
 from **Settings > About**.
+
+## 6. Test builds that update themselves (the beta channel)
+
+Test builds are published on one GitHub pre-release,
+[`beta`](https://github.com/turutupa/yames/releases/tag/beta). Its files are
+replaced every time a new test build is made. A test build's version looks like
+`1.3.0-beta.57`, and **Settings > About** shows **Channel: Test build (beta)**.
+People on the normal releases never get these builds. A pre-release never
+counts as the latest release, so their updates, winget and Homebrew are not
+affected.
+
+**Install the first one by hand.**
+
+- **Windows:** download `Yames_<version>_x64-setup.exe` from the `beta`
+  release and run it. It installs over a normal Yames and keeps your settings
+  and practice data. If you installed the `.msi` before, uninstall that one
+  first.
+- **Linux:** download the `.AppImage` (when the build includes Linux) and
+  run it.
+- **Android:** download `Yames_<version>_aarch64.apk` on the phone and open
+  it. If you have a Play Store or website copy of Yames, uninstall it first:
+  test builds are signed with a different key, so Android will not install one
+  over the other.
+
+**After that, updates come to you.**
+
+- **Desktop:** when a newer test build is out, a small notice under the header
+  says so, at most once a day and never while the metronome is playing.
+  Press **Update** there, or use **Settings > About > Updates**. Yames
+  downloads the new build, checks its signature, installs it with a progress
+  window (no questions) and opens again.
+- **Android:** Yames checks once a day when you open it, and you can check
+  yourself in **Settings > About > Updates**. **Update** downloads the APK
+  (with progress), checks it, and opens Android's installer. The first time,
+  Android sends you to **Install unknown apps** for Yames. Allow it, come back,
+  and press **Update** again.
+
+**To make a test build** (maintainers): run the `Beta (test builds)` workflow
+from any branch. Pick the platforms (default `windows,android`; `linux` and
+`macos` are optional, and macOS fails until Apple signing is sorted) and write
+the notes testers will see:
+
+```sh
+gh workflow run beta.yml --ref revamp -f platforms=windows,android -f notes="What changed in this build"
+```
+
+The version is the minor after the current stable (`1.2.2` gives `1.3.0`)
+plus `-beta.<run number>`. Android and desktop are separate feeds. A run
+without Android leaves the current APK in place, and a run without any desktop
+platform leaves the desktop builds in place. A run with some desktop platforms
+replaces the whole desktop feed, so include every desktop platform testers use.

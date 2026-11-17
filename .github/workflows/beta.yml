@@ -1,0 +1,485 @@
+name: Beta (test builds)
+
+# Test builds for testers, updated from inside the app. Run by hand only:
+#
+#   gh workflow run beta.yml --ref <branch> -f platforms=windows,android -f notes="What changed"
+#
+# What it publishes is ONE rolling GitHub pre-release, tagged `beta`, whose
+# assets are replaced on every run:
+#
+#   Yames_<v>_x64-setup.exe (+ AppImage / .app.tar.gz / .dmg when built)
+#   latest.json         the desktop betas' tauri-plugin-updater feed
+#   Yames_<v>_aarch64.apk
+#   android-beta.json   { version, versionCode, url, sha256, size, notes }
+#
+# The apps read them at `releases/download/beta/<name>`. GitHub resolves that
+# to the release whose TAG is `beta`, pre-release or not (the same way
+# neovim's rolling `nightly` pre-release is downloaded); drafts have no such
+# URL, which is why the release is never left as one.
+#
+# Stable is untouched, by construction:
+#   * a pre-release can never be "latest", and this job also passes
+#     --latest=false and checks `releases/latest` afterwards — so the stable
+#     updater feed (`releases/latest/download/latest.json`), the website's
+#     download links and the Android "newer version" check never see it;
+#   * winget and Homebrew are fed by release.yml's jobs, which only run on a
+#     `release …` commit to main; nothing here triggers them (no workflow in
+#     this repo runs on a tag push or a release event);
+#   * `src-tauri/tauri.conf.json` is not edited: the beta's version and
+#     updater endpoint come from a `--config` overlay made in the run;
+#   * the Android beta permission (REQUEST_INSTALL_PACKAGES) is merged only
+#     when gradle sees YAMES_CHANNEL=beta (gen/android/app/build.gradle.kts).
+#
+# Version: X.Y.Z-beta.N — X.Y.Z is the minor after the version in
+# tauri.conf.json (1.2.2 -> 1.3.0), N is this workflow's run number, so
+# every run is newer than the last. Android versionCode = (X*10000 + Y*100 +
+# Z) * 10000 + N (scripts/beta-feed.mjs, build.gradle.kts).
+#
+# Frugal on purpose: no LLM smoke job, no notes job, no AAB. Same features
+# as release.yml (coach-llm-vulkan on Windows/Linux, -metal on macOS).
+on:
+  # `gh workflow run` only finds workflows that exist on the default branch.
+  # Until this file is on main, a push to `beta-build` starts a run with the
+  # defaults (windows,android; the pushed commit's message as the notes):
+  #   git push -f origin <branch>:beta-build
+  push:
+    branches: [beta-build]
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Comma-separated: windows, android, linux, macos (macOS needs Apple signing sorted)'
+        required: true
+        default: 'windows,android'
+        type: string
+      notes:
+        description: 'Release notes for testers (shown in the app and on the release page)'
+        required: false
+        default: ''
+        type: string
+
+# One publish at a time: two runs merging latest.json at once would lose one.
+concurrency:
+  group: beta-feed
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      desktop: ${{ steps.p.outputs.desktop }}
+      has_desktop: ${{ steps.p.outputs.has_desktop }}
+      android: ${{ steps.p.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version
+        id: v
+        run: |
+          set -euo pipefail
+          STABLE=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          VERSION=$(node scripts/beta-feed.mjs version "$STABLE" "$GITHUB_RUN_NUMBER")
+          echo "Stable $STABLE -> beta $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Platforms
+        id: p
+        env:
+          # Through the environment, never interpolated into the script.
+          PLATFORMS: ${{ inputs.platforms || 'windows,android' }}
+        run: |
+          set -euo pipefail
+          node - <<'EOF' >> "$GITHUB_OUTPUT"
+          const asked = String(process.env.PLATFORMS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+          const known = ["windows", "linux", "macos", "android"];
+          const bad = asked.filter((p) => !known.includes(p));
+          if (bad.length || !asked.length) {
+            console.error(`::error::platforms must be a comma-separated subset of ${known.join(", ")}; got "${process.env.PLATFORMS}"`);
+            process.exit(1);
+          }
+          const rows = [];
+          if (asked.includes("windows")) rows.push({ label: "windows", os: "windows-latest", target: "", args: "--bundles nsis", features: "coach-llm-vulkan" });
+          if (asked.includes("linux")) rows.push({ label: "linux", os: "ubuntu-22.04", target: "", args: "--bundles appimage", features: "coach-llm-vulkan" });
+          if (asked.includes("macos")) {
+            rows.push({ label: "macos-aarch64", os: "macos-latest", target: "aarch64-apple-darwin", args: "--target aarch64-apple-darwin --bundles app,dmg", features: "coach-llm-metal" });
+            rows.push({ label: "macos-x86_64", os: "macos-latest", target: "x86_64-apple-darwin", args: "--target x86_64-apple-darwin --bundles app,dmg", features: "coach-llm-metal" });
+          }
+          console.log(`desktop=${JSON.stringify({ include: rows })}`);
+          console.log(`has_desktop=${rows.length > 0}`);
+          console.log(`android=${asked.includes("android")}`);
+          EOF
+
+  # ---------------------------------------------------------------------------
+  # Desktop: NSIS only on Windows (WiX/MSI refuses a non-numeric pre-release
+  # such as -beta.N), AppImage only on Linux (the format the updater replaces
+  # in place). Signed updater artifacts via TAURI_SIGNING_PRIVATE_KEY.
+  # ---------------------------------------------------------------------------
+  desktop:
+    needs: prepare
+    if: needs.prepare.outputs.has_desktop == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.desktop) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      - name: LLM build environment
+        uses: ./.github/actions/llm-build-env
+
+      # Same cache prefix as release.yml, its own key: a beta must not evict
+      # the release cache or be restored into it.
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          prefix-key: 'v2-ninja-vk1.4.313-nossl'
+          key: beta-${{ matrix.label }}
+          workspaces: 'src-tauri'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        shell: bash
+        run: npm install
+
+      - name: Beta config overlay
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: node scripts/beta-feed.mjs overlay "$VERSION" "$GITHUB_WORKSPACE/beta.conf.json"
+
+      # The updater signature needs the key; without it there is no feed to
+      # publish, so fail here rather than after a 30-minute build.
+      - name: Require the updater signing key
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY is not set; a beta without a signed updater artifact cannot update."
+            exit 1
+          fi
+
+      # `npx tauri`, as release.yml: the explicit --features, not the wrapper's.
+      # YAMES_CHANNEL reaches `beforeBuildCommand` (vite), which turns on the
+      # About row and the once-a-day prompt.
+      - name: Build
+        shell: bash
+        env:
+          YAMES_CHANNEL: beta
+          ARGS: ${{ matrix.args }}
+          FEATURES: ${{ matrix.features }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2086 # ARGS is a list of flags on purpose
+          npx tauri build --config "$GITHUB_WORKSPACE/beta.conf.json" $ARGS -- --features "$FEATURES"
+
+      - name: Collect
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          LABEL: ${{ matrix.label }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          TD="${CARGO_TARGET_DIR:-src-tauri/target}"
+          BUNDLE="$TD/${TARGET:+$TARGET/}release/bundle"
+          node scripts/beta-feed.mjs collect "$LABEL" "$VERSION" "$BUNDLE" beta-out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: beta-${{ matrix.label }}
+          path: beta-out/*
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Android: the arm64 APK, signed with the repository's TEST key (the
+  # ANDROID_* secrets, alias `yames-test`) so every beta updates in place.
+  # Steps mirror android.yml.
+  # ---------------------------------------------------------------------------
+  android:
+    needs: prepare
+    if: needs.prepare.outputs.android == 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # A beta signed with a throwaway key could never be updated over, which
+      # is the whole point of the channel: refuse instead.
+      - name: Require the test signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_IS_RELEASE: ${{ vars.ANDROID_KEY_IS_RELEASE }}
+        run: |
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set; beta APKs must all carry the test key."
+            exit 1
+          fi
+          if [ "${KEY_IS_RELEASE:-}" = "true" ]; then
+            echo "::warning::ANDROID_KEY_IS_RELEASE=true: the secrets hold the real upload key, so this beta is signed with it."
+          fi
+
+      - name: Install Rust stable with the arm64 Android target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager --install "platforms;android-36" "build-tools;35.0.0" "ndk;26.1.10909125"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> "$GITHUB_ENV"
+
+      - name: aubio's build needs (libclang, the NDK sysroot)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev cmake
+          echo "BINDGEN_EXTRA_CLANG_ARGS=--sysroot=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> "$GITHUB_ENV"
+          echo "CFLAGS=-std=gnu11 -Wno-implicit-function-declaration" >> "$GITHUB_ENV"
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: beta-android
+          workspaces: 'src-tauri'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Decode the test keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/yames-test.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/yames-test.jks" >> "$GITHUB_ENV"
+
+      - name: Beta config overlay
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: node scripts/beta-feed.mjs overlay "$VERSION" "$GITHUB_WORKSPACE/beta.conf.json"
+
+      # YAMES_CHANNEL=beta: vite turns on the in-app updater, gradle merges the
+      # REQUEST_INSTALL_PACKAGES manifest and computes the beta versionCode.
+      # YAMES_VERSION: gradle's versionName/Code, independent of whether the
+      # CLI passes the overlay's version through tauri.properties.
+      # No YAMES_SIDELOAD: a beta does not point testers at the website.
+      - name: Build the signed arm64 APK
+        env:
+          YAMES_CHANNEL: beta
+          YAMES_VERSION: ${{ needs.prepare.outputs.version }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: npm run tauri -- android build --apk --target aarch64 --config "$GITHUB_WORKSPACE/beta.conf.json"
+
+      - name: The APK can update itself (and is not a store build)
+        run: node scripts/check-mobile-bundle.mjs --beta
+
+      - name: Collect, verify, describe
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          NOTES: ${{ inputs.notes || github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          OUT=src-tauri/gen/android/app/build/outputs/apk
+          APK=$(find "$OUT" -name '*.apk' ! -name '*unsigned*' | sort | head -1)
+          test -n "$APK" || { echo "::error::no signed APK was produced"; find "$OUT" -name '*.apk'; exit 1; }
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/apksigner" verify --print-certs "$APK"
+          BADGING=$("$BT/aapt2" dump badging "$APK" | head -1)
+          echo "$BADGING"
+          CODE=$(printf '%s' "$BADGING" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
+          NAME=$(printf '%s' "$BADGING" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
+          [ "$NAME" = "$VERSION" ] || { echo "::error::APK versionName is '$NAME', expected '$VERSION'"; exit 1; }
+          "$BT/aapt2" dump permissions "$APK" | grep -q REQUEST_INSTALL_PACKAGES \
+            || { echo "::error::the beta APK does not declare REQUEST_INSTALL_PACKAGES"; exit 1; }
+          mkdir -p beta-out
+          cp "$APK" "beta-out/Yames_${VERSION}_aarch64.apk"
+          printf '%s' "$NOTES" > "$RUNNER_TEMP/notes.txt"
+          # Fails unless CODE is the scheme's code for VERSION.
+          node scripts/beta-feed.mjs android "$VERSION" "$CODE" "beta-out/Yames_${VERSION}_aarch64.apk" "$RUNNER_TEMP/notes.txt" beta-out/android-beta.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: beta-android
+          path: beta-out/*
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Publish: create or update the rolling `beta` pre-release. Only when every
+  # requested platform built, so a half-failed run never moves the feed.
+  # ---------------------------------------------------------------------------
+  publish:
+    needs: [prepare, desktop, android]
+    if: >-
+      always() && needs.prepare.result == 'success'
+      && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped')
+      && (needs.android.result == 'success' || needs.android.result == 'skipped')
+      && (needs.desktop.result == 'success' || needs.android.result == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.prepare.outputs.version }}
+      NOTES: ${{ inputs.notes || github.event.head_commit.message }}
+      HAS_DESKTOP: ${{ needs.prepare.outputs.has_desktop }}
+      HAS_ANDROID: ${{ needs.prepare.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: beta-*
+          path: built
+          merge-multiple: true
+
+      - name: Refuse to touch a release that is not a pre-release
+        run: |
+          set -euo pipefail
+          if gh release view beta --json isPrerelease,isDraft > "$RUNNER_TEMP/rel.json" 2>/dev/null; then
+            cat "$RUNNER_TEMP/rel.json"
+            node -e 'const r=require(process.argv[1]); if(!r.isPrerelease){console.error("::error::release beta exists and is NOT a pre-release; refusing to touch it"); process.exit(1)}' "$RUNNER_TEMP/rel.json"
+            echo "EXISTS=1" >> "$GITHUB_ENV"
+          else
+            echo "EXISTS=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: Merge the feeds
+        run: |
+          set -euo pipefail
+          mkdir -p existing
+          if [ "$EXISTS" = 1 ]; then
+            gh release download beta -p latest.json -p android-beta.json -D existing --clobber || true
+          fi
+          printf '%s' "$NOTES" > "$RUNNER_TEMP/notes.txt"
+          if [ "$HAS_DESKTOP" = true ]; then
+            node scripts/beta-feed.mjs latest "$VERSION" "$RUNNER_TEMP/notes.txt" built existing/latest.json built/latest.json
+          elif [ -f existing/latest.json ]; then
+            echo "No desktop build this run; latest.json stays as it is."
+          fi
+          if [ "$HAS_ANDROID" != true ] && [ -f existing/android-beta.json ]; then
+            echo "No Android build this run; android-beta.json stays as it is."
+          fi
+          # The feeds as they will be after this run, for the stale-asset sweep.
+          LATEST=built/latest.json;        [ -f "$LATEST" ] || LATEST=existing/latest.json
+          ANDROID=built/android-beta.json; [ -f "$ANDROID" ] || ANDROID=existing/android-beta.json
+          { echo "FEED_LATEST=$LATEST"; echo "FEED_ANDROID=$ANDROID"; } >> "$GITHUB_ENV"
+          ls -la built
+
+      - name: Create or update the pre-release
+        run: |
+          set -euo pipefail
+          {
+            echo "**Test build ${VERSION}** — for testers. Not a release: stable users never get this."
+            echo
+            if [ -n "$NOTES" ]; then printf '%s\n\n' "$NOTES"; fi
+            echo "Install the first one by hand (Windows: the \`-setup.exe\`; Android: the \`.apk\`); after that the app updates itself. See TESTING.md."
+            echo
+            echo "Built from ${GITHUB_SHA} (${GITHUB_REF_NAME}), run ${GITHUB_RUN_NUMBER}."
+          } > "$RUNNER_TEMP/body.md"
+          if [ "$EXISTS" = 1 ]; then
+            # Move the tag to this commit without deleting it (deleting the
+            # tag of a published release turns it into a draft).
+            # Traceability only: the feed works wherever the tag points.
+            gh api -X PATCH "repos/$GH_REPO/git/refs/tags/beta" -f sha="$GITHUB_SHA" -F force=true > /dev/null \
+              || echo "::warning::could not move tag beta to ${GITHUB_SHA}; the release body still names the commit"
+            gh release edit beta --prerelease --latest=false --draft=false \
+              --title "Yames test build ${VERSION}" --notes-file "$RUNNER_TEMP/body.md"
+          else
+            gh release create beta --prerelease --latest=false --target "$GITHUB_SHA" \
+              --title "Yames test build ${VERSION}" --notes-file "$RUNNER_TEMP/body.md"
+          fi
+
+      # Installers first, the two feeds last: a feed never names an asset
+      # that is not there yet.
+      - name: Upload
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=()
+          for f in built/*; do
+            case "$(basename "$f")" in
+              latest.json|android-beta.json|fragment-*.json) ;;
+              *) files+=("$f") ;;
+            esac
+          done
+          if [ ${#files[@]} -gt 0 ]; then gh release upload beta "${files[@]}" --clobber; fi
+          for f in built/latest.json built/android-beta.json; do
+            [ -f "$f" ] && gh release upload beta "$f" --clobber
+          done
+          true
+
+      - name: Remove stale assets
+        run: |
+          set -euo pipefail
+          gh release view beta --json assets --jq '.assets[].name' > "$RUNNER_TEMP/assets.txt"
+          node scripts/beta-feed.mjs stale "$FEED_LATEST" "$FEED_ANDROID" "$RUNNER_TEMP/assets.txt" > "$RUNNER_TEMP/stale.txt"
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            echo "removing stale $name"
+            gh release delete-asset beta "$name" -y
+          done < "$RUNNER_TEMP/stale.txt"
+
+      - name: Stable is still stable
+        run: |
+          set -euo pipefail
+          gh release view beta --json isPrerelease,isDraft,tagName,assets --jq '{isPrerelease,isDraft,tagName,assets:[.assets[].name]}'
+          LATEST=$(gh api "repos/$GH_REPO/releases/latest" --jq .tag_name)
+          echo "releases/latest is $LATEST"
+          if [ "$LATEST" = beta ]; then
+            echo "::error::the beta pre-release became releases/latest — stable users would be offered it. Fix the release flags now."
+            exit 1
+          fi
+          {
+            echo "### Beta ${VERSION}"
+            echo
+            echo "- Feed: https://github.com/${GH_REPO}/releases/download/beta/latest.json"
+            echo "- Android: https://github.com/${GH_REPO}/releases/download/beta/android-beta.json"
+            echo "- releases/latest is still \`${LATEST}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
