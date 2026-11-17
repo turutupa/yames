@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.ComponentCallbacks2
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.AudioDeviceCallback
@@ -19,8 +20,10 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import app.tauri.PermissionState
 import app.tauri.annotation.Command
@@ -81,6 +84,9 @@ class EventChannelArgs {
 class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     private companion object {
         const val TAG = "YamesMobile"
+        const val PREFS = "yames_mobile"
+        const val PREF_ASKED_NOTIFICATIONS = "asked_notifications"
+        const val NOTIFICATIONS_REQUEST_CODE = 0x7a01
     }
 
     private val audioManager: AudioManager
@@ -100,8 +106,20 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     @Volatile
     private var backIntercept = false
 
-    /** Kept so the permission callback can finish the play the user asked for. */
-    private var pendingStart: BackgroundAudioArgs? = null
+    /** Whether the click service is running (a Take or the metronome is playing). */
+    private var playing = false
+
+    /** Between `onResume` and `onStop`: the activity is on the screen. */
+    private var onScreen = false
+
+    /**
+     * Set when the app went to the background with the click running and
+     * Android 13+ had not yet been asked about notifications: the one moment
+     * the shade row was actually needed and could not be shown. The question
+     * is put the next time the click stops with the app on screen, never
+     * during first run and never while a Take or the metronome is playing.
+     */
+    private var notificationWasNeeded = false
 
     /**
      * The last system-bar insets measured, kept because they are measured
@@ -224,10 +242,13 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
      * really being gone from the screen.
      */
     override fun onResume() {
+        onScreen = true
         emit(JSObject().put("event", "app_visible").put("visible", true))
     }
 
     override fun onStop() {
+        onScreen = false
+        if (playing && notificationsUnasked()) notificationWasNeeded = true
         emit(JSObject().put("event", "app_visible").put("visible", false))
     }
 
@@ -250,31 +271,49 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
             abandonFocus()
             stopService()
             invoke.resolve()
+            maybeAskForNotifications()
             return
         }
 
-        // Ask for the notification permission the first time and only the
-        // first time: once the user has answered, `getPermissionState` stops
-        // returning PROMPT and playback proceeds either way. A denied prompt
-        // costs the row in the shade, not the click.
-        val needsPrompt =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                getPermissionState("notifications") == PermissionState.PROMPT
-        if (needsPrompt) {
-            pendingStart = args
-            requestPermissionForAlias("notifications", invoke, "notificationPermissionResult")
-            return
-        }
-
+        // No permission prompt here. It used to be asked on the first play,
+        // which put a system dialog over the player's first Take. The service
+        // runs and the click plays without the permission; what is missing
+        // is only the row in the shade, and that is asked for once it has
+        // been needed (see `notificationWasNeeded`).
         startPlayback(args)
         invoke.resolve()
     }
 
-    @PermissionCallback
-    fun notificationPermissionResult(invoke: Invoke) {
-        pendingStart?.let { startPlayback(it) }
-        pendingStart = null
-        invoke.resolve()
+    /** Android 13+, never granted, and this app has not put the question yet. */
+    private fun notificationsUnasked(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+        return !activity.getSharedPreferences(PREFS, Activity.MODE_PRIVATE)
+            .getBoolean(PREF_ASKED_NOTIFICATIONS, false)
+    }
+
+    /**
+     * The notification question, at a calm moment: the click has just stopped,
+     * the app is on screen, and the shade row was needed earlier (the app went
+     * to the background mid-click). Asked once; the answer does not matter to
+     * the click, so nothing waits on it.
+     */
+    private fun maybeAskForNotifications() {
+        if (!notificationWasNeeded || playing || !onScreen || !notificationsUnasked()) return
+        notificationWasNeeded = false
+        activity.getSharedPreferences(PREFS, Activity.MODE_PRIVATE).edit()
+            .putBoolean(PREF_ASKED_NOTIFICATIONS, true).apply()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                NOTIFICATIONS_REQUEST_CODE,
+            )
+        }
     }
 
     /**
@@ -303,6 +342,22 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
         val result = JSObject()
         result.put("granted", getPermissionState("microphone") == PermissionState.GRANTED)
         invoke.resolve(result)
+    }
+
+    /**
+     * `active`: the app's theme is light, so the status and navigation bar
+     * icons are drawn dark. `MainActivity` starts them light (most themes,
+     * and the default, are dark); this follows the theme the user picked.
+     */
+    @Command
+    fun setLightSystemBars(invoke: Invoke) {
+        val light = invoke.parseArgs(ToggleArgs::class.java).active
+        activity.runOnUiThread {
+            val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+            controller.isAppearanceLightStatusBars = light
+            controller.isAppearanceLightNavigationBars = light
+        }
+        invoke.resolve()
     }
 
     @Command
@@ -408,6 +463,7 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     }
 
     private fun startPlayback(args: BackgroundAudioArgs) {
+        playing = true
         requestFocus()
         val intent =
             Intent(activity, ClickService::class.java)
@@ -423,6 +479,7 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     }
 
     private fun stopService() {
+        playing = false
         activity.stopService(Intent(activity, ClickService::class.java))
     }
 

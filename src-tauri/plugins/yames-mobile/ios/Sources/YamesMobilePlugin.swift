@@ -109,6 +109,13 @@ class YamesMobilePlugin: Plugin {
     invoke.resolve()
   }
 
+  /// A no-op for now: the status bar style on iOS belongs to the view
+  /// controller. The command exists so the shared frontend does not branch.
+  @objc public func setLightSystemBars(_ invoke: Invoke) throws {
+    _ = try invoke.parseArgs(ToggleArgs.self)
+    invoke.resolve()
+  }
+
   @objc public func setEventChannel(_ invoke: Invoke) throws {
     events = try invoke.parseArgs(EventChannelArgs.self).channel
     invoke.resolve()

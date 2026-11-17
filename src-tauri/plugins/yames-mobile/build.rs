@@ -8,6 +8,7 @@ const COMMANDS: &[&str] = &[
     "open_url",
     "set_back_intercept",
     "set_event_channel",
+    "set_light_system_bars",
 ];
 
 fn main() {
