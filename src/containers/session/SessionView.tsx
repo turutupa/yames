@@ -573,7 +573,11 @@ export function BandVolume({ session, hint }: { session: SessionRun; hint: boole
           onChange={(e) => session.setBandVolume(Number(e.target.value))}
         />
       </label>
-      {hint && <div className="session-why">{t("session.run.bandHint")}</div>}
+      {hint && (
+        <div className="session-why">
+          {t(session.directInput ? "session.run.bandHint" : "session.run.bandMicHint")}
+        </div>
+      )}
     </>
   );
 }

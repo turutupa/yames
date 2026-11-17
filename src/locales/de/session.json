@@ -138,7 +138,8 @@
       "waitingForSignal": "Ich höre zu. Spiel einen Ton zum Testen.",
       "listeningBack": "Wiedergabe",
       "band": "Band",
-      "bandHint": "Die Band wird nicht bewertet. Mit Mikrofon leise halten oder Kopfhörer nutzen."
+      "bandHint": "Die Band wird nicht bewertet. Mit Mikrofon leise halten oder Kopfhörer nutzen.",
+      "bandMicHint": "Mit Mikrofon würde ich die Band als deine Töne hören, darum ist sie aus. Mit Kopfhörern kannst du sie aufdrehen."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",

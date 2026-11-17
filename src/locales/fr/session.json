@@ -138,7 +138,8 @@
       "waitingForSignal": "J'écoute. Joue une note pour vérifier.",
       "listeningBack": "Réécoute",
       "band": "Groupe",
-      "bandHint": "Le groupe n'est pas noté. Avec un micro, baisse-le ou mets un casque."
+      "bandHint": "Le groupe n'est pas noté. Avec un micro, baisse-le ou mets un casque.",
+      "bandMicHint": "Avec un micro, j'entendrais le groupe comme tes notes : il démarre coupé. Avec un casque, monte-le."
     },
     "result": {
       "kick": "Prise {{take}} · {{title}} · {{bpm}} BPM · {{bars}} mesures",

@@ -85,7 +85,7 @@ import {
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
-import { GUITAR_BAND, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
+import { GUITAR_BAND, bandVolumeFor, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
 import type { SongBacking } from "../../../songs/types";
 import { DEFAULT_PRACTICE_VIEW, isPracticeView } from "../highway/runwayModel";
 import type { PracticeView } from "../highway/runwayModel";
@@ -141,6 +141,12 @@ export type SessionRunInput = {
     toggleCard: () => void;
   };
   listening: boolean;
+  /**
+   * The guitar comes in through an interface (the selected input device is one
+   * the engine recognises as such), so nothing the speakers play reaches it.
+   * Absent or false: a microphone, or a device nobody can vouch for.
+   */
+  directInput?: boolean;
   /** The jam library, for a jam step. */
   jams: Jam[];
   lineup?: JamBand;
@@ -220,9 +226,8 @@ export function useSessionRun(input: SessionRunInput) {
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
   const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
-  const [bandVolume, setBandVolumeState] = useState<number>(() => readBandVolume(undefined));
-  const bandVolumeRef = useRef(bandVolume);
-  bandVolumeRef.current = bandVolume;
+  /** The player's band volume, or null for "never set" (the default then depends on the input). */
+  const [bandChoice, setBandChoice] = useState<number | null>(null);
   /** The band on the engine now (a Take's, or the finisher's), for live volume moves. */
   const loadedBand = useRef<SongBacking | null>(null);
   /** The song on the engine is the finisher's, which its step's stop clears. */
@@ -299,7 +304,7 @@ export function useSessionRun(input: SessionRunInput) {
       if (isPracticeView(saved)) setPracticeViewState(saved);
     });
     void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
-      if (saved !== undefined) setBandVolumeState(readBandVolume(saved));
+      setBandChoice(readBandVolume(saved));
     });
   }, [onLearningSide, refresh]);
 
@@ -308,17 +313,12 @@ export function useSessionRun(input: SessionRunInput) {
     void storeSave(MINUTES_KEY, next).catch(() => {});
   }, []);
 
-  /** The band's level, per player, kept; a move is heard at once. */
-  const setBandVolume = useCallback(
-    (next: number) => {
-      const level = readBandVolume(next);
-      setBandVolumeState(level);
-      void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
-      const band = loadedBand.current;
-      if (band) void enqueue(() => setSongMix(takeMix(band, level, DEFAULT_MIX_SETTING.mix.click)));
-    },
-    [enqueue],
-  );
+  /** The band's level, per player, kept. */
+  const setBandVolume = useCallback((next: number) => {
+    const level = readBandVolume(next) ?? 0;
+    setBandChoice(level);
+    void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
+  }, []);
 
   const setPracticeView = useCallback((next: PracticeView) => {
     setPracticeViewState(next);
@@ -354,6 +354,17 @@ export function useSessionRun(input: SessionRunInput) {
   const prepared = take !== null && preparedTake === takeKey(take, takeNumber);
 
   const onExercise = step?.kind === "exercise";
+  // A graded Take on a microphone starts with the band off (see `bandVolumeFor`).
+  const bandVolume = bandVolumeFor(bandChoice, input.directInput === true, onExercise);
+  const bandVolumeRef = useRef(bandVolume);
+  bandVolumeRef.current = bandVolume;
+  // A move of the slider (or the input changing) is heard at once, on the band loaded now.
+  useEffect(() => {
+    void enqueue(async () => {
+      const band = loadedBand.current;
+      if (band) await setSongMix(takeMix(band, bandVolumeRef.current, DEFAULT_MIX_SETTING.mix.click));
+    });
+  }, [bandVolume, enqueue]);
 
   const attempt = useSongAttempt({
     score: onExercise && take ? take.score : null,
@@ -1024,6 +1035,7 @@ export function useSessionRun(input: SessionRunInput) {
     setPracticeView,
     bandVolume,
     setBandVolume,
+    directInput: input.directInput === true,
     /** The Take on the stage has a band under it. */
     hasBand: take?.exercise.backing.kind === "jam",
     paths,

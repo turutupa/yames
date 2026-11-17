@@ -138,7 +138,8 @@
       "waitingForSignal": "Escuchando. Toca una nota para comprobarlo.",
       "listeningBack": "Reproduciendo",
       "band": "Banda",
-      "bandHint": "La banda no se califica. Con micrófono, bájala o usa auriculares."
+      "bandHint": "La banda no se califica. Con micrófono, bájala o usa auriculares.",
+      "bandMicHint": "Con micrófono oiría la banda como si fueran tus notas, así que empieza apagada. Con auriculares, súbela."
     },
     "result": {
       "kick": "Toma {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compases",

@@ -284,9 +284,19 @@ async function playTake(d, exercise, style, label, { band = false } = {}) {
     window.__e2eOff?.then?.((f) => f());
     window.__e2eOff = window.__TAURI__.event.listen('score-onset', (e) => window.__e2eOnsets.push(e.payload));`);
   const playing = band ? player.playOverBand(take) : player.playOnCountIn(take);
+  playing.catch(() => {}); // awaited below; a Take that never started must not crash the run
   // The app's PipeWire threads exist once its streams are open (see Env).
   env.promoteAudioThreads();
-  await d.clickText(/^Start take/);
+  try {
+    await d.clickText(/^Start take/, { timeoutMs: 20000 });
+  } catch (e) {
+    const why = await d.exec(`const b = document.querySelector('[data-testid="session-big"]');
+      return { phase: document.querySelector('[data-testid="session-take"]')?.dataset.phase ?? null, big: b?.innerText,
+        disabled: b?.disabled, noInput: !!document.querySelector('[data-testid="session-no-input"]'),
+        alert: document.querySelector('[role="alert"]')?.innerText ?? null }`).catch(() => null);
+    await shot(d, `no-start-${label}`);
+    throw new Error(`${e.message}; the Take screen: ${JSON.stringify(why)}`);
+  }
   const heard = await playing;
   // Played out, the engine stops the Take on its last bar line by itself.
   // `take` holds 1.5 s of tail after the last bar, so the end has passed.
@@ -468,8 +478,14 @@ async function scenarioBluesBand() {
     await d.clickText(/Chord tones: A7, D7 and E7/);
     await d.clickIn(/A on every downbeat/, /^Play this$/);
     await d.waitText(/Start take, (\d+) BPM/, 20000);
-    const banded = await d.exec(`return !!document.querySelector('[data-testid="session-band"]')`);
-    check(`${title}: the Take shows its band`, banded);
+    const banded = await d.exec(`return document.querySelector('[data-testid="session-band"] input')?.value ?? null`);
+    check(`${title}: the Take shows its band`, banded !== null);
+    // The virtual sound card is not an interface the app knows, so it is a
+    // microphone to the app, and a graded Take on a microphone starts with the
+    // band off (src/session/takeBand.ts bandVolumeFor). The player has
+    // headphones on, and turns it up.
+    check(`${title}: on a microphone the band starts off`, banded === "0", `slider at ${banded}`);
+    await setBand(d, "0.8");
     info.bluesBand = { takes: [] };
     const row = () => takesOf(exercise.id).at(-1);
     const summary = (r) =>
@@ -519,9 +535,7 @@ async function scenarioBluesBand() {
       await sleep(400);
       m = await d.waitText(/Start take, (\d+) BPM/);
     }
-    await d.exec(`const el = document.querySelector('[data-testid="session-band"] input');
-      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-      set.call(el, '0'); el.dispatchEvent(new Event('input', { bubbles: true }));`);
+    await setBand(d, "0");
 
     for (const [i, style] of ["good", "sloppy", "sloppier"].entries()) {
       if (i > 0) await d.clickText(/^(Go again|Again)/);
@@ -536,6 +550,14 @@ async function scenarioBluesBand() {
     if (report) printProbe("blues over the band", report);
     if (loopback) spawnSync("pactl", ["unload-module", loopback], { env: env.env() });
   }
+}
+
+/** Move the Take screen's band slider, as a hand on it would. */
+async function setBand(d, value) {
+  await d.exec(`const el = document.querySelector('[data-testid="session-band"] input');
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    set.call(el, arguments[0]); el.dispatchEvent(new Event('input', { bubbles: true }));`, [value]);
+  await sleep(300);
 }
 
 /** What WebKit itself says about its rendering, from webkit://gpu. */

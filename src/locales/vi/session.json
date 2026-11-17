@@ -138,7 +138,8 @@
       "waitingForSignal": "Đang nghe. Chơi một nốt để kiểm tra.",
       "listeningBack": "Đang nghe lại",
       "band": "Ban nhạc",
-      "bandHint": "Ban nhạc không được chấm. Dùng micro thì để nhỏ hoặc đeo tai nghe."
+      "bandHint": "Ban nhạc không được chấm. Dùng micro thì để nhỏ hoặc đeo tai nghe.",
+      "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên."
     },
     "result": {
       "kick": "Lượt {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ô nhịp",

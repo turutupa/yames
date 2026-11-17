@@ -138,7 +138,8 @@
       "waitingForSignal": "Dinliyorum. Kontrol için bir nota çal.",
       "listeningBack": "Geri dinleniyor",
       "band": "Grup",
-      "bandHint": "Grup notlanmaz. Mikrofonla çalıyorsan sesini kıs ya da kulaklık tak."
+      "bandHint": "Grup notlanmaz. Mikrofonla çalıyorsan sesini kıs ya da kulaklık tak.",
+      "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç."
     },
     "result": {
       "kick": "Deneme {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ölçü",

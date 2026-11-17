@@ -240,11 +240,32 @@ export function buildTakeBand(
 /** How loud the band is in a Session before the player touches anything. */
 export const DEFAULT_BAND_VOLUME = 0.8;
 
-/** The band volume as stored, or the default. 0..1.5, as a song fader. */
-export function readBandVolume(stored: unknown): number {
+/**
+ * A stored band volume, clamped to a song fader's 0..1.5, or null when the
+ * player has never set one (anything that is not a number).
+ */
+export function readBandVolume(stored: unknown): number | null {
   return typeof stored === "number" && Number.isFinite(stored)
     ? Math.min(1.5, Math.max(0, stored))
-    : DEFAULT_BAND_VOLUME;
+    : null;
+}
+
+/**
+ * How loud the band plays: the player's choice, or the default for where the
+ * guitar comes in and whether the Take is graded.
+ *
+ * **Off under a graded Take on a microphone, until the player turns it up.**
+ * Measured in the real app (tests/e2e, `blues-band --bleed`): with the band
+ * fed back into the input 30 dB down, a clean take of "A on every downbeat"
+ * scored 22 extra notes against a bar of 4 and failed, and a sloppy one read
+ * as perfectly even, because the drummer's strokes were matched in place of
+ * the guitar's. Speakers into a microphone are far louder than that. Through
+ * an interface (or with headphones, which is the player's call on the slider)
+ * nothing bleeds and the band is on. An ungraded finisher always has it.
+ */
+export function bandVolumeFor(chosen: number | null, direct: boolean, graded: boolean): number {
+  if (chosen !== null) return chosen;
+  return direct || !graded ? DEFAULT_BAND_VOLUME : 0;
 }
 
 /**

@@ -138,7 +138,8 @@
       "waitingForSignal": "正在听。弹一个音来检查。",
       "listeningBack": "正在回听",
       "band": "乐队",
-      "bandHint": "乐队不计分。用麦克风时请调小音量或戴耳机。"
+      "bandHint": "乐队不计分。用麦克风时请调小音量或戴耳机。",
+      "bandMicHint": "用麦克风时我会把乐队当成你的音，所以默认关闭。戴上耳机再调大。"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小节",

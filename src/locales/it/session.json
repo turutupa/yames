@@ -138,7 +138,8 @@
       "waitingForSignal": "In ascolto. Suona una nota per provare.",
       "listeningBack": "Riascolto",
       "band": "Band",
-      "bandHint": "La band non viene valutata. Col microfono, tienila bassa o usa le cuffie."
+      "bandHint": "La band non viene valutata. Col microfono, tienila bassa o usa le cuffie.",
+      "bandMicHint": "Col microfono sentirei la band come note tue, quindi parte spenta. Con le cuffie, alzala."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} battute",

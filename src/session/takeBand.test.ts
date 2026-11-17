@@ -6,7 +6,7 @@ import sweep from "../paths/packs/sweep-picking.json";
 import type { Exercise, PathDoc } from "../paths/format";
 import { barLengthTicks } from "../paths/format";
 import { buildTake } from "./take";
-import { bandJam, buildTakeBand, DEFAULT_BAND_VOLUME, isFillBar, readBandVolume, takeMix } from "./takeBand";
+import { bandJam, bandVolumeFor, buildTakeBand, DEFAULT_BAND_VOLUME, isFillBar, readBandVolume, takeMix } from "./takeBand";
 
 const PACKS = [blues, rock, alt, sweep] as unknown as PathDoc[];
 
@@ -135,11 +135,21 @@ describe("the Take's mix", () => {
     expect(takeMix(null, 0.8, 0.45)).toEqual({ click: 0.45, countIn: 0.45, tracks: [] });
   });
 
-  it("reads a stored band volume, clamped, and the default for anything else", () => {
-    expect(readBandVolume(undefined)).toBe(DEFAULT_BAND_VOLUME);
-    expect(readBandVolume("loud")).toBe(DEFAULT_BAND_VOLUME);
+  it("reads a stored band volume, clamped, and nothing for anything else", () => {
+    expect(readBandVolume(undefined)).toBeNull();
+    expect(readBandVolume("loud")).toBeNull();
     expect(readBandVolume(0.3)).toBe(0.3);
     expect(readBandVolume(9)).toBe(1.5);
     expect(readBandVolume(-1)).toBe(0);
+  });
+
+  it("starts the band off under a graded Take on a microphone, and on everywhere else", () => {
+    expect(bandVolumeFor(null, false, true)).toBe(0);
+    expect(bandVolumeFor(null, true, true)).toBe(DEFAULT_BAND_VOLUME);
+    // The finisher grades nothing, so a microphone hearing the band costs nothing.
+    expect(bandVolumeFor(null, false, false)).toBe(DEFAULT_BAND_VOLUME);
+    // The player's own choice wins, both ways.
+    expect(bandVolumeFor(0.5, false, true)).toBe(0.5);
+    expect(bandVolumeFor(0, true, true)).toBe(0);
   });
 });

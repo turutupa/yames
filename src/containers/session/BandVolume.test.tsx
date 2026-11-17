@@ -6,9 +6,9 @@ import type { SessionRun } from "./hooks/useSessionRun";
 
 afterEach(cleanup);
 
-function fake(hasBand: boolean) {
+function fake(hasBand: boolean, directInput = true) {
   const setBandVolume = vi.fn();
-  return { session: { hasBand, bandVolume: 0.8, setBandVolume } as unknown as SessionRun, setBandVolume };
+  return { session: { hasBand, directInput, bandVolume: 0.8, setBandVolume } as unknown as SessionRun, setBandVolume };
 }
 
 describe("the band volume", () => {
@@ -20,6 +20,12 @@ describe("the band volume", () => {
     fireEvent.change(slider, { target: { value: "0.3" } });
     expect(setBandVolume).toHaveBeenCalledWith(0.3);
     expect(screen.getByText(/not graded/)).toBeInTheDocument();
+  });
+
+  it("tells a microphone player why it starts off", () => {
+    const { session } = fake(true, false);
+    render(<BandVolume session={session} hint />);
+    expect(screen.getByText(/headphones/)).toBeInTheDocument();
   });
 
   it("is not there over a click", () => {

@@ -532,6 +532,7 @@ export function MainWindow() {
     state,
     coach: session,
     listening: evaluation.enabled,
+    directInput: evaluation.devices.find((d) => d.name === evaluation.selectedDevice)?.isInterface === true,
     jams: jamSession.jams,
     lineup: jamSession.lineup,
   });
