@@ -278,9 +278,11 @@ impl AudioInputCallback for MonoCallback {
         DataCallbackResult::Continue
     }
     fn on_error_after_close(&mut self, _stream: &mut dyn AudioInputStreamSafe, error: oboe::Error) {
-        // Unplugging the interface ends the stream. The UI's device list is
-        // refreshed by the device poll; the log says why the input went quiet.
+        // Unplugging the interface (or a route change) ends the stream.
+        // `android_route` tells the frontend, which restarts the input on what
+        // is there now; never reopened here.
         eprintln!("[yames][android] input stream closed by the system: {error:?}");
+        crate::android_route::input_lost();
     }
 }
 
@@ -300,6 +302,7 @@ impl AudioInputCallback for StereoCallback {
     }
     fn on_error_after_close(&mut self, _stream: &mut dyn AudioInputStreamSafe, error: oboe::Error) {
         eprintln!("[yames][android] input stream closed by the system: {error:?}");
+        crate::android_route::input_lost();
     }
 }
 
@@ -338,7 +341,8 @@ impl AudioInput {
         app_handle: AppHandle,
     ) -> Result<(), String> {
         let devices = input_devices();
-        let chosen = match device_name {
+        // An empty name is the picker's "System default", as None is.
+        let chosen = match device_name.filter(|n| !n.is_empty()) {
             Some(name) => Some(
                 devices
                     .iter()
@@ -512,7 +516,15 @@ impl AudioInput {
                      microphone, allow it in Android's settings for the app."
                 ))
             }
-            Err(_) => Err(format!("the input ({label}) did not open in time")),
+            Err(_) => {
+                // The open is still stuck somewhere in the system. Stand the
+                // thread down: if the open ever returns, `spectrum_loop` sees
+                // `alive` false at once and the stream is closed; the handle is
+                // let go rather than joined, so stop() cannot hang on it.
+                self.alive.store(false, Ordering::SeqCst);
+                drop(self.capture_thread.take());
+                Err(format!("the input ({label}) did not open in time"))
+            }
         }
     }
 }

@@ -256,6 +256,7 @@
     },
     "runway": {
       "label": "The next notes, arriving at the line"
-    }
+    },
+    "inputChanged": "The input changed. Listening through {{device}} now."
   }
 }

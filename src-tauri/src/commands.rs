@@ -1229,6 +1229,26 @@ pub fn reorder_presets(ids: Vec<String>, app_handle: AppHandle) -> Result<(), St
 // Audio Input / Evaluation Commands
 // ---------------------------------------------------------------------------
 
+/// Send both device lists again, as the desktop's device poll does when
+/// something is plugged in (`audio-devices-changed`,
+/// `audio-input-devices-changed`). A phone has no poll: its Kotlin side's
+/// `AudioDeviceCallback` asks for this when a USB interface, a jack adapter
+/// or headphones come or go (M7). Harmless anywhere else.
+#[tauri::command]
+pub async fn refresh_audio_devices(app_handle: AppHandle) {
+    let lists = tauri::async_runtime::spawn_blocking(|| {
+        (
+            crate::engine::list_output_devices(),
+            crate::audio_input::AudioInput::list_devices(),
+        )
+    })
+    .await;
+    if let Ok((outputs, inputs)) = lists {
+        let _ = app_handle.emit("audio-devices-changed", &outputs);
+        let _ = app_handle.emit("audio-input-devices-changed", &inputs);
+    }
+}
+
 #[tauri::command]
 pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
     tauri::async_runtime::spawn_blocking(|| crate::audio_input::AudioInput::list_devices())

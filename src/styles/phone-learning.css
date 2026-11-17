@@ -71,3 +71,33 @@
 .main-window.is-mobile .session-page {
   padding-bottom: calc(24px + var(--safe-bottom));
 }
+
+/* The Neck / Runway switch on the Take screen (mvp-runway): two thumb-sized
+   halves on a phone. It is locked while a Take runs, so it is only ever
+   pressed between Takes, and a mis-tap there costs nothing — but it is the
+   one control on that screen a player reaches for on purpose. */
+.main-window.is-mobile .session-viewswitch > button {
+  min-height: 44px;
+  min-width: 56px;
+}
+
+/* "The input changed. Listening through … now." (src/mobile/inputRoute.ts):
+   a line over the top of whatever is on screen, under the status bar, that
+   goes on its own after a few seconds or on a tap. Phone build only. */
+.main-window.is-mobile .input-route-notice {
+  position: fixed;
+  top: calc(56px + var(--safe-top));
+  left: 12px;
+  right: 12px;
+  z-index: 60;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}

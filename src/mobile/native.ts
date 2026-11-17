@@ -109,6 +109,8 @@ export interface WindowInsets {
 export type NativeEvent =
   | { event: "audio_interrupted"; kind: AudioInterruption }
   | { event: "back_pressed" }
+  /** An audio device came or went (USB interface, jack adapter, headphones). */
+  | { event: "audio_devices_changed" }
   | { event: "stop_requested" }
   /**
    * The activity came back to the screen, or left it (`onResume` / `onStop`).

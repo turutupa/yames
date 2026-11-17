@@ -577,6 +577,24 @@ export async function listAudioInputDevices(): Promise<AudioInputDevice[]> {
   return invoke<AudioInputDevice[]>("list_audio_input_devices");
 }
 
+/**
+ * Send both device lists again (`audio-devices-changed`,
+ * `audio-input-devices-changed`). A phone has no device poll: its native side
+ * asks for this when a USB interface, a jack adapter or headphones come or go.
+ */
+export async function refreshAudioDevices(): Promise<void> {
+  return invoke("refresh_audio_devices");
+}
+
+/**
+ * A phone's audio route changed and a stream was closed under it
+ * (`android_route.rs`): `output` has already been reopened by the engine;
+ * `input` is for the frontend to restart (see `src/mobile/inputRoute.ts`).
+ */
+export function onAudioRouteChanged(callback: (kind: "input" | "output") => void) {
+  return listen<{ kind: "input" | "output" }>("audio-route-changed", (e) => callback(e.payload.kind));
+}
+
 export function onAudioInputDevicesChanged(callback: (devices: AudioInputDevice[]) => void) {
   return listen<AudioInputDevice[]>("audio-input-devices-changed", (e) => callback(e.payload));
 }

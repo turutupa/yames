@@ -13,6 +13,7 @@ import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
 import { useAndroidNative } from "./hooks/useAndroidNative";
+import { useInputRoute } from "../../mobile/inputRoute";
 import { useBackDismiss } from "../../mobile/backStack";
 import {
   INERT_INPUT_TESTER,
@@ -1757,6 +1758,9 @@ export function MainWindow() {
   // full-screen layers, and with the stack empty Back backgrounds the app
   // with the click still going rather than killing it.
   if (IS_MOBILE) useBackDismiss(isFullscreen, zenExitHandler);
+  // A route change closed the input (a USB interface or jack adapter pulled
+  // or plugged): restart it on what is there and say so (M7, review).
+  const inputRoute = IS_MOBILE ? useInputRoute(evaluation) : null;
   const settingsBack = useCallback(() => setView(prevTab.current), [setView, prevTab]);
   if (IS_MOBILE) useBackDismiss(view === "settings", settingsBack);
 
@@ -1805,6 +1809,18 @@ export function MainWindow() {
           slot with the setup chip and the tour offer, none of which can be on
           screen during a failed Play — those are one-time onboarding nudges,
           this is a live fault. */}
+      {IS_MOBILE && inputRoute?.changedTo !== null && inputRoute?.changedTo !== undefined && (
+        <button
+          type="button"
+          className="input-route-notice"
+          role="status"
+          data-testid="input-route-notice"
+          onClick={inputRoute.dismiss}
+        >
+          {t("session.inputChanged", { device: inputRoute.changedTo || t("settings.inputTest.systemDefault") })}
+        </button>
+      )}
+
       {audioError.notice && (
         <AudioErrorNotice
           notice={audioError.notice}

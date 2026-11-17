@@ -6,10 +6,14 @@ import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.AudioAttributes
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
 import android.webkit.WebView
@@ -135,6 +139,27 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
             emit(JSObject().put("event", "audio_interrupted").put("kind", kind))
         }
 
+    /**
+     * A USB interface, a jack adapter or headphones in or out (M7).
+     *
+     * Android reroutes on its own and, on the fast path, closes the streams
+     * it rerouted: the Rust side reopens those itself (`android_route.rs`).
+     * What this adds is the LIST: the input picker and the first-run step
+     * show what is plugged in now, without the player reopening a screen.
+     * Registered with a main-looper handler; it is called once with every
+     * device present when it registers, which is harmless — a refresh.
+     */
+    private val deviceCallback =
+        object : AudioDeviceCallback() {
+            override fun onAudioDevicesAdded(added: Array<out AudioDeviceInfo>) {
+                emit(JSObject().put("event", "audio_devices_changed"))
+            }
+
+            override fun onAudioDevicesRemoved(removed: Array<out AudioDeviceInfo>) {
+                emit(JSObject().put("event", "audio_devices_changed"))
+            }
+        }
+
     private val backCallback =
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -184,6 +209,7 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
             watchWindowInsets()
         }
         activity.registerComponentCallbacks(memoryCallbacks)
+        audioManager.registerAudioDeviceCallback(deviceCallback, Handler(Looper.getMainLooper()))
         ClickService.onStopRequested = {
             emit(JSObject().put("event", "stop_requested"))
         }
@@ -208,6 +234,7 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     override fun onDestroy() {
         ClickService.onStopRequested = null
         activity.unregisterComponentCallbacks(memoryCallbacks)
+        audioManager.unregisterAudioDeviceCallback(deviceCallback)
         abandonFocus()
         stopService()
     }

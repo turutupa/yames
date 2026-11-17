@@ -256,6 +256,7 @@
     },
     "runway": {
       "label": "Çizgiye doğru gelen sıradaki notalar"
-    }
+    },
+    "inputChanged": "Giriş değişti. Artık {{device}} üzerinden dinliyorum."
   }
 }

@@ -16,6 +16,10 @@ mod calibration_cache;
 /// body is shared and unchanged.
 #[cfg(target_os = "android")]
 mod android_audio;
+/// Route changes on a phone: a stream AAudio closed under a headphone, USB or
+/// Bluetooth change is reopened from this module's thread (M7, review).
+#[cfg(target_os = "android")]
+mod android_route;
 // The phone's INPUT stream lives in `android_input.rs`, as a child module of
 // `audio_input` (it fills the same private ring and slots).
 mod clock;
@@ -191,7 +195,7 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, release_jam_sounds, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, release_jam_sounds, refresh_audio_devices, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     check_take_sound, delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback,
     takes_dir_size,
@@ -533,6 +537,10 @@ pub fn run() {
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
+            // A phone has no device poll; it reopens what a route change
+            // closed instead (`android_route.rs`).
+            #[cfg(target_os = "android")]
+            android_route::spawn(app.handle().clone());
             app.manage(create_shared_audio_input());
             app.manage(create_shared_onset_detector());
             app.manage(Arc::new(Mutex::new(TimingAnalyzer::new(beat_log))));
@@ -843,6 +851,7 @@ pub fn run() {
             set_jam_position,
             warm_jam,
             release_jam_sounds,
+            refresh_audio_devices,
             load_song,
             clear_song,
             set_song_range,

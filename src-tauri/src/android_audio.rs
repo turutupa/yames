@@ -101,10 +101,13 @@ where
         _stream: &mut dyn AudioOutputStreamSafe,
         error: oboe::Error,
     ) {
-        // Routing (headphones in or out) disconnects an exclusive stream. The
-        // engine's own restart path owns recovery; this is here so the reason
-        // is in logcat rather than nowhere.
+        // Routing (headphones in or out, a USB interface) disconnects an
+        // exclusive stream. `android_route` reopens it through the engine's
+        // own device-switch path.
         eprintln!("[yames][android] output stream closed by the system: {error:?}");
+        // A flag and an unpark; the reopen happens on `android_route`'s own
+        // thread, never on this one (M7, review).
+        crate::android_route::output_lost();
     }
 }
 

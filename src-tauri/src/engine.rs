@@ -4572,12 +4572,26 @@ pub(crate) fn take_offset(channels: usize, pair: usize) -> usize {
 /// rate is answered by the stream rather than by this.
 #[cfg(target_os = "android")]
 pub fn probe_output_rate(_device_name: Option<&str>) -> Option<u32> {
-    static PROBED: std::sync::OnceLock<Option<u32>> = std::sync::OnceLock::new();
-    *PROBED.get_or_init(|| {
-        crate::android_audio::probe_output_format()
+    // Cached once it has an answer. A failed probe is NOT cached (M7, review):
+    // it is retried at the next ask rather than leaving the process without a
+    // rate for its lifetime. And a route change forgets the answer
+    // (`android_route.rs`), because a USB interface can run at another rate.
+    let mut slot = PROBED_OUTPUT_RATE.lock().unwrap_or_else(|p| p.into_inner());
+    if slot.is_none() {
+        *slot = crate::android_audio::probe_output_format()
             .ok()
-            .map(|fmt| fmt.sample_rate)
-    })
+            .map(|fmt| fmt.sample_rate);
+    }
+    *slot
+}
+
+#[cfg(target_os = "android")]
+static PROBED_OUTPUT_RATE: std::sync::Mutex<Option<u32>> = std::sync::Mutex::new(None);
+
+/// The output route changed: the next probe asks the device again.
+#[cfg(target_os = "android")]
+pub(crate) fn forget_output_rate() {
+    *PROBED_OUTPUT_RATE.lock().unwrap_or_else(|p| p.into_inner()) = None;
 }
 
 #[cfg(not(target_os = "android"))]

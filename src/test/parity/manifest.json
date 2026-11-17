@@ -151,7 +151,8 @@
     "save_path_state",
     "save_path_take",
     "get_take_grade_with_notes",
-    "release_jam_sounds"
+    "release_jam_sounds",
+    "refresh_audio_devices"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -303,7 +304,8 @@
     "save_path_state",
     "save_path_take",
     "get_take_grade_with_notes",
-    "release_jam_sounds"
+    "release_jam_sounds",
+    "refresh_audio_devices"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -505,7 +507,9 @@
     "savePathTake",
     "openFeedback",
     "getTakeGradeWithNotes",
-    "releaseJamSounds"
+    "releaseJamSounds",
+    "onAudioRouteChanged",
+    "refreshAudioDevices"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -547,7 +551,8 @@
     "take-capped",
     "take-playback-ended",
     "tts-speech-ended",
-    "tts-speech-started"
+    "tts-speech-started",
+    "audio-route-changed"
   ],
   "eventsEmitted": [
     "adaptive-eval",
@@ -577,7 +582,8 @@
     "take-capped",
     "take-playback-ended",
     "tts-speech-ended",
-    "tts-speech-started"
+    "tts-speech-started",
+    "audio-route-changed"
   ],
   "hotkeys": [
     {

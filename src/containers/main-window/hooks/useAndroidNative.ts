@@ -34,7 +34,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { setPlaying } from "../../../ipc";
+import { refreshAudioDevices, setPlaying } from "../../../ipc";
 import { appVisibilityChanged, memoryTrimmed } from "../../../mobile/bandMemory";
 import { dismissTop } from "../../../mobile/backStack";
 import type { WindowInsets } from "../../../mobile/native";
@@ -145,6 +145,11 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
           break;
         case "memory_trim":
           memoryTrimmed(event.level);
+          break;
+        case "audio_devices_changed":
+          // A USB interface, a jack adapter or headphones came or went: the
+          // input picker and the first-run step show what is there now.
+          refreshAudioDevices().catch(() => {});
           break;
         case "audio_interrupted":
           if (event.kind === "focus_lost") {

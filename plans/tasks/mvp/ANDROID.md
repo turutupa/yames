@@ -20,7 +20,7 @@ emulator from this branch yet** (see "Verified" at the end).
 |---|---|
 | First run | Welcome → instrument → **how will I hear you** (mic, USB-C interface or jack adapter, with a level meter; asks for the microphone at this moment) → hear it work → sound & look → ready. Lands on Today. |
 | Today | Time choice, the plan and its reasons, Start. |
-| Session | The Take screen (the runway had not landed on `revamp` when this was written), graded from the guitar by the same onset detector, timing analyzer and scorer as a desktop: aubio, `onset.rs`, `timing.rs`, `score/` are all compiled for Android. Results, Find my edge, the recap. |
+| Session | The Take screen with the Neck / Runway switch (one picture at a time during a Take), graded from the guitar by the same onset detector, timing analyzer and scorer as a desktop: aubio, `onset.rs`, `timing.rs`, `score/` are all compiled for Android. Results, Find my edge, the recap. |
 | Paths, Progress | As on a desktop, in portrait. |
 | Tools | Metronome, Drill, Setlist, Jam, Songs, behind the Tools tab (the rail's Tools group). The library is a bottom sheet; Zen is on the tab bar while a tool is open. |
 | Settings | General, Appearance, **Devices (the audio input only)**, Support, About. |
@@ -75,6 +75,21 @@ desktop's cpal path is untouched (two `cfg(android)` early returns).
   slot is a `try_lock` that drops on contention, as on a desktop. The input
   tester's recording buffer and the once-a-second level snapshot still grow a
   `Vec`, exactly as the desktop callback does.
+- **Route changes** (from the review). AAudio closes a fast-path stream when
+  the route under it changes (headphones, a USB interface or jack adapter,
+  Bluetooth). Both Oboe error callbacks only raise a flag and unpark
+  `android_route.rs`'s thread: it reopens the output through the engine's own
+  device-switch path, and tells the frontend the input was lost;
+  `src/mobile/inputRoute.ts` restarts the evaluation on the same device if it
+  is still there, or on the one Android routes to now, and shows "The input
+  changed. Listening through … now." The Kotlin plugin registers an
+  `AudioDeviceCallback`, so a device plugged in refreshes the input picker
+  (`refresh_audio_devices`) without anything being reopened. **Not run on a
+  device.**
+- **Right notes.** The right-notes capture (`take_audio.rs`) is fed by the
+  onset detector's thread from the ring this callback fills, so it needs
+  nothing of its own on a phone; `ring_drops` (the input-drop counter) is
+  counted here as in the cpal callback.
 - **Background.** No `FOREGROUND_SERVICE_MICROPHONE`. Android 11+ silences the
   mic for a backgrounded app unless a microphone-type foreground service was
   started in the foreground; the screen is kept on while the click runs, so a
@@ -96,20 +111,25 @@ calibration (the first run's "hear it work") applies as on a desktop.
 ## Installing a test APK on a phone
 
 1. A push to `mvp-android` builds it (or, once `android.yml` is on `main`,
-   **Actions › Android (signed release) › Run workflow**)
-   on the branch, with an empty tag. Without the `ANDROID_KEYSTORE_*` secrets
-   the APK is signed with a throwaway key made in that run (`*-test-signed.apk`
-   in the `yames-android-<version>` artifact); with them, it is signed with the
-   upload key.
+   **Actions › Android (signed release) › Run workflow** with an empty tag).
+   The APK is signed with the repository's **test key** (the `ANDROID_*`
+   secrets, alias `yames-test`), so every tester build has the same signature
+   and installs over the previous one. It is the workflow artifact
+   `yames-android-<version>-<commit>`; nothing goes to Releases. Publishing a
+   tag also needs the repository variable `ANDROID_KEY_IS_RELEASE=true`, set
+   only once the secrets hold the real upload key. In a fork without the
+   secrets, the APK is signed with a key made in the run
+   (`*-test-signed.apk`): it installs, but not over another build.
 2. Download the artifact zip on a computer and unzip it, or open the run on
    the phone and download it there.
 3. On the phone, open the `.apk` (Files › Downloads). Android asks to allow
    installing from that app ("Install unknown apps" for Chrome or Files): allow
    it, go back, Install. Play Protect may warn about an unknown developer:
    "More details › Install anyway".
-4. A test-signed build cannot update a previous test-signed build (a new key
-   every run): uninstall the old Yames first. Progress is stored in the app's
-   data and goes with it.
+4. A new build installs over the old one and keeps its progress, as long as
+   the version in `package.json` has not gone down (the versionCode comes
+   from it). A fork's run-key build cannot: uninstall first, and the
+   progress goes with the app's data.
 5. First launch: the first run asks for the microphone at the input step, and
    for notifications the first time the click plays (the row in the shade that
    keeps the click alive with the screen off).
