@@ -14,9 +14,18 @@ import { exerciseScore } from "./toScore";
 import { exerciseWithVariant } from "./variants";
 import { RULES, errorsIn, runtimeNeeds, validatePath } from "./validate";
 import type { Issue } from "./validate";
+import {
+  checkOverlay,
+  englishStrings,
+  mergeTranslations,
+  readOverlay,
+  serializeOverlay,
+  stringsToTranslate,
+} from "./strings";
 
 export { RULES, errorsIn, runtimeNeeds, serializePath, validatePath, renderReviewPage };
 export type { Issue, PathDoc };
+export { checkOverlay, englishStrings, mergeTranslations, readOverlay, serializeOverlay, stringsToTranslate };
 
 export function allSpecs(): readonly PathSpec[] {
   return SPECS;
