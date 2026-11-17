@@ -85,6 +85,13 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   const wantRef = useRef(false);
   /** A start, stop or restart has been asked for since mount. */
   const touchedRef = useRef(false);
+  /**
+   * Bumped by every on/off asked for. A call that finishes may correct
+   * `wantRef` to what really happened (a start that failed) only while no
+   * newer on/off has been asked: otherwise it would undo the newer one, and a
+   * `toggle` made then would flip the wrong way.
+   */
+  const intentRef = useRef(0);
 
   // Load saved preferences on mount + sync persisted input gain to Rust DSP.
   // This last step is critical: the cpal callback defaults to unity gain
@@ -260,12 +267,14 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
     (on: boolean) => {
       wantRef.current = on;
       touchedRef.current = true;
+      const intent = ++intentRef.current;
       return serial(async () => {
         try {
           await apply(on);
         } finally {
-          // A start that failed leaves it off, whatever was asked.
-          if (wantRef.current === on) wantRef.current = enabledRef.current;
+          // A start that failed leaves it off, whatever was asked; only the
+          // latest intent may say so.
+          if (intentRef.current === intent) wantRef.current = enabledRef.current;
         }
       });
     },
@@ -279,6 +288,9 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   const restart = useCallback(
     (device: string | undefined, channel: number) => {
       touchedRef.current = true;
+      // A restart is no new on/off: it corrects `wantRef` only if none was
+      // asked for after it.
+      const intent = intentRef.current;
       return serial(async () => {
         if (!enabledRef.current) return;
         await stopEvaluation();
@@ -288,7 +300,7 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
           enabledRef.current = true;
         } finally {
           setEnabled(enabledRef.current);
-          wantRef.current = enabledRef.current;
+          if (intentRef.current === intent) wantRef.current = enabledRef.current;
         }
       });
     },

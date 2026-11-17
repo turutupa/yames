@@ -613,13 +613,39 @@ export function onAudioInputDevicesChanged(callback: (devices: AudioInputDevice[
 export const MIC_PERMISSION_DENIED =
   "Yames is not allowed to use the microphone. Allow it in Android's settings: Apps, Yames, Permissions, Microphone.";
 
+/**
+ * What `startEvaluation` rejects with when the microphone dialog was never
+ * answered (it was dismissed by the system, or hidden behind another window).
+ */
+export const MIC_PERMISSION_UNANSWERED =
+  "The microphone permission was not answered, so Yames is not listening. Try again, or allow it in Android's settings: Apps, Yames, Permissions, Microphone.";
+
+/**
+ * How long the microphone dialog may stay unanswered. Every start and stop of
+ * the input waits its turn behind this one (`useEvaluation`'s `serial`), so a
+ * dialog that never answers must not hold an Exit or a Session's end forever.
+ */
+export const MIC_PERMISSION_TIMEOUT_MS = 60_000;
+
+/** The permission, or `"unanswered"` once `MIC_PERMISSION_TIMEOUT_MS` has passed. */
+function askForMicrophone(): Promise<boolean | "unanswered"> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<"unanswered">((resolve) => {
+    timer = setTimeout(() => resolve("unanswered"), MIC_PERMISSION_TIMEOUT_MS);
+  });
+  return Promise.race([requestMicrophone(), timeout]).finally(() => clearTimeout(timer));
+}
+
 export async function startEvaluation(deviceName?: string, inputChannel?: number, coachMode?: "default" | "pro"): Promise<void> {
   // A phone asks for the microphone at the moment the input is first opened
   // — the first-run input step, a Session, or Settings' test — and every one
   // of those comes through here. A USB interface or a jack adapter is the
   // same permission on Android. Build-time constant: not in a desktop bundle.
-  if (IS_MOBILE && !(await requestMicrophone())) {
-    throw new Error(MIC_PERMISSION_DENIED);
+  if (IS_MOBILE) {
+    const allowed = await askForMicrophone();
+    // Treated as refused: the input stays off and the caller's screen says why.
+    if (allowed === "unanswered") throw new Error(MIC_PERMISSION_UNANSWERED);
+    if (!allowed) throw new Error(MIC_PERMISSION_DENIED);
   }
   return invoke("start_evaluation", {
     deviceName: deviceName ?? null,

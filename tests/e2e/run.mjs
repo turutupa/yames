@@ -735,7 +735,20 @@ async function scenarioBluesBand() {
 /** A good take on whatever the Take screen holds: it must be heard and pass. */
 async function goodTakeHeard(d, label) {
   await d.waitText(/Start take, (\d+) BPM/, 20000);
-  const noInput = await d.exec(`return !!document.querySelector('[data-testid="session-no-input"]')`);
+  // The input starts once the last Session's end has finished (stop, report,
+  // save): a few seconds on a busy machine. How long, for the record; a
+  // minute is "never".
+  const t0 = Date.now();
+  const deaf = () => d.exec(`return !!document.querySelector('[data-testid="session-no-input"]')`);
+  const noInput = await deaf();
+  while ((await deaf()) && Date.now() - t0 < 60000) await sleep(250);
+  const waitedS = ((Date.now() - t0) / 1000).toFixed(1);
+  if (await deaf()) {
+    const state = await d.invoke("get_evaluation_state").catch((e) => `error ${e.message}`);
+    check(`${label}: the input came on`, false, `still "can't hear" after ${waitedS} s; get_evaluation_state ${state}`);
+    await shot(d, `deaf-${label}`);
+    return;
+  }
   const exercise = (await exerciseHere(d)).hit?.exercise ?? null;
   if (!exercise) {
     check(`${label}: a shipped Exercise on the Take screen`, false, (await d.text()).slice(0, 300));
@@ -744,7 +757,7 @@ async function goodTakeHeard(d, label) {
   const r = await playTake(d, exercise, "good", label);
   const row = takesOf(exercise.id).at(-1);
   check(`${label}: the Take was heard and passes`, /PASS BAR MET/i.test(r.text) && row?.passed === 1,
-    `${exercise.title} at ${r.bpm}${noInput ? ", said it could not hear at first" : ""}; ` +
+    `${exercise.title} at ${r.bpm}${noInput ? `, input on after ${waitedS} s` : ""}; ` +
       (row ? `heard ${row.facts.measures.heard}/${row.facts.measures.expected}, passed ${row.passed}` : "no row"));
 }
 

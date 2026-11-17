@@ -134,6 +134,8 @@ export type SessionRunInput = {
   /** The coach session. Its call order is what keeps history. */
   coach: {
     active: boolean;
+    /** `active` as of the calls made, not the last render (`useSession`). */
+    isActive?: () => boolean;
     cardOpen: boolean;
     startSession: () => Promise<void>;
     endSession: () => Promise<void>;
@@ -824,7 +826,10 @@ export function useSessionRun(input: SessionRunInput) {
       cardWasOpen.current = coach.cardOpen;
       // The player's own coach session, running before this: not ours to end.
       // One we are still ending is ours, whatever the last render said.
-      const theirs = coach.active && !ownsCoach.current && coachEnding.current === null;
+      // `isActive` and not `active`: the end of our last session may have
+      // finished a moment ago with the render that says so still to come.
+      const active = coach.isActive ? coach.isActive() : coach.active;
+      const theirs = active && !ownsCoach.current && coachEnding.current === null;
       const now = Date.now();
       // A Path is started (subscribed) the first time it is played, not the
       // first time it is shown, so looking at Today writes nothing. Past the cap

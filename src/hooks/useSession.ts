@@ -1769,6 +1769,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     return next;
   }, []);
   const startSession = useCallback(() => inTurn(() => startNowRef.current()), [inTurn]);
+  const isActive = useCallback(() => activeRef.current, []);
   const endSession = useCallback(() => inTurn(() => endNowRef.current()), [inTurn]);
 
   // Chat: send a user question to the coach
@@ -2069,6 +2070,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     messages,
     startedAt,
     cardOpen,
+    /**
+     * Whether a session is on as of the calls already made, not as of the
+     * last render: false from the moment an end begins, true from the moment
+     * a start does. `active` lags it by a render.
+     */
+    isActive,
     startSession,
     endSession,
     sendChat,
