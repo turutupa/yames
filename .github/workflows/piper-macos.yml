@@ -1,0 +1,74 @@
+# Native macOS builds of the Piper TTS engine, published as assets on
+# a fixed pre-release that `tts::piper_archive_for` downloads from.
+#
+# Why we build it ourselves (issue #60): upstream rhasspy/piper
+# 2023.11.14-2 ran both of its macOS jobs on an Intel runner with no
+# arch flag, so `piper_macos_aarch64.tar.gz` holds an x86_64 binary
+# ("Bad CPU type in executable", os error 86, on Apple Silicon without
+# Rosetta). Both macOS archives also leave out the three dylibs piper
+# links against (their install rule only copies *.so / *.dll), so even
+# under Rosetta the engine dies at dyld time.
+#
+# Each arch builds on a native runner, bundles the dylibs, adds an
+# @loader_path rpath, re-signs ad hoc, and must synthesise real speech
+# before anything is uploaded. Run it only when the Piper pin changes.
+name: Piper (macOS native)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/piper-macos-native]
+    paths: [.github/workflows/piper-macos.yml, scripts/build-piper-macos.sh]
+
+permissions:
+  contents: write
+
+env:
+  PIPER_REF: 2023.11.14-2
+  # piper's CMake pulls piper-phonemize from `master.zip`; pin it.
+  PHONEMIZE_REF: ba3cc06c5248215928821f1393b2b854a936991a
+  RELEASE_TAG: piper-2023.11.14-2-macos.1
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-15, arch: aarch64, file_arch: arm64 }
+          - { runner: macos-15-intel, arch: x64, file_arch: x86_64 }
+    runs-on: ${{ matrix.runner }}
+    name: piper macos ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, bundle, verify
+        run: bash scripts/build-piper-macos.sh "${{ matrix.arch }}" "${{ matrix.file_arch }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: piper_macos_${{ matrix.arch }}
+          path: out/piper_macos_${{ matrix.arch }}.tar.gz*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Upload to the pinned pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -la dist
+          cat dist/*.sha256
+          # Pre-release + not latest: invisible to /releases/latest (the
+          # updater and the site) and to the site changelog.
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --prerelease --latest=false \
+              --target "$GITHUB_SHA" \
+              --title "Piper ${PIPER_REF} for macOS (native, with dylibs)" \
+              --notes "Not a Yames release. Native macOS builds of rhasspy/piper ${PIPER_REF} (piper-phonemize ${PHONEMIZE_REF}) that the Yames app downloads for speech. Built by .github/workflows/piper-macos.yml; see issue #60."
+          fi
+          gh release upload "$RELEASE_TAG" dist/* --clobber
