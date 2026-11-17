@@ -27,7 +27,7 @@
  * **Find my edge** is an Exercise step with the role `edge`, and the same states:
  * only the big action differs. It climbs a rung after every pass, holds after a
  * slip, and is done at the second slip on one rung or the top of the ladder.
- * What it found is `edgeOf`: the fastest rung passed over eight bars, which is
+ * What it found is `edgeOf`: the fastest rung passed over eight bars in a row, which is
  * exactly a clean tempo, so it moves the same number an Exercise does.
  *
  * Any state can `cancel`. That goes to `idle` from wherever it is and the effects
@@ -302,7 +302,7 @@ export type BigAction =
 export const EDGE_SLIPS = 2;
 
 export type Edge = {
-  /** The fastest rung passed over eight bars on this step: the edge. */
+  /** The fastest rung passed over eight bars in a row on this step: the edge. */
   reached: number | null;
   /** The rung it slipped on last, when it has. */
   slippedAt: number | null;

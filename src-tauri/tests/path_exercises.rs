@@ -16,7 +16,7 @@ use std::path::PathBuf;
 use yames_lib::instrument::Instrument;
 use yames_lib::score::pass::CLEAN_TEMPO_MIN_BARS;
 use yames_lib::score::{
-    match_attempt, BeatMap, OnsetState, PassBar, PassVerdict, PlayedOnset, ScheduleReport,
+    match_attempt, BeatMap, OnsetState, PassBar, PassResult, PassVerdict, PlayedOnset, ScheduleReport,
     ExpectedOnset, ScheduleRun, ScoreSchedule,
 };
 use yames_lib::session_log::Xorshift64;
@@ -317,6 +317,40 @@ fn exercise_bars(path: &str, exercise: &str, looping_only: bool) -> Option<Vec<P
     serde_json::from_value(own["passBars"].clone()).ok()
 }
 
+/// Bars a Session Take has past the stretch it is judged over:
+/// `TAKE_SLACK_BARS` in `src/session/grade.ts` (owner, 2026-11-17).
+const TAKE_SLACK_BARS: u32 = 2;
+
+/// A Session Take of this Exercise, exactly as `src/session/take.ts`
+/// `buildTake` writes it: `takeBarsOf` bars (the longest `overBars` or the
+/// clean tempo's 8, plus the slack, and at least one whole pass), as whole
+/// passes and the start of one more, cut on the bar line, not looping. Bars
+/// are four quarters in every pack today. Returns the schedule and its bars.
+fn session_take(row: &Row, bars: &[PassBar]) -> (ScoreSchedule, u32) {
+    let length = row.schedule.length_beats;
+    let ex_bars = (length / 4.0).round().max(1.0) as u32;
+    let needed = bars.iter().map(|b| b.over_bars).max().unwrap_or(1).max(CLEAN_TEMPO_MIN_BARS) + TAKE_SLACK_BARS;
+    let take_bars = needed.max(ex_bars);
+    let total = take_bars as f64 * 4.0;
+    let passes = take_bars.div_ceil(ex_bars) as usize;
+    let per_pass = row.schedule.onsets.len() as u32;
+    let schedule = ScoreSchedule {
+        onsets: (0..passes)
+            .flat_map(|p| {
+                row.schedule.onsets.iter().map(move |o| ExpectedOnset {
+                    id: o.id + p as u32 * per_pass,
+                    beat: o.beat + p as f64 * length,
+                    ..o.clone()
+                })
+            })
+            .filter(|o| o.beat < total - 1e-9)
+            .collect(),
+        length_beats: total,
+        loops: false,
+    };
+    (schedule, take_bars)
+}
+
 /// Every looping graded Exercise, played right round its loop for longer than
 /// its longest `overBars` and the clean tempo's 8 bars, passes its own bars.
 /// A bar that a tidy player could not meet would be a content bug; one the
@@ -376,10 +410,10 @@ fn every_looping_exercise_played_right_passes_its_own_bars() {
 }
 
 /// A Session Take, exactly as the engine logs it: the Exercise written out
-/// to whole passes (`src/session/take.ts` `buildTake`), not looping, and the
+/// to the Take's bars (`src/session/take.ts` `buildTake`), not looping, and the
 /// transport stopping on the line after the last bar. No downbeat follows that
 /// line, so the last bar has to count as finished from the pass length alone,
-/// or an 8-bar Take could never reach the clean tempo.
+/// or a Take with no slack could never reach the clean tempo.
 #[test]
 fn a_take_played_to_its_end_finishes_every_bar() {
     let row = rows()
@@ -391,23 +425,8 @@ fn a_take_played_to_its_end_finishes_every_bar() {
         })
         .expect("a graded Alternate Picking Exercise");
     let bars = pass_bars(&row.path, &row.exercise).unwrap();
-    let length = row.schedule.length_beats;
-    let passes = ((CLEAN_TEMPO_MIN_BARS as f64 * 4.0) / length).ceil() as usize;
-    let total = passes as f64 * length;
-    let per_pass = row.schedule.onsets.len() as u32;
-    let written = ScoreSchedule {
-        onsets: (0..passes)
-            .flat_map(|p| {
-                row.schedule.onsets.iter().map(move |o| ExpectedOnset {
-                    id: o.id + p as u32 * per_pass,
-                    beat: o.beat + p as f64 * length,
-                    ..o.clone()
-                })
-            })
-            .collect(),
-        length_beats: total,
-        loops: false,
-    };
+    let (written, _) = session_take(&row, &bars);
+    let total = written.length_beats;
     let ms = 60_000.0 / row.bpm;
     let notes: Vec<PlayedOnset> = written
         .onsets
@@ -473,12 +492,48 @@ fn a_run_without_lag_correction_scores_like_the_plain_matcher() {
     assert_eq!(from_run.interval_consistency, plain.interval_consistency);
 }
 
+/// Play a Session Take: every written onset with up to 2 ms of seeded jitter,
+/// except those `drop` says were fluffed. Returns the pass result.
+fn play_take(
+    written: &ScoreSchedule,
+    bars: &[PassBar],
+    bpm: f64,
+    seed: u64,
+    drop: impl Fn(&ExpectedOnset) -> bool,
+) -> PassResult {
+    let ms = 60_000.0 / bpm;
+    let mut rng = Xorshift64::new(seed);
+    let mut run = ScheduleRun::new(written.clone()).with_lag_correction(true).with_pass_bars(bars.to_vec());
+    for i in 0..(written.length_beats as usize) {
+        run.note_quarter_in_bar(i % 4 == 0, i as f64 * ms, 4);
+    }
+    for o in &written.onsets {
+        let jitter = ((rng.next_u64() % 2001) as f64 / 1000.0 - 1.0) * 2.0;
+        if drop(o) {
+            continue;
+        }
+        run.note_onset(PlayedOnset {
+            time_ms: o.beat * ms + jitter,
+            amplitude: if o.accent { 1.0 } else { 0.4 },
+            confidence: 1.0,
+        });
+    }
+    let weights = Instrument::ElectricGuitar.profile().score_weights;
+    let grade = run.report(&weights).expect("a beat map").grade;
+    grade.pass.expect("pass bars were loaded")
+}
+
 /// Every graded Exercise of every runnable Path, as a Session plays it: written
-/// out to whole passes for at least the clean tempo's 8 bars and its longest
-/// `overBars` (`src/session/grade.ts` `takeBarsOf`, `take.ts` `buildTake`), not
-/// looping, the transport stopping on the last bar line. Played right, each
-/// passes its own bars and counts toward the clean tempo. Looping or not, and
-/// every variant: this is the check that a Path is fit to be runnable.
+/// out to `takeBarsOf` bars (`src/session/grade.ts`, `take.ts` `buildTake`):
+/// the clean tempo's 8 bars or its longest `overBars`, two bars of slack, and
+/// the last pass cut on a bar line, not looping, the transport stopping on the
+/// last bar line. Played right, each passes its own bars and counts toward the
+/// clean tempo. Looping or not, and every variant: this is the check that a
+/// Path is fit to be runnable.
+///
+/// And with the slack, the owner's rule of 2026-11-17: the first bar fluffed
+/// (every note of it missed) or the last, the Take still passes and still
+/// earns the clean tempo from the clean bars in a row that are left.
 #[test]
 fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
     let mut checked = std::collections::BTreeMap::<String, usize>::new();
@@ -490,44 +545,19 @@ fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
             continue;
         }
         let name = format!("{}/{}", row.path, row.exercise);
-        let length = row.schedule.length_beats;
-        let ex_bars = (length / 4.0).round().max(1.0) as u32;
-        let needed = bars.iter().map(|b| b.over_bars).max().unwrap_or(1).max(CLEAN_TEMPO_MIN_BARS);
-        let passes = needed.div_ceil(ex_bars) as usize;
-        let per_pass = row.schedule.onsets.len() as u32;
-        let written = ScoreSchedule {
-            onsets: (0..passes)
-                .flat_map(|p| {
-                    row.schedule.onsets.iter().map(move |o| ExpectedOnset {
-                        id: o.id + p as u32 * per_pass,
-                        beat: o.beat + p as f64 * length,
-                        ..o.clone()
-                    })
-                })
-                .collect(),
-            length_beats: passes as f64 * length,
-            loops: false,
-        };
-        let ms = 60_000.0 / row.bpm;
-        let mut rng = Xorshift64::new(900 + index as u64);
-        let mut run = ScheduleRun::new(written.clone()).with_lag_correction(true).with_pass_bars(bars.clone());
-        for i in 0..(written.length_beats as usize) {
-            run.note_quarter_in_bar(i % 4 == 0, i as f64 * ms, 4);
-        }
-        for o in &written.onsets {
-            let jitter = ((rng.next_u64() % 2001) as f64 / 1000.0 - 1.0) * 2.0;
-            run.note_onset(PlayedOnset {
-                time_ms: o.beat * ms + jitter,
-                amplitude: if o.accent { 1.0 } else { 0.4 },
-                confidence: 1.0,
-            });
-        }
-        let weights = Instrument::ElectricGuitar.profile().score_weights;
-        let grade = run.report(&weights).expect("a beat map").grade;
-        let pass = grade.pass.as_ref().expect("pass bars were loaded");
+        let (written, take_bars) = session_take(row, &bars);
+        let seed = 900 + index as u64;
+        let pass = play_take(&written, &bars, row.bpm, seed, |_| false);
         assert_eq!(pass.verdict, PassVerdict::Passed, "{name}: {pass:?}");
         assert!(pass.counts_for_clean_tempo, "{name}: {pass:?}");
-        assert_eq!(pass.finished_bars, passes as u32 * ex_bars, "{name}");
+        assert_eq!(pass.finished_bars, take_bars, "{name}");
+
+        let total = written.length_beats;
+        for (which, fluffed) in [("first", 0.0..4.0), ("last", total - 4.0..total)] {
+            let pass = play_take(&written, &bars, row.bpm, seed, |o| fluffed.contains(&o.beat));
+            assert_eq!(pass.verdict, PassVerdict::Passed, "{name}, {which} bar fluffed: {pass:?}");
+            assert!(pass.counts_for_clean_tempo, "{name}, {which} bar fluffed: {pass:?}");
+        }
         *checked.entry(row.path.clone()).or_default() += 1;
     }
     println!("{checked:?}");

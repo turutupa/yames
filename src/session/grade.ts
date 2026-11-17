@@ -17,20 +17,38 @@ import type { ScorerPassResult } from "../ipc";
 import type { TakeMeasures } from "./takeMeasures";
 
 /**
- * How many bars a Take must run for its tempo to count as clean.
+ * How many clean bars in a row earn a clean tempo.
  *
  * The owner's definition (`BRIEF.md`): the highest tempo at which a Take on that
- * Exercise passes its bar over at least 8 bars.
+ * Exercise passes its bar over at least 8 bars. Since 2026-11-17 those are
+ * **any** 8 bars in a row of the Take, not all of it (`TAKE_SLACK_BARS`).
  */
 export const CLEAN_TEMPO_MIN_BARS = 8;
 
-/** How many bars a full Take of this Exercise is, in whole passes. */
+/**
+ * Bars a Take has beyond the longest stretch it is judged over (owner,
+ * 2026-11-17). Without them a Take was exactly as long as the stretch, so one
+ * fluffed bar anywhere lost it; with them, a bad bar near either end can be
+ * left behind and the clean bars around it still count.
+ */
+export const TAKE_SLACK_BARS = 2;
+
+/**
+ * How many bars a full Take of this Exercise is.
+ *
+ * Long enough for the clean tempo and for the longest stretch a pass bar asks
+ * to hold over (the Stamina minutes ask for 16; shorter, it could never pass),
+ * plus `TAKE_SLACK_BARS`, and never less than one whole pass of the Exercise.
+ *
+ * Not rounded up to whole passes: a 4-bar lick would be 12 bars for a 10-bar
+ * need, and a 16-bar Stamina pattern 32. The Take ends on a bar line inside
+ * the pattern instead (`take.ts` `writtenOut`), which costs nothing: grading is
+ * per bar, the band plays bar `b` of its chart as `b mod form` (`takeBand.ts`),
+ * and the engine stops on the last bar's sample whatever is written there.
+ */
 export function takeBarsOf(exercise: Exercise): number {
-  const bars = Math.max(1, exercise.bars);
-  // Long enough for the clean tempo and for the longest stretch a pass bar asks
-  // to hold over (the Stamina minutes ask for 16): shorter, it could never pass.
-  const needed = Math.max(CLEAN_TEMPO_MIN_BARS, barsAskedFor(exercise));
-  return Math.ceil(needed / bars) * bars;
+  const needed = Math.max(CLEAN_TEMPO_MIN_BARS, barsAskedFor(exercise)) + TAKE_SLACK_BARS;
+  return Math.max(Math.max(1, exercise.bars), needed);
 }
 
 export type BarCheck = {
@@ -78,7 +96,7 @@ function barsAskedFor(exercise: Exercise): number {
  * The best stretch of `overBars` bars, or the whole Take with no per-bar data.
  *
  * A pass bar says "consecutive bars this must hold over", so a Take with one bad
- * bar and eight good ones holds it. Until the scorer reports per bar, the whole
+ * bar and eight good ones holds it: the window slides one bar at a time. Until the scorer reports per bar, the whole
  * Take is the only window there is, which is the stricter reading.
  */
 function evennessOver(measures: TakeMeasures, overBars: number): number | null {
@@ -200,7 +218,17 @@ export function gradeTake(exercise: Exercise, bpm: number, measures: TakeMeasure
     return { ...nothing, checks, headline, unmeasured, verdict: "belowBar" };
   }
 
-  const longEnough = measures.barsPlayed >= CLEAN_TEMPO_MIN_BARS;
+  // The clean tempo is 8 clean bars in a row, not 8 bars played: with per-bar
+  // evenness, the best 8-bar stretch has to meet every evenness floor too, as
+  // `heldBars` does in `score/pass.rs`. Without it, the whole Take is the
+  // stretch, and it was judged above.
+  const longEnough =
+    measures.barsPlayed >= CLEAN_TEMPO_MIN_BARS &&
+    exercise.passBars.every((bar) => {
+      if (bar.metric !== "timingEvenness" || bar.min === undefined) return true;
+      const value = evennessOver(measures, Math.max(CLEAN_TEMPO_MIN_BARS, bar.overBars));
+      return value !== null && value >= bar.min;
+    });
   const passAt = exercise.tempo.passAtBpm;
   return {
     verdict: "passed",

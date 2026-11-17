@@ -107,7 +107,7 @@ export const METRICS: readonly Metric[] = [
     id: "evennessHold",
     label: "Evenness held to the end",
     unit: "ratio",
-    source: "New: interval consistency over the last quarter of the take, from OnsetResult",
+    source: "New: interval consistency over the last bars of the stretch judged (not the Take's slack bars), from OnsetResult",
     status: "new-grader",
     caveat: "Long unbroken playing is where the onset noise floor may close (audit §3 hazard 1).",
   },

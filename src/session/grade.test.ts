@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Exercise } from "../paths/format";
-import { CLEAN_TEMPO_MIN_BARS, gradeTake, takeBarsOf } from "./grade";
+import { CLEAN_TEMPO_MIN_BARS, TAKE_SLACK_BARS, gradeTake, takeBarsOf } from "./grade";
 import type { TakeMeasures } from "./takeMeasures";
 import { MIN_HEARD_NOTES, measureTake, withRightNotes } from "./takeMeasures";
 import { takeLine } from "./coachWords";
@@ -8,7 +8,7 @@ import type { ScorerReport } from "./takeMeasures";
 import type { ScorerTakeGrade } from "../ipc";
 import { ALT } from "./testKit";
 import type { ScorerPassResult } from "../ipc";
-import { buildTake } from "./take";
+import { buildTake, writtenOut } from "./take";
 
 const EX: Exercise = ALT.steps[0].exercises[0];
 const WITH_PITCH: Exercise = ALT.steps[0].exercises[2];
@@ -144,14 +144,31 @@ describe("the adapter", () => {
 });
 
 describe("a Take's length", () => {
-  it("is whole passes, at least the clean-tempo minimum", () => {
+  it("is the stretch it is judged over and two bars of slack, at least one whole pass", () => {
     for (const step of ALT.steps) {
       for (const ex of step.exercises) {
         const bars = takeBarsOf(ex);
-        expect(bars).toBeGreaterThanOrEqual(CLEAN_TEMPO_MIN_BARS);
-        expect(bars % ex.bars).toBe(0);
+        const asked = Math.max(CLEAN_TEMPO_MIN_BARS, ...ex.passBars.map((b) => b.overBars));
+        expect(bars).toBe(Math.max(ex.bars, asked + TAKE_SLACK_BARS));
       }
     }
+  });
+
+  it("ends on a bar line inside the pattern rather than rounding up to whole passes", () => {
+    const four = { ...EX, bars: 4, passBars: EX.passBars.map((b) => ({ ...b, overBars: 4 })) };
+    expect(takeBarsOf(four)).toBe(10);
+    expect(takeBarsOf({ ...four, bars: 12 })).toBe(12);
+    const barTicks = 3840;
+    const pattern: Exercise = {
+      ...four,
+      meter: { numerator: 4, denominator: 4 },
+      notes: [0, 1, 2, 3].map((bar) => ({ ...EX.notes[0], tick: bar * barTicks, dur: 960 })),
+      rests: [],
+    };
+    const out = writtenOut(pattern, 10);
+    expect(out.bars).toBe(10);
+    expect(out.notes.map((n) => n.tick / barTicks)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(writtenOut(pattern, 4)).toBe(pattern);
   });
 });
 
@@ -307,6 +324,22 @@ describe("the fallback reading", () => {
     expect(g.verdict).toBe("belowBar");
     expect(g.headline).toMatchObject({ metric: "timingEvenness", value: 0.6, met: false });
   });
+
+  it("leaves a fluffed first bar behind: eight clean bars after it earn the clean tempo", () => {
+    const barEvenness = [0.4, ...Array<number>(9).fill(0.95)];
+    const g = gradeTake(EX, 100, measures({ barEvenness, barsPlayed: 10 }));
+    expect(g.verdict).toBe("passed");
+    expect(g.cleanBpm).toBe(100);
+    expect(g.passesExercise).toBe(true);
+  });
+
+  it("passes on a clean stretch of four, but no clean tempo without eight in a row", () => {
+    const barEvenness = [0.95, 0.95, 0.95, 0.95, 0.4, 0.95, 0.95, 0.95, 0.95, 0.95];
+    const g = gradeTake(EX, 100, measures({ barEvenness, barsPlayed: 10 }));
+    expect(g.verdict).toBe("passed");
+    expect(g.cleanBpm).toBeNull();
+    expect(g.passesExercise).toBe(false);
+  });
 });
 
 describe("a Take's length", () => {
@@ -314,7 +347,7 @@ describe("a Take's length", () => {
     const stamina = ALT.steps
       .flatMap((s) => s.exercises)
       .find((e) => e.id === "stamina-minute.chromatic-minute")!;
-    expect(takeBarsOf(stamina)).toBe(16);
+    expect(takeBarsOf(stamina)).toBe(16 + TAKE_SLACK_BARS);
   });
 
   it("plays the variant the planner chose, under the Exercise's own id", () => {
