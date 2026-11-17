@@ -40,10 +40,12 @@
 //! nothing here allocates, locks or blocks once the stream is up.
 
 use oboe::{
-    AudioOutputCallback, AudioOutputStreamSafe, AudioStream, AudioStreamAsync, AudioStreamBase,
-    AudioStreamBuilder, AudioStreamSafe, ContentType, DataCallbackResult, Output,
+    AudioOutputCallback, AudioOutputStream, AudioOutputStreamSafe, AudioStream, AudioStreamAsync,
+    AudioStreamBase, AudioStreamBuilder, AudioStreamSafe, ContentType, DataCallbackResult, Output,
     PerformanceMode, SharingMode, Stereo, Usage,
 };
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 /// What the device told us when we asked it to open a low-latency stream.
 ///
@@ -75,6 +77,12 @@ pub(crate) struct OutputFormat {
 /// audio thread.
 pub(crate) struct RenderCallback<F> {
     render: F,
+    /// This stream's own "dead" flag (`MetronomeEngine::output_dead`, fresh
+    /// per spawn). Raised by `on_error_after_close` only — Oboe's error
+    /// thread, never the data callback — so the event loop asks nothing more
+    /// of a stream the system closed, and `android_route` knows this report
+    /// is about the stream that is live (see `output_park`).
+    dead: Arc<AtomicBool>,
 }
 
 impl<F> AudioOutputCallback for RenderCallback<F>
@@ -105,6 +113,7 @@ where
         // exclusive stream. `android_route` reopens it through the engine's
         // own device-switch path.
         eprintln!("[yames][android] output stream closed by the system: {error:?}");
+        self.dead.store(true, Ordering::SeqCst);
         // A flag and an unpark; the reopen happens on `android_route`'s own
         // thread, never on this one (M7, review).
         crate::android_route::output_lost();
@@ -130,6 +139,15 @@ where
         self.stream
             .start()
             .map_err(|e| format!("could not start the audio output stream: {e:?}"))
+    }
+
+    /// Ask AAudio to pause the stream. Non-blocking: the callback finishes
+    /// the buffer it is in and is then not called again until [`Self::play`].
+    /// From the engine's event loop only (`output_park`).
+    pub fn pause(&mut self) -> Result<(), String> {
+        self.stream
+            .request_pause()
+            .map_err(|e| format!("could not pause the audio output stream: {e:?}"))
     }
 }
 
@@ -190,7 +208,11 @@ pub(crate) fn probe_output_format() -> Result<OutputFormat, String> {
 /// `fmt` must be what `probe_output_format` returned: the rate is set
 /// explicitly so the stream cannot come up at a rate the sound bank was not
 /// decoded at.
-pub(crate) fn open_output_stream<F>(fmt: &OutputFormat, render: F) -> Result<OutputStream<F>, String>
+pub(crate) fn open_output_stream<F>(
+    fmt: &OutputFormat,
+    render: F,
+    dead: Arc<AtomicBool>,
+) -> Result<OutputStream<F>, String>
 where
     F: FnMut(&mut [f32]) + Send + 'static,
 {
@@ -204,7 +226,7 @@ where
         .set_format::<f32>()
         .set_stereo()
         .set_sample_rate(fmt.sample_rate as i32)
-        .set_callback(RenderCallback { render })
+        .set_callback(RenderCallback { render, dead })
         .open_stream()
         .map_err(|e| format!("could not open the audio output stream: {e:?}"))?;
 

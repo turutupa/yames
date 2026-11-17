@@ -121,6 +121,21 @@ impl SpeechHandoff {
             drop(slot);
             self.generation.fetch_add(1, Ordering::Release);
         }
+        // A parked output stream (Android, app in the background) has to run
+        // for the line to be heard and for its end to be noticed.
+        #[cfg(target_os = "android")]
+        crate::output_park::wake();
+    }
+
+    /// Event thread: is a line in the slot? The speaking thread empties it
+    /// when the line ends, is cut, or times out, so this is "speech in
+    /// flight" for `output_park`.
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    pub(crate) fn in_flight(&self) -> bool {
+        self.clip
+            .lock()
+            .map(|c| c.is_some())
+            .unwrap_or_else(|e| e.into_inner().is_some())
     }
 
     /// Speaking thread: has the line finished since anyone last asked?

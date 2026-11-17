@@ -469,6 +469,9 @@ impl TakeHandoff {
             drop(slot);
             self.record_generation.fetch_add(1, Ordering::Release);
         }
+        // A take's clock is the output callback: a parked stream must run.
+        #[cfg(target_os = "android")]
+        crate::output_park::wake();
     }
 
     /// Hand the callback a take to play, or `None` to stop it. Command
@@ -482,6 +485,26 @@ impl TakeHandoff {
             drop(slot);
             self.play_generation.fetch_add(1, Ordering::Release);
         }
+        #[cfg(target_os = "android")]
+        crate::output_park::wake();
+    }
+
+    /// Event thread: is the callback being asked to copy the band into a
+    /// take? A take's clock is the output callback, so a parked stream must
+    /// not stop it (`output_park`).
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    pub(crate) fn is_recording(&self) -> bool {
+        self.record
+            .lock()
+            .map(|r| r.is_some())
+            .unwrap_or_else(|e| e.into_inner().is_some())
+    }
+
+    /// Event thread: which playback is in the slot, so an ending can be
+    /// pinned to the playback it belongs to (`output_park`).
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    pub(crate) fn play_generation(&self) -> u64 {
+        self.play_generation.load(Ordering::Acquire)
     }
 
     /// Is the callback still being asked to copy the band somewhere? Only

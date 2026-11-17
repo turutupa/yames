@@ -13,7 +13,10 @@
 //! audio or Oboe thread.** This thread:
 //!
 //! * **Output lost:** forgets the probed output rate (a USB interface can run
-//!   at another one) and, if the engine is running, reopens it through
+//!   at another one) and, if the engine has an audio thread whose stream is
+//!   dead (`output_park::route_should_reopen`) — whether or not anything is
+//!   playing, so a stream lost while stopped or parked in the background is
+//!   not found dead by the next Play — reopens it through
 //!   `MetronomeEngine::set_device` with the same name — the path a desktop
 //!   device switch takes, which re-decodes what was decoded for the old rate.
 //! * **Input lost:** sends the input list again and `audio-route-changed`
@@ -74,7 +77,7 @@ pub(crate) fn spawn(app: AppHandle) {
                 let state = app.state::<crate::state::SharedState>().inner().clone();
                 if let Some(engine_state) = app.try_state::<crate::commands::EngineState>() {
                     if let Ok(mut engine) = engine_state.0.lock() {
-                        if engine.is_running() {
+                        if engine.output_needs_reopen() {
                             let name = engine.device_name().map(String::from);
                             if let Err(e) = engine.set_device(name, state, app.clone()) {
                                 eprintln!("[yames][android] reopening the output after a route change failed: {e}");

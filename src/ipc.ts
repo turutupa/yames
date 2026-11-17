@@ -588,6 +588,14 @@ export async function listAudioInputDevices(): Promise<AudioInputDevice[]> {
 }
 
 /**
+ * The phone's activity went off the screen or came back. On Android the
+ * engine parks its output stream while the app is away and nothing needs it.
+ */
+export async function setAppInBackground(hidden: boolean): Promise<void> {
+  return invoke("set_app_in_background", { hidden });
+}
+
+/**
  * Send both device lists again (`audio-devices-changed`,
  * `audio-input-devices-changed`). A phone has no device poll: its native side
  * asks for this when a USB interface, a jack adapter or headphones come or go.
