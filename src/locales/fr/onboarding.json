@@ -124,7 +124,15 @@
         "permission": "Accès au micro : sur macOS, Réglages système › Confidentialité et sécurité › Micro, active Yames ; sur Windows, Paramètres › Confidentialité › Microphone, autorise les applications de bureau. Puis redémarre Yames.",
         "other": "Toujours rien ? Essaie un autre appareil de la liste, ou passe : les outils marchent sans entrée."
       },
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "phone": {
+        "subtitle": "Choisis comment ta guitare arrive au téléphone, puis joue quelques notes. Le vumètre montre ce que Yames entend.",
+        "micDesc": "Ta guitare dans la pièce, par le micro du téléphone. Les notes seules marchent le mieux ; tiens le téléphone près de la guitare.",
+        "directDesc": "Une interface audio USB-C (iRig HD, Scarlett avec adaptateur, un ampli avec USB) ou un adaptateur jack comme l'iRig 2. Le signal le plus propre.",
+        "guidance": "Une interface ou un adaptateur jack, c'est mieux, mais le micro du téléphone marche : pose-le près de la guitare, pas dans ta poche.",
+        "noDevices": "Aucune entrée trouvée. Branche l'interface ou l'adaptateur ; s'il n'apparaît pas, débranche-le et rebranche-le.",
+        "permission": "Accès au micro : Paramètres Android › Applications › Yames › Autorisations › Micro, puis Autoriser. Une interface USB ou un adaptateur jack demande la même autorisation."
+      }
     },
     "hearItWork": {
       "title": "Écoute-le travailler",

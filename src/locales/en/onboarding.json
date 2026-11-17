@@ -124,7 +124,15 @@
         "permission": "Microphone access: on macOS, System Settings › Privacy & Security › Microphone, turn Yames on; on Windows, Settings › Privacy › Microphone, allow desktop apps. Then restart Yames.",
         "other": "Still nothing? Try another device in the list, or skip: the tools work without an input."
       },
-      "retry": "Try again"
+      "retry": "Try again",
+      "phone": {
+        "subtitle": "Pick how your guitar reaches the phone, then play a few notes. The meter shows what Yames hears.",
+        "micDesc": "Your guitar in the room, through the phone's own mic. Single notes work best; hold the phone near the guitar.",
+        "directDesc": "A USB-C audio interface (iRig HD, Scarlett with an adapter, an amp with USB) or a headset-jack adapter like the iRig 2. The cleanest signal.",
+        "guidance": "An interface or a jack adapter is better, but the phone's mic works: put it close to the guitar, not in your pocket.",
+        "noDevices": "No input found. Plug in the interface or the adapter; if it still does not appear, unplug it and plug it in again.",
+        "permission": "Microphone access: Android Settings › Apps › Yames › Permissions › Microphone, then Allow. A USB interface or a jack adapter needs the same permission."
+      }
     },
     "hearItWork": {
       "title": "Hear it work",

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, switchLanguage, MOBILE_URL } from "./fits";
+import { openShot, openTool, switchLanguage, MOBILE_URL } from "./fits";
 
 /**
  * The bar the Stop button lives on, with a routine on it (M12).
@@ -24,7 +24,7 @@ const PHONES = [
 /** The setlist tab with a routine on it, and the transport carrying it. */
 async function openRunningSetlist(page: Page, size: { width: number; height: number }) {
   await openShot(page, "metronome", size);
-  await page.click('.mobile-tab[data-tab="setlist"]');
+  await openTool(page, "setlist");
   await page.click(".mobile-tab-library");
   await page.waitForSelector(".sheet--library");
   await page.click(".preset-sidebar-item.setlist-item");
@@ -94,7 +94,7 @@ test.describe("the transport with a routine on it, on a phone", () => {
   test("keeps them on the screen at 360px in Brazilian Portuguese", async ({ page }) => {
     await openShot(page, "metronome", { width: 360, height: 800 });
     await switchLanguage(page, "pt-BR");
-    await page.click('.mobile-tab[data-tab="setlist"]');
+    await openTool(page, "setlist");
     await page.click(".mobile-tab-library");
     await page.waitForSelector(".sheet--library");
     await page.click(".preset-sidebar-item.setlist-item");

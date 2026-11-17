@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openShot, MOBILE_URL } from "./fits";
+import { openShot, openTool, MOBILE_URL } from "./fits";
 
 /**
  * The bottom tab bar, on a phone (M12).
@@ -44,7 +44,7 @@ test.describe("changing tab on a phone", () => {
     });
     await page.waitForTimeout(300);
 
-    await page.click('.mobile-tab[data-tab="beat"]');
+    await openTool(page, "beat");
     await page.waitForTimeout(700);
 
     const { scrollTop, tempoTop, barBottom } = await tempoAndBar(page);

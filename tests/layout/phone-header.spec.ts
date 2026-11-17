@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, switchLanguage, MOBILE_URL } from "./fits";
+import { openShot, openTool, switchLanguage, MOBILE_URL } from "./fits";
 
 /**
  * The bar above the stage, on a phone (M09).
@@ -204,7 +204,7 @@ test.describe("the phone's top bar", () => {
  */
 async function openSetlist(page: Page, size: { width: number; height: number }) {
   await openShot(page, "metronome", size);
-  await page.click('.mobile-tab[data-tab="setlist"]');
+  await openTool(page, "setlist");
   await page.click(".mobile-tab-library");
   await page.waitForSelector(".sheet--library");
   await page.click(".preset-sidebar-item.setlist-item");

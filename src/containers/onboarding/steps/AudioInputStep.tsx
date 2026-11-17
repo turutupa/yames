@@ -23,6 +23,7 @@ import {
   useSmoothedRms,
 } from "../../../components/InputLevelMeter";
 import type { AudioInputDevice } from "../../../types";
+import { IS_MOBILE } from "../../../platform";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
 
@@ -185,7 +186,12 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
     void Promise.resolve(setListening(false)).then(() => setListening(true));
   };
 
-  const guidanceKey = GUIDED_INSTRUMENTS.has(instrument)
+  // A phone (M7) has its own mic, a USB-C interface or a jack adapter, and
+  // Android's own permission screen: its own words for those, everything
+  // else shared with the desktop.
+  const guidanceKey = IS_MOBILE
+    ? "onboarding.audioInput.phone.guidance"
+    : GUIDED_INSTRUMENTS.has(instrument)
     ? `onboarding.audioInput.guidance.${instrument}`
     : "onboarding.audioInput.guidance.other";
 
@@ -196,7 +202,7 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("onboarding.audioInput.title")}
       </h2>
-      <p className="onboarding-step-subtitle">{t("onboarding.audioInput.subtitle")}</p>
+      <p className="onboarding-step-subtitle">{t(IS_MOBILE ? "onboarding.audioInput.phone.subtitle" : "onboarding.audioInput.subtitle")}</p>
 
       <div
         className="onboarding-input-modes"
@@ -211,7 +217,7 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
           data-testid="audio-input-mode-mic"
         >
           <b>{t("onboarding.audioInput.mode.mic.title")}</b>
-          <span>{t("onboarding.audioInput.mode.mic.desc")}</span>
+          <span>{t(IS_MOBILE ? "onboarding.audioInput.phone.micDesc" : "onboarding.audioInput.mode.mic.desc")}</span>
         </button>
         <button
           type="button"
@@ -221,7 +227,7 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
           data-testid="audio-input-mode-direct"
         >
           <b>{t("onboarding.audioInput.mode.direct.title")}</b>
-          <span>{t("onboarding.audioInput.mode.direct.desc")}</span>
+          <span>{t(IS_MOBILE ? "onboarding.audioInput.phone.directDesc" : "onboarding.audioInput.mode.direct.desc")}</span>
         </button>
       </div>
       {noInterface && (
@@ -298,7 +304,7 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
               <p className="onboarding-input-trouble-title">
                 {t("onboarding.audioInput.noDevices.title")}
               </p>
-              <p>{t("onboarding.audioInput.noDevices.body")}</p>
+              <p>{t(IS_MOBILE ? "onboarding.audioInput.phone.noDevices" : "onboarding.audioInput.noDevices.body")}</p>
             </>
           ) : startError ? (
             <>
@@ -307,7 +313,7 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
               </p>
               <p>{t("onboarding.audioInput.openFailed.body")}</p>
               <p className="onboarding-input-trouble-small">
-                {t("onboarding.audioInput.silent.permission")}
+                {t(IS_MOBILE ? "onboarding.audioInput.phone.permission" : "onboarding.audioInput.silent.permission")}
               </p>
             </>
           ) : (
@@ -321,7 +327,7 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
                     ? t("onboarding.audioInput.silent.direct")
                     : t("onboarding.audioInput.silent.mic")}
                 </li>
-                <li>{t("onboarding.audioInput.silent.permission")}</li>
+                <li>{t(IS_MOBILE ? "onboarding.audioInput.phone.permission" : "onboarding.audioInput.silent.permission")}</li>
                 <li>{t("onboarding.audioInput.silent.other")}</li>
               </ul>
             </>

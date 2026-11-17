@@ -124,7 +124,15 @@
         "permission": "Accesso al microfono: su macOS, Impostazioni di Sistema › Privacy e sicurezza › Microfono, attiva Yames; su Windows, Impostazioni › Privacy › Microfono, consenti le app desktop. Poi riavvia Yames.",
         "other": "Ancora niente? Prova un altro dispositivo dell'elenco, oppure salta: gli strumenti funzionano anche senza ingresso."
       },
-      "retry": "Riprova"
+      "retry": "Riprova",
+      "phone": {
+        "subtitle": "Scegli come la chitarra arriva al telefono, poi suona qualche nota. L'indicatore mostra cosa sente Yames.",
+        "micDesc": "La chitarra nella stanza, tramite il microfono del telefono. Le note singole funzionano meglio; tieni il telefono vicino alla chitarra.",
+        "directDesc": "Un'interfaccia audio USB-C (iRig HD, Scarlett con adattatore, un ampli con USB) o un adattatore jack come l'iRig 2. Il segnale più pulito.",
+        "guidance": "Un'interfaccia o un adattatore jack è meglio, ma il microfono del telefono funziona: mettilo vicino alla chitarra, non in tasca.",
+        "noDevices": "Nessun ingresso trovato. Collega l'interfaccia o l'adattatore; se non compare, scollegalo e ricollegalo.",
+        "permission": "Accesso al microfono: Impostazioni Android › App › Yames › Autorizzazioni › Microfono, poi Consenti. Un'interfaccia USB o un adattatore jack richiedono la stessa autorizzazione."
+      }
     },
     "hearItWork": {
       "title": "Sentilo funzionare",

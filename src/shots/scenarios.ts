@@ -1159,6 +1159,43 @@ export const SHOTS: Shot[] = [
   { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
 ];
 
+/**
+ * The learning side and the first run, at a phone's size (M7, the MVP).
+ *
+ * The same scenes as above — same seed, same walk through what a player
+ * presses — framed at 360×800, the narrowest Android phone people still
+ * buy. They mean "a phone" only when served from the phone build
+ * (`YAMES_MOBILE=1`, the second server in playwright.config.ts): the phone's
+ * layout hangs off `.main-window.is-mobile`, not off a width.
+ * `tests/layout/phone-learning.spec.ts` measures them at 360 and 412.
+ */
+export const PHONE_LEARNING_SCENES = [
+  "firstrun-welcome",
+  "firstrun-input",
+  "firstrun-ready",
+  "today-first",
+  "today-returning",
+  "session-ready",
+  "session-playing",
+  "session-between",
+  "session-result",
+  "session-no-catch",
+  "session-recap",
+  "session-edge-result",
+  "paths",
+  "path-alternate",
+  "step-detail",
+  "progress",
+  "tools",
+] as const;
+
+for (const id of PHONE_LEARNING_SCENES) {
+  const desktop = SHOTS.find((s) => s.id === id);
+  if (desktop) {
+    SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
+  }
+}
+
 export function shotById(id: string): Shot | undefined {
   return SHOTS.find((s) => s.id === id);
 }

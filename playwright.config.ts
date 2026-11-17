@@ -53,8 +53,12 @@ const PORT = (() => {
 
 export const LAYOUT_ORIGIN = `http://localhost:${PORT}`;
 
-/** The phone build's server: see the second `webServer` entry below. */
-const MOBILE_PORT = PORT + 1000;
+/**
+ * The phone build's server: see the second `webServer` entry below. +2000
+ * rather than +1000: 6390–6889 holds ports Chromium refuses to load
+ * (6566, 6665–6669, 6679, 6697 — ERR_UNSAFE_PORT), and 7390–7889 holds none.
+ */
+const MOBILE_PORT = PORT + 2000;
 export const MOBILE_ORIGIN = `http://localhost:${MOBILE_PORT}`;
 
 export default defineConfig({
@@ -117,7 +121,7 @@ export default defineConfig({
      * `IS_MOBILE` is a build-time constant (src/platform.ts) and the phone's
      * rules are written against the `.main-window.is-mobile` class it writes,
      * not against a width — so a desktop build narrowed to 360px is not the
-     * phone and never can be. Its own port (the desktop one plus 1000, so two
+     * phone and never can be. Its own port (the desktop one plus 2000, so two
      * worktrees still never share one) and its own server, because one Vite
      * process can only be one build. Tests opt in with
      * `test.use({ baseURL: MOBILE_URL })` — see `MOBILE_URL` in

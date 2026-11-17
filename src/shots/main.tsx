@@ -211,8 +211,12 @@ async function drive() {
   if (shot!.session) {
     const { stop } = shot!.session;
     const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+    // The rail on a desktop, the bottom tab bar on a phone (M7): both name
+    // the place in `aria-label`.
     const rail = (name: string) =>
-      document.querySelector<HTMLElement>(`.rail button[aria-label="${name}"]`);
+      document.querySelector<HTMLElement>(
+        `.rail button[aria-label="${name}"], .mobile-tabs button[aria-label="${name}"]`,
+      );
     await until("Today", () => !!byId("today"));
     await until("a plan", () => !!document.querySelector(".session-plan-item"));
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
@@ -313,6 +317,16 @@ async function drive() {
      * rather than in every jam scene's step list, because the jam driver
      * below is the thing that needs it.
      */
+    // The phone's library button is only drawn while a tool is open, and the
+    // restore that opens this scene's tool lands a moment after the mount
+    // (M7): wait for one of the two doors rather than for the first frame.
+    await until(
+      "the library or the library button",
+      () =>
+        !document.querySelector(".mobile-tabs") ||
+        !!document.querySelector(".mobile-tab-library") ||
+        !!document.querySelector(rows),
+    );
     const libraryTab = document.querySelector<HTMLElement>(".mobile-tab-library");
     if (libraryTab && !document.querySelector(rows)) {
       libraryTab.click();

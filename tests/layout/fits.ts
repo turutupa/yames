@@ -366,3 +366,13 @@ declare global {
     __SHOT_LOCALE__?: string;
   }
 }
+
+/**
+ * Open one of the tools on a phone (M7): the bottom bar carries the places —
+ * Today, Paths, Progress, Tools, Settings — and the tools are cards on the
+ * Tools screen, the way the rail nests them under Tools on a desktop.
+ */
+export async function openTool(page: Page, id: "beat" | "drill" | "setlist" | "jam" | "songs") {
+  await page.click('.mobile-tab[data-tab="tools"]');
+  await page.click(`[data-testid="tool-card-${id}"]`);
+}
