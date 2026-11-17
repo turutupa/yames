@@ -559,14 +559,20 @@ async function scenarioBluesBand() {
 }
 
 /**
- * The Exercise on the Take screen now, from the Alternate Picking pack: the
- * plan picks it, so a scenario that starts from Today reads it off the page.
+ * The Exercise on the Take screen now, from any shipped pack: the plan picks
+ * it, so a scenario that starts from Today reads it off the page.
  */
 async function exerciseOnScreen(d) {
-  const page = await d.text();
-  const path = loadPath();
-  for (const step of path.steps) {
-    for (const ex of step.exercises) if (page.includes(ex.title)) return ex;
+  const lines = (await d.text()).split("\n").map((l) => l.trim());
+  // The Take screen heads its Exercise "MECHANICS · SHRED, STEP 1", then the title.
+  const at = lines.findIndex((l) => /STEP \d+$/.test(l));
+  const page = at >= 0 ? lines.slice(at + 1, at + 3).join("\n") : lines.join("\n");
+  const packs = readdirSync(join(repo, "src", "paths", "packs")).filter((f) => f.endsWith(".json"));
+  for (const file of packs) {
+    const path = loadPath(file.replace(/\.json$/, ""));
+    for (const step of path.steps ?? []) {
+      for (const ex of step.exercises ?? []) if (ex.notes?.length && page.split("\n").includes(ex.title)) return ex;
+    }
   }
   return null;
 }
@@ -577,7 +583,7 @@ async function goodTakeHeard(d, label) {
   const noInput = await d.exec(`return !!document.querySelector('[data-testid="session-no-input"]')`);
   const exercise = await exerciseOnScreen(d);
   if (!exercise) {
-    check(`${label}: an Alternate Picking Exercise on the Take screen`, false, (await d.text()).slice(0, 300));
+    check(`${label}: a shipped Exercise on the Take screen`, false, (await d.text()).slice(0, 300));
     return;
   }
   const r = await playTake(d, exercise, "good", label);
