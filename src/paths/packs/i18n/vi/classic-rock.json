@@ -3,7 +3,7 @@
   "path": "classic-rock",
   "lng": "vi",
   "strings": {
-    "path.title": "Classic Rock",
+    "path.title": "Classic rock",
     "path.goal": "Chơi riff, lick và một đoạn solo viết sẵn theo phong cách classic rock cùng ban nhạc, và hiểu vì sao mỗi nốt hợp với hợp âm bên dưới.",
     "path.assumes": "Bạn chơi được power chord và từng nốt đơn sạch, và nốt móc đơn theo click ở 80 BPM. Biết box ngũ cung A thứ thì có ích nhưng không bắt buộc: bước 2 đi qua nó. Phần lớn lộ trình ở giọng A, nên phần lý thuyết đó là thứ mới duy nhất; những lick người chơi lặp lại hàng tuần sẽ chuyển sang giọng và vị trí khác.",
     "path.gradingLimits": "Các bài tập được chấm là những câu viết sẵn. Ở mọi bài, ứng dụng kiểm tra độ đều về nhịp, số nốt nghe được và nốt thừa, và sau lượt chơi kiểm tra đúng nốt với các nốt đơn đủ cách nhau và không ngân lẫn vào nhau; ở những chỗ khác, đúng nốt hiện là “không kiểm tra”. Double stop, phần tô điểm hợp âm và các riff có dây buông ngân được đo thời điểm và đếm, không kiểm tra cao độ, vì bộ dò một nốt không phân biệt được hai nốt. Một nốt bend sẽ bị đọc là nốt sai, nên bend được đo thời điểm và không bao giờ kiểm tra cao độ, và cao độ của nó là phần tự kiểm tra. Việc kiểm tra đúng nốt mới chỉ được thử với tiếng guitar do máy tạo và không có ban nhạc, nên cắm trực tiếp hoặc tai nghe là cách trung thực để chơi bất cứ gì có ban nhạc, còn với micro và loa thì chưa được kiểm tra. Việc tự chọn nốt, tiếp đất trên nốt trong hợp âm và cách xử lý câu hiện chưa được đo: những bài đó là “lượt bạn”, tự kiểm tra và ghi “chưa được kiểm tra”. Ở đây không có gì chấm cảm xúc hay âm sắc.",

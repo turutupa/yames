@@ -3,7 +3,7 @@
   "path": "alternate-picking",
   "lng": "pl",
   "strings": {
-    "path.title": "Alternate Picking",
+    "path.title": "Alternate picking",
     "path.goal": "Graj kostką czystą, równą linię w A-moll na wszystkich sześciu strunach i utrzymaj ją z zespołem przez osiem taktów.",
     "path.assumes": "Umiesz czysto chwytać pojedyncze nuty, trzymasz kostkę i grasz ósemki z klikiem przy 80 BPM. Nie zakładamy żadnej szybkości. Podane minuty to jedno przejście przez materiał; spodziewaj się, że do każdego kroku będziesz wracać przez dni albo tygodnie.",
     "path.gradingLimits": "Wszystko tutaj jest oceniane pod kątem rytmu i nut przy pojedynczych nutach granych kostką, do czego aplikacja jest zbudowana, i nic z tego nie było jeszcze sprawdzane na prawdziwej gitarze. Im szybsza linia, tym mniej pewna ocena. Twój sprzęt dodaje małe opóźnienie między zagraniem nuty a usłyszeniem jej przez aplikację; do szesnastek przy 100 BPM nie ma to znaczenia, a powyżej traktuj wynik równości jako tymczasowy. Mocny przester i kompresja rozmywają początek każdej nuty, więc czyste albo lekko przybrudzone brzmienie to uczciwe ustawienie do ocenianego podejścia. Nic szybszego niż szesnastki przy 200 BPM nie jest oceniane, a żadne ćwiczenie tutaj nie idzie tak daleko.",

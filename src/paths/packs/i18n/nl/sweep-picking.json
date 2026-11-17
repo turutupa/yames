@@ -3,9 +3,9 @@
   "path": "sweep-picking",
   "lng": "nl",
   "strings": {
-    "path.title": "Sweep Picking",
+    "path.title": "Sweep picking",
     "path.goal": "Sweep schone, gescheiden arpeggio's over twee tot zes snaren, en verbind ze in progressies in mineur zodat ze klinken als een solo.",
-    "path.assumes": "Je kunt losse noten gelijkmatig in zestienden aanslaan met alternate picking rond 80 BPM (Alternate Picking tot en met het niveau Gemiddeld behandelt dit) en je speelt hammer-ons en pull-offs schoon. Sweepen hoef je nog niet te kunnen, en je kunt beginnen op het niveau dat bij je past.",
+    "path.assumes": "Je kunt losse noten gelijkmatig in zestienden aanslaan met alternate picking rond 80 BPM (Alternate picking tot en met het niveau Gemiddeld behandelt dit) en je speelt hammer-ons en pull-offs schoon. Sweepen hoef je nog niet te kunnen, en je kunt beginnen op het niveau dat bij je past.",
     "path.gradingLimits": "De beoordeling is niet meer betrouwbaar vanaf ongeveer 150 ms tussen noten: zestienden op 100 BPM, achtste triolen op 133, sextolen op 66. Snellere treden beoordeel je zelf, hoe ze er ook uitzien, en de kaart zegt waar de beoordeling stopt. Die grens is een voorzichtige keuze, geen meting. Geen enkele test dekt gesweepte noten, die een zachtere aanslag hebben dan aangeslagen noten en kunnen doorklinken op naburige snaren, en zelfs de beoordeelde treden zijn voorlopig tot er met een echte gitaar getest is. Verbindingen brengen een eigen risico mee: de noot na een slide telt als gemist als hij niet gehoord wordt, dus de lat ligt lager bij vormen met slides. In de praktijk: Beginner wordt bijna helemaal beoordeeld. In Gemiddeld stoppen de vormen in zestienden op 100 BPM, de triolenvormen op 130 en de sextolen-opmaat op 65. In Gevorderd valt het meeste van wat het spel moeilijk maakt buiten de beoordeling: sextolenloopjes stoppen op 65 BPM, zessnarige vormen in zestienden op 100. Geluid vertelt ons nooit de twee dingen die hier het belangrijkst zijn, dempen en de baan van het plectrum, en de oefeningen zeggen dat ook.",
     "path.skills.0": "Gelijkmatige alternate picking in zestienden, 80 BPM",
     "path.skills.1": "Schone hammer-ons en pull-offs",

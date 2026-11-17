@@ -3,7 +3,7 @@
   "path": "alternate-picking",
   "lng": "it",
   "strings": {
-    "path.title": "Alternate Picking",
+    "path.title": "Alternate picking",
     "path.goal": "Suona in alternate picking una linea pulita e regolare in A minore su tutte e sei le corde, e tienila sopra una band per otto battute.",
     "path.assumes": "Sai tastare note singole in modo pulito, tieni un plettro in mano, e sai suonare crome con il clic a 80 BPM. Non si dà per scontata nessuna velocità. I minuti indicati sono un passaggio sul materiale; aspettati di tornare su ogni tappa per giorni o settimane.",
     "path.gradingLimits": "Qui tutto ha un voto su tempo e note per le note singole pennate, che è ciò per cui l'app è costruita, e niente è ancora stato provato su una chitarra vera. Più la linea è veloce, meno il voto è sicuro. Il tuo setup aggiunge un piccolo ritardo tra quando suoni una nota e quando l'app la sente; fino ai sedicesimi a 100 BPM non fa differenza, sopra considera provvisorio il punteggio di regolarità. Distorsione e compressione pesanti sfumano il punto in cui comincia ogni nota, quindi un suono pulito o leggermente crunch è l'impostazione onesta per una take con voto. Niente di più veloce dei sedicesimi a 200 BPM ha un voto, e nessun esercizio qui arriva a tanto.",

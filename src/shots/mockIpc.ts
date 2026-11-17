@@ -914,7 +914,12 @@ export function installFallbackCamera(): void {
     const canvas = document.createElement("canvas");
     canvas.width = 1280;
     canvas.height = 720;
-    const ctx = canvas.getContext("2d")!;
+    // A software canvas, not a GPU one (QA 2 #26): from a GPU canvas the
+    // captured frames change form after the first few, Chromium's H.264
+    // encoder restarts with a new codec description, and `MediaRecorder` logs
+    // "When using avc1 ... the codec description is not supposed to change"
+    // once per camera scene. A webcam, and Chromium's fake device, never do.
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
     let frame = 0;
     const draw = () => {
       frame += 1;

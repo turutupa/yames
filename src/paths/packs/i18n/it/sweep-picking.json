@@ -3,9 +3,9 @@
   "path": "sweep-picking",
   "lng": "it",
   "strings": {
-    "path.title": "Sweep Picking",
+    "path.title": "Sweep picking",
     "path.goal": "Suona con lo sweep arpeggi puliti e separati, da due a sei corde, e collegali in progressioni in minore perché suonino come un assolo.",
-    "path.assumes": "Sai suonare note singole in alternate picking, regolari, in sedicesimi intorno a 80 BPM (il percorso Alternate Picking fino al livello Intermedio copre questo) e sai fare hammer-on e pull-off puliti. Non serve ancora saper fare sweep, e puoi partire dal livello che fa per te.",
+    "path.assumes": "Sai suonare note singole in alternate picking, regolari, in sedicesimi intorno a 80 BPM (il percorso Alternate picking fino al livello Intermedio copre questo) e sai fare hammer-on e pull-off puliti. Non serve ancora saper fare sweep, e puoi partire dal livello che fa per te.",
     "path.gradingLimits": "Il voto smette di essere affidabile intorno ai 150 ms tra una nota e l'altra: sedicesimi a 100 BPM, terzine di crome a 133, sestine a 66. I gradini più veloci li controlli tu, qualunque cosa sembrino, e la scheda dice dove si ferma il voto. Quel limite è una scelta prudente, non una misura. Nessun test copre le note in sweep, che hanno attacchi più morbidi di quelle pennate e possono risuonare sulle corde vicine, e anche i gradini con voto sono provvisori finché non ci sarà un test con una chitarra vera. I collegamenti aggiungono un rischio in più: la nota dopo uno slide conta come mancata se non si sente, quindi sulle forme con slide l'asticella è più bassa. In pratica: il livello Principiante ha quasi tutto con voto. Nell'Intermedio le forme in sedicesimi si fermano a 100 BPM, quelle in terzine a 130 e l'attacco in sestine a 65. Nell'Avanzato la maggior parte di ciò che rende difficile suonare non si può valutare: le scale in sestine si fermano a 65 BPM, le forme su sei corde in sedicesimi a 100. Il suono non ci dice mai le due cose che qui contano di più, lo smorzamento e il percorso del plettro, e gli esercizi lo dicono.",
     "path.skills.0": "Alternate picking regolare in sedicesimi, 80 BPM",
     "path.skills.1": "Hammer-on e pull-off puliti",

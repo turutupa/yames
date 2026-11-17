@@ -192,6 +192,7 @@ export default definePath({
   assumes:
     "You can play power chords and single notes cleanly, and eighth notes with a click at 80 BPM. Knowing the A minor pentatonic box helps and isn't required: Step 2 goes through it. Most of the Path is in A, so that theory is the only new thing; licks a player repeats for weeks move to other keys and positions.",
   prerequisites: { skills: ["Power chords", "Clean single notes", "Eighth notes with a click at 80 BPM"] },
+  labelSubdivisions: "mostly",
   orderRationale:
     "Riffs come first because they are what a rock player plays most, and they put time in the hands before any theory. The minor pentatonic box and its extension come next, with the licks the style is built on; the major pentatonic follows at once, because hearing minor against major over the same chord is the theory that separates rock from blues. Repeating licks come after the box, since they are box notes played as loops. Double stops and chord embellishment move from one note to two and into the chord, then chord tones over A, G and D (I, flat VII, IV) show why the same box works over those changes. The slow melody needs control more than speed, so it comes late; call and response with a band uses everything before it, and the sixteen-bar etude puts it all in one solo.",
   gradingLimits:

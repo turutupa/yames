@@ -137,6 +137,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 6:5 6:8 5:5 5:7 4:5 4:7 3:5 3:7 2:5 2:8 1:5 1:8 1:5 2:8 2:5 3:7 3:5 4:7 4:5 5:7 5:5 6:8 hold",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 22,
             "minGapMsAtTop": 272.73,
@@ -236,6 +237,7 @@
           },
           "estimatedMinutes": 3,
           "tab": "/2 6:5 4:7 | 1:5 4:7",
+          "subdivision": "halves",
           "computed": {
             "noteCount": 4,
             "minGapMsAtTop": 1200,
@@ -1705,6 +1707,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 6:5 6:8 5:5 5:6 5:7 4:5 4:7 3:5 3:7 3:8 2:5 2:8 1:5 1:8 1:5 2:8 2:5 3:8 3:7 3:5 4:7 4:5 5:7 5:6 5:5 6:8 hold",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 26,
             "minGapMsAtTop": 272.73,
@@ -2135,6 +2138,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 3:7 3:8 2:5 2:8 2:5 3:8 3:7 3:5 | /4 4:7 /8 3:5 4:7 /2 4:5",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 272.73,
@@ -2478,6 +2482,7 @@
           },
           "estimatedMinutes": 4,
           "tab": "/1 6:5 | 6:5 | 6:5 | 6:5 | 5:5 | 5:5 | 6:5 | 6:5 | 5:7 | 5:5 | 6:5 | 5:7",
+          "subdivision": "wholes",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 2181.82,
@@ -4006,6 +4011,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/2 3:9 3:7b2 | /2 2:10 2:8b2 | /2 1:10 1:8b2 | /2 3:9 3:7b2",
+          "subdivision": "halves",
           "computed": {
             "noteCount": 8,
             "minGapMsAtTop": 1500,
@@ -4099,6 +4105,7 @@
           },
           "estimatedMinutes": 4,
           "tab": "/2 1:9 1:8b1 | 1:9 1:8b1v",
+          "subdivision": "halves",
           "computed": {
             "noteCount": 4,
             "minGapMsAtTop": 1333.33,
@@ -4196,6 +4203,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/4 3:7b2 2:8b2 3:7b2 2:8b2 | /2 3:7b2v /2 r",
+          "subdivision": "quarters",
           "computed": {
             "noteCount": 5,
             "minGapMsAtTop": 666.67,
@@ -4817,6 +4825,7 @@
           },
           "estimatedMinutes": 4,
           "tab": "/1 r | /1 r | /8 1:5 2:8 /4 2:5 3:7 /8 3:5 3:7 | /2 4:7v /2 r",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 7,
             "minGapMsAtTop": 352.94,
@@ -5066,6 +5075,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 6:8 6:10 5:7 5:10 4:7 4:10 3:7 3:9 2:8 2:10 1:8 1:10 1:8 2:10 2:8 3:9 3:7 4:10 4:7 5:10 5:7 6:10 hold",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 22,
             "minGapMsAtTop": 272.73,
@@ -5178,6 +5188,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 4:7 3:5 3:7s 3:9 /4 2:8 /8 2:10s 2:8 | /4 3:9 /8 3:7 3:5 /2 4:7",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 11,
             "minGapMsAtTop": 300,
@@ -5534,6 +5545,7 @@
           },
           "estimatedMinutes": 4,
           "tab": "/1 2:8 | 2:8 | 2:8 | 2:8 | 2:7 | 2:7 | 2:8 | 2:8 | 2:9 | 2:7 | 2:8 | 2:9",
+          "subdivision": "wholes",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 2400,
@@ -5644,6 +5656,7 @@
           },
           "estimatedMinutes": 4,
           "tab": "/1 3:6 | 3:6 | 3:6 | 3:6 | 3:5 | 3:5 | 3:6 | 3:6 | 4:6 | 3:5 | 3:6 | 4:6",
+          "subdivision": "wholes",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 2400,
@@ -5766,6 +5779,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/2 3:6 2:8 | 3:6 2:8 | 3:6 2:8 | 3:6 2:8 | 3:5 2:7 | 3:5 2:7 | 3:6 2:8 | 3:6 2:8 | 4:6 3:7 | 3:5 2:7 | 3:6 2:8 | 4:6 3:7",
+          "subdivision": "halves",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 1200,
@@ -6443,6 +6457,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/2 1:5v /4 r /8t 1:8 1:5 2:8 | /2 2:5v /4 3:7b2+2:5 /8t 3:5 3:7 3:5 | /2 4:7v /2 r | /2 r /4 r /8t 3:5 3:6h 2:5 | /2 3:7v /4 2:8b2+1:5 /8t 2:8 2:5 3:7 | /2 3:5v /2 r | /2 2:5v /4 3:7b2+2:5 /8t 3:5 3:7 3:5 | /2 4:7v /4 r /8t 4:7 3:5 3:7 | /2 2:5v /4 3:7b2+2:5 /8t 3:7 3:5 4:7 | /2 4:7v /4 3:7 /8t 3:5 3:7 3:5 | /4 3:9 3:8 3:7 3:6 | /2 2:5 4:6",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 277.78,
@@ -6600,6 +6615,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/2 1:5v /4 r /8t 1:8 1:5 2:8 | /2 2:5v /4 r /8t 3:7 3:5 4:7 | /1 r | /2 r /4 r /8t 4:7 3:5 3:7 | /2 3:7v /4 r /8t 1:8 1:5 2:8 | /2 3:5v /4 r /8t 2:8 2:5 3:7 | /1 r | /2 r /4 r /8t 3:5 3:6h 2:5 | /2 2:5v /4 r /8t 3:7 3:5 4:7 | /2 3:7v /4 r /8t 3:5 3:7 3:5 | /2 4:7v /4 r /8t 4:5 4:7 3:5 | /2 4:6 /2 r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 35,
             "minGapMsAtTop": 277.78,
@@ -6741,6 +6757,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/2 1:5v /4 r /8t 1:8 1:5 2:8 | /2 2:5v /4 3:7b2+2:5 /8t 3:5 3:7 3:5 | /2 4:7v /2 r | /2 r /4 r /8t 3:5 3:6h 2:5 | /2 3:7v /4 2:8b2+1:5 /8t 2:8 2:5 3:7 | /2 3:5v /2 r | /2 2:5v /4 3:7b2+2:5 /8t 3:5 3:7 3:5 | /2 4:7v /4 r /8t 4:7 3:5 3:7 | /2 2:5v /4 3:7b2+2:5 /8t 3:7 3:5 4:7 | /2 4:7v /4 3:7 /8t 3:5 3:7 3:5 | /4 3:9 3:8 3:7 3:6 | /2 2:5 4:6",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 333.33,
@@ -6876,6 +6893,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/2 1:5v /4 r /8t 1:8 1:5 2:8 | /2 2:5v /4 3:7b2+2:5 /8t 3:5 3:7 3:5 | /2 4:7v /2 r | /2 r /4 r /8t 3:5 3:6h 2:5 | /2 3:7v /4 2:8b2+1:5 /8t 2:8 2:5 3:7 | /2 3:5v /2 r | /2 2:5v /4 3:7b2+2:5 /8t 3:5 3:7 3:5 | /2 4:7v /4 r /8t 4:7 3:5 3:7 | /2 2:5v /4 3:7b2+2:5 /8t 3:7 3:5 4:7 | /2 4:7v /4 3:7 /8t 3:5 3:7 3:5 | /4 3:9 3:8 3:7 3:6 | /2 2:5 4:6",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 333.33,

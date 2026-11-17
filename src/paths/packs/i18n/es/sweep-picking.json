@@ -3,7 +3,7 @@
   "path": "sweep-picking",
   "lng": "es",
   "strings": {
-    "path.title": "Sweep Picking",
+    "path.title": "Sweep picking",
     "path.goal": "Haz sweep de arpegios limpios y separados de dos a seis cuerdas, y enlázalos en progresiones en tonalidad menor para que suenen a solo.",
     "path.assumes": "Tocas notas sueltas con púa alterna de forma regular en semicorcheas a unos 80 BPM (la ruta de Púa alterna hasta su nivel Intermedio lo cubre) y haces hammer-ons y pull-offs limpios. Todavía no necesitas saber nada de sweep, y puedes empezar en el nivel que mejor te vaya.",
     "path.gradingLimits": "La puntuación deja de ser fiable a unos 150 ms entre notas: semicorcheas a 100 BPM, tresillos de corchea a 133, seisillos a 66. Los peldaños más rápidos se autocomprueban, parezcan lo que parezcan, y la tarjeta indica dónde deja de puntuarse. Ese límite es una política prudente, no una medición. Ninguna prueba cubre las notas con sweep, cuyos ataques son más suaves que los de púa y cuyas notas pueden seguir sonando en cuerdas vecinas, e incluso los peldaños puntuados son provisionales hasta que haya una prueba con guitarra real. Los enlaces añaden un riesgo propio: la nota que sigue a un slide cuenta como perdida si no se oye, así que el listón en las formas con slide es más bajo. En la práctica: Principiante se puntúa casi entero. En Intermedio, las formas en semicorcheas paran en 100 BPM, las de tresillos en 130 y la anacrusa en seisillos en 65. En Avanzado, la mayor parte de lo que hace difícil la ejecución no se puede puntuar: las tiradas en seisillos paran en 65 BPM y las formas de seis cuerdas en semicorcheas en 100. El sonido nunca nos dice las dos cosas que más importan aquí, el apagado y el recorrido de la púa, y los ejercicios lo dicen.",

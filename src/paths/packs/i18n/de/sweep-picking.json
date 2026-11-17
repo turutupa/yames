@@ -3,9 +3,9 @@
   "path": "sweep-picking",
   "lng": "de",
   "strings": {
-    "path.title": "Sweep Picking",
+    "path.title": "Sweep-Picking",
     "path.goal": "Sweepe saubere, getrennte Arpeggios von zwei bis zu sechs Saiten und verbinde sie über Akkordfolgen in Moll, sodass sie wie ein Solo klingen.",
-    "path.assumes": "Du kannst Einzeltöne gleichmäßig im Wechselschlag in Sechzehnteln bei etwa 80 BPM spielen (Alternate Picking deckt das bis einschließlich Mittelstufe ab), und du kannst saubere Hammer-ons und Pull-offs. Sweeping brauchst du noch keins, und du kannst auf dem Niveau einsteigen, das zu dir passt.",
+    "path.assumes": "Du kannst Einzeltöne gleichmäßig im Wechselschlag in Sechzehnteln bei etwa 80 BPM spielen (der Pfad Wechselschlag deckt das bis einschließlich Mittelstufe ab), und du kannst saubere Hammer-ons und Pull-offs. Sweeping brauchst du noch keins, und du kannst auf dem Niveau einsteigen, das zu dir passt.",
     "path.gradingLimits": "Die Bewertung ist ab etwa 150 ms zwischen den Tönen nicht mehr verlässlich: Sechzehntel bei 100 BPM, Achteltriolen bei 133, Sextolen bei 66. Stufen, die schneller sind, prüfst du selbst, egal wie sie aussehen, und die Karte sagt, wo die Bewertung aufhört. Diese Grenze ist eine vorsichtige Regel, keine Messung. Kein Test deckt bisher gesweepte Töne ab, deren Anschläge weicher sind als angeschlagene und deren Töne auf Nachbarsaiten weiterklingen können, und selbst die bewerteten Stufen sind vorläufig, bis es einen Test mit echter Gitarre gegeben hat. Übergänge bringen ein eigenes Risiko mit: Der Ton nach einem Slide zählt als verpasst, wenn er nicht gehört wird, deshalb liegen die Messlatten bei Griffbildern mit Slides niedriger. In der Praxis: Einsteiger wird fast vollständig bewertet. In der Mittelstufe enden die Sechzehntel-Griffbilder bei 100 BPM, die Triolen-Griffbilder bei 130 und der Sextolen-Auftakt bei 65. Bei Fortgeschritten lässt sich das meiste von dem, was das Spielen schwer macht, nicht bewerten: Sextolenläufe enden bei 65 BPM, Sechs-Saiten-Griffbilder in Sechzehnteln bei 100. Der Klang verrät uns nie die zwei Dinge, die hier am wichtigsten sind, Dämpfen und Plektrumweg, und die Übungen sagen das auch.",
     "path.skills.0": "Gleichmäßiger Wechselschlag in Sechzehnteln, 80 BPM",
     "path.skills.1": "Saubere Hammer-ons und Pull-offs",

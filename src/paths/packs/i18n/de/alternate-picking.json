@@ -3,7 +3,7 @@
   "path": "alternate-picking",
   "lng": "de",
   "strings": {
-    "path.title": "Alternate Picking",
+    "path.title": "Wechselschlag",
     "path.goal": "Spiel eine saubere, gleichmäßige Linie in A-Moll über alle sechs Saiten im Wechselschlag und halte sie acht Takte lang über einer Band.",
     "path.assumes": "Du kannst Einzeltöne sauber greifen, hältst ein Plektrum und kannst Achtel zum Klick bei 80 BPM spielen. Tempo wird nicht vorausgesetzt. Die angegebenen Minuten sind ein Durchgang durch das Material; rechne damit, jeden Schritt über Tage oder Wochen immer wieder zu spielen.",
     "path.gradingLimits": "Alles hier wird nach Timing und Tönen für einzeln angeschlagene Töne bewertet, dafür ist die App gebaut, und nichts davon wurde bisher an einer echten Gitarre ausprobiert. Je schneller die Linie, desto unsicherer die Bewertung. Dein Setup fügt eine kleine Verzögerung zwischen dem Spielen eines Tons und dem Hören durch die App ein; bis Sechzehntel bei 100 BPM macht das keinen Unterschied, darüber solltest du den Wert für Gleichmäßigkeit als vorläufig lesen. Starke Verzerrung und Kompression verwischen, wo jeder Ton beginnt, daher ist ein cleaner oder leicht angezerrter Sound die ehrliche Einstellung für einen bewerteten Take. Nichts Schnelleres als Sechzehntel bei 200 BPM wird bewertet, und keine Übung hier geht so weit.",

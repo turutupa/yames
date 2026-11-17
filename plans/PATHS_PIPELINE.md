@@ -258,6 +258,10 @@ the same bytes):
   `subdivision` (the grid of its tightest onset gap: `sixteenths`, `sextuplets`,
   `quintuplets`, `eighthTriplets`, `quarterTriplets`, ...), and `tab.subdivision`
   checks it. `SUBDIVISION_WORDS` has the words for a screen.
+  `labelSubdivisions: "mostly"` (Alternate Picking, Blues, Classic Rock, Sweep since
+  2026-11-17) names the grid only where more than half the onset gaps are that grid,
+  and leaves swung, mixed or mostly-slower lines unlabelled instead of naming their
+  fastest moment. Labels only; notes and grading are unchanged.
 
 Templates, in `templates.ts`, return that same notation and take their pitches from
 the theory data, so a wrong shape is an impossible thing to type:

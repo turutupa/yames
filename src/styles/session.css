@@ -1004,14 +1004,18 @@
 .session-recap-head .session-h1 {
   font-size: clamp(40px, 8vh, 76px);
 }
+/* The name and its details keep a readable measure; when that and the number
+   do not both fit (a phone, a long language), the number drops under them
+   rather than squeezing the name to a word a line (QA 2 #1). */
 .session-recap-item {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 4px 10px;
   align-items: center;
   padding: 9px 12px;
 }
 .session-recap-text {
-  flex: 1 1 0;
+  flex: 1 1 15rem;
   min-width: 0;
 }
 .session-recap-number {
@@ -1138,18 +1142,25 @@
   color: var(--l-quiet);
   margin-top: 1px;
 }
+/* Like the recap's rows: the text keeps a readable measure, and on a phone
+   (or in a long language) Play this / Find my edge drop under it on the right
+   instead of squeezing it to a word a line. */
 .session-exercise {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   align-items: center;
   padding: 9px 12px;
+}
+.session-exercise > .session-col {
+  margin-left: auto;
 }
 .session-exercise[data-current] {
   border-color: rgba(255, 180, 84, 0.6);
   background: rgba(50, 35, 18, 0.84);
 }
 .session-exercise-text {
-  flex: 1 1 0;
+  flex: 1 1 13rem;
   min-width: 0;
   display: flex;
   flex-direction: column;

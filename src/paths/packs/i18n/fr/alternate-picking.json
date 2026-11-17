@@ -3,7 +3,7 @@
   "path": "alternate-picking",
   "lng": "fr",
   "strings": {
-    "path.title": "Alternate Picking",
+    "path.title": "Aller-retour",
     "path.goal": "Joue une ligne propre et régulière en A mineur sur les six cordes, et tiens-la avec un groupe pendant huit mesures.",
     "path.assumes": "Tu sais fretter des notes isolées proprement, tu tiens un médiator, et tu sais jouer des croches au clic à 80 BPM. Aucune vitesse n'est requise. Les minutes indiquées correspondent à un seul passage sur le contenu ; attends-toi à revenir sur chaque étape pendant des jours ou des semaines.",
     "path.gradingLimits": "Tout ici est noté sur le placement et les notes pour des notes isolées jouées au médiator, ce pour quoi l'app est conçue, et rien de tout ça n'a encore été essayé sur une vraie guitare. Plus la ligne est rapide, moins la note est sûre. Ton installation ajoute une petite latence entre le moment où tu joues une note et celui où l'app l'entend ; jusqu'aux doubles croches à 100 BPM, ça ne change rien, et au-dessus, considère le score de régularité comme provisoire. Une forte distorsion et la compression brouillent le début de chaque note, donc un son clair ou légèrement crunch est le réglage honnête pour une prise notée. Rien de plus rapide que des doubles croches à 200 BPM n'est noté, et aucun exercice ici ne va aussi loin.",
