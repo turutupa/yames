@@ -604,6 +604,15 @@ try {
   info.calibration = await player.calibrate();
   console.log(`player calibrated: ${fmt(info.calibration.offsetMs)} ms write-to-capture`);
   info.loadAtStart = readFileSync("/proc/loadavg", "utf8").trim();
+  const load1 = Number(info.loadAtStart.split(" ")[0]);
+  const cores = (await import("node:os")).availableParallelism();
+  if (load1 > cores / 2) {
+    console.warn(
+      `WARNING: load average ${load1} on ${cores} cores. The app's audio threads run at normal priority on ` +
+        "Linux, and on a machine this busy its input and output stall: takes come out garbled and the probe's " +
+        "numbers describe the machine, not the app. Re-run on a quieter machine before believing a failure.",
+    );
+  }
   info.appEnv = appEnv;
   if (scenarios.has("gpu-info")) await scenarioGpuInfo();
   if (scenarios.has("session")) await scenarioSession();
@@ -624,5 +633,6 @@ try {
 
 const failed = results.filter((r) => !r.ok);
 writeFileSync(join(out, "results.json"), JSON.stringify({ results, info }, null, 2));
+console.log(`load average at start ${info.loadAtStart?.split(" ").slice(0, 3).join(" ")}, at end ${info.loadAtEnd?.split(" ").slice(0, 3).join(" ")}`);
 console.log(`\n${results.length - failed.length} passed, ${failed.length} failed. Results, screenshots and probe reports: ${out}`);
 process.exit(failed.length || exitCode ? 1 : 0);
