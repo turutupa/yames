@@ -91,10 +91,6 @@ export function mountStageShot(kind: "whole" | "zoom" | "pluck" | "flat") {
   const style = document.createElement("style");
   style.textContent = CSS;
   document.head.appendChild(style);
-  const fonts = document.createElement("link");
-  fonts.rel = "stylesheet";
-  fonts.href = "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap";
-  document.head.appendChild(fonts);
   window.__NECK__ = stageDebug;
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

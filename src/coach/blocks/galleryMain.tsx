@@ -14,6 +14,7 @@
 import ReactDOM from "react-dom/client";
 import i18n from "../../i18n";
 import BlocksGallery from "./gallery";
+import "../../styles/fonts.css";
 import "./gallery.css";
 
 declare global {
