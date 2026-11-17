@@ -302,8 +302,10 @@ jobs:
 
       # ROADMAP 5.0.1 budgets 80 MB per platform. The native library is
       # essentially all of it, so its per-ABI size is the number to watch:
-      # the release profile strips it, and a regression here means something
-      # stopped stripping.
+      # `scripts/tauri.mjs` sets CARGO_PROFILE_RELEASE_STRIP=symbols for an
+      # Android build (52 MB unstripped, 45 MB stripped on arm64), and a
+      # regression here means something stopped stripping. Most of what is
+      # left is the sample banks `build.rs` embeds (about 32 MB of WAV).
       - name: Record sizes
         run: |
           set -uo pipefail

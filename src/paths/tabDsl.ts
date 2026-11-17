@@ -214,21 +214,27 @@ export function markEconomy(notes: PathNote[], start: PickMark = "d"): void {
 /**
  * Sweep strokes. Crossing toward the higher strings is one downward push;
  * crossing back is one upward push. Picked notes on one string alternate.
+ *
+ * Two picked notes belong to one motion when the line between them never
+ * stops for a beat or more. The notes between count: a hammer and a pull at
+ * the top of a loop keep the hand moving, so the picked note after them is
+ * judged against the one before them even when that is a full beat back.
  */
 export function markSweep(notes: PathNote[]): void {
   const picked = notes.map((n, i) => (isPicked(n, notes[i - 1]) ? i : -1)).filter((i) => i >= 0);
+  /** No gap of a beat or more between any two onsets from `from` to `to`. */
+  const joined = (from: number, to: number): boolean => {
+    for (let i = from + 1; i <= to; i++) if (notes[i].tick - notes[i - 1].tick >= TICKS) return false;
+    return true;
+  };
   picked.forEach((noteIndex, order) => {
     const note = notes[noteIndex];
     if (note.pick) return;
     const nextIndex = picked[order + 1];
     const previousIndex = picked[order - 1];
-    const nearBefore =
-      previousIndex !== undefined && note.tick - notes[previousIndex].tick < TICKS;
-    const previous = nearBefore ? notes[previousIndex] : undefined;
-    const next =
-      nextIndex !== undefined && notes[nextIndex].tick - note.tick < TICKS
-        ? notes[nextIndex]
-        : undefined;
+    const previous =
+      previousIndex !== undefined && joined(previousIndex, noteIndex) ? notes[previousIndex] : undefined;
+    const next = nextIndex !== undefined && joined(noteIndex, nextIndex) ? notes[nextIndex] : undefined;
     if (previous && previous.string !== note.string) {
       note.pick = note.string < previous.string ? "d" : "u";
     } else if (next && next.string !== note.string) {

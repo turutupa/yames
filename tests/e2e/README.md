@@ -8,7 +8,7 @@ graded by the real scorer and saved in the real store, come back after a
 restart; and does the click hold while the 3D neck draws.
 
 ```sh
-npm run test:e2e                         # build, then session, relaunch, four-fingers, gpu-info
+npm run test:e2e                         # build, then placement, session, relaunch, two-paths, four-fingers, gpu-info
 npm run test:e2e -- --no-build           # use the binary already built
 npm run test:e2e:probe                   # the click with the neck vs the headless probe
 node tests/e2e/run.mjs --help
@@ -23,17 +23,26 @@ the end).
 
 | Scenario | What happens | Checks |
 |---|---|---|
-| `session` | Today, 5 minutes, Start. The plan's first Exercise (Open A, pick hand alone, 60 BPM for a new player). A good take, then Go again with a sloppy one, then a silent one. Exit. | The Take ends by itself at its last bar. Good: "PASS BAR MET", a `path_takes` row passed and caught, `countsForCleanTempo`, the clean tempo stored at 60. Sloppy: "THE BAR IS 85% / Evenness was …", row caught and not passed, the evenness check not held, the clean tempo unmoved. Silent: "I didn't catch enough", row not caught. |
+| `placement` | A fresh profile (no Path started). Today, 5 minutes, Start. The planner puts a new player on the first Path, Shred (`FIRST_PATH_ID`), and a new Path's first block is placement: "Open A, sixteenths" at its first rung, 60 BPM. A good easy Take, then Exit. | Today says "Your first session". The Session is placement on Shred's first Exercise at the first rung. The Take passes and is saved on `shred`; the next Take offered is at the pass tempo (110). The pass-tempo Take is not played, so the Sessions after this one stay on Step 1. |
+| `session` | The second Session (after `placement`; run alone it plays `placement` first). Today, 5 minutes, Start: an ordinary focus block on Shred's first Exercise. A good take, then Go again with a sloppy one, then a silent one. Exit. | Not placement. Good: "PASS BAR MET", a `path_takes` row passed and caught, `countsForCleanTempo`, the clean tempo stored at the Take's tempo. Sloppy: "THE BAR IS 90% / Evenness was …" (the Exercise's own evenness bar), row caught and not passed, the evenness check not held, the clean tempo unmoved. Silent: "I didn't catch enough", row not caught. |
 | `relaunch` | Quit with the window's Close, start the app again on the same profile. | Today no longer plans a first Session; Progress shows the Exercise and its clean tempo. |
+| `two-paths` | Paths, Alternate Picking, Subscribe. Today, 20 minutes: the plan is read, then Start, and the Session is walked through (past the warm-up, one good Take on each Exercise it reaches, Move on past "Go again") until both Paths have a Take in it. | Today's "Running" line names both Paths; the plan has a block from each, Alternate Picking's as placement ("New here?"); the Session saved Takes on both `shred` and `alternate-picking`, and every good Take passed. |
 | `four-fingers` | Paths, Alternate Picking, Step 1, "Four fingers, one string", Play this, Faster to 80 BPM, a good take. | The Take is at 80, passes, and the clean tempo 80 is stored. |
 | `blues-band` | Paths, Blues and Pentatonics, "A on every downbeat" (a Texas shuffle: drums and bass under the Take, `src/session/takeBand.ts`). The band starts off (the virtual input is a "microphone" to the app); the player puts it at 0.8. Good, sloppy 35 ms, sloppy 80 ms and wrong-notes takes over the band, then good, 35 and 80 ms again with the band at 0 in a fresh launch, as the control. The player keeps time with the drummer after the count-in (`playOverBand`): the click is off under a band. `--bleed <dB>` also loops the app's output back into its input. | The band starts off on a microphone; the good take passes and stores its clean tempo; the player heard the band's beats; the 80 ms take and the wrong notes fail. The 35 ms take and the control are recorded (results in `plans/revamp/GRADING_LIMITS.md`, "Over the band"). |
 | `gpu-info` | `webkit://gpu`, the GL libraries mapped into the app, and what the page's WebGL says its renderer is. | Recorded, not checked. Under Xvfb WebKit reports policy "never" (software compositing) but WebGL still runs on the GPU through NVIDIA's EGL; with `--gpu`, policy "always". |
 | `neck` | Four fingers, three good Takes back to back (60, 70, 80 BPM) with the neck on screen and the in-app probe armed. | Every Take passes; the probe's hard gates (missed beats, callback allocations/frees, dropped notifications) are 0; p99 jitter < 1 ms is advisory, as in `AGENTS.md`. Also records which neck was drawn (WebGL2 canvas or not), CPU cores per process while playing, and whether `nvidia-smi` lists the web process. |
 | `baseline` | `click-jitter-probe --no-llm` in the same PipeWire, for comparison. | The same gates. |
 
-Every launch has the in-app click probe armed (below), so `session` and
-`four-fingers` also leave a probe report of a real Session with the neck
-drawing.
+Every launch has the in-app click probe armed (below), so `placement`,
+`session`, `two-paths` and `four-fingers` also leave a probe report of a real
+Session with the neck drawing.
+
+The scenarios share one profile and run in the order above: `session` and
+`relaunch` read what `placement` left, and `two-paths` needs the first Path
+started. Which Exercise a Session screen is on is read off the screen
+(`exerciseOnScreen` in `lib/exercises.mjs`) and looked up in the shipped packs,
+so a change to the planner's choice moves the Take rather than failing to find
+it.
 
 ## How it is put together
 
@@ -61,7 +70,7 @@ drawing.
   stall reads as the app's fault. The app's own cpal threads are left alone:
   cpal does not promote them on Linux, and the probe should measure that.
 - **The guitarist** (`lib/player.mjs`). Takes are rendered from the shipped
-  pack (`src/paths/packs/alternate-picking.json`), one Karplus-Strong pluck
+  packs (`src/paths/packs/shred.json`, `alternate-picking.json`), one Karplus-Strong pluck
   per note at the right pitch, for `takeBarsOf` bars: "good" is 1.5 ms of
   scatter, "sloppy" 35 ms (clipped at 70), "silent" nothing.
 - **Lining the take up with the transport.** The player records
