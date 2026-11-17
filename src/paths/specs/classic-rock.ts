@@ -311,7 +311,7 @@ export default definePath({
           purpose: "A, G and E as triplets, over and over: the repeat a lot of sixties players built solos on. Then C, A, G, and home to A.",
           howTo: [
             "Eighth-note triplets, three to a click, 60 BPM up to a pass at 90.",
-            "A at 5 on the high E with your first finger, G at 8 on the B with your fourth, E at 5 on the B with your first. Four times. Bar 2: C at 8, A at 5 on the high E, G at 8 on the B, twice, then the A held.",
+            "A at 5 on the high E and E at 5 on the B under one first finger, rolled from one string to the other, and G at 8 on the B with your fourth. Four times. Bar 2: C at 8, A at 5 on the high E, G at 8 on the B, twice, then the A held.",
           ],
           coach: "Written triplets: right notes, notes heard and timing after the take.",
           tab: "/8t 1:5 2:8 2:5 1:5 2:8 2:5 1:5 2:8 2:5 1:5 2:8 2:5 | /8t 1:8 1:5 2:8 1:8 1:5 2:8 /2 1:5",
@@ -351,8 +351,8 @@ export default definePath({
           purpose: "A lick that leaves the box upwards on the top two strings, frets 8 and 10, and comes back home to A. The extension is where a solo goes when it wants to lift.",
           howTo: [
             "Straight eighths, 70 BPM up to a pass at 100.",
-            "Bar 1: D on the G string, then G and A on the B string (frets 8 and 10), C and D on the high E (8 and 10), and back down C, A, G. Bar 2: D, C on the high E and B strings, A, G, then D and C in the box, and A at fret 7 on the D string.",
-            "Shift your first finger to fret 8 for the extension, and back to 5 at bar 2.",
+            "Bar 1: D on the G string, then G and A on the B string (frets 8 and 10), C and D on the high E (8 and 10), and back down C, A, G. Bar 2: D and C on the high E, A and G on the B, then D and C on the G string back in the box, and A at fret 7 on the D string.",
+            "First finger on fret 7 for the extension: frets 7, 8 and 10 lie under the first, second and fourth fingers. Move back to fret 5 for the last three notes of bar 2.",
           ],
           coach: "Written notes: I check them, and the time, after the take.",
           tab: "/8 3:7 2:8 2:10 1:8 1:10 1:8 2:10 2:8 | /8 1:10 1:8 2:10 2:8 3:7 3:5 /4 4:7",
@@ -388,7 +388,7 @@ export default definePath({
           purpose: "The major box up and down, so its notes are in the hand: at fret 2, and the same shape at fret 14.",
           howTo: [
             "Straight eighths, two to a click, 60 BPM up to a pass at 90.",
-            "First finger on fret 2 (or 14), fourth finger on 5 (or 17). The A's are on the low E at 5, the G string at 2, and the high E at 5.",
+            "First finger on fret 2 (or 14), fourth finger on 5 (or 17). At fret 2 the A's are on the low E at 5, the G string at 2 and the high E at 5; at 14 they are twelve frets higher.",
           ],
           coach: "Right notes and even eighths after the take.",
           vary: {
@@ -492,7 +492,7 @@ export default definePath({
           purpose: "Pick, pull off, pick, in triplets: C, A, G on the top strings, round and round, then out to E. Then the same loop a string pair lower.",
           howTo: [
             "Eighth-note triplets, three to a click, 80 BPM up to a pass at 110.",
-            "On the top pair: pick C at fret 8 on the high E with your fourth finger, pull off to A at fret 5, pick G at fret 8 on the B. The lower pairs are the same move: fret 8 to 5 on the B and 7 on the G, or 7 to 5 on the G and 7 on the D.",
+            "On the top pair: pick C at fret 8 on the high E with your fourth finger, pull off to A at fret 5 under your first, pick G at fret 8 on the B with your third. The lower pairs are the same move: fret 8 to 5 on the B and 7 on the G, or 7 to 5 on the G and 7 on the D.",
           ],
           coach: "The picked notes are checked for pitch and time. A pulled-off note that is too quiet for me doesn't count against you.",
           vary: {
@@ -536,7 +536,7 @@ export default definePath({
           purpose: "Fretted notes on the B string against the open high E, as sixteenths: the restless, high-voltage sound of Australian hard rock, in E minor. Original notes.",
           howTo: [
             "Straight sixteenths, four to a click, 60 BPM up to a pass at 90.",
-            "Every other note is the open high E. Bar 1: G, F#, F#... the fretted notes are frets 8, 7, 5 and 7 on the B string. Bar 2 climbs to A at 10 and B at 12, comes back, and ends on E at fret 5.",
+            "Every other note is the open high E. Bar 1, the fretted notes on the B string: G, F#, G, F# (frets 8 and 7), then E, F#, E, F# (frets 5 and 7). Bar 2 climbs G, A, B (frets 8, 10, 12), comes back down, and ends on E at fret 5.",
             "Pick evenly; the open string should be as loud as the fretted one.",
           ],
           coach: "The open string can ring under the next note, and when it does, I say right notes weren't checked. Notes heard and time always are.",
@@ -683,7 +683,7 @@ export default definePath({
           purpose: "The open E move, then the same move on an A chord at fret 5: B hammered to C# on the G string. Two chords, one idea.",
           howTo: [
             "Straight eighths, 60 BPM up to a pass at 80.",
-            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A: A at 5 on the low E, A at 7 on the D string, B at 4 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bars 3 and 4: the E move again, then E, B, G#, B and the high E held.",
+            "Bar 1 is the open E move from the first Exercise. Bar 2 moves it to A: A at 5 on the low E, A at 7 on the D string, B at 4 on the G hammered to C# at 6, E at 5 on the B, C#, A, C#. Bar 3 is the E move again. Bar 4: low E, E on the D string, G#, open B, and the open high E held.",
           ],
           coach: "Ringing notes again: timing and notes heard, not pitch.",
           tab: "/8 6:0 4:2 3:0 3:1h 2:0 3:1 4:2 3:1 | /8 6:5 4:7 3:4 3:6h 2:5 3:6 4:7 3:6 | /8 6:0 4:2 3:0 3:1h 2:0 3:1 4:2 3:1 | /8 6:0 4:2 3:1 2:0 /2 1:0",
