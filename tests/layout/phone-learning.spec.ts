@@ -30,6 +30,17 @@ const WIDTHS = [
 
 /** Every reachable control in view that is smaller than a thumb. */
 async function smallTargets(page: Page): Promise<{ small: string[]; seen: number }> {
+  // A screen comes in with `fade-scale` (98.7% → 100%): measured mid-way, a
+  // 44 px button reads 43.4. Wait for the finite animations to land; endless
+  // ones (a pulsing dot) never would.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.playState === "running" && Number.isFinite(a.effect?.getComputedTiming().endTime ?? Infinity))
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
   return page.evaluate(() => {
     const out: string[] = [];
     let seen = 0;
