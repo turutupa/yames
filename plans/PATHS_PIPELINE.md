@@ -212,8 +212,13 @@ the same bytes):
   both as `tap`). `reach.ts` leaves taps out of the hand's span, and a note right after a
   tap may move the hand.
 - **`economy` pick plan:** alternate on a string; a string change takes the stroke the
-  pick is travelling in (`markEconomy`). Graded like picked notes (75 ms), checked by
-  `pick.sweep` on crossings and `pick.economy` on one string.
+  pick is travelling in (`markEconomy`); a spec may print an alternating stroke at a
+  change instead (an outside return). Graded like picked notes (75 ms), checked by
+  `pick.sweep` on crossings (travel direction or alternation, never a repeat against
+  the travel) and `pick.economy` on one string.
+- **`honesty.unbuiltMetric`:** a graded Exercise may not pass on a `new-grader` metric
+  nothing computes yet (`BUILT_NEW_GRADERS` in `metrics.ts` lists the exceptions:
+  `evennessHold`, which `score/pass.rs` measures).
 - **`sweepTiming` profile:** swept notes on evenness, notes heard and extras only, so
   right notes are never promised on a sweep ("timing only").
 - **Named subdivisions:** a spec with `labelSubdivisions: true` writes each Exercise's
