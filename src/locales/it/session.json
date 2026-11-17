@@ -44,6 +44,8 @@
       "whatsIn": "Cosa c'è dentro, e perché",
       "min": "MIN",
       "nothing": "Non c'è ancora niente da suonare.",
+      "noPaths": "Al momento non segui nessun percorso. Scegline uno e Oggi costruirà la tua sessione a partire da quello.",
+      "choosePath": "Scegli un percorso",
       "needsInput": "Per dare un voto serve un microfono o un ingresso diretto.",
       "toolsOffer": "Sei qui per gli strumenti? Sono tutti sotto Strumenti.",
       "toolsOfferOpen": "Vai al mio ultimo strumento",

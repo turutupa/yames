@@ -44,6 +44,8 @@
       "whatsIn": "What's in it, and why",
       "min": "MIN",
       "nothing": "There's nothing to play yet.",
+      "noPaths": "You're not on any Path right now. Choose one and Today builds your Session from it.",
+      "choosePath": "Choose a Path",
       "needsInput": "Grading needs a microphone or direct input.",
       "toolsOffer": "Here for the tools? They're all under Tools.",
       "toolsOfferOpen": "Go to my last tool",

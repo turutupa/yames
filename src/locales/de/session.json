@@ -44,6 +44,8 @@
       "whatsIn": "Was drin ist, und warum",
       "min": "MIN",
       "nothing": "Noch gibt es nichts zu spielen.",
+      "noPaths": "Du folgst gerade keinem Pfad. Wähl einen, und Heute stellt deine Session daraus zusammen.",
+      "choosePath": "Pfad wählen",
       "needsInput": "Für die Bewertung braucht es ein Mikrofon oder einen direkten Eingang.",
       "toolsOffer": "Wegen der Werkzeuge hier? Die sind alle unter Werkzeuge.",
       "toolsOfferOpen": "Zu meinem letzten Werkzeug",

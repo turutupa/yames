@@ -220,7 +220,11 @@ async function drive() {
         `.rail button[aria-label="${name}"], .mobile-tabs button[aria-label="${name}"]`,
       );
     await until("Today", () => !!byId("today"));
-    await until("a plan", () => !!document.querySelector(".session-plan-item"));
+    // A plan, or (subscribed to nothing) the way to the Paths instead of one.
+    await until(
+      "a plan",
+      () => !!document.querySelector('.session-plan-item, [data-testid="today-choose-path"]'),
+    );
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
       rail("Paths")?.click();
       await until("the Paths list", () => !!byId("path-card-alternate-picking"));

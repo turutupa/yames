@@ -179,7 +179,7 @@ function TakeScreen({
 
       <div className="session-takerow">
         {running ? (
-          <div className="session-row" data-testid="session-live" style={{ gap: "clamp(14px,2.4vw,36px)", alignItems: "flex-end", flex: "1 1 0" }}>
+          <div className="session-row session-live" data-testid="session-live">
             <div className="session-stat" data-xl="">
               <b className="session-good">
                 {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–"}

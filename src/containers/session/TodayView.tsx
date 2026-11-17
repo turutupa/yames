@@ -77,6 +77,7 @@ export function TodayView({
   session,
   onOpenLastTool,
   onOpenTools,
+  onOpenPaths,
   listening = false,
 }: {
   session: SessionRun;
@@ -85,6 +86,8 @@ export function TodayView({
   /** "Open on my last tool": the setting, and going there now. */
   onOpenLastTool: () => void;
   onOpenTools: () => void;
+  /** To the Paths list: the way on when no Path is subscribed (QA 2026-11-17 #7). */
+  onOpenPaths: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const { plan, minutes, setMinutes, myPaths, progress, actions } = session;
@@ -101,6 +104,9 @@ export function TodayView({
         ? t("session.today.leadBack", { days: plan.daysAway ?? 0 })
         : weekday;
 
+  // Subscribed to nothing: Today has no plan to build, so its one big action
+  // is choosing a Path rather than a Start that cannot start.
+  const noPaths = myPaths.length === 0;
   const last = progress.takes[0];
   const lastFacts = last ? factsOf(last) : null;
   const lastPercent =
@@ -118,19 +124,34 @@ export function TodayView({
             <h1 className="session-mega session-rise" style={rise(1)}>
               {t("session.today.title")}
             </h1>
-            <div className="session-today-minutes session-rise" style={rise(2)}>
-              {t("session.today.minutes", { minutes })}
-            </div>
+            {!noPaths && (
+              <div className="session-today-minutes session-rise" style={rise(2)}>
+                {t("session.today.minutes", { minutes })}
+              </div>
+            )}
           </div>
-          <button
-            className="session-big session-rise"
-            style={rise(3)}
-            onClick={actions.startToday}
-            disabled={plan.steps.length === 0}
-            data-testid="today-start"
-          >
-            {t("session.today.start")}
-          </button>
+          {noPaths ? (
+            <button
+              className="session-big session-rise"
+              style={rise(3)}
+              onClick={onOpenPaths}
+              data-testid="today-choose-path"
+            >
+              {t("session.today.choosePath")}
+            </button>
+          ) : (
+            <button
+              className="session-big session-rise"
+              style={rise(3)}
+              onClick={actions.startToday}
+              disabled={plan.steps.length === 0}
+              data-testid="today-start"
+            >
+              {t("session.today.start")}
+            </button>
+          )}
+          {!noPaths && (
+          <>
           <div className="session-today-seg-label" id="session-minutes-label">
             {t("session.today.howLong")}
           </div>
@@ -149,6 +170,8 @@ export function TodayView({
               </button>
             ))}
           </div>
+          </>
+          )}
           {plan.mood !== "first" && myPaths.length > 0 && (
             <div className="session-quiet">
               {t("session.today.running", {
@@ -161,9 +184,11 @@ export function TodayView({
         </div>
 
         <div className="session-today-plan">
-          <div className="session-kick session-rise" style={rise(4)}>
-            {t("session.today.whatsIn")}
-          </div>
+          {plan.steps.length > 0 && (
+            <div className="session-kick session-rise" style={rise(4)}>
+              {t("session.today.whatsIn")}
+            </div>
+          )}
           {plan.mood === "back" && last && (
             <div className="session-glass session-card session-rise" data-testid="today-left-off">
               <div className="session-kick">{t("session.today.leftOff")}</div>
@@ -212,7 +237,16 @@ export function TodayView({
             </div>
           )}
           {plan.steps.length === 0 && (
-            <div className="session-why">{t("session.today.nothing")}</div>
+            <div className="session-glass session-card session-col" data-testid="today-nothing" style={{ gap: 6 }}>
+              <div className="session-why">
+                {t(noPaths ? "session.today.noPaths" : "session.today.nothing")}
+              </div>
+              {!noPaths && (
+                <button className="session-link" onClick={onOpenPaths}>
+                  {t("session.today.choosePath")}
+                </button>
+              )}
+            </div>
           )}
           {plan.mood === "first" && (
             <div className="session-footnote">

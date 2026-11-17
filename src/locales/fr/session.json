@@ -44,6 +44,8 @@
       "whatsIn": "Ce qu'il y a dedans, et pourquoi",
       "min": "MIN",
       "nothing": "Il n'y a encore rien à jouer.",
+      "noPaths": "Tu ne suis aucun parcours pour l'instant. Choisis-en un et Aujourd'hui composera ta séance à partir de lui.",
+      "choosePath": "Choisir un parcours",
       "needsInput": "La notation a besoin d'un micro ou d'une entrée directe.",
       "toolsOffer": "Tu viens pour les outils ? Ils sont tous sous Outils.",
       "toolsOfferOpen": "Aller à mon dernier outil",

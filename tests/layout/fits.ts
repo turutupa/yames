@@ -376,3 +376,126 @@ export async function openTool(page: Page, id: "beat" | "drill" | "setlist" | "j
   await page.click('.mobile-tab[data-tab="tools"]');
   await page.click(`[data-testid="tool-card-${id}"]`);
 }
+
+/**
+ * Let the learning side's entrance animations (`.session-rise`, `.session-fade`)
+ * land, so a measurement sees where things rest rather than where they rise
+ * from.
+ */
+export async function settleAnimations(page: Page) {
+  await page.evaluate(async () => {
+    for (const a of document.getAnimations()) {
+      if (a instanceof CSSAnimation && /^session-/.test(a.animationName)) {
+        try {
+          a.finish();
+        } catch {
+          // An infinite one (a pulse) cannot finish, and is not an entrance.
+        }
+      }
+    }
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  });
+}
+
+/**
+ * Pairs of blocks on a learning screen that are drawn over each other (QA
+ * 2026-11-17 #1, #2, #5): text, cards, controls and the neck's slot. One that
+ * holds the other is nesting, not an overlap; a hidden one is not drawn. A
+ * few pixels of touch are let through: a card's shadow, a tag's border.
+ */
+export async function overlapping(page: Page, root = ".session-page"): Promise<string[]> {
+  await settleAnimations(page);
+  return page.evaluate((rootSel) => {
+    const scope = document.querySelector(rootSel);
+    if (!scope) return [`no ${rootSel}`];
+    const sel = [
+      "button",
+      "h1",
+      "h2",
+      "h3",
+      ".session-kick",
+      ".session-why",
+      ".session-glass",
+      ".session-slot",
+      ".session-stat",
+      ".session-moved",
+      ".session-bpm",
+      ".session-tag",
+      ".session-chart",
+      "svg",
+    ].join(",");
+    const els = [...scope.querySelectorAll<HTMLElement>(sel)].filter((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return false;
+      for (let e: HTMLElement | null = el; e; e = e.parentElement) {
+        const cs = getComputedStyle(e);
+        if (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0") return false;
+      }
+      // Drawn inside something that owns its own picture (a chart's labels).
+      return !el.closest("svg") || el.tagName.toLowerCase() === "svg";
+    });
+    const name = (el: Element) =>
+      `${el.tagName.toLowerCase()}.${String(el.getAttribute("class") ?? "").split(" ")[0]} "${(el.textContent ?? "").trim().slice(0, 24)}"`;
+    // What is drawn of a block: its box, cut by every ancestor that clips
+    // (the tab panel's surfaces run on past their panel, out of sight).
+    const drawn = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      let { left, right, top, bottom } = r;
+      for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+        // Hidden or clipped only: a scroller's content is still there to be
+        // scrolled to, and an overlap below the fold is still an overlap.
+        if (!/hidden|clip/.test(getComputedStyle(e).overflow)) continue;
+        const c = e.getBoundingClientRect();
+        left = Math.max(left, c.left);
+        right = Math.min(right, c.right);
+        top = Math.max(top, c.top);
+        bottom = Math.min(bottom, c.bottom);
+      }
+      return { left, right, top, bottom };
+    };
+    const out: string[] = [];
+    const SLACK = 3;
+    for (let i = 0; i < els.length; i++) {
+      for (let j = i + 1; j < els.length; j++) {
+        const a = els[i];
+        const b = els[j];
+        if (a.contains(b) || b.contains(a)) continue;
+        const ra = drawn(a);
+        const rb = drawn(b);
+        const w = Math.min(ra.right, rb.right) - Math.max(ra.left, rb.left);
+        const h = Math.min(ra.bottom, rb.bottom) - Math.max(ra.top, rb.top);
+        if (w > SLACK && h > SLACK) out.push(`${name(a)} × ${name(b)} (${Math.round(w)}×${Math.round(h)})`);
+      }
+    }
+    return out;
+  }, root);
+}
+
+/**
+ * Whether a thumb or a pointer at the middle of each control reaches it: the
+ * element on top at its centre is the control or inside it (QA #1: the neck's
+ * slot took the tap meant for "Play this").
+ */
+export async function notHitTestable(page: Page, selector: string): Promise<string[]> {
+  await settleAnimations(page);
+  return page.evaluate((sel) => {
+    const out: string[] = [];
+    for (const el of document.querySelectorAll<HTMLElement>(sel)) {
+      if (el.getBoundingClientRect().width === 0) continue;
+      el.scrollIntoView({ block: "center", behavior: "instant" });
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      const top = document.elementFromPoint(x, y);
+      if (!top || !(top === el || el.contains(top))) {
+        out.push(
+          `"${(el.textContent ?? "").trim().slice(0, 30)}" at ${Math.round(x)},${Math.round(y)} is under ${
+            top ? `${top.tagName.toLowerCase()}.${String(top.getAttribute("class") ?? "").split(" ")[0]}` : "nothing"
+          }`,
+        );
+      }
+    }
+    return out;
+  }, selector);
+}

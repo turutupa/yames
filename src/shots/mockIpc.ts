@@ -746,8 +746,9 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back" | "three"): PathStoreSeed {
+function sessionSeed(seed: "first" | "returning" | "back" | "three" | "none"): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  if (seed === "none") return sessionSeed("returning");
   if (seed === "three") return threePaths();
   const away = seed === "back" ? 12 : 1;
   const open = "even-eighths.open-string";
@@ -936,6 +937,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
+  // Played Alternate Picking, then unsubscribed from it: no Path at all.
+  if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 

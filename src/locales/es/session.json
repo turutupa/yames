@@ -44,6 +44,8 @@
       "whatsIn": "Qué incluye, y por qué",
       "min": "MIN",
       "nothing": "Todavía no hay nada que tocar.",
+      "noPaths": "Ahora mismo no sigues ninguna ruta. Elige una y Hoy armará tu sesión a partir de ella.",
+      "choosePath": "Elegir una ruta",
       "needsInput": "Para puntuar hace falta un micrófono o una entrada directa.",
       "toolsOffer": "¿Vienes por las herramientas? Están todas en Herramientas.",
       "toolsOfferOpen": "Ir a mi última herramienta",

@@ -55,6 +55,9 @@
   align-items: stretch;
   flex: 1 1 auto;
   min-height: 0;
+  /* From the top: a page taller than the window must not spill above it,
+     where no scroll reaches (the note in transitions.css). */
+  justify-content: flex-start;
 }
 
 /* A running Session has the window to itself. The rail stays mounted, because
@@ -88,6 +91,11 @@
   gap: 12px;
   width: 100%;
   min-height: 100%;
+  /* A page longer than the window grows and the view scrolls; it never
+     squeezes its blocks into each other (QA #1, #5: a column shrunk to the
+     window let the next one, the neck's slot, start on top of it). Only a
+     running Session (.session-run) is held to the window's height. */
+  flex-shrink: 0;
   padding: 14px 26px 20px;
   color: var(--l-ink);
   font: 500 15px/1.4 var(--l-body);
@@ -243,11 +251,14 @@
   }
 }
 
-/* The neck's place on a screen. The stage frames into it; empty without one. */
+/* The neck's place on a screen. The stage frames into it; empty without one.
+   It is a picture, never a control: a tap on it belongs to whatever is under
+   it (QA 2026-11-17 #1, it took "Play this" on a Step's first card). */
 .session-slot {
   position: relative;
   flex: 1 1 0;
   min-height: 120px;
+  pointer-events: none;
 }
 .session-slot[data-band] {
   flex: none;
@@ -535,7 +546,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  justify-content: center;
+  /* From the top of its row: centred beside a long plan, the minutes picker
+     fell below a 700 px window under an empty band (QA 2026-11-17 #6). */
+  justify-content: flex-start;
   min-height: 0;
 }
 .session-today-plan {
@@ -637,9 +650,15 @@
 }
 
 /* ── A running Session ─────────────────────────────────────────────────── */
+/* The window's height, at least: the neck's slot takes what the blocks leave.
+   Taller when the blocks need more (a phone, a short window, a long language):
+   the view then scrolls, rather than the blocks being squeezed over Exit and
+   over each other (QA 2026-11-17 #2). */
 .session-run {
   min-height: 100%;
-  height: 100%;
+}
+.session-run > .session-body {
+  flex-shrink: 0;
 }
 .session-bar {
   flex: none;
@@ -723,6 +742,8 @@
 }
 .session-stat b {
   display: block;
+  /* "0 / 8" is one number: never a column of "0", "/", "8" (QA #4). */
+  white-space: nowrap;
   font: 700 clamp(40px, 7vh, 72px) / 0.95 var(--l-display);
   font-variant-numeric: tabular-nums;
 }
@@ -744,6 +765,12 @@
   flex-direction: column;
   gap: 6px;
   max-width: 760px;
+}
+/* The live numbers while a Take runs: heard so far, bars, the timing strip. */
+.session-live {
+  flex: 1 1 0;
+  gap: clamp(14px, 2.4vw, 36px);
+  align-items: flex-end;
 }
 .session-strip {
   flex: 1 1 0;
@@ -875,8 +902,14 @@
   flex: 1;
   min-height: 0;
 }
-.session-between > .session-col:first-child {
-  justify-content: center;
+/* Centred by auto margins, not justify-content: a centred column that runs
+   longer than its box spills out of the top, over Exit (QA #2). Auto margins
+   collapse to nothing instead. */
+.session-between > .session-col:first-child > :first-child {
+  margin-top: auto;
+}
+.session-between > .session-col:first-child > :last-child {
+  margin-bottom: auto;
 }
 .session-between .session-moved-value {
   font-size: clamp(84px, 15vh, 164px);
@@ -1148,17 +1181,32 @@
   min-height: 0;
 }
 .session-prog > .session-col:last-child {
-  justify-content: center;
   gap: 7px;
 }
+/* Centred by auto margins: a list longer than its column must not spill up
+   over the neck and the clean-tempo heading (QA 2026-11-17 #5). */
+.session-prog > .session-col:last-child > :first-child {
+  margin-top: auto;
+}
+.session-prog > .session-col:last-child > :last-child {
+  margin-bottom: auto;
+}
+/* A name keeps a readable measure: when the card is narrow the spark and the
+   number go under it rather than squeezing it to one word a line (QA #5). */
 .session-skill {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
   padding: 10px 13px;
 }
 .session-skill .session-exercise-text {
   gap: 1px;
+  flex: 1 1 10em;
+}
+.session-skill .session-spark,
+.session-skill .session-spark-none {
+  margin-left: auto;
 }
 .session-skill-name {
   font: 600 18px/1.12 var(--l-display);
@@ -1292,6 +1340,44 @@
   padding-left: 0;
 }
 
+/* On the learning side the rail holds no library, only its doors, and under
+   900 px its 252 px of labels took a third of the window and left a Step's
+   page 366 px at 620 (QA 2026-11-17 #25). There it is the strip of icons the
+   collapsed rail already is (shell.css); each door keeps its name in
+   `aria-label` and the tools keep theirs. */
+@media (max-width: 899px) {
+  .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
+    > .rail {
+    --learn-rail: 68px;
+    width: var(--learn-rail);
+    min-width: var(--learn-rail);
+  }
+  .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
+    > .rail
+    :is(.rail-mode, .rail-action) {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    border-left-width: 0;
+  }
+  .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
+    > .rail
+    :is(.rail-mode.active, .rail-action.active) {
+    border-left-width: 0;
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
+    > .rail
+    :is(.rail-mode-label, .rail-mode-badge, .rail-action-label, .rail-action-status, .rail-library, .rail-action-dot, .rail-mode-now) {
+    display: none;
+  }
+  .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
+    > .rail
+    .rail-tools {
+    padding-left: 0;
+  }
+}
+
 /* ── Smaller windows ───────────────────────────────────────────────────── */
 @media (max-height: 760px) {
   .session-page .session-big {
@@ -1351,6 +1437,12 @@
   }
   .session-stat[data-xl] b {
     font-size: 64px;
+  }
+  /* The numbers keep their width and the BPM moves under them when they
+     need the row; the strip takes a line of its own (QA #4). */
+  .session-live {
+    flex-basis: auto;
+    flex-wrap: wrap;
   }
   .session-strip {
     flex-basis: 100%;

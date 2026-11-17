@@ -44,6 +44,8 @@
       "whatsIn": "İçinde ne var, neden",
       "min": "DK",
       "nothing": "Henüz çalınacak bir şey yok.",
+      "noPaths": "Şu an hiçbir yolda değilsin. Birini seç, Bugün seansını ondan kursun.",
+      "choosePath": "Bir yol seç",
       "needsInput": "Notlama için mikrofon ya da doğrudan giriş gerekir.",
       "toolsOffer": "Araçlar için mi geldin? Hepsi Araçlar altında.",
       "toolsOfferOpen": "Son aracıma git",

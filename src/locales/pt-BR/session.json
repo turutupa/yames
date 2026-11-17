@@ -44,6 +44,8 @@
       "whatsIn": "O que tem nela, e por quê",
       "min": "MIN",
       "nothing": "Ainda não há nada para tocar.",
+      "noPaths": "Você não está em nenhuma trilha agora. Escolha uma e o Hoje monta sua sessão a partir dela.",
+      "choosePath": "Escolher uma trilha",
       "needsInput": "Para dar nota é preciso um microfone ou uma entrada direta.",
       "toolsOffer": "Veio pelas ferramentas? Estão todas em Ferramentas.",
       "toolsOfferOpen": "Ir para minha última ferramenta",

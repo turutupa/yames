@@ -20,12 +20,12 @@ afterEach(cleanup);
 
 describe("Today on a first run", () => {
   it("says grading needs an input when nothing is listening", () => {
-    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} listening={false} />);
+    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} listening={false} />);
     expect(screen.queryByText("Grading needs a microphone or direct input.")).not.toBeNull();
   });
 
   it("does not, while the input is listening", () => {
-    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} listening />);
+    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} listening />);
     expect(screen.queryByText("Grading needs a microphone or direct input.")).toBeNull();
   });
 });

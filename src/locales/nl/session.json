@@ -44,6 +44,8 @@
       "whatsIn": "Wat erin zit, en waarom",
       "min": "MIN",
       "nothing": "Er is nog niets om te spelen.",
+      "noPaths": "Je volgt nu geen leerpad. Kies er een en Vandaag stelt je sessie daaruit samen.",
+      "choosePath": "Kies een leerpad",
       "needsInput": "Voor de beoordeling is een microfoon of directe ingang nodig.",
       "toolsOffer": "Kom je voor de tools? Ze staan allemaal onder Tools.",
       "toolsOfferOpen": "Naar mijn laatste tool",

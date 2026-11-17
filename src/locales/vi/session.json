@@ -44,6 +44,8 @@
       "whatsIn": "Có gì trong buổi tập, và vì sao",
       "min": "PHÚT",
       "nothing": "Chưa có gì để chơi.",
+      "noPaths": "Hiện bạn chưa theo lộ trình nào. Hãy chọn một lộ trình, Hôm nay sẽ dựng buổi tập từ đó.",
+      "choosePath": "Chọn lộ trình",
       "needsInput": "Chấm điểm cần micro hoặc cắm trực tiếp.",
       "toolsOffer": "Bạn đến để dùng công cụ? Tất cả đều nằm trong Công cụ.",
       "toolsOfferOpen": "Tới công cụ tôi dùng lần cuối",
