@@ -61,6 +61,36 @@ new behaviour.
   256-sample hops were chosen to keep the detector's latency, but that is
   measured here on synthetic audio only.
 
+## Over the band (the real app, 2026-11-16)
+
+Not synthetic tones through the fixtures: the built app on Linux (`tests/e2e`,
+scenario `blues-band`), a Karplus-Strong guitar into a virtual input, "A on
+every downbeat" (Blues and Pentatonics, a Texas shuffle, drums and bass from
+`src/session/takeBand.ts`), 8 bars, Takes at 70, 80 and 90 BPM.
+
+| Take | band 0.8, no bleed | band at 0 (click) | band 0.8, bleed -20 dB | band 0.8, bleed -30 dB |
+|---|---|---|---|---|
+| good (1.5 ms) | passed; even 0.998, 40/40, extras 0, notes 1.00 | passed; 0.998, 40/40, 0 | **failed**; 0.995, 40/40, extras 21 | **failed**; 0.992, extras 22 |
+| sloppy 35 ms | passed; 0.80 | passed; 0.76 | failed on extras; reads **0.994** | failed on extras; reads 0.994 |
+| sloppy 80 ms | failed; 0.56, 27/39, extras 11 | failed; 0.65, 30/40, extras 8 | failed; reads 0.992 | failed; reads 0.996 |
+| wrong notes (every other one a semitone sharp) | failed; notes 0.50 | | failed; notes 0.53 | failed; notes 0.50 |
+
+- **Through an interface (no bleed) the band changes nothing**: the same
+  verdicts and numbers as the click, within run-to-run spread. The band's notes
+  are not in the schedule, so nothing it plays is expected or graded.
+- **Into a microphone the band breaks grading**, even 30 dB down: its strokes
+  are onsets the scorer counts as extra notes (a clean take fails), and on a
+  beat where the guitar is late the drummer's on-time stroke is matched instead
+  (a sloppy take reads perfectly even). So a graded Take on an input that is
+  not a recognised interface starts with the band OFF (`bandVolumeFor`), and
+  the screen says to wear headphones and turn it up. The ungraded finisher
+  always has the band.
+- 35 ms of scatter passes this Exercise at 70-80 BPM band or no band: its
+  evenness bar is 0.6 over the best four bars. That is the Exercise's bar.
+- Open: discounting onsets that coincide with the band's own (the engine knows
+  every band onset to the sample) would let a microphone player keep the band;
+  that is scorer work in `src-tauri/src/score`.
+
 ## Timing, by signal and tempo
 
 128 sixteenths per row. `evenness (true)`: measured, then the generator's own.
