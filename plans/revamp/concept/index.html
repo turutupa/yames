@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yames concept: Coach, Map, Stage</title>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+} }
+</script>
+<style>
+:root{
+  --bg:#07090f; --bg2:#0e1220; --panel:rgba(16,20,34,.86); --line:rgba(255,255,255,.09);
+  --ink:#f4f1ea; --dim:#9aa3b8; --amber:#ffb347; --teal:#3fe0c5; --violet:#a78bfa;
+  --ok:#5df29a; --early:#5aa9ff; --late:#ff7a5c;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+#gl{position:fixed;inset:0;z-index:0;transition:opacity .6s var(--ease)}
+#gl.hidden{opacity:0}
+#labels{position:fixed;inset:0;z-index:1;pointer-events:none}
+.nlabel{position:absolute;transform:translate(-50%,18px);font-size:12px;letter-spacing:.04em;white-space:nowrap;
+  color:var(--dim);text-shadow:0 1px 6px #000;transition:opacity .3s}
+.nlabel b{color:var(--ink);font-weight:600;margin-right:6px}
+.nlabel.current{color:var(--amber);font-size:14px}
+.nlabel.branch{font-size:11px;letter-spacing:.25em;color:#6b7590}
+
+/* top bar */
+#top{position:fixed;top:0;left:0;right:0;height:56px;z-index:20;display:flex;align-items:center;gap:6px;padding:0 16px;
+  background:linear-gradient(#07090fe6,#07090f00)}
+#logo{font-weight:800;letter-spacing:.18em;margin-right:18px}
+#logo span{color:var(--amber)}
+.tab{background:none;border:1px solid transparent;border-radius:999px;padding:7px 14px;color:var(--dim)}
+.tab.on{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.05)}
+.tab[hidden]{display:none}
+.spacer{flex:1}
+.pill{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.pill:hover,.tab:hover{color:var(--ink)}
+#weekMini{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:13px;margin-right:6px}
+
+/* screens */
+.screen{position:fixed;inset:56px 0 0 0;z-index:5;opacity:0;pointer-events:none;transform:translateY(14px) scale(.985);
+  transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.screen.active{opacity:1;pointer-events:auto;transform:none}
+body.chat-open .screen{right:380px}
+#map{pointer-events:none}
+#map.active .card{pointer-events:auto}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px);padding:22px}
+#nodeCard{position:absolute;left:24px;bottom:24px;width:340px;transform:translateY(20px);opacity:0;transition:.35s var(--ease)}
+#nodeCard.show{transform:none;opacity:1}
+.badge{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid currentColor}
+.rhythm{color:var(--teal)} .theory{color:var(--violet)} .boss{color:var(--amber)} .side{color:var(--dim)}
+h1,h2,h3{margin:.2em 0 .4em}
+.muted{color:var(--dim)}
+.btn{background:var(--amber);color:#1a1205;border:0;border-radius:12px;padding:12px 18px;font-weight:700}
+.btn.ghost{background:rgba(255,255,255,.07);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+#mapHint{position:absolute;right:24px;bottom:24px;color:var(--dim);font-size:13px}
+
+/* today */
+#today{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 30%,#07090f99,#07090fee 70%)}
+.todayWrap{width:min(920px,92%);display:grid;grid-template-columns:1fr 220px;gap:22px}
+.greet{font-size:28px;line-height:1.3;font-weight:600;margin:0 0 6px}
+.steps{display:grid;gap:10px;margin:18px 0}
+.step{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.step.next{border-color:var(--amber);background:rgba(255,179,71,.08)}
+.step .n{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font-weight:700}
+.step.done .n{background:var(--teal);color:#062;border:0}
+.ring{display:grid;place-items:center;text-align:center}
+.ring svg{width:170px;height:170px}
+
+/* session (stage mode) */
+#session{background:#05070c;display:grid;grid-template-rows:auto 1fr auto;padding:28px 40px}
+.stHead{display:flex;align-items:baseline;gap:28px;flex-wrap:wrap}
+.stTitle{font-size:clamp(22px,2.6vw,36px);font-weight:700}
+.stBpm{font-size:clamp(48px,6rem,110px);font-weight:800;line-height:1;margin-left:auto}
+.stBpm small{font-size:.28em;color:var(--dim);font-weight:600;margin-left:8px}
+.sim{font-size:12px;letter-spacing:.2em;color:#1a1205;background:var(--amber);padding:4px 10px;border-radius:6px;font-weight:800}
+.stMid{display:grid;align-content:center;gap:28px}
+#feedback{font-size:clamp(56px,12vw,180px);font-weight:900;text-align:center;letter-spacing:-.02em;line-height:1;min-height:1.1em}
+#feedback small{display:block;font-size:.22em;font-weight:700;letter-spacing:.1em;color:var(--dim);margin-top:10px}
+.grid{position:relative;display:grid;grid-template-columns:repeat(16,1fr);gap:6px;height:120px}
+.cell{border-radius:10px;background:#111726;border:2px solid #1c2336;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-weight:700;color:#59627a;font-size:18px}
+.cell.beat{background:#151c2e}
+.cell.target{border-color:var(--teal);color:var(--ink);background:#0f2a2a}
+#playhead{position:absolute;top:-10px;bottom:-10px;width:4px;border-radius:2px;background:var(--ink);box-shadow:0 0 14px #fff8;left:0}
+.hit{position:absolute;top:38%;width:26px;height:26px;margin-left:-13px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:900;color:#05070c}
+.stFoot{display:flex;align-items:center;gap:22px;font-size:22px;color:var(--dim)}
+.stFoot b{color:var(--ink)}
+.meter{flex:1;height:14px;background:#111726;border-radius:7px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s}
+#overlay{position:absolute;inset:0;display:none;place-items:center;background:#05070cf2;text-align:center}
+#overlay.show{display:grid}
+#overlay .big{font-size:clamp(80px,14vw,200px);font-weight:900;line-height:1}
+#overlay .cd{font-size:28px;color:var(--dim);margin-top:16px}
+kbd{border:1px solid #3a4258;border-bottom-width:3px;border-radius:6px;padding:2px 8px;font-size:.85em;color:var(--ink)}
+
+/* recap */
+#recap{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#07090f55,#07090fdd 70%)}
+.recapCard{width:min(760px,92%);text-align:center;padding:36px}
+.moved{font-size:clamp(70px,10vw,140px);font-weight:900;line-height:1;color:var(--ok)}
+.delta{font-size:24px;margin:6px 0 20px}
+.trend{display:flex;justify-content:center;margin:10px 0 18px}
+.takes{display:flex;gap:10px;justify-content:center;margin:12px 0 20px}
+.takes div{padding:10px 16px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.fact{font-size:18px;line-height:1.5;margin:0 auto 22px;max-width:560px}
+
+/* chat */
+#chat{position:fixed;top:56px;right:0;bottom:0;width:380px;z-index:30;display:flex;flex-direction:column;background:var(--panel);
+  border-left:1px solid var(--line);backdrop-filter:blur(16px);transform:translateX(100%);transition:transform .4s var(--ease)}
+body.chat-open #chat{transform:none}
+#msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 13px;border-radius:14px;line-height:1.45;font-size:14.5px}
+.msg.ai{background:rgba(255,255,255,.06);border:1px solid var(--line);border-top-left-radius:4px}
+.msg.me{align-self:flex-end;background:var(--amber);color:#1a1205;border-top-right-radius:4px}
+.msg.sys{align-self:center;font-size:12px;color:var(--dim);background:none;padding:2px}
+#chatForm{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+#chatIn{flex:1;background:#0b0f1b;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 4px}
+.chips button{font-size:12px;background:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--dim)}
+
+/* tools */
+#tools{position:fixed;left:16px;top:64px;z-index:25;width:280px;padding:10px;transform:translateY(-10px);opacity:0;pointer-events:none;transition:.25s var(--ease)}
+#tools.show{transform:none;opacity:1;pointer-events:auto}
+#tools button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:10px;padding:10px 12px}
+#tools button:hover{background:rgba(255,255,255,.06)}
+#tools small{display:block;color:var(--dim)}
+#modal{position:fixed;inset:0;z-index:40;display:none;place-items:center;background:#0009}
+#modal.show{display:grid}
+#modal .card{width:min(460px,92%)}
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;z-index:50;transition:.3s;font-size:18px;padding:12px 20px}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="labels"></div>
+
+<header id="top">
+  <div id="logo">YAM<span>E</span>S</div>
+  <button class="tab" data-go="today">Today</button>
+  <button class="tab" data-go="map">Map</button>
+  <button class="tab" data-go="session" id="tabSession" hidden>Session</button>
+  <div class="spacer"></div>
+  <div id="weekMini" title="Weekly goal"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#222a3d" stroke-width="5"/><circle id="miniArc" cx="18" cy="18" r="15" fill="none" stroke="#ffb347" stroke-width="5" stroke-linecap="round" transform="rotate(-90 18 18)" stroke-dasharray="94.2" stroke-dashoffset="62.8"/></svg><span class="num" id="weekMiniTxt">1/3 this week</span></div>
+  <button class="pill" id="toolsBtn" aria-expanded="false">Tools</button>
+  <button class="pill" id="chatBtn" aria-expanded="false">Coach</button>
+</header>
+
+<nav id="tools" class="card" aria-label="Tools">
+  <div class="muted" style="font-size:12px;padding:6px 12px">The plain v1.2 tools, unchanged</div>
+  <button data-tool="metronome">Metronome<small>Click, subdivisions, footswitch</small></button>
+  <button data-tool="jam">Jam mode<small>9 styles, 50 starter jams</small></button>
+  <button data-tool="cheat">Theory cheat sheet<small>Fretboard, scales, chords</small></button>
+  <button data-tool="setlists">Setlists<small>Your songs and presets</small></button>
+  <button data-tool="coach">Coach history<small>Takes, trends, exports</small></button>
+  <button data-tool="speed">Speed drill<small>Tempo ramps</small></button>
+</nav>
+
+<!-- MAP -->
+<section class="screen" id="map" aria-label="Progression map">
+  <div id="nodeCard" class="card" role="dialog" aria-live="polite"></div>
+  <div id="mapHint">Drag to orbit · scroll to zoom · click a node</div>
+</section>
+
+<!-- TODAY -->
+<section class="screen" id="today" aria-label="Today">
+  <div class="todayWrap">
+    <div class="card">
+      <div class="muted" style="font-size:13px;letter-spacing:.12em">SATURDAY · SESSION 2 THIS WEEK</div>
+      <p class="greet" id="greet"></p>
+      <p class="muted" id="greetSub"></p>
+      <div class="steps" id="steps"></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn" id="startBtn">Start session</button>
+        <span class="muted">or press <kbd>Space</kbd></span>
+        <div class="spacer"></div>
+        <button class="btn ghost" data-go="map">See map</button>
+      </div>
+    </div>
+    <div class="card ring">
+      <div class="muted" style="font-size:13px;letter-spacing:.12em">WEEKLY GOAL</div>
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="#1c2336" stroke-width="12"/>
+        <circle id="ringArc" cx="60" cy="60" r="50" fill="none" stroke="#ffb347" stroke-width="12" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1s var(--ease)"/>
+        <text x="60" y="58" text-anchor="middle" fill="#f4f1ea" font-size="26" font-weight="800" id="ringTxt">1/3</text>
+        <text x="60" y="78" text-anchor="middle" fill="#9aa3b8" font-size="11">sessions</text></svg>
+      <div class="muted" style="font-size:13px">Any 3 days count. Missing a day is fine.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SESSION (stage mode) -->
+<section class="screen" id="session" aria-label="Session runner, stage mode">
+  <div class="stHead">
+    <div>
+      <div class="muted" style="font-size:16px;letter-spacing:.14em" id="stKicker">STEP 1 OF 3 · NEW</div>
+      <div class="stTitle" id="stTitle"></div>
+      <span class="sim">SIMULATED HITS</span>
+    </div>
+    <div class="stBpm num" id="stBpm">80<small>BPM</small></div>
+  </div>
+  <div class="stMid">
+    <div id="feedback" aria-live="polite"></div>
+    <div class="grid" id="grid"><div id="playhead"></div></div>
+  </div>
+  <div class="stFoot">
+    <span>Take <b class="num" id="stTake">1/3</b></span>
+    <span>Bar <b class="num" id="stBar">–</b></span>
+    <span>In pocket</span><div class="meter"><i id="meter"></i></div><b class="num" id="stPct">–</b>
+    <button class="btn ghost" id="stopBtn" style="font-size:16px">End <kbd>Esc</kbd></button>
+  </div>
+  <div id="overlay"><div><div class="muted" style="font-size:24px" id="ovKick"></div><div class="big num" id="ovBig"></div><div class="cd" id="ovCd"></div></div></div>
+</section>
+
+<!-- RECAP -->
+<section class="screen" id="recap" aria-label="Recap">
+  <div class="card recapCard">
+    <div class="muted" style="letter-spacing:.14em" id="rcKicker">SYNCOPATION · IN THE POCKET</div>
+    <div class="moved num" id="rcMoved">0%</div>
+    <div class="delta" id="rcDelta"></div>
+    <div class="trend"><svg id="rcTrend" width="360" height="90" viewBox="0 0 360 90"></svg></div>
+    <div class="takes num" id="rcTakes"></div>
+    <p class="fact" id="rcFact"></p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn" id="rcNext">Next: review sixteenths</button>
+      <button class="btn ghost" data-go="map">Back to map</button>
+    </div>
+  </div>
+</section>
+
+<aside id="chat" aria-label="Coach chat">
+  <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px">
+    <b>Coach</b><span class="muted" style="font-size:12px">explains, never grades · scripted demo</span>
+    <div class="spacer"></div><button class="pill" id="chatClose" aria-label="Close coach">×</button>
+  </div>
+  <div id="msgs" aria-live="polite"></div>
+  <div class="chips" id="chips"></div>
+  <form id="chatForm"><input id="chatIn" placeholder="Try: slower, show me the map, jazz, why…" autocomplete="off"><button class="btn" style="padding:10px 14px">Send</button></form>
+</aside>
+
+<div id="modal"><div class="card" id="modalBody"></div></div>
+<div id="toast" class="card"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+/* ---------------- mock data ---------------- */
+const NODES = [
+  { id:'R1', name:'Pocket: quarters & eighths', kind:'rhythm', state:'done', best:88, desc:'Lock to the click on quarters and eighths over a straight rock groove.' },
+  { id:'R2', name:'Sixteenths & muting', kind:'rhythm', state:'done', best:71, desc:'Even sixteenths with left-hand muting. Review due today.' },
+  { id:'T1', name:'Pentatonic box 1', kind:'theory', state:'soon', desc:'Minor pentatonic, first position. Graded by note choice: arrives with the pitch coach.' },
+  { id:'R3', name:'Syncopation & anticipations', kind:'rhythm', state:'current', best:54, desc:'Hit the offbeats and push chords ahead of the beat without rushing the downbeats.' },
+  { id:'T2', name:'Landing on chord tones', kind:'theory', state:'soon', desc:'Land on a chord tone at every change. Arrives with the pitch coach.' },
+  { id:'R4', name:'Shuffle & swing feel', kind:'rhythm', state:'ahead', desc:'Triplet-based eighths. The feel the boss blues lives on.' },
+  { id:'T3', name:'Call & response', kind:'theory', state:'soon', desc:'Rhythm meets theory: answer a phrase in the right place in the bar.' },
+  { id:'T4', name:'Blues scale & blue notes', kind:'theory', state:'soon', desc:'The b5 and where it hurts so good.' },
+  { id:'BOSS', name:'Boss: slow blues jam', kind:'boss', state:'ahead', desc:'A full 12-bar form, judged on pocket now and note choice once the pitch coach ships.' },
+];
+const SIDE = [
+  { id:'SPD', name:'Speed drill', kind:'side', state:'open', near:1, desc:'Training ground: tempo ramps on any pattern you have done. Good daily review.' },
+  { id:'FRT', name:'Fretboard names', kind:'side', state:'soon', near:3, desc:'Training ground: name notes on the neck. Arrives with the pitch coach.' },
+];
+const BRANCHES = [
+  { id:'ROCK', name:'Rock', desc:'Straight-eighth drive · Mixolydian, Dorian', color:0xff7a5c },
+  { id:'METAL', name:'Metal', desc:'Gallops, palm-muted 16ths at speed · harmonic minor', color:0xff4d6d },
+  { id:'JAZZ', name:'Jazz', desc:'Swing eighths, comping on 2 & 4 · 7th chords, ii–V–I', color:0x5aa9ff },
+  { id:'FUNK', name:'Funk', desc:'16th pocket, ghost notes · dominant 9ths', color:0xffd166 },
+  { id:'LATIN', name:'Latin', desc:'Clave and montuno · minor ii–V', color:0x5df29a },
+];
+const SESSIONS = {
+  R3: { id:'R3', title:'R3 · Syncopation & anticipations', kicker:'STEP 1 OF 3 · NEW', bpm:80, targets:[0,3,6,10,12],
+        bias:[14,8,4], sd:[24,20,16], history:[38,44,49,54], label:'SYNCOPATION · IN THE POCKET', prevDay:'Tuesday' },
+  R2: { id:'R2', title:'R2 · Sixteenths & muting (review)', kicker:'STEP 2 OF 3 · REVIEW', bpm:72, targets:[0,1,2,3,4,6,8,9,10,11,12,14],
+        bias:[6,4,2], sd:[18,16,14], history:[52,60,66,71], label:'SIXTEENTHS · IN THE POCKET', prevDay:'last week' },
+};
+const COUNTS = ['1','e','&','a','2','e','&','a','3','e','&','a','4','e','&','a'];
+const stepName = i => i%4===0 ? `beat ${i/4+1}` : `the '${COUNTS[i]}' of ${Math.floor(i/4)+1}`;
+const TOL = 20;            // ms window counted as "in the pocket"
+const TAKES = 3, BARS = 4;
+let week = 1;
+const todayPlan = [
+  { s:'R3', t:'New · R3 Syncopation & anticipations', m:'8 min · 80 BPM · rock groove' },
+  { s:'R2', t:'Review · R2 Sixteenths & muting', m:'4 min · 72 BPM' },
+  { s:null, t:'Free jam · Slow blues in A', m:'3 min · no grading, just play' },
+];
+let planDone = 0;
+
+/* ---------------- three.js world map ---------------- */
+const canvas = $('#gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x07090f);
+scene.fog = new THREE.FogExp2(0x07090f, 0.028);
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 400);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+controls.minDistance = 4; controls.maxDistance = 60;
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.6, 0.5, 0.25);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+function glowTex(){
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), r = g.createRadialGradient(64,64,0,64,64,64);
+  r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.25,'rgba(255,255,255,.45)'); r.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = r; g.fillRect(0,0,128,128);
+  return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTex();
+const COL = { done:0x3fe0c5, current:0xffb347, ahead:0x8090b0, soon:0xa78bfa, boss:0xffb347, open:0x3fe0c5, side:0x9aa3b8 };
+
+// starfield
+{
+  const n = 2500, p = new Float32Array(n*3);
+  for (let i=0;i<n;i++){ const r = 60+Math.random()*120, t = Math.random()*Math.PI*2, f = Math.acos(2*Math.random()-1);
+    p[i*3]=r*Math.sin(f)*Math.cos(t); p[i*3+1]=r*Math.cos(f)*.6; p[i*3+2]=r*Math.sin(f)*Math.sin(t)-30; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color:0x8899cc, size:.35, sizeAttenuation:true, transparent:true, opacity:.7, fog:false })));
+}
+
+const pickables = [], labelEls = [], world = {};
+function addNode(def, pos, opts={}){
+  const color = opts.color ?? (def.kind==='boss' ? COL.boss : def.kind==='side' && def.state==='open' ? COL.open : COL[def.state] ?? COL.side);
+  const grp = new THREE.Group(); grp.position.copy(pos);
+  const r = opts.r ?? (def.kind==='boss' ? .6 : .36);
+  const lit = def.state==='done' || def.state==='current' || opts.lit;
+  const mat = new THREE.MeshBasicMaterial({ color, wireframe: def.state==='soon', transparent:true, opacity: opts.opacity ?? (lit ? 1 : def.state==='soon' ? .55 : .5) });
+  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(r, def.kind==='boss'?1:2), mat);
+  grp.add(core);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map:GLOW, color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, opacity: opts.glow ?? (lit ? .55 : .2) }));
+  glow.scale.setScalar(r*(lit?5:3.5)); grp.add(glow);
+  const hit = new THREE.Mesh(new THREE.SphereGeometry(Math.max(r*2,.8)), new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false }));
+  hit.userData.def = def; grp.add(hit); pickables.push(hit);
+  if (def.state==='current'){
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r*2, .04, 8, 64), new THREE.MeshBasicMaterial({ color }));
+    grp.add(ring); world.ring = ring;
+  }
+  scene.add(grp);
+  const el = document.createElement('div');
+  el.className = 'nlabel' + (def.state==='current' ? ' current' : '') + (opts.branch ? ' branch' : '');
+  el.innerHTML = opts.branch ? def.name.toUpperCase() : `<b>${def.id==='BOSS'?'★':def.id}</b>${def.name}`;
+  $('#labels').appendChild(el);
+  labelEls.push({ el, obj:grp });
+  def.pos = pos; def.grp = grp; def.glow = glow; def.core = core;
+  return grp;
+}
+
+// Act I trunk
+const trunkPts = NODES.map((_,i) => new THREE.Vector3(Math.sin(i*.85)*3.2, Math.sin(i*.5)*1.2 + i*.25, -i*3.4));
+NODES.forEach((d,i) => addNode(d, trunkPts[i]));
+const curve = new THREE.CatmullRomCurve3(trunkPts);
+const cur = NODES.findIndex(n => n.state==='current');
+const tCur = cur/(NODES.length-1);
+function tube(c, t0, t1, color, opacity, radius){
+  const pts = []; for (let k=0;k<=80;k++) pts.push(c.getPoint(t0+(t1-t0)*k/80));
+  const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, radius, 8), new THREE.MeshBasicMaterial({ color, transparent:true, opacity }));
+  scene.add(m); return m;
+}
+tube(curve, 0, tCur, 0x3fe0c5, .95, .06);
+tube(curve, tCur, 1, 0x56607a, .45, .035);
+// a light pulse that travels the lit part of the path
+const pulse = new THREE.Sprite(new THREE.SpriteMaterial({ map:GLOW, color:0xffffff, blending:THREE.AdditiveBlending, depthWrite:false }));
+pulse.scale.setScalar(1.4); scene.add(pulse);
+
+// training grounds
+SIDE.forEach(d => {
+  const base = trunkPts[d.near], p = base.clone().add(new THREE.Vector3(base.x > 0 ? -5 : 5, 1.6, -1));
+  addNode(d, p, { r:.28 });
+  const g = new THREE.BufferGeometry().setFromPoints([base, p]);
+  const l = new THREE.Line(g, new THREE.LineDashedMaterial({ color:0x6b7590, dashSize:.3, gapSize:.25, transparent:true, opacity:.6 }));
+  l.computeLineDistances(); scene.add(l);
+});
+
+// Act II branches fanning out from the boss
+const bossPos = trunkPts.at(-1);
+BRANCHES.forEach((b,k) => {
+  const ang = (k-(BRANCHES.length-1)/2) * .55;
+  const dir = new THREE.Vector3(Math.sin(ang), .18*(k%2?1:-1)+.1, -Math.cos(ang));
+  let prev = bossPos.clone();
+  for (let j=1;j<=4;j++){
+    const p = bossPos.clone().addScaledVector(dir, 4 + j*3.2);
+    const def = j===4 ? { ...b, kind:'branch', state:'far' } : { id:b.id+j, name:'', kind:'branch', state:'far', branch:b };
+    if (j===4) addNode(def, p, { color:b.color, r:.5, opacity:.35, glow:.35, branch:true });
+    else {
+      const s = new THREE.Mesh(new THREE.IcosahedronGeometry(.22,1), new THREE.MeshBasicMaterial({ color:b.color, transparent:true, opacity:.3 }));
+      s.position.copy(p); scene.add(s);
+    }
+    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([prev,p]), new THREE.LineBasicMaterial({ color:b.color, transparent:true, opacity:.18 }));
+    scene.add(l); prev = p;
+  }
+  b.pos = prev;
+});
+
+// celebration burst (recap)
+const burst = { pts:null, vel:null, t:0 };
+function celebrate(at){
+  if (RM) return;
+  if (burst.pts) scene.remove(burst.pts);
+  const n = 400, p = new Float32Array(n*3), v = [];
+  for (let i=0;i<n;i++){ p.set([at.x,at.y,at.z], i*3); const d = new THREE.Vector3().randomDirection().multiplyScalar(.04+Math.random()*.12); v.push(d); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p,3));
+  burst.pts = new THREE.Points(g, new THREE.PointsMaterial({ map:GLOW, color:0xffc76a, size:.5, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true }));
+  burst.vel = v; burst.t = 0; scene.add(burst.pts);
+}
+
+// camera flights
+const fly = { active:false };
+function flyTo(target, offset = new THREE.Vector3(5,3.5,8), dur = 1.4){
+  const toT = target.clone(), toP = target.clone().add(offset);
+  if (RM){ controls.target.copy(toT); camera.position.copy(toP); controls.update(); return; }
+  Object.assign(fly, { active:true, t0:performance.now(), dur:dur*1000, fromP:camera.position.clone(), fromT:controls.target.clone(), toP, toT });
+}
+const ease = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+camera.position.copy(trunkPts[cur]).add(new THREE.Vector3(-8,10,22));
+controls.target.copy(trunkPts[cur]);
+
+// render loop (stoppable)
+let raf = 0, running = false, last = performance.now();
+const tmp = new THREE.Vector3();
+function frame(now){
+  raf = requestAnimationFrame(frame);
+  const dt = Math.min((now-last)/1000, .05); last = now;
+  if (fly.active){
+    const k = Math.min((now-fly.t0)/fly.dur, 1), e = ease(k);
+    camera.position.lerpVectors(fly.fromP, fly.toP, e); controls.target.lerpVectors(fly.fromT, fly.toT, e);
+    if (k>=1) fly.active = false;
+  }
+  if (!RM){
+    const s = 1 + Math.sin(now*.004)*.12;
+    if (world.ring){ world.ring.rotation.x = now*.0007; world.ring.rotation.y = now*.0011; world.ring.scale.setScalar(s); }
+    NODES[cur].glow.scale.setScalar(.36*5*s);
+    pulse.position.copy(curve.getPoint(((now*.00012)%1)*tCur));
+    controls.autoRotate = idle && !fly.active; controls.autoRotateSpeed = .25;
+  } else pulse.visible = false;
+  if (burst.pts){
+    burst.t += dt; const a = burst.pts.geometry.attributes.position;
+    for (let i=0;i<burst.vel.length;i++){ a.array[i*3]+=burst.vel[i].x; a.array[i*3+1]+=burst.vel[i].y; a.array[i*3+2]+=burst.vel[i].z; burst.vel[i].multiplyScalar(.965); }
+    a.needsUpdate = true; burst.pts.material.opacity = Math.max(0, 1-burst.t/2.4);
+    if (burst.t>2.5){ scene.remove(burst.pts); burst.pts = null; }
+  }
+  controls.update();
+  composer.render();
+  for (const { el, obj } of labelEls){
+    tmp.copy(obj.position).project(camera);
+    const dist = camera.position.distanceTo(obj.position);
+    if (tmp.z>1 || dist>48){ el.style.opacity = 0; continue; }
+    el.style.opacity = Math.max(0, Math.min(1, (48-dist)/16));
+    el.style.left = ((tmp.x+1)/2*innerWidth)+'px'; el.style.top = ((1-tmp.y)/2*innerHeight)+'px';
+  }
+}
+function startGL(){ if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(frame); canvas.classList.remove('hidden'); $('#labels').style.display=''; }
+function stopGL(){ running = false; cancelAnimationFrame(raf); canvas.classList.add('hidden'); $('#labels').style.display='none'; }
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); });
+
+// picking
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let downAt = null;
+canvas.addEventListener('pointerdown', e => downAt = [e.clientX, e.clientY]);
+canvas.addEventListener('pointerup', e => {
+  if (!downAt || Math.hypot(e.clientX-downAt[0], e.clientY-downAt[1]) > 5 || screen !== 'map') return;
+  mouse.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables)[0];
+  if (hit) showNode(hit.object.userData.def); else $('#nodeCard').classList.remove('show');
+});
+let idle = true, idleT = 0;
+controls.addEventListener('start', () => { idle = false; clearTimeout(idleT); });
+controls.addEventListener('end', () => { clearTimeout(idleT); idleT = setTimeout(() => idle = true, 5000); });
+
+function showNode(d){
+  const card = $('#nodeCard');
+  const kindTxt = { rhythm:'Rhythm', theory:'Theory', boss:'Boss jam', side:'Training ground', branch:'Act II path' }[d.kind];
+  const stateTxt = { done:`Done · best ${d.best}%`, current:`You are here · best ${d.best}%`, ahead:'Ahead · playable any time', soon:'Arrives with the pitch coach', open:'Open', far:'Act II · opens after the boss (still playable as a jam)' }[d.state];
+  card.innerHTML = `<span class="badge ${d.kind==='branch'?'side':d.kind}">${kindTxt}</span>
+    <h2>${d.id==='BOSS'?'★ ':''}${d.name}</h2><div class="muted" style="margin-bottom:10px">${stateTxt}</div>
+    <p style="line-height:1.5;margin:0 0 16px">${d.desc}</p>
+    <div style="display:flex;gap:8px">${d.state==='soon' ? `<button class="btn" disabled>In development</button>`
+      : `<button class="btn" id="nodeGo">${d.state==='current'?'Start this step':d.kind==='branch'?'Jam in this style':'Play anyway'}</button>`}
+      <button class="btn ghost" id="nodeClose">Close</button></div>`;
+  card.classList.add('show');
+  $('#nodeClose').onclick = () => card.classList.remove('show');
+  if ($('#nodeGo')) $('#nodeGo').onclick = () => SESSIONS[d.id] ? startSession(d.id) : toast(`Mock: would open Jam mode preset for “${d.name}”`);
+  flyTo(d.pos, new THREE.Vector3(7,3.5,1), 1.1);
+}
+
+/* ---------------- screens ---------------- */
+let screen = null;
+function go(name, opts={}){
+  if (name==='session' && !sess) return go('today');
+  if (screen === name) return;
+  if (screen==='session' && name!=='session'){ endSession(true); sess = null; }
+  screen = name;
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id===name));
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.go===name));
+  $('#tabSession').hidden = !sess;
+  if (name==='session') stopGL(); else startGL();
+  canvas.style.pointerEvents = name==='map' ? 'auto' : 'none';
+  if (name!=='map') $('#nodeCard').classList.remove('show');
+  if (name==='map' && !opts.noFly) flyTo(trunkPts[cur], new THREE.Vector3(11,6,-1));
+  if (name==='today') flyTo(trunkPts[cur], new THREE.Vector3(-8,10,22), 1.8);
+  onScreen[name]?.(opts);
+}
+$$('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+
+function renderToday(){
+  const first = !planDone;
+  $('#greet').textContent = first ? 'Good morning. Syncopation is next, and you were close on Tuesday.' : 'Nice. Two steps left, about 7 minutes.';
+  $('#greetSub').textContent = first ? 'Tuesday you were in the pocket on 54% of anticipations. Most misses were late, so today we push.' : 'Next up is a quick review, then a free jam with no grading.';
+  $('#steps').innerHTML = todayPlan.map((p,i) => `<div class="step ${i<planDone?'done':i===planDone?'next':''}"><div class="n">${i<planDone?'✓':i+1}</div><div><b>${p.t}</b><div class="muted" style="font-size:14px">${p.m}</div></div><div class="muted">${i<planDone?'done':i===planDone?'next':''}</div></div>`).join('');
+  $('#startBtn').textContent = planDone ? 'Continue session' : 'Start session';
+  setWeek();
+}
+function setWeek(){
+  $('#ringArc').style.strokeDashoffset = 314.16*(1-week/3);
+  $('#ringTxt').textContent = `${week}/3`;
+  $('#miniArc').setAttribute('stroke-dashoffset', 94.2*(1-week/3));
+  $('#weekMiniTxt').textContent = `${week}/3 this week`;
+}
+$('#startBtn').onclick = () => { const p = todayPlan[planDone]; p?.s ? startSession(p.s) : toast('Mock: would open Jam mode with Slow blues in A, no grading'); };
+
+/* ---------------- audio engine (Web Audio) ---------------- */
+let ac = null, noiseBuf = null;
+function audio(){
+  if (!ac){ ac = new (window.AudioContext||window.webkitAudioContext)();
+    noiseBuf = ac.createBuffer(1, ac.sampleRate*.5, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i=0;i<d.length;i++) d[i]=Math.random()*2-1; }
+  if (ac.state==='suspended') ac.resume();
+  return ac;
+}
+function env(g, t, a, peak, d){ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+d); }
+function click(t, accent){ const o = ac.createOscillator(), g = ac.createGain(); o.type='square'; o.frequency.value = accent?1760:1320; env(g,t,.001,accent?.25:.13,.05); o.connect(g).connect(ac.destination); o.start(t); o.stop(t+.06); }
+function kick(t){ const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(42,t+.18); env(g,t,.002,.9,.3); o.connect(g).connect(ac.destination); o.start(t); o.stop(t+.32); }
+function noise(t, type, freq, peak, dur){ const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = noiseBuf; f.type = type; f.frequency.value = freq; env(g,t,.001,peak,dur); s.connect(f).connect(g).connect(ac.destination); s.start(t); s.stop(t+dur+.02); }
+function pluck(t){ const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain(); o.type='sawtooth'; o.frequency.value = 164.8; f.type='lowpass'; f.frequency.setValueAtTime(2400,t); f.frequency.exponentialRampToValueAtTime(300,t+.25); env(g,t,.003,.22,.3); o.connect(f).connect(g).connect(ac.destination); o.start(t); o.stop(t+.32); }
+
+/* ---------------- session runner ---------------- */
+let sess = null, sched = 0, uiRaf = 0, cdTimer = 0;
+function buildGrid(targets){
+  const g = $('#grid'); g.querySelectorAll('.cell,.hit').forEach(e => e.remove());
+  COUNTS.forEach((c,i) => { const d = document.createElement('div'); d.className = 'cell'+(i%4===0?' beat':'')+(targets.includes(i)?' target':''); d.textContent = c; g.insertBefore(d, $('#playhead')); });
+}
+function gauss(){ return Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(2*Math.PI*Math.random()); }
+
+function startSession(id){
+  const cfg = SESSIONS[id]; audio();
+  sess = { cfg, bpm: sess?.cfg.id===id ? sess.bpm : cfg.bpm, take:0, results:[], hits:[] };
+  $('#stTitle').textContent = cfg.title; $('#stKicker').textContent = cfg.kicker;
+  buildGrid(cfg.targets);
+  go('session');
+  startTake();
+}
+function startTake(){
+  clearInterval(cdTimer); $('#overlay').classList.remove('show');
+  const s = sess, spb = 60/s.bpm, step = spb/4, bar = spb*4;
+  $('#stBpm').innerHTML = `${s.bpm}<small>BPM</small>`;
+  s.t0 = ac.currentTime + .15; s.step = step; s.barDur = bar; s.hits = []; s.next = 0; s.shown = 0; s.ended = false;
+  const total = (BARS+1)*16;
+  $('#stTake').textContent = `${s.take+1}/${TAKES}`;
+  $('#feedback').innerHTML = '<span style="color:var(--dim)">Count-in…</span>';
+  $('#stPct').textContent = '–'; $('#meter').style.width = '0';
+  clearInterval(sched);
+  sched = setInterval(() => {                         // look-ahead scheduler
+    while (s.next < total && s.t0 + s.next*step < ac.currentTime + .12){
+      const i = s.next, t = s.t0 + i*step, b = Math.floor(i/16), k = i%16;
+      if (k%4===0) click(t, k===0);
+      if (b>0){
+        if (k%2===0) noise(t,'highpass',7500,.08,.04);
+        if (k===0 || k===8 || k===11) kick(t);
+        if (k===4 || k===12) noise(t,'bandpass',1800,.35,.14);
+        if (s.cfg.targets.includes(k)){                // SIMULATED player hit
+          const off = s.cfg.bias[s.take] + gauss()*s.cfg.sd[s.take];
+          const ht = t + off/1000; pluck(Math.max(ht, ac.currentTime));
+          s.hits.push({ bar:b, k, off, time:ht });
+        }
+      }
+      s.next++;
+    }
+  }, 25);
+  cancelAnimationFrame(uiRaf); uiRaf = requestAnimationFrame(ui);
+}
+function ui(){
+  const s = sess; if (!s) return;
+  uiRaf = requestAnimationFrame(ui);
+  const el = ac.currentTime - s.t0, pos = el / s.barDur, b = Math.floor(pos), f = pos - b;
+  if (el < 0) return;
+  const g = $('#grid'), w = g.clientWidth, gap = 6, cw = (w - gap*15)/16;
+  $('#playhead').style.left = (f*16*(cw+gap) - gap/2) + 'px';
+  $('#stBar').textContent = b<1 ? 'count-in' : `${Math.min(b,BARS)}/${BARS}`;
+  if (s.lastBar !== b){ s.lastBar = b; g.querySelectorAll('.hit').forEach(e => e.remove()); }
+  while (s.shown < s.hits.length && s.hits[s.shown].time <= ac.currentTime){
+    const h = s.hits[s.shown++], a = Math.abs(h.off), type = a<=TOL ? 'ok' : h.off<0 ? 'early' : 'late';
+    const dot = document.createElement('div'); dot.className = 'hit';
+    dot.style.background = `var(--${type})`; dot.textContent = type==='ok' ? '●' : type==='early' ? '←' : '→';
+    dot.style.left = (h.k*(cw+gap) + cw/2 + (h.off/1000)/s.step*(cw+gap)) + 'px'; g.appendChild(dot);
+    $('#feedback').innerHTML = type==='ok' ? `<span style="color:var(--ok)">IN THE POCKET</span><small>${stepName(h.k).toUpperCase()}</small>`
+      : `<span style="color:var(--${type})">${type==='early'?'← EARLY':'LATE →'} <span class="num">${Math.round(a)}</span>ms</span><small>${stepName(h.k).toUpperCase()}</small>`;
+    const done = s.hits.slice(0, s.shown), pct = Math.round(100*done.filter(x => Math.abs(x.off)<=TOL).length/done.length);
+    $('#stPct').textContent = pct+'%'; $('#meter').style.width = pct+'%';
+  }
+  if (b >= BARS+1 && !s.ended){ s.ended = true; endTake(); }
+}
+function endTake(){
+  const s = sess; clearInterval(sched); cancelAnimationFrame(uiRaf);
+  const pct = Math.round(100*s.hits.filter(h => Math.abs(h.off)<=TOL).length / s.hits.length);
+  s.results.push({ pct, hits:s.hits });
+  s.take++;
+  const last = s.take >= TAKES;
+  $('#ovKick').textContent = `TAKE ${s.take} · IN THE POCKET`;
+  $('#ovBig').innerHTML = `<span style="color:${pct>=70?'var(--ok)':'var(--ink)'}">${pct}%</span>`;
+  $('#overlay').classList.add('show');
+  let n = 4;
+  const tick = () => { $('#ovCd').innerHTML = last ? `Recap in ${n}… <kbd>Space</kbd> to continue` : `Next take in ${n}… <kbd>Space</kbd> to start now`; };
+  tick();
+  if (!last && s.take===1) aiSay(analyserFact(s.results.slice(-1)), true);
+  cdTimer = setInterval(() => { n--; if (n<=0) advance(); else tick(); }, 1000);
+}
+function advance(){
+  if (!sess || screen!=='session') return;
+  clearInterval(cdTimer);
+  if (sess.take >= TAKES) finishSession(); else startTake();
+}
+function endSession(silent){
+  clearInterval(sched); clearInterval(cdTimer); cancelAnimationFrame(uiRaf);
+  $('#overlay').classList.remove('show');
+  if (!silent && sess) { sess = null; go('today'); }
+}
+$('#stopBtn').onclick = () => { endSession(true); sess = null; go('today'); };
+
+function analyserFact(results){
+  const all = results.flatMap(r => r.hits), by = {};
+  all.forEach(h => (by[h.k] ??= []).push(h.off));
+  let worst = null, wm = 0;
+  for (const k in by){ const m = by[k].reduce((a,b)=>a+b,0)/by[k].length; if (Math.abs(m) > Math.abs(wm)){ wm = m; worst = +k; } }
+  const mean = all.reduce((a,h)=>a+h.off,0)/all.length;
+  return `Analyser: your hits on ${stepName(worst)} land ${Math.abs(Math.round(wm))} ms ${wm>0?'late':'early'} on average (overall ${Math.abs(Math.round(mean))} ms ${mean>0?'behind':'ahead of'} the beat).`;
+}
+
+/* ---------------- recap ---------------- */
+function finishSession(){
+  const s = sess, cfg = s.cfg;
+  const pct = Math.round(s.results.reduce((a,r)=>a+r.pct,0)/s.results.length);
+  const prev = cfg.history.at(-1), d = pct - prev;
+  cfg.history = [...cfg.history, pct];
+  $('#rcKicker').textContent = cfg.label;
+  $('#rcDelta').innerHTML = d>0 ? `<b style="color:var(--ok)">up from ${prev}%</b> on ${cfg.prevDay}` : d===0 ? `same as ${cfg.prevDay} (${prev}%)` : `down from ${prev}% on ${cfg.prevDay}. One rough day is normal.`;
+  $('#rcTakes').innerHTML = s.results.map((r,i)=>`<div>Take ${i+1}<br><b>${r.pct}%</b></div>`).join('');
+  $('#rcFact').textContent = analyserFact(s.results) + ' Coach: try feeling the anticipation as the end of the previous beat, not the start of the next.';
+  drawTrend(cfg.history);
+  const node = NODES.find(n => n.id===cfg.id); if (node) node.best = Math.max(node.best||0, pct);
+  if (planDone < 2 && todayPlan[planDone].s===cfg.id) planDone++;
+  if (cfg.id==='R3') { week = Math.min(3, week+1); setWeek(); }
+  const nxt = todayPlan[planDone];
+  $('#rcNext').textContent = nxt?.s ? `Next: ${nxt.t.split('·')[0].trim().toLowerCase()} ${nxt.t.split('·')[1].trim()}` : 'Next: free jam';
+  $('#rcNext').onclick = () => nxt?.s ? startSession(nxt.s) : toast('Mock: would open Jam mode, Slow blues in A');
+  sess = null; screen = 'session';
+  go('recap', { pct, d, prevDay:cfg.prevDay });
+  // count-up
+  const el = $('#rcMoved'), t0 = performance.now();
+  const step = now => { const k = Math.min((now-t0)/900,1); el.textContent = Math.round((RM?1:ease(k))*pct)+'%'; if (k<1 && !RM) requestAnimationFrame(step); };
+  RM ? el.textContent = pct+'%' : requestAnimationFrame(step);
+  if (node){ flyTo(node.pos, new THREE.Vector3(8,3,0), 1.2); setTimeout(() => celebrate(node.pos), RM?0:600); }
+}
+function drawTrend(h){
+  const W=360,H=90,p=14, mx=Math.max(...h,100), mn=Math.min(...h,0);
+  const x = i => p + i*(W-2*p)/(h.length-1), y = v => H-p - (v-mn)/(mx-mn)*(H-2*p);
+  const path = h.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v)}`).join(' ');
+  $('#rcTrend').innerHTML = `<path d="${path}" fill="none" stroke="#3fe0c5" stroke-width="3" stroke-linejoin="round"/>` +
+    h.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===h.length-1?6:3.5}" fill="${i===h.length-1?'#5df29a':'#3fe0c5'}"/><text x="${x(i)}" y="${y(v)-10}" fill="#9aa3b8" font-size="11" text-anchor="middle">${v}</text>`).join('');
+}
+
+/* ---------------- coach chat (scripted) ---------------- */
+const msgs = $('#msgs');
+function bubble(txt, who){ const d = document.createElement('div'); d.className = 'msg '+who; d.textContent = txt; msgs.appendChild(d); msgs.scrollTop = 1e9; return d; }
+function aiSay(txt, quiet){ const d = bubble('…', 'ai'); setTimeout(() => { d.textContent = txt; msgs.scrollTop = 1e9; }, RM?0:450); if (!quiet && !document.body.classList.contains('chat-open')) $('#chatBtn').style.borderColor = 'var(--amber)'; }
+function setChat(open){ document.body.classList.toggle('chat-open', open); $('#chatBtn').setAttribute('aria-expanded', open); $('#chatBtn').style.borderColor=''; if (open) setTimeout(()=>$('#chatIn').focus(), 50); setTimeout(()=>dispatchEvent(new Event('resize')), 420); }
+$('#chatBtn').onclick = () => setChat(!document.body.classList.contains('chat-open'));
+$('#chatClose').onclick = () => setChat(false);
+
+function changeBpm(delta){
+  const tgt = sess ?? { cfg:SESSIONS[todayPlan[planDone]?.s ?? 'R3'] };
+  const nb = Math.max(40, Math.min(200, (sess ? sess.bpm : tgt.cfg.bpm) + delta));
+  if (sess) sess.bpm = nb; else tgt.cfg.bpm = nb;
+  if (!sess && planDone===0) todayPlan[0].m = `8 min · ${nb} BPM · rock groove`;
+  if (screen==='today') renderToday();
+  toast(sess ? `Next take at ${nb} BPM` : `${tgt.cfg.title.split('·')[0].trim()} preset now ${nb} BPM`);
+  return `${delta<0?'Slowing':'Speeding'} to ${nb} BPM${sess?' from the next take, so the current one stays clean':''}. ${delta<0?'Slow and in the pocket beats fast and sloppy.':'Push it only while your pocket score stays above 70%.'}`;
+}
+const INTENTS = [
+  [/slow|down|easier/i, () => changeBpm(-5)],
+  [/fast|up|harder|speed/i, () => changeBpm(+5)],
+  [/(rock|metal|jazz|funk|latin)/i, m => { const b = BRANCHES.find(b => b.id===m[1].toUpperCase()); go('map',{noFly:true}); flyTo(b.pos, new THREE.Vector3(3,3,8), 1.8); setTimeout(()=>showNode({ ...b, kind:'branch', state:'far' }), RM?0:1800);
+      return `${b.name} is an Act II path: ${b.desc}. It lights up after the slow-blues boss, but every ${b.name.toLowerCase()} jam is playable right now in Jam mode.`; }],
+  [/boss/i, () => { go('map',{noFly:true}); const n = NODES.at(-1); showNode(n); return 'The boss is a full slow blues. Pocket counts now, note choice later. You can try it today if you like. Nothing is locked.'; }],
+  [/map|where|progress/i, () => { go('map'); return `You're on R3, Syncopation. R1 and R2 are done; the violet nodes are theory steps that arrive with the pitch coach.`; }],
+  [/today|home|plan/i, () => { go('today'); return 'Here is today: one new step, one review, one free jam. About 15 minutes.'; }],
+  [/start|go|play|begin|ready/i, () => { const p = todayPlan[planDone]; if (p?.s) { startSession(p.s); return `Starting ${SESSIONS[p.s].title}. I'll stay quiet while you play.`; } return 'Next is the free jam: no grading, just play.'; }],
+  [/metronome|tool|jam mode|cheat|setlist/i, () => { openTools(true); return 'All the plain tools are in the Tools drawer, exactly as they were.'; }],
+  [/why|explain|what is|syncop|anticip/i, () => 'An anticipation plays a chord or note a sixteenth or eighth before the beat it belongs to. It makes the groove lean forward. The trick is keeping the downbeats steady while the pushes move. Most players rush the beat after the push.'],
+  [/score|grade|how.*(did|doing)/i, () => sess?.results.length ? `Analyser numbers so far: ${sess.results.map(r=>r.pct+'%').join(', ')} in the pocket (±${TOL} ms). I don't grade. I only read what it measured.` : `Your best on R3 is ${NODES[cur].best}% in the pocket (±${TOL} ms). That number comes from the analyser, not from me.`],
+  [/help|\?$/i, () => 'Try: “slower”, “faster”, “start”, “show me the map”, “jazz”, “boss”, “why”, “how am I doing”, “metronome”.'],
+];
+function reply(text){
+  for (const [re, fn] of INTENTS){ const m = text.match(re); if (m) return fn(m); }
+  return "I'm a scripted demo coach, so I only know a few things. Try “slower”, “show me the map” or “jazz”.";
+}
+$('#chatForm').onsubmit = e => { e.preventDefault(); const t = $('#chatIn').value.trim(); if (!t) return; $('#chatIn').value=''; bubble(t,'me'); aiSay(reply(t), true); };
+const CHIPS = ['slower','show me the map','jazz','start','why?','how am I doing'];
+$('#chips').innerHTML = CHIPS.map(c=>`<button type="button">${c}</button>`).join('');
+$$('#chips button').forEach(b => b.onclick = () => { bubble(b.textContent,'me'); aiSay(reply(b.textContent), true); });
+
+const onScreen = {
+  today: () => { renderToday(); if (!onScreen.greeted){ onScreen.greeted = 1; aiSay('Morning! Today: syncopation (new), a sixteenths review, then a free slow blues. Ask me to make anything slower, or to show you around.'); } },
+  map: () => aiSay(`Map: Act I alternates rhythm (teal) and theory (violet). You're at R3. Click any node; nothing is locked.`, true),
+  session: () => aiSay(`${sess.cfg.title} at ${sess.bpm} BPM. Targets are outlined. I'll stay silent during takes.`, true),
+  recap: o => aiSay(o.d>0 ? `+${o.d} points versus ${o.prevDay}, measured by the analyser. That's the number that moved.` : 'Same ballpark as last time. Consistency counts too. Want to go 5 BPM slower next time?', true),
+};
+
+/* ---------------- tools drawer & modal ---------------- */
+function openTools(open){ $('#tools').classList.toggle('show', open); $('#toolsBtn').setAttribute('aria-expanded', open); }
+$('#toolsBtn').onclick = () => openTools(!$('#tools').classList.contains('show'));
+const TOOLS = {
+  metronome:['Metronome','The existing v1.2 metronome. In the real app the session runner opens it with the step’s tempo and subdivision.', true],
+  jam:['Jam mode','9 styles, 115 grooves, 7 kits. The session runner opens it with the step’s groove and key.'],
+  cheat:['Theory cheat sheet','Fretboard, scales and chords. The coach can open it at the scale you’re practising.'],
+  setlists:['Setlists','Your songs and presets, unchanged.'],
+  coach:['Coach history','Every take, trend and analyser fact, exportable.'],
+  speed:['Speed drill','Tempo ramps. Also the training ground on the map.'],
+};
+let metro = null;
+$$('#tools [data-tool]').forEach(b => b.onclick = () => {
+  const [t, d, live] = TOOLS[b.dataset.tool]; openTools(false);
+  $('#modalBody').innerHTML = `<span class="badge side">Stub</span><h2>${t}</h2><p class="muted" style="line-height:1.5">${d}</p>
+    ${live?`<div style="display:flex;align-items:center;gap:12px;margin:12px 0"><b class="num" style="font-size:40px" id="mBpm">${SESSIONS.R3.bpm}</b> BPM <button class="btn" id="mGo">Start</button></div>`:''}
+    <button class="btn ghost" id="mClose">Close</button>`;
+  $('#modal').classList.add('show');
+  $('#mClose').onclick = closeModal;
+  if (live) $('#mGo').onclick = () => { if (metro){ clearInterval(metro); metro=null; $('#mGo').textContent='Start'; return; }
+    audio(); let n=0, t=ac.currentTime+.1; const spb=60/SESSIONS.R3.bpm; $('#mGo').textContent='Stop';
+    metro = setInterval(()=>{ while (t < ac.currentTime+.12){ click(t, n%4===0); t+=spb; n++; } }, 25); };
+});
+function closeModal(){ $('#modal').classList.remove('show'); if (metro){ clearInterval(metro); metro=null; } }
+$('#modal').onclick = e => { if (e.target.id==='modal') closeModal(); };
+
+let toastT = 0;
+function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>el.classList.remove('show'), 2200); }
+
+/* ---------------- keyboard ---------------- */
+addEventListener('keydown', e => {
+  if (e.target.tagName==='INPUT') return;
+  if (e.code==='Space'){ e.preventDefault();
+    if (screen==='session' && $('#overlay').classList.contains('show')) advance();
+    else if (screen==='today') $('#startBtn').click();
+    else if (screen==='recap') $('#rcNext').click(); }
+  if (e.key==='Escape'){ if ($('#modal').classList.contains('show')) closeModal(); else if (screen==='session') $('#stopBtn').click(); else openTools(false); }
+});
+
+// expose for automated checks
+window.__yames = { go, startSession, get screen(){ return screen; }, get running(){ return running; }, get sess(){ return sess; }, finishFast(){ /* test hook: end the session with simulated takes instantly */
+  const s = sess; if (!s) return; clearInterval(sched); cancelAnimationFrame(uiRaf); clearInterval(cdTimer);
+  while (s.take < TAKES){ const hits = s.cfg.targets.flatMap(k => Array.from({length:BARS},(_,b)=>({ bar:b+1, k, off:s.cfg.bias[s.take]+gauss()*s.cfg.sd[s.take] })));
+    s.results.push({ pct:Math.round(100*hits.filter(h=>Math.abs(h.off)<=TOL).length/hits.length), hits }); s.take++; }
+  finishSession(); } };
+
+go('today');
+</script>
+</body>
+</html>

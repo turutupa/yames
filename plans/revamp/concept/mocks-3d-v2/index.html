@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0705">
+<title>Yames Coach: 3D mocks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.170.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body class="booting">
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="shade" aria-hidden="true"></div>
+<div id="stage"></div>
+
+<nav id="rail" aria-label="Main">
+  <div class="brand">YAM<b>E</b>S</div><div class="brandsub">Coach</div>
+  <button data-nav="today">Today</button>
+  <button data-nav="paths">Paths</button>
+  <button data-nav="progress">Progress</button>
+  <button data-nav="tools">Tools</button>
+  <span class="spacer"></span>
+  <button class="q" data-nav="coach">Ask the coach</button>
+  <button class="q" data-nav="settings">Settings</button>
+</nav>
+<header id="ptop"><div class="brand">YAM<b>E</b>S</div><div><button data-nav="coach">Ask</button><button data-nav="settings">Settings</button></div></header>
+<nav id="tabs" aria-label="Main">
+  <button data-nav="today">Today</button>
+  <button data-nav="paths">Paths</button>
+  <button data-nav="progress">Progress</button>
+  <button data-nav="tools">Tools</button>
+</nav>
+
+<div id="strip">
+  <span class="mock">Mock: simulated data</span>
+  <span class="grow"></span>
+  <button id="soundBtn" aria-pressed="false">Sound off</button>
+  <button id="indexBtn" aria-expanded="false">Screens</button>
+</div>
+<aside id="index" hidden aria-label="All screens"></aside>
+<div id="toast" hidden></div>
+<div id="boot"><div class="brand">YAM<b>E</b>S</div><div id="bootline">Warming up</div></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

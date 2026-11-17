@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0709">
+<title>Yames · Coach</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Caveat:wght@700&display=swap">
+<style>
+:root{--pocket:#3dffa2;--early:#5aa9ff;--late:#ff8a3d;--miss:#ff3d6e;--coach:#c8a8ff;--listen:#ffe14d;--ink:#f4f1ea;--dim:#c9c0ba;--rpx:160px;
+ --t:max(15px,2.6vmin);--chip:max(19px,3vmin);--tape:#e9e4d6;
+ --disp:"Barlow Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0b0709;color:var(--ink);font-family:var(--disp);font-weight:700;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+canvas{position:fixed;inset:0;display:block}
+.ov{position:fixed;pointer-events:none}
+/* top corners */
+#hudL{top:calc(10px + env(safe-area-inset-top));left:16px;max-width:30vw;white-space:nowrap}
+#stepTag{font-size:var(--t);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+#stepName{font-size:calc(var(--t)*1.5);font-weight:800;line-height:1.05}
+#takeLine{font-size:var(--t);color:var(--ink);letter-spacing:.06em;margin-top:2px}
+#hudR{top:calc(10px + env(safe-area-inset-top));right:16px;text-align:right;white-space:nowrap}
+#bpm{font-size:calc(var(--t)*2.2);font-weight:800;line-height:.95;font-variant-numeric:tabular-nums;transition:color .3s}
+#bpm small{font-size:.45em;font-weight:700;color:var(--dim);margin-left:4px}
+#bpm.flash{color:var(--listen)}
+#src{font-size:var(--t);letter-spacing:.08em;margin-top:2px}
+#src.demo{display:inline-block;background:var(--ink);color:#0b0709;padding:0 .5em;font-weight:800}
+/* status light on the amp's control panel */
+#sign{left:50%;transform:translate(-50%,-50%);font-size:calc(var(--t)*1.15);font-weight:800;letter-spacing:.12em;padding:.04em .7em;border-radius:4px;white-space:nowrap;background:#0d0908;color:var(--ink);border:2px solid #fff3}
+#sign:empty{display:none}
+#sign::before{content:"";display:inline-block;width:.62em;height:.62em;border-radius:50%;margin-right:.45em;vertical-align:.03em;background:#fff}
+#sign[data-k=COACH]{color:var(--coach);border-color:var(--coach)} #sign[data-k=COACH]::before{background:var(--coach);box-shadow:0 0 12px var(--coach)}
+#sign[data-k="YOUR TURN"]{color:var(--listen);border-color:var(--listen)} #sign[data-k="YOUR TURN"]::before{background:var(--listen);box-shadow:0 0 12px var(--listen)}
+#sign[data-k=PLAYING]::before{background:#e11;box-shadow:0 0 12px #e11}
+/* centre of the ring */
+#center{left:0;top:0;width:0;height:0}
+#cbox{position:absolute;transform:translate(-50%,-50%);text-align:center;width:calc(var(--rpx)*1.62)}
+#big{font-size:calc(var(--rpx)*.62);font-weight:800;line-height:.95;font-variant-numeric:tabular-nums;text-shadow:0 0 calc(var(--rpx)*.08) #0009}
+#cbox.verdict #big{font-size:calc(var(--rpx)*.36);line-height:.98;text-transform:uppercase}
+#cbox.chord #big{font-size:calc(var(--rpx)*.86)}
+#word{font-size:max(17px,calc(var(--rpx)*.15));font-weight:800;letter-spacing:.12em;margin-top:.15em;text-transform:uppercase}
+#small{font-size:max(16px,calc(var(--rpx)*.118));color:var(--ink);opacity:.82;margin-top:.15em;line-height:1.1}
+#cbox.chord #small{font-size:max(24px,calc(var(--rpx)*.24));opacity:1;font-weight:800}
+#dots{display:none;justify-content:center;gap:calc(var(--rpx)*.05);margin-top:calc(var(--rpx)*.06)}
+#dots i{width:calc(var(--rpx)*.055);height:calc(var(--rpx)*.055);border-radius:50%;background:#fff3}
+#dots i.on{background:#fff}
+body[data-view=take] #dots,body[data-view=count] #dots{display:flex}
+/* under the ring: captions, meter, legend. Never overlaps the ring. */
+#under{left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:calc(var(--t)*.35);padding:0 14px}
+#caption{max-width:min(26em,96vw);text-align:center;font-size:max(20px,3.3vmin);line-height:1.12;text-shadow:0 1px 10px #000,0 0 3px #000;display:none}
+#caption.show{display:block}
+#meter{width:min(calc(var(--rpx)*2.2),92vw);display:none}
+#meter .row{display:flex;justify-content:space-between;align-items:baseline;font-size:var(--t);letter-spacing:.08em}
+#meter .row b{font-size:calc(var(--t)*1.7);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0}
+#meter .bar{height:calc(var(--t)*.42);border-radius:3px;background:#ffffff1f;overflow:hidden}
+#meter .bar i{display:block;height:100%;width:0;background:#fff;transition:width .2s}
+#legend{display:none;flex-wrap:wrap;justify-content:center;gap:0 1em;font-size:var(--t)}
+#legend span{white-space:nowrap}
+#banner{display:none;background:var(--ink);color:#0b0709;font-size:calc(var(--t)*1.25);font-weight:800;padding:.05em .7em;letter-spacing:.06em;text-align:center}
+body.demo #banner{display:block}
+body[data-view=take].real #meter{display:block}
+body[data-view=take].firstbar #legend,body[data-view=count] #legend{display:flex}
+body[data-view=take] #caption,body[data-view=count] #caption,body[data-view=jam] #caption{display:none}
+body[data-view=jam] #banner,body[data-view=check] #banner,body[data-view=intro] #banner{display:none}
+/* bottom dock */
+#dock{left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 10px calc(10px + env(safe-area-inset-bottom))}
+#echo{font-size:calc(var(--t)*1.25);font-weight:800;background:var(--listen);color:#111;padding:0 .6em;border-radius:3px;opacity:0;transition:opacity .25s}
+#echo.show{opacity:1}
+#heard{font-size:var(--t);color:var(--listen);min-height:1em;text-align:center}
+#chips,#more{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+#more{display:none} #more.show{display:flex}
+.chip{pointer-events:auto;min-height:max(52px,6vmin);padding:0 .85em;border-radius:6px;border:2px solid #ffffff55;background:#150e10e6;color:var(--ink);font:800 var(--chip) var(--disp);letter-spacing:.05em;cursor:pointer;text-transform:uppercase}
+.chip.hero{background:var(--listen);color:#111;border-color:var(--listen)}
+.chip.sm{font-size:max(17px,2.6vmin);min-height:48px;font-weight:700}
+.chip:active{filter:brightness(1.4)}
+#hint{font-size:var(--t);color:var(--ink);opacity:.8;text-align:center;line-height:1.1}
+/* practice list: sticky notes on the wall */
+#notes{left:0;right:0;display:none;flex-wrap:wrap;justify-content:center;gap:clamp(8px,1.6vmin,20px);padding:0 10px}
+body[data-view=where] #notes{display:flex}
+.note{width:min(15vw,230px);min-height:calc(var(--t)*4.6);background:#d9cfa8;color:#2a2118;font:700 max(21px,3.5vmin)/1 Caveat,"Segoe Print","Bradley Hand",cursive;padding:.35em .4em;box-shadow:0 5px 14px #000a;opacity:0;transform:translateY(8px) rotate(var(--rot));transition:opacity .4s,transform .4s}
+.note.show{opacity:1;transform:rotate(var(--rot))}
+.note small{display:block;font:inherit;font-size:.82em;margin-top:.2em;color:#5a4c36}
+.note.later{background:#8f8768;color:#221b12} .note.later small{color:#322a1c}
+.note.today{background:#fff8dc;outline:3px solid #d0342c;outline-offset:2px}
+.note.today small{color:#d0342c}
+@media (max-aspect-ratio:17/20){.note{width:29vw}}
+body[data-view=where] #center{visibility:hidden}
+body[data-view=jam] #src{display:none}
+/* soundcheck */
+#lvl{display:none;width:min(calc(var(--rpx)*1.3),70vw);height:calc(var(--t)*.5);background:#ffffff1f;margin:.3em auto 0;overflow:hidden;border-radius:3px}
+#lvl i{display:block;height:100%;width:0;background:#fff}
+body[data-view=check] #lvl{display:block}
+/* gate */
+#gate{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,#3a1a20 0,#0b0709 70%);z-index:9;text-align:center;padding:24px}
+#gate h1{margin:0;font-size:clamp(48px,12vmin,110px);letter-spacing:.04em;font-weight:800}
+#gate p{margin:0;color:var(--ink);opacity:.86;font-size:max(18px,3vmin);max-width:26em;line-height:1.2}
+#go{width:min(240px,58vw);aspect-ratio:1;border-radius:50%;border:3px solid var(--listen);background:#ffe14d22;color:#fff;font:800 max(26px,4vmin) var(--disp);letter-spacing:.06em;cursor:pointer}
+@media (max-aspect-ratio:17/20){#stepName{font-size:calc(var(--t)*1.35)}#hudL{max-width:58vw}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.170.0/build/three.module.js"}}</script>
+</head>
+<body data-view="gate">
+<div id="gate">
+  <h1>YAMES</h1>
+  <p>About 7 minutes: a quick soundcheck, one new step, one review, then a jam that runs until you stop it.</p>
+  <button id="go">Tap to start</button>
+  <p style="font-size:max(16px,2.4vmin)">Using a mic? Wear headphones, or it hears the click instead of you. You can also tap along.</p>
+</div>
+<div id="hudL" class="ov"><div id="stepTag"></div><div id="stepName"></div><div id="takeLine"></div></div>
+<div id="hudR" class="ov"><div id="bpm"></div><div id="src"></div></div>
+<div id="center" class="ov"><div id="cbox"><div id="big"></div><div id="dots"><i></i><i></i><i></i><i></i></div><div id="word"></div><div id="small"></div><div id="lvl"><i></i></div></div></div>
+<div id="notes" class="ov"></div>
+<div id="sign" class="ov"></div>
+<div id="under" class="ov">
+  <div id="banner">DEMO PLAYER · NOT YOU · NOT SCORED</div>
+  <div id="meter"><div class="row"><span>IN THE POCKET</span><b id="mval">0%</b></div><div class="bar"><i id="mbar"></i></div></div>
+  <div id="legend"><span style="color:var(--early)">inside: EARLY</span><span style="color:var(--pocket)">band: POCKET</span><span style="color:var(--late)">outside: LATE</span></div>
+  <div id="caption"></div>
+</div>
+<div id="dock" class="ov">
+  <div id="echo"></div><div id="heard"></div>
+  <div id="chips"></div><div id="more"></div>
+  <div id="hint"></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+
+/* ---------- config ---------- */
+const Q = new URLSearchParams(location.search);
+const QUICK = Q.has('quick');                         // test mode: short takes, no TTS, short waits
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
+const CHECK_MS = QUICK ? 1500 : 10000, POCKET_MS = 25, DISP_MS = 65;
+const TAU = Math.PI * 2, R = 3, RL = R + .85, BAND = .28, FLOOR_Y = -4.32, LIP_Z = 1.02;
+const COL = { pocket: 0x3dffa2, early: 0x5aa9ff, late: 0xff8a3d, miss: 0xff3d6e, coach: 0xc8a8ff, listen: 0xffe14d, warm: 0xffd9b0, white: 0xffffff };
+const hex = c => '#' + c.toString(16).padStart(6, '0');
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const bars_ = n => QUICK ? 2 : n;
+
+const STEPS = {
+  sixteenths: { id: 'sixteenths', name: 'Sixteenths', sub: 4, bpm: 76, bars: 12, sigma: [30, 24, 18], bias: [-11, -7, -4], miss: [.06, .04, .03],
+    line: b => `Sixteenths at ${b}. Land in the band.`,
+    why: 'Sixteenths are the grid under funk and pop. If they are even, whatever you play on top sounds tight.' },
+  pocket: { id: 'pocket', name: 'Pocket: eighths', sub: 2, bpm: 88, bars: 8, sigma: [20, 18, 16], bias: [-7, -5, -3], miss: [.03, .02, .02],
+    line: b => `Review: eighths at ${b}. Relaxed, right on the click.`,
+    why: 'Most players rush when they concentrate. Reviewing the pocket keeps the new step on solid ground.' },
+};
+const PLAN = [{ kind: 'step', step: 'sixteenths', tag: 'New step' }, { kind: 'step', step: 'pocket', tag: 'Review' }, { kind: 'jam' }];
+const PATH = [{ id: 'pocket', label: 'Pocket', short: 'Pocket' }, { id: 'sixteenths', label: 'Sixteenths', short: '16ths' }, { id: 'synco', label: 'Syncopation', short: 'Synco' },
+  { id: 'shuffle', label: 'Shuffle', short: 'Shuffle' }, { id: 'ghost', label: 'Ghost notes', short: 'Ghosts' }, { id: 'odd', label: 'Odd groupings', short: 'Odd' }];
+const FRONTIER = 'sixteenths';
+// gels for the jam: deliberately not the timing hues
+const CHORDS = [{ n: 'Am', r: 45, notes: [57, 60, 64], col: 0xffcf87 }, { n: 'F', r: 41, notes: [57, 60, 65], col: 0xff9eb0 },
+  { n: 'C', r: 48, notes: [55, 60, 64], col: 0xa8f0e8 }, { n: 'G', r: 43, notes: [55, 59, 62], col: 0xb39cff }];
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+// shared state. hist only ever holds scores from real input: no seeded baselines
+const app = { view: 'gate', input: null, tk: null, hist: store.get('yames-v3-hist', {}), calib: store.get('yames-v3-calib', {}), bleedE: 0, bleedWarned: false, micOK: false, level: 0, pulse: 0, sess: null, vis: null, gauge: null, movedT: null };
+
+/* ---------- renderer and room ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: !MOBILE });
+renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.5 : 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0709);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 120);
+
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, '#fff'); gr.addColorStop(.22, '#ffffffdd'); gr.addColorStop(.5, '#ffffff44'); gr.addColorStop(1, '#ffffff00');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const GLOW = glowTexture();
+const ADD = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false };
+const spriteMat = (color, opacity = 1) => new THREE.SpriteMaterial({ map: GLOW, color, opacity, ...ADD });
+function arcMat(color, tail = 0, base = .06) {
+  return new THREE.ShaderMaterial({ ...ADD, side: THREE.DoubleSide,
+    uniforms: { uP: { value: 0 }, uC: { value: new THREE.Color(color) }, uO: { value: 1 }, uTail: { value: tail }, uBase: { value: base } },
+    vertexShader: 'varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader: `uniform float uP,uO,uTail,uBase;uniform vec3 uC;varying vec2 vP;
+      void main(){float a=atan(vP.x,vP.y);if(a<0.)a+=6.2831853;float f=a/6.2831853;
+      float al=f<=uP?mix(1.,smoothstep(uP-.25,uP,f),uTail):uBase;gl_FragColor=vec4(uC,al*uO);}` });
+}
+// the room: wall and floor share a wash colour. On each beat the LED strip floods the room in your timing
+// colour, so you catch it peripherally while looking at the fretboard
+const room = { uWash: { value: new THREE.Color(0, 0, 0) }, uLamp: { value: .7 }, uStripY: { value: 9 }, uLampP: { value: new THREE.Vector2(-8, 1) } };
+const passV = 'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}';
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(90, 60), new THREE.ShaderMaterial({ uniforms: room, vertexShader: passV,
+  fragmentShader: `uniform vec3 uWash;uniform float uLamp,uStripY;uniform vec2 uLampP;varying vec3 vW;
+   void main(){vec3 c=vec3(.052,.034,.032);c+=uWash*(.1+.62*exp(-abs(vW.y-uStripY)*.2)+.3*exp(-abs(vW.y+3.6)*.5));
+   c+=vec3(1.,.7,.42)*uLamp*.34*exp(-length(vW.xy-uLampP)*.26);gl_FragColor=vec4(c,1.);}` }));
+wall.position.set(0, 20, -6); scene.add(wall);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(90, 44), new THREE.ShaderMaterial({ uniforms: room, vertexShader: passV,
+  fragmentShader: `uniform vec3 uWash;uniform float uLamp;uniform vec2 uLampP;varying vec3 vW;
+   void main(){float pl=smoothstep(0.,.04,abs(fract(vW.x*.7)-.5));vec3 c=vec3(.082,.05,.036)*(.74+.26*pl);c+=uWash*(.3+.2*exp(vW.z*-.05));
+   c+=vec3(1.,.7,.42)*uLamp*.1*exp(-length(vec2(vW.x-uLampP.x,vW.z+3.))*.2);gl_FragColor=vec4(c,1.);}` }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(0, FLOOR_Y, 16); scene.add(floor);
+const stripMat = new THREE.MeshBasicMaterial({ color: 0x332018 }), unitBox = new THREE.BoxGeometry(1, 1, 1);
+const strip = new THREE.Mesh(unitBox, stripMat); scene.add(strip);
+// the amp: the coach's voice comes from here. The cone moves with the kick and with speech; the jewel lamp glows when it talks
+const amp = new THREE.Group(); scene.add(amp);
+const AH = RL + .42;
+const tolex = new THREE.MeshBasicMaterial({ color: 0x1b1210 }), tolexSide = new THREE.MeshBasicMaterial({ color: 0x0e0908 });
+const cab = new THREE.Mesh(unitBox, [tolexSide, tolexSide, tolexSide, tolexSide, tolex, tolexSide]); amp.add(cab);
+function clothTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 16; const g = c.getContext('2d');
+  g.fillStyle = '#b9b0a4'; g.fillRect(0, 0, 16, 16); g.fillStyle = '#8f867b'; for (let i = 0; i < 16; i += 4) { g.fillRect(i, 0, 1, 16); g.fillRect(0, i, 16, 1); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(26, 26); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const clothMat = new THREE.MeshBasicMaterial({ map: clothTexture(), color: 0x2c2019 });
+const cloth = new THREE.Mesh(new THREE.PlaneGeometry(2 * AH - .3, 2 * RL + .3), clothMat); cloth.position.z = -.012; amp.add(cloth);
+const CONE_R = R - BAND - .02;
+const coneMat = new THREE.ShaderMaterial({ uniforms: { uFlex: { value: 0 } }, vertexShader: 'varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader: `uniform float uFlex;varying vec2 vP;void main(){float r=length(vP)/${CONE_R.toFixed(2)};float rib=.5+.5*sin(r*46.-uFlex*5.);
+   vec3 c=mix(vec3(.028,.022,.021),vec3(.058,.045,.041),rib*.65*smoothstep(.25,.6,r));c+=vec3(.09,.06,.045)*smoothstep(.2,.17,r)*(1.-r*2.5);c*=1.+uFlex*.5;gl_FragColor=vec4(c,1.);}` });
+const cone = new THREE.Mesh(new THREE.CircleGeometry(CONE_R, 64), coneMat); cone.position.z = -.008; amp.add(cone);
+const surround = new THREE.Mesh(new THREE.RingGeometry(CONE_R, R + BAND + .04, 96), new THREE.MeshBasicMaterial({ color: 0x0b0807 })); surround.position.z = -.01; amp.add(surround);
+const panelMat = new THREE.MeshBasicMaterial({ color: 0x2e2520 });
+const panel = new THREE.Mesh(unitBox, panelMat); amp.add(panel);
+const knobMat = new THREE.MeshBasicMaterial({ color: 0x0e0b0a }), pointerMat = new THREE.MeshBasicMaterial({ color: 0xe8e0d0 });
+const knobs = [0, 1, 2].map(() => { const g = new THREE.Group(), k = new THREE.Mesh(new THREE.CircleGeometry(.19, 18), knobMat), m = new THREE.Mesh(new THREE.PlaneGeometry(.035, .15), pointerMat); m.position.y = .1; m.position.z = .002; g.add(k, m); g.ptr = m; amp.add(g); return g; });
+const tubeSlot = new THREE.Mesh(unitBox, new THREE.MeshBasicMaterial({ color: 0x060404 })); amp.add(tubeSlot);
+const tubes = [0, 1, 2].map(() => { const t = new THREE.Sprite(spriteMat(0xffb777, .3)); t.scale.set(.42, .62, 1); amp.add(t); return t; });
+const jewel = new THREE.Sprite(spriteMat(0xffffff, .4)); jewel.scale.setScalar(.6); amp.add(jewel);
+// the room's things: lamp, a spare guitar on a stand, a pedalboard. The board's LEDs are the bar history
+const lampG = new THREE.Group(), darkMat = new THREE.MeshBasicMaterial({ color: 0x0b0807 });
+const lampPole = new THREE.Mesh(unitBox, darkMat); lampG.add(lampPole);
+const shadeMat = new THREE.MeshBasicMaterial({ color: 0xe9b070 }); const shade = new THREE.Mesh(new THREE.CylinderGeometry(.42, .85, .9, 16, 1, true), shadeMat); lampG.add(shade);
+const lampGlow = new THREE.Sprite(spriteMat(0xffc284, .65)); lampGlow.scale.setScalar(4.2); lampGlow.material.depthTest = false; lampG.add(lampGlow); scene.add(lampG);
+const guitar = new THREE.Group();
+{ const m = darkMat, b1 = new THREE.Mesh(new THREE.CircleGeometry(.78, 20), m), b2 = new THREE.Mesh(new THREE.CircleGeometry(.56, 20), m), neck = new THREE.Mesh(new THREE.PlaneGeometry(.15, 2.3), m), head = new THREE.Mesh(new THREE.PlaneGeometry(.26, .55), m);
+  b1.position.y = .78; b2.position.y = 1.85; neck.position.y = 3.2; head.position.y = 4.55; guitar.add(b1, b2, neck, head); guitar.rotation.z = -.09; guitar.position.z = -5.7; }
+scene.add(guitar);
+const board = new THREE.Group(); scene.add(board);
+const plank = new THREE.Mesh(unitBox, new THREE.MeshBasicMaterial({ color: 0x120c0a })); board.add(plank);
+const pedals = [0x2c3d38, 0x45241f, 0x4a3d1c, 0x28303f].map(c => { const p = new THREE.Mesh(unitBox, new THREE.MeshBasicMaterial({ color: c })); board.add(p); return p; });
+// the ring: one thin line, a lit band for +/-25 ms, grid ticks, short playhead, gauge
+const ring = new THREE.Group(); scene.add(ring);
+const lineMat = new THREE.MeshBasicMaterial({ color: 0xd8d2cc, transparent: true, opacity: .85, depthWrite: false });
+const torusGeo = new THREE.TorusGeometry(R, .02, 6, 128), bandGeo = new THREE.RingGeometry(R - BAND, R + BAND, 128);
+const bandMat = new THREE.MeshBasicMaterial({ color: COL.pocket, transparent: true, opacity: .13, depthWrite: false, side: THREE.DoubleSide });
+ring.add(new THREE.Mesh(torusGeo, lineMat), new THREE.Mesh(bandGeo, bandMat));
+const tickGroup = new THREE.Group(); ring.add(tickGroup);
+const tickQ = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9, depthWrite: false }), tickS = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .4, depthWrite: false });
+const tickGeo = new THREE.PlaneGeometry(1, 1);
+let ticks = [];
+function setTicks(npb) {
+  tickGroup.clear(); ticks = [];
+  for (let k = 0; k < npb; k++) {
+    const quarter = k % (npb / 4) === 0, len = k === 0 ? .78 : quarter ? .66 : .56, a = k / npb * TAU;
+    const m = new THREE.Mesh(tickGeo, quarter ? tickQ : tickS); m.scale.set(k === 0 ? .07 : quarter ? .045 : .022, len, 1);
+    m.position.set(Math.sin(a) * R, Math.cos(a) * R, .01); m.rotation.z = -a; m.userData = { k, sx: m.scale.x }; tickGroup.add(m); ticks.push(m);
+  }
+}
+const playhead = new THREE.Group(), phMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1, depthWrite: false });
+const ph = new THREE.Mesh(new THREE.PlaneGeometry(.06, 1.1), phMat); ph.position.y = R; playhead.add(ph); ring.add(playhead);
+const progMat = arcMat(0xffffff, 1, 0); const prog = new THREE.Mesh(new THREE.RingGeometry(R - .05, R + .05, 128), progMat); ring.add(prog);
+const gaugeMat = arcMat(0xffffff, 0, .08); const gauge = new THREE.Mesh(new THREE.RingGeometry(R + .3, R + .72, 150), gaugeMat); gauge.visible = false; scene.add(gauge);
+const prevTick = new THREE.Mesh(new THREE.PlaneGeometry(.11, .7), new THREE.MeshBasicMaterial({ color: 0x0b0709, transparent: true })); prevTick.visible = false; scene.add(prevTick);
+
+// hit marks: pooled. Pocket = calm small dot. Error = stem to the grid + halo. Miss = big pink X
+const hitLayer = new THREE.Group(); ring.add(hitLayer);
+const stemGeo = new THREE.PlaneGeometry(.035, 1), xGeo = new THREE.PlaneGeometry(.62, .09), pool = [], liveHits = [];
+function getMark() {
+  let o = pool.pop();
+  if (!o) {
+    o = new THREE.Group();
+    o.dot = new THREE.Sprite(spriteMat(0xffffff)); o.halo = new THREE.Sprite(spriteMat(0xffffff, .45));
+    o.stem = new THREE.Mesh(stemGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9, depthWrite: false }));
+    o.x = new THREE.Group(); const xm = new THREE.MeshBasicMaterial({ color: COL.miss, transparent: true, depthWrite: false });
+    [.785, -.785].forEach(r => { const m = new THREE.Mesh(xGeo, xm); m.rotation.z = r; o.x.add(m); });
+    o.add(o.halo, o.dot, o.stem, o.x);
+  }
+  hitLayer.add(o); liveHits.push(o); return o;
+}
+function freeMark(o) { hitLayer.remove(o); pool.push(o); }
+function clearHits() { liveHits.splice(0).forEach(freeMark); }
+function drawHit(b, k, npb, ms) {
+  const o = getMark(), a = k / npb * TAU, r = hitR(ms), inP = Math.abs(ms) <= POCKET_MS, c = hitColor(ms);
+  o.b = b; o.pos = k / npb; o.note = k; o.isMiss = false; o.x.visible = false;
+  o.position.set(Math.sin(a) * r, Math.cos(a) * r, .04); o.rotation.z = 0;
+  o.dot.visible = true; o.dot.material.color.setHex(c); o.dot.scale.setScalar(inP ? .22 : .32);
+  o.halo.visible = !inP; o.halo.material.color.setHex(c); o.halo.scale.setScalar(1.1);
+  o.stem.visible = !inP;
+  if (!inP) { const len = Math.abs(r - R), s = r > R ? -1 : 1; o.stem.scale.y = len; o.stem.material.color.setHex(c); o.stem.rotation.z = -a; o.stem.position.set(Math.sin(a) * s * len / 2, Math.cos(a) * s * len / 2, -.01); }
+}
+function drawMiss(b, k, npb) {
+  const o = getMark(), a = k / npb * TAU; o.b = b; o.pos = k / npb; o.note = k; o.isMiss = true;
+  o.position.set(Math.sin(a) * R, Math.cos(a) * R, .05); o.dot.visible = o.halo.visible = o.stem.visible = false; o.x.visible = true;
+}
+// pedalboard LEDs: one flat tile per bar. This is the history, and it never touches the ring
+const ledGroup = new THREE.Group(); scene.add(ledGroup);
+let leds = [];
+function setLeds(n) {
+  ledGroup.clear(); leds.forEach(m => m.material.dispose()); leds = [];
+  const w = Math.min(.55, 6.2 / n);
+  for (let i = 0; i < n; i++) { const m = new THREE.Mesh(tickGeo, new THREE.MeshBasicMaterial({ color: 0x3a3234 })); m.scale.set(w * .84, .2, 1); m.position.set((i - (n - 1) / 2) * w, FLOOR_Y + .12, LIP_Z); ledGroup.add(m); leds.push(m); }
+}
+
+/* ---------- layout: everything is derived from pixels, so nothing overlaps ---------- */
+const L = { d: 14, camY: 0, ppu: 60, cy: 0 };
+const cam = { z: 14, tz: 14, y: 0, ty: 0 };
+function fit() {
+  const W = innerWidth, H = innerHeight, portrait = W / H < .85;
+  const topPx = portrait ? Math.min(136, H * .17) : Math.max(84, H * .125);
+  const botPx = portrait ? Math.max(H * .32, 240) : Math.max(H * .31, 170);
+  const avail = H - topPx - botPx, ar = Math.max(60, Math.min(avail / 2, W / 2 - 6)), ppu = ar / RL;
+  const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const d = (H / ppu) / (2 * tanH), cy = portrait ? topPx + ar : topPx + avail / 2, camY = (cy - H / 2) / ppu;
+  Object.assign(L, { d, camY, ppu, cy, portrait }); cam.y = cam.ty = camY;
+  camera.aspect = W / H; camera.updateProjectionMatrix();
+  cam.tz = cam.z = d; camera.position.set(0, camY, d); camera.lookAt(0, camY, 0);
+  // amp: the ring sits on its speaker. Its control panel takes the band above the ring; the room shows either side
+  const ampTopPx = portrait ? 86 : Math.max(26, H * .03), top = camY + (H / 2 - ampTopPx) / ppu, vis = W / 2 / ppu;
+  const h = top - FLOOR_Y; cab.scale.set(2 * AH, h, 3); cab.position.set(0, FLOOR_Y + h / 2, -1.52);
+  cloth.position.y = 0; const py = (top + RL + .15) / 2, ph_ = Math.max(.4, top - RL - .15);
+  panel.scale.set(2 * AH, ph_, .02); panel.position.set(0, py, -.005);
+  const pw = Math.min(AH, vis) - .32;
+  knobs.forEach((k, i) => k.position.set(-pw + i * .62, py, .01)); knobs.forEach(k => k.visible = ph_ > .6 || !portrait);
+  tubes.forEach((t, i) => t.position.set(pw - i * .5, py, .02));
+  tubeSlot.scale.set(1.5, Math.min(.5, ph_ * .7), .01); tubeSlot.position.set(pw - .5, py, .004);
+  jewel.position.set(-pw + 1.95, py, .02); jewel.visible = !portrait;
+  room.uStripY.value = camY + (H / 2 - 12) / ppu * (d + 6) / d;
+  strip.scale.set(90, .05, .05); strip.position.set(0, room.uStripY.value, -5.9);
+  const roomy = !portrait && vis > AH + 1.8, wallS = (d + 6) / d;
+  lampG.visible = roomy; const lx = -(AH + (vis - AH) * .5) * 1.04;
+  lampG.position.set(lx, FLOOR_Y, -2); lampPole.scale.set(.06, 3.3, .06); lampPole.position.y = 1.65; shade.position.y = 3.6; lampGlow.position.y = 3.6;
+  room.uLampP.value.set(roomy ? lx * 1.12 : -vis * .9, roomy ? FLOOR_Y + 4.4 : top);
+  guitar.visible = roomy && vis > AH + 2; guitar.position.set((AH + (vis - AH) * .5) * wallS * .98, FLOOR_Y + .05, -5.7);
+  const bw = Math.min(2 * AH - .4, 2 * vis - .4);
+  plank.scale.set(bw, .2, .85); plank.position.set(0, FLOOR_Y + .1, LIP_Z - .44); board.visible = true;
+  pedals.forEach((p, i) => { p.visible = !portrait; p.scale.set(.86, .12, .55); p.position.set(-bw / 2 + (i + .5) * (bw / 4), FLOOR_Y + .26, LIP_Z - .5); });
+  // DOM
+  const rpx = ar * R / RL, cs = document.documentElement.style; cs.setProperty('--rpx', rpx.toFixed(1) + 'px');
+  $('center').style.transform = `translate(${W / 2}px,${cy}px)`;
+  const lip = H / 2 - (FLOOR_Y - camY) * ppu * d / (d - LIP_Z);
+  $('under').style.top = Math.min(lip + 8, H - 120) + 'px';
+  $('sign').style.top = (H / 2 - (py - camY) * ppu) + 'px';
+  $('notes').style.top = (portrait ? 92 : Math.max(96, H * .13)) + 'px';
+  L.lift = portrait ? 5.2 : 5;
+}
+function onResize() { renderer.setSize(innerWidth, innerHeight); fit(); }
+addEventListener('resize', onResize); fit();
+
+/* ---------- audio ---------- */
+let ac, master, noiseBuf, bus;
+function initAudio() {
+  ac = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+  const comp = ac.createDynamicsCompressor(); master = ac.createGain(); master.gain.value = .9;
+  master.connect(comp).connect(ac.destination);
+  noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+  const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  // iOS `interrupted`, or anything else stopping the clock: drop the take rather than grade through it
+  ac.onstatechange = () => { if (ac.state !== 'running' && !document.hidden && (M.state === 'take' || M.state === 'count' || M.state === 'jam')) { send('esc'); } if (ac.state === 'interrupted') ac.resume().catch(() => {}); };
+  newBus();
+}
+function newBus() { bus = ac.createGain(); bus.connect(master); }
+function killBus() { const b = bus; b.gain.setTargetAtTime(0, ac.currentTime, .012); setTimeout(() => b.disconnect(), 300); newBus(); }
+function env(g, t, a, peak, d) { g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); }
+function tone(t, type, f, v, d, a = .002) { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; env(g, t, a, v, d); o.connect(g).connect(bus); o.start(t); o.stop(t + a + d + .05); return o; }
+function noise(t, type, f, q, v, d) {
+  const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+  s.buffer = noiseBuf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; env(g, t, .001, v, d);
+  s.connect(fl).connect(g).connect(bus); s.start(t, Math.random() * .5); s.stop(t + d + .05);
+}
+const midiHz = m => 440 * 2 ** ((m - 69) / 12);
+const A = {
+  click: (t, acc) => tone(t, 'square', acc ? 1760 : 1320, acc ? .32 : .2, .035, .001),
+  kick: (t, v = .8) => { const o = tone(t, 'sine', 140, v, .3); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + .18); },
+  snare: (t, v = .5) => { noise(t, 'bandpass', 1900, .8, v, .16); tone(t, 'triangle', 190, v * .5, .07); },
+  hat: (t, v = .12) => noise(t, 'highpass', 7500, .7, v, .035),
+  bass: (t, m, d) => { const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = midiHz(m); f.type = 'lowpass'; f.frequency.value = 650; f.Q.value = 3; env(g, t, .006, .3, d); o.connect(f).connect(g).connect(bus); o.start(t); o.stop(t + d + .1); },
+  keys: (t, notes, d) => notes.forEach(n => { tone(t, 'triangle', midiHz(n), .07, d, .02); tone(t, 'sine', midiHz(n) * 2, .02, d * .6, .02); }),
+  pluck: t => { noise(t, 'bandpass', 1100, 4, .3, .05); tone(t, 'triangle', 220, .1, .06); },
+};
+// lookahead scheduler + machine clock. Event lists are per take; the jam refills itself forever
+const tr = { ev: [], i: 0, refill: null };
+const setEvents = (l, refill = null) => { l.sort((a, b) => a.t - b.t); tr.ev = l; tr.i = 0; tr.refill = refill; };
+setInterval(() => {
+  if (!ac) return; const h = ac.currentTime + .15;
+  while (tr.i < tr.ev.length && tr.ev[tr.i].t < h) { const e = tr.ev[tr.i++]; if (e.t >= ac.currentTime - .01) e.f(e.t); }
+  if (tr.refill && tr.ev.length - tr.i < 60) { tr.ev = tr.ev.slice(tr.i).concat(tr.refill()); tr.i = 0; }
+  send('tick');
+}, 25);
+// heard audio = scheduled + output path. Sum, per the Web Audio definitions
+const lat = () => ac ? (ac.outputLatency || 0) + (ac.baseLatency || 0) : 0;
+const calibOf = src => (app.calib[src] ?? 0);
+// map a DOM event onto the audio clock using its own timestamp, not when the handler ran
+const evTime = e => ac.currentTime - Math.max(0, (performance.now() - e.timeStamp) / 1000);
+
+/* ---------- mic: AudioWorklet onset + level. All browser processing off ---------- */
+const WORKLET = `class O extends AudioWorkletProcessor{constructor(){super();this.env=0;this.floor=.003;this.hold=0;this.n=0}
+process(i){const c=i[0]&&i[0][0];if(!c)return true;let s=0;for(let k=0;k<c.length;k++)s+=c[k]*c[k];const e=Math.sqrt(s/c.length);
+this.floor=this.floor*.996+Math.min(e,this.floor*2)*.004;
+if(this.hold>0)this.hold--;else if(e>this.floor*5&&e>this.env*1.9&&e>.012){this.port.postMessage({t:currentTime,e});this.hold=Math.round(.07*sampleRate/128)}
+if(++this.n%16==0)this.port.postMessage({l:e});this.env=this.env*.8+e*.2;return true}}registerProcessor('onset',O);`;
+async function initMic() {
+  if (!navigator.mediaDevices?.getUserMedia || !ac.audioWorklet) return;
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    await ac.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' })));
+    const node = new AudioWorkletNode(ac, 'onset'), z = ac.createGain(); z.gain.value = 0;
+    ac.createMediaStreamSource(st).connect(node).connect(z).connect(ac.destination);
+    node.port.onmessage = e => { if (e.data.l !== undefined) app.level = e.data.l; else onMic(e.data); };
+    app.micOK = true;
+  } catch (e) { console.info('mic unavailable:', e.name); }
+}
+function onMic(n) { if (app.bleedE && n.e < app.bleedE * 1.5) return; send('note', n); }
+
+/* ---------- coach voice: every line is owned by a state and dies with it ---------- */
+let voice = null;
+function pickVoice() { const vs = window.speechSynthesis ? speechSynthesis.getVoices() : []; voice = vs.find(v => /^en/i.test(v.lang) && /Natural|Google UK English Female|Samantha|Aria|Jenny|Daniel|Google US/i.test(v.name)) || vs.find(v => /^en/i.test(v.lang)) || null; }
+if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+const spk = { tok: 0, active: false, lastEnd: 0, lastLine: '' };
+function caption(t) { $('caption').textContent = t || ''; $('caption').classList.toggle('show', !!t); }
+function speak(text, ev = 'spoken') {
+  caption(text); spk.lastLine = text; spk.active = true; const tok = ++spk.tok;
+  const est = QUICK ? .35 : Math.max(1.1, text.split(/\s+/).length * .37 + .4), t0 = performance.now();
+  const done = () => { if (tok !== spk.tok) return; spk.active = false; spk.lastEnd = performance.now(); send(ev); };
+  if (window.speechSynthesis && !QUICK) {
+    const u = new SpeechSynthesisUtterance(text); if (voice) u.voice = voice; u.lang = voice?.lang || 'en-US'; u.rate = 1.05;
+    u.onend = done; u.onerror = e => { if (e.error !== 'canceled' && e.error !== 'interrupted') setTimeout(done, Math.max(0, est * 1000 - (performance.now() - t0))); };
+    speechSynthesis.speak(u); setTimeout(done, est * 2000 + 1500);    // some engines never fire onend
+  } else setTimeout(done, est * 1000);
+}
+function shush() { spk.tok++; if (spk.active) { spk.active = false; spk.lastEnd = performance.now(); } if (window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); }
+
+/* ---------- voice commands: whole phrases, final results only ---------- */
+const PHRASES = { again: ['again', 'one more', 'one more time', 'repeat', 'redo', 'run it back', 'take it again'], slower: ['slower', 'slow', 'slow down', 'slow it down'], faster: ['faster', 'fast', 'speed up', 'speed it up'],
+  next: ['next', 'next one', 'skip', 'move on'], why: ['why', 'why that', 'why this'], where: ['where am i', 'where are we', 'where'], stop: ['stop', 'stop it', 'finish', 'end'], hold: ['hang on', 'hold on', 'wait', 'pause', 'one sec', 'one second'],
+  go: ['go', 'ready', 'start', 'continue', 'resume', 'lets go', 'play'], check: ['soundcheck', 'sound check', 'check'] };
+const LOOK = new Map(); for (const [c, l] of Object.entries(PHRASES)) l.forEach(p => LOOK.set(p, c));
+const norm = t => t.toLowerCase().replace(/[^a-z ]/g, '').replace(/\b(okay|ok|please|coach|um|uh|hey|so)\b/g, ' ').replace(/\s+/g, ' ').trim();
+const parseCmd = t => LOOK.get(norm(t)) || null;
+const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SR = { ok: !!SRC && window.isSecureContext, mode: 'off', rec: null, lastHeard: 0, speaking: false };
+function setSr(mode) { if (MOBILE && (mode === 'barge' || mode === 'jam')) mode = 'off'; SR.mode = SR.ok ? mode : 'off'; if (SR.mode === 'off') stopRec(); else startRec(); }
+function startRec() {
+  if (SR.rec || SR.mode === 'off') return;
+  try {
+    const rec = new SRC(); SR.rec = rec; rec.lang = 'en-US'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 3;
+    rec.onspeechstart = () => { SR.speaking = true; SR.lastHeard = performance.now(); };
+    rec.onspeechend = () => { SR.speaking = false; };
+    rec.onresult = e => {
+      SR.lastHeard = performance.now();
+      for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i];
+        if (!r.isFinal) { if (SR.mode === 'listen') $('heard').textContent = r[0].transcript.trim(); continue; }
+        heardFinal([...Array(r.length).keys()].map(j => r[j].transcript)); }
+    };
+    rec.onerror = e => { if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported'].includes(e.error)) { SR.ok = false; SR.mode = 'off'; refreshHint(); } };
+    rec.onend = () => { SR.rec = null; SR.speaking = false; if (SR.mode !== 'off') setTimeout(startRec, 250); };
+    rec.start();
+  } catch { SR.rec = null; SR.ok = false; SR.mode = 'off'; refreshHint(); }
+}
+function stopRec() { if (SR.rec) { const r = SR.rec; SR.rec = null; r.onend = null; try { r.abort(); } catch {} } }
+// the post-speech guard: drop anything that is just the coach's own line coming back through the mic
+function isOwnWords(t) { const n = norm(t); if (!n) return true; const line = norm(spk.lastLine); return (spk.active || performance.now() - spk.lastEnd < 1500) && line.includes(n); }
+function heardFinal(alts) {
+  $('heard').textContent = '';
+  const live = alts.filter(a => !isOwnWords(a)); if (!live.length) return false;
+  const c = live.map(parseCmd).find(Boolean);
+  if (SR.mode === 'barge' && c !== 'next') return false;
+  if (SR.mode === 'jam' && c !== 'stop') return false;
+  if (!c) { didntCatch(); return false; }
+  return dispatchCmd(c);
+}
+const LABEL = { again: 'AGAIN', slower: 'SLOWER', faster: 'FASTER', next: 'NEXT', why: 'WHY', where: 'WHERE AM I', stop: 'STOP', hold: 'HOLD ON', go: 'GO', check: 'SOUNDCHECK', demo: 'DEMO' };
+function dispatchCmd(c) { const ok = send('cmd:' + c); if (ok) echo(LABEL[c] || c); return ok; }
+let echoT = 0;
+function echo(t, ms = 1300) { const e = $('echo'); e.textContent = t; e.classList.add('show'); clearTimeout(echoT); echoT = setTimeout(() => e.classList.remove('show'), ms); }
+function didntCatch() { if (S[M.state].sr === 'listen') { echo("DIDN'T CATCH THAT", 2000); M.d.extended = (M.d.extended || 0) + 1; } }
+
+/* ---------- the session state machine ----------
+   Every state: { sign, sr, enter(data), exit(), on: {event: handler} }. go() cancels the old state's
+   speech and timers, so barge-in and stop are ordinary transitions, not races. */
+const M = { state: 'gate', d: {}, timers: [], log: [] };
+function go(name, d = {}) {
+  S[M.state].exit?.(); M.timers.forEach(clearTimeout); M.timers = []; shush();
+  M.state = name; M.d = d; M.log.push(name); document.body.dataset.state = name;
+  const s = S[name]; setSign(s.sign || ''); setSr(s.sr || 'off'); setChips([], ''); $('more').classList.remove('show');
+  if (typeof s.chips === 'function') s.chips(); s.enter?.(d);
+}
+function send(ev, arg) { const h = S[M.state].on?.[ev]; if (!h) return false; h(arg); return true; }
+const after = (ms, ev, arg) => M.timers.push(setTimeout(() => send(ev, arg), ms));
+const setSign = k => { const s = $('sign'); s.textContent = k; s.dataset.k = k; };
+
+let moreList = [];
+function setChips(list, hint, more = []) {
+  const mk = (arr, host) => { host.innerHTML = ''; arr.forEach(([c, l, cl]) => { const b = document.createElement('button'); b.className = 'chip ' + (cl || ''); b.textContent = l; b.dataset.cmd = c; b.tabIndex = -1; host.appendChild(b); }); };
+  moreList = more;
+  mk(more.length ? [...list, ['__more', 'More', 'sm']] : list, $('chips')); mk(more, $('more'));
+  $('hint').textContent = hint || '';
+}
+function chipDown(e) {
+  const c = e.target.dataset?.cmd; if (!c) return; e.stopPropagation();
+  if (c === '__more') { $('more').classList.toggle('show'); return; }
+  dispatchCmd(c);
+}
+$('chips').addEventListener('pointerdown', chipDown); $('more').addEventListener('pointerdown', chipDown);
+function refreshHint() { if (S[M.state].refresh) S[M.state].refresh(); }
+
+function setView(v) {
+  app.view = v; document.body.dataset.view = v;
+  const rolling = v === 'count' || v === 'take' || v === 'jam';
+  playhead.visible = prog.visible = rolling;
+  gauge.visible = prevTick.visible = v === 'moved' && !!app.gauge;
+  ring.visible = v !== 'where';
+  hitLayer.visible = tickGroup.visible = v === 'count' || v === 'take' || v === 'score' || v === 'jam';
+  ledGroup.visible = v === 'take' || v === 'count' || v === 'score';
+  cam.ty = v === 'where' ? L.camY + L.lift : L.camY;
+}
+const ui = {};
+function center(big, word = '', small = '', color = '#fff', cls = '') {
+  const k = [big, word, small, color, cls].join('|'); if (ui.c === k) return; ui.c = k;
+  $('big').textContent = big; $('word').textContent = word; $('small').textContent = small;
+  $('big').style.color = color; $('cbox').className = cls;
+}
+function setBpm(b, flash) { if (app.sess) app.sess.bpm = b; const e = $('bpm'); e.innerHTML = b ? `${b}<small>BPM</small>` : ''; if (flash) { e.classList.add('flash'); setTimeout(() => e.classList.remove('flash'), 1300); } }
+function setHud(tag, name, take) { $('stepTag').textContent = tag; $('stepName').textContent = name; $('takeLine').textContent = take || ''; }
+function setInputBadge() {
+  const s = $('src'), i = app.input, demo = i === 'demo';
+  s.textContent = demo ? 'DEMO' : i === 'mic' ? 'MIC' : i === 'tap' ? 'TAPS' : ''; s.className = demo ? 'demo' : '';
+  document.body.classList.toggle('demo', demo); document.body.classList.toggle('real', i === 'mic' || i === 'tap');
+}
+
+/* ---------- takes and deterministic grading ---------- */
+const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(TAU * Math.random());
+function buildTake(kind, { bpm, sub, bars, sim }) {
+  const barDur = 240 / bpm, beat = barDur / 4, countStart = ac.currentTime + .3, T0 = countStart + barDur, npb = 4 * sub, N = bars * npb, grid = barDur / npb;
+  const tk = { kind, bpm, barDur, beat, countStart, T0, npb, N, grid, bars, matched: new Array(N), start: 0, extras: 0, hits: 0, source: app.input, simOff: sim ? sim(N, grid) : [], simPtr: 0, missPtr: 0, inPocket: 0, passed: 0, done: false, verdicts: [], lastBar: -2, heroBar: -1 };
+  const ev = []; for (let k = 0; k < 4; k++) ev.push({ t: countStart + k * beat, f: t => A.click(t, k === 0) });
+  if (kind === 'jam') {
+    let next = 0; const chunk = () => { const out = []; for (let i = 0; i < 8; i++, next++) jamBar(out, T0 + next * barDur, next, barDur, beat); return out; };
+    ev.push(...chunk()); setEvents(ev, chunk);
+  } else {
+    for (let b = 0; b < bars; b++) {
+      const bt = T0 + b * barDur;
+      for (let k = 0; k < 4; k++) { const t = bt + k * beat; ev.push({ t, f: t => A.click(t, k === 0) }); ev.push({ t, f: t => k % 2 ? A.snare(t, .22) : A.kick(t, .42) }); }
+      for (let k = 0; k < npb; k++) ev.push({ t: bt + k * grid, f: t => A.hat(t, k % 2 ? .05 : .09) });
+    }
+    tk.simOff.forEach((o, i) => { if (o !== null) ev.push({ t: T0 + i * grid + o, f: t => { if (tk.source === 'demo') A.pluck(t); } }); });
+    setEvents(ev);
+  }
+  app.tk = tk; setTicks(kind === 'jam' ? 4 : npb);
+  return tk;
+}
+function jamBar(out, bt, b, barDur, beat) {
+  const c = CHORDS[b % 4];
+  for (let k = 0; k < 4; k++) out.push({ t: bt + k * beat, f: t => k % 2 ? A.snare(t, .55) : A.kick(t, .9) });
+  for (let k = 0; k < 8; k++) { out.push({ t: bt + k * beat / 2, f: t => A.hat(t, k % 2 ? .07 : .12) }); out.push({ t: bt + k * beat / 2, f: t => A.bass(t, c.r + (k === 6 ? 12 : k === 7 ? 7 : 0), beat * .42) }); }
+  out.push({ t: bt, f: t => A.keys(t, c.notes, barDur * .9) }); out.push({ t: bt + beat * 2.5, f: t => A.kick(t, .6) });
+}
+function hitColor(ms) { return Math.abs(ms) <= POCKET_MS ? COL.pocket : ms < 0 ? COL.early : COL.late; }
+function hitR(ms) { return R + clamp(ms, -DISP_MS, DISP_MS) * BAND / POCKET_MS; }
+// src: 'sim' | 'tap' | 'mic'. t is already on the heard clock (latency and calibration removed)
+function addHit(t, src) {
+  const tk = app.tk; if (!tk || tk.done || tk.kind !== 'take') return;
+  if (t < tk.T0 - tk.grid / 2) return;                      // nothing before bar 1 counts, or flips the source
+  const i = Math.round((t - tk.T0) / tk.grid); if (i < 0 || i >= tk.N) return;
+  if (src === 'sim') { if (tk.source !== 'demo') return; }
+  else if (tk.source === 'demo') {                          // first real hit: wipe the demo player, keep this source for the rest of the take
+    tk.source = src; tk.start = i; tk.matched.fill(undefined); tk.extras = 0; tk.hits = 0; tk.inPocket = 0; tk.passed = 0; tk.missPtr = Math.max(tk.missPtr, i); tk.verdicts = [];
+    clearHits(); leds.forEach(m => m.material.color.setHex(0x3a3234));
+    app.input = src; setInputBadge(); $('takeLine').dataset.conv = '1';
+  } else if (src !== tk.source) return;                     // a take never mixes sources
+  const ms = (t - (tk.T0 + i * tk.grid)) * 1000;
+  tk.hits++; app.pulse = 1;
+  if (tk.matched[i] === undefined) tk.matched[i] = ms;
+  else { tk.extras++; if (Math.abs(ms) < Math.abs(tk.matched[i])) tk.matched[i] = ms; }
+  const b = Math.floor(i / tk.npb), k = i % tk.npb;
+  drawHit(b, k, tk.npb, ms);
+}
+function grade(tk) {
+  const graded = tk.matched.slice(tk.start), Ne = Math.max(1, tk.N - tk.start), errs = graded.filter(x => x !== undefined);
+  const inP = errs.filter(x => Math.abs(x) <= POCKET_MS).length, mean = errs.length ? errs.reduce((a, b) => a + b, 0) / errs.length : 0;
+  const sd = errs.length ? Math.sqrt(errs.reduce((a, b) => a + (b - mean) ** 2, 0) / errs.length) : 0;
+  const demo = tk.source === 'demo';
+  const heard = errs.length >= Math.max(4, Math.ceil(Ne * .25));
+  const robot = tk.source === 'mic' && errs.length >= 8 && sd < 2.5;     // machine-tight mic hits are the click bleeding in, not a person
+  return { demo, source: tk.source, bpm: tk.bpm, heard: heard && !robot, robot, mean, sd, misses: Ne - errs.length, extras: tk.extras, n: Ne,
+    pct: demo ? undefined : Math.round(100 * inP / (Ne + tk.extras)) };   // extras widen the denominator
+}
+function barVerdict(tk, b) {
+  const from = Math.max(b * tk.npb, tk.start), to = (b + 1) * tk.npb; if (to <= from) return null;
+  const e = []; for (let i = from; i < to; i++) if (tk.matched[i] !== undefined) e.push(tk.matched[i]);
+  const n = to - from, inP = e.filter(x => Math.abs(x) <= POCKET_MS).length, mean = e.length ? e.reduce((a, c) => a + c, 0) / e.length : 0;
+  const prev = tk.verdicts[b - 1]; let v;
+  if (e.length < n * .4) v = { w: 'MISSED', c: COL.miss, k: 'miss' };
+  else if (inP >= n * .7) v = { w: 'IN THE POCKET', c: COL.pocket, k: 'pocket' };
+  else if (mean <= -8) v = { w: prev?.k === 'early' ? 'RUSHING' : 'EARLY', ms: mean, c: COL.early, k: 'early' };
+  else if (mean >= 8) v = { w: prev?.k === 'late' ? 'DRAGGING' : 'LATE', ms: mean, c: COL.late, k: 'late' };
+  else v = { w: 'UNEVEN', c: COL.white, k: 'uneven' };
+  return v;
+}
+const fmtMs = m => (m < 0 ? '−' : '+') + Math.abs(Math.round(m));
+function verdictText(v, demo) { return demo || v.ms === undefined || v.w === 'RUSHING' || v.w === 'DRAGGING' ? v.w : `${v.w} ${fmtMs(v.ms)}`; }
+function shortLine(r) {
+  if (r.demo) return 'That was the demo player, not you. Tap along to get a real score.';
+  if (r.robot) return 'That was the click in the mic, not you. Headphones on, then go.';
+  if (!r.heard) return "I didn't hear you on that one. Not scored.";
+  let s;
+  if (r.mean <= -7) s = `Rushing ${Math.round(-r.mean)} ms. Sit back.`;
+  else if (r.mean >= 7) s = `Dragging ${Math.round(r.mean)} ms. Push a little.`;
+  else if (r.pct < 75) s = 'Centred but uneven. Even out the gaps.';
+  else s = 'Locked in. Keep that.';
+  if (r.extras >= 3) s += ` ${r.extras} extra hits.`; else if (r.misses >= Math.ceil(r.n * .2)) s += ` ${r.misses} notes missing.`;
+  return s;
+}
+const simFor = (step, ti, bpm) => (N, grid) => { const i = Math.min(ti, 2), sig = step.sigma[i] * (bpm / step.bpm) ** 1.3, lim = grid * 1000 / 2 - 4; return Array.from({ length: N }, () => Math.random() < step.miss[i] ? null : clamp(step.bias[i] + gauss() * sig, -lim, lim) / 1000); };
+
+/* ---------- session helpers ---------- */
+function newSession() { app.sess = { idx: 0, moved: [], step: null, bpm: 0, takeNo: 1, max: 3, results: [], movedShown: false, repeat: false }; }
+function startItem() {
+  const s = app.sess, it = PLAN[s.idx]; clearHits(); app.gauge = null;
+  if (!it) return go('wrap');
+  if (it.kind === 'jam') return go('talk', { line: 'Free jam. Am, F, C, G, at 92. Play whatever you like. Say stop when you are done.', view: 'intro', big: 'JAM', word: 'until you stop', then: () => go('count', { jam: true }), hud: ['Free jam', 'Am · F · C · G', ''], bpm: 92 });
+  const step = STEPS[it.step]; Object.assign(s, { step, tag: it.tag, bpm: step.bpm, takeNo: 1, max: 3, results: [], movedShown: false, repeat: false, prev: app.hist[step.id] });
+  go('talk', { line: step.line(step.bpm), view: 'intro', big: step.name.split(':')[0].toUpperCase(), word: `${step.bpm} BPM`, cls: 'verdict', then: () => go('count'), hud: [it.tag, step.name, takeLabel()], bpm: step.bpm });
+}
+const gridSub = step => app.input === 'tap' ? Math.min(2, step.sub) : step.sub;   // nobody taps clean sixteenths on glass
+const takeLabel = () => { const s = app.sess; return `TAKE ${s.takeNo}/${s.max}`; };
+function advance() {
+  const s = app.sess;
+  if (s.step === null || s.movedShown) { s.idx++; return startItem(); }
+  if (s.repeat) { s.repeat = false; return go('count'); }
+  s.takeNo++; go('count');
+}
+function again() { const s = app.sess; if (s.movedShown) { s.max++; s.takeNo++; s.movedShown = false; } s.repeat = false; go('count'); }
+function tempo(d) {
+  const s = app.sess; const b = clamp(s.bpm + d, 50, 160); setBpm(b, true);
+  if (s.movedShown) { s.max++; s.takeNo++; s.movedShown = false; }
+  s.repeat = false; go('talk', { line: `${d < 0 ? 'Down' : 'Up'} to ${b}.`, then: () => go('count') });
+}
+function stopTake(line) {
+  const tk = app.tk; if (tk) tk.done = true; setEvents([]); killBus(); app.tk = null;
+  app.sess.repeat = true; setView('score'); center('STOPPED', 'not counted', '', '#fff', 'verdict'); go('wait', { line: line || 'Stopped. That one does not count.' });
+}
+const waitCmds = {
+  'cmd:go': () => advance(), 'cmd:next': () => advance(), 'cmd:again': () => again(),
+  'cmd:slower': () => tempo(-6), 'cmd:faster': () => tempo(6),
+  'cmd:why': () => { const s = app.sess; go('talk', { line: s.step?.why || 'The jam is where the drills turn into music. No grades.', then: () => go('wait') }); },
+  'cmd:where': () => go('where', { back: 'wait' }), 'cmd:hold': () => go('paused'), 'cmd:stop': () => go('paused'), 'cmd:check': () => go('check_hear', { recheck: true }),
+};
+
+/* ---------- states ---------- */
+const NOTES = [];
+const S = {
+  gate: {},
+  check_hear: { sign: 'SOUNDCHECK',
+    enter(d) {
+      setView('check'); setHud('Soundcheck', 'Let me hear you', ''); setBpm(0);
+      d.n = { mic: 0, tap: 0 }; center('0/3', 'play or tap', 'a few notes', '#fff');
+      speak(app.micOK ? 'Play or tap a few notes so I can hear you.' : 'Tap a few notes, anywhere on the screen.', 'spoken'); after(CHECK_MS, 'timeout');
+      setChips([['demo', 'Just show me a demo', 'sm']], '');
+    },
+    on: {
+      spoken() {},
+      tap() { S.check_hear.count('tap'); },
+      note() { if (!spk.active && performance.now() - spk.lastEnd > 300) S.check_hear.count('mic'); },
+      timeout() { S.check_hear.toDemo(); }, 'cmd:demo'() { S.check_hear.toDemo(); },
+    },
+    count(src) { const d = M.d; d.n[src]++; center(d.n[src] + '/3', 'heard you', src === 'mic' ? 'on the mic' : 'tapping', '#fff'); if (d.n[src] >= 3) { app.input = src; setInputBadge(); if (src === 'tap' && app.calib.tap !== undefined && !d.recheck) { startItem(); } else go('check_calib'); } },
+    toDemo() { app.input = 'demo'; setInputBadge(); go('talk', { line: "I can't hear you, so here's a demo player. Tap along any time to take over.", view: 'check', big: 'DEMO', word: 'not scored', then: startItem }); },
+  },
+  check_calib: { sign: 'SOUNDCHECK',
+    enter(d) {
+      setView('check'); const beat = .6, t0 = ac.currentTime + .4, mic = app.input === 'mic'; app.bleedE = 0;
+      d.beat = beat; d.t0 = t0; d.clicks = Array.from({ length: 8 }, (_, i) => t0 + i * beat); d.lead = []; d.hits = [];
+      const ev = []; d.clicks.forEach((t, i) => { ev.push({ t, f: t => A.click(t, i % 4 === 0) }); if (i < 4) { ev.push({ t, f: t => A.kick(t, .42) }); ev.push({ t, f: t => A.hat(t, .09) }); } });
+      setEvents(ev);
+      caption(mic ? 'Headphones on. Listen to 4 clicks, then play along with the next 4.' : 'Listen to 4 clicks, then tap along with the next 4.');
+      setChips([['next', 'Skip', 'sm']], '');
+    },
+    on: {
+      tick() {
+        const d = M.d, t = ac.currentTime - lat(), i = Math.floor((t - d.t0) / d.beat);
+        if (i >= 0 && i < 8) center(String(i % 4 + 1), i < 4 ? 'just listen' : 'now play', '', i < 4 ? '#fff' : hex(COL.listen));
+        if (t > d.clicks[7] + d.beat * .75) S.check_calib.finish();
+      },
+      note(n) { const d = M.d, t = n.t - lat(); if (t < d.clicks[3] + d.beat * .5) { d.lead.push(n.e); return; } d.hits.push(t); },
+      tap(t) { const d = M.d, h = t - lat(); if (h >= d.clicks[3] + d.beat * .5) d.hits.push(h); },
+      'cmd:next'() { setEvents([]); killBus(); startItem(); },
+    },
+    finish() {
+      const d = M.d, errs = d.clicks.slice(4).map(c => { let best = null; for (const h of d.hits) if (Math.abs(h - c) < d.beat * .4 && (best === null || Math.abs(h - c) < Math.abs(best))) best = h - c; return best; }).filter(x => x !== null).sort((a, b) => a - b);
+      if (errs.length >= 3) { app.calib[app.input] = clamp(errs[errs.length >> 1], -.12, .12); store.set('yames-v3-calib', app.calib); }
+      if (app.input === 'mic' && d.lead.length >= 2) { app.bleedE = Math.max(...d.lead); go('talk', { line: 'I can hear the click through your mic. Put headphones on, or I may not hear you.', then: startItem }); return; }
+      startItem();
+    },
+  },
+  // any coach line: barge-in with tap, Space, Esc or "next"
+  talk: { sign: 'COACH', sr: 'barge',
+    enter(d) {
+      if (d.view) setView(d.view); if (d.big !== undefined) center(d.big, d.word || '', d.small || '', '#fff', d.cls || '');
+      if (d.hud) setHud(...d.hud); if (d.bpm) setBpm(d.bpm);
+      speak(d.line); setChips([['next', 'Skip', 'sm']], '');
+    },
+    on: { spoken() { M.d.then(); }, tap() { M.d.then(); }, esc() { M.d.then(); }, 'cmd:next'() { M.d.then(); } },
+  },
+  count: { sign: 'PLAYING',
+    enter(d) {
+      const s = app.sess; caption(''); clearHits(); $('mbar').style.width = '0'; $('mval').textContent = '0%';
+      if (d.jam) { buildTake('jam', { bpm: 92, sub: 2, bars: 1e6 }); setBpm(92); s.step = null; }
+      else {
+        s.step && setHud(s.tag, s.step.name, takeLabel()); setBpm(s.bpm);
+        const bars = bars_(s.step.bars); buildTake('take', { bpm: s.bpm, sub: gridSub(s.step), bars, sim: app.input === 'demo' ? simFor(s.step, s.takeNo - 1, s.bpm) : null }); setLeds(bars);
+      }
+      setView('count'); document.body.classList.add('firstbar');
+      setChips([['stop', 'Stop', 'sm']], '');
+    },
+    on: {
+      tick() { const tk = app.tk; if (ac.currentTime - lat() >= tk.T0) go(tk.kind === 'jam' ? 'jam' : 'take'); },
+      esc() { M.d.jam ? go('wrap') : stopTake(); }, 'cmd:stop'() { M.d.jam ? go('wrap') : stopTake(); },
+    },
+  },
+  take: { sign: 'PLAYING',
+    enter() { setView('take'); center('PLAY', '', '', '#fff', 'verdict'); setChips([['stop', 'Stop', 'sm']], ''); },
+    on: {
+      tap(t) { const i = app.input; if (i === 'tap' || i === 'demo') addHit(t - lat() - calibOf('tap'), 'tap'); },
+      note(n) { if (app.input === 'mic') addHit(n.t - lat() - calibOf('mic'), 'mic'); },
+      tick() {
+        const tk = app.tk, vt = ac.currentTime - lat();
+        while (tk.simPtr < tk.N && tk.T0 + tk.simPtr * tk.grid + (tk.simOff[tk.simPtr] ?? 0) <= vt) { const i = tk.simPtr++, o = tk.simOff[i]; if (o != null && tk.source === 'demo') addHit(tk.T0 + i * tk.grid + o, 'sim'); }
+        while (tk.missPtr < tk.N && tk.T0 + (tk.missPtr + .5) * tk.grid < vt) {
+          const i = tk.missPtr++; if (i < tk.start) continue; tk.passed++;
+          if (tk.matched[i] === undefined) drawMiss(Math.floor(i / tk.npb), i % tk.npb, tk.npb);
+          else if (Math.abs(tk.matched[i]) <= POCKET_MS) tk.inPocket++;
+          if ((i + 1) % tk.npb === 0) { const b = Math.floor(i / tk.npb), v = barVerdict(tk, b); if (v) { tk.verdicts[b] = v; S.take.showVerdict(tk, b, v); } }
+        }
+        if (tk.source !== 'demo') { const pct = tk.passed ? Math.round(100 * tk.inPocket / (tk.passed + tk.extras)) : 0, s = pct + '%'; if (ui.m !== s) { ui.m = s; $('mval').textContent = s; $('mbar').style.width = s; } }
+        if (vt >= tk.T0 + tk.bars * tk.barDur + .12) S.take.finish();
+      },
+      esc() { stopTake(); }, 'cmd:stop'() { stopTake(); },
+    },
+    showVerdict(tk, b, v) {
+      const demo = tk.source === 'demo'; center(verdictText(v, demo), demo ? 'demo' : `bar ${b + 2 > tk.bars ? tk.bars : b + 2} of ${tk.bars}`, '', hex(v.c), 'verdict');
+      leds[b]?.material.color.setHex(v.c); document.body.classList.remove('firstbar');
+    },
+    finish() {
+      const tk = app.tk, s = app.sess; tk.done = true; const r = grade(tk); s.last = r; setView('score');
+      if (r.demo) center('DEMO', 'not scored', 'demo player', '#fff');
+      else if (!r.heard) center("DIDN'T HEAR YOU", 'not scored', '', '#fff', 'verdict');
+      else { s.results.push(r); center(r.pct + '%', `take ${s.takeNo}`, Math.abs(r.mean) >= 7 ? `${r.mean < 0 ? 'rushing' : 'dragging'} ${Math.abs(Math.round(r.mean))} ms` : 'centred', '#fff'); }
+      if (!r.demo && !r.heard) s.repeat = true;
+      const last = s.takeNo >= s.max && !s.repeat;
+      go('talk', { line: shortLine(r), then: () => last ? go('moved') : go('wait') });
+    },
+  },
+  wait: { sign: 'YOUR TURN', sr: 'listen',
+    enter(d) { if (d.line) caption(d.line); S.wait.refresh(); d.enteredAt = performance.now(); },
+    refresh() {
+      const heardOK = SR.ok ? 'Say go, ' + (app.input === 'mic' ? 'or just start playing' : 'or tap anywhere') : (app.input === 'mic' ? 'Tap, or just start playing' : 'Tap anywhere to go');
+      const s = app.sess, label = s.movedShown ? 'Next' : 'Go';
+      setChips([['go', label, 'hero'], ['again', 'Again'], ['slower', 'Slower'], ['faster', 'Faster']], heardOK, [['why', 'Why?', 'sm'], ['where', 'Where am I', 'sm'], ['hold', 'Hang on', 'sm'], ['check', 'Soundcheck', 'sm']]);
+    },
+    on: {
+      ...waitCmds,
+      tap() { advance(); },
+      esc() { go('paused'); },
+      // first note starts the next take. Speech makes onsets too, so hold off if the recogniser heard a voice
+      note() {
+        if (app.input !== 'mic' || performance.now() - M.d.enteredAt < 500) return;
+        if (!SR.ok) return advance();
+        M.d.onsets = (M.d.onsets || 0) + 1; if (M.d.onsets === 1) after(650, 'noteGo');
+      },
+      noteGo() { const quiet = !SR.speaking && performance.now() - SR.lastHeard > 700; if (M.d.onsets >= 2 && quiet) advance(); else M.d.onsets = 0; },
+    },
+  },
+  paused: { sign: 'PAUSED', sr: 'listen',
+    enter() {
+      caption('Paused. Take your time.'); playhead.visible = prog.visible = false;
+      progMat.uniforms.uP.value = 1; progMat.uniforms.uTail.value = 0; progMat.uniforms.uO.value = .5; prog.visible = true;   // the frozen bar
+      setChips([['go', 'Go', 'hero'], ['stop', 'End session', 'sm']], SR.ok ? 'Say go when you are ready' : '');
+    },
+    exit() { progMat.uniforms.uTail.value = 1; prog.visible = false; },
+    on: {
+      'cmd:go': () => { advance(); }, 'cmd:next': () => { advance(); }, 'cmd:again': () => again(),
+      'cmd:slower': () => tempo(-6), 'cmd:faster': () => tempo(6), 'cmd:where': () => go('where', { back: 'paused' }),
+      'cmd:stop': () => go('wrap'),
+    },
+    refresh() {},
+  },
+  moved: { sign: 'COACH', sr: 'barge',
+    enter(d) {
+      const s = app.sess, step = s.step, rs = s.results;
+      if (app.input === 'demo' && !rs.length) { app.gauge = null; setView('moved'); center('DEMO', 'no number yet', 'Your number goes here once I hear you', '#fff'); d.minDone = true; speak('No number for the demo player. Yours goes here once I hear you.'); return; }
+      if (!rs.length) { app.gauge = null; setView('moved'); center('NO SCORE', "didn't hear enough", '', '#fff', 'verdict'); d.minDone = true; speak("I didn't hear enough for a score on this step."); return; }
+      const best = rs.reduce((a, r) => r.pct > a.pct ? r : a), hasPrev = s.prev !== undefined, base = hasPrev ? s.prev : rs[0].pct, up = best.pct >= base, delta = best.pct - base;
+      const fromTxt = hasPrev ? 'last time' : 'take 1';
+      app.gauge = { from: base / 100, to: best.pct / 100, t0: performance.now(), up, sub: delta === 0 ? `same as ${fromTxt}` : `${up ? 'up' : 'down'} from ${base}%, ${fromTxt}` };
+      gaugeMat.uniforms.uC.value.setHex(0xffffff);
+      const a = base / 100 * TAU; prevTick.position.set(Math.sin(a) * (R + .51), Math.cos(a) * (R + .51), .03); prevTick.rotation.z = -a;
+      setView('moved');
+      app.hist[step.id] = best.pct; store.set('yames-v3-hist', app.hist);
+      s.moved.push({ name: step.name.split(':')[0], prev: base, fromTxt, best: best.pct });
+      after(RM ? 300 : 2300, 'minDone');
+      speak(delta === 0 ? `In the pocket ${best.pct} percent, same as ${fromTxt}.` : `In the pocket ${best.pct} percent, ${up ? 'up' : 'down'} from ${base}.`);
+    },
+    on: {
+      spoken() { M.d.spoken = true; if (M.d.minDone) S.moved.done(); },
+      minDone() { M.d.minDone = true; if (M.d.spoken) S.moved.done(); },
+      tap() { S.moved.done(); }, esc() { S.moved.done(); }, 'cmd:next'() { S.moved.done(); },
+    },
+    done() { if (app.gauge) app.gauge.t0 = -1e9; app.sess.movedShown = true; go('wait'); },
+  },
+  where: {
+    enter(d) {
+      d.prevView = app.view; d.prevCap = $('caption').textContent; app.whereT = performance.now();
+      setView('where'); setSign('');
+      const fi = PATH.findIndex(n => n.id === FRONTIER), host = $('notes'); host.innerHTML = '';
+      NOTES.length = 0;
+      PATH.forEach((n, i) => {
+        const done = i < fi, today = i === fi, sc = app.hist[n.id], el = document.createElement('div');
+        el.className = 'note' + (today ? ' today' : '') + (i > fi ? ' later' : ''); el.style.setProperty('--rot', ((i * 37 % 7) - 3) * .7 + 'deg');
+        el.innerHTML = `${done ? '✓ ' : ''}${L.portrait ? n.short : n.label}<small>${done ? (sc !== undefined ? `${sc}% in the pocket` : 'ticked off') : today ? 'today' : i === fi + 1 ? 'next' : 'later'}</small>`;
+        host.appendChild(el); NOTES.push(el);
+      });
+      const prev = PATH[fi - 1], sc = app.hist[prev.id];
+      after(QUICK ? 3600 : 6500, 'minDone');
+      speak(`You're on ${PATH[fi].label.toLowerCase()} today. ${prev.label} is ticked off${sc !== undefined ? `, at ${sc} percent` : ''}. ${PATH[fi + 1].label} comes next.`);
+    },
+    exit() { const d = M.d; setView(d.prevView); caption(d.prevCap); },
+    on: {
+      spoken() { M.d.spoken = true; if (M.d.minDone) go(M.d.back); },
+      minDone() { M.d.minDone = true; if (M.d.spoken) go(M.d.back); },
+      tap() { go(M.d.back); }, esc() { go(M.d.back); },
+    },
+  },
+  jam: { sign: 'PLAYING', sr: 'jam',
+    enter() { setView('jam'); setChips([['stop', 'Stop the jam', 'hero']], ''); },
+    on: { esc() { S.jam.end(); }, 'cmd:stop'() { S.jam.end(); } },
+    end() { setEvents([]); killBus(); app.tk.done = true; app.tk = null; go('wrap'); },
+  },
+  wrap: {
+    enter() {
+      const s = app.sess; app.tk = null; clearHits(); setEvents([]); killBus(); setView('wrap'); setHud('Done for today', 'Nice work', ''); setBpm(0);
+      const real = s.moved.length > 0;
+      center(real ? 'DONE FOR TODAY' : 'DEMO DONE', real ? '' : 'nothing scored', s.moved.map(m => `${m.name} ${m.prev} → ${m.best}%`).join('\n'), '#fff', 'verdict');
+      $('small').style.whiteSpace = 'pre-line';
+      go('talk', { line: real ? s.moved.map(m => (m.best === m.prev ? `${m.name}: ${m.best}, holding steady.` : `${m.name}: ${m.best}, ${m.best > m.prev ? 'up' : 'down'} from ${m.prev}.`)).join(' ') + ' Next time, syncopation.' : 'That was the demo. Run a soundcheck and tap along, and I will score you for real.', then: () => go('done') });
+    },
+  },
+  done: { sign: 'YOUR TURN', sr: 'listen',
+    enter() { setChips([['again', 'Go again', 'hero'], ['check', 'Soundcheck'], ['where', 'Where am I']], SR.ok ? 'Say again for another round' : ''); },
+    on: {
+      'cmd:again': () => { newSession(); startItem(); }, 'cmd:go': () => { newSession(); startItem(); },
+      'cmd:where': () => go('where', { back: 'done' }), 'cmd:check': () => { newSession(); go('check_hear', { recheck: true }); },
+    },
+  },
+};
+
+/* ---------- input ---------- */
+addEventListener('pointerdown', e => { if (!ac || e.target.closest('#gate,.chip')) return; send('tap', evTime(e)); });
+addEventListener('keydown', e => {
+  if (!ac || e.repeat) return;
+  if (e.code === 'Space') { e.preventDefault(); send('tap', evTime(e)); }
+  else if (e.code === 'Escape') send('esc');
+});
+
+/* ---------- frame: 60 fps while rolling, 30 otherwise ---------- */
+const tmpC = new THREE.Color();
+let last = performance.now(), lastDraw = 0, glLost = false, dotsOn = -1;
+function updateRing(vt, now) {
+  const tk = app.tk; if (!tk) { app.vis = null; return; }
+  let bar, frac;
+  if (vt < tk.T0) { bar = -1; frac = clamp((vt - tk.countStart) / tk.barDur, 0, 1); }
+  else { const p = (vt - tk.T0) / tk.barDur; bar = Math.min(Math.floor(p), tk.bars - 1); frac = p >= tk.bars ? 1 : p - Math.floor(p); }
+  const firstBar = bar < 1, jam = tk.kind === 'jam', guide = firstBar ? 1 : jam ? .55 : .2;   // visual pulses fade after bar 1: timing stays in the ear
+  playhead.rotation.z = -frac * TAU; progMat.uniforms.uP.value = frac; phMat.opacity = guide; progMat.uniforms.uO.value = guide * .55;
+  const chord = jam ? CHORDS[Math.max(0, bar) % 4] : null;
+  progMat.uniforms.uC.value.setHex(chord ? chord.col : 0xffffff);
+  // ticks pulse only in the first bar
+  const pulseOK = firstBar && !RM;
+  for (const m of ticks) { const dt = vt - ((bar < 0 ? tk.countStart : tk.T0 + bar * tk.barDur) + m.userData.k * tk.barDur / ticks.length), p = pulseOK && dt >= 0 && dt < .2 ? 1 - dt / .2 : 0; m.scale.x = m.userData.sx * (1 + p * 2); }
+  // last bar's marks are wiped by the playhead as it comes round
+  for (let i = liveHits.length - 1; i >= 0; i--) { const o = liveHits[i]; if (o.b < bar - 1 || (o.b === bar - 1 && frac >= o.pos)) { freeMark(o); liveHits.splice(i, 1); } else o.visible = o.b <= Math.max(bar, 0); }
+  // centre
+  const beatIdx = Math.min(3, Math.floor(frac * 4));
+  if (app.view === 'count') center(String(beatIdx + 1), 'count-in', jam ? '' : takeLabel(), '#fff');
+  if (app.view === 'jam') center(chord.n, '', `next: ${CHORDS[(bar + 1) % 4].n}`, '#fff', 'chord');
+  if (beatIdx !== dotsOn) { dotsOn = beatIdx; [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === beatIdx)); }
+  // light envelopes; beam colour = timing on the beat just played
+  const sc = vt - tk.countStart, bd = tk.beat, ex = (d, s) => sc < 0 ? 0 : Math.exp(-((sc % d) / d) * s);
+  const gb = Math.floor((vt - tk.T0) / bd) - 1, q = tk.npb / 4; let pc = COL.warm;
+  if (!jam && gb >= 0 && gb < tk.bars * 4 && gb * q >= tk.start) { const e = []; for (let i = gb * q; i < gb * q + q; i++) if (tk.matched[i] !== undefined) e.push(tk.matched[i]); pc = e.length ? hitColor(e.reduce((a, b) => a + b, 0) / e.length) : COL.miss; }
+  app.vis = { q: ex(bd, 6), e: ex(bd / 2, 6), bar: ex(tk.barDur, 3), down: sc < 0 ? 0 : Math.exp(-(sc % tk.barDur) / bd * 5), col: pc, chord: chord ? chord.col : 0xffffff, fade: firstBar ? 1 : .5 };
+}
+const washT = new THREE.Color(), base = { tolex: new THREE.Color(0x1b1210), cloth: new THREE.Color(0x2c2019), panel: new THREE.Color(0x2e2520), strip: new THREE.Color(0x4a3020) };
+function updateRoom(dt, now) {
+  const v = app.view, st = M.state, A0 = { q: 0, e: 0, bar: 0, down: 0, col: COL.warm, chord: 0xffffff, fade: 1 }, s = app.vis || A0;
+  const rolling = v === 'count' || v === 'take' || v === 'jam', talking = spk.active, listening = S[st].sr === 'listen';
+  const flash = (RM ? .25 : 1) * (s.fade ?? 1);
+  let I = .08, c = COL.warm, lamp = .75;
+  if (v === 'count') { I = .1 + .6 * s.q * flash; lamp = .4; }
+  else if (v === 'take') { I = .2 + .85 * s.q * flash; c = s.col; lamp = .22; }
+  else if (v === 'jam') { I = .18 + .75 * s.q * flash; c = s.chord; lamp = .25; }
+  else if (v === 'moved' && app.gauge) { I = .08 + .34 * gaugeMat.uniforms.uP.value; c = COL.warm; lamp = .9; }
+  else if (v === 'where') { I = .12; lamp = 1.15; }
+  else if (listening) { I = .16; c = COL.listen; }
+  else if (talking) { I = .14; c = COL.coach; }
+  // the wash: snappy while playing, slow between takes
+  washT.setHex(c).multiplyScalar(I);
+  const k = rolling || RM ? 1 : 1 - Math.exp(-dt * 4);
+  room.uWash.value.lerp(washT, k); room.uLamp.value += (lamp - room.uLamp.value) * (RM ? 1 : .08);
+  const w = room.uWash.value;
+  stripMat.color.copy(base.strip).lerp(washT, .5).add(tmpC.copy(w).multiplyScalar(2.2));
+  tolex.color.copy(base.tolex).add(tmpC.copy(w).multiplyScalar(.07));
+  clothMat.color.copy(base.cloth).add(tmpC.copy(w).multiplyScalar(.5));
+  panelMat.color.copy(base.panel).add(tmpC.copy(w).multiplyScalar(.1));
+  // cone: pumps with the kick (beats 1 and 3), flutters when the coach talks through the amp
+  const kick = rolling ? (app.tk ? Math.exp(-((Math.max(0, (ac.currentTime - lat()) - app.tk.countStart) % (app.tk.beat * 2)) / app.tk.beat) * 5) : 0) : 0;
+  const flex = RM ? 0 : kick * .9 * (s.fade ?? 1) + (talking ? .22 + .2 * Math.sin(now * .037) * Math.sin(now * .011) : 0);
+  cone.scale.setScalar(1 + flex * .018); coneMat.uniforms.uFlex.value = flex;
+  // jewel = coach speaking / your turn. Tubes = signal coming in
+  jewel.material.color.setHex(talking ? COL.coach : listening ? COL.listen : 0xffb777); jewel.material.opacity = talking ? .75 + .25 * Math.sin(now * .02) : listening ? .9 : .35;
+  const lvl = clamp(app.level * 14, 0, 1), tg = v === 'jam' ? .45 + s.e * .55 : .45 + Math.max(lvl, app.pulse) * .55; app.pulse *= .88;
+  tubes.forEach((t, i) => { t.material.opacity = tg * (1 - i * .08); });
+  const bpm = app.sess?.bpm || 60; knobs[0].ptr.parent.rotation.z = -((bpm - 90) / 70) * 2.2;     // the tempo knob really is the tempo
+  lampGlow.material.opacity = .25 + room.uLamp.value * .4;
+  if (v === 'check') { const lv = (lvl * 100).toFixed(0) + '%'; if (ui.l !== lv) { ui.l = lv; $('lvl').firstChild.style.width = lv; } }
+  if (v === 'where') { const tW = (now - (app.whereT || 0)) / 1000; NOTES.forEach((el, i) => { if (RM || tW > .35 + i * .3) el.classList.add('show'); }); }
+}
+function frame(now) {
+  const rolling = app.view === 'count' || app.view === 'take' || app.view === 'jam';
+  if (now - lastDraw < (rolling ? 1000 / 60 : 1000 / 30) - 2) return; lastDraw = now;
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  const vt = ac ? ac.currentTime - lat() : 0;
+  updateRing(vt, now);
+  updateRoom(dt, now);
+  if (app.view === 'moved' && app.gauge) {
+    const g = app.gauge, k = RM ? 1 : clamp((now - g.t0 - 300) / 1500, 0, 1), e = 1 - (1 - k) ** 3, val = g.from + (g.to - g.from) * e;
+    gaugeMat.uniforms.uP.value = val; center(Math.round(val * 100) + '%', 'in the pocket', g.sub, '#fff');
+  }
+  const ck = RM ? 1 : 1 - Math.exp(-dt * 2.2);
+  cam.z += (cam.tz - cam.z) * ck; camera.position.z = cam.z; cam.y += (cam.ty - cam.y) * ck; camera.position.y = cam.y;
+  if (!glLost) renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(frame);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { renderer.setAnimationLoop(null); ac?.suspend(); window.speechSynthesis?.pause(); }
+  else { last = performance.now(); renderer.setAnimationLoop(frame); ac?.resume(); window.speechSynthesis?.resume(); requestWake(); }
+});
+renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); glLost = true; });
+renderer.domElement.addEventListener('webglcontextrestored', () => { glLost = false; });
+let wake = null; async function requestWake() { try { if (M.state !== 'gate' && navigator.wakeLock && !wake) { wake = await navigator.wakeLock.request('screen'); wake.onrelease = () => { wake = null; }; } } catch {} }
+
+/* ---------- start ---------- */
+$('go').addEventListener('click', async () => {
+  $('go').textContent = '…'; initAudio(); await ac.resume();
+  if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } // unlock iOS TTS
+  await initMic();
+  $('gate').style.display = 'none'; newSession(); M.state = 'gate'; go('check_hear'); requestWake();
+});
+window.__yames = {
+  app, M, S, get state() { return M.state; }, get view() { return app.view; }, get input() { return app.input; },
+  command: t => { const c = LOOK.get(norm(String(t))) || (LABEL[t] ? t : null); return c ? dispatchCmd(c) : heardFinal([String(t)]); },
+  hear: t => heardFinal([t]), setSrMode: m => { SR.ok = true; SR.mode = m; }, micOnset: (t, e = .3) => onMic({ t, e }), audioNow: () => ac.currentTime, lat, spk, parseCmd, pending: () => tr.ev.length - tr.i,
+};
+</script>
+</body>
+</html>

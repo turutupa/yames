@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0709">
+<title>Yames · Coach</title>
+<style>
+:root{--on:#3dffa2;--early:#5aa9ff;--late:#ff8a3d;--miss:#ff3d6e;--coach:#ff6fae;--listen:#ffd24a;--ink:#eef2ff;--dim:#8fa3c7;--rpx:160px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0b0709;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+canvas{position:fixed;inset:0;display:block}
+.ov{position:fixed;pointer-events:none}
+#top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:calc(14px + env(safe-area-inset-top)) 18px 0;gap:12px;transition:opacity .4s}
+#stepTag{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--coach);font-weight:700}
+#stepName{font-size:clamp(20px,3.4vmin,34px);font-weight:700;margin-top:2px}
+#takes{display:flex;gap:7px;margin-top:8px;align-items:center;font-size:13px;color:var(--dim);letter-spacing:.12em}
+#takes i{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);display:inline-block}
+#takes i.done{background:var(--on);border-color:var(--on)} #takes i.cur{border-color:#fff;box-shadow:0 0 10px #fff}
+#tempo{text-align:right}
+#bpm{font-size:clamp(30px,6vmin,58px);font-weight:800;font-variant-numeric:tabular-nums;line-height:1;transition:color .3s,transform .3s}
+#bpm small{font-size:.38em;font-weight:600;color:var(--dim);margin-left:4px}
+#bpm.flash{color:var(--listen);transform:scale(1.15)}
+#src{display:inline-block;margin-top:8px;font-size:11px;letter-spacing:.18em;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid #ffffff40;color:var(--dim)}
+#src.real{color:var(--on);border-color:var(--on)}
+#center{left:0;top:0;width:0;height:0}
+#cbox{position:absolute;transform:translate(-50%,-50%);text-align:center;width:calc(var(--rpx)*1.7)}
+#big{font-size:calc(var(--rpx)*.62);font-weight:850;line-height:.95;font-variant-numeric:tabular-nums;text-shadow:0 0 30px currentColor;transition:color .15s}
+#word{font-size:max(15px,calc(var(--rpx)*.13));font-weight:800;letter-spacing:.2em;margin-top:.3em;text-transform:uppercase}
+#small{font-size:max(13px,calc(var(--rpx)*.085));color:var(--dim);margin-top:.4em;font-weight:600}
+#legend{left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;padding:0 10px;font-size:clamp(13px,2.4vmin,20px);font-weight:700;letter-spacing:.08em;opacity:0;transition:opacity .4s}
+#legend b{font-weight:800}
+#legend span{white-space:nowrap}
+#bottom{left:0;right:0;bottom:0;padding:0 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:12px}
+#caption{max-width:24em;text-align:center;font-size:clamp(19px,4.4vmin,40px);line-height:1.25;font-weight:600;text-shadow:0 2px 16px #000,0 0 4px #000;opacity:0;transition:opacity .35s}
+#caption.show{opacity:1}
+#meter{width:min(620px,92vw);display:none}
+#meter .row{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;letter-spacing:.14em;font-size:clamp(14px,2.8vmin,22px)}
+#meter .row b{font-size:clamp(26px,6vmin,52px);font-variant-numeric:tabular-nums;letter-spacing:0}
+#meter .bar{height:14px;border-radius:7px;background:#ffffff18;overflow:hidden;margin-top:6px}
+#meter .bar i{display:block;height:100%;width:0;background:var(--on);border-radius:7px;transition:width .2s,background .3s}
+#listen{display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto;width:min(720px,96vw)}
+#mic{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2em;font-size:clamp(15px,2.8vmin,22px);color:var(--listen)}
+#mic::before{content:"";width:16px;height:16px;border-radius:50%;background:var(--listen);box-shadow:0 0 18px var(--listen);animation:pulse 1.1s infinite}
+#mic.off{color:var(--dim)} #mic.off::before{background:var(--dim);box-shadow:none;animation:none}
+#cd{width:min(420px,80vw);height:5px;border-radius:3px;background:#ffffff18;overflow:hidden}
+#cd i{display:block;height:100%;background:var(--listen);width:100%}
+#chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.chip{pointer-events:auto;min-height:48px;padding:0 18px;border-radius:24px;border:1.5px solid #ffffff38;background:#0b0f20cc;color:var(--ink);font:700 16px system-ui,sans-serif;letter-spacing:.04em}
+.chip:active{background:var(--listen);color:#000}
+#hint{font-size:clamp(13px,2.3vmin,17px);color:var(--dim);text-align:center}
+#heard{font-size:14px;color:var(--listen);min-height:1em;font-style:italic}
+body.listening #listen{display:flex}
+body[data-phase=take] #meter,body[data-phase=jam] #meter{display:block}
+body[data-phase=take] #caption,body[data-phase=jam] #caption,body[data-phase=count] #caption{opacity:0}
+body[data-phase=take] #legend,body[data-phase=count] #legend{opacity:1}
+body[data-phase=where] #top,body[data-phase=where] #center{opacity:0}
+#center{transition:opacity .4s}
+#labels .lbl{position:absolute;transform:translate(-50%,60%);white-space:nowrap;text-align:center;font-weight:800;font-size:clamp(13px,2.6vmin,22px);text-shadow:0 0 10px #000;opacity:0;transition:opacity .6s}
+#labels .lbl small{display:block;font-size:.7em;letter-spacing:.16em;font-weight:700}
+#labels .lbl.show{opacity:1}
+#labels .lbl.lo{transform:translate(-50%,190%)}
+#gate{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:radial-gradient(circle at 50% 45%,#3a1420 0,#0b0709 70%);z-index:9;text-align:center;padding:24px}
+#gate h1{margin:0;font-size:clamp(40px,10vmin,86px);letter-spacing:.06em}
+#gate p{margin:0;color:var(--dim);font-size:clamp(15px,2.6vmin,20px);max-width:30em;line-height:1.45}
+#go{width:min(260px,62vw);aspect-ratio:1;border-radius:50%;border:2px solid var(--coach);background:radial-gradient(circle,#ff6fae55,#ff6fae11 70%);color:#fff;font:800 clamp(20px,4vmin,28px) system-ui,sans-serif;letter-spacing:.08em;box-shadow:0 0 60px #ff6fae66;animation:pulse 2s infinite;cursor:pointer}
+@keyframes pulse{50%{transform:scale(1.06);opacity:.85}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-aspect-ratio:3/4){#legend{gap:10px}.chip{padding:0 14px;font-size:15px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.170.0/build/three.module.js"}}</script>
+</head>
+<body data-phase="idle">
+<div id="gate">
+  <h1>YAMES</h1>
+  <p>A coach-led practice session. About 15 minutes. Hands-free: just play, and talk to the coach between takes.</p>
+  <button id="go">Tap to start</button>
+  <p style="font-size:14px">Headphones recommended. The mic is used for voice commands and to hear your hits.</p>
+</div>
+<div id="top" class="ov">
+  <div><div id="stepTag"></div><div id="stepName"></div><div id="takes"></div></div>
+  <div id="tempo"><div id="bpm"></div><div id="src">SIMULATED HITS</div></div>
+</div>
+<div id="center" class="ov"><div id="cbox"><div id="big"></div><div id="word"></div><div id="small"></div></div></div>
+<div id="legend" class="ov"><span style="color:var(--early)">◀ inside = <b>EARLY</b></span><span style="color:var(--on)">on the ring = <b>POCKET</b></span><span style="color:var(--late)">outside = <b>LATE</b> ▶</span></div>
+<div id="labels" class="ov" style="inset:0"></div>
+<div id="bottom" class="ov">
+  <div id="caption"></div>
+  <div id="meter"><div class="row"><span id="mlabel">IN THE POCKET</span><b id="mval">0%</b></div><div class="bar"><i id="mbar"></i></div></div>
+  <div id="listen">
+    <div id="mic">LISTENING</div>
+    <div id="cd"><i id="cdbar"></i></div>
+    <div id="heard"></div>
+    <div id="chips"></div>
+    <div id="hint"></div>
+  </div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+
+/* ---------- config ---------- */
+const Q = new URLSearchParams(location.search);
+const QUICK = Q.has('quick');                       // test mode: short takes, short waits
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
+const TAKE_BARS = QUICK ? 2 : 4, JAM_BARS = QUICK ? 2 : 16, LISTEN_MS = QUICK ? 1500 : 5000;
+const POCKET_MS = 25;
+const TAU = Math.PI * 2, R = 3;
+const COL = { on: 0x3dffa2, early: 0x5aa9ff, late: 0xff8a3d, miss: 0xff3d6e, coach: 0xff6fae, listen: 0xffd24a, idle: 0x8a7480, white: 0xffffff };
+const hex = c => '#' + c.toString(16).padStart(6, '0');
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+const STEPS = {
+  sixteenths: { id: 'sixteenths', name: 'Sixteenths', sub: 4, bpm: 76, sigma: [30, 24, 18], bias: [-11, -7, -4], miss: [.06, .04, .03],
+    intro: b => `New step: sixteenths. Four even notes per beat, at ${b}. Watch the ring. On the line is the pocket, inside means early, outside means late. Count-in, then go.`,
+    why: 'Sixteenths are the grid every funk and pop groove sits on. If they are even, whatever you play on top sounds tight. Uneven sixteenths are the most common reason a part sounds rushed.' },
+  pocket: { id: 'pocket', name: 'Pocket: quarters and eighths', sub: 2, bpm: 88, sigma: [20, 18, 16], bias: [-7, -5, -3], miss: [.03, .02, .02],
+    intro: b => `Review: the pocket. Eighth notes at ${b}. Keep it relaxed and land right on the click.`,
+    why: 'The pocket is landing exactly with the beat, not ahead of it. Most players rush when they concentrate. Reviewing it keeps the new step sitting on solid ground.' },
+};
+const PATH = [
+  { id: 'pocket', label: 'Pocket' }, { id: 'sixteenths', label: 'Sixteenths' },
+  { id: 'synco', label: 'Syncopation' }, { id: 'shuffle', label: 'Shuffle' },
+  { id: 'ghost', label: 'Ghost notes' }, { id: 'odd', label: 'Odd groupings' }];
+const FRONTIER = 'sixteenths';
+const CHORDS = [{ n: 'Am', r: 45, notes: [57, 60, 64], col: 0x8a7dff }, { n: 'F', r: 41, notes: [57, 60, 65], col: 0x4fd1ff },
+  { n: 'C', r: 48, notes: [55, 60, 64], col: 0x3dffa2 }, { n: 'G', r: 43, notes: [55, 59, 62], col: 0xffc44d }];
+const SEED = { pocket: 71, sixteenths: 54 };          // mocked "last session" baselines
+const loadHist = () => { try { return Object.assign({}, SEED, JSON.parse(localStorage.getItem('yames-v2-hist') || '{}')); } catch { return { ...SEED }; } };
+const saveHist = h => { try { localStorage.setItem('yames-v2-hist', JSON.stringify(h)); } catch {} };
+
+const state = { phase: 'idle', take: null, listening: false, paused: false, bpm: 0, step: null, hist: loadHist(), moved: [], speaking: false, micOK: false, srOK: false, orbKick: 0 };
+
+/* ---------- three.js scene ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: !MOBILE, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.5 : 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0709);
+scene.fog = new THREE.Fog(0x0b0709, 14, 46);   // stage haze
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 120);
+const cam = { pos: new THREE.Vector3(0, 0, 14), look: new THREE.Vector3(), tPos: new THREE.Vector3(0, 0, 14), tLook: new THREE.Vector3() };
+camera.position.copy(cam.pos);
+
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, '#fff'); gr.addColorStop(.22, '#ffffffdd'); gr.addColorStop(.5, '#ffffff44'); gr.addColorStop(1, '#ffffff00');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const GLOW = glowTexture();
+const spriteMat = (color, opacity = 1) => new THREE.SpriteMaterial({ map: GLOW, color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false });
+
+// arc shader: a ring filled clockwise from 12 o'clock up to uP (used for bar progress, gauge, listening countdown)
+function arcMat(color, tail = 0) {
+  return new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+    uniforms: { uP: { value: 0 }, uC: { value: new THREE.Color(color) }, uO: { value: 1 }, uTail: { value: tail }, uBase: { value: .06 } },
+    vertexShader: 'varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader: `uniform float uP,uO,uTail,uBase;uniform vec3 uC;varying vec2 vP;
+      void main(){float a=atan(vP.x,vP.y);if(a<0.)a+=6.2831853;float f=a/6.2831853;
+      float al=f<=uP?mix(1.,smoothstep(uP-.3,uP,f),uTail):uBase;gl_FragColor=vec4(uC,al*uO);}`
+  });
+}
+
+// the stage: floor, truss and six lights. Beams carry the beat and your timing colour;
+// in "where am I" each light is one step of the path.
+const FLOOR_Y = -R - 1.3, TRUSS_Y = R + 3.6, TRUSS_Z = -1.5, DROP = TRUSS_Y - .25 - FLOOR_Y;
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(70, 50), new THREE.MeshBasicMaterial({ color: 0x150c0d }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(0, FLOOR_Y, -10); scene.add(floor);
+const metal = new THREE.MeshBasicMaterial({ color: 0x3b3337 });
+[0, .55].forEach(dy => { const b = new THREE.Mesh(new THREE.BoxGeometry(20.4, .13, .13), metal); b.position.set(0, TRUSS_Y + .1 + dy, TRUSS_Z); scene.add(b); });
+[-10.2, 10.2].forEach(x => { const p = new THREE.Mesh(new THREE.BoxGeometry(.2, TRUSS_Y - FLOOR_Y + .8, .2), metal); p.position.set(x, (TRUSS_Y + FLOOR_Y) / 2 + .4, TRUSS_Z); scene.add(p); });
+const beamGeo = new THREE.CylinderGeometry(.16, 2.2, 12.5, 28, 1, true); beamGeo.translate(0, -6.25, 0);
+const canGeo = new THREE.CylinderGeometry(.3, .4, .62, 12), poolGeo = new THREE.PlaneGeometry(1, 1);
+const beamMat = () => new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  uniforms: { uC: { value: new THREE.Color() }, uO: { value: 0 } },
+  vertexShader: 'varying float vY,vF;void main(){vY=uv.y;vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vF=abs(dot(n,normalize(-mv.xyz)));gl_Position=projectionMatrix*mv;}',
+  fragmentShader: 'uniform vec3 uC;uniform float uO;varying float vY,vF;void main(){gl_FragColor=vec4(uC,uO*pow(vY,1.4)*pow(vF,2.2));}'
+});
+const FIX = PATH.map((n, i) => {
+  const x = -7.5 + i * 3, g = new THREE.Group(); g.position.set(x, TRUSS_Y - .25, TRUSS_Z); scene.add(g);
+  const can = new THREE.Mesh(canGeo, metal); can.position.y = .15; g.add(can);
+  const bm = beamMat(); g.add(new THREE.Mesh(beamGeo, bm));
+  const lens = new THREE.Sprite(spriteMat(0xffffff)); lens.scale.setScalar(1.2); lens.position.y = -.2; g.add(lens);
+  const pm = new THREE.MeshBasicMaterial({ map: GLOW, color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+  const pool = new THREE.Mesh(poolGeo, pm); pool.rotation.x = -Math.PI / 2; pool.scale.set(4.6, 4.6, 1); scene.add(pool);
+  const el = document.createElement('div'); el.className = 'lbl' + (i % 2 ? ' lo' : ''); $('labels').appendChild(el);
+  return { ...n, i, x, g, bm, lens, pm, pool, el, I: 0, col: new THREE.Color(0xffc9a0) };
+});
+
+// coach lamp: the coach's presence. Pulses while speaking, turns yellow while listening
+const orb = new THREE.Group();
+const orbMat = new THREE.MeshBasicMaterial({ color: COL.coach, transparent: true, opacity: .9 });
+orb.add(new THREE.Mesh(new THREE.SphereGeometry(.3, 20, 14), orbMat));
+const orbGlowMat = spriteMat(COL.coach, .9); const orbGlow = new THREE.Sprite(orbGlowMat); orbGlow.scale.setScalar(2.6); orb.add(orbGlow);
+scene.add(orb);
+const listenMat = arcMat(COL.listen); listenMat.uniforms.uBase.value = .1;
+const listenArc = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.68, 96), listenMat); listenArc.visible = false; scene.add(listenArc);
+
+// playhead + bar progress arc
+const playhead = new THREE.Group();
+const ph = new THREE.Mesh(new THREE.PlaneGeometry(.05, R), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .5, depthWrite: false }));
+ph.position.y = R / 2; playhead.add(ph);
+const phTip = new THREE.Sprite(spriteMat(0xffffff)); phTip.position.y = R; phTip.scale.setScalar(.7); playhead.add(phTip);
+playhead.visible = false; scene.add(playhead);
+const progMat = arcMat(0xffffff, 1); progMat.uniforms.uO.value = .55;
+const prog = new THREE.Mesh(new THREE.RingGeometry(R - .09, R + .09, 160), progMat); prog.visible = false; scene.add(prog);
+
+// gauge for "the number that moved"
+const gaugeMat = arcMat(COL.on); gaugeMat.uniforms.uBase.value = .08;
+const gauge = new THREE.Mesh(new THREE.RingGeometry(R + .3, R + .7, 180), gaugeMat); gauge.visible = false; scene.add(gauge);
+const prevTick = new THREE.Mesh(new THREE.PlaneGeometry(.07, .7), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .8 }));
+prevTick.visible = false; scene.add(prevTick);
+
+// per-bar rings: the current bar sits on the hit plane; finished bars recede into a tunnel of recent history
+const torusGeo = new THREE.TorusGeometry(R, .022, 6, 160);
+const bars = new Map();
+function makeBar(b) {
+  const tk = state.take, npb = b < 0 ? 4 : tk.npb, q = npb / 4;
+  const col = tk.chords ? tk.chords[(b < 0 ? 0 : b) % 4].col : COL.idle;
+  const g = new THREE.Group(), mats = [];
+  const rm = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: .9, depthWrite: false }); mats.push(rm);
+  g.add(new THREE.Mesh(torusGeo, rm));
+  const markers = [];
+  for (let k = 0; k < npb; k++) {
+    const quarter = k % q === 0, m = spriteMat(k === 0 ? 0xffffff : quarter ? 0xc8d4ff : 0x7d8cb8, quarter ? .95 : .7); mats.push(m);
+    const s = new THREE.Sprite(m), a = k / npb * TAU, base = k === 0 ? .62 : quarter ? .42 : .24;
+    s.position.set(Math.sin(a) * R, Math.cos(a) * R, 0); s.scale.setScalar(base); s.userData = { base, k };
+    markers.push(s); g.add(s);
+  }
+  g.userData = { b, mats, markers, hits: [] };
+  g.position.z = 0; scene.add(g); bars.set(b, g); return g;
+}
+function clearBars() { for (const g of bars.values()) { g.userData.mats.forEach(m => m.dispose()); scene.remove(g); } bars.clear(); }
+
+/* ---------- layout ---------- */
+const baseView = new THREE.Vector3(), baseLook = new THREE.Vector3();
+function fit() {
+  const a = innerWidth / innerHeight, t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const dv = (R * 1.75) / t, dh = (R * 1.2) / (t * a);
+  const d = Math.max(dv, dh);
+  baseView.set(0, 0, d); baseLook.set(0, a < .8 ? -R * .32 : -R * .12, 0);
+}
+function onResize() {
+  renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); fit();
+  if (state.phase !== 'where') { cam.tPos.copy(baseView); cam.tLook.copy(baseLook); }
+}
+addEventListener('resize', onResize); fit(); cam.tPos.copy(baseView); cam.tLook.copy(baseLook); cam.pos.copy(baseView).add(new THREE.Vector3(0, 0, 6));
+
+/* ---------- audio ---------- */
+let ac, master, noiseBuf;
+function initAudio() {
+  ac = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+  const comp = ac.createDynamicsCompressor(); master = ac.createGain(); master.gain.value = .9;
+  master.connect(comp).connect(ac.destination);
+  noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+  const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+function env(g, t, a, peak, d) { g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); }
+function tone(t, type, f, v, d, a = .002, dest = master) { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; env(g, t, a, v, d); o.connect(g).connect(dest); o.start(t); o.stop(t + a + d + .05); return o; }
+function noise(t, type, f, q, v, d) {
+  const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+  s.buffer = noiseBuf; fl.type = type; fl.frequency.value = f; fl.Q.value = q; env(g, t, .001, v, d);
+  s.connect(fl).connect(g).connect(master); s.start(t, Math.random() * .5); s.stop(t + d + .05);
+}
+const S = {
+  click: (t, acc) => tone(t, 'square', acc ? 1760 : 1320, acc ? .32 : .2, .035, .001),
+  kick: (t, v = .8) => { const o = tone(t, 'sine', 140, v, .3); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + .18); },
+  snare: (t, v = .5) => { noise(t, 'bandpass', 1900, .8, v, .16); tone(t, 'triangle', 190, v * .5, .07); },
+  hat: (t, v = .12) => noise(t, 'highpass', 7500, .7, v, .035),
+  bass: (t, midi, d) => { const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = 440 * 2 ** ((midi - 69) / 12); f.type = 'lowpass'; f.frequency.value = 650; f.Q.value = 3; env(g, t, .006, .3, d); o.connect(f).connect(g).connect(master); o.start(t); o.stop(t + d + .1); },
+  keys: (t, notes, d) => notes.forEach(n => { tone(t, 'triangle', 440 * 2 ** ((n - 69) / 12), .07, d, .02); tone(t, 'sine', 880 * 2 ** ((n - 69) / 12), .02, d * .6, .02); }),
+  pluck: t => { noise(t, 'bandpass', 1100, 4, .3, .05); tone(t, 'triangle', 220, .1, .06); },
+};
+// lookahead scheduler: event lists are built per take, drained ~150 ms ahead of audio time
+const tr = { ev: [], i: 0 };
+setInterval(() => {
+  if (!ac) return; const h = ac.currentTime + .15;
+  while (tr.i < tr.ev.length && tr.ev[tr.i].t < h) { const e = tr.ev[tr.i++]; if (e.t >= ac.currentTime - .01) e.f(e.t); }
+}, 25);
+const setEvents = l => { l.sort((a, b) => a.t - b.t); tr.ev = l; tr.i = 0; };
+const waitUntil = t => new Promise(r => { const id = setInterval(() => { if (ac.currentTime >= t) { clearInterval(id); r(); } }, 20); });
+const sleep = ms => waitUntil(ac.currentTime + ms / 1000);
+const outLat = () => ac ? (ac.outputLatency || ac.baseLatency || 0) : 0;
+
+/* ---------- mic onset detector (AudioWorklet, energy spike over adaptive floor) ---------- */
+const WORKLET = `class O extends AudioWorkletProcessor{constructor(){super();this.env=0;this.floor=.003;this.hold=0}
+process(i){const c=i[0]&&i[0][0];if(!c)return true;let s=0;for(let k=0;k<c.length;k++)s+=c[k]*c[k];const e=Math.sqrt(s/c.length);
+this.floor=this.floor*.996+Math.min(e,this.floor*2)*.004;
+if(this.hold>0)this.hold--;else if(e>this.floor*5&&e>this.env*1.9&&e>.02){this.port.postMessage(currentTime);this.hold=Math.round(.07*sampleRate/128)}
+this.env=this.env*.8+e*.2;return true}}registerProcessor('onset',O);`;
+async function initMic() {
+  if (!navigator.mediaDevices?.getUserMedia || !ac.audioWorklet) return;
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+    await ac.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' })));
+    const node = new AudioWorkletNode(ac, 'onset'), z = ac.createGain(); z.gain.value = 0;
+    ac.createMediaStreamSource(st).connect(node).connect(z).connect(ac.destination);
+    node.port.onmessage = e => { if (!state.listening) addHit(e.data - outLat() - .012, 'mic'); };
+    state.micOK = true;
+  } catch (e) { console.info('mic unavailable, using simulated hits:', e.name); }
+}
+
+/* ---------- coach voice ---------- */
+let voice = null;
+function pickVoice() {
+  const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  voice = vs.find(v => /^en/i.test(v.lang) && /Natural|Google UK English Female|Samantha|Aria|Jenny|Daniel|Google US/i.test(v.name)) || vs.find(v => /^en/i.test(v.lang)) || null;
+}
+if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function caption(t) { $('caption').textContent = t; $('caption').classList.toggle('show', !!t); }
+function say(text) {
+  caption(text); state.speaking = true;
+  return new Promise(res => {
+    const words = text.split(/\s+/).length, est = QUICK ? 1 : Math.max(1.6, words * .37 + .6);
+    let done = false; const t0 = performance.now();
+    const fin = () => { if (done) return; done = true; state.speaking = false; if (QUICK && window.speechSynthesis) speechSynthesis.cancel(); res(); };
+    if (window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance(text); if (voice) u.voice = voice; u.lang = voice?.lang || 'en-US'; u.rate = 1.03;
+      u.onend = fin; u.onerror = () => setTimeout(fin, Math.max(0, est * 1000 - (performance.now() - t0)));
+      u.onboundary = () => { state.orbKick = 1; };
+      speechSynthesis.speak(u);
+      setTimeout(fin, QUICK ? 1000 : est * 2000 + 1500);   // safety: some engines never fire onend
+    } else setTimeout(fin, est * 1000);
+  });
+}
+
+/* ---------- voice commands (only between takes) ---------- */
+const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+state.srOK = !!SRC && window.isSecureContext;
+const CMDS = [['where', /where am i|where are we|where/], ['again', /again|repeat|one more|redo/], ['slower', /slow/], ['faster', /fast|quick|speed up/],
+  ['next', /next|skip|move on|continue/], ['why', /\bwhy\b/], ['stop', /stop|pause|wait/], ['go', /\bgo\b|start|resume|ready/]];
+const parseCmd = t => { t = t.toLowerCase(); for (const [c, re] of CMDS) if (re.test(t)) return c; return null; };
+const CHIP_LIST = [['again', 'Again'], ['slower', 'Slower'], ['faster', 'Faster'], ['next', 'Next'], ['why', 'Why?'], ['where', 'Where am I'], ['stop', 'Stop']];
+CHIP_LIST.forEach(([c, l]) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = l; b.dataset.cmd = c; $('chips').appendChild(b); });
+$('chips').addEventListener('pointerdown', e => { const c = e.target.dataset?.cmd; if (c) { e.stopPropagation(); finish(state.paused && c === 'again' ? 'go' : c); } });
+let pend = null, rec = null;
+function setHint() {
+  $('mic').classList.toggle('off', !state.srOK);
+  $('mic').textContent = state.srOK ? (state.paused ? 'PAUSED · LISTENING' : 'LISTENING') : (state.paused ? 'PAUSED' : 'YOUR TURN');
+  $('hint').textContent = state.srOK ? 'Say: again · slower · faster · next · why · where am I · stop' :
+    'Voice commands unavailable here. Tap a command, or tap anywhere for ' + (state.paused ? '"go".' : '"next".');
+}
+function listen(ms) {
+  return new Promise(res => {
+    pend = { res, ms, start: performance.now() };
+    if (ms !== Infinity) pend.timer = setTimeout(() => finish('timeout'), ms);
+    state.listening = true; document.body.classList.add('listening'); $('heard').textContent = ''; setHint();
+    const bar = $('cdbar'); bar.style.transition = 'none'; bar.style.width = '100%';
+    if (ms !== Infinity) requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${ms}ms linear`; bar.style.width = '0%'; }));
+    startRec();
+  });
+}
+function finish(cmd) {
+  if (!pend) return; const p = pend; pend = null; clearTimeout(p.timer);
+  state.listening = false; document.body.classList.remove('listening'); stopRec(); p.res(cmd);
+}
+function startRec() {
+  if (!state.srOK || !pend || rec) return;
+  try {
+    rec = new SRC(); rec.lang = 'en-US'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 3;
+    rec.onresult = e => {
+      let txt = ''; for (let i = e.resultIndex; i < e.results.length; i++) for (let j = 0; j < e.results[i].length; j++) txt += ' ' + e.results[i][j].transcript;
+      $('heard').textContent = '“' + e.results[e.results.length - 1][0].transcript.trim() + '”';
+      const c = parseCmd(txt);
+      if (c) finish(state.paused && c === 'again' ? 'go' : c);
+      else if (pend && pend.ms !== Infinity) { clearTimeout(pend.timer); pend.timer = setTimeout(() => finish('timeout'), 1800); } // user is mid-sentence
+    };
+    rec.onerror = e => { if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported'].includes(e.error)) { state.srOK = false; setHint(); } };
+    rec.onend = () => { rec = null; if (pend && state.srOK) setTimeout(startRec, 250); };
+    rec.start();
+  } catch { rec = null; state.srOK = false; setHint(); }
+}
+function stopRec() { if (rec) { const r = rec; rec = null; r.onend = null; try { r.abort(); } catch {} } }
+
+/* ---------- input: tap = a real hit during takes; tap anywhere = next between takes ---------- */
+addEventListener('pointerdown', e => {
+  if (e.target.closest('#gate,.chip')) return;
+  if (pend) return finish(state.paused ? 'go' : 'next');
+  if (state.take && !state.take.done && ac) addHit(ac.currentTime - outLat(), 'tap');
+});
+addEventListener('keydown', e => {
+  if (e.code !== 'Space' || !ac) return; e.preventDefault();
+  if (pend) finish(state.paused ? 'go' : 'next'); else if (state.take && !state.take.done) addHit(ac.currentTime - outLat(), 'tap');
+});
+
+/* ---------- takes, hits and deterministic grading ---------- */
+const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(TAU * Math.random());
+function buildTake({ bpm, sub, bars: nb, sim, chords }) {
+  const barDur = 240 / bpm, beat = barDur / 4, countStart = ac.currentTime + .35, T0 = countStart + barDur;
+  const npb = 4 * sub, N = nb * npb, grid = barDur / npb;
+  const tk = { bpm, barDur, countStart, T0, npb, N, grid, bars: nb, chords, matched: new Array(N), simOff: sim(N, grid), simPtr: 0, missPtr: 0, source: 'sim', done: false, inPocket: 0 };
+  const ev = [];
+  for (let k = 0; k < 4; k++) ev.push({ t: countStart + k * beat, f: t => S.click(t, k === 0) });
+  for (let b = 0; b < nb; b++) {
+    const bt = T0 + b * barDur;
+    for (let k = 0; k < 4; k++) {
+      const t = bt + k * beat;
+      if (!chords) ev.push({ t, f: t => S.click(t, k === 0) });
+      ev.push({ t, f: t => (k % 2 ? S.snare(t, chords ? .55 : .25) : S.kick(t, chords ? .9 : .45)) });
+    }
+    for (let k = 0; k < (chords ? 8 : npb); k++) { const t = bt + k * barDur / (chords ? 8 : npb); ev.push({ t, f: t => S.hat(t, k % 2 ? .07 : .12) }); }
+    if (chords) {
+      const c = chords[b % 4];
+      ev.push({ t: bt, f: t => S.keys(t, c.notes, barDur * .9) });
+      ev.push({ t: bt + beat * 2.5, f: t => S.kick(t, .6) });
+      for (let k = 0; k < 8; k++) ev.push({ t: bt + k * beat / 2, f: t => S.bass(t, c.r + (k === 6 ? 12 : k === 7 ? 7 : 0), beat * .42) });
+    }
+  }
+  // simulated player: audible muted pluck at its own (imperfect) time
+  tk.simOff.forEach((o, i) => { if (o !== null) ev.push({ t: T0 + i * grid + o, f: t => { if (tk.source === 'sim') S.pluck(t); } }); });
+  setEvents(ev);
+  return tk;
+}
+function hitColor(ms) { return Math.abs(ms) <= POCKET_MS ? COL.on : ms < 0 ? COL.early : COL.late; }
+function hitR(ms) { const a = Math.abs(ms), d = a <= POCKET_MS ? a / POCKET_MS * .12 : .28 + Math.min(1, (a - POCKET_MS) / 45) * .85; return R + (ms < 0 ? -d : d); }
+function addHit(t, src) {
+  const tk = state.take; if (!tk || tk.done) return;
+  if (src !== 'sim' && tk.source === 'sim') { tk.source = src; setSrc(src); }
+  if (src === 'sim' && tk.source !== 'sim') return;
+  const i = Math.round((t - tk.T0) / tk.grid); if (i < 0 || i >= tk.N) return;
+  const ms = (t - (tk.T0 + i * tk.grid)) * 1000;
+  if (tk.matched[i] === undefined || Math.abs(ms) < Math.abs(tk.matched[i])) tk.matched[i] = ms;
+  const b = Math.floor(i / tk.npb), k = i % tk.npb, g = bars.get(b) || makeBar(b);
+  const m = spriteMat(hitColor(ms)); g.userData.mats.push(m);
+  const s = new THREE.Sprite(m), a = k / tk.npb * TAU, r = hitR(ms);
+  s.position.set(Math.sin(a) * r, Math.cos(a) * r, .05); s.scale.setScalar(RM ? .62 : 1.3); s.userData.born = performance.now();
+  g.add(s); g.userData.hits.push(s);
+}
+function grade(tk, jam) {
+  const errs = tk.matched.filter(x => x !== undefined), inP = errs.filter(x => Math.abs(x) <= POCKET_MS).length;
+  const mean = errs.length ? errs.reduce((a, b) => a + b, 0) / errs.length : 0;
+  return { pct: Math.round(100 * inP / Math.max(1, jam ? errs.length : tk.N)), mean, misses: tk.N - errs.length, n: tk.N, source: tk.source, bpm: tk.bpm };
+}
+async function playTake(opts) {
+  clearBars();
+  const tk = buildTake(opts); state.take = tk; setSrc(state.micOK ? 'listening' : 'sim');
+  setPhase('count');
+  await waitUntil(tk.T0); setPhase(opts.chords ? 'jam' : 'take');
+  await waitUntil(tk.T0 + tk.bars * tk.barDur + .12);
+  tk.done = true; return grade(tk, !!opts.chords);
+}
+function setSrc(s) {
+  const el = $('src'); el.classList.toggle('real', s === 'mic' || s === 'tap');
+  el.textContent = { sim: 'SIMULATED HITS', listening: 'MIC ON · SIMULATED UNTIL YOU PLAY', mic: 'MIC HITS', tap: 'TAP HITS' }[s];
+}
+
+/* ---------- phases: what the scene shows ---------- */
+function setPhase(p) {
+  state.phase = p; document.body.dataset.phase = p;
+  const playing = p === 'count' || p === 'take' || p === 'jam';
+  playhead.visible = prog.visible = playing;
+  gauge.visible = prevTick.visible = p === 'moved';
+  if (p === 'where') return;
+  cam.tPos.copy(baseView); cam.tLook.copy(baseLook);
+  FIX.forEach(f => f.el.classList.remove('show'));
+}
+function setHud(tag, name, takeNo, max) {
+  $('stepTag').textContent = tag; $('stepName').textContent = name;
+  $('takes').innerHTML = max ? Array.from({ length: max }, (_, i) => `<i class="${i + 1 < takeNo ? 'done' : i + 1 === takeNo ? 'cur' : ''}"></i>`).join('') + `<span>TAKE ${takeNo}/${max}</span>` : '';
+}
+function setBpm(b, flash) { state.bpm = b; $('bpm').innerHTML = `${b}<small>BPM</small>`; if (flash) { $('bpm').classList.add('flash'); setTimeout(() => $('bpm').classList.remove('flash'), 1200); } }
+const ui = {};
+function center(big, word, small, color) {
+  const k = big + '|' + word + '|' + small + '|' + color; if (ui.c === k) return; ui.c = k;
+  $('big').textContent = big; $('word').textContent = word; $('small').textContent = small;
+  $('big').style.color = $('word').style.color = color || '#fff';
+}
+
+/* ---------- "where am I": ambient, no interaction ---------- */
+async function whereAmI() {
+  const prevPhase = state.phase; setPhase('where'); state.whereT = performance.now();
+  const a = innerWidth / innerHeight, t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  cam.tPos.set(0, 2.2, Math.max(7.5 / t, (a < 1 ? 9.5 : 11) / (t * a)) + 2); cam.tLook.set(0, 1.4, TRUSS_Z);
+  const fi = PATH.findIndex(n => n.id === FRONTIER);
+  FIX.forEach(f => {
+    const done = f.i < fi, here = f.i === fi;
+    f.el.innerHTML = `${f.label}<small style="color:${done ? 'var(--on)' : here ? 'var(--listen)' : 'var(--dim)'}">${done ? `DONE · ${state.hist[f.id]}%` : here ? 'YOU ARE HERE' : f.i === fi + 1 ? 'NEXT' : 'LATER'}</small>`;
+  });
+  const behind = PATH.slice(0, fi).map(n => `${n.label}, at ${state.hist[n.id]} percent`).join(', ');
+  const line = `You are here: ${PATH[fi].label.toLowerCase()}. Behind you, ${behind.toLowerCase()}. Next on the setlist: ${PATH[fi + 1].label.toLowerCase()}, then ${PATH[fi + 2].label.toLowerCase()}.`;
+  await Promise.all([say(line), sleep(QUICK ? 3800 : 6500)]);
+  setPhase(prevPhase === 'where' ? 'listen' : prevPhase);
+}
+// stage lights: what each of the six beams shows in each phase
+function updateStage(dt, now) {
+  const ph = state.phase, v = state.vis || { q: 0, e: 0, bar: 0, down: 0, col: 0xffe2c0, chord: 0xffffff };
+  const fi = PATH.findIndex(n => n.id === FRONTIER), tW = (now - (state.whereT || 0)) / 1000;
+  const playing = ph === 'count' || ph === 'take' || ph === 'jam', k = playing || RM ? 1 : 1 - Math.exp(-dt * 4);
+  const ka = RM ? 1 : 1 - Math.exp(-dt * 3);
+  for (const f of FIX) {
+    const i = f.i, inner = i === 2 || i === 3; let I = .05, c = 0xffc9a0, tx = f.x * .45;
+    if (ph === 'count' || ph === 'take') { I = .07 + (inner ? .6 * v.q : .75 * v.down); c = ph === 'count' ? 0xffe2c0 : v.col; }
+    else if (ph === 'jam') { if (i < 2) { I = .07 + .55 * v.e; c = v.chord; } else if (i < 4) { I = .07 + .65 * v.q; c = 0xffe2c0; } else { I = .1 + .55 * v.bar; c = v.chord; } }
+    else if (ph === 'moved') { I = .05 + .6 * clamp(gaugeMat.uniforms.uP.value * 6 - i, 0, 1); c = state.movedText?.up ? COL.on : COL.late; }
+    else if (ph === 'where') {
+      const on = RM || tW > .6 + i * .5; tx = f.x;
+      if (i < fi) { I = on ? .6 : .02; c = COL.on; } else if (i === fi) { I = on ? .7 + .2 * Math.sin(tW * 5) : .02; c = COL.listen; tx = 0; } else { I = on ? .08 : .02; }
+      if (on) f.el.classList.add('show');
+    }
+    else if (ph === 'wrap') { I = .3; }
+    else if (inner) { I = state.speaking ? .34 : .22; c = state.listening ? COL.listen : COL.coach; tx = 0; }
+    f.I += (I - f.I) * k; f.col.lerp(color.setHex(c), playing ? .35 : .12);
+    f.g.rotation.z += (Math.atan2(tx - f.x, DROP) - f.g.rotation.z) * ka;
+    f.bm.uniforms.uO.value = f.I * .6; f.bm.uniforms.uC.value.copy(f.col);
+    f.lens.material.color.copy(f.col); f.lens.material.opacity = .3 + f.I;
+    f.pm.color.copy(f.col); f.pm.opacity = f.I * .55;
+    f.pool.position.set(f.x + Math.tan(f.g.rotation.z) * DROP, FLOOR_Y + .01, TRUSS_Z);
+    if (ph === 'where') { const p = f.lens.getWorldPosition(tmpV).project(camera); f.el.style.left = (p.x + 1) / 2 * innerWidth + 'px'; f.el.style.top = (1 - p.y) / 2 * innerHeight + 'px'; }
+  }
+}
+
+/* ---------- session script ---------- */
+async function between(why, ms0 = LISTEN_MS) {
+  let ms = ms0;
+  setPhase(state.phase === 'moved' ? 'moved' : 'listen');
+  for (;;) {
+    const c = await listen(ms);
+    if (c === 'why') { await say(why); continue; }
+    if (c === 'where') { await whereAmI(); continue; }
+    if (c === 'stop') { state.paused = true; setEvents([]); await say('Stopped. Take your time. Say go, or next, when you are ready.'); ms = Infinity; continue; }
+    if (state.paused) { state.paused = false; ms = ms0; if (c === 'go' || c === 'next' || c === 'timeout') return 'timeout'; return c; }
+    if (c === 'go') return 'timeout';
+    return c;
+  }
+}
+function feedback(r, n, prev) {
+  let s = `Take ${n}: ${r.pct} percent in the pocket.`;
+  if (prev && r.pct > prev.pct) s += ` Up from ${prev.pct}.`;
+  if (Math.abs(r.mean) >= 7) s += r.mean < 0 ? ` You are rushing, about ${Math.round(-r.mean)} milliseconds early. Sit back.` : ` You are dragging, about ${Math.round(r.mean)} milliseconds late. Push a little.`;
+  else if (r.pct < 75) s += ' Centred, but spread out. Make every note the same distance apart.';
+  else s += ' Locked in.';
+  if (r.misses >= 2) s += ` ${r.misses} notes missing.`;
+  return s;
+}
+const simFor = (step, ti, bpm) => (N, grid) => {
+  const i = Math.min(ti, 2), sig = step.sigma[i] * (bpm / step.bpm) ** 1.3, lim = grid * 1000 / 2 - 4;
+  return Array.from({ length: N }, () => Math.random() < step.miss[i] ? null : clamp(step.bias[i] + gauss() * sig, -lim, lim) / 1000);
+};
+async function runStep(step, tag) {
+  state.step = step; const prev = state.hist[step.id]; let bpm = step.bpm, takeNo = 1, max = 3; const results = [];
+  setBpm(bpm); setHud(tag, step.name, 1, max); setPhase('intro'); center('', '', '');
+  await say(step.intro(bpm));
+  for (;;) {
+    setHud(tag, step.name, takeNo, max);
+    const r = await playTake({ bpm, sub: step.sub, bars: TAKE_BARS, sim: simFor(step, takeNo - 1, bpm) });
+    results.push(r); setPhase('listen');
+    center(r.pct + '%', `take ${takeNo}`, Math.abs(r.mean) >= 7 ? `${r.mean < 0 ? 'rushing' : 'dragging'} ${Math.abs(Math.round(r.mean))} ms` : 'centred', hex(r.pct >= 75 ? COL.on : r.pct >= 55 ? COL.listen : COL.late));
+    await say(feedback(r, takeNo, results[results.length - 2]));
+    if (takeNo >= max) await moved(step, prev, results);
+    const c = await between(step.why);
+    if (c === 'slower' || c === 'faster') {
+      bpm = clamp(bpm + (c === 'slower' ? -6 : 6), 50, 160); setBpm(bpm, true);
+      await say(c === 'slower' ? `Down to ${bpm}. Same take, a bit slower.` : `Up to ${bpm}. Same take, a bit faster.`);
+    }
+    if (c === 'again' || c === 'slower' || c === 'faster') { if (takeNo >= max) { max++; takeNo++; } continue; }
+    if (takeNo >= max) break; takeNo++;
+  }
+  const best = Math.max(...results.map(r => r.pct));
+  state.hist[step.id] = best; saveHist(state.hist);
+  state.moved.push({ name: step.name.split(':')[0], prev, best });
+}
+async function moved(step, prev, results) {
+  const best = results.reduce((a, r) => (r.pct > a.pct ? r : a)), up = best.pct >= prev;
+  setPhase('moved'); state.gauge = { from: prev / 100, to: best.pct / 100, t0: performance.now() };
+  gaugeMat.uniforms.uC.value.setHex(up ? COL.on : COL.late);
+  const a = prev / 100 * TAU; prevTick.position.set(Math.sin(a) * (R + .5), Math.cos(a) * (R + .5), .03); prevTick.rotation.z = -a;
+  state.movedText = { prev, best: best.pct, up, sub: `${up ? 'up' : 'down'} from ${prev}% · best of ${results.length} takes · ${best.bpm} BPM` };
+  const d = best.pct - prev;
+  await Promise.all([sleep(2600), say(d === 0 ? `In the pocket: ${best.pct} percent, the same as last time. Solid.` :
+    up ? `The number that moved: in the pocket, ${best.pct} percent, up from ${prev}. That's ${d} points. Nice work.` :
+    `In the pocket: ${best.pct} percent, down from ${prev}. That happens on a new tempo. It will come back.`)]);
+}
+async function runJam() {
+  state.step = { why: 'The jam is where the drills turn into music. No grades, just feel. I only keep an eye on the pocket.' };
+  setHud('Free jam', 'A minor · F · C · G', 0, 0); setBpm(92); setPhase('intro'); center('', '', '');
+  await say('Free jam. Drums, bass and keys: A minor, F, C, G, at 92. Play anything you like. No grades here.');
+  for (;;) {
+    const r = await playTake({ bpm: 92, sub: 2, bars: JAM_BARS, chords: CHORDS, sim: N => Array.from({ length: N }, () => Math.random() < .68 ? (gauss() * 20 - 4) / 1000 : null) });
+    setPhase('listen'); center(r.pct + '%', 'jam pocket', 'not graded', '#fff');
+    await say(`Nice. No grade for the jam, but for the record you sat in the pocket ${r.pct} percent of the time. Say again to keep jamming.`);
+    const c = await between(state.step.why);
+    if (c !== 'again' && c !== 'slower' && c !== 'faster') break;
+  }
+}
+async function runSession() {
+  state.moved = []; setHud('', '', 0, 0); $('bpm').innerHTML = ''; setPhase('intro'); center('', '', '');
+  await say('Hey, I am your coach. Today is about fifteen minutes: one new step, sixteenths. Then a quick review of the pocket, then a free jam.');
+  await say(state.srOK ? 'You do not need to touch anything. Just play. Between takes, when the mic glows yellow, say again, slower, faster, next, why, or where am I.'
+    : 'Voice commands are not available in this browser, so between takes, tap a command, or tap anywhere to move on.');
+  await say(state.micOK ? 'I can hear you through the mic. Headphones help me hear you instead of the click.'
+    : 'I cannot hear your instrument here, so a simulated player plays for you. You can also tap along on the screen.');
+  await runStep(STEPS.sixteenths, 'New step');
+  await runStep(STEPS.pocket, 'Review');
+  await runJam();
+  setPhase('wrap'); setHud('Session done', 'See you tomorrow', 0, 0); clearBars();
+  center('✓', 'session done', state.moved.map(m => `${m.name} ${m.prev}→${m.best}%`).join(' · '), hex(COL.on));
+  await say('That is the session. ' + state.moved.map(m => `${m.name}: ${m.best}, ${m.best >= m.prev ? 'up' : 'down'} from ${m.prev}.`).join(' ') + ' Next time we keep sixteenths and start syncopation. Say again for another round.');
+  for (;;) { const c = await between('Short daily sessions beat long weekly ones. Your timing settles between sessions, not during them.', Infinity); if (c === 'again' || c === 'go' || c === 'next') return runSession(); }
+}
+
+/* ---------- frame loop ---------- */
+let last = performance.now(); const tmpV = new THREE.Vector3(), color = new THREE.Color();
+function updateTake(vt) {
+  const tk = state.take; if (!tk) return 0;
+  let bar, frac;
+  if (vt < tk.T0) { bar = -1; frac = clamp((vt - tk.countStart) / tk.barDur, 0, 1); }
+  else { const p = (vt - tk.T0) / tk.barDur; bar = Math.min(Math.floor(p), tk.bars - 1); frac = p >= tk.bars ? 1 : p - Math.floor(p); }
+  if (!bars.has(bar) && !tk.done && vt >= tk.countStart - .2) makeBar(bar);
+  playhead.rotation.z = -frac * TAU; progMat.uniforms.uP.value = frac;
+  const chord = tk.chords ? tk.chords[Math.max(0, bar) % 4] : null;
+  progMat.uniforms.uC.value.setHex(chord ? chord.col : 0xffffff);
+  // simulated hits appear when their (imperfect) time arrives
+  while (tk.simPtr < tk.N && tk.T0 + tk.simPtr * tk.grid + (tk.simOff[tk.simPtr] ?? 0) <= vt) { const i = tk.simPtr++, o = tk.simOff[i]; if (o !== null && tk.source === 'sim') addHit(tk.T0 + i * tk.grid + o, 'sim'); }
+  // misses: a note whose window passed with nothing in it
+  while (tk.missPtr < tk.N && tk.T0 + (tk.missPtr + .5) * tk.grid < vt) {
+    const i = tk.missPtr++;
+    if (tk.matched[i] === undefined && !tk.chords) { const g = bars.get(Math.floor(i / tk.npb)); const m = g?.userData.markers[i % tk.npb]; if (m) { m.material.color.setHex(COL.miss); m.userData.base *= .7; } }
+    else if (tk.matched[i] !== undefined && Math.abs(tk.matched[i]) <= POCKET_MS) tk.inPocket++;
+  }
+  // bar groups: current on the hit plane, older bars recede and fade
+  const nowP = performance.now();
+  for (const [b, g] of bars) {
+    const age = bar - b;
+    if (age > 7) { g.userData.mats.forEach(m => m.dispose()); scene.remove(g); bars.delete(b); continue; }
+    g.visible = age >= 0;
+    const tz = -Math.max(0, age) * 1.8; g.position.z += RM ? tz - g.position.z : (tz - g.position.z) * .14;
+    const f = age <= 0 ? 1 : Math.max(.05, .6 - age * .07);
+    g.userData.mats[0].opacity = f * .9;
+    const bt = b < 0 ? tk.countStart : tk.T0 + b * tk.barDur, npb = g.userData.markers.length;
+    for (const m of g.userData.markers) {
+      const dt = vt - (bt + m.userData.k * tk.barDur / npb), pulse = age === 0 && dt >= 0 && dt < .25 ? 1 - dt / .25 : 0;
+      m.scale.setScalar(m.userData.base * (1 + pulse * (RM ? .4 : 1.3))); m.material.opacity = f * (.55 + pulse * .45);
+    }
+    for (const h of g.userData.hits) { const k = clamp((nowP - h.userData.born) / 220, 0, 1); h.scale.setScalar(RM ? .62 : .62 + (1 - k) * .7); h.material.opacity = f; }
+  }
+  // centre readout: big beat number coloured by your timing in that beat
+  if (state.phase === 'count') center(String(Math.min(4, Math.floor(frac * 4) + 1)), 'count-in', `${tk.bpm} BPM`, '#fff');
+  else if ((state.phase === 'take' || state.phase === 'jam') && bar >= 0) {
+    const beatIdx = Math.min(3, Math.floor(frac * 4)), q = tk.npb / 4, base = bar * tk.npb + beatIdx * q;
+    const errs = []; for (let i = base; i < base + q; i++) if (tk.matched[i] !== undefined) errs.push(tk.matched[i]);
+    const avg = errs.length ? errs.reduce((a, b) => a + b, 0) / errs.length : null;
+    const word = avg === null ? '' : Math.abs(avg) <= POCKET_MS ? 'pocket' : avg < 0 ? 'early' : 'late';
+    if (chord) center(chord.n, 'free jam', `next: ${tk.chords[(bar + 1) % 4].n}`, hex(chord.col));
+    else center(String(beatIdx + 1), word, avg === null ? '' : `${avg > 0 ? '+' : ''}${Math.round(avg)} ms`, avg === null ? '#fff' : hex(hitColor(avg)));
+    const passed = tk.chords ? tk.matched.slice(0, tk.missPtr).filter(x => x !== undefined).length : tk.missPtr;
+    const pct = passed ? Math.round(100 * tk.inPocket / passed) : 0, s = pct + '%';
+    if (ui.m !== s) { ui.m = s; $('mval').textContent = s; $('mbar').style.width = s; $('mbar').style.background = hex(pct >= 75 ? COL.on : pct >= 55 ? COL.listen : COL.late); }
+  }
+  // light pulses: quarter, eighth, bar and downbeat envelopes; beam colour = your timing on the beat just played
+  const bd = tk.barDur / 4, sc = vt - tk.countStart, ex = (x, d, s) => sc < 0 ? 0 : Math.exp(-((x % d) / d) * s);
+  const gb = Math.floor((vt - tk.T0) / bd) - 1, q = tk.npb / 4; let pc = 0xffe2c0;
+  if (gb >= 0 && gb < tk.bars * 4) { const e = []; for (let i = gb * q; i < gb * q + q; i++) if (tk.matched[i] !== undefined) e.push(tk.matched[i]); pc = e.length ? hitColor(e.reduce((a, b) => a + b, 0) / e.length) : COL.miss; }
+  state.vis = { q: ex(sc, bd, 6), e: ex(sc, bd / 2, 6), bar: ex(sc, tk.barDur, 3), down: sc < 0 ? 0 : Math.exp(-(sc % tk.barDur) / bd * 5), col: pc, chord: chord ? chord.col : 0xffffff };
+  return (state.phase === 'count' || state.phase === 'take' || state.phase === 'jam') ? state.vis.q : 0;
+}
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now; const T = now / 1000;
+  const vt = ac ? ac.currentTime - outLat() : T;
+  const beat = updateTake(vt), ph = state.phase, playing = ph === 'count' || ph === 'take' || ph === 'jam';
+  // orb: coach presence
+  const orbCol = state.listening ? COL.listen : state.speaking ? COL.coach : playing ? 0xffffff : COL.coach;
+  color.setHex(orbCol); orbMat.color.lerp(color, .1); orbGlowMat.color.lerp(color, .1);
+  state.orbKick *= .9;
+  const talk = state.speaking ? .08 * Math.sin(T * 11) + .12 * state.orbKick : 0;
+  const os = (ph === 'moved' || ph === 'wrap' || ph === 'where' ? .0001 : playing ? .38 + beat * .25 : state.listening ? .55 : 1) * (1 + (RM ? 0 : talk));
+  orb.scale.lerp(tmpV.setScalar(os), RM ? 1 : .12);
+  orbGlowMat.opacity = .55 + (state.speaking ? .35 : 0) + beat * .3;
+  // listening countdown arc
+  listenArc.visible = state.listening && ph !== 'where';
+  if (listenArc.visible && pend) listenMat.uniforms.uP.value = pend.ms === Infinity ? 1 : 1 - (now - pend.start) / pend.ms;
+  // gauge
+  if (ph === 'moved' && state.gauge) {
+    const g = state.gauge, k = RM ? 1 : clamp((now - g.t0 - 400) / 1600, 0, 1), e = 1 - (1 - k) ** 3, v = g.from + (g.to - g.from) * e;
+    gaugeMat.uniforms.uP.value = v;
+    const m = state.movedText; center(Math.round(v * 100) + '%', 'in the pocket', m.sub, hex(m.up ? COL.on : COL.late));
+  }
+  updateStage(dt, now);
+  // camera
+  const ck = RM ? 1 : 1 - Math.exp(-dt * 2.2);
+  scene.fog.near = cam.pos.z * .7; scene.fog.far = cam.pos.z + 32;   // haze scales with how far back we stand
+  cam.pos.lerp(cam.tPos, ck); cam.look.lerp(cam.tLook, ck); camera.position.copy(cam.pos); camera.lookAt(cam.look);
+  // keep centre text locked to the ring's screen position and size
+  const c = tmpV.set(0, 0, 0).project(camera), e = new THREE.Vector3(R, 0, 0).project(camera);
+  const cx = (c.x + 1) / 2 * innerWidth, cy = (1 - c.y) / 2 * innerHeight, rpx = Math.abs(e.x - c.x) / 2 * innerWidth;
+  $('center').style.transform = `translate(${cx}px,${cy}px)`; $('center').style.setProperty('--rpx', rpx.toFixed(1) + 'px');
+  const ly = cy + rpx * 1.2; $('legend').style.top = Math.min(innerHeight - 140, ly) + 'px';
+  renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(frame);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { renderer.setAnimationLoop(null); ac?.suspend(); window.speechSynthesis?.pause(); }
+  else { last = performance.now(); renderer.setAnimationLoop(frame); ac?.resume(); window.speechSynthesis?.resume(); }
+});
+
+/* ---------- start gate ---------- */
+$('go').addEventListener('click', async () => {
+  initAudio(); await ac.resume();
+  if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } // unlock iOS TTS
+  $('go').textContent = '…';
+  await initMic();
+  $('gate').style.display = 'none';
+  runSession();
+});
+window.__yames = { state, command: c => finish(c) };
+</script>
+</body>
+</html>
