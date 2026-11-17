@@ -460,6 +460,14 @@
   color: #8cc2ff;
   border-color: rgba(90, 169, 255, 0.5);
 }
+/* A role ("Find your level", "Review"): plain caps, no pill. The kind is a
+   colour elsewhere, never this label's words. */
+.session-tag.session-role {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--l-quiet);
+}
 .session-tag[data-met] {
   color: var(--l-tone);
   border-color: rgba(78, 224, 138, 0.5);
@@ -537,17 +545,34 @@
 }
 
 /* ── Today ─────────────────────────────────────────────────────────────── */
+/*
+ * The plan is a numbered list (panel review, 2026-11-17, after the 2D concept's
+ * "Today" screens): one panel with hairline dividers beside a hero column, the
+ * pair centred. A row is a dot, the name, its role in plain words with the
+ * Path dimmer after it, one short reason, and the minutes with the tempo on
+ * the right. The Path's kind is colour only: the dot's ring and its stretch
+ * of the time bar.
+ */
 .session-today {
+  --today-hero: 340px;
+  --today-plan: 640px;
+  --k-mechanics: #8cc2ff;
+  --k-theory: var(--l-amber);
+  --k-plain: var(--l-faint);
   display: grid;
-  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+  /* The pair is centred by the two outer tracks, so the neck's slot still
+     spans the whole width above it (the stage frames the neck to the slot). */
+  grid-template-columns:
+    minmax(0, 1fr) minmax(280px, var(--today-hero)) clamp(28px, 4vw, 56px)
+    minmax(0, var(--today-plan)) minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-content: center;
-  column-gap: clamp(20px, 4vw, 60px);
+  column-gap: 0;
   row-gap: clamp(10px, 2.4vh, 26px);
   flex: 1;
 }
 .session-today > .session-slot {
-  grid-column: 1 / 3;
+  grid-column: 1 / -1;
   grid-row: 1;
   flex: none;
   height: clamp(130px, 26vh, 250px);
@@ -556,28 +581,46 @@
   pointer-events: none;
 }
 .session-today-hero {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 2;
   display: flex;
   flex-direction: column;
   gap: 12px;
   /* From the top of its row: centred beside a long plan, the minutes picker
-     fell below a 700 px window under an empty band (QA 2026-11-17 #6). */
+     fell below a 700 px window under an empty band (QA 2026-11-17 #6). It
+     stays in view while a long plan scrolls past it. */
   justify-content: flex-start;
+  align-self: start;
+  position: sticky;
+  top: 12px;
   min-height: 0;
 }
+.session-today-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.session-today-headline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* "Today" is a title, not the screen: the minutes and Start lead. */
+.session-today .session-mega {
+  font-size: clamp(56px, 9.5vh, 88px);
+}
 .session-today-plan {
-  grid-column: 2;
+  grid-column: 4;
   grid-row: 2;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
 }
 .session-today-minutes {
   white-space: nowrap;
-  font: 700 clamp(38px, 5.6vh, 56px) / 1 var(--l-display);
+  font: 700 clamp(36px, 5.2vh, 48px) / 1 var(--l-display);
   color: var(--l-amber);
   letter-spacing: 0.005em;
 }
@@ -585,6 +628,406 @@
   font-size: 13.5px;
   color: var(--l-quiet);
   margin-bottom: -7px;
+}
+/* Start, and under the word the first thing it plays. */
+.session-page .session-today-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 82px;
+}
+.session-today-start-word {
+  display: block;
+}
+.session-today-start-next {
+  display: block;
+  max-width: 100%;
+  font: 600 15px/1.2 var(--l-display);
+  letter-spacing: 0.05em;
+  opacity: 0.72;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* "No mic yet? Set up input", by Start, only while nothing is listening. */
+.session-today-mic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  margin-top: -4px;
+  color: var(--l-ink);
+  font-size: 14px;
+}
+.session-page .session-today-mic .session-link {
+  align-self: baseline;
+  color: var(--l-amber);
+  text-decoration-color: rgba(255, 180, 84, 0.5);
+  font-size: 14px;
+}
+
+/* The plan's header: what it is on the left, how much on the right. */
+.session-plan-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+.session-plan-total {
+  font: 600 14px/1.1 var(--l-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--l-quiet);
+  white-space: nowrap;
+}
+/* The minutes as one bar, a stretch per step coloured by its kind. */
+.session-timebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.session-timebar-bar {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+}
+.session-timebar-bar > span {
+  flex-basis: 0;
+  min-width: 6px;
+  border-radius: 3px;
+  background: var(--k-plain);
+  opacity: 0.6;
+}
+.session-timebar-bar > span[data-kind="mechanics"] {
+  background: var(--k-mechanics);
+  opacity: 0.88;
+}
+.session-timebar-bar > span[data-kind="theory"] {
+  background: var(--k-theory);
+  opacity: 0.88;
+}
+.session-timebar-ticks {
+  position: relative;
+  height: 13px;
+  font: 600 11px/1.2 var(--l-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--l-faint);
+  font-variant-numeric: tabular-nums;
+}
+.session-timebar-ticks > span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.session-timebar-ticks > span:first-child {
+  transform: none;
+}
+.session-timebar-ticks > span[data-end] {
+  transform: translateX(-100%);
+}
+
+/* The list: one panel, hairlines between rows. `role="list"` in the markup,
+   because `list-style: none` makes WebKit drop the list's semantics. */
+.session-today-plan .session-plan-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--l-panel);
+  border: 1px solid var(--l-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.session-today-plan .session-plan-item {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 0 14px;
+  align-items: start;
+  padding: 12px 18px 12px 14px;
+  border-top: 1px solid var(--l-line);
+}
+.session-today-plan .session-plan-item:first-child {
+  border-top: 0;
+}
+.session-plan-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 1.5px solid var(--l-line2);
+  font: 700 13px/1 var(--l-display);
+  color: var(--l-quiet);
+  font-variant-numeric: tabular-nums;
+}
+.session-plan-item[data-kind="mechanics"] .session-plan-dot {
+  border-color: color-mix(in srgb, var(--k-mechanics) 55%, transparent);
+}
+.session-plan-item[data-kind="theory"] .session-plan-dot {
+  border-color: color-mix(in srgb, var(--k-theory) 55%, transparent);
+}
+/* Step 1 is what Start plays: ringed in the accent. */
+.session-plan-item[data-first] .session-plan-dot {
+  border: 2px solid var(--l-amber);
+  color: var(--l-amber);
+  box-shadow: 0 0 10px rgba(255, 180, 84, 0.3);
+}
+.session-today-plan .session-plan-body {
+  gap: 1px;
+}
+.session-today-plan .session-plan-title {
+  display: block;
+  font: 600 20px/1.15 var(--l-display);
+  overflow-wrap: anywhere;
+}
+.session-plan-meta {
+  font: 600 12px/1.5 var(--l-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--l-quiet);
+  overflow-wrap: anywhere;
+}
+.session-plan-path {
+  color: var(--l-faint);
+  letter-spacing: 0.06em;
+}
+.session-today-plan .session-plan-why {
+  margin-top: 2px;
+  font-size: 14px;
+}
+.session-today-plan .session-plan-why .session-context {
+  font-weight: 500;
+}
+.session-plan-side {
+  text-align: right;
+  white-space: nowrap;
+}
+.session-today-plan .session-plan-mins {
+  width: auto;
+  font: 700 24px/1 var(--l-display);
+}
+.session-today-plan .session-plan-mins small {
+  display: inline;
+  margin-left: 2px;
+  font: 600 13px/1 var(--l-display);
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+.session-plan-bpm {
+  margin-top: 5px;
+  font: 600 13px/1.1 var(--l-display);
+  letter-spacing: 0.06em;
+  color: var(--l-faint);
+  font-variant-numeric: tabular-nums;
+}
+/* "More below": over the foot of the list while its last row is out of sight. */
+.session-plan-more {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex: none;
+  margin-top: -44px;
+  border-radius: 0 0 14px 14px;
+  padding: 26px 0 8px;
+  text-align: center;
+  font: 600 12px/1 var(--l-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--l-ink);
+  background: linear-gradient(to bottom, transparent, rgba(10, 7, 5, 0.92) 70%);
+  pointer-events: none;
+}
+.session-today-tools {
+  margin: 4px 0 0;
+}
+.session-page .session-today-tools .session-link,
+.session-page .session-today-mic .session-link {
+  display: inline;
+  padding: 0;
+  vertical-align: baseline;
+}
+@media (max-width: 980px) {
+  .session-today-hero {
+    position: static;
+  }
+}
+/*
+ * A desktop window, however short or wide: Today is the window's height and no
+ * more, so the page never scrolls the neck up under the title bar (the owner's
+ * 2000x780 screenshot; 617 px of page in 520 at 1280x560). The neck's slot
+ * gives up height first, down to a strip; then the hero's type steps down; and
+ * a plan longer than what is left scrolls inside its own panel, with "More
+ * below" over its foot.
+ */
+@media (min-width: 981px) and (min-height: 460px) {
+  .session-page.session-today-page {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .session-today-page > .session-today {
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+  }
+  .session-today > .session-slot {
+    height: min(250px, 26vh, max(56px, 100vh - 560px));
+  }
+  .session-today-hero {
+    position: static;
+  }
+  .session-today-plan {
+    min-height: 0;
+  }
+  .session-today-plan .session-plan-list {
+    flex: 0 1 auto;
+    min-height: 96px;
+    /* Hidden across, so what is scrolled out of the panel is clipped by it. */
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 232, 200, 0.25) transparent;
+  }
+  .session-today-plan .session-plan-item {
+    flex: none;
+  }
+}
+/* A short window: the hero's type steps down before anything leaves it. */
+@media (max-height: 760px) {
+  .session-today .session-mega {
+    font-size: clamp(52px, 9vh, 68px);
+  }
+  .session-page .session-today-hero .session-today-start {
+    min-height: 70px;
+    font-size: 36px;
+  }
+  .session-today-plan .session-plan-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+@media (max-height: 640px) {
+  .session-today-hero {
+    gap: 8px;
+  }
+  .session-today .session-mega {
+    font-size: 52px;
+  }
+  .session-today-minutes {
+    font-size: 34px;
+  }
+  .session-page .session-today-hero .session-today-start {
+    min-height: 60px;
+    font-size: 30px;
+  }
+  .session-page .session-today .session-seg button {
+    padding: 7px 8px;
+    font-size: 20px;
+  }
+}
+/*
+ * The phone: "Today" and the minutes on one line, the minutes picker above the
+ * list, reasons two lines at most, and Start a bar stuck to the bottom over
+ * the page's own colour, clear of the gesture bar. The hero lends its children
+ * to the page's column (`display: contents`) so Start can come last.
+ */
+.main-window.is-mobile .session-today-hero {
+  display: contents;
+}
+.main-window.is-mobile .session-today-head {
+  order: 1;
+}
+.main-window.is-mobile .session-today-seg-label {
+  order: 2;
+  margin-bottom: -4px;
+}
+.main-window.is-mobile .session-today .session-seg {
+  order: 3;
+}
+.main-window.is-mobile .session-today-mic {
+  order: 4;
+  margin-top: 0;
+}
+.main-window.is-mobile .session-today-running {
+  order: 5;
+}
+.main-window.is-mobile .session-today-plan {
+  order: 6;
+}
+.main-window.is-mobile .session-today-headline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 14px;
+}
+.main-window.is-mobile .session-today .session-mega {
+  font-size: 52px;
+}
+.main-window.is-mobile .session-today-minutes {
+  font-size: 30px;
+}
+.main-window.is-mobile .session-page .session-today-hero > .session-big {
+  order: 7;
+  position: sticky;
+  bottom: calc(10px + var(--safe-bottom, 0px));
+  z-index: 4;
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  min-height: 64px;
+  font-size: 30px;
+  box-shadow:
+    0 1px 0 rgba(255, 245, 220, 0.75) inset,
+    0 -2px 0 rgba(120, 66, 10, 0.45) inset,
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 0 10px var(--l-bg),
+    0 -18px 22px 10px var(--l-bg);
+}
+.main-window.is-mobile .session-today-start-next {
+  font-size: 14px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.main-window.is-mobile .session-today-plan .session-plan-item {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 0 10px;
+  padding: 11px 12px 11px 10px;
+}
+.main-window.is-mobile .session-plan-dot {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+.main-window.is-mobile .session-today-plan .session-plan-title {
+  font-size: 18px;
+}
+.main-window.is-mobile .session-today-plan .session-plan-why {
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* The page scrolls under a Start bar that already says there is more. */
+.main-window.is-mobile .session-plan-more {
+  display: none;
+}
+.main-window.is-mobile .session-page .session-today-tools .session-link,
+.main-window.is-mobile .session-page .session-today-mic .session-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  vertical-align: middle;
 }
 .session-plan-list {
   display: grid;

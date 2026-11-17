@@ -1,4 +1,4 @@
-/** Today's first-run footnote: it asks for an input only when none is listening. */
+/** Today: the plan as a numbered list, and the note that asks for an input only when none is listening. */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import i18n from "../../i18n";
@@ -21,39 +21,117 @@ function firstRun(): SessionRun {
 
 afterEach(cleanup);
 
-describe("Today on a first run", () => {
-  it("says grading needs an input when nothing is listening", () => {
-    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} listening={false} />);
-    expect(screen.queryByText("Grading needs a microphone or direct input.")).not.toBeNull();
+describe("Today without an input", () => {
+  it("asks for one by Start, and the link opens the input settings", () => {
+    const onSetUpInput = vi.fn();
+    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onSetUpInput={onSetUpInput} onOpenPaths={vi.fn()} listening={false} />);
+    expect(screen.queryByText("No mic yet?")).not.toBeNull();
+    fireEvent.click(screen.getByText("Set up input"));
+    expect(onSetUpInput).toHaveBeenCalledTimes(1);
   });
 
   it("does not, while the input is listening", () => {
-    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} listening />);
-    expect(screen.queryByText("Grading needs a microphone or direct input.")).toBeNull();
+    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    expect(screen.queryByText("No mic yet?")).toBeNull();
+    expect(screen.queryByTestId("today-no-mic")).toBeNull();
   });
 });
 
-describe("the plan's tag is the Path's kind (QA 2026-11-17 #9)", () => {
+describe("the tag says the role in plain words; the kind is colour only (panel 2026-11-17)", () => {
   const paths = [
     { id: "blues-pentatonics", kind: "theory" },
     { id: "shred", kind: "mechanics" },
   ] as unknown as PathDoc[];
-  const step = (pathId: string, role = "focus") =>
-    ({ kind: "exercise", id: "focus", role, pathId, exerciseId: "x", title: "Box 1", minutes: 4, bpm: 70, why: { code: "chosen", values: {} } }) as unknown as PlanStep;
+  const step = (pathId: string, role = "focus", code = "chosen") =>
+    ({ kind: "exercise", id: "focus", role, pathId, exerciseId: "x", title: "Box 1", minutes: 4, bpm: 70, why: { code, values: {} } }) as unknown as PlanStep;
 
-  it("a Blues Exercise reads Theory, as its Take screen does", () => {
+  it("a Blues Exercise is coloured Theory, and its words are its role", () => {
     render(<StepTag step={step("blues-pentatonics")} paths={paths} />);
     const tag = document.querySelector(".session-tag")!;
     expect(tag.getAttribute("data-kind")).toBe("theory");
-    expect(tag.textContent).toBe(i18n.t("session.kind.theory"));
+    expect(tag.textContent).toBe(i18n.t("session.today.role.nextUp"));
+    expect(tag.textContent).not.toBe(i18n.t("session.kind.theory"));
   });
 
-  it("a Shred Exercise reads Mechanics; a role with its own tag keeps it", () => {
-    render(<StepTag step={step("shred")} paths={paths} />);
-    expect(document.querySelector(".session-tag")!.textContent).toBe(i18n.t("session.kind.mechanics"));
+  it("never reads Mechanics or Placement; placement is \"Find your level\"", () => {
+    render(<StepTag step={step("shred", "placement", "placement")} paths={paths} />);
+    expect(document.querySelector(".session-tag")!.textContent).toBe("Find your level");
+    cleanup();
+    render(<StepTag step={step("shred", "focus", "newExercise")} paths={paths} />);
+    expect(document.querySelector(".session-tag")!.textContent).toBe("New");
     cleanup();
     render(<StepTag step={step("blues-pentatonics", "review")} paths={paths} />);
-    expect(document.querySelector(".session-tag")!.textContent).toBe(i18n.t("session.kind.review"));
+    expect(document.querySelector(".session-tag")!.textContent).toBe("Review");
+  });
+});
+
+describe("the plan as a list", () => {
+  const paths = [
+    { id: "shred", kind: "mechanics", title: "Shred", steps: [] },
+  ] as unknown as PathDoc[];
+  const warm = {
+    kind: "metronome", id: "warm", title: "A melody up one string", bpm: 70, subdivision: 1, minutes: 2,
+    pathId: "shred", exerciseId: "m", why: { code: "warmUp", values: { bpm: 70 } },
+  };
+  const place = {
+    kind: "exercise", id: "p", role: "placement", pathId: "shred", stepId: "s1", exerciseId: "a", title: "Open A, sixteenths",
+    bpm: 60, minutes: 5, variantSeed: null, placement: { passAtBpm: 110, then: null },
+    why: { code: "placement", values: { path: "Shred", step: "One-string sixteenths", bpm: 60, pass: 110 } },
+  };
+  const next = (id: string, title: string) => ({
+    kind: "exercise", id, role: "next", pathId: "shred", stepId: "s1", exerciseId: id, title, bpm: 60, minutes: 4, variantSeed: null,
+    why: { code: "nextInStep", values: { step: "One-string sixteenths", bpm: 60 } },
+  });
+  function planned(): SessionRun {
+    return {
+      ...firstRun(),
+      minutes: 15,
+      paths,
+      myPaths: [{ id: "shred", title: "Shred" }],
+      plan: { mood: "first", daysAway: null, minutes: 15, steps: [warm, place, next("b", "The fret-12 loop"), next("c", "1-2-3-4 on one string")] },
+    } as unknown as SessionRun;
+  }
+
+  it("is a numbered list with list semantics, a row per step", () => {
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    const list = document.querySelector("ol.session-plan-list")!;
+    expect(list.getAttribute("role")).toBe("list");
+    const rows = [...list.querySelectorAll("li")];
+    expect(rows).toHaveLength(4);
+    expect(rows[0].hasAttribute("data-first")).toBe(true);
+    expect(rows.map((r) => r.querySelector(".session-plan-dot")!.textContent)).toEqual(["1", "2", "3", "4"]);
+    expect(screen.queryByText("4 parts · 15 min")).not.toBeNull();
+  });
+
+  it("puts the tempo on the right, \"60 → 110 BPM\" for placement, and the Path on the meta line", () => {
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    const rows = [...document.querySelectorAll("li.session-plan-item")];
+    expect(rows[0].querySelector(".session-plan-bpm")!.textContent).toBe("70 BPM");
+    expect(rows[1].querySelector(".session-plan-bpm")!.textContent).toBe("60 → 110 BPM");
+    expect(rows[1].querySelector(".session-plan-meta")!.textContent).toBe("Find your level · Shred");
+    expect(rows[0].querySelector(".session-plan-meta")!.textContent).toContain("Warm-up · not graded");
+  });
+
+  it("gives every row its own short reason, without the BPM (the owner's screenshot)", () => {
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    const reasons = [...document.querySelectorAll(".session-plan-why")].map((r) => r.textContent);
+    expect(new Set(reasons).size).toBe(reasons.length);
+    expect(reasons[2]).toBe("Next in One-string sixteenths.");
+    for (const r of reasons) expect(r).not.toMatch(/BPM/);
+  });
+
+  it("names row 1 under Start, and offers Tools with one link", () => {
+    const onOpenTools = vi.fn();
+    render(<TodayView session={planned()} onOpenTools={onOpenTools} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    expect(screen.getByTestId("today-start").textContent).toBe("StartA melody up one string");
+    expect(screen.queryByText("Always open there")).toBeNull();
+    fireEvent.click(screen.getByText("Open Tools"));
+    expect(onOpenTools).toHaveBeenCalledTimes(1);
+  });
+
+  it("says what a first Session is for", () => {
+    render(<TodayView session={planned()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    expect(screen.queryByText("First session · finds where you start")).not.toBeNull();
   });
 });
 
@@ -69,7 +147,7 @@ describe("Today with no Path subscribed (QA 2026-11-17 #7)", () => {
 
   it("offers the Paths as its one big action, and opens them", () => {
     const onOpenPaths = vi.fn();
-    render(<TodayView session={noPaths()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} onOpenPaths={onOpenPaths} listening />);
+    render(<TodayView session={noPaths()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={onOpenPaths} listening />);
     expect(screen.queryByTestId("today-start")).toBeNull();
     fireEvent.click(screen.getByTestId("today-choose-path"));
     expect(onOpenPaths).toHaveBeenCalledTimes(1);
@@ -77,7 +155,7 @@ describe("Today with no Path subscribed (QA 2026-11-17 #7)", () => {
   });
 
   it("keeps Start while the Paths are still loading", () => {
-    render(<TodayView session={firstRun()} onOpenLastTool={vi.fn()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} listening />);
+    render(<TodayView session={firstRun()} onOpenTools={vi.fn()} onSetUpInput={vi.fn()} onOpenPaths={vi.fn()} listening />);
     expect(screen.queryByTestId("today-start")).not.toBeNull();
     expect(screen.queryByTestId("today-choose-path")).toBeNull();
   });
