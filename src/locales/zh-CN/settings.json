@@ -431,9 +431,11 @@
     "other": "其他"
   },
   "instrumentPicker": {
-    "title": "你在用什么乐器练习？",
-    "subtitle": "Yames 会根据你的乐器调整起始检测与练习反馈，之后可在设置中更改。",
-    "subtitleMobile": "让 Yames 知道你在用什么练习。之后可以在设置里更改。",
-    "skip": "跳过——之后再选"
+    "title": "你弹哪种吉他？",
+    "subtitle": "路线和练习课目前是为吉他编写的。选择你的吉他，Yames 会据此调整聆听方式。",
+    "subtitleMobile": "路线和练习课目前是为吉他编写的。选择你弹的那一把。",
+    "skip": "跳过——之后再选",
+    "otherInstruments": "弹贝斯、架子鼓或钢琴？请在设置中选择：节拍器、练习和即兴伴奏适用于任何乐器。",
+    "keepCurrent": "当前乐器：{{instrument}}。选择一把吉他即可切换，继续则保留。"
   }
 }

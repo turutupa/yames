@@ -4,17 +4,15 @@ import type { Dispatch, SetStateAction } from "react";
 import type {
   BrainTier,
   CoachMode,
-  InstrumentId,
   ModelTier,
   Verbosity,
   VoiceMode,
 } from "../../types";
 import type { CoachCapabilities, ModelStatus, VoiceDiagnostic } from "../../ipc.desktop";
-import { setInstrument as setInstrumentBackend, storeSave } from "../../ipc";
+import { storeSave } from "../../ipc";
 import { deleteModels, getCoachCapabilities, getModelStatus, onTtsSpeechEnded, ttsSetVoice, ttsSpeak, ttsStop } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
 import type { CoachStance } from "../../coach/learningMode";
-import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import { formatBytes } from "./formatBytes";
 import { coachStatusLabel, coachTierLabel } from "./coachStatus";
 
@@ -57,8 +55,6 @@ export function CoachSettingsSection({
   brainUpdateAvailable,
   availableVoices,
   voiceDiagnostics,
-  instrument,
-  setInstrument,
   jamCues,
   setJamCues,
   onStartDownload,
@@ -84,8 +80,6 @@ export function CoachSettingsSection({
   brainUpdateAvailable: boolean;
   availableVoices: [string, string][];
   voiceDiagnostics: VoiceDiagnostic[];
-  instrument: string;
-  setInstrument: Dispatch<SetStateAction<string>>;
   /** Spoken cues on the Jam tab (JAM_UX_DECISIONS A4). */
   jamCues: boolean;
   setJamCues: Dispatch<SetStateAction<boolean>>;
@@ -461,31 +455,6 @@ export function CoachSettingsSection({
             </button>
           ))}
         </div>
-      </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.coach.instrument")}</label>
-          <span className="setting-hint">{t("settings.coach.instrumentHint")}</span>
-        </div>
-        <InstrumentDropdown
-          value={instrument}
-          onChange={(val) => {
-            // Update local state + persistent store (for next-launch
-            // restore) AND push to the backend so the DSP picks up the
-            // new InstrumentProfile immediately (D0).
-            setInstrument(val);
-            storeSave("instrument", val);
-            setInstrumentBackend(val as InstrumentId).catch(() => {
-              // Backend may not be ready during early boot; the lib.rs
-              // restore path will hydrate from the store anyway.
-            });
-          }}
-          // When the Brain is "off" there's no coach to tune detection
-          // for, so the instrument selector is locked alongside the
-          // other coach-dependent controls (Voice) to keep the section
-          // visually consistent.
-          disabled={coachBrainTier === "off"}
-        />
       </div>
       <div className="setting-row">
         <div className="setting-label">

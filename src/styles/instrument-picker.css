@@ -89,6 +89,81 @@
   transform: scale(0.97);
 }
 
+.instrument-picker-card {
+  position: relative;
+}
+
+.instrument-picker-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Selected: accent border, accent tint, accent name and a check. The owner's
+   screenshot had a selected card that was only a shade darker than the rest. */
+.instrument-picker-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.instrument-picker-card.selected .instrument-picker-card-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.instrument-picker-card-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  color: transparent;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.instrument-picker-card.selected .instrument-picker-card-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+/* Two choices (the guitars, guitar first): two large cards side by side, so
+   the step reads as a deliberate either/or rather than a grid with holes. */
+.instrument-picker-grid.is-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.instrument-picker-grid.is-pair .instrument-picker-card {
+  padding: 28px 16px 22px;
+  gap: 14px;
+  border-radius: 14px;
+}
+
+.instrument-picker-grid.is-pair .instrument-picker-card-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.instrument-picker-grid.is-pair .instrument-picker-card-icon svg {
+  width: 60px;
+  height: 60px;
+  /* Drawn for 16px; at 60 the 1.5 stroke turns heavy. */
+  stroke-width: 1.15;
+}
+
+.instrument-picker-grid.is-pair .instrument-picker-card-name {
+  font-size: 1rem;
+}
+
 .instrument-picker-card-icon {
   display: flex;
   align-items: center;
@@ -173,5 +248,33 @@
 
   .instrument-picker-card {
     padding: 14px 8px;
+  }
+}
+
+/* A phone: the two guitars stack, each a wide row with the icon beside its
+   name, so both fit above the fold with the footer. */
+@media (max-width: 480px) {
+  .instrument-picker-grid.is-pair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .instrument-picker-grid.is-pair .instrument-picker-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 14px 44px 14px 16px;
+    gap: 14px;
+  }
+
+  .instrument-picker-grid.is-pair .instrument-picker-card-icon,
+  .instrument-picker-grid.is-pair .instrument-picker-card-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .instrument-picker-grid.is-pair .instrument-picker-card-check {
+    top: 50%;
+    transform: translateY(-50%);
+    right: 14px;
   }
 }

@@ -330,6 +330,12 @@
       "quintuplets": "Kwintolen",
       "sextuplets": "Sextolen",
       "thirtySeconds": "Tweeëndertigsten"
+    },
+    "instrumentNote": {
+      "other": "Leerpaden zijn voorlopig voor gitaar geschreven. De tools werken met jouw instrument.",
+      "bass": "Leerpaden zijn voorlopig voor gitaar geschreven; leerpaden voor bas komen eraan. De tools werken nu al met bas.",
+      "openTools": "Open de tools",
+      "change": "Instrument wijzigen"
     }
   }
 }

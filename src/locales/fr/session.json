@@ -337,6 +337,12 @@
       "quintuplets": "Quintolets",
       "sextuplets": "Sextolets",
       "thirtySeconds": "Triples croches"
+    },
+    "instrumentNote": {
+      "other": "Les Parcours sont écrits pour la guitare, pour l'instant. Les outils marchent avec ton instrument.",
+      "bass": "Les Parcours sont écrits pour la guitare, pour l'instant, et des Parcours pour la basse sont prévus. Les outils marchent déjà avec la basse.",
+      "openTools": "Ouvrir les outils",
+      "change": "Changer d'instrument"
     }
   }
 }

@@ -337,6 +337,12 @@
       "quintuplets": "Quintinas",
       "sextuplets": "Sextinas",
       "thirtySeconds": "Fusas"
+    },
+    "instrumentNote": {
+      "other": "As Trilhas são escritas para violão e guitarra, por enquanto. As ferramentas funcionam com o seu instrumento.",
+      "bass": "As Trilhas são escritas para violão e guitarra, por enquanto, e Trilhas de baixo estão nos planos. As ferramentas já funcionam com baixo.",
+      "openTools": "Abrir as ferramentas",
+      "change": "Trocar de instrumento"
     }
   }
 }

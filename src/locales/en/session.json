@@ -330,6 +330,12 @@
       "quintuplets": "Quintuplets",
       "sextuplets": "Sextuplets",
       "thirtySeconds": "32nds"
+    },
+    "instrumentNote": {
+      "other": "Paths are written for guitar for now. The tools work for your instrument.",
+      "bass": "Paths are written for guitar for now, and bass Paths are planned. The tools work for bass today.",
+      "openTools": "Open the tools",
+      "change": "Change instrument"
     }
   }
 }

@@ -18,6 +18,8 @@ vi.mock("../../ipc", () => ({
   listAudioOutputDevices: async () => [],
   getCalibrationCacheEntry: async () => null,
   clearCalibrationCacheEntry: async () => undefined,
+  setInstrument: async () => undefined,
+  storeSave: async () => undefined,
 }));
 
 const device = (name: string, channels: number): AudioOutputDevice => ({
@@ -145,5 +147,22 @@ describe("the Outputs picker", () => {
   it("says nothing about a fallback that did not happen", () => {
     renderSection();
     expect(screen.queryByText(/only delivered two outputs/i)).toBeNull();
+  });
+});
+
+describe("the instrument picker (guitar first)", () => {
+  it("is in Devices, enabled, and offers drums", () => {
+    const setInstrument = vi.fn();
+    renderSection({ instrument: "electric-guitar", setInstrument });
+    const trigger = document.querySelector<HTMLButtonElement>(
+      "#settings-instrument .instrument-dropdown-trigger",
+    )!;
+    expect(trigger).not.toBeNull();
+    expect(trigger.disabled).toBe(false);
+    fireEvent.click(trigger);
+    const drums = screen.getByRole("button", { name: /Drums/ });
+    expect(drums).toBeEnabled();
+    fireEvent.click(drums);
+    expect(setInstrument).toHaveBeenCalledWith("drums");
   });
 });

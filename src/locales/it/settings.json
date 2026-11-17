@@ -431,9 +431,11 @@
     "other": "Altro"
   },
   "instrumentPicker": {
-    "title": "Che strumento stai suonando?",
-    "subtitle": "Yames adatta il rilevamento dell'input e il feedback del coach al tuo strumento. Puoi cambiarlo in seguito nelle Impostazioni.",
-    "subtitleMobile": "Così Yames sa con cosa ti eserciti. Puoi cambiarlo più tardi nelle Impostazioni.",
-    "skip": "Salta — lo sceglierò più tardi"
+    "title": "Che chitarra suoni?",
+    "subtitle": "Percorsi e Sessioni sono scritti per chitarra, per ora. Scegli la tua e Yames regola l'ascolto su di essa.",
+    "subtitleMobile": "Percorsi e Sessioni sono scritti per chitarra, per ora. Scegli quella che suoni.",
+    "skip": "Salta — lo sceglierò più tardi",
+    "otherInstruments": "Basso, batteria o piano? Sceglilo nelle Impostazioni: metronomo, esercizi e jam funzionano con ogni strumento.",
+    "keepCurrent": "Il tuo strumento ora: {{instrument}}. Scegli una chitarra per cambiare, o vai avanti per tenerlo."
   }
 }

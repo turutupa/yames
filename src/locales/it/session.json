@@ -337,6 +337,12 @@
       "quintuplets": "Quintine",
       "sextuplets": "Sestine",
       "thirtySeconds": "Biscrome"
+    },
+    "instrumentNote": {
+      "other": "I Percorsi sono scritti per chitarra, per ora. Gli strumenti funzionano con il tuo strumento.",
+      "bass": "I Percorsi sono scritti per chitarra, per ora, e quelli per basso sono in programma. Gli strumenti funzionano già con il basso.",
+      "openTools": "Apri gli strumenti",
+      "change": "Cambia strumento"
     }
   }
 }

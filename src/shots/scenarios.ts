@@ -338,6 +338,8 @@ export interface Shot {
    * machine with no input device at all; `ready` is W7, after the input was
    * heard and the rest skipped.
    */
+  /** The stored instrument, for the guitar-first note on Today (drums, say). */
+  instrument?: string;
   firstRun?: {
     stop:
       | "welcome"
@@ -736,6 +738,17 @@ export const SHOTS: Shot[] = [
     id: "today-first",
     suffix: "today-first",
     window: "main",
+    session: { seed: "first", stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    // Guitar first: a drummer's Today, with the note at the top.
+    id: "today-drums",
+    suffix: "today-drums",
+    window: "main",
+    instrument: "drums",
     session: { seed: "first", stop: "today" },
     width: 1400,
     height: 900,
@@ -1313,6 +1326,7 @@ export const PHONE_LEARNING_SCENES = [
   "firstrun-sound-look",
   "firstrun-ready",
   "today-first",
+  "today-drums",
   "today-returning",
   "today-no-paths",
   "session-ready",

@@ -16,6 +16,7 @@ import { NO_ANDROID_BETA, useAndroidBetaUpdate } from "../../beta/useAndroidBeta
 import { NO_BETA_PROMPT, useBetaPrompt } from "../../beta/useBetaPrompt";
 import { BetaUpdateNotice } from "../../beta/BetaUpdateNotice";
 import { getThemeById } from "../../themes";
+import { DEFAULT_INSTRUMENT } from "../../constants/instruments";
 import { useAndroidNative } from "./hooks/useAndroidNative";
 import { useInputRoute } from "../../mobile/inputRoute";
 import { useBackDismiss } from "../../mobile/backStack";
@@ -277,7 +278,7 @@ export function MainWindow() {
   const [presetDirty, setPresetDirty] = useState(false);
   const [updateFeedback, setUpdateFeedback] = useState(false);
   const updateFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [instrument, setInstrument] = useState("electric-guitar");
+  const [instrument, setInstrument] = useState<string>(DEFAULT_INSTRUMENT);
   // Whether `instrument` reflects a real choice (stored or picked in the
   // wizard) rather than the electric-guitar fallback. W1 uses it to decide
   // whether to render a card as selected.
@@ -1103,6 +1104,20 @@ export function MainWindow() {
     }
   }, [setView]);
 
+  /** Settings, scrolled to the instrument: the guitar-first note's link. */
+  const openInstrumentSettings = useCallback(() => {
+    setView("settings");
+    for (const delay of [80, 260, 520]) {
+      setTimeout(
+        () =>
+          document
+            .getElementById("settings-instrument")
+            ?.scrollIntoView({ block: "center", behavior: "auto" }),
+        delay,
+      );
+    }
+  }, [setView]);
+
   /** The tool this player last used, and the Metronome if there has been none. */
   const openLastTool = useCallback(async () => {
     const tab = await getActiveTab().catch(() => "beat");
@@ -1246,7 +1261,7 @@ export function MainWindow() {
   const handleWizardFinish = useCallback(
     (outcome: "completed" | "skipped" | "closed") => {
       void stopSoftClick().then(() => {
-        if (!instrumentChosenRef.current) applyInstrument("electric-guitar");
+        if (!instrumentChosenRef.current) applyInstrument(DEFAULT_INSTRUMENT);
         // ONB-08, changed for the MVP (owner, 2026-11-16): a finished setup
         // lands on Today, the learning side's front door, rather than on the
         // Metronome. The click keeps the 80 BPM it was set up at, so the
@@ -2351,13 +2366,24 @@ export function MainWindow() {
             listening={evaluation.enabled}
             onOpenTools={() => void openLastTool()}
             onOpenPaths={() => setView("paths")}
+            instrument={instrument}
+            onOpenToolsList={() => setView("tools")}
+            onChangeInstrument={openInstrumentSettings}
             onOpenLastTool={() => {
               void storeSave(OPEN_ON_KEY, "lastTool");
               void openLastTool();
             }}
           />
         ) : view === "paths" ? (
-          <PathsView key={pathsVisit} session={sessionRun} />
+          <PathsView
+            key={pathsVisit}
+            session={sessionRun}
+            instrumentNote={{
+              instrument,
+              onOpenTools: () => setView("tools"),
+              onChangeInstrument: openInstrumentSettings,
+            }}
+          />
         ) : view === "progress" ? (
           <ProgressView session={sessionRun} />
         ) : view === "tools" ? (

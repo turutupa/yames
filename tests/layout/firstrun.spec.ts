@@ -13,6 +13,9 @@ import { openShot, noSidewaysScroll, insideViewport } from "./fits";
  */
 const SCENES: Record<string, string> = {
   "firstrun-welcome": ".onboarding-welcome-actions .onboarding-btn-primary",
+  "firstrun-instrument": ".onboarding-footer .onboarding-btn-primary",
+  "firstrun-sound-look": ".onboarding-footer .onboarding-btn-primary",
+  "firstrun-hands-free": ".onboarding-footer .onboarding-btn-primary",
   "firstrun-input": ".onboarding-footer .onboarding-btn-primary",
   "firstrun-input-silent": '[data-testid="audio-input-skip"]',
   "firstrun-input-none": '[data-testid="audio-input-skip"]',
@@ -38,6 +41,28 @@ for (const [scene, next] of Object.entries(SCENES)) {
     });
   }
 }
+
+test("W1 offers two guitars side by side, Electric selected and Next open", async ({ page }) => {
+  await openShot(page, "firstrun-instrument", { width: 1194, height: 951 });
+  const cards = page.locator(".instrument-picker-card");
+  await expect(cards).toHaveCount(2);
+  await expect(cards.nth(0)).toHaveAttribute("aria-pressed", "true");
+  await expect(cards.nth(1)).toHaveAttribute("aria-pressed", "false");
+  const [a, b] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()];
+  expect(Math.abs(a!.y - b!.y), "side by side").toBeLessThan(2);
+  // The selected card shows its check; the other's is empty.
+  const checkBg = (i: number) =>
+    cards.nth(i).locator(".instrument-picker-card-check").evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(await checkBg(0)).not.toBe(await checkBg(1));
+  await expect(page.locator(".onboarding-footer .onboarding-btn-primary")).toBeEnabled();
+});
+
+test("W1 stacks the two guitars on a narrow window", async ({ page }) => {
+  await openShot(page, "firstrun-instrument", { width: 420, height: 800 });
+  const cards = page.locator(".instrument-picker-card");
+  const [a, b] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()];
+  expect(b!.y, "one under the other").toBeGreaterThan(a!.y + a!.height - 1);
+});
 
 test("the input step says the guitar is heard, with Next open", async ({ page }) => {
   await openShot(page, "firstrun-input", { width: 1400, height: 900 });

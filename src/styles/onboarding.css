@@ -221,11 +221,18 @@
   color: var(--text-secondary);
 }
 
-/* W1 reuses `.instrument-picker-grid` / `.instrument-picker-card`; the
-   selected state is new (the standalone modal never had one). */
-.onboarding-step .instrument-picker-card.selected {
-  border-color: var(--accent);
-  background: var(--accent-subtle);
+/* W1 reuses `.instrument-picker-grid` / `.instrument-picker-card`; its
+   selected state, check and two-card layout live in instrument-picker.css.
+   The two lines under the cards are quieter than the subtitle above them. */
+.onboarding-instrument-note {
+  margin: 12px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-align: center;
+}
+.onboarding-instrument-note + .onboarding-instrument-note {
+  margin-top: 6px;
 }
 
 /* ---- W2 sound & look (O2) ----
@@ -1059,7 +1066,7 @@
     font-size: 1.5rem;
   }
 
-  .onboarding-step .instrument-picker-grid {
+  .onboarding-step .instrument-picker-grid:not(.is-pair) {
     grid-template-columns: repeat(2, 1fr);
   }
 

@@ -1002,6 +1002,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     store.delete("onboarding.completedAt");
     store.delete("presets");
   }
+  if (shot.instrument) store.set("instrument", shot.instrument);
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.

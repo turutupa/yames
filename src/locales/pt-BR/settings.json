@@ -431,9 +431,11 @@
     "other": "Outro"
   },
   "instrumentPicker": {
-    "title": "Com qual instrumento você pratica?",
-    "subtitle": "O Yames ajusta a detecção de som e o feedback do coach para o seu instrumento. Você pode mudar isso depois em Configurações.",
-    "subtitleMobile": "Para o Yames saber com o que você pratica. Você pode mudar isso depois nas Configurações.",
-    "skip": "Pular — escolho depois"
+    "title": "Você toca guitarra ou violão?",
+    "subtitle": "As Trilhas e as Sessões são escritas para violão e guitarra, por enquanto. Escolha o seu e o Yames ajusta como escuta.",
+    "subtitleMobile": "As Trilhas e as Sessões são escritas para violão e guitarra, por enquanto. Escolha o que você toca.",
+    "skip": "Pular — escolho depois",
+    "otherInstruments": "Baixo, bateria ou piano? Escolha em Configurações: o metrônomo, os exercícios e o jam funcionam com qualquer instrumento.",
+    "keepCurrent": "Seu instrumento agora: {{instrument}}. Escolha uma guitarra ou violão para trocar, ou siga em frente para mantê-lo."
   }
 }

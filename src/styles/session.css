@@ -1898,3 +1898,18 @@
   min-width: 0;
   accent-color: var(--l-amber);
 }
+
+/* Guitar first (2026-11-17): the note a non-guitar player sees at the top of
+   Today and the Paths list. Quiet: one line of copy and two links, no colour
+   that reads as a warning, nothing that blocks. */
+.session-page .session-instrument-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+}
+.session-instrument-note-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}

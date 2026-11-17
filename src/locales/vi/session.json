@@ -330,6 +330,12 @@
       "quintuplets": "Liên năm",
       "sextuplets": "Liên sáu",
       "thirtySeconds": "Móc ba"
+    },
+    "instrumentNote": {
+      "other": "Lộ trình hiện được viết cho guitar. Các công cụ vẫn dùng được với nhạc cụ của bạn.",
+      "bass": "Lộ trình hiện được viết cho guitar, lộ trình cho bass đang được lên kế hoạch. Các công cụ đã dùng được với bass.",
+      "openTools": "Mở công cụ",
+      "change": "Đổi nhạc cụ"
     }
   }
 }
