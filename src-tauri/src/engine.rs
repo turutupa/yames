@@ -5087,9 +5087,10 @@ pub struct MetronomeEngine {
     speech: SharedSpeech,
     /// Shared adaptive accuracy score (0-100), updated by timing analyzer callback
     adaptive_score: Arc<AtomicU32>,
-    /// Callback timing sink. `None` in the app — only `click-jitter-probe`
-    /// ever sets it (`new_with_probe`), so the shipping build's cpal
-    /// callback pays a single `Option` check per buffer and nothing else.
+    /// Callback timing sink. `None` in the app — only `click-jitter-probe`,
+    /// and the app run with `YAMES_CALLBACK_PROBE=1` (`app_probe`), ever set
+    /// it (`new_with_probe`), so the shipping build's cpal callback pays a
+    /// single `Option` check per buffer and nothing else.
     callback_probe: Option<Arc<CallbackProbe>>,
     /// D2 gate for the onset detector. The audio thread clears it when the
     /// output device will not open, because `start` no longer waits long
@@ -5329,8 +5330,9 @@ impl MetronomeEngine {
     }
 
     /// Build an engine whose output callback records its own timings into
-    /// `probe`. Used only by `click-jitter-probe` (ROADMAP §4 audio-safety
-    /// gate); the app uses `new`, which leaves the sink off.
+    /// `probe`. Used by `click-jitter-probe` (ROADMAP §4 audio-safety gate)
+    /// and by the app only when `YAMES_CALLBACK_PROBE=1` (`app_probe`);
+    /// otherwise the app uses `new`, which leaves the sink off.
     pub fn new_with_probe(beat_log: BeatLog, probe: Arc<CallbackProbe>) -> Self {
         // Not `..Self::new(beat_log)`: `MetronomeEngine` implements `Drop`,
         // so functional-update syntax cannot move fields out of it.
