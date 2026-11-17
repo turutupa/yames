@@ -150,7 +150,8 @@
     "list_path_takes",
     "save_path_state",
     "save_path_take",
-    "get_take_grade_with_notes"
+    "get_take_grade_with_notes",
+    "callback_probe_report"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -301,7 +302,8 @@
     "list_path_takes",
     "save_path_state",
     "save_path_take",
-    "get_take_grade_with_notes"
+    "get_take_grade_with_notes",
+    "callback_probe_report"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -502,7 +504,8 @@
     "savePathState",
     "savePathTake",
     "openFeedback",
-    "getTakeGradeWithNotes"
+    "getTakeGradeWithNotes",
+    "callbackProbeReport"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -514,7 +517,8 @@
     "listSessionLogs",
     "reorderPresets",
     "setCalibrationOffset",
-    "startVoiceRepair"
+    "startVoiceRepair",
+    "callbackProbeReport"
   ],
   "eventsListened": [
     "adaptive-eval",

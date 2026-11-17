@@ -73,6 +73,18 @@ describe("parseTab", () => {
     expect(late.totalTicks).toBe(3840);
   });
 
+  it("a double stop sounds both notes at one tick, and `hold` holds both", () => {
+    const { notes, totalTicks } = parse("/8 3:7b2+2:5 2:8 /4 3:9+2:9 hold");
+    expect(notes.map((n) => [n.string, n.fret, n.tick, n.dur, n.bend ?? 0])).toEqual([
+      [3, 7, 0, 480, 2],
+      [2, 5, 0, 480, 0],
+      [2, 8, 480, 480, 0],
+      [3, 9, 960, 2880, 0],
+      [2, 9, 960, 2880, 0],
+    ]);
+    expect(totalTicks).toBe(3840);
+  });
+
   it("refuses nonsense", () => {
     expect(() => parse("/7 5:5")).toThrow(/note value/);
     expect(() => parse("9:5")).toThrow(/no string 9/);

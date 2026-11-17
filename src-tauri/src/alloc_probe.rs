@@ -76,6 +76,80 @@ impl Drop for Span {
     }
 }
 
+// ---------------------------------------------------------------------------
+// The counting allocator, for the app (`app_probe`)
+// ---------------------------------------------------------------------------
+//
+// `click-jitter-probe` declares its own. The app gets this one only when
+// `main.rs` is built with `--features callback-probe-alloc`: a
+// `#[global_allocator]` is a property of the binary that declares it, so a
+// build without the feature has no counting allocator at all and pays
+// nothing, not even the thread-local read.
+
+#[cfg(feature = "callback-probe-alloc")]
+mod counting {
+    use std::alloc::{GlobalAlloc, Layout, System};
+    use std::sync::atomic::{AtomicU64, Ordering};
+
+    pub(super) static ALLOCS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ALLOC_BYTES: AtomicU64 = AtomicU64::new(0);
+    pub(super) static FREES: AtomicU64 = AtomicU64::new(0);
+
+    /// `System`, plus a count of what the output callback's body did. The same
+    /// allocator as the probe's, for the same reasons (see the probe).
+    pub struct CountingAlloc;
+
+    #[inline]
+    fn note_alloc(bytes: usize) {
+        if super::in_callback() {
+            ALLOCS.fetch_add(1, Ordering::Relaxed);
+            ALLOC_BYTES.fetch_add(bytes as u64, Ordering::Relaxed);
+        }
+    }
+
+    unsafe impl GlobalAlloc for CountingAlloc {
+        unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+            note_alloc(layout.size());
+            unsafe { System.alloc(layout) }
+        }
+        unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+            note_alloc(layout.size());
+            unsafe { System.alloc_zeroed(layout) }
+        }
+        unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+            note_alloc(new_size);
+            unsafe { System.realloc(ptr, layout, new_size) }
+        }
+        unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+            if super::in_callback() {
+                FREES.fetch_add(1, Ordering::Relaxed);
+            }
+            unsafe { System.dealloc(ptr, layout) }
+        }
+    }
+}
+
+#[cfg(feature = "callback-probe-alloc")]
+pub use counting::CountingAlloc;
+
+/// `(allocations, bytes, frees)` made inside the output callback's body, or
+/// `None` in a build that does not count them.
+pub fn counts() -> Option<(u64, u64, u64)> {
+    #[cfg(feature = "callback-probe-alloc")]
+    {
+        use std::sync::atomic::Ordering::Relaxed;
+        Some((
+            counting::ALLOCS.load(Relaxed),
+            counting::ALLOC_BYTES.load(Relaxed),
+            counting::FREES.load(Relaxed),
+        ))
+    }
+    #[cfg(not(feature = "callback-probe-alloc"))]
+    {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -5087,9 +5087,10 @@ pub struct MetronomeEngine {
     speech: SharedSpeech,
     /// Shared adaptive accuracy score (0-100), updated by timing analyzer callback
     adaptive_score: Arc<AtomicU32>,
-    /// Callback timing sink. `None` in the app — only `click-jitter-probe`
-    /// ever sets it (`new_with_probe`), so the shipping build's cpal
-    /// callback pays a single `Option` check per buffer and nothing else.
+    /// Callback timing sink. `None` in the app — only `click-jitter-probe`,
+    /// and the app run with `YAMES_CALLBACK_PROBE=1` (`app_probe`), ever set
+    /// it (`new_with_probe`), so the shipping build's cpal callback pays a
+    /// single `Option` check per buffer and nothing else.
     callback_probe: Option<Arc<CallbackProbe>>,
     /// D2 gate for the onset detector. The audio thread clears it when the
     /// output device will not open, because `start` no longer waits long
@@ -5329,8 +5330,9 @@ impl MetronomeEngine {
     }
 
     /// Build an engine whose output callback records its own timings into
-    /// `probe`. Used only by `click-jitter-probe` (ROADMAP §4 audio-safety
-    /// gate); the app uses `new`, which leaves the sink off.
+    /// `probe`. Used by `click-jitter-probe` (ROADMAP §4 audio-safety gate)
+    /// and by the app only when `YAMES_CALLBACK_PROBE=1` (`app_probe`);
+    /// otherwise the app uses `new`, which leaves the sink off.
     pub fn new_with_probe(beat_log: BeatLog, probe: Arc<CallbackProbe>) -> Self {
         // Not `..Self::new(beat_log)`: `MetronomeEngine` implements `Drop`,
         // so functional-update syntax cannot move fields out of it.
@@ -8068,6 +8070,17 @@ impl MetronomeEngine {
                 // dropped after this loop, so the channel could only
                 // disconnect once the loop had already ended. `alive` is what
                 // ends it, as it always really was.
+                // Read BEFORE the pop, with Acquire. The end of a song or a
+                // jam's form pushes its notification and THEN lowers
+                // `playing`, and the push is what unparks this thread.
+                // Reading the flag only after the park saw it already down and
+                // drained the very notification that woke it, so the UI never
+                // heard the piece end. Read before the pop, a `false` here was
+                // stored after the push, and Acquire makes that push visible
+                // to the pop below, which then returns it; read after an empty
+                // pop (the first fix) left a few instructions where the push
+                // and the store could both land, and the drain took the end.
+                let was_playing = playing.load(Ordering::Acquire);
                 let notif = match beats.pop() {
                     Some(n) => n,
                     None => {
@@ -8075,7 +8088,7 @@ impl MetronomeEngine {
                         // Ticks that landed while the transport was stopped
                         // are stale. Same rule, same place in the pass, as
                         // the `try_recv` drain this replaces.
-                        if !playing.load(Ordering::Relaxed) {
+                        if !was_playing && !playing.load(Ordering::Acquire) {
                             beats.drain();
                         }
                         continue;

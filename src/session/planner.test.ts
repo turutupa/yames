@@ -429,11 +429,12 @@ describe("Find my edge in a plan", () => {
 });
 
 describe("two runnable Paths", () => {
-  it("Shred, Alternate Picking and Sweep Picking run; Blues waits for the landing grader, and says so", () => {
-    expect([...RUNNABLE_PATH_IDS].sort()).toEqual(["alternate-picking", "shred", "sweep-picking"]);
+  it("the Mechanics and Theory Paths all run; an unknown one says why it waits", () => {
+    expect([...RUNNABLE_PATH_IDS].sort()).toEqual(["alternate-picking", "blues-pentatonics", "classic-rock", "shred", "sweep-picking"]);
     expect(isRunnable(SWEEP.id)).toBe(true);
-    expect(isRunnable("blues-pentatonics")).toBe(false);
-    expect(laterWhyKey("blues-pentatonics")).toBe("session.paths.laterWhyLanding");
+    expect(isRunnable("blues-pentatonics")).toBe(true);
+    expect(isRunnable("classic-rock")).toBe(true);
+    expect(laterWhyKey("blues-pentatonics")).toBe("session.paths.laterWhy");
     expect(laterWhyKey("some-future-path")).toBe("session.paths.laterWhy");
   });
 

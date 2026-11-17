@@ -12,6 +12,8 @@
  *   next note, `b2` bends two semitones, `v` vibrato, `>` accent, `m` palm
  *   mute, `l` let ring, `t` tapped with the picking hand (a loud attack with
  *   no stroke), `d` or `u` a printed stroke.
+ * - `a+b` sounds two notes together, a double stop: `3:7b2+2:5` is a unison
+ *   bend. Both take the current value; the score hears one attack.
  * - `r` is a rest of the current value.
  * - `hold` lengthens the last note to the bar line, as far as one notated value
  *   can, and rests the remainder. `rest` rests to the bar line.
@@ -61,6 +63,50 @@ function splitRest(startTick: number, ticks: number): PathRest[] {
   return out;
 }
 
+/** One note of a token: `s:f` and its suffixes. */
+function parseNote(part: string, token: string, tuning: readonly number[], tick: number, dur: number): PathNote {
+  const match = /^(\d):(\d+)(.*)$/.exec(part);
+  if (!match) throw new Error(`bad token: ${token}`);
+  const string = Number(match[1]);
+  const fret = Number(match[2]);
+  if (string < 1 || string > tuning.length) throw new Error(`no string ${string}: ${token}`);
+  const tech: PathTechnique[] = [];
+  let pick: PickMark | undefined;
+  let accent = false;
+  let bend: number | undefined;
+  const suffix = match[3];
+  for (let i = 0; i < suffix.length; i += 1) {
+    const c = suffix[i];
+    if (c === "h") tech.push("hammer");
+    else if (c === "p") tech.push("pull");
+    else if (c === "s") tech.push("slide");
+    else if (c === "v") tech.push("vibrato");
+    else if (c === "m") tech.push("palmMute");
+    else if (c === "l") tech.push("letRing");
+    else if (c === "t") tech.push("tap");
+    else if (c === ">") accent = true;
+    else if (c === "d" || c === "u") pick = c;
+    else if (c === "b") {
+      tech.push("bend");
+      bend = Number(suffix[i + 1]);
+      i += 1;
+      if (!Number.isFinite(bend)) throw new Error(`bad bend: ${token}`);
+    } else throw new Error(`bad suffix ${c} in ${token}`);
+  }
+  const note: PathNote = {
+    string,
+    fret,
+    midi: tuning[string - 1] + fret,
+    tick,
+    dur,
+    tech,
+  };
+  if (pick) note.pick = pick;
+  if (accent) note.accent = true;
+  if (bend !== undefined) note.bend = bend;
+  return note;
+}
+
 /** Parse a tab. `tuning` is MIDI per string, string 1 first. */
 export function parseTab(tab: string, tuning: readonly number[], barTicks: number): ParsedTab {
   const notes: PathNote[] = [];
@@ -103,51 +149,16 @@ export function parseTab(tab: string, tuning: readonly number[], barTicks: numbe
       const left = toBarLine();
       const span = last.dur + left;
       const value = NOTATED_TICKS.find((v) => v <= span)!;
-      last.dur = value;
+      // Every note of a double stop is held, not only its last part.
+      for (const note of notes) if (note.tick === last.tick) note.dur = value;
       if (span > value) rests.push(...splitRest(last.tick + value, span - value));
       tick += left;
       continue;
     }
-    const match = /^(\d):(\d+)(.*)$/.exec(token);
-    if (!match) throw new Error(`bad token: ${token}`);
-    const string = Number(match[1]);
-    const fret = Number(match[2]);
-    if (string < 1 || string > tuning.length) throw new Error(`no string ${string}: ${token}`);
-    const tech: PathTechnique[] = [];
-    let pick: PickMark | undefined;
-    let accent = false;
-    let bend: number | undefined;
-    const suffix = match[3];
-    for (let i = 0; i < suffix.length; i += 1) {
-      const c = suffix[i];
-      if (c === "h") tech.push("hammer");
-      else if (c === "p") tech.push("pull");
-      else if (c === "s") tech.push("slide");
-      else if (c === "v") tech.push("vibrato");
-      else if (c === "m") tech.push("palmMute");
-      else if (c === "l") tech.push("letRing");
-      else if (c === "t") tech.push("tap");
-      else if (c === ">") accent = true;
-      else if (c === "d" || c === "u") pick = c;
-      else if (c === "b") {
-        tech.push("bend");
-        bend = Number(suffix[i + 1]);
-        i += 1;
-        if (!Number.isFinite(bend)) throw new Error(`bad bend: ${token}`);
-      } else throw new Error(`bad suffix ${c} in ${token}`);
+    // `3:7b2+2:5` is a double stop: every part sounds at this tick, for this value.
+    for (const part of token.split("+")) {
+      notes.push(parseNote(part, token, tuning, tick, dur));
     }
-    const note: PathNote = {
-      string,
-      fret,
-      midi: tuning[string - 1] + fret,
-      tick,
-      dur,
-      tech,
-    };
-    if (pick) note.pick = pick;
-    if (accent) note.accent = true;
-    if (bend !== undefined) note.bend = bend;
-    notes.push(note);
     tick += dur;
   }
   return { notes, rests, totalTicks: tick };

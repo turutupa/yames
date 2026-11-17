@@ -21,16 +21,23 @@ const PACK_FILES = import.meta.glob("../paths/packs/*.json");
  * sweeps the notes usually ring into each other, so right notes are mostly
  * "not checked" there, and the result says so.
  *
- * Blues is graded on the notes you land on over the chords, which needs a
- * grader that does not exist yet, so it is listed as "later" rather than
- * offered and then not graded. `laterWhyKey` says that on its page.
+ * Blues and Classic Rock are Theory Paths taught through written licks,
+ * phrases and arpeggios, graded the same way: timing, notes heard, extras and
+ * right notes, every graded Exercise passing as a Session Take when played
+ * right (`path_exercises.rs`). Their "your turn" Exercises, where the player
+ * chooses the notes, are self-checked and not gradable, so the planner skips
+ * them and the Path page shows them as not graded yet.
  */
-export const RUNNABLE_PATH_IDS: readonly string[] = ["shred", "alternate-picking", "sweep-picking"];
+export const RUNNABLE_PATH_IDS: readonly string[] = [
+  "shred",
+  "alternate-picking",
+  "sweep-picking",
+  "blues-pentatonics",
+  "classic-rock",
+];
 
 /** Why a Path is not runnable yet, as a `session.paths.*` key. */
-const LATER_BECAUSE: Readonly<Record<string, string>> = {
-  "blues-pentatonics": "session.paths.laterWhyLanding",
-};
+const LATER_BECAUSE: Readonly<Record<string, string>> = {};
 
 /** The sentence a "later" Path's page says, naming what it waits for when known. */
 export function laterWhyKey(pathId: string): string {

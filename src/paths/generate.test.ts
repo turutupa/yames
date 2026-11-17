@@ -96,9 +96,14 @@ describe("the three Paths", () => {
   });
 
   it("the runtime's to-do list is computed from the packs", () => {
-    const needs = runtimeNeeds(docs[2]);
-    expect(needs.map((n) => n.metric)).toContain("landingChordTone");
-    expect(needs.find((n) => n.metric === "landingChordTone")?.status).toBe("new-grader");
+    // The Theory Paths grade only what is measured today: what they need of a
+    // grader that does not exist yet is "your turn", self-checked.
+    for (const doc of docs.filter((d) => d.kind === "theory")) {
+      const needs = runtimeNeeds(doc);
+      expect(needs.map((n) => n.metric)).toContain("noteIdentity");
+      expect(needs.filter((n) => n.status === "new-grader").map((n) => n.metric)).toEqual([]);
+    }
+    expect(docs.filter((d) => d.kind === "theory").length).toBeGreaterThanOrEqual(1);
   });
 });
 

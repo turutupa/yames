@@ -39,7 +39,7 @@ import {
 } from "./derive";
 import { exerciseDifficulty, minGapMs, stepDifficulty } from "./difficulty";
 import { bannedClaimsIn } from "./honesty";
-import { DETECTION_FLAGS, FORBIDDEN_METRICS, METRICS, METRIC_IDS, NOT_GRADED } from "./metrics";
+import { BUILT_NEW_GRADERS, DETECTION_FLAGS, FORBIDDEN_METRICS, METRICS, METRIC_IDS, NOT_GRADED } from "./metrics";
 import { checkReachAt, maxPlayableBpm } from "./reach";
 import { exerciseWithVariant } from "./variants";
 import { isPicked, NOTATED_TICKS } from "./tabDsl";
@@ -113,6 +113,7 @@ export const RULES = {
   "honesty.banned": "a banned claim in the text",
   "honesty.metric": "a metric that is not in the controlled list",
   "honesty.passNotGraded": "a pass bar on a metric the Exercise does not declare graded",
+  "honesty.unbuiltMetric": "a graded Exercise with a pass bar on a metric that isn't measured yet",
   "honesty.notGradedId": "a not-graded id that is not in the controlled list",
   "honesty.notGradedRequired": "the not-graded list leaves out something this Exercise cannot grade",
   "honesty.overlap": "the same thing listed as graded and not graded",
@@ -626,6 +627,10 @@ function checkHonesty(ex: Exercise, report: Report) {
       report("honesty.metric", ex.id, `pass bar on "${bar.metric}": not a controlled metric${why ? `. ${why}` : ""}`);
     } else if (!ex.graded.includes(bar.metric)) {
       report("honesty.passNotGraded", ex.id, `a pass bar uses ${bar.metric}, which is not in the graded list`);
+    }
+    const metric = METRICS.find((m) => m.id === bar.metric);
+    if (ex.grading === "graded" && metric?.status === "new-grader" && !BUILT_NEW_GRADERS.includes(bar.metric)) {
+      report("honesty.unbuiltMetric", ex.id, `a pass bar on ${bar.metric}, which no grader measures yet: make it self-checked or drop the bar`);
     }
   }
   for (const id of ex.notGraded) {

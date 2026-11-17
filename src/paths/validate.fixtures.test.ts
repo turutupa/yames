@@ -367,6 +367,13 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     ex(d, "scale").passBars.push({ metric: "score", min: 90, overBars: 4 });
     return d;
   },
+  "honesty.unbuiltMetric": () => {
+    const d = fresh();
+    const e = ex(d, "scale");
+    e.graded.push("restsKept");
+    e.passBars.push({ metric: "restsKept", min: 0.9, overBars: 4 });
+    return d;
+  },
   "honesty.passNotGraded": () => {
     const d = fresh();
     const e = ex(d, "scale");
