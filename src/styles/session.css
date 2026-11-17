@@ -749,7 +749,7 @@
 }
 .session-stage {
   position: relative;
-  height: clamp(130px, 21vh, 210px);
+  height: clamp(110px, 15vh, 170px);
   overflow: hidden;
   padding: 7px 12px;
 }
