@@ -76,6 +76,8 @@
 .onboarding-footer {
   flex: 0 0 auto;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: center;
   gap: 8px;
   padding-top: 4px;
@@ -83,8 +85,14 @@
   margin-top: 2px;
 }
 
-.onboarding-footer .onboarding-skip {
-  margin-left: auto;
+/* Back holds the left; Skip and Next sit on the right. Where the three do not
+   fit on one line (a phone in Russian, German, Portuguese...), Next drops to
+   its own line on the right instead of running off the card (QA 2 #2). */
+.onboarding-footer > .onboarding-btn:first-child {
+  margin-right: auto;
+}
+.onboarding-footer .onboarding-btn {
+  max-width: 100%;
 }
 
 /* ---- Buttons ---- */
