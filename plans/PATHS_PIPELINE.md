@@ -197,10 +197,29 @@ Session and advance `takeIndex`, or two Takes could land on the same variant.
 ## Writing a spec
 
 Compact tab, in `tabDsl.ts`: `/16 5:5 5:6> 3:7b2v | /4 r hold`. `/8` sets the value
-until changed (`.` dotted, `t` triplet), `s:f` is string and fret, suffixes are `h`
+until changed (`.` dotted, `t` triplet, `/16q` a sixteenth quintuplet, five to the
+beat), `s:f` is string and fret, suffixes are `h`
 hammer, `p` pull, `s` slides out, `b2` bend two semitones, `v` vibrato, `>` accent,
-`m` palm mute, `l` let ring, `d` or `u` a stroke. `r` rests, `rest` rests to the bar
+`m` palm mute, `l` let ring, `t` tapped, `d` or `u` a stroke. `r` rests, `rest` rests to the bar
 line, `hold` lengthens the last note to it, `|` is a bar check that throws.
+
+Added 2026-11-16 for the Shred Path, all additive (the packs written before it generate
+the same bytes):
+
+- **Quintuplets** (`/16q`, 192 ticks, alphaTex `16{tu 5}`).
+- **Taps** (`t`): a loud attack with no stroke, never soft, so a tap must be heard. It is
+  a picking-hand tap or a hammer-on from nowhere (alphaTex `{tt}`; the importer reads
+  both as `tap`). `reach.ts` leaves taps out of the hand's span, and a note right after a
+  tap may move the hand.
+- **`economy` pick plan:** alternate on a string; a string change takes the stroke the
+  pick is travelling in (`markEconomy`). Graded like picked notes (75 ms), checked by
+  `pick.sweep` on crossings and `pick.economy` on one string.
+- **`sweepTiming` profile:** swept notes on evenness, notes heard and extras only, so
+  right notes are never promised on a sweep ("timing only").
+- **Named subdivisions:** a spec with `labelSubdivisions: true` writes each Exercise's
+  `subdivision` (the grid of its tightest onset gap: `sixteenths`, `sextuplets`,
+  `quintuplets`, `eighthTriplets`, `quarterTriplets`, ...), and `tab.subdivision`
+  checks it. `SUBDIVISION_WORDS` has the words for a screen.
 
 Templates, in `templates.ts`, return that same notation and take their pitches from
 the theory data, so a wrong shape is an impossible thing to type:
