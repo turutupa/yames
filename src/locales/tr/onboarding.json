@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "Eller çalgının üzerinde kalır",
-      "subtitle": "Bu tuşlar şimdiden çalışıyor. Pedalın ya da oyun kumandan varsa, Çal/Durdur'a burada atayabilirsin.",
+      "subtitle": "Bir Seansta bu tuşlar zaten çalışır. Tek bir ayak pedalı da Seansı yönetebilir ve araçlarda çalmayı başlatıp durdurmaya devam eder.",
       "cancel": "İptal",
       "keyboard": {
-        "title": "Klavye",
         "hint": "Her tuş Ayarlar → Kısayollar'dan değiştirilebilir."
       },
       "midi": {
         "title": "MIDI pedalı",
         "none": "İstediğin zaman tak — Yames atamayı kendisi önerecek.",
-        "map": "Çal/Durdur'a ata",
+        "map": "Pedalı ata",
         "remap": "Başka pedal ata",
-        "listening": "Çal/Durdur için kullanmak istediğin pedala bas.",
-        "mapped": "Çal/Durdur → {{signal}} · kanal {{channel}}"
+        "listening": "Kullanmak istediğin pedala bas.",
+        "mapped": "Pedal → {{signal}} · kanal {{channel}}"
       },
       "gamepad": {
         "title": "Oyun kumandası",
         "none": "İstediğin zaman bir kumanda bağla — bir düğmeye bas, Yames görecek.",
-        "map": "Çal/Durdur'a ata",
+        "map": "Bir düğme ata",
         "remap": "Başka düğme ata",
-        "listening": "Çal/Durdur için kullanmak istediğin düğmeye bas.",
-        "mapped": "Çal/Durdur → {{button}}"
+        "listening": "Pedal olarak kullanmak istediğin düğmeye bas.",
+        "mapped": "Pedal → {{button}}"
+      },
+      "session": {
+        "title": "Seansta",
+        "go": "Kaydı başlat ya da bitir: büyük düğme",
+        "faster": "Daha hızlı, kayıtlar arasında",
+        "slower": "Daha yavaş, kayıtlar arasında",
+        "next": "Sonraki adım",
+        "or": "ya da"
+      },
+      "pedal": {
+        "title": "Tek pedal",
+        "tools": "Seans dışında bir dokunuş araçları başlatır ve durdurur."
+      },
+      "tools": {
+        "title": "Araçlarda"
       }
     },
     "coach": {

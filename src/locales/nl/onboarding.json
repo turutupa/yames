@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "Je handen blijven op het instrument",
-      "subtitle": "Deze toetsen werken al. Heb je een voetschakelaar of controller, koppel die hier meteen aan Afspelen/Stoppen.",
+      "subtitle": "In een sessie werken deze toetsen al. Eén voetschakelaar kan ook een sessie bedienen, en start en stopt nog steeds de tools.",
       "cancel": "Annuleren",
       "keyboard": {
-        "title": "Toetsenbord",
         "hint": "Elke toets is aan te passen in Instellingen → Sneltoetsen."
       },
       "midi": {
         "title": "MIDI-voetschakelaar",
         "none": "Sluit er wanneer je wilt een aan — Yames biedt dan aan om hem te koppelen.",
-        "map": "Afspelen/Stoppen koppelen",
+        "map": "Pedaal koppelen",
         "remap": "Ander pedaal koppelen",
-        "listening": "Druk op het pedaal dat je voor Afspelen/Stoppen wilt.",
-        "mapped": "Afspelen/Stoppen → {{signal}} · kanaal {{channel}}"
+        "listening": "Trap op het pedaal dat je wilt gebruiken.",
+        "mapped": "Pedaal → {{signal}} · kanaal {{channel}}"
       },
       "gamepad": {
         "title": "Gamepad",
         "none": "Sluit wanneer je wilt een controller aan — druk op een knop en Yames ziet hem.",
-        "map": "Afspelen/Stoppen koppelen",
+        "map": "Knop koppelen",
         "remap": "Andere knop koppelen",
-        "listening": "Druk op de knop die je voor Afspelen/Stoppen wilt.",
-        "mapped": "Afspelen/Stoppen → {{button}}"
+        "listening": "Druk op de knop die je als pedaal wilt gebruiken.",
+        "mapped": "Pedaal → {{button}}"
+      },
+      "session": {
+        "title": "In een sessie",
+        "go": "De take starten of stoppen: de grote knop",
+        "faster": "Sneller, tussen takes",
+        "slower": "Langzamer, tussen takes",
+        "next": "Volgende stap",
+        "or": "of"
+      },
+      "pedal": {
+        "title": "Eén voetschakelaar",
+        "tools": "Buiten een sessie start en stopt een tik de tools."
+      },
+      "tools": {
+        "title": "In de tools"
       }
     },
     "coach": {

@@ -92,33 +92,76 @@ beforeEach(() => {
   store.get.mockImplementation(async () => undefined);
 });
 
-describe("W3 — keyboard card", () => {
-  it("renders the real binding for every key it teaches", async () => {
-    await mount();
-    const card = screen.getByTestId("hands-free-keyboard");
+/** The kbd texts on one row of a card, by the row's label. */
+function keysOn(card: HTMLElement, label: string): string[] {
+  const row = within(card).getByText(label).closest(".onboarding-hf-key-row");
+  expect(row, label).not.toBeNull();
+  return Array.from(row!.querySelectorAll("kbd")).map((k) => k.textContent ?? "");
+}
 
-    for (const id of ["play", "bpm-up", "bpm-down", "toggle-coach", "tab-1", "tab-2"]) {
-      const label = i18n.t(`settings.hotkeys.actions.${id}`);
-      const row = within(card).getByText(label).closest(".onboarding-hf-key-row");
-      expect(row, id).not.toBeNull();
-      // Whatever the binding table says, split and localised for this
-      // platform — nothing in the step hardcodes a key.
-      const expected = splitCombo(HOTKEYS.find((h) => h.id === id)!.key).map(platformKey);
-      expect(
-        Array.from(row!.querySelectorAll("kbd")).map((k) => k.textContent),
-        id,
-      ).toEqual(expected);
-    }
+const keysFor = (id: string) =>
+  splitCombo(HOTKEYS.find((h) => h.id === id)!.key).map(platformKey);
+
+describe("W3 — the Session leads", () => {
+  it("comes first, with the Session's real keys", async () => {
+    await mount();
+    const cards = screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
+    expect(cards[0]).toBe("In a Session");
+    const card = screen.getByTestId("hands-free-keyboard");
+    // The big button is Play or session-go: Space or Enter, as bound.
+    expect(keysOn(card, "Start or end the Take, or press the big button")).toEqual([
+      ...keysFor("play"),
+      ...keysFor("session-go"),
+    ]);
+    expect(within(card).getByText("or")).toBeInTheDocument();
+    expect(keysOn(card, "Faster, between Takes")).toEqual(keysFor("session-faster"));
+    expect(keysOn(card, "Slower, between Takes")).toEqual(keysFor("session-slower"));
+    expect(keysOn(card, "Next step")).toEqual(keysFor("session-next"));
+    expect(within(card).getByText("Every key is remappable in Settings → Hotkeys.")).toBeInTheDocument();
   });
 
-  it("prefers the user's remapped key over the default", async () => {
+  it("prefers the user's remapped keys over the defaults", async () => {
     store.get.mockImplementation(async (key: string) =>
-      key === "keyBindings" ? { play: "P" } : undefined,
+      key === "keyBindings" ? { "session-next": "M", "session-go": "G" } : undefined,
     );
     await mount();
     const card = () => screen.getByTestId("hands-free-keyboard");
-    await waitFor(() => expect(within(card()).getByText("P")).toBeInTheDocument());
-    expect(within(card()).queryByText("Space")).toBeNull();
+    await waitFor(() => expect(keysOn(card(), "Next step")).toEqual(["M"]));
+    expect(keysOn(card(), "Start or end the Take, or press the big button")).toEqual([
+      ...keysFor("play"),
+      "G",
+    ]);
+  });
+
+  it("shows the pedal's tap, double and hold, and what a tap does in the tools", async () => {
+    await mount();
+    const legend = screen.getByTestId("hands-free-legend");
+    for (const [gesture, does] of [
+      ["Tap", "The big button"],
+      ["Double tap", "Slower"],
+      ["Hold", "Next"],
+    ]) {
+      expect(within(legend).getByText(gesture)).toBeInTheDocument();
+      expect(within(legend).getByText(does)).toBeInTheDocument();
+    }
+    expect(
+      within(screen.getByTestId("hands-free-pedal")).getByText(
+        "Outside a Session, a tap plays and stops the tools.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the tools' keys, folded away and without the tab keys", async () => {
+    await mount();
+    const tools = screen.getByTestId("hands-free-tools");
+    expect(tools.tagName).toBe("DETAILS");
+    expect(tools).not.toHaveAttribute("open");
+    for (const id of ["play", "bpm-up", "bpm-down", "toggle-coach"]) {
+      expect(keysOn(tools, i18n.t(`settings.hotkeys.actions.${id}`)), id).toEqual(keysFor(id));
+    }
+    for (const id of ["tab-1", "tab-2"]) {
+      expect(within(tools).queryByText(i18n.t(`settings.hotkeys.actions.${id}`))).toBeNull();
+    }
   });
 });
 
@@ -134,7 +177,7 @@ describe("W3 — MIDI card", () => {
       ).toBeInTheDocument(),
     );
     expect(
-      within(midiCard()).queryByRole("button", { name: "Map Play/Stop" }),
+      within(midiCard()).queryByRole("button", { name: "Map the pedal" }),
     ).toBeNull();
   });
 
@@ -149,7 +192,7 @@ describe("W3 — MIDI card", () => {
     expect(within(midiCard()).queryByText(/Plug one in any time/)).toBeNull();
   });
 
-  it("maps the pressed pedal to Play/Stop and confirms what it captured", async () => {
+  it("maps the pressed pedal to the Session's one-pedal action and confirms it", async () => {
     let bindings: MidiBinding[] = [];
     setInvokeResponse("list_midi_devices", [PEDAL]);
     setInvokeResponse("get_midi_bindings", () => bindings);
@@ -165,13 +208,13 @@ describe("W3 — MIDI card", () => {
     });
 
     await mount();
-    const map = await within(midiCard()).findByRole("button", { name: "Map Play/Stop" });
+    const map = await within(midiCard()).findByRole("button", { name: "Map the pedal" });
     act(() => {
       map.click();
     });
     await waitFor(() =>
       expect(
-        within(midiCard()).getByText("Press the pedal you want for Play/Stop."),
+        within(midiCard()).getByText("Press the pedal you want to use."),
       ).toBeInTheDocument(),
     );
 
@@ -179,7 +222,7 @@ describe("W3 — MIDI card", () => {
 
     await waitFor(() =>
       expect(mockInvoke).toHaveBeenCalledWith("set_midi_binding", {
-        action: "play",
+        action: "session-pedal",
         channel: 0,
         msgType: "cc",
         number: 64,
@@ -188,14 +231,14 @@ describe("W3 — MIDI card", () => {
     // The confirmation names the captured signal, 1-based channel like the
     // input tester.
     expect(
-      await within(midiCard()).findByText("Play/Stop → CC #64 · channel 1"),
+      await within(midiCard()).findByText("Pedal → CC #64 · channel 1"),
     ).toBeInTheDocument();
   });
 
   it("connects a device that is present but not open before listening", async () => {
     setInvokeResponse("list_midi_devices", [{ ...PEDAL, isConnected: false }]);
     await mount();
-    const map = await within(midiCard()).findByRole("button", { name: "Map Play/Stop" });
+    const map = await within(midiCard()).findByRole("button", { name: "Map the pedal" });
     act(() => {
       map.click();
     });
@@ -217,6 +260,7 @@ describe("W3 — the cards never navigate", () => {
     const controls = [
       ...within(midiCard()).getAllByRole("button"),
       ...within(screen.getByTestId("hands-free-keyboard")).queryAllByRole("button"),
+      ...within(screen.getByTestId("hands-free-tools")).queryAllByRole("button"),
       ...within(screen.getByTestId("hands-free-gamepad")).queryAllByRole("button"),
     ];
     expect(controls.length).toBeGreaterThan(0);

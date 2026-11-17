@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "双手一直留在乐器上",
-      "subtitle": "这些按键已经可用。如果你有踏板或手柄，现在就能把播放/停止映射上去。",
+      "subtitle": "在练习课中，这些按键已经可以用了。一个脚踏开关也能控制练习课，在工具里它照样负责播放和停止。",
       "cancel": "取消",
       "keyboard": {
-        "title": "键盘",
         "hint": "所有按键都可在设置 → 快捷键中修改。"
       },
       "midi": {
         "title": "MIDI 踏板",
         "none": "随时插上即可 — Yames 会主动提示映射。",
-        "map": "映射播放/停止",
+        "map": "绑定踏板",
         "remap": "改用别的踏板",
-        "listening": "踩下你想用来播放/停止的踏板。",
-        "mapped": "播放/停止 → {{signal}} · 通道 {{channel}}"
+        "listening": "踩下你想用的踏板。",
+        "mapped": "踏板 → {{signal}} · 通道 {{channel}}"
       },
       "gamepad": {
         "title": "手柄",
         "none": "随时连接手柄 — 按一个键，Yames 就能看到它。",
-        "map": "映射播放/停止",
+        "map": "绑定按钮",
         "remap": "改用别的按键",
-        "listening": "按下你想用来播放/停止的按键。",
-        "mapped": "播放/停止 → {{button}}"
+        "listening": "按下要当作踏板的按钮。",
+        "mapped": "踏板 → {{button}}"
+      },
+      "session": {
+        "title": "练习课中",
+        "go": "开始或结束这一遍：大按钮",
+        "faster": "更快（两遍之间）",
+        "slower": "更慢（两遍之间）",
+        "next": "下一步",
+        "or": "或"
+      },
+      "pedal": {
+        "title": "一个脚踏开关",
+        "tools": "在练习课之外，踩一下即可播放或停止工具。"
+      },
+      "tools": {
+        "title": "在工具中"
       }
     },
     "coach": {

@@ -532,6 +532,85 @@
   font-size: 0.75rem;
 }
 
+/* The Session leads (2026-11-17): "A or B" on one row, the pedal's legend,
+   a MIDI and a gamepad block inside the one footswitch card, and the tools'
+   keys folded into a closed <details>. */
+.onboarding-hf-key-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.onboarding-hf-or {
+  margin: 0 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.onboarding-hf-key-label {
+  min-width: 0;
+}
+
+.onboarding-hf-legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.onboarding-hf-legend-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+
+.onboarding-hf-legend-row dt {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.onboarding-hf-legend-row dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.onboarding-hf-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.onboarding-hf-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.onboarding-hf-tools > summary {
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.onboarding-hf-tools[open] > summary {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 420px) {
+  .onboarding-hf-legend {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 
 /* ---- W4 practice coach ----
    Three full-width option cards (they carry a paragraph each, so the W2 grid

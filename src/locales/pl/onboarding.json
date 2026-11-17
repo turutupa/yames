@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "Ręce zostają na instrumencie",
-      "subtitle": "Te klawisze już działają. Jeśli masz przełącznik nożny lub pada, przypisz go tutaj do Odtwarzaj/Zatrzymaj.",
+      "subtitle": "W sesji te klawisze już działają. Jeden przełącznik nożny też poprowadzi sesję, a w narzędziach nadal uruchamia i zatrzymuje granie.",
       "cancel": "Anuluj",
       "keyboard": {
-        "title": "Klawiatura",
         "hint": "Każdy klawisz zmienisz w Ustawieniach → Skróty klawiszowe."
       },
       "midi": {
         "title": "Przełącznik nożny MIDI",
         "none": "Podłącz go kiedy chcesz — Yames zaproponuje przypisanie.",
-        "map": "Przypisz Odtwarzaj/Zatrzymaj",
+        "map": "Przypisz pedał",
         "remap": "Przypisz inny pedał",
-        "listening": "Naciśnij pedał, który ma odtwarzać i zatrzymywać.",
-        "mapped": "Odtwarzaj/Zatrzymaj → {{signal}} · kanał {{channel}}"
+        "listening": "Naciśnij pedał, którego chcesz używać.",
+        "mapped": "Pedał → {{signal}} · kanał {{channel}}"
       },
       "gamepad": {
         "title": "Pad",
         "none": "Podłącz pada kiedy chcesz — naciśnij przycisk, a Yames go wykryje.",
-        "map": "Przypisz Odtwarzaj/Zatrzymaj",
+        "map": "Przypisz przycisk",
         "remap": "Przypisz inny przycisk",
-        "listening": "Naciśnij przycisk, który ma odtwarzać i zatrzymywać.",
-        "mapped": "Odtwarzaj/Zatrzymaj → {{button}}"
+        "listening": "Naciśnij przycisk, który ma działać jak pedał.",
+        "mapped": "Pedał → {{button}}"
+      },
+      "session": {
+        "title": "W sesji",
+        "go": "Zacznij lub zakończ podejście: duży przycisk",
+        "faster": "Szybciej, między podejściami",
+        "slower": "Wolniej, między podejściami",
+        "next": "Następny krok",
+        "or": "lub"
+      },
+      "pedal": {
+        "title": "Jeden przełącznik nożny",
+        "tools": "Poza sesją stuknięcie uruchamia i zatrzymuje narzędzia."
+      },
+      "tools": {
+        "title": "W narzędziach"
       }
     },
     "coach": {
