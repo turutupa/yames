@@ -53,6 +53,46 @@ new behaviour.
   approached by any tone here at a sane input level. They are design values
   until a real rig has been through them.
 
+## How long a Take is, and the slack in it (owner, 2026-11-17)
+
+Not a measurement: the rule the numbers below are judged under.
+
+- **A Take is the stretch it is judged over, plus two bars of slack.**
+  `takeBarsOf` in `src/session/grade.ts`: `max(8, longest overBars) + 2`
+  (`TAKE_SLACK_BARS`), and never less than one whole pass of the Exercise. A
+  one-, two- or four-bar drill is 10 bars; a Stamina minute (`overBars` 16)
+  is 18, the tapping minute (20) is 22; a 12-bar blues is still 12, a 16-bar
+  etude still 16. Until 2026-11-17 it was `max(8, overBars)` rounded up to
+  whole passes, so an 8-bar Take had to hold every bar, and one fluffed bar
+  anywhere lost the clean tempo.
+- **The last pass can stop part-way.** Rounding up to whole passes would make
+  a 4-bar lick 12 bars and a 16-bar Stamina pattern 32, so the Take is cut on
+  the bar line instead (`take.ts` `writtenOut`): a 4-bar lick plays two and a
+  half times. Nothing depends on whole passes: the scorer reads the
+  schedule's own length (`score.rs` `finished_bars_of`), the band plays bar
+  `b` of its chart as `b mod form` (`takeBand.ts`), a note never crosses a bar
+  line in a pack, and the engine stops on the last bar's sample.
+- **Any 8 clean bars in a row earn the clean tempo, and pass.** `pass.rs`
+  slides its `W`-bar window one bar at a time over the finished bars, and
+  `heldBars` is the run of windows that held; 8 or more counts. So the first
+  or the last bar of a 10-bar Take (or both, or the first two) can be fluffed
+  and the Take still counts; a bad bar in the middle of a 10-bar Take leaves
+  no 8 in a row, and it passes without moving the clean tempo. The TypeScript
+  fallback (`grade.ts`, a build without `pass`) asks the same: its clean tempo
+  needs the best 8-bar stretch of per-bar evenness to meet the bar.
+- **`evennessHold` reads the end of the stretch, not of the Take**, so a
+  Stamina minute whose 16 bars held is not lost to a fluffed bar in the slack.
+- Every graded Exercise of every runnable Path is played as a Session Take of
+  the new length in `path_exercises.rs`, clean, with the first bar fluffed and
+  with the last: all pass and count. `tests/e2e` plays a Take whose first bar
+  is 80 ms of scatter in the real app.
+- **Benchmarks** (days 1, 7, 14, 21) play the same Exercise at the same tempo,
+  and from 2026-11-17 at the new length. What they compare is ratios (evenness,
+  notes heard per notes due, extras per four bars) and the clean verdict, which
+  the length does not change; counts of notes do change (an 8-bar Take of 32
+  notes is a 10-bar Take of 40). A benchmark row keeps its `bars`, so a
+  before-and-after pair across the change can be told apart.
+
 ## Open, for the first real recordings
 
 - The known-score refractory is at 0.5 (`onset.rs`). If real takes show extra
@@ -66,7 +106,8 @@ new behaviour.
 Not synthetic tones through the fixtures: the built app on Linux (`tests/e2e`,
 scenario `blues-band`), a Karplus-Strong guitar into a virtual input, "A on
 every downbeat" (Blues and Pentatonics, a Texas shuffle, drums and bass from
-`src/session/takeBand.ts`), 8 bars, Takes at 70, 80 and 90 BPM.
+`src/session/takeBand.ts`), 8 bars (the Take length until 2026-11-17; it is
+10 now), Takes at 70, 80 and 90 BPM.
 
 | Take | band 0.8, no bleed | band at 0 (click) | band 0.8, bleed -20 dB | band 0.8, bleed -30 dB |
 |---|---|---|---|---|

@@ -47,7 +47,10 @@ function seriesFrom(session: SessionRun): Series[] {
       const measured = factsOf(take).measures?.evenness;
       if (take.caught && typeof measured === "number") evenness.push(measured);
       const best = clean[clean.length - 1]?.bpm ?? 0;
-      if (take.passed && take.bars >= CLEAN_TEMPO_MIN_BARS && take.bpm > best) {
+      // Clean is 8 bars in a row that held, not 8 bars played: the scorer's own
+      // word when the row kept it, and the bars played for an older row.
+      const counted = factsOf(take).measures?.pass?.countsForCleanTempo ?? take.bars >= CLEAN_TEMPO_MIN_BARS;
+      if (take.passed && counted && take.bpm > best) {
         clean.push({ at: take.startedAt, bpm: take.bpm });
       }
     }

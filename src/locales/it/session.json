@@ -178,8 +178,8 @@
       "recap": "Limite"
     },
     "coach": {
-      "passed": "Sentite {{heard}} note su {{expected}}, regolari per {{bars}} battute a {{bpm}} BPM.",
-      "passedExtras": "Sentite {{heard}} note su {{expected}}, regolari per {{bars}} battute, con {{extras}} in più.",
+      "passed": "Sentite {{heard}} note su {{expected}}, regolari per {{bars}} battute di fila a {{bpm}} BPM.",
+      "passedExtras": "Sentite {{heard}} note su {{expected}}, regolari per {{bars}} battute di fila, con {{extras}} in più.",
       "heardNothing": "Non ho sentito niente.",
       "heardLittle": "Ho sentito {{heard}} note su {{expected}}.",
       "tooShort": "Erano {{bars}} battute, troppo poche per giudicare. Serve la take intera.",
@@ -291,8 +291,8 @@
       "cleanTempo": "Tempo pulito",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Tempo pulito nel tempo, {{title}}",
-      "cleanMeans": "Il tempo più veloce a cui hai superato l'asticella, per almeno otto battute.",
-      "noClean": "Ancora nessun tempo pulito. Serve una take che superi l'asticella per otto battute.",
+      "cleanMeans": "Il tempo più veloce a cui hai superato l'asticella, per otto battute di fila qualsiasi.",
+      "noClean": "Ancora nessun tempo pulito. Serve una take che superi l'asticella per otto battute di fila, quali che siano.",
       "exercises": "Esercizi che hai suonato",
       "sparkLabel": "Regolarità nelle varie take, {{title}}"
     },

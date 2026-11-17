@@ -178,8 +178,8 @@
       "recap": "Límite"
     },
     "coach": {
-      "passed": "Oí {{heard}} de {{expected}} notas, regulares durante {{bars}} compases a {{bpm}} BPM.",
-      "passedExtras": "Oí {{heard}} de {{expected}} notas, regulares durante {{bars}} compases, con {{extras}} de más.",
+      "passed": "Oí {{heard}} de {{expected}} notas, regulares durante {{bars}} compases seguidos a {{bpm}} BPM.",
+      "passedExtras": "Oí {{heard}} de {{expected}} notas, regulares durante {{bars}} compases seguidos, con {{extras}} de más.",
       "heardNothing": "No oí nada.",
       "heardLittle": "Oí {{heard}} de {{expected}} notas.",
       "tooShort": "Fueron {{bars}} compases, demasiado poco para juzgar. Hace falta la toma entera.",
@@ -291,8 +291,8 @@
       "cleanTempo": "Tempo limpio",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Tempo limpio a lo largo del tiempo, {{title}}",
-      "cleanMeans": "Lo más rápido a lo que llegaste al listón, durante al menos ocho compases.",
-      "noClean": "Aún no hay tempo limpio. Hace falta una toma que llegue al listón durante ocho compases.",
+      "cleanMeans": "Lo más rápido a lo que llegaste al listón, durante ocho compases seguidos cualesquiera.",
+      "noClean": "Aún no hay tempo limpio. Hace falta una toma que llegue al listón durante ocho compases seguidos, sean cuales sean.",
       "exercises": "Ejercicios que has tocado",
       "sparkLabel": "Regularidad a lo largo de las tomas, {{title}}"
     },

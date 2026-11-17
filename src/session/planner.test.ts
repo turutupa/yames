@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { Exercise, PathDoc } from "../paths/format";
 import {
   BREAK_DAYS,
+  EDGE_MINUTES,
+  MIN_BLOCK_MINUTES,
   PLAN_MINUTES,
+  TEST_OUT_MINUTES,
   planSession,
   rungsToDrop,
   tempoFor,
@@ -13,7 +16,8 @@ import {
 import type { PlanMinutes, PlanStep, SessionPlan } from "./planner";
 import { pickVariantSeed } from "./variants";
 import { RUNNABLE_PATH_IDS, findExercise, isRunnable, laterWhyKey } from "./packs";
-import { buildTake } from "./take";
+import { buildTake, takeSecondsOf } from "./take";
+import { isGradable } from "./progress";
 import { NO_PROGRESS } from "./progress";
 import { ALT, DAY, NOW, SWEEP, ceiling, missed, passed, progress, state, take } from "./testKit";
 
@@ -541,5 +545,48 @@ describe("Test out (QA 2026-11-17 #18)", () => {
     const p = progress({ ceilings: gradable.map((e) => ceiling(e.id, passAt(e))) });
     expect(testOutSteps(ALT, step, p)).toHaveLength(gradable.length);
     expect(testOutRetests(ALT, step, p)).toBe(true);
+  });
+});
+
+describe("a Take fits the minutes it is given", () => {
+  // Every pack, every graded Exercise, at the slowest rung a Session plays it
+  // at: Takes are two bars longer since 2026-11-17 (`grade.ts` TAKE_SLACK_BARS).
+  const packs = Object.values(import.meta.glob("../paths/packs/*.json", { eager: true })).map(
+    (m) => (m as { default: PathDoc }).default,
+  );
+  const graded = packs.flatMap((path) =>
+    path.steps.flatMap((step) => step.exercises.filter(isGradable).map((exercise) => ({ path, exercise }))),
+  );
+
+  it("two Takes at the slowest rung fit the smallest block, and Find my edge's", () => {
+    expect(graded.length).toBeGreaterThan(100);
+    const smallest = Math.min(MIN_BLOCK_MINUTES, EDGE_MINUTES) * 60;
+    for (const { path, exercise } of graded) {
+      const slowest = Math.min(...exercise.tempo.rungs.map((r) => r.bpm));
+      const one = takeSecondsOf(exercise, slowest);
+      const name = `${path.id}/${exercise.id}`;
+      if (exercise.passBars.some((b) => b.overBars >= 16)) {
+        // A Stamina minute is long by design: one Take and a breath in the
+        // smallest block, two in the four minutes a Session's blocks have.
+        expect(one, name).toBeLessThanOrEqual(smallest - 30);
+        expect(2 * one, name).toBeLessThanOrEqual(4 * 60);
+      } else {
+        expect(2 * one, name).toBeLessThanOrEqual(smallest);
+      }
+    }
+  });
+
+  it("one Take at the pass tempo fits Test out's minutes", () => {
+    for (const { path, exercise } of graded) {
+      const seconds = takeSecondsOf(exercise, exercise.tempo.passAtBpm!);
+      expect(seconds, `${path.id}/${exercise.id}`).toBeLessThanOrEqual(TEST_OUT_MINUTES * 60);
+    }
+  });
+
+  it("is the Take's own length: ten bars and a count-in for a one-bar drill", () => {
+    const one = graded.find(({ exercise }) => exercise.bars === 1 && exercise.passBars.every((b) => b.overBars <= 8))!;
+    const quarters = one.exercise.meter.numerator * (4 / one.exercise.meter.denominator);
+    expect(takeSecondsOf(one.exercise, 60)).toBeCloseTo((10 + 1) * quarters, 6);
+    expect(buildTake(one.path, one.exercise, 60).bars).toBe(10);
   });
 });

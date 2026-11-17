@@ -113,9 +113,11 @@ export function takeLine(grade: TakeGrade, measures: TakeMeasures, bpm: number):
     case "ungraded":
       return { key: "session.coach.ungraded", values };
     case "passed":
+      // "Even across" is the stretch that held, which with a Take's slack bars
+      // (`grade.ts` `TAKE_SLACK_BARS`) can be shorter than the Take.
       return {
         key: measures.extras > 0 ? "session.coach.passedExtras" : "session.coach.passed",
-        values,
+        values: { ...values, bars: measures.pass?.heldBars || measures.barsPlayed },
       };
     case "belowBar": {
       const check = grade.headline;

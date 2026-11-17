@@ -5338,7 +5338,7 @@
             "Straight eighths and sixteenths, 60 BPM up to a pass at 85.",
             "Bar 1 climbs A, C, D, E, G, A. Bar 2 holds the E and A double stop, then G, E, D, C. Bars 3 and 4 answer low. Bars 5 and 6 are the sixteenth runs from Step 2. Bars 7 and 8 come home to the high A."
           ],
-          "coachLine": "Written notes: right notes, notes heard and time over all eight bars, after the take.",
+          "coachLine": "Written notes: right notes, notes heard and time over any eight bars in a row, after the take.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {
@@ -5497,7 +5497,7 @@
             "Straight eighths, triplets and a double stop, 60 BPM up to a pass at 85.",
             "Bars 9 and 10: C, A, G twice, then G, E, D twice. Bar 11: the triplet repeat A, G, E. Bar 12: two double stops, then G, E, D, C. Bars 13 to 15 come down the box to the low strings, and bar 16 holds E."
           ],
-          "coachLine": "Written notes: right notes, notes heard and time over all eight bars.",
+          "coachLine": "Written notes: right notes, notes heard and time over any eight bars in a row.",
           "grading": "graded",
           "feedback": "afterTake",
           "meter": {

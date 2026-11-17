@@ -178,8 +178,8 @@
       "recap": "限界"
     },
     "coach": {
-      "passed": "{{expected}} 音中 {{heard}} 音を聞き取れました。{{bpm}} BPM で {{bars}} 小節、均等に弾けています。",
-      "passedExtras": "{{expected}} 音中 {{heard}} 音を聞き取れました。{{bars}} 小節均等に弾けていますが、余分な音が {{extras}} 個ありました。",
+      "passed": "{{expected}} 音中 {{heard}} 音を聞き取れました。{{bpm}} BPM で {{bars}} 小節続けて、均等に弾けています。",
+      "passedExtras": "{{expected}} 音中 {{heard}} 音を聞き取れました。{{bars}} 小節続けて均等に弾けていますが、余分な音が {{extras}} 個ありました。",
       "heardNothing": "何も聞こえませんでした。",
       "heardLittle": "{{expected}} 音中 {{heard}} 音しか聞き取れませんでした。",
       "tooShort": "{{bars}} 小節では短すぎて判定できません。テイクを最後まで弾いてください。",
@@ -284,8 +284,8 @@
       "cleanTempo": "クリーンテンポ",
       "bpmOn": "BPM、{{title}}",
       "chartLabel": "クリーンテンポの推移、{{title}}",
-      "cleanMeans": "8 小節以上にわたって合格ラインに届いた最速のテンポです。",
-      "noClean": "クリーンテンポはまだありません。8 小節にわたって合格ラインに届くテイクが必要です。",
+      "cleanMeans": "どこでもよいので 8 小節続けて合格ラインに届いた最速のテンポです。",
+      "noClean": "クリーンテンポはまだありません。どこでもよいので 8 小節続けて合格ラインに届くテイクが必要です。",
       "exercises": "弾いた課題",
       "sparkLabel": "テイクごとの均等さ、{{title}}"
     },

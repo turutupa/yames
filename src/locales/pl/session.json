@@ -178,8 +178,8 @@
       "recap": "Limit"
     },
     "coach": {
-      "passed": "Usłyszane nuty: {{heard}} z {{expected}}, równo w {{bars}} taktach przy {{bpm}} BPM.",
-      "passedExtras": "Usłyszane nuty: {{heard}} z {{expected}}, równo w {{bars}} taktach, dodatkowe: {{extras}}.",
+      "passed": "Usłyszane nuty: {{heard}} z {{expected}}, równo w {{bars}} kolejnych taktach przy {{bpm}} BPM.",
+      "passedExtras": "Usłyszane nuty: {{heard}} z {{expected}}, równo w {{bars}} kolejnych taktach, dodatkowe: {{extras}}.",
       "heardNothing": "Nic nie usłyszałem.",
       "heardLittle": "Usłyszałem {{heard}} z {{expected}} nut.",
       "tooShort": "Takty: {{bars}}. Za krótko, żeby ocenić. Potrzebne jest całe podejście.",
@@ -298,8 +298,8 @@
       "cleanTempo": "Czyste tempo",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Czyste tempo w czasie, {{title}}",
-      "cleanMeans": "Najszybsze tempo, przy którym przeskoczyłeś poprzeczkę, przez co najmniej osiem taktów.",
-      "noClean": "Jeszcze bez czystego tempa. Potrzebne jest podejście, które przeskoczy poprzeczkę przez osiem taktów.",
+      "cleanMeans": "Najszybsze tempo, przy którym przeskoczyłeś poprzeczkę przez dowolne osiem taktów z rzędu.",
+      "noClean": "Jeszcze bez czystego tempa. Potrzebne jest podejście, które przeskoczy poprzeczkę przez dowolne osiem taktów z rzędu.",
       "exercises": "Ćwiczenia, które grałeś",
       "sparkLabel": "Równość w kolejnych podejściach, {{title}}"
     },

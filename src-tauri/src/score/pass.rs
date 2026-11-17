@@ -27,8 +27,13 @@
 //!   least 8 bars) when it passed and `heldBars` is at least
 //!   [`CLEAN_TEMPO_MIN_BARS`].
 //! * `evennessHold` is the exception to pooling: it is evenness over the last
-//!   `overBars` finished bars of the Take, whichever window is being judged,
-//!   because what it asks is whether the playing held to the end.
+//!   `overBars` bars of the window being judged, because what it asks is
+//!   whether the playing held to the end of the stretch. Not the end of the
+//!   Take: a Take has two bars of slack (`TAKE_SLACK_BARS` in
+//!   `src/session/grade.ts`, owner 2026-11-17), and a Stamina minute whose
+//!   sixteen bars held should not be lost to a fluffed bar after them.
+//! * Windows slide one bar at a time, so any `W` consecutive finished bars can
+//!   be the ones that hold, wherever they fall in the Take.
 //! * `noteIdentity` is measured only when the pitch pass ran over the Take's
 //!   own audio (`score::notes`) and can be believed: see [`notes_status`].
 //!   Over a window it is the share of the notes that had a pitch that were the
@@ -324,7 +329,7 @@ pub fn evaluate(
         .map(|s| {
             assessed
                 .iter()
-                .map(|b| check(b, &bars[s..s + w], bars, gap_ms))
+                .map(|b| check(b, &bars[s..s + w], gap_ms))
                 .collect()
         })
         .collect();
@@ -370,9 +375,8 @@ pub fn evaluate(
     Some(out)
 }
 
-/// One pass bar over one window. `take` is every finished bar, for the one
-/// metric that reads the end of the Take rather than the window.
-fn check(bar: &PassBar, window: &[BarSample], take: &[BarSample], gap_ms: f64) -> BarCheck {
+/// One pass bar over one window.
+fn check(bar: &PassBar, window: &[BarSample], gap_ms: f64) -> BarCheck {
     let measured = match bar.metric.as_str() {
         // Pooled evenness is a median, so one sloppy bar can hide inside a
         // window. The window's value is therefore the lower of the pooled
@@ -402,8 +406,8 @@ fn check(bar: &PassBar, window: &[BarSample], take: &[BarSample], gap_ms: f64) -
             (pitched >= NOTES_MIN_WINDOW_PITCHED).then(|| sum.right as f64 / pitched as f64)
         }
         EVENNESS_HOLD => {
-            let last = (bar.over_bars.max(1) as usize).min(take.len());
-            pooled_evenness(&take[take.len() - last..], gap_ms)
+            let last = (bar.over_bars.max(1) as usize).min(window.len());
+            pooled_evenness(&window[window.len() - last..], gap_ms)
         }
         _ => None,
     };
@@ -674,7 +678,7 @@ mod tests {
     }
 
     #[test]
-    fn evenness_hold_reads_the_end_of_the_take() {
+    fn evenness_hold_reads_the_end_of_the_stretch() {
         let bars_spec = vec![
             bar(TIMING_EVENNESS, Some(0.8), None, 16),
             bar(NOTES_HEARD, Some(0.9), None, 16),
@@ -693,6 +697,53 @@ mod tests {
         assert_eq!(r.verdict, PassVerdict::Failed);
         let hold = r.checks.iter().find(|c| c.metric == EVENNESS_HOLD).unwrap();
         assert!(!hold.held);
+    }
+
+    /// Owner, 2026-11-17: a Take has two bars of slack, and a Stamina minute
+    /// whose sixteen bars held is not lost to the bars after them.
+    #[test]
+    fn a_stamina_take_keeps_its_slack_at_the_end() {
+        let bars_spec = vec![
+            bar(TIMING_EVENNESS, Some(0.8), None, 16),
+            bar(NOTES_HEARD, Some(0.9), None, 16),
+            bar(EVENNESS_HOLD, Some(0.75), None, 4),
+        ];
+        let mut bars = vec![clean(3.0); 18];
+        bars[16] = sloppy();
+        bars[17] = sloppy();
+        let r = evaluate(&bars, &bars_spec, GAP, true, false).unwrap();
+        assert_eq!(r.verdict, PassVerdict::Passed, "{r:?}");
+        assert_eq!((r.held_bars, r.held_from_bar), (16, Some(0)));
+        assert!(r.counts_for_clean_tempo);
+        // And at the start.
+        let mut bars = vec![clean(3.0); 18];
+        bars[0] = sloppy();
+        let r = evaluate(&bars, &bars_spec, GAP, true, false).unwrap();
+        assert_eq!((r.held_bars, r.held_from_bar), (17, Some(1)));
+        assert!(r.counts_for_clean_tempo);
+    }
+
+    /// Owner, 2026-11-17: any 8 clean bars in a row earn the clean tempo. A
+    /// ten-bar Take with one fluffed bar at either end, or two, still does.
+    #[test]
+    fn any_eight_clean_bars_in_a_row_of_a_ten_bar_take_count() {
+        for sloppy_at in [vec![0], vec![9], vec![0, 9], vec![0, 1], vec![8, 9]] {
+            let mut bars = vec![clean(3.0); 10];
+            for &i in &sloppy_at {
+                bars[i] = sloppy();
+            }
+            let r = evaluate(&bars, &alternate_picking(), GAP, true, false).unwrap();
+            assert_eq!(r.verdict, PassVerdict::Passed, "{sloppy_at:?}: {r:?}");
+            assert!(r.held_bars >= CLEAN_TEMPO_MIN_BARS, "{sloppy_at:?}: {r:?}");
+            assert!(r.counts_for_clean_tempo, "{sloppy_at:?}: {r:?}");
+        }
+        // A fluffed bar in the middle leaves no eight in a row: it passes on a
+        // shorter stretch, and the clean tempo waits.
+        let mut bars = vec![clean(3.0); 10];
+        bars[4] = sloppy();
+        let r = evaluate(&bars, &alternate_picking(), GAP, true, false).unwrap();
+        assert_eq!(r.verdict, PassVerdict::Passed);
+        assert!(!r.counts_for_clean_tempo, "{r:?}");
     }
 
     #[test]

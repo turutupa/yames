@@ -289,6 +289,10 @@ export type BenchmarkDue = ExercisePick & { day: number; bpm: number };
  * Days 1, 7, 14 and 21 since it was subscribed: the same Exercise at the same
  * tempo every time, fixed by the first one (the Exercise its first Session was
  * on, at its clean tempo then or its first rung), so the four can be compared.
+ * A Take's length is `takeBarsOf`'s like any other: two bars longer from
+ * 2026-11-17 (owner), so a pair across that date compares ratios (evenness,
+ * notes heard per due, the clean verdict), not note counts. The rows keep their
+ * `bars`.
  * A missed day is skipped rather than made up late: the latest day reached is
  * the one due, unless it or a later one is already on record.
  */

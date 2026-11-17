@@ -178,8 +178,8 @@
       "recap": "Sınır"
     },
     "coach": {
-      "passed": "{{expected}} notadan {{heard}} tanesi duyuldu, {{bpm}} BPM'de {{bars}} ölçü boyunca düzgün.",
-      "passedExtras": "{{expected}} notadan {{heard}} tanesi duyuldu, {{bars}} ölçü boyunca düzgün, {{extras}} fazla nota ile.",
+      "passed": "{{expected}} notadan {{heard}} tanesi duyuldu, {{bpm}} BPM'de art arda {{bars}} ölçü boyunca düzgün.",
+      "passedExtras": "{{expected}} notadan {{heard}} tanesi duyuldu, art arda {{bars}} ölçü boyunca düzgün, {{extras}} fazla nota ile.",
       "heardNothing": "Hiçbir şey duymadım.",
       "heardLittle": "{{expected}} notadan {{heard}} tanesini duydum.",
       "tooShort": "Bu {{bars}} ölçüydü, değerlendirmek için çok kısa. Denemenin tamamı gerekiyor.",
@@ -284,8 +284,8 @@
       "cleanTempo": "Temiz tempo",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Zaman içinde temiz tempo, {{title}}",
-      "cleanMeans": "En az sekiz ölçü boyunca çıtayı geçtiğin en hızlı tempo.",
-      "noClean": "Henüz temiz tempo yok. Sekiz ölçü boyunca çıtayı geçen bir deneme gerekiyor.",
+      "cleanMeans": "Herhangi art arda sekiz ölçü boyunca çıtayı geçtiğin en hızlı tempo.",
+      "noClean": "Henüz temiz tempo yok. Herhangi art arda sekiz ölçü boyunca çıtayı geçen bir deneme gerekiyor.",
       "exercises": "Çaldığın alıştırmalar",
       "sparkLabel": "Denemeler boyunca düzgünlük, {{title}}"
     },

@@ -178,8 +178,8 @@
       "recap": "Limite"
     },
     "coach": {
-      "passed": "{{heard}} notes entendues sur {{expected}}, régulières sur {{bars}} mesures à {{bpm}} BPM.",
-      "passedExtras": "{{heard}} notes entendues sur {{expected}}, régulières sur {{bars}} mesures, avec {{extras}} en trop.",
+      "passed": "{{heard}} notes entendues sur {{expected}}, régulières sur {{bars}} mesures d'affilée à {{bpm}} BPM.",
+      "passedExtras": "{{heard}} notes entendues sur {{expected}}, régulières sur {{bars}} mesures d'affilée, avec {{extras}} en trop.",
       "heardNothing": "Je n'ai rien entendu.",
       "heardLittle": "J'ai entendu {{heard}} notes sur {{expected}}.",
       "tooShort": "C'était {{bars}} mesures, trop court pour juger. Il faut la prise entière.",
@@ -291,8 +291,8 @@
       "cleanTempo": "Tempo propre",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Tempo propre au fil du temps, {{title}}",
-      "cleanMeans": "Le tempo le plus rapide où tu as atteint le seuil, sur au moins huit mesures.",
-      "noClean": "Pas encore de tempo propre. Il faut une prise qui atteint le seuil sur huit mesures.",
+      "cleanMeans": "Le tempo le plus rapide où tu as atteint le seuil, sur n'importe quelles huit mesures d'affilée.",
+      "noClean": "Pas encore de tempo propre. Il faut une prise qui atteint le seuil sur n'importe quelles huit mesures d'affilée.",
       "exercises": "Exercices que tu as joués",
       "sparkLabel": "Régularité au fil des prises, {{title}}"
     },

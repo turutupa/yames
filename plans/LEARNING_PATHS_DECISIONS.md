@@ -195,6 +195,18 @@ by whom, and what the code assumed without a decision.
 - **C5.** Clean tempo is the highest tempo at which a Take on that Exercise
   passes its bar over at least 8 bars. One number per Exercise. The rule is
   `src-tauri/src/score/pass.rs`.
+- **C5, amended 2026-11-17: the Take has slack.** With a Take exactly as long
+  as the 8 bars, one fluffed bar anywhere lost the clean tempo. The owner
+  decided: Takes get **2 bars of slack** (`TAKE_SLACK_BARS` in
+  `src/session/grade.ts`), and **any 8 consecutive clean bars** earn the clean
+  tempo and pass. A Take is `max(8, longest overBars) + 2` bars and at least
+  one whole pass of the Exercise; Stamina minutes get the same +2 (18 bars).
+  Chosen in the code: the last pass of a short pattern is cut on a bar line
+  rather than rounded up to whole passes (a 4-bar lick is 10 bars, not 12; a
+  16-bar Stamina pattern 18, not 32); `evennessHold` reads the end of the held
+  stretch rather than of the Take. Benchmark Takes are the new length from
+  this date; their ratios stay comparable, their note counts do not
+  (`plans/revamp/GRADING_LIMITS.md`, "How long a Take is").
 - **C1, in part.** First Mechanics grading needs a mic or direct input; tap
   input is cut.
 - **E2, in part.** Plain code decides; the coach only narrates what was

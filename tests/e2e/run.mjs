@@ -288,7 +288,7 @@ async function playTake(d, exercise, style, label, { band = false } = {}) {
     exerciseBars: exercise.bars,
     bars: takeBars(exercise),
     style,
-    seed: style === "sloppy" || style === "sloppier" ? 11 : 7,
+    seed: style === "sloppy" || style === "sloppier" || style === "fluffed" ? 11 : 7,
   });
   // What the scorer said about each note as it went, for the record: a
   // step in these is a stall somewhere in the audio path.
@@ -482,6 +482,28 @@ async function scenarioSession() {
     check("silent take: the result says it didn't catch enough", /didn.t catch enough/i.test(silent.text), firstLines(silent.text, /catch/));
     check("silent take: saved as not caught", silentRow?.caught === 0 && silentRow?.passed === 0,
       silentRow ? `noCatchReason ${silentRow.facts.measures.noCatchReason}` : "no row");
+
+    // 4. The first bar fluffed (80 ms of scatter), the rest clean, at the tempo
+    //    the sloppy take failed: the Take's two bars of slack (owner,
+    //    2026-11-17) leave the bad bar behind, and the clean bars in a row
+    //    after it pass and earn the clean tempo.
+    await d.clickText(/^(Go again|Again,)/);
+    const fluffed = await playTake(d, exercise, "fluffed", "fluffed first bar");
+    const fluffedRow = takesOf(exercise.id).at(-1);
+    const fluffedPass = fluffedRow?.facts?.measures?.pass;
+    const firstBar = fluffedRow?.facts?.measures?.barEvenness?.[0];
+    check("fluffed first bar: the Take is the new length", fluffedPass?.finishedBars === takeBars(exercise),
+      `finished ${fluffedPass?.finishedBars} of ${takeBars(exercise)} bars`);
+    check("fluffed first bar: the result says the bar was met", /PASS BAR MET/i.test(fluffed.text) && fluffedRow?.passed === 1,
+      firstLines(fluffed.text, /BPM ·/));
+    check("fluffed first bar: it counts toward the clean tempo, from the bars after it",
+      fluffedPass?.countsForCleanTempo === true && fluffedPass.heldBars >= 8 && (fluffedPass.heldFromBar ?? 0) >= 1,
+      `heldBars ${fluffedPass?.heldBars} from bar ${fluffedPass?.heldFromBar}, first bar's evenness ${fmt(firstBar)}`);
+    check("fluffed first bar: the clean tempo moved up to its tempo",
+      cleanTempo(ceilingKey) === fluffed.bpm && fluffed.bpm > good.bpm, `clean tempo ${cleanTempo(ceilingKey)}, take ${fluffed.bpm} BPM`);
+    info.fluffedTake = fluffedRow?.facts?.measures;
+    // What Progress must show after a restart: the clean tempo as it now stands.
+    info.session.cleanBpm = cleanTempo(ceilingKey);
 
     await d.clickText(/^Exit$/);
     await d.waitText(/How long have you got/, 15000);

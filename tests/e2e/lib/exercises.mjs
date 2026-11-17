@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const CLEAN_TEMPO_MIN_BARS = 8; // src/session/grade.ts
+const TAKE_SLACK_BARS = 2; // src/session/grade.ts
 
 export function loadPath(id = "alternate-picking") {
   return JSON.parse(readFileSync(join(repo, "src", "paths", "packs", `${id}.json`), "utf8"));
@@ -59,9 +60,8 @@ export function exerciseOnScreen({ heading, page, pathTitle }, paths) {
 
 /** `takeBarsOf` in src/session/grade.ts. */
 export function takeBars(ex) {
-  const bars = Math.max(1, ex.bars);
   const asked = ex.passBars.reduce((m, b) => Math.max(m, b.overBars), 0);
-  return Math.ceil(Math.max(CLEAN_TEMPO_MIN_BARS, asked) / bars) * bars;
+  return Math.max(Math.max(1, ex.bars), Math.max(CLEAN_TEMPO_MIN_BARS, asked) + TAKE_SLACK_BARS);
 }
 
 export function barTicks(ex) {

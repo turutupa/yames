@@ -178,8 +178,8 @@
       "recap": "Edge"
     },
     "coach": {
-      "passed": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars at {{bpm}} BPM.",
-      "passedExtras": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars, with {{extras}} extra.",
+      "passed": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars in a row at {{bpm}} BPM.",
+      "passedExtras": "Heard {{heard}} of {{expected}} notes, even across {{bars}} bars in a row, with {{extras}} extra.",
       "heardNothing": "I didn't hear anything.",
       "heardLittle": "I heard {{heard}} of {{expected}} notes.",
       "tooShort": "That was {{bars}} bars, too short to judge. It takes the whole Take.",
@@ -284,8 +284,8 @@
       "cleanTempo": "Clean tempo",
       "bpmOn": "BPM, {{title}}",
       "chartLabel": "Clean tempo over time, {{title}}",
-      "cleanMeans": "The fastest you met the bar, over at least eight bars.",
-      "noClean": "No clean tempo yet. It takes a Take that meets the bar over eight bars.",
+      "cleanMeans": "The fastest you met the bar, over any eight bars in a row.",
+      "noClean": "No clean tempo yet. It takes a Take that meets the bar over any eight bars in a row.",
       "exercises": "Exercises you've played",
       "sparkLabel": "Evenness across Takes, {{title}}"
     },
