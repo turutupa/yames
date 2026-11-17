@@ -313,7 +313,8 @@
       "between": "Zmieniaj widok między podejściami"
     },
     "runway": {
-      "label": "Kolejne nuty zbliżające się do linii"
+      "label": "Kolejne nuty zbliżające się do linii",
+      "later": "Pas rusza razem z podejściem. Najpierw ułóż tu rękę; potem nuty nadjeżdżają z prawej, a każdą grasz, gdy dotrze do linii."
     },
     "inputChanged": "Wejście się zmieniło. Teraz słucham przez {{device}}.",
     "export": {

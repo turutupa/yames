@@ -299,7 +299,8 @@
       "between": "Ansicht zwischen den Takes wechseln"
     },
     "runway": {
-      "label": "Die nächsten Noten, die auf die Linie zulaufen"
+      "label": "Die nächsten Noten, die auf die Linie zulaufen",
+      "later": "Das Laufband startet mit dem Take. Setz zuerst hier deine Hand an; dann kommen die Noten von rechts, und du spielst jede, wenn sie die Linie erreicht."
     },
     "inputChanged": "Der Eingang hat sich geändert. Yames hört jetzt über {{device}}.",
     "export": {

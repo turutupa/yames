@@ -306,7 +306,8 @@
       "between": "Troque a visualização entre os takes"
     },
     "runway": {
-      "label": "As próximas notas, chegando à linha"
+      "label": "As próximas notas, chegando à linha",
+      "later": "A pista começa com a tomada. Primeiro posicione a mão aqui; depois as notas chegam pela direita e você toca cada uma quando ela alcança a linha."
     },
     "inputChanged": "A entrada mudou. Agora estou ouvindo por {{device}}.",
     "export": {

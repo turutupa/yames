@@ -106,7 +106,8 @@ export function TodayView({
 
   // Subscribed to nothing: Today has no plan to build, so its one big action
   // is choosing a Path rather than a Start that cannot start.
-  const noPaths = myPaths.length === 0;
+  // Only once the Paths have loaded: before then nothing is subscribed either.
+  const noPaths = session.paths.length > 0 && myPaths.length === 0;
   const last = progress.takes[0];
   const lastFacts = last ? factsOf(last) : null;
   const lastPercent =

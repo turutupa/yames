@@ -306,7 +306,8 @@
       "between": "Change de vue entre deux prises"
     },
     "runway": {
-      "label": "Les prochaines notes, qui arrivent sur la ligne"
+      "label": "Les prochaines notes, qui arrivent sur la ligne",
+      "later": "La piste démarre avec la prise. Place d'abord ta main ici ; ensuite les notes arrivent par la droite et tu joues chacune quand elle atteint la ligne."
     },
     "inputChanged": "L'entrée a changé. J'écoute maintenant par {{device}}.",
     "export": {

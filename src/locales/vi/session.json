@@ -299,7 +299,8 @@
       "between": "Đổi chế độ xem giữa các lượt chơi"
     },
     "runway": {
-      "label": "Những nốt tiếp theo đang tiến đến vạch"
+      "label": "Những nốt tiếp theo đang tiến đến vạch",
+      "later": "Đường băng bắt đầu cùng lượt chơi. Hãy đặt tay ở đây trước; sau đó các nốt chạy tới từ bên phải và bạn chơi từng nốt khi nó chạm vạch."
     },
     "inputChanged": "Đầu vào đã thay đổi. Giờ đang nghe qua {{device}}.",
     "export": {

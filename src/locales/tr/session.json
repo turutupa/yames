@@ -299,7 +299,8 @@
       "between": "Görünümü kayıtlar arasında değiştir"
     },
     "runway": {
-      "label": "Çizgiye doğru gelen sıradaki notalar"
+      "label": "Çizgiye doğru gelen sıradaki notalar",
+      "later": "Pist denemeyle birlikte başlar. Önce elini burada yerleştir; sonra notalar sağdan gelir ve her birini çizgiye vardığında çalarsın."
     },
     "inputChanged": "Giriş değişti. Artık {{device}} üzerinden dinliyorum.",
     "export": {

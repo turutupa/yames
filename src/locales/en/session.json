@@ -299,7 +299,8 @@
       "between": "Switch views between Takes"
     },
     "runway": {
-      "label": "The next notes, arriving at the line"
+      "label": "The next notes, arriving at the line",
+      "later": "The runway starts with the Take. Place your hand here first; then the notes come in from the right and you play each one as it reaches the line."
     },
     "inputChanged": "The input changed. Listening through {{device}} now.",
     "export": {
