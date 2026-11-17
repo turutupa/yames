@@ -139,24 +139,35 @@ export function nextOnsetIndex(onsets: RunwayModel["onsets"], tick: number, grac
   return lo;
 }
 
+/** The note the analyzer ruled on last, and the colour of its verdict. */
+export type Judged = { places: readonly { string: number; fret: number }[]; kind: NeckNote["kind"] };
+
 /**
  * The straight-on neck during a runway Take: the Exercise's shape quiet, the
- * next note amber and the one after it a cream ghost. Each place once; the
- * nearest in time wins.
+ * next note amber, the note just judged in its verdict's colour, and the one
+ * after next a cream ghost. Each place once; what is next wins, then the
+ * verdict, then the ghost.
+ *
+ * The verdict is a colour rather than a pluck: a pluck sets the string
+ * vibrating and keeps the stage drawing for as long as it rings, which for a
+ * run of eighths is every frame of the Take. A colour change is one frame.
  */
 export function ghostNeck(
   shape: readonly NeckNote[],
   onsets: RunwayModel["onsets"],
   index: number,
+  judged: Judged | null = null,
 ): NeckNote[] {
   const kinds = new Map<string, NeckNote["kind"]>();
-  const ahead = onsets.slice(index, index + 2);
-  ahead.forEach((onset, i) => {
-    for (const p of onset.places) {
+  const put = (places: readonly { string: number; fret: number }[], kind: NeckNote["kind"]) => {
+    for (const p of places) {
       const key = `${p.string}:${p.fret}`;
-      if (!kinds.has(key)) kinds.set(key, i === 0 ? "aim" : "box");
+      if (!kinds.has(key)) kinds.set(key, kind);
     }
-  });
+  };
+  if (onsets[index]) put(onsets[index].places, "aim");
+  if (judged) put(judged.places, judged.kind);
+  if (onsets[index + 1]) put(onsets[index + 1].places, "box");
   return shape.map((n) => ({ ...n, kind: kinds.get(`${n.string}:${n.fret}`) ?? "dim" }));
 }
 

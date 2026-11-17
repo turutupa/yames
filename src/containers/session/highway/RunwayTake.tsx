@@ -7,7 +7,7 @@
  * default. Nothing here decides anything: it reads the same Take, lights and
  * engine position the neck view reads.
  */
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { barLine, reasonLine } from "../../../session/coachWords";
 import { currentStep, isEdgeStep } from "../../../session/runner";
@@ -16,12 +16,16 @@ import { TAKE_COUNT_IN_BARS } from "../../../session/take";
 import { useNeck } from "../../../stage3d/api";
 import type { NeckView } from "../../../stage3d/api";
 import type { SessionRun } from "../hooks/useSessionRun";
-import { neckNotesOf, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
+import { kindOfMark, neckNotesOf, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
+import type { TimingMark } from "../../songs/review/marks";
 import { lineText } from "../lineText";
 import { CoachLine, TempoNudges, bigLabel } from "../parts";
 import { Runway } from "./Runway";
 import { ghostNeck, runwayModel } from "./runwayModel";
-import type { PracticeView, RunwayModel } from "./runwayModel";
+import type { Judged, PracticeView } from "./runwayModel";
+
+/** The neck is told verdicts as colours here, not plucks (see `ghostNeck`). */
+const NO_PLUCKS: ReadonlyMap<number, TimingMark> = new Map();
 
 /** Neck or Runway. Locked while a Take runs, so each Take has one view. */
 export function PracticeViewSwitch({ session, locked }: { session: SessionRun; locked: boolean }) {
@@ -87,11 +91,33 @@ export function RunwayTakeScreen({
   const view: NeckView = useMemo(() => ({ ...zoomOf(played), flat: true }) as NeckView, [played]);
   const first = useMemo(() => (model ? ghostNeck(shape, model.onsets, 0) : shape), [shape, model]);
   const slot = useNeckSlot(view, first);
-  useNeckTake(take, lights, running && isPlaying);
+  // The frame cap while the Take runs; no plucks, so the stage draws a frame
+  // per change instead of every frame a string rings.
+  useNeckTake(take, NO_PLUCKS, running && isPlaying);
+  const shown = useRef<{ index: number; judged: Judged | null }>({ index: 0, judged: null });
+  const draw = useCallback(() => {
+    if (!model) return;
+    neck.setNotes(ghostNeck(shape, model.onsets, shown.current.index, shown.current.judged), { fade: 0 });
+  }, [neck, shape, model]);
   const onNext = useCallback(
-    (index: number, m: RunwayModel) => neck.setNotes(ghostNeck(shape, m.onsets, index), { fade: 0.12 }),
-    [neck, shape],
+    (index: number) => {
+      shown.current.index = index;
+      draw();
+    },
+    [draw],
   );
+  // The note just judged, in its verdict's colour (the same lights the runway uses).
+  useEffect(() => {
+    if (!model) return;
+    let last: [number, TimingMark] | null = null;
+    for (const entry of lights) last = entry;
+    const kind = last ? kindOfMark(last[1]) : null;
+    const places = last ? model.onsets.find((o) => o.id === last![0])?.places : undefined;
+    const judged = kind && places ? { places, kind } : null;
+    if (!judged && !shown.current.judged) return;
+    shown.current.judged = judged;
+    draw();
+  }, [lights, model, draw]);
 
   const step = currentStep(run);
   if (!exercise || !take || !step) return null;

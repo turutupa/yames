@@ -92,6 +92,13 @@ describe("ghostNeck", () => {
     expect(ghostNeck(shape, onsets, 1).map((n) => n.kind)).toEqual(["box", "aim", "dim"]);
     expect(ghostNeck(shape, onsets, 3).map((n) => n.kind)).toEqual(["dim", "dim", "dim"]);
   });
+  it("colours the note just judged, below what is next", () => {
+    const judged = { places: [{ string: 3, fret: 5 }], kind: "tone" as const };
+    expect(ghostNeck(shape, onsets, 1, judged).map((n) => n.kind)).toEqual(["tone", "aim", "dim"]);
+    // The next note is the next note, whatever was judged there before.
+    expect(ghostNeck(shape, onsets, 0, judged).map((n) => n.kind)).toEqual(["aim", "box", "dim"]);
+    expect(ghostNeck(shape, onsets, 1, { places: [{ string: 2, fret: 5 }], kind: "clash" }).map((n) => n.kind)).toEqual(["box", "aim", "clash"]);
+  });
   it("keeps the labels and places", () => {
     expect(ghostNeck(shape, onsets, 0).map((n) => n.label)).toEqual(["C", "D", "E"]);
   });

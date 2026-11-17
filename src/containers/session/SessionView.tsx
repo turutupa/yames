@@ -28,7 +28,7 @@ import type { RunState, TakeOutcome } from "../../session/runner";
 import type { BeatPosition } from "../../songs/position";
 import { ExerciseStage } from "./ExerciseStage";
 import { CoachLine, TempoNudges, bigLabel } from "./parts";
-import { PracticeViewSwitch, RunwayTakeScreen } from "./highway/RunwayTake";
+import { PracticeViewSwitch, RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
 import type { NeckKind, NeckView } from "../../stage3d/api";
@@ -164,7 +164,11 @@ function TakeScreen({
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
       <div className="session-takeinfo">
         <span className="session-kick">
-          {isEdgeStep(step) ? t("session.edge.kick") : t("session.kind.mechanics")}
+          {isEdgeStep(step)
+            ? t("session.edge.kick")
+            : isTheoryTake(session)
+              ? t("session.kind.theory")
+              : t("session.kind.mechanics")}
           {pathTitle &&
             ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
         </span>
