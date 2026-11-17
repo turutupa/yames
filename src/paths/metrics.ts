@@ -167,7 +167,7 @@ export const DETECTION_FLAGS: Readonly<Record<string, string>> = {
   fastPicking:
     "At this speed a real rig's input delay can push notes out of their matching window, which reads as late or missed. Evenness is the number to trust here, and only once the delay is calibrated.",
   sustainedPlaying:
-    "Long unbroken playing, especially high-gain, is where the onset noise floor may close and stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands.",
+    "Long unbroken playing, especially high-gain, can drown out where each note starts, so the app may stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands.",
   bendPitch: "A bend is one attack. The app can time it; it does not measure how far it travelled.",
   roughAccents:
     "Accents are measured roughly, as louder than the notes either side. Compression and high gain flatten them.",
