@@ -82,6 +82,8 @@ export function pluck(midi, seconds = 0.6, gain = 0.5, rand = rng(midi)) {
  *
  * style: "good"   1.5 ms of human scatter (σ), every note
  *        "sloppy" σ = 35 ms of scatter (clipped at ±70 ms), every note
+ *        "sloppier" σ = 80 ms (clipped at ±160 ms)
+ *        "wrong"  timed like "good", every other note a semitone sharp
  *        "silent" nothing
  */
 export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, seed = 7 }) {
@@ -96,13 +98,17 @@ export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, se
     for (const note of notes) {
       const tick = note.tick + p * passTicks;
       if (tick >= bars * barTicks) continue;
-      let jitterMs = style === "sloppy" ? gauss(rand) * 35 : gauss(rand) * 1.5;
-      jitterMs = Math.max(-70, Math.min(70, jitterMs));
+      const spread = style === "sloppy" ? 35 : style === "sloppier" ? 80 : 1.5;
+      const clip = style === "sloppier" ? 160 : 70;
+      let jitterMs = gauss(rand) * spread;
+      // "wrong": in time, and every other note a semitone sharp.
+      const midi = style === "wrong" && out.notes.length % 2 === 1 ? note.midi + 1 : note.midi;
+      jitterMs = Math.max(-clip, Math.min(clip, jitterMs));
       const seconds = Math.min(0.9, ((note.dur ?? 480) * msPerTick) / 1000 + 0.05);
       out.notes.push({
         beat: tick / 960,
         jitterMs,
-        samples: pluck(note.midi, seconds, 0.45, rng(seed + tick)),
+        samples: pluck(midi, seconds, 0.45, rng(seed + tick)),
       });
     }
   }
@@ -357,5 +363,119 @@ export class Player {
       play.stop();
     }
     return { ...first, clicksHeard: clicks.length };
+  }
+
+  /**
+   * Arm over a BAND: a jam-backed Take, where the click is off after the
+   * count-in and the drummer keeps the time (`src/session/takeBand.ts`).
+   *
+   * The count-in is still the click alone, so the beat and the downbeat come
+   * from it as in `playOnCountIn`. After that the output is a band, and a
+   * threshold-after-quiet finder hears nothing once the bass sustains, so the
+   * clock is the count-in's beat, nudged by any sharp rise in the output that
+   * lands within 15% of a beat of where the next beat is due (a kick, a hat, a
+   * snare: the band is placed off the same map as the click, to the sample).
+   * A beat with no such rise is taken where it was due.
+   */
+  async playOverBand(take, { countInClicks = 4, timeoutMs = 30000 } = {}) {
+    const cap = new Capture(this.env, "yames_out.monitor");
+    const play = new Playback(this.env, "guitar");
+    const lastBeat = Math.ceil(take.beats);
+    const byBeat = new Map();
+    for (const n of take.notes) {
+      const k = Math.floor(n.beat + 1e-9);
+      if (!byBeat.has(k)) byBeat.set(k, []);
+      byBeat.get(k).push(n);
+    }
+    const clicks = [];
+    let beatMs = 0;
+    let beatAt = null; // our-clock time of the latest beat placed
+    let beat = -1; // its number; the count-in's last click is -1
+    let first = null;
+    let nudged = 0;
+    let finished = false;
+    let watch = null;
+    const placeNext = () => {
+      const next = beat + 1;
+      for (const note of byBeat.get(next) ?? []) {
+        const at = beatAt + beatMs + (note.beat - next) * beatMs + note.jitterMs - this.offsetMs;
+        play.schedule(play.indexAt(at), note.samples);
+      }
+    };
+    const done = new Promise((resolve, reject) => {
+      const timer = setTimeout(
+        () => reject(new Error(`heard ${clicks.length} count-in clicks in ${timeoutMs} ms`)),
+        timeoutMs,
+      );
+      // The count-in: clicks after quiet, as `playOnCountIn` hears them.
+      const countIn = onsetFinder(0.05, RATE / 20, (n) => {
+        if (clicks.length >= countInClicks) return;
+        clicks.push(cap.timeOf(n));
+        if (clicks.length < countInClicks) return;
+        const gaps = clicks.slice(1).map((c, i) => c - clicks[i]).sort((x, y) => x - y);
+        beatMs = gaps[Math.floor(gaps.length / 2)];
+        beatAt = clicks[clicks.length - 1];
+        beat = -1;
+        clearTimeout(timer);
+        placeNext();
+        first = { beatMs, bpm: 60000 / beatMs, aheadMs: beatAt + beatMs - this.offsetMs - now() };
+      });
+      // After it: sharp rises (1 ms peaks against the 20 ms before them).
+      const block = RATE / 1000;
+      const history = [];
+      let peak = 0;
+      let fill = 0;
+      let refractory = 0;
+      const rises = (pcm, firstIndex) => {
+        for (let i = 0; i < pcm.length; i++) {
+          peak = Math.max(peak, Math.abs(pcm[i]) / 32768);
+          if (++fill < block) continue;
+          const before = history.reduce((m, v) => Math.max(m, v), 0);
+          history.push(peak);
+          if (history.length > 20) history.shift();
+          if (refractory > 0) refractory--;
+          else if (beatAt !== null && peak > 0.03 && peak > 2.5 * before) {
+            refractory = 60;
+            const t = cap.timeOf(firstIndex + i);
+            const due = beatAt + beatMs;
+            if (Math.abs(t - due) < 0.15 * beatMs && beat + 1 <= lastBeat && !finished) {
+              beat += 1;
+              beatAt = t;
+              nudged += 1;
+              if (beat + 1 <= lastBeat) placeNext();
+            }
+          }
+          peak = 0;
+          fill = 0;
+        }
+      };
+      cap.listeners.add((pcm, firstIndex) => {
+        countIn(pcm, firstIndex);
+        rises(pcm, firstIndex);
+      });
+      // A beat that nothing marked is taken where it was due.
+      watch = setInterval(() => {
+        if (beatAt === null || finished) return;
+        while (now() > beatAt + beatMs * 1.2) {
+          beat += 1;
+          beatAt += beatMs;
+          if (beat + 1 <= lastBeat) placeNext();
+          else break;
+        }
+        if (beat >= lastBeat) {
+          finished = true;
+          resolve();
+        }
+      }, 10);
+    });
+    try {
+      await done;
+      await play.drain();
+    } finally {
+      clearInterval(watch);
+      cap.stop();
+      play.stop();
+    }
+    return { ...first, clicksHeard: clicks.length, beatsHeardFromTheBand: nudged };
   }
 }
