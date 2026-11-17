@@ -12,7 +12,12 @@ import { factsOf } from "../../session/progress";
 import { findExercise } from "../../session/packs";
 import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
+import { useNeck3d, useNeckSlot } from "./hooks/useNeck";
+import type { NeckView } from "../../stage3d/api";
+import { rise } from "./TodayView";
 import "../../styles/session.css";
+
+const WHOLE: NeckView = { kind: "whole" };
 
 type Series = {
   exerciseId: string;
@@ -114,6 +119,14 @@ function CleanChart({ series, label }: { series: Series; label: string }) {
         {date.format(last)}
       </text>
       <path d={d} className="session-chart-line" fill="none" />
+      <text
+        x={x(points[points.length - 1].at)}
+        y={y(points[points.length - 1].bpm) - 12}
+        textAnchor="end"
+        className="session-chart-end"
+      >
+        {points[points.length - 1].bpm}
+      </text>
       {points.map((p) => (
         <g key={p.at}>
           <circle cx={x(p.at)} cy={y(p.bpm)} r="4" className="session-chart-dot" />
@@ -129,6 +142,8 @@ function CleanChart({ series, label }: { series: Series; label: string }) {
 
 export function ProgressView({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
+  const slot = useNeckSlot(WHOLE, [], { sweep: true });
+  const neck3d = useNeck3d();
   const series = useMemo(() => seriesFrom(session), [session.progress, session.paths]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The one that moved last gets the chart.
@@ -142,26 +157,27 @@ export function ProgressView({ session }: { session: SessionRun }) {
   }, [series]);
 
   return (
-    <div className="session-page session-progress" data-testid="progress">
-      <div>
-        <h2 className="session-h2">{t("session.progress.title")}</h2>
+    <div className="session-page" data-testid="progress" data-neck3d={neck3d}>
+      <div className="session-rise">
+        <h1 className="session-h1">{t("session.progress.title")}</h1>
         <div className="session-why">{t("session.progress.intro")}</div>
       </div>
+      <div className="session-slot" data-band="" ref={slot} aria-hidden="true" />
       {series.length === 0 ? (
-        <div className="session-card" data-testid="progress-empty">
+        <div className="session-glass session-card session-rise" data-testid="progress-empty">
           <div className="session-why">{t("session.progress.empty")}</div>
         </div>
       ) : (
-        <div className="session-split">
+        <div className="session-prog">
           <div className="session-col">
-            <div className="session-kick">{t("session.progress.cleanTempo")}</div>
+            <div className="session-kick session-rise">{t("session.progress.cleanTempo")}</div>
             {headline ? (
               <>
-                <div className="session-moved">
-                  <span className="session-h1">
+                <div className="session-headline session-rise" style={rise(1)}>
+                  <span className="session-num">
                     {headline.clean[headline.clean.length - 1].bpm}
                   </span>
-                  <span className="session-quiet">
+                  <span className="session-why">
                     {t("session.progress.bpmOn", { title: headline.title })}
                   </span>
                 </div>
@@ -178,14 +194,18 @@ export function ProgressView({ session }: { session: SessionRun }) {
             )}
           </div>
           <div className="session-col">
-            <div className="session-kick">{t("session.progress.exercises")}</div>
-            {series.map((s) => {
+            <div className="session-kick session-rise">{t("session.progress.exercises")}</div>
+            {series.map((s, i) => {
               const last = s.evenness[s.evenness.length - 1];
               const clean = s.clean[s.clean.length - 1]?.bpm;
               return (
-                <div className="session-progress-row" key={s.exerciseId}>
+                <div
+                  className="session-skill session-glass session-rise"
+                  style={rise(i + 1)}
+                  key={s.exerciseId}
+                >
                   <div className="session-exercise-text">
-                    <div className="session-plan-title">{s.title}</div>
+                    <div className="session-skill-name">{s.title}</div>
                     <div className="session-quiet">
                       {clean === undefined
                         ? t("session.paths.playedNoClean", { count: s.takes })

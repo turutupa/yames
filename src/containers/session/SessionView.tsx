@@ -30,9 +30,34 @@ import type { BigAction, RunState, TakeOutcome } from "../../session/runner";
 import type { BeatPosition } from "../../songs/position";
 import { ExerciseStage } from "./ExerciseStage";
 import type { SessionRun } from "./hooks/useSessionRun";
+import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
+import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
-import { stepTitle } from "./TodayView";
+import { rise, stepTitle } from "./TodayView";
 import "../../styles/session.css";
+
+const WHOLE: NeckView = { kind: "whole" };
+
+/** The Exercise the screen is about, as played: the Take's variant when there is one. */
+function playedNotes(session: SessionRun) {
+  return (session.take?.exercise ?? session.exercise)?.notes;
+}
+
+/** The neck framed on the Exercise's own frets, its notes in one colour. */
+function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
+  const { view, notes } = exerciseNeck(playedNotes(session), kind);
+  return useNeckSlot(view, notes, { sweep });
+}
+
+/** One line from the coach, with its lamp. */
+function CoachLine({ children, good }: { children: React.ReactNode; good?: boolean }) {
+  return (
+    <div className="session-coach session-glass">
+      <i className="session-lamp" data-good={good ? "" : undefined} />
+      <div>{children}</div>
+    </div>
+  );
+}
 
 type T = ReturnType<typeof useTranslation>["t"];
 
@@ -89,8 +114,8 @@ function SessionBar({ run, onExit }: { run: RunState; onExit: () => void }) {
 /** The latest notes against the grid: a dot per note, late above, early below. */
 function TimingStrip({ deviations }: { deviations: readonly number[] }) {
   const { t } = useTranslation();
-  const W = 360;
-  const H = 64;
+  const W = 560;
+  const H = 84;
   const MID = H / 2;
   const RANGE_MS = 50;
   const y = (ms: number) => MID - (Math.max(-RANGE_MS, Math.min(RANGE_MS, ms)) / RANGE_MS) * (MID - 8);
@@ -108,7 +133,7 @@ function TimingStrip({ deviations }: { deviations: readonly number[] }) {
       <text x="0" y={H - 4} className="session-strip-label">
         {t("session.run.early")}
       </text>
-      <line x1="36" x2={W} y1={MID} y2={MID} className="session-strip-grid" />
+      <line x1="40" x2={W} y1={MID} y2={MID} className="session-strip-grid" />
       {deviations.map((ms, i) => (
         <circle key={i} cx={40 + i * step} cy={y(ms)} r="4" className="session-strip-dot" />
       ))}
@@ -151,15 +176,15 @@ function TempoNudges({
 function PedalCard() {
   const { t } = useTranslation();
   return (
-    <div className="session-card session-pedal-card">
+    <div className="session-glass session-card">
       <div className="session-kick">{t("session.pedal.title")}</div>
-      <dl className="session-legend">
-        <dt>{t("session.pedal.tap")}</dt>
-        <dd>{t("session.pedal.tapDoes")}</dd>
-        <dt>{t("session.pedal.double")}</dt>
-        <dd>{t("session.pedal.doubleDoes")}</dd>
-        <dt>{t("session.pedal.hold")}</dt>
-        <dd>{t("session.pedal.holdDoes")}</dd>
+      <dl className="session-say">
+        <dt className="session-ped">{t("session.pedal.tap")}</dt>
+        <dd className="session-why">{t("session.pedal.tapDoes")}</dd>
+        <dt className="session-ped">{t("session.pedal.double")}</dt>
+        <dd className="session-why">{t("session.pedal.doubleDoes")}</dd>
+        <dt className="session-ped">{t("session.pedal.hold")}</dt>
+        <dd className="session-why">{t("session.pedal.holdDoes")}</dd>
       </dl>
     </div>
   );
@@ -185,12 +210,15 @@ function TakeScreen({
 }) {
   const { t } = useTranslation();
   const { run, take, exercise, live, lights, big, prepared, engineTrouble, actions } = session;
+  const running = run.phase === "playing";
+  // The Exercise's frets, large; its notes to aim for; each heard note plucked.
+  const slot = useExerciseSlot(session, "aim");
+  useNeckTake(take, lights, running && isPlaying);
   const step = currentStep(run);
   if (!exercise || !take || !step) return null;
 
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
   const stepNumber = pathTitle?.steps.find((s) => s.exercises.some((e) => e.id === exercise.id))?.order;
-  const running = run.phase === "playing";
   const bar = barLine(exercise, run.bpm);
   const scored = live.heard + live.missed;
   const inputReady = listening;
@@ -198,35 +226,23 @@ function TakeScreen({
 
   return (
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
-      <div className="session-head">
-        <div className="session-head-text">
-          <div className="session-kick">
-            {isEdgeStep(step) ? t("session.edge.kick") : t("session.kind.mechanics")}
-            {pathTitle &&
-              ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
-          </div>
-          <h2 className="session-h2">{exercise.title}</h2>
-          <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
-        </div>
-        <div className="session-bpm">
-          {run.bpm}
-          <small>{t("session.run.bpm")}</small>
-        </div>
+      <div className="session-takeinfo">
+        <span className="session-kick">
+          {isEdgeStep(step) ? t("session.edge.kick") : t("session.kind.mechanics")}
+          {pathTitle &&
+            ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
+        </span>
+        <h2 className="session-h3">{exercise.title}</h2>
+        <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
       </div>
 
-      <ExerciseStage
-        take={take}
-        tick={running && beat && !beat.songCountIn ? beat.songTick : 0}
-        playing={running && isPlaying && !beat?.songCountIn}
-        themeId={themeId}
-        lights={lights}
-      />
-
-      {running ? (
-        <div className="session-live" data-testid="session-live">
-          <div className="session-stats">
-            <div className="session-stat">
-              <b>{scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–"}</b>
+      <div className="session-takerow">
+        {running ? (
+          <div className="session-row" data-testid="session-live" style={{ gap: "clamp(14px,2.4vw,36px)", alignItems: "flex-end", flex: "1 1 0" }}>
+            <div className="session-stat" data-xl="">
+              <b className="session-good">
+                {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–"}
+              </b>
               <span>{t("session.run.heardSoFar")}</span>
             </div>
             <div className="session-stat">
@@ -236,56 +252,76 @@ function TakeScreen({
               </b>
               <span>{t("session.run.bars")}</span>
             </div>
+            <TimingStrip deviations={live.deviations} />
           </div>
-          <TimingStrip deviations={live.deviations} />
+        ) : (
+          <div className="session-brief">
+            <CoachLine>{exercise.coachLine}</CoachLine>
+          </div>
+        )}
+        <div className="session-bpm">
+          {run.bpm}
+          <small>{t("session.run.bpm")}</small>
         </div>
-      ) : (
-        <div className="session-brief">
-          <div className="session-coach">{exercise.coachLine}</div>
-          {exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
-          {bar && <div className="session-why">{lineText(t, bar)}</div>}
-        </div>
-      )}
+      </div>
 
-      <div className="session-grow" />
-      {live.countingIn && running && (
-        <div className="session-count" role="status">
-          {t("session.run.countIn")}
-        </div>
-      )}
-      <div className="session-why">{t("session.run.honest")}</div>
+      <div className="session-slot" ref={slot} aria-hidden="true" />
 
-      {!running && !inputReady && (
-        <div className="session-card" role="status" data-testid="session-no-input">
-          <div className="session-why">{t("session.run.noInput")}</div>
-          <button className="session-link" onClick={onCheckSound}>
-            {t("session.run.checkSound")}
-          </button>
+      <div className="session-mechlow">
+        <div className="session-glass">
+          <ExerciseStage
+            take={take}
+            tick={running && beat && !beat.songCountIn ? beat.songTick : 0}
+            playing={running && isPlaying && !beat?.songCountIn}
+            themeId={themeId}
+            lights={lights}
+          />
         </div>
-      )}
-      {engineTrouble && (
-        <div className="session-card" role="alert">
-          <div className="session-why">{t("session.run.engineTrouble")}</div>
+        <div className="session-col">
+          {running && <CoachLine>{exercise.coachLine}</CoachLine>}
+          {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
+          {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
+          <div className="session-why">{t("session.run.honest")}</div>
+          {!running && !inputReady && (
+            <div className="session-glass session-card" role="status" data-testid="session-no-input">
+              <div className="session-why">{t("session.run.noInput")}</div>
+              <button className="session-link" onClick={onCheckSound}>
+                {t("session.run.checkSound")}
+              </button>
+            </div>
+          )}
+          {engineTrouble && (
+            <div className="session-glass session-card" role="alert">
+              <div className="session-why session-bad">{t("session.run.engineTrouble")}</div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="session-actions">
-        <button
-          className="session-big"
-          onClick={actions.go}
-          disabled={!running && !canStart}
-          data-testid="session-big"
-        >
-          {bigLabel(big, t)}
-        </button>
-        {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
         {!running && inputReady && (
           <span className="session-signal" data-on={hasSignal ? "" : undefined}>
             <i />
             {t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
           </span>
         )}
+        {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
+        <button
+          className="session-big"
+          data-size="mid"
+          onClick={actions.go}
+          disabled={!running && !canStart}
+          data-testid="session-big"
+        >
+          {bigLabel(big, t)}
+        </button>
       </div>
+
+      {live.countingIn && running && (
+        <div className="session-count" role="status">
+          {t("session.run.countIn")}
+        </div>
+      )}
     </div>
   );
 }
@@ -308,11 +344,11 @@ function MovedNumber({ outcome }: { outcome: TakeOutcome }) {
   return (
     <div className="session-moved" data-testid="session-moved">
       {moved && <span className="session-moved-before">{before} →</span>}
-      <span className="session-mega session-moved-value" data-met={met ? "" : undefined}>
+      <span className="session-moved-value" data-met={met ? "" : undefined}>
         {value}
         {percent ? "%" : ""}
       </span>
-      <span className="session-h2">{t(`session.metric.${metric}`)}</span>
+      <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
       {bar !== null && (
         <span className="session-tag" data-met={met ? "" : undefined}>
           {met
@@ -387,50 +423,90 @@ function ResultScreen({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
   const { run, exercise, big, actions } = session;
   const outcome = run.outcomes[run.outcomes.length - 1];
+  const passed = outcome?.grade.verdict === "passed";
+  // The warm sweep on every result; the notes green when the bar was met.
+  const slot = useExerciseSlot(session, passed ? "tone" : "aim", true);
   if (!outcome) return null;
-  const passed = outcome.grade.verdict === "passed";
   const onEdge = isEdgeStep(currentStep(run));
   const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);
-  return (
-    <div
-      className="session-body"
-      data-testid={passed ? "session-result" : "session-between"}
-    >
-      <div className="session-kick">
-        {t("session.result.kick", {
-          take: outcome.takeNumber,
-          title: outcome.title,
-          bpm: outcome.bpm,
-          bars: outcome.measures.barsPlayed,
-        })}
+  const kick = (
+    <div className="session-kick session-fade" style={rise(1)}>
+      {t("session.result.kick", {
+        take: outcome.takeNumber,
+        title: outcome.title,
+        bpm: outcome.bpm,
+        bars: outcome.measures.barsPlayed,
+      })}
+    </div>
+  );
+  const nudges = (
+    <div className="session-nudges">
+      <TempoNudges run={run} exercise={exercise} session={session} />
+      {big.kind !== "again" && (
+        <button className="session-secondary" onClick={actions.again}>
+          {t("session.result.againSame", { bpm: run.bpm })}
+        </button>
+      )}
+      {big.kind === "again" && (
+        <button className="session-secondary" onClick={actions.next}>
+          {t("session.result.moveOn")}
+        </button>
+      )}
+    </div>
+  );
+  const unmeasured = outcome.grade.unmeasured.length > 0 && (
+    <div className="session-why">{t("session.result.unmeasuredNotes")}</div>
+  );
+
+  if (!passed) {
+    return (
+      <div className="session-body" data-testid="session-between">
+        <div className="session-between">
+          <div className="session-col">
+            {kick}
+            <MovedNumber outcome={outcome} />
+            <CleanTempoLine outcome={outcome} />
+            {onEdge && <EdgePanel session={session} />}
+            <CoachLine>{lineText(t, line)}</CoachLine>
+            {unmeasured}
+            <button className="session-big" onClick={actions.go} data-testid="session-big">
+              {bigLabel(big, t)}
+            </button>
+            {nudges}
+            <PedalCard />
+          </div>
+          <div className="session-col">
+            <div className="session-slot" ref={slot} aria-hidden="true" />
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="session-body" data-testid="session-result">
+      <div className="session-slot" ref={slot} aria-hidden="true" style={{ flex: "1 1 30%" }} />
+      {kick}
       <MovedNumber outcome={outcome} />
       <CleanTempoLine outcome={outcome} />
       {onEdge && <EdgePanel session={session} />}
-      <div className="session-coach">{lineText(t, line)}</div>
-      {outcome.grade.unmeasured.length > 0 && (
-        <div className="session-why">{t("session.result.unmeasuredNotes")}</div>
-      )}
-      <div className="session-grow" />
-      <button className="session-big" onClick={actions.go} data-testid="session-big">
+      <div className="session-fade" style={rise(6)}>
+        <CoachLine good>{lineText(t, line)}</CoachLine>
+      </div>
+      {unmeasured}
+      <button
+        className="session-big session-fade"
+        style={rise(8)}
+        data-size="mid"
+        onClick={actions.go}
+        data-testid="session-big"
+      >
         {bigLabel(big, t)}
       </button>
-      <div className="session-nudges">
-        <TempoNudges run={run} exercise={exercise} session={session} />
-        {big.kind !== "again" && (
-          <button className="session-secondary" onClick={actions.again}>
-            {t("session.result.againSame", { bpm: run.bpm })}
-          </button>
-        )}
-        {big.kind === "again" && (
-          <button className="session-secondary" onClick={actions.next}>
-            {t("session.result.moveOn")}
-          </button>
-        )}
-      </div>
-      {passed && !onEdge && (
+      {nudges}
+      {!onEdge && (
         <button
-          className="session-choice"
+          className="session-choice session-glass"
           onClick={actions.findEdgeFromHere}
           data-testid="session-find-edge"
         >
@@ -438,7 +514,6 @@ function ResultScreen({ session }: { session: SessionRun }) {
           <span>{t("session.edge.offerBody", { bpm: outcome.bpm, minutes: EDGE_MINUTES })}</span>
         </button>
       )}
-      {!passed && <PedalCard />}
     </div>
   );
 }
@@ -453,31 +528,45 @@ function NoCatchScreen({
   const { t } = useTranslation();
   const { run, big, actions } = session;
   const outcome = run.outcomes[run.outcomes.length - 1];
+  // The neck quiet: nothing on it was heard well enough to colour.
+  const slot = useExerciseSlot(session, "dim");
   if (!outcome) return null;
   const { measures } = outcome;
   return (
-    <div className="session-body session-center" data-testid="session-no-catch">
-      <div className="session-kick">{t("session.noCatch.kick")}</div>
-      <h1 className="session-h1">{t("session.noCatch.title")}</h1>
-      {measures.expected > 0 && (
-        <div className="session-stat">
-          <b>{measures.heard}</b>
-          <span>{t("session.noCatch.heardOf", { expected: measures.expected })}</span>
+    <div className="session-body" data-testid="session-no-catch">
+      <div className="session-center" data-top="">
+        <div className="session-kick session-rise">{t("session.noCatch.kick")}</div>
+        <h1 className="session-h1 session-rise" style={rise(1)}>
+          {t("session.noCatch.title")}
+        </h1>
+        {measures.expected > 0 && (
+          <div className="session-stat session-rise" style={rise(2)}>
+            <b>{measures.heard}</b>
+            <span>{t("session.noCatch.heardOf", { expected: measures.expected })}</span>
+          </div>
+        )}
+        <div className="session-why session-rise" style={rise(3)}>
+          {t("session.noCatch.noGuess")} {lineText(t, notCaughtHint(measures))}
         </div>
-      )}
-      <div className="session-why">
-        {t("session.noCatch.noGuess")} {lineText(t, notCaughtHint(measures))}
       </div>
-      <button className="session-big" onClick={actions.go} data-testid="session-big">
-        {bigLabel(big, t)}
-      </button>
-      <div className="session-nudges">
-        <button className="session-link" onClick={onCheckSound}>
-          {t("session.run.checkSound")}
+      <div className="session-slot" ref={slot} aria-hidden="true" />
+      <div className="session-center">
+        <button
+          className="session-big"
+          data-size="mid"
+          onClick={actions.go}
+          data-testid="session-big"
+        >
+          {bigLabel(big, t)}
         </button>
-        <button className="session-link" onClick={actions.next}>
-          {t("session.result.moveOn")}
-        </button>
+        <div className="session-nudges">
+          <button className="session-link" onClick={onCheckSound}>
+            {t("session.run.checkSound")}
+          </button>
+          <button className="session-link" onClick={actions.next}>
+            {t("session.result.moveOn")}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -503,6 +592,12 @@ function TimedScreen({
   const { t } = useTranslation();
   const { run, take, big, actions } = session;
   const step = currentStep(run);
+  // A warm-up shows its Exercise's frets; a jam or a ramp, the whole neck.
+  const { view, notes } = exerciseNeck(
+    step?.kind === "metronome" ? playedNotes(session) : undefined,
+    "box",
+  );
+  const slot = useNeckSlot(step?.kind === "metronome" ? view : WHOLE, notes);
   if (!step) return null;
   const kick =
     step.kind === "metronome"
@@ -513,11 +608,14 @@ function TimedScreen({
   const bpm = step.kind === "metronome" ? step.bpm : bpmNow;
   return (
     <div className="session-body" data-testid="session-timed" data-kind={step.kind}>
-      <div className="session-head">
-        <div className="session-head-text">
-          <div className="session-kick">{kick}</div>
-          <h2 className="session-h2">{stepTitle(step, t)}</h2>
-          <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
+      <div className="session-takeinfo">
+        <span className="session-kick">{kick}</span>
+        <h2 className="session-h3">{stepTitle(step, t)}</h2>
+        <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
+      </div>
+      <div className="session-takerow">
+        <div className="session-countdown" role="timer" data-testid="session-countdown">
+          {clock(stepRemainingMs(run))}
         </div>
         {bpm > 0 && (
           <div className="session-bpm">
@@ -526,17 +624,23 @@ function TimedScreen({
           </div>
         )}
       </div>
+      <div className="session-slot" ref={slot} aria-hidden="true" />
       {step.kind === "metronome" && take && (
-        <ExerciseStage take={take} tick={0} playing={false} themeId={themeId} />
+        <div className="session-glass">
+          <ExerciseStage take={take} tick={0} playing={false} themeId={themeId} />
+        </div>
       )}
-      <div className="session-grow" />
-      <div className="session-countdown" role="timer" data-testid="session-countdown">
-        {clock(stepRemainingMs(run))}
+      <div className="session-actions">
+        <span className="session-why">{t("session.timed.movesOn")}</span>
+        <button
+          className="session-big"
+          data-size="mid"
+          onClick={actions.go}
+          data-testid="session-big"
+        >
+          {bigLabel(big, t)}
+        </button>
       </div>
-      <div className="session-why">{t("session.timed.movesOn")}</div>
-      <button className="session-big" onClick={actions.go} data-testid="session-big">
-        {bigLabel(big, t)}
-      </button>
     </div>
   );
 }
@@ -556,7 +660,7 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
       null,
     );
     return (
-      <div className="session-recap-item">
+      <div className="session-recap-item session-glass session-rise">
         <div className="session-recap-text">
           <div className="session-plan-title">{`${t("session.edge.kick")} · ${first.title}`}</div>
           <div className="session-why">
@@ -585,7 +689,7 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
       ? displayValue({ metric: head.metric, value: graded[0].previousValue })
       : null;
   return (
-    <div className="session-recap-item">
+    <div className="session-recap-item session-glass session-rise">
       <div className="session-recap-text">
         <div className="session-plan-title">{first.title}</div>
         <div className="session-why">
@@ -616,6 +720,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
   ).size;
   const takes = run.outcomes.length;
   const notGraded = run.timedSteps.length > 0;
+  const slot = useNeckSlot(WHOLE, [], { sweep: true });
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),
@@ -625,7 +730,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
 
   return (
     <div className="session-body" data-testid="session-recap">
-      <div>
+      <div className="session-recap-head session-rise">
         <div className="session-kick">{t("session.recap.kick")}</div>
         <h1 className="session-h1">
           {passed > 0
@@ -637,7 +742,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
       </div>
       <div className="session-split">
         <div className="session-col">
-          <div className="session-kick">{t("session.recap.moved")}</div>
+          <div className="session-kick session-rise">{t("session.recap.moved")}</div>
           {steps.map((step) => (
             <RecapItem key={step.id} step={step} session={session} />
           ))}
@@ -645,25 +750,44 @@ function RecapScreen({ session }: { session: SessionRun }) {
           {notGraded && <div className="session-why">{t("session.recap.notGraded")}</div>}
         </div>
         <div className="session-col">
-          <div className="session-kick">
+          <div className="session-kick session-rise">
             {t("session.recap.nextSession", { minutes: tomorrow.minutes })}
           </div>
           {tomorrow.steps
             .filter((s) => s.kind === "exercise")
             .map((step) => (
-              <div className="session-plan-item" key={step.id}>
+              <div className="session-plan-item session-glass session-rise" key={step.id}>
                 <div className="session-plan-body">
-                  <div className="session-plan-title">{stepTitle(step, t)}</div>
+                  <div className="session-plan-title">
+                    <span>{stepTitle(step, t)}</span>
+                    <span className="session-tag" data-kind="mechanics">
+                      {t("session.kind.mechanics")}
+                    </span>
+                  </div>
                   <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
                 </div>
               </div>
             ))}
         </div>
       </div>
-      <div className="session-grow" />
-      <button className="session-big" onClick={actions.go} data-testid="session-big">
+      <div className="session-slot" ref={slot} aria-hidden="true" />
+      <button className="session-big session-rise" onClick={actions.go} data-testid="session-big">
         {bigLabel(big, t)}
       </button>
+    </div>
+  );
+}
+
+/** Between the Take and its verdict: a moment, with the Exercise still on the neck. */
+function ListeningScreen({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const slot = useExerciseSlot(session, "aim");
+  return (
+    <div className="session-body" role="status" data-testid="session-listening">
+      <div className="session-center" data-top="">
+        <div className="session-h2">{t("session.run.listeningBack")}</div>
+      </div>
+      <div className="session-slot" ref={slot} aria-hidden="true" />
     </div>
   );
 }
@@ -688,12 +812,12 @@ export function SessionView({
   bpmNow: number;
   onCheckSound: () => void;
 }) {
-  const { t } = useTranslation();
   const { run, actions } = session;
   const last = run.outcomes[run.outcomes.length - 1];
+  const neck3d = useNeck3d();
 
   return (
-    <div className="session-page session-run" data-testid="session">
+    <div className="session-page session-run" data-testid="session" data-neck3d={neck3d}>
       {run.phase !== "recap" && <SessionBar run={run} onExit={actions.exit} />}
       {(run.phase === "ready" || run.phase === "playing") && (
         <TakeScreen
@@ -706,11 +830,7 @@ export function SessionView({
           onCheckSound={onCheckSound}
         />
       )}
-      {run.phase === "listening" && (
-        <div className="session-body session-center" role="status" data-testid="session-listening">
-          <div className="session-h2">{t("session.run.listeningBack")}</div>
-        </div>
-      )}
+      {run.phase === "listening" && <ListeningScreen session={session} />}
       {run.phase === "result" &&
         (last?.grade.verdict === "notCaught" ? (
           <NoCatchScreen session={session} onCheckSound={onCheckSound} />
