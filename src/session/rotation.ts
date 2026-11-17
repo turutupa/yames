@@ -13,6 +13,7 @@ import type { Exercise, PathDoc, Step } from "../paths/format";
 import type { PathTakeRow } from "../ipc";
 import { firstRung, rungBelow } from "./ladder";
 import {
+  calendarDaysBetween,
   cleanTempoOf,
   currentStepOf,
   daysBetween,
@@ -103,10 +104,10 @@ export function pickFocus(
     return { path, order, played, waited };
   });
   const away = rows
-    .filter((r) => r.played !== null && daysBetween(r.played, now) >= JUMP_QUEUE_DAYS)
+    .filter((r) => r.played !== null && calendarDaysBetween(r.played, now) >= JUMP_QUEUE_DAYS)
     .sort((a, b) => (a.played ?? 0) - (b.played ?? 0) || a.order - b.order);
   if (away.length > 0) {
-    return { path: away[0].path, awayDays: daysBetween(away[0].played ?? now, now) };
+    return { path: away[0].path, awayDays: calendarDaysBetween(away[0].played ?? now, now) };
   }
   const longest = [...rows].sort((a, b) => a.waited - b.waited || a.order - b.order)[0];
   return { path: longest.path, awayDays: null };

@@ -367,7 +367,7 @@ function EdgePanel({ session }: { session: SessionRun }) {
  * "Was this grade fair?": one tap, kept in the Take's facts for the export.
  * Only on a graded result: a Take not heard has no grade to judge.
  */
-function FairTap({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
+export function FairTap({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
   const { t } = useTranslation();
   const id = outcome.takeId;
   if (!id) return null;

@@ -137,6 +137,18 @@ export function daysBetween(earlier: number, later: number): number {
   return Math.floor((later - earlier) / 86_400_000);
 }
 
+/**
+ * Calendar days between two instants, in local time: "yesterday" is the day
+ * before, whatever the hour. What a sentence about days means.
+ */
+export function calendarDaysBetween(earlier: number, later: number): number {
+  const day = (at: number) => {
+    const d = new Date(at);
+    return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  };
+  return Math.round((day(later) - day(earlier)) / 86_400_000);
+}
+
 /** The most recent Take that was actually heard, at any tempo. */
 export function lastCaughtTake(takes: readonly PathTakeRow[]): PathTakeRow | null {
   return takes.find((t) => t.caught) ?? null;

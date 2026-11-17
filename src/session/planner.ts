@@ -34,6 +34,7 @@
 import type { Exercise, PathDoc, Step } from "../paths/format";
 import { firstRung, hasRungBelow, rungAbove, rungBelow } from "./ladder";
 import {
+  calendarDaysBetween,
   cleanTempoOf,
   currentStepOf,
   daysBetween,
@@ -572,8 +573,9 @@ function placementStep(
   return build(0);
 }
 
+/** Calendar days since, for a sentence ("yesterday", "3 days ago"). */
 function daysSince(at: number | null, now: number): number | null {
-  return at === null ? null : Math.max(0, daysBetween(at, now));
+  return at === null ? null : Math.max(0, calendarDaysBetween(at, now));
 }
 
 /**
@@ -760,6 +762,7 @@ export function planSession(input: PlannerInput): SessionPlan {
     const last = i === rest.length - 1;
     if (minutes === 20 && last) {
       const fun = finisherPick(paths, progress);
+      const full = steps.filter((x) => x.kind === "exercise").length >= MAX_GRADED;
       if (fun && !back) {
         const backing = fun.exercise.backing;
         steps.push({
@@ -775,12 +778,13 @@ export function planSession(input: PlannerInput): SessionPlan {
         });
         return;
       }
-      const review = reviewStep(id, mins);
+      // Four graded already: the band, which grades nothing.
+      const review = full ? null : reviewStep(id, mins);
       if (review) {
         steps.push(review);
         return;
       }
-      if (mood === "returning" && cleanTempoOf(progress, focus.path.id, focus.exercise.id) !== null) {
+      if (!full && mood === "returning" && cleanTempoOf(progress, focus.path.id, focus.exercise.id) !== null) {
         steps.push(edgeStep(focus, progress, { minutes: mins }));
         return;
       }

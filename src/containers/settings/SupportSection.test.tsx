@@ -4,10 +4,16 @@
  * version said beside it. Pressing it sends nothing by itself.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const openUrl = vi.fn(async () => undefined);
+const exportPracticeData = vi.fn(async (_name: string, _json: string) => "/tmp/yames-practice.json");
 vi.mock("../../ipc", () => ({
+  exportPracticeData: (name: string, json: string) => exportPracticeData(name, json),
+  listPathStates: async () => [],
+  listPathTakes: async () => [],
+  listExerciseCeilings: async () => [],
+  storeLoad: async () => undefined,
   openUrl: (url: string) => openUrl(url),
   openFeedback: async (version: string) =>
     openUrl(`https://github.com/turutupa/yames/issues/new?title=${encodeURIComponent(version)}`),
@@ -28,5 +34,17 @@ describe("Send feedback in Settings", () => {
     fireEvent.click(screen.getByTestId("settings-send-feedback"));
     expect(openUrl).toHaveBeenCalledTimes(1);
     expect(String((openUrl.mock.calls[0] as unknown[])[0])).toContain("github.com/turutupa/yames/issues/new");
+  });
+});
+
+describe("Export my practice data, beside Send feedback", () => {
+  it("writes the JSON through the save dialog and says where it went", async () => {
+    render(<SupportSection shareTooltip={false} onShareOption={vi.fn()} appVersion="0.9.0" />);
+    fireEvent.click(screen.getByTestId("export-practice-button"));
+    await waitFor(() => expect(exportPracticeData).toHaveBeenCalledTimes(1));
+    const [name, json] = exportPracticeData.mock.calls[0] as unknown as [string, string];
+    expect(name).toMatch(/^yames-practice-\d{4}-\d{2}-\d{2}\.json$/);
+    expect(JSON.parse(json)).toMatchObject({ kind: "yames-practice-data", appVersion: "0.9.0" });
+    expect(await screen.findByText(/Saved to \/tmp\/yames-practice.json/)).toBeInTheDocument();
   });
 });
