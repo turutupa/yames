@@ -8070,21 +8070,25 @@ impl MetronomeEngine {
                 // dropped after this loop, so the channel could only
                 // disconnect once the loop had already ended. `alive` is what
                 // ends it, as it always really was.
+                // Read BEFORE the pop, with Acquire. The end of a song or a
+                // jam's form pushes its notification and THEN lowers
+                // `playing`, and the push is what unparks this thread.
+                // Reading the flag only after the park saw it already down and
+                // drained the very notification that woke it, so the UI never
+                // heard the piece end. Read before the pop, a `false` here was
+                // stored after the push, and Acquire makes that push visible
+                // to the pop below, which then returns it; read after an empty
+                // pop (the first fix) left a few instructions where the push
+                // and the store could both land, and the drain took the end.
+                let was_playing = playing.load(Ordering::Acquire);
                 let notif = match beats.pop() {
                     Some(n) => n,
                     None => {
-                        // Read BEFORE the park. The end of a song or a jam's
-                        // form pushes its notification and THEN lowers
-                        // `playing`, and the push is what unparks this
-                        // thread: reading the flag only after the park saw it
-                        // already down and drained the very notification
-                        // that woke it, so the UI never heard the piece end.
-                        let was_playing = playing.load(Ordering::Relaxed);
                         thread::park_timeout(Duration::from_millis(50));
                         // Ticks that landed while the transport was stopped
                         // are stale. Same rule, same place in the pass, as
                         // the `try_recv` drain this replaces.
-                        if !was_playing && !playing.load(Ordering::Relaxed) {
+                        if !was_playing && !playing.load(Ordering::Acquire) {
                             beats.drain();
                         }
                         continue;
