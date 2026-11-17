@@ -303,6 +303,16 @@ export interface Shot {
    * it spent a release overlapping by four pixels.
    */
   settings?: { update?: "available" };
+  /**
+   * The first-run wizard, over a store with no player in it (MVP, 2026-11-16).
+   *
+   * `welcome` is W0; `input` is W5 with a guitar heard through the mocked
+   * interface; `inputSilent` is W5 after six seconds of an open stream that
+   * hears nothing (the "nothing heard yet" checks); `inputNone` is W5 on a
+   * machine with no input device at all; `ready` is W7, after the input was
+   * heard and the rest skipped.
+   */
+  firstRun?: { stop: "welcome" | "input" | "inputSilent" | "inputNone" | "ready" };
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
@@ -657,6 +667,18 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
+  // The first run (MVP). Not on the site: the layout suite opens them.
+  ...(["welcome", "input", "inputSilent", "inputNone", "ready"] as const).map(
+    (stop): Shot => ({
+      id: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
+      suffix: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
+      window: "main",
+      firstRun: { stop },
+      width: 1400,
+      height: 900,
+      settleMs: 300,
+    }),
+  ),
   // The learning side. Not on the site yet: the layout suite is what opens them.
   {
     id: "today-first",

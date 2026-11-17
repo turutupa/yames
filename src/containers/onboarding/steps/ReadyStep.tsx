@@ -34,6 +34,7 @@ export function ReadyStep(_props: WizardStepProps) {
     jumpTo,
     finish,
     onRequestTour,
+    machineContext,
   } = useWizardEnv();
 
   const rows: SummaryRow[] = [
@@ -75,7 +76,12 @@ export function ReadyStep(_props: WizardStepProps) {
     {
       key: "input",
       label: t("onboarding.ready.rows.input"),
-      value: inputDeviceName || t("onboarding.ready.inputNone"),
+      // The system default has no name to show, but heard on W5 it is set up.
+      value:
+        inputDeviceName ||
+        (machineContext.inputConfigured
+          ? t("settings.inputTest.systemDefault")
+          : t("onboarding.ready.inputNone")),
       target: "audio-input",
     },
   ];

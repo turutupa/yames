@@ -178,6 +178,36 @@ async function drive() {
    * press than the one before it, so a scene that reaches the recap has walked
    * through the whole of a Session on the way.
    */
+  /** The first-run wizard, by pressing what a new player presses. */
+  if (shot!.firstRun) {
+    const { stop } = shot!.firstRun;
+    const overlay = () => document.querySelector('[data-testid="onboarding-overlay"]');
+    const button = (label: string) =>
+      [...document.querySelectorAll<HTMLButtonElement>(".onboarding-card button")].find(
+        (b) => b.textContent?.trim() === label,
+      );
+    await until("the wizard", () => !!overlay());
+    if (stop !== "welcome") {
+      await until("Set me up", () => !!button(i18n.t("onboarding.welcome.setup")));
+      button(i18n.t("onboarding.welcome.setup"))!.click();
+      await until("the instrument cards", () => !!document.querySelector(".instrument-picker-card"));
+      document.querySelector<HTMLButtonElement>(".instrument-picker-card")!.click();
+      await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
+      button(i18n.t("onboarding.next"))!.click();
+      await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
+      if (stop === "input" || stop === "ready") {
+        await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
+      } else {
+        await until("the trouble panel", () => !!document.querySelector('[data-testid="audio-input-trouble"]'), 20000);
+      }
+      if (stop === "ready") {
+        button(i18n.t("onboarding.next"))!.click();
+        const start = () => button(i18n.t("onboarding.ready.start"));
+        await pressUntil("Skip to the summary", () => button(i18n.t("onboarding.skip"))?.click(), () => !!start(), 20000);
+      }
+    }
+  }
+
   if (shot!.session) {
     const { stop } = shot!.session;
     const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);

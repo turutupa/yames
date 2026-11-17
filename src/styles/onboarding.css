@@ -1124,10 +1124,13 @@ button.onboarding-summary-row:hover {
   color: #1c1206;
   box-shadow: 0 6px 20px rgba(255, 180, 84, 0.18);
 }
+.onboarding-overlay .onboarding-welcome-actions {
+  max-width: 380px;
+}
 .onboarding-overlay .onboarding-welcome-actions .onboarding-btn-primary,
 .onboarding-overlay .onboarding-ready-actions .onboarding-btn-primary {
-  font-size: 24px;
-  padding: 14px 22px;
+  font-size: 22px;
+  padding: 13px 20px;
 }
 .onboarding-overlay .onboarding-dot.active {
   background: var(--l-amber);
