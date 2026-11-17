@@ -483,9 +483,6 @@ fn a_run_without_lag_correction_scores_like_the_plain_matcher() {
 fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
     let mut checked = std::collections::BTreeMap::<String, usize>::new();
     for (index, row) in rows().iter().enumerate() {
-        if row.path == "blues-pentatonics" {
-            continue; // Not runnable: it needs the landing grader.
-        }
         let Some(bars) = graded_bars(&row.path, &row.exercise) else {
             continue;
         };
@@ -536,4 +533,7 @@ fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
     println!("{checked:?}");
     assert!(checked.get("alternate-picking").copied().unwrap_or(0) > 30, "{checked:?}");
     assert!(checked.get("sweep-picking").copied().unwrap_or(0) > 100, "{checked:?}");
+    // The Theory Paths: written licks, phrases and arpeggios, with timing bars.
+    assert!(checked.get("blues-pentatonics").copied().unwrap_or(0) >= 30, "{checked:?}");
+    assert!(checked.get("classic-rock").copied().unwrap_or(0) >= 24, "{checked:?}");
 }
