@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      `enableOnBackInvokedCallback`: M00 found the system Back gesture
+      finishing the activity mid-click, with logcat saying exactly why
+      ("OnBackInvokedCallback is not enabled for the application"). The
+      yames-mobile plugin registers a callback that closes an open sheet, or
+      sends the app to the background with the click still running; this flag
+      is what makes Android 13+ route Back to it, predictive-back animation
+      and all, instead of straight to "finish the activity".
+    -->
+    <application
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.yames"
+        android:enableOnBackInvokedCallback="true"
+        android:usesCleartextTraffic="${usesCleartextTraffic}">
+        <!--
+          Portrait only, in v1 (plan §1, "No landscape"). Every phone screen
+          M03 drew assumes a tall window: the bottom tab bar, the full-width
+          play button, the presets sheet. A tablet in a stand would be the
+          reason to revisit this, and nothing is designed for one yet.
+        -->
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:label="@string/main_activity_title"
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+          android:name="androidx.core.content.FileProvider"
+          android:authorities="${applicationId}.fileprovider"
+          android:exported="false"
+          android:grantUriPermissions="true">
+          <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>

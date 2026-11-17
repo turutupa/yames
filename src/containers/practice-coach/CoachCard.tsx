@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { getSessionHistory, deleteSession, clearAllSessions } from "../../ipc";
+import { getSessionHistory, deleteSession, clearAllSessions } from "../../ipc.desktop";
 import { rescoreReport } from "../../coach/reportStats";
 import type { FeedMessage, SavedSession, AudioSpectrum, InferredGridChanged } from "../../types";
 import { FeedMessageItem, type ChipAction } from "./CoachFeedMessage";

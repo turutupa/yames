@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import type { DownloadProgress, ModelStatus } from "../../ipc";
+import type { DownloadProgress, ModelStatus } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
 import { formatBytes } from "./formatBytes";
 

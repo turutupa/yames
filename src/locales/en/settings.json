@@ -346,6 +346,9 @@
       "sounds": "Sounds",
       "soundsCredit": "The Club kit is Virtuosity Drums by Versilian Studios and Karoryfer Samples, performed by Austin McMahon (public domain). The Studio kit is DRSKit by the DrumGizmo project (CC BY 4.0).",
       "madeWith": "Made with {{heart}} for musicians everywhere",
+      "newerOut": "Version {{version}} is out",
+      "getIt": "Get it",
+      "notNow": "Not now",
       "soundsCreditSongs": "The other instruments come from the Sonivox General MIDI sound set (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
@@ -411,6 +414,7 @@
   "instrumentPicker": {
     "title": "What are you practicing on?",
     "subtitle": "Yames tunes onset detection and coaching feedback for your instrument. You can change this later in Settings.",
+    "subtitleMobile": "So Yames knows what you're practising on. You can change this later in Settings.",
     "skip": "Skip — I'll pick later"
   }
 }

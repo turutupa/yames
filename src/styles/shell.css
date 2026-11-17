@@ -7,6 +7,27 @@
  * edited, and the parts are contiguous runs of the original file imported in
  * the original order, so the cascade is unchanged. */
 
+/* =================== Safe areas =================== */
+/* A phone's screen is not all usable: a notch or a camera cut-out eats the top
+   strip, a rounded corner clips the sides, and the gesture bar owns a band at
+   the bottom. The browser reports each as an `env(safe-area-inset-*)`, but
+   only once the page opts in with `viewport-fit=cover` — and only on a device
+   that has them. Every desktop browser, and every phone browser before the
+   page opts in, resolves all four to the fallback, which is why the tokens
+   below are 0px everywhere today and this whole section is inert on desktop.
+ *
+ * They are named rather than used inline so a layout reads as "the gutter plus
+   whatever the hardware is taking" instead of a wall of env() calls, and so
+   M03 has one place to look. Use them as `calc(<the design's own spacing> +
+   var(--safe-left))`, never on their own: an inset is extra clearance the
+   hardware demands, not a replacement for the padding the design asked for. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
 /* ── Scrollbars, everywhere ───────────────────────────────────────────────
  *
  * The app draws its own menus, its own sliders and its own switches, and then
@@ -46,18 +67,22 @@
   background-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
 }
 
-*::-webkit-scrollbar-thumb:hover {
-  background-color: color-mix(in srgb, var(--text-primary) 38%, transparent);
+@media (hover: hover) {
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--text-primary) 38%, transparent);
+  }
 }
 
 *::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-
 /* =================== Layout: fixed header + scrolling content =================== */
 .main-window {
   height: 100%;
+  /* Whatever sits first inside the window clears the status bar / notch. On
+     desktop this is 0 and the titlebar still starts at the window's top. */
+  padding-top: var(--safe-top);
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
@@ -252,11 +277,18 @@
   justify-content: center;
 }
 
-button.context-chip:hover,
 .context-chip-open {
   color: var(--text-primary);
   background: var(--bg-raised);
   border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
+}
+
+@media (hover: hover) {
+  button.context-chip:hover {
+    color: var(--text-primary);
+    background: var(--bg-raised);
+    border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
+  }
 }
 
 .context-chip-open {
@@ -300,9 +332,11 @@ button.context-chip:hover,
   z-index: 50;
 }
 
-.context-chip[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(0);
+@media (hover: hover) {
+  .context-chip[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header-sound-wrap {
@@ -403,14 +437,24 @@ button.context-chip:hover,
   transition: opacity 0.15s ease;
 }
 
-.context-chip-volume:hover .context-chip-range:not(:disabled)::-webkit-slider-thumb,
 .context-chip-range:focus-visible::-webkit-slider-thumb {
   opacity: 1;
 }
 
-.context-chip-volume:hover .context-chip-range:not(:disabled)::-moz-range-thumb,
+@media (hover: hover) {
+  .context-chip-volume:hover .context-chip-range:not(:disabled)::-webkit-slider-thumb {
+    opacity: 1;
+  }
+}
+
 .context-chip-range:focus-visible::-moz-range-thumb {
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .context-chip-volume:hover .context-chip-range:not(:disabled)::-moz-range-thumb {
+    opacity: 1;
+  }
 }
 
 .context-chip-range:focus-visible {
@@ -506,9 +550,11 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
-.preset-sidebar-chip:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .preset-sidebar-chip:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .preset-sidebar-chip.active {
@@ -543,8 +589,10 @@ button.context-chip:hover,
   position: relative;
 }
 
-.preset-sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+  .preset-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 
 /* A row you can pick up says so before you pick it up.
@@ -687,9 +735,11 @@ button.context-chip:hover,
     border-color 120ms ease;
 }
 
-.preset-sidebar-empty-state .empty-state-action:hover {
-  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
-  border-color: var(--accent);
+@media (hover: hover) {
+  .preset-sidebar-empty-state .empty-state-action:hover {
+    background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+    border-color: var(--accent);
+  }
 }
 
 .preset-sidebar-empty-state .empty-state-action:focus-visible {
@@ -769,12 +819,16 @@ button.context-chip:hover,
   cursor: pointer;
 }
 
-.preset-context-menu button:hover {
-  background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+  .preset-context-menu button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
-[data-theme-group="light"] .preset-context-menu button:hover {
-  background: rgba(0, 0, 0, 0.05);
+@media (hover: hover) {
+  [data-theme-group="light"] .preset-context-menu button:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .preset-context-delete {
@@ -846,19 +900,23 @@ button.context-chip:hover,
     padding-left 0.15s ease;
 }
 
-.eval-action-btn:hover {
-  max-width: 160px;
-  border-radius: var(--radius-sm);
-  padding: 0 10px;
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .eval-action-btn:hover {
+    max-width: 160px;
+    border-radius: var(--radius-sm);
+    padding: 0 10px;
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+  }
 }
 
-.eval-action-btn:hover .eval-action-label {
-  max-width: 120px;
-  opacity: 1;
-  padding-left: 5px;
+@media (hover: hover) {
+  .eval-action-btn:hover .eval-action-label {
+    max-width: 120px;
+    opacity: 1;
+    padding-left: 5px;
+  }
 }
 
 .eval-action-active {
@@ -890,18 +948,26 @@ button.context-chip:hover,
   transition: color 0.15s;
 }
 
-.preset-active-name:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .preset-active-name:hover {
+    color: var(--accent);
+  }
 }
 
 /* The same line, when nothing has been saved yet — "Unsaved metronome". It is
    a label rather than a door, so it neither invites a click nor lights up
    under the pointer, and it sits a shade back from a name you chose because
    the app picked those words, not you. */
-.preset-active-name--unsaved,
-.preset-active-name--unsaved:hover {
+.preset-active-name--unsaved {
   color: var(--text-muted);
   cursor: default;
+}
+
+@media (hover: hover) {
+  .preset-active-name--unsaved:hover {
+    color: var(--text-muted);
+    cursor: default;
+  }
 }
 
 /* "Edited", not a bullet. The dot is the glance; the word is what makes the
@@ -968,8 +1034,10 @@ button.context-chip:hover,
   color: var(--accent-text, #fff);
 }
 
-.preset-text-btn--save:not(:disabled):not(.preset-text-btn--feedback):hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .preset-text-btn--save:not(:disabled):not(.preset-text-btn--feedback):hover {
+    filter: brightness(1.08);
+  }
 }
 
 .preset-text-btn--revert {
@@ -977,9 +1045,11 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
-.preset-text-btn--revert:hover:not(:disabled) {
-  background: var(--surface-hover, color-mix(in srgb, currentColor 8%, transparent));
-  color: var(--text-primary);
+@media (hover: hover) {
+  .preset-text-btn--revert:hover:not(:disabled) {
+    background: var(--surface-hover, color-mix(in srgb, currentColor 8%, transparent));
+    color: var(--text-primary);
+  }
 }
 
 /* Nothing to save reads as nothing to save. The button stays — its absence
@@ -1045,9 +1115,11 @@ button.jam-vibe-chip {
   cursor: pointer;
 }
 
-button.jam-vibe-chip:hover {
-  color: var(--accent);
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  button.jam-vibe-chip:hover {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
 }
 
 .jam-vibe-chip-dot {
@@ -1077,8 +1149,10 @@ button.jam-vibe-chip:hover {
     border-color 0.15s;
 }
 
-.jam-save-area .jam-sheet-btn.jam-door:hover {
-  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+@media (hover: hover) {
+  .jam-save-area .jam-sheet-btn.jam-door:hover {
+    background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+  }
 }
 
 .jam-save-area .jam-sheet-btn.jam-door.active {
@@ -1121,13 +1195,17 @@ button.jam-vibe-chip:hover {
   white-space: nowrap;
 }
 
-.preset-save-btn:hover {
-  background: var(--accent);
-  color: var(--accent-text, white);
+@media (hover: hover) {
+  .preset-save-btn:hover {
+    background: var(--accent);
+    color: var(--accent-text, white);
+  }
 }
 
-.preset-save-btn:hover .preset-save-btn-label {
-  opacity: 1;
+@media (hover: hover) {
+  .preset-save-btn:hover .preset-save-btn-label {
+    opacity: 1;
+  }
 }
 
 /* The dirty and feedback modifiers of this button are gone: with a preset
@@ -1140,7 +1218,7 @@ button.jam-vibe-chip:hover {
   flex: 1;
   overflow: hidden;
   position: relative;
-  padding: 56px 24px 0;
+  padding: 56px calc(24px + var(--safe-right)) 0 calc(24px + var(--safe-left));
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -1217,9 +1295,11 @@ button.jam-vibe-chip:hover {
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.rail-mode:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .rail-mode:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .rail-mode.active {
@@ -1282,9 +1362,11 @@ button.jam-vibe-chip:hover {
    left edge, and leaving it there keeps the narrow and collapsed rails —
    where the glyph is hidden and the row IS the button — exactly as they
    were. */
-.rail-mode-row:hover {
-  border-radius: var(--radius-sm);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .rail-mode-row:hover {
+    border-radius: var(--radius-sm);
+    background: var(--surface-hover);
+  }
 }
 
 .rail-mode-row[data-active] {
@@ -1292,15 +1374,22 @@ button.jam-vibe-chip:hover {
   background: var(--accent-subtle);
 }
 
-.rail-mode-row:hover .rail-mode,
 .rail-mode-row[data-active] .rail-mode.active {
   background: transparent;
 }
 
+@media (hover: hover) {
+  .rail-mode-row:hover .rail-mode {
+    background: transparent;
+  }
+}
+
 /* Over the row's own fill, the glyph's hover needs to be the stronger of the
    two or it reads as nothing happening. */
-.rail-mode-row[data-active] .rail-mode-now:hover {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
+@media (hover: hover) {
+  .rail-mode-row[data-active] .rail-mode-now:hover {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
 }
 
 .rail-mode-now {
@@ -1319,9 +1408,11 @@ button.jam-vibe-chip:hover {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.rail-mode-now:hover {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .rail-mode-now:hover {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+  }
 }
 
 .rail-mode-now:focus-visible {
@@ -1369,9 +1460,11 @@ button.jam-vibe-chip:hover {
   cursor: pointer;
 }
 
-.rail-library-reopen:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .rail-library-reopen:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 /* A maximized cheat sheet is fixed over the window down to the transport,
@@ -1409,9 +1502,11 @@ body[data-sheet-maximized] .rail {
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.rail-action:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .rail-action:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .rail-action.active {
@@ -1469,8 +1564,13 @@ body[data-sheet-maximized] .rail {
   display: flex;
   align-items: center;
   gap: 22px;
-  height: 76px;
-  padding: 0 24px;
+  /* The bar the stop button lives on is the last thing above a phone's
+     gesture bar, so it grows by the inset and pads its contents clear of it
+     rather than letting the swipe strip overlap the one control that must
+     always be reachable. Both terms are 0px on desktop, so the bar is the
+     same 76px it has always been. */
+  height: calc(76px + var(--safe-bottom));
+  padding: 0 24px var(--safe-bottom);
   margin: 0 -24px;
   border-top: 1px solid var(--border);
   background: var(--bg-secondary);
@@ -1496,9 +1596,11 @@ body[data-sheet-maximized] .rail {
   box-shadow: 0 8px 24px -10px var(--accent-glow-strong);
 }
 
-.transport-play:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px -10px var(--accent-glow-strong);
+@media (hover: hover) {
+  .transport-play:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -10px var(--accent-glow-strong);
+  }
 }
 
 .transport-play:active {
@@ -1668,8 +1770,10 @@ body[data-sheet-maximized] .rail {
   color: var(--text-secondary);
 }
 
-.transport-switch:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .transport-switch:hover {
+    color: var(--text-primary);
+  }
 }
 
 .transport-switch-track {
@@ -1864,12 +1968,18 @@ body[data-sheet-maximized] .rail {
   transition: opacity 0.45s ease;
 }
 
-.main-window[data-playing="true"] .rail:hover,
 .main-window[data-playing="true"] .rail:focus-within,
-.main-window[data-playing="true"] .main-header:hover,
 .main-window[data-playing="true"] .main-header:focus-within {
   opacity: 1;
   transition: opacity 0.12s ease;
+}
+
+@media (hover: hover) {
+  .main-window[data-playing="true"] .rail:hover,
+  .main-window[data-playing="true"] .main-header:hover {
+    opacity: 1;
+    transition: opacity 0.12s ease;
+  }
 }
 
 .rail,
@@ -2156,9 +2266,11 @@ body[data-sheet-maximized] .rail {
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.transport-skip:hover:not(:disabled) {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .transport-skip:hover:not(:disabled) {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+  }
 }
 
 .transport-skip[data-waiting]:not(:disabled) {
@@ -2168,8 +2280,10 @@ body[data-sheet-maximized] .rail {
   box-shadow: 0 0 0 4px var(--accent-subtle);
 }
 
-.transport-skip[data-waiting]:not(:disabled):hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .transport-skip[data-waiting]:not(:disabled):hover {
+    filter: brightness(1.08);
+  }
 }
 
 /* Stopped, it has no downbeat to land on. It stays in the row rather than
@@ -2199,15 +2313,16 @@ body[data-sheet-maximized] .rail {
    that the transport still reports it — shedding it here too would leave the
    answer nowhere. */
 @media (max-width: 819px) {
+  /* The chevron-and-bar icon is the whole button here: it keeps its
+     `aria-label` and its `title`, so nothing is lost but the words. It used
+     to draw a `::after` beside the icon as well, whose content was a stray
+     U+0083 — a C1 control character, never a glyph — followed by an "A".
+     It rendered as an empty box on every platform whose font cannot draw
+     it, which on Android is all of them; M05b found it sitting in a store
+     screenshot. There was never anything for it to say. */
   .transport[data-setlist] .transport-skip {
     font-size: 0;
     padding: 0 11px;
-  }
-
-  .transport[data-setlist] .transport-skip::after {
-    content: "A";
-    font-size: 16px;
-    line-height: 1;
   }
 
   .transport[data-setlist] .transport-input span {
@@ -2368,7 +2483,7 @@ body[data-sheet-maximized] .rail {
    now have the rail's top to themselves. */
 
 .main-content {
-  padding: 0 24px;
+  padding: 0 calc(24px + var(--safe-right)) 0 calc(24px + var(--safe-left));
 }
 
 /* The bar's own geometry — static, 56px, hairline-closed — is declared with
@@ -2445,8 +2560,10 @@ body[data-sheet-maximized] .rail {
   opacity: 0.75;
 }
 
-.rail-collapse:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .rail-collapse:hover {
+    opacity: 1;
+  }
 }
 
 
@@ -2492,10 +2609,12 @@ body[data-sheet-maximized] .rail {
    `setlist.css` gave that one button its own shape and its own hover. The
    owner picked the accent one, so it is the only one now, and the override
    that made them differ is gone. */
-.preset-sidebar-head-btn:hover {
-  color: var(--accent);
-  background: var(--accent-subtle);
-  border-color: transparent;
+@media (hover: hover) {
+  .preset-sidebar-head-btn:hover {
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border-color: transparent;
+  }
 }
 
 .preset-sidebar-head-btn.active {
@@ -2533,10 +2652,16 @@ body[data-sheet-maximized] .rail {
   z-index: 120;
 }
 
-.preset-sidebar-head-btn[data-tip]:hover::after,
 .preset-sidebar-head-btn[data-tip]:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .preset-sidebar-head-btn[data-tip]:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =================== Unsaved changes ===================
@@ -2553,6 +2678,9 @@ body[data-sheet-maximized] .rail {
   position: fixed;
   inset: 0;
   z-index: 200;
+  /* A centred dialog stays clear of a notch and a gesture bar; 0px on
+     desktop, where this changes nothing. */
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2672,9 +2800,11 @@ body[data-sheet-maximized] .rail {
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.unsaved-actions .unsaved-cancel:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+@media (hover: hover) {
+  .unsaved-actions .unsaved-cancel:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  }
 }
 
 .unsaved-actions .unsaved-discard {
@@ -2682,9 +2812,11 @@ body[data-sheet-maximized] .rail {
   color: var(--text-secondary);
 }
 
-.unsaved-actions .unsaved-discard:hover {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+@media (hover: hover) {
+  .unsaved-actions .unsaved-discard:hover {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
 }
 
 /* Two selectors deep, because `.unsaved-actions button` above is (0,1,1) and
@@ -2697,8 +2829,10 @@ body[data-sheet-maximized] .rail {
   color: var(--accent-text);
 }
 
-.unsaved-actions .unsaved-save:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .unsaved-actions .unsaved-save:hover {
+    filter: brightness(1.08);
+  }
 }
 
 .unsaved-actions button:focus-visible {
@@ -2845,4 +2979,514 @@ body[data-sheet-maximized] .rail {
 @keyframes jam-spinner-breathe {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
+}
+
+/* =================== Touch targets =================== */
+/* 44x44 CSS px is the floor both platforms' guidance puts under anything you
+   hit with a fingertip, and almost nothing in this app was drawn for one: the
+   window opens at 800x900 and the smallest it has ever had to survive is
+   480x780. Both are mouse sizes, and a mouse pointer is a single pixel.
+ *
+ * `pointer: coarse` is the query for "the primary input is a finger", so a
+ * desktop with a mouse matches none of this and nothing below changes what
+ * the owner sees. Two shapes are used, and which one applies is decided by
+ * the row rather than by taste:
+ *
+ *   - where the row has vertical room, the control grows with min-height,
+ *     which costs the layout nothing because rows lay out horizontally;
+ *   - where the row is horizontally tight -- the context bar and the preset
+ *     sidebar's header already run off a phone before anything grows -- the
+ *     visual keeps its size and a transparent ::after reaches out to 44
+ *     instead, so the hit area grows without pushing its neighbours further
+ *     off screen.
+ *
+ * Controls whose width comes from a flex container rather than from
+ * themselves are deliberately left alone: a min-width on those only moves the
+ * overflow around. They are a layout problem, and M03 owns it. */
+@media (pointer: coarse) {
+  .rail-mode,
+  .rail-action {
+    min-height: 44px;
+  }
+
+  .preset-sidebar-item {
+    min-height: 44px;
+  }
+
+  /* 26x26 icon buttons, in a header row a phone cannot fit as it is.
+     ::before, not ::after: these buttons already spend ::after on their
+     [data-tip] tooltip, and a second rule for the same pseudo-element would
+     fight it rather than sit beside it. */
+  .preset-sidebar-head-btn {
+    position: relative;
+  }
+
+  .preset-sidebar-head-btn::before {
+    content: "";
+    position: absolute;
+    /* The two sit 2px apart, so 1px is the whole inline budget -- reaching 44
+       wide would mean each one answering taps aimed at the other. Vertically
+       the header has room, so the height is the one that gets there: 28x44,
+       and the 16px the width is short of is spacing M03 has to find. */
+    inset: -9px -1px;
+  }
+
+  .preset-save-btn,
+  .preset-text-btn {
+    min-height: 44px;
+  }
+
+  .context-chip {
+    min-height: 44px;
+  }
+
+  .context-chip-icon {
+    position: relative;
+  }
+
+  /* ::before for the same reason: ::after is the chip's tooltip. */
+  .context-chip-icon::before {
+    content: "";
+    position: absolute;
+    inset: 0 -6px;
+  }
+
+  /* The faders in the context bar are 54x12. The bar the eye reads is drawn
+     by the track pseudo-element, not by the input's own box, so the input can
+     be 44px tall without the bar getting any thicker. The thumb is the other
+     half of this: it is invisible until :hover on a desktop, and a screen
+     with no hover would otherwise show a volume control with no handle. */
+  .context-chip-range {
+    height: 44px;
+  }
+
+  .context-chip-range:not(:disabled)::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    /* half the difference between the thumb and the 3px track */
+    margin-top: -5.5px;
+    opacity: 1;
+  }
+
+  .context-chip-range:not(:disabled)::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    opacity: 1;
+  }
+
+  .transport-skip {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .unsaved-actions button {
+    min-height: 44px;
+  }
+}
+
+/* =================== The phone shell (M03b) ===============================
+ *
+ * Everything below is under `.main-window.is-mobile` or on a class only the
+ * phone build renders (`.mobile-tabs`). `is-mobile` is written by
+ * `MainWindow` from `IS_MOBILE`, which is a build-time constant — so a desktop
+ * build never carries the class, never renders the tab bar, and cannot reach
+ * a single rule here. That is deliberate rather than a width query: a desktop
+ * window dragged to 360px still has a rail, a pointer and a keyboard, and the
+ * answers below are the wrong ones for it.
+ */
+
+/* The bottom tab bar. Four screens, then a hairline, then the two things that
+   are not screens — the library (a sheet over what you are on) and Zen (a
+   mode of it). See MobileTabBar.tsx. */
+.mobile-tabs {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  /* The last thing above the gesture bar. Same treatment as the transport:
+     the bar grows by the inset and pads its contents clear of it, so a swipe
+     strip never overlaps a tab. */
+  height: calc(58px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.mobile-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 2px;
+  border: none;
+  border-top: 2px solid transparent;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+/* The current screen is marked at the top edge, against the hairline, rather
+   than with the rail's left bar — there is no left edge to put it on. */
+.mobile-tab.active {
+  border-top-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.mobile-tab.active svg {
+  color: var(--accent);
+}
+
+/* The library is not a destination, so its open state is the second accent —
+   the app's colour for "this is a different kind of thing". */
+.mobile-tab-library.active {
+  border-top-color: var(--accent-2);
+  color: var(--text-primary);
+}
+
+.mobile-tab-library.active svg {
+  color: var(--accent-2);
+}
+
+/* A newer version is out (M11).
+ *
+ * Six pixels on the Settings tab, and that is the whole of it: enough that
+ * somebody notices it eventually, not enough to interrupt anything. It is
+ * drawn from an attribute on the window rather than from a prop, so
+ * `MobileTabBar.tsx` does not have to know that updates exist — the tab bar
+ * belongs to another task, and a mark is a mark whatever put it there. Gone
+ * while you are in Settings, where the line itself is; gone for good once the
+ * version is taken or waved away.
+ *
+ * Only the phone build from the website can ever set the attribute
+ * (`SAYS_WHEN_NEWER`), so a store build cannot reach this rule. */
+.main-window[data-newer-version] .mobile-tab[data-tab="settings"] {
+  position: relative;
+}
+
+.main-window[data-newer-version] .mobile-tab[data-tab="settings"]::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  /* Half the tab, plus half the 21px glyph, less the dot — the corner of the
+     icon rather than the corner of the button, so it reads as belonging to
+     the icon at every tab width the fifteen locales produce. */
+  left: calc(50% + 8px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.mobile-tab-label {
+  max-width: 100%;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-tabs-split {
+  flex: 0 0 1px;
+  align-self: center;
+  height: 26px;
+  background: var(--border);
+}
+
+/* While the click runs the furniture recedes, the same three rungs the rail
+   and the header follow (UI_DECISIONS U6.2). It comes back on focus; there is
+   no hover to come back on. */
+.main-window[data-playing="true"] .mobile-tabs {
+  opacity: 0.55;
+  transition: opacity 0.45s ease;
+}
+
+.main-window[data-playing="true"] .mobile-tabs:focus-within {
+  opacity: 1;
+  transition: opacity 0.12s ease;
+}
+
+.mobile-tabs {
+  transition: opacity 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-window[data-playing="true"] .mobile-tabs,
+  .mobile-tabs {
+    transition: none;
+  }
+}
+
+/* The gutters. 24px each side was cut for a window that also had a 252px rail
+   beside it; on a 360px screen it is 13% of the width spent on nothing. The
+   safe-area terms stay, because a notch in landscape is not a gutter.
+
+   The top gutter is 0, and that is the phone's whole answer to what was above
+   the header. On desktop the region's 56px of top padding is the air between
+   the titlebar and the context bar; a phone has no titlebar, so the trimmed
+   40px was air above nothing — and it sat on top of `.main-window`'s own
+   `--safe-top`, which on a phone drawing behind the status bar is another 49.
+   Together they pushed the header about 150 device pixels down the screen
+   with nothing in the space (M05 store shot 01). The header is furniture: it
+   belongs directly under the status bar, the way an app bar does, and the
+   inset alone is what keeps it clear of it. */
+.main-window.is-mobile .main-content {
+  padding: 0 calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left));
+  gap: 18px;
+}
+
+.main-window.is-mobile .main-header {
+  margin: 0 -14px;
+  padding: 0 10px 0 14px;
+  height: 40px;
+}
+
+/* The transport keeps the stop button reachable and nothing else changes about
+   it; it only has to give back the 24px of gutter the content region no longer
+   has.
+
+   And it gives back the gesture-bar inset too. Both terms were written when
+   the transport was the last thing above the bottom edge; on a phone the tab
+   bar is below it and clears the pill for both of them (`.mobile-tabs`). Left
+   in, they were 24px of dead height in the middle of the screen the moment
+   the real inset arrived. */
+.main-window.is-mobile .transport {
+  height: 76px;
+  margin: 0 -14px;
+  padding: 0 14px;
+  gap: 14px;
+}
+
+/* ...except with a setlist running, where it did not fit and the thing that
+   fell off the edge was the one control that matters (M11).
+ *
+ * The desktop shedding order was written for a window: the step count goes
+ * under 680px, Skip loses its words under 820, and what is left — "Next in 8
+ * bars" and the button — is 125px against the 73px a 360px screen has after
+ * Stop and the count-in switch. Measured: the group ran 52px past the right
+ * edge and Skip was entirely off screen. On a "when I say" step nothing is
+ * counting down and no bar is running out, so Skip is the ONLY way the
+ * routine moves on — an unreachable one.
+ *
+ * So the words go and the button stays, which is the same order every other
+ * width uses. Nothing is lost: the step you are on, the bar you are in and
+ * how much of it is left are all drawn large on the player above it, which is
+ * the screen you are looking at while it plays. */
+.main-window.is-mobile .transport[data-setlist] .transport-setlist-next {
+  display: none;
+}
+
+/* ...and the same row again, in the longest language there is (M12).
+ *
+ * M11 left Stop, the count-in switch and Skip, and in English that is 359px
+ * of content in 358px of row — exact, and only exact. In Brazilian
+ * Portuguese "Count-in" is "Contagem inicial" and the switch is 140px rather
+ * than 95, so Skip was pushed off the right edge again: on the tab where a
+ * routine is running, with nothing left to shed.
+ *
+ * Three pixels-worth of changes and one rule:
+ *
+ *   - The gap drops from 14 to 10 and the gutter from 14 to 12. Three
+ *     controls, not six, and they are far enough apart for a thumb at either.
+ *   - The spacer goes. It exists to push the setlist group to the right of a
+ *     wide window; in a row that is already full it contributes nothing but
+ *     one more gap.
+ *   - And the count-in's WORD may be cut, which is this file's one exception
+ *     to `.transport > *`'s "nothing squashes, it sheds instead". Shedding
+ *     the word outright is what the header does to its chips and the tab bar
+ *     does to its last two buttons — but both of those leave a glyph that
+ *     says what the control is, and a switch with nothing beside it says
+ *     nothing at all. "Contagem in…" is still the words; a bare toggle
+ *     between Stop and Skip is a riddle.
+ *
+ * English, German, Russian, Japanese and Vietnamese all fit with room to
+ * spare and nothing in them is cut. */
+.main-window.is-mobile .transport[data-setlist] {
+  gap: 10px;
+  padding: 0 12px;
+}
+
+.main-window.is-mobile .transport[data-setlist] .transport-spacer {
+  display: none;
+}
+
+.main-window.is-mobile .transport[data-setlist] .transport-switch {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.main-window.is-mobile .transport[data-setlist] .transport-switch-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The library is a sheet now, so the rail's own drawer geometry has nothing
+   to animate and nothing to sit beside. */
+.main-window.is-mobile .main-body {
+  min-height: 0;
+}
+
+/* The stage scrolls, the furniture does not.
+ *
+ * A desktop window is at least 780px tall and the beat view is laid out to
+ * fill it, vertically centred inside a region that never scrolls. A 360x800
+ * phone spends 174 of those pixels on the header, the transport and the tab
+ * bar, and the SUBDIVISION row fell off the bottom of what was left — clipped,
+ * with no way to reach it, because `.main-content` hides its overflow.
+ *
+ * So the view scrolls and the two things you must always be able to find do
+ * not: the transport keeps the stop button and the tab bar keeps the way out,
+ * both outside this box. Centring goes with it — content taller than its box
+ * cannot be centred in it without losing the top as well as the bottom.
+ *
+ * Beat and setlist only. Drill and settings have their own scrolling rules and
+ * belong to M03c. */
+.main-window.is-mobile .main-content[data-view="beat"] > .view-transition-wrapper,
+.main-window.is-mobile .main-content[data-view="setlist"] > .view-transition-wrapper {
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  gap: 20px;
+  padding-bottom: 16px;
+}
+
+/* ── Seven along the bottom, and only five of them are places (M09) ────────
+ *
+ * Jam made the bar a seventh button and the first label went to "Metrono…"
+ * at 360px. Shorter words are not the fix — M03d already spent that budget
+ * choosing labels that fit fifteen languages in six tabs — and a smaller font
+ * is not one either.
+ *
+ * So the two on the right of the hairline give up their words. They were
+ * never destinations: the library is a sheet over whatever you are on and Zen
+ * is a mode of it, neither ever carries `aria-current`, and the hairline has
+ * been saying they are a different kind of thing since M03b. A musician
+ * reaches for a PLACE by name — Metronome, Drill, Setlist, Jam, Settings —
+ * and for these two by the glyph, the way a phone's share and search buttons
+ * are reached everywhere else.
+ *
+ * The full names stay: `aria-label` already carries "Library" and "Zen", so
+ * a screen reader hears exactly what it heard before, and the five names on
+ * the left get the width back — enough for "Metronome" to be a word again.
+ */
+.mobile-tab-library,
+.mobile-tab-zen {
+  flex: 0 0 44px;
+}
+
+.mobile-tab-library .mobile-tab-label,
+.mobile-tab-zen .mobile-tab-label {
+  display: none;
+}
+
+/* And the five share the room by what their words need rather than by
+   counting to five. Equal columns are the reflex for a bottom bar, and they
+   are why the longest label was the only one that truncated while "Jam" sat
+   in a box twice the width of the word in it: five equal fifths give
+   "Metronome" the same 54px they give "Jam". Content-sized with the slack
+   spread over them, every label on the bar is a whole word — and in a locale
+   long enough to run out of room they give way together instead of one of
+   them carrying all of it. */
+.mobile-tab {
+  flex: 1 1 auto;
+}
+
+/* ── The bar above the stage, on a phone (M09) ─────────────────────────────
+ *
+ * It was 40px tall and everything in it is 44: the touch pass gave every chip
+ * and every text button a 44px minimum, which is the size of a fingertip and
+ * not negotiable, and the row centred them in four pixels less than that. So
+ * the sound chip, the volume chip, the overflow and Save were all drawn two
+ * pixels above the top of the screen with their top border cut off, on every
+ * tab.
+ *
+ * 48px: a 44px control with two pixels of air above and below it. The bar
+ * still reads as an app bar rather than a toolbar, and — this is the half a
+ * screenshot cannot show — it stays clear of the status bar whatever the real
+ * inset is, because the inset is padding on the window OUTSIDE this region
+ * (shell.css's `--safe-top` on `.main-window`), so nothing here was ever
+ * under the status bar; it was simply taller than its own row.
+ */
+.main-window.is-mobile .main-header {
+  height: 48px;
+}
+
+/* Save, as the icon it already carries.
+ *
+ * With no preset loaded the bar is "Unsaved metronome" and a Save button, and
+ * at 360 the button kept every letter of its label while the name — the
+ * answer to "what am I looking at" — was cut to "Unsa…". The name is worth
+ * more than the button's words: the button has a floppy disc on it and sits
+ * where it always sits, and what it does is the one thing in this bar that
+ * needs no reading.
+ *
+ * Clipped rather than removed, the way this file sheds every other label
+ * (see the chips at 1081px): the word stays in the accessibility tree, so a
+ * screen reader still hears "Save preset".
+ */
+.main-window.is-mobile .preset-save-btn .preset-save-btn-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.main-window.is-mobile .preset-save-btn {
+  position: relative;
+  min-width: 44px;
+  justify-content: center;
+  padding: 0;
+}
+
+/* And the name takes what that gives back. It is the first thing in the bar
+   and the only one that can flex, so it is the one that has to be told it
+   may.
+
+   15px rather than 16.5: still the largest text in the bar and still the
+   answer to "what am I looking at", and a phone's bar is 110px of name where
+   a desktop's is three hundred. The placeholder the app writes for a stage
+   nobody has saved yet is one word on a phone for the same reason — see
+   PresetSaveBar. */
+.main-window.is-mobile .preset-save-area .preset-active-name {
+  flex: 0 1 auto;
+  max-width: 100%;
+  font-size: 15px;
+}
+
+/* ── What is left of the bar's left half on a phone (M12) ──────────────────
+ *
+ * Measured at 360 on the merged branch, the setlist tab's bar read
+ *
+ *     D  [SETLIST]  No changes
+ *
+ * — a routine called "Daily routine" cut to its initial, to make room for a
+ * badge repeating the word already lit in the tab bar and for a caption
+ * saying that nothing had happened. Both go, and the name gets the room.
+ *
+ * The badge: the tab bar at the foot of the screen says Setlist, in the
+ * accent, with the tab lit. Saying it twice on a 360px row costs the one
+ * thing the row is for. (The jam's badge went the same way in M09.)
+ *
+ * "No changes": a disabled button is a state you have to read to learn that
+ * there is nothing to do. The jam bar already drew nothing there; the preset
+ * and setlist bars now do the same, so the only save affordance a phone ever
+ * shows is a live one. "Edited" is already a bare dot below 1081px, which is
+ * every phone — the word stays in the accessibility tree.
+ *
+ * Desktop keeps all three: it has the room, and the badge is what makes
+ * "setlist" a precise word there (U9.4). */
+.main-window.is-mobile .setlist-save-area .setlist-badge {
+  display: none;
+}
+
+.main-window.is-mobile .preset-save-area .preset-text-btn:disabled {
+  display: none;
 }

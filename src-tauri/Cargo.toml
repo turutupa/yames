@@ -30,13 +30,11 @@ tauri-build = { version = "2", features = [] }
 # delete through the app. The feature and the scope have to agree or the build
 # script refuses, which is how this line came to be here.
 tauri = { version = "2", features = ["macos-private-api", "tray-icon", "protocol-asset"] }
-tauri-plugin-global-shortcut = "2"
 tauri-plugin-store = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rodio = { version = "0.19", default-features = false, features = ["wav"] }
 cpal = "0.15"
-tauri-plugin-updater = "2"
 # The native folder picker behind `pick_kit_folder` — a kit of your own
 # samples is a folder you point the app at (plans/JAM_UX_DECISIONS.md B3),
 # and only the OS can draw that dialog. Apache-2.0 OR MIT, like Tauri
@@ -54,9 +52,6 @@ hound = "3"
 # cmake for aubio. It renders on a thread of our own, never on the audio
 # callback: `src/synth.rs` says why and what stands between them.
 rustysynth = "1.3.6"
-tauri-plugin-process = "2"
-tauri-plugin-decorum = "1"
-midir = "0.10"
 # Tauri already pulls tokio in transitively; declared explicitly so we can
 # use `tokio::task::spawn_blocking` from blocking command handlers.
 tokio = { version = "1", features = ["rt"] }
@@ -68,24 +63,7 @@ tokio = { version = "1", features = ["rt"] }
 # The crate name on crates.io is `aubio` (v0.2.*).
 aubio = { version = "0.2", features = ["static", "bindgen"] }
 
-# LLM inference for Practice Coach (requires cmake + a C/C++ toolchain to
-# build). Deliberately carries NO backend feature here: `metal` is a
-# macOS-only backend, and hardcoding it made `--features coach-llm`
-# unbuildable on Windows and Linux. The backend is chosen by the Yames
-# feature that turns this dependency on — see [features] below.
-llama-cpp-2 = { version = "0.1.146", optional = true }
-# Detokenisation of LLM output. `LlamaModel::token_to_piece` takes an
-# `encoding_rs::Decoder` and llama-cpp-2 does not re-export the crate, so it
-# has to be a direct dependency. Already in the graph underneath
-# llama-cpp-2, so this adds no package to Cargo.lock.
-encoding_rs = { version = "0.8", optional = true }
 audio_thread_priority = { version = "0.37.0", default-features = false }
-# Physical-core count for the inference thread budget (ROADMAP §3:
-# `n_threads = max(1, physical_cores - 2)`). std only exposes *logical*
-# CPUs; halving them as an SMT proxy under-counts by 2x on every machine
-# without hyper-threading (an 8-core M1 got 2 threads). Optional so a
-# default build does not pay for it.
-num_cpus = { version = "1", optional = true }
 # FLAC, for the shipped sound bank only. Nine minutes of audio was 70 MB as
 # uncompressed WAV and is 31 MB as FLAC, bit for bit the same samples — see
 # `kit.rs`. Chosen over symphonia and rodio's decoders for the same reason
@@ -109,21 +87,6 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 # under tauri itself, so this adds NO package to Cargo.lock and NOTHING to
 # the installer. MIT OR Apache-2.0.
 base64 = "0.22"
-# One Yames at a time, so that double-clicking a Guitar Pro file while the app
-# is already open hands the path to the running window instead of starting a
-# second copy — which would fight the first for the audio device and the
-# settings store. Apache-2.0 OR MIT, like Tauri itself.
-#
-# What it costs, per platform, because it is NOT the same on all three:
-# on Windows a named mutex plus a hidden window and WM_COPYDATA, over
-# `windows-sys`, which is already in this graph — a few kilobytes. On macOS
-# it is close to nothing; LaunchServices already forwards a second launch to
-# the running app. On LINUX it talks over D-Bus, and that pulls `zbus` and
-# its async stack: **thirty packages into Cargo.lock**, all of them behind
-# `cfg(target_os = "linux")` so nothing but the Linux build compiles them.
-# The lock file grew by thirty-one entries; the Windows and macOS binaries
-# did not.
-tauri-plugin-single-instance = "2"
 
 [features]
 default = []
@@ -141,9 +104,87 @@ coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 # `YAMES_CALLBACK_PROBE=1`, with or without this.
 callback-probe-alloc = []
 
+# ---------------------------------------------------------------------------
+# Desktop only (MOBILE_IMPLEMENTATION_PLAN §3, revised for the MVP by M7).
+#
+# What a phone cannot build or has no use for: the window manager's plugins,
+# MIDI (midir 0.10 has no Android backend at all), one-instance-at-a-time, and
+# the coach's LLM. A target block rather than a Cargo feature because the Tauri
+# CLI has no `--no-default-features`, so nothing has to be remembered on a
+# phone build. Cargo never evaluates this block for `aarch64-linux-android`.
+#
+# What is NOT here any more, unlike the mobile v1 branch: aubio and the whole
+# mic evaluation. The revamp grades a Session from the guitar, so a phone
+# needs the same onset detector, timing analyzer and scorer as a desktop
+# (plans/tasks/mvp/ANDROID.md). `tauri` stays in `[dependencies]` with its
+# features: tauri-build reads only that table for its allowlist check, and
+# `macos-private-api` / `tray-icon` are inert off their platforms.
+# ---------------------------------------------------------------------------
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+tauri-plugin-decorum = "1"
+midir = "0.10"
+# One Yames at a time, so that double-clicking a Guitar Pro file while the app
+# is already open hands the path to the running window instead of starting a
+# second copy — which would fight the first for the audio device and the
+# settings store. Apache-2.0 OR MIT, like Tauri itself.
+#
+# What it costs, per platform, because it is NOT the same on all three:
+# on Windows a named mutex plus a hidden window and WM_COPYDATA, over
+# `windows-sys`, which is already in this graph — a few kilobytes. On macOS
+# it is close to nothing; LaunchServices already forwards a second launch to
+# the running app. On LINUX it talks over D-Bus, and that pulls `zbus` and
+# its async stack: **thirty packages into Cargo.lock**, all of them behind
+# `cfg(target_os = "linux")` so nothing but the Linux build compiles them.
+# The lock file grew by thirty-one entries; the Windows and macOS binaries
+# did not.
+tauri-plugin-single-instance = "2"
+
+# LLM inference for Practice Coach (requires cmake + a C/C++ toolchain to
+# build). Deliberately carries NO backend feature here: `metal` is a
+# macOS-only backend, and hardcoding it made `--features coach-llm`
+# unbuildable on Windows and Linux. The backend is chosen by the Yames
+# feature that turns this dependency on — see [features] below.
+llama-cpp-2 = { version = "0.1.146", optional = true }
+# Detokenisation of LLM output. `LlamaModel::token_to_piece` takes an
+# `encoding_rs::Decoder` and llama-cpp-2 does not re-export the crate, so it
+# has to be a direct dependency. Already in the graph underneath
+# llama-cpp-2, so this adds no package to Cargo.lock.
+encoding_rs = { version = "0.8", optional = true }
+# Physical-core count for the inference thread budget (ROADMAP §3:
+# `n_threads = max(1, physical_cores - 2)`). std only exposes *logical*
+# CPUs; halving them as an SMT proxy under-counts by 2x on every machine
+# without hyper-threading (an 8-core M1 got 2 threads). Optional so a
+# default build does not pay for it.
+num_cpus = { version = "1", optional = true }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 coreaudio-sys = "0.2"
 core-foundation-sys = "0.8"
+
+# ---------------------------------------------------------------------------
+# Android only.
+#
+# `oboe` is already in the graph — cpal 0.15 pulls it in as its Android audio
+# backend, with the same "0.6" requirement and the same `java-interface`
+# feature — so naming it here adds no package to Cargo.lock. cpal's Oboe
+# backend never asks for `PerformanceMode::LowLatency`, opens 44.1 kHz into a
+# 48 kHz device and sets no input preset (so the platform's AGC and noise
+# suppression would flatten every pick attack), so `src/android_audio.rs`
+# opens the output stream and `src/android_input.rs` the input stream itself.
+# ---------------------------------------------------------------------------
+[target.'cfg(target_os = "android")'.dependencies]
+oboe = { version = "0.6", features = ["java-interface"] }
+# The things a webview cannot do on Android: keep playing with the screen off
+# (a foreground service), yield to a phone call (audio focus), keep the screen
+# awake, answer the Back gesture, open a link, and ask for the microphone.
+tauri-plugin-yames-mobile = { path = "plugins/yames-mobile" }
+
+# iPhone: the same plugin crate, with a Swift half (M06a). Not an MVP target.
+[target.'cfg(target_os = "ios")'.dependencies]
+tauri-plugin-yames-mobile = { path = "plugins/yames-mobile" }
 
 # Thread-priority control for the LLM inference worker (ROADMAP §3: the
 # generation thread runs *below normal* so it can never starve the audio

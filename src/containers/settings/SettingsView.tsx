@@ -15,6 +15,7 @@ import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
 import type { BindingTarget } from "./KeybindingModals";
 import { SHARE_OPTIONS } from "../../constants/metronome";
+import { IS_MOBILE } from "../../platform";
 import { UpdateBanner } from "./UpdateBanner";
 import { GeneralSettingsSection } from "./GeneralSettingsSection";
 import { AppearanceSettingsSection } from "./AppearanceSettingsSection";
@@ -32,6 +33,7 @@ type ViewTransitionLevel = "off" | "subtle" | "smooth" | "expressive";
 type AnimationStyle = "fade" | "scale" | "blur" | "slide" | "reveal";
 // The union lives with the hook that owns the state.
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
+import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
 type Evaluation = ReturnType<typeof useEvaluation>;
 
 interface SettingsViewProps {
@@ -41,7 +43,13 @@ interface SettingsViewProps {
   latestVersion: string;
   appVersion: string;
   doUpdateCheck: () => void;
-  downloadAndInstallUpdate: () => Promise<void>;
+  /**
+   * "Version 1.3.0 is out" — only ever set on the phone build people
+   * download from the website, which nothing else keeps current (M11).
+   */
+  newerVersion?: NewerVersion;
+  /** Absent on a phone: the in-app updater is desktop-only. */
+  downloadAndInstallUpdate?: () => Promise<void>;
 
   // General
   autoCheckUpdates: boolean;
@@ -147,6 +155,7 @@ export function SettingsView({
   appVersion,
   doUpdateCheck,
   downloadAndInstallUpdate,
+  newerVersion = NEVER_NEWER,
   autoCheckUpdates,
   setAutoCheckUpdates,
   alwaysOnTop,
@@ -221,6 +230,7 @@ export function SettingsView({
   const [updateError, setUpdateError] = useState<string | null>(null);
 
   const handleInstallUpdate = () => {
+    if (!downloadAndInstallUpdate) return;
     setUpdateStatus("downloading");
     setUpdateError(null);
     downloadAndInstallUpdate().catch((err: unknown) => {
@@ -235,12 +245,15 @@ export function SettingsView({
 
   return (
     <>
-      <UpdateBanner
-        updateStatus={updateStatus}
-        latestVersion={latestVersion}
-        updateError={updateError}
-        onInstall={handleInstallUpdate}
-      />
+      {/* The in-app updater is desktop-only. */}
+      {!IS_MOBILE && (
+        <UpdateBanner
+          updateStatus={updateStatus}
+          latestVersion={latestVersion}
+          updateError={updateError}
+          onInstall={handleInstallUpdate}
+        />
+      )}
       <GeneralSettingsSection
         autoCheckUpdates={autoCheckUpdates}
         setAutoCheckUpdates={setAutoCheckUpdates}
@@ -279,59 +292,66 @@ export function SettingsView({
         instrument={instrument}
       />
 
-      <CoachSettingsSection
-        coachBrainTier={coachBrainTier}
-        setCoachBrainTier={setCoachBrainTier}
-        coachVoiceMode={coachVoiceMode}
-        setCoachVoiceMode={setCoachVoiceMode}
-        coachVoiceName={coachVoiceName}
-        setCoachVoiceName={setCoachVoiceName}
-        coachVerbosity={coachVerbosity}
-        setCoachVerbosity={setCoachVerbosity}
-        coachMode={coachMode}
-        setCoachMode={setCoachMode}
-        coachStance={coachStance}
-        setCoachStance={setCoachStance}
-        modelStatus={modelStatus}
-        setModelStatus={setModelStatus}
-        modelDownloading={modelDownloading}
-        studioAvailable={studioAvailable}
-        standardAvailable={standardAvailable}
-        brainUpdateAvailable={brainUpdateAvailable}
-        availableVoices={availableVoices}
-        voiceDiagnostics={voiceDiagnostics}
-        instrument={instrument}
-        setInstrument={setInstrument}
-        jamCues={jamCues}
-        setJamCues={setJamCues}
-        onStartDownload={onStartDownload}
-        onRequestDownload={onRequestDownload}
-      />
+      {/* The coach's model, Songs' download watch, the floating widget and
+          the hotkeys are not part of the phone app (mobile plan §1, kept for
+          the MVP): no section, no greyed-out card. */}
+      {!IS_MOBILE && (
+        <>
+        <CoachSettingsSection
+          coachBrainTier={coachBrainTier}
+          setCoachBrainTier={setCoachBrainTier}
+          coachVoiceMode={coachVoiceMode}
+          setCoachVoiceMode={setCoachVoiceMode}
+          coachVoiceName={coachVoiceName}
+          setCoachVoiceName={setCoachVoiceName}
+          coachVerbosity={coachVerbosity}
+          setCoachVerbosity={setCoachVerbosity}
+          coachMode={coachMode}
+          setCoachMode={setCoachMode}
+          coachStance={coachStance}
+          setCoachStance={setCoachStance}
+          modelStatus={modelStatus}
+          setModelStatus={setModelStatus}
+          modelDownloading={modelDownloading}
+          studioAvailable={studioAvailable}
+          standardAvailable={standardAvailable}
+          brainUpdateAvailable={brainUpdateAvailable}
+          availableVoices={availableVoices}
+          voiceDiagnostics={voiceDiagnostics}
+          instrument={instrument}
+          setInstrument={setInstrument}
+          jamCues={jamCues}
+          setJamCues={setJamCues}
+          onStartDownload={onStartDownload}
+          onRequestDownload={onRequestDownload}
+        />
 
-      {/* W19 — catching a download is the only part of Songs that happens
-          without being asked for, so it is the only part with a switch.
-          Takes no props: it reads and writes `settings.json` itself. */}
-      <SongsSettingsSection />
+        {/* W19 — catching a download is the only part of Songs that happens
+            without being asked for, so it is the only part with a switch.
+            Takes no props: it reads and writes `settings.json` itself. */}
+        <SongsSettingsSection />
 
-      <WidgetSettingsSection
-        widgetMode={widgetMode}
-        setWidgetMode={setWidgetMode}
-        widgetAlwaysOnTop={widgetAlwaysOnTop}
-        setWidgetAlwaysOnTop={setWidgetAlwaysOnTop}
-      />
+        <WidgetSettingsSection
+          widgetMode={widgetMode}
+          setWidgetMode={setWidgetMode}
+          widgetAlwaysOnTop={widgetAlwaysOnTop}
+          setWidgetAlwaysOnTop={setWidgetAlwaysOnTop}
+        />
 
-      <HotkeysSettingsSection
-        keyBindings={keyBindings}
-        globalBindings={globalBindings}
-        footBindings={footBindings}
-        bindingFor={bindingFor}
-        setBindingFor={setBindingFor}
-        setPendingKeys={setPendingKeys}
-        inputTestMode={inputTestMode}
-        setInputTestMode={setInputTestMode}
-        midi={midi}
-        onResetRequest={onResetRequest}
-      />
+        <HotkeysSettingsSection
+          keyBindings={keyBindings}
+          globalBindings={globalBindings}
+          footBindings={footBindings}
+          bindingFor={bindingFor}
+          setBindingFor={setBindingFor}
+          setPendingKeys={setPendingKeys}
+          inputTestMode={inputTestMode}
+          setInputTestMode={setInputTestMode}
+          midi={midi}
+          onResetRequest={onResetRequest}
+        />
+        </>
+      )}
 
       <SupportSection
         shareTooltip={shareTooltip}
@@ -341,6 +361,7 @@ export function SettingsView({
 
       <AboutSection
         appVersion={appVersion}
+        newerVersion={newerVersion}
         updateStatus={updateStatus}
         latestVersion={latestVersion}
         onInstallUpdate={handleInstallUpdate}

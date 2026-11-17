@@ -255,6 +255,7 @@
     },
     "runway": {
       "label": "De volgende noten, op weg naar de lijn"
-    }
+    },
+    "inputChanged": "De ingang is veranderd. Ik luister nu via {{device}}."
   }
 }

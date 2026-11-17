@@ -15,6 +15,7 @@ import { ChannelDropdown } from "../../components/ChannelDropdown";
 import { OutputPairDropdown } from "../../components/OutputPairDropdown";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
+import { IS_MOBILE } from "../../platform";
 
 type EvaluationLike = ReturnType<typeof useEvaluation>;
 type MidiLike = UseMidiReturn;
@@ -117,6 +118,10 @@ export function DevicesSettingsSection({
     // `settings-coach` is for O4's "Pick a voice" toast.
     <section className="hotkeys-section" id="settings-devices">
       <h2>{t("settings.devices.title")}</h2>
+      {/* No output picker on a phone (from the `mobile` branch, M05): Android
+          routes output itself and the Oboe stream ignores a saved device
+          name, so a dropdown here would change nothing. */}
+      {!IS_MOBILE && (
       <div className="midi-device-section">
         <label className="midi-label devices-subsection-label">{t("settings.devices.audioOutput")}</label>
         <div className="midi-device-row">
@@ -174,8 +179,12 @@ export function DevicesSettingsSection({
           </>
         )}
       </div>
+      )}
 
-      <div className="midi-device-section" style={{ marginTop: 28 }}>
+      {/* The input, on every platform: Takes are graded from the guitar. On
+          a phone the list is the built-in mic, a USB-C interface and a
+          headset-jack adapter — whatever Android reports (android_input.rs). */}
+      <div className="midi-device-section" style={IS_MOBILE ? undefined : { marginTop: 28 }}>
         <label className="midi-label devices-subsection-label">{t("settings.devices.audioInput")}</label>
         <div className="midi-device-row">
           <AudioInputDropdown
@@ -231,6 +240,8 @@ export function DevicesSettingsSection({
         )}
       </div>
 
+      {/* No MIDI on a phone: midir has no Android backend. */}
+      {!IS_MOBILE && (
       <div className="midi-device-section" style={{ marginTop: 28 }}>
         <label className="midi-label devices-subsection-label">{t("settings.devices.midi")}</label>
         <div className="midi-device-row">
@@ -260,6 +271,7 @@ export function DevicesSettingsSection({
           </div>
         )}
       </div>
+      )}
     </section>
   );
 }

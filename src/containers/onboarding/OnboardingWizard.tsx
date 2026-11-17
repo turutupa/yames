@@ -27,6 +27,8 @@ import {
   type WizardEvaluationEnv,
 } from "./WizardContext";
 import "../../styles/onboarding.css";
+import "../../styles/phone-learning.css";
+import { IS_MOBILE } from "../../platform";
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -447,6 +449,9 @@ export function OnboardingWizard({
     <WizardEnvProvider value={env}>
     <div
       className={`onboarding-overlay${animate ? "" : " no-motion"}`}
+      // The phone build (M7): phone-learning.css gives the wizard's controls
+      // a thumb's height. Build-time constant; never on a desktop.
+      data-mobile={IS_MOBILE ? "" : undefined}
       data-testid="onboarding-overlay"
     >
       <div

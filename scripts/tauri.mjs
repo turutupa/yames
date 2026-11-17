@@ -20,6 +20,16 @@
  *
  * CI is unaffected: `release.yml` runs `tauriScript: npx tauri` and
  * passes its own `--features`, so it never goes through this file.
+ *
+ * Mobile (`tauri android …`, `tauri ios …`) is the other way round: there is
+ * no coach in a phone build at all (MOBILE_IMPLEMENTATION_PLAN §1), so this
+ * injects no feature and no LLM build environment. The cut is made by
+ * target-conditional dependencies in `src-tauri/Cargo.toml` plus
+ * `#[cfg(desktop)]` in the source, not by a Cargo feature — the Tauri CLI has
+ * no `--no-default-features` flag to turn one off with. What the mobile path
+ * does need is `YAMES_MOBILE=1` in the child environment: the frontend build
+ * reads it (M02) to drop the coach and desktop-only subtrees from the bundle,
+ * and `beforeDevCommand` / `beforeBuildCommand` inherit it from here.
  */
 import { spawn } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
@@ -34,6 +44,7 @@ const argv = process.argv.slice(2);
 const FEATURE = process.platform === "darwin" ? "coach-llm-metal" : "coach-llm-vulkan";
 
 const subcommand = argv.find((a) => !a.startsWith("-"));
+const isMobile = subcommand === "android" || subcommand === "ios";
 const wantsFeatureInjection =
   (subcommand === "dev" || subcommand === "build") &&
   process.env.YAMES_DEV_NO_LLM !== "1" &&
@@ -41,6 +52,14 @@ const wantsFeatureInjection =
 
 const args = [...argv];
 const env = { ...process.env };
+
+if (isMobile) {
+  // Read by `vite.config.ts` (M02) to build the phone bundle: no coach, no
+  // evaluation, no window controls. Set here rather than left to the caller
+  // so `npm run tauri android dev` and the CI job cannot disagree.
+  env.YAMES_MOBILE = "1";
+  console.log(`[tauri] YAMES_MOBILE=1 for \`tauri ${subcommand}\` (no coach in a phone build)`);
+}
 
 if (wantsFeatureInjection) {
   // Insert straight after the subcommand: everything after a `--` is

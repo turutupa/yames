@@ -1,0 +1,349 @@
+name: Android (signed release)
+
+# The Android release build. Still `workflow_dispatch`-only, deliberately:
+# Android does not follow the desktop's cadence (a Play closed test runs for
+# fourteen days before anything reaches production), so it is run by hand,
+# for a tag that already exists, rather than off a `release …` commit.
+#
+# M7 (2026-11-16): the MVP's Android build — the learning side, graded from
+# the guitar through the phone's mic, a USB-C interface or a jack adapter
+# (plans/tasks/mvp/ANDROID.md). Run it from the Actions tab on any branch with
+# an empty tag to get an unsigned or signed APK as a workflow artifact.
+#
+# It does not touch `release.yml` (the desktop release), `ci.yml` (the desktop
+# gate), `pages.yml` or `snap.yml`. Nothing here runs on push.
+#
+# What it produces:
+#   * an **arm64 APK**, signed, attached to the GitHub release named by the
+#     `tag` input — this is what someone installs from the website, and arm64
+#     is every phone sold in the last decade;
+#   * an **AAB** carrying all four ABIs, as a workflow artifact, which is what
+#     gets uploaded to the Play Console. Play splits it per device, so the AAB
+#     is deliberately not attached to the release: nobody can install one.
+#
+# Secrets it needs (repo settings -> Secrets and variables -> Actions). All
+# four are the *upload* key; Play App Signing holds the app signing key, so
+# losing these costs a key reset, not the listing:
+#
+#   ANDROID_KEYSTORE_BASE64    base64 of the .jks, one line (`base64 -w0`)
+#   ANDROID_KEYSTORE_PASSWORD  the keystore password
+#   ANDROID_KEY_ALIAS          the alias inside it (`yames`)
+#   ANDROID_KEY_PASSWORD       the key password
+#
+# The owner generates that keystore; see plans/tasks/mobile/M05-RELEASE-NOTES.md
+# for the exact `keytool` command. With the secrets absent the workflow still
+# builds and refuses to publish; the APK is then signed with a throwaway key
+# made in the run (installable by sideloading, not updatable in place), and
+# the AAB stays unsigned.
+#
+# The `push` trigger is for the MVP and nothing else (M7): GitHub only offers
+# "Run workflow" for a workflow that is on the default branch, and this file is
+# not on `main` yet — so pushing `mvp-android` is what builds the APK until it
+# is. Drop the branch trigger when this reaches `main` and keep the dispatch.
+# A push builds the arm64 APK only, signed with the repository's TEST key
+# (the ANDROID_* secrets, alias `yames-test`) so every tester build shares one
+# signature and updates in place; it is uploaded as a workflow artifact and
+# never published (see "Refuse to publish" below). In a fork, where the
+# secrets are absent, the APK is signed with a key made in the run.
+on:
+  push:
+    branches: [mvp-android]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or tag to build (defaults to the branch this is run from)'
+        required: false
+        type: string
+      tag:
+        description: 'Existing release tag to attach the signed APK to, e.g. v1.0.5. Leave empty to build only.'
+        required: false
+        type: string
+
+# `gh release upload` writes to Releases. Nothing else here needs a token.
+permissions:
+  contents: write
+
+jobs:
+  build-android:
+    name: signed APK + AAB
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      # Fail before a twenty-minute build rather than after it: publishing is
+      # the whole point of passing a tag, and an unsigned APK on a release
+      # page is worse than no APK — it cannot be updated in place later,
+      # because Android refuses an upgrade whose signature changed.
+      #
+      # M7: the four ANDROID_* secrets in this repository are a TEST key (alias
+      # `yames-test`), there so every tester APK carries one signature and
+      # updates in place. A test key must never sign something on the Releases
+      # page or in Play. So publishing also needs the repository VARIABLE
+      # `ANDROID_KEY_IS_RELEASE` set to `true`, which is set only once the
+      # secrets hold the real upload key. A branch push never publishes: it
+      # has no tag.
+      - name: Refuse to publish without a signing key
+        if: inputs.tag != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_IS_RELEASE: ${{ vars.ANDROID_KEY_IS_RELEASE }}
+          # Through the environment, never interpolated into the script: an
+          # input that reaches `run:` as text is an input that can close the
+          # quoting and carry on as a command.
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::tag '$TAG' was given but ANDROID_KEYSTORE_BASE64 is not set."
+            echo "::error::Add the four ANDROID_* secrets first, or run with an empty tag to build without publishing."
+            exit 1
+          fi
+          if [ "${KEY_IS_RELEASE:-}" != "true" ]; then
+            echo "::error::tag '$TAG' was given, but the signing secrets are marked as a test key."
+            echo "::error::Put the real upload key in the ANDROID_* secrets and set the repository variable ANDROID_KEY_IS_RELEASE=true, or run with an empty tag."
+            exit 1
+          fi
+
+      # All four ABIs, because the AAB carries all four. armv7 and x86 are
+      # old phones and emulators; aarch64 is every phone anyone will install
+      # the APK on.
+      - name: Install Rust stable with Android targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Pinned to what the Android work was actually done against (M00/M04
+      # findings, and the owner's SDK): NDK r26.1, platform 36 for the
+      # project's compileSdk/targetSdk, build-tools 35. Letting gradle pick
+      # these for itself works until the day a new default lands and the
+      # build that reproduced yesterday does not.
+      - name: Install Android SDK components
+        run: |
+          sdkmanager --install "platforms;android-36" "build-tools;35.0.0" "ndk;26.1.10909125"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> "$GITHUB_ENV"
+
+      # M7 (the MVP): the phone grades a Session from the guitar, so aubio —
+      # the onset detector — is in the Android build now. aubio-sys compiles
+      # its C with the NDK's clang (tauri sets CC_<target>), and generates its
+      # bindings with bindgen, which needs the host's libclang and the NDK's
+      # sysroot for <stdlib.h> and friends. The CFLAGS are the ones every
+      # Linux build of aubio already needs (AGENTS.md).
+      - name: aubio's build needs (libclang, the NDK sysroot)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev cmake
+          echo "BINDGEN_EXTRA_CLANG_ARGS=--sysroot=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> "$GITHUB_ENV"
+          echo "CFLAGS=-std=gnu11 -Wno-implicit-function-declaration" >> "$GITHUB_ENV"
+
+      # The quick failure: the whole crate type-checked for the phone before
+      # twenty minutes of gradle. Same command as on a laptop (ANDROID.md).
+      - name: Type-check the Rust crate for Android
+        run: |
+          rustup target add aarch64-linux-android
+          export CC_aarch64_linux_android="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
+          export CXX_aarch64_linux_android="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang++"
+          export AR_aarch64_linux_android="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+          cargo check --manifest-path src-tauri/Cargo.toml --lib --target aarch64-linux-android
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # `npm install`, not `npm ci`: the repo's lockfile is bun's, and
+      # package-lock.json is gitignored. Same as ci.yml and release.yml.
+      - name: Install frontend dependencies
+        run: npm install
+
+      # `src-tauri/gen/android` is committed — the signing config, the portrait
+      # lock and the versionCode derivation all live in files inside it, and
+      # regenerating would throw them away. This only catches a checkout that
+      # somehow lacks it.
+      - name: Check the Android project is present
+        run: |
+          test -f src-tauri/gen/android/app/build.gradle.kts \
+            || { echo "::error::src-tauri/gen/android is missing from this ref"; exit 1; }
+
+      # Decoded into the runner's temp dir, never the workspace, so no build
+      # step can sweep it into an artifact. `base64 -w0` on the way in means
+      # `-d` alone on the way out.
+      #
+      # The step runs unconditionally and decides inside itself, because
+      # `secrets` is not one of the contexts a step-level `if` can read —
+      # written as `if: secrets.X != ''` the condition is false whatever the
+      # secret holds, and every build would come out unsigned with nothing in
+      # the log to say why.
+      - name: Decode the upload keystore
+        id: keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            echo "No ANDROID_KEYSTORE_BASE64 secret; building unsigned."
+            echo "signed=no" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/yames-upload.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/yames-upload.jks" >> "$GITHUB_ENV"
+          echo "signed=yes" >> "$GITHUB_OUTPUT"
+
+      # arm64 first and on its own, so the APK carries one ABI. The AAB build
+      # below leaves all four libraries in the tree; an APK built after it
+      # would quietly pick them all up and triple in size.
+      #
+      # `npm run tauri --`, not a bare `npx tauri`: the wrapper is what sets
+      # YAMES_MOBILE=1 for the frontend build (no coach in a phone bundle) and
+      # what makes sure CI and a laptop run the same command.
+      # `YAMES_SIDELOAD=1` on the APK and NOWHERE else. The APK is what the
+      # website offers, and nothing keeps it current — so that build, and only
+      # that build, asks once a day whether a newer release exists and says so
+      # in About. The AAB below goes to a store, which does its own updating
+      # and refuses an app that points at its own download page.
+      #
+      # The frontend is rebuilt by `beforeBuildCommand` for each of these two
+      # steps, so the flag set here reaches that build and is gone for the
+      # next one. The two checks after them prove it both ways rather than
+      # trusting it.
+      - name: Build the signed arm64 APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          YAMES_SIDELOAD: "1"
+        run: npm run tauri -- android build --apk --target aarch64
+
+      - name: The APK can say when a newer version is out
+        run: node scripts/check-mobile-bundle.mjs --sideload
+
+      # Not on a branch push (M7): testers install the APK, and the AAB's four
+      # ABIs (aubio and all) double the build. A dispatch builds both.
+      - name: Build the signed AAB (all four ABIs)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: npm run tauri -- android build --aab
+
+      # The store's bundle, and the `dist/` the AAB was built from is still
+      # on disk: neither web address may be in it.
+      - name: The store bundle says nothing about downloads
+        if: github.event_name == 'workflow_dispatch'
+        run: node scripts/check-mobile-bundle.mjs
+
+      # Locate the outputs rather than hardcode paths: the gradle flavour
+      # directory ("universal") is the Tauri template's, not a promise.
+      - name: Collect the outputs
+        id: outputs
+        run: |
+          set -euo pipefail
+          OUT=src-tauri/gen/android/app/build/outputs
+          # `sort | head` rather than `find -print | head`: head closing the
+          # pipe early kills find with SIGPIPE, and `pipefail` would turn that
+          # into a failed step. Prefer a signed artifact if both are lying
+          # around, which they are not on a fresh runner but are on a laptop.
+          pick() { find "$1" -name "$2" ! -name '*unsigned*' | sort | head -1; }
+          APK=$(pick "$OUT/apk" '*.apk')
+          [ -n "$APK" ] || APK=$(find "$OUT/apk" -name '*.apk' | sort | head -1)
+          # No bundle directory at all on a branch push (no AAB is built).
+          AAB=""
+          if [ -d "$OUT/bundle" ]; then
+            AAB=$(pick "$OUT/bundle" '*.aab')
+            [ -n "$AAB" ] || AAB=$(find "$OUT/bundle" -name '*.aab' | sort | head -1)
+          fi
+          test -n "$APK" || { echo "::error::no APK was produced"; exit 1; }
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            test -n "$AAB" || { echo "::error::no AAB was produced"; exit 1; }
+          fi
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist-android
+          cp "$APK" "dist-android/Yames_${VERSION}_aarch64.apk"
+          if [ -n "$AAB" ]; then cp "$AAB" "dist-android/Yames_${VERSION}.aab"; fi
+          echo "apk=dist-android/Yames_${VERSION}_aarch64.apk" >> "$GITHUB_OUTPUT"
+          echo "aab=dist-android/Yames_${VERSION}.aab" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # M7: without the upload key the APK above is UNSIGNED, and Android
+      # refuses to install an unsigned APK at all. For a tester build that is
+      # useless, so sign it with a key made on the spot. Such an APK installs
+      # by sideloading; the next run makes a different key, so a tester
+      # uninstalls the old build before installing the new one (Android
+      # refuses an update whose signature changed). Never published: the
+      # "refuse to publish" step above already stops a tag without the key.
+      - name: Test-sign the APK when there is no upload key
+        if: steps.keystore.outputs.signed != 'yes'
+        run: |
+          set -euo pipefail
+          APK="${{ steps.outputs.outputs.apk }}"
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
+          keytool -genkeypair -keystore "$RUNNER_TEMP/test.jks" -storepass testtest -keypass testtest \
+            -alias test -keyalg RSA -keysize 2048 -validity 30 -dname "CN=Yames test build"
+          "$APKSIGNER" sign --ks "$RUNNER_TEMP/test.jks" --ks-pass pass:testtest --key-pass pass:testtest \
+            --out "${APK%.apk}-test-signed.apk" "$APK"
+          rm "$APK"
+          "$APKSIGNER" verify "${APK%.apk}-test-signed.apk"
+
+      # ROADMAP 5.0.1 budgets 80 MB per platform. The native library is
+      # essentially all of it, so its per-ABI size is the number to watch:
+      # the release profile strips it, and a regression here means something
+      # stopped stripping.
+      - name: Record sizes
+        run: |
+          set -uo pipefail
+          {
+            echo "### Android artifacts (${{ steps.outputs.outputs.version }})"
+            echo
+            echo '| Artifact | Size |'
+            echo '|---|---|'
+            for f in dist-android/*; do
+              echo "| $(basename "$f") | $(du -h "$f" | cut -f1) |"
+            done
+            echo
+            echo '#### Native libraries, per ABI, inside the AAB'
+            echo
+            echo '| Entry | Uncompressed |'
+            echo '|---|---|'
+            [ -f "${{ steps.outputs.outputs.aab }}" ] && unzip -l "${{ steps.outputs.outputs.aab }}" \
+              | awk '/\.so$/ { printf "| %s | %s bytes |\n", $4, $1 }'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # `apksigner verify` is the only thing that answers "would a phone
+      # install this": a build can succeed, produce an APK, and have no
+      # signature at all.
+      - name: Verify the APK signature
+        if: steps.keystore.outputs.signed == 'yes'
+        run: |
+          set -euo pipefail
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
+          "$APKSIGNER" verify --print-certs -v "${{ steps.outputs.outputs.apk }}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # The commit in the name: testers on a branch get a new APK per push.
+          name: yames-android-${{ steps.outputs.outputs.version }}-${{ github.sha }}
+          path: dist-android/*
+          if-no-files-found: error
+          retention-days: 30
+
+      # Only when a tag was asked for. `--clobber` so re-running the workflow
+      # after a fix replaces the asset instead of failing on a name collision.
+      - name: Attach the APK to the release
+        if: inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+          APK: ${{ steps.outputs.outputs.apk }}
+        run: gh release upload "$TAG" "$APK" --clobber

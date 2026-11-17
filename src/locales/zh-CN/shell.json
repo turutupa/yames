@@ -47,6 +47,7 @@
     "delete": "删除",
     "newPreset": "新建预设",
     "newDrill": "新建练习",
+    "unsaved": "未保存",
     "titleSongs": "曲目"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "折叠侧边栏 ({{shortcut}})",
     "expandWithShortcut": "展开侧边栏 ({{shortcut}})",
     "beta": "测试版"
+  },
+  "tabs": {
+    "library": "资料库"
+  },
+  "mobileTabs": {
+    "settings": "设置",
+    "library": "资料库",
+    "zen": "禅意"
+  },
+  "sheet": {
+    "close": "关闭"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "正在播放 — {{bpm}} BPM",
+    "notificationPaused": "已暂停",
+    "notificationStop": "停止",
+    "notificationChannel": "播放"
   }
 }

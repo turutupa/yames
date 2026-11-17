@@ -14,6 +14,16 @@ videos/
 # Tauri regenerates these on every build; they churned in every worktree and PR.
 src-tauri/gen/schemas/
 
+# Where the iPhone CI job puts what it built and photographed
+# (.github/workflows/ios.yml). Uploaded as run artifacts, never committed.
+/artifacts/
+/build/
+
+# The Xcode project's link to the built frontend. A symlink to `dist/`,
+# remade by scripts/ci/ios-ensure-assets.sh on every build — see the comment
+# in that file for why it is not committed.
+src-tauri/gen/apple/assets
+
 # Seeded design-canvas output — regenerated from the .dc.html working files
 design/**/yames-app-redesign.html
 design/**/yames-site-directions.html

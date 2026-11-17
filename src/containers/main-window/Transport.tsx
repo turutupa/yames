@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useJamLoading } from "../../hooks/useJamLoading";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 import type { TakeSound } from "../../jam/types";
+import { IS_MOBILE } from "../../platform";
 
 interface TransportProps {
   view: "beat" | "drill" | "setlist" | "jam" | "songs";
@@ -296,7 +297,10 @@ export function Transport({
         onClick={onToggleCountIn}
       >
         <span className="transport-switch-track" aria-hidden="true" />
-        {t("transport.countIn")}
+        {/* The word in its own box, so that the one row that is allowed to
+            squash — a phone's, with a setlist on it — has something to put an
+            ellipsis on. Everywhere else it is the same text it always was. */}
+        <span className="transport-switch-label">{t("transport.countIn")}</span>
       </button>
 
       {/* Nothing has been counted yet, so there is nothing to say — a bar
@@ -449,26 +453,30 @@ export function Transport({
        * explicit grounds that the transport reports the same state — so the
        * compact readout has to come back at that width instead. The sentence
        * has no room there anyway. */}
-      {listening ? (
-        <div className="transport-input listening">
-          <MicIcon />
-          <span>{t("transport.listening")}</span>
-          <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
-        </div>
-      ) : (
-        <>
-          <div className="transport-note">
-            <CoachIcon />
-            <span>
-              {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
-            </span>
-          </div>
-          <div className="transport-input transport-input-narrow">
+      {/* All three of these states are the coach and the microphone it
+          listens on. A phone has neither, so the right end of the bar is
+          simply empty there rather than explaining an absent feature. */}
+      {!IS_MOBILE &&
+        (listening ? (
+          <div className="transport-input listening">
             <MicIcon />
-            <span>{t("transport.inputOff")}</span>
+            <span>{t("transport.listening")}</span>
+            <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="transport-note">
+              <CoachIcon />
+              <span>
+                {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
+              </span>
+            </div>
+            <div className="transport-input transport-input-narrow">
+              <MicIcon />
+              <span>{t("transport.inputOff")}</span>
+            </div>
+          </>
+        ))}
     </div>
   );
 }

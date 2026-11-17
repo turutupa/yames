@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Âm thanh và giao diện",
       "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Chọn cái bạn thích.",
+      "subtitleTouch": "Chạm vào một thẻ để nghe tiếng gõ hoặc thử giao diện. Chạm thẻ khác nếu bạn đổi ý.",
       "soundHeading": "Âm thanh click",
       "themeHeading": "Giao diện",
       "moreThemes": "Thêm giao diện trong Cài đặt"
@@ -123,7 +124,15 @@
         "permission": "Quyền dùng micro: trên macOS, Cài đặt hệ thống › Quyền riêng tư & Bảo mật › Micro, bật Yames; trên Windows, Cài đặt › Quyền riêng tư › Micro, cho phép ứng dụng máy tính. Sau đó khởi động lại Yames.",
         "other": "Vẫn không được? Thử thiết bị khác trong danh sách, hoặc bỏ qua: các công cụ vẫn chạy mà không cần đầu vào."
       },
-      "retry": "Thử lại"
+      "retry": "Thử lại",
+      "phone": {
+        "subtitle": "Chọn cách đàn của bạn vào điện thoại, rồi chơi vài nốt. Đồng hồ cho thấy Yames nghe được gì.",
+        "micDesc": "Đàn trong phòng, qua micro của điện thoại. Nốt đơn hiệu quả nhất; để điện thoại gần đàn.",
+        "directDesc": "Một audio interface USB-C (iRig HD, Scarlett qua bộ chuyển, ampli có USB) hoặc bộ chuyển cổng tai nghe như iRig 2. Tín hiệu sạch nhất.",
+        "guidance": "Interface hoặc bộ chuyển cổng tai nghe tốt hơn, nhưng micro điện thoại vẫn được: đặt gần đàn, đừng để trong túi.",
+        "noDevices": "Không tìm thấy đầu vào. Cắm interface hoặc bộ chuyển; nếu không hiện, rút ra rồi cắm lại.",
+        "permission": "Quyền micro: Cài đặt Android › Ứng dụng › Yames › Quyền › Micro, rồi Cho phép. Interface USB hoặc bộ chuyển cổng tai nghe cũng cần quyền này."
+      }
     },
     "hearItWork": {
       "title": "Nghe thử xem nó chạy",
@@ -142,6 +151,7 @@
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "notificationNote": "Lần đầu bạn nhấn phát, điện thoại sẽ hỏi Yames có được hiện thông báo không — hãy đồng ý để tiếng gõ vẫn chạy khi tắt màn hình.",
       "rows": {
         "instrument": "Nhạc cụ",
         "sound": "Âm thanh click",

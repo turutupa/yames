@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { MOBILE_ORIGIN } from "../../playwright.config";
 
 /**
  * The language every scene in this run is built in.
@@ -18,6 +19,23 @@ export const LAYOUT_LOCALE = process.env.YAMES_LAYOUT_LOCALE ?? "en";
 
 /** True when this run is measuring English, and may assert on English words. */
 export const IN_ENGLISH = LAYOUT_LOCALE === "en";
+
+/**
+ * The harness, built for a phone (M09).
+ *
+ * A second Vite server, started by `playwright.config.ts` with
+ * `YAMES_MOBILE=1`, because `IS_MOBILE` is a build-time constant and the
+ * phone's layout hangs off the `.main-window.is-mobile` class that constant
+ * writes — a desktop build dragged to 360px is a different app with a rail in
+ * it. A describe block opts in with:
+ *
+ *     test.use({ baseURL: MOBILE_URL, viewport: { width: 360, height: 800 },
+ *                isMobile: true, hasTouch: true });
+ *
+ * `isMobile` + `hasTouch` are what make the page match `(pointer: coarse)`
+ * and `(hover: none)`, which is where every 44px touch target lives.
+ */
+export const MOBILE_URL = MOBILE_ORIGIN;
 
 /**
  * Open one scene of the screenshot harness at one window size.
@@ -109,6 +127,39 @@ export async function openShot(
       () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
     );
   }
+}
+
+/**
+ * The whole page's language, switched through Settings → General → the
+ * dropdown — the door a person uses, and the one `scripts/mobile-shots.mjs`
+ * drives for its `--locale` runs. The list names each language in its own
+ * words, so the option is found by that name rather than by the code.
+ *
+ * Phone builds only: it presses the bottom bar's Settings tab, and presses it
+ * again to come back to the tab the test started on.
+ */
+export const NATIVE_NAME: Record<string, string> = {
+  de: "Deutsch",
+  ja: "\u65e5\u672c\u8a9e",
+  "pt-BR": "Portugu\u00eas (Brasil)",
+  ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+};
+
+export async function switchLanguage(page: Page, code: string) {
+  const name = NATIVE_NAME[code];
+  if (!name) throw new Error(`no native name on file for "${code}"`);
+  const settings = '.mobile-tab[data-tab="settings"]';
+  await page.click(settings);
+  await page.waitForSelector(".settings-section");
+  await page.click(".lang-select-btn");
+  await page.waitForSelector(".lang-options");
+  await page.getByText(name, { exact: true }).first().click();
+  // Back to the tab the test came from.
+  await page.click(settings);
+  await page.waitForSelector(".main-header");
+  await page.evaluate(
+    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+  );
 }
 
 /** A box in page pixels, rounded the way a reader's eye rounds it. */
@@ -314,4 +365,14 @@ declare global {
     __SHOT_MANIFEST__?: unknown;
     __SHOT_LOCALE__?: string;
   }
+}
+
+/**
+ * Open one of the tools on a phone (M7): the bottom bar carries the places —
+ * Today, Paths, Progress, Tools, Settings — and the tools are cards on the
+ * Tools screen, the way the rail nests them under Tools on a desktop.
+ */
+export async function openTool(page: Page, id: "beat" | "drill" | "setlist" | "jam" | "songs") {
+  await page.click('.mobile-tab[data-tab="tools"]');
+  await page.click(`[data-testid="tool-card-${id}"]`);
 }

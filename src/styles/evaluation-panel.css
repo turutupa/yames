@@ -37,9 +37,11 @@
   transition: opacity 0.15s, color 0.15s;
 }
 
-.eval-panel-collapsed-tab:hover {
-  color: var(--text-primary);
-  opacity: 1;
+@media (hover: hover) {
+  .eval-panel-collapsed-tab:hover {
+    color: var(--text-primary);
+    opacity: 1;
+  }
 }
 
 .eval-panel-collapsed-tab:active {
@@ -90,8 +92,10 @@
   padding: 0;
 }
 
-.eval-panel-close:hover {
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+@media (hover: hover) {
+  .eval-panel-close:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  }
 }
 
 .eval-panel-close:active {
@@ -126,17 +130,21 @@
   transition: max-width 0.2s ease, opacity 0.15s ease;
 }
 
-.eval-clear-all-btn:hover {
-  width: auto;
-  gap: 4px;
-  padding: 0 8px;
-  color: var(--text-secondary);
-  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+@media (hover: hover) {
+  .eval-clear-all-btn:hover {
+    width: auto;
+    gap: 4px;
+    padding: 0 8px;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  }
 }
 
-.eval-clear-all-btn:hover .eval-clear-all-label {
-  max-width: 60px;
-  opacity: 1;
+@media (hover: hover) {
+  .eval-clear-all-btn:hover .eval-clear-all-label {
+    max-width: 60px;
+    opacity: 1;
+  }
 }
 
 .eval-clear-all-btn:active {
@@ -195,8 +203,10 @@
   color: var(--text-secondary);
 }
 
-.eval-confirm-cancel:hover {
-  background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+@media (hover: hover) {
+  .eval-confirm-cancel:hover {
+    background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+  }
 }
 
 .eval-confirm-delete {
@@ -204,8 +214,10 @@
   color: #fff;
 }
 
-.eval-confirm-delete:hover {
-  background: #b91c1c;
+@media (hover: hover) {
+  .eval-confirm-delete:hover {
+    background: #b91c1c;
+  }
 }
 
 .eval-back-btn {
@@ -223,9 +235,11 @@
   font-weight: 500;
 }
 
-.eval-back-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .eval-back-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .eval-panel-body {
@@ -436,9 +450,11 @@
   border-radius: 4px;
 }
 
-.eval-history-list::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-  filter: brightness(1.2);
+@media (hover: hover) {
+  .eval-history-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+    filter: brightness(1.2);
+  }
 }
 
 .eval-history-heading {
@@ -471,9 +487,11 @@
   gap: 6px;
 }
 
-.eval-history-card:hover {
-  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
-  border-color: color-mix(in srgb, var(--text-primary) 14%, transparent);
+@media (hover: hover) {
+  .eval-history-card:hover {
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+    border-color: color-mix(in srgb, var(--text-primary) 14%, transparent);
+  }
 }
 
 .eval-card-top {
@@ -562,13 +580,17 @@
   transition: opacity 0.15s ease, color 0.15s ease;
 }
 
-.eval-history-card:hover .eval-history-delete {
-  opacity: 1;
+@media (hover: hover) {
+  .eval-history-card:hover .eval-history-delete {
+    opacity: 1;
+  }
 }
 
-.eval-history-delete:hover {
-  color: var(--text-primary);
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+@media (hover: hover) {
+  .eval-history-delete:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  }
 }
 
 /* Clear/Delete button */
@@ -584,9 +606,11 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.eval-clear-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .eval-clear-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 /* Empty state */

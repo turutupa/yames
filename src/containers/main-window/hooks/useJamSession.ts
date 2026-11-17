@@ -10,9 +10,11 @@ import {
   setPlaying,
   storeLoad,
   storeSave,
-  ttsSpeak,
   warmJam,
 } from "../../../ipc";
+import { IS_MOBILE } from "../../../platform";
+import { useBandSleep } from "../../../mobile/bandMemory";
+import { ttsSpeak } from "../../../ipc.desktop";
 import {
   GROOVES,
   STARTER_JAMS,
@@ -193,23 +195,28 @@ export const jamSpeechLatency = { last: 0, worst: 0, says: 0 };
  * busy or broken costs the player nothing. That is what lets this swallow the
  * error rather than surfacing one — there is no failure here worth a dialog.
  */
-async function speakCue(text: string): Promise<void> {
-  const started = performance.now();
-  try {
-    await ttsSpeak(text);
-  } catch {
-    /* No voice, or a voice that is busy. The screen already said it. */
-  } finally {
-    const took = performance.now() - started;
-    jamSpeechLatency.last = took;
-    jamSpeechLatency.says += 1;
-    if (took > jamSpeechLatency.worst) jamSpeechLatency.worst = took;
-    if (typeof window !== "undefined") {
-      (window as unknown as { __yamesJamSpeech?: typeof jamSpeechLatency }).__yamesJamSpeech =
-        jamSpeechLatency;
-    }
-  }
-}
+const speakCue: (text: string) => Promise<void> = IS_MOBILE
+  ? // No voice on a phone (plan §1), so no cue is ever spoken and the
+    // `tts_speak` command never reaches the bundle. Every cue is on the
+    // screen as well, which is why silence costs the player nothing.
+    async () => {}
+  : async function speakCue(text: string): Promise<void> {
+      const started = performance.now();
+      try {
+        await ttsSpeak(text);
+      } catch {
+        /* No voice, or a voice that is busy. The screen already said it. */
+      } finally {
+        const took = performance.now() - started;
+        jamSpeechLatency.last = took;
+        jamSpeechLatency.says += 1;
+        if (took > jamSpeechLatency.worst) jamSpeechLatency.worst = took;
+        if (typeof window !== "undefined") {
+          (window as unknown as { __yamesJamSpeech?: typeof jamSpeechLatency }).__yamesJamSpeech =
+            jamSpeechLatency;
+        }
+      }
+    };
 
 
 interface UseJamSessionArgs {
@@ -608,9 +615,19 @@ export function useJamSession({
    * Once per session, and late enough not to compete with the window
    * drawing itself. The ref is set inside the timer, not before it, so React
    * running this effect twice in development does not cancel the only warm.
+   *
+   * **NOT ON A PHONE (M10).** On a laptop those 165 MB are the first jam's
+   * anyway and nobody notices. On a phone they are 342 MB spent 2.5 seconds
+   * after launch by a musician who opened the app for a metronome — and
+   * 455 MB of PSS is what gets a backgrounded app killed, which is the one
+   * thing M04's foreground service exists to prevent. A phone decodes when
+   * the player goes to Jam, and decodes only the jam that is loaded: opening
+   * the tab sends it, `set_jam` decodes it off the window's thread (7bdb6eb),
+   * and until then nothing of the band is in memory at all.
    */
   const warmedLibraryRef = useRef(false);
   useEffect(() => {
+    if (IS_MOBILE) return;
     if (warmedLibraryRef.current || jams.length === 0) return;
     const timer = setTimeout(() => {
       if (warmedLibraryRef.current) return;
@@ -687,7 +704,23 @@ export function useJamSession({
   const engineJamRef = useRef<Jam | null>(engineJam);
   engineJamRef.current = engineJam;
 
-  const engineKey = jam
+  /**
+   * THE BAND SLEEPS WHEN THE PHONE IS NOT LOOKING (M10).
+   *
+   * Out of sight and stopped for half a minute, and the loaded table and
+   * every decode behind it are let go — tens of megabytes a backgrounded app
+   * is killed for holding. Waking is this flag going back to false, which
+   * moves `engineKey` and sends the jam on screen again, exactly as opening
+   * the tab does.
+   *
+   * `IS_MOBILE ?` rather than a guard inside the hook: it is the form Rollup
+   * folds, so `bandMemory.ts` and `release_jam_sounds` never reach a desktop
+   * bundle. The constant cannot change for the life of a build, so the hook
+   * order cannot change either.
+   */
+  const bandAsleep = IS_MOBILE ? useBandSleep(isPlaying) : false;
+
+  const engineKey = jam && !bandAsleep
     ? JSON.stringify([
         // Every field of the record that is not on the list above, in a fixed
         // order, so a field nobody thought about here still re-sends.
@@ -708,7 +741,12 @@ export function useJamSession({
     : null;
 
   useEffect(() => {
-    if (view !== "jam" || !jam) {
+    // `bandAsleep` takes the same road as leaving the tab: the engine is
+    // holding nothing, this hook knows it is holding nothing, and the wake
+    // below re-sends from the top of the form. The release itself is Rust's
+    // — it takes the table away under the engine's own lock, so it cannot
+    // land between a Play and a first beat.
+    if (view !== "jam" || !jam || bandAsleep) {
       // The meter goes back with the band. `restoreRef` is nulled here rather
       // than inside `clearJam` so a second pass through this branch — React
       // runs effects twice in development — does not hand the metronome its

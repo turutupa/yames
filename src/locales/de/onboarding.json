@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Klang & Aussehen",
       "subtitle": "Fahre über eine Karte, um den Klick zu hören oder das Design zu sehen. Wähle, was dir gefällt.",
+      "subtitleTouch": "Tippe auf eine Karte, um den Klick zu hören oder das Design zu sehen. Tippe auf eine andere, um es dir anders zu überlegen.",
       "soundHeading": "Klick-Sound",
       "themeHeading": "Design",
       "moreThemes": "Mehr Designs in den Einstellungen"
@@ -123,7 +124,15 @@
         "permission": "Mikrofonzugriff: unter macOS Systemeinstellungen › Datenschutz & Sicherheit › Mikrofon, Yames einschalten; unter Windows Einstellungen › Datenschutz › Mikrofon, Desktop-Apps erlauben. Danach Yames neu starten.",
         "other": "Immer noch nichts? Probier ein anderes Gerät aus der Liste oder überspring den Schritt: Die Werkzeuge funktionieren auch ohne Eingang."
       },
-      "retry": "Noch einmal"
+      "retry": "Noch einmal",
+      "phone": {
+        "subtitle": "Wähle, wie deine Gitarre das Handy erreicht, und spiel ein paar Töne. Die Anzeige zeigt, was Yames hört.",
+        "micDesc": "Deine Gitarre im Raum, über das Mikrofon des Handys. Einzeltöne funktionieren am besten; halte das Handy nah an die Gitarre.",
+        "directDesc": "Ein USB-C-Audiointerface (iRig HD, Scarlett mit Adapter, ein Verstärker mit USB) oder ein Klinkenadapter wie das iRig 2. Das sauberste Signal.",
+        "guidance": "Ein Interface oder ein Klinkenadapter ist besser, aber das Mikrofon des Handys geht auch: leg es nah an die Gitarre, nicht in die Tasche.",
+        "noDevices": "Kein Eingang gefunden. Steck das Interface oder den Adapter ein; erscheint es nicht, zieh es ab und steck es neu ein.",
+        "permission": "Mikrofonzugriff: Android-Einstellungen › Apps › Yames › Berechtigungen › Mikrofon, dann Zulassen. Ein USB-Interface oder Klinkenadapter braucht dieselbe Berechtigung."
+      }
     },
     "hearItWork": {
       "title": "Hör es arbeiten",
@@ -142,6 +151,7 @@
     "ready": {
       "title": "Alles bereit",
       "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",
+      "notificationNote": "Wenn du zum ersten Mal auf Start drückst, fragt dein Telefon, ob Yames eine Benachrichtigung anzeigen darf — sag ja, dann läuft der Klick auch bei ausgeschaltetem Bildschirm weiter.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Klick-Sound",

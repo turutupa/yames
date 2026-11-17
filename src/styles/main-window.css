@@ -16,3 +16,6 @@
 @import "./theme-overrides.css";
 @import "./instrument-picker.css";
 @import "./setlist.css";
+/* Last, and phone-only: every rule in it is under `.sheet` or
+   `.main-window.is-mobile`, neither of which a desktop build ever renders. */
+@import "./sheet.css";

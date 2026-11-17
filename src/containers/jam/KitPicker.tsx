@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useMenuPlacement } from "./useMenuPlacement";
-import { inspectKitFolder, pickKitFolder, warmJam } from "../../ipc";
+import { warmJam } from "../../ipc";
+import { IS_MOBILE } from "../../platform";
+import { inspectKitFolder, pickKitFolder } from "../../ipc.desktop";
 
 /**
  * The kits that ship, in the order the menu draws them.
@@ -130,8 +132,20 @@ export function KitPicker({
   const [busy, setBusy] = useState(false);
   const { wrapRef, menuRef, style } = useMenuPlacement(open);
   const warmedRef = useRef(false);
+  /**
+   * Every kit the app ships, decoded before one is clicked — so the audition
+   * is instant.
+   *
+   * **Not on a phone (M10).** The seven kits are about 97 MB, and on a phone
+   * that is 97 MB of drums nobody has asked to hear, held for as long as the
+   * app is open, on the device where holding memory is what gets the app
+   * killed. A phone decodes the kit that is CHOSEN, when it is chosen:
+   * `onKit` recompiles the jam, `set_jam` decodes it off the window's thread,
+   * and the spinner `JamSetupSheet` already puts on the row you touched says
+   * so while it happens.
+   */
   const warmKits = () => {
-    if (warmedRef.current) return;
+    if (IS_MOBILE || warmedRef.current) return;
     warmedRef.current = true;
     warmJam({ kits: true });
   };
@@ -177,8 +191,15 @@ export function KitPicker({
    * custom kit the engine would refuse and a row that said "Found ." So an
    * empty inspection — and one that did not come back at all — is turned
    * down here, with the menu left open and the reason under the button.
+   *
+   * Null on a phone, and the row below it is absent with it. A kit of your
+   * own is a folder you point a file manager at; Android has no folder to
+   * point at and no dialog to point with, so M08 left this half of the menu
+   * behind rather than shipping a button that answers nothing. The
+   * `IS_MOBILE ?` shape is deliberate — it is the form Rollup can fold, so
+   * `pick_kit_folder` never reaches the phone's bundle at all.
    */
-  const chooseFolder = async () => {
+  const chooseFolder = IS_MOBILE ? null : async () => {
     setBusy(true);
     try {
       const dir = await pickKitFolder();
@@ -299,8 +320,15 @@ export function KitPicker({
             );
           })}
 
-          <div className="jam-dropdown-rule" aria-hidden="true" />
-          <div className="jam-dropdown-section">{t("jam.kit.yours")}</div>
+          {/* "Yours" is a heading over the folder row, so it goes where the
+              folder row goes: absent on a phone rather than left over an
+              empty space (M08). */}
+          {chooseFolder && (
+            <>
+              <div className="jam-dropdown-rule" aria-hidden="true" />
+              <div className="jam-dropdown-section">{t("jam.kit.yours")}</div>
+            </>
+          )}
 
           {customKit && (
             <div
@@ -331,24 +359,26 @@ export function KitPicker({
             </div>
           )}
 
-          <button
-            type="button"
-            className="jam-dropdown-item jam-dropdown-item-action"
-            disabled={busy}
-            onClick={() => void chooseFolder()}
-          >
-            <FolderGlyph />
-            <span className="jam-dropdown-item-text">
-              <span className="jam-dropdown-item-name">{t("jam.kit.chooseFolder")}</span>
-              <span className="jam-dropdown-item-hint">
-                {unavailable
-                  ? t("jam.kit.folderUnavailable")
-                  : empty
-                    ? t("jam.kit.folderEmpty")
-                    : t("jam.kit.folderHint")}
+          {chooseFolder && (
+            <button
+              type="button"
+              className="jam-dropdown-item jam-dropdown-item-action"
+              disabled={busy}
+              onClick={() => void chooseFolder()}
+            >
+              <FolderGlyph />
+              <span className="jam-dropdown-item-text">
+                <span className="jam-dropdown-item-name">{t("jam.kit.chooseFolder")}</span>
+                <span className="jam-dropdown-item-hint">
+                  {unavailable
+                    ? t("jam.kit.folderUnavailable")
+                    : empty
+                      ? t("jam.kit.folderEmpty")
+                      : t("jam.kit.folderHint")}
+                </span>
               </span>
-            </span>
-          </button>
+            </button>
+          )}
           </div>,
           document.body,
         )}

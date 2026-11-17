@@ -1,0 +1,103 @@
+/* ══ The learning side, on a phone (M7, the MVP) ═════════════════════════════
+ *
+ * Today, a Session, its results, Paths and Progress at 360–412 px. The
+ * screens already reflow (session.css stacks below 620 px); what a phone adds
+ * is a thumb. Every rule here is under `.main-window.is-mobile` or
+ * `.onboarding-overlay[data-mobile]`, which only the phone build writes (from
+ * the build-time IS_MOBILE), so nothing in this file can reach a desktop
+ * pixel — the same contract shell.css and jam.css keep for the tools.
+ * `tests/layout/phone-learning.spec.ts` holds every control on these screens
+ * to 44 px.
+ *
+ * Kept out of session.css on purpose: that file belongs to the learning side's
+ * own work (the runway, the neck), and a phone's touch targets are a property
+ * of the phone, not of the screen.
+ */
+
+/* Exit, Slower, Faster, Move on, Play this, Find my edge: a thumb tall. */
+.main-window.is-mobile .session-page .session-exit,
+.main-window.is-mobile .session-page .session-secondary {
+  min-height: 44px;
+}
+
+.main-window.is-mobile .session-page .session-exit {
+  min-width: 56px;
+  padding: 4px 14px;
+}
+
+/* The underlined links ("Check my sound", "Paths", "Alternate Picking") are
+   text on a desktop and a row of their own on a phone: the hit box grows, the
+   underline stays where the eye expects it. */
+.main-window.is-mobile .session-page .session-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 2px;
+}
+
+/* The Level picker on a Path: three rows, each a thumb tall. */
+.main-window.is-mobile .session-page .session-seg > button {
+  min-height: 44px;
+}
+
+/* "Blues and Pentatonics — Later": a row you can press, not a caption. */
+.main-window.is-mobile .session-page .session-later > button {
+  min-height: 44px;
+}
+
+/* The header's overflow on the learning screens gets a wider hit box, the way
+   shell.css grows `.context-chip-icon` for the tools; the volume fader is
+   already 44 px tall there (its track is a pseudo-element). */
+.main-window.is-mobile .context-chip-icon::before {
+  inset: 0 -7px;
+}
+
+/* The first run's summary rows are buttons (they jump back to that step). */
+.onboarding-overlay[data-mobile] .onboarding-summary-row {
+  min-height: 44px;
+}
+
+/* The input dropdown in the first run and in Settings › Devices: the one
+   control on that step a player must get right, so it is the easiest to hit. */
+.onboarding-overlay[data-mobile] .midi-dropdown-trigger,
+.main-window.is-mobile .midi-dropdown-trigger {
+  min-height: 44px;
+}
+
+/* The bottom of a long screen clears the tab bar and the gesture bar, so the
+   last card (the recap's "Done", Progress's last row) can be scrolled out
+   from under the bar. */
+.main-window.is-mobile .session-page {
+  padding-bottom: calc(24px + var(--safe-bottom));
+}
+
+/* The Neck / Runway switch on the Take screen (mvp-runway): two thumb-sized
+   halves on a phone. It is locked while a Take runs, so it is only ever
+   pressed between Takes, and a mis-tap there costs nothing — but it is the
+   one control on that screen a player reaches for on purpose. */
+.main-window.is-mobile .session-viewswitch > button {
+  min-height: 44px;
+  min-width: 56px;
+}
+
+/* "The input changed. Listening through … now." (src/mobile/inputRoute.ts):
+   a line over the top of whatever is on screen, under the status bar, that
+   goes on its own after a few seconds or on a tap. Phone build only. */
+.main-window.is-mobile .input-route-notice {
+  position: fixed;
+  top: calc(56px + var(--safe-top));
+  left: 12px;
+  right: 12px;
+  z-index: 60;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}

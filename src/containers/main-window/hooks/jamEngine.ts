@@ -21,7 +21,7 @@ import { setBeatGroups, setFreeMode, setJam, setSubdivision } from "../../../ipc
 import { jamMeter } from "../../../jam";
 import type { Jam, JamEngineConfig } from "../../../jam";
 import type { Subdivision } from "../../../types";
-import { coachDebug } from "../../../coach/debug";
+import { coachDebug } from "../../../utils/debug";
 
 /** Said once per session, not once per beat: the command may not exist yet. */
 let warnedAboutSetJam = false;

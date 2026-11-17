@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Sonido y aspecto",
       "subtitle": "Pasa por encima de una tarjeta para oír el clic o ver el tema. Elige lo que te guste.",
+      "subtitleTouch": "Toca una tarjeta para oír el clic o probar el tema. Toca otra para cambiar de idea.",
       "soundHeading": "Sonido del clic",
       "themeHeading": "Tema",
       "moreThemes": "Más temas en Ajustes"
@@ -123,7 +124,15 @@
         "permission": "Acceso al micrófono: en macOS, Ajustes del Sistema › Privacidad y seguridad › Micrófono, activa Yames; en Windows, Configuración › Privacidad › Micrófono, permite las apps de escritorio. Después reinicia Yames.",
         "other": "¿Sigue sin oírse nada? Prueba otro dispositivo de la lista, o sáltalo: las herramientas funcionan sin entrada."
       },
-      "retry": "Reintentar"
+      "retry": "Reintentar",
+      "phone": {
+        "subtitle": "Elige cómo llega tu guitarra al móvil y toca unas notas. El medidor muestra lo que oye Yames.",
+        "micDesc": "Tu guitarra en la sala, a través del micrófono del móvil. Mejor notas sueltas; acerca el móvil a la guitarra.",
+        "directDesc": "Una interfaz de audio USB-C (iRig HD, Scarlett con adaptador, un ampli con USB) o un adaptador de minijack como el iRig 2. La señal más limpia.",
+        "guidance": "Una interfaz o un adaptador de minijack es mejor, pero el micrófono del móvil funciona: ponlo cerca de la guitarra, no en el bolsillo.",
+        "noDevices": "No se encontró ninguna entrada. Conecta la interfaz o el adaptador; si no aparece, desconéctalo y vuelve a conectarlo.",
+        "permission": "Acceso al micrófono: Ajustes de Android › Aplicaciones › Yames › Permisos › Micrófono, y Permitir. Una interfaz USB o un adaptador de minijack necesitan el mismo permiso."
+      }
     },
     "hearItWork": {
       "title": "Escúchalo funcionar",
@@ -142,6 +151,7 @@
     "ready": {
       "title": "Todo listo",
       "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",
+      "notificationNote": "La primera vez que pulses play, el teléfono te preguntará si Yames puede mostrar una notificación: dile que sí y el clic seguirá sonando con la pantalla apagada.",
       "rows": {
         "instrument": "Instrumento",
         "sound": "Sonido del clic",

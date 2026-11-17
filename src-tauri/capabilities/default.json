@@ -1,6 +1,11 @@
 {
   "identifier": "default",
-  "description": "Default capabilities for Yames",
+  "description": "Default capabilities for Yames (desktop). The global-shortcut, updater, process and decorum plugins this grants do not exist in a mobile build, so the platform list keeps this file off Android and iOS - see mobile.json.",
+  "platforms": [
+    "linux",
+    "macOS",
+    "windows"
+  ],
   "windows": [
     "main",
     "floating"

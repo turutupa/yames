@@ -255,6 +255,7 @@
     },
     "runway": {
       "label": "Những nốt tiếp theo đang tiến đến vạch"
-    }
+    },
+    "inputChanged": "Đầu vào đã thay đổi. Giờ đang nghe qua {{device}}."
   }
 }

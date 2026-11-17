@@ -47,6 +47,7 @@
     "delete": "刪除",
     "newPreset": "新增預設",
     "newDrill": "新增練習",
+    "unsaved": "未儲存",
     "titleSongs": "曲目"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "摺疊側邊欄 ({{shortcut}})",
     "expandWithShortcut": "展開側邊欄 ({{shortcut}})",
     "beta": "測試版"
+  },
+  "tabs": {
+    "library": "資料庫"
+  },
+  "mobileTabs": {
+    "settings": "設定",
+    "library": "資料庫",
+    "zen": "禪意"
+  },
+  "sheet": {
+    "close": "關閉"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "正在播放 — {{bpm}} BPM",
+    "notificationPaused": "已暫停",
+    "notificationStop": "停止",
+    "notificationChannel": "播放"
   }
 }

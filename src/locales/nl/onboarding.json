@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Geluid en uiterlijk",
       "subtitle": "Beweeg over een kaart om de klik te horen of het thema te zien. Kies wat je mooi vindt.",
+      "subtitleTouch": "Tik op een kaart om de klik te horen of het thema te proberen. Tik op een andere om van gedachten te veranderen.",
       "soundHeading": "Klikgeluid",
       "themeHeading": "Thema",
       "moreThemes": "Meer thema's in Instellingen"
@@ -123,7 +124,15 @@
         "permission": "Microfoontoegang: op macOS Systeeminstellingen › Privacy en beveiliging › Microfoon, zet Yames aan; op Windows Instellingen › Privacy › Microfoon, sta desktop-apps toe. Start Yames daarna opnieuw.",
         "other": "Nog steeds niets? Probeer een ander apparaat uit de lijst, of sla over: de tools werken zonder ingang."
       },
-      "retry": "Opnieuw"
+      "retry": "Opnieuw",
+      "phone": {
+        "subtitle": "Kies hoe je gitaar de telefoon bereikt en speel een paar noten. De meter toont wat Yames hoort.",
+        "micDesc": "Je gitaar in de kamer, via de microfoon van de telefoon. Losse noten werken het best; houd de telefoon dicht bij de gitaar.",
+        "directDesc": "Een USB-C-audio-interface (iRig HD, Scarlett met adapter, een versterker met USB) of een jack-adapter zoals de iRig 2. Het schoonste signaal.",
+        "guidance": "Een interface of jack-adapter is beter, maar de microfoon van de telefoon werkt: leg hem dicht bij de gitaar, niet in je zak.",
+        "noDevices": "Geen ingang gevonden. Sluit de interface of adapter aan; verschijnt hij niet, haal hem eruit en steek hem opnieuw in.",
+        "permission": "Microfoontoegang: Android-instellingen › Apps › Yames › Rechten › Microfoon, dan Toestaan. Een USB-interface of jack-adapter heeft hetzelfde recht nodig."
+      }
     },
     "hearItWork": {
       "title": "Hoor het werken",
@@ -142,6 +151,7 @@
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",
+      "notificationNote": "De eerste keer dat je op afspelen drukt, vraagt je telefoon of Yames een melding mag tonen — zeg ja en de klik loopt door met het scherm uit.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Klikgeluid",

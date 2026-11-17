@@ -25,6 +25,7 @@ import { CoachStep } from "./CoachStep";
 import { AudioInputStep } from "./AudioInputStep";
 import { HearItWorkStep } from "./HearItWorkStep";
 import { ReadyStep } from "./ReadyStep";
+import { IS_MOBILE } from "../../../platform";
 
 export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "welcome", Component: WelcomeStep, hideInProgress: true },
@@ -45,9 +46,12 @@ export const ONBOARDING_STEPS: WizardStepDef[] = [
     Component: HearItWorkStep,
     isEnabled: (ctx) => ctx.inputConfigured === true,
   },
-  { id: "coach", Component: CoachStep },
+  // Not on a phone: the coach's model tiers do not run there (no LLM in a
+  // phone build), and the template coach needs no setting.
+  ...(IS_MOBILE ? [] : ([{ id: "coach", Component: CoachStep }] as WizardStepDef[])),
   { id: "sound-look", Component: SoundLookStep },
-  { id: "hands-free", Component: HandsFreeStep },
+  // Footswitches are MIDI and keyboard shortcuts; a phone build has neither.
+  ...(IS_MOBILE ? [] : ([{ id: "hands-free", Component: HandsFreeStep }] as WizardStepDef[])),
   { id: "ready", Component: ReadyStep },
 ];
 

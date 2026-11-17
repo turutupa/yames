@@ -17,7 +17,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  /* The wizard's own 20px gutter, plus whatever the hardware takes. Both
+     insets are 0px on desktop. */
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(20px + var(--safe-bottom)) calc(20px + var(--safe-left));
   animation: onboarding-fade-in 200ms ease-out;
 }
 
@@ -110,8 +113,10 @@
   color: var(--accent-text, #fff);
 }
 
-.onboarding-btn-primary:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .onboarding-btn-primary:hover {
+    filter: brightness(1.08);
+  }
 }
 
 .onboarding-btn-ghost {
@@ -119,9 +124,11 @@
   color: var(--text-secondary);
 }
 
-.onboarding-btn-ghost:hover:not(:disabled) {
-  color: var(--text-primary);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .onboarding-btn-ghost:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
 }
 
 .onboarding-btn:disabled {
@@ -264,10 +271,16 @@
     background 120ms ease;
 }
 
-.onboarding-sound-card:hover,
 .onboarding-sound-card:focus-visible {
   border-color: var(--accent);
   background: var(--bg-secondary);
+}
+
+@media (hover: hover) {
+  .onboarding-sound-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+  }
 }
 
 .onboarding-sound-card:focus-visible {
@@ -348,8 +361,10 @@
   transition: color 120ms ease;
 }
 
-.onboarding-more-themes:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .onboarding-more-themes:hover {
+    color: var(--accent);
+  }
 }
 
 .onboarding-more-themes:focus-visible {
@@ -466,9 +481,11 @@
   text-align: left;
 }
 
-button.onboarding-hf-device:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  button.onboarding-hf-device:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
 }
 
 .onboarding-hf-device.connected {
@@ -538,8 +555,10 @@ button.onboarding-hf-device:hover {
     background 120ms ease;
 }
 
-.onboarding-coach-card:hover:not(:disabled) {
-  border-color: var(--accent);
+@media (hover: hover) {
+  .onboarding-coach-card:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
 }
 
 .onboarding-coach-card:focus-visible {
@@ -683,8 +702,10 @@ button.onboarding-hf-device:hover {
   transition: background 120ms ease;
 }
 
-.coach-voice-offer-accept:hover {
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .coach-voice-offer-accept:hover {
+    background: var(--accent-subtle);
+  }
 }
 
 .coach-voice-offer-dismiss {
@@ -841,6 +862,17 @@ button.onboarding-hf-device:hover {
 }
 
 /* ---- W7 summary ---- */
+/* The notification heads-up on the mobile ready step. Smaller than the
+   subtitle and set apart from the summary rows above it, because it is not a
+   setting you can change here -- it describes something the phone will do. */
+.onboarding-ready-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 .onboarding-summary {
   list-style: none;
   margin: 0;
@@ -869,8 +901,10 @@ button.onboarding-hf-device:hover {
     background 120ms ease;
 }
 
-button.onboarding-summary-row:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  button.onboarding-summary-row:hover {
+    border-color: var(--accent);
+  }
 }
 
 /* Rows that lead nowhere yet: no hover, no pointer, no button affordance. */
@@ -906,7 +940,10 @@ button.onboarding-summary-row:hover {
 /* ---- "Finish setup" chip ---- */
 .finish-setup-chip {
   position: absolute;
-  top: 44px;
+  /* Same slot, and the same reasoning, as `.audio-error-notice`: 44px into the
+     app, plus whatever the hardware is taking above it. Without the inset the
+     chip sat across the header on a phone. 0px on desktop. */
+  top: calc(44px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 90;
@@ -936,17 +973,21 @@ button.onboarding-summary-row:hover {
   transition: color 120ms ease, background 120ms ease;
 }
 
-.finish-setup-chip-main:hover {
-  color: var(--accent);
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .finish-setup-chip-main:hover {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
 }
 
 .finish-setup-chip-close {
   padding: 5px 8px;
 }
 
-.finish-setup-chip-close:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .finish-setup-chip-close:hover {
+    color: var(--text-primary);
+  }
 }
 
 @keyframes onboarding-fade-in {
@@ -992,7 +1033,12 @@ button.onboarding-summary-row:hover {
 /* Minimum window (480x780): tighter padding, two-up instrument grid. */
 @media (max-width: 560px) {
   .onboarding-overlay {
-    padding: 12px;
+    /* The gutter shrinks; the hardware's insets do not. Written as a flat
+       12px, this rule was quietly undoing the safe-area padding the rule it
+       overrides sets, and on a phone with a notch or a gesture bar the card
+       would have sat under them. */
+    padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-right))
+      calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
   }
 
   .onboarding-card {
@@ -1232,5 +1278,16 @@ button.onboarding-summary-row:hover {
 @media (max-width: 520px) {
   .onboarding-input-modes {
     grid-template-columns: 1fr;
+  }
+}
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. */
+@media (pointer: coarse) {
+  .onboarding-btn,
+  .onboarding-theme-card,
+  .onboarding-sound-card,
+  .onboarding-more-themes {
+    min-height: 44px;
   }
 }

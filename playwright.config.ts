@@ -53,6 +53,14 @@ const PORT = (() => {
 
 export const LAYOUT_ORIGIN = `http://localhost:${PORT}`;
 
+/**
+ * The phone build's server: see the second `webServer` entry below. +2000
+ * rather than +1000: 6390–6889 holds ports Chromium refuses to load
+ * (6566, 6665–6669, 6679, 6697 — ERR_UNSAFE_PORT), and 7390–7889 holds none.
+ */
+const MOBILE_PORT = PORT + 2000;
+export const MOBILE_ORIGIN = `http://localhost:${MOBILE_PORT}`;
+
 export default defineConfig({
   testDir: "tests/layout",
   fullyParallel: true,
@@ -100,10 +108,31 @@ export default defineConfig({
    * served out of this checkout. See the comment on `PORT` for what the
    * alternative cost.
    */
-  webServer: {
-    command: `npx vite --port ${PORT} --strictPort`,
-    url: `${LAYOUT_ORIGIN}/shots.html?manifest=1`,
-    reuseExistingServer: false,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: `npx vite --port ${PORT} --strictPort`,
+      url: `${LAYOUT_ORIGIN}/shots.html?manifest=1`,
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    /*
+     * The same harness, built for a phone (M09, from the `mobile` branch).
+     *
+     * `IS_MOBILE` is a build-time constant (src/platform.ts) and the phone's
+     * rules are written against the `.main-window.is-mobile` class it writes,
+     * not against a width — so a desktop build narrowed to 360px is not the
+     * phone and never can be. Its own port (the desktop one plus 2000, so two
+     * worktrees still never share one) and its own server, because one Vite
+     * process can only be one build. Tests opt in with
+     * `test.use({ baseURL: MOBILE_URL })` — see `MOBILE_URL` in
+     * tests/layout/fits.ts.
+     */
+    {
+      command: `npx vite --port ${MOBILE_PORT} --strictPort`,
+      url: `${MOBILE_ORIGIN}/shots.html?manifest=1`,
+      reuseExistingServer: false,
+      timeout: 120_000,
+      env: { YAMES_MOBILE: "1" },
+    },
+  ],
 });

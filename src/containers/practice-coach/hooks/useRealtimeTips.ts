@@ -17,7 +17,7 @@ import {
 } from "../../../coach/templates";
 import { TEMPLATE_CATALOG } from "../../../coach/templateCatalog";
 import { PRESET_CEILING_MAX_SESSIONS } from "../../../coach/gatekeeper";
-import { coachDebug } from "../../../coach/debug";
+import { coachDebug } from "../../../utils/debug";
 
 export function useRealtimeTips(params: {
   shuffleStateRef: MutableRefObject<ShuffleState>;

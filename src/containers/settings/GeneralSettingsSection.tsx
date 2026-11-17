@@ -5,6 +5,7 @@ import { OpenOnRow } from "../session/OpenOnRow";
 import { storeLoad, storeSave } from "../../ipc";
 import { getLanguages } from "../../i18n";
 import { resetHints } from "../onboarding/hints/hintRuntime";
+import { IS_MOBILE } from "../../platform";
 
 /**
  * General settings — auto-update, always-on-top, button flash, active border,
@@ -88,7 +89,11 @@ export function GeneralSettingsSection({
   const currentLang = languages.find((l) => l.code === language) ?? languages[0];
 
   return (
-    <section className="settings-section">
+    // `id` for the same reason Appearance, Devices and Coach carry one: it is
+    // how something outside this file names this section without counting to
+    // it. The screenshot harness did count, and a section that is null on a
+    // phone (Devices, M08) shifted every number after it by one (M09).
+    <section className="settings-section" id="settings-general">
       <h2>{t("settings.general.title")}</h2>
       <div className="setting-row">
         <div className="setting-label">
@@ -145,38 +150,44 @@ export function GeneralSettingsSection({
           )}
         </div>
       </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.checkUpdates")}</label>
-          <span className="setting-hint">
-            {t("settings.general.checkUpdatesHint")}
-          </span>
+      {/* The app store keeps a phone app up to date, and a phone has no
+          window to keep on top of anything. */}
+      {!IS_MOBILE && (
+        <>
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.checkUpdates")}</label>
+            <span className="setting-hint">
+              {t("settings.general.checkUpdatesHint")}
+            </span>
+          </div>
+          <button
+            className={`toggle-btn ${autoCheckUpdates ? "active" : ""}`}
+            onClick={() => {
+              const next = !autoCheckUpdates;
+              setAutoCheckUpdates(next);
+              storeSave("autoCheckUpdates", next);
+            }}
+          >
+            {autoCheckUpdates ? t("common.on") : t("common.off")}
+          </button>
         </div>
-        <button
-          className={`toggle-btn ${autoCheckUpdates ? "active" : ""}`}
-          onClick={() => {
-            const next = !autoCheckUpdates;
-            setAutoCheckUpdates(next);
-            storeSave("autoCheckUpdates", next);
-          }}
-        >
-          {autoCheckUpdates ? t("common.on") : t("common.off")}
-        </button>
-      </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.alwaysOnTop")}</label>
-          <span className="setting-hint">
-            {t("settings.general.alwaysOnTopHint")}
-          </span>
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.alwaysOnTop")}</label>
+            <span className="setting-hint">
+              {t("settings.general.alwaysOnTopHint")}
+            </span>
+          </div>
+          <button
+            className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
+            onClick={() => setAlwaysOnTop(!alwaysOnTop)}
+          >
+            {alwaysOnTop ? t("common.on") : t("common.off")}
+          </button>
         </div>
-        <button
-          className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
-          onClick={() => setAlwaysOnTop(!alwaysOnTop)}
-        >
-          {alwaysOnTop ? t("common.on") : t("common.off")}
-        </button>
-      </div>
+        </>
+      )}
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.general.buttonFlash")}</label>
@@ -247,7 +258,7 @@ export function GeneralSettingsSection({
       )}
       {/* The three first-run rows sit together, in the order a user meets
           them: rerun the wizard, retake the tour, bring the hints back. */}
-      {onTakeTour && (
+      {!IS_MOBILE && onTakeTour && (
         <div className="setting-row">
           <div className="setting-label">
             <label>{t("settings.general.takeTour")}</label>
@@ -260,25 +271,33 @@ export function GeneralSettingsSection({
           </button>
         </div>
       )}
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.resetHints")}</label>
-          <span className="setting-hint">
-            {t("settings.general.resetHintsHint")}
-          </span>
+      {/* Not on a phone (M12). All nine hints are switched off in a mobile
+          build — two of them point at the floating widget and the hotkeys
+          screen, which a phone does not have, and the rest are turned off
+          alongside them in MainWindow and in the Zen overlay. So the row
+          offered to bring back tips that can never appear: a button that
+          says "Reset", says "Done!", and changes nothing anybody will see. */}
+      {!IS_MOBILE && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.resetHints")}</label>
+            <span className="setting-hint">
+              {t("settings.general.resetHintsHint")}
+            </span>
+          </div>
+          <button
+            className="toggle-btn"
+            onClick={() => {
+              void resetHints();
+              setHintsReset(true);
+            }}
+          >
+            {hintsReset
+              ? t("settings.general.resetHintsDone")
+              : t("settings.general.resetHintsAction")}
+          </button>
         </div>
-        <button
-          className="toggle-btn"
-          onClick={() => {
-            void resetHints();
-            setHintsReset(true);
-          }}
-        >
-          {hintsReset
-            ? t("settings.general.resetHintsDone")
-            : t("settings.general.resetHintsAction")}
-        </button>
-      </div>
+      )}
     </section>
   );
 }

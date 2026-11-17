@@ -47,6 +47,7 @@
     "delete": "삭제",
     "newPreset": "새 프리셋",
     "newDrill": "새 드릴",
+    "unsaved": "저장 안 됨",
     "titleSongs": "곡"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "사이드바 접기 ({{shortcut}})",
     "expandWithShortcut": "사이드바 펼치기 ({{shortcut}})",
     "beta": "베타"
+  },
+  "tabs": {
+    "library": "라이브러리"
+  },
+  "mobileTabs": {
+    "settings": "설정",
+    "library": "보관함",
+    "zen": "젠"
+  },
+  "sheet": {
+    "close": "닫기"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "재생 중 — {{bpm}} BPM",
+    "notificationPaused": "일시정지",
+    "notificationStop": "정지",
+    "notificationChannel": "재생"
   }
 }

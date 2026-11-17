@@ -61,8 +61,10 @@
   padding: 0;
 }
 
-.input-test-modal-close:hover {
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+@media (hover: hover) {
+  .input-test-modal-close:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  }
 }
 
 .input-test-modal-body {
@@ -416,8 +418,10 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.input-test-rec-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+@media (hover: hover) {
+  .input-test-rec-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  }
 }
 
 .input-test-rec-btn:disabled {
@@ -425,8 +429,10 @@
   cursor: not-allowed;
 }
 
-.input-test-rec-btn:disabled:hover {
-  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+@media (hover: hover) {
+  .input-test-rec-btn:disabled:hover {
+    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  }
 }
 
 /* Record button red dot */
@@ -464,8 +470,10 @@
   color: #ef4444;
 }
 
-.input-test-rec-btn.stop:hover {
-  background: color-mix(in srgb, #ef4444 10%, transparent);
+@media (hover: hover) {
+  .input-test-rec-btn.stop:hover {
+    background: color-mix(in srgb, #ef4444 10%, transparent);
+  }
 }
 
 /* Play button styling */
@@ -474,8 +482,10 @@
   color: var(--accent);
 }
 
-.input-test-rec-btn.play:hover {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+@media (hover: hover) {
+  .input-test-rec-btn.play:hover {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
 }
 
 /* Discard button */

@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Ses ve görünüm",
       "subtitle": "Bir kartın üzerine gelerek klik sesini duy ya da temayı gör. Beğendiğini seç.",
+      "subtitleTouch": "Tıkı duymak ya da temayı denemek için bir karta dokun. Fikrini değiştirmek için başka birine dokun.",
       "soundHeading": "Klik sesi",
       "themeHeading": "Tema",
       "moreThemes": "Ayarlar'da daha fazla tema"
@@ -123,7 +124,15 @@
         "permission": "Mikrofon erişimi: macOS'ta Sistem Ayarları › Gizlilik ve Güvenlik › Mikrofon, Yames'i aç; Windows'ta Ayarlar › Gizlilik › Mikrofon, masaüstü uygulamalarına izin ver. Sonra Yames'i yeniden başlat.",
         "other": "Hâlâ bir şey yok mu? Listeden başka bir cihaz dene ya da atla: araçlar giriş olmadan da çalışır."
       },
-      "retry": "Tekrar dene"
+      "retry": "Tekrar dene",
+      "phone": {
+        "subtitle": "Gitarının telefona nasıl ulaştığını seç ve birkaç nota çal. Gösterge Yames'in ne duyduğunu gösterir.",
+        "micDesc": "Odadaki gitarın, telefonun kendi mikrofonuyla. En iyi tek notalar çalışır; telefonu gitara yakın tut.",
+        "directDesc": "Bir USB-C ses arabirimi (iRig HD, adaptörlü Scarlett, USB'li bir amfi) ya da iRig 2 gibi bir kulaklık girişi adaptörü. En temiz sinyal.",
+        "guidance": "Arabirim ya da kulaklık adaptörü daha iyidir ama telefonun mikrofonu da çalışır: cebine değil, gitara yakın koy.",
+        "noDevices": "Giriş bulunamadı. Arabirimi ya da adaptörü tak; görünmezse çıkarıp yeniden tak.",
+        "permission": "Mikrofon izni: Android Ayarları › Uygulamalar › Yames › İzinler › Mikrofon, sonra İzin ver. USB arabirim ya da kulaklık adaptörü de aynı izni ister."
+      }
     },
     "hearItWork": {
       "title": "Çalıştığını duy",
@@ -142,6 +151,7 @@
     "ready": {
       "title": "Hazırsın",
       "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
+      "notificationNote": "Çalmaya ilk kez bastığında telefonun Yames’in bildirim gösterip gösteremeyeceğini soracak — izin ver, ekran kapalıyken de tık çalmaya devam etsin.",
       "rows": {
         "instrument": "Enstrüman",
         "sound": "Klik sesi",

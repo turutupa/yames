@@ -70,17 +70,21 @@
   color: var(--accent-text, #fff);
 }
 
-.hint-card-btn-action:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .hint-card-btn-action:hover {
+    filter: brightness(1.08);
+  }
 }
 
 .hint-card-btn-dismiss {
   border-color: var(--border);
 }
 
-.hint-card-btn-dismiss:hover {
-  color: var(--text-primary);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .hint-card-btn-dismiss:hover {
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
 }
 
 /* `zen-first` lives inside the Zen overlay (z-index 9999), so it is placed by

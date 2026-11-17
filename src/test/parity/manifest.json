@@ -151,6 +151,8 @@
     "save_path_state",
     "save_path_take",
     "get_take_grade_with_notes",
+    "release_jam_sounds",
+    "refresh_audio_devices",
     "callback_probe_report"
   ],
   "ipcCommands": [
@@ -303,6 +305,8 @@
     "save_path_state",
     "save_path_take",
     "get_take_grade_with_notes",
+    "release_jam_sounds",
+    "refresh_audio_devices",
     "callback_probe_report"
   ],
   "commandsInvokedOutsideIpc": [
@@ -505,6 +509,9 @@
     "savePathTake",
     "openFeedback",
     "getTakeGradeWithNotes",
+    "releaseJamSounds",
+    "onAudioRouteChanged",
+    "refreshAudioDevices",
     "callbackProbeReport"
   ],
   "ipcWrappersWithoutCaller": [
@@ -548,7 +555,8 @@
     "take-capped",
     "take-playback-ended",
     "tts-speech-ended",
-    "tts-speech-started"
+    "tts-speech-started",
+    "audio-route-changed"
   ],
   "eventsEmitted": [
     "adaptive-eval",
@@ -578,7 +586,8 @@
     "take-capped",
     "take-playback-ended",
     "tts-speech-ended",
-    "tts-speech-started"
+    "tts-speech-started",
+    "audio-route-changed"
   ],
   "hotkeys": [
     {
@@ -1390,6 +1399,21 @@
       "written": true
     },
     "practiceView": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "newerVersion.askedAt": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "newerVersion.hidden": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "newerVersion.latest": {
       "store": "settings.json",
       "read": true,
       "written": true

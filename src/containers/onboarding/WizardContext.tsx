@@ -8,7 +8,7 @@
  */
 import { createContext, useContext } from "react";
 import type { UseMidiReturn } from "../../hooks/useMidi";
-import type { ModelStatus } from "../../ipc";
+import type { ModelStatus } from "../../ipc.desktop";
 import type {
   AudioInputDevice,
   AudioSpectrum,

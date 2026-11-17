@@ -84,7 +84,16 @@ function usesIn(css: string): Use[] {
   return out;
 }
 
-const CONTRACT = new Set<string>(TOKEN_CONTRACT);
+/**
+ * The safe-area insets (from the `mobile` branch): declared once on `:root` in
+ * shell.css as `env(safe-area-inset-*, 0px)` — 0px on every desktop — and
+ * overwritten at runtime on Android by `useAndroidNative`, because the
+ * WebView's `env()` only reports the display cutout. Global layout, not
+ * colour, so not in the theme contract; every stylesheet may use them.
+ */
+const SHELL_LAYOUT_TOKENS = ["--safe-top", "--safe-right", "--safe-bottom", "--safe-left"];
+
+const CONTRACT = new Set<string>([...TOKEN_CONTRACT, ...SHELL_LAYOUT_TOKENS]);
 
 /** Every token one stylesheet reaches for that nothing will define. */
 function missingIn(css: string, where: string): string[] {

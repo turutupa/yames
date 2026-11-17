@@ -47,6 +47,7 @@
     "delete": "Xóa",
     "newPreset": "Cài đặt mới",
     "newDrill": "Bài tập mới",
+    "unsaved": "Chưa lưu",
     "titleSongs": "Bài hát"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "Thu gọn thanh bên ({{shortcut}})",
     "expandWithShortcut": "Mở rộng thanh bên ({{shortcut}})",
     "beta": "Bản thử"
+  },
+  "tabs": {
+    "library": "Thư viện"
+  },
+  "mobileTabs": {
+    "settings": "Cài đặt",
+    "library": "Thư viện",
+    "zen": "Thiền"
+  },
+  "sheet": {
+    "close": "Đóng"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Đang phát — {{bpm}} BPM",
+    "notificationPaused": "Tạm dừng",
+    "notificationStop": "Dừng",
+    "notificationChannel": "Phát"
   }
 }

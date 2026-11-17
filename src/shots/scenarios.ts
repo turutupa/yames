@@ -324,6 +324,19 @@ export interface Shot {
    * heard and the rest skipped.
    */
   firstRun?: { stop: "welcome" | "input" | "inputSilent" | "inputNone" | "ready" };
+
+  /**
+   * A version newer than this build's, already known.
+   *
+   * Only the phone build from yames.app can draw anything from it
+   * (`SAYS_WHEN_NEWER`, M11), and only that build ever asks. Seeded rather
+   * than asked for, so the harness stays offline and the picture is the same
+   * every time it is taken.
+   *
+   * Its own field rather than one inside `settings`, because `settings` also
+   * means "drive into Settings through the rail" — and a phone has no rail.
+   */
+  newerVersion?: string;
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
@@ -1172,6 +1185,20 @@ export const SHOTS: Shot[] = [
     settleMs: 600,
   },
   {
+    // A phone that knows a newer version is out (M11). Not a screenshot for
+    // the site either: `scripts/mobile-shots.mjs` is what opens it, and only
+    // a run with `YAMES_SIDELOAD=1` can draw anything — the build from a
+    // store has no such row, which is the point of the whole switch.
+    id: "newer-version",
+    suffix: "newer-version",
+    window: "main",
+    tab: "beat",
+    newerVersion: "1.3.0",
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
     id: "widget",
     suffix: "widget",
     window: "floating",
@@ -1190,6 +1217,47 @@ export const SHOTS: Shot[] = [
   // The straight-on neck the practice runway sits under (M6).
   { id: "stage-flat", suffix: "stage-flat", window: "main", stage: "flat", width: 1400, height: 900, settleMs: 200 },
 ];
+
+/**
+ * The learning side and the first run, at a phone's size (M7, the MVP).
+ *
+ * The same scenes as above — same seed, same walk through what a player
+ * presses — framed at 360×800, the narrowest Android phone people still
+ * buy. They mean "a phone" only when served from the phone build
+ * (`YAMES_MOBILE=1`, the second server in playwright.config.ts): the phone's
+ * layout hangs off `.main-window.is-mobile`, not off a width.
+ * `tests/layout/phone-learning.spec.ts` measures them at 360 and 412.
+ */
+export const PHONE_LEARNING_SCENES = [
+  "firstrun-welcome",
+  "firstrun-input",
+  "firstrun-ready",
+  "today-first",
+  "today-returning",
+  "session-ready",
+  "session-playing",
+  // The runway view's Take (mvp-runway): only the runway is on screen while
+  // it runs ("one picture at a time").
+  "session-runway-ready",
+  "session-runway-playing",
+  "session-between",
+  "session-result",
+  "session-no-catch",
+  "session-recap",
+  "session-edge-result",
+  "paths",
+  "path-alternate",
+  "step-detail",
+  "progress",
+  "tools",
+] as const;
+
+for (const id of PHONE_LEARNING_SCENES) {
+  const desktop = SHOTS.find((s) => s.id === id);
+  if (desktop) {
+    SHOTS.push({ ...desktop, id: `phone-${id}`, suffix: `phone-${id}`, width: 360, height: 800 });
+  }
+}
 
 export function shotById(id: string): Shot | undefined {
   return SHOTS.find((s) => s.id === id);

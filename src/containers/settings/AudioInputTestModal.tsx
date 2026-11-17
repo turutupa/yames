@@ -1,22 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { AudioInputDevice, AudioSpectrum } from "../../types";
-import {
-  listAudioInputDevices,
-  startEvaluation,
-  stopEvaluation,
-  onAudioSpectrum,
-  storeSave,
-  storeLoad,
-  setInputGain,
-  startRecording,
-  stopRecording,
-  startPlayback,
-  stopPlayback,
-  discardRecording,
-  getWaveform,
-  onPlaybackFinished,
-} from "../../ipc";
+import { storeSave, storeLoad } from "../../ipc";
+import { listAudioInputDevices, startEvaluation, stopEvaluation, onAudioSpectrum, setInputGain, startRecording, stopRecording, startPlayback, stopPlayback, discardRecording, getWaveform, onPlaybackFinished } from "../../ipc.desktop";
 import { ChannelDropdown } from "../../components/ChannelDropdown";
 import {
   InputLevelMeter,

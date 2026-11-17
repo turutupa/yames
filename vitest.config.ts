@@ -3,6 +3,13 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  // NOTE: no `define` for `__YAMES_MOBILE__` here, on purpose. Baking the
+  // constant in would make `src/platform.ts` a literal `false` at transform
+  // time and the mobile composition tests could not flip it. Left undefined,
+  // the `typeof` guard resolves against `globalThis` at runtime, so a test
+  // does `vi.stubGlobal("__YAMES_MOBILE__", true)` + `vi.resetModules()` and
+  // then `await import(...)` the module it wants composed for a phone.
+  // Everything else sees `IS_MOBILE === false`, which is the desktop app.
   test: {
     // happy-dom replaces jsdom here purely to dodge the broken
     // `html-encoding-sniffer@6.0.0` → `require('@exodus/bytes')` chain.

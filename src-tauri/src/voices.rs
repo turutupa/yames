@@ -752,7 +752,21 @@ enum Key {
 /// smaller than that list would evict the voice being played to make room for
 /// one being looked at. All four together are about 215 MB at 48 kHz, which is
 /// why they are built when the dropdown opens and not at start-up.
+#[cfg(not(mobile))]
 const CACHE_ENTRIES: usize = 6;
+
+/// TWO ON A PHONE: the bass the loaded jam plays and the keys voice beside
+/// it, and nothing else.
+///
+/// All four recorded voices together are about 215 MB, which on a phone is
+/// the difference between an app that survives being backgrounded and one
+/// that does not. `resolve_voices` asks for the bass and then the keys, so
+/// two entries hold the band on screen and a jam loaded after it pushes the
+/// voice it replaced out. Same trade as `kit::CACHE_ENTRIES` on a phone, and
+/// the same visible answer: a short spinner on the control you changed
+/// (M10).
+#[cfg(mobile)]
+const CACHE_ENTRIES: usize = 2;
 
 /// The melodic banks the app has already built.
 ///
@@ -824,6 +838,23 @@ impl VoiceCache {
         self.fetch(Key::Shipped(index, rate, low, high), 0x766f_6963_65, || {
             load_shipped(index, rate, low, high)
         })
+    }
+
+    /// LET EVERY BANK GO. Command thread only, and never while the band is
+    /// playing. See `kit::KitCache::clear`, which this mirrors: the frees
+    /// happen on the thread that calls this, and a bank a loaded `JamTable`
+    /// still names survives until the table goes too (M10).
+    #[cfg(any(mobile, test))]
+    pub fn clear(&self) {
+        if let Ok(mut slot) = self.entries.lock() {
+            slot.clear();
+        }
+    }
+
+    /// How many banks the cache is holding.
+    #[cfg(any(mobile, test))]
+    pub fn len(&self) -> usize {
+        self.entries.lock().map(|s| s.len()).unwrap_or(0)
     }
 
     /// The bank for this folder, built only if the folder, one of its files,

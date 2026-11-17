@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  listMidiDevices,
-  connectMidiDevice,
-  disconnectMidiDevice,
-  getMidiBindings,
-  setMidiBinding,
-  clearMidiBinding,
-  onMidiAction,
-  onMidiActivity,
-  onMidiDevicesChanged,
-} from "../ipc";
+import { listMidiDevices, connectMidiDevice, disconnectMidiDevice, getMidiBindings, setMidiBinding, clearMidiBinding, onMidiAction, onMidiActivity, onMidiDevicesChanged } from "../ipc.desktop";
 import type { MidiDeviceInfo, MidiBinding, MidiActivity } from "../types";
 
 export interface MidiConflict {

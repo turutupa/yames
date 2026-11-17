@@ -213,8 +213,12 @@ async function drive() {
   if (shot!.session) {
     const { stop } = shot!.session;
     const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+    // The rail on a desktop, the bottom tab bar on a phone (M7): both name
+    // the place in `aria-label`.
     const rail = (name: string) =>
-      document.querySelector<HTMLElement>(`.rail button[aria-label="${name}"]`);
+      document.querySelector<HTMLElement>(
+        `.rail button[aria-label="${name}"], .mobile-tabs button[aria-label="${name}"]`,
+      );
     await until("Today", () => !!byId("today"));
     await until("a plan", () => !!document.querySelector(".session-plan-item"));
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
@@ -322,9 +326,37 @@ async function drive() {
    */
   if (shot!.jam) {
     const rows = ".preset-sidebar-item.jam-item";
+    /**
+     * On a phone the library is a sheet, and it starts closed (M03b), so
+     * the rows this waits for are not on screen until something opens it.
+     * The bottom bar's library button is what a person would press, and it
+     * is the same door the setlist shots already go through — pressed here
+     * rather than in every jam scene's step list, because the jam driver
+     * below is the thing that needs it.
+     */
+    // The phone's library button is only drawn while a tool is open, and the
+    // restore that opens this scene's tool lands a moment after the mount
+    // (M7): wait for one of the two doors rather than for the first frame.
+    await until(
+      "the library or the library button",
+      () =>
+        !document.querySelector(".mobile-tabs") ||
+        !!document.querySelector(".mobile-tab-library") ||
+        !!document.querySelector(rows),
+    );
+    const libraryTab = document.querySelector<HTMLElement>(".mobile-tab-library");
+    if (libraryTab && !document.querySelector(rows)) {
+      libraryTab.click();
+      await until("the library sheet", () => !!document.querySelector(".sheet--library"));
+    }
     await until("the jam library", () => document.querySelectorAll(rows).length > shot!.jam!.row);
     (document.querySelectorAll(rows)[shot!.jam!.row] as HTMLElement).click();
     await until("the jam stage", () => !!document.querySelector(".jam-view"));
+    // Loading from the sheet does not close it; the sheet's own toggle does.
+    if (libraryTab && document.querySelector(".sheet--library")) {
+      libraryTab.click();
+      await until("the library sheet to close", () => !document.querySelector(".sheet--library"));
+    }
 
     const wanted = shot!.jam.bar ?? 1;
     if (wanted > 1) {
@@ -994,8 +1026,10 @@ async function drive() {
 
   if (shot!.zen) {
     // The rail's Zen button, by the anchor the tour already puts on it.
-    await until("the Zen button", () => !!document.querySelector('[data-tour="zen-widget"]'));
-    (document.querySelector('[data-tour="zen-widget"]') as HTMLButtonElement).click();
+    // Desktop reaches Zen from the rail; the phone build from its bottom tab bar.
+    const zenButton = '[data-tour="zen-widget"], .mobile-tab-zen';
+    await until("the Zen button", () => !!document.querySelector(zenButton));
+    (document.querySelector(zenButton) as HTMLButtonElement).click();
     await until("the Zen canvas", () => !!document.querySelector("[data-zen-style]"));
   }
 

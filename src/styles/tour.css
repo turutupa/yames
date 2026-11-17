@@ -205,8 +205,10 @@
   color: var(--accent-text, #fff);
 }
 
-.tour-btn-primary:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .tour-btn-primary:hover {
+    filter: brightness(1.08);
+  }
 }
 
 .tour-btn-ghost {
@@ -214,9 +216,11 @@
   color: var(--text-secondary);
 }
 
-.tour-btn-ghost:hover:not(:disabled) {
-  color: var(--text-primary);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .tour-btn-ghost:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
 }
 
 .tour-btn:disabled {
@@ -269,8 +273,10 @@
   transition: background 120ms ease, color 120ms ease;
 }
 
-.tour-offer-accept:hover {
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .tour-offer-accept:hover {
+    background: var(--accent-subtle);
+  }
 }
 
 .tour-offer-dismiss {
@@ -280,8 +286,10 @@
   padding: 5px 8px;
 }
 
-.tour-offer-dismiss:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .tour-offer-dismiss:hover {
+    color: var(--text-primary);
+  }
 }
 
 @keyframes tour-fade-in {

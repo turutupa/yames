@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Merged into the app's manifest by the Android Gradle plugin.
+
+  FOREGROUND_SERVICE + FOREGROUND_SERVICE_MEDIA_PLAYBACK are what let the
+  click keep running once the screen goes off; POST_NOTIFICATIONS (Android 13
+  and up, prompted at runtime the first time you press play) is what lets the
+  notification that comes with it be seen. If the user says no to the prompt
+  the service still runs and the metronome still plays — they just do not get
+  the row in the shade.
+
+  RECORD_AUDIO (M7, the MVP) is the guitar: the built-in mic, a USB-C
+  class-compliant interface, or a headset-jack adapter. Asked for at runtime
+  when the first-run input step or a Session first opens the input. There is
+  deliberately no FOREGROUND_SERVICE_MICROPHONE: the screen is kept on while
+  the click runs, so a Take is always recorded with the app in the foreground.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- A USB interface or a jack adapter is a nice-to-have, not a requirement:
+         the app installs on a phone without a microphone feature at all. -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+
+    <application>
+        <service
+            android:name="com.yames.metronome.mobile.ClickService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+    </application>
+</manifest>

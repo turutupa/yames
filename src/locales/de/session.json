@@ -255,6 +255,7 @@
     },
     "runway": {
       "label": "Die nächsten Noten, die auf die Linie zulaufen"
-    }
+    },
+    "inputChanged": "Der Eingang hat sich geändert. Yames hört jetzt über {{device}}."
   }
 }

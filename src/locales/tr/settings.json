@@ -346,6 +346,9 @@
       "sounds": "Sesler",
       "soundsCredit": "Kulüp takımı, Versilian Studios ve Karoryfer Samples'ın Virtuosity Drums'ı; çalan Austin McMahon (kamu malı). Stüdyo takımı, DrumGizmo projesinin DRSKit'i (CC BY 4.0).",
       "madeWith": "Dünyanın her yerindeki müzisyenler için {{heart}} ile yapıldı",
+      "newerOut": "{{version}} sürümü çıktı",
+      "getIt": "İndir",
+      "notNow": "Şimdi değil",
       "soundsCreditSongs": "Diğer enstrümanlar Sonivox General MIDI ses setinden gelir (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
@@ -411,6 +414,7 @@
   "instrumentPicker": {
     "title": "Hangi enstrümanla çalışıyorsun?",
     "subtitle": "Yames, vuruş algılamayı ve koç geri bildirimini enstrümanına göre ayarlar. Bunu daha sonra Ayarlar'dan değiştirebilirsin.",
+    "subtitleMobile": "Yames neyle çalıştığını bilsin diye. Bunu sonra Ayarlar'dan değiştirebilirsin.",
     "skip": "Atla — daha sonra seçerim"
   }
 }

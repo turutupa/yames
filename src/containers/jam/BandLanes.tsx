@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { JamBandState } from "../../jam/types";
+import { IS_MOBILE } from "../../platform";
 
 /** The drum kit on a lane row. */
 function DrumsIcon() {
@@ -258,26 +259,38 @@ export function BandLanes({
         );
       })}
 
-      <div className="jam-band-lane jam-band-you">
-        <span className="jam-band-name">
-          <MicIcon />
-          {t("jam.band.you")}
-        </span>
-        <span className="jam-band-detail">{youLabel}</span>
-        <span className="jam-band-live" />
-        {/* The honesty line, said where it applies rather than as a caption
-            under the whole screen (JAM_UX_DECISIONS A7). A band through
-            speakers lands on the grid and the mic scores its hits as your
-            notes; this chip is the only place on the playing screen where
-            that is about to matter, so it is the one that says so. */}
-        <span
-          className="jam-band-input"
-          data-on={listening ? "" : undefined}
-          title={t("jam.headphones")}
-        >
-          {listening ? t("jam.band.inputOn") : t("jam.band.inputOff")}
-        </span>
-      </div>
+      {/* You, and whether anything is listening to you.
+       *
+       * Absent on a phone, and absent rather than empty: the whole row is
+       * about the microphone — what it hears you play, and the warning that a
+       * band through speakers lands on the grid as your notes — and a mobile
+       * build has no mic evaluation at all (MOBILE_IMPLEMENTATION_PLAN §1,
+       * "gone, not greyed out"). It said "You — Input off" on a phone, which
+       * is a row promising a feature the build does not have. `IS_MOBILE`
+       * folds at compile time, so the row and its glyph leave the bundle
+       * with it. */}
+      {!IS_MOBILE && (
+        <div className="jam-band-lane jam-band-you">
+          <span className="jam-band-name">
+            <MicIcon />
+            {t("jam.band.you")}
+          </span>
+          <span className="jam-band-detail">{youLabel}</span>
+          <span className="jam-band-live" />
+          {/* The honesty line, said where it applies rather than as a caption
+              under the whole screen (JAM_UX_DECISIONS A7). A band through
+              speakers lands on the grid and the mic scores its hits as your
+              notes; this chip is the only place on the playing screen where
+              that is about to matter, so it is the one that says so. */}
+          <span
+            className="jam-band-input"
+            data-on={listening ? "" : undefined}
+            title={t("jam.headphones")}
+          >
+            {listening ? t("jam.band.inputOn") : t("jam.band.inputOff")}
+          </span>
+        </div>
+      )}
     </section>
   );
 }

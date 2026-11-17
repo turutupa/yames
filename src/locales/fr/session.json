@@ -262,6 +262,7 @@
     },
     "runway": {
       "label": "Les prochaines notes, qui arrivent sur la ligne"
-    }
+    },
+    "inputChanged": "L'entrée a changé. J'écoute maintenant par {{device}}."
   }
 }

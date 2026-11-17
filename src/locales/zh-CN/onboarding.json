@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "音色与外观",
       "subtitle": "把鼠标移到卡片上即可试听节拍音、预览主题。选一个你喜欢的。",
+      "subtitleTouch": "点按卡片试听节拍声或预览主题。想换就点另一张。",
       "soundHeading": "节拍音",
       "themeHeading": "主题",
       "moreThemes": "更多主题在设置中"
@@ -123,7 +124,15 @@
         "permission": "麦克风权限：macOS 上在 系统设置 › 隐私与安全性 › 麦克风 中打开 Yames；Windows 上在 设置 › 隐私 › 麦克风 中允许桌面应用。然后重启 Yames。",
         "other": "还是不行？试试列表里的其他设备，或者跳过：没有输入，工具也能用。"
       },
-      "retry": "重试"
+      "retry": "重试",
+      "phone": {
+        "subtitle": "选择吉他怎样接到手机，然后弹几个音。电平表会显示 Yames 听到的声音。",
+        "micDesc": "房间里的吉他，用手机自带的麦克风。单音效果最好；把手机放在吉他附近。",
+        "directDesc": "USB-C 声卡（iRig HD、通过转接头的 Scarlett、带 USB 的音箱）或像 iRig 2 这样的耳机孔转接器。信号最干净。",
+        "guidance": "声卡或耳机孔转接器更好，但手机麦克风也能用：放在吉他旁边，别放在口袋里。",
+        "noDevices": "没有找到输入。插上声卡或转接器；如果没有出现，拔下后重新插上。",
+        "permission": "麦克风权限：Android 设置 › 应用 › Yames › 权限 › 麦克风，选择允许。USB 声卡或耳机孔转接器也需要同样的权限。"
+      }
     },
     "hearItWork": {
       "title": "听听它怎么工作",
@@ -142,6 +151,7 @@
     "ready": {
       "title": "准备就绪",
       "subtitle": "可以在这里修改，也可以稍后在设置中修改。",
+      "notificationNote": "第一次按下播放时，手机会询问 Yames 是否可以显示通知——同意后，关掉屏幕节拍声也会继续。",
       "rows": {
         "instrument": "乐器",
         "sound": "节拍音",

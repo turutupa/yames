@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { currentFacts, feedbackUrl } from "./feedback/feedbackUrl";
 import { listen } from "@tauri-apps/api/event";
+import { IS_MOBILE } from "./platform";
+import { openUrlNative, requestMicrophone } from "./mobile/native";
 import { load } from "@tauri-apps/plugin-store";
 import type { AppState, BeatEvent, ComponentScores, InstrumentId, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
 
@@ -22,6 +24,12 @@ export async function storeLoad<T>(key: string): Promise<T | undefined> {
 }
 
 export async function openUrl(url: string): Promise<void> {
+  // The desktop `open_url` command spawns `open` / `start` / `xdg-open`, and
+  // there is no process to spawn on a phone, so a phone routes links through
+  // the yames-mobile plugin's `Intent.ACTION_VIEW` (M04, from the `mobile`
+  // branch). `IS_MOBILE` is a build-time constant, so this branch is not in a
+  // desktop bundle at all.
+  if (IS_MOBILE) return openUrlNative(url);
   return invoke("open_url", { url });
 }
 
@@ -569,11 +577,40 @@ export async function listAudioInputDevices(): Promise<AudioInputDevice[]> {
   return invoke<AudioInputDevice[]>("list_audio_input_devices");
 }
 
+/**
+ * Send both device lists again (`audio-devices-changed`,
+ * `audio-input-devices-changed`). A phone has no device poll: its native side
+ * asks for this when a USB interface, a jack adapter or headphones come or go.
+ */
+export async function refreshAudioDevices(): Promise<void> {
+  return invoke("refresh_audio_devices");
+}
+
+/**
+ * A phone's audio route changed and a stream was closed under it
+ * (`android_route.rs`): `output` has already been reopened by the engine;
+ * `input` is for the frontend to restart (see `src/mobile/inputRoute.ts`).
+ */
+export function onAudioRouteChanged(callback: (kind: "input" | "output") => void) {
+  return listen<{ kind: "input" | "output" }>("audio-route-changed", (e) => callback(e.payload.kind));
+}
+
 export function onAudioInputDevicesChanged(callback: (devices: AudioInputDevice[]) => void) {
   return listen<AudioInputDevice[]>("audio-input-devices-changed", (e) => callback(e.payload));
 }
 
+/** What `startEvaluation` rejects with on a phone whose microphone is refused. */
+export const MIC_PERMISSION_DENIED =
+  "Yames is not allowed to use the microphone. Allow it in Android's settings: Apps, Yames, Permissions, Microphone.";
+
 export async function startEvaluation(deviceName?: string, inputChannel?: number, coachMode?: "default" | "pro"): Promise<void> {
+  // A phone asks for the microphone at the moment the input is first opened
+  // — the first-run input step, a Session, or Settings' test — and every one
+  // of those comes through here. A USB interface or a jack adapter is the
+  // same permission on Android. Build-time constant: not in a desktop bundle.
+  if (IS_MOBILE && !(await requestMicrophone())) {
+    throw new Error(MIC_PERMISSION_DENIED);
+  }
   return invoke("start_evaluation", {
     deviceName: deviceName ?? null,
     inputChannel: inputChannel ?? null,
@@ -2234,6 +2271,24 @@ export type JamWarmRequest = {
   /** Every recorded keys voice — the keys dropdown is about to open. */
   keysVoices?: boolean;
 };
+
+/**
+ * Let the decoded band go, and say whether it went.
+ *
+ * The other end of `warmJam`, and a phone's alone: a band that has been
+ * decoded costs tens of megabytes for as long as anything holds it, and on a
+ * phone that is what decides whether the app survives being put down (M10).
+ * The loaded table goes first and the two caches after it, all on a blocking
+ * thread — never the audio thread, and never while the band is playing,
+ * which the engine refuses under its own lock.
+ *
+ * `false` means it refused, which today means the band was playing. Every
+ * caller is behind `IS_MOBILE`; on a desktop the command answers `false` and
+ * changes nothing.
+ */
+export async function releaseJamSounds(): Promise<boolean> {
+  return invoke<boolean>("release_jam_sounds");
+}
 
 /**
  * Decode sounds before anybody asks for them, so choosing a jam, a kit or a
