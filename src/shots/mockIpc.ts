@@ -2087,6 +2087,13 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
 
+    // W2 previews and picks a theme through the engine's state, like the app.
+    if (cmd === "set_theme" && typeof a?.theme === "string") {
+      STATE.theme = a.theme;
+      emit("state-changed", STATE);
+      return null;
+    }
+
     if (cmd === "set_bpm" && typeof a?.bpm === "number") {
       STATE.bpm = a.bpm;
       emit("state-changed", STATE);
