@@ -1311,8 +1311,10 @@ fn extract_piper_archive(
 ///     refuse to load unsigned dylibs that have it, producing "Library
 ///     not loaded: @rpath/…" with every file visibly present,
 ///     2026-05-18) plus `install_name_tool -add_rpath` (the shipped
-///     binaries reference `@rpath/lib*.dylib` but carry no LC_RPATH
-///     entry, so dyld can never find the bundled libraries otherwise).
+///     binaries reference `@rpath/lib*.dylib`; upstream's carried no
+///     LC_RPATH, our native rebuild carries `@loader_path`), followed by
+///     an ad-hoc re-sign, because the edit breaks the signature and
+///     Apple Silicon refuses to run a binary whose signature is broken.
 ///   * Linux — restore the executable bit and warn on a missing
 ///     `espeak-ng-data`.
 ///   * Windows — nothing to repair (the DLLs sit beside `piper.exe` and
@@ -1332,11 +1334,23 @@ fn post_extract_fixups(piper_dir: &std::path::Path) {
         for bin in ["piper", "piper_phonemize"] {
             let bin_path = piper_dir.join(bin);
             if bin_path.exists() {
-                let _ = std::process::Command::new("install_name_tool")
+                let rpath_added = std::process::Command::new("install_name_tool")
                     .arg("-add_rpath")
                     .arg(piper_dir)
                     .arg(&bin_path)
-                    .output();
+                    .output()
+                    .map(|o| o.status.success())
+                    .unwrap_or(false);
+                // Editing load commands invalidates the code signature,
+                // and Apple Silicon kills a binary whose signature is
+                // broken ("Killed: 9"). The native arm64 build is
+                // ad-hoc signed, so re-sign ad hoc after the edit.
+                if rpath_added {
+                    let _ = std::process::Command::new("codesign")
+                        .args(["--force", "--sign", "-"])
+                        .arg(&bin_path)
+                        .output();
+                }
             }
         }
         // Log any still-missing dylibs after extraction for future debugging.

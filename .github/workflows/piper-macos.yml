@@ -14,11 +14,10 @@
 # before anything is uploaded. Run it only when the Piper pin changes.
 name: Piper (macOS native)
 
+# Manual only: the assets are pinned, so this runs again only when the
+# Piper pin (or RELEASE_TAG, together with tts.rs) changes.
 on:
   workflow_dispatch:
-  push:
-    branches: [fix/piper-macos-native]
-    paths: [.github/workflows/piper-macos.yml, scripts/build-piper-macos.sh]
 
 permissions:
   contents: write

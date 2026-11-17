@@ -551,9 +551,19 @@ pub fn piper_smoke_test(piper_dir: &Path) -> Result<(), String> {
     let mut cmd = std::process::Command::new(&bin);
     cmd.arg("--help");
     apply_piper_env(&mut cmd, piper_dir);
-    let output = cmd
-        .output()
-        .map_err(|e| format!("failed to launch piper: {e}"))?;
+    let output = cmd.output().map_err(|e| {
+        // "Bad CPU type in executable" (os error 86 on macOS): the binary
+        // is for another architecture. Say so rather than leaving the
+        // user to decode the errno (issue #60).
+        if e.raw_os_error() == Some(86) || e.to_string().contains("Bad CPU type") {
+            format!(
+                "the downloaded piper binary is built for a different CPU ({e}); \
+                 re-download the voices to fetch the build for this Mac"
+            )
+        } else {
+            format!("failed to launch piper: {e}")
+        }
+    })?;
     let stderr = String::from_utf8_lossy(&output.stderr);
     // Loader errors print BEFORE main() runs. Match the per-OS markers
     // explicitly so the error string we surface points at the actual
@@ -1070,7 +1080,8 @@ pub struct PiperArchive {
 /// "linux"); `arch` is the raw `uname -m` string (or a normalised
 /// equivalent) — "arm64"/"aarch64", "x86_64"/"amd64", "armv7l"/"armv6l".
 ///
-/// All assets come from `rhasspy/piper` 2023.11.14-2, which is the last
+/// Windows and Linux assets come from `rhasspy/piper` 2023.11.14-2 (macOS
+/// gets our own native rebuild of that release, see below), which is the last
 /// release carrying prebuilt binaries for all three desktop OSes. Newer
 /// builds live at `OHF-Voice/piper1-gpl` (GPL-3, license-compatible with
 /// Yames) but do not ship the same one-archive-per-platform layout, so
@@ -1084,16 +1095,22 @@ pub fn piper_archive_for(os: &str, arch: &str) -> Option<PiperArchive> {
     let is_arm64 = matches!(arch, "arm64" | "aarch64");
     let is_armv7 = matches!(arch, "armv7l" | "armv6l" | "armv7" | "arm");
     match os {
+        // Not upstream's macOS archives: its "aarch64" tarball holds an
+        // x86_64 binary (os error 86 on Apple Silicon without Rosetta,
+        // issue #60) and neither macOS tarball ships the dylibs piper
+        // links against. `.github/workflows/piper-macos.yml` builds the
+        // same Piper release natively per arch, bundles the dylibs and
+        // proves real speech before publishing.
         "macos" => Some(PiperArchive {
             url: if is_arm64 {
                 concat!(
-                    "https://github.com/rhasspy/piper/releases/download/2023.11.14-2",
-                    "/piper_macos_aarch64.tar.gz"
+                    "https://github.com/turutupa/yames/releases/download/",
+                    "piper-2023.11.14-2-macos.1/piper_macos_aarch64.tar.gz"
                 )
             } else {
                 concat!(
-                    "https://github.com/rhasspy/piper/releases/download/2023.11.14-2",
-                    "/piper_macos_x64.tar.gz"
+                    "https://github.com/turutupa/yames/releases/download/",
+                    "piper-2023.11.14-2-macos.1/piper_macos_x64.tar.gz"
                 )
             },
             format: ArchiveFormat::TarGz,
@@ -1384,9 +1401,13 @@ mod piper_archive_tests {
         ] {
             let a = piper_archive_for(os, arch)
                 .unwrap_or_else(|| panic!("no Piper archive for {os}/{arch}"));
+            let catalog = if os == "macos" {
+                "https://github.com/turutupa/yames/releases/download/piper-"
+            } else {
+                "https://github.com/rhasspy/piper/releases/download/"
+            };
             assert!(
-                a.url
-                    .starts_with("https://github.com/rhasspy/piper/releases/download/"),
+                a.url.starts_with(catalog),
                 "{os}/{arch} URL is off-catalog: {}",
                 a.url,
             );
@@ -1414,6 +1435,26 @@ mod piper_archive_tests {
             assert_eq!(a.file_name, "piper.tar.gz", "{os}/{arch}");
             assert!(a.url.ends_with(suffix), "{os}/{arch} -> {}", a.url);
         }
+    }
+
+    /// Issue #60: Apple Silicon must get the native rebuild, never
+    /// upstream's mislabelled x86_64 "aarch64" archive, and the two Mac
+    /// arches must not share an asset.
+    #[test]
+    fn apple_silicon_gets_the_native_rebuild() {
+        for arch in ["arm64", "aarch64"] {
+            let a = piper_archive_for("macos", arch).unwrap();
+            assert!(!a.url.contains("rhasspy/piper"), "{arch} -> {}", a.url);
+            assert!(
+                a.url.ends_with("/piper_macos_aarch64.tar.gz"),
+                "{arch} -> {}",
+                a.url
+            );
+        }
+        assert_ne!(
+            piper_archive_for("macos", "arm64").unwrap().url,
+            piper_archive_for("macos", "x86_64").unwrap().url,
+        );
     }
 
     #[test]
