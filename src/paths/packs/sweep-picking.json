@@ -131,6 +131,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 2:5 1:5 /4 r /8 2:5 1:5 /4 r",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 4,
             "minGapMsAtTop": 272.73,
@@ -244,6 +245,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 1:5 2:5 /4 r /8 1:5 2:5 /4 r",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 4,
             "minGapMsAtTop": 272.73,
@@ -357,6 +359,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 2:5 1:5 1:5 2:5 /4 r r",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 4,
             "minGapMsAtTop": 272.73,
@@ -470,6 +473,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8 3:5 2:5 2:5 3:5 2:5 1:5 1:5 2:5",
+          "subdivision": "eighths",
           "computed": {
             "noteCount": 8,
             "minGapMsAtTop": 300,
@@ -589,6 +593,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 2:5 1:5 1:8h 1:5p 2:8 2:5p /4 3:7 r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 7,
             "minGapMsAtTop": 166.67,
@@ -726,6 +731,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8t 3:14 2:13 1:12 r r r 3:14 2:13 1:12 r r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 6,
             "minGapMsAtTop": 181.82,
@@ -845,6 +851,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8t 1:12 2:13 3:14 r r r 1:12 2:13 3:14 r r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 6,
             "minGapMsAtTop": 181.82,
@@ -964,6 +971,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8t 3:14 2:13 1:12 2:13 3:14 r 3:14 2:13 1:12 2:13 3:14 r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 10,
             "minGapMsAtTop": 181.82,
@@ -1117,6 +1125,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:14 2:13 1:12 r r r 3:14 2:13 1:12 r r r | /8t 3:10 2:10 1:8 r r r 3:10 2:10 1:8 r r r | /8t 3:12 2:13 1:12 r r r 3:12 2:13 1:12 r r r | /8t 3:12 2:12 1:10 r r r 3:12 2:12 1:10 r r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 200,
@@ -1254,6 +1263,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 166.67,
@@ -1375,6 +1385,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:9 2:10 1:8 1:12h 1:8p 2:10 3:9 2:10 1:8 1:12h 1:8p 2:10",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 166.67,
@@ -1496,6 +1507,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 166.67,
@@ -1620,6 +1632,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/16 3:14 2:13 1:12 2:13 3:14 2:13 1:12 2:13 3:14 2:13 1:12 2:13 3:14 2:13 1:12 2:13",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 16,
             "minGapMsAtTop": 125,
@@ -1769,6 +1782,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | 3:12 2:13 1:11 1:15h 1:11p 2:13 3:12 2:13 1:11 1:15h 1:11p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 166.67,
@@ -1923,6 +1937,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:5 2:5 1:5 1:8h 1:5p 2:5 3:5 2:5 1:5 1:8h 1:5p 2:5 | 3:9 2:10 1:8 1:12h 1:8p 2:10 3:9 2:10 1:8 1:12h 1:8p 2:10 | 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | 3:9 2:10 1:8 1:12h 1:8p 2:10 3:9 2:10 1:8 1:12h 1:8p 2:10",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 181.82,
@@ -2078,6 +2093,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 2:8 1:8 1:12h 1:8p 2:8 | 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | 3:17 2:17 1:15 1:20h 1:15p 2:17 3:17 2:17 1:15 1:20h 1:15p 2:17 | 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 181.82,
@@ -2200,6 +2216,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/16 3:16 2:15 1:13 2:15 3:16 2:15 1:13 2:15 3:16 2:15 1:13 2:15 3:16 2:15 1:13 2:15",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 16,
             "minGapMsAtTop": 125,
@@ -2356,6 +2373,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | 3:13 2:12 1:10 1:13h 1:10p 2:12 3:13 2:12 1:10 1:13h 1:10p 2:12 | 3:16 2:15 1:13 1:16h 1:13p 2:15 3:16 2:15 1:13 1:16h 1:13p 2:15 | 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 181.82,
@@ -2483,6 +2501,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/2 2:13 1:12 | 1:13h 2:13",
+          "subdivision": "halves",
           "computed": {
             "noteCount": 4,
             "minGapMsAtTop": 1263.16,
@@ -3855,6 +3874,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/2t 3:14 2:13 1:12 | /2t 1:10p 2:12 3:12",
+          "subdivision": "halfTriplets",
           "computed": {
             "noteCount": 6,
             "minGapMsAtTop": 500,
@@ -4823,6 +4843,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/4t 3:14 2:13 1:12 1:17h 1:12p 2:13 | /4t 3:14 2:13 1:13 1:17h 1:13p 2:13",
+          "subdivision": "quarterTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 285.71,
@@ -5931,6 +5952,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/2t 3:14 2:13 1:12 | /2t 1:13h 2:13 3:14 | /2t 3:12p 2:13 1:12 | /2t 1:10p 2:12 3:12",
+          "subdivision": "halfTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 444.44,
@@ -6789,6 +6811,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 2:13 1:13 1:17h 1:13p 2:13 | /8t 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | /8t 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 2:12 1:10s 1:15s 1:10 2:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -7797,6 +7820,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 2:13 1:13 1:17h 1:13p 2:13 | /8t 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | /8t 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 2:12 1:10s 1:15s 1:10 2:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 166.67,
@@ -8511,6 +8535,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/16 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 16,
             "minGapMsAtTop": 125,
@@ -8637,6 +8662,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/16 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 16,
             "minGapMsAtTop": 125,
@@ -8762,6 +8788,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/16 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 16,
             "minGapMsAtTop": 125,
@@ -8933,6 +8960,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/16 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 | 4:10 3:10 2:10 1:8s 1:13s 1:8 2:10 3:10 4:10 3:10 2:10 1:8s 1:13s 1:8 2:10 3:10 | 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 | 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 64,
             "minGapMsAtTop": 136.36,
@@ -9067,6 +9095,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 125,
@@ -9186,6 +9215,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 125,
@@ -9306,6 +9336,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 5:10 4:9 3:7 2:8 1:7 1:10h 1:7p 2:8 3:7 4:9 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 10,
             "minGapMsAtTop": 125,
@@ -9424,6 +9455,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 5:7 5:10h 4:9 3:9 2:8 1:7s 1:12s 1:7 2:8 3:9 4:9 5:10",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 133.33,
@@ -9609,6 +9641,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/16 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 | /16 4:15 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 4:15 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 | /16 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 | /16 4:12 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 4:12 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 64,
             "minGapMsAtTop": 157.89,
@@ -10837,6 +10870,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | /8t 5:12 5:15h 4:15 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 4:15 5:15 | /8t 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15 | /8t 5:10 5:14h 4:12 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 4:12 5:14",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -11826,6 +11860,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 5:8 5:12h 4:10 3:10 2:10 1:8s 1:13s 1:8 2:10 3:10 4:10 5:12 | /8t 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | /8t 5:10 5:14h 4:12 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 4:12 5:14",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -12639,6 +12674,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | 5:5 5:8h 4:7 3:7 2:6 1:5s 1:10s 1:5 2:6 3:7 4:7 5:8",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 166.67,
@@ -12798,6 +12834,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | 5:8 4:7 3:5 2:6 1:5 1:8h 1:5p 2:6 3:5 4:7 r r | 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15 | 5:10 4:9 3:7 2:8 1:7 1:10h 1:7p 2:8 3:7 4:9 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 44,
             "minGapMsAtTop": 153.85,
@@ -12970,6 +13007,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/16 4:12 3:10 2:10 1:10 1:13h 1:10p 2:10 3:10 4:12 3:10 2:10 1:10 1:13h 1:10p 2:10 3:10 | 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 | 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 | 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 64,
             "minGapMsAtTop": 125,
@@ -13143,6 +13181,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 2:12 1:12 1:16h 1:12p 2:12 | /8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 2:12 1:12 1:16h 1:12p 2:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -13714,6 +13753,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:14 2:15 1:13 1:17h 1:13p 2:15 3:14 2:15 1:13 1:17h 1:13p 2:15 | /8t 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 2:12 1:12 1:16h 1:12p 2:12 | /8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -15076,6 +15116,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/4 4:14 3:14 2:13 1:12 | /4 1:13h 2:15 3:14 4:15 | /4 4:14p 3:13 2:12 1:12s | /4 1:8 2:10 3:9 4:10",
+          "subdivision": "quarters",
           "computed": {
             "noteCount": 16,
             "minGapMsAtTop": 333.33,
@@ -15994,6 +16035,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:16 2:15 1:13 1:16h 1:13p 2:15 3:16 2:15 1:13 1:16h 1:13p 2:15 | /8t 3:16 2:17 1:16 1:19h 1:16p 2:17 3:16 2:17 1:16 1:19h 1:16p 2:17 | /8t 3:17 2:17 1:17 1:20h 1:17p 2:17 3:17 2:17 1:17 1:20h 1:17p 2:17 | /8t 3:19 2:18 1:17 1:22h 1:17p 2:18 3:19 2:18 1:17 1:22h 1:17p 2:18",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -16390,6 +16432,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:15p 1:13p 1:12p 2:15 2:13 2:12 3:14 3:12 | /2 3:14v /4 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 13,
             "minGapMsAtTop": 166.67,
@@ -16519,6 +16562,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:5 2:5 1:5 1:8h 1:5p 2:8 2:5p 3:7 3:5 3:7 3:5 4:7 | /2 3:7b2v /4 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 13,
             "minGapMsAtTop": 166.67,
@@ -16638,6 +16682,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:14 2:13 1:12 1:10p 2:12 3:12 3:14 2:13 1:12 1:10p 2:12 3:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 133.33,
@@ -16760,6 +16805,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/2 1:12v /4 r /16t 4:14 3:14 2:13 1:12 1:17h 1:12p | /2 2:13v /4 r /16t 4:14 3:14 2:13 1:12 2:13 3:14",
+          "subdivision": "sextuplets",
           "computed": {
             "noteCount": 14,
             "minGapMsAtTop": 125,
@@ -16938,6 +16984,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | 3:10 2:10 1:8s 1:13s 1:8 2:10 3:10 2:10 1:8s 1:13s 1:8 2:10 | 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 2:12 1:10 1:15h 1:10p 2:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 166.67,
@@ -17112,6 +17159,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/16 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 | 4:10 3:10 2:10 1:8s 1:13s 1:8 2:10 3:10 4:10 3:10 2:10 1:8s 1:13s 1:8 2:10 3:10 | 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 4:10 3:9 2:8 1:8 1:12h 1:8p 2:8 3:9 | 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 4:12 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 64,
             "minGapMsAtTop": 125,
@@ -17273,6 +17321,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | 5:8 4:7 3:5 2:6 1:5 1:8h 1:5p 2:6 3:5 4:7 r r | 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15 | 5:10 4:9 3:7 2:8 1:7 1:10h 1:7p 2:8 3:7 4:9 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 44,
             "minGapMsAtTop": 153.85,
@@ -17452,6 +17501,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | 5:8 4:7 3:5 2:6 1:5 1:8h 1:5p 2:6 3:5 4:7 r r | 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | 3:12 2:12 1:10 1:15h 1:10p 2:12 3:12 2:12 1:10 1:15h 1:10p 2:12 | 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | 5:8 4:7 3:5 2:6 1:5 1:8h 1:5p 2:6 3:5 4:7 r r | 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15 | /2 3:12v /4 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 81,
             "minGapMsAtTop": 166.67,
@@ -17598,6 +17648,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/16 6:5 6:8h 5:7 4:7 3:5 2:5 1:5 1:8h 1:5p 2:5 3:5 4:7 5:7 6:8 r r",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 14,
             "minGapMsAtTop": 115.38,
@@ -17978,6 +18029,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 6:13 5:12 4:10 3:10 2:10 1:8 1:13h 1:8p 2:10 3:10 4:10 5:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 12,
             "minGapMsAtTop": 133.33,
@@ -18253,6 +18305,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
+          "subdivision": "quarterTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 222.22,
@@ -18937,6 +18990,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:5 2:5 1:5 1:8h 1:5p 2:5 3:5 2:5 1:5 1:8h 1:5p 2:5 | 3:17 2:17 1:17 1:20h 1:17p 2:17 3:17 2:17 1:17 1:20h 1:17p 2:17",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 153.85,
@@ -19349,6 +19403,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/16t 3:5 2:5 1:5s 1:8s 1:5 2:5 3:9 2:10 1:8 1:12h 1:8p 2:10 3:14 2:13 1:12 1:17h 1:12p 2:13 3:17 2:17 1:17 1:20h 1:17p 2:17",
+          "subdivision": "sextuplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 111.11,
@@ -19748,6 +19803,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | /16 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14",
+          "subdivision": "sixteenths",
           "computed": {
             "noteCount": 28,
             "minGapMsAtTop": 125,
@@ -20115,6 +20171,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:14 2:15 1:13 1:17h 1:13p 2:15 3:14 2:15 1:13 1:17h 1:13p 2:15 | /8t 3:13 2:12 1:10 1:13h 1:10p 2:12 3:13 2:12 1:10 1:13h 1:10p 2:12 | /8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -20688,6 +20745,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8t 3:7 2:6 1:4 1:7h 1:4p 2:6 3:7 2:6 1:4 1:7h 1:4p 2:6 | /8t 3:10 2:9 1:7 1:10h 1:7p 2:9 3:10 2:9 1:7 1:10h 1:7p 2:9 | /8t 3:13 2:12 1:10 1:13h 1:10p 2:12 3:13 2:12 1:10 1:13h 1:10p 2:12 | /8t 3:16 2:15 1:13 1:16h 1:13p 2:15 3:16 2:15 1:13 1:16h 1:13p 2:15",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 153.85,
@@ -21310,6 +21368,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/8t 3:5 2:5 1:5 1:8h 1:5p 2:5 3:5 2:5 1:5 1:8h 1:5p 2:5 | /8t 3:7 2:6 1:4 1:7h 1:4p 2:6 3:7 2:6 1:4 1:7h 1:4p 2:6 | /8t 3:10 2:10 1:10 1:13h 1:10p 2:10 3:10 2:10 1:10 1:13h 1:10p 2:10 | /8t 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 2:12 1:12 1:16h 1:12p 2:12 | /8t 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 2:13 1:13 1:17h 1:13p 2:13 | /8t 3:16 2:15 1:13 1:16h 1:13p 2:15 3:16 2:15 1:13 1:16h 1:13p 2:15 | /8t 3:17 2:17 1:17 1:20h 1:17p 2:17 3:17 2:17 1:17 1:20h 1:17p 2:17 | /8t 3:16 2:17 1:16 1:19h 1:16p 2:17 3:16 2:17 1:16 1:19h 1:16p 2:17",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 96,
             "minGapMsAtTop": 166.67,
@@ -21846,6 +21905,7 @@
           },
           "estimatedMinutes": 6,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | /8t 5:14p 4:14 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 4:14 5:14 5:14 | /2 1:17v /4 r r",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 25,
             "minGapMsAtTop": 153.85,
@@ -22016,6 +22076,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | /8t 5:12 5:17h 4:15 3:14 2:15 1:13 1:17h 1:13p 2:15 3:14 4:15 5:17 | /8t 5:11 5:14h 4:14 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 4:14 5:14 | /8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 133.33,
@@ -23180,6 +23241,7 @@
           },
           "estimatedMinutes": 7,
           "tab": "/4t 6:17 5:15 4:14 3:14 2:13 1:12 | /4t 1:10p 2:12 3:12 4:12 5:14 6:15 | /4t 6:13p 5:12 4:10 3:10 2:10 1:8 | /4t 1:7p 2:8 3:7 4:9 5:10 6:10",
+          "subdivision": "quarterTriplets",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 222.22,
@@ -23742,6 +23804,7 @@
           },
           "estimatedMinutes": 8,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | /8t 5:12 5:15h 4:15 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 4:15 5:15 | /8t 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15 | /8t 5:10 5:14h 4:12 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 4:12 5:14 | /8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:14 2:15 1:13 1:17h 1:13p 2:15 3:14 2:15 1:13 1:17h 1:13p 2:15 | /8t 3:13 2:12 1:12 1:16h 1:12p 2:12 3:13 2:12 1:12 1:16h 1:12p 2:12 | /8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 96,
             "minGapMsAtTop": 153.85,
@@ -23909,6 +23972,7 @@
           },
           "estimatedMinutes": 4,
           "tab": "/8t 3:5 2:5 1:5 1:8h 1:5p 2:5 3:5 2:5 1:5 1:8h 1:5p 2:5 | /8t 3:9 2:10 1:8 1:12h 1:8p 2:10 3:9 2:10 1:8 1:12h 1:8p 2:10 | /8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:9 2:10 1:8 1:12h 1:8p 2:10 3:9 2:10 1:8 1:12h 1:8p 2:10",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 181.82,
@@ -24977,6 +25041,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8t 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 2:13 1:12 1:17h 1:12p 2:13 | /8t 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 2:13 1:13 1:17h 1:13p 2:13 | /8t 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 2:13 1:12 1:15h 1:12p 2:13 | /8t 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 2:12 1:10s 1:15s 1:10 2:12",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 181.82,
@@ -27216,6 +27281,7 @@
           },
           "estimatedMinutes": 5,
           "tab": "/8t 5:12 5:15h 4:14 3:14 2:13 1:12 1:17h 1:12p 2:13 3:14 4:14 5:15 | /8t 5:12 5:15h 4:15 3:14 2:13 1:13 1:17h 1:13p 2:13 3:14 4:15 5:15 | /8t 5:10s 5:15 4:14 3:12 2:13 1:12 1:15h 1:12p 2:13 3:12 4:14 5:15 | /8t 5:10 5:14h 4:12 3:12 2:12 1:10s 1:15s 1:10 2:12 3:12 4:12 5:14",
+          "subdivision": "eighthTriplets",
           "computed": {
             "noteCount": 48,
             "minGapMsAtTop": 181.82,

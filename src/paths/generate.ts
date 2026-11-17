@@ -4,7 +4,7 @@
  */
 import { GRADING_PROFILES } from "./profiles";
 import type { GradingProfile } from "./profiles";
-import { PATH_SCHEMA_VERSION, STANDARD_TUNING, VARIATION_DIMENSIONS, barLengthTicks, subdivisionOf } from "./format";
+import { PATH_SCHEMA_VERSION, STANDARD_TUNING, SUBDIVISION_TICKS, VARIATION_DIMENSIONS, barLengthTicks, subdivisionOf } from "./format";
 import type {
   Backing,
   Crossing,
@@ -21,6 +21,7 @@ import type {
   PathNote,
   PathRest,
   Step,
+  Subdivision,
   TempoRung,
   VariationDimension,
 } from "./format";
@@ -174,6 +175,26 @@ const variantId = (params: VariantParams) =>
     .map(([k, v]) => `${k}=${v.replace(/\s+/g, "-")}`)
     .join(",");
 
+/**
+ * `labelSubdivisions: "mostly"`: the grid most of the notes move in, or nothing.
+ * Strictly more than half the gaps between onsets must be the tightest one, so
+ * a swung line, a line of quarters with a pickup, or a mixed etude goes
+ * unlabelled rather than called by its fastest moment.
+ */
+function mostlyOn(notes: readonly { tick: number; dur: number }[]): Subdivision | undefined {
+  const grid = subdivisionOf(notes);
+  if (grid === null) return undefined;
+  let gaps = 0;
+  let onGrid = 0;
+  for (let i = 1; i < notes.length; i += 1) {
+    const d = notes[i].tick - notes[i - 1].tick;
+    if (d <= 0) continue;
+    gaps += 1;
+    if (d === SUBDIVISION_TICKS[grid]) onGrid += 1;
+  }
+  return gaps > 0 && onGrid * 2 > gaps ? grid : undefined;
+}
+
 function buildExercise(
   pathSpec: PathSpec,
   groupId: string,
@@ -271,7 +292,12 @@ function buildExercise(
   const passBars = barsFor(concrete[0].part.notes);
 
   const first = concrete[0];
-  const grid = pathSpec.labelSubdivisions ? subdivisionOf(first.part.notes) : undefined;
+  const grid =
+    pathSpec.labelSubdivisions === "mostly"
+      ? mostlyOn(first.part.notes)
+      : pathSpec.labelSubdivisions
+        ? subdivisionOf(first.part.notes)
+        : undefined;
   if (grid === null) throw new Error(`${where}: no nameable subdivision in its notes`);
   const exercise: Exercise = {
     id: `${groupId}.${spec.id}`,

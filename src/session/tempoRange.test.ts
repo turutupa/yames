@@ -17,8 +17,13 @@ describe("an Exercise card's tempo (QA 2026-11-17 #14)", () => {
     });
   });
 
-  it("without one, just the tempos", () => {
+  it("Alternate Picking names its grid too (QA 2 #14)", () => {
     const ex = ALT.steps[0].exercises[0];
+    expect(tempoRange(ex)).toMatchObject({ subdivision: "eighths", from: ex.tempo.rungs[0].bpm });
+  });
+
+  it("without one, just the tempos", () => {
+    const ex = { ...ALT.steps[0].exercises[0], subdivision: undefined };
     expect(tempoRange(ex)).toMatchObject({ subdivision: null, from: ex.tempo.rungs[0].bpm });
   });
 

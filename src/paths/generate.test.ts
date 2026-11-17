@@ -116,6 +116,21 @@ describe("subdivisions", () => {
     }
     expect(validatePath(labelled).filter((i) => i.rule === "tab.subdivision")).toEqual([]);
   });
+
+  it('"mostly" names a grid only where most of the notes move in it (QA 2 #14)', () => {
+    let named = 0;
+    for (const spec of SPECS.filter((s) => s.labelSubdivisions === "mostly")) {
+      for (const ex of buildPath(spec).steps.flatMap((s) => s.exercises)) {
+        if (ex.subdivision === undefined) continue;
+        named += 1;
+        expect(ex.subdivision).toBe(subdivisionOf(ex.notes));
+        const gaps = ex.notes.slice(1).map((n, i) => n.tick - ex.notes[i].tick).filter((d) => d > 0);
+        const tightest = Math.min(...gaps);
+        expect(gaps.filter((d) => d === tightest).length * 2, ex.id).toBeGreaterThan(gaps.length);
+      }
+    }
+    expect(named).toBeGreaterThan(100);
+  });
 });
 
 describe("serialization", () => {

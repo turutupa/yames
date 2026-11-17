@@ -179,8 +179,15 @@ export type PathSpec = {
   /**
    * Write each Exercise's `subdivision` into the pack, from its notes. Opt-in so
    * Paths written before it generate the same bytes.
+   *
+   * `true` labels every Exercise with the tightest grid its notes move in, and
+   * fails on one with no nameable grid. `"mostly"` labels an Exercise only when
+   * that grid is what most of its notes actually move in, and leaves the rest
+   * unlabelled: a swung line (quarter-note triplet, eighth-note triplet) is not
+   * "triplets", and an etude of eighths with a sixteenth run is not "16ths"
+   * (QA 2 #14). The music and the grading are the same either way.
    */
-  labelSubdivisions?: boolean;
+  labelSubdivisions?: boolean | "mostly";
 };
 
 export function definePath(spec: PathSpec): PathSpec {
