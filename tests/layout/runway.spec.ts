@@ -9,6 +9,10 @@ import { openShot, noSidewaysScroll, insideViewport } from "./fits";
  * Take runs and stops when it ends; a note the analyzer has ruled on has
  * already reached the hit line; the switch flips the screen, is locked during a
  * Take, and the Take remembers which view it was played in.
+ *
+ * One picture at a time (the owner, 2026-11-16): before a runway Take the
+ * neck shows where the hand goes; while it runs the runway is alone; theory
+ * keeps the neck and has no runway; the neck view hides the tab while playing.
  */
 test.use({
   launchOptions: {
@@ -39,16 +43,25 @@ for (const [scene, sizes] of SCENES) {
       await noSidewaysScroll(page, `${scene} at ${size.width}px`);
       await expect(page.locator('[data-testid="session-big"]')).toBeVisible();
       await insideViewport(page, '[data-testid="session-big"]', `${scene} at ${size.width}px`, size);
-      if (scene.includes("runway")) {
+      const runwayShown = scene === "session-runway-playing" || scene === "session-runway-phone";
+      const neckShown = scene === "session-runway-ready" || scene === "session-runway-theory";
+      if (runwayShown) {
         const lane = await page.locator('[data-testid="runway"]').boundingBox();
         expect(lane, "the runway is on the screen").not.toBeNull();
         expect(lane!.x).toBeGreaterThanOrEqual(-1);
         expect(lane!.x + lane!.width).toBeLessThanOrEqual(size.width + 1);
-        expect(lane!.height).toBeGreaterThan(scene.includes("theory") ? 30 : 100);
-        // The neck sits directly above the runway.
+        expect(lane!.height).toBeGreaterThan(100);
+        await expect(page.locator("[data-runway-neck]"), "one picture: no neck over a running runway").toHaveCount(0);
+      }
+      if (neckShown) {
         const neck = await page.locator("[data-runway-neck]").boundingBox();
-        expect(neck!.y + neck!.height).toBeLessThanOrEqual(lane!.y + 1);
-        if (scene.includes("theory")) expect(neck!.height).toBeGreaterThan(lane!.height * 3);
+        expect(neck, "the neck is on the screen").not.toBeNull();
+        expect(neck!.height).toBeGreaterThan(150);
+        await expect(page.locator('[data-testid="runway"]'), "one picture: no runway beside the neck").toHaveCount(0);
+      }
+      if (scene === "session-theory-playing") {
+        await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
+        await expect(page.locator('[data-testid="exercise-stage"]'), "no tab while the neck view plays").toHaveCount(0);
       }
     });
   }
@@ -115,12 +128,20 @@ test("the switch flips the Take screen, and is locked while a Take runs", async 
   await expect(page.locator('[data-testid="practice-view-neck"]')).toHaveAttribute("aria-checked", "true");
   await expect(page.locator('[data-testid="exercise-stage"]')).toBeVisible();
   await page.locator('[data-testid="practice-view-runway"]').click();
-  await expect(page.locator('[data-testid="runway"]')).toBeVisible();
+  // Before the Take the runway view shows the neck alone; the lane comes with the Take.
+  await expect(page.locator("[data-runway-neck]")).toBeVisible();
   await expect(page.locator('[data-testid="exercise-stage"]')).toHaveCount(0);
-  await page.locator('[data-testid="practice-view-neck"]').click();
   await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
+  await page.locator('[data-testid="practice-view-neck"]').click();
+  await expect(page.locator('[data-testid="exercise-stage"]')).toBeVisible();
 
   await openShot(page, "session-runway-playing", WIDE);
   await expect(page.locator('[data-testid="practice-view-neck"]')).toBeDisabled();
   await expect(page.locator('[data-testid="practice-view-runway"]')).toBeDisabled();
+});
+
+test("the neck view hides the tab while a Take runs", async ({ page }) => {
+  await openShot(page, "session-playing", WIDE);
+  await expect(page.locator('[data-testid="exercise-stage"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
 });

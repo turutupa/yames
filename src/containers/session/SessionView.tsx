@@ -130,7 +130,6 @@ function PedalCard() {
 function TakeScreen({
   session,
   themeId,
-  beat,
   isPlaying,
   listening,
   hasSignal,
@@ -138,7 +137,6 @@ function TakeScreen({
 }: {
   session: SessionRun;
   themeId: string;
-  beat: BeatPosition | null;
   isPlaying: boolean;
   listening: boolean;
   hasSignal: boolean;
@@ -209,15 +207,19 @@ function TakeScreen({
       <div className="session-slot" ref={slot} aria-hidden="true" />
 
       <div className="session-mechlow">
-        <div className="session-glass">
-          <ExerciseStage
-            take={take}
-            tick={running && beat && !beat.songCountIn ? beat.songTick : 0}
-            playing={running && isPlaying && !beat?.songCountIn}
-            themeId={themeId}
-            lights={lights}
-          />
-        </div>
+        {/* The tab is for reading the Exercise before it starts; while it
+            runs the neck is the one picture (one pair of eyes). */}
+        {!running && (
+          <div className="session-glass">
+            <ExerciseStage
+              take={take}
+              tick={0}
+              playing={false}
+              themeId={themeId}
+              lights={lights}
+            />
+          </div>
+        )}
         <div className="session-col">
           {running && <CoachLine>{exercise.coachLine}</CoachLine>}
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
@@ -774,7 +776,6 @@ export function SessionView({
         <TakeScreen
           session={session}
           themeId={themeId}
-          beat={beat}
           isPlaying={isPlaying}
           listening={listening}
           hasSignal={hasSignal}

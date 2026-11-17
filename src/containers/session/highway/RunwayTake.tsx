@@ -88,7 +88,16 @@ export function RunwayTakeScreen({
   const played = take?.exercise.notes ?? exercise?.notes ?? [];
   const shape = useMemo(() => neckNotesOf(played, "aim"), [played]);
   const model = useMemo(() => (take ? runwayModel(take, TAKE_COUNT_IN_BARS) : null), [take]);
-  const view: NeckView = useMemo(() => ({ ...zoomOf(played), flat: true }) as NeckView, [played]);
+  // One picture at a time (the owner, 2026-11-16: "users only have one pair of
+  // eyes"). Before the Take the neck shows where the hand goes; while it runs
+  // the runway alone says what comes next. Theory is about where, so it keeps
+  // the neck and has no runway.
+  const neckOn = !running || theory;
+  const runwayOn = running && !theory;
+  const view: NeckView = useMemo(
+    () => (neckOn ? ({ ...zoomOf(played), flat: true } as NeckView) : ({ kind: "hidden" } as NeckView)),
+    [played, neckOn],
+  );
   const first = useMemo(() => (model ? ghostNeck(shape, model.onsets, 0) : shape), [shape, model]);
   const slot = useNeckSlot(view, first);
   // The frame cap while the Take runs; no plucks, so the stage draws a frame
@@ -180,16 +189,18 @@ export function RunwayTakeScreen({
         </span>
       </div>
 
-      <div className="session-slot" data-runway-neck="" ref={slot} aria-hidden="true" />
+      {neckOn && <div className="session-slot" data-runway-neck="" ref={slot} aria-hidden="true" />}
 
-      <Runway
-        take={take}
-        beat={beat}
-        playing={running && isPlaying}
-        lights={lights}
-        collapsed={theory}
-        onNext={onNext}
-      />
+      {runwayOn && (
+        <Runway
+          take={take}
+          beat={beat}
+          playing={isPlaying}
+          lights={lights}
+          collapsed={false}
+          onNext={onNext}
+        />
+      )}
 
       <div className="session-actions">
         <div className="session-runway-notes">
