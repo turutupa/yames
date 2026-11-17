@@ -22,6 +22,7 @@ import {
   shouldHintWidgetDiscover,
   shouldHintZenFirst,
   shouldSuggestPreset,
+  hintsAllowedOn,
   type SetupRecord,
   type SetupSignature,
 } from "./triggers";
@@ -47,6 +48,19 @@ function preset(over: Partial<Preset> = {}): Preset {
 function history(sessions: number[], setup: SetupSignature = SETUP): SetupRecord[] {
   return sessions.map((session) => ({ ...setup, session }));
 }
+
+describe("where a tool's hint may show", () => {
+  it("never in a Session or on the learning side", () => {
+    for (const view of ["session", "today", "paths", "progress", "tools"]) {
+      expect(hintsAllowedOn(view), view).toBe(false);
+    }
+  });
+  it("on the tools themselves", () => {
+    for (const view of ["beat", "drill", "setlist", "jam", "songs"]) {
+      expect(hintsAllowedOn(view), view).toBe(true);
+    }
+  });
+});
 
 describe("drill-first-open", () => {
   it("fires on the Drill tab only", () => {

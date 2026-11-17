@@ -243,7 +243,11 @@
         "session-slower": "Mais devagar",
         "session-faster": "Mais rápido",
         "session-next": "Próxima etapa",
-        "session-pedal": "Um pedal só"
+        "session-pedal": "Um pedal só",
+        "session-exit": "Sair da sessão",
+        "tab-paths": "Trilhas",
+        "tab-progress": "Progresso",
+        "tab-tools": "Ferramentas"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -293,7 +297,11 @@
         "session-slower": "Entre tomadas: um degrau mais devagar",
         "session-faster": "Entre tomadas: um degrau mais rápido",
         "session-next": "Entre tomadas: passar para a próxima coisa da sessão",
-        "session-pedal": "Para um único footswitch. Toque: a próxima coisa. Toque duplo: mais devagar. Segurar: próxima etapa"
+        "session-pedal": "Para um único footswitch. Toque: a próxima coisa. Toque duplo: mais devagar. Segurar: próxima etapa",
+        "session-exit": "Durante uma sessão: sair, como faz Sair. Uma tomada em andamento para antes.",
+        "tab-paths": "Ir para Trilhas",
+        "tab-progress": "Ir para Progresso",
+        "tab-tools": "Ir para Ferramentas"
       }
     },
     "inputTest": {

@@ -3,7 +3,7 @@ import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { Rail } from "./Rail";
 import { DEFAULT_TEST_STATE } from "../../test/mocks";
 import { readStylesheet } from "../../test/readStyles";
-import { HOTKEYS } from "../../hotkeys";
+import { HOTKEYS, IS_MAC, platformKey } from "../../hotkeys";
 
 function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
   const props = {
@@ -294,4 +294,57 @@ describe("Rail", () => {
   });
 
 
+});
+
+/** Every rail entry shows its key (owner, 2026-11-17), from the player's own bindings. */
+describe("Rail keycaps", () => {
+  const defaults = Object.fromEntries(HOTKEYS.map((h) => [h.id, h.key]));
+  const ENTRIES: Array<[string, string]> = [
+    ["today", "tab-today"],
+    ["paths", "tab-paths"],
+    ["progress", "tab-progress"],
+    ["tools", "tab-tools"],
+    ["beat", "tab-1"],
+    ["setlist", "tab-2"],
+    ["drill", "tab-3"],
+    ["jam", "tab-4"],
+    ["songs", "tab-5"],
+    ["settings", "settings"],
+  ];
+
+  it("puts each entry's key on its row, written as Settings writes it", () => {
+    setup({ keyBindings: defaults });
+    for (const [id, action] of ENTRIES) {
+      const cap = screen.getByTestId(`rail-key-${id}`);
+      expect(cap.textContent, id).toBe(platformKey(defaults[action]));
+      expect(cap.getAttribute("aria-hidden")).toBe("true");
+    }
+  });
+
+  it("writes Ctrl off a Mac and ⌘ on one", () => {
+    expect(platformKey("⌘6")).toBe(IS_MAC ? "⌘6" : "Ctrl+6");
+  });
+
+  it("shows a remapped key, and none for an unbound action", () => {
+    setup({ keyBindings: { ...defaults, "tab-paths": "⌘⇧P", "tab-progress": "" } });
+    expect(screen.getByTestId("rail-key-paths").textContent).toBe(platformKey("⌘⇧P"));
+    expect(screen.queryByTestId("rail-key-progress")).toBeNull();
+  });
+
+  it("shows none without bindings", () => {
+    setup();
+    expect(document.querySelector(".rail-key")).toBeNull();
+  });
+
+  it("hides with the labels when the rail is a strip of icons", () => {
+    const css = readStylesheet("shell.css");
+    expect(css).toMatch(/\.rail\[data-collapsed\] \.rail-library,\s*\.rail\[data-collapsed\] \.rail-key \{\s*display: none;/);
+    expect(css).toMatch(/\.rail-action-dot,\s*\.rail-key \{\s*display: none;/);
+  });
+
+  it("never shrinks; the label gives way", () => {
+    const css = readStylesheet("shell.css");
+    const rule = css.slice(css.indexOf(".rail-key {"));
+    expect(rule.slice(0, rule.indexOf("}"))).toMatch(/flex-shrink: 0/);
+  });
 });

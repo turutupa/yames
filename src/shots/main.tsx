@@ -297,8 +297,13 @@ async function drive() {
         byId("today-start")?.click();
       }
       await until("the Session", () => !!byId("session"));
-      if (stop === "timed") {
-        await until("the warm-up", () => !!byId("session-timed"));
+      if (stop === "timed" || stop === "timedReady") {
+        const timedPhase = () => byId("session-timed")?.dataset.phase;
+        await until("the warm-up, ready", () => timedPhase() === "timedReady");
+        if (stop === "timed") {
+          byId("session-big")?.click();
+          await until("the warm-up, running", () => timedPhase() === "timed");
+        }
       } else {
         const big = () => byId("session-big") as HTMLButtonElement | null;
         // Ready means the Session is in its ready phase and the Take is loaded.

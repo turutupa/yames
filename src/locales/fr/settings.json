@@ -243,7 +243,11 @@
         "session-slower": "Plus lent",
         "session-faster": "Plus vite",
         "session-next": "Étape suivante",
-        "session-pedal": "Une seule pédale"
+        "session-pedal": "Une seule pédale",
+        "session-exit": "Quitter la séance",
+        "tab-paths": "Parcours",
+        "tab-progress": "Progrès",
+        "tab-tools": "Outils"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -293,7 +297,11 @@
         "session-slower": "Entre deux prises : un cran plus lent",
         "session-faster": "Entre deux prises : un cran plus vite",
         "session-next": "Entre deux prises : passer à la suite de la séance",
-        "session-pedal": "Pour un seul footswitch. Appui : la suite. Double appui : plus lent. Appui long : étape suivante"
+        "session-pedal": "Pour un seul footswitch. Appui : la suite. Double appui : plus lent. Appui long : étape suivante",
+        "session-exit": "Pendant une séance : la quitter, comme Quitter. Une prise en cours s'arrête d'abord.",
+        "tab-paths": "Aller à Parcours",
+        "tab-progress": "Aller à Progrès",
+        "tab-tools": "Aller à Outils"
       }
     },
     "inputTest": {

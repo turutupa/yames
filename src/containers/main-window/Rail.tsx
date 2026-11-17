@@ -2,6 +2,8 @@ import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { showFloating } from "../../ipc.desktop";
 import { IS_MOBILE } from "../../platform";
+import { platformKey } from "../../hotkeys";
+import type { HotkeyAction } from "../../hotkeys";
 import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
@@ -65,6 +67,55 @@ interface RailProps {
   coachListening: boolean;
   onToggleCoach: () => void;
   onZen: () => void;
+  /**
+   * The player's own key bindings, as stored (`useKeybindings`), so a keycap
+   * shows the key that really goes there. Absent: no keycaps.
+   */
+  keyBindings?: Readonly<Record<string, string>>;
+}
+
+/**
+ * Which action each rail entry's key is.
+ *
+ * Today and the tools had theirs (⌘0, ⌘1–⌘5 in rail order); Paths, Progress
+ * and Tools got ⌘6–⌘8 with the keycaps (owner, 2026-11-17).
+ */
+export const RAIL_KEYS: Record<string, HotkeyAction> = {
+  today: "tab-today",
+  paths: "tab-paths",
+  progress: "tab-progress",
+  tools: "tab-tools",
+  beat: "tab-1",
+  setlist: "tab-2",
+  drill: "tab-3",
+  jam: "tab-4",
+  songs: "tab-5",
+  settings: "settings",
+};
+
+/**
+ * The key a rail entry answers to, as a small keycap at the right of its row.
+ *
+ * Read from the player's bindings, so a remapped key shows, and drawn the way
+ * Settings → Hotkeys draws one (⌘ on a Mac, Ctrl elsewhere). Nothing when the
+ * action is unbound, and nothing on a phone, which has no keyboard to press it
+ * on. The collapsed rail hides it with the labels (shell.css).
+ */
+export function RailKey({
+  id,
+  keyBindings,
+}: {
+  id: string;
+  keyBindings?: Readonly<Record<string, string>>;
+}) {
+  const action = RAIL_KEYS[id];
+  const combo = action ? keyBindings?.[action] : undefined;
+  if (IS_MOBILE || !combo) return null;
+  return (
+    <kbd className="rail-key" aria-hidden="true" data-testid={`rail-key-${id}`}>
+      {platformKey(combo)}
+    </kbd>
+  );
 }
 
 /**
@@ -274,6 +325,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     coachListening,
     onToggleCoach,
     onZen,
+    keyBindings,
   },
   sidebarRef,
 ) {
@@ -334,6 +386,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
                 {place.icon}
               </svg>
               <span className="rail-mode-label">{t(place.labelKey)}</span>
+              <RailKey id={place.id} keyBindings={keyBindings} />
             </button>
           </div>
         ))}
@@ -385,6 +438,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
               {mode.id === "jam" && (
                 <span className="rail-mode-badge">{t("rail.beta")}</span>
               )}
+              <RailKey id={mode.id} keyBindings={keyBindings} />
             </button>
           </div>
         ))}
@@ -561,6 +615,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             </svg>
           </span>
           <span className="rail-action-label">{t("tooltip.settings")}</span>
+          <RailKey id="settings" keyBindings={keyBindings} />
         </button>
         {/* The sidebar's own control, at the sidebar's level.
 

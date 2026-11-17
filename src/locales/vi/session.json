@@ -208,7 +208,23 @@
       "drillKick": "Tăng dần tempo · không chấm điểm",
       "movesOn": "Phần này tự chuyển tiếp.",
       "finisherKick": "Kết thúc · không chấm",
-      "yourTurnKick": "Lượt bạn · không kiểm tra"
+      "yourTurnKick": "Lượt bạn · không kiểm tra",
+      "start": {
+        "warmUp": "Bắt đầu khởi động",
+        "yourTurn": "Bắt đầu lượt của bạn",
+        "jam": "Bắt đầu jam",
+        "finisher": "Bắt đầu phần kết",
+        "drill": "Bắt đầu tăng tốc"
+      },
+      "how": {
+        "warmUp": "Chơi theo tiếng click. Ở đây không chấm điểm gì, cứ thả lỏng.",
+        "yourTurn": "Chơi theo cách của bạn, cùng tiếng click. Ở đây không kiểm tra gì.",
+        "jam": "Chơi cùng ban nhạc. Ở đây không chấm điểm gì.",
+        "finisher": "Chơi trên nền ban nhạc, lặp lại. Ở đây không chấm điểm gì.",
+        "drill": "Tiếng click nhanh dần khi bạn chơi. Ở đây không chấm điểm gì."
+      },
+      "skip": "Bỏ qua",
+      "startKeys": "Enter, Space hoặc pedal để bắt đầu."
     },
     "pedal": {
       "title": "Pedal chân",

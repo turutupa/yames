@@ -208,7 +208,23 @@
       "drillKick": "逐步提速 · 不評分",
       "movesOn": "這一段會自動繼續。",
       "finisherKick": "收尾 · 不評分",
-      "yourTurnKick": "輪到你 · 不檢查"
+      "yourTurnKick": "輪到你 · 不檢查",
+      "start": {
+        "warmUp": "開始暖身",
+        "yourTurn": "開始你的回合",
+        "jam": "開始即興",
+        "finisher": "開始收尾",
+        "drill": "開始提速"
+      },
+      "how": {
+        "warmUp": "跟著節拍器彈。這裡不評分，放輕鬆就好。",
+        "yourTurn": "用你自己的方式跟著節拍器彈。這裡不做檢查。",
+        "jam": "跟著樂團一起彈。這裡不評分。",
+        "finisher": "在樂團伴奏上循環彈。這裡不評分。",
+        "drill": "節拍會隨著你彈奏逐漸加快。這裡不評分。"
+      },
+      "skip": "略過",
+      "startKeys": "按 Enter、空白鍵或踏板開始。"
     },
     "pedal": {
       "title": "腳踏板",

@@ -27,7 +27,7 @@ import {
 import type { RunState, TakeOutcome } from "../../session/runner";
 import type { BeatPosition } from "../../songs/position";
 import { ExerciseStage } from "./ExerciseStage";
-import { CoachLine, TempoNudges, bigLabel } from "./parts";
+import { CoachLine, TempoNudges, bigLabel, timedHowKey } from "./parts";
 import { PracticeViewSwitch, RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
@@ -592,7 +592,14 @@ export function BandVolume({ session, hint }: { session: SessionRun; hint: boole
   );
 }
 
-/** A metronome, a jam or a drill: not graded, and it moves on by itself. */
+/**
+ * A metronome, a jam or a drill: not graded, and it moves on by itself.
+ *
+ * It opens ready, like a Take: what to play, its tempo and its minutes, the
+ * neck at rest, and a Start. The clock, the click and the camera's move all
+ * wait for that press, so the first block of a Session is not already running
+ * by the time anyone has read it (owner, 2026-11-17).
+ */
 function TimedScreen({
   session,
   themeId,
@@ -605,12 +612,15 @@ function TimedScreen({
   const { t } = useTranslation();
   const { run, take, big, actions } = session;
   const step = currentStep(run);
+  const ready = run.phase === "timedReady";
   // A warm-up shows its Exercise's frets; a jam or a ramp, the whole neck.
+  // Ready, the neck stays at rest with the notes on it: the camera moves in
+  // on Start, with everything else.
   const { view, notes } = exerciseNeck(
     step?.kind === "metronome" ? playedNotes(session) : undefined,
     "box",
   );
-  const slot = useNeckSlot(step?.kind === "metronome" ? view : WHOLE, notes);
+  const slot = useNeckSlot(step?.kind === "metronome" && !ready ? view : WHOLE, notes);
   if (!step) return null;
   const kick =
     step.kind === "metronome"
@@ -620,14 +630,24 @@ function TimedScreen({
         : t("session.timed.drillKick");
   const bpm = step.kind === "metronome" ? step.bpm : step.kind === "jam" && step.bpm ? step.bpm : bpmNow;
   return (
-    <div className="session-body" data-testid="session-timed" data-kind={step.kind}>
+    <div
+      className="session-body"
+      data-testid="session-timed"
+      data-kind={step.kind}
+      data-phase={run.phase}
+    >
       <div className="session-takeinfo">
         <span className="session-kick">{kick}</span>
         <h2 className="session-h3">{stepTitle(step, t)}</h2>
         <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
       </div>
       <div className="session-takerow">
-        <div className="session-countdown" role="timer" data-testid="session-countdown">
+        <div
+          className="session-countdown"
+          role="timer"
+          data-testid="session-countdown"
+          data-ready={ready ? "" : undefined}
+        >
           {clock(stepRemainingMs(run))}
         </div>
         {bpm > 0 && (
@@ -645,12 +665,24 @@ function TimedScreen({
       )}
       <div className="session-actions">
         {step.kind === "jam" && step.exerciseId && <BandVolume session={session} hint={false} />}
-        <span className="session-why">{t("session.timed.movesOn")}</span>
+        {ready ? (
+          <>
+            <span className="session-why" data-testid="session-timed-how">
+              {t(timedHowKey(step))}
+            </span>
+            <button className="session-link" onClick={actions.next} data-testid="session-skip">
+              {t("session.timed.skip")}
+            </button>
+          </>
+        ) : (
+          <span className="session-why">{t("session.timed.movesOn")}</span>
+        )}
         <button
           className="session-big"
-          data-size="mid"
+          data-size={ready ? undefined : "mid"}
           onClick={actions.go}
           data-testid="session-big"
+          title={ready ? t("session.timed.startKeys") : undefined}
         >
           {bigLabel(big, t)}
         </button>
@@ -858,7 +890,7 @@ export function SessionView({
         ) : (
           <ResultScreen session={session} />
         ))}
-      {run.phase === "timed" && <TimedScreen session={session} themeId={themeId} bpmNow={bpmNow} />}
+      {(run.phase === "timedReady" || run.phase === "timed") && <TimedScreen session={session} themeId={themeId} bpmNow={bpmNow} />}
       {run.phase === "recap" && <RecapScreen session={session} />}
     </div>
   );

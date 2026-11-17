@@ -75,6 +75,9 @@ export interface Shot {
       | "between"
       | "result"
       | "noCatch"
+      /** A timed step (the warm-up), up and waiting for its Start. */
+      | "timedReady"
+      /** A timed step after its Start: the clock and the click running. */
       | "timed"
       | "recap"
       | "paths"
@@ -914,6 +917,15 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   {
+    id: "session-warmup-ready",
+    suffix: "session-warmup-ready",
+    window: "main",
+    session: { seed: "returning", minutes: 10, stop: "timedReady" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
     id: "session-warmup",
     suffix: "session-warmup",
     window: "main",
@@ -1331,6 +1343,8 @@ export const PHONE_LEARNING_SCENES = [
   "today-no-paths",
   "session-ready",
   "session-playing",
+  "session-warmup-ready",
+  "session-warmup",
   // The runway view's Take (mvp-runway): only the runway is on screen while
   // it runs ("one picture at a time").
   "session-runway-ready",

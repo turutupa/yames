@@ -243,7 +243,11 @@
         "session-slower": "Langsamer",
         "session-faster": "Schneller",
         "session-next": "Nächster Schritt",
-        "session-pedal": "Ein Pedal"
+        "session-pedal": "Ein Pedal",
+        "session-exit": "Session verlassen",
+        "tab-paths": "Pfade",
+        "tab-progress": "Fortschritt",
+        "tab-tools": "Werkzeuge"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -293,7 +297,11 @@
         "session-slower": "Zwischen Takes: eine Stufe langsamer",
         "session-faster": "Zwischen Takes: eine Stufe schneller",
         "session-next": "Zwischen Takes: weiter zum Nächsten in der Session",
-        "session-pedal": "Für einen einzelnen Fußschalter. Tippen: das Nächste. Doppelt tippen: langsamer. Halten: nächster Schritt"
+        "session-pedal": "Für einen einzelnen Fußschalter. Tippen: das Nächste. Doppelt tippen: langsamer. Halten: nächster Schritt",
+        "session-exit": "In einer Session: sie verlassen, wie Beenden. Ein laufender Take stoppt zuerst.",
+        "tab-paths": "Zu „Pfade“ wechseln",
+        "tab-progress": "Zu „Fortschritt“ wechseln",
+        "tab-tools": "Zu „Werkzeuge“ wechseln"
       }
     },
     "inputTest": {

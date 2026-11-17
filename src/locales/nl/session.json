@@ -208,7 +208,23 @@
       "drillKick": "Tempo opbouwen · zonder beoordeling",
       "movesOn": "Dit gaat vanzelf verder.",
       "finisherKick": "Afsluiter · niet beoordeeld",
-      "yourTurnKick": "Jouw beurt · niet gecontroleerd"
+      "yourTurnKick": "Jouw beurt · niet gecontroleerd",
+      "start": {
+        "warmUp": "Opwarmen starten",
+        "yourTurn": "Jouw beurt starten",
+        "jam": "Jam starten",
+        "finisher": "Afsluiter starten",
+        "drill": "Tempo-oploop starten"
+      },
+      "how": {
+        "warmUp": "Speel het mee met de klik. Hier wordt niets beoordeeld, dus speel los.",
+        "yourTurn": "Speel het op jouw manier, met de klik. Hier wordt niets gecontroleerd.",
+        "jam": "Speel mee met de band. Hier wordt niets beoordeeld.",
+        "finisher": "Speel het over de band, in een lus. Hier wordt niets beoordeeld.",
+        "drill": "De klik versnelt terwijl je speelt. Hier wordt niets beoordeeld."
+      },
+      "skip": "Overslaan",
+      "startKeys": "Enter, spatie of het pedaal start het."
     },
     "pedal": {
       "title": "Voetpedaal",

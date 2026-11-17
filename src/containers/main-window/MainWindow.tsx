@@ -154,6 +154,7 @@ import { AudioErrorNotice } from "./AudioErrorNotice";
 import { jamEscapeTarget } from "./jamEscape";
 import {
   CoachDownloadConfirmDialog,
+  DownloadHairline,
   DownloadProgressBar,
   DownloadErrorBar,
   DownloadSuccessBar,
@@ -1562,8 +1563,10 @@ export function MainWindow() {
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
       pedalPress: () => pedalPress.current(),
+      exit: sessionRun.actions.exit,
     }),
     [
+      sessionRun.actions.exit,
       sessionRun.actions.startToday,
       sessionRun.actions.go,
       sessionRun.actions.slower,
@@ -2025,6 +2028,7 @@ export function MainWindow() {
           coachListening={evaluation.enabled}
           onToggleCoach={session.toggleCard}
           onZen={() => setIsFullscreen(true)}
+          keyBindings={keyBindings}
         />
         )}
       <div
@@ -2758,7 +2762,15 @@ export function MainWindow() {
         />
       )}
 
-      {!IS_MOBILE && coach.modelDownloading && (
+      {/* A Session keeps its bottom edge: the download goes on as a hairline,
+          and its label, Cancel and the bars after it wait for the Session to end. */}
+      {!IS_MOBILE && coach.modelDownloading && view === "session" && (
+        <DownloadHairline
+          downloadProgress={coach.downloadProgress}
+          downloadingTier={coach.downloadingTier}
+        />
+      )}
+      {!IS_MOBILE && coach.modelDownloading && view !== "session" && (
         <DownloadProgressBar
           downloadProgress={coach.downloadProgress}
           downloadingTier={coach.downloadingTier}
@@ -2766,14 +2778,14 @@ export function MainWindow() {
         />
       )}
 
-      {!IS_MOBILE && coach.downloadError && (
+      {!IS_MOBILE && coach.downloadError && view !== "session" && (
         <DownloadErrorBar
           error={coach.downloadError}
           onDismiss={() => coach.setDownloadError(null)}
         />
       )}
 
-      {!IS_MOBILE && coach.downloadSuccess && !coach.modelDownloading && (
+      {!IS_MOBILE && coach.downloadSuccess && !coach.modelDownloading && view !== "session" && (
         <DownloadSuccessBar onDismiss={() => coach.setDownloadSuccess(false)} />
       )}
     </div>

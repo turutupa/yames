@@ -24,7 +24,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { readStylesheet } from "../../test/readStyles";
-import { CoachDownloadConfirmDialog } from "./CoachDownloadStatus";
+import { CoachDownloadConfirmDialog, DownloadHairline } from "./CoachDownloadStatus";
 import type { ModelStatus } from "../../ipc.desktop";
 
 const NOTHING_INSTALLED: ModelStatus = {
@@ -229,5 +229,31 @@ describe("CoachDownloadConfirmDialog — actions", () => {
     const [, studio] = cards(container);
     const btn = studio.querySelector(".download-confirm-go") as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
+  });
+});
+
+/**
+ * In a Session the download is a hairline (owner, 2026-11-17): no Cancel, no
+ * label strip over the big button, and nothing that takes a click.
+ */
+describe("DownloadHairline", () => {
+  it("shows the progress with nothing to press", () => {
+    const { getByTestId, container } = render(
+      <DownloadHairline
+        downloadProgress={{ component: "brain", fraction: 0.59, downloadedBytes: 1, totalBytes: 2, done: false }}
+        downloadingTier="full"
+      />,
+    );
+    const bar = getByTestId("download-hairline");
+    expect(bar.getAttribute("aria-valuenow")).toBe("59");
+    expect(container.querySelector("button")).toBeNull();
+  });
+
+  it("is a thin strip that pointer events pass through", () => {
+    const css = readStylesheet("settings.css");
+    const rule = css.slice(css.indexOf(".global-download-hairline {"));
+    const body = rule.slice(0, rule.indexOf("}"));
+    expect(body).toMatch(/pointer-events:\s*none/);
+    expect(body).toMatch(/height:\s*3px/);
   });
 });

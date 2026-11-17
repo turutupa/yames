@@ -83,8 +83,27 @@ function afterTake(state: RunState, verdict: TakeGrade["verdict"], passes = fals
 describe("the walk through a Session", () => {
   it("begins on the first step", () => {
     const s = run(IDLE, { type: "start", plan: plan(), now: NOW });
-    expect(s.phase).toBe("timed");
+    expect(s.phase).toBe("timedReady");
     expect(currentStep(s)?.kind).toBe("metronome");
+  });
+
+  it("a timed step waits for Start, its clock held at full", () => {
+    const s = run(IDLE, { type: "start", plan: plan(), now: NOW });
+    const step = currentStep(s) as PlanStep;
+    expect(bigAction(s, EX)).toEqual({ kind: "startTimed", step });
+    const later = run(s, { type: "tick", now: NOW + 10 * MIN });
+    expect(later.phase).toBe("timedReady");
+    expect(stepRemainingMs(later)).toBe(step.minutes * MIN);
+    const going = run(later, { type: "timedStart", now: NOW + 10 * MIN });
+    expect(going.phase).toBe("timed");
+    expect(stepRemainingMs(going)).toBe(step.minutes * MIN);
+    expect(eventForBigAction(bigAction(s, EX), NOW)).toEqual({ type: "timedStart", now: NOW });
+  });
+
+  it("a timed step can be skipped before it starts", () => {
+    const s = run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "next", now: NOW });
+    expect(s.phase).toBe("ready");
+    expect(s.timedSteps).toHaveLength(1);
   });
 
   it("does not begin with nothing to do", () => {
@@ -116,7 +135,7 @@ describe("the walk through a Session", () => {
   });
 
   it("a timed step moves on by itself", () => {
-    const start = run(IDLE, { type: "start", plan: plan(), now: NOW });
+    const start = run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "timedStart", now: NOW });
     const during = run(start, { type: "tick", now: NOW + MIN });
     expect(during.phase).toBe("timed");
     const after = run(start, { type: "tick", now: NOW + 2 * MIN });
@@ -138,7 +157,8 @@ describe("the walk through a Session", () => {
     const jamAt = twenty.steps.findIndex((x) => x.kind === "jam");
     let s = run(IDLE, { type: "start", plan: twenty, now: NOW });
     for (let i = 0; i < jamAt; i += 1) s = run(s, { type: "next", now: NOW });
-    expect(s.phase).toBe("timed");
+    expect(s.phase).toBe("timedReady");
+    s = run(s, { type: "timedStart", now: NOW });
     s = run(s, { type: "tick", now: NOW + twenty.steps[jamAt].minutes * MIN });
     expect(s.phase).toBe("recap");
   });
@@ -153,7 +173,11 @@ describe("leaving", () => {
       () => run(atFocus(), { type: "takeStarted", now: NOW }, { type: "takeStopped", now: NOW }),
     ],
     ["result", () => afterTake(atFocus(), "passed")],
-    ["timed", () => run(IDLE, { type: "start", plan: plan(), now: NOW })],
+    ["timedReady", () => run(IDLE, { type: "start", plan: plan(), now: NOW })],
+    [
+      "timed",
+      () => run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "timedStart", now: NOW }),
+    ],
   ];
   it.each(places)("can cancel from %s", (_name, make) => {
     expect(run(make(), { type: "cancel" })).toEqual(IDLE);
@@ -279,7 +303,11 @@ describe("the seam for Ramp up", () => {
 
   it("goes in after the Exercise and comes back to the plan", () => {
     const s = afterTake(atFocus(), "passed");
-    const during = run(s, { type: "insertStep", step: drill, now: NOW });
+    const during = run(
+      s,
+      { type: "insertStep", step: drill, now: NOW },
+      { type: "timedStart", now: NOW },
+    );
     expect(during.phase).toBe("timed");
     expect(currentStep(during)?.id).toBe("edge");
     // It takes what was left of the focus block, plus its own two minutes.

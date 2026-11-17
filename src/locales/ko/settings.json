@@ -243,7 +243,11 @@
         "session-slower": "느리게",
         "session-faster": "빠르게",
         "session-next": "다음 단계",
-        "session-pedal": "페달 하나"
+        "session-pedal": "페달 하나",
+        "session-exit": "세션 나가기",
+        "tab-paths": "코스",
+        "tab-progress": "진도",
+        "tab-tools": "도구"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -293,7 +297,11 @@
         "session-slower": "테이크 사이: 한 단계 느리게",
         "session-faster": "테이크 사이: 한 단계 빠르게",
         "session-next": "테이크 사이: 세션의 다음 항목으로 넘어갑니다",
-        "session-pedal": "풋스위치 하나용. 탭: 다음 동작. 더블 탭: 느리게. 길게 누르기: 다음 단계"
+        "session-pedal": "풋스위치 하나용. 탭: 다음 동작. 더블 탭: 느리게. 길게 누르기: 다음 단계",
+        "session-exit": "세션 중: 나가기와 똑같이 세션을 나갑니다. 진행 중인 테이크는 먼저 멈춥니다.",
+        "tab-paths": "코스로 이동합니다",
+        "tab-progress": "진도로 이동합니다",
+        "tab-tools": "도구로 이동합니다"
       }
     },
     "inputTest": {

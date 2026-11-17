@@ -243,7 +243,11 @@
         "session-slower": "Slower",
         "session-faster": "Faster",
         "session-next": "Next step",
-        "session-pedal": "One pedal"
+        "session-pedal": "One pedal",
+        "session-exit": "Leave the Session",
+        "tab-paths": "Paths",
+        "tab-progress": "Progress",
+        "tab-tools": "Tools"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -293,7 +297,11 @@
         "session-slower": "Between Takes: one rung slower",
         "session-faster": "Between Takes: one rung faster",
         "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step"
+        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step",
+        "session-exit": "In a Session: leave it, as Exit does. A running Take stops first.",
+        "tab-paths": "Go to Paths",
+        "tab-progress": "Go to Progress",
+        "tab-tools": "Go to Tools"
       }
     },
     "inputTest": {

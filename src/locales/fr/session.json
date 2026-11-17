@@ -208,7 +208,23 @@
       "drillKick": "Monte le tempo · non noté",
       "movesOn": "Ça avance tout seul.",
       "finisherKick": "Final · non noté",
-      "yourTurnKick": "À toi · non vérifié"
+      "yourTurnKick": "À toi · non vérifié",
+      "start": {
+        "warmUp": "Lancer l'échauffement",
+        "yourTurn": "Lancer ton tour",
+        "jam": "Lancer le jam",
+        "finisher": "Lancer le final",
+        "drill": "Lancer la rampe"
+      },
+      "how": {
+        "warmUp": "Joue-le avec le clic. Rien n'est noté ici, alors détends-toi.",
+        "yourTurn": "Joue-le à ta façon, avec le clic. Rien n'est vérifié ici.",
+        "jam": "Joue avec le groupe. Rien n'est noté ici.",
+        "finisher": "Joue-le sur le groupe, en boucle. Rien n'est noté ici.",
+        "drill": "Le clic accélère au fil du jeu. Rien n'est noté ici."
+      },
+      "skip": "Passer",
+      "startKeys": "Entrée, Espace ou la pédale le lance."
     },
     "pedal": {
       "title": "Pédale",
