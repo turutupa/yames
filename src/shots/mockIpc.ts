@@ -893,9 +893,71 @@ function baseStore(
 }
 
 /** Install the mock. Call once, before React mounts. */
+/**
+ * A camera for the camera scenes when the browser has none (QA 2026-11-17 #26).
+ *
+ * `take-screenshots.mjs` launches Chromium with `--use-fake-device-for-media-stream`
+ * and `--use-fake-ui-for-media-stream`, which give `getUserMedia` a test
+ * pattern. A plain headless Playwright has neither, and its `getUserMedia`
+ * either refuses or waits on a prompt nobody answers, so the camera scenes
+ * timed out. The real call goes first, so a run with the flags photographs
+ * exactly what it did before; only when it fails, or has not answered in
+ * 1.5 s, does the page get a canvas of its own, captured as a stream, which is
+ * as real a `MediaStream` to `MediaRecorder` as a webcam's.
+ */
+export function installFallbackCamera(): void {
+  const media = navigator.mediaDevices as MediaDevices | undefined;
+  if (!media?.getUserMedia || (media as { __shotFallback?: true }).__shotFallback) return;
+  const real = media.getUserMedia.bind(media);
+  const canvasStream = (): MediaStream => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1280;
+    canvas.height = 720;
+    const ctx = canvas.getContext("2d")!;
+    let frame = 0;
+    const draw = () => {
+      frame += 1;
+      const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      g.addColorStop(0, "#2a1a10");
+      g.addColorStop(1, "#6b3a1c");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(255, 196, 140, 0.55)";
+      const x = canvas.width / 2 + Math.sin(frame / 20) * 260;
+      ctx.beginPath();
+      ctx.arc(x, canvas.height / 2, 120, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    draw();
+    const timer = window.setInterval(draw, 1000 / 30);
+    const stream = canvas.captureStream(30);
+    for (const track of stream.getVideoTracks()) {
+      track.addEventListener("ended", () => window.clearInterval(timer));
+      const stop = track.stop.bind(track);
+      track.stop = () => {
+        window.clearInterval(timer);
+        stop();
+      };
+    }
+    return stream;
+  };
+  media.getUserMedia = async (constraints?: MediaStreamConstraints) => {
+    if (!constraints?.video || constraints.audio) return real(constraints);
+    const asked = real(constraints);
+    const timeout = new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1500));
+    const got = await Promise.race([asked.catch(() => null), timeout]);
+    if (got) return got;
+    // A late answer from the real device is closed, not leaked.
+    void asked.then((late) => late.getTracks().forEach((t) => t.stop())).catch(() => {});
+    return canvasStream();
+  };
+  (media as { __shotFallback?: true }).__shotFallback = true;
+}
+
 export function installShotMock(shot: Shot, theme: string): void {
   const w = window as unknown as Record<string, unknown>;
   if (w.__TAURI_INTERNALS__) return;
+  installFallbackCamera();
 
   /** W21 — the bytes `MediaRecorder` handed over during the camera scene. */
   const cameraChunks: ArrayBuffer[] = [];

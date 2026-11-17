@@ -908,6 +908,7 @@ export function JamSetupSheet({
               <button
                 type="button"
                 className={`jam-link${editingChords ? " active" : ""}`}
+                data-action="edit-changes"
                 aria-pressed={editingChords}
                 title={t("jam.changes.hint")}
                 onClick={() => onEditingChords(!editingChords)}

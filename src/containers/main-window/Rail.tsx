@@ -317,6 +317,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             <button
               className={`rail-mode ${view === place.id ? "active" : ""}`}
               aria-label={t(place.labelKey)}
+              data-view={place.id}
               onClick={() => setView(place.id)}
               aria-current={view === place.id ? "page" : undefined}
             >
@@ -358,6 +359,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
               // none, which leaves the button with no accessible name at all.
               // The label is named here so it survives being hidden.
               aria-label={t(mode.labelKey)}
+              data-view={mode.id}
               data-tour={mode.id === "drill" ? "drill-tab" : undefined}
               onClick={() => setView(mode.id)}
               aria-current={view === mode.id ? "page" : undefined}
@@ -476,6 +478,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           aria-label={t("tooltip.zen")}
           onClick={onZen}
           data-tour="zen-widget"
+          data-action="zen"
         >
           <span className="rail-action-icon">
             <svg

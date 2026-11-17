@@ -218,7 +218,7 @@ export function FormTimeline({
 
             One sentence, live, so the place in the form is readable without
             counting cells, and so a screen reader gets it at all. */}
-        <span className="jam-timeline-where" role="status">
+        <span className="jam-timeline-where" role="status" data-bar={current + 1}>
           {t("jam.form.chorus", { count: chorus })}
           {" · "}
           {t("jam.form.barOf", { current: current + 1, total })}

@@ -27,6 +27,7 @@
  * tuning, which is every drum kit and every singer.
  */
 import { useEffect, useState } from "react";
+import type { RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useMenuPlacement } from "../jam/useMenuPlacement";
@@ -183,8 +184,10 @@ export function TrackMenu({ tracks, current, currentName, onChoose, facts = null
     return <span className="songs-track-one">{name}</span>;
   }
 
+  // A span, not a div: it sits inside the song head's <p>, and a <div> there
+  // is invalid HTML that React warns about (QA 2026-11-17 #26).
   return (
-    <div className="songs-track-menu" ref={wrapRef}>
+    <span className="songs-track-menu" ref={wrapRef as unknown as RefObject<HTMLSpanElement>}>
       <button
         type="button"
         className="songs-chip songs-track-chip"
@@ -258,6 +261,6 @@ export function TrackMenu({ tracks, current, currentName, onChoose, facts = null
           </div>,
           document.body,
         )}
-    </div>
+    </span>
   );
 }

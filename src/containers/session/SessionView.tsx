@@ -431,7 +431,7 @@ function ResultScreen({ session }: { session: SessionRun }) {
         </button>
       )}
       {big.kind === "again" && (
-        <button className="session-secondary" onClick={actions.next}>
+        <button className="session-secondary" onClick={actions.next} data-testid="session-move-on">
           {t("session.result.moveOn")}
         </button>
       )}

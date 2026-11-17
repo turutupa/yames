@@ -106,6 +106,7 @@ export function JamSaveBar({
         <button
           type="button"
           className={`jam-sheet-btn jam-door${setupOpen ? " active" : ""}`}
+          data-sheet="setup"
           aria-pressed={setupOpen}
           onClick={onSetup}
         >
@@ -117,6 +118,7 @@ export function JamSaveBar({
         <button
           type="button"
           className={`jam-sheet-btn jam-door${chordsOpen ? " active" : ""}`}
+          data-sheet="chords"
           aria-pressed={chordsOpen}
           onClick={onChords}
         >

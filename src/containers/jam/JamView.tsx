@@ -579,6 +579,7 @@ export function JamView({
           <button
             type="button"
             className={`jam-sheet-btn jam-door${screen.setupOpen ? " active" : ""}`}
+            data-sheet="setup"
             aria-pressed={screen.setupOpen}
             onClick={() => {
               const next = !screen.setupOpen;
@@ -591,6 +592,7 @@ export function JamView({
           <button
             type="button"
             className={`jam-sheet-btn jam-door${screen.chordsOpen ? " active" : ""}`}
+            data-sheet="chords"
             aria-pressed={screen.chordsOpen}
             onClick={() => {
               const next = !screen.chordsOpen;
