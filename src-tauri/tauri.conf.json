@@ -41,7 +41,6 @@
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,
-        "skipTaskbar": true,
         "visibleOnAllWorkspaces": true
       }
     ],

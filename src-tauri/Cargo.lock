@@ -6755,6 +6755,7 @@ dependencies = [
  "llama-cpp-2",
  "midir",
  "num_cpus",
+ "objc2-app-kit",
  "rodio",
  "rusqlite",
  "rustysynth",

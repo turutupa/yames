@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onFullscreenChanged } from "../../../ipc";
+import { onFullscreenChanged, setAlwaysOnTop } from "../../../ipc";
 import { FULLSCREEN_EXIT_DELAY } from "../../../hotkeys";
 import type { MainView } from "../MainHeader";
 
@@ -68,6 +68,7 @@ export function useFullscreenLifecycle({
   const [isOsFullscreen, setIsOsFullscreen] = useState(false);
   const wasOsFullscreen = useRef(false);
   const prevFullscreen = useRef(false);
+  const restoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 1. Listen for fullscreen changes from Rust (global shortcut)
   useEffect(() => {
@@ -85,26 +86,50 @@ export function useFullscreenLifecycle({
     const win = getCurrentWindow();
     const unlisten = win.onResized(async () => {
       const isFull = await win.isFullscreen();
-      setIsOsFullscreen(isFull);
-      // Exiting OS fullscreen — restore always-on-top and focus
-      if (wasOsFullscreen.current && !isFull) {
-        await new Promise((r) => setTimeout(r, FULLSCREEN_EXIT_DELAY));
-        await win.setAlwaysOnTop(alwaysOnTop);
-        await win.setFocus();
-        await forceWebviewFocus();
-      }
+      const prevWasFull = wasOsFullscreen.current;
       wasOsFullscreen.current = isFull;
+      setIsOsFullscreen(isFull);
+      if (isFull) {
+        if (restoreTimerRef.current) {
+          clearTimeout(restoreTimerRef.current);
+          restoreTimerRef.current = null;
+        }
+        return;
+      }
+      // Exiting OS fullscreen — restore always-on-top, macOS Managed collection
+      // behavior, and focus once the Space transition finishes.
+      if (prevWasFull && !isFull) {
+        if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
+        restoreTimerRef.current = setTimeout(async () => {
+          restoreTimerRef.current = null;
+          await win.setAlwaysOnTop(alwaysOnTop);
+          await setAlwaysOnTop(alwaysOnTop);
+          await win.setFocus();
+          await forceWebviewFocus();
+        }, FULLSCREEN_EXIT_DELAY);
+      }
     });
     return () => {
+      if (restoreTimerRef.current) {
+        clearTimeout(restoreTimerRef.current);
+        restoreTimerRef.current = null;
+      }
       unlisten.then((fn) => fn());
     };
   }, [alwaysOnTop]);
 
   // 3. Safety net: re-apply always-on-top and focus after any zen exit
   useEffect(() => {
+    if (isFullscreen && restoreTimerRef.current) {
+      clearTimeout(restoreTimerRef.current);
+      restoreTimerRef.current = null;
+    }
     if (prevFullscreen.current && !isFullscreen) {
+      prevFullscreen.current = isFullscreen;
       const win = getCurrentWindow();
+      if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
       const timer = setTimeout(async () => {
+        restoreTimerRef.current = null;
         if (await win.isFullscreen()) {
           await win.setFullscreen(false);
           await new Promise((r) => setTimeout(r, FULLSCREEN_EXIT_DELAY));
@@ -113,12 +138,19 @@ export function useFullscreenLifecycle({
         // fullscreen exit animation hasn't fully completed
         for (let i = 0; i < 3; i++) {
           await win.setAlwaysOnTop(alwaysOnTop);
+          await setAlwaysOnTop(alwaysOnTop);
           await new Promise((r) => setTimeout(r, 200));
         }
         await win.setFocus();
         await forceWebviewFocus();
       }, 100);
-      return () => clearTimeout(timer);
+      restoreTimerRef.current = timer;
+      return () => {
+        clearTimeout(timer);
+        if (restoreTimerRef.current === timer) {
+          restoreTimerRef.current = null;
+        }
+      };
     }
     prevFullscreen.current = isFullscreen;
   }, [isFullscreen, alwaysOnTop]);
