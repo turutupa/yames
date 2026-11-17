@@ -73,8 +73,11 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
         setInputGain(gain);
       });
     } else {
-      // Clean up everything when modal closes
-      if (listening) stopEvaluation();
+      // Clean up everything when modal closes. Only a stream this modal
+      // opened: one that was already running is the Session's or the
+      // coach's, and stopping it here left them deaf with the screen saying
+      // they were listening (B1, the Settings door).
+      if (listening && !evaluationActive) stopEvaluation();
       setListening(false);
       setSpectrum(null);
       setHasSignal(false);

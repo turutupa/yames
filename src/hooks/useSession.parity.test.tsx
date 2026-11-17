@@ -151,6 +151,50 @@ describe("a practice session", () => {
     expect(order().filter((c) => c === "start_evaluation")).toHaveLength(1);
   });
 
+  // B1 (2026-11-16): Exit, then Start at once. Both from the same render, as a
+  // click handler sees them: the start used to find the old session still
+  // active and do nothing, and the end then switched the input off.
+  it("a session started while the last one is still ending listens", async () => {
+    const hook = mount();
+    await start(hook);
+    const { session } = hook.result.current;
+    await act(async () => {
+      const ending = session.endSession();
+      const starting = session.startSession();
+      await Promise.all([ending, starting]);
+    });
+    await waitFor(() => expect(hook.result.current.session.active).toBe(true));
+    await waitFor(() => expect(hook.result.current.evaluation.enabled).toBe(true));
+    const seen = order().filter((c) => c === "start_evaluation" || c === "stop_evaluation");
+    expect(seen).toEqual(["start_evaluation", "stop_evaluation", "start_evaluation"]);
+  });
+
+  // The same, with the stop slow to come back (a busy machine): the second
+  // start must still come after it, not beside it.
+  it("the next start waits for the stop, however long it takes", async () => {
+    let releaseStop: () => void = () => {};
+    const hook = mount();
+    await start(hook);
+    setInvokeResponse("stop_evaluation", () => new Promise<void>((r) => (releaseStop = r)));
+    const { session } = hook.result.current;
+    let both: Promise<unknown> = Promise.resolve();
+    await act(async () => {
+      both = Promise.all([session.endSession(), session.startSession()]);
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(order().filter((c) => c === "start_evaluation")).toHaveLength(1);
+    await act(async () => {
+      releaseStop();
+      await both;
+    });
+    await waitFor(() => expect(hook.result.current.evaluation.enabled).toBe(true));
+    expect(order().filter((c) => c === "start_evaluation" || c === "stop_evaluation")).toEqual([
+      "start_evaluation",
+      "stop_evaluation",
+      "start_evaluation",
+    ]);
+  });
+
   it("ending one that never started saves nothing", async () => {
     const hook = mount();
     await act(async () => {

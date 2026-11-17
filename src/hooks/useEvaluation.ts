@@ -63,11 +63,28 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   const [inferredGrid, setInferredGrid] = useState<InferredGridChanged | null>(null);
   const gridUnlistenRef = useRef<(() => void) | null>(null);
 
-  // Serialization flag: prevents concurrent stop+start races on the Rust Mutex
-  // when the user changes device or channel rapidly. A second change fired while
-  // a restart is in-flight is silently dropped — state updates still apply, but
-  // the stream stays on the previous device/channel until the restart completes.
-  const restartingRef = useRef(false);
+  /**
+   * Every start and stop of the input, one after another.
+   *
+   * `start_evaluation` and `stop_evaluation` are async commands: two sent
+   * without waiting run on two runtime threads, in either order. A stop sent
+   * just before a start could land after it and leave the input off while
+   * the screen says it is on (2026-11-16, B1: a Session started right after
+   * Exit could not hear the guitar). So each one waits for the last, and
+   * decides what to do when its turn comes, from the state as it is then. A
+   * call made during a restart used to be dropped, which was the same
+   * silence by another road; now it waits its turn.
+   */
+  const chain = useRef<Promise<unknown>>(Promise.resolve());
+  const serial = useCallback(<T,>(work: () => Promise<T>): Promise<T> => {
+    const next = chain.current.then(work, work);
+    chain.current = next.catch(() => {});
+    return next;
+  }, []);
+  /** What the queued calls leave the input at, ahead of them running. */
+  const wantRef = useRef(false);
+  /** A start, stop or restart has been asked for since mount. */
+  const touchedRef = useRef(false);
 
   // Load saved preferences on mount + sync persisted input gain to Rust DSP.
   // This last step is critical: the cpal callback defaults to unity gain
@@ -182,7 +199,13 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
 
   // Sync with backend state on mount
   useEffect(() => {
-    getEvaluationState().then(setEnabled);
+    getEvaluationState().then((on) => {
+      // Only before any start or stop of ours: after one, it knows better.
+      if (touchedRef.current) return;
+      wantRef.current = on;
+      enabledRef.current = on;
+      setEnabled(on);
+    });
     listAudioInputDevices().then(setDevices);
     const unlisten = onAudioInputDevicesChanged(setDevices);
     return () => { unlisten.then(fn => fn()); };
@@ -207,86 +230,93 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   const selectedChannelRef = useRef(selectedChannel);
   selectedChannelRef.current = selectedChannel;
 
+  /** Start or stop now (inside `serial`), unless it already is. */
+  const apply = useCallback(async (on: boolean, device?: string, channel?: number) => {
+    if (on === enabledRef.current) return;
+    if (on) {
+      await refreshDevices();
+      await startEvaluation(
+        device ?? selectedDeviceRef.current,
+        channel ?? selectedChannelRef.current,
+        coachModeRef.current,
+      );
+    } else {
+      await stopEvaluation();
+    }
+    enabledRef.current = on;
+    setEnabled(on);
+  }, [refreshDevices]);
+
   /**
    * Explicit start/stop, as opposed to `toggle`'s flip.
    *
    * The wizard's W5 (level meter) and W6 ("hear it work") mount and unmount
    * around the same shared stream, so they need "make sure it is on/off" rather
    * than "invert it" — a `toggle` racing an unmount cleanup ends with the
-   * stream in the wrong state. Idempotent, and shares `restartingRef` with
-   * `selectDevice`/`selectChannel` so a call landing mid-restart is dropped
-   * instead of opening a second stream on the same device.
+   * stream in the wrong state. Idempotent, and in turn with every other start,
+   * stop and restart (`serial`), so the last call made is the state it ends in.
    */
-  const setListening = useCallback(async (on: boolean) => {
-    if (on === enabledRef.current) return;
-    if (restartingRef.current) return;
-    restartingRef.current = true;
-    try {
-      if (on) {
-        await refreshDevices();
-        await startEvaluation(
-          selectedDeviceRef.current,
-          selectedChannelRef.current,
-          coachModeRef.current,
-        );
-      } else {
-        await stopEvaluation();
-      }
-      enabledRef.current = on;
-      setEnabled(on);
-    } finally {
-      restartingRef.current = false;
-    }
-  }, [refreshDevices]);
+  const setListening = useCallback(
+    (on: boolean) => {
+      wantRef.current = on;
+      touchedRef.current = true;
+      return serial(async () => {
+        try {
+          await apply(on);
+        } finally {
+          // A start that failed leaves it off, whatever was asked.
+          if (wantRef.current === on) wantRef.current = enabledRef.current;
+        }
+      });
+    },
+    [serial, apply],
+  );
 
-  const toggle = useCallback(async () => {
-    if (enabled) {
-      await stopEvaluation();
-      setEnabled(false);
-    } else {
-      await refreshDevices();
-      await startEvaluation(selectedDevice, selectedChannel, coachModeRef.current);
-      setEnabled(true);
-    }
-  }, [enabled, selectedDevice, selectedChannel, refreshDevices]);
+  /** Flip what the calls made so far leave it at, not what the last render saw. */
+  const toggle = useCallback(() => setListening(!wantRef.current), [setListening]);
+
+  /** Restart on another device or channel, if it is on when its turn comes. */
+  const restart = useCallback(
+    (device: string | undefined, channel: number) => {
+      touchedRef.current = true;
+      return serial(async () => {
+        if (!enabledRef.current) return;
+        await stopEvaluation();
+        enabledRef.current = false;
+        try {
+          await startEvaluation(device, channel, coachModeRef.current);
+          enabledRef.current = true;
+        } finally {
+          setEnabled(enabledRef.current);
+          wantRef.current = enabledRef.current;
+        }
+      });
+    },
+    [serial],
+  );
 
   const selectDevice = useCallback(async (deviceName: string) => {
     setSelectedDevice(deviceName);
+    selectedDeviceRef.current = deviceName;
     // Reset channel to 0 when device changes (per task spec).
     setSelectedChannel(0);
+    selectedChannelRef.current = 0;
     await storeSave("evaluationDevice", deviceName);
     await storeSave("evaluationChannel", 0);
     // Apply this device's persisted gain before (re)starting the stream so
     // the DSP sees boosted samples from the very first callback.
     await applyPersistedGain(deviceName);
     // If currently active, restart with new device (channel 0).
-    if (enabled) {
-      if (restartingRef.current) return;
-      restartingRef.current = true;
-      try {
-        await stopEvaluation();
-        await startEvaluation(deviceName, 0, coachModeRef.current);
-      } finally {
-        restartingRef.current = false;
-      }
-    }
-  }, [enabled]);
+    await restart(deviceName, 0);
+  }, [restart]);
 
   const selectChannel = useCallback(async (channel: number) => {
     setSelectedChannel(channel);
+    selectedChannelRef.current = channel;
     await storeSave("evaluationChannel", channel);
     // If currently active, restart with the new channel immediately.
-    if (enabled) {
-      if (restartingRef.current) return;
-      restartingRef.current = true;
-      try {
-        await stopEvaluation();
-        await startEvaluation(selectedDevice, channel, coachModeRef.current);
-      } finally {
-        restartingRef.current = false;
-      }
-    }
-  }, [enabled, selectedDevice]);
+    await restart(selectedDeviceRef.current, channel);
+  }, [restart]);
 
   const toggleRealtime = useCallback(async () => {
     const next = !showRealtime;

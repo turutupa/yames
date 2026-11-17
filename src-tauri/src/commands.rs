@@ -1256,6 +1256,18 @@ pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
         .unwrap_or_default()
 }
 
+/// Starts and stops of the evaluation input, one whole command at a time.
+///
+/// Both are async commands, so two sent close together run on two runtime
+/// threads at once. Each takes its locks one after another, not together, so
+/// a stop running beside a start could find the analyzer the start had just
+/// begun, take it for the old one, and stop the detector and the input under
+/// it: a Session that says it is listening and hears nothing (2026-11-16,
+/// B1). The JS side now awaits each before sending the next
+/// (`useEvaluation`'s `serial`); this keeps the two from interleaving even if
+/// something does not. Taken first, before any other lock, and never inside one.
+static EVALUATION_TURN: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 #[tauri::command]
 pub async fn start_evaluation(
     device_name: Option<String>,
@@ -1272,6 +1284,7 @@ pub async fn start_evaluation(
     cal_cache: State<'_, crate::calibration_cache::SharedCalibrationCache>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
+    let _turn = EVALUATION_TURN.lock().unwrap_or_else(|e| e.into_inner());
     let coach_mode = match coach_mode.as_deref().unwrap_or("default") {
         "pro" => CoachMode::Pro,
         _ => CoachMode::Default,
@@ -1547,6 +1560,7 @@ pub async fn stop_evaluation(
     state: State<'_, SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
+    let _turn = EVALUATION_TURN.lock().unwrap_or_else(|e| e.into_inner());
     // Idempotency guard — if the analyzer is already stopped (e.g. double-call
     // from a device change racing an explicit Stop), skip silently. The first
     // call already drained telemetry and persisted the log.

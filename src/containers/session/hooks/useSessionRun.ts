@@ -265,11 +265,19 @@ export function useSessionRun(input: SessionRunInput) {
   const snapshot = useRef<EngineSnapshot | null>(null);
   const cardWasOpen = useRef(false);
   /**
-   * A coach session the player already had running. It is theirs: the Session
-   * rides along in it and leaves it running, rather than ending it and writing
-   * their own practice into the Session's history row.
+   * The coach session this Session started, and the end of it while that is
+   * still running. A coach session the player already had running is theirs:
+   * the Session rides along in it and leaves it running, rather than ending it
+   * and writing their own practice into the Session's history row.
+   *
+   * Read instead of `coach.active`, which is a render behind: pressing Start
+   * again right after Exit saw the old session still active, took it for the
+   * player's own, and did not start one, and the end then switched the input
+   * off (B1). `useSession` runs the end and the start in turn; these only
+   * decide whose it is.
    */
-  const coachWasActive = useRef(false);
+  const ownsCoach = useRef(false);
+  const coachEnding = useRef<Promise<unknown> | null>(null);
 
   // --- what the store knows ------------------------------------------------
   const loadedRef = useRef(false);
@@ -753,7 +761,14 @@ export function useSessionRun(input: SessionRunInput) {
     });
     const { coach } = latest.current;
     // Through `useSession`: this is what writes the Session into the history.
-    if (coach.active && !coachWasActive.current) void coach.endSession().catch(() => {});
+    if (ownsCoach.current) {
+      ownsCoach.current = false;
+      const ending = coach.endSession().catch(() => {});
+      coachEnding.current = ending;
+      void ending.then(() => {
+        if (coachEnding.current === ending) coachEnding.current = null;
+      });
+    }
     if (!cardWasOpen.current && coach.cardOpen) coach.toggleCard();
   }, [enqueue]);
 
@@ -787,7 +802,9 @@ export function useSessionRun(input: SessionRunInput) {
         freeMode: state.freeMode,
       };
       cardWasOpen.current = coach.cardOpen;
-      coachWasActive.current = coach.active;
+      // The player's own coach session, running before this: not ours to end.
+      // One we are still ending is ours, whatever the last render said.
+      const theirs = coach.active && !ownsCoach.current && coachEnding.current === null;
       const now = Date.now();
       // A Path is started (subscribed) the first time it is played, not the
       // first time it is shown, so looking at Today writes nothing. Past the cap
@@ -803,7 +820,10 @@ export function useSessionRun(input: SessionRunInput) {
       }
       dispatch({ type: "start", plan: next, now });
       setView("session");
-      if (!coach.active) void coach.startSession().catch(() => {});
+      if (!theirs) {
+        ownsCoach.current = true;
+        void coach.startSession().catch(() => {});
+      }
     },
     [progress, setView],
   );
