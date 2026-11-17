@@ -2639,3 +2639,12 @@ export async function pickKitFolder(): Promise<string | null> {
 export async function inspectKitFolder(dir: string): Promise<{ voices: string[]; missing: string[] }> {
   return invoke("inspect_kit_folder", { dir });
 }
+
+/**
+ * The in-app click probe's report (`app_probe.rs`): the four numbers the
+ * audio-safety gate reads, for a build started with `YAMES_CALLBACK_PROBE=1`.
+ * An error otherwise. Diagnostics only; `tests/e2e` reads it.
+ */
+export async function callbackProbeReport(): Promise<unknown> {
+  return invoke<unknown>("callback_probe_report");
+}

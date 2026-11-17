@@ -2,6 +2,8 @@
 /// allocator `click-jitter-probe` installs. `pub` because the allocator
 /// lives in that binary, which can only see the crate's public surface.
 pub mod alloc_probe;
+/// The click-jitter probe inside the real app, armed by `YAMES_CALLBACK_PROBE=1`.
+mod app_probe;
 pub mod audio_input;
 mod calibration_cache;
 // Android (M7, the MVP): the phone runs the same grading as a desktop — the
@@ -161,6 +163,7 @@ pub mod probe {
 }
 
 use audio_input::create_shared_audio_input;
+use app_probe::callback_probe_report;
 use calibration_cache::create_shared_calibration_cache;
 use coach::create_shared_engine;
 use commands::{
@@ -455,7 +458,13 @@ pub fn run() {
 
             app.manage(shared_state);
             let beat_log = create_beat_log();
-            let mut engine = MetronomeEngine::new(beat_log.clone());
+            // `YAMES_CALLBACK_PROBE=1` builds it the way the headless probe
+            // does, so `tests/e2e` can time the click with the webview drawing.
+            // Unset, which is always for a player, it is `new` as before.
+            let mut engine = match app_probe::from_env() {
+                Some(probe) => MetronomeEngine::new_with_probe(beat_log.clone(), probe),
+                None => MetronomeEngine::new(beat_log.clone()),
+            };
             // The audio thread clears this gate itself when the output device
             // will not open: `start` no longer waits long enough for the
             // command that called it to learn that and clear it.
@@ -989,6 +998,7 @@ pub fn run() {
             tts_list_voices,
             tts_voice_diagnostics,
             start_voice_repair,
+            callback_probe_report,
         ]);
 
     // Window events are the window manager's: saving the main window's size
@@ -1078,6 +1088,13 @@ pub fn run() {
                         if let Some(engine_state) = window.try_state::<EngineState>() {
                             let mut engine = engine_state.0.lock().unwrap();
                             engine.shutdown();
+                            // After the shutdown joined the audio thread, so
+                            // nothing is still writing the capture.
+                            if app_probe::armed() {
+                                if let Err(e) = app_probe::write(engine.dropped_notifications()) {
+                                    eprintln!("[probe] {e}");
+                                }
+                            }
                         }
                     }
                     window.app_handle().exit(0);

@@ -98,6 +98,11 @@ coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs", "dep:num_cpus"]
 # device/driver is present, so a single binary serves both cases.
 coach-llm-metal = ["coach-llm", "llama-cpp-2/metal"]
 coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
+# The in-app click probe's allocation count (`src/app_probe.rs`): installs a
+# counting `#[global_allocator]` in the app binary. For `tests/e2e` only,
+# never for a build anyone plays on. The probe itself is armed at run time by
+# `YAMES_CALLBACK_PROBE=1`, with or without this.
+callback-probe-alloc = []
 
 # ---------------------------------------------------------------------------
 # Desktop only (MOBILE_IMPLEMENTATION_PLAN §3, revised for the MVP by M7).
