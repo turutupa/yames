@@ -39,7 +39,12 @@
       "howLong": "Ile masz czasu? Minuty:",
       "running": "W toku: {{paths}}",
       "leftOff": "Gdzie skończyłeś",
-      "leftOffValue": "{{value}} przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
+      "leftOffValue": {
+        "even": "{{value}}% równo przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
+        "heard": "{{value}}% nut usłyszanych przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
+        "accents": "{{value}}% akcentów trafionych przy {{bpm}} BPM. Dziś zaczynamy wolniej.",
+        "notes": "{{value}}% właściwych nut przy {{bpm}} BPM. Dziś zaczynamy wolniej."
+      },
       "leftOffPlain": "{{bpm}} BPM. Dziś zaczynamy wolniej.",
       "whatsIn": "Co w niej jest i dlaczego",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "Czy ta ocena była uczciwa?",
       "fairYes": "Tak",
       "fairNo": "Nie",
-      "fairThanks": "Dzięki. Zapisano z twoimi danymi ćwiczeń."
+      "fairThanksYes": "Dzięki: zapisano jako uczciwą. Stuknij Nie, aby zmienić.",
+      "fairThanksNo": "Dzięki: zapisano jako nieuczciwą. Stuknij Tak, aby zmienić."
     },
     "edge": {
       "kick": "Znajdź mój limit",
@@ -236,13 +242,12 @@
       "intro": "Wybierz cel. Nic nie jest zablokowane: możesz zacząć dowolny krok i zmienić zdanie.",
       "theorySub": "Co wybierasz do grania",
       "mechanicsSub": "Jak grają twoje ręce",
-      "later": "Później",
       "laterWhy": "Możesz to przeczytać już teraz. Ocena, której to wymaga, pojawi się później.",
+      "comingSoon": "Wkrótce",
       "stepCount": "{{count}} krok",
       "stepCount_few": "{{count}} kroki",
       "stepCount_many": "{{count}} kroków",
       "stepCount_other": "{{count}} kroku",
-      "draft": "Szkic",
       "back": "Ścieżki",
       "level": "Poziom",
       "limits": "Co to potrafi zmierzyć, a czego nie",
@@ -259,7 +264,11 @@
       "yourStep": "To krok, na którym jesteś.",
       "passed": "Zaliczone",
       "notGradedYet": "Jeszcze nieoceniane.",
+      "selfChecked": "Samoocena: tu oceniasz sam.",
+      "practiceOnly": "Tylko ćwiczenie, bez oceny.",
       "playThis": "Zagraj to",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Od {{from}} BPM",
       "playedNoClean": "{{count}} podejście. Jeszcze bez czystego tempa.",
       "playedNoClean_few": "{{count}} podejścia. Jeszcze bez czystego tempa.",
       "playedNoClean_many": "{{count}} podejść. Jeszcze bez czystego tempa.",
@@ -268,7 +277,6 @@
       "playedClean_few": "{{count}} podejścia. Czyste tempo: {{bpm}} BPM.",
       "playedClean_many": "{{count}} podejść. Czyste tempo: {{bpm}} BPM.",
       "playedClean_other": "{{count}} podejścia. Czyste tempo: {{bpm}} BPM.",
-      "running": "W toku",
       "whereYouAre": "Gdzie jesteś",
       "openStep": "Przejdź do kroku {{n}}",
       "subscribe": "Subskrybuj",
@@ -278,7 +286,8 @@
       "subscribeCap": "W tym teście możesz śledzić do {{cap}} ścieżek. Najpierw anuluj jedną; jej historia zostanie.",
       "unsubscribedNote": "Nie ma w dzisiejszym planie. Historia zostaje; subskrybuj ponownie w każdej chwili.",
       "testOut": "Zalicz krok",
-      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia. Zalicz około trzech z czterech i krok jest ukończony."
+      "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia, którego jeszcze nie zaliczyłeś. Zalicz około trzech z czterech i krok jest ukończony.",
+      "testOutRetests": "Zaliczyłeś tu każde ćwiczenie, więc to sprawdzi je wszystkie ponownie: po jednym podejściu w tempie zaliczenia."
     },
     "progress": {
       "title": "Postępy",
@@ -319,6 +328,19 @@
       "note": "Plik JSON z twoimi podejściami, czystymi tempami i powodami planisty. Dołącz go do zgłoszenia, jeśli chcesz; nic nie jest wysyłane.",
       "done": "Zapisano w {{path}}.",
       "failed": "Nie udało się zapisać pliku."
+    },
+    "subdivision": {
+      "wholes": "Całe nuty",
+      "halves": "Półnuty",
+      "halfTriplets": "Triole półnutowe",
+      "quarters": "Ćwierćnuty",
+      "quarterTriplets": "Triole ćwierćnutowe",
+      "eighths": "Ósemki",
+      "eighthTriplets": "Triole ósemkowe",
+      "sixteenths": "Szesnastki",
+      "quintuplets": "Kwintole",
+      "sextuplets": "Sekstole",
+      "thirtySeconds": "Trzydziestodwójki"
     }
   }
 }

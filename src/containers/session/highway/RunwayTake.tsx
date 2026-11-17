@@ -7,6 +7,7 @@
  * default. Nothing here decides anything: it reads the same Take, lights and
  * engine position the neck view reads.
  */
+import { kindOfPath } from "../../../session/kind";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { barLine, reasonLine } from "../../../session/coachWords";
@@ -58,8 +59,7 @@ export function PracticeViewSwitch({ session, locked }: { session: SessionRun; l
 
 /** A Theory Exercise is about WHERE: the runway folds to one lane and the neck takes the room. */
 export function isTheoryTake(session: SessionRun): boolean {
-  const pathId = session.take?.pathId;
-  return !!pathId && session.paths.find((p) => p.id === pathId)?.kind === "theory";
+  return kindOfPath(session.paths, session.take?.pathId) === "theory";
 }
 
 export function RunwayTakeScreen({

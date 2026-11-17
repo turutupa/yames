@@ -512,6 +512,50 @@ describe("benchmarks on days 1, 7, 14, 21", () => {
   });
 });
 
+describe("one Exercise once per Session (QA 2026-11-17 #9)", () => {
+  /** Every Exercise a plan plays, Find my edge aside: that one is the lead's, climbing on. */
+  const playedIn = (s: SessionPlan) =>
+    s.steps.flatMap((x) => {
+      if (x.kind === "exercise" && x.role !== "edge") return [`${x.pathId}/${x.exerciseId}`];
+      if (x.kind === "jam" && x.pathId && x.exerciseId) return [`${x.pathId}/${x.exerciseId}`];
+      return [];
+    });
+
+  it("the day-1 benchmark on the lead's head moves the lead block to the next Exercise", () => {
+    const OPEN = ALT.steps[0].exercises[0];
+    const at = NOW;
+    const p: PlayerProgress = {
+      ...subscribed([ALT], at),
+      takes: [row(ALT, OPEN.id, at, { bpm: 60, facts: { session: at, role: "placement" } })],
+    };
+    for (const minutes of [10, 15, 20] as const) {
+      const s = plan(minutes, p, [ALT], NOW + 60_000);
+      const [bench, focus] = exerciseSteps(s);
+      expect(bench.role).toBe("benchmark");
+      expect(focus.role).toBe("focus");
+      expect(focus.exerciseId).not.toBe(bench.exerciseId);
+      const keys = playedIn(s);
+      expect(new Set(keys).size, keys.join(", ")).toBe(keys.length);
+    }
+  });
+
+  it("a month of daily Sessions on 1 to 4 Paths never plays an Exercise twice in one", () => {
+    for (let count = 1; count <= 4; count += 1) {
+      const paths = ALL.slice(0, count);
+      for (const minutes of PLAN_MINUTES) {
+        let p = subscribed(paths, NOW);
+        for (let day = 0; day < 30; day += 1) {
+          const at = NOW + day * DAY + 60_000;
+          const s = plan(minutes, p, paths, at);
+          const keys = playedIn(s);
+          expect(new Set(keys).size, `${count} Paths, ${minutes} min, day ${day}: ${keys.join(", ")}`).toBe(keys.length);
+          p = play(p, s, at, (x) => (day + x.bpm) % 3 !== 0);
+        }
+      }
+    }
+  });
+});
+
 describe("your turn, and the finisher", () => {
   it("one Session in three, from fifteen minutes, has a two-minute self-checked block", () => {
     // Blues' first Step has no self-checked item; its second does.

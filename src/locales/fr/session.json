@@ -39,7 +39,12 @@
       "howLong": "Combien de temps as-tu ? Minutes :",
       "running": "En cours : {{paths}}",
       "leftOff": "Là où tu t'es arrêté",
-      "leftOffValue": "{{value}} à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+      "leftOffValue": {
+        "even": "{{value}} % de régularité à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+        "heard": "{{value}} % des notes entendues à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+        "accents": "{{value}} % des accents bien placés à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+        "notes": "{{value}} % de bonnes notes à {{bpm}} BPM. Aujourd'hui, on commence plus lentement."
+      },
       "leftOffPlain": "{{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
       "whatsIn": "Ce qu'il y a dedans, et pourquoi",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "Cette note était-elle juste ?",
       "fairYes": "Oui",
       "fairNo": "Non",
-      "fairThanks": "Merci. C'est gardé avec tes données de pratique."
+      "fairThanksYes": "Merci : noté comme juste. Touche Non pour changer.",
+      "fairThanksNo": "Merci : noté comme pas juste. Touche Oui pour changer."
     },
     "edge": {
       "kick": "Trouver ma limite",
@@ -233,12 +239,11 @@
       "intro": "Choisis un objectif. Rien n'est verrouillé : tu peux commencer n'importe quelle étape et changer d'avis.",
       "theorySub": "Ce que tu choisis de jouer",
       "mechanicsSub": "Comment tes mains jouent",
-      "later": "Plus tard",
       "laterWhy": "Tu peux déjà lire celui-ci. La notation dont il a besoin viendra plus tard.",
+      "comingSoon": "Bientôt",
       "stepCount": "{{count}} étape",
       "stepCount_many": "{{count}} étapes",
       "stepCount_other": "{{count}} étapes",
-      "draft": "Brouillon",
       "back": "Parcours",
       "level": "Niveau",
       "limits": "Ce que ça peut mesurer, et ce que ça ne peut pas",
@@ -254,14 +259,17 @@
       "yourStep": "C'est l'étape où tu en es.",
       "passed": "Validé",
       "notGradedYet": "Pas encore noté.",
+      "selfChecked": "Auto-évalué : c'est toi qui juges.",
+      "practiceOnly": "Pour s'entraîner, non noté.",
       "playThis": "Jouer ça",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "À partir de {{from}} BPM",
       "playedNoClean": "{{count}} prise. Pas encore de tempo propre.",
       "playedNoClean_many": "{{count}} prises. Pas encore de tempo propre.",
       "playedNoClean_other": "{{count}} prises. Pas encore de tempo propre.",
       "playedClean": "{{count}} prise. Tempo propre : {{bpm}} BPM.",
       "playedClean_many": "{{count}} prises. Tempo propre : {{bpm}} BPM.",
       "playedClean_other": "{{count}} prises. Tempo propre : {{bpm}} BPM.",
-      "running": "En cours",
       "whereYouAre": "Où tu en es",
       "openStep": "Aller à l'étape {{n}}",
       "subscribe": "S'abonner",
@@ -271,7 +279,8 @@
       "subscribeCap": "Dans ce test, tu peux suivre jusqu'à {{cap}} parcours. Désabonne-toi d'abord d'un parcours ; son historique est conservé.",
       "unsubscribedNote": "Absent du plan du jour. Ton historique est conservé ; réabonne-toi quand tu veux.",
       "testOut": "Valider l'étape",
-      "testOutHow": "Une prise au tempo de réussite de chaque exercice. Réussis environ trois sur quatre et l'étape est faite."
+      "testOutHow": "Une prise au tempo de réussite de chaque exercice pas encore réussi. Réussis environ trois sur quatre et l'étape est faite.",
+      "testOutRetests": "Tu as réussi tous les exercices ici, alors ceci les reteste tous : une prise chacun au tempo de réussite."
     },
     "progress": {
       "title": "Progrès",
@@ -312,6 +321,19 @@
       "note": "Un fichier JSON avec tes prises, tes tempos propres et les raisons du planificateur. Joins-le à un retour si tu veux ; rien n'est envoyé.",
       "done": "Enregistré dans {{path}}.",
       "failed": "Impossible d'enregistrer le fichier."
+    },
+    "subdivision": {
+      "wholes": "Rondes",
+      "halves": "Blanches",
+      "halfTriplets": "Triolets de blanches",
+      "quarters": "Noires",
+      "quarterTriplets": "Triolets de noires",
+      "eighths": "Croches",
+      "eighthTriplets": "Triolets de croches",
+      "sixteenths": "Doubles croches",
+      "quintuplets": "Quintolets",
+      "sextuplets": "Sextolets",
+      "thirtySeconds": "Triples croches"
     }
   }
 }

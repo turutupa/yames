@@ -4,6 +4,7 @@
  * One file, shared by the page that renders a shot and the script that
  * captures it, so the two can never disagree about what `?shot=drill` means.
  */
+import type { CheatTab, ChordPage } from "../containers/jam/ChordSheet";
 
 /**
  * Every theme in src/themes.ts, in that file's order.
@@ -267,7 +268,11 @@ export interface Shot {
      * like the library row above.
      */
     sheet?: "setup" | "chords";
-    /** Expand the setup sheet's MORE block: meter, what you read, takes. */
+    /**
+     * Expand the arrangement's breakdown disclosure (`.jam-more-toggle`), which
+     * only a Song or Endless arrangement has. The meter and the takes used to
+     * be behind a MORE block and are not any more: they are on the sheet.
+     */
     more?: boolean;
     /**
      * Turn Record the take AND the camera on, and wait for the picture.
@@ -296,8 +301,8 @@ export interface Shot {
      * everything else here: the controls are on the sheet and a person has
      * no other way to reach them.
      */
-    cheatTab?: "Chords" | "Scales";
-    chordPage?: "In key" | "All keys";
+    cheatTab?: CheatTab;
+    chordPage?: ChordPage;
   };
   /**
    * The Setlist tab, with a setlist actually on it.
@@ -577,7 +582,7 @@ export const SHOTS: Shot[] = [
     // A jam in 7/8: the meter control, and the sentence saying the groove
     // does not fit it so the drummer plays the rule. Both are inside MORE
     // now, which is where a thing true of one jam in twenty belongs.
-    jam: { row: 0, sheet: "setup", more: true, meter: "7/8", scrollTo: ".jam-more-body" },
+    jam: { row: 0, sheet: "setup", meter: "7/8", scrollTo: ".jam-meters" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -616,7 +621,7 @@ export const SHOTS: Shot[] = [
     // The In key page at Colours: the sus, add9, 6 and 9 chords of the key,
     // gathered under the degree each belongs to. The page that says the sheet
     // knows more than seven chords (A10).
-    jam: { row: 0, bar: 5, sheet: "chords", cheatTab: "Scales" },
+    jam: { row: 0, bar: 5, sheet: "chords", cheatTab: "scales" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -628,7 +633,7 @@ export const SHOTS: Shot[] = [
     tab: "jam",
     // Every degree as a power chord — I5, IV5, V5 — with the real two-note
     // grips under them. A rock jam opens here without being asked.
-    jam: { row: 0, bar: 5, sheet: "chords", cheatTab: "Scales", chordPage: "All keys" },
+    jam: { row: 0, bar: 5, sheet: "chords", cheatTab: "scales", chordPage: "all" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -642,7 +647,7 @@ export const SHOTS: Shot[] = [
     // across the top in their three bands, with the filter on so the gaps
     // draw the shape of the key. The printed card the owner had in front of
     // them — "that's what i want to build".
-    jam: { row: 0, bar: 5, sheet: "chords", chordPage: "All keys" },
+    jam: { row: 0, bar: 5, sheet: "chords", chordPage: "all" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -668,7 +673,7 @@ export const SHOTS: Shot[] = [
     // The shelf inside MORE: three takes of the slow blues. The section is
     // the only place in the app that keeps a file, so the picture has to show
     // what that looks like rather than an empty heading.
-    jam: { row: 0, sheet: "setup", more: true, scrollTo: ".jam-takes" },
+    jam: { row: 0, sheet: "setup", scrollTo: ".jam-takes" },
     width: 1400,
     height: 900,
     settleMs: 400,

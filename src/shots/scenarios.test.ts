@@ -155,3 +155,27 @@ describe("the screenshots the website is built on", () => {
     expect(orphans, `on disk but nothing takes or uses them: ${orphans.join(", ")}`).toEqual([]);
   });
 });
+
+describe("the harness finds controls the same way in every language (QA 2026-11-17 #26)", () => {
+  const main = fs.readFileSync(path.join(process.cwd(), "src/shots/main.tsx"), "utf8");
+
+  it("goes to a place by its id, not by its English label", () => {
+    expect(main).not.toMatch(/aria-label="\$\{name\}"/);
+    for (const call of main.match(/rail\("[^"]*"\)/g) ?? []) expect(call).toMatch(/^rail\("[a-z]+"\)$/);
+  });
+
+  it("matches no English words against a control's text", () => {
+    for (const english of ["set up", "cheat sheet", "edit changes", "bar ${wanted} of"]) {
+      expect(main, english).not.toContain(`"${english}"`);
+      expect(main, english).not.toContain(`\`${english}\``);
+    }
+  });
+
+  it("a cheat-sheet scene names a segment by its option id", () => {
+    for (const shot of SHOTS) {
+      const jam = (shot as { jam?: { cheatTab?: string; chordPage?: string } }).jam;
+      if (jam?.cheatTab) expect(["chords", "scales"]).toContain(jam.cheatTab);
+      if (jam?.chordPage) expect(["key", "all"]).toContain(jam.chordPage);
+    }
+  });
+});

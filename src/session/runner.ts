@@ -229,10 +229,14 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
         }
         case "insertStep": {
+          // Find my edge from a result: what is left of this step goes with it,
+          // so the Session gets exactly the inserted step's minutes longer, as
+          // the offer says ("Adds 3 minutes", QA 2026-11-17 #17).
           const plan = state.plan;
           if (!plan) return state;
+          const carried = Math.round(stepRemainingMs({ ...state, now: event.now }) / 1000) / 60;
           const steps = [...plan.steps];
-          steps.splice(state.stepIndex + 1, 0, event.step);
+          steps.splice(state.stepIndex + 1, 0, { ...event.step, minutes: event.step.minutes + carried });
           return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
         }
         case "tick":

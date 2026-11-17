@@ -33,7 +33,8 @@ import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
-import { ContextLine, rise, stepTitle } from "./TodayView";
+import { pickDirectionMatters } from "../../session/caveats";
+import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
 import "../../styles/session.css";
 
@@ -226,7 +227,9 @@ function TakeScreen({
           {running && <CoachLine>{exercise.coachLine}</CoachLine>}
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
-          <div className="session-why">{t("session.run.honest")}</div>
+          {pickDirectionMatters(exercise) && (
+            <div className="session-why" data-testid="pick-caveat">{t("session.run.honest")}</div>
+          )}
           <BandVolume session={session} hint={!running} />
           {!running && !inputReady && (
             <div className="session-glass session-card" role="status" data-testid="session-no-input">
@@ -365,7 +368,8 @@ function EdgePanel({ session }: { session: SessionRun }) {
 }
 
 /**
- * "Was this grade fair?": one tap, kept in the Take's facts for the export.
+ * "Was this grade fair?": one tap, kept in the Take's facts for the export; a
+ * tap on the other answer changes it, and the thanks says which is kept.
  * Only on a graded result: a Take not heard has no grade to judge.
  */
 export function FairTap({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
@@ -388,7 +392,11 @@ export function FairTap({ session, outcome }: { session: SessionRun; outcome: Ta
           {t(value === "yes" ? "session.result.fairYes" : "session.result.fairNo")}
         </button>
       ))}
-      {answer && <span role="status">{t("session.result.fairThanks")}</span>}
+      {answer && (
+        <span role="status" data-answer={answer}>
+          {t(answer === "yes" ? "session.result.fairThanksYes" : "session.result.fairThanksNo")}
+        </span>
+      )}
     </div>
   );
 }
@@ -423,7 +431,7 @@ function ResultScreen({ session }: { session: SessionRun }) {
         </button>
       )}
       {big.kind === "again" && (
-        <button className="session-secondary" onClick={actions.next}>
+        <button className="session-secondary" onClick={actions.next} data-testid="session-move-on">
           {t("session.result.moveOn")}
         </button>
       )}
@@ -764,9 +772,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
                 <div className="session-plan-body">
                   <div className="session-plan-title">
                     <span>{stepTitle(step, t)}</span>
-                    <span className="session-tag" data-kind="mechanics">
-                      {t("session.kind.mechanics")}
-                    </span>
+                    <StepTag step={step} paths={session.paths} />
                   </div>
                   <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
                 </div>

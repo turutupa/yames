@@ -39,7 +39,12 @@
       "howLong": "Hoeveel tijd heb je? Minuten:",
       "running": "Bezig met: {{paths}}",
       "leftOff": "Waar je gebleven was",
-      "leftOffValue": "{{value}} op {{bpm}} BPM. Vandaag begint langzamer.",
+      "leftOffValue": {
+        "even": "{{value}}% gelijkmatig op {{bpm}} BPM. Vandaag begint langzamer.",
+        "heard": "{{value}}% van de noten gehoord op {{bpm}} BPM. Vandaag begint langzamer.",
+        "accents": "{{value}}% van de accenten raak op {{bpm}} BPM. Vandaag begint langzamer.",
+        "notes": "{{value}}% juiste noten op {{bpm}} BPM. Vandaag begint langzamer."
+      },
       "leftOffPlain": "{{bpm}} BPM. Vandaag begint langzamer.",
       "whatsIn": "Wat erin zit, en waarom",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "Was dit oordeel eerlijk?",
       "fairYes": "Ja",
       "fairNo": "Nee",
-      "fairThanks": "Bedankt. Het wordt bij je oefengegevens bewaard."
+      "fairThanksYes": "Bedankt: bewaard als eerlijk. Tik op Nee om het te wijzigen.",
+      "fairThanksNo": "Bedankt: bewaard als niet eerlijk. Tik op Ja om het te wijzigen."
     },
     "edge": {
       "kick": "Mijn grens vinden",
@@ -230,11 +236,10 @@
       "intro": "Kies een doel. Niets zit op slot: je kunt met elke stap beginnen en van gedachten veranderen.",
       "theorySub": "Wat je kiest om te spelen",
       "mechanicsSub": "Hoe je handen spelen",
-      "later": "Later",
       "laterWhy": "Deze kun je nu al lezen. De beoordeling die ervoor nodig is, komt later.",
+      "comingSoon": "Binnenkort",
       "stepCount": "{{count}} stap",
       "stepCount_other": "{{count}} stappen",
-      "draft": "Concept",
       "back": "Leerpaden",
       "level": "Niveau",
       "limits": "Wat dit wel en niet kan meten",
@@ -249,12 +254,15 @@
       "yourStep": "Dit is de stap waar je nu bent.",
       "passed": "Gehaald",
       "notGradedYet": "Nog niet beoordeeld.",
+      "selfChecked": "Zelf beoordelen: dit oordeel is aan jou.",
+      "practiceOnly": "Alleen oefenen, niet beoordeeld.",
       "playThis": "Speel dit",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Vanaf {{from}} BPM",
       "playedNoClean": "{{count}} take. Nog geen schoon tempo.",
       "playedNoClean_other": "{{count}} takes. Nog geen schoon tempo.",
       "playedClean": "{{count}} take. Schoon tempo {{bpm}} BPM.",
       "playedClean_other": "{{count}} takes. Schoon tempo {{bpm}} BPM.",
-      "running": "Loopt",
       "whereYouAre": "Waar je staat",
       "openStep": "Naar stap {{n}}",
       "subscribe": "Abonneren",
@@ -264,7 +272,8 @@
       "subscribeCap": "In deze test kun je tot {{cap}} paden volgen. Zeg er eerst een op; de geschiedenis blijft bewaard.",
       "unsubscribedNote": "Niet in het plan van vandaag. Je geschiedenis blijft; abonneer je wanneer je wilt opnieuw.",
       "testOut": "Uittesten",
-      "testOutHow": "Eén take op het slaagtempo van elke oefening. Haal er ongeveer drie van de vier en de stap is klaar."
+      "testOutHow": "Eén take op het slaagtempo van elke oefening die je nog niet hebt gehaald. Haal er ongeveer drie van de vier en de stap is klaar.",
+      "testOutRetests": "Je hebt hier elke oefening gehaald, dus dit test ze allemaal opnieuw: één take per oefening op het slaagtempo."
     },
     "progress": {
       "title": "Voortgang",
@@ -305,6 +314,19 @@
       "note": "Een JSON-bestand met je takes, schone tempo's en de redenen van de planner. Voeg het toe aan een feedbackmelding als je wilt; er wordt niets verstuurd.",
       "done": "Opgeslagen in {{path}}.",
       "failed": "Het bestand kon niet worden opgeslagen."
+    },
+    "subdivision": {
+      "wholes": "Hele noten",
+      "halves": "Halve noten",
+      "halfTriplets": "Halve triolen",
+      "quarters": "Kwartnoten",
+      "quarterTriplets": "Kwarttriolen",
+      "eighths": "Achtsten",
+      "eighthTriplets": "Achtste triolen",
+      "sixteenths": "Zestienden",
+      "quintuplets": "Kwintolen",
+      "sextuplets": "Sextolen",
+      "thirtySeconds": "Tweeëndertigsten"
     }
   }
 }

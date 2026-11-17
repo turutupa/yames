@@ -74,3 +74,46 @@ describe("Test out on a Step's page", () => {
     expect(actions.testOut).toHaveBeenCalledWith(ALT, ALT.steps[1]);
   });
 });
+
+describe("badges on the Paths list (QA 2026-11-17 #13)", () => {
+  it("never shows the pack's Draft status; a subscribed Path says Subscribed", () => {
+    const { session } = fake(started);
+    render(<PathsView session={session} />);
+    const card = screen.getByTestId(`path-card-${ALT.id}`);
+    expect(ALT.review.status).toBe("draft");
+    expect(card).not.toHaveTextContent(/draft/i);
+    expect(card).toHaveTextContent("Subscribed");
+  });
+
+  it("an unsubscribed runnable Path has no badge", () => {
+    const { session } = fake({ states: [], takes: [], ceilings: [] });
+    render(<PathsView session={session} />);
+    expect(screen.getByTestId(`path-card-${ALT.id}`).querySelector("[data-badge]")).toBeNull();
+  });
+});
+
+describe("Exercise cards show their tempo (QA 2026-11-17 #14)", () => {
+  it("start→pass BPM on each card", () => {
+    const { session } = fake(started);
+    render(<PathsView session={session} />);
+    openPath();
+    fireEvent.click(screen.getByTestId(`step-row-${ALT.steps[0].id}`));
+    const ex = ALT.steps[0].exercises.find((e) => e.tempo.passAtBpm !== null && e.tempo.passAtBpm !== e.tempo.rungs[0].bpm)!;
+    expect(screen.getByTestId(`tempo-${ex.id}`)).toHaveTextContent(`${ex.tempo.rungs[0].bpm}→${ex.tempo.passAtBpm} BPM`);
+  });
+});
+
+describe("a Path whose pack names its subdivisions", () => {
+  it("reads e.g. '16ths · 60→110 BPM'", () => {
+    const pack = import.meta.glob("../../paths/packs/shred.json", { eager: true });
+    const SHRED = (Object.values(pack)[0] as { default: unknown }).default as typeof ALT;
+    const session = { paths: [SHRED], progress: { states: [], takes: [], ceilings: [] }, actions: {} } as unknown as SessionRun;
+    render(<PathsView session={session} />);
+    fireEvent.click(screen.getByTestId(`path-card-${SHRED.id}`));
+    fireEvent.click(screen.getByTestId(`step-row-${SHRED.steps[0].id}`));
+    const ex = SHRED.steps[0].exercises[0];
+    expect(screen.getByTestId(`tempo-${ex.id}`)).toHaveTextContent(
+      `16ths · ${ex.tempo.rungs[0].bpm}→${ex.tempo.passAtBpm} BPM`,
+    );
+  });
+});

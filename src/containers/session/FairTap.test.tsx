@@ -1,4 +1,5 @@
 /** "Was this grade fair?" on the result: one tap, kept on the Take's row. */
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { FairTap } from "./SessionView";
@@ -30,7 +31,26 @@ describe("the fairness tap", () => {
     const { session } = fake("yes");
     render(<FairTap session={session} outcome={outcome} />);
     expect(screen.getByTestId("session-fair-yes")).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("status")).toHaveTextContent("Thanks");
+    expect(screen.getByRole("status")).toHaveTextContent("Thanks: kept as fair.");
+  });
+
+  it("can be changed: the other tap saves again, and the thanks follows it (QA 2026-11-17 #16)", () => {
+    function Live() {
+      const [fair, setFair] = useState<"yes" | "no" | undefined>(undefined);
+      const row = { ...take("even-eighths.open-string"), id: "t-fair", facts: fair ? { fair } : {} };
+      const session = {
+        progress: { states: [], takes: [row], ceilings: [] },
+        actions: { answerFair: (_: string, v: "yes" | "no") => setFair(v) },
+      } as unknown as SessionRun;
+      return <FairTap session={session} outcome={outcome} />;
+    }
+    render(<Live />);
+    fireEvent.click(screen.getByTestId("session-fair-yes"));
+    expect(screen.getByRole("status")).toHaveTextContent("kept as fair");
+    fireEvent.click(screen.getByTestId("session-fair-no"));
+    expect(screen.getByTestId("session-fair-no")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("session-fair-yes")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("status")).toHaveTextContent("kept as not fair");
   });
 
   it("is not offered for a Take with no stored row", () => {

@@ -39,7 +39,12 @@
       "howLong": "Quanto tempo hai? Minuti:",
       "running": "In corso: {{paths}}",
       "leftOff": "Dove eri rimasto",
-      "leftOffValue": "{{value}} a {{bpm}} BPM. Oggi si parte più piano.",
+      "leftOffValue": {
+        "even": "{{value}}% di regolarità a {{bpm}} BPM. Oggi si parte più piano.",
+        "heard": "{{value}}% delle note sentite a {{bpm}} BPM. Oggi si parte più piano.",
+        "accents": "{{value}}% degli accenti a segno a {{bpm}} BPM. Oggi si parte più piano.",
+        "notes": "{{value}}% di note giuste a {{bpm}} BPM. Oggi si parte più piano."
+      },
       "leftOffPlain": "{{bpm}} BPM. Oggi si parte più piano.",
       "whatsIn": "Cosa c'è dentro, e perché",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "Questo voto era giusto?",
       "fairYes": "Sì",
       "fairNo": "No",
-      "fairThanks": "Grazie. È salvato con i tuoi dati di pratica."
+      "fairThanksYes": "Grazie: salvato come giusto. Tocca No per cambiarlo.",
+      "fairThanksNo": "Grazie: salvato come non giusto. Tocca Sì per cambiarlo."
     },
     "edge": {
       "kick": "Trova il mio limite",
@@ -233,12 +239,11 @@
       "intro": "Scegli un obiettivo. Niente è bloccato: puoi iniziare qualsiasi tappa e cambiare idea.",
       "theorySub": "Cosa scegli di suonare",
       "mechanicsSub": "Come suonano le tue mani",
-      "later": "Più avanti",
       "laterWhy": "Questo puoi già leggerlo. La valutazione che gli serve arriverà più avanti.",
+      "comingSoon": "In arrivo",
       "stepCount": "{{count}} tappa",
       "stepCount_many": "{{count}} tappe",
       "stepCount_other": "{{count}} tappe",
-      "draft": "Bozza",
       "back": "Percorsi",
       "level": "Livello",
       "limits": "Cosa può misurare e cosa no",
@@ -254,14 +259,17 @@
       "yourStep": "Questa è la tappa in cui sei.",
       "passed": "Superato",
       "notGradedYet": "Non ancora valutato.",
+      "selfChecked": "Autovalutato: questo lo giudichi tu.",
+      "practiceOnly": "Solo pratica, non valutato.",
       "playThis": "Suona questo",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Da {{from}} BPM",
       "playedNoClean": "{{count}} take. Ancora nessun tempo pulito.",
       "playedNoClean_many": "{{count}} take. Ancora nessun tempo pulito.",
       "playedNoClean_other": "{{count}} take. Ancora nessun tempo pulito.",
       "playedClean": "{{count}} take. Tempo pulito: {{bpm}} BPM.",
       "playedClean_many": "{{count}} take. Tempo pulito: {{bpm}} BPM.",
       "playedClean_other": "{{count}} take. Tempo pulito: {{bpm}} BPM.",
-      "running": "In corso",
       "whereYouAre": "Dove sei",
       "openStep": "Vai alla tappa {{n}}",
       "subscribe": "Iscriviti",
@@ -271,7 +279,8 @@
       "subscribeCap": "In questo test puoi seguire fino a {{cap}} percorsi. Annulla prima un'iscrizione; la sua cronologia resta.",
       "unsubscribedNote": "Non è nel piano di oggi. La tua cronologia resta; iscriviti di nuovo quando vuoi.",
       "testOut": "Fai la verifica",
-      "testOutHow": "Una take al tempo di superamento di ogni esercizio. Superane circa tre su quattro e lo step è fatto."
+      "testOutHow": "Una take al tempo di superamento di ogni esercizio non ancora superato. Superane circa tre su quattro e lo step è fatto.",
+      "testOutRetests": "Hai superato tutti gli esercizi qui, quindi questo li riverifica tutti: una take ciascuno al tempo di superamento."
     },
     "progress": {
       "title": "Progressi",
@@ -312,6 +321,19 @@
       "note": "Un file JSON con le tue take, i tempi puliti e i motivi del pianificatore. Allegalo a un feedback se vuoi; non viene inviato nulla.",
       "done": "Salvato in {{path}}.",
       "failed": "Impossibile salvare il file."
+    },
+    "subdivision": {
+      "wholes": "Semibrevi",
+      "halves": "Minime",
+      "halfTriplets": "Terzine di minime",
+      "quarters": "Semiminime",
+      "quarterTriplets": "Terzine di semiminime",
+      "eighths": "Crome",
+      "eighthTriplets": "Terzine di crome",
+      "sixteenths": "Semicrome",
+      "quintuplets": "Quintine",
+      "sextuplets": "Sestine",
+      "thirtySeconds": "Biscrome"
     }
   }
 }

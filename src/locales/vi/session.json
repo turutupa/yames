@@ -39,7 +39,12 @@
       "howLong": "Bạn có bao nhiêu thời gian? Số phút:",
       "running": "Đang theo: {{paths}}",
       "leftOff": "Chỗ bạn dừng lần trước",
-      "leftOffValue": "{{value}} ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+      "leftOffValue": {
+        "even": "Đều {{value}}% ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+        "heard": "Nghe được {{value}}% số nốt ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+        "accents": "{{value}}% nhấn đúng chỗ ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+        "notes": "{{value}}% nốt đúng ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn."
+      },
       "leftOffPlain": "{{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
       "whatsIn": "Có gì trong buổi tập, và vì sao",
       "min": "PHÚT",
@@ -154,7 +159,8 @@
       "fairAsk": "Điểm này có công bằng không?",
       "fairYes": "Có",
       "fairNo": "Không",
-      "fairThanks": "Cảm ơn. Đã lưu cùng dữ liệu luyện tập của bạn."
+      "fairThanksYes": "Cảm ơn: đã lưu là công bằng. Chạm Không để đổi.",
+      "fairThanksNo": "Cảm ơn: đã lưu là không công bằng. Chạm Có để đổi."
     },
     "edge": {
       "kick": "Tìm giới hạn",
@@ -230,11 +236,10 @@
       "intro": "Chọn một mục tiêu. Không có gì bị khóa: bạn có thể bắt đầu bước nào cũng được và đổi ý bất cứ lúc nào.",
       "theorySub": "Bạn chọn chơi gì",
       "mechanicsSub": "Tay bạn chơi thế nào",
-      "later": "Để sau",
       "laterWhy": "Bạn có thể đọc phần này ngay. Phần chấm điểm nó cần sẽ có sau.",
+      "comingSoon": "Sắp có",
       "stepCount": "{{count}} bước",
       "stepCount_other": "{{count}} bước",
-      "draft": "Bản nháp",
       "back": "Lộ trình",
       "level": "Cấp độ",
       "limits": "Những gì đo được và không đo được",
@@ -249,12 +254,15 @@
       "yourStep": "Đây là bước bạn đang ở.",
       "passed": "Đã đạt",
       "notGradedYet": "Chưa được chấm.",
+      "selfChecked": "Tự kiểm tra: bạn tự đánh giá bài này.",
+      "practiceOnly": "Chỉ để luyện, không chấm.",
       "playThis": "Chơi bài này",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Từ {{from}} BPM",
       "playedNoClean": "{{count}} lượt. Chưa có tempo sạch.",
       "playedNoClean_other": "{{count}} lượt. Chưa có tempo sạch.",
       "playedClean": "{{count}} lượt. Tempo sạch {{bpm}} BPM.",
       "playedClean_other": "{{count}} lượt. Tempo sạch {{bpm}} BPM.",
-      "running": "Đang chạy",
       "whereYouAre": "Bạn đang ở đâu",
       "openStep": "Đến bước {{n}}",
       "subscribe": "Đăng ký",
@@ -264,7 +272,8 @@
       "subscribeCap": "Trong bản thử này bạn theo được tối đa {{cap}} lộ trình. Hãy hủy một cái trước; lịch sử vẫn được giữ.",
       "unsubscribedNote": "Không có trong kế hoạch hôm nay. Lịch sử vẫn còn; đăng ký lại bất cứ lúc nào.",
       "testOut": "Kiểm tra vượt",
-      "testOutHow": "Một lượt ở tempo đạt của mỗi bài. Đạt khoảng ba trên bốn là bước hoàn thành."
+      "testOutHow": "Một lượt ở tempo đạt cho mỗi bài bạn chưa đạt. Đạt khoảng ba trên bốn là bước hoàn thành.",
+      "testOutRetests": "Bạn đã đạt mọi bài ở đây, nên lần này kiểm tra lại tất cả: mỗi bài một lượt ở tempo đạt."
     },
     "progress": {
       "title": "Tiến bộ",
@@ -305,6 +314,19 @@
       "note": "Một tệp JSON gồm các lượt chơi, tempo sạch và lý do của bộ lập kế hoạch. Đính kèm vào phản hồi nếu muốn; không gì được gửi đi.",
       "done": "Đã lưu vào {{path}}.",
       "failed": "Không lưu được tệp."
+    },
+    "subdivision": {
+      "wholes": "Nốt tròn",
+      "halves": "Nốt trắng",
+      "halfTriplets": "Liên ba nốt trắng",
+      "quarters": "Nốt đen",
+      "quarterTriplets": "Liên ba nốt đen",
+      "eighths": "Móc đơn",
+      "eighthTriplets": "Liên ba móc đơn",
+      "sixteenths": "Móc kép",
+      "quintuplets": "Liên năm",
+      "sextuplets": "Liên sáu",
+      "thirtySeconds": "Móc ba"
     }
   }
 }

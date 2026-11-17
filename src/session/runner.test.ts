@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TakeGrade } from "./grade";
-import { edgeStep, planSession } from "./planner";
+import { EDGE_MINUTES, edgeStep, planSession } from "./planner";
 import { gradedRungs } from "./ladder";
 import type { PlanStep, SessionPlan } from "./planner";
 import {
@@ -282,7 +282,9 @@ describe("the seam for Ramp up", () => {
     const during = run(s, { type: "insertStep", step: drill, now: NOW });
     expect(during.phase).toBe("timed");
     expect(currentStep(during)?.id).toBe("edge");
-    const after = run(during, { type: "tick", now: NOW + 2 * MIN });
+    // It takes what was left of the focus block, plus its own two minutes.
+    const focusMinutes = (currentStep(s) as PlanStep).minutes;
+    const after = run(during, { type: "tick", now: NOW + (2 + focusMinutes) * MIN });
     expect(currentStep(after)?.id).toBe("block-1");
     expect(after.phase).toBe("ready");
   });
@@ -354,6 +356,17 @@ describe("Find my edge", () => {
     const s = edgeTake(edgeRun(), "notCaught");
     expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: start });
     expect(edgeOf(s, EX)).toMatchObject({ reached: null, slippedAt: null, done: false });
+  });
+
+  it("adds exactly its minutes to the Session clock, as the offer says (QA 2026-11-17 #17)", () => {
+    const s0 = afterTake(atFocus(), "passed");
+    for (const elapsed of [0, 1.5, 3]) {
+      const s = run(s0, { type: "tick", now: NOW + elapsed * MIN });
+      const before = minutesLeft(s);
+      const step = edgeStep(pick, NO_PROGRESS, { id: "edge", bpm: 60 });
+      const during = run(s, { type: "insertStep", step, now: NOW + elapsed * MIN });
+      expect(minutesLeft(during), `after ${elapsed} min`).toBe(before + EDGE_MINUTES);
+    }
   });
 
   it("can be put in after a result, and the plan carries on after it", () => {

@@ -39,7 +39,12 @@
       "howLong": "Ne kadar vaktin var? Dakika:",
       "running": "Devam eden: {{paths}}",
       "leftOff": "Kaldığın yer",
-      "leftOffValue": "{{bpm}} BPM'de {{value}}. Bugün daha yavaş başlıyor.",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM'de %{{value}} düzgün. Bugün daha yavaş başlıyor.",
+        "heard": "{{bpm}} BPM'de notaların %{{value}}'i duyuldu. Bugün daha yavaş başlıyor.",
+        "accents": "{{bpm}} BPM'de vurguların %{{value}}'i yerinde. Bugün daha yavaş başlıyor.",
+        "notes": "{{bpm}} BPM'de %{{value}} doğru nota. Bugün daha yavaş başlıyor."
+      },
       "leftOffPlain": "{{bpm}} BPM. Bugün daha yavaş başlıyor.",
       "whatsIn": "İçinde ne var, neden",
       "min": "DK",
@@ -154,7 +159,8 @@
       "fairAsk": "Bu not adil miydi?",
       "fairYes": "Evet",
       "fairNo": "Hayır",
-      "fairThanks": "Teşekkürler. Çalışma verilerinle birlikte saklandı."
+      "fairThanksYes": "Teşekkürler: adil olarak saklandı. Değiştirmek için Hayır'a dokun.",
+      "fairThanksNo": "Teşekkürler: adil değil olarak saklandı. Değiştirmek için Evet'e dokun."
     },
     "edge": {
       "kick": "Sınırımı bul",
@@ -230,11 +236,10 @@
       "intro": "Bir hedef seç. Hiçbir şey kilitli değil: istediğin adımdan başlayabilir, fikrini değiştirebilirsin.",
       "theorySub": "Ne çalmayı seçtiğin",
       "mechanicsSub": "Ellerinin nasıl çaldığı",
-      "later": "Sonra",
       "laterWhy": "Bunu şimdi okuyabilirsin. Gerektirdiği notlama daha sonra gelecek.",
+      "comingSoon": "Yakında",
       "stepCount": "{{count}} adım",
       "stepCount_other": "{{count}} adım",
-      "draft": "Taslak",
       "back": "Yollar",
       "level": "Seviye",
       "limits": "Bunun neyi ölçüp neyi ölçemediği",
@@ -249,12 +254,15 @@
       "yourStep": "Şu an bu adımdasın.",
       "passed": "Geçildi",
       "notGradedYet": "Henüz notlanmadı.",
+      "selfChecked": "Kendin kontrol et: Bunu sen değerlendiriyorsun.",
+      "practiceOnly": "Yalnızca pratik, notlanmaz.",
       "playThis": "Bunu çal",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "{{from}} BPM'den",
       "playedNoClean": "{{count}} deneme. Henüz temiz tempo yok.",
       "playedNoClean_other": "{{count}} deneme. Henüz temiz tempo yok.",
       "playedClean": "{{count}} deneme. Temiz tempo {{bpm}} BPM.",
       "playedClean_other": "{{count}} deneme. Temiz tempo {{bpm}} BPM.",
-      "running": "Sürüyor",
       "whereYouAre": "Neredesin",
       "openStep": "{{n}}. adıma git",
       "subscribe": "Abone ol",
@@ -264,7 +272,8 @@
       "subscribeCap": "Bu testte en fazla {{cap}} yol takip edebilirsin. Önce birinden çık; geçmişi kalır.",
       "unsubscribedNote": "Bugünün planında yok. Geçmişin duruyor; istediğin zaman yeniden abone ol.",
       "testOut": "Sınava gir",
-      "testOutHow": "Her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam."
+      "testOutHow": "Henüz geçmediğin her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam.",
+      "testOutRetests": "Buradaki her egzersizi geçtin, bu yüzden hepsini yeniden sınar: her biri için geçme temposunda bir kayıt."
     },
     "progress": {
       "title": "İlerleme",
@@ -305,6 +314,19 @@
       "note": "Kayıtların, temiz tempoların ve planlayıcının gerekçelerini içeren bir JSON dosyası. İstersen bir geri bildirime ekle; hiçbir şey gönderilmez.",
       "done": "{{path}} konumuna kaydedildi.",
       "failed": "Dosya kaydedilemedi."
+    },
+    "subdivision": {
+      "wholes": "Birlik notalar",
+      "halves": "İkilik notalar",
+      "halfTriplets": "İkilik triole",
+      "quarters": "Dörtlük notalar",
+      "quarterTriplets": "Dörtlük triole",
+      "eighths": "Sekizlikler",
+      "eighthTriplets": "Sekizlik triole",
+      "sixteenths": "On altılıklar",
+      "quintuplets": "Beşleme",
+      "sextuplets": "Altılama",
+      "thirtySeconds": "Otuz ikilikler"
     }
   }
 }

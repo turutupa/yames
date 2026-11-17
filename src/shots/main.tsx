@@ -213,16 +213,18 @@ async function drive() {
   if (shot!.session) {
     const { stop } = shot!.session;
     const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
-    // The rail on a desktop, the bottom tab bar on a phone (M7): both name
-    // the place in `aria-label`.
-    const rail = (name: string) =>
+    // The rail on a desktop, the bottom tab bar on a phone (M7), by the
+    // place's id rather than its label: `?lng=` changes every label, and a
+    // scene that looked for "Paths" timed out in every other language
+    // (QA 2026-11-17 #26).
+    const rail = (place: "today" | "paths" | "progress" | "tools") =>
       document.querySelector<HTMLElement>(
-        `.rail button[aria-label="${name}"], .mobile-tabs button[aria-label="${name}"]`,
+        `.rail button[data-view="${place}"], .mobile-tabs button[data-tab="${place}"]`,
       );
     await until("Today", () => !!byId("today"));
     await until("a plan", () => !!document.querySelector(".session-plan-item"));
     if (stop === "paths" || stop === "path" || stop === "step" || stop === "edge" || stop === "edgeDone") {
-      rail("Paths")?.click();
+      rail("paths")?.click();
       await until("the Paths list", () => !!byId("path-card-alternate-picking"));
       if (stop !== "paths") {
         byId("path-card-alternate-picking")?.click();
@@ -257,17 +259,17 @@ async function drive() {
         if (stop === "edgeDone") await until("the edge", done);
       }
     } else if (stop === "progress") {
-      rail("Progress")?.click();
+      rail("progress")?.click();
       await until("Progress", () => !!byId("progress"));
     } else if (stop === "tools") {
-      rail("Tools")?.click();
+      rail("tools")?.click();
       await until("the Tools list", () => !!byId("tools"));
     } else if (stop !== "today") {
       const path = shot!.session.path;
       if (path) {
         // A Path that is not runnable yet, made runnable for this scene only.
         if (!RUNNABLE_PATH_IDS.includes(path)) (RUNNABLE_PATH_IDS as string[]).push(path);
-        rail("Paths")?.click();
+        rail("paths")?.click();
         await until("the Paths list", () => !!byId(`path-card-${path}`));
         byId(`path-card-${path}`)?.click();
         await until("the Path", () => !!byId("path-detail"));
@@ -313,9 +315,7 @@ async function drive() {
                 () => {
                   // A pass below the pass rung offers to climb. Moving on is
                   // the way to the end of a five-minute Session from there.
-                  const moveOn = [...document.querySelectorAll<HTMLElement>(".session-secondary")].find(
-                    (b) => b.textContent === i18n.t("session.result.moveOn"),
-                  );
+                  const moveOn = byId("session-move-on");
                   (moveOn ?? big())?.click();
                 },
                 () => !!byId("session-recap"),
@@ -379,10 +379,7 @@ async function drive() {
       // group and `:nth-child(5)` would match bar one of every group.
       await until(
         `bar ${wanted} of the form`,
-        () =>
-          (document.querySelector(".jam-timeline-where")?.textContent ?? "").includes(
-            `bar ${wanted} of`,
-          ),
+        () => document.querySelector<HTMLElement>(".jam-timeline-where")?.dataset.bar === String(wanted),
         30000,
       );
     }
@@ -396,13 +393,10 @@ async function drive() {
      * the jam shots below start here.
      */
     if (shot!.jam.sheet) {
-      const wantedLabel = shot!.jam.sheet === "setup" ? "set up" : "cheat sheet";
-      await until("the context bar", () => !!document.querySelector(".jam-sheet-btn"));
-      const button = [...document.querySelectorAll<HTMLElement>(".jam-sheet-btn")].find(
-        (b) => (b.textContent ?? "").trim().toLowerCase() === wantedLabel,
-      );
-      if (!button) throw new Error(`no "${wantedLabel}" button in the context bar`);
-      button.click();
+      // By the door's own id, not its label, so `?lng=` reaches it too.
+      const door = `.jam-sheet-btn[data-sheet="${shot!.jam.sheet}"]`;
+      await until("the context bar", () => !!document.querySelector(door));
+      document.querySelector<HTMLElement>(door)!.click();
       await until(
         `the ${shot!.jam.sheet} sheet`,
         () => !!document.querySelector(`.jam-sheet[data-sheet="${shot!.jam!.sheet}"]`),
@@ -491,21 +485,13 @@ async function drive() {
     /**
      * The chord sheet's page, its reading and its filter (A10).
      *
-     * By the label on the segment, not by an index: the four flavours are in
-     * an order the data decides, and a shot pointing at "the third one" would
-     * quietly photograph a different page the day that order changed.
+     * By the segment's option id, not by an index or its label: the order is
+     * the data's to decide, and the label is the locale's (`?lng=`).
      */
-    const pressInSheet = async (label: string) => {
-      await until(`the "${label}" control`, () =>
-        [...document.querySelectorAll(".jam-sheet .accent-option, .jam-sheet .jam-switch")].some(
-          (b) => (b.textContent ?? "").trim() === label,
-        ),
-      );
-      const button = [...document.querySelectorAll<HTMLElement>(
-        ".jam-sheet .accent-option, .jam-sheet .jam-switch",
-      )].find((b) => (b.textContent ?? "").trim() === label);
-      if (!button) throw new Error(`no "${label}" control on the sheet`);
-      button.click();
+    const pressInSheet = async (option: string) => {
+      const where = `.jam-sheet .accent-option[data-option="${option}"]`;
+      await until(`the "${option}" control`, () => !!document.querySelector(where));
+      document.querySelector<HTMLElement>(where)!.click();
     };
 
     if (shot!.jam.cheatTab) await pressInSheet(shot!.jam.cheatTab);
@@ -530,15 +516,9 @@ async function drive() {
 
     if (shot!.jam.editChords) {
       // The mode first, then the cell — the two presses a person makes.
-      await until("the EDIT CHANGES link", () =>
-        [...document.querySelectorAll(".jam-link")].some((b) =>
-          (b.textContent ?? "").toLowerCase().includes("edit changes"),
-        ),
-      );
-      const edit = [...document.querySelectorAll<HTMLElement>(".jam-link")].find((b) =>
-        (b.textContent ?? "").toLowerCase().includes("edit changes"),
-      )!;
-      edit.click();
+      const editLink = '.jam-link[data-action="edit-changes"]';
+      await until("the EDIT CHANGES link", () => !!document.querySelector(editLink));
+      document.querySelector<HTMLElement>(editLink)!.click();
       await until(
         "the editable cells",
         () => !!document.querySelector(".jam-timeline-cell[data-editable]"),
@@ -1035,12 +1015,17 @@ async function drive() {
   }
 
   if (shot!.zen) {
-    // The rail's Zen button, by the anchor the tour already puts on it.
-    // Desktop reaches Zen from the rail; the phone build from its bottom tab bar.
-    const zenButton = '[data-tour="zen-widget"], .mobile-tab-zen';
-    await until("the Zen button", () => !!document.querySelector(zenButton));
-    (document.querySelector(zenButton) as HTMLButtonElement).click();
-    await until("the Zen canvas", () => !!document.querySelector("[data-zen-style]"));
+    // The rail's Zen button, by its own action id. Desktop reaches Zen from
+    // the rail; the phone build from its bottom tab bar. Not by the tour's
+    // anchor: "Open widget" carries it too and is drawn first, before the
+    // tool view the Zen button waits for has mounted — so the old wait
+    // pressed the widget and the Zen canvas never came (QA 2026-11-17 #26).
+    const zenButton = '.rail-action[data-action="zen"], .mobile-tab-zen';
+    await pressUntil(
+      "the Zen button",
+      () => document.querySelector<HTMLButtonElement>(zenButton)?.click(),
+      () => !!document.querySelector("[data-zen-style]"),
+    );
   }
 
   // Web fonts decide the metrics of every label in the picture, and a capture

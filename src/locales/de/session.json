@@ -39,7 +39,12 @@
       "howLong": "Wie viel Zeit hast du? Minuten:",
       "running": "Aktiv: {{paths}}",
       "leftOff": "Wo du aufgehört hast",
-      "leftOffValue": "{{value}} bei {{bpm}} BPM. Heute geht es langsamer los.",
+      "leftOffValue": {
+        "even": "{{value}} % gleichmäßig bei {{bpm}} BPM. Heute geht es langsamer los.",
+        "heard": "{{value}} % der Töne gehört bei {{bpm}} BPM. Heute geht es langsamer los.",
+        "accents": "{{value}} % der Akzente getroffen bei {{bpm}} BPM. Heute geht es langsamer los.",
+        "notes": "{{value}} % richtige Töne bei {{bpm}} BPM. Heute geht es langsamer los."
+      },
       "leftOffPlain": "{{bpm}} BPM. Heute geht es langsamer los.",
       "whatsIn": "Was drin ist, und warum",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "War diese Bewertung fair?",
       "fairYes": "Ja",
       "fairNo": "Nein",
-      "fairThanks": "Danke. Das wird bei deinen Übungsdaten gespeichert."
+      "fairThanksYes": "Danke: als fair gespeichert. Tippe auf Nein, um es zu ändern.",
+      "fairThanksNo": "Danke: als nicht fair gespeichert. Tippe auf Ja, um es zu ändern."
     },
     "edge": {
       "kick": "Mein Limit finden",
@@ -230,11 +236,10 @@
       "intro": "Such dir ein Ziel aus. Nichts ist gesperrt: Du kannst mit jedem Schritt anfangen und es dir anders überlegen.",
       "theorySub": "Was du spielst",
       "mechanicsSub": "Wie deine Hände spielen",
-      "later": "Später",
       "laterWhy": "Lesen kannst du das schon jetzt. Die Bewertung dafür kommt später.",
+      "comingSoon": "Demnächst",
       "stepCount": "{{count}} Schritt",
       "stepCount_other": "{{count}} Schritte",
-      "draft": "Entwurf",
       "back": "Pfade",
       "level": "Niveau",
       "limits": "Was das messen kann und was nicht",
@@ -249,12 +254,15 @@
       "yourStep": "An diesem Schritt bist du gerade.",
       "passed": "Bestanden",
       "notGradedYet": "Noch nicht bewertet.",
+      "selfChecked": "Selbstkontrolle: Das beurteilst du.",
+      "practiceOnly": "Nur zum Üben, wird nicht bewertet.",
       "playThis": "Spielen",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Ab {{from}} BPM",
       "playedNoClean": "{{count}} Take. Noch kein sauberes Tempo.",
       "playedNoClean_other": "{{count}} Takes. Noch kein sauberes Tempo.",
       "playedClean": "{{count}} Take. Sauberes Tempo {{bpm}} BPM.",
       "playedClean_other": "{{count}} Takes. Sauberes Tempo {{bpm}} BPM.",
-      "running": "Läuft",
       "whereYouAre": "Wo du stehst",
       "openStep": "Zu Schritt {{n}}",
       "subscribe": "Abonnieren",
@@ -264,7 +272,8 @@
       "subscribeCap": "In diesem Test kannst du bis zu {{cap}} Pfaden folgen. Beende erst ein Abo; sein Verlauf bleibt erhalten.",
       "unsubscribedNote": "Nicht im heutigen Plan. Dein Verlauf bleibt; du kannst jederzeit wieder abonnieren.",
       "testOut": "Austesten",
-      "testOutHow": "Ein Take im Bestehenstempo jeder Übung. Besteh etwa drei von vier, und der Schritt ist erledigt."
+      "testOutHow": "Ein Take im Bestehenstempo jeder Übung, die du noch nicht bestanden hast. Besteh etwa drei von vier, und der Schritt ist erledigt.",
+      "testOutRetests": "Du hast hier jede Übung bestanden, also prüft das alle noch einmal: je ein Take im Bestehenstempo."
     },
     "progress": {
       "title": "Fortschritt",
@@ -305,6 +314,19 @@
       "note": "Eine JSON-Datei mit deinen Takes, sauberen Tempi und den Gründen des Planers. Häng sie an ein Feedback-Issue, wenn du magst; nichts wird gesendet.",
       "done": "Gespeichert unter {{path}}.",
       "failed": "Die Datei konnte nicht gespeichert werden."
+    },
+    "subdivision": {
+      "wholes": "Ganze",
+      "halves": "Halbe",
+      "halfTriplets": "Halbe-Triolen",
+      "quarters": "Viertel",
+      "quarterTriplets": "Viertel-Triolen",
+      "eighths": "Achtel",
+      "eighthTriplets": "Achteltriolen",
+      "sixteenths": "Sechzehntel",
+      "quintuplets": "Quintolen",
+      "sextuplets": "Sextolen",
+      "thirtySeconds": "Zweiunddreißigstel"
     }
   }
 }

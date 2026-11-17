@@ -79,9 +79,14 @@ export function buildPracticeExport(input: {
   };
 }
 
-/** The file name the save dialog suggests. */
+/**
+ * The file name the save dialog suggests, dated by the player's own calendar:
+ * an evening export west of Greenwich is still today (QA 2026-11-17 #23).
+ */
 export function exportFileName(now: number): string {
-  return `yames-practice-${new Date(now).toISOString().slice(0, 10)}.json`;
+  const d = new Date(now);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `yames-practice-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
 }
 
 /**

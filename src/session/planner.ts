@@ -586,6 +586,17 @@ function placementStep(
   return build(0);
 }
 
+/**
+ * Whether a benchmark can take the warm-up slot without the Session playing an
+ * Exercise twice: when it is the focus Path's head, the Path needs another open
+ * Exercise for the focus block. Otherwise the warm-up is the click as usual and
+ * the benchmark waits for the next Session in its window.
+ */
+function benchmarkFits(bench: Pick, focus: Pick | undefined, focusList: readonly Pick[]): boolean {
+  if (!focus || key(bench) !== key(focus)) return true;
+  return focusList.some((p) => key(p) !== key(bench));
+}
+
 /** Calendar days since, for a sentence ("yesterday", "3 days ago"). */
 function daysSince(at: number | null, now: number): number | null {
   return at === null ? null : Math.max(0, calendarDaysBetween(at, now));
@@ -618,7 +629,7 @@ export function planSession(input: PlannerInput): SessionPlan {
 
   const work = new Map(paths.map((path) => [path.id, openWork(path, progress, now)]));
   const focusWork = work.get(focusPath.id)!;
-  const focus = focusWork.list[0];
+  let focus = focusWork.list[0];
   const row = shape(minutes, back);
   const used = new Set<string>();
   const firstEver = mood === "first";
@@ -665,7 +676,8 @@ export function planSession(input: PlannerInput): SessionPlan {
     if (back && recap && recap.exercise.id !== focus.exercise.id) {
       steps.push(exerciseStep(recap, "recap", "recap", tempoOf(recap), row.warm, progress));
       used.add(key(recap));
-    } else if (bench && !back) {
+    } else if (bench && !back && benchmarkFits(bench, focus, focusWork.list)) {
+      used.add(key(bench));
       const step = exerciseStep(
         bench,
         "benchmark",
@@ -679,6 +691,10 @@ export function planSession(input: PlannerInput): SessionPlan {
       steps.push(warmupStep(focus, progress, row.warm));
     }
   }
+
+  // One Exercise once per Session: a benchmark on the focus Path's head moves
+  // the focus block on to its next open Exercise.
+  if (used.has(key(focus))) focus = focusWork.list.find((p) => !used.has(key(p))) ?? focus;
 
   // --- the focus block ---
   let focusMinutes = row.blocks[0];
@@ -774,7 +790,7 @@ export function planSession(input: PlannerInput): SessionPlan {
     const id = `block-${i + 1}`;
     const last = i === rest.length - 1;
     if (minutes === 20 && last) {
-      const fun = finisherPick(paths, progress);
+      const fun = finisherPick(paths, progress, used);
       const full = steps.filter((x) => x.kind === "exercise").length >= MAX_GRADED;
       if (fun && !back) {
         const backing = fun.exercise.backing;
@@ -891,4 +907,40 @@ function skippedOf(
         why: { code: "skippedToday" as const, values: { path: path.title, ...(days === null ? {} : { days }) } },
       };
     });
+}
+
+/** Minutes a Test out gives each Exercise: one Take at the pass tempo. */
+export const TEST_OUT_MINUTES = 2;
+
+/**
+ * Test out of a Step: one Take at the pass tempo for each gradable Exercise
+ * not passed yet (QA 2026-11-17 #18). When every one is passed already there is
+ * nothing left to prove, so it re-tests them all, and the Step page says so
+ * (`testOutRetests`).
+ */
+export function testOutSteps(path: PathDoc, step: Step, progress: PlayerProgress): PlanStep[] {
+  const gradable = step.exercises.filter(isGradable);
+  const open = gradable.filter((e) => !isExercisePassed(progress, path.id, e));
+  return (open.length > 0 ? open : gradable).map((exercise, i) => {
+    const bpm = exercise.tempo.passAtBpm ?? exercise.tempo.rungs[0]?.bpm ?? 60;
+    return {
+      kind: "exercise",
+      id: `test-${i}`,
+      role: "test",
+      pathId: path.id,
+      stepId: step.id,
+      exerciseId: exercise.id,
+      title: exercise.title,
+      bpm,
+      minutes: TEST_OUT_MINUTES,
+      variantSeed: null,
+      why: { code: "testOut", values: { step: step.title, bpm } },
+    };
+  });
+}
+
+/** Whether Test out on this Step would re-test Exercises already passed: all of them are. */
+export function testOutRetests(path: PathDoc, step: Step, progress: PlayerProgress): boolean {
+  const gradable = step.exercises.filter(isGradable);
+  return gradable.length > 0 && gradable.every((e) => isExercisePassed(progress, path.id, e));
 }

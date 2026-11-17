@@ -39,7 +39,12 @@
       "howLong": "How long have you got? Minutes:",
       "running": "Running: {{paths}}",
       "leftOff": "Where you left off",
-      "leftOffValue": "{{value}} at {{bpm}} BPM. Today starts slower.",
+      "leftOffValue": {
+        "even": "{{value}}% even at {{bpm}} BPM. Today starts slower.",
+        "heard": "{{value}}% of the notes heard at {{bpm}} BPM. Today starts slower.",
+        "accents": "{{value}}% of the accents landed at {{bpm}} BPM. Today starts slower.",
+        "notes": "{{value}}% right notes at {{bpm}} BPM. Today starts slower."
+      },
       "leftOffPlain": "{{bpm}} BPM. Today starts slower.",
       "whatsIn": "What's in it, and why",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "Was this grade fair?",
       "fairYes": "Yes",
       "fairNo": "No",
-      "fairThanks": "Thanks. It's kept with your practice data."
+      "fairThanksYes": "Thanks: kept as fair. Tap No to change it.",
+      "fairThanksNo": "Thanks: kept as not fair. Tap Yes to change it."
     },
     "edge": {
       "kick": "Find my edge",
@@ -230,11 +236,10 @@
       "intro": "Pick a goal. Nothing is locked: you can start any Step and change your mind.",
       "theorySub": "What you choose to play",
       "mechanicsSub": "How your hands play",
-      "later": "Later",
       "laterWhy": "You can read this one now. The grading it needs comes later.",
+      "comingSoon": "Coming soon",
       "stepCount": "{{count}} step",
       "stepCount_other": "{{count}} steps",
-      "draft": "Draft",
       "back": "Paths",
       "level": "Level",
       "limits": "What this can and can't measure",
@@ -249,12 +254,15 @@
       "yourStep": "This is the Step you're on.",
       "passed": "Passed",
       "notGradedYet": "Not graded yet.",
+      "selfChecked": "Self-checked: you judge this one.",
+      "practiceOnly": "Practice only, not graded.",
       "playThis": "Play this",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "From {{from}} BPM",
       "playedNoClean": "{{count}} take. No clean tempo yet.",
       "playedNoClean_other": "{{count}} takes. No clean tempo yet.",
       "playedClean": "{{count}} take. Clean tempo {{bpm}} BPM.",
       "playedClean_other": "{{count}} takes. Clean tempo {{bpm}} BPM.",
-      "running": "Running",
       "whereYouAre": "Where you are",
       "openStep": "Go to step {{n}}",
       "subscribe": "Subscribe",
@@ -264,7 +272,8 @@
       "subscribeCap": "You can follow up to {{cap}} Paths in this test. Unsubscribe from one first; its history stays.",
       "unsubscribedNote": "Not in Today's plan. Your history is kept; subscribe again any time.",
       "testOut": "Test out",
-      "testOutHow": "One Take at each Exercise's pass tempo. Pass about three of four and the Step is done."
+      "testOutHow": "One Take at the pass tempo of each Exercise you haven't passed yet. Pass about three of four and the Step is done.",
+      "testOutRetests": "You've passed every Exercise here, so this re-tests them all: one Take each at the pass tempo."
     },
     "progress": {
       "title": "Progress",
@@ -305,6 +314,19 @@
       "note": "A JSON file with your Takes, clean tempos and the planner's reasons. Attach it to a feedback issue if you like; nothing is sent.",
       "done": "Saved to {{path}}.",
       "failed": "Couldn't save the file."
+    },
+    "subdivision": {
+      "wholes": "Whole notes",
+      "halves": "Half notes",
+      "halfTriplets": "Half-note triplets",
+      "quarters": "Quarter notes",
+      "quarterTriplets": "Quarter-note triplets",
+      "eighths": "8ths",
+      "eighthTriplets": "8th-note triplets",
+      "sixteenths": "16ths",
+      "quintuplets": "Quintuplets",
+      "sextuplets": "Sextuplets",
+      "thirtySeconds": "32nds"
     }
   }
 }

@@ -9,8 +9,11 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
-import { barLine } from "../../session/coachWords";
+import { barLine, tempoRange } from "../../session/coachWords";
 import { isRunnable, laterWhyKey } from "../../session/packs";
+import { stepPickDirectionMatters } from "../../session/caveats";
+import { testOutRetests } from "../../session/planner";
+import { PATH_BADGE_KEY, exerciseGradingKey, pathBadge } from "../../session/badges";
 import {
   cleanTempoOf,
   currentStepOf,
@@ -61,10 +64,16 @@ function StepPips({ session, path }: { session: SessionRun; path: PathDoc }) {
   );
 }
 
-function DraftNote({ path }: { path: PathDoc }) {
+/** Subscribed, Coming soon, or nothing (`session/badges.ts`). Never the pack's review status. */
+function PathBadgeTag({ session, path }: { session: SessionRun; path: PathDoc }) {
   const { t } = useTranslation();
-  if (path.review.status !== "draft") return null;
-  return <span className="session-tag">{t("session.paths.draft")}</span>;
+  const badge = pathBadge(path.id, session.progress);
+  if (!badge) return null;
+  return (
+    <span className="session-tag" data-met={badge === "subscribed" ? "" : undefined} data-badge={badge}>
+      {t(PATH_BADGE_KEY[badge])}
+    </span>
+  );
 }
 
 function PathList({
@@ -89,7 +98,6 @@ function PathList({
           <span className="session-why">{sub}</span>
         </div>
         {runnable.map((path) => {
-          const started = isSubscribed(progress, path.id);
           const current = currentStepOf(progress, path);
           return (
             <button
@@ -102,12 +110,7 @@ function PathList({
               <span className="session-col" style={{ gap: 2 }}>
                 <span className="session-row" data-wrap="">
                   <span className="session-h2">{path.title}</span>
-                  {started && (
-                    <span className="session-tag" data-met="">
-                      {t("session.paths.running")}
-                    </span>
-                  )}
-                  <DraftNote path={path} />
+                  <PathBadgeTag session={session} path={path} />
                 </span>
                 <span className="session-why">
                   {t("session.paths.stepCount", { count: path.steps.length })}
@@ -132,7 +135,7 @@ function PathList({
                 data-testid={`path-card-${path.id}`}
               >
                 {path.title}
-                <span className="session-tag">{t("session.paths.later")}</span>
+                <PathBadgeTag session={session} path={path} />
               </button>
             ))}
           </div>
@@ -186,7 +189,7 @@ function PathDetail({
         <div className="session-row" data-wrap="" style={{ gap: 9 }}>
           <h1 className="session-h1">{path.title}</h1>
           <KindTag kind={path.kind} />
-          <DraftNote path={path} />
+          {!runnable && <PathBadgeTag session={session} path={path} />}
         </div>
         <div className="session-why">{path.goal}</div>
         {!runnable && <div className="session-why">{t(laterWhyKey(path.id))}</div>}
@@ -345,6 +348,8 @@ function ExerciseRow({
   const played = takesOf(progress, path.id, exercise.id).length;
   const bar = barLine(exercise, exercise.tempo.passAtBpm);
   const gradable = isGradable(exercise);
+  const gradingKey = exerciseGradingKey(exercise, isRunnable(path.id));
+  const range = tempoRange(exercise);
   return (
     <div
       className="session-exercise session-glass session-rise"
@@ -365,8 +370,20 @@ function ExerciseRow({
           {passed && <span className="session-tag" data-met="">{t("session.paths.passed")}</span>}
         </div>
         <div className="session-why">{exercise.purpose}</div>
+        {range && (
+          <div className="session-quiet" data-testid={`tempo-${exercise.id}`}>
+            {[
+              range.subdivision ? t(`session.subdivision.${range.subdivision}`) : null,
+              range.to === null
+                ? t("session.paths.tempoFrom", { from: range.from })
+                : t("session.paths.tempoRange", { from: range.from, to: range.to }),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </div>
+        )}
         {gradable && bar && <div className="session-quiet">{lineText(t, bar)}</div>}
-        {!gradable && <div className="session-quiet">{t("session.paths.notGradedYet")}</div>}
+        {gradingKey && <div className="session-quiet">{t(gradingKey)}</div>}
         {played > 0 && (
           <div className="session-quiet">
             <b>
@@ -490,13 +507,17 @@ function StepDetail({
               >
                 {t("session.paths.testOut")}
               </button>
-              <div className="session-why">{t("session.paths.testOutHow")}</div>
+              <div className="session-why" data-testid="step-test-out-how">
+                {t(testOutRetests(path, step, progress) ? "session.paths.testOutRetests" : "session.paths.testOutHow")}
+              </div>
             </div>
           )}
         </div>
         <div className="session-col">
           <div className="session-slot" ref={slot} aria-hidden="true" style={{ minHeight: 240 }} />
-          <div className="session-why">{t("session.run.honest")}</div>
+          {stepPickDirectionMatters(step) && (
+            <div className="session-why" data-testid="pick-caveat">{t("session.run.honest")}</div>
+          )}
         </div>
       </div>
     </div>

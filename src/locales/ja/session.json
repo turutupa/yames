@@ -39,7 +39,12 @@
       "howLong": "時間はどれくらいありますか？ 分数：",
       "running": "進行中：{{paths}}",
       "leftOff": "前回の続き",
-      "leftOffValue": "{{bpm}} BPM で {{value}}。今日は少し遅めから始めます。",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM で均等さ {{value}}%。今日は少し遅めから始めます。",
+        "heard": "{{bpm}} BPM で音の {{value}}% を聞き取り。今日は少し遅めから始めます。",
+        "accents": "{{bpm}} BPM でアクセントの {{value}}% が正確。今日は少し遅めから始めます。",
+        "notes": "{{bpm}} BPM で正しい音 {{value}}%。今日は少し遅めから始めます。"
+      },
       "leftOffPlain": "{{bpm}} BPM。今日は少し遅めから始めます。",
       "whatsIn": "内容とその理由",
       "min": "分",
@@ -154,7 +159,8 @@
       "fairAsk": "この判定は妥当でしたか？",
       "fairYes": "はい",
       "fairNo": "いいえ",
-      "fairThanks": "ありがとう。練習データと一緒に保存しました。"
+      "fairThanksYes": "ありがとう：「妥当」として保存しました。変えるには「いいえ」をタップ。",
+      "fairThanksNo": "ありがとう：「妥当でない」として保存しました。変えるには「はい」をタップ。"
     },
     "edge": {
       "kick": "限界に挑戦",
@@ -230,11 +236,10 @@
       "intro": "目標を選びましょう。ロックされたものはありません。どのステップからでも始められ、あとから変えられます。",
       "theorySub": "何を弾くか",
       "mechanicsSub": "手がどう弾くか",
-      "later": "準備中",
       "laterWhy": "内容はもう読めます。必要な採点機能はあとで追加されます。",
+      "comingSoon": "近日公開",
       "stepCount": "{{count}} ステップ",
       "stepCount_other": "{{count}} ステップ",
-      "draft": "下書き",
       "back": "コース",
       "level": "レベル",
       "limits": "測れること、測れないこと",
@@ -249,12 +254,15 @@
       "yourStep": "いま取り組んでいるステップです。",
       "passed": "合格",
       "notGradedYet": "まだ採点されていません。",
+      "selfChecked": "セルフチェック：判断はあなたです。",
+      "practiceOnly": "練習用・採点なし。",
       "playThis": "これを弾く",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "{{from}} BPMから",
       "playedNoClean": "{{count}} テイク。クリーンテンポはまだありません。",
       "playedNoClean_other": "{{count}} テイク。クリーンテンポはまだありません。",
       "playedClean": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。",
       "playedClean_other": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。",
-      "running": "進行中",
       "whereYouAre": "現在地",
       "openStep": "ステップ {{n}} へ",
       "subscribe": "登録する",
@@ -264,7 +272,8 @@
       "subscribeCap": "このテストでは最大{{cap}}つのパスまで登録できます。先にどれかを解除してください。履歴は残ります。",
       "unsubscribedNote": "今日のプランには入りません。履歴は残るので、いつでも再登録できます。",
       "testOut": "テストアウト",
-      "testOutHow": "各練習の合格テンポで1テイクずつ。4つ中3つほど合格すればこのステップは完了です。"
+      "testOutHow": "まだ合格していない各練習を、合格テンポで1テイクずつ。4つ中3つほど合格すればこのステップは完了です。",
+      "testOutRetests": "ここの練習はすべて合格済みなので、全部をもう一度テストします：それぞれ合格テンポで1テイク。"
     },
     "progress": {
       "title": "上達",
@@ -305,6 +314,19 @@
       "note": "テイク、クリーンテンポ、プランナーの理由を含むJSONファイルです。必要ならフィードバックに添付してください。何も送信されません。",
       "done": "{{path}} に保存しました。",
       "failed": "ファイルを保存できませんでした。"
+    },
+    "subdivision": {
+      "wholes": "全音符",
+      "halves": "2分音符",
+      "halfTriplets": "2分3連符",
+      "quarters": "4分音符",
+      "quarterTriplets": "4分3連符",
+      "eighths": "8分音符",
+      "eighthTriplets": "8分3連符",
+      "sixteenths": "16分音符",
+      "quintuplets": "5連符",
+      "sextuplets": "6連符",
+      "thirtySeconds": "32分音符"
     }
   }
 }

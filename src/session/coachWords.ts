@@ -10,7 +10,7 @@
  * test walks every English sentence under `session.coach` and `session.why` for
  * that, the same way `src/paths/honesty.ts` walks a pack.
  */
-import type { Exercise } from "../paths/format";
+import type { Exercise, Subdivision } from "../paths/format";
 import type { BarCheck, TakeGrade } from "./grade";
 import type { Reason } from "./planner";
 import type { TakeMeasures } from "./takeMeasures";
@@ -62,6 +62,23 @@ export function metricKey(metric: string): "even" | "heard" | "extras" | "accent
     default:
       return "even";
   }
+}
+
+/**
+ * "Where you left off" on Today after a break: the last Take's headline number
+ * with its unit, "78% even at 80 BPM" (QA 2026-11-17 #22). Extra notes are a
+ * count, not a share, so they read as the plain line, as does a Take with no
+ * number on record.
+ */
+export function leftOffLine(facts: { headlineMetric?: string; headlineValue?: unknown }, bpm: number): Line {
+  const metric = metricKey(facts.headlineMetric ?? "timingEvenness");
+  if (typeof facts.headlineValue !== "number" || metric === "extras") {
+    return { key: "session.today.leftOffPlain", values: { bpm } };
+  }
+  return {
+    key: `session.today.leftOffValue.${metric}`,
+    values: { bpm, value: Math.round(facts.headlineValue * 100) },
+  };
 }
 
 /** A bar's value as the player reads it: a percentage, or a count. */
@@ -132,6 +149,18 @@ export function notCaughtHint(measures: TakeMeasures): Line {
     key: measures.heard === 0 ? "session.noCatch.hintNothing" : "session.noCatch.hintQuiet",
     values: {},
   };
+}
+
+/**
+ * What an Exercise card says about its tempo: what the tempo counts (when the
+ * pack says) and where the ladder starts and where it passes, "16ths · 60→110
+ * BPM" (QA 2026-11-17 #14). `to` is null when nothing passes it.
+ */
+export function tempoRange(exercise: Exercise): { subdivision: Subdivision | null; from: number; to: number | null } | null {
+  const from = exercise.tempo.rungs[0]?.bpm;
+  if (from === undefined) return null;
+  const to = exercise.tempo.passAtBpm;
+  return { subdivision: exercise.subdivision ?? null, from, to: to !== null && to !== from ? to : null };
 }
 
 /** What a Step's bar reads like, for the Step page and the running screen. */

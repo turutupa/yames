@@ -39,7 +39,12 @@
       "howLong": "你有多少時間？分鐘數：",
       "running": "進行中：{{paths}}",
       "leftOff": "上次練到哪裡",
-      "leftOffValue": "{{bpm}} BPM 時 {{value}}。今天從慢一點開始。",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM 時均勻度 {{value}}%。今天從慢一點開始。",
+        "heard": "{{bpm}} BPM 時聽到 {{value}}% 的音。今天從慢一點開始。",
+        "accents": "{{bpm}} BPM 時 {{value}}% 的重音到位。今天從慢一點開始。",
+        "notes": "{{bpm}} BPM 時音準 {{value}}%。今天從慢一點開始。"
+      },
       "leftOffPlain": "{{bpm}} BPM。今天從慢一點開始。",
       "whatsIn": "練什麼，為什麼",
       "min": "分鐘",
@@ -154,7 +159,8 @@
       "fairAsk": "這個評分公平嗎？",
       "fairYes": "是",
       "fairNo": "否",
-      "fairThanks": "謝謝。已和你的練習資料一起保存。"
+      "fairThanksYes": "謝謝：已記為公平。點「否」可以更改。",
+      "fairThanksNo": "謝謝：已記為不公平。點「是」可以更改。"
     },
     "edge": {
       "kick": "挑戰極限",
@@ -230,11 +236,10 @@
       "intro": "選一個目標。沒有任何鎖定：你可以從任意一步開始，也可以隨時改主意。",
       "theorySub": "你選擇彈什麼",
       "mechanicsSub": "你的手怎麼彈",
-      "later": "稍後",
       "laterWhy": "現在就可以閱讀。它需要的評分功能以後才有。",
+      "comingSoon": "即將推出",
       "stepCount": "{{count}} 步",
       "stepCount_other": "{{count}} 步",
-      "draft": "草稿",
       "back": "路線",
       "level": "級別",
       "limits": "能測什麼，不能測什麼",
@@ -249,12 +254,15 @@
       "yourStep": "這是你正在練的一步。",
       "passed": "已通過",
       "notGradedYet": "還沒評分。",
+      "selfChecked": "自行檢查：由你來判斷。",
+      "practiceOnly": "僅供練習，不評分。",
       "playThis": "彈這個",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "從 {{from}} BPM 起",
       "playedNoClean": "{{count}} 遍。還沒有乾淨速度。",
       "playedNoClean_other": "{{count}} 遍。還沒有乾淨速度。",
       "playedClean": "{{count}} 遍。乾淨速度 {{bpm}} BPM。",
       "playedClean_other": "{{count}} 遍。乾淨速度 {{bpm}} BPM。",
-      "running": "進行中",
       "whereYouAre": "你所在的位置",
       "openStep": "前往第 {{n}} 步",
       "subscribe": "訂閱",
@@ -264,7 +272,8 @@
       "subscribeCap": "本次測試最多可訂閱{{cap}}條路徑。請先取消一條；它的紀錄會保留。",
       "unsubscribedNote": "不在今天的計畫裡。你的紀錄會保留，隨時可以重新訂閱。",
       "testOut": "測試跳過",
-      "testOutHow": "每個練習以通過速度練一遍。大約四個通過三個，這一步就完成了。"
+      "testOutHow": "每個還沒通過的練習以通過速度練一遍。大約四個通過三個，這一步就完成了。",
+      "testOutRetests": "這裡的練習你都已通過，所以這次會全部重測：每個以通過速度練一遍。"
     },
     "progress": {
       "title": "進度",
@@ -305,6 +314,19 @@
       "note": "包含你的練習紀錄、乾淨速度和計畫理由的 JSON 檔案。願意的話可以附在回饋裡；不會傳送任何內容。",
       "done": "已儲存到 {{path}}。",
       "failed": "無法儲存檔案。"
+    },
+    "subdivision": {
+      "wholes": "全音符",
+      "halves": "二分音符",
+      "halfTriplets": "二分音符三連音",
+      "quarters": "四分音符",
+      "quarterTriplets": "四分音符三連音",
+      "eighths": "八分音符",
+      "eighthTriplets": "八分音符三連音",
+      "sixteenths": "十六分音符",
+      "quintuplets": "五連音",
+      "sextuplets": "六連音",
+      "thirtySeconds": "三十二分音符"
     }
   }
 }

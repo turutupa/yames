@@ -39,7 +39,12 @@
       "howLong": "¿Cuánto tiempo tienes? Minutos:",
       "running": "En marcha: {{paths}}",
       "leftOff": "Donde lo dejaste",
-      "leftOffValue": "{{value}} a {{bpm}} BPM. Hoy se empieza más lento.",
+      "leftOffValue": {
+        "even": "{{value}}% de regularidad a {{bpm}} BPM. Hoy se empieza más lento.",
+        "heard": "{{value}}% de las notas oídas a {{bpm}} BPM. Hoy se empieza más lento.",
+        "accents": "{{value}}% de los acentos en su sitio a {{bpm}} BPM. Hoy se empieza más lento.",
+        "notes": "{{value}}% de notas correctas a {{bpm}} BPM. Hoy se empieza más lento."
+      },
       "leftOffPlain": "{{bpm}} BPM. Hoy se empieza más lento.",
       "whatsIn": "Qué incluye, y por qué",
       "min": "MIN",
@@ -154,7 +159,8 @@
       "fairAsk": "¿Fue justa esta nota?",
       "fairYes": "Sí",
       "fairNo": "No",
-      "fairThanks": "Gracias. Queda guardado con tus datos de práctica."
+      "fairThanksYes": "Gracias: guardado como justa. Toca No para cambiarlo.",
+      "fairThanksNo": "Gracias: guardado como no justa. Toca Sí para cambiarlo."
     },
     "edge": {
       "kick": "Buscar mi límite",
@@ -233,12 +239,11 @@
       "intro": "Elige un objetivo. No hay nada bloqueado: puedes empezar cualquier paso y cambiar de idea.",
       "theorySub": "Lo que eliges tocar",
       "mechanicsSub": "Cómo tocan tus manos",
-      "later": "Más adelante",
       "laterWhy": "Esta ya la puedes leer. La puntuación que necesita llegará más adelante.",
+      "comingSoon": "Próximamente",
       "stepCount": "{{count}} paso",
       "stepCount_many": "{{count}} pasos",
       "stepCount_other": "{{count}} pasos",
-      "draft": "Borrador",
       "back": "Rutas",
       "level": "Nivel",
       "limits": "Lo que esto puede medir y lo que no",
@@ -254,14 +259,17 @@
       "yourStep": "Este es el paso en el que estás.",
       "passed": "Superado",
       "notGradedYet": "Aún no se puntúa.",
+      "selfChecked": "Autoevaluado: este lo juzgas tú.",
+      "practiceOnly": "Solo práctica, no se puntúa.",
       "playThis": "Tocar esto",
+      "tempoRange": "{{from}}→{{to}} BPM",
+      "tempoFrom": "Desde {{from}} BPM",
       "playedNoClean": "{{count}} toma. Aún sin tempo limpio.",
       "playedNoClean_many": "{{count}} tomas. Aún sin tempo limpio.",
       "playedNoClean_other": "{{count}} tomas. Aún sin tempo limpio.",
       "playedClean": "{{count}} toma. Tempo limpio: {{bpm}} BPM.",
       "playedClean_many": "{{count}} tomas. Tempo limpio: {{bpm}} BPM.",
       "playedClean_other": "{{count}} tomas. Tempo limpio: {{bpm}} BPM.",
-      "running": "En curso",
       "whereYouAre": "Dónde estás",
       "openStep": "Ir al paso {{n}}",
       "subscribe": "Suscribirme",
@@ -271,7 +279,8 @@
       "subscribeCap": "En esta prueba puedes seguir hasta {{cap}} caminos. Cancela uno primero; su historial se conserva.",
       "unsubscribedNote": "No está en el plan de hoy. Tu historial se conserva; vuelve a suscribirte cuando quieras.",
       "testOut": "Hacer examen",
-      "testOutHow": "Una toma al tempo de aprobado de cada ejercicio. Pasa unos tres de cada cuatro y el paso queda hecho."
+      "testOutHow": "Una toma al tempo de aprobado de cada ejercicio que aún no has pasado. Pasa unos tres de cada cuatro y el paso queda hecho.",
+      "testOutRetests": "Ya pasaste todos los ejercicios de aquí, así que esto los vuelve a probar todos: una toma de cada uno al tempo de aprobado."
     },
     "progress": {
       "title": "Progreso",
@@ -312,6 +321,19 @@
       "note": "Un archivo JSON con tus tomas, tempos limpios y los motivos del planificador. Adjúntalo a un informe si quieres; no se envía nada.",
       "done": "Guardado en {{path}}.",
       "failed": "No se pudo guardar el archivo."
+    },
+    "subdivision": {
+      "wholes": "Redondas",
+      "halves": "Blancas",
+      "halfTriplets": "Tresillos de blanca",
+      "quarters": "Negras",
+      "quarterTriplets": "Tresillos de negra",
+      "eighths": "Corcheas",
+      "eighthTriplets": "Tresillos de corchea",
+      "sixteenths": "Semicorcheas",
+      "quintuplets": "Quintillos",
+      "sextuplets": "Seisillos",
+      "thirtySeconds": "Fusas"
     }
   }
 }
