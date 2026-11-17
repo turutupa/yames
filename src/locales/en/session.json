@@ -21,7 +21,8 @@
       "even": "even",
       "heard": "of the notes heard",
       "extras": "extra notes",
-      "accents": "accents landed"
+      "accents": "accents landed",
+      "notes": "right notes"
     },
     "today": {
       "title": "Today",
@@ -52,14 +53,16 @@
         "heard": "Because I heard {{value}}% of the notes at {{bpm}} BPM. The bar is {{bar}}%.",
         "extras": "Because of extra notes at {{bpm}} BPM. The bar is {{bar}} over four bars.",
         "accents": "Because {{value}}% of the accents landed at {{bpm}} BPM. The bar is {{bar}}%.",
-        "plain": "Because the last Take at {{bpm}} BPM didn't meet the bar."
+        "plain": "Because the last Take at {{bpm}} BPM didn't meet the bar.",
+        "notes": "Because {{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM. The bar is {{bar}}%."
       },
       "easing": {
         "even": "Evenness was {{value}}% at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
         "heard": "I heard {{value}}% of the notes at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
         "extras": "There were extra notes at {{bpm}} BPM, so this is {{next}} BPM.",
         "accents": "{{value}}% of the accents landed at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM.",
-        "plain": "The last Takes at {{bpm}} BPM didn't meet the bar, so this is {{next}} BPM."
+        "plain": "The last Takes at {{bpm}} BPM didn't meet the bar, so this is {{next}} BPM.",
+        "notes": "{{value}}% of the notes I could pitch were the written ones at {{bpm}} BPM and the bar is {{bar}}%, so this is {{next}} BPM."
       },
       "climb": "Because you met the bar at {{bpm}} BPM. Next rung: {{next}}.",
       "climbFast": "Because evenness was {{value}}% at {{bpm}} BPM, well over the bar. This skips to {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "The bar is {{bar}}",
       "cleanFirst": "Clean tempo: {{bpm}} BPM.",
       "cleanMoved": "Clean tempo: {{from}} to {{bpm}} BPM.",
-      "unmeasuredNotes": "I checked timing only. Whether they were the right notes isn't graded yet.",
+      "unmeasuredNotes": "I checked the timing. I couldn't hear the notes clearly enough to say whether they were the right ones, so that wasn't graded this time.",
       "againSame": "Again, {{bpm}} BPM",
       "moveOn": "Move on"
     },
@@ -144,7 +147,8 @@
         "even": "Evenness was {{value}}%. Heard {{heard}} of {{expected}} notes. Same notes, same tempo.",
         "heard": "I heard {{heard}} of {{expected}} notes, and timing can't pass without them.",
         "extras": "{{extras}} notes I wasn't expecting. Keep the idle strings quiet if they're ringing.",
-        "accents": "{{value}}% of the marked accents came out louder than the notes around them."
+        "accents": "{{value}}% of the marked accents came out louder than the notes around them.",
+        "notes": "{{value}}% of the notes I could pitch were the written ones. Same notes, same tempo, and watch the frets."
       }
     },
     "noCatch": {

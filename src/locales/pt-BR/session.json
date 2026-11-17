@@ -21,7 +21,8 @@
       "even": "regular",
       "heard": "das notas ouvidas",
       "extras": "notas a mais",
-      "accents": "acentos certeiros"
+      "accents": "acentos certeiros",
+      "notes": "notas certas"
     },
     "today": {
       "title": "Hoje",
@@ -52,14 +53,16 @@
         "heard": "Porque eu ouvi {{value}}% das notas a {{bpm}} BPM. A meta é {{bar}}%.",
         "extras": "Por causa de notas a mais a {{bpm}} BPM. A meta é {{bar}} a cada quatro compassos.",
         "accents": "Porque {{value}}% dos acentos caíram no lugar a {{bpm}} BPM. A meta é {{bar}}%.",
-        "plain": "Porque a última tomada a {{bpm}} BPM não bateu a meta."
+        "plain": "Porque a última tomada a {{bpm}} BPM não bateu a meta.",
+        "notes": "Porque {{value}}% das notas que consegui identificar eram as escritas a {{bpm}} BPM. A meta é {{bar}}%."
       },
       "easing": {
         "even": "A regularidade foi de {{value}}% a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "heard": "Eu ouvi {{value}}% das notas a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
         "extras": "Teve notas a mais a {{bpm}} BPM, então agora vai a {{next}} BPM.",
         "accents": "{{value}}% dos acentos caíram no lugar a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM.",
-        "plain": "As últimas tomadas a {{bpm}} BPM não bateram a meta, então agora vai a {{next}} BPM."
+        "plain": "As últimas tomadas a {{bpm}} BPM não bateram a meta, então agora vai a {{next}} BPM.",
+        "notes": "{{value}}% das notas identificadas eram as escritas a {{bpm}} BPM e a meta é {{bar}}%, então agora vai a {{next}} BPM."
       },
       "climb": "Porque você bateu a meta a {{bpm}} BPM. Próximo degrau: {{next}}.",
       "climbFast": "Porque a regularidade foi de {{value}}% a {{bpm}} BPM, bem acima da meta. Isto pula para {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "A meta é {{bar}}",
       "cleanFirst": "Andamento limpo: {{bpm}} BPM.",
       "cleanMoved": "Andamento limpo: de {{from}} para {{bpm}} BPM.",
-      "unmeasuredNotes": "Só conferi o tempo. Ainda não avalio se eram as notas certas.",
+      "unmeasuredNotes": "Conferi o tempo. Não ouvi as notas com clareza suficiente para dizer se eram as certas, então isso não foi avaliado desta vez.",
       "againSame": "De novo, {{bpm}} BPM",
       "moveOn": "Seguir em frente"
     },
@@ -144,7 +147,8 @@
         "even": "A regularidade foi de {{value}}%. Ouvi {{heard}} de {{expected}} notas. Mesmas notas, mesmo andamento.",
         "heard": "Ouvi {{heard}} de {{expected}} notas, e o tempo não passa sem elas.",
         "extras": "{{extras}} notas que eu não esperava. Abafe as cordas soltas se estiverem soando.",
-        "accents": "{{value}}% dos acentos marcados saíram mais fortes que as notas em volta."
+        "accents": "{{value}}% dos acentos marcados saíram mais fortes que as notas em volta.",
+        "notes": "{{value}}% das notas que consegui identificar eram as escritas. Mesmas notas, mesmo andamento, e atenção às casas."
       }
     },
     "noCatch": {

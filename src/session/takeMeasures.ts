@@ -10,6 +10,7 @@
  * It never invents a number. A value the report does not carry is `null`, and
  * `grade.ts` treats `null` as "not measured", never as zero and never as a pass.
  */
+import { getTakeGradeWithNotes } from "../ipc";
 import type {
   NoCatchReason,
   PracticeSegmentEndedPayload,
@@ -33,7 +34,11 @@ export type TakeMeasures = {
   evenness: number | null;
   /** Whether marked accents came out louder, 0 to 1, when that could be told. */
   accent: number | null;
-  /** Right notes, 0 to 1. Pitch is not wired to Exercises yet, so null. */
+  /**
+   * Right notes, 0 to 1: of the heard notes that had a pitch, the share that
+   * were the written one, in the window the scorer judged. Null when the pitch
+   * pass did not run or could not be believed (`pass.notes.status`).
+   */
   noteIdentity: number | null;
   /** Bars the transport got through. */
   barsPlayed: number;
@@ -90,6 +95,37 @@ function barsOf(grade: ScorerTakeGrade): number[] | null {
   return out;
 }
 
+/** The scorer's right-notes value, when it measured one. */
+function noteIdentityOf(pass: ScorerPassResult | undefined): number | null {
+  if (pass?.notes?.status !== "measured") return null;
+  return pass.checks.find((c) => c.metric === "noteIdentity")?.measured ?? null;
+}
+
+/**
+ * How long a Take's result waits for right notes. The pitch pass takes well
+ * under a second for a Take in a release build; this is the end of the
+ * "mid-session report" tier (`AGENTS.md`, 3 to 8 s) less the time the timing
+ * grade already took, and past it the timing grade stands.
+ */
+export const NOTES_WAIT_MS = 5000;
+
+/**
+ * The grade a Take's result should read: the timing grade as it came, or, when
+ * it said the pitch pass was still running, the grade with right notes in it.
+ * The timing numbers are the same in both; only `pass` gains `noteIdentity`.
+ * A build without the command, a pass that is not done in time, or one that
+ * failed all leave the timing grade, `noteIdentity` not assessed.
+ */
+export async function withRightNotes(
+  grade: ScorerTakeGrade | null,
+  fetch: (timeoutMs: number) => Promise<ScorerTakeGrade | null> = getTakeGradeWithNotes,
+): Promise<ScorerTakeGrade | null> {
+  if (!grade?.notesPending) return grade;
+  const withNotes = await fetch(NOTES_WAIT_MS).catch(() => null);
+  if (!withNotes?.pass) return { ...grade, notesPending: false };
+  return { ...grade, pass: withNotes.pass, notesPending: false };
+}
+
 function fromGrade(
   grade: ScorerTakeGrade,
   report: ScorerReport | null,
@@ -102,7 +138,7 @@ function fromGrade(
     extras: grade.extra,
     evenness: caught ? grade.evenness : null,
     accent: typeof report?.accentAgreement === "number" ? report.accentAgreement : null,
-    noteIdentity: null,
+    noteIdentity: caught ? noteIdentityOf(grade.pass) : null,
     barsPlayed: context.barsPlayed,
     barEvenness: caught ? barsOf(grade) : null,
     caught,

@@ -149,7 +149,8 @@
     "list_path_states",
     "list_path_takes",
     "save_path_state",
-    "save_path_take"
+    "save_path_take",
+    "get_take_grade_with_notes"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -299,7 +300,8 @@
     "list_path_states",
     "list_path_takes",
     "save_path_state",
-    "save_path_take"
+    "save_path_take",
+    "get_take_grade_with_notes"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -498,7 +500,8 @@
     "listPathStates",
     "listPathTakes",
     "savePathState",
-    "savePathTake"
+    "savePathTake",
+    "getTakeGradeWithNotes"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",

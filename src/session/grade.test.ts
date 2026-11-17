@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { Exercise } from "../paths/format";
 import { CLEAN_TEMPO_MIN_BARS, gradeTake, takeBarsOf } from "./grade";
 import type { TakeMeasures } from "./takeMeasures";
-import { MIN_HEARD_NOTES, measureTake } from "./takeMeasures";
+import { MIN_HEARD_NOTES, measureTake, withRightNotes } from "./takeMeasures";
+import { takeLine } from "./coachWords";
 import type { ScorerReport } from "./takeMeasures";
 import type { ScorerTakeGrade } from "../ipc";
 import { ALT } from "./testKit";
@@ -325,5 +326,101 @@ describe("a Take's length", () => {
     expect(second.exercise.notes).toEqual(varied.variation!.variants[1].notes);
     // Variants move the notes, not the rhythm: the tab differs, the timing schedule need not.
     expect(new TextDecoder().decode(first.source)).not.toBe(new TextDecoder().decode(second.source));
+  });
+});
+
+describe("right notes", () => {
+  // The scorer's pass on the Exercise that names noteIdentity, every bar held
+  // unless a test says otherwise.
+  const scorerPass = (
+    notes: ScorerPassResult["notes"],
+    identity: { measured: number; held: boolean } | null,
+  ): ScorerPassResult => {
+    const timing = WITH_PITCH.passBars.filter((b) => b.metric !== "noteIdentity");
+    const idBar = WITH_PITCH.passBars.find((b) => b.metric === "noteIdentity")!;
+    return {
+      verdict: identity && !identity.held ? "failed" : "passed",
+      windowBars: 4,
+      finishedBars: 8,
+      heldBars: identity && !identity.held ? 0 : 8,
+      heldFromBar: 0,
+      countsForCleanTempo: !(identity && !identity.held),
+      windowFromBar: 0,
+      checks: [
+        ...timing.map((bar) => ({ ...bar, measured: bar.max === undefined ? 0.95 : 0, held: true })),
+        ...(identity ? [{ ...idBar, ...identity }] : []),
+      ],
+      notAssessed: identity ? [] : ["noteIdentity"],
+      ...(notes ? { notes } : {}),
+    };
+  };
+  const counts = { right: 60, wrong: 0, octave: 0, unpitched: 2 };
+
+  it("a measured noteIdentity is in the checks and in the verdict", () => {
+    const grade = scorerGrade({ pass: scorerPass({ status: "measured", ...counts }, { measured: 0.97, held: true }) });
+    const m = measureTake(null, { barsPlayed: 8, grade });
+    expect(m.noteIdentity).toBe(0.97);
+    const g = gradeTake(WITH_PITCH, 100, m);
+    expect(g.verdict).toBe("passed");
+    expect(g.unmeasured).toEqual([]);
+    expect(g.checks.find((c) => c.metric === "noteIdentity")).toMatchObject({ value: 0.97, met: true });
+  });
+
+  it("wrong notes fail the Take, and the coach says it was the notes", () => {
+    const grade = scorerGrade({
+      pass: scorerPass({ status: "measured", ...counts, right: 45, wrong: 15 }, { measured: 0.75, held: false }),
+    });
+    const m = measureTake(null, { barsPlayed: 8, grade });
+    const g = gradeTake(WITH_PITCH, 100, m);
+    expect(g.verdict).toBe("belowBar");
+    expect(g.headline).toMatchObject({ metric: "noteIdentity", value: 0.75, met: false });
+    expect(takeLine(g, m, 100).key).toBe("session.coach.below.notes");
+  });
+
+  it("notes the pitch pass could not believe are named as not measured, and decide nothing", () => {
+    const grade = scorerGrade({ pass: scorerPass({ status: "notesRing", ...counts, right: 10, unpitched: 50 }, null) });
+    const m = measureTake(null, { barsPlayed: 8, grade });
+    expect(m.noteIdentity).toBeNull();
+    const g = gradeTake(WITH_PITCH, 100, m);
+    expect(g.verdict).toBe("passed");
+    expect(g.unmeasured).toEqual(["noteIdentity"]);
+  });
+
+  it("waits for the grade with right notes only when the scorer said it is coming", async () => {
+    const timed = scorerGrade({ notesPending: true, pass: scorerPass({ status: "notRun", ...counts }, null) });
+    const full = scorerGrade({
+      score: 1, // only `pass` is taken from it
+      pass: scorerPass({ status: "measured", ...counts }, { measured: 1, held: true }),
+    });
+    const asked: number[] = [];
+    const merged = await withRightNotes(timed, async (ms) => {
+      asked.push(ms);
+      return full;
+    });
+    expect(asked.length).toBe(1);
+    expect(merged?.notesPending).toBe(false);
+    expect(merged?.score).toBe(timed.score);
+    expect(merged?.pass?.notes?.status).toBe("measured");
+
+    const plain = scorerGrade();
+    expect(await withRightNotes(plain, () => Promise.reject(new Error("never asked")))).toBe(plain);
+    expect(await withRightNotes(null)).toBeNull();
+  });
+
+  it("keeps the timing grade when the right notes do not come in time", async () => {
+    const timed = scorerGrade({ notesPending: true, pass: scorerPass({ status: "notRun", ...counts }, null) });
+    const late = await withRightNotes(timed, async () => null);
+    expect(late?.pass).toBe(timed.pass);
+    expect(late?.notesPending).toBe(false);
+    const broken = await withRightNotes(timed, () => Promise.reject(new Error("an older build")));
+    expect(gradeTake(WITH_PITCH, 100, measureTake(null, { barsPlayed: 8, grade: broken })).unmeasured).toEqual([
+      "noteIdentity",
+    ]);
+  });
+
+  it("a Take carries the written pitches the scorer checks against", () => {
+    const take = buildTake(ALT, WITH_PITCH, 100);
+    expect(take.pitches.length).toBe(take.score.notes.length);
+    expect(take.pitches[0]).toEqual({ id: take.score.notes[0].id, midi: take.score.notes[0].midi });
   });
 });
