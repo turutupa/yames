@@ -101,6 +101,44 @@ test.describe("the learning side on a phone", () => {
     }
   }
 
+  // QA 2 (2026-11-17) #1 and #2: in the longest languages, on the narrowest
+  // phones, the recap's "What moved" number drew over its own details, and the
+  // first run's Next ran off the card.
+  for (const lng of ["ru", "de", "pt-BR", "fr"]) {
+    for (const size of [{ width: 360, height: 800 }, { width: 390, height: 844 }]) {
+      test(`the recap and the first run's footer fit in ${lng} at ${size.width}px`, async ({ page }) => {
+        test.slow();
+        await openShot(page, "phone-session-recap", size, "ember", { lng });
+        const recap = await page.evaluate(() =>
+          [...document.querySelectorAll(".session-recap-item")].map((item) => {
+            const box = item.getBoundingClientRect();
+            const text = item.querySelector(".session-recap-text")!.getBoundingClientRect();
+            const num = item.querySelector(".session-recap-number")?.getBoundingClientRect();
+            return {
+              textWide: Math.round(text.width) >= 150,
+              apart: !num || num.top >= text.bottom - 1 || num.left >= text.right - 1,
+              inside: !num || (num.right <= box.right + 1 && num.left >= box.left - 1),
+            };
+          }),
+        );
+        expect(recap.length, "no recap rows").toBeGreaterThan(0);
+        expect(recap.every((r) => r.textWide && r.apart && r.inside), JSON.stringify(recap)).toBe(true);
+
+        await openShot(page, "phone-firstrun-input", size, "ember", { lng });
+        const out = await page.evaluate(() => {
+          const footer = document.querySelector(".onboarding-footer")!.getBoundingClientRect();
+          return [...document.querySelectorAll<HTMLElement>(".onboarding-footer .onboarding-btn")]
+            .filter((b) => {
+              const r = b.getBoundingClientRect();
+              return r.left < footer.left - 1 || r.right > footer.right + 1 || b.scrollWidth > b.clientWidth + 1;
+            })
+            .map((b) => b.textContent);
+        });
+        expect(out, "footer buttons off the card").toEqual([]);
+      });
+    }
+  }
+
   test("the tab bar clears the gesture bar the phone reports", async ({ page }) => {
     await openShot(page, "phone-today-returning", { width: 360, height: 800 });
     const inset = 24;
