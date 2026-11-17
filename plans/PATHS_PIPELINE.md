@@ -18,6 +18,9 @@ npm run paths -- check [id]                              # validate; prove packs
 npm run paths -- validate <file.json>                    # validate any pack file
 npm run paths -- review [id] [--out dir]                 # one HTML page per Path
 npm run paths -- all                                     # gen, check, review
+npm run paths -- strings [id]                            # English text for translators, and a report
+npm run paths -- strings todo <lng> [--out file]         # what <lng> still needs, each sentence once
+npm run paths -- strings merge <lng> <file>              # take translations in, stamped
 ```
 
 Review pages go to `../yames-concept/paths-review/` unless `--out` says otherwise.
@@ -110,6 +113,36 @@ hear themselves gain), `prerequisites`, `difficulty`, optional
 
 Review status: `draft`, then `agent-reviewed`, `teacher-reviewed`, `played`. Past
 draft, the validator wants an entry in `review.history` with who and when.
+
+## Pack text in other languages
+
+Added 2026-11-17 (QA item 10). A pack's notes, ids and grading are the same in
+every language; only what a player reads is translated, in an overlay per language
+and Path: `src/paths/packs/i18n/<lng>/<pathId>.json` (`src/paths/strings.ts`).
+
+- **Keys** are stable ids and field names: `path.title`, `path.gradingLimits`,
+  `level.<levelId>.startHereIf.0`, `step.<stepId>.why`, `step.<stepId>.howTo.1`,
+  `exercise.<exerciseId>.coachLine`, `exercise.<id>.selfCheck.0`,
+  `exercise.<id>.detection.0` (warm-ups are Exercises too). One walk over the pack
+  both extracts and applies them, so they cannot drift. Not translated: ids, tab,
+  notes, chords, variant labels, and author-facing text (`orderRationale`,
+  `difficultyException`, `feedbackNote`, review history).
+- **`i18n/en/<pathId>.json`** is the translators' source, written by
+  `paths -- strings` from the pack and never bundled. `check` fails when it is not
+  what the pack says.
+- **Each translation is stamped** with a hash of the English it was made from
+  (`from`). If the English changes, the hash stops matching, the app shows the new
+  English, and `check` counts the string as outdated; `strings todo <lng>` lists it
+  for translating again. A missing string is English too. Both are allowed.
+- **`check` fails** on an overlay key the English does not have (stale), or a
+  `{{placeholder}}` or tag that is not in both. `strings` and `merge` also warn when
+  the numbers differ (usually a spelled-out number written as digits).
+- **The app** (`src/session/packs.ts`) loads each pack with its overlay for the
+  language on screen, as a lazy chunk, and again when the language changes.
+
+To retranslate after an English change: `npm run paths -- gen && npm run paths --
+strings`, then for each language `strings todo <lng> --out todo.json`, translate the
+values (keep the keys), and `strings merge <lng> translated.json`.
 
 ## Levels, variation and warm-ups
 

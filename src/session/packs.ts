@@ -8,8 +8,17 @@
  */
 import { PATH_SCHEMA_VERSION } from "../paths/format";
 import type { Exercise, PathDoc, Step } from "../paths/format";
+import { localizePack, readOverlay } from "../paths/strings";
+import type { StringsOverlay } from "../paths/strings";
 
 const PACK_FILES = import.meta.glob("../paths/packs/*.json");
+
+/**
+ * The words of each pack in other languages (`src/paths/strings.ts`), one chunk
+ * per language and Path, fetched with the pack for the language on screen.
+ * English is the pack itself, so `en/` (the translators' source) is not bundled.
+ */
+const OVERLAY_FILES = import.meta.glob(["../paths/packs/i18n/*/*.json", "!../paths/packs/i18n/en/*.json"]);
 
 /**
  * The Paths a Session can run today.
@@ -70,13 +79,35 @@ export function readPack(raw: unknown): PathDoc | null {
   return doc as PathDoc;
 }
 
-/** Every pack in the bundle, in a stable order, the unreadable ones left out. */
-export async function loadAllPacks(): Promise<PathDoc[]> {
+/**
+ * The overlay for one Path in one language, or null: English, an unknown
+ * language, or a file that does not read. Never throws; English is the answer.
+ */
+export async function loadOverlay(pathId: string, lng: string): Promise<StringsOverlay | null> {
+  if (!lng || lng === "en") return null;
+  const load = OVERLAY_FILES[`../paths/packs/i18n/${lng}/${pathId}.json`];
+  if (!load) return null;
+  try {
+    const module = (await load()) as { default?: unknown };
+    return readOverlay(module.default ?? module);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Every pack in the bundle, in a stable order, the unreadable ones left out,
+ * with its words in `lng` where they have been translated and English
+ * elsewhere. Ids, notes and grading are the same in every language.
+ */
+export async function loadAllPacks(lng = "en"): Promise<PathDoc[]> {
   const paths = Object.keys(PACK_FILES).sort();
   const docs = await Promise.all(
     paths.map(async (file) => {
       const module = (await PACK_FILES[file]()) as { default?: unknown };
-      return readPack(module.default ?? module);
+      const doc = readPack(module.default ?? module);
+      if (!doc) return null;
+      return localizePack(doc, await loadOverlay(doc.id, lng));
     }),
   );
   return docs.filter((doc): doc is PathDoc => doc !== null);

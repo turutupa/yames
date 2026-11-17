@@ -21,6 +21,7 @@
  * Session does not go through yet.
  */
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   clearScoreSchedule,
   clearSong,
@@ -223,6 +224,8 @@ export function useSessionRun(input: SessionRunInput) {
   const { view, setView, isPlaying, beat, listening } = input;
   const [run, dispatch] = useReducer(runReducer, IDLE);
   const [paths, setPaths] = useState<PathDoc[]>([]);
+  const { i18n } = useTranslation();
+  const packLanguage = i18n.resolvedLanguage ?? i18n.language ?? "en";
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
   const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
@@ -303,7 +306,6 @@ export function useSessionRun(input: SessionRunInput) {
     setPlanClock(Date.now());
     if (loadedRef.current) return;
     loadedRef.current = true;
-    void loadAllPacks().then(setPaths);
     void refresh();
     void storeLoad<number>(MINUTES_KEY).then((saved) => {
       if (PLAN_MINUTES.includes(saved as PlanMinutes)) setMinutesState(saved as PlanMinutes);
@@ -315,6 +317,26 @@ export function useSessionRun(input: SessionRunInput) {
       setBandChoice(readBandVolume(saved));
     });
   }, [onLearningSide, refresh]);
+
+  // The packs, in the language on screen: loaded with the learning side, and
+  // again when the language changes. Ids and notes are the same in every
+  // language, so a plan or a Take in progress keeps its place.
+  const packsLanguage = useRef<string | null>(null);
+  useEffect(() => {
+    if (!onLearningSide || packsLanguage.current === packLanguage) return;
+    packsLanguage.current = packLanguage;
+    let current = true;
+    let done = false;
+    void loadAllPacks(packLanguage).then((docs) => {
+      done = true;
+      if (current) setPaths(docs);
+    });
+    return () => {
+      current = false;
+      // Interrupted before it arrived: the next run must load it again.
+      if (!done && packsLanguage.current === packLanguage) packsLanguage.current = null;
+    };
+  }, [onLearningSide, packLanguage]);
 
   const setMinutes = useCallback((next: PlanMinutes) => {
     setMinutesState(next);

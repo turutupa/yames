@@ -19101,7 +19101,7 @@
           "detection": {
             "flags": ["sustainedPlaying"],
             "notes": [
-              "Long unbroken playing, especially high-gain, is where the onset noise floor may close and stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
+              "Long unbroken playing, especially high-gain, can drown out where each note starts, so the app may stop hearing you. Unproven either way; if the app says it did not catch enough, believe that before you doubt your hands."
             ]
           },
           "backing": {
