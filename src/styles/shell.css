@@ -1281,8 +1281,8 @@ button.jam-vibe-chip {
   display: flex;
   align-items: center;
   gap: 11px;
-  height: 42px;
-  padding: 0 12px 0 10px;
+  min-height: 42px;
+  padding: 3px 12px 3px 10px;
   border: none;
   border-left: 2px solid transparent;
   border-radius: var(--radius-sm);
@@ -1331,9 +1331,14 @@ button.jam-vibe-chip {
 }
 
 .rail-mode-label {
-  white-space: nowrap;
+  /* A long name takes two lines rather than an ellipsis ("Темповая
+     тренировка", QA 2026-11-17 #11); a third is clamped. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.15;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* ── Jam now, on the rail (JAM_KILLER A4) ──────────────────────────────────
@@ -1488,8 +1493,8 @@ body[data-sheet-maximized] .rail {
   display: flex;
   align-items: center;
   gap: 11px;
-  height: 42px;
-  padding: 0 12px 0 10px;
+  min-height: 42px;
+  padding: 3px 12px 3px 10px;
   border: none;
   border-left: 2px solid transparent;
   border-radius: var(--radius-sm);
@@ -1526,10 +1531,16 @@ body[data-sheet-maximized] .rail {
 
 .rail-action-label {
   flex: 1;
+  min-width: 0;
   text-align: left;
-  white-space: nowrap;
+  /* Two lines before an ellipsis, as the modes above ("Свернуть боковую
+     панель", "Спросить тренера" beside its status; QA #11). */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.15;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* The coach's status, at the right of its row. Quieter and smaller than the

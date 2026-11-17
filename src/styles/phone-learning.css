@@ -101,3 +101,23 @@
   text-align: left;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
+
+/* A running Take's numbers on a phone: heard so far, bars and the BPM share
+   one row at 360 px (QA 2026-11-17 #4, "0 / 8" broke into a column), and the
+   timing strip under them is a thin line, so the neck keeps the room. */
+.main-window.is-mobile .session-run .session-stat[data-xl] b {
+  font-size: 54px;
+}
+.main-window.is-mobile .session-run .session-stat b {
+  font-size: 40px;
+}
+.main-window.is-mobile .session-run .session-bpm {
+  font-size: 46px;
+}
+.main-window.is-mobile .session-run .session-strip {
+  height: 52px;
+}
+.main-window.is-mobile .session-run .session-takerow:has(> .session-live) {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}

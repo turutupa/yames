@@ -49,6 +49,8 @@
       "whatsIn": "O que tem nela, e por quê",
       "min": "MIN",
       "nothing": "Ainda não há nada para tocar.",
+      "noPaths": "Você não está em nenhuma trilha agora. Escolha uma e o Hoje monta sua sessão a partir dela.",
+      "choosePath": "Escolher uma trilha",
       "needsInput": "Para dar nota é preciso um microfone ou uma entrada direta.",
       "toolsOffer": "Veio pelas ferramentas? Estão todas em Ferramentas.",
       "toolsOfferOpen": "Ir para minha última ferramenta",
@@ -313,7 +315,8 @@
       "between": "Troque a visualização entre os takes"
     },
     "runway": {
-      "label": "As próximas notas, chegando à linha"
+      "label": "As próximas notas, chegando à linha",
+      "later": "A pista começa com a tomada. Primeiro posicione a mão aqui; depois as notas chegam pela direita e você toca cada uma quando ela alcança a linha."
     },
     "inputChanged": "A entrada mudou. Agora estou ouvindo por {{device}}.",
     "export": {

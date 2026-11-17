@@ -38,8 +38,18 @@ export function PracticeViewSwitch({ session, locked }: { session: SessionRun; l
       role="radiogroup"
       aria-label={t("session.view.label")}
       title={locked ? t("session.view.between") : undefined}
+      aria-disabled={locked || undefined}
+      data-locked={locked ? "" : undefined}
       data-testid="practice-view"
     >
+      {/* Locked while a Take runs, and it looks it: a padlock, a dashed
+          edge, both halves quiet (QA 2026-11-17 #20). */}
+      {locked && (
+        <svg className="session-viewswitch-lock" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor" />
+          <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+        </svg>
+      )}
       {views.map((v) => (
         <button
           key={v}
@@ -164,8 +174,8 @@ export function RunwayTakeScreen({
         {running ? (
           <>
             <span className="session-compact-stat">
-              <b className="session-good">
-                {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–"}
+              <b className={scored > 0 ? "session-good" : "session-stat-none"}>
+                {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–%"}
               </b>
               <span>{t("session.run.heardSoFar")}</span>
             </span>
@@ -204,6 +214,15 @@ export function RunwayTakeScreen({
 
       <div className="session-actions">
         <div className="session-runway-notes">
+          {/* The ready screen keeps the one picture a hand needs before it
+              plays, the neck (WHERE). The runway is WHEN, so it has nothing to
+              say until the Take runs, and a frozen strip beside the neck would
+              be two pictures at once (QA 2026-11-17 #19). Theory has no runway. */}
+          {!running && !theory && (
+            <span className="session-why session-runway-later" data-testid="runway-later">
+              {t("session.runway.later")}
+            </span>
+          )}
           {!running && listening && (
             <span className="session-signal" data-on={hasSignal ? "" : undefined}>
               <i />

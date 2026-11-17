@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, noSidewaysScroll, MOBILE_URL } from "./fits";
+import { openShot, noSidewaysScroll, MOBILE_URL, notHitTestable, overlapping, spillingLabels } from "./fits";
 import { PHONE_LEARNING_SCENES } from "../../src/shots/scenarios";
 
 /**
@@ -83,8 +83,10 @@ test.describe("the learning side on a phone", () => {
         const first = await smallTargets(page);
         // A sweep that finds nothing looks exactly like one that cannot find
         // anything: every one of these screens has a control to press (the
-        // welcome card has two; the rest have the tab bar as well).
-        expect(first.seen, "no controls measured at all").toBeGreaterThan(1);
+        // welcome card has two; the rest have the tab bar as well, except a
+        // running Session, which has no tab bar (QA 2026-11-17 #3) and whose
+        // recap has only "Done").
+        expect(first.seen, "no controls measured at all").toBeGreaterThan(scene.startsWith("session-") ? 0 : 1);
         expect(first.small, "controls smaller than 44×44 px").toEqual([]);
 
         // And again at the bottom of the screen, where the last card meets
@@ -117,30 +119,90 @@ test.describe("the learning side on a phone", () => {
 
   // The runway Take on a phone (mvp-runway, "one picture at a time"): while
   // the Take runs, the runway is the picture — on screen, as wide as the
-  // phone, and above the tab bar, at both widths.
+  // phone, and inside the window (no tab bar while a Session runs), at both widths.
   for (const size of WIDTHS) {
     test(`the runway Take fills the phone at ${size.width}px`, async ({ page }) => {
       await openShot(page, "phone-session-runway-playing", size);
       const runway = page.locator('[data-testid="runway"]');
       await expect(runway, "no runway during the Take").toBeVisible();
       const r = (await runway.boundingBox())!;
-      const bar = (await page.locator(".mobile-tabs").boundingBox())!;
       expect(Math.round(r.x), "the runway starts off the left edge").toBeGreaterThanOrEqual(0);
       expect(Math.round(r.x + r.width), "the runway runs off the right edge").toBeLessThanOrEqual(size.width);
       expect(Math.round(r.width), "the runway is a strip, not the picture").toBeGreaterThan(size.width * 0.8);
       expect(Math.round(r.height), "the runway has no height to fall down").toBeGreaterThan(200);
-      expect(Math.round(r.y), "the runway starts under the tab bar").toBeLessThan(Math.round(bar.y));
+      expect(Math.round(r.y + r.height), "the runway runs off the bottom").toBeLessThanOrEqual(size.height);
     });
   }
 
-  test("a Session's big button scrolls clear of the tab bar", async ({ page }) => {
+  // QA 2026-11-17 #3: one picture at a time. While a Session runs the tab bar
+  // is gone (it covered "Start take" at 360x800); Exit is the way out.
+  for (const scene of ["session-ready", "session-playing", "session-between", "session-result", "session-recap"]) {
+    test(`no tab bar during ${scene}`, async ({ page }) => {
+      await openShot(page, `phone-${scene}`, { width: 360, height: 800 });
+      await expect(page.locator('[data-testid="session"]')).toBeVisible();
+      await expect(page.locator(".mobile-tabs")).toHaveCount(0);
+    });
+  }
+
+  test("a Session's big button is reachable, with nothing over it", async ({ page }) => {
     await openShot(page, "phone-session-ready", { width: 360, height: 800 });
-    const big = page.locator('[data-testid="session-big"]');
-    await big.scrollIntoViewIfNeeded();
-    const b = (await big.boundingBox())!;
-    const bar = (await page.locator(".mobile-tabs").boundingBox())!;
-    expect(Math.round(b.y + b.height), "the big button is under the tab bar").toBeLessThanOrEqual(
-      Math.round(bar.y),
-    );
+    expect(await notHitTestable(page, '[data-testid="session-big"], [data-testid="session-exit"]')).toEqual([]);
   });
+
+  test("the tab bar is back on Today after a Session", async ({ page }) => {
+    await openShot(page, "phone-today-returning", { width: 360, height: 800 });
+    await expect(page.locator(".mobile-tabs")).toBeVisible();
+  });
+
+  for (const size of WIDTHS) {
+    // #1: the Step page's first card's buttons, under the neck's slot.
+    test(`phone-step-detail: every button takes a tap, nothing overlaps, at ${size.width}px`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "phone-step-detail", size);
+      expect(await notHitTestable(page, '[data-testid="step-detail"] button')).toEqual([]);
+      expect(await overlapping(page)).toEqual([]);
+    });
+
+    // #2: Exit under the Take's heading on the result scenes.
+    for (const scene of ["session-between", "session-edge-result"]) {
+      test(`phone-${scene}: Exit takes a tap, nothing overlaps, at ${size.width}px`, async ({ page }) => {
+        test.slow();
+        await openShot(page, `phone-${scene}`, size);
+        expect(await notHitTestable(page, '[data-testid="session-exit"]')).toEqual([]);
+        expect(await overlapping(page)).toEqual([]);
+      });
+    }
+
+    // #4: "0 / 8" is one line, and the live numbers do not overlap.
+    test(`phone-session-playing: the bar counter is one line at ${size.width}px`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "phone-session-playing", size);
+      const lines = await page.$eval('[data-testid="session-live"] .session-stat:not([data-xl]) b', (b) => {
+        const lh = parseFloat(getComputedStyle(b).lineHeight) || parseFloat(getComputedStyle(b).fontSize);
+        return Math.round(b.getBoundingClientRect().height / lh);
+      });
+      expect(lines, "the bar counter wraps").toBe(1);
+      expect(await overlapping(page)).toEqual([]);
+    });
+
+    // #11: the longest translations on the Take and its result.
+    for (const lng of ["ru", "de", "pt-BR", "ja"]) {
+      for (const scene of ["session-playing", "session-between"]) {
+        test(`phone-${scene} in ${lng}: every label fits at ${size.width}px`, async ({ page }) => {
+          test.slow();
+          await openShot(page, `phone-${scene}`, size, "ember", { lng });
+          await noSidewaysScroll(page, `phone-${scene} in ${lng}`);
+          expect(await spillingLabels(page)).toEqual([]);
+          expect(await overlapping(page)).toEqual([]);
+        });
+      }
+    }
+
+    // #5: Progress, nothing drawn over anything.
+    test(`phone-progress: nothing overlaps at ${size.width}px`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "phone-progress", size);
+      expect(await overlapping(page)).toEqual([]);
+    });
+  }
 });

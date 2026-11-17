@@ -49,6 +49,8 @@
       "whatsIn": "Co w niej jest i dlaczego",
       "min": "MIN",
       "nothing": "Na razie nie ma nic do zagrania.",
+      "noPaths": "Nie jesteś teraz na żadnej ścieżce. Wybierz jedną, a Dzisiaj ułoży z niej twoją sesję.",
+      "choosePath": "Wybierz ścieżkę",
       "needsInput": "Do oceny potrzebny jest mikrofon albo wejście bezpośrednie.",
       "toolsOffer": "Przyszedłeś po narzędzia? Wszystkie są w Narzędziach.",
       "toolsOfferOpen": "Do mojego ostatniego narzędzia",
@@ -320,7 +322,8 @@
       "between": "Zmieniaj widok między podejściami"
     },
     "runway": {
-      "label": "Kolejne nuty zbliżające się do linii"
+      "label": "Kolejne nuty zbliżające się do linii",
+      "later": "Pas rusza razem z podejściem. Najpierw ułóż tu rękę; potem nuty nadjeżdżają z prawej, a każdą grasz, gdy dotrze do linii."
     },
     "inputChanged": "Wejście się zmieniło. Teraz słucham przez {{device}}.",
     "export": {

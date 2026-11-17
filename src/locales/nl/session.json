@@ -49,6 +49,8 @@
       "whatsIn": "Wat erin zit, en waarom",
       "min": "MIN",
       "nothing": "Er is nog niets om te spelen.",
+      "noPaths": "Je volgt nu geen leerpad. Kies er een en Vandaag stelt je sessie daaruit samen.",
+      "choosePath": "Kies een leerpad",
       "needsInput": "Voor de beoordeling is een microfoon of directe ingang nodig.",
       "toolsOffer": "Kom je voor de tools? Ze staan allemaal onder Tools.",
       "toolsOfferOpen": "Naar mijn laatste tool",
@@ -306,7 +308,8 @@
       "between": "Wissel van weergave tussen takes"
     },
     "runway": {
-      "label": "De volgende noten, op weg naar de lijn"
+      "label": "De volgende noten, op weg naar de lijn",
+      "later": "De baan begint met de take. Zet hier eerst je hand neer; daarna komen de noten van rechts en speel je elke noot als hij de lijn bereikt."
     },
     "inputChanged": "De ingang is veranderd. Ik luister nu via {{device}}.",
     "export": {

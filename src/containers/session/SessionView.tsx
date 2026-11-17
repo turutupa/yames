@@ -180,10 +180,12 @@ function TakeScreen({
 
       <div className="session-takerow">
         {running ? (
-          <div className="session-row" data-testid="session-live" style={{ gap: "clamp(14px,2.4vw,36px)", alignItems: "flex-end", flex: "1 1 0" }}>
+          <div className="session-row session-live" data-testid="session-live">
             <div className="session-stat" data-xl="">
-              <b className="session-good">
-                {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–"}
+              {/* Nothing scored yet: a quiet "–%", not a green dash drawn
+                  at 120 px that reads as an empty bar (QA 2026-11-17 #21). */}
+              <b className={scored > 0 ? "session-good" : "session-stat-none"}>
+                {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–%"}
               </b>
               <span>{t("session.run.heardSoFar")}</span>
             </div>

@@ -75,11 +75,14 @@ export async function openShot(
    */
   const BUILD_AT = { width: 1440, height: Math.max(size.height, 900) };
   await page.setViewportSize(BUILD_AT);
-  const extra = Object.entries(query)
+  // `{ lng }` builds this one scene in another language than the run's: the
+  // checks on long translations (QA 2026-11-17 #11) ask for ru, de, pt-BR, ja.
+  const { lng = LAYOUT_LOCALE, ...rest } = query;
+  const extra = Object.entries(rest)
     .map(([key, value]) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join("");
   await page.goto(
-    `/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${LAYOUT_LOCALE}${extra}`,
+    `/shots.html?shot=${shot}&theme=${theme}&window=main&lng=${lng}${extra}`,
   );
 
   // That the page is the harness at all, before waiting thirty seconds for it
@@ -116,9 +119,7 @@ export async function openShot(
   // And it is in the language this run asked for. A locale run that quietly
   // fell back to English would report a clean suite having measured nothing.
   const built = await page.evaluate(() => window.__SHOT_LOCALE__);
-  expect(built, `the "${shot}" scene was built in ${built}, not ${LAYOUT_LOCALE}`).toBe(
-    LAYOUT_LOCALE,
-  );
+  expect(built, `the "${shot}" scene was built in ${built}, not ${lng}`).toBe(lng);
 
   if (size.width !== BUILD_AT.width || size.height !== BUILD_AT.height) {
     await page.setViewportSize(size);
@@ -375,4 +376,179 @@ declare global {
 export async function openTool(page: Page, id: "beat" | "drill" | "setlist" | "jam" | "songs") {
   await page.click('.mobile-tab[data-tab="tools"]');
   await page.click(`[data-testid="tool-card-${id}"]`);
+}
+
+/**
+ * Let the learning side's entrance animations (`.session-rise`, `.session-fade`)
+ * land, so a measurement sees where things rest rather than where they rise
+ * from.
+ */
+export async function settleAnimations(page: Page) {
+  await page.evaluate(async () => {
+    for (const a of document.getAnimations()) {
+      if (a instanceof CSSAnimation && /^session-/.test(a.animationName)) {
+        try {
+          a.finish();
+        } catch {
+          // An infinite one (a pulse) cannot finish, and is not an entrance.
+        }
+      }
+    }
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  });
+}
+
+/**
+ * Pairs of blocks on a learning screen that are drawn over each other (QA
+ * 2026-11-17 #1, #2, #5): text, cards, controls and the neck's slot. One that
+ * holds the other is nesting, not an overlap; a hidden one is not drawn. A
+ * few pixels of touch are let through: a card's shadow, a tag's border.
+ */
+export async function overlapping(page: Page, root = ".session-page"): Promise<string[]> {
+  await settleAnimations(page);
+  return page.evaluate((rootSel) => {
+    const scope = document.querySelector(rootSel);
+    if (!scope) return [`no ${rootSel}`];
+    const sel = [
+      "button",
+      "h1",
+      "h2",
+      "h3",
+      ".session-kick",
+      ".session-why",
+      ".session-glass",
+      ".session-slot",
+      ".session-stat",
+      ".session-moved",
+      ".session-bpm",
+      ".session-tag",
+      ".session-chart",
+      "svg",
+    ].join(",");
+    const els = [...scope.querySelectorAll<HTMLElement>(sel)].filter((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return false;
+      for (let e: HTMLElement | null = el; e; e = e.parentElement) {
+        const cs = getComputedStyle(e);
+        if (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0") return false;
+      }
+      // Drawn inside something that owns its own picture (a chart's labels).
+      return !el.closest("svg") || el.tagName.toLowerCase() === "svg";
+    });
+    const name = (el: Element) =>
+      `${el.tagName.toLowerCase()}.${String(el.getAttribute("class") ?? "").split(" ")[0]} "${(el.textContent ?? "").trim().slice(0, 24)}"`;
+    // What is drawn of a block: its box, cut by every ancestor that clips
+    // (the tab panel's surfaces run on past their panel, out of sight).
+    const drawn = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      let { left, right, top, bottom } = r;
+      for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+        // Hidden or clipped only: a scroller's content is still there to be
+        // scrolled to, and an overlap below the fold is still an overlap.
+        if (!/hidden|clip/.test(getComputedStyle(e).overflow)) continue;
+        const c = e.getBoundingClientRect();
+        left = Math.max(left, c.left);
+        right = Math.min(right, c.right);
+        top = Math.max(top, c.top);
+        bottom = Math.min(bottom, c.bottom);
+      }
+      return { left, right, top, bottom };
+    };
+    const out: string[] = [];
+    const SLACK = 3;
+    for (let i = 0; i < els.length; i++) {
+      for (let j = i + 1; j < els.length; j++) {
+        const a = els[i];
+        const b = els[j];
+        if (a.contains(b) || b.contains(a)) continue;
+        const ra = drawn(a);
+        const rb = drawn(b);
+        const w = Math.min(ra.right, rb.right) - Math.max(ra.left, rb.left);
+        const h = Math.min(ra.bottom, rb.bottom) - Math.max(ra.top, rb.top);
+        if (w > SLACK && h > SLACK) out.push(`${name(a)} × ${name(b)} (${Math.round(w)}×${Math.round(h)})`);
+      }
+    }
+    return out;
+  }, root);
+}
+
+/**
+ * Whether a thumb or a pointer at the middle of each control reaches it: the
+ * element on top at its centre is the control or inside it (QA #1: the neck's
+ * slot took the tap meant for "Play this").
+ */
+export async function notHitTestable(page: Page, selector: string): Promise<string[]> {
+  await settleAnimations(page);
+  return page.evaluate((sel) => {
+    const out: string[] = [];
+    for (const el of document.querySelectorAll<HTMLElement>(sel)) {
+      if (el.getBoundingClientRect().width === 0) continue;
+      el.scrollIntoView({ block: "center", behavior: "instant" });
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      const top = document.elementFromPoint(x, y);
+      if (!top || !(top === el || el.contains(top))) {
+        out.push(
+          `"${(el.textContent ?? "").trim().slice(0, 30)}" at ${Math.round(x)},${Math.round(y)} is under ${
+            top ? `${top.tagName.toLowerCase()}.${String(top.getAttribute("class") ?? "").split(" ")[0]}` : "nothing"
+          }`,
+        );
+      }
+    }
+    return out;
+  }, selector);
+}
+
+/**
+ * Labels that do not fit what holds them (QA 2026-11-17 #11): a button, a
+ * tag or a rail label whose text is cut (an ellipsis, a clamp, a hidden
+ * overflow), or that runs past its card or its button. Long translations are
+ * what find these: Russian, German, Brazilian Portuguese, Japanese.
+ */
+export async function spillingLabels(page: Page, root = ".session-page, .rail"): Promise<string[]> {
+  await settleAnimations(page);
+  return page.evaluate((rootSel) => {
+    const scopes = [...document.querySelectorAll(rootSel)];
+    if (scopes.length === 0) return [`no ${rootSel}`];
+    const out: string[] = [];
+    const name = (el: Element) =>
+      `${el.tagName.toLowerCase()}.${String(el.getAttribute("class") ?? "").split(" ")[0]} "${(el.textContent ?? "").trim().slice(0, 30)}"`;
+    const shown = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return false;
+      for (let e: HTMLElement | null = el; e; e = e.parentElement) {
+        const cs = getComputedStyle(e);
+        if (cs.display === "none" || cs.visibility === "hidden") return false;
+      }
+      return true;
+    };
+    const sel = "button, .session-tag, .rail-mode-label, .rail-action-label, .session-kick";
+    for (const el of scopes.flatMap((scope) => [...scope.querySelectorAll<HTMLElement>(sel)])) {
+      if (!shown(el) || el.closest("svg")) continue;
+      // Cut: the text is wider or taller than the box that shows it.
+      if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2) {
+        const cs = getComputedStyle(el);
+        if (cs.overflow !== "visible" || cs.textOverflow === "ellipsis") {
+          out.push(`${name(el)} is cut (${el.scrollWidth}×${el.scrollHeight} in ${el.clientWidth}×${el.clientHeight})`);
+          continue;
+        }
+      }
+      // Spilt: drawn past the card, button or rail it sits in.
+      const r = el.getBoundingClientRect();
+      const box = el.parentElement?.closest<HTMLElement>(".session-glass, button, .rail, .session-card");
+      if (box) {
+        const b = box.getBoundingClientRect();
+        if (r.left < b.left - 1 || r.right > b.right + 1) {
+          out.push(`${name(el)} runs past ${name(box)} (${Math.round(r.left)}–${Math.round(r.right)} in ${Math.round(b.left)}–${Math.round(b.right)})`);
+        }
+      }
+      // A button's own text past its edge.
+      if (el.tagName === "BUTTON" && el.scrollWidth > el.clientWidth + 1) {
+        out.push(`${name(el)} text runs past its edge (${el.scrollWidth} in ${el.clientWidth})`);
+      }
+    }
+    return out;
+  }, root);
 }

@@ -59,8 +59,10 @@ export interface Shot {
     /**
      * `three`: subscribed to three Paths (Alternate Picking, Sweep Picking and
      * Blues, made runnable for the scene), each played in the last days.
+     * `none`: played Alternate Picking once, then unsubscribed from it, so no
+     * Path is subscribed (QA 2026-11-17 #7).
      */
-    seed: "first" | "returning" | "back" | "three";
+    seed: "first" | "returning" | "back" | "three" | "none";
     /** On a result, answer "Was this grade fair?" before the photograph. */
     fair?: "yes" | "no";
     minutes?: 5 | 10 | 15 | 20;
@@ -736,6 +738,15 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   {
+    id: "today-no-paths",
+    suffix: "today-no-paths",
+    window: "main",
+    session: { seed: "none", stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
     id: "today-back",
     suffix: "today-back",
     window: "main",
@@ -1288,6 +1299,7 @@ export const PHONE_LEARNING_SCENES = [
   "firstrun-ready",
   "today-first",
   "today-returning",
+  "today-no-paths",
   "session-ready",
   "session-playing",
   // The runway view's Take (mvp-runway): only the runway is on screen while

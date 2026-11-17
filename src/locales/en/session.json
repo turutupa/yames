@@ -49,6 +49,8 @@
       "whatsIn": "What's in it, and why",
       "min": "MIN",
       "nothing": "There's nothing to play yet.",
+      "noPaths": "You're not on any Path right now. Choose one and Today builds your Session from it.",
+      "choosePath": "Choose a Path",
       "needsInput": "Grading needs a microphone or direct input.",
       "toolsOffer": "Here for the tools? They're all under Tools.",
       "toolsOfferOpen": "Go to my last tool",
@@ -306,7 +308,8 @@
       "between": "Switch views between Takes"
     },
     "runway": {
-      "label": "The next notes, arriving at the line"
+      "label": "The next notes, arriving at the line",
+      "later": "The runway starts with the Take. Place your hand here first; then the notes come in from the right and you play each one as it reaches the line."
     },
     "inputChanged": "The input changed. Listening through {{device}} now.",
     "export": {

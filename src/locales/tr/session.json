@@ -49,6 +49,8 @@
       "whatsIn": "İçinde ne var, neden",
       "min": "DK",
       "nothing": "Henüz çalınacak bir şey yok.",
+      "noPaths": "Şu an hiçbir yolda değilsin. Birini seç, Bugün seansını ondan kursun.",
+      "choosePath": "Bir yol seç",
       "needsInput": "Notlama için mikrofon ya da doğrudan giriş gerekir.",
       "toolsOffer": "Araçlar için mi geldin? Hepsi Araçlar altında.",
       "toolsOfferOpen": "Son aracıma git",
@@ -306,7 +308,8 @@
       "between": "Görünümü kayıtlar arasında değiştir"
     },
     "runway": {
-      "label": "Çizgiye doğru gelen sıradaki notalar"
+      "label": "Çizgiye doğru gelen sıradaki notalar",
+      "later": "Pist denemeyle birlikte başlar. Önce elini burada yerleştir; sonra notalar sağdan gelir ve her birini çizgiye vardığında çalarsın."
     },
     "inputChanged": "Giriş değişti. Artık {{device}} üzerinden dinliyorum.",
     "export": {

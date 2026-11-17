@@ -80,6 +80,7 @@ import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
 import { MetronomeFigure } from "../metronome/MetronomeFigure";
 import { MainHeader } from "./MainHeader";
+import type { MainView } from "./MainHeader";
 import { TitleBar } from "../../components/TitleBar";
 import { Rail } from "./Rail";
 import { MobileTabBar } from "./MobileTabBar";
@@ -225,6 +226,18 @@ export function MainWindow() {
     // Today is the front door, unless the player asked for their last tool.
     frontDoor: true,
   });
+  // A door pressed for the place already open goes back to that place's
+  // start: the rail's (or the tab bar's) Paths on a Step's page is the Paths
+  // list again, not nothing (QA 2026-11-17 #8). The Paths screen keeps which
+  // Path and Step are open in its own state; a new key starts it over.
+  const [pathsVisit, setPathsVisit] = useState(0);
+  const navigate = useCallback(
+    (next: MainView) => {
+      if (next === view && next === "paths") setPathsVisit((n) => n + 1);
+      setView(next);
+    },
+    [view, setView],
+  );
   // Fullscreen / zen-mode lifecycle (intended state, OS-level state, and
   // the webview-focus restoration helper) — owned by a dedicated hook.
   const {
@@ -1886,7 +1899,7 @@ export function MainWindow() {
           state={state}
           view={view}
           mode={mode}
-          setView={setView}
+          setView={navigate}
           prevTab={prevTab}
           libraryOpen={sidebarOpen}
           onToggleLibrary={() => setSidebarOpen((o) => !o)}
@@ -2289,13 +2302,14 @@ export function MainWindow() {
             session={sessionRun}
             listening={evaluation.enabled}
             onOpenTools={() => void openLastTool()}
+            onOpenPaths={() => setView("paths")}
             onOpenLastTool={() => {
               void storeSave(OPEN_ON_KEY, "lastTool");
               void openLastTool();
             }}
           />
         ) : view === "paths" ? (
-          <PathsView session={sessionRun} />
+          <PathsView key={pathsVisit} session={sessionRun} />
         ) : view === "progress" ? (
           <ProgressView session={sessionRun} />
         ) : view === "tools" ? (
@@ -2534,11 +2548,14 @@ export function MainWindow() {
 
       {/* The phone's navigation, and the library it opens. Both live outside
           `.main-body` — the bar is the window's last row, under the transport,
-          and the sheet portals itself over everything (Sheet.tsx). */}
-      {IS_MOBILE && (
+          and the sheet portals itself over everything (Sheet.tsx).
+          Not while a Session runs: one picture at a time, and the Session's
+          own Exit is the way out (QA 2026-11-17 #3, the bar covered "Start
+          take" at 360x800). */}
+      {IS_MOBILE && view !== "session" && (
         <MobileTabBar
           view={view}
-          setView={setView}
+          setView={navigate}
           prevTab={prevTab}
           libraryOpen={sidebarOpen}
           onToggleLibrary={() => setSidebarOpen((o) => !o)}
