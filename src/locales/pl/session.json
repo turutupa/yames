@@ -154,7 +154,8 @@
       "fairAsk": "Czy ta ocena była uczciwa?",
       "fairYes": "Tak",
       "fairNo": "Nie",
-      "fairThanks": "Dzięki. Zapisano z twoimi danymi ćwiczeń."
+      "fairThanksYes": "Dzięki: zapisano jako uczciwą. Stuknij Nie, aby zmienić.",
+      "fairThanksNo": "Dzięki: zapisano jako nieuczciwą. Stuknij Tak, aby zmienić."
     },
     "edge": {
       "kick": "Znajdź mój limit",

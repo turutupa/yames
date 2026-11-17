@@ -154,7 +154,8 @@
       "fairAsk": "Esta nota foi justa?",
       "fairYes": "Sim",
       "fairNo": "Não",
-      "fairThanks": "Obrigado. Fica guardado com seus dados de prática."
+      "fairThanksYes": "Obrigado: guardado como justa. Toque em Não para mudar.",
+      "fairThanksNo": "Obrigado: guardado como não justa. Toque em Sim para mudar."
     },
     "edge": {
       "kick": "Achar meu limite",

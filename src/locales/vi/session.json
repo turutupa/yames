@@ -154,7 +154,8 @@
       "fairAsk": "Điểm này có công bằng không?",
       "fairYes": "Có",
       "fairNo": "Không",
-      "fairThanks": "Cảm ơn. Đã lưu cùng dữ liệu luyện tập của bạn."
+      "fairThanksYes": "Cảm ơn: đã lưu là công bằng. Chạm Không để đổi.",
+      "fairThanksNo": "Cảm ơn: đã lưu là không công bằng. Chạm Có để đổi."
     },
     "edge": {
       "kick": "Tìm giới hạn",

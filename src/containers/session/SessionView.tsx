@@ -368,7 +368,8 @@ function EdgePanel({ session }: { session: SessionRun }) {
 }
 
 /**
- * "Was this grade fair?": one tap, kept in the Take's facts for the export.
+ * "Was this grade fair?": one tap, kept in the Take's facts for the export; a
+ * tap on the other answer changes it, and the thanks says which is kept.
  * Only on a graded result: a Take not heard has no grade to judge.
  */
 export function FairTap({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
@@ -391,7 +392,11 @@ export function FairTap({ session, outcome }: { session: SessionRun; outcome: Ta
           {t(value === "yes" ? "session.result.fairYes" : "session.result.fairNo")}
         </button>
       ))}
-      {answer && <span role="status">{t("session.result.fairThanks")}</span>}
+      {answer && (
+        <span role="status" data-answer={answer}>
+          {t(answer === "yes" ? "session.result.fairThanksYes" : "session.result.fairThanksNo")}
+        </span>
+      )}
     </div>
   );
 }

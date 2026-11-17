@@ -154,7 +154,8 @@
       "fairAsk": "Was dit oordeel eerlijk?",
       "fairYes": "Ja",
       "fairNo": "Nee",
-      "fairThanks": "Bedankt. Het wordt bij je oefengegevens bewaard."
+      "fairThanksYes": "Bedankt: bewaard als eerlijk. Tik op Nee om het te wijzigen.",
+      "fairThanksNo": "Bedankt: bewaard als niet eerlijk. Tik op Ja om het te wijzigen."
     },
     "edge": {
       "kick": "Mijn grens vinden",

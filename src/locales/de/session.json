@@ -154,7 +154,8 @@
       "fairAsk": "War diese Bewertung fair?",
       "fairYes": "Ja",
       "fairNo": "Nein",
-      "fairThanks": "Danke. Das wird bei deinen Übungsdaten gespeichert."
+      "fairThanksYes": "Danke: als fair gespeichert. Tippe auf Nein, um es zu ändern.",
+      "fairThanksNo": "Danke: als nicht fair gespeichert. Tippe auf Ja, um es zu ändern."
     },
     "edge": {
       "kick": "Mein Limit finden",

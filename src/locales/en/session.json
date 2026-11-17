@@ -154,7 +154,8 @@
       "fairAsk": "Was this grade fair?",
       "fairYes": "Yes",
       "fairNo": "No",
-      "fairThanks": "Thanks. It's kept with your practice data."
+      "fairThanksYes": "Thanks: kept as fair. Tap No to change it.",
+      "fairThanksNo": "Thanks: kept as not fair. Tap Yes to change it."
     },
     "edge": {
       "kick": "Find my edge",

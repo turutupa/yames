@@ -943,18 +943,22 @@ export function useSessionRun(input: SessionRunInput) {
     [begin],
   );
 
-  /** "Was this grade fair?": kept in the Take's facts, and in the export. */
-  const answerFair = useCallback(
-    (takeId: string, fair: "yes" | "no") => {
-      const row = progress.takes.find((t) => t.id === takeId);
-      if (!row) return;
-      const next: PathTakeRow = { ...row, facts: { ...factsOf(row), fair } };
-      setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? next : t)) }));
-      // The same row again: `INSERT OR REPLACE`, and no clean tempo with it.
-      void savePathTake(next, null).catch(() => {});
-    },
-    [progress.takes],
-  );
+  /**
+   * "Was this grade fair?": kept in the Take's facts, and in the export. Tapping
+   * the other answer changes it and saves again; the latest tap wins, read from
+   * a ref so two quick taps can't race on a stale list.
+   */
+  const takesRef = useRef(progress.takes);
+  takesRef.current = progress.takes;
+  const answerFair = useCallback((takeId: string, fair: "yes" | "no") => {
+    const row = takesRef.current.find((t) => t.id === takeId);
+    if (!row || factsOf(row).fair === fair) return;
+    const next: PathTakeRow = { ...row, facts: { ...factsOf(row), fair } };
+    takesRef.current = takesRef.current.map((t) => (t.id === takeId ? next : t));
+    setProgress((p) => ({ ...p, takes: p.takes.map((t) => (t.id === takeId ? { ...t, facts: { ...factsOf(t), fair } } : t)) }));
+    // The same row again: `INSERT OR REPLACE`, and no clean tempo with it.
+    void savePathTake(next, null).catch(() => {});
+  }, []);
 
   const exercise = current?.exercise ?? null;
   const big: BigAction = useMemo(() => bigAction(run, exercise), [run, exercise]);

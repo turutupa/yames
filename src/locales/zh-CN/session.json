@@ -154,7 +154,8 @@
       "fairAsk": "这个评分公平吗？",
       "fairYes": "是",
       "fairNo": "否",
-      "fairThanks": "谢谢。已和你的练习数据一起保存。"
+      "fairThanksYes": "谢谢：已记为公平。点“否”可以更改。",
+      "fairThanksNo": "谢谢：已记为不公平。点“是”可以更改。"
     },
     "edge": {
       "kick": "挑战极限",

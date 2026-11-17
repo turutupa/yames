@@ -154,7 +154,8 @@
       "fairAsk": "Bu not adil miydi?",
       "fairYes": "Evet",
       "fairNo": "Hayır",
-      "fairThanks": "Teşekkürler. Çalışma verilerinle birlikte saklandı."
+      "fairThanksYes": "Teşekkürler: adil olarak saklandı. Değiştirmek için Hayır'a dokun.",
+      "fairThanksNo": "Teşekkürler: adil değil olarak saklandı. Değiştirmek için Evet'e dokun."
     },
     "edge": {
       "kick": "Sınırımı bul",
