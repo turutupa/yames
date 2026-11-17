@@ -22,6 +22,7 @@ type Evaluation = Parameters<typeof useSession>[0]["evaluation"];
 const evaluation = {
   enabled: true,
   toggle: vi.fn(),
+  setListening: vi.fn(async () => {}),
   selectedDevice: null,
 } as unknown as Evaluation;
 

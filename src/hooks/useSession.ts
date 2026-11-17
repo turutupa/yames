@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, queryHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
+import { getFinalSessionReport, getSessionHistory, queryHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
 import type { AdaptiveEvalRequest } from "../ipc";
 import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
@@ -214,6 +214,8 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   const [active, setActive] = useState(false);
   const [messages, setMessages] = useState<FeedMessage[]>([]);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  /** `startedAt`, for the end of a session queued behind its start. */
+  const startedAtRef = useRef<number | null>(null);
   const [cardOpen, setCardOpen] = useState(false);
   // Step 5 — play-style derived from onset_efficiency each mini-report.
   // 'structured' = ≥0.65 ratio of matched onsets; 'noodling' = <0.65.
@@ -1228,8 +1230,8 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     return () => { unlisten?.(); };
   }, [active]);
 
-  const startSession = useCallback(async () => {
-    if (active) {
+  const startSessionNow = useCallback(async () => {
+    if (activeRef.current) {
       coachDebug("startSession.noop-already-active");
       return;
     }
@@ -1262,7 +1264,9 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // intentionally per-session: a fresh practice attempt deserves a
     // fresh affordance budget.
     interventionStateRef.current = createInterventionState();
+    activeRef.current = true;
     setActive(true);
+    startedAtRef.current = now;
     setStartedAt(now);
     setCardOpen(true);
 
@@ -1400,9 +1404,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       );
     }
 
-    if (!evaluation.enabled) {
-      evaluation.toggle();
-    }
+    // Awaited, inside the lifecycle queue: an end asked for now runs after
+    // the input is on, so its stop cannot overtake this start (B1).
+    await evaluation.setListening(true).catch((e: unknown) => {
+      console.error("[startSession] the input would not start:", e);
+    });
 
     // LLM paraphrase path — the coach LLM (when available) gets the
     // already-filled template + structured context and is asked to
@@ -1454,10 +1460,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         }
       })();
     }
-  }, [active, evaluation, presetId, presetName, maybeSpeak, instrumentLabel, speakAndReveal, brainTier]);
+  }, [evaluation, presetId, presetName, maybeSpeak, instrumentLabel, speakAndReveal, brainTier]);
 
-  const endSession = useCallback(async () => {
-    if (!active) {
+  const endSessionNow = useCallback(async () => {
+    if (!activeRef.current) {
       coachDebug("endSession.noop-not-active");
       return;
     }
@@ -1482,18 +1488,17 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // Without this early stop, acc.segments is empty at getSessionReport()
     // time and the Rust side falls back to the legacy hit-rate formula.
     //
-    // evaluation.toggle() below (lines ~1319-1321) still runs to update
-    // React state; calling stop_evaluation twice is idempotent — the
-    // Rust command returns early if the analyzer is already stopped.
-    if (evaluation.enabled) {
-      try {
-        await stopEvaluation();
-      } catch (e) {
-        // stopEvaluation failing should never strand the session in active
-        // state. Log the error for diagnosis (e.g. "Lock failed: poisoned"
-        // from a timing-thread panic cascade) and continue the end flow.
-        console.error("[endSession] stopEvaluation failed:", e);
-      }
+    // Through `useEvaluation`, awaited, so its state and the input's agree
+    // before the next start (B1: a second, unawaited stop here used to
+    // land after a Session started right after this one, and it heard
+    // nothing). A no-op when the input is already off.
+    try {
+      await evaluation.setListening(false);
+    } catch (e) {
+      // stopEvaluation failing should never strand the session in active
+      // state. Log the error for diagnosis (e.g. "Lock failed: poisoned"
+      // from a timing-thread panic cascade) and continue the end flow.
+      console.error("[endSession] stopEvaluation failed:", e);
     }
 
     // Same rescoring rationale as the mini-report path above — see
@@ -1602,11 +1607,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     };
     setMessages((prev) => [...prev, endMsg]);
 
-    if (evaluation.enabled) {
-      evaluation.toggle();
-    }
     segmentReportsRef.current = [];
+    const sessionStartedAt = startedAtRef.current;
     setActive(false);
+    startedAtRef.current = null;
     setStartedAt(null);
 
     // Save session — same gate as segment reportability. A session
@@ -1615,7 +1619,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     if (sessionReport && isSegmentReportable(sessionReport)) {
       saveSession({
         id: crypto.randomUUID(),
-        timestamp: startedAt ?? now,
+        timestamp: sessionStartedAt ?? now,
         bpm,
         timeSignature,
         report: sessionReport,
@@ -1661,7 +1665,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       // patch the placeholder summary), so it deliberately uses the
       // sid-only `isStale()` check — `activeRef` is already false here.
       const token = createSessionToken(sessionIdRef);
-      const durationSecs = Math.round((now - (startedAt ?? now)) / 1000);
+      const durationSecs = Math.round((now - (sessionStartedAt ?? now)) / 1000);
       // Accuracy uses the scored-beat denominator (hits + miss), NOT
       // totalBeats. Sessions with stretches of silence at the start or
       // end accumulate "skipped" beats that deflate accuracy into
@@ -1744,7 +1748,28 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       window.clearTimeout(boundaryDebounceRef.current);
       boundaryDebounceRef.current = null;
     }
-  }, [active, evaluation, bpm, timeSignature, startedAt, presetId, presetName, maybeSpeak, instrumentLabel]);
+  }, [evaluation, bpm, timeSignature, presetId, presetName, maybeSpeak, instrumentLabel]);
+
+  /**
+   * Starts and ends, one after another (B1). Ending a session awaits the stop
+   * of the input, the final report and the save; a start asked for meanwhile
+   * (Exit, then Start at once) used to see the old session still active and
+   * do nothing, and then the end switched the input off under it. Each now
+   * runs when the one before it has finished, and decides from the refs, not
+   * from the render it was called in.
+   */
+  const lifecycle = useRef<Promise<unknown>>(Promise.resolve());
+  const startNowRef = useRef(startSessionNow);
+  startNowRef.current = startSessionNow;
+  const endNowRef = useRef(endSessionNow);
+  endNowRef.current = endSessionNow;
+  const inTurn = useCallback((work: () => Promise<void>): Promise<void> => {
+    const next = lifecycle.current.then(work, work);
+    lifecycle.current = next.catch(() => {});
+    return next;
+  }, []);
+  const startSession = useCallback(() => inTurn(() => startNowRef.current()), [inTurn]);
+  const endSession = useCallback(() => inTurn(() => endNowRef.current()), [inTurn]);
 
   // Chat: send a user question to the coach
   const sendChat = useCallback((question: string) => {

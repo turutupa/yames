@@ -30,7 +30,8 @@ if (flag("--help")) {
   console.log(`usage: node tests/e2e/run.mjs [options]
   --no-build          use the binary already built (default: build it first)
   --app <path>        the app binary (default: $CARGO_TARGET_DIR or src-tauri/target, release/yames)
-  --scenarios <list>  comma list of: session,relaunch,four-fingers,blues-band,gpu-info,neck,baseline
+  --scenarios <list>  comma list of: session,relaunch,four-fingers,blues-band,gpu-info,neck,baseline,
+                      restart,wrong-notes
                       (default: session,relaunch,four-fingers,gpu-info)
   --bleed <dB>        blues-band: also feed the app's output back into its input at this
                       level (e.g. -20), as speakers into a microphone would
@@ -557,6 +558,128 @@ async function scenarioBluesBand() {
   }
 }
 
+/**
+ * The Exercise on the Take screen now, from the Alternate Picking pack: the
+ * plan picks it, so a scenario that starts from Today reads it off the page.
+ */
+async function exerciseOnScreen(d) {
+  const page = await d.text();
+  const path = loadPath();
+  for (const step of path.steps) {
+    for (const ex of step.exercises) if (page.includes(ex.title)) return ex;
+  }
+  return null;
+}
+
+/** A good take on whatever the Take screen holds: it must be heard and pass. */
+async function goodTakeHeard(d, label) {
+  await d.waitText(/Start take, (\d+) BPM/, 20000);
+  const noInput = await d.exec(`return !!document.querySelector('[data-testid="session-no-input"]')`);
+  const exercise = await exerciseOnScreen(d);
+  if (!exercise) {
+    check(`${label}: an Alternate Picking Exercise on the Take screen`, false, (await d.text()).slice(0, 300));
+    return;
+  }
+  const r = await playTake(d, exercise, "good", label);
+  const row = takesOf(exercise.id).at(-1);
+  check(`${label}: the Take was heard and passes`, /PASS BAR MET/i.test(r.text) && row?.passed === 1,
+    `${exercise.title} at ${r.bpm}${noInput ? ", said it could not hear at first" : ""}; ` +
+      (row ? `heard ${row.facts.measures.heard}/${row.facts.measures.expected}, passed ${row.passed}` : "no row"));
+}
+
+/**
+ * B1 (2026-11-16): a Session started again in the same run could not hear the
+ * guitar. Ending the coach session (Exit) stops the input; a start that came
+ * before that stop had finished did nothing, and the stop then landed after
+ * it. Every door out and back in, each followed by a good take that must pass.
+ */
+async function scenarioRestart() {
+  const d = await launchApp();
+  const backToToday = async () => d.waitText(/How long have you got/, 15000);
+  try {
+    // 1. Today, Start, Exit at once, Start at once.
+    await d.clickText(/^5$/);
+    await d.clickText(/^Start$/);
+    await d.waitText(/Start take, (\d+) BPM/, 20000);
+    await d.clickText(/^Exit$/);
+    await backToToday();
+    await d.clickText(/^Start$/);
+    await goodTakeHeard(d, "restart: Start, Exit, Start");
+    await d.clickText(/^Exit$/);
+    await backToToday();
+
+    // 2. Exit, then a Step's "Play this".
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Alternate Picking/);
+    await d.clickText(/Even eighths on one string/);
+    await d.clickIn(/Four fingers, one string/, /^Play this$/);
+    await goodTakeHeard(d, "restart: Exit, then Play this");
+
+    // 3. Leave by a tab hotkey (Metronome) mid-Session, come back by Today's.
+    const key = (k, code) => d.exec(`document.dispatchEvent(new KeyboardEvent('keydown',
+      { key: arguments[0], code: arguments[1], ctrlKey: true, bubbles: true, cancelable: true }))`, [k, code]);
+    await key("1", "Digit1");
+    await sleep(1500);
+    check("restart: the Metronome hotkey leaves the Session", !/Start take|End take/.test(await d.text()));
+    await key("0", "Digit0");
+    await backToToday();
+    await d.clickText(/^Start$/);
+    await goodTakeHeard(d, "restart: a tab hotkey out and back");
+
+    // 4. Open Tools mid-Session, then back to Today and start again.
+    await d.clickText(/^Tools$/);
+    await sleep(1500);
+    check("restart: Tools leaves the Session", !/Start take|End take/.test(await d.text()));
+    await d.clickText(/^Today$/);
+    await backToToday();
+    await d.clickText(/^Start$/);
+    await goodTakeHeard(d, "restart: Tools out and back");
+    await d.clickText(/^Exit$/);
+  } finally {
+    await quitApp(d, "restart");
+  }
+}
+
+/**
+ * B2 (2026-11-16): a wrong-notes Take passed because the right-notes pass came
+ * back `notRun` (the second close of a Take threw away the pass the first had
+ * started). On a clean, direct signal with no band, right notes must be
+ * measured on every Take, and a wrong-notes one must fail on them.
+ */
+async function scenarioWrongNotes() {
+  const d = await launchApp();
+  const title = "A minor up one string";
+  try {
+    const { exercise } = exerciseByTitle(title);
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Alternate Picking/);
+    await d.clickText(/Even eighths on one string/);
+    await d.clickIn(/A minor up one string/, /^Play this$/);
+    info.wrongNotes = [];
+    const summary = (r) => r
+      ? `passed ${r.passed}, notes ${fmt(r.facts.measures.noteIdentity)} (${r.facts.measures.pass?.notes?.status}), heard ${r.facts.measures.heard}/${r.facts.measures.expected}`
+      : "no row";
+    for (const [i, style] of ["good", "wrong", "wrong", "wrong"].entries()) {
+      if (i > 0) await d.clickText(/^(Go again|Again,)/);
+      const r = await playTake(d, exercise, style, `${title}, ${style} ${i}`);
+      const row = takesOf(exercise.id).at(-1);
+      const m = row?.facts?.measures;
+      info.wrongNotes.push({ style, bpm: r.bpm, measures: m });
+      check(`${title}, ${style} take ${i}: right notes were measured`,
+        m?.pass?.notes?.status === "measured" && typeof m?.noteIdentity === "number", summary(row));
+      if (style === "good") {
+        check(`${title}, good take: passes`, row?.passed === 1 && /PASS BAR MET/i.test(r.text), summary(row));
+      } else {
+        check(`${title}, wrong notes ${i}: does not pass, on right notes`,
+          row?.passed === 0 && !/PASS BAR MET/i.test(r.text) && m?.noteIdentity !== null && m.noteIdentity < 0.9, summary(row));
+      }
+    }
+    await d.clickText(/^Exit$/);
+  } finally {
+    await quitApp(d, "wrong-notes");
+  }
+}
+
 /** Move the Take screen's band slider, as a hand on it would. */
 async function setBand(d, value) {
   await d.exec(`const el = document.querySelector('[data-testid="session-band"] input');
@@ -759,6 +882,8 @@ try {
   if (scenarios.has("relaunch")) await scenarioRelaunch();
   if (scenarios.has("four-fingers")) await scenarioFourFingers();
   if (scenarios.has("blues-band")) await scenarioBluesBand();
+  if (scenarios.has("restart")) await scenarioRestart();
+  if (scenarios.has("wrong-notes")) await scenarioWrongNotes();
   if (scenarios.has("neck")) await scenarioNeck();
   if (scenarios.has("baseline")) await scenarioBaseline();
   info.loadAtEnd = readFileSync("/proc/loadavg", "utf8").trim();

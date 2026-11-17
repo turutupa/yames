@@ -379,6 +379,17 @@ pub struct NotesPass {
     pub slot: Arc<Mutex<NotesSlot>>,
 }
 
+impl NotesPass {
+    /// A new Take: whatever pass the last one started is no answer for it. A
+    /// pass still running finishes into nothing (its serial is stale).
+    fn forget(&self) {
+        let mut slot = self.slot.lock().unwrap_or_else(|e| e.into_inner());
+        slot.serial += 1;
+        slot.pending = false;
+        slot.grade = None;
+    }
+}
+
 /// The grade with right notes, for the Take that was closed last.
 #[derive(Debug, Default)]
 pub struct NotesSlot {
@@ -466,6 +477,7 @@ impl TimingAnalyzer {
         pitches: Vec<crate::pitch::ScoreNote>,
         input_rate: Option<u32>,
     ) {
+        self.notes.forget();
         if !pitches.is_empty() && pass_bars.iter().any(|b| b.metric == "noteIdentity") {
             self.notes.tap.arm(input_rate);
         } else {
@@ -480,6 +492,7 @@ impl TimingAnalyzer {
     /// is dropped — the caller has already been given it on the last
     /// segment-ended event.
     pub fn clear_score_schedule(&self) {
+        self.notes.forget();
         self.notes.tap.disarm();
         *self.schedule.lock().unwrap() = None;
         self.schedule_version
@@ -535,14 +548,16 @@ impl TimingAnalyzer {
     /// Called by the JS falling-edge handler before fetching the mini-
     /// report score so the score is correct from first display. Activity
     /// state is NOT reset — the player can resume after the fetch.
+    ///
+    /// The right-notes slot is NOT touched here. It used to be emptied (and
+    /// its serial bumped) on every close, so a second close of the same Take
+    /// (the Session's stop and the coach's mini-report each send one, and
+    /// on a busy machine they land a loop pass apart) threw away the pitch
+    /// pass the first close had started: the Take came back `notRun` and
+    /// passed without its notes checked (2026-11-16, B2). A new Take empties
+    /// it instead (`load_exercise_with_notes`, `clear_score_schedule`).
     pub fn close_open_segment(&self) {
         *self.take_grade.lock().unwrap() = None;
-        {
-            let mut slot = self.notes.slot.lock().unwrap();
-            slot.serial += 1;
-            slot.pending = false;
-            slot.grade = None;
-        }
         self.close_segment_now.store(true, Ordering::SeqCst);
     }
 
@@ -795,6 +810,12 @@ impl TimingAnalyzer {
         // does not mention it.
         let mut schedule_run: Option<ScheduleRun> = None;
         let mut seen_schedule_version = u64::MAX;
+        // The pitch pass this run's Take already has, from its first close.
+        // A Take is closed twice as a rule (the Session's own stop and the
+        // coach's mini-report each ask), and the second close finds the tap
+        // already handed over: it must say the first pass is coming, not
+        // that none ran. Forgotten with the run.
+        let mut take_notes_serial: Option<u64> = None;
         // `plans/SONGS.md` A7 — the verdicts the live sweep hands back, in a
         // buffer that is filled and drained rather than allocated: the sweep
         // runs twenty-five times a second for as long as a schedule is
@@ -928,6 +949,7 @@ impl TimingAnalyzer {
                 let version = schedule_version.load(Ordering::SeqCst);
                 if version != seen_schedule_version {
                     seen_schedule_version = version;
+                    take_notes_serial = None;
                     schedule_run = schedule_slot
                         .lock()
                         .unwrap()
@@ -1002,11 +1024,7 @@ impl TimingAnalyzer {
                     };
                     // Right notes take a pitch pass, off this loop. The grade
                     // below and the segment's say it is coming.
-                    let serial = if run.wants_notes() {
-                        start_notes_pass(run, weights, &notes)
-                    } else {
-                        None
-                    };
+                    let serial = close_take_notes(run, weights, &notes, &mut take_notes_serial);
                     run.set_notes_pending(serial);
                     *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
                 }
@@ -2717,6 +2735,28 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
         return None;
     }
     Some(serial)
+}
+
+/// A close of a Take whose notes are checked: start the pitch pass over its
+/// audio, or, when an earlier close of the same run already did (the tap hands
+/// its audio over once), keep saying that one is coming. `started` is the
+/// run's own record of it, reset when the run is.
+fn close_take_notes(
+    run: &ScheduleRun,
+    weights: ScoreWeights,
+    notes: &NotesPass,
+    started: &mut Option<u64>,
+) -> Option<u64> {
+    if !run.wants_notes() {
+        return None;
+    }
+    if let Some(serial) = start_notes_pass(run, weights, notes) {
+        *started = Some(serial);
+        return Some(serial);
+    }
+    // Only while the slot still belongs to it: a new Take's load empties it.
+    let current = notes.slot.lock().map(|s| s.serial).unwrap_or(0);
+    started.filter(|s| *s == current)
 }
 
 /// Convert a monotonic-NS timestamp (from `clock::now_ns()`) to wall-clock
@@ -5982,9 +6022,13 @@ mod notes_pass_tests {
         }
         assert!(run.wants_notes());
         let weights = Instrument::ElectricGuitar.profile().score_weights;
-        let serial = start_notes_pass(&run, weights, &notes).expect("a pass started");
-        // Once: a second close of the same Take starts nothing.
+        let mut started = None;
+        let serial = close_take_notes(&run, weights, &notes, &mut started).expect("a pass started");
+        // Once: a second close of the same Take starts nothing...
         assert!(start_notes_pass(&run, weights, &notes).is_none());
+        // ...and says the first pass is still the one coming, rather than
+        // that none ran (B2: the second close used to leave `notRun`).
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started), Some(serial));
         // The timing grade says the notes are coming, and does not count them.
         run.set_notes_pending(Some(serial));
         let timed = run.report(&weights).unwrap().grade;
@@ -6013,5 +6057,34 @@ mod notes_pass_tests {
         assert!(pass.checks.iter().any(|c| c.metric == "noteIdentity" && c.held));
         assert!(!grade.notes_pending);
         assert_eq!(grade.notes_serial, Some(serial));
+        // A new Take's load forgets it: no answer for the next Take.
+        notes.forget();
+        assert!(notes.slot.lock().unwrap().grade.is_none());
+        assert_eq!(close_take_notes(&run, weights, &notes, &mut started), None);
+    }
+
+    /// B2, end to end through the analyzer: a Take closed twice, the second
+    /// close landing after the first had started the pitch pass, still gets
+    /// its right notes. `close_open_segment` used to empty the slot, which
+    /// threw away the pass the first close had started.
+    #[test]
+    fn a_second_close_does_not_throw_away_the_first_closes_pitch_pass() {
+        let ta = TimingAnalyzer::new(Arc::new(Mutex::new(VecDeque::new())));
+        let slot = ta.notes_slot();
+        {
+            let mut s = slot.lock().unwrap();
+            s.serial = 7;
+            s.pending = true;
+        }
+        ta.close_open_segment();
+        {
+            let s = slot.lock().unwrap();
+            assert_eq!(s.serial, 7);
+            assert!(s.pending, "a close must not cancel the pass in flight");
+        }
+        // A new Take does.
+        ta.clear_score_schedule();
+        let s = slot.lock().unwrap();
+        assert!(s.serial > 7 && !s.pending && s.grade.is_none());
     }
 }
