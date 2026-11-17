@@ -24,7 +24,7 @@ the end).
 | Scenario | What happens | Checks |
 |---|---|---|
 | `placement` | A fresh profile (no Path started). Today, 5 minutes, Start. The planner puts a new player on the first Path, Shred (`FIRST_PATH_ID`), and a new Path's first block is placement: "Open A, sixteenths" at its first rung, 60 BPM. A good easy Take, then Exit. | Today says "Your first session". The Session is placement on Shred's first Exercise at the first rung. The Take passes and is saved on `shred`; the next Take offered is at the pass tempo (110). The pass-tempo Take is not played, so the Sessions after this one stay on Step 1. |
-| `session` | The second Session (after `placement`; run alone it plays `placement` first). Today, 5 minutes, Start: an ordinary focus block on Shred's first Exercise. A good take, then Go again with a sloppy one, then a silent one. Exit. | Not placement. Good: "PASS BAR MET", a `path_takes` row passed and caught, `countsForCleanTempo`, the clean tempo stored at the Take's tempo. Sloppy: "THE BAR IS 90% / Evenness was …" (the Exercise's own evenness bar), row caught and not passed, the evenness check not held, the clean tempo unmoved. Silent: "I didn't catch enough", row not caught. |
+| `session` | The second Session (after `placement`; run alone it plays `placement` first). Today, 5 minutes, Start: an ordinary focus block on Shred's first Exercise. A good take, then Go again with a sloppy one, then a silent one, then one whose first bar is fluffed (80 ms of scatter) and the rest good. Exit. | Not placement. Good: "PASS BAR MET", a `path_takes` row passed and caught, `countsForCleanTempo`, the clean tempo stored at the Take's tempo. Sloppy: "THE BAR IS 90% / Evenness was …" (the Exercise's own evenness bar), row caught and not passed, the evenness check not held, the clean tempo unmoved. Silent: "I didn't catch enough", row not caught. Fluffed first bar: the Take ran its `takeBarsOf` bars (10), "PASS BAR MET", `countsForCleanTempo` with `heldBars` ≥ 8 starting after bar 0, and the clean tempo moved up to its tempo (the Take's two bars of slack, owner 2026-11-17). |
 | `relaunch` | Quit with the window's Close, start the app again on the same profile. | Today no longer plans a first Session; Progress shows the Exercise and its clean tempo. |
 | `two-paths` | Paths, Alternate Picking, Subscribe. Today, 20 minutes: the plan is read, then Start, and the Session is walked through (past the warm-up, one good Take on each Exercise it reaches, Move on past "Go again") until both Paths have a Take in it. | Today's "Running" line names both Paths; the plan has a block from each, Alternate Picking's as placement ("New here?"); the Session saved Takes on both `shred` and `alternate-picking`, and every good Take passed. |
 | `four-fingers` | Paths, Alternate Picking, Step 1, "Four fingers, one string", Play this, Faster to 80 BPM, a good take. | The Take is at 80, passes, and the clean tempo 80 is stored. |
@@ -74,7 +74,8 @@ it.
 - **The guitarist** (`lib/player.mjs`). Takes are rendered from the shipped
   packs (`src/paths/packs/shred.json`, `alternate-picking.json`), one Karplus-Strong pluck
   per note at the right pitch, for `takeBarsOf` bars: "good" is 1.5 ms of
-  scatter, "sloppy" 35 ms (clipped at 70), "silent" nothing.
+  scatter, "sloppy" 35 ms (clipped at 70), "fluffed" the first bar at 80 ms
+  (clipped at 160) and the rest at 1.5, "silent" nothing.
 - **Lining the take up with the transport.** The player records
   `yames_out.monitor` and plays into `guitar` with `pacat`, fed on its own
   clock with a fixed lead. Before the run it measures, with a pulse, how long a

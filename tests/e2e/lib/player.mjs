@@ -84,6 +84,8 @@ export function pluck(midi, seconds = 0.6, gain = 0.5, rand = rng(midi)) {
  *        "sloppy" σ = 35 ms of scatter (clipped at ±70 ms), every note
  *        "sloppier" σ = 80 ms (clipped at ±160 ms)
  *        "wrong"  timed like "good", every other note a semitone sharp
+ *        "fluffed" the first bar played like "sloppier", the rest like "good":
+ *                 the slack a Take has (owner, 2026-11-17) leaves it behind
  *        "silent" nothing
  */
 export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, seed = 7 }) {
@@ -98,8 +100,9 @@ export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, se
     for (const note of notes) {
       const tick = note.tick + p * passTicks;
       if (tick >= bars * barTicks) continue;
-      const spread = style === "sloppy" ? 35 : style === "sloppier" ? 80 : 1.5;
-      const clip = style === "sloppier" ? 160 : 70;
+      const rough = style === "sloppier" || (style === "fluffed" && tick < barTicks);
+      const spread = style === "sloppy" ? 35 : rough ? 80 : 1.5;
+      const clip = rough ? 160 : 70;
       let jitterMs = gauss(rand) * spread;
       // "wrong": in time, and every other note a semitone sharp.
       const midi = style === "wrong" && out.notes.length % 2 === 1 ? note.midi + 1 : note.midi;
