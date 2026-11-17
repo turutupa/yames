@@ -286,7 +286,7 @@ From `metrics.ts`, on the evidence of `plans/revamp/CONVERSION_AUDIT.md` §3.
 | `extraNotes` | `extras` | in report |
 | `accentPlacement` | `accent_agreement` (rough) | in report |
 | `cleanTempo` | `srs.rs update_ceiling` | exists, unwired |
-| `noteIdentity` | `pitch.rs` over a take's dry stem | exists, unwired |
+| `noteIdentity` | `pitch.rs` over a Session Take's input (`score/notes.rs`) | in the pass rule where it can be believed |
 | `landingChordTone` | pitch at the landing moment | new |
 | `scaleMembership` | share of pitched notes in the scale | new |
 | `restsKept` | no onset in the rest windows | new |
@@ -323,8 +323,8 @@ Still to do:
 2. **Slid-to notes as soft.** `schedule.ts` marks hammers and pulls soft, and not
    slides, so an unheard slid-to note is a miss. Small, but it moves song scoring, so
    it's not changed here. Until then `honesty.slideBar` keeps the bars forgiving.
-3. **`noteIdentity` wired** from `analyze_take_pitch` to an Exercise's notes. Until
-   then the pass rule lists it as not assessed and the result says so.
+3. ~~**`noteIdentity` wired**~~ Done (M2, 2026-11-16): `score/notes.rs`, measured
+   per window where `pass::notes_status` believes it, not assessed elsewhere.
 4. **The new graders:** `landingChordTone`, `scaleMembership`, `restsKept`.
 5. **Live per-bar pitch** for the four `livePerBar` Exercises in Blues (land-any-tone,
    two-chords, follow-the-form, free-guide-tones). They fall back to after the take.
