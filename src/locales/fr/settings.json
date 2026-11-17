@@ -318,6 +318,11 @@
         "gamepad": "MANETTE"
       }
     },
+    "feedback": {
+      "blurb": "Tu testes Yames ? Dis-nous avec tes mots ce qui a marché et ce qui n'a pas marché.",
+      "button": "Envoyer un avis",
+      "note": "Yames {{version}}. Ouvre un nouveau ticket GitHub dans ton navigateur, avec la version et ton système déjà remplis ; rien n'est envoyé tant que tu ne le publies pas."
+    },
     "support": {
       "title": "Soutien",
       "blurb": "Yames est gratuit et open source. S'il t'aide dans ta pratique, pense à soutenir son développement !",

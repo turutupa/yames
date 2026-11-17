@@ -128,6 +128,50 @@ describe("first-run detection", () => {
   });
 });
 
+// ── ONB-08: where the wizard lands ──────────────────────────────────────
+// Changed on purpose for the MVP (owner, 2026-11-16): a finished setup used to
+// land on the Metronome at 80 BPM; it lands on Today now, the learning side's
+// front door. "Just give me the click" still means the click and lands on the
+// Metronome. The 80 BPM is kept, so the Metronome opens where the wizard left it.
+describe("where the wizard lands (ONB-08)", () => {
+  const wizard = () => screen.queryByTestId("onboarding-overlay");
+  const click = async (name: string | RegExp) => {
+    const button = await screen.findByRole("button", { name });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+  };
+
+  it("finishing setup lands on Today, with the click at 80 BPM", async () => {
+    const store = await installSettings({});
+    render(<MainWindow />);
+    await waitFor(() => expect(wizard()).not.toBeNull());
+    await click(i18n.t("onboarding.welcome.setup"));
+    // W1: pick a guitar, then Next. Every later step is skipped; the input
+    // step's own outcome is W5's tests' business.
+    await click(new RegExp(i18n.t("instrument.electric-guitar")));
+    await click(i18n.t("onboarding.next"));
+    for (let i = 0; i < 8 && !screen.queryByRole("button", { name: i18n.t("onboarding.ready.start") }); i++) {
+      await click(i18n.t("onboarding.skip"));
+    }
+    await click(i18n.t("onboarding.ready.start"));
+    await waitFor(() => expect(wizard()).toBeNull());
+    await waitFor(() => expect(screen.queryByTestId("today")).not.toBeNull());
+    expect(store.values.get("onboarding.completedAt")).toBeDefined();
+    await waitFor(() => expect(wasInvoked("set_bpm", { bpm: 80 })).toBe(true));
+  });
+
+  it('"Just give me the click" lands on the Metronome', async () => {
+    await installSettings({});
+    render(<MainWindow />);
+    await waitFor(() => expect(wizard()).not.toBeNull());
+    await click(i18n.t("onboarding.welcome.skip"));
+    await waitFor(() => expect(wizard()).toBeNull());
+    await expectOnTool(METRONOME);
+    expect(screen.queryByTestId("today")).toBeNull();
+  });
+});
+
 // ── Every rail mode reachable, by both routes ────────────────────────────
 describe("every tool can be reached", () => {
   it("names all five tools where a player can see them", async () => {

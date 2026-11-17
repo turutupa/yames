@@ -1819,6 +1819,18 @@
   gap: 10px;
 }
 
+/* "Send feedback", at the top of Support: a line, the button, the version. */
+.feedback-block {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.feedback-block .feedback-note {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-tertiary, var(--text-secondary));
+}
+
 .about-link-btn {
   display: inline-flex;
   align-items: center;

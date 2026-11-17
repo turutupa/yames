@@ -318,6 +318,11 @@
         "gamepad": "手把"
       }
     },
+    "feedback": {
+      "blurb": "在測試 Yames？用你自己的話告訴我們哪些好用、哪些不好用。",
+      "button": "傳送意見回饋",
+      "note": "Yames {{version}}。在瀏覽器中開啟一個新的 GitHub issue，版本和系統已填好；在你在那裡送出之前不會傳送任何內容。"
+    },
     "support": {
       "title": "支援",
       "blurb": "Yames 完全免費且開源。如果它對你的練習有幫助，歡迎支持開發！",

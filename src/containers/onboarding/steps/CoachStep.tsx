@@ -110,6 +110,9 @@ export function CoachStep(_props: WizardStepProps) {
     () => machineContext.tryListening === true,
   );
 
+  // W5 already ran on this run (it comes first since the MVP reorder).
+  const inputAsked = machineContext.visited.includes("audio-input");
+
   const gb = memoryGb(coach.systemMemoryMb);
   const options: Option[] = facts
     ? [
@@ -243,8 +246,10 @@ export function CoachStep(_props: WizardStepProps) {
       )}
 
       {/* Decision 3: the listening steps stay on offer for timing-only users
-          — the timing score is the part that works without any model. */}
-      {staged === "off" && (
+          — the timing score is the part that works without any model. Since
+          the MVP reorder W5 runs before this step on every run, so a player
+          who has already been through it is not offered it a second time. */}
+      {staged === "off" && !inputAsked && (
         <label className="onboarding-coach-try" data-testid="coach-try-listening">
           <input
             type="checkbox"

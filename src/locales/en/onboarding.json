@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "A metronome built for real practice. Hands stay on the instrument.",
-      "setup": "Set me up (about a minute)",
+      "tagline": "A band plays, you play, and Yames hears your guitar. Practice that fits the minutes you have.",
+      "setup": "Set me up (about two minutes)",
       "skip": "Just give me the click",
       "footer": "Free · local · open source · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Dismiss"
     },
     "audioInput": {
-      "title": "Set up your input",
-      "subtitle": "Yames listens through this to score your timing. Play something and watch the meter move.",
+      "title": "How will I hear you?",
+      "subtitle": "Pick how your guitar reaches the computer, then play a few notes. The meter shows what Yames hears.",
+      "mode": {
+        "label": "How your guitar is connected",
+        "mic": {
+          "title": "Microphone",
+          "desc": "Your guitar in the room, through the computer's mic or a USB mic. Single notes work best."
+        },
+        "direct": {
+          "title": "Direct input",
+          "desc": "A cable from the guitar into an audio interface. The cleanest signal."
+        }
+      },
+      "noInterface": "No audio interface found. Plug it in and it appears in the list below, or use the microphone.",
       "device": "Input device",
       "guidance": {
         "electric-guitar": "Plug into an interface, or play in front of the laptop mic — the mic works, an interface is better.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Play something — the meter needs a second of signal.",
       "heard": "Got it. Yames can hear you.",
-      "skip": "Skip, I'll set this up later"
+      "skip": "Skip, I'll set this up later",
+      "noDevices": {
+        "title": "No input found",
+        "body": "Plug in a microphone or an audio interface; the list updates by itself. On a laptop, check that the built-in mic is not switched off."
+      },
+      "openFailed": {
+        "title": "This input would not open",
+        "body": "Another app may be using it, or Yames may not be allowed to use the microphone. Close the other app or allow access, then try again."
+      },
+      "silent": {
+        "title": "Nothing heard yet",
+        "mic": "Play closer to the microphone, and a little louder.",
+        "direct": "Turn up the guitar's volume knob and the interface's gain, and pick the input channel your cable is plugged into.",
+        "permission": "Microphone access: on macOS, System Settings › Privacy & Security › Microphone, turn Yames on; on Windows, Settings › Privacy › Microphone, allow desktop apps. Then restart Yames.",
+        "other": "Still nothing? Try another device in the list, or skip: the tools work without an input."
+      },
+      "retry": "Try again"
     },
     "hearItWork": {
       "title": "Hear it work",
@@ -128,7 +156,7 @@
       "coachOn": "On",
       "inputNone": "Not set up",
       "alwaysOnTop": "Always on top",
-      "start": "Start practicing",
+      "start": "Go to Today",
       "tour": "Show me around (30 s)"
     },
     "hints": {
@@ -206,6 +234,8 @@
       "takeTour": "Take the tour",
       "runSetup": "Run setup again",
       "shortcuts": "Keyboard shortcuts",
+      "sendFeedback": "Send feedback",
+      "sendFeedbackNote": "Opens a GitHub issue in your browser with the version and system filled in. Nothing is sent until you submit it.",
       "reportProblem": "Report a problem",
       "reportWorking": "Collecting logs…",
       "reportDone": "Diagnostics saved. Attach this file to your report:",

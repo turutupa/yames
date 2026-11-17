@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { currentFacts, feedbackUrl } from "./feedback/feedbackUrl";
 import { listen } from "@tauri-apps/api/event";
 import { load } from "@tauri-apps/plugin-store";
 import type { AppState, BeatEvent, ComponentScores, InstrumentId, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
@@ -22,6 +23,15 @@ export async function storeLoad<T>(key: string): Promise<T | undefined> {
 
 export async function openUrl(url: string): Promise<void> {
   return invoke("open_url", { url });
+}
+
+/**
+ * "Send feedback": opens a prefilled GitHub issue in the system browser, with
+ * the version and OS filled in (`src/feedback/feedbackUrl.ts`). The player
+ * submits it there, or doesn't; nothing is sent from the app.
+ */
+export async function openFeedback(version: string, language?: string): Promise<void> {
+  return openUrl(feedbackUrl(currentFacts(version, language)));
 }
 
 export async function getState(): Promise<AppState> {

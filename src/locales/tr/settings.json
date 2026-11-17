@@ -318,6 +318,11 @@
         "gamepad": "PAD"
       }
     },
+    "feedback": {
+      "blurb": "Yames'i mi test ediyorsun? Neyin işe yarayıp neyin yaramadığını kendi sözlerinle anlat.",
+      "button": "Geri bildirim gönder",
+      "note": "Yames {{version}}. Tarayıcında sürüm ve sistem bilgisi doldurulmuş yeni bir GitHub kaydı açar; sen orada gönderene kadar hiçbir şey gönderilmez."
+    },
     "support": {
       "title": "Destek",
       "blurb": "Yames ücretsiz ve açık kaynak. Alıştırmalarına yardımcı oluyorsa geliştirmeye destek olmayı düşün!",

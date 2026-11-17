@@ -351,6 +351,16 @@ describe("W4 — the optional listening branch (decision 3)", () => {
     expect(screen.getByTestId("coach-try-listening")).toBeInTheDocument();
   });
 
+  // MVP, 2026-11-16: W5 comes before this step on every run now, so a player
+  // who has been through it is not offered it again.
+  it("is not offered once the input step has already run", async () => {
+    await mount({
+      state: stateAt("coach", { visited: ["welcome", "instrument", "audio-input", "coach"] }),
+    });
+    await click(card("off"));
+    expect(screen.queryByTestId("coach-try-listening")).toBeNull();
+  });
+
   it("records the intent for O5 when ticked", async () => {
     const { dispatch } = await mount({ llmCompiled: false });
     const checkbox = within(screen.getByTestId("coach-try-listening")).getByRole("checkbox");

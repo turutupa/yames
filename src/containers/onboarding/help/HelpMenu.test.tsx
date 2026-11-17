@@ -53,6 +53,23 @@ describe("HelpMenu — items by feature availability", () => {
     expect(screen.getByRole("button", { name: /take the tour/i })).toBeInTheDocument();
   });
 
+  it("Send feedback closes the menu and hands off, and is hidden when not wired", () => {
+    const onClose = vi.fn();
+    const onSendFeedback = vi.fn();
+    const { unmount } = render(
+      <HelpMenu {...base} onClose={onClose} onSendFeedback={onSendFeedback} />,
+    );
+    const item = screen.getByRole("button", { name: /send feedback/i });
+    // Says, before it is pressed, that pressing it sends nothing.
+    expect(screen.getByText(/Nothing is sent until you submit it/)).toBeInTheDocument();
+    act(() => item.click());
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onSendFeedback).toHaveBeenCalledTimes(1);
+    unmount();
+    render(<HelpMenu {...base} />);
+    expect(screen.queryByRole("button", { name: /send feedback/i })).toBeNull();
+  });
+
   it("hides Report a problem when no export is available", () => {
     render(<HelpMenu {...base} />);
     expect(screen.queryByRole("button", { name: /report a problem/i })).toBeNull();

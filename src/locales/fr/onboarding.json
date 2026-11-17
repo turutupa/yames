@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Un métronome conçu pour le vrai travail. Les mains restent sur l'instrument.",
-      "setup": "Configurer (environ une minute)",
+      "tagline": "Un groupe joue, tu joues, et Yames entend ta guitare. Une pratique qui tient dans les minutes dont tu disposes.",
+      "setup": "Me configurer (environ deux minutes)",
       "skip": "Juste le clic",
       "footer": "Gratuit · local · open source · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Ignorer"
     },
     "audioInput": {
-      "title": "Configurer l'entrée",
-      "subtitle": "Yames écoute par ici pour évaluer ta précision. Joue quelque chose et regarde le vu-mètre.",
+      "title": "Comment vais-je t'entendre ?",
+      "subtitle": "Choisis comment ta guitare arrive jusqu'à l'ordinateur, puis joue quelques notes. Le vumètre montre ce qu'entend Yames.",
+      "mode": {
+        "label": "Comment ta guitare est branchée",
+        "mic": {
+          "title": "Micro",
+          "desc": "Ta guitare dans la pièce, via le micro de l'ordinateur ou un micro USB. Les notes seules marchent le mieux."
+        },
+        "direct": {
+          "title": "Entrée directe",
+          "desc": "Un câble de la guitare vers une interface audio. Le signal le plus propre."
+        }
+      },
+      "noInterface": "Aucune interface audio trouvée. Branche-la et elle apparaîtra dans la liste ci-dessous, ou utilise le micro.",
       "device": "Périphérique d'entrée",
       "guidance": {
         "electric-guitar": "Branche-toi sur une interface ou joue devant le micro du portable — le micro suffit, l'interface est meilleure.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Joue quelque chose — le vu-mètre a besoin d'une seconde de signal.",
       "heard": "C'est bon. Yames t'entend.",
-      "skip": "Passer, je verrai plus tard"
+      "skip": "Passer, je verrai plus tard",
+      "noDevices": {
+        "title": "Aucune entrée trouvée",
+        "body": "Branche un micro ou une interface audio ; la liste se met à jour toute seule. Sur un portable, vérifie que le micro intégré n'est pas désactivé."
+      },
+      "openFailed": {
+        "title": "Impossible d'ouvrir cette entrée",
+        "body": "Une autre app l'utilise peut-être, ou Yames n'a pas le droit d'utiliser le micro. Ferme l'autre app ou autorise l'accès, puis réessaie."
+      },
+      "silent": {
+        "title": "Rien entendu pour l'instant",
+        "mic": "Joue plus près du micro, et un peu plus fort.",
+        "direct": "Monte le volume de la guitare et le gain de l'interface, et choisis le canal d'entrée où ton câble est branché.",
+        "permission": "Accès au micro : sur macOS, Réglages système › Confidentialité et sécurité › Micro, active Yames ; sur Windows, Paramètres › Confidentialité › Microphone, autorise les applications de bureau. Puis redémarre Yames.",
+        "other": "Toujours rien ? Essaie un autre appareil de la liste, ou passe : les outils marchent sans entrée."
+      },
+      "retry": "Réessayer"
     },
     "hearItWork": {
       "title": "Écoute-le travailler",
@@ -128,7 +156,7 @@
       "coachOn": "Activé",
       "inputNone": "Non configurée",
       "alwaysOnTop": "Toujours au premier plan",
-      "start": "Commencer à jouer",
+      "start": "Aller à Aujourd'hui",
       "tour": "Faites-moi visiter (30 s)"
     },
     "hints": {
@@ -206,6 +234,8 @@
       "takeTour": "Faire la visite",
       "runSetup": "Relancer la configuration",
       "shortcuts": "Raccourcis clavier",
+      "sendFeedback": "Envoyer un avis",
+      "sendFeedbackNote": "Ouvre un ticket GitHub dans ton navigateur, avec la version et le système déjà remplis. Rien n'est envoyé tant que tu ne le publies pas.",
       "reportProblem": "Signaler un problème",
       "reportWorking": "Collecte des journaux…",
       "reportDone": "Diagnostic enregistré. Joignez ce fichier à votre signalement :",

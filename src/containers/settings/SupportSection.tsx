@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { SHARE_OPTIONS, SHARE_URL } from "../../constants/metronome";
-import { openUrl } from "../../ipc";
+import { openFeedback, openUrl } from "../../ipc";
 import { ShareIcon } from "../main-window/ShareMenuPopover";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
@@ -13,14 +13,38 @@ type ShareOption = (typeof SHARE_OPTIONS)[number];
 export function SupportSection({
   shareTooltip,
   onShareOption,
+  appVersion = "",
 }: {
   shareTooltip: boolean;
   onShareOption: (opt: ShareOption) => void;
+  /** Goes into the feedback issue, and is said beside the button. */
+  appVersion?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <section className="settings-section about-section support-card">
       <h2>{t("settings.support.title")}</h2>
+      {/* Testers first: what happened, in their words, with the version and
+          OS already filled in. A GitHub issue in their browser, which they
+          submit or don't; nothing is sent from here. */}
+      <div className="feedback-block" data-testid="settings-feedback">
+        <p className="about-text">{t("settings.feedback.blurb")}</p>
+        <div className="about-links">
+          <button
+            className="about-link-btn support-btn"
+            data-testid="settings-send-feedback"
+            onClick={() => void openFeedback(appVersion, i18n.language).catch(() => {})}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {t("settings.feedback.button")}
+          </button>
+        </div>
+        <p className="about-text feedback-note">
+          {t("settings.feedback.note", { version: appVersion })}
+        </p>
+      </div>
       <p className="about-text">
         {t("settings.support.blurb")}
       </p>
