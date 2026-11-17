@@ -85,6 +85,8 @@ import {
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
+import { GUITAR_BAND, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
+import type { SongBacking } from "../../../songs/types";
 import { DEFAULT_PRACTICE_VIEW, isPracticeView } from "../highway/runwayModel";
 import type { PracticeView } from "../highway/runwayModel";
 import type { TakePlan } from "../../../session/take";
@@ -96,6 +98,8 @@ const MINUTES_KEY = "session.minutes";
 const UNSUBSCRIBED_KEY = "session.unsubscribed";
 /** Neck or runway on the Take screen (plans/tasks/mvp/RUNWAY.md). A tester's own A/B switch. */
 const PRACTICE_VIEW_KEY = "practiceView";
+/** How loud the band is under a jam-backed Take, 0..1.5 (0 is the click alone). */
+const BAND_VOLUME_KEY = "session.bandVolume";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
 const TEST_OUT_MINUTES = 2;
@@ -216,6 +220,13 @@ export function useSessionRun(input: SessionRunInput) {
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
   const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
+  const [bandVolume, setBandVolumeState] = useState<number>(() => readBandVolume(undefined));
+  const bandVolumeRef = useRef(bandVolume);
+  bandVolumeRef.current = bandVolume;
+  /** The band on the engine now (a Take's, or the finisher's), for live volume moves. */
+  const loadedBand = useRef<SongBacking | null>(null);
+  /** The song on the engine is the finisher's, which its step's stop clears. */
+  const finisherLoaded = useRef(false);
   const practiceViewRef = useRef(practiceView);
   practiceViewRef.current = practiceView;
   /**
@@ -287,12 +298,27 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<string>(PRACTICE_VIEW_KEY).then((saved) => {
       if (isPracticeView(saved)) setPracticeViewState(saved);
     });
+    void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
+      if (saved !== undefined) setBandVolumeState(readBandVolume(saved));
+    });
   }, [onLearningSide, refresh]);
 
   const setMinutes = useCallback((next: PlanMinutes) => {
     setMinutesState(next);
     void storeSave(MINUTES_KEY, next).catch(() => {});
   }, []);
+
+  /** The band's level, per player, kept; a move is heard at once. */
+  const setBandVolume = useCallback(
+    (next: number) => {
+      const level = readBandVolume(next);
+      setBandVolumeState(level);
+      void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
+      const band = loadedBand.current;
+      if (band) void enqueue(() => setSongMix(takeMix(band, level, DEFAULT_MIX_SETTING.mix.click)));
+    },
+    [enqueue],
+  );
 
   const setPracticeView = useCallback((next: PracticeView) => {
     setPracticeViewState(next);
@@ -322,6 +348,8 @@ export function useSessionRun(input: SessionRunInput) {
   }, [current, run.bpm, step?.kind === "exercise" ? step.variantSeed : null]);
   // Which Take of this step it is: Go again at the same tempo is the same
   // notes, and still a new Take that has to be loaded before it can start.
+  const takeRef = useRef(take);
+  takeRef.current = take;
   const takeNumber = `${run.stepIndex}|${run.takes}`;
   const prepared = take !== null && preparedTake === takeKey(take, takeNumber);
 
@@ -351,7 +379,16 @@ export function useSessionRun(input: SessionRunInput) {
     (kind: PlanStep["kind"] | null) =>
       enqueue(async () => {
         await setPlaying(false).catch(() => {});
-        if (kind === "jam") await clearJam(null);
+        if (kind === "jam") {
+          await clearJam(null);
+          // The finisher plays its band as a song. Only its own: a Take that
+          // was queued ahead of this stop has already replaced it.
+          if (finisherLoaded.current) {
+            finisherLoaded.current = false;
+            await clearSong().catch(() => {});
+            loadedBand.current = null;
+          }
+        }
         if (kind === "drill") await stopSpeedRamp().catch(() => {});
       }),
     [enqueue],
@@ -376,8 +413,17 @@ export function useSessionRun(input: SessionRunInput) {
           countInBars: TAKE_COUNT_IN_BARS,
           startTick: 0,
         });
-        await loadSong(transport, null);
-        await setSongMix(engineMix(DEFAULT_MIX_SETTING, 0));
+        // The band the Exercise asks for, in the song itself: one transport,
+        // one clock, and none of its notes in the schedule the scorer reads.
+        const band = buildTakeBand(take.exercise, take.bars, take.bpm, latest.current.lineup ?? GUITAR_BAND);
+        finisherLoaded.current = false;
+        await loadSong(transport, band);
+        loadedBand.current = band;
+        await setSongMix(
+          band
+            ? takeMix(band, bandVolumeRef.current, DEFAULT_MIX_SETTING.mix.click)
+            : engineMix(DEFAULT_MIX_SETTING, 0),
+        );
         await loadScoreSchedule(take.schedule, take.exercise.passBars, take.pitches);
         if (prepareId.current === mine) setPreparedTake(takeKey(take, takeNumber));
       } catch (err) {
@@ -394,16 +440,46 @@ export function useSessionRun(input: SessionRunInput) {
     if (entered?.index === run.stepIndex) return;
     lastEntered.current = { index: run.stepIndex, kind: step.kind };
     const { jams, lineup, state } = latest.current;
+    const finisher = step.kind === "jam" ? takeRef.current : null;
     void enqueue(async () => {
       await setPlaying(false).catch(() => {});
       await clearScoreSchedule().catch(() => {});
       await clearSong().catch(() => {});
+      loadedBand.current = null;
       await clearJam(null);
       if (step.kind === "metronome") {
         await setBpm(step.bpm).catch(() => {});
         await setFreeMode(false).catch(() => {});
         await setBeatGroups([4]).catch(() => {});
         await setSubdivision(step.subdivision as Subdivision).catch(() => {});
+        await setPlaying(true).catch(() => {});
+      } else if (step.kind === "jam" && step.exerciseId && finisher) {
+        // The finisher: its Exercise over the band it asks for, looping, at a
+        // tempo already passed. Nothing is scheduled for the scorer: ungraded.
+        const band = buildTakeBand(finisher.exercise, finisher.bars, finisher.bpm, lineup ?? GUITAR_BAND);
+        if (band) {
+          const importer = await import("../../../songs/import");
+          const transport = importer.buildTransport(finisher.score, finisher.range, {
+            loops: true,
+            tempoPercent: 100,
+            countInBars: TAKE_COUNT_IN_BARS,
+            startTick: 0,
+          });
+          try {
+            await loadSong(transport, band);
+            finisherLoaded.current = true;
+            loadedBand.current = band;
+            await setSongMix(takeMix(band, bandVolumeRef.current, DEFAULT_MIX_SETTING.mix.click));
+            await setPlaying(true).catch(() => {});
+            return;
+          } catch (err) {
+            console.warn("[yames] the finisher's band would not load; the jam plays instead", err);
+          }
+        }
+        const first = jams[0];
+        if (!first) return;
+        const jam = step.bpm ? { ...first, bpm: step.bpm } : first;
+        pushJam(jam, compileJam(jam, { formBar: 0, lineup }));
         await setPlaying(true).catch(() => {});
       } else if (step.kind === "jam") {
         const first = jams[0];
@@ -655,6 +731,8 @@ export function useSessionRun(input: SessionRunInput) {
       if (entered?.kind === "drill") await stopSpeedRamp().catch(() => {});
       await clearScoreSchedule().catch(() => {});
       await clearSong().catch(() => {});
+      finisherLoaded.current = false;
+      loadedBand.current = null;
       await clearJam(null);
       if (!saved) return;
       await setFreeMode(saved.freeMode).catch(() => {});
@@ -944,6 +1022,10 @@ export function useSessionRun(input: SessionRunInput) {
     setMinutes,
     practiceView,
     setPracticeView,
+    bandVolume,
+    setBandVolume,
+    /** The Take on the stage has a band under it. */
+    hasBand: take?.exercise.backing.kind === "jam",
     paths,
     myPaths,
     progress,

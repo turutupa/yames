@@ -136,7 +136,9 @@
       "engineTrouble": "Die Audio-Engine hat diese Übung nicht angenommen. Beende und starte neu.",
       "hearing": "Ich höre dich",
       "waitingForSignal": "Ich höre zu. Spiel einen Ton zum Testen.",
-      "listeningBack": "Wiedergabe"
+      "listeningBack": "Wiedergabe",
+      "band": "Band",
+      "bandHint": "Die Band wird nicht bewertet. Mit Mikrofon leise halten oder Kopfhörer nutzen."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",

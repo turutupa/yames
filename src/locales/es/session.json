@@ -136,7 +136,9 @@
       "engineTrouble": "El motor de sonido no aceptó este ejercicio. Sal y vuelve a empezar.",
       "hearing": "Te oigo",
       "waitingForSignal": "Escuchando. Toca una nota para comprobarlo.",
-      "listeningBack": "Reproduciendo"
+      "listeningBack": "Reproduciendo",
+      "band": "Banda",
+      "bandHint": "La banda no se califica. Con micrófono, bájala o usa auriculares."
     },
     "result": {
       "kick": "Toma {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compases",

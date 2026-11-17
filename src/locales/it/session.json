@@ -136,7 +136,9 @@
       "engineTrouble": "Il motore audio non ha accettato questo esercizio. Esci e ricomincia.",
       "hearing": "Ti sento",
       "waitingForSignal": "In ascolto. Suona una nota per provare.",
-      "listeningBack": "Riascolto"
+      "listeningBack": "Riascolto",
+      "band": "Band",
+      "bandHint": "La band non viene valutata. Col microfono, tienila bassa o usa le cuffie."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} battute",

@@ -136,7 +136,9 @@
       "engineTrouble": "サウンドエンジンがこの課題を読み込めませんでした。終了してもう一度始めてください。",
       "hearing": "聞こえています",
       "waitingForSignal": "待機中。音を 1 つ弾いて確認してください。",
-      "listeningBack": "聞き返し中"
+      "listeningBack": "聞き返し中",
+      "band": "バンド",
+      "bandHint": "バンドは採点されません。マイク使用時は音量を下げるかヘッドホンを使ってください。"
     },
     "result": {
       "kick": "テイク {{take}} · {{title}} · {{bpm}} BPM · {{bars}} 小節",

@@ -136,7 +136,9 @@
       "engineTrouble": "音频引擎没能载入这个练习。退出后重新开始。",
       "hearing": "正在听你",
       "waitingForSignal": "正在听。弹一个音来检查。",
-      "listeningBack": "正在回听"
+      "listeningBack": "正在回听",
+      "band": "乐队",
+      "bandHint": "乐队不计分。用麦克风时请调小音量或戴耳机。"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小节",

@@ -136,7 +136,9 @@
       "engineTrouble": "The sound engine wouldn't take this Exercise. Exit and start again.",
       "hearing": "Hearing you",
       "waitingForSignal": "Listening. Play a note to check.",
-      "listeningBack": "Listening back"
+      "listeningBack": "Listening back",
+      "band": "Band",
+      "bandHint": "The band is not graded. On a microphone, keep it low or use headphones."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
