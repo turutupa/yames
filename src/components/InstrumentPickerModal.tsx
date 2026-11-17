@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { INSTRUMENTS } from "../constants/metronome";
+import { IS_MOBILE } from "../platform";
 import { INSTRUMENT_ICONS } from "./MetronomeIcons";
 
 /**
@@ -69,7 +70,9 @@ export function InstrumentPickerModal({
       <div className="instrument-picker-modal">
         <h2 className="instrument-picker-title">{t("instrumentPicker.title")}</h2>
         <p className="instrument-picker-subtitle">
-          {t("instrumentPicker.subtitle")}
+          {/* Same two sentences as the wizard's W1, for the same reason: the
+              desktop one names the coach and the microphone. */}
+          {t(IS_MOBILE ? "instrumentPicker.subtitleMobile" : "instrumentPicker.subtitle")}
         </p>
         <InstrumentPickerGrid onPick={onPick} />
         <button

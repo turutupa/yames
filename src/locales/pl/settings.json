@@ -346,6 +346,9 @@
       "sounds": "Dźwięki",
       "soundsCredit": "Zestaw Klub to Virtuosity Drums od Versilian Studios i Karoryfer Samples, zagrany przez Austina McMahona (domena publiczna). Zestaw Studio to DRSKit z projektu DrumGizmo (CC BY 4.0).",
       "madeWith": "Stworzone z {{heart}} dla muzyków na całym świecie",
+      "newerOut": "Jest już wersja {{version}}",
+      "getIt": "Pobierz",
+      "notNow": "Nie teraz",
       "soundsCreditSongs": "Pozostałe instrumenty pochodzą z brzmień General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
@@ -411,6 +414,7 @@
   "instrumentPicker": {
     "title": "Na czym ćwiczysz?",
     "subtitle": "Yames dostraja wykrywanie dźwięku i wskazówki Trenera do Twojego instrumentu. Zmienisz to później w Ustawieniach.",
+    "subtitleMobile": "Żeby Yames wiedział, na czym ćwiczysz. Możesz to zmienić później w Ustawieniach.",
     "skip": "Pomiń — wybiorę później"
   }
 }

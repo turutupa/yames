@@ -47,6 +47,7 @@
     "delete": "Удалить",
     "newPreset": "Новый пресет",
     "newDrill": "Новое упражнение",
+    "unsaved": "Не сохранено",
     "titleSongs": "Песни"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "Свернуть боковую панель ({{shortcut}})",
     "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})",
     "beta": "Бета"
+  },
+  "tabs": {
+    "library": "Библиотека"
+  },
+  "mobileTabs": {
+    "settings": "Опции",
+    "library": "Пресеты",
+    "zen": "Дзен"
+  },
+  "sheet": {
+    "close": "Закрыть"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Играет — {{bpm}} BPM",
+    "notificationPaused": "Пауза",
+    "notificationStop": "Стоп",
+    "notificationChannel": "Воспроизведение"
   }
 }

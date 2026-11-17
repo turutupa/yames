@@ -149,7 +149,8 @@
     "list_path_states",
     "list_path_takes",
     "save_path_state",
-    "save_path_take"
+    "save_path_take",
+    "release_jam_sounds"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -299,7 +300,8 @@
     "list_path_states",
     "list_path_takes",
     "save_path_state",
-    "save_path_take"
+    "save_path_take",
+    "release_jam_sounds"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -499,7 +501,8 @@
     "listPathTakes",
     "savePathState",
     "savePathTake",
-    "openFeedback"
+    "openFeedback",
+    "releaseJamSounds"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -1378,6 +1381,21 @@
       "written": true
     },
     "session.minutes": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "newerVersion.askedAt": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "newerVersion.hidden": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "newerVersion.latest": {
       "store": "settings.json",
       "read": true,
       "written": true

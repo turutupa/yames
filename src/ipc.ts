@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { currentFacts, feedbackUrl } from "./feedback/feedbackUrl";
 import { listen } from "@tauri-apps/api/event";
+import { IS_MOBILE } from "./platform";
+import { openUrlNative } from "./mobile/native";
 import { load } from "@tauri-apps/plugin-store";
 import type { AppState, BeatEvent, ComponentScores, InstrumentId, SegmentEndReason, SpeedRamp, Subdivision } from "./types";
 
@@ -22,6 +24,12 @@ export async function storeLoad<T>(key: string): Promise<T | undefined> {
 }
 
 export async function openUrl(url: string): Promise<void> {
+  // The desktop `open_url` command spawns `open` / `start` / `xdg-open`, and
+  // there is no process to spawn on a phone, so a phone routes links through
+  // the yames-mobile plugin's `Intent.ACTION_VIEW` (M04, from the `mobile`
+  // branch). `IS_MOBILE` is a build-time constant, so this branch is not in a
+  // desktop bundle at all.
+  if (IS_MOBILE) return openUrlNative(url);
   return invoke("open_url", { url });
 }
 
@@ -2182,6 +2190,24 @@ export type JamWarmRequest = {
   /** Every recorded keys voice — the keys dropdown is about to open. */
   keysVoices?: boolean;
 };
+
+/**
+ * Let the decoded band go, and say whether it went.
+ *
+ * The other end of `warmJam`, and a phone's alone: a band that has been
+ * decoded costs tens of megabytes for as long as anything holds it, and on a
+ * phone that is what decides whether the app survives being put down (M10).
+ * The loaded table goes first and the two caches after it, all on a blocking
+ * thread — never the audio thread, and never while the band is playing,
+ * which the engine refuses under its own lock.
+ *
+ * `false` means it refused, which today means the band was playing. Every
+ * caller is behind `IS_MOBILE`; on a desktop the command answers `false` and
+ * changes nothing.
+ */
+export async function releaseJamSounds(): Promise<boolean> {
+  return invoke<boolean>("release_jam_sounds");
+}
 
 /**
  * Decode sounds before anybody asks for them, so choosing a jam, a kit or a

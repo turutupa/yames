@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { storeLoad, storeSave } from "../../../ipc";
 import {
   deleteTake,
   listTakes,
@@ -8,10 +9,8 @@ import {
   startTake,
   stopTake,
   stopTakePlayback,
-  storeLoad,
-  storeSave,
   takesDirSize,
-} from "../../../ipc";
+} from "../../../ipc.desktop";
 import { sortTakes } from "../../../jam";
 import { TAKES_INTRO_KEY } from "../../../jam/takes";
 import { useTakeSound } from "../../../takes/useTakeSound";

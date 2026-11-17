@@ -1,0 +1,238 @@
+/**
+ * Everything the phone's native half needs from the app's state, and
+ * everything the app needs back from it.
+ *
+ * Three jobs, all of them one-way plumbing:
+ *
+ * 1. **The foreground service follows the transport.** Press play and Android
+ *    is told a `mediaPlayback` service is running with this notification on
+ *    it; press stop and it is torn down. Without that the process is a
+ *    candidate for freezing or killing within minutes of the screen going off
+ *    — the plan's §6 risk, and the reason M04 exists.
+ * 2. **The screen stays awake when you are reading it hands-free.** Playing, a
+ *    running drill, or zen mode. Not on the settings screen, which should go
+ *    dark like any other screen.
+ * 3. **The system's interruptions reach the transport.** A call takes audio
+ *    focus; the click pauses and comes back when the call ends. Another app
+ *    taking playback for good stops it and does not bring it back. The Stop
+ *    button in the notification stops it too. And the Back gesture closes
+ *    whatever is open rather than killing the app.
+ * 4. **The system bars' real heights reach the stylesheet.** The app draws
+ *    behind the status bar and the gesture bar, and `env(safe-area-inset-*)`
+ *    does not describe either of them — see `WindowInsets` in
+ *    `src/mobile/native.ts`. The Android side measures them; this writes them
+ *    into the `--safe-*` tokens every layout already pads with.
+ * 5. **The system's memory pressure reaches the band.** A decoded backing
+ *    band is tens of megabytes, and the biggest backgrounded process is the
+ *    first one Android kills. The activity's own lifecycle and
+ *    `onTrimMemory` are forwarded to `mobile/bandMemory.ts`, which lets the
+ *    band go once the app has been out of sight and stopped for a while, and
+ *    brings it back when the musician does (M10).
+ *
+ * Mounted only on a phone (`IS_MOBILE`), so none of `src/mobile/` reaches a
+ * desktop bundle.
+ */
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { setPlaying } from "../../../ipc";
+import { appVisibilityChanged, memoryTrimmed } from "../../../mobile/bandMemory";
+import { dismissTop } from "../../../mobile/backStack";
+import type { WindowInsets } from "../../../mobile/native";
+import { keepAwake, listenToNative, setBackgroundAudio } from "../../../mobile/native";
+
+/**
+ * How long the transport has to stay live before the foreground service is
+ * started. See `liveSettled` below for why this is not zero.
+ */
+export const SERVICE_START_DELAY_MS = 500;
+
+/** The four tokens, in the order the Android side measures them. */
+const INSET_TOKENS: ReadonlyArray<[keyof WindowInsets, string]> = [
+  ["top", "--safe-top"],
+  ["right", "--safe-right"],
+  ["bottom", "--safe-bottom"],
+  ["left", "--safe-left"],
+];
+
+/**
+ * Write the measured system-bar insets over the `env()` fallback the tokens
+ * are declared with in `shell.css`.
+ *
+ * An inline custom property on `:root` beats the stylesheet's `:root` rule, so
+ * this is the whole mechanism — every `calc(<spacing> + var(--safe-bottom))`
+ * in the app starts clearing the gesture bar the moment the first event
+ * lands, and no layout needs to know where the number came from. Nothing
+ * writes these until Android says so, which is why a desktop build and the
+ * screenshot harness are untouched.
+ *
+ * Rounded to hundredths: the raw quotient is a repeating decimal on most
+ * densities (128 ÷ 2.625) and two places is far below a device pixel.
+ */
+export function applyWindowInsets(insets: WindowInsets) {
+  const root = document.documentElement.style;
+  for (const [side, token] of INSET_TOKENS) {
+    const value = insets[side];
+    // A garbled payload must not be able to shove the header off the screen.
+    if (!Number.isFinite(value) || value < 0) continue;
+    root.setProperty(token, `${Math.round(value * 100) / 100}px`);
+  }
+}
+
+interface Options {
+  /** The engine's transport, as the backend reports it. */
+  isPlaying: boolean;
+  /** Shown in the notification, so it has to be the tempo actually sounding. */
+  bpm: number;
+  /** Playing, in zen, or running a drill — the hands-free screens. */
+  keepScreenOn: boolean;
+}
+
+export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
+  const { t } = useTranslation();
+
+  // The event channel is opened once and lives for the app's lifetime, so its
+  // handler must not close over a render's values. Refs, not dependencies.
+  const isPlayingRef = useRef(isPlaying);
+  isPlayingRef.current = isPlaying;
+
+  /**
+   * Whether the pause currently in effect is ours — we stood aside for
+   * something the system let through, and mean to come back.
+   *
+   * Two things hang off it. First, only a pause we caused may be undone by
+   * `focus_gained`: if the user pressed stop while a call was ringing, coming
+   * back to a metronome that started itself would be worse than doing nothing.
+   * Second, and this is what the emulator caught, the foreground service and
+   * the focus request must *stay* while it is true. Tearing them down on the
+   * way into a pause abandons audio focus, and an app that has abandoned focus
+   * is never told it has it again — the click paused for the call and then sat
+   * there after the caller hung up. Held in state as well as a ref because the
+   * notification effect has to see it change; the ref is for the event channel,
+   * whose handler is built once and must not read a stale render.
+   */
+  const [standingAside, setStandingAside] = useState(false);
+  const standingAsideRef = useRef(false);
+  const standAside = useCallback((value: boolean) => {
+    standingAsideRef.current = value;
+    setStandingAside(value);
+  }, []);
+
+  const stop = useCallback(() => {
+    setPlaying(false).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    listenToNative((event) => {
+      switch (event.event) {
+        case "window_insets":
+          applyWindowInsets(event);
+          break;
+        case "back_pressed":
+          // The Android side only sends this while something is open; if the
+          // stack has emptied in between, there is nothing to do — it will not
+          // ask again.
+          dismissTop();
+          break;
+        case "stop_requested":
+          standAside(false);
+          stop();
+          break;
+        case "app_visible":
+          // Out of sight and stopped is when the decoded band is allowed to
+          // go, and back on screen is when it comes back. The decision is
+          // `bandMemory.ts`'s; this is only the wire.
+          appVisibilityChanged(event.visible);
+          break;
+        case "memory_trim":
+          memoryTrimmed(event.level);
+          break;
+        case "audio_interrupted":
+          if (event.kind === "focus_lost") {
+            if (isPlayingRef.current) {
+              standAside(true);
+              stop();
+            }
+          } else if (event.kind === "focus_gained") {
+            if (standingAsideRef.current) {
+              // Cleared by the effect below, when the backend confirms it is
+              // playing again — not here. Clearing it on the way in leaves one
+              // render where nothing is playing and nothing is standing aside,
+              // and the service and the focus request are torn down and rebuilt
+              // across it. Seventeen milliseconds is long enough for another app
+              // to take the focus we just got back.
+              setPlaying(true).catch(() => standAside(false));
+            }
+          } else {
+            // Permanent: another app owns playback now. Let the service and
+            // the focus request go with it.
+            standAside(false);
+            stop();
+          }
+          break;
+      }
+    }).catch(() => {});
+    // Opened once. The plugin keeps one channel and replaces it if this ever
+    // ran twice, so a double mount in React's strict mode is harmless.
+  }, [stop, standAside]);
+
+  /**
+   * The transport, but only once it has been live long enough to mean it.
+   *
+   * Starting the foreground service is not free: on Android 13 and up the
+   * first one raises a permission dialog, and that dialog lands on whatever
+   * the user is looking at. So it must never fire for a transport that was
+   * only briefly true. One such blip is real and was caught on the first
+   * release build: the wizard's demo click is unwound as the wizard closes,
+   * and for the render between "the demo is no longer running" and "the
+   * engine has stopped" the transport reads as a user pressing play. The
+   * dialog arrived on the way out of setup, for a notification about a click
+   * that had already stopped.
+   *
+   * Half a second, and only on the way up — stopping is immediate, because a
+   * service that outlives playback is the thing the plan actually forbids.
+   * Nobody can tell that the row in the shade arrives half a second after the
+   * first beat; the app is in the foreground and not about to be killed.
+   */
+  const live = isPlaying || standingAside;
+  const [liveSettled, setLiveSettled] = useState(false);
+  useEffect(() => {
+    if (!live) {
+      setLiveSettled(false);
+      return;
+    }
+    const id = setTimeout(() => setLiveSettled(true), SERVICE_START_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [live]);
+
+  // The notification. Re-sent when the words would change — which is when the
+  // tempo changes or the user switches language mid-practice — and not
+  // otherwise, so a tempo dialled while stopped does not talk to Android 40
+  // times.
+  const lastNotification = useRef<string | null>(null);
+  useEffect(() => {
+    // `liveSettled` rather than `isPlaying`, for the two reasons above it:
+    // `standingAside` keeps the service (and with it the focus request) alive
+    // across a pause we mean to come back from, and the delay keeps it from
+    // starting for a transport that was only momentarily true.
+    const text = {
+      title: t("playback.notificationTitle"),
+      body: isPlaying ? t("playback.notificationBody", { bpm }) : t("playback.notificationPaused"),
+      stopLabel: t("playback.notificationStop"),
+      channelName: t("playback.notificationChannel"),
+    };
+    const signature = liveSettled ? `on:${text.title}:${text.body}:${text.stopLabel}` : "off";
+    if (signature === lastNotification.current) return;
+    lastNotification.current = signature;
+    setBackgroundAudio(liveSettled, text).catch(() => {});
+  }, [liveSettled, isPlaying, bpm, t]);
+
+  // Playing again — by the resume above, or because the user pressed play
+  // themselves while the click was standing aside.
+  useEffect(() => {
+    if (isPlaying) standAside(false);
+  }, [isPlaying, standAside]);
+
+  useEffect(() => {
+    keepAwake(keepScreenOn).catch(() => {});
+  }, [keepScreenOn]);
+}

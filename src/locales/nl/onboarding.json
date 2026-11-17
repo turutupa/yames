@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Geluid en uiterlijk",
       "subtitle": "Beweeg over een kaart om de klik te horen of het thema te zien. Kies wat je mooi vindt.",
+      "subtitleTouch": "Tik op een kaart om de klik te horen of het thema te proberen. Tik op een andere om van gedachten te veranderen.",
       "soundHeading": "Klikgeluid",
       "themeHeading": "Thema",
       "moreThemes": "Meer thema's in Instellingen"
@@ -142,6 +143,7 @@
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",
+      "notificationNote": "De eerste keer dat je op afspelen drukt, vraagt je telefoon of Yames een melding mag tonen — zeg ja en de klik loopt door met het scherm uit.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Klikgeluid",

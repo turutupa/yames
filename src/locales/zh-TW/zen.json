@@ -3,7 +3,9 @@
     "startingIn": "即將開始",
     "rampStep": "第 {{step}} 步",
     "fullscreen": "全螢幕",
+    "exit": "離開禪意",
     "exitHint": "雙擊或按 Esc 退出",
+    "exitHintTouch": "點按右上角的關閉按鈕離開禪意",
     "styles": {
       "focus": "專注",
       "pulse": "脈動",

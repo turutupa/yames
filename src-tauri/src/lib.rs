@@ -4,6 +4,18 @@
 pub mod alloc_probe;
 pub mod audio_input;
 mod calibration_cache;
+// Android (M7, the MVP): the phone runs the same grading as a desktop — the
+// mic, the onset detector, the timing analyzer, the scorer and the store are
+// all compiled for it. What it does not compile is what cannot build there or
+// has no meaning on a phone: MIDI (midir has no Android backend), the tray and
+// the window manager. Those carry `#[cfg(desktop)]` below and in `run()`;
+// MIDI is a no-device stand-in (`midi_android.rs`).
+/// The phone's output stream (from the `mobile` branch, M04): Android drives
+/// `oboe` directly because cpal's Oboe backend asks for neither the
+/// low-latency path nor the device's own sample rate. The engine's callback
+/// body is shared and unchanged.
+#[cfg(target_os = "android")]
+mod android_audio;
 mod clock;
 mod coach;
 mod commands;
@@ -24,6 +36,9 @@ pub mod findings;
 pub mod instrument;
 mod jam;
 mod kit;
+// midir has no Android backend; a phone compiles a no-device stand-in with
+// the same surface (`midi_android.rs`), so no MIDI call site needs a cfg.
+#[cfg_attr(target_os = "android", path = "midi_android.rs")]
 mod midi;
 mod models;
 pub mod onset;
@@ -173,7 +188,7 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, release_jam_sounds, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     check_take_sound, delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback,
     takes_dir_size,
@@ -202,15 +217,16 @@ use engine::MetronomeEngine;
 use midi::create_shared_midi;
 use onset::{create_shared_onset_detector, SharedTempoContext, TempoContext};
 use session::create_shared_session_accumulator;
+#[cfg_attr(mobile, allow(unused_imports))]
 use state::{create_shared_state, SharedState};
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
-};
+use std::sync::{Arc, Mutex};
+#[cfg(desktop)]
+use std::sync::atomic::{AtomicBool, Ordering};
+use tauri::Manager;
+#[cfg(desktop)]
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    Manager,
 };
 use tauri_plugin_store::StoreExt;
 use timing::{create_beat_log, TimingAnalyzer};
@@ -239,7 +255,10 @@ pub fn run() {
     // Startup-complete flag: gates the WindowEvent::Moved handler so that
     // position moves that happen during app initialization (centering, set_position
     // restore) don't overwrite the persisted position in the store.
+    // A phone has no window to move.
+    #[cfg(desktop)]
     let startup_complete = Arc::new(AtomicBool::new(false));
+    #[cfg(desktop)]
     let startup_complete_events = Arc::clone(&startup_complete);
 
     // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
@@ -252,7 +271,13 @@ pub fn run() {
         // a window callback, i.e. a crash at launch when two song files are
         // opened at once. State managed here exists from the moment the app
         // does.
-        .manage(commands::PendingOpenState::default())
+        .manage(commands::PendingOpenState::default());
+
+    // Desktop only: one instance at a time, the updater (stores update apps),
+    // the process plugin and decorum (a title bar). A phone has none of them.
+    #[cfg(desktop)]
+    #[allow(unused_mut)]
+    let mut builder = builder
         // W19 — one Yames at a time, and it MUST be the first plugin
         // registered (the plugin's own documentation is explicit about it).
         //
@@ -265,19 +290,27 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             commands::announce_opened_paths(app, &argv, std::path::Path::new(&cwd));
         }))
-        .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init());
+
+    let builder = builder
+        .plugin(tauri_plugin_store::Builder::default().build())
         // The native folder picker behind `pick_kit_folder`. Only the
         // Rust side uses it — `pick_kit_folder` is our own command —
         // so nothing in the frontend invokes a `plugin:dialog|…`
         // command and no capability has to be widened for it.
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_process::init());
+        .plugin(tauri_plugin_dialog::init());
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(all(desktop, not(target_os = "macos")))]
     let builder = builder.plugin(tauri_plugin_decorum::init());
 
-    builder.setup(move |app| {
+    // The phone's own half (`plugins/yames-mobile`): the foreground service
+    // that keeps the click going with the screen off, audio focus, the wake
+    // lock, the Back gesture, `open_url`, and the microphone permission.
+    #[cfg(mobile)]
+    let builder = builder.plugin(tauri_plugin_yames_mobile::init());
+
+    let builder = builder.setup(move |app| {
             let shared_state = create_shared_state();
 
             // Restore saved settings from store
@@ -618,7 +651,7 @@ pub fn run() {
             app.manage(create_shared_tts_active());
             app.manage(DownloadState(std::sync::Mutex::new(None)));
 
-            // Set up MIDI listener
+            // Set up MIDI listener (a no-device stand-in on Android).
             let shared_midi = create_shared_midi();
             {
                 let listener = shared_midi.lock().unwrap();
@@ -638,6 +671,11 @@ pub fn run() {
             }
             app.manage(shared_midi);
 
+            // Everything from here to the end of `setup` is the window
+            // manager: the tray, the main window's saved size and position,
+            // and the floating widget. A phone has one fullscreen webview.
+            #[cfg(desktop)]
+            {
             // Set up system tray
             let show_i = MenuItem::with_id(app, "show", "Show Yames", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -770,6 +808,7 @@ pub fn run() {
 
             // Mark startup complete so the Moved handler begins persisting positions.
             startup_complete.store(true, Ordering::Release);
+            }
 
             Ok(())
         })
@@ -800,6 +839,7 @@ pub fn run() {
             set_jam,
             set_jam_position,
             warm_jam,
+            release_jam_sounds,
             load_song,
             clear_song,
             set_song_range,
@@ -936,8 +976,13 @@ pub fn run() {
             tts_list_voices,
             tts_voice_diagnostics,
             start_voice_repair,
-        ])
-        .on_window_event(move |window, event| {
+        ]);
+
+    // Window events are the window manager's: saving the main window's size
+    // and position, and tearing the audio engine down when the last window
+    // closes. A phone has one fullscreen webview, so this is desktop-only.
+    #[cfg(desktop)]
+    let builder = builder.on_window_event(move |window, event| {
             match event {
                 tauri::WindowEvent::CloseRequested { .. } => {
                     // Authoritative position save: read outer_position() right before
@@ -1060,9 +1105,31 @@ pub fn run() {
                 }
                 _ => {}
             }
-        })
+        });
+
+    #[cfg(desktop)]
+    builder
         .run(tauri::generate_context!())
         .expect("error while running Yames");
+
+    // A phone never fires `WindowEvent::Destroyed` (the handler above is
+    // desktop-only), so `RunEvent::Exit` is where the audio thread is joined
+    // and the Oboe streams released (from the `mobile` branch, M04).
+    #[cfg(mobile)]
+    {
+        let app = builder
+            .build(tauri::generate_context!())
+            .expect("error while running Yames");
+        app.run(|app_handle, event| {
+            if matches!(event, tauri::RunEvent::Exit) {
+                if let Some(engine_state) = app_handle.try_state::<EngineState>() {
+                    if let Ok(mut engine) = engine_state.0.lock() {
+                        engine.shutdown();
+                    }
+                }
+            }
+        });
+    }
 }
 
 /// Check if a window position is at least partially visible on any available monitor.
@@ -1071,6 +1138,7 @@ pub fn run() {
 /// Always iterates all monitors (not just current_monitor) so that positions saved
 /// on secondary monitors are correctly accepted when the window starts hidden on
 /// the primary monitor.
+#[cfg(desktop)]
 pub(crate) fn is_position_visible(x: i32, y: i32, window: &tauri::WebviewWindow) -> bool {
     let margin = 100i32; // At least 100px of the window must remain on-screen
     if let Ok(monitors) = window.available_monitors() {

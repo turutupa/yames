@@ -49,8 +49,10 @@
   min-width: 40px;
 }
 
-.jam-editor__name:hover {
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .jam-editor__name:hover {
+    background: var(--surface-hover);
+  }
 }
 
 .jam-editor__name:focus-visible,
@@ -121,9 +123,11 @@
   border-radius: var(--radius-sm);
 }
 
-.jam-editor__text-btn:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .jam-editor__text-btn:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
+  }
 }
 
 .jam-editor__text-btn--done {
@@ -219,8 +223,10 @@
     border-color 0.12s ease;
 }
 
-.jam-editor__cell:hover {
-  border-color: var(--accent-glow);
+@media (hover: hover) {
+  .jam-editor__cell:hover {
+    border-color: var(--accent-glow);
+  }
 }
 
 .jam-editor__cell:active {

@@ -16,9 +16,13 @@ const ipc = vi.hoisted(() => ({
   warm: vi.fn(),
 }));
 
-vi.mock("../../ipc", () => ({
+// The folder dialog is desktop-only (M08): a phone has no folder to point at.
+vi.mock("../../ipc.desktop", () => ({
   pickKitFolder: () => ipc.pick(),
   inspectKitFolder: (dir: string) => ipc.inspect(dir),
+}));
+
+vi.mock("../../ipc", () => ({
   warmJam: (request: unknown) => ipc.warm(request),
 }));
 

@@ -47,6 +47,7 @@
     "delete": "Supprimer",
     "newPreset": "Nouveau préréglage",
     "newDrill": "Nouvel exercice",
+    "unsaved": "Non enregistré",
     "titleSongs": "Morceaux"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "Réduire la barre latérale ({{shortcut}})",
     "expandWithShortcut": "Développer la barre latérale ({{shortcut}})",
     "beta": "Bêta"
+  },
+  "tabs": {
+    "library": "Bibliothèque"
+  },
+  "mobileTabs": {
+    "settings": "Réglages",
+    "library": "Presets",
+    "zen": "Zen"
+  },
+  "sheet": {
+    "close": "Fermer"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Lecture — {{bpm}} BPM",
+    "notificationPaused": "En pause",
+    "notificationStop": "Arrêt",
+    "notificationChannel": "Lecture"
   }
 }

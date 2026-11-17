@@ -47,6 +47,7 @@
     "delete": "Excluir",
     "newPreset": "Novo preset",
     "newDrill": "Novo exercício",
+    "unsaved": "Não salvo",
     "titleSongs": "Músicas"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "Recolher barra lateral ({{shortcut}})",
     "expandWithShortcut": "Expandir barra lateral ({{shortcut}})",
     "beta": "Beta"
+  },
+  "tabs": {
+    "library": "Biblioteca"
+  },
+  "mobileTabs": {
+    "settings": "Ajustes",
+    "library": "Presets",
+    "zen": "Zen"
+  },
+  "sheet": {
+    "close": "Fechar"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Tocando — {{bpm}} BPM",
+    "notificationPaused": "Pausado",
+    "notificationStop": "Parar",
+    "notificationChannel": "Reprodução"
   }
 }

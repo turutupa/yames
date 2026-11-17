@@ -1,12 +1,18 @@
 use crate::jam::{
     JamBandState, JamLane, JamPosition, JamSlot, JamTable, JamTick, DRIFT_MAX_SECS,
 };
-use crate::onset::SharedTempoContext;
 use crate::speech_out::{mix_speech, SharedSpeech, SpeechClip, SpeechHandoff, SpeechOut};
 use crate::state::SharedState;
 use crate::take::SharedTake;
+use crate::onset::SharedTempoContext;
 use crate::timing::{BeatLog, BeatTick};
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use cpal::traits::{DeviceTrait, HostTrait};
+// Android opens its output through `crate::android_audio` rather than cpal
+// (M00: cpal's Oboe backend never asks for the low-latency path and resamples
+// to 44.1 kHz), so nothing there ever holds a `cpal::Stream`. Device
+// *enumeration* still goes through cpal on every platform.
+#[cfg(not(target_os = "android"))]
+use cpal::traits::StreamTrait;
 use rodio::Source;
 use std::io::Cursor;
 use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU32, AtomicU64, AtomicUsize, Ordering};
@@ -225,7 +231,9 @@ fn query_coreaudio_output_latency_frames(device_name: Option<&str>) -> Option<u3
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+// Android never asks: it takes its output latency from the Oboe stream's own
+// burst size (see `android_audio.rs`), so the stub would be dead code there.
+#[cfg(all(not(target_os = "macos"), not(target_os = "android")))]
 fn query_coreaudio_output_latency_frames(_device_name: Option<&str>) -> Option<u32> {
     None
 }
@@ -4358,6 +4366,10 @@ pub(crate) fn effective_pair(pair: u16, channels: usize) -> u16 {
 /// Same rate as the default config, always. A device will happily offer a
 /// wider config at a rate it is not running at, and taking it would mean
 /// every sound in the bank decoded for the wrong clock.
+/// Unused on a phone: the Oboe stream is whatever AAudio granted, and the
+/// system owns the routing (M04) — there is no wider config to go looking
+/// for. Its unit tests still run on the host.
+#[cfg_attr(mobile, allow(dead_code))]
 pub(crate) fn channels_for_pair(
     pair: u16,
     default_channels: u16,
@@ -4542,6 +4554,33 @@ pub(crate) fn take_offset(channels: usize, pair: usize) -> usize {
 ///
 /// A device query, so never under the engine's lock and never on the main
 /// thread. `None` when there is no device or it will not say.
+///
+/// **A PHONE HAS TO ASK OBOE, NOT CPAL** (M10). M04 took Android's output off
+/// cpal and opened it at `oboe` directly, because cpal 0.15.3 asks for
+/// 44 100 into a 48 kHz device — and this function was still asking cpal. So
+/// a jam opened before Play was decoded at 44 100, the stream then opened at
+/// 48 000, and the first Play decoded the whole band a second time: measured
+/// on the Pixel 6 AVD, native heap went from 134 MB to 245 MB on pressing
+/// Play, for the same band. Asking the stream the app actually opens makes
+/// the first decode the one that plays, which is what this function was
+/// written for in the first place.
+///
+/// Once per process. Before Play there is no stream to ask and probing means
+/// opening a throwaway one, which is not something to do on every edit in the
+/// setup sheet; the moment a stream IS running `jam_rate` reads the real rate
+/// off it and never comes here at all, so a routing change that moves the
+/// rate is answered by the stream rather than by this.
+#[cfg(target_os = "android")]
+pub fn probe_output_rate(_device_name: Option<&str>) -> Option<u32> {
+    static PROBED: std::sync::OnceLock<Option<u32>> = std::sync::OnceLock::new();
+    *PROBED.get_or_init(|| {
+        crate::android_audio::probe_output_format()
+            .ok()
+            .map(|fmt| fmt.sample_rate)
+    })
+}
+
+#[cfg(not(target_os = "android"))]
 pub fn probe_output_rate(device_name: Option<&str>) -> Option<u32> {
     let host = cpal::default_host();
     let device = match device_name {
@@ -4621,7 +4660,9 @@ fn poll_device_count() -> usize {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+// `desktop` as well as `not(macos)`: the only caller is the polling loop, and
+// that loop does not exist on a phone.
+#[cfg(all(desktop, not(target_os = "macos")))]
 fn poll_device_count() -> usize {
     let host = cpal::default_host();
     host.output_devices().map(|d| d.count()).unwrap_or(0)
@@ -4632,6 +4673,17 @@ fn poll_device_count() -> usize {
 /// Uses a lightweight name-only check; only does the full enumeration
 /// (with BT detection) when the device list actually changes.
 pub fn start_audio_device_polling(app_handle: AppHandle) {
+    // Not on a phone. This loop wakes every 5 seconds forever to notice a USB
+    // interface being plugged in or a Bluetooth speaker appearing — the thing
+    // a desktop does and a phone does not. Android routes output itself and
+    // never hands the app a device list to re-render, so on a phone this is a
+    // timer that wakes the CPU 17 280 times a day to learn nothing, on the one
+    // platform where that is measured in battery.
+    #[cfg(mobile)]
+    {
+        let _ = app_handle;
+    }
+    #[cfg(desktop)]
     thread::spawn(move || {
         let mut last_count = poll_device_count();
         loop {
@@ -4642,8 +4694,13 @@ pub fn start_audio_device_polling(app_handle: AppHandle) {
                 // (only hits cpal when devices actually change, not every poll)
                 let devices = list_output_devices();
                 let _ = app_handle.emit("audio-devices-changed", &devices);
-                let input_devices = crate::audio_input::AudioInput::list_devices();
-                let _ = app_handle.emit("audio-input-devices-changed", &input_devices);
+                // Input devices exist only where the mic evaluation does —
+                // desktop (M01). A mobile build has no `audio_input` module.
+                #[cfg(desktop)]
+                {
+                    let input_devices = crate::audio_input::AudioInput::list_devices();
+                    let _ = app_handle.emit("audio-input-devices-changed", &input_devices);
+                }
                 last_count = current_count;
             }
         }
@@ -5652,6 +5709,23 @@ impl MetronomeEngine {
                 return;
             }
 
+            // ---- Output device ----
+            //
+            // Two device opens, one callback. On Android cpal's Oboe backend
+            // gives a resampled, non-fast-path stream whatever you ask it for
+            // (M00; the reasoning is in `android_audio.rs`), so the phone
+            // drives `oboe` directly. Everything below the open — the sound
+            // bank, the render closure, the event loop — is shared and
+            // identical.
+            //
+            // Which pair of the device's outputs the musician asked for, read
+            // once here on the setup thread. On a phone it is always 0: the
+            // system owns the routing, there is no picker, and the fallback
+            // at the bottom of this function says so out loud if a saved
+            // value ever says otherwise.
+            let requested_pair = output_pair.load(Ordering::Acquire) as u16;
+            #[cfg(not(target_os = "android"))]
+            let (device, config, sample_rate, channels) = {
             // ---- cpal setup ----
             let host = cpal::default_host();
             let device = if let Some(ref name) = device_name {
@@ -5716,7 +5790,6 @@ impl MetronomeEngine {
             // opens at the default width and the callback puts the click on
             // outputs 1-2, which is audible and honest. `audio-output-pair-
             // fallback`, below, is how the screen hears about it.
-            let requested_pair = output_pair.load(Ordering::Acquire) as u16;
             if !pair_fits(requested_pair, default_channels as usize) {
                 match device.supported_output_configs().ok().and_then(|cfgs| {
                     channels_for_pair(
@@ -5794,9 +5867,31 @@ impl MetronomeEngine {
                 }
             }
             let channels = config.channels as usize;
+            (device, config, sample_rate, channels)
+            };
+
+            // Android picks its own output route; there is no per-device open
+            // to aim a saved name at the way the desktop's device picker does.
+            #[cfg(target_os = "android")]
+            let (android_format, sample_rate, channels) = {
+                let _ = &device_name;
+                match crate::android_audio::probe_output_format() {
+                    Ok(f) => {
+                        let (sr, ch) = (f.sample_rate, f.channels);
+                        (f, sr, ch)
+                    }
+                    Err(e) => {
+                        exit.fail(e);
+                        return;
+                    }
+                }
+            };
+
             // What the callback will actually be handed. A pair the stream
             // turned out to be too narrow for becomes the first pair, and
-            // the screen is told so below.
+            // the screen is told so below. Computed after both arms: the
+            // phone's stream is whatever AAudio granted, and a saved pair
+            // that does not fit it falls back exactly as a desktop one does.
             let effective_pair_now = effective_pair(requested_pair, channels);
 
             // Pre-decode all sounds at the output sample rate
@@ -5852,9 +5947,22 @@ impl MetronomeEngine {
 
             // Query CoreAudio for the real output latency (device + safety + stream).
             // This auto-adapts to the user's selected device.
+            #[cfg(not(target_os = "android"))]
             let device_latency_frames =
                 query_coreaudio_output_latency_frames(device_name.as_deref()).unwrap_or(0);
+            // On Android the same quantity is what AAudio holds ahead of the
+            // callback. We size the stream's buffer at two bursts, one of which
+            // is the buffer this callback is filling and which the loop below
+            // adds on its own — so the *other* burst is this number. Known
+            // before the stream opens, which is what lets it stay a plain
+            // captured integer rather than something the audio thread reloads.
+            #[cfg(target_os = "android")]
+            let device_latency_frames = android_format.frames_per_burst.max(0) as u32;
             let device_latency_us = (device_latency_frames as u64 * 1_000_000) / sr as u64;
+            // Not on a phone: there is no CoreAudio there, the query above is
+            // the stub that answers 0, and M00 found the line sitting in the
+            // Android log telling whoever reads it next a flat untruth.
+            #[cfg(not(target_os = "android"))]
             eprintln!(
                 "[yames] CoreAudio output latency: {} frames ({:.1}ms) + buffer",
                 device_latency_frames,
@@ -6002,10 +6110,15 @@ impl MetronomeEngine {
                 speech_pos: 0,
             };
 
-            // ---- Build output stream ----
-            let stream = device.build_output_stream(
-                &config,
-                move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| {
+            // ---- The render callback ----
+            //
+            // One closure, every platform. cpal wraps it in its own callback
+            // signature below; Oboe takes it as the body of its
+            // `on_audio_ready`. Nothing in here knows which stream is driving
+            // it — that is the whole point of the split, because this is the
+            // code that renders the click and it must be the same code on a
+            // laptop and on a phone.
+            let render = move |data: &mut [f32]| {
                     let frames = data.len() / channels;
 
                     // Which pair of outputs everything this buffer plays
@@ -7923,21 +8036,43 @@ impl MetronomeEngine {
                     // while the click is dimmed. After the take ring, for
                     // the reason the stopped path gives.
                     mix_in_the_coach!();
-                },
-                |err| {
-                    eprintln!("Audio stream error: {}", err);
-                },
-                None,
-            );
+            };
 
-            let stream = match stream {
+            // ---- Build the output stream ----
+            #[cfg(not(target_os = "android"))]
+            let stream = {
+                // cpal calls the closure below through `&mut`, so the capture
+                // it moves has to be a mutable binding. Oboe takes ownership
+                // of it instead and needs no such thing, hence the rebinding
+                // here rather than a `mut` on the definition.
+                let mut render = render;
+                let built = device.build_output_stream(
+                    &config,
+                    move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| render(data),
+                    |err| {
+                        eprintln!("Audio stream error: {}", err);
+                    },
+                    None,
+                );
+                match built {
+                    Ok(s) => s,
+                    Err(e) => {
+                        // The one observed in the wild: WASAPI answers
+                        // AUDCLNT_E_DEVICE_IN_USE (0x8889000A) when the endpoint
+                        // is already held exclusively, which on Windows is any
+                        // second client on some Realtek configurations.
+                        exit.fail(format!("could not open the audio output stream: {e}"));
+                        return;
+                    }
+                }
+            };
+
+            #[cfg(target_os = "android")]
+            let mut stream = match crate::android_audio::open_output_stream(&android_format, render)
+            {
                 Ok(s) => s,
                 Err(e) => {
-                    // The one observed in the wild: WASAPI answers
-                    // AUDCLNT_E_DEVICE_IN_USE (0x8889000A) when the endpoint
-                    // is already held exclusively, which on Windows is any
-                    // second client on some Realtek configurations.
-                    exit.fail(format!("could not open the audio output stream: {e}"));
+                    exit.fail(e);
                     return;
                 }
             };

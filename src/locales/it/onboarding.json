@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Suono e aspetto",
       "subtitle": "Passa sopra una scheda per sentire il click o vedere il tema. Scegli quello che ti piace.",
+      "subtitleTouch": "Tocca una scheda per sentire il clic o provare il tema. Toccane un'altra per cambiare idea.",
       "soundHeading": "Suono del click",
       "themeHeading": "Tema",
       "moreThemes": "Altri temi nelle Impostazioni"
@@ -142,6 +143,7 @@
     "ready": {
       "title": "Tutto pronto",
       "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
+      "notificationNote": "La prima volta che premi play, il telefono ti chiederà se Yames può mostrare una notifica: rispondi di sì e il click continua anche a schermo spento.",
       "rows": {
         "instrument": "Strumento",
         "sound": "Suono del click",

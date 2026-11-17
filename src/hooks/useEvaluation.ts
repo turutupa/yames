@@ -1,17 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import {
-  listAudioInputDevices,
-  startEvaluation,
-  stopEvaluation,
-  getEvaluationState,
-  onAudioSpectrum,
-  onAudioInputDevicesChanged,
-  onBeatFeedback,
-  onInferredGridChanged,
-  setInputGain,
-  storeLoad,
-  storeSave,
-} from "../ipc";
+import { storeLoad, storeSave } from "../ipc";
+import { listAudioInputDevices, startEvaluation, stopEvaluation, getEvaluationState, onAudioSpectrum, onAudioInputDevicesChanged, onBeatFeedback, onInferredGridChanged, setInputGain } from "../ipc.desktop";
 import type { AudioInputDevice, AudioSpectrum, BeatFeedback, InferredGridChanged } from "../types";
 
 /**

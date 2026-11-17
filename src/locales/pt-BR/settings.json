@@ -346,6 +346,9 @@
       "sounds": "Sons",
       "soundsCredit": "A bateria Club é a Virtuosity Drums, da Versilian Studios e da Karoryfer Samples, tocada por Austin McMahon (domínio público). A bateria Estúdio é a DRSKit, do projeto DrumGizmo (CC BY 4.0).",
       "madeWith": "Feito com {{heart}} para músicos do mundo todo",
+      "newerOut": "A versão {{version}} saiu",
+      "getIt": "Baixar",
+      "notNow": "Agora não",
       "soundsCreditSongs": "Os outros instrumentos vêm do banco de sons General MIDI da Sonivox (Sonic Network Inc., Apache-2.0)."
     },
     "songs": {
@@ -411,6 +414,7 @@
   "instrumentPicker": {
     "title": "Com qual instrumento você pratica?",
     "subtitle": "O Yames ajusta a detecção de som e o feedback do coach para o seu instrumento. Você pode mudar isso depois em Configurações.",
+    "subtitleMobile": "Para o Yames saber com o que você pratica. Você pode mudar isso depois nas Configurações.",
     "skip": "Pular — escolho depois"
   }
 }

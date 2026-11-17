@@ -54,6 +54,7 @@ import { GrooveGlyph } from "./GrooveGlyph";
 import { JamSheetGroup } from "./JamSheet";
 import { JamSelect } from "./JamSelect";
 import { KitPicker } from "./KitPicker";
+import { IS_MOBILE } from "../../platform";
 import { Segmented } from "./Segmented";
 import { TakesSection } from "./TakesSection";
 import { TakeSoundControl } from "../../takes/TakeSoundControl";
@@ -266,8 +267,16 @@ export function JamSetupSheet({
     return () => clearTimeout(timer);
   }, [changed, loading]);
   const spinning = (which: "kit" | "bass" | "keys") => loading && changed === which;
+  /**
+   * Every recorded voice for this role, built before one is chosen.
+   *
+   * **Not on a phone (M10).** The four recorded voices are about 215 MB
+   * between them, and a phone that is holding four bass players to make one
+   * dropdown instant is a phone that kills the app the moment it goes to the
+   * background. A phone builds the voice that is CHOSEN, when it is chosen.
+   */
   const warmVoices = (role: "bass" | "keys") => {
-    if (warmedRef.current[role]) return;
+    if (IS_MOBILE || warmedRef.current[role]) return;
     warmedRef.current[role] = true;
     warmJam(role === "bass" ? { bassVoices: true } : { keysVoices: true });
   };
@@ -1246,6 +1255,12 @@ export function JamSetupSheet({
       {/* MORE. Collapsed, because these are true of maybe one jam in twenty
           and the sheet's whole job is to stop being a wall (A3). */}
 
+      {/* No takes on a phone (M08, kept for the MVP): a take is your playing
+          mixed with the band and, here, a camera beside it; the learning
+          side does not need it and nobody has tried it on a phone. Absent,
+          not disabled. */}
+      {!IS_MOBILE && (
+        <>
       {/* TAKES — a section of its own, and not folded away (2026-09-18).
 
           It was the last third of a collapsed "More", which is where the
@@ -1324,6 +1339,8 @@ export function JamSetupSheet({
               onDelete={takes.remove}
             />
       </JamSheetGroup>
+        </>
+      )}
 
     </>
   );

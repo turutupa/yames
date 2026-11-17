@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The status-bar icon for the "playing" notification.
+
+  It is the Yames mark (docs/favicon.svg): a Y whose fork is a metronome's
+  swing and whose stem is the rod. Redrawn rather than exported, because a
+  notification's small icon is not a small version of the launcher icon -
+  Android throws away every colour in it and keeps only the alpha, so the
+  amber tile and the ink-on-amber Y would arrive as a solid white square with
+  a hole in it. What is drawn here is the glyph alone, in white on nothing,
+  which is the only thing the platform can render.
+
+  Two deliberate departures from the 64px brand mark: the stroke is 3/24
+  rather than 8/64 (a shade under 1/8 of the canvas - the mark's own weight
+  closes the fork up at status-bar size), and the glyph fills more of the
+  canvas, leaving the ~3dp of padding the platform expects instead of the
+  tile's rounded corner.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFFFF">
+    <!-- The fork: the swing. -->
+    <path
+        android:pathData="M5.5,4.75 L12,13.75 L18.5,4.75"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- The stem: the rod. -->
+    <path
+        android:pathData="M12,13.75 L12,19.25"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

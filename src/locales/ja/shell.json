@@ -47,6 +47,7 @@
     "delete": "削除",
     "newPreset": "新しいプリセット",
     "newDrill": "新しいドリル",
+    "unsaved": "未保存",
     "titleSongs": "曲"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "サイドバーを折りたたむ ({{shortcut}})",
     "expandWithShortcut": "サイドバーを展開 ({{shortcut}})",
     "beta": "ベータ"
+  },
+  "tabs": {
+    "library": "ライブラリ"
+  },
+  "mobileTabs": {
+    "settings": "設定",
+    "library": "ライブラリ",
+    "zen": "禅"
+  },
+  "sheet": {
+    "close": "閉じる"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "再生中 — {{bpm}} BPM",
+    "notificationPaused": "一時停止",
+    "notificationStop": "停止",
+    "notificationChannel": "再生"
   }
 }

@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Âm thanh và giao diện",
       "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Chọn cái bạn thích.",
+      "subtitleTouch": "Chạm vào một thẻ để nghe tiếng gõ hoặc thử giao diện. Chạm thẻ khác nếu bạn đổi ý.",
       "soundHeading": "Âm thanh click",
       "themeHeading": "Giao diện",
       "moreThemes": "Thêm giao diện trong Cài đặt"
@@ -142,6 +143,7 @@
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "notificationNote": "Lần đầu bạn nhấn phát, điện thoại sẽ hỏi Yames có được hiện thông báo không — hãy đồng ý để tiếng gõ vẫn chạy khi tắt màn hình.",
       "rows": {
         "instrument": "Nhạc cụ",
         "sound": "Âm thanh click",

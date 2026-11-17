@@ -53,9 +53,11 @@
   flex-shrink: 0;
 }
 
-.eval-fab:hover {
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .eval-fab:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .eval-fab.active {
@@ -64,8 +66,10 @@
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.eval-fab.active:hover {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+@media (hover: hover) {
+  .eval-fab.active:hover {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
 }
 
 /* Subtle pulse animation when active and receiving signal */

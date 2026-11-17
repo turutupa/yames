@@ -27,7 +27,7 @@
  * process, not of a React tree, and two mounted components must not each
  * own their own idea of it.
  */
-import { loadCoachModel, unloadCoachModel } from "../ipc";
+import { loadCoachModel, unloadCoachModel } from "../ipc.desktop";
 
 /**
  * How long the brain stays resident after the last session ends.

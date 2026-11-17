@@ -13,6 +13,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { InstrumentPickerGrid } from "../../../components/InstrumentPickerModal";
+import { IS_MOBILE } from "../../../platform";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
 
@@ -42,7 +43,14 @@ export function InstrumentStep(_props: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("instrumentPicker.title")}
       </h2>
-      <p className="onboarding-step-subtitle">{t("instrumentPicker.subtitle")}</p>
+      {/* The desktop sentence explains what the answer is FOR: onset
+          detection and coaching feedback, neither of which is in the phone
+          build. A step that justifies itself with two features the app does
+          not have is the "greyed out" the mobile plan forbids, one remove.
+          The phone says what its answer is actually for. */}
+      <p className="onboarding-step-subtitle">
+        {t(IS_MOBILE ? "instrumentPicker.subtitleMobile" : "instrumentPicker.subtitle")}
+      </p>
       <InstrumentPickerGrid selectedId={staged} onPick={setStaged} />
     </div>
   );

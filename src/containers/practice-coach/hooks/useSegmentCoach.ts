@@ -7,7 +7,7 @@ import {
   formatForLLM,
   type Narrative,
 } from "../../../coach/narrative";
-import { coachGenerate, getSessionReport, clearSession, closeOpenSegment } from "../../../ipc";
+import { coachGenerate, getSessionReport, clearSession, closeOpenSegment } from "../../../ipc.desktop";
 import {
   accuracyPct,
   accuracyRatio,
@@ -15,7 +15,7 @@ import {
   scoredBeats,
 } from "../../../coach/reportStats";
 import { createSessionToken } from "../../../coach/sessionGuard";
-import { coachDebug } from "../../../coach/debug";
+import { coachDebug } from "../../../utils/debug";
 import { DEFAULT_MODE_CATALOG, PRO_MODE_CATALOG, TEMPLATE_CATALOG } from "../../../coach/templateCatalog";
 import { pickTemplate, createShuffleState } from "../../../coach/templates";
 import {

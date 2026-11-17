@@ -3,7 +3,9 @@
     "startingIn": "Begint over",
     "rampStep": "Stap {{step}}",
     "fullscreen": "Volledig scherm",
+    "exit": "Zen verlaten",
     "exitHint": "Dubbelklik of druk op Esc om te verlaten",
+    "exitHintTouch": "Tik rechtsboven op de sluitknop om Zen te verlaten",
     "styles": {
       "focus": "Focus",
       "pulse": "Puls",

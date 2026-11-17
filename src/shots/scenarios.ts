@@ -313,6 +313,19 @@ export interface Shot {
    * heard and the rest skipped.
    */
   firstRun?: { stop: "welcome" | "input" | "inputSilent" | "inputNone" | "ready" };
+
+  /**
+   * A version newer than this build's, already known.
+   *
+   * Only the phone build from yames.app can draw anything from it
+   * (`SAYS_WHEN_NEWER`, M11), and only that build ever asks. Seeded rather
+   * than asked for, so the harness stays offline and the picture is the same
+   * every time it is taken.
+   *
+   * Its own field rather than one inside `settings`, because `settings` also
+   * means "drive into Settings through the rail" — and a phone has no rail.
+   */
+  newerVersion?: string;
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
@@ -1113,6 +1126,20 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 600,
+  },
+  {
+    // A phone that knows a newer version is out (M11). Not a screenshot for
+    // the site either: `scripts/mobile-shots.mjs` is what opens it, and only
+    // a run with `YAMES_SIDELOAD=1` can draw anything — the build from a
+    // store has no such row, which is the point of the whole switch.
+    id: "newer-version",
+    suffix: "newer-version",
+    window: "main",
+    tab: "beat",
+    newerVersion: "1.3.0",
+    width: 1400,
+    height: 900,
+    settleMs: 300,
   },
   {
     id: "widget",

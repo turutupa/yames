@@ -47,6 +47,7 @@
     "delete": "Sil",
     "newPreset": "Yeni ayar",
     "newDrill": "Yeni çalışma",
+    "unsaved": "Kaydedilmedi",
     "titleSongs": "Şarkılar"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "Kenar çubuğunu daralt ({{shortcut}})",
     "expandWithShortcut": "Kenar çubuğunu genişlet ({{shortcut}})",
     "beta": "Beta"
+  },
+  "tabs": {
+    "library": "Kitaplık"
+  },
+  "mobileTabs": {
+    "settings": "Ayarlar",
+    "library": "Kitaplık",
+    "zen": "Zen"
+  },
+  "sheet": {
+    "close": "Kapat"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Çalıyor — {{bpm}} BPM",
+    "notificationPaused": "Duraklatıldı",
+    "notificationStop": "Durdur",
+    "notificationChannel": "Çalma"
   }
 }

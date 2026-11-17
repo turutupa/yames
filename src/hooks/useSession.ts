@@ -66,7 +66,7 @@ import {
 } from "../coach/interventions";
 import { accuracyPct, commentForScore, computeLegacyScore, computeRecentHitCompleteness, gradeForScore, rescoreReport, scoredBeats } from "../coach/reportStats";
 import { createSessionToken } from "../coach/sessionGuard";
-import { coachDebug } from "../coach/debug";
+import { coachDebug } from "../utils/debug";
 import { meterKey } from "../utils/meter";
 import { useRealtimeTips } from "../containers/practice-coach/hooks/useRealtimeTips";
 import { useSegmentCoach } from "../containers/practice-coach/hooks/useSegmentCoach";

@@ -1,0 +1,16 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = """
+Everything the phone build of Yames needs from its own native half: keeping
+the click playing with the screen off, keeping the screen awake, answering the
+system Back gesture, and opening a link in the browser. All four commands, and
+no scope — there is nothing here to narrow, and the frontend calls all of them.
+"""
+permissions = [
+  "allow-set-background-audio",
+  "allow-keep-awake",
+  "allow-open-url",
+  "allow-set-back-intercept",
+  "allow-set-event-channel",
+]

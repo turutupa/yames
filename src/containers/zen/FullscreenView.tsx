@@ -8,6 +8,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintZenFirst } from "../onboarding/hints/triggers";
+import { IS_MOBILE } from "../../platform";
 import "../../styles/fullscreen.css";
 
 /**
@@ -133,7 +134,7 @@ export function FullscreenView({
   // `zen-first` (O7): this component only mounts inside Zen, so being here is
   // the trigger. The card renders inside the overlay — the overlay sits at
   // z-index 9999, well above the fixed hint layer MainWindow uses.
-  const zenHint = useFirstTimeHint("zen-first", shouldHintZenFirst(true));
+  const zenHint = useFirstTimeHint("zen-first", !IS_MOBILE && shouldHintZenFirst(true));
 
   // Restore zen style from store on mount
   useEffect(() => {
@@ -146,6 +147,9 @@ export function FullscreenView({
     setThemeOpen(false);
   };
   const toggleFullscreen = async () => {
+    // Zen already fills a phone's screen; there is no window behind it to
+    // grow, and no always-on-top or webview focus to put back afterwards.
+    if (IS_MOBILE) return;
     const win = getCurrentWindow();
     const isFull = await win.isFullscreen();
     await win.setFullscreen(!isFull);
@@ -219,14 +223,27 @@ export function FullscreenView({
     >
       <ZenEffects style={zenStyle} currentBeat={currentBeat} isPlaying={state.isPlaying} activeTab={activeTab} beatsPerMeasure={beatsPerMeasure} />
 
-      {zenHint.shouldShow && (
+      {!IS_MOBILE && zenHint.shouldShow && (
         <div className="zen-hint" onDoubleClick={(e) => e.stopPropagation()}>
           <HintCard id="zen-first" inline onDismiss={zenHint.markShown} />
         </div>
       )}
 
       {/* Top-right controls: theme picker + fullscreen */}
-      <div className="zen-top-controls" onDoubleClick={(e) => e.stopPropagation()} ref={themePickerRef}>
+      {/* `--touch` on the phone build, and not a media query. These controls
+          are hidden until you hover the view, and `@media (pointer: coarse)`
+          was what un-hid them for a phone -- but a device can be wrong about
+          that, and M05 watched one be: the Android emulator's WebView reports
+          `(pointer: fine)` and `(hover: none)`, so the coarse block never
+          applied and zen had no visible way out. A Chromebook running the app,
+          or a phone with a mouse paired, would do the same. The build already
+          knows it is the phone build; the only exit from a screen that covers
+          everything should not rest on the device agreeing. */}
+      <div
+        className={`zen-top-controls${IS_MOBILE ? " zen-top-controls--touch" : ""}`}
+        onDoubleClick={(e) => e.stopPropagation()}
+        ref={themePickerRef}
+      >
         {/* Theme picker */}
         <div className={`zen-theme-picker ${themeOpen ? "open" : ""}`}>
           <button
@@ -249,13 +266,27 @@ export function FullscreenView({
             ))}
           </div>
         </div>
-        {/* Fullscreen toggle */}
-        <button className="zen-top-btn" onClick={toggleFullscreen} data-tooltip={t("zen.fullscreen")}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
-            <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
-          </svg>
-        </button>
+        {/* Fullscreen toggle — nothing to toggle on a phone. */}
+        {!IS_MOBILE && (
+          <button className="zen-top-btn" onClick={toggleFullscreen} data-tooltip={t("zen.fullscreen")}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          </button>
+        )}
+        {/* The way out, on a screen that has no Esc key and where a
+            double-tap is the zoom gesture. Zen is the one place in the app
+            you can get stuck: it covers everything, and until now the only
+            exit was a keystroke and a gesture that a phone spends on
+            something else. So the phone build draws the door. */}
+        {IS_MOBILE && (
+          <button className="zen-top-btn zen-exit-btn" onClick={exitFullscreen} aria-label={t("zen.exit")} data-tooltip={t("zen.exit")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="fs-content">
@@ -496,9 +527,12 @@ export function FullscreenView({
         )}
       </div>
 
-      {/* Exit hint */}
-      <div className="fs-exit-hint">
-        {t("zen.exitHint")}
+      {/* Exit hint. Two strings, not one: "Double-click or press Esc" is an
+          instruction a phone user cannot act on — there is no Esc, and a
+          double-tap is the zoom gesture — so the phone build names the
+          button above instead. */}
+      <div className={`fs-exit-hint${IS_MOBILE ? " fs-exit-hint--touch" : ""}`}>
+        {t(IS_MOBILE ? "zen.exitHintTouch" : "zen.exitHint")}
       </div>
     </div>
   );

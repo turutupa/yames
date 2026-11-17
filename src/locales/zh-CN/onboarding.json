@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "音色与外观",
       "subtitle": "把鼠标移到卡片上即可试听节拍音、预览主题。选一个你喜欢的。",
+      "subtitleTouch": "点按卡片试听节拍声或预览主题。想换就点另一张。",
       "soundHeading": "节拍音",
       "themeHeading": "主题",
       "moreThemes": "更多主题在设置中"
@@ -142,6 +143,7 @@
     "ready": {
       "title": "准备就绪",
       "subtitle": "可以在这里修改，也可以稍后在设置中修改。",
+      "notificationNote": "第一次按下播放时，手机会询问 Yames 是否可以显示通知——同意后，关掉屏幕节拍声也会继续。",
       "rows": {
         "instrument": "乐器",
         "sound": "节拍音",

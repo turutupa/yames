@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Dźwięk i wygląd",
       "subtitle": "Najedź na kartę, aby usłyszeć klik lub zobaczyć motyw. Wybierz to, co lubisz.",
+      "subtitleTouch": "Dotknij karty, aby usłyszeć klik albo zobaczyć motyw. Dotknij innej, aby zmienić zdanie.",
       "soundHeading": "Dźwięk kliknięcia",
       "themeHeading": "Motyw",
       "moreThemes": "Więcej motywów w Ustawieniach"
@@ -142,6 +143,7 @@
     "ready": {
       "title": "Wszystko gotowe",
       "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",
+      "notificationNote": "Przy pierwszym naciśnięciu odtwarzania telefon zapyta, czy Yames może pokazywać powiadomienie — zgódź się, a klik będzie grał dalej przy wygaszonym ekranie.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Dźwięk kliknięcia",

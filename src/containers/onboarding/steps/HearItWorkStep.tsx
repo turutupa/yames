@@ -25,12 +25,7 @@ import { accuracyPct } from "../../../coach/reportStats";
 import { formatMiniReport, formatMiniReportContext } from "../../../coach/miniReport";
 import { ScoreRing } from "../../drill/evaluation";
 import { FEEDBACK_COLORS } from "../../../hooks/useEvaluation";
-import {
-  clearSession,
-  closeOpenSegment,
-  coachGenerate,
-  getSessionReport,
-} from "../../../ipc";
+import { clearSession, closeOpenSegment, coachGenerate, getSessionReport } from "../../../ipc.desktop";
 import type { BeatFeedback, SessionReport } from "../../../types";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";

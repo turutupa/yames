@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onFullscreenChanged } from "../../../ipc";
+import { getActiveTab } from "../../../ipc";
+import { onFullscreenChanged } from "../../../ipc.desktop";
 import { FULLSCREEN_EXIT_DELAY } from "../../../hotkeys";
+import {
+  DEBUG_SCREEN_ZEN,
+  IS_MOBILE,
+  MOBILE_DEBUG_SCREENS,
+} from "../../../platform";
 import type { MainView } from "../MainHeader";
 
 /**
@@ -47,6 +53,7 @@ export interface FullscreenLifecycle {
 // The hidden-input trick is the only reliable way — body.focus()/click()
 // don't work.
 async function forceWebviewFocus(retries = 4, delayMs = 200) {
+  if (IS_MOBILE) return;
   for (let i = 0; i < retries; i++) {
     if (document.hasFocus()) break;
     await new Promise((r) => setTimeout(r, delayMs));
@@ -69,8 +76,23 @@ export function useFullscreenLifecycle({
   const wasOsFullscreen = useRef(false);
   const prevFullscreen = useRef(false);
 
+  // Zen is not a tab and is not persisted, so the screenshot job cannot get a
+  // picture of it the way it gets the other four — see `MOBILE_DEBUG_SCREENS`.
+  // `false` in every build but that job, which folds this away entirely.
+  useEffect(() => {
+    if (!MOBILE_DEBUG_SCREENS) return;
+    getActiveTab().then((tab) => {
+      if (tab === DEBUG_SCREEN_ZEN) setIsFullscreen(true);
+    });
+  }, []);
+
   // 1. Listen for fullscreen changes from Rust (global shortcut)
   useEffect(() => {
+    // Zen mode itself works on a phone — it is a React overlay. What does
+    // not is everything below: a global shortcut to toggle it, an OS
+    // window to resize, always-on-top, and a webview to hand focus back
+    // to. A phone has one fullscreen webview and no window manager.
+    if (IS_MOBILE) return;
     const unlisten = onFullscreenChanged(() => {
       setIsFullscreen((prev) => !prev);
     });
@@ -82,6 +104,7 @@ export function useFullscreenLifecycle({
   // 2. Track OS fullscreen state and restore always-on-top when exiting
   // (handles macOS Escape key which the app never receives)
   useEffect(() => {
+    if (IS_MOBILE) return;
     const win = getCurrentWindow();
     const unlisten = win.onResized(async () => {
       const isFull = await win.isFullscreen();
@@ -102,6 +125,7 @@ export function useFullscreenLifecycle({
 
   // 3. Safety net: re-apply always-on-top and focus after any zen exit
   useEffect(() => {
+    if (IS_MOBILE) return;
     if (prevFullscreen.current && !isFullscreen) {
       const win = getCurrentWindow();
       const timer = setTimeout(async () => {

@@ -18,7 +18,10 @@ import { useJamTakes } from "./useJamTakes";
 import { STARTER_JAMS } from "../../../jam/jams";
 import type { Jam, JamTake } from "../../../jam/types";
 
-vi.mock("../../../ipc", () => ({
+// The seven take commands live in `ipc.desktop` (M08): a take needs the mic,
+// and the mic is not part of a mobile build. The store is cross-platform and
+// stays in `ipc`.
+vi.mock("../../../ipc.desktop", () => ({
   listTakes: vi.fn(() => Promise.resolve([] as JamTake[])),
   startTake: vi.fn(() => Promise.resolve()),
   stopTake: vi.fn(() => Promise.resolve(null)),
@@ -28,14 +31,20 @@ vi.mock("../../../ipc", () => ({
   onTakePlaybackEnded: vi.fn(() => Promise.resolve(() => {})),
   onTakeCapped: vi.fn(() => Promise.resolve(() => {})),
   takesDirSize: vi.fn(() => Promise.resolve(0)),
+}));
+
+vi.mock("../../../ipc", () => ({
   storeLoad: vi.fn(() => Promise.resolve(undefined)),
   storeSave: vi.fn(() => Promise.resolve()),
 }));
 
-const ipc = (await import("../../../ipc")) as unknown as Record<
-  string,
-  ReturnType<typeof vi.fn>
->;
+const ipc = {
+  ...((await import("../../../ipc")) as unknown as Record<string, ReturnType<typeof vi.fn>>),
+  ...((await import("../../../ipc.desktop")) as unknown as Record<
+    string,
+    ReturnType<typeof vi.fn>
+  >),
+};
 
 const JAM: Jam = { ...STARTER_JAMS[0], id: "j1", takes: true };
 

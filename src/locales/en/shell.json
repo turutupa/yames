@@ -47,6 +47,7 @@
     "delete": "Delete",
     "newPreset": "New preset",
     "newDrill": "New drill",
+    "unsaved": "Unsaved",
     "titleSongs": "Songs"
   },
   "emptyStates": {
@@ -87,5 +88,23 @@
     "collapseWithShortcut": "Collapse sidebar ({{shortcut}})",
     "expandWithShortcut": "Expand sidebar ({{shortcut}})",
     "beta": "Beta"
+  },
+  "tabs": {
+    "library": "Library"
+  },
+  "mobileTabs": {
+    "settings": "Settings",
+    "library": "Library",
+    "zen": "Zen"
+  },
+  "sheet": {
+    "close": "Close"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Playing — {{bpm}} BPM",
+    "notificationPaused": "Paused",
+    "notificationStop": "Stop",
+    "notificationChannel": "Playback"
   }
 }

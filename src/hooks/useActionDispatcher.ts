@@ -1,15 +1,8 @@
 import { useCallback } from "react";
 import type { MutableRefObject } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import {
-  setBeatGroups,
-  setBpm,
-  setSubdivision,
-  showFloating,
-  startSpeedRamp,
-  stopSpeedRamp,
-  togglePlayback,
-} from "../ipc";
+import { setBeatGroups, setBpm, setSubdivision, startSpeedRamp, stopSpeedRamp, togglePlayback } from "../ipc";
+import { showFloating } from "../ipc.desktop";
 import { markWidgetOpened } from "../containers/onboarding/hints/hintRuntime";
 import type { AppState, Subdivision } from "../types";
 import type { HotkeyAction } from "../hotkeys";

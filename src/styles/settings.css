@@ -105,9 +105,11 @@
   min-width: 64px;
 }
 
-.input-test-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .input-test-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+  }
 }
 
 .input-test-btn.active {
@@ -189,9 +191,11 @@
   transition: background 0.15s, border-color 0.15s;
 }
 
-.coach-download-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .coach-download-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    border-color: var(--accent);
+  }
 }
 
 .coach-download-btn:disabled {
@@ -319,12 +323,16 @@
   z-index: 2;
 }
 
-.global-download-bar-cancel:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .global-download-bar-cancel:hover {
+    opacity: 1;
+  }
 }
 
-.global-download-bar-close:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .global-download-bar-close:hover {
+    opacity: 1;
+  }
 }
 
 .global-download-bar-error .global-download-bar-close {
@@ -356,7 +364,12 @@
    `--feedback-miss`, the same colour the download error bar uses. */
 .audio-error-notice {
   position: absolute;
-  top: 44px;
+  /* 44px into the app, whatever the hardware is taking above it. An absolutely
+     positioned box measures from the window's padding box, so on a phone
+     drawing behind the status bar the 44px alone landed the notice half inside
+     it and on top of the header — which now starts one status-bar inset down
+     and no further (M05b). 0px on desktop, where this changes nothing. */
+  top: calc(44px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 200;
@@ -406,8 +419,10 @@
   transition: background 120ms ease, color 120ms ease;
 }
 
-.audio-error-notice-action:hover {
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .audio-error-notice-action:hover {
+    background: var(--accent-subtle);
+  }
 }
 
 .audio-error-notice-dismiss {
@@ -417,8 +432,10 @@
   padding: 5px 8px;
 }
 
-.audio-error-notice-dismiss:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .audio-error-notice-dismiss:hover {
+    color: var(--text-primary);
+  }
 }
 
 /* ─── Download Confirmation Dialog ─── */
@@ -490,9 +507,11 @@
    it worse: two cards lit at once. The pending tier now gets no treatment
    at all; "Installed" (badge + dimming) is the only persistent per-card
    state, and it describes the disk, not a choice. */
-.download-confirm-model:hover {
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
+@media (hover: hover) {
+  .download-confirm-model:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
+  }
 }
 
 .download-confirm-model-installed {
@@ -505,8 +524,10 @@
    washed out by the dimming. `:hover` adds a class-level component (0,2,0
    vs 0,1,0), so it beats the plain rule on specificity; it is still written
    after it so the cascade reads in the order it applies. */
-.download-confirm-model-installed:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .download-confirm-model-installed:hover {
+    opacity: 1;
+  }
 }
 
 .download-confirm-installed-badge {
@@ -562,9 +583,11 @@
   width: 100%;
 }
 
-.download-confirm-cancel:hover {
-  background: color-mix(in srgb, var(--border) 30%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .download-confirm-cancel:hover {
+    background: color-mix(in srgb, var(--border) 30%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .download-confirm-go {
@@ -582,10 +605,12 @@
   width: 100%;
 }
 
-.download-confirm-go:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text, white);
+@media (hover: hover) {
+  .download-confirm-go:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text, white);
+  }
 }
 
 .download-confirm-go-installed {
@@ -593,10 +618,12 @@
   border-color: var(--border);
 }
 
-.download-confirm-go-installed:hover {
-  background: color-mix(in srgb, var(--border) 30%, transparent);
-  border-color: var(--border);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .download-confirm-go-installed:hover {
+    background: color-mix(in srgb, var(--border) 30%, transparent);
+    border-color: var(--border);
+    color: var(--text-primary);
+  }
 }
 
 .setting-control {
@@ -673,8 +700,10 @@
   z-index: 30;
 }
 
-.toggle-btn[data-tooltip]:hover::after {
-  opacity: 1;
+@media (hover: hover) {
+  .toggle-btn[data-tooltip]:hover::after {
+    opacity: 1;
+  }
 }
 
 /* =================== Language select ===================
@@ -754,9 +783,11 @@
     color 0.12s;
 }
 
-.lang-option:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .lang-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
 }
 
 .lang-option.selected {
@@ -891,9 +922,11 @@
     transform 0.15s;
 }
 
-.theme-card:hover {
-  background: var(--surface-hover, rgba(255, 255, 255, 0.04));
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .theme-card:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+    transform: translateY(-1px);
+  }
 }
 
 .theme-card.active {
@@ -1008,9 +1041,11 @@
   z-index: 50;
 }
 
-.hotkey-table-header span[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+@media (hover: hover) {
+  .hotkey-table-header span[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .hotkey-row {
@@ -1059,9 +1094,11 @@
   z-index: 50;
 }
 
-.hotkey-action[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(0);
+@media (hover: hover) {
+  .hotkey-action[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hotkey-row kbd {
@@ -1083,10 +1120,12 @@
   transition: all 0.15s;
 }
 
-.hotkey-bind-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
+@media (hover: hover) {
+  .hotkey-bind-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
 }
 
 .hotkey-bind-btn.listening {
@@ -1135,9 +1174,11 @@
     border-color 0.15s;
 }
 
-.hotkey-defaults-btn:hover {
-  color: var(--text-primary);
-  border-color: var(--text-muted);
+@media (hover: hover) {
+  .hotkey-defaults-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
 }
 
 /* =================== MIDI Section =================== */
@@ -1188,8 +1229,10 @@
     box-shadow 0.15s;
 }
 
-.midi-dropdown-trigger:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+@media (hover: hover) {
+  .midi-dropdown-trigger:hover {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  }
 }
 
 .midi-dropdown.open .midi-dropdown-trigger {
@@ -1276,8 +1319,10 @@
   transition: background 0.1s;
 }
 
-.midi-dropdown-item:hover {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+@media (hover: hover) {
+  .midi-dropdown-item:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
 }
 
 .midi-dropdown-item.selected {
@@ -1327,8 +1372,10 @@
   cursor: default;
 }
 
-.instrument-dropdown-trigger:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+@media (hover: hover) {
+  .instrument-dropdown-trigger:hover {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  }
 }
 
 .instrument-dropdown.open .instrument-dropdown-trigger {
@@ -1397,8 +1444,10 @@
   transition: background 0.1s;
 }
 
-.instrument-dropdown-item:hover {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+@media (hover: hover) {
+  .instrument-dropdown-item:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
 }
 
 .instrument-dropdown-item.selected {
@@ -1434,8 +1483,10 @@
   cursor: not-allowed;
 }
 
-.instrument-dropdown-item.soon:hover {
-  background: transparent;
+@media (hover: hover) {
+  .instrument-dropdown-item.soon:hover {
+    background: transparent;
+  }
 }
 
 .instrument-dropdown-soon {
@@ -1466,9 +1517,11 @@
   flex-shrink: 0;
 }
 
-.midi-refresh-btn:hover {
-  color: var(--text-primary);
-  border-color: var(--text-muted);
+@media (hover: hover) {
+  .midi-refresh-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
 }
 
 .midi-status {
@@ -1565,9 +1618,11 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.calibration-recalibrate-btn:hover {
-  background: var(--accent);
-  color: var(--bg-primary);
+@media (hover: hover) {
+  .calibration-recalibrate-btn:hover {
+    background: var(--accent);
+    color: var(--bg-primary);
+  }
 }
 
 /* ─── Channel Picker ─────────────────────────────────────────────────────── */
@@ -1662,9 +1717,11 @@
   transition: all 0.15s;
 }
 
-.midi-test-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .midi-test-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+  }
 }
 
 .midi-test-btn.active {
@@ -1847,10 +1904,12 @@
   cursor: pointer;
 }
 
-.about-link-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.15);
+@media (hover: hover) {
+  .about-link-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .about-link-btn.support-btn {
@@ -1858,10 +1917,12 @@
   border-color: rgba(255, 107, 138, 0.2);
 }
 
-.about-link-btn.support-btn:hover {
-  background: rgba(255, 107, 138, 0.1);
-  color: #ff8fa8;
-  border-color: rgba(255, 107, 138, 0.3);
+@media (hover: hover) {
+  .about-link-btn.support-btn:hover {
+    background: rgba(255, 107, 138, 0.1);
+    color: #ff8fa8;
+    border-color: rgba(255, 107, 138, 0.3);
+  }
 }
 
 .header-share-wrap {
@@ -1912,9 +1973,11 @@
     color 0.12s;
 }
 
-.header-share-option:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .header-share-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
 }
 
 .header-share-option svg {
@@ -1922,8 +1985,10 @@
   opacity: 0.7;
 }
 
-.header-share-option:hover svg {
-  opacity: 1;
+@media (hover: hover) {
+  .header-share-option:hover svg {
+    opacity: 1;
+  }
 }
 
 .about-links.share-row {
@@ -1935,10 +2000,12 @@
   border-color: rgba(107, 181, 255, 0.2);
 }
 
-.about-link-btn.share-btn:hover {
-  background: rgba(107, 181, 255, 0.1);
-  color: #8fc8ff;
-  border-color: rgba(107, 181, 255, 0.3);
+@media (hover: hover) {
+  .about-link-btn.share-btn:hover {
+    background: rgba(107, 181, 255, 0.1);
+    color: #8fc8ff;
+    border-color: rgba(107, 181, 255, 0.3);
+  }
 }
 
 .about-link-btn.share-btn.copied {
@@ -1958,6 +2025,77 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
+}
+
+/* "Version 1.3.0 is out" (M11).
+ *
+ * The first line of About on the phone build people download from the site,
+ * and deliberately the quietest thing that could carry the news: a sentence
+ * and two words, no colour, no icon, no card. It is not an alert — the app
+ * works perfectly well as it is, and somebody who opened Settings in the
+ * middle of a practice session did not come here to be sold an upgrade. The
+ * tint is the accent at a tenth, which is the same wash a selected step gets:
+ * "this is the one worth looking at", not "act now".
+ *
+ * Wraps rather than squeezes: at 360px in German the sentence and the two
+ * words do not fit on one line and the buttons are what a finger is aiming
+ * at. */
+.about-newer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.about-newer-said {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-right: auto;
+}
+
+.about-newer-get,
+.about-newer-hide {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.about-newer-get {
+  color: var(--accent);
+}
+
+.about-newer-hide {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+@media (hover: hover) {
+  .about-newer-get:hover {
+    background: var(--accent-subtle);
+  }
+
+  .about-newer-hide:hover {
+    color: var(--text-secondary);
+  }
+}
+
+/* Both are real targets on the screen this only ever appears on. */
+@media (pointer: coarse) {
+  .about-newer-get,
+  .about-newer-hide {
+    min-height: 44px;
+    padding: 4px 12px;
+  }
 }
 
 .about-label {
@@ -2039,9 +2177,11 @@
     border-color 0.2s;
 }
 
-.update-banner:hover {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .update-banner:hover {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    border-color: var(--accent);
+  }
 }
 
 .update-banner svg {
@@ -2055,8 +2195,10 @@
   opacity: 0.8;
 }
 
-.update-banner:hover .update-banner-action {
-  opacity: 1;
+@media (hover: hover) {
+  .update-banner:hover .update-banner-action {
+    opacity: 1;
+  }
 }
 
 .update-banner-downloading {
@@ -2105,9 +2247,11 @@
     background 0.2s;
 }
 
-.update-check-btn:hover {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+@media (hover: hover) {
+  .update-check-btn:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
 }
 
 .update-available-btn {
@@ -2122,8 +2266,10 @@
   animation: update-pulse 2s ease-in-out infinite;
 }
 
-.update-available-btn:hover {
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
+@media (hover: hover) {
+  .update-available-btn:hover {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+  }
 }
 
 @keyframes update-pulse {
@@ -2231,9 +2377,11 @@
   border: 1px solid var(--border);
 }
 
-.keybinding-btn-reset:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+@media (hover: hover) {
+  .keybinding-btn-reset:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
 }
 
 .keybinding-btn-remove {
@@ -2242,8 +2390,10 @@
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
-.keybinding-btn-remove:hover {
-  background: color-mix(in srgb, var(--accent) 25%, transparent);
+@media (hover: hover) {
+  .keybinding-btn-remove:hover {
+    background: color-mix(in srgb, var(--accent) 25%, transparent);
+  }
 }
 
 .keybinding-capture-hint {
@@ -2339,8 +2489,10 @@
   transition: filter 0.15s;
 }
 
-.conflict-accept-btn:hover {
-  filter: brightness(1.15);
+@media (hover: hover) {
+  .conflict-accept-btn:hover {
+    filter: brightness(1.15);
+  }
 }
 
 .conflict-dont-ask {
@@ -2415,4 +2567,134 @@
    is not sitting on it. */
 .main-content[data-view="settings"] .view-transition-wrapper {
   padding-bottom: 24px;
+}
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. `.toggle-btn` is the app's general
+   two-state control and is used well beyond this file -- the drill view's
+   mode row is the same class -- so the one rule here covers all of them. */
+@media (pointer: coarse) {
+  .toggle-btn,
+  .instrument-dropdown-trigger,
+  .theme-card,
+  .about-link-btn,
+  .header-share-option {
+    min-height: 44px;
+  }
+}
+
+/* =================== Phone widths =================== */
+/* Every row on this screen is `label + description | control`, and at 360px
+   neither half gives way: "UI language, applies immediately" wraps to one word
+   a line while the control it belongs to is squeezed into what is left
+   (M03-GAPS, ranked #3 — the single largest CSS job in M03).
+ *
+ * So below 480px the row stops being two columns and becomes two rows: the
+ * label and its description at full width, the control under them, also at
+ * full width. The label finally has a line to wrap on, the control is a thumb
+ * target rather than a sliver, and no rule above this one changes — desktop is
+ * untouched, and 480 is the desktop window's own minimum width, where the
+ * stacked form is the better one too.
+ *
+ * `max-width`, not `pointer: coarse`: this is a question about how much room
+ * the row has, and a narrow window has the same problem a phone does. */
+@media (max-width: 480px) {
+  .setting-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  /* The control half is a different element in every section — a dropdown
+     wrapper, a toggle group, a lone button — so the row says "whatever is not
+     the label" rather than naming six classes that would go stale. */
+  .setting-row > *:not(.setting-label) {
+    width: 100%;
+  }
+
+  .setting-row > .toggle-btn,
+  .setting-row .lang-select-btn,
+  .setting-row .setting-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* The language menu hangs off the button, which is now the full width of
+     the card; without this it would still be 150px of it. */
+  .setting-row .lang-options {
+    left: 0;
+    right: 0;
+    min-width: 0;
+  }
+
+  /* A group of four or five two-word buttons wraps instead of running off the
+     edge; each one keeps its own width rather than being stretched to a fifth
+     of a line it no longer shares. */
+  .toggle-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toggle-group .toggle-btn {
+    flex: 1 1 auto;
+  }
+
+  /* The theme picker was five `1fr` columns, and `1fr` is `minmax(auto, 1fr)`
+     — a column cannot shrink below the widest word in it, so thirteen themes
+     pushed the grid 137px past the screen (M03-GAPS). An explicit minimum lets
+     the grid decide how many columns the card can actually hold.
+
+     That minimum was 72px, and a name does not fit in 72px. "MANUSCRIPT" is
+     the longest of the thirteen and, measured on the phone at this size, it is
+     67px in the monospace stacks and **77px in the serif stack its own theme
+     uses** — so the card was always too narrow and `overflow-wrap: anywhere`
+     did exactly what it was told: "MANUSCRIP" on one line and a lone "T" on
+     the next (M05 store shot 06).
+
+     The fix is the width, not the wrapping. The minimum is measured against
+     that name in the widest face the app can fall back to; the side padding is
+     trimmed so the card spends its width on the label rather than on air; and
+     the label breaks between words again, never inside one. Three columns at
+     360px instead of four, and a whole name in every one of them — which is
+     what a name you can read costs on a phone. */
+  .theme-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+  }
+
+  .theme-card {
+    min-width: 0;
+    padding: 6px 3px;
+  }
+
+  .theme-card-name {
+    overflow-wrap: normal;
+    text-align: center;
+  }
+
+  /* Support's three donation links were one unwrapping row; the third fell off
+     the card. The share row already wrapped. */
+  .about-links {
+    flex-wrap: wrap;
+  }
+
+  /* Version, platform and the rest read better stacked than as a label pinned
+     left with a value pinned right of a 292px card. */
+  .about-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .about-value,
+  .about-value-small {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  /* 22px of side padding is 44px of a 360px screen. */
+  .settings-section,
+  .hotkeys-section {
+    padding: 16px 14px;
+  }
 }

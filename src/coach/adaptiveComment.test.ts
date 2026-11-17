@@ -17,7 +17,7 @@ import {
 } from "./adaptiveComment";
 import { createShuffleState, pickTemplate } from "./templates";
 import { TEMPLATE_CATALOG } from "./templateCatalog";
-import type { AdaptiveEvalRequest } from "../ipc";
+import type { AdaptiveEvalRequest } from "../ipc.desktop";
 
 function req(over: Partial<AdaptiveEvalRequest> = {}): AdaptiveEvalRequest {
   return {

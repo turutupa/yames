@@ -7,6 +7,10 @@ import {
   stopSpeedRamp,
   storeLoad,
 } from "../../../ipc";
+import {
+  DEBUG_SCREEN_SETTINGS,
+  MOBILE_DEBUG_SCREENS,
+} from "../../../platform";
 import type { MainView } from "../MainHeader";
 
 /**
@@ -177,7 +181,15 @@ export function useTabRouting({
         if (openOn !== "lastTool") return;
       }
       const tab = await getActiveTab();
-      if (cancelled || !isPlayTab(tab)) return;
+      if (cancelled) return;
+      // The one screen a headless simulator cannot otherwise be put on — see
+      // `MOBILE_DEBUG_SCREENS`. `false` in every build but the iOS screenshot
+      // job, so this whole branch and the string it compares against fold away.
+      if (MOBILE_DEBUG_SCREENS && tab === DEBUG_SCREEN_SETTINGS) {
+        setViewRaw("settings");
+        return;
+      }
+      if (!isPlayTab(tab)) return;
       if (viewRef.current !== opening || prevTab.current !== opening) return;
       viewRef.current = tab;
       prevTab.current = tab;

@@ -9,7 +9,7 @@
  * user is remapping everything else.
  */
 import { useCallback, useEffect, useState } from "react";
-import { exportSessionLogs } from "../../../ipc";
+import { exportSessionLogs } from "../../../ipc.desktop";
 
 export type HelpPanel = "closed" | "menu" | "shortcuts";
 

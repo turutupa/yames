@@ -136,8 +136,10 @@
     border-color 0.12s ease;
 }
 
-.key-chord:hover {
-  background: var(--bg-raised);
+@media (hover: hover) {
+  .key-chord:hover {
+    background: var(--bg-raised);
+  }
 }
 
 /* The roles, tinted rather than spelled out: where the music rests, the
@@ -229,9 +231,11 @@
   cursor: pointer;
 }
 
-.chord-shapes-next:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
+@media (hover: hover) {
+  .chord-shapes-next:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 }
 
 .chord-shapes-next:disabled {
@@ -264,8 +268,10 @@
   scroll-snap-align: center;
 }
 
-.chord-shape:hover {
-  background: var(--bg-raised);
+@media (hover: hover) {
+  .chord-shape:hover {
+    background: var(--bg-raised);
+  }
 }
 
 .chord-shape.is-selected {

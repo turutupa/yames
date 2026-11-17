@@ -8,7 +8,7 @@
  * tokens cannot be produced in three seconds.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { COACH_GENERATE_TIMEOUT_MS, coachGenerate } from "./ipc";
+import { COACH_GENERATE_TIMEOUT_MS, coachGenerate } from "./ipc.desktop";
 import { mockInvoke, setInvokeResponse } from "./test/mocks";
 
 beforeEach(() => {

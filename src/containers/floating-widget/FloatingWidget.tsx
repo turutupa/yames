@@ -4,14 +4,8 @@ import { useTranslation } from "react-i18next";
 import { isTypingTarget } from "../../hotkeys";
 import { useDrag } from "../../hooks/useDrag";
 import { useMetronome } from "../../hooks/useMetronome";
-import {
-  setBeatGroups,
-  setBpm,
-  setSubdivision,
-  showMain,
-  storeLoad,
-  togglePlayback,
-} from "../../ipc";
+import { setBeatGroups, setBpm, setSubdivision, storeLoad, togglePlayback } from "../../ipc";
+import { showMain } from "../../ipc.desktop";
 import { meterKey, meterLabel, meterTotal, stepMeter } from "../../utils/meter";
 import "../../styles/floating-widget.css";
 import type { Subdivision } from "../../types";

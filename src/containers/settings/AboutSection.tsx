@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
+import { IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
 
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
+import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
 
 /**
  * About section — version, update status (with inline install button when an
@@ -11,12 +13,15 @@ export function AboutSection({
   appVersion,
   updateStatus,
   latestVersion,
+  newerVersion = NEVER_NEWER,
   onInstallUpdate,
   onCheckUpdate,
 }: {
   appVersion: string;
   updateStatus: UpdateStatus;
   latestVersion: string;
+  /** Empty on every build but the phone one from yames.app (M11). */
+  newerVersion?: NewerVersion;
   onInstallUpdate: () => void;
   onCheckUpdate: () => void;
 }) {
@@ -25,77 +30,124 @@ export function AboutSection({
     <section className="settings-section about-section">
       <h2>{t("settings.about.title")}</h2>
       <div className="about-info">
+        {/* A newer version exists, and this app is the one nobody updates for
+            you — installed from the website, where there is no store behind
+            it. One quiet line at the top of About: no dialog, no banner over
+            the metronome, nothing that arrives in the middle of practising.
+            "Not now" quiets this version and only this version; the next one
+            gets to speak for itself.
+
+            `SAYS_WHEN_NEWER &&` and not just the value: the constant is
+            known at build time, so on a store build this whole block — its
+            markup, its class names and the three keys it asks i18n for — is
+            dead code and Rollup takes it out of `dist/` along with the hook
+            behind it. `scripts/check-mobile-bundle.mjs` is the gate. */}
+        {SAYS_WHEN_NEWER && newerVersion.newest && (
+          <div className="about-newer">
+            <span className="about-newer-said">
+              {t("settings.about.newerOut", { version: newerVersion.newest })}
+            </span>
+            <button
+              type="button"
+              className="about-newer-get"
+              onClick={newerVersion.getIt}
+            >
+              {t("settings.about.getIt")}
+            </button>
+            <button
+              type="button"
+              className="about-newer-hide"
+              onClick={newerVersion.hide}
+            >
+              {t("settings.about.notNow")}
+            </button>
+          </div>
+        )}
         <div className="about-row">
           <span className="about-label">{t("settings.about.version")}</span>
           <span className="about-value">{appVersion}</span>
         </div>
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.updates")}</span>
-          <span className="about-value">
-            {/*
-              The row says what is known, and — unless something is actually
-              in flight — offers the check again.
+        {/* The store updates a phone app; there is no in-app check. */}
+        {!IS_MOBILE && (
+          <div className="about-row">
+            <span className="about-label">{t("settings.about.updates")}</span>
+            <span className="about-value">
+              {/*
+                The row says what is known, and — unless something is actually
+                in flight — offers the check again.
 
-              It used to offer it only in "idle", so the first click was the
-              last one available: a check that came back up to date replaced
-              the button with the words "up to date" and left no way to ask
-              a second time, for the rest of the session. The owner: "once a
-              user clicks on it, there's no way of re-triggering that button,
-              it disappears." A release published five minutes later was
-              unreachable without restarting the app.
+                It used to offer it only in "idle", so the first click was the
+                last one available: a check that came back up to date replaced
+                the button with the words "up to date" and left no way to ask
+                a second time, for the rest of the session. The owner: "once a
+                user clicks on it, there's no way of re-triggering that button,
+                it disappears." A release published five minutes later was
+                unreachable without restarting the app.
 
-              "checking" and "downloading" are the two states where asking
-              again means nothing, so they are the two without a button.
-              "failed" had no arm at all and rendered an empty row.
-            */}
-            {updateStatus === "checking" && (
-              <span className="update-status">{t("settings.about.checking")}</span>
-            )}
-            {updateStatus === "downloading" && (
-              <span className="update-status">{t("settings.about.updating")}</span>
-            )}
-            {updateStatus === "available" && (
-              <button
-                className="update-available-btn"
-                onClick={onInstallUpdate}
-              >
-                {t("settings.about.available", { version: latestVersion })}
-              </button>
-            )}
-            {updateStatus === "up-to-date" && (
-              <span className="update-status up-to-date">
-                {t("settings.about.upToDate")}
+                "checking" and "downloading" are the two states where asking
+                again means nothing, so they are the two without a button.
+                "failed" had no arm at all and rendered an empty row.
+              */}
+              {updateStatus === "checking" && (
+                <span className="update-status">{t("settings.about.checking")}</span>
+              )}
+              {updateStatus === "downloading" && (
+                <span className="update-status">{t("settings.about.updating")}</span>
+              )}
+              {updateStatus === "available" && (
+                <button
+                  className="update-available-btn"
+                  onClick={onInstallUpdate}
+                >
+                  {t("settings.about.available", { version: latestVersion })}
+                </button>
+              )}
+              {updateStatus === "up-to-date" && (
+                <span className="update-status up-to-date">
+                  {t("settings.about.upToDate")}
+                </span>
+              )}
+              {updateStatus === "failed" && (
+                <span className="update-status">{t("settings.about.failed")}</span>
+              )}
+              {(updateStatus === "idle" ||
+                updateStatus === "up-to-date" ||
+                updateStatus === "failed") && (
+                <button
+                  className="update-check-btn"
+                  onClick={onCheckUpdate}
+                >
+                  {t(
+                    updateStatus === "idle"
+                      ? "settings.about.checkUpdates"
+                      : "settings.about.checkAgain",
+                  )}
+                </button>
+              )}
+            </span>
+          </div>
+        )}
+        {/* Two rows of diagnostics, for a desktop bug report. On a phone
+            `navigator.platform` reads "Linux armv8l" and the user agent is
+            four lines naming the browser engine and the word every string a
+            musician reads is forbidden to contain -- and neither is anything
+            they could act on or would paste anywhere. Musicians, not
+            developers (mobile plan §1). The version above is the one line
+            that matters for "which build am I on", and it stays. */}
+        {!IS_MOBILE && (
+          <>
+            <div className="about-row">
+              <span className="about-label">{t("settings.about.platform")}</span>
+              <span className="about-value">{navigator.platform}</span>
+            </div>
+            <div className="about-row">
+              <span className="about-label">{t("settings.about.userAgent")}</span>
+              <span className="about-value about-value-small">
+                {navigator.userAgent}
               </span>
-            )}
-            {updateStatus === "failed" && (
-              <span className="update-status">{t("settings.about.failed")}</span>
-            )}
-            {(updateStatus === "idle" ||
-              updateStatus === "up-to-date" ||
-              updateStatus === "failed") && (
-              <button
-                className="update-check-btn"
-                onClick={onCheckUpdate}
-              >
-                {t(
-                  updateStatus === "idle"
-                    ? "settings.about.checkUpdates"
-                    : "settings.about.checkAgain",
-                )}
-              </button>
-            )}
-          </span>
-        </div>
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.platform")}</span>
-          <span className="about-value">{navigator.platform}</span>
-        </div>
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.userAgent")}</span>
-          <span className="about-value about-value-small">
-            {navigator.userAgent}
-          </span>
-        </div>
+            </div>
+          </>
+        )}
       </div>
       <div className="about-footer-divider"></div>
       {/*

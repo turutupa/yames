@@ -19,10 +19,17 @@ import path from "node:path";
  */
 
 const root = process.cwd();
-const ipc = fs.readFileSync(path.join(root, "src/ipc.ts"), "utf8");
+// Both halves of the wrapper. `ipc.desktop.ts` carries the coach,
+// evaluation, voice, MIDI, window and updater commands (they are cut from the
+// mobile bundle); a command that moved there must still be one Rust
+// registers, so both files are read as one surface.
+const ipc = [
+  fs.readFileSync(path.join(root, "src/ipc.ts"), "utf8"),
+  fs.readFileSync(path.join(root, "src/ipc.desktop.ts"), "utf8"),
+].join("\n");
 const lib = fs.readFileSync(path.join(root, "src-tauri/src/lib.rs"), "utf8");
 
-/** Command names passed to `invoke("…")` anywhere in ipc.ts. */
+/** Command names passed to `invoke("…")` anywhere in either ipc file. */
 function invoked(): string[] {
   const names = new Set<string>();
   for (const m of ipc.matchAll(/invoke(?:<[^>]*>)?\(\s*"([a-z0-9_]+)"/g)) {

@@ -4952,6 +4952,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tauri-plugin-yames-mobile"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+]
+
+[[package]]
 name = "tauri-runtime"
 version = "2.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6755,6 +6765,7 @@ dependencies = [
  "llama-cpp-2",
  "midir",
  "num_cpus",
+ "oboe",
  "rodio",
  "rusqlite",
  "rustysynth",
@@ -6769,6 +6780,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-store",
  "tauri-plugin-updater",
+ "tauri-plugin-yames-mobile",
  "tokio",
  "webview2-com",
  "windows 0.61.3",
