@@ -133,10 +133,10 @@ const ETUDE = `/16
 
 /**
  * Print an upstroke on a loop's last note. A loop's last note comes a full beat
- * after the last picked note before it (a hammer and a pull sit between), and
- * `markSweep` only looks within a beat, so it would print a downstroke on a
- * note the pick reaches travelling up. Written here rather than changed in
- * `markSweep`, which would move the Sweep Picking pack under its players.
+ * after the last picked note before it (a hammer and a pull sit between).
+ * `markSweep` used to look only within a beat and printed a downstroke there;
+ * it now follows the line through the legato notes and gives the same upstroke,
+ * so this is belt and braces, kept so the Shred pack's marks stay as written.
  */
 function endsUp(tab: string): string {
   return tab.replace(/(\d:\d+)\s*$/, "$1u");

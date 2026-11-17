@@ -1185,7 +1185,7 @@
             {"string":1,"fret":12,"midi":76,"tick":2560,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":2880,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":3200,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":3520,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":3520,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -1306,7 +1306,7 @@
             {"string":1,"fret":8,"midi":72,"tick":2560,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":12,"midi":76,"tick":2880,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":8,"midi":72,"tick":3200,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":10,"midi":69,"tick":3520,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":10,"midi":69,"tick":3520,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -1427,7 +1427,7 @@
             {"string":1,"fret":12,"midi":76,"tick":2560,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":17,"midi":81,"tick":2880,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":3200,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":3520,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":3520,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -1700,7 +1700,7 @@
             {"string":1,"fret":11,"midi":75,"tick":6400,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":6720,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":11,"midi":75,"tick":7040,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":7360,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":7360,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -1856,7 +1856,7 @@
             {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -2011,7 +2011,7 @@
             {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -2289,7 +2289,7 @@
             {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -4760,7 +4760,7 @@
             {"string":1,"fret":13,"midi":77,"tick":5120,"dur":640,"tech":[],"pick":"d"},
             {"string":1,"fret":17,"midi":81,"tick":5760,"dur":640,"tech":["hammer"]},
             {"string":1,"fret":13,"midi":77,"tick":6400,"dur":640,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -4872,7 +4872,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -4918,7 +4918,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":5120,"dur":640,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":5760,"dur":640,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":6400,"dur":640,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -4986,7 +4986,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5032,7 +5032,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5078,7 +5078,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5124,7 +5124,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5170,7 +5170,7 @@
                   {"string":1,"fret":11,"midi":75,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":11,"midi":75,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5216,7 +5216,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5262,7 +5262,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":11,"midi":70,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":11,"midi":70,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5308,7 +5308,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5354,7 +5354,7 @@
                   {"string":1,"fret":9,"midi":73,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":9,"midi":73,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5400,7 +5400,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":5120,"dur":640,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":5760,"dur":640,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":6400,"dur":640,"tech":[]},
-                  {"string":2,"fret":11,"midi":70,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":11,"midi":70,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5468,7 +5468,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5514,7 +5514,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5560,7 +5560,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5606,7 +5606,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5652,7 +5652,7 @@
                   {"string":1,"fret":16,"midi":80,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":16,"midi":80,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5698,7 +5698,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5744,7 +5744,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -5790,7 +5790,7 @@
                   {"string":1,"fret":16,"midi":80,"tick":5120,"dur":640,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":5760,"dur":640,"tech":["hammer"]},
                   {"string":1,"fret":16,"midi":80,"tick":6400,"dur":640,"tech":["pull"]},
-                  {"string":2,"fret":18,"midi":77,"tick":7040,"dur":640,"tech":[],"pick":"d"}
+                  {"string":2,"fret":18,"midi":77,"tick":7040,"dur":640,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -6718,7 +6718,7 @@
             {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
             {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -6874,7 +6874,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -6956,7 +6956,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7060,7 +7060,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7142,7 +7142,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7224,7 +7224,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7306,7 +7306,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7388,7 +7388,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7470,7 +7470,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7552,7 +7552,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7634,7 +7634,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7728,7 +7728,7 @@
             {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
             {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -7887,7 +7887,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -7969,7 +7969,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8073,7 +8073,7 @@
                   {"string":1,"fret":7,"midi":71,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":10,"midi":74,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":7,"midi":71,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8155,7 +8155,7 @@
                   {"string":1,"fret":3,"midi":67,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":7,"midi":71,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":3,"midi":67,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8237,7 +8237,7 @@
                   {"string":1,"fret":3,"midi":67,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":7,"midi":71,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":3,"midi":67,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -8341,7 +8341,7 @@
                   {"string":1,"fret":3,"midi":67,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":7,"midi":71,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":3,"midi":67,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -11990,7 +11990,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -12154,7 +12154,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -12318,7 +12318,7 @@
                   {"string":1,"fret":5,"midi":69,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":10,"midi":74,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":5,"midi":69,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":7,"midi":66,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":7,"midi":66,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -12482,7 +12482,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13072,7 +13072,7 @@
             {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -13227,7 +13227,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13308,7 +13308,7 @@
                   {"string":1,"fret":11,"midi":75,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":11,"midi":75,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13389,7 +13389,7 @@
                   {"string":1,"fret":9,"midi":73,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":9,"midi":73,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13470,7 +13470,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13551,7 +13551,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13643,7 +13643,7 @@
             {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -13799,7 +13799,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13881,7 +13881,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -13963,7 +13963,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14045,7 +14045,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14127,7 +14127,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14209,7 +14209,7 @@
                   {"string":1,"fret":11,"midi":75,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":11,"midi":75,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14291,7 +14291,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14373,7 +14373,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":14,"midi":73,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":14,"midi":73,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14455,7 +14455,7 @@
                   {"string":1,"fret":9,"midi":73,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":9,"midi":73,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14537,7 +14537,7 @@
                   {"string":1,"fret":18,"midi":82,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":22,"midi":86,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":18,"midi":82,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":20,"midi":79,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":20,"midi":79,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14619,7 +14619,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":22,"midi":86,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":19,"midi":78,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":19,"midi":78,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14701,7 +14701,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14783,7 +14783,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14865,7 +14865,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -14947,7 +14947,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -15923,7 +15923,7 @@
             {"string":1,"fret":17,"midi":81,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":22,"midi":86,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":17,"midi":81,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":18,"midi":77,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":18,"midi":77,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -16078,7 +16078,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":22,"midi":86,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":18,"midi":77,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":18,"midi":77,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -16159,7 +16159,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -16240,7 +16240,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -16312,8 +16312,8 @@
             {"string":1,"fret":15,"midi":79,"tick":1280,"dur":320,"tech":["pull"]},
             {"string":1,"fret":13,"midi":77,"tick":1600,"dur":320,"tech":["pull"]},
             {"string":1,"fret":12,"midi":76,"tick":1920,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":15,"midi":74,"tick":2240,"dur":320,"tech":[],"pick":"d"},
-            {"string":2,"fret":13,"midi":72,"tick":2560,"dur":320,"tech":[],"pick":"u"},
+            {"string":2,"fret":15,"midi":74,"tick":2240,"dur":320,"tech":[],"pick":"u"},
+            {"string":2,"fret":13,"midi":72,"tick":2560,"dur":320,"tech":[],"pick":"d"},
             {"string":2,"fret":12,"midi":71,"tick":2880,"dur":320,"tech":[],"pick":"u"},
             {"string":3,"fret":14,"midi":69,"tick":3200,"dur":320,"tech":[],"pick":"u"},
             {"string":3,"fret":12,"midi":67,"tick":3520,"dur":320,"tech":[],"pick":"d"},
@@ -16867,7 +16867,7 @@
             {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -18866,7 +18866,7 @@
             {"string":1,"fret":17,"midi":81,"tick":6400,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":20,"midi":84,"tick":6720,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":17,"midi":81,"tick":7040,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":17,"midi":76,"tick":7360,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":17,"midi":76,"tick":7360,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -18995,7 +18995,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":6400,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":6720,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":7040,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":17,"midi":76,"tick":7360,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":17,"midi":76,"tick":7360,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -19053,7 +19053,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":6400,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":6720,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":7040,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":7360,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":7360,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -19133,7 +19133,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":6400,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":6720,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":7040,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":7360,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":7360,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -19213,7 +19213,7 @@
                   {"string":1,"fret":18,"midi":82,"tick":6400,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":21,"midi":85,"tick":6720,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":18,"midi":82,"tick":7040,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":18,"midi":77,"tick":7360,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":18,"midi":77,"tick":7360,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20044,7 +20044,7 @@
             {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -20199,7 +20199,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20280,7 +20280,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20361,7 +20361,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20442,7 +20442,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20523,7 +20523,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20617,7 +20617,7 @@
             {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -20770,7 +20770,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20852,7 +20852,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -20934,7 +20934,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -21016,7 +21016,7 @@
                   {"string":1,"fret":16,"midi":80,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":16,"midi":80,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":18,"midi":77,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":18,"midi":77,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -21098,7 +21098,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":19,"midi":78,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":19,"midi":78,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -21241,7 +21241,7 @@
             {"string":1,"fret":16,"midi":80,"tick":29440,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":19,"midi":83,"tick":29760,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":16,"midi":80,"tick":30080,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":17,"midi":76,"tick":30400,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":17,"midi":76,"tick":30400,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -21442,7 +21442,7 @@
                   {"string":1,"fret":16,"midi":80,"tick":29440,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":29760,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":16,"midi":80,"tick":30080,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":17,"midi":76,"tick":30400,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":17,"midi":76,"tick":30400,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -21571,7 +21571,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":29440,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":29760,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":30080,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":30400,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":30400,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -21700,7 +21700,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":29440,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":29760,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":30080,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":18,"midi":77,"tick":30400,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":18,"midi":77,"tick":30400,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -23689,7 +23689,7 @@
             {"string":1,"fret":12,"midi":76,"tick":29440,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":17,"midi":81,"tick":29760,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":12,"midi":76,"tick":30080,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":13,"midi":72,"tick":30400,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":13,"midi":72,"tick":30400,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -23851,7 +23851,7 @@
             {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
             {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
             {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-            {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -23999,7 +23999,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24082,7 +24082,7 @@
                   {"string":1,"fret":5,"midi":69,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":8,"midi":72,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":5,"midi":69,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":5,"midi":64,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":5,"midi":64,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24165,7 +24165,7 @@
                   {"string":1,"fret":3,"midi":67,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":7,"midi":71,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":3,"midi":67,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":5,"midi":64,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":5,"midi":64,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24260,7 +24260,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24355,7 +24355,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24438,7 +24438,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":13,"midi":77,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24521,7 +24521,7 @@
                   {"string":1,"fret":6,"midi":70,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":10,"midi":74,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":6,"midi":70,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24616,7 +24616,7 @@
                   {"string":1,"fret":3,"midi":67,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":6,"midi":70,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":3,"midi":67,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":3,"midi":62,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24711,7 +24711,7 @@
                   {"string":1,"fret":11,"midi":75,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":11,"midi":75,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24794,7 +24794,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":11,"midi":75,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -24919,7 +24919,7 @@
             {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
             {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
             {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+            {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -25066,7 +25066,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25148,7 +25148,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":["slide"],"pick":"d"},
                   {"string":1,"fret":15,"midi":79,"tick":14400,"dur":320,"tech":["slide"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":[]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25242,7 +25242,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25324,7 +25324,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25406,7 +25406,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":16,"midi":80,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25488,7 +25488,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25570,7 +25570,7 @@
                   {"string":1,"fret":10,"midi":74,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":10,"midi":74,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25652,7 +25652,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":17,"midi":76,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25734,7 +25734,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25816,7 +25816,7 @@
                   {"string":1,"fret":11,"midi":75,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":14,"midi":78,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":11,"midi":75,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":12,"midi":71,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25898,7 +25898,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -25980,7 +25980,7 @@
                   {"string":1,"fret":8,"midi":72,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":8,"midi":72,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":8,"midi":67,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26062,7 +26062,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26144,7 +26144,7 @@
                   {"string":1,"fret":12,"midi":76,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":12,"midi":76,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":14,"midi":73,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":14,"midi":73,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26226,7 +26226,7 @@
                   {"string":1,"fret":9,"midi":73,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":12,"midi":76,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":9,"midi":73,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":10,"midi":69,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26308,7 +26308,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26390,7 +26390,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":13,"midi":72,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26472,7 +26472,7 @@
                   {"string":1,"fret":18,"midi":82,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":22,"midi":86,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":18,"midi":82,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":20,"midi":79,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":20,"midi":79,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26554,7 +26554,7 @@
                   {"string":1,"fret":17,"midi":81,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":22,"midi":86,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":17,"midi":81,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":19,"midi":78,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":19,"midi":78,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26636,7 +26636,7 @@
                   {"string":1,"fret":14,"midi":78,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":17,"midi":81,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":14,"midi":78,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26718,7 +26718,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26800,7 +26800,7 @@
                   {"string":1,"fret":13,"midi":77,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":18,"midi":82,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":13,"midi":77,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26882,7 +26882,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":20,"midi":84,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":16,"midi":75,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -26964,7 +26964,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
@@ -27046,7 +27046,7 @@
                   {"string":1,"fret":15,"midi":79,"tick":14080,"dur":320,"tech":[],"pick":"d"},
                   {"string":1,"fret":19,"midi":83,"tick":14400,"dur":320,"tech":["hammer"]},
                   {"string":1,"fret":15,"midi":79,"tick":14720,"dur":320,"tech":["pull"]},
-                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"d"}
+                  {"string":2,"fret":15,"midi":74,"tick":15040,"dur":320,"tech":[],"pick":"u"}
                 ],
                 "rests": [],
                 "backing": {
