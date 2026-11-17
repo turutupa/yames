@@ -95,7 +95,8 @@ calibration (the first run's "hear it work") applies as on a desktop.
 
 ## Installing a test APK on a phone
 
-1. The orchestrator runs **Actions › Android (signed release) › Run workflow**
+1. A push to `mvp-android` builds it (or, once `android.yml` is on `main`,
+   **Actions › Android (signed release) › Run workflow**
    on the branch, with an empty tag. Without the `ANDROID_KEYSTORE_*` secrets
    the APK is signed with a throwaway key made in that run (`*-test-signed.apk`
    in the `yames-android-<version>` artifact); with them, it is signed with the
@@ -150,7 +151,7 @@ it.
 
 ## Next
 
-1. Dispatch `android.yml` on `mvp-android`; fix what gradle and Kotlin say.
+1. Push `mvp-android` (that triggers `android.yml`: `workflow_dispatch` only works once the file is on `main`); fix what gradle and Kotlin say.
 2. On a phone (owner's spare): first run with the built-in mic, then a USB-C
    interface; a Session graded; `logcat` for the granted modes; the click
    jitter with the input open.

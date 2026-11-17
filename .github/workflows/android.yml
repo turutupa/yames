@@ -35,7 +35,14 @@ name: Android (signed release)
 # builds and refuses to publish; the APK is then signed with a throwaway key
 # made in the run (installable by sideloading, not updatable in place), and
 # the AAB stays unsigned.
+#
+# The `push` trigger is for the MVP and nothing else (M7): GitHub only offers
+# "Run workflow" for a workflow that is on the default branch, and this file is
+# not on `main` yet — so pushing `mvp-android` is what builds the APK until it
+# is. Drop the branch trigger when this reaches `main` and keep the dispatch.
 on:
+  push:
+    branches: [mvp-android]
   workflow_dispatch:
     inputs:
       ref:
