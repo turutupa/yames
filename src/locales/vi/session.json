@@ -242,6 +242,15 @@
       "drill": "Tăng tốc độ khi bạn chơi, và luyện một kế hoạch bạn tự viết.",
       "jam": "Một ban nhạc và hợp âm của bạn. Không bao giờ chấm điểm.",
       "songs": "Đọc tab của một bài hát và chơi theo."
+    },
+    "view": {
+      "label": "Chế độ xem luyện tập",
+      "neck": "Cần đàn",
+      "runway": "Đường băng",
+      "between": "Đổi chế độ xem giữa các lượt chơi"
+    },
+    "runway": {
+      "label": "Những nốt tiếp theo đang tiến đến vạch"
     }
   }
 }

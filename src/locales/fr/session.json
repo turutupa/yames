@@ -249,6 +249,15 @@
       "drill": "Monte le tempo pendant que tu joues, et travaille un plan que tu écris.",
       "jam": "Un groupe et tes accords. Jamais noté.",
       "songs": "Lis la tablature d'un morceau et joue avec."
+    },
+    "view": {
+      "label": "Vue d'entraînement",
+      "neck": "Manche",
+      "runway": "Piste",
+      "between": "Change de vue entre deux prises"
+    },
+    "runway": {
+      "label": "Les prochaines notes, qui arrivent sur la ligne"
     }
   }
 }

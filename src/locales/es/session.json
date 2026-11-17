@@ -249,6 +249,15 @@
       "drill": "Sube el tempo mientras tocas y practica un plan que escribes tú.",
       "jam": "Una banda y tus acordes. Nunca se califica.",
       "songs": "Lee la tablatura de una canción y toca con ella."
+    },
+    "view": {
+      "label": "Vista de práctica",
+      "neck": "Mástil",
+      "runway": "Pista",
+      "between": "Cambia de vista entre tomas"
+    },
+    "runway": {
+      "label": "Las próximas notas, llegando a la línea"
     }
   }
 }

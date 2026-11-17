@@ -242,6 +242,15 @@
       "drill": "Sen çalarken tempoyu yükseltir ve yazdığın bir planı çalıştırır.",
       "jam": "Bir grup ve senin akorların. Asla notlanmaz.",
       "songs": "Bir şarkının tabını oku ve onunla birlikte çal."
+    },
+    "view": {
+      "label": "Çalışma görünümü",
+      "neck": "Sap",
+      "runway": "Pist",
+      "between": "Görünümü kayıtlar arasında değiştir"
+    },
+    "runway": {
+      "label": "Çizgiye doğru gelen sıradaki notalar"
     }
   }
 }

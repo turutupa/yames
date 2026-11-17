@@ -249,6 +249,15 @@
       "drill": "Sobe o andamento enquanto você toca e treina um plano que você escreve.",
       "jam": "Uma banda e os seus acordes. Nunca recebe nota.",
       "songs": "Leia a tablatura de uma música e toque junto."
+    },
+    "view": {
+      "label": "Visualização do treino",
+      "neck": "Braço",
+      "runway": "Pista",
+      "between": "Troque a visualização entre os takes"
+    },
+    "runway": {
+      "label": "As próximas notas, chegando à linha"
     }
   }
 }

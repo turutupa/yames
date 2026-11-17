@@ -21,6 +21,7 @@ import "../styles/global.css";
 import "../styles/session-narrative.css";
 import { installShotMock } from "./mockIpc";
 import { shotById, SHOTS, SHOT_THEMES } from "./scenarios";
+import { RUNNABLE_PATH_IDS } from "../session/packs";
 
 declare global {
   interface Window {
@@ -227,7 +228,22 @@ async function drive() {
       rail("Tools")?.click();
       await until("the Tools list", () => !!byId("tools"));
     } else if (stop !== "today") {
-      byId("today-start")?.click();
+      const path = shot!.session.path;
+      if (path) {
+        // A Path that is not runnable yet, made runnable for this scene only.
+        if (!RUNNABLE_PATH_IDS.includes(path)) (RUNNABLE_PATH_IDS as string[]).push(path);
+        rail("Paths")?.click();
+        await until("the Paths list", () => !!byId(`path-card-${path}`));
+        byId(`path-card-${path}`)?.click();
+        await until("the Path", () => !!byId("path-detail"));
+        const stepRow = document.querySelector<HTMLElement>('[data-testid^="step-row-"]');
+        stepRow?.click();
+        await until("the Step", () => !!byId("step-detail"));
+        await until("an Exercise to play", () => !!document.querySelector('[data-testid^="play-"]'));
+        document.querySelector<HTMLElement>('[data-testid^="play-"]')?.click();
+      } else {
+        byId("today-start")?.click();
+      }
       await until("the Session", () => !!byId("session"));
       if (stop === "timed") {
         await until("the warm-up", () => !!byId("session-timed"));
