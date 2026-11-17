@@ -250,27 +250,68 @@ describe("W0 — welcome", () => {
   });
 });
 
-describe("W1 — instrument", () => {
-  it("hosts the first-launch picker grid", () => {
+describe("W1 — instrument (guitar first)", () => {
+  it("offers the two guitars and nothing else", () => {
     const { container } = setup({ state: stateAt("instrument") });
-    expect(container.querySelector(".instrument-picker-grid")).not.toBeNull();
+    expect(container.querySelector(".instrument-picker-grid.is-pair")).not.toBeNull();
+    expect(container.querySelectorAll(".instrument-picker-card")).toHaveLength(2);
     expect(screen.getByRole("button", { name: /Electric Guitar/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Bass/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Acoustic Guitar/ })).toBeInTheDocument();
+    for (const name of [/Bass/, /Drums/, /Piano/]) {
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    }
   });
 
-  it("does not pre-select anything on a true first run, and Next waits", () => {
+  it("says the other instruments live in Settings", () => {
+    setup({ state: stateAt("instrument") });
+    expect(screen.getByText(/Bass, drums or piano\? Choose it in Settings/)).toBeInTheDocument();
+  });
+
+  it("preselects Electric on a true first run, so Next is open", () => {
     const { container } = setup({ state: stateAt("instrument") });
-    expect(container.querySelector(".instrument-picker-card.selected")).toBeNull();
-    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    const selected = container.querySelectorAll(".instrument-picker-card.selected");
+    expect(selected).toHaveLength(1);
+    expect(screen.getByRole("button", { name: /Electric Guitar/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: /Acoustic Guitar/ })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
   });
 
-  it("preselects the current instrument on a re-run, with Next live", () => {
-    setup({ state: stateAt("instrument"), instrument: "bass", instrumentChosen: true });
-    expect(screen.getByRole("button", { name: /Bass/ })).toHaveAttribute(
+  it("Next on a first run persists the preselected electric guitar", () => {
+    const onInstrumentChange = vi.fn();
+    const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(onInstrumentChange).toHaveBeenCalledWith("electric-guitar");
+    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
+  });
+
+  it("preselects the current guitar on a re-run", () => {
+    setup({ state: stateAt("instrument"), instrument: "acoustic-guitar", instrumentChosen: true });
+    expect(screen.getByRole("button", { name: /Acoustic Guitar/ })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+  });
+
+  it("a re-run keeps a non-guitar choice unless a guitar is picked", () => {
+    const onInstrumentChange = vi.fn();
+    const { container, dispatch } = setup({
+      state: stateAt("instrument"),
+      instrument: "drums",
+      instrumentChosen: true,
+      onInstrumentChange,
+    });
+    expect(container.querySelector(".instrument-picker-card.selected")).toBeNull();
+    expect(screen.getByTestId("instrument-keep-current")).toHaveTextContent("Drums");
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(onInstrumentChange).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
   });
 
   it("clicking a card only selects it — it never advances or persists", () => {
@@ -279,67 +320,43 @@ describe("W1 — instrument", () => {
       state: stateAt("instrument"),
       onInstrumentChange,
     });
-    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
-    expect(screen.getByRole("button", { name: /Bass/ })).toHaveAttribute(
+    fireEvent.click(screen.getByRole("button", { name: /Acoustic Guitar/ }));
+    expect(screen.getByRole("button", { name: /Acoustic Guitar/ })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
-    expect(dispatch).not.toHaveBeenCalled();
-    expect(onInstrumentChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
-  });
-
-  it("a misclick is harmless: the last card clicked is the one selected", () => {
-    const onInstrumentChange = vi.fn();
-    const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
-    fireEvent.click(screen.getByRole("button", { name: /Drums/ }));
-    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
-    expect(screen.getByRole("button", { name: /Drums/ })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /Electric Guitar/ })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
     expect(dispatch).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(onInstrumentChange).toHaveBeenCalledTimes(1);
-    expect(onInstrumentChange).toHaveBeenCalledWith("bass");
+    expect(onInstrumentChange).not.toHaveBeenCalled();
   });
 
   it("Next persists the selection, then advances", () => {
     const onInstrumentChange = vi.fn();
     const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
-    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Acoustic Guitar/ }));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(onInstrumentChange).toHaveBeenCalledWith("bass");
+    expect(onInstrumentChange).toHaveBeenCalledTimes(1);
+    expect(onInstrumentChange).toHaveBeenCalledWith("acoustic-guitar");
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
   });
 
-  it("Skip advances without persisting anything", () => {
+  it("Skip advances without persisting anything (the shell falls back to electric)", () => {
     const onInstrumentChange = vi.fn();
     const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
-    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Acoustic Guitar/ }));
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(onInstrumentChange).not.toHaveBeenCalled();
     expect(dispatch).toHaveBeenCalledWith({ type: "SKIP_STEP" });
   });
 
-  it("Enter advances once a card is selected, and does nothing before", () => {
+  it("Enter and → advance with the preselected guitar", () => {
     const onInstrumentChange = vi.fn();
     const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
     fireEvent.keyDown(document, { key: "Enter" });
-    expect(dispatch).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
-    fireEvent.keyDown(document, { key: "Enter" });
-    expect(onInstrumentChange).toHaveBeenCalledWith("bass");
-    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
-  });
-
-  it("→ is gated the same way as Next", () => {
-    const { dispatch } = setup({ state: stateAt("instrument") });
-    fireEvent.keyDown(document, { key: "ArrowRight" });
-    expect(dispatch).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
-    fireEvent.keyDown(document, { key: "ArrowRight" });
+    expect(onInstrumentChange).toHaveBeenCalledWith("electric-guitar");
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
   });
 });

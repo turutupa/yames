@@ -265,7 +265,23 @@
       "drillKick": "逐步提速 · 不打分",
       "movesOn": "这一段会自动继续。",
       "finisherKick": "收尾 · 不评分",
-      "yourTurnKick": "轮到你 · 不检查"
+      "yourTurnKick": "轮到你 · 不检查",
+      "start": {
+        "warmUp": "开始热身",
+        "yourTurn": "开始你的回合",
+        "jam": "开始即兴",
+        "finisher": "开始收尾",
+        "drill": "开始提速"
+      },
+      "how": {
+        "warmUp": "跟着节拍器弹。这里不评分，放松就好。",
+        "yourTurn": "按你自己的方式跟着节拍器弹。这里不做检查。",
+        "jam": "跟着乐队一起弹。这里不评分。",
+        "finisher": "在乐队伴奏上循环弹。这里不评分。",
+        "drill": "节拍会随着你弹奏逐渐加快。这里不评分。"
+      },
+      "skip": "跳过",
+      "startKeys": "按 Enter、空格或踏板开始。"
     },
     "pedal": {
       "title": "脚踏板",
@@ -387,6 +403,12 @@
       "quintuplets": "五连音",
       "sextuplets": "六连音",
       "thirtySeconds": "三十二分音符"
+    },
+    "instrumentNote": {
+      "other": "路线目前是为吉他编写的。工具适用于你的乐器。",
+      "bass": "路线目前是为吉他编写的，贝斯路线已在计划中。工具现在就适用于贝斯。",
+      "openTools": "打开工具",
+      "change": "更换乐器"
     }
   }
 }

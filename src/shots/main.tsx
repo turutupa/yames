@@ -194,11 +194,17 @@ async function drive() {
       await until("Set me up", () => !!button(i18n.t("onboarding.welcome.setup")));
       button(i18n.t("onboarding.welcome.setup"))!.click();
       await until("the instrument cards", () => !!document.querySelector(".instrument-picker-card"));
+    }
+    if (stop !== "welcome" && stop !== "instrument") {
       document.querySelector<HTMLButtonElement>(".instrument-picker-card")!.click();
       await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
       button(i18n.t("onboarding.next"))!.click();
       await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
-      if (stop === "input" || stop === "ready") {
+      const at = (id: string) => () => !!document.querySelector(`[data-step="${id}"]`);
+      if (stop === "soundLook" || stop === "handsFree") {
+        const id = stop === "soundLook" ? "sound-look" : "hands-free";
+        await pressUntil(`Skip to ${id}`, () => button(i18n.t("onboarding.skip"))?.click(), at(id), 20000);
+      } else if (stop === "input" || stop === "ready") {
         await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
       } else {
         await until("the trouble panel", () => !!document.querySelector('[data-testid="audio-input-trouble"]'), 20000);
@@ -291,8 +297,13 @@ async function drive() {
         byId("today-start")?.click();
       }
       await until("the Session", () => !!byId("session"));
-      if (stop === "timed") {
-        await until("the warm-up", () => !!byId("session-timed"));
+      if (stop === "timed" || stop === "timedReady") {
+        const timedPhase = () => byId("session-timed")?.dataset.phase;
+        await until("the warm-up, ready", () => timedPhase() === "timedReady");
+        if (stop === "timed") {
+          byId("session-big")?.click();
+          await until("the warm-up, running", () => timedPhase() === "timed");
+        }
       } else {
         const big = () => byId("session-big") as HTMLButtonElement | null;
         // Ready means the Session is in its ready phase and the Take is loaded.

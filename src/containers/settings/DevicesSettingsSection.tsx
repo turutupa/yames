@@ -1,12 +1,15 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AudioOutputDevice } from "../../types";
+import type { AudioOutputDevice, InstrumentId } from "../../types";
 import {
   clearCalibrationCacheEntry,
   getCalibrationCacheEntry,
   listAudioOutputDevices,
+  setInstrument as setInstrumentBackend,
+  storeSave,
 } from "../../ipc";
+import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import type { CalibrationCacheEntry } from "../../ipc";
 import { AudioOutputDropdown } from "../../components/AudioOutputDropdown";
 import { AudioInputDropdown } from "../../components/AudioInputDropdown";
@@ -54,6 +57,7 @@ export function DevicesSettingsSection({
   midi,
   onOpenInputTest,
   instrument,
+  setInstrument,
 }: {
   audioOutputDevices: AudioOutputDevice[];
   setAudioOutputDevices: Dispatch<SetStateAction<AudioOutputDevice[]>>;
@@ -66,6 +70,11 @@ export function DevicesSettingsSection({
   midi: MidiLike;
   onOpenInputTest: () => void;
   instrument: string;
+  /**
+   * Optional so the section's own tests can leave it out; without it the
+   * instrument picker is not drawn.
+   */
+  setInstrument?: Dispatch<SetStateAction<string>>;
 }) {
   const { t } = useTranslation();
   // Find the selected input device object to read its channel count.
@@ -179,6 +188,37 @@ export function DevicesSettingsSection({
           </>
         )}
       </div>
+      )}
+
+      {/* The instrument, on every platform and always enabled (guitar first,
+          2026-11-17). It used to sit in the coach's section, locked while the
+          coach was off and absent from the phone; the first run now offers
+          only the two guitars and says "the rest is in Settings", so the rest
+          has to be here for everybody. It tunes onset detection for every
+          tool, which is why it sits beside the input. */}
+      {setInstrument && (
+        <div
+          className="midi-device-section"
+          id="settings-instrument"
+          style={IS_MOBILE ? undefined : { marginTop: 28 }}
+        >
+          <label className="midi-label devices-subsection-label">{t("settings.coach.instrument")}</label>
+          <div className="midi-device-row">
+            <InstrumentDropdown
+              value={instrument}
+              onChange={(val) => {
+                // Local state, the store (next launch) and the backend (the
+                // DSP picks up the new InstrumentProfile now, D0).
+                setInstrument(val);
+                storeSave("instrument", val);
+                setInstrumentBackend(val as InstrumentId).catch(() => {
+                  // Early boot: lib.rs restores from the store anyway.
+                });
+              }}
+            />
+          </div>
+          <span className="channel-picker-hint">{t("settings.coach.instrumentHint")}</span>
+        </div>
       )}
 
       {/* The input, on every platform: Takes are graded from the guitar. On

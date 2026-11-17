@@ -1449,6 +1449,11 @@
   text-shadow: 0 0 44px rgba(255, 170, 70, 0.34);
   font-variant-numeric: tabular-nums;
 }
+/* Held at full until Start: the minutes it will take, not a clock running. */
+.session-countdown[data-ready] {
+  opacity: 0.55;
+  text-shadow: none;
+}
 .session-recap-head .session-h1 {
   font-size: clamp(40px, 8vh, 76px);
 }
@@ -1842,7 +1847,7 @@
   }
   .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
     > .rail
-    :is(.rail-mode-label, .rail-mode-badge, .rail-action-label, .rail-action-status, .rail-library, .rail-action-dot, .rail-mode-now) {
+    :is(.rail-mode-label, .rail-mode-badge, .rail-action-label, .rail-action-status, .rail-library, .rail-action-dot, .rail-mode-now, .rail-key) {
     display: none;
   }
   .main-body:has(> .main-content:is([data-view="today"], [data-view="paths"], [data-view="progress"], [data-view="tools"]))
@@ -2340,4 +2345,19 @@
   width: clamp(90px, 14vw, 160px);
   min-width: 0;
   accent-color: var(--l-amber);
+}
+
+/* Guitar first (2026-11-17): the note a non-guitar player sees at the top of
+   Today and the Paths list. Quiet: one line of copy and two links, no colour
+   that reads as a warning, nothing that blocks. */
+.session-page .session-instrument-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+}
+.session-instrument-note-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
 }

@@ -17,12 +17,20 @@
  *  recap ◀── (no steps left) ───────────────────┤
  *    ▲                                          ▼
  *    └── next, tick when time is up ─────────  timed  (a metronome, a jam, a drill)
+ *                                                 ▲
+ *                                      timedStart │
+ *                                            timedReady
  * ```
  *
  * The two rules from the brief are the shape of it. **Lessons wait for the
  * player:** an Exercise sits in `ready` and in `result` until told otherwise, and
  * running over its minutes only changes what the big action offers. **Timed steps
  * move on:** a metronome or a jam is left by the clock, through `tick`.
+ *
+ * A timed step starts the way a Take does, though: it waits in `timedReady`,
+ * its clock held at full, until the player presses Start (`timedStart`). The
+ * warm-up used to begin the instant the Session opened, click and countdown
+ * and all, before anyone had read what it was (owner, 2026-11-17).
  *
  * **Find my edge** is an Exercise step with the role `edge`, and the same states:
  * only the big action differs. It climbs a rung after every pass, holds after a
@@ -50,6 +58,8 @@ export type RunPhase =
   | "listening"
   /** A Take has been graded, or could not be. Waits for the player. */
   | "result"
+  /** A metronome, a jam or a drill is up, waiting for the player to start it. */
+  | "timedReady"
   /** A metronome, a jam or a drill is running against the clock. */
   | "timed"
   /** The Session is over, and says what moved. */
@@ -94,6 +104,8 @@ export type RunState = {
 export type RunEvent =
   | { type: "start"; plan: SessionPlan; now: number }
   | { type: "takeStarted"; now: number }
+  /** A timed step's Start was pressed: its clock begins now. */
+  | { type: "timedStart"; now: number }
   | { type: "takeStopped"; now: number }
   | { type: "takeResult"; outcome: TakeOutcome; now: number }
   /** Go again, at the tempo the result proposes. */
@@ -140,7 +152,7 @@ function enter(state: RunState, index: number, now: number): RunState {
   if (step.kind === "exercise") return { ...base, phase: "ready", bpm: step.bpm };
   return {
     ...base,
-    phase: "timed",
+    phase: "timedReady",
     bpm:
       step.kind === "drill"
         ? step.startBpm
@@ -245,6 +257,15 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           return state;
       }
 
+    case "timedReady":
+      if (event.type === "timedStart") {
+        return { ...state, phase: "timed", stepStartedAt: event.now, now: event.now };
+      }
+      if (event.type === "next") return enter(state, state.stepIndex + 1, event.now);
+      // The clock is held at full until Start: the step's minutes are all still to come.
+      if (event.type === "tick") return { ...state, stepStartedAt: event.now, now: event.now };
+      return state;
+
     case "timed":
       if (event.type === "next") return enter(state, state.stepIndex + 1, event.now);
       if (event.type === "tick") {
@@ -292,6 +313,8 @@ export function minutesLeft(state: RunState): number {
 export type BigAction =
   | { kind: "none" }
   | { kind: "playTake"; bpm: number }
+  /** Start a timed step's clock, and whatever it plays. */
+  | { kind: "startTimed"; step: PlanStep }
   | { kind: "endTake" }
   | { kind: "again"; bpm: number }
   | { kind: "next"; step: PlanStep; insert?: boolean }
@@ -417,6 +440,10 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
       return { kind: "playTake", bpm: state.bpm };
     case "playing":
       return { kind: "endTake" };
+    case "timedReady": {
+      const here = currentStep(state);
+      return here ? { kind: "startTimed", step: here } : onward();
+    }
     case "timed":
       return onward();
     case "recap":
@@ -471,6 +498,8 @@ export function eventForBigAction(action: BigAction, now: number): RunEvent | nu
       return { type: "next", now };
     case "close":
       return { type: "close" };
+    case "startTimed":
+      return { type: "timedStart", now };
     // Starting and stopping a Take are the engine's to do; its edge is the event.
     case "playTake":
     case "endTake":

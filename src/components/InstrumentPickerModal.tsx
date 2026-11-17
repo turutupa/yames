@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { INSTRUMENTS } from "../constants/metronome";
+import { GUITAR_INSTRUMENTS } from "../constants/instruments";
 import { IS_MOBILE } from "../platform";
 import { INSTRUMENT_ICONS } from "./MetronomeIcons";
 
@@ -24,29 +25,51 @@ import { INSTRUMENT_ICONS } from "./MetronomeIcons";
 export function InstrumentPickerGrid({
   onPick,
   selectedId,
+  ids = GUITAR_INSTRUMENTS,
 }: {
   onPick: (instrumentId: string) => void;
   selectedId?: string;
+  /**
+   * Which instruments to offer. A first run offers the two guitars (guitar
+   * first, 2026-11-17): the Paths are written for guitar, and every other
+   * instrument lives in Settings, where the tools still follow it.
+   */
+  ids?: readonly string[];
 }) {
   const { t } = useTranslation();
+  const offered = INSTRUMENTS.filter((i) => ids.includes(i.id));
   return (
-    <div className="instrument-picker-grid">
-      {INSTRUMENTS.filter((i) => i.id !== "other").map((inst) => (
-        <button
-          key={inst.id}
-          className={`instrument-picker-card${selectedId === inst.id ? " selected" : ""}`}
-          aria-pressed={selectedId ? selectedId === inst.id : undefined}
-          onClick={() => onPick(inst.id)}
-          type="button"
-        >
-          <span className="instrument-picker-card-icon">
-            {INSTRUMENT_ICONS[inst.id]}
-          </span>
-          <span className="instrument-picker-card-name">
-            {t(`instrument.${inst.id}`)}
-          </span>
-        </button>
-      ))}
+    <div
+      className={`instrument-picker-grid${offered.length === 2 ? " is-pair" : ""}`}
+      role="group"
+    >
+      {offered.map((inst) => {
+        const selected = selectedId === inst.id;
+        return (
+          <button
+            key={inst.id}
+            className={`instrument-picker-card${selected ? " selected" : ""}`}
+            aria-pressed={selected}
+            data-instrument={inst.id}
+            onClick={() => onPick(inst.id)}
+            type="button"
+          >
+            {/* The check is the selected state's second cue, after the border
+                and tint: a dimmer card alone read as "not chosen" (owner). */}
+            <span className="instrument-picker-card-check" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3.5 8.5l3 3 6-7" />
+              </svg>
+            </span>
+            <span className="instrument-picker-card-icon">
+              {INSTRUMENT_ICONS[inst.id]}
+            </span>
+            <span className="instrument-picker-card-name">
+              {t(`instrument.${inst.id}`)}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -75,6 +98,7 @@ export function InstrumentPickerModal({
           {t(IS_MOBILE ? "instrumentPicker.subtitleMobile" : "instrumentPicker.subtitle")}
         </p>
         <InstrumentPickerGrid onPick={onPick} />
+        <p className="instrument-picker-subtitle">{t("instrumentPicker.otherInstruments")}</p>
         <button
           className="instrument-picker-skip"
           onClick={onDismiss}

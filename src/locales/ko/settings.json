@@ -243,7 +243,11 @@
         "session-slower": "느리게",
         "session-faster": "빠르게",
         "session-next": "다음 단계",
-        "session-pedal": "페달 하나"
+        "session-pedal": "페달 하나",
+        "session-exit": "세션 나가기",
+        "tab-paths": "코스",
+        "tab-progress": "진도",
+        "tab-tools": "도구"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -293,7 +297,11 @@
         "session-slower": "테이크 사이: 한 단계 느리게",
         "session-faster": "테이크 사이: 한 단계 빠르게",
         "session-next": "테이크 사이: 세션의 다음 항목으로 넘어갑니다",
-        "session-pedal": "풋스위치 하나용. 탭: 다음 동작. 더블 탭: 느리게. 길게 누르기: 다음 단계"
+        "session-pedal": "풋스위치 하나용. 탭: 다음 동작. 더블 탭: 느리게. 길게 누르기: 다음 단계",
+        "session-exit": "세션 중: 나가기와 똑같이 세션을 나갑니다. 진행 중인 테이크는 먼저 멈춥니다.",
+        "tab-paths": "코스로 이동합니다",
+        "tab-progress": "진도로 이동합니다",
+        "tab-tools": "도구로 이동합니다"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "기타 악기"
   },
   "instrumentPicker": {
-    "title": "무슨 악기로 연습하나요?",
-    "subtitle": "Yames가 악기에 맞춰 음 감지와 코칭 피드백을 조정합니다. 설정에서 나중에 변경할 수 있어요.",
-    "subtitleMobile": "무엇으로 연습하는지 Yames가 알 수 있도록 알려주세요. 나중에 설정에서 바꿀 수 있습니다.",
-    "skip": "건너뛰기 — 나중에 고를게요"
+    "title": "어떤 기타를 연주하나요?",
+    "subtitle": "코스와 세션은 지금은 기타용으로 만들어져 있어요. 내 기타를 고르면 Yames가 그에 맞춰 듣습니다.",
+    "subtitleMobile": "코스와 세션은 지금은 기타용으로 만들어져 있어요. 연주하는 기타를 고르세요.",
+    "skip": "건너뛰기 — 나중에 고를게요",
+    "otherInstruments": "베이스, 드럼, 피아노인가요? 설정에서 고르세요. 메트로놈, 드릴, 잼은 모든 악기에서 작동해요.",
+    "keepCurrent": "현재 악기: {{instrument}}. 바꾸려면 기타를 고르고, 그대로 두려면 계속 진행하세요."
   }
 }

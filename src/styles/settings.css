@@ -253,6 +253,25 @@
   align-items: center;
 }
 
+/* In a Session: the download as a hairline on the window's bottom edge, under
+   nothing and over nothing that can be pressed (`DownloadHairline`). */
+.global-download-hairline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  z-index: 50;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--border) 25%, transparent);
+}
+.global-download-hairline-fill {
+  height: 100%;
+  background: var(--accent);
+  opacity: 0.7;
+  transition: width 0.4s ease;
+}
+
 .global-download-bar-fill {
   position: absolute;
   top: 0;

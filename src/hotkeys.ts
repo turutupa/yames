@@ -68,6 +68,11 @@ export type HotkeyAction =
   // The new front door. A new id rather than a sixth number: `tab-1` to `tab-5`
   // are positional and stored, and Today sits above them.
   | "tab-today"
+  // The rest of the rail's learning side (owner, 2026-11-17). Not numbers in
+  // the 1–5 run: those count the tools, and a habit of ⌘3 for Drill is kept.
+  | "tab-paths"
+  | "tab-progress"
+  | "tab-tools"
   // A Session, hands-free. A player between Takes has a guitar in their hands.
   // `session-pedal` is the one to bind to a single footswitch: tap, double tap
   // and hold are decided from its presses (`src/session/pedalGesture.ts`).
@@ -76,6 +81,8 @@ export type HotkeyAction =
   | "session-faster"
   | "session-next"
   | "session-pedal"
+  /** Escape in a Session: what Exit does. */
+  | "session-exit"
   | "settings";
 
 export interface HotkeyEntry {
@@ -233,7 +240,11 @@ export function actionForCombo(
 ): string | undefined {
   const bound = Object.entries(bindings)
     .filter(([, key]) => key === combo)
-    .map(([action]) => action);
+    .map(([action]) => action)
+    // Leaving a Session is only ever the Session's. Off it, Escape belongs to
+    // whatever is open (the Songs tab's portion, the jam's sheets), so the
+    // fallback below must not hand it out.
+    .filter((action) => action !== "session-exit" || view === "session");
   const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
   return (
     bound.find((action) => action.startsWith(`${view}-`)) ??
@@ -633,6 +644,29 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Go to Today",
     group: "navigation",
   },
+  // After the tools' ⌘1–⌘5, in the rail's order. ⌘P, ⌘R and the other letters
+  // a webview or an OS already means are left alone on purpose.
+  {
+    id: "tab-paths",
+    action: "Paths",
+    key: "⌘6",
+    desc: "Go to Paths",
+    group: "navigation",
+  },
+  {
+    id: "tab-progress",
+    action: "Progress",
+    key: "⌘7",
+    desc: "Go to Progress",
+    group: "navigation",
+  },
+  {
+    id: "tab-tools",
+    action: "Tools",
+    key: "⌘8",
+    desc: "Go to Tools",
+    group: "navigation",
+  },
   // The Session's own keys. By the prefix rule in `actionForCombo` these only
   // mean this on the running Session, so the arrows go on being the tempo
   // everywhere else and N goes on being the jam's.
@@ -669,6 +703,16 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "One pedal",
     key: "",
     desc: "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step",
+    group: "session",
+  },
+  // Escape leaves a Session the way Exit does. A `session-` action, so by the
+  // prefix rule it means nothing on any other tab, and Escape there goes on
+  // closing whatever it closed before.
+  {
+    id: "session-exit",
+    action: "Leave the Session",
+    key: "Escape",
+    desc: "In a Session: leave it, as Exit does. A running Take stops first.",
     group: "session",
   },
 ];

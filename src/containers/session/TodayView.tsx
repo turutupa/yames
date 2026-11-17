@@ -14,6 +14,7 @@ import type { PathDoc } from "../../paths/format";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { lineText } from "./lineText";
 import { bpmLine, pathTitleOf, roleKey, roleOf, rowKind, shortContext, shortReason, ticksOf } from "./todayPlan";
+import { InstrumentNote } from "./InstrumentNote";
 import { useNeckSlot, useNeck3d } from "./hooks/useNeck";
 import { useNeck } from "../../stage3d/api";
 import type { NeckView } from "../../stage3d/api";
@@ -168,8 +169,21 @@ export function TodayView({
   onSetUpInput,
   onOpenPaths,
   listening = false,
+  instrument,
+  onOpenToolsList,
+  onChangeInstrument,
 }: {
   session: SessionRun;
+  /**
+   * The player's instrument. Anything but a guitar gets a calm note at the top
+   * (guitar first, 2026-11-17); nothing is blocked. Absent in scenes and tests
+   * that predate it, which then read as a guitar.
+   */
+  instrument?: string;
+  /** To the Tools list, from that note. */
+  onOpenToolsList?: () => void;
+  /** To the instrument setting, from that note. */
+  onChangeInstrument?: () => void;
   /** The input is on and listening: grading needs nothing more, so Today does not ask for it. */
   listening?: boolean;
   /** "Open Tools": the Tools list. Opening on the last tool is a setting (Settings › General). */
@@ -209,6 +223,13 @@ export function TodayView({
       <div className="session-today" data-steps={steps.length}>
         <div className="session-slot" ref={slot} aria-hidden="true" />
         <div className="session-today-hero">
+          {instrument && (
+            <InstrumentNote
+              instrument={instrument}
+              onOpenTools={onOpenToolsList ?? onOpenTools}
+              onChangeInstrument={onChangeInstrument ?? (() => {})}
+            />
+          )}
           <div className="session-today-head">
             <div className="session-kick session-rise">{lead}</div>
             <div className="session-today-headline">

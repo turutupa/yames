@@ -265,7 +265,23 @@
       "drillKick": "Tempoyu artır · notlanmaz",
       "movesOn": "Kendiliğinden devam eder.",
       "finisherKick": "Kapanış · notlanmaz",
-      "yourTurnKick": "Sıra sende · kontrol yok"
+      "yourTurnKick": "Sıra sende · kontrol yok",
+      "start": {
+        "warmUp": "Isınmayı başlat",
+        "yourTurn": "Sıranı başlat",
+        "jam": "Jam'i başlat",
+        "finisher": "Finali başlat",
+        "drill": "Hız rampasını başlat"
+      },
+      "how": {
+        "warmUp": "Klikle birlikte çal. Burada hiçbir şey puanlanmaz, rahatla.",
+        "yourTurn": "Klikle birlikte, kendi tarzınla çal. Burada hiçbir şey kontrol edilmez.",
+        "jam": "Grupla birlikte çal. Burada hiçbir şey puanlanmaz.",
+        "finisher": "Grubun üzerinde, döngüde çal. Burada hiçbir şey puanlanmaz.",
+        "drill": "Sen çaldıkça klik hızlanır. Burada hiçbir şey puanlanmaz."
+      },
+      "skip": "Atla",
+      "startKeys": "Enter, Boşluk veya pedal başlatır."
     },
     "pedal": {
       "title": "Ayak pedalı",
@@ -387,6 +403,12 @@
       "quintuplets": "Beşleme",
       "sextuplets": "Altılama",
       "thirtySeconds": "Otuz ikilikler"
+    },
+    "instrumentNote": {
+      "other": "Yollar şimdilik gitar için yazıldı. Araçlar senin enstrümanınla çalışır.",
+      "bass": "Yollar şimdilik gitar için yazıldı; bas için Yollar planlanıyor. Araçlar bas ile bugün de çalışır.",
+      "openTools": "Araçları aç",
+      "change": "Enstrümanı değiştir"
     }
   }
 }

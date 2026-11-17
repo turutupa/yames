@@ -25,7 +25,11 @@ const SNAPSHOT = path.resolve(process.cwd(), "src/test/parity/locale-keys.en.jso
  * Keys taken out on purpose, each one a decision somebody made. Keep the reason
  * in the commit. A key listed here must really be gone, so this cannot go stale.
  */
-const DELIBERATELY_REMOVED: readonly string[] = [];
+const DELIBERATELY_REMOVED: readonly string[] = [
+  // W3 leads with the Session's keys under "In a Session" (2026-11-17); the
+  // old "Keyboard" heading over the tools' keys has nothing left to head.
+  "onboarding.handsFree.keyboard.title",
+];
 
 function englishKeys(): string[] {
   const merged: Record<string, unknown> = {};

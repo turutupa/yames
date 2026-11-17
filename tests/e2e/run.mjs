@@ -572,9 +572,25 @@ async function scenarioTwoPaths() {
     await d.clickText(/^Start(\n|$)/);
     const played = new Set();
     for (let step = 0; step < 12 && played.size < 2; step++) {
-      // A Take to play, or a timed step (the warm-up) to move past.
-      const m = await d.waitText(/Start take, (\d+) BPM|Next: |See how it went/, 20000);
+      // A Take to play, or a timed step (the warm-up) to start and move past.
+      const m = await d.waitText(/Start take, (\d+) BPM|Start warm-up|Start (?:the (?:jam|ramp|finisher)|your turn)|Next: |See how it went/, 20000);
       if (/See how it went/.test(m[0])) break;
+      if (/^Start (?:warm-up|the |your turn)/.test(m[0])) {
+        // A timed step waits for its Start: nothing plays and the clock holds
+        // until it is pressed (owner, 2026-11-17).
+        const before = await d.invoke("get_state");
+        const clock0 = await d.exec(`return document.querySelector('[data-testid="session-countdown"]')?.innerText ?? null`);
+        await sleep(1500);
+        const clock1 = await d.exec(`return document.querySelector('[data-testid="session-countdown"]')?.innerText ?? null`);
+        check("a timed step waits for Start: silent, its clock held", !before.isPlaying && clock0 === clock1,
+          `playing ${before.isPlaying}, clock ${clock0} -> ${clock1}`);
+        await d.clickText(/^Start (?:warm-up|the |your turn)/);
+        await sleep(800);
+        const after = await d.invoke("get_state");
+        check("Start on a timed step starts it", after.isPlaying === true || m[0] !== "Start warm-up",
+          `playing ${after.isPlaying}`);
+        continue;
+      }
       if (m[0].startsWith("Next: ")) {
         await d.clickText(/^Next: /);
         continue;

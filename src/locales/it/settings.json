@@ -243,7 +243,11 @@
         "session-slower": "Più lento",
         "session-faster": "Più veloce",
         "session-next": "Tappa successiva",
-        "session-pedal": "Un solo pedale"
+        "session-pedal": "Un solo pedale",
+        "session-exit": "Esci dalla sessione",
+        "tab-paths": "Percorsi",
+        "tab-progress": "Progressi",
+        "tab-tools": "Strumenti"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -293,7 +297,11 @@
         "session-slower": "Tra una take e l'altra: un gradino più lento",
         "session-faster": "Tra una take e l'altra: un gradino più veloce",
         "session-next": "Tra una take e l'altra: passa alla prossima cosa della sessione",
-        "session-pedal": "Per un solo footswitch. Tocco: la prossima cosa. Doppio tocco: più lento. Tieni premuto: tappa successiva"
+        "session-pedal": "Per un solo footswitch. Tocco: la prossima cosa. Doppio tocco: più lento. Tieni premuto: tappa successiva",
+        "session-exit": "In una sessione: uscire, come fa Esci. Una take in corso si ferma prima.",
+        "tab-paths": "Vai a Percorsi",
+        "tab-progress": "Vai a Progressi",
+        "tab-tools": "Vai a Strumenti"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "Altro"
   },
   "instrumentPicker": {
-    "title": "Che strumento stai suonando?",
-    "subtitle": "Yames adatta il rilevamento dell'input e il feedback del coach al tuo strumento. Puoi cambiarlo in seguito nelle Impostazioni.",
-    "subtitleMobile": "Così Yames sa con cosa ti eserciti. Puoi cambiarlo più tardi nelle Impostazioni.",
-    "skip": "Salta — lo sceglierò più tardi"
+    "title": "Che chitarra suoni?",
+    "subtitle": "Percorsi e Sessioni sono scritti per chitarra, per ora. Scegli la tua e Yames regola l'ascolto su di essa.",
+    "subtitleMobile": "Percorsi e Sessioni sono scritti per chitarra, per ora. Scegli quella che suoni.",
+    "skip": "Salta — lo sceglierò più tardi",
+    "otherInstruments": "Basso, batteria o piano? Sceglilo nelle Impostazioni: metronomo, esercizi e jam funzionano con ogni strumento.",
+    "keepCurrent": "Il tuo strumento ora: {{instrument}}. Scegli una chitarra per cambiare, o vai avanti per tenerlo."
   }
 }

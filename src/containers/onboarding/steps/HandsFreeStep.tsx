@@ -1,20 +1,26 @@
 /**
- * W3 — Hands-free control (ONBOARDING_PLAN §3, principle 5).
+ * W3 — Hands-free control (ONBOARDING_PLAN §3, principle 5), led by the
+ * Session (owner, 2026-11-17).
  *
- * Three cards, in the order the user is likely to own the hardware:
- *   Keyboard  — the keys that matter, read from the live binding table
- *               (`HOTKEYS` merged with the user's stored overrides) so a
- *               remapped key is never mis-taught here. Nothing is hardcoded.
- *   MIDI      — the connected/available devices, and one tap that maps the
- *               next pedal press to Play/Stop through the app's existing
- *               learn path (`useMidi`, the same one Settings → Hotkeys uses).
- *   Gamepad   — the same learn tap: MainWindow's `useGamepad` already routes a
- *               button press into `footBindings` while `midi.learnMode` is on,
- *               so one learn state covers both kinds of footswitch.
+ * The learning side is the main experience now, so the step teaches its keys
+ * first and the tools' keys last:
+ *   In a Session — the big button (Play or `session-go`), faster and slower
+ *               between Takes, and the next step. Every combo is read from the
+ *               live binding table (`HOTKEYS` merged with the user's stored
+ *               overrides), so a remapped key is never mis-taught here.
+ *   Footswitch  — one pedal, mapped to `session-pedal` through the app's
+ *               existing learn path (`useMidi`, the same one Settings → Hotkeys
+ *               uses; MainWindow's `useGamepad` routes a button into
+ *               `footBindings` while `midi.learnMode` is on). On the Session it
+ *               is tap / double / hold; everywhere else the dispatcher treats a
+ *               press as Play/Stop, so the tools keep their pedal.
+ *   In the tools — tempo and coach keys, folded away.
  *
  * The step deliberately owns no MIDI state of its own: it drives the app's
  * single `useMidi` instance (through the wizard env) so a binding made here is
  * immediately visible to the rest of the app — including W7's "Control" row.
+ * Not in the phone build (no keyboard, MIDI or gamepad there; see the step
+ * registry).
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,24 +31,29 @@ import type { MidiBinding } from "../../../types";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
 
-/** The action every footswitch maps to first. */
-const PLAY = "play";
+/** The action a single footswitch maps to: the Session's one-pedal action. */
+export const PEDAL = "session-pedal";
 
 /**
- * The five things worth knowing on day one (ONBOARDING_PLAN §3 W3). Ids only —
- * the combos come from the binding table, never from this file. `T` (tap
- * tempo) in the plan has no hotkey in `HOTKEYS`; tab switching earns the slot.
+ * The Session's keys, in the order a player meets them. Each row lists the
+ * actions whose keys it shows; a row with two shows "A or B".
  */
-const KEYBOARD_ACTIONS: HotkeyAction[] = [
-  "play",
-  "bpm-up",
-  "bpm-down",
-  "toggle-coach",
-  "tab-1",
-  "tab-2",
+const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[] }> = [
+  { key: "go", actions: ["play", "session-go"] },
+  { key: "faster", actions: ["session-faster"] },
+  { key: "slower", actions: ["session-slower"] },
+  { key: "next", actions: ["session-next"] },
 ];
 
-type KeyRow = { id: HotkeyAction; label: string; keys: string[] };
+/** The tools' everyday keys, secondary now. Labels come from Settings → Hotkeys. */
+const TOOL_ACTIONS: HotkeyAction[] = ["play", "bpm-up", "bpm-down", "toggle-coach"];
+
+/** The pedal's three gestures, worded by the Session's own pedal legend. */
+const GESTURES = [
+  ["tap", "tapDoes"],
+  ["double", "doubleDoes"],
+  ["hold", "holdDoes"],
+] as const;
 
 /** `CC #64`, `Note #36`, `PC #3` — the format Settings → Hotkeys shows. */
 function signalLabel(binding: Pick<MidiBinding, "msgType" | "number">): string {
@@ -72,32 +83,47 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
     };
   }, []);
 
-  const keyRows: KeyRow[] = useMemo(
+  const keysOf = useCallback(
+    (id: HotkeyAction): string[] => {
+      const combo = overrides[id] ?? HOTKEYS.find((h) => h.id === id)?.key ?? "";
+      // Split first, then localise each token: `platformKey` turns ⌘ into
+      // Ctrl on Windows/Linux and leaves the glyph alone on macOS.
+      return combo ? splitCombo(combo).map(platformKey) : [];
+    },
+    [overrides],
+  );
+
+  const sessionRows = useMemo(
     () =>
-      KEYBOARD_ACTIONS.map((id) => {
-        const combo = overrides[id] ?? HOTKEYS.find((h) => h.id === id)?.key ?? "";
-        return {
-          id,
-          label: t(`settings.hotkeys.actions.${id}`),
-          // Split first, then localise each token: `platformKey` turns ⌘ into
-          // Ctrl on Windows/Linux and leaves the glyph alone on macOS.
-          keys: combo ? splitCombo(combo).map(platformKey) : [],
-        };
-      }),
-    [overrides, t],
+      SESSION_ROWS.map((row) => ({
+        key: row.key,
+        label: t(`onboarding.handsFree.session.${row.key}`),
+        combos: row.actions.map(keysOf).filter((k) => k.length > 0),
+      })),
+    [keysOf, t],
+  );
+
+  const toolRows = useMemo(
+    () =>
+      TOOL_ACTIONS.map((id) => ({
+        key: id,
+        label: t(`settings.hotkeys.actions.${id}`),
+        combos: [keysOf(id)].filter((k) => k.length > 0),
+      })),
+    [keysOf, t],
   );
 
   // --- Shared learn state --------------------------------------------------
-  const learning = midi.learnMode === PLAY;
-  const midiBinding = midi.bindings.find((b) => b.action === PLAY) ?? null;
-  const padBinding = gamepadBindings[PLAY] ?? null;
+  const learning = midi.learnMode === PEDAL;
+  const midiBinding = midi.bindings.find((b) => b.action === PEDAL) ?? null;
+  const padBinding = gamepadBindings[PEDAL] ?? null;
 
   // A pedal that is already bound to something else would raise the conflict
   // dialog, which lives *behind* the wizard overlay. In a setup step the tap is
-  // the answer: take the signal for Play/Stop.
+  // the answer: take the signal for the pedal.
   const { pendingConflict, acceptConflict, cancelLearn } = midi;
   useEffect(() => {
-    if (isActive && pendingConflict?.targetAction === PLAY) acceptConflict();
+    if (isActive && pendingConflict?.targetAction === PEDAL) acceptConflict();
   }, [isActive, pendingConflict, acceptConflict]);
 
   // Leaving the step must not leave the app listening for a pedal.
@@ -117,7 +143,7 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
         // A device that refuses to open still leaves the gamepad path usable.
       }
     }
-    midi.startLearn(PLAY);
+    midi.startLearn(PEDAL);
   }, [learning, midi]);
 
   // --- Gamepad card --------------------------------------------------------
@@ -150,6 +176,34 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
     };
   }, []);
 
+  const renderRows = (rows: Array<{ key: string; label: string; combos: string[][] }>) => (
+    <ul className="onboarding-hf-keys">
+      {rows.map((row) => (
+        <li key={row.key} className="onboarding-hf-key-row" data-row={row.key}>
+          <span className="onboarding-hf-key-label">{row.label}</span>
+          <span className="onboarding-hf-key-combo">
+            {row.combos.length === 0 ? (
+              <span className="onboarding-hf-muted">—</span>
+            ) : (
+              row.combos.map((keys, c) => (
+                <span key={c} className="onboarding-hf-key-alt">
+                  {c > 0 && (
+                    <span className="onboarding-hf-or">{t("onboarding.handsFree.session.or")}</span>
+                  )}
+                  {keys.map((k, i) => (
+                    <kbd key={i} className="onboarding-hf-kbd">
+                      {k}
+                    </kbd>
+                  ))}
+                </span>
+              ))
+            )}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <div className="onboarding-step">
       <h2 className="onboarding-step-title" id="onboarding-title">
@@ -158,128 +212,129 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
       <p className="onboarding-step-subtitle">{t("onboarding.handsFree.subtitle")}</p>
 
       <div className="onboarding-cards">
-        {/* ---- Keyboard ---- */}
+        {/* ---- In a Session ---- */}
         <section className="onboarding-hf-card" data-testid="hands-free-keyboard">
-          <h3 className="onboarding-hf-title">{t("onboarding.handsFree.keyboard.title")}</h3>
-          <ul className="onboarding-hf-keys">
-            {keyRows.map((row) => (
-              <li key={row.id} className="onboarding-hf-key-row">
-                <span className="onboarding-hf-key-label">{row.label}</span>
-                <span className="onboarding-hf-key-combo">
-                  {row.keys.length === 0 ? (
-                    <span className="onboarding-hf-muted">—</span>
-                  ) : (
-                    row.keys.map((k, i) => (
-                      <kbd key={i} className="onboarding-hf-kbd">
-                        {k}
-                      </kbd>
-                    ))
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <h3 className="onboarding-hf-title">{t("onboarding.handsFree.session.title")}</h3>
+          {renderRows(sessionRows)}
           <p className="onboarding-hf-hint">{t("onboarding.handsFree.keyboard.hint")}</p>
         </section>
 
-        {/* ---- MIDI footswitch ---- */}
-        <section className="onboarding-hf-card" data-testid="hands-free-midi">
-          <h3 className="onboarding-hf-title">{t("onboarding.handsFree.midi.title")}</h3>
-          {midi.devices.length === 0 ? (
-            <p className="onboarding-hf-hint">{t("onboarding.handsFree.midi.none")}</p>
-          ) : (
-            <>
-              <ul className="onboarding-hf-devices">
-                {midi.devices.map((device) => {
-                  const connected = midi.connectedDevice === device.name;
-                  return (
-                    <li key={device.id}>
-                      <button
-                        type="button"
-                        className={`onboarding-hf-device${connected ? " connected" : ""}`}
-                        aria-pressed={connected}
-                        onClick={() => {
-                          if (!connected) midi.connect(device.name).catch(() => {});
-                        }}
-                      >
-                        <span className="onboarding-hf-device-dot" aria-hidden="true" />
-                        <span className="onboarding-hf-device-name">{device.name}</span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              {midiBinding && !learning && (
-                <p className="onboarding-hf-mapped">
-                  {t("onboarding.handsFree.midi.mapped", {
-                    signal: signalLabel(midiBinding),
-                    channel: (midiBinding.channel ?? 0) + 1,
+        {/* ---- One footswitch ---- */}
+        <section className="onboarding-hf-card" data-testid="hands-free-pedal">
+          <h3 className="onboarding-hf-title">{t("onboarding.handsFree.pedal.title")}</h3>
+          <dl className="onboarding-hf-legend" data-testid="hands-free-legend">
+            {GESTURES.map(([gesture, does]) => (
+              <div key={gesture} className="onboarding-hf-legend-row">
+                <dt>{t(`session.pedal.${gesture}`)}</dt>
+                <dd>{t(`session.pedal.${does}`)}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="onboarding-hf-hint">{t("onboarding.handsFree.pedal.tools")}</p>
+
+          <div className="onboarding-hf-sub" data-testid="hands-free-midi">
+            <h4 className="onboarding-hf-subtitle">{t("onboarding.handsFree.midi.title")}</h4>
+            {midi.devices.length === 0 ? (
+              <p className="onboarding-hf-hint">{t("onboarding.handsFree.midi.none")}</p>
+            ) : (
+              <>
+                <ul className="onboarding-hf-devices">
+                  {midi.devices.map((device) => {
+                    const connected = midi.connectedDevice === device.name;
+                    return (
+                      <li key={device.id}>
+                        <button
+                          type="button"
+                          className={`onboarding-hf-device${connected ? " connected" : ""}`}
+                          aria-pressed={connected}
+                          onClick={() => {
+                            if (!connected) midi.connect(device.name).catch(() => {});
+                          }}
+                        >
+                          <span className="onboarding-hf-device-dot" aria-hidden="true" />
+                          <span className="onboarding-hf-device-name">{device.name}</span>
+                        </button>
+                      </li>
+                    );
                   })}
-                </p>
-              )}
-              {learning && (
-                <p className="onboarding-hf-listening" role="status">
-                  {t("onboarding.handsFree.midi.listening")}
-                </p>
-              )}
-              <button
-                type="button"
-                className="onboarding-btn onboarding-btn-ghost onboarding-hf-action"
-                onClick={startMapping}
-              >
-                {learning
-                  ? t("onboarding.handsFree.cancel")
-                  : midiBinding
-                    ? t("onboarding.handsFree.midi.remap")
-                    : t("onboarding.handsFree.midi.map")}
-              </button>
-            </>
-          )}
+                </ul>
+                {midiBinding && !learning && (
+                  <p className="onboarding-hf-mapped">
+                    {t("onboarding.handsFree.midi.mapped", {
+                      signal: signalLabel(midiBinding),
+                      channel: (midiBinding.channel ?? 0) + 1,
+                    })}
+                  </p>
+                )}
+                {learning && (
+                  <p className="onboarding-hf-listening" role="status">
+                    {t("onboarding.handsFree.midi.listening")}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="onboarding-btn onboarding-btn-ghost onboarding-hf-action"
+                  onClick={startMapping}
+                >
+                  {learning
+                    ? t("onboarding.handsFree.cancel")
+                    : midiBinding
+                      ? t("onboarding.handsFree.midi.remap")
+                      : t("onboarding.handsFree.midi.map")}
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="onboarding-hf-sub" data-testid="hands-free-gamepad">
+            <h4 className="onboarding-hf-subtitle">{t("onboarding.handsFree.gamepad.title")}</h4>
+            {pads.length === 0 ? (
+              <p className="onboarding-hf-hint">{t("onboarding.handsFree.gamepad.none")}</p>
+            ) : (
+              <>
+                <ul className="onboarding-hf-devices">
+                  {pads.map((id, i) => (
+                    <li key={`${id}-${i}`}>
+                      <div className="onboarding-hf-device connected">
+                        <span className="onboarding-hf-device-dot" aria-hidden="true" />
+                        <span className="onboarding-hf-device-name">{id}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {padBinding && !learning && (
+                  <p className="onboarding-hf-mapped">
+                    {t("onboarding.handsFree.gamepad.mapped", {
+                      button: formatGamepadButton(padBinding),
+                    })}
+                  </p>
+                )}
+                {learning && (
+                  <p className="onboarding-hf-listening" role="status">
+                    {t("onboarding.handsFree.gamepad.listening")}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="onboarding-btn onboarding-btn-ghost onboarding-hf-action"
+                  onClick={startMapping}
+                >
+                  {learning
+                    ? t("onboarding.handsFree.cancel")
+                    : padBinding
+                      ? t("onboarding.handsFree.gamepad.remap")
+                      : t("onboarding.handsFree.gamepad.map")}
+                </button>
+              </>
+            )}
+          </div>
         </section>
 
-        {/* ---- Gamepad ---- */}
-        <section className="onboarding-hf-card" data-testid="hands-free-gamepad">
-          <h3 className="onboarding-hf-title">{t("onboarding.handsFree.gamepad.title")}</h3>
-          {pads.length === 0 ? (
-            <p className="onboarding-hf-hint">{t("onboarding.handsFree.gamepad.none")}</p>
-          ) : (
-            <>
-              <ul className="onboarding-hf-devices">
-                {pads.map((id, i) => (
-                  <li key={`${id}-${i}`}>
-                    <div className="onboarding-hf-device connected">
-                      <span className="onboarding-hf-device-dot" aria-hidden="true" />
-                      <span className="onboarding-hf-device-name">{id}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {padBinding && !learning && (
-                <p className="onboarding-hf-mapped">
-                  {t("onboarding.handsFree.gamepad.mapped", {
-                    button: formatGamepadButton(padBinding),
-                  })}
-                </p>
-              )}
-              {learning && (
-                <p className="onboarding-hf-listening" role="status">
-                  {t("onboarding.handsFree.gamepad.listening")}
-                </p>
-              )}
-              <button
-                type="button"
-                className="onboarding-btn onboarding-btn-ghost onboarding-hf-action"
-                onClick={startMapping}
-              >
-                {learning
-                  ? t("onboarding.handsFree.cancel")
-                  : padBinding
-                    ? t("onboarding.handsFree.gamepad.remap")
-                    : t("onboarding.handsFree.gamepad.map")}
-              </button>
-            </>
-          )}
-        </section>
+        {/* ---- In the tools: secondary, folded away ---- */}
+        <details className="onboarding-hf-card onboarding-hf-tools" data-testid="hands-free-tools">
+          <summary className="onboarding-hf-title">{t("onboarding.handsFree.tools.title")}</summary>
+          {renderRows(toolRows)}
+        </details>
       </div>
     </div>
   );

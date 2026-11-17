@@ -243,7 +243,11 @@
         "session-slower": "Daha yavaş",
         "session-faster": "Daha hızlı",
         "session-next": "Sonraki adım",
-        "session-pedal": "Tek pedal"
+        "session-pedal": "Tek pedal",
+        "session-exit": "Seanstan çık",
+        "tab-paths": "Yollar",
+        "tab-progress": "İlerleme",
+        "tab-tools": "Araçlar"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -293,7 +297,11 @@
         "session-slower": "Denemeler arasında: bir basamak yavaş",
         "session-faster": "Denemeler arasında: bir basamak hızlı",
         "session-next": "Denemeler arasında: seansta sıradaki şeye geç",
-        "session-pedal": "Tek bir ayak anahtarı için. Dokun: sıradaki şey. Çift dokun: daha yavaş. Basılı tut: sonraki adım"
+        "session-pedal": "Tek bir ayak anahtarı için. Dokun: sıradaki şey. Çift dokun: daha yavaş. Basılı tut: sonraki adım",
+        "session-exit": "Seans sırasında: Çık gibi seanstan çık. Süren deneme önce durur.",
+        "tab-paths": "Yollar'a git",
+        "tab-progress": "İlerleme'ye git",
+        "tab-tools": "Araçlar'a git"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "Diğer"
   },
   "instrumentPicker": {
-    "title": "Hangi enstrümanla çalışıyorsun?",
-    "subtitle": "Yames, vuruş algılamayı ve koç geri bildirimini enstrümanına göre ayarlar. Bunu daha sonra Ayarlar'dan değiştirebilirsin.",
-    "subtitleMobile": "Yames neyle çalıştığını bilsin diye. Bunu sonra Ayarlar'dan değiştirebilirsin.",
-    "skip": "Atla — daha sonra seçerim"
+    "title": "Hangi gitarı çalıyorsun?",
+    "subtitle": "Yollar ve Seanslar şimdilik gitar için yazıldı. Kendi gitarını seç, Yames dinlemeyi ona göre ayarlasın.",
+    "subtitleMobile": "Yollar ve Seanslar şimdilik gitar için yazıldı. Çaldığın gitarı seç.",
+    "skip": "Atla — daha sonra seçerim",
+    "otherInstruments": "Bas, bateri ya da piyano mu? Ayarlar'dan seç: metronom, alıştırmalar ve jam her enstrümanla çalışır.",
+    "keepCurrent": "Şu anki enstrümanın: {{instrument}}. Değiştirmek için bir gitar seç ya da korumak için devam et."
   }
 }

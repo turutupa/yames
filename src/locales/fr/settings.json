@@ -243,7 +243,11 @@
         "session-slower": "Plus lent",
         "session-faster": "Plus vite",
         "session-next": "Étape suivante",
-        "session-pedal": "Une seule pédale"
+        "session-pedal": "Une seule pédale",
+        "session-exit": "Quitter la séance",
+        "tab-paths": "Parcours",
+        "tab-progress": "Progrès",
+        "tab-tools": "Outils"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -293,7 +297,11 @@
         "session-slower": "Entre deux prises : un cran plus lent",
         "session-faster": "Entre deux prises : un cran plus vite",
         "session-next": "Entre deux prises : passer à la suite de la séance",
-        "session-pedal": "Pour un seul footswitch. Appui : la suite. Double appui : plus lent. Appui long : étape suivante"
+        "session-pedal": "Pour un seul footswitch. Appui : la suite. Double appui : plus lent. Appui long : étape suivante",
+        "session-exit": "Pendant une séance : la quitter, comme Quitter. Une prise en cours s'arrête d'abord.",
+        "tab-paths": "Aller à Parcours",
+        "tab-progress": "Aller à Progrès",
+        "tab-tools": "Aller à Outils"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "Autre"
   },
   "instrumentPicker": {
-    "title": "Sur quel instrument joues-tu ?",
-    "subtitle": "Yames adapte la détection d'attaques et les retours du Coach à ton instrument. Tu pourras le changer plus tard dans les paramètres.",
-    "subtitleMobile": "Pour que Yames sache sur quoi tu travailles. Tu peux changer ça plus tard dans les Réglages.",
-    "skip": "Passer — je choisirai plus tard"
+    "title": "Quelle guitare joues-tu ?",
+    "subtitle": "Les Parcours et les Sessions sont écrits pour la guitare, pour l'instant. Choisis la tienne et Yames règle son écoute dessus.",
+    "subtitleMobile": "Les Parcours et les Sessions sont écrits pour la guitare, pour l'instant. Choisis celle que tu joues.",
+    "skip": "Passer — je choisirai plus tard",
+    "otherInstruments": "Basse, batterie ou piano ? Choisis-le dans les Réglages : le métronome, les exercices et le jam marchent avec tous les instruments.",
+    "keepCurrent": "Ton instrument actuel : {{instrument}}. Choisis une guitare pour changer, ou continue pour le garder."
   }
 }

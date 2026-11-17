@@ -13,6 +13,8 @@ import { openShot, noSidewaysScroll, insideViewport, notHitTestable, overlapping
  */
 const SCENES = [
   "today-first",
+  // Guitar first: a drummer's Today carries the note at the top of the hero.
+  "today-drums",
   "today-returning",
   "today-back",
   "session-ready",
@@ -20,6 +22,7 @@ const SCENES = [
   "session-between",
   "session-result",
   "session-no-catch",
+  "session-warmup-ready",
   "session-warmup",
   "session-edge",
   "session-edge-result",
@@ -40,9 +43,12 @@ const SIZES = [
 /** The scenes with one big next action, and the control that is it. */
 const BIG: Record<string, string> = {
   "today-first": '[data-testid="today-start"]',
+  "today-drums": '[data-testid="today-start"]',
   "today-returning": '[data-testid="today-start"]',
   "today-back": '[data-testid="today-start"]',
   "session-ready": '[data-testid="session-big"]',
+  "session-warmup-ready": '[data-testid="session-big"]',
+  "session-warmup": '[data-testid="session-big"]',
   "session-result": '[data-testid="session-big"]',
   "session-no-catch": '[data-testid="session-big"]',
   "session-edge-result": '[data-testid="session-big"]',
@@ -149,3 +155,12 @@ for (const lng of LONG_LOCALES) {
     });
   }
 }
+
+test("a drummer's Today says the Paths are for guitar, and still starts", async ({ page }) => {
+  await openShot(page, "today-drums", { width: 1400, height: 900 });
+  const note = page.locator('[data-testid="instrument-note"]');
+  await expect(note).toBeVisible();
+  const [n, start] = [await note.boundingBox(), await page.locator('[data-testid="today-start"]').boundingBox()];
+  expect(n!.y, "the note sits above the Start button").toBeLessThan(start!.y);
+  await expect(page.locator('[data-testid="today-start"]')).toBeEnabled();
+});

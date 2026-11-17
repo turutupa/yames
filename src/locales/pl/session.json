@@ -267,7 +267,23 @@
       "drillKick": "Podkręć tempo · bez oceny",
       "movesOn": "To przechodzi dalej samo.",
       "finisherKick": "Finał · bez oceny",
-      "yourTurnKick": "Twoja kolej · niesprawdzane"
+      "yourTurnKick": "Twoja kolej · niesprawdzane",
+      "start": {
+        "warmUp": "Zacznij rozgrzewkę",
+        "yourTurn": "Zacznij swoją kolej",
+        "jam": "Zacznij jam",
+        "finisher": "Zacznij finał",
+        "drill": "Zacznij rampę"
+      },
+      "how": {
+        "warmUp": "Graj z klikiem. Nic tu nie jest oceniane, więc się rozluźnij.",
+        "yourTurn": "Graj po swojemu, z klikiem. Nic tu nie jest sprawdzane.",
+        "jam": "Graj z zespołem. Nic tu nie jest oceniane.",
+        "finisher": "Graj z zespołem, w pętli. Nic tu nie jest oceniane.",
+        "drill": "Klik przyspiesza w trakcie gry. Nic tu nie jest oceniane."
+      },
+      "skip": "Pomiń",
+      "startKeys": "Enter, spacja lub pedał to uruchamia."
     },
     "pedal": {
       "title": "Pedał nożny",
@@ -403,6 +419,12 @@
       "quintuplets": "Kwintole",
       "sextuplets": "Sekstole",
       "thirtySeconds": "Trzydziestodwójki"
+    },
+    "instrumentNote": {
+      "other": "Ścieżki są na razie pisane na gitarę. Narzędzia działają z twoim instrumentem.",
+      "bass": "Ścieżki są na razie pisane na gitarę, a ścieżki na bas są w planach. Narzędzia działają z basem już teraz.",
+      "openTools": "Otwórz narzędzia",
+      "change": "Zmień instrument"
     }
   }
 }

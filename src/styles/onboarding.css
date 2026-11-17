@@ -221,11 +221,18 @@
   color: var(--text-secondary);
 }
 
-/* W1 reuses `.instrument-picker-grid` / `.instrument-picker-card`; the
-   selected state is new (the standalone modal never had one). */
-.onboarding-step .instrument-picker-card.selected {
-  border-color: var(--accent);
-  background: var(--accent-subtle);
+/* W1 reuses `.instrument-picker-grid` / `.instrument-picker-card`; its
+   selected state, check and two-card layout live in instrument-picker.css.
+   The two lines under the cards are quieter than the subtitle above them. */
+.onboarding-instrument-note {
+  margin: 12px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-align: center;
+}
+.onboarding-instrument-note + .onboarding-instrument-note {
+  margin-top: 6px;
 }
 
 /* ---- W2 sound & look (O2) ----
@@ -523,6 +530,85 @@
   align-self: flex-start;
   padding: 7px 12px;
   font-size: 0.75rem;
+}
+
+/* The Session leads (2026-11-17): "A or B" on one row, the pedal's legend,
+   a MIDI and a gamepad block inside the one footswitch card, and the tools'
+   keys folded into a closed <details>. */
+.onboarding-hf-key-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.onboarding-hf-or {
+  margin: 0 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.onboarding-hf-key-label {
+  min-width: 0;
+}
+
+.onboarding-hf-legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.onboarding-hf-legend-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+
+.onboarding-hf-legend-row dt {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.onboarding-hf-legend-row dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.onboarding-hf-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.onboarding-hf-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.onboarding-hf-tools > summary {
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.onboarding-hf-tools[open] > summary {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 420px) {
+  .onboarding-hf-legend {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 
@@ -1059,7 +1145,7 @@
     font-size: 1.5rem;
   }
 
-  .onboarding-step .instrument-picker-grid {
+  .onboarding-step .instrument-picker-grid:not(.is-pair) {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1114,21 +1200,84 @@
   --l-serif: Fraunces, Georgia, "Times New Roman", serif;
   --l-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
 
+  /* EVERY theme token, not a subset (owner, 2026-11-17: with Ivory chosen
+     the click-sound cards turned into beige blocks under amber ink). A token
+     left out here is inherited from `:root`, where `applyTheme` writes the
+     chosen theme, so a light theme painted half the wizard light and the
+     other half dark. The wizard keeps its own look whatever the theme; the
+     theme shows in W2's swatches and on the window behind the overlay.
+     `onboardingPalette.test.ts` holds this list against TOKEN_CONTRACT. */
+  color-scheme: dark;
+  --bg-primary: #0e0906;
   --bg-secondary: #16100b;
+  --bg-card: #1d150e;
+  --bg-panel: #130d09;
+  --bg-raised: #271c13;
+  --bg-widget: linear-gradient(135deg, #0e0906, #16100b);
   --bg-tertiary: #20170f;
   --bg-hover: #2a1e14;
+  --bg-elevated: #271c13;
   --border: var(--l-line2);
+  --border-subtle: var(--l-line);
+  --surface-hover: rgba(255, 180, 84, 0.06);
+  --surface-active: rgba(255, 180, 84, 0.12);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   --text-primary: var(--l-ink);
   --text-secondary: var(--l-quiet);
   --text-tertiary: var(--l-faint);
   --text-muted: var(--l-faint);
+  --text-faint: var(--l-faint);
   --accent: var(--l-amber);
   --accent-text: #1c1206;
+  --accent-glow: rgba(255, 180, 84, 0.3);
+  --accent-glow-strong: rgba(255, 180, 84, 0.5);
+  --accent-subtle: rgba(255, 180, 84, 0.1);
+  --accent-subtle-hover: rgba(255, 180, 84, 0.18);
+  --accent-2: #7cc4ff;
+  --accent-2-subtle: rgba(124, 196, 255, 0.12);
+  --accent-2-text: #1c1206;
+  --beat-accent: #ffd08a;
+  --font-family: var(--l-body);
+  --font-weight: 400;
+  --radius: 10px;
+  --radius-sm: 8px;
+  --feedback-perfect: var(--l-tone);
+  --feedback-good: #e8c547;
+  --feedback-ok: #ff9a4a;
+  --feedback-miss: #9a9184;
 
   background:
     radial-gradient(90% 70% at 60% 45%, rgba(42, 26, 16, 0.82) 0, rgba(18, 11, 7, 0.86) 55%, rgba(10, 7, 5, 0.92) 100%);
   color: var(--l-ink);
   font-family: var(--l-body);
+}
+
+/* global.css restyles a few shared controls for a light theme with black
+   ink at a few percent (`[data-theme-group="light"] .toggle-btn`, `.theme-card`,
+   `kbd`). On the wizard's own dark surface that ink vanishes, so inside the
+   overlay those controls go back to the tokens above. */
+[data-theme-group="light"] .onboarding-overlay .toggle-group .toggle-btn {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+[data-theme-group="light"] .onboarding-overlay .toggle-group .toggle-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+[data-theme-group="light"] .onboarding-overlay .theme-card.active {
+  background: var(--surface-active);
+}
+@media (hover: hover) {
+  [data-theme-group="light"] .onboarding-overlay .theme-card:hover {
+    background: var(--surface-hover);
+  }
+}
+[data-theme-group="light"] .onboarding-overlay kbd {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
 }
 
 .onboarding-overlay .onboarding-card {

@@ -243,7 +243,11 @@
         "session-slower": "遅く",
         "session-faster": "速く",
         "session-next": "次のステップ",
-        "session-pedal": "ペダル 1 つ"
+        "session-pedal": "ペダル 1 つ",
+        "session-exit": "セッションを終了",
+        "tab-paths": "コース",
+        "tab-progress": "上達",
+        "tab-tools": "ツール"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -293,7 +297,11 @@
         "session-slower": "テイクの合間：1 段階遅く",
         "session-faster": "テイクの合間：1 段階速く",
         "session-next": "テイクの合間：セッションの次へ進む",
-        "session-pedal": "フットスイッチ 1 つ用。タップ：次の操作。ダブルタップ：遅く。長押し：次のステップ"
+        "session-pedal": "フットスイッチ 1 つ用。タップ：次の操作。ダブルタップ：遅く。長押し：次のステップ",
+        "session-exit": "セッション中：「終了」と同じく抜けます。進行中のテイクは先に止まります。",
+        "tab-paths": "「コース」へ移動",
+        "tab-progress": "「上達」へ移動",
+        "tab-tools": "「ツール」へ移動"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "その他"
   },
   "instrumentPicker": {
-    "title": "何の楽器で練習していますか？",
-    "subtitle": "Yames が楽器に合わせて音の検出とコーチのフィードバックを調整します。あとから設定で変更できます。",
-    "subtitleMobile": "何で練習しているかを Yames に伝えます。あとから設定で変更できます。",
-    "skip": "スキップ — あとで選ぶ"
+    "title": "どのギターを弾きますか？",
+    "subtitle": "コースとセッションは今のところギター向けです。あなたのギターを選ぶと、Yames が聞き取りを合わせます。",
+    "subtitleMobile": "コースとセッションは今のところギター向けです。弾いているギターを選んでください。",
+    "skip": "スキップ — あとで選ぶ",
+    "otherInstruments": "ベース、ドラム、ピアノの方は設定で選べます。メトロノーム、ドリル、ジャムはどの楽器でも使えます。",
+    "keepCurrent": "現在の楽器: {{instrument}}。変えるならギターを選び、そのままなら次へ進んでください。"
   }
 }

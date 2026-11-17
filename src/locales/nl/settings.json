@@ -243,7 +243,11 @@
         "session-slower": "Langzamer",
         "session-faster": "Sneller",
         "session-next": "Volgende stap",
-        "session-pedal": "Eén pedaal"
+        "session-pedal": "Eén pedaal",
+        "session-exit": "Sessie verlaten",
+        "tab-paths": "Leerpaden",
+        "tab-progress": "Voortgang",
+        "tab-tools": "Tools"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -293,7 +297,11 @@
         "session-slower": "Tussen takes: een trede langzamer",
         "session-faster": "Tussen takes: een trede sneller",
         "session-next": "Tussen takes: door naar het volgende in de sessie",
-        "session-pedal": "Voor één voetschakelaar. Tikken: het volgende. Dubbeltikken: langzamer. Vasthouden: volgende stap"
+        "session-pedal": "Voor één voetschakelaar. Tikken: het volgende. Dubbeltikken: langzamer. Vasthouden: volgende stap",
+        "session-exit": "Tijdens een sessie: die verlaten, net als Stoppen. Een lopende take stopt eerst.",
+        "tab-paths": "Naar Leerpaden",
+        "tab-progress": "Naar Voortgang",
+        "tab-tools": "Naar Tools"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "Anders"
   },
   "instrumentPicker": {
-    "title": "Op welk instrument oefen je?",
-    "subtitle": "Yames stemt de detectie en coachingsfeedback af op je instrument. Je kunt dit later wijzigen in Instellingen.",
-    "subtitleMobile": "Zodat Yames weet waarop je oefent. Je kunt dit later wijzigen in Instellingen.",
-    "skip": "Overslaan — kies ik later wel"
+    "title": "Welke gitaar speel je?",
+    "subtitle": "Leerpaden en sessies zijn voorlopig voor gitaar geschreven. Kies de jouwe en Yames stemt het luisteren erop af.",
+    "subtitleMobile": "Leerpaden en sessies zijn voorlopig voor gitaar geschreven. Kies de gitaar die je speelt.",
+    "skip": "Overslaan — kies ik later wel",
+    "otherInstruments": "Bas, drums of piano? Kies het in Instellingen: de metronoom, oefeningen en jam werken met elk instrument.",
+    "keepCurrent": "Je instrument nu: {{instrument}}. Kies een gitaar om te wisselen, of ga verder om het te houden."
   }
 }

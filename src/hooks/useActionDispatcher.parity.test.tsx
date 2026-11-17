@@ -101,20 +101,22 @@ const groups = (g: number[]) => [`invoke set_beat_groups ${JSON.stringify({ grou
 const JAM = (name: string): Row => ({ where: ["jam"], does: [`jam ${name}`] });
 const SONGS = (...what: string[]): Row => ({ where: ["songs"], does: what.map((w) => `songs ${w}`) });
 
+/** What Play does off the Session; `session-pedal` does the same there. */
+const PLAY: Partial<Record<Where, readonly string[]>> = {
+  beat: ["invoke toggle_playback"],
+  drill: ["invoke start_speed_ramp"],
+  drillRamping: ["invoke stop_speed_ramp"],
+  setlist: ["invoke toggle_playback"],
+  jam: ["onToggleJam"],
+  jamEditor: ["onToggleJam"],
+  songs: ["invoke toggle_playback"],
+  today: ["session startToday"],
+};
+
 /** `Record<HotkeyAction, …>`: a new action does not compile until it has a row. */
 const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[]>>> = {
   // `play` is different in every mode, and an empty stage starts nothing.
-  play: {
-    beat: ["invoke toggle_playback"],
-    drill: ["invoke start_speed_ramp"],
-    drillRamping: ["invoke stop_speed_ramp"],
-    setlist: ["invoke toggle_playback"],
-    jam: ["onToggleJam"],
-    jamEditor: ["onToggleJam"],
-    songs: ["invoke toggle_playback"],
-    today: ["session startToday"],
-    session: ["session go"],
-  },
+  play: { ...PLAY, session: ["session go"] },
   "bpm-up": tempo(105, "faster"),
   "bpm-down": tempo(95, "slower"),
   "bpm-up-1": tempo(101, "faster"),
@@ -145,12 +147,18 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
   "tab-4": { where: EVERYWHERE, does: ["setView jam"] },
   "tab-5": { where: EVERYWHERE, does: ["setView songs"] },
   "tab-today": { where: EVERYWHERE, does: ["setView today"] },
+  "tab-paths": { where: EVERYWHERE, does: ["setView paths"] },
+  "tab-progress": { where: EVERYWHERE, does: ["setView progress"] },
+  "tab-tools": { where: EVERYWHERE, does: ["setView tools"] },
   // Only a running Session reads these; everywhere else they mean nothing.
   "session-go": { where: ["session"], does: ["session go"] },
   "session-slower": { where: ["session"], does: ["session slower"] },
   "session-faster": { where: ["session"], does: ["session faster"] },
   "session-next": { where: ["session"], does: ["session next"] },
-  "session-pedal": { where: ["session"], does: ["session pedalPress"] },
+  // One pedal for both halves (2026-11-17): its gestures on the Session, and
+  // Play/Stop everywhere else, so the first run can map one pedal to it.
+  "session-pedal": { ...PLAY, session: ["session pedalPress"] },
+  "session-exit": { where: ["session"], does: ["session exit"] },
   // Settings is a layer: closing it returns to the mode it covered.
   settings: {
     ...Object.fromEntries(without("settings").map((w) => [w, ["setView settings"]])),
@@ -238,6 +246,7 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
         "faster",
         "next",
         "pedalPress",
+        "exit",
       ]) as never,
       forceWebviewFocus: () => Promise.resolve(),
     }),

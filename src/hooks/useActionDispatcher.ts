@@ -112,6 +112,8 @@ interface ActionDispatcherArgs {
     next: () => void;
     /** A press of the single footswitch. Gestures are decided from these. */
     pedalPress: () => void;
+    /** Leave the Session, as its Exit button does. */
+    exit?: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -170,6 +172,9 @@ export function useActionDispatcher({
         actionId === "tab-4" ||
         actionId === "tab-5" ||
         actionId === "tab-today" ||
+        actionId === "tab-paths" ||
+        actionId === "tab-progress" ||
+        actionId === "tab-tools" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
@@ -194,6 +199,15 @@ export function useActionDispatcher({
             break;
           case "tab-today":
             setView("today");
+            break;
+          case "tab-paths":
+            setView("paths");
+            break;
+          case "tab-progress":
+            setView("progress");
+            break;
+          case "tab-tools":
+            setView("tools");
             break;
           case "settings":
             // `setView` remembers the mode Settings covers.
@@ -227,6 +241,18 @@ export function useActionDispatcher({
         return;
       }
       if (view === "settings") return;
+
+      /**
+       * One pedal for both halves of the app (2026-11-17).
+       *
+       * The first run maps a single footswitch to `session-pedal`, because the
+       * Session is the main experience now. Its gestures (tap, double, hold)
+       * only mean something on the running Session; everywhere else a press of
+       * that pedal is Play/Stop, exactly as the pedal did when the wizard
+       * mapped it to `play`. So nobody with one pedal has to choose between
+       * the Sessions and the tools.
+       */
+      if (actionId === "session-pedal" && view !== "session") actionId = "play";
 
       /**
        * The learning side, before anything else gets a look.
@@ -266,6 +292,12 @@ export function useActionDispatcher({
             break;
           case "session-pedal":
             sessionActions?.pedalPress();
+            break;
+          case "session-exit":
+            // Whatever is open over the Session closes first, on its own key
+            // handler; Escape only leaves once nothing is.
+            if (document.querySelector('[role="dialog"], [role="alertdialog"]')) break;
+            sessionActions?.exit?.();
             break;
         }
         return;

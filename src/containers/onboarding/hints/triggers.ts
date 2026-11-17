@@ -8,6 +8,26 @@
 import type { Preset } from "../../../types";
 
 // ---------------------------------------------------------------------------
+// Where a tool's hint may show at all.
+// ---------------------------------------------------------------------------
+
+/**
+ * The learning side and a running Session take no tool hints.
+ *
+ * A hint here is about a tool: the Drill's start and step, a preset, the
+ * widget, a MIDI mapping. On Today, Paths, Progress or the Tools list none of
+ * that is on the screen, and in a Session hands are on a guitar: the Drill's
+ * "Set start, target and step" turned up over a warm-up, beside its Next
+ * button (owner, 2026-11-17). A hint already up when one of these opens is
+ * hidden, not spent, and comes back on the tool it is about.
+ */
+export const NO_HINT_VIEWS: readonly string[] = ["today", "paths", "progress", "tools", "session"];
+
+export function hintsAllowedOn(view: string): boolean {
+  return !NO_HINT_VIEWS.includes(view);
+}
+
+// ---------------------------------------------------------------------------
 // drill-first-open — first time the user lands on the Drill tab.
 // ---------------------------------------------------------------------------
 

@@ -266,7 +266,23 @@
       "drillKick": "Suba o andamento · sem nota",
       "movesOn": "Isto avança sozinho.",
       "finisherKick": "Final · sem nota",
-      "yourTurnKick": "Sua vez · não verificado"
+      "yourTurnKick": "Sua vez · não verificado",
+      "start": {
+        "warmUp": "Começar aquecimento",
+        "yourTurn": "Começar sua vez",
+        "jam": "Começar o jam",
+        "finisher": "Começar o final",
+        "drill": "Começar a rampa"
+      },
+      "how": {
+        "warmUp": "Toque junto com o clique. Nada aqui é avaliado, então solte as mãos.",
+        "yourTurn": "Toque do seu jeito, com o clique. Nada aqui é conferido.",
+        "jam": "Toque junto com a banda. Nada aqui é avaliado.",
+        "finisher": "Toque sobre a banda, em loop. Nada aqui é avaliado.",
+        "drill": "O clique acelera enquanto você toca. Nada aqui é avaliado."
+      },
+      "skip": "Pular",
+      "startKeys": "Enter, Espaço ou o pedal começa."
     },
     "pedal": {
       "title": "Pedal",
@@ -395,6 +411,12 @@
       "quintuplets": "Quintinas",
       "sextuplets": "Sextinas",
       "thirtySeconds": "Fusas"
+    },
+    "instrumentNote": {
+      "other": "As Trilhas são escritas para violão e guitarra, por enquanto. As ferramentas funcionam com o seu instrumento.",
+      "bass": "As Trilhas são escritas para violão e guitarra, por enquanto, e Trilhas de baixo estão nos planos. As ferramentas já funcionam com baixo.",
+      "openTools": "Abrir as ferramentas",
+      "change": "Trocar de instrumento"
     }
   }
 }

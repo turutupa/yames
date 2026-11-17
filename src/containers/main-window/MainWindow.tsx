@@ -16,6 +16,7 @@ import { NO_ANDROID_BETA, useAndroidBetaUpdate } from "../../beta/useAndroidBeta
 import { NO_BETA_PROMPT, useBetaPrompt } from "../../beta/useBetaPrompt";
 import { BetaUpdateNotice } from "../../beta/BetaUpdateNotice";
 import { getThemeById } from "../../themes";
+import { DEFAULT_INSTRUMENT } from "../../constants/instruments";
 import { useAndroidNative } from "./hooks/useAndroidNative";
 import { useInputRoute } from "../../mobile/inputRoute";
 import { useBackDismiss } from "../../mobile/backStack";
@@ -152,6 +153,7 @@ import { AudioErrorNotice } from "./AudioErrorNotice";
 import { jamEscapeTarget } from "./jamEscape";
 import {
   CoachDownloadConfirmDialog,
+  DownloadHairline,
   DownloadProgressBar,
   DownloadErrorBar,
   DownloadSuccessBar,
@@ -276,7 +278,7 @@ export function MainWindow() {
   const [presetDirty, setPresetDirty] = useState(false);
   const [updateFeedback, setUpdateFeedback] = useState(false);
   const updateFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [instrument, setInstrument] = useState("electric-guitar");
+  const [instrument, setInstrument] = useState<string>(DEFAULT_INSTRUMENT);
   // Whether `instrument` reflects a real choice (stored or picked in the
   // wizard) rather than the electric-guitar fallback. W1 uses it to decide
   // whether to render a card as selected.
@@ -1102,6 +1104,20 @@ export function MainWindow() {
     }
   }, [setView]);
 
+  /** Settings, scrolled to the instrument: the guitar-first note's link. */
+  const openInstrumentSettings = useCallback(() => {
+    setView("settings");
+    for (const delay of [80, 260, 520]) {
+      setTimeout(
+        () =>
+          document
+            .getElementById("settings-instrument")
+            ?.scrollIntoView({ block: "center", behavior: "auto" }),
+        delay,
+      );
+    }
+  }, [setView]);
+
   // --- W2 → Settings → Appearance detour (O2) ------------------------------
   // "More themes in Settings" cannot open Settings *under* a full-window
   // overlay, so the wizard steps aside instead of ending: the machine keeps
@@ -1239,7 +1255,7 @@ export function MainWindow() {
   const handleWizardFinish = useCallback(
     (outcome: "completed" | "skipped" | "closed") => {
       void stopSoftClick().then(() => {
-        if (!instrumentChosenRef.current) applyInstrument("electric-guitar");
+        if (!instrumentChosenRef.current) applyInstrument(DEFAULT_INSTRUMENT);
         // ONB-08, changed for the MVP (owner, 2026-11-16): a finished setup
         // lands on Today, the learning side's front door, rather than on the
         // Metronome. The click keeps the 80 BPM it was set up at, so the
@@ -1540,8 +1556,10 @@ export function MainWindow() {
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
       pedalPress: () => pedalPress.current(),
+      exit: sessionRun.actions.exit,
     }),
     [
+      sessionRun.actions.exit,
       sessionRun.actions.startToday,
       sessionRun.actions.go,
       sessionRun.actions.slower,
@@ -2003,6 +2021,7 @@ export function MainWindow() {
           coachListening={evaluation.enabled}
           onToggleCoach={session.toggleCard}
           onZen={() => setIsFullscreen(true)}
+          keyBindings={keyBindings}
         />
         )}
       <div
@@ -2345,9 +2364,20 @@ export function MainWindow() {
             onOpenTools={() => setView("tools")}
             onSetUpInput={openAudioSettings}
             onOpenPaths={() => setView("paths")}
+            instrument={instrument}
+            onOpenToolsList={() => setView("tools")}
+            onChangeInstrument={openInstrumentSettings}
           />
         ) : view === "paths" ? (
-          <PathsView key={pathsVisit} session={sessionRun} />
+          <PathsView
+            key={pathsVisit}
+            session={sessionRun}
+            instrumentNote={{
+              instrument,
+              onOpenTools: () => setView("tools"),
+              onChangeInstrument: openInstrumentSettings,
+            }}
+          />
         ) : view === "progress" ? (
           <ProgressView session={sessionRun} />
         ) : view === "tools" ? (
@@ -2722,7 +2752,15 @@ export function MainWindow() {
         />
       )}
 
-      {!IS_MOBILE && coach.modelDownloading && (
+      {/* A Session keeps its bottom edge: the download goes on as a hairline,
+          and its label, Cancel and the bars after it wait for the Session to end. */}
+      {!IS_MOBILE && coach.modelDownloading && view === "session" && (
+        <DownloadHairline
+          downloadProgress={coach.downloadProgress}
+          downloadingTier={coach.downloadingTier}
+        />
+      )}
+      {!IS_MOBILE && coach.modelDownloading && view !== "session" && (
         <DownloadProgressBar
           downloadProgress={coach.downloadProgress}
           downloadingTier={coach.downloadingTier}
@@ -2730,14 +2768,14 @@ export function MainWindow() {
         />
       )}
 
-      {!IS_MOBILE && coach.downloadError && (
+      {!IS_MOBILE && coach.downloadError && view !== "session" && (
         <DownloadErrorBar
           error={coach.downloadError}
           onDismiss={() => coach.setDownloadError(null)}
         />
       )}
 
-      {!IS_MOBILE && coach.downloadSuccess && !coach.modelDownloading && (
+      {!IS_MOBILE && coach.downloadSuccess && !coach.modelDownloading && view !== "session" && (
         <DownloadSuccessBar onDismiss={() => coach.setDownloadSuccess(false)} />
       )}
     </div>

@@ -243,7 +243,11 @@
         "session-slower": "Wolniej",
         "session-faster": "Szybciej",
         "session-next": "Następny krok",
-        "session-pedal": "Jeden pedał"
+        "session-pedal": "Jeden pedał",
+        "session-exit": "Wyjdź z sesji",
+        "tab-paths": "Ścieżki",
+        "tab-progress": "Postępy",
+        "tab-tools": "Narzędzia"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -293,7 +297,11 @@
         "session-slower": "Między podejściami: szczebel wolniej",
         "session-faster": "Między podejściami: szczebel szybciej",
         "session-next": "Między podejściami: przejdź do następnej rzeczy w sesji",
-        "session-pedal": "Dla jednego przełącznika nożnego. Stuknięcie: co dalej. Podwójne stuknięcie: wolniej. Przytrzymanie: następny krok"
+        "session-pedal": "Dla jednego przełącznika nożnego. Stuknięcie: co dalej. Podwójne stuknięcie: wolniej. Przytrzymanie: następny krok",
+        "session-exit": "W sesji: wyjdź z niej, tak jak Wyjdź. Trwające podejście najpierw się zatrzyma.",
+        "tab-paths": "Przejdź do zakładki Ścieżki",
+        "tab-progress": "Przejdź do zakładki Postępy",
+        "tab-tools": "Przejdź do zakładki Narzędzia"
       }
     },
     "inputTest": {
@@ -431,9 +439,11 @@
     "other": "Inne"
   },
   "instrumentPicker": {
-    "title": "Na czym ćwiczysz?",
-    "subtitle": "Yames dostraja wykrywanie dźwięku i wskazówki Trenera do Twojego instrumentu. Zmienisz to później w Ustawieniach.",
-    "subtitleMobile": "Żeby Yames wiedział, na czym ćwiczysz. Możesz to zmienić później w Ustawieniach.",
-    "skip": "Pomiń — wybiorę później"
+    "title": "Na jakiej gitarze grasz?",
+    "subtitle": "Ścieżki i sesje są na razie pisane na gitarę. Wybierz swoją, a Yames dostroi do niej słuchanie.",
+    "subtitleMobile": "Ścieżki i sesje są na razie pisane na gitarę. Wybierz tę, na której grasz.",
+    "skip": "Pomiń — wybiorę później",
+    "otherInstruments": "Bas, perkusja albo pianino? Wybierz w Ustawieniach: metronom, ćwiczenia i jam działają z każdym instrumentem.",
+    "keepCurrent": "Twój instrument teraz: {{instrument}}. Wybierz gitarę, żeby zmienić, albo idź dalej, żeby go zostawić."
   }
 }

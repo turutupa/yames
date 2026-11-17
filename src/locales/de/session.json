@@ -265,7 +265,23 @@
       "drillKick": "Tempo steigern · ohne Wertung",
       "movesOn": "Das geht von selbst weiter.",
       "finisherKick": "Abschluss · nicht bewertet",
-      "yourTurnKick": "Du bist dran · nicht geprüft"
+      "yourTurnKick": "Du bist dran · nicht geprüft",
+      "start": {
+        "warmUp": "Aufwärmen starten",
+        "yourTurn": "Deine Runde starten",
+        "jam": "Jam starten",
+        "finisher": "Abschluss starten",
+        "drill": "Tempo-Rampe starten"
+      },
+      "how": {
+        "warmUp": "Spiel es zum Klick. Hier wird nichts bewertet, also locker bleiben.",
+        "yourTurn": "Spiel es auf deine Art zum Klick. Hier wird nichts geprüft.",
+        "jam": "Spiel mit der Band. Hier wird nichts bewertet.",
+        "finisher": "Spiel es über der Band, in Schleife. Hier wird nichts bewertet.",
+        "drill": "Der Klick wird beim Spielen schneller. Hier wird nichts bewertet."
+      },
+      "skip": "Überspringen",
+      "startKeys": "Enter, Leertaste oder das Pedal startet es."
     },
     "pedal": {
       "title": "Fußpedal",
@@ -387,6 +403,12 @@
       "quintuplets": "Quintolen",
       "sextuplets": "Sextolen",
       "thirtySeconds": "Zweiunddreißigstel"
+    },
+    "instrumentNote": {
+      "other": "Pfade sind vorerst für Gitarre geschrieben. Die Werkzeuge funktionieren mit deinem Instrument.",
+      "bass": "Pfade sind vorerst für Gitarre geschrieben, Pfade für Bass sind geplant. Die Werkzeuge funktionieren schon jetzt mit Bass.",
+      "openTools": "Zu den Werkzeugen",
+      "change": "Instrument ändern"
     }
   }
 }

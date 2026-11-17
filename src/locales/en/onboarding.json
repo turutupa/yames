@@ -25,27 +25,41 @@
     },
     "handsFree": {
       "title": "Hands stay on the instrument",
-      "subtitle": "These keys already work. If you have a footswitch or a controller, map it to Play/Stop right here.",
+      "subtitle": "In a Session these keys already work. One footswitch can run a Session too, and it still plays and stops the tools.",
       "cancel": "Cancel",
       "keyboard": {
-        "title": "Keyboard",
         "hint": "Every key is remappable in Settings → Hotkeys."
       },
       "midi": {
         "title": "MIDI footswitch",
         "none": "Plug one in any time — Yames will offer to map it.",
-        "map": "Map Play/Stop",
+        "map": "Map the pedal",
         "remap": "Map a different pedal",
-        "listening": "Press the pedal you want for Play/Stop.",
-        "mapped": "Play/Stop → {{signal}} · channel {{channel}}"
+        "listening": "Press the pedal you want to use.",
+        "mapped": "Pedal → {{signal}} · channel {{channel}}"
       },
       "gamepad": {
         "title": "Gamepad",
         "none": "Connect a controller any time — press a button and Yames will see it.",
-        "map": "Map Play/Stop",
+        "map": "Map a button",
         "remap": "Map a different button",
-        "listening": "Press the button you want for Play/Stop.",
-        "mapped": "Play/Stop → {{button}}"
+        "listening": "Press the button you want to use as the pedal.",
+        "mapped": "Pedal → {{button}}"
+      },
+      "session": {
+        "title": "In a Session",
+        "go": "Start or end the Take, or press the big button",
+        "faster": "Faster, between Takes",
+        "slower": "Slower, between Takes",
+        "next": "Next step",
+        "or": "or"
+      },
+      "pedal": {
+        "title": "One footswitch",
+        "tools": "Outside a Session, a tap plays and stops the tools."
+      },
+      "tools": {
+        "title": "In the tools"
       }
     },
     "coach": {

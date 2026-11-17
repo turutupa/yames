@@ -1002,6 +1002,7 @@ export function installShotMock(shot: Shot, theme: string): void {
     store.delete("onboarding.completedAt");
     store.delete("presets");
   }
+  if (shot.instrument) store.set("instrument", shot.instrument);
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
@@ -2083,6 +2084,13 @@ export function installShotMock(shot: Shot, theme: string): void {
 
     if (cmd === "set_subdivision" && typeof a?.subdivision === "number") {
       STATE.subdivision = a.subdivision;
+      emit("state-changed", STATE);
+      return null;
+    }
+
+    // W2 previews and picks a theme through the engine's state, like the app.
+    if (cmd === "set_theme" && typeof a?.theme === "string") {
+      STATE.theme = a.theme;
       emit("state-changed", STATE);
       return null;
     }
