@@ -66,7 +66,9 @@ function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" }) {
 }
 
 const CSS = `
-html,body,#root{margin:0;height:100%;background:transparent;color:#fbf5ea;font-family:Inter,system-ui,sans-serif}
+html,body,#root{margin:0;height:100%;background:transparent;}
+body{background:#0a0705;}
+#root{color:#fbf5ea;font-family:Inter,system-ui,sans-serif}
 .stage-shot{position:relative;height:100%;display:flex;flex-direction:column;padding:24px 28px;box-sizing:border-box}
 .stage-shot-head{display:flex;flex-direction:column;gap:4px;flex:none}
 .stage-shot-kick{font:600 13px/1 "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d6c9b4}
