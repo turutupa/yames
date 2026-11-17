@@ -122,7 +122,9 @@ export async function withRightNotes(
 ): Promise<ScorerTakeGrade | null> {
   if (!grade?.notesPending) return grade;
   const withNotes = await fetch(NOTES_WAIT_MS).catch(() => null);
-  if (!withNotes?.pass) return { ...grade, notesPending: false };
+  // Only the pass this Take started: a grade for another Take is no answer.
+  const same = withNotes?.notesSerial !== undefined && withNotes.notesSerial === grade.notesSerial;
+  if (!withNotes?.pass || !same) return { ...grade, notesPending: false };
   return { ...grade, pass: withNotes.pass, notesPending: false };
 }
 

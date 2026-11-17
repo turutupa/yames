@@ -821,6 +821,11 @@ export type ScorerTakeGrade = {
    * with it in.
    */
   notesPending?: boolean;
+  /**
+   * Which pitch pass this grade belongs to: the one coming, on a grade with
+   * `notesPending`; the one that made it, on the grade with right notes.
+   */
+  notesSerial?: number;
 };
 
 /** Whether right notes could be measured on a Take (`score/pass.rs` `NotesStatus`). */

@@ -451,20 +451,23 @@ impl TimingAnalyzer {
     /// [`Self::load_score_schedule`], for an Exercise: the Take's grade is
     /// also judged against its pass bars (`score::pass`).
     pub fn load_exercise_schedule(&self, schedule: ScoreSchedule, pass_bars: Vec<PassBar>) {
-        self.load_exercise_with_notes(schedule, pass_bars, Vec::new());
+        self.load_exercise_with_notes(schedule, pass_bars, Vec::new(), None);
     }
 
     /// [`Self::load_exercise_schedule`], with the written pitch of every note.
     /// When a pass bar names `noteIdentity`, the Take's audio is kept for the
     /// pitch pass from the next time the transport runs.
+    /// `input_rate` is the input device's sample rate, when known, which sizes
+    /// the buffer the audio is kept in.
     pub fn load_exercise_with_notes(
         &self,
         schedule: ScoreSchedule,
         pass_bars: Vec<PassBar>,
         pitches: Vec<crate::pitch::ScoreNote>,
+        input_rate: Option<u32>,
     ) {
         if !pitches.is_empty() && pass_bars.iter().any(|b| b.metric == "noteIdentity") {
-            self.notes.tap.arm();
+            self.notes.tap.arm(input_rate);
         } else {
             self.notes.tap.disarm();
         }
@@ -999,8 +1002,12 @@ impl TimingAnalyzer {
                     };
                     // Right notes take a pitch pass, off this loop. The grade
                     // below and the segment's say it is coming.
-                    let pending = run.wants_notes() && start_notes_pass(run, weights, &notes);
-                    run.set_notes_pending(pending);
+                    let serial = if run.wants_notes() {
+                        start_notes_pass(run, weights, &notes)
+                    } else {
+                        None
+                    };
+                    run.set_notes_pending(serial);
                     *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
                 }
                 if let Some(seg) = segment.take() {
@@ -2659,23 +2666,13 @@ pub fn window_thresholds(window_ms: f64) -> WindowThresholds {
     WindowThresholds { perfect, good, ok }
 }
 
-/// Convert a monotonic-NS timestamp (from `clock::now_ns()`) to wall-clock
-/// milliseconds using a co-sampled `(base_wall_ms, base_ns)` pair. The
-/// caller is responsible for sampling both bases close together
-/// (within the same loop iteration); drift between the monotonic and
-/// wall clocks over <100ms is sub-microsecond in practice.
-///
-/// Used by the telemetry buffer (`SessionTelemetry`) to produce
-/// portable `timestamp_ms` values without storing both clock bases in
-/// every event.
 /// Hand the Take's audio and a copy of the run to a thread that grades it with
-/// right notes, into `notes.slot`. False, and nothing started, when no usable
-/// audio was kept. Called on the analyzer's thread; the pitch pass is never
-/// run on it.
-fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass) -> bool {
-    let Some(audio) = notes.tap.capture() else {
-        return false;
-    };
+/// right notes, into `notes.slot`. The serial the grade will carry, or `None`
+/// and nothing started when no usable audio was kept. Called on the analyzer's
+/// thread; the pitch pass never runs on it, and its own thread runs below
+/// normal priority, like the coach's model worker.
+fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass) -> Option<u64> {
+    let audio = notes.tap.capture()?;
     // `clock::now_ns` to the wall milliseconds the beat map is in, the way
     // every onset and beat is converted.
     let start_ms =
@@ -2692,6 +2689,7 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
     let spawned = thread::Builder::new()
         .name("yames-take-notes".into())
         .spawn(move || {
+            crate::coach::lower_current_thread_priority();
             let graded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 let take = crate::score::notes::TakeAudio {
                     samples: &audio.samples,
@@ -2700,19 +2698,36 @@ fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass)
                 };
                 run.report_with_notes(&weights, &take).map(|r| r.grade)
             }));
-            let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
-            if slot.serial == serial {
-                slot.pending = false;
-                slot.grade = graded.ok().flatten();
+            let mut grade = graded.ok().flatten();
+            if let Some(g) = grade.as_mut() {
+                g.notes_serial = Some(serial);
             }
+            {
+                let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
+                if slot.serial == serial {
+                    slot.pending = false;
+                    slot.grade = grade;
+                }
+            }
+            // The Take's audio is freed here, on this thread.
+            drop(audio);
         });
     if spawned.is_err() {
         notes.slot.lock().unwrap().pending = false;
-        return false;
+        return None;
     }
-    true
+    Some(serial)
 }
 
+/// Convert a monotonic-NS timestamp (from `clock::now_ns()`) to wall-clock
+/// milliseconds using a co-sampled `(base_wall_ms, base_ns)` pair. The
+/// caller is responsible for sampling both bases close together
+/// (within the same loop iteration); drift between the monotonic and
+/// wall clocks over <100ms is sub-microsecond in practice.
+///
+/// Used by the telemetry buffer (`SessionTelemetry`) to produce
+/// portable `timestamp_ms` values without storing both clock bases in
+/// every event.
 fn ts_ns_to_wall_ms(ts_ns: u64, base_wall_ms: u64, base_ns: u64) -> u64 {
     if ts_ns >= base_ns {
         let delta_ms = ((ts_ns - base_ns) / 1_000_000) as u64;
@@ -5922,8 +5937,7 @@ mod notes_pass_tests {
             tap: crate::take_audio::TakeAudioTap::new(),
             slot: Arc::new(Mutex::new(NotesSlot::default())),
         };
-        notes.tap.set_rate(RATE);
-        notes.tap.arm();
+        notes.tap.arm(Some(RATE));
         let mut ring = RingBuffer::new(RATE as usize * 4);
         notes.tap.pull(&ring, t0_ns);
         let chunk = RATE as usize / 10;
@@ -5968,11 +5982,14 @@ mod notes_pass_tests {
         }
         assert!(run.wants_notes());
         let weights = Instrument::ElectricGuitar.profile().score_weights;
-        assert!(start_notes_pass(&run, weights, &notes));
+        let serial = start_notes_pass(&run, weights, &notes).expect("a pass started");
+        // Once: a second close of the same Take starts nothing.
+        assert!(start_notes_pass(&run, weights, &notes).is_none());
         // The timing grade says the notes are coming, and does not count them.
-        run.set_notes_pending(true);
+        run.set_notes_pending(Some(serial));
         let timed = run.report(&weights).unwrap().grade;
         assert!(timed.notes_pending);
+        assert_eq!(timed.notes_serial, Some(serial));
         let timed_pass = timed.pass.unwrap();
         assert_eq!(timed_pass.not_assessed, vec!["noteIdentity".to_string()]);
         assert_eq!(timed_pass.notes.unwrap().status, NotesStatus::NotRun);
@@ -5995,5 +6012,6 @@ mod notes_pass_tests {
         assert!(pass.not_assessed.is_empty());
         assert!(pass.checks.iter().any(|c| c.metric == "noteIdentity" && c.held));
         assert!(!grade.notes_pending);
+        assert_eq!(grade.notes_serial, Some(serial));
     }
 }

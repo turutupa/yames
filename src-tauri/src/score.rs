@@ -983,6 +983,11 @@ pub struct TakeGrade {
     /// See [`notes`].
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub notes_pending: bool,
+    /// Which pitch pass this grade belongs to: on a grade with `notes_pending`,
+    /// the pass that is coming; on the grade with right notes, the pass that
+    /// made it. A caller checks the two match before taking one for the other.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notes_serial: Option<u64>,
 }
 
 /// Under this share of the notes due, the Take says "I didn't catch enough"
@@ -1676,6 +1681,7 @@ fn grade_take(input: GradeInputs<'_>, score: f32, calibration: TakeCalibration) 
         bpm: 60_000.0 / median_interval_ms(beats),
         pass,
         notes_pending: false,
+        notes_serial: None,
     }
 }
 
@@ -2067,8 +2073,9 @@ pub struct ScheduleRun {
     /// The written pitch of every note the schedule names, when the Exercise
     /// has a `noteIdentity` bar for the pitch pass to check (`notes`).
     pitches: Vec<crate::pitch::ScoreNote>,
-    /// Said on the grade: the pitch pass is running and its grade will follow.
-    notes_pending: bool,
+    /// Said on the grade: the pitch pass with this serial is running and its
+    /// grade will follow.
+    notes_pending: Option<u64>,
 }
 
 /// How long after an expected onset's matching window closes its live verdict
@@ -2134,7 +2141,7 @@ impl ScheduleRun {
             pass_bars: Vec::new(),
             correct_lag: false,
             pitches: Vec::new(),
-            notes_pending: false,
+            notes_pending: None,
         }
     }
 
@@ -2151,9 +2158,10 @@ impl ScheduleRun {
         !self.pitches.is_empty() && self.pass_bars.iter().any(|b| b.metric == "noteIdentity")
     }
 
-    /// The grades this run reports from now on say the pitch pass is running.
-    pub fn set_notes_pending(&mut self, pending: bool) {
-        self.notes_pending = pending;
+    /// The grades this run reports from now on say the pitch pass with this
+    /// serial is running (`None`: none is).
+    pub fn set_notes_pending(&mut self, serial: Option<u64>) {
+        self.notes_pending = serial;
     }
 
     /// [`Self::report`], with right notes: the pitch pass over the Take's own
@@ -2272,7 +2280,8 @@ impl ScheduleRun {
             self.policy(),
             &self.pass_bars,
         );
-        report.grade.notes_pending = self.notes_pending;
+        report.grade.notes_pending = self.notes_pending.is_some();
+        report.grade.notes_serial = self.notes_pending;
         Some(report)
     }
 

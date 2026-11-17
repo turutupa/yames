@@ -1534,11 +1534,11 @@ pub async fn stop_evaluation(
     //
     // Drain audio levels first — the comment "BEFORE stop()" still holds since
     // we call take_audio_levels() immediately before stop() in the same block.
-    let captured_audio_levels = {
+    let (captured_audio_levels, input_ring_drops) = {
         let ai = audio_input
             .lock()
             .map_err(|e| format!("Lock failed: {e}"))?;
-        ai.take_audio_levels()
+        (ai.take_audio_levels(), ai.ring_drops())
     };
     audio_input
         .lock()
@@ -1558,6 +1558,7 @@ pub async fn stop_evaluation(
         ta.drain_telemetry()
     };
     telemetry.audio_levels = captured_audio_levels;
+    telemetry.input_ring_drops = input_ring_drops;
 
     // POSTMATCH_1: Post-session best-candidate matching. Run on the raw
     // telemetry before it's consumed by persist_session_log. Results are
@@ -1829,11 +1830,20 @@ pub fn load_score_schedule(
     pass_bars: Option<Vec<crate::score::PassBar>>,
     notes: Option<Vec<crate::pitch::ScoreNote>>,
     timing_analyzer: State<SharedTimingAnalyzer>,
+    audio_input: State<SharedAudioInput>,
 ) -> Result<(), String> {
+    // The device's rate sizes the buffer a Take's audio is kept in. Read
+    // before the analyzer is locked, so the two locks are never held together.
+    let input_rate = audio_input.lock().ok().map(|ai| ai.sample_rate());
     let ta = timing_analyzer
         .lock()
         .map_err(|e| format!("Lock failed: {e}"))?;
-    ta.load_exercise_with_notes(schedule, pass_bars.unwrap_or_default(), notes.unwrap_or_default());
+    ta.load_exercise_with_notes(
+        schedule,
+        pass_bars.unwrap_or_default(),
+        notes.unwrap_or_default(),
+        input_rate,
+    );
     Ok(())
 }
 
@@ -1842,8 +1852,11 @@ pub fn load_score_schedule(
 /// `notesPending`. Waits at most `timeoutMs` (capped at 8 s, the end of the
 /// "mid-session report" tier in AGENTS.md); `None` when it has not finished by
 /// then, or nothing was started, and the timing grade stands.
-#[tauri::command(async)]
-pub fn get_take_grade_with_notes(
+///
+/// The grade carries `notesSerial`: the caller checks it against the one on the
+/// timing grade it is answering.
+#[tauri::command]
+pub async fn get_take_grade_with_notes(
     timeout_ms: Option<u64>,
     timing_analyzer: State<'_, SharedTimingAnalyzer>,
 ) -> Result<Option<crate::score::TakeGrade>, String> {
@@ -1853,7 +1866,9 @@ pub fn get_take_grade_with_notes(
         .notes_slot();
     let deadline = std::time::Instant::now()
         + std::time::Duration::from_millis(timeout_ms.unwrap_or(4_000).min(8_000));
-    loop {
+    // The wait is on the blocking pool, not on one of the runtime's async
+    // threads, which other commands share.
+    tauri::async_runtime::spawn_blocking(move || loop {
         {
             let s = slot.lock().map_err(|e| format!("Lock failed: {e}"))?;
             if !s.pending {
@@ -1864,7 +1879,9 @@ pub fn get_take_grade_with_notes(
             return Ok(None);
         }
         std::thread::sleep(std::time::Duration::from_millis(10));
-    }
+    })
+    .await
+    .map_err(|e| format!("the wait for right notes failed: {e}"))?
 }
 
 /// Roadmap 2.4 — back to free play. Whatever the current attempt had

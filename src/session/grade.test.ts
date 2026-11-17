@@ -387,9 +387,14 @@ describe("right notes", () => {
   });
 
   it("waits for the grade with right notes only when the scorer said it is coming", async () => {
-    const timed = scorerGrade({ notesPending: true, pass: scorerPass({ status: "notRun", ...counts }, null) });
+    const timed = scorerGrade({
+      notesPending: true,
+      notesSerial: 7,
+      pass: scorerPass({ status: "notRun", ...counts }, null),
+    });
     const full = scorerGrade({
       score: 1, // only `pass` is taken from it
+      notesSerial: 7,
       pass: scorerPass({ status: "measured", ...counts }, { measured: 1, held: true }),
     });
     const asked: number[] = [];
@@ -405,6 +410,21 @@ describe("right notes", () => {
     const plain = scorerGrade();
     expect(await withRightNotes(plain, () => Promise.reject(new Error("never asked")))).toBe(plain);
     expect(await withRightNotes(null)).toBeNull();
+  });
+
+  it("does not take another Take's right notes for this one's", async () => {
+    const timed = scorerGrade({
+      notesPending: true,
+      notesSerial: 8,
+      pass: scorerPass({ status: "notRun", ...counts }, null),
+    });
+    const other = scorerGrade({
+      notesSerial: 7,
+      pass: scorerPass({ status: "measured", ...counts }, { measured: 0.5, held: false }),
+    });
+    const got = await withRightNotes(timed, async () => other);
+    expect(got?.pass).toBe(timed.pass);
+    expect(got?.notesPending).toBe(false);
   });
 
   it("keeps the timing grade when the right notes do not come in time", async () => {
