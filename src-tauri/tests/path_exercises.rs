@@ -536,4 +536,5 @@ fn every_graded_exercise_of_a_runnable_path_passes_as_a_session_take() {
     println!("{checked:?}");
     assert!(checked.get("alternate-picking").copied().unwrap_or(0) > 30, "{checked:?}");
     assert!(checked.get("sweep-picking").copied().unwrap_or(0) > 100, "{checked:?}");
+    assert!(checked.get("shred").copied().unwrap_or(0) > 150, "{checked:?}");
 }

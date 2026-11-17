@@ -63,9 +63,13 @@ type Group = {
 function fretGroups(notes: readonly PathNote[]): Group[] {
   const groups: Group[] = [];
   notes.forEach((note, index) => {
-    if (note.fret === 0) return;
-    const legato = note.tech.includes("hammer") || note.tech.includes("pull");
+    // A tap is played by the picking hand, or (a hammer-on from nowhere) by a
+    // fretting finger already over its fret: it asks nothing of the hand's span.
+    if (note.fret === 0 || note.tech.includes("tap")) return;
     const previous = notes[index - 1];
+    // While a tap sounds the fretting hand is free, so the note after it may move.
+    const afterTap = !!previous && previous.tech.includes("tap") && previous.string === note.string;
+    const legato = (note.tech.includes("hammer") || note.tech.includes("pull")) && !afterTap;
     const slideIn = !!previous && previous.tech.includes("slide") && previous.string === note.string;
     const last = groups[groups.length - 1];
     if (last && last.tick === note.tick) {

@@ -36,7 +36,7 @@ import {
 import { DETECTION_FLAGS } from "./metrics";
 import { checkReachAt, maxPlayableBpm } from "./reach";
 import type { ExerciseSpec, HarmonySpec, PathSpec, VariantBuild, VariantParams, VarySpec } from "./spec";
-import { markAlternate, markSweep, parseTab } from "./tabDsl";
+import { markAlternate, markEconomy, markSweep, parseTab } from "./tabDsl";
 import { canSpellScale, chordRootName, guideTones, spellChord, spellScale } from "./theory";
 import type { ScaleId } from "../jam/scales";
 
@@ -195,6 +195,7 @@ function buildExercise(
     const part = compile(spec, build, `${where}#${variantId(paramsList[index])}`);
     if (pickPlan === "alternate") markAlternate(part.notes, spec.pickStart ?? "d");
     if (pickPlan === "sweep") markSweep(part.notes);
+    if (pickPlan === "economy") markEconomy(part.notes, spec.pickStart ?? "d");
     return part;
   });
 

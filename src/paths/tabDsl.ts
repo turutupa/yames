@@ -180,6 +180,27 @@ export function markAlternate(notes: PathNote[], start: PickMark = "d"): void {
 }
 
 /**
+ * Economy strokes: alternate on a string, and a string change takes the stroke
+ * the pick is travelling in (down toward the higher strings, up toward the
+ * lower), so a stroke that ends one string carries on through the next. A beat
+ * or more between onsets resets to `start`, as `markAlternate` does. Marks the
+ * spec already wrote are kept.
+ */
+export function markEconomy(notes: PathNote[], start: PickMark = "d"): void {
+  let last: PathNote | undefined;
+  notes.forEach((note, index) => {
+    if (!isPicked(note, notes[index - 1])) return;
+    const near = last && note.tick - last.tick < TICKS ? last : undefined;
+    if (!note.pick) {
+      if (!near?.pick) note.pick = start;
+      else if (near.string !== note.string) note.pick = note.string < near.string ? "d" : "u";
+      else note.pick = near.pick === "d" ? "u" : "d";
+    }
+    last = note;
+  });
+}
+
+/**
  * Sweep strokes. Crossing toward the higher strings is one downward push;
  * crossing back is one upward push. Picked notes on one string alternate.
  */

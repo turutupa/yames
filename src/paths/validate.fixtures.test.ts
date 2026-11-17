@@ -159,6 +159,14 @@ const FIXTURES: Record<RuleId, () => unknown> = {
     ex(d, "arp").notes[1].pick = "u";
     return d;
   },
+  "pick.economy": () => {
+    const d = fresh();
+    const e = ex(d, "scale");
+    e.pickPlan = "economy";
+    e.crossing = "none";
+    e.notes[1].pick = e.notes[0].pick;
+    return d;
+  },
   "pick.legatoMarked": () => {
     const d = fresh();
     ex(d, "arp").notes[3].pick = "d";

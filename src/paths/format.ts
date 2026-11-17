@@ -92,8 +92,12 @@ export type GradingMode = (typeof GRADING_MODES)[number];
 export const FEEDBACK_TIMINGS = ["afterTake", "livePerNote", "livePerBar", "none"] as const;
 export type FeedbackTiming = (typeof FEEDBACK_TIMINGS)[number];
 
-/** What the printed pick marks are claiming about the hand. */
-export const PICK_PLANS = ["alternate", "sweep", "free"] as const;
+/**
+ * What the printed pick marks are claiming about the hand. `economy` alternates
+ * on a string and carries the stroke through a string change that goes the way
+ * the pick is already moving; it is graded like picked notes, not like a sweep.
+ */
+export const PICK_PLANS = ["alternate", "sweep", "economy", "free"] as const;
 export type PickPlan = (typeof PICK_PLANS)[number];
 
 /** Which string crossings an alternate-picked Exercise is meant to contain. */
@@ -202,7 +206,9 @@ export type HandPosition = {
 export const SUBDIVISIONS = [
   "wholes",
   "halves",
+  "halfTriplets",
   "quarters",
+  "quarterTriplets",
   "eighths",
   "eighthTriplets",
   "sixteenths",
@@ -216,7 +222,9 @@ export type Subdivision = (typeof SUBDIVISIONS)[number];
 export const SUBDIVISION_TICKS: Readonly<Record<Subdivision, number>> = {
   wholes: 3840,
   halves: 1920,
+  halfTriplets: 1280,
   quarters: 960,
+  quarterTriplets: 640,
   eighths: 480,
   eighthTriplets: 320,
   sixteenths: 240,
@@ -229,6 +237,8 @@ export const SUBDIVISION_TICKS: Readonly<Record<Subdivision, number>> = {
 export const SUBDIVISION_WORDS: Readonly<Record<Subdivision, string>> = {
   wholes: "whole notes (1 per bar)",
   halves: "half notes (2 per bar)",
+  halfTriplets: "half-note triplets (3 per bar)",
+  quarterTriplets: "quarter-note triplets (3 to every 2 beats)",
   quarters: "quarter notes (1 per beat)",
   eighths: "eighth notes (2 per beat)",
   eighthTriplets: "eighth-note triplets (3 per beat)",

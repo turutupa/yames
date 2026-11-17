@@ -74,6 +74,7 @@ export const RULES = {
   "pick.alternate": "the marks do not alternate",
   "pick.sweep": "the marks do not sweep with the strings",
   "pick.legatoMarked": "a hammer-on or pull-off has a stroke on it",
+  "pick.economy": "economy marks that do not alternate on one string",
   "pick.freeMarked": "a free pick plan prints strokes",
   "pick.crossing": "the declared crossing is not what the strokes produce",
   "music.unknownScale": "a scale the theory data does not have",
@@ -420,7 +421,15 @@ function checkPicks(ex: Exercise, report: Report) {
       report("pick.crossing", ex.id, `declared "${ex.crossing}", the strokes produce "${actual}"`);
     }
   }
-  if (ex.pickPlan === "sweep") {
+  if (ex.pickPlan === "economy") {
+    for (const { a, b, seam } of pairs) {
+      if (seam || a.string !== b.string || !a.pick || !b.pick) continue;
+      if (a.pick === b.pick) {
+        report("pick.economy", `${ex.id} (tick ${b.tick})`, `two ${a.pick === "d" ? "down" : "up"}strokes in a row on one string`);
+      }
+    }
+  }
+  if (ex.pickPlan === "sweep" || ex.pickPlan === "economy") {
     for (const { a, b, seam } of pairs) {
       if (seam || a.string === b.string || !b.pick) continue;
       const wanted = b.string < a.string ? "d" : "u";
@@ -428,7 +437,7 @@ function checkPicks(ex: Exercise, report: Report) {
         report("pick.sweep", `${ex.id} (tick ${b.tick})`, `crossing from string ${a.string} to ${b.string} wants a ${wanted === "d" ? "down" : "up"}stroke`);
       }
     }
-    if (ex.crossing !== "none") report("pick.crossing", ex.id, "a sweep plan has no declared crossing");
+    if (ex.crossing !== "none") report("pick.crossing", ex.id, `a ${ex.pickPlan} plan has no declared crossing`);
   }
 }
 

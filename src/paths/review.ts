@@ -344,7 +344,9 @@ function exerciseCard(ex: Exercise, stepOrder: number, exOrder: number): string 
       ? `<span class="chip">Alternate, ${ex.crossing === "none" ? "one string" : `${ex.crossing} crossings`}</span>`
       : ex.pickPlan === "sweep"
         ? `<span class="chip">Swept</span>`
-        : "",
+        : ex.pickPlan === "economy"
+          ? `<span class="chip">Economy</span>`
+          : "",
     `<span class="chip">Rhythm: ${rhythmWords(ex)}</span>`,
     `<span class="chip">${ex.backing.kind === "jam" ? `Band: ${esc(ex.backing.grooveId)}${ex.backing.feel === "straight" ? "" : `, ${ex.backing.feel}`}` : "Click"}</span>`,
     `<span class="chip">${ex.bars} bar${ex.bars === 1 ? "" : "s"}${ex.loops ? ", loops" : ""}</span>`,

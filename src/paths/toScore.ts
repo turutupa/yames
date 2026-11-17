@@ -105,9 +105,10 @@ export function exerciseAlphaTex(ex: Exercise, bpm: number): string {
   const items: Item[] = [];
   ex.rests.forEach((r) => items.push({ tick: r.tick, text: `r.${durationToken(r.dur)}` }));
   ex.notes.forEach((note, index) => {
-    // A tap is a beat effect in alphaTex, so it follows the duration.
-    const tap = note.tech.includes("tap") ? "{tt}" : "";
-    const text = `${note.fret}.${note.string}${noteEffects(note, ex.notes[index + 1])}.${durationToken(note.dur)}${tap}`;
+    // A tap is a beat effect in alphaTex: it joins the duration's braces.
+    const value = durationToken(note.dur);
+    const beat = !note.tech.includes("tap") ? value : value.includes("{") ? value.replace("}", " tt}") : `${value}{tt}`;
+    const text = `${note.fret}.${note.string}${noteEffects(note, ex.notes[index + 1])}.${beat}`;
     items.push({ tick: note.tick, text });
   });
   items.sort((a, b) => a.tick - b.tick);
