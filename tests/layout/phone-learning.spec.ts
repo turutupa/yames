@@ -73,7 +73,10 @@ test.describe("the learning side on a phone", () => {
     for (const size of WIDTHS) {
       test(`${scene} fits a thumb at ${size.width}px`, async ({ page }) => {
         // Find my edge plays its Takes in real time (see session.spec.ts).
-        if (scene === "session-edge-result") test.slow();
+        // Scenes that play a Take in real time with the neck or the runway
+        // drawing (SwiftShader, a parallel suite): the budget session.spec.ts
+        // gives its own.
+        if (scene.startsWith("session-")) test.slow();
         await openShot(page, `phone-${scene}`, size);
         await noSidewaysScroll(page, `phone-${scene} at ${size.width}px`);
         const first = await smallTargets(page);
@@ -110,6 +113,24 @@ test.describe("the learning side on a phone", () => {
       expect(Math.round(bottom), "a tab is drawn under the gesture bar").toBeLessThanOrEqual(800 - inset);
     }
   });
+
+  // The runway Take on a phone (mvp-runway, "one picture at a time"): while
+  // the Take runs, the runway is the picture — on screen, as wide as the
+  // phone, and above the tab bar, at both widths.
+  for (const size of WIDTHS) {
+    test(`the runway Take fills the phone at ${size.width}px`, async ({ page }) => {
+      await openShot(page, "phone-session-runway-playing", size);
+      const runway = page.locator('[data-testid="runway"]');
+      await expect(runway, "no runway during the Take").toBeVisible();
+      const r = (await runway.boundingBox())!;
+      const bar = (await page.locator(".mobile-tabs").boundingBox())!;
+      expect(Math.round(r.x), "the runway starts off the left edge").toBeGreaterThanOrEqual(0);
+      expect(Math.round(r.x + r.width), "the runway runs off the right edge").toBeLessThanOrEqual(size.width);
+      expect(Math.round(r.width), "the runway is a strip, not the picture").toBeGreaterThan(size.width * 0.8);
+      expect(Math.round(r.height), "the runway has no height to fall down").toBeGreaterThan(200);
+      expect(Math.round(r.y), "the runway starts under the tab bar").toBeLessThan(Math.round(bar.y));
+    });
+  }
 
   test("a Session's big button scrolls clear of the tab bar", async ({ page }) => {
     await openShot(page, "phone-session-ready", { width: 360, height: 800 });

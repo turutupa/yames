@@ -1236,6 +1236,10 @@ export const PHONE_LEARNING_SCENES = [
   "today-returning",
   "session-ready",
   "session-playing",
+  // The runway view's Take (mvp-runway): only the runway is on screen while
+  // it runs ("one picture at a time").
+  "session-runway-ready",
+  "session-runway-playing",
   "session-between",
   "session-result",
   "session-no-catch",
