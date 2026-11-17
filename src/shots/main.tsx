@@ -12,6 +12,9 @@
  * the window buttons in these pictures are the app's own, not a browser's.
  */
 import ReactDOM from "react-dom/client";
+
+// The capture harness runs on SwiftShader; let the stage draw the 3D neck there.
+window.__YAMES_ALLOW_SOFTWARE_GL__ = true;
 import App from "../App";
 import i18n from "../i18n";
 import "../styles/global.css";

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Adaptive, pickTier, tierSettings } from "./quality";
+import { isSoftwareRenderer } from "./webgl";
 
 describe("pickTier", () => {
   const desk = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
@@ -53,5 +54,16 @@ describe("Adaptive", () => {
     a.reset();
     for (let i = 0; i < 9; i++) a.sample(50);
     expect(lower).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("software renderers", () => {
+  it("are recognised, so the stage falls back to the SVG neck on them", () => {
+    expect(isSoftwareRenderer("ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0)), SwiftShader driver)")).toBe(true);
+    expect(isSoftwareRenderer("llvmpipe (LLVM 15.0.7, 256 bits)")).toBe(true);
+    expect(isSoftwareRenderer("ANGLE (Microsoft, Microsoft Basic Render Driver Direct3D11)")).toBe(true);
+    expect(isSoftwareRenderer("ANGLE (NVIDIA Corporation, NVIDIA GB10/PCIe, OpenGL ES 3.2)")).toBe(false);
+    expect(isSoftwareRenderer("Apple M2")).toBe(false);
   });
 });
