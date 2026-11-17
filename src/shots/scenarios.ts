@@ -352,6 +352,13 @@ export interface Shot {
    * drawn something worth looking at.
    */
   settleMs: number;
+  /**
+   * The neck stage alone (`src/stage3d/`), on a minimal page with one slot:
+   * no app, no mock backend. `whole` is the hero angle, `zoom` a practice
+   * zoom with notes and the overview strip, `pluck` the same caught while a
+   * string rings. `?nogl=1` on any of them draws the SVG fallback instead.
+   */
+  stage?: "whole" | "zoom" | "pluck";
 }
 
 /**
@@ -1097,6 +1104,10 @@ export const SHOTS: Shot[] = [
     height: 160,
     settleMs: 400,
   },
+  // The neck stage (W4, revamp-3d). See `stage` above.
+  { id: "stage-whole", suffix: "stage-whole", window: "main", stage: "whole", width: 1400, height: 900, settleMs: 200 },
+  { id: "stage-zoom", suffix: "stage-zoom", window: "main", stage: "zoom", width: 1400, height: 900, settleMs: 200 },
+  { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
 ];
 
 export function shotById(id: string): Shot | undefined {
