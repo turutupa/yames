@@ -33,6 +33,7 @@ import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
+import { pickDirectionMatters } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
 import "../../styles/session.css";
@@ -226,7 +227,9 @@ function TakeScreen({
           {running && <CoachLine>{exercise.coachLine}</CoachLine>}
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
-          <div className="session-why">{t("session.run.honest")}</div>
+          {pickDirectionMatters(exercise) && (
+            <div className="session-why" data-testid="pick-caveat">{t("session.run.honest")}</div>
+          )}
           <BandVolume session={session} hint={!running} />
           {!running && !inputReady && (
             <div className="session-glass session-card" role="status" data-testid="session-no-input">
