@@ -27,6 +27,7 @@ import {
   shouldSuggestPreset,
   type SetupRecord,
   type SetupSignature,
+  hintsAllowedOn,
 } from "./triggers";
 import { HINT_SETUP_HISTORY_KEY, type HintId } from "./types";
 
@@ -78,7 +79,7 @@ export type UseAppHintsArgs = {
 export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
   const { view, isPlaying, midiDevices, midiBindings } = args;
   const { session, widgetOpened } = useHintSession();
-  const onMainScreen = view !== "settings";
+  const onMainScreen = view !== "settings" && hintsAllowedOn(view);
 
   const suggestPreset = usePresetSuggestion({
     setup: { bpm: args.bpm, subdivision: args.subdivision, groups: args.beatGroups },
@@ -116,6 +117,9 @@ export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
     jamPlaying && shouldHintJamArrangement({ chorus: args.jamChorus ?? null }),
   );
 
+  // A card already up when a Session or the learning side opens is put away
+  // until the player is back on a tool (`hintsAllowedOn`).
+  if (!hintsAllowedOn(view)) return null;
   if (drill.shouldShow) {
     return { id: "drill-first-open", markShown: drill.markShown };
   }
