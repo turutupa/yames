@@ -39,7 +39,12 @@
       "howLong": "Bạn có bao nhiêu thời gian? Số phút:",
       "running": "Đang theo: {{paths}}",
       "leftOff": "Chỗ bạn dừng lần trước",
-      "leftOffValue": "{{value}} ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+      "leftOffValue": {
+        "even": "Đều {{value}}% ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+        "heard": "Nghe được {{value}}% số nốt ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+        "accents": "{{value}}% nhấn đúng chỗ ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
+        "notes": "{{value}}% nốt đúng ở {{bpm}} BPM. Hôm nay bắt đầu chậm hơn."
+      },
       "leftOffPlain": "{{bpm}} BPM. Hôm nay bắt đầu chậm hơn.",
       "whatsIn": "Có gì trong buổi tập, và vì sao",
       "min": "PHÚT",

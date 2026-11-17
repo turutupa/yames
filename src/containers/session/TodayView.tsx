@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { PLAN_MINUTES } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
-import { reasonLine } from "../../session/coachWords";
+import { leftOffLine, reasonLine } from "../../session/coachWords";
 import { currentStepOf, factsOf } from "../../session/progress";
 import { FIRST_PATH_ID } from "../../session/packs";
 import { kindOfPath } from "../../session/kind";
@@ -105,11 +105,7 @@ export function TodayView({
         : weekday;
 
   const last = progress.takes[0];
-  const lastFacts = last ? factsOf(last) : null;
-  const lastPercent =
-    lastFacts && typeof lastFacts.headlineValue === "number" && lastFacts.headlineMetric !== "extraNotes"
-      ? Math.round(lastFacts.headlineValue * 100)
-      : null;
+  const leftOff = last ? leftOffLine(factsOf(last), last.bpm) : null;
 
   return (
     <div className="session-page" data-testid="today" data-neck3d={neck3d}>
@@ -172,9 +168,7 @@ export function TodayView({
               <div className="session-kick">{t("session.today.leftOff")}</div>
               <div className="session-why">
                 <b>
-                  {lastPercent === null
-                    ? t("session.today.leftOffPlain", { bpm: last.bpm })
-                    : t("session.today.leftOffValue", { bpm: last.bpm, value: lastPercent })}
+                  {leftOff && lineText(t, leftOff)}
                 </b>
               </div>
             </div>

@@ -39,7 +39,12 @@
       "howLong": "시간이 얼마나 있나요? 분:",
       "running": "진행 중: {{paths}}",
       "leftOff": "지난번에 멈춘 곳",
-      "leftOffValue": "{{bpm}} BPM에서 {{value}}. 오늘은 조금 느리게 시작합니다.",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM에서 고르기 {{value}}%. 오늘은 조금 느리게 시작합니다.",
+        "heard": "{{bpm}} BPM에서 음의 {{value}}% 들림. 오늘은 조금 느리게 시작합니다.",
+        "accents": "{{bpm}} BPM에서 악센트 {{value}}% 정확. 오늘은 조금 느리게 시작합니다.",
+        "notes": "{{bpm}} BPM에서 맞는 음 {{value}}%. 오늘은 조금 느리게 시작합니다."
+      },
       "leftOffPlain": "{{bpm}} BPM. 오늘은 조금 느리게 시작합니다.",
       "whatsIn": "구성과 그 이유",
       "min": "분",

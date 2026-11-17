@@ -39,7 +39,12 @@
       "howLong": "Hoeveel tijd heb je? Minuten:",
       "running": "Bezig met: {{paths}}",
       "leftOff": "Waar je gebleven was",
-      "leftOffValue": "{{value}} op {{bpm}} BPM. Vandaag begint langzamer.",
+      "leftOffValue": {
+        "even": "{{value}}% gelijkmatig op {{bpm}} BPM. Vandaag begint langzamer.",
+        "heard": "{{value}}% van de noten gehoord op {{bpm}} BPM. Vandaag begint langzamer.",
+        "accents": "{{value}}% van de accenten raak op {{bpm}} BPM. Vandaag begint langzamer.",
+        "notes": "{{value}}% juiste noten op {{bpm}} BPM. Vandaag begint langzamer."
+      },
       "leftOffPlain": "{{bpm}} BPM. Vandaag begint langzamer.",
       "whatsIn": "Wat erin zit, en waarom",
       "min": "MIN",

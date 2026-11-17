@@ -39,7 +39,12 @@
       "howLong": "Ne kadar vaktin var? Dakika:",
       "running": "Devam eden: {{paths}}",
       "leftOff": "Kaldığın yer",
-      "leftOffValue": "{{bpm}} BPM'de {{value}}. Bugün daha yavaş başlıyor.",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM'de %{{value}} düzgün. Bugün daha yavaş başlıyor.",
+        "heard": "{{bpm}} BPM'de notaların %{{value}}'i duyuldu. Bugün daha yavaş başlıyor.",
+        "accents": "{{bpm}} BPM'de vurguların %{{value}}'i yerinde. Bugün daha yavaş başlıyor.",
+        "notes": "{{bpm}} BPM'de %{{value}} doğru nota. Bugün daha yavaş başlıyor."
+      },
       "leftOffPlain": "{{bpm}} BPM. Bugün daha yavaş başlıyor.",
       "whatsIn": "İçinde ne var, neden",
       "min": "DK",

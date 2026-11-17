@@ -39,7 +39,12 @@
       "howLong": "時間はどれくらいありますか？ 分数：",
       "running": "進行中：{{paths}}",
       "leftOff": "前回の続き",
-      "leftOffValue": "{{bpm}} BPM で {{value}}。今日は少し遅めから始めます。",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM で均等さ {{value}}%。今日は少し遅めから始めます。",
+        "heard": "{{bpm}} BPM で音の {{value}}% を聞き取り。今日は少し遅めから始めます。",
+        "accents": "{{bpm}} BPM でアクセントの {{value}}% が正確。今日は少し遅めから始めます。",
+        "notes": "{{bpm}} BPM で正しい音 {{value}}%。今日は少し遅めから始めます。"
+      },
       "leftOffPlain": "{{bpm}} BPM。今日は少し遅めから始めます。",
       "whatsIn": "内容とその理由",
       "min": "分",

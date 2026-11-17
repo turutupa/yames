@@ -64,6 +64,23 @@ export function metricKey(metric: string): "even" | "heard" | "extras" | "accent
   }
 }
 
+/**
+ * "Where you left off" on Today after a break: the last Take's headline number
+ * with its unit, "78% even at 80 BPM" (QA 2026-11-17 #22). Extra notes are a
+ * count, not a share, so they read as the plain line, as does a Take with no
+ * number on record.
+ */
+export function leftOffLine(facts: { headlineMetric?: string; headlineValue?: unknown }, bpm: number): Line {
+  const metric = metricKey(facts.headlineMetric ?? "timingEvenness");
+  if (typeof facts.headlineValue !== "number" || metric === "extras") {
+    return { key: "session.today.leftOffPlain", values: { bpm } };
+  }
+  return {
+    key: `session.today.leftOffValue.${metric}`,
+    values: { bpm, value: Math.round(facts.headlineValue * 100) },
+  };
+}
+
 /** A bar's value as the player reads it: a percentage, or a count. */
 export function displayValue(check: Pick<BarCheck, "metric" | "value">): number | null {
   if (check.value === null) return null;

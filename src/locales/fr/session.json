@@ -39,7 +39,12 @@
       "howLong": "Combien de temps as-tu ? Minutes :",
       "running": "En cours : {{paths}}",
       "leftOff": "Là où tu t'es arrêté",
-      "leftOffValue": "{{value}} à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+      "leftOffValue": {
+        "even": "{{value}} % de régularité à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+        "heard": "{{value}} % des notes entendues à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+        "accents": "{{value}} % des accents bien placés à {{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
+        "notes": "{{value}} % de bonnes notes à {{bpm}} BPM. Aujourd'hui, on commence plus lentement."
+      },
       "leftOffPlain": "{{bpm}} BPM. Aujourd'hui, on commence plus lentement.",
       "whatsIn": "Ce qu'il y a dedans, et pourquoi",
       "min": "MIN",

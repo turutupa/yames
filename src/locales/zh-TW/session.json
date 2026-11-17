@@ -39,7 +39,12 @@
       "howLong": "你有多少時間？分鐘數：",
       "running": "進行中：{{paths}}",
       "leftOff": "上次練到哪裡",
-      "leftOffValue": "{{bpm}} BPM 時 {{value}}。今天從慢一點開始。",
+      "leftOffValue": {
+        "even": "{{bpm}} BPM 時均勻度 {{value}}%。今天從慢一點開始。",
+        "heard": "{{bpm}} BPM 時聽到 {{value}}% 的音。今天從慢一點開始。",
+        "accents": "{{bpm}} BPM 時 {{value}}% 的重音到位。今天從慢一點開始。",
+        "notes": "{{bpm}} BPM 時音準 {{value}}%。今天從慢一點開始。"
+      },
       "leftOffPlain": "{{bpm}} BPM。今天從慢一點開始。",
       "whatsIn": "練什麼，為什麼",
       "min": "分鐘",

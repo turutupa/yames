@@ -39,7 +39,12 @@
       "howLong": "How long have you got? Minutes:",
       "running": "Running: {{paths}}",
       "leftOff": "Where you left off",
-      "leftOffValue": "{{value}} at {{bpm}} BPM. Today starts slower.",
+      "leftOffValue": {
+        "even": "{{value}}% even at {{bpm}} BPM. Today starts slower.",
+        "heard": "{{value}}% of the notes heard at {{bpm}} BPM. Today starts slower.",
+        "accents": "{{value}}% of the accents landed at {{bpm}} BPM. Today starts slower.",
+        "notes": "{{value}}% right notes at {{bpm}} BPM. Today starts slower."
+      },
       "leftOffPlain": "{{bpm}} BPM. Today starts slower.",
       "whatsIn": "What's in it, and why",
       "min": "MIN",
