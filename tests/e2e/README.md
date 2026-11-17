@@ -1,0 +1,125 @@
+# tests/e2e: the real app, end to end, on Linux
+
+The built app (not Vite, not a mock engine) run with no screen and no guitar:
+a virtual display, a virtual sound card, a synthesised guitarist who listens
+to the click, and WebDriver pressing the buttons. It answers the questions the
+unit and layout suites cannot: does a Take recorded through a real input,
+graded by the real scorer and saved in the real store, come back after a
+restart; and does the click hold while the 3D neck draws.
+
+```sh
+npm run test:e2e                         # build, then session, relaunch, four-fingers, gpu-info
+npm run test:e2e -- --no-build           # use the binary already built
+npm run test:e2e -- --scenarios neck,baseline --gpu   # the click with the neck, on the GPU
+node tests/e2e/run.mjs --help
+```
+
+Exit 0 when every check passes, 1 when one fails, 2 for a setup error.
+Results (`results.json`), screenshots of every result screen and the in-app
+probe reports land in the `--out` directory (a temp dir by default, printed at
+the end).
+
+## What it covers
+
+| Scenario | What happens | Checks |
+|---|---|---|
+| `session` | Today, 5 minutes, Start. The plan's first Exercise (Open A, pick hand alone, 60 BPM for a new player). A good take, then Go again with a sloppy one, then a silent one. Exit. | The Take ends by itself at its last bar. Good: "PASS BAR MET", a `path_takes` row passed and caught, `countsForCleanTempo`, the clean tempo stored at 60. Sloppy: "THE BAR IS 85% / Evenness was …", row caught and not passed, the evenness check not held, the clean tempo unmoved. Silent: "I didn't catch enough", row not caught. |
+| `relaunch` | Quit with the window's Close, start the app again on the same profile. | Today no longer plans a first Session; Progress shows the Exercise and its clean tempo. |
+| `four-fingers` | Paths, Alternate Picking, Step 1, "Four fingers, one string", Play this, Faster to 80 BPM, a good take. | The Take is at 80, passes, and the clean tempo 80 is stored. |
+| `gpu-info` | `webkit://gpu`, the GL libraries mapped into the app, and what the page's WebGL says its renderer is. | Recorded, not checked. |
+| `neck` | Four fingers, three good Takes back to back (60, 70, 80 BPM) with the neck on screen and the in-app probe armed. | Every Take passes; the probe's hard gates (missed beats, callback allocations/frees, dropped notifications) are 0; p99 jitter < 1 ms is advisory, as in `AGENTS.md`. Also records which neck was drawn (WebGL2 canvas or not), CPU cores per process while playing, and whether `nvidia-smi` lists the web process. |
+| `baseline` | `click-jitter-probe --no-llm` in the same PipeWire, for comparison. | The same gates. |
+
+Every launch has the in-app click probe armed (below), so `session` and
+`four-fingers` also leave a probe report of a real Session with the neck
+drawing.
+
+## How it is put together
+
+- **A profile of its own.** `HOME`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`,
+  `XDG_CACHE_HOME` and `XDG_RUNTIME_DIR` all point into one `mkdtemp`. The
+  app's store and `practice.db` are under `$XDG_DATA_HOME/com.yames.metronome`.
+  The owner's profile, audio server and display are never touched. The
+  settings are seeded as a returning player who finished setup
+  (`onboarding.version`, `onboarding.completedAt`), so the app opens on Today;
+  the first-run wizard is M1's and not tested here.
+- **Display.** `Xvfb` by default. `--gpu` starts `Xorg` on the NVIDIA GPU with
+  no monitor (`AllowEmptyInitialConfiguration`, a virtual 1280x1024 screen),
+  which needs passwordless sudo and the NVIDIA Xorg driver. With it the app is
+  started with the `render` group (via `sudo setpriv`, as a desktop seat's ACL
+  would give), and with `WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`: WebKit's DMABuf
+  renderer otherwise asks the KMS node for dumb buffers, which only the X
+  server may make, and WebGL then has no context at all.
+- **Sound.** A private `dbus-daemon`, `pipewire`, `wireplumber` and
+  `pipewire-pulse`, with two null sinks: `yames_out` (the default sink, the
+  app's output) and `guitar` (its monitor is the default source, the app's
+  input). cpal opens ALSA's `default`, which PipeWire's ALSA plugin routes to
+  them. With passwordless sudo the PipeWire data-loop threads (the daemons'
+  and the plugin's inside the app) are put at `SCHED_FIFO` 88, which is what
+  rtkit does on a desktop; without it a busy machine stalls the graph and the
+  stall reads as the app's fault. The app's own cpal threads are left alone:
+  cpal does not promote them on Linux, and the probe should measure that.
+- **The guitarist** (`lib/player.mjs`). Takes are rendered from the shipped
+  pack (`src/paths/packs/alternate-picking.json`), one Karplus-Strong pluck
+  per note at the right pitch, for `takeBarsOf` bars: "good" is 1.5 ms of
+  scatter, "sloppy" 35 ms (clipped at 70), "silent" nothing.
+- **Lining the take up with the transport.** The player records
+  `yames_out.monitor` and plays into `guitar` with `pacat`, fed on its own
+  clock with a fixed lead. Before the run it measures, with a pulse, how long a
+  sample takes from being written to `guitar` to being caught on its monitor,
+  and takes that off every note. It then does what a player does: the first
+  four clicks after Start take are the count-in, and every click it hears
+  places the notes of the next beat, one beat ahead, at the median spacing of
+  the last few clicks. So the notes go into the guitar sink when the click
+  went into the output sink; what is left is the app's own input and output
+  latency, which is what the scorer's lag estimate exists to remove. Because
+  it follows the click, a stall in the app's output makes the take late with
+  it, as it would a person, and shows up in the probe rather than as a
+  sloppy take. (An earlier version predicted the whole take from the
+  count-in; on a busy machine the app's clock drifted from PipeWire's and a
+  good take came out 70 ms early by the end.)
+- **The UI** is driven through `tauri-driver` and `WebKitWebDriver` with a
+  small W3C client over `fetch` (`lib/webdriver.mjs`); buttons are found by
+  their text, as a player would. The store is read with `node:sqlite`.
+
+## Requirements (Ubuntu 24.04)
+
+```sh
+sudo apt-get install -y xvfb x11-utils webkit2gtk-driver pulseaudio-utils \
+  pipewire pipewire-pulse wireplumber pipewire-alsa dbus
+cargo install tauri-driver --locked
+```
+
+Node 22.5 or later (`node:sqlite`). The Tauri build dependencies as for any
+build. `--gpu` also needs `xserver-xorg-video-nvidia-*` and passwordless sudo.
+
+## Known bugs it finds (2026-11-16)
+
+1. **A Take never ends by itself** (and neither does a non-looping song, or a
+   jam whose form ends). `engine.rs`, the event loop's park branch: it reads
+   `playing` after `park_timeout`. The audio thread pushes the end
+   notification, which unparks the loop, and then lowers `playing`; the woken
+   loop sees the flag down and `drain()`s the notification that woke it.
+   `is_playing` stays true, `jam-ended` never fires, and the Session sits on
+   "End take" after the last bar. Every run of `session` reproduces it on
+   `revamp`; the fix (read the flag before parking, drain only if it was down
+   on both sides) is on branch `mvp-e2e-song-end`, and with it the Take ends
+   within 100 ms. Until it is merged, the suite presses End take itself, the
+   bar it stopped in is not counted, and the clean-tempo checks fail.
+2. **The stage cannot tell a software renderer on WebKitGTK.** WebKitGTK
+   masks `WEBGL_debug_renderer_info` and answers "Apple GPU" whatever draws, so
+   `src/stage3d/webgl.ts` never refuses llvmpipe and the 3D neck is drawn on
+   the CPU wherever there is no GPU (Xvfb here; a VM or a machine without
+   drivers for a tester).
+
+## The in-app click probe
+
+`YAMES_CALLBACK_PROBE=1` makes the app build its engine the way the headless
+`click-jitter-probe` does (`src-tauri/src/app_probe.rs`). It writes the same
+four numbers to `YAMES_CALLBACK_PROBE_OUT` (JSON, raw capture beside it as
+`.csv`) when the main window closes, or now through the
+`callback_probe_report` command. The allocation count needs a build with
+`--features callback-probe-alloc` (the suite's build has it); without the
+feature the report says `"allocs_counted": false`. The app starts and stops
+the transport, so the capture is cut into runs where the engine's sample
+counter starts again, and jitter and missed beats are worked out inside runs.

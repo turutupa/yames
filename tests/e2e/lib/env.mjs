@@ -110,6 +110,64 @@ export function freeDisplay(from = 90) {
   throw new Error("no free X display");
 }
 
+/**
+ * An X server on the NVIDIA GPU, with no monitor: what a desktop would give
+ * WebKit, without a desktop. Needs passwordless sudo (Xorg on a real GPU runs
+ * as root) and the NVIDIA Xorg driver. Returns a stop function.
+ */
+export async function startNvidiaX(display, dir) {
+  const bus = spawnSync("nvidia-smi", ["--query-gpu=pci.bus_id", "--format=csv,noheader"], { encoding: "utf8" }).stdout?.trim().split("\n")[0];
+  const m = bus?.match(/^([0-9A-Fa-f]+):([0-9A-Fa-f]+):([0-9A-Fa-f]+)\.(\d+)$/);
+  if (!m) throw new Error(`no NVIDIA GPU (nvidia-smi said ${JSON.stringify(bus)})`);
+  const [, domain, b, dev, fn] = m.map((x, i) => (i === 0 ? x : parseInt(x, 16)));
+  const conf = join(dir, "xorg-nvidia.conf");
+  const modules = ["/usr/lib/aarch64-linux-gnu/nvidia/xorg", "/usr/lib/x86_64-linux-gnu/nvidia/xorg", "/usr/lib/xorg/modules"].filter(existsSync);
+  writeFileSync(conf, `Section "ServerLayout"
+    Identifier "e2e"
+    Screen 0 "gpu"
+EndSection
+Section "Files"
+${modules.map((p) => `    ModulePath "${p}"`).join("\n")}
+EndSection
+Section "ServerFlags"
+    Option "AutoAddDevices" "false"
+    Option "AutoAddGPU" "false"
+EndSection
+Section "Device"
+    Identifier "nv"
+    Driver "nvidia"
+    BusID "PCI:${b}@${domain}:${dev}:${fn}"
+    Option "AllowEmptyInitialConfiguration" "true"
+    Option "ConnectedMonitor" "DFP-0"
+EndSection
+Section "Screen"
+    Identifier "gpu"
+    Device "nv"
+    DefaultDepth 24
+    SubSection "Display"
+        Depth 24
+        Virtual 1280 1024
+    EndSubSection
+EndSection
+`);
+  const log = join(dir, `Xorg.${display}.log`);
+  const child = spawn("sudo", ["-n", "Xorg", `:${display}`, "-config", conf, "-logfile", log, "-noreset", "-nolisten", "tcp", "-novtswitch", "-sharevts", "-ac", `vt${display}`], {
+    stdio: "ignore",
+  });
+  const stop = async () => {
+    spawnSync("sudo", ["-n", "pkill", "-f", `Xorg :${display} -config ${conf}`]);
+    await sleep(300);
+  };
+  const t0 = Date.now();
+  while (Date.now() - t0 < 15000) {
+    if (spawnSync("xdpyinfo", [], { env: { ...process.env, DISPLAY: `:${display}` } }).status === 0) return stop;
+    if (child.exitCode !== null) break;
+    await sleep(200);
+  }
+  await stop();
+  throw new Error(`the NVIDIA X server did not start; see ${log}`);
+}
+
 export class Env {
   constructor({ root, display, gpu = false } = {}) {
     this.dirs = makeProfile(root ?? mkdtempSync(join(tmpdir(), "yames-e2e-")));

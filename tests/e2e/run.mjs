@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
-import { Env, appDataDir, seedSettings } from "./lib/env.mjs";
+import { Env, appDataDir, freeDisplay, seedSettings, startNvidiaX } from "./lib/env.mjs";
 import { Driver } from "./lib/webdriver.mjs";
 import { Player, renderTake } from "./lib/player.mjs";
 import { barTicks, exerciseByTitle, takeBars } from "./lib/exercises.mjs";
@@ -36,8 +36,9 @@ if (flag("--help")) {
   --baseline-seconds <n>  length of the headless probe run (default 60)
   --out <dir>         where results, screenshots and the probe reports go
                       (default: a new temp dir, printed at the end)
-  --gpu-display <:n>  run on an existing X server (e.g. a GPU one, see README)
-                      instead of starting Xvfb
+  --gpu               start an X server on the NVIDIA GPU (sudo) instead of
+                      Xvfb, so WebKit draws the neck on the GPU (see README)
+  --gpu-display <:n>  run on an existing X server instead of starting one
   --app-env K=V       an extra variable for the app (repeatable), e.g.
                       WEBKIT_DMABUF_RENDERER_FORCE_SHM=1 for WebGL on the
                       NVIDIA X server (see README)
@@ -49,10 +50,20 @@ const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "targe
 const app = resolve(opt("--app", join(targetDir, "release", "yames")));
 const out = resolve(opt("--out", mkdtempSync(join(tmpdir(), "yames-e2e-out-"))));
 mkdirSync(out, { recursive: true });
-const gpuDisplay = opt("--gpu-display", null);
-const appEnv = Object.fromEntries(
+let gpuDisplay = opt("--gpu-display", null);
+let stopX = null;
+if (flag("--gpu") && !gpuDisplay) {
+  const n = freeDisplay(50);
+  stopX = await startNvidiaX(n, mkdtempSync(join(tmpdir(), "yames-e2e-xorg-")));
+  gpuDisplay = `:${n}`;
+}
+// WebKit's DMABuf renderer asks the KMS node for dumb buffers, which only the
+// X server (DRM master) may make; shared-memory buffers for the compositor,
+// with WebGL still on the GPU, is what works on the NVIDIA X server.
+const gpuEnv = gpuDisplay ? { WEBKIT_DMABUF_RENDERER_FORCE_SHM: "1" } : {};
+const appEnv = Object.assign({}, gpuEnv, Object.fromEntries(
   argv.flatMap((a, i) => (a === "--app-env" && argv[i + 1] ? [argv[i + 1].split(/=(.*)/s).slice(0, 2)] : [])),
-);
+));
 
 // ---------------------------------------------------------------------------
 // Results
@@ -84,7 +95,12 @@ if (!flag("--no-build")) {
   const r = spawnSync(
     process.execPath,
     [join(repo, "scripts", "tauri.mjs"), "build", "--no-bundle", "--features", "callback-probe-alloc"],
-    { cwd: repo, stdio: "inherit", env: { ...process.env, YAMES_DEV_NO_LLM: "1" } },
+    {
+      cwd: repo,
+      stdio: "inherit",
+      // aubio-sys's C needs these with the compilers on Ubuntu 24.04.
+      env: { CFLAGS: "-std=gnu11 -Wno-implicit-function-declaration", ...process.env, YAMES_DEV_NO_LLM: "1" },
+    },
   );
   if (r.status !== 0) {
     console.error("build failed");
@@ -94,6 +110,7 @@ if (!flag("--no-build")) {
     const p = spawnSync("cargo", ["build", "--release", "--manifest-path", join(repo, "src-tauri", "Cargo.toml"), "--bin", "click-jitter-probe"], {
       cwd: repo,
       stdio: "inherit",
+      env: { CFLAGS: "-std=gnu11 -Wno-implicit-function-declaration", ...process.env },
     });
     if (p.status !== 0) {
       console.error("probe build failed");
@@ -601,6 +618,7 @@ try {
 } finally {
   if (driverProc) driverProc.kill("SIGTERM");
   await env.down().catch(() => {});
+  if (stopX) await stopX();
   if (!flag("--keep")) rmSync(env.dirs.root, { recursive: true, force: true });
 }
 
