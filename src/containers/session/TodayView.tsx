@@ -129,6 +129,9 @@ export function TodayView({
         </div>
 
         <div className="session-today-plan">
+          <div className="session-kick session-rise" style={rise(4)}>
+            {t("session.today.whatsIn")}
+          </div>
           {plan.mood === "back" && last && (
             <div className="session-glass session-card session-rise" data-testid="today-left-off">
               <div className="session-kick">{t("session.today.leftOff")}</div>
@@ -141,9 +144,6 @@ export function TodayView({
               </div>
             </div>
           )}
-          <div className="session-kick session-rise" style={rise(4)}>
-            {t("session.today.whatsIn")}
-          </div>
           <ol className="session-plan-list">
             {plan.steps.map((step, i) => {
               const why = reasonLine(step.why);

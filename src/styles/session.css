@@ -672,6 +672,8 @@
   font-size: 0.6em;
 }
 .session-brief {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1265,6 +1267,24 @@
   }
   .session-takerow {
     flex-wrap: wrap;
+    align-items: center;
+  }
+  .session-bpm {
+    font-size: 56px;
+  }
+  .session-slot {
+    min-height: 64px;
+  }
+  .session-coach {
+    font-size: 15px;
+    padding: 9px 12px;
+    gap: 9px;
+  }
+  .session-stage {
+    height: clamp(110px, 16vh, 150px);
+  }
+  .session-stat[data-xl] b {
+    font-size: 64px;
   }
   .session-strip {
     flex-basis: 100%;
