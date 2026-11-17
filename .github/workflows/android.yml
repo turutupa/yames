@@ -40,6 +40,11 @@ name: Android (signed release)
 # "Run workflow" for a workflow that is on the default branch, and this file is
 # not on `main` yet — so pushing `mvp-android` is what builds the APK until it
 # is. Drop the branch trigger when this reaches `main` and keep the dispatch.
+# A push builds the arm64 APK only, signed with the repository's TEST key
+# (the ANDROID_* secrets, alias `yames-test`) so every tester build shares one
+# signature and updates in place; it is uploaded as a workflow artifact and
+# never published (see "Refuse to publish" below). In a fork, where the
+# secrets are absent, the APK is signed with a key made in the run.
 on:
   push:
     branches: [mvp-android]
@@ -71,10 +76,19 @@ jobs:
       # the whole point of passing a tag, and an unsigned APK on a release
       # page is worse than no APK — it cannot be updated in place later,
       # because Android refuses an upgrade whose signature changed.
+      #
+      # M7: the four ANDROID_* secrets in this repository are a TEST key (alias
+      # `yames-test`), there so every tester APK carries one signature and
+      # updates in place. A test key must never sign something on the Releases
+      # page or in Play. So publishing also needs the repository VARIABLE
+      # `ANDROID_KEY_IS_RELEASE` set to `true`, which is set only once the
+      # secrets hold the real upload key. A branch push never publishes: it
+      # has no tag.
       - name: Refuse to publish without a signing key
         if: inputs.tag != ''
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_IS_RELEASE: ${{ vars.ANDROID_KEY_IS_RELEASE }}
           # Through the environment, never interpolated into the script: an
           # input that reaches `run:` as text is an input that can close the
           # quoting and carry on as a command.
@@ -83,6 +97,11 @@ jobs:
           if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
             echo "::error::tag '$TAG' was given but ANDROID_KEYSTORE_BASE64 is not set."
             echo "::error::Add the four ANDROID_* secrets first, or run with an empty tag to build without publishing."
+            exit 1
+          fi
+          if [ "${KEY_IS_RELEASE:-}" != "true" ]; then
+            echo "::error::tag '$TAG' was given, but the signing secrets are marked as a test key."
+            echo "::error::Put the real upload key in the ANDROID_* secrets and set the repository variable ANDROID_KEY_IS_RELEASE=true, or run with an empty tag."
             exit 1
           fi
 
@@ -208,7 +227,10 @@ jobs:
       - name: The APK can say when a newer version is out
         run: node scripts/check-mobile-bundle.mjs --sideload
 
+      # Not on a branch push (M7): testers install the APK, and the AAB's four
+      # ABIs (aubio and all) double the build. A dispatch builds both.
       - name: Build the signed AAB (all four ABIs)
+        if: github.event_name == 'workflow_dispatch'
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -218,6 +240,7 @@ jobs:
       # The store's bundle, and the `dist/` the AAB was built from is still
       # on disk: neither web address may be in it.
       - name: The store bundle says nothing about downloads
+        if: github.event_name == 'workflow_dispatch'
         run: node scripts/check-mobile-bundle.mjs
 
       # Locate the outputs rather than hardcode paths: the gradle flavour
@@ -233,15 +256,21 @@ jobs:
           # around, which they are not on a fresh runner but are on a laptop.
           pick() { find "$1" -name "$2" ! -name '*unsigned*' | sort | head -1; }
           APK=$(pick "$OUT/apk" '*.apk')
-          AAB=$(pick "$OUT/bundle" '*.aab')
           [ -n "$APK" ] || APK=$(find "$OUT/apk" -name '*.apk' | sort | head -1)
-          [ -n "$AAB" ] || AAB=$(find "$OUT/bundle" -name '*.aab' | sort | head -1)
+          # No bundle directory at all on a branch push (no AAB is built).
+          AAB=""
+          if [ -d "$OUT/bundle" ]; then
+            AAB=$(pick "$OUT/bundle" '*.aab')
+            [ -n "$AAB" ] || AAB=$(find "$OUT/bundle" -name '*.aab' | sort | head -1)
+          fi
           test -n "$APK" || { echo "::error::no APK was produced"; exit 1; }
-          test -n "$AAB" || { echo "::error::no AAB was produced"; exit 1; }
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            test -n "$AAB" || { echo "::error::no AAB was produced"; exit 1; }
+          fi
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p dist-android
           cp "$APK" "dist-android/Yames_${VERSION}_aarch64.apk"
-          cp "$AAB" "dist-android/Yames_${VERSION}.aab"
+          if [ -n "$AAB" ]; then cp "$AAB" "dist-android/Yames_${VERSION}.aab"; fi
           echo "apk=dist-android/Yames_${VERSION}_aarch64.apk" >> "$GITHUB_OUTPUT"
           echo "aab=dist-android/Yames_${VERSION}.aab" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -286,7 +315,7 @@ jobs:
             echo
             echo '| Entry | Uncompressed |'
             echo '|---|---|'
-            unzip -l "${{ steps.outputs.outputs.aab }}" \
+            [ -f "${{ steps.outputs.outputs.aab }}" ] && unzip -l "${{ steps.outputs.outputs.aab }}" \
               | awk '/\.so$/ { printf "| %s | %s bytes |\n", $4, $1 }'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -303,7 +332,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: yames-android-${{ steps.outputs.outputs.version }}
+          # The commit in the name: testers on a branch get a new APK per push.
+          name: yames-android-${{ steps.outputs.outputs.version }}-${{ github.sha }}
           path: dist-android/*
           if-no-files-found: error
           retention-days: 30
