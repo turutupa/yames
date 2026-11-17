@@ -837,7 +837,12 @@
   place-items: center;
   pointer-events: none;
   z-index: 5;
-  font: 700 clamp(64px, 14vh, 140px) / 1 var(--l-display);
+  /* Sized by the height, but held to the width too: at 360 px, 14vh made
+     "Counting in" two 90 px lines across the numbers and the neck. Long
+     translations ("Contando la entrada") still wrap, centred. */
+  font: 700 clamp(36px, min(14vh, 13vw), 140px) / 1.05 var(--l-display);
+  text-align: center;
+  padding: 0 16px;
   color: var(--l-amber);
   text-shadow: 0 0 80px rgba(255, 170, 70, 0.55);
   animation: session-fade 0.4s ease both;
