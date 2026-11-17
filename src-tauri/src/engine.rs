@@ -8170,46 +8170,8 @@ impl MetronomeEngine {
             // overflows is reported when it happens and not once a beat
             // forever after.
             let mut dropped_said: u64 = 0;
-            // Whether this loop has paused the output stream because the app
-            // is in the background with nothing playing. See
-            // `android_audio::APP_IN_BACKGROUND`.
-            #[cfg(target_os = "android")]
-            let mut output_parked = false;
 
             while alive.load(Ordering::SeqCst) {
-                // THE OUTPUT STREAM SLEEPS WHILE THE APP IS AWAY AND SILENT.
-                //
-                // This thread, not the callback, and nothing in the callback
-                // changed for it: the callback is simply not called while the
-                // stream is paused. Checked once a pass, so within the 50 ms
-                // park below of the app going to Home, coming back, or the
-                // transport starting. Stopped is the condition, not "quiet",
-                // so a click, a jam or a song playing on with the screen off
-                // is never touched. The sample counter stands still while
-                // paused, and nothing that runs while stopped depends on it
-                // keeping pace with the wall clock (a beat's time is stamped
-                // from `clock::now_ns` in the callback).
-                #[cfg(target_os = "android")]
-                {
-                    let want_parked =
-                        crate::android_audio::app_in_background() && !playing.load(Ordering::Acquire);
-                    if want_parked != output_parked {
-                        // Recorded either way, so a refusal is said once and
-                        // not every 50 ms.
-                        output_parked = want_parked;
-                        if want_parked {
-                            if let Err(e) = stream.pause() {
-                                eprintln!("[yames][android] {e}");
-                            }
-                        } else if let Err(e) = stream.play() {
-                            // A stream that will not start again is a lost
-                            // stream: hand it to the route thread, which
-                            // reopens it the way it does after a reroute.
-                            eprintln!("[yames][android] {e}");
-                            crate::android_route::output_lost();
-                        }
-                    }
-                }
                 // A BEAT THE CALLBACK COULD NOT HAND OVER.
                 //
                 // Said here because this is the thread that may print, and

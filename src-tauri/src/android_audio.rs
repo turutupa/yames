@@ -40,31 +40,10 @@
 //! nothing here allocates, locks or blocks once the stream is up.
 
 use oboe::{
-    AudioOutputCallback, AudioOutputStream, AudioOutputStreamSafe, AudioStream, AudioStreamAsync,
-    AudioStreamBase, AudioStreamBuilder, AudioStreamSafe, ContentType, DataCallbackResult, Output,
+    AudioOutputCallback, AudioOutputStreamSafe, AudioStream, AudioStreamAsync, AudioStreamBase,
+    AudioStreamBuilder, AudioStreamSafe, ContentType, DataCallbackResult, Output,
     PerformanceMode, SharingMode, Stereo, Usage,
 };
-use std::sync::atomic::{AtomicBool, Ordering};
-
-/// The activity is off the screen (`onStop`), as the yames-mobile plugin's
-/// `app_visible` event reports it to the frontend and the frontend reports it
-/// here (`set_app_in_background`).
-///
-/// Read by the engine's EVENT LOOP, never by the callback: while it is up and
-/// the transport is stopped, that loop pauses the output stream, and it starts
-/// it again when the app comes back or the transport starts. An open
-/// low-latency (often exclusive, MMAP) AAudio stream keeps the audio path
-/// awake and rendering silence for as long as it runs; a metronome left on
-/// Home with nothing playing has no reason to.
-static APP_IN_BACKGROUND: AtomicBool = AtomicBool::new(false);
-
-pub(crate) fn set_app_in_background(hidden: bool) {
-    APP_IN_BACKGROUND.store(hidden, Ordering::Release);
-}
-
-pub(crate) fn app_in_background() -> bool {
-    APP_IN_BACKGROUND.load(Ordering::Acquire)
-}
 
 /// What the device told us when we asked it to open a low-latency stream.
 ///
@@ -151,15 +130,6 @@ where
         self.stream
             .start()
             .map_err(|e| format!("could not start the audio output stream: {e:?}"))
-    }
-
-    /// Ask AAudio to pause the stream. Non-blocking: the callback finishes
-    /// the buffer it is in and is then not called again until [`Self::play`].
-    /// From the engine's event loop only.
-    pub fn pause(&mut self) -> Result<(), String> {
-        self.stream
-            .request_pause()
-            .map_err(|e| format!("could not pause the audio output stream: {e:?}"))
     }
 }
 

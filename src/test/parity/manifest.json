@@ -154,8 +154,7 @@
     "release_jam_sounds",
     "refresh_audio_devices",
     "callback_probe_report",
-    "export_practice_data",
-    "set_app_in_background"
+    "export_practice_data"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -310,8 +309,7 @@
     "release_jam_sounds",
     "refresh_audio_devices",
     "callback_probe_report",
-    "export_practice_data",
-    "set_app_in_background"
+    "export_practice_data"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -517,8 +515,7 @@
     "onAudioRouteChanged",
     "refreshAudioDevices",
     "callbackProbeReport",
-    "exportPracticeData",
-    "setAppInBackground"
+    "exportPracticeData"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
