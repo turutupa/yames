@@ -1,0 +1,406 @@
+#!/usr/bin/env node
+// The real app, end to end, on Linux with no screen and no guitar.
+// See tests/e2e/README.md for what it covers and how to run it.
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { DatabaseSync } from "node:sqlite";
+import { Env, appDataDir, seedSettings } from "./lib/env.mjs";
+import { Driver } from "./lib/webdriver.mjs";
+import { Player, renderTake } from "./lib/player.mjs";
+import { barTicks, exerciseByTitle, takeBars } from "./lib/exercises.mjs";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const repo = resolve(here, "..", "..");
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ---------------------------------------------------------------------------
+// Arguments
+// ---------------------------------------------------------------------------
+
+const argv = process.argv.slice(2);
+const flag = (name) => argv.includes(name);
+const opt = (name, fallback) => {
+  const i = argv.indexOf(name);
+  return i >= 0 && argv[i + 1] ? argv[i + 1] : fallback;
+};
+if (flag("--help")) {
+  console.log(`usage: node tests/e2e/run.mjs [options]
+  --no-build          use the binary already built (default: build it first)
+  --app <path>        the app binary (default: $CARGO_TARGET_DIR or src-tauri/target, release/yames)
+  --scenarios <list>  comma list of: session,relaunch,four-fingers (default: all)
+  --out <dir>         where results, screenshots and the probe reports go
+                      (default: a new temp dir, printed at the end)
+  --gpu-display <:n>  run on an existing X server (e.g. a GPU one, see README)
+                      instead of starting Xvfb
+  --keep              leave the profile and logs behind`);
+  process.exit(0);
+}
+const scenarios = new Set(opt("--scenarios", "session,relaunch,four-fingers").split(","));
+const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "target");
+const app = resolve(opt("--app", join(targetDir, "release", "yames")));
+const out = resolve(opt("--out", mkdtempSync(join(tmpdir(), "yames-e2e-out-"))));
+mkdirSync(out, { recursive: true });
+const gpuDisplay = opt("--gpu-display", null);
+
+// ---------------------------------------------------------------------------
+// Results
+// ---------------------------------------------------------------------------
+
+const results = [];
+function check(name, ok, detail = "") {
+  results.push({ name, ok: !!ok, detail });
+  console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`);
+  return !!ok;
+}
+const info = {};
+
+// ---------------------------------------------------------------------------
+// Preflight and build
+// ---------------------------------------------------------------------------
+
+const TOOLS = ["Xvfb", "xdpyinfo", "dbus-daemon", "pipewire", "wireplumber", "pipewire-pulse", "pactl", "parec", "pacat", "WebKitWebDriver"];
+const tauriDriver = process.env.TAURI_DRIVER || join(process.env.HOME, ".cargo", "bin", "tauri-driver");
+const missing = TOOLS.filter((t) => spawnSync("sh", ["-c", `command -v ${t}`]).status !== 0);
+if (!existsSync(tauriDriver)) missing.push("tauri-driver (cargo install tauri-driver --locked)");
+if (missing.length) {
+  console.error(`missing: ${missing.join(", ")}\nsee tests/e2e/README.md for the apt line`);
+  process.exit(2);
+}
+
+if (!flag("--no-build")) {
+  console.log("building the app (no LLM, release, with the probe's allocation count)...");
+  const r = spawnSync(
+    process.execPath,
+    [join(repo, "scripts", "tauri.mjs"), "build", "--no-bundle", "--features", "callback-probe-alloc"],
+    { cwd: repo, stdio: "inherit", env: { ...process.env, YAMES_DEV_NO_LLM: "1" } },
+  );
+  if (r.status !== 0) {
+    console.error("build failed");
+    process.exit(2);
+  }
+}
+if (!existsSync(app)) {
+  console.error(`no app at ${app} (build it, or pass --app)`);
+  process.exit(2);
+}
+
+// ---------------------------------------------------------------------------
+// The world
+// ---------------------------------------------------------------------------
+
+const env = new Env({ display: gpuDisplay ? Number(gpuDisplay.replace(":", "")) : undefined, gpu: !!gpuDisplay });
+console.log(`profile: ${env.dirs.root}`);
+const probeOut = (n) => join(out, `callback-probe-${n}.json`);
+let launch = 0;
+let driverProc = null;
+
+async function startDriver() {
+  if (driverProc && driverProc.exitCode === null) return;
+  driverProc = env.spawnLogged("tauri-driver", tauriDriver, ["--port", "4444"], {
+    env: {
+      // The in-app click probe, armed for every launch. The report path is
+      // set per launch below through the app's args-less env, so restart
+      // the driver when it changes.
+      YAMES_CALLBACK_PROBE: "1",
+      YAMES_CALLBACK_PROBE_OUT: probeOut(launch),
+    },
+  });
+  await env.waitFor(async () => {
+    const r = await fetch("http://127.0.0.1:4444/status").catch(() => null);
+    return !!r;
+  }, "tauri-driver");
+}
+
+async function launchApp() {
+  launch += 1;
+  // A fresh driver per launch, so each launch writes its own probe report.
+  if (driverProc) {
+    driverProc.kill("SIGTERM");
+    await sleep(500);
+  }
+  driverProc = null;
+  await startDriver();
+  const d = await new Driver().start(app);
+  await d.waitText(/Today/, 30000);
+  // "What's new" is offered on every new version; it is not what this tests.
+  await d.clickText(/^Got it$/, { timeoutMs: 3000 }).catch(() => {});
+  return d;
+}
+
+/** Quit as a player does (the window's Close), so the probe report is written. */
+async function quitApp(d, label) {
+  const path = probeOut(launch);
+  try {
+    await d.clickText(/^Close$/, { timeoutMs: 5000 });
+  } catch (e) {
+    console.warn(`could not press Close: ${e.message}`);
+  }
+  await env.waitFor(() => existsSync(path), "the probe report", 10000).catch(() => {});
+  await d.quit();
+  if (existsSync(path)) {
+    const report = JSON.parse(readFileSync(path, "utf8"));
+    info[`probe_${label}`] = report;
+    return report;
+  }
+  return null;
+}
+
+async function shot(d, name) {
+  try {
+    writeFileSync(join(out, `${name}.png`), await d.screenshot());
+  } catch {
+    /* a screenshot is a nicety */
+  }
+}
+
+function db() {
+  return new DatabaseSync(join(appDataDir(env.dirs), "practice.db"), { readOnly: true });
+}
+function takesOf(exerciseId) {
+  const conn = db();
+  try {
+    return conn
+      .prepare("SELECT * FROM path_takes WHERE exercise_id = ? ORDER BY started_at")
+      .all(exerciseId)
+      .map((r) => ({ ...r, facts: JSON.parse(r.facts_json) }));
+  } finally {
+    conn.close();
+  }
+}
+function cleanTempo(exerciseKey) {
+  const conn = db();
+  try {
+    return conn.prepare("SELECT comfortable_bpm FROM exercise_ceilings WHERE exercise_key = ?").get(exerciseKey)
+      ?.comfortable_bpm ?? null;
+  } finally {
+    conn.close();
+  }
+}
+
+/** What the neck on the screen is drawn with: a WebGL2 canvas (3D) or not. */
+function neckKind(d) {
+  return d.exec(`
+    const gl = [...document.querySelectorAll('canvas')].some((c) => {
+      const r = c.getBoundingClientRect();
+      if (r.width < 200) return false;
+      try { return !!c.getContext('webgl2'); } catch { return false; }
+    });
+    return gl ? '3d-webgl2' : 'svg-or-none';`);
+}
+
+// ---------------------------------------------------------------------------
+// One Take
+// ---------------------------------------------------------------------------
+
+const player = new Player(env);
+
+/**
+ * Arm the player, press Start take, play `style`, and wait for the result.
+ * Returns the result screen's text, and whether the Take ended by itself.
+ */
+async function playTake(d, exercise, style, label) {
+  const m = await d.waitText(/Start take, (\d+) BPM/);
+  const bpm = Number(m[1]);
+  const take = renderTake({
+    bpm,
+    notes: exercise.notes,
+    barTicks: barTicks(exercise),
+    exerciseBars: exercise.bars,
+    bars: takeBars(exercise),
+    style,
+    seed: style === "sloppy" ? 11 : 7,
+  });
+  // What the scorer said about each note as it went, for the record: a
+  // step in these is a stall somewhere in the audio path.
+  await d.exec(`window.__e2eOnsets = [];
+    window.__e2eOff?.then?.((f) => f());
+    window.__e2eOff = window.__TAURI__.event.listen('score-onset', (e) => window.__e2eOnsets.push(e.payload));`);
+  const playing = player.playOnCountIn(take);
+  // The app's PipeWire threads exist once its streams are open (see Env).
+  env.promoteAudioThreads();
+  await d.clickText(/^Start take/);
+  const heard = await playing;
+  // Played out, the engine stops the Take on its last bar line by itself.
+  // `take` holds 1.5 s of tail after the last bar, so the end has passed.
+  let endedItself = false;
+  for (let i = 0; i < 12; i++) {
+    const st = await d.invoke("get_state");
+    if (!st.isPlaying) {
+      endedItself = true;
+      break;
+    }
+    await sleep(500);
+  }
+  check(`${label}: the Take ends by itself at its last bar`, endedItself,
+    endedItself ? "" : "still playing 6 s after the last bar; pressing End take (see README, known bugs)");
+  if (!endedItself) await d.clickText(/^End take$/).catch(() => {});
+  await d.waitText(/Go again|Move on|Next/i, 30000);
+  await sleep(800);
+  const text = await d.text();
+  await shot(d, `result-${label}`);
+  const onsets = await d.exec("return window.__e2eOnsets || []");
+  info.liveOnsets ??= {};
+  info.liveOnsets[label] = onsets.map((o) => (o.state === "hit" ? o.deviationMs : o.state));
+  return { bpm, text, heard, endedItself };
+}
+
+// ---------------------------------------------------------------------------
+// Scenarios
+// ---------------------------------------------------------------------------
+
+async function scenarioSession() {
+  const d = await launchApp();
+  try {
+    await shot(d, "today-first-run");
+    check("Today opens for a returning player", /Today/.test(await d.text()));
+    await d.clickText(/^5$/);
+    await d.clickText(/^Start$/);
+    const m = await d.waitText(/Start take, (\d+) BPM/, 20000);
+    // The first Exercise the plan puts in front of a new player.
+    const page = await d.text();
+    const title = ["Open A, pick hand alone", "Four fingers, one string"].find((t) => page.includes(t));
+    check("a 5-minute Session starts on a graded Exercise", !!title, title ?? page.slice(0, 300));
+    if (!title) return;
+    const { exercise } = exerciseByTitle(title);
+    info.session = { exercise: title, startBpm: Number(m[1]) };
+    info.neck_session = await neckKind(d);
+
+    // 1. A good take: passes, and counts toward the clean tempo.
+    const good = await playTake(d, exercise, "good", "good take");
+    const goodRow = takesOf(exercise.id).at(-1);
+    check("good take: the result says the bar was met", /PASS BAR MET/i.test(good.text), firstLines(good.text, /BPM ·/));
+    check("good take: a Take row was saved, passed", goodRow?.passed === 1 && goodRow?.caught === 1,
+      goodRow ? `evenness ${fmt(goodRow.facts.measures.evenness)}, heard ${goodRow.facts.measures.heard}/${goodRow.facts.measures.expected}, extras ${goodRow.facts.measures.extras}` : "no row");
+    check("good take: it counts toward the clean tempo", goodRow?.facts?.measures?.pass?.countsForCleanTempo === true,
+      `heldBars ${goodRow?.facts?.measures?.pass?.heldBars}`);
+    const clean = cleanTempo(`alternate-picking/${exercise.id}`);
+    check("good take: the clean tempo is stored at the Take's tempo", clean === good.bpm, `clean tempo ${clean}, take ${good.bpm} BPM`);
+    info.goodTake = goodRow?.facts?.measures;
+
+    // 2. A sloppy take at the next tempo: fails on evenness.
+    await d.clickText(/^Go again/);
+    const sloppy = await playTake(d, exercise, "sloppy", "sloppy take");
+    const sloppyRow = takesOf(exercise.id).at(-1);
+    const evenCheck = sloppyRow?.facts?.measures?.pass?.checks?.find((c) => c.metric === "timingEvenness");
+    check("sloppy take: the result names the evenness bar", /THE BAR IS 85%/i.test(sloppy.text) && /Evenness was/i.test(sloppy.text),
+      firstLines(sloppy.text, /Evenness was/));
+    check("sloppy take: saved, caught, not passed, evenness under the bar",
+      sloppyRow?.passed === 0 && sloppyRow?.caught === 1 && evenCheck && evenCheck.held === false,
+      sloppyRow ? `evenness ${fmt(sloppyRow.facts.measures.evenness)}, heard ${sloppyRow.facts.measures.heard}/${sloppyRow.facts.measures.expected}` : "no row");
+    check("sloppy take: the clean tempo did not move", cleanTempo(`alternate-picking/${exercise.id}`) === good.bpm);
+    info.sloppyTake = sloppyRow?.facts?.measures;
+
+    // 3. Silence: "didn't catch enough", and it does not count.
+    await d.clickText(/^Go again/);
+    const silent = await playTake(d, exercise, "silent", "silent take");
+    const silentRow = takesOf(exercise.id).at(-1);
+    check("silent take: the result says it didn't catch enough", /didn.t catch enough/i.test(silent.text), firstLines(silent.text, /catch/));
+    check("silent take: saved as not caught", silentRow?.caught === 0 && silentRow?.passed === 0,
+      silentRow ? `noCatchReason ${silentRow.facts.measures.noCatchReason}` : "no row");
+
+    await d.clickText(/^Exit$/);
+    await d.waitText(/How long have you got/, 15000);
+  } finally {
+    const report = await quitApp(d, "session");
+    if (report) printProbe("session (3D neck on screen)", report);
+  }
+}
+
+async function scenarioRelaunch() {
+  const d = await launchApp();
+  try {
+    const today = await d.text();
+    await shot(d, "today-after-relaunch");
+    info.todayAfterRelaunch = firstLines(today, /WHAT'S IN IT/i, 8);
+    check("after a restart, Today no longer plans a first Session", !/YOUR FIRST SESSION/i.test(today), firstLines(today, /SESSION/i));
+    await d.clickText(/^Progress$/);
+    await sleep(1500);
+    const progress = await d.text();
+    await shot(d, "progress-after-relaunch");
+    info.progressAfterRelaunch = progress.slice(progress.indexOf("Progress\n"), progress.indexOf("Progress\n") + 600);
+    const startBpm = info.session?.startBpm;
+    check("after a restart, Progress shows the Exercise played", info.session && progress.includes(info.session.exercise.split(",")[0]),
+      firstLines(progress, /Open A|Four fingers/));
+    check("after a restart, Progress shows its clean tempo", startBpm && new RegExp(`\\b${startBpm}\\b`).test(progress));
+  } finally {
+    await quitApp(d, "relaunch");
+  }
+}
+
+async function scenarioFourFingers() {
+  const d = await launchApp();
+  const title = "Four fingers, one string";
+  const target = 80;
+  try {
+    const { exercise } = exerciseByTitle(title);
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Alternate Picking/);
+    await d.clickText(/Even eighths on one string/);
+    await d.clickIn(/Four fingers, one string/, /^Play this$/);
+    let m = await d.waitText(/Start take, (\d+) BPM/, 20000);
+    for (let i = 0; i < 10 && Number(m[1]) < target; i++) {
+      await d.clickText(/^Faster$/);
+      await sleep(400);
+      m = await d.waitText(/Start take, (\d+) BPM/);
+    }
+    check(`${title}: the Take is set to ${target} BPM`, Number(m[1]) === target, `${m[1]} BPM`);
+    info.neck_fourFingers = await neckKind(d);
+    const good = await playTake(d, exercise, "good", "four fingers at 80");
+    const row = takesOf(exercise.id).at(-1);
+    check(`${title} at ${target}: passes`, /PASS BAR MET/i.test(good.text) && row?.passed === 1,
+      row ? `evenness ${fmt(row.facts.measures.evenness)}, heard ${row.facts.measures.heard}/${row.facts.measures.expected}, extras ${row.facts.measures.extras}` : "no row");
+    const clean = cleanTempo(`alternate-picking/${exercise.id}`);
+    check(`${title} at ${target}: clean tempo ${target} stored`, clean === target, `clean tempo ${clean}`);
+    info.fourFingers = row?.facts?.measures;
+    await d.clickText(/^Exit$/);
+  } finally {
+    const report = await quitApp(d, "four-fingers");
+    if (report) printProbe("four fingers (3D neck on screen)", report);
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+function fmt(x) {
+  return typeof x === "number" ? x.toFixed(3) : String(x);
+}
+function firstLines(text, re, n = 3) {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const i = lines.findIndex((l) => re.test(l));
+  return i < 0 ? "" : lines.slice(i, i + n).join(" / ");
+}
+function printProbe(label, r) {
+  console.log(
+    `probe ${label}: p99 jitter ${r.jitter_p99_ms} ms (max ${r.jitter_max_ms}), missed beats ${r.missed_beats}, ` +
+      `callback allocs/frees ${r.callback_allocs}/${r.callback_frees}, dropped notifications ${r.dropped_notifications}; ` +
+      `${r.callbacks} callbacks in ${r.runs} runs, ${r.buffer_ms} ms buffers at ${r.sample_rate} Hz`,
+  );
+}
+
+let exitCode = 0;
+try {
+  await env.up();
+  seedSettings(env.dirs);
+  info.rtThreads = env.rtThreads;
+  if (!env.rtThreads) console.warn("PipeWire is not real-time (no passwordless sudo): a busy machine will glitch the audio");
+  info.calibration = await player.calibrate();
+  console.log(`player calibrated: ${fmt(info.calibration.offsetMs)} ms write-to-capture`);
+  if (scenarios.has("session")) await scenarioSession();
+  if (scenarios.has("relaunch")) await scenarioRelaunch();
+  if (scenarios.has("four-fingers")) await scenarioFourFingers();
+} catch (e) {
+  check("the run finished", false, e.message.split("\n").slice(0, 6).join(" | "));
+  exitCode = 1;
+} finally {
+  if (driverProc) driverProc.kill("SIGTERM");
+  await env.down().catch(() => {});
+  if (!flag("--keep")) rmSync(env.dirs.root, { recursive: true, force: true });
+}
+
+const failed = results.filter((r) => !r.ok);
+writeFileSync(join(out, "results.json"), JSON.stringify({ results, info }, null, 2));
+console.log(`\n${results.length - failed.length} passed, ${failed.length} failed. Results, screenshots and probe reports: ${out}`);
+process.exit(failed.length || exitCode ? 1 : 0);

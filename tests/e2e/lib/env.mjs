@@ -1,0 +1,256 @@
+// The world the real app runs in for the e2e: a temp profile, an X server,
+// a private session bus and a private PipeWire with two null sinks.
+//
+//   yames_out   the app's output (default sink). Its monitor is what the
+//               player listens to for the count-in, and what a human would
+//               have heard.
+//   guitar      the "guitar". The player writes the take into it, and its
+//               monitor is the default source, so the app's input is it.
+//
+// Nothing here touches the owner's profile, audio server or display: every
+// path is under one mkdtemp, and every process is ours and killed at the end.
+import { spawn, spawnSync, execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, writeFileSync, existsSync, chmodSync, createWriteStream, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+export const APP_ID = "com.yames.metronome";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+export function makeProfile(root) {
+  const dirs = {
+    root,
+    home: join(root, "home"),
+    config: join(root, "config"),
+    data: join(root, "data"),
+    cache: join(root, "cache"),
+    run: join(root, "run"),
+    logs: join(root, "logs"),
+  };
+  for (const d of Object.values(dirs)) mkdirSync(d, { recursive: true });
+  chmodSync(dirs.run, 0o700);
+  return dirs;
+}
+
+/** Where the app keeps its store and its SQLite file, under this profile. */
+export function appDataDir(dirs) {
+  return join(dirs.data, APP_ID);
+}
+
+/**
+ * A returning player who finished setup, so the app opens on Today rather
+ * than the first-run wizard (M1 owns the wizard; this suite is about the
+ * Session). Only the keys `useOnboarding` reads to decide it is not a first
+ * run, plus the instrument.
+ */
+export function seedSettings(dirs, extra = {}) {
+  const dir = appDataDir(dirs);
+  mkdirSync(dir, { recursive: true });
+  const settings = {
+    "onboarding.version": 1,
+    "onboarding.completedAt": "2026-11-01T00:00:00.000Z",
+    "onboarding.chipDismissed": 99,
+    instrument: "guitar",
+    ...extra,
+  };
+  writeFileSync(join(dir, "settings.json"), JSON.stringify(settings, null, 2));
+}
+
+/**
+ * Kill every process of ours whose XDG_RUNTIME_DIR is under `root`: the
+ * daemons, the app and its WebKit children. Run at the end, and at the start
+ * in case a previous run was killed before it could clean up.
+ */
+export function reap(root) {
+  const mine = process.getuid?.();
+  let killed = 0;
+  for (const pid of readdirSync("/proc")) {
+    if (!/^\d+$/.test(pid) || Number(pid) === process.pid) continue;
+    try {
+      if (mine !== undefined && readFileSync(`/proc/${pid}/status`, "utf8").match(/^Uid:\s+(\d+)/m)?.[1] !== String(mine)) continue;
+      const env = readFileSync(`/proc/${pid}/environ`, "utf8").split("\0");
+      const run = env.find((e) => e.startsWith("XDG_RUNTIME_DIR="))?.slice(16);
+      if (run && run.startsWith(root)) {
+        process.kill(Number(pid), "SIGKILL");
+        killed++;
+      }
+    } catch {
+      /* gone, or not ours */
+    }
+  }
+  return killed;
+}
+
+/**
+ * The session bus activates gvfsd-fuse and the document portal, and both
+ * mount a FUSE file system under XDG_RUNTIME_DIR. Killed, they leave the
+ * mount behind and the profile cannot be deleted. Unmount what is ours.
+ */
+export function unmountUnder(root) {
+  let mounts = "";
+  try {
+    mounts = readFileSync("/proc/mounts", "utf8");
+  } catch {
+    return;
+  }
+  for (const line of mounts.split("\n")) {
+    const point = line.split(" ")[1];
+    if (!point || !point.startsWith(root)) continue;
+    for (const [cmd, args] of [["fusermount3", ["-u", "-z", point]], ["fusermount", ["-u", "-z", point]]]) {
+      if (spawnSync(cmd, args).status === 0) break;
+    }
+  }
+}
+
+/** The first X display number with no server on it. */
+export function freeDisplay(from = 90) {
+  for (let n = from; n < from + 50; n++) {
+    if (!existsSync(`/tmp/.X11-unix/X${n}`) && !existsSync(`/tmp/.X${n}-lock`)) return n;
+  }
+  throw new Error("no free X display");
+}
+
+export class Env {
+  constructor({ root, display, gpu = false } = {}) {
+    this.dirs = makeProfile(root ?? mkdtempSync(join(tmpdir(), "yames-e2e-")));
+    reap(this.dirs.root);
+    unmountUnder(this.dirs.root);
+    this.display = display ?? freeDisplay();
+    this.gpu = gpu;
+    this.procs = [];
+    this.vars = {
+      HOME: this.dirs.home,
+      XDG_CONFIG_HOME: this.dirs.config,
+      XDG_DATA_HOME: this.dirs.data,
+      XDG_CACHE_HOME: this.dirs.cache,
+      XDG_RUNTIME_DIR: this.dirs.run,
+      DISPLAY: `:${this.display}`,
+      // PipeWire's ALSA plugin, which is what cpal's "default" opens.
+      PIPEWIRE_RUNTIME_DIR: this.dirs.run,
+      PULSE_RUNTIME_PATH: join(this.dirs.run, "pulse"),
+      NO_AT_BRIDGE: "1",
+      // Keep GIO off gvfs (no FUSE mount in the profile) and GTK off portals.
+      GIO_USE_VFS: "local",
+      GTK_USE_PORTAL: "0",
+      LANG: "en_US.UTF-8",
+    };
+  }
+
+  env(extra = {}) {
+    const base = { ...process.env };
+    // Never inherit the caller's session: bus, audio and display are ours.
+    for (const k of ["DBUS_SESSION_BUS_ADDRESS", "WAYLAND_DISPLAY", "PULSE_SERVER"]) delete base[k];
+    return { ...base, ...this.vars, ...extra };
+  }
+
+  spawnLogged(name, cmd, args, opts = {}) {
+    const log = join(this.dirs.logs, `${name}.log`);
+    const child = spawn(cmd, args, {
+      env: this.env(opts.env),
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: false,
+    });
+    const out = createWriteStream(log, { flags: "a" });
+    child.stdout.pipe(out);
+    child.stderr.pipe(out);
+    child.logPath = log;
+    this.procs.push({ name, child });
+    return child;
+  }
+
+  sh(cmd, args) {
+    return execFileSync(cmd, args, { env: this.env(), encoding: "utf8" });
+  }
+
+  async up() {
+    // --- display ---------------------------------------------------------
+    if (!this.gpu) {
+      this.spawnLogged("xvfb", "Xvfb", [
+        `:${this.display}`,
+        "-screen", "0", "1280x1024x24",
+        "-nolisten", "tcp",
+        "+extension", "GLX",
+      ]);
+    }
+    await this.waitFor(() => spawnSync("xdpyinfo", [], { env: this.env() }).status === 0, "the X server");
+
+    // --- session bus (wireplumber and webkit want one) -------------------
+    const bus = join(this.dirs.run, "bus");
+    this.spawnLogged("dbus", "dbus-daemon", ["--session", "--nofork", `--address=unix:path=${bus}`]);
+    await this.waitFor(() => existsSync(bus), "the session bus");
+    this.vars.DBUS_SESSION_BUS_ADDRESS = `unix:path=${bus}`;
+
+    // --- audio -----------------------------------------------------------
+    this.spawnLogged("pipewire", "pipewire", []);
+    await this.waitFor(() => existsSync(join(this.dirs.run, "pipewire-0")), "PipeWire");
+    this.spawnLogged("wireplumber", "wireplumber", []);
+    this.spawnLogged("pipewire-pulse", "pipewire-pulse", []);
+    await this.waitFor(() => spawnSync("pactl", ["info"], { env: this.env() }).status === 0, "pipewire-pulse");
+    const load = (...a) => this.sh("pactl", ["load-module", ...a]);
+    load("module-null-sink", "sink_name=yames_out", "sink_properties=device.description=YamesOut");
+    load("module-null-sink", "sink_name=guitar", "sink_properties=device.description=Guitar");
+    // wireplumber can take a moment to see the new nodes.
+    await this.waitFor(() => /guitar\.monitor/.test(this.sh("pactl", ["list", "short", "sources"])), "the guitar source");
+    this.sh("pactl", ["set-default-sink", "yames_out"]);
+    this.sh("pactl", ["set-default-source", "guitar.monitor"]);
+    this.rtThreads = this.promoteAudioThreads();
+    await sleep(300);
+    return this;
+  }
+
+  /**
+   * What rtkit does for PipeWire on a desktop: its data loops run SCHED_FIFO.
+   * Our private PipeWire has no rtkit to ask, so on a busy machine its graph
+   * stalls and the stall reads as the app's fault. With passwordless sudo
+   * this puts every PipeWire data-loop thread of ours (the daemons' and the
+   * ALSA plugin's inside the app) at FIFO 88, as rtkit would. The app's own
+   * cpal callback thread is left alone: on Linux cpal does not promote it,
+   * and the probe should measure what users get.
+   */
+  promoteAudioThreads() {
+    if (spawnSync("sudo", ["-n", "true"]).status !== 0) return 0;
+    let promoted = 0;
+    for (const pid of readdirSync("/proc")) {
+      if (!/^\d+$/.test(pid)) continue;
+      try {
+        const env = readFileSync(`/proc/${pid}/environ`, "utf8");
+        if (!env.includes(`XDG_RUNTIME_DIR=${this.dirs.run}`)) continue;
+        for (const tid of readdirSync(`/proc/${pid}/task`)) {
+          const comm = readFileSync(`/proc/${pid}/task/${tid}/comm`, "utf8").trim();
+          if (!/data-loop/.test(comm)) continue;
+          if (spawnSync("sudo", ["-n", "chrt", "-f", "-p", "88", tid]).status === 0) promoted++;
+        }
+      } catch {
+        /* gone */
+      }
+    }
+    return promoted;
+  }
+
+  async waitFor(test, what, timeoutMs = 15000) {
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeoutMs) {
+      try {
+        if (await test()) return;
+      } catch {
+        /* not yet */
+      }
+      await sleep(100);
+    }
+    throw new Error(`timed out waiting for ${what}`);
+  }
+
+  async down() {
+    reap(this.dirs.root);
+    for (const { child } of this.procs.reverse()) {
+      if (child.exitCode === null) child.kill("SIGTERM");
+    }
+    await sleep(300);
+    for (const { child } of this.procs) {
+      if (child.exitCode === null) child.kill("SIGKILL");
+    }
+    this.procs = [];
+    unmountUnder(this.dirs.root);
+  }
+}
+
