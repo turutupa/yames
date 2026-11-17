@@ -361,7 +361,7 @@ async function scenarioSession() {
     info.goodTake = goodRow?.facts?.measures;
 
     // 2. A sloppy take at the next tempo: fails on evenness.
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const sloppy = await playTake(d, exercise, "sloppy", "sloppy take");
     const sloppyRow = takesOf(exercise.id).at(-1);
     const evenCheck = sloppyRow?.facts?.measures?.pass?.checks?.find((c) => c.metric === "timingEvenness");
@@ -374,7 +374,7 @@ async function scenarioSession() {
     info.sloppyTake = sloppyRow?.facts?.measures;
 
     // 3. Silence: "didn't catch enough", and it does not count.
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const silent = await playTake(d, exercise, "silent", "silent take");
     const silentRow = takesOf(exercise.id).at(-1);
     check("silent take: the result says it didn't catch enough", /didn.t catch enough/i.test(silent.text), firstLines(silent.text, /catch/));
@@ -467,7 +467,7 @@ async function scenarioBluesBand() {
     }
     info.bluesBandBleed = { dB: Number(bleed), percent: pct, module: loopback };
   }
-  const d = await launchApp();
+  let d = await launchApp();
   const title = "A on every downbeat";
   const path = loadPath("blues-pentatonics");
   const key = `blues-pentatonics/${"landing.root-on-one"}`;
@@ -500,7 +500,7 @@ async function scenarioBluesBand() {
       `${good.heard?.beatsHeardFromTheBand} of ${takeBars(exercise) * 4}`);
     check(`${title}${tag}: clean tempo stored`, cleanTempo(key) === good.bpm, `clean tempo ${cleanTempo(key)}`);
 
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const sloppy = await playTake(d, exercise, "sloppy", `blues sloppy${tag}`, { band: true });
     const sloppyRow = row();
     info.bluesBand.takes.push({ style: "sloppy", bpm: sloppy.bpm, measures: sloppyRow?.facts?.measures });
@@ -508,13 +508,13 @@ async function scenarioBluesBand() {
     // evenness bar (0.6) at 70 BPM, band or no band (the control below).
     console.log(`      sloppy (35 ms) over the band: ${summary(sloppyRow)}`);
 
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const sloppier = await playTake(d, exercise, "sloppier", `blues sloppier${tag}`, { band: true });
     const sloppierRow = row();
     info.bluesBand.takes.push({ style: "sloppier", bpm: sloppier.bpm, measures: sloppierRow?.facts?.measures });
     check(`${title}${tag}: a sloppy (80 ms) take over the band does not pass`, sloppierRow?.passed === 0 && !/PASS BAR MET/i.test(sloppier.text), summary(sloppierRow));
 
-    await d.clickText(/^Go again/);
+    await d.clickText(/^(Go again|Again,)/);
     const wrong = await playTake(d, exercise, "wrong", `blues wrong notes${tag}`, { band: true });
     const wrongRow = row();
     info.bluesBand.takes.push({ style: "wrong", bpm: wrong.bpm, measures: wrongRow?.facts?.measures });
@@ -522,8 +522,13 @@ async function scenarioBluesBand() {
 
     // The control: the same Takes with the band turned all the way down (the
     // click comes back), so a difference above is the band's and not the take's.
-    // A fresh Session: "Play this" is a five-minute one, and seven Takes outrun it.
+    // A fresh Session: "Play this" is a five-minute one, and seven Takes outrun
+    // it. In a fresh app: a Session started again after Exit in the same run
+    // could not hear the input (see the report of 2026-11-16, B1).
     await d.clickText(/^Exit$/);
+    const first = await quitApp(d, "blues-band");
+    if (first) printProbe("blues over the band", first);
+    d = await launchApp();
     await d.clickText(/^Paths$/);
     await d.clickText(/^Blues and Pentatonics/);
     await d.clickText(/Chord tones: A7, D7 and E7/);
@@ -538,7 +543,7 @@ async function scenarioBluesBand() {
     await setBand(d, "0");
 
     for (const [i, style] of ["good", "sloppy", "sloppier"].entries()) {
-      if (i > 0) await d.clickText(/^(Go again|Again)/);
+      if (i > 0) await d.clickText(/^(Go again|Again,)/);
       const r = await playTake(d, exercise, style, `blues ${style}, band at 0${tag}`, { band: true });
       const rr = row();
       info.bluesBand.takes.push({ style, band: 0, bpm: r.bpm, measures: rr?.facts?.measures });
@@ -546,8 +551,8 @@ async function scenarioBluesBand() {
     }
     await d.clickText(/^Exit$/);
   } finally {
-    const report = await quitApp(d, "blues-band");
-    if (report) printProbe("blues over the band", report);
+    const report = await quitApp(d, "blues-band-control");
+    if (report) printProbe("blues, band at 0 (the control)", report);
     if (loopback) spawnSync("pactl", ["unload-module", loopback], { env: env.env() });
   }
 }
@@ -647,7 +652,7 @@ async function scenarioNeck() {
     const before = cpuByName();
     const t0 = Date.now();
     for (let i = 0; i < takes; i++) {
-      if (i > 0) await d.clickText(/^(Go again|Again)/);
+      if (i > 0) await d.clickText(/^(Go again|Again,)/);
       const r = await playTake(d, exercise, "good", `neck take ${i + 1}`);
       info.neck.takes.push({ bpm: r.bpm, passed: /PASS BAR MET/i.test(r.text) });
     }
