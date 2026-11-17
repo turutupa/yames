@@ -38,7 +38,7 @@
       "min": "MIN",
       "nothing": "Todavía no hay nada que tocar.",
       "needsInput": "Para puntuar hace falta un micrófono o una entrada directa.",
-      "toolsOffer": "¿Vienes por las herramientas? Siguen todas en la barra lateral.",
+      "toolsOffer": "¿Vienes por las herramientas? Están todas en Herramientas.",
       "toolsOfferOpen": "Ir a mi última herramienta",
       "toolsOfferAlways": "Abrir siempre ahí"
     },
@@ -221,7 +221,10 @@
       "playedNoClean_other": "{{count}} tomas. Aún sin tempo limpio.",
       "playedClean": "{{count}} toma. Tempo limpio: {{bpm}} BPM.",
       "playedClean_many": "{{count}} tomas. Tempo limpio: {{bpm}} BPM.",
-      "playedClean_other": "{{count}} tomas. Tempo limpio: {{bpm}} BPM."
+      "playedClean_other": "{{count}} tomas. Tempo limpio: {{bpm}} BPM.",
+      "running": "En curso",
+      "whereYouAre": "Dónde estás",
+      "openStep": "Ir al paso {{n}}"
     },
     "progress": {
       "title": "Progreso",
@@ -238,6 +241,14 @@
     "settings": {
       "openOnLastTool": "Abrir en mi última herramienta",
       "openOnLastToolHint": "Saltarse Hoy y abrir en la última herramienta que usaste. Se aplica la próxima vez que abras Yames."
+    },
+    "tools": {
+      "intro": "Úsalas cuando quieras. Lo que toques en ellas sigue siendo tuyo.",
+      "beat": "Un clic para tocar encima, con el coach escuchando si quieres.",
+      "setlist": "Una rutina que montas tú y que suena en orden.",
+      "drill": "Sube el tempo mientras tocas y practica un plan que escribes tú.",
+      "jam": "Una banda y tus acordes. Nunca se califica.",
+      "songs": "Lee la tablatura de una canción y toca con ella."
     }
   }
 }

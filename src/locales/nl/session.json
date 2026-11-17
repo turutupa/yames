@@ -38,7 +38,7 @@
       "min": "MIN",
       "nothing": "Er is nog niets om te spelen.",
       "needsInput": "Voor de beoordeling is een microfoon of directe ingang nodig.",
-      "toolsOffer": "Kom je voor de tools? Ze staan nog allemaal in de zijbalk.",
+      "toolsOffer": "Kom je voor de tools? Ze staan allemaal onder Tools.",
       "toolsOfferOpen": "Naar mijn laatste tool",
       "toolsOfferAlways": "Altijd daar openen"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "{{count}} take. Nog geen schoon tempo.",
       "playedNoClean_other": "{{count}} takes. Nog geen schoon tempo.",
       "playedClean": "{{count}} take. Schoon tempo {{bpm}} BPM.",
-      "playedClean_other": "{{count}} takes. Schoon tempo {{bpm}} BPM."
+      "playedClean_other": "{{count}} takes. Schoon tempo {{bpm}} BPM.",
+      "running": "Loopt",
+      "whereYouAre": "Waar je staat",
+      "openStep": "Naar stap {{n}}"
     },
     "progress": {
       "title": "Voortgang",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "Openen op mijn laatste tool",
       "openOnLastToolHint": "Vandaag overslaan en openen op de tool die je het laatst gebruikte. Gaat in de volgende keer dat Yames opent."
+    },
+    "tools": {
+      "intro": "Gebruik ze wanneer je wilt. Wat je erin speelt, blijft van jou.",
+      "beat": "Een klik om op te spelen, met de coach die meeluistert als je wilt.",
+      "setlist": "Een routine die je zelf bouwt en op volgorde speelt.",
+      "drill": "Voert het tempo op terwijl je speelt, en oefent een plan dat je zelf schrijft.",
+      "jam": "Een band en jouw akkoorden. Nooit beoordeeld.",
+      "songs": "Lees de tab van een nummer en speel mee."
     }
   }
 }

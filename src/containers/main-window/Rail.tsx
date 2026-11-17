@@ -67,10 +67,12 @@ interface RailProps {
 }
 
 /**
- * The learning side: where the app opens, and what it knows about you.
+ * The rail's places, as in the mocks: Today, Paths, Progress, Tools.
  *
- * Above the tools rather than among them, and `MODES` below is untouched: the
- * five tools keep their order, because `tab-1` to `tab-5` count down that list.
+ * Tools opens the Tools list. The five tools in `MODES` below keep their order,
+ * because `tab-1` to `tab-5` count down that list; they show under Tools, nested,
+ * while a tool (or the list) is open, so moving between two tools is still one
+ * click and their library still sits beneath them.
  */
 const LEARN = [
   {
@@ -111,9 +113,22 @@ const LEARN = [
       </>
     ),
   },
+  {
+    id: "tools" as const,
+    labelKey: "session.nav.tools",
+    /** Four tiles: the Tools list is a grid of them, one per tool. */
+    icon: (
+      <>
+        <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+        <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+        <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+        <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+      </>
+    ),
+  },
 ];
 
-const MODES = [
+export const MODES = [
   {
     id: "beat" as const,
     labelKey: "nav.metronome",
@@ -269,6 +284,8 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   // The library is a list of what the tools play, so it has nothing to say on
   // the learning side, and the room goes to the rail's own rows.
   const playView: PlayTab | null = isLearnTab(covered) ? null : covered;
+  // The tools show, nested under Tools, while one of them or their list is open.
+  const toolsOpen = playView !== null || covered === "tools";
 
   // The mockup writes "Ready" at the right of the coach's row. Three words
   // rather than one, because the row already knows more than that: a session
@@ -294,6 +311,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             className="rail-mode-row"
             key={place.id}
             data-active={view === place.id ? "" : undefined}
+            data-open={place.id === "tools" && toolsOpen ? "" : undefined}
           >
             <button
               className={`rail-mode ${view === place.id ? "active" : ""}`}
@@ -319,11 +337,8 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
         ))}
       </div>
 
-      <div className="rail-group-label" aria-hidden="true">
-        {t("session.nav.tools")}
-      </div>
-
-      <div className="rail-modes" role="group" aria-label={t("session.nav.tools")}>
+      {toolsOpen && (
+      <div className="rail-modes rail-tools" role="group" aria-label={t("session.nav.tools")}>
         {MODES.map((mode) => (
           /* The row is the entry, highlight and all, so `data-active` puts the
              fill on the row rather than on the button inside it. It held a
@@ -371,6 +386,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           </div>
         ))}
       </div>
+      )}
 
       <div className="rail-library" data-open={libraryOpen ? "" : undefined}>
         {libraryOpen && playView && (

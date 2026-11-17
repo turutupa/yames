@@ -38,7 +38,7 @@
       "min": "分",
       "nothing": "まだ弾くものがありません。",
       "needsInput": "採点にはマイクかダイレクト入力が必要です。",
-      "toolsOffer": "ツールを使いたいだけですか？ 全部いつもどおりサイドバーにあります。",
+      "toolsOffer": "ツールを使いたいだけですか？ 全部「ツール」の中にあります。",
       "toolsOfferOpen": "前回のツールへ",
       "toolsOfferAlways": "いつもそこで開く"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "{{count}} テイク。クリーンテンポはまだありません。",
       "playedNoClean_other": "{{count}} テイク。クリーンテンポはまだありません。",
       "playedClean": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。",
-      "playedClean_other": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。"
+      "playedClean_other": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。",
+      "running": "進行中",
+      "whereYouAre": "現在地",
+      "openStep": "ステップ {{n}} へ"
     },
     "progress": {
       "title": "上達",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "前回のツールで開く",
       "openOnLastToolHint": "「今日」を飛ばして、最後に使ったツールで開きます。次に Yames を開いたときから有効です。"
+    },
+    "tools": {
+      "intro": "いつでも使えます。ここで弾いたものはあなたのものです。",
+      "beat": "合わせて弾くためのクリック。必要ならコーチが聴きます。",
+      "setlist": "自分で組んで、順番に演奏するルーティン。",
+      "drill": "弾いている間にテンポを上げ、自分で書いたプランを練習します。",
+      "jam": "バンドとあなたのコード。採点はしません。",
+      "songs": "曲のタブ譜を読んで、一緒に弾きます。"
     }
   }
 }

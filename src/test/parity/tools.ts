@@ -4,8 +4,9 @@
  * The revamp puts Today in front and moves these under a Tools door, so nothing
  * else in this suite may assume the rail's shape. Everything that needs to reach
  * a tool goes through `openTool`, and everything that reads a rail goes through
- * `visibleToolLabels`. **When the Tools door lands, this is the file to change,
- * and these ids, actions and hotkeys must not move:** `beat` is the Metronome in
+ * `visibleToolLabels`. The Tools door has landed (wave 2): this file is where the
+ * rail's new shape is known, and nothing else changed. **These ids, actions and
+ * hotkeys must not move:** `beat` is the Metronome in
  * users' saved `activeTab`, and `tab-1` to `tab-5` are stored in their bindings.
  */
 import { fireEvent, waitFor } from "@testing-library/react";
@@ -50,30 +51,38 @@ export const RETURNING_PLAYER: Record<string, unknown> = {
   "whatsNew.seenVersion": "0.9.0",
 };
 
+/** The tools' own group in the rail: Today, Paths, Progress and Tools are not tools. */
+function toolGroup(root: ParentNode): Element | null {
+  return root.querySelector(".rail-modes[role='group']:not(.rail-learn)");
+}
+
 /**
  * Whatever opens the tool list, if something has to.
  *
- * Today the modes sit straight on the rail, so nothing does. Under the revamp's
- * rail this clicks Tools first.
+ * The rail reads Today, Paths, Progress, Tools. The five tools show under Tools,
+ * nested, while a tool or the Tools list is open; from anywhere else a player
+ * clicks Tools first, which opens the Tools list and the rail's tool group with it.
  */
-function revealTools(): void {
-  // Nothing to reveal yet: the five modes are on the rail.
+function revealTools(root: ParentNode = document): void {
+  if (toolGroup(root)) return;
+  const door = root.querySelector<HTMLElement>(".rail-learn .rail-mode[aria-label='Tools']");
+  if (door) fireEvent.click(door);
 }
 
 /** The names of the tools a player can see, in order. */
 export function visibleToolLabels(root: ParentNode = document): string[] {
-  revealTools();
-  // The tools' own group: Today, Paths and Progress sit above it in the rail
-  // and are not tools.
-  const group = root.querySelector(".rail-modes[role='group']:not(.rail-learn)") ?? root;
+  revealTools(root);
+  const group = toolGroup(root);
+  if (!group) return [];
   return [...group.querySelectorAll(".rail-mode-label")].map((n) => n.textContent ?? "");
 }
 
 /** Open a tool the way a player does: by clicking its name. */
 export async function openTool(tool: Tool): Promise<void> {
-  revealTools();
   const name = await waitFor(() => {
-    const el = [...document.querySelectorAll<HTMLElement>(".rail-mode-label")].find(
+    revealTools();
+    const group = toolGroup(document);
+    const el = [...(group?.querySelectorAll<HTMLElement>(".rail-mode-label") ?? [])].find(
       (n) => n.textContent === tool.label,
     );
     if (!el) throw new Error(`${tool.label} is not on the rail`);

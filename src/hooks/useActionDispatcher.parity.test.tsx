@@ -58,6 +58,7 @@ const SITUATIONS = {
   paths: { view: "paths" },
   progress: { view: "progress" },
   session: { view: "session" },
+  tools: { view: "tools" },
 } as const satisfies Record<string, Situation>;
 
 type Where = keyof typeof SITUATIONS;
@@ -69,7 +70,7 @@ const without = (...not: Where[]) => EVERYWHERE.filter((w) => !not.includes(w));
  * tools' keys do nothing there (useActionDispatcher, "The learning side"); in a
  * running Session the tempo keys and Space mean the same idea in its terms.
  */
-const LEARNING = ["today", "paths", "progress", "session"] as const satisfies readonly Where[];
+const LEARNING = ["today", "paths", "progress", "session", "tools"] as const satisfies readonly Where[];
 /** The meter and tempo actions work on every tool, not on Settings. */
 const NOT_SETTINGS = without("settings", ...LEARNING);
 /** And the meter ones not on a loaded jam, where the groove owns the meter. */
@@ -134,7 +135,7 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
     does: ["setSidebarOpen"],
   },
   "toggle-coach": {
-    where: ["beat", "drill", "drillRamping", "jam", "jamEmpty", "jamEditor", "today", "paths", "progress"],
+    where: ["beat", "drill", "drillRamping", "jam", "jamEmpty", "jamEditor", "today", "paths", "progress", "tools"],
     does: ["toggleCard"],
   },
   // The saved meaning of these five is exactly this, whatever else the rail grows.

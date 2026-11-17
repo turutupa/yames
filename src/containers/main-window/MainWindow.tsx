@@ -106,6 +106,8 @@ import { TodayView } from "../session/TodayView";
 import { SessionView } from "../session/SessionView";
 import { PathsView } from "../session/PathsView";
 import { ProgressView } from "../session/ProgressView";
+import { ToolsView } from "../session/ToolsView";
+import { LearningNeck } from "../session/NeckGate";
 import { useJamTakes } from "./hooks/useJamTakes";
 /* W32 — the camera comes to Jam. The hook and the preview are eager, like the
    take's machinery is, because they run while a jam is happening; the
@@ -1715,6 +1717,7 @@ export function MainWindow() {
         />
       )}
 
+      <LearningNeck view={view}>
       <div className="main-body" data-session={view === "session" ? "" : undefined}>
         <Rail
           ref={sidebarRef}
@@ -2115,6 +2118,8 @@ export function MainWindow() {
           <PathsView session={sessionRun} />
         ) : view === "progress" ? (
           <ProgressView session={sessionRun} />
+        ) : view === "tools" ? (
+          <ToolsView onOpen={setView} />
         ) : view === "session" ? (
           <SessionView
             session={sessionRun}
@@ -2313,7 +2318,8 @@ export function MainWindow() {
         view === "jam" ||
         view === "today" ||
         view === "paths" ||
-        view === "progress") && (
+        view === "progress" ||
+        view === "tools") && (
       <CoachCard
         open={session.cardOpen}
         active={session.active}
@@ -2334,6 +2340,7 @@ export function MainWindow() {
       />
       )}
       </div>{/* main-body */}
+      </LearningNeck>
       {showResetConfirm && (
         <ResetKeybindingsConfirm
           onConfirm={resetAllBindings}

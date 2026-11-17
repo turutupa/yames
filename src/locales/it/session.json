@@ -38,7 +38,7 @@
       "min": "MIN",
       "nothing": "Non c'è ancora niente da suonare.",
       "needsInput": "Per dare un voto serve un microfono o un ingresso diretto.",
-      "toolsOffer": "Sei qui per gli strumenti? Sono ancora tutti nella barra laterale.",
+      "toolsOffer": "Sei qui per gli strumenti? Sono tutti sotto Strumenti.",
       "toolsOfferOpen": "Vai al mio ultimo strumento",
       "toolsOfferAlways": "Apri sempre lì"
     },
@@ -221,7 +221,10 @@
       "playedNoClean_other": "{{count}} take. Ancora nessun tempo pulito.",
       "playedClean": "{{count}} take. Tempo pulito: {{bpm}} BPM.",
       "playedClean_many": "{{count}} take. Tempo pulito: {{bpm}} BPM.",
-      "playedClean_other": "{{count}} take. Tempo pulito: {{bpm}} BPM."
+      "playedClean_other": "{{count}} take. Tempo pulito: {{bpm}} BPM.",
+      "running": "In corso",
+      "whereYouAre": "Dove sei",
+      "openStep": "Vai alla tappa {{n}}"
     },
     "progress": {
       "title": "Progressi",
@@ -238,6 +241,14 @@
     "settings": {
       "openOnLastTool": "Apri sul mio ultimo strumento",
       "openOnLastToolHint": "Salta Oggi e apri sull'ultimo strumento che hai usato. Vale dalla prossima apertura di Yames."
+    },
+    "tools": {
+      "intro": "Usali quando vuoi. Quello che ci suoni resta tuo.",
+      "beat": "Un clic su cui suonare, con il coach in ascolto se vuoi.",
+      "setlist": "Una routine che costruisci tu, suonata in ordine.",
+      "drill": "Alza il tempo mentre suoni e allena un piano che scrivi tu.",
+      "jam": "Una band e i tuoi accordi. Mai valutato.",
+      "songs": "Leggi la tablatura di un brano e suonaci sopra."
     }
   }
 }

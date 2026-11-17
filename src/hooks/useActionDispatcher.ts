@@ -26,7 +26,8 @@ export type ViewName =
   | "today"
   | "paths"
   | "progress"
-  | "session";
+  | "session"
+  | "tools";
 
 interface ActionDispatcherArgs {
   view: ViewName;
@@ -224,7 +225,8 @@ export function useActionDispatcher({
               view === "jam" ||
               view === "today" ||
               view === "paths" ||
-              view === "progress"
+              view === "progress" ||
+              view === "tools"
             )
               toggleCard();
             break;
@@ -245,7 +247,8 @@ export function useActionDispatcher({
        * every action (TOOLS_PARITY §3.1, item 6). On the running Session the
        * Metronome's own keys mean the same idea in the Session's terms.
        */
-      if (view === "today" || view === "paths" || view === "progress") {
+      // The Tools list is a door to the tools, not one of them: same deal.
+      if (view === "today" || view === "paths" || view === "progress" || view === "tools") {
         if (view === "today" && actionId === "play") sessionActions?.startToday();
         return;
       }

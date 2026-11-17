@@ -29,6 +29,7 @@ const SCENES = [
   "step-detail",
   "progress",
   "progress-empty",
+  "tools",
 ];
 
 const SIZES = [
@@ -51,6 +52,9 @@ const BIG: Record<string, string> = {
 for (const scene of SCENES) {
   for (const size of SIZES) {
     test(`${scene} fits at ${size.name} (${size.width}px)`, async ({ page }) => {
+      // Find my edge plays up to four Takes in real time with the neck stage
+      // drawing them; under SwiftShader and a parallel suite that passes 30 s.
+      if (scene === "session-edge-result") test.slow();
       await openShot(page, scene, size);
       await noSidewaysScroll(page, `${scene} at ${size.width}px`);
       const big = BIG[scene];

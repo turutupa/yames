@@ -26,7 +26,8 @@ type TourHome =
   | "today"
   | "paths"
   | "progress"
-  | "session";
+  | "session"
+  | "tools";
 
 export type UseTourArgs = {
   /** Overridable for tests; defaults to the six stops. */

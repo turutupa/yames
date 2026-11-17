@@ -38,7 +38,7 @@
       "min": "MIN",
       "nothing": "There's nothing to play yet.",
       "needsInput": "Grading needs a microphone or direct input.",
-      "toolsOffer": "Here for the tools? They're all still in the rail.",
+      "toolsOffer": "Here for the tools? They're all under Tools.",
       "toolsOfferOpen": "Go to my last tool",
       "toolsOfferAlways": "Always open there"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "{{count}} take. No clean tempo yet.",
       "playedNoClean_other": "{{count}} takes. No clean tempo yet.",
       "playedClean": "{{count}} take. Clean tempo {{bpm}} BPM.",
-      "playedClean_other": "{{count}} takes. Clean tempo {{bpm}} BPM."
+      "playedClean_other": "{{count}} takes. Clean tempo {{bpm}} BPM.",
+      "running": "Running",
+      "whereYouAre": "Where you are",
+      "openStep": "Go to step {{n}}"
     },
     "progress": {
       "title": "Progress",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "Open on my last tool",
       "openOnLastToolHint": "Skip Today and open on whichever tool you used last. Takes effect the next time Yames opens."
+    },
+    "tools": {
+      "intro": "Use them any time. What you play in them stays yours.",
+      "beat": "A click to play to, with the coach listening if you want it.",
+      "setlist": "A routine you build yourself, played in order.",
+      "drill": "Climbs the tempo while you play, and drills a plan you write.",
+      "jam": "A band and your chords. Never graded.",
+      "songs": "Read a song's tab and play along with it."
     }
   }
 }

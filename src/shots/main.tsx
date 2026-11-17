@@ -86,7 +86,17 @@ if (!params.get("manifest") && !shot) {
   throw new Error(window.__SHOT_ERROR__);
 }
 
-if (shot) installShotMock(shot, theme);
+/*
+ * The neck stage's scenes mount the stage alone on a minimal page (one slot,
+ * no app, no mock backend), so they say only what the stage draws.
+ */
+if (shot?.stage) {
+  void import("../stage3d/shots/StageShot")
+    .then((m) => m.mountStageShot(shot.stage!))
+    .catch((err) => {
+      window.__SHOT_ERROR__ = String(err?.message ?? err);
+    });
+} else if (shot) installShotMock(shot, theme);
 
 /**
  * Press something until it has done what it was meant to do.
@@ -210,6 +220,9 @@ async function drive() {
     } else if (stop === "progress") {
       rail("Progress")?.click();
       await until("Progress", () => !!byId("progress"));
+    } else if (stop === "tools") {
+      rail("Tools")?.click();
+      await until("the Tools list", () => !!byId("tools"));
     } else if (stop !== "today") {
       byId("today-start")?.click();
       await until("the Session", () => !!byId("session"));
@@ -948,7 +961,7 @@ async function drive() {
   window.__SHOT_READY__ = true;
 }
 
-if (shot) {
+if (shot && !shot.stage) {
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     // No StrictMode: its double-invoked effects make the transport fire twice,
     // and a screenshot wants one pass through the app's startup, not two.

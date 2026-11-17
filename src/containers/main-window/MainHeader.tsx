@@ -219,7 +219,8 @@ export type MainView =
   | "today"
   | "paths"
   | "progress"
-  | "session";
+  | "session"
+  | "tools";
 
 interface MainHeaderProps {
   state: AppState;

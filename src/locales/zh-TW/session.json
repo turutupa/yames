@@ -38,7 +38,7 @@
       "min": "分鐘",
       "nothing": "還沒有可以彈的內容。",
       "needsInput": "評分需要麥克風或直接輸入。",
-      "toolsOffer": "只是來用工具？它們都還在側邊欄裡。",
+      "toolsOffer": "只是來用工具？它們都在「工具」裡。",
       "toolsOfferOpen": "去我上次用的工具",
       "toolsOfferAlways": "總是在那裡打開"
     },
@@ -214,7 +214,10 @@
       "playedNoClean": "{{count}} 遍。還沒有乾淨速度。",
       "playedNoClean_other": "{{count}} 遍。還沒有乾淨速度。",
       "playedClean": "{{count}} 遍。乾淨速度 {{bpm}} BPM。",
-      "playedClean_other": "{{count}} 遍。乾淨速度 {{bpm}} BPM。"
+      "playedClean_other": "{{count}} 遍。乾淨速度 {{bpm}} BPM。",
+      "running": "進行中",
+      "whereYouAre": "你所在的位置",
+      "openStep": "前往第 {{n}} 步"
     },
     "progress": {
       "title": "進度",
@@ -231,6 +234,14 @@
     "settings": {
       "openOnLastTool": "打開上次用的工具",
       "openOnLastToolHint": "跳過「今天」，直接打開你上次用的工具。下次打開 Yames 時生效。"
+    },
+    "tools": {
+      "intro": "隨時都能用。你在裡面彈的東西仍然屬於你。",
+      "beat": "跟著彈的節拍聲，需要的話教練會聽。",
+      "setlist": "你自己編排、依序演奏的練習流程。",
+      "drill": "你彈的時候逐步提速，並練習你自己寫的計畫。",
+      "jam": "一支樂團加上你的和弦。從不評分。",
+      "songs": "看歌曲的六線譜並跟著彈。"
     }
   }
 }
