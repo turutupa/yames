@@ -121,6 +121,11 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        # The action's default list still asks for the long-removed `tools`
+        # package, and sdkmanager now fails on it. The step below installs
+        # everything the build needs.
+        with:
+          packages: platform-tools
 
       # Pinned to what the Android work was actually done against (M00/M04
       # findings, and the owner's SDK): NDK r26.1, platform 36 for the
