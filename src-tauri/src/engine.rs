@@ -8073,11 +8073,18 @@ impl MetronomeEngine {
                 let notif = match beats.pop() {
                     Some(n) => n,
                     None => {
+                        // Read BEFORE the park. The end of a song or a jam's
+                        // form pushes its notification and THEN lowers
+                        // `playing`, and the push is what unparks this
+                        // thread: reading the flag only after the park saw it
+                        // already down and drained the very notification
+                        // that woke it, so the UI never heard the piece end.
+                        let was_playing = playing.load(Ordering::Relaxed);
                         thread::park_timeout(Duration::from_millis(50));
                         // Ticks that landed while the transport was stopped
                         // are stale. Same rule, same place in the pass, as
                         // the `try_recv` drain this replaces.
-                        if !playing.load(Ordering::Relaxed) {
+                        if !was_playing && !playing.load(Ordering::Relaxed) {
                             beats.drain();
                         }
                         continue;

@@ -344,7 +344,7 @@ pub struct TimingAnalyzer {
     /// Roadmap 2.4 — the score the player is playing against, when
     /// there is one. `None` is free play, and free play is untouched
     /// by everything this field enables.
-    schedule: Arc<Mutex<Option<(ScoreSchedule, Vec<PassBar>)>>>,
+    schedule: Arc<Mutex<Option<LoadedSchedule>>>,
     /// Bumped whenever the slot above changes, so the analysis loop can
     /// tell "still the same schedule" from "a new one" without locking
     /// and cloning it every 5 ms.
@@ -354,6 +354,39 @@ pub struct TimingAnalyzer {
     /// `practice-segment-ended` with a grade on it, and a silent Take has to
     /// be able to say "I didn't catch enough" too. See [`Self::take_grade_slot`].
     take_grade: Arc<Mutex<Option<TakeGrade>>>,
+    /// The Take's audio and the grade the pitch pass makes of it. See
+    /// [`NotesPass`].
+    notes: NotesPass,
+}
+
+/// What `load_exercise_schedule` was handed: the schedule, the Exercise's pass
+/// bars, and the written pitch of each note for the pitch pass.
+type LoadedSchedule = (ScoreSchedule, Vec<PassBar>, Vec<crate::pitch::ScoreNote>);
+
+/// Right notes on a Session Take (`score::notes`), the second half of its
+/// grade.
+///
+/// The timing grade goes out as it always has, the moment the Take is closed,
+/// with `notesPending` on it. The pitch pass then runs on a thread of its own
+/// over the audio the onset detector kept (`take_audio`), and leaves the whole
+/// grade, right notes in it, in `slot`; `get_take_grade_with_notes` waits for
+/// it. A release build takes well under a second for a Take; the screen waits
+/// a few at most and keeps the timing grade, `noteIdentity` not assessed, past
+/// that.
+#[derive(Clone)]
+pub struct NotesPass {
+    pub tap: crate::take_audio::SharedTakeAudioTap,
+    pub slot: Arc<Mutex<NotesSlot>>,
+}
+
+/// The grade with right notes, for the Take that was closed last.
+#[derive(Debug, Default)]
+pub struct NotesSlot {
+    /// Which close this belongs to. A pass for an earlier close that finishes
+    /// late leaves nothing here.
+    pub serial: u64,
+    pub pending: bool,
+    pub grade: Option<TakeGrade>,
 }
 
 /// How many live verdicts one sweep is expected to hand back.
@@ -379,7 +412,22 @@ impl TimingAnalyzer {
             schedule: Arc::new(Mutex::new(None)),
             schedule_version: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             take_grade: Arc::new(Mutex::new(None)),
+            notes: NotesPass {
+                tap: crate::take_audio::TakeAudioTap::new(),
+                slot: Arc::new(Mutex::new(NotesSlot::default())),
+            },
         }
+    }
+
+    /// Where the onset detector keeps a Session Take's audio. Handed to it
+    /// before it starts (`OnsetDetector::set_take_tap`).
+    pub fn take_audio_tap(&self) -> crate::take_audio::SharedTakeAudioTap {
+        self.notes.tap.clone()
+    }
+
+    /// Where the grade with right notes lands. See [`NotesPass`].
+    pub fn notes_slot(&self) -> Arc<Mutex<NotesSlot>> {
+        self.notes.slot.clone()
     }
 
     /// Where the grade of the Take that was just closed lands, within a
@@ -403,7 +451,27 @@ impl TimingAnalyzer {
     /// [`Self::load_score_schedule`], for an Exercise: the Take's grade is
     /// also judged against its pass bars (`score::pass`).
     pub fn load_exercise_schedule(&self, schedule: ScoreSchedule, pass_bars: Vec<PassBar>) {
-        *self.schedule.lock().unwrap() = Some((schedule, pass_bars));
+        self.load_exercise_with_notes(schedule, pass_bars, Vec::new(), None);
+    }
+
+    /// [`Self::load_exercise_schedule`], with the written pitch of every note.
+    /// When a pass bar names `noteIdentity`, the Take's audio is kept for the
+    /// pitch pass from the next time the transport runs.
+    /// `input_rate` is the input device's sample rate, when known, which sizes
+    /// the buffer the audio is kept in.
+    pub fn load_exercise_with_notes(
+        &self,
+        schedule: ScoreSchedule,
+        pass_bars: Vec<PassBar>,
+        pitches: Vec<crate::pitch::ScoreNote>,
+        input_rate: Option<u32>,
+    ) {
+        if !pitches.is_empty() && pass_bars.iter().any(|b| b.metric == "noteIdentity") {
+            self.notes.tap.arm(input_rate);
+        } else {
+            self.notes.tap.disarm();
+        }
+        *self.schedule.lock().unwrap() = Some((schedule, pass_bars, pitches));
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
@@ -412,6 +480,7 @@ impl TimingAnalyzer {
     /// is dropped — the caller has already been given it on the last
     /// segment-ended event.
     pub fn clear_score_schedule(&self) {
+        self.notes.tap.disarm();
         *self.schedule.lock().unwrap() = None;
         self.schedule_version
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
@@ -468,6 +537,12 @@ impl TimingAnalyzer {
     /// state is NOT reset — the player can resume after the fetch.
     pub fn close_open_segment(&self) {
         *self.take_grade.lock().unwrap() = None;
+        {
+            let mut slot = self.notes.slot.lock().unwrap();
+            slot.serial += 1;
+            slot.pending = false;
+            slot.grade = None;
+        }
         self.close_segment_now.store(true, Ordering::SeqCst);
     }
 
@@ -547,6 +622,7 @@ impl TimingAnalyzer {
         let schedule = self.schedule.clone();
         let schedule_version = self.schedule_version.clone();
         let take_grade = self.take_grade.clone();
+        let notes = self.notes.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             Self::analysis_loop(
@@ -560,6 +636,7 @@ impl TimingAnalyzer {
                 schedule,
                 schedule_version,
                 take_grade,
+                notes,
                 profile,
                 instrument_id,
                 preset_id,
@@ -607,9 +684,10 @@ impl TimingAnalyzer {
         close_segment_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
-        schedule_slot: Arc<Mutex<Option<(ScoreSchedule, Vec<PassBar>)>>>,
+        schedule_slot: Arc<Mutex<Option<LoadedSchedule>>>,
         schedule_version: Arc<std::sync::atomic::AtomicU64>,
         take_grade: Arc<Mutex<Option<TakeGrade>>>,
+        notes: NotesPass,
         profile: InstrumentProfile,
         instrument_id: String,
         preset_id: Option<String>,
@@ -854,7 +932,7 @@ impl TimingAnalyzer {
                         .lock()
                         .unwrap()
                         .clone()
-                        .map(|(schedule, pass_bars)| {
+                        .map(|(schedule, pass_bars, pitches)| {
                             // A schedule loaded with pass bars is a Session
                             // Take; only those get the lag correction.
                             let session_take = !pass_bars.is_empty();
@@ -862,6 +940,7 @@ impl TimingAnalyzer {
                                 .with_calibration_seed(initial_calibration_offset_ms)
                                 .with_lag_correction(session_take)
                                 .with_pass_bars(pass_bars)
+                                .with_note_pitches(pitches)
                         });
                 }
             }
@@ -914,13 +993,21 @@ impl TimingAnalyzer {
             // of the legacy-formula fallback. Activity state is preserved
             // (player can resume after the report is shown).
             if close_segment_now.swap(false, Ordering::SeqCst) {
-                if let Some(run) = schedule_run.as_ref() {
+                if let Some(run) = schedule_run.as_mut() {
                     // Before the segment, because there may not be one.
                     let weights = if coach_mode == CoachMode::Default {
                         profile.default_score_weights
                     } else {
                         profile.score_weights
                     };
+                    // Right notes take a pitch pass, off this loop. The grade
+                    // below and the segment's say it is coming.
+                    let serial = if run.wants_notes() {
+                        start_notes_pass(run, weights, &notes)
+                    } else {
+                        None
+                    };
+                    run.set_notes_pending(serial);
                     *take_grade.lock().unwrap() = run.report(&weights).map(|r| r.grade);
                 }
                 if let Some(seg) = segment.take() {
@@ -2577,6 +2664,59 @@ pub fn window_thresholds(window_ms: f64) -> WindowThresholds {
     // ok spans the full matching window — no dead zone.
     let ok = window_ms.max(good);
     WindowThresholds { perfect, good, ok }
+}
+
+/// Hand the Take's audio and a copy of the run to a thread that grades it with
+/// right notes, into `notes.slot`. The serial the grade will carry, or `None`
+/// and nothing started when no usable audio was kept. Called on the analyzer's
+/// thread; the pitch pass never runs on it, and its own thread runs below
+/// normal priority, like the coach's model worker.
+fn start_notes_pass(run: &ScheduleRun, weights: ScoreWeights, notes: &NotesPass) -> Option<u64> {
+    let audio = notes.tap.capture()?;
+    // `clock::now_ns` to the wall milliseconds the beat map is in, the way
+    // every onset and beat is converted.
+    let start_ms =
+        now_wall_ms() as f64 + (audio.first_ns as f64 - crate::clock::now_ns() as f64) / 1e6;
+    let serial = {
+        let mut slot = notes.slot.lock().unwrap();
+        slot.serial += 1;
+        slot.pending = true;
+        slot.grade = None;
+        slot.serial
+    };
+    let run = run.clone();
+    let slot = notes.slot.clone();
+    let spawned = thread::Builder::new()
+        .name("yames-take-notes".into())
+        .spawn(move || {
+            crate::coach::lower_current_thread_priority();
+            let graded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                let take = crate::score::notes::TakeAudio {
+                    samples: &audio.samples,
+                    rate: audio.rate,
+                    start_ms,
+                };
+                run.report_with_notes(&weights, &take).map(|r| r.grade)
+            }));
+            let mut grade = graded.ok().flatten();
+            if let Some(g) = grade.as_mut() {
+                g.notes_serial = Some(serial);
+            }
+            {
+                let mut slot = slot.lock().unwrap_or_else(|e| e.into_inner());
+                if slot.serial == serial {
+                    slot.pending = false;
+                    slot.grade = grade;
+                }
+            }
+            // The Take's audio is freed here, on this thread.
+            drop(audio);
+        });
+    if spawned.is_err() {
+        notes.slot.lock().unwrap().pending = false;
+        return None;
+    }
+    Some(serial)
 }
 
 /// Convert a monotonic-NS timestamp (from `clock::now_ns()`) to wall-clock
@@ -5755,5 +5895,123 @@ mod tests {
             verdicts.len(),
             verdicts
         );
+    }
+}
+
+#[cfg(test)]
+mod notes_pass_tests {
+    use super::*;
+    use crate::audio_input::RingBuffer;
+    use crate::pitch::ScoreNote;
+    use crate::score::{ExpectedOnset, NotesStatus};
+
+    /// The glue between the Take's kept audio and the pitch pass: the tap is
+    /// pulled the way the detector's thread pulls it, on the real clock, the
+    /// run is fed on the wall clock the analyzer converts everything to, and
+    /// the grade with right notes lands in the slot off this thread.
+    #[test]
+    fn a_closed_take_gets_its_right_notes_from_a_thread_of_its_own() {
+        const RATE: u32 = 22_050;
+        let notes_n = 32usize;
+        let midis = [57.0, 60.0, 64.0, 60.0];
+        let t0_wall = now_wall_ms() as f64;
+        let t0_ns = crate::clock::now_ns();
+        let first_beat = 500.0;
+        let eighth = 250.0;
+        let len_ms = first_beat + notes_n as f64 * eighth + 500.0;
+
+        // Plucked sines, each cut by the next.
+        let total = (len_ms / 1000.0 * RATE as f64) as usize;
+        let mut audio = vec![0.0f32; total];
+        for i in 0..notes_n {
+            let hz = 440.0 * 2f64.powf((midis[i % 4] - 69.0) / 12.0);
+            let start = ((first_beat + i as f64 * eighth) / 1000.0 * RATE as f64) as usize;
+            let n = (eighth / 1000.0 * RATE as f64) as usize;
+            for k in 0..n {
+                let t = k as f64 / RATE as f64;
+                audio[start + k] = (0.5 * (-t * 6.0).exp() * (2.0 * std::f64::consts::PI * hz * t).sin()) as f32;
+            }
+        }
+
+        let notes = NotesPass {
+            tap: crate::take_audio::TakeAudioTap::new(),
+            slot: Arc::new(Mutex::new(NotesSlot::default())),
+        };
+        notes.tap.arm(Some(RATE));
+        let mut ring = RingBuffer::new(RATE as usize * 4);
+        notes.tap.pull(&ring, t0_ns);
+        let chunk = RATE as usize / 10;
+        for (c, part) in audio.chunks(chunk).enumerate() {
+            ring.write(part);
+            let end = (c * chunk + part.len()) as f64 / RATE as f64;
+            notes.tap.pull(&ring, t0_ns + (end * 1e9) as u64);
+        }
+
+        let schedule = ScoreSchedule {
+            onsets: (0..notes_n)
+                .map(|i| ExpectedOnset {
+                    id: i as u32,
+                    beat: i as f64 * 0.5,
+                    note_ids: vec![i as u32],
+                    soft: false,
+                    accent: false,
+                })
+                .collect(),
+            length_beats: notes_n as f64 * 0.5,
+            loops: false,
+        };
+        let pitches: Vec<ScoreNote> =
+            (0..notes_n).map(|i| ScoreNote { id: i as u32, midi: midis[i % 4] }).collect();
+        let bars = vec![
+            PassBar { metric: "notesHeard".into(), min: Some(0.9), max: None, over_bars: 4 },
+            PassBar { metric: "noteIdentity".into(), min: Some(0.9), max: None, over_bars: 4 },
+        ];
+        let mut run = ScheduleRun::new(schedule)
+            .with_lag_correction(true)
+            .with_pass_bars(bars)
+            .with_note_pitches(pitches);
+        for q in 0..=(notes_n / 2 + 1) {
+            run.note_quarter_in_bar(q % 4 == 0, t0_wall + first_beat + q as f64 * 500.0, 4);
+        }
+        for i in 0..notes_n {
+            run.note_onset(PlayedOnset {
+                time_ms: t0_wall + first_beat + i as f64 * eighth + 8.0,
+                amplitude: 0.5,
+                confidence: 0.9,
+            });
+        }
+        assert!(run.wants_notes());
+        let weights = Instrument::ElectricGuitar.profile().score_weights;
+        let serial = start_notes_pass(&run, weights, &notes).expect("a pass started");
+        // Once: a second close of the same Take starts nothing.
+        assert!(start_notes_pass(&run, weights, &notes).is_none());
+        // The timing grade says the notes are coming, and does not count them.
+        run.set_notes_pending(Some(serial));
+        let timed = run.report(&weights).unwrap().grade;
+        assert!(timed.notes_pending);
+        assert_eq!(timed.notes_serial, Some(serial));
+        let timed_pass = timed.pass.unwrap();
+        assert_eq!(timed_pass.not_assessed, vec!["noteIdentity".to_string()]);
+        assert_eq!(timed_pass.notes.unwrap().status, NotesStatus::NotRun);
+
+        let deadline = std::time::Instant::now() + Duration::from_secs(30);
+        let grade = loop {
+            {
+                let slot = notes.slot.lock().unwrap();
+                if !slot.pending {
+                    break slot.grade.clone().expect("a grade with right notes");
+                }
+            }
+            assert!(std::time::Instant::now() < deadline, "the pitch pass never finished");
+            thread::sleep(Duration::from_millis(10));
+        };
+        let pass = grade.pass.unwrap();
+        let check = pass.notes.unwrap();
+        assert_eq!(check.status, NotesStatus::Measured, "{pass:?}");
+        assert!(check.right >= 30, "{check:?}");
+        assert!(pass.not_assessed.is_empty());
+        assert!(pass.checks.iter().any(|c| c.metric == "noteIdentity" && c.held));
+        assert!(!grade.notes_pending);
+        assert_eq!(grade.notes_serial, Some(serial));
     }
 }

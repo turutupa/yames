@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Metronom stworzony do prawdziwych ćwiczeń. Ręce zostają na instrumencie.",
-      "setup": "Skonfiguruj (około minuty)",
+      "tagline": "Zespół gra, ty grasz, a Yames słyszy twoją gitarę. Ćwiczenie, które mieści się w minutach, które masz.",
+      "setup": "Skonfiguruj mnie (około dwóch minut)",
       "skip": "Chcę tylko klik",
       "footer": "Darmowy · lokalny · open source · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Zamknij"
     },
     "audioInput": {
-      "title": "Skonfiguruj wejście",
-      "subtitle": "Yames słucha tędy, żeby ocenić twoje tempo. Zagraj coś i popatrz na wskaźnik.",
+      "title": "Jak mam cię słyszeć?",
+      "subtitle": "Wybierz, jak gitara trafia do komputera, i zagraj kilka dźwięków. Wskaźnik pokazuje, co słyszy Yames.",
+      "mode": {
+        "label": "Jak podłączona jest gitara",
+        "mic": {
+          "title": "Mikrofon",
+          "desc": "Gitara w pokoju, przez mikrofon komputera lub mikrofon USB. Pojedyncze dźwięki działają najlepiej."
+        },
+        "direct": {
+          "title": "Wejście bezpośrednie",
+          "desc": "Kabel z gitary do interfejsu audio. Najczystszy sygnał."
+        }
+      },
+      "noInterface": "Nie znaleziono interfejsu audio. Podłącz go, a pojawi się na liście poniżej, albo użyj mikrofonu.",
       "device": "Urządzenie wejściowe",
       "guidance": {
         "electric-guitar": "Podłącz się do interfejsu albo graj przed mikrofonem laptopa — mikrofon wystarczy, interfejs jest lepszy.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Zagraj coś — wskaźnik potrzebuje sekundy sygnału.",
       "heard": "Jest. Yames cię słyszy.",
-      "skip": "Pomiń, ustawię to później"
+      "skip": "Pomiń, ustawię to później",
+      "noDevices": {
+        "title": "Nie znaleziono wejścia",
+        "body": "Podłącz mikrofon lub interfejs audio; lista odświeży się sama. W laptopie sprawdź, czy wbudowany mikrofon nie jest wyłączony."
+      },
+      "openFailed": {
+        "title": "Nie udało się otworzyć tego wejścia",
+        "body": "Może używa go inna aplikacja albo Yames nie ma dostępu do mikrofonu. Zamknij tamtą aplikację lub zezwól na dostęp i spróbuj ponownie."
+      },
+      "silent": {
+        "title": "Na razie nic nie słychać",
+        "mic": "Graj bliżej mikrofonu i trochę głośniej.",
+        "direct": "Podkręć głośność w gitarze i gain w interfejsie, i wybierz kanał wejściowy, do którego wpięty jest kabel.",
+        "permission": "Dostęp do mikrofonu: w macOS Ustawienia systemowe › Prywatność i ochrona › Mikrofon, włącz Yames; w Windows Ustawienia › Prywatność › Mikrofon, zezwól aplikacjom klasycznym. Potem uruchom Yames ponownie.",
+        "other": "Nadal nic? Wypróbuj inne urządzenie z listy albo pomiń: narzędzia działają bez wejścia."
+      },
+      "retry": "Spróbuj ponownie"
     },
     "hearItWork": {
       "title": "Posłuchaj, jak działa",
@@ -128,7 +156,7 @@
       "coachOn": "Włączony",
       "inputNone": "Nie skonfigurowano",
       "alwaysOnTop": "Zawsze na wierzchu",
-      "start": "Zacznij ćwiczyć",
+      "start": "Przejdź do Dzisiaj",
       "tour": "Oprowadź mnie (30 s)"
     },
     "hints": {
@@ -206,6 +234,8 @@
       "takeTour": "Zobacz przewodnik",
       "runSetup": "Uruchom konfigurację ponownie",
       "shortcuts": "Skróty klawiszowe",
+      "sendFeedback": "Wyślij opinię",
+      "sendFeedbackNote": "Otwiera zgłoszenie na GitHubie w przeglądarce, z wersją i systemem już wpisanymi. Nic nie zostanie wysłane, dopóki go nie zatwierdzisz.",
       "reportProblem": "Zgłoś problem",
       "reportWorking": "Zbieranie logów…",
       "reportDone": "Zapisano diagnostykę. Dołącz ten plik do zgłoszenia:",

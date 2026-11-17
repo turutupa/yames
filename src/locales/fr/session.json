@@ -21,7 +21,8 @@
       "even": "régulier",
       "heard": "des notes entendues",
       "extras": "notes en trop",
-      "accents": "accents placés"
+      "accents": "accents placés",
+      "notes": "bonnes notes"
     },
     "today": {
       "title": "Aujourd'hui",
@@ -52,14 +53,16 @@
         "heard": "Parce que j'ai entendu {{value}} % des notes à {{bpm}} BPM. Le seuil est à {{bar}} %.",
         "extras": "À cause de notes en trop à {{bpm}} BPM. Le seuil est de {{bar}} sur quatre mesures.",
         "accents": "Parce que {{value}} % des accents sont bien tombés à {{bpm}} BPM. Le seuil est à {{bar}} %.",
-        "plain": "Parce que la dernière prise à {{bpm}} BPM n'a pas atteint le seuil."
+        "plain": "Parce que la dernière prise à {{bpm}} BPM n'a pas atteint le seuil.",
+        "notes": "Parce que {{value}} % des notes dont j'ai pu reconnaître la hauteur étaient celles écrites à {{bpm}} BPM. Le seuil est à {{bar}} %."
       },
       "easing": {
         "even": "La régularité était de {{value}} % à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
         "heard": "J'ai entendu {{value}} % des notes à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
         "extras": "Il y avait des notes en trop à {{bpm}} BPM, donc on passe à {{next}} BPM.",
         "accents": "{{value}} % des accents sont bien tombés à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM.",
-        "plain": "Les dernières prises à {{bpm}} BPM n'ont pas atteint le seuil, donc on passe à {{next}} BPM."
+        "plain": "Les dernières prises à {{bpm}} BPM n'ont pas atteint le seuil, donc on passe à {{next}} BPM.",
+        "notes": "{{value}} % des notes reconnues étaient celles écrites à {{bpm}} BPM et le seuil est à {{bar}} %, donc on passe à {{next}} BPM."
       },
       "climb": "Parce que tu as atteint le seuil à {{bpm}} BPM. Cran suivant : {{next}}.",
       "climbFast": "Parce que la régularité était de {{value}} % à {{bpm}} BPM, bien au-dessus du seuil. On saute à {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "Le seuil est de {{bar}}",
       "cleanFirst": "Tempo propre : {{bpm}} BPM.",
       "cleanMoved": "Tempo propre : de {{from}} à {{bpm}} BPM.",
-      "unmeasuredNotes": "J'ai vérifié le placement seulement. Le choix des bonnes notes n'est pas encore noté.",
+      "unmeasuredNotes": "J'ai vérifié le placement. Je n'ai pas entendu les notes assez nettement pour dire si c'étaient les bonnes, donc ce n'est pas noté cette fois.",
       "againSame": "Encore, {{bpm}} BPM",
       "moveOn": "Passer à la suite"
     },
@@ -144,7 +147,8 @@
         "even": "La régularité était de {{value}} %. {{heard}} notes entendues sur {{expected}}. Mêmes notes, même tempo.",
         "heard": "J'ai entendu {{heard}} notes sur {{expected}}, et le placement ne peut pas passer sans elles.",
         "extras": "{{extras}} notes que je n'attendais pas. Étouffe les cordes inutilisées si elles résonnent.",
-        "accents": "{{value}} % des accents marqués sont sortis plus fort que les notes autour."
+        "accents": "{{value}} % des accents marqués sont sortis plus fort que les notes autour.",
+        "notes": "{{value}} % des notes dont j'ai pu reconnaître la hauteur étaient celles écrites. Mêmes notes, même tempo, et attention aux cases."
       }
     },
     "noCatch": {
@@ -196,6 +200,7 @@
       "mechanicsSub": "Comment tes mains jouent",
       "later": "Plus tard",
       "laterWhy": "Tu peux déjà lire celui-ci. La notation dont il a besoin viendra plus tard.",
+      "laterWhyLanding": "Tu peux déjà le lire. Il se note sur les notes où tu retombes sur les accords, et l'appli ne sait pas encore les juger, donc il n'est pas dans tes séances.",
       "stepCount": "{{count}} étape",
       "stepCount_many": "{{count}} étapes",
       "stepCount_other": "{{count}} étapes",
@@ -249,6 +254,15 @@
       "drill": "Monte le tempo pendant que tu joues, et travaille un plan que tu écris.",
       "jam": "Un groupe et tes accords. Jamais noté.",
       "songs": "Lis la tablature d'un morceau et joue avec."
+    },
+    "view": {
+      "label": "Vue d'entraînement",
+      "neck": "Manche",
+      "runway": "Piste",
+      "between": "Change de vue entre deux prises"
+    },
+    "runway": {
+      "label": "Les prochaines notes, qui arrivent sur la ligne"
     }
   }
 }

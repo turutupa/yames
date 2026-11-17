@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Een metronoom gemaakt voor echt oefenen. Je handen blijven op het instrument.",
-      "setup": "Stel het voor me in (ongeveer een minuut)",
+      "tagline": "Een band speelt, jij speelt, en Yames hoort je gitaar. Oefenen dat past in de minuten die je hebt.",
+      "setup": "Stel me in (ongeveer twee minuten)",
       "skip": "Geef me gewoon de klik",
       "footer": "Gratis · lokaal · open source · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "Sluiten"
     },
     "audioInput": {
-      "title": "Stel je ingang in",
-      "subtitle": "Yames luistert hierlangs mee om je timing te beoordelen. Speel iets en kijk naar de meter.",
+      "title": "Hoe hoor ik je?",
+      "subtitle": "Kies hoe je gitaar bij de computer komt en speel een paar noten. De meter laat zien wat Yames hoort.",
+      "mode": {
+        "label": "Hoe je gitaar is aangesloten",
+        "mic": {
+          "title": "Microfoon",
+          "desc": "Je gitaar in de kamer, via de microfoon van de computer of een USB-microfoon. Losse noten werken het best."
+        },
+        "direct": {
+          "title": "Direct in",
+          "desc": "Een kabel van de gitaar naar een audio-interface. Het schoonste signaal."
+        }
+      },
+      "noInterface": "Geen audio-interface gevonden. Sluit hem aan en hij verschijnt in de lijst hieronder, of gebruik de microfoon.",
       "device": "Invoerapparaat",
       "guidance": {
         "electric-guitar": "Sluit aan op een interface of speel voor de laptopmicrofoon — de microfoon werkt, een interface is beter.",
@@ -95,7 +107,23 @@
       },
       "waiting": "Speel iets — de meter heeft een seconde signaal nodig.",
       "heard": "Gelukt. Yames hoort je.",
-      "skip": "Overslaan, doe ik later"
+      "skip": "Overslaan, doe ik later",
+      "noDevices": {
+        "title": "Geen ingang gevonden",
+        "body": "Sluit een microfoon of audio-interface aan; de lijst werkt zichzelf bij. Controleer op een laptop of de ingebouwde microfoon niet uit staat."
+      },
+      "openFailed": {
+        "title": "Deze ingang ging niet open",
+        "body": "Misschien gebruikt een andere app hem, of mag Yames de microfoon niet gebruiken. Sluit die app of geef toegang, en probeer het opnieuw."
+      },
+      "silent": {
+        "title": "Nog niets gehoord",
+        "mic": "Speel dichter bij de microfoon, en iets harder.",
+        "direct": "Draai de volumeknop van de gitaar en de gain van de interface open, en kies het ingangskanaal waar je kabel in zit.",
+        "permission": "Microfoontoegang: op macOS Systeeminstellingen › Privacy en beveiliging › Microfoon, zet Yames aan; op Windows Instellingen › Privacy › Microfoon, sta desktop-apps toe. Start Yames daarna opnieuw.",
+        "other": "Nog steeds niets? Probeer een ander apparaat uit de lijst, of sla over: de tools werken zonder ingang."
+      },
+      "retry": "Opnieuw"
     },
     "hearItWork": {
       "title": "Hoor het werken",
@@ -128,7 +156,7 @@
       "coachOn": "Aan",
       "inputNone": "Niet ingesteld",
       "alwaysOnTop": "Altijd op voorgrond",
-      "start": "Beginnen met oefenen",
+      "start": "Naar Vandaag",
       "tour": "Laat me rondkijken (30 s)"
     },
     "hints": {
@@ -206,6 +234,8 @@
       "takeTour": "Rondleiding starten",
       "runSetup": "Setup opnieuw doorlopen",
       "shortcuts": "Sneltoetsen",
+      "sendFeedback": "Feedback sturen",
+      "sendFeedbackNote": "Opent een GitHub-issue in je browser met de versie en het systeem al ingevuld. Er wordt niets verstuurd tot je het indient.",
       "reportProblem": "Probleem melden",
       "reportWorking": "Logs verzamelen…",
       "reportDone": "Diagnose opgeslagen. Voeg dit bestand toe aan je melding:",

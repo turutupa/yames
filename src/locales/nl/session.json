@@ -21,7 +21,8 @@
       "even": "gelijkmatig",
       "heard": "van de noten gehoord",
       "extras": "extra noten",
-      "accents": "accenten raak"
+      "accents": "accenten raak",
+      "notes": "juiste noten"
     },
     "today": {
       "title": "Vandaag",
@@ -52,14 +53,16 @@
         "heard": "Omdat ik {{value}}% van de noten hoorde op {{bpm}} BPM. De lat ligt op {{bar}}%.",
         "extras": "Door extra noten op {{bpm}} BPM. De lat ligt op {{bar}} over vier maten.",
         "accents": "Omdat {{value}}% van de accenten raak was op {{bpm}} BPM. De lat ligt op {{bar}}%.",
-        "plain": "Omdat de laatste take op {{bpm}} BPM de lat niet haalde."
+        "plain": "Omdat de laatste take op {{bpm}} BPM de lat niet haalde.",
+        "notes": "Omdat {{value}}% van de noten waarvan ik de toonhoogte kon horen de geschreven waren op {{bpm}} BPM. De lat ligt op {{bar}}%."
       },
       "easing": {
         "even": "De gelijkmatigheid was {{value}}% op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
         "heard": "Ik hoorde {{value}}% van de noten op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
         "extras": "Er waren extra noten op {{bpm}} BPM, dus nu {{next}} BPM.",
         "accents": "{{value}}% van de accenten was raak op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM.",
-        "plain": "De laatste takes op {{bpm}} BPM haalden de lat niet, dus nu {{next}} BPM."
+        "plain": "De laatste takes op {{bpm}} BPM haalden de lat niet, dus nu {{next}} BPM.",
+        "notes": "{{value}}% van de herkende noten waren de geschreven op {{bpm}} BPM en de lat ligt op {{bar}}%, dus nu {{next}} BPM."
       },
       "climb": "Omdat je de lat haalde op {{bpm}} BPM. Volgende trede: {{next}}.",
       "climbFast": "Omdat de gelijkmatigheid {{value}}% was op {{bpm}} BPM, ruim boven de lat. Dit springt naar {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "De lat ligt op {{bar}}",
       "cleanFirst": "Schoon tempo: {{bpm}} BPM.",
       "cleanMoved": "Schoon tempo: van {{from}} naar {{bpm}} BPM.",
-      "unmeasuredNotes": "Ik heb alleen de timing gecontroleerd. Of het de juiste noten waren, wordt nog niet beoordeeld.",
+      "unmeasuredNotes": "Ik heb de timing gecontroleerd. Ik hoorde de noten niet duidelijk genoeg om te zeggen of het de juiste waren, dus dat is deze keer niet beoordeeld.",
       "againSame": "Nog een keer, {{bpm}} BPM",
       "moveOn": "Verder"
     },
@@ -144,7 +147,8 @@
         "even": "De gelijkmatigheid was {{value}}%. {{heard}} van de {{expected}} noten gehoord. Zelfde noten, zelfde tempo.",
         "heard": "Ik hoorde {{heard}} van de {{expected}} noten, en zonder die noten kan de timing niet slagen.",
         "extras": "{{extras}} noten die ik niet verwachtte. Demp de vrije snaren als ze meeklinken.",
-        "accents": "{{value}}% van de gemarkeerde accenten klonk harder dan de noten eromheen."
+        "accents": "{{value}}% van de gemarkeerde accenten klonk harder dan de noten eromheen.",
+        "notes": "{{value}}% van de noten waarvan ik de toonhoogte kon horen waren de geschreven. Zelfde noten, zelfde tempo, en let op de frets."
       }
     },
     "noCatch": {
@@ -193,6 +197,7 @@
       "mechanicsSub": "Hoe je handen spelen",
       "later": "Later",
       "laterWhy": "Deze kun je nu al lezen. De beoordeling die ervoor nodig is, komt later.",
+      "laterWhyLanding": "Je kunt dit pad nu al lezen. Het wordt beoordeeld op de noten waarop je over de akkoorden landt, en dat kan de app nog niet beoordelen, dus het zit niet in je sessies.",
       "stepCount": "{{count}} stap",
       "stepCount_other": "{{count}} stappen",
       "draft": "Concept",
@@ -242,6 +247,15 @@
       "drill": "Voert het tempo op terwijl je speelt, en oefent een plan dat je zelf schrijft.",
       "jam": "Een band en jouw akkoorden. Nooit beoordeeld.",
       "songs": "Lees de tab van een nummer en speel mee."
+    },
+    "view": {
+      "label": "Oefenweergave",
+      "neck": "Hals",
+      "runway": "Baan",
+      "between": "Wissel van weergave tussen takes"
+    },
+    "runway": {
+      "label": "De volgende noten, op weg naar de lijn"
     }
   }
 }

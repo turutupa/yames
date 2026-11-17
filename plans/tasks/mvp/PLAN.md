@@ -17,6 +17,16 @@ A tester installs a build on Windows, macOS or Linux, and without help:
    (or mail) with the version, OS and their words; nothing is sent without them pressing it.
 6. **The click is safe** with the neck drawing: measured in the real app, not only headless.
 
+## Platforms (the owner, 2026-11-16)
+
+Windows, macOS and Android are the main targets, and every MVP feature works on all three.
+
+- **Desktop input:** the microphone, or an audio interface such as a Focusrite, or an amp with USB audio.
+- **Android input:** the built-in mic, a USB-C class-compliant interface, or an analog TRRS adapter. Not Bluetooth, because of its latency.
+- **Linux** keeps building. **iOS** comes later.
+
+The Android work restarts from the `mobile` branch (Android v1 on the emulator, September): see worker M7 below.
+
 ## Product positioning (the owner's, 2026-11-16)
 
 Three things together, which no guitar app does: a Session that fits the minutes you have;
@@ -32,6 +42,8 @@ progress should feel.
 | M2 | runnable Paths and right notes | `mvp-paths` | `src/session/packs.ts` (runnable list), `src/paths/**` fixes a Path needs, `src-tauri/src/score/**` + `pitch.rs` + commands for `noteIdentity` |
 | M3 | the real app, end to end | `mvp-e2e` | an in-app click probe flag in `src-tauri` (reviewer), `tests/e2e/**`, scripts to run the real app headless on Linux with a virtual input |
 | M4 | builds | orchestrator | `release.yml` dispatch on `revamp`, CI fixes, artifacts for testers |
+| M6 | practice runway | `mvp-runway` | the neck + runway practice view behind a switch (`RUNWAY.md`) |
+| M7 | Android | `mvp-android` | merge `mobile`, Android audio input, the learning side on a phone, the APK in CI |
 | M5 | polish | later | the mocks' amp meter, tubes and chart on results, recap and Progress |
 
 Each branches from `revamp`, merges back when green; the orchestrator integrates, pushes, and

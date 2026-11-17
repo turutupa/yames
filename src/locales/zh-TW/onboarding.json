@@ -2,8 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "為真正的練習而生的節拍器。雙手始終留在樂器上。",
-      "setup": "幫我設定（約一分鐘）",
+      "tagline": "樂團在演奏，你在彈，Yames 在聽你的吉他。練習剛好填滿你有的那幾分鐘。",
+      "setup": "幫我設定（約兩分鐘）",
       "skip": "只要節拍聲",
       "footer": "免費 · 本機 · 開源 · v{{version}}"
     },
@@ -82,8 +82,20 @@
       "voiceDismiss": "關閉"
     },
     "audioInput": {
-      "title": "設定輸入",
-      "subtitle": "Yames 透過它聆聽並為你的節奏評分。彈一下，看看電平表。",
+      "title": "我要怎麼聽到你？",
+      "subtitle": "選擇吉他接入電腦的方式，然後彈幾個音。音量表會顯示 Yames 聽到的聲音。",
+      "mode": {
+        "label": "吉他的連接方式",
+        "mic": {
+          "title": "麥克風",
+          "desc": "房間裡的吉他，透過電腦麥克風或 USB 麥克風收音。單音效果最好。"
+        },
+        "direct": {
+          "title": "直接輸入",
+          "desc": "用導線把吉他接到錄音介面。訊號最乾淨。"
+        }
+      },
+      "noInterface": "找不到錄音介面。接上後它會出現在下方的清單中，也可以用麥克風。",
       "device": "輸入裝置",
       "guidance": {
         "electric-guitar": "接上錄音介面，或對著筆電麥克風彈——麥克風可以用，介面更穩。",
@@ -95,7 +107,23 @@
       },
       "waiting": "彈點什麼——電平表需要一秒鐘的訊號。",
       "heard": "可以了，Yames 聽得到你。",
-      "skip": "跳過，我之後再設定"
+      "skip": "跳過，我之後再設定",
+      "noDevices": {
+        "title": "找不到輸入裝置",
+        "body": "請接上麥克風或錄音介面，清單會自動更新。筆電請檢查內建麥克風是否被關閉。"
+      },
+      "openFailed": {
+        "title": "無法開啟這個輸入",
+        "body": "可能有其他 App 正在使用它，或 Yames 沒有使用麥克風的權限。關閉那個 App 或允許存取，然後再試一次。"
+      },
+      "silent": {
+        "title": "還沒有聽到聲音",
+        "mic": "離麥克風近一點，彈得稍微大聲一點。",
+        "direct": "調大吉他的音量旋鈕和錄音介面的增益，並選擇導線插著的那個輸入聲道。",
+        "permission": "麥克風權限：macOS 上在 系統設定 › 隱私權與安全性 › 麥克風 中開啟 Yames；Windows 上在 設定 › 隱私權 › 麥克風 中允許桌面應用程式。然後重新啟動 Yames。",
+        "other": "還是不行？試試清單裡的其他裝置，或者跳過：沒有輸入，工具也能用。"
+      },
+      "retry": "重試"
     },
     "hearItWork": {
       "title": "聽聽它怎麼運作",
@@ -128,7 +156,7 @@
       "coachOn": "已開啟",
       "inputNone": "未設定",
       "alwaysOnTop": "永遠在最上層",
-      "start": "開始練習",
+      "start": "前往今天",
       "tour": "帶我逛一圈（30 秒）"
     },
     "hints": {
@@ -206,6 +234,8 @@
       "takeTour": "看看導覽",
       "runSetup": "重新執行設定",
       "shortcuts": "鍵盤快速鍵",
+      "sendFeedback": "傳送意見回饋",
+      "sendFeedbackNote": "在瀏覽器中開啟一個 GitHub issue，版本和系統已填好。在你送出之前不會傳送任何內容。",
       "reportProblem": "回報問題",
       "reportWorking": "正在收集紀錄…",
       "reportDone": "診斷資訊已儲存。請把這個檔案附在回報裡：",

@@ -866,8 +866,17 @@ export function installShotMock(shot: Shot, theme: string): void {
   const store = baseStore(theme, shot.tab ?? "beat", shot.zenStyle, shot.starterShelf);
   // Every other scene opens on its own tool, the way a player who chose "open on
   // my last tool" does. Only a scene about the learning side uses the front door.
-  if (!shot.session) store.set("openOn", "lastTool");
+  if (!shot.session && !shot.firstRun) store.set("openOn", "lastTool");
+  // The first run: nobody has used this app. No instrument, no onboarding
+  // stamp, no presets (a saved preset alone counts as an existing player).
+  if (shot.firstRun) {
+    store.delete("instrument");
+    store.delete("onboarding.version");
+    store.delete("onboarding.completedAt");
+    store.delete("presets");
+  }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
+  if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
   (window as unknown as { __SHOT_PATHS__: PathStoreSeed }).__SHOT_PATHS__ = pathStore;
 
@@ -907,6 +916,8 @@ export function installShotMock(shot: Shot, theme: string): void {
   // A beat every 60/bpm seconds while playing. Only the Zen shot runs it, and
   // only because Zen is a picture of a metronome that is going.
   let beatTimer: ReturnType<typeof setTimeout> | undefined;
+  /** The first run's mocked input level, while the stream is open. */
+  let firstRunMeter: ReturnType<typeof setInterval> | undefined;
   let beatCount = 0;
 
   /**
@@ -1199,7 +1210,7 @@ export function installShotMock(shot: Shot, theme: string): void {
   // one cannot photograph an empty one.
   const MAP: Record<string, (a?: Record<string, unknown>) => unknown> = {
     get_state: () => STATE,
-    list_presets: () => [...PRESETS, ...DRILLS],
+    list_presets: () => (shot.firstRun ? [] : [...PRESETS, ...DRILLS]),
     get_active_tab: () => shot.tab ?? "beat",
     list_path_states: () => pathStore.states,
     list_path_takes: () => pathStore.takes,
@@ -1234,7 +1245,15 @@ export function installShotMock(shot: Shot, theme: string): void {
     // with the input on, and since 2026-09-21 a stop with it off (rightly) says
     // nothing at all, so a review scene with the input off never builds.
     get_evaluation_state: () => Boolean(shot.songs?.review),
-    list_audio_input_devices: () => [],
+    // The first run's input step needs something to pick: a laptop mic and
+    // an interface, or nothing at all for the "no input found" scene.
+    list_audio_input_devices: () =>
+      shot.firstRun && shot.firstRun.stop !== "inputNone" && shot.firstRun.stop !== "welcome"
+        ? [
+            { name: "MacBook Pro Microphone", isDefault: true, isInterface: false, channels: 1 },
+            { name: "Scarlett 2i2 USB", isDefault: false, isInterface: true, channels: 2 },
+          ]
+        : [],
     list_audio_output_devices: () => ["Default"],
     list_midi_devices: () => [],
     get_midi_bindings: () => [],
@@ -1667,6 +1686,22 @@ export function installShotMock(shot: Shot, theme: string): void {
      * invents a note — the recipes are `reviewFixtures.ts`, the same ones the
      * unit tests use, so a green suite and a picture cannot disagree.
      */
+    // The first run's level meter: a plucked note every 600 ms, decaying,
+    // while the input is open. Silent on the scene about hearing nothing.
+    if (cmd === "start_evaluation" && shot.firstRun) {
+      clearInterval(firstRunMeter);
+      let t = 0;
+      firstRunMeter = setInterval(() => {
+        t += 1;
+        const rms = shot.firstRun!.stop === "inputSilent" ? 0.0004 : 0.03 + 0.14 * Math.exp(-((t % 6) / 2));
+        emit("audio-spectrum", { bands: new Array(16).fill(0).map((_, i) => rms * (1.6 - i / 12)), rms });
+      }, 100);
+      return null;
+    }
+    if (cmd === "stop_evaluation" && shot.firstRun) {
+      clearInterval(firstRunMeter);
+      return null;
+    }
     if (cmd === "load_score_schedule") {
       songSchedule = a?.schedule as ScoreSchedule;
       songPassBars = (a?.passBars as ScorerPassBar[] | undefined) ?? [];

@@ -105,6 +105,12 @@ pub struct SessionLog {
     #[serde(rename = "audioLevels", default)]
     pub audio_levels: Vec<AudioLevelSnapshot>,
 
+    /// Input buffers the cpal callback could not hand the onset detector,
+    /// because the ring's `try_lock` failed (`AudioInput::ring_drops`). 0 in
+    /// logs written before it was counted.
+    #[serde(rename = "inputRingDrops", default)]
+    pub input_ring_drops: u64,
+
     /// Final aggregate report.
     pub report: SessionReport,
 }
@@ -879,6 +885,7 @@ pub fn build_log_from_raw(
         activity_transitions: Vec::new(),
         segments: Vec::new(),
         audio_levels: Vec::new(),
+        input_ring_drops: 0,
         report,
     }
 }
@@ -925,6 +932,8 @@ pub struct SessionTelemetry {
     /// emitted by the timing analyzer on every state change. Used to
     /// populate `SessionLog.activity_transitions` at session stop.
     pub activity_transitions: Vec<ActivityTransition>,
+    /// `AudioInput::ring_drops` at session stop.
+    pub input_ring_drops: u64,
 }
 
 /// Hard cap on each telemetry stream. Beyond this we stop pushing
@@ -1209,6 +1218,7 @@ pub fn build_log_from_session(
         spurious_onset_indices,
         audio_levels,
         activity_transitions,
+        input_ring_drops,
     } = telemetry;
 
     // POSTMATCH_1: run post-session best-candidate matching when raw
@@ -1262,6 +1272,7 @@ pub fn build_log_from_session(
         activity_transitions,
         segments,
         audio_levels,
+        input_ring_drops,
         report,
     }
 }

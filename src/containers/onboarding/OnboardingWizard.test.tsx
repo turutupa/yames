@@ -205,12 +205,12 @@ describe("W0 — welcome", () => {
     expect(screen.getByRole("heading", { name: "Yames" })).toBeInTheDocument();
     expect(
       screen.getByText(
-        "A metronome built for real practice. Hands stay on the instrument.",
+        "A band plays, you play, and Yames hears your guitar. Practice that fits the minutes you have.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/v9\.9\.9/)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Set me up (about a minute)" }),
+      screen.getByRole("button", { name: "Set me up (about two minutes)" }),
     ).toBeInTheDocument();
   });
 
@@ -222,7 +222,7 @@ describe("W0 — welcome", () => {
 
   it("'Set me up' dispatches START_SETUP", () => {
     const { dispatch } = setup();
-    fireEvent.click(screen.getByRole("button", { name: "Set me up (about a minute)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set me up (about two minutes)" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "START_SETUP" });
   });
 
@@ -633,9 +633,9 @@ describe("W7 — ready", () => {
     expect(onAlwaysOnTopChange).toHaveBeenCalledWith(false);
   });
 
-  it("'Start practicing' closes the wizard", () => {
+  it("'Go to Today' closes the wizard", () => {
     const { dispatch } = setup(ready);
-    fireEvent.click(screen.getByRole("button", { name: "Start practicing" }));
+    fireEvent.click(screen.getByRole("button", { name: "Go to Today" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "CLOSE" });
   });
 
@@ -714,8 +714,8 @@ describe("step commit contract", () => {
         state={stateAt("ready", ["instrument", "ready"])}
       />,
     );
-    expect(screen.getByRole("button", { name: "Start practicing" })).toBeEnabled();
-    fireEvent.click(screen.getByRole("button", { name: "Start practicing" }));
+    expect(screen.getByRole("button", { name: "Go to Today" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Go to Today" }));
     expect(commitSpy).not.toHaveBeenCalled();
   });
 });

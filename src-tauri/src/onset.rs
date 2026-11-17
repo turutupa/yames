@@ -359,6 +359,9 @@ impl RefractoryGate {
 pub struct OnsetDetector {
     alive: Arc<AtomicBool>,
     thread_handle: Option<thread::JoinHandle<()>>,
+    /// Where a Session Take's audio is kept for the pitch pass, when the
+    /// timing analyzer handed one over. Copies, and decides nothing.
+    take_tap: Option<crate::take_audio::SharedTakeAudioTap>,
 }
 
 impl OnsetDetector {
@@ -366,7 +369,14 @@ impl OnsetDetector {
         Self {
             alive: Arc::new(AtomicBool::new(false)),
             thread_handle: None,
+            take_tap: None,
         }
+    }
+
+    /// Keep an armed Take's audio as it is read (`take_audio`). Call before
+    /// `start`; the thread takes its own handle at spawn.
+    pub fn set_take_tap(&mut self, tap: crate::take_audio::SharedTakeAudioTap) {
+        self.take_tap = Some(tap);
     }
 
     /// Start the onset detection thread.
@@ -396,13 +406,14 @@ impl OnsetDetector {
         self.stop();
         self.alive.store(true, Ordering::SeqCst);
         let alive = self.alive.clone();
+        let take_tap = self.take_tap.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             // ROADMAP §0.5 — the analyzer runs per audio hop and must not be
             // preempted by background compute (LLM inference).
             let _rt = audio_thread_priority::promote_current_thread_to_real_time(0, 48_000)
                 .map_err(|e| eprintln!("[yames] analyzer stayed at normal priority: {e}"));
-            Self::detect_loop(alive, audio_input, profile, tempo_ctx, on_onset);
+            Self::detect_loop(alive, audio_input, profile, tempo_ctx, take_tap, on_onset);
         }));
     }
 
@@ -430,6 +441,7 @@ impl OnsetDetector {
         audio_input: SharedAudioInput,
         profile: InstrumentProfile,
         tempo_ctx: SharedTempoContext,
+        take_tap: Option<crate::take_audio::SharedTakeAudioTap>,
         on_onset: F,
     ) where
         F: Fn(Onset) + Send + 'static,
@@ -438,6 +450,9 @@ impl OnsetDetector {
             let ai = audio_input.lock().unwrap();
             ai.sample_rate()
         };
+        if let Some(tap) = take_tap.as_ref() {
+            tap.set_rate(sample_rate);
+        }
         let mut core = OnsetCore::new(&profile, sample_rate);
         let mut emit = |onset: Onset| on_onset(onset);
 
@@ -453,6 +468,9 @@ impl OnsetDetector {
             // ring has nothing to contend with while nobody is listening.
             if !tempo_ctx.is_playing() {
                 core.idle(&mut emit);
+                if let Some(tap) = take_tap.as_ref() {
+                    tap.idle();
+                }
                 continue;
             }
 
@@ -461,6 +479,11 @@ impl OnsetDetector {
                 let ring = ai.ring();
                 let r = ring.lock().unwrap();
                 core.pull(&r);
+                // A second copy of the same samples, only while a Take whose
+                // notes are to be checked is armed: an atomic load otherwise.
+                if let Some(tap) = take_tap.as_ref() {
+                    tap.pull(&r, crate::clock::now_ns());
+                }
             }
             core.process(crate::clock::now_ns(), &tempo_ctx, &mut emit);
         }

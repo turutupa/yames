@@ -21,7 +21,8 @@
       "even": "gleichmäßig",
       "heard": "der Töne gehört",
       "extras": "zusätzliche Töne",
-      "accents": "Akzente getroffen"
+      "accents": "Akzente getroffen",
+      "notes": "richtige Töne"
     },
     "today": {
       "title": "Heute",
@@ -52,14 +53,16 @@
         "heard": "Weil ich bei {{bpm}} BPM {{value}} % der Töne gehört habe. Die Messlatte liegt bei {{bar}} %.",
         "extras": "Wegen zusätzlicher Töne bei {{bpm}} BPM. Die Messlatte liegt bei {{bar}} über vier Takte.",
         "accents": "Weil bei {{bpm}} BPM {{value}} % der Akzente saßen. Die Messlatte liegt bei {{bar}} %.",
-        "plain": "Weil der letzte Take bei {{bpm}} BPM die Messlatte nicht erreicht hat."
+        "plain": "Weil der letzte Take bei {{bpm}} BPM die Messlatte nicht erreicht hat.",
+        "notes": "Weil bei {{bpm}} BPM {{value}} % der Töne, deren Höhe ich erkennen konnte, die notierten waren. Die Messlatte liegt bei {{bar}} %."
       },
       "easing": {
         "even": "Die Gleichmäßigkeit war {{value}} % bei {{bpm}} BPM und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
         "heard": "Ich habe bei {{bpm}} BPM {{value}} % der Töne gehört und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
         "extras": "Bei {{bpm}} BPM gab es zusätzliche Töne, also jetzt {{next}} BPM.",
         "accents": "Bei {{bpm}} BPM saßen {{value}} % der Akzente und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM.",
-        "plain": "Die letzten Takes bei {{bpm}} BPM haben die Messlatte nicht erreicht, also jetzt {{next}} BPM."
+        "plain": "Die letzten Takes bei {{bpm}} BPM haben die Messlatte nicht erreicht, also jetzt {{next}} BPM.",
+        "notes": "{{value}} % der erkennbaren Töne waren bei {{bpm}} BPM die notierten und die Messlatte liegt bei {{bar}} %, also jetzt {{next}} BPM."
       },
       "climb": "Weil du die Messlatte bei {{bpm}} BPM erreicht hast. Nächste Stufe: {{next}}.",
       "climbFast": "Weil die Gleichmäßigkeit bei {{bpm}} BPM {{value}} % war, weit über der Messlatte. Es geht direkt auf {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "Die Messlatte liegt bei {{bar}}",
       "cleanFirst": "Sauberes Tempo: {{bpm}} BPM.",
       "cleanMoved": "Sauberes Tempo: von {{from}} auf {{bpm}} BPM.",
-      "unmeasuredNotes": "Ich habe nur das Timing geprüft. Ob es die richtigen Töne waren, wird noch nicht bewertet.",
+      "unmeasuredNotes": "Ich habe das Timing geprüft. Die Töne waren nicht klar genug zu hören, um zu sagen, ob es die richtigen waren, deshalb wurde das diesmal nicht bewertet.",
       "againSame": "Noch mal, {{bpm}} BPM",
       "moveOn": "Weiter"
     },
@@ -144,7 +147,8 @@
         "even": "Die Gleichmäßigkeit war {{value}} %. {{heard}} von {{expected}} Tönen gehört. Gleiche Töne, gleiches Tempo.",
         "heard": "Ich habe {{heard}} von {{expected}} Tönen gehört, und ohne sie kann das Timing nicht bestehen.",
         "extras": "{{extras}} Töne, mit denen ich nicht gerechnet habe. Dämpf die freien Saiten, falls sie mitklingen.",
-        "accents": "{{value}} % der markierten Akzente kamen lauter als die Töne drumherum."
+        "accents": "{{value}} % der markierten Akzente kamen lauter als die Töne drumherum.",
+        "notes": "{{value}} % der Töne, deren Höhe ich erkennen konnte, waren die notierten. Gleiche Töne, gleiches Tempo, und achte auf die Bünde."
       }
     },
     "noCatch": {
@@ -193,6 +197,7 @@
       "mechanicsSub": "Wie deine Hände spielen",
       "later": "Später",
       "laterWhy": "Lesen kannst du das schon jetzt. Die Bewertung dafür kommt später.",
+      "laterWhyLanding": "Diesen Pfad kannst du jetzt schon lesen. Bewertet wird, auf welchen Tönen du über den Akkorden landest, und das kann die App noch nicht beurteilen, deshalb ist er nicht in deinen Sessions.",
       "stepCount": "{{count}} Schritt",
       "stepCount_other": "{{count}} Schritte",
       "draft": "Entwurf",
@@ -242,6 +247,15 @@
       "drill": "Steigert das Tempo, während du spielst, und übt einen Plan, den du schreibst.",
       "jam": "Eine Band und deine Akkorde. Nie bewertet.",
       "songs": "Lies die Tabulatur eines Songs und spiel dazu."
+    },
+    "view": {
+      "label": "Übungsansicht",
+      "neck": "Hals",
+      "runway": "Laufband",
+      "between": "Ansicht zwischen den Takes wechseln"
+    },
+    "runway": {
+      "label": "Die nächsten Noten, die auf die Linie zulaufen"
     }
   }
 }

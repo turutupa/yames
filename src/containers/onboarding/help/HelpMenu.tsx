@@ -28,9 +28,20 @@ export type HelpMenuProps = {
    * under the item so the user can attach it to an issue. Omit to hide.
    */
   onReportProblem?: () => Promise<string>;
+  /**
+   * "Send feedback": opens a prefilled GitHub issue in the browser. Nothing is
+   * sent from the app. Omit to hide the item.
+   */
+  onSendFeedback?: () => void;
   /** False suppresses the entrance animation. */
   animate?: boolean;
 };
+
+const FeedbackIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
 
 const TourIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -78,6 +89,7 @@ export function HelpMenu({
   onRunSetupAgain,
   onShowShortcuts,
   onReportProblem,
+  onSendFeedback,
   animate = true,
 }: HelpMenuProps) {
   const { t } = useTranslation();
@@ -172,6 +184,24 @@ export function HelpMenu({
               <span>{t("onboarding.help.shortcuts")}</span>
             </button>
           </li>
+          {onSendFeedback && (
+            <li>
+              <button
+                ref={focusRef()}
+                type="button"
+                className="help-menu-item"
+                data-testid="help-send-feedback"
+                onClick={() => {
+                  onClose();
+                  onSendFeedback();
+                }}
+              >
+                <FeedbackIcon />
+                <span>{t("onboarding.help.sendFeedback")}</span>
+              </button>
+              <p className="help-menu-note">{t("onboarding.help.sendFeedbackNote")}</p>
+            </li>
+          )}
           {onReportProblem && (
             <li>
               <button

@@ -21,7 +21,8 @@
       "even": "düzgünlük",
       "heard": "duyulan nota",
       "extras": "fazla nota",
-      "accents": "oturan aksan"
+      "accents": "oturan aksan",
+      "notes": "doğru nota"
     },
     "today": {
       "title": "Bugün",
@@ -52,14 +53,16 @@
         "heard": "Çünkü {{bpm}} BPM'de notaların %{{value}} kadarını duydum. Çıta %{{bar}}.",
         "extras": "Çünkü {{bpm}} BPM'de fazla notalar vardı. Çıta dört ölçüde {{bar}}.",
         "accents": "Çünkü {{bpm}} BPM'de aksanların %{{value}} kadarı oturdu. Çıta %{{bar}}.",
-        "plain": "Çünkü {{bpm}} BPM'deki son deneme çıtayı geçemedi."
+        "plain": "Çünkü {{bpm}} BPM'deki son deneme çıtayı geçemedi.",
+        "notes": "Çünkü {{bpm}} BPM'de perdesini seçebildiğim notaların %{{value}}'i yazılanlardı. Çıta %{{bar}}."
       },
       "easing": {
         "even": "{{bpm}} BPM'de düzgünlük %{{value}} idi ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
         "heard": "{{bpm}} BPM'de notaların %{{value}} kadarını duydum ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
         "extras": "{{bpm}} BPM'de fazla notalar vardı, o yüzden şimdi {{next}} BPM.",
         "accents": "{{bpm}} BPM'de aksanların %{{value}} kadarı oturdu ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM.",
-        "plain": "{{bpm}} BPM'deki son denemeler çıtayı geçemedi, o yüzden şimdi {{next}} BPM."
+        "plain": "{{bpm}} BPM'deki son denemeler çıtayı geçemedi, o yüzden şimdi {{next}} BPM.",
+        "notes": "{{bpm}} BPM'de seçebildiğim notaların %{{value}}'i yazılanlardı ve çıta %{{bar}}, o yüzden şimdi {{next}} BPM."
       },
       "climb": "Çünkü {{bpm}} BPM'de çıtayı geçtin. Sonraki basamak: {{next}}.",
       "climbFast": "Çünkü {{bpm}} BPM'de düzgünlük %{{value}} idi, çıtanın epey üstünde. Doğrudan {{next}} BPM'e atlıyor.",
@@ -116,7 +119,7 @@
       "barIsCount": "Çıta {{bar}}",
       "cleanFirst": "Temiz tempo: {{bpm}} BPM.",
       "cleanMoved": "Temiz tempo: {{from}} → {{bpm}} BPM.",
-      "unmeasuredNotes": "Sadece zamanlamaya baktım. Doğru notalar olup olmadığı henüz notlanmıyor.",
+      "unmeasuredNotes": "Zamanlamaya baktım. Notaları doğru olup olmadıklarını söyleyecek kadar net duyamadım, bu yüzden bu sefer notlanmadı.",
       "againSame": "Tekrar, {{bpm}} BPM",
       "moveOn": "Devam et"
     },
@@ -144,7 +147,8 @@
         "even": "Düzgünlük %{{value}} idi. {{expected}} notadan {{heard}} tanesi duyuldu. Aynı notalar, aynı tempo.",
         "heard": "{{expected}} notadan {{heard}} tanesini duydum; onlar olmadan zamanlama geçemez.",
         "extras": "Beklemediğim {{extras}} nota. Boştaki teller çınlıyorsa onları sustur.",
-        "accents": "İşaretli aksanların %{{value}} kadarı çevresindeki notalardan yüksek çıktı."
+        "accents": "İşaretli aksanların %{{value}} kadarı çevresindeki notalardan yüksek çıktı.",
+        "notes": "Perdesini seçebildiğim notaların %{{value}}'i yazılanlardı. Aynı notalar, aynı tempo, perdelere dikkat."
       }
     },
     "noCatch": {
@@ -193,6 +197,7 @@
       "mechanicsSub": "Ellerinin nasıl çaldığı",
       "later": "Sonra",
       "laterWhy": "Bunu şimdi okuyabilirsin. Gerektirdiği notlama daha sonra gelecek.",
+      "laterWhyLanding": "Bunu şimdiden okuyabilirsin. Akorların üzerinde hangi notalara indiğine göre notlanıyor ve uygulama bunu henüz değerlendiremiyor, o yüzden seanslarında yok.",
       "stepCount": "{{count}} adım",
       "stepCount_other": "{{count}} adım",
       "draft": "Taslak",
@@ -242,6 +247,15 @@
       "drill": "Sen çalarken tempoyu yükseltir ve yazdığın bir planı çalıştırır.",
       "jam": "Bir grup ve senin akorların. Asla notlanmaz.",
       "songs": "Bir şarkının tabını oku ve onunla birlikte çal."
+    },
+    "view": {
+      "label": "Çalışma görünümü",
+      "neck": "Sap",
+      "runway": "Pist",
+      "between": "Görünümü kayıtlar arasında değiştir"
+    },
+    "runway": {
+      "label": "Çizgiye doğru gelen sıradaki notalar"
     }
   }
 }

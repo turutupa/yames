@@ -33,6 +33,7 @@ import {
   storeLoad,
   storeSave,
   togglePlayback,
+  openFeedback,
 } from "../../ipc";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
@@ -181,7 +182,7 @@ const JAM_PREVIEW_CORNERS: readonly PreviewCorner[] = ["bottomLeft", "bottomRigh
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
 
 export function MainWindow() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useDrag();
   const { state, currentBeat } = useMetronome();
   // Practice Coach model + voice state (must come before useEvaluation so
@@ -1074,6 +1075,7 @@ export function MainWindow() {
   // drives the single `useMidi`: the device picked in the wizard is the device
   // the rest of the app uses, and W6's eight beats go through the normal
   // analyzer — the only path that leaves a real calibration seed behind.
+  const [wizardInputError, setWizardInputError] = useState<string | null>(null);
   const wizardEvaluation: WizardEvaluationEnv = useMemo(
     () => ({
       devices: evaluation.devices,
@@ -1086,12 +1088,18 @@ export function MainWindow() {
         void evaluation.selectChannel(channel);
       },
       listening: evaluation.enabled,
-      setListening: (on: boolean) => {
-        void evaluation.setListening(on);
-      },
+      // The wizard's W5 says what went wrong when the stream will not open
+      // (busy, unplugged, or the OS refused the microphone), so the rejection
+      // is kept rather than dropped.
+      setListening: (on: boolean) =>
+        evaluation.setListening(on).then(
+          () => setWizardInputError(null),
+          (err: unknown) => setWizardInputError(on ? String(err) : null),
+        ),
       spectrum: evaluation.spectrum,
       lastFeedback: evaluation.lastFeedback,
       avgDeviation: evaluation.avgDeviation,
+      startError: wizardInputError,
     }),
     [
       evaluation.devices,
@@ -1104,6 +1112,7 @@ export function MainWindow() {
       evaluation.spectrum,
       evaluation.lastFeedback,
       evaluation.avgDeviation,
+      wizardInputError,
     ],
   );
 
@@ -1130,12 +1139,26 @@ export function MainWindow() {
    * set either way, and land a completed run on the metronome at 80 BPM
    * (ONBOARDING_PLAN §3, W7).
    */
+  // "Send feedback" (Help menu, Settings): a prefilled GitHub issue in the
+  // browser. Nothing is sent from the app.
+  const sendFeedback = useCallback(() => {
+    void openFeedback(appVersion, i18n.language).catch(() => {});
+  }, [appVersion, i18n.language]);
+
   const handleWizardFinish = useCallback(
     (outcome: "completed" | "skipped" | "closed") => {
       void stopSoftClick().then(() => {
         if (!instrumentChosenRef.current) applyInstrument("electric-guitar");
+        // ONB-08, changed for the MVP (owner, 2026-11-16): a finished setup
+        // lands on Today, the learning side's front door, rather than on the
+        // Metronome. The click keeps the 80 BPM it was set up at, so the
+        // Metronome opens where the wizard left it. "Just give me the click"
+        // still means the click: it lands on the Metronome. A run closed
+        // early stays where it was.
         if (outcome === "completed") {
           setBpm(SOFT_CLICK_BPM);
+          setView("today");
+        } else if (outcome === "skipped") {
           setView("beat");
         }
       });
@@ -2484,6 +2507,7 @@ export function MainWindow() {
       }}
       onShowShortcuts={help.openShortcuts}
       onReportProblem={help.reportProblem}
+      onSendFeedback={sendFeedback}
       animate={!reducedMotion}
     />
     <ShortcutsSheet

@@ -89,9 +89,12 @@ plain test.
   drive a running Session.
 - **The doors**: the Session's own play and stop are `playTake`/`endTake`, so
   `startTake`/`stopTake` still have only the two take hooks as callers.
+- **The wizard's landing (ONB-08)**, `shell.parity.test.tsx`: a finished setup
+  lands on Today (changed from the Metronome for the MVP, owner 2026-11-16), and
+  "Just give me the click" lands on the Metronome.
 - **Not yet covered:** a Session writing the same `sessions`, `segments` and
   `attempts` rows as the same practice through the tool's own tab (TOOLS_PARITY
-  section 5.3), and the wizard's landing after the front door (ONB-08).
+  section 5.3).
 
 ## Pinned as they are, on purpose
 

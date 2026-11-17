@@ -37,6 +37,8 @@ export type TakePlan = {
   source: Uint8Array;
   schedule: ScoreSchedule;
   range: BarRange;
+  /** The written pitch of every note, for the scorer's right-notes check. */
+  pitches: { id: number; midi: number }[];
 };
 
 /** The same Exercise, written out `times` over. */
@@ -90,5 +92,6 @@ export function buildTake(
     source: new TextEncoder().encode(exerciseAlphaTex(whole, bpm)),
     schedule: buildSchedule(score, range, { loops: false }),
     range,
+    pitches: score.notes.map((n) => ({ id: n.id, midi: n.midi })),
   };
 }

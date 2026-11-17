@@ -21,7 +21,8 @@
       "even": "regolare",
       "heard": "delle note sentite",
       "extras": "note in più",
-      "accents": "accenti a segno"
+      "accents": "accenti a segno",
+      "notes": "note giuste"
     },
     "today": {
       "title": "Oggi",
@@ -52,14 +53,16 @@
         "heard": "Perché ho sentito il {{value}}% delle note a {{bpm}} BPM. L'asticella è al {{bar}}%.",
         "extras": "Per le note in più a {{bpm}} BPM. L'asticella è {{bar}} su quattro battute.",
         "accents": "Perché il {{value}}% degli accenti è andato a segno a {{bpm}} BPM. L'asticella è al {{bar}}%.",
-        "plain": "Perché l'ultima take a {{bpm}} BPM non ha superato l'asticella."
+        "plain": "Perché l'ultima take a {{bpm}} BPM non ha superato l'asticella.",
+        "notes": "Perché il {{value}}% delle note di cui ho riconosciuto l'altezza erano quelle scritte a {{bpm}} BPM. L'asticella è al {{bar}}%."
       },
       "easing": {
         "even": "La regolarità era del {{value}}% a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "heard": "Ho sentito il {{value}}% delle note a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
         "extras": "C'erano note in più a {{bpm}} BPM, quindi ora si va a {{next}} BPM.",
         "accents": "Il {{value}}% degli accenti è andato a segno a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM.",
-        "plain": "Le ultime take a {{bpm}} BPM non hanno superato l'asticella, quindi ora si va a {{next}} BPM."
+        "plain": "Le ultime take a {{bpm}} BPM non hanno superato l'asticella, quindi ora si va a {{next}} BPM.",
+        "notes": "Il {{value}}% delle note riconosciute erano quelle scritte a {{bpm}} BPM e l'asticella è al {{bar}}%, quindi ora si va a {{next}} BPM."
       },
       "climb": "Perché hai superato l'asticella a {{bpm}} BPM. Prossimo gradino: {{next}}.",
       "climbFast": "Perché la regolarità era del {{value}}% a {{bpm}} BPM, ben sopra l'asticella. Si salta a {{next}}.",
@@ -116,7 +119,7 @@
       "barIsCount": "L'asticella è {{bar}}",
       "cleanFirst": "Tempo pulito: {{bpm}} BPM.",
       "cleanMoved": "Tempo pulito: da {{from}} a {{bpm}} BPM.",
-      "unmeasuredNotes": "Ho controllato solo il tempo. Se fossero le note giuste non viene ancora valutato.",
+      "unmeasuredNotes": "Ho controllato il tempo. Non ho sentito le note abbastanza chiaramente da dire se erano quelle giuste, quindi stavolta non è stato valutato.",
       "againSame": "Ancora, {{bpm}} BPM",
       "moveOn": "Vai avanti"
     },
@@ -144,7 +147,8 @@
         "even": "La regolarità era del {{value}}%. Sentite {{heard}} note su {{expected}}. Stesse note, stesso tempo.",
         "heard": "Ho sentito {{heard}} note su {{expected}}, e il tempo non può passare senza di loro.",
         "extras": "{{extras}} note che non mi aspettavo. Smorza le corde libere se stanno suonando.",
-        "accents": "Il {{value}}% degli accenti segnati è uscito più forte delle note intorno."
+        "accents": "Il {{value}}% degli accenti segnati è uscito più forte delle note intorno.",
+        "notes": "Il {{value}}% delle note di cui ho riconosciuto l'altezza erano quelle scritte. Stesse note, stesso tempo, e occhio ai tasti."
       }
     },
     "noCatch": {
@@ -196,6 +200,7 @@
       "mechanicsSub": "Come suonano le tue mani",
       "later": "Più avanti",
       "laterWhy": "Questo puoi già leggerlo. La valutazione che gli serve arriverà più avanti.",
+      "laterWhyLanding": "Puoi già leggerlo. Si valuta sulle note su cui atterri sopra gli accordi, e l'app non sa ancora giudicarle, quindi non è nelle tue sessioni.",
       "stepCount": "{{count}} tappa",
       "stepCount_many": "{{count}} tappe",
       "stepCount_other": "{{count}} tappe",
@@ -249,6 +254,15 @@
       "drill": "Alza il tempo mentre suoni e allena un piano che scrivi tu.",
       "jam": "Una band e i tuoi accordi. Mai valutato.",
       "songs": "Leggi la tablatura di un brano e suonaci sopra."
+    },
+    "view": {
+      "label": "Vista di pratica",
+      "neck": "Manico",
+      "runway": "Pista",
+      "between": "Cambia vista tra una ripresa e l'altra"
+    },
+    "runway": {
+      "label": "Le prossime note, in arrivo sulla linea"
     }
   }
 }

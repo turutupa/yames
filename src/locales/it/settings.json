@@ -318,6 +318,11 @@
         "gamepad": "PAD"
       }
     },
+    "feedback": {
+      "blurb": "Stai provando Yames? Raccontaci con parole tue cosa ha funzionato e cosa no.",
+      "button": "Invia un feedback",
+      "note": "Yames {{version}}. Apre una nuova issue di GitHub nel browser con versione e sistema già compilati; non viene inviato nulla finché non la pubblichi lì."
+    },
     "support": {
       "title": "Supporto",
       "blurb": "Yames è gratuito e open source. Se ti aiuta nella tua pratica, considera di sostenerme lo sviluppo!",

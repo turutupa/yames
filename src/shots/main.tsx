@@ -21,6 +21,8 @@ import "../styles/global.css";
 import "../styles/session-narrative.css";
 import { installShotMock } from "./mockIpc";
 import { shotById, SHOTS, SHOT_THEMES } from "./scenarios";
+import { RUNNABLE_PATH_IDS } from "../session/packs";
+import { stageDebug } from "../stage3d/controller";
 
 declare global {
   interface Window {
@@ -178,6 +180,36 @@ async function drive() {
    * press than the one before it, so a scene that reaches the recap has walked
    * through the whole of a Session on the way.
    */
+  /** The first-run wizard, by pressing what a new player presses. */
+  if (shot!.firstRun) {
+    const { stop } = shot!.firstRun;
+    const overlay = () => document.querySelector('[data-testid="onboarding-overlay"]');
+    const button = (label: string) =>
+      [...document.querySelectorAll<HTMLButtonElement>(".onboarding-card button")].find(
+        (b) => b.textContent?.trim() === label,
+      );
+    await until("the wizard", () => !!overlay());
+    if (stop !== "welcome") {
+      await until("Set me up", () => !!button(i18n.t("onboarding.welcome.setup")));
+      button(i18n.t("onboarding.welcome.setup"))!.click();
+      await until("the instrument cards", () => !!document.querySelector(".instrument-picker-card"));
+      document.querySelector<HTMLButtonElement>(".instrument-picker-card")!.click();
+      await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
+      button(i18n.t("onboarding.next"))!.click();
+      await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
+      if (stop === "input" || stop === "ready") {
+        await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
+      } else {
+        await until("the trouble panel", () => !!document.querySelector('[data-testid="audio-input-trouble"]'), 20000);
+      }
+      if (stop === "ready") {
+        button(i18n.t("onboarding.next"))!.click();
+        const start = () => button(i18n.t("onboarding.ready.start"));
+        await pressUntil("Skip to the summary", () => button(i18n.t("onboarding.skip"))?.click(), () => !!start(), 20000);
+      }
+    }
+  }
+
   if (shot!.session) {
     const { stop } = shot!.session;
     const byId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
@@ -227,7 +259,22 @@ async function drive() {
       rail("Tools")?.click();
       await until("the Tools list", () => !!byId("tools"));
     } else if (stop !== "today") {
-      byId("today-start")?.click();
+      const path = shot!.session.path;
+      if (path) {
+        // A Path that is not runnable yet, made runnable for this scene only.
+        if (!RUNNABLE_PATH_IDS.includes(path)) (RUNNABLE_PATH_IDS as string[]).push(path);
+        rail("Paths")?.click();
+        await until("the Paths list", () => !!byId(`path-card-${path}`));
+        byId(`path-card-${path}`)?.click();
+        await until("the Path", () => !!byId("path-detail"));
+        const stepRow = document.querySelector<HTMLElement>('[data-testid^="step-row-"]');
+        stepRow?.click();
+        await until("the Step", () => !!byId("step-detail"));
+        await until("an Exercise to play", () => !!document.querySelector('[data-testid^="play-"]'));
+        document.querySelector<HTMLElement>('[data-testid^="play-"]')?.click();
+      } else {
+        byId("today-start")?.click();
+      }
       await until("the Session", () => !!byId("session"));
       if (stop === "timed") {
         await until("the warm-up", () => !!byId("session-timed"));
@@ -965,6 +1012,9 @@ async function drive() {
 }
 
 if (shot && !shot.stage) {
+  // The neck stage's live controller, for the layout specs that ask what view
+  // a screen gave it (the runway's straight-on neck).
+  (window as unknown as { __NECK__?: typeof stageDebug }).__NECK__ = stageDebug;
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     // No StrictMode: its double-invoked effects make the transport fire twice,
     // and a screenshot wants one pass through the app's startup, not two.

@@ -15,6 +15,7 @@
 import * as THREE from "three";
 import type { NeckKind, NeckNote } from "../api";
 import type { EngineOptions, SlotRect, StageEngine, VisibleView } from "../engineTypes";
+import { framingFor } from "../framing";
 import { pickTier, tierSettings, type QualityStep, type Tier } from "../quality";
 import { createGuitar, type Guitar } from "./guitar";
 import * as T from "./textures";
@@ -56,19 +57,19 @@ type Shot = {
   lift: number;
 };
 
-/** The two shots the stage has, from the mock's `fullNeck` and `neckShot`. */
+/** The two shots the stage has, from the mock's `fullNeck` and `neckShot`; the angles live in `framing.ts`. */
 function shotFor(view: VisibleView, rect: SlotRect, guitar: Guitar): Shot {
-  const portrait = rect.height > rect.width * 1.08;
+  const f = framingFor(view, rect);
   if (view.kind === "whole") {
     return {
       points: () => guitar.windowPoints(0, 24),
-      dir: [0, 1, 0.26],
-      fov: 14,
-      numScale: portrait ? 2.4 : 1.55,
+      dir: f.dir,
+      fov: f.fov,
+      numScale: f.numScale,
       key: { angle: 0.62, i: 3.1, offset: [-0.6, 7.4, 2.2] },
       rim: 0.6,
       env: 0.5,
-      pool: portrait ? 0.55 : 1.1,
+      pool: f.pool,
       dur: 1.7,
       lift: 0.4,
     };
@@ -77,13 +78,13 @@ function shotFor(view: VisibleView, rect: SlotRect, guitar: Guitar): Shot {
   const hi = Math.max(lo + 1, Math.min(24, Math.round(Math.max(view.from, view.to))));
   return {
     points: () => guitar.windowPoints(lo, hi),
-    dir: portrait ? [0.95, 1, 0] : [0, 1, 0.34],
-    fov: portrait ? 40 : 22,
-    numScale: portrait ? 1 : 0.66,
+    dir: f.dir,
+    fov: f.fov,
+    numScale: f.numScale,
     key: { angle: 0.52, i: 3.0, offset: [-0.9, 7.2, 2.4] },
     rim: 0.6,
     env: 0.46,
-    pool: 0.9,
+    pool: f.pool,
     dur: 1.3,
     lift: 0.3,
   };
