@@ -1,3 +1,43 @@
+# Revamp: status (2026-11-17, MVP)
+
+## The MVP, as of 2026-11-17
+
+`revamp` holds the MVP the owner asked for on 2026-11-16 (`plans/tasks/mvp/PLAN.md`):
+the learning path comes first, and the tools are still all there under Tools.
+
+- **The three core points.**
+  - **A Session fits the minutes you pick** (5, 10, 15 or 20), planned across every Path you subscribe to (up to 4): a rotating focus, reviews at 1, 3, 7, 14 and 30 days, benchmark Takes on days 1, 7, 14 and 21, placement and Test out (`src/session/planner.ts`, `rotation.ts`).
+  - **Technique is graded from the real guitar.** `score/pass.rs` judges timing evenness over windows of finished bars, and a pitch pass over the Take's audio counts right notes (`take_audio.rs`).
+  - **Each Exercise has a clean tempo that rises over time.**
+- **The 3D neck** (`src/stage3d`) has a switch for the 3D fretboard (Auto/Off), falls back to SVG on a software renderer, and lets the player choose Neck or Runway. Only one picture shows during a Take.
+- **Five Paths can be played:** Shred (the first), Blues, Classic Rock, Alternate Picking and Sweep. Their content is in 15 languages.
+- **The band plays behind a Take.** It starts muted on a microphone and at 0.8 on an interface.
+- **Platforms.**
+  - Windows and Linux installers come from `release.yml` (`workflow_dispatch` on `revamp`).
+  - Android: a push to `mvp-android` builds an APK signed with the TEST key.
+  - macOS is blocked until the owner accepts the Apple Developer agreement.
+- **QA.** Two sweeps (`plans/tasks/mvp/QA-2026-11-17.md`; the second sweep's shots are in `~/projects/.preview/qa2`). All 26 items are fixed, except that the runway intentionally has no preview before the Take. The second round's issues (the phone recap, the Russian first run, Path names, subdivision labels) are fixed.
+- **Input robustness (`mvp-bugs`).**
+  - The input is no longer lost after Exit.
+  - An unanswered Android microphone dialog times out after 60 s.
+  - `EVALUATION_TURN` is an awaited tokio mutex.
+  - A Take closes only an input it opened itself.
+- **Gates** on 90b84756: tsc, vitest 8428, `test:rust` 1009, build, `paths check`, and the layout specs that were touched.
+
+**Before real users get it:**
+1. **Play it on a real guitar**, on a microphone and on an interface (Windows and Android). No threshold has been tuned on real playing yet.
+2. **Owner decision on how strict the clean tempo is.** Today all 8 bars of an 8-bar Take must hold. The proposal is 10-bar Takes, where any 8 clean bars in a row count.
+3. **Native speakers review the translations.**
+4. **The release signing key for Play is the owner's choice.** The APK is test-signed (`ANDROID_KEY_IS_RELEASE` gates publishing).
+5. **Known residuals.**
+   - A band picked up by a microphone (bleed) can count as onsets; that is why the band starts muted on a mic.
+   - Whether the input is an interface is decided from a list of device names.
+   - The Shred finale has no sweep bar.
+   - Classic Rock has few bends.
+   - Linux audio threads run at normal priority.
+
+The sections below are the 2026-11-16 record and are kept as history.
+
 # Revamp: status (2026-11-16)
 
 The wave in `BRIEF.md` is merged into `revamp`. This file says what the branch
