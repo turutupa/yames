@@ -25,6 +25,8 @@ export type AndroidBetaStatus =
   | "installing"
   /** Sent to "Install unknown apps" for Yames; Update again once allowed. */
   | "needs-permission"
+  /** A check the player asked for could not reach the feed (offline, most often). */
+  | "check-failed"
   | "failed";
 
 export interface AndroidBetaUpdate {
@@ -119,7 +121,7 @@ export function useAndroidBetaUpdate({
         // A failed automatic check says nothing; a failed manual one says so.
         if (manual) {
           setError(messageOf(e));
-          setStatus("failed");
+          setStatus("check-failed");
         }
       }
     },

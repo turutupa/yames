@@ -106,6 +106,11 @@ export function AboutSection({
               {androidBeta.status === "up-to-date" && (
                 <span className="update-status up-to-date">{t("settings.about.upToDate")}</span>
               )}
+              {androidBeta.status === "check-failed" && (
+                <span className="update-status" title={androidBeta.error ?? undefined}>
+                  {t("settings.about.betaCheckFailed")}
+                </span>
+              )}
               {androidBeta.status === "failed" && (
                 <span className="update-status" title={androidBeta.error ?? undefined}>
                   {t("settings.about.betaFailed")}

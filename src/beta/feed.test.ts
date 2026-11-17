@@ -142,3 +142,12 @@ describe("the workflow's feed files", () => {
     );
   });
 });
+
+describe("notes for testers", () => {
+  it("drop the commit's trailers", () => {
+    expect(
+      script.cleanNotes("merge(x): the thing\n\nCo-Authored-By: Someone <a@b>\nSigned-off-by: Someone"),
+    ).toBe("merge(x): the thing");
+    expect(script.cleanNotes("Plain notes\nwith two lines")).toBe("Plain notes\nwith two lines");
+  });
+});

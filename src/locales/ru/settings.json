@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "Загрузка… {{percent}}%",
       "betaInstalling": "Открываем установщик…",
       "betaAllowInstalls": "Разрешите Yames устанавливать приложения и снова нажмите «Обновить»",
+      "betaCheckFailed": "Не удалось проверить. Есть ли подключение?",
       "betaFailed": "Обновить не получилось",
       "soundsCreditSongs": "Остальные инструменты — из набора звуков General MIDI от Sonivox (Sonic Network Inc., Apache-2.0)."
     },

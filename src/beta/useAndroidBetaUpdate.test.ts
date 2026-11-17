@@ -91,6 +91,15 @@ describe("useAndroidBetaUpdate", () => {
     expect(download).toHaveBeenCalledTimes(1);
   });
 
+  it("says a check it was asked for could not reach the feed, apart from a failed update", async () => {
+    store.set(BETA_CHECKED_AT_KEY, Date.now() - 1000);
+    const { result } = mount();
+    probe.mockRejectedValueOnce(new Error('Unable to resolve host "github.com"'));
+    act(() => result.current.check());
+    await waitFor(() => expect(result.current.status).toBe("check-failed"));
+    expect(result.current.error).toMatch(/resolve host/);
+  });
+
   it("reports a failed download", async () => {
     download.mockRejectedValueOnce(new Error("the download does not match its sha256"));
     const { result } = mount();

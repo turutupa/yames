@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "ダウンロード中… {{percent}}%",
       "betaInstalling": "インストーラーを開いています…",
       "betaAllowInstalls": "Yames にアプリのインストールを許可してから、もう一度「アップデート」をタップしてください",
+      "betaCheckFailed": "確認できませんでした。オンラインですか？",
       "betaFailed": "アップデートできませんでした",
       "soundsCreditSongs": "ほかの楽器は Sonivox の General MIDI 音源です（Sonic Network Inc., Apache-2.0）。"
     },

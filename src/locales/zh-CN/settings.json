@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "正在下载… {{percent}}%",
       "betaInstalling": "正在打开安装程序…",
       "betaAllowInstalls": "请允许 Yames 安装应用，然后再次点按“更新”",
+      "betaCheckFailed": "无法检查。你在线吗？",
       "betaFailed": "更新未成功",
       "soundsCreditSongs": "其他乐器来自 Sonivox 的 General MIDI 音色库（Sonic Network Inc.，Apache-2.0）。"
     },

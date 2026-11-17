@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "Descargando… {{percent}} %",
       "betaInstalling": "Abriendo el instalador…",
       "betaAllowInstalls": "Permite que Yames instale apps y vuelve a tocar Actualizar",
+      "betaCheckFailed": "No se pudo comprobar. ¿Tienes conexión?",
       "betaFailed": "La actualización no ha funcionado",
       "soundsCreditSongs": "Los demás instrumentos vienen del banco de sonidos General MIDI de Sonivox (Sonic Network Inc., Apache-2.0)."
     },

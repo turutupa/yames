@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "Downloaden… {{percent}}%",
       "betaInstalling": "Installatieprogramma openen…",
       "betaAllowInstalls": "Sta Yames toe apps te installeren en tik daarna opnieuw op Bijwerken",
+      "betaCheckFailed": "Controleren lukte niet. Ben je online?",
       "betaFailed": "Het bijwerken is niet gelukt",
       "soundsCreditSongs": "De andere instrumenten komen uit de Sonivox General MIDI-klankset (Sonic Network Inc., Apache-2.0)."
     },

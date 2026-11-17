@@ -266,6 +266,18 @@ function readText(path) {
   return path && path !== "-" && existsSync(path) ? readFileSync(path, "utf8").trim() : "";
 }
 
+/**
+ * Notes for testers. A push to `beta-build` uses the commit message, whose
+ * trailers (Co-Authored-By, Signed-off-by) mean nothing to a tester.
+ */
+export function cleanNotes(text) {
+  return text
+    .split("\n")
+    .filter((line) => !/^[A-Za-z-]+-by:\s/i.test(line.trim()))
+    .join("\n")
+    .trim();
+}
+
 function main(argv) {
   const [cmd, ...a] = argv;
   switch (cmd) {
@@ -286,7 +298,7 @@ function main(argv) {
         .map((f) => JSON.parse(readFileSync(join(fragmentsDir, f), "utf8")));
       const merged = mergeLatest({
         version,
-        notes: readText(notesFile),
+        notes: cleanNotes(readText(notesFile)),
         fragments,
         existing: readJsonOrNull(existingPath),
       });
@@ -302,7 +314,7 @@ function main(argv) {
         apkName: basename(apk),
         sha256: sha256File(apk),
         size: statSync(apk).size,
-        notes: readText(notesFile),
+        notes: cleanNotes(readText(notesFile)),
       });
       writeFileSync(out, JSON.stringify(feed, null, 2) + "\n");
       console.log(JSON.stringify(feed, null, 2));

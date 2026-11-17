@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "Đang tải… {{percent}}%",
       "betaInstalling": "Đang mở trình cài đặt…",
       "betaAllowInstalls": "Hãy cho phép Yames cài ứng dụng, rồi chạm Cập nhật lần nữa",
+      "betaCheckFailed": "Không kiểm tra được. Bạn có đang trực tuyến không?",
       "betaFailed": "Cập nhật không thành công",
       "soundsCreditSongs": "Các nhạc cụ còn lại lấy từ bộ tiếng General MIDI của Sonivox (Sonic Network Inc., Apache-2.0)."
     },

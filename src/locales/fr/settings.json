@@ -366,6 +366,7 @@
       "betaDownloadingPercent": "Téléchargement… {{percent}} %",
       "betaInstalling": "Ouverture du programme d'installation…",
       "betaAllowInstalls": "Autorisez Yames à installer des applis, puis touchez à nouveau Mettre à jour",
+      "betaCheckFailed": "Vérification impossible. Êtes-vous en ligne ?",
       "betaFailed": "La mise à jour n'a pas fonctionné",
       "soundsCreditSongs": "Les autres instruments viennent du jeu de sons General MIDI Sonivox (Sonic Network Inc., Apache-2.0)."
     },
