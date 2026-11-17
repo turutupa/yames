@@ -243,7 +243,11 @@
         "session-slower": "Más lento",
         "session-faster": "Más rápido",
         "session-next": "Siguiente paso",
-        "session-pedal": "Un solo pedal"
+        "session-pedal": "Un solo pedal",
+        "session-exit": "Salir de la sesión",
+        "tab-paths": "Rutas",
+        "tab-progress": "Progreso",
+        "tab-tools": "Herramientas"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -293,7 +297,11 @@
         "session-slower": "Entre tomas: un peldaño más lento",
         "session-faster": "Entre tomas: un peldaño más rápido",
         "session-next": "Entre tomas: pasar a lo siguiente de la sesión",
-        "session-pedal": "Para un solo pedal. Pulsar: lo siguiente. Doble pulsación: más lento. Mantener: siguiente paso"
+        "session-pedal": "Para un solo pedal. Pulsar: lo siguiente. Doble pulsación: más lento. Mantener: siguiente paso",
+        "session-exit": "En una sesión: salir, como hace Salir. Una toma en marcha se para antes.",
+        "tab-paths": "Ir a Rutas",
+        "tab-progress": "Ir a Progreso",
+        "tab-tools": "Ir a Herramientas"
       }
     },
     "inputTest": {

@@ -243,7 +243,11 @@
         "session-slower": "慢一點",
         "session-faster": "快一點",
         "session-next": "下一步",
-        "session-pedal": "單踏板"
+        "session-pedal": "單踏板",
+        "session-exit": "離開課程",
+        "tab-paths": "路線",
+        "tab-progress": "進度",
+        "tab-tools": "工具"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -293,7 +297,11 @@
         "session-slower": "兩遍之間：慢一檔",
         "session-faster": "兩遍之間：快一檔",
         "session-next": "兩遍之間：進入這節課的下一項",
-        "session-pedal": "用於單個腳踏開關。單踩：下一步操作。雙踩：慢一點。長踩：下一步"
+        "session-pedal": "用於單個腳踏開關。單踩：下一步操作。雙踩：慢一點。長踩：下一步",
+        "session-exit": "課程中：和「退出」一樣離開。正在進行的這一遍會先停止。",
+        "tab-paths": "前往「路線」",
+        "tab-progress": "前往「進度」",
+        "tab-tools": "前往「工具」"
       }
     },
     "inputTest": {

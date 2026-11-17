@@ -243,7 +243,11 @@
         "session-slower": "Chậm hơn",
         "session-faster": "Nhanh hơn",
         "session-next": "Bước tiếp theo",
-        "session-pedal": "Một pedal"
+        "session-pedal": "Một pedal",
+        "session-exit": "Rời buổi tập",
+        "tab-paths": "Lộ trình",
+        "tab-progress": "Tiến bộ",
+        "tab-tools": "Công cụ"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -293,7 +297,11 @@
         "session-slower": "Giữa các lượt: chậm hơn một nấc",
         "session-faster": "Giữa các lượt: nhanh hơn một nấc",
         "session-next": "Giữa các lượt: chuyển sang việc tiếp theo trong buổi tập",
-        "session-pedal": "Cho một công tắc chân. Nhấn: việc tiếp theo. Nhấn đúp: chậm hơn. Giữ: bước tiếp theo"
+        "session-pedal": "Cho một công tắc chân. Nhấn: việc tiếp theo. Nhấn đúp: chậm hơn. Giữ: bước tiếp theo",
+        "session-exit": "Trong buổi tập: rời đi, giống nút Thoát. Lượt đang chạy sẽ dừng trước.",
+        "tab-paths": "Chuyển sang Lộ trình",
+        "tab-progress": "Chuyển sang Tiến bộ",
+        "tab-tools": "Chuyển sang Công cụ"
       }
     },
     "inputTest": {

@@ -934,6 +934,34 @@
       "globalKey": null,
       "globalAllowed": false,
       "group": "session"
+    },
+    {
+      "id": "tab-paths",
+      "key": "⌘6",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-progress",
+      "key": "⌘7",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "tab-tools",
+      "key": "⌘8",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "navigation"
+    },
+    {
+      "id": "session-exit",
+      "key": "Escape",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
     }
   ],
   "settingsKeys": {

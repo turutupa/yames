@@ -243,7 +243,11 @@
         "session-slower": "Langzamer",
         "session-faster": "Sneller",
         "session-next": "Volgende stap",
-        "session-pedal": "Eén pedaal"
+        "session-pedal": "Eén pedaal",
+        "session-exit": "Sessie verlaten",
+        "tab-paths": "Leerpaden",
+        "tab-progress": "Voortgang",
+        "tab-tools": "Tools"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -293,7 +297,11 @@
         "session-slower": "Tussen takes: een trede langzamer",
         "session-faster": "Tussen takes: een trede sneller",
         "session-next": "Tussen takes: door naar het volgende in de sessie",
-        "session-pedal": "Voor één voetschakelaar. Tikken: het volgende. Dubbeltikken: langzamer. Vasthouden: volgende stap"
+        "session-pedal": "Voor één voetschakelaar. Tikken: het volgende. Dubbeltikken: langzamer. Vasthouden: volgende stap",
+        "session-exit": "Tijdens een sessie: die verlaten, net als Stoppen. Een lopende take stopt eerst.",
+        "tab-paths": "Naar Leerpaden",
+        "tab-progress": "Naar Voortgang",
+        "tab-tools": "Naar Tools"
       }
     },
     "inputTest": {

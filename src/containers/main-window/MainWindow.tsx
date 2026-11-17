@@ -1548,8 +1548,10 @@ export function MainWindow() {
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
       pedalPress: () => pedalPress.current(),
+      exit: sessionRun.actions.exit,
     }),
     [
+      sessionRun.actions.exit,
       sessionRun.actions.startToday,
       sessionRun.actions.go,
       sessionRun.actions.slower,
