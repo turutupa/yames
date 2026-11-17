@@ -1005,14 +1005,25 @@ pub fn reveal_in_folder(path: String) {
 
 #[tauri::command]
 pub fn open_url(url: String) {
+    // Only web and mail links: this hands its argument to the system's
+    // opener, which would just as happily run a local file.
+    let lower = url.to_ascii_lowercase();
+    if !(lower.starts_with("https://") || lower.starts_with("http://") || lower.starts_with("mailto:")) {
+        return;
+    }
     #[cfg(target_os = "macos")]
     {
         let _ = std::process::Command::new("open").arg(&url).spawn();
     }
     #[cfg(target_os = "windows")]
     {
-        let _ = std::process::Command::new("cmd")
-            .args(["/C", "start", &url])
+        // Not `cmd /C start`: cmd parses the URL as a command line, so the
+        // first `&` in a query string ended it (`?title=..&body=..` opened
+        // the title and tried to run `body=..` as a command). The share links
+        // and the prefilled feedback issue all have one. `FileProtocolHandler`
+        // hands the URL to the default browser without a shell in between.
+        let _ = std::process::Command::new("rundll32")
+            .args(["url.dll,FileProtocolHandler", &url])
             .spawn();
     }
     #[cfg(target_os = "linux")]
