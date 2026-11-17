@@ -11,7 +11,13 @@
       "mechanics": "テクニック",
       "theory": "理論",
       "jam": "ジャム（採点なし）",
-      "warmUp": "ウォームアップ（採点なし）"
+      "warmUp": "ウォームアップ（採点なし）",
+      "review": "復習",
+      "placement": "レベル判定",
+      "benchmark": "ベンチマーク",
+      "test": "テストアウト",
+      "finisher": "バンドと一緒に・採点なし",
+      "yourTurn": "あなたの番・判定なし"
     },
     "step": {
       "jam": "バンドに合わせて弾く",
@@ -41,7 +47,8 @@
       "needsInput": "採点にはマイクかダイレクト入力が必要です。",
       "toolsOffer": "ツールを使いたいだけですか？ 全部「ツール」の中にあります。",
       "toolsOfferOpen": "前回のツールへ",
-      "toolsOfferAlways": "いつもそこで開く"
+      "toolsOfferAlways": "いつもそこで開く",
+      "resting": "今日はお休み"
     },
     "why": {
       "firstEver": "はじめてなので {{bpm}} BPM から。速さではなく、タイミングの練習です。",
@@ -78,7 +85,26 @@
       "edge": "到達したテンポ {{bpm}} BPM から。合格ラインに届くたびに 1 段階上がります。",
       "edgeCheck": "クリーンテンポの確認です。前回は {{clean}} BPM でした。",
       "edgeFirst": "クリーンテンポを見つけます。{{bpm}} BPM から始めて、合格ラインに届くかぎり上がっていきます。",
-      "chosen": "{{step}} からあなたが選んだ課題です。"
+      "chosen": "{{step}} からあなたが選んだ課題です。",
+      "focusTurn": "今日は{{path}}が中心です。順番が来ました。",
+      "focusTurnAway": "今日は{{path}}が中心です。{{days}}日間弾いていません。",
+      "keepWarm": "{{path}}を忘れないように。最後に弾いたのは{{days}}日前です。",
+      "keepWarmYesterday": "{{path}}を忘れないように。最後に弾いたのは昨日です。",
+      "keepWarmToday": "{{path}}を忘れないように。今日すでに弾いています。",
+      "keepWarmNew": "{{path}}：最初のブロックです。",
+      "reviewDue": "復習：{{days}}日前に合格しました。クリーンテンポ{{bpm}} BPMで2テイク。",
+      "reviewDueSlipped": "前回うまくいかなかった復習なので、1段下げます：{{bpm}} BPM。",
+      "reviewDueLeft": "完了した{{step}}の残りです。{{bpm}} BPMで復習。",
+      "parked": "{{exercise}}は新しいクリーンテンポのないセッションが3回続いたので{{days}}日間お休み。新鮮な気持ちで戻ってきます。",
+      "skippedToday": "{{path}}は今日はお休み：{{days}}日前に弾きました。",
+      "skippedTodayToday": "{{path}}はお休み：今日すでに弾きました。",
+      "skippedTodayYesterday": "{{path}}は今日はお休み：昨日弾きました。",
+      "skippedTodayNever": "{{path}}は今日はお休み：まだ弾いていません。",
+      "finisher": "締めくくり：バンドと一緒に{{exercise}}を{{bpm}} BPMで。合格済みのテンポです。採点なし。",
+      "placement": "初めてですか？まず{{bpm}} BPMで易しく1テイク、次に{{pass}}で1テイク。両方合格すれば次のステップへ進めます。",
+      "testOut": "{{step}}のテストアウト：合格テンポ{{bpm}} BPMで1テイク。",
+      "benchmark": "ベンチマーク、{{day}}日目：毎回同じ練習を{{bpm}} BPMで。比べるためです。",
+      "yourTurn": "あなたの番：{{exercise}}。まだ判定できないので、自分で確かめてください。"
     },
     "bar": {
       "summary": "合格ライン：{{bpm}} BPM で均等さ {{even}}%、聞き取れた音 {{heard}}%。"
@@ -121,7 +147,11 @@
       "cleanMoved": "クリーンテンポ：{{from}} → {{bpm}} BPM。",
       "unmeasuredNotes": "タイミングは確認しました。音がはっきり聞き取れず、正しい音だったかは判断できなかったので、今回は採点していません。",
       "againSame": "もう一度、{{bpm}} BPM",
-      "moveOn": "次へ進む"
+      "moveOn": "次へ進む",
+      "fairAsk": "この判定は妥当でしたか？",
+      "fairYes": "はい",
+      "fairNo": "いいえ",
+      "fairThanks": "ありがとう。練習データと一緒に保存しました。"
     },
     "edge": {
       "kick": "限界に挑戦",
@@ -165,7 +195,9 @@
       "warmUpKick": "ウォームアップ · 採点なし",
       "jamKick": "ジャム · 採点なし",
       "drillKick": "テンポを上げる · 採点なし",
-      "movesOn": "自動で次に進みます。"
+      "movesOn": "自動で次に進みます。",
+      "finisherKick": "締めくくり・採点なし",
+      "yourTurnKick": "あなたの番・判定なし"
     },
     "pedal": {
       "title": "フットペダル",
@@ -221,7 +253,15 @@
       "playedClean_other": "{{count}} テイク。クリーンテンポ {{bpm}} BPM。",
       "running": "進行中",
       "whereYouAre": "現在地",
-      "openStep": "ステップ {{n}} へ"
+      "openStep": "ステップ {{n}} へ",
+      "subscribe": "登録する",
+      "unsubscribe": "登録を解除",
+      "subscribed": "登録済み",
+      "subscribeHow": "「今日」は登録したすべてのパス（最大{{cap}}つ）から組み立てます。",
+      "subscribeCap": "このテストでは最大{{cap}}つのパスまで登録できます。先にどれかを解除してください。履歴は残ります。",
+      "unsubscribedNote": "今日のプランには入りません。履歴は残るので、いつでも再登録できます。",
+      "testOut": "テストアウト",
+      "testOutHow": "各練習の合格テンポで1テイクずつ。4つ中3つほど合格すればこのステップは完了です。"
     },
     "progress": {
       "title": "上達",
@@ -256,6 +296,12 @@
     "runway": {
       "label": "ラインに向かって流れてくる次の音"
     },
-    "inputChanged": "入力が変わりました。今は {{device}} で聞いています。"
+    "inputChanged": "入力が変わりました。今は {{device}} で聞いています。",
+    "export": {
+      "button": "練習データを書き出す",
+      "note": "テイク、クリーンテンポ、プランナーの理由を含むJSONファイルです。必要ならフィードバックに添付してください。何も送信されません。",
+      "done": "{{path}} に保存しました。",
+      "failed": "ファイルを保存できませんでした。"
+    }
   }
 }

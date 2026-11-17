@@ -607,6 +607,34 @@
   color: var(--l-quiet);
   font-size: 13px;
 }
+/* Paths with nothing today, one line each (Play now across subscribed Paths). */
+.session-skipped {
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+.session-context {
+  margin-bottom: 2px;
+}
+/* "Was this grade fair?": one tap, small, under the result. */
+.session-fair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  color: var(--l-quiet);
+  font-size: 13px;
+}
+.session-fair button[aria-pressed="true"] {
+  border-color: var(--l-amber);
+  color: var(--l-ink);
+}
+.session-subscribe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
 
 /* ── A running Session ─────────────────────────────────────────────────── */
 .session-run {

@@ -11,7 +11,13 @@
       "mechanics": "Techniek",
       "theory": "Theorie",
       "jam": "Jam, zonder beoordeling",
-      "warmUp": "Warming-up, zonder beoordeling"
+      "warmUp": "Warming-up, zonder beoordeling",
+      "review": "Herhaling",
+      "placement": "Instap",
+      "benchmark": "Meetpunt",
+      "test": "Uittesten",
+      "finisher": "Met de band, niet beoordeeld",
+      "yourTurn": "Jouw beurt, niet gecontroleerd"
     },
     "step": {
       "jam": "Speel mee met de band",
@@ -41,7 +47,8 @@
       "needsInput": "Voor de beoordeling is een microfoon of directe ingang nodig.",
       "toolsOffer": "Kom je voor de tools? Ze staan allemaal onder Tools.",
       "toolsOfferOpen": "Naar mijn laatste tool",
-      "toolsOfferAlways": "Altijd daar openen"
+      "toolsOfferAlways": "Altijd daar openen",
+      "resting": "Rust vandaag"
     },
     "why": {
       "firstEver": "Je eerste, dus hij begint op {{bpm}} BPM. Het gaat hier om timing, niet om snelheid.",
@@ -78,7 +85,26 @@
       "edge": "Vanaf het tempo dat je haalde, {{bpm}} BPM. Na elke take die de lat haalt, gaat het een trede omhoog.",
       "edgeCheck": "Om je schone tempo te controleren. Vorige keer was het {{clean}} BPM.",
       "edgeFirst": "Om je schone tempo te vinden. Begint op {{bpm}} BPM en gaat omhoog zolang je de lat haalt.",
-      "chosen": "Deze heb je zelf gekozen, uit {{step}}."
+      "chosen": "Deze heb je zelf gekozen, uit {{step}}.",
+      "focusTurn": "{{path}} gaat vandaag voorop: het is aan de beurt.",
+      "focusTurnAway": "{{path}} gaat vandaag voorop: je hebt het {{days}} dagen niet gespeeld.",
+      "keepWarm": "{{path}}, warm gehouden: {{days}} dagen geleden gespeeld.",
+      "keepWarmYesterday": "{{path}}, warm gehouden: gisteren gespeeld.",
+      "keepWarmToday": "{{path}}, warm gehouden: vandaag al gespeeld.",
+      "keepWarmNew": "{{path}}: het eerste blok.",
+      "reviewDue": "Een herhaling: {{days}} dagen geleden gehaald. Twee takes op je schone tempo, {{bpm}} BPM.",
+      "reviewDueSlipped": "Een herhaling die vorige keer misging, dus een trede lager: {{bpm}} BPM.",
+      "reviewDueLeft": "Over uit {{step}}, dat klaar is. Een herhaling op {{bpm}} BPM.",
+      "parked": "{{exercise}} staat {{days}} dagen geparkeerd na drie sessies zonder nieuw schoon tempo. Het komt fris terug.",
+      "skippedToday": "{{path}} rust vandaag: {{days}} dagen geleden gespeeld.",
+      "skippedTodayToday": "{{path}} rust: vandaag al gespeeld.",
+      "skippedTodayYesterday": "{{path}} rust vandaag: gisteren gespeeld.",
+      "skippedTodayNever": "{{path}} rust vandaag: nog niet gespeeld.",
+      "finisher": "Als afsluiter: {{exercise}} met de band op {{bpm}} BPM, een tempo dat je al haalde. Niet beoordeeld.",
+      "placement": "Nieuw hier? Eén makkelijke take op {{bpm}} BPM, dan één op {{pass}}. Haal ze allebei en je springt naar de volgende stap.",
+      "testOut": "Test jezelf uit {{step}}: één take op het slaagtempo, {{bpm}} BPM.",
+      "benchmark": "Meetpunt, dag {{day}}: elke keer dezelfde oefening op {{bpm}} BPM, om te vergelijken.",
+      "yourTurn": "Jouw beurt: {{exercise}}. Nog niet gecontroleerd, dus jij beoordeelt het."
     },
     "bar": {
       "summary": "De lat: {{even}}% gelijkmatig en {{heard}}% van de noten gehoord, op {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Schoon tempo: van {{from}} naar {{bpm}} BPM.",
       "unmeasuredNotes": "Ik heb de timing gecontroleerd. Ik hoorde de noten niet duidelijk genoeg om te zeggen of het de juiste waren, dus dat is deze keer niet beoordeeld.",
       "againSame": "Nog een keer, {{bpm}} BPM",
-      "moveOn": "Verder"
+      "moveOn": "Verder",
+      "fairAsk": "Was dit oordeel eerlijk?",
+      "fairYes": "Ja",
+      "fairNo": "Nee",
+      "fairThanks": "Bedankt. Het wordt bij je oefengegevens bewaard."
     },
     "edge": {
       "kick": "Mijn grens vinden",
@@ -165,7 +195,9 @@
       "warmUpKick": "Warming-up · zonder beoordeling",
       "jamKick": "Jam · zonder beoordeling",
       "drillKick": "Tempo opbouwen · zonder beoordeling",
-      "movesOn": "Dit gaat vanzelf verder."
+      "movesOn": "Dit gaat vanzelf verder.",
+      "finisherKick": "Afsluiter · niet beoordeeld",
+      "yourTurnKick": "Jouw beurt · niet gecontroleerd"
     },
     "pedal": {
       "title": "Voetpedaal",
@@ -221,7 +253,15 @@
       "playedClean_other": "{{count}} takes. Schoon tempo {{bpm}} BPM.",
       "running": "Loopt",
       "whereYouAre": "Waar je staat",
-      "openStep": "Naar stap {{n}}"
+      "openStep": "Naar stap {{n}}",
+      "subscribe": "Abonneren",
+      "unsubscribe": "Opzeggen",
+      "subscribed": "Geabonneerd",
+      "subscribeHow": "Vandaag plant uit elk pad waarop je geabonneerd bent, tot {{cap}}.",
+      "subscribeCap": "In deze test kun je tot {{cap}} paden volgen. Zeg er eerst een op; de geschiedenis blijft bewaard.",
+      "unsubscribedNote": "Niet in het plan van vandaag. Je geschiedenis blijft; abonneer je wanneer je wilt opnieuw.",
+      "testOut": "Uittesten",
+      "testOutHow": "Eén take op het slaagtempo van elke oefening. Haal er ongeveer drie van de vier en de stap is klaar."
     },
     "progress": {
       "title": "Voortgang",
@@ -256,6 +296,12 @@
     "runway": {
       "label": "De volgende noten, op weg naar de lijn"
     },
-    "inputChanged": "De ingang is veranderd. Ik luister nu via {{device}}."
+    "inputChanged": "De ingang is veranderd. Ik luister nu via {{device}}.",
+    "export": {
+      "button": "Mijn oefengegevens exporteren",
+      "note": "Een JSON-bestand met je takes, schone tempo's en de redenen van de planner. Voeg het toe aan een feedbackmelding als je wilt; er wordt niets verstuurd.",
+      "done": "Opgeslagen in {{path}}.",
+      "failed": "Het bestand kon niet worden opgeslagen."
+    }
   }
 }

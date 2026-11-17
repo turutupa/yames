@@ -33,7 +33,8 @@ import type { SessionRun } from "./hooks/useSessionRun";
 import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
-import { rise, stepTitle } from "./TodayView";
+import { ContextLine, rise, stepTitle } from "./TodayView";
+import { factsOf } from "../../session/progress";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -171,6 +172,7 @@ function TakeScreen({
             ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
         </span>
         <h2 className="session-h3">{exercise.title}</h2>
+        <ContextLine step={step} />
         <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
         <PracticeViewSwitch session={session} locked={running} />
       </div>
@@ -361,6 +363,35 @@ function EdgePanel({ session }: { session: SessionRun }) {
   );
 }
 
+/**
+ * "Was this grade fair?": one tap, kept in the Take's facts for the export.
+ * Only on a graded result: a Take not heard has no grade to judge.
+ */
+export function FairTap({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
+  const { t } = useTranslation();
+  const id = outcome.takeId;
+  if (!id) return null;
+  const row = session.progress.takes.find((take) => take.id === id);
+  const answer = row ? factsOf(row).fair : undefined;
+  return (
+    <div className="session-fair" role="group" aria-label={t("session.result.fairAsk")} data-testid="session-fair">
+      <span>{t("session.result.fairAsk")}</span>
+      {(["yes", "no"] as const).map((value) => (
+        <button
+          key={value}
+          className="session-secondary"
+          aria-pressed={answer === value}
+          onClick={() => session.actions.answerFair(id, value)}
+          data-testid={`session-fair-${value}`}
+        >
+          {t(value === "yes" ? "session.result.fairYes" : "session.result.fairNo")}
+        </button>
+      ))}
+      {answer && <span role="status">{t("session.result.fairThanks")}</span>}
+    </div>
+  );
+}
+
 /** A graded Take: passed reads as a result, below the bar as between Takes. */
 function ResultScreen({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
@@ -416,6 +447,7 @@ function ResultScreen({ session }: { session: SessionRun }) {
               {bigLabel(big, t)}
             </button>
             {nudges}
+            <FairTap session={session} outcome={outcome} />
             <PedalCard />
           </div>
           <div className="session-col">
@@ -447,6 +479,7 @@ function ResultScreen({ session }: { session: SessionRun }) {
         {bigLabel(big, t)}
       </button>
       {nudges}
+      <FairTap session={session} outcome={outcome} />
       {!onEdge && (
         <button
           className="session-choice session-glass"
@@ -544,11 +577,11 @@ function TimedScreen({
   if (!step) return null;
   const kick =
     step.kind === "metronome"
-      ? t("session.timed.warmUpKick")
+      ? t(step.why.code === "yourTurn" ? "session.timed.yourTurnKick" : "session.timed.warmUpKick")
       : step.kind === "jam"
-        ? t("session.timed.jamKick")
+        ? t(step.exerciseId ? "session.timed.finisherKick" : "session.timed.jamKick")
         : t("session.timed.drillKick");
-  const bpm = step.kind === "metronome" ? step.bpm : bpmNow;
+  const bpm = step.kind === "metronome" ? step.bpm : step.kind === "jam" && step.bpm ? step.bpm : bpmNow;
   return (
     <div className="session-body" data-testid="session-timed" data-kind={step.kind}>
       <div className="session-takeinfo">
@@ -568,7 +601,7 @@ function TimedScreen({
         )}
       </div>
       <div className="session-slot" ref={slot} aria-hidden="true" />
-      {step.kind === "metronome" && take && (
+      {(step.kind === "metronome" || (step.kind === "jam" && step.exerciseId)) && take && (
         <div className="session-glass">
           <ExerciseStage take={take} tick={0} playing={false} themeId={themeId} />
         </div>

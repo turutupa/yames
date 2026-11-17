@@ -153,7 +153,8 @@
     "get_take_grade_with_notes",
     "release_jam_sounds",
     "refresh_audio_devices",
-    "callback_probe_report"
+    "callback_probe_report",
+    "export_practice_data"
   ],
   "ipcCommands": [
     "analyze_attempt",
@@ -307,7 +308,8 @@
     "get_take_grade_with_notes",
     "release_jam_sounds",
     "refresh_audio_devices",
-    "callback_probe_report"
+    "callback_probe_report",
+    "export_practice_data"
   ],
   "commandsInvokedOutsideIpc": [
     "app_ready",
@@ -512,7 +514,8 @@
     "releaseJamSounds",
     "onAudioRouteChanged",
     "refreshAudioDevices",
-    "callbackProbeReport"
+    "callbackProbeReport",
+    "exportPracticeData"
   ],
   "ipcWrappersWithoutCaller": [
     "clearSessionLogs",
@@ -1414,6 +1417,11 @@
       "written": true
     },
     "newerVersion.latest": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.unsubscribed": {
       "store": "settings.json",
       "read": true,
       "written": true

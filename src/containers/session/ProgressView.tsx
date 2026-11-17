@@ -15,6 +15,7 @@ import type { SessionRun } from "./hooks/useSessionRun";
 import { useNeck3d, useNeckSlot } from "./hooks/useNeck";
 import type { NeckView } from "../../stage3d/api";
 import { rise } from "./TodayView";
+import { ExportPracticeButton } from "./ExportPracticeButton";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -223,6 +224,9 @@ export function ProgressView({ session }: { session: SessionRun }) {
                 </div>
               );
             })}
+            <div className="session-glass session-card session-rise">
+              <ExportPracticeButton />
+            </div>
           </div>
         </div>
       )}

@@ -11,7 +11,13 @@
       "mechanics": "Kỹ thuật",
       "theory": "Lý thuyết",
       "jam": "Jam, không chấm điểm",
-      "warmUp": "Khởi động, không chấm điểm"
+      "warmUp": "Khởi động, không chấm điểm",
+      "review": "Ôn tập",
+      "placement": "Xếp cấp",
+      "benchmark": "Mốc",
+      "test": "Kiểm tra",
+      "finisher": "Cùng ban nhạc, không chấm",
+      "yourTurn": "Lượt bạn, không kiểm tra"
     },
     "step": {
       "jam": "Chơi cùng ban nhạc",
@@ -41,7 +47,8 @@
       "needsInput": "Chấm điểm cần micro hoặc cắm trực tiếp.",
       "toolsOffer": "Bạn đến để dùng công cụ? Tất cả đều nằm trong Công cụ.",
       "toolsOfferOpen": "Tới công cụ tôi dùng lần cuối",
-      "toolsOfferAlways": "Luôn mở ở đó"
+      "toolsOfferAlways": "Luôn mở ở đó",
+      "resting": "Nghỉ hôm nay"
     },
     "why": {
       "firstEver": "Đây là lần đầu, nên bắt đầu ở {{bpm}} BPM. Trọng tâm là nhịp, không phải tốc độ.",
@@ -78,7 +85,26 @@
       "edge": "Từ tempo bạn đã đạt, {{bpm}} BPM. Tăng một nấc sau mỗi lượt đạt mức.",
       "edgeCheck": "Để kiểm tra tempo sạch của bạn. Lần trước là {{clean}} BPM.",
       "edgeFirst": "Để tìm tempo sạch của bạn. Bắt đầu ở {{bpm}} BPM và tăng dần khi bạn còn đạt mức.",
-      "chosen": "Bạn tự chọn bài này, từ {{step}}."
+      "chosen": "Bạn tự chọn bài này, từ {{step}}.",
+      "focusTurn": "Hôm nay {{path}} dẫn đầu: đến lượt nó.",
+      "focusTurnAway": "Hôm nay {{path}} dẫn đầu: bạn chưa chơi nó {{days}} ngày.",
+      "keepWarm": "{{path}}, để giữ phong độ: chơi lần cuối {{days}} ngày trước.",
+      "keepWarmYesterday": "{{path}}, để giữ phong độ: chơi lần cuối hôm qua.",
+      "keepWarmToday": "{{path}}, để giữ phong độ: đã chơi hôm nay.",
+      "keepWarmNew": "{{path}}: phần đầu tiên.",
+      "reviewDue": "Ôn tập: đã đạt {{days}} ngày trước. Hai lượt ở tempo sạch của bạn, {{bpm}} BPM.",
+      "reviewDueSlipped": "Lần ôn trước bị trượt, nên hạ một bậc: {{bpm}} BPM.",
+      "reviewDueLeft": "Còn lại từ {{step}}, bước đã xong. Ôn ở {{bpm}} BPM.",
+      "parked": "{{exercise}} được tạm gác {{days}} ngày sau ba buổi không có tempo sạch mới. Nó sẽ quay lại.",
+      "skippedToday": "{{path}} nghỉ hôm nay: chơi {{days}} ngày trước.",
+      "skippedTodayToday": "{{path}} nghỉ: đã chơi hôm nay.",
+      "skippedTodayYesterday": "{{path}} nghỉ hôm nay: đã chơi hôm qua.",
+      "skippedTodayNever": "{{path}} nghỉ hôm nay: chưa chơi.",
+      "finisher": "Để kết thúc: {{exercise}} cùng ban nhạc ở {{bpm}} BPM, tempo bạn đã đạt. Không chấm.",
+      "placement": "Mới đến? Một lượt dễ ở {{bpm}} BPM, rồi một lượt ở {{pass}}. Đạt cả hai là bạn nhảy sang bước tiếp theo.",
+      "testOut": "Kiểm tra vượt {{step}}: một lượt ở tempo đạt, {{bpm}} BPM.",
+      "benchmark": "Mốc so sánh, ngày {{day}}: cùng một bài ở {{bpm}} BPM mỗi lần, để so sánh.",
+      "yourTurn": "Đến lượt bạn: {{exercise}}. Chưa được kiểm tra, bạn tự đánh giá."
     },
     "bar": {
       "summary": "Mức đạt: đều {{even}}% và nghe được {{heard}}% số nốt, ở {{bpm}} BPM."
@@ -121,7 +147,11 @@
       "cleanMoved": "Tempo sạch: từ {{from}} lên {{bpm}} BPM.",
       "unmeasuredNotes": "Tôi đã kiểm tra nhịp. Tôi không nghe các nốt đủ rõ để nói chúng có đúng không, nên lần này phần đó không được chấm.",
       "againSame": "Lại lần nữa, {{bpm}} BPM",
-      "moveOn": "Đi tiếp"
+      "moveOn": "Đi tiếp",
+      "fairAsk": "Điểm này có công bằng không?",
+      "fairYes": "Có",
+      "fairNo": "Không",
+      "fairThanks": "Cảm ơn. Đã lưu cùng dữ liệu luyện tập của bạn."
     },
     "edge": {
       "kick": "Tìm giới hạn",
@@ -165,7 +195,9 @@
       "warmUpKick": "Khởi động · không chấm điểm",
       "jamKick": "Jam · không chấm điểm",
       "drillKick": "Tăng dần tempo · không chấm điểm",
-      "movesOn": "Phần này tự chuyển tiếp."
+      "movesOn": "Phần này tự chuyển tiếp.",
+      "finisherKick": "Kết thúc · không chấm",
+      "yourTurnKick": "Lượt bạn · không kiểm tra"
     },
     "pedal": {
       "title": "Pedal chân",
@@ -221,7 +253,15 @@
       "playedClean_other": "{{count}} lượt. Tempo sạch {{bpm}} BPM.",
       "running": "Đang chạy",
       "whereYouAre": "Bạn đang ở đâu",
-      "openStep": "Đến bước {{n}}"
+      "openStep": "Đến bước {{n}}",
+      "subscribe": "Đăng ký",
+      "unsubscribe": "Hủy đăng ký",
+      "subscribed": "Đã đăng ký",
+      "subscribeHow": "Hôm nay lên kế hoạch từ mọi lộ trình bạn đăng ký, tối đa {{cap}}.",
+      "subscribeCap": "Trong bản thử này bạn theo được tối đa {{cap}} lộ trình. Hãy hủy một cái trước; lịch sử vẫn được giữ.",
+      "unsubscribedNote": "Không có trong kế hoạch hôm nay. Lịch sử vẫn còn; đăng ký lại bất cứ lúc nào.",
+      "testOut": "Kiểm tra vượt",
+      "testOutHow": "Một lượt ở tempo đạt của mỗi bài. Đạt khoảng ba trên bốn là bước hoàn thành."
     },
     "progress": {
       "title": "Tiến bộ",
@@ -256,6 +296,12 @@
     "runway": {
       "label": "Những nốt tiếp theo đang tiến đến vạch"
     },
-    "inputChanged": "Đầu vào đã thay đổi. Giờ đang nghe qua {{device}}."
+    "inputChanged": "Đầu vào đã thay đổi. Giờ đang nghe qua {{device}}.",
+    "export": {
+      "button": "Xuất dữ liệu luyện tập",
+      "note": "Một tệp JSON gồm các lượt chơi, tempo sạch và lý do của bộ lập kế hoạch. Đính kèm vào phản hồi nếu muốn; không gì được gửi đi.",
+      "done": "Đã lưu vào {{path}}.",
+      "failed": "Không lưu được tệp."
+    }
   }
 }

@@ -11,7 +11,13 @@
       "mechanics": "Teknik",
       "theory": "Teori",
       "jam": "Jam, notlanmaz",
-      "warmUp": "Isınma, notlanmaz"
+      "warmUp": "Isınma, notlanmaz",
+      "review": "Tekrar",
+      "placement": "Seviye",
+      "benchmark": "Ölçüt",
+      "test": "Sınav",
+      "finisher": "Grupla, notlanmaz",
+      "yourTurn": "Sıra sende, kontrol yok"
     },
     "step": {
       "jam": "Grupla birlikte çal",
@@ -41,7 +47,8 @@
       "needsInput": "Notlama için mikrofon ya da doğrudan giriş gerekir.",
       "toolsOffer": "Araçlar için mi geldin? Hepsi Araçlar altında.",
       "toolsOfferOpen": "Son aracıma git",
-      "toolsOfferAlways": "Hep orada aç"
+      "toolsOfferAlways": "Hep orada aç",
+      "resting": "Bugün dinlenenler"
     },
     "why": {
       "firstEver": "İlk seferin, o yüzden {{bpm}} BPM'den başlıyor. Mesele hız değil, zamanlama.",
@@ -78,7 +85,26 @@
       "edge": "Ulaştığın tempodan, {{bpm}} BPM. Çıtayı geçen her denemeden sonra bir basamak yükselir.",
       "edgeCheck": "Temiz temponu kontrol etmek için. Geçen sefer {{clean}} BPM idi.",
       "edgeFirst": "Temiz temponu bulmak için. {{bpm}} BPM'den başlar ve çıtayı geçtikçe yükselir.",
-      "chosen": "Bunu sen seçtin, {{step}} içinden."
+      "chosen": "Bunu sen seçtin, {{step}} içinden.",
+      "focusTurn": "Bugün {{path}} önde: sıra onda.",
+      "focusTurnAway": "Bugün {{path}} önde: {{days}} gündür çalmadın.",
+      "keepWarm": "{{path}}, unutmamak için: en son {{days}} gün önce çalındı.",
+      "keepWarmYesterday": "{{path}}, unutmamak için: en son dün çalındı.",
+      "keepWarmToday": "{{path}}, unutmamak için: bugün zaten çalındı.",
+      "keepWarmNew": "{{path}}: ilk blok.",
+      "reviewDue": "Tekrar: {{days}} gün önce geçtin. Temiz temponda iki kayıt, {{bpm}} BPM.",
+      "reviewDueSlipped": "Geçen sefer kaçan bir tekrar, bu yüzden bir basamak aşağıda: {{bpm}} BPM.",
+      "reviewDueLeft": "Tamamlanan {{step}} adımından kalan. {{bpm}} BPM'de tekrar.",
+      "parked": "{{exercise}}, yeni temiz tempo olmadan geçen üç seanstan sonra {{days}} gün dinleniyor. Taze döner.",
+      "skippedToday": "{{path}} bugün dinleniyor: {{days}} gün önce çalındı.",
+      "skippedTodayToday": "{{path}} dinleniyor: bugün zaten çalındı.",
+      "skippedTodayYesterday": "{{path}} bugün dinleniyor: dün çalındı.",
+      "skippedTodayNever": "{{path}} bugün dinleniyor: henüz çalınmadı.",
+      "finisher": "Bitirirken: {{exercise}} grupla {{bpm}} BPM'de, zaten geçtiğin bir tempo. Notlanmaz.",
+      "placement": "Yeni misin? {{bpm}} BPM'de kolay bir kayıt, sonra {{pass}}'da bir tane. İkisini de geçersen sonraki adıma atlarsın.",
+      "testOut": "{{step}} sınavı: geçme temposunda bir kayıt, {{bpm}} BPM.",
+      "benchmark": "Ölçüt, {{day}}. gün: karşılaştırmak için her seferinde aynı egzersiz, {{bpm}} BPM.",
+      "yourTurn": "Sıra sende: {{exercise}}. Henüz kontrol edilmiyor, kendin değerlendir."
     },
     "bar": {
       "summary": "Çıta: {{bpm}} BPM'de %{{even}} düzgünlük ve notaların %{{heard}} kadarı duyulmuş."
@@ -121,7 +147,11 @@
       "cleanMoved": "Temiz tempo: {{from}} → {{bpm}} BPM.",
       "unmeasuredNotes": "Zamanlamaya baktım. Notaları doğru olup olmadıklarını söyleyecek kadar net duyamadım, bu yüzden bu sefer notlanmadı.",
       "againSame": "Tekrar, {{bpm}} BPM",
-      "moveOn": "Devam et"
+      "moveOn": "Devam et",
+      "fairAsk": "Bu not adil miydi?",
+      "fairYes": "Evet",
+      "fairNo": "Hayır",
+      "fairThanks": "Teşekkürler. Çalışma verilerinle birlikte saklandı."
     },
     "edge": {
       "kick": "Sınırımı bul",
@@ -165,7 +195,9 @@
       "warmUpKick": "Isınma · notlanmaz",
       "jamKick": "Jam · notlanmaz",
       "drillKick": "Tempoyu artır · notlanmaz",
-      "movesOn": "Kendiliğinden devam eder."
+      "movesOn": "Kendiliğinden devam eder.",
+      "finisherKick": "Kapanış · notlanmaz",
+      "yourTurnKick": "Sıra sende · kontrol yok"
     },
     "pedal": {
       "title": "Ayak pedalı",
@@ -221,7 +253,15 @@
       "playedClean_other": "{{count}} deneme. Temiz tempo {{bpm}} BPM.",
       "running": "Sürüyor",
       "whereYouAre": "Neredesin",
-      "openStep": "{{n}}. adıma git"
+      "openStep": "{{n}}. adıma git",
+      "subscribe": "Abone ol",
+      "unsubscribe": "Abonelikten çık",
+      "subscribed": "Abone",
+      "subscribeHow": "Bugün, abone olduğun her yoldan planlar, en fazla {{cap}}.",
+      "subscribeCap": "Bu testte en fazla {{cap}} yol takip edebilirsin. Önce birinden çık; geçmişi kalır.",
+      "unsubscribedNote": "Bugünün planında yok. Geçmişin duruyor; istediğin zaman yeniden abone ol.",
+      "testOut": "Sınava gir",
+      "testOutHow": "Her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam."
     },
     "progress": {
       "title": "İlerleme",
@@ -256,6 +296,12 @@
     "runway": {
       "label": "Çizgiye doğru gelen sıradaki notalar"
     },
-    "inputChanged": "Giriş değişti. Artık {{device}} üzerinden dinliyorum."
+    "inputChanged": "Giriş değişti. Artık {{device}} üzerinden dinliyorum.",
+    "export": {
+      "button": "Çalışma verilerimi dışa aktar",
+      "note": "Kayıtların, temiz tempoların ve planlayıcının gerekçelerini içeren bir JSON dosyası. İstersen bir geri bildirime ekle; hiçbir şey gönderilmez.",
+      "done": "{{path}} konumuna kaydedildi.",
+      "failed": "Dosya kaydedilemedi."
+    }
   }
 }

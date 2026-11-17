@@ -9,18 +9,31 @@
  *
  * ## How the time is spent
  *
- * The total always equals what the player chose.
+ * The total always equals what the player chose (`shape`).
  *
- * | Minutes | Coming back as usual            | After a break                   |
- * |---------|---------------------------------|---------------------------------|
- * | 5       | focus 5                         | recap 5                         |
- * | 10      | warm-up 2, focus 8              | recap 3, focus 7                |
- * | 15      | warm-up 2, focus 8, next 5      | recap 3, focus 7, next 5        |
- * | 20      | warm-up 2, focus 9, next 6, jam | recap 3, focus 8, next 6, jam 3 |
+ * | Minutes | Coming back as usual              | After a break                    |
+ * |---------|-----------------------------------|----------------------------------|
+ * | 5       | lead 5                            | recap 5                          |
+ * | 10      | warm-up 2, lead 4, other 4        | recap 3, lead 3, other 4         |
+ * | 15      | warm-up 2, lead 5, 4, 4           | recap 3, lead 4, 4, 4            |
+ * | 20      | warm-up 2, lead 6, 4, 4, last 4   | recap 3, lead 5, 4, 4, last 4    |
  *
- * At twenty, once the focus Exercise has a clean tempo, three of the focus
- * minutes go to Find my edge on it after the next Exercise: the one check of
- * that number a Session makes by itself.
+ * Across every subscribed Path (`plans/tasks/mvp/CONTENT.md`, the adopted
+ * algorithm; the questions it asks of the history are in `rotation.ts`):
+ *
+ * - One Path leads: the one that has waited longest to lead, ties to the
+ *   player's order; a Path unplayed four days or more jumps the queue.
+ * - The warm-up slot is a benchmark Take on days 1, 7, 14 and 21 of a Path.
+ * - Each other Path gets one block, the one played longest ago first; then
+ *   reviews that are due (1, 3, 7, 14, 30 days); then the lead's next Exercise.
+ * - At twenty the last block is a finisher with the band (a jam-backed
+ *   Exercise at a tempo already passed), else a review, else Find my edge, else
+ *   the band.
+ * - At most four graded, blocks of three minutes or more, one Session in three
+ *   (from fifteen minutes) gives two of the lead's minutes to a self-checked
+ *   "your turn" item. A new Path's first block is placement; an Exercise three
+ *   Sessions without a new clean rung is parked for two days. A Path with
+ *   nothing today says why in `skipped`.
  *
  * Five minutes is one thing rather than two thin slices: splitting it leaves no
  * time for a second Take of anything (the mocks' open question 12).
@@ -34,6 +47,7 @@
 import type { Exercise, PathDoc, Step } from "../paths/format";
 import { firstRung, hasRungBelow, rungAbove, rungBelow } from "./ladder";
 import {
+  calendarDaysBetween,
   cleanTempoOf,
   currentStepOf,
   daysBetween,
@@ -45,6 +59,20 @@ import {
 } from "./progress";
 import type { PlayerProgress } from "./progress";
 import { pickVariantSeed, warmupsOf } from "./variants";
+import {
+  PARK_DAYS,
+  benchmarkDue,
+  dueReviews,
+  finisherPick,
+  isNewPath,
+  isParked,
+  lastPlayedAt,
+  othersByLastPlayed,
+  pickFocus,
+  placementPicks,
+  sessionCount,
+  yourTurnPicks,
+} from "./rotation";
 
 export const PLAN_MINUTES = [5, 10, 15, 20] as const;
 export type PlanMinutes = (typeof PLAN_MINUTES)[number];
@@ -83,7 +111,18 @@ export type ReasonCode =
   | "edge"
   | "edgeCheck"
   | "edgeFirst"
-  | "chosen";
+  | "chosen"
+  // Play now across every subscribed Path (`rotation.ts`).
+  | "focusTurn"
+  | "keepWarm"
+  | "reviewDue"
+  | "parked"
+  | "skippedToday"
+  | "finisher"
+  | "placement"
+  | "testOut"
+  | "benchmark"
+  | "yourTurn";
 
 export type Reason = {
   code: ReasonCode;
@@ -91,8 +130,21 @@ export type Reason = {
   values: Record<string, string | number>;
 };
 
-/** `edge` is Find my edge: the same Exercise, climbing while it passes. */
-export type ExerciseRole = "focus" | "next" | "recap" | "edge";
+/**
+ * `edge` is Find my edge: the same Exercise, climbing while it passes.
+ * `review` is two Takes at the stored clean tempo; `placement` is one easy Take
+ * then one at the pass tempo; `test` is one Take at the pass tempo (Test out);
+ * `benchmark` is the one Take a day-1/7/14/21 benchmark is.
+ */
+export type ExerciseRole =
+  | "focus"
+  | "next"
+  | "recap"
+  | "edge"
+  | "review"
+  | "placement"
+  | "test"
+  | "benchmark";
 
 export type PlanStep =
   | {
@@ -108,6 +160,12 @@ export type PlanStep =
       /** Which notes, when the Exercise has variants. */
       variantSeed: number | null;
       why: Reason;
+      /** Why this Path is here today (whose turn it is), beside why this tempo. */
+      context?: Reason;
+      /** Placement: passing at this tempo moves on to `then`, the next Step's try. */
+      placement?: { passAtBpm: number; then: PlanStep | null };
+      /** A benchmark Take's tag, written into its facts. */
+      benchmark?: { day: number };
     }
   | {
       /** The click and nothing else, for a set time. Not graded. */
@@ -129,6 +187,10 @@ export type PlanStep =
       title: string;
       /** A key the jam should suit. A hint; the library decides. */
       key?: string;
+      /** The fun finisher: an Exercise played over the band at a tempo already passed. */
+      pathId?: string;
+      exerciseId?: string;
+      bpm?: number;
       minutes: number;
       why: Reason;
     }
@@ -154,6 +216,10 @@ export type SessionPlan = {
   /** Whole days since the last Take. Null on a first Session. */
   daysAway: number | null;
   steps: PlanStep[];
+  /** The Path that leads today, when there is one. */
+  focusPathId?: string | null;
+  /** Subscribed Paths with nothing today, and why. Today's footer. */
+  skipped?: Array<{ pathId: string; why: Reason }>;
 };
 
 export type PlannerInput = {
@@ -309,17 +375,6 @@ function worklist(path: PathDoc, progress: PlayerProgress): Pick[] {
   return [...every].sort((a, b) => lastPlayed(a) - lastPlayed(b));
 }
 
-/** Paths that have something to grade, the one played longest ago first. */
-function orderedPaths(paths: readonly PathDoc[], progress: PlayerProgress): PathDoc[] {
-  const lastPlayed = (path: PathDoc) =>
-    progress.takes.find((t) => t.pathId === path.id)?.startedAt ?? 0;
-  return paths
-    .filter((path) => path.steps.some((s) => s.exercises.some(isGradable)))
-    .map((path, order) => ({ path, order }))
-    .sort((a, b) => lastPlayed(a.path) - lastPlayed(b.path) || a.order - b.order)
-    .map(({ path }) => path);
-}
-
 function variantFor(pick: Pick, progress: PlayerProgress): number | null {
   const takes = takesOf(progress, pick.path.id, pick.exercise.id);
   return pickVariantSeed(pick.exercise, takes.length, takes[0]?.variantSeed);
@@ -381,7 +436,7 @@ export const EDGE_MINUTES = 3;
 export function edgeStep(
   pick: { path: PathDoc; step: Step; exercise: Exercise },
   progress: PlayerProgress,
-  options: { id?: string; bpm?: number; why?: Reason } = {},
+  options: { id?: string; bpm?: number; why?: Reason; minutes?: number } = {},
 ): PlanStep {
   const clean = cleanTempoOf(progress, pick.path.id, pick.exercise.id);
   const bpm = options.bpm ?? clean ?? tempoFor(pick.path, pick.exercise, progress).bpm;
@@ -390,7 +445,14 @@ export function edgeStep(
     (clean === null
       ? { code: "edgeFirst", values: { bpm } }
       : { code: "edgeCheck", values: { clean } });
-  return exerciseStep(pick, options.id ?? "edge", "edge", { bpm, why }, EDGE_MINUTES, progress);
+  return exerciseStep(
+    pick,
+    options.id ?? "edge",
+    "edge",
+    { bpm, why },
+    options.minutes ?? EDGE_MINUTES,
+    progress,
+  );
 }
 
 function exerciseStep(
@@ -442,23 +504,107 @@ function recapPick(paths: readonly PathDoc[], progress: PlayerProgress): Pick | 
   return null;
 }
 
-/** How the chosen minutes are split. See the table at the top of this file. */
-function shape(minutes: PlanMinutes, back: boolean) {
-  const table: Record<PlanMinutes, { warm: number; focus: number; next: number; jam: number }> = {
-    5: { warm: 0, focus: 5, next: 0, jam: 0 },
-    10: { warm: 2, focus: 8, next: 0, jam: 0 },
-    15: { warm: 2, focus: 8, next: 5, jam: 0 },
-    20: { warm: 2, focus: 9, next: 6, jam: 3 },
+
+/** The most graded Exercises one Session holds. */
+export const MAX_GRADED = 4;
+/** A block is at least this long: time for two Takes and a breath. */
+export const MIN_BLOCK_MINUTES = 3;
+/** A "your turn" block: short, self-checked, not graded. */
+export const YOUR_TURN_MINUTES = 2;
+/** One Session in this many, from fifteen minutes up, has a "your turn" block. */
+export const YOUR_TURN_EVERY = 3;
+/** Each further Step placement tries, inside the placement block. */
+const PLACEMENT_NEXT_MINUTES = 2;
+
+/**
+ * How the chosen minutes are split. See the table at the top of this file.
+ * `blocks[0]` is the focus Path's; the others are one each for the rest.
+ */
+function shape(minutes: PlanMinutes, back: boolean): { warm: number; blocks: number[] } {
+  const table: Record<PlanMinutes, { warm: number; blocks: number[] }> = {
+    5: { warm: 0, blocks: [5] },
+    10: { warm: 2, blocks: [4, 4] },
+    15: { warm: 2, blocks: [5, 4, 4] },
+    20: { warm: 2, blocks: [6, 4, 4, 4] },
   };
   const row = table[minutes];
-  // The recap takes the warm-up's place and a minute of the focus.
-  if (back && row.warm > 0) return { ...row, warm: row.warm + 1, focus: row.focus - 1 };
-  return row;
+  // The recap takes the warm-up's place and a minute of the focus, so it is a
+  // block of its own length.
+  if (back && row.warm > 0) {
+    return { warm: row.warm + 1, blocks: [row.blocks[0] - 1, ...row.blocks.slice(1)] };
+  }
+  return { warm: row.warm, blocks: [...row.blocks] };
 }
 
+const key = (pick: { path: PathDoc; exercise: Exercise }) => `${pick.path.id}/${pick.exercise.id}`;
+
+/**
+ * The worklist with parking applied: an Exercise that has gone three Sessions
+ * without a new clean rung waits behind the open ones for two days.
+ */
+function openWork(path: PathDoc, progress: PlayerProgress, now: number) {
+  const list = worklist(path, progress);
+  const parked = list.filter((p) => isParked(progress, path.id, p.exercise, now));
+  const fresh = list.filter((p) => !parked.includes(p));
+  return { list: [...fresh, ...parked], parkedHead: parked.includes(list[0]) ? list[0] : null };
+}
+
+/** Placement on a new Path: one easy Take, then one at the pass tempo, Step by Step. */
+function placementStep(
+  picks: Pick[],
+  progress: PlayerProgress,
+  minutes: number,
+  id: string,
+  context?: Reason,
+): PlanStep | null {
+  const build = (at: number): PlanStep | null => {
+    const pick = picks[at];
+    if (!pick) return null;
+    const passAt = pick.exercise.tempo.passAtBpm ?? firstRung(pick.exercise);
+    const bpm = firstRung(pick.exercise);
+    const step = exerciseStep(
+      pick,
+      at === 0 ? id : `${id}-${at}`,
+      "placement",
+      {
+        bpm,
+        why: {
+          code: "placement",
+          values: { path: pick.path.title, step: pick.step.title, bpm, pass: passAt },
+        },
+      },
+      at === 0 ? minutes : PLACEMENT_NEXT_MINUTES,
+      progress,
+    );
+    if (step.kind !== "exercise") return step;
+    return {
+      ...step,
+      ...(context && at === 0 ? { context } : {}),
+      placement: { passAtBpm: passAt, then: build(at + 1) },
+    };
+  };
+  return build(0);
+}
+
+/** Calendar days since, for a sentence ("yesterday", "3 days ago"). */
+function daysSince(at: number | null, now: number): number | null {
+  return at === null ? null : Math.max(0, calendarDaysBetween(at, now));
+}
+
+/**
+ * Play now, across every subscribed Path.
+ *
+ * `paths` is the player's subscribed Paths in their order. One Path leads (the
+ * one that has waited longest to, or one unplayed for four days); each other
+ * Path gets one block, the one played longest ago first; what is left goes to
+ * reviews that have come due, then to the focus Path's next Exercise. At twenty
+ * minutes the last block is a finisher over the band, else a review, else Find
+ * my edge. Never more than four graded Exercises, never a block under three
+ * minutes, and a Path with nothing today says why in `skipped`.
+ */
 export function planSession(input: PlannerInput): SessionPlan {
   const { minutes, now, progress } = input;
-  const paths = orderedPaths(input.paths, progress);
+  const paths = input.paths.filter((path) => path.steps.some((s) => s.exercises.some(isGradable)));
   const lastTake = progress.takes[0];
   const daysAway = lastTake ? Math.max(0, daysBetween(lastTake.startedAt, now)) : null;
   const drop = daysAway === null ? 0 : rungsToDrop(daysAway);
@@ -466,75 +612,283 @@ export function planSession(input: PlannerInput): SessionPlan {
   const mood: SessionMood = daysAway === null ? "first" : back ? "back" : "returning";
 
   const base = { minutes, mood, daysAway };
-  if (paths.length === 0) return { ...base, steps: [] };
+  const choice = pickFocus(paths, progress, now);
+  if (!choice) return { ...base, steps: [], focusPathId: null, skipped: [] };
+  const focusPath = choice.path;
 
-  const lists = paths.map((path) => worklist(path, progress));
-  const focus = lists[0][0];
-  // The other Path when there is one: a mix is the point of having two.
-  const next = lists[1]?.[0] ?? lists[0][1] ?? null;
+  const work = new Map(paths.map((path) => [path.id, openWork(path, progress, now)]));
+  const focusWork = work.get(focusPath.id)!;
+  const focus = focusWork.list[0];
   const row = shape(minutes, back);
-
+  const used = new Set<string>();
   const firstEver = mood === "first";
+
   const tempoOf = (pick: Pick): Tempo => {
     const tempo = tempoFor(pick.path, pick.exercise, progress);
     if (back) return eased(pick, tempo, drop, daysAway ?? 0, progress);
     return tempo;
   };
-  const focusTempo = tempoOf(focus);
-  const focusWhy: Tempo = firstEver
-    ? { bpm: focusTempo.bpm, why: { code: "firstEver", values: { bpm: focusTempo.bpm } } }
-    : focusTempo;
+  /** The block's head Exercise, saying whose turn it is and what got parked. */
+  const headContext = (path: PathDoc, lead: boolean): Reason => {
+    const parked = work.get(path.id)?.parkedHead;
+    if (parked) {
+      return {
+        code: "parked",
+        values: { path: path.title, exercise: parked.exercise.title, days: PARK_DAYS },
+      };
+    }
+    if (lead) {
+      return {
+        code: "focusTurn",
+        values: { path: path.title, ...(choice.awayDays === null ? {} : { days: choice.awayDays }) },
+      };
+    }
+    const played = daysSince(lastPlayedAt(progress, path.id), now);
+    return { code: "keepWarm", values: { path: path.title, ...(played === null ? {} : { days: played }) } };
+  };
 
   const steps: PlanStep[] = [];
   const recap = back ? recapPick(paths, progress) : null;
 
   if (back && recap && row.warm === 0) {
     // Five minutes after a break: the recap is the whole Session.
-    steps.push(exerciseStep(recap, "recap", "recap", tempoOf(recap), row.focus, progress));
-    return { ...base, steps };
+    steps.push(exerciseStep(recap, "recap", "recap", tempoOf(recap), row.blocks[0], progress));
+    return { ...base, steps, focusPathId: recap.path.id, skipped: skippedOf(paths, steps, progress, now) };
   }
 
-  let focusMinutes = row.focus;
+  // --- the warm-up slot: a recap, a benchmark, or the click under the focus ---
   if (row.warm > 0) {
+    const bench =
+      [focusPath, ...paths.filter((p) => p.id !== focusPath.id)]
+        .map((path) => benchmarkDue(path, progress, now))
+        .find((b) => b !== null) ?? null;
     if (back && recap && recap.exercise.id !== focus.exercise.id) {
       steps.push(exerciseStep(recap, "recap", "recap", tempoOf(recap), row.warm, progress));
+      used.add(key(recap));
+    } else if (bench && !back) {
+      const step = exerciseStep(
+        bench,
+        "benchmark",
+        "benchmark",
+        { bpm: bench.bpm, why: { code: "benchmark", values: { path: bench.path.title, day: bench.day, bpm: bench.bpm } } },
+        row.warm,
+        progress,
+      );
+      steps.push(step.kind === "exercise" ? { ...step, benchmark: { day: bench.day } } : step);
     } else {
       steps.push(warmupStep(focus, progress, row.warm));
     }
   }
-  if (!next) focusMinutes += row.next;
-  const checkEdge =
-    row.jam > 0 &&
-    mood === "returning" &&
-    cleanTempoOf(progress, focus.path.id, focus.exercise.id) !== null;
-  if (checkEdge) focusMinutes -= EDGE_MINUTES;
-  steps.push(exerciseStep(focus, "focus", "focus", focusWhy, focusMinutes, progress));
 
-  if (next && row.next > 0) {
-    const tempo = tempoOf(next);
-    const sameStep = next.step.id === focus.step.id && next.path.id === focus.path.id;
-    const why: Reason =
-      takesOf(progress, next.path.id, next.exercise.id).length > 0
-        ? tempo.why
-        : {
-            code: sameStep ? "nextInStep" : "newStep",
-            values: { step: next.step.title, bpm: tempo.bpm },
-          };
-    steps.push(exerciseStep(next, "next", "next", { bpm: tempo.bpm, why }, row.next, progress));
+  // --- the focus block ---
+  let focusMinutes = row.blocks[0];
+  const turn = mood === "returning" && paths.length > 1 ? headContext(focusPath, true) : undefined;
+  const sessions = sessionCount(progress);
+  const yourTurn =
+    minutes >= 15 && sessions % YOUR_TURN_EVERY === YOUR_TURN_EVERY - 1
+      ? ([focusPath, ...paths.filter((p) => p.id !== focusPath.id)]
+          .map((path) => yourTurnPicks(path, progress))
+          .find((list) => list.length > 0) ?? [])
+      : [];
+  const yourPick = yourTurn.length > 0 ? yourTurn[Math.floor(sessions / YOUR_TURN_EVERY) % yourTurn.length] : null;
+  if (yourPick && focusMinutes - YOUR_TURN_MINUTES >= MIN_BLOCK_MINUTES) focusMinutes -= YOUR_TURN_MINUTES;
+
+  const focusIndex = steps.length;
+  if (isNewPath(progress, focusPath.id)) {
+    const placed = placementStep(placementPicks(focusPath, progress), progress, focusMinutes, "focus", turn);
+    if (placed) steps.push(placed);
+  } else {
+    const tempo = tempoOf(focus);
+    const why: Tempo = firstEver
+      ? { bpm: tempo.bpm, why: { code: "firstEver", values: { bpm: tempo.bpm } } }
+      : tempo;
+    const step = exerciseStep(focus, "focus", "focus", why, focusMinutes, progress);
+    const context = focusWork.parkedHead ? headContext(focusPath, true) : turn;
+    steps.push(step.kind === "exercise" && context ? { ...step, context } : step);
   }
-
-  if (checkEdge) steps.push(edgeStep(focus, progress));
-
-  if (row.jam > 0) {
+  used.add(key(focus));
+  if (yourPick && focusMinutes < row.blocks[0]) {
+    const backing = yourPick.exercise.backing;
+    const bpm = yourPick.exercise.tempo.rungs[0]?.bpm ?? 70;
     steps.push({
-      kind: "jam",
-      id: "jam",
-      title: "",
-      key: "A minor",
-      minutes: row.jam,
-      why: { code: "jam", values: {} },
+      kind: "metronome",
+      id: "your-turn",
+      title: yourPick.exercise.title,
+      bpm,
+      subdivision: backing.kind === "click" ? backing.subdivision : 1,
+      pathId: yourPick.path.id,
+      exerciseId: yourPick.exercise.id,
+      minutes: YOUR_TURN_MINUTES,
+      why: { code: "yourTurn", values: { exercise: yourPick.exercise.title } },
     });
   }
 
-  return { ...base, steps };
+  // --- one block for each other Path, then reviews, then the focus Path again ---
+  const others = othersByLastPlayed(paths, focusPath, progress);
+  const due = back ? [] : dueReviews(paths, progress, now);
+  const reviewStep = (id: string, mins: number): PlanStep | null => {
+    const item = due.find((d) => !used.has(key(d)));
+    if (!item) return null;
+    used.add(key(item));
+    if (item.kind === "review") {
+      return exerciseStep(
+        item,
+        id,
+        "review",
+        {
+          bpm: item.bpm,
+          why: {
+            code: "reviewDue",
+            values: {
+              exercise: item.exercise.title,
+              path: item.path.title,
+              bpm: item.bpm,
+              days: daysSince(item.since, now) ?? 0,
+              ...(item.slips > 0 ? { slipped: 1 } : {}),
+            },
+          },
+        },
+        mins,
+        progress,
+      );
+    }
+    const tempo = tempoFor(item.path, item.exercise, progress);
+    return exerciseStep(
+      item,
+      id,
+      "review",
+      {
+        bpm: tempo.bpm,
+        why: {
+          code: "reviewDue",
+          values: { exercise: item.exercise.title, path: item.path.title, step: item.step.title, bpm: tempo.bpm, left: 1 },
+        },
+      },
+      mins,
+      progress,
+    );
+  };
+
+  const rest = row.blocks.slice(1);
+  rest.forEach((mins, i) => {
+    const id = `block-${i + 1}`;
+    const last = i === rest.length - 1;
+    if (minutes === 20 && last) {
+      const fun = finisherPick(paths, progress);
+      const full = steps.filter((x) => x.kind === "exercise").length >= MAX_GRADED;
+      if (fun && !back) {
+        const backing = fun.exercise.backing;
+        steps.push({
+          kind: "jam",
+          id: "finisher",
+          title: fun.exercise.title,
+          key: backing.kind === "jam" ? backing.key : "A minor",
+          pathId: fun.path.id,
+          exerciseId: fun.exercise.id,
+          bpm: fun.bpm,
+          minutes: mins,
+          why: { code: "finisher", values: { exercise: fun.exercise.title, bpm: fun.bpm } },
+        });
+        return;
+      }
+      // Four graded already: the band, which grades nothing.
+      const review = full ? null : reviewStep(id, mins);
+      if (review) {
+        steps.push(review);
+        return;
+      }
+      if (!full && mood === "returning" && cleanTempoOf(progress, focus.path.id, focus.exercise.id) !== null) {
+        steps.push(edgeStep(focus, progress, { minutes: mins }));
+        return;
+      }
+      steps.push({ kind: "jam", id: "jam", title: "", key: "A minor", minutes: mins, why: { code: "jam", values: {} } });
+      return;
+    }
+    // The next other Path's head Exercise.
+    const other = others.shift();
+    if (other) {
+      const list = work.get(other.id)!.list;
+      const head = list.find((p) => !used.has(key(p)));
+      if (head) {
+        used.add(key(head));
+        const context = mood === "first" ? undefined : headContext(other, false);
+        if (isNewPath(progress, other.id)) {
+          const placed = placementStep(placementPicks(other, progress), progress, mins, id, context);
+          if (placed) {
+            steps.push(placed);
+            return;
+          }
+        }
+        const tempo = tempoOf(head);
+        const why: Reason =
+          takesOf(progress, head.path.id, head.exercise.id).length > 0
+            ? tempo.why
+            : { code: "newStep", values: { step: head.step.title, bpm: tempo.bpm } };
+        const step = exerciseStep(head, id, "next", { bpm: tempo.bpm, why }, mins, progress);
+        steps.push(step.kind === "exercise" && context ? { ...step, context } : step);
+        return;
+      }
+    }
+    const review = reviewStep(id, mins);
+    if (review) {
+      steps.push(review);
+      return;
+    }
+    // The focus Path's next Exercise, when nothing else wants the time.
+    const next = focusWork.list.find((p) => !used.has(key(p)));
+    if (next) {
+      used.add(key(next));
+      const tempo = tempoOf(next);
+      const sameStep = next.step.id === focus.step.id;
+      const why: Reason =
+        takesOf(progress, next.path.id, next.exercise.id).length > 0
+          ? tempo.why
+          : { code: sameStep ? "nextInStep" : "newStep", values: { step: next.step.title, bpm: tempo.bpm } };
+      steps.push(exerciseStep(next, id, "next", { bpm: tempo.bpm, why }, mins, progress));
+      return;
+    }
+    const lead = steps[focusIndex];
+    if (lead) steps[focusIndex] = { ...lead, minutes: lead.minutes + mins };
+  });
+
+  // At most four graded: any beyond go back to the focus block.
+  let graded = 0;
+  const kept: PlanStep[] = [];
+  for (const step of steps) {
+    if (step.kind === "exercise") {
+      graded += 1;
+      if (graded > MAX_GRADED && step.id !== "focus") {
+        const at = kept.findIndex((s) => s.id === "focus");
+        if (at >= 0) kept[at] = { ...kept[at], minutes: kept[at].minutes + step.minutes };
+        continue;
+      }
+    }
+    kept.push(step);
+  }
+
+  return {
+    ...base,
+    steps: kept,
+    focusPathId: focusPath.id,
+    skipped: skippedOf(paths, kept, progress, now),
+  };
+}
+
+/** Subscribed Paths with no block today, and why: when they were last played. */
+function skippedOf(
+  paths: readonly PathDoc[],
+  steps: readonly PlanStep[],
+  progress: PlayerProgress,
+  now: number,
+): Array<{ pathId: string; why: Reason }> {
+  const here = new Set(steps.flatMap((s) => ("pathId" in s && s.pathId ? [s.pathId] : [])));
+  return paths
+    .filter((path) => !here.has(path.id))
+    .map((path) => {
+      const days = daysSince(lastPlayedAt(progress, path.id), now);
+      return {
+        pathId: path.id,
+        why: { code: "skippedToday" as const, values: { path: path.title, ...(days === null ? {} : { days }) } },
+      };
+    });
 }

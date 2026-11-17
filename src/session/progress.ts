@@ -18,6 +18,21 @@ export type TakeFacts = {
   headlineValue?: number | null;
   headlineMin?: number;
   headlineMax?: number;
+  /**
+   * Which Session this Take was in: the Session's start, in ms. Older rows have
+   * none, and are grouped by the day they were played on (`sessionKeyOf`).
+   */
+  session?: number;
+  /** The plan's role for the step it was played in (`PlanStep.role`). */
+  role?: string;
+  /** The planner's reason code for that step, kept for the export. */
+  reason?: string;
+  /** This Take raised the Exercise's clean tempo. What parking counts. */
+  newClean?: boolean;
+  /** A benchmark Take: the same Exercise at the same tempo on days 1, 7, 14, 21. */
+  benchmark?: { day: number; exerciseId: string; bpm: number };
+  /** The player's answer to "Was this grade fair?". Absent: not asked or not answered. */
+  fair?: "yes" | "no";
 };
 
 export type PlayerProgress = {
@@ -26,9 +41,27 @@ export type PlayerProgress = {
   /** Newest first. */
   takes: PathTakeRow[];
   ceilings: ExerciseCeilingRow[];
+  /**
+   * Paths the player has unsubscribed from. Their `path_state` row and every
+   * Take stay, so subscribing again picks up where they were. Kept in the
+   * settings store (`session.unsubscribed`), not in SQLite.
+   */
+  unsubscribed?: string[];
 };
 
 export const NO_PROGRESS: PlayerProgress = { states: [], takes: [], ceilings: [] };
+
+/**
+ * The share of a Step's graded Exercises that finishes it: about three of four
+ * (`plans/tasks/mvp/CONTENT.md`, progression). The rest go to reviews.
+ */
+export const STEP_DONE_SHARE = 0.75;
+
+/** How many of `count` graded Exercises finish a Step: 4 → 3, 3 → 2, 2 → 2, 1 → 1. */
+export function passesNeeded(count: number): number {
+  if (count <= 0) return 0;
+  return Math.max(1, Math.min(count, Math.round(count * STEP_DONE_SHARE)));
+}
 
 export function ceilingKey(pathId: string, exerciseId: string): string {
   return `${pathId}/${exerciseId}`;
@@ -65,10 +98,15 @@ export function isExercisePassed(progress: PlayerProgress, pathId: string, ex: E
   return clean !== null && passAt !== null && clean >= passAt;
 }
 
-/** Is everything the app can grade in this Step passed? */
+/**
+ * Is this Step done: about three quarters of what the app can grade in it
+ * passed (`passesNeeded`)? The Exercises left over go to reviews.
+ */
 export function isStepPassed(progress: PlayerProgress, pathId: string, step: Step): boolean {
   const gradable = step.exercises.filter(isGradable);
-  return gradable.length > 0 && gradable.every((ex) => isExercisePassed(progress, pathId, ex));
+  if (gradable.length === 0) return false;
+  const done = gradable.filter((ex) => isExercisePassed(progress, pathId, ex)).length;
+  return done >= passesNeeded(gradable.length);
 }
 
 /** The Step this player is on: the stored one, or the Path's first. */
@@ -99,6 +137,18 @@ export function daysBetween(earlier: number, later: number): number {
   return Math.floor((later - earlier) / 86_400_000);
 }
 
+/**
+ * Calendar days between two instants, in local time: "yesterday" is the day
+ * before, whatever the hour. What a sentence about days means.
+ */
+export function calendarDaysBetween(earlier: number, later: number): number {
+  const day = (at: number) => {
+    const d = new Date(at);
+    return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  };
+  return Math.round((day(later) - day(earlier)) / 86_400_000);
+}
+
 /** The most recent Take that was actually heard, at any tempo. */
 export function lastCaughtTake(takes: readonly PathTakeRow[]): PathTakeRow | null {
   return takes.find((t) => t.caught) ?? null;
@@ -107,4 +157,18 @@ export function lastCaughtTake(takes: readonly PathTakeRow[]): PathTakeRow | nul
 /** Read a row's facts, tolerating anything an older build wrote. */
 export function factsOf(take: PathTakeRow): TakeFacts {
   return take.facts && typeof take.facts === "object" ? (take.facts as TakeFacts) : {};
+}
+
+/** Which Session a Take was played in: its tag, or the day for an older row. */
+export function sessionKeyOf(take: PathTakeRow): string {
+  const session = factsOf(take).session;
+  return typeof session === "number" ? `s${session}` : `d${Math.floor(take.startedAt / 86_400_000)}`;
+}
+
+/** Is this Path subscribed: started, and not unsubscribed since? */
+export function isSubscribed(progress: PlayerProgress, pathId: string): boolean {
+  return (
+    progress.states.some((s) => s.pathId === pathId) &&
+    !(progress.unsubscribed ?? []).includes(pathId)
+  );
 }

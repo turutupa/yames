@@ -11,7 +11,13 @@
       "mechanics": "테크닉",
       "theory": "이론",
       "jam": "잼, 채점 없음",
-      "warmUp": "워밍업, 채점 없음"
+      "warmUp": "워밍업, 채점 없음",
+      "review": "복습",
+      "placement": "배치",
+      "benchmark": "벤치마크",
+      "test": "건너뛰기 테스트",
+      "finisher": "밴드와 함께, 채점 없음",
+      "yourTurn": "당신 차례, 확인 없음"
     },
     "step": {
       "jam": "밴드에 맞춰 연주하기",
@@ -41,7 +47,8 @@
       "needsInput": "채점하려면 마이크나 다이렉트 입력이 필요합니다.",
       "toolsOffer": "도구만 쓰러 오셨나요? 모두 도구 안에 있습니다.",
       "toolsOfferOpen": "마지막 도구로 가기",
-      "toolsOfferAlways": "항상 거기서 열기"
+      "toolsOfferAlways": "항상 거기서 열기",
+      "resting": "오늘 쉬는 Path"
     },
     "why": {
       "firstEver": "처음이니 {{bpm}} BPM에서 시작합니다. 속도가 아니라 타이밍 연습입니다.",
@@ -78,7 +85,26 @@
       "edge": "도달한 템포인 {{bpm}} BPM에서 시작합니다. 통과 기준을 넘는 테이크마다 한 단계씩 올라갑니다.",
       "edgeCheck": "클린 템포를 확인합니다. 지난번에는 {{clean}} BPM이었습니다.",
       "edgeFirst": "클린 템포를 찾습니다. {{bpm}} BPM에서 시작해 통과 기준을 넘는 동안 계속 올라갑니다.",
-      "chosen": "{{step}}에서 직접 고른 과제입니다."
+      "chosen": "{{step}}에서 직접 고른 과제입니다.",
+      "focusTurn": "오늘은 {{path}} 차례입니다.",
+      "focusTurnAway": "오늘은 {{path}}이(가) 중심입니다. {{days}}일 동안 연주하지 않았어요.",
+      "keepWarm": "{{path}} 감 유지: 마지막 연주는 {{days}}일 전입니다.",
+      "keepWarmYesterday": "{{path}} 감 유지: 마지막 연주는 어제입니다.",
+      "keepWarmToday": "{{path}} 감 유지: 오늘 이미 연주했어요.",
+      "keepWarmNew": "{{path}}: 첫 블록입니다.",
+      "reviewDue": "복습: {{days}}일 전에 통과했어요. 클린 템포 {{bpm}} BPM으로 두 번 테이크.",
+      "reviewDueSlipped": "지난번에 놓친 복습이라 한 단계 낮춥니다: {{bpm}} BPM.",
+      "reviewDueLeft": "끝낸 {{step}}에서 남은 연습입니다. {{bpm}} BPM으로 복습.",
+      "parked": "{{exercise}}은(는) 새 클린 템포 없이 세 번의 세션이 지나 {{days}}일 동안 쉽니다. 새롭게 돌아옵니다.",
+      "skippedToday": "{{path}}은(는) 오늘 쉽니다: {{days}}일 전에 연주.",
+      "skippedTodayToday": "{{path}}은(는) 쉽니다: 오늘 이미 연주.",
+      "skippedTodayYesterday": "{{path}}은(는) 오늘 쉽니다: 어제 연주.",
+      "skippedTodayNever": "{{path}}은(는) 오늘 쉽니다: 아직 연주 안 함.",
+      "finisher": "마무리: 밴드와 함께 {{exercise}}을(를) {{bpm}} BPM으로, 이미 통과한 템포입니다. 채점 없음.",
+      "placement": "처음이신가요? {{bpm}} BPM으로 쉬운 테이크 한 번, 그다음 {{pass}}로 한 번. 둘 다 통과하면 다음 단계로 건너뜁니다.",
+      "testOut": "{{step}} 건너뛰기 테스트: 통과 템포 {{bpm}} BPM으로 한 번.",
+      "benchmark": "벤치마크, {{day}}일째: 비교를 위해 매번 같은 연습을 {{bpm}} BPM으로.",
+      "yourTurn": "당신 차례: {{exercise}}. 아직 확인 기능이 없어 직접 판단하세요."
     },
     "bar": {
       "summary": "통과 기준: {{bpm}} BPM에서 고르기 {{even}}%, 들린 음 {{heard}}%."
@@ -121,7 +147,11 @@
       "cleanMoved": "클린 템포: {{from}} → {{bpm}} BPM.",
       "unmeasuredNotes": "타이밍은 확인했습니다. 음이 충분히 또렷하게 들리지 않아 맞는 음이었는지 말할 수 없어서, 이번에는 채점하지 않았습니다.",
       "againSame": "다시, {{bpm}} BPM",
-      "moveOn": "넘어가기"
+      "moveOn": "넘어가기",
+      "fairAsk": "이 평가는 공정했나요?",
+      "fairYes": "예",
+      "fairNo": "아니요",
+      "fairThanks": "감사합니다. 연습 데이터에 저장했어요."
     },
     "edge": {
       "kick": "한계 찾기",
@@ -165,7 +195,9 @@
       "warmUpKick": "워밍업 · 채점 없음",
       "jamKick": "잼 · 채점 없음",
       "drillKick": "템포 올리기 · 채점 없음",
-      "movesOn": "자동으로 넘어갑니다."
+      "movesOn": "자동으로 넘어갑니다.",
+      "finisherKick": "마무리 · 채점 없음",
+      "yourTurnKick": "당신 차례 · 확인 없음"
     },
     "pedal": {
       "title": "풋 페달",
@@ -221,7 +253,15 @@
       "playedClean_other": "테이크 {{count}}개. 클린 템포 {{bpm}} BPM.",
       "running": "진행 중",
       "whereYouAre": "현재 위치",
-      "openStep": "{{n}}단계로 가기"
+      "openStep": "{{n}}단계로 가기",
+      "subscribe": "구독",
+      "unsubscribe": "구독 해제",
+      "subscribed": "구독 중",
+      "subscribeHow": "오늘은 구독한 모든 Path(최대 {{cap}}개)에서 계획합니다.",
+      "subscribeCap": "이번 테스트에서는 최대 {{cap}}개의 Path만 구독할 수 있어요. 먼저 하나를 해제하세요. 기록은 유지됩니다.",
+      "unsubscribedNote": "오늘 계획에는 없습니다. 기록은 남아 있으니 언제든 다시 구독하세요.",
+      "testOut": "건너뛰기 테스트",
+      "testOutHow": "각 연습의 통과 템포로 한 번씩. 넷 중 셋 정도 통과하면 이 단계는 끝납니다."
     },
     "progress": {
       "title": "진도",
@@ -256,6 +296,12 @@
     "runway": {
       "label": "선으로 다가오는 다음 음들"
     },
-    "inputChanged": "입력이 바뀌었습니다. 이제 {{device}}(으)로 듣습니다."
+    "inputChanged": "입력이 바뀌었습니다. 이제 {{device}}(으)로 듣습니다.",
+    "export": {
+      "button": "연습 데이터 내보내기",
+      "note": "테이크, 클린 템포, 플래너의 이유가 담긴 JSON 파일입니다. 원하면 피드백 이슈에 첨부하세요. 아무것도 전송되지 않습니다.",
+      "done": "{{path}}에 저장했어요.",
+      "failed": "파일을 저장하지 못했어요."
+    }
   }
 }

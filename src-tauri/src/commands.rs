@@ -2406,6 +2406,34 @@ pub fn clear_due(
 // it means is decided in `src/session/`; this only keeps it.
 // ---------------------------------------------------------------------------
 
+/// "Export my practice data": write the JSON the frontend built
+/// (`src/session/exportData.ts`) where the player chooses, through a native save
+/// dialog. `Ok(None)` is the player cancelling. The file is theirs; nothing is
+/// sent anywhere. `async fn` for the deadlock reason `export_score_source` gives.
+#[tauri::command]
+pub async fn export_practice_data(
+    suggested: String,
+    json: String,
+    app: AppHandle,
+) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+
+    let chosen = app
+        .dialog()
+        .file()
+        .set_file_name(&suggested)
+        .add_filter("JSON", &["json"])
+        .blocking_save_file();
+    let Some(chosen) = chosen else {
+        return Ok(None);
+    };
+    let path = chosen
+        .into_path()
+        .map_err(|e| format!("that is not a place Yames can write to: {e}"))?;
+    std::fs::write(&path, json.as_bytes()).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(Some(path.to_string_lossy().into_owned()))
+}
+
 /// Start a Path, or move a player along one.
 #[tauri::command(async)]
 pub fn save_path_state(

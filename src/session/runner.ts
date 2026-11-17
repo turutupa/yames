@@ -68,6 +68,8 @@ export type TakeOutcome = {
   previousValue: number | null;
   /** The clean tempo before this Take. */
   cleanBefore: number | null;
+  /** The stored row's id, so an answer to "was this fair?" can be kept on it. */
+  takeId?: string;
 };
 
 export type RunState = {
@@ -98,8 +100,8 @@ export type RunEvent =
   | { type: "again"; bpm?: number; now: number }
   | { type: "slower"; exercise: Exercise; now: number }
   | { type: "faster"; exercise: Exercise; now: number }
-  /** On to the next step, or the recap after the last. */
-  | { type: "next"; now: number }
+  /** On to the next step, or the recap after the last. `insert` is played first (placement's next try). */
+  | { type: "next"; now: number; insert?: PlanStep }
   /** The clock moved. Only a timed step cares. */
   | { type: "tick"; now: number }
   /** Reached from a result: a step played next, then back to the plan. */
@@ -139,7 +141,12 @@ function enter(state: RunState, index: number, now: number): RunState {
   return {
     ...base,
     phase: "timed",
-    bpm: step.kind === "drill" ? step.startBpm : step.kind === "metronome" ? step.bpm : 0,
+    bpm:
+      step.kind === "drill"
+        ? step.startBpm
+        : step.kind === "metronome"
+          ? step.bpm
+          : (step.bpm ?? 0),
     timedSteps: [...state.timedSteps, step],
   };
 }
@@ -214,8 +221,13 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
             bpm: rungAbove(event.exercise, state.bpm),
             now: event.now,
           };
-        case "next":
-          return enter(state, state.stepIndex + 1, event.now);
+        case "next": {
+          const plan = state.plan;
+          if (!event.insert || !plan) return enter(state, state.stepIndex + 1, event.now);
+          const steps = [...plan.steps];
+          steps.splice(state.stepIndex + 1, 0, event.insert);
+          return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
+        }
         case "insertStep": {
           const plan = state.plan;
           if (!plan) return state;
@@ -278,7 +290,7 @@ export type BigAction =
   | { kind: "playTake"; bpm: number }
   | { kind: "endTake" }
   | { kind: "again"; bpm: number }
-  | { kind: "next"; step: PlanStep }
+  | { kind: "next"; step: PlanStep; insert?: boolean }
   | { kind: "finish" }
   | { kind: "close" };
 
@@ -352,6 +364,42 @@ function edgeAction(state: RunState, exercise: Exercise | null, onward: () => Bi
   }
 }
 
+/** Takes a review gets: two at the stored clean tempo. */
+export const REVIEW_TAKES = 2;
+
+/**
+ * The roles that decide in a Take or two rather than climbing: a review, a
+ * benchmark, Test out and placement.
+ */
+function decidingAction(
+  state: RunState,
+  step: Extract<PlanStep, { kind: "exercise" }>,
+  onward: () => BigAction,
+): BigAction | null {
+  const last = state.outcomes[state.outcomes.length - 1];
+  if (!last) return onward();
+  if (last.grade.verdict === "notCaught") return { kind: "again", bpm: state.bpm };
+  const passed = last.grade.verdict === "passed";
+  switch (step.role) {
+    case "review":
+      // Two Takes at the clean tempo; a pass on either is a pass.
+      if (passed || state.takes >= REVIEW_TAKES) return onward();
+      return { kind: "again", bpm: state.bpm };
+    case "benchmark":
+    case "test":
+      return onward();
+    case "placement": {
+      const plan = step.placement;
+      if (!passed || !plan) return onward();
+      // The easy Take passed: now the one at the pass tempo.
+      if (state.bpm < plan.passAtBpm) return { kind: "again", bpm: plan.passAtBpm };
+      return plan.then ? { kind: "next", step: plan.then, insert: true } : onward();
+    }
+    default:
+      return null;
+  }
+}
+
 export function bigAction(state: RunState, exercise: Exercise | null): BigAction {
   const onward = (): BigAction => {
     const step = nextStep(state);
@@ -373,7 +421,12 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
       break;
   }
 
-  if (isEdgeStep(currentStep(state))) return edgeAction(state, exercise, onward);
+  const here = currentStep(state);
+  if (isEdgeStep(here)) return edgeAction(state, exercise, onward);
+  if (here?.kind === "exercise") {
+    const deciding = decidingAction(state, here, onward);
+    if (deciding) return deciding;
+  }
   const last = state.outcomes[state.outcomes.length - 1];
   if (!last) return onward();
   const timeLeft = stepRemainingMs(state) > 0;
@@ -409,6 +462,7 @@ export function eventForBigAction(action: BigAction, now: number): RunEvent | nu
     case "again":
       return { type: "again", bpm: action.bpm, now };
     case "next":
+      return action.insert ? { type: "next", now, insert: action.step } : { type: "next", now };
     case "finish":
       return { type: "next", now };
     case "close":

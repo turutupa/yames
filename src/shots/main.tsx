@@ -297,6 +297,11 @@ async function drive() {
           if (stop !== "playing") {
             const outcome = stop === "noCatch" ? "session-no-catch" : stop === "between" ? "session-between" : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);
+            const fair = shot!.session.fair;
+            if (fair) {
+              byId(`session-fair-${fair}`)?.click();
+              await until("the fairness answer", () => byId(`session-fair-${fair}`)?.getAttribute("aria-pressed") === "true");
+            }
             if (stop === "recap") {
               await pressUntil(
                 "the recap",

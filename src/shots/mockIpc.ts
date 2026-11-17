@@ -14,6 +14,7 @@
  */
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 import type { Shot } from "./scenarios";
+import { RUNNABLE_PATH_IDS } from "../session/packs";
 import { STARTER_JAMS } from "../jam/jams";
 import { jamToSetlistStep } from "../setlist/setlists";
 import { bandStateForBar } from "../jam/practice";
@@ -745,8 +746,9 @@ function seededTake(
   };
 }
 
-function sessionSeed(seed: "first" | "returning" | "back"): PathStoreSeed {
+function sessionSeed(seed: "first" | "returning" | "back" | "three"): PathStoreSeed {
   if (seed === "first") return { states: [], takes: [], ceilings: [] };
+  if (seed === "three") return threePaths();
   const away = seed === "back" ? 12 : 1;
   const open = "even-eighths.open-string";
   const four = "even-eighths.four-fingers";
@@ -780,6 +782,50 @@ function sessionSeed(seed: "first" | "returning" | "back"): PathStoreSeed {
         cleanBpm: 70,
         lastPracticed: Date.now() - (away + 1) * DAY_MS,
       },
+    ],
+  };
+}
+
+/**
+ * Three subscribed Paths, each played in the last days and tagged the way a
+ * Session tags its Takes: Alternate Picking led yesterday, Sweep was kept warm
+ * yesterday, Blues was last played three days ago. Blues is not runnable yet,
+ * so the scene makes it so.
+ */
+function threePaths(): PathStoreSeed {
+  if (!RUNNABLE_PATH_IDS.includes("blues-pentatonics")) {
+    (RUNNABLE_PATH_IDS as string[]).push("blues-pentatonics");
+  }
+  const base = sessionSeed("returning");
+  const day = (n: number) => Date.now() - n * DAY_MS;
+  const tagged = base.takes.map((t, i) => ({
+    ...t,
+    facts: { ...(t.facts as object), session: t.startedAt, role: i === 0 ? "focus" : "next" },
+  }));
+  const sweep: PathTakeRow = {
+    ...seededTake("two-strings.down-two", 60, 0.82, false, 1),
+    pathId: "sweep-picking",
+    stepId: "two-strings",
+    id: "seed-sweep-1",
+    facts: { verdict: "belowBar", headlineMetric: "timingEvenness", headlineValue: 0.82, headlineMin: 0.85, session: day(1), role: "next" },
+  };
+  const blues: PathTakeRow = {
+    ...seededTake("box-one.box-eighths", 70, 0.86, true, 3),
+    pathId: "blues-pentatonics",
+    stepId: "box-one",
+    id: "seed-blues-3",
+    facts: { verdict: "passed", headlineMetric: "timingEvenness", headlineValue: 0.86, headlineMin: 0.85, session: day(3), role: "focus" },
+  };
+  return {
+    states: [
+      ...base.states,
+      { pathId: "sweep-picking", startedAt: day(20), updatedAt: day(1) },
+      { pathId: "blues-pentatonics", startedAt: day(19), updatedAt: day(3) },
+    ],
+    takes: [...tagged, sweep, blues].sort((a, b) => b.startedAt - a.startedAt),
+    ceilings: [
+      ...base.ceilings,
+      { exerciseKey: "blues-pentatonics/box-one.box-eighths", cleanBpm: 70, lastPracticed: day(3) },
     ],
   };
 }
@@ -1242,7 +1288,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     },
     save_path_take: (a) => {
       const row = a?.take as PathTakeRow;
-      pathStore.takes = [row, ...pathStore.takes];
+      // INSERT OR REPLACE, as the store does: a fairness answer rewrites its row.
+      pathStore.takes = [row, ...pathStore.takes.filter((t) => t.id !== row.id)];
       const clean = a?.cleanBpm as number | null;
       if (clean !== null) {
         const key = `${row.pathId}/${row.exerciseId}`;
@@ -1516,6 +1563,8 @@ export function installShotMock(shot: Shot, theme: string): void {
      * the bytes out and put a real file in front of `ffprobe`. It is the only
      * way to answer "is that a video?" — no assertion about a Blob's size can.
      */
+    // The save dialog, cancelled: nothing is written from a scene.
+    export_practice_data: () => null,
     clip_save_begin: () => {
       clipChunks.length = 0;
       delete (window as unknown as { __SHOT_CLIP__?: unknown }).__SHOT_CLIP__;

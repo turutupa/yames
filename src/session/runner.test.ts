@@ -17,13 +17,14 @@ import {
 } from "./runner";
 import type { RunEvent, RunState, TakeOutcome } from "./runner";
 import { NO_PROGRESS } from "./progress";
-import { ALT, NOW } from "./testKit";
+import { ALT, NOW, missed, progress } from "./testKit";
 
 const EX = ALT.steps[0].exercises[0];
 const MIN = 60_000;
 
+/** A returning player one Take in, so the focus is a plain Exercise (a new Path's is placement). */
 function plan(minutes: 5 | 10 | 15 | 20 = 15): SessionPlan {
-  return planSession({ minutes, now: NOW, paths: [ALT], progress: NO_PROGRESS });
+  return planSession({ minutes, now: NOW, paths: [ALT], progress: progress({ takes: [missed(EX.id, 60, 0.8)] }) });
 }
 
 function run(state: RunState, ...events: RunEvent[]): RunState {
@@ -124,7 +125,7 @@ describe("the walk through a Session", () => {
   });
 
   it("ends in a recap after the last step, and closes to idle", () => {
-    let s = atFocus(10);
+    let s = run(IDLE, { type: "start", plan: plan(5), now: NOW });
     s = afterTake(s, "passed", true);
     s = run(s, { type: "next", now: NOW });
     expect(s.phase).toBe("recap");
@@ -138,7 +139,7 @@ describe("the walk through a Session", () => {
     let s = run(IDLE, { type: "start", plan: twenty, now: NOW });
     for (let i = 0; i < jamAt; i += 1) s = run(s, { type: "next", now: NOW });
     expect(s.phase).toBe("timed");
-    s = run(s, { type: "tick", now: NOW + 3 * MIN });
+    s = run(s, { type: "tick", now: NOW + twenty.steps[jamAt].minutes * MIN });
     expect(s.phase).toBe("recap");
   });
 });
@@ -213,7 +214,7 @@ describe("the one big next action", () => {
   });
 
   it("the last step's big action finishes", () => {
-    const s = afterTake(atFocus(10), "passed", true);
+    const s = afterTake(run(IDLE, { type: "start", plan: plan(5), now: NOW }), "passed", true);
     expect(bigAction(s, EX)).toEqual({ kind: "finish" });
   });
 
@@ -256,7 +257,7 @@ describe("the clock", () => {
     const focus = currentStep(s) as PlanStep;
     expect(stepRemainingMs(s)).toBe(focus.minutes * MIN);
     const later = run(s, { type: "tick", now: NOW + 3 * MIN + 1 });
-    expect(minutesLeft(later)).toBe(focus.minutes - 3 + 5);
+    expect(minutesLeft(later)).toBe(focus.minutes - 3 + 4 + 4);
   });
 
   it("never goes negative", () => {
@@ -282,7 +283,7 @@ describe("the seam for Ramp up", () => {
     expect(during.phase).toBe("timed");
     expect(currentStep(during)?.id).toBe("edge");
     const after = run(during, { type: "tick", now: NOW + 2 * MIN });
-    expect(currentStep(after)?.id).toBe("next");
+    expect(currentStep(after)?.id).toBe("block-1");
     expect(after.phase).toBe("ready");
   });
 });
@@ -362,6 +363,6 @@ describe("Find my edge", () => {
     expect(during.phase).toBe("ready");
     expect(isEdgeStep(currentStep(during))).toBe(true);
     const after = run(during, { type: "next", now: NOW });
-    expect(currentStep(after)?.id).toBe("next");
+    expect(currentStep(after)?.id).toBe("block-1");
   });
 });
