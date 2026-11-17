@@ -149,3 +149,90 @@ headless browser only proves it runs.
 2. Are six variants enough for a warm-up not to feel the same? Only playing it will tell.
 3. Whether a slid-to note should be `soft` in `schedule.ts` still matters more now, with so
    many links. It would let those 20 variants, and the sliding shapes, keep the full bar.
+
+---
+
+# Third pass: the Theory Paths for the first testers (Blues rewrite, Classic Rock)
+
+> 2026-11-16, on `mvp-theory`, by C2 (the content worker), against
+> `plans/tasks/mvp/CONTENT.md`. Brief A (the demanding teacher) run on both Paths by the
+> author, reading every how-to against its notes (`python3` dump of the packs: string,
+> fret, sounding note, bar by bar). **Still not a teacher review, and nothing has been
+> played.** Both Paths stay `draft`.
+
+## What changed, and why it is honest now
+
+- **Blues: 44 Exercises, 32 graded (73%).** The draft graded 26, and four of those
+  (free in the box, same rhythm, two on two off, play less) had pass bars on
+  `scaleMembership` or `restsKept`, which nothing measures. Every graded Exercise is
+  now a written line graded on timing, notes heard, extras and right notes. Landing,
+  choosing and bend pitch are nine "Your turn" Exercises, self-checked, whose coach line
+  and how-to say "not checked yet".
+- **Classic Rock: 35 Exercises, 30 graded (86%).** New. Double stops, the ringing
+  chord embellishments and riffs in fourths are timed and counted, never pitch-checked
+  (a monophonic tracker can't read two notes). Bends are timed; their pitch is a
+  self-check.
+- **A timing bar on every written line.** Evenness is measured around the player's own
+  median, so a constant lean behind the beat costs nothing; the bar forgives spread.
+  0.8 on the easy Steps, 0.75 straight, 0.6 over a shuffle (a 60/40 swing against the
+  written triplet reads about 0.7 at 90 BPM by the formula in `score.rs`), 0.5 on slow
+  blues, 0.6 on the slow rock melody. Finales hold over 12 or 16 bars.
+- **A bent note reads as a wrong note** to `noteIdentity` (it is compared with the
+  fretted pitch). So no graded right-notes Exercise has a single-note bend. Where the
+  brief wanted a bend "with the release note graded", it is a unison bend (a double
+  stop, which the note check leaves alone) followed by the released note picked again.
+- **New in the tab notation: double stops** (`3:7b2+2:5`), for Chuck Berry stops,
+  fourths, hammered thirds and unison bends. See the pipeline change below.
+- New test `src/paths/specs/theoryPaths.test.ts` holds both Paths to the brief: no pass
+  bar on an unbuilt metric, a timing bar on every graded line, a swing-tolerant bar
+  wherever the band swings and the line has swung off-beats, "Your turn" titles and
+  "not checked yet" coach lines, and the subdivision named first in every how-to.
+
+## Teacher brief: findings, both Paths
+
+| Exercise | Problem | Done |
+|---|---|---|
+| `landing.a7-arpeggio`, `d7-arpeggio`, `e7-arpeggio` | Reach refused them at one position (fret 4 to 8 at 100 BPM). The how-to described a fixed hand | The hand moves a fret for the top strings; how-to says so |
+| `bends.*`, `slow-blues.written-chorus` | A graded right-notes chorus with single-note bends would fail a correct take | Unison bends (double stops) in the chorus; bend Exercises are timed only, pitch self-checked |
+| `call-response.two-on-two-off`, `slow-blues.play-less` | Graded on `restsKept`, which nothing measures | Written phrases graded on notes and time; a note in a rest shows as an extra, and the coach line says only that |
+| `twelve-bar.walking` | How-to said "root, fifth, sixth..." in one draft of this pass; the line is root, third, fifth, sixth, flat seven | Fixed against the tab |
+| `slow-blues` sparse chorus | Bar 6 started on E over D7, a downbeat off the chord | C over D7 |
+| `classic-rock` `extension-lick` | Bar 2 named "D, C on the high E and B strings"; both are on the high E. Fingering said first finger on 8 when the line starts on 7 | Rewritten against the tab |
+| `classic-rock` `open-string-repeat` | Named bar 1 as "G, F#, F#" | G, F#, G, F#, E, F#, E, F#, with frets |
+| `classic-rock` `clapton-repeat`, `pulloff-loop` | Fourth finger twice in a row across strings; a teacher would roll the first finger and use the third on the B string | Fingering rewritten |
+| `classic-rock` `minor-vs-major` | Bar 2 and 4 began on D and C#, not tones of A5 (the validator caught it) | Both bars begin on E; minor C against major C# is still the point |
+| `classic-rock` `stops-and-single` | Bar 2 began on D over A7 | Begins on E |
+| `classic-rock` `e-to-a` | Bar 4 described as "E, B, G#, B" | Low E, E, G#, open B, high E |
+| `classic-rock` `sixes-down` | A two-octave seam (27 semitones) when looped | Played once, not looped |
+| Classic Rock warm-up `loop-around` | A pull-off right after a position change didn't fit at 110 | Top rung 100 |
+
+## Left for a teacher, or for the runtime
+
+1. **The Session plays no band behind an Exercise.** `useSessionRun` loads the Take as a
+   song transport; an Exercise's `backing.jam` (the shuffle, the rock beat, the ballad)
+   is used by the review page and not by the Session. A shuffle lick against a straight
+   click is harder to feel. The swing-tolerant bar covers the grading; the feel needs
+   the band (P1 / M2).
+2. **The calls in call and response are not played** (guide parts, a known runtime
+   need). Echo and "One call, four answers" are read from the tab until then.
+3. **Sixes down the box (Classic Rock Step 2) is fast for Beginner.** It is in Step 2 by
+   the brief; the pass rung is 70 BPM sextuplets. A teacher may move it to Step 4.
+4. **Classic Rock has few bends.** The style lives on them; until bend pitch is
+   measured they can only be timed. Blues Step 6 is the bend Step for now.
+5. **Open-string repeats ring.** `open-string-repeat` and the embellishments may read
+   right notes "not checked" on a real guitar; notes heard and time still decide.
+6. **Every threshold is a design value**, the swing allowance included. The first real
+   takes should move them.
+
+## Pipeline change (for C1 to reconcile)
+
+- `src/paths/tabDsl.ts`: a token `a+b` is a double stop, every part at one tick for the
+  current value; `hold` holds every part.
+- `src/paths/toScore.ts`: notes sharing a tick are written as one alphaTex beat,
+  `(7.3 5.2).8`, and a hammer or pull's arrival is looked for on the same string at the
+  next onset.
+- Nothing else: `validate.ts`, `reach.ts` and `schedule.ts` already treat notes sharing a
+  tick as one attack, and `pitch.rs` leaves chords unassessed.
+- Proposed rule, not written (it is `validate.ts`, C1's): an Exercise in `graded` mode
+  may not carry a pass bar on a `new-grader` metric. The draft had four; the new test
+  holds the Theory Paths to it, but a validator rule would hold every Path.
