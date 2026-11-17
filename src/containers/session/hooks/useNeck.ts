@@ -103,6 +103,9 @@ export function useNeckSlot(
 
   useEffect(() => {
     neck.setView(latestView.current, slot.current);
+    // The stage defers a hide, so leaving one screen for another in the same
+    // commit flies the camera rather than blinking the neck out.
+    return () => neck.setView({ kind: "hidden" }, null);
   }, [neck, key]);
 
   const notesKey = notes.map((n) => `${n.string}:${n.fret}:${n.kind}:${n.label ?? ""}`).join("|");

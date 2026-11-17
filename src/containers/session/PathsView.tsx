@@ -379,7 +379,12 @@ function StepDetail({
   const slot = useNeckSlot(view, notes);
   const neck3d = useNeck3d();
   return (
-    <div className="session-page" data-testid="step-detail" data-neck3d={neck3d}>
+    <div
+      className="session-page"
+      data-testid="step-detail"
+      data-neck3d={neck3d}
+      data-scrim="split"
+    >
       <div className="session-rise">
         <button className="session-link" onClick={onBack}>
           {path.title}
