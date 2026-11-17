@@ -73,10 +73,11 @@ test.describe("the learning side on a phone", () => {
     for (const size of WIDTHS) {
       test(`${scene} fits a thumb at ${size.width}px`, async ({ page }) => {
         // Find my edge plays its Takes in real time (see session.spec.ts).
-        // Scenes that play a Take in real time with the neck or the runway
-        // drawing (SwiftShader, a parallel suite): the budget session.spec.ts
-        // gives its own.
-        if (scene.startsWith("session-")) test.slow();
+        // Every one of these walks the app from Today (and the session scenes
+        // play a Take in real time with the neck or the runway drawing): under
+        // SwiftShader and the full parallel suite, Paths alone passed 30 s.
+        // The budget session.spec.ts gives its own.
+        test.slow();
         await openShot(page, `phone-${scene}`, size);
         await noSidewaysScroll(page, `phone-${scene} at ${size.width}px`);
         const first = await smallTargets(page);
