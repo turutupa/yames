@@ -27,7 +27,6 @@ import {
 } from "../../platform.inert";
 import {
   armCountIn,
-  getActiveTab,
   configureSpeedRamp,
   downloadAndInstallUpdate,
   setAlwaysOnTop,
@@ -119,7 +118,7 @@ import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
-import { isLearnTab, isPlayTab, OPEN_ON_KEY, type PlayTab } from "./hooks/useTabRouting";
+import { isLearnTab, isPlayTab, type PlayTab } from "./hooks/useTabRouting";
 import { useSessionRun } from "../session/hooks/useSessionRun";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
 import { TodayView } from "../session/TodayView";
@@ -1101,12 +1100,6 @@ export function MainWindow() {
         delay,
       );
     }
-  }, [setView]);
-
-  /** The tool this player last used, and the Metronome if there has been none. */
-  const openLastTool = useCallback(async () => {
-    const tab = await getActiveTab().catch(() => "beat");
-    setView(isPlayTab(tab) ? tab : "beat");
   }, [setView]);
 
   // --- W2 → Settings → Appearance detour (O2) ------------------------------
@@ -2349,12 +2342,9 @@ export function MainWindow() {
           <TodayView
             session={sessionRun}
             listening={evaluation.enabled}
-            onOpenTools={() => void openLastTool()}
+            onOpenTools={() => setView("tools")}
+            onSetUpInput={openAudioSettings}
             onOpenPaths={() => setView("paths")}
-            onOpenLastTool={() => {
-              void storeSave(OPEN_ON_KEY, "lastTool");
-              void openLastTool();
-            }}
           />
         ) : view === "paths" ? (
           <PathsView key={pathsVisit} session={sessionRun} />

@@ -96,3 +96,54 @@ test("the rail's Paths on a Step page returns to the list", async ({ page }) => 
   await expect(page.locator('[data-testid="paths"]')).toBeVisible();
   await expect(page.locator('[data-testid="step-detail"]')).toHaveCount(0);
 });
+
+/*
+ * The plan as a list (panel review, 2026-11-17), in short and wide windows.
+ * The owner's 2000x780 screenshot had the neck cut off under the title bar:
+ * Today was taller than the window, so the page scrolled. On a desktop window
+ * Today is now the window's height: the neck's slot and the hero give up
+ * room first, and a plan longer than what is left scrolls inside its panel
+ * with "More below" over its foot. Five minutes and twenty, so one row and
+ * five or six.
+ */
+const SHORT_SIZES = [
+  { width: 1280, height: 560 },
+  { width: 2000, height: 780 },
+  { width: 1024, height: 700 },
+  { width: 1400, height: 900 },
+];
+for (const size of SHORT_SIZES) {
+  for (const minutes of [5, 20]) {
+    for (const scene of ["today-first", "today-returning"]) {
+      test(`${scene}, ${minutes} min: no page scroll, Start and the picker in view, at ${size.width}x${size.height}`, async ({ page }) => {
+        await openShot(page, scene, size);
+        await page.locator(".session-seg button", { hasText: new RegExp(`^${minutes}$`) }).first().click();
+        await expect(page.locator("li.session-plan-item").first()).toBeVisible();
+        await noSidewaysScroll(page, `${scene} at ${size.width}`);
+        const where = `${scene} ${minutes} min at ${size.width}x${size.height}`;
+        const pageScroll = await page.evaluate(() => {
+          const m = document.querySelector(".main-content")!;
+          return m.scrollHeight - m.clientHeight;
+        });
+        expect(pageScroll, `${where}: the page scrolls, and the neck goes up under the title bar`).toBeLessThanOrEqual(1);
+        await insideViewport(page, '[data-testid="today-start"]', where, size);
+        await insideViewport(page, ".session-seg", where, size);
+        await insideViewport(page, ".session-slot", where, size);
+        expect(await page.locator('ol.session-plan-list[role="list"]').count()).toBe(1);
+        expect(await overlapping(page)).toEqual([]);
+
+        // A list longer than its panel says so, and stops saying so at its end.
+        const list = page.locator("ol.session-plan-list");
+        const scrolls = await list.evaluate((el) => el.scrollHeight - el.clientHeight > 1);
+        const more = page.locator('[data-testid="today-more"]');
+        if (scrolls) {
+          await expect(more, `${where}: the list scrolls with no cue`).toBeVisible();
+          await list.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+          await expect(more).toHaveCount(0);
+        } else {
+          await expect(more).toHaveCount(0);
+        }
+      });
+    }
+  }
+}

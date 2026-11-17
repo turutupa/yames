@@ -346,7 +346,8 @@ async function playTake(d, exercise, style, label, { band = false } = {}) {
 /** Today's minutes, then Start: the Session's first screen. */
 async function startSession(d, minutes) {
   await d.clickText(new RegExp(`^${minutes}$`));
-  await d.clickText(/^Start$/);
+  // "Start", with the first block's name on a line under it.
+  await d.clickText(/^Start(\n|$)/);
 }
 
 /** Which Exercise the Session is on, read off its screen. */
@@ -399,7 +400,7 @@ async function scenarioPlacement() {
     const today = await d.text();
     await shot(d, "today-first-run");
     check("Today opens for a returning player", /Today/.test(today));
-    check("a fresh profile's Today plans a first Session", /YOUR FIRST SESSION/i.test(today), firstLines(today, /SESSION/i));
+    check("a fresh profile's Today plans a first Session", /FIRST SESSION · FINDS WHERE YOU START/i.test(today), firstLines(today, /SESSION/i));
     await startSession(d, 5);
     const m = await d.waitText(/Start take, (\d+) BPM/, 20000);
     const { page, hit } = await exerciseHere(d);
@@ -519,7 +520,7 @@ async function scenarioRelaunch() {
     const today = await d.text();
     await shot(d, "today-after-relaunch");
     info.todayAfterRelaunch = firstLines(today, /WHAT'S IN IT/i, 8);
-    check("after a restart, Today no longer plans a first Session", !/YOUR FIRST SESSION/i.test(today), firstLines(today, /SESSION/i));
+    check("after a restart, Today no longer plans a first Session", !/FIRST SESSION · FINDS WHERE YOU START/i.test(today), firstLines(today, /SESSION/i));
     await d.clickText(/^Progress$/);
     await sleep(1500);
     const progress = await d.text();
@@ -565,10 +566,10 @@ async function scenarioTwoPaths() {
     check("20 minutes: Today runs both Paths", new RegExp(firstPath.title, "i").test(today) && new RegExp(secondPath.title, "i").test(today),
       firstLines(today, /Running/i));
     check("20 minutes: the plan has a block from each Path", inPlan(firstPath) && inPlan(secondPath), firstLines(plan, /What's in it/i, 12));
-    check(`20 minutes: ${secondPath.title}, new, comes in as placement`, /Placement/i.test(plan) && /New here\?/i.test(plan));
+    check(`20 minutes: ${secondPath.title}, new, comes in as placement`, /Find your level/i.test(plan) && /Pass both and you skip ahead/i.test(plan));
 
     const t0 = Date.now() - 1000;
-    await d.clickText(/^Start$/);
+    await d.clickText(/^Start(\n|$)/);
     const played = new Set();
     for (let step = 0; step < 12 && played.size < 2; step++) {
       // A Take to play, or a timed step (the warm-up) to move past.
@@ -795,11 +796,11 @@ async function scenarioRestart() {
   try {
     // 1. Today, Start, Exit at once, Start at once.
     await d.clickText(/^5$/);
-    await d.clickText(/^Start$/);
+    await d.clickText(/^Start(\n|$)/);
     await d.waitText(/Start take, (\d+) BPM/, 20000);
     await d.clickText(/^Exit$/);
     await backToToday();
-    await d.clickText(/^Start$/);
+    await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: Start, Exit, Start");
     await d.clickText(/^Exit$/);
     await backToToday();
@@ -819,7 +820,7 @@ async function scenarioRestart() {
     check("restart: the Metronome hotkey leaves the Session", !/Start take|End take/.test(await d.text()));
     await key("0", "Digit0");
     await backToToday();
-    await d.clickText(/^Start$/);
+    await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: a tab hotkey out and back");
 
     // 4. Settings mid-Session (it keeps the Session) and back: still heard.
@@ -841,7 +842,7 @@ async function scenarioRestart() {
     check("restart: Tools opens from Today", !/Start take|End take/.test(await d.text()));
     await key("0", "Digit0");
     await backToToday();
-    await d.clickText(/^Start$/);
+    await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: Tools out and back");
     await d.clickText(/^Exit$/);
   } finally {
