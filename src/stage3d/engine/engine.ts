@@ -467,6 +467,18 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       });
       return true;
     },
+    probe(frames: number): number[] {
+      const gl = renderer.getContext();
+      const px = new Uint8Array(4);
+      const out: number[] = [];
+      for (let i = 0; i < frames; i++) {
+        const t0 = performance.now();
+        engine.frame(0);
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        out.push(performance.now() - t0);
+      }
+      return out;
+    },
     dispose() {
       canvas.removeEventListener("webglcontextlost", onLost);
       canvas.removeEventListener("webglcontextrestored", onRestored);

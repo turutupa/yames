@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Animeer elementen bij het wisselen van schermen",
       "animationStyle": "Animatiestijl",
       "animationStyleHint": "Effect dat bij het wisselen van schermen wordt gebruikt",
+      "neck3d": "3D-toets",
+      "neck3dHint": "Auto toont de 3D-hals als de grafische kaart het aankan; Uit toont altijd de platte",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Uit"
+      },
+      "neck3dSlow": "Deze computer tekende de 3D-hals te traag, dus Yames toont de platte.",
+      "neck3dRetry": "3D opnieuw proberen",
       "transitions": {
         "off": "Uit",
         "subtle": "Subtiel",

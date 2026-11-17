@@ -16,6 +16,14 @@
       "viewAnimationsHint": "ビューを切り替えるときにアニメーションします",
       "animationStyle": "アニメーションスタイル",
       "animationStyleHint": "ビュー切り替え時に使う効果",
+      "neck3d": "3D指板",
+      "neck3dHint": "自動：グラフィックが対応していれば3Dのネックを表示。オフ：常に平面のネックを表示",
+      "neck3dModes": {
+        "auto": "自動",
+        "off": "オフ"
+      },
+      "neck3dSlow": "このコンピューターでは3Dネックの描画が遅すぎたため、平面のネックを表示しています。",
+      "neck3dRetry": "もう一度3Dを試す",
       "transitions": {
         "off": "オフ",
         "subtle": "控えめ",

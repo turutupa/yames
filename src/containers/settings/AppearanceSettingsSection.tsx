@@ -1,6 +1,7 @@
-import type { Dispatch, SetStateAction } from "react";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { storeSave } from "../../ipc";
+import { setForceFlat, setNeck3d, stagePrefsReady, useStagePrefs } from "../../stage3d/prefs";
 import { THEMES } from "../../themes";
 
 type ViewTransitions = "off" | "subtle" | "smooth" | "expressive";
@@ -97,6 +98,47 @@ export function AppearanceSettingsSection({
           ))}
         </div>
       </div>
+      <Neck3dRow />
     </section>
+  );
+}
+
+/**
+ * "3D fretboard: Auto / Off" (`stage3d/prefs.ts`). When the frame-time guard
+ * found this machine too slow, Auto says so and offers to measure again.
+ */
+function Neck3dRow() {
+  const { t } = useTranslation();
+  const prefs = useStagePrefs();
+  useEffect(() => {
+    void stagePrefsReady();
+  }, []);
+  const slow = prefs.neck3d === "auto" && prefs.forceFlat;
+  return (
+    <div className="setting-row" data-testid="setting-neck3d">
+      <div className="setting-label">
+        <label>{t("settings.appearance.neck3d")}</label>
+        <span className="setting-hint">
+          {slow ? t("settings.appearance.neck3dSlow") : t("settings.appearance.neck3dHint")}
+        </span>
+      </div>
+      <div className="toggle-group">
+        {(["auto", "off"] as const).map((mode) => (
+          <button
+            key={mode}
+            className={`toggle-btn ${prefs.neck3d === mode ? "active" : ""}`}
+            aria-pressed={prefs.neck3d === mode}
+            onClick={() => setNeck3d(mode)}
+          >
+            {t(`settings.appearance.neck3dModes.${mode}`)}
+          </button>
+        ))}
+        {slow && (
+          <button className="toggle-btn" data-testid="neck3d-retry" onClick={() => setForceFlat(false)}>
+            {t("settings.appearance.neck3dRetry")}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

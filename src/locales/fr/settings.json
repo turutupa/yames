@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Animer les éléments lors du changement de vue",
       "animationStyle": "Style d'animation",
       "animationStyleHint": "Effet utilisé lors du changement de vue",
+      "neck3d": "Manche 3D",
+      "neck3dHint": "Auto affiche le manche en 3D si la carte graphique le permet ; Désactivé affiche toujours le manche plat",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Désactivé"
+      },
+      "neck3dSlow": "Cet ordinateur dessinait le manche 3D trop lentement, Yames affiche donc le manche plat.",
+      "neck3dRetry": "Réessayer la 3D",
       "transitions": {
         "off": "Désactivées",
         "subtle": "Subtiles",

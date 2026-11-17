@@ -22,6 +22,13 @@ export interface StageEngine {
   /** Advance by `dt` seconds and draw. True while something is still moving. */
   frame(dt: number): boolean;
   lowerQuality(step: QualityStep, dprScale: number): boolean;
+  /**
+   * Draw `frames` frames back to back, waiting for each to finish on the GPU
+   * (a one-pixel read), and give the time of each in ms. The renderer string
+   * can lie (WebKitGTK says "Apple GPU" whatever draws), the clock cannot:
+   * this is how the stage tells a CPU rasteriser from a GPU (see `speed.ts`).
+   */
+  probe(frames: number): number[];
   dispose(): void;
 }
 

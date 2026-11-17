@@ -16,6 +16,14 @@
       "viewAnimationsHint": "뷰를 전환할 때 요소를 애니메이션 처리합니다",
       "animationStyle": "애니메이션 스타일",
       "animationStyleHint": "뷰 전환 시 사용하는 효과",
+      "neck3d": "3D 지판",
+      "neck3dHint": "자동: 그래픽이 감당할 수 있으면 3D 넥을 표시하고, 끔: 항상 평면 넥을 표시합니다",
+      "neck3dModes": {
+        "auto": "자동",
+        "off": "끔"
+      },
+      "neck3dSlow": "이 컴퓨터에서 3D 넥이 너무 느리게 그려져 평면 넥을 표시합니다.",
+      "neck3dRetry": "3D 다시 시도",
       "transitions": {
         "off": "끔",
         "subtle": "은은",

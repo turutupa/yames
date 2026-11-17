@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Animuj elementy przy przełączaniu widoków",
       "animationStyle": "Styl animacji",
       "animationStyleHint": "Efekt używany przy przełączaniu widoków",
+      "neck3d": "Gryf 3D",
+      "neck3dHint": "Auto rysuje gryf w 3D, jeśli grafika komputera daje radę; Wył. zawsze rysuje płaski",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Wył."
+      },
+      "neck3dSlow": "Ten komputer rysował gryf 3D zbyt wolno, więc Yames pokazuje płaski.",
+      "neck3dRetry": "Spróbuj 3D ponownie",
       "transitions": {
         "off": "Wyłączone",
         "subtle": "Dyskretne",

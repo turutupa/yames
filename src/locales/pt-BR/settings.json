@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Anima os elementos ao trocar de tela",
       "animationStyle": "Estilo de animação",
       "animationStyleHint": "Efeito usado ao trocar de tela",
+      "neck3d": "Braço 3D",
+      "neck3dHint": "Auto desenha o braço em 3D quando o vídeo do computador aguenta; Desligado sempre desenha o plano",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Desligado"
+      },
+      "neck3dSlow": "Este computador desenhou o braço 3D devagar demais, então o Yames mostra o plano.",
+      "neck3dRetry": "Tentar 3D de novo",
       "transitions": {
         "off": "Desligado",
         "subtle": "Sutil",

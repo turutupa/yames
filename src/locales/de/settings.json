@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Elemente beim Ansichtswechsel animieren",
       "animationStyle": "Animationsstil",
       "animationStyleHint": "Effekt beim Ansichtswechsel",
+      "neck3d": "3D-Griffbrett",
+      "neck3dHint": "Auto zeigt den 3D-Hals, wo die Grafik deines Computers es schafft; Aus zeigt immer den flachen",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Aus"
+      },
+      "neck3dSlow": "Dieser Computer hat den 3D-Hals zu langsam gezeichnet, deshalb zeigt Yames den flachen.",
+      "neck3dRetry": "3D erneut versuchen",
       "transitions": {
         "off": "Aus",
         "subtle": "Dezent",

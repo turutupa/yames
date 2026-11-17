@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Görünümler arasında geçerken animasyon göster",
       "animationStyle": "Animasyon stili",
       "animationStyleHint": "Görünüm geçişlerinde kullanılan efekt",
+      "neck3d": "3D klavye",
+      "neck3dHint": "Otomatik, bilgisayarın grafiği kaldırabiliyorsa 3D sapı çizer; Kapalı her zaman düz sapı çizer",
+      "neck3dModes": {
+        "auto": "Otomatik",
+        "off": "Kapalı"
+      },
+      "neck3dSlow": "Bu bilgisayar 3D sapı çok yavaş çizdi, bu yüzden Yames düz sapı gösteriyor.",
+      "neck3dRetry": "3D'yi yeniden dene",
       "transitions": {
         "off": "Kapalı",
         "subtle": "Hafif",

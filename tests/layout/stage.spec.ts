@@ -196,3 +196,22 @@ for (const scene of ["stage-whole", "stage-zoom"]) {
     expect(await page.locator("canvas.neck-stage-canvas").isVisible()).toBe(false);
   });
 }
+
+/*
+ * The frame-time guard (src/stage3d/speed.ts). The harness lets SwiftShader
+ * through its name check, which is what WebKitGTK does for every renderer (it
+ * says "Apple GPU"); `?probe=1` turns the clock back on, and the clock must
+ * catch it and leave the SVG neck in the slot.
+ */
+test("a CPU renderer the name check cannot see is caught by the frame clock", async ({ page }) => {
+  await openShot(page, "stage-whole", SIZES[0], "ember", { probe: "1" });
+  const r = await page.evaluate(() => {
+    const c = window.__NECK__!.current! as unknown as { mode: string; lastProbe: { slow: boolean; medianMs: number; budgetMs: number } | null };
+    return { mode: c.mode, probe: c.lastProbe };
+  });
+  expect(r.probe, "the probe ran").not.toBeNull();
+  expect(r.probe!.slow, `SwiftShader at ${r.probe!.medianMs.toFixed(0)} ms against ${r.probe!.budgetMs.toFixed(0)} ms`).toBe(true);
+  expect(r.mode).toBe("fallback");
+  expect(await page.locator('[data-testid="stage-slot"] [data-testid="neck-fallback"] svg').count()).toBe(1);
+  expect(await page.locator("canvas.neck-stage-canvas").isVisible()).toBe(false);
+});

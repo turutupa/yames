@@ -16,6 +16,14 @@
       "viewAnimationsHint": "切换视图时播放动画",
       "animationStyle": "动画样式",
       "animationStyleHint": "切换视图时使用的效果",
+      "neck3d": "3D 指板",
+      "neck3dHint": "自动：显卡能胜任时显示 3D 琴颈；关闭：始终显示平面琴颈",
+      "neck3dModes": {
+        "auto": "自动",
+        "off": "关闭"
+      },
+      "neck3dSlow": "这台电脑绘制 3D 琴颈太慢，因此 Yames 显示平面琴颈。",
+      "neck3dRetry": "重新尝试 3D",
       "transitions": {
         "off": "关闭",
         "subtle": "细腻",

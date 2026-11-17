@@ -16,6 +16,14 @@
       "viewAnimationsHint": "Animate elements when switching views",
       "animationStyle": "Animation style",
       "animationStyleHint": "Effect used when switching views",
+      "neck3d": "3D fretboard",
+      "neck3dHint": "Auto draws the 3D neck where your computer's graphics can; Off always draws the flat one",
+      "neck3dModes": {
+        "auto": "Auto",
+        "off": "Off"
+      },
+      "neck3dSlow": "This computer drew the 3D neck too slowly, so Yames shows the flat one.",
+      "neck3dRetry": "Try 3D again",
       "transitions": {
         "off": "Off",
         "subtle": "Subtle",
