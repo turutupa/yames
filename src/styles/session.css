@@ -1757,11 +1757,15 @@
 .session-center > .session-kick {
   text-wrap: balance;
 }
-/* On a phone the result's big button is one line in every theme (acceptance
-   4, P2-11: Ivory's wider serif broke "Go again, up to 90 BPM" in two). */
+/* On a phone the big button is one line in every theme where it can be
+   (acceptance 4, P2-11: Ivory's wider serif broke "Go again, up to 90 BPM"
+   in two, and Aurora "Turn on input and start"); a longer one still wraps
+   into two balanced lines. */
 @media (max-width: 480px) {
-  .session-between .session-big {
-    font-size: clamp(22px, 7.4vw, 30px);
+  .session-page .session-big[data-size="mid"] {
+    font-size: clamp(22px, 6.8vw, 27px);
+    padding-left: 14px;
+    padding-right: 14px;
   }
 }
 /* The result's neck: a landscape band, centred in its column. A slot taller
