@@ -322,7 +322,7 @@ async function drive() {
         if (stop !== "ready") {
           big()?.click();
           await until("the Take to run", () => !!byId("session-live"));
-          if (shot!.session.exercise) await until("the band", () => !!byId("session-band"));
+          if (shot!.session.band) await until("the band", () => !!byId("session-band"));
           if (stop !== "playing") {
             const outcome = stop === "noCatch" ? "session-no-catch" : stop === "between" ? "session-between" : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);

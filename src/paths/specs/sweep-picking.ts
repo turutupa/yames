@@ -30,7 +30,6 @@ const am3 = sweepLoop({ chord: "Am", strings: [3, 2, 1], near: 14 });
 const am3Low = sweepLoop({ chord: "Am", strings: [3, 2, 1], near: 5 });
 const am3Mid = sweepLoop({ chord: "Am", strings: [3, 2, 1], near: 9 });
 const c3 = sweepLoop({ chord: "C", strings: [3, 2, 1], near: 12 });
-const cm3 = sweepLoop({ chord: "Cm", strings: [3, 2, 1], near: 12 });
 const c3Low = sweepLoop({ chord: "C", strings: [3, 2, 1], near: 9 });
 const c3High = sweepLoop({ chord: "C", strings: [3, 2, 1], near: 17 });
 // F's top reach is five frets at fret 8, wider than a hammer: `reach.ts` caught it.
@@ -111,7 +110,6 @@ function rockChain(chords: readonly string[], near: number): string {
 
 // Slow, short triads: evenness is held a little higher than on the long shapes.
 const TRIAD_BARS = [
-  { metric: "noteIdentity", min: 0.85, overBars: 4 },
   { metric: "notesHeard", min: 0.9, overBars: 4 },
   { metric: "timingEvenness", min: 0.8, overBars: 4 },
   { metric: "extraNotes", max: 3, overBars: 4 },
@@ -141,7 +139,6 @@ const twoPerBar = (cell: string) => repeat(cell, 2);
 // A slid-to note the listening misses counts as missed today, so a shape with
 // slides at the top keeps a lower notes-heard bar (`honesty.slideBar`).
 const SLIDE_BARS = [
-  { metric: "noteIdentity", min: 0.8, overBars: 4 },
   { metric: "notesHeard", min: 0.75, overBars: 4 },
   { metric: "timingEvenness", min: 0.75, overBars: 4 },
   { metric: "extraNotes", max: 4, overBars: 4 },
@@ -150,7 +147,9 @@ const SLIDE_BARS = [
 function sweepExercise(args: Omit<ExerciseSpec, "pick" | "grade"> & { grade?: ExerciseSpec["grade"] }): ExerciseSpec {
   return {
     pick: "sweep",
-    grade: "sweep",
+    // Timing only: on a sweep the strings ring into each other, and a pitch
+    // read there can fail a take that was played right (audio_fixtures, 2026-11-17).
+    grade: "sweepTiming",
     selfCheck: [ROLL_CHECK],
     ...args,
   };
@@ -196,7 +195,7 @@ const OLD_STEPS: StepSpec[] = [
             "Up, back, up, back in each bar: four sweeps, twelve notes. At the bar line only the little finger moves, from fret 14 to fret 12 on the G string.",
             "Say the chord name on each bar line. If you can hear the change before you name it, your ears are doing their job.",
           ],
-          coach: "Timing and notes heard are what I report. Right notes on a sweep usually come back 'not checked', because the strings ring into each other.",
+          coach: "I grade timing and notes heard. Right notes aren't graded on a sweep, because the strings ring into each other, so name each chord yourself.",
           tab: `/8t ${rock(AM_HIGH)} | /8t ${rock({ chord: "C", strings: [3, 2, 1], near: 12 })}`,
           position: 12,
           chords: "Am | C",
@@ -365,7 +364,7 @@ const OLD_STEPS: StepSpec[] = [
           title: "B diminished",
           purpose: "A diminished triad, B, D, F, in the turn-with-the-pick form. It is the darkest sound on this Path, and it is only three notes.",
           howTo: ["No top note yet: both turns are pick turns. Hear how it wants to fall to C or A minor."],
-          coach: "I report the timing. Right notes on ringing strings usually read 'not checked', so say the three names, B, D, F, as you play.",
+          coach: "I report the timing. Right notes aren't graded on a sweep, so say the three names, B, D, F, as you play.",
           tab: `/16 ${repeat("3:16 2:15 1:13 2:15", 4)}`,
           position: 13,
           harmony: { arpeggio: "Bdim", cover: true },
@@ -683,7 +682,7 @@ const OLD_STEPS: StepSpec[] = [
           howTo: ["Bar 1 is the A minor loop you know. Bar 2 drops the index finger to fret 10 for D minor, with a three-fret hammer on top, and the rest at the end of the bar is your time to get back."],
           coach: "A chord change is where notes go missing. If one does, I'll count it, and the bar line is where to look.",
           tab: `/8t ${am5} | /8t ${dmE} r r`,
-          position: 10,
+          position: 12,
           shifts: true,
           chords: "Am | Dm",
           harmony: { chordTones: true, cover: true },
@@ -791,7 +790,7 @@ const OLD_STEPS: StepSpec[] = [
           title: "Sweep up, scale down",
           purpose: "Up the Am shape, then run back down the scale with pull-offs. It is the most natural sweep phrase there is, and it ends on a held A with vibrato.",
           howTo: ["Hammer to 17, then three pull-offs on the top string (each pull sounds the next note), then pick the run down the B and G strings."],
-          coach: "A chain of pull-offs may be too quiet for me, and that's fine. It's the picked notes I can check.",
+          coach: "A chain of pull-offs may be too quiet for me, and that's fine. It's the picked notes I time and count.",
           tab: `/8t 3:14 2:13 1:12 1:17h 1:15p 1:13p 1:12p 2:15 2:13 2:12 3:14 3:12 | /2 3:14v /4 r r`,
           position: 12,
           shifts: true,
@@ -805,7 +804,7 @@ const OLD_STEPS: StepSpec[] = [
           title: "Two strings, a run, and a bend",
           purpose: "Your two-string lick from Step 1, extended with a three-string start and finishing in a whole-tone bend. It ties the whole Path back to where it began.",
           howTo: ["Sweep through G, B and E, then the lick. The last note is D on the G string, bent up to E and held with vibrato. Hear E on the B string first, so you know where the bend has to reach."],
-          coach: "I can check the picked notes. How far the bend went is up to your ear: compare it with the E at fret 5 on the B string.",
+          coach: "I time the picked notes. How far the bend went is up to your ear: compare it with the E at fret 5 on the B string.",
           tab: `/8t 3:5 2:5 1:5 1:8h 1:5p 2:8 2:5p 3:7 3:5 3:7 3:5 4:7 | /2 3:7b2v /4 r r`,
           position: 5,
           harmony: { scale: ["A", "minorPentatonic"], cover: true },
@@ -900,7 +899,7 @@ const OLD_STEPS: StepSpec[] = [
           ],
           coach: "Graded on the slower rungs, on direct input. I report timing and notes heard; whether it sounds like a solo is for you and a recording.",
           tab: ETUDE,
-          position: 10,
+          position: 12,
           shifts: true,
           chords: "Am | F | C | G | Dm | E | Am | Am",
           jam: { groove: "rockTwelveEight", key: "A minor" },
@@ -1706,7 +1705,7 @@ export default definePath({
   orderRationale:
     "Three Levels, each open from the start, rebuilt on 2026-11-17 after the owner played the old Step 1 (two notes, mostly rests, at 50 BPM) and called it a beginner exercise nobody should have to sit through. Beginner now starts on a real sweep: a three-string A minor triad up and down in triplets, with one beat of rest only where it teaches the muting reset. It is the standard first drill in most sweep courses (one push per click, the top note repeated where the pick turns), and it already sounds like an arpeggio. Major and minor come together in the first Step because they differ by one note and hearing that note is the point. Then the turn at the top with a hammer and a pull, which is what removes the repeated note; then the three inversions and diminished; and the Level ends with a four-bar solo over a band. Intermediate skips everything under four strings: four-string shapes, then the five-string A-shape, then the E-shape with a hammer or a tap at the top, then inversions and position shifts with those shapes, and only then linking, which the owner asked for as the backbone, on three strings first because a long shape makes a bad link worse. It ends on an eight-bar etude over a band. Advanced adds six strings, wide shifts and neoclassical sequences. The comparison was against common practice (Gambale's economy and sweep method, Becker- and Malmsteen-style arpeggio studies, Troy Grady's work on pick paths): triads before long shapes, the turnaround as its own skill, the tap as an extension of the five-string shape. Chains change chord once a bar because Jam's grid is one chord to a bar. The progressions are common vocabulary and every line is written for this Path: nothing is transcribed from a song or copied from a course.",
   gradingLimits:
-    "Grading stops being trustworthy at about 150 ms between notes: sixteenths at 100 BPM, eighth triplets at 133, sextuplets at 66. Rungs faster than that are self-checked, whatever they look like, and the card says where grading stops. That line is a cautious policy, not a measurement. What a sweep is graded on is timing: how even the notes are, whether each one arrived, and whether extra notes crept in. Right notes are measured only when the notes come through separate and clear; swept notes ring into each other, so on most sweeps right notes read 'not checked', and nothing here promises them. The tests behind these numbers used synthetic tones, and no real guitar has been through them yet. The note after a slide counts as missed if it isn't heard, so bars on sliding shapes are lower; a tap counts as a note that must be heard, and a hammer or pull that isn't heard costs nothing. In practice: Beginner is graded at every rung. In Intermediate the sixteenth-note shapes stop at 100 BPM, triplet shapes at 130, and the sextuplet pickup at 65. In Advanced most of what makes the playing hard can't be graded. Sound never tells us the two things that matter most here, muting and pick path, and the Exercises say so.",
+    "Grading stops being trustworthy at about 150 ms between notes: sixteenths at 100 BPM, eighth triplets at 133, sextuplets at 66. Rungs faster than that are self-checked, whatever they look like, and the card says where grading stops. That line is a cautious policy, not a measurement. What a sweep is graded on is timing: how even the notes are, whether each one arrived, and whether extra notes crept in. Right notes are not graded anywhere on this Path: swept notes ring into each other, and a pitch read on ringing strings can fail a take that was played right, so nothing here promises them. The tests behind these numbers used synthetic tones, and no real guitar has been through them yet. The note after a slide counts as missed if it isn't heard, so bars on sliding shapes are lower; a tap counts as a note that must be heard, and a hammer or pull that isn't heard costs nothing. In practice: Beginner is graded at every rung. In Intermediate the sixteenth-note shapes stop at 100 BPM, triplet shapes at 130, and the sextuplet pickup at 65. In Advanced most of what makes the playing hard can't be graded. Sound never tells us the two things that matter most here, muting and pick path, and the Exercises say so.",
   steps: [...LEVEL_STEPS.beginner, ...LEVEL_STEPS.intermediate, ...LEVEL_STEPS.advanced].map(stepNamed),
   levels: [
     {
