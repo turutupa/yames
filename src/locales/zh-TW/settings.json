@@ -321,6 +321,14 @@
         "session-restart": "熱身或計時段中：從頭開始。錄製之後：同一段再來一次",
         "session-prev": "練習中：回到此前一個練習區塊",
         "session-watch": "Take 之前，在琴頸上：依速度逐一點亮各音，或停止。沒有聲音，不評分"
+      },
+      "scope": {
+        "in": {
+          "jam": "在即興中",
+          "songs": "在曲目中",
+          "session": "課程中"
+        },
+        "notIn": "{{where}}除外"
       }
     },
     "inputTest": {

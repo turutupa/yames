@@ -234,7 +234,7 @@ describe("Hotkeys (KEY-01 to KEY-13, MID-08)", () => {
   function hotkeyRow(id: string) {
     const name = t(`settings.hotkeys.actions.${id}`);
     const found = [...document.querySelectorAll<HTMLElement>(".hotkey-row")].find(
-      (r) => r.querySelector(".hotkey-action")?.textContent === name,
+      (r) => r.querySelector(".hotkey-action-name")?.textContent === name,
     );
     if (!found) throw new Error(`no hotkey row for ${id}`);
     const [key, midi] = [...found.querySelectorAll<HTMLButtonElement>(".hotkey-bind-btn")];
@@ -249,6 +249,16 @@ describe("Hotkeys (KEY-01 to KEY-13, MID-08)", () => {
     expect(key.textContent).toBe(platformKey(hk.key || "—"));
     expect(key.disabled).toBe(false);
     expect(midi.disabled).toBe(false);
+  });
+
+  // Acceptance 4, P1-4: a key two actions share says where each one holds.
+  it("labels a shared key's rows with where each applies, and leaves a lone key bare", async () => {
+    await inSettings();
+    const scope = (id: string) => document.querySelector(`[data-testid="hotkey-scope-${id}"]`)?.textContent ?? null;
+    expect(scope("jam-take")).toContain(t("settings.hotkeys.scope.in.jam"));
+    expect(scope("songs-loop-start")).toContain(t("settings.hotkeys.scope.in.songs"));
+    expect(scope("sub-prev")).toBe(" (not in Songs)");
+    expect(scope("toggle-coach")).toBeNull();
   });
 
   it("rebinds a key, and saves it under the action's id", async () => {

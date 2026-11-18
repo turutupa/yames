@@ -321,6 +321,14 @@
         "session-restart": "Isınmada ya da süreli blokta: baştan. Bir kayıttan sonra: aynı kayıt yeniden",
         "session-prev": "Oturumda: bundan önceki bloğa dön",
         "session-watch": "Bir Take'ten önce, sapta: notaları tempoda sırayla yakar ya da durdurur. Ses yok, puan yok"
+      },
+      "scope": {
+        "in": {
+          "jam": "Jam’de",
+          "songs": "Şarkılar’da",
+          "session": "seans sırasında"
+        },
+        "notIn": "{{where}} hariç"
       }
     },
     "inputTest": {

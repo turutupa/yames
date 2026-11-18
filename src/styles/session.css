@@ -2814,6 +2814,50 @@
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-nudges {
     justify-content: flex-end;
   }
+  /* Start spans the column (acceptance 4): the desktop row's
+     "first child takes the slack" margin held it to its text's width. */
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go {
+    margin-right: 0;
+    width: 100%;
+  }
+  /* The input's state and its ways out, at the top of the footer
+     (acceptance 4, P1-3): one line of state, or the reason it would not come
+     on with Check my sound, Choose input and Play without grading, tight
+     enough that the footer stays a footer. Each control a thumb tall. */
+  /* The dot beside the words' first line, never on a line of its own. */
+  .session-go > [data-place="footer"].session-input-note {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0 8px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .session-go > [data-place="footer"].session-input-note > .session-input-dot {
+    margin-top: 4px;
+  }
+  .session-go > [data-place="footer"].session-input-note > .session-link {
+    grid-column: 2;
+    justify-self: start;
+    margin: -4px 0 -10px;
+  }
+  .session-go > [data-place="footer"].session-input-failed {
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+  .session-go > [data-place="footer"].session-input-failed > .session-why {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .session-go > [data-place="footer"] .session-input-actions {
+    gap: 6px 8px;
+  }
+  .session-go > [data-place="footer"] .session-input-actions .session-secondary {
+    font-size: 14px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big {
     box-shadow:
       0 1px 0 var(--l-gloss) inset,

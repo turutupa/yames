@@ -305,6 +305,21 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
 .main-window.is-mobile .session-page .session-bar-left {
   margin-left: auto;
 }
+/* One block, no blocks to show (acceptance 4): the chip left alone on a
+   second row read as a stray. With no pips the first row has the room, so
+   it is Exit, then the clock, the mic and Skip on one line. */
+.main-window.is-mobile .session-page .session-bar:has(> .session-pips:empty) > .session-pips {
+  display: none;
+}
+.main-window.is-mobile .session-page .session-bar:has(> .session-pips:empty) > .session-exit {
+  order: -2;
+}
+.main-window.is-mobile .session-page .session-bar:has(> .session-pips:empty) > .session-bar-left {
+  order: -1;
+}
+.main-window.is-mobile .session-page .session-bar:has(> .session-pips:empty) > .session-input-chip {
+  order: 0;
+}
 .main-window.is-mobile .session-page .session-pips > .session-pip {
   height: 44px;
   margin: 0;

@@ -321,6 +321,14 @@
         "session-restart": "Beim Aufwärmen oder in einem Zeitblock: von vorn. Nach einem Take: derselbe Take nochmal",
         "session-prev": "In einer Session: zurück zum Block davor",
         "session-watch": "Vor einem Take, auf dem Hals: die Töne der Reihe nach im Tempo aufleuchten lassen, oder stoppen. Ohne Ton, ohne Bewertung"
+      },
+      "scope": {
+        "in": {
+          "jam": "im Jam",
+          "songs": "in Songs",
+          "session": "in einer Session"
+        },
+        "notIn": "nicht {{where}}"
       }
     },
     "inputTest": {

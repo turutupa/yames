@@ -321,6 +321,14 @@
         "session-restart": "En un calentamiento o un bloque cronometrado: desde el principio. Tras una toma: la misma toma otra vez",
         "session-prev": "En una sesión: volver al bloque anterior",
         "session-watch": "Antes de una toma, en el mástil: ilumina las notas en orden al tempo, o para. Sin sonido, sin nota"
+      },
+      "scope": {
+        "in": {
+          "jam": "en Jam",
+          "songs": "en Canciones",
+          "session": "en una sesión"
+        },
+        "notIn": "no {{where}}"
       }
     },
     "inputTest": {

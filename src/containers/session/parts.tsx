@@ -157,19 +157,23 @@ export function ReadyInput({
   hasSignal,
   onTestInput,
   onChooseInput,
+  compact = false,
 }: {
   session: SessionRun;
   listening: boolean;
   hasSignal: boolean;
   onTestInput: () => void;
   onChooseInput: () => void;
+  /** In a phone's sticky footer: the same words and ways out, tighter. */
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
   if (run.phase !== "ready") return null;
+  const place = compact ? "footer" : undefined;
   if (run.ungraded) {
     return (
-      <div className="session-input-note" role="status" data-testid="session-ungraded-note">
+      <div className="session-input-note" role="status" data-place={place} data-testid="session-ungraded-note">
         <span className="session-input-dot" data-state="ungraded" aria-hidden="true" />
         <span>{t(run.ungraded === "gradingOff" ? "session.ungraded.readyOff" : "session.ungraded.ready")}</span>
       </div>
@@ -178,7 +182,7 @@ export function ReadyInput({
   if (listening) {
     const device = inputStart.device;
     return (
-      <div className="session-input-note" role="status" data-testid="session-input-on">
+      <div className="session-input-note" role="status" data-place={place} data-testid="session-input-on">
         <span className="session-input-dot" data-state={hasSignal ? "on" : "quiet"} aria-hidden="true" />
         <span>
           {inputStart.fellBack
@@ -192,7 +196,7 @@ export function ReadyInput({
   }
   if (inputStart.status === "failed") {
     return (
-      <div className="session-glass session-card session-input-failed" role="alert" data-testid="session-input-failed">
+      <div className="session-glass session-card session-input-failed" role="alert" data-place={place} data-testid="session-input-failed">
         <div className="session-why session-bad">{t(`session.input.failed.${inputStart.failure ?? "other"}`)}</div>
         <div className="session-input-actions">
           <button className="session-secondary" onClick={onTestInput} data-testid="session-check-sound">
@@ -209,7 +213,7 @@ export function ReadyInput({
     );
   }
   return (
-    <div className="session-input-note" role="status" data-testid="session-no-input">
+    <div className="session-input-note" role="status" data-place={place} data-testid="session-no-input">
       <span className="session-input-dot" data-state="off" aria-hidden="true" />
       <span>
         {inputStart.status === "starting" ? t("session.input.startingLong") : t("session.run.noInput")}

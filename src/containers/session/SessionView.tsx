@@ -32,6 +32,7 @@ import {
   timedTempoLive,
 } from "../../session/runner";
 import type { TakeOutcome } from "../../session/runner";
+import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { Runway } from "./highway/Runway";
@@ -339,6 +340,11 @@ function TakeScreen({
   const running = run.phase === "playing";
   const tabView = session.practiceView === "tab";
   const step = currentStep(run);
+  // On a phone held upright the input's state and its ways out ride in the
+  // sticky footer, above Slower and Faster (acceptance 4, P1-3): under the
+  // page's flow they sat below the fold, behind the footer, and the first
+  // screen showed a Start that would not start with no word of why.
+  const inputInFooter = useMediaQuery(PORTRAIT_PHONE_QUERY) && !running;
   if (!exercise || !take || !step) return null;
 
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
@@ -453,7 +459,7 @@ function TakeScreen({
             </HowLines>
           )}
           <BandVolume session={session} hint={!running} />
-          {!running && (
+          {!running && !inputInFooter && (
             <ReadyInput
               session={session}
               listening={listening}
@@ -479,6 +485,16 @@ function TakeScreen({
             under the button (acceptance P1-5). A plain run of the row on a
             desktop (`display: contents`). */}
         <div className="session-go" data-testid="session-go">
+          {inputInFooter && (
+            <ReadyInput
+              session={session}
+              listening={listening}
+              hasSignal={hasSignal}
+              onTestInput={onTestInput}
+              onChooseInput={onChooseInput}
+              compact
+            />
+          )}
           {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
           {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
               ↑ reloads it, and a disabled button drops the keyboard's focus

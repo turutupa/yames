@@ -4,6 +4,7 @@ import {
   HOTKEYS,
   HOTKEY_GROUPS,
   platformKey,
+  scopeNote,
 } from "../../hotkeys";
 import { formatGamepadButton, isGamepadBinding } from "../../hooks/useGamepad";
 import type { UseMidiReturn } from "../../hooks/useMidi";
@@ -107,13 +108,27 @@ export function HotkeysSettingsSection({
               {items.map((hk) => {
                 const midiBinding = midi.bindings.find((b) => b.action === hk.id);
                 const gamepadBound = footBindings[hk.id];
+                // A key shared with another action says where this row's
+                // meaning holds: "in Jam", "not in Songs" (acceptance 4).
+                const scope = scopeNote(hk.id, keyBindings);
+                const where = (v: string) => t(`settings.hotkeys.scope.in.${v}`);
+                const scopeText = scope
+                  ? scope.kind === "in"
+                    ? where(scope.views[0])
+                    : t("settings.hotkeys.scope.notIn", { where: scope.views.map(where).join(", ") })
+                  : null;
                 return (
                   <div key={hk.id} className="hotkey-row">
                     <span
                       className="hotkey-action"
                       data-tooltip={t(`settings.hotkeys.descs.${hk.id}`)}
                     >
-                      {t(`settings.hotkeys.actions.${hk.id}`)}
+                      <span className="hotkey-action-name">{t(`settings.hotkeys.actions.${hk.id}`)}</span>
+                      {scopeText && (
+                        <span className="hotkey-scope" data-testid={`hotkey-scope-${hk.id}`}>
+                          {" "}({scopeText})
+                        </span>
+                      )}
                     </span>
                     <button
                       className={`hotkey-bind-btn ${bindingFor?.id === hk.id && bindingFor.type === "key" ? "listening" : ""}`}
