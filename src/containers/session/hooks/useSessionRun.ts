@@ -87,7 +87,7 @@ import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
 import { GUITAR_BAND, bandVolumeFor, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
 import type { SongBacking } from "../../../songs/types";
-import { DEFAULT_PRACTICE_VIEW, isPracticeView } from "../highway/runwayModel";
+import { DEFAULT_PRACTICE_VIEW, isPracticeView, nextPracticeView } from "../highway/runwayModel";
 import type { PracticeView } from "../highway/runwayModel";
 import type { TakePlan } from "../../../session/take";
 
@@ -98,6 +98,8 @@ const MINUTES_KEY = "session.minutes";
 const UNSUBSCRIBED_KEY = "session.unsubscribed";
 /** Neck or runway on the Take screen (plans/tasks/mvp/RUNWAY.md). A tester's own A/B switch. */
 const PRACTICE_VIEW_KEY = "practiceView";
+/** The one-time "Switch views any time" hint has been shown and seen. */
+const VIEW_HINT_KEY = "session.viewHintSeen";
 /** How loud the band is under a jam-backed Take, 0..1.5 (0 is the click alone). */
 const BAND_VOLUME_KEY = "session.bandVolume";
 const TICK_MS = 1000;
@@ -229,6 +231,7 @@ export function useSessionRun(input: SessionRunInput) {
   const [progress, setProgress] = useState<PlayerProgress>(NO_PROGRESS);
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
   const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
+  const [viewHintSeen, setViewHintSeen] = useState(false);
   /** The player's band volume, or null for "never set" (the default then depends on the input). */
   const [bandChoice, setBandChoice] = useState<number | null>(null);
   /** The band on the engine now (a Take's, or the finisher's), for live volume moves. */
@@ -311,7 +314,11 @@ export function useSessionRun(input: SessionRunInput) {
       if (PLAN_MINUTES.includes(saved as PlanMinutes)) setMinutesState(saved as PlanMinutes);
     });
     void storeLoad<string>(PRACTICE_VIEW_KEY).then((saved) => {
+      // "tab" is new (2026-11-17); a value this build does not know keeps the default.
       if (isPracticeView(saved)) setPracticeViewState(saved);
+    });
+    void storeLoad<boolean>(VIEW_HINT_KEY).then((seen) => {
+      if (seen === true) setViewHintSeen(true);
     });
     void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
       setBandChoice(readBandVolume(saved));
@@ -350,10 +357,22 @@ export function useSessionRun(input: SessionRunInput) {
     void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
   }, []);
 
-  const setPracticeView = useCallback((next: PracticeView) => {
-    setPracticeViewState(next);
-    void storeSave(PRACTICE_VIEW_KEY, next).catch(() => {});
+  /** The one-time hint is done with: switched once, or read once. */
+  const dismissViewHint = useCallback(() => {
+    setViewHintSeen((seen) => {
+      if (!seen) void storeSave(VIEW_HINT_KEY, true).catch(() => {});
+      return true;
+    });
   }, []);
+
+  const setPracticeView = useCallback(
+    (next: PracticeView) => {
+      setPracticeViewState(next);
+      void storeSave(PRACTICE_VIEW_KEY, next).catch(() => {});
+      dismissViewHint();
+    },
+    [dismissViewHint],
+  );
 
   const myPaths = useMemo(() => playerPaths(paths, progress), [paths, progress]);
 
@@ -380,6 +399,13 @@ export function useSessionRun(input: SessionRunInput) {
   // notes, and still a new Take that has to be loaded before it can start.
   const takeRef = useRef(take);
   takeRef.current = take;
+
+  // The view hint is shown on a warm-up with an Exercise: once one is over, it has been read.
+  const hintPhase = useRef(run.phase);
+  useEffect(() => {
+    if (hintPhase.current === "timed" && run.phase !== "timed" && takeRef.current) dismissViewHint();
+    hintPhase.current = run.phase;
+  }, [run.phase, dismissViewHint]);
   const takeNumber = `${run.stepIndex}|${run.takes}`;
   const prepared = take !== null && preparedTake === takeKey(take, takeNumber);
 
@@ -1054,6 +1080,17 @@ export function useSessionRun(input: SessionRunInput) {
     [begin, progress],
   );
 
+  /**
+   * V on a practice screen: the next of Neck, Runway and Tab. Live in a
+   * warm-up or a timed block while it runs; a graded Take keeps the view it
+   * started with, so V does nothing while one runs.
+   */
+  const cycleView = useCallback(() => {
+    const phase = runRef.current.phase;
+    if (phase !== "ready" && phase !== "timedReady" && phase !== "timed") return;
+    setPracticeView(nextPracticeView(practiceViewRef.current));
+  }, [setPracticeView]);
+
   const exit = useCallback(() => {
     teardown();
     dispatch({ type: "cancel" });
@@ -1067,6 +1104,8 @@ export function useSessionRun(input: SessionRunInput) {
     setMinutes,
     practiceView,
     setPracticeView,
+    viewHintSeen,
+    dismissViewHint,
     bandVolume,
     setBandVolume,
     directInput: input.directInput === true,
@@ -1101,6 +1140,7 @@ export function useSessionRun(input: SessionRunInput) {
       unsubscribe,
       testOut,
       answerFair,
+      cycleView,
     },
   };
 }

@@ -386,7 +386,23 @@
       "label": "Vista de práctica",
       "neck": "Mástil",
       "runway": "Pista",
-      "between": "Cambia de vista entre tomas"
+      "between": "Cambia de vista entre tomas",
+      "tab": "Tablatura",
+      "keyHint": "Cambiar de vista: {{key}}"
+    },
+    "practice": {
+      "next": "siguiente",
+      "then": "luego {{frets}}",
+      "finger": "dedo {{n}}",
+      "start": "empieza aquí",
+      "legendNow": "toca ahora",
+      "legendNext": "siguiente",
+      "legendPlayed": "recién tocada",
+      "beats": "Los pulsos del compás",
+      "hand": "Mano: índice en el traste {{fret}}, un dedo por traste.",
+      "handShifts": "Mano: empieza con el índice en el traste {{fret}}; se desplaza por el mástil.",
+      "handOpen": "Mano: posición abierta, índice sobre el traste 1.",
+      "viewHint": "Cambia de vista cuando quieras"
     },
     "runway": {
       "label": "Las próximas notas, llegando a la línea",
@@ -417,6 +433,10 @@
       "bass": "Las Rutas están escritas para guitarra, por ahora, y hay Rutas de bajo en camino. Las herramientas ya funcionan con el bajo.",
       "openTools": "Abrir las herramientas",
       "change": "Cambiar de instrumento"
+    },
+    "tabstrip": {
+      "label": "Tablatura: {{notes}}",
+      "bar": "compás {{n}}"
     }
   }
 }

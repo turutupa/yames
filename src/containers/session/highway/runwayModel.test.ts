@@ -11,6 +11,7 @@ import {
   isPracticeView,
   laneScale,
   nextOnsetIndex,
+  nextPracticeView,
   runwayModel,
   stripOffset,
 } from "./runwayModel";
@@ -113,10 +114,18 @@ describe("dotOffset and the setting", () => {
     expect(dotOffset(500)).toBe(16);
     expect(dotOffset(Number.NaN)).toBe(0);
   });
-  it("accepts only the two views", () => {
+  it("accepts the three views, and nothing else", () => {
     expect(isPracticeView("neck")).toBe(true);
     expect(isPracticeView("runway")).toBe(true);
-    expect(isPracticeView("tab")).toBe(false);
+    expect(isPracticeView("tab")).toBe(true);
+    // A stored value this build does not know falls back to the default.
+    expect(isPracticeView("highway")).toBe(false);
     expect(isPracticeView(undefined)).toBe(false);
+  });
+
+  it("V goes round the three views", () => {
+    expect(nextPracticeView("neck")).toBe("runway");
+    expect(nextPracticeView("runway")).toBe("tab");
+    expect(nextPracticeView("tab")).toBe("neck");
   });
 });

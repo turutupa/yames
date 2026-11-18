@@ -9,6 +9,7 @@ export const NOOP_STAGE: NeckStage = Object.freeze({
   pluck() {},
   sweep() {},
   setTakeRunning() {},
+  project: () => null,
   is3d: false,
 });
 

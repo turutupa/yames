@@ -102,6 +102,12 @@ if (shot?.stage) {
     .catch((err) => {
       window.__SHOT_ERROR__ = String(err?.message ?? err);
     });
+} else if (shot?.tabstrip) {
+  void import("./tabstrip")
+    .then((m) => m.mountTabStripShot(shot.tabstrip!, theme))
+    .catch((err) => {
+      window.__SHOT_ERROR__ = String(err?.message ?? err);
+    });
 } else if (shot) installShotMock(shot, theme);
 
 /**
@@ -1056,7 +1062,7 @@ async function drive() {
   window.__SHOT_READY__ = true;
 }
 
-if (shot && !shot.stage) {
+if (shot && !shot.stage && !shot.tabstrip) {
   // The neck stage's live controller, for the layout specs that ask what view
   // a screen gave it (the runway's straight-on neck).
   (window as unknown as { __NECK__?: typeof stageDebug }).__NECK__ = stageDebug;

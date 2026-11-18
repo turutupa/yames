@@ -378,7 +378,23 @@
       "label": "Practice view",
       "neck": "Neck",
       "runway": "Runway",
-      "between": "Switch views between Takes"
+      "between": "Switch views between Takes",
+      "tab": "Tab",
+      "keyHint": "Switch views: {{key}}"
+    },
+    "practice": {
+      "next": "next",
+      "then": "then {{frets}}",
+      "finger": "finger {{n}}",
+      "start": "start here",
+      "legendNow": "play now",
+      "legendNext": "next",
+      "legendPlayed": "just played",
+      "beats": "The bar's beats",
+      "hand": "Hand: index finger at fret {{fret}}, one finger per fret.",
+      "handShifts": "Hand: start with the index finger at fret {{fret}}; it moves along the neck.",
+      "handOpen": "Hand: open position, index finger over fret 1.",
+      "viewHint": "Switch views any time"
     },
     "runway": {
       "label": "The next notes, arriving at the line",
@@ -409,6 +425,10 @@
       "bass": "Paths are written for guitar for now, and bass Paths are planned. The tools work for bass today.",
       "openTools": "Open the tools",
       "change": "Change instrument"
+    },
+    "tabstrip": {
+      "label": "Tab: {{notes}}",
+      "bar": "bar {{n}}"
     }
   }
 }

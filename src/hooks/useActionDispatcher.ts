@@ -114,6 +114,8 @@ interface ActionDispatcherArgs {
     pedalPress: () => void;
     /** Leave the Session, as its Exit button does. */
     exit?: () => void;
+    /** Neck, Runway, Tab: the next view (locked while a graded Take runs). */
+    cycleView?: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -292,6 +294,9 @@ export function useActionDispatcher({
             break;
           case "session-pedal":
             sessionActions?.pedalPress();
+            break;
+          case "session-view":
+            sessionActions?.cycleView?.();
             break;
           case "session-exit":
             // Whatever is open over the Session closes first, on its own key

@@ -394,7 +394,23 @@
       "label": "Widok ćwiczenia",
       "neck": "Gryf",
       "runway": "Pas",
-      "between": "Zmieniaj widok między podejściami"
+      "between": "Zmieniaj widok między podejściami",
+      "tab": "Tabulatura",
+      "keyHint": "Zmień widok: {{key}}"
+    },
+    "practice": {
+      "next": "następna",
+      "then": "potem {{frets}}",
+      "finger": "palec {{n}}",
+      "start": "zacznij tutaj",
+      "legendNow": "graj teraz",
+      "legendNext": "następna",
+      "legendPlayed": "właśnie zagrana",
+      "beats": "Miary taktu",
+      "hand": "Ręka: palec wskazujący na progu {{fret}}, jeden palec na próg.",
+      "handShifts": "Ręka: zacznij palcem wskazującym na progu {{fret}}; przesuwa się wzdłuż gryfu.",
+      "handOpen": "Ręka: pozycja otwarta, palec wskazujący nad progiem 1.",
+      "viewHint": "Zmieniaj widok, kiedy chcesz"
     },
     "runway": {
       "label": "Kolejne nuty zbliżające się do linii",
@@ -425,6 +441,10 @@
       "bass": "Ścieżki są na razie pisane na gitarę, a ścieżki na bas są w planach. Narzędzia działają z basem już teraz.",
       "openTools": "Otwórz narzędzia",
       "change": "Zmień instrument"
+    },
+    "tabstrip": {
+      "label": "Tabulatura: {{notes}}",
+      "bar": "takt {{n}}"
     }
   }
 }

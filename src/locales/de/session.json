@@ -378,7 +378,23 @@
       "label": "Übungsansicht",
       "neck": "Hals",
       "runway": "Laufband",
-      "between": "Ansicht zwischen den Takes wechseln"
+      "between": "Ansicht zwischen den Takes wechseln",
+      "tab": "Tab",
+      "keyHint": "Ansicht wechseln: {{key}}"
+    },
+    "practice": {
+      "next": "als Nächstes",
+      "then": "dann {{frets}}",
+      "finger": "Finger {{n}}",
+      "start": "hier beginnen",
+      "legendNow": "jetzt spielen",
+      "legendNext": "als Nächstes",
+      "legendPlayed": "gerade gespielt",
+      "beats": "Die Schläge des Takts",
+      "hand": "Hand: Zeigefinger am {{fret}}. Bund, ein Finger pro Bund.",
+      "handShifts": "Hand: Zeigefinger zuerst am {{fret}}. Bund; sie wandert den Hals entlang.",
+      "handOpen": "Hand: offene Lage, Zeigefinger über dem 1. Bund.",
+      "viewHint": "Ansicht jederzeit wechseln"
     },
     "runway": {
       "label": "Die nächsten Noten, die auf die Linie zulaufen",
@@ -409,6 +425,10 @@
       "bass": "Pfade sind vorerst für Gitarre geschrieben, Pfade für Bass sind geplant. Die Werkzeuge funktionieren schon jetzt mit Bass.",
       "openTools": "Zu den Werkzeugen",
       "change": "Instrument ändern"
+    },
+    "tabstrip": {
+      "label": "Tabulatur: {{notes}}",
+      "bar": "Takt {{n}}"
     }
   }
 }

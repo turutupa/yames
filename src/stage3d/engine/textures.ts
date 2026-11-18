@@ -304,6 +304,9 @@ const NOTE_LOOK: Record<NeckKind, [string, string, string, string]> = {
   clash: ["#ffc2c8", "#ff6474", "#e23c4d", "rgba(255,215,220,.95)"],
   box: ["#3a2c20", "#281d15", "#1a130d", "rgba(205,182,150,.55)"],
   dim: ["#1e1711", "#16100b", "#100b08", "rgba(110,95,80,.55)"],
+  now: ["#ffe2b0", "#ffbc62", "#f0922a", "rgba(255,243,220,1)"],
+  // NEXT is an outline: dark inside, a thick amber ring (see `noteDisc`).
+  next: ["#1d140c", "#1a120b", "#140d08", "#ffb454"],
 };
 
 const discCache = new Map<string, THREE.Texture>();
@@ -324,7 +327,7 @@ export function noteDisc(kind: NeckKind): THREE.Texture {
   g.arc(m, m, S * 0.46, 0, 7);
   g.fill();
   g.strokeStyle = L[3];
-  g.lineWidth = S * 0.022;
+  g.lineWidth = S * (kind === "next" ? 0.075 : kind === "now" ? 0.04 : 0.022);
   g.beginPath();
   g.arc(m, m, S * 0.46, 0, 7);
   g.stroke();

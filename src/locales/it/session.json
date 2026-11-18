@@ -386,7 +386,23 @@
       "label": "Vista di pratica",
       "neck": "Manico",
       "runway": "Pista",
-      "between": "Cambia vista tra una ripresa e l'altra"
+      "between": "Cambia vista tra una ripresa e l'altra",
+      "tab": "Tablatura",
+      "keyHint": "Cambia vista: {{key}}"
+    },
+    "practice": {
+      "next": "dopo",
+      "then": "poi {{frets}}",
+      "finger": "dito {{n}}",
+      "start": "inizia qui",
+      "legendNow": "suona ora",
+      "legendNext": "dopo",
+      "legendPlayed": "appena suonata",
+      "beats": "I movimenti della battuta",
+      "hand": "Mano: indice al tasto {{fret}}, un dito per tasto.",
+      "handShifts": "Mano: inizia con l'indice al tasto {{fret}}; si sposta lungo il manico.",
+      "handOpen": "Mano: posizione aperta, indice sopra il tasto 1.",
+      "viewHint": "Cambia vista quando vuoi"
     },
     "runway": {
       "label": "Le prossime note, in arrivo sulla linea",
@@ -417,6 +433,10 @@
       "bass": "I Percorsi sono scritti per chitarra, per ora, e quelli per basso sono in programma. Gli strumenti funzionano già con il basso.",
       "openTools": "Apri gli strumenti",
       "change": "Cambia strumento"
+    },
+    "tabstrip": {
+      "label": "Intavolatura: {{notes}}",
+      "bar": "battuta {{n}}"
     }
   }
 }

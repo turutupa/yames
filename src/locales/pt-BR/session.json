@@ -386,7 +386,23 @@
       "label": "Visualização do treino",
       "neck": "Braço",
       "runway": "Pista",
-      "between": "Troque a visualização entre os takes"
+      "between": "Troque a visualização entre os takes",
+      "tab": "Tablatura",
+      "keyHint": "Trocar de visualização: {{key}}"
+    },
+    "practice": {
+      "next": "próxima",
+      "then": "depois {{frets}}",
+      "finger": "dedo {{n}}",
+      "start": "comece aqui",
+      "legendNow": "toque agora",
+      "legendNext": "próxima",
+      "legendPlayed": "acabou de tocar",
+      "beats": "Os tempos do compasso",
+      "hand": "Mão: indicador na casa {{fret}}, um dedo por casa.",
+      "handShifts": "Mão: comece com o indicador na casa {{fret}}; ela se move pelo braço.",
+      "handOpen": "Mão: posição aberta, indicador sobre a casa 1.",
+      "viewHint": "Troque de visualização quando quiser"
     },
     "runway": {
       "label": "As próximas notas, chegando à linha",
@@ -417,6 +433,10 @@
       "bass": "As Trilhas são escritas para violão e guitarra, por enquanto, e Trilhas de baixo estão nos planos. As ferramentas já funcionam com baixo.",
       "openTools": "Abrir as ferramentas",
       "change": "Trocar de instrumento"
+    },
+    "tabstrip": {
+      "label": "Tablatura: {{notes}}",
+      "bar": "compasso {{n}}"
     }
   }
 }

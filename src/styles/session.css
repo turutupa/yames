@@ -2150,6 +2150,8 @@
   width: 34px;
   border-right: 1px solid var(--l-line);
 }
+/* A lane per string the Exercise plays on: their tops and heights are set
+   inline (`Runway.tsx`), so one string is one lane, not one of six. */
 .runway-names span {
   position: absolute;
   left: 0;
@@ -2160,12 +2162,6 @@
   font: 700 14px/1 var(--l-display);
   color: var(--lane, var(--l-quiet));
 }
-.runway-names span[data-string="1"] { top: 0; --lane: var(--lane-1); }
-.runway-names span[data-string="2"] { top: calc(100% / 6); --lane: var(--lane-2); }
-.runway-names span[data-string="3"] { top: calc(200% / 6); --lane: var(--lane-3); }
-.runway-names span[data-string="4"] { top: calc(300% / 6); --lane: var(--lane-4); }
-.runway-names span[data-string="5"] { top: calc(400% / 6); --lane: var(--lane-5); }
-.runway-names span[data-string="6"] { top: calc(500% / 6); --lane: var(--lane-6); }
 .runway-lanes {
   position: relative;
   flex: 1 1 auto;
@@ -2360,4 +2356,243 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0 16px;
+}
+
+/* ── The practice screens: one picture, three views (2026-11-17) ──────────
+   The neck as the instruction (NOW, NEXT, the approach ring, the beat dots),
+   the runway, or the tab large. The view switch carries an icon and a word. */
+.session-viewswitch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.session-viewswitch button svg {
+  flex: none;
+}
+.session-viewswitch button[data-on] {
+  background: var(--l-amber);
+  color: #2a1606;
+}
+.session-viewswitch[data-locked] button[data-on] {
+  background: rgba(255, 232, 200, 0.08);
+  color: var(--l-quiet);
+}
+
+/* The neck and its overlay: the slot takes the room, the overlay sits over it
+   and is hung on `project()`, the beat dots and the key under it. */
+.practice-neck {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.practice-neck > .practice-neck-slot {
+  flex: 1 1 0;
+  min-height: 110px;
+}
+.practice-neck-over {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+}
+.practice-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60px;
+  height: 60px;
+  visibility: hidden;
+  border-radius: 50%;
+  border: 3px dashed var(--l-amber);
+  box-shadow: 0 0 22px rgba(255, 180, 84, 0.45);
+  transform: translate(-50%, -50%);
+  opacity: 0.85;
+}
+.practice-ring[data-ready] {
+  border-style: solid;
+  opacity: 0.6;
+}
+.practice-now-tag,
+.practice-next-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  transform: translate(-50%, 0);
+  white-space: nowrap;
+  font: 600 15px/1.15 var(--l-body);
+  color: #ffd9a0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+.practice-now-tag:empty {
+  display: none;
+}
+/* Readable over strings and frets: a dark pill under the words. */
+.practice-now-tag,
+.practice-next-tag {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(14, 9, 6, 0.78);
+}
+.practice-next-tag {
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  color: var(--l-amber);
+}
+.practice-next-tag b {
+  font: 700 14px/1.1 var(--l-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.practice-next-tag [data-then] {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.practice-neck-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 24px;
+  position: relative;
+}
+.practice-beats {
+  display: flex;
+  gap: 12px;
+}
+.practice-beats i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 232, 200, 0.32);
+}
+.practice-beats i[data-on] {
+  background: var(--l-amber);
+  border-color: var(--l-amber);
+  box-shadow: 0 0 12px var(--l-amber);
+}
+.practice-legend {
+  position: absolute;
+  right: 0;
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--l-quiet);
+}
+.practice-legend span::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+.practice-legend [data-k="now"]::before {
+  background: var(--l-amber);
+}
+.practice-legend [data-k="next"]::before {
+  border: 2px solid var(--l-amber);
+  width: 6px;
+  height: 6px;
+}
+.practice-legend [data-k="played"]::before {
+  background: var(--l-tone);
+  opacity: 0.7;
+}
+@media (max-width: 700px) {
+  .practice-legend {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .practice-ring {
+    border-style: solid;
+  }
+}
+
+/* The neck is the hero on the Take and warm-up screens: it takes the room. */
+.session-body > .session-practice-hero {
+  flex: 1 1 0;
+}
+/* The Take's low row with no small tab in it any more: the words alone. */
+.session-mechlow[data-single] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The Tab view: the tab as the picture, large. */
+.practice-tab {
+  flex: 1 1 0;
+  min-height: 150px;
+  display: flex;
+  overflow: hidden;
+  padding: 10px 14px;
+}
+.practice-tab > .session-stage {
+  flex: 1 1 auto;
+  height: auto;
+}
+
+/* The runway in a warm-up: the same lanes, in the slot's place. */
+.session-body[data-view="runway"][data-testid="session-timed"] > .runway {
+  flex: 1 1 0;
+  min-height: 140px;
+}
+
+.practice-hand {
+  color: var(--l-ink);
+}
+.practice-viewhint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.practice-viewhint kbd {
+  padding: 1px 7px;
+  border: 1px solid var(--l-line2);
+  border-radius: 5px;
+  font: 700 13px/1.4 var(--l-display);
+  color: var(--l-ink);
+}
+
+/* Fewer lanes, larger notes, and no taller than the lanes need: three lanes
+   do not stretch into six lanes' height (the designer, 2026-11-17). */
+.runway .runway-note {
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  font-size: 17px;
+}
+/* Not on a phone held upright: there the notes fall down the runway's height. */
+@media (min-width: 701px), (orientation: landscape) {
+  .runway[data-lanes="1"],
+  .runway[data-lanes="2"],
+  .runway[data-lanes="3"] {
+    max-height: calc(var(--lanes, 3) * 78px + 20px);
+  }
+}
+.runway[data-collapsed] .runway-note {
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  font-size: 12px;
+}
+/* A warm-up's count-in: said, but off the neck, which is showing the first note. */
+.session-count[data-small] {
+  inset: auto 0 auto auto;
+  top: 0;
+  padding: 0 4px;
+  font-size: clamp(30px, 5vh, 46px);
+  text-shadow: 0 0 30px rgba(255, 170, 70, 0.55);
+}
+.runway[data-lanes="1"],
+.runway[data-lanes="2"],
+.runway[data-lanes="3"] {
+  margin-block: auto;
 }

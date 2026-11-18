@@ -25,12 +25,18 @@ import {
   stepRemainingMs,
 } from "../../session/runner";
 import type { RunState, TakeOutcome } from "../../session/runner";
-import type { BeatPosition } from "../../songs/position";
-import { ExerciseStage } from "./ExerciseStage";
 import { CoachLine, TempoNudges, bigLabel, timedHowKey } from "./parts";
-import { PracticeViewSwitch, RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
+import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
+import { Runway } from "./highway/Runway";
 import type { SessionRun } from "./hooks/useSessionRun";
-import { exerciseNeck, useNeck3d, useNeckSlot, useNeckTake } from "./hooks/useNeck";
+import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
+import { PracticeViewSwitch } from "./practice/PracticeViewSwitch";
+import { NeckInstruction } from "./practice/NeckInstruction";
+import { PracticeTab } from "./practice/PracticeTab";
+import { HandLine, ViewHint } from "./practice/HandLine";
+import { useWarmupBeat, warmupClockOf } from "./practice/useWarmupBeat";
+import type { PracticeBeat } from "./practice/useWarmupBeat";
+import type { TimingMark } from "../songs/review/marks";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
 import { pickDirectionMatters } from "../../session/caveats";
@@ -131,25 +137,25 @@ function PedalCard() {
 /** Ready and running are one screen: what to play, and how it is going. */
 function TakeScreen({
   session,
-  themeId,
+  beat,
   isPlaying,
   listening,
   hasSignal,
+  viewKey,
   onCheckSound,
 }: {
   session: SessionRun;
-  themeId: string;
+  beat: PracticeBeat | null;
   isPlaying: boolean;
   listening: boolean;
   hasSignal: boolean;
+  viewKey: string;
   onCheckSound: () => void;
 }) {
   const { t } = useTranslation();
   const { run, take, exercise, live, lights, big, prepared, engineTrouble, actions } = session;
   const running = run.phase === "playing";
-  // The Exercise's frets, large; its notes to aim for; each heard note plucked.
-  const slot = useExerciseSlot(session, "aim");
-  useNeckTake(take, lights, running && isPlaying);
+  const tabView = session.practiceView === "tab";
   const step = currentStep(run);
   if (!exercise || !take || !step) return null;
 
@@ -175,7 +181,12 @@ function TakeScreen({
         <h2 className="session-h3">{exercise.title}</h2>
         <ContextLine step={step} />
         <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
-        <PracticeViewSwitch session={session} locked={running} />
+        <PracticeViewSwitch
+          view={session.practiceView}
+          onChange={session.setPracticeView}
+          locked={running}
+          keyLabel={viewKey}
+        />
       </div>
 
       <div className="session-takerow">
@@ -209,23 +220,27 @@ function TakeScreen({
         </div>
       </div>
 
-      <div className="session-slot" ref={slot} aria-hidden="true" />
+      {/* One picture at a time (the owner, 2026-11-16): the neck, numbered
+          before the start and leading note by note while it runs, or the
+          tab, large, its cursor following. Never both. */}
+      {tabView ? (
+        <PracticeTab take={take} running={running} beat={beat} playing={isPlaying} lights={lights} />
+      ) : (
+        <NeckInstruction
+          take={take}
+          running={running}
+          beat={beat}
+          playing={isPlaying}
+          lights={lights}
+          pluck
+          theory={isTheoryTake(session)}
+          className="session-practice-hero"
+        />
+      )}
 
-      <div className="session-mechlow">
-        {/* The tab is for reading the Exercise before it starts; while it
-            runs the neck is the one picture (one pair of eyes). */}
-        {!running && (
-          <div className="session-glass">
-            <ExerciseStage
-              take={take}
-              tick={0}
-              playing={false}
-              themeId={themeId}
-              lights={lights}
-            />
-          </div>
-        )}
+      <div className="session-mechlow" data-single="">
         <div className="session-col">
+          {!running && <HandLine position={exercise.position} />}
           {running && <CoachLine>{exercise.coachLine}</CoachLine>}
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
@@ -600,27 +615,46 @@ export function BandVolume({ session, hint }: { session: SessionRun; hint: boole
  * wait for that press, so the first block of a Session is not already running
  * by the time anyone has read it (owner, 2026-11-17).
  */
+const NO_LIGHTS: ReadonlyMap<number, TimingMark> = new Map();
+
+/** A Take's whole range in ticks: one loop of a finisher, which the engine repeats. */
+function takeTicks(take: NonNullable<SessionRun["take"]>): number {
+  const first = take.score.bars[take.range.startBar];
+  const last = take.score.bars[take.range.endBar];
+  return first && last ? last.startTick + last.lengthTicks - first.startTick : 0;
+}
+
+/** A jam or a ramp: the whole neck at rest, nothing on it to follow. */
+function WholeNeckSlot() {
+  const slot = useNeckSlot(WHOLE, []);
+  return <div className="session-slot" ref={slot} aria-hidden="true" />;
+}
+
 function TimedScreen({
   session,
-  themeId,
   bpmNow,
+  beat,
+  isPlaying,
+  viewKey,
 }: {
   session: SessionRun;
-  themeId: string;
   bpmNow: number;
+  beat: PracticeBeat | null;
+  isPlaying: boolean;
+  viewKey: string;
 }) {
   const { t } = useTranslation();
   const { run, take, big, actions } = session;
   const step = currentStep(run);
   const ready = run.phase === "timedReady";
-  // A warm-up shows its Exercise's frets; a jam or a ramp, the whole neck.
-  // Ready, the neck stays at rest with the notes on it: the camera moves in
-  // on Start, with everything else.
-  const { view, notes } = exerciseNeck(
-    step?.kind === "metronome" ? playedNotes(session) : undefined,
-    "box",
-  );
-  const slot = useNeckSlot(step?.kind === "metronome" && !ready ? view : WHOLE, notes);
+  const running = !ready;
+  // A warm-up plays the click alone, so its position is made from the click's
+  // beats; a finisher loads its Exercise as a song, so the engine reports one.
+  const warmup = step?.kind === "metronome";
+  const finisher = step?.kind === "jam" && !!step.exerciseId;
+  const pattern = (warmup || finisher) && take ? take : null;
+  const warmBeat = useWarmupBeat(warmup ? take : null, beat, running && isPlaying);
+  const position = warmup ? warmBeat : finisher ? beat : null;
   if (!step) return null;
   const kick =
     step.kind === "metronome"
@@ -629,17 +663,25 @@ function TimedScreen({
         ? t(step.exerciseId ? "session.timed.finisherKick" : "session.timed.jamKick")
         : t("session.timed.drillKick");
   const bpm = step.kind === "metronome" ? step.bpm : step.kind === "jam" && step.bpm ? step.bpm : bpmNow;
+  const view = session.practiceView;
+  const countingIn = !!pattern && running && isPlaying && !!position?.songCountIn;
   return (
     <div
       className="session-body"
       data-testid="session-timed"
       data-kind={step.kind}
       data-phase={run.phase}
+      data-view={pattern ? view : undefined}
     >
       <div className="session-takeinfo">
         <span className="session-kick">{kick}</span>
         <h2 className="session-h3">{stepTitle(step, t)}</h2>
         <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
+        {/* Live the whole time: nothing here is graded, so the player may
+            look at it whichever way helps, while it plays. */}
+        {pattern && (
+          <PracticeViewSwitch view={view} onChange={session.setPracticeView} locked={false} keyLabel={viewKey} />
+        )}
       </div>
       <div className="session-takerow">
         <div
@@ -657,14 +699,32 @@ function TimedScreen({
           </div>
         )}
       </div>
-      <div className="session-slot" ref={slot} aria-hidden="true" />
-      {(step.kind === "metronome" || (step.kind === "jam" && step.exerciseId)) && take && (
-        <div className="session-glass">
-          <ExerciseStage take={take} tick={0} playing={false} themeId={themeId} />
-        </div>
+      {!pattern ? (
+        <WholeNeckSlot />
+      ) : view === "tab" ? (
+        <PracticeTab
+          take={pattern}
+          running={running}
+          beat={position}
+          playing={isPlaying}
+          loopTicks={warmup ? warmupClockOf(pattern).passTicks : takeTicks(pattern)}
+        />
+      ) : view === "runway" ? (
+        <Runway take={pattern} beat={position} playing={running && isPlaying} lights={NO_LIGHTS} />
+      ) : (
+        <NeckInstruction
+          take={pattern}
+          running={running}
+          beat={position}
+          playing={isPlaying}
+          theory={isTheoryTake(session)}
+          className="session-practice-hero"
+        />
       )}
       <div className="session-actions">
         {step.kind === "jam" && step.exerciseId && <BandVolume session={session} hint={false} />}
+        {pattern && ready && <HandLine position={pattern.exercise.position} />}
+        {pattern && <ViewHint seen={session.viewHintSeen} keyLabel={viewKey} />}
         {ready ? (
           <>
             <span className="session-why" data-testid="session-timed-how">
@@ -687,6 +747,11 @@ function TimedScreen({
           {bigLabel(big, t)}
         </button>
       </div>
+      {countingIn && (
+        <div className="session-count" role="status" data-testid="session-count" data-small="">
+          {t("session.run.countIn")}
+        </div>
+      )}
     </div>
   );
 }
@@ -838,30 +903,43 @@ function ListeningScreen({ session }: { session: SessionRun }) {
 
 export function SessionView({
   session,
-  themeId,
   beat,
   isPlaying,
   listening,
   hasSignal,
   bpmNow,
+  viewKey = "V",
   onCheckSound,
 }: {
   session: SessionRun;
-  themeId: string;
-  beat: BeatPosition | null;
+  /** The theme. The Session's tab strip draws in its own palette; kept for the caller. */
+  themeId?: string;
+  /** The engine's beat: a Take's position, and the click's own count for a warm-up. */
+  beat: PracticeBeat | null;
   isPlaying: boolean;
   listening: boolean;
   hasSignal: boolean;
   /** The tempo the engine is at, for a ramp that moves it. */
   bpmNow: number;
+  /** The key bound to switching views, as shown. */
+  viewKey?: string;
   onCheckSound: () => void;
 }) {
   const { run, actions } = session;
   const last = run.outcomes[run.outcomes.length - 1];
   const neck3d = useNeck3d();
+  // The Tab view draws no neck: the page keeps its own backdrop then.
+  const step = currentStep(run);
+  const tabShown =
+    session.practiceView === "tab" &&
+    !!session.take &&
+    (run.phase === "ready" ||
+      run.phase === "playing" ||
+      ((run.phase === "timedReady" || run.phase === "timed") &&
+        (step?.kind === "metronome" || (step?.kind === "jam" && !!step.exerciseId))));
 
   return (
-    <div className="session-page session-run" data-testid="session" data-neck3d={neck3d}>
+    <div className="session-page session-run" data-testid="session" data-neck3d={tabShown ? undefined : neck3d}>
       {run.phase !== "recap" && <SessionBar run={run} onExit={actions.exit} />}
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView === "runway" && (
         <RunwayTakeScreen
@@ -870,16 +948,18 @@ export function SessionView({
           isPlaying={isPlaying}
           listening={listening}
           hasSignal={hasSignal}
+          viewKey={viewKey}
           onCheckSound={onCheckSound}
         />
       )}
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView !== "runway" && (
         <TakeScreen
           session={session}
-          themeId={themeId}
+          beat={beat}
           isPlaying={isPlaying}
           listening={listening}
           hasSignal={hasSignal}
+          viewKey={viewKey}
           onCheckSound={onCheckSound}
         />
       )}
@@ -890,7 +970,15 @@ export function SessionView({
         ) : (
           <ResultScreen session={session} />
         ))}
-      {(run.phase === "timedReady" || run.phase === "timed") && <TimedScreen session={session} themeId={themeId} bpmNow={bpmNow} />}
+      {(run.phase === "timedReady" || run.phase === "timed") && (
+        <TimedScreen
+          session={session}
+          bpmNow={bpmNow}
+          beat={beat}
+          isPlaying={isPlaying}
+          viewKey={viewKey}
+        />
+      )}
       {run.phase === "recap" && <RecapScreen session={session} />}
     </div>
   );

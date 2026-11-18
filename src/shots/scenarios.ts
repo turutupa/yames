@@ -94,7 +94,7 @@ export interface Shot {
      * Neck or runway on the Take screen: what the `practiceView` setting holds
      * (plans/tasks/mvp/RUNWAY.md). Absent is the app's default, the neck.
      */
-    practiceView?: "neck" | "runway";
+    practiceView?: "neck" | "runway" | "tab";
     /**
      * Play this Path's first Exercise from its Step page instead of starting
      * Today's plan. The harness makes it runnable for the scene, so a Theory
@@ -426,6 +426,12 @@ export interface Shot {
    * string rings. `?nogl=1` on any of them draws the SVG fallback instead.
    */
   stage?: "whole" | "zoom" | "pluck" | "flat";
+  /**
+   * The Session's tab strip alone (`containers/session/tabstrip/`), in the
+   * chosen theme, drawing a real Exercise from a Path pack. See
+   * `src/shots/tabstrip.tsx` for what each kind holds.
+   */
+  tabstrip?: "preview" | "follow" | "playing" | "dense";
 }
 
 /**
@@ -934,6 +940,62 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 900,
   },
+  // The three views on every practice screen (2026-11-17): a warm-up and a
+  // Take, ready and running, in the Runway and the Tab view.
+  {
+    id: "session-warmup-ready-runway",
+    suffix: "session-warmup-ready-runway",
+    window: "main",
+    session: { seed: "returning", minutes: 10, stop: "timedReady", practiceView: "runway" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-warmup-ready-tab",
+    suffix: "session-warmup-ready-tab",
+    window: "main",
+    session: { seed: "returning", minutes: 10, stop: "timedReady", practiceView: "tab" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-warmup-runway",
+    suffix: "session-warmup-runway",
+    window: "main",
+    session: { seed: "returning", minutes: 10, stop: "timed", practiceView: "runway" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-warmup-tab",
+    suffix: "session-warmup-tab",
+    window: "main",
+    session: { seed: "returning", minutes: 10, stop: "timed", practiceView: "tab" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-ready-tab",
+    suffix: "session-ready-tab",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", practiceView: "tab" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-playing-tab",
+    suffix: "session-playing-tab",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "playing", practiceView: "tab" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
   {
     id: "session-recap",
     suffix: "session-recap",
@@ -1319,6 +1381,11 @@ export const SHOTS: Shot[] = [
   { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
   // The straight-on neck the practice runway sits under (M6).
   { id: "stage-flat", suffix: "stage-flat", window: "main", stage: "flat", width: 1400, height: 900, settleMs: 200 },
+  // The Session's tab strip (mvp-tabstrip): before a Take, and during one.
+  { id: "tabstrip-preview", suffix: "tabstrip-preview", window: "main", tabstrip: "preview", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-follow", suffix: "tabstrip-follow", window: "main", tabstrip: "follow", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-playing", suffix: "tabstrip-playing", window: "main", tabstrip: "playing", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-dense", suffix: "tabstrip-dense", window: "main", tabstrip: "dense", width: 1400, height: 900, settleMs: 100 },
 ];
 
 /**

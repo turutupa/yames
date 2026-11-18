@@ -19,12 +19,23 @@ export const BARS_BEHIND = 1;
 /** The six lanes, string 1 (high e) on top, as in tab and on the straight-on neck. */
 export const STRING_NAMES = ["e", "B", "G", "D", "A", "E"] as const;
 
-export type PracticeView = "neck" | "runway";
-export const PRACTICE_VIEWS: readonly PracticeView[] = ["neck", "runway"];
+/**
+ * What a practice screen shows: the neck, the runway or the tab, one picture at
+ * a time. "tab" arrived 2026-11-17; a stored value from before it (or one this
+ * build does not know) reads as the default, so an old store never breaks.
+ */
+export type PracticeView = "neck" | "runway" | "tab";
+export const PRACTICE_VIEWS: readonly PracticeView[] = ["neck", "runway", "tab"];
 export const DEFAULT_PRACTICE_VIEW: PracticeView = "neck";
 
 export function isPracticeView(v: unknown): v is PracticeView {
-  return v === "neck" || v === "runway";
+  return v === "neck" || v === "runway" || v === "tab";
+}
+
+/** The view after `view`, round the three: what V does. */
+export function nextPracticeView(view: PracticeView): PracticeView {
+  const i = PRACTICE_VIEWS.indexOf(view);
+  return PRACTICE_VIEWS[(i + 1) % PRACTICE_VIEWS.length];
 }
 
 /** One fret-number circle on a lane. Several share an onset in a chord. */
@@ -53,6 +64,16 @@ export type RunwayModel = {
   /** The tightest gap between two onsets, in ticks (0 with fewer than two). */
   minGap: number;
 };
+
+/**
+ * The strings an Exercise plays on, high e first: the runway draws a lane for
+ * these alone (the designer, 2026-11-17: six 100 px lanes with 22 px circles
+ * on one of them read as empty). Every string when the model has no notes.
+ */
+export function usedStrings(model: Pick<RunwayModel, "notes">): number[] {
+  const used = [...new Set(model.notes.map((n) => n.string))].filter((s) => s >= 1 && s <= 6).sort((a, b) => a - b);
+  return used.length > 0 ? used : [1, 2, 3, 4, 5, 6];
+}
 
 /** The closest two circles may sit, centre to centre, before the lane zooms in. */
 export const MIN_NOTE_PX = 32;
