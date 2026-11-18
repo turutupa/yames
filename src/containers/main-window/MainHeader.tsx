@@ -431,6 +431,20 @@ export function MainHeader({
     };
   }, [moreOpen]);
 
+  // The sound picker (the "Drum" / "Click" chip) closes on Escape as the More
+  // menu does, and claims the key the same way. Its outside click is handled
+  // by MainWindow, which owns `soundOpen`; Escape was nobody's (UX audit).
+  useEffect(() => {
+    if (!soundOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      setSoundOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [soundOpen, setSoundOpen]);
+
   return (
     // The header doubles as the window’s drag area on Windows and Linux.
     // A phone has no window to drag.

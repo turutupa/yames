@@ -1,14 +1,24 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { openUrl } from "../../ipc";
 import { IS_BETA, IS_MOBILE, SAYS_WHEN_NEWER } from "../../platform";
 import { NO_ANDROID_BETA, type AndroidBetaUpdate } from "../../beta/useAndroidBetaUpdate";
 
 import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
 import { NEVER_NEWER, type NewerVersion } from "../main-window/hooks/useNewerVersion";
 
+const LICENSE_URL = "https://github.com/turutupa/yames/blob/main/LICENSE";
+
 /**
- * About section — version, update status (with inline install button when an
- * update is available), platform/user-agent, and footer tagline. The parent
- * owns the update lifecycle and passes setters / handlers.
+ * About (settings polish, 2026-11-18): a summary card — the name, the version,
+ * the channel and the updater — then the diagnostics folded away behind
+ * "Technical details" with a copy button, then credits and licences.
+ *
+ * It used to be a table whose loudest row was a raw user-agent string in
+ * monospace: something a musician cannot act on, shown above the one line
+ * they might need. The diagnostics are still one click away, and copy as a
+ * block to paste into a bug report. The parent owns the update lifecycle and
+ * passes setters / handlers.
  */
 export function AboutSection({
   appVersion,
@@ -67,24 +77,31 @@ export function AboutSection({
             </button>
           </div>
         )}
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.version")}</span>
-          <span className="about-value">{appVersion}</span>
-        </div>
-        {/* A test build says so, next to its version, on every platform:
-            "which build are you on" is the first question about a bug. */}
-        {IS_BETA && (
-          <div className="about-row" data-testid="about-channel">
-            <span className="about-label">{t("settings.about.channel")}</span>
-            <span className="about-value">{t("settings.about.channelBeta")}</span>
+        <div className="about-summary">
+          <span className="about-mark" aria-hidden="true">Y</span>
+          <div className="about-summary-text">
+            <span className="about-summary-name">Yames</span>
+            <span className="about-summary-meta">
+              <span className="about-summary-version">
+                {t("settings.about.version")} {appVersion}
+              </span>
+              {/* A test build says so, next to its version, on every
+                  platform: "which build are you on" is the first question
+                  about a bug. */}
+              {IS_BETA ? (
+                <span className="about-channel about-channel-beta" data-testid="about-channel">
+                  {t("settings.about.channelBeta")}
+                </span>
+              ) : (
+                <span className="about-channel">{t("settings.about.channelStable")}</span>
+              )}
+            </span>
           </div>
-        )}
         {/* The Android test build updates itself from the beta feed; a store
             build has the store, and the website's build the line above. */}
         {IS_BETA && IS_MOBILE && (
-          <div className="about-row" data-testid="about-beta-updates">
-            <span className="about-label">{t("settings.about.updates")}</span>
-            <span className="about-value">
+          <div className="about-summary-update" data-testid="about-beta-updates">
+            <span className="about-update-line">
               {androidBeta.status === "checking" && (
                 <span className="update-status">{t("settings.about.checking")}</span>
               )}
@@ -140,9 +157,8 @@ export function AboutSection({
         )}
         {/* The store updates a phone app; there is no in-app check. */}
         {!IS_MOBILE && (
-          <div className="about-row">
-            <span className="about-label">{t("settings.about.updates")}</span>
-            <span className="about-value">
+          <div className="about-summary-update">
+            <span className="about-update-line">
               {/*
                 The row says what is known, and — unless something is actually
                 in flight — offers the check again.
@@ -205,22 +221,16 @@ export function AboutSection({
             they could act on or would paste anywhere. Musicians, not
             developers (mobile plan §1). The version above is the one line
             that matters for "which build am I on", and it stays. */}
-        {!IS_MOBILE && (
-          <>
-            <div className="about-row">
-              <span className="about-label">{t("settings.about.platform")}</span>
-              <span className="about-value">{navigator.platform}</span>
-            </div>
-            <div className="about-row">
-              <span className="about-label">{t("settings.about.userAgent")}</span>
-              <span className="about-value about-value-small">
-                {navigator.userAgent}
-              </span>
-            </div>
-          </>
-        )}
+        </div>
+        {!IS_MOBILE && <TechnicalDetails appVersion={appVersion} />}
       </div>
-      <div className="about-footer-divider"></div>
+      <h3 className="settings-subhead">{t("settings.about.credits")}</h3>
+      <p className="about-license">
+        {t("settings.about.license")}{" "}
+        <button type="button" className="about-inline-link" onClick={() => void openUrl(LICENSE_URL)}>
+          {t("settings.about.licenseLink")}
+        </button>
+      </p>
       {/*
         Where the drums came from. The two recorded kits are other people's
         work under licences that ask to be named, and one of those licences
@@ -242,5 +252,50 @@ export function AboutSection({
         {t("settings.about.madeWith", { heart: "♥" })}
       </p>
     </section>
+  );
+}
+
+/**
+ * Platform and user agent, folded away (desktop only — see the note above
+ * its call). "Copy" puts the three lines on the clipboard as one block, the
+ * way they go into a bug report.
+ */
+function TechnicalDetails({ appVersion }: { appVersion: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const lines = [
+    `Yames ${appVersion}`,
+    `${t("settings.about.platform")}: ${navigator.platform}`,
+    `${t("settings.about.userAgent")}: ${navigator.userAgent}`,
+  ];
+  const copy = () => {
+    void navigator.clipboard
+      ?.writeText(lines.join("\n"))
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1600);
+      })
+      .catch(() => {});
+  };
+  return (
+    <details className="about-tech" data-testid="about-technical">
+      <summary className="about-tech-summary">
+        <svg className="about-tech-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+        {t("settings.about.technical")}
+      </summary>
+      <div className="about-tech-body">
+        <dl className="about-tech-list">
+          <dt>{t("settings.about.platform")}</dt>
+          <dd>{navigator.platform}</dd>
+          <dt>{t("settings.about.userAgent")}</dt>
+          <dd className="about-tech-mono">{navigator.userAgent}</dd>
+        </dl>
+        <button type="button" className="toggle-btn about-tech-copy" onClick={copy}>
+          {copied ? t("tooltip.copied") : t("settings.about.copy")}
+        </button>
+      </div>
+    </details>
   );
 }

@@ -39,7 +39,7 @@ const OPEN_THINGS = [
  */
 const STANDING_DISCLOSURES = ".song-shelf-heading, .jam-now-fretboard";
 
-function somethingOpen(): boolean {
+export function somethingOpen(): boolean {
   if (document.querySelector(OPEN_THINGS)) return true;
   for (const el of document.querySelectorAll('[aria-expanded="true"]')) {
     if (el.closest(".rail") || el.matches(STANDING_DISCLOSURES)) continue;

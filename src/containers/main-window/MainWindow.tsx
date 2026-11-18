@@ -131,7 +131,7 @@ import { ProgressView } from "../session/ProgressView";
 import { ToolsView } from "../session/ToolsView";
 import { LearningNeck } from "../session/NeckGate";
 import { useJamTakes } from "./hooks/useJamTakes";
-import { useToolEscape } from "./hooks/useToolEscape";
+import { somethingOpen, useToolEscape } from "./hooks/useToolEscape";
 /* W32 — the camera comes to Jam. The hook and the preview are eager, like the
    take's machinery is, because they run while a jam is happening; the
    compositor behind "save as a video" is the only lazy thing on this tab. */
@@ -1663,6 +1663,11 @@ export function MainWindow() {
           return;
         }
         if (view === "settings") {
+          // A menu, a dropdown or a dialog standing open is what Escape puts
+          // away first; its own listener does that. This one ran before them
+          // (registered at mount) and left Settings with the language list,
+          // or the header's sound picker, still open over it.
+          if (e.defaultPrevented || somethingOpen()) return;
           e.preventDefault();
           setView(prevTab.current);
           return;
@@ -2568,6 +2573,12 @@ export function MainWindow() {
             inputTestMode={inputTestMode}
             setInputTestMode={setInputTestMode}
             onResetRequest={() => setShowResetConfirm(true)}
+            practice={{
+              minutes: sessionRun.minutes,
+              setMinutes: sessionRun.setMinutes,
+              practiceView: sessionRun.practiceView,
+              setPracticeView: sessionRun.setPracticeView,
+            }}
             shareTooltip={shareTooltip}
             onShareOption={handleShareOption}
           />
@@ -2581,6 +2592,7 @@ export function MainWindow() {
             // missing, until the settings revamp).
             sections={[
               { id: "general", label: t("settings.tabs.general") },
+              { id: "practice", label: t("settings.tabs.practice") },
               { id: "devices", label: t("settings.tabs.devices") },
               // The coach, Songs, the widget and the hotkeys are not on this
               // screen on a phone, so the rail does not point at them.

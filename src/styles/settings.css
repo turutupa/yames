@@ -1023,7 +1023,7 @@
 
 .hotkey-table-header {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 0 6px;
   padding: 8px 12px;
   background: var(--bg-secondary);
@@ -1081,7 +1081,7 @@
 
 .hotkey-row {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 0 6px;
   align-items: center;
   padding: 8px 12px;

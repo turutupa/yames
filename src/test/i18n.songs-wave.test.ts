@@ -487,6 +487,7 @@ const ALLOWED: { key: string; langs: string[]; why: string }[] = [
   { key: "songs.band.drums", langs: ["nl"], why: "matches jam.band.drums, which is Drums in Dutch" },
   { key: "songs.band.keys", langs: ["de"], why: "matches jam.band.keys, which is Keys in German" },
   { key: "nav.songs", langs: ["de"], why: "German rock musicians say Songs" },
+  { key: "settings.hotkeys.actions.tab-5", langs: ["de"], why: "the rail's own name for the tab (nav.songs), which German keeps as Songs" },
   { key: "presets.titleSongs", langs: ["de"], why: "the rail label again" },
   { key: "settings.songs.title", langs: ["de"], why: "the rail label a third time" },
   {

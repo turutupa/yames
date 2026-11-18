@@ -6,6 +6,8 @@
  * Exercises played on it, each with its own evenness trend (UX audit PROG-1).
  * Single series everywhere, so no legends: the heading names each one. The
  * rows are the table view of the same numbers.
+ *
+ * "Export my practice data" lives in Settings › Support.
  */
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,7 +20,6 @@ import { CLEAN_TEMPO_MIN_BARS } from "../../session/grade";
 import type { SessionRun } from "./hooks/useSessionRun";
 import { useNeck3d } from "./hooks/useNeck";
 import { rise } from "./TodayView";
-import { ExportPracticeButton } from "./ExportPracticeButton";
 import "../../styles/session.css";
 
 type Point = { at: number; bpm: number };
@@ -280,10 +281,6 @@ export function ProgressView({ session, onStart }: { session: SessionRun; onStar
             ))}
           </div>
           <p className="session-footnote">{t("session.progress.cleanMeans")}</p>
-          {/* Where it was; whether it moves to Settings is the Settings work's call (PROG-4). */}
-          <div className="session-rise session-prog-export">
-            <ExportPracticeButton />
-          </div>
         </>
       )}
     </div>

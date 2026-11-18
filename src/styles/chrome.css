@@ -748,3 +748,606 @@
 .audio-error-notice-text {
   font-size: 13px;
 }
+
+/* ══ Settings polish (2026-11-18) ═══════════════════════════════════════
+ *
+ * The owner, at 2000px: "If we've got the space, the settings cards should
+ * be wider; some menus are a bit cramped." The column was a fixed 680px
+ * (shell.css), so the long hints wrapped and the selects were squeezed while
+ * a third of the window sat empty. Three things here:
+ *
+ *   1. The column grows with the window, up to 1120px, and always leaves a
+ *      gutter for the section index on the right (`--settings-gutter`).
+ *   2. A row is a label column and a control column. The label keeps a
+ *      reading measure (64ch) however wide the panel gets, so the control
+ *      moves out to the right edge instead of the text running on.
+ *   3. Devices are labelled fields: stacked when the column is narrow, and
+ *      two columns (what it is | the picker, ~440px wide) when there is room.
+ *
+ * And the type: the page wears the THEME's faces, the way the learning
+ * screens do since 2026-11-17 (`session.css`, `--l-*`). It was the only page
+ * left on the fixed Fraunces / Barlow pair. */
+
+:root {
+  /* Room for the section index beside the column: its ticks below 1300px,
+     ticks and names above. */
+  --settings-gutter: 0px;
+}
+
+@media (min-width: 700px) {
+  :root {
+    --settings-gutter: 44px;
+  }
+}
+
+@media (min-width: 1300px) {
+  :root {
+    --settings-gutter: 190px;
+  }
+}
+
+/* The scroller spans the region and its children are capped. shell.css
+   meant the same ("> .view-transition-wrapper { max-width: none }") but
+   lost to its own `> *:not(.main-header):not(.transport)` on specificity,
+   so the scroller itself was 680px and nothing inside could grow. */
+.main-content[data-view="settings"] > .view-transition-wrapper:not(.main-header):not(.transport) {
+  max-width: none;
+}
+
+.main-content[data-view="settings"] > .view-transition-wrapper > * {
+  max-width: min(1120px, max(680px, 100% - 2 * var(--settings-gutter)));
+}
+
+/* The theme's typography, for the page (not for the index beside it, which
+   is chrome and keeps the condensed face it measures its gutter in). */
+.main-content[data-view="settings"] > .view-transition-wrapper {
+  --ui-display: var(--font-display, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --ui-serif: var(--font-heading, Fraunces, Georgia, "Times New Roman", serif);
+  --ui-body: var(--font-body, Inter, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--ui-body);
+}
+
+/* ── Rows: a label column with a measure, a control column ─────────────── */
+
+.main-content[data-view="settings"] .setting-label {
+  flex: 1 1 auto;
+  max-width: 64ch;
+}
+
+.main-content[data-view="settings"] .setting-row > :not(.setting-label) {
+  flex-shrink: 0;
+}
+
+.main-content[data-view="settings"] .lang-select-btn {
+  min-width: 190px;
+}
+
+/* A one-line note under a section's title ("These apply to the tools"). */
+.main-content[data-view="settings"] .settings-section-intro {
+  margin: 0 0 4px;
+  max-width: 64ch;
+  color: var(--text-muted);
+  font: 500 13px/1.45 var(--ui-body);
+}
+
+/* A heading inside a panel, quieter than the panel's own. */
+.main-content[data-view="settings"] .settings-subhead {
+  margin: 22px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ui-line);
+  color: var(--text-secondary);
+  font: 600 13px/1.1 var(--ui-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* A label with a small tag beside it ("Tools only"). */
+.main-content[data-view="settings"] .setting-label-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.main-content[data-view="settings"] .setting-scope-tag {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-line-strong);
+  background: var(--ui-well);
+  color: var(--text-secondary);
+  font: 600 11px/1.3 var(--ui-body);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: help;
+}
+
+/* ── Devices: labelled fields ─────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .devices-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 64ch;
+}
+
+.main-content[data-view="settings"] .devices-field-label .devices-subsection-label {
+  margin-bottom: 0;
+}
+
+.main-content[data-view="settings"] .devices-field-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+/* Every picker fills its row: the instrument was a fixed 220px beside
+   full-width ones. */
+.main-content[data-view="settings"] .devices-field-control .instrument-dropdown {
+  flex: 1;
+  min-width: 0;
+}
+
+.main-content[data-view="settings"] .calibration-cache-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+/* Room for two columns: the field's name and purpose on the left, the
+   picker on the right at a width a device name fits in. */
+@media (min-width: 1440px) {
+  .main-content[data-view="settings"] .midi-device-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 440px);
+    column-gap: 40px;
+    align-items: start;
+  }
+
+  .main-content[data-view="settings"] .devices-field-control {
+    margin-top: 0;
+  }
+}
+
+/* ── Support ──────────────────────────────────────────────────────────── */
+
+/* The one primary action on the panel. */
+.main-content[data-view="settings"] .support-feedback {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 16px;
+  margin: 8px 0 6px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--ui-line));
+  background: color-mix(in srgb, var(--accent) 7%, var(--ui-well));
+}
+
+.main-content[data-view="settings"] .support-feedback-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  align-self: start;
+}
+
+.main-content[data-view="settings"] .support-feedback-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  max-width: 64ch;
+}
+
+.main-content[data-view="settings"] .support-feedback-title {
+  margin: 0;
+  color: var(--text-primary);
+  font: 600 15.5px/1.3 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .support-feedback-blurb {
+  margin: 0;
+  color: var(--text-secondary);
+  font: 500 13.5px/1.45 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .support-feedback-note {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font: 500 12.5px/1.45 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .support-primary-btn {
+  min-height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  font: 650 13.5px/1.2 var(--ui-body);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  transition: filter 0.15s ease;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .support-primary-btn:hover {
+    filter: brightness(1.08);
+  }
+}
+
+.main-content[data-view="settings"] .export-practice-status {
+  color: var(--text-secondary);
+}
+
+.main-content[data-view="settings"] .support-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 10px 0 2px;
+}
+
+.main-content[data-view="settings"] .support-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--ui-line-strong);
+  background: var(--ui-raised);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .support-link:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    background: color-mix(in srgb, var(--accent) 8%, var(--ui-raised));
+  }
+}
+
+.main-content[data-view="settings"] .support-link-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--ui-well);
+  color: var(--text-primary);
+}
+
+.main-content[data-view="settings"] .support-link-heart .support-link-icon {
+  color: #e2557a;
+  background: color-mix(in srgb, #e2557a 14%, var(--ui-well));
+}
+
+.main-content[data-view="settings"] .support-link-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.main-content[data-view="settings"] .support-link-title {
+  font: 600 14px/1.25 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .support-link-hint {
+  color: var(--text-muted);
+  font: 500 12.5px/1.35 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .support-link-out {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.main-content[data-view="settings"] .support-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 6px;
+}
+
+.main-content[data-view="settings"] .support-share-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-line-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 12.5px/1.2 var(--ui-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .support-share-chip:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    color: var(--text-primary);
+  }
+}
+
+.main-content[data-view="settings"] .support-share-chip.copied {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+/* ── About ────────────────────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .about-info {
+  gap: 10px;
+  margin: 8px 0 0;
+}
+
+.main-content[data-view="settings"] .about-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 16px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-well);
+}
+
+.main-content[data-view="settings"] .about-mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  font: 700 24px/1 var(--ui-display);
+}
+
+.main-content[data-view="settings"] .about-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.main-content[data-view="settings"] .about-summary-name {
+  color: var(--text-primary);
+  font: 500 24px/1.1 var(--ui-serif);
+  letter-spacing: -0.01em;
+}
+
+.main-content[data-view="settings"] .about-summary-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  color: var(--text-secondary);
+  font: 500 13.5px/1.3 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-summary-version {
+  font-variant-numeric: tabular-nums;
+}
+
+.main-content[data-view="settings"] .about-channel {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-line-strong);
+  color: var(--text-secondary);
+  font: 600 11.5px/1.3 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-channel-beta {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text-primary);
+}
+
+.main-content[data-view="settings"] .about-summary-update {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.main-content[data-view="settings"] .about-update-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 12px;
+}
+
+.main-content[data-view="settings"] .update-status {
+  color: var(--text-secondary);
+  font: 500 13px/1.3 var(--ui-body);
+}
+
+/* Technical details: folded away, one click and a copy button. */
+.main-content[data-view="settings"] .about-tech {
+  border-radius: 12px;
+  border: 1px solid var(--ui-line);
+}
+
+.main-content[data-view="settings"] .about-tech-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font: 600 13px/1.2 var(--ui-body);
+  border-radius: 12px;
+}
+
+.main-content[data-view="settings"] .about-tech-summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .about-tech-summary:hover {
+    color: var(--text-primary);
+  }
+}
+
+.main-content[data-view="settings"] .about-tech-chevron {
+  transition: transform 0.15s ease;
+}
+
+.main-content[data-view="settings"] .about-tech[open] .about-tech-chevron {
+  transform: rotate(90deg);
+}
+
+.main-content[data-view="settings"] .about-tech-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 0 14px 14px 36px;
+}
+
+.main-content[data-view="settings"] .about-tech-list {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 16px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.main-content[data-view="settings"] .about-tech-list dt {
+  color: var(--text-muted);
+  font: 500 12.5px/1.45 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-tech-list dd {
+  margin: 0;
+  color: var(--text-secondary);
+  font: 500 12.5px/1.45 var(--ui-body);
+  overflow-wrap: anywhere;
+}
+
+.main-content[data-view="settings"] .about-tech-mono {
+  font-family: var(--ui-mono) !important;
+  font-size: 12px !important;
+}
+
+.main-content[data-view="settings"] .about-tech-copy {
+  flex-shrink: 0;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid var(--ui-line-strong);
+  background: var(--ui-raised);
+  color: var(--text-primary);
+  font: 600 12.5px/1.2 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-license {
+  margin: 8px 0 0;
+  max-width: 72ch;
+  color: var(--text-secondary);
+  font: 500 13px/1.5 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-inline-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.main-content[data-view="settings"] .about-sounds {
+  margin: 10px 0 0;
+  max-width: 72ch;
+  text-align: left;
+  font: 500 13px/1.55 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-sounds-title {
+  color: var(--text-secondary);
+  font-weight: 650;
+}
+
+.main-content[data-view="settings"] .about-footer {
+  margin: 0;
+  padding-top: 18px;
+  text-align: left;
+  font: 500 13px/1.4 var(--ui-body);
+}
+
+/* ── Narrow and phone ─────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .main-content[data-view="settings"] .support-feedback {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .main-content[data-view="settings"] .support-primary-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .main-content[data-view="settings"] .about-summary-update {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .main-content[data-view="settings"] .about-update-line {
+    justify-content: flex-start;
+  }
+
+  .main-content[data-view="settings"] .about-tech-body {
+    flex-direction: column;
+    padding-left: 14px;
+  }
+}
+
+/* The index's names, in the gutter the column now leaves for them. */
+@media (min-width: 1300px) {
+  .settings-timeline .stl-tooltip {
+    max-width: calc(var(--settings-gutter) - 48px);
+  }
+}
+
+/* "15 min", not "15 Min": `.toggle-btn` capitalises for its one-word
+   labels, and a unit is not one. */
+.main-content[data-view="settings"] #settings-practice .toggle-btn {
+  text-transform: none;
+}
+
+/* Hotkeys: the action takes the room; a key column only needs a keycap. */
+.main-content[data-view="settings"] .hotkey-table-header,
+.main-content[data-view="settings"] .hotkey-row {
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 180px) minmax(110px, 180px);
+}
+
+/* Room for the longer section names (ru "ГОРЯЧИЕ КЛАВИШИ") where the window
+   has it; the column is at its 1120px cap by then anyway. */
+@media (min-width: 1700px) {
+  :root {
+    --settings-gutter: 230px;
+  }
+}
