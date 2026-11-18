@@ -101,6 +101,31 @@ function SpeakerIcon() {
   );
 }
 
+/**
+ * The click's sound: a metronome, not a speaker. At 1024 px the sound chip
+ * sheds its word and stood as a second speaker beside Vol's (acceptance
+ * pass 2); the two chips must not look alike.
+ */
+function ClickSoundIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 3h6l4 18H5L9 3z" />
+      <path d="M12 16l5-9" />
+      <path d="M7.5 16h9" />
+    </svg>
+  );
+}
+
 function MicIcon({ off = false }: { off?: boolean }) {
   return (
     <svg
@@ -515,7 +540,7 @@ export function MainHeader({
             aria-label={soundName}
             data-tooltip={soundOpen ? undefined : soundName}
           >
-            <SpeakerIcon />
+            <ClickSoundIcon />
             <span className="context-chip-label">{soundName}</span>
           </button>
           {soundOpen && (
