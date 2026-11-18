@@ -523,7 +523,8 @@
       "title": "Rời buổi tập này?",
       "body": "Các lượt chơi đến giờ đã được lưu.",
       "stay": "Tiếp tục",
-      "leave": "Rời đi"
+      "leave": "Rời đi",
+      "bodyNothingSaved": "Chưa có lượt chơi nào, nên chỉ phần đang chạy dừng lại."
     },
     "placement": {
       "result": "Bạn bắt đầu từ Bước {{n}}: {{step}}"

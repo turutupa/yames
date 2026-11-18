@@ -536,7 +536,8 @@
       "title": "¿Salir de esta sesión?",
       "body": "Tus tomas hasta ahora están guardadas.",
       "stay": "Seguir",
-      "leave": "Salir"
+      "leave": "Salir",
+      "bodyNothingSaved": "Aún no hay tomas, así que solo se detiene lo que está sonando."
     },
     "placement": {
       "result": "Empiezas en el paso {{n}}: {{step}}"

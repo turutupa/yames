@@ -523,7 +523,8 @@
       "title": "离开这次练习？",
       "body": "你到目前为止的录音都已保存。",
       "stay": "继续练",
-      "leave": "离开"
+      "leave": "离开",
+      "bodyNothingSaved": "还没有录音，只会停下正在播放的内容。"
     },
     "placement": {
       "result": "你从第 {{n}} 步开始：{{step}}"

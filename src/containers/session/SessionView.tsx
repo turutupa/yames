@@ -1360,7 +1360,7 @@ export function SessionView({
       {run.phase !== "recap" && (
         <SessionBar
           run={run}
-          onExit={actions.exit}
+          onExit={actions.requestExit}
           onSkip={run.phase === "ready" ? actions.next : undefined}
           skipKey={skipKey}
         />

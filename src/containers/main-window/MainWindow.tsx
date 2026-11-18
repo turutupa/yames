@@ -2522,7 +2522,11 @@ export function MainWindow() {
             </div>
           )}
           {sessionRun.leaveAsked && (
-            <LeaveSessionDialog onLeave={sessionRun.actions.exit} onStay={sessionRun.actions.stayInSession} />
+            <LeaveSessionDialog
+              onLeave={sessionRun.actions.exit}
+              onStay={sessionRun.actions.stayInSession}
+              saved={sessionRun.run.outcomes.length > 0}
+            />
           )}
           <SessionView
             session={sessionRun}

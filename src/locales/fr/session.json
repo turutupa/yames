@@ -536,7 +536,8 @@
       "title": "Quitter cette séance ?",
       "body": "Tes prises jusqu’ici sont enregistrées.",
       "stay": "Continuer",
-      "leave": "Quitter"
+      "leave": "Quitter",
+      "bodyNothingSaved": "Pas encore de prise : seul ce qui joue s'arrête."
     },
     "placement": {
       "result": "Tu commences à l’étape {{n}} : {{step}}"

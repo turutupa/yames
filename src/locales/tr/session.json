@@ -523,7 +523,8 @@
       "title": "Bu oturumdan çıkılsın mı?",
       "body": "Şimdiye kadarki kayıtların kaydedildi.",
       "stay": "Devam et",
-      "leave": "Çık"
+      "leave": "Çık",
+      "bodyNothingSaved": "Henüz kayıt yok, yalnızca çalan şey durur."
     },
     "placement": {
       "result": "Adım {{n}}'den başlıyorsun: {{step}}"

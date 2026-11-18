@@ -523,7 +523,8 @@
       "title": "Diese Session verlassen?",
       "body": "Deine bisherigen Takes sind gespeichert.",
       "stay": "Weiterspielen",
-      "leave": "Verlassen"
+      "leave": "Verlassen",
+      "bodyNothingSaved": "Noch keine Takes – nur was gerade läuft, hört auf."
     },
     "placement": {
       "result": "Du startest bei Schritt {{n}}: {{step}}"

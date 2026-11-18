@@ -523,7 +523,8 @@
       "title": "Leave this Session?",
       "body": "Your Takes so far are saved.",
       "stay": "Keep going",
-      "leave": "Leave"
+      "leave": "Leave",
+      "bodyNothingSaved": "No Takes yet, so only what's running stops."
     },
     "placement": {
       "result": "You start at Step {{n}}: {{step}}"

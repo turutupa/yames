@@ -536,7 +536,8 @@
       "title": "Sair desta sessão?",
       "body": "Seus takes até agora estão salvos.",
       "stay": "Continuar",
-      "leave": "Sair"
+      "leave": "Sair",
+      "bodyNothingSaved": "Ainda não há takes, então só o que está tocando para."
     },
     "placement": {
       "result": "Você começa no passo {{n}}: {{step}}"

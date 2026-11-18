@@ -523,7 +523,8 @@
       "title": "離開這次練習？",
       "body": "你到目前為止的錄音都已儲存。",
       "stay": "繼續練",
-      "leave": "離開"
+      "leave": "離開",
+      "bodyNothingSaved": "還沒有錄音，只會停下正在播放的內容。"
     },
     "placement": {
       "result": "你從第 {{n}} 步開始：{{step}}"

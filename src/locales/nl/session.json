@@ -523,7 +523,8 @@
       "title": "Deze sessie verlaten?",
       "body": "Je takes tot nu toe zijn bewaard.",
       "stay": "Doorgaan",
-      "leave": "Verlaten"
+      "leave": "Verlaten",
+      "bodyNothingSaved": "Nog geen takes, dus alleen wat nu loopt stopt."
     },
     "placement": {
       "result": "Je begint bij stap {{n}}: {{step}}"

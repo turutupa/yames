@@ -549,7 +549,8 @@
       "title": "Opuścić tę sesję?",
       "body": "Twoje dotychczasowe podejścia są zapisane.",
       "stay": "Graj dalej",
-      "leave": "Wyjdź"
+      "leave": "Wyjdź",
+      "bodyNothingSaved": "Nie ma jeszcze żadnych podejść, więc zatrzyma się tylko to, co gra."
     },
     "placement": {
       "result": "Zaczynasz od kroku {{n}}: {{step}}"

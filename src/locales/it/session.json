@@ -536,7 +536,8 @@
       "title": "Uscire da questa sessione?",
       "body": "Le tue take finora sono salvate.",
       "stay": "Continua",
-      "leave": "Esci"
+      "leave": "Esci",
+      "bodyNothingSaved": "Ancora nessuna take: si ferma solo quello che sta suonando."
     },
     "placement": {
       "result": "Parti dal passo {{n}}: {{step}}"
