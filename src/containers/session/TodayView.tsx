@@ -103,38 +103,24 @@ function PlanRow({
   const pathTitle = showPath ? pathTitleOf(step, paths) : null;
   const bpm = bpmLine(step);
   const context = step.kind === "exercise" && step.context ? shortContext(step.context) : null;
-  return (
-    <li
-      ref={rowRef}
-      className="session-plan-item session-plan-swap"
-      style={rise(index)}
-      data-kind={rowKind(step, paths)}
-      data-role={roleOf(step)}
-      data-first={index === 0 ? "" : undefined}
-      data-go={onStart ? "" : undefined}
-    >
-      {/* The whole row is the button: one press starts the Session here.
-          Laid over the row rather than wrapped round it, so the row keeps its
-          grid and its words stay text (a button may hold no blocks). */}
-      {onStart && (
-        <button
-          type="button"
-          className="session-plan-go"
-          onClick={onStart}
-          aria-label={t("session.today.startHereLabel", { n: index + 1, title: stepTitle(step, t) })}
-          data-testid={`today-row-${index}`}
-        />
-      )}
+  const look = {
+    style: rise(index),
+    "data-kind": rowKind(step, paths),
+    "data-role": roleOf(step),
+    "data-first": index === 0 ? "" : undefined,
+  };
+  const content = (
+    <>
       <span className="session-plan-dot" aria-hidden="true">
         {index + 1}
       </span>
-      <div className="session-plan-body">
-        <div className="session-plan-title">{stepTitle(step, t)}</div>
-        <div className="session-plan-meta">
+      <span className="session-plan-body">
+        <span className="session-plan-title">{stepTitle(step, t)}</span>
+        <span className="session-plan-meta">
           <span className="session-plan-role">{t(roleKey(step))}</span>
           {pathTitle && <span className="session-plan-path"> · {pathTitle}</span>}
-        </div>
-        <div className="session-why session-plan-why">
+        </span>
+        <span className="session-why session-plan-why">
           {context && (
             <>
               <b className="session-context" data-code={step.kind === "exercise" ? step.context?.code : undefined}>
@@ -143,20 +129,41 @@ function PlanRow({
             </>
           )}
           {lineText(t, shortReason(step, earlier))}
-        </div>
-      </div>
-      <div className="session-plan-side">
-        <div className="session-plan-mins">
+        </span>
+      </span>
+      <span className="session-plan-side">
+        <span className="session-plan-mins">
           {step.minutes}
           <small>{t("session.today.min")}</small>
-        </div>
-        {bpm && <div className="session-plan-bpm">{lineText(t, bpm)}</div>}
-        {onStart && (
-          <div className="session-plan-here" aria-hidden="true">
+        </span>
+        {bpm && <span className="session-plan-bpm">{lineText(t, bpm)}</span>}
+      </span>
+    </>
+  );
+  // The whole row is the button (owner, 2026-11-18): one press starts the
+  // Session at this block. Its words are spans, as a button may hold no blocks.
+  if (onStart) {
+    return (
+      <li ref={rowRef} className="session-plan-row">
+        <button
+          type="button"
+          className="session-plan-item session-plan-swap session-plan-go"
+          {...look}
+          onClick={onStart}
+          aria-label={t("session.today.startHereLabel", { n: index + 1, title: stepTitle(step, t) })}
+          data-testid={`today-row-${index}`}
+        >
+          {content}
+          <span className="session-plan-here" aria-hidden="true">
             {t("session.today.startHere")}
-          </div>
-        )}
-      </div>
+          </span>
+        </button>
+      </li>
+    );
+  }
+  return (
+    <li ref={rowRef} className="session-plan-item session-plan-swap" {...look}>
+      {content}
     </li>
   );
 }

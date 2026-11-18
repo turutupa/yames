@@ -151,3 +151,36 @@ for (const size of SHORT_SIZES) {
     }
   }
 }
+
+/*
+ * Today's rows start the Session there (owner, 2026-11-18): each row is a
+ * button over the whole row, its "Start here" hint shows on hover and stays
+ * inside the row, and pressing the third row opens the third block.
+ */
+for (const size of [...SIZES, { name: "1024", width: 1024, height: 700 }]) {
+  test(`today-returning: every plan row takes a click, and says Start here, at ${size.name}`, async ({ page }) => {
+    await openShot(page, "today-returning", size);
+    expect(await notHitTestable(page, ".session-plan-go")).toEqual([]);
+    const row = page.locator(".session-plan-go").nth(1);
+    await row.scrollIntoViewIfNeeded();
+    await row.hover();
+    const hint = row.locator(".session-plan-here");
+    await expect(hint).toHaveCSS("opacity", "1");
+    const [r, h] = [await row.boundingBox(), await hint.boundingBox()];
+    expect(h!.x + h!.width).toBeLessThanOrEqual(r!.x + r!.width + 1);
+    expect(h!.y + h!.height).toBeLessThanOrEqual(r!.y + r!.height + 1);
+    await noSidewaysScroll(page, `today-returning hovered at ${size.width}px`);
+  });
+}
+
+test("a plan row starts the Session at that block; Start still starts at the first", async ({ page }) => {
+  await openShot(page, "today-returning", { width: 1400, height: 900 });
+  const rows = page.locator(".session-plan-go");
+  const count = await rows.count();
+  expect(count).toBeGreaterThan(1);
+  const at = Math.min(2, count - 1);
+  await rows.nth(at).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(`[data-testid="session-pip-${at}"]`)).toHaveAttribute("aria-current", "step");
+  await expect(page.locator('[data-testid="session-pip-0"]')).not.toHaveAttribute("data-state", /.+/);
+});

@@ -15,7 +15,7 @@ function firstRun(): SessionRun {
     paths: [],
     myPaths: [],
     progress: { states: [], takes: [], ceilings: [] },
-    actions: { startToday: vi.fn() },
+    actions: { startToday: vi.fn(), startTodayAt: vi.fn() },
   } as unknown as SessionRun;
 }
 
@@ -92,14 +92,26 @@ describe("the plan as a list", () => {
     expect(list.getAttribute("role")).toBe("list");
     const rows = [...list.querySelectorAll("li")];
     expect(rows).toHaveLength(4);
-    expect(rows[0].hasAttribute("data-first")).toBe(true);
+    // Each row is a button inside its list item (owner, 2026-11-18).
+    expect(rows[0].querySelector("button.session-plan-item")!.hasAttribute("data-first")).toBe(true);
     expect(rows.map((r) => r.querySelector(".session-plan-dot")!.textContent)).toEqual(["1", "2", "3", "4"]);
     expect(screen.queryByText("4 parts · 15 min")).not.toBeNull();
   });
 
+  it("starts the Session at the row pressed, by click or by key; Start still starts at the first", () => {
+    const session = planned();
+    render(<TodayView session={session} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    const third = screen.getByTestId("today-row-2");
+    expect(third.tagName).toBe("BUTTON");
+    expect(third.getAttribute("aria-label")).toMatch(/^Start the Session at 3: /);
+    fireEvent.click(third);
+    expect(session.actions.startTodayAt).toHaveBeenCalledWith(2);
+    expect(session.actions.startToday).not.toHaveBeenCalled();
+  });
+
   it("puts the tempo on the right, \"60 → 110 BPM\" for placement, and the Path on the meta line", () => {
     render(<TodayView session={planned()} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
-    const rows = [...document.querySelectorAll("li.session-plan-item")];
+    const rows = [...document.querySelectorAll(".session-plan-item")];
     expect(rows[0].querySelector(".session-plan-bpm")!.textContent).toBe("70 BPM");
     expect(rows[1].querySelector(".session-plan-bpm")!.textContent).toBe("60 → 110 BPM");
     // One Path: its name on every row says nothing (UX audit TODAY-6).
@@ -111,7 +123,7 @@ describe("the plan as a list", () => {
     const run = planned();
     const two = { ...run, myPaths: [...run.myPaths, { id: "blues", title: "Blues" }] } as unknown as SessionRun;
     render(<TodayView session={two} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
-    const rows = [...document.querySelectorAll("li.session-plan-item")];
+    const rows = [...document.querySelectorAll(".session-plan-item")];
     expect(rows[1].querySelector(".session-plan-meta")!.textContent).toBe("Find your level · Shred");
   });
 

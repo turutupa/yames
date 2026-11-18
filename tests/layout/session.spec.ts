@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openShot, noSidewaysScroll, insideViewport, notHitTestable, overlapping, spillingLabels } from "./fits";
+import { openShot, noSidewaysScroll, insideViewport, notHitTestable, overlapping, spillingLabels, fitsOnOneLine } from "./fits";
 
 /**
  * The learning side, measured: Today, a Session, Paths and Progress.
@@ -27,6 +27,13 @@ const SCENES = [
   "session-edge",
   "session-edge-result",
   "session-recap",
+  // The input at a Take's ready screen, and a Session played without grading
+  // (owner, 2026-11-18).
+  "session-input-off",
+  "session-input-failed",
+  "session-ungraded-ready",
+  "session-ungraded-result",
+  "session-ungraded-recap",
   "paths",
   "path-alternate",
   "step-detail",
@@ -54,6 +61,11 @@ const BIG: Record<string, string> = {
   "session-no-catch": '[data-testid="session-big"]',
   "session-edge-result": '[data-testid="session-big"]',
   "session-recap": '[data-testid="session-big"]',
+  "session-input-off": '[data-testid="session-big"]',
+  "session-input-failed": '[data-testid="session-big"]',
+  "session-ungraded-ready": '[data-testid="session-big"]',
+  "session-ungraded-result": '[data-testid="session-big"]',
+  "session-ungraded-recap": '[data-testid="session-big"]',
 };
 
 for (const scene of SCENES) {
@@ -192,5 +204,47 @@ test.describe("the fairness question", () => {
     await expect(page.locator('[data-testid="session-edge"][data-done]')).toBeVisible();
     await expect(page.locator('[data-testid="session-fair"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="session-fair"]')).toContainText("climb");
+  });
+});
+
+/*
+ * The Session bar (owner, 2026-11-18): every block a button, Previous beside
+ * Skip, the input's state, and the clock, on one line at 1400 and 1024; a
+ * block takes a click and opens its ready screen, and Previous comes back.
+ */
+test.describe("the Session bar", () => {
+  for (const size of [
+    { name: "1400", width: 1400, height: 900 },
+    { name: "1024", width: 1024, height: 700 },
+  ]) {
+    test(`fits on one line, and every block takes a click, at ${size.name}`, async ({ page }) => {
+      await openShot(page, "session-warmup-ready", size);
+      await noSidewaysScroll(page, `session-warmup-ready at ${size.width}px`);
+      await fitsOnOneLine(page, '[data-testid="session-bar"]', `the Session bar at ${size.width}px`);
+      expect(await notHitTestable(page, ".session-pip")).toEqual([]);
+      expect(await notHitTestable(page, '[data-testid="session-previous"]')).toEqual([]);
+      expect(await notHitTestable(page, '[data-testid="session-input-chip"]')).toEqual([]);
+      // Taller than the 5 px it draws: a pointer finds it.
+      for (const box of await page.locator(".session-pip").evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) {
+        expect(box).toBeGreaterThanOrEqual(20);
+      }
+      // On the first block, Previous says why it does nothing.
+      await expect(page.locator('[data-testid="session-previous"]')).toHaveAttribute("aria-disabled", "true");
+    });
+  }
+
+  test("a block opens its ready screen, and Previous comes back, by mouse and by key", async ({ page }) => {
+    await openShot(page, "session-warmup-ready", { width: 1400, height: 900 });
+    await page.locator('[data-testid="session-pip-1"]').click();
+    await expect(page.locator('[data-testid="session-take"]')).toBeVisible();
+    await expect(page.locator('[data-testid="session-pip-1"]')).toHaveAttribute("aria-current", "step");
+    // The warm-up was left before it was played: skipped, not done.
+    await expect(page.locator('[data-testid="session-pip-0"]')).toHaveAttribute("data-state", "skipped");
+    await page.locator('[data-testid="session-previous"]').click();
+    await expect(page.locator('[data-testid="session-pip-0"]')).toHaveAttribute("aria-current", "step");
+    // Keyboard: a block is focusable and Enter opens it.
+    await page.locator('[data-testid="session-pip-1"]').focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator('[data-testid="session-pip-1"]')).toHaveAttribute("aria-current", "step");
   });
 });

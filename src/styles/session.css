@@ -4441,49 +4441,71 @@ button.session-input-chip:hover {
   min-height: 36px;
 }
 
-/* ══ Today's rows: each starts the Session there (owner, 2026-11-18) ══════ */
-.session-today-plan .session-plan-item[data-go] {
-  position: relative;
-  transition: background 0.14s var(--l-ease, ease);
+/* ══ Today's rows: each starts the Session there (owner, 2026-11-18) ══════
+ * The row is a <button> inside its <li>: every button is its li's first
+ * child, so the hairline between rows is put back on the li's order. */
+.session-plan-row {
+  display: block;
+}
+.session-today-plan .session-plan-row > .session-plan-item {
+  border-top: 1px solid var(--l-line);
+}
+.session-today-plan .session-plan-row:first-child > .session-plan-item {
+  border-top: 0;
 }
 .session-plan-go {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+  position: relative;
   width: 100%;
   margin: 0;
-  padding: 0;
-  border: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
   border-radius: 0;
   background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
+  transition: background 0.14s var(--l-ease, ease);
+}
+.session-plan-go .session-plan-meta,
+.session-plan-go .session-plan-why,
+.session-plan-go .session-plan-side,
+.session-plan-go .session-plan-mins,
+.session-plan-go .session-plan-bpm {
+  display: block;
 }
 .session-plan-go:focus-visible {
   outline: 2px solid var(--l-amber);
   outline-offset: -3px;
   border-radius: 12px;
 }
-.session-today-plan .session-plan-item[data-go]:hover,
-.session-today-plan .session-plan-item[data-go]:has(.session-plan-go:focus-visible) {
+.session-plan-go:hover,
+.session-plan-go:focus-visible {
   background: color-mix(in srgb, var(--l-wash) 6%, transparent);
 }
-.session-plan-item[data-go]:hover .session-plan-dot,
-.session-plan-item[data-go]:has(.session-plan-go:focus-visible) .session-plan-dot {
+.session-plan-go:hover .session-plan-dot,
+.session-plan-go:focus-visible .session-plan-dot {
   border-color: var(--l-amber);
   color: var(--l-amber);
 }
+/* Bottom right, out of the flow: the row is no taller for it. */
 .session-plan-here {
-  margin-top: 6px;
+  position: absolute;
+  right: 18px;
+  bottom: 10px;
   font: 600 12px/1 var(--l-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--l-amber);
   opacity: 0;
   transform: translateX(-4px);
   transition: opacity 0.14s, transform 0.14s;
+  pointer-events: none;
 }
-.session-plan-item[data-go]:hover .session-plan-here,
-.session-plan-item[data-go]:has(.session-plan-go:focus-visible) .session-plan-here {
+.session-plan-go:hover .session-plan-here,
+.session-plan-go:focus-visible .session-plan-here {
   opacity: 1;
   transform: none;
 }
