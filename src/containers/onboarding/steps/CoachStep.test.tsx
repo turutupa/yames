@@ -424,9 +424,10 @@ describe("W7 — the coach row goes live once the step is registered", () => {
         />,
       );
     });
-    const row = screen.getByText("Practice coach").closest("button");
+    // "Coach model", Settings' word, with the tier's name (2026-11-18).
+    const row = screen.getByText("Coach model").closest("button");
     expect(row).not.toBeNull();
-    expect(within(row!).getByText("On")).toBeInTheDocument();
+    expect(within(row!).getByText("Standard")).toBeInTheDocument();
     await click(row!);
     expect(dispatch).toHaveBeenCalledWith({ type: "JUMP", stepId: "coach" });
   });

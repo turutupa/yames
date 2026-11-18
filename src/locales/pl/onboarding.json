@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Zespół gra, ty grasz, a Yames słyszy twoją gitarę. Ćwiczenie, które mieści się w minutach, które masz.",
+      "tagline": "Trener gitary, który słucha. Wybierz ścieżkę, a każda sesja zmieści się w minutach, które masz.",
+      "taglineMobile": "Ćwiczenie na gitarze, które słucha. Wybierz ścieżkę, a każda sesja zmieści się w minutach, które masz.",
       "setup": "Skonfiguruj mnie (około dwóch minut)",
       "skip": "Chcę tylko klik",
       "footer": "Darmowy · lokalny · open source · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "Dźwięk i wygląd",
-      "subtitle": "Najedź na kartę, aby usłyszeć klik lub zobaczyć motyw. Wybierz to, co lubisz.",
-      "subtitleTouch": "Dotknij karty, aby usłyszeć klik albo zobaczyć motyw. Dotknij innej, aby zmienić zdanie.",
+      "subtitle": "Najedź na kartę, aby usłyszeć klik lub zobaczyć motyw. Motyw ubiera Dzisiaj, Ścieżki i gryf.",
+      "subtitleTouch": "Dotknij karty, aby usłyszeć klik albo wypróbować motyw. Motyw ubiera Dzisiaj, Ścieżki i gryf.",
       "soundHeading": "Dźwięk kliknięcia",
       "themeHeading": "Motyw",
       "moreThemes": "Więcej motywów w Ustawieniach"
@@ -49,20 +50,18 @@
       "session": {
         "title": "W sesji",
         "go": "Zacznij lub zakończ podejście: duży przycisk",
-        "faster": "Szybciej, między podejściami",
-        "slower": "Wolniej, między podejściami",
         "next": "Następny krok",
-        "or": "lub"
+        "or": "lub",
+        "tempo": "Szybciej lub wolniej, między podejściami",
+        "view": "Zmień widok: {{neck}}, {{runway}} lub {{tab}}"
       },
       "pedal": {
         "title": "Jeden przełącznik nożny",
         "tools": "Poza sesją stuknięcie uruchamia i zatrzymuje narzędzia."
       },
-      "tools": {
-        "title": "W narzędziach"
-      },
       "nav": {
-        "title": "Poruszanie się"
+        "learning": "Ekrany nauki",
+        "tools": "Narzędzia"
       }
     },
     "coach": {
@@ -84,7 +83,7 @@
         "desc": "Qwen3 8B · ~5 GB pobierania · ~8 GB RAM. Bogatsze uwagi i plany ćwiczeń."
       },
       "studioNeedsRam": "Studio wymaga co najmniej 16 GB RAM — ten komputer ma {{gb}} GB.",
-      "standardNeedsRam": "Mózg Standard wymaga co najmniej 8 GB RAM — ten komputer ma {{gb}} GB.",
+      "standardNeedsRam": "Model Standard wymaga co najmniej 8 GB RAM — ten komputer ma {{gb}} GB.",
       "unavailableInBuild": "Niedostępne w tej kompilacji.",
       "reasonNoLlm": "Ta kompilacja nie uruchomi modelu, więc uczciwym wyborem jest sama informacja o timingu.",
       "reasonLowMemory": "Ten komputer ma {{gb}} GB RAM — za mało, by wygodnie uruchomić model.",
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "Wszystko gotowe",
-      "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",
+      "subtitle": "Twoja pierwsza sesja czeka w Dzisiaj. Zmień coś tutaj albo później w Ustawieniach.",
       "notificationNote": "Przy pierwszym naciśnięciu odtwarzania telefon zapyta, czy Yames może pokazywać powiadomienie — zgódź się, a klik będzie grał dalej przy wygaszonym ekranie.",
       "rows": {
+        "path": "Ścieżka",
         "instrument": "Instrument",
         "sound": "Dźwięk kliknięcia",
         "theme": "Motyw",
         "control": "Sterowanie",
-        "coach": "Trener ćwiczeń",
         "input": "Wejście audio"
       },
       "controlKeyboard": "Klawiatura",
       "controlFootswitch": "Przełącznik nożny",
       "coachTiming": "Tylko informacje o timingu",
-      "coachOn": "Włączony",
       "inputNone": "Nie skonfigurowano",
       "alwaysOnTop": "Zawsze na wierzchu",
       "start": "Przejdź do Dzisiaj",
-      "tour": "Oprowadź mnie (30 s)"
+      "tour": "Oprowadź mnie (30 s)",
+      "moreOnToday": "+{{count}} więcej w Dzisiaj"
     },
     "hints": {
       "dismiss": "Jasne",
@@ -272,6 +271,12 @@
       "back": "Wstecz",
       "close": "Zamknij",
       "alwaysOnTopNote": "Yames pozostaje nad innymi oknami. Zmienisz to w Ustawieniach → Ogólne."
+    },
+    "start": {
+      "title": "Od czego zaczynasz?",
+      "subtitle": "Wybierz ścieżkę i swój poziom. Dzisiaj ułoży z tego pierwszą sesję; oba zmienisz na stronie ścieżki.",
+      "pathHeading": "Ścieżka",
+      "loading": "Wczytywanie ścieżek…"
     }
   },
   "whatsNew": {

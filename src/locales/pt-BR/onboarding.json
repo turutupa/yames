@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Uma banda toca, você toca e o Yames ouve sua guitarra. Prática que cabe nos minutos que você tem.",
+      "tagline": "Um coach de guitarra que escuta. Escolha uma Trilha, e cada sessão cabe nos minutos que você tem.",
+      "taglineMobile": "Prática de guitarra que escuta. Escolha uma Trilha, e cada sessão cabe nos minutos que você tem.",
       "setup": "Configurar (cerca de dois minutos)",
       "skip": "Só me dê o clique",
       "footer": "Grátis · local · código aberto · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "Som e aparência",
-      "subtitle": "Passe o mouse sobre um cartão para ouvir o clique ou ver o tema. Escolha o que gostar.",
-      "subtitleTouch": "Toque em um cartão para ouvir o clique ou testar o tema. Toque em outro para mudar de ideia.",
+      "subtitle": "Passe o mouse sobre um cartão para ouvir o clique ou ver o tema. O tema veste Hoje, as Trilhas e o braço.",
+      "subtitleTouch": "Toque em um cartão para ouvir o clique ou testar o tema. O tema veste Hoje, as Trilhas e o braço.",
       "soundHeading": "Som do clique",
       "themeHeading": "Tema",
       "moreThemes": "Mais temas em Configurações"
@@ -49,20 +50,18 @@
       "session": {
         "title": "Numa Sessão",
         "go": "Começar ou terminar o take: o botão grande",
-        "faster": "Mais rápido, entre takes",
-        "slower": "Mais devagar, entre takes",
         "next": "Próximo passo",
-        "or": "ou"
+        "or": "ou",
+        "tempo": "Mais rápido ou mais lento, entre takes",
+        "view": "Trocar vista: {{neck}}, {{runway}} ou {{tab}}"
       },
       "pedal": {
         "title": "Um pedal só",
         "tools": "Fora de uma Sessão, um toque inicia e para as ferramentas."
       },
-      "tools": {
-        "title": "Nas ferramentas"
-      },
       "nav": {
-        "title": "Navegação"
+        "learning": "Telas de estudo",
+        "tools": "Ferramentas"
       }
     },
     "coach": {
@@ -84,7 +83,7 @@
         "desc": "Qwen3 8B · ~5 GB de download · ~8 GB de RAM. Retorno mais rico e planos de estudo."
       },
       "studioNeedsRam": "O Studio precisa de pelo menos 16 GB de RAM — esta máquina tem {{gb}} GB.",
-      "standardNeedsRam": "O cérebro Standard precisa de pelo menos 8 GB de RAM — esta máquina tem {{gb}} GB.",
+      "standardNeedsRam": "O modelo Padrão precisa de pelo menos 8 GB de RAM — esta máquina tem {{gb}} GB.",
       "unavailableInBuild": "Indisponível nesta build.",
       "reasonNoLlm": "Esta build não consegue rodar um modelo, então o feedback de timing é a escolha honesta.",
       "reasonLowMemory": "Esta máquina tem {{gb}} GB de RAM — pouco para rodar um modelo com folga.",
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "Tudo pronto",
-      "subtitle": "Mude o que quiser aqui, ou depois em Configurações.",
+      "subtitle": "Sua primeira sessão está pronta em Hoje. Mude o que quiser aqui, ou depois em Configurações.",
       "notificationNote": "Na primeira vez que você tocar em play, o telefone vai perguntar se o Yames pode mostrar uma notificação — diga que sim e o clique continua com a tela apagada.",
       "rows": {
+        "path": "Trilha",
         "instrument": "Instrumento",
         "sound": "Som do clique",
         "theme": "Tema",
         "control": "Controle",
-        "coach": "Coach de estudo",
         "input": "Entrada de áudio"
       },
       "controlKeyboard": "Teclado",
       "controlFootswitch": "Pedal",
       "coachTiming": "Apenas feedback de tempo",
-      "coachOn": "Ativado",
       "inputNone": "Não configurada",
       "alwaysOnTop": "Sempre visível",
       "start": "Ir para Hoje",
-      "tour": "Me mostre o app (30 s)"
+      "tour": "Me mostre o app (30 s)",
+      "moreOnToday": "+{{count}} em Hoje"
     },
     "hints": {
       "dismiss": "Entendi",
@@ -272,6 +271,12 @@
       "back": "Voltar",
       "close": "Fechar",
       "alwaysOnTopNote": "O Yames fica acima das outras janelas. Você muda isso em Configurações → Geral."
+    },
+    "start": {
+      "title": "Por onde você começa?",
+      "subtitle": "Escolha uma Trilha e seu nível. Hoje monta sua primeira sessão a partir daí; dá para mudar os dois na página da Trilha.",
+      "pathHeading": "Trilha",
+      "loading": "Carregando as Trilhas…"
     }
   },
   "whatsNew": {

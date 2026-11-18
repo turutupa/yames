@@ -16,6 +16,10 @@ import type {
   BrainTier,
   ModelTier,
 } from "../../types";
+import type { PathDoc } from "../../paths/format";
+import type { SessionPlan } from "../../session/planner";
+import type { PlayerProgress } from "../../session/progress";
+import type { SubscribeRefusal } from "../session/hooks/useSessionRun";
 import type { OnboardingContext, StepId } from "./onboardingMachine";
 
 /**
@@ -76,6 +80,23 @@ export type WizardEvaluationEnv = {
   startError?: string | null;
 };
 
+/**
+ * The learning side, as "Where do you start?" and W7 need it: the app's single
+ * `useSessionRun`, narrowed. The step writes through the same subscribe and
+ * Level logic the Path page uses, so Today and the Path page see the choice
+ * the moment the wizard closes.
+ */
+export type WizardLearningEnv = {
+  /** Every Path the app ships, in the language on screen; empty until loaded. */
+  paths: PathDoc[];
+  /** What the store knows: started Paths, their Levels, Takes. */
+  progress: PlayerProgress;
+  /** Today's plan from the Paths the player follows, or null outside the app. */
+  plan: SessionPlan | null;
+  /** Subscribe to a Path and start it at a Level, in one write. */
+  startPath: (path: PathDoc, level: string | null) => SubscribeRefusal;
+};
+
 export type WizardEnv = {
   /** App version, for the W0 footer. */
   appVersion: string;
@@ -108,6 +129,9 @@ export type WizardEnv = {
   // --- Practice coach (W4) --------------------------------------------------
   /** Facts and hand-offs for the coach step; see `WizardCoachEnv`. */
   coach: WizardCoachEnv;
+
+  // --- Where do you start? + W7's first Session ----------------------------
+  learning: WizardLearningEnv;
 
   // --- Audio input + "hear it work" (W5/W6) ---------------------------------
   /** The app's evaluation hook, narrowed; see `WizardEvaluationEnv`. */

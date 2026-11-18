@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Una banda toca, tú tocas y Yames escucha tu guitarra. Práctica que cabe en los minutos que tienes.",
+      "tagline": "Un coach de guitarra que escucha. Elige una Ruta y cada Sesión cabe en los minutos que tienes.",
+      "taglineMobile": "Práctica de guitarra que escucha. Elige una Ruta y cada Sesión cabe en los minutos que tienes.",
       "setup": "Configurarlo (unos dos minutos)",
       "skip": "Solo dame el clic",
       "footer": "Gratis · local · código abierto · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "Sonido y aspecto",
-      "subtitle": "Pasa por encima de una tarjeta para oír el clic o ver el tema. Elige lo que te guste.",
-      "subtitleTouch": "Toca una tarjeta para oír el clic o probar el tema. Toca otra para cambiar de idea.",
+      "subtitle": "Pasa por encima de una tarjeta para oír el clic o ver el tema. El tema viste Hoy, las Rutas y el mástil.",
+      "subtitleTouch": "Toca una tarjeta para oír el clic o probar el tema. El tema viste Hoy, las Rutas y el mástil.",
       "soundHeading": "Sonido del clic",
       "themeHeading": "Tema",
       "moreThemes": "Más temas en Ajustes"
@@ -49,20 +50,18 @@
       "session": {
         "title": "En una Sesión",
         "go": "Empezar o terminar la toma: el botón grande",
-        "faster": "Más rápido, entre tomas",
-        "slower": "Más lento, entre tomas",
         "next": "Siguiente paso",
-        "or": "o"
+        "or": "o",
+        "tempo": "Más rápido o más lento, entre tomas",
+        "view": "Cambiar vista: {{neck}}, {{runway}} o {{tab}}"
       },
       "pedal": {
         "title": "Un solo pedal",
         "tools": "Fuera de una Sesión, un toque inicia y detiene las herramientas."
       },
-      "tools": {
-        "title": "En las herramientas"
-      },
       "nav": {
-        "title": "Moverte por la app"
+        "learning": "Pantallas de aprendizaje",
+        "tools": "Herramientas"
       }
     },
     "coach": {
@@ -84,7 +83,7 @@
         "desc": "Qwen3 8B · ~5 GB de descarga · ~8 GB de RAM. Feedback más rico y planes de práctica."
       },
       "studioNeedsRam": "Studio necesita al menos 16 GB de RAM; este equipo tiene {{gb}} GB.",
-      "standardNeedsRam": "El cerebro Standard necesita al menos 8 GB de RAM; este equipo tiene {{gb}} GB.",
+      "standardNeedsRam": "El modelo Estándar necesita al menos 8 GB de RAM; este equipo tiene {{gb}} GB.",
       "unavailableInBuild": "No disponible en esta compilación.",
       "reasonNoLlm": "Esta compilación no puede ejecutar un modelo, así que el feedback de timing es la opción honesta.",
       "reasonLowMemory": "Este equipo tiene {{gb}} GB de RAM: no bastan para mover un modelo con soltura.",
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "Todo listo",
-      "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",
+      "subtitle": "Tu primera Sesión te espera en Hoy. Cambia lo que quieras aquí o luego en Ajustes.",
       "notificationNote": "La primera vez que pulses play, el teléfono te preguntará si Yames puede mostrar una notificación: dile que sí y el clic seguirá sonando con la pantalla apagada.",
       "rows": {
+        "path": "Ruta",
         "instrument": "Instrumento",
         "sound": "Sonido del clic",
         "theme": "Tema",
         "control": "Control",
-        "coach": "Entrenador de práctica",
         "input": "Entrada de audio"
       },
       "controlKeyboard": "Teclado",
       "controlFootswitch": "Pedal",
       "coachTiming": "Solo feedback de tiempo",
-      "coachOn": "Activado",
       "inputNone": "Sin configurar",
       "alwaysOnTop": "Siempre visible",
       "start": "Ir a Hoy",
-      "tour": "Enséñame la app (30 s)"
+      "tour": "Enséñame la app (30 s)",
+      "moreOnToday": "+{{count}} más en Hoy"
     },
     "hints": {
       "dismiss": "Entendido",
@@ -272,6 +271,12 @@
       "back": "Atrás",
       "close": "Cerrar",
       "alwaysOnTopNote": "Yames se mantiene sobre las demás ventanas. Puedes cambiarlo en Ajustes → General."
+    },
+    "start": {
+      "title": "¿Por dónde empiezas?",
+      "subtitle": "Elige una Ruta y tu nivel. Hoy arma tu primera Sesión a partir de ahí; puedes cambiar ambos en la página de la Ruta.",
+      "pathHeading": "Ruta",
+      "loading": "Cargando las Rutas…"
     }
   },
   "whatsNew": {

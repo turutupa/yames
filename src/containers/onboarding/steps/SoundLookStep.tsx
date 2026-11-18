@@ -26,6 +26,8 @@ import { IS_MOBILE } from "../../../platform";
 import { getThemeById } from "../../../themes";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
+import { ThemePreview } from "./ThemePreview";
+import "../../../styles/onboarding-learning.css";
 
 /** The three themes W2 offers; the other eight live in Settings → Appearance. */
 export const CURATED_THEME_IDS = ["obsidian", "aurora", "ivory"] as const;
@@ -53,7 +55,9 @@ type Choice = { sound: string; theme: string | null };
 
 export function SoundLookStep({ isActive }: WizardStepProps) {
   const { t } = useTranslation();
-  const { soundType, themeId, startSoftClick, openThemeSettings } = useWizardEnv();
+  const { soundType, themeId, startSoftClick, openThemeSettings, learning } = useWizardEnv();
+  // The theme under the pointer or focus, for the preview card; null = the chosen one.
+  const [hoveredTheme, setHoveredTheme] = useState<string | null>(null);
 
   // What the app was set to on the way in, and what a pick has confirmed
   // since. Captured once: `soundType` / `themeId` follow every preview, so
@@ -72,6 +76,10 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   // What the engine is actually set to right now (preview included), so a
   // revert only fires when something really changed.
   const appliedRef = useRef({ sound: soundType, theme: themeId });
+  // The theme the window had on the way in. A theme outside the three offered
+  // here (Ember, say) is never "confirmed" by this step, so a hover preview
+  // must still go back to it: before, hovering Ivory over Ember stuck.
+  const enteredThemeRef = useRef(themeId);
   // One timer per column, never one shared: moving the mouse off a sound card
   // and onto a theme card would otherwise cancel the sound's pending rollback
   // and leave the click stuck on a preview the user never picked.
@@ -140,7 +148,8 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
         if (ref.current !== null) clearTimeout(ref.current);
         ref.current = null;
       }
-      const { sound, theme } = confirmedRef.current;
+      const { sound } = confirmedRef.current;
+      const theme = confirmedRef.current.theme ?? enteredThemeRef.current;
       if (appliedRef.current.sound !== sound) {
         appliedRef.current.sound = sound;
         void setSoundType(sound);
@@ -158,7 +167,10 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
     [schedule, pushSound],
   );
   const previewTheme = useCallback(
-    (id: string) => schedule(themeTimerRef, () => pushTheme(id)),
+    (id: string) => {
+      setHoveredTheme(id);
+      schedule(themeTimerRef, () => pushTheme(id));
+    },
     [schedule, pushTheme],
   );
   const revertSound = useCallback(
@@ -166,11 +178,13 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
     [schedule, pushSound],
   );
   const revertTheme = useCallback(
-    () =>
+    () => {
+      setHoveredTheme(null);
       schedule(themeTimerRef, () => {
-        const theme = confirmedRef.current.theme;
+        const theme = confirmedRef.current.theme ?? enteredThemeRef.current;
         if (theme) pushTheme(theme);
-      }),
+      });
+    },
     [schedule, pushTheme],
   );
 
@@ -287,6 +301,11 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
               );
             })}
           </div>
+          {/* What the theme does: the learning side, in it (the wizard keeps its own look). */}
+          <ThemePreview
+            themeId={hoveredTheme ?? confirmed.theme ?? themeId}
+            plan={learning.plan}
+          />
           {openThemeSettings && (
             <button
               type="button"

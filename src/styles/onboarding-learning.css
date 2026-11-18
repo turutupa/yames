@@ -1,0 +1,326 @@
+/* ============ The wizard's learning-side pieces (2026-11-18) ============
+ *
+ * "Where do you start?", W2's theme preview and W7's first Session. Kept out
+ * of onboarding.css so the selectable cards' shared rules there stay one
+ * owner's. Every colour here is the wizard's own token (onboarding.css sets
+ * all of them on the overlay), except inside `.onboarding-theme-preview`,
+ * which wears the previewed theme's tokens inline.
+ */
+
+/* ---- Where do you start? ---- */
+.onboarding-start {
+  display: flex;
+  flex-direction: column;
+}
+.onboarding-start-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.onboarding-start-paths {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.onboarding-start-path {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+/* Five cards in two columns: the last one spans both, so no hole is left. */
+.onboarding-start-path:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+@media (hover: hover) {
+  .onboarding-start-path:hover {
+    border-color: var(--accent);
+  }
+}
+.onboarding-start-path:focus-visible,
+.onboarding-start-level:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.onboarding-start-path.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.onboarding-start-path-title {
+  font: 600 19px/1.1 var(--l-display, inherit);
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+.onboarding-start-path.selected .onboarding-start-path-title {
+  color: var(--accent);
+}
+.onboarding-start-path-goal {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.onboarding-start-levels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+}
+.onboarding-start-level {
+  min-width: 0;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 16px/1.1 var(--l-display, inherit);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .onboarding-start-level:hover {
+    color: var(--text-primary);
+  }
+}
+.onboarding-start-level.selected {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.onboarding-start-about {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.onboarding-start-about-who {
+  color: var(--text-primary);
+}
+.onboarding-start-loading,
+.onboarding-start-cap {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.onboarding-start-cap {
+  color: var(--l-clash, var(--text-primary));
+}
+
+@media (max-width: 520px) {
+  .onboarding-start-paths {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .onboarding-start-path-goal {
+    -webkit-line-clamp: 1;
+  }
+}
+@media (pointer: coarse) {
+  .onboarding-start-path,
+  .onboarding-start-level {
+    min-height: 44px;
+  }
+}
+
+/* ---- W2: what the theme does to the learning side ---- */
+.onboarding-theme-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body, inherit);
+  overflow: hidden;
+  transition: background 160ms ease;
+}
+.onboarding-theme-preview-today {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border);
+  background: var(--bg-card-solid, var(--bg-card));
+}
+.onboarding-theme-preview-kick {
+  font: 600 10px/1.1 var(--font-display, inherit);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.onboarding-theme-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--text-primary);
+  min-width: 0;
+}
+.onboarding-theme-preview-row span:nth-child(2) {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.onboarding-theme-preview-dot {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 600 11px/1 var(--font-num, inherit);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.onboarding-theme-preview-row[data-first] .onboarding-theme-preview-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.onboarding-theme-preview-min {
+  flex: 0 0 auto;
+  font: 600 12px/1 var(--font-num, inherit);
+  color: var(--text-secondary);
+}
+.onboarding-theme-preview-neck {
+  height: 86px;
+}
+.onboarding-theme-preview-neck .neck-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- W7: the first Session, as Today will show it ---- */
+.onboarding-first-session {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.onboarding-first-session-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.onboarding-first-session-title {
+  font: 600 13px/1.1 var(--l-display, inherit);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.onboarding-first-session-total {
+  font: 600 15px/1.1 var(--l-display, inherit);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.onboarding-first-session ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.onboarding-first-session li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+.onboarding-first-session-dot {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  font: 600 12px/1 var(--l-display, inherit);
+  color: var(--text-secondary);
+}
+.onboarding-first-session li:first-child .onboarding-first-session-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.onboarding-first-session-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.onboarding-first-session-min {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.onboarding-first-session-more {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* ---- W3: getting around, one quiet line under the cards ---- */
+.onboarding-hf-nav {
+  margin: 2px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+.onboarding-hf-nav-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.onboarding-hf-nav-sep {
+  margin-right: 4px;
+}
+.onboarding-first-session-role {
+  color: var(--text-tertiary);
+}

@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Ban nhạc chơi, bạn chơi, và Yames nghe tiếng guitar của bạn. Luyện tập vừa với số phút bạn có.",
+      "tagline": "Một huấn luyện viên guitar biết lắng nghe. Chọn một Lộ trình, mỗi buổi tập vừa với số phút bạn có.",
+      "taglineMobile": "Luyện guitar biết lắng nghe. Chọn một Lộ trình, mỗi buổi tập vừa với số phút bạn có.",
       "setup": "Thiết lập (khoảng hai phút)",
       "skip": "Chỉ cần tiếng click",
       "footer": "Miễn phí · cục bộ · mã nguồn mở · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "Âm thanh và giao diện",
-      "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Chọn cái bạn thích.",
-      "subtitleTouch": "Chạm vào một thẻ để nghe tiếng gõ hoặc thử giao diện. Chạm thẻ khác nếu bạn đổi ý.",
+      "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Giao diện khoác lên Hôm nay, các Lộ trình và cần đàn.",
+      "subtitleTouch": "Chạm vào một thẻ để nghe tiếng gõ hoặc thử giao diện. Giao diện khoác lên Hôm nay, các Lộ trình và cần đàn.",
       "soundHeading": "Âm thanh click",
       "themeHeading": "Giao diện",
       "moreThemes": "Thêm giao diện trong Cài đặt"
@@ -49,20 +50,18 @@
       "session": {
         "title": "Trong Buổi tập",
         "go": "Bắt đầu hoặc kết thúc lượt chơi: nút lớn",
-        "faster": "Nhanh hơn, giữa các lượt",
-        "slower": "Chậm hơn, giữa các lượt",
         "next": "Bước tiếp theo",
-        "or": "hoặc"
+        "or": "hoặc",
+        "tempo": "Nhanh hơn hoặc chậm hơn, giữa các lượt",
+        "view": "Đổi chế độ xem: {{neck}}, {{runway}} hoặc {{tab}}"
       },
       "pedal": {
         "title": "Một bàn đạp",
         "tools": "Ngoài Buổi tập, nhấn một lần để phát hoặc dừng công cụ."
       },
-      "tools": {
-        "title": "Trong các công cụ"
-      },
       "nav": {
-        "title": "Di chuyển"
+        "learning": "Màn hình học",
+        "tools": "Công cụ"
       }
     },
     "coach": {
@@ -84,7 +83,7 @@
         "desc": "Qwen3 8B · tải ~5 GB · ~8 GB RAM. Nhận xét sâu hơn và kế hoạch luyện tập."
       },
       "studioNeedsRam": "Studio cần ít nhất 16 GB RAM — máy này có {{gb}} GB.",
-      "standardNeedsRam": "Bộ não Standard cần ít nhất 8 GB RAM — máy này có {{gb}} GB.",
+      "standardNeedsRam": "Mô hình Tiêu chuẩn cần ít nhất 8 GB RAM — máy này có {{gb}} GB.",
       "unavailableInBuild": "Không có trong bản dựng này.",
       "reasonNoLlm": "Bản dựng này không chạy được mô hình, nên chỉ phản hồi nhịp là lựa chọn trung thực.",
       "reasonLowMemory": "Máy này có {{gb}} GB RAM — không đủ để chạy mô hình thoải mái.",
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "Đã sẵn sàng",
-      "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "subtitle": "Buổi tập đầu tiên đã sẵn sàng ở Hôm nay. Thay đổi tại đây, hoặc sau này trong Cài đặt.",
       "notificationNote": "Lần đầu bạn nhấn phát, điện thoại sẽ hỏi Yames có được hiện thông báo không — hãy đồng ý để tiếng gõ vẫn chạy khi tắt màn hình.",
       "rows": {
+        "path": "Lộ trình",
         "instrument": "Nhạc cụ",
         "sound": "Âm thanh click",
         "theme": "Giao diện",
         "control": "Điều khiển",
-        "coach": "Huấn luyện viên luyện tập",
         "input": "Đầu vào âm thanh"
       },
       "controlKeyboard": "Bàn phím",
       "controlFootswitch": "Bàn đạp",
       "coachTiming": "Chỉ phản hồi về nhịp",
-      "coachOn": "Bật",
       "inputNone": "Chưa thiết lập",
       "alwaysOnTop": "Luôn ở trên cùng",
       "start": "Đến Hôm nay",
-      "tour": "Giới thiệu nhanh (30 giây)"
+      "tour": "Giới thiệu nhanh (30 giây)",
+      "moreOnToday": "Thêm {{count}} mục ở Hôm nay"
     },
     "hints": {
       "dismiss": "Đã hiểu",
@@ -272,6 +271,12 @@
       "back": "Quay lại",
       "close": "Đóng",
       "alwaysOnTopNote": "Yames luôn nằm trên các cửa sổ khác. Bạn đổi được trong Cài đặt → Chung."
+    },
+    "start": {
+      "title": "Bạn bắt đầu từ đâu?",
+      "subtitle": "Chọn một Lộ trình và cấp độ. Hôm nay sẽ dựng buổi tập đầu tiên từ đó; đổi cả hai trong trang Lộ trình.",
+      "pathHeading": "Lộ trình",
+      "loading": "Đang tải các Lộ trình…"
     }
   },
   "whatsNew": {

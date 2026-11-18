@@ -14,7 +14,8 @@
  *               `footBindings` while `midi.learnMode` is on). On the Session it
  *               is tap / double / hold; everywhere else the dispatcher treats a
  *               press as Play/Stop, so the tools keep their pedal.
- *   In the tools — tempo and coach keys, folded away.
+ *   Getting around — the learning screens' and the tools' keys, on one
+ *               quiet line under the rest.
  *
  * The step deliberately owns no MIDI state of its own: it drives the app's
  * single `useMidi` instance (through the wizard env) so a binding made here is
@@ -30,6 +31,7 @@ import { storeLoad } from "../../../ipc";
 import type { MidiBinding } from "../../../types";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
+import "../../../styles/onboarding-learning.css";
 
 /** The action a single footswitch maps to: the Session's one-pedal action. */
 export const PEDAL = "session-pedal";
@@ -38,31 +40,40 @@ export const PEDAL = "session-pedal";
  * The Session's keys, in the order a player meets them. Each row lists the
  * actions whose keys it shows; a row with two shows "A or B".
  */
-const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[] }> = [
-  { key: "go", actions: ["play", "session-go"] },
-  { key: "faster", actions: ["session-faster"] },
-  { key: "slower", actions: ["session-slower"] },
-  { key: "next", actions: ["session-next"] },
+const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[]; label: string }> = [
+  { key: "go", actions: ["play", "session-go"], label: "onboarding.handsFree.session.go" },
+  { key: "pause", actions: ["session-pause"], label: "settings.hotkeys.actions.session-pause" },
+  { key: "restart", actions: ["session-restart"], label: "settings.hotkeys.actions.session-restart" },
+  { key: "next", actions: ["session-next"], label: "onboarding.handsFree.session.next" },
+  { key: "tempo", actions: ["session-faster", "session-slower"], label: "onboarding.handsFree.session.tempo" },
+  { key: "view", actions: ["session-view"], label: "onboarding.handsFree.session.view" },
+  { key: "exit", actions: ["session-exit"], label: "settings.hotkeys.actions.session-exit" },
 ];
-
-/** The tools' everyday keys, secondary now. Labels come from Settings → Hotkeys. */
-const TOOL_ACTIONS: HotkeyAction[] = ["play", "bpm-up", "bpm-down", "toggle-coach"];
 
 /**
- * Getting around (2026-11-17): the learning side on ⌘1–⌘4, the tools on
- * ⌥1–⌥5, read from the same bindings as everything else on this step.
+ * Getting around, on one quiet line (2026-11-18): the learning screens on
+ * ⌘1–⌘4 and the tools on ⌥1–⌥5, read from the same bindings as the rows above.
  */
-const NAV_ACTIONS: HotkeyAction[] = [
-  "tab-today",
-  "tab-paths",
-  "tab-progress",
-  "tab-tools",
-  "tab-1",
-  "tab-2",
-  "tab-3",
-  "tab-4",
-  "tab-5",
+const NAV_GROUPS: Array<{ key: string; actions: HotkeyAction[] }> = [
+  { key: "learning", actions: ["tab-today", "tab-paths", "tab-progress", "tab-tools"] },
+  { key: "tools", actions: ["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"] },
 ];
+
+/**
+ * A run of keys as one keycap when it is one (`Ctrl 1–4`): the same modifiers
+ * on every key and consecutive digits. Anything remapped out of that shape is
+ * listed key by key, so the line never claims a range the player does not have.
+ */
+export function keyRange(combos: string[][]): string[][] {
+  const bound = combos.filter((c) => c.length > 0);
+  if (bound.length < 2 || bound.length !== combos.length) return bound;
+  const mods = bound[0].slice(0, -1).join("+");
+  const digits = bound.map((c) => Number(c[c.length - 1]));
+  const sameMods = bound.every((c) => c.slice(0, -1).join("+") === mods);
+  const consecutive = digits.every((d, i) => Number.isInteger(d) && d === digits[0] + i);
+  if (!sameMods || !consecutive) return bound;
+  return [[...bound[0].slice(0, -1), `${digits[0]}–${digits[digits.length - 1]}`]];
+}
 
 /** The pedal's three gestures, worded by the Session's own pedal legend. */
 const GESTURES = [
@@ -113,28 +124,22 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
     () =>
       SESSION_ROWS.map((row) => ({
         key: row.key,
-        label: t(`onboarding.handsFree.session.${row.key}`),
+        label: t(row.label, {
+          neck: t("session.view.neck"),
+          runway: t("session.view.runway"),
+          tab: t("session.view.tab"),
+        }),
         combos: row.actions.map(keysOf).filter((k) => k.length > 0),
       })),
     [keysOf, t],
   );
 
-  const toolRows = useMemo(
+  const navGroups = useMemo(
     () =>
-      TOOL_ACTIONS.map((id) => ({
-        key: id,
-        label: t(`settings.hotkeys.actions.${id}`),
-        combos: [keysOf(id)].filter((k) => k.length > 0),
-      })),
-    [keysOf, t],
-  );
-
-  const navRows = useMemo(
-    () =>
-      NAV_ACTIONS.map((id) => ({
-        key: id,
-        label: t(`settings.hotkeys.actions.${id}`),
-        combos: [keysOf(id)].filter((k) => k.length > 0),
+      NAV_GROUPS.map((group) => ({
+        key: group.key,
+        label: t(`onboarding.handsFree.nav.${group.key}`),
+        keys: keyRange(group.actions.map(keysOf)),
       })),
     [keysOf, t],
   );
@@ -356,17 +361,24 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
           </div>
         </section>
 
-        {/* ---- Getting around: the rail's keys, folded away ---- */}
-        <details className="onboarding-hf-card onboarding-hf-tools" data-testid="hands-free-nav">
-          <summary className="onboarding-hf-title">{t("onboarding.handsFree.nav.title")}</summary>
-          {renderRows(navRows)}
-        </details>
-
-        {/* ---- In the tools: secondary, folded away ---- */}
-        <details className="onboarding-hf-card onboarding-hf-tools" data-testid="hands-free-tools">
-          <summary className="onboarding-hf-title">{t("onboarding.handsFree.tools.title")}</summary>
-          {renderRows(toolRows)}
-        </details>
+        {/* ---- Getting around: one quiet line, the rail's keys ---- */}
+        <p className="onboarding-hf-nav" data-testid="hands-free-nav">
+          {navGroups.map((group, g) => (
+            <span key={group.key} className="onboarding-hf-nav-group" data-group={group.key}>
+              {g > 0 && <span className="onboarding-hf-nav-sep" aria-hidden="true">·</span>}
+              <span className="onboarding-hf-nav-label">{group.label}</span>
+              {group.keys.map((keys, c) => (
+                <span key={c} className="onboarding-hf-key-alt">
+                  {keys.map((k, i) => (
+                    <kbd key={i} className="onboarding-hf-kbd">
+                      {k}
+                    </kbd>
+                  ))}
+                </span>
+              ))}
+            </span>
+          ))}
+        </p>
       </div>
     </div>
   );
