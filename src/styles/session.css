@@ -25,7 +25,7 @@
 .main-content[data-view="session"] > .main-header,
 .main-content[data-view="tools"] > .main-header {
   margin: 0;
-  border-bottom-color: color-mix(in srgb, var(--l-wash) 8%, transparent);
+  border-bottom-color: var(--l-header-edge, color-mix(in srgb, var(--text-primary) 8%, transparent));
 }
 /* The stage is a fixed layer under the whole window (z-index -1): on the
    learning side the window's own fill steps aside for it. */
@@ -43,7 +43,7 @@
 /* The backdrop, when the stage is not drawing one (no WebGL2, or no stage). */
 .main-content:has(> .view-transition-wrapper > .session-page:not([data-neck3d])),
 .main-content:has(> .session-page:not([data-neck3d])) {
-  background: var(--bg-primary);
+  background: var(--l-backdrop, var(--bg-primary));
 }
 .main-content[data-view="today"] > .view-transition-wrapper,
 .main-content[data-view="paths"] > .view-transition-wrapper,
@@ -97,6 +97,26 @@
   --l-on-tens: color-mix(in srgb, var(--l-tens) 14%, #000);
   /* Shadows: black on a dark theme, a soft ink on a light one (below). */
   --l-shade: #000;
+  /* The 1 px highlight along a filled button's top edge. */
+  --l-gloss: color-mix(in srgb, var(--l-wash) 75%, transparent);
+  /* A plain button, the current exercise, and a found edge's rungs. */
+  --l-btn: var(--l-btn);
+  --l-panel-on: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
+  --l-met-fill: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
+  --l-miss-fill: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
+  /* A note's words on the neck ("finger 2", "next · then 7, 8"): on an opaque
+     pill of the page, so the accent reads as it does on the page itself. */
+  --l-tag-ink: var(--l-ink);
+  --l-tag-pill: var(--l-bg);
+  --l-tag-edge: var(--l-line);
+  --l-tag-shadow: transparent;
+  --l-then-opacity: 1;
+  --l-status: var(--l-quiet);
+  --l-switch-ink: var(--l-amber-ink);
+  /* Green as words (a met tag, the clean tempo): the hit colour, taken toward
+     the ink on paper until it reads as text (below). */
+  --l-tone-text: var(--l-tone);
+  --l-start-next-opacity: 0.86;
   /* The theme's faces (themes.ts, --font-*), so the learning side wears the
      chosen theme's type; the learning side's own design where a theme says
      nothing. Fret numbers and clocks take --l-num, which has tabular figures. */
@@ -129,6 +149,52 @@
   --l-shade: color-mix(in srgb, var(--text-primary) 40%, transparent);
   --l-on-tone: #fff;
   --l-on-tens: #fff;
+  --l-gloss: rgba(255, 255, 255, 0.7);
+  --l-tone-text: color-mix(in oklab, var(--l-tone) 72%, var(--text-primary));
+}
+/* Ember is the learning side's own palette, kept to the value: the theme this
+   design was drawn in, and the regression check for everything above. */
+:root[data-theme="ember"] .session-page {
+  --l-bg: #0a0705;
+  --l-panel-solid: #16100b;
+  --l-wash: #ffe8c8;
+  --l-line: rgba(255, 232, 200, 0.13);
+  --l-line2: rgba(255, 232, 200, 0.24);
+  --l-panel: rgba(22, 16, 11, 0.74);
+  --l-ink: #fbf5ea;
+  --l-quiet: #c9bba6;
+  --l-faint: #94866f;
+  --l-amber: #ffb454;
+  --l-amber-ink: #1e1305;
+  --l-amber-hi: #ffd089;
+  --l-amber-lo: #f19f38;
+  --l-amber-deep: #78420a;
+  --l-tone: #4ee08a;
+  --l-tens: #5aa9ff;
+  --l-clash: #ff5d6c;
+  --l-mech: #8cc2ff;
+  --l-on-tone: #07190f;
+  --l-on-tens: #06162a;
+  --l-gloss: rgba(255, 245, 220, 0.75);
+  --l-btn: rgba(40, 30, 20, 0.7);
+  --l-panel-on: rgba(50, 35, 18, 0.84);
+  --l-met-fill: rgba(22, 84, 52, 0.88);
+  --l-miss-fill: rgba(100, 28, 38, 0.9);
+  --l-tag-ink: #ffd9a0;
+  --l-tag-pill: rgba(14, 9, 6, 0.78);
+  --l-tag-edge: transparent;
+  --l-tag-shadow: rgba(0, 0, 0, 0.85);
+  --l-then-opacity: 0.75;
+  --l-status: #d8c8b0;
+  --l-switch-ink: #2a1606;
+  --l-tab-bg: #160f0b;
+  --l-off: #fbbf24;
+  --l-tab-now: #ffd38a;
+  --l-start-next-opacity: 0.72;
+}
+:root[data-theme="ember"] .main-content {
+  --l-header-edge: rgba(255, 232, 200, 0.08);
+  --l-backdrop: radial-gradient(90% 70% at 60% 45%, #2a1a10 0, #120b07 55%, #0a0705 100%);
 }
 .session-page *,
 .session-page *::before,
@@ -201,7 +267,7 @@
   line-height: 1.35;
 }
 .session-good {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 /* A number not measured yet: quiet, so it cannot be read as a result. */
 .session-stat-none {
@@ -330,7 +396,7 @@
   min-height: 48px;
   padding: 8px 22px;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--l-panel-solid) 70%, transparent);
+  background: var(--l-btn);
   border: 1px solid var(--l-line2);
   font: 600 21px/1.1 var(--l-display);
   letter-spacing: 0.03em;
@@ -348,7 +414,7 @@
   border: 0;
   background: linear-gradient(180deg, var(--l-amber-hi) 0, var(--l-amber) 48%, var(--l-amber-lo) 100%);
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--l-wash) 75%, transparent) inset,
+    0 1px 0 var(--l-gloss) inset,
     0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
     0 10px 34px color-mix(in srgb, var(--l-amber) 28%, transparent),
     0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
@@ -386,7 +452,7 @@
   transform: translateY(1px) scale(0.995);
 }
 .session-page .session-big:disabled {
-  background: color-mix(in srgb, var(--l-panel-solid) 70%, transparent);
+  background: var(--l-btn);
   color: var(--l-faint);
   box-shadow: 0 0 0 1px var(--l-line2) inset;
 }
@@ -400,7 +466,7 @@
   min-height: 40px;
   padding: 6px 16px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--l-panel-solid) 70%, transparent);
+  background: var(--l-btn);
   border: 1px solid var(--l-line2);
   font: 600 18px/1.1 var(--l-display);
   letter-spacing: 0.03em;
@@ -481,7 +547,7 @@
   color: var(--l-amber-ink);
   background: linear-gradient(180deg, var(--l-amber-hi), var(--l-amber-lo));
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--l-wash) 70%, transparent) inset,
+    0 1px 0 var(--l-gloss) inset,
     0 0 18px color-mix(in srgb, var(--l-amber) 34%, transparent);
 }
 .session-seg[data-small] {
@@ -526,7 +592,7 @@
   color: var(--l-quiet);
 }
 .session-tag[data-met] {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
   border-color: color-mix(in srgb, var(--l-tone) 50%, transparent);
 }
 .session-glass {
@@ -703,7 +769,7 @@
   max-width: 100%;
   font: 600 15px/1.2 var(--l-display);
   letter-spacing: 0.05em;
-  opacity: 0.86;
+  opacity: var(--l-start-next-opacity);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1043,7 +1109,7 @@
   min-height: 64px;
   font-size: 30px;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--l-wash) 75%, transparent) inset,
+    0 1px 0 var(--l-gloss) inset,
     0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
     0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
     0 0 0 10px var(--l-bg),
@@ -1429,7 +1495,7 @@
   animation: session-fall 0.9s var(--l-ease) 0.5s both;
 }
 .session-moved-value[data-met] {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
   text-shadow: 0 0 60px color-mix(in srgb, var(--l-tone) 34%, transparent);
 }
 .session-moved .session-tag {
@@ -1437,7 +1503,7 @@
 }
 .session-clean {
   font: 600 22px/1.2 var(--l-display);
-  color: var(--l-tone);
+  color: var(--l-tone-text);
   letter-spacing: 0.01em;
 }
 .session-between {
@@ -1503,12 +1569,12 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 .session-edge-rung[data-state="met"] {
-  background: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
+  background: var(--l-met-fill);
   border-color: var(--l-tone);
   color: var(--l-ink);
 }
 .session-edge-rung[data-state="missed"] {
-  background: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
+  background: var(--l-miss-fill);
   border-color: var(--l-clash);
   color: var(--l-ink);
 }
@@ -1564,7 +1630,7 @@
   font-size: 0.66em;
 }
 .session-recap-number b {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .session-recap-number small {
   margin-left: 4px;
@@ -1665,7 +1731,7 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 .session-step-row[data-passed] .session-step-num {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .session-step-row[data-current] .session-step-num {
   color: var(--l-amber);
@@ -1699,7 +1765,7 @@
 }
 .session-exercise[data-current] {
   border-color: color-mix(in srgb, var(--l-amber) 60%, transparent);
-  background: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
+  background: var(--l-panel-on);
 }
 .session-exercise-text {
   flex: 1 1 13rem;
@@ -2066,7 +2132,7 @@
     bottom: calc(10px + var(--safe-bottom, 0px));
     z-index: 4;
     box-shadow:
-      0 1px 0 color-mix(in srgb, var(--l-wash) 75%, transparent) inset,
+      0 1px 0 var(--l-gloss) inset,
       0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
       0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
       0 0 0 10px var(--l-bg),
@@ -2074,7 +2140,7 @@
   }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-big:disabled {
     background:
-      linear-gradient(color-mix(in srgb, var(--l-panel-solid) 70%, transparent), color-mix(in srgb, var(--l-panel-solid) 70%, transparent)),
+      linear-gradient(var(--l-btn), var(--l-btn)),
       var(--l-bg);
     box-shadow:
       0 0 0 1px var(--l-line2) inset,
@@ -2522,7 +2588,8 @@
   transform: translate(-50%, 0);
   white-space: nowrap;
   font: 600 15px/1.15 var(--l-body);
-  color: var(--l-ink);
+  color: var(--l-tag-ink);
+  text-shadow: 0 1px 3px var(--l-tag-shadow);
 }
 .practice-now-tag:empty {
   display: none;
@@ -2532,8 +2599,8 @@
 .practice-next-tag {
   padding: 2px 8px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--l-bg) 90%, transparent);
-  box-shadow: 0 0 0 1px var(--l-line);
+  background: var(--l-tag-pill);
+  box-shadow: 0 0 0 1px var(--l-tag-edge);
 }
 .practice-next-tag {
   transform: translate(-50%, -100%);
@@ -2549,6 +2616,7 @@
 }
 .practice-next-tag [data-then] {
   font-size: 13px;
+  opacity: var(--l-then-opacity);
 }
 .practice-neck-foot {
   flex: none;
@@ -2777,7 +2845,7 @@
   align-items: center;
   gap: 9px;
   font-size: 15px;
-  color: var(--l-quiet);
+  color: var(--l-status);
   text-align: right;
   min-width: 0;
 }
@@ -2826,7 +2894,7 @@
 }
 .session-page .session-viewswitch button[data-on] {
   background: var(--l-amber);
-  color: var(--l-amber-ink);
+  color: var(--l-switch-ink);
 }
 .session-page .session-viewswitch[data-locked] button[data-on] {
   background: color-mix(in srgb, var(--l-wash) 8%, transparent);
@@ -3048,7 +3116,7 @@
   min-width: 0;
 }
 .practice-num[data-tone="good"] {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .practice-live .session-strip {
   align-self: center;

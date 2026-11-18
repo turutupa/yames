@@ -42,7 +42,7 @@
   --ts-bg: var(--l-tab-bg, #150e0a);
   --ts-amber: var(--l-amber, #ffb454);
   --ts-good: var(--l-tone, #4ade80);
-  --ts-off: var(--feedback-ok, #fbbf24);
+  --ts-off: var(--l-off, var(--feedback-ok, #fbbf24));
   --ts-miss: var(--l-clash, #f87171);
   --ts-num: var(--l-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
   --ts-face: var(--l-body, Inter, system-ui, sans-serif);
@@ -178,7 +178,7 @@
 /* The note under the column: 40 px where the rest are 34, amber-white. */
 .tabstrip-note[data-current] text {
   font-size: calc(var(--ts-fret) * 40 / 34);
-  fill: color-mix(in srgb, var(--ts-amber) 72%, var(--ts-ink));
+  fill: var(--l-tab-now, color-mix(in srgb, var(--ts-amber) 72%, var(--ts-ink)));
   fill-opacity: 1;
   stroke: var(--ts-col);
 }
