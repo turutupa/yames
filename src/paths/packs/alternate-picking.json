@@ -30,50 +30,68 @@
         "Down on the beat, up on the 'and'. The pick stays in the same place above and below the string and travels as little as it can.",
         "Rest the side of the picking hand lightly on the bridge so the low strings stay quiet."
       ],
-      "payoff": "A plain line of eighths that sits on the click, and a riff that already sounds like a riff.",
+      "payoff": "A tune over an open string that sits on the click from the first Exercise, and a riff that already sounds like a riff.",
       "prerequisites": [],
-      "difficulty": 3.5,
+      "difficulty": 3.57,
       "exercises": [
         {
           "id": "even-eighths.open-string",
-          "title": "Open A, pick hand alone",
-          "purpose": "Take the fretting hand out of it, so the only question is whether every stroke is the same length.",
+          "title": "A tune over the open E",
+          "purpose": "A melody in A minor with the open high E sounding between every note, the pedal-tone sound of a baroque prelude or a rock guitar's showpiece, slowed right down. The fretting hand moves once a beat, so nearly all your attention stays on the pick.",
           "howTo": [
-            "Eighth notes on the open A string. Keep down and up equally loud: uneven pick depth is the usual reason they are not."
+            "Eighth notes on the high E string, 60 BPM up to a pass at 100. Downstroke on every fretted note, upstroke on every open E: strictly down-up, never two the same way.",
+            "The tune is C, B, A, B, then C, D, C, B, then C, B, A, G#, then A, G#, A, B, and round again. First finger on fret 5, third on 7, fourth on 8. Move the hand up two frets for the D at fret 10 in bar 2, and back one fret in bars 3 and 4, so the first finger takes the G# at 4 and the second the A at 5.",
+            "Each open E is your time to move the fretting hand. Keep down and up equally loud: uneven pick depth is the usual reason they are not."
           ],
-          "coachLine": "This one is only about time. I'll tell you how even the notes were and whether any went missing.",
+          "coachLine": "Even eighths and the written notes are what I check, after the take. The direction of each stroke is yours to keep: I can't hear it.",
           "grading": "graded",
-          "feedback": "livePerNote",
+          "feedback": "afterTake",
           "meter": {
             "numerator": 4,
             "denominator": 4
           },
-          "bars": 2,
+          "bars": 4,
           "loops": true,
           "position": {
-            "fret": 0,
-            "shifts": "none"
+            "fret": 5,
+            "shifts": "allowed"
           },
           "pickPlan": "alternate",
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":5,"fret":0,"midi":45,"tick":0,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":480,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":960,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":1440,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":2880,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":3360,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":3840,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":4320,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":4800,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":5280,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":5760,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":6240,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":6720,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":7200,"dur":480,"tech":[],"pick":"u"}
+            {"string":1,"fret":8,"midi":72,"tick":0,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":480,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":960,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":1440,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":1920,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":2400,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":2880,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":3360,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":3840,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":4320,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":10,"midi":74,"tick":4800,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":5280,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":5760,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":6240,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":6720,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":7200,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":7680,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":8160,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":8640,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":9120,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":9600,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":10080,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":4,"midi":68,"tick":10560,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":11040,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":11520,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":12000,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":4,"midi":68,"tick":12480,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":12960,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":13440,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":13920,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":14400,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":14880,"dur":480,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
@@ -103,9 +121,14 @@
               "metric": "extraNotes",
               "max": 2,
               "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
             }
           ],
-          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
           "notGraded": [
             "pickDirection",
             "muting",
@@ -114,8 +137,7 @@
             "handAttribution",
             "fingering",
             "tone",
-            "feel",
-            "notesWritten"
+            "feel"
           ],
           "detection": {
             "flags": [],
@@ -126,14 +148,21 @@
             "subdivision": 1
           },
           "estimatedMinutes": 5,
-          "tab": "/8 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0",
+          "tab": "/8 1:8 1:0 1:7 1:0 1:5 1:0 1:7 1:0 | 1:8 1:0 1:10 1:0 1:8 1:0 1:7 1:0 | 1:8 1:0 1:7 1:0 1:5 1:0 1:4 1:0 | 1:5 1:0 1:4 1:0 1:5 1:0 1:7 1:0",
           "subdivision": "eighths",
           "computed": {
-            "noteCount": 16,
+            "noteCount": 32,
             "minGapMsAtTop": 250,
-            "handShifts": 0,
-            "maxPlayableBpm": 400,
-            "difficulty": 3.33
+            "handShifts": 4,
+            "maxPlayableBpm": 357,
+            "difficulty": 3.46
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "harmonicMinor",
+            "spelled": ["A", "B", "C", "D", "E", "F", "G#"],
+            "cover": false
           }
         },
         {
@@ -486,14 +515,15 @@
       "exercises": [
         {
           "id": "even-sixteenths.gear-change",
-          "title": "Change gear",
-          "purpose": "Going from eighths to sixteenths without a stumble is the real skill, because every line changes rate.",
+          "title": "Change gear, same tune",
+          "purpose": "The open-E tune from the first Step, then the same notes twice as fast. Going from eighths to sixteenths without a stumble is the real skill, because every line changes rate.",
           "howTo": [
-            "One bar of eighths, one bar of sixteenths, on the open A. The pick does not speed up; it just stops skipping the strokes in between."
+            "Bar 1 is eighths: C, B, A, B with the open E between each. Bar 2 is sixteenths: the first two bars of the open-E tune, C, B, A, B, C, D, C, B, squeezed into one. 50 BPM up to a pass at 85.",
+            "Down on every fretted note, up on every open E, in both bars. The stroke gets smaller in bar 2, not harder; the pick never skips."
           ],
-          "coachLine": "I'll say how even each half was. The join between them is usually where it slips.",
+          "coachLine": "I'll say how even each half was, and check the notes after the take. The join between the bars is usually where it slips.",
           "grading": "graded",
-          "feedback": "livePerNote",
+          "feedback": "afterTake",
           "meter": {
             "numerator": 4,
             "denominator": 4
@@ -501,45 +531,45 @@
           "bars": 2,
           "loops": true,
           "position": {
-            "fret": 0,
-            "shifts": "none"
+            "fret": 5,
+            "shifts": "allowed"
           },
           "pickPlan": "alternate",
           "crossing": "none",
           "notesRole": "target",
           "notes": [
-            {"string":5,"fret":0,"midi":45,"tick":0,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":480,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":960,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":1440,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":1920,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":2400,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":2880,"dur":480,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":3360,"dur":480,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":3840,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":4080,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":4320,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":4560,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":4800,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":5040,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":5280,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":5520,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":5760,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":6000,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":6240,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":6480,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":6720,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":6960,"dur":240,"tech":[],"pick":"u"},
-            {"string":5,"fret":0,"midi":45,"tick":7200,"dur":240,"tech":[],"pick":"d"},
-            {"string":5,"fret":0,"midi":45,"tick":7440,"dur":240,"tech":[],"pick":"u"}
+            {"string":1,"fret":8,"midi":72,"tick":0,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":480,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":960,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":1440,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":1920,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":2400,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":2880,"dur":480,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":3360,"dur":480,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":3840,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":4080,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":4320,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":4560,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":5,"midi":69,"tick":4800,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":5040,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":5280,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":5520,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":5760,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":6000,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":10,"midi":74,"tick":6240,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":6480,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":8,"midi":72,"tick":6720,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":6960,"dur":240,"tech":[],"pick":"u"},
+            {"string":1,"fret":7,"midi":71,"tick":7200,"dur":240,"tech":[],"pick":"d"},
+            {"string":1,"fret":0,"midi":64,"tick":7440,"dur":240,"tech":[],"pick":"u"}
           ],
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":50,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":75,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
               {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
@@ -561,9 +591,14 @@
               "metric": "extraNotes",
               "max": 2,
               "overBars": 4
+            },
+            {
+              "metric": "noteIdentity",
+              "min": 0.9,
+              "overBars": 4
             }
           ],
-          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo"],
+          "graded": ["timingEvenness", "notesHeard", "extraNotes", "cleanTempo", "noteIdentity"],
           "notGraded": [
             "pickDirection",
             "muting",
@@ -572,8 +607,7 @@
             "handAttribution",
             "fingering",
             "tone",
-            "feel",
-            "notesWritten"
+            "feel"
           ],
           "detection": {
             "flags": ["fastPicking"],
@@ -586,14 +620,21 @@
             "subdivision": 1
           },
           "estimatedMinutes": 5,
-          "tab": "/8 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 | /16 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0 5:0",
+          "tab": "/8 1:8 1:0 1:7 1:0 1:5 1:0 1:7 1:0 | /16 1:8 1:0 1:7 1:0 1:5 1:0 1:7 1:0 1:8 1:0 1:10 1:0 1:8 1:0 1:7 1:0",
           "subdivision": "sixteenths",
           "computed": {
             "noteCount": 24,
             "minGapMsAtTop": 150,
-            "handShifts": 0,
-            "maxPlayableBpm": 400,
-            "difficulty": 4.25
+            "handShifts": 2,
+            "maxPlayableBpm": 178,
+            "difficulty": 4.36
+          },
+          "harmony": {
+            "kind": "scale",
+            "root": "A",
+            "scale": "naturalMinor",
+            "spelled": ["A", "B", "C", "D", "E", "F", "G"],
+            "cover": false
           }
         },
         {
