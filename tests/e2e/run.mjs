@@ -713,7 +713,7 @@ async function scenarioWarmup() {
     check("warm-up: Next is a link while it runs", await click("session-next-link"));
     await sleep(1500);
     st = await d.invoke("get_state");
-    const pip = await d.exec(`return document.querySelector('.session-pips i')?.dataset.state ?? null`);
+    const pip = await d.exec(`return document.querySelector('.session-pips .session-pip')?.dataset.state ?? null`);
     check("warm-up: Next moves on, the click stops, the warm-up shows skipped", st.isPlaying === false && pip === "skipped",
       `playing ${st.isPlaying}, first pip ${pip}`);
     // Back from the step after it (its ready screen offers "Again: <warm-up>").
