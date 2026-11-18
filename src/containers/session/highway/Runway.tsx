@@ -30,7 +30,9 @@ import {
   STRING_NAMES,
   dotOffset,
   laneScale,
+  minGapPx,
   nextOnsetIndex,
+  noteSize,
   runwayModel,
   stripOffset,
   usedStrings,
@@ -111,13 +113,20 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
   const laneRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
-  const scale = useMemo(() => laneScale(model, width), [model, width]);
+  const [height, setHeight] = useState(0);
+  const laneH = collapsed ? height : height / Math.max(1, lanes.length);
+  const scale = useMemo(() => laneScale(model, width, minGapPx(width, laneH)), [model, width, laneH]);
+  const note = noteSize(model, scale.ppt, collapsed ? 0 : laneH);
 
-  // The lane's width, once and on every resize.
+  // The lane's size, once and on every resize.
   useLayoutEffect(() => {
     const lane = laneRef.current;
     if (!lane) return;
-    const measure = () => setWidth(Math.round(lane.getBoundingClientRect().width));
+    const measure = () => {
+      const r = lane.getBoundingClientRect();
+      setWidth(Math.round(r.width));
+      setHeight(Math.round(r.height));
+    };
     measure();
     if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(measure);
@@ -262,7 +271,7 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
       data-collapsed={collapsed ? "" : undefined}
       data-moving={playing ? "" : undefined}
       data-lanes={lanes.length}
-      style={{ ["--lanes" as string]: lanes.length }}
+      style={{ ["--lanes" as string]: lanes.length, ["--note" as string]: `${note}px` }}
       role="img"
       aria-label={t("session.runway.label")}
     >

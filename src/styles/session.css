@@ -3162,20 +3162,33 @@
   color: var(--l-ink);
 }
 
-/* Fewer lanes, larger notes, and no taller than the lanes need: three lanes
-   do not stretch into six lanes' height (the designer, 2026-11-17). */
+/* The runway fills its room the way the neck and the tab do (acceptance
+   P1-8): taller lanes and notes sized to them (`--note`, set by Runway.tsx
+   from the lane's height and the closest two notes). A lane stops growing at
+   about 240 px, so one string is a broad band, not the whole screen. */
 .runway .runway-note {
-  width: 32px;
-  height: 32px;
-  margin: -16px 0 0 -16px;
-  font-size: 17px;
+  width: var(--note, 32px);
+  height: var(--note, 32px);
+  margin: calc(var(--note, 32px) / -2) 0 0 calc(var(--note, 32px) / -2);
+  font-size: calc(var(--note, 32px) * 0.52);
+  border-width: max(2px, calc(var(--note, 32px) / 16));
 }
-/* Not on a phone held upright: there the notes fall down the runway's height. */
+.runway .runway-names span {
+  font-size: clamp(14px, calc(var(--note, 32px) * 0.45), 22px);
+}
+.runway .runway-dot {
+  width: max(6px, calc(var(--note, 32px) / 6));
+  height: max(6px, calc(var(--note, 32px) / 6));
+  margin-left: calc(max(6px, calc(var(--note, 32px) / 6)) / -2);
+}
+.runway .runway-legend {
+  font-size: 12px;
+}
 @media (min-width: 701px), (orientation: landscape) {
   .runway[data-lanes="1"],
   .runway[data-lanes="2"],
   .runway[data-lanes="3"] {
-    max-height: calc(var(--lanes, 3) * 78px + 20px);
+    max-height: calc(var(--lanes, 3) * 240px + 20px);
   }
 }
 .runway[data-collapsed] .runway-note {

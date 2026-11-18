@@ -136,12 +136,35 @@ export function runwayModel(take: TakePlan, countInBars = 1): RunwayModel {
  * the closest two notes nearer than `MIN_NOTE_PX`: then the lane zooms in and
  * shows less (a phone, or sixteenths), keeping the line a third of the way in.
  */
-export function laneScale(model: Pick<RunwayModel, "barLength" | "minGap">, laneWidth: number) {
+export function laneScale(model: Pick<RunwayModel, "barLength" | "minGap">, laneWidth: number, minPx = MIN_NOTE_PX) {
   const bars = BARS_AHEAD + BARS_BEHIND;
   if (!(laneWidth > 0)) return { ppt: 0, hitX: 0 };
   const fit = laneWidth / (bars * model.barLength);
-  const legible = model.minGap > 0 ? MIN_NOTE_PX / model.minGap : 0;
+  const legible = model.minGap > 0 ? Math.max(MIN_NOTE_PX, minPx) / model.minGap : 0;
   return { ppt: Math.max(fit, legible), hitX: laneWidth * (BARS_BEHIND / bars) };
+}
+
+/**
+ * How big a note is drawn (acceptance P1-8): half its lane's height, so the
+ * runway fills its room the way the neck and the tab do, but never wider than
+ * the closest two notes leave room for, and never under `MIN_NOTE_PX`.
+ */
+export function noteSize(model: Pick<RunwayModel, "minGap">, ppt: number, laneHeight: number): number {
+  const gap = model.minGap > 0 && ppt > 0 ? model.minGap * ppt * 0.88 : Number.POSITIVE_INFINITY;
+  const want = Math.min(laneHeight * 0.5, gap, MAX_NOTE_PX);
+  return Math.round(Math.max(MIN_NOTE_PX, want));
+}
+
+/** The largest a note is drawn. */
+export const MAX_NOTE_PX = 64;
+
+/**
+ * How close the closest two notes may sit: wider than `MIN_NOTE_PX` when the
+ * lanes are tall, so the notes can grow with them (fewer bars ahead on a
+ * dense pattern, but each note large enough to read from the guitar).
+ */
+export function minGapPx(laneWidth: number, laneHeight: number): number {
+  return Math.max(MIN_NOTE_PX, Math.min(laneWidth >= 600 ? 54 : 50, laneHeight * 0.3));
 }
 
 /** The strip's x offset that puts `tick` on the hit line. */
