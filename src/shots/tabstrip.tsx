@@ -106,7 +106,9 @@ export async function mountTabStripShot(kind: TabStripShotKind, themeId: string)
   const style = document.createElement("style");
   style.textContent = CSS;
   document.head.appendChild(style);
-  const source = SOURCES[kind];
+  // `&pack=<pathId>&ex=<step.exercise>` draws any Exercise in the scene, for content review.
+  const params = new URLSearchParams(window.location.search);
+  const source = { pack: params.get("pack") ?? SOURCES[kind].pack, exercise: params.get("ex") ?? SOURCES[kind].exercise };
   const exercise = await loadExercise(source.pack, source.exercise);
   const root = document.getElementById("root")!;
   ReactDOM.createRoot(root).render(<Scene kind={kind} exercise={exercise} />);

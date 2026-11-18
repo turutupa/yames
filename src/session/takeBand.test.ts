@@ -18,7 +18,7 @@ function exercise(pack: PathDoc, id: string): Exercise {
 const ROOT_ON_ONE = exercise(PACKS[0], "landing.root-on-one");
 const TWELVE = exercise(PACKS[0], "twelve-bar.roots");
 const ROOT_RIFF = exercise(PACKS[1], "riffs.root-riff");
-const CLICK = exercise(PACKS[0], "box-one.box-eighths");
+const CLICK = exercise(PACKS[0], "call-response.echo");
 
 const notesOf = (ex: Exercise, bars: number, role: string) =>
   buildTakeBand(ex, bars, 90)!.tracks.find((t) => t.role === role)?.notes ?? [];
