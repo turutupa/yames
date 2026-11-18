@@ -111,7 +111,42 @@
         "keepWarmNew": "先嚐個鮮。"
       },
       "from": "{{path}} · {{level}} · 第 {{step}} 步",
-      "fromNoLevel": "{{path}} · 第 {{step}} 步"
+      "fromNoLevel": "{{path}} · 第 {{step}} 步",
+      "startHere": "從這裡開始 ›",
+      "startHereLabel": "從第 {{n}} 項開始練習：{{title}}",
+      "swap": {
+        "button": "換",
+        "buttonLabel": "換掉 {{title}}",
+        "tooltip": "換成別的練習",
+        "heading": "換成",
+        "dialogLabel": "換掉 {{title}}",
+        "close": "關閉",
+        "choice": {
+          "harder": "更難",
+          "different": "換個別的",
+          "style": "換個風格"
+        },
+        "hint": {
+          "harder": "同一技巧，難一級。",
+          "different": "這條路線裡的另一個練習。",
+          "style": "另一條路線裡的練習。",
+          "harderWarmUp": "更密一點但仍然合適的熱身。",
+          "differentWarmUp": "這條路線裡的另一個熱身。",
+          "styleWarmUp": "另一條路線裡的熱身。"
+        },
+        "none": {
+          "harder": "這條路線裡還沒有更難的。",
+          "harderWarmUp": "再密就比它要熱身的那段還快了。",
+          "different": "這條路線裡現在沒有別的合適的。",
+          "style": "你還沒有別的路線。"
+        },
+        "count": "{{n}} / {{count}}",
+        "confirm": "換上",
+        "another": "再看一個",
+        "cancel": "取消",
+        "undo": "換回 {{title}}",
+        "swapped": "已換"
+      }
     },
     "why": {
       "firstEver": "這是你的第一次，所以從 {{bpm}} BPM 開始。練的是節奏，不是速度。",
@@ -211,7 +246,9 @@
       "goAgainUp": "再來一遍，提到 {{bpm}} BPM",
       "slowerFloor": "已經是這個練習最慢的速度",
       "fasterCeiling": "已經是這個練習最快的速度",
-      "tempoLocked": "測驗要用及格速度彈，所以速度不變"
+      "tempoLocked": "測驗要用及格速度彈，所以速度不變",
+      "previous": "上一個",
+      "previousFirst": "這是第一個練習區塊，前面沒有了"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -535,6 +572,49 @@
     },
     "placement": {
       "result": "你從第 {{n}} 步開始：{{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "目前",
+        "done": "已完成",
+        "skipped": "已略過",
+        "todo": "尚未練習"
+      }
+    },
+    "jump": {
+      "title": "停止並前往「{{title}}」？",
+      "body": "目前彈過的內容都會保留。",
+      "go": "前往"
+    },
+    "input": {
+      "turnOnAndStart": "開啟輸入並開始",
+      "starting": "正在開啟輸入…",
+      "startingShort": "正在開啟…",
+      "startingLong": "正在開啟輸入。評分需要麥克風或直連輸入。",
+      "listeningTo": "正在聆聽 {{device}}",
+      "fellBack": "你選擇的輸入未連接，這次練習改為聆聽 {{device}}。",
+      "defaultDevice": "預設輸入",
+      "chooseInput": "選擇輸入",
+      "playUngraded": "不評分彈奏",
+      "notGraded": "未評分",
+      "turnOn": "開啟輸入",
+      "noSignal": "沒有訊號",
+      "failed": {
+        "noDevice": "找不到麥克風或音訊介面。請接上一個，或選擇一個。",
+        "permission": "Yames 沒有使用麥克風的權限。請在系統設定中允許，然後再按一次開始。",
+        "noAnswer": "輸入沒有回應。如果有權限對話框，請先回應，然後再按一次開始。",
+        "busy": "另一個 App 正在使用你的輸入。請關閉它，然後再按一次開始。",
+        "other": "輸入無法啟動。請檢查，或選擇其他輸入。"
+      }
+    },
+    "ungraded": {
+      "ready": "未評分：輸入已關閉，這次練習我不會聆聽。",
+      "readyOff": "未評分：已在設定中關閉評分。",
+      "result": "未評分：當時輸入已關閉",
+      "resultOff": "未評分：已在設定中關閉評分",
+      "body": "這算作練習，計入練習時間和連續天數。乾淨速度和步驟只會因評分過的錄音而前進。",
+      "recap": "未評分"
     }
   }
 }

@@ -259,7 +259,8 @@
         "tab-tools": "Herramientas",
         "session-view": "Cambiar vista",
         "session-pause": "Pausar / seguir",
-        "session-restart": "Reiniciar la toma"
+        "session-restart": "Reiniciar la toma",
+        "session-prev": "Volver al bloque anterior"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -316,7 +317,8 @@
         "tab-tools": "Ir a Herramientas",
         "session-view": "En una sesión: Mástil, Pista o Tab. En cualquier momento en un calentamiento; entre tomas en una calificada",
         "session-pause": "En un calentamiento o un bloque cronometrado: pausarlo o seguir",
-        "session-restart": "En un calentamiento o un bloque cronometrado: desde el principio. Tras una toma: la misma toma otra vez"
+        "session-restart": "En un calentamiento o un bloque cronometrado: desde el principio. Tras una toma: la misma toma otra vez",
+        "session-prev": "En una sesión: volver al bloque anterior"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Duración de la sesión",
       "minutesHint": "Cuánto tiempo planifica Hoy tu práctica. También puedes cambiarlo en Hoy.",
       "view": "Vista de práctica",
-      "viewHint": "Lo que muestra una sesión mientras tocas."
+      "viewHint": "Lo que muestra una sesión mientras tocas.",
+      "grade": "Evaluar cómo toco",
+      "gradeHint": "Desactivado: las sesiones no escuchan ni evalúan nada. Tus minutos y tu racha siguen contando."
     }
   },
   "keybindings": {

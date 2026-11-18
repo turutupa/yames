@@ -209,6 +209,6 @@ describe("the tour", () => {
     await startTourFrom(METRONOME);
     await toDrillStop();
     const keys = [...document.querySelectorAll(".tour-key")].map((k) => k.textContent ?? "");
-    expect(keys.join(" ")).toMatch(/3/);
+    expect(keys.join(" ")).toMatch(/7/);
   });
 });

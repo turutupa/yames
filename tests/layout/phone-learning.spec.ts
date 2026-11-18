@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openShot, noSidewaysScroll, MOBILE_URL, notHitTestable, overlapping, spillingLabels } from "./fits";
+import { openShot, noSidewaysScroll, MOBILE_URL, notHitTestable, overlapping, spillingLabels, settleAnimations } from "./fits";
 import { PHONE_LEARNING_SCENES } from "../../src/shots/scenarios";
 
 /**
@@ -110,6 +110,36 @@ test.describe("the learning side on a phone", () => {
         expect((await smallTargets(page)).small, "controls smaller than 44×44 px, scrolled down").toEqual([]);
       });
     }
+  }
+
+  // The Session bar's blocks and Today's rows, a thumb each (owner, 2026-11-18).
+  for (const size of WIDTHS) {
+    test(`the Session bar's blocks are a thumb tall, and a tap opens one, at ${size.width}px`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "phone-session-warmup-ready", size);
+      await noSidewaysScroll(page, `phone-session-warmup-ready at ${size.width}px`);
+      await settleAnimations(page);
+      // Its own height, not its box: a screen still scaling in (98.5% → 100%) reads 43.3.
+      const heights = await page.locator(".session-pip").evaluateAll((els) => els.map((e) => parseFloat(getComputedStyle(e).height)));
+      expect(heights.length).toBeGreaterThan(1);
+      for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
+      expect(await notHitTestable(page, ".session-pip")).toEqual([]);
+      await page.locator('[data-testid="session-pip-1"]').tap();
+      await expect(page.locator('[data-testid="session-pip-1"]')).toHaveAttribute("aria-current", "step");
+      await page.locator('[data-testid="session-previous"]').tap();
+      await expect(page.locator('[data-testid="session-pip-0"]')).toHaveAttribute("aria-current", "step");
+    });
+
+    test(`a tap on Today's second row starts there at ${size.width}px`, async ({ page }) => {
+      test.slow();
+      await openShot(page, "phone-today-returning", size);
+      const row = page.locator(".session-plan-go").nth(1);
+      await row.scrollIntoViewIfNeeded();
+      const box = (await row.boundingBox())!;
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      await row.tap();
+      await expect(page.locator('[data-testid="session-pip-1"]')).toHaveAttribute("aria-current", "step");
+    });
   }
 
   // QA 2 (2026-11-17) #1 and #2: in the longest languages, on the narrowest

@@ -120,6 +120,8 @@ describe("W3 — the Session leads", () => {
       ...keysFor("session-slower"),
     ]);
     expect(keysOn(card, "Next step")).toEqual(keysFor("session-next"));
+    // Back one block (owner, 2026-11-18).
+    expect(keysOn(card, "Back to the previous block")).toEqual(keysFor("session-prev"));
     // Pause, again, the view and the way out (2026-11-18).
     expect(keysOn(card, "Pause / resume")).toEqual(keysFor("session-pause"));
     expect(keysOn(card, "Restart the Take")).toEqual(keysFor("session-restart"));
@@ -167,7 +169,7 @@ describe("W3 — the Session leads", () => {
     const tools = nav.querySelector('[data-group="tools"]')!;
     expect(learning.textContent).toContain("Learning screens");
     expect(tools.textContent).toContain("Tools");
-    // One keycap per run: Ctrl 1–4 and Alt 1–5, read from the binding table.
+    // One keycap per run: Ctrl 1–4 and Ctrl 5–9, read from the binding table.
     const today = keysFor("tab-today");
     const tool1 = keysFor("tab-1");
     expect(Array.from(learning.querySelectorAll("kbd")).map((k) => k.textContent)).toEqual([
@@ -176,7 +178,7 @@ describe("W3 — the Session leads", () => {
     ]);
     expect(Array.from(tools.querySelectorAll("kbd")).map((k) => k.textContent)).toEqual([
       ...tool1.slice(0, -1),
-      "1–5",
+      "5–9",
     ]);
   });
 

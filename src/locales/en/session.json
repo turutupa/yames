@@ -111,7 +111,42 @@
         "keepWarmNew": "A first taste."
       },
       "from": "{{path}} · {{level}} · Step {{step}}",
-      "fromNoLevel": "{{path}} · Step {{step}}"
+      "fromNoLevel": "{{path}} · Step {{step}}",
+      "startHere": "Start here ›",
+      "startHereLabel": "Start the Session at {{n}}: {{title}}",
+      "swap": {
+        "button": "Swap",
+        "buttonLabel": "Swap {{title}}",
+        "tooltip": "Swap for another exercise",
+        "heading": "Swap it for",
+        "dialogLabel": "Swap {{title}}",
+        "close": "Close",
+        "choice": {
+          "harder": "Harder",
+          "different": "Something different",
+          "style": "Another style"
+        },
+        "hint": {
+          "harder": "The same skill, a step up.",
+          "different": "Another exercise from this Path.",
+          "style": "An exercise from another Path.",
+          "harderWarmUp": "A busier warm-up that still fits.",
+          "differentWarmUp": "Another warm-up from this Path.",
+          "styleWarmUp": "A warm-up from another Path."
+        },
+        "none": {
+          "harder": "Nothing harder in this Path yet.",
+          "harderWarmUp": "Anything busier would outpace the block it warms up.",
+          "different": "Nothing else in this Path fits right now.",
+          "style": "You have no other Path to borrow from yet."
+        },
+        "count": "{{n}} of {{count}}",
+        "confirm": "Swap it in",
+        "another": "Show another",
+        "cancel": "Cancel",
+        "undo": "Put back {{title}}",
+        "swapped": "Swapped in"
+      }
     },
     "why": {
       "firstEver": "Your first one, so it starts at {{bpm}} BPM. This is about time, not speed.",
@@ -211,7 +246,9 @@
       "goAgainUp": "Go again, up to {{bpm}} BPM",
       "slowerFloor": "Already the slowest tempo this Exercise has",
       "fasterCeiling": "Already the fastest tempo this Exercise has",
-      "tempoLocked": "A Test out is played at the pass tempo, so this one stays put"
+      "tempoLocked": "A Test out is played at the pass tempo, so this one stays put",
+      "previous": "Previous",
+      "previousFirst": "This is the first block, so there is nothing before it"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
@@ -539,6 +576,49 @@
     },
     "placement": {
       "result": "You start at Step {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "now",
+        "done": "done",
+        "skipped": "skipped",
+        "todo": "not played yet"
+      }
+    },
+    "jump": {
+      "title": "Stop and go to {{title}}?",
+      "body": "What you've played so far is kept.",
+      "go": "Go there"
+    },
+    "input": {
+      "turnOnAndStart": "Turn on input and start",
+      "starting": "Starting your input…",
+      "startingShort": "Starting…",
+      "startingLong": "Starting your input. Grading needs a microphone or direct input.",
+      "listeningTo": "Listening to {{device}}",
+      "fellBack": "Your chosen input isn't connected, so I'm listening to {{device}} this Session.",
+      "defaultDevice": "your default input",
+      "chooseInput": "Choose input",
+      "playUngraded": "Play without grading",
+      "notGraded": "Not graded",
+      "turnOn": "Turn on input",
+      "noSignal": "No signal",
+      "failed": {
+        "noDevice": "I couldn't find a microphone or audio interface. Plug one in, or choose one.",
+        "permission": "Yames isn't allowed to use the microphone. Allow it in your system settings, then press Start again.",
+        "noAnswer": "The input didn't answer. If a permission prompt is open, answer it, then press Start again.",
+        "busy": "Another app is using your input. Close it, then press Start again.",
+        "other": "Your input wouldn't start. Check it, or choose another one."
+      }
+    },
+    "ungraded": {
+      "ready": "Not graded: the input is off, so I'm not listening this Session.",
+      "readyOff": "Not graded: grading is off in Settings.",
+      "result": "Not graded: the input was off",
+      "resultOff": "Not graded: grading is off in Settings",
+      "body": "It counts as practice, for your minutes and your streak. Your clean tempo and Steps only move on graded Takes.",
+      "recap": "not graded"
     }
   }
 }

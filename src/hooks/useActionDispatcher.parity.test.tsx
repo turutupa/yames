@@ -160,6 +160,7 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
   "session-slower": { where: ["session"], does: ["session slower"] },
   "session-faster": { where: ["session"], does: ["session faster"] },
   "session-next": { where: ["session"], does: ["session next"] },
+  "session-prev": { where: ["session"], does: ["session previous"] },
   // One pedal for both halves (2026-11-17): its gestures on the Session, and
   // Play/Stop everywhere else, so the first run can map one pedal to it.
   "session-pedal": { ...PLAY, session: ["session pedalPress"] },
@@ -254,6 +255,7 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
         "slower",
         "faster",
         "next",
+        "previous",
         "pedalPress",
         "exit",
         "cycleView",
@@ -352,11 +354,11 @@ describe("the tab hotkeys", () => {
     expect(await observe(action, "beat")).toEqual([`setView ${mode}`]);
   });
 
-  // 2026-11-17, owner-approved: the tools moved from ⌘1–⌘5 to ⌥1–⌥5 so the
+  // 2026-11-17, owner-approved: the tools moved from ⌘1–⌘5 to ⌘5–⌘9 so the
   // learning side could have ⌘1–⌘4. Players on the old defaults are moved once
   // and anyone who remapped keeps theirs (`hooks/keybindingMigration.ts`).
-  it("are ⌥1 to ⌥5, in the rail's order", () => {
+  it("are ⌘5 to ⌘9, in the rail's order", () => {
     const keyOf = (id: string) => HOTKEYS.find((h) => h.id === id)?.key;
-    expect(TOOLS.map((t) => keyOf(t.action))).toEqual(["⌥1", "⌥2", "⌥3", "⌥4", "⌥5"]);
+    expect(TOOLS.map((t) => keyOf(t.action))).toEqual(["⌘5", "⌘6", "⌘7", "⌘8", "⌘9"]);
   });
 });

@@ -70,7 +70,7 @@ export type HotkeyAction =
   | "tab-today"
   // The rest of the rail's learning side (owner, 2026-11-17). Ids of their own
   // rather than `tab-1`…: those count the tools and are stored by name. The
-  // keys moved later that day: ⌘1–⌘4 are the learning side, the tools ⌥1–5.
+  // keys moved later that day: ⌘1–⌘4 are the learning side, the tools ⌘5–⌘9 (2026-11-18).
   | "tab-paths"
   | "tab-progress"
   | "tab-tools"
@@ -81,6 +81,8 @@ export type HotkeyAction =
   | "session-slower"
   | "session-faster"
   | "session-next"
+  /** Shift+N in a Session: back one block, as N is on to the next (owner, 2026-11-18). */
+  | "session-prev"
   | "session-pedal"
   /** Escape in a Session: what Exit does. */
   | "session-exit"
@@ -165,21 +167,80 @@ export function isTypingTarget(target: EventTarget | null): boolean {
  *    focus, and Space there must go on meaning the hotkey ("space not working
  *    for play pause is by far the most annoying thing ever"). So off the
  *    learning pages the control only takes the key when it was reached by
- *    keyboard, which is what `:focus-visible` says.
+ *    keyboard (see `trackFocusModality`; `:focus-visible` alone is not
+ *    enough). In Zen only Zen's own controls can take it.
  *  - The Session's big button IS the Session action, and its click is not
  *    the key's (a key pauses a running warm-up; see `goKey`), so the key
  *    stays the Session's there.
  */
-export function focusedControlTakesKey(e: KeyboardEvent, view: string): boolean {
+export function focusedControlTakesKey(
+  e: KeyboardEvent,
+  view: string,
+  opts: { zen?: boolean } = {},
+): boolean {
   if (e.key !== "Enter" && e.key !== " ") return false;
   if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return false;
   const el = e.target as HTMLElement | null;
   if (!el || typeof el.matches !== "function") return false;
   if (!el.matches(ACTIVATABLE)) return false;
+  // Zen covers the whole window, and the button that opened it (the rail's
+  // Zen, a tool's own) keeps focus behind it. Space there "pressed" a button
+  // nobody can see, and the jam in front never started (the owner,
+  // 2026-11-18: "spacebar for playing on zen mode not working"). Only Zen's
+  // own controls can take the key while it is up.
+  if (opts.zen && !el.closest(".fullscreen-view")) return false;
   // A checkbox or radio toggles on Space only; Enter there is still a hotkey.
   if (e.key === "Enter" && el.matches('input[type="checkbox"], input[type="radio"]')) return false;
   if (LEARNING_VIEWS.has(view)) return true;
   if (el.closest(".session-big")) return false;
+  return focusedByKeyboard(el);
+}
+
+/*
+ * Was this control reached by keyboard, or clicked?
+ *
+ * `:focus-visible` alone cannot say, at the moment it is asked. Chromium (and
+ * so the Windows and Linux webviews) starts matching it on a clicked button
+ * as soon as a key goes down, BEFORE the key's listeners run: the
+ * heuristic is "the user is using the keyboard now". So every clicked button
+ * read as keyboard-focused to the key handler, and Space after any click in a
+ * tool or in Zen pressed that button again instead of Play/Stop.
+ *
+ * So the window remembers how each control got its focus: a focus that
+ * arrives on the heels of a pointer press is a click's, any other is the
+ * keyboard's (Tab, an arrow, or a script moving focus after a key).
+ */
+const pointerFocused = new WeakSet<Element>();
+let pointerDown = false;
+let modalityInstalled = false;
+
+/** Start tracking how focus arrives. Idempotent; the main window calls it. */
+export function trackFocusModality(doc: Document = document): void {
+  if (modalityInstalled) return;
+  modalityInstalled = true;
+  const onPointer = (e: Event) => {
+    pointerDown = true;
+    // A press on the control that already has focus makes it a clicked one,
+    // even though no focus event follows.
+    const active = doc.activeElement;
+    if (active && e.target instanceof Node && active.contains(e.target)) pointerFocused.add(active);
+  };
+  doc.addEventListener("pointerdown", onPointer, true);
+  doc.addEventListener("mousedown", onPointer, true);
+  doc.addEventListener("keydown", () => void (pointerDown = false), true);
+  doc.addEventListener(
+    "focusin",
+    (e) => {
+      if (!(e.target instanceof Element)) return;
+      if (pointerDown) pointerFocused.add(e.target);
+      else pointerFocused.delete(e.target);
+    },
+    true,
+  );
+}
+
+function focusedByKeyboard(el: HTMLElement): boolean {
+  if (pointerFocused.has(el)) return false;
   return matchesFocusVisible(el);
 }
 
@@ -272,8 +333,9 @@ export function eventToCombo(e: KeyboardEvent): string {
   if (e.altKey) parts.push("⌥");
   if (e.shiftKey) parts.push("⇧");
   const unshifted = e.shiftKey ? SHIFTED_PUNCTUATION[e.code] : undefined;
-  // A digit with Shift or Option is still the digit (2026-11-17): the tools sit
-  // on ⌥1–5, and the browser reports Shift+1 as "!" on a US keyboard, '"' on
+  // A digit with Shift or Option is still the digit (2026-11-17): a player may
+  // bind ⌥1 or ⇧1 (the tools sat on ⌥1–5 for a day), and the browser reports
+  // Shift+1 as "!" on a US keyboard, '"' on
   // a German one, and Option+1 as "¡" on a Mac. The digit row's PHYSICAL key
   // is the same everywhere, so `code` answers.
   const digit = (e.shiftKey || e.altKey) && /^Digit[0-9]$/.test(e.code ?? "") ? e.code.slice(5) : null;
@@ -470,20 +532,17 @@ export const HOTKEYS: HotkeyEntry[] = [
     group: "navigation",
   },
   /**
-   * The tools are ⌥1–5 (Alt+1–5) since 2026-11-17 (owner): ⌘1–4 went to the
-   * learning side, which is the app's front door now. A player who never
-   * changed these is moved over once (`hooks/keybindingMigration.ts`); one who
-   * did keeps theirs.
-   *
-   * Not ⌘⇧1–5, which was tried first: macOS takes ⌘⇧3, ⌘⇧4 and ⌘⇧5 for
-   * screenshots before any app hears them. Alt/Option with a digit is free on
-   * Windows, Linux and macOS, in WebView2 and WebKit; the digit is read from
-   * `e.code`, so Option+1 typing "¡" on a Mac still means 1.
+   * The tools are ⌘5–⌘9 since 2026-11-18 (owner): all nine rail entries on
+   * ⌘1–⌘9 in rail order, one modifier. ⌥+digit (the 2026-11-17 layout) is
+   * what tiling window managers such as GlazeWM and i3 take for workspaces,
+   * and ⌘⇧3/4/5 are macOS screenshots; ⌘+digit is free in the app on every OS.
+   * Players on an older layout's defaults move once
+   * (`hooks/keybindingMigration.ts`); keys they chose themselves stay.
    */
   {
     id: "tab-1",
     action: "Metronome tab",
-    key: "⌥1",
+    key: "⌘5",
     desc: "Switch to Metronome tab",
     group: "navigation",
   },
@@ -498,28 +557,28 @@ export const HOTKEYS: HotkeyEntry[] = [
   {
     id: "tab-2",
     action: "Setlist tab",
-    key: "⌥2",
+    key: "⌘6",
     desc: "Switch to Setlist tab",
     group: "navigation",
   },
   {
     id: "tab-3",
     action: "Drill tab",
-    key: "⌥3",
+    key: "⌘7",
     desc: "Switch to Drill tab",
     group: "navigation",
   },
   {
     id: "tab-4",
     action: "Jam tab",
-    key: "⌥4",
+    key: "⌘8",
     desc: "Switch to Jam tab",
     group: "navigation",
   },
   {
     id: "tab-5",
     action: "Songs tab",
-    key: "⌥5",
+    key: "⌘9",
     desc: "Switch to Songs tab",
     group: "navigation",
   },
@@ -800,6 +859,15 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Next step",
     key: "N",
     desc: "Between Takes: move on to the next thing in the Session",
+    group: "session",
+  },
+  // Back one block. Shift+N, as the jam's previous section is beside its N; by
+  // the prefix rule it is the Session's only on the Session.
+  {
+    id: "session-prev",
+    action: "Previous block",
+    key: "⇧N",
+    desc: "In a Session: back to the block before this one",
     group: "session",
   },
   {

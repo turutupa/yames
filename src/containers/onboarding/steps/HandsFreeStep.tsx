@@ -45,6 +45,7 @@ const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[]; label: string 
   { key: "pause", actions: ["session-pause"], label: "settings.hotkeys.actions.session-pause" },
   { key: "restart", actions: ["session-restart"], label: "settings.hotkeys.actions.session-restart" },
   { key: "next", actions: ["session-next"], label: "onboarding.handsFree.session.next" },
+  { key: "prev", actions: ["session-prev"], label: "settings.hotkeys.actions.session-prev" },
   { key: "tempo", actions: ["session-faster", "session-slower"], label: "onboarding.handsFree.session.tempo" },
   { key: "view", actions: ["session-view"], label: "onboarding.handsFree.session.view" },
   { key: "exit", actions: ["session-exit"], label: "settings.hotkeys.actions.session-exit" },
@@ -52,7 +53,7 @@ const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[]; label: string 
 
 /**
  * Getting around, on one quiet line (2026-11-18): the learning screens on
- * ⌘1–⌘4 and the tools on ⌥1–⌥5, read from the same bindings as the rows above.
+ * ⌘1–⌘4 and the tools on ⌘5–⌘9, read from the same bindings as the rows above.
  */
 const NAV_GROUPS: Array<{ key: string; actions: HotkeyAction[] }> = [
   { key: "learning", actions: ["tab-today", "tab-paths", "tab-progress", "tab-tools"] },

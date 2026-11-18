@@ -259,7 +259,8 @@
         "tab-tools": "Araçlar",
         "session-view": "Görünümü değiştir",
         "session-pause": "Duraklat / devam",
-        "session-restart": "Kaydı baştan başlat"
+        "session-restart": "Kaydı baştan başlat",
+        "session-prev": "Önceki bloğa dön"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -316,7 +317,8 @@
         "tab-tools": "Araçlar'a git",
         "session-view": "Bir oturumda: Sap, Pist ya da Tab. Isınmada her zaman; notlananda kayıtlar arasında",
         "session-pause": "Isınmada ya da süreli blokta: duraklat ya da devam et",
-        "session-restart": "Isınmada ya da süreli blokta: baştan. Bir kayıttan sonra: aynı kayıt yeniden"
+        "session-restart": "Isınmada ya da süreli blokta: baştan. Bir kayıttan sonra: aynı kayıt yeniden",
+        "session-prev": "Oturumda: bundan önceki bloğa dön"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Seans süresi",
       "minutesHint": "Bugün'ün pratiğini ne kadar süreye planladığı. Bunu Bugün'den de değiştirebilirsin.",
       "view": "Pratik görünümü",
-      "viewHint": "Sen çalarken bir seansın gösterdiği şey."
+      "viewHint": "Sen çalarken bir seansın gösterdiği şey.",
+      "grade": "Çalışımı değerlendir",
+      "gradeHint": "Kapalı: oturumlar dinlemez ve hiçbir şeyi değerlendirmez. Dakikaların ve serin yine sayılır."
     }
   },
   "keybindings": {

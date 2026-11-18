@@ -11,6 +11,7 @@ import {
   scheduleCoachIdleUnload,
 } from "./coachLoader";
 import { loadHistoryWithBudget, renderGreeting } from "../coach/greeting";
+import { safeRephrase } from "../coach/rephraseGuard";
 import {
   appendCoachUtterance,
   appendInstrumentChange,
@@ -100,6 +101,22 @@ export function __resetHistoryNoticeForTests(): void {
 }
 
 type Evaluation = ReturnType<typeof useEvaluation>;
+
+/** How a coach session is opened. */
+export interface StartSessionOptions {
+  /**
+   * Opened for a learning-side Session, not by the coach's Start: listen and
+   * save to the history, but greet nobody, open no card and leave the feed as
+   * it was (`quietRef`).
+   */
+  quiet?: boolean;
+  /**
+   * `false`: open the coach session without turning the input on. A learning
+   * Session played without grading (owner, 2026-11-18) never asks for a
+   * microphone it will not use.
+   */
+  listen?: boolean;
+}
 
 interface UseSessionOptions {
   evaluation: Evaluation;
@@ -240,6 +257,17 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   // can do a synchronous "is the session still alive?" check before
   // calling `maybeSpeak(...)` or `setMessages(...)`.
   const activeRef = useRef(false);
+  /**
+   * The session was opened by someone other than the player: a learning-side
+   * Session (`useSessionRun`) uses this hook only to listen and to write the
+   * history. It posts nothing to the coach's feed, does not open the card and
+   * does not greet: the player never pressed the coach's Start, and finding
+   * a greeting and an end card there afterwards reads as the coach making
+   * things up (owner report, 2026-11-18).
+   */
+  const quietRef = useRef(false);
+  /** The last tempo the click actually played at during this session. */
+  const playedBpmRef = useRef<number | null>(null);
 
   // ── C1: Session Narrative ─────────────────────────────────────
   // Compact 2KB running log of the session arc. Seeded on
@@ -462,6 +490,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   // segmentStartRef and beatsInSegmentRef (those are segment-scoped,
   // not playback-scoped).
   useEffect(() => { playBpmRef.current = bpm; }, [bpm]);
+  // What a quiet session saves as its tempo. The bpm at its end is not it: a
+  // learning Session hands the metronome back to the player's own tempo as it
+  // ends, so the end would record that (often the 120 default) instead.
+  useEffect(() => {
+    if (isPlaying && activeRef.current) playedBpmRef.current = bpm;
+  }, [bpm, isPlaying]);
 
   // Nothing is loaded at mount.
   //
@@ -815,9 +849,9 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
               // genuinely "what the user just heard."
               recentUtterances: shuffleStateRef.current.ring.slice(-3),
             });
-            const rephrased = await coachGenerate("tip", llmPrompt);
-            if (rephrased && rephrased.trim()) {
-              comment = rephrased.trim();
+            const rephrased = safeRephrase(template, await coachGenerate("tip", llmPrompt));
+            if (rephrased !== template) {
+              comment = rephrased;
               // Prime the similarity ring with the LLM rephrase too,
               // so the next pick doesn't echo a line the user JUST
               // heard verbatim.
@@ -1230,12 +1264,16 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     return () => { unlisten?.(); };
   }, [active]);
 
-  const startSessionNow = useCallback(async () => {
+  const startSessionNow = useCallback(async (options?: StartSessionOptions) => {
     if (activeRef.current) {
       coachDebug("startSession.noop-already-active");
       return;
     }
-    coachDebug("startSession", { bpm, presetId, presetName, timeSignature, instrument });
+    // `=== true`: the card's Start button hands its click event in here.
+    const quiet = options?.quiet === true;
+    quietRef.current = quiet;
+    playedBpmRef.current = null;
+    coachDebug("startSession", { bpm, presetId, presetName, timeSignature, instrument, quiet });
 
     // Bump session ID FIRST to invalidate any in-flight stale reports
     sessionIdRef.current++;
@@ -1268,14 +1306,17 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     setActive(true);
     startedAtRef.current = now;
     setStartedAt(now);
-    setCardOpen(true);
+    if (!quiet) {
+      setCardOpen(true);
 
-    // Clear the feed synchronously BEFORE awaiting history. Without this,
-    // any messages from a prior session stay visible for up to 500ms
-    // while `loadHistoryWithBudget` races, producing a "stale state" flash
-    // where the user sees the previous session's tips and session-end card
-    // even though they just clicked Start on a new session.
-    setMessages([]);
+      // Clear the feed synchronously BEFORE awaiting history. Without this,
+      // any messages from a prior session stay visible for up to 500ms
+      // while `loadHistoryWithBudget` races, producing a "stale state" flash
+      // where the user sees the previous session's tips and session-end card
+      // even though they just clicked Start on a new session.
+      // A quiet session leaves the feed as the player last saw it.
+      setMessages([]);
+    }
 
     // Clear backend session data in background — don't block UI
     clearSession().catch(() => {});
@@ -1372,7 +1413,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       now,
     });
 
-    setMessages([{
+    if (!quiet) setMessages([{
       id: greetingId,
       type: "session-start",
       timestamp: now,
@@ -1391,12 +1432,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // greeting twice. When no LLM is loaded, speak the template right
     // away since it's all we'll get; the spinner reveals in lockstep
     // with the audio.
-    if (!coachLoadedRef.current) {
+    if (!quiet && !coachLoadedRef.current) {
       speakAndReveal(greetingId, greeting.text);
     }
 
     // Record the greeting as the first coach utterance in the narrative.
-    if (narrativeRef.current) {
+    if (!quiet && narrativeRef.current) {
       narrativeRef.current = appendCoachUtterance(
         narrativeRef.current,
         greeting.text,
@@ -1406,9 +1447,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
 
     // Awaited, inside the lifecycle queue: an end asked for now runs after
     // the input is on, so its stop cannot overtake this start (B1).
-    await evaluation.setListening(true).catch((e: unknown) => {
-      console.error("[startSession] the input would not start:", e);
-    });
+    if (options?.listen !== false) {
+      await evaluation.setListening(true).catch((e: unknown) => {
+        console.error("[startSession] the input would not start:", e);
+      });
+    }
 
     // LLM paraphrase path — the coach LLM (when available) gets the
     // already-filled template + structured context and is asked to
@@ -1416,7 +1459,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // calls this "LLM as paraphraser, never deciding what to say."
     // If the model is unavailable or times out, the template greeting
     // above ships as-is and is spoken via the fallback branches below.
-    if (coachLoadedRef.current) {
+    if (!quiet && coachLoadedRef.current) {
       const token = createSessionToken(sessionIdRef, activeRef);
       const tierGreeting = greeting; // capture for the closure
       (async () => {
@@ -1430,9 +1473,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
           } else {
             context = `Rephrase this practice-coach greeting for a player of ${instrumentLabel}. Preserve every number; keep it warm and short (1-2 sentences).\n\nOriginal: "${tierGreeting.text}"`;
           }
-          const rephrased = await coachGenerate("greeting", context);
+          // The model may reword the greeting, never add to it: a rephrase
+          // that brings a number or a unit of its own is dropped for the
+          // template (it once invented "this week's 120 BPM reps").
+          const rephrased = safeRephrase(tierGreeting.text, await coachGenerate("greeting", context));
           if (token.isStaleOrInactive()) return;
-          if (!rephrased || !rephrased.trim()) {
+          if (rephrased === tierGreeting.text) {
             // LLM returned nothing useful — fall back to speaking the
             // template greeting we've already shown in the feed. The
             // message stays `pending: true` until the audio starts.
@@ -1583,8 +1629,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     }
 
     // End session immediately — no freeze
+    const quiet = quietRef.current;
+    quietRef.current = false;
     const endMsgId = crypto.randomUUID();
-    const placeholderComment = sessionReport ? "Session complete." : "Session ended — no data recorded.";
+    const placeholderComment = "Session complete.";
     // Only mark pending when we know an LLM summary will be generated
     // AND voice mode is on — otherwise the placeholder text is the
     // final text and there's no spinner-to-text swap to do. The actual
@@ -1593,7 +1641,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // A summary is generated whenever there's a report — `coach_generate`
     // falls back to the Rust session-summary template when no model is
     // resident, so this no longer keys off `coachLoadedRef`.
-    const willSpeakSummary = !!sessionReport && voiceMode === "voice";
+    const willSpeakSummary = !!sessionReport && !quiet && voiceMode === "voice";
     const endMsg: FeedMessage = {
       id: endMsgId,
       type: "session-end",
@@ -1605,10 +1653,21 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       segments: miniReportSegments.length > 0 ? miniReportSegments : undefined,
       pending: willSpeakSummary,
     };
-    setMessages((prev) => [...prev, endMsg]);
+    const sessionStartedAt = startedAtRef.current;
+    if (quiet) {
+      // Nothing a quiet session said stays in the feed: the player never
+      // opened it. What was there before it is left as it was.
+      const since = sessionStartedAt ?? now;
+      setMessages((prev) => prev.filter((m) => m.timestamp < since));
+    } else if (sessionReport) {
+      // A session that recorded nothing gets no end card. There is nothing
+      // to report, and "no data recorded" under a session the player may not
+      // even have meant to start is noise; the Start button coming back says
+      // it ended.
+      setMessages((prev) => [...prev, endMsg]);
+    }
 
     segmentReportsRef.current = [];
-    const sessionStartedAt = startedAtRef.current;
     setActive(false);
     startedAtRef.current = null;
     setStartedAt(null);
@@ -1620,11 +1679,13 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       saveSession({
         id: crypto.randomUUID(),
         timestamp: sessionStartedAt ?? now,
-        bpm,
+        // A quiet session is a learning Session: its tempo is the one it was
+        // played at, and the metronome's preset is not what it played.
+        bpm: quiet ? (playedBpmRef.current ?? bpm) : bpm,
         timeSignature,
         report: sessionReport,
-        presetId: presetId,
-        presetName: presetName,
+        presetId: quiet ? undefined : presetId,
+        presetName: quiet ? undefined : presetName,
         segments: miniReportSegments.length > 0 ? miniReportSegments : undefined,
       })
         .then((outcome) => {
@@ -1655,7 +1716,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // template, which is the only session wrap-up a template-mode user
     // ever gets. Gating here would leave them staring at the bare
     // "Session complete." placeholder.
-    if (sessionReport) {
+    if (sessionReport && !quiet) {
       // Capture a token so we can drop the result if the user starts
       // a NEW session before the LLM call resolves. Without this guard,
       // the old session's spoken summary leaks into the next session
@@ -1768,7 +1829,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     lifecycle.current = next.catch(() => {});
     return next;
   }, []);
-  const startSession = useCallback(() => inTurn(() => startNowRef.current()), [inTurn]);
+  const startSession = useCallback(
+    (options?: StartSessionOptions) => inTurn(() => startNowRef.current(options)),
+    [inTurn],
+  );
   const isActive = useCallback(() => activeRef.current, []);
   const endSession = useCallback(() => inTurn(() => endNowRef.current()), [inTurn]);
 

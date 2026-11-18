@@ -50,6 +50,7 @@ import {
   storeSave,
   togglePlayback,
   openFeedback,
+  MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
@@ -124,6 +125,7 @@ import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
 import { isLearnTab, isPlayTab, type PlayTab } from "./hooks/useTabRouting";
 import { useSessionRun } from "../session/hooks/useSessionRun";
+import { startSessionInput } from "../../session/inputStart";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
 import { TodayView } from "../session/TodayView";
 import { SessionView } from "../session/SessionView";
@@ -181,6 +183,7 @@ import {
   platformKey,
   actionForCombo,
   focusedControlTakesKey,
+  trackFocusModality,
   sessionKeyIsInert,
   eventToCombo,
   isTypingTarget,
@@ -584,6 +587,20 @@ export function MainWindow() {
     state,
     coach: session,
     listening: evaluation.enabled,
+    // A Session turns the input on by itself, and says why when it cannot
+    // (owner, beta 6: Start take did nothing with the input off).
+    startInput: async () => {
+      const started = await startSessionInput({
+        setListening: (on, device) => evaluation.setListening(on, device),
+        selectedDevice: evaluation.selectedDevice,
+        devices: evaluation.devices,
+        // A phone's permission dialog has its own minute (`MIC_PERMISSION_TIMEOUT_MS`).
+        timeoutMs: IS_MOBILE ? MIC_PERMISSION_TIMEOUT_MS + 5_000 : undefined,
+      });
+      const name = started.device ?? evaluation.devices.find((d) => d.isDefault)?.name ?? null;
+      return { device: name, fellBack: started.fellBack };
+    },
+    stopInput: () => evaluation.setListening(false),
     directInput: evaluation.devices.find((d) => d.name === evaluation.selectedDevice)?.isInterface === true,
     jams: jamSession.jams,
     lineup: jamSession.lineup,
@@ -1494,7 +1511,7 @@ export function MainWindow() {
 
   // Escape in a tool, with nothing in it left to put away, goes back to Tools
   // (UX audit TOOL-3). What counts as "left to put away" is the hook's.
-  // Back where the tool was opened from: Alt+1-5 from Today opens a tool
+  // Back where the tool was opened from: Ctrl+5-9 from Today opens a tool
   // straight from Today, and Escape there landed on Tools, a page the player
   // never saw (acceptance pass 2, P2-8). From Tools itself, or from another
   // tool, it is Tools as before.
@@ -1646,6 +1663,7 @@ export function MainWindow() {
       slower: sessionRun.actions.slower,
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
+      previous: sessionRun.actions.previous,
       pedalPress: () => pedalPress.current(),
       // Escape: a running Take stops first; leaving asks once there are Takes.
       exit: sessionRun.actions.escape,
@@ -1658,6 +1676,7 @@ export function MainWindow() {
     [
       sessionRun.actions.togglePause,
       sessionRun.actions.restart,
+      sessionRun.actions.previous,
       sessionRun.actions.cycleView,
       sessionRun.actions.escape,
       sessionRun.actions.startToday,
@@ -1695,6 +1714,11 @@ export function MainWindow() {
     toggleCard: session.toggleCard,
     forceWebviewFocus,
   });
+
+  // How each control got its focus, which `focusedControlTakesKey` reads.
+  useEffect(() => {
+    if (!IS_MOBILE) trackFocusModality();
+  }, []);
 
   // Unified local hotkey dispatcher — reads from keyBindings
   useEffect(() => {
@@ -1754,7 +1778,7 @@ export function MainWindow() {
       }
       if (!actionId) return;
       // Enter or Space on a focused button is that button's (N-P1-1).
-      if (focusedControlTakesKey(e, view)) return;
+      if (focusedControlTakesKey(e, view, { zen: isFullscreen })) return;
       // A Session key off the Session means nothing (the dispatcher drops it),
       // so it must not eat the key either: Enter stays the page's own.
       if (sessionKeyIsInert(actionId, view)) return;
@@ -2579,6 +2603,10 @@ export function MainWindow() {
             pauseKey={platformKey(keyBindings["session-pause"] || "")}
             restartKey={platformKey(keyBindings["session-restart"] || "")}
             skipKey={platformKey(keyBindings["session-next"] || "")}
+            previousKey={platformKey(keyBindings["session-prev"] || "")}
+            inputDevice={evaluation.openDevice ?? evaluation.selectedDevice ?? null}
+            onChooseInput={openAudioSettings}
+            onTestInput={() => setInputTestOpen(true)}
             pedalMapped={
               !!keyBindings["session-pedal"] ||
               !!footBindings["session-pedal"] ||
@@ -2695,6 +2723,8 @@ export function MainWindow() {
               setMinutes: sessionRun.setMinutes,
               practiceView: sessionRun.practiceView,
               setPracticeView: sessionRun.setPracticeView,
+              grade: sessionRun.grade,
+              setGrade: sessionRun.setGrade,
             }}
             shareTooltip={shareTooltip}
             onShareOption={handleShareOption}

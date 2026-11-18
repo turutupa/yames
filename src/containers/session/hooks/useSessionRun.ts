@@ -88,8 +88,11 @@ import {
   TIMED_BPM_STEP,
   bigAction,
   canGoBack,
+  canJump,
   currentStep,
   eventForBigAction,
+  hasPrevious,
+  jumpNeedsAsking,
   leaveNeedsAsking,
   runReducer,
   timedBpm,
@@ -97,13 +100,27 @@ import {
   timedTempoLive,
   tempoNudges,
 } from "../../../session/runner";
-import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
+import type { BigAction, RunState, TakeOutcome, UngradedWhy } from "../../../session/runner";
+import { classifyInputError } from "../../../session/inputStart";
+import type { InputFailure } from "../../../session/inputStart";
 import { TAKE_COUNT_IN_BARS, buildTake } from "../../../session/take";
 import { GUITAR_BAND, bandVolumeFor, buildTakeBand, readBandVolume, takeMix } from "../../../session/takeBand";
 import type { SongBacking } from "../../../songs/types";
 import { DEFAULT_PRACTICE_VIEW, isPracticeView, nextPracticeView } from "../highway/runwayModel";
 import type { PracticeView } from "../highway/runwayModel";
 import type { TakePlan } from "../../../session/take";
+import {
+  SWAPS_KEY,
+  applySwaps,
+  avoidSet,
+  forgetSwap,
+  readSwapMemory,
+  refOf,
+  rememberSwap,
+  swapMemoryOn,
+  swapOptions,
+} from "../../../session/swap";
+import type { SwapChoice, SwapMemory, SwapOptions } from "../../../session/swap";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
 const TAKES_TO_READ = 500;
@@ -116,6 +133,8 @@ const PRACTICE_VIEW_KEY = "practiceView";
 const VIEW_HINT_KEY = "session.viewHintSeen";
 /** How loud the band is under a jam-backed Take, 0..1.5 (0 is the click alone). */
 const BAND_VOLUME_KEY = "session.bandVolume";
+/** Settings → Practice → "Grade my playing". Off: every Session is played without grading. */
+export const GRADE_KEY = "session.grade";
 const TICK_MS = 1000;
 /** Minutes per Exercise in Test out: one Take at the pass tempo, and a breath. */
 /** How many recent timing deviations the running screen's strip shows. */
@@ -133,6 +152,31 @@ export type LiveTake = {
 };
 
 const NO_LIVE: LiveTake = { heard: 0, missed: 0, bars: 0, countingIn: false, deviations: [] };
+
+/**
+ * The Session's own ask for the input (owner, beta 6): idle, on its way, or
+ * refused, with what was opened when it came on.
+ */
+export type InputStartState = {
+  status: "idle" | "starting" | "failed";
+  failure: InputFailure | null;
+  /** The device the Session opened, by name, once it is on; null when nothing is known. */
+  device: string | null;
+  /** The selected device was gone and the system's default was opened instead. */
+  fellBack: boolean;
+};
+
+const INPUT_IDLE: InputStartState = { status: "idle", failure: null, device: null, fellBack: false };
+
+/** A grade that says nothing: the Take was played without grading. */
+const UNGRADED_GRADE: TakeGrade = {
+  verdict: "ungraded",
+  checks: [],
+  headline: null,
+  unmeasured: [],
+  cleanBpm: null,
+  passesExercise: false,
+};
 
 type EngineSnapshot = {
   bpm: number;
@@ -153,11 +197,23 @@ export type SessionRunInput = {
     /** `active` as of the calls made, not the last render (`useSession`). */
     isActive?: () => boolean;
     cardOpen: boolean;
-    startSession: () => Promise<void>;
+    /**
+     * `quiet`: a Session's coach session is for the history, not the coach's feed.
+     * `listen: false`: a Session played without grading, which never asks for the input.
+     */
+    startSession: (options?: { quiet?: boolean; listen?: boolean }) => Promise<void>;
     endSession: () => Promise<void>;
     toggleCard: () => void;
   };
   listening: boolean;
+  /**
+   * Turn the input on for this Session (`startSessionInput`): resolves with the
+   * device's name once it is on, rejects with an error `classifyInputError`
+   * reads. Absent where there is no input to turn on.
+   */
+  startInput?: () => Promise<{ device: string | null; fellBack: boolean }>;
+  /** Turn it off again: a Session hands back an input it turned on. */
+  stopInput?: () => Promise<unknown>;
   /**
    * The guitar comes in through an interface (the selected input device is one
    * the engine recognises as such), so nothing the speakers play reaches it.
@@ -292,6 +348,13 @@ export function useSessionRun(input: SessionRunInput) {
   const [minutes, setMinutesState] = useState<PlanMinutes>(10);
   const [practiceView, setPracticeViewState] = useState<PracticeView>(DEFAULT_PRACTICE_VIEW);
   const [viewHintSeen, setViewHintSeen] = useState(false);
+  /** Settings → Practice → "Grade my playing", kept. */
+  const [grade, setGradeState] = useState(true);
+  const [inputStart, setInputStart] = useState<InputStartState>(INPUT_IDLE);
+  const inputStartRef = useRef(inputStart);
+  inputStartRef.current = inputStart;
+  /** A block asked for from the bar while something runs: "Go there?" is on screen. */
+  const [jumpAsked, setJumpAsked] = useState<number | null>(null);
   /** The player's band volume, or null for "never set" (the default then depends on the input). */
   const [bandChoice, setBandChoice] = useState<number | null>(null);
   /** The band on the engine now (a Take's, or the finisher's), for live volume moves. */
@@ -312,6 +375,8 @@ export function useSessionRun(input: SessionRunInput) {
   const [live, setLive] = useState<LiveTake>(NO_LIVE);
   // Stamped once a view opens, so a plan does not rebuild on every second.
   const [planClock, setPlanClock] = useState(() => Date.now());
+  /** Today's swaps as kept (`session/swap.ts`); undefined until the store has answered. */
+  const [swapStored, setSwapStored] = useState<SwapMemory | null | undefined>(undefined);
 
   const latest = useRef(input);
   latest.current = input;
@@ -348,6 +413,28 @@ export function useSessionRun(input: SessionRunInput) {
    */
   const ownsCoach = useRef(false);
   const coachEnding = useRef<Promise<unknown> | null>(null);
+
+  /**
+   * The Session's own hold on the input (owner, beta 6). It used to have
+   * none: the input came on as a side effect of the coach session starting,
+   * whose failure went to the console, and a Take's Start then did nothing.
+   */
+  /** Bumped by every ask, so an answer to an older one is dropped. */
+  const inputAttempt = useRef(0);
+  /** This Session turned the input on: it hands it back when it ends. */
+  const turnedOnInput = useRef(false);
+  /** The input was on when this Session began. */
+  const inputWasOn = useRef(false);
+  /** The last ask was refused: no more asking by itself, only from a press. */
+  const autoInputFailed = useRef(false);
+  const gradeRef = useRef(grade);
+  gradeRef.current = grade;
+  /**
+   * Go again starts the count-in by itself (UX audit SES-4), and so does a
+   * Start pressed while the input is still coming on. Either is a request the
+   * next ready state answers, not a start on the old Take.
+   */
+  const autoStart = useRef(false);
 
   // --- what the store knows ------------------------------------------------
   const loadedRef = useRef(false);
@@ -388,6 +475,12 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
       setBandChoice(readBandVolume(saved));
     });
+    void storeLoad<boolean>(GRADE_KEY).then((saved) => {
+      if (saved === false) setGradeState(false);
+    });
+    void storeLoad<unknown>(SWAPS_KEY)
+      .then((saved) => setSwapStored(readSwapMemory(saved)))
+      .catch(() => setSwapStored(null));
   }, [wantsLearning, refresh]);
 
   // The packs, in the language on screen: loaded with the learning side, and
@@ -422,6 +515,12 @@ export function useSessionRun(input: SessionRunInput) {
     void storeSave(BAND_VOLUME_KEY, level).catch(() => {});
   }, []);
 
+  /** "Grade my playing": the next Session starts graded or not; one running now is left as it is. */
+  const setGrade = useCallback((next: boolean) => {
+    setGradeState(next);
+    void storeSave(GRADE_KEY, next).catch(() => {});
+  }, []);
+
   /** The one-time hint is done with: switched once, or read once. */
   const dismissViewHint = useCallback(() => {
     setViewHintSeen((seen) => {
@@ -441,9 +540,63 @@ export function useSessionRun(input: SessionRunInput) {
 
   const myPaths = useMemo(() => playerPaths(paths, progress), [paths, progress]);
 
+  // The swaps as they stand today: yesterday's become this plan's penalty.
+  const swapMemory = useMemo(() => swapMemoryOn(swapStored ?? null, planClock), [swapStored, planClock]);
+  // A new day changed what is kept: write it down, once the store has answered.
+  useEffect(() => {
+    if (swapStored === undefined) return;
+    if (swapStored?.day === swapMemory.day) return;
+    if (swapStored === null && swapMemory.swaps.length === 0 && swapMemory.avoid === null) return;
+    setSwapStored(swapMemory);
+    void storeSave(SWAPS_KEY, swapMemory).catch(() => {});
+  }, [swapStored, swapMemory]);
+  const swapContext = useMemo(
+    () => ({ paths: myPaths, allPaths: paths, progress, now: planClock }),
+    [myPaths, paths, progress, planClock],
+  );
+  const basePlan: SessionPlan = useMemo(
+    () => planSession({ minutes, now: planClock, paths: myPaths, progress, avoid: avoidSet(swapMemory) }),
+    [minutes, planClock, myPaths, progress, swapMemory],
+  );
   const plan: SessionPlan = useMemo(
-    () => planSession({ minutes, now: planClock, paths: myPaths, progress }),
-    [minutes, planClock, myPaths, progress],
+    () => applySwaps(basePlan, swapMemory.swaps, swapContext),
+    [basePlan, swapMemory.swaps, swapContext],
+  );
+
+  /** What Today's row `index` can be swapped for (owner, 2026-11-18). */
+  const swapOptionsAt = useCallback(
+    (index: number, choice: SwapChoice): SwapOptions => swapOptions(plan, index, choice, swapContext),
+    [plan, swapContext],
+  );
+  const keepSwaps = useCallback((next: SwapMemory) => {
+    setSwapStored(next);
+    void storeSave(SWAPS_KEY, next).catch(() => {});
+  }, []);
+  /** Row `index` plays `replacement` today, in the same minutes. */
+  const confirmSwap = useCallback(
+    (index: number, replacement: PlanStep) => {
+      const shown = plan.steps[index];
+      const base = shown ? basePlan.steps.find((s) => s.id === shown.id) : undefined;
+      const from = base ? refOf(base) : null;
+      const now = shown ? refOf(shown) : null;
+      const to = refOf(replacement);
+      if (!shown || !from || !now || !to || replacement.id !== shown.id) return;
+      // Back to what the planner had: that is no swap at all.
+      if (from.pathId === to.pathId && from.exerciseId === to.exerciseId) {
+        keepSwaps(forgetSwap(swapMemory, shown.id));
+        return;
+      }
+      keepSwaps(rememberSwap(swapMemory, shown.id, from, to, now));
+    },
+    [plan, basePlan, swapMemory, keepSwaps],
+  );
+  /** Row `index` back as the planner had it. */
+  const undoSwap = useCallback(
+    (index: number) => {
+      const shown = plan.steps[index];
+      if (shown) keepSwaps(forgetSwap(swapMemory, shown.id));
+    },
+    [plan, swapMemory, keepSwaps],
   );
 
   // --- what is on the stage ------------------------------------------------
@@ -757,6 +910,59 @@ export function useSessionRun(input: SessionRunInput) {
     if (state.phase !== "listening" || !current || !stepNow || stepNow.kind !== "exercise") return;
 
     const played = take?.bars ?? 0;
+    // Played without grading (owner, 2026-11-18): practice, kept as such.
+    // Minutes and the streak count it; nothing about the bar moves.
+    if (state.ungraded) {
+      const barsPlayed = playedOut.current ? played : Math.min(played, Math.max(0, barsReached.current - 1));
+      const quiet: TakeMeasures = { ...measureTake(null, { barsPlayed }), caught: false };
+      const { path, step: pathStep, exercise } = current;
+      const now = Date.now();
+      const row: PathTakeRow = {
+        id: newAttemptId(),
+        pathId: path.id,
+        stepId: pathStep.id,
+        exerciseId: exercise.id,
+        startedAt: takeStartedAt.current || now,
+        bpm: state.bpm,
+        bars: barsPlayed,
+        caught: false,
+        passed: false,
+        ...(stepNow.variantSeed === null ? {} : { variantSeed: stepNow.variantSeed }),
+        facts: {
+          measures: quiet,
+          verdict: "ungraded",
+          ungraded: state.ungraded,
+          session: state.startedAt,
+          role: stepNow.role,
+          reason: stepNow.why.code,
+          newClean: false,
+          view: practiceViewRef.current,
+        } satisfies TakeFacts & { view: string },
+      };
+      dispatch({
+        type: "takeResult",
+        now,
+        outcome: {
+          stepId: stepNow.id,
+          exerciseId: exercise.id,
+          title: exercise.title,
+          bpm: state.bpm,
+          takeNumber: state.takes + 1,
+          measures: quiet,
+          grade: UNGRADED_GRADE,
+          previousValue: null,
+          cleanBefore: cleanTempoOf(progress, path.id, exercise.id),
+          takeId: row.id,
+          ungraded: state.ungraded,
+        },
+      });
+      setProgress((p) => ({ ...p, takes: [row, ...p.takes] }));
+      // No clean tempo with it, ever.
+      void savePathTake(row, null).catch((err) => {
+        console.warn("[yames] could not keep the Take", err);
+      });
+      return;
+    }
     const measures: TakeMeasures = measureTake(attempt.review?.segment ?? null, {
       // Played to the end, the engine stopped itself on the last bar's line and
       // every bar is finished. Stopped early, the bar it stopped in is not.
@@ -915,6 +1121,16 @@ export function useSessionRun(input: SessionRunInput) {
       await setBpm(saved.bpm).catch(() => {});
     });
     const { coach } = latest.current;
+    // An input this Session turned on, that was off before it and that no
+    // coach session of ours will stop, is handed back off (owner, beta 6:
+    // "restore the previous state when the Session ends").
+    inputAttempt.current += 1;
+    setInputStart(INPUT_IDLE);
+    autoInputFailed.current = false;
+    if (turnedOnInput.current && !inputWasOn.current && !ownsCoach.current) {
+      void latest.current.stopInput?.()?.catch?.(() => {});
+    }
+    turnedOnInput.current = false;
     // Through `useSession`: this is what writes the Session into the history.
     if (ownsCoach.current) {
       ownsCoach.current = false;
@@ -947,9 +1163,16 @@ export function useSessionRun(input: SessionRunInput) {
 
   // --- what the player can do ----------------------------------------------
   const begin = useCallback(
-    (next: SessionPlan, options: { untimed?: boolean } = {}) => {
+    (next: SessionPlan, options: { untimed?: boolean; at?: number } = {}) => {
       if (next.steps.length === 0) return;
       const { state, coach } = latest.current;
+      inputWasOn.current = latest.current.listening;
+      turnedOnInput.current = false;
+      autoInputFailed.current = false;
+      inputAttempt.current += 1;
+      setInputStart(INPUT_IDLE);
+      setJumpAsked(null);
+      const ungraded: UngradedWhy | null = gradeRef.current ? null : "gradingOff";
       snapshot.current = {
         bpm: state.bpm,
         subdivision: state.subdivision,
@@ -976,18 +1199,32 @@ export function useSessionRun(input: SessionRunInput) {
           void savePathState(row).catch(() => {});
         }
       }
-      dispatch({ type: "start", plan: next, now, untimed: options.untimed === true });
+      dispatch({ type: "start", plan: next, now, untimed: options.untimed === true, at: options.at, ungraded });
       origin.current = sessionOrigin(latest.current.view);
       setView("session");
       if (!theirs) {
         ownsCoach.current = true;
-        void coach.startSession().catch(() => {});
+        // Quiet: the Session listens and saves through the coach, but the
+        // player never pressed the coach's Start, so its feed is left alone.
+        // Grading off: no microphone either.
+        void coach.startSession({ quiet: true, listen: ungraded === null }).catch(() => {});
       }
     },
     [progress, setView],
   );
 
   const startToday = useCallback(() => begin(plan), [begin, plan]);
+
+  /**
+   * Today's plan, from its row `index` (owner, 2026-11-18). The same Session as
+   * Start: the blocks before it stay in the plan, neither done nor skipped, so
+   * the bar (or Previous) can still take the player back to them. Next runs on
+   * from the block chosen; the end of the plan is the recap.
+   */
+  const startTodayAt = useCallback(
+    (index: number) => begin(plan, { at: Math.max(0, Math.min(plan.steps.length - 1, index)) }),
+    [begin, plan],
+  );
 
   /** One Exercise, from its Step's page: a short Session of just that. */
   const playExercise = useCallback(
@@ -1197,21 +1434,66 @@ export function useSessionRun(input: SessionRunInput) {
   }, [run.phase, step, big, paths, progress]);
 
   const playTake = useCallback(() => {
-    if (!prepared || !listening) return;
+    // Graded, it needs the input; played without grading, it never does.
+    if (!prepared || !(listening || runRef.current.ungraded)) return;
     void enqueue(() => setPlaying(true));
   }, [prepared, listening, enqueue]);
+
+  /**
+   * Ask for the input now. Resolves true once it is on. A refusal is kept, in
+   * words the ready screen can say, and stops any Start that was waiting on it.
+   */
+  const startInputNow = useCallback((): Promise<boolean> => {
+    const start = latest.current.startInput;
+    if (!start) return Promise.resolve(false);
+    const mine = ++inputAttempt.current;
+    setInputStart({ ...INPUT_IDLE, status: "starting" });
+    return start().then(
+      (started) => {
+        if (inputAttempt.current !== mine) return false;
+        turnedOnInput.current = true;
+        autoInputFailed.current = false;
+        setInputStart({ status: "idle", failure: null, device: started.device, fellBack: started.fellBack });
+        return true;
+      },
+      (err: unknown) => {
+        if (inputAttempt.current !== mine) return false;
+        console.warn("[yames] the Session could not turn the input on", err);
+        autoInputFailed.current = true;
+        autoStart.current = false;
+        setInputStart({ ...INPUT_IDLE, status: "failed", failure: classifyInputError(err) });
+        return false;
+      },
+    );
+  }, []);
+
+  /**
+   * A Take's ready screen with the input off, graded: turn it on by itself
+   * (owner, beta 6), once. After a refusal it waits for a press, so a missing
+   * device is not asked for again on every screen.
+   */
+  useEffect(() => {
+    if (run.phase !== "ready" || run.ungraded || listening) return;
+    if (autoInputFailed.current || inputStartRef.current.status === "starting") return;
+    void startInputNow();
+    // Each ready screen, and a change of mind about grading.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.phase, run.stepIndex, run.takes, run.ungraded, listening]);
+
+  // On from anywhere (Settings, the wizard, a late answer): nothing failed any more.
+  useEffect(() => {
+    if (listening && inputStartRef.current.status === "failed") {
+      autoInputFailed.current = false;
+      setInputStart(INPUT_IDLE);
+    }
+  }, [listening]);
 
   const endTake = useCallback(() => {
     void enqueue(() => setPlaying(false));
   }, [enqueue]);
 
-  /**
-   * Go again starts the count-in by itself (UX audit SES-4): one press, not
-   * one to get back to the ready screen and another to start. The Take still
-   * waits until its song is on the engine and the input is open, so this is
-   * a request the next ready state answers, not a start on the old Take.
-   */
-  const autoStart = useRef(false);
+  // Go again, or a Start pressed while the input comes on: the Take starts
+  // once its song is on the engine and the input is open (or it is ungraded).
   useEffect(() => {
     if (run.phase !== "ready") {
       if (run.phase !== "result") autoStart.current = false;
@@ -1221,22 +1503,87 @@ export function useSessionRun(input: SessionRunInput) {
       autoStart.current = false;
       return;
     }
-    if (prepared && listening) {
+    if (prepared && (listening || run.ungraded)) {
       autoStart.current = false;
       playTake();
+      return;
     }
-  }, [run.phase, prepared, listening, engineTrouble, playTake]);
+    // Waiting on an input nobody is turning on (it was refused before): ask.
+    if (!listening && !run.ungraded && inputStartRef.current.status !== "starting") void startInputNow();
+  }, [run.phase, run.ungraded, prepared, listening, engineTrouble, playTake, startInputNow]);
 
   /** The one big next action, from the button, the keyboard or the pedal. */
   const go = useCallback(() => {
-    if (big.kind === "playTake") return playTake();
+    if (big.kind === "playTake") {
+      if (runRef.current.ungraded || listening) return playTake();
+      // Never a dead button (owner, beta 6): turn the input on, then start.
+      autoStart.current = true;
+      if (inputStartRef.current.status !== "starting") void startInputNow();
+      return;
+    }
     if (big.kind === "endTake") return endTake();
     const event = eventForBigAction(big, Date.now());
     if (!event) return;
     if (event.type === "again") autoStart.current = true;
     dispatch(event);
     if (event.type === "close") setView(origin.current);
-  }, [big, playTake, endTake, setView]);
+  }, [big, listening, playTake, endTake, setView, startInputNow]);
+
+  /** "Play without grading": this Take and the rest of the Session, input or not. */
+  const playUngraded = useCallback(() => {
+    inputAttempt.current += 1;
+    setInputStart(INPUT_IDLE);
+    dispatch({ type: "setUngraded", why: "inputOff" });
+    if (runRef.current.phase === "ready") autoStart.current = true;
+  }, []);
+
+  /** "Turn on input": graded again from the next Take, with the input asked for now. */
+  const gradeAgain = useCallback(() => {
+    dispatch({ type: "setUngraded", why: null });
+    autoInputFailed.current = false;
+    if (!latest.current.listening) void startInputNow();
+  }, [startInputNow]);
+
+  /**
+   * To a block of the bar, or Previous (owner, 2026-11-18). From a ready
+   * screen, a result or a timed block it goes at once; with a Take running it
+   * asks first, as Escape does, and a Take stopped that way is kept.
+   */
+  const pendingJump = useRef<number | null>(null);
+  const jump = useCallback((index: number) => {
+    const state = runRef.current;
+    if (index === state.stepIndex || !state.plan?.steps[index]) return;
+    if (jumpNeedsAsking(state)) {
+      setJumpAsked(index);
+      return;
+    }
+    if (canJump(state)) dispatch({ type: "jump", index, now: Date.now() });
+  }, []);
+  const previous = useCallback(() => {
+    const state = runRef.current;
+    if (hasPrevious(state)) jump(state.stepIndex - 1);
+  }, [jump]);
+  const confirmJump = useCallback(() => {
+    const index = jumpAsked;
+    setJumpAsked(null);
+    if (index === null) return;
+    const state = runRef.current;
+    if (state.phase === "playing" || state.phase === "listening") {
+      // Stop the Take; the jump waits for its verdict, which is kept.
+      pendingJump.current = index;
+      if (state.phase === "playing") void enqueue(() => setPlaying(false));
+      return;
+    }
+    dispatch({ type: "jump", index, now: Date.now() });
+  }, [jumpAsked, enqueue]);
+  const stayHere = useCallback(() => setJumpAsked(null), []);
+  useEffect(() => {
+    if (pendingJump.current === null || !canJump(run)) return;
+    const index = pendingJump.current;
+    pendingJump.current = null;
+    autoStart.current = false;
+    dispatch({ type: "jump", index, now: Date.now() });
+  }, [run]);
 
   /**
    * A timed step's own tempo, a step at a time: on its ready screen or while
@@ -1486,12 +1833,23 @@ export function useSessionRun(input: SessionRunInput) {
     canGoBack: canGoBack(run),
     /** Escape asked "Leave this Session?" and it has not been answered. */
     leaveAsked,
+    /** A block asked for from the bar while something runs: "Go there?" waits on this. */
+    jumpAsked,
+    /** The Session's own ask for the input. */
+    inputStart,
+    /** Settings → Practice → "Grade my playing". */
+    grade,
+    setGrade,
     /** Placement's verdict, on the result that ended its climb. */
     placed,
     /** Where this Session goes back to when it ends. */
     origin: origin.current,
     actions: {
       startToday,
+      startTodayAt,
+      swapOptionsAt,
+      confirmSwap,
+      undoSwap,
       playExercise,
       chooseStep,
       chooseLevel,
@@ -1518,6 +1876,13 @@ export function useSessionRun(input: SessionRunInput) {
       testOut,
       answerFair,
       cycleView,
+      jump,
+      previous,
+      confirmJump,
+      stayHere,
+      playUngraded,
+      gradeAgain,
+      startInput: startInputNow,
     },
   };
 }

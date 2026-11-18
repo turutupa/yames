@@ -259,7 +259,8 @@
         "tab-tools": "Ferramentas",
         "session-view": "Trocar vista",
         "session-pause": "Pausar / continuar",
-        "session-restart": "Recomeçar a take"
+        "session-restart": "Recomeçar a take",
+        "session-prev": "Voltar ao bloco anterior"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -316,7 +317,8 @@
         "tab-tools": "Ir para Ferramentas",
         "session-view": "Numa sessão: Braço, Pista ou Tab. A qualquer momento no aquecimento; entre takes num avaliado",
         "session-pause": "Num aquecimento ou bloco cronometrado: pausar, ou continuar",
-        "session-restart": "Num aquecimento ou bloco cronometrado: do começo. Depois de um take: o mesmo take de novo"
+        "session-restart": "Num aquecimento ou bloco cronometrado: do começo. Depois de um take: o mesmo take de novo",
+        "session-prev": "Numa sessão: voltar ao bloco antes deste"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Duração da sessão",
       "minutesHint": "Quanto tempo o Hoje planeja para a sua prática. Você também pode mudar no Hoje.",
       "view": "Visualização de prática",
-      "viewHint": "O que uma sessão mostra enquanto você toca."
+      "viewHint": "O que uma sessão mostra enquanto você toca.",
+      "grade": "Avaliar meu toque",
+      "gradeHint": "Desligado: as sessões não ouvem e não avaliam nada. Seus minutos e sua sequência continuam contando."
     }
   },
   "keybindings": {

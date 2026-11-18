@@ -22,6 +22,7 @@ import type { BarCheck } from "../../session/grade";
 import { EDGE_MINUTES, planSession } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import {
+  blockState,
   currentStep,
   edgeOf,
   isEdgeStep,
@@ -30,8 +31,8 @@ import {
   timedTempoAdjustable,
   timedTempoLive,
 } from "../../session/runner";
-import type { RunState, TakeOutcome } from "../../session/runner";
-import { CoachLine, TempoNudges, bigLabel, timedHowKey } from "./parts";
+import type { TakeOutcome } from "../../session/runner";
+import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { Runway } from "./highway/Runway";
 import type { SessionRun } from "./hooks/useSessionRun";
@@ -49,10 +50,12 @@ import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
 import { readyHonestLineKey } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
+import { roleKey } from "./todayPlan";
 import { factsOf } from "../../session/progress";
 import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
+import { LeaveSessionDialog } from "./LeaveSessionDialog";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -81,44 +84,71 @@ function purposeOf(session: SessionRun, step: PlanStep): string | null {
 
 /** Exit, how far along, and how long is left. The mocks' session bar. */
 function SessionBar({
-  run,
-  onExit,
+  session,
   onSkip,
   skipKey,
+  previousKey,
+  listening,
+  hasSignal,
+  onTestInput,
 }: {
-  run: RunState;
-  onExit: () => void;
+  session: SessionRun;
   /** "Skip this" on a Take's ready screen (UX audit TODAY-2), with its key. */
   onSkip?: () => void;
   skipKey?: string;
+  /** The key bound to Previous, shown on it. */
+  previousKey?: string;
+  listening: boolean;
+  hasSignal: boolean;
+  onTestInput: () => void;
 }) {
   const { t } = useTranslation();
+  const { run, actions } = session;
   const steps = run.plan?.steps ?? [];
   const left = minutesLeft(run);
+  const first = run.stepIndex === 0;
   return (
-    <div className="session-bar">
-      <button className="session-exit" onClick={onExit} data-testid="session-exit">
+    <div className="session-bar" data-testid="session-bar">
+      <button className="session-exit" onClick={actions.requestExit} data-testid="session-exit">
         {t("session.run.exit")}
       </button>
       {/* One step is no progress to show: its single pip, lit, read as a
           full bar over a clock counting up (acceptance pass 2). The empty row
-          keeps the clock where it was. */}
+          keeps the clock where it was. Each block is a button (owner,
+          2026-11-18): to any block's ready screen, back or ahead. */}
       <div
         className="session-pips"
-        role={steps.length > 1 ? "img" : undefined}
+        role={steps.length > 1 ? "group" : undefined}
         aria-label={steps.length > 1 ? t("session.run.stepOf", { n: run.stepIndex + 1, of: steps.length }) : undefined}
         data-testid="session-pips"
       >
-        {steps.length > 1 && steps.map((step, i) => (
-          <i
-            key={step.id}
-            data-state={
-              i < run.stepIndex ? (run.skipped.includes(step.id) ? "skipped" : "done") : i === run.stepIndex ? "on" : undefined
-            }
-            title={i < run.stepIndex && run.skipped.includes(step.id) ? t("session.run.skipped") : undefined}
-          />
-        ))}
+        {steps.length > 1 &&
+          steps.map((step, i) => {
+            const state = blockState(run, i);
+            const tip = t("session.blocks.tip", {
+              n: i + 1,
+              title: stepTitle(step, t),
+              kind: t(roleKey(step)),
+              state: t(`session.blocks.state.${state}`),
+            });
+            return (
+              <button
+                key={step.id}
+                className="session-pip"
+                data-state={state === "todo" ? undefined : state}
+                data-edge={i === 0 ? "start" : i === steps.length - 1 ? "end" : undefined}
+                data-tip={tip}
+                aria-label={tip}
+                aria-current={state === "on" ? "step" : undefined}
+                onClick={() => actions.jump(i)}
+                data-testid={`session-pip-${i}`}
+              >
+                <i aria-hidden="true" />
+              </button>
+            );
+          })}
       </div>
+      <InputChip session={session} listening={listening} hasSignal={hasSignal} onTestInput={onTestInput} />
       {/* Started from a Step: no countdown, only a quiet clock of the time
           spent so far (UX audit SES-11). */}
       <span className="session-quiet session-bar-left" data-untimed={run.untimed ? "" : undefined}>
@@ -128,6 +158,22 @@ function SessionBar({
             ? t("session.run.minutesLeft", { minutes: left })
             : t("session.run.timeUp")}
       </span>
+      {steps.length > 1 && (
+        // `aria-disabled` with its reason, not `disabled`: a disabled button
+        // shows no tooltip and drops the keyboard's focus.
+        <button
+          className="session-skip-this session-prev"
+          onClick={first ? undefined : actions.previous}
+          aria-label={first ? `${t("session.run.previous")}. ${t("session.run.previousFirst")}` : t("session.run.previous")}
+          aria-disabled={first ? true : undefined}
+          data-tip={first ? t("session.run.previousFirst") : undefined}
+          data-testid="session-previous"
+        >
+          <span aria-hidden="true">‹</span>
+          <span className="session-prev-word">{t("session.run.previous")}</span>
+          {previousKey && <kbd>{previousKey}</kbd>}
+        </button>
+      )}
       {onSkip && (
         <button className="session-skip-this" onClick={onSkip} data-testid="session-skip-this">
           {t("session.run.skip")}
@@ -135,6 +181,82 @@ function SessionBar({
         </button>
       )}
     </div>
+  );
+}
+
+/**
+ * The input, as the Session sees it, in the bar: listening, no signal, off,
+ * or not graded, and one press from fixing it (owner, beta 6). The same
+ * words and mic as the header's chip.
+ */
+function InputChip({
+  session,
+  listening,
+  hasSignal,
+  onTestInput,
+}: {
+  session: SessionRun;
+  listening: boolean;
+  hasSignal: boolean;
+  onTestInput: () => void;
+}) {
+  const { t } = useTranslation();
+  const { run, inputStart, actions } = session;
+  if (run.ungraded) {
+    // Not graded; one press turns the input on and grades from the next Take.
+    return (
+      <button
+        className="session-input-chip"
+        data-state="ungraded"
+        onClick={actions.gradeAgain}
+        aria-label={`${t("session.input.notGraded")}. ${t("session.input.turnOn")}`}
+        data-tip={t("session.input.turnOn")}
+        data-testid="session-input-chip"
+      >
+        <MicGlyph off />
+        <span className="session-input-chip-word">{t("session.input.notGraded")}</span>
+        <span className="session-input-chip-fix" data-testid="session-grade-again">
+          {t("session.input.turnOn")}
+        </span>
+      </button>
+    );
+  }
+  const state = listening ? (hasSignal ? "on" : "quiet") : inputStart.status === "starting" ? "starting" : "off";
+  const word =
+    state === "on"
+      ? t("transport.listening")
+      : state === "quiet"
+        ? t("session.input.noSignal")
+        : state === "starting"
+          ? t("session.input.startingShort")
+          : t("transport.inputOff");
+  // On: check it. Off: turn it on.
+  const press = listening ? onTestInput : () => void actions.startInput();
+  const hint = listening ? t("session.run.checkSound") : t("session.input.turnOn");
+  return (
+    <button
+      className="session-input-chip"
+      data-state={state}
+      onClick={state === "starting" ? undefined : press}
+      aria-disabled={state === "starting" ? true : undefined}
+      aria-label={`${word}. ${hint}`}
+      data-tip={hint}
+      data-testid="session-input-chip"
+    >
+      <MicGlyph off={!listening} />
+      <span className="session-input-chip-word">{word}</span>
+    </button>
+  );
+}
+
+function MicGlyph({ off = false }: { off?: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 12a6.5 6.5 0 0 0 13 0" />
+      <line x1="12" y1="18.5" x2="12" y2="21" />
+      {off && <line x1="4" y1="3.5" x2="20" y2="20.5" />}
+    </svg>
   );
 }
 
@@ -200,7 +322,8 @@ function TakeScreen({
   listening,
   hasSignal,
   viewKey,
-  onCheckSound,
+  onTestInput,
+  onChooseInput,
 }: {
   session: SessionRun;
   beat: PracticeBeat | null;
@@ -208,10 +331,11 @@ function TakeScreen({
   listening: boolean;
   hasSignal: boolean;
   viewKey: string;
-  onCheckSound: () => void;
+  onTestInput: () => void;
+  onChooseInput: () => void;
 }) {
   const { t } = useTranslation();
-  const { run, take, exercise, live, lights, big, prepared, engineTrouble, actions } = session;
+  const { run, take, exercise, live, lights, engineTrouble, actions } = session;
   const running = run.phase === "playing";
   const tabView = session.practiceView === "tab";
   const step = currentStep(run);
@@ -221,8 +345,8 @@ function TakeScreen({
   const stepNumber = pathTitle?.steps.find((s) => s.exercises.some((e) => e.id === exercise.id))?.order;
   const bar = barLine(exercise, run.bpm);
   const scored = live.heard + live.missed;
-  const inputReady = listening;
-  const canStart = prepared && inputReady;
+  const canStart = takeCanStart(session, listening);
+  const start = startButton(session, listening, t);
   // Said once a Session, before its first Take (UX audit SES-14), and not at
   // all where the coach's own line already says it (acceptance P1-4).
   const honest = run.outcomes.length === 0 ? readyHonestLineKey(exercise) : null;
@@ -329,13 +453,14 @@ function TakeScreen({
             </HowLines>
           )}
           <BandVolume session={session} hint={!running} />
-          {!running && !inputReady && (
-            <div className="session-glass session-card" role="status" data-testid="session-no-input">
-              <div className="session-why">{t("session.run.noInput")}</div>
-              <button className="session-link" onClick={onCheckSound}>
-                {t("session.run.checkSound")}
-              </button>
-            </div>
+          {!running && (
+            <ReadyInput
+              session={session}
+              listening={listening}
+              hasSignal={hasSignal}
+              onTestInput={onTestInput}
+              onChooseInput={onChooseInput}
+            />
           )}
           {engineTrouble && (
             <div className="session-glass session-card" role="alert">
@@ -346,12 +471,6 @@ function TakeScreen({
       </div>
 
       <div className="session-actions">
-        {!running && inputReady && (
-          <span className="session-signal" data-on={hasSignal ? "" : undefined}>
-            <i />
-            {t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
-          </span>
-        )}
         {/* Back to the warm-up before anything is played here (the e2e
             `warmup` scenario; lost with acceptance P1-4's first pass). */}
         {!running && session.canGoBack && <BackLink session={session} />}
@@ -364,14 +483,18 @@ function TakeScreen({
           {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
               ↑ reloads it, and a disabled button drops the keyboard's focus
               to the page (acceptance pass 2, P2-9). */}
+          {/* With the input off it says so and turns it on (owner, beta 6):
+              never a button that does nothing when pressed. */}
           <button
             className="session-big"
             data-size="mid"
             onClick={!running && !canStart ? undefined : actions.go}
             aria-disabled={!running && !canStart ? true : undefined}
+            aria-busy={start.busy ? true : undefined}
+            data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
             data-testid="session-big"
           >
-            {bigLabel(big, t)}
+            {running ? bigLabel(session.big, t) : start.label}
           </button>
         </div>
       </div>
@@ -890,6 +1013,51 @@ function NoCatchScreen({
   );
 }
 
+/**
+ * A Take played without grading (owner, 2026-11-18): said plainly, with no
+ * score, no bar strip and no fairness question. Next, or the same again.
+ */
+function UngradedResultScreen({ session }: { session: SessionRun }) {
+  const { t } = useTranslation();
+  const { run, big, actions } = session;
+  const outcome = run.outcomes[run.outcomes.length - 1];
+  const slot = useExerciseSlot(session, "dim");
+  if (!outcome) return null;
+  return (
+    <div className="session-body" data-testid="session-ungraded" data-verdict="ungraded">
+      <div className="session-center" data-top="">
+        <div className="session-kick session-rise">
+          {t("session.result.kick", {
+            take: outcome.takeNumber,
+            title: outcome.title,
+            bpm: outcome.bpm,
+            bars: outcome.measures.barsPlayed,
+          })}
+        </div>
+        <h1 className="session-h1 session-rise" style={rise(1)}>
+          {t(outcome.ungraded === "gradingOff" ? "session.ungraded.resultOff" : "session.ungraded.result")}
+        </h1>
+        <div className="session-why session-rise" style={rise(2)}>
+          {t("session.ungraded.body")}
+        </div>
+      </div>
+      <div className="session-slot" ref={slot} aria-hidden="true" />
+      <div className="session-center">
+        <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
+          {bigLabel(big, t)}
+        </button>
+        <div className="session-nudges">
+          {big.kind !== "again" && (
+            <button className="session-secondary" onClick={actions.again} data-testid="session-again">
+              {t("session.run.goAgain", { bpm: run.bpm })}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** How loud the band under this Exercise is. Only when there is one. */
 export function BandVolume({ session, hint }: { session: SessionRun; hint: boolean }) {
   const { t } = useTranslation();
@@ -1265,6 +1433,8 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
         <div className="session-why">
           {t("session.recap.takesAt", { count: outcomes.length, bpm: last.bpm })}
           {last.grade.verdict === "passed" ? ` · ${t("session.result.barMet")}` : ""}
+          {/* Practice all the same (owner, 2026-11-18): counted, not graded. */}
+          {outcomes.every((o) => o.ungraded) ? ` · ${t("session.ungraded.recap")}` : ""}
         </div>
       </div>
       {value !== null && metric && (
@@ -1432,8 +1602,12 @@ export function SessionView({
   pauseKey = "K",
   restartKey = "R",
   skipKey = "N",
+  previousKey = "⇧N",
   pedalMapped = false,
   onCheckSound,
+  onTestInput,
+  onChooseInput,
+  inputDevice: _inputDevice = null,
 }: {
   session: SessionRun;
   /** The theme. The Session's tab strip draws in its own palette; kept for the caller. */
@@ -1452,11 +1626,24 @@ export function SessionView({
   restartKey?: string;
   /** The key bound to the next step, shown on Skip this. */
   skipKey?: string;
+  /** The key bound to Previous. */
+  previousKey?: string;
   /** A footswitch is mapped to the Session's pedal: only then is its legend shown (UX audit SES-5). */
   pedalMapped?: boolean;
   onCheckSound: () => void;
+  /** "Check my sound": the input tester, over the Session. Defaults to `onCheckSound`. */
+  onTestInput?: () => void;
+  /** "Choose input": Settings, at the input devices. Defaults to `onCheckSound`. */
+  onChooseInput?: () => void;
+  /** The device the input is on, when known. Kept for the caller; the Session reads its own. */
+  inputDevice?: string | null;
 }) {
+  const { t } = useTranslation();
   const { run, actions } = session;
+  const testInput = onTestInput ?? onCheckSound;
+  const chooseInput = onChooseInput ?? onCheckSound;
+  const asked = session.jumpAsked;
+  const askedStep = asked === null ? null : run.plan?.steps[asked] ?? null;
   const last = run.outcomes[run.outcomes.length - 1];
   const neck3d = useNeck3d();
   // The Tab view draws no neck: the page keeps its own backdrop then.
@@ -1474,10 +1661,26 @@ export function SessionView({
     <div className="session-page session-run" data-testid="session" data-neck3d={tabShown || run.phase === "recap" ? undefined : neck3d}>
       {run.phase !== "recap" && (
         <SessionBar
-          run={run}
-          onExit={actions.requestExit}
+          session={session}
           onSkip={run.phase === "ready" ? actions.next : undefined}
           skipKey={skipKey}
+          previousKey={previousKey}
+          listening={listening}
+          hasSignal={hasSignal}
+          onTestInput={testInput}
+        />
+      )}
+      {askedStep && (
+        <LeaveSessionDialog
+          testId="jump-ask"
+          onLeave={actions.confirmJump}
+          onStay={actions.stayHere}
+          words={{
+            title: t("session.jump.title", { title: stepTitle(askedStep, t) }),
+            body: t("session.jump.body"),
+            stay: t("session.leave.stay"),
+            leave: t("session.jump.go"),
+          }}
         />
       )}
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView === "runway" && (
@@ -1488,7 +1691,8 @@ export function SessionView({
           listening={listening}
           hasSignal={hasSignal}
           viewKey={viewKey}
-          onCheckSound={onCheckSound}
+          onTestInput={testInput}
+          onChooseInput={chooseInput}
         />
       )}
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView !== "runway" && (
@@ -1499,12 +1703,15 @@ export function SessionView({
           listening={listening}
           hasSignal={hasSignal}
           viewKey={viewKey}
-          onCheckSound={onCheckSound}
+          onTestInput={testInput}
+          onChooseInput={chooseInput}
         />
       )}
       {run.phase === "listening" && <ListeningScreen session={session} />}
       {run.phase === "result" &&
-        (last?.grade.verdict === "notCaught" ? (
+        (last?.ungraded ? (
+          <UngradedResultScreen session={session} />
+        ) : last?.grade.verdict === "notCaught" ? (
           <NoCatchScreen session={session} onCheckSound={onCheckSound} />
         ) : (
           <ResultScreen session={session} pedalMapped={pedalMapped} />

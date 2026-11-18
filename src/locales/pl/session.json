@@ -113,7 +113,42 @@
         "keepWarmNew": "Pierwszy przedsmak."
       },
       "from": "{{path}} · {{level}} · Krok {{step}}",
-      "fromNoLevel": "{{path}} · Krok {{step}}"
+      "fromNoLevel": "{{path}} · Krok {{step}}",
+      "startHere": "Zacznij tutaj ›",
+      "startHereLabel": "Zacznij sesję od {{n}}: {{title}}",
+      "swap": {
+        "button": "Zamień",
+        "buttonLabel": "Zamień {{title}}",
+        "tooltip": "Zamień na inne ćwiczenie",
+        "heading": "Zamień na",
+        "dialogLabel": "Zamień {{title}}",
+        "close": "Zamknij",
+        "choice": {
+          "harder": "Trudniej",
+          "different": "Coś innego",
+          "style": "Inny styl"
+        },
+        "hint": {
+          "harder": "Ta sama technika, stopień wyżej.",
+          "different": "Inne ćwiczenie z tej ścieżki.",
+          "style": "Ćwiczenie z innej ścieżki.",
+          "harderWarmUp": "Gęstsza rozgrzewka, która nadal pasuje.",
+          "differentWarmUp": "Inna rozgrzewka z tej ścieżki.",
+          "styleWarmUp": "Rozgrzewka z innej ścieżki."
+        },
+        "none": {
+          "harder": "Na tej ścieżce nie ma jeszcze nic trudniejszego.",
+          "harderWarmUp": "Gęstsza byłaby szybsza niż blok po niej.",
+          "different": "Teraz nic innego z tej ścieżki nie pasuje.",
+          "style": "Nie masz jeszcze innej ścieżki."
+        },
+        "count": "{{n}} z {{count}}",
+        "confirm": "Zamień",
+        "another": "Pokaż inne",
+        "cancel": "Anuluj",
+        "undo": "Przywróć {{title}}",
+        "swapped": "Zamienione"
+      }
     },
     "why": {
       "firstEver": "To twoja pierwsza, więc zaczyna się od {{bpm}} BPM. Chodzi o rytm, nie o szybkość.",
@@ -213,7 +248,9 @@
       "goAgainUp": "Jeszcze raz, w górę do {{bpm}} BPM",
       "slowerFloor": "To już najwolniejsze tempo tego ćwiczenia",
       "fasterCeiling": "To już najszybsze tempo tego ćwiczenia",
-      "tempoLocked": "Test gra się w tempie zaliczenia, więc się nie zmienia"
+      "tempoLocked": "Test gra się w tempie zaliczenia, więc się nie zmienia",
+      "previous": "Wstecz",
+      "previousFirst": "To pierwszy blok, przed nim nic nie ma"
     },
     "result": {
       "kick": "Podejście {{take}} · {{title}} · {{bpm}} BPM · takty: {{bars}}",
@@ -561,6 +598,49 @@
     },
     "placement": {
       "result": "Zaczynasz od kroku {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "teraz",
+        "done": "zrobione",
+        "skipped": "pominięte",
+        "todo": "jeszcze nie grane"
+      }
+    },
+    "jump": {
+      "title": "Przerwać i przejść do: {{title}}?",
+      "body": "To, co zagrałeś do tej pory, zostaje zapisane.",
+      "go": "Przejdź"
+    },
+    "input": {
+      "turnOnAndStart": "Włącz wejście i zacznij",
+      "starting": "Włączam wejście…",
+      "startingShort": "Włączam…",
+      "startingLong": "Włączam wejście. Do oceny potrzebny jest mikrofon albo wejście bezpośrednie.",
+      "listeningTo": "Słucham: {{device}}",
+      "fellBack": "Wybrane wejście nie jest podłączone, więc w tej sesji słucham: {{device}}.",
+      "defaultDevice": "domyślne wejście",
+      "chooseInput": "Wybierz wejście",
+      "playUngraded": "Graj bez oceny",
+      "notGraded": "Bez oceny",
+      "turnOn": "Włącz wejście",
+      "noSignal": "Brak sygnału",
+      "failed": {
+        "noDevice": "Nie znalazłem mikrofonu ani interfejsu audio. Podłącz go albo wybierz.",
+        "permission": "Yames nie ma zgody na mikrofon. Zezwól w ustawieniach systemu, a potem naciśnij Start jeszcze raz.",
+        "noAnswer": "Wejście nie odpowiedziało. Jeśli jest otwarte okno z prośbą o zgodę, odpowiedz, a potem naciśnij Start jeszcze raz.",
+        "busy": "Inna aplikacja używa wejścia. Zamknij ją, a potem naciśnij Start jeszcze raz.",
+        "other": "Wejście się nie uruchomiło. Sprawdź je albo wybierz inne."
+      }
+    },
+    "ungraded": {
+      "ready": "Bez oceny: wejście jest wyłączone, więc w tej sesji nie słucham.",
+      "readyOff": "Bez oceny: ocena jest wyłączona w Ustawieniach.",
+      "result": "Bez oceny: wejście było wyłączone",
+      "resultOff": "Bez oceny: ocena jest wyłączona w Ustawieniach",
+      "body": "Liczy się jako ćwiczenie, do minut i serii. Czyste tempo i kroki rosną tylko po ocenionych podejściach.",
+      "recap": "bez oceny"
     }
   }
 }

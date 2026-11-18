@@ -58,6 +58,7 @@ import {
   isExercisePassed,
   isGradable,
   isStepSkipped,
+  isUngradedTake,
   lastCaughtTake,
   takesOf,
 } from "./progress";
@@ -177,6 +178,8 @@ export type PlanStep =
       placement?: { passAtBpm: number; ladder?: number[]; then: PlanStep | null };
       /** A benchmark Take's tag, written into its facts. */
       benchmark?: { day: number };
+      /** The player swapped this in for the step of this title (`swap.ts`). */
+      swappedFrom?: string;
     }
   | {
       /** The click and nothing else, for a set time. Not graded. */
@@ -192,6 +195,8 @@ export type PlanStep =
       variantSeed?: number | null;
       minutes: number;
       why: Reason;
+      /** The player swapped this in for the step of this title (`swap.ts`). */
+      swappedFrom?: string;
     }
   | {
       /** A band, for a set time. Not graded. */
@@ -242,6 +247,12 @@ export type PlannerInput = {
   /** The player's Paths. Only those with something gradable get a step. */
   paths: readonly PathDoc[];
   progress: PlayerProgress;
+  /**
+   * `path/exercise` keys the player swapped away from in the last plan: they go
+   * to the back of their Path's list for this one (`swap.ts`), so the plan does
+   * not serve straight back what was just turned down.
+   */
+  avoid?: ReadonlySet<string>;
 };
 
 /** How many rungs to come down after this long away. */
@@ -317,7 +328,8 @@ function siblingStart(
  *   second miss in a row here.
  */
 export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProgress): Tempo {
-  const takes = takesOf(progress, path.id, exercise.id);
+  // A Take played without grading said nothing about the bar: as if it were not there.
+  const takes = takesOf(progress, path.id, exercise.id).filter((t) => !isUngradedTake(t));
   const passAt = exercise.tempo.passAtBpm ?? firstRung(exercise);
   const values = { exercise: exercise.title };
 
@@ -415,7 +427,7 @@ export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProg
   };
 }
 
-type Pick = { path: PathDoc; step: Step; exercise: Exercise };
+export type Pick = { path: PathDoc; step: Step; exercise: Exercise };
 
 /** The gradable Exercises of a Path from a Step on, in order. */
 function exercisesFrom(path: PathDoc, step: Step): Pick[] {
@@ -430,7 +442,7 @@ function exercisesFrom(path: PathDoc, step: Step): Pick[] {
 }
 
 /** The next things to work on in a Path, most urgent first. */
-function worklist(path: PathDoc, progress: PlayerProgress): Pick[] {
+export function worklist(path: PathDoc, progress: PlayerProgress): Pick[] {
   const step = currentStepOf(progress, path);
   const open = exercisesFrom(path, step).filter(
     (pick) => !isExercisePassed(progress, path.id, pick.exercise),
@@ -477,6 +489,67 @@ export function notesPerSecond(exercise: Exercise, bpm: number): number | null {
   return grid ? bpm / 60 / grid : null;
 }
 
+/**
+ * A warm-up's tempo on any Exercise: a pack warm-up reads its reference's clean
+ * tempo (or has its own with no history); anything else is 80% of its own clean.
+ */
+export function warmupTempo(
+  path: PathDoc,
+  warmup: Exercise,
+  progress: PlayerProgress,
+): { bpm: number; clean: number | null } {
+  const plan = warmup.warmup;
+  const clean = cleanTempoOf(progress, path.id, plan?.referenceExercise ?? warmup.id);
+  const bpm = plan
+    ? clean === null
+      ? plan.fallbackBpm
+      : Math.max(MIN_WARMUP_BPM, Math.round((clean * plan.startAtCleanRatio) / 5) * 5)
+    : warmupBpm(warmup, clean);
+  return { bpm, clean };
+}
+
+/**
+ * The fastest a warm-up on `warmup` may go before `focus` at `focusBpm`, to the
+ * warm-up's rounding (`WARMUP_HARDER_THAN`). Null when either note grid is
+ * unknown, which sets no limit.
+ */
+export function warmupCeiling(warmup: Exercise, focus: Exercise, focusBpm: number): number | null {
+  const unit = notesPerSecond(warmup, 60);
+  const focusRate = notesPerSecond(focus, focusBpm);
+  if (unit === null || focusRate === null) return null;
+  // notesPerSecond is linear in the tempo: 60 BPM gives `unit`.
+  return Math.floor((focusRate * WARMUP_HARDER_THAN * 60) / unit / 5) * 5;
+}
+
+/** One warm-up step on a chosen Exercise, with the reason its tempo has. */
+export function warmupStepOn(
+  path: PathDoc,
+  warmup: Exercise,
+  progress: PlayerProgress,
+  minutes: number,
+  bpm: number,
+  clean: number | null,
+): Extract<PlanStep, { kind: "metronome" }> {
+  const variantSeed = pickVariantSeed(warmup, sessionCount(progress), undefined);
+  // Its own backing: a warm-up's grid need not be the focus Exercise's.
+  const backing = warmup.backing.kind === "click" ? warmup.backing.subdivision : 1;
+  return {
+    kind: "metronome",
+    id: "warmup",
+    title: warmup.title,
+    bpm,
+    subdivision: backing,
+    pathId: path.id,
+    exerciseId: warmup.id,
+    ...(variantSeed === null ? {} : { variantSeed }),
+    minutes,
+    why:
+      clean === null
+        ? { code: "warmUp", values: { bpm } }
+        : { code: "warmUpClean", values: { bpm, clean } },
+  };
+}
+
 function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number, focusBpm?: number): PlanStep {
   const { path, exercise } = focus;
   // The focus Exercise itself at 80% of its clean tempo, once there is one: the
@@ -510,24 +583,7 @@ function warmupStep(focus: Pick, progress: PlayerProgress, minutes: number, focu
       bpm = warmupBpm(exercise, clean);
     }
   }
-  const variantSeed = pickVariantSeed(warmup, sessions, undefined);
-  // Its own backing: a warm-up's grid need not be the focus Exercise's.
-  const backing = warmup.backing.kind === "click" ? warmup.backing.subdivision : 1;
-  return {
-    kind: "metronome",
-    id: "warmup",
-    title: warmup.title,
-    bpm,
-    subdivision: backing,
-    pathId: path.id,
-    exerciseId: warmup.id,
-    ...(variantSeed === null ? {} : { variantSeed }),
-    minutes,
-    why:
-      clean === null
-        ? { code: "warmUp", values: { bpm } }
-        : { code: "warmUpClean", values: { bpm, clean } },
-  };
+  return warmupStepOn(path, warmup, progress, minutes, bpm, clean);
 }
 
 /** Minutes Find my edge gets, planned or added from a result. */
@@ -561,14 +617,14 @@ export function edgeStep(
   );
 }
 
-function exerciseStep(
+export function exerciseStep(
   pick: Pick,
   id: string,
   role: ExerciseRole,
   tempo: Tempo,
   minutes: number,
   progress: PlayerProgress,
-): PlanStep {
+): Extract<PlanStep, { kind: "exercise" }> {
   return {
     kind: "exercise",
     id,
@@ -657,11 +713,13 @@ const key = (pick: { path: PathDoc; exercise: Exercise }) => `${pick.path.id}/${
  * The worklist with parking applied: an Exercise that has gone three Sessions
  * without a new clean rung waits behind the open ones for two days.
  */
-function openWork(path: PathDoc, progress: PlayerProgress, now: number) {
+export function openWork(path: PathDoc, progress: PlayerProgress, now: number, avoid?: ReadonlySet<string>) {
   const list = worklist(path, progress);
   const parked = list.filter((p) => isParked(progress, path.id, p.exercise, now));
-  const fresh = list.filter((p) => !parked.includes(p));
-  return { list: [...fresh, ...parked], parkedHead: parked.includes(list[0]) ? list[0] : null };
+  // Swapped away last time: behind the open ones, ahead of the parked.
+  const avoided = avoid?.size ? list.filter((p) => !parked.includes(p) && avoid.has(key(p))) : [];
+  const fresh = list.filter((p) => !parked.includes(p) && !avoided.includes(p));
+  return { list: [...fresh, ...avoided, ...parked], parkedHead: parked.includes(list[0]) ? list[0] : null };
 }
 
 /** The shares of the pass tempo placement climbs through, one Take each. */
@@ -795,7 +853,7 @@ export function planSession(input: PlannerInput): SessionPlan {
   if (!choice) return { ...base, steps: [], focusPathId: null, skipped: [] };
   const focusPath = choice.path;
 
-  const work = new Map(paths.map((path) => [path.id, openWork(path, progress, now)]));
+  const work = new Map(paths.map((path) => [path.id, openWork(path, progress, now, input.avoid)]));
   const focusWork = work.get(focusPath.id)!;
   let focus = focusWork.list[0];
   const row = shape(minutes, back, paths.length === 1);

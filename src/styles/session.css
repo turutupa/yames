@@ -4325,3 +4325,550 @@
   padding: 2px 9px;
   border-radius: 999px;
 }
+
+/* ══ The Session bar's blocks, Previous and the input (owner, 2026-11-18) ══
+ * Each block of the bar is a button: to that block's ready screen, back or
+ * ahead. The visible bar stays 5 px; the button round it is the hit area,
+ * taller than it looks (44 px on a phone, phone-learning.css). The tooltip is
+ * drawn only while hovered or focused, so it can never widen the page. */
+.session-pips > .session-pip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 22px;
+  margin: -8px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+.session-pip > i {
+  display: block;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--l-wash) 16%, transparent);
+  transition: height 0.12s var(--l-ease, ease), background 0.12s;
+}
+.session-pip[data-state="done"] > i {
+  background: var(--l-tone);
+}
+.session-pip[data-state="on"] > i {
+  background: var(--l-amber);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-amber) 55%, transparent);
+}
+.session-pip[data-state="skipped"] > i {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-wash) 40%, transparent);
+}
+.session-pip:hover > i,
+.session-pip:focus-visible > i {
+  height: 8px;
+}
+.session-pip:hover:not([data-state]) > i {
+  background: color-mix(in srgb, var(--l-wash) 32%, transparent);
+}
+.session-pip:focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 2px;
+}
+.session-pip[data-tip]:hover::after,
+.session-pip[data-tip]:focus-visible::after,
+.session-input-chip[data-tip]:hover::after,
+.session-input-chip[data-tip]:focus-visible::after,
+.session-prev[data-tip]:hover::after,
+.session-prev[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: min(320px, 70vw);
+  padding: 6px 10px;
+  border: 1px solid var(--l-line2);
+  border-radius: 8px;
+  background: var(--l-panel-solid, var(--bg-secondary));
+  color: var(--l-ink);
+  font: 500 13px/1.35 var(--l-body);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  text-align: left;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--l-shade) 35%, transparent);
+  pointer-events: none;
+}
+.session-pip[data-edge="start"]:hover::after,
+.session-pip[data-edge="start"]:focus-visible::after {
+  left: 0;
+  transform: none;
+}
+.session-pip[data-edge="end"]:hover::after,
+.session-pip[data-edge="end"]:focus-visible::after,
+.session-prev[data-tip]:hover::after,
+.session-prev[data-tip]:focus-visible::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.session-page .session-prev {
+  position: relative;
+  padding-left: 10px;
+}
+.session-page .session-prev[aria-disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.session-page .session-prev[aria-disabled]:hover {
+  background: transparent;
+  border-color: var(--l-line);
+}
+
+/* The input, in the bar: one press from fixing it. */
+.session-input-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  min-height: 30px;
+  padding: 3px 10px;
+  border: 1px solid var(--l-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-quiet);
+  font: 600 13px/1 var(--l-body);
+  white-space: nowrap;
+}
+button.session-input-chip {
+  cursor: pointer;
+}
+button.session-input-chip:hover {
+  border-color: var(--l-line2);
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
+}
+.session-input-chip[data-state="on"] {
+  color: var(--l-tone-text);
+  border-color: color-mix(in srgb, var(--l-tone) 45%, transparent);
+}
+.session-input-chip[data-state="quiet"] {
+  color: var(--l-amber);
+  border-color: color-mix(in srgb, var(--l-amber) 45%, transparent);
+}
+.session-input-chip[data-state="off"] {
+  color: var(--l-clash);
+  border-color: color-mix(in srgb, var(--l-clash) 50%, transparent);
+}
+.session-input-chip[data-state="starting"] {
+  cursor: progress;
+}
+.session-input-chip-fix {
+  color: var(--l-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Under a Take's ready screen: what the input is doing, in words. */
+.session-input-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 14px;
+  color: var(--l-quiet);
+}
+.session-input-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--l-faint);
+}
+.session-input-dot[data-state="on"] {
+  background: var(--l-tone);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--l-tone) 60%, transparent);
+}
+.session-input-dot[data-state="quiet"] {
+  background: var(--l-amber);
+}
+.session-input-dot[data-state="off"] {
+  background: var(--l-clash);
+}
+.session-input-failed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.session-input-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.session-page .session-input-actions .session-secondary {
+  font-size: 15px;
+  min-height: 36px;
+}
+
+/* ══ Today's rows: each starts the Session there (owner, 2026-11-18) ══════
+ * The row is a <button> inside its <li>: every button is its li's first
+ * child, so the hairline between rows is put back on the li's order. */
+.session-plan-row {
+  display: block;
+}
+.session-today-plan .session-plan-row > .session-plan-item {
+  border-top: 1px solid var(--l-line);
+}
+.session-today-plan .session-plan-row:first-child > .session-plan-item {
+  border-top: 0;
+}
+.session-plan-go {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s var(--l-ease, ease);
+}
+.session-plan-go .session-plan-meta,
+.session-plan-go .session-plan-why,
+.session-plan-go .session-plan-side,
+.session-plan-go .session-plan-mins,
+.session-plan-go .session-plan-bpm {
+  display: block;
+}
+.session-plan-go:focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+.session-plan-go:hover,
+.session-plan-go:focus-visible {
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
+}
+.session-plan-go:hover .session-plan-dot,
+.session-plan-go:focus-visible .session-plan-dot {
+  border-color: var(--l-amber);
+  color: var(--l-amber);
+}
+/* Bottom right, out of the flow: the row is no taller for it. */
+.session-plan-here {
+  position: absolute;
+  right: 18px;
+  bottom: 10px;
+  font: 600 12px/1 var(--l-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--l-amber);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.14s, transform 0.14s;
+  pointer-events: none;
+}
+.session-plan-go:hover .session-plan-here,
+.session-plan-go:focus-visible .session-plan-here {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-plan-here,
+  .session-pip > i {
+    transition: none;
+  }
+}
+
+/* ══ Swap, beside each of Today's rows (owner, 2026-11-18) ══════════════
+ * The row stays one button; Swap is a second one beside it, in a cell of its
+ * own, so pressing it never starts the Session. The hairline moves to the li
+ * so it runs under both. */
+.session-today-plan .session-plan-row[data-swap] {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--l-line);
+}
+.session-today-plan .session-plan-row[data-swap]:first-child {
+  border-top: 0;
+}
+.session-today-plan .session-plan-row[data-swap] > .session-plan-item {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-top: 0;
+  padding-right: 10px;
+}
+.session-plan-row[data-swap] .session-plan-here {
+  right: 10px;
+}
+.session-plan-swapcell {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 10px 0 0;
+}
+.session-page .session-swap-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 4px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--l-line);
+  background: transparent;
+  color: var(--l-quiet);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.14s var(--l-ease, ease),
+    color 0.14s,
+    border-color 0.14s;
+}
+.session-swap-btn-word {
+  font: 600 10.5px/1 var(--l-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.session-page .session-swap-btn:hover,
+.session-page .session-swap-btn[aria-expanded="true"] {
+  color: var(--l-ink);
+  border-color: var(--l-line2);
+  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
+}
+.session-page .session-swap-btn:focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 2px;
+}
+.session-plan-swapped {
+  color: var(--l-ink);
+}
+
+/* The menu: fixed to the window so the plan's own scroll cannot clip it. */
+.session-page .session-swap-menu {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(340px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 14px;
+  color: var(--l-ink);
+  background: var(--l-raised-solid);
+  border: 1px solid var(--l-line2);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--l-wash) 6%, transparent) inset,
+    0 18px 48px color-mix(in srgb, var(--l-shade) 45%, transparent);
+  animation: session-swap 0.16s var(--l-ease) both;
+}
+.session-swap-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  padding-left: 4px;
+}
+.session-swap-count {
+  font: 600 12px/1 var(--l-display);
+  letter-spacing: 0.06em;
+  color: var(--l-quiet);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.session-page .session-swap-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -6px -8px 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--l-quiet);
+  font: 400 26px/1 var(--l-display);
+  cursor: pointer;
+}
+.session-page .session-swap-close:hover {
+  color: var(--l-ink);
+  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
+}
+.session-swap-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.session-page .session-swap-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+  min-height: 56px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.14s,
+    border-color 0.14s;
+}
+.session-page .session-swap-choice:hover:not(:disabled),
+.session-page .session-swap-choice:focus-visible {
+  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
+  border-color: var(--l-line2);
+}
+.session-page :is(.session-swap-choice, .session-swap-confirm, .session-swap-another, .session-swap-cancel, .session-swap-undo, .session-swap-close):focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: -2px;
+}
+.session-page .session-swap-choice:disabled {
+  cursor: default;
+}
+.session-swap-choice-word {
+  font: 600 18px/1.15 var(--l-display);
+  letter-spacing: 0.01em;
+}
+.session-swap-choice:disabled .session-swap-choice-word {
+  color: var(--l-faint);
+}
+.session-swap-choice-hint {
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--l-quiet);
+}
+.session-swap-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.session-swap-name {
+  padding: 0 4px;
+  font: 600 22px/1.15 var(--l-display);
+  overflow-wrap: anywhere;
+}
+.session-swap-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  padding: 0 4px;
+  font: 600 12px/1.5 var(--l-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--l-quiet);
+}
+.session-swap-meta > span + span::before {
+  content: "·";
+  margin: 0 8px;
+}
+.session-page .session-swap-why {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 14px;
+}
+/* Two equal buttons, then Cancel under them: the same shape in every language. */
+.session-swap-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+.session-swap-actions > .session-swap-confirm:nth-last-child(2),
+.session-swap-actions > .session-swap-cancel {
+  grid-column: 1 / -1;
+}
+.session-page .session-swap-confirm {
+  min-height: 44px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font: 700 17px/1.1 var(--l-display);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.session-page .session-swap-another {
+  min-height: 44px;
+  font-size: 16px;
+}
+.session-page .session-swap-confirm,
+.session-page .session-swap-another {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.session-page .session-swap-cancel,
+.session-page .session-swap-undo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 14px;
+}
+.session-page .session-swap-cancel {
+  justify-content: center;
+  justify-self: center;
+  margin-top: -4px;
+}
+.session-page .session-swap-undo {
+  align-self: flex-start;
+  margin-top: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-page .session-swap-menu {
+    animation: none;
+  }
+  .session-page .session-swap-btn,
+  .session-page .session-swap-choice {
+    transition: none;
+  }
+}
+/* A phone-wide window: the menu spans it, with the same margin each side. */
+@media (max-width: 480px) {
+  .session-page .session-swap-menu {
+    width: calc(100vw - 16px);
+  }
+}
+/*
+ * A narrow list (a phone, a narrow window): the button is its icon alone, a
+ * 44 px square, so the title keeps the width it needs. Its name is still its
+ * label for a screen reader, and its tooltip for a pointer.
+ */
+.session-today-plan .session-plan-list:has(.session-plan-row[data-swap]) {
+  container: today-plan / inline-size;
+}
+@container today-plan (max-width: 560px) {
+  .session-plan-swapcell {
+    padding-right: 6px;
+  }
+  .session-today-plan .session-plan-row[data-swap] > .session-plan-item {
+    padding-right: 8px;
+  }
+  .session-plan-row[data-swap] .session-plan-here {
+    right: 8px;
+  }
+  .session-page .session-swap-btn {
+    min-width: 44px;
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
+  .session-swap-btn-word {
+    display: none;
+  }
+}

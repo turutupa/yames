@@ -111,7 +111,42 @@
         "keepWarmNew": "Làm quen trước."
       },
       "from": "{{path}} · {{level}} · Bước {{step}}",
-      "fromNoLevel": "{{path}} · Bước {{step}}"
+      "fromNoLevel": "{{path}} · Bước {{step}}",
+      "startHere": "Bắt đầu từ đây ›",
+      "startHereLabel": "Bắt đầu buổi tập từ {{n}}: {{title}}",
+      "swap": {
+        "button": "Đổi",
+        "buttonLabel": "Đổi {{title}}",
+        "tooltip": "Đổi sang bài khác",
+        "heading": "Đổi sang",
+        "dialogLabel": "Đổi {{title}}",
+        "close": "Đóng",
+        "choice": {
+          "harder": "Khó hơn",
+          "different": "Thứ khác",
+          "style": "Phong cách khác"
+        },
+        "hint": {
+          "harder": "Cùng kỹ thuật, nâng một bậc.",
+          "different": "Một bài khác trong lộ trình này.",
+          "style": "Một bài từ lộ trình khác.",
+          "harderWarmUp": "Bài khởi động dày hơn mà vẫn hợp.",
+          "differentWarmUp": "Một bài khởi động khác trong lộ trình này.",
+          "styleWarmUp": "Một bài khởi động từ lộ trình khác."
+        },
+        "none": {
+          "harder": "Lộ trình này chưa có bài nào khó hơn.",
+          "harderWarmUp": "Dày hơn sẽ nhanh hơn phần mà nó khởi động cho.",
+          "different": "Lúc này không có bài nào khác trong lộ trình này hợp.",
+          "style": "Bạn chưa có lộ trình nào khác."
+        },
+        "count": "{{n}} / {{count}}",
+        "confirm": "Đổi bài này",
+        "another": "Xem bài khác",
+        "cancel": "Hủy",
+        "undo": "Trả lại {{title}}",
+        "swapped": "Đã đổi"
+      }
     },
     "why": {
       "firstEver": "Đây là lần đầu, nên bắt đầu ở {{bpm}} BPM. Trọng tâm là nhịp, không phải tốc độ.",
@@ -211,7 +246,9 @@
       "goAgainUp": "Chơi lại, lên {{bpm}} BPM",
       "slowerFloor": "Đây đã là tempo chậm nhất của bài này",
       "fasterCeiling": "Đây đã là tempo nhanh nhất của bài này",
-      "tempoLocked": "Bài kiểm tra chơi ở tempo đạt, nên giữ nguyên"
+      "tempoLocked": "Bài kiểm tra chơi ở tempo đạt, nên giữ nguyên",
+      "previous": "Trước",
+      "previousFirst": "Đây là khối đầu tiên, không có gì phía trước"
     },
     "result": {
       "kick": "Lượt {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ô nhịp",
@@ -535,6 +572,49 @@
     },
     "placement": {
       "result": "Bạn bắt đầu từ Bước {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "đang chơi",
+        "done": "xong",
+        "skipped": "đã bỏ qua",
+        "todo": "chưa chơi"
+      }
+    },
+    "jump": {
+      "title": "Dừng và chuyển sang {{title}}?",
+      "body": "Những gì bạn đã chơi vẫn được lưu.",
+      "go": "Chuyển"
+    },
+    "input": {
+      "turnOnAndStart": "Bật đầu vào và bắt đầu",
+      "starting": "Đang bật đầu vào…",
+      "startingShort": "Đang bật…",
+      "startingLong": "Đang bật đầu vào. Muốn chấm điểm cần micro hoặc đầu vào trực tiếp.",
+      "listeningTo": "Đang nghe {{device}}",
+      "fellBack": "Đầu vào bạn chọn chưa được kết nối, nên buổi này tôi nghe {{device}}.",
+      "defaultDevice": "đầu vào mặc định",
+      "chooseInput": "Chọn đầu vào",
+      "playUngraded": "Chơi không chấm điểm",
+      "notGraded": "Không chấm điểm",
+      "turnOn": "Bật đầu vào",
+      "noSignal": "Không có tín hiệu",
+      "failed": {
+        "noDevice": "Không tìm thấy micro hay giao diện âm thanh. Hãy cắm vào hoặc chọn một cái.",
+        "permission": "Yames chưa được phép dùng micro. Hãy cho phép trong cài đặt hệ thống rồi bấm Bắt đầu lại.",
+        "noAnswer": "Đầu vào không phản hồi. Nếu có hộp thoại xin quyền đang mở, hãy trả lời rồi bấm Bắt đầu lại.",
+        "busy": "Một ứng dụng khác đang dùng đầu vào. Hãy đóng nó rồi bấm Bắt đầu lại.",
+        "other": "Không bật được đầu vào. Hãy kiểm tra hoặc chọn cái khác."
+      }
+    },
+    "ungraded": {
+      "ready": "Không chấm điểm: đầu vào đang tắt nên buổi này tôi không nghe.",
+      "readyOff": "Không chấm điểm: chấm điểm đang tắt trong Cài đặt.",
+      "result": "Không chấm điểm: đầu vào đã tắt",
+      "resultOff": "Không chấm điểm: chấm điểm đang tắt trong Cài đặt",
+      "body": "Vẫn tính là luyện tập, cho số phút và chuỗi ngày. Tempo sạch và các Bước chỉ tiến lên với lượt chơi được chấm.",
+      "recap": "không chấm điểm"
     }
   }
 }
