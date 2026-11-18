@@ -76,6 +76,10 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   // What the engine is actually set to right now (preview included), so a
   // revert only fires when something really changed.
   const appliedRef = useRef({ sound: soundType, theme: themeId });
+  // The theme the window had on the way in. A theme outside the three offered
+  // here (Ember, say) is never "confirmed" by this step, so a hover preview
+  // must still go back to it: before, hovering Ivory over Ember stuck.
+  const enteredThemeRef = useRef(themeId);
   // One timer per column, never one shared: moving the mouse off a sound card
   // and onto a theme card would otherwise cancel the sound's pending rollback
   // and leave the click stuck on a preview the user never picked.
@@ -144,7 +148,8 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
         if (ref.current !== null) clearTimeout(ref.current);
         ref.current = null;
       }
-      const { sound, theme } = confirmedRef.current;
+      const { sound } = confirmedRef.current;
+      const theme = confirmedRef.current.theme ?? enteredThemeRef.current;
       if (appliedRef.current.sound !== sound) {
         appliedRef.current.sound = sound;
         void setSoundType(sound);
@@ -176,7 +181,7 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
     () => {
       setHoveredTheme(null);
       schedule(themeTimerRef, () => {
-        const theme = confirmedRef.current.theme;
+        const theme = confirmedRef.current.theme ?? enteredThemeRef.current;
         if (theme) pushTheme(theme);
       });
     },

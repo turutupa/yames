@@ -552,6 +552,39 @@ describe("W2 — sound & look", () => {
     expect(container.querySelector(".onboarding-theme-card.active")).toBeNull();
   });
 
+  it("a hover over a theme the user did not have goes back to theirs (Lavender, say)", () => {
+    // A theme outside the three is never "confirmed" by W2, so the rollback
+    // had nothing to return to and the preview stuck (found 2026-11-18).
+    const { rerender, props } = setup({ ...at, themeId: "lavender" });
+    const ivory = screen.getByRole("button", { name: "Ivory" });
+    fireEvent.mouseEnter(ivory);
+    settle();
+    fireEvent.mouseLeave(ivory);
+    settle();
+    expect(calls("set_theme")).toEqual(["ivory", "lavender"]);
+    fireEvent.mouseEnter(ivory);
+    settle();
+    act(() => {
+      rerender(<OnboardingWizard {...props} state={stateAt("ready")} />);
+    });
+    expect(calls("set_theme")).toEqual(["ivory", "lavender", "ivory", "lavender"]);
+  });
+
+  it("shows the learning side in the hovered theme, then the chosen one", () => {
+    setup(at);
+    const preview = () => screen.getByTestId("onboarding-theme-preview");
+    expect(preview()).toHaveAttribute("data-theme-preview", "obsidian");
+    // The neck is the real graphic neck, at a small size.
+    expect(preview().querySelector('[data-testid="neck-fallback"]')).not.toBeNull();
+    const aurora = screen.getByRole("button", { name: "Aurora" });
+    fireEvent.mouseEnter(aurora);
+    expect(preview()).toHaveAttribute("data-theme-preview", "aurora");
+    // The preview wears the theme's tokens itself; the wizard keeps its own.
+    expect(preview().style.getPropertyValue("--bg-primary")).not.toBe("");
+    fireEvent.mouseLeave(aurora);
+    expect(preview()).toHaveAttribute("data-theme-preview", "obsidian");
+  });
+
   it("'More themes in Settings' is hidden until the app wires the detour", () => {
     setup(at);
     expect(screen.queryByRole("button", { name: /More themes/ })).toBeNull();
