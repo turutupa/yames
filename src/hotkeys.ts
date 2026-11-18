@@ -92,6 +92,8 @@ export type HotkeyAction =
   | "session-pause"
   /** R in a Session: a timed block from the top, or a graded Take again. */
   | "session-restart"
+  /** L in a Session: watch the pattern's order on the neck before a Take (2026-11-18). */
+  | "session-watch"
   | "settings";
 
 export interface HotkeyEntry {
@@ -909,6 +911,18 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Go again",
     key: "R",
     desc: "In a warm-up or a timed block: from the top. After a Take: the same Take again",
+    group: "session",
+  },
+  // The order, played on the neck without sound before a Take starts (the
+  // coordinator, 2026-11-18). L, to look: W is the widget's everywhere (in a
+  // Session the session- prefix would have taken it away), O read as a zero on
+  // a condensed keycap, and L is the jam's and the songs' loop only on their
+  // own tabs, so in a Session it was free.
+  {
+    id: "session-watch",
+    action: "Watch the order",
+    key: "L",
+    desc: "Before a Take, on the neck: light the notes in order at the tempo, or stop. No sound, nothing graded",
     group: "session",
   },
 ];

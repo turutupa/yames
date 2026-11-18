@@ -8,10 +8,12 @@ import {
   beatInBar,
   cameraPlan,
   fingerFor,
+  fingering,
   nowNextNeck,
-  orderedNeck,
+  readyNeck,
   thenFrets,
   warmupPosition,
+  watchIndex,
   windowOver,
 } from "./practiceModel";
 import { warmupClockOf } from "./useWarmupBeat";
@@ -36,19 +38,30 @@ const onsets = [
 const shape = [N(1, 5, "A"), N(1, 7, "B"), N(1, 8, "C"), N(1, 3, "G")];
 
 describe("the neck as the instruction", () => {
-  it("puts NOW and NEXT on with their fret numbers, the rest quiet and unlabelled", () => {
-    const out = nowNextNeck(shape, onsets, 1);
+  const fingers = fingering(
+    onsets.map((o) => o.places[0]),
+    { fret: 5, shifts: "none" },
+  );
+
+  it("puts NOW and NEXT on, every dot carrying its finger and never a fret or an order", () => {
+    const out = nowNextNeck(shape, onsets, 1, null, false, fingers);
     const at = (f: number) => out.find((n) => n.fret === f)!;
-    expect(at(7)).toMatchObject({ kind: "now", label: "7" });
-    expect(at(8)).toMatchObject({ kind: "next", label: "8" });
-    expect(at(5)).toMatchObject({ kind: "box", label: undefined });
+    expect(at(7)).toMatchObject({ kind: "now", label: "3" });
+    expect(at(8)).toMatchObject({ kind: "next", label: "4" });
+    expect(at(5)).toMatchObject({ kind: "box", label: "1" });
+    // Not in the pattern: no finger, and no number of any other kind.
     expect(at(3)).toMatchObject({ kind: "box", label: undefined });
+  });
+
+  it("leaves a dot blank where the finger is not known", () => {
+    const out = nowNextNeck(shape, onsets, 1);
+    expect(out.every((n) => n.label === undefined)).toBe(true);
   });
 
   it("keeps the letters on the quiet shape only in theory", () => {
     const out = nowNextNeck(shape, onsets, 1, null, true);
     expect(out.find((n) => n.fret === 3)!.label).toBe("G");
-    expect(out.find((n) => n.fret === 7)!.label).toBe("7");
+    expect(out.find((n) => n.fret === 7)!.label).toBe(undefined);
   });
 
   it("colours the notes just played by their verdict, NOW winning a shared place", () => {
@@ -63,12 +76,16 @@ describe("the neck as the instruction", () => {
     expect(out.find((n) => n.fret === 8)!.kind).toBe("now");
   });
 
-  it("numbers the pattern in order before the start", () => {
-    const out = orderedNeck(shape, onsets);
-    expect(out.find((n) => n.fret === 5)).toMatchObject({ kind: "now", label: "1" });
-    expect(out.find((n) => n.fret === 7)).toMatchObject({ kind: "next", label: "2" });
-    expect(out.find((n) => n.fret === 8)).toMatchObject({ kind: "box", label: "3" });
-    expect(out.find((n) => n.fret === 3)).toMatchObject({ kind: "dim" });
+  it("before the start: fingers on the dots, the first note NOW, no order numbers", () => {
+    // The pattern starts on 7, so an order number would put "1" there.
+    const from7 = [onsets[1], onsets[2], onsets[0]];
+    const out = readyNeck(shape, from7, fingers);
+    expect(out.find((n) => n.fret === 7)).toMatchObject({ kind: "now", label: "3" });
+    expect(out.find((n) => n.fret === 8)).toMatchObject({ kind: "box", label: "4" });
+    expect(out.find((n) => n.fret === 5)).toMatchObject({ kind: "box", label: "1" });
+    expect(out.find((n) => n.fret === 3)).toMatchObject({ kind: "dim", label: undefined });
+    // No NEXT before the start: the order is the Watch preview's.
+    expect(out.some((n) => n.kind === "next")).toBe(false);
   });
 
   it("says what comes after next", () => {
@@ -82,6 +99,87 @@ describe("the neck as the instruction", () => {
     expect(fingerFor({ fret: 5, shifts: "allowed" }, 7)).toBe(null);
     expect(fingerFor({ fret: 0, shifts: "none" }, 0)).toBe(null);
     expect(fingerFor(undefined, 3)).toBe(null);
+  });
+});
+
+describe("the fingers on the dots", () => {
+  const P = (string: number, fret: number, tech: string[] = []) => ({ string, fret, tech });
+
+  it("is one finger per fret from the index at the hand's position", () => {
+    const f = fingering([P(5, 5), P(5, 6), P(5, 7), P(5, 8)], { fret: 5, shifts: "none" });
+    expect([...f.entries()]).toEqual([
+      ["5:5", "1"],
+      ["5:6", "2"],
+      ["5:7", "3"],
+      ["5:8", "4"],
+    ]);
+  });
+
+  it("gives the C major sweep at 8 the shape's own fingering, the 12 to the little finger's stretch", () => {
+    const sweep = [P(4, 10), P(3, 9), P(2, 8), P(1, 8), P(1, 12)];
+    const f = fingering(sweep, { fret: 8, shifts: "none" });
+    expect(f.get("4:10")).toBe("3");
+    expect(f.get("3:9")).toBe("2");
+    expect(f.get("2:8")).toBe("1");
+    expect(f.get("1:8")).toBe("1");
+    expect(f.get("1:12")).toBe("4");
+  });
+
+  it("gives the box lick 1, 3 and 4", () => {
+    const f = fingering([P(1, 5), P(1, 8), P(2, 8), P(3, 7), P(4, 5)], { fret: 5, shifts: "none" });
+    expect([f.get("1:5"), f.get("3:7"), f.get("1:8"), f.get("4:5")]).toEqual(["1", "3", "4", "1"]);
+  });
+
+  it("does not guess a stretch when the little finger's own fret is used too, or two frets are out there", () => {
+    expect(fingering([P(1, 5), P(1, 8), P(1, 9)], { fret: 5, shifts: "none" }).get("1:9")).toBeUndefined();
+    const two = fingering([P(1, 5), P(1, 9), P(1, 10)], { fret: 5, shifts: "none" });
+    expect(two.get("1:9")).toBeUndefined();
+    expect(two.get("1:10")).toBeUndefined();
+  });
+
+  it("marks an open string 0, a tap nothing, and a fret below the hand nothing", () => {
+    const f = fingering([P(5, 0), P(1, 12, ["tap"]), P(1, 4), P(1, 5)], { fret: 5, shifts: "none" });
+    expect(f.get("5:0")).toBe("0");
+    expect(f.has("1:12")).toBe(false);
+    expect(f.has("1:4")).toBe(false);
+    expect(f.get("1:5")).toBe("1");
+  });
+
+  it("numbers a hand that may shift only when every note is under its first four fingers", () => {
+    const inHand = fingering([P(3, 5), P(3, 7)], { fret: 5, shifts: "allowed" });
+    expect(inHand.get("3:7")).toBe("3");
+    const moves = fingering([P(3, 5), P(3, 7), P(3, 12)], { fret: 5, shifts: "allowed" });
+    expect(moves.size).toBe(0);
+  });
+
+  it("has open strings and nothing else without a hand position", () => {
+    expect([...fingering([P(5, 0), P(1, 5)], undefined).entries()]).toEqual([["5:0", "0"]]);
+  });
+});
+
+describe("the Watch preview", () => {
+  const m = { onsets, barTicks: [0, 1920, 3840], endTick: 2400 };
+
+  it("lights each note when its time comes, at the set tempo", () => {
+    // 60 BPM, 480 ticks a quarter: a quarter is a second, 480 ticks.
+    expect(watchIndex(m, 0, 60, 480).index).toBe(0);
+    expect(watchIndex(m, 999, 60, 480).index).toBe(0);
+    expect(watchIndex(m, 1000, 60, 480).index).toBe(1);
+    expect(watchIndex(m, 4000, 60, 480).index).toBe(4);
+    // Twice the tempo, twice as far.
+    expect(watchIndex(m, 1000, 120, 480).index).toBe(2);
+  });
+
+  it("loops from the end back to the start", () => {
+    // 2400 ticks a pass at 60 BPM is five seconds.
+    expect(watchIndex(m, 5000, 60, 480)).toEqual({ index: 0, tick: 0 });
+    expect(watchIndex(m, 6000, 60, 480).index).toBe(1);
+  });
+
+  it("counts from the first bar, not from a count-in", () => {
+    const late = { onsets: onsets.map((o) => ({ ...o, tick: o.tick + 1920 })), barTicks: [1920, 3840], endTick: 4320 };
+    expect(watchIndex(late, 0, 60, 480).index).toBe(0);
+    expect(watchIndex(late, 1000, 60, 480).index).toBe(1);
   });
 });
 

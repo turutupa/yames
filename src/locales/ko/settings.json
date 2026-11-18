@@ -260,7 +260,8 @@
         "session-view": "보기 전환",
         "session-pause": "일시정지 / 계속",
         "session-restart": "테이크 다시 시작",
-        "session-prev": "이전 블록으로"
+        "session-prev": "이전 블록으로",
+        "session-watch": "순서 보기"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -318,7 +319,8 @@
         "session-view": "세션에서: 넥, 런웨이, 탭. 워밍업 중엔 언제든, 채점 테이크는 테이크 사이에",
         "session-pause": "워밍업이나 시간 블록에서: 일시정지 또는 계속",
         "session-restart": "워밍업이나 시간 블록에서: 처음부터. 테이크 후: 같은 테이크를 다시",
-        "session-prev": "세션 중: 이 블록 앞의 블록으로 돌아갑니다"
+        "session-prev": "세션 중: 이 블록 앞의 블록으로 돌아갑니다",
+        "session-watch": "테이크 전, 넥에서: 음을 템포에 맞춰 순서대로 비추거나 멈춥니다. 소리 없음, 채점 없음"
       }
     },
     "inputTest": {

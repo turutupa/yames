@@ -260,7 +260,8 @@
         "session-view": "切換檢視",
         "session-pause": "暫停 / 繼續",
         "session-restart": "重錄這一遍",
-        "session-prev": "回到上一個練習區塊"
+        "session-prev": "回到上一個練習區塊",
+        "session-watch": "觀看順序"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -318,7 +319,8 @@
         "session-view": "練習中：琴頸、跑道或六線譜。熱身時隨時可切換；評分練習在兩次錄製之間",
         "session-pause": "熱身或計時段中：暫停，或繼續",
         "session-restart": "熱身或計時段中：從頭開始。錄製之後：同一段再來一次",
-        "session-prev": "練習中：回到此前一個練習區塊"
+        "session-prev": "練習中：回到此前一個練習區塊",
+        "session-watch": "Take 之前，在琴頸上：依速度逐一點亮各音，或停止。沒有聲音，不評分"
       }
     },
     "inputTest": {

@@ -260,7 +260,8 @@
         "session-view": "Changer de vue",
         "session-pause": "Pause / reprendre",
         "session-restart": "Recommencer la prise",
-        "session-prev": "Revenir au bloc précédent"
+        "session-prev": "Revenir au bloc précédent",
+        "session-watch": "Voir l'ordre"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -318,7 +319,8 @@
         "session-view": "Dans une session : Manche, Piste ou Tab. À tout moment pendant l'échauffement ; entre les prises dans une prise notée",
         "session-pause": "Pendant un échauffement ou un bloc minuté : le mettre en pause, ou continuer",
         "session-restart": "Pendant un échauffement ou un bloc minuté : depuis le début. Après une prise : la même prise encore",
-        "session-prev": "Dans une séance : revenir au bloc d'avant"
+        "session-prev": "Dans une séance : revenir au bloc d'avant",
+        "session-watch": "Avant une prise, sur le manche : allume les notes dans l'ordre au tempo, ou arrête. Sans son, sans note"
       }
     },
     "inputTest": {

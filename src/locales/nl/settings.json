@@ -260,7 +260,8 @@
         "session-view": "Weergave wisselen",
         "session-pause": "Pauze / verder",
         "session-restart": "Take opnieuw starten",
-        "session-prev": "Terug naar het vorige blok"
+        "session-prev": "Terug naar het vorige blok",
+        "session-watch": "Volgorde bekijken"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -318,7 +319,8 @@
         "session-view": "In een sessie: Hals, Baan of Tab. Altijd tijdens een warming-up; tussen takes bij een beoordeelde",
         "session-pause": "Tijdens een warming-up of een getimed blok: pauzeren, of doorgaan",
         "session-restart": "Tijdens een warming-up of een getimed blok: vanaf het begin. Na een take: dezelfde take nog eens",
-        "session-prev": "In een sessie: terug naar het blok hiervoor"
+        "session-prev": "In een sessie: terug naar het blok hiervoor",
+        "session-watch": "Voor een take, op de hals: de noten op volgorde in het tempo laten oplichten, of stoppen. Zonder geluid, zonder beoordeling"
       }
     },
     "inputTest": {

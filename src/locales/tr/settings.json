@@ -260,7 +260,8 @@
         "session-view": "Görünümü değiştir",
         "session-pause": "Duraklat / devam",
         "session-restart": "Kaydı baştan başlat",
-        "session-prev": "Önceki bloğa dön"
+        "session-prev": "Önceki bloğa dön",
+        "session-watch": "Sırayı izle"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -318,7 +319,8 @@
         "session-view": "Bir oturumda: Sap, Pist ya da Tab. Isınmada her zaman; notlananda kayıtlar arasında",
         "session-pause": "Isınmada ya da süreli blokta: duraklat ya da devam et",
         "session-restart": "Isınmada ya da süreli blokta: baştan. Bir kayıttan sonra: aynı kayıt yeniden",
-        "session-prev": "Oturumda: bundan önceki bloğa dön"
+        "session-prev": "Oturumda: bundan önceki bloğa dön",
+        "session-watch": "Bir Take'ten önce, sapta: notaları tempoda sırayla yakar ya da durdurur. Ses yok, puan yok"
       }
     },
     "inputTest": {

@@ -1,4 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { setWatchKeyLabel, toggleWatch } from "../session/practice/watchBus";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -1652,6 +1653,8 @@ export function MainWindow() {
   // A press of the single footswitch. Through a ref because the pedal needs the
   // MIDI bindings, which are built from the dispatcher this hands to.
   const pedalPress = useRef<() => void>(() => {});
+  // The Watch button shows its key as the player has it bound.
+  useEffect(() => setWatchKeyLabel(platformKey(keyBindings["session-watch"] || "")), [keyBindings]);
   const sessionActions = useMemo(
     () => ({
       startToday: sessionRun.actions.startToday,
@@ -1667,6 +1670,8 @@ export function MainWindow() {
       cycleView: sessionRun.actions.cycleView,
       togglePause: sessionRun.actions.togglePause,
       restart: sessionRun.actions.restart,
+      // The neck's Watch preview, which listens for it while it is on screen.
+      watch: toggleWatch,
     }),
     [
       sessionRun.actions.togglePause,

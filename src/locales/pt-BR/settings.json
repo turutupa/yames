@@ -260,7 +260,8 @@
         "session-view": "Trocar vista",
         "session-pause": "Pausar / continuar",
         "session-restart": "Recomeçar a take",
-        "session-prev": "Voltar ao bloco anterior"
+        "session-prev": "Voltar ao bloco anterior",
+        "session-watch": "Ver a ordem"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -318,7 +319,8 @@
         "session-view": "Numa sessão: Braço, Pista ou Tab. A qualquer momento no aquecimento; entre takes num avaliado",
         "session-pause": "Num aquecimento ou bloco cronometrado: pausar, ou continuar",
         "session-restart": "Num aquecimento ou bloco cronometrado: do começo. Depois de um take: o mesmo take de novo",
-        "session-prev": "Numa sessão: voltar ao bloco antes deste"
+        "session-prev": "Numa sessão: voltar ao bloco antes deste",
+        "session-watch": "Antes de um take, no braço: acende as notas em ordem no andamento, ou para. Sem som, sem nota"
       }
     },
     "inputTest": {
