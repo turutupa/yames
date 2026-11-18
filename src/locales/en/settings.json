@@ -151,7 +151,7 @@
       "resetHintsHint": "Show the one-time tips again",
       "resetHintsAction": "Reset",
       "resetHintsDone": "Done",
-      "takeTour": "Take the tour",
+      "takeTour": "Tour the tools",
       "takeTourHint": "A 30-second walk around the Metronome and Drill",
       "takeTourAction": "Start"
     },
@@ -321,6 +321,14 @@
         "session-restart": "In a warm-up or a timed block: from the top. After a Take: the same Take again",
         "session-prev": "In a Session: back to the block before this one",
         "session-watch": "Before a Take, on the neck: light the notes in order at the tempo, or stop. No sound, nothing graded"
+      },
+      "scope": {
+        "in": {
+          "jam": "in Jam",
+          "songs": "in Songs",
+          "session": "in a Session"
+        },
+        "notIn": "not {{where}}"
       }
     },
     "inputTest": {

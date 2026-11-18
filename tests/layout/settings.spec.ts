@@ -127,3 +127,34 @@ test.describe("the section index", () => {
     });
   }
 });
+
+/*
+ * Acceptance 4, P2-3: at 1400 the column was 718px, held by a gutter kept on
+ * both sides for an index that is only on the right, and the Support page's
+ * GitHub tile wrapped to three lines. The column grows to a reading width
+ * (900–1040px at 1400 and up), and each support tile's hint is one or two lines.
+ */
+test.describe("the settings column", () => {
+  for (const [width, min] of [
+    [1400, 860],
+    [2000, 1000],
+  ] as const) {
+    test(`is wide enough for its cards at ${width}px`, async ({ page }) => {
+      await openShot(page, "settings-update", { width, height: 900 });
+      const sizes = await page.$$eval("section.settings-section", (els) => els.map((e) => e.getBoundingClientRect().width));
+      expect(sizes.length).toBeGreaterThan(3);
+      for (const w of sizes) {
+        expect(w).toBeGreaterThanOrEqual(min);
+        expect(w).toBeLessThanOrEqual(1040.5);
+      }
+      const lines = await page.$$eval(".support-link-hint", (els) =>
+        els.map((e) => {
+          const lh = parseFloat(getComputedStyle(e).lineHeight) || parseFloat(getComputedStyle(e).fontSize) * 1.3;
+          return Math.round(e.getBoundingClientRect().height / lh);
+        }),
+      );
+      expect(lines.length).toBeGreaterThan(1);
+      for (const n of lines) expect(n, "a support tile's hint wraps past two lines").toBeLessThanOrEqual(2);
+    });
+  }
+});

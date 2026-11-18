@@ -1104,6 +1104,13 @@
   cursor: default;
 }
 
+/* "(in Jam)", "(not in Songs)": where a shared key's meaning holds. */
+.hotkey-scope {
+  font-weight: 400;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .hotkey-action[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;

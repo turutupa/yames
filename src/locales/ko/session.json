@@ -145,7 +145,11 @@
         "another": "다른 것 보기",
         "cancel": "취소",
         "undo": "{{title}}(으)로 되돌리기",
-        "swapped": "바꿈"
+        "swapped": "바꿈",
+        "tempo": {
+          "busier": "{{bpm}} BPM이지만 박마다 음이 더 많아서 여기의 {{was}} BPM보다 촘촘합니다.",
+          "startsSlow": "{{bpm}} BPM에서 시작해 여기의 {{was}}보다 느립니다. 새 연습은 천천히 시작해 깔끔하게 치면 올라갑니다."
+        }
       }
     },
     "why": {
@@ -564,7 +568,8 @@
       "next": "다음 · {{where}}",
       "barBeat": "{{n}}마디 {{beat}}박",
       "barBeats": "{{n}}마디 {{from}}–{{to}}박",
-      "pausedHere": "여기서 일시정지 · {{where}}"
+      "pausedHere": "여기서 일시정지 · {{where}}",
+      "barAgain": "다시 {{n}}마디"
     },
     "leave": {
       "title": "이 세션을 나갈까요?",
@@ -609,7 +614,9 @@
         "noAnswer": "입력이 응답하지 않았습니다. 권한 요청 창이 열려 있다면 응답한 뒤 다시 시작을 누르세요.",
         "busy": "다른 앱이 입력을 사용 중입니다. 그 앱을 닫고 다시 시작을 누르세요.",
         "other": "입력을 시작하지 못했습니다. 확인하거나 다른 입력을 선택하세요."
-      }
+      },
+      "gradingOff": "채점 꺼짐",
+      "turnOnGrading": "채점 켜기"
     },
     "ungraded": {
       "ready": "채점 안 함: 입력이 꺼져 있어 이번 세션은 듣지 않습니다.",

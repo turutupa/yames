@@ -102,14 +102,14 @@ describe("GeneralSettingsSection language select", () => {
     expect(cleared).not.toContain("appSessionCount");
   });
 
-  it('shows "Take the tour" only when the handler is wired, and calls it', () => {
+  it('shows "Tour the tools" only when the handler is wired, and calls it', () => {
     render(<GeneralSettingsSection {...baseProps} />);
-    expect(screen.queryByText("Take the tour")).toBeNull();
+    expect(screen.queryByText("Tour the tools")).toBeNull();
     cleanup();
 
     const onTakeTour = vi.fn();
     render(<GeneralSettingsSection {...baseProps} onTakeTour={onTakeTour} />);
-    expect(screen.getByText("Take the tour")).toBeInTheDocument();
+    expect(screen.getByText("Tour the tools")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
     expect(onTakeTour).toHaveBeenCalled();
   });

@@ -145,7 +145,11 @@
         "another": "再看一个",
         "cancel": "取消",
         "undo": "换回 {{title}}",
-        "swapped": "已换"
+        "swapped": "已换",
+        "tempo": {
+          "busier": "{{bpm}} BPM，但每拍音符更多：比这里的 {{was}} BPM 更密。",
+          "startsSlow": "从 {{bpm}} BPM 开始，低于这里的 {{was}}：新练习先慢后快，弹干净了就会提速。"
+        }
       }
     },
     "why": {
@@ -564,7 +568,8 @@
       "next": "接下来 · {{where}}",
       "barBeat": "第 {{n}} 小节第 {{beat}} 拍",
       "barBeats": "第 {{n}} 小节第 {{from}}–{{to}} 拍",
-      "pausedHere": "在此暂停 · {{where}}"
+      "pausedHere": "在此暂停 · {{where}}",
+      "barAgain": "再次第 {{n}} 小节"
     },
     "leave": {
       "title": "离开这次练习？",
@@ -609,7 +614,9 @@
         "noAnswer": "输入没有响应。如果有权限对话框，请先回应，然后再按一次开始。",
         "busy": "另一个应用正在使用你的输入。请关闭它，然后再按一次开始。",
         "other": "输入无法启动。请检查，或选择其他输入。"
-      }
+      },
+      "gradingOff": "评分已关闭",
+      "turnOnGrading": "开启评分"
     },
     "ungraded": {
       "ready": "未评分：输入已关闭，本次练习我不会聆听。",

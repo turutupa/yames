@@ -151,7 +151,7 @@
       "resetHintsHint": "Pokaż ponownie jednorazowe wskazówki",
       "resetHintsAction": "Resetuj",
       "resetHintsDone": "Gotowe",
-      "takeTour": "Uruchom przewodnik",
+      "takeTour": "Przewodnik po narzędziach",
       "takeTourHint": "30-sekundowy spacer po Metronomie i Rozbiegu",
       "takeTourAction": "Start"
     },
@@ -321,6 +321,14 @@
         "session-restart": "W rozgrzewce lub bloku na czas: od początku. Po podejściu: to samo podejście jeszcze raz",
         "session-prev": "W sesji: wróć do bloku przed tym",
         "session-watch": "Przed nagraniem, na gryfie: podświetla dźwięki po kolei w tempie albo zatrzymuje. Bez dźwięku, bez oceny"
+      },
+      "scope": {
+        "in": {
+          "jam": "w Jamie",
+          "songs": "w Utworach",
+          "session": "w sesji"
+        },
+        "notIn": "nie {{where}}"
       }
     },
     "inputTest": {

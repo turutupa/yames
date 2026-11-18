@@ -700,10 +700,10 @@ describe("W7 — ready", () => {
 
   it("hides the tour button until O6 wires one up", () => {
     setup(ready);
-    expect(screen.queryByRole("button", { name: /Show me around/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Tour the tools/ })).toBeNull();
     const onRequestTour = vi.fn();
     setup({ ...ready, onRequestTour });
-    fireEvent.click(screen.getByRole("button", { name: /Show me around/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Tour the tools/ }));
     expect(onRequestTour).toHaveBeenCalled();
   });
 });

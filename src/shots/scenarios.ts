@@ -1125,6 +1125,17 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 900,
   },
+  // The neck view while a Take runs, chosen rather than the phone's default
+  // Tab (acceptance 4: the phone's mid-Take neck left empty bands round it).
+  {
+    id: "session-playing-neck",
+    suffix: "session-playing-neck",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "playing", practiceView: "neck" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
   {
     id: "session-playing-tab",
     suffix: "session-playing-tab",
@@ -1608,6 +1619,7 @@ export const PHONE_LEARNING_SCENES = [
   "today-no-paths",
   "session-ready",
   "session-playing",
+  "session-playing-neck",
   "session-warmup-ready",
   "session-warmup",
   // The runway view's Take (mvp-runway): only the runway is on screen while

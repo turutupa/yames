@@ -32,6 +32,7 @@ import {
   timedTempoLive,
 } from "../../session/runner";
 import type { TakeOutcome } from "../../session/runner";
+import { PORTRAIT_PHONE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
 import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart, timedHowKey } from "./parts";
 import { RunwayTakeScreen, isTheoryTake } from "./highway/RunwayTake";
 import { Runway } from "./highway/Runway";
@@ -204,20 +205,26 @@ function InputChip({
   const { t } = useTranslation();
   const { run, inputStart, actions } = session;
   if (run.ungraded) {
-    // Not graded; one press turns the input on and grades from the next Take.
+    // Not graded; one press grades from the next Take. With grading off in
+    // Settings that is what it says and what it turns on (acceptance 4,
+    // P2-4): "Turn on input" blamed an input that was never the cause.
+    const off = run.ungraded === "gradingOff";
+    const word = t(off ? "session.input.gradingOff" : "session.input.notGraded");
+    const fix = t(off ? "session.input.turnOnGrading" : "session.input.turnOn");
     return (
       <button
         className="session-input-chip"
         data-state="ungraded"
+        data-why={run.ungraded}
         onClick={actions.gradeAgain}
-        aria-label={`${t("session.input.notGraded")}. ${t("session.input.turnOn")}`}
-        data-tip={t("session.input.turnOn")}
+        aria-label={`${word}. ${fix}`}
+        data-tip={fix}
         data-testid="session-input-chip"
       >
         <MicGlyph off />
-        <span className="session-input-chip-word">{t("session.input.notGraded")}</span>
+        <span className="session-input-chip-word">{word}</span>
         <span className="session-input-chip-fix" data-testid="session-grade-again">
-          {t("session.input.turnOn")}
+          {fix}
         </span>
       </button>
     );
@@ -340,6 +347,11 @@ function TakeScreen({
   const running = run.phase === "playing";
   const tabView = session.practiceView === "tab";
   const step = currentStep(run);
+  // On a phone held upright the input's state and its ways out ride in the
+  // sticky footer, above Slower and Faster (acceptance 4, P1-3): under the
+  // page's flow they sat below the fold, behind the footer, and the first
+  // screen showed a Start that would not start with no word of why.
+  const inputInFooter = useMediaQuery(PORTRAIT_PHONE_QUERY) && !running;
   if (!exercise || !take || !step) return null;
 
   const pathTitle = session.paths.find((p) => p.id === take.pathId);
@@ -454,7 +466,7 @@ function TakeScreen({
             </HowLines>
           )}
           <BandVolume session={session} hint={!running} />
-          {!running && (
+          {!running && !inputInFooter && (
             <ReadyInput
               session={session}
               listening={listening}
@@ -480,6 +492,16 @@ function TakeScreen({
             under the button (acceptance P1-5). A plain run of the row on a
             desktop (`display: contents`). */}
         <div className="session-go" data-testid="session-go">
+          {inputInFooter && (
+            <ReadyInput
+              session={session}
+              listening={listening}
+              hasSignal={hasSignal}
+              onTestInput={onTestInput}
+              onChooseInput={onChooseInput}
+              compact
+            />
+          )}
           {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
           {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
               ↑ reloads it, and a disabled button drops the keyboard's focus
@@ -502,6 +524,19 @@ function TakeScreen({
 
     </div>
   );
+}
+
+/**
+ * A " · " line with its short parts held together: "10 bars" and "80 BPM"
+ * never split across a line end, which on a phone left "BARS" alone on the
+ * result's second line (acceptance 4, P2-11). A long part (a title) may
+ * still wrap inside itself.
+ */
+export function keepShortParts(line: string, longest = 14): string {
+  return line
+    .split(" · ")
+    .map((part) => (part.length <= longest ? part.replace(/ /g, "\u00a0") : part))
+    .join(" · ");
 }
 
 /**
@@ -901,12 +936,14 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
       <div className="session-between">
         <div className="session-col">
           <div className="session-kick session-fade" style={rise(1)}>
-            {t("session.result.kick", {
-              take: outcome.takeNumber,
-              title: outcome.title,
-              bpm: outcome.bpm,
-              bars: outcome.measures.barsPlayed,
-            })}
+            {keepShortParts(
+              t("session.result.kick", {
+                take: outcome.takeNumber,
+                title: outcome.title,
+                bpm: outcome.bpm,
+                bars: outcome.measures.barsPlayed,
+              }),
+            )}
           </div>
           <DecidingNumber outcome={outcome} />
           <CleanTempoLine outcome={outcome} />
@@ -1028,12 +1065,14 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
     <div className="session-body" data-testid="session-ungraded" data-verdict="ungraded">
       <div className="session-center" data-top="">
         <div className="session-kick session-rise">
-          {t("session.result.kick", {
-            take: outcome.takeNumber,
-            title: outcome.title,
-            bpm: outcome.bpm,
-            bars: outcome.measures.barsPlayed,
-          })}
+          {keepShortParts(
+            t("session.result.kick", {
+              take: outcome.takeNumber,
+              title: outcome.title,
+              bpm: outcome.bpm,
+              bars: outcome.measures.barsPlayed,
+            }),
+          )}
         </div>
         <h1 className="session-h1 session-rise" style={rise(1)}>
           {t(outcome.ungraded === "gradingOff" ? "session.ungraded.resultOff" : "session.ungraded.result")}

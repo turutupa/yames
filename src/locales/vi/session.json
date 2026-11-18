@@ -145,7 +145,11 @@
         "another": "Xem bài khác",
         "cancel": "Hủy",
         "undo": "Trả lại {{title}}",
-        "swapped": "Đã đổi"
+        "swapped": "Đã đổi",
+        "tempo": {
+          "busier": "{{bpm}} BPM, nhưng nhiều nốt hơn mỗi phách: dày hơn {{was}} BPM ở đây.",
+          "startsSlow": "Bắt đầu ở {{bpm}} BPM, dưới mức {{was}} ở đây: bài mới bắt đầu chậm và tăng dần khi bạn chơi sạch."
+        }
       }
     },
     "why": {
@@ -564,7 +568,8 @@
       "next": "tiếp · {{where}}",
       "barBeat": "ô nhịp {{n}}, phách {{beat}}",
       "barBeats": "ô nhịp {{n}}, phách {{from}}–{{to}}",
-      "pausedHere": "tạm dừng ở đây · {{where}}"
+      "pausedHere": "tạm dừng ở đây · {{where}}",
+      "barAgain": "lại ô nhịp {{n}}"
     },
     "leave": {
       "title": "Rời buổi tập này?",
@@ -609,7 +614,9 @@
         "noAnswer": "Đầu vào không phản hồi. Nếu có hộp thoại xin quyền đang mở, hãy trả lời rồi bấm Bắt đầu lại.",
         "busy": "Một ứng dụng khác đang dùng đầu vào. Hãy đóng nó rồi bấm Bắt đầu lại.",
         "other": "Không bật được đầu vào. Hãy kiểm tra hoặc chọn cái khác."
-      }
+      },
+      "gradingOff": "Đã tắt chấm điểm",
+      "turnOnGrading": "Bật chấm điểm"
     },
     "ungraded": {
       "ready": "Không chấm điểm: đầu vào đang tắt nên buổi này tôi không nghe.",

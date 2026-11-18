@@ -151,7 +151,7 @@
       "resetHintsHint": "Hiện lại các mẹo chỉ xuất hiện một lần",
       "resetHintsAction": "Đặt lại",
       "resetHintsDone": "Xong",
-      "takeTour": "Xem hướng dẫn",
+      "takeTour": "Xem nhanh các công cụ",
       "takeTourHint": "Một vòng 30 giây qua Máy đếm nhịp và Luyện tempo",
       "takeTourAction": "Bắt đầu"
     },
@@ -321,6 +321,14 @@
         "session-restart": "Khi khởi động hoặc trong khối tính giờ: từ đầu. Sau một lượt: lượt đó thêm lần nữa",
         "session-prev": "Trong buổi tập: quay về khối trước khối này",
         "session-watch": "Trước một lượt, trên cần đàn: sáng các nốt theo thứ tự đúng tempo, hoặc dừng. Không tiếng, không chấm điểm"
+      },
+      "scope": {
+        "in": {
+          "jam": "trong Jam",
+          "songs": "trong Bài hát",
+          "session": "trong buổi tập"
+        },
+        "notIn": "không {{where}}"
       }
     },
     "inputTest": {

@@ -137,6 +137,44 @@ describe("the preview", () => {
     expect(screen.queryByTestId("swap-menu")).toBeNull();
   });
 
+  it("every choice counts its candidates, 1 of 1 too (acceptance 4)", () => {
+    run();
+    fireEvent.click(screen.getByTestId("today-swap-0"));
+    fireEvent.click(screen.getByTestId("swap-different"));
+    expect(screen.getByTestId("swap-count").textContent).toBe(i18n.t("session.today.swap.count", { n: 1, count: 1 }));
+  });
+
+  it("Harder at a lower tempo than the block says why; at the same tempo says nothing", () => {
+    run();
+    fireEvent.click(screen.getByTestId("today-swap-0"));
+    fireEvent.click(screen.getByTestId("swap-harder"));
+    expect(screen.queryByTestId("swap-tempo-note")).toBeNull();
+    cleanup();
+    const slowHarder = [ex("focus", "Four fingers", { bpm: 60 })];
+    const session = {
+      plan: { mood: "returning", steps: [focus, jam], daysAway: 1, minutes: 10 },
+      minutes: 10,
+      setMinutes: vi.fn(),
+      paths: [],
+      myPaths: [],
+      progress: { states: [], takes: [], ceilings: [] },
+      actions: {
+        startToday: vi.fn(),
+        startTodayAt: vi.fn(),
+        swapOptionsAt: (_i: number, c: SwapChoice): SwapOptions =>
+          c === "harder" ? { candidates: slowHarder, none: null } : { candidates: [], none: c },
+        confirmSwap: vi.fn(),
+        undoSwap: vi.fn(),
+      },
+    } as unknown as SessionRun;
+    render(<TodayView session={session} onOpenTools={vi.fn()} onOpenPaths={vi.fn()} />);
+    fireEvent.click(screen.getByTestId("today-swap-0"));
+    fireEvent.click(screen.getByTestId("swap-harder"));
+    expect(screen.getByTestId("swap-tempo-note").textContent).toBe(
+      i18n.t("session.today.swap.tempo.startsSlow", { bpm: 60, was: 80 }),
+    );
+  });
+
   it("Cancel changes nothing", () => {
     const s = run();
     fireEvent.click(screen.getByTestId("today-swap-0"));

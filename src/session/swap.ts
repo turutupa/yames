@@ -341,6 +341,33 @@ export function swapOptions(plan: SessionPlan, index: number, choice: SwapChoice
 }
 
 /**
+ * What a Harder choice says when its tempo is under the block it replaces
+ * (acceptance 4, P2-5: "Harder" offered 60 BPM for an 80 BPM block, which
+ * reads as easier). Busier anyway (more notes to a beat): it says so. Not:
+ * it says a new Exercise starts slow and climbs. Null when the tempo is the
+ * same or higher, or either side has none.
+ */
+export function harderTempoNote(
+  slot: PlanStep,
+  candidate: PlanStep,
+  allPaths: readonly PathDoc[],
+): { key: "busier" | "startsSlow"; values: { bpm: number; was: number } } | null {
+  const bpmOf = (s: PlanStep) => ("bpm" in s && typeof s.bpm === "number" ? s.bpm : null);
+  const was = bpmOf(slot);
+  const bpm = bpmOf(candidate);
+  if (was === null || bpm === null || bpm >= was) return null;
+  const rate = (s: PlanStep, at: number) => {
+    const ref = refOf(s);
+    const pick = ref ? pickOf(allPaths, ref) : null;
+    return pick ? notesPerSecond(pick.exercise, at) : null;
+  };
+  const mine = rate(slot, was);
+  const theirs = rate(candidate, bpm);
+  const busier = mine !== null && theirs !== null && theirs >= mine * 0.999;
+  return { key: busier ? "busier" : "startsSlow", values: { bpm, was } };
+}
+
+/**
  * Today's plan with the day's swaps in it. A swap applies while its block still
  * holds what it swapped away; once the plan has moved on (that block was played
  * and the plan rebuilt) it quietly stops. Exercise blocks go first, then the

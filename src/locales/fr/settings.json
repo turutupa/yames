@@ -151,7 +151,7 @@
       "resetHintsHint": "Réafficher les astuces uniques",
       "resetHintsAction": "Réinitialiser",
       "resetHintsDone": "Terminé",
-      "takeTour": "Faire la visite",
+      "takeTour": "Visiter les outils",
       "takeTourHint": "Une visite de 30 secondes du Métronome et de la Rampe",
       "takeTourAction": "Démarrer"
     },
@@ -321,6 +321,14 @@
         "session-restart": "Pendant un échauffement ou un bloc minuté : depuis le début. Après une prise : la même prise encore",
         "session-prev": "Dans une séance : revenir au bloc d'avant",
         "session-watch": "Avant une prise, sur le manche : allume les notes dans l'ordre au tempo, ou arrête. Sans son, sans note"
+      },
+      "scope": {
+        "in": {
+          "jam": "en Jam",
+          "songs": "dans Morceaux",
+          "session": "pendant une séance"
+        },
+        "notIn": "pas {{where}}"
       }
     },
     "inputTest": {

@@ -146,7 +146,11 @@
         "another": "Mostrane un altro",
         "cancel": "Annulla",
         "undo": "Rimetti {{title}}",
-        "swapped": "Cambiato"
+        "swapped": "Cambiato",
+        "tempo": {
+          "busier": "{{bpm}} BPM, ma più note per battito: più fitto di {{was}} BPM qui.",
+          "startsSlow": "Parte da {{bpm}} BPM, sotto i {{was}} di qui: un esercizio nuovo parte lento e sale quando lo suoni pulito."
+        }
       }
     },
     "why": {
@@ -577,7 +581,8 @@
       "next": "dopo · {{where}}",
       "barBeat": "battuta {{n}}, movimento {{beat}}",
       "barBeats": "battuta {{n}}, movimenti {{from}}–{{to}}",
-      "pausedHere": "in pausa qui · {{where}}"
+      "pausedHere": "in pausa qui · {{where}}",
+      "barAgain": "di nuovo battuta {{n}}"
     },
     "leave": {
       "title": "Uscire da questa sessione?",
@@ -622,7 +627,9 @@
         "noAnswer": "L'ingresso non ha risposto. Se c'è una richiesta di permesso aperta, rispondi, poi premi di nuovo Inizia.",
         "busy": "Un'altra app sta usando l'ingresso. Chiudila, poi premi di nuovo Inizia.",
         "other": "L'ingresso non è partito. Controllalo o scegline un altro."
-      }
+      },
+      "gradingOff": "Valutazione disattivata",
+      "turnOnGrading": "Attiva la valutazione"
     },
     "ungraded": {
       "ready": "Non valutato: l'ingresso è spento, in questa sessione non ascolto.",

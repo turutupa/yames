@@ -104,6 +104,91 @@ export interface HotkeyEntry {
   desc: string;
   globalAllowed?: boolean;
   group: "metronome" | "view" | "navigation" | "jam" | "songs" | "session";
+  /**
+   * Views where this (app-wide) action stands aside and its key is the
+   * view's own (acceptance 4, P1-4). The Songs tab's `[` and `]` mark a
+   * portion, so the subdivision stepper is not there; a Session's ↑ and ↓
+   * are its Faster and Slower. `actionForCombo` honours it, and the
+   * Settings list says it ("not in Songs").
+   */
+  notIn?: readonly string[];
+}
+
+/**
+ * Every view a key press can arrive on. A mode's own actions (`jam-`,
+ * `songs-`, `session-`) live only on their view; everything else lives
+ * everywhere but its `notIn`.
+ */
+export const HOTKEY_VIEWS = [
+  "today",
+  "paths",
+  "progress",
+  "tools",
+  "beat",
+  "setlist",
+  "drill",
+  "jam",
+  "songs",
+  "session",
+  "settings",
+] as const;
+
+/** The mode an action belongs to, by its prefix, or null for an app-wide one. */
+export function modeOf(actionId: string): "jam" | "songs" | "session" | null {
+  const p = MODE_ACTION_PREFIXES.find((prefix) => actionId.startsWith(prefix));
+  return p ? (p.slice(0, -1) as "jam" | "songs" | "session") : null;
+}
+
+/** Does this action answer a key on this view? */
+export function activeIn(entry: Pick<HotkeyEntry, "id" | "notIn">, view: string): boolean {
+  const mode = modeOf(entry.id);
+  if (mode) return mode === view;
+  return !(entry.notIn ?? []).includes(view);
+}
+
+/**
+ * Keys that mean two things on one view, for a map of bindings: each entry is
+ * the view, the key, and the actions that both answer it there. Empty is the
+ * rule for the defaults (acceptance 4, P1-4: C was both the coach and the
+ * camera in Jam).
+ */
+export function sameViewClashes(
+  bindings: Record<string, string>,
+): { view: string; key: string; actions: string[] }[] {
+  const out: { view: string; key: string; actions: string[] }[] = [];
+  for (const view of HOTKEY_VIEWS) {
+    const byKey = new Map<string, string[]>();
+    for (const hk of HOTKEYS) {
+      const key = bindings[hk.id];
+      if (!key || !activeIn(hk, view)) continue;
+      byKey.set(key, [...(byKey.get(key) ?? []), hk.id]);
+    }
+    for (const [key, actions] of byKey) if (actions.length > 1) out.push({ view, key, actions });
+  }
+  return out;
+}
+
+/**
+ * Where a row in the hotkeys list applies, when its key is shared with
+ * another action (acceptance 4): a mode's own action is "in Jam"; an
+ * app-wide one that a mode's action shadows is "not in Songs". Null when the
+ * key is the action's alone.
+ */
+export function scopeNote(
+  actionId: string,
+  bindings: Record<string, string>,
+): { kind: "in" | "notIn"; views: string[] } | null {
+  const key = bindings[actionId];
+  if (!key) return null;
+  const others = Object.entries(bindings).filter(([id, k]) => id !== actionId && k === key).map(([id]) => id);
+  if (others.length === 0) return null;
+  const mode = modeOf(actionId);
+  if (mode) return { kind: "in", views: [mode] };
+  const entry = HOTKEYS.find((h) => h.id === actionId);
+  const views = [
+    ...new Set([...(entry?.notIn ?? []), ...others.map(modeOf).filter((m): m is "jam" | "songs" | "session" => !!m)]),
+  ];
+  return views.length ? { kind: "notIn", views } : null;
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -397,7 +482,9 @@ export function actionForCombo(
     // Leaving a Session is only ever the Session's. Off it, Escape belongs to
     // whatever is open (the Songs tab's portion, the jam's sheets), so the
     // fallback below must not hand it out.
-    .filter((action) => action !== "session-exit" || view === "session");
+    .filter((action) => action !== "session-exit" || view === "session")
+    // An app-wide action that stands aside on this view (`notIn`).
+    .filter((action) => !(HOTKEYS.find((h) => h.id === action)?.notIn ?? []).includes(view));
   const modeOnly = (action: string) => MODE_ACTION_PREFIXES.some((p) => action.startsWith(p));
   return (
     bound.find((action) => action.startsWith(`${view}-`)) ??
@@ -424,6 +511,8 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Increase tempo by 5 BPM",
     globalAllowed: true,
     group: "metronome",
+    // A Session's ↑ is its own Faster.
+    notIn: ["session"],
   },
   {
     id: "bpm-down",
@@ -433,6 +522,7 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Decrease tempo by 5 BPM",
     globalAllowed: true,
     group: "metronome",
+    notIn: ["session"],
   },
   {
     id: "bpm-up-1",
@@ -458,6 +548,8 @@ export const HOTKEYS: HotkeyEntry[] = [
     key: "]",
     desc: "Cycle to next subdivision",
     group: "metronome",
+    // On Songs `[` and `]` mark the portion; the click follows the score there.
+    notIn: ["songs"],
   },
   {
     id: "sub-prev",
@@ -465,6 +557,7 @@ export const HOTKEYS: HotkeyEntry[] = [
     key: "[",
     desc: "Cycle to previous subdivision",
     group: "metronome",
+    notIn: ["songs"],
   },
   {
     id: "sub-1",
@@ -695,15 +788,20 @@ export const HOTKEYS: HotkeyEntry[] = [
   /**
    * The picture, hands-free (W32).
    *
-   * Exactly Songs' `C` and exactly its meaning, because a player who has
-   * learned what `C` does on one tab has learned it on the other. It arms the
-   * NEXT play for the same reason `R` does, and it goes through the switch
-   * rather than the record, so a first press still shows the promise.
+   * Exactly Songs' key and exactly its meaning, because a player who has
+   * learned it on one tab has learned it on the other. It arms the NEXT play
+   * for the same reason `R` does, and it goes through the switch rather than
+   * the record, so a first press still shows the promise.
+   *
+   * ⇧R since acceptance 4 (P1-4): it was `C`, which is the coach's key, and
+   * the coach opens on a jam — so in Jam one key meant two things and the
+   * coach could not be reached. ⇧R sits beside the take's R: the sound, and
+   * the sound with the picture.
    */
   {
     id: "jam-camera",
     action: "Record the picture",
-    key: "C",
+    key: "⇧R",
     desc: "Film the next time you press play, or turn the camera off",
     group: "jam",
   },
@@ -775,9 +873,8 @@ export const HOTKEYS: HotkeyEntry[] = [
    * decides which one a press means (`MainWindow`'s `MODE_ACTION_PREFIXES`),
    * and a player who has learned what R does in Jam has learned it here.
    *
-   * `C` is the camera, and it is the coach's key everywhere else. Same rule,
-   * and the same reason it is worth the collision: `C` for camera is what
-   * somebody would guess, and the coach card is not on the Songs tab at all.
+   * ⇧R is the camera, beside R as on the Jam tab (it was `C`, the coach's
+   * key, until acceptance 4).
    *
    * Both go through the SWITCHES rather than the settings behind them, so a
    * first press still shows the promise. A camera that came on from a
@@ -794,7 +891,7 @@ export const HOTKEYS: HotkeyEntry[] = [
   {
     id: "songs-camera",
     action: "Record the picture",
-    key: "C",
+    key: "⇧R",
     desc: "Film the next time you press play, or turn the camera off",
     group: "songs",
   },

@@ -53,7 +53,8 @@
         "next": "Next step",
         "or": "or",
         "tempo": "Faster or slower, between Takes",
-        "view": "Switch view: {{neck}}, {{runway}} or {{tab}}"
+        "view": "Switch view: {{neck}}, {{runway}} or {{tab}}",
+        "watch": "Watch the notes light up in order on the {{neck}}, before a Take"
       },
       "pedal": {
         "title": "One footswitch",
@@ -182,7 +183,7 @@
       "inputNone": "Not set up",
       "alwaysOnTop": "Always on top",
       "start": "Go to Today",
-      "tour": "Show me around (30 s)",
+      "tour": "Tour the tools (30 s)",
       "moreOnToday": "+{{count}} more on Today",
       "subtitleNext": "Your next Session is ready on Today. Change anything here, or later in Settings.",
       "nextSession": "Your next session"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Help",
-      "takeTour": "Take the tour",
+      "takeTour": "Tour the tools",
       "runSetup": "Run setup again",
       "shortcuts": "Keyboard shortcuts",
       "sendFeedback": "Send feedback",

@@ -53,7 +53,8 @@
         "next": "Sonraki adım",
         "or": "ya da",
         "tempo": "Daha hızlı ya da yavaş, kayıtlar arasında",
-        "view": "Görünümü değiştir: {{neck}}, {{runway}} ya da {{tab}}"
+        "view": "Görünümü değiştir: {{neck}}, {{runway}} ya da {{tab}}",
+        "watch": "Bir Take’ten önce notaları sırayla izle ({{neck}})"
       },
       "pedal": {
         "title": "Tek pedal",
@@ -182,7 +183,7 @@
       "inputNone": "Ayarlanmadı",
       "alwaysOnTop": "Her zaman üstte",
       "start": "Bugün'e git",
-      "tour": "Bana etrafı gezdir (30 sn)",
+      "tour": "Araçları gez (30 sn)",
       "moreOnToday": "Bugün'de {{count}} tane daha",
       "subtitleNext": "Sıradaki seansın Bugün'de hazır. Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
       "nextSession": "Sıradaki seansın"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Yardım",
-      "takeTour": "Turu başlat",
+      "takeTour": "Araçları gez",
       "runSetup": "Kurulumu yeniden çalıştır",
       "shortcuts": "Klavye kısayolları",
       "sendFeedback": "Geri bildirim gönder",

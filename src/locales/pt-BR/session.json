@@ -146,7 +146,11 @@
         "another": "Mostrar outro",
         "cancel": "Cancelar",
         "undo": "Voltar para {{title}}",
-        "swapped": "Trocado"
+        "swapped": "Trocado",
+        "tempo": {
+          "busier": "{{bpm}} BPM, mas com mais notas por tempo: mais denso que {{was}} BPM aqui.",
+          "startsSlow": "Começa em {{bpm}} BPM, abaixo dos {{was}} daqui: um exercício novo começa devagar e sobe quando você toca limpo."
+        }
       }
     },
     "why": {
@@ -577,7 +581,8 @@
       "next": "depois · {{where}}",
       "barBeat": "compasso {{n}}, tempo {{beat}}",
       "barBeats": "compasso {{n}}, tempos {{from}}–{{to}}",
-      "pausedHere": "pausado aqui · {{where}}"
+      "pausedHere": "pausado aqui · {{where}}",
+      "barAgain": "compasso {{n}} de novo"
     },
     "leave": {
       "title": "Sair desta sessão?",
@@ -622,7 +627,9 @@
         "noAnswer": "A entrada não respondeu. Se houver um pedido de permissão aberto, responda e toque em Começar de novo.",
         "busy": "Outro app está usando sua entrada. Feche-o e toque em Começar de novo.",
         "other": "Sua entrada não ligou. Verifique ou escolha outra."
-      }
+      },
+      "gradingOff": "Avaliação desligada",
+      "turnOnGrading": "Ligar a avaliação"
     },
     "ungraded": {
       "ready": "Sem avaliação: a entrada está desligada, então não estou ouvindo nesta sessão.",

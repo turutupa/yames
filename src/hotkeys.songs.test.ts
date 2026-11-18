@@ -106,12 +106,14 @@ describe("the keys the Songs tab binds", () => {
     expect(actionOf(press("]"), "songs")).toBe("songs-loop-end");
   });
 
-  /** R and C mean the recorder and the camera here, not the jam's or the coach's. */
-  it("gives R and C to the song's own recorder and camera", () => {
+  /** R and ⇧R mean the recorder and the camera here, not the jam's; C stays the coach's. */
+  it("gives R and ⇧R to the song's own recorder and camera", () => {
     expect(actionOf(press("r"), "songs")).toBe("songs-take");
-    expect(actionOf(press("c"), "songs")).toBe("songs-camera");
+    expect(actionOf(press("R", { shiftKey: true }), "songs")).toBe("songs-camera");
     expect(actionOf(press("r"), "jam")).toBe("jam-take");
+    expect(actionOf(press("R", { shiftKey: true }), "jam")).toBe("jam-camera");
     expect(actionOf(press("c"), "beat")).toBe("toggle-coach");
+    expect(actionOf(press("c"), "jam")).toBe("toggle-coach");
   });
 
   it("gives L to the portion here and to the section in Jam", () => {

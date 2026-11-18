@@ -151,7 +151,7 @@
       "resetHintsHint": "Mostra di nuovo i suggerimenti una tantum",
       "resetHintsAction": "Reimposta",
       "resetHintsDone": "Fatto",
-      "takeTour": "Fai il tour",
+      "takeTour": "Giro degli strumenti",
       "takeTourHint": "Un giro di 30 secondi tra Metronomo e Rampa",
       "takeTourAction": "Avvia"
     },
@@ -321,6 +321,14 @@
         "session-restart": "In un riscaldamento o in un blocco a tempo: dall'inizio. Dopo una presa: la stessa presa di nuovo",
         "session-prev": "In una sessione: torna al blocco prima di questo",
         "session-watch": "Prima di una take, sul manico: accende le note in ordine al tempo, o ferma. Senza suono, senza voto"
+      },
+      "scope": {
+        "in": {
+          "jam": "in Jam",
+          "songs": "in Brani",
+          "session": "in una sessione"
+        },
+        "notIn": "non {{where}}"
       }
     },
     "inputTest": {

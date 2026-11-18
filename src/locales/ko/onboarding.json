@@ -53,7 +53,8 @@
         "next": "다음 단계",
         "or": "또는",
         "tempo": "더 빠르게 또는 느리게, 테이크 사이에",
-        "view": "보기 전환: {{neck}}, {{runway}}, {{tab}}"
+        "view": "보기 전환: {{neck}}, {{runway}}, {{tab}}",
+        "watch": "테이크 전에 음 순서 보기 ({{neck}})"
       },
       "pedal": {
         "title": "풋스위치 하나",
@@ -182,7 +183,7 @@
       "inputNone": "설정 안 됨",
       "alwaysOnTop": "항상 위에 표시",
       "start": "오늘로 가기",
-      "tour": "앱 둘러보기 (30초)",
+      "tour": "도구 둘러보기 (30초)",
       "moreOnToday": "오늘에 {{count}}개 더",
       "subtitleNext": "다음 세션이 오늘에서 기다리고 있어요. 여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",
       "nextSession": "다음 세션"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "도움말",
-      "takeTour": "둘러보기",
+      "takeTour": "도구 둘러보기",
       "runSetup": "설정 다시 하기",
       "shortcuts": "키보드 단축키",
       "sendFeedback": "피드백 보내기",

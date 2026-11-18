@@ -1121,6 +1121,69 @@
     font-size: 28px;
   }
 }
+/*
+ * Today in a middling width (acceptance 4, P2-7): a 1024 window, or a wide one
+ * with the coach docked beside it. The hero gives up 70px and the gap closes,
+ * so the plan's titles and its "Warm-up · not graded" fit on their lines; a
+ * title that still wraps breaks evenly, never one word alone.
+ */
+.session-today-plan .session-plan-title {
+  text-wrap: balance;
+}
+@media (min-width: 981px) and (max-width: 1180px) {
+  .session-today {
+    --today-hero: 270px;
+    grid-template-columns:
+      minmax(0, 1fr) minmax(250px, var(--today-hero)) 28px
+      minmax(0, var(--today-plan)) minmax(0, 1fr);
+  }
+}
+@media (min-width: 1360px) and (max-width: 1700px) {
+  .main-body:has(> .coach-card.coach-card-open) .session-today {
+    --today-hero: 270px;
+    grid-template-columns:
+      minmax(0, 1fr) minmax(250px, var(--today-hero)) 28px
+      minmax(0, var(--today-plan)) minmax(0, 1fr);
+  }
+}
+/*
+ * The coach open beside Today with too little room for both columns: one
+ * column, the plan under Start, the page scrolling. Under 1160 the coach
+ * floats over the stage for the tools (shell.css); over Today it covered the
+ * whole plan, so here it docks and Today takes the rest.
+ */
+@media (min-width: 981px) and (max-width: 1159px) {
+  .main-body:has(.session-today-page) > .coach-card.coach-card-open {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    box-shadow: none;
+  }
+}
+@media (min-width: 981px) and (max-width: 1359px) {
+  .main-body:has(> .coach-card.coach-card-open) .session-today-page {
+    flex: none;
+    min-height: 100%;
+  }
+  .main-body:has(> .coach-card.coach-card-open) .session-today {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(100%, 560px);
+    margin: 0 auto;
+    align-content: normal;
+  }
+  .main-body:has(> .coach-card.coach-card-open) .session-today-hero {
+    position: static;
+    align-self: stretch;
+  }
+  .main-body:has(> .coach-card.coach-card-open) .session-today > .session-today-plan,
+  .main-body:has(> .coach-card.coach-card-open) .session-today-plan .session-plan-list {
+    flex-shrink: 0;
+    overflow-y: visible;
+  }
+}
 /* A short window: the hero's type steps down before anything leaves it. */
 @media (max-height: 760px) {
   .session-today .session-mega {
@@ -1226,12 +1289,15 @@
 .main-window.is-mobile .session-today-plan .session-plan-title {
   font-size: 18px;
 }
+/* The reason is why the row is there: never cut mid-word with an ellipsis
+   (acceptance 4: "Because evenness was 78% at 80 BPM. The bar i…"). */
 .main-window.is-mobile .session-today-plan .session-plan-why {
   font-size: 13px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+}
+/* "Warm-up · not graded" on one line beside the minutes. */
+.main-window.is-mobile .session-today-plan .session-plan-meta {
+  letter-spacing: 0.05em;
+  text-wrap: balance;
 }
 /* The page scrolls under a Start bar that already says there is more. */
 .main-window.is-mobile .session-plan-more {
@@ -1689,6 +1755,22 @@
 }
 .session-between .session-big {
   font-size: 38px;
+}
+/* The result's line over the number breaks evenly, never one word alone. */
+.session-between .session-kick,
+.session-center > .session-kick {
+  text-wrap: balance;
+}
+/* On a phone the big button is one line in every theme where it can be
+   (acceptance 4, P2-11: Ivory's wider serif broke "Go again, up to 90 BPM"
+   in two, and Aurora "Turn on input and start"); a longer one still wraps
+   into two balanced lines. */
+@media (max-width: 480px) {
+  .session-page .session-big[data-size="mid"] {
+    font-size: clamp(22px, 6.8vw, 27px);
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }
 /* The result's neck: a landscape band, centred in its column. A slot taller
    than it is wide turns the camera to the steep, vertical neck (framing.ts),
@@ -2669,6 +2751,13 @@
     flex-direction: column;
     gap: 10px;
   }
+  /* The page scrolls, the list does not: as a flex item with its overflow
+     hidden the list shrank to what was left of the window and clipped its
+     last row under the phone's sticky Start (acceptance 4, P2-7). */
+  .session-today > .session-today-plan,
+  .session-today-plan .session-plan-list {
+    flex-shrink: 0;
+  }
   .session-split,
   .session-between,
   .session-result-low,
@@ -2817,6 +2906,50 @@
   }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-nudges {
     justify-content: flex-end;
+  }
+  /* Start spans the column (acceptance 4): the desktop row's
+     "first child takes the slack" margin held it to its text's width. */
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go {
+    margin-right: 0;
+    width: 100%;
+  }
+  /* The input's state and its ways out, at the top of the footer
+     (acceptance 4, P1-3): one line of state, or the reason it would not come
+     on with Check my sound, Choose input and Play without grading, tight
+     enough that the footer stays a footer. Each control a thumb tall. */
+  /* The dot beside the words' first line, never on a line of its own. */
+  .session-go > [data-place="footer"].session-input-note {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0 8px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .session-go > [data-place="footer"].session-input-note > .session-input-dot {
+    margin-top: 4px;
+  }
+  .session-go > [data-place="footer"].session-input-note > .session-link {
+    grid-column: 2;
+    justify-self: start;
+    margin: -4px 0 -10px;
+  }
+  .session-go > [data-place="footer"].session-input-failed {
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+  .session-go > [data-place="footer"].session-input-failed > .session-why {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .session-go > [data-place="footer"] .session-input-actions {
+    gap: 6px 8px;
+  }
+  .session-go > [data-place="footer"] .session-input-actions .session-secondary {
+    font-size: 14px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big {
     box-shadow:
@@ -3188,6 +3321,13 @@
   min-width: 0;
   accent-color: var(--l-amber);
 }
+/* A ring of the page's own accent when reached by keyboard (acceptance 4,
+   P2-10): the engine's default is a thin dark line on a dark page. */
+.session-band input[type="range"]:focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
 
 /* Guitar first (2026-11-17): the note a non-guitar player sees at the top of
    Today and the Paths list. Quiet: one line of copy and two links, no colour
@@ -3427,6 +3567,18 @@
 /* The neck is the hero on the Take and warm-up screens: it takes the room. */
 .session-body > .session-practice-hero {
   flex: 1 1 0;
+}
+/* A phone held upright, mid-Take (acceptance 4, the coordinator): the neck
+   is framed on its width, so a slot stretched to the window's leftover height
+   drew it as a 145 px band with empty bands above and below. The slot keeps
+   the height the framed neck, its numbers and the beat dots use, and sits in
+   the middle of the room that is left. */
+@media (orientation: portrait) and (max-width: 480px) {
+  .session-body[data-phase="playing"] > .session-practice-hero.practice-neck {
+    flex: 0 0 auto;
+    height: clamp(230px, 64vw, 270px);
+    margin-block: auto;
+  }
 }
 /* The Take's low row with no small tab in it any more: the words alone. */
 .session-mechlow[data-single] {
@@ -4547,6 +4699,18 @@ button.session-input-chip:hover {
 .session-plan-go:focus-visible {
   background: color-mix(in srgb, var(--l-wash) 6%, transparent);
 }
+/* With a Swap beside it the highlight is the whole row's, Swap's column
+   included (acceptance 4, P2-8: it stopped short of it, leaving a notch).
+   Swap's own hover is still only Swap's. */
+.session-today-plan .session-plan-row[data-swap] {
+  transition: background 0.14s var(--l-ease, ease);
+}
+.session-today-plan .session-plan-row[data-swap]:has(> .session-plan-go:is(:hover, :focus-visible)) {
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
+}
+.session-today-plan .session-plan-row[data-swap] > .session-plan-go:is(:hover, :focus-visible) {
+  background: transparent;
+}
 .session-plan-go:hover .session-plan-dot,
 .session-plan-go:focus-visible .session-plan-dot {
   border-color: var(--l-amber);
@@ -4774,6 +4938,13 @@ button.session-input-chip:hover {
   margin: 0;
   padding: 0 4px;
   font-size: 14px;
+}
+/* Harder at a lower tempo says why, quieter than the reason (acceptance 4). */
+.session-page .session-swap-tempo {
+  margin: -4px 0 0;
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--l-quiet);
 }
 /* Two equal buttons, then Cancel under them: the same shape in every language. */
 .session-swap-actions {

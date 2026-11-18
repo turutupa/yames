@@ -58,8 +58,8 @@
       "shortcut": "Druk op {{shortcut}} om dit paneel te openen en te sluiten."
     },
     "history": {
-      "title": "Nog geen sessies.",
-      "hint": "Je sessies verschijnen hier zodra je de metronoom stopt."
+      "title": "Nog niets hier.",
+      "hint": "Elke keer dat je op Beëindigen drukt of de metronoom stopt, verschijnt het hier. Je sessies van Vandaag staan bij Voortgang."
     },
     "drill": {
       "linear": "Lineair: het tempo klimt stap voor stap van start-BPM naar doel.",

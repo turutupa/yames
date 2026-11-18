@@ -58,8 +58,8 @@
       "shortcut": "Naciśnij {{shortcut}}, aby otworzyć i zamknąć ten panel."
     },
     "history": {
-      "title": "Nie ma jeszcze sesji.",
-      "hint": "Twoje sesje pojawią się tutaj po zatrzymaniu metronomu."
+      "title": "Jeszcze nic tu nie ma.",
+      "hint": "Za każdym razem, gdy naciśniesz Zakończ albo zatrzymasz metronom, pojawi się to tutaj. Sesje z zakładki „Dzisiaj” są w zakładce „Postępy”."
     },
     "drill": {
       "linear": "Liniowo: tempo rośnie od BPM startowego do docelowego, krok po kroku.",

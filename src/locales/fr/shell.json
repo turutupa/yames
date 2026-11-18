@@ -58,8 +58,8 @@
       "shortcut": "Appuyez sur {{shortcut}} pour ouvrir et fermer ce panneau."
     },
     "history": {
-      "title": "Aucune session pour l'instant.",
-      "hint": "Vos sessions apparaissent ici dès que vous arrêtez le métronome."
+      "title": "Rien ici pour l’instant.",
+      "hint": "Chaque fois que vous appuyez sur Terminer ou arrêtez le métronome, cela apparaît ici. Vos séances du jour sont dans Progrès."
     },
     "drill": {
       "linear": "Linéaire : le tempo monte du BPM de départ vers la cible, palier par palier.",

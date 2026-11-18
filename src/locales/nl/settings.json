@@ -151,7 +151,7 @@
       "resetHintsHint": "De eenmalige tips opnieuw tonen",
       "resetHintsAction": "Resetten",
       "resetHintsDone": "Klaar",
-      "takeTour": "Rondleiding volgen",
+      "takeTour": "Rondleiding door de tools",
       "takeTourHint": "Een rondleiding van 30 seconden door Metronoom en Tempotraining",
       "takeTourAction": "Start"
     },
@@ -321,6 +321,14 @@
         "session-restart": "Tijdens een warming-up of een getimed blok: vanaf het begin. Na een take: dezelfde take nog eens",
         "session-prev": "In een sessie: terug naar het blok hiervoor",
         "session-watch": "Voor een take, op de hals: de noten op volgorde in het tempo laten oplichten, of stoppen. Zonder geluid, zonder beoordeling"
+      },
+      "scope": {
+        "in": {
+          "jam": "in Jam",
+          "songs": "in Nummers",
+          "session": "tijdens een sessie"
+        },
+        "notIn": "niet {{where}}"
       }
     },
     "inputTest": {

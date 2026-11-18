@@ -70,7 +70,7 @@ describe("session history empty state", () => {
     );
     expect(container.firstChild).toMatchSnapshot();
     expect(
-      screen.getByText(/after you stop the metronome/i),
+      screen.getByText(/press End or stop the metronome.*Sessions from Today are in Progress/i),
     ).toBeInTheDocument();
   });
 });

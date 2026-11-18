@@ -758,7 +758,7 @@
  * (shell.css), so the long hints wrapped and the selects were squeezed while
  * a third of the window sat empty. Three things here:
  *
- *   1. The column grows with the window, up to 1120px, and always leaves a
+ *   1. The column grows with the window, up to 1040px, and always leaves a
  *      gutter for the section index on the right (`--settings-gutter`).
  *   2. A row is a label column and a control column. The label keeps a
  *      reading measure (64ch) however wide the panel gets, so the control
@@ -796,8 +796,17 @@
   max-width: none;
 }
 
+/* The gutter is kept on the index's side only (acceptance 4, P2-3): kept on
+   both, to centre the column in the window, it held the column to 718px at
+   1400 with 190px of nothing on its left, and the cards' text wrapped
+   (Support's GitHub tile to three lines). The column centres in what is left
+   of the gutter and grows to 1040px. */
+.main-content[data-view="settings"] > .view-transition-wrapper:not(.main-header):not(.transport) {
+  padding-right: var(--settings-gutter);
+}
+
 .main-content[data-view="settings"] > .view-transition-wrapper > * {
-  max-width: min(1120px, max(680px, 100% - 2 * var(--settings-gutter)));
+  max-width: min(1040px, max(680px, 100% - 24px));
 }
 
 /* The theme's typography, for the page (not for the index beside it, which
@@ -1347,7 +1356,7 @@
 }
 
 /* Room for the longer section names (ru "ГОРЯЧИЕ КЛАВИШИ") where the window
-   has it; the column is at its 1120px cap by then anyway. */
+   has it; the column is at its 1040px cap by then anyway. */
 @media (min-width: 1700px) {
   :root {
     --settings-gutter: 230px;

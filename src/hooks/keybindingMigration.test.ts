@@ -6,12 +6,20 @@ import { describe, expect, it } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { HOTKEYS, actionForCombo, eventToCombo } from "../hotkeys";
 import { installSettings } from "../test/parity/store";
-import { KEYMAP_VERSION, KEYMAP_VERSION_KEY, NAV_DEFAULTS_V2, OLD_NAV_DEFAULTS, migrateNavKeys } from "./keybindingMigration";
+import {
+  CAMERA_DEFAULTS_V3,
+  KEYMAP_VERSION,
+  KEYMAP_VERSION_KEY,
+  NAV_DEFAULTS_V2,
+  OLD_NAV_DEFAULTS,
+  migrateNavKeys,
+} from "./keybindingMigration";
 import { useKeybindings } from "./useKeybindings";
 
 const NEW = Object.fromEntries(HOTKEYS.map((h) => [h.id, h.key]));
 const OLD = { ...NEW, ...OLD_NAV_DEFAULTS };
 const V2 = { ...NEW, ...NAV_DEFAULTS_V2 };
+const V3 = { ...NEW, ...CAMERA_DEFAULTS_V3 };
 
 describe("the new defaults", () => {
   it("are ⌘1–⌘9 in rail order: the learning side, then the tools; Settings stays ⌘,", () => {
@@ -68,6 +76,26 @@ describe("migrateNavKeys", () => {
     expect(moved["tab-today"]).toBe("⌘1");
   });
 
+  it("moves the camera off the coach's C to ⇧R for a map on layout 3, and from older layouts too", () => {
+    expect(migrateNavKeys(V3, 3)).toEqual(NEW);
+    expect(migrateNavKeys({ ...V2, ...CAMERA_DEFAULTS_V3 }, 2)).toEqual(NEW);
+    expect(migrateNavKeys({ ...OLD, ...CAMERA_DEFAULTS_V3 }, 1)).toEqual(NEW);
+    expect(NEW["toggle-coach"]).toBe("C");
+  });
+
+  it("keeps a camera key the player chose, and does not take ⇧R from their own binding", () => {
+    const chosen = migrateNavKeys({ ...V3, "jam-camera": "J" }, 3);
+    expect(chosen["jam-camera"]).toBe("J");
+    expect(chosen["songs-camera"]).toBe("⇧R");
+    const taken = migrateNavKeys({ ...V3, "toggle-sidebar": "⇧R" }, 3);
+    expect(taken["jam-camera"]).toBe("C");
+    expect(taken["songs-camera"]).toBe("C");
+  });
+
+  it("leaves a map on layout 4 alone", () => {
+    expect(migrateNavKeys(V3, 4)).toBe(V3);
+  });
+
   it("leaves a map already on the new defaults exactly as it is", () => {
     expect(migrateNavKeys(NEW)).toBe(NEW);
   });
@@ -89,6 +117,13 @@ describe("on launch", () => {
     expect(result.current.keyBindings).toEqual(NEW);
     expect(store.values.get("keyBindings")).toEqual(NEW);
     expect(store.values.get(KEYMAP_VERSION_KEY)).toBe(KEYMAP_VERSION);
+  });
+
+  it("a player on layout 3 gets the camera on ⇧R, and C stays the coach's", async () => {
+    const { result, store } = await mount({ keyBindings: V3, [KEYMAP_VERSION_KEY]: 3 });
+    await waitFor(() => expect(result.current.keyBindings["jam-camera"]).toBe("⇧R"));
+    expect(result.current.keyBindings).toEqual(NEW);
+    await waitFor(() => expect(store.values.get(KEYMAP_VERSION_KEY)).toBe(KEYMAP_VERSION));
   });
 
   it("once: a player who put Today back on ⌘0 afterwards keeps it", async () => {

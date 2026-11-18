@@ -53,7 +53,8 @@
         "next": "Étape suivante",
         "or": "ou",
         "tempo": "Plus vite ou plus lent, entre deux prises",
-        "view": "Changer de vue : {{neck}}, {{runway}} ou {{tab}}"
+        "view": "Changer de vue : {{neck}}, {{runway}} ou {{tab}}",
+        "watch": "Avant une prise, voir les notes dans l’ordre ({{neck}})"
       },
       "pedal": {
         "title": "Une seule pédale",
@@ -182,7 +183,7 @@
       "inputNone": "Non configurée",
       "alwaysOnTop": "Toujours au premier plan",
       "start": "Aller à Aujourd'hui",
-      "tour": "Faites-moi visiter (30 s)",
+      "tour": "Visiter les outils (30 s)",
       "moreOnToday": "+{{count}} de plus dans Aujourd'hui",
       "subtitleNext": "Ta prochaine séance t'attend dans Aujourd'hui. Modifie ce que tu veux ici, ou plus tard dans les Réglages.",
       "nextSession": "Ta prochaine séance"
@@ -259,7 +260,7 @@
     },
     "help": {
       "title": "Aide",
-      "takeTour": "Faire la visite",
+      "takeTour": "Visiter les outils",
       "runSetup": "Relancer la configuration",
       "shortcuts": "Raccourcis clavier",
       "sendFeedback": "Envoyer un avis",

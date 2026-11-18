@@ -147,7 +147,11 @@
         "another": "Pokaż inne",
         "cancel": "Anuluj",
         "undo": "Przywróć {{title}}",
-        "swapped": "Zamienione"
+        "swapped": "Zamienione",
+        "tempo": {
+          "busier": "{{bpm}} BPM, ale więcej nut na uderzenie: gęściej niż {{was}} BPM tutaj.",
+          "startsSlow": "Zaczyna się od {{bpm}} BPM, poniżej tutejszych {{was}}: nowe ćwiczenie zaczyna się wolno i przyspiesza, gdy grasz je czysto."
+        }
       }
     },
     "why": {
@@ -590,7 +594,8 @@
       "next": "dalej · {{where}}",
       "barBeat": "takt {{n}}, miara {{beat}}",
       "barBeats": "takt {{n}}, miary {{from}}–{{to}}",
-      "pausedHere": "pauza tutaj · {{where}}"
+      "pausedHere": "pauza tutaj · {{where}}",
+      "barAgain": "znowu takt {{n}}"
     },
     "leave": {
       "title": "Opuścić tę sesję?",
@@ -635,7 +640,9 @@
         "noAnswer": "Wejście nie odpowiedziało. Jeśli jest otwarte okno z prośbą o zgodę, odpowiedz, a potem naciśnij Start jeszcze raz.",
         "busy": "Inna aplikacja używa wejścia. Zamknij ją, a potem naciśnij Start jeszcze raz.",
         "other": "Wejście się nie uruchomiło. Sprawdź je albo wybierz inne."
-      }
+      },
+      "gradingOff": "Ocena wyłączona",
+      "turnOnGrading": "Włącz ocenę"
     },
     "ungraded": {
       "ready": "Bez oceny: wejście jest wyłączone, więc w tej sesji nie słucham.",
