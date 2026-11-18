@@ -571,11 +571,15 @@ export function minutesLeft(state: RunState): number {
   const plan = state.plan;
   if (!plan) return 0;
   // Every block still to play, wherever it is: the bar's blocks can be jumped
-  // to in any order, so "later" is not "after this index". A block played out
-  // or skipped gives nothing back, so jumping back to one does not refill the
+  // to in any order, so "later" is not "after this index". A block played out,
+  // or skipped and behind, gives nothing back, so jumping back to one does not refill the
   // clock with the whole plan (owner, 2026-11-18: the budget keeps real time).
   const later = plan.steps
-    .filter((s, i) => i !== state.stepIndex && !state.done.includes(s.id) && !state.skipped.includes(s.id))
+    // A skipped block still ahead is reached by Next again, so it still counts.
+    .filter(
+      (s, i) =>
+        i !== state.stepIndex && !state.done.includes(s.id) && (i > state.stepIndex || !state.skipped.includes(s.id)),
+    )
     .reduce((sum, s) => sum + s.minutes, 0);
   return Math.ceil(stepRemainingMs(state) / 60_000) + later;
 }

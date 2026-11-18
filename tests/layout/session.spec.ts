@@ -242,7 +242,10 @@ test.describe("the Session bar", () => {
     await expect(page.locator('[data-testid="session-pip-0"]')).toHaveAttribute("data-state", "skipped");
     await page.locator('[data-testid="session-previous"]').click();
     await expect(page.locator('[data-testid="session-pip-0"]')).toHaveAttribute("aria-current", "step");
-    // Keyboard: a block is focusable and Enter opens it.
+    // Keyboard: a block is focusable and Enter opens it. A key first, so the
+    // focus that follows is the keyboard's, not the click's just before
+    // (`trackFocusModality`: a clicked control leaves Enter to the Session).
+    await page.keyboard.press("Tab");
     await page.locator('[data-testid="session-pip-1"]').focus();
     await page.keyboard.press("Enter");
     await expect(page.locator('[data-testid="session-pip-1"]')).toHaveAttribute("aria-current", "step");
