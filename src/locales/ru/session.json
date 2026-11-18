@@ -334,7 +334,7 @@
       "noTakes": "В этом занятии дублей не было.",
       "notGraded": "Разминка и джем не оценивались.",
       "nextSession": "Следующее занятие, {{minutes}} мин",
-      "headClean": "Чистый темп вырос до {{bpm}} BPM: {{title}}.",
+      "headClean": "«{{title}}»: чистый темп вырос до {{bpm}} BPM.",
       "headPlayed": "{{count}} минута игры, и она считается.",
       "headPlayed_few": "{{count}} минуты игры, и они считаются.",
       "headPlayed_many": "{{count}} минут игры, и они считаются.",
