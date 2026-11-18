@@ -493,7 +493,6 @@
     },
     "practice": {
       "next": "tiếp theo",
-      "then": "rồi {{frets}}",
       "finger": "ngón {{n}}",
       "start": "bắt đầu ở đây",
       "legendNow": "chơi ngay",

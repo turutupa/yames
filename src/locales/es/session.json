@@ -506,7 +506,6 @@
     },
     "practice": {
       "next": "siguiente",
-      "then": "luego {{frets}}",
       "finger": "dedo {{n}}",
       "start": "empieza aquí",
       "legendNow": "toca ahora",

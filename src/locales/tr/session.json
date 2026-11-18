@@ -493,7 +493,6 @@
     },
     "practice": {
       "next": "sonraki",
-      "then": "sonra {{frets}}",
       "finger": "{{n}}. parmak",
       "start": "buradan başla",
       "legendNow": "şimdi çal",

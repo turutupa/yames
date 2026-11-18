@@ -506,7 +506,6 @@
     },
     "practice": {
       "next": "dopo",
-      "then": "poi {{frets}}",
       "finger": "dito {{n}}",
       "start": "inizia qui",
       "legendNow": "suona ora",

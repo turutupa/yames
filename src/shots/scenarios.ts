@@ -852,6 +852,26 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 1800,
   },
+  // The same sweep and box lick mid-Take, at their real tempo: "next" kept off
+  // every dot, the NOW ring off the dot on the next string (acceptance 4).
+  {
+    id: "session-neck-sweep-playing",
+    suffix: "session-neck-sweep-playing",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "sweep-picking", exercise: "four-strings.c-four" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-box-playing",
+    suffix: "session-neck-box-playing",
+    window: "main",
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "blues-pentatonics", exercise: "box-one.first-lick" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
   {
     id: "session-playing",
     suffix: "session-playing",

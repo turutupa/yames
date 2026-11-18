@@ -15,7 +15,20 @@ import { noteLook, useNeckPalette } from "./neckTheme";
 const DOTS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const fx = (n: number) => 1 - Math.pow(2, -n / 12);
 
-export function OverviewStrip({ from, to, notes, height }: { from: number; to: number; notes: readonly NeckNote[]; height: number }) {
+export function OverviewStrip({
+  from,
+  to,
+  notes,
+  height,
+  numbers = true,
+}: {
+  from: number;
+  to: number;
+  notes: readonly NeckNote[];
+  height: number;
+  /** The marker frets' numbers under it. Off under the 3D neck, which numbers its own frets (one row, acceptance 4 P2-12). */
+  numbers?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const P = useNeckPalette();
@@ -36,7 +49,7 @@ export function OverviewStrip({ from, to, notes, height }: { from: number; to: n
   const H = height;
   const pad = 8;
   const X = (f: number) => pad + (fx(f) / fx(24)) * (W - 2 * pad - 7);
-  const numH = 15;
+  const numH = numbers ? 15 : 0;
   const cy = (H - numH) / 2;
   // A flat bar, as in the mock: the same half-height nut to 24.
   const hw0 = cy * 0.8;
@@ -88,9 +101,11 @@ export function OverviewStrip({ from, to, notes, height }: { from: number; to: n
                 {(f === 12 || f === 24 ? [-d, d] : [0]).map((dy) => (
                   <circle key={dy} cx={x} cy={cy + dy} r={r} fill={P.inlay} />
                 ))}
-                <text x={x} y={H - 2} textAnchor="middle" fontSize={12} fontWeight={600} fill={P.numFaint} style={{ fontFamily: "var(--font-num, 'Barlow Condensed', 'Arial Narrow', sans-serif)" }}>
-                  {f}
-                </text>
+                {numbers && (
+                  <text x={x} y={H - 2} textAnchor="middle" fontSize={12} fontWeight={600} fill={P.numFaint} style={{ fontFamily: "var(--font-num, 'Barlow Condensed', 'Arial Narrow', sans-serif)" }}>
+                    {f}
+                  </text>
+                )}
               </g>
             );
           })}

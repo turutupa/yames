@@ -493,7 +493,6 @@
     },
     "practice": {
       "next": "als Nächstes",
-      "then": "dann {{frets}}",
       "finger": "Finger {{n}}",
       "start": "hier beginnen",
       "legendNow": "jetzt spielen",

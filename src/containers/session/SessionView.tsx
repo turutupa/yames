@@ -61,13 +61,14 @@ import "../../styles/session.css";
 const WHOLE: NeckView = { kind: "whole" };
 
 /** The Exercise the screen is about, as played: the Take's variant when there is one. */
-function playedNotes(session: SessionRun) {
-  return (session.take?.exercise ?? session.exercise)?.notes;
+function playedExercise(session: SessionRun) {
+  return session.take?.exercise ?? session.exercise;
 }
 
-/** The neck framed on the Exercise's own frets, its notes in one colour. */
+/** The neck framed on the Exercise's own frets, its notes in one colour, each with its finger. */
 function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false, clip = false) {
-  const { view, notes } = exerciseNeck(playedNotes(session), kind, isTheoryTake(session));
+  const played = playedExercise(session);
+  const { view, notes } = exerciseNeck(played?.notes, kind, isTheoryTake(session), played?.position);
   return useNeckSlot(clip && view.kind === "zoom" ? { ...view, clip: true } : view, notes, { sweep });
 }
 
@@ -952,7 +953,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
           {pedalMapped && <PedalCard />}
         </div>
         <div className="session-col">
-          <div className="session-slot" ref={slot} aria-hidden="true" />
+          <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
         </div>
       </div>
     </div>
@@ -990,7 +991,7 @@ function NoCatchScreen({
           {t("session.noCatch.noGuess")} {lineText(t, notCaughtHint(measures))}
         </div>
       </div>
-      <div className="session-slot" ref={slot} aria-hidden="true" />
+      <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
       <div className="session-center">
         <button
           className="session-big"
@@ -1041,7 +1042,7 @@ function UngradedResultScreen({ session }: { session: SessionRun }) {
           {t("session.ungraded.body")}
         </div>
       </div>
-      <div className="session-slot" ref={slot} aria-hidden="true" />
+      <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
       <div className="session-center">
         <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
           {bigLabel(big, t)}
@@ -1586,7 +1587,7 @@ function ListeningScreen({ session }: { session: SessionRun }) {
       <div className="session-center" data-top="">
         <div className="session-h2">{t("session.run.listeningBack")}</div>
       </div>
-      <div className="session-slot" ref={slot} aria-hidden="true" />
+      <div className="session-slot" ref={slot} aria-hidden="true" data-exercise="" />
     </div>
   );
 }
