@@ -232,5 +232,7 @@ describe("persistence", () => {
     act(() => result.current.open());
     expect(result.current.state.status).toBe("welcome");
     expect(result.current.isOpen).toBe(true);
+    // Marked as asked for, so Esc on its welcome screen can close it (P1-6).
+    expect(result.current.state.context.rerun).toBe(true);
   });
 });

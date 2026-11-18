@@ -132,16 +132,25 @@ describe("wizard shell", () => {
     expect(screen.queryByRole("button", { name: "Skip" })).toBeNull();
   });
 
-  it("Esc on W0 is 'Just give me the click' (SKIP_ALL)", () => {
+  it("Esc on W0 of a first run does nothing (acceptance P1-6)", () => {
     const { dispatch } = setup();
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(dispatch).toHaveBeenCalledWith({ type: "SKIP_ALL" });
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it("Esc on a step skips just that step", () => {
+  it("Esc on W0 of a run the player opened again closes it", () => {
+    const { dispatch } = setup({
+      state: { status: "welcome", stepId: "welcome", context: { skipped: [], visited: ["welcome"], rerun: true } },
+    });
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(dispatch).toHaveBeenCalledWith({ type: "CLOSE" });
+  });
+
+  it("Esc on a step goes back a step, never forward", () => {
     const { dispatch } = setup({ state: stateAt("instrument") });
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(dispatch).toHaveBeenCalledWith({ type: "SKIP_STEP" });
+    expect(dispatch).toHaveBeenCalledWith({ type: "BACK" });
+    expect(dispatch).not.toHaveBeenCalledWith({ type: "SKIP_STEP" });
   });
 
   it("←/→ navigate on a step and do nothing on W0", () => {

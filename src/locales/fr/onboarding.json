@@ -183,7 +183,9 @@
       "alwaysOnTop": "Toujours au premier plan",
       "start": "Aller à Aujourd'hui",
       "tour": "Faites-moi visiter (30 s)",
-      "moreOnToday": "+{{count}} de plus dans Aujourd'hui"
+      "moreOnToday": "+{{count}} de plus dans Aujourd'hui",
+      "subtitleNext": "Ta prochaine séance t'attend dans Aujourd'hui. Modifie ce que tu veux ici, ou plus tard dans les Réglages.",
+      "nextSession": "Ta prochaine séance"
     },
     "hints": {
       "dismiss": "Compris",
@@ -276,7 +278,8 @@
       "title": "Par où commencer ?",
       "subtitle": "Choisis un Parcours et ton niveau. Aujourd'hui en tire ta première séance ; tu peux changer les deux sur la page du Parcours.",
       "pathHeading": "Parcours",
-      "loading": "Chargement des Parcours…"
+      "loading": "Chargement des Parcours…",
+      "subtitleNext": "Choisis un Parcours et ton niveau. Aujourd'hui en tire ta prochaine séance ; tu peux changer les deux sur la page du Parcours."
     }
   },
   "whatsNew": {

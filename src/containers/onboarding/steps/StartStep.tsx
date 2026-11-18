@@ -116,7 +116,9 @@ export function StartStep(_props: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("onboarding.start.title")}
       </h2>
-      <p className="onboarding-step-subtitle">{t("onboarding.start.subtitle")}</p>
+      <p className="onboarding-step-subtitle">
+        {t(progress.takes.length > 0 ? "onboarding.start.subtitleNext" : "onboarding.start.subtitle")}
+      </p>
 
       {offered.length === 0 ? (
         <p className="onboarding-start-loading" role="status">

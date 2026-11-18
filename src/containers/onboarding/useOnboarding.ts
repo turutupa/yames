@@ -185,6 +185,8 @@ export function useOnboarding(
   const open = useCallback(() => {
     setChipVisible(false);
     rawDispatch({ type: "START_SETUP" });
+    // A fresh run's context, marked as asked for: Esc can close it again.
+    rawDispatch({ type: "SET_CONTEXT", patch: { rerun: true } });
   }, []);
 
   const openAt = useCallback((stepId: StepId) => {

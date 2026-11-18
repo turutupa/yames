@@ -2,8 +2,9 @@
  * The wizard shell (O1) — full-window overlay, one step at a time.
  *
  * The shell owns chrome and keyboard only: progress dots, the Back/Skip/Next
- * footer, the focus trap, ←/→ navigation and Esc semantics (on W0 Esc is
- * "Just give me the click", everywhere else it skips the step). Which steps
+ * footer, the focus trap, ←/→ navigation and Esc semantics (Esc goes back a
+ * step; on W0 it closes a wizard the player opened again, and does nothing on
+ * a first run, acceptance P1-6). Which steps
  * exist and what they render is the registry's business
  * (`steps/index.ts` + `steps/types.ts`), so O2–O5 never edit this file.
  */
@@ -228,6 +229,7 @@ export function OnboardingWizard({
     [steps, state.context],
   );
   const isWelcome = state.status === "welcome";
+  const rerun = !!state.context.rerun;
   // Back on the first step returns to W0 (never a dead end), so it is never
   // disabled — the ← key does the same thing.
   const isLastStep = dotIndex === dotted.length - 1;
@@ -348,9 +350,12 @@ export function OnboardingWizard({
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
-        // W0: Esc is "Just give me the click", not "skip this screen".
-        if (isWelcome) skipAll();
-        else onSkip();
+        // Esc goes back, never forward (acceptance P1-6): it used to skip the
+        // step, so pressing it to get out walked deeper in. On W0 it closes a
+        // run the player opened ("Run setup again"), back where they were; a
+        // first run has nowhere to go back to, so there it does nothing.
+        if (!isWelcome) onBack();
+        else if (rerun) finish();
         return;
       }
       if (e.key === "ArrowRight") {
@@ -385,7 +390,7 @@ export function OnboardingWizard({
     };
     document.addEventListener("keydown", handler, true);
     return () => document.removeEventListener("keydown", handler, true);
-  }, [open, isWelcome, nextEnabled, skipAll, onSkip, onNext, onBack]);
+  }, [open, isWelcome, rerun, nextEnabled, finish, onNext, onBack]);
 
   // --- Step environment ----------------------------------------------------
   // Count main beats only (subdivision 0) so the W0 mark pulses in tempo

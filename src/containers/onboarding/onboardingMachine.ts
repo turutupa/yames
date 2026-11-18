@@ -44,6 +44,12 @@ export type OnboardingContext = {
    * than whichever the store lists first.
    */
   startPathId?: string;
+  /**
+   * Opened again by the player ("Run setup again"), not by a first launch.
+   * Esc on the welcome screen then closes the wizard, back where it was
+   * opened from; on a first run it does nothing (acceptance P1-6).
+   */
+  rerun?: boolean;
 };
 
 /**

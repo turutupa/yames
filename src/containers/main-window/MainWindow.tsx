@@ -1293,8 +1293,13 @@ export function MainWindow() {
     void openFeedback(appVersion, i18n.language).catch(() => {});
   }, [appVersion, i18n.language]);
 
+  // "Run setup again" from Settings: a run closed early (Esc on its welcome
+  // screen) goes back to Settings rather than to the tab behind it (P1-6).
+  const wizardFromSettingsRef = useRef(false);
   const handleWizardFinish = useCallback(
     (outcome: "completed" | "skipped" | "closed") => {
+      const fromSettings = wizardFromSettingsRef.current;
+      wizardFromSettingsRef.current = false;
       void stopSoftClick().then(() => {
         if (!instrumentChosenRef.current) applyInstrument(DEFAULT_INSTRUMENT);
         // ONB-08, changed for the MVP (owner, 2026-11-16): a finished setup
@@ -1308,6 +1313,8 @@ export function MainWindow() {
           setView("today");
         } else if (outcome === "skipped") {
           setView("beat");
+        } else if (fromSettings) {
+          setView("settings");
         }
       });
     },
@@ -2576,6 +2583,7 @@ export function MainWindow() {
             setDrillAutoCollapse={setDrillAutoCollapse}
             onRunSetupAgain={() => {
               setView(prevTab.current);
+              wizardFromSettingsRef.current = true;
               onboarding.open();
             }}
             onTakeTour={() => {
@@ -3005,6 +3013,7 @@ export function MainWindow() {
           tour?.open(back);
         }}
         onRunSetupAgain={() => {
+          wizardFromSettingsRef.current = view === "settings";
           if (view === "settings") setView(prevTab.current);
           onboarding.open();
         }}

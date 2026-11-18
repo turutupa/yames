@@ -183,7 +183,9 @@
       "alwaysOnTop": "Luôn ở trên cùng",
       "start": "Đến Hôm nay",
       "tour": "Giới thiệu nhanh (30 giây)",
-      "moreOnToday": "Thêm {{count}} mục ở Hôm nay"
+      "moreOnToday": "Thêm {{count}} mục ở Hôm nay",
+      "subtitleNext": "Buổi tập tiếp theo đã sẵn sàng ở Hôm nay. Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "nextSession": "Buổi tập tiếp theo của bạn"
     },
     "hints": {
       "dismiss": "Đã hiểu",
@@ -276,7 +278,8 @@
       "title": "Bạn bắt đầu từ đâu?",
       "subtitle": "Chọn một Lộ trình và cấp độ. Hôm nay sẽ dựng buổi tập đầu tiên từ đó; đổi cả hai trong trang Lộ trình.",
       "pathHeading": "Lộ trình",
-      "loading": "Đang tải các Lộ trình…"
+      "loading": "Đang tải các Lộ trình…",
+      "subtitleNext": "Chọn một Lộ trình và cấp độ. Hôm nay sẽ dựng buổi tập tiếp theo từ đó; đổi cả hai trong trang Lộ trình."
     }
   },
   "whatsNew": {
