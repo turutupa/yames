@@ -68,8 +68,9 @@ export type HotkeyAction =
   // The new front door. A new id rather than a sixth number: `tab-1` to `tab-5`
   // are positional and stored, and Today sits above them.
   | "tab-today"
-  // The rest of the rail's learning side (owner, 2026-11-17). Not numbers in
-  // the 1–5 run: those count the tools, and a habit of ⌘3 for Drill is kept.
+  // The rest of the rail's learning side (owner, 2026-11-17). Ids of their own
+  // rather than `tab-1`…: those count the tools and are stored by name. The
+  // keys moved later that day: ⌘1–⌘4 are the learning side, the tools ⌥1–5.
   | "tab-paths"
   | "tab-progress"
   | "tab-tools"
@@ -192,7 +193,12 @@ export function eventToCombo(e: KeyboardEvent): string {
   if (e.altKey) parts.push("⌥");
   if (e.shiftKey) parts.push("⇧");
   const unshifted = e.shiftKey ? SHIFTED_PUNCTUATION[e.code] : undefined;
-  const key = unshifted && e.key === unshifted.shifted ? unshifted.plain : e.key;
+  // A digit with Shift or Option is still the digit (2026-11-17): the tools sit
+  // on ⌥1–5, and the browser reports Shift+1 as "!" on a US keyboard, '"' on
+  // a German one, and Option+1 as "¡" on a Mac. The digit row's PHYSICAL key
+  // is the same everywhere, so `code` answers.
+  const digit = (e.shiftKey || e.altKey) && /^Digit[0-9]$/.test(e.code ?? "") ? e.code.slice(5) : null;
+  const key = digit ?? (unshifted && e.key === unshifted.shifted ? unshifted.plain : e.key);
   if (["Meta", "Control", "Alt", "Shift"].includes(key)) return parts.join("");
   switch (key) {
     case " ":
@@ -384,10 +390,21 @@ export const HOTKEYS: HotkeyEntry[] = [
     globalAllowed: true,
     group: "navigation",
   },
+  /**
+   * The tools are ⌥1–5 (Alt+1–5) since 2026-11-17 (owner): ⌘1–4 went to the
+   * learning side, which is the app's front door now. A player who never
+   * changed these is moved over once (`hooks/keybindingMigration.ts`); one who
+   * did keeps theirs.
+   *
+   * Not ⌘⇧1–5, which was tried first: macOS takes ⌘⇧3, ⌘⇧4 and ⌘⇧5 for
+   * screenshots before any app hears them. Alt/Option with a digit is free on
+   * Windows, Linux and macOS, in WebView2 and WebKit; the digit is read from
+   * `e.code`, so Option+1 typing "¡" on a Mac still means 1.
+   */
   {
     id: "tab-1",
     action: "Metronome tab",
-    key: "⌘1",
+    key: "⌥1",
     desc: "Switch to Metronome tab",
     group: "navigation",
   },
@@ -402,28 +419,28 @@ export const HOTKEYS: HotkeyEntry[] = [
   {
     id: "tab-2",
     action: "Setlist tab",
-    key: "⌘2",
+    key: "⌥2",
     desc: "Switch to Setlist tab",
     group: "navigation",
   },
   {
     id: "tab-3",
     action: "Drill tab",
-    key: "⌘3",
+    key: "⌥3",
     desc: "Switch to Drill tab",
     group: "navigation",
   },
   {
     id: "tab-4",
     action: "Jam tab",
-    key: "⌘4",
+    key: "⌥4",
     desc: "Switch to Jam tab",
     group: "navigation",
   },
   {
     id: "tab-5",
     action: "Songs tab",
-    key: "⌘5",
+    key: "⌥5",
     desc: "Switch to Songs tab",
     group: "navigation",
   },
@@ -646,30 +663,32 @@ export const HOTKEYS: HotkeyEntry[] = [
   {
     id: "tab-today",
     action: "Today",
-    key: "⌘0",
+    key: "⌘1",
     desc: "Go to Today",
     group: "navigation",
   },
-  // After the tools' ⌘1–⌘5, in the rail's order. ⌘P, ⌘R and the other letters
-  // a webview or an OS already means are left alone on purpose.
+  // ⌘1–⌘4 down the rail's learning side, Today first (owner, 2026-11-17; they
+  // were ⌘0 and ⌘6–⌘8 behind the tools' ⌘1–⌘5). ⌘P, ⌘R and the other letters a
+  // webview or an OS already means are left alone on purpose, and so is ⌘0,
+  // which is "actual size" in every browser engine.
   {
     id: "tab-paths",
     action: "Paths",
-    key: "⌘6",
+    key: "⌘2",
     desc: "Go to Paths",
     group: "navigation",
   },
   {
     id: "tab-progress",
     action: "Progress",
-    key: "⌘7",
+    key: "⌘3",
     desc: "Go to Progress",
     group: "navigation",
   },
   {
     id: "tab-tools",
     action: "Tools",
-    key: "⌘8",
+    key: "⌘4",
     desc: "Go to Tools",
     group: "navigation",
   },

@@ -43,7 +43,7 @@ import type { TimingMark } from "../songs/review/marks";
 import type { BeatPosition } from "../../songs/position";
 import type { NeckKind, NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
-import { pickDirectionMatters } from "../../session/caveats";
+import { honestLineKey } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
 import "../../styles/session.css";
@@ -61,8 +61,30 @@ function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
   return useNeckSlot(view, notes, { sweep });
 }
 
+/** What an Exercise step plays, in the pack's words: its purpose. */
+function purposeOf(session: SessionRun, step: PlanStep): string | null {
+  if (step.kind !== "exercise") return null;
+  const path = session.paths.find((p) => p.id === step.pathId);
+  for (const s of path?.steps ?? []) {
+    const found = s.exercises.find((e) => e.id === step.exerciseId);
+    if (found) return found.purpose;
+  }
+  return null;
+}
+
 /** Exit, how far along, and how long is left. The mocks' session bar. */
-function SessionBar({ run, onExit }: { run: RunState; onExit: () => void }) {
+function SessionBar({
+  run,
+  onExit,
+  onSkip,
+  skipKey,
+}: {
+  run: RunState;
+  onExit: () => void;
+  /** "Skip this" on a Take's ready screen (UX audit TODAY-2), with its key. */
+  onSkip?: () => void;
+  skipKey?: string;
+}) {
   const { t } = useTranslation();
   const steps = run.plan?.steps ?? [];
   const left = minutesLeft(run);
@@ -89,6 +111,12 @@ function SessionBar({ run, onExit }: { run: RunState; onExit: () => void }) {
       <span className="session-quiet session-bar-left">
         {left > 0 ? t("session.run.minutesLeft", { minutes: left }) : t("session.run.timeUp")}
       </span>
+      {onSkip && (
+        <button className="session-skip-this" onClick={onSkip} data-testid="session-skip-this">
+          {t("session.run.skip")}
+          {skipKey && <kbd>{skipKey}</kbd>}
+        </button>
+      )}
     </div>
   );
 }
@@ -172,6 +200,7 @@ function TakeScreen({
   const scored = live.heard + live.missed;
   const inputReady = listening;
   const canStart = prepared && inputReady;
+  const honest = honestLineKey(exercise);
 
   return (
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
@@ -221,7 +250,9 @@ function TakeScreen({
             ? live.countingIn
               ? t("session.run.countIn")
               : null
-            : lineText(t, reasonLine(step.why))
+            : // What the Exercise is, not why the planner picked it: that is
+              // Today's line, and in here it read as a log (UX audit TODAY-8).
+              exercise.purpose
         }
         statusTone={running ? "live" : "quiet"}
       />
@@ -251,8 +282,8 @@ function TakeScreen({
           <CoachLine>{exercise.coachLine}</CoachLine>
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
-          {pickDirectionMatters(exercise) && (
-            <div className="session-why" data-testid="pick-caveat">{t("session.run.honest")}</div>
+          {honest && (
+            <div className="session-why" data-testid="pick-caveat">{t(honest)}</div>
           )}
           <BandVolume session={session} hint={!running} />
           {!running && !inputReady && (
@@ -710,7 +741,7 @@ function TimedScreen({
   const checked = step.kind === "metronome" && step.why.code === "yourTurn";
 
   const status = ready
-    ? lineText(t, reasonLine(step.why))
+    ? (session.exercise?.purpose ?? lineText(t, reasonLine(step.why)))
     : ended
       ? t("session.practice.ended")
       : paused
@@ -783,8 +814,6 @@ function TimedScreen({
         statusTone={ready || ended ? "quiet" : paused ? "hold" : "live"}
       />
       {picture}
-      {/* The whole pattern under the neck or the runway, before the start and
-          while paused: learn the sequence before keeping up (owner, beta 5). */}
       {/* The whole pattern under the neck or the runway before the start:
           learn the sequence before keeping up (owner, beta 5). Paused, the
           neck holds where it was and the Tab view (V) has every bar marked;
@@ -1022,7 +1051,9 @@ function RecapScreen({ session }: { session: SessionRun }) {
                     <span>{stepTitle(step, t)}</span>
                     <StepTag step={step} paths={session.paths} />
                   </div>
-                  <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
+                  <div className="session-why">
+                    {purposeOf(session, step) ?? lineText(t, reasonLine(step.why))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -1060,6 +1091,7 @@ export function SessionView({
   viewKey = "V",
   pauseKey = "K",
   restartKey = "R",
+  skipKey = "N",
   onCheckSound,
 }: {
   session: SessionRun;
@@ -1077,6 +1109,8 @@ export function SessionView({
   /** The keys bound to pausing and restarting a timed block, as shown. */
   pauseKey?: string;
   restartKey?: string;
+  /** The key bound to the next step, shown on Skip this. */
+  skipKey?: string;
   onCheckSound: () => void;
 }) {
   const { run, actions } = session;
@@ -1094,7 +1128,14 @@ export function SessionView({
 
   return (
     <div className="session-page session-run" data-testid="session" data-neck3d={tabShown ? undefined : neck3d}>
-      {run.phase !== "recap" && <SessionBar run={run} onExit={actions.exit} />}
+      {run.phase !== "recap" && (
+        <SessionBar
+          run={run}
+          onExit={actions.exit}
+          onSkip={run.phase === "ready" ? actions.next : undefined}
+          skipKey={skipKey}
+        />
+      )}
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView === "runway" && (
         <RunwayTakeScreen
           session={session}

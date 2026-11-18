@@ -172,8 +172,8 @@ fn an_unheard_hammer_on_costs_nothing() {
     let rows = rows();
     let row = rows
         .iter()
-        .find(|r| r.exercise == "two-strings.pentatonic-lick")
-        .expect("a two-string sweep lick with a hammer and two pulls");
+        .find(|r| r.exercise == "phrases.lick-to-bend")
+        .expect("a sweep lick with a hammer and two pulls");
     let mut notes = played(row, 1.0, 11);
     let soft: Vec<usize> = row
         .schedule

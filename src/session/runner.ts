@@ -154,6 +154,8 @@ export type RunEvent =
   | { type: "tick"; now: number }
   /** Reached from a result: a step played next, then back to the plan. */
   | { type: "insertStep"; step: PlanStep; now: number }
+  /** The steps after this one, planned again (placement moved the player). */
+  | { type: "replaceRest"; steps: PlanStep[] }
   /** Leave. From any state. */
   | { type: "cancel" }
   /** The recap has been read. */
@@ -219,6 +221,11 @@ function enter(state: RunState, index: number, now: number): RunState {
 
 export function runReducer(state: RunState, event: RunEvent): RunState {
   if (event.type === "cancel") return IDLE;
+  if (event.type === "replaceRest") {
+    if (!state.plan || state.phase === "idle" || state.phase === "recap") return state;
+    const steps = [...state.plan.steps.slice(0, state.stepIndex + 1), ...event.steps];
+    return { ...state, plan: { ...state.plan, steps } };
+  }
 
   switch (state.phase) {
     case "idle":
@@ -239,7 +246,9 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
         case "faster":
           return { ...state, bpm: rungAbove(event.exercise, state.bpm), now: event.now };
         case "next":
-          return onward(state, event.now);
+          // Skip this. With `insert`, that step is played next (from a Step's
+          // page, the next Exercise there: UX audit TODAY-2).
+          return onward(state, event.now, event.insert);
         case "back":
           return backOf(state, event.now);
         case "tick":
@@ -370,14 +379,18 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
 }
 
 /** On to the next step from here; this one is marked skipped if it was not played out. */
-function onward(state: RunState, now: number): RunState {
+function onward(state: RunState, now: number, insert?: PlanStep): RunState {
   const step = currentStep(state);
   const playedOut =
     (state.phase === "timed" && state.ended) ||
     state.phase === "result" ||
     state.outcomes.some((o) => o.stepId === step?.id);
   const skipped = step && !playedOut && !state.skipped.includes(step.id) ? [...state.skipped, step.id] : state.skipped;
-  return enter({ ...state, skipped }, state.stepIndex + 1, now);
+  const plan = state.plan;
+  if (!insert || !plan) return enter({ ...state, skipped }, state.stepIndex + 1, now);
+  const steps = [...plan.steps];
+  steps.splice(state.stepIndex + 1, 0, insert);
+  return enter({ ...state, skipped, plan: { ...plan, steps } }, state.stepIndex + 1, now);
 }
 
 /**
@@ -531,10 +544,12 @@ function decidingAction(
     case "test":
       return onward();
     case "placement": {
+      // A climb, one Take a rung, stopping at the first miss (UX audit TODAY-3).
       const plan = step.placement;
       if (!passed || !plan) return onward();
-      // The easy Take passed: now the one at the pass tempo.
-      if (state.bpm < plan.passAtBpm) return { kind: "again", bpm: plan.passAtBpm };
+      const ladder = plan.ladder ?? [plan.passAtBpm];
+      const higher = ladder.find((bpm) => bpm > state.bpm);
+      if (higher !== undefined) return { kind: "again", bpm: higher };
       return plan.then ? { kind: "next", step: plan.then, insert: true } : onward();
     }
     default:
@@ -595,7 +610,11 @@ export function bigAction(state: RunState, exercise: Exercise | null): BigAction
 
 /** Whether "slower" and "faster" mean anything right now. */
 export function tempoNudges(state: RunState, exercise: Exercise | null) {
-  const can = state.phase === "ready" || state.phase === "result";
+  // A Test out is a Take at the pass tempo, or it tests nothing (UX audit
+  // PATH-5): its tempo is locked.
+  const step = currentStep(state);
+  const locked = step?.kind === "exercise" && step.role === "test";
+  const can = !locked && (state.phase === "ready" || state.phase === "result");
   return {
     slower: can && !!exercise && hasRungBelow(exercise, state.bpm),
     faster: can && !!exercise && hasRungAbove(exercise, state.bpm),

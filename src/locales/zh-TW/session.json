@@ -9,7 +9,7 @@
     },
     "kind": {
       "mechanics": "技術",
-      "theory": "樂理",
+      "theory": "風格",
       "jam": "即興伴奏，不評分",
       "warmUp": "熱身，不評分",
       "review": "複習",
@@ -99,7 +99,7 @@
         "reviewDueSlipped": "上次沒穩住，所以降一檔。",
         "reviewDueLeft": "{{step}} 已完成，這是剩下的。",
         "finisher": "和樂團一起，用你已通過的速度。",
-        "placement": "先輕鬆練一遍，再以通過速度練一遍。兩遍都通過就跳過一步。",
+        "placement": "一段短爬升：通過速度的約 75%、100% 和 120%，第一次沒過就停。在通過速度上通過，就跳過一步。",
         "testOut": "以通過速度練一遍。通過了這一步就完成。",
         "benchmark": "第 {{day}} 天：每次同樣的一遍，用來對比。",
         "yourTurn": "還不能檢查，所以由你來判斷。",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}}今天休息：昨天練過。",
       "skippedTodayNever": "{{path}}今天休息：還沒練過。",
       "finisher": "收尾：和樂團一起以 {{bpm}} BPM 演奏{{exercise}}，這是你已經通過的速度。不評分。",
-      "placement": "剛來？先以 {{bpm}} BPM 輕鬆練一遍，再以 {{pass}} 練一遍。兩遍都通過就直接跳到下一步。",
+      "placement": "新來的？從 {{bpm}} BPM 起，經過 {{pass}} 往上爬，每檔一遍，第一次沒過就停。在 {{pass}} 通過，就跳到下一步。",
       "testOut": "{{step}}測試：以通過速度 {{bpm}} BPM 練一遍。",
       "benchmark": "基準測試，第{{day}}天：每次都以 {{bpm}} BPM 練同一個練習，用來對比。",
-      "yourTurn": "輪到你：{{exercise}}。暫不檢查，由你自己判斷。"
+      "yourTurn": "輪到你：{{exercise}}。暫不檢查，由你自己判斷。",
+      "newFromSibling": "新練習。從 {{bpm}} BPM 開始，約為你在「{{sibling}}」上乾淨速度 {{clean}} BPM 的 80%。"
     },
     "bar": {
       "summary": "及格線：{{bpm}} BPM 時均勻度 {{even}}%，聽到 {{heard}}% 的音。"
@@ -204,7 +205,9 @@
       "band": "樂團",
       "bandHint": "樂團不計分。用麥克風時請調小音量或戴耳機。",
       "bandMicHint": "用麥克風時我會把樂團當成你的音，所以預設關閉。戴上耳機再調大。",
-      "skipped": "已略過"
+      "skip": "跳過這個",
+      "skipped": "已略過",
+      "honestTiming": "我聽的是節奏，不是哪些音。上下撥由你掌握：我聽不出彈片方向。"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -348,8 +351,17 @@
       "subscribeCap": "本次測試最多可訂閱{{cap}}條路徑。請先取消一條；它的紀錄會保留。",
       "unsubscribedNote": "不在今天的計畫裡。你的紀錄會保留，隨時可以重新訂閱。",
       "testOut": "測試跳過",
-      "testOutHow": "每個還沒通過的練習以通過速度練一遍。大約四個通過三個，這一步就完成了。",
-      "testOutRetests": "這裡的練習你都已通過，所以這次會全部重測：每個以通過速度練一遍。"
+      "testOutHow": "還沒通過的每個練習，用通過速度各彈一遍。通過 {{count}} 個中的 {{need}} 個，這一步就完成了。",
+      "testOutRetests": "這裡的練習你都已通過，所以這次會全部重測：每個以通過速度練一遍。",
+      "levelName": {
+        "beginner": "初級",
+        "intermediate": "中級",
+        "advanced": "高級"
+      },
+      "levelStart": "從第 {{n}} 步開始 · {{level}}",
+      "skipped": "已跳過",
+      "skippedHow": "低於你選擇的級別（{{level}}），所以「今天」會跳過它。你仍然可以在這裡練習，或選擇這一步把它找回來。",
+      "startHereIf": "如果符合這些，從這裡開始"
     },
     "progress": {
       "title": "進度",
@@ -373,7 +385,13 @@
       "setlist": "你自己編排、依序演奏的練習流程。",
       "drill": "你彈的時候逐步提速，並練習你自己寫的計畫。",
       "jam": "一支樂團加上你的和弦。從不評分。",
-      "songs": "看歌曲的六線譜並跟著彈。"
+      "songs": "看歌曲的六線譜並跟著彈。",
+      "last": "上次",
+      "ramp": "變速",
+      "tempo": "速度",
+      "target": "目標",
+      "steps": "{{count}} 步",
+      "steps_other": "{{count}} 步"
     },
     "view": {
       "label": "練習檢視",
@@ -453,6 +471,15 @@
       "barBeat": "第 {{n}} 小節第 {{beat}} 拍",
       "barBeats": "第 {{n}} 小節第 {{from}}–{{to}} 拍",
       "pausedHere": "在此暫停 · {{where}}"
+    },
+    "leave": {
+      "title": "離開這次練習？",
+      "body": "你到目前為止的錄音都已儲存。",
+      "stay": "繼續練",
+      "leave": "離開"
+    },
+    "placement": {
+      "result": "你從第 {{n}} 步開始：{{step}}"
     }
   }
 }

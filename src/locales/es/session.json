@@ -9,7 +9,7 @@
     },
     "kind": {
       "mechanics": "Técnica",
-      "theory": "Teoría",
+      "theory": "Estilos",
       "jam": "Jam, sin nota",
       "warmUp": "Calentamiento, sin nota",
       "review": "Repaso",
@@ -100,7 +100,7 @@
         "reviewDueSlipped": "La última vez se escapó, así que un paso más abajo.",
         "reviewDueLeft": "Pendiente de {{step}}, que ya está hecho.",
         "finisher": "Con la banda, a un tempo que ya pasaste.",
-        "placement": "Una toma fácil y otra al tempo de aprobado. Pasa las dos y saltas un paso.",
+        "placement": "Una subida corta: cerca del 75 %, 100 % y 120 % del tempo de aprobado, parando en el primer fallo. Aprueba al tempo de aprobado y saltas un paso.",
         "testOut": "Una toma al tempo de aprobado. Pásala y el paso queda hecho.",
         "benchmark": "Día {{day}}: la misma toma cada vez, para comparar.",
         "yourTurn": "Aún sin comprobar, así que lo juzgas tú.",
@@ -166,10 +166,11 @@
       "skippedTodayYesterday": "{{path}} descansa hoy: tocado ayer.",
       "skippedTodayNever": "{{path}} descansa hoy: aún sin tocar.",
       "finisher": "Para terminar: {{exercise}} con la banda a {{bpm}} BPM, un tempo que ya pasaste. Sin nota.",
-      "placement": "¿Nuevo aquí? Una toma fácil a {{bpm}} BPM y otra a {{pass}}. Pasa las dos y saltas al siguiente paso.",
+      "placement": "¿Eres nuevo? Una subida corta desde {{bpm}} BPM pasando por {{pass}}, una toma en cada uno, parando en el primer fallo. Aprueba a {{pass}} y saltas al siguiente paso.",
       "testOut": "Examen de {{step}}: una toma al tempo de aprobado, {{bpm}} BPM.",
       "benchmark": "Referencia, día {{day}}: el mismo ejercicio a {{bpm}} BPM cada vez, para comparar.",
-      "yourTurn": "Tu turno: {{exercise}}. Aún no se comprueba, así que lo juzgas tú."
+      "yourTurn": "Tu turno: {{exercise}}. Aún no se comprueba, así que lo juzgas tú.",
+      "newFromSibling": "Nuevo. Empieza a {{bpm}} BPM, cerca del 80 % de tu tempo limpio de {{clean}} BPM en {{sibling}}."
     },
     "bar": {
       "summary": "El listón: {{even}}% de regularidad y {{heard}}% de las notas oídas, a {{bpm}} BPM."
@@ -205,7 +206,9 @@
       "band": "Banda",
       "bandHint": "La banda no se califica. Con micrófono, bájala o usa auriculares.",
       "bandMicHint": "Con micrófono oiría la banda como si fueran tus notas, así que empieza apagada. Con auriculares, súbela.",
-      "skipped": "Saltado"
+      "skip": "Saltar este",
+      "skipped": "Saltado",
+      "honestTiming": "Oigo tu tiempo, no qué notas tocas. La púa arriba-abajo es cosa tuya: no oigo la dirección."
     },
     "result": {
       "kick": "Toma {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compases",
@@ -356,8 +359,17 @@
       "subscribeCap": "En esta prueba puedes seguir hasta {{cap}} caminos. Cancela uno primero; su historial se conserva.",
       "unsubscribedNote": "No está en el plan de hoy. Tu historial se conserva; vuelve a suscribirte cuando quieras.",
       "testOut": "Hacer examen",
-      "testOutHow": "Una toma al tempo de aprobado de cada ejercicio que aún no has pasado. Pasa unos tres de cada cuatro y el paso queda hecho.",
-      "testOutRetests": "Ya pasaste todos los ejercicios de aquí, así que esto los vuelve a probar todos: una toma de cada uno al tempo de aprobado."
+      "testOutHow": "Una toma al tempo de aprobado de cada ejercicio que aún no has pasado. Pasa {{need}} de {{count}} y el paso queda hecho.",
+      "testOutRetests": "Ya pasaste todos los ejercicios de aquí, así que esto los vuelve a probar todos: una toma de cada uno al tempo de aprobado.",
+      "levelName": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzado"
+      },
+      "levelStart": "Empiezas en el paso {{n}} · {{level}}",
+      "skipped": "Saltado",
+      "skippedHow": "Está por debajo de tu nivel ({{level}}), así que Hoy lo salta. Puedes tocarlo aquí igualmente, o elegir este paso para recuperarlo.",
+      "startHereIf": "Empieza aquí si"
     },
     "progress": {
       "title": "Progreso",
@@ -381,7 +393,14 @@
       "setlist": "Una rutina que montas tú y que suena en orden.",
       "drill": "Sube el tempo mientras tocas y practica un plan que escribes tú.",
       "jam": "Una banda y tus acordes. Nunca se califica.",
-      "songs": "Lee la tablatura de una canción y toca con ella."
+      "songs": "Lee la tablatura de una canción y toca con ella.",
+      "last": "Último",
+      "ramp": "Rampa",
+      "tempo": "Tempo",
+      "target": "Objetivo",
+      "steps": "{{count}} paso",
+      "steps_many": "{{count}} pasos",
+      "steps_other": "{{count}} pasos"
     },
     "view": {
       "label": "Vista de práctica",
@@ -461,6 +480,15 @@
       "barBeat": "compás {{n}}, tiempo {{beat}}",
       "barBeats": "compás {{n}}, tiempos {{from}}–{{to}}",
       "pausedHere": "pausado aquí · {{where}}"
+    },
+    "leave": {
+      "title": "¿Salir de esta sesión?",
+      "body": "Tus tomas hasta ahora están guardadas.",
+      "stay": "Seguir",
+      "leave": "Salir"
+    },
+    "placement": {
+      "result": "Empiezas en el paso {{n}}: {{step}}"
     }
   }
 }

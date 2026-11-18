@@ -291,7 +291,8 @@ describe("the clock", () => {
     const focus = currentStep(s) as PlanStep;
     expect(stepRemainingMs(s)).toBe(focus.minutes * MIN);
     const later = run(s, { type: "tick", now: NOW + 3 * MIN + 1 });
-    expect(minutesLeft(later)).toBe(focus.minutes - 3 + 4 + 4);
+    // One Path at fifteen: the lead, then one four-minute block (UX audit TODAY-4).
+    expect(minutesLeft(later)).toBe(focus.minutes - 3 + 4);
   });
 
   it("never goes negative", () => {

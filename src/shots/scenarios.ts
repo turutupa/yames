@@ -100,9 +100,11 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics";
+    path?: "blues-pentatonics" | "sweep-picking";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
+    /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
+    band?: boolean;
   };
   /**
    * The Jam tab, with a jam actually on it.
@@ -753,6 +755,17 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   {
+    // Find my level, played through (UX audit TODAY-3): pass at 75%, pass at the
+    // pass tempo, miss at 120%. The result says where the player starts.
+    id: "today-first-climb",
+    suffix: "today-first-climb",
+    window: "main",
+    session: { seed: "first", minutes: 5, take: ["pass", "pass", "below"], stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
     // Guitar first: a drummer's Today, with the note at the top.
     id: "today-drums",
     suffix: "today-drums",
@@ -850,7 +863,7 @@ export const SHOTS: Shot[] = [
     id: "session-band-playing",
     suffix: "session-band-playing",
     window: "main",
-    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "blues-pentatonics", exercise: "landing.root-on-one" },
+    session: { seed: "returning", stop: "playing", practiceView: "neck", path: "blues-pentatonics", exercise: "landing.root-on-one", band: true },
     width: 1400,
     height: 900,
     settleMs: 900,
@@ -862,6 +875,70 @@ export const SHOTS: Shot[] = [
     session: { seed: "returning", minutes: 5, stop: "playing", practiceView: "runway" },
     width: 390,
     height: 844,
+    settleMs: 900,
+  },
+  // Sweep Picking, rebuilt 2026-11-17: its first Exercise, a tap and the etude, as the player sees them.
+  {
+    id: "sweep-step1-tab",
+    suffix: "sweep-step1-tab",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "tab", path: "sweep-picking", exercise: "triads.triad-rolls" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "sweep-step1-neck",
+    suffix: "sweep-step1-neck",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "sweep-picking", exercise: "triads.triad-rolls" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "sweep-rock-tab",
+    suffix: "sweep-rock-tab",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "tab", path: "sweep-picking", exercise: "triads.four-chords-rock" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "sweep-tap-tab",
+    suffix: "sweep-tap-tab",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "tab", path: "sweep-picking", exercise: "five-e-shape.e-shape-tap" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "sweep-tap-neck",
+    suffix: "sweep-tap-neck",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "sweep-picking", exercise: "five-e-shape.e-shape-tap" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "sweep-etude-tab",
+    suffix: "sweep-etude-tab",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "tab", path: "sweep-picking", exercise: "over-the-progression.etude", band: true },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "sweep-etude-neck",
+    suffix: "sweep-etude-neck",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "sweep-picking", exercise: "over-the-progression.etude", band: true },
+    width: 1400,
+    height: 900,
     settleMs: 900,
   },
   // Play now across every subscribed Path: three of them, ten minutes, so one

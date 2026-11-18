@@ -21,6 +21,7 @@ import {
   isExercisePassed,
   isGradable,
   isStepPassed,
+  isStepSkipped,
   sessionKeyOf,
   takesOf,
 } from "./progress";
@@ -271,6 +272,9 @@ export function dueReviews(
       const stepAt = path.steps.findIndex((s) => s.id === pick.step.id);
       const stepDone = stepAt < at || isStepPassed(progress, path.id, pick.step);
       if (!stepDone || stepAt === at) continue;
+      // A Step under the chosen Level was skipped, not finished: nothing in it
+      // was left behind, so nothing in it comes back as a leftover.
+      if (isStepSkipped(progress, path, pick.step)) continue;
       const last = takesOf(progress, path.id, pick.exercise.id)[0]?.startedAt ?? 0;
       const dueAt = last + DAY_MS;
       if (dueAt <= now) leftovers.push({ kind: "leftover", ...pick, dueAt });
@@ -350,6 +354,7 @@ export function yourTurnPicks(path: PathDoc, progress: PlayerProgress): Exercise
   const at = Math.max(0, path.steps.findIndex((s) => s.id === step.id));
   const out: ExercisePick[] = [];
   for (const s of path.steps.slice(0, at + 1).reverse()) {
+    if (isStepSkipped(progress, path, s)) continue;
     for (const exercise of s.exercises) {
       if (exercise.grading !== "graded" && exercise.notes.length > 0) out.push({ path, step: s, exercise });
     }

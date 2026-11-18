@@ -188,6 +188,15 @@ export type PathSpec = {
    * (QA 2 #14). The music and the grading are the same either way.
    */
   labelSubdivisions?: boolean | "mostly";
+  /**
+   * Re-space every Exercise's ladder from its pass tempo (UX audit TODAY-4,
+   * 2026-11-17): the first rung at about 0.6 of the pass, the top kept, six to
+   * eight rungs, no jump over 25%. A ladder that starts at 50 whatever the note
+   * grid leaves a four-minute block no way to reach a pass. The pass tempo and
+   * the top rung stay as written; warm-ups and self-checked Exercises keep theirs. Opt-in, so a Path
+   * written without it generates the same bytes. See `paceLadder` in `pace.ts`.
+   */
+  paceLadders?: boolean;
 };
 
 export function definePath(spec: PathSpec): PathSpec {

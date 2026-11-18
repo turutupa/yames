@@ -60,6 +60,9 @@
       },
       "tools": {
         "title": "En las herramientas"
+      },
+      "nav": {
+        "title": "Moverte por la app"
       }
     },
     "coach": {

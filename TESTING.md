@@ -110,6 +110,13 @@ change the input in **Settings > Devices**.
    still be there, and Today should plan from them.
 8. **The tools still work:** **Tools** in the rail opens Metronome, Setlist,
    Drill, Jam and Songs. Play with each for a minute.
+9. **Keys:** **Ctrl+1** Today, **Ctrl+2** Paths, **Ctrl+3** Progress,
+   **Ctrl+4** Tools; the tools are **Alt+1** to **Alt+5** (⌥ on a Mac)
+   (Metronome, Setlist, Drill, Jam, Songs), and **Ctrl+,** is Settings. On a
+   Mac it is ⌘ instead of Ctrl. If you had changed any of these keys, yours
+   are kept. **Escape** goes back: out of a Session to where you started it,
+   from a Step to its Path, from a Path to the list. In a Session, the first
+   Escape stops a running Take and the next one asks before leaving.
 
 Things worth telling us: anything that looked wrong, a grade that did not
 match what you played, a click that stuttered or drifted, a screen that did

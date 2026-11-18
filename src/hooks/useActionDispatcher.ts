@@ -170,6 +170,10 @@ export function useActionDispatcher({
 
   return useCallback(
     (actionId: HotkeyAction) => {
+      // A running Session is not left by a view key (UX audit NAV-2, 2026-11-17).
+      // Walking away ends it, so a stray ⌘1 meant to switch a tool threw the
+      // Session away without a word. Exit, Escape and the recap are the doors.
+      if (view === "session" && actionId.startsWith("tab-")) return;
       // Universal actions — work from any view.
       if (
         actionId === "tab-1" ||

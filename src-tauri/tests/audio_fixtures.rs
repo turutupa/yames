@@ -847,7 +847,9 @@ fn pack_pass_bars(path: &str, exercise: &str) -> Vec<PassBar> {
             _ => None,
         }
     }
-    let ex = find(&pack, exercise).unwrap_or_else(|| panic!("{exercise} in {path}"));
+    // A variant (`id#params`) carries its Exercise's bars.
+    let base = exercise.split('#').next().unwrap_or(exercise);
+    let ex = find(&pack, base).unwrap_or_else(|| panic!("{exercise} in {path}"));
     serde_json::from_value(ex["passBars"].clone()).expect("passBars as format.ts writes them")
 }
 
@@ -1163,19 +1165,20 @@ fn notes_that_ring_into_each_other_leave_right_notes_unassessed() {
     assert_eq!(pass.verdict, PassVerdict::Passed);
 }
 
-/// A sweep, on the swept tone: every Sweep Picking Exercise names
-/// `noteIdentity`, and on notes that ring across strings the honest answer is
-/// that they were not checked. The Take is still graded on its timing.
+/// A sweep, on the swept tone, is graded on its timing only. On a slow triplet
+/// sweep the pitch tracker does measure (the notes are 250 ms apart) and reads
+/// many of the ringing notes wrong: 0.53 right on a take played perfectly, on
+/// 2026-11-17. So no Sweep Picking Exercise puts `noteIdentity` in its bars, and
+/// a sweep played right passes and earns its clean tempo.
 #[test]
-fn a_sweep_played_right_passes_on_timing_and_says_the_notes_were_not_checked() {
-    let mut take = path_take("sweep-picking", "two-strings.down-two", 80.0, 8);
+fn a_sweep_played_right_passes_on_timing_and_is_never_failed_on_notes() {
+    let mut take = path_take("sweep-picking", "triads.triad-rolls#progression=Am-to-C", 80.0, 4);
     take.tone = Tone::Swept;
     take.jitter_ms = 3.0;
-    let (run, report) = run_take_with_notes(&take);
-    let pass = report.grade.pass.as_ref().unwrap();
+    assert!(take.pass_bars.iter().all(|b| b.metric != "noteIdentity"), "{:?}", take.pass_bars);
+    let run = run_take(&take);
+    let pass = run.grade().pass.as_ref().expect("pass bars were loaded");
     println!("{}\n  {pass:?}", run.line());
-    assert_ne!(notes_of(pass).status, NotesStatus::Measured, "{pass:?}");
-    assert_eq!(pass.not_assessed, vec!["noteIdentity".to_string()]);
     assert_eq!(pass.verdict, PassVerdict::Passed, "{pass:?}");
     assert!(pass.counts_for_clean_tempo);
 }

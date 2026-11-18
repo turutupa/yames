@@ -109,6 +109,7 @@ import { useAudioOutputDevices } from "./hooks/useAudioOutputDevices";
 import { useFullscreenLifecycle } from "./hooks/useFullscreenLifecycle";
 import { useAppUpdates } from "./hooks/useAppUpdates";
 import { NEVER_NEWER, useNewerVersion } from "./hooks/useNewerVersion";
+import { usePathsPlace } from "./hooks/usePathsPlace";
 import { useTabRouting } from "./hooks/useTabRouting";
 import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
@@ -124,11 +125,13 @@ import { useSessionRun } from "../session/hooks/useSessionRun";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
 import { TodayView } from "../session/TodayView";
 import { SessionView } from "../session/SessionView";
+import { LeaveSessionDialog } from "../session/LeaveSessionDialog";
 import { PathsView } from "../session/PathsView";
 import { ProgressView } from "../session/ProgressView";
 import { ToolsView } from "../session/ToolsView";
 import { LearningNeck } from "../session/NeckGate";
 import { useJamTakes } from "./hooks/useJamTakes";
+import { useToolEscape } from "./hooks/useToolEscape";
 /* W32 — the camera comes to Jam. The hook and the preview are eager, like the
    take's machinery is, because they run while a jam is happening; the
    compositor behind "save as a video" is the only lazy thing on this tab. */
@@ -231,17 +234,25 @@ export function MainWindow() {
     // Today is the front door, unless the player asked for their last tool.
     frontDoor: true,
   });
-  // A door pressed for the place already open goes back to that place's
-  // start: the rail's (or the tab bar's) Paths on a Step's page is the Paths
-  // list again, not nothing (QA 2026-11-17 #8). The Paths screen keeps which
-  // Path and Step are open in its own state; a new key starts it over.
-  const [pathsVisit, setPathsVisit] = useState(0);
+  // Where the player is inside Paths, kept above the screen so a Session
+  // started from a Step comes back to that Step, scrolled where it was
+  // (`usePathsPlace`).
+  const pathsPlace = usePathsPlace(view, contentRef);
+  // A running Session, or Settings opened from one ("Check my sound"). Either
+  // way the rail and the tab bar are away: a click on them would walk out of
+  // the Session and end it without a word (UX audit NAV-2). Settings' own Back
+  // and Escape return to the Session.
+  const inSession = view === "session" || (view === "settings" && mode === "session");
+  const pathsUpOne = pathsPlace.back;
+  // Paths reopens where the player was (UX audit NAV-3); the door pressed again
+  // while on Paths goes one page up, Step to Path to the list (QA 2026-11-17 #8
+  // asked for "not nothing"). The rail, the tab bar and the hotkey alike.
   const navigate = useCallback(
     (next: MainView) => {
-      if (next === view && next === "paths") setPathsVisit((n) => n + 1);
+      if (next === view && next === "paths") pathsUpOne();
       setView(next);
     },
-    [view, setView],
+    [view, setView, pathsUpOne],
   );
   // Fullscreen / zen-mode lifecycle (intended state, OS-level state, and
   // the webview-focus restoration helper) — owned by a dedicated hook.
@@ -554,6 +565,15 @@ export function MainWindow() {
     jams: jamSession.jams,
     lineup: jamSession.lineup,
   });
+
+  /**
+   * The one-time nudges (the tour offer, the voice question, the Finish-setup
+   * chip, the beta update, What's New, the hints) wait while a Session runs and
+   * until its recap is closed (UX audit NAV-6): a card over the neck mid-Take
+   * is the last thing a player with a guitar in their hands can deal with.
+   * Nothing is dropped; each shows as before once the Session is over.
+   */
+  const holdNudges = inSession || sessionRun.run.phase !== "idle";
 
   /**
    * "Open with Yames" on a Guitar Pro or MusicXML file (`SONGS.md` S0.9).
@@ -1428,6 +1448,17 @@ export function MainWindow() {
     return () => window.removeEventListener("keydown", onKey);
   }, [view, jamLoaded, jamScreen]);
 
+  // Escape in a tool, with nothing in it left to put away, goes back to Tools
+  // (UX audit TOOL-3). What counts as "left to put away" is the hook's.
+  const leaveToTools = useCallback(() => setView("tools"), [setView]);
+  useToolEscape({
+    view,
+    onLeave: leaveToTools,
+    blocked: isFullscreen || inputTestMode || inputTestOpen || !!bindingFor || onboarding.isOpen || !!tour?.isOpen,
+    jamBusy:
+      !!jamScreen?.editorOpen || jamScreen?.editingBar != null || !!jamScreen?.setupOpen || !!jamScreen?.chordsOpen,
+  });
+
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
@@ -1557,7 +1588,8 @@ export function MainWindow() {
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
       pedalPress: () => pedalPress.current(),
-      exit: sessionRun.actions.exit,
+      // Escape: a running Take stops first; leaving asks once there are Takes.
+      exit: sessionRun.actions.escape,
       cycleView: sessionRun.actions.cycleView,
       togglePause: sessionRun.actions.togglePause,
       restart: sessionRun.actions.restart,
@@ -1566,7 +1598,7 @@ export function MainWindow() {
       sessionRun.actions.togglePause,
       sessionRun.actions.restart,
       sessionRun.actions.cycleView,
-      sessionRun.actions.exit,
+      sessionRun.actions.escape,
       sessionRun.actions.startToday,
       sessionRun.actions.goKey,
       sessionRun.actions.slower,
@@ -1581,7 +1613,7 @@ export function MainWindow() {
   // reason it does not travel.
   const dispatchAction = IS_MOBILE ? () => {} : useActionDispatcher({
     view,
-    setView,
+    setView: navigate,
     prevTab,
     setlistLoaded: !!setlistSession.setlist,
     jamLoaded: !!jamSession.jam,
@@ -1869,7 +1901,7 @@ export function MainWindow() {
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       {!IS_MOBILE && <TitleBar />}
 
-      {onboarding.chipVisible && view !== "settings" && (
+      {onboarding.chipVisible && view !== "settings" && !holdNudges && (
         <FinishSetupChip
           onOpen={() => onboarding.openAt("instrument")}
           onDismiss={onboarding.dismissChip}
@@ -1894,7 +1926,7 @@ export function MainWindow() {
         </button>
       )}
 
-      {IS_BETA && betaPrompt.show && !audioError.notice && (
+      {IS_BETA && betaPrompt.show && !audioError.notice && !holdNudges && (
         <BetaUpdateNotice
           version={IS_MOBILE ? androidBeta.version : latestVersion}
           busy={betaBusy}
@@ -1923,7 +1955,7 @@ export function MainWindow() {
       {/* Hints stay out of the way of the wizard, of the tour (another
           anchored overlay — two cards pointing at the same UI is noise) and
           of Zen (which renders its own `zen-first` card inside the overlay). */}
-      {!IS_MOBILE && appHint && !onboarding.isOpen && !tour?.isOpen && !isFullscreen && (
+      {!IS_MOBILE && appHint && !onboarding.isOpen && !tour?.isOpen && !isFullscreen && !holdNudges && (
         <HintCard
           id={appHint.id}
           onAction={appHint.onAction}
@@ -1932,7 +1964,7 @@ export function MainWindow() {
         />
       )}
 
-      {!IS_MOBILE && tour?.offerVisible && view !== "settings" && (
+      {!IS_MOBILE && tour?.offerVisible && view !== "settings" && !holdNudges && (
         <TourOfferToast
           onAccept={tour.acceptOffer}
           onDismiss={tour.dismissOffer}
@@ -1943,7 +1975,7 @@ export function MainWindow() {
       {/* W4 left the voice unchosen on purpose; the download that finished is
           what makes the question answerable (O4). Never over the wizard or
           over the Settings page it points at. */}
-      {!IS_MOBILE && voicePrompt?.visible && view !== "settings" && !onboarding.isOpen && (
+      {!IS_MOBILE && voicePrompt?.visible && view !== "settings" && !onboarding.isOpen && !holdNudges && (
         <CoachVoiceToast
           onAccept={openVoiceSettings}
           onDismiss={voicePrompt.dismiss}
@@ -1959,7 +1991,7 @@ export function MainWindow() {
       )}
 
       <LearningNeck view={view}>
-      <div className="main-body" data-session={view === "session" ? "" : undefined}>
+      <div className="main-body" data-session={inSession ? "" : undefined}>
         {/* A phone gets a bottom tab bar instead (below): 252px of rail on a
             360px screen is two thirds of the app. See MobileTabBar.tsx. */}
         {!IS_MOBILE && (
@@ -2380,8 +2412,8 @@ export function MainWindow() {
           />
         ) : view === "paths" ? (
           <PathsView
-            key={pathsVisit}
             session={sessionRun}
+            place={pathsPlace}
             instrumentNote={{
               instrument,
               onOpenTools: () => setView("tools"),
@@ -2391,8 +2423,31 @@ export function MainWindow() {
         ) : view === "progress" ? (
           <ProgressView session={sessionRun} />
         ) : view === "tools" ? (
-          <ToolsView onOpen={setView} />
+          <ToolsView
+            onOpen={setView}
+            keyBindings={keyBindings}
+            info={{
+              bpm: state.bpm,
+              groups: state.beatGroups ?? [state.timeSignature],
+              freeMode: state.freeMode,
+              ramp: state.speedRamp,
+              setlist: setlistSession.setlist
+                ? { name: setlistSession.setlist.name, steps: setlistSession.setlist.steps.length }
+                : null,
+              jam: jamSession.jam?.name ?? null,
+              song: songsSession.song?.name ?? null,
+            }}
+          />
         ) : view === "session" ? (
+          <>
+          {sessionRun.placed && (
+            <div className="session-placed" role="status" data-testid="session-placed">
+              {t("session.placement.result", sessionRun.placed)}
+            </div>
+          )}
+          {sessionRun.leaveAsked && (
+            <LeaveSessionDialog onLeave={sessionRun.actions.exit} onStay={sessionRun.actions.stayInSession} />
+          )}
           <SessionView
             session={sessionRun}
             themeId={state.theme}
@@ -2404,8 +2459,10 @@ export function MainWindow() {
             viewKey={platformKey(keyBindings["session-view"] || "")}
             pauseKey={platformKey(keyBindings["session-pause"] || "")}
             restartKey={platformKey(keyBindings["session-restart"] || "")}
+            skipKey={platformKey(keyBindings["session-next"] || "")}
             onCheckSound={openAudioSettings}
           />
+          </>
         ) : view === "songs" ? (
           <SongsView
             session={songsSession}
@@ -2642,7 +2699,7 @@ export function MainWindow() {
           Not while a Session runs: one picture at a time, and the Session's
           own Exit is the way out (QA 2026-11-17 #3, the bar covered "Start
           take" at 360x800). */}
-      {IS_MOBILE && view !== "session" && (
+      {IS_MOBILE && !inSession && (
         <MobileTabBar
           view={view}
           setView={navigate}
@@ -2888,7 +2945,7 @@ export function MainWindow() {
       />
     )}
     <WhatsNewModal
-      open={whatsNew.isOpen && !onboarding.isOpen}
+      open={whatsNew.isOpen && !onboarding.isOpen && !holdNudges}
       version={appVersion}
       notes={whatsNew.notes}
       onClose={whatsNew.dismiss}

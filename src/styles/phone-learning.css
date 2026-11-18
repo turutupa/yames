@@ -36,6 +36,14 @@
   padding: 0 2px;
 }
 
+/* The Path and Step pages' Back, and a Take's Skip this (UX audit NAV-4,
+   TODAY-2): a thumb tall like Exit beside it. */
+.main-window.is-mobile .session-page .session-back,
+.main-window.is-mobile .session-page .session-skip-this {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 /* The Level picker on a Path: three rows, each a thumb tall. */
 .main-window.is-mobile .session-page .session-seg > button {
   min-height: 44px;

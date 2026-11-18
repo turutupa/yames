@@ -60,6 +60,9 @@
       },
       "tools": {
         "title": "Nas ferramentas"
+      },
+      "nav": {
+        "title": "Navegação"
       }
     },
     "coach": {

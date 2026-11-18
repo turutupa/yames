@@ -36,6 +36,7 @@ import {
 } from "./derive";
 import { DETECTION_FLAGS } from "./metrics";
 import { checkReachAt, maxPlayableBpm } from "./reach";
+import { paceLadder } from "./pace";
 import type { ExerciseSpec, HarmonySpec, PathSpec, VariantBuild, VariantParams, VarySpec } from "./spec";
 import { markAlternate, markEconomy, markSweep, parseTab } from "./tabDsl";
 import { canSpellScale, chordRootName, guideTones, spellChord, spellScale } from "./theory";
@@ -222,19 +223,24 @@ function buildExercise(
 
   // A rung is graded only if every variant may be graded at it.
   const limit = gradedGapLimit(pickPlan);
-  const rungs: TempoRung[] = spec.rungs.map((bpm) => {
-    const allowed = profile.mode !== "selfChecked" && profile.mode !== "practiceOnly";
-    const fits = parts.every((part) => {
-      const gap = minGapMs(part.notes, bpm);
-      return notesRole === "example" || gap === null || gap >= limit;
+  const allowed = profile.mode !== "selfChecked" && profile.mode !== "practiceOnly";
+  const rungsAt = (bpms: readonly number[]): TempoRung[] =>
+    bpms.map((bpm) => {
+      const fits = parts.every((part) => {
+        const gap = minGapMs(part.notes, bpm);
+        return notesRole === "example" || gap === null || gap >= limit;
+      });
+      return { bpm, grading: allowed && fits ? "graded" : "selfChecked" };
     });
-    return { bpm, grading: allowed && fits ? "graded" : "selfChecked" };
-  });
+  const written = rungsAt(spec.rungs);
+  const writtenPass = spec.passAt ?? written.filter((r) => r.grading === "graded").slice(-1)[0]?.bpm ?? null;
+  const writtenTop = spec.rungs[spec.rungs.length - 1] ?? 60;
+  // Paced: re-spaced from the pass, pass and top kept. Only a graded Exercise has a
+  // pass to space from; warm-ups and self-checked ones keep the ladder written.
+  const paced = !!pathSpec.paceLadders && !spec.warmup && allowed && writtenPass !== null;
+  const rungs: TempoRung[] = paced ? rungsAt(paceLadder(writtenPass!, writtenTop, spec.rungs[0])) : written;
   const gradedRungs = rungs.filter((r) => r.grading === "graded");
-  const passAt =
-    profile.mode === "selfChecked" || profile.mode === "practiceOnly"
-      ? null
-      : (spec.passAt ?? gradedRungs[gradedRungs.length - 1]?.bpm ?? null);
+  const passAt = !allowed ? null : paced ? writtenPass : (spec.passAt ?? gradedRungs[gradedRungs.length - 1]?.bpm ?? null);
   const tempo = { rungs, passAtBpm: passAt };
   const graded = [...new Set([...profile.graded, ...(spec.alsoGraded ?? [])])];
   const top = rungs[rungs.length - 1]?.bpm ?? 60;

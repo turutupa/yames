@@ -88,13 +88,16 @@ for (const size of SIZES) {
   });
 }
 
-// QA #8: the rail's Paths, pressed on a Step's page, is the Paths list again.
-test("the rail's Paths on a Step page returns to the list", async ({ page }) => {
+// QA #8, then UX audit NAV-3 (2026-11-17): the rail's Paths, pressed on a
+// Step's page, goes one page up, to the Path; pressed again, to the list.
+test("the rail's Paths on a Step page goes up a page at a time", async ({ page }) => {
   await openShot(page, "step-detail", { width: 1400, height: 900 });
   await expect(page.locator('[data-testid="step-detail"]')).toBeVisible();
   await page.locator(".rail-learn .rail-mode[aria-current=page]").click();
-  await expect(page.locator('[data-testid="paths"]')).toBeVisible();
+  await expect(page.locator('[data-testid="path-detail"]')).toBeVisible();
   await expect(page.locator('[data-testid="step-detail"]')).toHaveCount(0);
+  await page.locator(".rail-learn .rail-mode[aria-current=page]").click();
+  await expect(page.locator('[data-testid="paths"]')).toBeVisible();
 });
 
 /*

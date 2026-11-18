@@ -48,6 +48,22 @@ const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[] }> = [
 /** The tools' everyday keys, secondary now. Labels come from Settings → Hotkeys. */
 const TOOL_ACTIONS: HotkeyAction[] = ["play", "bpm-up", "bpm-down", "toggle-coach"];
 
+/**
+ * Getting around (2026-11-17): the learning side on ⌘1–⌘4, the tools on
+ * ⌥1–⌥5, read from the same bindings as everything else on this step.
+ */
+const NAV_ACTIONS: HotkeyAction[] = [
+  "tab-today",
+  "tab-paths",
+  "tab-progress",
+  "tab-tools",
+  "tab-1",
+  "tab-2",
+  "tab-3",
+  "tab-4",
+  "tab-5",
+];
+
 /** The pedal's three gestures, worded by the Session's own pedal legend. */
 const GESTURES = [
   ["tap", "tapDoes"],
@@ -106,6 +122,16 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
   const toolRows = useMemo(
     () =>
       TOOL_ACTIONS.map((id) => ({
+        key: id,
+        label: t(`settings.hotkeys.actions.${id}`),
+        combos: [keysOf(id)].filter((k) => k.length > 0),
+      })),
+    [keysOf, t],
+  );
+
+  const navRows = useMemo(
+    () =>
+      NAV_ACTIONS.map((id) => ({
         key: id,
         label: t(`settings.hotkeys.actions.${id}`),
         combos: [keysOf(id)].filter((k) => k.length > 0),
@@ -329,6 +355,12 @@ export function HandsFreeStep({ isActive }: WizardStepProps) {
             )}
           </div>
         </section>
+
+        {/* ---- Getting around: the rail's keys, folded away ---- */}
+        <details className="onboarding-hf-card onboarding-hf-tools" data-testid="hands-free-nav">
+          <summary className="onboarding-hf-title">{t("onboarding.handsFree.nav.title")}</summary>
+          {renderRows(navRows)}
+        </details>
 
         {/* ---- In the tools: secondary, folded away ---- */}
         <details className="onboarding-hf-card onboarding-hf-tools" data-testid="hands-free-tools">

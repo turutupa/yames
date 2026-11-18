@@ -316,18 +316,19 @@ describe("Rail keycaps", () => {
     setup({ keyBindings: defaults });
     for (const [id, action] of ENTRIES) {
       const cap = screen.getByTestId(`rail-key-${id}`);
-      expect(cap.textContent, id).toBe(platformKey(defaults[action]));
+      expect(cap.textContent, id).toBe(platformKey(defaults[action]).replace("Shift+", "⇧"));
       expect(cap.getAttribute("aria-hidden")).toBe("true");
     }
   });
 
   it("writes Ctrl off a Mac and ⌘ on one", () => {
-    expect(platformKey("⌘6")).toBe(IS_MAC ? "⌘6" : "Ctrl+6");
+    expect(platformKey("⌘2")).toBe(IS_MAC ? "⌘2" : "Ctrl+2");
+    expect(platformKey("⌥3")).toBe(IS_MAC ? "⌥3" : "Alt+3");
   });
 
   it("shows a remapped key, and none for an unbound action", () => {
     setup({ keyBindings: { ...defaults, "tab-paths": "⌘⇧P", "tab-progress": "" } });
-    expect(screen.getByTestId("rail-key-paths").textContent).toBe(platformKey("⌘⇧P"));
+    expect(screen.getByTestId("rail-key-paths").textContent).toBe(IS_MAC ? "⌘⇧P" : "Ctrl+⇧P");
     expect(screen.queryByTestId("rail-key-progress")).toBeNull();
   });
 

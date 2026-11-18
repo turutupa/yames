@@ -77,8 +77,9 @@ interface RailProps {
 /**
  * Which action each rail entry's key is.
  *
- * Today and the tools had theirs (⌘0, ⌘1–⌘5 in rail order); Paths, Progress
- * and Tools got ⌘6–⌘8 with the keycaps (owner, 2026-11-17).
+ * Today, Paths, Progress and Tools are ⌘1–⌘4 and the tools ⌥1–⌥5, in rail
+ * order (owner, 2026-11-17; they were ⌘0, ⌘6–⌘8 and ⌘1–⌘5). The keycaps read
+ * the player's bindings, so a key they remapped shows as theirs.
  */
 export const RAIL_KEYS: Record<string, HotkeyAction> = {
   today: "tab-today",
@@ -92,6 +93,15 @@ export const RAIL_KEYS: Record<string, HotkeyAction> = {
   songs: "tab-5",
   settings: "settings",
 };
+
+/**
+ * A keycap's text: Settings → Hotkeys' spelling, with Shift as its glyph.
+ * "Ctrl+Shift+1" took a third of the rail and broke "Metronome" over two
+ * lines (2026-11-17); "Ctrl+⇧1" says the same in the width of "Ctrl+1".
+ */
+export function railKeyText(combo: string): string {
+  return platformKey(combo).replace(/Shift\+/g, "⇧");
+}
 
 /**
  * The key a rail entry answers to, as a small keycap at the right of its row.
@@ -113,7 +123,7 @@ export function RailKey({
   if (IS_MOBILE || !combo) return null;
   return (
     <kbd className="rail-key" aria-hidden="true" data-testid={`rail-key-${id}`}>
-      {platformKey(combo)}
+      {railKeyText(combo)}
     </kbd>
   );
 }
