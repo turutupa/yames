@@ -180,6 +180,7 @@ import {
   platformKey,
   actionForCombo,
   focusedControlTakesKey,
+  trackFocusModality,
   sessionKeyIsInert,
   eventToCombo,
   isTypingTarget,
@@ -1691,6 +1692,11 @@ export function MainWindow() {
     forceWebviewFocus,
   });
 
+  // How each control got its focus, which `focusedControlTakesKey` reads.
+  useEffect(() => {
+    if (!IS_MOBILE) trackFocusModality();
+  }, []);
+
   // Unified local hotkey dispatcher — reads from keyBindings
   useEffect(() => {
     // The onboarding overlay owns the keyboard while it is up — Space must
@@ -1749,7 +1755,7 @@ export function MainWindow() {
       }
       if (!actionId) return;
       // Enter or Space on a focused button is that button's (N-P1-1).
-      if (focusedControlTakesKey(e, view)) return;
+      if (focusedControlTakesKey(e, view, { zen: isFullscreen })) return;
       // A Session key off the Session means nothing (the dispatcher drops it),
       // so it must not eat the key either: Enter stays the page's own.
       if (sessionKeyIsInert(actionId, view)) return;
