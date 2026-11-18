@@ -11,8 +11,9 @@
  *   (1 index to 4 little finger, 0 an open string), never the order: the owner
  *   read the old order numbers as fingers (2026-11-18). Where the fingering is
  *   not certain the dot carries no number rather than a guess (`fingering`);
- * - the order is a path before the start (`orderPath`), and NOW and NEXT once
- *   it runs: the note to play NOW is solid amber, the NEXT one an amber outline;
+ * - the order is shown in time, never drawn: the Watch preview before the
+ *   start, and NOW and NEXT once it runs: the note to play NOW is solid
+ *   amber, the NEXT one an amber outline;
  * - the notes just played keep the colour of their verdict for a moment,
  *   where there is one (a Take); with none (a warm-up) they go quiet;
  * - the rest of the shape stays on the neck, quiet (`box`), so the hand still sees
@@ -81,8 +82,8 @@ export function nowNextNeck(
 /**
  * Before the start: the pattern with its fingers. The first note is NOW
  * ("start here"); the rest of the pattern is the quiet outline, each dot with
- * its finger where it is known. The order is not on the dots: `orderPath`
- * draws it as a line over them.
+ * its finger where it is known. The order is not on the dots, and not drawn:
+ * the Watch preview plays it (`watchIndex`).
  */
 export function readyNeck(
   shape: readonly NeckNote[],
@@ -142,34 +143,26 @@ export function fingering(
 }
 
 /**
- * The order to draw before the start: the places of ONE pass, in the order
- * they are played, a note repeated on its own place counted once. A pattern
- * that repeats inside the Take (two loops a bar, a pass played twice) is drawn
- * once; past `max` places the line stops, so a long line stays legible.
+ * The Watch preview's position: which onset sounds at `ms` into the preview,
+ * looping over the pattern from its first bar to its end at `bpm`. -1 before
+ * the first note of a pass.
  */
-export function orderPath(onsets: Onsets, max = 16): Place[] {
-  const seq: Place[] = [];
-  for (const o of onsets) {
-    const p = o.places[0];
-    if (p) seq.push({ string: p.string, fret: p.fret });
+export function watchIndex(
+  model: Pick<RunwayModel, "onsets" | "barTicks" | "endTick">,
+  ms: number,
+  bpm: number,
+  perQuarter: number,
+): { index: number; tick: number } {
+  const start = model.barTicks[0] ?? model.onsets[0]?.tick ?? 0;
+  const span = Math.max(1, model.endTick - start);
+  const ticks = (ms / 60_000) * Math.max(1, bpm) * perQuarter;
+  const tick = start + (ticks % span);
+  let index = -1;
+  for (let i = 0; i < model.onsets.length; i++) {
+    if (model.onsets[i].tick <= tick) index = i;
+    else break;
   }
-  const n = seq.length;
-  let period = n;
-  for (let k = 1; k <= n / 2; k++) {
-    let same = true;
-    for (let i = 0; i + k < n && same; i++) same = key(seq[i]) === key(seq[i + k]);
-    if (same) {
-      period = k;
-      break;
-    }
-  }
-  const out: Place[] = [];
-  for (const p of seq.slice(0, period)) {
-    if (out.length && key(out[out.length - 1]) === key(p)) continue;
-    out.push(p);
-    if (out.length >= max) break;
-  }
-  return out;
+  return { index, tick };
 }
 
 /** "then 7, 5": the frets of the two onsets after NEXT, or null when there are none. */

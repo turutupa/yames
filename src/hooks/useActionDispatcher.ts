@@ -120,6 +120,8 @@ interface ActionDispatcherArgs {
     togglePause?: () => void;
     /** A timed block from the top, or a graded Take again. */
     restart?: () => void;
+    /** Before a Take, on the neck: the order lit at the tempo, or stop (the Watch button). */
+    watch?: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -311,6 +313,9 @@ export function useActionDispatcher({
             break;
           case "session-restart":
             sessionActions?.restart?.();
+            break;
+          case "session-watch":
+            sessionActions?.watch?.();
             break;
           case "session-exit":
             // Whatever is open over the Session closes first, on its own key

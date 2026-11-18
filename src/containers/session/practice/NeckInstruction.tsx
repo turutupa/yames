@@ -5,9 +5,10 @@
  * - A number on a dot is a FINGER, never the order (the owner, 2026-11-18):
  *   1 to 4 index to little finger, 0 an open string, nothing where it is not
  *   certain (`fingering`).
- * - Before the start, the pattern with its fingers, the first note NOW with a
- *   "start here", and the order as a thin line through one pass, arrowed and
- *   fading along its length (`orderPath`, drawn on `project()`).
+ * - Before the start, a static diagram: the pattern with its fingers and a
+ *   "start here" pill on the first note, nothing else drawn (the owner,
+ *   2026-11-18: an order line was confusing). The order is shown in time:
+ *   the Watch preview lights the notes in order at the tempo, looping.
  * - While it runs, the note to play NOW is solid amber; an approach ring
  *   closes on it as its beat arrives. NEXT is an amber outline marked "next",
  *   with "then 7, 5" beside it. The notes just played keep their verdict's
@@ -21,7 +22,7 @@
  * on-demand and capped at 30 fps for the run (`useNeckTake`). The overlay is
  * DOM hung on `project()`, so the SVG fallback gets exactly the same states.
  */
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { useNeck } from "../../../stage3d/api";
 import { stripHeight } from "../../../stage3d/controller";
@@ -39,13 +40,14 @@ import {
   cameraPlan,
   fingering,
   nowNextNeck,
-  orderPath,
   readyNeck,
   thenFrets,
   windowOver,
+  watchIndex,
   windowView,
 } from "./practiceModel";
 import { usePracticeCursor } from "./usePracticeCursor";
+import { onToggleWatch, subscribeWatchKeyLabel, watchKeyLabel } from "./watchBus";
 
 /** The row under the neck for the beat counter and the key, kept out of the neck's frame. */
 const FOOT_PX = 34;
@@ -101,7 +103,6 @@ export function NeckInstruction({
   const nextTag = useRef<HTMLSpanElement>(null);
   const dots = useRef<HTMLDivElement>(null);
   const foot = useRef<HTMLDivElement>(null);
-  const pathSvg = useRef<SVGSVGElement>(null);
 
   const notes = take.exercise.notes;
   const shape = useMemo(() => neckNotesOf(notes, "aim"), [notes]);
@@ -136,91 +137,60 @@ export function NeckInstruction({
     }
     return map;
   }, [lights]);
-  const order = useMemo(() => orderPath(model.onsets), [model]);
-  const latest = useRef({ verdicts, model, shape, theory, running, fingers, order });
-  latest.current = { verdicts, model, shape, theory, running, fingers, order };
+  const [watching, setWatching] = useState(false);
+  const latest = useRef({ verdicts, model, shape, theory, running, fingers, watching });
+  latest.current = { verdicts, model, shape, theory, running, fingers, watching };
 
   /**
-   * The order before the start: a thin line from each place to the next, edge
-   * to edge so it never crosses a finger number, with a small arrowhead, each
-   * leg a little to its own right so a sweep's way up and way back read as
-   * two lanes of one stroke. It fades along its length; hidden once it runs.
+   * "start here", before the start: a pill in the gap between two strings,
+   * beside the first note on the side the next one is not, and never on a dot
+   * of the pattern. The first spot that is clear wins; with none, the one
+   * beside the note away from the next.
    */
-  const drawPath = useCallback(
-    (box: DOMRect) => {
-      const svg = pathSvg.current;
-      if (!svg) return;
-      const { order: places, running: on } = latest.current;
-      if (on || places.length < 2) {
-        svg.replaceChildren();
-        return;
+  const placeStart = useCallback(
+    (tag: HTMLElement, box: DOMRect, now: { x: number; y: number; r: number }) => {
+      const { model: m, shape: sh } = latest.current;
+      const first = m.onsets[0]?.places[0];
+      const k0 = first ? `${first.string}:${first.fret}` : "";
+      const second = m.onsets.map((o) => o.places[0]).find((p) => p && `${p.string}:${p.fret}` !== k0);
+      const w = tag.offsetWidth || 90;
+      const h = tag.offsetHeight || 24;
+      const local = (s0: number, f: number) => {
+        const pt = neck.project(s0, f);
+        return pt ? { x: pt.x - box.left, y: pt.y - box.top, r: pt.r } : null;
+      };
+      const to = second ? local(second.string, second.fret) : null;
+      const away = to && to.x > now.x ? -1 : 1;
+      // The string lines either side of the note, at its fret.
+      const gaps: number[] = [];
+      if (first) {
+        for (const d of [1, -1]) {
+          const o = local(first.string + d, first.fret);
+          if (o) gaps.push((now.y + o.y) / 2);
+        }
       }
-      const pts = places.map((p) => neck.project(p.string, p.fret));
-      const NS = "http://www.w3.org/2000/svg";
-      const out: SVGElement[] = [];
-      const legs = places.length - 1;
-      for (let i = 0; i < legs; i++) {
-        const a = pts[i];
-        const b = pts[i + 1];
-        if (!a || !b) continue;
-        const ax = a.x - box.left;
-        const ay = a.y - box.top;
-        const bx = b.x - box.left;
-        const by = b.y - box.top;
-        const len = Math.hypot(bx - ax, by - ay);
-        if (len < 1) continue;
-        const ux = (bx - ax) / len;
-        const uy = (by - ay) / len;
-        // Each leg bows to its own right, so a leg and its way back sit side
-        // by side, and two neighbours (the next string, same fret) get an arc
-        // round the outside rather than nothing.
-        const r = Math.min(a.r, b.r);
-        const near = len < (a.r + b.r) * 1.6 + 24;
-        const bulge = near ? r * 1.7 : Math.max(8, r * 0.8);
-        const cx = (ax + bx) / 2 - uy * bulge;
-        const cy = (ay + by) / 2 + ux * bulge;
-        // Start and end on the dots' rims (NOW's is the larger marker), aimed at the bow.
-        const rim = (x: number, y: number, rad: number) => {
-          const d = Math.hypot(cx - x, cy - y) || 1;
-          return { x: x + ((cx - x) / d) * rad, y: y + ((cy - y) / d) * rad };
-        };
-        const s1 = rim(ax, ay, a.r * (i === 0 ? 1.45 : 1.1) + 2);
-        const s2 = rim(bx, by, b.r * 1.1 + 3);
-        // The arrowhead: in the middle of a long leg, where it has room and
-        // shows the way at a glance; at the end of a short one.
-        const mid = Math.hypot(s2.x - s1.x, s2.y - s1.y) > 110;
-        const tx = mid ? 0.25 * s1.x + 0.5 * cx + 0.25 * s2.x : s2.x;
-        const ty = mid ? 0.25 * s1.y + 0.5 * cy + 0.25 * s2.y : s2.y;
-        const ex = mid ? s2.x - s1.x : s2.x - cx;
-        const ey = mid ? s2.y - s1.y : s2.y - cy;
-        const el = Math.hypot(ex, ey) || 1;
-        const vx = ex / el;
-        const vy = ey / el;
-        const fade = legs > 1 ? 1 - (0.7 * i) / (legs - 1) : 1;
-        const g = document.createElementNS(NS, "g");
-        g.setAttribute("opacity", fade.toFixed(2));
-        const h = Math.max(8, Math.min(11, r * 0.55));
-        const line = document.createElementNS(NS, "path");
-        line.setAttribute("class", "practice-path-leg");
-        // A short leg stops short of its arrowhead's tip, so the round cap never shows past it.
-        const lx = mid ? s2.x : s2.x - vx * h * 0.6;
-        const ly = mid ? s2.y : s2.y - vy * h * 0.6;
-        line.setAttribute("d", `M${s1.x.toFixed(1)} ${s1.y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)}`);
-        g.appendChild(line);
-        const tip = document.createElementNS(NS, "path");
-        tip.setAttribute("class", "practice-path-tip");
-        const px = tx + (mid ? vx * h * 0.5 : 0);
-        const py = ty + (mid ? vy * h * 0.5 : 0);
-        const hx = px - vx * h;
-        const hy = py - vy * h;
-        tip.setAttribute(
-          "d",
-          `M${px.toFixed(1)} ${py.toFixed(1)} L${(hx - vy * h * 0.55).toFixed(1)} ${(hy + vx * h * 0.55).toFixed(1)} L${(hx + vy * h * 0.55).toFixed(1)} ${(hy - vx * h * 0.55).toFixed(1)} Z`,
-        );
-        g.appendChild(tip);
-        out.push(g);
-      }
-      svg.replaceChildren(...out);
+      const dotsAt = sh.map((n) => local(n.string, n.fret)).filter((p): p is { x: number; y: number; r: number } => !!p);
+      const clear = (cx: number, cy: number) => {
+        const x1 = cx - w / 2 - 3;
+        const x2 = cx + w / 2 + 3;
+        const y1 = cy - h / 2 - 2;
+        const y2 = cy + h / 2 + 2;
+        if (x1 < 2 || x2 > box.width - 2 || y1 < 2 || y2 > box.height - 2) return false;
+        for (const d of dotsAt) {
+          const nx = Math.max(x1, Math.min(d.x, x2));
+          const ny = Math.max(y1, Math.min(d.y, y2));
+          if (Math.hypot(d.x - nx, d.y - ny) < d.r * 1.35 + 4) return false;
+        }
+        return true;
+      };
+      const side = now.r * 1.5 + 6 + w / 2;
+      const tries: { x: number; y: number }[] = [];
+      for (const dir of [away, -away]) for (const g of gaps) tries.push({ x: now.x + dir * side, y: g });
+      for (const g of gaps) tries.push({ x: now.x, y: g + (g > now.y ? h / 2 + 2 : -h / 2 - 2) });
+      const pick = tries.find((p) => clear(p.x, p.y)) ?? tries[0] ?? { x: now.x, y: now.y + Math.max(20, now.r * 2.1) + h / 2 };
+      tag.style.left = `${pick.x}px`;
+      tag.style.top = `${pick.y}px`;
+      tag.style.transform = "translate(-50%, -50%)";
     },
     [neck],
   );
@@ -232,7 +202,6 @@ export function NeckInstruction({
       const m = latest.current.model;
       const hide = (el: HTMLElement | null) => el && (el.style.visibility = "hidden");
       if (!box) return;
-      drawPath(box);
       const at = (i: number) => {
         const p = m.onsets[i]?.places[0];
         if (!p) return null;
@@ -270,25 +239,8 @@ export function NeckInstruction({
           tag.style.left = `${now.x}px`;
           tag.style.top = `${now.y + Math.max(20, now.r * 2.1)}px`;
           tag.style.transform = "";
-          // Before the start, "start here" goes on the side the path leaves
-          // from, so the words never sit on the line or the next dot.
-          const ord = latest.current.order;
-          const to = !latest.current.running && ord.length > 1 ? neck.project(ord[1].string, ord[1].fret) : null;
-          if (to) {
-            const dx = to.x - box.left - now.x;
-            const dy = to.y - box.top - now.y;
-            const off = now.r * 1.55 + 8;
-            if (Math.abs(dx) >= Math.abs(dy)) {
-              tag.style.top = `${now.y}px`;
-              tag.style.left = `${now.x + (dx > 0 ? -off : off)}px`;
-              tag.style.transform = dx > 0 ? "translate(-100%, -50%)" : "translate(0, -50%)";
-            } else if (dy < 0) {
-              tag.style.top = `${now.y + Math.max(20, now.r * 2.1)}px`;
-            } else {
-              tag.style.top = `${now.y - Math.max(20, now.r * 2.1)}px`;
-              tag.style.transform = "translate(-50%, -100%)";
-            }
-          }
+          tag.toggleAttribute("data-start", !latest.current.running);
+          if (!latest.current.running) placeStart(tag, box, now);
         }
       }
       const nt = nextTag.current;
@@ -429,7 +381,7 @@ export function NeckInstruction({
         }
       }
     },
-    [neck, drawPath],
+    [neck, placeStart],
   );
 
   /** NOW moved on: the neck, the tags' words, the ring. */
@@ -456,9 +408,8 @@ export function NeckInstruction({
     return () => neck.setView({ kind: "hidden" }, null);
   }, [neck, whole]);
 
-  // Ready, or stopped: the pattern in order, the whole of it in view.
-  useLayoutEffect(() => {
-    if (running) return;
+  // Ready, or stopped: the pattern with its fingers, the whole of it in view. Also where a Watch preview comes back to.
+  const showReady = useCallback(() => {
     shown.current = { index: -1, bar: -1, beat: -1, view: whole };
     neck.setView(whole, slot.current);
     neck.setNotes(readyNeck(shape, model.onsets, fingers, theory));
@@ -466,9 +417,50 @@ export function NeckInstruction({
     dots.current?.querySelectorAll("i").forEach((d) => d.removeAttribute("data-on"));
     // Once the camera is there (an instant cut or the end of a flight).
     placeOverlay(0, null);
+  }, [whole, shape, model, theory, fingers, neck, placeOverlay, t]);
+
+  useLayoutEffect(() => {
+    if (running || watching) return;
+    showReady();
     const id = window.setTimeout(() => placeOverlay(0, null), 1500);
     return () => window.clearTimeout(id);
-  }, [running, whole, shape, model, theory, fingers, neck, placeOverlay, t]);
+  }, [running, watching, showReady, placeOverlay]);
+
+  // The Watch preview: the whole order, note by note at the set tempo, in the
+  // run's own NOW and NEXT, looping until Watch again, Start or another view
+  // (which unmounts this). Nothing but the picture: no input, no Take.
+  const canWatch = !running && model.onsets.length > 1;
+  useEffect(() => {
+    if (running) setWatching(false);
+  }, [running]);
+  useEffect(() => onToggleWatch(() => latest.current.running || setWatching((w) => !w)), []);
+  useEffect(() => {
+    if (!watching) return;
+    if (nowTag.current) nowTag.current.textContent = "";
+    let frame = 0;
+    let shownIndex = -2;
+    let shownBeat = -1;
+    const t0 = performance.now();
+    const step = () => {
+      const { model: m, shape: sh, theory: th, fingers: fg } = latest.current;
+      const { index, tick } = watchIndex(m, performance.now() - t0, take.bpm, perQuarter);
+      if (index !== shownIndex) {
+        shownIndex = index;
+        const at = Math.max(0, index);
+        neck.setNotes(nowNextNeck(sh, m.onsets, at, null, th, fg), { fade: 0.08 });
+        placeOverlay(at, null);
+      }
+      const b = beatInBar(m, tick, perQuarter);
+      if (b !== shownBeat) {
+        shownBeat = b;
+        dots.current?.querySelectorAll("i").forEach((d, i) => d.toggleAttribute("data-on", i === b));
+      }
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [watching, neck, placeOverlay, take.bpm, perQuarter]);
+  const watchKey = useSyncExternalStore(subscribeWatchKeyLabel, watchKeyLabel, watchKeyLabel);
 
   // Running, before the first report: the first note is NOW, the first bar framed.
   useLayoutEffect(() => {
@@ -559,7 +551,6 @@ export function NeckInstruction({
     <div className={`practice-neck${className ? ` ${className}` : ""}`} ref={wrap} data-testid="practice-neck" data-running={running ? "" : undefined}>
       <div className="session-slot practice-neck-slot" ref={slot} aria-hidden="true" data-neck-foot={FOOT_PX} />
       <div className="practice-neck-over" aria-hidden="true">
-        <svg className="practice-path" ref={pathSvg} data-testid="practice-path" />
         <i className="practice-ring" ref={ring} data-ready={running ? undefined : ""} />
         <span className="practice-now-tag" ref={nowTag} data-testid="practice-now-tag" />
         <span className="practice-next-tag" ref={nextTag} data-testid="practice-next-tag">
@@ -583,6 +574,23 @@ export function NeckInstruction({
             <i key={i} />
           ))}
         </div>
+        <div className="practice-foot-end">
+        {canWatch && (
+          <button
+            type="button"
+            className="practice-watch"
+            data-testid="practice-watch"
+            aria-pressed={watching}
+            onClick={() => setWatching((w) => !w)}
+            title={t("session.practice.watchTitle")}
+          >
+            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+              {watching ? <rect x="1.5" y="1.5" width="7" height="7" rx="1" /> : <path d="M2 1 L9 5 L2 9 Z" />}
+            </svg>
+            {t(watching ? "session.practice.watchStop" : "session.practice.watch")}
+            {watchKey && <kbd>{watchKey}</kbd>}
+          </button>
+        )}
         <span className="practice-legend" aria-hidden="true">
           {running ? (
             <>
@@ -591,10 +599,16 @@ export function NeckInstruction({
               {pluck && <span data-k="played">{t("session.practice.legendPlayed")}</span>}
             </>
           ) : (
-            order.length > 1 && <span data-k="path">{t("session.practice.legendPath")}</span>
+            watching && (
+              <>
+                <span data-k="now">{t("session.practice.legendNow")}</span>
+                <span data-k="next">{t("session.practice.legendNext")}</span>
+              </>
+            )
           )}
           {hasFingers && <span data-k="fingers">{t("session.practice.legendFingers")}</span>}
         </span>
+        </div>
       </div>
     </div>
   );

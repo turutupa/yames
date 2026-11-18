@@ -167,6 +167,7 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
   "session-view": { where: ["session"], does: ["session cycleView"] },
   "session-pause": { where: ["session"], does: ["session togglePause"] },
   "session-restart": { where: ["session"], does: ["session restart"] },
+  "session-watch": { where: ["session"], does: ["session watch"] },
   // Settings is a layer: closing it returns to the mode it covered.
   settings: {
     ...Object.fromEntries(without("settings").map((w) => [w, ["setView settings"]])),
@@ -258,6 +259,7 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
         "cycleView",
         "togglePause",
         "restart",
+        "watch",
       ]) as never,
       forceWebviewFocus: () => Promise.resolve(),
     }),
