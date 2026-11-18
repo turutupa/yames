@@ -595,6 +595,10 @@ export function useActionDispatcher({
       setlistLoaded,
       songsLoaded,
       songsActions,
+      // Without it the keys kept the Session's first go(), from before the
+      // Take was prepared: Space, Enter and the pedal did nothing on a ready
+      // Take or a result while a click worked (acceptance P0-2, 2026-11-18).
+      sessionActions,
       state.bpm,
       state.subdivision,
       // Stable key — `state.beatGroups` is a fresh array on every
