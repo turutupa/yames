@@ -109,6 +109,18 @@ import type { SongBacking } from "../../../songs/types";
 import { DEFAULT_PRACTICE_VIEW, isPracticeView, nextPracticeView } from "../highway/runwayModel";
 import type { PracticeView } from "../highway/runwayModel";
 import type { TakePlan } from "../../../session/take";
+import {
+  SWAPS_KEY,
+  applySwaps,
+  avoidSet,
+  forgetSwap,
+  readSwapMemory,
+  refOf,
+  rememberSwap,
+  swapMemoryOn,
+  swapOptions,
+} from "../../../session/swap";
+import type { SwapChoice, SwapMemory, SwapOptions } from "../../../session/swap";
 
 /** How many Takes are read back for planning. More than any plan looks at. */
 const TAKES_TO_READ = 500;
@@ -363,6 +375,8 @@ export function useSessionRun(input: SessionRunInput) {
   const [live, setLive] = useState<LiveTake>(NO_LIVE);
   // Stamped once a view opens, so a plan does not rebuild on every second.
   const [planClock, setPlanClock] = useState(() => Date.now());
+  /** Today's swaps as kept (`session/swap.ts`); undefined until the store has answered. */
+  const [swapStored, setSwapStored] = useState<SwapMemory | null | undefined>(undefined);
 
   const latest = useRef(input);
   latest.current = input;
@@ -464,6 +478,9 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<boolean>(GRADE_KEY).then((saved) => {
       if (saved === false) setGradeState(false);
     });
+    void storeLoad<unknown>(SWAPS_KEY)
+      .then((saved) => setSwapStored(readSwapMemory(saved)))
+      .catch(() => setSwapStored(null));
   }, [wantsLearning, refresh]);
 
   // The packs, in the language on screen: loaded with the learning side, and
@@ -523,9 +540,63 @@ export function useSessionRun(input: SessionRunInput) {
 
   const myPaths = useMemo(() => playerPaths(paths, progress), [paths, progress]);
 
+  // The swaps as they stand today: yesterday's become this plan's penalty.
+  const swapMemory = useMemo(() => swapMemoryOn(swapStored ?? null, planClock), [swapStored, planClock]);
+  // A new day changed what is kept: write it down, once the store has answered.
+  useEffect(() => {
+    if (swapStored === undefined) return;
+    if (swapStored?.day === swapMemory.day) return;
+    if (swapStored === null && swapMemory.swaps.length === 0 && swapMemory.avoid === null) return;
+    setSwapStored(swapMemory);
+    void storeSave(SWAPS_KEY, swapMemory).catch(() => {});
+  }, [swapStored, swapMemory]);
+  const swapContext = useMemo(
+    () => ({ paths: myPaths, allPaths: paths, progress, now: planClock }),
+    [myPaths, paths, progress, planClock],
+  );
+  const basePlan: SessionPlan = useMemo(
+    () => planSession({ minutes, now: planClock, paths: myPaths, progress, avoid: avoidSet(swapMemory) }),
+    [minutes, planClock, myPaths, progress, swapMemory],
+  );
   const plan: SessionPlan = useMemo(
-    () => planSession({ minutes, now: planClock, paths: myPaths, progress }),
-    [minutes, planClock, myPaths, progress],
+    () => applySwaps(basePlan, swapMemory.swaps, swapContext),
+    [basePlan, swapMemory.swaps, swapContext],
+  );
+
+  /** What Today's row `index` can be swapped for (owner, 2026-11-18). */
+  const swapOptionsAt = useCallback(
+    (index: number, choice: SwapChoice): SwapOptions => swapOptions(plan, index, choice, swapContext),
+    [plan, swapContext],
+  );
+  const keepSwaps = useCallback((next: SwapMemory) => {
+    setSwapStored(next);
+    void storeSave(SWAPS_KEY, next).catch(() => {});
+  }, []);
+  /** Row `index` plays `replacement` today, in the same minutes. */
+  const confirmSwap = useCallback(
+    (index: number, replacement: PlanStep) => {
+      const shown = plan.steps[index];
+      const base = shown ? basePlan.steps.find((s) => s.id === shown.id) : undefined;
+      const from = base ? refOf(base) : null;
+      const now = shown ? refOf(shown) : null;
+      const to = refOf(replacement);
+      if (!shown || !from || !now || !to || replacement.id !== shown.id) return;
+      // Back to what the planner had: that is no swap at all.
+      if (from.pathId === to.pathId && from.exerciseId === to.exerciseId) {
+        keepSwaps(forgetSwap(swapMemory, shown.id));
+        return;
+      }
+      keepSwaps(rememberSwap(swapMemory, shown.id, from, to, now));
+    },
+    [plan, basePlan, swapMemory, keepSwaps],
+  );
+  /** Row `index` back as the planner had it. */
+  const undoSwap = useCallback(
+    (index: number) => {
+      const shown = plan.steps[index];
+      if (shown) keepSwaps(forgetSwap(swapMemory, shown.id));
+    },
+    [plan, swapMemory, keepSwaps],
   );
 
   // --- what is on the stage ------------------------------------------------
@@ -1776,6 +1847,9 @@ export function useSessionRun(input: SessionRunInput) {
     actions: {
       startToday,
       startTodayAt,
+      swapOptionsAt,
+      confirmSwap,
+      undoSwap,
       playExercise,
       chooseStep,
       chooseLevel,

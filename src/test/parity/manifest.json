@@ -1532,6 +1532,11 @@
       "store": "settings.json",
       "read": true,
       "written": true
+    },
+    "session.swaps": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
     }
   },
   "tools": [

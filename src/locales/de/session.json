@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · Schritt {{step}}",
       "fromNoLevel": "{{path}} · Schritt {{step}}",
       "startHere": "Hier starten ›",
-      "startHereLabel": "Die Session bei {{n}} starten: {{title}}"
+      "startHereLabel": "Die Session bei {{n}} starten: {{title}}",
+      "swap": {
+        "button": "Tauschen",
+        "buttonLabel": "{{title}} tauschen",
+        "tooltip": "Gegen eine andere Übung tauschen",
+        "heading": "Tauschen gegen",
+        "dialogLabel": "{{title}} tauschen",
+        "close": "Schließen",
+        "choice": {
+          "harder": "Schwerer",
+          "different": "Etwas anderes",
+          "style": "Anderer Stil"
+        },
+        "hint": {
+          "harder": "Dieselbe Technik, eine Stufe höher.",
+          "different": "Eine andere Übung aus diesem Pfad.",
+          "style": "Eine Übung aus einem anderen Pfad.",
+          "harderWarmUp": "Ein dichteres Aufwärmen, das noch passt.",
+          "differentWarmUp": "Ein anderes Aufwärmen aus diesem Pfad.",
+          "styleWarmUp": "Ein Aufwärmen aus einem anderen Pfad."
+        },
+        "none": {
+          "harder": "In diesem Pfad gibt es noch nichts Schwereres.",
+          "harderWarmUp": "Dichter wäre schneller als der Block danach.",
+          "different": "In diesem Pfad passt gerade nichts anderes.",
+          "style": "Du hast noch keinen anderen Pfad."
+        },
+        "count": "{{n}} von {{count}}",
+        "confirm": "Eintauschen",
+        "another": "Etwas anderes zeigen",
+        "cancel": "Abbrechen",
+        "undo": "{{title}} zurückholen",
+        "swapped": "Getauscht"
+      }
     },
     "why": {
       "firstEver": "Deine erste, deshalb geht es bei {{bpm}} BPM los. Hier geht es ums Timing, nicht ums Tempo.",

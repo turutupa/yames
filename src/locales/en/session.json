@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · Step {{step}}",
       "fromNoLevel": "{{path}} · Step {{step}}",
       "startHere": "Start here ›",
-      "startHereLabel": "Start the Session at {{n}}: {{title}}"
+      "startHereLabel": "Start the Session at {{n}}: {{title}}",
+      "swap": {
+        "button": "Swap",
+        "buttonLabel": "Swap {{title}}",
+        "tooltip": "Swap for another exercise",
+        "heading": "Swap it for",
+        "dialogLabel": "Swap {{title}}",
+        "close": "Close",
+        "choice": {
+          "harder": "Harder",
+          "different": "Something different",
+          "style": "Another style"
+        },
+        "hint": {
+          "harder": "The same skill, a step up.",
+          "different": "Another exercise from this Path.",
+          "style": "An exercise from another Path.",
+          "harderWarmUp": "A busier warm-up that still fits.",
+          "differentWarmUp": "Another warm-up from this Path.",
+          "styleWarmUp": "A warm-up from another Path."
+        },
+        "none": {
+          "harder": "Nothing harder in this Path yet.",
+          "harderWarmUp": "Anything busier would outpace the block it warms up.",
+          "different": "Nothing else in this Path fits right now.",
+          "style": "You have no other Path to borrow from yet."
+        },
+        "count": "{{n}} of {{count}}",
+        "confirm": "Swap it in",
+        "another": "Show another",
+        "cancel": "Cancel",
+        "undo": "Put back {{title}}",
+        "swapped": "Swapped in"
+      }
     },
     "why": {
       "firstEver": "Your first one, so it starts at {{bpm}} BPM. This is about time, not speed.",

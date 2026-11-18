@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · Adım {{step}}",
       "fromNoLevel": "{{path}} · Adım {{step}}",
       "startHere": "Buradan başla ›",
-      "startHereLabel": "Oturumu {{n}} numaradan başlat: {{title}}"
+      "startHereLabel": "Oturumu {{n}} numaradan başlat: {{title}}",
+      "swap": {
+        "button": "Değiştir",
+        "buttonLabel": "{{title}} değiştir",
+        "tooltip": "Başka bir alıştırmayla değiştir",
+        "heading": "Şununla değiştir",
+        "dialogLabel": "{{title}} değiştir",
+        "close": "Kapat",
+        "choice": {
+          "harder": "Daha zor",
+          "different": "Farklı bir şey",
+          "style": "Başka bir tarz"
+        },
+        "hint": {
+          "harder": "Aynı teknik, bir adım yukarı.",
+          "different": "Bu yoldan başka bir alıştırma.",
+          "style": "Başka bir yoldan bir alıştırma.",
+          "harderWarmUp": "Hâlâ uyan, daha yoğun bir ısınma.",
+          "differentWarmUp": "Bu yoldan başka bir ısınma.",
+          "styleWarmUp": "Başka bir yoldan bir ısınma."
+        },
+        "none": {
+          "harder": "Bu yolda henüz daha zor bir şey yok.",
+          "harderWarmUp": "Daha yoğunu, ısıttığı bloktan hızlı olur.",
+          "different": "Şu an bu yolda uyan başka bir şey yok.",
+          "style": "Henüz başka bir yolun yok."
+        },
+        "count": "{{n}} / {{count}}",
+        "confirm": "Değiştir",
+        "another": "Başkasını göster",
+        "cancel": "Vazgeç",
+        "undo": "{{title}} geri al",
+        "swapped": "Değiştirildi"
+      }
     },
     "why": {
       "firstEver": "İlk seferin, o yüzden {{bpm}} BPM'den başlıyor. Mesele hız değil, zamanlama.",

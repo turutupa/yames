@@ -115,7 +115,40 @@
       "from": "{{path}} · {{level}} · Krok {{step}}",
       "fromNoLevel": "{{path}} · Krok {{step}}",
       "startHere": "Zacznij tutaj ›",
-      "startHereLabel": "Zacznij sesję od {{n}}: {{title}}"
+      "startHereLabel": "Zacznij sesję od {{n}}: {{title}}",
+      "swap": {
+        "button": "Zamień",
+        "buttonLabel": "Zamień {{title}}",
+        "tooltip": "Zamień na inne ćwiczenie",
+        "heading": "Zamień na",
+        "dialogLabel": "Zamień {{title}}",
+        "close": "Zamknij",
+        "choice": {
+          "harder": "Trudniej",
+          "different": "Coś innego",
+          "style": "Inny styl"
+        },
+        "hint": {
+          "harder": "Ta sama technika, stopień wyżej.",
+          "different": "Inne ćwiczenie z tej ścieżki.",
+          "style": "Ćwiczenie z innej ścieżki.",
+          "harderWarmUp": "Gęstsza rozgrzewka, która nadal pasuje.",
+          "differentWarmUp": "Inna rozgrzewka z tej ścieżki.",
+          "styleWarmUp": "Rozgrzewka z innej ścieżki."
+        },
+        "none": {
+          "harder": "Na tej ścieżce nie ma jeszcze nic trudniejszego.",
+          "harderWarmUp": "Gęstsza byłaby szybsza niż blok po niej.",
+          "different": "Teraz nic innego z tej ścieżki nie pasuje.",
+          "style": "Nie masz jeszcze innej ścieżki."
+        },
+        "count": "{{n}} z {{count}}",
+        "confirm": "Zamień",
+        "another": "Pokaż inne",
+        "cancel": "Anuluj",
+        "undo": "Przywróć {{title}}",
+        "swapped": "Zamienione"
+      }
     },
     "why": {
       "firstEver": "To twoja pierwsza, więc zaczyna się od {{bpm}} BPM. Chodzi o rytm, nie o szybkość.",
