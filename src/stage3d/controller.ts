@@ -35,6 +35,16 @@ export const TAKE_FPS = 30;
 export const CALM_FPS = 60;
 
 /** The overview strip's height for a slot of height `h` (zoom only). */
+/**
+ * Room a slot keeps between the framed neck and the overview strip, for its
+ * own row (the practice neck's beat counter and key, acceptance P1-1): the
+ * slot says how much in `data-neck-foot`, in px. Zooms only.
+ */
+export function footReserve(slot: HTMLElement | null): number {
+  const n = Number(slot?.dataset?.neckFoot ?? 0);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 export function stripHeight(h: number): number {
   if (h < 150) return 0;
   return h >= 260 ? 54 : 42;
@@ -484,7 +494,7 @@ export class StageController {
     }
     if (this.snap.view.kind === "zoom") {
       const s = stripHeight(r.height);
-      r = { ...r, height: r.height - s - (s ? 6 : 0) };
+      r = { ...r, height: Math.max(40, r.height - s - (s ? 6 : 0) - footReserve(slot)) };
     }
     return r;
   }

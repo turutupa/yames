@@ -27,9 +27,9 @@ export type NeckNote = { string: 1 | 2 | 3 | 4 | 5 | 6; fret: number; kind: Neck
 
 export type NeckView =
   | { kind: "whole" } //                           Today, Paths, Progress: the hero angle
-  | { kind: "zoom"; from: number; to: number; flat?: boolean } // practice: these frets large, plus the overview strip
-  //   `flat`: straight-on (the runway's neck): almost no tilt, strings evenly spaced, high e on top,
-  //   the same framing in a portrait slot. Without it, the hero three-quarter angle.
+  | { kind: "zoom"; from: number; to: number; flat?: boolean; clip?: boolean } // practice: these frets large, plus the overview strip
+  //   `flat`: the runway's neck (smaller fret numbers). Every shot is straight-on now (mock A).
+  //   `clip`: drawn inside the slot only, never behind the page's text beside it (a result, P1-2).
   | { kind: "hidden" }; //                         tools, settings: no canvas work at all
 
 export interface NeckStage {

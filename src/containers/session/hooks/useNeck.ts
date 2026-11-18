@@ -87,7 +87,7 @@ export function exerciseNeck(notes: readonly PathNote[] | undefined, kind: NeckK
 }
 
 function viewKey(view: NeckView): string {
-  return view.kind === "zoom" ? `zoom:${view.from}:${view.to}${view.flat ? ":flat" : ""}` : view.kind;
+  return view.kind === "zoom" ? `zoom:${view.from}:${view.to}${view.flat ? ":flat" : ""}${view.clip ? ":clip" : ""}` : view.kind;
 }
 
 /**

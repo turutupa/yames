@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNeck } from "../../../stage3d/api";
+import { stripHeight } from "../../../stage3d/controller";
 import type { NeckKind, NeckView } from "../../../stage3d/api";
 import type { BeatPosition } from "../../../songs/position";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
@@ -41,6 +42,9 @@ import {
   windowView,
 } from "./practiceModel";
 import { usePracticeCursor } from "./usePracticeCursor";
+
+/** The row under the neck for the beat counter and the key, kept out of the neck's frame. */
+const FOOT_PX = 34;
 
 const NO_LIGHTS: ReadonlyMap<number, TimingMark> = new Map();
 
@@ -92,6 +96,7 @@ export function NeckInstruction({
   const nowTag = useRef<HTMLSpanElement>(null);
   const nextTag = useRef<HTMLSpanElement>(null);
   const dots = useRef<HTMLDivElement>(null);
+  const foot = useRef<HTMLDivElement>(null);
 
   const notes = take.exercise.notes;
   const shape = useMemo(() => neckNotesOf(notes, "aim"), [notes]);
@@ -281,14 +286,26 @@ export function NeckInstruction({
     neck.setNotes(nowNextNeck(sh, m.onsets, shown.current.index, verdicts, th), { fade: 0.12 });
   }, [verdicts, running, neck]);
 
+  // The beat counter's row sits just over the overview strip, in the room the
+  // slot keeps out of the neck's frame (FOOT_PX), never on the fret numbers.
+  const placeFoot = useCallback(() => {
+    const h = slot.current?.getBoundingClientRect().height ?? 0;
+    const s = stripHeight(h);
+    if (foot.current) foot.current.style.bottom = `${s ? s + 6 : 0}px`;
+  }, []);
+  useLayoutEffect(placeFoot, [placeFoot]);
+
   // The window moved or resized: put the overlay back on its notes.
   useEffect(() => {
     const el = wrap.current;
     if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => placeOverlay(Math.max(0, shown.current.index), null));
+    const ro = new ResizeObserver(() => {
+      placeFoot();
+      placeOverlay(Math.max(0, shown.current.index), null);
+    });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [placeOverlay]);
+  }, [placeOverlay, placeFoot]);
 
   const onTick = useCallback(
     (tick: number) => {
@@ -339,7 +356,7 @@ export function NeckInstruction({
 
   return (
     <div className={`practice-neck${className ? ` ${className}` : ""}`} ref={wrap} data-testid="practice-neck" data-running={running ? "" : undefined}>
-      <div className="session-slot practice-neck-slot" ref={slot} aria-hidden="true" />
+      <div className="session-slot practice-neck-slot" ref={slot} aria-hidden="true" data-neck-foot={FOOT_PX} />
       <div className="practice-neck-over" aria-hidden="true">
         <i className="practice-ring" ref={ring} data-ready={running ? undefined : ""} />
         <span className="practice-now-tag" ref={nowTag} data-testid="practice-now-tag" />
@@ -348,7 +365,10 @@ export function NeckInstruction({
           <span data-then="" />
         </span>
       </div>
-      <div className="practice-neck-foot">
+      <div className="practice-neck-foot" ref={foot}>
+        <span className="practice-beats-label" aria-hidden="true">
+          {t("session.practice.beatLabel")}
+        </span>
         <div
           className="practice-beats"
           ref={dots}

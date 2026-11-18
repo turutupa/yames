@@ -15,7 +15,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { NeckStageContext } from "./context";
-import { StageController, stripHeight } from "./controller";
+import { StageController, footReserve, stripHeight } from "./controller";
 import { FallbackNeck } from "./FallbackNeck";
 import { OverviewStrip } from "./OverviewStrip";
 import { setForceFlat, stagePrefsReady, subscribeStagePrefs, wantsFlat } from "./prefs";
@@ -106,7 +106,7 @@ export function NeckStageHost({ children, controllerFactory }: { children: React
         createPortal(
           <div className="neck-slot-layer" data-testid="neck-slot-layer">
             {fallback && (
-              <div className="neck-fallback-area" style={{ bottom: sH ? sH + 6 : 0 }}>
+              <div className="neck-fallback-area" style={{ bottom: (sH ? sH + 6 : 0) + (zoom ? footReserve(snap.slot) : 0) }}>
                 <FallbackNeck view={snap.view} notes={snap.notes} pluck={snap.pluck} />
               </div>
             )}
