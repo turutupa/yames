@@ -91,7 +91,7 @@ describe("a variant and a chain, from the seed to the schedule", () => {
 describe("what scoring is told", () => {
   it("a hammer-on is soft, so an unheard one is never a miss", () => {
     const doc = loadPack("sweep-picking");
-    const ex = doc.steps[0].exercises.find((e) => e.id.endsWith("pentatonic-lick"))!;
+    const ex = doc.steps.find((s) => s.id === "phrases")!.exercises.find((e) => e.id.endsWith("lick-to-bend"))!;
     const schedule = buildSchedule(exerciseScore(doc.id, ex, 90));
     expect(schedule.onsets.filter((o) => o.soft).length).toBe(3);
   });

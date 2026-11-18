@@ -8,8 +8,8 @@
       "askCoach": "Ask the coach"
     },
     "kind": {
-      "mechanics": "Mechanics",
-      "theory": "Theory",
+      "mechanics": "Technique",
+      "theory": "Styles",
       "jam": "Jam, not graded",
       "warmUp": "Warm-up, not graded",
       "review": "Review",

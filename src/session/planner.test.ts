@@ -362,7 +362,8 @@ describe("warm-ups", () => {
   it("uses the pack's own tempo with no clean tempo to go on", () => {
     const warm = plan(10, { ...NO_PROGRESS }).steps[0];
     expect(warm.why.code).toBe("warmUp");
-    if (warm.kind === "metronome") expect(warm.bpm).toBe(70);
+    // The pack's fallback: no faster than its reference's first rung (60), audit TODAY-5.
+    if (warm.kind === "metronome") expect(warm.bpm).toBe(60);
   });
 
   it("finds a Level's warm-up, which lives on the Level and not on a Step", () => {
