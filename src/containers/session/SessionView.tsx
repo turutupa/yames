@@ -51,6 +51,7 @@ import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
+import { IS_MOBILE } from "../../platform";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -291,12 +292,16 @@ function TakeScreen({
         <div className="session-col">
           {!running && <HandLine position={exercise.position} />}
           <CoachLine>{exercise.coachLine}</CoachLine>
-          {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
-          {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
-          {/* Said once a Session, before its first Take, not on every
-              screen of it (UX audit SES-14). */}
-          {honest && !running && run.outcomes.length === 0 && (
-            <div className="session-why" data-testid="pick-caveat">{t(honest)}</div>
+          {!running && (
+            <HowLines collapsed={IS_MOBILE}>
+              {exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
+              {bar && <div className="session-why">{lineText(t, bar)}</div>}
+              {/* Said once a Session, before its first Take, not on every
+                  screen of it (UX audit SES-14). */}
+              {honest && run.outcomes.length === 0 && (
+                <div className="session-why" data-testid="pick-caveat">{t(honest)}</div>
+              )}
+            </HowLines>
           )}
           <BandVolume session={session} hint={!running} />
           {!running && !inputReady && (
@@ -336,6 +341,22 @@ function TakeScreen({
       </div>
 
     </div>
+  );
+}
+
+/**
+ * The how-to under the coach's line. On a phone it folds behind "How"
+ * (PHONE-2): three paragraphs there pushed the Start button a screen down and
+ * read as a wall; the coach's line stays open, the rest is one tap away.
+ */
+function HowLines({ collapsed, children }: { collapsed: boolean; children: React.ReactNode }) {
+  const { t } = useTranslation();
+  if (!collapsed) return <>{children}</>;
+  return (
+    <details className="session-how" data-testid="session-how">
+      <summary>{t("session.paths.howTo")}</summary>
+      <div className="session-how-body">{children}</div>
+    </details>
   );
 }
 
@@ -622,6 +643,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   const outcome = run.outcomes[run.outcomes.length - 1];
   const passed = outcome?.grade.verdict === "passed";
   // The warm sweep on every result; the notes green when the bar was met.
+  // A phone hides the neck here (phone-learning.css, PHONE-4).
   const slot = useExerciseSlot(session, passed ? "tone" : "aim", true);
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));

@@ -129,3 +129,87 @@
   flex-wrap: nowrap;
   align-items: flex-start;
 }
+
+/* ── The Session on a phone (PHONE-2) ──────────────────────────────────────
+   The bar with Exit, the pips and the clock stays at the top while the page
+   scrolls under it: at 360 px it scrolled off with the first flick, and Exit
+   with it. Its own backdrop, so what scrolls beneath reads as beneath. */
+.main-window.is-mobile .session-page .session-bar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  margin: -8px -14px 0;
+  padding: 8px 14px 8px;
+  background: color-mix(in srgb, var(--l-bg, var(--bg-primary)) 86%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* What the Exercise is, under the tempo: a paragraph, so it reads from the
+   left like every other one on the page, not ragged against the right edge. */
+.main-window.is-mobile .session-page .practice-meta {
+  flex-wrap: wrap;
+}
+.main-window.is-mobile .session-page .practice-status {
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* The coach's line: a size down and a little tighter, so it is two or three
+   lines rather than five. */
+.main-window.is-mobile .session-page .session-coach {
+  font-size: 14.5px;
+  line-height: 1.35;
+  padding: 9px 12px;
+}
+
+/* "How", folded: the summary is a quiet, thumb-sized row with a chevron. */
+.main-window.is-mobile .session-how {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.main-window.is-mobile .session-how > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  list-style: none;
+  color: var(--text-secondary);
+  font: 600 13px/1 var(--font-display, inherit);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.main-window.is-mobile .session-how > summary::-webkit-details-marker {
+  display: none;
+}
+.main-window.is-mobile .session-how > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  margin-right: 4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.main-window.is-mobile .session-how[open] > summary::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+.main-window.is-mobile .session-how-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+
+/* The result on a phone (PHONE-4): its neck slot is a column under
+   everything, a screen down, and the camera flying there crossed the big
+   number and every line on its way. The neck is not drawn on that screen at
+   all; the stage's backdrop stays, so the page keeps its light. */
+body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"], [data-testid="session-between"]))
+  .neck-stage-canvas {
+  visibility: hidden;
+}

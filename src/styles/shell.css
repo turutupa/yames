@@ -3233,7 +3233,10 @@ body[data-sheet-maximized] .rail {
   border: none;
   border-top: 2px solid transparent;
   background: transparent;
-  color: var(--text-tertiary);
+  /* Secondary, not tertiary (PHONE-6): an inactive tab is still a place you
+     can go, and at this size tertiary measured under 4.5:1 on the bar. The
+     active one is set apart by its accent glyph, its top edge and full ink. */
+  color: var(--text-secondary);
   font-family: inherit;
   cursor: pointer;
   transition: color 0.15s ease;
@@ -3293,7 +3296,7 @@ body[data-sheet-maximized] .rail {
 
 .mobile-tab-label {
   max-width: 100%;
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;

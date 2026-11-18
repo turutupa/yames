@@ -8,6 +8,7 @@
  * bar) and two bars ahead of it (what is coming).
  */
 import type { NeckNote } from "../../../stage3d/api";
+import { IS_MOBILE } from "../../../platform";
 import type { TakePlan } from "../../../session/take";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
 import type { SongScore } from "../../../songs/types";
@@ -26,7 +27,12 @@ export const STRING_NAMES = ["e", "B", "G", "D", "A", "E"] as const;
  */
 export type PracticeView = "neck" | "runway" | "tab";
 export const PRACTICE_VIEWS: readonly PracticeView[] = ["neck", "runway", "tab"];
-export const DEFAULT_PRACTICE_VIEW: PracticeView = "neck";
+/**
+ * The neck on a desktop; the tab on a phone (PHONE-2), where the neck is a
+ * strip a few pixels a fret and its markers sit on one another. Only the
+ * default: a view the player picked is stored and wins on either.
+ */
+export const DEFAULT_PRACTICE_VIEW: PracticeView = IS_MOBILE ? "tab" : "neck";
 
 export function isPracticeView(v: unknown): v is PracticeView {
   return v === "neck" || v === "runway" || v === "tab";
