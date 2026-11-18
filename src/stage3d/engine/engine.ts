@@ -24,7 +24,7 @@ import type { EngineOptions, SlotRect, StageEngine, VisibleView } from "../engin
 import { framingFor } from "../framing";
 import { pickTier, tierSettings, type QualityStep, type Tier } from "../quality";
 import { neckPalette, type NeckPalette } from "../neckTheme";
-import { NOTE_R, createGuitar, type Guitar } from "./guitar";
+import { NOTE_R, OPEN_K, createGuitar, type Guitar } from "./guitar";
 import * as T from "./textures";
 import { cloneRig, createRigFlight, type Rig } from "./rig";
 
@@ -333,7 +333,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       const x = (pv.x * 0.5 + 0.5) * W;
       const y = (-pv.y * 0.5 + 0.5) * H;
       // The marker's radius on screen: one radius along the string axis, projected.
-      pv.copy(at).add(V(0, 0, NOTE_R)).project(projCam);
+      pv.copy(at).add(V(0, 0, NOTE_R * (f <= 0 ? OPEN_K : 1))).project(projCam);
       const r = Math.hypot((pv.x * 0.5 + 0.5) * W - x, (-pv.y * 0.5 + 0.5) * H - y);
       return { x, y, r };
     },

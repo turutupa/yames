@@ -189,34 +189,113 @@ export function NeckInstruction({
           // distance above the note, which in every theme put "next" on the
           // neighbouring string.
           const place = m.onsets[index + 1]?.places[0];
-          const gapAt = (up: boolean): number | null => {
-            if (!place) return null;
-            const ys = [-2, -1, 1, 2]
-              .map((d) => ({ d, pt: neck.project(place.string + d, place.fret) }))
-              .filter((o): o is { d: number; pt: { x: number; y: number; r: number } } => !!o.pt)
-              .map((o) => ({ d: o.d, y: o.pt.y - box.top }));
-            const side = ys.filter((o) => (up ? o.y < next.y : o.y > next.y)).sort((a, b) => Math.abs(a.d) - Math.abs(b.d));
-            const near = side[0];
-            if (!near) return null;
-            const far = side[1];
-            const spacing = Math.abs(near.y - next.y);
-            gap = far ? Math.abs(far.y - near.y) : spacing;
-            return far ? (near.y + far.y) / 2 : near.y + (up ? -spacing / 2 : spacing / 2);
-          };
-          let gap = 0;
-          // Two lines ("then 7, 6" over "next") fit a wide gap; a narrow one
-          // takes them side by side on one line.
+          // Where each string runs at NEXT's fret, from two above it to two
+          // below (a string past the edge is the board's edge).
+          const yAt = new Map<number, number>([[0, next.y]]);
+          if (place) {
+            for (const d of [-2, -1, 1, 2]) {
+              const sIdx = place.string + d;
+              if (sIdx < 0 || sIdx > 7) continue;
+              const pt = neck.project(sIdx, place.fret);
+              if (pt) yAt.set(d, pt.y - box.top);
+            }
+          }
+          // The tag in both shapes: "next" over "then 8, 7", and on one line.
           nt.removeAttribute("data-row");
-          gapAt(true);
-          if (gap > 0 && nt.offsetHeight > gap - 6) nt.setAttribute("data-row", "");
-          const tagH = nt.offsetHeight || 36;
-          const above = gapAt(true);
-          const useAbove = above !== null && above - tagH / 2 >= 4;
-          const centre = useAbove ? above : gapAt(false);
-          if (centre !== null) {
+          const colH = nt.offsetHeight || 36;
+          const colW = nt.offsetWidth || 70;
+          nt.setAttribute("data-row", "");
+          const rowH = nt.offsetHeight || 20;
+          const rowW = nt.offsetWidth || 110;
+          nt.removeAttribute("data-row");
+          const H = box.height;
+          const W = box.width;
+          // The inlays (acceptance 2: "next then 8, 7" lay on the 7th fret's
+          // dot): a fret's dot is in the middle of its cell, between the 3rd
+          // and 4th strings, or for 12 and 24 between the 2nd and 3rd and the
+          // 4th and 5th. A cell's wires are found from the markers' places,
+          // which stand just behind them.
+          const marks = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
+          const noteXAt = new Map<number, number>();
+          const nx = (k: number) => {
+            if (!place) return null;
+            if (!noteXAt.has(k)) {
+              const pt = neck.project(place.string, k);
+              noteXAt.set(k, pt ? pt.x - box.left : Number.NaN);
+            }
+            const v = noteXAt.get(k)!;
+            return Number.isNaN(v) ? null : v;
+          };
+          const inlaysIn = (a: number, x1: number, x2: number) => {
+            for (const k of marks) {
+              if (!(a === 3 && k !== 12 && k !== 24) && !((a === 2 || a === 4) && (k === 12 || k === 24))) continue;
+              const p0 = nx(k - 1);
+              const p1 = nx(k);
+              if (p0 === null || p1 === null || k - 1 < 1) continue;
+              const ix = (p0 + p1) / 2 + next.r * 1.4;
+              if (ix > x1 - next.r * 0.7 && ix < x2 + next.r * 0.7) return true;
+            }
+            return false;
+          };
+          // The markers round it (NOW larger), and NOW's finger tag: the
+          // words go where none of them is.
+          const blocks: { x: number; y: number; r: number }[] = [];
+          for (let i = Math.max(0, index - 3); i <= index + 3; i++) {
+            const p = at(i);
+            // NOW and NEXT whole; the quiet ones around them only at their
+            // middle, so on a narrow neck the words may touch a played
+            // note's edge rather than leave the gaps altogether.
+            if (p) blocks.push({ x: p.x, y: p.y, r: p.r * (i === index ? 1.5 : i === index + 1 ? 1.1 : 0.4) });
+          }
+          const nowBox = tag && tag.textContent ? tag.getBoundingClientRect() : null;
+          const clear = (x1: number, x2: number, y1: number, y2: number) => {
+            for (const b of blocks) {
+              const cx = Math.max(x1, Math.min(b.x, x2));
+              const cy = Math.max(y1, Math.min(b.y, y2));
+              if (Math.hypot(b.x - cx, b.y - cy) < b.r - 1) return false;
+            }
+            if (nowBox && nowBox.width > 0) {
+              const l = nowBox.left - box.left;
+              const t2 = nowBox.top - box.top;
+              if (x1 < l + nowBox.width && x2 > l && y1 < t2 + nowBox.height && y2 > t2) return false;
+            }
+            return true;
+          };
+          type Spot = { centre: number; row: boolean; up: boolean; x: number };
+          let pick: Spot | null = null;
+          if (place) {
+            // Beside NEXT's own string first (above, then below), centred on
+            // it, then to its right, then to its left; then a string further out.
+            const tries: Array<[number, "c" | "r" | "l"]> = [
+              [-1, "c"], [0, "c"], [-1, "r"], [0, "r"], [-1, "l"], [0, "l"],
+              [-2, "c"], [1, "c"], [-2, "r"], [1, "r"], [-2, "l"], [1, "l"],
+            ];
+            for (const [lo, side] of tries) {
+              const y1 = yAt.get(lo);
+              const y2 = yAt.get(lo + 1);
+              if (y1 === undefined || y2 === undefined) continue;
+              const gap = Math.abs(y2 - y1);
+              const centre = (y1 + y2) / 2;
+              const row = !(colH <= gap - 6);
+              const h = row ? rowH : colH;
+              const w = row ? rowW : colW;
+              if (row && rowH > gap - 2) continue;
+              if (centre - h / 2 < 2 || centre + h / 2 > H - 2) continue;
+              const x = side === "c" ? next.x : side === "r" ? next.x + next.r + 4 + w / 2 : next.x - next.r - 4 - w / 2;
+              if (x - w / 2 < 2 || x + w / 2 > W - 2) {
+                if (side !== "c") continue;
+              }
+              if (!clear(x - w / 2, x + w / 2, centre - h / 2, centre + h / 2)) continue;
+              if (inlaysIn(place.string + lo, x - w / 2, x + w / 2)) continue;
+              pick = { centre, row, up: centre < next.y, x };
+              break;
+            }
+          }
+          nt.toggleAttribute("data-row", !!pick?.row);
+          if (pick) {
             nt.setAttribute("data-gap", "");
-            nt.toggleAttribute("data-below", !useAbove);
-            nt.style.top = `${centre}px`;
+            nt.toggleAttribute("data-below", !pick.up);
+            nt.style.top = `${pick.centre}px`;
           } else {
             const fallback = next.y - Math.max(18, next.r * 1.9);
             const below = fallback < 34;
@@ -224,6 +303,15 @@ export function NeckInstruction({
             nt.toggleAttribute("data-below", below);
             nt.style.top = `${below ? next.y + Math.max(18, next.r * 1.9) : fallback}px`;
           }
+          const tagX = pick ? pick.x : next.x;
+          // Inside the picture: an open string's NEXT is at the nut, at its very edge.
+          nt.style.left = `${tagX}px`;
+          const r = nt.getBoundingClientRect();
+          let shift = r.left < box.left + 4 ? box.left + 4 - r.left : r.right > box.right - 4 ? box.right - 4 - r.right : 0;
+          // Pushed in from the left edge (an open string by the nut): clear of
+          // its token, beside it, rather than over it.
+          if (shift > 0 && r.left + shift < next.x + box.left + next.r + 6) shift = next.x + box.left + next.r + 6 - r.left;
+          if (shift) nt.style.left = `${tagX + shift}px`;
         }
       }
     },

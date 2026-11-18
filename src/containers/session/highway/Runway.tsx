@@ -29,6 +29,7 @@ import { kindOfMark } from "../hooks/useNeck";
 import {
   STRING_NAMES,
   dotOffset,
+  laneBands,
   laneScale,
   minGapPx,
   nextOnsetIndex,
@@ -37,7 +38,7 @@ import {
   stripOffset,
   usedStrings,
 } from "./runwayModel";
-import type { RunwayModel } from "./runwayModel";
+import type { LaneBand, RunwayModel } from "./runwayModel";
 
 declare global {
   interface Window {
@@ -72,16 +73,19 @@ const Strip = memo(function Strip({
   model,
   ppt,
   collapsed,
-  lanes,
+  bands,
 }: {
   model: RunwayModel;
   ppt: number;
   collapsed: boolean;
-  /** The strings with a lane, high e first. */
-  lanes: readonly number[];
+  /** Each string's lane, high e first. */
+  bands: readonly LaneBand[];
 }) {
   const left = (tick: number) => (tick - model.countInTicks) * ppt;
-  const row = (s: number) => Math.max(0, lanes.indexOf(s));
+  const mid = (s: number) => {
+    const b = bands.find((x) => x.string === s);
+    return b ? b.top + b.height / 2 : 0.5;
+  };
   return (
     <>
       {model.barTicks.map((tick, i) => (
@@ -95,7 +99,7 @@ const Strip = memo(function Strip({
           data-string={n.string}
           style={{
             left: left(n.tick),
-            top: collapsed ? "50%" : `${((row(n.string) + 0.5) / lanes.length) * 100}%`,
+            top: collapsed ? "50%" : `${mid(n.string) * 100}%`,
           }}
         >
           {n.fret}
@@ -110,11 +114,12 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
   const { t } = useTranslation();
   const model = useMemo(() => runwayModel(take, TAKE_COUNT_IN_BARS), [take]);
   const lanes = useMemo(() => usedStrings(model), [model]);
+  const bands = useMemo(() => laneBands(lanes), [lanes]);
   const laneRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
-  const laneH = collapsed ? height : height / Math.max(1, lanes.length);
+  const laneH = collapsed ? height : height * Math.max(...bands.filter((b) => b.used).map((b) => b.height));
   const scale = useMemo(() => laneScale(model, width, minGapPx(width, laneH)), [model, width, laneH]);
   const note = noteSize(model, scale.ppt, collapsed ? 0 : laneH);
 
@@ -271,31 +276,45 @@ export function Runway({ take, beat, playing, lights, collapsed = false, onNext 
       data-collapsed={collapsed ? "" : undefined}
       data-moving={playing ? "" : undefined}
       data-lanes={lanes.length}
+      data-bands=""
       style={{ ["--lanes" as string]: lanes.length, ["--note" as string]: `${note}px` }}
       role="img"
       aria-label={t("session.runway.label")}
     >
       {!collapsed && (
         <div className="runway-names" aria-hidden="true">
-          {lanes.map((s, i) => (
+          {bands.map((b) => (
             <span
-              key={s}
-              data-string={s}
-              style={{ top: `${(i / lanes.length) * 100}%`, height: `${100 / lanes.length}%` }}
+              key={b.string}
+              data-string={b.string}
+              data-context={b.used ? undefined : ""}
+              style={{ top: `${b.top * 100}%`, height: `${b.height * 100}%` }}
             >
-              {STRING_NAMES[s - 1]}
+              {STRING_NAMES[b.string - 1]}
             </span>
           ))}
         </div>
       )}
       <div className="runway-lanes" ref={laneRef}>
         {!collapsed &&
-          lanes.map((s, i) => (
-            <i key={s} className="runway-lane" data-string={s} style={{ top: `${((i + 0.5) / lanes.length) * 100}%` }} />
+          bands.map((b) =>
+            b.used && bands.some((x) => !x.used) ? (
+              <i key={`band${b.string}`} className="runway-band" data-string={b.string} style={{ top: `${b.top * 100}%`, height: `${b.height * 100}%` }} />
+            ) : null,
+          )}
+        {!collapsed &&
+          bands.map((b) => (
+            <i
+              key={b.string}
+              className="runway-lane"
+              data-string={b.string}
+              data-context={b.used ? undefined : ""}
+              style={{ top: `${(b.top + b.height / 2) * 100}%` }}
+            />
           ))}
         <div className="runway-past" style={{ width: scale.hitX }} aria-hidden="true" />
         <div className="runway-strip" ref={stripRef} data-testid="runway-strip">
-          {width > 0 && <Strip model={model} ppt={scale.ppt} collapsed={collapsed} lanes={lanes} />}
+          {width > 0 && <Strip model={model} ppt={scale.ppt} collapsed={collapsed} bands={bands} />}
         </div>
         <i className="runway-hit" style={{ left: scale.hitX }} aria-hidden="true" />
         <span className="runway-legend" aria-hidden="true">

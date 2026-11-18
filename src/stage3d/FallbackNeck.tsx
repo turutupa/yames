@@ -17,6 +17,9 @@ import type { NeckKind, NeckNote, NeckView } from "./api";
 import type { StageSnapshot } from "./controller";
 import { noteLook, useNeckPalette, type NeckPalette } from "./neckTheme";
 
+/** An open string's token, as a share of a marker: the 3D neck's `OPEN_K` (engine/guitar.ts, not imported: it brings three.js). */
+const OPEN_K = 0.66;
+
 /** Stage string (1 = high E) to Fretboard's index (0 = lowest string). */
 export const stringIndex = (s: number) => 6 - s;
 export const pitchOf = (s: number, fret: number) => (GUITAR_STANDARD_TUNING[stringIndex(s)] + fret) % 12;
@@ -99,12 +102,14 @@ export function FallbackNeck({
   const mL = whole || a === 0 ? Math.max(14, R * 2.6) : 0;
   const mR = whole ? 14 + W * 0.012 : 0;
   const X = (f: number) => mL + ((fx(f) - fx(a)) / (fx(b) - fx(a))) * (W - mL - mR);
-  // A stub of board before the nut, so an open string's marker sits on the board, just left of the nut.
-  const xL = a === 0 ? Math.max(0, X(0) - R * 2.6) : 0;
+  // A stub of board before the nut, just room for an open string's token
+  // (the 3D neck's OPEN_K: two thirds of a marker, "0", by the nut; acceptance 2, P1-3).
+  const xL = a === 0 ? Math.max(0, X(0) - R * 2.3) : 0;
   const xR = whole ? X(24) + (X(24) - X(23)) * 0.6 : W;
   const fretW = Math.max(1, sp * 0.065);
   const nutW = Math.max(3, sp * 0.16);
-  const noteX = (f: number) => (f <= 0 ? X(0) - R * 1.4 : X(f) - Math.min(0.3 * (X(f) - X(f - 1)), R * 1.5));
+  const noteX = (f: number) => (f <= 0 ? X(0) - nutW - R * 1.45 * OPEN_K - 2 : X(f) - Math.min(0.3 * (X(f) - X(f - 1)), R * 1.5));
+  const kOf = (f: number) => (f <= 0 ? OPEN_K : 1);
   const fsMark = Math.max(12, Math.min(30, sp * 0.62));
   const fsOther = fsMark * 0.68;
   const numY = bB + numH * 0.62;
@@ -124,6 +129,9 @@ export function FallbackNeck({
         viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label={whole ? "Fretboard, the whole neck" : `Fretboard, frets ${range.startFret} to ${range.startFret + range.frets}`}
+        // Where any place would be, for the controller's `project` when no dot
+        // stands there (a NEXT tag looks for the strings either side of its note).
+        data-geom={JSON.stringify({ a, top: bT + inset, sp, r: R, xs: Array.from({ length: b - a + 1 }, (_u, i) => Math.round(noteX(a + i) * 10) / 10) })}
       >
         <defs>
           {P.shadowA > 0 && (
@@ -174,12 +182,12 @@ export function FallbackNeck({
         {shown
           .filter((n) => n.kind === "now")
           .map((n) => (
-            <circle key={`g${n.string}:${n.fret}`} cx={noteX(n.fret)} cy={S(n.string)} r={R * 1.45 * 2.4} fill={`url(#${uid}glow)`} pointerEvents="none" />
+            <circle key={`g${n.string}:${n.fret}`} cx={noteX(n.fret)} cy={S(n.string)} r={R * kOf(n.fret) * 1.45 * 2.4} fill={`url(#${uid}glow)`} pointerEvents="none" />
           ))}
         {/* The markers. */}
         {shown.map((n) => {
           const look = noteLook(n.kind, P);
-          const r = R * (SCALE[n.kind] ?? 1) * look.size;
+          const r = R * kOf(n.fret) * (SCALE[n.kind] ?? 1) * look.size;
           const lw = look.stroke ? r * look.strokeW : 0;
           return (
             <circle
@@ -203,7 +211,7 @@ export function FallbackNeck({
             .filter((n) => n.label)
             .map((n) => {
               const look = noteLook(n.kind, P);
-              const r = R * (SCALE[n.kind] ?? 1);
+              const r = R * kOf(n.fret) * (SCALE[n.kind] ?? 1);
               return (
                 <text
                   key={`${n.string}:${n.fret}`}
