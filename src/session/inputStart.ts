@@ -35,6 +35,8 @@ export const INPUT_ANSWER_MS = 10_000;
 export function classifyInputError(err: unknown): InputFailure {
   if (err instanceof InputTimeout) return "noAnswer";
   const text = (err instanceof Error ? err.message : String(err ?? "")).toLowerCase();
+  // Android's dialog dismissed or hidden (`MIC_PERMISSION_UNANSWERED`): not a refusal.
+  if (/not answered|unanswered/.test(text)) return "noAnswer";
   if (/permission|denied|not allowed|notallowed|refused|access/.test(text)) return "permission";
   if (/busy|in use|exclusive|already/.test(text)) return "busy";
   if (/no default input|not found|no input|no device|unavailable/.test(text)) return "noDevice";

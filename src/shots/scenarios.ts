@@ -106,6 +106,14 @@ export interface Shot {
     exercise?: string;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
     band?: boolean;
+    /**
+     * The input misbehaving (owner, beta 6): `hang` never answers (Android's
+     * dialog left open), `fail` is refused with no device at all, `missing` is
+     * a selected interface that is not there by that name (the default opens).
+     */
+    input?: "hang" | "fail" | "missing";
+    /** Settings → Practice → "Grade my playing". False: the Session is ungraded. */
+    grade?: false;
   };
   /**
    * The Jam tab, with a jam actually on it.
@@ -1077,6 +1085,62 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 900,
   },
+  // The input at a Take's ready screen (owner, beta 6), and a Session played
+  // without grading (2026-11-18).
+  {
+    id: "session-input-off",
+    suffix: "session-input-off",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", input: "hang" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-input-failed",
+    suffix: "session-input-failed",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", input: "fail" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-input-fallback",
+    suffix: "session-input-fallback",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", input: "missing" },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-ungraded-ready",
+    suffix: "session-ungraded-ready",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "ready", grade: false },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
+  },
+  {
+    id: "session-ungraded-result",
+    suffix: "session-ungraded-result",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "result", grade: false },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
+    id: "session-ungraded-recap",
+    suffix: "session-ungraded-recap",
+    window: "main",
+    session: { seed: "returning", minutes: 5, stop: "recap", grade: false },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
   {
     id: "session-recap",
     suffix: "session-recap",
@@ -1506,6 +1570,11 @@ export const PHONE_LEARNING_SCENES = [
   "session-no-catch",
   "session-recap",
   "session-edge-result",
+  "session-input-off",
+  "session-input-failed",
+  "session-ungraded-ready",
+  "session-ungraded-result",
+  "session-ungraded-recap",
   "paths",
   "path-alternate",
   "step-detail",

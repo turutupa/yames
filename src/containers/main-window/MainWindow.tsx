@@ -49,6 +49,7 @@ import {
   storeSave,
   togglePlayback,
   openFeedback,
+  MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
@@ -591,6 +592,8 @@ export function MainWindow() {
         setListening: (on, device) => evaluation.setListening(on, device),
         selectedDevice: evaluation.selectedDevice,
         devices: evaluation.devices,
+        // A phone's permission dialog has its own minute (`MIC_PERMISSION_TIMEOUT_MS`).
+        timeoutMs: IS_MOBILE ? MIC_PERMISSION_TIMEOUT_MS + 5_000 : undefined,
       });
       const name = started.device ?? evaluation.devices.find((d) => d.isDefault)?.name ?? null;
       return { device: name, fellBack: started.fellBack };

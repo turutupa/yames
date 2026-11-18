@@ -46,8 +46,8 @@ if (flag("--help")) {
   --no-build          use the binary already built (default: build it first)
   --app <path>        the app binary (default: $CARGO_TARGET_DIR or src-tauri/target, release/yames)
   --scenarios <list>  comma list of: placement,session,relaunch,warmup,two-paths,four-fingers,
-                      blues-band,gpu-info,neck,baseline,restart,wrong-notes
-                      (default: placement,session,relaunch,warmup,two-paths,four-fingers,gpu-info)
+                      input-off,blues-band,gpu-info,neck,baseline,restart,wrong-notes
+                      (default: placement,session,relaunch,warmup,two-paths,four-fingers,input-off,gpu-info)
   --bleed <dB>        blues-band: also feed the app's output back into its input at this
                       level (e.g. -20), as speakers into a microphone would
   --neck-takes <n>    Takes the neck scenario plays back to back (default 3)
@@ -63,7 +63,7 @@ if (flag("--help")) {
   --keep              leave the profile and logs behind`);
   process.exit(0);
 }
-const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,two-paths,four-fingers,warmup,gpu-info").split(","));
+const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,two-paths,four-fingers,warmup,input-off,gpu-info").split(","));
 const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "target");
 const app = resolve(opt("--app", join(targetDir, "release", "yames")));
 const out = resolve(opt("--out", mkdtempSync(join(tmpdir(), "yames-e2e-out-"))));
@@ -850,6 +850,84 @@ async function scenarioFourFingers() {
   }
 }
 
+/** Change the stored settings between launches (the app is closed: it writes them on its way out). */
+function patchSettings(changes) {
+  const file = join(appDataDir(env.dirs), "settings.json");
+  const now = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
+  for (const [k, v] of Object.entries(changes)) {
+    if (v === undefined) delete now[k];
+    else now[k] = v;
+  }
+  writeFileSync(file, JSON.stringify(now, null, 2));
+}
+
+/**
+ * The input off at a Take's ready screen (owner, beta 6: "I hit start take but
+ * nothing happens"). Two launches.
+ *
+ * 1. The selected input is a device that is not there (on Windows a USB
+ *    interface's name changes with its port): the coach session's start of the
+ *    input fails, as it did for the owner. The Session must turn the input on
+ *    by itself, on the system default, say so, and the Take must be heard.
+ * 2. Settings → Practice → "Grade my playing" off: the Session never turns the
+ *    input on, a Take runs anyway, its result says it was not graded, and its
+ *    row is kept as ungraded practice that moves no clean tempo.
+ */
+async function scenarioInputOff() {
+  const title = "Four fingers, one string";
+  const { exercise } = exerciseByTitle(title);
+  const key = `alternate-picking/${exercise.id}`;
+  const openIt = async (d) => {
+    await d.clickText(/^Paths$/);
+    await d.clickText(/^Alternate Picking/);
+    await d.clickText(/Even eighths on one string/);
+    await d.clickIn(/Four fingers, one string/, /^Play this$/);
+  };
+
+  patchSettings({ evaluationDevice: "Scarlett 2i2 USB (unplugged)" });
+  let d = await launchApp();
+  try {
+    await openIt(d);
+    await d.waitText(/Start take, (\d+) BPM/, 30000);
+    const note = await d
+      .exec(`return document.querySelector('[data-testid="session-input-on"]')?.innerText ?? null`)
+      .catch(() => null);
+    const on = await d.invoke("get_evaluation_state");
+    check("input off: the Session turns the input on by itself, on the default device", on === true && /connected/i.test(note ?? ""),
+      `listening ${on}; the ready screen says ${JSON.stringify(note)}`);
+    await shot(d, "input-off-fallback-ready");
+    const good = await playTake(d, exercise, "good", "input off, then on");
+    const row = takesOf(exercise.id).at(-1);
+    check("input off: the Take started by Start take is heard and passes", PASSED.test(good.text) && row?.caught === 1 && row?.passed === 1,
+      row ? `caught ${row.caught}, passed ${row.passed}` : "no row");
+    await d.leaveSession();
+  } finally {
+    await quitApp(d, "input-off");
+  }
+
+  patchSettings({ evaluationDevice: undefined, "session.grade": false });
+  const cleanBefore = cleanTempo(key);
+  d = await launchApp();
+  try {
+    await openIt(d);
+    await d.waitText(/Not graded/, 30000);
+    const on = await d.invoke("get_evaluation_state");
+    check("ungraded: the Session does not turn the input on", on === false, `listening ${on}`);
+    const quiet = await playTake(d, exercise, "good", "ungraded");
+    await shot(d, "ungraded-result");
+    const row = takesOf(exercise.id).at(-1);
+    check("ungraded: the result says it was not graded", /Not graded: grading is off in Settings/.test(quiet.text), firstLines(quiet.text, /Not graded/));
+    check("ungraded: kept as ungraded practice, not an attempt at the bar",
+      row?.facts?.ungraded === "gradingOff" && row?.facts?.verdict === "ungraded" && row?.caught === 0 && row?.passed === 0 && row?.bars > 0,
+      row ? JSON.stringify({ ungraded: row.facts.ungraded, verdict: row.facts.verdict, caught: row.caught, passed: row.passed, bars: row.bars }) : "no row");
+    check("ungraded: the clean tempo did not move", cleanTempo(key) === cleanBefore, `${cleanBefore} -> ${cleanTempo(key)}`);
+    await d.leaveSession();
+  } finally {
+    await quitApp(d, "ungraded");
+    patchSettings({ "session.grade": undefined });
+  }
+}
+
 /**
  * A jam-backed Take: Blues and Pentatonics, "A on every downbeat", a Texas
  * shuffle with drums and bass under it (src/session/takeBand.ts). The click
@@ -1297,6 +1375,7 @@ try {
   if (scenarios.has("two-paths")) await scenarioTwoPaths();
   if (scenarios.has("four-fingers")) await scenarioFourFingers();
   if (scenarios.has("warmup")) await scenarioWarmup();
+  if (scenarios.has("input-off")) await scenarioInputOff();
   if (scenarios.has("blues-band")) await scenarioBluesBand();
   if (scenarios.has("restart")) await scenarioRestart();
   if (scenarios.has("wrong-notes")) await scenarioWrongNotes();

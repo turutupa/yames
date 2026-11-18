@@ -329,13 +329,32 @@ async function drive() {
         const phase = () =>
           document.querySelector<HTMLElement>('[data-testid="session-take"]')?.dataset.phase;
         const ready = () => phase() === "ready" && !!big() && !big()!.disabled && big()!.getAttribute("aria-disabled") !== "true";
-        await until("the Take to be ready", ready, 20000);
+        const input = shot!.session.input;
+        if (input && stop === "ready") {
+          // The input's own state is the picture (owner, beta 6).
+          const shown =
+            input === "fail"
+              ? () => !!byId("session-input-failed")
+              : input === "hang"
+                ? () => big()?.dataset.input === "starting"
+                : () => !!byId("session-input-on");
+          await until("the input's state", () => phase() === "ready" && shown(), 20000);
+        } else {
+          await until("the Take to be ready", ready, 20000);
+        }
         if (stop !== "ready") {
           big()?.click();
           await until("the Take to run", () => !!byId("session-live"));
           if (shot!.session.band) await until("the band", () => !!byId("session-band"));
           if (stop !== "playing") {
-            const outcome = stop === "noCatch" ? "session-no-catch" : stop === "between" ? "session-between" : "session-result";
+            const outcome =
+              shot!.session.grade === false
+                ? "session-ungraded"
+                : stop === "noCatch"
+                  ? "session-no-catch"
+                  : stop === "between"
+                    ? "session-between"
+                    : "session-result";
             await until("the verdict", () => !!byId(outcome), 30000);
             const fair = shot!.session.fair;
             if (fair) {

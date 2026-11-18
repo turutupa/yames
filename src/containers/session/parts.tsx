@@ -138,12 +138,11 @@ export function startButton(
 }
 
 /** The Take's own state: whether pressing Start would start it now. */
-export function takeCanStart(session: SessionRun, listening: boolean): boolean {
-  const { prepared, run, inputStart } = session;
-  if (!prepared) return false;
-  // Off and graded, Start turns the input on first: it is pressable, not dead.
-  if (!listening && !run.ungraded) return inputStart.status !== "starting";
-  return true;
+export function takeCanStart(session: SessionRun, _listening: boolean): boolean {
+  // Off and graded, Start turns the input on first; while it comes on, a press
+  // is kept and the Take starts once it is on. Pressable either way, never
+  // dead: only a Take still loading holds it.
+  return session.prepared;
 }
 
 /**
