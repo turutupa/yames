@@ -153,7 +153,8 @@ export type SessionRunInput = {
     /** `active` as of the calls made, not the last render (`useSession`). */
     isActive?: () => boolean;
     cardOpen: boolean;
-    startSession: () => Promise<void>;
+    /** `quiet`: a Session's coach session is for the history, not the coach's feed. */
+    startSession: (options?: { quiet?: boolean }) => Promise<void>;
     endSession: () => Promise<void>;
     toggleCard: () => void;
   };
@@ -981,7 +982,9 @@ export function useSessionRun(input: SessionRunInput) {
       setView("session");
       if (!theirs) {
         ownsCoach.current = true;
-        void coach.startSession().catch(() => {});
+        // Quiet: the Session listens and saves through the coach, but the
+        // player never pressed the coach's Start, so its feed is left alone.
+        void coach.startSession({ quiet: true }).catch(() => {});
       }
     },
     [progress, setView],

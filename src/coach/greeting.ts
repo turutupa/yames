@@ -131,11 +131,18 @@ const TIER3_SOLID_VARIANTS = [
  * hitting the solid-work bar (low session count or low median). None
  * of these may contain `solid work` (the negative test at
  * `greeting.test.ts:291` enforces that).
+ *
+ * No numbers and no claims about what was practised: this tier knows only
+ * that *something* was saved in the last week, which may have been a
+ * learning Session at a tempo the metronome never showed. "Let's keep
+ * building on this week's reps" claimed reps, and a model paraphrasing it
+ * filled in "120 BPM" (the metronome default). Every line here must be true
+ * of any player with one recent session.
  */
 const TIER3_GENERIC_VARIANTS = [
-  "Welcome back. Let's keep building on this week's reps.",
-  "Back again — let's build on what you've been working on.",
   "Welcome back. Pick up where you left off.",
+  "Back again — good to see you. Play when you're ready.",
+  "Welcome back. Start when you're ready and I'll listen in.",
 ] as const;
 
 function pickVariant<T>(

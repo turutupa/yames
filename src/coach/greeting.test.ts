@@ -371,3 +371,70 @@ describe("loadHistoryWithBudget", () => {
     expect(result).toBeUndefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Only true facts (owner report, 2026-11-18)
+// ---------------------------------------------------------------------------
+
+/**
+ * "Welcome back! Let's keep building on this week's 120 BPM reps." — to a
+ * player who had never practised at 120. The greeting may cite a tempo or a
+ * score only when it came from a session of the preset being played, or is
+ * the tempo the player has set right now; with no preset it cites nothing.
+ */
+describe("the greeting never cites what the player has not done", () => {
+  const numbers = (text: string) => (text.match(/\d+/g) ?? []).map(Number);
+  // A tiny LCG so the sweep is the same on every run.
+  const seeded = (seed: number) => () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+
+  it("with no preset: no number, no reps, whatever the history and the metronome say", () => {
+    for (let i = 0; i < 200; i++) {
+      const rnd = seeded(i + 1);
+      const history = Array.from({ length: Math.floor(rnd() * 8) }, () =>
+        makeSession(Math.floor(rnd() * 20), 40 + Math.floor(rnd() * 60), 60 + Math.floor(rnd() * 120)),
+      );
+      const out = renderGreeting({ bpm: 120, history, now: FIXED_NOW, rng: rnd });
+      expect(numbers(out.text), out.text).toEqual([]);
+      expect(out.text).not.toMatch(/\brep/i);
+      expect(out.text).not.toMatch(/bpm/i);
+    }
+  });
+
+  it("every variant of the history-free tiers, at every pick", () => {
+    for (const r of [0, 0.2, 0.4, 0.6, 0.8, 0.99]) {
+      for (const history of [[], [makeSession(1, 50, 90)], [makeSession(1, 90, 90), makeSession(2, 90, 90), makeSession(3, 90, 90)]]) {
+        const text = renderGreeting({ bpm: 120, history, now: FIXED_NOW, rng: () => r }).text;
+        expect(text).not.toMatch(/\d|\brep|week's/i);
+      }
+    }
+  });
+
+  it("with a preset: each number is the current tempo or comes from that preset's own sessions", () => {
+    for (let i = 0; i < 200; i++) {
+      const rnd = seeded(i + 1000);
+      const bpm = 60 + Math.floor(rnd() * 120);
+      const history = Array.from({ length: Math.floor(rnd() * 8) }, () =>
+        makeSession(
+          Math.floor(rnd() * 20),
+          40 + Math.floor(rnd() * 60),
+          60 + Math.floor(rnd() * 120),
+          rnd() < 0.6 ? "p1" : "p2",
+          "Riff",
+        ),
+      );
+      const own = history.filter((s) => s.presetId === "p1");
+      const out = renderGreeting({ presetId: "p1", presetName: "Riff", bpm, history, now: FIXED_NOW, rng: rnd });
+      const allowed = new Set<number>([bpm, ...own.map((s) => s.bpm), ...own.map((s) => s.report.score)]);
+      if (out.context.targetScore !== undefined) allowed.add(out.context.targetScore);
+      // The target is never above the best this preset has seen.
+      if (out.context.targetScore !== undefined && own.length > 0) {
+        expect(out.context.targetScore).toBeLessThanOrEqual(Math.max(...own.map((s) => s.report.score)));
+      }
+      for (const n of numbers(out.text)) expect(allowed.has(n), `${n} in "${out.text}"`).toBe(true);
+      expect(out.text).not.toMatch(/\brep/i);
+    }
+  });
+});
