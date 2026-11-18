@@ -137,7 +137,7 @@ export function hue(hex: string): number | null {
 
 /** The ink for a numeral on a filled disc: near-black on a light fill, white on a dark one. */
 function inkOn(fill: string): string {
-  return luminance(fill) > 0.3 ? mix(fill, "#000000", 0.86) : "#ffffff";
+  return luminance(fill) > 0.2 ? mix(fill, "#000000", 0.86) : "#ffffff";
 }
 
 // ─── the palette ───

@@ -427,7 +427,7 @@ export interface Shot {
    * zoom with notes and the overview strip, `pluck` the same caught while a
    * string rings. `?nogl=1` on any of them draws the SVG fallback instead.
    */
-  stage?: "whole" | "zoom" | "pluck" | "flat";
+  stage?: "whole" | "zoom" | "pluck" | "flat" | "played";
   /**
    * The Session's tab strip alone (`containers/session/tabstrip/`), in the
    * chosen theme, drawing a real Exercise from a Path pack. See
@@ -1458,6 +1458,8 @@ export const SHOTS: Shot[] = [
   { id: "stage-pluck", suffix: "stage-pluck", window: "main", stage: "pluck", width: 1400, height: 900, settleMs: 0 },
   // The straight-on neck the practice runway sits under (M6).
   { id: "stage-flat", suffix: "stage-flat", window: "main", stage: "flat", width: 1400, height: 900, settleMs: 200 },
+  // Every marker look on one string, as in the neck art direction's mock: on time, late, NOW, NEXT, the shape.
+  { id: "stage-played", suffix: "stage-played", window: "main", stage: "played", width: 1400, height: 900, settleMs: 200 },
   // The Session's tab strip (mvp-tabstrip): before a Take, and during one.
   { id: "tabstrip-preview", suffix: "tabstrip-preview", window: "main", tabstrip: "preview", width: 1400, height: 900, settleMs: 100 },
   { id: "tabstrip-follow", suffix: "tabstrip-follow", window: "main", tabstrip: "follow", width: 1400, height: 900, settleMs: 100 },

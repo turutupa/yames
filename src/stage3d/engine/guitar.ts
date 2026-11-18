@@ -365,8 +365,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
   const haloGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
   const haloTex = T.radial([
     [0, "rgba(255,255,255,1)"],
-    [0.3, "rgba(255,255,255,.55)"],
-    [0.65, "rgba(255,255,255,.14)"],
+    [0.5, "rgba(255,255,255,.5)"],
     [1, "rgba(255,255,255,0)"],
   ]);
   const pool: Note[] = [];
@@ -610,7 +609,7 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
       const x = sweepA + (sweepB - sweepA) * e;
       const env = Math.sin(Math.PI * Math.min(1, e));
       sweepMesh.position.set(x, 0.003, 0);
-      sweepMesh.material.opacity = Math.min(P.dark ? 0.3 : 0.14, 0.12 * sweepPow * env);
+      sweepMesh.material.opacity = Math.min(P.dark ? 0.2 : 0.1, 0.08 * sweepPow * env);
       sweepMesh.visible = true;
       if (sweepT >= 1) {
         sweepT = -1;
