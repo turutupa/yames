@@ -77,3 +77,53 @@ number means it is drawn over it`,
     await noSidewaysScroll(page, "the settings sheet at 520px");
   });
 });
+
+/*
+ * P1-10 (acceptance, 2026-11-18): at 1024px the section index's "you are
+ * here" label was drawn over the rows it named. Whatever the index shows —
+ * ticks, always-on names, the scroll flash — stays out of the sheet, at every
+ * width a desktop window is dragged to.
+ */
+test.describe("the section index", () => {
+  for (const width of [900, 1024, 1180, 1300, 1400, 2000]) {
+    test(`never draws over the sheet at ${width}px`, async ({ page }) => {
+      await openShot(page, "settings-update", { width, height: 800 });
+      const hits: string[] = [];
+      for (const y of [0, 700, 1600, 2600, 4000]) {
+        const found = await page.evaluate(async (y) => {
+          const c = document.querySelector<HTMLElement>(".view-transition-wrapper");
+          if (!c) return ["no scroller"];
+          c.scrollTop = y;
+          c.dispatchEvent(new Event("scroll"));
+          await new Promise((r) => setTimeout(r, 200));
+          const sections = [...c.querySelectorAll("section.settings-section, section.hotkeys-section")].map(
+            (s) => s.getBoundingClientRect(),
+          );
+          const shown = [...document.querySelectorAll<HTMLElement>(".stl-tick, .stl-tooltip, .stl-popover")].filter((e) => {
+            const cs = getComputedStyle(e);
+            const rail = e.closest<HTMLElement>(".settings-timeline");
+            return (
+              cs.display !== "none" &&
+              cs.visibility !== "hidden" &&
+              Number(cs.opacity) > 0 &&
+              (!rail || getComputedStyle(rail).visibility !== "hidden")
+            );
+          });
+          const out: string[] = [];
+          for (const e of shown) {
+            const r = e.getBoundingClientRect();
+            if (r.width === 0) continue;
+            for (const s of sections) {
+              const x = Math.min(r.right, s.right) - Math.max(r.left, s.left);
+              const yv = Math.min(r.bottom, s.bottom) - Math.max(r.top, s.top);
+              if (x > 0 && yv > 0) out.push(`${e.className} "${e.textContent?.trim()}" at x ${Math.round(r.left)}–${Math.round(r.right)}, sheet ends at ${Math.round(s.right)}`);
+            }
+          }
+          return out;
+        }, y);
+        hits.push(...found);
+      }
+      expect([...new Set(hits)], "the section index is drawn over the settings sheet").toEqual([]);
+    });
+  }
+});
