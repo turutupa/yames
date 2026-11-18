@@ -2430,6 +2430,13 @@
 .practice-now-tag:empty {
   display: none;
 }
+/* Readable over strings and frets: a dark pill under the words. */
+.practice-now-tag,
+.practice-next-tag {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(14, 9, 6, 0.78);
+}
 .practice-next-tag {
   transform: translate(-50%, -100%);
   display: flex;
@@ -2562,10 +2569,13 @@
   margin: -16px 0 0 -16px;
   font-size: 17px;
 }
-.runway[data-lanes="1"],
-.runway[data-lanes="2"],
-.runway[data-lanes="3"] {
-  max-height: calc(var(--lanes, 3) * 78px + 20px);
+/* Not on a phone held upright: there the notes fall down the runway's height. */
+@media (min-width: 701px), (orientation: landscape) {
+  .runway[data-lanes="1"],
+  .runway[data-lanes="2"],
+  .runway[data-lanes="3"] {
+    max-height: calc(var(--lanes, 3) * 78px + 20px);
+  }
 }
 .runway[data-collapsed] .runway-note {
   width: 22px;
