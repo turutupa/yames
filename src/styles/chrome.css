@@ -23,9 +23,16 @@
  * layer over it, the way `session.css` is over the tools'. */
 
 :root {
-  --ui-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --ui-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
-  --ui-serif: Fraunces, Georgia, "Times New Roman", serif;
+  /* The THEME's faces, everywhere this file reaches: the rail, the top bar,
+     the notices and Settings (owner, 2026-11-18: "everything should follow
+     the current set theme"). The rail kept a fixed Inter / Barlow pair after
+     the pages beside it had moved to the theme, so "Today" in the rail and
+     "Today" on the page were two different faces in every theme but Ember.
+     The fallbacks are the learning side's own pair, for a theme without the
+     token. */
+  --ui-body: var(--font-body, Inter, system-ui, -apple-system, "Segoe UI", sans-serif);
+  --ui-display: var(--font-display, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --ui-serif: var(--font-heading, Fraunces, Georgia, "Times New Roman", serif);
   /* Only where the text IS code: a key's name. */
   --ui-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
   /* A hairline: the theme's border, softened, as the learning side's panels. */
