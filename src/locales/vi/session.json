@@ -146,7 +146,7 @@
       "edge": "Từ tempo bạn đã đạt, {{bpm}} BPM. Tăng một nấc sau mỗi lượt đạt mức.",
       "edgeCheck": "Để kiểm tra tempo sạch của bạn. Lần trước là {{clean}} BPM.",
       "edgeFirst": "Để tìm tempo sạch của bạn. Bắt đầu ở {{bpm}} BPM và tăng dần khi bạn còn đạt mức.",
-      "chosen": "Bạn tự chọn bài này, từ {{step}}.",
+      "chosen": "Bạn chọn, từ {{step}}.",
       "focusTurn": "Hôm nay {{path}} dẫn đầu: đến lượt nó.",
       "focusTurnAway": "Hôm nay {{path}} dẫn đầu: bạn chưa chơi nó {{days}} ngày.",
       "keepWarm": "{{path}}, để giữ phong độ: chơi lần cuối {{days}} ngày trước.",
@@ -192,7 +192,7 @@
       "early": "sớm",
       "stripLabel": "Các nốt mới nhất so với lưới nhịp",
       "countIn": "Đang đếm vào",
-      "honest": "Tôi nghe được nốt và nhịp. Xuống-lên là việc của bạn: tôi không nghe được chiều gảy.",
+      "honest": "Tôi nghe các nốt và thời điểm của chúng. Chiều gảy thì tôi không nghe được, phần đó bạn tự để ý.",
       "noInput": "Tôi chưa nghe thấy đàn của bạn. Chấm điểm cần micro hoặc cắm trực tiếp.",
       "checkSound": "Kiểm tra âm thanh",
       "engineTrouble": "Bộ máy âm thanh không nhận bài tập này. Thoát ra và bắt đầu lại.",
@@ -204,23 +204,36 @@
       "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên.",
       "skip": "Bỏ qua bài này",
       "skipped": "Đã bỏ qua",
-      "honestTiming": "Tôi nghe được nhịp của bạn, không phải nốt nào. Lên-xuống là việc của bạn: tôi không nghe được chiều gảy."
+      "honestTiming": "Tôi nghe nhịp của bạn, không nghe cao độ. Chiều gảy thì tôi không nghe được, phần đó bạn tự để ý.",
+      "goAgainUp": "Chơi lại, lên {{bpm}} BPM",
+      "slowerFloor": "Đây đã là tempo chậm nhất của bài này",
+      "fasterCeiling": "Đây đã là tempo nhanh nhất của bài này",
+      "tempoLocked": "Bài kiểm tra chơi ở tempo đạt, nên giữ nguyên"
     },
     "result": {
       "kick": "Lượt {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ô nhịp",
       "barMet": "Đã đạt mức",
-      "barIs": "Mức đạt là {{bar}}%",
-      "barIsCount": "Mức đạt là {{bar}}",
       "cleanFirst": "Tempo sạch: {{bpm}} BPM.",
       "cleanMoved": "Tempo sạch: từ {{from}} lên {{bpm}} BPM.",
-      "unmeasuredNotes": "Tôi đã kiểm tra nhịp. Tôi không nghe các nốt đủ rõ để nói chúng có đúng không, nên lần này phần đó không được chấm.",
-      "againSame": "Lại lần nữa, {{bpm}} BPM",
       "moveOn": "Đi tiếp",
       "fairAsk": "Điểm này có công bằng không?",
       "fairYes": "Có",
       "fairNo": "Không",
       "fairThanksYes": "Cảm ơn: đã lưu là công bằng. Chạm Không để đổi.",
-      "fairThanksNo": "Cảm ơn: đã lưu là không công bằng. Chạm Có để đổi."
+      "fairThanksNo": "Cảm ơn: đã lưu là không công bằng. Chạm Có để đổi.",
+      "barChip": "Mức {{bar}}%",
+      "barChipCount": "Mức: tối đa {{bar}}",
+      "barMissed": "Chưa đạt mức",
+      "decidedPass": "Sát mức nhất",
+      "decidedMiss": "Điều kéo lại",
+      "notesNotChecked": "Đúng nốt: lần này chưa kiểm tra",
+      "barsTitle": "Từng ô nhịp",
+      "barsHeld": "Giữ được {{count}} ô nhịp liền",
+      "barsHeld_other": "Giữ được {{count}} ô nhịp liền",
+      "barsMet": "Giữ được {{count}} trên {{of}} ô nhịp",
+      "barHeld": "Ô nhịp {{n}}: giữ được",
+      "barSlipped": "Ô nhịp {{n}}: bị lệch",
+      "barThin": "Ô nhịp {{n}}: quá ít nốt để đánh giá"
     },
     "edge": {
       "kick": "Tìm giới hạn",
@@ -233,22 +246,27 @@
       "offerTitle": "Tìm giới hạn từ đây",
       "offerBody": "Tăng dần từ {{bpm}} BPM khi bạn còn đạt mức, và giữ tempo sạch của bạn. Thêm {{minutes}} phút.",
       "start": "Tìm giới hạn",
-      "recap": "Giới hạn"
+      "recap": "Giới hạn",
+      "rungLabel": "{{bpm}} BPM: đạt {{met}}, trượt {{missed}}"
     },
     "coach": {
-      "passed": "Nghe được {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp liền ở {{bpm}} BPM.",
-      "passedExtras": "Nghe được {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp liền, có {{extras}} nốt thừa.",
+      "passed": "Nốt nào cũng vào, đều suốt {{bars}} ô nhịp liền ở {{bpm}} BPM.",
+      "passedExtras": "Đều suốt {{bars}} ô nhịp liền, có {{extras}} nốt thừa trên đường.",
       "heardNothing": "Tôi không nghe thấy gì.",
       "heardLittle": "Tôi nghe được {{heard}} trên {{expected}} nốt.",
       "tooShort": "Mới {{bars}} ô nhịp, quá ngắn để đánh giá. Cần cả lượt.",
       "ungraded": "Bài này không chấm điểm. Bạn tự đánh giá.",
       "below": {
-        "even": "Độ đều là {{value}}%. Nghe được {{heard}} trên {{expected}} nốt. Cùng nốt, cùng tempo.",
+        "even": "Độ đều {{value}}%, mức là {{bar}}%. Đủ nốt cả; vấn đề là khoảng cách giữa chúng. Cùng nốt, cùng tempo.",
         "heard": "Tôi nghe được {{heard}} trên {{expected}} nốt, mà thiếu nốt thì nhịp không thể đạt.",
         "extras": "{{extras}} nốt tôi không chờ đợi. Nếu dây không chơi đang ngân, hãy chặn chúng lại.",
         "accents": "{{value}}% số nhấn được đánh dấu vang to hơn các nốt xung quanh.",
-        "notes": "{{value}}% số nốt tôi nhận ra cao độ là đúng nốt đã viết. Cùng nốt, cùng tempo, và để ý phím đàn."
-      }
+        "notes": "{{value}}% số nốt tôi nhận ra cao độ là đúng nốt đã viết. Cùng nốt, cùng tempo, và để ý phím đàn.",
+        "evenSome": "Độ đều {{value}}%, mức là {{bar}}%, và {{missed}} nốt không kêu. Cùng nốt, cùng tempo, đủ từng nốt."
+      },
+      "passedSome": "Vào {{heard}} trên {{expected}} nốt, đều suốt {{bars}} ô nhịp liền ở {{bpm}} BPM.",
+      "passedTiming": "Cả {{heard}} nốt đều đúng lúc, {{bars}} ô nhịp liền. Lần này tôi chưa kiểm tra được cao độ.",
+      "passedTimingSome": "{{heard}} trên {{expected}} nốt đúng lúc, {{bars}} ô nhịp liền. Lần này tôi chưa kiểm tra được cao độ."
     },
     "noCatch": {
       "kick": "Lượt này không có điểm",
@@ -275,11 +293,11 @@
         "drill": "Bắt đầu tăng tốc"
       },
       "how": {
-        "warmUp": "Chơi theo tiếng click. Ở đây không chấm điểm gì, cứ thả lỏng.",
-        "yourTurn": "Chơi theo cách của bạn, cùng tiếng click. Ở đây không kiểm tra gì.",
-        "jam": "Chơi cùng ban nhạc. Ở đây không chấm điểm gì.",
-        "finisher": "Chơi trên nền ban nhạc, lặp lại. Ở đây không chấm điểm gì.",
-        "drill": "Tiếng click nhanh dần khi bạn chơi. Ở đây không chấm điểm gì."
+        "warmUp": "Chơi theo tiếng click, và thả lỏng.",
+        "yourTurn": "Chơi theo cách của bạn, theo tiếng click.",
+        "jam": "Chơi cùng ban nhạc.",
+        "finisher": "Chơi trên nền ban nhạc, lặp lại.",
+        "drill": "Tiếng click nhanh dần khi bạn chơi."
       },
       "skip": "Bỏ qua",
       "startKeys": "Enter, Space hoặc pedal để bắt đầu."
@@ -305,7 +323,20 @@
       "takesAt_other": "{{count}} lượt, lượt cuối ở {{bpm}} BPM",
       "noTakes": "Buổi tập này không có lượt nào.",
       "notGraded": "Phần khởi động và jam không được chấm.",
-      "nextSession": "Buổi tập tới, {{minutes}} phút"
+      "nextSession": "Buổi tập tới, {{minutes}} phút",
+      "headClean": "Tempo sạch lên {{bpm}} BPM ở {{title}}.",
+      "headPlayed": "{{count}} phút tập, và đều có tính.",
+      "headPlayed_other": "{{count}} phút tập, và đều có tính.",
+      "statMinutesLabel": "Đã tập",
+      "statMinutes": "{{count}} phút",
+      "statTakesLabel": "Lượt",
+      "statStreakLabel": "Chuỗi",
+      "statStreak": "{{count}} ngày",
+      "statStreak_other": "{{count}} ngày",
+      "fairAsk": "Điểm hôm nay có công bằng không?",
+      "backTo": "Về {{place}}",
+      "more": "Thêm 5 phút",
+      "keepGoing": "Tập tiếp: {{title}}"
     },
     "paths": {
       "title": "Lộ trình",
@@ -431,8 +462,8 @@
       "handOpen": "Tay: thế bấm mở, ngón trỏ trên phím 1.",
       "viewHint": "Đổi chế độ xem bất cứ lúc nào",
       "left": "còn lại",
-      "notGraded": "Không chấm điểm. Kết thúc sau {{time}}; rồi tập lại, hoặc tiếp.",
-      "notChecked": "Không kiểm tra. Kết thúc sau {{time}}; rồi tập lại, hoặc tiếp.",
+      "notGraded": "Kết thúc sau {{time}}; rồi chơi lại, hoặc tiếp.",
+      "notChecked": "Kết thúc sau {{time}}; rồi chơi lại, hoặc tiếp.",
       "pausedFoot": "Đã tạm dừng. Đồng hồ chờ bạn; chậm hơn hoặc nhanh hơn, rồi Tiếp tục.",
       "pausedFootNeck": "Đã tạm dừng. Mọi ô nhịp đều có trong chế độ Tab ({{key}}); chậm hơn hoặc nhanh hơn, rồi Tiếp tục.",
       "switchAny": "Đổi chế độ xem bất cứ lúc nào khi khởi động",
@@ -445,8 +476,8 @@
       "restart": "Bắt đầu lại",
       "back": "Lại: {{title}}",
       "ended": "Xong. Tập lại, hoặc sang phần tiếp theo.",
-      "endedFoot": "Không chấm điểm. Tập lại, hoặc đi tiếp khi bạn sẵn sàng.",
-      "again": "Lại",
+      "endedFoot": "Chơi lại, hoặc tiếp khi bạn sẵn sàng.",
+      "again": "Chơi lại",
       "beatOf": "Phách {{n}}/{{of}}"
     },
     "runway": {

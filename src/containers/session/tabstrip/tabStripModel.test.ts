@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import type { PathDoc } from "../../../paths/format";
+import type { PathDoc, PathTechnique } from "../../../paths/format";
 import { findExercise } from "../../../session/packs";
 import { buildTake } from "../../../session/take";
 import {
@@ -303,5 +303,41 @@ describe("the rhythm hint", () => {
     expect(beamsFor(240)).toBe(2);
     expect(beamsFor(160)).toBe(2);
     expect(beamsFor(120)).toBe(3);
+  });
+});
+
+describe("technique marks (card #40)", () => {
+  const BAR = 3840;
+  const n = (string: number, fret: number, tick: number, tech: PathTechnique[] = [], bend?: number) => ({
+    string,
+    fret,
+    tick,
+    dur: 240,
+    tech,
+    ...(bend !== undefined ? { bend } : {}),
+  });
+
+  it("puts h, p and t on the note they arrive at, from the note before on that string", () => {
+    const m = patternModel([n(1, 12, 0, ["tap"]), n(1, 5, 320, ["pull"]), n(1, 8, 640, ["hammer"])], BAR, 1);
+    expect(m.notes.map((x) => x.link?.mark)).toEqual(["t", "p", "h"]);
+    expect(m.notes[1].link?.fromTicks).toBe(320);
+    // The first note's tap comes from the last of the pass before, round the seam.
+    expect(m.notes[0].link?.fromTicks).toBe(BAR - 640);
+  });
+
+  it("moves a slide onto the note it lands on, up or down", () => {
+    const m = patternModel([n(3, 5, 0, ["slide"]), n(3, 7, 960), n(3, 7, 1920, ["slide"]), n(3, 5, 2880)], BAR, 1);
+    expect(m.notes.map((x) => x.link?.mark)).toEqual([undefined, "/", undefined, "\\"]);
+  });
+
+  it("keeps a bend's target fret and vibrato after the number", () => {
+    const m = patternModel([n(3, 7, 0, ["bend", "vibrato"], 2), n(2, 5, 960, ["vibrato"])], BAR, 1);
+    expect(m.notes[0].after).toEqual({ bendTo: 9, vibrato: true });
+    expect(m.notes[1].after).toEqual({ vibrato: true });
+  });
+
+  it("marks nothing on a plain note", () => {
+    const m = patternModel([n(1, 5, 0), n(1, 7, 960)], BAR, 1);
+    expect(m.notes.every((x) => !x.link && !x.after)).toBe(true);
   });
 });

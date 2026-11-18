@@ -148,7 +148,7 @@
       "edge": "Od tempa, do którego doszedłeś: {{bpm}} BPM. Idzie o szczebel w górę po każdym podejściu, które przeskoczy poprzeczkę.",
       "edgeCheck": "Żeby sprawdzić twoje czyste tempo. Ostatnio było to {{clean}} BPM.",
       "edgeFirst": "Żeby znaleźć twoje czyste tempo. Zaczyna od {{bpm}} BPM i rośnie, dopóki przeskakujesz poprzeczkę.",
-      "chosen": "Sam to wybrałeś, z: {{step}}.",
+      "chosen": "Twój wybór, z: {{step}}.",
       "focusTurn": "Dziś prowadzi {{path}}: jego kolej.",
       "focusTurnAway": "Dziś prowadzi {{path}}: nie grałeś go od {{days}} dni.",
       "keepWarm": "{{path}}, żeby nie wystygło: grane {{days}} dni temu.",
@@ -194,7 +194,7 @@
       "early": "za wcześnie",
       "stripLabel": "Ostatnie nuty na tle siatki",
       "countIn": "Odliczanie",
-      "honest": "Słyszę nuty i rytm. Góra-dół zależy od ciebie: nie słyszę kierunku kostki.",
+      "honest": "Słucham nut i ich timingu. Kierunku kostki nie słyszę, tego pilnujesz sam.",
       "noInput": "Jeszcze nie słyszę twojej gitary. Do oceny potrzebny jest mikrofon albo wejście bezpośrednie.",
       "checkSound": "Sprawdź mój dźwięk",
       "engineTrouble": "Silnik dźwięku nie przyjął tego ćwiczenia. Wyjdź i zacznij od nowa.",
@@ -206,23 +206,38 @@
       "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go.",
       "skip": "Pomiń to",
       "skipped": "Pominięte",
-      "honestTiming": "Słyszę twoje tempo, nie to, które dźwięki. Góra-dół zależy od ciebie: nie słyszę kierunku kostki."
+      "honestTiming": "Słucham twojego timingu, nie wysokości dźwięków. Kierunku kostki nie słyszę, tego pilnujesz sam.",
+      "goAgainUp": "Jeszcze raz, w górę do {{bpm}} BPM",
+      "slowerFloor": "To już najwolniejsze tempo tego ćwiczenia",
+      "fasterCeiling": "To już najszybsze tempo tego ćwiczenia",
+      "tempoLocked": "Test gra się w tempie zaliczenia, więc się nie zmienia"
     },
     "result": {
       "kick": "Podejście {{take}} · {{title}} · {{bpm}} BPM · takty: {{bars}}",
       "barMet": "Poprzeczka przeskoczona",
-      "barIs": "Poprzeczka to {{bar}}%",
-      "barIsCount": "Poprzeczka to {{bar}}",
       "cleanFirst": "Czyste tempo: {{bpm}} BPM.",
       "cleanMoved": "Czyste tempo: z {{from}} na {{bpm}} BPM.",
-      "unmeasuredNotes": "Sprawdziłem rytm. Nie słyszałem nut dość wyraźnie, żeby powiedzieć, czy były właściwe, więc tym razem nie było to oceniane.",
-      "againSame": "Jeszcze raz, {{bpm}} BPM",
       "moveOn": "Idź dalej",
       "fairAsk": "Czy ta ocena była uczciwa?",
       "fairYes": "Tak",
       "fairNo": "Nie",
       "fairThanksYes": "Dzięki: zapisano jako uczciwą. Stuknij Nie, aby zmienić.",
-      "fairThanksNo": "Dzięki: zapisano jako nieuczciwą. Stuknij Tak, aby zmienić."
+      "fairThanksNo": "Dzięki: zapisano jako nieuczciwą. Stuknij Tak, aby zmienić.",
+      "barChip": "Poprzeczka {{bar}}%",
+      "barChipCount": "Poprzeczka: najwyżej {{bar}}",
+      "barMissed": "Poprzeczka nie przeskoczona",
+      "decidedPass": "Najbliżej poprzeczki",
+      "decidedMiss": "Co zatrzymało",
+      "notesNotChecked": "Właściwe nuty: tym razem niesprawdzone",
+      "barsTitle": "Takt po takcie",
+      "barsHeld": "{{count}} takt z rzędu utrzymany",
+      "barsHeld_few": "{{count}} takty z rzędu utrzymane",
+      "barsHeld_many": "{{count}} taktów z rzędu utrzymanych",
+      "barsHeld_other": "{{count}} taktu z rzędu utrzymanego",
+      "barsMet": "Utrzymane takty: {{count}} z {{of}}",
+      "barHeld": "Takt {{n}}: utrzymany",
+      "barSlipped": "Takt {{n}}: rozjechał się",
+      "barThin": "Takt {{n}}: za mało nut, by ocenić"
     },
     "edge": {
       "kick": "Znajdź mój limit",
@@ -235,22 +250,27 @@
       "offerTitle": "Znajdź mój limit od tego miejsca",
       "offerBody": "Idzie w górę od {{bpm}} BPM, dopóki przeskakujesz poprzeczkę, i zapisuje twoje czyste tempo. Dodaje {{minutes}} min.",
       "start": "Znajdź mój limit",
-      "recap": "Limit"
+      "recap": "Limit",
+      "rungLabel": "{{bpm}} BPM: zaliczone {{met}}, niezaliczone {{missed}}"
     },
     "coach": {
-      "passed": "Usłyszane nuty: {{heard}} z {{expected}}, równo w {{bars}} kolejnych taktach przy {{bpm}} BPM.",
-      "passedExtras": "Usłyszane nuty: {{heard}} z {{expected}}, równo w {{bars}} kolejnych taktach, dodatkowe: {{extras}}.",
+      "passed": "Każda nuta na miejscu, równo przez {{bars}} taktów z rzędu przy {{bpm}} BPM.",
+      "passedExtras": "Równo przez {{bars}} taktów z rzędu, po drodze {{extras}} dodatkowych nut.",
       "heardNothing": "Nic nie usłyszałem.",
       "heardLittle": "Usłyszałem {{heard}} z {{expected}} nut.",
       "tooShort": "Takty: {{bars}}. Za krótko, żeby ocenić. Potrzebne jest całe podejście.",
       "ungraded": "To nie jest oceniane. Ty tu jesteś sędzią.",
       "below": {
-        "even": "Równość wyniosła {{value}}%. Usłyszane nuty: {{heard}} z {{expected}}. Te same nuty, to samo tempo.",
+        "even": "Równość {{value}}% przy poprzeczce {{bar}}%. Wszystkie nuty były; chodzi o odstępy między nimi. Te same nuty, to samo tempo.",
         "heard": "Usłyszałem {{heard}} z {{expected}} nut, a bez nich rytm nie może zaliczyć.",
         "extras": "Nuty, których się nie spodziewałem: {{extras}}. Wycisz wolne struny, jeśli dzwonią.",
         "accents": "{{value}}% zaznaczonych akcentów zabrzmiało głośniej niż nuty wokół nich.",
-        "notes": "{{value}}% nut, których wysokość rozpoznałem, było zapisanymi. Te same nuty, to samo tempo, i uważaj na progi."
-      }
+        "notes": "{{value}}% nut, których wysokość rozpoznałem, było zapisanymi. Te same nuty, to samo tempo, i uważaj na progi.",
+        "evenSome": "Równość {{value}}% przy poprzeczce {{bar}}%, a {{missed}} nut nie zabrzmiało. Te same nuty, to samo tempo, każda z nich."
+      },
+      "passedSome": "Na miejscu {{heard}} z {{expected}} nut, równo przez {{bars}} taktów z rzędu przy {{bpm}} BPM.",
+      "passedTiming": "Wszystkie {{heard}} nuty w czasie, {{bars}} taktów z rzędu. Wysokości dźwięków tym razem nie mogłem sprawdzić.",
+      "passedTimingSome": "{{heard}} z {{expected}} nut w czasie, {{bars}} taktów z rzędu. Wysokości dźwięków tym razem nie mogłem sprawdzić."
     },
     "noCatch": {
       "kick": "Brak oceny tego podejścia",
@@ -277,11 +297,11 @@
         "drill": "Zacznij rampę"
       },
       "how": {
-        "warmUp": "Graj z klikiem. Nic tu nie jest oceniane, więc się rozluźnij.",
-        "yourTurn": "Graj po swojemu, z klikiem. Nic tu nie jest sprawdzane.",
-        "jam": "Graj z zespołem. Nic tu nie jest oceniane.",
-        "finisher": "Graj z zespołem, w pętli. Nic tu nie jest oceniane.",
-        "drill": "Klik przyspiesza w trakcie gry. Nic tu nie jest oceniane."
+        "warmUp": "Graj z klikiem i się rozluźnij.",
+        "yourTurn": "Graj po swojemu, z klikiem.",
+        "jam": "Graj z zespołem.",
+        "finisher": "Graj to na tle zespołu, w pętli.",
+        "drill": "Klik przyspiesza w trakcie."
       },
       "skip": "Pomiń",
       "startKeys": "Enter, spacja lub pedał to uruchamia."
@@ -313,7 +333,24 @@
       "takesAt_other": "{{count}} podejścia, ostatnie przy {{bpm}} BPM",
       "noTakes": "Żadnych podejść w tej sesji.",
       "notGraded": "Rozgrzewka i jam nie były oceniane.",
-      "nextSession": "Następna sesja, {{minutes}} min"
+      "nextSession": "Następna sesja, {{minutes}} min",
+      "headClean": "Czyste tempo w górę: {{bpm}} BPM w {{title}}.",
+      "headPlayed": "{{count}} minuta grania i to się liczy.",
+      "headPlayed_few": "{{count}} minuty grania i to się liczy.",
+      "headPlayed_many": "{{count}} minut grania i to się liczy.",
+      "headPlayed_other": "{{count}} minuty grania i to się liczy.",
+      "statMinutesLabel": "Granie",
+      "statMinutes": "{{count}} min",
+      "statTakesLabel": "Podejścia",
+      "statStreakLabel": "Seria",
+      "statStreak": "{{count}} dzień",
+      "statStreak_few": "{{count}} dni",
+      "statStreak_many": "{{count}} dni",
+      "statStreak_other": "{{count}} dnia",
+      "fairAsk": "Czy dzisiejsze oceny były uczciwe?",
+      "backTo": "Wróć: {{place}}",
+      "more": "Jeszcze 5 minut",
+      "keepGoing": "Graj dalej: {{title}}"
     },
     "paths": {
       "title": "Ścieżki",
@@ -451,8 +488,8 @@
       "handOpen": "Ręka: pozycja otwarta, palec wskazujący nad progiem 1.",
       "viewHint": "Zmieniaj widok, kiedy chcesz",
       "left": "zostało",
-      "notGraded": "Bez oceny. Koniec za {{time}}; potem jeszcze raz albo dalej.",
-      "notChecked": "Bez sprawdzania. Koniec za {{time}}; potem jeszcze raz albo dalej.",
+      "notGraded": "Koniec za {{time}}; potem jeszcze raz albo dalej.",
+      "notChecked": "Koniec za {{time}}; potem jeszcze raz albo dalej.",
       "pausedFoot": "Pauza. Zegar na ciebie czeka; wolniej lub szybciej, potem Wznów.",
       "pausedFootNeck": "Pauza. Wszystkie takty są w widoku Tab ({{key}}); wolniej lub szybciej, potem Wznów.",
       "switchAny": "Zmieniaj widok kiedy chcesz podczas rozgrzewki",
@@ -465,7 +502,7 @@
       "restart": "Od nowa",
       "back": "Jeszcze raz: {{title}}",
       "ended": "Gotowe. Jeszcze raz albo dalej.",
-      "endedFoot": "Bez oceny. Powtórz albo idź dalej, gdy będziesz gotów.",
+      "endedFoot": "Jeszcze raz albo dalej, kiedy będziesz gotów.",
       "again": "Jeszcze raz",
       "beatOf": "Miara {{n}} z {{of}}"
     },

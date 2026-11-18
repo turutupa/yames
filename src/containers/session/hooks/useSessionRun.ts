@@ -324,6 +324,8 @@ export function useSessionRun(input: SessionRunInput) {
   }, []);
 
   const snapshot = useRef<EngineSnapshot | null>(null);
+  /** What the last teardown handed back: a Session begun from the recap keeps it. */
+  const restoredTo = useRef<EngineSnapshot | null>(null);
   const cardWasOpen = useRef(false);
   /**
    * The coach session this Session started, and the end of it while that is
@@ -870,6 +872,7 @@ export function useSessionRun(input: SessionRunInput) {
     prepareId.current += 1;
     const saved = snapshot.current;
     snapshot.current = null;
+    if (saved) restoredTo.current = saved;
     const entered = lastEntered.current;
     lastEntered.current = null;
     setPreparedTake(null);
@@ -920,7 +923,7 @@ export function useSessionRun(input: SessionRunInput) {
 
   // --- what the player can do ----------------------------------------------
   const begin = useCallback(
-    (next: SessionPlan) => {
+    (next: SessionPlan, options: { untimed?: boolean } = {}) => {
       if (next.steps.length === 0) return;
       const { state, coach } = latest.current;
       snapshot.current = {
@@ -949,7 +952,7 @@ export function useSessionRun(input: SessionRunInput) {
           void savePathState(row).catch(() => {});
         }
       }
-      dispatch({ type: "start", plan: next, now });
+      dispatch({ type: "start", plan: next, now, untimed: options.untimed === true });
       origin.current = sessionOrigin(latest.current.view);
       setView("session");
       if (!theirs) {
@@ -986,7 +989,7 @@ export function useSessionRun(input: SessionRunInput) {
             why: { code: "chosen", values: { step: pathStep.title } },
           },
         ],
-      });
+      }, { untimed: true });
     },
     [begin, progress],
   );
@@ -1094,7 +1097,7 @@ export function useSessionRun(input: SessionRunInput) {
       if (steps.length === 0) return;
       const total = steps.length * TEST_OUT_MINUTES;
       const minutes = PLAN_MINUTES.find((m) => m >= total) ?? 20;
-      begin({ minutes, mood: "returning", daysAway: null, steps });
+      begin({ minutes, mood: "returning", daysAway: null, steps }, { untimed: true });
     },
     [begin, progress],
   );
@@ -1141,12 +1144,35 @@ export function useSessionRun(input: SessionRunInput) {
     void enqueue(() => setPlaying(false));
   }, [enqueue]);
 
+  /**
+   * Go again starts the count-in by itself (UX audit SES-4): one press, not
+   * one to get back to the ready screen and another to start. The Take still
+   * waits until its song is on the engine and the input is open, so this is
+   * a request the next ready state answers, not a start on the old Take.
+   */
+  const autoStart = useRef(false);
+  useEffect(() => {
+    if (run.phase !== "ready") {
+      if (run.phase !== "result") autoStart.current = false;
+      return;
+    }
+    if (!autoStart.current || engineTrouble) {
+      autoStart.current = false;
+      return;
+    }
+    if (prepared && listening) {
+      autoStart.current = false;
+      playTake();
+    }
+  }, [run.phase, prepared, listening, engineTrouble, playTake]);
+
   /** The one big next action, from the button, the keyboard or the pedal. */
   const go = useCallback(() => {
     if (big.kind === "playTake") return playTake();
     if (big.kind === "endTake") return endTake();
     const event = eventForBigAction(big, Date.now());
     if (!event) return;
+    if (event.type === "again") autoStart.current = true;
     dispatch(event);
     if (event.type === "close") setView(origin.current);
   }, [big, playTake, endTake, setView]);
@@ -1192,7 +1218,10 @@ export function useSessionRun(input: SessionRunInput) {
   const restart = useCallback(() => {
     const state = runRef.current;
     if (state.phase === "timed") dispatch({ type: "restart", now: Date.now() });
-    else if (state.phase === "result") dispatch({ type: "again", now: Date.now() });
+    else if (state.phase === "result") {
+      autoStart.current = true;
+      dispatch({ type: "again", now: Date.now() });
+    }
   }, []);
 
   /** Back to the warm-up (or the timed step) just before this one, before anything is played here. */
@@ -1211,10 +1240,49 @@ export function useSessionRun(input: SessionRunInput) {
     go();
   }, [go, togglePause]);
 
-  /** Go again at this tempo, whatever the big button is offering. */
+  /** Go again at this tempo, whatever the big button is offering: straight into the count-in. */
   const again = useCallback(() => {
+    autoStart.current = true;
     dispatch({ type: "again", now: Date.now() });
   }, []);
+
+  /**
+   * The recap's ways on (UX audit SES-10). "5 more minutes" plans five more
+   * minutes the way Today would; from a Step's page it is that Step's
+   * Exercise again, still with no countdown. Either way the Session goes back
+   * where this one came from when it ends.
+   */
+  const moreMinutes = useCallback(() => {
+    const state = runRef.current;
+    if (state.phase !== "recap") return;
+    const from = origin.current;
+    const lastExercise = [...(state.plan?.steps ?? [])].reverse().find((s) => s.kind === "exercise");
+    const next: SessionPlan | null = state.untimed
+      ? lastExercise
+        ? {
+            minutes: 5,
+            mood: "returning",
+            daysAway: null,
+            steps: [{ ...lastExercise, id: `${lastExercise.id}-more`, bpm: state.outcomes[state.outcomes.length - 1]?.bpm ?? lastExercise.bpm }],
+          }
+        : null
+      : planSession({ minutes: 5, now: Date.now(), paths: myPaths, progress });
+    if (!next || next.steps.length === 0) return;
+    dispatch({ type: "close" });
+    endedRef.current = false;
+    begin(next, { untimed: state.untimed });
+    origin.current = from;
+    if (restoredTo.current) snapshot.current = restoredTo.current;
+  }, [begin, myPaths, progress]);
+
+  /** Leave the recap for a screen of the player's choosing: where it began, or Progress. */
+  const closeTo = useCallback(
+    (to: MainView) => {
+      dispatch({ type: "close" });
+      setView(to);
+    },
+    [setView],
+  );
 
   /**
    * The next step: Skip this, or N. A Session started with Play this on a
@@ -1274,7 +1342,7 @@ export function useSessionRun(input: SessionRunInput) {
     (path: PathDoc, pathStep: Step, exercise: Exercise) => {
       const step = edgeStep({ path, step: pathStep, exercise }, progress);
       // Planned as the shortest Session; the step keeps its own minutes.
-      begin({ minutes: 5, mood: "returning", daysAway: null, steps: [step] });
+      begin({ minutes: 5, mood: "returning", daysAway: null, steps: [step] }, { untimed: true });
     },
     [begin, progress],
   );
@@ -1350,6 +1418,8 @@ export function useSessionRun(input: SessionRunInput) {
     leaveAsked,
     /** Placement's verdict, on the result that ended its climb. */
     placed,
+    /** Where this Session goes back to when it ends. */
+    origin: origin.current,
     actions: {
       startToday,
       playExercise,
@@ -1360,6 +1430,8 @@ export function useSessionRun(input: SessionRunInput) {
       slower,
       faster,
       again,
+      moreMinutes,
+      closeTo,
       next,
       togglePause,
       restart,

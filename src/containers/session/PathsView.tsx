@@ -491,7 +491,7 @@ function TabPreview({ exercise }: { exercise: Exercise }) {
     () =>
       exercise.notes
         .filter((n) => n.tick < bars * barTicks && n.string >= 1 && n.string <= 6)
-        .map((n) => ({ string: n.string, fret: n.fret, tick: n.tick, dur: n.dur })),
+        .map((n) => ({ string: n.string, fret: n.fret, tick: n.tick, dur: n.dur, tech: n.tech, bend: n.bend })),
     [exercise.notes, bars, barTicks],
   );
   if (notes.length === 0) return null;

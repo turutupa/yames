@@ -180,6 +180,9 @@ import {
 } from "../../hotkeys";
 import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
+// Last: the five tools in the app's design language, over every tool's own
+// stylesheet (UX audit TOOL-1). Every rule is scoped to a tool's view.
+import "../../styles/tools-chrome.css";
 
 /**
  * Action ids that only mean something on one tab.
@@ -2468,6 +2471,11 @@ export function MainWindow() {
             pauseKey={platformKey(keyBindings["session-pause"] || "")}
             restartKey={platformKey(keyBindings["session-restart"] || "")}
             skipKey={platformKey(keyBindings["session-next"] || "")}
+            pedalMapped={
+              !!keyBindings["session-pedal"] ||
+              !!footBindings["session-pedal"] ||
+              midi.bindings.some((b) => b.action === "session-pedal")
+            }
             onCheckSound={openAudioSettings}
           />
           </>

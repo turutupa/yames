@@ -146,7 +146,7 @@
       "edge": "Vanaf het tempo dat je haalde, {{bpm}} BPM. Na elke take die de lat haalt, gaat het een trede omhoog.",
       "edgeCheck": "Om je schone tempo te controleren. Vorige keer was het {{clean}} BPM.",
       "edgeFirst": "Om je schone tempo te vinden. Begint op {{bpm}} BPM en gaat omhoog zolang je de lat haalt.",
-      "chosen": "Deze heb je zelf gekozen, uit {{step}}.",
+      "chosen": "Jouw keuze, uit {{step}}.",
       "focusTurn": "{{path}} gaat vandaag voorop: het is aan de beurt.",
       "focusTurnAway": "{{path}} gaat vandaag voorop: je hebt het {{days}} dagen niet gespeeld.",
       "keepWarm": "{{path}}, warm gehouden: {{days}} dagen geleden gespeeld.",
@@ -192,7 +192,7 @@
       "early": "vroeg",
       "stripLabel": "De laatste noten, tegen het raster",
       "countIn": "Aftellen",
-      "honest": "Ik hoor noten en timing. Neer-op is aan jou: de aanslagrichting kan ik niet horen.",
+      "honest": "Ik luister naar de noten en hun timing. De aanslagrichting hoor ik niet, die let je zelf op.",
       "noInput": "Ik hoor je gitaar nog niet. Voor de beoordeling is een microfoon of directe ingang nodig.",
       "checkSound": "Mijn geluid controleren",
       "engineTrouble": "De geluidsengine accepteerde deze oefening niet. Stop en begin opnieuw.",
@@ -204,23 +204,36 @@
       "bandMicHint": "Met een microfoon zou ik de band als jouw noten horen, dus hij begint uit. Met een koptelefoon op: zet hem hoger.",
       "skip": "Deze overslaan",
       "skipped": "Overgeslagen",
-      "honestTiming": "Ik hoor je timing, niet welke noten. Op-neer is aan jou: ik hoor de aanslagrichting niet."
+      "honestTiming": "Ik luister naar je timing, niet naar de toonhoogtes. De aanslagrichting hoor ik niet, die let je zelf op.",
+      "goAgainUp": "Nog een keer, omhoog naar {{bpm}} BPM",
+      "slowerFloor": "Al het langzaamste tempo van deze oefening",
+      "fasterCeiling": "Al het snelste tempo van deze oefening",
+      "tempoLocked": "Een test speel je op het slagingstempo, dus dat blijft vast"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} maten",
       "barMet": "Lat gehaald",
-      "barIs": "De lat ligt op {{bar}}%",
-      "barIsCount": "De lat ligt op {{bar}}",
       "cleanFirst": "Schoon tempo: {{bpm}} BPM.",
       "cleanMoved": "Schoon tempo: van {{from}} naar {{bpm}} BPM.",
-      "unmeasuredNotes": "Ik heb de timing gecontroleerd. Ik hoorde de noten niet duidelijk genoeg om te zeggen of het de juiste waren, dus dat is deze keer niet beoordeeld.",
-      "againSame": "Nog een keer, {{bpm}} BPM",
       "moveOn": "Verder",
       "fairAsk": "Was dit oordeel eerlijk?",
       "fairYes": "Ja",
       "fairNo": "Nee",
       "fairThanksYes": "Bedankt: bewaard als eerlijk. Tik op Nee om het te wijzigen.",
-      "fairThanksNo": "Bedankt: bewaard als niet eerlijk. Tik op Ja om het te wijzigen."
+      "fairThanksNo": "Bedankt: bewaard als niet eerlijk. Tik op Ja om het te wijzigen.",
+      "barChip": "Lat {{bar}}%",
+      "barChipCount": "Lat: hoogstens {{bar}}",
+      "barMissed": "Lat niet gehaald",
+      "decidedPass": "Het dichtst bij de lat",
+      "decidedMiss": "Waar het op stukliep",
+      "notesNotChecked": "Juiste noten: deze keer niet gecontroleerd",
+      "barsTitle": "Maat voor maat",
+      "barsHeld": "{{count}} maat achter elkaar gehouden",
+      "barsHeld_other": "{{count}} maten achter elkaar gehouden",
+      "barsMet": "{{count}} van de {{of}} maten gehouden",
+      "barHeld": "Maat {{n}}: gehouden",
+      "barSlipped": "Maat {{n}}: gegleden",
+      "barThin": "Maat {{n}}: te weinig noten om te beoordelen"
     },
     "edge": {
       "kick": "Mijn grens vinden",
@@ -233,22 +246,27 @@
       "offerTitle": "Vanaf hier mijn grens vinden",
       "offerBody": "Gaat omhoog vanaf {{bpm}} BPM zolang je de lat haalt, en bewaart je schone tempo. Kost {{minutes}} minuten extra.",
       "start": "Mijn grens vinden",
-      "recap": "Grens"
+      "recap": "Grens",
+      "rungLabel": "{{bpm}} BPM: {{met}} gehaald, {{missed}} gemist"
     },
     "coach": {
-      "passed": "{{heard}} van de {{expected}} noten gehoord, gelijkmatig over {{bars}} maten achter elkaar op {{bpm}} BPM.",
-      "passedExtras": "{{heard}} van de {{expected}} noten gehoord, gelijkmatig over {{bars}} maten achter elkaar, met {{extras}} extra.",
+      "passed": "Elke noot zat erin, gelijkmatig over {{bars}} maten achter elkaar op {{bpm}} BPM.",
+      "passedExtras": "Gelijkmatig over {{bars}} maten achter elkaar, met onderweg {{extras}} extra noten.",
       "heardNothing": "Ik heb niets gehoord.",
       "heardLittle": "Ik hoorde {{heard}} van de {{expected}} noten.",
       "tooShort": "Dat waren {{bars}} maten, te kort om te beoordelen. Er is een hele take voor nodig.",
       "ungraded": "Deze wordt niet beoordeeld. Jij bent de jury.",
       "below": {
-        "even": "De gelijkmatigheid was {{value}}%. {{heard}} van de {{expected}} noten gehoord. Zelfde noten, zelfde tempo.",
+        "even": "{{value}}% gelijkmatig bij een lat van {{bar}}%. Alle noten waren er; het zit in de ruimte ertussen. Zelfde noten, zelfde tempo.",
         "heard": "Ik hoorde {{heard}} van de {{expected}} noten, en zonder die noten kan de timing niet slagen.",
         "extras": "{{extras}} noten die ik niet verwachtte. Demp de vrije snaren als ze meeklinken.",
         "accents": "{{value}}% van de gemarkeerde accenten klonk harder dan de noten eromheen.",
-        "notes": "{{value}}% van de noten waarvan ik de toonhoogte kon horen waren de geschreven. Zelfde noten, zelfde tempo, en let op de frets."
-      }
+        "notes": "{{value}}% van de noten waarvan ik de toonhoogte kon horen waren de geschreven. Zelfde noten, zelfde tempo, en let op de frets.",
+        "evenSome": "{{value}}% gelijkmatig bij een lat van {{bar}}%, en {{missed}} noten klonken niet. Zelfde noten, zelfde tempo, allemaal."
+      },
+      "passedSome": "{{heard}} van de {{expected}} noten zaten erin, gelijkmatig over {{bars}} maten achter elkaar op {{bpm}} BPM.",
+      "passedTiming": "Alle {{heard}} noten op tijd, {{bars}} maten achter elkaar. De toonhoogtes kon ik deze keer niet controleren.",
+      "passedTimingSome": "{{heard}} van de {{expected}} noten op tijd, {{bars}} maten achter elkaar. De toonhoogtes kon ik deze keer niet controleren."
     },
     "noCatch": {
       "kick": "Geen beoordeling voor deze take",
@@ -275,11 +293,11 @@
         "drill": "Tempo-oploop starten"
       },
       "how": {
-        "warmUp": "Speel het mee met de klik. Hier wordt niets beoordeeld, dus speel los.",
-        "yourTurn": "Speel het op jouw manier, met de klik. Hier wordt niets gecontroleerd.",
-        "jam": "Speel mee met de band. Hier wordt niets beoordeeld.",
-        "finisher": "Speel het over de band, in een lus. Hier wordt niets beoordeeld.",
-        "drill": "De klik versnelt terwijl je speelt. Hier wordt niets beoordeeld."
+        "warmUp": "Speel het mee met de klik, en speel los.",
+        "yourTurn": "Speel het op jouw manier, mee met de klik.",
+        "jam": "Speel mee met de band.",
+        "finisher": "Speel het over de band, in een loop.",
+        "drill": "De klik versnelt terwijl je speelt."
       },
       "skip": "Overslaan",
       "startKeys": "Enter, spatie of het pedaal start het."
@@ -305,7 +323,20 @@
       "takesAt_other": "{{count}} takes, laatste op {{bpm}} BPM",
       "noTakes": "Geen takes in deze sessie.",
       "notGraded": "De warming-up en de jam werden niet beoordeeld.",
-      "nextSession": "Volgende sessie, {{minutes}} min"
+      "nextSession": "Volgende sessie, {{minutes}} min",
+      "headClean": "Schoon tempo omhoog naar {{bpm}} BPM op {{title}}.",
+      "headPlayed": "{{count}} minuut gespeeld, en die telt.",
+      "headPlayed_other": "{{count}} minuten gespeeld, en die tellen.",
+      "statMinutesLabel": "Gespeeld",
+      "statMinutes": "{{count}} min",
+      "statTakesLabel": "Takes",
+      "statStreakLabel": "Reeks",
+      "statStreak": "{{count}} dag",
+      "statStreak_other": "{{count}} dagen",
+      "fairAsk": "Voelden de beoordelingen van vandaag eerlijk?",
+      "backTo": "Terug naar {{place}}",
+      "more": "Nog 5 minuten",
+      "keepGoing": "Ga door: {{title}}"
     },
     "paths": {
       "title": "Leerpaden",
@@ -431,8 +462,8 @@
       "handOpen": "Hand: open positie, wijsvinger boven fret 1.",
       "viewHint": "Wissel wanneer je wilt van weergave",
       "left": "over",
-      "notGraded": "Geen cijfer. Klaar over {{time}}; dan nog eens, of verder.",
-      "notChecked": "Niet gecontroleerd. Klaar over {{time}}; dan nog eens, of verder.",
+      "notGraded": "Klaar over {{time}}; dan nog een keer, of verder.",
+      "notChecked": "Klaar over {{time}}; dan nog een keer, of verder.",
       "pausedFoot": "Gepauzeerd. De klok wacht op je; langzamer of sneller, dan Hervatten.",
       "pausedFootNeck": "Gepauzeerd. Elke maat staat in de Tab-weergave ({{key}}); langzamer of sneller, dan Hervatten.",
       "switchAny": "Wissel van weergave wanneer je wilt tijdens de warming-up",
@@ -445,8 +476,8 @@
       "restart": "Opnieuw",
       "back": "Nog eens: {{title}}",
       "ended": "Klaar. Nog eens, of door naar de volgende.",
-      "endedFoot": "Geen cijfer. Nog eens, of ga verder als je klaar bent.",
-      "again": "Nog eens",
+      "endedFoot": "Nog een keer, of verder als je zover bent.",
+      "again": "Nog een keer",
       "beatOf": "Tel {{n}} van {{of}}"
     },
     "runway": {

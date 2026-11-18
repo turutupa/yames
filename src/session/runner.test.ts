@@ -238,7 +238,7 @@ describe("the one big next action", () => {
 
   it("bar met under the pass rung: up a rung", () => {
     const s = afterTake(atFocus(), "passed");
-    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: 70 });
+    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: 70, up: true });
   });
 
   it("Exercise passed: straight on, whatever time is left", () => {
@@ -274,13 +274,15 @@ describe("tempo between Takes", () => {
     expect(s).toMatchObject({ phase: "ready", bpm: 70 });
     s = run(s, { type: "slower", exercise: EX, now: NOW });
     expect(s.bpm).toBe(60);
-    expect(tempoNudges(s, EX)).toEqual({ slower: false, faster: true });
+    expect(tempoNudges(s, EX)).toMatchObject({ slower: false, faster: true });
+    // At the floor, Slower says why it is off (UX audit SES-13).
+    expect(tempoNudges(s, EX)).toMatchObject({ slowerWhy: "floor", fasterWhy: null });
     expect(run(s, { type: "slower", exercise: EX, now: NOW }).bpm).toBe(60);
   });
 
   it("cannot change while a Take runs", () => {
     const s = run(atFocus(), { type: "takeStarted", now: NOW });
-    expect(tempoNudges(s, EX)).toEqual({ slower: false, faster: false });
+    expect(tempoNudges(s, EX)).toEqual({ slower: false, faster: false, slowerWhy: null, fasterWhy: null });
     expect(run(s, { type: "faster", exercise: EX, now: NOW }).bpm).toBe(s.bpm);
   });
 });
@@ -376,7 +378,7 @@ describe("Find my edge", () => {
 
   it("climbs a rung after every pass, past the Exercise's own pass rung", () => {
     let s = edgeTake(edgeRun(), "passed");
-    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: rungs[1] });
+    expect(bigAction(s, EX)).toEqual({ kind: "again", bpm: rungs[1], up: true });
     s = edgeTake(goBig(s), "passed");
     expect(s.bpm).toBe(rungs[1]);
     expect(edgeOf(s, EX).reached).toBe(rungs[1]);
@@ -490,5 +492,24 @@ describe("a timed step: pause, resume, restart, tempo, back (owner, beta 5)", ()
     expect(s.skipped).toEqual([plan().steps[0].id]);
     const t = run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "next", now: NOW });
     expect(t.skipped).toEqual([plan().steps[0].id]);
+  });
+});
+
+describe("a Session started from a Step has no countdown (UX audit SES-11)", () => {
+  it("still offers Go again after the step's minutes are gone", () => {
+    const step = plan(5).steps.find((x) => x.kind === "exercise")!;
+    const one: SessionPlan = { minutes: 5, mood: "returning", daysAway: null, steps: [{ ...step, minutes: 5 }] };
+    let s = runReducer(IDLE, { type: "start", plan: one, now: NOW, untimed: true });
+    expect(s.untimed).toBe(true);
+    s = run(
+      s,
+      { type: "takeStarted", now: NOW },
+      { type: "takeStopped", now: NOW + MIN },
+      { type: "takeResult", outcome: { ...outcome("belowBar"), stepId: step.id }, now: NOW + 30 * MIN },
+    );
+    expect(bigAction(s, EX).kind).toBe("again");
+    // The same Session with a countdown moves on once its time is up.
+    const timed = { ...s, untimed: false };
+    expect(bigAction(timed, EX).kind).not.toBe("again");
   });
 });
