@@ -52,7 +52,6 @@ import { factsOf } from "../../session/progress";
 import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
-import { IS_MOBILE } from "../../platform";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -222,7 +221,18 @@ function TakeScreen({
   // Said once a Session, before its first Take (UX audit SES-14), and not at
   // all where the coach's own line already says it (acceptance P1-4).
   const honest = run.outcomes.length === 0 ? readyHonestLineKey(exercise) : null;
-  const how = howText(exercise.howTo[0], exercise.position, [bar ? lineText(t, bar) : null, honest ? t(honest) : null]);
+  // The ready screen says three things (acceptance pass 2, P1-4): where the
+  // hand goes, what is graded, and a folded "how". The bar IS what is graded,
+  // so it is the coach's line; the Exercise's own tip and caveat go in the
+  // fold, and any sentence naming the fret or the tempo the screen already
+  // shows is left out of it.
+  const gradedLine = bar ? lineText(t, bar) : exercise.coachLine;
+  const how = howText(
+    exercise.howTo[0],
+    exercise.position,
+    [bar ? exercise.coachLine : null, honest ? t(honest) : null],
+    [exercise.tempo.passAtBpm, exercise.tempo.rungs[0]?.bpm, run.bpm],
+  );
 
   return (
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
@@ -272,9 +282,11 @@ function TakeScreen({
             ? live.countingIn
               ? t("session.run.countIn")
               : null
-            : // What the Exercise is, not why the planner picked it: that is
-              // Today's line, and in here it read as a log (UX audit TODAY-8).
-              exercise.purpose
+            : // Nothing on the ready screen's head: what the Exercise is was a
+              // fourth block of text over the hand, coach and how lines, and a
+              // ragged right-aligned one (acceptance pass 2, P1-4 and P2-3).
+              // The Step page says it.
+              null
         }
         statusTone={running ? "live" : "quiet"}
       />
@@ -301,12 +313,13 @@ function TakeScreen({
       <div className="session-mechlow" data-single="">
         <div className="session-col">
           {!running && <HandLine position={exercise.position} />}
-          <CoachLine>{exercise.coachLine}</CoachLine>
-          {/* One hand line, one coach line, one "how": the how-to, the bar and
-              the pick caveat as a single paragraph, with nothing the two
-              lines above it already said (acceptance P1-4). */}
+          {/* Ready: what is graded. Running: the Exercise's own tip. */}
+          <CoachLine>{running ? exercise.coachLine : gradedLine}</CoachLine>
+          {/* One hand line, one coach line, one "how", folded: the how-to, the
+              tip and the pick caveat, with nothing the lines above or the
+              picture already said (acceptance P1-4). */}
           {!running && how && (
-            <HowLines collapsed={IS_MOBILE}>
+            <HowLines>
               <div className="session-why session-how-text" data-testid="session-how-text">{how}</div>
             </HowLines>
           )}
@@ -366,22 +379,26 @@ export function howText(
   first: string | undefined,
   position: { fret: number } | undefined,
   more: readonly (string | null)[],
+  /** Numbers already on screen (the tempo, the bar's): a sentence naming one goes. */
+  shown: readonly (number | null | undefined)[] = [],
 ): string {
   const fret = position && position.fret > 0 ? position.fret : null;
   const sentences = (first ?? "").split(/(?<=[.!?。！？])\s*/).filter((s) => s.trim() !== "");
-  const named = fret === null ? null : new RegExp(`(^|[^0-9])${fret}([^0-9]|$)`);
-  const kept = named ? sentences.filter((s) => !named.test(s)) : sentences;
+  const numbers = [fret, ...shown].filter((n): n is number => typeof n === "number" && n > 0);
+  const names = (s: string) => numbers.some((n) => new RegExp(`(^|[^0-9])${n}([^0-9]|$)`).test(s));
+  const kept = sentences.filter((s) => !names(s));
   return [...kept.map((s) => s.trim()), ...more.filter((m): m is string => !!m)].join(" ");
 }
 
 /**
- * The how-to under the coach's line. On a phone it folds behind "How"
- * (PHONE-2): three paragraphs there pushed the Start button a screen down and
+ * The how-to under the coach's line, folded behind "How" (PHONE-2, then
+ * acceptance pass 2 on every screen): three paragraphs there pushed the Start button a screen down and
  * read as a wall; the coach's line stays open, the rest is one tap away.
  */
-function HowLines({ collapsed, children }: { collapsed: boolean; children: React.ReactNode }) {
+function HowLines({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
-  if (!collapsed) return <>{children}</>;
+  // Folded everywhere since acceptance pass 2 (P1-4): open, it was the wall
+  // of text the owner keeps asking to be rid of.
   return (
     <details className="session-how" data-testid="session-how">
       <summary>{t("session.paths.howTo")}</summary>

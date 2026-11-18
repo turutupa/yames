@@ -4089,3 +4089,47 @@
   padding: 10px 0 8px;
   border-top: 1px solid var(--l-line);
 }
+
+/* "How", folded on every screen (acceptance pass 2, P1-4): the ready screen
+   says the hand and what is graded; the rest is one click away. A quiet row
+   with a chevron; the phone gives it a thumb-sized row of its own
+   (phone-learning.css). */
+.session-how > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  list-style: none;
+  color: var(--l-quiet);
+  font: 600 12px/1 var(--font-display, inherit);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.session-how > summary::-webkit-details-marker {
+  display: none;
+}
+.session-how > summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.session-how[open] > summary::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+.session-how > summary:hover {
+  color: var(--l-ink);
+}
+.session-how > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.session-how-body {
+  padding-top: 4px;
+  max-width: 90ch;
+}
