@@ -33,6 +33,15 @@ const SIZE = { width: 1400, height: 900 };
  * frame apart; a real failure is there both times, a race is not.
  */
 async function belowAATwice(page: Page) {
+  // The pages rise in: measure once every finite animation has landed.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
   const first = await textContrast(page, ".session-page");
   const bad = belowAA(first);
   if (!bad.length) return { hits: first, bad };
