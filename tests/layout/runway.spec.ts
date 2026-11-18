@@ -66,7 +66,7 @@ for (const [scene, sizes] of SCENES) {
       }
       if (scene === "session-theory-playing") {
         await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
-        await expect(page.locator('[data-testid="exercise-stage"]'), "no tab while the neck view plays").toHaveCount(0);
+        await expect(page.locator('[data-testid="practice-tab"]'), "no tab while the neck view plays").toHaveCount(0);
       }
     });
   }
@@ -128,25 +128,36 @@ test("the Take remembers the view it was played in", async ({ page }) => {
   expect(facts.view).toBe("runway");
 });
 
-test("the switch flips the Take screen, and is locked while a Take runs", async ({ page }) => {
+test("the switch flips the Take screen between three views, and is locked while a Take runs", async ({ page }) => {
   await openShot(page, "session-ready", WIDE);
   await expect(page.locator('[data-testid="practice-view-neck"]')).toHaveAttribute("aria-checked", "true");
-  await expect(page.locator('[data-testid="exercise-stage"]')).toBeVisible();
+  // The neck, numbered in playing order: the one picture, no tab beside it.
+  await expect(page.locator('[data-testid="practice-neck"]')).toBeVisible();
+  await expect(page.locator('[data-testid="practice-tab"]')).toHaveCount(0);
   await page.locator('[data-testid="practice-view-runway"]').click();
   // Before the Take the runway view shows the neck alone; the lane comes with the Take.
   await expect(page.locator("[data-runway-neck]")).toBeVisible();
-  await expect(page.locator('[data-testid="exercise-stage"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="practice-tab"]')).toHaveCount(0);
   await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
-  await page.locator('[data-testid="practice-view-neck"]').click();
-  await expect(page.locator('[data-testid="exercise-stage"]')).toBeVisible();
+  await page.locator('[data-testid="practice-view-tab"]').click();
+  await expect(page.locator('[data-testid="practice-tab"]')).toBeVisible();
+  await expect(page.locator('[data-testid="practice-neck"]')).toHaveCount(0);
+  // V goes round: tab to neck.
+  await page.keyboard.press("v");
+  await expect(page.locator('[data-testid="practice-view-neck"]')).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator('[data-testid="practice-neck"]')).toBeVisible();
 
   await openShot(page, "session-runway-playing", WIDE);
   await expect(page.locator('[data-testid="practice-view-neck"]')).toBeDisabled();
   await expect(page.locator('[data-testid="practice-view-runway"]')).toBeDisabled();
+  await expect(page.locator('[data-testid="practice-view-tab"]')).toBeDisabled();
 });
 
-test("the neck view hides the tab while a Take runs", async ({ page }) => {
+test("the neck view hides the tab while a Take runs, and leads note by note", async ({ page }) => {
   await openShot(page, "session-playing", WIDE);
-  await expect(page.locator('[data-testid="exercise-stage"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="practice-tab"]')).toHaveCount(0);
   await expect(page.locator('[data-testid="runway"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="practice-beats"] i')).toHaveCount(4);
+  const notes = await page.evaluate(() => window.__NECK__?.current?.getSnapshot().notes ?? []);
+  expect(notes.some((n: { kind: string }) => n.kind === "now"), "a NOW on the neck").toBe(true);
 });

@@ -11,7 +11,7 @@
  * - the NEXT one is an amber outline, also with its fret number;
  * - the notes just played keep the colour of their verdict for a moment,
  *   where there is one (a Take); with none (a warm-up) they go quiet;
- * - the rest of the shape stays on the neck, quiet, so the hand still sees
+ * - the rest of the shape stays on the neck, quiet (`box`), so the hand still sees
  *   where it is. Letters only on a theory Exercise, where the note's name is
  *   the lesson.
  */
@@ -61,7 +61,7 @@ export function nowNextNeck(
   const out: NeckNote[] = shape.map((n) => {
     const hit = kinds.get(key(n));
     if (hit) return { ...n, kind: hit.kind, label: hit.label };
-    return { ...n, kind: "dim", label: theory ? n.label : undefined };
+    return { ...n, kind: "box", label: theory ? n.label : undefined };
   });
   // NOW and NEXT are on the neck even when the shape somehow lacks them.
   const seen = new Set(shape.map(key));

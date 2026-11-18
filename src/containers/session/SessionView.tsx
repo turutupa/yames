@@ -34,7 +34,7 @@ import { PracticeViewSwitch } from "./practice/PracticeViewSwitch";
 import { NeckInstruction } from "./practice/NeckInstruction";
 import { PracticeTab } from "./practice/PracticeTab";
 import { HandLine, ViewHint } from "./practice/HandLine";
-import { useWarmupBeat } from "./practice/useWarmupBeat";
+import { useWarmupBeat, warmupClockOf } from "./practice/useWarmupBeat";
 import type { PracticeBeat } from "./practice/useWarmupBeat";
 import type { TimingMark } from "../songs/review/marks";
 import type { NeckKind, NeckView } from "../../stage3d/api";
@@ -137,7 +137,6 @@ function PedalCard() {
 /** Ready and running are one screen: what to play, and how it is going. */
 function TakeScreen({
   session,
-  themeId,
   beat,
   isPlaying,
   listening,
@@ -146,7 +145,6 @@ function TakeScreen({
   onCheckSound,
 }: {
   session: SessionRun;
-  themeId: string;
   beat: PracticeBeat | null;
   isPlaying: boolean;
   listening: boolean;
@@ -226,14 +224,7 @@ function TakeScreen({
           before the start and leading note by note while it runs, or the
           tab, large, its cursor following. Never both. */}
       {tabView ? (
-        <PracticeTab
-          take={take}
-          running={running}
-          beat={beat}
-          playing={isPlaying}
-          themeId={themeId}
-          lights={lights}
-        />
+        <PracticeTab take={take} running={running} beat={beat} playing={isPlaying} lights={lights} />
       ) : (
         <NeckInstruction
           take={take}
@@ -626,6 +617,13 @@ export function BandVolume({ session, hint }: { session: SessionRun; hint: boole
  */
 const NO_LIGHTS: ReadonlyMap<number, TimingMark> = new Map();
 
+/** A Take's whole range in ticks: one loop of a finisher, which the engine repeats. */
+function takeTicks(take: NonNullable<SessionRun["take"]>): number {
+  const first = take.score.bars[take.range.startBar];
+  const last = take.score.bars[take.range.endBar];
+  return first && last ? last.startTick + last.lengthTicks - first.startTick : 0;
+}
+
 /** A jam or a ramp: the whole neck at rest, nothing on it to follow. */
 function WholeNeckSlot() {
   const slot = useNeckSlot(WHOLE, []);
@@ -634,14 +632,12 @@ function WholeNeckSlot() {
 
 function TimedScreen({
   session,
-  themeId,
   bpmNow,
   beat,
   isPlaying,
   viewKey,
 }: {
   session: SessionRun;
-  themeId: string;
   bpmNow: number;
   beat: PracticeBeat | null;
   isPlaying: boolean;
@@ -706,7 +702,13 @@ function TimedScreen({
       {!pattern ? (
         <WholeNeckSlot />
       ) : view === "tab" ? (
-        <PracticeTab take={pattern} running={running} beat={position} playing={isPlaying} themeId={themeId} />
+        <PracticeTab
+          take={pattern}
+          running={running}
+          beat={position}
+          playing={isPlaying}
+          loopTicks={warmup ? warmupClockOf(pattern).passTicks : takeTicks(pattern)}
+        />
       ) : view === "runway" ? (
         <Runway take={pattern} beat={position} playing={running && isPlaying} lights={NO_LIGHTS} />
       ) : (
@@ -746,7 +748,7 @@ function TimedScreen({
         </button>
       </div>
       {countingIn && (
-        <div className="session-count" role="status" data-testid="session-count">
+        <div className="session-count" role="status" data-testid="session-count" data-small="">
           {t("session.run.countIn")}
         </div>
       )}
@@ -901,7 +903,6 @@ function ListeningScreen({ session }: { session: SessionRun }) {
 
 export function SessionView({
   session,
-  themeId,
   beat,
   isPlaying,
   listening,
@@ -911,7 +912,8 @@ export function SessionView({
   onCheckSound,
 }: {
   session: SessionRun;
-  themeId: string;
+  /** The theme. The Session's tab strip draws in its own palette; kept for the caller. */
+  themeId?: string;
   /** The engine's beat: a Take's position, and the click's own count for a warm-up. */
   beat: PracticeBeat | null;
   isPlaying: boolean;
@@ -953,7 +955,6 @@ export function SessionView({
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView !== "runway" && (
         <TakeScreen
           session={session}
-          themeId={themeId}
           beat={beat}
           isPlaying={isPlaying}
           listening={listening}
@@ -972,7 +973,6 @@ export function SessionView({
       {(run.phase === "timedReady" || run.phase === "timed") && (
         <TimedScreen
           session={session}
-          themeId={themeId}
           bpmNow={bpmNow}
           beat={beat}
           isPlaying={isPlaying}

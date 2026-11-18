@@ -1325,7 +1325,8 @@ export function installShotMock(shot: Shot, theme: string): void {
     }
     beatCount += 1;
     // A Take's verdict is the point of those scenes, not sitting through one.
-    const fast = shot.session && shot.session.stop !== "playing";
+    // A warm-up after its Start is watched as it runs, at its own tempo.
+    const fast = shot.session && shot.session.stop !== "playing" && shot.session.stop !== "timed";
     beatTimer = setTimeout(beatLoop, fast ? 15 : 60000 / (STATE.bpm as number));
   }
 

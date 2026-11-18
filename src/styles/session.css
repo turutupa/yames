@@ -2573,3 +2573,16 @@
   margin: -11px 0 0 -11px;
   font-size: 12px;
 }
+/* A warm-up's count-in: said, but off the neck, which is showing the first note. */
+.session-count[data-small] {
+  inset: auto 0 auto auto;
+  top: 0;
+  padding: 0 4px;
+  font-size: clamp(30px, 5vh, 46px);
+  text-shadow: 0 0 30px rgba(255, 170, 70, 0.55);
+}
+.runway[data-lanes="1"],
+.runway[data-lanes="2"],
+.runway[data-lanes="3"] {
+  margin-block: auto;
+}

@@ -41,8 +41,8 @@ describe("the neck as the instruction", () => {
     const at = (f: number) => out.find((n) => n.fret === f)!;
     expect(at(7)).toMatchObject({ kind: "now", label: "7" });
     expect(at(8)).toMatchObject({ kind: "next", label: "8" });
-    expect(at(5)).toMatchObject({ kind: "dim", label: undefined });
-    expect(at(3)).toMatchObject({ kind: "dim", label: undefined });
+    expect(at(5)).toMatchObject({ kind: "box", label: undefined });
+    expect(at(3)).toMatchObject({ kind: "box", label: undefined });
   });
 
   it("keeps the letters on the quiet shape only in theory", () => {
