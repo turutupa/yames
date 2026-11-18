@@ -348,7 +348,15 @@
       "unsubscribedNote": "오늘 계획에는 없습니다. 기록은 남아 있으니 언제든 다시 구독하세요.",
       "testOut": "건너뛰기 테스트",
       "testOutHow": "아직 통과하지 않은 각 연습을 통과 템포로 한 번씩. 넷 중 셋 정도 통과하면 이 단계는 끝납니다.",
-      "testOutRetests": "여기 연습은 모두 통과했으니 전부 다시 테스트합니다: 각각 통과 템포로 한 번씩."
+      "testOutRetests": "여기 연습은 모두 통과했으니 전부 다시 테스트합니다: 각각 통과 템포로 한 번씩.",
+      "levelName": {
+        "beginner": "초급",
+        "intermediate": "중급",
+        "advanced": "고급"
+      },
+      "levelStart": "{{n}}단계부터 시작 · {{level}}",
+      "skipped": "건너뜀",
+      "skippedHow": "선택한 레벨({{level}})보다 아래라서 오늘 계획에서는 건너뜁니다. 여기서는 그대로 연습할 수 있고, 이 단계를 선택하면 다시 돌아옵니다."
     },
     "progress": {
       "title": "진도",

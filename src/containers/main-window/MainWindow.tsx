@@ -109,6 +109,7 @@ import { useAudioOutputDevices } from "./hooks/useAudioOutputDevices";
 import { useFullscreenLifecycle } from "./hooks/useFullscreenLifecycle";
 import { useAppUpdates } from "./hooks/useAppUpdates";
 import { NEVER_NEWER, useNewerVersion } from "./hooks/useNewerVersion";
+import { usePathsPlace } from "./hooks/usePathsPlace";
 import { useTabRouting } from "./hooks/useTabRouting";
 import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
@@ -231,17 +232,20 @@ export function MainWindow() {
     // Today is the front door, unless the player asked for their last tool.
     frontDoor: true,
   });
+  // Where the player is inside Paths, kept above the screen so a Session
+  // started from a Step comes back to that Step, scrolled where it was
+  // (`usePathsPlace`).
+  const pathsPlace = usePathsPlace(view, contentRef);
+  const resetPaths = pathsPlace.reset;
   // A door pressed for the place already open goes back to that place's
-  // start: the rail's (or the tab bar's) Paths on a Step's page is the Paths
-  // list again, not nothing (QA 2026-11-17 #8). The Paths screen keeps which
-  // Path and Step are open in its own state; a new key starts it over.
-  const [pathsVisit, setPathsVisit] = useState(0);
+  // start: the rail's (or the tab bar's, or the hotkey's) Paths on a Step's
+  // page is the Paths list again, not nothing (QA 2026-11-17 #8).
   const navigate = useCallback(
     (next: MainView) => {
-      if (next === view && next === "paths") setPathsVisit((n) => n + 1);
+      if (next === view && next === "paths") resetPaths();
       setView(next);
     },
-    [view, setView],
+    [view, setView, resetPaths],
   );
   // Fullscreen / zen-mode lifecycle (intended state, OS-level state, and
   // the webview-focus restoration helper) — owned by a dedicated hook.
@@ -1576,7 +1580,7 @@ export function MainWindow() {
   // reason it does not travel.
   const dispatchAction = IS_MOBILE ? () => {} : useActionDispatcher({
     view,
-    setView,
+    setView: navigate,
     prevTab,
     setlistLoaded: !!setlistSession.setlist,
     jamLoaded: !!jamSession.jam,
@@ -2374,8 +2378,8 @@ export function MainWindow() {
           />
         ) : view === "paths" ? (
           <PathsView
-            key={pathsVisit}
             session={sessionRun}
+            place={pathsPlace}
             instrumentNote={{
               instrument,
               onOpenTools: () => setView("tools"),

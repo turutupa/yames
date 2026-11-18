@@ -356,7 +356,15 @@
       "unsubscribedNote": "No está en el plan de hoy. Tu historial se conserva; vuelve a suscribirte cuando quieras.",
       "testOut": "Hacer examen",
       "testOutHow": "Una toma al tempo de aprobado de cada ejercicio que aún no has pasado. Pasa unos tres de cada cuatro y el paso queda hecho.",
-      "testOutRetests": "Ya pasaste todos los ejercicios de aquí, así que esto los vuelve a probar todos: una toma de cada uno al tempo de aprobado."
+      "testOutRetests": "Ya pasaste todos los ejercicios de aquí, así que esto los vuelve a probar todos: una toma de cada uno al tempo de aprobado.",
+      "levelName": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzado"
+      },
+      "levelStart": "Empiezas en el paso {{n}} · {{level}}",
+      "skipped": "Saltado",
+      "skippedHow": "Está por debajo de tu nivel ({{level}}), así que Hoy lo salta. Puedes tocarlo aquí igualmente, o elegir este paso para recuperarlo."
     },
     "progress": {
       "title": "Progreso",

@@ -348,7 +348,15 @@
       "unsubscribedNote": "不在今天的计划里。你的记录会保留，随时可以重新订阅。",
       "testOut": "测试跳过",
       "testOutHow": "每个还没通过的练习以通过速度练一遍。大约四个通过三个，这一步就完成了。",
-      "testOutRetests": "这里的练习你都已通过，所以这次会全部重测：每个以通过速度练一遍。"
+      "testOutRetests": "这里的练习你都已通过，所以这次会全部重测：每个以通过速度练一遍。",
+      "levelName": {
+        "beginner": "初级",
+        "intermediate": "中级",
+        "advanced": "高级"
+      },
+      "levelStart": "从第 {{n}} 步开始 · {{level}}",
+      "skipped": "已跳过",
+      "skippedHow": "低于你选择的级别（{{level}}），所以“今天”会跳过它。你仍然可以在这里练习，或者选择这一步把它找回来。"
     },
     "progress": {
       "title": "进度",

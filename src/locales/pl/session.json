@@ -364,7 +364,15 @@
       "unsubscribedNote": "Nie ma w dzisiejszym planie. Historia zostaje; subskrybuj ponownie w każdej chwili.",
       "testOut": "Zalicz krok",
       "testOutHow": "Jedno podejście w tempie zaliczenia każdego ćwiczenia, którego jeszcze nie zaliczyłeś. Zalicz około trzech z czterech i krok jest ukończony.",
-      "testOutRetests": "Zaliczyłeś tu każde ćwiczenie, więc to sprawdzi je wszystkie ponownie: po jednym podejściu w tempie zaliczenia."
+      "testOutRetests": "Zaliczyłeś tu każde ćwiczenie, więc to sprawdzi je wszystkie ponownie: po jednym podejściu w tempie zaliczenia.",
+      "levelName": {
+        "beginner": "Początkujący",
+        "intermediate": "Średniozaawansowany",
+        "advanced": "Zaawansowany"
+      },
+      "levelStart": "Start od kroku {{n}} · {{level}}",
+      "skipped": "Pominięty",
+      "skippedHow": "Poniżej twojego poziomu ({{level}}), więc Dziś go pomija. Nadal możesz go tu zagrać albo wybrać ten krok, żeby go przywrócić."
     },
     "progress": {
       "title": "Postępy",

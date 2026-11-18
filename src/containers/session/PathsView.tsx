@@ -5,7 +5,7 @@
  * the rest of the app links to yet. Nothing is locked or priced: a Step can be
  * chosen from any point, and a Path the app cannot grade yet says "later".
  */
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
@@ -19,7 +19,9 @@ import {
   currentStepOf,
   isExercisePassed,
   isGradable,
+  chosenLevelOf,
   isStepPassed,
+  isStepSkipped,
   isSubscribed,
   takesOf,
 } from "../../session/progress";
@@ -31,6 +33,8 @@ import type { NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
 import { rise } from "./TodayView";
 import { InstrumentNote } from "./InstrumentNote";
+import { PATHS_LIST, pathsUp } from "../main-window/hooks/usePathsPlace";
+import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -175,7 +179,7 @@ function PathDetail({
   const { progress, actions } = session;
   const current = currentStepOf(progress, path);
   const levels = levelsOf(path);
-  const level = progress.states.find((s) => s.pathId === path.id)?.level;
+  const level = chosenLevelOf(progress, path)?.id;
   const slot = useNeckSlot(WHOLE, [], { sweep: true });
   const neck3d = useNeck3d();
   const runnable = isRunnable(path.id);
@@ -203,6 +207,7 @@ function PathDetail({
         <ol className="session-step-list">
           {path.steps.map((step, i) => {
             const passed = isStepPassed(progress, path.id, step);
+            const skipped = isStepSkipped(progress, path, step);
             const isCurrent = step.id === current.id && runnable;
             const gradable = step.exercises.filter(isGradable);
             const done = gradable.filter((e) => isExercisePassed(progress, path.id, e)).length;
@@ -212,12 +217,14 @@ function PathDetail({
                   className="session-step-row"
                   data-current={isCurrent ? "" : undefined}
                   data-passed={passed ? "" : undefined}
+                  data-skipped={skipped ? "" : undefined}
                   onClick={() => onOpenStep(step)}
                   data-testid={`step-row-${step.id}`}
                 >
                   <span className="session-step-num">{passed ? "✓" : step.order}</span>
                   <span className="session-step-text">
                     <span className="session-step-name">{step.title}</span>
+                    {skipped && <small data-testid={`step-skipped-${step.id}`}>{t("session.paths.skipped")}</small>}
                     {(isCurrent || passed) && gradable.length > 0 && (
                       <small>
                         {t("session.paths.exercisesPassed", { done, count: gradable.length })}
@@ -301,11 +308,20 @@ function PathDetail({
                     className={l.id === level ? "on" : ""}
                     aria-pressed={l.id === level}
                     onClick={() => actions.chooseLevel(path, l.id)}
+                    data-testid={`level-${l.id}`}
                   >
                     {l.title}
                   </button>
                 ))}
               </div>
+              {level && runnable && (
+                <div className="session-why" style={{ marginTop: 7 }} role="status" data-testid="level-start">
+                  {t("session.paths.levelStart", {
+                    n: current.order,
+                    level: t(`session.paths.levelName.${level}`),
+                  })}
+                </div>
+              )}
             </div>
           )}
           <div className="session-glass session-card session-rise">
@@ -437,6 +453,7 @@ function StepDetail({
   const { t } = useTranslation();
   const { progress, actions } = session;
   const isCurrent = currentStepOf(progress, path).id === step.id;
+  const skippedBy = isStepSkipped(progress, path, step) ? chosenLevelOf(progress, path) : null;
   // The Exercise to work on next: the first the app can grade and you have not passed.
   const next =
     step.exercises.find((e) => isGradable(e) && !isExercisePassed(progress, path.id, e)) ??
@@ -463,6 +480,12 @@ function StepDetail({
           <KindTag kind={path.kind} />
         </div>
         <div className="session-why">{step.goal}</div>
+        {skippedBy && (
+          <div className="session-quiet" style={{ marginTop: 6 }} data-testid="step-skipped-note">
+            <span className="session-tag">{t("session.paths.skipped")}</span>{" "}
+            {t("session.paths.skippedHow", { level: t(`session.paths.levelName.${skippedBy.id}`) })}
+          </div>
+        )}
       </div>
       <div className="session-split">
         <div className="session-col">
@@ -533,28 +556,82 @@ type InstrumentNoteProps = Parameters<typeof InstrumentNote>[0];
 export function PathsView({
   session,
   instrumentNote,
+  place: given,
 }: {
   session: SessionRun;
   /** Guitar first: the same note Today shows, on the list of Paths only. */
   instrumentNote?: InstrumentNoteProps;
+  /**
+   * Which Path and Step are open, kept by the window so a Session started from
+   * here comes back here (`usePathsPlace`). Without one, the screen keeps its
+   * own, as it did before, for the tests and scenes that mount it alone.
+   */
+  place?: PathsPlace;
 }) {
-  const [pathId, setPathId] = useState<string | null>(null);
-  const [stepId, setStepId] = useState<string | null>(null);
-  const path = session.paths.find((p) => p.id === pathId) ?? null;
-  const step = path?.steps.find((s) => s.id === stepId) ?? null;
+  const own = useOwnPlace();
+  const place = given ?? own;
+  const { at, move, back } = place;
+  const path = session.paths.find((p) => p.id === at.pathId) ?? null;
+  const step = path?.steps.find((s) => s.id === at.stepId) ?? null;
+
+  // Escape goes one page up: a Step to its Path, a Path to the list. On the
+  // window, after everything else has had its turn: whatever is open over the
+  // page (a sheet, a menu, the help) claims the key first.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      // Not from a text field: Escape there is the field's. (Not `hotkeys.ts`'s
+      // `isTypingTarget`: the hotkey table stays out of the phone's bundle.)
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.("input:not([type=range]):not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable=true]")) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      if (back()) e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [back]);
 
   if (path && step) {
-    return <StepDetail session={session} path={path} step={step} onBack={() => setStepId(null)} />;
+    return (
+      <StepDetail
+        session={session}
+        path={path}
+        step={step}
+        onBack={() => move({ pathId: path.id, stepId: null })}
+      />
+    );
   }
   if (path) {
     return (
       <PathDetail
         session={session}
         path={path}
-        onBack={() => setPathId(null)}
-        onOpenStep={(s) => setStepId(s.id)}
+        onBack={() => move(PATHS_LIST)}
+        onOpenStep={(s) => move({ pathId: path.id, stepId: s.id })}
       />
     );
   }
-  return <PathList session={session} onOpen={(p) => setPathId(p.id)} note={instrumentNote} />;
+  return (
+    <PathList
+      session={session}
+      onOpen={(p) => move({ pathId: p.id, stepId: null })}
+      note={instrumentNote}
+    />
+  );
+}
+
+/** A place of the screen's own, for a PathsView mounted without the window. */
+function useOwnPlace(): PathsPlace {
+  const [at, setAt] = useState<PathsAt>(PATHS_LIST);
+  const atRef = useRef(at);
+  atRef.current = at;
+  const move = useCallback((next: PathsAt) => setAt(next), []);
+  const back = useCallback(() => {
+    const up = pathsUp(atRef.current);
+    if (up) setAt(up);
+    return up !== null;
+  }, []);
+  const reset = useCallback(() => setAt(PATHS_LIST), []);
+  return { at, move, back, reset };
 }

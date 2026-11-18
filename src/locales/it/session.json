@@ -356,7 +356,15 @@
       "unsubscribedNote": "Non è nel piano di oggi. La tua cronologia resta; iscriviti di nuovo quando vuoi.",
       "testOut": "Fai la verifica",
       "testOutHow": "Una take al tempo di superamento di ogni esercizio non ancora superato. Superane circa tre su quattro e lo step è fatto.",
-      "testOutRetests": "Hai superato tutti gli esercizi qui, quindi questo li riverifica tutti: una take ciascuno al tempo di superamento."
+      "testOutRetests": "Hai superato tutti gli esercizi qui, quindi questo li riverifica tutti: una take ciascuno al tempo di superamento.",
+      "levelName": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzato"
+      },
+      "levelStart": "Si parte dal passo {{n}} · {{level}}",
+      "skipped": "Saltato",
+      "skippedHow": "Sotto il tuo livello ({{level}}), quindi Oggi lo salta. Puoi comunque suonarlo qui, o scegliere questo passo per riprenderlo."
     },
     "progress": {
       "title": "Progressi",

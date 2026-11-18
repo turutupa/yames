@@ -348,7 +348,15 @@
       "unsubscribedNote": "Not in Today's plan. Your history is kept; subscribe again any time.",
       "testOut": "Test out",
       "testOutHow": "One Take at the pass tempo of each Exercise you haven't passed yet. Pass about three of four and the Step is done.",
-      "testOutRetests": "You've passed every Exercise here, so this re-tests them all: one Take each at the pass tempo."
+      "testOutRetests": "You've passed every Exercise here, so this re-tests them all: one Take each at the pass tempo.",
+      "levelName": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "levelStart": "Starting at Step {{n}} · {{level}}",
+      "skipped": "Skipped",
+      "skippedHow": "Below your Level ({{level}}), so Today skips it. You can still play it here, or choose this Step to bring it back."
     },
     "progress": {
       "title": "Progress",

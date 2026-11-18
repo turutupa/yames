@@ -68,13 +68,19 @@ import { SUBSCRIPTION_CAP } from "../../../session/rotation";
 import type { PlanMinutes, PlanStep, SessionPlan } from "../../../session/planner";
 import {
   NO_PROGRESS,
+  chosenLevelOf,
   cleanTempoOf,
+  currentStepOf,
   factsOf,
   isSubscribed,
   lastCaughtTake,
+  levelEntryStep,
+  levelOfStep,
+  levelStartIndex,
   nextStepAfterPass,
   takesOf,
 } from "../../../session/progress";
+import { levelsOf } from "../../../session/variants";
 import type { PlayerProgress, TakeFacts } from "../../../session/progress";
 import {
   IDLE,
@@ -186,6 +192,22 @@ export function playerPaths(paths: readonly PathDoc[], progress: PlayerProgress)
 /** Why a subscribe did not happen. */
 export type SubscribeRefusal = "cap" | null;
 
+/**
+ * Where a Session goes back to when it ends: Exit, Escape, or the recap's Done.
+ *
+ * The screen it was started from (QA 2026-11-17: Escape on an Exercise played
+ * from a Step's page landed on Today). Today's Start goes back to Today; a
+ * Step's Play this, Find my edge and Test out go back to that Step, which keeps
+ * its place because the Paths screen's place is kept above it
+ * (`usePathsPlace`). Anything that is not a learning screen, or a Session
+ * started from inside a Session, goes back to Today, the front door.
+ */
+export function sessionOrigin(view: MainView): MainView {
+  return view === "today" || view === "paths" || view === "progress" || view === "tools"
+    ? view
+    : "today";
+}
+
 /** The number a result is about, on the scale it is written in. */
 function headlineFacts(grade: TakeGrade): Pick<
   TakeFacts,
@@ -255,6 +277,8 @@ export function useSessionRun(input: SessionRunInput) {
 
   const latest = useRef(input);
   latest.current = input;
+  /** Where this Session was started from (`sessionOrigin`). Set by `begin`. */
+  const origin = useRef<MainView>("today");
   const runRef = useRef<RunState>(run);
   runRef.current = run;
 
@@ -753,7 +777,7 @@ export function useSessionRun(input: SessionRunInput) {
         ? path.steps[path.steps.findIndex((s) => s.id === pathStep.id) + 1] ?? null
         : null;
     const currentAt = (id: string | undefined) => path.steps.findIndex((s) => s.id === id);
-    const storedStep = progress.states.find((s) => s.pathId === path.id)?.currentStepId ?? path.steps[0]?.id;
+    const storedStep = currentStepOf(progress, path).id;
     const moved =
       placedPast && currentAt(placedPast.id) > currentAt(storedStep)
         ? placedPast
@@ -870,6 +894,7 @@ export function useSessionRun(input: SessionRunInput) {
         }
       }
       dispatch({ type: "start", plan: next, now });
+      origin.current = sessionOrigin(latest.current.view);
       setView("session");
       if (!theirs) {
         ownsCoach.current = true;
@@ -910,14 +935,24 @@ export function useSessionRun(input: SessionRunInput) {
     [begin, progress],
   );
 
-  /** Choose this Step. No lock: a player can start anywhere and change later. */
+  /**
+   * Choose this Step. No lock: a player can start anywhere and change later.
+   * A Step below the chosen Level takes the Level down with it, to the one the
+   * Step is in, so the Step chosen is the Step they are on (`currentStepOf`
+   * never goes below the Level).
+   */
   const chooseStep = useCallback(
     (path: PathDoc, pathStep: Step) => {
       const now = Date.now();
       const stored = progress.states.find((s) => s.pathId === path.id);
+      const chosen = chosenLevelOf(progress, path);
+      const below =
+        chosen !== null &&
+        path.steps.findIndex((s) => s.id === pathStep.id) < levelStartIndex(path, chosen);
+      const level = below ? levelOfStep(path, pathStep.id)?.id : stored?.level;
       const row: PathStateRow = {
         pathId: path.id,
-        ...(stored?.level ? { level: stored.level } : {}),
+        ...(level ? { level } : {}),
         currentStepId: pathStep.id,
         startedAt: stored?.startedAt ?? now,
         updatedAt: now,
@@ -928,18 +963,27 @@ export function useSessionRun(input: SessionRunInput) {
       }));
       void savePathState(row).catch(() => {});
     },
-    [progress.states],
+    [progress],
   );
 
-  /** Choose a Level. Progress is keyed by Exercise, so nothing is lost. */
+  /**
+   * Choose a Level, and start there (owner, 2026-11-17: Levels must actually do
+   * something). The current Step becomes the Level's first Step not passed yet;
+   * the Steps below it count as skipped (`isStepSkipped`), so Today plans from
+   * there. Choosing a lower Level brings them back. Progress is keyed by
+   * Exercise, so nothing is lost either way.
+   */
   const chooseLevel = useCallback(
     (path: PathDoc, level: string) => {
       const now = Date.now();
       const stored = progress.states.find((s) => s.pathId === path.id);
+      const offered = levelsOf(path).find((l) => l.id === level);
+      const entry = offered ? levelEntryStep(progress, path, offered) : null;
+      const currentStepId = entry?.id ?? stored?.currentStepId;
       const row: PathStateRow = {
         pathId: path.id,
         level,
-        ...(stored?.currentStepId ? { currentStepId: stored.currentStepId } : {}),
+        ...(currentStepId ? { currentStepId } : {}),
         startedAt: stored?.startedAt ?? now,
         updatedAt: now,
       };
@@ -1035,7 +1079,7 @@ export function useSessionRun(input: SessionRunInput) {
     const event = eventForBigAction(big, Date.now());
     if (!event) return;
     dispatch(event);
-    if (event.type === "close") setView("today");
+    if (event.type === "close") setView(origin.current);
   }, [big, playTake, endTake, setView]);
 
   const slower = useCallback(() => {
@@ -1094,7 +1138,7 @@ export function useSessionRun(input: SessionRunInput) {
   const exit = useCallback(() => {
     teardown();
     dispatch({ type: "cancel" });
-    setView("today");
+    setView(origin.current);
   }, [teardown, setView]);
 
   return {

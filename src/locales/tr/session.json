@@ -348,7 +348,15 @@
       "unsubscribedNote": "Bugünün planında yok. Geçmişin duruyor; istediğin zaman yeniden abone ol.",
       "testOut": "Sınava gir",
       "testOutHow": "Henüz geçmediğin her egzersizin geçme temposunda bir kayıt. Dörtte üç kadarını geçersen adım tamam.",
-      "testOutRetests": "Buradaki her egzersizi geçtin, bu yüzden hepsini yeniden sınar: her biri için geçme temposunda bir kayıt."
+      "testOutRetests": "Buradaki her egzersizi geçtin, bu yüzden hepsini yeniden sınar: her biri için geçme temposunda bir kayıt.",
+      "levelName": {
+        "beginner": "Başlangıç",
+        "intermediate": "Orta",
+        "advanced": "İleri"
+      },
+      "levelStart": "Adım {{n}}'den başlıyor · {{level}}",
+      "skipped": "Atlandı",
+      "skippedHow": "Seviyenin ({{level}}) altında, bu yüzden Bugün onu atlıyor. Yine de burada çalabilir ya da geri getirmek için bu adımı seçebilirsin."
     },
     "progress": {
       "title": "İlerleme",

@@ -356,7 +356,15 @@
       "unsubscribedNote": "Fora do plano de hoje. Seu histórico fica; inscreva-se de novo quando quiser.",
       "testOut": "Fazer teste",
       "testOutHow": "Um take no tempo de aprovação de cada exercício em que você ainda não passou. Passe em cerca de três de quatro e o passo está feito.",
-      "testOutRetests": "Você já passou em todos os exercícios daqui, então isto testa todos de novo: um take de cada no tempo de aprovação."
+      "testOutRetests": "Você já passou em todos os exercícios daqui, então isto testa todos de novo: um take de cada no tempo de aprovação.",
+      "levelName": {
+        "beginner": "Iniciante",
+        "intermediate": "Intermediário",
+        "advanced": "Avançado"
+      },
+      "levelStart": "Começando no passo {{n}} · {{level}}",
+      "skipped": "Pulado",
+      "skippedHow": "Abaixo do seu nível ({{level}}), então Hoje pula este passo. Você ainda pode tocá-lo aqui, ou escolher este passo para trazê-lo de volta."
     },
     "progress": {
       "title": "Progresso",

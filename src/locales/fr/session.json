@@ -356,7 +356,15 @@
       "unsubscribedNote": "Absent du plan du jour. Ton historique est conservé ; réabonne-toi quand tu veux.",
       "testOut": "Valider l'étape",
       "testOutHow": "Une prise au tempo de réussite de chaque exercice pas encore réussi. Réussis environ trois sur quatre et l'étape est faite.",
-      "testOutRetests": "Tu as réussi tous les exercices ici, alors ceci les reteste tous : une prise chacun au tempo de réussite."
+      "testOutRetests": "Tu as réussi tous les exercices ici, alors ceci les reteste tous : une prise chacun au tempo de réussite.",
+      "levelName": {
+        "beginner": "Débutant",
+        "intermediate": "Intermédiaire",
+        "advanced": "Avancé"
+      },
+      "levelStart": "Départ à l’étape {{n}} · {{level}}",
+      "skipped": "Passée",
+      "skippedHow": "En dessous de ton niveau ({{level}}), donc Aujourd’hui la saute. Tu peux quand même la jouer ici, ou choisir cette étape pour la reprendre."
     },
     "progress": {
       "title": "Progrès",

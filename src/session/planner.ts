@@ -54,6 +54,7 @@ import {
   factsOf,
   isExercisePassed,
   isGradable,
+  isStepSkipped,
   lastCaughtTake,
   takesOf,
 } from "./progress";
@@ -367,9 +368,10 @@ function worklist(path: PathDoc, progress: PlayerProgress): Pick[] {
   if (open.length > 0) return open;
   // Everything from here on is passed, so go back over what is left anywhere,
   // the least recently played first.
-  const every = path.steps.flatMap((s) =>
-    s.exercises.filter(isGradable).map((exercise) => ({ path, step: s, exercise })),
-  );
+  // A Step skipped by the chosen Level is not "left" anywhere: it stays out.
+  const every = path.steps
+    .filter((s) => !isStepSkipped(progress, path, s))
+    .flatMap((s) => s.exercises.filter(isGradable).map((exercise) => ({ path, step: s, exercise })));
   const lastPlayed = (pick: Pick) =>
     takesOf(progress, path.id, pick.exercise.id)[0]?.startedAt ?? 0;
   return [...every].sort((a, b) => lastPlayed(a) - lastPlayed(b));

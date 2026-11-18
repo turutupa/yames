@@ -1567,6 +1567,13 @@
   background: rgba(255, 180, 84, 0.11);
   border-color: rgba(255, 180, 84, 0.6);
 }
+/* Below the chosen Level: skipped, not done, and still a button. */
+.session-page .session-step-row[data-skipped] {
+  color: var(--l-faint);
+}
+.session-page .session-step-row[data-skipped] .session-step-name {
+  font-weight: 500;
+}
 .session-step-num {
   flex: none;
   width: 22px;
