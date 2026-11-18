@@ -114,7 +114,7 @@ WID-02, WID-05 to WID-15.
 
 - `manifest.json` changed by hand for nine defaults: `tab-today`, `tab-paths`,
   `tab-progress`, `tab-tools` are ⌘1–⌘4 (were ⌘0, ⌘6, ⌘7, ⌘8) and `tab-1` to
-  `tab-5` are ⌘⇧1–⌘⇧5 (were ⌘1–⌘5). One settings key added: `keyBindingsVersion`.
+  `tab-5` are ⌥1–⌥5 (were ⌘1–⌘5). One settings key added: `keyBindingsVersion`.
 - Players still on the old defaults are moved once (`src/hooks/keybindingMigration.ts`,
   tested in `keybindingMigration.test.ts`); a key anyone remapped is kept. P3's
   v1.2.2 fixture stores the old tool keys, so `savedFormats.test.tsx` now expects them

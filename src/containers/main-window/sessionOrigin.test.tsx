@@ -172,7 +172,7 @@ describe("leaving a Session", () => {
     await click(testid("play-even-eighths.open-string"));
     await inSession();
     await act(async () => press("⌘1"));
-    await act(async () => press("⌘⇧1"));
+    await act(async () => press("⌥1"));
     await settle();
     expect(on("session-exit")).toBe(true);
   });

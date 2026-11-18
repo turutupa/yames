@@ -19,15 +19,15 @@ describe("ToolsView", () => {
 
   it("reads its keycaps from the bindings, so a remapped key shows", () => {
     const keyBindings = {
-      "tab-1": "⌘⇧1",
-      "tab-2": "⌘⇧2",
-      "tab-3": "⌘⇧3",
-      "tab-4": "⌘⇧4",
-      "tab-5": "⌘⇧5",
+      "tab-1": "⌥1",
+      "tab-2": "⌥2",
+      "tab-3": "⌥3",
+      "tab-4": "⌥4",
+      "tab-5": "⌥5",
     };
     render(<ToolsView onOpen={vi.fn()} keyBindings={keyBindings} />);
     IDS.forEach((id, i) => {
-      expect(screen.getByTestId(`tool-key-${id}`).textContent).toBe(platformKey(`⌘⇧${i + 1}`));
+      expect(screen.getByTestId(`tool-key-${id}`).textContent).toBe(platformKey(`⌥${i + 1}`));
     });
   });
 

@@ -472,7 +472,7 @@ export function warmupBpm(exercise: Exercise, clean: number | null): number {
 const WARMUP_HARDER_THAN = 1.25;
 
 /** Notes per second at a tempo, from the note grid; null when it is unknown. */
-function notesPerSecond(exercise: Exercise, bpm: number): number | null {
+export function notesPerSecond(exercise: Exercise, bpm: number): number | null {
   const grid = beatsPerNote(exercise);
   return grid ? bpm / 60 / grid : null;
 }

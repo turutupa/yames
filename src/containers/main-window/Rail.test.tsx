@@ -323,7 +323,7 @@ describe("Rail keycaps", () => {
 
   it("writes Ctrl off a Mac and ⌘ on one", () => {
     expect(platformKey("⌘2")).toBe(IS_MAC ? "⌘2" : "Ctrl+2");
-    expect(platformKey("⌘⇧3")).toBe(IS_MAC ? "⌘⇧3" : "Ctrl+Shift+3");
+    expect(platformKey("⌥3")).toBe(IS_MAC ? "⌥3" : "Alt+3");
   });
 
   it("shows a remapped key, and none for an unbound action", () => {

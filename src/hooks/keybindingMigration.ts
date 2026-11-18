@@ -2,7 +2,7 @@
  * Moving players off the old navigation keys, once (owner, 2026-11-17).
  *
  * The defaults were Today ⌘0, the tools ⌘1–⌘5 and Paths, Progress and Tools
- * ⌘6–⌘8. They are now the learning side on ⌘1–⌘4 and the tools on ⌘⇧1–⌘⇧5.
+ * ⌘6–⌘8. They are now the learning side on ⌘1–⌘4 and the tools on ⌥1–⌥5.
  *
  * `useKeybindings` saves the WHOLE map, defaults included, so a stored ⌘3 does
  * not say whether the player chose it. The rule: a binding still on its old

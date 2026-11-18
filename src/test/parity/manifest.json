@@ -713,35 +713,35 @@
     },
     {
       "id": "tab-1",
-      "key": "⌘⇧1",
+      "key": "⌥1",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-2",
-      "key": "⌘⇧2",
+      "key": "⌥2",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-3",
-      "key": "⌘⇧3",
+      "key": "⌥3",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-4",
-      "key": "⌘⇧4",
+      "key": "⌥4",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-5",
-      "key": "⌘⇧5",
+      "key": "⌥5",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"

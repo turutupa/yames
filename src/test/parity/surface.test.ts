@@ -233,7 +233,7 @@ describe("the frozen surface", () => {
 
 // 2026-11-17, owner-approved: the navigation defaults changed in the manifest by
 // hand. Today, Paths, Progress and Tools are ⌘1–⌘4 (were ⌘0, ⌘6, ⌘7, ⌘8) and
-// the five tools ⌘⇧1–⌘⇧5 (were ⌘1–⌘5). Players still on the old defaults are
+// the five tools ⌥1–⌥5 (were ⌘1–⌘5). Players still on the old defaults are
 // moved once (`hooks/keybindingMigration.ts`, marked by the new settings key
 // `keyBindingsVersion`); anyone who remapped one keeps their key.
 describe("the frozen hotkeys", () => {

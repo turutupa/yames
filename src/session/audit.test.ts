@@ -2,6 +2,7 @@
 // TODAY-4, TODAY-5 and PATH-5. Each block names its item.
 import { describe, expect, it } from "vitest";
 import {
+  notesPerSecond,
   placementLadder,
   planSession,
   replanRest,
@@ -72,15 +73,27 @@ describe("TODAY-5: the warm-up", () => {
     expect(warm.bpm).toBe(70);
   });
 
-  it("is never three times as busy as the block it warms up: Sweep Beginner gives way to the focus Exercise", () => {
-    const p = progress({ states: [state({ pathId: SWEEP.id })] });
-    const s = planSession({ minutes: 10, now: NOW, paths: [SWEEP], progress: p });
-    const warm = s.steps[0];
-    const focus = s.steps.find((x): x is ExStep => x.kind === "exercise")!;
-    expect(warm.kind).toBe("metronome");
-    if (warm.kind !== "metronome") return;
-    expect(warm.exerciseId).toBe(focus.exerciseId);
-    expect(warm.bpm).toBeLessThanOrEqual(focus.bpm);
+  it("is never much busier than the block it warms up, on any Path at its first Session", () => {
+    // The rule, not one case: Sweep Beginner's old warm-up (triplets at 60 for a
+    // Step under one note a second) is what it caught first; the Sweep rework
+    // changed that content, so check every Path instead.
+    for (const path of [SWEEP, ALT]) {
+      const p = progress({ states: [state({ pathId: path.id })] });
+      const s = planSession({ minutes: 10, now: NOW, paths: [path], progress: p });
+      const warm = s.steps[0];
+      const focus = s.steps.find((x): x is ExStep => x.kind === "exercise")!;
+      expect(warm.kind).toBe("metronome");
+      if (warm.kind !== "metronome") continue;
+      const all = [...path.steps.flatMap((st) => st.exercises), ...(path.levels ?? []).flatMap((l) => l.warmups)];
+      const warmEx = all.find((e) => e.id === warm.exerciseId);
+      const focusEx = all.find((e) => e.id === focus.exerciseId);
+      expect(warmEx, `${path.id} warm-up ${warm.exerciseId}`).toBeDefined();
+      expect(focusEx, `${path.id} focus ${focus.exerciseId}`).toBeDefined();
+      if (!warmEx || !focusEx) continue;
+      const warmRate = notesPerSecond(warmEx, warm.bpm);
+      const focusRate = notesPerSecond(focusEx, focus.bpm);
+      if (warmRate !== null && focusRate !== null) expect(warmRate, path.id).toBeLessThanOrEqual(focusRate * 1.25);
+    }
   });
 
   it("a pack warm-up carries a variant seed, which changes from Session to Session", () => {

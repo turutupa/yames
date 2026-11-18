@@ -50,7 +50,7 @@ const TOOL_ACTIONS: HotkeyAction[] = ["play", "bpm-up", "bpm-down", "toggle-coac
 
 /**
  * Getting around (2026-11-17): the learning side on ⌘1–⌘4, the tools on
- * ⌘⇧1–⌘⇧5, read from the same bindings as everything else on this step.
+ * ⌥1–⌥5, read from the same bindings as everything else on this step.
  */
 const NAV_ACTIONS: HotkeyAction[] = [
   "tab-today",
