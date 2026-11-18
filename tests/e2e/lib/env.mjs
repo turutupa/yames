@@ -10,7 +10,7 @@
 // Nothing here touches the owner's profile, audio server or display: every
 // path is under one mkdtemp, and every process is ours and killed at the end.
 import { spawn, spawnSync, execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync, existsSync, chmodSync, createWriteStream, readdirSync, readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync, existsSync, chmodSync, createWriteStream, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -102,9 +102,39 @@ export function unmountUnder(root) {
   }
 }
 
+/**
+ * A lock whose server is gone: Xvfb killed with its run (a crash, a timeout,
+ * a worker stopped mid-run) leaves `/tmp/.X<n>-lock` and its socket behind,
+ * and fifty of those used up the whole range and stopped every later run
+ * ("no free X display", 2026-11-18). Only ours, and only when the pid in the
+ * lock is not alive.
+ */
+function clearStaleDisplay(n) {
+  const lock = `/tmp/.X${n}-lock`;
+  try {
+    const st = statSync(lock);
+    if (typeof process.getuid === "function" && st.uid !== process.getuid()) return false;
+    const pid = Number(readFileSync(lock, "utf8").trim());
+    if (pid > 0) {
+      try {
+        process.kill(pid, 0);
+        return false; // alive
+      } catch (e) {
+        if (e.code === "EPERM") return false; // alive, someone else's
+      }
+    }
+    rmSync(lock, { force: true });
+    rmSync(`/tmp/.X11-unix/X${n}`, { force: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** The first X display number with no server on it. */
 export function freeDisplay(from = 90) {
   for (let n = from; n < from + 50; n++) {
+    if (existsSync(`/tmp/.X${n}-lock`)) clearStaleDisplay(n);
     if (!existsSync(`/tmp/.X11-unix/X${n}`) && !existsSync(`/tmp/.X${n}-lock`)) return n;
   }
   throw new Error("no free X display");
