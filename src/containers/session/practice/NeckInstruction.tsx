@@ -2,10 +2,13 @@
  * The neck as the instruction (the panel's redesign, 2026-11-17): WHERE, WHEN
  * and WHAT NEXT on the neck alone, for a warm-up and for a Take.
  *
- * - Before the start, the pattern in order: each place numbered by the note
- *   that first plays it, the first one NOW, and a "start here" on it.
- * - While it runs, the note to play NOW is solid amber with its fret number
- *   and, where the Exercise fixes the hand, its finger; an approach ring
+ * - A number on a dot is a FINGER, never the order (the owner, 2026-11-18):
+ *   1 to 4 index to little finger, 0 an open string, nothing where it is not
+ *   certain (`fingering`).
+ * - Before the start, the pattern with its fingers, the first note NOW with a
+ *   "start here", and the order as a thin line through one pass, arrowed and
+ *   fading along its length (`orderPath`, drawn on `project()`).
+ * - While it runs, the note to play NOW is solid amber; an approach ring
  *   closes on it as its beat arrives. NEXT is an amber outline marked "next",
  *   with "then 7, 5" beside it. The notes just played keep their verdict's
  *   colour (a Take); four beat dots count the bar under the neck.
@@ -34,9 +37,10 @@ import {
   barAt,
   beatInBar,
   cameraPlan,
-  fingerFor,
+  fingering,
   nowNextNeck,
-  orderedNeck,
+  orderPath,
+  readyNeck,
   thenFrets,
   windowOver,
   windowView,
@@ -97,6 +101,7 @@ export function NeckInstruction({
   const nextTag = useRef<HTMLSpanElement>(null);
   const dots = useRef<HTMLDivElement>(null);
   const foot = useRef<HTMLDivElement>(null);
+  const pathSvg = useRef<SVGSVGElement>(null);
 
   const notes = take.exercise.notes;
   const shape = useMemo(() => neckNotesOf(notes, "aim"), [notes]);
@@ -105,6 +110,8 @@ export function NeckInstruction({
   const perQuarter = take.score.ticksPerQuarter > 0 ? take.score.ticksPerQuarter : TICKS_PER_QUARTER;
   const beats = Math.max(1, Math.round(model.barLength / perQuarter));
   const position = take.exercise.position;
+  const fingers = useMemo(() => fingering(notes, position), [notes, position]);
+  const hasFingers = useMemo(() => [...fingers.values()].some((f) => f !== "0"), [fingers]);
 
   // Ready: the whole pattern in view. Running: the bar's window.
   const whole = useMemo<NeckView>(() => {
@@ -129,8 +136,94 @@ export function NeckInstruction({
     }
     return map;
   }, [lights]);
-  const latest = useRef({ verdicts, model, shape, theory, running });
-  latest.current = { verdicts, model, shape, theory, running };
+  const order = useMemo(() => orderPath(model.onsets), [model]);
+  const latest = useRef({ verdicts, model, shape, theory, running, fingers, order });
+  latest.current = { verdicts, model, shape, theory, running, fingers, order };
+
+  /**
+   * The order before the start: a thin line from each place to the next, edge
+   * to edge so it never crosses a finger number, with a small arrowhead, each
+   * leg a little to its own right so a sweep's way up and way back read as
+   * two lanes of one stroke. It fades along its length; hidden once it runs.
+   */
+  const drawPath = useCallback(
+    (box: DOMRect) => {
+      const svg = pathSvg.current;
+      if (!svg) return;
+      const { order: places, running: on } = latest.current;
+      if (on || places.length < 2) {
+        svg.replaceChildren();
+        return;
+      }
+      const pts = places.map((p) => neck.project(p.string, p.fret));
+      const NS = "http://www.w3.org/2000/svg";
+      const out: SVGElement[] = [];
+      const legs = places.length - 1;
+      for (let i = 0; i < legs; i++) {
+        const a = pts[i];
+        const b = pts[i + 1];
+        if (!a || !b) continue;
+        const ax = a.x - box.left;
+        const ay = a.y - box.top;
+        const bx = b.x - box.left;
+        const by = b.y - box.top;
+        const len = Math.hypot(bx - ax, by - ay);
+        if (len < 1) continue;
+        const ux = (bx - ax) / len;
+        const uy = (by - ay) / len;
+        // Each leg bows to its own right, so a leg and its way back sit side
+        // by side, and two neighbours (the next string, same fret) get an arc
+        // round the outside rather than nothing.
+        const r = Math.min(a.r, b.r);
+        const near = len < (a.r + b.r) * 1.6 + 24;
+        const bulge = near ? r * 1.7 : Math.max(8, r * 0.8);
+        const cx = (ax + bx) / 2 - uy * bulge;
+        const cy = (ay + by) / 2 + ux * bulge;
+        // Start and end on the dots' rims (NOW's is the larger marker), aimed at the bow.
+        const rim = (x: number, y: number, rad: number) => {
+          const d = Math.hypot(cx - x, cy - y) || 1;
+          return { x: x + ((cx - x) / d) * rad, y: y + ((cy - y) / d) * rad };
+        };
+        const s1 = rim(ax, ay, a.r * (i === 0 ? 1.45 : 1.1) + 2);
+        const s2 = rim(bx, by, b.r * 1.1 + 3);
+        // The arrowhead: in the middle of a long leg, where it has room and
+        // shows the way at a glance; at the end of a short one.
+        const mid = Math.hypot(s2.x - s1.x, s2.y - s1.y) > 110;
+        const tx = mid ? 0.25 * s1.x + 0.5 * cx + 0.25 * s2.x : s2.x;
+        const ty = mid ? 0.25 * s1.y + 0.5 * cy + 0.25 * s2.y : s2.y;
+        const ex = mid ? s2.x - s1.x : s2.x - cx;
+        const ey = mid ? s2.y - s1.y : s2.y - cy;
+        const el = Math.hypot(ex, ey) || 1;
+        const vx = ex / el;
+        const vy = ey / el;
+        const fade = legs > 1 ? 1 - (0.7 * i) / (legs - 1) : 1;
+        const g = document.createElementNS(NS, "g");
+        g.setAttribute("opacity", fade.toFixed(2));
+        const h = Math.max(8, Math.min(11, r * 0.55));
+        const line = document.createElementNS(NS, "path");
+        line.setAttribute("class", "practice-path-leg");
+        // A short leg stops short of its arrowhead's tip, so the round cap never shows past it.
+        const lx = mid ? s2.x : s2.x - vx * h * 0.6;
+        const ly = mid ? s2.y : s2.y - vy * h * 0.6;
+        line.setAttribute("d", `M${s1.x.toFixed(1)} ${s1.y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)}`);
+        g.appendChild(line);
+        const tip = document.createElementNS(NS, "path");
+        tip.setAttribute("class", "practice-path-tip");
+        const px = tx + (mid ? vx * h * 0.5 : 0);
+        const py = ty + (mid ? vy * h * 0.5 : 0);
+        const hx = px - vx * h;
+        const hy = py - vy * h;
+        tip.setAttribute(
+          "d",
+          `M${px.toFixed(1)} ${py.toFixed(1)} L${(hx - vy * h * 0.55).toFixed(1)} ${(hy + vx * h * 0.55).toFixed(1)} L${(hx + vy * h * 0.55).toFixed(1)} ${(hy - vx * h * 0.55).toFixed(1)} Z`,
+        );
+        g.appendChild(tip);
+        out.push(g);
+      }
+      svg.replaceChildren(...out);
+    },
+    [neck],
+  );
 
   /** Hang the DOM overlay on the places NOW and NEXT stand on. */
   const placeOverlay = useCallback(
@@ -139,6 +232,7 @@ export function NeckInstruction({
       const m = latest.current.model;
       const hide = (el: HTMLElement | null) => el && (el.style.visibility = "hidden");
       if (!box) return;
+      drawPath(box);
       const at = (i: number) => {
         const p = m.onsets[i]?.places[0];
         if (!p) return null;
@@ -175,6 +269,26 @@ export function NeckInstruction({
           tag.style.visibility = "visible";
           tag.style.left = `${now.x}px`;
           tag.style.top = `${now.y + Math.max(20, now.r * 2.1)}px`;
+          tag.style.transform = "";
+          // Before the start, "start here" goes on the side the path leaves
+          // from, so the words never sit on the line or the next dot.
+          const ord = latest.current.order;
+          const to = !latest.current.running && ord.length > 1 ? neck.project(ord[1].string, ord[1].fret) : null;
+          if (to) {
+            const dx = to.x - box.left - now.x;
+            const dy = to.y - box.top - now.y;
+            const off = now.r * 1.55 + 8;
+            if (Math.abs(dx) >= Math.abs(dy)) {
+              tag.style.top = `${now.y}px`;
+              tag.style.left = `${now.x + (dx > 0 ? -off : off)}px`;
+              tag.style.transform = dx > 0 ? "translate(-100%, -50%)" : "translate(0, -50%)";
+            } else if (dy < 0) {
+              tag.style.top = `${now.y + Math.max(20, now.r * 2.1)}px`;
+            } else {
+              tag.style.top = `${now.y - Math.max(20, now.r * 2.1)}px`;
+              tag.style.transform = "translate(-50%, -100%)";
+            }
+          }
         }
       }
       const nt = nextTag.current;
@@ -315,17 +429,16 @@ export function NeckInstruction({
         }
       }
     },
-    [neck],
+    [neck, drawPath],
   );
 
   /** NOW moved on: the neck, the tags' words, the ring. */
   const showIndex = useCallback(
     (index: number, tick: number | null) => {
-      const { model: m, shape: sh, verdicts: v, theory: th } = latest.current;
-      neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th), { fade: 0.12 });
-      const p = m.onsets[index]?.places[0];
-      const finger = p ? fingerFor(position, p.fret) : null;
-      if (nowTag.current) nowTag.current.textContent = finger ? t("session.practice.finger", { n: finger }) : "";
+      const { model: m, shape: sh, verdicts: v, theory: th, fingers: fg } = latest.current;
+      neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg), { fade: 0.12 });
+      // The finger is on the dot itself now; the tag under NOW says nothing.
+      if (nowTag.current) nowTag.current.textContent = "";
       const then = thenFrets(m.onsets, index);
       const nextLabel = nextTag.current?.querySelector<HTMLElement>("[data-then]");
       if (nextLabel) nextLabel.textContent = then.length ? t("session.practice.then", { frets: then.join(", ") }) : "";
@@ -333,7 +446,7 @@ export function NeckInstruction({
       const ms = tick !== null && due !== undefined ? ((due - tick) / perQuarter) * (60_000 / Math.max(1, take.bpm)) : null;
       placeOverlay(index, ms);
     },
-    [neck, position, t, placeOverlay, perQuarter, take.bpm],
+    [neck, t, placeOverlay, perQuarter, take.bpm],
   );
 
   // The slot: framed on arrival, hidden on the way out.
@@ -348,14 +461,14 @@ export function NeckInstruction({
     if (running) return;
     shown.current = { index: -1, bar: -1, beat: -1, view: whole };
     neck.setView(whole, slot.current);
-    neck.setNotes(orderedNeck(shape, model.onsets, theory));
+    neck.setNotes(readyNeck(shape, model.onsets, fingers, theory));
     if (nowTag.current) nowTag.current.textContent = t("session.practice.start");
     dots.current?.querySelectorAll("i").forEach((d) => d.removeAttribute("data-on"));
     // Once the camera is there (an instant cut or the end of a flight).
     placeOverlay(0, null);
     const id = window.setTimeout(() => placeOverlay(0, null), 1500);
     return () => window.clearTimeout(id);
-  }, [running, whole, shape, model, theory, neck, placeOverlay, t]);
+  }, [running, whole, shape, model, theory, fingers, neck, placeOverlay, t]);
 
   // Running, before the first report: the first note is NOW, the first bar framed.
   useLayoutEffect(() => {
@@ -370,8 +483,8 @@ export function NeckInstruction({
   // A new verdict: the played notes take its colour, NOW and NEXT unchanged.
   useEffect(() => {
     if (!running || shown.current.index < 0) return;
-    const { model: m, shape: sh, theory: th } = latest.current;
-    neck.setNotes(nowNextNeck(sh, m.onsets, shown.current.index, verdicts, th), { fade: 0.12 });
+    const { model: m, shape: sh, theory: th, fingers: fg } = latest.current;
+    neck.setNotes(nowNextNeck(sh, m.onsets, shown.current.index, verdicts, th, fg), { fade: 0.12 });
   }, [verdicts, running, neck]);
 
   // The beat counter's row sits just over the overview strip, in the room the
@@ -446,6 +559,7 @@ export function NeckInstruction({
     <div className={`practice-neck${className ? ` ${className}` : ""}`} ref={wrap} data-testid="practice-neck" data-running={running ? "" : undefined}>
       <div className="session-slot practice-neck-slot" ref={slot} aria-hidden="true" data-neck-foot={FOOT_PX} />
       <div className="practice-neck-over" aria-hidden="true">
+        <svg className="practice-path" ref={pathSvg} data-testid="practice-path" />
         <i className="practice-ring" ref={ring} data-ready={running ? undefined : ""} />
         <span className="practice-now-tag" ref={nowTag} data-testid="practice-now-tag" />
         <span className="practice-next-tag" ref={nextTag} data-testid="practice-next-tag">
@@ -470,9 +584,16 @@ export function NeckInstruction({
           ))}
         </div>
         <span className="practice-legend" aria-hidden="true">
-          <span data-k="now">{t("session.practice.legendNow")}</span>
-          <span data-k="next">{t("session.practice.legendNext")}</span>
-          {pluck && <span data-k="played">{t("session.practice.legendPlayed")}</span>}
+          {running ? (
+            <>
+              <span data-k="now">{t("session.practice.legendNow")}</span>
+              <span data-k="next">{t("session.practice.legendNext")}</span>
+              {pluck && <span data-k="played">{t("session.practice.legendPlayed")}</span>}
+            </>
+          ) : (
+            order.length > 1 && <span data-k="path">{t("session.practice.legendPath")}</span>
+          )}
+          {hasFingers && <span data-k="fingers">{t("session.practice.legendFingers")}</span>}
         </span>
       </div>
     </div>

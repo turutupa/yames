@@ -7,8 +7,12 @@
  * the engine.
  *
  * The neck as the instruction:
- * - the note to play NOW is solid amber and carries its fret number;
- * - the NEXT one is an amber outline, also with its fret number;
+ * - a number on a dot is always a FINGER, as in a chord or scale diagram
+ *   (1 index to 4 little finger, 0 an open string), never the order: the owner
+ *   read the old order numbers as fingers (2026-11-18). Where the fingering is
+ *   not certain the dot carries no number rather than a guess (`fingering`);
+ * - the order is a path before the start (`orderPath`), and NOW and NEXT once
+ *   it runs: the note to play NOW is solid amber, the NEXT one an amber outline;
  * - the notes just played keep the colour of their verdict for a moment,
  *   where there is one (a Take); with none (a warm-up) they go quiet;
  * - the rest of the shape stays on the neck, quiet (`box`), so the hand still sees
@@ -41,17 +45,18 @@ export function nowNextNeck(
   index: number,
   verdicts: ReadonlyMap<number, NeckKind> | null = null,
   theory = false,
+  fingers: ReadonlyMap<string, string> | null = null,
 ): NeckNote[] {
   const kinds = new Map<string, { kind: NeckKind; label?: string }>();
-  const put = (places: readonly Place[] | undefined, kind: NeckKind, label?: (p: Place) => string) => {
+  const put = (places: readonly Place[] | undefined, kind: NeckKind, label?: (p: Place) => string | undefined) => {
     for (const p of places ?? []) {
       const k = key(p);
       if (!kinds.has(k)) kinds.set(k, { kind, label: label?.(p) });
     }
   };
-  const fret = (p: Place) => String(p.fret);
-  put(onsets[index]?.places, "now", fret);
-  put(onsets[index + 1]?.places, "next", fret);
+  const finger = (p: Place) => fingers?.get(key(p));
+  put(onsets[index]?.places, "now", finger);
+  put(onsets[index + 1]?.places, "next", finger);
   if (verdicts) {
     for (let i = index - 1; i >= Math.max(0, index - PLAYED_SHOWN); i--) {
       const kind = verdicts.get(onsets[i].id);
@@ -61,7 +66,7 @@ export function nowNextNeck(
   const out: NeckNote[] = shape.map((n) => {
     const hit = kinds.get(key(n));
     if (hit) return { ...n, kind: hit.kind, label: hit.label };
-    return { ...n, kind: "box", label: theory ? n.label : undefined };
+    return { ...n, kind: "box", label: fingers?.get(key(n)) ?? (theory ? n.label : undefined) };
   });
   // NOW and NEXT are on the neck even when the shape somehow lacks them.
   const seen = new Set(shape.map(key));
@@ -74,35 +79,97 @@ export function nowNextNeck(
 }
 
 /**
- * Before the start: the pattern in order. Each place carries the number of
- * the note that first plays it; the first is NOW, the second NEXT, the rest
- * an outline, so the order reads at a glance.
+ * Before the start: the pattern with its fingers. The first note is NOW
+ * ("start here"); the rest of the pattern is the quiet outline, each dot with
+ * its finger where it is known. The order is not on the dots: `orderPath`
+ * draws it as a line over them.
  */
-export function orderedNeck(shape: readonly NeckNote[], onsets: Onsets, theory = false): NeckNote[] {
-  const order = new Map<string, number>();
-  // The numbers count the fretted places only. An open string is the "0"
-  // token by the nut, as tab writes it (acceptance 2, P1-3): numbering it put
-  // a "2" on the headstock, and a pedal tone between every note took a number
-  // the run of fretted notes then skipped.
-  const numbered = new Map<string, number>();
-  let n = 0;
-  let f = 0;
-  for (const o of onsets) {
-    for (const p of o.places) {
-      if (order.has(key(p))) continue;
-      order.set(key(p), ++n);
-      if (p.fret > 0) numbered.set(key(p), ++f);
-    }
-  }
+export function readyNeck(
+  shape: readonly NeckNote[],
+  onsets: Onsets,
+  fingers: ReadonlyMap<string, string>,
+  theory = false,
+): NeckNote[] {
+  const first = onsets[0]?.places[0];
+  const played = new Set<string>();
+  for (const o of onsets) for (const p of o.places) played.add(key(p));
   return shape.map((note) => {
-    const at = order.get(key(note));
-    if (at === undefined) return { ...note, kind: "dim", label: theory ? note.label : undefined };
+    const k = key(note);
+    if (!played.has(k)) return { ...note, kind: "dim", label: theory ? note.label : undefined };
     return {
       ...note,
-      kind: at === 1 ? "now" : at === 2 ? "next" : "box",
-      label: note.fret > 0 ? String(numbered.get(key(note)) ?? at) : "0",
+      kind: first && key(first) === k ? "now" : "box",
+      label: fingers.get(k) ?? (theory ? note.label : undefined),
     };
   });
+}
+
+/**
+ * The fingers, by place ("string:fret" to "1".."4", or "0" for an open
+ * string), as a chord or scale diagram writes them. Only what the Exercise
+ * makes certain:
+ *
+ * - its hand position is the index finger's fret, one finger per fret, so a
+ *   fret one to three above it is the middle, ring and little finger;
+ * - a fret past the four is the little finger's stretch, but only when it is
+ *   the one fret out there and the little finger's own fret is not used (the
+ *   C major sweep at 8: 8, 9, 10 and the 12 above them);
+ * - a hand that may shift gets fingers only when every note is under the four
+ *   fingers where it starts; otherwise which finger takes a note after a shift
+ *   is a choice, and a dot with a guessed number is worse than one without.
+ *
+ * A tapped note is the picking hand's, and gets no number.
+ */
+export function fingering(
+  notes: readonly { string: number; fret: number; tech?: readonly string[] }[],
+  position: HandPosition | undefined,
+): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const n of notes) if (n.fret === 0) out.set(key(n), "0");
+  if (!position) return out;
+  const fretted = notes.filter((n) => n.fret > 0 && !n.tech?.includes("tap"));
+  const base = Math.max(1, position.fret);
+  const frets = new Set(fretted.map((n) => n.fret));
+  const beyond = [...frets].filter((f) => f > base + 3);
+  if (position.shifts !== "none" && (beyond.length > 0 || [...frets].some((f) => f < base))) return out;
+  const stretch = beyond.length === 1 && beyond[0] - base <= 5 && !frets.has(base + 3) ? beyond[0] : null;
+  for (const n of fretted) {
+    const d = n.fret - base;
+    const finger = d >= 0 && d <= 3 ? d + 1 : n.fret === stretch ? 4 : null;
+    if (finger !== null) out.set(key(n), String(finger));
+  }
+  return out;
+}
+
+/**
+ * The order to draw before the start: the places of ONE pass, in the order
+ * they are played, a note repeated on its own place counted once. A pattern
+ * that repeats inside the Take (two loops a bar, a pass played twice) is drawn
+ * once; past `max` places the line stops, so a long line stays legible.
+ */
+export function orderPath(onsets: Onsets, max = 16): Place[] {
+  const seq: Place[] = [];
+  for (const o of onsets) {
+    const p = o.places[0];
+    if (p) seq.push({ string: p.string, fret: p.fret });
+  }
+  const n = seq.length;
+  let period = n;
+  for (let k = 1; k <= n / 2; k++) {
+    let same = true;
+    for (let i = 0; i + k < n && same; i++) same = key(seq[i]) === key(seq[i + k]);
+    if (same) {
+      period = k;
+      break;
+    }
+  }
+  const out: Place[] = [];
+  for (const p of seq.slice(0, period)) {
+    if (out.length && key(out[out.length - 1]) === key(p)) continue;
+    out.push(p);
+    if (out.length >= max) break;
+  }
+  return out;
 }
 
 /** "then 7, 5": the frets of the two onsets after NEXT, or null when there are none. */

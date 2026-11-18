@@ -101,7 +101,7 @@ export interface Shot {
      * Today's plan. The harness makes it runnable for the scene, so a Theory
      * Take can be photographed before any Theory Path ships as runnable.
      */
-    path?: "blues-pentatonics" | "sweep-picking";
+    path?: "blues-pentatonics" | "sweep-picking" | "alternate-picking";
     /** With `path`: play this Exercise rather than the first Step's first. */
     exercise?: string;
     /** With `exercise`: it plays over the band, so wait for the band before the photograph. */
@@ -814,6 +814,35 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 900,
+  },
+  // Fingers on the dots, the order as a path (the owner, 2026-11-18): the
+  // Take's ready screen for a sweep, a one-string four-finger drill and a box lick.
+  {
+    id: "session-neck-sweep",
+    suffix: "session-neck-sweep",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "sweep-picking", exercise: "four-strings.c-four" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-fingers",
+    suffix: "session-neck-fingers",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "alternate-picking", exercise: "even-eighths.four-fingers" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
+  },
+  {
+    id: "session-neck-box",
+    suffix: "session-neck-box",
+    window: "main",
+    session: { seed: "returning", stop: "ready", practiceView: "neck", path: "blues-pentatonics", exercise: "box-one.first-lick" },
+    width: 1400,
+    height: 900,
+    settleMs: 1800,
   },
   {
     id: "session-playing",
