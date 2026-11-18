@@ -3568,6 +3568,18 @@
 .session-body > .session-practice-hero {
   flex: 1 1 0;
 }
+/* A phone held upright, mid-Take (acceptance 4, the coordinator): the neck
+   is framed on its width, so a slot stretched to the window's leftover height
+   drew it as a 145 px band with empty bands above and below. The slot keeps
+   the height the framed neck, its numbers and the beat dots use, and sits in
+   the middle of the room that is left. */
+@media (orientation: portrait) and (max-width: 480px) {
+  .session-body[data-phase="playing"] > .session-practice-hero.practice-neck {
+    flex: 0 0 auto;
+    height: clamp(230px, 64vw, 270px);
+    margin-block: auto;
+  }
+}
 /* The Take's low row with no small tab in it any more: the words alone. */
 .session-mechlow[data-single] {
   grid-template-columns: minmax(0, 1fr);
