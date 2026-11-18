@@ -122,10 +122,8 @@ function columnWidth(model: PatternModel, ppt: number, fretPx: number): number {
 }
 
 /** The left column: the six lines' start and TAB, still while the segments move. */
-function Letters({ geo, lines = 0 }: { geo: StaffGeometry; lines?: number }) {
-  // `lines`: the scrolling view's lines run on under the window from here, so
-  // its faded edges fade the numbers and never the strings.
-  const width = geo.letters + lines;
+function Letters({ geo }: { geo: StaffGeometry }) {
+  const width = geo.letters;
   return (
     <svg className="tabstrip-letters" width={width} height={geo.height} aria-hidden="true">
       {Array.from({ length: 6 }, (_u, i) => (
@@ -621,7 +619,14 @@ export function TabStrip({
     const endX = Number.isFinite(lastSegment) ? (lastSegment + 1) * fl.segWidth : null;
     body = (
       <div className="tabstrip-staff" style={{ height: geo.height }}>
-        <Letters geo={geo} lines={fl.windowWidth} />
+        <Letters geo={geo} />
+        {/* The scrolling view's strings run on under the window, outside its
+            faded edges, so the fade takes the numbers and never the lines. */}
+        <div className="tabstrip-lines" style={{ left: geo.letters, width: fl.windowWidth }} aria-hidden="true">
+          {Array.from({ length: 6 }, (_u, i) => (
+            <i key={i} style={{ top: geo.top + i * geo.gap }} />
+          ))}
+        </div>
         <div className="tabstrip-window" data-scroll="" style={{ left: geo.letters, width: fl.windowWidth, height: geo.height }}>
           <i
             className="tabstrip-cursor"

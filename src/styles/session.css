@@ -4125,3 +4125,8 @@
   background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--lane) 7%, transparent) 30%, color-mix(in srgb, var(--lane) 7%, transparent) 70%, transparent);
   pointer-events: none;
 }
+/* On one line in a gap between two strings (a narrow neck): the pill only as
+   tall as the words, so it stays between the strings. */
+:root:not([data-theme="ember"]) .practice-next-tag[data-row] {
+  padding-block: 1px;
+}

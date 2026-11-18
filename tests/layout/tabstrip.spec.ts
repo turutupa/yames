@@ -73,8 +73,19 @@ for (const scene of SCENES) {
         const col = await page.locator(".tabstrip-cursor").boundingBox();
         expect(cur && col, "a current note and the column").toBeTruthy();
         expect(Math.abs(cur!.x + cur!.width / 2 - (col!.x + col!.width / 2))).toBeLessThan(5);
-        await expect(page.locator('.tabstrip-seg[data-rel="now"] .tabstrip-label')).toContainText("now");
-        await expect(page.locator('.tabstrip-seg[data-rel="next"] .tabstrip-label')).toContainText("next");
+        if (size.width < 600) {
+          // A phone scrolls under a still column (acceptance 2, N-P1-2): one
+          // "now" at the left, each bar ahead named at its own bar line.
+          await expect(page.locator(".tabstrip-nowlabel")).toContainText("bar");
+          await expect(page.locator('.tabstrip-seg[data-rel="next"] .tabstrip-label')).toContainText("bar");
+          const view = (await page.locator(".tabstrip-window").boundingBox())!;
+          const share = (col!.x + col!.width / 2 - view.x) / view.width;
+          expect(share, "the column stands about a quarter in").toBeGreaterThan(0.18);
+          expect(share).toBeLessThan(0.34);
+        } else {
+          await expect(page.locator('.tabstrip-seg[data-rel="now"] .tabstrip-label')).toContainText("now");
+          await expect(page.locator('.tabstrip-seg[data-rel="next"] .tabstrip-label')).toContainText("next");
+        }
       } else if (scene === "tabstrip-paused") {
         await expect(page.locator('.tabstrip-seg[data-rel="mark"] .tabstrip-label')).toContainText("paused here");
       } else {
