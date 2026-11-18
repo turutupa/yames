@@ -1993,7 +1993,9 @@ export function MainWindow() {
           anchored overlay — two cards pointing at the same UI is noise) and
           of Zen (which renders its own `zen-first` card inside the overlay). */}
       {!IS_MOBILE && appHint && !onboarding.isOpen && !tour?.isOpen && !isFullscreen && !holdNudges && (
-        jamHintSlot && appHint.id.startsWith("jam-") ? (
+        // "jam-live" is about the open sheet, which lies over the page:
+        // it stays anchored, where it can be seen.
+        jamHintSlot && appHint.id.startsWith("jam-") && appHint.id !== "jam-live" ? (
           createPortal(
             <HintCard
               id={appHint.id}

@@ -256,8 +256,6 @@ test.describe("what the stage looks like", () => {
          * Closing it is what a player does the moment they have armed the
          * thing, so it is also the state they actually play in.
          */
-        const hint = page.getByRole("button", { name: "Got it", exact: true });
-        if ((await hint.count()) > 0) await hint.first().click();
         const done = page.locator(".jam-sheet-done, .jam-sheet-frame-done").first();
         if ((await done.count()) > 0) await done.click();
         else {
@@ -265,6 +263,11 @@ test.describe("what the stage looks like", () => {
           if ((await label.count()) > 0) await label.first().click();
         }
         await expect(page.locator(".jam-sheet")).toHaveCount(0);
+        // Then the hint, which sits in the page under the doors now (in the
+        // flow, so the open sheet lay over it). Its own button: the camera's
+        // guide says "Got it" too.
+        const hint = page.locator(".hint-card").getByRole("button", { name: "Got it", exact: true });
+        if ((await hint.count()) > 0) await hint.first().click();
         await page.waitForTimeout(300);
         const file = path.join(OUT, `jam-stage-${String(size.width)}-${theme}.png`);
         await page.screenshot({ path: file });
