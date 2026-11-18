@@ -15,7 +15,12 @@
 import { useContext } from "react";
 import { NeckStageContext } from "./context";
 
-export type NeckKind = "aim" | "tone" | "tens" | "clash" | "box" | "dim";
+/**
+ * What a marker on the neck means. `now` and `next` are the practice screens'
+ * instruction (2026-11-17): the note to play now, solid amber with its fret
+ * number, and the one after it, an amber outline.
+ */
+export type NeckKind = "aim" | "tone" | "tens" | "clash" | "box" | "dim" | "now" | "next";
 
 /** String 1 is high E, 6 is low E (as in the packs). Fret 0 is the open string. */
 export type NeckNote = { string: 1 | 2 | 3 | 4 | 5 | 6; fret: number; kind: NeckKind; label?: string };
@@ -38,6 +43,15 @@ export interface NeckStage {
   sweep(): void;
   /** A Take is running: cap the frame rate (rule 1). */
   setTakeRunning(on: boolean): void;
+  /**
+   * Where a place on the neck is on screen, in viewport CSS px: the centre of
+   * its marker, where the camera is going (not where a flight has got to).
+   * Null while nothing is drawn, or for a place the view does not show. The
+   * practice screens hang their DOM overlay (the approach ring, "next") on it.
+   * `r` is the radius of a resting marker there, in px, so an overlay can be
+   * sized to the note it rings.
+   */
+  project(string: number, fret: number): { x: number; y: number; r: number } | null;
   /** True when WebGL2 is up; false means the SVG fallback is drawing. */
   readonly is3d: boolean;
 }

@@ -3,7 +3,7 @@
  * straight-on above, six lanes of what comes next under it, one compact row of
  * numbers. The neck answers WHERE, the runway WHEN and WHAT NEXT.
  *
- * Behind the Neck / Runway switch; the neck view (`SessionView.tsx`) stays the
+ * Behind the Neck / Runway / Tab switch; the neck view (`SessionView.tsx`) stays the
  * default. Nothing here decides anything: it reads the same Take, lights and
  * engine position the neck view reads.
  */
@@ -23,49 +23,12 @@ import { lineText } from "../lineText";
 import { CoachLine, TempoNudges, bigLabel } from "../parts";
 import { Runway } from "./Runway";
 import { ghostNeck, runwayModel } from "./runwayModel";
-import type { Judged, PracticeView } from "./runwayModel";
+import type { Judged } from "./runwayModel";
+import { PracticeViewSwitch } from "../practice/PracticeViewSwitch";
+import { HandLine } from "../practice/HandLine";
 
 /** The neck is told verdicts as colours here, not plucks (see `ghostNeck`). */
 const NO_PLUCKS: ReadonlyMap<number, TimingMark> = new Map();
-
-/** Neck or Runway. Locked while a Take runs, so each Take has one view. */
-export function PracticeViewSwitch({ session, locked }: { session: SessionRun; locked: boolean }) {
-  const { t } = useTranslation();
-  const views: PracticeView[] = ["neck", "runway"];
-  return (
-    <div
-      className="session-viewswitch"
-      role="radiogroup"
-      aria-label={t("session.view.label")}
-      title={locked ? t("session.view.between") : undefined}
-      aria-disabled={locked || undefined}
-      data-locked={locked ? "" : undefined}
-      data-testid="practice-view"
-    >
-      {/* Locked while a Take runs, and it looks it: a padlock, a dashed
-          edge, both halves quiet (QA 2026-11-17 #20). */}
-      {locked && (
-        <svg className="session-viewswitch-lock" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-          <rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor" />
-          <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-        </svg>
-      )}
-      {views.map((v) => (
-        <button
-          key={v}
-          role="radio"
-          aria-checked={session.practiceView === v}
-          data-on={session.practiceView === v ? "" : undefined}
-          disabled={locked}
-          onClick={() => session.setPracticeView(v)}
-          data-testid={`practice-view-${v}`}
-        >
-          {t(`session.view.${v}`)}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 /** A Theory Exercise is about WHERE: the runway folds to one lane and the neck takes the room. */
 export function isTheoryTake(session: SessionRun): boolean {
@@ -78,6 +41,7 @@ export function RunwayTakeScreen({
   isPlaying,
   listening,
   hasSignal,
+  viewKey,
   onCheckSound,
 }: {
   session: SessionRun;
@@ -85,6 +49,7 @@ export function RunwayTakeScreen({
   isPlaying: boolean;
   listening: boolean;
   hasSignal: boolean;
+  viewKey?: string;
   onCheckSound: () => void;
 }) {
   const { t } = useTranslation();
@@ -167,7 +132,12 @@ export function RunwayTakeScreen({
         </span>
         <h2 className="session-h3">{exercise.title}</h2>
         {!running && <span className="session-why">{lineText(t, reasonLine(step.why))}</span>}
-        <PracticeViewSwitch session={session} locked={running} />
+        <PracticeViewSwitch
+          view={session.practiceView}
+          onChange={session.setPracticeView}
+          locked={running}
+          keyLabel={viewKey}
+        />
       </div>
 
       <div className="session-compact" data-testid={running ? "session-live" : undefined}>
@@ -229,6 +199,7 @@ export function RunwayTakeScreen({
               {t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
             </span>
           )}
+          {!running && <HandLine position={exercise.position} />}
           {!running && exercise.howTo[0] && <span className="session-why">{exercise.howTo[0]}</span>}
           {!running && bar && <span className="session-why">{lineText(t, bar)}</span>}
           {!running && !listening && (

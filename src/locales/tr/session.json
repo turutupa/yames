@@ -378,7 +378,23 @@
       "label": "Çalışma görünümü",
       "neck": "Sap",
       "runway": "Pist",
-      "between": "Görünümü kayıtlar arasında değiştir"
+      "between": "Görünümü kayıtlar arasında değiştir",
+      "tab": "Tab",
+      "keyHint": "Görünümü değiştir: {{key}}"
+    },
+    "practice": {
+      "next": "sonraki",
+      "then": "sonra {{frets}}",
+      "finger": "{{n}}. parmak",
+      "start": "buradan başla",
+      "legendNow": "şimdi çal",
+      "legendNext": "sonraki",
+      "legendPlayed": "az önce çalındı",
+      "beats": "Ölçünün vuruşları",
+      "hand": "El: işaret parmağı {{fret}}. perdede, her perdeye bir parmak.",
+      "handShifts": "El: işaret parmağıyla {{fret}}. perdeden başla; sap boyunca kayar.",
+      "handOpen": "El: açık pozisyon, işaret parmağı 1. perdenin üstünde.",
+      "viewHint": "Görünümü istediğin zaman değiştir"
     },
     "runway": {
       "label": "Çizgiye doğru gelen sıradaki notalar",

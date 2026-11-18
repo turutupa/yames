@@ -378,7 +378,23 @@
       "label": "练习视图",
       "neck": "琴颈",
       "runway": "跑道",
-      "between": "请在两次录制之间切换视图"
+      "between": "请在两次录制之间切换视图",
+      "tab": "六线谱",
+      "keyHint": "切换视图：{{key}}"
+    },
+    "practice": {
+      "next": "下一个",
+      "then": "然后 {{frets}}",
+      "finger": "{{n}} 指",
+      "start": "从这里开始",
+      "legendNow": "现在弹",
+      "legendNext": "下一个",
+      "legendPlayed": "刚弹过",
+      "beats": "这一小节的拍子",
+      "hand": "手：食指在第 {{fret}} 品，一指一品。",
+      "handShifts": "手：食指从第 {{fret}} 品开始，沿琴颈移动。",
+      "handOpen": "手：开放把位，食指在第 1 品上方。",
+      "viewHint": "随时可以切换视图"
     },
     "runway": {
       "label": "即将到达判定线的下一组音符",

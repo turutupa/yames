@@ -16,6 +16,8 @@ export const NOTE_FILL: Record<NeckKind, string> = {
   clash: "#ff5d6c",
   box: "#ffe2bd",
   dim: "#7d6a55",
+  now: "#ffb454",
+  next: "#ffb454",
 };
 const fx = (n: number) => 1 - Math.pow(2, -n / 12);
 

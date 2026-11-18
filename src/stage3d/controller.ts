@@ -220,6 +220,30 @@ export class StageController {
     this.adaptive.reset();
   }
 
+  /**
+   * A place on screen. In 3D the engine projects it through the camera it is
+   * flying to; on the SVG fallback it is the centre of that place's dot, which
+   * the fallback draws inside the slot.
+   */
+  project(string: number, fret: number): { x: number; y: number; r: number } | null {
+    if (this.snap.view.kind === "hidden") return null;
+    if (this.engine) {
+      try {
+        return this.engine.project(string, fret);
+      } catch {
+        return null;
+      }
+    }
+    if (this.snap.mode !== "fallback") return null;
+    const dot = this.snap.slot?.querySelector<SVGElement>(
+      `[data-testid="fret-dot"][data-string="${6 - string}"][data-fret="${Math.round(fret)}"]`,
+    );
+    if (!dot) return null;
+    const b = dot.getBoundingClientRect();
+    if (b.width === 0 && b.height === 0) return null;
+    return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: b.width / 2 };
+  }
+
   get isTakeRunning(): boolean {
     return this.takeRunning;
   }
@@ -232,6 +256,7 @@ export class StageController {
       pluck: (s, f, k) => this.pluck(s, f, k),
       sweep: () => this.sweep(),
       setTakeRunning: (on) => this.setTakeRunning(on),
+      project: (s, f) => this.project(s, f),
       is3d,
     };
   }

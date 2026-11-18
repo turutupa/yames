@@ -962,6 +962,13 @@
       "globalKey": null,
       "globalAllowed": false,
       "group": "session"
+    },
+    {
+      "id": "session-view",
+      "key": "V",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
     }
   ],
   "settingsKeys": {
@@ -1486,6 +1493,11 @@
       "written": true
     },
     "betaUpdate.promptedAt": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.viewHintSeen": {
       "store": "settings.json",
       "read": true,
       "written": true

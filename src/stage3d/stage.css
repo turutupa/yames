@@ -66,6 +66,15 @@
 .neck-fallback .fretboard-dot[data-kind="clash"] { fill: #ff5d6c; stroke: #ffc2c8; }
 .neck-fallback .fretboard-dot[data-kind="box"] { fill: #281d15; stroke: rgba(205, 182, 150, 0.7); }
 .neck-fallback .fretboard-dot[data-kind="dim"] { fill: #16100b; stroke: rgba(110, 95, 80, 0.7); }
+/* The practice screens' instruction: NOW solid amber with a light edge and a
+   glow, NEXT an amber outline. Same meaning as the 3D neck's markers. */
+.neck-fallback .fretboard-dot[data-kind="now"] {
+  fill: #ffb454;
+  stroke: #fff3dc;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(255, 180, 84, 0.85));
+}
+.neck-fallback .fretboard-dot[data-kind="next"] { fill: #1a120b; stroke: #ffb454; stroke-width: 2.5; }
 .neck-fallback-label {
   font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   font-weight: 700;
@@ -76,6 +85,8 @@
 .neck-fallback-label[data-kind="clash"] { fill: #2a0509; }
 .neck-fallback-label[data-kind="box"] { fill: #e6dac8; }
 .neck-fallback-label[data-kind="dim"] { fill: #8a7a68; }
+.neck-fallback-label[data-kind="now"] { fill: #201507; }
+.neck-fallback-label[data-kind="next"] { fill: #ffc978; }
 .neck-fallback .fretboard-dot.neck-flash {
   animation: neck-flash 0.6s ease-out;
 }

@@ -83,6 +83,8 @@ export type HotkeyAction =
   | "session-pedal"
   /** Escape in a Session: what Exit does. */
   | "session-exit"
+  /** V in a Session: Neck, Runway, Tab, round again (2026-11-17). */
+  | "session-view"
   | "settings";
 
 export interface HotkeyEntry {
@@ -713,6 +715,15 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Leave the Session",
     key: "Escape",
     desc: "In a Session: leave it, as Exit does. A running Take stops first.",
+    group: "session",
+  },
+  // What the practice screen shows. Live through a warm-up; a graded Take
+  // keeps the view it started with, so it does nothing while one runs.
+  {
+    id: "session-view",
+    action: "Switch view",
+    key: "V",
+    desc: "In a Session: Neck, Runway or Tab. Any time in a warm-up; between Takes in a graded one",
     group: "session",
   },
 ];

@@ -378,7 +378,23 @@
       "label": "Oefenweergave",
       "neck": "Hals",
       "runway": "Baan",
-      "between": "Wissel van weergave tussen takes"
+      "between": "Wissel van weergave tussen takes",
+      "tab": "Tab",
+      "keyHint": "Weergave wisselen: {{key}}"
+    },
+    "practice": {
+      "next": "hierna",
+      "then": "dan {{frets}}",
+      "finger": "vinger {{n}}",
+      "start": "begin hier",
+      "legendNow": "speel nu",
+      "legendNext": "hierna",
+      "legendPlayed": "net gespeeld",
+      "beats": "De tellen van de maat",
+      "hand": "Hand: wijsvinger op fret {{fret}}, één vinger per fret.",
+      "handShifts": "Hand: begin met de wijsvinger op fret {{fret}}; hij schuift langs de hals.",
+      "handOpen": "Hand: open positie, wijsvinger boven fret 1.",
+      "viewHint": "Wissel wanneer je wilt van weergave"
     },
     "runway": {
       "label": "De volgende noten, op weg naar de lijn",

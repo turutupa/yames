@@ -94,7 +94,7 @@ export interface Shot {
      * Neck or runway on the Take screen: what the `practiceView` setting holds
      * (plans/tasks/mvp/RUNWAY.md). Absent is the app's default, the neck.
      */
-    practiceView?: "neck" | "runway";
+    practiceView?: "neck" | "runway" | "tab";
     /**
      * Play this Path's first Exercise from its Step page instead of starting
      * Today's plan. The harness makes it runnable for the scene, so a Theory

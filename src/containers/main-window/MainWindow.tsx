@@ -1557,8 +1557,10 @@ export function MainWindow() {
       next: sessionRun.actions.next,
       pedalPress: () => pedalPress.current(),
       exit: sessionRun.actions.exit,
+      cycleView: sessionRun.actions.cycleView,
     }),
     [
+      sessionRun.actions.cycleView,
       sessionRun.actions.exit,
       sessionRun.actions.startToday,
       sessionRun.actions.go,
@@ -2391,6 +2393,7 @@ export function MainWindow() {
             listening={evaluation.enabled}
             hasSignal={evaluation.hasSignal}
             bpmNow={state.bpm}
+            viewKey={platformKey(keyBindings["session-view"] || "")}
             onCheckSound={openAudioSettings}
           />
         ) : view === "songs" ? (

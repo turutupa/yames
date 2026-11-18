@@ -17,7 +17,7 @@ import type { NeckKind, NeckNote } from "../api";
 import type { EngineOptions, SlotRect, StageEngine, VisibleView } from "../engineTypes";
 import { framingFor } from "../framing";
 import { pickTier, tierSettings, type QualityStep, type Tier } from "../quality";
-import { createGuitar, type Guitar } from "./guitar";
+import { NOTE_R, createGuitar, type Guitar } from "./guitar";
 import * as T from "./textures";
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -398,7 +398,9 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     /* compiled on first use instead */
   }
 
-  const KINDS: ReadonlySet<string> = new Set(["aim", "tone", "tens", "clash", "box", "dim"]);
+  const KINDS: ReadonlySet<string> = new Set(["aim", "tone", "tens", "clash", "box", "dim", "now", "next"]);
+  const projCam = new THREE.PerspectiveCamera();
+  const pv = V();
   const engine: StageEngine = {
     tier,
     setView: go,
@@ -422,6 +424,30 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     },
     sweep() {
       if (!reduced) guitar.sweep();
+    },
+    project(s: number, f: number) {
+      if (s < 1 || s > 6 || f < 0 || f > 24) return null;
+      // Through the rig the camera is going to, so an overlay placed now is
+      // where the note will be when a flight lands.
+      const rig = flight ? to : R;
+      projCam.position.copy(rig.pos);
+      projCam.fov = rig.fov;
+      projCam.aspect = W / H;
+      projCam.near = camera.near;
+      projCam.far = camera.far;
+      projCam.lookAt(rig.tgt);
+      projCam.setViewOffset(W, H, -rig.ox, -rig.oy, W, H);
+      projCam.updateProjectionMatrix();
+      projCam.updateMatrixWorld(true);
+      const at = guitar.notePoint(s, Math.round(f));
+      pv.copy(at).project(projCam);
+      if (pv.z > 1) return null;
+      const x = (pv.x * 0.5 + 0.5) * W;
+      const y = (-pv.y * 0.5 + 0.5) * H;
+      // The marker's radius on screen: one radius along the string axis, projected.
+      pv.copy(at).add(V(0, 0, NOTE_R)).project(projCam);
+      const r = Math.hypot((pv.x * 0.5 + 0.5) * W - x, (-pv.y * 0.5 + 0.5) * H - y);
+      return { x, y, r };
     },
     resize,
     frame(dt: number): boolean {

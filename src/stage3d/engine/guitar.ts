@@ -17,7 +17,7 @@ const NW = 1.3;
 const RAD = 4.2;
 export const fretX = (n: number) => L * (1 - Math.pow(2, -n / 12));
 // Markers sit just behind the fret wire, where the finger goes, which leaves the inlay clear.
-const NOTE_R = 0.05;
+export const NOTE_R = 0.05;
 export const noteX = (f: number) => (f <= 0 ? -0.07 : fretX(f) - NOTE_R - 0.021);
 const INLAY_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const DOUBLE = (f: number) => f === 12 || f === 24;
@@ -40,6 +40,8 @@ export const COLORS: Record<NeckKind, number> = {
   clash: 0xff5d6c,
   box: 0xffe2bd,
   dim: 0x7d6a55,
+  now: 0xffb454,
+  next: 0xffb454,
 };
 const LETTER: Record<NeckKind, string> = {
   aim: "#201507",
@@ -48,7 +50,11 @@ const LETTER: Record<NeckKind, string> = {
   clash: "#2a0509",
   box: "#e6dac8",
   dim: "#8a7a68",
+  now: "#201507",
+  next: "#ffc978",
 };
+/** NOW is drawn larger than the rest, so the eye lands on it first. */
+const NOTE_SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
 
 type Arrays = { p: number[]; n: number[]; uv: number[]; c: number[]; i: number[] };
 const arrays = (): Arrays => ({ p: [], n: [], uv: [], c: [], i: [] });
@@ -525,8 +531,11 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
       n.disc.material.map = T.noteDisc(d.kind);
       n.disc.material.needsUpdate = true;
       n.halo.material.color.set(COLORS[d.kind] ?? COLORS.box);
-      const hs = d.kind === "box" || d.kind === "dim" ? 0.001 : 0.36;
+      const hs = d.kind === "box" || d.kind === "dim" || d.kind === "next" ? 0.001 : d.kind === "now" ? 0.5 : 0.36;
       n.halo.scale.setScalar(hs);
+      const sc = NOTE_SCALE[d.kind] ?? 1;
+      n.disc.scale.setScalar(sc);
+      n.label.scale.setScalar(0.118 * sc);
       n.text = "\u0000";
     }
     if (n.text !== d.t) {
@@ -571,11 +580,12 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
       n.label.material.opacity = v;
       n.disc.visible = v > 0.004;
       n.label.visible = v > 0.004 && !!n.text;
-      const isDim = n.kind === "box" || n.kind === "dim";
-      n.halo.material.opacity = (isDim ? 0 : v * 0.32) + n.flash * 0.7;
+      const isDim = n.kind === "box" || n.kind === "dim" || n.kind === "next";
+      const rest = n.kind === "now" ? 0.5 : 0.36;
+      n.halo.material.opacity = (isDim ? 0 : v * (n.kind === "now" ? 0.5 : 0.32)) + n.flash * 0.7;
       n.halo.visible = n.halo.material.opacity > 0.004;
-      if (n.flash > 0) n.halo.scale.setScalar(0.36 + (1 - n.flash) * 0.2);
-      else if (!isDim) n.halo.scale.setScalar(0.36);
+      if (n.flash > 0) n.halo.scale.setScalar(rest + (1 - n.flash) * 0.2);
+      else if (!isDim) n.halo.scale.setScalar(rest);
       if (n.o <= 0 && n.to === 0) {
         n.disc.visible = n.halo.visible = n.label.visible = false;
         active.delete(k);
@@ -662,6 +672,14 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     sweepPow = power;
   }
 
+  /** Where a place's marker sits, in world space (for `project`). */
+  function notePoint(s: number, f: number): THREE.Vector3 {
+    const x = noteX(f);
+    const z = strZ(s, x);
+    const p = new THREE.Vector3(x, crown(z) + strH(x) + 0.012, z);
+    return root.localToWorld(p);
+  }
+
   // Point list to frame a stretch of the neck. The low-E side leaves room for the fret numbers.
   const tmp = new THREE.Vector3();
   function windowPoints(lo: number, hi: number): THREE.Vector3[] {
@@ -737,6 +755,7 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     pluck,
     sweep,
     windowPoints,
+    notePoint,
     update,
     addFakeShadows,
     setNumberScale: (k: number) => numSprites.forEach((sp) => sp.scale.setScalar(sp.userData.base * k)),

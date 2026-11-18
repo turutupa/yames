@@ -386,7 +386,23 @@
       "label": "Vue d'entraînement",
       "neck": "Manche",
       "runway": "Piste",
-      "between": "Change de vue entre deux prises"
+      "between": "Change de vue entre deux prises",
+      "tab": "Tablature",
+      "keyHint": "Changer de vue : {{key}}"
+    },
+    "practice": {
+      "next": "ensuite",
+      "then": "puis {{frets}}",
+      "finger": "doigt {{n}}",
+      "start": "commence ici",
+      "legendNow": "à jouer",
+      "legendNext": "ensuite",
+      "legendPlayed": "vient d'être jouée",
+      "beats": "Les temps de la mesure",
+      "hand": "Main : index sur la case {{fret}}, un doigt par case.",
+      "handShifts": "Main : index d'abord sur la case {{fret}} ; elle se déplace le long du manche.",
+      "handOpen": "Main : position ouverte, index au-dessus de la case 1.",
+      "viewHint": "Change de vue quand tu veux"
     },
     "runway": {
       "label": "Les prochaines notes, qui arrivent sur la ligne",

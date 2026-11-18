@@ -16,6 +16,8 @@ export interface StageEngine {
   refit(rect: SlotRect): void;
   setNotes(notes: NeckNote[], fade: number): void;
   pluck(string: number, fret: number, kind: NeckKind): void;
+  /** A place's marker on screen (viewport px), framed where the camera is going. */
+  project(string: number, fret: number): { x: number; y: number; r: number } | null;
   sweep(): void;
   /** The window changed size. */
   resize(width: number, height: number): void;

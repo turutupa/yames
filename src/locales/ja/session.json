@@ -378,7 +378,23 @@
       "label": "練習ビュー",
       "neck": "ネック",
       "runway": "ランウェイ",
-      "between": "表示はテイクの合間に切り替えられます"
+      "between": "表示はテイクの合間に切り替えられます",
+      "tab": "タブ譜",
+      "keyHint": "表示の切り替え: {{key}}"
+    },
+    "practice": {
+      "next": "次",
+      "then": "その後 {{frets}}",
+      "finger": "{{n}}の指",
+      "start": "ここから",
+      "legendNow": "今弾く",
+      "legendNext": "次",
+      "legendPlayed": "弾いた音",
+      "beats": "小節の拍",
+      "hand": "手: 人差し指を{{fret}}フレットに、1フレット1本の指で。",
+      "handShifts": "手: 人差し指を{{fret}}フレットから。ネックに沿って移動します。",
+      "handOpen": "手: 開放ポジション、人差し指は1フレットの上。",
+      "viewHint": "表示はいつでも切り替えられます"
     },
     "runway": {
       "label": "ラインに向かって流れてくる次の音",

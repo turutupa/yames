@@ -378,7 +378,23 @@
       "label": "Chế độ xem luyện tập",
       "neck": "Cần đàn",
       "runway": "Đường băng",
-      "between": "Đổi chế độ xem giữa các lượt chơi"
+      "between": "Đổi chế độ xem giữa các lượt chơi",
+      "tab": "Tab",
+      "keyHint": "Đổi chế độ xem: {{key}}"
+    },
+    "practice": {
+      "next": "tiếp theo",
+      "then": "rồi {{frets}}",
+      "finger": "ngón {{n}}",
+      "start": "bắt đầu ở đây",
+      "legendNow": "chơi ngay",
+      "legendNext": "tiếp theo",
+      "legendPlayed": "vừa chơi",
+      "beats": "Các phách của ô nhịp",
+      "hand": "Tay: ngón trỏ ở phím {{fret}}, mỗi ngón một phím.",
+      "handShifts": "Tay: bắt đầu với ngón trỏ ở phím {{fret}}; tay di chuyển dọc cần đàn.",
+      "handOpen": "Tay: thế bấm mở, ngón trỏ trên phím 1.",
+      "viewHint": "Đổi chế độ xem bất cứ lúc nào"
     },
     "runway": {
       "label": "Những nốt tiếp theo đang tiến đến vạch",
