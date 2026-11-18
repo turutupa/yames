@@ -146,6 +146,83 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   return !NON_TEXT_INPUTS.has(type);
 }
 
+/**
+ * Does Enter or Space belong to the control that has focus, not to a hotkey?
+ *
+ * Acceptance pass 2, N-P1-1: the skip link puts focus on Today's Start, and
+ * Enter there did nothing. Enter is `session-go`, the handler took the key
+ * and `preventDefault`ed it, and outside a running Session the action means
+ * nothing, so the button never heard its own key. Space only worked because
+ * `play` on Today happens to start the Session too.
+ *
+ * The rule: a plain Enter or Space on a focused button, link or tab-like
+ * control activates that control, as it does on every other page on the web.
+ * Two exceptions keep the keyboard and pedal flows the owner relies on:
+ *
+ *  - In the running Session (or a tool) a control that was CLICKED keeps
+ *    focus, and Space there must go on meaning the hotkey ("space not working
+ *    for play pause is by far the most annoying thing ever"). So off the
+ *    learning pages the control only takes the key when it was reached by
+ *    keyboard, which is what `:focus-visible` says.
+ *  - The Session's big button IS the Session action, and its click is not
+ *    the key's (a key pauses a running warm-up; see `goKey`), so the key
+ *    stays the Session's there.
+ */
+export function focusedControlTakesKey(e: KeyboardEvent, view: string): boolean {
+  if (e.key !== "Enter" && e.key !== " ") return false;
+  if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return false;
+  const el = e.target as HTMLElement | null;
+  if (!el || typeof el.matches !== "function") return false;
+  if (!el.matches(ACTIVATABLE)) return false;
+  // A checkbox or radio toggles on Space only; Enter there is still a hotkey.
+  if (e.key === "Enter" && el.matches('input[type="checkbox"], input[type="radio"]')) return false;
+  if (LEARNING_VIEWS.has(view)) return true;
+  if (el.closest(".session-big")) return false;
+  return matchesFocusVisible(el);
+}
+
+/**
+ * A `session-` action pressed anywhere but the Session does nothing (the
+ * dispatcher returns before it), so the key handler must not `preventDefault`
+ * it: that is how Enter on Today's Start died. The pedal is the exception,
+ * since off the Session it is Play/Stop.
+ */
+export function sessionKeyIsInert(actionId: string, view: string): boolean {
+  return view !== "session" && actionId.startsWith("session-") && actionId !== "session-pedal";
+}
+
+const ACTIVATABLE = [
+  "button",
+  "a[href]",
+  "summary",
+  'input[type="button"]',
+  'input[type="submit"]',
+  'input[type="reset"]',
+  'input[type="checkbox"]',
+  'input[type="radio"]',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="tab"]',
+  '[role="menuitem"]',
+  '[role="switch"]',
+  '[role="checkbox"]',
+  '[role="radio"]',
+  '[role="option"]',
+].join(", ");
+
+/** The pages where no hotkey applies to Enter or Space but starting Today. */
+const LEARNING_VIEWS = new Set(["today", "paths", "progress", "tools"]);
+
+function matchesFocusVisible(el: HTMLElement): boolean {
+  try {
+    return el.matches(":focus-visible");
+  } catch {
+    // An engine that cannot parse the selector: treat the focus as keyboard
+    // focus, since a click-focused control is the case that can be wrong.
+    return document.activeElement === el;
+  }
+}
+
 /** Input types that hold no text, so a keypress in them is not typing. */
 const NON_TEXT_INPUTS = new Set([
   "range",

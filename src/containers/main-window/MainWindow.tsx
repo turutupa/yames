@@ -179,6 +179,8 @@ import {
   FULLSCREEN_EXIT_DELAY,
   platformKey,
   actionForCombo,
+  focusedControlTakesKey,
+  sessionKeyIsInert,
   eventToCombo,
   isTypingTarget,
 } from "../../hotkeys";
@@ -1731,6 +1733,11 @@ export function MainWindow() {
         return;
       }
       if (!actionId) return;
+      // Enter or Space on a focused button is that button's (N-P1-1).
+      if (focusedControlTakesKey(e, view)) return;
+      // A Session key off the Session means nothing (the dispatcher drops it),
+      // so it must not eat the key either: Enter stays the page's own.
+      if (sessionKeyIsInert(actionId, view)) return;
       e.preventDefault();
       dispatchAction(actionId);
     };
