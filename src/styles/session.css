@@ -4021,7 +4021,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px clamp(18px, 3vw, 40px);
-  margin: 6px 0 0;
+  /* Clear of the headline's descenders (acceptance pass 2, P2-5). */
+  margin: 18px 0 0;
 }
 .session-recap-stats div {
   display: flex;
@@ -4132,4 +4133,13 @@
 .session-how-body {
   padding-top: 4px;
   max-width: 90ch;
+}
+
+/* The metric beside the result's number ("even"), in the number's own
+   condensed face: the serif beside the condensed 87% read as two voices
+   (acceptance pass 2). */
+.session-moved-metric {
+  font: 600 clamp(26px, 4vh, 40px) / 1 var(--l-display);
+  letter-spacing: 0.02em;
+  color: var(--l-quiet);
 }

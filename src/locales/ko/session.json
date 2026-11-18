@@ -227,7 +227,7 @@
       "barChip": "기준 {{bar}}%",
       "barChipCount": "기준: {{bar}}개 이하",
       "barMissed": "기준 미달",
-      "decidedPass": "기준에 가장 가까웠던 것",
+      "decidedPass": "통과",
       "lastTime": "지난번",
       "decidedMiss": "발목을 잡은 것",
       "notesNotChecked": "맞는 음: 이번엔 확인 못 함",

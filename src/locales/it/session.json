@@ -228,7 +228,7 @@
       "barChip": "Asticella {{bar}}%",
       "barChipCount": "Asticella: {{bar}} al massimo",
       "barMissed": "Asticella non superata",
-      "decidedPass": "Il più vicino all'asticella",
+      "decidedPass": "Superato",
       "lastTime": "l'ultima volta",
       "decidedMiss": "Cosa l'ha frenato",
       "notesNotChecked": "Note giuste: non controllate stavolta",

@@ -422,7 +422,8 @@ function barText(check: Pick<BarCheck, "metric" | "min" | "max">, t: ReturnType<
 /**
  * The number the verdict turned on (UX audit SES-3), the same kind of number
  * whichever way the Take went: on a miss what held it back, on a pass the
- * closest call. Said in words above it, with the bar beside it, ✓ or ✗.
+ * closest call. Said in words above it: on a pass "Passed" and the bar it
+ * met; on a miss what held it back, with the bar beside it, ✗.
  */
 function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const { t } = useTranslation();
@@ -443,8 +444,12 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const bar = barText(check, t);
   return (
     <div className="session-decided" data-testid="session-moved" data-metric={check.metric} data-met={met ? "" : undefined}>
+      {/* A pass says so, with the bar it met ("Passed · Bar 85%"); "closest
+          to the bar" over a pass read as a near miss (acceptance pass 2). */}
       <div className="session-kick session-decided-why">
-        {t(met ? "session.result.decidedPass" : "session.result.decidedMiss")}
+        {met
+          ? [t("session.result.decidedPass"), bar].filter(Boolean).join(" · ")
+          : t("session.result.decidedMiss")}
       </div>
       <div className="session-moved">
         {/* The two numbers never part: "78 →" alone on a line above the
@@ -461,8 +466,8 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
             {percent ? "%" : ""}
           </span>
         </span>
-        <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
-        {bar !== null && (
+        <span className="session-moved-metric session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
+        {bar !== null && !met && (
           <span className="session-tag session-barchip" data-met={met ? "" : undefined} data-testid="session-barchip">
             <span aria-hidden="true">{met ? "✓" : "✗"}</span> {bar}
             <span className="sr-only"> {t(met ? "session.result.barMet" : "session.result.barMissed")}</span>

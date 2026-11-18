@@ -227,7 +227,7 @@
       "barChip": "及格線 {{bar}}%",
       "barChipCount": "及格線：不超過 {{bar}}",
       "barMissed": "未過及格線",
-      "decidedPass": "最接近及格線的一項",
+      "decidedPass": "通過",
       "lastTime": "上次",
       "decidedMiss": "卡在這裡",
       "notesNotChecked": "音準：這次沒有檢查",

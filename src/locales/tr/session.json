@@ -227,7 +227,7 @@
       "barChip": "Çıta %{{bar}}",
       "barChipCount": "Çıta: en fazla {{bar}}",
       "barMissed": "Çıta geçilmedi",
-      "decidedPass": "Çıtaya en yakın olan",
+      "decidedPass": "Geçti",
       "lastTime": "geçen sefer",
       "decidedMiss": "Geri tutan",
       "notesNotChecked": "Doğru notalar: bu sefer kontrol edilmedi",
