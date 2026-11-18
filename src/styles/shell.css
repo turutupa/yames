@@ -3668,7 +3668,7 @@ body[data-sheet-maximized] .rail {
   border-radius: var(--radius-sm);
   background: var(--bg-raised);
   color: var(--text-primary);
-  font-family: var(--ui-body);
+  font-family: inherit;
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
