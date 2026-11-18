@@ -1538,6 +1538,19 @@
 .session-between .session-big {
   font-size: 38px;
 }
+/* The result's neck: a landscape band, centred in its column. A slot taller
+   than it is wide turns the camera to the steep, vertical neck (framing.ts),
+   so the band keeps a wide shape and gets the practice neck's framing. */
+.session-between > .session-col:last-child {
+  justify-content: center;
+}
+.session-between .session-slot {
+  flex: none;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 2.2 / 1;
+  max-height: 44vh;
+}
 .session-result-low {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
@@ -3587,7 +3600,7 @@
   color: var(--l-amber);
 }
 .session-decided[data-met] .session-decided-why {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .session-barchip {
   display: inline-flex;
@@ -3629,7 +3642,7 @@
   color: var(--l-faint);
 }
 .session-checks li[data-met] .session-check-mark {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .session-checks li[data-missed] .session-check-mark {
   color: var(--l-clash);
@@ -3678,13 +3691,13 @@
 }
 .session-bars-row li small {
   font: 500 10px/1 var(--l-body);
-  color: var(--l-faint);
+  color: var(--l-quiet);
   font-variant-numeric: tabular-nums;
 }
 .session-bars-row li[data-state="met"] {
   border-color: color-mix(in srgb, var(--l-tone) 70%, transparent);
   background: color-mix(in srgb, var(--l-tone) 20%, transparent);
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .session-bars-row li[data-state="missed"] {
   border-color: color-mix(in srgb, var(--l-clash) 70%, transparent);
@@ -3715,7 +3728,7 @@
   font-style: normal;
 }
 .session-edge-marks i[data-mark="met"] {
-  color: var(--l-tone);
+  color: var(--l-tone-text);
 }
 .session-edge-marks i[data-mark="missed"] {
   color: var(--l-clash);

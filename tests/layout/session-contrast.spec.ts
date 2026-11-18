@@ -23,6 +23,7 @@ const SCENES = [
   "session-playing-tab",
   "session-warmup",
   "session-result",
+  "session-between",
   "session-recap",
 ];
 const SIZE = { width: 1400, height: 900 };
