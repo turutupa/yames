@@ -8,7 +8,9 @@
       "widget": "Виджет",
       "hotkeys": "Горячие клавиши",
       "support": "Поддержка",
-      "about": "О программе"
+      "about": "О программе",
+      "tools": "Инструменты",
+      "songs": "Песни"
     },
     "appearance": {
       "title": "Внешний вид",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Тот, что идёт с Yames",
       "chooseSoundSet": "Выбрать .sf2",
       "useBuiltInSoundSet": "Взять встроенный"
+    },
+    "tools": {
+      "title": "Инструменты"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

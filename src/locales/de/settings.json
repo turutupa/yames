@@ -8,7 +8,9 @@
       "widget": "Widget",
       "hotkeys": "Tastenkürzel",
       "support": "Support",
-      "about": "Über"
+      "about": "Über",
+      "tools": "Werkzeuge",
+      "songs": "Songs"
     },
     "appearance": {
       "title": "Darstellung",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Der von Yames mitgelieferte",
       "chooseSoundSet": ".sf2 wählen",
       "useBuiltInSoundSet": "Den eingebauten nehmen"
+    },
+    "tools": {
+      "title": "Werkzeuge"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

@@ -8,7 +8,9 @@
       "widget": "ウィジェット",
       "hotkeys": "ショートカット",
       "support": "サポート",
-      "about": "アプリについて"
+      "about": "アプリについて",
+      "tools": "ツール",
+      "songs": "曲"
     },
     "appearance": {
       "title": "外観",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Yames に付属のもの",
       "chooseSoundSet": ".sf2 を選ぶ",
       "useBuiltInSoundSet": "付属のものを使う"
+    },
+    "tools": {
+      "title": "ツール"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

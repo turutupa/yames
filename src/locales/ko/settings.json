@@ -8,7 +8,9 @@
       "widget": "위젯",
       "hotkeys": "단축키",
       "support": "지원",
-      "about": "정보"
+      "about": "정보",
+      "tools": "도구",
+      "songs": "곡"
     },
     "appearance": {
       "title": "외관",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Yames에 들어 있는 것",
       "chooseSoundSet": ".sf2 고르기",
       "useBuiltInSoundSet": "기본 세트 쓰기"
+    },
+    "tools": {
+      "title": "도구"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

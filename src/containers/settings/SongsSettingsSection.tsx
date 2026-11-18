@@ -17,6 +17,7 @@
  */
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SwitchFace } from "./SwitchFace";
 import {
   SONG_SOUND_FONT_KEY,
   defaultDownloadsDir,
@@ -86,7 +87,7 @@ export function SongsSettingsSection() {
   };
 
   return (
-    <section className="settings-section">
+    <section className="settings-section" id="settings-songs">
       <h2>{t("settings.songs.title")}</h2>
       <div className="setting-row">
         <div className="setting-label">
@@ -94,7 +95,7 @@ export function SongsSettingsSection() {
           <span className="setting-hint">{t("settings.songs.catchDownloadsHint")}</span>
         </div>
         <button
-          className={`toggle-btn ${setting.enabled ? "active" : ""}`}
+          className={`toggle-btn setting-switch ${setting.enabled ? "active" : ""}`}
           onClick={() => {
             const next = { ...setting, enabled: !setting.enabled };
             // Stopped here as well as by the Songs screen's own effect: the
@@ -104,7 +105,7 @@ export function SongsSettingsSection() {
             write(next);
           }}
         >
-          {setting.enabled ? t("common.on") : t("common.off")}
+          <SwitchFace label={setting.enabled ? t("common.on") : t("common.off")} />
         </button>
       </div>
       {setting.enabled && (

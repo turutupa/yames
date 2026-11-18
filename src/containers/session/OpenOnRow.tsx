@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { storeLoad, storeSave } from "../../ipc";
 import { OPEN_ON_KEY } from "../main-window/hooks/useTabRouting";
 import type { OpenOn } from "../main-window/hooks/useTabRouting";
+import { SwitchFace } from "../settings/SwitchFace";
 
 export function OpenOnRow() {
   const { t } = useTranslation();
@@ -26,7 +27,7 @@ export function OpenOnRow() {
         <span className="setting-hint">{t("session.settings.openOnLastToolHint")}</span>
       </div>
       <button
-        className={`toggle-btn ${lastTool ? "active" : ""}`}
+        className={`toggle-btn setting-switch ${lastTool ? "active" : ""}`}
         data-testid="open-on-last-tool"
         onClick={() => {
           const next = !lastTool;
@@ -34,7 +35,7 @@ export function OpenOnRow() {
           void storeSave(OPEN_ON_KEY, (next ? "lastTool" : "today") satisfies OpenOn);
         }}
       >
-        {lastTool ? t("common.on") : t("common.off")}
+        <SwitchFace label={lastTool ? t("common.on") : t("common.off")} />
       </button>
     </div>
   );
