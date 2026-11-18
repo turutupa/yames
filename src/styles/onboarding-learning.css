@@ -42,7 +42,10 @@
     background 120ms ease;
 }
 /* Five cards in two columns: the last one spans both, so no hole is left. */
-.onboarding-start-path:last-child:nth-child(odd) {
+/* Five Paths in pairs: the first, the one everybody starts on, takes the top
+   row on its own when the count is odd, so no card sits alone at the bottom
+   (acceptance P2-16). */
+.onboarding-start-path:first-child:nth-last-child(odd) {
   grid-column: 1 / -1;
 }
 @media (hover: hover) {
@@ -70,13 +73,15 @@
 .onboarding-start-path.selected .onboarding-start-path-title {
   color: var(--accent);
 }
+/* The whole goal, never cut with "…": the card is wider on this step so it
+   runs two or three lines (acceptance P2-16). */
 .onboarding-start-path-goal {
   font-size: 0.75rem;
   line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  text-wrap: pretty;
+}
+.onboarding-overlay .onboarding-card[data-step="start"] {
+  max-width: 720px;
 }
 
 .onboarding-start-levels {
@@ -137,9 +142,6 @@
 @media (max-width: 520px) {
   .onboarding-start-paths {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .onboarding-start-path-goal {
-    -webkit-line-clamp: 1;
   }
 }
 @media (pointer: coarse) {
