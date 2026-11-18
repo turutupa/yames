@@ -4096,3 +4096,32 @@
   justify-content: center;
   padding-top: 0;
 }
+
+/* The runway's lanes as bands (acceptance 2, P1-8; `laneBands`): all six
+   strings keep a lane, the ones the Exercise plays are three times as tall,
+   the rest are dimmed context. So the runway fills its room at every size
+   and a one-string Exercise is one broad lane among quiet strings, not a
+   lane floating in an empty screen. */
+.runway[data-bands] {
+  max-height: none;
+  margin-block: 0;
+}
+.runway-lane[data-context] {
+  border-top-color: color-mix(in srgb, var(--lane) 16%, transparent);
+  border-top-style: dashed;
+}
+.runway-names span[data-context] {
+  font-size: 12px;
+  opacity: 0.45;
+}
+.runway-lane:not([data-context]) {
+  border-top-width: 2px;
+}
+/* A played string's band: a faint wash of its colour, edge to edge. */
+.runway-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--lane) 7%, transparent) 30%, color-mix(in srgb, var(--lane) 7%, transparent) 70%, transparent);
+  pointer-events: none;
+}

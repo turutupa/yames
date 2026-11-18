@@ -81,6 +81,30 @@ export function usedStrings(model: Pick<RunwayModel, "notes">): number[] {
   return used.length > 0 ? used : [1, 2, 3, 4, 5, 6];
 }
 
+/** One string's lane: its band, as fractions of the runway's height, high e on top. */
+export type LaneBand = { string: number; top: number; height: number; used: boolean };
+
+/**
+ * The lanes as bands (acceptance 2, P1-8). Every string keeps a lane, so a
+ * one-string Exercise still reads as a guitar and its string sits where it
+ * sits on the neck; but the strings it plays take the room: three times a
+ * quiet one's height with one or two strings, twice with three to five. The
+ * quiet ones are drawn dimmed, as context. All six played: six even lanes.
+ */
+export function laneBands(used: readonly number[]): LaneBand[] {
+  const set = new Set(used);
+  const all = set.size === 0 || set.size >= 6;
+  const weight = all ? 1 : set.size <= 2 ? 3.2 : 2;
+  const w = [1, 2, 3, 4, 5, 6].map((s) => (all || set.has(s) ? weight : 1));
+  const total = w.reduce((a, b) => a + b, 0);
+  let top = 0;
+  return w.map((wi, i) => {
+    const band = { string: i + 1, top: top / total, height: wi / total, used: all || set.has(i + 1) };
+    top += wi;
+    return band;
+  });
+}
+
 /** The closest two circles may sit, centre to centre, before the lane zooms in. */
 export const MIN_NOTE_PX = 32;
 
@@ -164,7 +188,7 @@ export const MAX_NOTE_PX = 64;
  * dense pattern, but each note large enough to read from the guitar).
  */
 export function minGapPx(laneWidth: number, laneHeight: number): number {
-  return Math.max(MIN_NOTE_PX, Math.min(laneWidth >= 600 ? 54 : 50, laneHeight * 0.3));
+  return Math.max(MIN_NOTE_PX, Math.min(laneWidth >= 600 ? 72 : 50, laneHeight * 0.34));
 }
 
 /** The strip's x offset that puts `tick` on the hit line. */
