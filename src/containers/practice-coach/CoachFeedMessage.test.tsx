@@ -219,3 +219,26 @@ describe("mini-report components", () => {
     expect(row.textContent).not.toMatch(/\d\.\d/);
   });
 });
+
+describe("a card says each thing once", () => {
+  it("an end card without a report shows its line once, not as a title and a body", () => {
+    const message: FeedMessage = {
+      id: "end",
+      type: "session-end",
+      timestamp: 0,
+      content: "Session complete.",
+    };
+    const { container } = render(<FeedMessageItem message={message} />);
+    const text = container.textContent ?? "";
+    expect(text.split("Session complete.").length - 1).toBe(1);
+  });
+
+  it.each(["session-start", "system", "coach-tip", "coach-chat", "user-chat"] as const)(
+    "a %s card shows its line once",
+    (type) => {
+      const message: FeedMessage = { id: type, type, timestamp: 0, content: "One line from the coach." };
+      const { container } = render(<FeedMessageItem message={message} />);
+      expect((container.textContent ?? "").split("One line from the coach.").length - 1).toBe(1);
+    },
+  );
+});
