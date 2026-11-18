@@ -703,8 +703,10 @@
 }
 
 .rail-action-status {
-  font: 600 12px/1 var(--ui-display);
-  letter-spacing: 0.1em;
+  font: 600 11px/1 var(--ui-display);
+  /* Narrow enough that "Спросить тренера" and "Perguntar ao coach" keep one
+     line beside it (I18N-3). */
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 

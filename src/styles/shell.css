@@ -1458,13 +1458,33 @@ button.jam-vibe-chip {
 }
 .rail-tools[data-nested] {
   gap: 1px;
-  margin: -2px 0 6px 30px;
-  padding: 2px 10px 2px 6px;
+  margin: -2px 0 6px 24px;
+  padding: 2px 8px 2px 4px;
   border-left: 1px solid var(--border);
 }
 .rail-tools[data-nested] .rail-mode {
   min-height: 36px;
+  gap: 9px;
+  padding-left: 8px;
+  padding-right: 8px;
   font-size: 0.86rem;
+}
+/* A long name ("Темповая тренировка") takes its two lines from the left
+   edge, beside an icon that keeps its size; a word is never split ("Дже м"). */
+.rail-mode svg,
+.rail-action-icon svg {
+  flex: none;
+}
+.rail-mode-label,
+.rail-action-label {
+  text-align: left;
+  overflow-wrap: break-word;
+}
+/* The coach's row carries a status beside its name, so it spends less on
+   gaps: "Спросить тренера" keeps one line beside "ГОТОВ" (I18N-3). */
+.rail-action:has(> .rail-action-status) {
+  gap: 8px;
+  padding-right: 8px;
 }
 .rail[data-collapsed] .rail-tools[data-nested] {
   margin-left: 0;

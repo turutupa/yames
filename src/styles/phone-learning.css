@@ -213,3 +213,58 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
   .neck-stage-canvas {
   visibility: hidden;
 }
+
+/* Neck · Runway · Tab across the phone's width (I18N-3): the row's whole
+   width, shared out by the words' own lengths, rather than three words at
+   their natural width from the right, which in Russian ran "Табулатура" off
+   the screen's edge. A word that still does not fit ends in an ellipsis. */
+.main-window.is-mobile .session-page .session-viewswitch {
+  display: flex;
+  width: 100%;
+  margin-left: 0;
+}
+.main-window.is-mobile .session-page .session-viewswitch > button {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+  padding: 3px 8px;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.main-window.is-mobile .session-page .session-viewswitch > button > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The bar keeps its progress pips in every language: Exit, the clock and
+   Skip in Russian left them no width at all at 360 px. */
+.main-window.is-mobile .session-page .session-bar {
+  gap: 8px;
+}
+.main-window.is-mobile .session-page .session-pips {
+  min-width: 36px;
+}
+.main-window.is-mobile .session-page .session-bar-left {
+  font-size: 12px;
+  /* "Осталось 5 мин" goes onto two short lines before it pushes Skip off. */
+  white-space: normal;
+  max-width: 76px;
+  line-height: 1.15;
+  text-align: right;
+}
+.main-window.is-mobile .session-page .session-skip-this {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+/* Under 400 px the words get the room: only the chosen view keeps its icon,
+   which marks it as well as the fill does; the other two are their words. */
+@media (max-width: 399px) {
+  .main-window.is-mobile .session-page .session-viewswitch > button:not([data-on]) > svg {
+    display: none;
+  }
+}
+.main-window.is-mobile .session-page .session-exit {
+  flex: none;
+}
