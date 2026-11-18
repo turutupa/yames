@@ -1010,6 +1010,12 @@ export function installShotMock(shot: Shot, theme: string): void {
     store.delete("presets");
   }
   if (shot.instrument) store.set("instrument", shot.instrument);
+  // The Tools page names the setlist and the jam last opened (acceptance
+  // P2-13): a returning player has opened one of each.
+  if (shot.session?.seed === "returning") {
+    store.set("lastSetlistId", "c1");
+    store.set("lastJamId", "jam-slow-blues-a");
+  }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
