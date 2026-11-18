@@ -804,7 +804,7 @@ function threePaths(): PathStoreSeed {
     facts: { ...(t.facts as object), session: t.startedAt, role: i === 0 ? "focus" : "next" },
   }));
   const sweep: PathTakeRow = {
-    ...seededTake("triads.am-rock", 60, 0.82, false, 1),
+    ...seededTake("triads.triad-rolls", 60, 0.82, false, 1),
     pathId: "sweep-picking",
     stepId: "triads",
     id: "seed-sweep-1",

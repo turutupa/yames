@@ -1170,7 +1170,7 @@ fn notes_that_ring_into_each_other_leave_right_notes_unassessed() {
 /// a sweep played right passes and earns its clean tempo.
 #[test]
 fn a_sweep_played_right_passes_on_timing_and_is_never_failed_on_notes() {
-    let mut take = path_take("sweep-picking", "triads.am-rock", 80.0, 8);
+    let mut take = path_take("sweep-picking", "triads.triad-rolls#progression=Am-to-C", 80.0, 4);
     take.tone = Tone::Swept;
     take.jitter_ms = 3.0;
     assert!(take.pass_bars.iter().all(|b| b.metric != "noteIdentity"), "{:?}", take.pass_bars);

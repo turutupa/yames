@@ -94,6 +94,7 @@ export default definePath({
     "You can fret single notes cleanly, you hold a pick, and you can play eighth notes with a click at 80 BPM. No speed is assumed. The minutes listed are one pass through the material; expect to come back to each Step for days or weeks.",
   prerequisites: { skills: ["Clean single notes", "Eighth notes with a click at 80 BPM"] },
   labelSubdivisions: "mostly",
+  paceLadders: true,
   orderRationale:
     "Time first, then speed of the same motion, then control of it (accents), then one problem at a time across strings. It departs from the starting order in one place: pentatonic patterns move up to Step 5, before three notes per string, and bursts follow them. Two notes per string gives the same crossing over and over, so it is the natural first application, while three per string changes crossing type on every string. Bursts come after both so they can use real shapes rather than chromatic fingers. Outside picking is taught before inside because most players find it easier, and both are named so a teacher can overrule that.",
   gradingLimits:
@@ -940,7 +941,7 @@ export default definePath({
             },
           },
           grade: "warmup",
-          warmup: { start: 0.6, top: 0.8, reference: "even-eighths.four-fingers", fallback: 70 },
+          warmup: { start: 0.6, top: 0.8, reference: "even-eighths.four-fingers", fallback: 60 },
           rungs: ladder(60, 110, 10),
           minutes: 3,
         },
@@ -1013,7 +1014,7 @@ export default definePath({
             },
           },
           grade: "warmup",
-          warmup: { start: 0.6, top: 0.8, reference: "three-per-string.three-strings", fallback: 55 },
+          warmup: { start: 0.6, top: 0.8, reference: "three-per-string.three-strings", fallback: 50 },
           rungs: ladder(50, 80, 5),
           minutes: 4,
         },
