@@ -16,6 +16,9 @@ import { lineText } from "./lineText";
 import { bpmLine, pathTitleOf, planSources, roleKey, roleOf, rowKind, shortContext, shortReason, ticksOf } from "./todayPlan";
 import { InstrumentNote } from "./InstrumentNote";
 import { useNeck3d } from "./hooks/useNeck";
+import { SwapButton, SwapMenu } from "./SwapMenu";
+import { canSwap } from "../../session/swap";
+import type { SwapChoice } from "../../session/swap";
 import "../../styles/session.css";
 
 /** The staggered entrance the mocks give each block. */
@@ -88,6 +91,8 @@ function PlanRow({
   showPath,
   rowRef,
   onStart,
+  onSwap,
+  swapOpen = false,
 }: {
   step: PlanStep;
   index: number;
@@ -98,6 +103,9 @@ function PlanRow({
   rowRef?: (el: HTMLElement | null) => void;
   /** Start the Session at this row (owner, 2026-11-18). */
   onStart?: () => void;
+  /** Open this row's Swap menu, from its button. Absent: the row cannot be swapped. */
+  onSwap?: (anchor: HTMLElement) => void;
+  swapOpen?: boolean;
 }) {
   const { t } = useTranslation();
   const pathTitle = showPath ? pathTitleOf(step, paths) : null;
@@ -119,6 +127,12 @@ function PlanRow({
         <span className="session-plan-meta">
           <span className="session-plan-role">{t(roleKey(step))}</span>
           {pathTitle && <span className="session-plan-path"> · {pathTitle}</span>}
+          {"swappedFrom" in step && step.swappedFrom && (
+            <span className="session-plan-swapped" data-testid={`today-swapped-${index}`}>
+              {" "}
+              · {t("session.today.swap.swapped")}
+            </span>
+          )}
         </span>
         <span className="session-why session-plan-why">
           {context && (
@@ -142,9 +156,20 @@ function PlanRow({
   );
   // The whole row is the button (owner, 2026-11-18): one press starts the
   // Session at this block. Its words are spans, as a button may hold no blocks.
+  // Swap is a button of its own beside it, never inside it.
+  const swap = onSwap ? (
+    <span className="session-plan-swapcell">
+      <SwapButton
+        title={stepTitle(step, t)}
+        open={swapOpen}
+        onOpen={onSwap}
+        testId={`today-swap-${index}`}
+      />
+    </span>
+  ) : null;
   if (onStart) {
     return (
-      <li ref={rowRef} className="session-plan-row">
+      <li ref={rowRef} className="session-plan-row" data-swap={swap ? "" : undefined}>
         <button
           type="button"
           className="session-plan-item session-plan-swap session-plan-go"
@@ -158,6 +183,7 @@ function PlanRow({
             {t("session.today.startHere")}
           </span>
         </button>
+        {swap}
       </li>
     );
   }
@@ -241,6 +267,16 @@ export function TodayView({
   const showPath = myPaths.length > 1;
   // Which Path, Level and Step the plan is built from (acceptance P1-11).
   const sources = planSources(steps, session.paths, progress);
+  // The row whose Swap menu is open, and the button it opened from.
+  const [swapAt, setSwapAt] = useState<{ index: number; anchor: HTMLElement } | null>(null);
+  const swapStep = swapAt ? steps[swapAt.index] : undefined;
+  const closeSwap = useCallback(() => setSwapAt(null), []);
+  const swapIndex = swapAt?.index ?? 0;
+  const swapOptionsAt = actions.swapOptionsAt;
+  const optionsFor = useCallback(
+    (choice: SwapChoice) => swapOptionsAt(swapIndex, choice),
+    [swapOptionsAt, swapIndex],
+  );
 
   return (
     <div className="session-page session-today-page" data-testid="today" data-neck3d={neck3d}>
@@ -362,9 +398,27 @@ export function TodayView({
                   showPath={showPath}
                   rowRef={i === steps.length - 1 ? endRef : undefined}
                   onStart={() => actions.startTodayAt(i)}
+                  onSwap={
+                    typeof swapOptionsAt === "function" && canSwap(step)
+                      ? (anchor) => setSwapAt((open) => (open?.index === i ? null : { index: i, anchor }))
+                      : undefined
+                  }
+                  swapOpen={swapAt?.index === i}
                 />
               ))}
             </ol>
+          )}
+          {swapAt && swapStep && (
+            <SwapMenu
+              key={`${swapAt.index}:${swapStep.id}:${"exerciseId" in swapStep ? swapStep.exerciseId : ""}`}
+              step={swapStep}
+              anchor={swapAt.anchor}
+              paths={session.paths}
+              optionsFor={optionsFor}
+              onConfirm={(replacement) => actions.confirmSwap(swapAt.index, replacement)}
+              onUndo={"swappedFrom" in swapStep && swapStep.swappedFrom ? () => actions.undoSwap(swapAt.index) : undefined}
+              onClose={closeSwap}
+            />
           )}
           {steps.length > 0 && !endInView && (
             <div className="session-plan-more" aria-hidden="true" data-testid="today-more">

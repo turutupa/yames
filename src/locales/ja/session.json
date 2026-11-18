@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · ステップ {{step}}",
       "fromNoLevel": "{{path}} · ステップ {{step}}",
       "startHere": "ここから始める ›",
-      "startHereLabel": "{{n}} からセッションを始める：{{title}}"
+      "startHereLabel": "{{n}} からセッションを始める：{{title}}",
+      "swap": {
+        "button": "入れ替え",
+        "buttonLabel": "{{title}} を入れ替える",
+        "tooltip": "別の課題に入れ替える",
+        "heading": "入れ替え先",
+        "dialogLabel": "{{title}} を入れ替える",
+        "close": "閉じる",
+        "choice": {
+          "harder": "もっと難しく",
+          "different": "別のもの",
+          "style": "別のスタイル"
+        },
+        "hint": {
+          "harder": "同じ技術を一段上で。",
+          "different": "このコースの別の課題。",
+          "style": "別のコースの課題。",
+          "harderWarmUp": "まだ合う、少し密度の高いウォームアップ。",
+          "differentWarmUp": "このコースの別のウォームアップ。",
+          "styleWarmUp": "別のコースのウォームアップ。"
+        },
+        "none": {
+          "harder": "このコースにはまだ難しいものがありません。",
+          "harderWarmUp": "これ以上密だと、次のブロックより速くなります。",
+          "different": "今はこのコースに合う課題がほかにありません。",
+          "style": "ほかのコースがまだありません。"
+        },
+        "count": "{{n}} / {{count}}",
+        "confirm": "入れ替える",
+        "another": "ほかを見る",
+        "cancel": "キャンセル",
+        "undo": "{{title}} に戻す",
+        "swapped": "入れ替え済み"
+      }
     },
     "why": {
       "firstEver": "はじめてなので {{bpm}} BPM から。速さではなく、タイミングの練習です。",

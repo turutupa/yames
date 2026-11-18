@@ -114,7 +114,40 @@
       "from": "{{path}} · {{level}} · Etapa {{step}}",
       "fromNoLevel": "{{path}} · Etapa {{step}}",
       "startHere": "Começar aqui ›",
-      "startHereLabel": "Começar a sessão em {{n}}: {{title}}"
+      "startHereLabel": "Começar a sessão em {{n}}: {{title}}",
+      "swap": {
+        "button": "Trocar",
+        "buttonLabel": "Trocar {{title}}",
+        "tooltip": "Trocar por outro exercício",
+        "heading": "Trocar por",
+        "dialogLabel": "Trocar {{title}}",
+        "close": "Fechar",
+        "choice": {
+          "harder": "Mais difícil",
+          "different": "Algo diferente",
+          "style": "Outro estilo"
+        },
+        "hint": {
+          "harder": "A mesma técnica, um passo acima.",
+          "different": "Outro exercício desta trilha.",
+          "style": "Um exercício de outra trilha.",
+          "harderWarmUp": "Um aquecimento mais denso que ainda cabe.",
+          "differentWarmUp": "Outro aquecimento desta trilha.",
+          "styleWarmUp": "Um aquecimento de outra trilha."
+        },
+        "none": {
+          "harder": "Ainda não há nada mais difícil nesta trilha.",
+          "harderWarmUp": "Mais denso, ficaria mais rápido que o bloco que ele aquece.",
+          "different": "Agora nada mais desta trilha encaixa.",
+          "style": "Você ainda não tem outra trilha."
+        },
+        "count": "{{n}} de {{count}}",
+        "confirm": "Trocar",
+        "another": "Mostrar outro",
+        "cancel": "Cancelar",
+        "undo": "Voltar para {{title}}",
+        "swapped": "Trocado"
+      }
     },
     "why": {
       "firstEver": "É a sua primeira, então começa a {{bpm}} BPM. Aqui o que conta é o tempo, não a velocidade.",

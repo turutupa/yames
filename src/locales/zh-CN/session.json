@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · 第 {{step}} 步",
       "fromNoLevel": "{{path}} · 第 {{step}} 步",
       "startHere": "从这里开始 ›",
-      "startHereLabel": "从第 {{n}} 项开始练习：{{title}}"
+      "startHereLabel": "从第 {{n}} 项开始练习：{{title}}",
+      "swap": {
+        "button": "换",
+        "buttonLabel": "换掉 {{title}}",
+        "tooltip": "换成别的练习",
+        "heading": "换成",
+        "dialogLabel": "换掉 {{title}}",
+        "close": "关闭",
+        "choice": {
+          "harder": "更难",
+          "different": "换个别的",
+          "style": "换个风格"
+        },
+        "hint": {
+          "harder": "同一技巧，难一级。",
+          "different": "这条路线里的另一个练习。",
+          "style": "另一条路线里的练习。",
+          "harderWarmUp": "更密一点但仍然合适的热身。",
+          "differentWarmUp": "这条路线里的另一个热身。",
+          "styleWarmUp": "另一条路线里的热身。"
+        },
+        "none": {
+          "harder": "这条路线里还没有更难的。",
+          "harderWarmUp": "再密就比它要热身的那段还快了。",
+          "different": "这条路线里现在没有别的合适的。",
+          "style": "你还没有别的路线。"
+        },
+        "count": "{{n}} / {{count}}",
+        "confirm": "换上",
+        "another": "再看一个",
+        "cancel": "取消",
+        "undo": "换回 {{title}}",
+        "swapped": "已换"
+      }
     },
     "why": {
       "firstEver": "这是你的第一次，所以从 {{bpm}} BPM 开始。练的是节奏，不是速度。",

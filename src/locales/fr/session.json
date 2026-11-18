@@ -114,7 +114,40 @@
       "from": "{{path}} · {{level}} · Étape {{step}}",
       "fromNoLevel": "{{path}} · Étape {{step}}",
       "startHere": "Commencer ici ›",
-      "startHereLabel": "Commencer la séance à {{n}} : {{title}}"
+      "startHereLabel": "Commencer la séance à {{n}} : {{title}}",
+      "swap": {
+        "button": "Échanger",
+        "buttonLabel": "Échanger {{title}}",
+        "tooltip": "Échanger contre un autre exercice",
+        "heading": "Échanger contre",
+        "dialogLabel": "Échanger {{title}}",
+        "close": "Fermer",
+        "choice": {
+          "harder": "Plus dur",
+          "different": "Autre chose",
+          "style": "Autre style"
+        },
+        "hint": {
+          "harder": "La même technique, un cran au-dessus.",
+          "different": "Un autre exercice de ce parcours.",
+          "style": "Un exercice d'un autre parcours.",
+          "harderWarmUp": "Un échauffement plus dense qui reste adapté.",
+          "differentWarmUp": "Un autre échauffement de ce parcours.",
+          "styleWarmUp": "Un échauffement d'un autre parcours."
+        },
+        "none": {
+          "harder": "Rien de plus dur dans ce parcours pour l'instant.",
+          "harderWarmUp": "Plus dense, il irait plus vite que le bloc qu'il prépare.",
+          "different": "Rien d'autre dans ce parcours ne convient pour l'instant.",
+          "style": "Tu n'as pas encore d'autre parcours."
+        },
+        "count": "{{n}} sur {{count}}",
+        "confirm": "L'échanger",
+        "another": "En voir un autre",
+        "cancel": "Annuler",
+        "undo": "Remettre {{title}}",
+        "swapped": "Échangé"
+      }
     },
     "why": {
       "firstEver": "C'est ta première, donc on commence à {{bpm}} BPM. Ici, c'est le placement qui compte, pas la vitesse.",

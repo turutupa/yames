@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · {{step}}단계",
       "fromNoLevel": "{{path}} · {{step}}단계",
       "startHere": "여기서 시작 ›",
-      "startHereLabel": "{{n}}번부터 세션 시작: {{title}}"
+      "startHereLabel": "{{n}}번부터 세션 시작: {{title}}",
+      "swap": {
+        "button": "바꾸기",
+        "buttonLabel": "{{title}} 바꾸기",
+        "tooltip": "다른 과제로 바꾸기",
+        "heading": "바꿀 대상",
+        "dialogLabel": "{{title}} 바꾸기",
+        "close": "닫기",
+        "choice": {
+          "harder": "더 어렵게",
+          "different": "다른 것",
+          "style": "다른 스타일"
+        },
+        "hint": {
+          "harder": "같은 기술, 한 단계 위.",
+          "different": "이 코스의 다른 과제.",
+          "style": "다른 코스의 과제.",
+          "harderWarmUp": "아직 맞는, 조금 더 빽빽한 워밍업.",
+          "differentWarmUp": "이 코스의 다른 워밍업.",
+          "styleWarmUp": "다른 코스의 워밍업."
+        },
+        "none": {
+          "harder": "이 코스에는 아직 더 어려운 것이 없어요.",
+          "harderWarmUp": "더 빽빽하면 이어지는 블록보다 빨라져요.",
+          "different": "지금은 이 코스에 맞는 다른 과제가 없어요.",
+          "style": "아직 다른 코스가 없어요."
+        },
+        "count": "{{n}} / {{count}}",
+        "confirm": "바꾸기",
+        "another": "다른 것 보기",
+        "cancel": "취소",
+        "undo": "{{title}}(으)로 되돌리기",
+        "swapped": "바꿈"
+      }
     },
     "why": {
       "firstEver": "처음이니 {{bpm}} BPM에서 시작합니다. 속도가 아니라 타이밍 연습입니다.",

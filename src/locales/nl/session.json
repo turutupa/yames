@@ -113,7 +113,40 @@
       "from": "{{path}} · {{level}} · Stap {{step}}",
       "fromNoLevel": "{{path}} · Stap {{step}}",
       "startHere": "Hier beginnen ›",
-      "startHereLabel": "De sessie bij {{n}} beginnen: {{title}}"
+      "startHereLabel": "De sessie bij {{n}} beginnen: {{title}}",
+      "swap": {
+        "button": "Wisselen",
+        "buttonLabel": "{{title}} wisselen",
+        "tooltip": "Wisselen voor een andere oefening",
+        "heading": "Wisselen voor",
+        "dialogLabel": "{{title}} wisselen",
+        "close": "Sluiten",
+        "choice": {
+          "harder": "Moeilijker",
+          "different": "Iets anders",
+          "style": "Andere stijl"
+        },
+        "hint": {
+          "harder": "Dezelfde techniek, een stap hoger.",
+          "different": "Een andere oefening uit dit leerpad.",
+          "style": "Een oefening uit een ander leerpad.",
+          "harderWarmUp": "Een drukkere warming-up die nog past.",
+          "differentWarmUp": "Een andere warming-up uit dit leerpad.",
+          "styleWarmUp": "Een warming-up uit een ander leerpad."
+        },
+        "none": {
+          "harder": "Nog niets moeilijkers in dit leerpad.",
+          "harderWarmUp": "Drukker zou sneller gaan dan het blok erna.",
+          "different": "Niets anders uit dit leerpad past nu.",
+          "style": "Je hebt nog geen ander leerpad."
+        },
+        "count": "{{n}} van {{count}}",
+        "confirm": "Inwisselen",
+        "another": "Toon een andere",
+        "cancel": "Annuleren",
+        "undo": "{{title}} terugzetten",
+        "swapped": "Gewisseld"
+      }
     },
     "why": {
       "firstEver": "Je eerste, dus hij begint op {{bpm}} BPM. Het gaat hier om timing, niet om snelheid.",
