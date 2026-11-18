@@ -1168,7 +1168,7 @@ fn notes_that_ring_into_each_other_leave_right_notes_unassessed() {
 /// that they were not checked. The Take is still graded on its timing.
 #[test]
 fn a_sweep_played_right_passes_on_timing_and_says_the_notes_were_not_checked() {
-    let mut take = path_take("sweep-picking", "two-strings.down-two", 80.0, 8);
+    let mut take = path_take("sweep-picking", "triads.am-rock", 80.0, 8);
     take.tone = Tone::Swept;
     take.jitter_ms = 3.0;
     let (run, report) = run_take_with_notes(&take);
