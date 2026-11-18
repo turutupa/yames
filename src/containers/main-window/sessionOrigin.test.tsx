@@ -137,6 +137,17 @@ describe("leaving a Session", () => {
     expect(on("exercise-even-eighths.open-string")).toBe(true);
   });
 
+  it("started from a Step's Play this: no one-pip bar, and the clock says it is time played (acceptance pass 2)", async () => {
+    await openReturning();
+    await toStep();
+    await click(testid("play-even-eighths.four-fingers"));
+    await inSession();
+    // One step: a single lit pip read as a full progress bar.
+    expect(document.querySelectorAll('[data-testid="session-pips"] i')).toHaveLength(0);
+    const clock = document.querySelector(".session-bar-left")?.textContent ?? "";
+    expect(clock).toBe(t("session.run.played").replace("{{time}}", clock.match(/\d+:\d\d/)?.[0] ?? "?"));
+  });
+
   it("started from a Step's Play this: Exit goes back to that Step", async () => {
     await openReturning();
     await toStep();
