@@ -450,11 +450,11 @@ describe("placement on a new Path", () => {
         { type: "takeResult", now: NOW, outcome: outcome(verdict, state.bpm) } as const,
       ].reduce(runReducer, state);
     r = take(r, "passed");
-    expect(bigAction(r, ex)).toEqual({ kind: "again", bpm: 100 });
+    expect(bigAction(r, ex)).toEqual({ kind: "again", bpm: 100, up: true });
     r = runReducer(r, eventForBigAction(bigAction(r, ex), NOW)!);
     r = take(r, "passed");
     // Past the pass tempo: one more, at about 120% (UX audit TODAY-3).
-    expect(bigAction(r, ex)).toEqual({ kind: "again", bpm: 120 });
+    expect(bigAction(r, ex)).toEqual({ kind: "again", bpm: 120, up: true });
     r = runReducer(r, eventForBigAction(bigAction(r, ex), NOW)!);
     r = take(r, "passed");
     const next = bigAction(r, ex);

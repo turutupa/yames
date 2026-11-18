@@ -147,7 +147,7 @@
       "edge": "A partir do andamento que você alcançou, {{bpm}} BPM. Sobe um degrau depois de cada tomada que bate a meta.",
       "edgeCheck": "Para conferir seu andamento limpo. Da última vez foi {{clean}} BPM.",
       "edgeFirst": "Para achar seu andamento limpo. Começa a {{bpm}} BPM e sobe enquanto você bater a meta.",
-      "chosen": "Você escolheu este, de {{step}}.",
+      "chosen": "Escolha sua, de {{step}}.",
       "focusTurn": "{{path}} lidera hoje: é a vez dele.",
       "focusTurnAway": "{{path}} lidera hoje: você não toca há {{days}} dias.",
       "keepWarm": "{{path}}, para manter: tocado há {{days}} dias.",
@@ -193,7 +193,7 @@
       "early": "adiantado",
       "stripLabel": "As últimas notas, contra a grade",
       "countIn": "Contando a entrada",
-      "honest": "Eu ouço notas e tempo. Baixo-cima é com você: não consigo ouvir a direção da palheta.",
+      "honest": "Escuto as notas e o tempo delas. A direção da palheta eu não ouço, então essa fica com você.",
       "noInput": "Ainda não estou ouvindo sua guitarra. Para dar nota é preciso um microfone ou uma entrada direta.",
       "checkSound": "Testar meu som",
       "engineTrouble": "O motor de áudio não aceitou este exercício. Saia e comece de novo.",
@@ -205,23 +205,37 @@
       "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente.",
       "skip": "Pular este",
       "skipped": "Pulado",
-      "honestTiming": "Ouço seu tempo, não quais notas. Baixo-cima é com você: não ouço a direção da palheta."
+      "honestTiming": "Escuto seu tempo, não as alturas. A direção da palheta eu não ouço, então essa fica com você.",
+      "goAgainUp": "De novo, subindo para {{bpm}} BPM",
+      "slowerFloor": "Já é o andamento mais lento deste exercício",
+      "fasterCeiling": "Já é o andamento mais rápido deste exercício",
+      "tempoLocked": "Um teste é tocado no andamento de aprovação, então ele não muda"
     },
     "result": {
       "kick": "Tomada {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compassos",
       "barMet": "Meta batida",
-      "barIs": "A meta é {{bar}}%",
-      "barIsCount": "A meta é {{bar}}",
       "cleanFirst": "Andamento limpo: {{bpm}} BPM.",
       "cleanMoved": "Andamento limpo: de {{from}} para {{bpm}} BPM.",
-      "unmeasuredNotes": "Conferi o tempo. Não ouvi as notas com clareza suficiente para dizer se eram as certas, então isso não foi avaliado desta vez.",
-      "againSame": "De novo, {{bpm}} BPM",
       "moveOn": "Seguir em frente",
       "fairAsk": "Esta nota foi justa?",
       "fairYes": "Sim",
       "fairNo": "Não",
       "fairThanksYes": "Obrigado: guardado como justa. Toque em Não para mudar.",
-      "fairThanksNo": "Obrigado: guardado como não justa. Toque em Sim para mudar."
+      "fairThanksNo": "Obrigado: guardado como não justa. Toque em Sim para mudar.",
+      "barChip": "Meta {{bar}}%",
+      "barChipCount": "Meta: {{bar}} ou menos",
+      "barMissed": "Meta não batida",
+      "decidedPass": "O mais perto da meta",
+      "decidedMiss": "O que segurou",
+      "notesNotChecked": "Notas certas: não conferidas desta vez",
+      "barsTitle": "Compasso a compasso",
+      "barsHeld": "{{count}} compasso seguido sustentado",
+      "barsHeld_many": "{{count}} compassos seguidos sustentados",
+      "barsHeld_other": "{{count}} compassos seguidos sustentados",
+      "barsMet": "{{count}} de {{of}} compassos sustentados",
+      "barHeld": "Compasso {{n}}: sustentado",
+      "barSlipped": "Compasso {{n}}: escapou",
+      "barThin": "Compasso {{n}}: poucas notas para julgar"
     },
     "edge": {
       "kick": "Achar meu limite",
@@ -234,22 +248,27 @@
       "offerTitle": "Achar meu limite a partir daqui",
       "offerBody": "Sobe a partir de {{bpm}} BPM enquanto você bater a meta, e guarda seu andamento limpo. Acrescenta {{minutes}} minutos.",
       "start": "Achar meu limite",
-      "recap": "Limite"
+      "recap": "Limite",
+      "rungLabel": "{{bpm}} BPM: {{met}} batidas, {{missed}} perdidas"
     },
     "coach": {
-      "passed": "Ouvi {{heard}} de {{expected}} notas, regulares ao longo de {{bars}} compassos seguidos a {{bpm}} BPM.",
-      "passedExtras": "Ouvi {{heard}} de {{expected}} notas, regulares ao longo de {{bars}} compassos seguidos, com {{extras}} a mais.",
+      "passed": "Todas as notas entraram, regulares por {{bars}} compassos seguidos a {{bpm}} BPM.",
+      "passedExtras": "Regular por {{bars}} compassos seguidos, com {{extras}} notas a mais no caminho.",
       "heardNothing": "Não ouvi nada.",
       "heardLittle": "Ouvi {{heard}} de {{expected}} notas.",
       "tooShort": "Foram {{bars}} compassos, curto demais para avaliar. Precisa da tomada inteira.",
       "ungraded": "Este não vale nota. Quem julga é você.",
       "below": {
-        "even": "A regularidade foi de {{value}}%. Ouvi {{heard}} de {{expected}} notas. Mesmas notas, mesmo andamento.",
+        "even": "{{value}}% de regularidade para uma meta de {{bar}}%. Todas as notas estavam lá; é o espaço entre elas. Mesmas notas, mesmo andamento.",
         "heard": "Ouvi {{heard}} de {{expected}} notas, e o tempo não passa sem elas.",
         "extras": "{{extras}} notas que eu não esperava. Abafe as cordas soltas se estiverem soando.",
         "accents": "{{value}}% dos acentos marcados saíram mais fortes que as notas em volta.",
-        "notes": "{{value}}% das notas que consegui identificar eram as escritas. Mesmas notas, mesmo andamento, e atenção às casas."
-      }
+        "notes": "{{value}}% das notas que consegui identificar eram as escritas. Mesmas notas, mesmo andamento, e atenção às casas.",
+        "evenSome": "{{value}}% de regularidade para uma meta de {{bar}}%, e {{missed}} notas não soaram. Mesmas notas, mesmo andamento, todas elas."
+      },
+      "passedSome": "Entraram {{heard}} de {{expected}} notas, regulares por {{bars}} compassos seguidos a {{bpm}} BPM.",
+      "passedTiming": "Todas as {{heard}} notas no tempo, {{bars}} compassos seguidos. Desta vez não consegui conferir as alturas.",
+      "passedTimingSome": "{{heard}} de {{expected}} notas no tempo, {{bars}} compassos seguidos. Desta vez não consegui conferir as alturas."
     },
     "noCatch": {
       "kick": "Sem nota para esta tomada",
@@ -276,11 +295,11 @@
         "drill": "Começar a rampa"
       },
       "how": {
-        "warmUp": "Toque junto com o clique. Nada aqui é avaliado, então solte as mãos.",
-        "yourTurn": "Toque do seu jeito, com o clique. Nada aqui é conferido.",
-        "jam": "Toque junto com a banda. Nada aqui é avaliado.",
-        "finisher": "Toque sobre a banda, em loop. Nada aqui é avaliado.",
-        "drill": "O clique acelera enquanto você toca. Nada aqui é avaliado."
+        "warmUp": "Toque junto com o clique e solte as mãos.",
+        "yourTurn": "Toque do seu jeito, junto com o clique.",
+        "jam": "Toque junto com a banda.",
+        "finisher": "Toque sobre a banda, em loop.",
+        "drill": "O clique acelera enquanto você toca."
       },
       "skip": "Pular",
       "startKeys": "Enter, Espaço ou o pedal começa."
@@ -309,7 +328,22 @@
       "takesAt_other": "{{count}} tomadas, a última a {{bpm}} BPM",
       "noTakes": "Nenhuma tomada nesta sessão.",
       "notGraded": "O aquecimento e a jam não valeram nota.",
-      "nextSession": "Próxima sessão, {{minutes}} min"
+      "nextSession": "Próxima sessão, {{minutes}} min",
+      "headClean": "Andamento limpo subiu para {{bpm}} BPM em {{title}}.",
+      "headPlayed": "{{count}} minuto tocado, e conta.",
+      "headPlayed_many": "{{count}} minutos tocados, e contam.",
+      "headPlayed_other": "{{count}} minutos tocados, e contam.",
+      "statMinutesLabel": "Tocado",
+      "statMinutes": "{{count}} min",
+      "statTakesLabel": "Tomadas",
+      "statStreakLabel": "Sequência",
+      "statStreak": "{{count}} dia",
+      "statStreak_many": "{{count}} dias",
+      "statStreak_other": "{{count}} dias",
+      "fairAsk": "As notas de hoje pareceram justas?",
+      "backTo": "Voltar para {{place}}",
+      "more": "Mais 5 minutos",
+      "keepGoing": "Continuar: {{title}}"
     },
     "paths": {
       "title": "Trilhas",
@@ -441,8 +475,8 @@
       "handOpen": "Mão: posição aberta, indicador sobre a casa 1.",
       "viewHint": "Troque de visualização quando quiser",
       "left": "restantes",
-      "notGraded": "Sem nota. Termina em {{time}}; depois de novo, ou segue.",
-      "notChecked": "Sem checagem. Termina em {{time}}; depois de novo, ou segue.",
+      "notGraded": "Termina em {{time}}; depois de novo, ou segue.",
+      "notChecked": "Termina em {{time}}; depois de novo, ou segue.",
       "pausedFoot": "Pausado. O relógio espera por você; mais lento ou mais rápido, depois Retomar.",
       "pausedFootNeck": "Pausado. Todos os compassos estão na vista Tab ({{key}}); mais lento ou mais rápido, depois Retomar.",
       "switchAny": "Troque de vista quando quiser no aquecimento",
@@ -455,7 +489,7 @@
       "restart": "Recomeçar",
       "back": "De novo: {{title}}",
       "ended": "Concluído. De novo, ou para o próximo.",
-      "endedFoot": "Sem nota. Repita, ou siga quando estiver pronto.",
+      "endedFoot": "De novo, ou siga quando estiver pronto.",
       "again": "De novo",
       "beatOf": "Tempo {{n}} de {{of}}"
     },

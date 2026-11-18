@@ -3439,3 +3439,221 @@
   text-align: center;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
+
+/* ── A Take's result and the Session's recap (UX audit SES-2 to SES-13) ──
+ * One block, at the end, in the learning side's tokens only (`--l-*`), never
+ * a colour of its own: the light themes restyle it through the same tokens. */
+
+/* The number the verdict turned on, with a line saying why it leads. */
+.session-decided {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.session-decided-why {
+  margin-top: 6px;
+  color: var(--l-amber);
+}
+.session-decided[data-met] .session-decided-why {
+  color: var(--l-tone);
+}
+.session-barchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.session-barchip:not([data-met]) {
+  color: var(--l-clash);
+  border-color: color-mix(in srgb, var(--l-clash) 60%, transparent);
+}
+
+/* The rest of the bar, each with its own mark, and what was not checked. */
+.session-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  color: var(--l-quiet);
+}
+.session-checks li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+.session-checks b {
+  color: var(--l-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.session-check-mark {
+  flex: none;
+  width: 1em;
+  font-weight: 700;
+  text-align: center;
+  color: var(--l-faint);
+}
+.session-checks li[data-met] .session-check-mark {
+  color: var(--l-tone);
+}
+.session-checks li[data-missed] .session-check-mark {
+  color: var(--l-clash);
+}
+.session-check-bar {
+  color: var(--l-faint);
+  font-size: 13px;
+}
+
+/* Bar by bar: one cell a bar, ✓ or ✗ as well as green or red, and the
+   stretch that counted underlined. */
+.session-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.session-bars-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+.session-bars-head .session-why {
+  font-size: 13px;
+}
+.session-bars-row {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0 0 7px;
+  list-style: none;
+  max-width: 640px;
+}
+.session-bars-row li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 1px;
+  min-width: 0;
+  height: 36px;
+  border: 1px solid var(--l-line);
+  border-radius: 6px;
+  color: var(--l-faint);
+  font: 700 14px/1 var(--l-display);
+}
+.session-bars-row li small {
+  font: 500 10px/1 var(--l-body);
+  color: var(--l-faint);
+  font-variant-numeric: tabular-nums;
+}
+.session-bars-row li[data-state="met"] {
+  border-color: color-mix(in srgb, var(--l-tone) 70%, transparent);
+  background: color-mix(in srgb, var(--l-tone) 20%, transparent);
+  color: var(--l-tone);
+}
+.session-bars-row li[data-state="missed"] {
+  border-color: color-mix(in srgb, var(--l-clash) 70%, transparent);
+  background: color-mix(in srgb, var(--l-clash) 18%, transparent);
+  color: var(--l-clash);
+}
+.session-bars-row li[data-held]::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: -7px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--l-tone);
+}
+
+/* Find my edge: a rung per tempo, each Take on it a ✓ or a ✗ (SES-12). */
+.session-edge-rung {
+  gap: 2px;
+}
+.session-edge-marks {
+  display: flex;
+  gap: 3px;
+  font: 700 13px/1 var(--l-body);
+}
+.session-edge-marks i {
+  font-style: normal;
+}
+.session-edge-marks i[data-mark="met"] {
+  color: var(--l-tone);
+}
+.session-edge-marks i[data-mark="missed"] {
+  color: var(--l-clash);
+}
+
+/* A disabled Slower or Faster says why on hover (SES-13). */
+.session-nudge-wrap {
+  display: inline-flex;
+  max-width: 100%;
+}
+.session-nudge-wrap[data-why] {
+  cursor: help;
+}
+
+/* The recap: the numbers, what changed, what is next, and three ways on,
+   held together in the middle of the window rather than spread to its edges. */
+.session-recap {
+  gap: clamp(10px, 2vh, 20px);
+}
+.session-recap > :first-child {
+  margin-top: auto;
+}
+.session-recap > :last-child {
+  margin-bottom: auto;
+}
+.session-page .session-recap .session-recap-head .session-h1 {
+  font-size: clamp(30px, 5.6vh, 54px);
+  text-wrap: balance;
+  max-width: 26ch;
+}
+.session-recap-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px clamp(18px, 3vw, 40px);
+  margin: 6px 0 0;
+}
+.session-recap-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.session-recap-stats dt {
+  font: 600 12px/1 var(--l-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--l-quiet);
+}
+.session-recap-stats dd {
+  margin: 0;
+  font: 700 clamp(26px, 4.4vh, 36px) / 1 var(--l-num);
+  color: var(--l-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.session-recap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding-top: 8px;
+}
+.session-page .session-recap-actions .session-big {
+  width: auto;
+  min-width: min(300px, 100%);
+  padding-inline: 32px;
+}
+.session-page .session-recap-actions .session-link {
+  align-self: center;
+}
+@media (max-width: 480px) {
+  .session-page .session-recap-actions .session-big {
+    width: 100%;
+  }
+}

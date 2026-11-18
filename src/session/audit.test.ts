@@ -126,7 +126,7 @@ describe("TODAY-3: Find my level climbs", () => {
     let r = runReducer(IDLE, { type: "start", plan: s, now: NOW });
     const e = ex("even-eighths.open-string");
     r = take(r, "passed");
-    expect(bigAction(r, e)).toEqual({ kind: "again", bpm: 100 });
+    expect(bigAction(r, e)).toEqual({ kind: "again", bpm: 100, up: true });
     r = runReducer(r, eventForBigAction(bigAction(r, e), NOW)!);
     r = take(r, "belowBar");
     // Missed at the pass tempo: placement is over, the plan goes on.
@@ -194,6 +194,8 @@ describe("PATH-5: Test out", () => {
       why: { code: "testOut", values: {} },
     };
     const r = runReducer(IDLE, { type: "start", plan: { minutes: 5, mood: "returning", daysAway: null, steps: [test] }, now: NOW });
-    expect(tempoNudges(r, ex("even-eighths.open-string"))).toEqual({ slower: false, faster: false });
+    expect(tempoNudges(r, ex("even-eighths.open-string"))).toMatchObject({ slower: false, faster: false });
+    // And the disabled buttons say why (UX audit SES-13).
+    expect(tempoNudges(r, ex("even-eighths.open-string"))).toMatchObject({ slowerWhy: "locked", fasterWhy: "locked" });
   });
 });

@@ -146,7 +146,7 @@
       "edge": "Ab dem Tempo, das du erreicht hast: {{bpm}} BPM. Nach jedem Take, der die Messlatte erreicht, geht es eine Stufe hoch.",
       "edgeCheck": "Um dein sauberes Tempo zu prüfen. Letztes Mal waren es {{clean}} BPM.",
       "edgeFirst": "Um dein sauberes Tempo zu finden. Es beginnt bei {{bpm}} BPM und steigt, solange du die Messlatte erreichst.",
-      "chosen": "Die hast du ausgesucht, aus {{step}}.",
+      "chosen": "Deine Wahl, aus {{step}}.",
       "focusTurn": "{{path}} führt heute: Es ist an der Reihe.",
       "focusTurnAway": "{{path}} führt heute: Du hast es seit {{days}} Tagen nicht gespielt.",
       "keepWarm": "{{path}}, warm gehalten: zuletzt vor {{days}} Tagen gespielt.",
@@ -192,7 +192,7 @@
       "early": "früh",
       "stripLabel": "Die letzten Töne, gegen das Raster",
       "countIn": "Einzählen",
-      "honest": "Ich höre Töne und Timing. Ab- und Aufschlag liegen bei dir: Die Anschlagsrichtung kann ich nicht hören.",
+      "honest": "Ich höre auf die Töne und ihr Timing. Die Anschlagsrichtung höre ich nicht, die behältst du selbst im Blick.",
       "noInput": "Ich kann deine Gitarre noch nicht hören. Für die Bewertung braucht es ein Mikrofon oder einen direkten Eingang.",
       "checkSound": "Meinen Sound prüfen",
       "engineTrouble": "Die Audio-Engine hat diese Übung nicht angenommen. Beende und starte neu.",
@@ -204,23 +204,36 @@
       "bandMicHint": "Mit Mikrofon würde ich die Band als deine Töne hören, darum ist sie aus. Mit Kopfhörern kannst du sie aufdrehen.",
       "skip": "Überspringen",
       "skipped": "Übersprungen",
-      "honestTiming": "Ich höre dein Timing, nicht welche Töne. Ab- und Aufschlag liegen bei dir: die Anschlagsrichtung höre ich nicht."
+      "honestTiming": "Ich höre auf dein Timing, nicht auf die Tonhöhen. Die Anschlagsrichtung höre ich nicht, die behältst du selbst im Blick.",
+      "goAgainUp": "Noch mal, rauf auf {{bpm}} BPM",
+      "slowerFloor": "Schon das langsamste Tempo dieser Übung",
+      "fasterCeiling": "Schon das schnellste Tempo dieser Übung",
+      "tempoLocked": "Ein Test läuft im Bestehens-Tempo, darum bleibt es fest"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",
       "barMet": "Messlatte erreicht",
-      "barIs": "Die Messlatte liegt bei {{bar}} %",
-      "barIsCount": "Die Messlatte liegt bei {{bar}}",
       "cleanFirst": "Sauberes Tempo: {{bpm}} BPM.",
       "cleanMoved": "Sauberes Tempo: von {{from}} auf {{bpm}} BPM.",
-      "unmeasuredNotes": "Ich habe das Timing geprüft. Die Töne waren nicht klar genug zu hören, um zu sagen, ob es die richtigen waren, deshalb wurde das diesmal nicht bewertet.",
-      "againSame": "Noch mal, {{bpm}} BPM",
       "moveOn": "Weiter",
       "fairAsk": "War diese Bewertung fair?",
       "fairYes": "Ja",
       "fairNo": "Nein",
       "fairThanksYes": "Danke: als fair gespeichert. Tippe auf Nein, um es zu ändern.",
-      "fairThanksNo": "Danke: als nicht fair gespeichert. Tippe auf Ja, um es zu ändern."
+      "fairThanksNo": "Danke: als nicht fair gespeichert. Tippe auf Ja, um es zu ändern.",
+      "barChip": "Latte {{bar}} %",
+      "barChipCount": "Latte: höchstens {{bar}}",
+      "barMissed": "Latte nicht erreicht",
+      "decidedPass": "Am knappsten an der Latte",
+      "decidedMiss": "Daran lag es",
+      "notesNotChecked": "Richtige Töne: diesmal nicht geprüft",
+      "barsTitle": "Takt für Takt",
+      "barsHeld": "{{count}} Takt am Stück gehalten",
+      "barsHeld_other": "{{count}} Takte am Stück gehalten",
+      "barsMet": "{{count}} von {{of}} Takten gehalten",
+      "barHeld": "Takt {{n}}: gehalten",
+      "barSlipped": "Takt {{n}}: verrutscht",
+      "barThin": "Takt {{n}}: zu wenige Töne zum Beurteilen"
     },
     "edge": {
       "kick": "Mein Limit finden",
@@ -233,22 +246,27 @@
       "offerTitle": "Von hier aus mein Limit finden",
       "offerBody": "Steigt ab {{bpm}} BPM, solange du die Messlatte erreichst, und behält dein sauberes Tempo. Dauert {{minutes}} Minuten länger.",
       "start": "Mein Limit finden",
-      "recap": "Limit"
+      "recap": "Limit",
+      "rungLabel": "{{bpm}} BPM: {{met}} geschafft, {{missed}} verfehlt"
     },
     "coach": {
-      "passed": "{{heard}} von {{expected}} Tönen gehört, gleichmäßig über {{bars}} Takte am Stück bei {{bpm}} BPM.",
-      "passedExtras": "{{heard}} von {{expected}} Tönen gehört, gleichmäßig über {{bars}} Takte am Stück, mit {{extras}} zusätzlichen.",
+      "passed": "Jeder Ton saß, gleichmäßig über {{bars}} Takte am Stück bei {{bpm}} BPM.",
+      "passedExtras": "Gleichmäßig über {{bars}} Takte am Stück, mit {{extras}} Extratönen unterwegs.",
       "heardNothing": "Ich habe nichts gehört.",
       "heardLittle": "Ich habe {{heard}} von {{expected}} Tönen gehört.",
       "tooShort": "Das waren {{bars}} Takte, zu kurz für eine Bewertung. Es braucht den ganzen Take.",
       "ungraded": "Das hier wird nicht bewertet. Du entscheidest selbst.",
       "below": {
-        "even": "Die Gleichmäßigkeit war {{value}} %. {{heard}} von {{expected}} Tönen gehört. Gleiche Töne, gleiches Tempo.",
+        "even": "{{value}} % gleichmäßig bei einer Latte von {{bar}} %. Alle Töne waren da, es liegt am Abstand dazwischen. Gleiche Töne, gleiches Tempo.",
         "heard": "Ich habe {{heard}} von {{expected}} Tönen gehört, und ohne sie kann das Timing nicht bestehen.",
         "extras": "{{extras}} Töne, mit denen ich nicht gerechnet habe. Dämpf die freien Saiten, falls sie mitklingen.",
         "accents": "{{value}} % der markierten Akzente kamen lauter als die Töne drumherum.",
-        "notes": "{{value}} % der Töne, deren Höhe ich erkennen konnte, waren die notierten. Gleiche Töne, gleiches Tempo, und achte auf die Bünde."
-      }
+        "notes": "{{value}} % der Töne, deren Höhe ich erkennen konnte, waren die notierten. Gleiche Töne, gleiches Tempo, und achte auf die Bünde.",
+        "evenSome": "{{value}} % gleichmäßig bei einer Latte von {{bar}} %, und {{missed}} Töne kamen nicht. Gleiche Töne, gleiches Tempo, jeder einzelne."
+      },
+      "passedSome": "{{heard}} von {{expected}} Tönen saßen, gleichmäßig über {{bars}} Takte am Stück bei {{bpm}} BPM.",
+      "passedTiming": "Alle {{heard}} Töne im Timing, {{bars}} Takte am Stück. Die Tonhöhen konnte ich diesmal nicht prüfen.",
+      "passedTimingSome": "{{heard}} von {{expected}} Tönen im Timing, {{bars}} Takte am Stück. Die Tonhöhen konnte ich diesmal nicht prüfen."
     },
     "noCatch": {
       "kick": "Keine Wertung für diesen Take",
@@ -275,11 +293,11 @@
         "drill": "Tempo-Rampe starten"
       },
       "how": {
-        "warmUp": "Spiel es zum Klick. Hier wird nichts bewertet, also locker bleiben.",
-        "yourTurn": "Spiel es auf deine Art zum Klick. Hier wird nichts geprüft.",
-        "jam": "Spiel mit der Band. Hier wird nichts bewertet.",
-        "finisher": "Spiel es über der Band, in Schleife. Hier wird nichts bewertet.",
-        "drill": "Der Klick wird beim Spielen schneller. Hier wird nichts bewertet."
+        "warmUp": "Spiel es zum Klick und werd locker.",
+        "yourTurn": "Spiel es auf deine Art, zum Klick.",
+        "jam": "Spiel mit der Band mit.",
+        "finisher": "Spiel es über die Band, in Schleife.",
+        "drill": "Der Klick wird beim Spielen schneller."
       },
       "skip": "Überspringen",
       "startKeys": "Enter, Leertaste oder das Pedal startet es."
@@ -305,7 +323,20 @@
       "takesAt_other": "{{count}} Takes, zuletzt bei {{bpm}} BPM",
       "noTakes": "Keine Takes in dieser Session.",
       "notGraded": "Aufwärmen und Jam wurden nicht bewertet.",
-      "nextSession": "Nächste Session, {{minutes}} Min."
+      "nextSession": "Nächste Session, {{minutes}} Min.",
+      "headClean": "Sauberes Tempo rauf auf {{bpm}} BPM bei {{title}}.",
+      "headPlayed": "{{count}} Minute gespielt, und sie zählt.",
+      "headPlayed_other": "{{count}} Minuten gespielt, und sie zählen.",
+      "statMinutesLabel": "Gespielt",
+      "statMinutes": "{{count}} Min.",
+      "statTakesLabel": "Takes",
+      "statStreakLabel": "Serie",
+      "statStreak": "{{count}} Tag",
+      "statStreak_other": "{{count}} Tage",
+      "fairAsk": "Fühlten sich die Bewertungen heute fair an?",
+      "backTo": "Zurück zu {{place}}",
+      "more": "5 Minuten mehr",
+      "keepGoing": "Weiter: {{title}}"
     },
     "paths": {
       "title": "Pfade",
@@ -431,8 +462,8 @@
       "handOpen": "Hand: offene Lage, Zeigefinger über dem 1. Bund.",
       "viewHint": "Ansicht jederzeit wechseln",
       "left": "übrig",
-      "notGraded": "Ohne Bewertung. Endet in {{time}}; dann nochmal oder weiter.",
-      "notChecked": "Nicht geprüft. Endet in {{time}}; dann nochmal oder weiter.",
+      "notGraded": "Endet in {{time}}; dann noch mal oder weiter.",
+      "notChecked": "Endet in {{time}}; dann noch mal oder weiter.",
       "pausedFoot": "Pausiert. Die Uhr wartet auf dich; langsamer oder schneller, dann Weiter.",
       "pausedFootNeck": "Pausiert. Alle Takte stehen in der Tab-Ansicht ({{key}}); langsamer oder schneller, dann Weiter.",
       "switchAny": "Beim Aufwärmen jederzeit die Ansicht wechseln",
@@ -445,8 +476,8 @@
       "restart": "Neu starten",
       "back": "Nochmal: {{title}}",
       "ended": "Fertig. Nochmal oder weiter zum Nächsten.",
-      "endedFoot": "Ohne Bewertung. Nochmal, oder weiter, wenn du so weit bist.",
-      "again": "Nochmal",
+      "endedFoot": "Noch mal, oder weiter, wenn du so weit bist.",
+      "again": "Noch mal",
       "beatOf": "Schlag {{n}} von {{of}}"
     },
     "runway": {

@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   barLine,
+  barStrip,
+  decidingCheck,
   displayBar,
   displayValue,
   metricKey,
@@ -16,6 +18,7 @@ import {
   reasonLine,
   takeLine,
 } from "../../session/coachWords";
+import type { BarCheck } from "../../session/grade";
 import { EDGE_MINUTES, planSession } from "../../session/planner";
 import type { PlanStep } from "../../session/planner";
 import {
@@ -46,6 +49,8 @@ import { lineText } from "./lineText";
 import { honestLineKey } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
+import { totalsFrom } from "./ProgressView";
+import type { MainView } from "../main-window/MainHeader";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -108,8 +113,14 @@ function SessionBar({
           />
         ))}
       </div>
-      <span className="session-quiet session-bar-left">
-        {left > 0 ? t("session.run.minutesLeft", { minutes: left }) : t("session.run.timeUp")}
+      {/* Started from a Step: no countdown, only a quiet clock of the time
+          spent so far (UX audit SES-11). */}
+      <span className="session-quiet session-bar-left" data-untimed={run.untimed ? "" : undefined}>
+        {run.untimed
+          ? clockText(Math.max(0, run.now - run.startedAt))
+          : left > 0
+            ? t("session.run.minutesLeft", { minutes: left })
+            : t("session.run.timeUp")}
       </span>
       {onSkip && (
         <button className="session-skip-this" onClick={onSkip} data-testid="session-skip-this">
@@ -282,7 +293,9 @@ function TakeScreen({
           <CoachLine>{exercise.coachLine}</CoachLine>
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
-          {honest && (
+          {/* Said once, before the first Take of a step, not on every
+              screen of it (UX audit SES-14). */}
+          {honest && !running && run.takes === 0 && (
             <div className="session-why" data-testid="pick-caveat">{t(honest)}</div>
           )}
           <BandVolume session={session} hint={!running} />
@@ -326,38 +339,151 @@ function TakeScreen({
   );
 }
 
-/** The number that moved, against the bar. */
-function MovedNumber({ outcome }: { outcome: TakeOutcome }) {
+/** A bar as the player reads it: "Bar 85%", "Bar: 2 or fewer". */
+function barText(check: Pick<BarCheck, "metric" | "min" | "max">, t: ReturnType<typeof useTranslation>["t"]): string | null {
+  const bar = displayBar(check);
+  if (bar === null) return null;
+  return check.metric === "extraNotes" ? t("session.result.barChipCount", { bar }) : t("session.result.barChip", { bar });
+}
+
+/**
+ * The number the verdict turned on (UX audit SES-3), the same kind of number
+ * whichever way the Take went: on a miss what held it back, on a pass the
+ * closest call. Said in words above it, with the bar beside it, ✓ or ✗.
+ */
+function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const { t } = useTranslation();
-  const check = outcome.grade.headline;
+  const check = decidingCheck(outcome.grade);
   if (!check) return null;
   const value = displayValue(check);
-  const bar = displayBar(check);
   const metric = metricKey(check.metric);
   const percent = check.metric !== "extraNotes";
+  // The last Take's number is kept for the grade's own headline; it only
+  // means something beside the same metric.
+  const sameAsStored = outcome.grade.headline?.metric === check.metric;
   const before =
-    outcome.previousValue === null
+    outcome.previousValue === null || !sameAsStored
       ? null
       : displayValue({ metric: check.metric, value: outcome.previousValue });
   const moved = before !== null && before !== value;
   const met = check.met === true;
+  const bar = barText(check, t);
   return (
-    <div className="session-moved" data-testid="session-moved">
-      {moved && <span className="session-moved-before">{before} →</span>}
-      <span className="session-moved-value" data-met={met ? "" : undefined}>
-        {value}
-        {percent ? "%" : ""}
-      </span>
-      <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
-      {bar !== null && (
-        <span className="session-tag" data-met={met ? "" : undefined}>
-          {met
-            ? t("session.result.barMet")
-            : t(percent ? "session.result.barIs" : "session.result.barIsCount", { bar })}
+    <div className="session-decided" data-testid="session-moved" data-metric={check.metric} data-met={met ? "" : undefined}>
+      <div className="session-kick session-decided-why">
+        {t(met ? "session.result.decidedPass" : "session.result.decidedMiss")}
+      </div>
+      <div className="session-moved">
+        {moved && <span className="session-moved-before">{before} →</span>}
+        <span className="session-moved-value" data-met={met ? "" : undefined}>
+          {value}
+          {percent ? "%" : ""}
         </span>
-      )}
+        <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
+        {bar !== null && (
+          <span className="session-tag session-barchip" data-met={met ? "" : undefined} data-testid="session-barchip">
+            <span aria-hidden="true">{met ? "✓" : "✗"}</span> {bar}
+            <span className="sr-only"> {t(met ? "session.result.barMet" : "session.result.barMissed")}</span>
+          </span>
+        )}
+      </div>
     </div>
   );
+}
+
+/**
+ * Everything else the bar asked for, each with its own ✓ or ✗, and what could
+ * not be checked this time, said plainly in one place (UX audit SES-2, SES-3).
+ */
+function OtherChecks({ outcome }: { outcome: TakeOutcome }) {
+  const { t } = useTranslation();
+  const deciding = decidingCheck(outcome.grade);
+  const others = outcome.grade.checks.filter((c) => c !== deciding && c.met !== null && c.value !== null);
+  // Only the pitch check is ever left unmeasured by this build; it is said
+  // plainly here, in one place (UX audit SES-2).
+  const unchecked = outcome.grade.unmeasured.includes("noteIdentity");
+  if (others.length === 0 && !unchecked) return null;
+  return (
+    <ul className="session-checks" data-testid="session-checks">
+      {others.map((c, i) => {
+        const value = displayValue(c);
+        const bar = barText(c, t);
+        return (
+          <li key={i} data-met={c.met ? "" : undefined} data-missed={c.met === false ? "" : undefined}>
+            <span className="session-check-mark" aria-hidden="true">{c.met ? "✓" : "✗"}</span>
+            <span>
+              <b>
+                {value}
+                {c.metric !== "extraNotes" ? "%" : ""}
+              </b>{" "}
+              {t(`session.metric.${metricKey(c.metric)}`)}
+            </span>
+            {bar && <span className="session-check-bar">{bar}</span>}
+          </li>
+        );
+      })}
+      {unchecked && (
+        <li data-unchecked="">
+          <span className="session-check-mark" aria-hidden="true">–</span>
+          <span>{t("session.result.notesNotChecked")}</span>
+        </li>
+      )}
+    </ul>
+  );
+}
+
+/**
+ * Bar by bar (UX audit SES-3): every bar of the Take, green with ✓ where it
+ * held, red with ✗ where it slipped, from the scorer's own per-bar figures;
+ * the stretch that counted underlined.
+ */
+function BarByBar({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
+  const { t } = useTranslation();
+  const exercise = session.exercise;
+  if (!exercise) return null;
+  const strip = barStrip(exercise, outcome.measures);
+  if (!strip || strip.cells.length < 2) return null;
+  const { cells, held } = strip;
+  const inHeld = (n: number) => !!held && n >= held.from && n < held.from + held.count;
+  const met = cells.filter((c) => c.state === "met").length;
+  return (
+    <div className="session-bars" data-testid="session-bars">
+      <div className="session-bars-head">
+        <span className="session-kick">{t("session.result.barsTitle")}</span>
+        <span className="session-why">
+          {held && outcome.grade.verdict === "passed"
+            ? t("session.result.barsHeld", { count: held.count })
+            : t("session.result.barsMet", { count: met, of: cells.length })}
+        </span>
+      </div>
+      <ol className="session-bars-row" style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}>
+        {cells.map((c) => (
+          <li
+            key={c.n}
+            data-state={c.state}
+            data-held={inHeld(c.n) ? "" : undefined}
+            aria-label={t(
+              c.state === "met" ? "session.result.barHeld" : c.state === "missed" ? "session.result.barSlipped" : "session.result.barThin",
+              { n: c.n },
+            )}
+          >
+            <span aria-hidden="true">{c.state === "met" ? "✓" : c.state === "missed" ? "✗" : "·"}</span>
+            <small aria-hidden="true">{c.n}</small>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** Close enough to the bar either way that the player's own view is worth asking (UX audit SES-5). */
+function borderline(outcome: TakeOutcome): boolean {
+  const check = decidingCheck(outcome.grade);
+  if (!check) return false;
+  const value = displayValue(check);
+  const bar = displayBar(check);
+  if (value === null || bar === null) return false;
+  return Math.abs(value - bar) <= (check.metric === "extraNotes" ? 1 : 5);
 }
 
 function CleanTempoLine({ outcome }: { outcome: TakeOutcome }) {
@@ -399,17 +525,29 @@ function EdgePanel({ session }: { session: SessionRun }) {
           <span className="session-why">{t("session.edge.slipped", { bpm: edge.slippedAt })}</span>
         )}
       </div>
+      {/* One rung per tempo, with every Take on it as ✓ or ✗: a slip and
+          its retry are one rung, not "90 90" (UX audit SES-12). */}
       <div className="session-edge-climb" role="list" aria-label={t("session.edge.climb")}>
-        {edge.climb.map((rung, i) => (
+        {rungsOf(edge.climb).map((rung) => (
           <span
-            key={i}
+            key={rung.bpm}
             role="listitem"
             className="session-edge-rung"
-            data-state={
-              rung.verdict === "passed" ? "met" : rung.verdict === "belowBar" ? "missed" : "none"
-            }
+            data-state={rung.marks.includes("met") ? "met" : rung.marks.includes("missed") ? "missed" : "none"}
+            aria-label={t("session.edge.rungLabel", {
+              bpm: rung.bpm,
+              met: rung.marks.filter((m) => m === "met").length,
+              missed: rung.marks.filter((m) => m === "missed").length,
+            })}
           >
             {rung.bpm}
+            <span className="session-edge-marks" aria-hidden="true">
+              {rung.marks.map((m, i) => (
+                <i key={i} data-mark={m}>
+                  {m === "met" ? "✓" : m === "missed" ? "✗" : "·"}
+                </i>
+              ))}
+            </span>
           </span>
         ))}
       </div>
@@ -418,20 +556,40 @@ function EdgePanel({ session }: { session: SessionRun }) {
   );
 }
 
+/** The climb, one rung per tempo in the order first reached, each with its Takes' marks. */
+function rungsOf(climb: ReadonlyArray<{ bpm: number; verdict: TakeOutcome["grade"]["verdict"] }>) {
+  const out: Array<{ bpm: number; marks: Array<"met" | "missed" | "none"> }> = [];
+  for (const take of climb) {
+    let rung = out.find((r) => r.bpm === take.bpm);
+    if (!rung) out.push((rung = { bpm: take.bpm, marks: [] }));
+    rung.marks.push(take.verdict === "passed" ? "met" : take.verdict === "belowBar" ? "missed" : "none");
+  }
+  return out;
+}
+
 /**
  * "Was this grade fair?": one tap, kept in the Take's facts for the export; a
  * tap on the other answer changes it, and the thanks says which is kept.
  * Only on a graded result: a Take not heard has no grade to judge.
  */
-export function FairTap({ session, outcome }: { session: SessionRun; outcome: TakeOutcome }) {
+export function FairTap({
+  session,
+  outcome,
+  askKey = "session.result.fairAsk",
+}: {
+  session: SessionRun;
+  outcome: TakeOutcome;
+  /** The question: about this Take, or (on the recap) about today's grades. */
+  askKey?: string;
+}) {
   const { t } = useTranslation();
   const id = outcome.takeId;
   if (!id) return null;
   const row = session.progress.takes.find((take) => take.id === id);
   const answer = row ? factsOf(row).fair : undefined;
   return (
-    <div className="session-fair" role="group" aria-label={t("session.result.fairAsk")} data-testid="session-fair">
-      <span>{t("session.result.fairAsk")}</span>
+    <div className="session-fair" role="group" aria-label={t(askKey)} data-testid="session-fair">
+      <span>{t(askKey)}</span>
       {(["yes", "no"] as const).map((value) => (
         <button
           key={value}
@@ -452,8 +610,13 @@ export function FairTap({ session, outcome }: { session: SessionRun; outcome: Ta
   );
 }
 
-/** A graded Take: passed reads as a result, below the bar as between Takes. */
-function ResultScreen({ session }: { session: SessionRun }) {
+/**
+ * A graded Take. Passed or not, one layout and one order (UX audit SES-3): the
+ * number the verdict turned on, why in words, the rest of the bar, the Take
+ * bar by bar; then the big button, which after a miss is Go again and after a
+ * pass is what comes next (SES-4).
+ */
+function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapped: boolean }) {
   const { t } = useTranslation();
   const { run, exercise, big, actions } = session;
   const outcome = run.outcomes[run.outcomes.length - 1];
@@ -463,94 +626,61 @@ function ResultScreen({ session }: { session: SessionRun }) {
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
   const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);
-  const kick = (
-    <div className="session-kick session-fade" style={rise(1)}>
-      {t("session.result.kick", {
-        take: outcome.takeNumber,
-        title: outcome.title,
-        bpm: outcome.bpm,
-        bars: outcome.measures.barsPlayed,
-      })}
-    </div>
-  );
-  const nudges = (
-    <div className="session-nudges">
-      <TempoNudges run={run} exercise={exercise} session={session} />
-      {big.kind !== "again" && (
-        <button className="session-secondary" onClick={actions.again}>
-          {t("session.result.againSame", { bpm: run.bpm })}
-        </button>
-      )}
-      {big.kind === "again" && (
-        <button className="session-secondary" onClick={actions.next} data-testid="session-move-on">
-          {t("session.result.moveOn")}
-        </button>
-      )}
-    </div>
-  );
-  const unmeasured = outcome.grade.unmeasured.length > 0 && (
-    <div className="session-why">{t("session.result.unmeasuredNotes")}</div>
-  );
-
-  if (!passed) {
-    return (
-      <div className="session-body" data-testid="session-between">
-        <div className="session-between">
-          <div className="session-col">
-            {kick}
-            <MovedNumber outcome={outcome} />
-            <CleanTempoLine outcome={outcome} />
-            {onEdge && <EdgePanel session={session} />}
-            <CoachLine>{lineText(t, line)}</CoachLine>
-            {unmeasured}
-            <button className="session-big" onClick={actions.go} data-testid="session-big">
-              {bigLabel(big, t)}
+  return (
+    <div className="session-body" data-testid={passed ? "session-result" : "session-between"} data-verdict={outcome.grade.verdict}>
+      <div className="session-between">
+        <div className="session-col">
+          <div className="session-kick session-fade" style={rise(1)}>
+            {t("session.result.kick", {
+              take: outcome.takeNumber,
+              title: outcome.title,
+              bpm: outcome.bpm,
+              bars: outcome.measures.barsPlayed,
+            })}
+          </div>
+          <DecidingNumber outcome={outcome} />
+          <CleanTempoLine outcome={outcome} />
+          {onEdge && <EdgePanel session={session} />}
+          <CoachLine good={passed}>{lineText(t, line)}</CoachLine>
+          <OtherChecks outcome={outcome} />
+          <BarByBar session={session} outcome={outcome} />
+          {/* There at once, with no fade: a pedal tap the moment the result
+              lands must find it (UX audit SES-15). */}
+          <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
+            {bigLabel(big, t)}
+          </button>
+          <div className="session-nudges">
+            <TempoNudges run={run} exercise={exercise} session={session} />
+            {big.kind !== "again" && (
+              <button className="session-secondary" onClick={actions.again} data-testid="session-again">
+                {t("session.run.goAgain", { bpm: run.bpm })}
+              </button>
+            )}
+            {big.kind === "again" && (
+              <button className="session-secondary" onClick={actions.next} data-testid="session-move-on">
+                {t("session.result.moveOn")}
+              </button>
+            )}
+          </div>
+          {/* Asked where the answer is worth having: a result near its bar
+              either way. The recap asks about the rest (UX audit SES-5). */}
+          {borderline(outcome) && <FairTap session={session} outcome={outcome} />}
+          {passed && !onEdge && (
+            <button
+              className="session-choice session-glass"
+              onClick={actions.findEdgeFromHere}
+              data-testid="session-find-edge"
+            >
+              <b>{t("session.edge.offerTitle")}</b>
+              <span>{t("session.edge.offerBody", { bpm: outcome.bpm, minutes: EDGE_MINUTES })}</span>
             </button>
-            {nudges}
-            <FairTap session={session} outcome={outcome} />
-            <PedalCard />
-          </div>
-          <div className="session-col">
-            <div className="session-slot" ref={slot} aria-hidden="true" />
-          </div>
+          )}
+          {pedalMapped && <PedalCard />}
+        </div>
+        <div className="session-col">
+          <div className="session-slot" ref={slot} aria-hidden="true" />
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="session-body" data-testid="session-result">
-      <div className="session-slot" ref={slot} aria-hidden="true" style={{ flex: "1 1 30%" }} />
-      {kick}
-      <MovedNumber outcome={outcome} />
-      <CleanTempoLine outcome={outcome} />
-      {onEdge && <EdgePanel session={session} />}
-      <div className="session-fade" style={rise(6)}>
-        <CoachLine good>{lineText(t, line)}</CoachLine>
-      </div>
-      {unmeasured}
-      {/* There at once, with no fade: a pedal tap the moment the result
-          lands must find it (UX audit SES-15). */}
-      <button
-        className="session-big"
-        data-size="mid"
-        onClick={actions.go}
-        data-testid="session-big"
-      >
-        {bigLabel(big, t)}
-      </button>
-      {nudges}
-      <FairTap session={session} outcome={outcome} />
-      {!onEdge && (
-        <button
-          className="session-choice session-glass"
-          onClick={actions.findEdgeFromHere}
-          data-testid="session-find-edge"
-        >
-          <b>{t("session.edge.offerTitle")}</b>
-          <span>{t("session.edge.offerBody", { bpm: outcome.bpm, minutes: EDGE_MINUTES })}</span>
-        </button>
-      )}
     </div>
   );
 }
@@ -1000,34 +1130,70 @@ function RecapItem({ step, session }: { step: PlanStep; session: SessionRun }) {
   );
 }
 
+/** A learning screen's name, as the rail calls it. */
+function placeName(view: MainView, t: ReturnType<typeof useTranslation>["t"]): string {
+  return view === "paths" || view === "progress" || view === "tools" ? t(`session.nav.${view}`) : t("session.nav.today");
+}
+
+/**
+ * The recap (UX audit SES-10): what the Session did, in numbers that mean
+ * something (minutes, Takes, the streak), what changed, what comes next, and
+ * three ways on. No empty neck, and no button the width of the window.
+ */
 function RecapScreen({ session }: { session: SessionRun }) {
   const { t } = useTranslation();
-  const { run, actions, big } = session;
+  const { run, actions } = session;
   const steps = run.plan?.steps ?? [];
   const passed = new Set(
     run.outcomes.filter((o) => o.grade.passesExercise).map((o) => o.exerciseId),
   ).size;
   const takes = run.outcomes.length;
   const notGraded = run.timedSteps.length > 0;
-  const slot = useNeckSlot(WHOLE, [], { sweep: true });
+  const minutes = Math.max(1, Math.round((run.now - run.startedAt) / 60_000));
+  const streak = totalsFrom(session.progress.takes, session.paths).streak;
+  // The best news first: a clean tempo that rose, then a pass, then the time put in.
+  const raised = [...run.outcomes]
+    .reverse()
+    .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
+  const lastGraded = [...run.outcomes].reverse().find((o) => o.takeId && o.grade.verdict !== "notCaught" && o.grade.verdict !== "ungraded");
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),
     paths: session.myPaths,
     progress: session.progress,
   });
+  const origin = session.origin;
+  const lastExercise = [...steps].reverse().find((s) => s.kind === "exercise");
 
   return (
-    <div className="session-body" data-testid="session-recap">
+    <div className="session-body session-recap" data-testid="session-recap">
       <div className="session-recap-head session-rise">
         <div className="session-kick">{t("session.recap.kick")}</div>
         <h1 className="session-h1">
-          {passed > 0
-            ? t("session.recap.passed", { count: passed })
-            : takes > 0
-              ? t("session.recap.takes", { count: takes })
-              : t("session.recap.none")}
+          {raised && raised.grade.cleanBpm !== null
+            ? t("session.recap.headClean", { bpm: raised.grade.cleanBpm, title: raised.title })
+            : passed > 0
+              ? t("session.recap.passed", { count: passed })
+              : takes > 0
+                ? t("session.recap.headPlayed", { count: minutes })
+                : t("session.recap.none")}
         </h1>
+        <dl className="session-recap-stats" data-testid="session-recap-stats">
+          <div>
+            <dt>{t("session.recap.statMinutesLabel")}</dt>
+            <dd>{t("session.recap.statMinutes", { count: minutes })}</dd>
+          </div>
+          <div>
+            <dt>{t("session.recap.statTakesLabel")}</dt>
+            <dd>{takes}</dd>
+          </div>
+          {streak > 0 && (
+            <div data-testid="session-recap-streak">
+              <dt>{t("session.recap.statStreakLabel")}</dt>
+              <dd>{t("session.recap.statStreak", { count: streak })}</dd>
+            </div>
+          )}
+        </dl>
       </div>
       <div className="session-split">
         <div className="session-col">
@@ -1037,6 +1203,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
           ))}
           {takes === 0 && <div className="session-why">{t("session.recap.noTakes")}</div>}
           {notGraded && <div className="session-why">{t("session.recap.notGraded")}</div>}
+          {lastGraded && <FairTap session={session} outcome={lastGraded} askKey="session.recap.fairAsk" />}
         </div>
         <div className="session-col">
           <div className="session-kick session-rise">
@@ -1059,10 +1226,23 @@ function RecapScreen({ session }: { session: SessionRun }) {
             ))}
         </div>
       </div>
-      <div className="session-slot" ref={slot} aria-hidden="true" />
-      <button className="session-big session-rise" onClick={actions.go} data-testid="session-big">
-        {bigLabel(big, t)}
-      </button>
+      <div className="session-recap-actions">
+        {/* The big button is what the pedal's tap does: back where the
+            Session began. */}
+        <button className="session-big" data-size="mid" onClick={actions.go} data-testid="session-big">
+          {t("session.recap.backTo", { place: placeName(origin, t) })}
+        </button>
+        <button className="session-secondary" onClick={actions.moreMinutes} data-testid="session-more">
+          {run.untimed && lastExercise
+            ? t("session.recap.keepGoing", { title: stepTitle(lastExercise, t) })
+            : t("session.recap.more")}
+        </button>
+        {origin !== "progress" && (
+          <button className="session-link" onClick={() => actions.closeTo("progress")} data-testid="session-to-progress">
+            {t("session.nav.progress")} →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -1092,6 +1272,7 @@ export function SessionView({
   pauseKey = "K",
   restartKey = "R",
   skipKey = "N",
+  pedalMapped = false,
   onCheckSound,
 }: {
   session: SessionRun;
@@ -1111,6 +1292,8 @@ export function SessionView({
   restartKey?: string;
   /** The key bound to the next step, shown on Skip this. */
   skipKey?: string;
+  /** A footswitch is mapped to the Session's pedal: only then is its legend shown (UX audit SES-5). */
+  pedalMapped?: boolean;
   onCheckSound: () => void;
 }) {
   const { run, actions } = session;
@@ -1163,7 +1346,7 @@ export function SessionView({
         (last?.grade.verdict === "notCaught" ? (
           <NoCatchScreen session={session} onCheckSound={onCheckSound} />
         ) : (
-          <ResultScreen session={session} />
+          <ResultScreen session={session} pedalMapped={pedalMapped} />
         ))}
       {(run.phase === "timedReady" || run.phase === "timed") && (
         <TimedScreen

@@ -2468,6 +2468,11 @@ export function MainWindow() {
             pauseKey={platformKey(keyBindings["session-pause"] || "")}
             restartKey={platformKey(keyBindings["session-restart"] || "")}
             skipKey={platformKey(keyBindings["session-next"] || "")}
+            pedalMapped={
+              !!keyBindings["session-pedal"] ||
+              !!footBindings["session-pedal"] ||
+              midi.bindings.some((b) => b.action === "session-pedal")
+            }
             onCheckSound={openAudioSettings}
           />
           </>

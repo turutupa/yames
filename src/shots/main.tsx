@@ -265,10 +265,13 @@ async function drive() {
         const done = () => !!document.querySelector('[data-testid="session-edge"][data-done]');
         // One Take at a time: start it, let it end itself, read the verdict, and
         // only then press again. A press while a Take runs would stop it short.
+        // Go again starts the count-in by itself (UX audit SES-4), so after the
+        // first Take the next one may already be running when it is looked for.
+        const running = () => !!byId("session-live");
         for (let take = 0; take < 8; take += 1) {
-          await until("the Take to be ready", ready, 20000);
-          big()?.click();
-          await until("the Take to run", () => !!byId("session-live"));
+          await until("the Take to be ready", () => ready() || running(), 20000);
+          if (!running()) big()?.click();
+          await until("the Take to run", running);
           await until("the verdict", verdict, 30000);
           if (stop === "edge" || done()) break;
           big()?.click();

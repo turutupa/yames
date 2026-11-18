@@ -652,8 +652,15 @@ function mockTakeGrade(
       heard,
       missed: mine.length - heard,
       extra: 0,
-      // A little life in it, so a chart of bars is not a ruler.
-      evenness: caught ? Math.min(1, even + ((bar % 3) - 1) * 0.02) : null,
+      // A little life in it, so a chart of bars is not a ruler; a Take below
+      // the bar holds for its first bars and then slips, as one usually does.
+      evenness: !caught
+        ? null
+        : recipe === "below"
+          ? bar < 4
+            ? 0.86 + (bar % 2) * 0.02
+            : 0.68 + (bar % 3) * 0.04
+          : Math.min(1, even + ((bar % 3) - 1) * 0.02),
       evennessSigmaMs: caught ? 6 : null,
     };
   });

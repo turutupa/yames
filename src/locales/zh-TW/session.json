@@ -146,7 +146,7 @@
       "edge": "從你達到的速度 {{bpm}} BPM 開始。每過一遍及格線就升一檔。",
       "edgeCheck": "檢查你的乾淨速度。上次是 {{clean}} BPM。",
       "edgeFirst": "找出你的乾淨速度。從 {{bpm}} BPM 開始，只要過及格線就一直往上升。",
-      "chosen": "這是你從 {{step}} 裡選的。",
+      "chosen": "你從 {{step}} 裡選的。",
       "focusTurn": "今天以{{path}}為主：輪到它了。",
       "focusTurnAway": "今天以{{path}}為主：你已經{{days}}天沒練了。",
       "keepWarm": "{{path}}，保持手感：上次練習是{{days}}天前。",
@@ -192,7 +192,7 @@
       "early": "偏早",
       "stripLabel": "最近的音與網格對比",
       "countIn": "預備拍中",
-      "honest": "我能聽到音和節奏。下上撥要靠你自己：我聽不出撥弦方向。",
+      "honest": "我聽的是音和它們的時值。彈片方向我聽不出來，這一點你自己留意。",
       "noInput": "我還聽不到你的吉他。評分需要麥克風或直接輸入。",
       "checkSound": "檢查聲音",
       "engineTrouble": "音訊引擎沒能載入這個練習。退出後重新開始。",
@@ -204,23 +204,36 @@
       "bandMicHint": "用麥克風時我會把樂團當成你的音，所以預設關閉。戴上耳機再調大。",
       "skip": "跳過這個",
       "skipped": "已略過",
-      "honestTiming": "我聽的是節奏，不是哪些音。上下撥由你掌握：我聽不出彈片方向。"
+      "honestTiming": "我聽的是節奏，不是音高。彈片方向我聽不出來，這一點你自己留意。",
+      "goAgainUp": "再來一遍，提到 {{bpm}} BPM",
+      "slowerFloor": "已經是這個練習最慢的速度",
+      "fasterCeiling": "已經是這個練習最快的速度",
+      "tempoLocked": "測驗要用及格速度彈，所以速度不變"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小節",
       "barMet": "已過及格線",
-      "barIs": "及格線是 {{bar}}%",
-      "barIsCount": "及格線是 {{bar}}",
       "cleanFirst": "乾淨速度：{{bpm}} BPM。",
       "cleanMoved": "乾淨速度：從 {{from}} 到 {{bpm}} BPM。",
-      "unmeasuredNotes": "節奏我檢查過了。音聽得不夠清楚，沒辦法判斷彈得對不對，所以這次沒有評分。",
-      "againSame": "再來一遍，{{bpm}} BPM",
       "moveOn": "繼續",
       "fairAsk": "這個評分公平嗎？",
       "fairYes": "是",
       "fairNo": "否",
       "fairThanksYes": "謝謝：已記為公平。點「否」可以更改。",
-      "fairThanksNo": "謝謝：已記為不公平。點「是」可以更改。"
+      "fairThanksNo": "謝謝：已記為不公平。點「是」可以更改。",
+      "barChip": "及格線 {{bar}}%",
+      "barChipCount": "及格線：不超過 {{bar}}",
+      "barMissed": "未過及格線",
+      "decidedPass": "最接近及格線的一項",
+      "decidedMiss": "卡在這裡",
+      "notesNotChecked": "音準：這次沒有檢查",
+      "barsTitle": "逐小節",
+      "barsHeld": "連續 {{count}} 小節穩住",
+      "barsHeld_other": "連續 {{count}} 小節穩住",
+      "barsMet": "{{of}} 小節裡穩住 {{count}} 小節",
+      "barHeld": "第 {{n}} 小節：穩住",
+      "barSlipped": "第 {{n}} 小節：亂了",
+      "barThin": "第 {{n}} 小節：音太少，無法判斷"
     },
     "edge": {
       "kick": "挑戰極限",
@@ -233,22 +246,27 @@
       "offerTitle": "從這裡挑戰極限",
       "offerBody": "從 {{bpm}} BPM 開始，只要過及格線就往上升，並保留你的乾淨速度。增加 {{minutes}} 分鐘。",
       "start": "挑戰極限",
-      "recap": "極限"
+      "recap": "極限",
+      "rungLabel": "{{bpm}} BPM：達標 {{met}}，未達標 {{missed}}"
     },
     "coach": {
-      "passed": "聽到 {{expected}} 個音中的 {{heard}} 個，{{bpm}} BPM 下連續 {{bars}} 小節都很均勻。",
-      "passedExtras": "聽到 {{expected}} 個音中的 {{heard}} 個，連續 {{bars}} 小節都很均勻，多了 {{extras}} 個音。",
+      "passed": "每個音都到位了，{{bpm}} BPM 下連續 {{bars}} 小節都很均勻。",
+      "passedExtras": "連續 {{bars}} 小節都很均勻，途中多了 {{extras}} 個音。",
       "heardNothing": "我什麼都沒聽到。",
       "heardLittle": "我聽到 {{expected}} 個音中的 {{heard}} 個。",
       "tooShort": "只有 {{bars}} 小節，太短，沒法判斷。需要彈完整一遍。",
       "ungraded": "這個不評分。你自己來判斷。",
       "below": {
-        "even": "均勻度是 {{value}}%。聽到 {{expected}} 個音中的 {{heard}} 個。同樣的音，同樣的速度。",
+        "even": "均勻度 {{value}}%，及格線 {{bar}}%。音都在，問題在音與音之間的間隔。同樣的音，同樣的速度。",
         "heard": "我只聽到 {{expected}} 個音中的 {{heard}} 個，沒有這些音，節奏也過不了。",
         "extras": "有 {{extras}} 個我沒預料到的音。如果不彈的弦在響，把它們悶住。",
         "accents": "標記的重音中有 {{value}}% 比周圍的音更響。",
-        "notes": "我能聽出音高的音裡，{{value}}% 是譜上的音。同樣的音，同樣的速度，注意格位。"
-      }
+        "notes": "我能聽出音高的音裡，{{value}}% 是譜上的音。同樣的音，同樣的速度，注意格位。",
+        "evenSome": "均勻度 {{value}}%，及格線 {{bar}}%，還有 {{missed}} 個音沒響。同樣的音，同樣的速度，一個都別漏。"
+      },
+      "passedSome": "{{expected}} 個音裡到位了 {{heard}} 個，{{bpm}} BPM 下連續 {{bars}} 小節都很均勻。",
+      "passedTiming": "{{heard}} 個音全都準時，連續 {{bars}} 小節。這次沒能檢查音高。",
+      "passedTimingSome": "{{expected}} 個音裡 {{heard}} 個準時，連續 {{bars}} 小節。這次沒能檢查音高。"
     },
     "noCatch": {
       "kick": "這一遍不評分",
@@ -275,11 +293,11 @@
         "drill": "開始提速"
       },
       "how": {
-        "warmUp": "跟著節拍器彈。這裡不評分，放輕鬆就好。",
-        "yourTurn": "用你自己的方式跟著節拍器彈。這裡不做檢查。",
-        "jam": "跟著樂團一起彈。這裡不評分。",
-        "finisher": "在樂團伴奏上循環彈。這裡不評分。",
-        "drill": "節拍會隨著你彈奏逐漸加快。這裡不評分。"
+        "warmUp": "跟著節拍器彈，放鬆手。",
+        "yourTurn": "跟著節拍器，按你的方式彈。",
+        "jam": "跟著樂隊一起彈。",
+        "finisher": "在樂隊伴奏上循環彈。",
+        "drill": "節拍器會越彈越快。"
       },
       "skip": "略過",
       "startKeys": "按 Enter、空白鍵或踏板開始。"
@@ -305,7 +323,20 @@
       "takesAt_other": "{{count}} 遍，最後一遍 {{bpm}} BPM",
       "noTakes": "這節課沒有彈任何一遍。",
       "notGraded": "熱身和即興伴奏不評分。",
-      "nextSession": "下節課，{{minutes}} 分鐘"
+      "nextSession": "下節課，{{minutes}} 分鐘",
+      "headClean": "{{title}} 的乾淨速度升到 {{bpm}} BPM。",
+      "headPlayed": "練了 {{count}} 分鐘，都算數。",
+      "headPlayed_other": "練了 {{count}} 分鐘，都算數。",
+      "statMinutesLabel": "練習時長",
+      "statMinutes": "{{count}} 分鐘",
+      "statTakesLabel": "遍數",
+      "statStreakLabel": "連續",
+      "statStreak": "{{count}} 天",
+      "statStreak_other": "{{count}} 天",
+      "fairAsk": "今天的評分公平嗎？",
+      "backTo": "回到{{place}}",
+      "more": "再練 5 分鐘",
+      "keepGoing": "繼續：{{title}}"
     },
     "paths": {
       "title": "路線",
@@ -431,8 +462,8 @@
       "handOpen": "手：開放把位，食指在第 1 格上方。",
       "viewHint": "隨時可以切換檢視",
       "left": "剩餘",
-      "notGraded": "不評分。{{time}} 後結束；然後再來一次，或繼續。",
-      "notChecked": "不檢查。{{time}} 後結束；然後再來一次，或繼續。",
+      "notGraded": "{{time}} 後結束；然後再來一遍，或繼續。",
+      "notChecked": "{{time}} 後結束；然後再來一遍，或繼續。",
       "pausedFoot": "已暫停。計時等著你；調慢或調快，然後繼續。",
       "pausedFootNeck": "已暫停。所有小節都在六線譜檢視（{{key}}）裡；調慢或調快，然後繼續。",
       "switchAny": "熱身時隨時可以切換檢視",
@@ -445,8 +476,8 @@
       "restart": "重新開始",
       "back": "再來一次：{{title}}",
       "ended": "完成。再來一次，或進入下一項。",
-      "endedFoot": "不評分。再來一次，或準備好後繼續。",
-      "again": "再來一次",
+      "endedFoot": "再來一遍，或準備好了就繼續。",
+      "again": "再來一遍",
       "beatOf": "第 {{n}} / {{of}} 拍"
     },
     "runway": {
