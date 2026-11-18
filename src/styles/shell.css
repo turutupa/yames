@@ -90,6 +90,10 @@
   border-radius: 10px;
   transition: border-color 0.3s;
   position: relative;
+  /* Its own stacking context, so the Aurora/Prism particles (ThemeEffects, at
+     z-index -1) drift over this background and under every panel and label,
+     never across the text (owner, 2026-11-17). */
+  isolation: isolate;
 }
 
 .main-window[data-playing="true"][data-border="true"] {
