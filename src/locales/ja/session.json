@@ -412,7 +412,7 @@
       "intro": "ここにあるのはすべてあなたの演奏から測ったものです：聞き取れた音、タイミングの均等さ、クリーンテンポ。",
       "cleanMeans": "どこでもよいので 8 小節続けて合格ラインに届いた最速のテンポです。",
       "sparkLabel": "テイクごとの均等さ、{{title}}",
-      "statMinutes": "演奏した分数",
+      "statMinutes": "テイクの演奏時間(分)",
       "statSessions": "セッション",
       "statStreak": "連続日数",
       "pathSparkLabel": "{{title}} の最高クリーンテンポが上がるたびの記録",

@@ -70,6 +70,16 @@ export default function SettingsTimeline({ sections, containerRef }: SettingsTim
   const [scrolling, setScrolling] = useState(false);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const tipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const railRef = useRef<HTMLDivElement | null>(null);
+  // P1-10 (acceptance, 2026-11-18): the "you are here" label sits to the left
+  // of its tick, in the gutter between the sheet and the window's edge. At
+  // 1024px that gutter is a few pixels wide and the label landed on the rows.
+  // So it is measured: a tick whose label does not fit the gutter shows no
+  // label, and when the ticks themselves would touch the sheet the whole
+  // rail steps aside. It never draws over a row, at any width or language.
+  const [labelFits, setLabelFits] = useState<boolean[]>([]);
+  const [railFits, setRailFits] = useState(true);
   const accentIsLight = useAccentIsLight();
 
   const getScrollContainer = useCallback(() => {
@@ -83,9 +93,40 @@ export default function SettingsTimeline({ sections, containerRef }: SettingsTim
 
     let rafId = 0;
 
+    const measure = () => {
+      const sectionEls = container.querySelectorAll("section.settings-section, section.hotkeys-section");
+      const rail = railRef.current;
+      if (sectionEls.length === 0 || !rail) return;
+      let contentRight = 0;
+      sectionEls.forEach((el) => {
+        contentRight = Math.max(contentRight, el.getBoundingClientRect().right);
+      });
+      // The ticks, not the rail's box: the rail is a flex column whose own
+      // width is not the ticks'.
+      let railLeft = Infinity;
+      tickRefs.current.forEach((tick) => {
+        if (tick) railLeft = Math.min(railLeft, tick.getBoundingClientRect().left);
+      });
+      if (!Number.isFinite(railLeft)) railLeft = rail.getBoundingClientRect().left;
+      // 8px of air between the sheet and anything the rail draws.
+      const gutter = railLeft - contentRight - 8;
+      setRailFits(gutter >= 0);
+      setLabelFits((prev) => {
+        const next = tipRefs.current.map((tip, i) => {
+          const tick = tickRefs.current[i];
+          if (!tip || !tick) return false;
+          // The label's right edge is 10px left of its tick's left edge.
+          const labelLeft = tick.getBoundingClientRect().left - 10 - tip.offsetWidth;
+          return labelLeft >= contentRight + 8;
+        });
+        return next.length === prev.length && next.every((v, i) => v === prev[i]) ? prev : next;
+      });
+    };
+
     const update = () => {
       const sectionEls = container.querySelectorAll("section.settings-section, section.hotkeys-section");
       if (sectionEls.length === 0) return;
+      measure();
 
       const containerRect = container.getBoundingClientRect();
 
@@ -132,7 +173,14 @@ export default function SettingsTimeline({ sections, containerRef }: SettingsTim
     const initTimer = setTimeout(update, 350);
 
     container.addEventListener("scroll", onScroll, { passive: true });
+    // The sheet's width changes with the window, the rail collapsing and
+    // the language; any of them can open or close the gutter.
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => measure()) : null;
+    ro?.observe(container);
+    window.addEventListener("resize", measure);
     return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", measure);
       container.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(rafId);
       cancelAnimationFrame(initId);
@@ -157,19 +205,21 @@ export default function SettingsTimeline({ sections, containerRef }: SettingsTim
   if (IS_MOBILE || sections.length === 0) return null;
 
   return (
-    <div className="settings-timeline">
+    <div ref={railRef} className={`settings-timeline${railFits ? "" : " stl-hidden"}`}>
       {sections.map((section, i) => {
         const isActive = i === activeIdx;
+        const fits = labelFits[i] ?? false;
 
         return (
           <div
             key={section.id}
             ref={(el) => { tickRefs.current[i] = el; }}
-            className={`stl-tick${isActive ? " stl-active" : ""}`}
+            className={`stl-tick${isActive ? " stl-active" : ""}${fits ? "" : " stl-no-label"}`}
             onClick={() => handleClick(i)}
+            title={fits ? undefined : section.label}
           >
-            <div className="stl-tooltip">{section.label}</div>
-            {isActive && scrolling && (
+            <div ref={(el) => { tipRefs.current[i] = el; }} className="stl-tooltip">{section.label}</div>
+            {isActive && scrolling && fits && (
               <div className={`stl-popover ${accentIsLight ? "stl-dark-text" : "stl-light-text"}`}>{section.label}</div>
             )}
           </div>

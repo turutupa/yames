@@ -412,7 +412,7 @@
       "intro": "Buradaki her şey senin çalışından ölçüldü: duyulan notalar, zamanlama düzgünlüğü, temiz tempo.",
       "cleanMeans": "Herhangi art arda sekiz ölçü boyunca çıtayı geçtiğin en hızlı tempo.",
       "sparkLabel": "Denemeler boyunca düzgünlük, {{title}}",
-      "statMinutes": "Çalınan dakika",
+      "statMinutes": "Denemelerdeki dakika",
       "statSessions": "Oturumlar",
       "statStreak": "Üst üste gün",
       "pathSparkLabel": "{{title}} için en iyi temiz tempon, her yükseldiğinde",

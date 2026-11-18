@@ -130,6 +130,7 @@ import { LeaveSessionDialog } from "../session/LeaveSessionDialog";
 import { PathsView } from "../session/PathsView";
 import { ProgressView } from "../session/ProgressView";
 import { ToolsView } from "../session/ToolsView";
+import { useLastUsed } from "../session/tools/useLastUsed";
 import { LearningNeck } from "../session/NeckGate";
 import { useJamTakes } from "./hooks/useJamTakes";
 import { somethingOpen, useToolEscape } from "./hooks/useToolEscape";
@@ -154,6 +155,7 @@ import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
 import { usePageFocus } from "./hooks/usePageFocus";
+import { SkipLink } from "./SkipLink";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import { jamEscapeTarget } from "./jamEscape";
 import {
@@ -534,6 +536,15 @@ export function MainWindow() {
       setlistSession.closeSetlist();
     },
   });
+
+  // The Tools page's LAST line (acceptance P2-13): what is on the stage now,
+  // else what each tool wrote down as the last one opened.
+  const lastUsed = useLastUsed(view === "tools");
+  const lastSetlist =
+    setlistSession.setlist ??
+    setlistSession.setlists.find((s) => s.id === lastUsed.setlistId) ??
+    null;
+  const lastJam = jamSession.jam ?? jamSession.jams.find((j) => j.id === lastUsed.jamId) ?? null;
 
   /**
    * The Songs library, the loaded song, and the song the engine is playing.
@@ -1949,6 +1960,7 @@ export function MainWindow() {
          you are actually in Settings — the row is right there. */
       data-newer-version={newerVersion.newest && view !== "settings" ? "" : undefined}
     >
+      <SkipLink root={contentRef} view={view} />
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       {!IS_MOBILE && <TitleBar />}
 
@@ -2500,10 +2512,10 @@ export function MainWindow() {
               groups: state.beatGroups ?? [state.timeSignature],
               freeMode: state.freeMode,
               ramp: state.speedRamp,
-              setlist: setlistSession.setlist
-                ? { name: setlistSession.setlist.name, steps: setlistSession.setlist.steps.length }
+              setlist: lastSetlist
+                ? { name: lastSetlist.name, steps: lastSetlist.steps.length }
                 : null,
-              jam: jamSession.jam?.name ?? null,
+              jam: lastJam?.name ?? null,
               song: songsSession.song?.name ?? null,
             }}
           />

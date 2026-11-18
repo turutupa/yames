@@ -85,6 +85,7 @@
     "coachReady": "Klaar",
     "coachInSession": "In sessie",
     "collapse": "Zijbalk inklappen",
+    "collapseLabel": "Zijbalk inklappen",
     "expand": "Zijbalk uitklappen",
     "collapseWithShortcut": "Zijbalk inklappen ({{shortcut}})",
     "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "Gepauzeerd",
     "notificationStop": "Stoppen",
     "notificationChannel": "Afspelen"
-  }
+  },
+  "skipLink": "Naar de hoofdinhoud"
 }

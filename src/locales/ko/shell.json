@@ -85,6 +85,7 @@
     "coachReady": "대기 중",
     "coachInSession": "세션 중",
     "collapse": "사이드바 접기",
+    "collapseLabel": "사이드바 접기",
     "expand": "사이드바 펼치기",
     "collapseWithShortcut": "사이드바 접기 ({{shortcut}})",
     "expandWithShortcut": "사이드바 펼치기 ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "일시정지",
     "notificationStop": "정지",
     "notificationChannel": "재생"
-  }
+  },
+  "skipLink": "본문으로 건너뛰기"
 }

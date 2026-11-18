@@ -85,6 +85,7 @@
     "coachReady": "Hazır",
     "coachInSession": "Seansta",
     "collapse": "Kenar çubuğunu daralt",
+    "collapseLabel": "Kenar çubuğunu daralt",
     "expand": "Kenar çubuğunu genişlet",
     "collapseWithShortcut": "Kenar çubuğunu daralt ({{shortcut}})",
     "expandWithShortcut": "Kenar çubuğunu genişlet ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "Duraklatıldı",
     "notificationStop": "Durdur",
     "notificationChannel": "Çalma"
-  }
+  },
+  "skipLink": "Ana içeriğe geç"
 }

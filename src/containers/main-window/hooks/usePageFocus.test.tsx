@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { act, render, waitFor } from "@testing-library/react";
 import { useRef } from "react";
-import { usePageFocus } from "./usePageFocus";
+import { focusPagePrimary, usePageFocus } from "./usePageFocus";
 
 function Host({ view, page }: { view: string; page: "a" | "b" | "session" | "session-wait" }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -47,5 +47,77 @@ describe("usePageFocus (NAV-10)", () => {
     await act(async () => new Promise((r) => setTimeout(r, 30)));
     expect(document.activeElement).toBe(input);
     input.remove();
+  });
+
+  it("focuses a tool's Play when the tool opens, once it draws (P2-8)", async () => {
+    function Tool({ view, play }: { view: string; play: boolean }) {
+      const ref = useRef<HTMLDivElement>(null);
+      usePageFocus(ref, view);
+      return (
+        <div ref={ref}>
+          {view === "tools" && <h1>Tools</h1>}
+          {view === "beat" && play && <button className="transport-play">Play</button>}
+        </div>
+      );
+    }
+    const { rerender, getByText } = render(<Tool view="tools" play={false} />);
+    rerender(<Tool view="beat" play={false} />);
+    await act(async () => new Promise((r) => setTimeout(r, 30)));
+    rerender(<Tool view="beat" play />);
+    await waitFor(() => expect(document.activeElement).toBe(getByText("Play")));
+  });
+
+  it("puts focus on the page when the focused element is taken away (P2-8)", async () => {
+    function Page({ wizard }: { wizard: boolean }) {
+      const ref = useRef<HTMLDivElement>(null);
+      usePageFocus(ref, "today");
+      return (
+        <>
+          {wizard && <button>Go to Today</button>}
+          <div ref={ref}>
+            <h1>Today</h1>
+            <button className="session-today-start">Start</button>
+          </div>
+        </>
+      );
+    }
+    const { rerender, getByText } = render(<Page wizard />);
+    getByText("Go to Today").focus();
+    rerender(<Page wizard={false} />);
+    await waitFor(() => expect(document.activeElement).toBe(getByText("Start")));
+  });
+
+  it("leaves focus alone while a modal is open", async () => {
+    function Page({ step }: { step: number }) {
+      const ref = useRef<HTMLDivElement>(null);
+      usePageFocus(ref, "today");
+      return (
+        <>
+          <div role="dialog" aria-modal="true">
+            <button key={step}>Next {step}</button>
+          </div>
+          <div ref={ref}>
+            <button className="session-today-start">Start</button>
+          </div>
+        </>
+      );
+    }
+    const { rerender, getByText } = render(<Page step={1} />);
+    getByText("Next 1").focus();
+    rerender(<Page step={2} />);
+    await act(async () => new Promise((r) => setTimeout(r, 40)));
+    expect(document.activeElement).not.toBe(getByText("Start"));
+  });
+
+  it("the skip link's target: Start on Today, else the heading", () => {
+    const root = document.createElement("div");
+    root.innerHTML = '<h1>Progress</h1>';
+    document.body.appendChild(root);
+    expect(focusPagePrimary(root, "progress")).toBe(true);
+    expect(document.activeElement?.textContent).toBe("Progress");
+    root.innerHTML = '<h1>Today</h1><button class="session-today-start">Start</button>';
+    expect(focusPagePrimary(root, "today")).toBe(true);
+    expect(document.activeElement?.textContent).toBe("Start");
+    root.remove();
   });
 });

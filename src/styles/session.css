@@ -3906,3 +3906,11 @@
     height: 48px;
   }
 }
+
+/* Progress: what "top clean BPM" means, as the first card's own footer
+   (acceptance P2-12), not a line adrift under the stack. */
+.session-prog-foot {
+  margin: 0;
+  padding: 10px 0 8px;
+  border-top: 1px solid var(--l-line);
+}

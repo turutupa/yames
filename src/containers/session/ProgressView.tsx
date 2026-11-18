@@ -172,7 +172,18 @@ function Stat({ value, label, i, testId }: { value: string; label: string; i: nu
   );
 }
 
-function PathCard({ group, session, i }: { group: PathGroup; session: SessionRun; i: number }) {
+function PathCard({
+  group,
+  session,
+  i,
+  footnote,
+}: {
+  group: PathGroup;
+  session: SessionRun;
+  i: number;
+  /** What "top clean BPM" means, said once, inside the first card (P2-12). */
+  footnote?: string;
+}) {
   const { t, i18n } = useTranslation();
   const { path } = group;
   const current = currentStepOf(session.progress, path);
@@ -228,6 +239,11 @@ function PathCard({ group, session, i }: { group: PathGroup; session: SessionRun
           );
         })}
       </ul>
+      {footnote && (
+        <p className="session-footnote session-prog-foot" data-testid="progress-footnote">
+          {footnote}
+        </p>
+      )}
     </section>
   );
 }
@@ -277,10 +293,17 @@ export function ProgressView({ session, onStart }: { session: SessionRun; onStar
           </div>
           <div className="session-prog-paths">
             {groups.map((g, i) => (
-              <PathCard key={g.path.id} group={g} session={session} i={i + 4} />
+              <PathCard
+                key={g.path.id}
+                group={g}
+                session={session}
+                i={i + 4}
+                // Inside the card whose number it explains, not floating under
+                // the stack (acceptance P2-12).
+                footnote={i === 0 ? t("session.progress.cleanMeans") : undefined}
+              />
             ))}
           </div>
-          <p className="session-footnote">{t("session.progress.cleanMeans")}</p>
         </>
       )}
     </div>

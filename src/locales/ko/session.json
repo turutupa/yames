@@ -412,7 +412,7 @@
       "intro": "여기 있는 모든 것은 연주에서 측정한 것입니다. 들린 음, 타이밍의 고르기, 클린 템포.",
       "cleanMeans": "어느 구간이든 여덟 마디 연속으로 통과 기준을 넘은 가장 빠른 템포입니다.",
       "sparkLabel": "테이크별 고르기, {{title}}",
-      "statMinutes": "연주한 시간(분)",
+      "statMinutes": "테이크 연주 시간(분)",
       "statSessions": "세션",
       "statStreak": "연속 일수",
       "pathSparkLabel": "{{title}}의 최고 클린 템포가 오를 때마다의 기록",
