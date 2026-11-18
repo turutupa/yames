@@ -1617,8 +1617,12 @@
   font: 600 22px/1.12 var(--l-display);
   letter-spacing: 0.01em;
 }
-.session-where .session-big {
+.session-page .session-where .session-big {
   margin-top: 12px;
+  /* One line in every language: "Продолжить · шаг 1" is half again "Continue · Step 1". */
+  font-size: 25px;
+  text-wrap: balance;
+  padding-inline: 10px;
 }
 .session-step-list {
   display: flex;
@@ -1754,15 +1758,17 @@
 }
 /* The Level: a segmented control, then who the chosen one is for and where it starts. */
 .session-level .session-level-seg {
-  grid-auto-flow: column;
+  /* Each Level as wide as its name, and a long one ("Продвинутый") wraps the
+     control to a second row rather than breaking mid-word or spilling out. */
+  display: flex;
+  flex-wrap: wrap;
   margin-top: 8px;
 }
 .session-page .session-level .session-level-seg button {
+  flex: 1 1 auto;
   font-size: 16px;
-  padding: 9px 4px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  hyphens: auto;
+  padding: 9px 8px;
+  white-space: nowrap;
   line-height: 1.05;
 }
 .session-level-about {
@@ -1829,6 +1835,18 @@
   gap: 18px 28px;
   align-items: start;
   margin-top: 8px;
+}
+/* Under ~1180 px the side column would squeeze the cards until each tab
+   drops under its words and one card fills the window: one column instead,
+   the cards at full width, Test out after them. */
+@media (max-width: 1180px) {
+  .session-stepgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .session-step-side {
+    position: static;
+    max-width: 640px;
+  }
 }
 .session-step-side {
   position: sticky;
