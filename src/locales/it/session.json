@@ -420,7 +420,8 @@
       "back": "Di nuovo: {{title}}",
       "ended": "Finito. Di nuovo, o avanti al prossimo.",
       "endedFoot": "Senza voto. Rifallo, o vai avanti quando sei pronto.",
-      "again": "Di nuovo"
+      "again": "Di nuovo",
+      "beatOf": "Movimento {{n}} di {{of}}"
     },
     "runway": {
       "label": "Le prossime note, in arrivo sulla linea",

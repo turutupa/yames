@@ -412,7 +412,8 @@
       "back": "Nochmal: {{title}}",
       "ended": "Fertig. Nochmal oder weiter zum Nächsten.",
       "endedFoot": "Ohne Bewertung. Nochmal, oder weiter, wenn du so weit bist.",
-      "again": "Nochmal"
+      "again": "Nochmal",
+      "beatOf": "Schlag {{n}} von {{of}}"
     },
     "runway": {
       "label": "Die nächsten Noten, die auf die Linie zulaufen",

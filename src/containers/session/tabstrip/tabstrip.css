@@ -16,8 +16,8 @@
   --ts-good: var(--feedback-perfect, #4ade80);
   --ts-off: var(--feedback-ok, #fbbf24);
   --ts-miss: #f87171;
-  --ts-num: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
-  --ts-face: Inter, system-ui, sans-serif;
+  --ts-num: var(--font-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --ts-face: var(--font-body, Inter, system-ui, sans-serif);
   --ts-fret: 34px;
   /* The column's colour as a solid, so a number's halo inside it is invisible. */
   --ts-col: color-mix(in srgb, var(--ts-amber) 22%, var(--ts-bg));
@@ -32,7 +32,7 @@
   background: var(--ts-bg);
   contain: layout paint;
 }
-:root[data-theme-group="light"] .tabstrip {
+:root[data-theme-group="light"] .tabstrip:not(.session-page *) {
   --ts-miss: #b4232f;
 }
 .session-page .tabstrip {
@@ -155,7 +155,7 @@
   font-family: var(--ts-num);
   font-size: var(--ts-fret);
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   fill: var(--ts-ink);
   stroke: var(--ts-bg);
   stroke-width: calc(var(--ts-fret) * 0.32);

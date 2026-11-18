@@ -57,7 +57,7 @@ function playedNotes(session: SessionRun) {
 
 /** The neck framed on the Exercise's own frets, its notes in one colour. */
 function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
-  const { view, notes } = exerciseNeck(playedNotes(session), kind);
+  const { view, notes } = exerciseNeck(playedNotes(session), kind, isTheoryTake(session));
   return useNeckSlot(view, notes, { sweep });
 }
 
@@ -175,57 +175,57 @@ function TakeScreen({
 
   return (
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
-      <div className="session-takeinfo">
-        <span className="session-kick">
-          {isEdgeStep(step)
-            ? t("session.edge.kick")
-            : isTheoryTake(session)
-              ? t("session.kind.theory")
-              : t("session.kind.mechanics")}
-          {pathTitle &&
-            ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
-        </span>
-        <h2 className="session-h3">{exercise.title}</h2>
-        <ContextLine step={step} />
-        <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
-        <PracticeViewSwitch
-          view={session.practiceView}
-          onChange={session.setPracticeView}
-          locked={running}
-          keyLabel={viewKey}
-        />
-      </div>
-
-      <div className="session-takerow">
-        {running ? (
-          <div className="session-row session-live" data-testid="session-live">
-            <div className="session-stat" data-xl="">
-              {/* Nothing scored yet: a quiet "–%", not a green dash drawn
-                  at 120 px that reads as an empty bar (QA 2026-11-17 #21). */}
-              <b className={scored > 0 ? "session-good" : "session-stat-none"}>
-                {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–%"}
-              </b>
-              <span>{t("session.run.heardSoFar")}</span>
-            </div>
-            <div className="session-stat">
-              <b>
-                {live.bars}
-                <span className="session-stat-of"> / {take.bars}</span>
-              </b>
-              <span>{t("session.run.bars")}</span>
-            </div>
-            <TimingStrip deviations={live.deviations} />
-          </div>
-        ) : (
-          <div className="session-brief">
-            <CoachLine>{exercise.coachLine}</CoachLine>
-          </div>
-        )}
-        <div className="session-bpm">
-          {run.bpm}
-          <small>{t("session.run.bpm")}</small>
-        </div>
-      </div>
+      <PracticeHead
+        kick={
+          <>
+            {isEdgeStep(step)
+              ? t("session.edge.kick")
+              : isTheoryTake(session)
+                ? t("session.kind.theory")
+                : t("session.kind.mechanics")}
+            {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
+          </>
+        }
+        title={exercise.title}
+        aside={
+          <PracticeViewSwitch
+            view={session.practiceView}
+            onChange={session.setPracticeView}
+            locked={running}
+            keyLabel={viewKey}
+          />
+        }
+        meta={
+          <>
+            <MetaTempo bpm={run.bpm} />
+            {running && (
+              <span className="session-row session-live practice-live" data-testid="session-live">
+                {/* Nothing scored yet: a quiet "–%", not a green dash that
+                    reads as an empty bar (QA 2026-11-17 #21). */}
+                <span className="practice-num" data-tone={scored > 0 ? "good" : undefined}>
+                  {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–%"}
+                  <small>{t("session.run.heardSoFar")}</small>
+                </span>
+                <span className="practice-num">
+                  {live.bars}
+                  <span className="session-stat-of"> / {take.bars}</span>
+                  <small>{t("session.run.bars")}</small>
+                </span>
+                <TimingStrip deviations={live.deviations} />
+              </span>
+            )}
+          </>
+        }
+        status={
+          running
+            ? live.countingIn
+              ? t("session.run.countIn")
+              : null
+            : lineText(t, reasonLine(step.why))
+        }
+        statusTone={running ? "live" : "quiet"}
+      />
+      {!running && <ContextLine step={step} />}
 
       {/* One picture at a time (the owner, 2026-11-16): the neck, numbered
           before the start and leading note by note while it runs, or the
@@ -248,7 +248,7 @@ function TakeScreen({
       <div className="session-mechlow" data-single="">
         <div className="session-col">
           {!running && <HandLine position={exercise.position} />}
-          {running && <CoachLine>{exercise.coachLine}</CoachLine>}
+          <CoachLine>{exercise.coachLine}</CoachLine>
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
           {pickDirectionMatters(exercise) && (
@@ -291,11 +291,6 @@ function TakeScreen({
         </button>
       </div>
 
-      {live.countingIn && running && (
-        <div className="session-count" role="status">
-          {t("session.run.countIn")}
-        </div>
-      )}
     </div>
   );
 }
@@ -503,9 +498,10 @@ function ResultScreen({ session }: { session: SessionRun }) {
         <CoachLine good>{lineText(t, line)}</CoachLine>
       </div>
       {unmeasured}
+      {/* There at once, with no fade: a pedal tap the moment the result
+          lands must find it (UX audit SES-15). */}
       <button
-        className="session-big session-fade"
-        style={rise(8)}
+        className="session-big"
         data-size="mid"
         onClick={actions.go}
         data-testid="session-big"

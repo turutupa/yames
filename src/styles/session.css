@@ -79,9 +79,13 @@
   --l-tone: #4ee08a;
   --l-tens: #5aa9ff;
   --l-clash: #ff5d6c;
-  --l-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
-  --l-serif: Fraunces, Georgia, "Times New Roman", serif;
-  --l-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The theme's faces (themes.ts, --font-*), so the learning side wears the
+     chosen theme's type; the learning side's own design where a theme says
+     nothing. Fret numbers and clocks take --l-num, which has tabular figures. */
+  --l-display: var(--font-display, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --l-serif: var(--font-heading, Fraunces, Georgia, "Times New Roman", serif);
+  --l-body: var(--font-body, Inter, system-ui, -apple-system, "Segoe UI", sans-serif);
+  --l-num: var(--font-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
   --l-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   box-sizing: border-box;
@@ -413,7 +417,7 @@
   border-radius: 9px;
   font: 700 24px/1 var(--l-display);
   color: var(--l-quiet);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
   transition: all 0.2s var(--l-ease);
 }
@@ -717,7 +721,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--l-faint);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-timebar-ticks > span {
   position: absolute;
@@ -767,7 +771,7 @@
   border: 1.5px solid var(--l-line2);
   font: 700 13px/1 var(--l-display);
   color: var(--l-quiet);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-plan-item[data-kind="mechanics"] .session-plan-dot {
   border-color: color-mix(in srgb, var(--k-mechanics) 55%, transparent);
@@ -827,7 +831,7 @@
   font: 600 13px/1.1 var(--l-display);
   letter-spacing: 0.06em;
   color: var(--l-faint);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 /* "More below": over the foot of the list while its last row is out of sight. */
 .session-plan-more {
@@ -1048,7 +1052,7 @@
   width: 42px;
   font: 700 30px/1 var(--l-display);
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-plan-mins small {
   display: block;
@@ -1189,7 +1193,7 @@
   margin-left: auto;
   font: 700 clamp(58px, 10vh, 104px) / 0.9 var(--l-display);
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-bpm small {
   font-size: 0.32em;
@@ -1203,7 +1207,7 @@
   /* "0 / 8" is one number: never a column of "0", "/", "8" (QA #4). */
   white-space: nowrap;
   font: 700 clamp(40px, 7vh, 72px) / 0.95 var(--l-display);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-stat > span {
   font-size: 13px;
@@ -1339,11 +1343,11 @@
 .session-moved-before {
   font: 700 clamp(48px, 10vh, 96px) / 0.9 var(--l-display);
   color: var(--l-quiet);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-moved-value {
   font: 700 clamp(100px, 20vh, 190px) / 0.84 var(--l-display);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   animation: session-fall 0.9s var(--l-ease) 0.5s both;
 }
 .session-moved-value[data-met] {
@@ -1418,7 +1422,7 @@
   background: rgba(14, 10, 7, 0.76);
   font: 700 21px/1 var(--l-display);
   color: var(--l-quiet);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-edge-rung[data-state="met"] {
   background: rgba(22, 84, 52, 0.88);
@@ -1447,7 +1451,7 @@
   font: 700 clamp(62px, 12vh, 124px) / 0.95 var(--l-display);
   color: var(--l-amber);
   text-shadow: 0 0 44px rgba(255, 170, 70, 0.34);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 /* Held at full until Start: the minutes it will take, not a clock running. */
 .session-countdown[data-ready] {
@@ -1474,7 +1478,7 @@
 .session-recap-number {
   flex: none;
   font: 700 44px/1 var(--l-display);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
 }
 .session-recap-number span {
@@ -1573,7 +1577,7 @@
   font: 700 19px/1 var(--l-display);
   color: var(--l-faint);
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-step-row[data-passed] .session-step-num {
   color: var(--l-tone);
@@ -1696,7 +1700,7 @@
   min-width: 58px;
   text-align: right;
   font: 700 25px/1 var(--l-display);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-progress-value small {
   display: block;
@@ -2100,7 +2104,7 @@
 }
 .session-compact-stat b {
   font: 700 clamp(28px, 4.6vh, 42px) / 1 var(--l-display);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .session-compact-stat > span {
   font-size: 13px;
@@ -2218,7 +2222,7 @@
   background: rgba(14, 10, 7, 0.92);
   color: var(--l-ink);
   font: 700 14px/1 var(--l-display);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   z-index: 1;
 }
 .runway-note[data-state="tone"] {
@@ -2639,7 +2643,7 @@
 }
 .practice-num {
   font: 600 44px/1 var(--l-num, var(--l-display));
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
   color: var(--l-ink);
 }
@@ -2864,7 +2868,8 @@
    staff near its top, the fret strip under it, and the room left over above
    the footer rather than inside the panel. */
 .session-page .practice-tab:not([data-compact]) {
-  flex: 0 1 440px;
+  flex: 1 1 0;
+  max-height: 440px;
   margin-top: 14px;
 }
 .session-page .practice-tab:not([data-compact]) .tabstrip[data-mode="follow"] .tabstrip-fill {
@@ -2940,4 +2945,35 @@
 }
 .practice-foot .session-link {
   align-self: center;
+}
+/* A Take's live numbers, small, in the head's meta row. */
+.practice-live {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 22px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.practice-num[data-tone="good"] {
+  color: var(--l-tone);
+}
+.practice-live .session-strip {
+  align-self: center;
+  flex: 0 1 300px;
+  height: 46px;
+}
+/* No grade: the words on a panel of their own, so the neck under them cannot
+   cross them (UX audit SES-9). */
+[data-testid="session-no-catch"] > .session-center:first-child {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  padding: 18px 26px;
+  border-radius: 16px;
+  background: rgba(14, 9, 6, 0.9);
+  border: 1px solid var(--l-line);
+}
+.practice-next-tag[data-below] {
+  transform: translate(-30%, 0);
+  flex-direction: column;
 }

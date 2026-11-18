@@ -412,7 +412,8 @@
       "back": "Nog eens: {{title}}",
       "ended": "Klaar. Nog eens, of door naar de volgende.",
       "endedFoot": "Geen cijfer. Nog eens, of ga verder als je klaar bent.",
-      "again": "Nog eens"
+      "again": "Nog eens",
+      "beatOf": "Tel {{n}} van {{of}}"
     },
     "runway": {
       "label": "De volgende noten, op weg naar de lijn",

@@ -412,7 +412,8 @@
       "back": "Yeniden: {{title}}",
       "ended": "Bitti. Yeniden ya da sıradakine.",
       "endedFoot": "Notlanmaz. Yeniden çal ya da hazır olunca devam et.",
-      "again": "Yeniden"
+      "again": "Yeniden",
+      "beatOf": "Vuruş {{n}} / {{of}}"
     },
     "runway": {
       "label": "Çizgiye doğru gelen sıradaki notalar",

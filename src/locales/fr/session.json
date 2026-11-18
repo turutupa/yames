@@ -420,7 +420,8 @@
       "back": "Encore : {{title}}",
       "ended": "Terminé. Encore, ou on passe à la suite.",
       "endedFoot": "Non noté. Recommence, ou passe à la suite quand tu es prêt.",
-      "again": "Encore"
+      "again": "Encore",
+      "beatOf": "Temps {{n}} sur {{of}}"
     },
     "runway": {
       "label": "Les prochaines notes, qui arrivent sur la ligne",

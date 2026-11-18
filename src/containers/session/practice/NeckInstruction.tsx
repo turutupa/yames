@@ -103,7 +103,8 @@ export function NeckInstruction({
 
   // Ready: the whole pattern in view. Running: the bar's window.
   const whole = useMemo<NeckView>(() => {
-    const frets = notes.map((n) => n.fret).filter((f) => f > 0);
+    // Open strings included, so a "start here" at the nut is on the neck (SES-7).
+    const frets = notes.map((n) => n.fret).filter((f) => f >= 0);
     return frets.length ? windowView(windowOver(Math.min(...frets), Math.max(...frets), 5)) : { kind: "zoom", from: 0, to: 5 };
   }, [notes]);
 
@@ -177,7 +178,11 @@ export function NeckInstruction({
         else {
           nt.style.visibility = "visible";
           nt.style.left = `${next.x}px`;
-          nt.style.top = `${next.y - Math.max(18, next.r * 1.9)}px`;
+          // Above its note, or under it where the top of the picture would cut it (SES-7).
+          const above = next.y - Math.max(18, next.r * 1.9);
+          const below = above < 34;
+          nt.toggleAttribute("data-below", below);
+          nt.style.top = `${below ? next.y + Math.max(18, next.r * 1.9) : above}px`;
         }
       }
     },
@@ -275,9 +280,13 @@ export function NeckInstruction({
           if (i === b) d.setAttribute("data-on", "");
           else d.removeAttribute("data-on");
         });
+        // Says which beat, not just "the bar's beats" (UX audit SES-16).
+        const label = t("session.practice.beatOf", { n: b + 1, of: beats });
+        dots.current?.setAttribute("aria-label", label);
+        dots.current?.setAttribute("title", label);
       }
     },
-    [neck, plan, perQuarter, showIndex, placeOverlay],
+    [neck, plan, perQuarter, showIndex, placeOverlay, t, beats],
   );
 
   usePracticeCursor({
@@ -309,6 +318,7 @@ export function NeckInstruction({
           ref={dots}
           role="img"
           aria-label={t("session.practice.beats")}
+          title={t("session.practice.beats")}
           data-testid="practice-beats"
         >
           {Array.from({ length: beats }, (_, i) => (

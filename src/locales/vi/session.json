@@ -412,7 +412,8 @@
       "back": "Lại: {{title}}",
       "ended": "Xong. Tập lại, hoặc sang phần tiếp theo.",
       "endedFoot": "Không chấm điểm. Tập lại, hoặc đi tiếp khi bạn sẵn sàng.",
-      "again": "Lại"
+      "again": "Lại",
+      "beatOf": "Phách {{n}}/{{of}}"
     },
     "runway": {
       "label": "Những nốt tiếp theo đang tiến đến vạch",

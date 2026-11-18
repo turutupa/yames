@@ -337,8 +337,20 @@ export function noteDisc(kind: NeckKind): THREE.Texture {
 }
 
 const labelCache = new Map<string, THREE.Texture>();
+/** The theme's number face (`--font-num`, themes.ts), read when a label is drawn. */
+function numFace(): string {
+  try {
+    const face = getComputedStyle(document.documentElement).getPropertyValue("--font-num").trim();
+    if (face) return face;
+  } catch {
+    /* no document (a worker, a test) */
+  }
+  return '"Barlow Condensed","Arial Narrow",system-ui,sans-serif';
+}
+
 export function noteLabel(text: string, color: string): THREE.Texture {
-  const k = text + "\u0000" + color;
+  const face = numFace();
+  const k = text + "\u0000" + color + "\u0000" + face;
   const hit = labelCache.get(k);
   if (hit) return hit;
   const S = 192;
@@ -347,7 +359,7 @@ export function noteLabel(text: string, color: string): THREE.Texture {
   g.fillStyle = color;
   g.textAlign = "center";
   g.textBaseline = "middle";
-  g.font = `700 ${text.length > 1 ? 96 : 118}px "Barlow Condensed","Arial Narrow",system-ui,sans-serif`;
+  g.font = `700 ${text.length > 1 ? 96 : 118}px ${face}`;
   g.fillText(text, S / 2, S / 2 + 6);
   const t = tex(c);
   labelCache.set(k, t);

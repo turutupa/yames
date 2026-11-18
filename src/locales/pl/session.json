@@ -428,7 +428,8 @@
       "back": "Jeszcze raz: {{title}}",
       "ended": "Gotowe. Jeszcze raz albo dalej.",
       "endedFoot": "Bez oceny. Powtórz albo idź dalej, gdy będziesz gotów.",
-      "again": "Jeszcze raz"
+      "again": "Jeszcze raz",
+      "beatOf": "Miara {{n}} z {{of}}"
     },
     "runway": {
       "label": "Kolejne nuty zbliżające się do linii",

@@ -1238,6 +1238,11 @@
   --accent-2-text: #1c1206;
   --beat-accent: #ffd08a;
   --font-family: var(--l-body);
+  /* The theme's faces too: the wizard's type is its own, like its colours. */
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-heading: Fraunces, Georgia, "Times New Roman", serif;
+  --font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --font-weight: 400;
   --radius: 10px;
   --radius-sm: 8px;

@@ -74,10 +74,16 @@ export function kindOfMark(mark: TimingMark): NeckKind | null {
   }
 }
 
-/** An Exercise's own notes, on the neck. */
-export function exerciseNeck(notes: readonly PathNote[] | undefined, kind: NeckKind = "aim") {
+/**
+ * An Exercise's own notes, on the neck. Labelled with their fret numbers, as
+ * the practice neck labels NOW and NEXT (UX audit SES-17: the result's neck
+ * said letters where the practice neck said numbers); a Theory Exercise,
+ * whose point is the notes' names, keeps its letters.
+ */
+export function exerciseNeck(notes: readonly PathNote[] | undefined, kind: NeckKind = "aim", letters = false) {
   const list = notes ?? [];
-  return { view: zoomOf(list), notes: neckNotesOf(list, kind) };
+  const placed = neckNotesOf(list, kind);
+  return { view: zoomOf(list), notes: letters ? placed : placed.map((n) => ({ ...n, label: String(n.fret) })) };
 }
 
 function viewKey(view: NeckView): string {

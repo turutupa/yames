@@ -420,7 +420,8 @@
       "back": "De novo: {{title}}",
       "ended": "Concluído. De novo, ou para o próximo.",
       "endedFoot": "Sem nota. Repita, ou siga quando estiver pronto.",
-      "again": "De novo"
+      "again": "De novo",
+      "beatOf": "Tempo {{n}} de {{of}}"
     },
     "runway": {
       "label": "As próximas notas, chegando à linha",

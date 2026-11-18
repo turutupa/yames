@@ -146,10 +146,19 @@ export function cameraPlan(model: Pick<RunwayModel, "onsets" | "barTicks">, widt
     const out: number[] = [];
     for (const o of model.onsets) {
       if (o.tick < start || o.tick >= end) continue;
-      for (const p of o.places) if (p.fret > 0) out.push(p.fret);
+      // Open strings count: a ring at the nut must be in the picture (SES-7).
+      for (const p of o.places) if (p.fret >= 0) out.push(p.fret);
     }
     return out;
   };
+  // The whole pattern in one window when it nearly fits: the camera then never
+  // moves while it runs, and never zooms out under the player (SES-7).
+  const all: number[] = [];
+  for (const o of model.onsets) for (const p of o.places) if (p.fret >= 0) all.push(p.fret);
+  if (all.length > 0 && Math.max(...all) - Math.min(...all) <= width) {
+    const one = windowOver(Math.min(...all), Math.max(...all), width);
+    return Array.from({ length: bars }, () => one);
+  }
   const plan: { from: number; to: number }[] = [];
   let current: { from: number; to: number } | null = null;
   for (let b = 0; b < bars; b++) {

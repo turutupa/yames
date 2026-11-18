@@ -76,7 +76,7 @@
 }
 .neck-fallback .fretboard-dot[data-kind="next"] { fill: #1a120b; stroke: #ffb454; stroke-width: 2.5; }
 .neck-fallback-label {
-  font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  font-family: var(--font-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
   font-weight: 700;
   fill: #201507;
 }

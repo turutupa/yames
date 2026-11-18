@@ -412,7 +412,8 @@
       "ended": "Played out. Again, or on to the next.",
       "endedFoot": "Not graded. Go again, or move on when you are ready.",
       "again": "Again",
-      "pausedFootNeck": "Paused. Every bar is in the Tab view ({{key}}); slower or faster, then Resume."
+      "pausedFootNeck": "Paused. Every bar is in the Tab view ({{key}}); slower or faster, then Resume.",
+      "beatOf": "Beat {{n}} of {{of}}"
     },
     "runway": {
       "label": "The next notes, arriving at the line",

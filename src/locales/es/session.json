@@ -420,7 +420,8 @@
       "back": "Otra vez: {{title}}",
       "ended": "Terminado. Otra vez, o al siguiente.",
       "endedFoot": "Sin nota. Repite, o sigue cuando quieras.",
-      "again": "Otra vez"
+      "again": "Otra vez",
+      "beatOf": "Tiempo {{n}} de {{of}}"
     },
     "runway": {
       "label": "Las próximas notas, llegando a la línea",
