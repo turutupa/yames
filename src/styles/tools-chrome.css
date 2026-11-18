@@ -517,3 +517,14 @@
   border-radius: 10px;
   font-family: var(--tk-body);
 }
+
+/* ── The phone ────────────────────────────────────────────────────────── */
+
+/* The condensed caps read smaller than the heavy ones they replaced; a
+   section's name gets back the size it had. */
+.main-window.is-mobile .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .stage-label,
+.main-window.is-mobile .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .setlist-paragraph-title,
+.main-window.is-mobile .main-content:is([data-view="beat"], [data-view="setlist"], [data-view="drill"], [data-view="jam"], [data-view="songs"]) .drill-climb-title {
+  font-size: 13px;
+  line-height: 1.1;
+}
