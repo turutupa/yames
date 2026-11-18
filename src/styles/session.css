@@ -25,7 +25,7 @@
 .main-content[data-view="session"] > .main-header,
 .main-content[data-view="tools"] > .main-header {
   margin: 0;
-  border-bottom-color: rgba(255, 232, 200, 0.08);
+  border-bottom-color: color-mix(in srgb, var(--l-wash) 8%, transparent);
 }
 /* The stage is a fixed layer under the whole window (z-index -1): on the
    learning side the window's own fill steps aside for it. */
@@ -43,7 +43,7 @@
 /* The backdrop, when the stage is not drawing one (no WebGL2, or no stage). */
 .main-content:has(> .view-transition-wrapper > .session-page:not([data-neck3d])),
 .main-content:has(> .session-page:not([data-neck3d])) {
-  background: radial-gradient(90% 70% at 60% 45%, #2a1a10 0, #120b07 55%, #0a0705 100%);
+  background: var(--bg-primary);
 }
 .main-content[data-view="today"] > .view-transition-wrapper,
 .main-content[data-view="paths"] > .view-transition-wrapper,
@@ -68,17 +68,35 @@
 
 /* ── Tokens, type and the page ─────────────────────────────────────────── */
 .session-page {
-  --l-bg: #0a0705;
-  --l-line: rgba(255, 232, 200, 0.13);
-  --l-line2: rgba(255, 232, 200, 0.24);
-  --l-panel: rgba(22, 16, 11, 0.74);
-  --l-ink: #fbf5ea;
-  --l-quiet: #c9bba6;
-  --l-faint: #94866f;
-  --l-amber: #ffb454;
-  --l-tone: #4ee08a;
-  --l-tens: #5aa9ff;
-  --l-clash: #ff5d6c;
+  /* The learning side follows the theme, light themes included (the owner,
+     2026-11-17: the stage's fonts and colours did not match the chosen theme).
+     Every colour below is the theme's own token; the names stay so the rules
+     that use them did not have to change. Ember is the regression check: its
+     tokens are within a shade of the palette this replaced, except the accent,
+     which is now Ember's own orange as in the neck art direction's mock. */
+  --l-bg: var(--bg-solid, #0a0705);
+  --l-panel-solid: var(--bg-card-solid, #1e1712);
+  --l-raised-solid: var(--bg-raised-solid, #261e17);
+  --l-wash: var(--text-primary, #fbf5ea);
+  --l-line: color-mix(in srgb, var(--l-wash) 13%, transparent);
+  --l-line2: color-mix(in srgb, var(--l-wash) 24%, transparent);
+  --l-panel: color-mix(in srgb, var(--l-panel-solid) 74%, transparent);
+  --l-ink: var(--text-primary, #fbf5ea);
+  --l-quiet: var(--text-secondary, #c9bba6);
+  --l-faint: var(--text-tertiary, #94866f);
+  --l-amber: var(--accent, #ffb454);
+  --l-amber-ink: var(--accent-text, #1e1305);
+  --l-amber-hi: color-mix(in srgb, var(--l-amber) 70%, #fff);
+  --l-amber-lo: color-mix(in srgb, var(--l-amber) 88%, #000);
+  --l-amber-deep: color-mix(in srgb, var(--l-amber) 45%, #000);
+  --l-tone: var(--neck-hit, var(--feedback-perfect, #4ee08a));
+  --l-tens: var(--accent-2, #5aa9ff);
+  --l-clash: var(--neck-miss, #ff5d6c);
+  --l-mech: var(--accent-2, #8cc2ff);
+  --l-on-tone: color-mix(in srgb, var(--l-tone) 14%, #000);
+  --l-on-tens: color-mix(in srgb, var(--l-tens) 14%, #000);
+  /* Shadows: black on a dark theme, a soft ink on a light one (below). */
+  --l-shade: #000;
   /* The theme's faces (themes.ts, --font-*), so the learning side wears the
      chosen theme's type; the learning side's own design where a theme says
      nothing. Fret numbers and clocks take --l-num, which has tabular figures. */
@@ -104,6 +122,13 @@
   color: var(--l-ink);
   font: 500 15px/1.4 var(--l-body);
   -webkit-font-smoothing: antialiased;
+}
+/* A light theme: paper, so shadows are a soft ink and a filled green or blue
+   carries white. */
+:root[data-theme-group="light"] .session-page {
+  --l-shade: color-mix(in srgb, var(--text-primary) 40%, transparent);
+  --l-on-tone: #fff;
+  --l-on-tens: #fff;
 }
 .session-page *,
 .session-page *::before,
@@ -287,8 +312,8 @@
   pointer-events: none;
   background: linear-gradient(
     90deg,
-    rgba(8, 5, 3, 0.96) 0,
-    rgba(8, 5, 3, 0.9) 44%,
+    color-mix(in srgb, var(--l-bg) 96%, transparent) 0,
+    color-mix(in srgb, var(--l-bg) 90%, transparent) 44%,
     transparent 52%
   );
 }
@@ -305,28 +330,28 @@
   min-height: 48px;
   padding: 8px 22px;
   border-radius: 12px;
-  background: rgba(40, 30, 20, 0.7);
+  background: color-mix(in srgb, var(--l-panel-solid) 70%, transparent);
   border: 1px solid var(--l-line2);
   font: 600 21px/1.1 var(--l-display);
   letter-spacing: 0.03em;
   transition: transform 0.12s, box-shadow 0.2s, filter 0.2s, border-color 0.2s;
 }
 .session-page .session-btn:hover:not(:disabled) {
-  border-color: rgba(255, 232, 200, 0.45);
+  border-color: color-mix(in srgb, var(--l-wash) 45%, transparent);
 }
 .session-page .session-btn:active:not(:disabled) {
   transform: translateY(1px) scale(0.992);
 }
 .session-page .session-big,
 .session-page .session-pri {
-  color: #1e1305;
+  color: var(--l-amber-ink);
   border: 0;
-  background: linear-gradient(180deg, #ffd089 0, #ffb454 48%, #f19f38 100%);
+  background: linear-gradient(180deg, var(--l-amber-hi) 0, var(--l-amber) 48%, var(--l-amber-lo) 100%);
   box-shadow:
-    0 1px 0 rgba(255, 245, 220, 0.75) inset,
-    0 -2px 0 rgba(120, 66, 10, 0.45) inset,
-    0 10px 34px rgba(255, 160, 60, 0.28),
-    0 2px 8px rgba(0, 0, 0, 0.5);
+    0 1px 0 color-mix(in srgb, var(--l-wash) 75%, transparent) inset,
+    0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+    0 10px 34px color-mix(in srgb, var(--l-amber) 28%, transparent),
+    0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
 }
 .session-page .session-big:hover:not(:disabled),
 .session-page .session-pri:hover:not(:disabled) {
@@ -361,7 +386,7 @@
   transform: translateY(1px) scale(0.995);
 }
 .session-page .session-big:disabled {
-  background: rgba(40, 30, 20, 0.7);
+  background: color-mix(in srgb, var(--l-panel-solid) 70%, transparent);
   color: var(--l-faint);
   box-shadow: 0 0 0 1px var(--l-line2) inset;
 }
@@ -375,14 +400,14 @@
   min-height: 40px;
   padding: 6px 16px;
   border-radius: 10px;
-  background: rgba(40, 30, 20, 0.7);
+  background: color-mix(in srgb, var(--l-panel-solid) 70%, transparent);
   border: 1px solid var(--l-line2);
   font: 600 18px/1.1 var(--l-display);
   letter-spacing: 0.03em;
   transition: border-color 0.2s;
 }
 .session-page .session-secondary:hover:not(:disabled) {
-  border-color: rgba(255, 232, 200, 0.45);
+  border-color: color-mix(in srgb, var(--l-wash) 45%, transparent);
 }
 .session-page .session-secondary:disabled {
   color: var(--l-faint);
@@ -395,7 +420,7 @@
   color: var(--l-quiet);
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: rgba(201, 187, 166, 0.45);
+  text-decoration-color: color-mix(in srgb, var(--l-wash) 45%, transparent);
   font-size: 13.5px;
 }
 .session-page .session-link:hover {
@@ -426,7 +451,7 @@
   color: var(--l-amber);
 }
 .session-page .session-back:hover {
-  background: rgba(255, 232, 200, 0.06);
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
   border-color: var(--l-line2);
 }
 .session-seg {
@@ -436,9 +461,9 @@
   gap: 4px;
   padding: 4px;
   border-radius: 13px;
-  background: rgba(6, 4, 3, 0.72);
+  background: color-mix(in srgb, var(--l-bg) 72%, transparent);
   border: 1px solid var(--l-line);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6) inset;
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--l-shade) 60%, transparent) inset;
 }
 .session-page .session-seg button {
   padding: 10px 8px;
@@ -453,11 +478,11 @@
   color: var(--l-ink);
 }
 .session-page .session-seg button.on {
-  color: #1e1305;
-  background: linear-gradient(180deg, #ffd089, #f6a945);
+  color: var(--l-amber-ink);
+  background: linear-gradient(180deg, var(--l-amber-hi), var(--l-amber-lo));
   box-shadow:
-    0 1px 0 rgba(255, 245, 220, 0.7) inset,
-    0 0 18px rgba(255, 160, 60, 0.34);
+    0 1px 0 color-mix(in srgb, var(--l-wash) 70%, transparent) inset,
+    0 0 18px color-mix(in srgb, var(--l-amber) 34%, transparent);
 }
 .session-seg[data-small] {
   grid-auto-flow: row;
@@ -486,11 +511,11 @@
 }
 .session-tag[data-kind="theory"] {
   color: var(--l-amber);
-  border-color: rgba(255, 180, 84, 0.45);
+  border-color: color-mix(in srgb, var(--l-amber) 45%, transparent);
 }
 .session-tag[data-kind="mechanics"] {
-  color: #8cc2ff;
-  border-color: rgba(90, 169, 255, 0.5);
+  color: var(--l-mech);
+  border-color: color-mix(in srgb, var(--l-tens) 50%, transparent);
 }
 /* A role ("Find your level", "Review"): plain caps, no pill. The kind is a
    colour elsewhere, never this label's words. */
@@ -502,15 +527,15 @@
 }
 .session-tag[data-met] {
   color: var(--l-tone);
-  border-color: rgba(78, 224, 138, 0.5);
+  border-color: color-mix(in srgb, var(--l-tone) 50%, transparent);
 }
 .session-glass {
   background: var(--l-panel);
   border: 1px solid var(--l-line);
   border-radius: 14px;
   box-shadow:
-    0 1px 0 rgba(255, 240, 215, 0.05) inset,
-    0 12px 34px rgba(0, 0, 0, 0.34);
+    0 1px 0 color-mix(in srgb, var(--l-wash) 5%, transparent) inset,
+    0 12px 34px color-mix(in srgb, var(--l-shade) 34%, transparent);
 }
 .session-card {
   padding: 13px 15px;
@@ -530,11 +555,11 @@
   height: 11px;
   border-radius: 50%;
   background: var(--l-amber);
-  box-shadow: 0 0 12px rgba(255, 180, 84, 0.8);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--l-amber) 80%, transparent);
 }
 .session-lamp[data-good] {
   background: var(--l-tone);
-  box-shadow: 0 0 12px rgba(78, 224, 138, 0.8);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--l-tone) 80%, transparent);
 }
 .session-choice {
   display: block;
@@ -544,7 +569,7 @@
   transition: border-color 0.2s, transform 0.2s var(--l-ease);
 }
 .session-choice:hover {
-  border-color: rgba(255, 180, 84, 0.6);
+  border-color: color-mix(in srgb, var(--l-amber) 60%, transparent);
   transform: translateY(-1px);
 }
 .session-choice b {
@@ -588,7 +613,7 @@
 .session-today {
   --today-hero: 340px;
   --today-plan: 640px;
-  --k-mechanics: #8cc2ff;
+  --k-mechanics: var(--l-mech);
   --k-theory: var(--l-amber);
   --k-plain: var(--l-faint);
   display: grid;
@@ -678,7 +703,7 @@
   max-width: 100%;
   font: 600 15px/1.2 var(--l-display);
   letter-spacing: 0.05em;
-  opacity: 0.72;
+  opacity: 0.86;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -696,7 +721,7 @@
 .session-page .session-today-mic .session-link {
   align-self: baseline;
   color: var(--l-amber);
-  text-decoration-color: rgba(255, 180, 84, 0.5);
+  text-decoration-color: color-mix(in srgb, var(--l-amber) 50%, transparent);
   font-size: 14px;
 }
 
@@ -811,7 +836,7 @@
 .session-plan-item[data-first] .session-plan-dot {
   border: 2px solid var(--l-amber);
   color: var(--l-amber);
-  box-shadow: 0 0 10px rgba(255, 180, 84, 0.3);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-amber) 30%, transparent);
 }
 .session-today-plan .session-plan-body {
   gap: 1px;
@@ -875,7 +900,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--l-ink);
-  background: linear-gradient(to bottom, transparent, rgba(10, 7, 5, 0.92) 70%);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--l-bg) 92%, transparent) 70%);
   pointer-events: none;
 }
 .session-today-tools {
@@ -927,7 +952,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 232, 200, 0.25) transparent;
+    scrollbar-color: color-mix(in srgb, var(--l-wash) 25%, transparent) transparent;
   }
   .session-today-plan .session-plan-item {
     flex: none;
@@ -1018,9 +1043,9 @@
   min-height: 64px;
   font-size: 30px;
   box-shadow:
-    0 1px 0 rgba(255, 245, 220, 0.75) inset,
-    0 -2px 0 rgba(120, 66, 10, 0.45) inset,
-    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 1px 0 color-mix(in srgb, var(--l-wash) 75%, transparent) inset,
+    0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+    0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
     0 0 0 10px var(--l-bg),
     0 -18px 22px 10px var(--l-bg);
 }
@@ -1163,7 +1188,7 @@
   border-radius: 8px;
   font: 600 15px/1.2 var(--l-display);
   color: var(--l-quiet);
-  background: rgba(10, 7, 5, 0.6);
+  background: color-mix(in srgb, var(--l-bg) 60%, transparent);
 }
 .session-page .session-exit:hover {
   color: var(--l-ink);
@@ -1178,14 +1203,14 @@
 .session-pips i {
   height: 5px;
   border-radius: 3px;
-  background: rgba(255, 232, 200, 0.16);
+  background: color-mix(in srgb, var(--l-wash) 16%, transparent);
 }
 .session-pips i[data-state="done"] {
   background: var(--l-tone);
 }
 .session-pips i[data-state="on"] {
   background: var(--l-amber);
-  box-shadow: 0 0 10px rgba(255, 180, 84, 0.55);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-amber) 55%, transparent);
 }
 .session-bar-left {
   font-size: 13px;
@@ -1207,7 +1232,7 @@
   white-space: nowrap;
 }
 .session-page .session-skip-this:hover {
-  background: rgba(255, 232, 200, 0.06);
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
   border-color: var(--l-line2);
 }
 .session-page .session-skip-this kbd {
@@ -1299,12 +1324,12 @@
   font: 500 12px var(--l-body);
 }
 .session-strip-grid {
-  stroke: rgba(78, 224, 138, 0.35);
+  stroke: color-mix(in srgb, var(--l-tone) 35%, transparent);
   stroke-width: 1;
 }
 .session-strip-dot {
   fill: var(--l-tone);
-  filter: drop-shadow(0 0 4px rgba(78, 224, 138, 0.8));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--l-tone) 80%, transparent));
 }
 .session-mechlow {
   flex: none;
@@ -1344,7 +1369,7 @@
   text-align: center;
   padding: 0 16px;
   color: var(--l-amber);
-  text-shadow: 0 0 80px rgba(255, 170, 70, 0.55);
+  text-shadow: 0 0 80px color-mix(in srgb, var(--l-amber) 55%, transparent);
   animation: session-fade 0.4s ease both;
 }
 .session-actions {
@@ -1383,7 +1408,7 @@
 }
 .session-signal[data-on] i {
   background: var(--l-tone);
-  box-shadow: 0 0 10px rgba(78, 224, 138, 0.8);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-tone) 80%, transparent);
 }
 
 /* A result: the number that moved, large, in green when the bar was met. */
@@ -1405,7 +1430,7 @@
 }
 .session-moved-value[data-met] {
   color: var(--l-tone);
-  text-shadow: 0 0 60px rgba(78, 224, 138, 0.34);
+  text-shadow: 0 0 60px color-mix(in srgb, var(--l-tone) 34%, transparent);
 }
 .session-moved .session-tag {
   font-size: 15px;
@@ -1472,18 +1497,18 @@
   padding: 7px 0;
   border: 1px solid var(--l-line);
   border-radius: 9px;
-  background: rgba(14, 10, 7, 0.76);
+  background: color-mix(in srgb, var(--l-bg) 76%, transparent);
   font: 700 21px/1 var(--l-display);
   color: var(--l-quiet);
   font-variant-numeric: lining-nums tabular-nums;
 }
 .session-edge-rung[data-state="met"] {
-  background: rgba(22, 84, 52, 0.88);
+  background: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
   border-color: var(--l-tone);
   color: var(--l-ink);
 }
 .session-edge-rung[data-state="missed"] {
-  background: rgba(100, 28, 38, 0.9);
+  background: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
   border-color: var(--l-clash);
   color: var(--l-ink);
 }
@@ -1503,7 +1528,7 @@
 .session-countdown {
   font: 700 clamp(62px, 12vh, 124px) / 0.95 var(--l-display);
   color: var(--l-amber);
-  text-shadow: 0 0 44px rgba(255, 170, 70, 0.34);
+  text-shadow: 0 0 44px color-mix(in srgb, var(--l-amber) 34%, transparent);
   font-variant-numeric: lining-nums tabular-nums;
 }
 /* Held at full until Start: the minutes it will take, not a clock running. */
@@ -1565,7 +1590,7 @@
   transition: border-color 0.25s, transform 0.25s var(--l-ease);
 }
 .session-path-card:hover {
-  border-color: rgba(255, 180, 84, 0.55);
+  border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
   transform: translateY(-2px);
 }
 .session-path-card .session-pips {
@@ -1614,15 +1639,15 @@
   color: var(--l-quiet);
 }
 .session-page .session-step-row:hover {
-  background: rgba(255, 232, 200, 0.05);
+  background: color-mix(in srgb, var(--l-wash) 5%, transparent);
 }
 .session-page .session-step-row[data-passed] {
   color: var(--l-ink);
 }
 .session-page .session-step-row[data-current] {
   color: var(--l-ink);
-  background: rgba(255, 180, 84, 0.11);
-  border-color: rgba(255, 180, 84, 0.6);
+  background: color-mix(in srgb, var(--l-amber) 11%, transparent);
+  border-color: color-mix(in srgb, var(--l-amber) 60%, transparent);
 }
 /* Below the chosen Level: skipped, not done, and still a button. */
 .session-page .session-step-row[data-skipped] {
@@ -1673,8 +1698,8 @@
   margin-left: auto;
 }
 .session-exercise[data-current] {
-  border-color: rgba(255, 180, 84, 0.6);
-  background: rgba(50, 35, 18, 0.84);
+  border-color: color-mix(in srgb, var(--l-amber) 60%, transparent);
+  background: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
 }
 .session-exercise-text {
   flex: 1 1 13rem;
@@ -1700,7 +1725,7 @@
   place-items: center;
   font-size: 12px;
   font-weight: 700;
-  color: #07190f;
+  color: var(--l-on-tone);
   background: var(--l-tone);
 }
 .session-tick[data-state="wait"] {
@@ -1712,7 +1737,7 @@
   background: none;
   border: 2px solid var(--l-amber);
   color: transparent;
-  box-shadow: 0 0 10px rgba(255, 180, 84, 0.5);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-amber) 50%, transparent);
 }
 
 /* ── Progress ──────────────────────────────────────────────────────────── */
@@ -1789,7 +1814,7 @@
   max-height: 46vh;
 }
 .session-chart-grid {
-  stroke: rgba(255, 232, 200, 0.18);
+  stroke: color-mix(in srgb, var(--l-wash) 18%, transparent);
   stroke-width: 1;
 }
 .session-chart-axis {
@@ -1800,11 +1825,11 @@
   stroke: var(--l-amber);
   stroke-width: 2.4;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 6px rgba(255, 170, 70, 0.6));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--l-amber) 60%, transparent));
 }
 .session-chart-dot {
-  fill: #ffd089;
-  stroke: #1e1305;
+  fill: var(--l-amber-hi);
+  stroke: var(--l-amber-ink);
   stroke-width: 2;
 }
 .session-chart-end {
@@ -1841,7 +1866,7 @@
   transition: border-color 0.25s, transform 0.25s var(--l-ease);
 }
 .session-tool:hover {
-  border-color: rgba(255, 180, 84, 0.55);
+  border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
   transform: translateY(-3px);
 }
 .session-tool-view {
@@ -1850,13 +1875,13 @@
   display: grid;
   place-items: center;
   color: var(--l-amber);
-  background: radial-gradient(70% 80% at 50% 60%, rgba(255, 170, 70, 0.14), transparent 70%);
+  background: radial-gradient(70% 80% at 50% 60%, color-mix(in srgb, var(--l-amber) 14%, transparent), transparent 70%);
 }
 .session-tool-meta {
   display: block;
   min-height: 104px;
   padding: 12px 14px;
-  background: rgba(14, 10, 7, 0.92);
+  background: color-mix(in srgb, var(--l-bg) 92%, transparent);
   border-top: 1px solid var(--l-line);
 }
 .session-tool-meta b {
@@ -2041,15 +2066,15 @@
     bottom: calc(10px + var(--safe-bottom, 0px));
     z-index: 4;
     box-shadow:
-      0 1px 0 rgba(255, 245, 220, 0.75) inset,
-      0 -2px 0 rgba(120, 66, 10, 0.45) inset,
-      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 1px 0 color-mix(in srgb, var(--l-wash) 75%, transparent) inset,
+      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
       0 0 0 10px var(--l-bg),
       0 -18px 22px 10px var(--l-bg);
   }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-big:disabled {
     background:
-      linear-gradient(rgba(40, 30, 20, 0.7), rgba(40, 30, 20, 0.7)),
+      linear-gradient(color-mix(in srgb, var(--l-panel-solid) 70%, transparent), color-mix(in srgb, var(--l-panel-solid) 70%, transparent)),
       var(--l-bg);
     box-shadow:
       0 0 0 1px var(--l-line2) inset,
@@ -2081,7 +2106,7 @@
   padding: 2px;
   border: 1px solid var(--l-line2);
   border-radius: 9px;
-  background: rgba(10, 7, 5, 0.6);
+  background: color-mix(in srgb, var(--l-bg) 60%, transparent);
 }
 .session-viewswitch button {
   padding: 3px 12px;
@@ -2095,7 +2120,7 @@
   cursor: pointer;
 }
 .session-viewswitch button[data-on] {
-  background: rgba(255, 180, 84, 0.18);
+  background: color-mix(in srgb, var(--l-amber) 18%, transparent);
   color: var(--l-amber);
 }
 .session-viewswitch button:disabled {
@@ -2110,7 +2135,7 @@
   background: transparent;
 }
 .session-viewswitch[data-locked] button[data-on] {
-  background: rgba(255, 232, 200, 0.08);
+  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
   color: var(--l-quiet);
 }
 .session-viewswitch-lock {
@@ -2128,6 +2153,15 @@
   --lane-4: #f1e3c4;
   --lane-5: #7fd6d0;
   --lane-6: #ff8fa3;
+}
+/* On paper the same six hues, taken down toward the ink until they read as lines and labels. */
+:root[data-theme-group="light"] .session-body[data-view="runway"] {
+  --lane-1: color-mix(in oklab, #b45ee8 70%, var(--text-primary));
+  --lane-2: color-mix(in oklab, #b88600 70%, var(--text-primary));
+  --lane-3: color-mix(in oklab, #d4621a 70%, var(--text-primary));
+  --lane-4: color-mix(in oklab, #8a7a58 70%, var(--text-primary));
+  --lane-5: color-mix(in oklab, #1f8f86 70%, var(--text-primary));
+  --lane-6: color-mix(in oklab, #d0405e 70%, var(--text-primary));
 }
 .session-body[data-view="runway"] > .session-slot {
   flex: 45 1 0;
@@ -2198,7 +2232,7 @@
   top: 0;
   padding: 0 4px;
   font-size: clamp(30px, 5vh, 46px);
-  text-shadow: 0 0 30px rgba(255, 170, 70, 0.55);
+  text-shadow: 0 0 30px color-mix(in srgb, var(--l-amber) 55%, transparent);
 }
 
 .runway {
@@ -2250,7 +2284,7 @@
   top: 0;
   bottom: 0;
   left: 0;
-  background: linear-gradient(90deg, rgba(10, 7, 5, 0.55), rgba(10, 7, 5, 0.15));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--l-bg) 55%, transparent), color-mix(in srgb, var(--l-bg) 15%, transparent));
   pointer-events: none;
   z-index: 2;
 }
@@ -2268,7 +2302,7 @@
   top: 0;
   bottom: 0;
   width: 0;
-  border-left: 1px solid rgba(255, 232, 200, 0.16);
+  border-left: 1px solid color-mix(in srgb, var(--l-wash) 16%, transparent);
 }
 .runway-note {
   position: absolute;
@@ -2279,7 +2313,7 @@
   place-items: center;
   border-radius: 50%;
   border: 2px solid var(--lane);
-  background: rgba(14, 10, 7, 0.92);
+  background: color-mix(in srgb, var(--l-bg) 92%, transparent);
   color: var(--l-ink);
   font: 700 14px/1 var(--l-display);
   font-variant-numeric: lining-nums tabular-nums;
@@ -2288,12 +2322,12 @@
 .runway-note[data-state="tone"] {
   background: var(--l-tone);
   border-color: var(--l-tone);
-  color: #07190f;
+  color: var(--l-on-tone);
 }
 .runway-note[data-state="tens"] {
   background: var(--l-tens);
   border-color: var(--l-tens);
-  color: #06162a;
+  color: var(--l-on-tens);
 }
 .runway-note[data-state="clash"] {
   background: transparent;
@@ -2329,7 +2363,7 @@
   bottom: 0;
   width: 0;
   border-left: 2px solid var(--l-amber);
-  box-shadow: 0 0 14px rgba(255, 180, 84, 0.7);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--l-amber) 70%, transparent);
   z-index: 3;
 }
 .runway-legend {
@@ -2435,10 +2469,10 @@
 }
 .session-viewswitch button[data-on] {
   background: var(--l-amber);
-  color: #2a1606;
+  color: var(--l-amber-ink);
 }
 .session-viewswitch[data-locked] button[data-on] {
-  background: rgba(255, 232, 200, 0.08);
+  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
   color: var(--l-quiet);
 }
 
@@ -2471,7 +2505,7 @@
   visibility: hidden;
   border-radius: 50%;
   border: 3px dashed var(--l-amber);
-  box-shadow: 0 0 22px rgba(255, 180, 84, 0.45);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--l-amber) 45%, transparent);
   transform: translate(-50%, -50%);
   opacity: 0.85;
 }
@@ -2488,18 +2522,18 @@
   transform: translate(-50%, 0);
   white-space: nowrap;
   font: 600 15px/1.15 var(--l-body);
-  color: #ffd9a0;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  color: var(--l-ink);
 }
 .practice-now-tag:empty {
   display: none;
 }
-/* Readable over strings and frets: a dark pill under the words. */
+/* Readable over strings and frets: a pill of the page's own colour under the words. */
 .practice-now-tag,
 .practice-next-tag {
   padding: 2px 8px;
   border-radius: 8px;
-  background: rgba(14, 9, 6, 0.78);
+  background: color-mix(in srgb, var(--l-bg) 90%, transparent);
+  box-shadow: 0 0 0 1px var(--l-line);
 }
 .practice-next-tag {
   transform: translate(-50%, -100%);
@@ -2515,7 +2549,6 @@
 }
 .practice-next-tag [data-then] {
   font-size: 13px;
-  opacity: 0.75;
 }
 .practice-neck-foot {
   flex: none;
@@ -2534,7 +2567,7 @@
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 232, 200, 0.32);
+  border: 2px solid color-mix(in srgb, var(--l-wash) 32%, transparent);
 }
 .practice-beats i[data-on] {
   background: var(--l-amber);
@@ -2657,7 +2690,7 @@
   text-align: center;
   padding: 0 12px;
   font-size: clamp(30px, 5vh, 46px);
-  text-shadow: 0 0 30px rgba(255, 170, 70, 0.55);
+  text-shadow: 0 0 30px color-mix(in srgb, var(--l-amber) 55%, transparent);
 }
 .runway[data-lanes="1"],
 .runway[data-lanes="2"],
@@ -2731,12 +2764,12 @@
   place-items: center;
   border: 1px solid var(--l-line2);
   border-radius: 8px;
-  background: rgba(10, 7, 5, 0.6);
+  background: color-mix(in srgb, var(--l-bg) 60%, transparent);
   color: var(--l-ink);
   font: 600 20px/1 var(--l-body);
 }
 .session-page .practice-step:hover {
-  border-color: rgba(255, 180, 84, 0.6);
+  border-color: color-mix(in srgb, var(--l-amber) 60%, transparent);
   color: var(--l-amber);
 }
 .practice-status {
@@ -2744,7 +2777,7 @@
   align-items: center;
   gap: 9px;
   font-size: 15px;
-  color: #d8c8b0;
+  color: var(--l-quiet);
   text-align: right;
   min-width: 0;
 }
@@ -2778,9 +2811,9 @@
 /* The view switch as the mock draws it: amber edge, the chosen one filled. */
 .session-page .session-viewswitch {
   padding: 3px;
-  border: 1px solid rgba(255, 180, 84, 0.45);
+  border: 1px solid color-mix(in srgb, var(--l-amber) 45%, transparent);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
+  background: color-mix(in srgb, var(--l-shade) 25%, transparent);
 }
 .session-page .session-viewswitch button {
   display: inline-flex;
@@ -2793,16 +2826,16 @@
 }
 .session-page .session-viewswitch button[data-on] {
   background: var(--l-amber);
-  color: #2a1606;
+  color: var(--l-amber-ink);
 }
 .session-page .session-viewswitch[data-locked] button[data-on] {
-  background: rgba(255, 232, 200, 0.08);
+  background: color-mix(in srgb, var(--l-wash) 8%, transparent);
   color: var(--l-quiet);
 }
 
 /* The tab's panel (mock: 16 px corners, a faint amber edge, nearly black). */
 .session-page {
-  --l-tab-bg: #160f0b;
+  --l-tab-bg: var(--l-panel-solid);
 }
 .session-page .practice-tab {
   flex: 1 1 0;
@@ -2812,7 +2845,7 @@
   padding: 0 20px;
   border-radius: 16px;
   background: var(--l-tab-bg);
-  border: 1px solid rgba(255, 180, 84, 0.18);
+  border: 1px solid color-mix(in srgb, var(--l-amber) 18%, transparent);
   box-shadow: none;
 }
 .session-page .practice-tab[data-compact] {
@@ -2841,8 +2874,8 @@
   z-index: 6;
   padding: 8px 22px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 180, 84, 0.6);
-  background: rgba(14, 9, 6, 0.86);
+  border: 1px solid color-mix(in srgb, var(--l-amber) 60%, transparent);
+  background: color-mix(in srgb, var(--l-bg) 86%, transparent);
   color: var(--l-amber);
   font: 700 28px/1.1 var(--l-display);
   letter-spacing: 0.04em;
@@ -2966,7 +2999,7 @@
   background: none;
   align-items: flex-start;
   transform: translate(-30%, -100%);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--l-shade) 90%, transparent), 0 0 10px color-mix(in srgb, var(--l-shade) 75%, transparent);
 }
 .practice-next-tag b {
   font: 600 14px/1.15 var(--l-body);
@@ -2981,7 +3014,7 @@
   background: none;
   padding: 0;
   font-size: 17px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--l-shade) 90%, transparent), 0 0 10px color-mix(in srgb, var(--l-shade) 75%, transparent);
 }
 .practice-legend {
   font-size: 13px;
@@ -2990,7 +3023,7 @@
 /* A step left before it was played out: an outline, not the green of done (SES-1). */
 .session-pips i[data-state="skipped"] {
   background: transparent;
-  box-shadow: inset 0 0 0 1px rgba(255, 232, 200, 0.4);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-wash) 40%, transparent);
 }
 .practice-next-link {
   white-space: nowrap;
@@ -2998,9 +3031,9 @@
 /* Paused: said where the eye is, in the head, as a chip (no box over the notes). */
 .practice-status[data-tone="hold"] {
   padding: 5px 14px;
-  border: 1px solid rgba(255, 180, 84, 0.6);
+  border: 1px solid color-mix(in srgb, var(--l-amber) 60%, transparent);
   border-radius: 999px;
-  background: rgba(255, 180, 84, 0.1);
+  background: color-mix(in srgb, var(--l-amber) 10%, transparent);
   font: 600 17px/1.2 var(--l-body);
 }
 .practice-foot .session-link {
@@ -3030,7 +3063,7 @@
   align-self: center;
   padding: 18px 26px;
   border-radius: 16px;
-  background: rgba(14, 9, 6, 0.9);
+  background: color-mix(in srgb, var(--l-bg) 90%, transparent);
   border: 1px solid var(--l-line);
 }
 .practice-next-tag[data-below] {
@@ -3056,11 +3089,11 @@
   transform: translateX(-50%);
   max-width: min(560px, calc(100vw - 32px));
   padding: 9px 18px;
-  border: 1px solid rgba(255, 180, 84, 0.6);
+  border: 1px solid color-mix(in srgb, var(--l-amber) 60%, transparent);
   border-radius: 999px;
-  background: rgba(22, 16, 11, 0.92);
-  color: #fbf5ea;
+  background: color-mix(in srgb, var(--l-panel-solid) 92%, transparent);
+  color: var(--l-ink);
   font: 600 15px/1.3 var(--font-body, inherit);
   text-align: center;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--l-shade) 45%, transparent);
 }
