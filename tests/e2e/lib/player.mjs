@@ -84,7 +84,7 @@ export function pluck(midi, seconds = 0.6, gain = 0.5, rand = rng(midi)) {
  *        "sloppy" σ = 35 ms of scatter (clipped at ±70 ms), every note
  *        "sloppier" σ = 80 ms (clipped at ±160 ms)
  *        "wrong"  timed like "good", every other note a semitone sharp
- *        "fluffed" the first bar played like "sloppier", the rest like "good":
+ *        "fluffed" the first bar alternately 60 ms early and late, the rest like "good":
  *                 the slack a Take has (owner, 2026-11-17) leaves it behind
  *        "silent" nothing
  */
@@ -96,6 +96,7 @@ export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, se
   const rand = rng(seed);
   const passTicks = barTicks * exerciseBars;
   const passes = Math.ceil(bars / exerciseBars);
+  let fluffIndex = 0;
   for (let p = 0; p < passes; p++) {
     for (const note of notes) {
       const tick = note.tick + p * passTicks;
@@ -104,6 +105,15 @@ export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, se
       const spread = style === "sloppy" ? 35 : rough ? 80 : 1.5;
       const clip = rough ? 160 : 70;
       let jitterMs = gauss(rand) * spread;
+      // "fluffed": the first bar must FAIL, every run. Random scatter of 80 ms
+      // came out 0.91 even once (a 75 BPM grid, a lucky draw), so the bar
+      // "held" and the check that the clean bars come after it failed. Notes
+      // alternately 60 ms early and late are uneven by construction.
+      if (style === "fluffed" && tick < barTicks) {
+        // By note count, not tick: on an eighth-note grid a tick rule shifts
+        // every note the same way, and a uniform shift is corrected as lag.
+        jitterMs = (fluffIndex++ % 2 === 0 ? -60 : 60) + gauss(rand) * 5;
+      }
       // "wrong": in time, and every other note a semitone sharp.
       const midi = style === "wrong" && out.notes.length % 2 === 1 ? note.midi + 1 : note.midi;
       jitterMs = Math.max(-clip, Math.min(clip, jitterMs));
