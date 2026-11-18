@@ -10,9 +10,10 @@
  *   2026-11-18: an order line was confusing). The order is shown in time:
  *   the Watch preview lights the notes in order at the tempo, looping.
  * - While it runs, the note to play NOW is solid amber; an approach ring
- *   closes on it as its beat arrives. NEXT is an amber outline marked "next",
- *   with "then 7, 5" beside it. The notes just played keep their verdict's
- *   colour (a Take); four beat dots count the bar under the neck.
+ *   closes on it as its beat arrives. NEXT is an amber outline marked "next"
+ *   (no fret numbers after it: a number on the neck is a finger). The notes
+ *   just played keep their verdict's colour and their finger (a Take); four
+ *   beat dots count the bar under the neck.
  * - The camera holds about seven frets around the action and moves only on a
  *   bar line, and only when the bar would not fit (`cameraPlan`).
  *
@@ -26,6 +27,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, use
 import { useTranslation } from "react-i18next";
 import { useNeck } from "../../../stage3d/api";
 import { stripHeight } from "../../../stage3d/controller";
+import { markerExtent } from "../../../stage3d/neckTheme";
 import type { NeckKind, NeckView } from "../../../stage3d/api";
 import type { BeatPosition } from "../../../songs/position";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
@@ -41,7 +43,7 @@ import {
   fingering,
   nowNextNeck,
   readyNeck,
-  thenFrets,
+  SPAN_FRETS,
   windowOver,
   watchIndex,
   windowView,
@@ -51,6 +53,9 @@ import { onToggleWatch, subscribeWatchKeyLabel, watchKeyLabel } from "./watchBus
 
 /** The row under the neck for the beat counter and the key, kept out of the neck's frame. */
 const FOOT_PX = 34;
+
+/** The approach ring's room outside NOW's disc: a pixel of air and its 2 px line. */
+const RING_PAD = 3;
 
 const NO_LIGHTS: ReadonlyMap<number, TimingMark> = new Map();
 
@@ -118,7 +123,7 @@ export function NeckInstruction({
   const whole = useMemo<NeckView>(() => {
     // Open strings included, so a "start here" at the nut is on the neck (SES-7).
     const frets = notes.map((n) => n.fret).filter((f) => f >= 0);
-    return frets.length ? windowView(windowOver(Math.min(...frets), Math.max(...frets), 5)) : { kind: "zoom", from: 0, to: 5 };
+    return frets.length ? windowView(windowOver(Math.min(...frets), Math.max(...frets), SPAN_FRETS)) : { kind: "zoom", from: 0, to: 5 };
   }, [notes]);
 
   // What is on screen now, read and written by the frame loop alone.
@@ -217,7 +222,9 @@ export function NeckInstruction({
       if (r) {
         if (!now) hide(r);
         else {
-          const size = Math.max(34, Math.min(110, now.r * 3.4));
+          // Hugging NOW's disc, so it rings the note without reaching the dot
+          // on the next string at the same fret (acceptance 4, P2-9).
+          const size = 2 * (now.r * markerExtent("now") + RING_PAD);
           r.style.visibility = "visible";
           r.style.left = `${now.x}px`;
           r.style.top = `${now.y}px`;
@@ -226,7 +233,7 @@ export function NeckInstruction({
           if (msToDue !== null && msToDue > 40 && typeof r.animate === "function" && !reducedMotion()) {
             r.animate(
               [
-                { transform: "translate(-50%, -50%) scale(1.9)", opacity: 0.15 },
+                { transform: "translate(-50%, -50%) scale(1.4)", opacity: 0.15 },
                 { transform: "translate(-50%, -50%) scale(1)", opacity: 0.95 },
               ],
               { duration: msToDue, easing: "linear", fill: "forwards" },
@@ -248,53 +255,58 @@ export function NeckInstruction({
       }
       const nt = nextTag.current;
       if (nt) {
-        if (!next) hide(nt);
-        else {
-          nt.style.visibility = "visible";
-          nt.style.left = `${next.x}px`;
-          // Centred in the space between two strings, never on one: the gap
-          // past the string beside its note, above it, or under it where the
-          // top of the picture would cut it (SES-7). It used to hang a fixed
-          // distance above the note, which in every theme put "next" on the
-          // neighbouring string.
-          const place = m.onsets[index + 1]?.places[0];
-          // Where each string runs at NEXT's fret, from two above it to two
-          // below (a string past the edge is the board's edge).
+        const place = m.onsets[index + 1]?.places[0];
+        if (!next || !place) {
+          hide(nt);
+          nt.removeAttribute("data-clear");
+        } else {
+          // "next" goes in the space between two strings, never on one, and
+          // never on a dot: not on NOW (with its ring), not on NEXT, and not
+          // on any other dot of the pattern (acceptance 4, P1-1: it lay on
+          // the "4" in Aurora). Beside NEXT's own string first, centred on
+          // it, then to either side; then a string further out. Nowhere clear
+          // (a crowded neck at a small size), it is not drawn: NEXT is the
+          // outlined dot, and the key under the neck says so.
           const yAt = new Map<number, number>([[0, next.y]]);
-          if (place) {
-            for (const d of [-2, -1, 1, 2]) {
-              const sIdx = place.string + d;
-              if (sIdx < 0 || sIdx > 7) continue;
-              const pt = neck.project(sIdx, place.fret);
-              if (pt) yAt.set(d, pt.y - box.top);
-            }
+          for (const d of [-3, -2, -1, 1, 2, 3]) {
+            const sIdx = place.string + d;
+            if (sIdx < 1 || sIdx > 6) continue;
+            const pt = neck.project(sIdx, place.fret);
+            if (pt) yAt.set(d, pt.y - box.top);
           }
-          // The tag in both shapes: "next" over "then 8, 7", and on one line.
-          nt.removeAttribute("data-row");
-          const colH = nt.offsetHeight || 36;
-          const colW = nt.offsetWidth || 70;
-          nt.setAttribute("data-row", "");
-          const rowH = nt.offsetHeight || 20;
-          const rowW = nt.offsetWidth || 110;
-          nt.removeAttribute("data-row");
+          nt.style.visibility = "hidden";
+          const w = nt.offsetWidth || 40;
+          const h = nt.offsetHeight || 18;
           const H = box.height;
           const W = box.width;
-          // The inlays (acceptance 2: "next then 8, 7" lay on the 7th fret's
-          // dot): a fret's dot is in the middle of its cell, between the 3rd
-          // and 4th strings, or for 12 and 24 between the 2nd and 3rd and the
-          // 4th and 5th. A cell's wires are found from the markers' places,
-          // which stand just behind them.
+          // Every dot of the pattern, at the size it is drawn (NOW with its ring).
+          const nowKey = (() => {
+            const p = m.onsets[index]?.places[0];
+            return p ? `${p.string}:${p.fret}` : "";
+          })();
+          const nextKey = `${place.string}:${place.fret}`;
+          const blocks: { x: number; y: number; r: number }[] = [];
+          for (const n of latest.current.shape) {
+            const pt = neck.project(n.string, n.fret);
+            if (!pt) continue;
+            const k = `${n.string}:${n.fret}`;
+            const kind = k === nowKey ? "now" : k === nextKey ? "next" : "aim";
+            const extent = pt.r * markerExtent(kind) + (kind === "now" ? RING_PAD : 0);
+            blocks.push({ x: pt.x - box.left, y: pt.y - box.top, r: extent + 2 });
+          }
+          const nowBox = tag && tag.textContent ? tag.getBoundingClientRect() : null;
           const marks = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
-          const noteXAt = new Map<number, number>();
+          const noteXAt = new Map<number, number | null>();
           const nx = (k: number) => {
-            if (!place) return null;
             if (!noteXAt.has(k)) {
               const pt = neck.project(place.string, k);
-              noteXAt.set(k, pt ? pt.x - box.left : Number.NaN);
+              noteXAt.set(k, pt ? pt.x - box.left : null);
             }
-            const v = noteXAt.get(k)!;
-            return Number.isNaN(v) ? null : v;
+            return noteXAt.get(k)!;
           };
+          // The inlays: a fret's dot is in the middle of its cell, between the
+          // 3rd and 4th strings, or for 12 and 24 between the 2nd and 3rd and
+          // the 4th and 5th (acceptance 2: "next" lay on the 7th fret's dot).
           const inlaysIn = (a: number, x1: number, x2: number) => {
             for (const k of marks) {
               if (!(a === 3 && k !== 12 && k !== 24) && !((a === 2 || a === 4) && (k === 12 || k === 24))) continue;
@@ -302,26 +314,16 @@ export function NeckInstruction({
               const p1 = nx(k);
               if (p0 === null || p1 === null || k - 1 < 1) continue;
               const ix = (p0 + p1) / 2 + next.r * 1.4;
-              if (ix > x1 - next.r * 0.7 && ix < x2 + next.r * 0.7) return true;
+              if (ix > x1 - next.r * 0.5 && ix < x2 + next.r * 0.5) return true;
             }
             return false;
           };
-          // The markers round it (NOW larger), and NOW's finger tag: the
-          // words go where none of them is.
-          const blocks: { x: number; y: number; r: number }[] = [];
-          for (let i = Math.max(0, index - 3); i <= index + 3; i++) {
-            const p = at(i);
-            // NOW and NEXT whole; the quiet ones around them only at their
-            // middle, so on a narrow neck the words may touch a played
-            // note's edge rather than leave the gaps altogether.
-            if (p) blocks.push({ x: p.x, y: p.y, r: p.r * (i === index ? 1.5 : i === index + 1 ? 1.1 : 0.4) });
-          }
-          const nowBox = tag && tag.textContent ? tag.getBoundingClientRect() : null;
           const clear = (x1: number, x2: number, y1: number, y2: number) => {
+            if (x1 < 2 || x2 > W - 2 || y1 < 2 || y2 > H - 2) return false;
             for (const b of blocks) {
               const cx = Math.max(x1, Math.min(b.x, x2));
               const cy = Math.max(y1, Math.min(b.y, y2));
-              if (Math.hypot(b.x - cx, b.y - cy) < b.r - 1) return false;
+              if (Math.hypot(b.x - cx, b.y - cy) < b.r) return false;
             }
             if (nowBox && nowBox.width > 0) {
               const l = nowBox.left - box.left;
@@ -330,57 +332,32 @@ export function NeckInstruction({
             }
             return true;
           };
-          type Spot = { centre: number; row: boolean; up: boolean; x: number };
-          let pick: Spot | null = null;
-          if (place) {
-            // Beside NEXT's own string first (above, then below), centred on
-            // it, then to its right, then to its left; then a string further out.
-            const tries: Array<[number, "c" | "r" | "l"]> = [
-              [-1, "c"], [0, "c"], [-1, "r"], [0, "r"], [-1, "l"], [0, "l"],
-              [-2, "c"], [1, "c"], [-2, "r"], [1, "r"], [-2, "l"], [1, "l"],
-            ];
-            for (const [lo, side] of tries) {
-              const y1 = yAt.get(lo);
-              const y2 = yAt.get(lo + 1);
-              if (y1 === undefined || y2 === undefined) continue;
-              const gap = Math.abs(y2 - y1);
-              const centre = (y1 + y2) / 2;
-              const row = !(colH <= gap - 6);
-              const h = row ? rowH : colH;
-              const w = row ? rowW : colW;
-              if (row && rowH > gap - 2) continue;
-              if (centre - h / 2 < 2 || centre + h / 2 > H - 2) continue;
-              const x = side === "c" ? next.x : side === "r" ? next.x + next.r + 4 + w / 2 : next.x - next.r - 4 - w / 2;
-              if (x - w / 2 < 2 || x + w / 2 > W - 2) {
-                if (side !== "c") continue;
-              }
+          const reach = next.r * markerExtent("next") + 4 + w / 2;
+          const offsets = [0, reach, -reach, reach + w * 0.6, -reach - w * 0.6];
+          let pick: { x: number; y: number; up: boolean } | null = null;
+          for (const lo of [-1, 0, -2, 1, -3, 2]) {
+            const y1 = yAt.get(lo);
+            const y2 = yAt.get(lo + 1);
+            if (y1 === undefined || y2 === undefined) continue;
+            if (Math.abs(y2 - y1) < h - 1) continue;
+            const centre = (y1 + y2) / 2;
+            for (const dx of offsets) {
+              const x = next.x + dx;
               if (!clear(x - w / 2, x + w / 2, centre - h / 2, centre + h / 2)) continue;
               if (inlaysIn(place.string + lo, x - w / 2, x + w / 2)) continue;
-              pick = { centre, row, up: centre < next.y, x };
+              pick = { x, y: centre, up: centre < next.y };
               break;
             }
+            if (pick) break;
           }
-          nt.toggleAttribute("data-row", !!pick?.row);
+          // Said on the tag, so the layout gates can ask whether it found room.
+          nt.toggleAttribute("data-clear", !!pick);
           if (pick) {
-            nt.setAttribute("data-gap", "");
             nt.toggleAttribute("data-below", !pick.up);
-            nt.style.top = `${pick.centre}px`;
-          } else {
-            const fallback = next.y - Math.max(18, next.r * 1.9);
-            const below = fallback < 34;
-            nt.removeAttribute("data-gap");
-            nt.toggleAttribute("data-below", below);
-            nt.style.top = `${below ? next.y + Math.max(18, next.r * 1.9) : fallback}px`;
+            nt.style.left = `${pick.x}px`;
+            nt.style.top = `${pick.y}px`;
+            nt.style.visibility = "visible";
           }
-          const tagX = pick ? pick.x : next.x;
-          // Inside the picture: an open string's NEXT is at the nut, at its very edge.
-          nt.style.left = `${tagX}px`;
-          const r = nt.getBoundingClientRect();
-          let shift = r.left < box.left + 4 ? box.left + 4 - r.left : r.right > box.right - 4 ? box.right - 4 - r.right : 0;
-          // Pushed in from the left edge (an open string by the nut): clear of
-          // its token, beside it, rather than over it.
-          if (shift > 0 && r.left + shift < next.x + box.left + next.r + 6) shift = next.x + box.left + next.r + 6 - r.left;
-          if (shift) nt.style.left = `${tagX + shift}px`;
         }
       }
     },
@@ -394,14 +371,11 @@ export function NeckInstruction({
       neck.setNotes(nowNextNeck(sh, m.onsets, index, v, th, fg), { fade: 0.12 });
       // The finger is on the dot itself now; the tag under NOW says nothing.
       if (nowTag.current) nowTag.current.textContent = "";
-      const then = thenFrets(m.onsets, index);
-      const nextLabel = nextTag.current?.querySelector<HTMLElement>("[data-then]");
-      if (nextLabel) nextLabel.textContent = then.length ? t("session.practice.then", { frets: then.join(", ") }) : "";
       const due = m.onsets[index]?.tick;
       const ms = tick !== null && due !== undefined ? ((due - tick) / perQuarter) * (60_000 / Math.max(1, take.bpm)) : null;
       placeOverlay(index, ms);
     },
-    [neck, t, placeOverlay, perQuarter, take.bpm],
+    [neck, placeOverlay, perQuarter, take.bpm],
   );
 
   // The slot: framed on arrival, hidden on the way out.
@@ -486,7 +460,7 @@ export function NeckInstruction({
   // slot keeps out of the neck's frame (FOOT_PX), never on the fret numbers.
   const placeFoot = useCallback(() => {
     const h = slot.current?.getBoundingClientRect().height ?? 0;
-    const s = stripHeight(h);
+    const s = stripHeight(h - FOOT_PX);
     if (foot.current) foot.current.style.bottom = `${s ? s + 6 : 0}px`;
   }, []);
   useLayoutEffect(placeFoot, [placeFoot]);
@@ -558,7 +532,6 @@ export function NeckInstruction({
         <span className="practice-now-tag" ref={nowTag} data-testid="practice-now-tag" />
         <span className="practice-next-tag" ref={nextTag} data-testid="practice-next-tag">
           <b>{t("session.practice.next")}</b>
-          <span data-then="" />
         </span>
       </div>
       <div className="practice-neck-foot" ref={foot}>

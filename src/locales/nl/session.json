@@ -493,7 +493,6 @@
     },
     "practice": {
       "next": "hierna",
-      "then": "dan {{frets}}",
       "finger": "vinger {{n}}",
       "start": "begin hier",
       "legendNow": "speel nu",

@@ -17,7 +17,7 @@ import { TAKE_COUNT_IN_BARS } from "../../../session/take";
 import { useNeck } from "../../../stage3d/api";
 import type { NeckView } from "../../../stage3d/api";
 import type { SessionRun } from "../hooks/useSessionRun";
-import { kindOfMark, neckNotesOf, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
+import { fingeredNotes, kindOfMark, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
 import type { TimingMark } from "../../songs/review/marks";
 import { lineText } from "../lineText";
 import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
@@ -63,7 +63,9 @@ export function RunwayTakeScreen({
   // The neck straight-on over the Exercise's frets; its shape quiet, the next
   // note amber and the one after a ghost (the runway moves those on).
   const played = take?.exercise.notes ?? exercise?.notes ?? [];
-  const shape = useMemo(() => neckNotesOf(played, "aim"), [played]);
+  const position = (take?.exercise ?? exercise)?.position;
+  // Fingers on the dots, as on the neck view; letters only for theory (the owner, 2026-11-18).
+  const shape = useMemo(() => fingeredNotes(played, position, "aim", theory), [played, position, theory]);
   const model = useMemo(() => (take ? runwayModel(take, TAKE_COUNT_IN_BARS) : null), [take]);
   // One picture at a time (the owner, 2026-11-16: "users only have one pair of
   // eyes"). Before the Take the neck shows where the hand goes; while it runs

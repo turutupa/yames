@@ -104,13 +104,12 @@
   --l-panel-on: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
   --l-met-fill: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
   --l-miss-fill: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
-  /* A note's words on the neck ("finger 2", "next · then 7, 8"): on a pill of
+  /* A note's words on the neck ("start here", "next"): on a pill of
      the page in every theme but Ember, which draws them bare (further down). */
   --l-tag-ink: var(--l-ink);
   --l-tag-pill: var(--l-bg);
   --l-tag-edge: transparent;
   --l-tag-shadow: transparent;
-  --l-then-opacity: 1;
   --l-status: var(--l-quiet);
   --l-switch-ink: var(--l-amber-ink);
   /* Green as words (a met tag, the clean tempo): the hit colour, taken toward
@@ -196,7 +195,6 @@
   --l-tag-ink: #ffd9a0;
   --l-tag-pill: rgba(14, 9, 6, 0.78);
   --l-tag-shadow: rgba(0, 0, 0, 0.85);
-  --l-then-opacity: 0.85;
   --l-held-ink: #ffb454;
   --l-held-opacity: 0.6;
   --l-held-small: var(--l-ink);
@@ -380,6 +378,12 @@
   flex: 1 1 0;
   min-height: 120px;
   pointer-events: none;
+}
+/* An Exercise's neck on a result or between Takes: tall enough that its
+   finger numbers stay 13 px and up on a short window or a phone; the page
+   scrolls rather than squeeze it (acceptance 4, P1-2). */
+.session-page .session-slot[data-exercise] {
+  min-height: 180px;
 }
 .session-slot[data-band] {
   flex: none;
@@ -3221,11 +3225,15 @@
 }
 
 /* The neck and its overlay: the slot takes the room, the overlay sits over it
-   and is hung on `project()`, the beat dots and the key under it. */
+   and is hung on `project()`, the beat dots and the key under it. Never
+   squeezed below the height that keeps its finger numbers 13 px and up
+   (acceptance 4, P1-2: 140 px at 1024x700, 90 with the input panel open):
+   the blocks under it scroll instead (`.session-run`). Less on a narrow
+   window, whose neck is as wide as it can be well before that height. */
 .practice-neck {
   position: relative;
   flex: 1 1 0;
-  min-height: 150px;
+  min-height: clamp(220px, 30vw, 250px);
   display: flex;
   flex-direction: column;
   pointer-events: none;
@@ -3248,8 +3256,9 @@
   height: 60px;
   visibility: hidden;
   border-radius: 50%;
-  border: 3px dashed var(--l-amber);
-  box-shadow: 0 0 22px color-mix(in srgb, var(--l-amber) 45%, transparent);
+  border: 2px dashed var(--l-amber);
+  /* A close glow: a wide one lay over the dot on the next string (acceptance 4, P2-9). */
+  box-shadow: 0 0 8px color-mix(in srgb, var(--l-amber) 40%, transparent);
   transform: translate(-50%, -50%);
   opacity: 0.85;
 }
@@ -3283,7 +3292,6 @@
 .practice-next-tag {
   transform: translate(-50%, -100%);
   display: flex;
-  /* "next" first, "then 6, 5" under it: it reads in order (acceptance P2-4). */
   flex-direction: column;
   align-items: center;
   color: var(--l-tag-accent);
@@ -3292,10 +3300,6 @@
   font: 700 14px/1.1 var(--l-display);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-.practice-next-tag [data-then] {
-  font-size: 13px;
-  opacity: var(--l-then-opacity);
 }
 .practice-neck-foot {
   flex: none;
@@ -3836,7 +3840,7 @@
    The slot keeps that row out of the neck's frame (`data-neck-foot`, read by
    the stage), and NeckInstruction sets `bottom` to sit it just over the
    strip, so nothing prints over the fret numbers (acceptance P1-1). NEXT as
-   amber words over its note ("next", then "then 7, 5"), no box. */
+   amber word beside its note ("next"), no box. */
 .practice-neck-foot {
   position: absolute;
   left: 0;
@@ -3865,10 +3869,6 @@
   letter-spacing: 0;
   text-transform: none;
 }
-.practice-next-tag [data-then] {
-  font: 600 15px/1.15 var(--l-body);
-  opacity: var(--l-then-opacity);
-}
 .practice-now-tag {
   background: none;
   padding: 0;
@@ -3877,7 +3877,7 @@
 }
 /* Every theme but Ember (whose bare amber words are the learning side's own
    design): the words on a pill of the page, as mock A draws "finger 3" and
-   "next · then", so they read over a glow, a string or a pale board alike. */
+   "next", so they read over a glow, a string or a pale board alike. */
 :root:not([data-theme="ember"]) .practice-now-tag,
 :root:not([data-theme="ember"]) .practice-next-tag {
   padding: 4px 10px;
@@ -4188,23 +4188,11 @@
     font-size: 32px;
   }
 }
-/* Placed by the centre of a gap between two strings (NeckInstruction): the
-   tag's own middle goes there, so neither of its lines lies on a string. */
-.practice-next-tag[data-gap],
-.practice-next-tag[data-gap][data-below] {
+/* Placed by the centre of a gap between two strings, clear of every dot
+   (NeckInstruction): the tag's own middle goes there. */
+.practice-next-tag,
+.practice-next-tag[data-below] {
   transform: translate(-50%, -50%);
-}
-/* On one line it reads in order: "next  then 7, 6". */
-.practice-next-tag[data-row] {
-  flex-direction: row;
-  align-items: baseline;
-  gap: 6px;
-}
-/* On one line, "next · then 8, 7": a dot between, so it never reads "next then"
-   as one phrase (acceptance pass 3 P2-8). */
-.practice-next-tag[data-row] [data-then]:not(:empty)::before {
-  content: "·";
-  margin-right: 6px;
 }
 /* A phone: the timing strip is a line under the numbers, not a block. */
 @media (max-width: 480px) {
@@ -4309,9 +4297,9 @@
   background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--lane) 7%, transparent) 30%, color-mix(in srgb, var(--lane) 7%, transparent) 70%, transparent);
   pointer-events: none;
 }
-/* On one line in a gap between two strings (a narrow neck): the pill only as
-   tall as the words, so it stays between the strings. */
-:root:not([data-theme="ember"]) .practice-next-tag[data-row] {
+/* "next" sits in the gap between two strings: the pill only as tall as the
+   word, so it stays between them. */
+:root:not([data-theme="ember"]) .practice-next-tag {
   padding-block: 1px;
 }
 

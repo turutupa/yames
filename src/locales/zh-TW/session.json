@@ -493,7 +493,6 @@
     },
     "practice": {
       "next": "下一個",
-      "then": "然後 {{frets}}",
       "finger": "{{n}} 指",
       "start": "從這裡開始",
       "legendNow": "現在彈",

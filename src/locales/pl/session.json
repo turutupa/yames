@@ -519,7 +519,6 @@
     },
     "practice": {
       "next": "następna",
-      "then": "potem {{frets}}",
       "finger": "palec {{n}}",
       "start": "zacznij tutaj",
       "legendNow": "graj teraz",

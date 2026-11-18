@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { NeckStageContext } from "../../../stage3d/api";
 import type { NeckStage } from "../../../stage3d/api";
-import { kindOfMark, neckNotesOf, useNeckSlot, useNeckTake, zoomOf } from "./useNeck";
+import { exerciseNeck, fingeredNotes, kindOfMark, neckNotesOf, useNeckSlot, useNeckTake, zoomOf } from "./useNeck";
 import type { TakePlan } from "../../../session/take";
 import type { TimingMark } from "../../songs/review/marks";
 
@@ -45,6 +45,36 @@ describe("the neck's selectors", () => {
       { string: 5, fret: 5, kind: "aim", label: "D" },
       { string: 5, fret: 7, kind: "aim", label: "E" },
     ]);
+  });
+});
+
+describe("an Exercise's dots: fingers, never frets", () => {
+  // Four fingers on one string at fret 5: 5 6 7 8 are fingers 1 2 3 4.
+  const drill = [5, 6, 7, 8].map((fret, i) => ({ string: 5, fret, midi: 45 + 5 + i, tick: i * 480, duration: 480 }));
+  const fixed = { fret: 5, shifts: "none" as const };
+
+  it("labels a result's neck with the fingers the ready screen shows", () => {
+    const { view, notes } = exerciseNeck(drill as never, "tone", false, fixed);
+    expect(view).toEqual({ kind: "zoom", from: 4, to: 9 });
+    expect(notes.map((n) => n.label)).toEqual(["1", "2", "3", "4"]);
+    expect(notes.every((n) => n.kind === "tone")).toBe(true);
+  });
+
+  it("never puts a fret number on a dot, and leaves it blank where the finger is not known", () => {
+    const { notes } = exerciseNeck(drill as never, "dim");
+    expect(notes.every((n) => n.label === undefined)).toBe(true);
+    const shifting = exerciseNeck([...drill, { string: 5, fret: 12, midi: 57, tick: 2000, duration: 480 }] as never, "dim", false, {
+      fret: 5,
+      shifts: "allowed",
+    });
+    expect(shifting.notes.some((n) => n.label === "12" || n.label === "5")).toBe(false);
+  });
+
+  it("marks an open string 0 and keeps a theory dot's letter only where it has no finger", () => {
+    const open = fingeredNotes([{ string: 6, fret: 0, midi: 40 }], undefined, "aim", true);
+    expect(open[0].label).toBe("0");
+    const theory = fingeredNotes([{ string: 5, fret: 3, midi: 48 }], undefined, "aim", true);
+    expect(theory[0].label).toBe("C");
   });
 });
 

@@ -89,7 +89,7 @@ export function NeckStageHost({ children, controllerFactory }: { children: React
   const showStrip = !!zoom && (snap.mode === "3d" || snap.mode === "fallback");
   const target = useSlotLayer(snap.slot, visible && (fallback || showStrip));
   const slotH = useSlotHeight(snap.slot, showStrip);
-  const sH = zoom ? stripHeight(slotH) : 0;
+  const sH = zoom ? stripHeight(slotH - footReserve(snap.slot)) : 0;
 
   return (
     <NeckStageContext.Provider value={stage}>
@@ -110,7 +110,7 @@ export function NeckStageHost({ children, controllerFactory }: { children: React
                 <FallbackNeck view={snap.view} notes={snap.notes} pluck={snap.pluck} />
               </div>
             )}
-            {showStrip && sH > 0 && zoom && <OverviewStrip from={zoom.from} to={zoom.to} notes={snap.notes} height={sH} />}
+            {showStrip && sH > 0 && zoom && <OverviewStrip from={zoom.from} to={zoom.to} notes={snap.notes} height={sH} numbers={false} />}
           </div>,
           target,
         )}

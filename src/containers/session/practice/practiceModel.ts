@@ -61,7 +61,8 @@ export function nowNextNeck(
   if (verdicts) {
     for (let i = index - 1; i >= Math.max(0, index - PLAYED_SHOWN); i--) {
       const kind = verdicts.get(onsets[i].id);
-      if (kind) put(onsets[i].places, kind);
+      // A played note keeps its finger: the colour is the verdict, the number the hand.
+      if (kind) put(onsets[i].places, kind, finger);
     }
   }
   const out: NeckNote[] = shape.map((n) => {
@@ -165,16 +166,6 @@ export function watchIndex(
   return { index, tick };
 }
 
-/** "then 7, 5": the frets of the two onsets after NEXT, or null when there are none. */
-export function thenFrets(onsets: Onsets, index: number, count = 2): number[] {
-  const out: number[] = [];
-  for (let i = index + 2; i < onsets.length && out.length < count; i++) {
-    const p = onsets[i].places[0];
-    if (p) out.push(p.fret);
-  }
-  return out;
-}
-
 /**
  * The finger for a fret, when the Exercise says where the hand sits and that
  * it does not shift: one finger per fret from the index at `position.fret`.
@@ -189,6 +180,13 @@ export function fingerFor(position: HandPosition | undefined, fret: number): num
 
 /** How many frets the camera keeps in view while a pattern runs. */
 export const WINDOW_FRETS = 7;
+
+/**
+ * The fewest frets a still picture of a pattern shows: the pattern's own
+ * frets with one either side, widened to this. The ready neck, and the camera
+ * all through a pattern that fits, so it never moves or zooms out at Start.
+ */
+export const SPAN_FRETS = 5;
 
 /** A window of about `width` frets holding `lo`..`hi`, with a fret of air either side where it fits. */
 export function windowOver(lo: number, hi: number, width = WINDOW_FRETS): { from: number; to: number } {
@@ -223,8 +221,10 @@ export function cameraPlan(model: Pick<RunwayModel, "onsets" | "barTicks">, widt
   // moves while it runs, and never zooms out under the player (SES-7).
   const all: number[] = [];
   for (const o of model.onsets) for (const p of o.places) if (p.fret >= 0) all.push(p.fret);
+  // Framed as the ready screen frames it (the pattern's frets and one either
+  // side), so Start neither moves the camera nor zooms out on a narrow window.
   if (all.length > 0 && Math.max(...all) - Math.min(...all) <= width) {
-    const one = windowOver(Math.min(...all), Math.max(...all), width);
+    const one = windowOver(Math.min(...all), Math.max(...all), Math.min(width, SPAN_FRETS));
     return Array.from({ length: bars }, () => one);
   }
   const plan: { from: number; to: number }[] = [];

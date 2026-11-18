@@ -34,7 +34,6 @@ export const LOST_GRACE_MS = 3000;
 export const TAKE_FPS = 30;
 export const CALM_FPS = 60;
 
-/** The overview strip's height for a slot of height `h` (zoom only). */
 /**
  * Room a slot keeps between the framed neck and the overview strip, for its
  * own row (the practice neck's beat counter and key, acceptance P1-1): the
@@ -45,9 +44,16 @@ export function footReserve(slot: HTMLElement | null): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
+/**
+ * The overview strip's height under a zoom, for a slot that keeps `h` px for
+ * the neck and the strip (the slot less its foot, `footReserve`). The strip
+ * only comes where it costs the neck nothing that matters: in a shorter slot
+ * every pixel goes to the neck, so its finger numbers stay legible (acceptance
+ * 4, P1-2: at 1024x700 the strip left the neck 140 px and its digits 8 px).
+ * It carries no fret numbers under a neck that has its own (P2-12).
+ */
 export function stripHeight(h: number): number {
-  if (h < 150) return 0;
-  return h >= 260 ? 54 : 42;
+  return h >= 300 ? 34 : 0;
 }
 
 export type ControllerDeps = {
@@ -288,7 +294,9 @@ export class StageController {
     }
     const b = dot.getBoundingClientRect();
     if (b.width === 0 && b.height === 0) return null;
-    return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: b.width / 2 };
+    // The resting marker's radius, as the 3D neck reports it, not this dot's drawn size.
+    const rest = Number(dot.getAttribute("data-r"));
+    return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: rest > 0 ? rest : b.width / 2 };
   }
 
   get isTakeRunning(): boolean {
@@ -507,8 +515,9 @@ export class StageController {
       if (b.width > 4 && b.height > 4) r = { left: b.left, top: b.top, width: b.width, height: b.height };
     }
     if (this.snap.view.kind === "zoom") {
-      const s = stripHeight(r.height);
-      r = { ...r, height: Math.max(40, r.height - s - (s ? 6 : 0) - footReserve(slot)) };
+      const foot = footReserve(slot);
+      const s = stripHeight(r.height - foot);
+      r = { ...r, height: Math.max(40, r.height - s - (s ? 6 : 0) - foot) };
     }
     return r;
   }

@@ -229,6 +229,27 @@ export type NoteLook = {
 };
 
 /**
+ * How much larger than a resting marker each kind is drawn. NOW is larger so
+ * the eye lands on it first, but only so much larger that it never reaches
+ * the dot on the next string at the same fret (acceptance 4, P2-9: at 1.45 it
+ * covered it in the sweep). The emphasis is the accent, the edge and the glow.
+ */
+export const MARKER_SCALE: Partial<Record<NeckKind, number>> = { now: 1.3, next: 1.1 };
+
+/** The quiet shape's dots are drawn smaller than the rest (`NoteLook.size`). */
+const QUIET_SIZE = 0.72;
+
+/**
+ * The radius a kind of marker is drawn at, as a multiple of the resting
+ * marker's radius (`NeckStage.project`'s `r`): its scale times the disc the
+ * texture paints (0.94 of the quad, smaller for the quiet shape). What the
+ * overlay needs to keep its words and rings off the dots.
+ */
+export function markerExtent(kind: NeckKind): number {
+  return (MARKER_SCALE[kind] ?? 1) * 0.94 * (kind === "box" || kind === "dim" ? QUIET_SIZE : 1);
+}
+
+/**
  * How each kind of marker looks, the same on the 3D neck, the fallback and the
  * strip (the mock's tokens): NOW solid accent with an edge and a glow, NEXT an
  * accent ring on the board, played on time and off as solid hit and miss, the
@@ -249,10 +270,10 @@ export function noteLook(kind: NeckKind, p: NeckPalette): NoteLook {
     case "clash":
       return { fill: p.miss, stroke: null, strokeW: 0, ink: p.missInk, size: 1, glow: false };
     case "dim":
-      return { fill: p.board, stroke: p.dim, strokeW: 0.1, ink: p.ghost, size: 0.72, glow: false };
+      return { fill: p.board, stroke: p.dim, strokeW: 0.1, ink: p.ghost, size: QUIET_SIZE, glow: false };
     case "box":
     default:
-      return { fill: p.board, stroke: p.ghost, strokeW: 0.11, ink: p.ghostInk, size: 0.72, glow: false };
+      return { fill: p.board, stroke: p.ghost, strokeW: 0.11, ink: p.ghostInk, size: QUIET_SIZE, glow: false };
   }
 }
 
