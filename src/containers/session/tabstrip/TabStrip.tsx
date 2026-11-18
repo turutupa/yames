@@ -254,7 +254,11 @@ function TechMarks({
   geo: StaffGeometry;
 }) {
   const f = geo.fretPx;
-  const size = Math.max(10, Math.round(f * 0.66));
+  // Read from a music stand, 1–2 m off (owner, mvp-final): a letter's
+  // x-height about half the number's, and every stroke one weight, heavy
+  // enough to hold up beside a 700-weight 34 px number.
+  const size = Math.max(12, Math.round(f * 0.8));
+  const stroke = Math.max(2, f * 0.085);
   const near = f * 0.8;
   const { link, after } = note;
   if (!link && !after) return null;
@@ -263,61 +267,69 @@ function TechMarks({
   const slur = !!link && inSegment && (link.mark === "h" || link.mark === "p") && nx - fromX <= f * 4.2;
   // Under its slur's middle; otherwise close to the note it leads into, so it
   // stays inside that note's column when the note is current.
-  const letterX = !link ? 0 : slur ? (fromX + nx) / 2 : inSegment ? Math.max((fromX + nx) / 2, nx - near) : nx - near;
-  // A number is about half as wide as it is tall per digit.
-  const numHalf = (String(note.fret).length * f * 0.5) / 2;
-  let ax = nx + numHalf + f * 0.12;
+  // A number is about half as wide as it is tall per digit (and the current
+  // one is drawn 40/34 larger).
+  const numHalf = (String(note.fret).length * f * 0.5 * (40 / 34)) / 2;
+  // Never closer to its number than the number's own edge and half a letter:
+  // a two-digit "12" after a "t" read as "t12".
+  const clear = Math.max(near, numHalf + size * 0.42);
+  const letterX = !link ? 0 : slur ? (fromX + nx) / 2 : inSegment ? Math.max((fromX + nx) / 2, nx - clear) : nx - clear;
+  let ax = nx + numHalf + f * 0.1;
   const afterParts: React.ReactNode[] = [];
   if (after?.bendTo !== undefined) {
-    // A bend: an arrow curving up off the number, and the fret it bends to.
-    const w = Math.max(6, f * 0.34);
-    const rise = Math.max(5, f * 0.36);
-    const x0 = ax + f * 0.02;
+    // A bend: an arrow curving up off the number, and the fret it bends to
+    // at its tip, the size of a letter.
+    const w = Math.max(8, f * 0.42);
+    const rise = Math.max(9, f * 0.78);
+    const x0 = ax;
     const tipX = x0 + w;
     const tipY = ly - rise;
-    const head = Math.max(2.5, f * 0.11);
+    const head = Math.max(4, f * 0.17);
+    const targetSize = Math.max(12, Math.round(f * 0.8));
     afterParts.push(
       <g key="b" className="tabstrip-bend" data-mark="bend">
         <path
           className="tabstrip-vib"
-          d={`M${x0.toFixed(1)},${(ly + rise * 0.35).toFixed(1)} Q${tipX.toFixed(1)},${(ly + rise * 0.35).toFixed(1)} ${tipX.toFixed(1)},${tipY.toFixed(1)} M${(tipX - head).toFixed(1)},${(tipY + head).toFixed(1)} L${tipX.toFixed(1)},${tipY.toFixed(1)} L${(tipX + head).toFixed(1)},${(tipY + head).toFixed(1)}`}
-          style={{ strokeWidth: Math.max(1.4, f * 0.06) }}
+          d={`M${x0.toFixed(1)},${(ly + f * 0.12).toFixed(1)} Q${tipX.toFixed(1)},${(ly + f * 0.12).toFixed(1)} ${tipX.toFixed(1)},${tipY.toFixed(1)} M${(tipX - head).toFixed(1)},${(tipY + head * 1.1).toFixed(1)} L${tipX.toFixed(1)},${tipY.toFixed(1)} L${(tipX + head).toFixed(1)},${(tipY + head * 1.1).toFixed(1)}`}
+          style={{ strokeWidth: stroke }}
         />
-        <text className="tabstrip-tech" data-free="" x={tipX + f * 0.1} y={tipY + size * 0.02} dominantBaseline="central" style={{ fontSize: size }}>
+        <text className="tabstrip-tech" data-free="" x={tipX + f * 0.14} y={tipY + targetSize * 0.08} dominantBaseline="central" style={{ fontSize: targetSize }}>
           {after.bendTo}
         </text>
       </g>,
     );
-    ax = tipX + f * 0.14 + size * String(after.bendTo).length * 0.48;
+    ax = tipX + f * 0.2 + targetSize * String(after.bendTo).length * 0.5;
   }
   if (after?.slideOut) {
     afterParts.push(
-      <text key="s" className="tabstrip-tech" data-mark="slide-out" x={ax + size * 0.1} y={ly} dominantBaseline="central" style={{ fontSize: size }}>
+      <text key="s" className="tabstrip-tech" data-mark="slide-out" x={ax + size * 0.08} y={ly} dominantBaseline="central" style={{ fontSize: size }}>
         {after.slideOut}
       </text>,
     );
     ax += size * 0.6;
   }
   if (after?.vibrato) {
-    const w = Math.max(10, f * 0.62);
-    const amp = Math.max(1.6, f * 0.07);
-    const x0 = ax + size * 0.12;
-    const steps = 4;
+    // Three full waves, as wide as a number and a half, deep enough to read
+    // as a wave rather than a wobble in the line.
+    const w = Math.max(18, f * 1.05);
+    const amp = Math.max(3, f * 0.13);
+    const x0 = ax + f * 0.12;
+    const steps = 6;
     let d = `M${x0.toFixed(1)},${ly.toFixed(1)}`;
     for (let i = 0; i < steps; i++) {
       const xa = x0 + ((i + 0.5) * w) / steps;
       const xb = x0 + ((i + 1) * w) / steps;
       d += ` Q${xa.toFixed(1)},${(ly + (i % 2 === 0 ? -amp * 2 : amp * 2)).toFixed(1)} ${xb.toFixed(1)},${ly.toFixed(1)}`;
     }
-    afterParts.push(<path key="v" className="tabstrip-vib" data-mark="vibrato" d={d} style={{ strokeWidth: Math.max(1.4, f * 0.06) }} />);
+    afterParts.push(<path key="v" className="tabstrip-vib" data-mark="vibrato" d={d} style={{ strokeWidth: stroke }} />);
   }
   return (
     <g className="tabstrip-techs" aria-hidden="true">
       {slur && (
         <path
           className="tabstrip-slur"
-          d={`M${(fromX + f * 0.22).toFixed(1)},${(ly - f * 0.52).toFixed(1)} Q${((fromX + nx) / 2).toFixed(1)},${(ly - f * 0.92).toFixed(1)} ${(nx - f * 0.22).toFixed(1)},${(ly - f * 0.52).toFixed(1)}`}
-          style={{ strokeWidth: Math.max(1.2, f * 0.05) }}
+          d={`M${(fromX + f * 0.2).toFixed(1)},${(ly - f * 0.58).toFixed(1)} Q${((fromX + nx) / 2).toFixed(1)},${(ly - f * 1.12).toFixed(1)} ${(nx - f * 0.2).toFixed(1)},${(ly - f * 0.58).toFixed(1)}`}
+          style={{ strokeWidth: stroke }}
         />
       )}
       {link && (

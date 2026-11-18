@@ -561,6 +561,10 @@ export function JamView({
   return (
     <MotionProvider value={motionInputs}>
     <div className="jam-view" data-sheet={screen.setupOpen ? "setup" : undefined}>
+      {/* Where the jam's one-time hints sit (MainWindow portals them here): in
+          the page's flow under the doors they talk about, so a hint never lies
+          over a control or the transport's elapsed time. Empty, it is gone. */}
+      <div className="jam-hint-slot" />
       {/* ── The two doors, on a phone (M09) ───────────────────────────────
           On a desktop these live in the context bar, where the app already
           answers "what am I looking at, and what can I do to it". A phone's
@@ -575,7 +579,7 @@ export function JamView({
           rule the header's pair has: they occupy the same room, and two of
           them at once is a screen with no jam left on it. */}
       {IS_MOBILE && (
-        <div className="jam-phone-doors">
+        <div className="jam-phone-doors" data-hint="jam-sheets">
           <button
             type="button"
             className={`jam-sheet-btn jam-door${screen.setupOpen ? " active" : ""}`}

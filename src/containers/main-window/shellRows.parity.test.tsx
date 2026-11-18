@@ -46,7 +46,9 @@ describe("the tool list", () => {
 
   it("SHL-08: marks Jam, and only Jam, as Beta", async () => {
     await openShell();
-    // Wherever the tool list is: under the rail's Tools door since wave 2.
+    // Wherever the tool list is: nested under the rail's Tools door while a
+    // tool is open (NAV-9).
+    await onTool(TOOLS[0]!);
     expect(visibleToolLabels()).toContain(JAM.label);
     const badges = [...document.querySelectorAll(".rail-mode-badge")];
     expect(badges.map((b) => b.textContent)).toEqual([t("rail.beta")]);

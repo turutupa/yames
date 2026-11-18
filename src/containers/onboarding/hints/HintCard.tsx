@@ -43,11 +43,13 @@ export type HintCardProps = {
  */
 function anchorRect(hintId: string): Rect | null {
   if (typeof document === "undefined") return null;
-  const el = document.querySelector<HTMLElement>(`[data-hint="${hintId}"]`);
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  if (r.width <= 0 || r.height <= 0) return null;
-  return { x: r.left, y: r.top, width: r.width, height: r.height };
+  // The first one that is laid out: a hint can name an anchor in two places
+  // (a door in the desktop header and the phone's own doors), one hidden.
+  for (const el of document.querySelectorAll<HTMLElement>(`[data-hint="${hintId}"]`)) {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) return { x: r.left, y: r.top, width: r.width, height: r.height };
+  }
+  return null;
 }
 
 export function HintCard({

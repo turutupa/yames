@@ -23,11 +23,11 @@ describe("App routing", () => {
   it("renders the main window app shell when no ?window param is present", async () => {
     render(<App />);
     // MainWindow opens on Today (the revamp's front door), and the Metronome
-    // is two rail clicks away, under Tools. Default state has bpm=120. Query the
+    // is two clicks away: Tools, then its card. Default state has bpm=120. Query the
     // readout specifically: the tempo ruler is numbered, so "120" is also a gradation.
     expect(await screen.findByTestId("today")).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Tools" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Metronome" }));
+    fireEvent.click(await screen.findByTestId("tool-card-beat"));
     expect(await screen.findByText("120", { selector: ".bpm-input" })).toBeInTheDocument();
   });
 

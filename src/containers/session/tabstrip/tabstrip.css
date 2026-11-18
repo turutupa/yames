@@ -241,8 +241,10 @@
    what the hand reads first. */
 .tabstrip-tech {
   font-family: var(--ts-num);
-  font-weight: 700;
-  fill: var(--ts-quiet);
+  font-weight: 800;
+  /* Ink, a step under the numbers by size alone: in the quiet colour at
+     reading distance an "h" or a bend's target vanished into the lines. */
+  fill: color-mix(in srgb, var(--ts-ink) 82%, var(--ts-quiet));
   stroke: var(--ts-bg);
   stroke-width: calc(var(--ts-fret) * 0.18);
   stroke-linejoin: round;
@@ -255,11 +257,15 @@
 .tabstrip-slur,
 .tabstrip-vib {
   fill: none;
-  stroke: var(--ts-quiet);
+  stroke: color-mix(in srgb, var(--ts-ink) 82%, var(--ts-quiet));
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.tabstrip-seg[data-rel="next"] .tabstrip-techs { opacity: 0.6; }
-.tabstrip-seg[data-rel="past"] .tabstrip-techs,
-.tabstrip-seg[data-rel="later"] .tabstrip-techs { opacity: 0.3; }
+/* Dimmed with their numbers, by the same amount: the letters already take
+   the numbers' fill-opacity (`.tabstrip-note text`), and a group opacity on
+   top of it left a bend's target in the next bar at a fifth of its ink. */
+.tabstrip-seg[data-rel="next"] :is(.tabstrip-slur, .tabstrip-vib) { stroke-opacity: 0.38; }
+.tabstrip-seg[data-rel="past"] :is(.tabstrip-slur, .tabstrip-vib),
+.tabstrip-seg[data-rel="later"] :is(.tabstrip-slur, .tabstrip-vib) { stroke-opacity: 0.25; }
 /* Inside the amber column: the halo in the column's colour, as the number's is. */
 .tabstrip-note[data-current] .tabstrip-tech:not([data-free]) { stroke: var(--ts-col); }

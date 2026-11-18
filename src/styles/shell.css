@@ -1156,6 +1156,11 @@ button.jam-vibe-chip {
 .jam-save-area .jam-sheet-btn.jam-door {
   display: inline-flex;
   align-items: center;
+  /* "Set up" and "Cheat sheet" are one word each to the eye: never broken
+     over two lines in a 32 px chip (Obsidian's wider face did it). The
+     jam's name gives way first; it already ellipsises. */
+  flex-shrink: 0;
+  white-space: nowrap;
   gap: 7px;
   height: 32px;
   margin: 0;
@@ -1187,6 +1192,27 @@ button.jam-vibe-chip {
 .jam-door-glyph {
   flex-shrink: 0;
   opacity: 0.85;
+}
+
+/* Under 1300 px the bar's left half is ~400 px: the doors keep their words on
+   one line and the jam keeps its name by giving up what repeats elsewhere,
+   the doors' glyphs and the "Jam" badge (the rail says which tool this is). */
+@media (max-width: 1299px) {
+  .jam-save-area .jam-door-glyph,
+  .jam-save-area .jam-badge {
+    display: none;
+  }
+  .jam-save-area .preset-active-name {
+    min-width: 3.5em;
+  }
+}
+/* Narrower, with the rail still full width beside it, the vibe goes too: it
+   is one click away behind Set up, which is where it is changed. */
+@media (max-width: 1199px) {
+  .jam-save-area .jam-vibe-chip,
+  .jam-save-area .jam-vibe-chip + .jam-bar-divider {
+    display: none;
+  }
 }
 
 .preset-text-btn--feedback,
@@ -1445,6 +1471,60 @@ button.jam-vibe-chip {
   }
 }
 
+/* ── The tools, nested under Tools (NAV-9) ─────────────────────────────────
+ * Only while a tool is open. They hang off a hairline that drops from the
+ * Tools icon, a step in and a size down, so they read as Tools' children and
+ * not as a second list of places; Tools itself keeps its accent icon and full
+ * text (the door you came through) without the fill, which is the open tool's. */
+.rail-mode-row[data-parent] .rail-mode {
+  color: var(--text-primary);
+}
+.rail-mode-row[data-parent] .rail-mode svg {
+  color: var(--accent);
+}
+.rail-tools[data-nested] {
+  gap: 1px;
+  margin: -2px 0 6px 24px;
+  padding: 2px 8px 2px 4px;
+  border-left: 1px solid var(--border);
+}
+.rail-tools[data-nested] .rail-mode {
+  min-height: 36px;
+  gap: 9px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 0.86rem;
+}
+/* A long name ("Темповая тренировка") takes its two lines from the left
+   edge, beside an icon that keeps its size; a word is never split ("Дже м"). */
+.rail-mode svg,
+.rail-action-icon svg {
+  flex: none;
+}
+.rail-mode-label,
+.rail-action-label {
+  text-align: left;
+  overflow-wrap: break-word;
+}
+/* The coach's row carries a status beside its name, so it spends less on
+   gaps: "Спросить тренера" keeps one line beside "ГОТОВ" (I18N-3). */
+.rail-action:has(> .rail-action-status) {
+  gap: 8px;
+  padding-right: 8px;
+}
+.rail[data-collapsed] .rail-tools[data-nested] {
+  margin-left: 0;
+  padding: 0 10px;
+  border-left: none;
+}
+@media (width < 620px) {
+  .rail:not([data-library-open]) .rail-tools[data-nested] {
+    margin-left: 0;
+    padding: 0 10px;
+    border-left: none;
+  }
+}
+
 /* Over the row's own fill, the glyph's hover needs to be the stronger of the
    two or it reads as nothing happening. */
 @media (hover: hover) {
@@ -1571,9 +1651,14 @@ body[data-sheet-maximized] .rail {
 }
 
 .rail-action.active {
-  background: var(--accent-2-subtle);
-  border-left-color: var(--accent-2);
+  /* The same accent as a selected mode (NAV-8): Settings was the one teal
+     selection in an amber rail. Teal stays the coach's own glyph. */
+  background: var(--accent-subtle);
+  border-left-color: var(--accent);
   color: var(--text-primary);
+}
+.rail-action.active .rail-action-icon:not(.rail-action-coach) {
+  color: var(--accent);
 }
 
 .rail-action-icon {
@@ -2116,9 +2201,6 @@ body[data-sheet-maximized] .rail {
     box-shadow: inset 2px 0 0 var(--accent);
   }
 
-  .rail-action.active {
-    box-shadow: inset 2px 0 0 var(--accent-2);
-  }
 
   .rail-mode-label,
   .rail-mode-badge,
@@ -2617,9 +2699,6 @@ body[data-sheet-maximized] .rail {
   box-shadow: inset 2px 0 0 var(--accent);
 }
 
-.rail[data-collapsed] .rail-action.active {
-  box-shadow: inset 2px 0 0 var(--accent-2);
-}
 
 .rail[data-collapsed] .rail-mode-label,
 .rail[data-collapsed] .rail-mode-badge,
@@ -3200,7 +3279,10 @@ body[data-sheet-maximized] .rail {
   border: none;
   border-top: 2px solid transparent;
   background: transparent;
-  color: var(--text-tertiary);
+  /* Secondary, not tertiary (PHONE-6): an inactive tab is still a place you
+     can go, and at this size tertiary measured under 4.5:1 on the bar. The
+     active one is set apart by its accent glyph, its top edge and full ink. */
+  color: var(--text-secondary);
   font-family: inherit;
   cursor: pointer;
   transition: color 0.15s ease;
@@ -3260,7 +3342,7 @@ body[data-sheet-maximized] .rail {
 
 .mobile-tab-label {
   max-width: 100%;
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -3566,4 +3648,11 @@ body[data-sheet-maximized] .rail {
 
 .main-window.is-mobile .preset-save-area .preset-text-btn:disabled {
   display: none;
+}
+
+/* A page's heading takes focus when the page changes (NAV-10), so it is
+   announced and Tab carries on from it. It is a place, not a control: no
+   ring on it. */
+.main-content h1[tabindex="-1"]:focus {
+  outline: none;
 }

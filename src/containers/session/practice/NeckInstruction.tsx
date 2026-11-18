@@ -178,11 +178,47 @@ export function NeckInstruction({
         else {
           nt.style.visibility = "visible";
           nt.style.left = `${next.x}px`;
-          // Above its note, or under it where the top of the picture would cut it (SES-7).
-          const above = next.y - Math.max(18, next.r * 1.9);
-          const below = above < 34;
-          nt.toggleAttribute("data-below", below);
-          nt.style.top = `${below ? next.y + Math.max(18, next.r * 1.9) : above}px`;
+          // Centred in the space between two strings, never on one: the gap
+          // past the string beside its note, above it, or under it where the
+          // top of the picture would cut it (SES-7). It used to hang a fixed
+          // distance above the note, which in every theme put "next" on the
+          // neighbouring string.
+          const place = m.onsets[index + 1]?.places[0];
+          const gapAt = (up: boolean): number | null => {
+            if (!place) return null;
+            const ys = [-2, -1, 1, 2]
+              .map((d) => ({ d, pt: neck.project(place.string + d, place.fret) }))
+              .filter((o): o is { d: number; pt: { x: number; y: number; r: number } } => !!o.pt)
+              .map((o) => ({ d: o.d, y: o.pt.y - box.top }));
+            const side = ys.filter((o) => (up ? o.y < next.y : o.y > next.y)).sort((a, b) => Math.abs(a.d) - Math.abs(b.d));
+            const near = side[0];
+            if (!near) return null;
+            const far = side[1];
+            const spacing = Math.abs(near.y - next.y);
+            gap = far ? Math.abs(far.y - near.y) : spacing;
+            return far ? (near.y + far.y) / 2 : near.y + (up ? -spacing / 2 : spacing / 2);
+          };
+          let gap = 0;
+          // Two lines ("then 7, 6" over "next") fit a wide gap; a narrow one
+          // takes them side by side on one line.
+          nt.removeAttribute("data-row");
+          gapAt(true);
+          if (gap > 0 && nt.offsetHeight > gap - 6) nt.setAttribute("data-row", "");
+          const tagH = nt.offsetHeight || 36;
+          const above = gapAt(true);
+          const useAbove = above !== null && above - tagH / 2 >= 4;
+          const centre = useAbove ? above : gapAt(false);
+          if (centre !== null) {
+            nt.setAttribute("data-gap", "");
+            nt.toggleAttribute("data-below", !useAbove);
+            nt.style.top = `${centre}px`;
+          } else {
+            const fallback = next.y - Math.max(18, next.r * 1.9);
+            const below = fallback < 34;
+            nt.removeAttribute("data-gap");
+            nt.toggleAttribute("data-below", below);
+            nt.style.top = `${below ? next.y + Math.max(18, next.r * 1.9) : fallback}px`;
+          }
         }
       }
     },

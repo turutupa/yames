@@ -50,10 +50,12 @@
     border-color: var(--accent);
   }
 }
+/* Keyboard focus is the ink ring inside the card, as on every setup card
+   (onboarding.css, SET-8): the accent is what a chosen card wears. */
 .onboarding-start-path:focus-visible,
 .onboarding-start-level:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--text-primary);
+  outline-offset: -4px;
 }
 .onboarding-start-path.selected {
   border-color: var(--accent);
