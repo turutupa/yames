@@ -3805,3 +3805,15 @@
     font-size: 32px;
   }
 }
+/* Placed by the centre of a gap between two strings (NeckInstruction): the
+   tag's own middle goes there, so neither of its lines lies on a string. */
+.practice-next-tag[data-gap],
+.practice-next-tag[data-gap][data-below] {
+  transform: translate(-50%, -50%);
+}
+/* On one line it reads in order: "next  then 7, 6". */
+.practice-next-tag[data-row] {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+}
