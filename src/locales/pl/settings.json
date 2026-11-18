@@ -8,7 +8,9 @@
       "widget": "Widget",
       "hotkeys": "Skróty klawiszowe",
       "support": "Wsparcie",
-      "about": "O aplikacji"
+      "about": "O aplikacji",
+      "tools": "Narzędzia",
+      "songs": "Utwory"
     },
     "appearance": {
       "title": "Wygląd",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Ten dołączony do Yames",
       "chooseSoundSet": "Wybierz plik .sf2",
       "useBuiltInSoundSet": "Użyj wbudowanego"
+    },
+    "tools": {
+      "title": "Narzędzia"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

@@ -31,7 +31,7 @@ export function AboutSection({
 }) {
   const { t } = useTranslation();
   return (
-    <section className="settings-section about-section">
+    <section className="settings-section about-section" id="settings-about">
       <h2>{t("settings.about.title")}</h2>
       <div className="about-info">
         {/* A newer version exists, and this app is the one nobody updates for

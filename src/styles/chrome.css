@@ -1,0 +1,746 @@
+/* chrome.css — Settings, the rail, the top bar's chips and the notices, in the
+ * learning side's language (settings revamp, 2026-11-17).
+ *
+ * The owner: "The settings page looks like this because it's the original one
+ * before the revamp. Can we make it more integrated with our UI?" It looked
+ * like that because everything here inherited the THEME's `--font-family`:
+ * Obsidian's is SF Mono / Fira Code / JetBrains Mono, which on Windows is the
+ * system monospace, so a whole page of prose was set in a code face, while
+ * Today, Paths and a Session beside it are Fraunces, Barlow Condensed and
+ * Inter whatever the theme (`session.css`).
+ *
+ * The rule this file follows: TYPE AND GEOMETRY from the learning side,
+ * COLOUR from the theme. The learning side can keep one dark palette because
+ * it sits over the neck stage; Settings cannot, it has to read in all thirteen
+ * themes, and the themes' ink tokens are tuned to 4.5:1 on every surface they
+ * paint (`themes.ts`). So every colour below is a theme token or a mix of two
+ * of them, and the surfaces are mixes between `--bg-card` and `--bg-primary`,
+ * which keeps the ink between two surfaces it already clears.
+ *
+ * Imported last by `main-window.css`, and every rule is scoped to the settings
+ * view, the rail, the header or a notice, so `.toggle-btn` elsewhere (Drill's
+ * mode row) is untouched. `settings.css` is left as it was; this file is the
+ * layer over it, the way `session.css` is over the tools'. */
+
+:root {
+  --ui-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ui-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --ui-serif: Fraunces, Georgia, "Times New Roman", serif;
+  /* Only where the text IS code: a key's name. */
+  --ui-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  /* A hairline: the theme's border, softened, as the learning side's panels. */
+  --ui-line: color-mix(in srgb, var(--border) 55%, transparent);
+  --ui-line-strong: color-mix(in srgb, var(--border) 85%, transparent);
+  /* The panel, and the well a control sits in. */
+  --ui-panel: color-mix(in srgb, var(--bg-card) 62%, var(--bg-primary));
+  --ui-well: color-mix(in srgb, var(--bg-primary) 72%, var(--bg-card));
+  --ui-raised: color-mix(in srgb, var(--bg-raised) 60%, var(--bg-card));
+}
+
+/* ── The page ─────────────────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] > .view-transition-wrapper {
+  font-family: var(--ui-body);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Today's head: a kicker and a serif name. */
+.main-content[data-view="settings"] .settings-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 26px;
+  padding: 0 4px;
+}
+
+.main-content[data-view="settings"] .settings-head-kick {
+  color: var(--text-tertiary);
+  font: 600 14px/1.1 var(--ui-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.main-content[data-view="settings"] .settings-head-title {
+  margin: 0;
+  color: var(--text-primary);
+  font: 500 clamp(34px, 5vh, 46px) / 1.04 var(--ui-serif);
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
+
+/* The first panel follows the head now, not the top of the sheet. */
+.main-content[data-view="settings"] .settings-head + .settings-section {
+  margin-top: 18px;
+}
+
+.main-content[data-view="settings"] .settings-head + .update-banner {
+  margin-top: 18px;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .settings-section,
+.main-content[data-view="settings"] .hotkeys-section {
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  padding: 18px 22px 12px;
+  /* A lift, not a float: the learning side's deep shadow is for panels over
+     the neck stage, and on paper it reads as a smudge. */
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--text-primary) 4%, transparent) inset,
+    0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.main-content[data-view="settings"] .settings-section + .settings-section,
+.main-content[data-view="settings"] .settings-section + .hotkeys-section,
+.main-content[data-view="settings"] .hotkeys-section + .settings-section,
+.main-content[data-view="settings"] .hotkeys-section + .hotkeys-section {
+  border-top: 1px solid var(--ui-line);
+  padding-top: 18px;
+  margin-top: 14px;
+}
+
+/* Support had a card of its own inside the stack of cards. */
+.main-content[data-view="settings"] .support-card {
+  margin-bottom: 0;
+}
+
+.main-content[data-view="settings"] .about-section {
+  padding-bottom: 20px;
+}
+
+/* Section titles: the learning side's kicker (`.session-kick`). */
+.main-content[data-view="settings"] .settings-section h2,
+.main-content[data-view="settings"] .hotkeys-section h2 {
+  margin: 0 0 6px;
+  color: var(--text-tertiary);
+  font: 600 15px/1.1 var(--ui-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.main-content[data-view="settings"] .settings-section-title,
+.main-content[data-view="settings"] .hotkeys-section-header {
+  margin-bottom: 6px;
+}
+
+.main-content[data-view="settings"] .settings-section-title h2,
+.main-content[data-view="settings"] .hotkeys-section-header h2 {
+  margin-bottom: 0;
+}
+
+.main-content[data-view="settings"] .experimental-badge {
+  font: 600 12px/1 var(--ui-display);
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+}
+
+/* ── Rows ─────────────────────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .setting-row {
+  padding: 13px 0;
+  gap: 18px;
+}
+
+.main-content[data-view="settings"] .settings-section .setting-row + .setting-row,
+.main-content[data-view="settings"] .hotkeys-section .setting-row + .setting-row {
+  border-top: 1px solid var(--ui-line);
+}
+
+.main-content[data-view="settings"] .setting-label {
+  gap: 3px;
+  min-width: 0;
+}
+
+.main-content[data-view="settings"] .setting-label label {
+  color: var(--text-primary);
+  font: 500 14.5px/1.3 var(--ui-body);
+}
+
+/* Quieter than the label by colour and size, never by opacity: the theme's
+   ink levels are tuned to clear 4.5:1 and an opacity undoes that. */
+.main-content[data-view="settings"] .setting-hint {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 1;
+}
+
+.main-content[data-view="settings"] .channel-picker-hint,
+.main-content[data-view="settings"] .calibration-cache-text,
+.main-content[data-view="settings"] .midi-status {
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+/* Devices: each block is a labelled field rather than a row. */
+.main-content[data-view="settings"] .devices-subsection-label,
+.main-content[data-view="settings"] .midi-label {
+  color: var(--text-primary);
+  font: 500 14.5px/1.3 var(--ui-body);
+  margin-bottom: 4px;
+}
+
+.main-content[data-view="settings"] .midi-device-section {
+  padding: 13px 0;
+}
+
+.main-content[data-view="settings"] .midi-device-section + .midi-device-section {
+  border-top: 1px solid var(--ui-line);
+  /* The inline 28px between blocks predates the hairline. */
+  margin-top: 0 !important;
+}
+
+/* ── On / off: a switch ───────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .toggle-btn.setting-switch {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  box-shadow: none;
+}
+
+.main-content[data-view="settings"] .setting-switch-track {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 24px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 22%, var(--ui-well));
+  border: 1px solid color-mix(in srgb, var(--text-muted) 45%, transparent);
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.main-content[data-view="settings"] .setting-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 0.18s ease;
+}
+
+.main-content[data-view="settings"] .setting-switch.active .setting-switch-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.main-content[data-view="settings"] .setting-switch.active .setting-switch-thumb {
+  transform: translateX(16px);
+  background: var(--accent-text, #fff);
+}
+
+/* The word is the button's name; the switch already shows it. */
+.main-content[data-view="settings"] .setting-switch-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .setting-switch:hover:not(.active) .setting-switch-track {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--text-muted));
+  }
+}
+
+/* ── Choices: the learning side's segmented well (`.session-seg`) ─────── */
+
+.main-content[data-view="settings"] .toggle-group {
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--ui-well);
+  border: 1px solid var(--ui-line);
+}
+
+.main-content[data-view="settings"] .toggle-group .toggle-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 13px/1.25 var(--ui-body);
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .toggle-group .toggle-btn:hover:not(.active):not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+}
+
+.main-content[data-view="settings"] .toggle-group .toggle-btn.active {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.main-content[data-view="settings"] .toggle-group .toggle-btn:disabled.active {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--text-secondary);
+}
+
+/* ── Actions: the learning side's secondary button ───────────────────── */
+
+.main-content[data-view="settings"] .setting-row > .toggle-btn:not(.setting-switch),
+.main-content[data-view="settings"] .setting-control .toggle-btn,
+.main-content[data-view="settings"] .coach-download-btn,
+.main-content[data-view="settings"] .input-test-btn,
+.main-content[data-view="settings"] .hotkey-defaults-btn,
+.main-content[data-view="settings"] .about-link-btn,
+.main-content[data-view="settings"] .update-check-btn,
+.main-content[data-view="settings"] .update-available-btn,
+.main-content[data-view="settings"] .about-newer-get,
+.main-content[data-view="settings"] .calibration-recalibrate-btn,
+.main-content[data-view="settings"] .midi-refresh-btn {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-line-strong);
+  background: var(--ui-raised);
+  color: var(--text-primary);
+  font: 600 13px/1.2 var(--ui-body);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .setting-row > .toggle-btn:not(.setting-switch):hover,
+  .main-content[data-view="settings"] .setting-control .toggle-btn:hover,
+  .main-content[data-view="settings"] .coach-download-btn:hover:not(:disabled),
+  .main-content[data-view="settings"] .input-test-btn:hover,
+  .main-content[data-view="settings"] .hotkey-defaults-btn:hover,
+  .main-content[data-view="settings"] .about-link-btn:hover,
+  .main-content[data-view="settings"] .update-check-btn:hover,
+  .main-content[data-view="settings"] .calibration-recalibrate-btn:hover,
+  .main-content[data-view="settings"] .midi-refresh-btn:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    background: color-mix(in srgb, var(--accent) 8%, var(--ui-raised));
+    color: var(--text-primary);
+  }
+}
+
+.main-content[data-view="settings"] .midi-refresh-btn {
+  min-height: 38px;
+  padding: 0 11px;
+}
+
+/* The offers worth taking: an update, a coach to download. */
+.main-content[data-view="settings"] .update-available-btn,
+.main-content[data-view="settings"] .about-newer-get,
+.main-content[data-view="settings"] .coach-download-btn {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--ui-raised));
+  color: var(--text-primary);
+}
+
+.main-content[data-view="settings"] .input-test-btn.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--ui-raised));
+}
+
+/* Support's heart keeps its colour, on the same button shape. */
+.main-content[data-view="settings"] .about-link-btn.support-btn {
+  color: var(--text-primary);
+}
+
+.main-content[data-view="settings"] .about-link-btn.support-btn svg {
+  color: #e2557a;
+}
+
+/* ── Selects ──────────────────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .lang-select-btn,
+.main-content[data-view="settings"] .midi-dropdown-trigger,
+.main-content[data-view="settings"] .instrument-dropdown-trigger,
+.main-content[data-view="settings"] .channel-picker-select,
+.main-content[data-view="settings"] .setting-select {
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-line-strong);
+  background: var(--ui-well);
+  color: var(--text-primary);
+  font: 500 13.5px/1.2 var(--ui-body);
+  text-transform: none;
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .lang-select-btn:hover,
+  .main-content[data-view="settings"] .midi-dropdown-trigger:hover,
+  .main-content[data-view="settings"] .instrument-dropdown-trigger:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  }
+}
+
+.main-content[data-view="settings"] .lang-select-btn.open,
+.main-content[data-view="settings"] .midi-dropdown.open .midi-dropdown-trigger,
+.main-content[data-view="settings"] .instrument-dropdown.open .instrument-dropdown-trigger {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.main-content[data-view="settings"] .lang-options,
+.main-content[data-view="settings"] .midi-dropdown-menu,
+.main-content[data-view="settings"] .instrument-dropdown-menu {
+  border-radius: 12px;
+  border: 1px solid var(--ui-line-strong);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+}
+
+/* ── Appearance: the theme swatches ───────────────────────────────────── */
+
+.main-content[data-view="settings"] .theme-grid {
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.main-content[data-view="settings"] .theme-card {
+  gap: 8px;
+  padding: 7px 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+}
+
+.main-content[data-view="settings"] .theme-card-preview {
+  height: 32px;
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-primary) 14%, transparent);
+}
+
+.main-content[data-view="settings"] .theme-card-swatch:last-child {
+  border-left: 0;
+}
+
+.main-content[data-view="settings"] .theme-card-name {
+  color: var(--text-secondary);
+  font: 600 13px/1.1 var(--ui-display);
+  letter-spacing: 0.1em;
+}
+
+.main-content[data-view="settings"] .theme-card.active {
+  border-color: var(--ui-line-strong);
+  background: var(--surface-active);
+}
+
+.main-content[data-view="settings"] .theme-card.active .theme-card-preview {
+  box-shadow:
+    0 0 0 2px var(--ui-panel),
+    0 0 0 4px var(--accent);
+}
+
+.main-content[data-view="settings"] .theme-card.active .theme-card-name {
+  color: var(--text-primary);
+}
+
+/* ── Hotkeys: the one place a monospace means something ───────────────── */
+
+.main-content[data-view="settings"] .hotkey-group-label {
+  padding: 4px 0 8px 2px;
+  color: var(--text-muted);
+  font: 600 13px/1.1 var(--ui-display);
+  letter-spacing: 0.14em;
+}
+
+.main-content[data-view="settings"] .hotkey-table {
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ui-well) 55%, transparent);
+}
+
+.main-content[data-view="settings"] .hotkey-table-header {
+  background: color-mix(in srgb, var(--ui-well) 80%, transparent);
+  border-bottom: 1px solid var(--ui-line);
+  border-radius: 12px 12px 0 0;
+  color: var(--text-tertiary);
+  font: 600 13px/1.1 var(--ui-display);
+  letter-spacing: 0.12em;
+}
+
+.main-content[data-view="settings"] .hotkey-soon-badge {
+  font: 600 10.5px/1.2 var(--ui-display);
+  letter-spacing: 0.08em;
+}
+
+.main-content[data-view="settings"] .hotkey-row {
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.main-content[data-view="settings"] .hotkey-row:last-child {
+  border-bottom: 0;
+}
+
+.main-content[data-view="settings"] .hotkey-action {
+  color: var(--text-primary);
+  font: 500 14px/1.3 var(--ui-body);
+}
+
+/* A key, drawn as one: the rail's keycap, a little larger. */
+.main-content[data-view="settings"] .hotkey-bind-btn {
+  min-width: 34px;
+  padding: 4px 9px 3px;
+  border-radius: 6px;
+  border: 1px solid var(--ui-line-strong);
+  border-bottom-width: 2px;
+  background: var(--ui-raised);
+  color: var(--text-primary);
+  font: 600 12.5px/1.3 var(--ui-mono);
+}
+
+@media (hover: hover) {
+  .main-content[data-view="settings"] .hotkey-bind-btn:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    background: color-mix(in srgb, var(--accent) 8%, var(--ui-raised));
+    color: var(--text-primary);
+  }
+}
+
+.main-content[data-view="settings"] .hotkey-bind-btn.listening {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--ui-raised));
+  color: var(--text-primary);
+}
+
+/* "Soon": not a key yet. Dashed and quiet, not a ghost. */
+.main-content[data-view="settings"] .hotkey-bind-btn:disabled {
+  opacity: 0.55;
+  border-style: dashed;
+  border-bottom-width: 1px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+/* ── Support and About ────────────────────────────────────────────────── */
+
+.main-content[data-view="settings"] .about-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.main-content[data-view="settings"] .feedback-block {
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.main-content[data-view="settings"] .feedback-block .feedback-note,
+.main-content[data-view="settings"] .about-sounds,
+.main-content[data-view="settings"] .about-footer {
+  color: var(--text-muted);
+}
+
+.main-content[data-view="settings"] .about-row {
+  padding: 9px 0;
+  border-top: 1px solid var(--ui-line);
+}
+
+.main-content[data-view="settings"] .about-row:first-child {
+  border-top: 0;
+}
+
+.main-content[data-view="settings"] .about-label {
+  color: var(--text-secondary);
+  font: 500 14px/1.3 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-value {
+  color: var(--text-primary);
+  font: 600 14px/1.3 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .about-value-small {
+  color: var(--text-muted);
+  font: 500 12px/1.4 var(--ui-mono);
+}
+
+.main-content[data-view="settings"] .about-footer-divider {
+  border-top: 1px solid var(--ui-line);
+  margin: 14px 0 20px;
+}
+
+/* The update banner, as a panel of the stack with the accent in it. */
+.main-content[data-view="settings"] .update-banner {
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font: 500 14px/1.35 var(--ui-body);
+}
+
+.main-content[data-view="settings"] .update-banner svg,
+.main-content[data-view="settings"] .update-banner-action {
+  color: var(--accent);
+}
+
+/* ── Phone and narrow windows (settings.css stacks a row below 480px) ── */
+
+/* A switch is small enough to stay beside its label; stretching it across
+   the card would turn it back into the bar it replaced. */
+@media (max-width: 480px) {
+  .main-content[data-view="settings"] .setting-row:has(> .setting-switch) {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .main-content[data-view="settings"] .setting-row > .toggle-btn.setting-switch {
+    width: auto;
+  }
+
+  .main-content[data-view="settings"] .toggle-group {
+    flex-shrink: 1;
+  }
+
+  .main-content[data-view="settings"] .settings-section,
+  .main-content[data-view="settings"] .hotkeys-section {
+    padding: 16px 16px 10px;
+  }
+
+  .main-content[data-view="settings"] .settings-head {
+    margin-top: 18px;
+  }
+}
+
+@media (pointer: coarse) {
+  .main-content[data-view="settings"] .toggle-btn.setting-switch {
+    min-height: 44px;
+    min-width: 52px;
+  }
+}
+
+/* ── The section index down the right edge ───────────────────────────── */
+
+/* Wide enough, it says what each tick is instead of waiting for a hover. At
+   1300px the gutter beside the 680px column is 180px or more. */
+@media (min-width: 1300px) {
+  /* `body`: settings-timeline.css is imported by its component, after this
+     file, so an equal selector would lose to it. */
+  body .settings-timeline {
+    right: 18px;
+    gap: 18px;
+  }
+
+  .settings-timeline .stl-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+    /* The gutter beside the column, less the tick and its gap. */
+    max-width: calc((100vw - 252px - 680px) / 2 - 50px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--text-muted);
+    font: 600 13px/1 var(--ui-display);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.15s ease;
+  }
+
+  .settings-timeline .stl-tick.stl-active .stl-tooltip {
+    color: var(--text-primary);
+  }
+
+    /* The label is always there, so the "you are here" flash is not needed. */
+  .settings-timeline .stl-popover {
+    display: none;
+  }
+}
+
+@media (min-width: 1300px) and (hover: hover) {
+  .settings-timeline .stl-tick:hover .stl-tooltip {
+    color: var(--accent);
+  }
+}
+
+.settings-timeline .stl-tooltip,
+.settings-timeline .stl-popover {
+  font-family: var(--ui-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── The rail ─────────────────────────────────────────────────────────── */
+
+.rail {
+  font-family: var(--ui-body);
+}
+
+.rail-mode,
+.rail-action {
+  font-weight: 500;
+}
+
+.rail-mode.active,
+.rail-action.active {
+  font-weight: 600;
+}
+
+.rail-action-status {
+  font: 600 12px/1 var(--ui-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rail-mode-badge {
+  font: 600 10.5px/1.2 var(--ui-display);
+  letter-spacing: 0.1em;
+}
+
+.rail-key {
+  font-family: var(--ui-mono);
+  font-weight: 600;
+  border-bottom-width: 2px;
+}
+
+/* The phone's rail: its bottom tab bar. */
+.mobile-tabs {
+  font-family: var(--ui-body);
+}
+
+/* ── The top bar's chips ──────────────────────────────────────────────── */
+
+.context-chip {
+  border-radius: 10px;
+  border-color: var(--ui-line-strong);
+  font-family: var(--ui-body);
+  font-weight: 600;
+}
+
+.header-sound-menu,
+.header-more-menu {
+  border-radius: 12px;
+  font-family: var(--ui-body);
+}
+
+/* ── Notices ──────────────────────────────────────────────────────────── */
+
+.audio-error-notice {
+  font-family: var(--ui-body);
+}
+
+.audio-error-notice-text {
+  font-size: 13px;
+}

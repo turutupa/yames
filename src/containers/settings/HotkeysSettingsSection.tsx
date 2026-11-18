@@ -73,7 +73,12 @@ export function HotkeysSettingsSection({
 }) {
   const { t } = useTranslation();
   return (
-    <section className={`hotkeys-section${readOnly ? " hotkeys-section-readonly" : ""}`}>
+    // `id` only on the Settings copy: Help mounts a read-only one too, and an
+    // id is one element's. The "hotkeys" hint deep-links to it by id.
+    <section
+      className={`hotkeys-section${readOnly ? " hotkeys-section-readonly" : ""}`}
+      id={readOnly ? undefined : "settings-hotkeys"}
+    >
       <div className="hotkeys-section-header">
         <h2>{t("settings.hotkeys.title")}</h2>
         {!readOnly && setInputTestMode && (

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { WidgetMode } from "../../types";
+import { SwitchFace } from "./SwitchFace";
 
 /**
  * Widget settings — layout mode (compact/comfortable) and always-on-top
@@ -19,7 +20,7 @@ export function WidgetSettingsSection({
 }) {
   const { t } = useTranslation();
   return (
-    <section className="settings-section">
+    <section className="settings-section" id="settings-widget">
       <h2>{t("settings.widget.title")}</h2>
       <div className="setting-row">
         <div className="setting-label">
@@ -46,10 +47,10 @@ export function WidgetSettingsSection({
           </span>
         </div>
         <button
-          className={`toggle-btn ${widgetAlwaysOnTop ? "active" : ""}`}
+          className={`toggle-btn setting-switch ${widgetAlwaysOnTop ? "active" : ""}`}
           onClick={() => setWidgetAlwaysOnTop(!widgetAlwaysOnTop)}
         >
-          {widgetAlwaysOnTop ? t("common.on") : t("common.off")}
+          <SwitchFace label={widgetAlwaysOnTop ? t("common.on") : t("common.off")} />
         </button>
       </div>
     </section>

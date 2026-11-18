@@ -8,7 +8,9 @@
       "widget": "Widget",
       "hotkeys": "Raccourcis",
       "support": "Soutien",
-      "about": "À propos"
+      "about": "À propos",
+      "tools": "Outils",
+      "songs": "Morceaux"
     },
     "appearance": {
       "title": "Apparence",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Celui fourni avec Yames",
       "chooseSoundSet": "Choisir un .sf2",
       "useBuiltInSoundSet": "Utiliser celui d'origine"
+    },
+    "tools": {
+      "title": "Outils"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

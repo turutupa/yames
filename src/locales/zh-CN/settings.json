@@ -8,7 +8,9 @@
       "widget": "悬浮小窗",
       "hotkeys": "快捷键",
       "support": "支持",
-      "about": "关于"
+      "about": "关于",
+      "tools": "工具",
+      "songs": "歌曲"
     },
     "appearance": {
       "title": "外观",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Yames 自带的那个",
       "chooseSoundSet": "选一个 .sf2",
       "useBuiltInSoundSet": "用自带的"
+    },
+    "tools": {
+      "title": "工具"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

@@ -8,7 +8,9 @@
       "widget": "Mini Pencere",
       "hotkeys": "Kısayollar",
       "support": "Destek",
-      "about": "Hakkında"
+      "about": "Hakkında",
+      "tools": "Araçlar",
+      "songs": "Parçalar"
     },
     "appearance": {
       "title": "Görünüm",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Yames ile gelen",
       "chooseSoundSet": "Bir .sf2 seç",
       "useBuiltInSoundSet": "Yerleşik olanı kullan"
+    },
+    "tools": {
+      "title": "Araçlar"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

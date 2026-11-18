@@ -8,7 +8,9 @@
       "widget": "Cửa sổ mini",
       "hotkeys": "Phím tắt",
       "support": "Hỗ trợ",
-      "about": "Giới thiệu"
+      "about": "Giới thiệu",
+      "tools": "Công cụ",
+      "songs": "Bài hát"
     },
     "appearance": {
       "title": "Giao diện",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Bộ đi kèm Yames",
       "chooseSoundSet": "Chọn tệp .sf2",
       "useBuiltInSoundSet": "Dùng bộ có sẵn"
+    },
+    "tools": {
+      "title": "Công cụ"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

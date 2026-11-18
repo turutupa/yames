@@ -219,14 +219,32 @@ export function DownloadErrorBar({
   );
 }
 
-/** Sticky bottom bar shown when a model finishes downloading. */
+/**
+ * "Practice Coach available!" — news, not a fault, so it wears the same pill as
+ * the test-build notice (`BetaUpdateNotice`): the notice slot under the
+ * header, tinted with the accent, dismissed with its ×. It used to be a 22px
+ * amber strip across the whole bottom edge of the window, which read as an
+ * error bar (owner, settings revamp 2026-11-17).
+ */
 export function DownloadSuccessBar({ onDismiss }: { onDismiss: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="global-download-bar global-download-bar-success">
-      <span className="global-download-bar-label">{t("coachDownload.success")}</span>
-      <button className="global-download-bar-close" onClick={onDismiss} title={t("coachDownload.dismiss")}>
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <div
+      className="audio-error-notice beta-update-notice coach-ready-notice"
+      role="status"
+      data-testid="coach-ready-notice"
+    >
+      <div className="audio-error-notice-body">
+        <span className="audio-error-notice-text">{t("coachDownload.success")}</span>
+      </div>
+      <button
+        type="button"
+        className="audio-error-notice-dismiss"
+        onClick={onDismiss}
+        title={t("coachDownload.dismiss")}
+        aria-label={t("coachDownload.dismiss")}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
       </button>
