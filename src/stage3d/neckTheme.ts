@@ -17,7 +17,7 @@
  * | nut             | text-primary                       | text-primary                     |
  * | plain strings   | mix(board, text-secondary, 92%)    | the same at 95%                  |
  * | wound strings   | plain mixed 35% toward the accent  |                                  |
- * | inlays          | mix(board, text-primary, 22%)      | the same at 17%                  |
+ * | inlays          | mix(board, text-primary, 16%)      | the same at 12%                  |
  * | fret numbers    | marker frets text-primary, bold, an accent dot under; others text-faint |
  * | now / next      | accent fill / accent ring on the board colour                         |
  * | played on time  | --neck-hit (defaults to --feedback-perfect)                            |
@@ -182,7 +182,7 @@ export function paletteFrom(read: (name: string) => string, light: boolean): Nec
     nut: ink,
     string,
     wound,
-    inlay: mix(board, ink, dark ? 0.22 : 0.17),
+    inlay: mix(board, ink, dark ? 0.16 : 0.12),
     num: ink,
     numFaint: faint,
     accent,

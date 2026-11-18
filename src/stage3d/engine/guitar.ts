@@ -54,8 +54,15 @@ const WOUND = (s: number) => s >= 4;
 const FRET_W = 0.0072;
 const NUT_W = 0.017;
 const EDGE_W = 0.0032;
-/** The inlay dots' radius. */
-const INLAY_R = 0.026;
+/**
+ * The inlay dots' radius: small, so an inlay is a landmark of the board and
+ * never reads as a note (the coordinator, 2026-11-18: the 9th fret's inlay
+ * under a "2" read as a second dot). One a note stands on or beside is not
+ * drawn at all (`setNotes`).
+ */
+const INLAY_R = 0.019;
+/** How close a note's centre may come to an inlay's before the inlay steps aside. */
+const INLAY_CLEAR = NOTE_R * 1.45 + INLAY_R + 0.014;
 
 /** NOW is drawn larger than the rest, so the eye lands on it first. */
 const NOTE_SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
@@ -326,11 +333,15 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
   // Flat inlay dots.
   const inlayMat = flat(P.inlay);
   const inlayGeo = new THREE.CircleGeometry(INLAY_R, 32).rotateX(-Math.PI / 2);
+  const inlays: THREE.Mesh[] = [];
   INLAY_FRETS.forEach((f) => {
     const x = (fretX(f - 1) + fretX(f)) / 2;
     const place = (z: number) => {
       const m = new THREE.Mesh(inlayGeo, inlayMat);
       m.position.set(x, crown(z) + 0.0012, z);
+      // Under everything on the board: the strings and the notes draw over it.
+      m.renderOrder = -1;
+      inlays.push(m);
       root.add(m);
     };
     if (DOUBLE(f)) {
@@ -456,6 +467,15 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
         n.fade = fade;
       }
     });
+    // An inlay a note stands on or beside steps aside, so it never shows
+    // through the marker or reads as a second dot next to it.
+    const at2 = list.map((d) => {
+      const x = noteX(d.f) - (crowded.has(d.s + ":" + d.f) ? NOTE_R * 1.7 : 0);
+      return { x, z: strZ(d.s, x) };
+    });
+    for (const m of inlays) {
+      m.visible = !at2.some((p) => Math.hypot(p.x - m.position.x, p.z - m.position.z) < INLAY_CLEAR);
+    }
   }
   function updateNotes(dt: number): boolean {
     let busy = false;
