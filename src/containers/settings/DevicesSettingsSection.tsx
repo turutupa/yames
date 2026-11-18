@@ -138,7 +138,11 @@ export function DevicesSettingsSection({
           className="midi-device-section"
           id="settings-instrument"
         >
-          <label className="midi-label devices-subsection-label">{t("settings.coach.instrument")}</label>
+          <div className="devices-field-label">
+            <label className="midi-label devices-subsection-label">{t("settings.coach.instrument")}</label>
+            <span className="channel-picker-hint">{t("settings.coach.instrumentHint")}</span>
+          </div>
+          <div className="devices-field-control">
           <div className="midi-device-row">
             <InstrumentDropdown
               value={instrument}
@@ -153,15 +157,19 @@ export function DevicesSettingsSection({
               }}
             />
           </div>
-          <span className="channel-picker-hint">{t("settings.coach.instrumentHint")}</span>
+          </div>
         </div>
       )}
 
       {/* The input, on every platform: Takes are graded from the guitar. On
           a phone the list is the built-in mic, a USB-C interface and a
           headset-jack adapter — whatever Android reports (android_input.rs). */}
-      <div className="midi-device-section" style={IS_MOBILE ? undefined : { marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">{t("settings.devices.audioInput")}</label>
+      <div className="midi-device-section">
+        <div className="devices-field-label">
+          <label className="midi-label devices-subsection-label">{t("settings.devices.audioInput")}</label>
+          <span className="channel-picker-hint">{t("settings.devices.audioInputHint")}</span>
+        </div>
+        <div className="devices-field-control">
         <div className="midi-device-row">
           <AudioInputDropdown
             devices={evaluation.devices}
@@ -214,6 +222,7 @@ export function DevicesSettingsSection({
             {t("settings.devices.loopback")}
           </span>
         )}
+        </div>
       </div>
 
       {/* Order: the instrument, then what the app hears, then what it plays
@@ -224,8 +233,12 @@ export function DevicesSettingsSection({
           routes output itself and the Oboe stream ignores a saved device
           name, so a dropdown here would change nothing. */}
       {!IS_MOBILE && (
-      <div className="midi-device-section" style={{ marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">{t("settings.devices.audioOutput")}</label>
+      <div className="midi-device-section">
+        <div className="devices-field-label">
+          <label className="midi-label devices-subsection-label">{t("settings.devices.audioOutput")}</label>
+          <span className="channel-picker-hint">{t("settings.devices.audioOutputHint")}</span>
+        </div>
+        <div className="devices-field-control">
         <div className="midi-device-row">
           <AudioOutputDropdown
             devices={audioOutputDevices}
@@ -280,13 +293,18 @@ export function DevicesSettingsSection({
             )}
           </>
         )}
+        </div>
       </div>
       )}
 
       {/* No MIDI on a phone: midir has no Android backend. */}
       {!IS_MOBILE && (
-      <div className="midi-device-section" style={{ marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">{t("settings.devices.midi")}</label>
+      <div className="midi-device-section">
+        <div className="devices-field-label">
+          <label className="midi-label devices-subsection-label">{t("settings.devices.midi")}</label>
+          <span className="channel-picker-hint">{t("settings.devices.midiHint")}</span>
+        </div>
+        <div className="devices-field-control">
         <div className="midi-device-row">
           <MidiDeviceDropdown
             devices={midi.devices}
@@ -313,6 +331,7 @@ export function DevicesSettingsSection({
             {t("settings.devices.noMidi")}
           </div>
         )}
+        </div>
       </div>
       )}
     </section>

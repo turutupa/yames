@@ -18,14 +18,6 @@ const KeyIcon = () => (
   </svg>
 );
 
-const GlobeIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-  </svg>
-);
-
 const MidiIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 18V5l12-2v13" />
@@ -35,8 +27,12 @@ const MidiIcon = () => (
 );
 
 /**
- * Hotkeys section — renders all hotkey groups, each with a 3-column binding
- * table (Key / Global / MIDI). Includes the "Test inputs" toggle and the
+ * Hotkeys section — renders all hotkey groups, each with a binding table
+ * (Key / MIDI or footswitch). The "Global" column (system-wide shortcuts) is
+ * not drawn: nothing registers those yet, so it was a column of disabled
+ * dashes under a "SOON" badge nobody could act on (UX audit SET-4). The
+ * bindings are still loaded and saved by `useKeybindings`; only the column
+ * is gone, and it comes back when the feature does. Includes the "Test inputs" toggle and the
  * "Reset to defaults" button. Pure UI; capture/binding state lives in the
  * parent.
  *
@@ -48,7 +44,6 @@ const MidiIcon = () => (
  */
 export function HotkeysSettingsSection({
   keyBindings,
-  globalBindings,
   footBindings,
   bindingFor,
   setBindingFor,
@@ -104,11 +99,6 @@ export function HotkeysSettingsSection({
                   <KeyIcon />
                   {t("settings.hotkeys.keyHeader")}
                 </span>
-                <span data-tooltip={t("settings.hotkeys.globalTooltip")}>
-                  <GlobeIcon />
-                  {t("settings.hotkeys.globalHeader")}
-                  <span className="hotkey-soon-badge">{t("settings.hotkeys.soon")}</span>
-                </span>
                 <span data-tooltip={t("settings.hotkeys.midiTooltip")}>
                   <MidiIcon />
                   {t("settings.hotkeys.midiHeader")}
@@ -135,11 +125,6 @@ export function HotkeysSettingsSection({
                       }}
                     >
                       {platformKey(keyBindings[hk.id] || "—")}
-                    </button>
-                    <button className="hotkey-bind-btn" disabled>
-                      {hk.globalAllowed
-                        ? platformKey(globalBindings[hk.id] || "—")
-                        : "—"}
                     </button>
                     <button
                       className={`hotkey-bind-btn ${midi.learnMode === hk.id ? "listening" : ""}`}

@@ -401,7 +401,14 @@ export function CoachSettingsSection({
       )}
       <div className="setting-row">
         <div className="setting-label">
-          <label>{t("settings.coach.scoringMode")}</label>
+          {/* SET-2: Sessions grade one way, whatever this says (grade.ts
+              reads neither), so the row says which side it is for. */}
+          <span className="setting-label-line">
+            <label>{t("settings.coach.scoringMode")}</label>
+            <span className="setting-scope-tag" title={t("settings.coach.toolsOnlyHint")}>
+              {t("settings.coach.toolsOnly")}
+            </span>
+          </span>
           <span className="setting-hint">{t("settings.coach.scoringModeHint")}</span>
           <span className="setting-hint" style={{ marginTop: 4 }}>
             {coachMode === "pro"
@@ -431,7 +438,14 @@ export function CoachSettingsSection({
           it, and its hint says outright that the score does not move. */}
       <div className="setting-row">
         <div className="setting-label">
-          <label>{t("settings.coach.stance")}</label>
+          {/* SET-2: Sessions grade one way, whatever this says (grade.ts
+              reads neither), so the row says which side it is for. */}
+          <span className="setting-label-line">
+            <label>{t("settings.coach.stance")}</label>
+            <span className="setting-scope-tag" title={t("settings.coach.toolsOnlyHint")}>
+              {t("settings.coach.toolsOnly")}
+            </span>
+          </span>
           <span className="setting-hint">{t("settings.coach.stanceHint")}</span>
           <span className="setting-hint" style={{ marginTop: 4 }}>
             {coachStance === "learning"
@@ -493,7 +507,7 @@ export function CoachSettingsSection({
         <div className="setting-label">
           <label>{t("jam.cues.label")}</label>
           <span className="setting-hint">
-            {modelStatus?.voiceReady ? t("jam.cues.hint") : t("jam.cues.noVoice")}
+            {modelStatus?.voiceReady ? t("jam.cues.hint") : t("settings.coach.cuesNoVoice")}
           </span>
         </div>
         <div className="toggle-group">

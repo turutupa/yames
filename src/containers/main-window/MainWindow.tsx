@@ -2565,6 +2565,12 @@ export function MainWindow() {
             inputTestMode={inputTestMode}
             setInputTestMode={setInputTestMode}
             onResetRequest={() => setShowResetConfirm(true)}
+            practice={{
+              minutes: sessionRun.minutes,
+              setMinutes: sessionRun.setMinutes,
+              practiceView: sessionRun.practiceView,
+              setPracticeView: sessionRun.setPracticeView,
+            }}
             shareTooltip={shareTooltip}
             onShareOption={handleShareOption}
           />
@@ -2578,6 +2584,7 @@ export function MainWindow() {
             // missing, until the settings revamp).
             sections={[
               { id: "general", label: t("settings.tabs.general") },
+              { id: "practice", label: t("settings.tabs.practice") },
               { id: "devices", label: t("settings.tabs.devices") },
               // The coach, Songs, the widget and the hotkeys are not on this
               // screen on a phone, so the rail does not point at them.
