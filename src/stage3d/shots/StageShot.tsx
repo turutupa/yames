@@ -13,6 +13,7 @@ import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { NeckStageProvider, useNeck, type NeckNote } from "../api";
 import { stageDebug } from "../controller";
+import { applyTheme, getThemeById } from "../../themes";
 
 declare global {
   interface Window {
@@ -40,13 +41,28 @@ export function d7Notes(lo = 4, hi = 10): NeckNote[] {
   return [...at.values()];
 }
 
-function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" | "flat" }) {
+/** The art direction mock's warm-up, mid-take, on the A string: 5 on time, 6 late, 7 NOW, 8 NEXT, then the shape. */
+export const PLAYED: NeckNote[] = [
+  { string: 5, fret: 5, kind: "tone", label: "5" },
+  { string: 5, fret: 6, kind: "tens", label: "6" },
+  { string: 5, fret: 7, kind: "now", label: "7" },
+  { string: 5, fret: 8, kind: "next", label: "8" },
+  { string: 5, fret: 9, kind: "box" },
+  { string: 5, fret: 10, kind: "box" },
+];
+
+type SceneKind = "whole" | "zoom" | "pluck" | "flat" | "played";
+
+function Scene({ kind }: { kind: SceneKind }) {
   const neck = useNeck();
   const slot = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (kind === "whole") {
       neck.setView({ kind: "whole" }, slot.current, { instant: true });
       neck.setNotes([]);
+    } else if (kind === "played") {
+      neck.setView({ kind: "zoom", from: 4, to: 11 }, slot.current, { instant: true });
+      neck.setNotes(PLAYED, { fade: 0 });
     } else {
       neck.setView({ kind: "zoom", from: 4, to: 10, flat: kind === "flat" }, slot.current, { instant: true });
       neck.setNotes(d7Notes(), { fade: 0 });
@@ -57,8 +73,8 @@ function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" | "flat" }) {
   return (
     <div className={`stage-shot stage-shot-${kind}`}>
       <header className="stage-shot-head">
-        <span className="stage-shot-kick">{kind === "whole" ? "Sunday" : "Theory · Blues path, step 2"}</span>
-        <span className="stage-shot-title">{kind === "whole" ? "Today" : "D7"}</span>
+        <span className="stage-shot-kick">{kind === "whole" ? "Sunday" : kind === "played" ? "Warm-up · not graded" : "Theory · Blues path, step 2"}</span>
+        <span className="stage-shot-title">{kind === "whole" ? "Today" : kind === "played" ? "1:43" : "D7"}</span>
       </header>
       <div className="stage-shot-slot" data-testid="stage-slot" ref={slot} />
     </div>
@@ -67,16 +83,16 @@ function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" | "flat" }) {
 
 const CSS = `
 html,body,#root{margin:0;height:100%;background:transparent;}
-body{background:#0a0705;}
-#root{color:#fbf5ea;font-family:Inter,system-ui,sans-serif}
+body{background:var(--bg-primary);}
+#root{color:var(--text-primary);font-family:Inter,system-ui,sans-serif}
 .stage-shot{position:relative;height:100%;display:flex;flex-direction:column;padding:24px 28px;box-sizing:border-box}
 .stage-shot-head{display:flex;flex-direction:column;gap:4px;flex:none}
-.stage-shot-kick{font:600 13px/1 "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d6c9b4}
+.stage-shot-kick{font:600 13px/1 "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary)}
 .stage-shot-title{font:700 88px/1 "Barlow Condensed",sans-serif}
 .stage-shot-whole{flex-direction:column-reverse;justify-content:flex-end}
 .stage-shot-whole .stage-shot-slot{flex:none;height:300px;margin:30px -28px 20px}
 .stage-shot-whole .stage-shot-title{font:500 120px/1 Fraunces,Georgia,serif}
-.stage-shot-zoom .stage-shot-slot,.stage-shot-pluck .stage-shot-slot,.stage-shot-flat .stage-shot-slot{flex:1 1 auto;min-height:0;margin:12px -28px 80px}
+.stage-shot-zoom .stage-shot-slot,.stage-shot-pluck .stage-shot-slot,.stage-shot-flat .stage-shot-slot,.stage-shot-played .stage-shot-slot{flex:1 1 auto;min-height:0;margin:12px -28px 80px}
 `;
 
 async function waitFor(what: string, check: () => boolean, ms = 30000) {
@@ -87,10 +103,12 @@ async function waitFor(what: string, check: () => boolean, ms = 30000) {
   }
 }
 
-export function mountStageShot(kind: "whole" | "zoom" | "pluck" | "flat") {
+export function mountStageShot(kind: SceneKind) {
   const style = document.createElement("style");
   style.textContent = CSS;
   document.head.appendChild(style);
+  // The neck follows the theme: the scenes take `?theme=` like every other shot (Ember by default).
+  applyTheme(getThemeById(new URLSearchParams(window.location.search).get("theme") ?? "ember"));
   window.__NECK__ = stageDebug;
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

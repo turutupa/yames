@@ -9,20 +9,26 @@
  * back, each waited for (`StageEngine.probe`), and compares the middle one
  * with a budget for that many pixels.
  *
- * The budget, from the numbers measured on the DGX Spark (20 cores, NVIDIA
- * GB10) with Chromium, both stage scenes, warm frames, 2026-11-16:
+ * The budget. The realistic neck (2026-11-16) cost SwiftShader 105 to 400 ms a
+ * frame at 1400x900 and the budget was `8 + 20 ms per megapixel`. The flat
+ * neck (art direction "A, graphic", 2026-11-17) is unlit with no textures, and
+ * a CPU rasteriser draws it about ten times faster, fast enough to slip under
+ * that budget while still costing several cores at 30 fps during a Take. So
+ * the budget was re-cut against the flat neck, measured on the DGX Spark (20
+ * cores, NVIDIA GB10) with Chromium, both stage scenes, the median of three
+ * probes each, with the box at a load of about 9:
  *
  * | canvas (device px)  | SwiftShader (CPU) | GB10 (gl-egl) | budget |
  * |---------------------|-------------------|---------------|--------|
- * | 620x780  (0.48 MP)  | 45 - 110 ms       | 1.4 - 2.5 ms  | 18 ms  |
- * | 1400x900 (1.26 MP)  | 105 - 400 ms      | 1.0 - 4.8 ms  | 33 ms  |
- * | 2240x1440 (3.2 MP)  | 280 - 1100 ms     | (tier 2: 5 MP) 1.8 - 3 ms | 72 ms |
+ * | 620x780  (0.48 MP)  | 7.7 - 8.8 ms      | 1.5 - 2.4 ms  | 4.9 ms |
+ * | 1400x900 (1.26 MP)  | 16.1 - 18.5 ms    | 1.3 - 2.2 ms  | 8.0 ms |
+ * | 2240x1440 (3.2 MP)  | 30.7 - 39.1 ms    | 1.5 - 2.8 ms  | 15.9 ms |
  *
- * So `8 ms + 20 ms per megapixel`: the fastest CPU rasteriser seen (twenty
- * cores) is at least 2.5x over it, a desktop GPU is ten times under it, and
- * an integrated GPU several times slower than the GB10 still passes. A GPU that
- * really is over it draws under 30 fps at the size the player uses, where the
- * flat neck is the better choice anyway.
+ * So `3 ms + 4 ms per megapixel`: the fastest CPU rasteriser seen (twenty
+ * cores) is about twice over it, and the GB10 two to five times under it (a
+ * GPU frame here is mostly the fixed cost of the read-back that waits for it).
+ * A GPU that really is over it would be one where the SVG neck, which looks
+ * the same, is the better choice anyway.
  */
 
 /** How many frames the probe draws. The first is a warm-up and is not judged. */
@@ -30,7 +36,7 @@ export const PROBE_FRAMES = 5;
 
 /** The longest a frame of `pixels` device pixels may take on a GPU, in ms. */
 export function frameBudgetMs(pixels: number): number {
-  return 8 + 20 * (Math.max(0, pixels) / 1e6);
+  return 3 + 4 * (Math.max(0, pixels) / 1e6);
 }
 
 export type ProbeVerdict = { slow: boolean; medianMs: number; budgetMs: number };
