@@ -423,7 +423,7 @@
       "intro": "Todo lo que hay aquí se midió a partir de cómo tocas: notas oídas, regularidad del tiempo, tempo limpio.",
       "cleanMeans": "Lo más rápido a lo que llegaste al listón, durante ocho compases seguidos cualesquiera.",
       "sparkLabel": "Regularidad a lo largo de las tomas, {{title}}",
-      "statMinutes": "Minutos tocados",
+      "statMinutes": "Minutos en tomas",
       "statSessions": "Sesiones",
       "statStreak": "Días seguidos",
       "pathSparkLabel": "Tu tempo limpio máximo en {{title}}, cada vez que subió",

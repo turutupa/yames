@@ -411,7 +411,7 @@
       "intro": "这里的一切都是从你的演奏中测出来的：听到的音、节奏均匀度、干净速度。",
       "cleanMeans": "在任意连续八个小节内过及格线的最快速度。",
       "sparkLabel": "各遍的均匀度，{{title}}",
-      "statMinutes": "已弹分钟",
+      "statMinutes": "各遍合计分钟",
       "statSessions": "练习次数",
       "statStreak": "连续天数",
       "pathSparkLabel": "{{title}} 的最高干净速度，每次提高时",

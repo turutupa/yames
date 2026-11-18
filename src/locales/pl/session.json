@@ -435,7 +435,7 @@
       "intro": "Wszystko tutaj zmierzono na podstawie twojej gry: usłyszane nuty, równość rytmu, czyste tempo.",
       "cleanMeans": "Najszybsze tempo, przy którym przeskoczyłeś poprzeczkę przez dowolne osiem taktów z rzędu.",
       "sparkLabel": "Równość w kolejnych podejściach, {{title}}",
-      "statMinutes": "Minuty gry",
+      "statMinutes": "Minuty w podejściach",
       "statSessions": "Sesje",
       "statStreak": "Dni z rzędu",
       "pathSparkLabel": "Twoje najwyższe czyste tempo w {{title}}, za każdym razem, gdy rosło",

@@ -411,7 +411,7 @@
       "intro": "Alles hier is gemeten aan je spel: gehoorde noten, gelijkmatigheid van de timing, schoon tempo.",
       "cleanMeans": "Het snelste tempo waarop je de lat haalde, over willekeurige acht maten achter elkaar.",
       "sparkLabel": "Gelijkmatigheid over de takes, {{title}}",
-      "statMinutes": "Minuten gespeeld",
+      "statMinutes": "Minuten in takes",
       "statSessions": "Sessies",
       "statStreak": "Dagen op rij",
       "pathSparkLabel": "Je hoogste schone tempo op {{title}}, telkens als het steeg",

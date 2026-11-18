@@ -423,7 +423,7 @@
       "intro": "Tudo aqui foi medido a partir do seu jeito de tocar: notas ouvidas, regularidade do tempo, andamento limpo.",
       "cleanMeans": "O mais rápido em que você bateu a meta, em quaisquer oito compassos seguidos.",
       "sparkLabel": "Regularidade ao longo das tomadas, {{title}}",
-      "statMinutes": "Minutos tocados",
+      "statMinutes": "Minutos em tomadas",
       "statSessions": "Sessões",
       "statStreak": "Dias seguidos",
       "pathSparkLabel": "Seu tempo limpo máximo em {{title}}, cada vez que subiu",

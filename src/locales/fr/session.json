@@ -423,7 +423,7 @@
       "intro": "Tout ici a été mesuré à partir de ton jeu : notes entendues, régularité du placement, tempo propre.",
       "cleanMeans": "Le tempo le plus rapide où tu as atteint le seuil, sur n'importe quelles huit mesures d'affilée.",
       "sparkLabel": "Régularité au fil des prises, {{title}}",
-      "statMinutes": "Minutes jouées",
+      "statMinutes": "Minutes en prises",
       "statSessions": "Sessions",
       "statStreak": "Jours d'affilée",
       "pathSparkLabel": "Ton meilleur tempo propre sur {{title}}, à chaque hausse",

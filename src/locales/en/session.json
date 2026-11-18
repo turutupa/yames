@@ -411,7 +411,7 @@
       "intro": "Everything here was measured from your playing: notes heard, timing evenness, clean tempo.",
       "cleanMeans": "The fastest you met the bar, over any eight bars in a row.",
       "sparkLabel": "Evenness across Takes, {{title}}",
-      "statMinutes": "Minutes played",
+      "statMinutes": "Minutes in Takes",
       "statSessions": "Sessions",
       "statStreak": "Day streak",
       "pathSparkLabel": "Your top clean tempo on {{title}}, each time it rose",
