@@ -92,6 +92,17 @@ it.
   sloppy take. (An earlier version predicted the whole take from the
   count-in; on a busy machine the app's clock drifted from PipeWire's and a
   good take came out 70 ms early by the end.)
+- **The capture's clock** (`CaptureClock`, `node --test tests/e2e/lib/`). A
+  sample's time is `t0 + index / rate`, `t0` the lower envelope of "arrival
+  minus samples so far". On a loaded machine the capture loses audio, and
+  each loss moves that difference up for good; the envelope is taken over the
+  last half second and only moves up, so a loss is followed within half a
+  second and a stall shorter than that (late, not lost) does not move it.
+  A click the capture lost is a beat skipped, not every later beat moved by
+  one (the beat is read from the time since the last click), and the notes
+  after it are placed from the tempo, twice at most. `results.json`
+  `info.players` holds, per Take, the clicks heard and when, why the player
+  stopped, and `captureLostMs`.
 - **The UI** is driven through `tauri-driver` and `WebKitWebDriver` with a
   small W3C client over `fetch` (`lib/webdriver.mjs`); buttons are found by
   their text, as a player would. The store is read with `node:sqlite`.
@@ -110,16 +121,17 @@ build. `--gpu` also needs `xserver-xorg-video-nvidia-*` and passwordless sudo.
 ## Known bugs it finds (2026-11-16)
 
 1. **A Take never ends by itself** (and neither does a non-looping song, or a
-   jam whose form ends). `engine.rs`, the event loop's park branch: it reads
-   `playing` after `park_timeout`. The audio thread pushes the end
-   notification, which unparks the loop, and then lowers `playing`; the woken
-   loop sees the flag down and `drain()`s the notification that woke it.
-   `is_playing` stays true, `jam-ended` never fires, and the Session sits on
-   "End take" after the last bar. Every run of `session` reproduces it on
-   `revamp`; the fix (read the flag before parking, drain only if it was down
-   on both sides) is on branch `mvp-e2e-song-end`, and with it the Take ends
-   within 100 ms. Until it is merged, the suite presses End take itself, the
-   bar it stopped in is not counted, and the clean-tempo checks fail.
+   jam whose form ends). Fixed in `engine.rs` on 2026-11-16 (the event loop
+   reads `playing` before it pops, so it never drains the end notification
+   that woke it). If "the Take ends by itself" fails now, read the detail
+   first: "the player heard 33 of 44 clicks and stopped on silence" with the
+   probe CSV showing the engine still clicking on time is the harness, not
+   the app. That was the 2026-11-18 failure (two-paths, four-fingers): the
+   capture lost audio under load, its clock (then a minimum over the whole
+   capture) ran 1.4 s fast in 28 s, the player played early, took the click
+   it no longer lined up with for silence and stopped mid-Take, and the
+   suite waited 6 s for an end that was still bars away. See "The capture's
+   clock" above.
 2. **The stage cannot tell a software renderer on WebKitGTK.** WebKitGTK
    masks `WEBGL_debug_renderer_info` and answers "Apple GPU" whatever draws, so
    `isSoftwareRenderer` in `src/stage3d/webgl.ts` can never match on Linux and

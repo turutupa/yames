@@ -237,7 +237,7 @@ async function quitApp(d, label) {
 
 async function shot(d, name) {
   try {
-    writeFileSync(join(out, `${name}.png`), await d.screenshot());
+    writeFileSync(join(out, `${name.replace(/[\/:]/g, "_")}.png`), await d.screenshot());
   } catch {
     /* a screenshot is a nicety */
   }
@@ -324,6 +324,8 @@ async function playTake(d, exercise, style, label, { band = false, again = false
     throw new Error(`${e.message}; the Take screen: ${JSON.stringify(why)}`);
   }
   const heard = await playing;
+  info.players ??= {};
+  info.players[label] = heard;
   // Played out, the engine stops the Take on its last bar line by itself.
   // `take` holds 1.5 s of tail after the last bar, so the end has passed.
   let endedItself = false;
@@ -336,7 +338,9 @@ async function playTake(d, exercise, style, label, { band = false, again = false
     await sleep(500);
   }
   check(`${label}: the Take ends by itself at its last bar`, endedItself,
-    endedItself ? "" : "still playing 6 s after the last bar; pressing End take (see README, known bugs)");
+    endedItself ? "" : `still playing 6 s after the last bar; pressing End take (see README, known bugs); ` +
+      `the player heard ${heard?.clicksHeard} of ${heard?.expectedClicks} clicks and stopped on ${heard?.endedBy}; ` +
+      `the capture lost ${heard?.captureLostMs} ms of audio`);
   if (!endedItself) await d.clickText(/^End take$/).catch(() => {});
   try {
     await d.waitText(/Go again|Move on|Next|See how it went/i, 30000);

@@ -122,7 +122,64 @@ export function renderTake({ bpm, notes, barTicks, exerciseBars, bars, style, se
 // The two streams
 // ---------------------------------------------------------------------------
 
-/** Reads a sink's monitor as mono s16; reports chunks with their sample index. */
+/**
+ * Reads a sink's monitor as mono s16; reports chunks with their sample index.
+ *
+ * THE CLOCK. A sample's time on our clock is `t0 + index / RATE`, and `t0` is
+ * the lower envelope of `arrival - samples so far`: the chunk that arrived
+ * soonest after its last sample was taken. Late arrivals (a busy event loop)
+ * only push that difference up, so its minimum is the true one.
+ *
+ * But not over the whole capture. On a loaded machine the capture LOSES
+ * samples (the reader falls behind and the sound server drops what it could
+ * not hand over), and every loss moves the true difference up for good. A
+ * minimum over the whole capture then sits below it, every click after the
+ * loss is timed early by everything lost so far, and the clock runs fast:
+ * measured on the 2026-11-18 failures, the engine clicking every 923 ms and
+ * this hearing 780-870 ms, 1.4 s fast after 28 s. The player followed that
+ * clock, played early, heard what looked like 2.5 beats of silence while the
+ * click went on, and stopped with the Take half played ("the Take never ends
+ * by itself", two-paths and four-fingers).
+ *
+ * So the envelope is taken over the last `CLOCK_WINDOW_MS` of arrivals, and only
+ * ever moves up: a loss is real and permanent, and a stall shorter than the
+ * window (data late, not lost) cannot raise it. `lostMs` is how far it moved.
+ */
+const CLOCK_WINDOW_MS = 500;
+export class CaptureClock {
+  constructor(windowMs = CLOCK_WINDOW_MS) {
+    this.windowMs = windowMs;
+    this.t0 = Infinity;
+    /** The envelope as it first settled, before any loss. */
+    this.firstT0 = Infinity;
+    this.startedAt = null;
+    /** [arrival, offset] of recent chunks, offsets increasing (a min-deque). */
+    this.recent = [];
+  }
+  /** A chunk arrived at `t` (our clock, ms), and `samples` have arrived in all. */
+  track(t, samples) {
+    const offset = t - (samples / RATE) * 1000;
+    this.startedAt ??= t;
+    while (this.recent.length && this.recent[this.recent.length - 1][1] >= offset) this.recent.pop();
+    this.recent.push([t, offset]);
+    while (this.recent[0][0] < t - this.windowMs) this.recent.shift();
+    if (t - this.startedAt < this.windowMs) {
+      // The first window: the plain minimum, as it always was.
+      this.t0 = Math.min(this.t0, offset);
+      this.firstT0 = this.t0;
+    } else {
+      this.t0 = Math.max(this.t0, this.recent[0][1]);
+    }
+  }
+  timeOf(sampleIndex) {
+    return this.t0 + (sampleIndex / RATE) * 1000;
+  }
+  /** How much the capture has lost so far, in ms of audio. */
+  get lostMs() {
+    return Number.isFinite(this.t0) && Number.isFinite(this.firstT0) ? this.t0 - this.firstT0 : 0;
+  }
+}
+
 class Capture {
   constructor(env, device) {
     this.child = spawn(
@@ -131,9 +188,7 @@ class Capture {
       { env: env.env(), stdio: ["ignore", "pipe", "ignore"] },
     );
     this.samples = 0;
-    // Our clock at sample 0, from the lower envelope of arrivals: the chunk
-    // that arrived soonest after its last sample was taken.
-    this.t0 = Infinity;
+    this.clock = new CaptureClock();
     this.listeners = new Set();
     let carry = null;
     this.child.stdout.on("data", (buf) => {
@@ -149,13 +204,16 @@ class Capture {
       const n = buf.length / 2;
       const first = this.samples;
       this.samples += n;
-      this.t0 = Math.min(this.t0, t - (this.samples / RATE) * 1000);
+      this.clock.track(t, this.samples);
       const pcm = new Int16Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length));
       for (const fn of this.listeners) fn(pcm, first);
     });
   }
   timeOf(sampleIndex) {
-    return this.t0 + (sampleIndex / RATE) * 1000;
+    return this.clock.timeOf(sampleIndex);
+  }
+  get lostMs() {
+    return this.clock.lostMs;
   }
   stop() {
     this.child.kill("SIGTERM");
@@ -296,8 +354,17 @@ export class Player {
     const clicks = [];
     const lastBeat = Math.ceil(take.beats);
     let finished = false;
+    let endedBy = null;
     let first = null;
     let watch = null;
+    /** The latest click: its beat and when it was heard. */
+    let last = null;
+    /** Each click's distance from the one before, per beat between them. */
+    const beatGaps = [];
+    let beatMs = 0;
+    /** The last beat whose notes are placed, and how many of those in a row were placed without a click. */
+    let placed = -Infinity;
+    let extrapolated = 0;
     const byBeat = new Map();
     for (const n of take.notes) {
       const k = Math.floor(n.beat + 1e-9);
@@ -309,51 +376,79 @@ export class Player {
         () => reject(new Error(`heard ${clicks.length} clicks in ${timeoutMs} ms, expected a count-in of ${countInClicks}`)),
         timeoutMs,
       );
+      // Where the notes of beat `beat` go, one beat after a click at `t`.
+      const place = (beat, at) => {
+        placed = beat;
+        for (const note of byBeat.get(beat) ?? []) {
+          // We hear the click `capture` late, and a sample we write reaches
+          // the guitar sink `playback` after we write it. Calibration
+          // measured playback + capture, so writing `offsetMs` before the
+          // click we expect puts a note into the guitar sink when that
+          // click went into the app's output sink.
+          const when = at + (note.beat - beat) * beatMs + note.jitterMs - this.offsetMs;
+          play.schedule(play.indexAt(when), note.samples);
+        }
+      };
+      const finish = (why) => {
+        finished = true;
+        endedBy = why;
+        clearTimeout(timer);
+        resolve();
+      };
       cap.listeners.add(
         onsetFinder(0.05, RATE / 20, (n) => {
+          if (finished) return;
           const t = cap.timeOf(n);
+          // Which beat this click is. The count-in by count (-4..-1); after
+          // it, by TIME from the click before, so a click the capture lost
+          // is a beat skipped rather than every later beat shifted by one.
+          let beat;
+          if (clicks.length < countInClicks) {
+            beat = clicks.length - countInClicks;
+          } else {
+            const steps = Math.round((t - last.t) / beatMs);
+            if (steps < 1) return; // not a click: nothing sounds between them
+            beat = last.beat + steps;
+          }
           clicks.push(t);
-          // Beat number of this click: the count-in is -4..-1.
-          const beat = clicks.length - 1 - countInClicks;
-          if (clicks.length < 2 || finished) return;
-          const recent = clicks.slice(-5);
-          const gaps = recent.slice(1).map((c, i) => c - recent[i]).sort((x, y) => x - y);
-          const beatMs = gaps[Math.floor(gaps.length / 2)];
+          const prev = last;
+          last = { beat, t };
+          extrapolated = 0;
+          if (prev) {
+            beatGaps.push((t - prev.t) / (beat - prev.beat));
+            const recent = beatGaps.slice(-4).sort((x, y) => x - y);
+            beatMs = recent[Math.floor(recent.length / 2)];
+          }
+          if (clicks.length < 2) return;
           const next = beat + 1;
-          if (clicks.length >= countInClicks && next <= lastBeat) {
-            // We hear the click `capture` late, and a sample we write reaches
-            // the guitar sink `playback` after we write it. Calibration
-            // measured playback + capture, so writing `offsetMs` before the
-            // click we expect puts a note into the guitar sink when that
-            // click went into the app's output sink.
-            const nextClick = t + beatMs;
-            for (const note of byBeat.get(next) ?? []) {
-              const at = nextClick + (note.beat - next) * beatMs + note.jitterMs - this.offsetMs;
-              play.schedule(play.indexAt(at), note.samples);
-            }
+          if (clicks.length >= countInClicks && next <= lastBeat && next > placed) {
+            place(next, t + beatMs);
             if (next === 0) {
-              first = { beatMs, bpm: 60000 / beatMs, aheadMs: nextClick - this.offsetMs - now() };
+              first = { beatMs, bpm: 60000 / beatMs, aheadMs: t + beatMs - this.offsetMs - now() };
               // The count-in was heard; from here the clicks are the clock.
               clearTimeout(timer);
             }
           }
-          if (next > lastBeat) {
-            finished = true;
-            clearTimeout(timer);
-            resolve();
-          }
+          if (next > lastBeat) finish("last beat");
         }),
       );
-      // A take whose last click is its last beat ends on silence: give up
-      // waiting for one more click a beat and a half after the last.
       watch = setInterval(() => {
         if (finished || clicks.length < countInClicks + 2) return;
-        const gap = now() - clicks[clicks.length - 1];
-        const beatMs = (clicks[clicks.length - 1] - clicks[0]) / (clicks.length - 1);
-        if (gap > 2.5 * beatMs) {
-          finished = true;
-          clearTimeout(timer);
-          resolve();
+        const gap = now() - last.t;
+        // A click the capture lost: its beat's click is 30% of a beat
+        // overdue, so the beat after it is placed from the tempo, as a
+        // player carries on through a click they did not hear. Twice at
+        // most; after that the click has stopped and so do we.
+        const due = last.t + (placed - last.beat) * beatMs;
+        if (placed < lastBeat && extrapolated < 2 && now() > due + 0.3 * beatMs) {
+          extrapolated += 1;
+          place(placed + 1, due + beatMs);
+          return;
+        }
+        // A take whose last click is its last beat ends on silence: give up
+        // waiting for one more click a beat and a half after the last.
+        if (gap > (placed >= lastBeat ? 2.5 : 3.5) * beatMs) {
+          finish(`silence (${Math.round(gap)} ms since the last click)`);
         }
       }, 50);
     });
@@ -365,7 +460,17 @@ export class Player {
       cap.stop();
       play.stop();
     }
-    return { ...first, clicksHeard: clicks.length };
+    // What the clock was, for a Take that went wrong: when each click was
+    // heard (ms after the first) and why the player stopped.
+    const at0 = clicks[0] ?? 0;
+    return {
+      ...first,
+      clicksHeard: clicks.length,
+      expectedClicks: countInClicks + lastBeat,
+      endedBy,
+      clicksMs: clicks.map((c) => Math.round(c - at0)),
+      captureLostMs: Math.round(cap.lostMs),
+    };
   }
 
   /**
