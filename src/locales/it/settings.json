@@ -259,7 +259,8 @@
         "tab-tools": "Strumenti",
         "session-view": "Cambia vista",
         "session-pause": "Pausa / riprendi",
-        "session-restart": "Ricomincia la take"
+        "session-restart": "Ricomincia la take",
+        "session-prev": "Torna al blocco precedente"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -316,7 +317,8 @@
         "tab-tools": "Vai a Strumenti",
         "session-view": "In una sessione: Manico, Pista o Tab. In qualsiasi momento nel riscaldamento; tra le prese in una valutata",
         "session-pause": "In un riscaldamento o in un blocco a tempo: mettilo in pausa, o continua",
-        "session-restart": "In un riscaldamento o in un blocco a tempo: dall'inizio. Dopo una presa: la stessa presa di nuovo"
+        "session-restart": "In un riscaldamento o in un blocco a tempo: dall'inizio. Dopo una presa: la stessa presa di nuovo",
+        "session-prev": "In una sessione: torna al blocco prima di questo"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Durata della sessione",
       "minutesHint": "Quanto dura la pratica che Oggi pianifica. Puoi cambiarla anche da Oggi.",
       "view": "Vista di pratica",
-      "viewHint": "Cosa mostra una sessione mentre suoni."
+      "viewHint": "Cosa mostra una sessione mentre suoni.",
+      "grade": "Valuta come suono",
+      "gradeHint": "Disattivato: le sessioni non ascoltano e non valutano nulla. Minuti e serie contano comunque."
     }
   },
   "keybindings": {

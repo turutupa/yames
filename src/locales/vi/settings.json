@@ -259,7 +259,8 @@
         "tab-tools": "Công cụ",
         "session-view": "Đổi chế độ xem",
         "session-pause": "Tạm dừng / tiếp tục",
-        "session-restart": "Thu lại từ đầu"
+        "session-restart": "Thu lại từ đầu",
+        "session-prev": "Về khối trước"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -316,7 +317,8 @@
         "tab-tools": "Chuyển sang Công cụ",
         "session-view": "Trong buổi tập: Cần đàn, Đường chạy hoặc Tab. Bất cứ lúc nào khi khởi động; giữa các lượt khi được chấm",
         "session-pause": "Khi khởi động hoặc trong khối tính giờ: tạm dừng, hoặc tiếp tục",
-        "session-restart": "Khi khởi động hoặc trong khối tính giờ: từ đầu. Sau một lượt: lượt đó thêm lần nữa"
+        "session-restart": "Khi khởi động hoặc trong khối tính giờ: từ đầu. Sau một lượt: lượt đó thêm lần nữa",
+        "session-prev": "Trong buổi tập: quay về khối trước khối này"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Độ dài buổi tập",
       "minutesHint": "Hôm nay lên kế hoạch luyện tập trong bao lâu. Bạn cũng có thể đổi ở Hôm nay.",
       "view": "Chế độ xem khi tập",
-      "viewHint": "Những gì buổi tập hiển thị khi bạn chơi."
+      "viewHint": "Những gì buổi tập hiển thị khi bạn chơi.",
+      "grade": "Chấm điểm phần chơi của tôi",
+      "gradeHint": "Tắt: buổi tập không nghe và không chấm gì. Số phút và chuỗi ngày vẫn được tính."
     }
   },
   "keybindings": {

@@ -929,6 +929,13 @@
       "group": "session"
     },
     {
+      "id": "session-prev",
+      "key": "⇧N",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
+    },
+    {
       "id": "session-pedal",
       "key": "",
       "globalKey": null,
@@ -1492,6 +1499,11 @@
       "written": true
     },
     "session.bandVolume": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "session.grade": {
       "store": "settings.json",
       "read": true,
       "written": true

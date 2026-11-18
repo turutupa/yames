@@ -49,6 +49,7 @@ import {
   storeSave,
   togglePlayback,
   openFeedback,
+  MIC_PERMISSION_TIMEOUT_MS,
 } from "../../ipc";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
@@ -123,6 +124,7 @@ import { useJamSession } from "./hooks/useJamSession";
 import { useSongsSession } from "./hooks/useSongsSession";
 import { isLearnTab, isPlayTab, type PlayTab } from "./hooks/useTabRouting";
 import { useSessionRun } from "../session/hooks/useSessionRun";
+import { startSessionInput } from "../../session/inputStart";
 import { useSessionPedal } from "../session/hooks/useSessionPedal";
 import { TodayView } from "../session/TodayView";
 import { SessionView } from "../session/SessionView";
@@ -584,6 +586,20 @@ export function MainWindow() {
     state,
     coach: session,
     listening: evaluation.enabled,
+    // A Session turns the input on by itself, and says why when it cannot
+    // (owner, beta 6: Start take did nothing with the input off).
+    startInput: async () => {
+      const started = await startSessionInput({
+        setListening: (on, device) => evaluation.setListening(on, device),
+        selectedDevice: evaluation.selectedDevice,
+        devices: evaluation.devices,
+        // A phone's permission dialog has its own minute (`MIC_PERMISSION_TIMEOUT_MS`).
+        timeoutMs: IS_MOBILE ? MIC_PERMISSION_TIMEOUT_MS + 5_000 : undefined,
+      });
+      const name = started.device ?? evaluation.devices.find((d) => d.isDefault)?.name ?? null;
+      return { device: name, fellBack: started.fellBack };
+    },
+    stopInput: () => evaluation.setListening(false),
     directInput: evaluation.devices.find((d) => d.name === evaluation.selectedDevice)?.isInterface === true,
     jams: jamSession.jams,
     lineup: jamSession.lineup,
@@ -1644,6 +1660,7 @@ export function MainWindow() {
       slower: sessionRun.actions.slower,
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
+      previous: sessionRun.actions.previous,
       pedalPress: () => pedalPress.current(),
       // Escape: a running Take stops first; leaving asks once there are Takes.
       exit: sessionRun.actions.escape,
@@ -1654,6 +1671,7 @@ export function MainWindow() {
     [
       sessionRun.actions.togglePause,
       sessionRun.actions.restart,
+      sessionRun.actions.previous,
       sessionRun.actions.cycleView,
       sessionRun.actions.escape,
       sessionRun.actions.startToday,
@@ -2580,6 +2598,10 @@ export function MainWindow() {
             pauseKey={platformKey(keyBindings["session-pause"] || "")}
             restartKey={platformKey(keyBindings["session-restart"] || "")}
             skipKey={platformKey(keyBindings["session-next"] || "")}
+            previousKey={platformKey(keyBindings["session-prev"] || "")}
+            inputDevice={evaluation.openDevice ?? evaluation.selectedDevice ?? null}
+            onChooseInput={openAudioSettings}
+            onTestInput={() => setInputTestOpen(true)}
             pedalMapped={
               !!keyBindings["session-pedal"] ||
               !!footBindings["session-pedal"] ||
@@ -2696,6 +2718,8 @@ export function MainWindow() {
               setMinutes: sessionRun.setMinutes,
               practiceView: sessionRun.practiceView,
               setPracticeView: sessionRun.setPracticeView,
+              grade: sessionRun.grade,
+              setGrade: sessionRun.setGrade,
             }}
             shareTooltip={shareTooltip}
             onShareOption={handleShareOption}

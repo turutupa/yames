@@ -160,6 +160,7 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
   "session-slower": { where: ["session"], does: ["session slower"] },
   "session-faster": { where: ["session"], does: ["session faster"] },
   "session-next": { where: ["session"], does: ["session next"] },
+  "session-prev": { where: ["session"], does: ["session previous"] },
   // One pedal for both halves (2026-11-17): its gestures on the Session, and
   // Play/Stop everywhere else, so the first run can map one pedal to it.
   "session-pedal": { ...PLAY, session: ["session pedalPress"] },
@@ -253,6 +254,7 @@ async function observe(action: HotkeyAction, where: Where, state: AppState = STA
         "slower",
         "faster",
         "next",
+        "previous",
         "pedalPress",
         "exit",
         "cycleView",

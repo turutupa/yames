@@ -259,7 +259,8 @@
         "tab-tools": "Outils",
         "session-view": "Changer de vue",
         "session-pause": "Pause / reprendre",
-        "session-restart": "Recommencer la prise"
+        "session-restart": "Recommencer la prise",
+        "session-prev": "Revenir au bloc précédent"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -316,7 +317,8 @@
         "tab-tools": "Aller à Outils",
         "session-view": "Dans une session : Manche, Piste ou Tab. À tout moment pendant l'échauffement ; entre les prises dans une prise notée",
         "session-pause": "Pendant un échauffement ou un bloc minuté : le mettre en pause, ou continuer",
-        "session-restart": "Pendant un échauffement ou un bloc minuté : depuis le début. Après une prise : la même prise encore"
+        "session-restart": "Pendant un échauffement ou un bloc minuté : depuis le début. Après une prise : la même prise encore",
+        "session-prev": "Dans une séance : revenir au bloc d'avant"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Durée de la séance",
       "minutesHint": "La durée que Aujourd'hui prévoit pour ta pratique. Tu peux aussi la changer depuis Aujourd'hui.",
       "view": "Vue de pratique",
-      "viewHint": "Ce qu'une séance affiche pendant que tu joues."
+      "viewHint": "Ce qu'une séance affiche pendant que tu joues.",
+      "grade": "Évaluer mon jeu",
+      "gradeHint": "Désactivé : les séances n'écoutent pas et n'évaluent rien. Vos minutes et votre série comptent toujours."
     }
   },
   "keybindings": {

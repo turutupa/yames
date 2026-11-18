@@ -111,7 +111,9 @@
         "keepWarmNew": "İlk tadımlık."
       },
       "from": "{{path}} · {{level}} · Adım {{step}}",
-      "fromNoLevel": "{{path}} · Adım {{step}}"
+      "fromNoLevel": "{{path}} · Adım {{step}}",
+      "startHere": "Buradan başla ›",
+      "startHereLabel": "Oturumu {{n}} numaradan başlat: {{title}}"
     },
     "why": {
       "firstEver": "İlk seferin, o yüzden {{bpm}} BPM'den başlıyor. Mesele hız değil, zamanlama.",
@@ -211,7 +213,9 @@
       "goAgainUp": "Tekrar, {{bpm}} BPM'ye çıkarak",
       "slowerFloor": "Bu alıştırmanın en yavaş temposu zaten bu",
       "fasterCeiling": "Bu alıştırmanın en hızlı temposu zaten bu",
-      "tempoLocked": "Sınav geçme temposunda çalınır, bu yüzden sabit kalır"
+      "tempoLocked": "Sınav geçme temposunda çalınır, bu yüzden sabit kalır",
+      "previous": "Önceki",
+      "previousFirst": "Bu ilk blok, öncesinde bir şey yok"
     },
     "result": {
       "kick": "Deneme {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ölçü",
@@ -535,6 +539,49 @@
     },
     "placement": {
       "result": "Adım {{n}}'den başlıyorsun: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "şimdi",
+        "done": "bitti",
+        "skipped": "atlandı",
+        "todo": "henüz çalınmadı"
+      }
+    },
+    "jump": {
+      "title": "Durup {{title}} bölümüne geçilsin mi?",
+      "body": "Şimdiye kadar çaldıkların kayıtlı kalır.",
+      "go": "Oraya git"
+    },
+    "input": {
+      "turnOnAndStart": "Girişi aç ve başla",
+      "starting": "Girişin açılıyor…",
+      "startingShort": "Açılıyor…",
+      "startingLong": "Girişin açılıyor. Değerlendirme için mikrofon ya da doğrudan giriş gerekir.",
+      "listeningTo": "{{device}} dinleniyor",
+      "fellBack": "Seçtiğin giriş bağlı değil, bu yüzden bu oturumda {{device}} dinliyorum.",
+      "defaultDevice": "varsayılan girişin",
+      "chooseInput": "Giriş seç",
+      "playUngraded": "Değerlendirmeden çal",
+      "notGraded": "Değerlendirilmedi",
+      "turnOn": "Girişi aç",
+      "noSignal": "Sinyal yok",
+      "failed": {
+        "noDevice": "Mikrofon ya da ses arabirimi bulamadım. Birini tak ya da seç.",
+        "permission": "Yames'in mikrofonu kullanma izni yok. Sistem ayarlarından izin ver, sonra Başla'ya yeniden bas.",
+        "noAnswer": "Giriş yanıt vermedi. Açık bir izin penceresi varsa yanıtla, sonra Başla'ya yeniden bas.",
+        "busy": "Girişini başka bir uygulama kullanıyor. Onu kapat, sonra Başla'ya yeniden bas.",
+        "other": "Giriş başlamadı. Kontrol et ya da başka birini seç."
+      }
+    },
+    "ungraded": {
+      "ready": "Değerlendirilmiyor: giriş kapalı, bu oturumda dinlemiyorum.",
+      "readyOff": "Değerlendirilmiyor: değerlendirme Ayarlar'da kapalı.",
+      "result": "Değerlendirilmedi: giriş kapalıydı",
+      "resultOff": "Değerlendirilmedi: değerlendirme Ayarlar'da kapalı",
+      "body": "Pratik olarak sayılır, dakikalarına ve serine. Temiz tempo ve adımlar yalnızca değerlendirilen kayıtlarla ilerler.",
+      "recap": "değerlendirilmedi"
     }
   }
 }

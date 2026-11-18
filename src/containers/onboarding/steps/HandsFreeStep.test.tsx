@@ -120,6 +120,8 @@ describe("W3 — the Session leads", () => {
       ...keysFor("session-slower"),
     ]);
     expect(keysOn(card, "Next step")).toEqual(keysFor("session-next"));
+    // Back one block (owner, 2026-11-18).
+    expect(keysOn(card, "Back to the previous block")).toEqual(keysFor("session-prev"));
     // Pause, again, the view and the way out (2026-11-18).
     expect(keysOn(card, "Pause / resume")).toEqual(keysFor("session-pause"));
     expect(keysOn(card, "Restart the Take")).toEqual(keysFor("session-restart"));

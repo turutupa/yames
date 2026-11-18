@@ -110,6 +110,12 @@ export interface StartSessionOptions {
    * it was (`quietRef`).
    */
   quiet?: boolean;
+  /**
+   * `false`: open the coach session without turning the input on. A learning
+   * Session played without grading (owner, 2026-11-18) never asks for a
+   * microphone it will not use.
+   */
+  listen?: boolean;
 }
 
 interface UseSessionOptions {
@@ -1441,9 +1447,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
 
     // Awaited, inside the lifecycle queue: an end asked for now runs after
     // the input is on, so its stop cannot overtake this start (B1).
-    await evaluation.setListening(true).catch((e: unknown) => {
-      console.error("[startSession] the input would not start:", e);
-    });
+    if (options?.listen !== false) {
+      await evaluation.setListening(true).catch((e: unknown) => {
+        console.error("[startSession] the input would not start:", e);
+      });
+    }
 
     // LLM paraphrase path — the coach LLM (when available) gets the
     // already-filled template + structured context and is asked to

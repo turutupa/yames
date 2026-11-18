@@ -112,7 +112,9 @@
         "keepWarmNew": "Uma primeira provada."
       },
       "from": "{{path}} · {{level}} · Etapa {{step}}",
-      "fromNoLevel": "{{path}} · Etapa {{step}}"
+      "fromNoLevel": "{{path}} · Etapa {{step}}",
+      "startHere": "Começar aqui ›",
+      "startHereLabel": "Começar a sessão em {{n}}: {{title}}"
     },
     "why": {
       "firstEver": "É a sua primeira, então começa a {{bpm}} BPM. Aqui o que conta é o tempo, não a velocidade.",
@@ -212,7 +214,9 @@
       "goAgainUp": "De novo, subindo para {{bpm}} BPM",
       "slowerFloor": "Já é o andamento mais lento deste exercício",
       "fasterCeiling": "Já é o andamento mais rápido deste exercício",
-      "tempoLocked": "Um teste é tocado no andamento de aprovação, então ele não muda"
+      "tempoLocked": "Um teste é tocado no andamento de aprovação, então ele não muda",
+      "previous": "Anterior",
+      "previousFirst": "Este é o primeiro bloco, não há nada antes"
     },
     "result": {
       "kick": "Tomada {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compassos",
@@ -548,6 +552,49 @@
     },
     "placement": {
       "result": "Você começa no passo {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "agora",
+        "done": "feito",
+        "skipped": "pulado",
+        "todo": "ainda não tocado"
+      }
+    },
+    "jump": {
+      "title": "Parar e ir para {{title}}?",
+      "body": "O que você tocou até aqui fica salvo.",
+      "go": "Ir para lá"
+    },
+    "input": {
+      "turnOnAndStart": "Ligar a entrada e começar",
+      "starting": "Ligando sua entrada…",
+      "startingShort": "Ligando…",
+      "startingLong": "Ligando sua entrada. A avaliação precisa de um microfone ou entrada direta.",
+      "listeningTo": "Ouvindo {{device}}",
+      "fellBack": "A entrada escolhida não está conectada, então nesta sessão estou ouvindo {{device}}.",
+      "defaultDevice": "sua entrada padrão",
+      "chooseInput": "Escolher entrada",
+      "playUngraded": "Tocar sem avaliação",
+      "notGraded": "Sem avaliação",
+      "turnOn": "Ligar a entrada",
+      "noSignal": "Sem sinal",
+      "failed": {
+        "noDevice": "Não encontrei microfone nem interface de áudio. Conecte um ou escolha um.",
+        "permission": "O Yames não tem permissão para usar o microfone. Permita nas configurações do sistema e toque em Começar de novo.",
+        "noAnswer": "A entrada não respondeu. Se houver um pedido de permissão aberto, responda e toque em Começar de novo.",
+        "busy": "Outro app está usando sua entrada. Feche-o e toque em Começar de novo.",
+        "other": "Sua entrada não ligou. Verifique ou escolha outra."
+      }
+    },
+    "ungraded": {
+      "ready": "Sem avaliação: a entrada está desligada, então não estou ouvindo nesta sessão.",
+      "readyOff": "Sem avaliação: a avaliação está desligada nas Configurações.",
+      "result": "Sem avaliação: a entrada estava desligada",
+      "resultOff": "Sem avaliação: a avaliação está desligada nas Configurações",
+      "body": "Conta como prática, para seus minutos e sua sequência. O tempo limpo e os passos só avançam com takes avaliados.",
+      "recap": "sem avaliação"
     }
   }
 }

@@ -81,6 +81,8 @@ export type HotkeyAction =
   | "session-slower"
   | "session-faster"
   | "session-next"
+  /** Shift+N in a Session: back one block, as N is on to the next (owner, 2026-11-18). */
+  | "session-prev"
   | "session-pedal"
   /** Escape in a Session: what Exit does. */
   | "session-exit"
@@ -855,6 +857,15 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Next step",
     key: "N",
     desc: "Between Takes: move on to the next thing in the Session",
+    group: "session",
+  },
+  // Back one block. Shift+N, as the jam's previous section is beside its N; by
+  // the prefix rule it is the Session's only on the Session.
+  {
+    id: "session-prev",
+    action: "Previous block",
+    key: "⇧N",
+    desc: "In a Session: back to the block before this one",
     group: "session",
   },
   {

@@ -259,7 +259,8 @@
         "tab-tools": "工具",
         "session-view": "切换视图",
         "session-pause": "暂停 / 继续",
-        "session-restart": "重录这一遍"
+        "session-restart": "重录这一遍",
+        "session-prev": "返回上一个练习块"
       },
       "descs": {
         "play": "开始或停止节拍器",
@@ -316,7 +317,8 @@
         "tab-tools": "前往“工具”",
         "session-view": "练习中：琴颈、跑道或六线谱。热身时随时可切换；评分练习在两次录制之间",
         "session-pause": "热身或计时段中：暂停，或继续",
-        "session-restart": "热身或计时段中：从头开始。录制之后：同一段再来一次"
+        "session-restart": "热身或计时段中：从头开始。录制之后：同一段再来一次",
+        "session-prev": "练习中：返回此前一个练习块"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "练习时长",
       "minutesHint": "“今天”为你安排多长的练习。也可以在“今天”里修改。",
       "view": "练习视图",
-      "viewHint": "演奏时课程显示的内容。"
+      "viewHint": "演奏时课程显示的内容。",
+      "grade": "为我的演奏评分",
+      "gradeHint": "关闭：练习不聆听，也不评分。练习时长和连续天数照常计算。"
     }
   },
   "keybindings": {

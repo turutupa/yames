@@ -20,7 +20,7 @@ import type { SessionRun } from "../hooks/useSessionRun";
 import { kindOfMark, neckNotesOf, useNeckSlot, useNeckTake, zoomOf } from "../hooks/useNeck";
 import type { TimingMark } from "../../songs/review/marks";
 import { lineText } from "../lineText";
-import { CoachLine, TempoNudges, bigLabel } from "../parts";
+import { CoachLine, ReadyInput, TempoNudges, bigLabel, startButton, takeCanStart } from "../parts";
 import { Runway } from "./Runway";
 import { ghostNeck, runwayModel } from "./runwayModel";
 import type { Judged } from "./runwayModel";
@@ -42,7 +42,8 @@ export function RunwayTakeScreen({
   listening,
   hasSignal,
   viewKey,
-  onCheckSound,
+  onTestInput,
+  onChooseInput,
 }: {
   session: SessionRun;
   beat: BeatPosition | null;
@@ -50,10 +51,11 @@ export function RunwayTakeScreen({
   listening: boolean;
   hasSignal: boolean;
   viewKey?: string;
-  onCheckSound: () => void;
+  onTestInput: () => void;
+  onChooseInput: () => void;
 }) {
   const { t } = useTranslation();
-  const { run, take, exercise, live, lights, big, prepared, engineTrouble, actions } = session;
+  const { run, take, exercise, live, lights, big, engineTrouble, actions } = session;
   const running = run.phase === "playing";
   const theory = isTheoryTake(session);
   const neck = useNeck();
@@ -110,7 +112,8 @@ export function RunwayTakeScreen({
   const stepNumber = pathTitle?.steps.find((s) => s.exercises.some((e) => e.id === exercise.id))?.order;
   const bar = barLine(exercise, run.bpm);
   const scored = live.heard + live.missed;
-  const canStart = prepared && listening;
+  const canStart = takeCanStart(session, listening);
+  const start = startButton(session, listening, t);
   const kind = isEdgeStep(step)
     ? t("session.edge.kick")
     : theory
@@ -194,22 +197,17 @@ export function RunwayTakeScreen({
               {t("session.runway.later")}
             </span>
           )}
-          {!running && listening && (
-            <span className="session-signal" data-on={hasSignal ? "" : undefined}>
-              <i />
-              {t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
-            </span>
-          )}
           {!running && <HandLine position={exercise.position} />}
           {!running && exercise.howTo[0] && <span className="session-why">{exercise.howTo[0]}</span>}
           {!running && bar && <span className="session-why">{lineText(t, bar)}</span>}
-          {!running && !listening && (
-            <div className="session-glass session-card" role="status" data-testid="session-no-input">
-              <div className="session-why">{t("session.run.noInput")}</div>
-              <button className="session-link" onClick={onCheckSound}>
-                {t("session.run.checkSound")}
-              </button>
-            </div>
+          {!running && (
+            <ReadyInput
+              session={session}
+              listening={listening}
+              hasSignal={hasSignal}
+              onTestInput={onTestInput}
+              onChooseInput={onChooseInput}
+            />
           )}
           {engineTrouble && (
             <div className="session-glass session-card" role="alert">
@@ -221,11 +219,13 @@ export function RunwayTakeScreen({
         <button
           className="session-big"
           data-size="mid"
-          onClick={actions.go}
-          disabled={!running && !canStart}
+          onClick={!running && !canStart ? undefined : actions.go}
+          aria-disabled={!running && !canStart ? true : undefined}
+          aria-busy={start.busy ? true : undefined}
+          data-input={!running && start.needsInput ? (start.busy ? "starting" : "off") : undefined}
           data-testid="session-big"
         >
-          {bigLabel(big, t)}
+          {running ? bigLabel(big, t) : start.label}
         </button>
       </div>
 

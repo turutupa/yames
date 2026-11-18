@@ -45,6 +45,7 @@ const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[]; label: string 
   { key: "pause", actions: ["session-pause"], label: "settings.hotkeys.actions.session-pause" },
   { key: "restart", actions: ["session-restart"], label: "settings.hotkeys.actions.session-restart" },
   { key: "next", actions: ["session-next"], label: "onboarding.handsFree.session.next" },
+  { key: "prev", actions: ["session-prev"], label: "settings.hotkeys.actions.session-prev" },
   { key: "tempo", actions: ["session-faster", "session-slower"], label: "onboarding.handsFree.session.tempo" },
   { key: "view", actions: ["session-view"], label: "onboarding.handsFree.session.view" },
   { key: "exit", actions: ["session-exit"], label: "settings.hotkeys.actions.session-exit" },

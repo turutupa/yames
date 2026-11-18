@@ -1018,6 +1018,10 @@ export function installShotMock(shot: Shot, theme: string): void {
   }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
+  // Settings → Practice → "Grade my playing", off (owner, 2026-11-18).
+  if (shot.session?.grade === false) store.set("session.grade", false);
+  // A Windows interface that came back on another port with another name.
+  if (shot.session?.input === "missing") store.set("evaluationDevice", "Scarlett 2i2 USB");
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
   if (shot.session?.seed === "none") store.set("session.unsubscribed", ["alternate-picking"]);
   const pathStore = sessionSeed(shot.session?.seed ?? "first");
@@ -1403,7 +1407,14 @@ export function installShotMock(shot: Shot, theme: string): void {
     // The first run's input step needs something to pick: a laptop mic and
     // an interface, or nothing at all for the "no input found" scene.
     list_audio_input_devices: () =>
-      shot.firstRun && shot.firstRun.stop !== "inputNone" && shot.firstRun.stop !== "welcome"
+      shot.session?.input === "missing"
+        ? [
+            { name: "Microphone (Realtek(R) Audio)", isDefault: true, isInterface: false, channels: 1 },
+            { name: "2- Scarlett 2i2 USB", isDefault: false, isInterface: true, channels: 2 },
+          ]
+        : shot.session?.input === "fail"
+          ? []
+          : shot.firstRun && shot.firstRun.stop !== "inputNone" && shot.firstRun.stop !== "welcome"
         ? [
             { name: "MacBook Pro Microphone", isDefault: true, isInterface: false, channels: 1 },
             { name: "Scarlett 2i2 USB", isDefault: false, isInterface: true, channels: 2 },
@@ -1840,6 +1851,16 @@ export function installShotMock(shot: Shot, theme: string): void {
     if (cmd === "plugin:yames-mobile|request_microphone") return true;
 
     if (cmd.startsWith("plugin:")) return null;
+
+    // The input, made to misbehave (owner, beta 6): it never answers, it is
+    // refused, or the device asked for is not there under that name.
+    if (cmd === "start_evaluation" && shot.session?.input) {
+      const input = shot.session.input;
+      if (input === "hang") return new Promise(() => {});
+      if (input === "fail") throw "No default input device found";
+      if (input === "missing" && a?.deviceName === "Scarlett 2i2 USB") throw "Audio device 'Scarlett 2i2 USB' not found";
+      return null;
+    }
 
     /*
      * The score the player is about to play, and the verdict on it.

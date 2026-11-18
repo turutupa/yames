@@ -31,6 +31,7 @@ const asyncNoop = async () => {};
 /** The microphone, the onset detector and everything downstream of them. */
 export const INERT_EVALUATION: ReturnType<typeof useEvaluation> = {
   enabled: false,
+  openDevice: null,
   toggle: asyncNoop,
   setListening: asyncNoop,
   devices: [],
