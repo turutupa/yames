@@ -5,10 +5,11 @@
  * the rest of the app links to yet. Nothing is locked or priced: a Step can be
  * chosen from any point, and a Path the app cannot grade yet says "later".
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import type { Exercise, PathDoc, Step } from "../../paths/format";
+import type { Exercise, Level, PathDoc, Step } from "../../paths/format";
+import { barLengthTicks } from "../../paths/format";
 import { barLine, tempoRange } from "../../session/coachWords";
 import { isRunnable, laterWhyKey } from "../../session/packs";
 import { stepHonestLineKey } from "../../session/caveats";
@@ -20,6 +21,8 @@ import {
   isExercisePassed,
   isGradable,
   chosenLevelOf,
+  levelEntryStep,
+  levelOfStep,
   isStepPassed,
   isStepSkipped,
   isSubscribed,
@@ -29,16 +32,37 @@ import {
 import { SUBSCRIPTION_CAP } from "../../session/rotation";
 import { levelsOf } from "../../session/variants";
 import type { SessionRun } from "./hooks/useSessionRun";
-import { exerciseNeck, useNeck3d, useNeckSlot } from "./hooks/useNeck";
-import type { NeckView } from "../../stage3d/api";
+import { useNeck3d } from "./hooks/useNeck";
 import { lineText } from "./lineText";
+import { TabStrip } from "./tabstrip/TabStrip";
 import { rise } from "./TodayView";
 import { InstrumentNote } from "./InstrumentNote";
 import { PATHS_LIST, pathsUp } from "../main-window/hooks/usePathsPlace";
 import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import "../../styles/session.css";
 
-const WHOLE: NeckView = { kind: "whole" };
+/*
+ * No neck on these pages (UX audit TODAY-9: "a decorative empty neck takes a
+ * quarter of every page"). A Step's Exercises carry a small tab of their own
+ * instead (PATH-6), and the neck is the practice screen's.
+ */
+
+/** A Level's own words, without "Beginner:" in front: the control names the Level. */
+export function levelSubtitle(level: Pick<Level, "title">): string {
+  const at = level.title.search(/[:：]/);
+  const rest = at < 0 ? level.title : level.title.slice(at + 1).trim();
+  return rest.charAt(0).toLocaleUpperCase() + rest.slice(1);
+}
+
+/** Where a Step's ladders run, over its Exercises: lowest first rung to highest pass. */
+export function stepTempoRange(step: Step): { from: number; to: number | null } | null {
+  const ranges = step.exercises.map(tempoRange).filter((r) => r !== null);
+  if (ranges.length === 0) return null;
+  const from = Math.min(...ranges.map((r) => r.from));
+  const tops = ranges.map((r) => r.to).filter((v): v is number => v !== null);
+  const to = tops.length ? Math.max(...tops) : null;
+  return { from, to: to !== null && to > from ? to : null };
+}
 
 function KindTag({ kind }: { kind: PathDoc["kind"] }) {
   const { t } = useTranslation();
@@ -93,7 +117,6 @@ function PathList({
 }) {
   const { t } = useTranslation();
   const { paths, progress } = session;
-  const slot = useNeckSlot(WHOLE, [], { sweep: true });
   const neck3d = useNeck3d();
   const group = (kind: PathDoc["kind"], sub: string, i: number) => {
     const mine = paths.filter((p) => p.kind === kind);
@@ -107,6 +130,9 @@ function PathList({
         </div>
         {runnable.map((path) => {
           const current = currentStepOf(progress, path);
+          // Real progress, not "Step 1 of N" on every card (UX audit PATH-4).
+          const started = progress.states.some((s) => s.pathId === path.id);
+          const stepsDone = path.steps.filter((s) => isStepPassed(progress, path.id, s)).length;
           return (
             <button
               key={path.id}
@@ -126,9 +152,15 @@ function PathList({
               </span>
               <span className="session-col" style={{ gap: 0 }}>
                 <StepPips session={session} path={path} />
-                <span className="session-why">
-                  {t("session.paths.stepOf", { n: current.order, of: path.steps.length })}:{" "}
-                  {current.title}
+                <span className="session-why" data-testid={`path-card-progress-${path.id}`}>
+                  {started ? (
+                    <>
+                      <b>{t("session.paths.onStep", { n: current.order, title: current.title })}</b>
+                      {stepsDone > 0 && <> · {t("session.paths.stepsDone", { done: stepsDone, of: path.steps.length })}</>}
+                    </>
+                  ) : (
+                    t("session.paths.notStarted")
+                  )}
                 </span>
               </span>
             </button>
@@ -158,10 +190,162 @@ function PathList({
         <div className="session-why">{t("session.paths.intro")}</div>
       </div>
       {note && <InstrumentNote {...note} />}
-      <div className="session-slot" data-band="" ref={slot} aria-hidden="true" />
       {group("theory", t("session.paths.theorySub"), 1)}
       {group("mechanics", t("session.paths.mechanicsSub"), 4)}
     </div>
+  );
+}
+
+/** One Step in a Path's list: where you stand on it, how much is in it, how fast it runs. */
+function StepRow({
+  session,
+  path,
+  step,
+  current,
+  onOpen,
+  style,
+}: {
+  session: SessionRun;
+  path: PathDoc;
+  step: Step;
+  current: boolean;
+  onOpen: () => void;
+  style?: CSSProperties;
+}) {
+  const { t } = useTranslation();
+  const { progress } = session;
+  const passed = isStepPassed(progress, path.id, step);
+  const skipped = isStepSkipped(progress, path, step);
+  const gradable = step.exercises.filter(isGradable);
+  const done = gradable.filter((e) => isExercisePassed(progress, path.id, e)).length;
+  const range = stepTempoRange(step);
+  // Done, here, skipped, or ahead: ahead is never locked, only not yet.
+  const state = passed ? "done" : current ? "current" : skipped ? "skipped" : "ahead";
+  return (
+    <li className="session-rise" style={style}>
+      <button
+        className="session-step-row"
+        data-state={state}
+        data-current={current ? "" : undefined}
+        data-passed={passed ? "" : undefined}
+        data-skipped={skipped ? "" : undefined}
+        onClick={onOpen}
+        data-testid={`step-row-${step.id}`}
+      >
+        <span className="session-step-num">
+          {passed ? "✓" : step.order}
+        </span>
+        <span className="session-step-text">
+          <span className="session-step-name">{step.title}</span>
+          <small className="session-step-meta">
+            {t("session.paths.exerciseCount", { count: step.exercises.length })}
+            {range && (
+              <>
+                {" · "}
+                {range.to === null
+                  ? t("session.paths.tempoFrom", { from: range.from })
+                  : t("session.paths.tempoRange", { from: range.from, to: range.to })}
+              </>
+            )}
+          </small>
+        </span>
+        <span className="session-step-state">
+          {state === "done" && <span className="session-tag" data-met="">{t("session.paths.stateDone")}</span>}
+          {state === "current" && (
+            <span className="session-step-here">
+              {t("session.paths.stateHere")}
+              {gradable.length > 0 && <small>{t("session.paths.passedOf", { done, count: gradable.length })}</small>}
+            </span>
+          )}
+          {state === "skipped" && (
+            <span className="session-tag" data-testid={`step-skipped-${step.id}`}>
+              {t("session.paths.skipped")}
+            </span>
+          )}
+          <span className="session-step-chev" aria-hidden="true">›</span>
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/**
+ * The Level picker: a segmented control, a default (the first Level, until one
+ * is chosen), and under it who the chosen one is for and where it starts
+ * (UX audit PATH-2). Choosing one moves the start Step; it says so.
+ */
+function LevelPicker({ session, path, runnable }: { session: SessionRun; path: PathDoc; runnable: boolean }) {
+  const { t } = useTranslation();
+  const { progress, actions } = session;
+  const levels = levelsOf(path);
+  const chosen = chosenLevelOf(progress, path);
+  // No Level chosen plays as the first one: show it as chosen (UX audit TODAY-1).
+  const shown = chosen ?? levels[0] ?? null;
+  if (!shown) return null;
+  const entry = levelEntryStep(progress, path, shown);
+  const current = currentStepOf(progress, path);
+  return (
+    <div className="session-glass session-card session-rise session-level" data-testid="path-level">
+      <div className="session-kick" id="session-level-label">
+        {t("session.paths.level")}
+      </div>
+      <div className="session-seg session-level-seg" role="group" aria-labelledby="session-level-label">
+        {levels.map((l) => (
+          <button
+            key={l.id}
+            className={l.id === shown.id ? "on" : ""}
+            aria-pressed={l.id === shown.id}
+            onClick={() => actions.chooseLevel(path, l.id)}
+            data-testid={`level-${l.id}`}
+          >
+            {t(`session.paths.levelName.${l.id}`)}
+          </button>
+        ))}
+      </div>
+      <div className="session-level-about">
+        <div className="session-level-title">{levelSubtitle(shown)}</div>
+        {chosen && runnable ? (
+          <div className="session-level-start" role="status" data-testid="level-start">
+            {t("session.paths.levelStart", {
+              n: current.order,
+              level: t(`session.paths.levelName.${chosen.id}`),
+            })}
+          </div>
+        ) : (
+          <div className="session-quiet" data-testid="level-default">
+            {t("session.paths.levelStartsAt", { n: entry.order, title: entry.title })}
+          </div>
+        )}
+      </div>
+      {shown.placement.startHereIf.length > 0 && (
+        <div className="session-level-who" data-testid="level-start-here-if">
+          <div className="session-kick">{t("session.paths.startHereIf")}</div>
+          <ul>
+            {shown.placement.startHereIf.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** What grading can be trusted with: one plain line, the Path's own account behind "Why?" (PATH-3). */
+function LimitsLine({ path }: { path: PathDoc }) {
+  const { t } = useTranslation();
+  return (
+    <details className="session-limits session-rise" data-testid="path-limits">
+      <summary>
+        <span>{t("session.paths.limitsLine")}</span> <span className="session-limits-why">{t("session.paths.limitsWhy")}</span>
+      </summary>
+      <div className="session-glass session-card">
+        <div className="session-kick">{t("session.paths.limits")}</div>
+        <div className="session-why" style={{ marginTop: 4 }}>
+          {path.gradingLimits}
+        </div>
+      </div>
+    </details>
   );
 }
 
@@ -179,11 +363,6 @@ function PathDetail({
   const { t } = useTranslation();
   const { progress, actions } = session;
   const current = currentStepOf(progress, path);
-  const levels = levelsOf(path);
-  const level = chosenLevelOf(progress, path)?.id;
-  // No Level chosen plays as the first one: show it as chosen (UX audit TODAY-1).
-  const shownLevel = levels.find((l) => l.id === level) ?? levels[0] ?? null;
-  const slot = useNeckSlot(WHOLE, [], { sweep: true });
   const neck3d = useNeck3d();
   const runnable = isRunnable(path.id);
   const gradableNow = current.exercises.filter(isGradable);
@@ -202,57 +381,33 @@ function PathDetail({
           <KindTag kind={path.kind} />
           {!runnable && <PathBadgeTag session={session} path={path} />}
         </div>
-        <div className="session-why">{path.goal}</div>
+        <div className="session-why session-lede">{path.goal}</div>
         {!runnable && <div className="session-why">{t(laterWhyKey(path.id))}</div>}
       </div>
-      <div className="session-slot" data-band="" ref={slot} aria-hidden="true" />
       <div className="session-pathgrid">
-        <ol className="session-step-list">
-          {path.steps.map((step, i) => {
-            const passed = isStepPassed(progress, path.id, step);
-            const skipped = isStepSkipped(progress, path, step);
-            const isCurrent = step.id === current.id && runnable;
-            const gradable = step.exercises.filter(isGradable);
-            const done = gradable.filter((e) => isExercisePassed(progress, path.id, e)).length;
-            return (
-              <li key={step.id} className="session-rise" style={rise(i)}>
-                <button
-                  className="session-step-row"
-                  data-current={isCurrent ? "" : undefined}
-                  data-passed={passed ? "" : undefined}
-                  data-skipped={skipped ? "" : undefined}
-                  onClick={() => onOpenStep(step)}
-                  data-testid={`step-row-${step.id}`}
-                >
-                  <span className="session-step-num">{passed ? "✓" : step.order}</span>
-                  <span className="session-step-text">
-                    <span className="session-step-name">{step.title}</span>
-                    {skipped && <small data-testid={`step-skipped-${step.id}`}>{t("session.paths.skipped")}</small>}
-                    {(isCurrent || passed) && gradable.length > 0 && (
-                      <small>
-                        {t("session.paths.exercisesPassed", { done, count: gradable.length })}
-                      </small>
-                    )}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-        <div className="session-col">
+        {/* First in the markup: on a phone, Continue is the first thing under
+            the title, not two screens down (UX audit PHONE-3). */}
+        <aside className="session-col session-path-side">
           {runnable && (
-            <div className="session-glass session-card session-rise">
+            <div className="session-glass session-card session-rise session-where" data-testid="path-where">
               <div className="session-kick">{t("session.paths.whereYouAre")}</div>
-              <div className="session-h2" style={{ margin: "3px 0" }}>
+              <div className="session-where-title">{current.title}</div>
+              <div className="session-quiet">
                 {t("session.paths.stepOf", { n: current.order, of: path.steps.length })}
-              </div>
-              <div className="session-why">
-                {current.title}
                 {gradableNow.length > 0 &&
                   ` · ${t("session.paths.exercisesPassed", { done: doneNow, count: gradableNow.length })}`}
               </div>
+              <button
+                className="session-big"
+                data-size="mid"
+                onClick={() => onOpenStep(current)}
+                data-testid="path-open-current"
+              >
+                {t("session.paths.continue", { n: current.order })}
+              </button>
             </div>
           )}
+          {levelsOf(path).length > 0 && <LevelPicker session={session} path={path} runnable={runnable} />}
           {runnable && (
             <div
               className="session-glass session-card session-rise session-col"
@@ -280,11 +435,11 @@ function PathDetail({
                   {t(subscribed ? "session.paths.unsubscribe" : "session.paths.subscribe")}
                 </button>
               </div>
-              <div className="session-why">
+              <div className="session-quiet">
                 {t("session.paths.subscribeHow", { cap: SUBSCRIPTION_CAP })}
               </div>
               {!subscribed && started && (
-                <div className="session-why">{t("session.paths.unsubscribedNote")}</div>
+                <div className="session-quiet">{t("session.paths.unsubscribedNote")}</div>
               )}
               {refused && (
                 <div className="session-why session-bad" role="alert" data-testid="path-subscribe-cap">
@@ -293,68 +448,61 @@ function PathDetail({
               )}
             </div>
           )}
-          {levels.length > 0 && (
-            <div className="session-glass session-card session-rise">
-              <div className="session-kick" id="session-level-label">
-                {t("session.paths.level")}
-              </div>
-              <div
-                className="session-seg"
-                data-small=""
-                role="group"
-                aria-labelledby="session-level-label"
-                style={{ marginTop: 7 }}
-              >
-                {levels.map((l) => (
-                  <button
-                    key={l.id}
-                    className={l.id === shownLevel?.id ? "on" : ""}
-                    aria-pressed={l.id === shownLevel?.id}
-                    onClick={() => actions.chooseLevel(path, l.id)}
-                    data-testid={`level-${l.id}`}
-                  >
-                    {l.title}
-                  </button>
-                ))}
-              </div>
-              {level && runnable && (
-                <div className="session-why" style={{ marginTop: 7 }} role="status" data-testid="level-start">
-                  {t("session.paths.levelStart", {
-                    n: current.order,
-                    level: t(`session.paths.levelName.${level}`),
-                  })}
-                </div>
-              )}
-              {shownLevel && shownLevel.placement.startHereIf.length > 0 && (
-                <div className="session-col" style={{ gap: 2, marginTop: 7 }} data-testid="level-start-here-if">
-                  <div className="session-kick">{t("session.paths.startHereIf")}</div>
-                  {shownLevel.placement.startHereIf.map((line) => (
-                    <div className="session-quiet" key={line}>
-                      {line}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          <div className="session-glass session-card session-rise">
-            <div className="session-kick">{t("session.paths.limits")}</div>
-            <div className="session-why" style={{ marginTop: 3 }}>
-              {path.gradingLimits}
-            </div>
-          </div>
-          {runnable && (
-            <button
-              className="session-big session-rise"
-              data-size="small"
-              onClick={() => onOpenStep(current)}
-              data-testid="path-open-current"
-            >
-              {t("session.paths.openStep", { n: current.order })}
-            </button>
-          )}
-        </div>
+          <LimitsLine path={path} />
+        </aside>
+        <ol className="session-step-list" role="list">
+          {path.steps.map((step, i) => {
+            const level = levelOfStep(path, step.id);
+            const firstOfLevel = level !== null && level.stepIds[0] === step.id;
+            return (
+              <Fragment key={step.id}>
+                {firstOfLevel && (
+                  <li className="session-level-divider">
+                    <span className="session-kick">{t(`session.paths.levelName.${level.id}`)}</span>
+                    <span className="session-quiet">{levelSubtitle(level)}</span>
+                  </li>
+                )}
+                <StepRow
+                  session={session}
+                  path={path}
+                  step={step}
+                  current={step.id === current.id && runnable}
+                  onOpen={() => onOpenStep(step)}
+                  style={rise(Math.min(i, 12))}
+                />
+              </Fragment>
+            );
+          })}
+        </ol>
       </div>
+    </div>
+  );
+}
+
+/** The first bars of an Exercise as tab: what "Play this" will ask, at a glance (PATH-6). */
+function TabPreview({ exercise }: { exercise: Exercise }) {
+  const { t } = useTranslation();
+  const barTicks = barLengthTicks(exercise.meter);
+  const bars = Math.max(1, Math.min(exercise.bars, 2));
+  const notes = useMemo(
+    () =>
+      exercise.notes
+        .filter((n) => n.tick < bars * barTicks && n.string >= 1 && n.string <= 6)
+        .map((n) => ({ string: n.string, fret: n.fret, tick: n.tick, dur: n.dur })),
+    [exercise.notes, bars, barTicks],
+  );
+  if (notes.length === 0) return null;
+  return (
+    <div className="session-tabpreview" aria-hidden="true" title={t("session.paths.tabPreview")}>
+      <TabStrip
+        notes={notes}
+        barTicks={barTicks}
+        patternBars={bars}
+        position={-barTicks}
+        playing={false}
+        mode="preview"
+        maxFretPx={15}
+      />
     </div>
   );
 }
@@ -402,9 +550,11 @@ function ExerciseRow({
           <span>{exercise.title}</span>
           {passed && <span className="session-tag" data-met="">{t("session.paths.passed")}</span>}
         </div>
-        <div className="session-why">{exercise.purpose}</div>
+        <div className="session-why session-exercise-purpose" title={exercise.purpose}>
+          {exercise.purpose}
+        </div>
         {range && (
-          <div className="session-quiet" data-testid={`tempo-${exercise.id}`}>
+          <div className="session-quiet session-exercise-tempo" data-testid={`tempo-${exercise.id}`}>
             {[
               range.subdivision ? t(`session.subdivision.${range.subdivision}`) : null,
               range.to === null
@@ -427,8 +577,9 @@ function ExerciseRow({
           </div>
         )}
       </div>
-      <div className="session-col" style={{ gap: 6, flex: "none" }}>
-        {gradable && isRunnable(path.id) && (
+      <TabPreview exercise={exercise} />
+      {gradable && isRunnable(path.id) && (
+        <div className="session-exercise-actions">
           <button
             className={current ? "session-big" : "session-secondary"}
             data-size={current ? "small" : undefined}
@@ -437,17 +588,17 @@ function ExerciseRow({
           >
             {t("session.paths.playThis")}
           </button>
-        )}
-        {gradable && isRunnable(path.id) && played > 0 && (
-          <button
-            className="session-secondary"
-            onClick={() => actions.findEdge(path, step, exercise)}
-            data-testid={`edge-${exercise.id}`}
-          >
-            {t("session.edge.start")}
-          </button>
-        )}
-      </div>
+          {played > 0 && (
+            <button
+              className="session-secondary"
+              onClick={() => actions.findEdge(path, step, exercise)}
+              data-testid={`edge-${exercise.id}`}
+            >
+              {t("session.edge.start")}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -471,28 +622,26 @@ function StepDetail({
   const next =
     step.exercises.find((e) => isGradable(e) && !isExercisePassed(progress, path.id, e)) ??
     step.exercises[0];
-  const { view, notes } = exerciseNeck(next?.notes, "aim");
-  const slot = useNeckSlot(view, notes);
   const neck3d = useNeck3d();
+  const level = levelOfStep(path, step.id);
+  const gradable = step.exercises.filter(isGradable);
+  const runnable = isRunnable(path.id);
+  const honest = stepHonestLineKey(step);
   return (
-    <div
-      className="session-page"
-      data-testid="step-detail"
-      data-neck3d={neck3d}
-      data-scrim="split"
-    >
+    <div className="session-page" data-testid="step-detail" data-neck3d={neck3d}>
       <div className="session-rise">
         <button className="session-back" onClick={onBack} data-testid="paths-back">
           <span aria-hidden="true">‹</span> {path.title}
         </button>
         <div className="session-kick">
           {t("session.paths.stepOf", { n: step.order, of: path.steps.length })}
+          {level && ` · ${t(`session.paths.levelName.${level.id}`)}`}
         </div>
         <div className="session-row" data-wrap="" style={{ gap: 9 }}>
           <h1 className="session-h1">{step.title}</h1>
           <KindTag kind={path.kind} />
         </div>
-        <div className="session-why">{step.goal}</div>
+        <div className="session-why session-lede">{step.goal}</div>
         {skippedBy && (
           <div className="session-quiet" style={{ marginTop: 6 }} data-testid="step-skipped-note">
             <span className="session-tag">{t("session.paths.skipped")}</span>{" "}
@@ -500,21 +649,16 @@ function StepDetail({
           </div>
         )}
       </div>
-      <div className="session-split">
-        <div className="session-col">
-          <div className="session-glass session-card session-rise session-col" style={{ gap: 4 }}>
-            <div className="session-kick">{t("session.paths.why")}</div>
-            <div className="session-why">{step.why}</div>
-            <div className="session-kick" style={{ marginTop: 6 }}>{t("session.paths.howTo")}</div>
-            {step.howTo.map((line) => (
-              <div className="session-why" key={line}>
-                {line}
+      <div className="session-stepgrid">
+        <div className="session-col session-step-main">
+          <div className="session-row session-rise" data-wrap="" data-between="">
+            <div className="session-kick">{t("session.paths.exercises")}</div>
+            {runnable && gradable.length > 0 && (
+              <div className="session-quiet">
+                {t("session.paths.finishHow", { need: passesNeeded(gradable.length), count: gradable.length })}
               </div>
-            ))}
-            <div className="session-kick" style={{ marginTop: 6 }}>{t("session.paths.payoff")}</div>
-            <div className="session-why">{step.payoff}</div>
+            )}
           </div>
-          <div className="session-kick session-rise">{t("session.paths.exercises")}</div>
           {step.exercises.map((exercise, i) => (
             <ExerciseRow
               key={exercise.id}
@@ -523,48 +667,73 @@ function StepDetail({
               step={step}
               exercise={exercise}
               current={exercise.id === next?.id && isGradable(exercise)}
-              style={rise(i + 2)}
+              style={rise(i + 1)}
             />
           ))}
-          {isRunnable(path.id) && !isCurrent && (
-            <button
-              className="session-secondary"
-              onClick={() => actions.chooseStep(path, step)}
-              data-testid="choose-step"
-            >
-              {t("session.paths.workOnThis")}
-            </button>
-          )}
-          {isCurrent && isRunnable(path.id) && (
-            <div className="session-quiet">{t("session.paths.yourStep")}</div>
-          )}
-          {isRunnable(path.id) && step.exercises.some(isGradable) && (
-            <div className="session-glass session-card session-rise session-col" style={{ gap: 6 }}>
-              <button
-                className="session-secondary"
-                onClick={() => actions.testOut(path, step)}
-                data-testid="step-test-out"
-              >
-                {t("session.paths.testOut")}
-              </button>
-              <div className="session-why" data-testid="step-test-out-how">
-                {testOutRetests(path, step, progress)
-                  ? t("session.paths.testOutRetests")
-                  : t("session.paths.testOutHow", {
-                      // The real count, not "about three of four" (UX audit PATH-5).
-                      need: passesNeeded(step.exercises.filter(isGradable).length),
-                      count: step.exercises.filter(isGradable).length,
-                    })}
-              </div>
+          {/* The reading, behind one click: why the Step, how, what you'll hear. */}
+          <details className="session-notes session-glass session-rise" data-testid="step-notes">
+            <summary>
+              <span className="session-kick">{t("session.paths.techniqueNotes")}</span>
+              <span className="session-quiet">{t("session.paths.techniqueNotesHint")}</span>
+            </summary>
+            <div className="session-notes-body">
+              <div className="session-kick">{t("session.paths.why")}</div>
+              <div className="session-why">{step.why}</div>
+              <div className="session-kick">{t("session.paths.howTo")}</div>
+              {step.howTo.map((line) => (
+                <div className="session-why" key={line}>
+                  {line}
+                </div>
+              ))}
+              <div className="session-kick">{t("session.paths.payoff")}</div>
+              <div className="session-why">{step.payoff}</div>
+            </div>
+          </details>
+        </div>
+        <aside className="session-col session-step-side">
+          {runnable && (
+            <div className="session-glass session-card session-rise session-col" style={{ gap: 8 }}>
+              {isCurrent ? (
+                <div className="session-why">
+                  <b>{t("session.paths.yourStep")}</b>
+                </div>
+              ) : (
+                <button
+                  className="session-secondary"
+                  onClick={() => actions.chooseStep(path, step)}
+                  data-testid="choose-step"
+                >
+                  {t("session.paths.workOnThis")}
+                </button>
+              )}
+              {gradable.length > 0 && (
+                <>
+                  <button
+                    className="session-secondary"
+                    onClick={() => actions.testOut(path, step)}
+                    data-testid="step-test-out"
+                  >
+                    {t("session.paths.testOut")}
+                  </button>
+                  <div className="session-quiet" data-testid="step-test-out-how">
+                    {testOutRetests(path, step, progress)
+                      ? t("session.paths.testOutRetests")
+                      : t("session.paths.testOutHow", {
+                          // The real count, not "about three of four" (UX audit PATH-5).
+                          need: passesNeeded(gradable.length),
+                          count: gradable.length,
+                        })}
+                  </div>
+                </>
+              )}
             </div>
           )}
-        </div>
-        <div className="session-col">
-          <div className="session-slot" ref={slot} aria-hidden="true" style={{ minHeight: 240 }} />
-          {stepHonestLineKey(step) && (
-            <div className="session-why" data-testid="pick-caveat">{t(stepHonestLineKey(step)!)}</div>
+          {honest && (
+            <div className="session-quiet session-rise" data-testid="pick-caveat">
+              {t(honest)}
+            </div>
           )}
-        </div>
+        </aside>
       </div>
     </div>
   );

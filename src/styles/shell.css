@@ -313,6 +313,20 @@
   background: color-mix(in srgb, var(--feedback-perfect) 8%, transparent);
 }
 
+/* Off, on a screen that grades: the same chip, now the way to set it up. A
+   warm edge says "this wants you" without reading as an error. */
+button.context-chip-input[data-off] {
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+@media (hover: hover) {
+  button.context-chip-input[data-off]:hover {
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+  }
+}
+
 /* The volume chip carries its own readout: how loud the metronome is, drawn
    rather than written, so the answer survives the label being shed. */
 .context-chip[data-tooltip]::after {
@@ -2465,6 +2479,13 @@ body[data-sheet-maximized] .rail {
 @media (max-width: 959px) {
   .context-chip-input {
     display: none;
+  }
+}
+/* The learning screens have no transport to carry the readout, so there the
+   chip stays, as an icon, at any width. */
+@media (max-width: 959px) {
+  button.context-chip-input[data-off] {
+    display: flex;
   }
 }
 

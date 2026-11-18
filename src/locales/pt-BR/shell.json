@@ -77,7 +77,8 @@
     "coachOnPlay": "O coach escuta quando você toca",
     "coachQuiet": "O coach fica quieto durante o passo",
     "countIn": "Contagem inicial",
-    "backToStart": "Voltar ao início"
+    "backToStart": "Voltar ao início",
+    "setUpInput": "Configurar entrada"
   },
   "rail": {
     "label": "Modos e biblioteca",

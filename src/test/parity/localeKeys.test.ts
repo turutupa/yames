@@ -29,6 +29,21 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   // W3 leads with the Session's keys under "In a Session" (2026-11-17); the
   // old "Keyboard" heading over the tools' keys has nothing left to head.
   "onboarding.handsFree.keyboard.title",
+  // The learning pages' polish (UX audit, 2026-11-17). Today's "Running: …"
+  // line is gone (TODAY-6); "No mic yet? Set up input" is the header's input
+  // chip now (TODAY-10, `shell` transport.setUpInput); "Go to step N" is
+  // "Continue · Step N" (PATH-4); Progress lost its one headline chart for a
+  // card per Path (PROG-1) and its one-line empty state for a real one (PROG-2).
+  "session.today.running",
+  "session.today.noMic",
+  "session.today.setUpInput",
+  "session.paths.openStep",
+  "session.progress.empty",
+  "session.progress.cleanTempo",
+  "session.progress.bpmOn",
+  "session.progress.chartLabel",
+  "session.progress.noClean",
+  "session.progress.exercises",
 ];
 
 function englishKeys(): string[] {

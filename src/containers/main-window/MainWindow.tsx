@@ -2162,6 +2162,11 @@ export function MainWindow() {
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
           }}
           listening={evaluation.enabled}
+          /* On the pages that plan graded work, the input chip is also the way
+             to set it up while it is off (UX audit TODAY-10). */
+          onSetUpInput={
+            view === "today" || view === "paths" || view === "progress" ? openAudioSettings : undefined
+          }
           /* W36 item 2 — on Songs the bar carries the song, and the click's
              sound picker is not part of it: over a file that brings its own
              band the click starts off, and what it sounds like when it is on
@@ -2402,9 +2407,7 @@ export function MainWindow() {
         ) : view === "today" ? (
           <TodayView
             session={sessionRun}
-            listening={evaluation.enabled}
             onOpenTools={() => setView("tools")}
-            onSetUpInput={openAudioSettings}
             onOpenPaths={() => setView("paths")}
             instrument={instrument}
             onOpenToolsList={() => setView("tools")}
@@ -2421,7 +2424,7 @@ export function MainWindow() {
             }}
           />
         ) : view === "progress" ? (
-          <ProgressView session={sessionRun} />
+          <ProgressView session={sessionRun} onStart={() => setView("today")} />
         ) : view === "tools" ? (
           <ToolsView
             onOpen={setView}

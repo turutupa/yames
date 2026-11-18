@@ -101,7 +101,7 @@ function SpeakerIcon() {
   );
 }
 
-function MicIcon() {
+function MicIcon({ off = false }: { off?: boolean }) {
   return (
     <svg
       width="14"
@@ -117,6 +117,8 @@ function MicIcon() {
       <rect x="9" y="3" width="6" height="11" rx="3" />
       <path d="M5.5 12a6.5 6.5 0 0 0 13 0" />
       <line x1="12" y1="18.5" x2="12" y2="21" />
+      {/* Off: struck through, so the chip still says it once its label is shed. */}
+      {off && <line x1="4" y1="3.5" x2="20" y2="20.5" />}
     </svg>
   );
 }
@@ -291,6 +293,13 @@ interface MainHeaderProps {
   /** Audio input is on. Status only — what turns it on lives elsewhere. */
   listening?: boolean;
   /**
+   * Where the input is set up (Settings at its devices). Given, the chip is a
+   * button while nothing is listening: one accurate status in the header, in
+   * place of Today's "No mic yet?" line, which read as "no device" when the
+   * input was only off (UX audit TODAY-10).
+   */
+  onSetUpInput?: () => void;
+  /**
    * Show the click's sound picker ("Wood", "Drum", …). W36 item 2.
    *
    * The owner, over a song: *"i don't think we need the audio preset dropdown
@@ -378,6 +387,7 @@ export function MainHeader({
   setTtsVolume = () => {},
   voiceEnabled = false,
   listening = false,
+  onSetUpInput,
   soundPicker = true,
   modeBar = false,
   onOpenHelp,
@@ -543,17 +553,33 @@ export function MainHeader({
         )}
 
         {/* A readout, not a switch — nothing in the bar turns the input on,
-            so the chip does not pretend to. */}
-        {!IS_MOBILE && (
-          <div
-            className={`context-chip context-chip-static context-chip-input${listening ? " listening" : ""}`}
-            role="status"
+            so the chip does not pretend to. Off, and with somewhere to set it
+            up, it is the way there instead: the one place that says so. */}
+        {!listening && onSetUpInput ? (
+          <button
+            type="button"
+            className="context-chip context-chip-input"
+            data-off=""
+            data-testid="header-input-off"
+            onClick={onSetUpInput}
+            aria-label={`${t("transport.inputOff")}. ${t("transport.setUpInput")}`}
+            title={t("transport.setUpInput")}
           >
-            <MicIcon />
-            <span className="context-chip-label">
-              {listening ? t("transport.listening") : t("transport.inputOff")}
-            </span>
-          </div>
+            <MicIcon off />
+            <span className="context-chip-label">{t("transport.inputOff")}</span>
+          </button>
+        ) : (
+          !IS_MOBILE && (
+            <div
+              className={`context-chip context-chip-static context-chip-input${listening ? " listening" : ""}`}
+              role="status"
+            >
+              <MicIcon off={!listening} />
+              <span className="context-chip-label">
+                {listening ? t("transport.listening") : t("transport.inputOff")}
+              </span>
+            </div>
+          )
         )}
 
         <div className="header-more-wrap" ref={moreWrapRef}>
