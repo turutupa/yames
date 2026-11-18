@@ -483,6 +483,7 @@
       "legendNext": "potem, po kolei",
       "legendPlayed": "właśnie zagrana",
       "beats": "Miary taktu",
+      "beatLabel": "miara",
       "hand": "Ręka: palec wskazujący na progu {{fret}}, jeden palec na próg.",
       "handShifts": "Ręka: zacznij palcem wskazującym na progu {{fret}}; przesuwa się wzdłuż gryfu.",
       "handOpen": "Ręka: pozycja otwarta, palec wskazujący nad progiem 1.",

@@ -457,6 +457,7 @@
       "legendNext": "然後，依序",
       "legendPlayed": "剛彈過",
       "beats": "這一小節的拍子",
+      "beatLabel": "拍",
       "hand": "手：食指在第 {{fret}} 格，一指一格。",
       "handShifts": "手：食指從第 {{fret}} 格開始，沿琴頸移動。",
       "handOpen": "手：開放把位，食指在第 1 格上方。",

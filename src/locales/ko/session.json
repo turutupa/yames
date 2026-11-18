@@ -457,6 +457,7 @@
       "legendNext": "그다음, 순서대로",
       "legendPlayed": "방금 연주함",
       "beats": "마디의 박",
+      "beatLabel": "박",
       "hand": "손: 검지를 {{fret}}프렛에, 한 프렛에 한 손가락.",
       "handShifts": "손: 검지를 {{fret}}프렛에서 시작해 넥을 따라 이동합니다.",
       "handOpen": "손: 개방 포지션, 검지는 1프렛 위.",

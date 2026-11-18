@@ -3008,7 +3008,8 @@
 .practice-next-tag {
   transform: translate(-50%, -100%);
   display: flex;
-  flex-direction: column-reverse;
+  /* "next" first, "then 6, 5" under it: it reads in order (acceptance P2-4). */
+  flex-direction: column;
   align-items: center;
   color: var(--l-tag-accent);
 }
@@ -3454,21 +3455,27 @@
   white-space: nowrap;
 }
 
-/* The Neck view as the mock lays it out: the beat dots and the legend between
-   the fret numbers and the slim fret strip, not under the strip; NEXT as
-   amber words over its note ("then 7, 5" above "next"), no box. */
+/* The Neck view as the mock lays it out: the beat counter and the legend
+   between the fret numbers and the slim fret strip, in a row of their own.
+   The slot keeps that row out of the neck's frame (`data-neck-foot`, read by
+   the stage), and NeckInstruction sets `bottom` to sit it just over the
+   strip, so nothing prints over the fret numbers (acceptance P1-1). NEXT as
+   amber words over its note ("next", then "then 7, 5"), no box. */
 .practice-neck-foot {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 64px;
-  min-height: 20px;
+  bottom: 60px;
+  height: 30px;
+  min-height: 0;
   z-index: 3;
 }
-@media (max-height: 640px) {
-  .practice-neck-foot {
-    bottom: 50px;
-  }
+.practice-beats-label {
+  font: 600 11px/1 var(--l-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--l-quiet);
+  margin-right: -6px;
 }
 .practice-next-tag {
   padding: 0;
@@ -3555,7 +3562,6 @@
 }
 .practice-next-tag[data-below] {
   transform: translate(-30%, 0);
-  flex-direction: column;
 }
 /* A phone: every control a thumb's size. */
 .main-window.is-mobile .session-page .practice-step {

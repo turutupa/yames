@@ -470,6 +470,7 @@
       "legendNext": "ensuite, dans l'ordre",
       "legendPlayed": "vient d'être jouée",
       "beats": "Les temps de la mesure",
+      "beatLabel": "temps",
       "hand": "Main : index sur la case {{fret}}, un doigt par case.",
       "handShifts": "Main : index d'abord sur la case {{fret}} ; elle se déplace le long du manche.",
       "handOpen": "Main : position ouverte, index au-dessus de la case 1.",

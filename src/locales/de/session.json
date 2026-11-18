@@ -457,6 +457,7 @@
       "legendNext": "dann, der Reihe nach",
       "legendPlayed": "gerade gespielt",
       "beats": "Die Schläge des Takts",
+      "beatLabel": "Schlag",
       "hand": "Hand: Zeigefinger am {{fret}}. Bund, ein Finger pro Bund.",
       "handShifts": "Hand: Zeigefinger zuerst am {{fret}}. Bund; sie wandert den Hals entlang.",
       "handOpen": "Hand: offene Lage, Zeigefinger über dem 1. Bund.",

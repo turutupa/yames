@@ -1,19 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { FLAT_TILT, framingFor, isPortrait } from "./framing";
+import { FLAT_FOV, FLAT_TILT, framingFor, isPortrait } from "./framing";
 
 const WIDE = { width: 1200, height: 400 };
 const TALL = { width: 380, height: 700 };
 
 describe("framingFor", () => {
-  it("keeps the whole-neck shot as it was", () => {
-    expect(framingFor({ kind: "whole" }, WIDE)).toEqual({ dir: [0, 1, 0.26], fov: 14, numScale: 1.55, pool: 1.1 });
-    expect(framingFor({ kind: "whole" }, TALL)).toEqual({ dir: [0, 1, 0.26], fov: 14, numScale: 2.4, pool: 0.55 });
+  it("frames the whole neck flat and straight on, like mock A (acceptance P1-3)", () => {
+    expect(framingFor({ kind: "whole" }, WIDE)).toEqual({ dir: [0, 1, FLAT_TILT], fov: FLAT_FOV, numScale: 1.55, pool: 1.1 });
+    expect(framingFor({ kind: "whole" }, TALL)).toEqual({ dir: [0, 1, FLAT_TILT], fov: FLAT_FOV, numScale: 2.4, pool: 0.55 });
   });
 
-  it("keeps the practice zoom's three-quarter angle when not flat", () => {
-    expect(framingFor({ kind: "zoom", from: 3, to: 9 }, WIDE)).toEqual({ dir: [0, 1, 0.34], fov: 22, numScale: 0.66, pool: 0.9 });
-    expect(framingFor({ kind: "zoom", from: 3, to: 9 }, TALL).dir).toEqual([0.95, 1, 0]);
-    expect(framingFor({ kind: "zoom", from: 3, to: 9, flat: false }, WIDE).fov).toBe(22);
+  it("frames every practice zoom flat too, flat asked for or not", () => {
+    for (const rect of [WIDE, TALL]) {
+      for (const flat of [undefined, false, true]) {
+        const f = framingFor({ kind: "zoom", from: 3, to: 9, flat }, rect);
+        expect(f.dir).toEqual([0, 1, FLAT_TILT]);
+        expect(f.fov).toBe(FLAT_FOV);
+      }
+    }
   });
 
   it("looks almost straight down for a flat zoom, high e on top, in any slot", () => {

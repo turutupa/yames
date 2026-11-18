@@ -470,6 +470,7 @@
       "legendNext": "luego, en orden",
       "legendPlayed": "recién tocada",
       "beats": "Los pulsos del compás",
+      "beatLabel": "pulso",
       "hand": "Mano: índice en el traste {{fret}}, un dedo por traste.",
       "handShifts": "Mano: empieza con el índice en el traste {{fret}}; se desplaza por el mástil.",
       "handOpen": "Mano: posición abierta, índice sobre el traste 1.",

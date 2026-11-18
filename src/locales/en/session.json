@@ -457,6 +457,7 @@
       "legendNext": "then, in order",
       "legendPlayed": "just played",
       "beats": "The bar's beats",
+      "beatLabel": "beat",
       "hand": "Hand: index finger at fret {{fret}}, one finger per fret.",
       "handShifts": "Hand: start with the index finger at fret {{fret}}; it moves along the neck.",
       "handOpen": "Hand: open position, index finger over fret 1.",

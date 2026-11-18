@@ -457,6 +457,7 @@
       "legendNext": "daarna, op volgorde",
       "legendPlayed": "net gespeeld",
       "beats": "De tellen van de maat",
+      "beatLabel": "tel",
       "hand": "Hand: wijsvinger op fret {{fret}}, één vinger per fret.",
       "handShifts": "Hand: begin met de wijsvinger op fret {{fret}}; hij schuift langs de hals.",
       "handOpen": "Hand: open positie, wijsvinger boven fret 1.",

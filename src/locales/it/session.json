@@ -470,6 +470,7 @@
       "legendNext": "poi, in ordine",
       "legendPlayed": "appena suonata",
       "beats": "I movimenti della battuta",
+      "beatLabel": "battito",
       "hand": "Mano: indice al tasto {{fret}}, un dito per tasto.",
       "handShifts": "Mano: inizia con l'indice al tasto {{fret}}; si sposta lungo il manico.",
       "handOpen": "Mano: posizione aperta, indice sopra il tasto 1.",

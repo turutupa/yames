@@ -457,6 +457,7 @@
       "legendNext": "sonra, sırayla",
       "legendPlayed": "az önce çalındı",
       "beats": "Ölçünün vuruşları",
+      "beatLabel": "vuruş",
       "hand": "El: işaret parmağı {{fret}}. perdede, her perdeye bir parmak.",
       "handShifts": "El: işaret parmağıyla {{fret}}. perdeden başla; sap boyunca kayar.",
       "handOpen": "El: açık pozisyon, işaret parmağı 1. perdenin üstünde.",
