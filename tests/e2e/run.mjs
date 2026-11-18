@@ -24,6 +24,8 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/** A result that met its bar: the pass leads with its closest call (UX audit SES-3). */
+const PASSED = /PASS BAR MET|CLOSEST TO THE BAR/i;
 /** The Paths the suite plays: the one a new player starts on, and a second. */
 const PATHS = [loadPath(FIRST_PATH), loadPath(SECOND_PATH)];
 
@@ -278,8 +280,12 @@ const player = new Player(env);
  * Arm the player, press Start take, play `style`, and wait for the result.
  * Returns the result screen's text, and whether the Take ended by itself.
  */
-async function playTake(d, exercise, style, label, { band = false } = {}) {
-  const m = await d.waitText(/Start take, (\d+) BPM/);
+async function playTake(d, exercise, style, label, { band = false, again = false } = {}) {
+  // From a result, Go again starts the count-in by itself (UX audit SES-4):
+  // the player is armed before the press, and the press is the start.
+  const m = again
+    ? await d.waitText(/Go again, (?:up to )?(\d+) BPM/)
+    : await d.waitText(/Start take, (\d+) BPM/);
   const bpm = Number(m[1]);
   const take = renderTake({
     bpm,
@@ -300,7 +306,7 @@ async function playTake(d, exercise, style, label, { band = false } = {}) {
   // The app's PipeWire threads exist once its streams are open (see Env).
   env.promoteAudioThreads();
   try {
-    await d.clickText(/^Start take/, { timeoutMs: 20000 });
+    await d.clickText(again ? /^Go again/ : /^Start take/, { timeoutMs: 20000 });
   } catch (e) {
     const why = await d.exec(`const b = document.querySelector('[data-testid="session-big"]');
       return { phase: document.querySelector('[data-testid="session-take"]')?.dataset.phase ?? null, big: b?.innerText,
@@ -325,7 +331,7 @@ async function playTake(d, exercise, style, label, { band = false } = {}) {
     endedItself ? "" : "still playing 6 s after the last bar; pressing End take (see README, known bugs)");
   if (!endedItself) await d.clickText(/^End take$/).catch(() => {});
   try {
-    await d.waitText(/Go again|Move on|Next|Again, \d+ BPM|See how it went/i, 30000);
+    await d.waitText(/Go again|Move on|Next|See how it went/i, 30000);
   } catch (e) {
     await shot(d, `stuck-${label}`);
     throw e;
@@ -414,10 +420,10 @@ async function scenarioPlacement() {
     const good = await playTake(d, hit.exercise, "good", "placement easy take");
     const row = takesSince(t0).at(-1);
     check("placement: the easy Take passes and is saved on the first Path",
-      /PASS BAR MET/i.test(good.text) && row?.passed === 1 && row?.path_id === first.path.id,
+      PASSED.test(good.text) && row?.passed === 1 && row?.path_id === first.path.id,
       row ? `${row.path_id}/${row.exercise_id} at ${row.bpm}, evenness ${fmt(row.facts.measures.evenness)}` : "no row");
     check("placement: the next Take offered is at the pass tempo",
-      new RegExp(`Go again, ${passAt} BPM`, "i").test(good.text), firstLines(good.text, /Go again|Next|Move on/i));
+      new RegExp(`Go again, (up to )?${passAt} BPM`, "i").test(good.text), firstLines(good.text, /Go again|Next|Move on/i));
     info.placementTake = row?.facts?.measures;
     await d.clickText(/^Exit$/);
     await d.waitText(/How long have you got/, 15000);
@@ -451,7 +457,7 @@ async function scenarioSession() {
     // 1. A good take: passes, and counts toward the clean tempo.
     const good = await playTake(d, exercise, "good", "good take");
     const goodRow = takesOf(exercise.id).at(-1);
-    check("good take: the result says the bar was met", /PASS BAR MET/i.test(good.text), firstLines(good.text, /BPM ·/));
+    check("good take: the result says the bar was met", PASSED.test(good.text), firstLines(good.text, /BPM ·/));
     check("good take: a Take row was saved, passed", goodRow?.passed === 1 && goodRow?.caught === 1,
       goodRow ? `evenness ${fmt(goodRow.facts.measures.evenness)}, heard ${goodRow.facts.measures.heard}/${goodRow.facts.measures.expected}, extras ${goodRow.facts.measures.extras}` : "no row");
     check("good take: it counts toward the clean tempo", goodRow?.facts?.measures?.pass?.countsForCleanTempo === true,
@@ -462,14 +468,14 @@ async function scenarioSession() {
     info.goodTake = goodRow?.facts?.measures;
 
     // 2. A sloppy take at the next tempo: fails on evenness.
-    await d.clickText(/^(Go again|Again,)/);
-    const sloppy = await playTake(d, exercise, "sloppy", "sloppy take");
+    const sloppy = await playTake(d, exercise, "sloppy", "sloppy take", { again: true });
     const sloppyRow = takesOf(exercise.id).at(-1);
     const evenCheck = sloppyRow?.facts?.measures?.pass?.checks?.find((c) => c.metric === "timingEvenness");
     const evenBar = exercise.passBars.find((b) => b.metric === "timingEvenness")?.min;
+    // The result leads with what held it back, the bar beside it (UX audit SES-3).
     check("sloppy take: the result names the evenness bar",
-      new RegExp(`THE BAR IS ${Math.round((evenBar ?? 0) * 100)}%`, "i").test(sloppy.text) && /Evenness was/i.test(sloppy.text),
-      firstLines(sloppy.text, /Evenness was|THE BAR IS/i));
+      new RegExp(`against a bar of ${Math.round((evenBar ?? 0) * 100)}%`, "i").test(sloppy.text) && /WHAT HELD IT BACK/i.test(sloppy.text),
+      firstLines(sloppy.text, /against a bar|WHAT HELD IT BACK/i));
     check("sloppy take: saved, caught, not passed, evenness under the bar",
       sloppyRow?.passed === 0 && sloppyRow?.caught === 1 && evenCheck && evenCheck.held === false,
       sloppyRow ? `evenness ${fmt(sloppyRow.facts.measures.evenness)}, heard ${sloppyRow.facts.measures.heard}/${sloppyRow.facts.measures.expected}` : "no row");
@@ -477,8 +483,7 @@ async function scenarioSession() {
     info.sloppyTake = sloppyRow?.facts?.measures;
 
     // 3. Silence: "didn't catch enough", and it does not count.
-    await d.clickText(/^(Go again|Again,)/);
-    const silent = await playTake(d, exercise, "silent", "silent take");
+    const silent = await playTake(d, exercise, "silent", "silent take", { again: true });
     const silentRow = takesOf(exercise.id).at(-1);
     check("silent take: the result says it didn't catch enough", /didn.t catch enough/i.test(silent.text), firstLines(silent.text, /catch/));
     check("silent take: saved as not caught", silentRow?.caught === 0 && silentRow?.passed === 0,
@@ -488,14 +493,13 @@ async function scenarioSession() {
     //    the sloppy take failed: the Take's two bars of slack (owner,
     //    2026-11-17) leave the bad bar behind, and the clean bars in a row
     //    after it pass and earn the clean tempo.
-    await d.clickText(/^(Go again|Again,)/);
-    const fluffed = await playTake(d, exercise, "fluffed", "fluffed first bar");
+    const fluffed = await playTake(d, exercise, "fluffed", "fluffed first bar", { again: true });
     const fluffedRow = takesOf(exercise.id).at(-1);
     const fluffedPass = fluffedRow?.facts?.measures?.pass;
     const firstBar = fluffedRow?.facts?.measures?.barEvenness?.[0];
     check("fluffed first bar: the Take is the new length", fluffedPass?.finishedBars === takeBars(exercise),
       `finished ${fluffedPass?.finishedBars} of ${takeBars(exercise)} bars`);
-    check("fluffed first bar: the result says the bar was met", /PASS BAR MET/i.test(fluffed.text) && fluffedRow?.passed === 1,
+    check("fluffed first bar: the result says the bar was met", PASSED.test(fluffed.text) && fluffedRow?.passed === 1,
       firstLines(fluffed.text, /BPM ·/));
     check("fluffed first bar: it counts toward the clean tempo, from the bars after it",
       fluffedPass?.countsForCleanTempo === true && fluffedPass.heldBars >= 8 && (fluffedPass.heldFromBar ?? 0) >= 1,
@@ -567,7 +571,7 @@ async function scenarioWarmup() {
         if (kind === "metronome") return "found";
         const big = await d.exec(`return document.querySelector('[data-testid="session-big"]')?.innerText ?? ""`);
         if (/Start take/.test(big)) return "take";
-        if (/See how it went|Done/.test(big)) return "none";
+        if (/See how it went|Back to /.test(big)) return "none";
         await key("n", "KeyN");
       }
       return "none";
@@ -734,7 +738,7 @@ async function scenarioTwoPaths() {
     const allPassed = rows.length > 0 && rows.every((r) => r.passed === 1);
     console.log(`${allPassed ? "PASS" : "WARN"}  20 minutes: every good Take passed (advisory)  (${JSON.stringify(info.twoPaths)})`);
     results.push({ name: "20 minutes: every good Take passed (advisory)", ok: true, advisory: !allPassed, detail: JSON.stringify(info.twoPaths) });
-    await d.clickText(/^Exit$/).catch(() => d.clickText(/^Done$/));
+    await d.clickText(/^Exit$/).catch(() => d.clickText(/^Back to /));
   } finally {
     const report = await quitApp(d, "two-paths");
     if (report) printProbe("two Paths (3D neck on screen)", report);
@@ -761,7 +765,7 @@ async function scenarioFourFingers() {
     info.neck_fourFingers = await neckKind(d);
     const good = await playTake(d, exercise, "good", "four fingers at 80");
     const row = takesOf(exercise.id).at(-1);
-    check(`${title} at ${target}: passes`, /PASS BAR MET/i.test(good.text) && row?.passed === 1,
+    check(`${title} at ${target}: passes`, PASSED.test(good.text) && row?.passed === 1,
       row ? `evenness ${fmt(row.facts.measures.evenness)}, heard ${row.facts.measures.heard}/${row.facts.measures.expected}, extras ${row.facts.measures.extras}` : "no row");
     const clean = cleanTempo(`alternate-picking/${exercise.id}`);
     check(`${title} at ${target}: clean tempo ${target} stored`, clean === target, `clean tempo ${clean}`);
@@ -826,30 +830,27 @@ async function scenarioBluesBand() {
     const good = await playTake(d, exercise, "good", `blues good${tag}`, { band: true });
     const goodRow = row();
     info.bluesBand.takes.push({ style: "good", bpm: good.bpm, heard: good.heard, measures: goodRow?.facts?.measures });
-    check(`${title}${tag}: a good take over the band passes`, /PASS BAR MET/i.test(good.text) && goodRow?.passed === 1, summary(goodRow));
+    check(`${title}${tag}: a good take over the band passes`, PASSED.test(good.text) && goodRow?.passed === 1, summary(goodRow));
     check(`${title}${tag}: the player kept time with the band (beats it heard from the drums)`, (good.heard?.beatsHeardFromTheBand ?? 0) >= 16,
       `${good.heard?.beatsHeardFromTheBand} of ${takeBars(exercise) * 4}`);
     check(`${title}${tag}: clean tempo stored`, cleanTempo(key) === good.bpm, `clean tempo ${cleanTempo(key)}`);
 
-    await d.clickText(/^(Go again|Again,)/);
-    const sloppy = await playTake(d, exercise, "sloppy", `blues sloppy${tag}`, { band: true });
+    const sloppy = await playTake(d, exercise, "sloppy", `blues sloppy${tag}`, { band: true, again: true });
     const sloppyRow = row();
     info.bluesBand.takes.push({ style: "sloppy", bpm: sloppy.bpm, measures: sloppyRow?.facts?.measures });
     // Recorded, not checked: 35 ms of scatter is inside this Exercise's own
     // evenness bar (0.6) at 70 BPM, band or no band (the control below).
     console.log(`      sloppy (35 ms) over the band: ${summary(sloppyRow)}`);
 
-    await d.clickText(/^(Go again|Again,)/);
-    const sloppier = await playTake(d, exercise, "sloppier", `blues sloppier${tag}`, { band: true });
+    const sloppier = await playTake(d, exercise, "sloppier", `blues sloppier${tag}`, { band: true, again: true });
     const sloppierRow = row();
     info.bluesBand.takes.push({ style: "sloppier", bpm: sloppier.bpm, measures: sloppierRow?.facts?.measures });
-    check(`${title}${tag}: a sloppy (80 ms) take over the band does not pass`, sloppierRow?.passed === 0 && !/PASS BAR MET/i.test(sloppier.text), summary(sloppierRow));
+    check(`${title}${tag}: a sloppy (80 ms) take over the band does not pass`, sloppierRow?.passed === 0 && !PASSED.test(sloppier.text), summary(sloppierRow));
 
-    await d.clickText(/^(Go again|Again,)/);
-    const wrong = await playTake(d, exercise, "wrong", `blues wrong notes${tag}`, { band: true });
+    const wrong = await playTake(d, exercise, "wrong", `blues wrong notes${tag}`, { band: true, again: true });
     const wrongRow = row();
     info.bluesBand.takes.push({ style: "wrong", bpm: wrong.bpm, measures: wrongRow?.facts?.measures });
-    check(`${title}${tag}: wrong notes over the band do not pass`, wrongRow?.passed === 0 && !/PASS BAR MET/i.test(wrong.text), summary(wrongRow));
+    check(`${title}${tag}: wrong notes over the band do not pass`, wrongRow?.passed === 0 && !PASSED.test(wrong.text), summary(wrongRow));
 
     // The control: the same Takes with the band turned all the way down (the
     // click comes back), so a difference above is the band's and not the take's.
@@ -874,8 +875,7 @@ async function scenarioBluesBand() {
     await setBand(d, "0");
 
     for (const [i, style] of ["good", "sloppy", "sloppier"].entries()) {
-      if (i > 0) await d.clickText(/^(Go again|Again,)/);
-      const r = await playTake(d, exercise, style, `blues ${style}, band at 0${tag}`, { band: true });
+      const r = await playTake(d, exercise, style, `blues ${style}, band at 0${tag}`, { band: true, again: i > 0 });
       const rr = row();
       info.bluesBand.takes.push({ style, band: 0, bpm: r.bpm, measures: rr?.facts?.measures });
       console.log(`      control, band at 0, ${style}: ${summary(rr)}`);
@@ -889,8 +889,8 @@ async function scenarioBluesBand() {
 }
 
 /** A good take on whatever the Take screen holds: it must be heard and pass. */
-async function goodTakeHeard(d, label) {
-  await d.waitText(/Start take, (\d+) BPM/, 20000);
+async function goodTakeHeard(d, label, { again = false } = {}) {
+  await d.waitText(again ? /Go again, (?:up to )?(\d+) BPM/ : /Start take, (\d+) BPM/, 20000);
   // The input starts once the last Session's end has finished (stop, report,
   // save): a few seconds on a busy machine. How long, for the record; a
   // minute is "never".
@@ -910,9 +910,9 @@ async function goodTakeHeard(d, label) {
     check(`${label}: a shipped Exercise on the Take screen`, false, (await d.text()).slice(0, 300));
     return;
   }
-  const r = await playTake(d, exercise, "good", label);
+  const r = await playTake(d, exercise, "good", label, { again });
   const row = takesOf(exercise.id).at(-1);
-  check(`${label}: the Take was heard and passes`, /PASS BAR MET/i.test(r.text) && row?.passed === 1,
+  check(`${label}: the Take was heard and passes`, PASSED.test(r.text) && row?.passed === 1,
     `${exercise.title} at ${r.bpm}${noInput ? `, input on after ${waitedS} s` : ""}; ` +
       (row ? `heard ${row.facts.measures.heard}/${row.facts.measures.expected}, passed ${row.passed}` : "no row"));
 }
@@ -957,12 +957,11 @@ async function scenarioRestart() {
     await goodTakeHeard(d, "restart: a tab hotkey out and back");
 
     // 4. Settings mid-Session (it keeps the Session) and back: still heard.
-    await d.clickText(/^(Go again|Again,)/);
-    await d.waitText(/Start take, (\d+) BPM/, 20000);
+    // Opened from the result: Go again goes straight into the next Take.
     await key(",", "Comma");
     await sleep(1500);
     await key(",", "Comma");
-    await goodTakeHeard(d, "restart: Settings open and closed mid-Session");
+    await goodTakeHeard(d, "restart: Settings open and closed mid-Session", { again: true });
 
     // 5. The Session screen has no rail: Tools is reached after Exit. Open a
     // tool, play nothing, come back to Today and start again.
@@ -1003,18 +1002,17 @@ async function scenarioWrongNotes() {
       ? `passed ${r.passed}, notes ${fmt(r.facts.measures.noteIdentity)} (${r.facts.measures.pass?.notes?.status}), heard ${r.facts.measures.heard}/${r.facts.measures.expected}`
       : "no row";
     for (const [i, style] of ["good", "wrong", "wrong", "wrong"].entries()) {
-      if (i > 0) await d.clickText(/^(Go again|Again,)/);
-      const r = await playTake(d, exercise, style, `${title}, ${style} ${i}`);
+      const r = await playTake(d, exercise, style, `${title}, ${style} ${i}`, { again: i > 0 });
       const row = takesOf(exercise.id).at(-1);
       const m = row?.facts?.measures;
       info.wrongNotes.push({ style, bpm: r.bpm, measures: m });
       check(`${title}, ${style} take ${i}: right notes were measured`,
         m?.pass?.notes?.status === "measured" && typeof m?.noteIdentity === "number", summary(row));
       if (style === "good") {
-        check(`${title}, good take: passes`, row?.passed === 1 && /PASS BAR MET/i.test(r.text), summary(row));
+        check(`${title}, good take: passes`, row?.passed === 1 && PASSED.test(r.text), summary(row));
       } else {
         check(`${title}, wrong notes ${i}: does not pass, on right notes`,
-          row?.passed === 0 && !/PASS BAR MET/i.test(r.text) && m?.noteIdentity !== null && m.noteIdentity < 0.9, summary(row));
+          row?.passed === 0 && !PASSED.test(r.text) && m?.noteIdentity !== null && m.noteIdentity < 0.9, summary(row));
       }
     }
     await d.clickText(/^Exit$/);
@@ -1118,9 +1116,8 @@ async function scenarioNeck() {
     const before = cpuByName();
     const t0 = Date.now();
     for (let i = 0; i < takes; i++) {
-      if (i > 0) await d.clickText(/^(Go again|Again,)/);
-      const r = await playTake(d, exercise, "good", `neck take ${i + 1}`);
-      info.neck.takes.push({ bpm: r.bpm, passed: /PASS BAR MET/i.test(r.text) });
+      const r = await playTake(d, exercise, "good", `neck take ${i + 1}`, { again: i > 0 });
+      info.neck.takes.push({ bpm: r.bpm, passed: PASSED.test(r.text) });
     }
     const wall = (Date.now() - t0) / 1000;
     const after = cpuByName();
