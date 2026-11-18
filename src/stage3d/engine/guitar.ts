@@ -516,8 +516,12 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     overlayGroup.add(disc, label);
     return { disc, halo, label, o: 0, to: 0, fade: 0.25, flash: 0, kind: null, text: "" };
   }
+  /** Places shared by a note on the next string up, this setNotes: staggered so neither hides the other. */
+  let crowded = new Set<string>();
   function placeNote(n: Note, d: GuitarNote) {
-    const x = noteX(d.f);
+    // Two markers on one fret, neighbouring strings: the lower string's sits a
+    // marker's width toward the nut (UX audit SES-7: "2 hides under 1").
+    const x = noteX(d.f) - (crowded.has(d.s + ":" + d.f) ? NOTE_R * 1.7 : 0);
     const z = strZ(d.s, x);
     const y = crown(z);
     const top = y + strH(x) + 0.012;
@@ -546,6 +550,11 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
   }
   function setNotes(list: GuitarNote[], fade = 0.25) {
     const keep = new Set<string>();
+    const at = new Set(list.map((d) => d.s + ":" + d.f));
+    const next = new Set<string>();
+    for (const d of list) if (d.f > 0 && at.has(d.s - 1 + ":" + d.f) && (d.s % 2 === 0 || !at.has(d.s - 2 + ":" + d.f))) next.add(d.s + ":" + d.f);
+    const moved = [...next].some((k) => !crowded.has(k)) || [...crowded].some((k) => !next.has(k));
+    crowded = next;
     list.forEach((d) => {
       const k = d.s + ":" + d.f;
       keep.add(k);
@@ -556,7 +565,7 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
         active.set(k, n);
         placeNote(n, d);
         n.o = fade ? 0 : 1;
-      }
+      } else if (moved) placeNote(n, d);
       styleNote(n, d);
       n.to = 1;
       n.fade = fade;

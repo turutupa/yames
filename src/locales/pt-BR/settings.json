@@ -249,7 +249,10 @@
         "session-exit": "Sair da sessão",
         "tab-paths": "Trilhas",
         "tab-progress": "Progresso",
-        "tab-tools": "Ferramentas"
+        "tab-tools": "Ferramentas",
+        "session-view": "Trocar vista",
+        "session-pause": "Pausar",
+        "session-restart": "De novo"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -299,11 +302,14 @@
         "session-slower": "Entre tomadas: um degrau mais devagar",
         "session-faster": "Entre tomadas: um degrau mais rápido",
         "session-next": "Entre tomadas: passar para a próxima coisa da sessão",
-        "session-pedal": "Para um único footswitch. Toque: a próxima coisa. Toque duplo: mais devagar. Segurar: próxima etapa",
+        "session-pedal": "Para um único pedal. Toque: a próxima ação (pausa um aquecimento em andamento). Toque duplo: mais lento. Segurar: de novo",
         "session-exit": "Durante uma sessão: sair, como faz Sair. Uma tomada em andamento para antes.",
         "tab-paths": "Ir para Trilhas",
         "tab-progress": "Ir para Progresso",
-        "tab-tools": "Ir para Ferramentas"
+        "tab-tools": "Ir para Ferramentas",
+        "session-view": "Numa sessão: Braço, Pista ou Tab. A qualquer momento no aquecimento; entre takes num avaliado",
+        "session-pause": "Num aquecimento ou bloco cronometrado: pausar, ou continuar",
+        "session-restart": "Num aquecimento ou bloco cronometrado: do começo. Depois de um take: o mesmo take de novo"
       }
     },
     "inputTest": {

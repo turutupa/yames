@@ -249,7 +249,10 @@
         "session-exit": "Wyjdź z sesji",
         "tab-paths": "Ścieżki",
         "tab-progress": "Postępy",
-        "tab-tools": "Narzędzia"
+        "tab-tools": "Narzędzia",
+        "session-view": "Zmień widok",
+        "session-pause": "Pauza",
+        "session-restart": "Jeszcze raz"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -299,11 +302,14 @@
         "session-slower": "Między podejściami: szczebel wolniej",
         "session-faster": "Między podejściami: szczebel szybciej",
         "session-next": "Między podejściami: przejdź do następnej rzeczy w sesji",
-        "session-pedal": "Dla jednego przełącznika nożnego. Stuknięcie: co dalej. Podwójne stuknięcie: wolniej. Przytrzymanie: następny krok",
+        "session-pedal": "Dla jednego przełącznika nożnego. Stuknięcie: następna rzecz (pauzuje trwającą rozgrzewkę). Podwójne: wolniej. Przytrzymanie: jeszcze raz",
         "session-exit": "W sesji: wyjdź z niej, tak jak Wyjdź. Trwające podejście najpierw się zatrzyma.",
         "tab-paths": "Przejdź do zakładki Ścieżki",
         "tab-progress": "Przejdź do zakładki Postępy",
-        "tab-tools": "Przejdź do zakładki Narzędzia"
+        "tab-tools": "Przejdź do zakładki Narzędzia",
+        "session-view": "W sesji: Gryf, Pas lub Tab. W rozgrzewce w każdej chwili; w ocenianej między podejściami",
+        "session-pause": "W rozgrzewce lub bloku na czas: pauza albo dalej",
+        "session-restart": "W rozgrzewce lub bloku na czas: od początku. Po podejściu: to samo podejście jeszcze raz"
       }
     },
     "inputTest": {

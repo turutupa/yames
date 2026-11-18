@@ -146,10 +146,19 @@ export function cameraPlan(model: Pick<RunwayModel, "onsets" | "barTicks">, widt
     const out: number[] = [];
     for (const o of model.onsets) {
       if (o.tick < start || o.tick >= end) continue;
-      for (const p of o.places) if (p.fret > 0) out.push(p.fret);
+      // Open strings count: a ring at the nut must be in the picture (SES-7).
+      for (const p of o.places) if (p.fret >= 0) out.push(p.fret);
     }
     return out;
   };
+  // The whole pattern in one window when it nearly fits: the camera then never
+  // moves while it runs, and never zooms out under the player (SES-7).
+  const all: number[] = [];
+  for (const o of model.onsets) for (const p of o.places) if (p.fret >= 0) all.push(p.fret);
+  if (all.length > 0 && Math.max(...all) - Math.min(...all) <= width) {
+    const one = windowOver(Math.min(...all), Math.max(...all), width);
+    return Array.from({ length: bars }, () => one);
+  }
   const plan: { from: number; to: number }[] = [];
   let current: { from: number; to: number } | null = null;
   for (let b = 0; b < bars; b++) {
@@ -220,11 +229,12 @@ export type WarmupClock = {
  * that first beat). The first `countInBeats` are the count-in; then the
  * pattern runs and wraps on every pass, `songPass` counting the passes.
  */
-export function warmupPosition(clock: WarmupClock, beatsIn: number): BeatPosition {
+export function warmupPosition(clock: WarmupClock, beatsIn: number, fromBeats = 0): BeatPosition {
   if (beatsIn < clock.countInBeats) {
     return { songBar: null, songTick: 0, songPass: 0, songCountIn: true };
   }
-  const into = (beatsIn - clock.countInBeats) * clock.perQuarter;
+  // A Resume counts in again, then carries on from the bar it was paused in.
+  const into = (beatsIn - clock.countInBeats + Math.max(0, fromBeats)) * clock.perQuarter;
   const pass = clock.passTicks > 0 ? Math.floor(into / clock.passTicks) : 0;
   const at = clock.passTicks > 0 ? into - pass * clock.passTicks : into;
   return { songBar: 0, songTick: clock.start + at, songPass: pass, songCountIn: false };

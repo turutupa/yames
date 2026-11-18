@@ -139,7 +139,7 @@ describe("W3 — the Session leads", () => {
     for (const [gesture, does] of [
       ["Tap", "The big button"],
       ["Double tap", "Slower"],
-      ["Hold", "Next"],
+      ["Hold", "Again"],
     ]) {
       expect(within(legend).getByText(gesture)).toBeInTheDocument();
       expect(within(legend).getByText(does)).toBeInTheDocument();

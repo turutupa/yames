@@ -206,7 +206,9 @@
       "band": "Groupe",
       "bandHint": "Le groupe n'est pas noté. Avec un micro, baisse-le ou mets un casque.",
       "bandMicHint": "Avec un micro, j'entendrais le groupe comme tes notes : il démarre coupé. Avec un casque, monte-le.",
-      "skip": "Passer celui-ci"
+      "skip": "Passer celui-ci",
+      "skipped": "Passé",
+      "honestTiming": "J'entends ton timing, pas quelles notes. Le bas-haut, c'est toi : je n'entends pas le sens du médiator."
     },
     "result": {
       "kick": "Prise {{take}} · {{title}} · {{bpm}} BPM · {{bars}} mesures",
@@ -293,7 +295,7 @@
       "double": "Double appui",
       "doubleDoes": "Plus lent",
       "hold": "Appui long",
-      "holdDoes": "Suivant"
+      "holdDoes": "Encore"
     },
     "recap": {
       "kick": "Séance terminée",
@@ -414,13 +416,31 @@
       "finger": "doigt {{n}}",
       "start": "commence ici",
       "legendNow": "à jouer",
-      "legendNext": "ensuite",
+      "legendNext": "ensuite, dans l'ordre",
       "legendPlayed": "vient d'être jouée",
       "beats": "Les temps de la mesure",
       "hand": "Main : index sur la case {{fret}}, un doigt par case.",
       "handShifts": "Main : index d'abord sur la case {{fret}} ; elle se déplace le long du manche.",
       "handOpen": "Main : position ouverte, index au-dessus de la case 1.",
-      "viewHint": "Change de vue quand tu veux"
+      "viewHint": "Change de vue quand tu veux",
+      "left": "restant",
+      "notGraded": "Non noté. Se termine dans {{time}} ; ensuite on recommence, ou on continue.",
+      "notChecked": "Non vérifié. Se termine dans {{time}} ; ensuite on recommence, ou on continue.",
+      "pausedFoot": "En pause. Le chrono t'attend ; plus lent ou plus rapide, puis Reprendre.",
+      "pausedFootNeck": "En pause. Toutes les mesures sont dans la vue Tab ({{key}}) ; plus lent ou plus rapide, puis Reprendre.",
+      "switchAny": "Change de vue quand tu veux pendant l'échauffement",
+      "barOf": "Mesure {{n}} sur {{of}} · laisse le clic te porter.",
+      "pausedAt": "En pause à la mesure {{n}} sur {{of}}",
+      "paused": "En pause",
+      "pause": "Pause",
+      "pauseKeys": "Pause : {{key}}, Espace ou Entrée",
+      "resume": "Reprendre",
+      "restart": "Recommencer",
+      "back": "Encore : {{title}}",
+      "ended": "Terminé. Encore, ou on passe à la suite.",
+      "endedFoot": "Non noté. Recommence, ou passe à la suite quand tu es prêt.",
+      "again": "Encore",
+      "beatOf": "Temps {{n}} sur {{of}}"
     },
     "runway": {
       "label": "Les prochaines notes, qui arrivent sur la ligne",
@@ -454,7 +474,12 @@
     },
     "tabstrip": {
       "label": "Tablature : {{notes}}",
-      "bar": "mesure {{n}}"
+      "bar": "mesure {{n}}",
+      "now": "maintenant · {{where}}",
+      "next": "ensuite · {{where}}",
+      "barBeat": "mesure {{n}}, temps {{beat}}",
+      "barBeats": "mesure {{n}}, temps {{from}}–{{to}}",
+      "pausedHere": "en pause ici · {{where}}"
     },
     "leave": {
       "title": "Quitter cette séance ?",

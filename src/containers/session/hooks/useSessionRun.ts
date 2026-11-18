@@ -85,10 +85,14 @@ import { levelsOf } from "../../../session/variants";
 import type { PlayerProgress, TakeFacts } from "../../../session/progress";
 import {
   IDLE,
+  TIMED_BPM_STEP,
   bigAction,
+  canGoBack,
   currentStep,
   eventForBigAction,
   runReducer,
+  timedBpm,
+  timedTempoAdjustable,
   tempoNudges,
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
@@ -513,7 +517,8 @@ export function useSessionRun(input: SessionRunInput) {
     [enqueue],
   );
 
-  const lastEntered = useRef<{ index: number; kind: PlanStep["kind"] } | null>(null);
+  /** The timed step whose sound is on: which step, and which of its runs (Start, Resume, Restart). */
+  const lastEntered = useRef<{ index: number; kind: PlanStep["kind"]; runs: number } | null>(null);
   const prepareId = useRef(0);
 
   /** Get a Take onto the engine: the song, the mix, then the schedule. */
@@ -554,20 +559,24 @@ export function useSessionRun(input: SessionRunInput) {
 
   /** Start whatever a timed step is. It moves on by the clock, in the reducer. */
   useEffect(() => {
-    if (run.phase !== "timed" || !step) return;
+    if (run.phase !== "timed" || !step || run.paused || run.ended) return;
     const entered = lastEntered.current;
-    if (entered?.index === run.stepIndex) return;
-    lastEntered.current = { index: run.stepIndex, kind: step.kind };
+    if (entered?.index === run.stepIndex && entered.runs === run.runs) return;
+    lastEntered.current = { index: run.stepIndex, kind: step.kind, runs: run.runs };
     const { jams, lineup, state } = latest.current;
     const finisher = step.kind === "jam" ? takeRef.current : null;
+    // The player's tempo (- / + on the ready screen or while paused), else the step's.
+    const bpmNow = run.bpm;
     void enqueue(async () => {
       await setPlaying(false).catch(() => {});
+      // A Restart of a ramp: from its first rung again.
+      if (step.kind === "drill") await stopSpeedRamp().catch(() => {});
       await clearScoreSchedule().catch(() => {});
       await clearSong().catch(() => {});
       loadedBand.current = null;
       await clearJam(null);
       if (step.kind === "metronome") {
-        await setBpm(step.bpm).catch(() => {});
+        await setBpm(bpmNow > 0 ? bpmNow : step.bpm).catch(() => {});
         await setFreeMode(false).catch(() => {});
         await setBeatGroups([4]).catch(() => {});
         await setSubdivision(step.subdivision as Subdivision).catch(() => {});
@@ -597,14 +606,14 @@ export function useSessionRun(input: SessionRunInput) {
         }
         const first = jams[0];
         if (!first) return;
-        const jam = step.bpm ? { ...first, bpm: step.bpm } : first;
+        const jam = step.bpm ? { ...first, bpm: bpmNow || step.bpm } : first;
         pushJam(jam, compileJam(jam, { formBar: 0, lineup }));
         await setPlaying(true).catch(() => {});
       } else if (step.kind === "jam") {
         const first = jams[0];
         if (!first) return;
         // The finisher plays at a tempo already passed on its Exercise.
-        const jam = step.bpm ? { ...first, bpm: step.bpm } : first;
+        const jam = step.bpm ? { ...first, bpm: bpmNow || step.bpm } : first;
         pushJam(jam, compileJam(jam, { formBar: 0, lineup }));
         await setPlaying(true).catch(() => {});
       } else if (step.kind === "drill") {
@@ -624,16 +633,17 @@ export function useSessionRun(input: SessionRunInput) {
         await startSpeedRamp().catch(() => {});
       }
     });
-  }, [run.phase, run.stepIndex, step, enqueue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.phase, run.stepIndex, run.paused, run.runs, step, enqueue]);
 
-  /** Leaving a timed step for anything else: stop what it started. */
+  /** Leaving a timed step for anything else, or pausing it: stop what it started. */
   useEffect(() => {
     const entered = lastEntered.current;
     if (!entered) return;
-    if (run.phase === "timed" && entered.index === run.stepIndex) return;
+    if (run.phase === "timed" && entered.index === run.stepIndex && !run.paused && !run.ended) return;
     lastEntered.current = null;
     void stopTimed(entered.kind);
-  }, [run.phase, run.stepIndex, stopTimed]);
+  }, [run.phase, run.stepIndex, run.paused, run.ended, stopTimed]);
 
   // --- the clock -----------------------------------------------------------
   const running = run.phase !== "idle" && run.phase !== "recap";
@@ -1141,18 +1151,65 @@ export function useSessionRun(input: SessionRunInput) {
     if (event.type === "close") setView(origin.current);
   }, [big, playTake, endTake, setView]);
 
+  /**
+   * A timed step's own tempo, a step at a time: on its ready screen or while
+   * paused. Not graded, so any tempo is fine (owner, beta 5: slow down to learn).
+   */
+  const nudgeTimed = useCallback((sign: 1 | -1) => {
+    const state = runRef.current;
+    const timedNow = state.phase === "timedReady" || (state.phase === "timed" && (state.paused || state.ended));
+    if (!timedNow || !timedTempoAdjustable(currentStep(state))) return false;
+    dispatch({ type: "setBpm", bpm: timedBpm(state.bpm, sign * TIMED_BPM_STEP), now: Date.now() });
+    return true;
+  }, []);
+
   // Locked on a Test out, whose Take has to be at the pass tempo (`tempoNudges`).
   const slower = useCallback(() => {
+    if (nudgeTimed(-1)) return;
     if (exercise && tempoNudges(runRef.current, exercise).slower) {
       dispatch({ type: "slower", exercise, now: Date.now() });
     }
-  }, [exercise]);
+  }, [exercise, nudgeTimed]);
 
   const faster = useCallback(() => {
+    if (nudgeTimed(1)) return;
     if (exercise && tempoNudges(runRef.current, exercise).faster) {
       dispatch({ type: "faster", exercise, now: Date.now() });
     }
-  }, [exercise]);
+  }, [exercise, nudgeTimed]);
+
+  /** Pause a running timed step, or resume a paused one. */
+  const togglePause = useCallback(() => {
+    const state = runRef.current;
+    if (state.phase !== "timed" || state.ended) return;
+    dispatch({ type: state.paused ? "resume" : "pause", now: Date.now() });
+  }, []);
+
+  /**
+   * Go again: a timed step from the top (running or paused), a graded result
+   * at the same tempo. Nothing anywhere else.
+   */
+  const restart = useCallback(() => {
+    const state = runRef.current;
+    if (state.phase === "timed") dispatch({ type: "restart", now: Date.now() });
+    else if (state.phase === "result") dispatch({ type: "again", now: Date.now() });
+  }, []);
+
+  /** Back to the warm-up (or the timed step) just before this one, before anything is played here. */
+  const back = useCallback(() => {
+    dispatch({ type: "back", now: Date.now() });
+  }, []);
+
+  /**
+   * Space and Enter: what the big button says, except while a timed step runs,
+   * where they pause and resume it. The big button there says "Next", and a
+   * key pressed to stop the click must not skip the warm-up (owner, beta 5).
+   */
+  const goKey = useCallback(() => {
+    const state = runRef.current;
+    if (state.phase === "timed" && !state.ended) return togglePause();
+    go();
+  }, [go, togglePause]);
 
   /** Go again at this tempo, whatever the big button is offering. */
   const again = useCallback(() => {
@@ -1288,6 +1345,7 @@ export function useSessionRun(input: SessionRunInput) {
     lights,
     big,
     working: run.phase === "listening",
+    canGoBack: canGoBack(run),
     /** Escape asked "Leave this Session?" and it has not been answered. */
     leaveAsked,
     /** Placement's verdict, on the result that ended its climb. */
@@ -1298,10 +1356,14 @@ export function useSessionRun(input: SessionRunInput) {
       chooseStep,
       chooseLevel,
       go,
+      goKey,
       slower,
       faster,
       again,
       next,
+      togglePause,
+      restart,
+      back,
       findEdgeFromHere,
       findEdge,
       exit,

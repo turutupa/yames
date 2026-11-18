@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
 import { barLine, tempoRange } from "../../session/coachWords";
 import { isRunnable, laterWhyKey } from "../../session/packs";
-import { stepPickDirectionMatters } from "../../session/caveats";
+import { stepHonestLineKey } from "../../session/caveats";
 import { testOutRetests } from "../../session/planner";
 import { PATH_BADGE_KEY, exerciseGradingKey, pathBadge } from "../../session/badges";
 import {
@@ -561,8 +561,8 @@ function StepDetail({
         </div>
         <div className="session-col">
           <div className="session-slot" ref={slot} aria-hidden="true" style={{ minHeight: 240 }} />
-          {stepPickDirectionMatters(step) && (
-            <div className="session-why" data-testid="pick-caveat">{t("session.run.honest")}</div>
+          {stepHonestLineKey(step) && (
+            <div className="session-why" data-testid="pick-caveat">{t(stepHonestLineKey(step)!)}</div>
           )}
         </div>
       </div>

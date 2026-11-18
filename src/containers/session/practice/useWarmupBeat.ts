@@ -25,6 +25,17 @@ import type { ClickBeat, WarmupClock } from "./practiceModel";
 /** The beat a practice screen is handed: the engine's event, read for position and for the click's own count. */
 export type PracticeBeat = BeatPosition & Partial<ClickBeat>;
 
+/**
+ * Where a Resume carries on from, in beats into the pattern: the start of the
+ * bar it was paused in, so the player comes back in on a downbeat.
+ */
+export function resumeBeats(clock: WarmupClock, pos: BeatPosition | null, barTicks: number): number {
+  if (!pos || pos.songCountIn) return 0;
+  const into = pos.songPass * clock.passTicks + (pos.songTick - clock.start);
+  const bar = Math.max(1, barTicks);
+  return Math.max(0, Math.floor(into / bar) * Math.round(bar / clock.perQuarter));
+}
+
 /** One pass of a warm-up's pattern, from its Take. */
 export function warmupClockOf(take: TakePlan): WarmupClock {
   const score = take.score;
@@ -50,7 +61,13 @@ export function warmupClockOf(take: TakePlan): WarmupClock {
  * The warm-up's position while it runs, or null (stopped, or before the
  * first downbeat after Start). A new object per beat, like the engine's.
  */
-export function useWarmupBeat(take: TakePlan | null, beat: PracticeBeat | null, running: boolean): BeatPosition | null {
+export function useWarmupBeat(
+  take: TakePlan | null,
+  beat: PracticeBeat | null,
+  running: boolean,
+  /** Beats into the pattern to carry on from after the count-in (a Resume); 0 from the top. */
+  fromBeats = 0,
+): BeatPosition | null {
   const clock = useMemo(() => (take ? warmupClockOf(take) : null), [take]);
   const [pos, setPos] = useState<BeatPosition | null>(null);
   const first = useRef<number | null>(null);
@@ -74,8 +91,8 @@ export function useWarmupBeat(take: TakePlan | null, beat: PracticeBeat | null, 
       if (beat.isDownbeat === false) return;
       first.current = beat.beat;
     }
-    setPos(warmupPosition(clock, beat.beat - first.current));
-  }, [beat, running, clock]);
+    setPos(warmupPosition(clock, beat.beat - first.current, fromBeats));
+  }, [beat, running, clock, fromBeats]);
 
   return running ? pos : null;
 }

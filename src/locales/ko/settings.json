@@ -249,7 +249,10 @@
         "session-exit": "세션 나가기",
         "tab-paths": "코스",
         "tab-progress": "진도",
-        "tab-tools": "도구"
+        "tab-tools": "도구",
+        "session-view": "보기 전환",
+        "session-pause": "일시정지",
+        "session-restart": "다시"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -299,11 +302,14 @@
         "session-slower": "테이크 사이: 한 단계 느리게",
         "session-faster": "테이크 사이: 한 단계 빠르게",
         "session-next": "테이크 사이: 세션의 다음 항목으로 넘어갑니다",
-        "session-pedal": "풋스위치 하나용. 탭: 다음 동작. 더블 탭: 느리게. 길게 누르기: 다음 단계",
+        "session-pedal": "풋스위치 하나용. 탭: 다음 동작(진행 중인 워밍업은 일시정지). 더블 탭: 더 느리게. 길게 누르기: 다시",
         "session-exit": "세션 중: 나가기와 똑같이 세션을 나갑니다. 진행 중인 테이크는 먼저 멈춥니다.",
         "tab-paths": "코스로 이동합니다",
         "tab-progress": "진도로 이동합니다",
-        "tab-tools": "도구로 이동합니다"
+        "tab-tools": "도구로 이동합니다",
+        "session-view": "세션에서: 넥, 런웨이, 탭. 워밍업 중엔 언제든, 채점 테이크는 테이크 사이에",
+        "session-pause": "워밍업이나 시간 블록에서: 일시정지 또는 계속",
+        "session-restart": "워밍업이나 시간 블록에서: 처음부터. 테이크 후: 같은 테이크를 다시"
       }
     },
     "inputTest": {

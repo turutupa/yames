@@ -205,7 +205,9 @@
       "band": "樂團",
       "bandHint": "樂團不計分。用麥克風時請調小音量或戴耳機。",
       "bandMicHint": "用麥克風時我會把樂團當成你的音，所以預設關閉。戴上耳機再調大。",
-      "skip": "跳過這個"
+      "skip": "跳過這個",
+      "skipped": "已略過",
+      "honestTiming": "我聽的是節奏，不是哪些音。上下撥由你掌握：我聽不出彈片方向。"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -292,7 +294,7 @@
       "double": "雙踩",
       "doubleDoes": "慢一點",
       "hold": "長踩",
-      "holdDoes": "下一步"
+      "holdDoes": "再來一次"
     },
     "recap": {
       "kick": "這節課結束了",
@@ -405,13 +407,31 @@
       "finger": "{{n}} 指",
       "start": "從這裡開始",
       "legendNow": "現在彈",
-      "legendNext": "下一個",
+      "legendNext": "然後，依序",
       "legendPlayed": "剛彈過",
       "beats": "這一小節的拍子",
       "hand": "手：食指在第 {{fret}} 格，一指一格。",
       "handShifts": "手：食指從第 {{fret}} 格開始，沿琴頸移動。",
       "handOpen": "手：開放把位，食指在第 1 格上方。",
-      "viewHint": "隨時可以切換檢視"
+      "viewHint": "隨時可以切換檢視",
+      "left": "剩餘",
+      "notGraded": "不評分。{{time}} 後結束；然後再來一次，或繼續。",
+      "notChecked": "不檢查。{{time}} 後結束；然後再來一次，或繼續。",
+      "pausedFoot": "已暫停。計時等著你；調慢或調快，然後繼續。",
+      "pausedFootNeck": "已暫停。所有小節都在六線譜檢視（{{key}}）裡；調慢或調快，然後繼續。",
+      "switchAny": "熱身時隨時可以切換檢視",
+      "barOf": "第 {{n}} / {{of}} 小節 · 讓節拍器帶著你。",
+      "pausedAt": "暫停在第 {{n}} / {{of}} 小節",
+      "paused": "已暫停",
+      "pause": "暫停",
+      "pauseKeys": "暫停：{{key}}、空白鍵或 Enter",
+      "resume": "繼續",
+      "restart": "重新開始",
+      "back": "再來一次：{{title}}",
+      "ended": "完成。再來一次，或進入下一項。",
+      "endedFoot": "不評分。再來一次，或準備好後繼續。",
+      "again": "再來一次",
+      "beatOf": "第 {{n}} / {{of}} 拍"
     },
     "runway": {
       "label": "即將抵達判定線的下一組音符",
@@ -445,7 +465,12 @@
     },
     "tabstrip": {
       "label": "六線譜：{{notes}}",
-      "bar": "第 {{n}} 小節"
+      "bar": "第 {{n}} 小節",
+      "now": "現在 · {{where}}",
+      "next": "接下來 · {{where}}",
+      "barBeat": "第 {{n}} 小節第 {{beat}} 拍",
+      "barBeats": "第 {{n}} 小節第 {{from}}–{{to}} 拍",
+      "pausedHere": "在此暫停 · {{where}}"
     },
     "leave": {
       "title": "離開這次練習？",

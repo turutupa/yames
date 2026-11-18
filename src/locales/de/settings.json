@@ -249,7 +249,10 @@
         "session-exit": "Session verlassen",
         "tab-paths": "Pfade",
         "tab-progress": "Fortschritt",
-        "tab-tools": "Werkzeuge"
+        "tab-tools": "Werkzeuge",
+        "session-view": "Ansicht wechseln",
+        "session-pause": "Pause",
+        "session-restart": "Nochmal"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -299,11 +302,14 @@
         "session-slower": "Zwischen Takes: eine Stufe langsamer",
         "session-faster": "Zwischen Takes: eine Stufe schneller",
         "session-next": "Zwischen Takes: weiter zum Nächsten in der Session",
-        "session-pedal": "Für einen einzelnen Fußschalter. Tippen: das Nächste. Doppelt tippen: langsamer. Halten: nächster Schritt",
+        "session-pedal": "Für einen einzelnen Fußschalter. Tippen: das Nächste (pausiert ein laufendes Aufwärmen). Doppelt tippen: langsamer. Halten: nochmal",
         "session-exit": "In einer Session: sie verlassen, wie Beenden. Ein laufender Take stoppt zuerst.",
         "tab-paths": "Zu „Pfade“ wechseln",
         "tab-progress": "Zu „Fortschritt“ wechseln",
-        "tab-tools": "Zu „Werkzeuge“ wechseln"
+        "tab-tools": "Zu „Werkzeuge“ wechseln",
+        "session-view": "In einer Session: Hals, Runway oder Tab. Beim Aufwärmen jederzeit; bei bewerteten Takes zwischen den Takes",
+        "session-pause": "Beim Aufwärmen oder in einem Zeitblock: pausieren oder weitermachen",
+        "session-restart": "Beim Aufwärmen oder in einem Zeitblock: von vorn. Nach einem Take: derselbe Take nochmal"
       }
     },
     "inputTest": {

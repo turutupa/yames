@@ -118,7 +118,8 @@ kbd {
 
 /* =================== Light theme overrides =================== */
 [data-theme-group="light"] { --graph-grid: rgba(0, 0, 0, 0.12); --graph-line: rgba(0, 0, 0, 0.3); }
-[data-theme-group="light"] button { color: var(--text-primary); }
+/* Not inside the learning side: its page keeps its own dark palette in every theme (UX audit SES-8). */
+[data-theme-group="light"] button:not(.session-page *) { color: var(--text-primary); }
 [data-theme-group="light"] .main-header h1 { color: var(--text-primary); }
 [data-theme-group="light"] .play-btn { background: var(--accent); color: var(--accent-text); box-shadow: none; }
 @media (hover: hover) {

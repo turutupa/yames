@@ -1582,7 +1582,8 @@ export function MainWindow() {
   const sessionActions = useMemo(
     () => ({
       startToday: sessionRun.actions.startToday,
-      go: sessionRun.actions.go,
+      // A key: pauses a running warm-up rather than skipping it (`goKey`).
+      go: sessionRun.actions.goKey,
       slower: sessionRun.actions.slower,
       faster: sessionRun.actions.faster,
       next: sessionRun.actions.next,
@@ -1590,12 +1591,16 @@ export function MainWindow() {
       // Escape: a running Take stops first; leaving asks once there are Takes.
       exit: sessionRun.actions.escape,
       cycleView: sessionRun.actions.cycleView,
+      togglePause: sessionRun.actions.togglePause,
+      restart: sessionRun.actions.restart,
     }),
     [
+      sessionRun.actions.togglePause,
+      sessionRun.actions.restart,
       sessionRun.actions.cycleView,
       sessionRun.actions.escape,
       sessionRun.actions.startToday,
-      sessionRun.actions.go,
+      sessionRun.actions.goKey,
       sessionRun.actions.slower,
       sessionRun.actions.faster,
       sessionRun.actions.next,
@@ -1732,9 +1737,10 @@ export function MainWindow() {
     midiBindings: midi.bindings,
     keyBinding: keyBindings["session-pedal"],
     onGesture: (gesture) => {
-      if (gesture === "tap") sessionRun.actions.go();
+      // Tap: the next thing (a running warm-up: pause). Hold: again (UX audit SES-1).
+      if (gesture === "tap") sessionRun.actions.goKey();
       else if (gesture === "double") sessionRun.actions.slower();
-      else sessionRun.actions.next();
+      else sessionRun.actions.restart();
     },
   });
   pedalPress.current = sessionPedal.press;
@@ -2451,6 +2457,8 @@ export function MainWindow() {
             hasSignal={evaluation.hasSignal}
             bpmNow={state.bpm}
             viewKey={platformKey(keyBindings["session-view"] || "")}
+            pauseKey={platformKey(keyBindings["session-pause"] || "")}
+            restartKey={platformKey(keyBindings["session-restart"] || "")}
             skipKey={platformKey(keyBindings["session-next"] || "")}
             onCheckSound={openAudioSettings}
           />

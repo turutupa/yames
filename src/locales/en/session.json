@@ -205,7 +205,9 @@
       "band": "Band",
       "bandHint": "The band is not graded. On a microphone, keep it low or use headphones.",
       "bandMicHint": "On a microphone I'd hear the band as your notes, so it starts off. With headphones on, turn it up.",
-      "skip": "Skip this"
+      "skip": "Skip this",
+      "skipped": "Skipped",
+      "honestTiming": "I hear your timing, not which notes. Down-up is on you: I can't hear pick direction."
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
@@ -292,7 +294,7 @@
       "double": "Double tap",
       "doubleDoes": "Slower",
       "hold": "Hold",
-      "holdDoes": "Next"
+      "holdDoes": "Again"
     },
     "recap": {
       "kick": "Session done",
@@ -405,13 +407,31 @@
       "finger": "finger {{n}}",
       "start": "start here",
       "legendNow": "play now",
-      "legendNext": "next",
+      "legendNext": "then, in order",
       "legendPlayed": "just played",
       "beats": "The bar's beats",
       "hand": "Hand: index finger at fret {{fret}}, one finger per fret.",
       "handShifts": "Hand: start with the index finger at fret {{fret}}; it moves along the neck.",
       "handOpen": "Hand: open position, index finger over fret 1.",
-      "viewHint": "Switch views any time"
+      "viewHint": "Switch views any time",
+      "left": "left",
+      "notGraded": "Not graded. Ends in {{time}}; then again, or on.",
+      "notChecked": "Not checked. Ends in {{time}}; then again, or on.",
+      "pausedFoot": "Paused. The clock waits for you; slower or faster, then Resume.",
+      "pausedFootNeck": "Paused. Every bar is in the Tab view ({{key}}); slower or faster, then Resume.",
+      "switchAny": "Switch views any time in a warm-up",
+      "barOf": "Bar {{n}} of {{of}} · let the click carry you.",
+      "pausedAt": "Paused at bar {{n}} of {{of}}",
+      "paused": "Paused",
+      "pause": "Pause",
+      "pauseKeys": "Pause: {{key}}, Space or Enter",
+      "resume": "Resume",
+      "restart": "Restart",
+      "back": "Again: {{title}}",
+      "ended": "Played out. Again, or on to the next.",
+      "endedFoot": "Not graded. Go again, or move on when you are ready.",
+      "again": "Again",
+      "beatOf": "Beat {{n}} of {{of}}"
     },
     "runway": {
       "label": "The next notes, arriving at the line",
@@ -445,7 +465,12 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
-      "bar": "bar {{n}}"
+      "bar": "bar {{n}}",
+      "now": "now · {{where}}",
+      "next": "next · {{where}}",
+      "barBeat": "bar {{n}}, beat {{beat}}",
+      "barBeats": "bar {{n}}, beats {{from}}–{{to}}",
+      "pausedHere": "paused here · {{where}}"
     },
     "leave": {
       "title": "Leave this Session?",

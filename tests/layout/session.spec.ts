@@ -48,7 +48,8 @@ const BIG: Record<string, string> = {
   "today-back": '[data-testid="today-start"]',
   "session-ready": '[data-testid="session-big"]',
   "session-warmup-ready": '[data-testid="session-big"]',
-  "session-warmup": '[data-testid="session-big"]',
+  // Running, the big button is Pause (UX audit SES-1); Next is a link.
+  "session-warmup": '[data-testid="session-pause"]',
   "session-result": '[data-testid="session-big"]',
   "session-no-catch": '[data-testid="session-big"]',
   "session-edge-result": '[data-testid="session-big"]',

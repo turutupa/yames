@@ -249,7 +249,10 @@
         "session-exit": "Leave the Session",
         "tab-paths": "Paths",
         "tab-progress": "Progress",
-        "tab-tools": "Tools"
+        "tab-tools": "Tools",
+        "session-view": "Switch view",
+        "session-pause": "Pause",
+        "session-restart": "Go again"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -299,11 +302,14 @@
         "session-slower": "Between Takes: one rung slower",
         "session-faster": "Between Takes: one rung faster",
         "session-next": "Between Takes: move on to the next thing in the Session",
-        "session-pedal": "For a single footswitch. Tap: the next thing. Double tap: slower. Hold: next step",
+        "session-pedal": "For a single footswitch. Tap: the next thing (pauses a running warm-up). Double tap: slower. Hold: again",
         "session-exit": "In a Session: leave it, as Exit does. A running Take stops first.",
         "tab-paths": "Go to Paths",
         "tab-progress": "Go to Progress",
-        "tab-tools": "Go to Tools"
+        "tab-tools": "Go to Tools",
+        "session-view": "In a Session: Neck, Runway or Tab. Any time in a warm-up; between Takes in a graded one",
+        "session-pause": "In a warm-up or a timed block: pause it, or carry on",
+        "session-restart": "In a warm-up or a timed block: from the top. After a Take: the same Take again"
       }
     },
     "inputTest": {

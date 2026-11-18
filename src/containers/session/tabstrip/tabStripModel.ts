@@ -172,133 +172,289 @@ export function currentOnset(
   return { pass, index, at };
 }
 
-/** Pixels per tick and the fixed cursor's x, for a view this wide. */
-export type StripScale = {
-  ppt: number;
-  cursorX: number;
-  /** Fret-number size, in px. */
-  fretPx: number;
-  /** The closest two onsets may sit, centre to centre. */
-  minGapPx: number;
-};
+/**
+ * The layout (owner, beta 5: "it does not look like the picture").
+ *
+ * The approved mock (`.preview/practice-review/designer/mock.html?view=tab`)
+ * is a staff with the high e as its top line, the fret numbers ON their lines,
+ * "now · bar 2" over the bar being played and "next · bar 3", dimmed, beside
+ * it, beat counts under each bar and TAB at the left. Nothing scrolls under a
+ * fixed column: the amber column goes from note to note across the bar, and
+ * at the bar line the next bar slides into "now".
+ *
+ * So the unit is a SEGMENT: a bar, or half or a quarter of one when the notes
+ * are dense. Two are shown, now and next, and the segment is the largest that
+ * keeps every two neighbouring numbers `minGapPx` apart, about twice a
+ * number's width (the mock spaces 65 px a note at 34 px). The overview the
+ * ready and paused screens show is the same segments, one pass of them,
+ * wrapped onto rows.
+ */
 
-/** The cursor's place across the view in follow mode. */
-export const CURSOR_AT = 0.3;
-/** How many bars the space right of the cursor is sized for: now and next. */
-export const BARS_AHEAD = 2;
-/** Fret numbers at full size (a 1024px window and wider), and at their smallest. */
+/** Fret numbers at full size (the mock's footnote: 34 px), and the smallest any layout takes. */
 export const FRET_PX = 34;
-export const FRET_PX_MIN = 20;
-/** Preview may go smaller than follow on a phone: the whole pattern has to fit. */
-export const PREVIEW_FRET_PX_MIN = 15;
+export const FRET_PX_MIN = 14;
 /** The current note is drawn this much larger: 34 px becomes 40. */
 export const CURRENT_SCALE = 40 / 34;
+/** Segments per bar the layouts try, sparsest first: a bar, half, a quarter, an eighth. */
+export const SEGMENT_SPLITS = [1, 2, 4, 8] as const;
+/** Segments the follow view shows side by side: now and next. */
+export const FOLLOW_SEGMENTS = 2;
 
-/** The fret-number size for a view this wide: full from 760 px, scaled to a phone below. */
+/** The fret-number size for a staff this wide: full from 760 px, scaled to a phone below. */
 export function fretPxFor(viewWidth: number): number {
   if (!(viewWidth > 0)) return FRET_PX;
   if (viewWidth >= 760) return FRET_PX;
-  const k = Math.max(0, (viewWidth - 300) / (760 - 300));
-  return Math.round(FRET_PX_MIN + k * (FRET_PX - FRET_PX_MIN));
+  const k = Math.max(0, (viewWidth - 280) / (760 - 280));
+  return Math.round(18 + k * (FRET_PX - 18));
 }
 
-/** Room for a two-digit number and its knock-out, centre to centre. */
+/** The closest two neighbouring numbers may sit, centre to centre: about twice a number (65 px at 34). */
 export function minGapPxFor(fretPx: number): number {
-  return Math.round(fretPx * 1.45);
+  return Math.round(fretPx * 1.9);
+}
+
+/** The vertical geometry of one staff, for numbers this size. */
+export type StaffGeometry = {
+  fretPx: number;
+  /** Between two string lines. */
+  gap: number;
+  /** The "now · bar 2" label's baseline. */
+  labelY: number;
+  /** The high e's line, and the low E's. */
+  top: number;
+  bottom: number;
+  /** The beat counts' baseline. */
+  beatY: number;
+  height: number;
+  /** The TAB letters' column, left of the first bar. */
+  letters: number;
+  /** Space inside a segment before its first note's slot, and after its last. */
+  inset: number;
+};
+
+export function staffGeometry(fretPx: number): StaffGeometry {
+  const f = fretPx;
+  const gap = Math.round(f * 1.35);
+  const labelY = Math.round(Math.max(12, f * 0.47) + 4);
+  const top = Math.round(labelY + f * 0.9 + 10);
+  const bottom = top + 5 * gap;
+  const beatY = Math.round(bottom + f + Math.max(10, f * 0.5));
+  return {
+    fretPx: f,
+    gap,
+    labelY,
+    top,
+    bottom,
+    beatY,
+    height: beatY + 8,
+    letters: Math.round(f * 1.25 + 8),
+    inset: Math.round(Math.max(6, f * 0.45)),
+  };
+}
+
+/** The tightest gap between two onsets, in ticks; a beat when there is one onset or none. */
+export function gapTicksOf(model: Pick<PatternModel, "minGap" | "beatTicks">): number {
+  return model.minGap > 0 ? model.minGap : model.beatTicks;
+}
+
+/** A segment's x scale: pixels per tick inside a segment this wide. */
+export function segmentPpt(segWidth: number, segTicks: number, geo: Pick<StaffGeometry, "inset">): number {
+  return Math.max(0, segWidth - 2 * geo.inset) / Math.max(1, segTicks);
 }
 
 /**
- * Follow mode: the cursor 30 % in, and the 70 % right of it sized for the
- * current bar and the next. Closer than `minGapPx` and the strip zooms in and
- * shows less ahead, as the runway does, rather than let numbers collide.
+ * A note's x inside its segment: the segment's inset, then its tick, then
+ * half the tightest gap, so the numbers sit centred in their slots and none
+ * stands on a bar line (the mock's `step * (i + .5)`).
  */
-export function followScale(
-  model: Pick<PatternModel, "barTicks" | "minGap">,
-  viewWidth: number,
-): StripScale {
-  const fretPx = fretPxFor(viewWidth);
-  const minGapPx = minGapPxFor(fretPx);
-  if (!(viewWidth > 0)) return { ppt: 0, cursorX: 0, fretPx, minGapPx };
-  const cursorX = Math.round(viewWidth * CURSOR_AT);
-  const fit = (viewWidth - cursorX) / (BARS_AHEAD * model.barTicks);
-  const legible = model.minGap > 0 ? minGapPx / model.minGap : 0;
-  return { ppt: Math.max(fit, legible), cursorX, fretPx, minGapPx };
+export function noteXIn(
+  intoTicks: number,
+  ppt: number,
+  model: Pick<PatternModel, "minGap" | "beatTicks">,
+  geo: Pick<StaffGeometry, "inset">,
+): number {
+  return geo.inset + (intoTicks + gapTicksOf(model) / 2) * ppt;
 }
 
+/** Whether neighbours `gapTicks` apart are far enough apart at this scale. */
+function holds(model: Pick<PatternModel, "minGap" | "beatTicks">, ppt: number, fretPx: number): boolean {
+  return gapTicksOf(model) * ppt >= minGapPxFor(fretPx) - 0.5;
+}
+
+export type FollowLayout = {
+  fretPx: number;
+  geo: StaffGeometry;
+  /** Segments per bar (1: a bar each). */
+  split: number;
+  segTicks: number;
+  /** One segment's width, in px. */
+  segWidth: number;
+  ppt: number;
+  /** The gap holds; false only when nothing tried would (a phone and thirty-seconds). */
+  fits: boolean;
+};
+
 /**
- * Preview mode: one pass, the whole width, with a margin each side for the
- * first and last numbers. The numbers shrink (never below `PREVIEW_FRET_PX_MIN`)
- * before two neighbours on one string are allowed to touch.
+ * The follow view for a panel this wide: two segments, the largest that keeps
+ * the gap, at full size where the width allows. A phone takes smaller numbers
+ * before it takes a shorter segment, down to 18 px.
  */
-export function previewScale(
-  model: Pick<PatternModel, "passTicks" | "minGap" | "notes">,
+export function followLayout(
+  model: Pick<PatternModel, "barTicks" | "minGap" | "beatTicks">,
   viewWidth: number,
-): StripScale & { margin: number } {
+): FollowLayout {
   const base = fretPxFor(viewWidth);
-  if (!(viewWidth > 0)) return { ppt: 0, cursorX: 0, fretPx: base, minGapPx: minGapPxFor(base), margin: 0 };
-  const margin = Math.round(base * 1.1);
-  const ppt = Math.max(0, viewWidth - 2 * margin) / model.passTicks;
-  const fretPx = Math.max(PREVIEW_FRET_PX_MIN, Math.min(base, largestFretPx(model.notes, ppt)));
-  return { ppt, cursorX: margin, fretPx, minGapPx: minGapPxFor(fretPx), margin };
-}
-
-/** A fret number's width, in ems of its own size: one digit or two. */
-export function numberEm(fret: number): number {
-  return fret >= 10 ? 1.2 : 0.72;
-}
-
-/**
- * The largest number size at which no two neighbours on one string touch, at
- * `ppt`. Only the same string matters: numbers on different strings are on
- * different lines.
- */
-export function largestFretPx(notes: readonly TabStripNoteInput[], ppt: number): number {
-  const byString = new Map<number, TabStripNoteInput[]>();
-  for (const n of notes) byString.set(n.string, [...(byString.get(n.string) ?? []), n]);
-  let best = Number.POSITIVE_INFINITY;
-  for (const list of byString.values()) {
-    const sorted = [...list].sort((a, b) => a.tick - b.tick);
-    for (let i = 1; i < sorted.length; i++) {
-      const gapPx = (sorted[i].tick - sorted[i - 1].tick) * ppt;
-      if (!(gapPx > 0)) continue;
-      const need = (numberEm(sorted[i].fret) + numberEm(sorted[i - 1].fret)) / 2;
-      best = Math.min(best, Math.floor((gapPx - 3) / need));
+  // Never much smaller than the width allows: a dense bar splits instead.
+  const sizes = base - 4 >= 18 ? [base, base - 4] : [base];
+  let last: FollowLayout | null = null;
+  for (const split of SEGMENT_SPLITS) {
+    for (const fretPx of sizes) {
+      const geo = staffGeometry(fretPx);
+      const segTicks = model.barTicks / split;
+      const segWidth = Math.max(1, (viewWidth - geo.letters) / FOLLOW_SEGMENTS);
+      const ppt = segmentPpt(segWidth, segTicks, geo);
+      last = { fretPx, geo, split, segTicks, segWidth, ppt, fits: holds(model, ppt, fretPx) };
+      if (last.fits) return last;
     }
   }
-  return best;
+  return last!;
 }
 
-/** The strip's x offset that puts `tick` under the cursor. */
-export function stripOffset(tick: number, scale: Pick<StripScale, "ppt" | "cursorX">): number {
-  return scale.cursorX - tick * scale.ppt;
-}
-
-/** Where a tick sits on the strip, before the offset. */
-export function tickX(tick: number, scale: Pick<StripScale, "ppt">): number {
-  return tick * scale.ppt;
-}
+export type OverviewLayout = {
+  fretPx: number;
+  geo: StaffGeometry;
+  split: number;
+  segTicks: number;
+  /** Segments in one pass, and on one row. */
+  segments: number;
+  perRow: number;
+  rows: number;
+  segWidth: number;
+  ppt: number;
+  /** Every row fits the height given. False: the panel scrolls. */
+  fits: boolean;
+};
 
 /**
- * A bar line sits a little before the bar's first tick, so a note on beat one
- * is not drawn on the line: half the tightest gap, at most 28 px.
+ * The whole pattern for the ready and paused screens: one pass, wrapped onto
+ * rows, the largest numbers whose rows fit the height, never closer than the
+ * gap. Bars stay whole when they can; a dense bar on a narrow window splits.
  */
-export function barLinePad(model: Pick<PatternModel, "minGap" | "beatTicks">, ppt: number): number {
-  const gap = (model.minGap > 0 ? model.minGap : model.beatTicks) * ppt;
-  return Math.min(28, Math.max(6, gap / 2));
+export function overviewLayout(
+  model: Pick<PatternModel, "barTicks" | "minGap" | "beatTicks" | "patternBars">,
+  viewWidth: number,
+  viewHeight: number,
+  maxFretPx: number = FRET_PX,
+): OverviewLayout {
+  const top = Math.min(maxFretPx, fretPxFor(viewWidth));
+  let fallback: OverviewLayout | null = null;
+  for (let fretPx = top; fretPx >= FRET_PX_MIN; fretPx -= 2) {
+    const geo = staffGeometry(fretPx);
+    const usable = Math.max(1, viewWidth - geo.letters);
+    for (const split of SEGMENT_SPLITS) {
+      const segTicks = model.barTicks / split;
+      const segments = model.patternBars * split;
+      // The narrowest a segment may be and keep the gap.
+      const need = (segTicks / gapTicksOf(model)) * minGapPxFor(fretPx) + 2 * geo.inset;
+      const perRow = Math.min(segments, Math.floor(usable / need));
+      if (perRow < 1) continue;
+      // Whole bars on a row where they fit: a row of one and a half bars reads badly.
+      let rowSegs = split > 1 && perRow >= split ? perRow - (perRow % split) : perRow;
+      const rows = Math.ceil(segments / rowSegs);
+      // Even rows: four bars that fit three to a row are two rows of two.
+      const even = Math.ceil(segments / rows);
+      if (even <= rowSegs && (split === 1 || even % split === 0)) rowSegs = even;
+      const segWidth = usable / rowSegs;
+      const ppt = segmentPpt(segWidth, segTicks, geo);
+      const layout: OverviewLayout = {
+        fretPx,
+        geo,
+        split,
+        segTicks,
+        segments,
+        perRow: rowSegs,
+        rows,
+        segWidth,
+        ppt,
+        fits: rows * geo.height <= viewHeight,
+      };
+      if (layout.fits) return layout;
+      if (fretPx === FRET_PX_MIN) fallback ??= layout;
+      break;
+    }
+  }
+  // Nothing fits the height (or the width is not known yet): the smallest
+  // numbers, the sparsest split that has a segment on a row, and the panel scrolls.
+  const geo = staffGeometry(FRET_PX_MIN);
+  const usable = Math.max(1, viewWidth - geo.letters);
+  let pick = fallback;
+  if (!pick || pick.fretPx !== FRET_PX_MIN) {
+    let split: number = SEGMENT_SPLITS[SEGMENT_SPLITS.length - 1];
+    for (const s of SEGMENT_SPLITS) {
+      const need = (model.barTicks / s / gapTicksOf(model)) * minGapPxFor(FRET_PX_MIN) + 2 * geo.inset;
+      if (usable >= need) {
+        split = s;
+        break;
+      }
+    }
+    const segTicks = model.barTicks / split;
+    const segments = model.patternBars * split;
+    const need = (segTicks / gapTicksOf(model)) * minGapPxFor(FRET_PX_MIN) + 2 * geo.inset;
+    const perRow = Math.max(1, Math.min(segments, Math.floor(usable / need)));
+    const segWidth = usable / perRow;
+    pick = {
+      fretPx: FRET_PX_MIN,
+      geo,
+      split,
+      segTicks,
+      segments,
+      perRow,
+      rows: Math.ceil(segments / perRow),
+      segWidth,
+      ppt: segmentPpt(segWidth, segTicks, geo),
+      fits: false,
+    };
+  }
+  return pick;
 }
 
-/** Which passes must be on the strip for the view to be full at `tick`. */
-export function passWindow(
-  model: Pick<PatternModel, "passTicks">,
-  tick: number,
-  scale: Pick<StripScale, "ppt" | "cursorX">,
-  viewWidth: number,
-): { from: number; to: number } {
-  const pass = passAt(model, tick);
-  const passPx = Math.max(1, model.passTicks * scale.ppt);
-  const behind = Math.ceil(scale.cursorX / passPx);
-  const ahead = Math.ceil(Math.max(0, viewWidth - scale.cursorX) / passPx);
-  return { from: Math.max(0, pass - behind), to: Math.max(0, pass + ahead) };
+/** Which segment a tick falls in (the count-in is -1). */
+export function segmentAt(segTicks: number, tick: number): number {
+  return Math.floor(tick / segTicks);
+}
+
+/** What a segment is called: its bar from 1 (in the pattern), and its beats when it is part of one. */
+export function segmentPlace(
+  model: Pick<PatternModel, "barTicks" | "beatTicks" | "patternBars">,
+  segment: number,
+  segTicks: number,
+): { bar: number; fromBeat: number; toBeat: number; whole: boolean } {
+  const start = segment * segTicks;
+  const bar = Math.floor(start / model.barTicks);
+  const inBar = start - bar * model.barTicks;
+  const fromBeat = Math.floor(inBar / model.beatTicks) + 1;
+  const toBeat = Math.max(fromBeat, Math.ceil((inBar + segTicks) / model.beatTicks));
+  return {
+    bar: (((bar % model.patternBars) + model.patternBars) % model.patternBars) + 1,
+    fromBeat,
+    toBeat,
+    whole: segTicks >= model.barTicks,
+  };
+}
+
+/** The notes of segment `segment`, every pass that reaches into it, cut at the Take's end. */
+export function segmentNotes(
+  model: PatternModel,
+  segment: number,
+  segTicks: number,
+  takeBars?: number,
+): StripNote[] {
+  if (segment < 0) return [];
+  const from = segment * segTicks;
+  const to = from + segTicks;
+  const p0 = Math.max(0, passAt(model, from));
+  const p1 = Math.max(p0, passAt(model, to - 1));
+  return occurrences(model, p0, p1, takeBars).filter((n) => n.at >= from && n.at < to);
 }
 
 /** Where a bar stands relative to the one being played. */

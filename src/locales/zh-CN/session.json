@@ -205,7 +205,9 @@
       "band": "乐队",
       "bandHint": "乐队不计分。用麦克风时请调小音量或戴耳机。",
       "bandMicHint": "用麦克风时我会把乐队当成你的音，所以默认关闭。戴上耳机再调大。",
-      "skip": "跳过这个"
+      "skip": "跳过这个",
+      "skipped": "已跳过",
+      "honestTiming": "我听的是节奏，不是哪些音。上下拨由你掌握：我听不出拨片方向。"
     },
     "result": {
       "kick": "第 {{take}} 遍 · {{title}} · {{bpm}} BPM · {{bars}} 小节",
@@ -292,7 +294,7 @@
       "double": "双踩",
       "doubleDoes": "慢一点",
       "hold": "长踩",
-      "holdDoes": "下一步"
+      "holdDoes": "再来一次"
     },
     "recap": {
       "kick": "这节课结束了",
@@ -405,13 +407,31 @@
       "finger": "{{n}} 指",
       "start": "从这里开始",
       "legendNow": "现在弹",
-      "legendNext": "下一个",
+      "legendNext": "然后，按顺序",
       "legendPlayed": "刚弹过",
       "beats": "这一小节的拍子",
       "hand": "手：食指在第 {{fret}} 品，一指一品。",
       "handShifts": "手：食指从第 {{fret}} 品开始，沿琴颈移动。",
       "handOpen": "手：开放把位，食指在第 1 品上方。",
-      "viewHint": "随时可以切换视图"
+      "viewHint": "随时可以切换视图",
+      "left": "剩余",
+      "notGraded": "不评分。{{time}} 后结束；然后再来一次，或继续。",
+      "notChecked": "不检查。{{time}} 后结束；然后再来一次，或继续。",
+      "pausedFoot": "已暂停。计时等着你；调慢或调快，然后继续。",
+      "pausedFootNeck": "已暂停。所有小节都在六线谱视图（{{key}}）里；调慢或调快，然后继续。",
+      "switchAny": "热身时随时可以切换视图",
+      "barOf": "第 {{n}} / {{of}} 小节 · 让节拍器带着你。",
+      "pausedAt": "暂停在第 {{n}} / {{of}} 小节",
+      "paused": "已暂停",
+      "pause": "暂停",
+      "pauseKeys": "暂停：{{key}}、空格或回车",
+      "resume": "继续",
+      "restart": "重新开始",
+      "back": "再来一次：{{title}}",
+      "ended": "完成。再来一次，或进入下一项。",
+      "endedFoot": "不评分。再来一次，或准备好后继续。",
+      "again": "再来一次",
+      "beatOf": "第 {{n}} / {{of}} 拍"
     },
     "runway": {
       "label": "即将到达判定线的下一组音符",
@@ -445,7 +465,12 @@
     },
     "tabstrip": {
       "label": "六线谱：{{notes}}",
-      "bar": "第 {{n}} 小节"
+      "bar": "第 {{n}} 小节",
+      "now": "当前 · {{where}}",
+      "next": "接下来 · {{where}}",
+      "barBeat": "第 {{n}} 小节第 {{beat}} 拍",
+      "barBeats": "第 {{n}} 小节第 {{from}}–{{to}} 拍",
+      "pausedHere": "在此暂停 · {{where}}"
     },
     "leave": {
       "title": "离开这次练习？",
