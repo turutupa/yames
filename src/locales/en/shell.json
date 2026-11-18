@@ -85,6 +85,7 @@
     "coachReady": "Ready",
     "coachInSession": "In session",
     "collapse": "Collapse sidebar",
+    "collapseLabel": "Collapse sidebar",
     "expand": "Expand sidebar",
     "collapseWithShortcut": "Collapse sidebar ({{shortcut}})",
     "expandWithShortcut": "Expand sidebar ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "Paused",
     "notificationStop": "Stop",
     "notificationChannel": "Playback"
-  }
+  },
+  "skipLink": "Skip to main content"
 }

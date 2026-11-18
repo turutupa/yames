@@ -102,3 +102,18 @@
   from { opacity: 0; transform: translateY(-50%) translateX(4px); }
   to { opacity: 1; transform: translateY(-50%) translateX(0); }
 }
+
+/* P1-10: no room for the label beside the sheet → no label. Kept in the
+   layout (visibility, not display) so it can still be measured when the
+   window widens again. */
+.stl-tick.stl-no-label .stl-tooltip {
+  visibility: hidden;
+}
+
+/* No room for the ticks either → the rail steps aside entirely. */
+.settings-timeline.stl-hidden {
+  visibility: hidden;
+}
+.settings-timeline.stl-hidden .stl-tick {
+  pointer-events: none;
+}

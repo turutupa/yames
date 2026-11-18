@@ -131,10 +131,12 @@ function Letters({ geo }: { geo: StaffGeometry }) {
           key={letter}
           className="tabstrip-tab"
           x={geo.letters * 0.36}
-          y={geo.top + geo.gap * (1.3 + i * 1.2)}
+          // In the three middle spaces, between lines, never on one: "B" sat
+          // on the fifth line and met a note there (acceptance P2-5).
+          y={geo.top + geo.gap * (1.5 + i)}
           textAnchor="middle"
           dominantBaseline="central"
-          style={{ fontSize: geo.fretPx * 0.82 }}
+          style={{ fontSize: Math.min(geo.fretPx * 0.82, geo.gap * 0.66) }}
         >
           {letter}
         </text>
@@ -399,6 +401,22 @@ export function TabStrip({
     [position],
   );
 
+  /**
+   * Where a segment is, in as many words as its width has room for: "bar 2,
+   * beats 3–4", then "bar 2", then "2". A phone's segment clipped "next ·
+   * bar 2, be…" (acceptance P2-6). `room` is the segment's width in px and
+   * `px` the label's font size; the words are measured at about 0.56 em a
+   * character, with the "now · " or "next · " they are put in.
+   */
+  const fitPlace = (where: { bar: number; fromBeat: number; toBeat: number; whole: boolean }, room: number, px: number, rel: "now" | "next" | "other") => {
+    const wrap = (w: string) => (rel === "now" ? t("session.tabstrip.now", { where: w }) : rel === "next" ? t("session.tabstrip.next", { where: w }) : w);
+    const fits = (text: string) => text.length * px * 0.56 <= room - 14;
+    for (const w of [place(where), t("session.tabstrip.bar", { n: where.bar }), String(where.bar)]) {
+      if (fits(wrap(w))) return wrap(w);
+    }
+    return wrap(String(where.bar));
+  };
+
   const place = (where: { bar: number; fromBeat: number; toBeat: number; whole: boolean }) =>
     where.whole
       ? t("session.tabstrip.bar", { n: where.bar })
@@ -582,7 +600,9 @@ export function TabStrip({
             />
             {followSegments.map((s) => {
               const rel = s === page ? "now" : s === page + 1 ? "next" : s < page ? "past" : "later";
-              const where = place(segmentPlace(model, s, fl.segTicks));
+              const spot = segmentPlace(model, s, fl.segTicks);
+              const where = place(spot);
+              const labelPx = Math.max(11, geo.fretPx * 0.47);
               return (
                 <Segment
                   key={`${s}:${fl.segTicks}:${fl.fretPx}`}
@@ -595,11 +615,9 @@ export function TabStrip({
                   notes={segmentNotes(model, s, fl.segTicks, takeBars)}
                   rel={rel}
                   label={
-                    rel === "now"
-                      ? t("session.tabstrip.now", { where })
-                      : rel === "next"
-                        ? t("session.tabstrip.next", { where })
-                        : where
+                    rel === "now" || rel === "next"
+                      ? fitPlace(spot, fl.segWidth, labelPx, rel)
+                      : where
                   }
                   left={(s - page) * fl.segWidth}
                 />

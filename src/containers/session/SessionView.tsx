@@ -63,9 +63,9 @@ function playedNotes(session: SessionRun) {
 }
 
 /** The neck framed on the Exercise's own frets, its notes in one colour. */
-function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
+function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false, clip = false) {
   const { view, notes } = exerciseNeck(playedNotes(session), kind, isTheoryTake(session));
-  return useNeckSlot(view, notes, { sweep });
+  return useNeckSlot(clip && view.kind === "zoom" ? { ...view, clip: true } : view, notes, { sweep });
 }
 
 /** What an Exercise step plays, in the pack's words: its purpose. */
@@ -142,25 +142,31 @@ function TimingStrip({ deviations }: { deviations: readonly number[] }) {
   const MID = H / 2;
   const RANGE_MS = 50;
   const y = (ms: number) => MID - (Math.max(-RANGE_MS, Math.min(RANGE_MS, ms)) / RANGE_MS) * (MID - 8);
-  const step = (W - 44) / 24;
+  const step = (W - 12) / 24;
+  // The words are HTML beside the drawing, not SVG text in it: the drawing is
+  // scaled to its box, and at the head's 46 px they came out about 6 px tall
+  // (acceptance P2-5).
   return (
-    <svg
-      className="session-strip"
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label={t("session.run.stripLabel")}
-    >
-      <text x="0" y="13" className="session-strip-label">
-        {t("session.run.late")}
-      </text>
-      <text x="0" y={H - 4} className="session-strip-label">
-        {t("session.run.early")}
-      </text>
-      <line x1="40" x2={W} y1={MID} y2={MID} className="session-strip-grid" />
-      {deviations.map((ms, i) => (
-        <circle key={i} cx={40 + i * step} cy={y(ms)} r="4" className="session-strip-dot" />
-      ))}
-    </svg>
+    <span className="session-strip" role="img" aria-label={t("session.run.stripLabel")}>
+      <span className="session-strip-labels" aria-hidden="true">
+        <span>{t("session.run.late")}</span>
+        <span>{t("session.run.early")}</span>
+      </span>
+      <span className="session-strip-area" aria-hidden="true">
+        <svg className="session-strip-plot" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+          <line x1="0" x2={W} y1={MID} y2={MID} className="session-strip-grid" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <span className="session-strip-dots">
+          {deviations.map((ms, i) => (
+            <i
+              key={i}
+              className="session-strip-dot"
+              style={{ left: `${((6 + i * step) / W) * 100}%`, top: `${(y(ms) / H) * 100}%` }}
+            />
+          ))}
+        </span>
+      </span>
+    </span>
   );
 }
 
@@ -419,10 +425,19 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
         {t(met ? "session.result.decidedPass" : "session.result.decidedMiss")}
       </div>
       <div className="session-moved">
-        {moved && <span className="session-moved-before">{before} →</span>}
-        <span className="session-moved-value" data-met={met ? "" : undefined}>
-          {value}
-          {percent ? "%" : ""}
+        {/* The two numbers never part: "78 →" alone on a line above the
+            result read as a heading (acceptance P1-2). */}
+        <span className="session-moved-pair">
+          {moved && (
+            <span className="session-moved-before" data-testid="session-moved-before">
+              <small>{t("session.result.lastTime")}</small>
+              {before} →
+            </span>
+          )}
+          <span className="session-moved-value" data-met={met ? "" : undefined}>
+            {value}
+            {percent ? "%" : ""}
+          </span>
         </span>
         <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
         {bar !== null && (
@@ -693,7 +708,8 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   const passed = outcome?.grade.verdict === "passed";
   // The warm sweep on every result; the notes green when the bar was met.
   // A phone hides the neck here (phone-learning.css, PHONE-4).
-  const slot = useExerciseSlot(session, passed ? "tone" : "aim", true);
+  // Clipped to its own column: never behind the result's words (acceptance P1-2).
+  const slot = useExerciseSlot(session, passed ? "tone" : "aim", true, true);
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
   const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);

@@ -85,6 +85,7 @@
     "coachReady": "待機中",
     "coachInSession": "セッション中",
     "collapse": "サイドバーを折りたたむ",
+    "collapseLabel": "サイドバーを折りたたむ",
     "expand": "サイドバーを展開",
     "collapseWithShortcut": "サイドバーを折りたたむ ({{shortcut}})",
     "expandWithShortcut": "サイドバーを展開 ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "一時停止",
     "notificationStop": "停止",
     "notificationChannel": "再生"
-  }
+  },
+  "skipLink": "メインコンテンツへスキップ"
 }

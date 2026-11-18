@@ -24,17 +24,22 @@ const RAD = 4.2;
 export const fretX = (n: number) => L * (1 - Math.pow(2, -n / 12));
 // Markers sit just behind the fret wire, where the finger goes, which leaves the inlay clear.
 export const NOTE_R = 0.05;
-export const noteX = (f: number) => (f <= 0 ? -0.07 : fretX(f) - NOTE_R - 0.021);
+// An open string's marker sits just left of the nut, on the stub of board before it (HEAD), so even
+// NOW's larger disc clears the nut and stays on the board (acceptance P1-3).
+export const noteX = (f: number) => (f <= 0 ? -0.1 : fretX(f) - NOTE_R - 0.021);
+/** Where the board starts: a short stub before the nut, for the open strings' markers. */
+export const HEAD = -0.2;
 const INLAY_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const DOUBLE = (f: number) => f === 12 || f === 24;
-// The taper, nut to the 24th fret. A real neck goes about 43 mm to 56 mm (0.77),
-// but seen whole on a wide, short stage that reads as a wedge with the nut end
-// pinched. The board runs 0.46 to 0.545 (0.84; about 0.87 on screen, nut piece to
-// end bar) and the strings keep the same margin to its edges all the way up.
-const span = (x: number) => (0.375 + (0.11 * x) / L) * NW;
+// The taper, nut to the 24th fret. A real neck goes about 43 mm to 56 mm (0.77);
+// mock A is "unrealistically horizontal, more symbolic" (acceptance P1-3), so
+// the board and the strings barely widen: 0.525 to 0.555 (0.95), the strings
+// 0.4 to 0.44, and they keep a margin to the edges wide enough that NOW's
+// larger disc on an outer string stays on the board (0.08 each side).
+const span = (x: number) => (0.4 + (0.04 * x) / L) * NW;
 export const strZ = (s: number, x: number) => ((s - 3.5) * span(x)) / 5;
 export const XEND = fretX(24) + 0.14;
-export const boardW = (x: number) => (0.46 + ((0.545 - 0.46) * Math.max(0, x)) / XEND) * NW;
+export const boardW = (x: number) => (0.525 + ((0.555 - 0.525) * Math.max(0, x)) / XEND) * NW;
 const crown = (z: number) => (-z * z) / (2 * RAD);
 const strH = (x: number) => 0.05 + (0.018 * x) / L;
 /** Each string's drawn width, high e to low E: the mock's 2.2 to 6.6 px at the practice zoom. */
@@ -62,7 +67,7 @@ function toGeo(a: Arrays, colorSize = 0): THREE.BufferGeometry {
 
 /** The board's top: the crowned surface, nut to the end of the board. */
 function boardGeometry() {
-  const xs = [-0.012];
+  const xs = [HEAD, -0.012];
   for (let f = 1; f <= 24; f++) xs.push(fretX(f));
   xs.push(XEND);
   const cols = 10;
@@ -110,7 +115,7 @@ function fretsGeometry() {
 /** The board's two long edges, as hairlines just inside them. */
 function edgeGeometry() {
   const a = arrays();
-  const xs = [-0.012, XEND / 2, XEND];
+  const xs = [HEAD, XEND / 2, XEND];
   [-1, 1].forEach((side) => {
     const base = a.p.length / 3;
     xs.forEach((x) => {
@@ -135,7 +140,7 @@ function edgeGeometry() {
 function shadowGeometry() {
   const blur = 0.075;
   const drop = 0.028;
-  const x0 = -0.012;
+  const x0 = HEAD;
   const x1 = XEND;
   const steps = [-1, -0.6, -0.25, 0.25, 0.6, 1];
   const fall = (d: number) => {
@@ -576,12 +581,12 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
   // Point list to frame a stretch of the neck. The low-E side leaves room for the fret numbers.
   const tmp = new THREE.Vector3();
   function windowPoints(lo: number, hi: number): THREE.Vector3[] {
-    const a = lo <= 1 ? -0.13 : fretX(lo - 1);
+    const a = lo <= 1 ? HEAD - 0.02 : fretX(lo - 1);
     const b = hi >= 24 ? XEND + 0.02 : fretX(hi);
     const out: THREE.Vector3[] = [];
     [a, b].forEach((x) => {
       const W = boardW(x) / 2;
-      [-W, W + 0.15].forEach((z) => {
+      [-W - 0.02, W + 0.15].forEach((z) => {
         tmp.set(x, 0, z);
         out.push(root.localToWorld(tmp.clone()));
       });

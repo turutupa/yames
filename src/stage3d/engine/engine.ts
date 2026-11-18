@@ -26,23 +26,11 @@ import { pickTier, tierSettings, type QualityStep, type Tier } from "../quality"
 import { neckPalette, type NeckPalette } from "../neckTheme";
 import { NOTE_R, createGuitar, type Guitar } from "./guitar";
 import * as T from "./textures";
+import { cloneRig, createRigFlight, type Rig } from "./rig";
 
-const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const GUITAR_Y = 0.62;
 
-type Rig = {
-  pos: THREE.Vector3;
-  tgt: THREE.Vector3;
-  fov: number;
-  ox: number;
-  oy: number;
-  poolX: number;
-  poolY: number;
-  poolA: number;
-};
-const SCALARS = ["fov", "ox", "oy", "poolX", "poolY", "poolA"] as const;
-const cloneRig = (s: Rig): Rig => ({ ...s, pos: s.pos.clone(), tgt: s.tgt.clone() });
 
 type Shot = {
   points: () => THREE.Vector3[];
@@ -163,7 +151,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
   guitar.root.updateMatrixWorld(true);
 
   // ─── Camera rig ───
-  const R: Rig = {
+  const rig = createRigFlight({
     pos: V(-1, 3, 4),
     tgt: V(2, 0.6, 0),
     fov: 26,
@@ -172,10 +160,9 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     poolX: 0.5,
     poolY: 0.5,
     poolA: 1,
-  };
-  let from = cloneRig(R);
-  let to = cloneRig(R);
-  let flight: { t: number; dur: number; lift: number } | null = null;
+  });
+  // What the camera draws: the flight's path plus its arc (see ./rig.ts).
+  const R = rig.shown;
   let current: { view: VisibleView; rect: SlotRect } | null = null;
   const solverCam = new THREE.PerspectiveCamera();
   const v3 = V();
@@ -250,20 +237,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     current = { view, rect };
     const shot = shotFor(view, rect, guitar);
     guitar.setNumberScale(shot.numScale);
-    to = target(shot, rect);
-    from = cloneRig(R);
-    if (instant || reduced) {
-      Object.assign(R, cloneRig(to));
-      flight = null;
-      return;
-    }
-    const dist = from.pos.distanceTo(to.pos);
-    if (dist < 1e-4 && Math.abs(from.ox - to.ox) < 0.5 && Math.abs(from.oy - to.oy) < 0.5) {
-      Object.assign(R, cloneRig(to));
-      flight = null;
-      return;
-    }
-    flight = { t: 0, dur: shot.dur, lift: Math.max(shot.lift, Math.min(3.4, dist * 0.2)) };
+    rig.fly(target(shot, rect), shot.dur, shot.lift, instant || reduced);
   }
 
   function applyRig() {
@@ -299,8 +273,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     renderer.setPixelRatio(dpr());
     renderer.setSize(W, H, false);
     if (current) {
-      to = target(shotFor(current.view, current.rect, guitar), current.rect);
-      if (!flight) Object.assign(R, cloneRig(to));
+      rig.retarget(target(shotFor(current.view, current.rect, guitar), current.rect));
     }
   }
 
@@ -323,8 +296,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     refit(rect: SlotRect) {
       if (!current) return;
       current = { view: current.view, rect };
-      to = target(shotFor(current.view, rect, guitar), rect);
-      if (!flight) Object.assign(R, cloneRig(to));
+      rig.retarget(target(shotFor(current.view, rect, guitar), rect));
     },
     setNotes(notes: NeckNote[], fade: number) {
       guitar.setNotes(
@@ -345,14 +317,14 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       if (s < 1 || s > 6 || f < 0 || f > 24) return null;
       // Through the rig the camera is going to, so an overlay placed now is
       // where the note will be when a flight lands.
-      const rig = flight ? to : R;
-      projCam.position.copy(rig.pos);
-      projCam.fov = rig.fov;
+      const at0 = rig.to;
+      projCam.position.copy(at0.pos);
+      projCam.fov = at0.fov;
       projCam.aspect = W / H;
       projCam.near = camera.near;
       projCam.far = camera.far;
-      projCam.lookAt(rig.tgt);
-      projCam.setViewOffset(W, H, -rig.ox, -rig.oy, W, H);
+      projCam.lookAt(at0.tgt);
+      projCam.setViewOffset(W, H, -at0.ox, -at0.oy, W, H);
       projCam.updateProjectionMatrix();
       projCam.updateMatrixWorld(true);
       const at = guitar.notePoint(s, Math.round(f));
@@ -375,19 +347,18 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     frame(dt: number): boolean {
       if (lost) return false;
       let busy = false;
-      if (flight) {
-        busy = true;
-        flight.t = Math.min(1, flight.t + Math.min(dt, 0.1) / flight.dur);
-        const e = ease(flight.t);
-        const l = Math.sin(Math.PI * flight.t) * flight.lift;
-        R.pos.lerpVectors(from.pos, to.pos, e);
-        R.pos.y += l;
-        R.tgt.lerpVectors(from.tgt, to.tgt, e);
-        for (const k of SCALARS) R[k] = from[k] + (to[k] - from[k]) * e;
-        if (flight.t >= 1) flight = null;
-      }
+      if (rig.step(dt)) busy = true;
       if (guitar.update(dt)) busy = true;
       applyRig();
+      // A clipped view draws inside its slot only (acceptance P1-2). The canvas
+      // still clears whole, so nothing is left behind outside it.
+      const clip = current && current.view.kind === "zoom" && current.view.clip ? current.rect : null;
+      if (clip) {
+        renderer.setScissorTest(false);
+        renderer.clear();
+        renderer.setScissor(clip.left, H - clip.top - clip.height, clip.width, clip.height);
+        renderer.setScissorTest(true);
+      } else renderer.setScissorTest(false);
       renderer.autoClear = true;
       renderer.render(scene, camera);
       renderer.autoClear = false;

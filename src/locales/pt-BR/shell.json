@@ -85,6 +85,7 @@
     "coachReady": "Pronto",
     "coachInSession": "Em sessão",
     "collapse": "Recolher barra lateral",
+    "collapseLabel": "Recolher barra lateral",
     "expand": "Expandir barra lateral",
     "collapseWithShortcut": "Recolher barra lateral ({{shortcut}})",
     "expandWithShortcut": "Expandir barra lateral ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "Pausado",
     "notificationStop": "Parar",
     "notificationChannel": "Reprodução"
-  }
+  },
+  "skipLink": "Pular para o conteúdo principal"
 }

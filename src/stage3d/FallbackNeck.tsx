@@ -90,14 +90,17 @@ export function FallbackNeck({
   const bh = Math.max(24, Math.min(H - numH - 2 * pad, W * (whole ? 0.115 : 0.45)));
   const bT = pad + Math.max(0, (H - numH - 2 * pad - bh) / 2);
   const bB = bT + bh;
-  const inset = bh * 0.075;
-  const sp = (bh - 2 * inset) / 5;
+  // The outer strings sit far enough in that NOW's marker on them stays on
+  // the board, as the 3D neck's do (acceptance P1-3).
+  const sp = bh / 6.3;
+  const inset = sp * 0.65;
   const S = (s: number) => bT + inset + (s - 1) * sp;
   const R = sp * 0.46;
   const mL = whole || a === 0 ? Math.max(14, R * 2.6) : 0;
   const mR = whole ? 14 + W * 0.012 : 0;
   const X = (f: number) => mL + ((fx(f) - fx(a)) / (fx(b) - fx(a))) * (W - mL - mR);
-  const xL = a === 0 ? X(0) : 0;
+  // A stub of board before the nut, so an open string's marker sits on the board, just left of the nut.
+  const xL = a === 0 ? Math.max(0, X(0) - R * 2.6) : 0;
   const xR = whole ? X(24) + (X(24) - X(23)) * 0.6 : W;
   const fretW = Math.max(1, sp * 0.065);
   const nutW = Math.max(3, sp * 0.16);

@@ -1010,6 +1010,12 @@ export function installShotMock(shot: Shot, theme: string): void {
     store.delete("presets");
   }
   if (shot.instrument) store.set("instrument", shot.instrument);
+  // The Tools page names the setlist and the jam last opened (acceptance
+  // P2-13): a returning player has opened one of each.
+  if (shot.session?.seed === "returning") {
+    store.set("lastSetlistId", "c1");
+    store.set("lastJamId", "jam-slow-blues-a");
+  }
   if (shot.session?.minutes) store.set("session.minutes", shot.session.minutes);
   if (shot.session?.practiceView) store.set("practiceView", shot.session.practiceView);
   // Played Alternate Picking, then unsubscribed from it: no Path at all.
@@ -1332,8 +1338,11 @@ export function installShotMock(shot: Shot, theme: string): void {
     }
     beatCount += 1;
     // A Take's verdict is the point of those scenes, not sitting through one.
-    // A warm-up after its Start is watched as it runs, at its own tempo.
-    const fast = shot.session && shot.session.stop !== "playing" && shot.session.stop !== "timed";
+    // A warm-up after its Start is watched as it runs, at its own tempo: a
+    // warm-up loads no song, so only a Take (a song loaded) is hurried. A
+    // warm-up at 15 ms a beat moved the camera every 60 ms and hid what the
+    // neck does at a real tempo (acceptance P0-1).
+    const fast = shot.session && shot.session.stop !== "playing" && shot.session.stop !== "timed" && !!songTransport;
     beatTimer = setTimeout(beatLoop, fast ? 15 : 60000 / (STATE.bpm as number));
   }
 

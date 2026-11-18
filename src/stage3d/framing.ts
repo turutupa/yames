@@ -30,16 +30,11 @@ export const FLAT_FOV = 12;
 
 export function framingFor(view: VisibleView, rect: { width: number; height: number }): Framing {
   const portrait = isPortrait(rect);
+  // Mock A (acceptance P1-3): every shot is the flat one, straight on and
+  // horizontal. The three-quarter tilt read as a product render and fanned
+  // the frets at the edges of a wide slot.
   if (view.kind === "whole") {
-    return { dir: [0, 1, 0.26], fov: 14, numScale: portrait ? 2.4 : 1.55, pool: portrait ? 0.55 : 1.1 };
+    return { dir: [0, 1, FLAT_TILT], fov: FLAT_FOV, numScale: portrait ? 2.4 : 1.55, pool: portrait ? 0.55 : 1.1 };
   }
-  if (view.flat) {
-    return { dir: [0, 1, FLAT_TILT], fov: FLAT_FOV, numScale: 0.6, pool: 0.9 };
-  }
-  return {
-    dir: portrait ? [0.95, 1, 0] : [0, 1, 0.34],
-    fov: portrait ? 40 : 22,
-    numScale: portrait ? 1 : 0.66,
-    pool: 0.9,
-  };
+  return { dir: [0, 1, FLAT_TILT], fov: FLAT_FOV, numScale: view.flat ? 0.6 : 0.66, pool: 0.9 };
 }
