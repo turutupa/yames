@@ -39,6 +39,9 @@
   --ts-miss: #b4232f;
 }
 .session-page .tabstrip {
+  /* The Tab view's panel is taller than one staff: centre the staff in it.
+     (The size is the component's own, `--ts-fret` inline from its scale.) */
+  align-items: center;
   --ts-ink: var(--l-ink, #fbf5ea);
   --ts-quiet: var(--l-quiet, #c9bba6);
   --ts-faint: var(--l-faint, #94866f);

@@ -692,6 +692,13 @@ function TimedScreen({
         >
           {clock(stepRemainingMs(run))}
         </div>
+        {/* Between the clock and the tempo: the row has room, and the corner
+            above is the view switch's. */}
+        {countingIn && (
+          <div className="session-count" role="status" data-testid="session-count" data-small="">
+            {t("session.run.countIn")}
+          </div>
+        )}
         {bpm > 0 && (
           <div className="session-bpm">
             {bpm}
@@ -747,11 +754,6 @@ function TimedScreen({
           {bigLabel(big, t)}
         </button>
       </div>
-      {countingIn && (
-        <div className="session-count" role="status" data-testid="session-count" data-small="">
-          {t("session.run.countIn")}
-        </div>
-      )}
     </div>
   );
 }
