@@ -76,6 +76,8 @@ function KindTag({ kind }: { kind: PathDoc["kind"] }) {
 /** One pip per Step: passed, the one you are on, the rest. */
 function StepPips({ session, path }: { session: SessionRun; path: PathDoc }) {
   const current = currentStepOf(session.progress, path);
+  // Not started: no pip lit, so the bar agrees with "Not started yet" under it.
+  const started = session.progress.states.some((s) => s.pathId === path.id);
   return (
     <span className="session-pips" aria-hidden="true">
       {path.steps.map((step) => (
@@ -84,7 +86,7 @@ function StepPips({ session, path }: { session: SessionRun; path: PathDoc }) {
           data-state={
             isStepPassed(session.progress, path.id, step)
               ? "done"
-              : step.id === current.id
+              : started && step.id === current.id
                 ? "on"
                 : undefined
           }
@@ -483,7 +485,8 @@ function PathDetail({
 function TabPreview({ exercise }: { exercise: Exercise }) {
   const { t } = useTranslation();
   const barTicks = barLengthTicks(exercise.meter);
-  const bars = Math.max(1, Math.min(exercise.bars, 2));
+  // One bar: the shape of it at a glance, at a size that leaves the words first.
+  const bars = 1;
   const notes = useMemo(
     () =>
       exercise.notes
@@ -501,7 +504,7 @@ function TabPreview({ exercise }: { exercise: Exercise }) {
         position={-barTicks}
         playing={false}
         mode="preview"
-        maxFretPx={15}
+        maxFretPx={14}
       />
     </div>
   );
