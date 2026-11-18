@@ -1456,3 +1456,25 @@
     min-height: 44px;
   }
 }
+
+/* ── Keyboard focus in setup (SET-8) ───────────────────────────────────────
+   Every choice here is SELECTED in the accent (border, tint, accent name), so
+   a focus ring in the same accent read as a second selection: two cards lit,
+   which one is mine? Focus is the ink colour instead, set off from the card by
+   a gap, and only for the keyboard (`:focus-visible`); a click shows nothing
+   but the choice. A focused card no longer borrows the selected card's
+   border or fill either. */
+.onboarding-overlay :is(button, a, input, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 3px;
+}
+.onboarding-overlay .onboarding-sound-card:focus-visible:not(.selected) {
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+/* Cards draw their ring inside their own edge: their rows clip anything
+   outside, and an inner ring cannot be mistaken for the selected border. */
+.onboarding-overlay
+  :is(.instrument-picker-card, .onboarding-sound-card, .onboarding-theme-card, .onboarding-coach-card, .onboarding-input-mode):focus-visible {
+  outline-offset: -4px;
+}
