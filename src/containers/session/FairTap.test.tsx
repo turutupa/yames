@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { FairTap } from "./SessionView";
+import { FairTap, borderline, recapFairOutcome } from "./SessionView";
 import type { SessionRun } from "./hooks/useSessionRun";
 import type { TakeOutcome } from "../../session/runner";
 import { take } from "../../session/testKit";
@@ -57,5 +57,34 @@ describe("the fairness tap", () => {
     const { session } = fake();
     const { container } = render(<FairTap session={session} outcome={{} as TakeOutcome} />);
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("when the fairness question is asked (acceptance P1-9)", () => {
+  const graded = (takeId: string, value: number) =>
+    ({
+      takeId,
+      grade: {
+        verdict: value >= 85 ? "passed" : "notYet",
+        checks: [{ metric: "timingEvenness", value: value / 100, min: 0.85, met: value >= 85 }],
+        unmeasured: [],
+      },
+    }) as unknown as TakeOutcome;
+
+  it("on a result only within 5 points of the bar", () => {
+    expect(borderline(graded("a", 87))).toBe(true);
+    expect(borderline(graded("a", 80))).toBe(true);
+    expect(borderline(graded("a", 97))).toBe(false);
+    expect(borderline(graded("a", 60))).toBe(false);
+  });
+
+  it("on the recap about the last graded Take, unless already answered this Session", () => {
+    const outcomes = [graded("a", 87), graded("b", 97)];
+    const row = (id: string, fair?: "yes" | "no") => ({ ...take("even-eighths.open-string"), id, facts: fair ? { fair } : {} });
+    expect(recapFairOutcome(outcomes, [row("a"), row("b")])?.takeId).toBe("b");
+    expect(recapFairOutcome(outcomes, [row("a", "yes"), row("b")])).toBeNull();
+    // Answered on the recap itself: it stays, with its thanks.
+    expect(recapFairOutcome(outcomes, [row("a"), row("b", "no")])?.takeId).toBe("b");
+    expect(recapFairOutcome([], [])).toBeNull();
   });
 });

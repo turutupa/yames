@@ -49,6 +49,7 @@ import { lineText } from "./lineText";
 import { readyHonestLineKey } from "../../session/caveats";
 import { ContextLine, StepTag, rise, stepTitle } from "./TodayView";
 import { factsOf } from "../../session/progress";
+import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
 import { IS_MOBILE } from "../../platform";
@@ -520,8 +521,33 @@ function BarByBar({ session, outcome }: { session: SessionRun; outcome: TakeOutc
   );
 }
 
-/** Close enough to the bar either way that the player's own view is worth asking (UX audit SES-5). */
-function borderline(outcome: TakeOutcome): boolean {
+/**
+ * The Take the recap asks "fair?" about, or null (acceptance P1-9): the last
+ * graded one, at most once a Session. A player who already answered for
+ * another Take of this Session (on a borderline result) is not asked again;
+ * an answer given on the recap itself stays on screen with its thanks.
+ */
+export function recapFairOutcome(
+  outcomes: readonly TakeOutcome[],
+  takes: readonly PathTakeRow[],
+): TakeOutcome | null {
+  const graded = outcomes.filter((o) => o.takeId && o.grade.verdict !== "notCaught" && o.grade.verdict !== "ungraded");
+  const last = graded[graded.length - 1];
+  if (!last) return null;
+  const answered = (id: string | undefined) => {
+    const row = takes.find((take) => take.id === id);
+    return !!row && factsOf(row).fair !== undefined;
+  };
+  const elsewhere = graded.some((o) => o !== last && answered(o.takeId));
+  return elsewhere ? null : last;
+}
+
+/**
+ * Close enough to the bar either way that the player's own view is worth
+ * asking (UX audit SES-5, acceptance P1-9): within 5 points of the bar, or one
+ * note on a count. Exported for its test.
+ */
+export function borderline(outcome: TakeOutcome): boolean {
   const check = decidingCheck(outcome.grade);
   if (!check) return false;
   const value = displayValue(check);
@@ -1200,7 +1226,7 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const raised = [...run.outcomes]
     .reverse()
     .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
-  const lastGraded = [...run.outcomes].reverse().find((o) => o.takeId && o.grade.verdict !== "notCaught" && o.grade.verdict !== "ungraded");
+  const lastGraded = recapFairOutcome(run.outcomes, session.progress.takes);
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),
