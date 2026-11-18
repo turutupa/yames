@@ -1343,3 +1343,11 @@
 .main-content[data-view="settings"] .hotkey-row {
   grid-template-columns: minmax(0, 1fr) minmax(110px, 180px) minmax(110px, 180px);
 }
+
+/* Room for the longer section names (ru "ГОРЯЧИЕ КЛАВИШИ") where the window
+   has it; the column is at its 1120px cap by then anyway. */
+@media (min-width: 1700px) {
+  :root {
+    --settings-gutter: 230px;
+  }
+}

@@ -434,7 +434,7 @@
       "minutes": "Długość sesji",
       "minutesHint": "Na ile czasu Dzisiaj planuje twoje ćwiczenie. Możesz to też zmienić w Dzisiaj.",
       "view": "Widok ćwiczenia",
-      "viewHint": "Co sesja pokazuje, gdy grasz. Naciśnij V, by przełączyć w trakcie sesji."
+      "viewHint": "Co sesja pokazuje, gdy grasz."
     }
   },
   "keybindings": {

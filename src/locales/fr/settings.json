@@ -434,7 +434,7 @@
       "minutes": "Durée de la séance",
       "minutesHint": "La durée que Aujourd'hui prévoit pour ta pratique. Tu peux aussi la changer depuis Aujourd'hui.",
       "view": "Vue de pratique",
-      "viewHint": "Ce qu'une séance affiche pendant que tu joues. Appuie sur V pour changer pendant une séance."
+      "viewHint": "Ce qu'une séance affiche pendant que tu joues."
     }
   },
   "keybindings": {

@@ -434,7 +434,7 @@
       "minutes": "Sessieduur",
       "minutesHint": "Hoe lang Vandaag je oefening plant. Je kunt het ook op Vandaag wijzigen.",
       "view": "Oefenweergave",
-      "viewHint": "Wat een sessie toont terwijl je speelt. Druk op V om tijdens een sessie te wisselen."
+      "viewHint": "Wat een sessie toont terwijl je speelt."
     }
   },
   "keybindings": {

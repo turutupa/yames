@@ -434,7 +434,7 @@
       "minutes": "Durata della sessione",
       "minutesHint": "Quanto dura la pratica che Oggi pianifica. Puoi cambiarla anche da Oggi.",
       "view": "Vista di pratica",
-      "viewHint": "Cosa mostra una sessione mentre suoni. Premi V per cambiarla durante una sessione."
+      "viewHint": "Cosa mostra una sessione mentre suoni."
     }
   },
   "keybindings": {

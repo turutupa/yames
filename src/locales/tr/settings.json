@@ -434,7 +434,7 @@
       "minutes": "Seans süresi",
       "minutesHint": "Bugün'ün pratiğini ne kadar süreye planladığı. Bunu Bugün'den de değiştirebilirsin.",
       "view": "Pratik görünümü",
-      "viewHint": "Sen çalarken bir seansın gösterdiği şey. Seans sırasında değiştirmek için V'ye bas."
+      "viewHint": "Sen çalarken bir seansın gösterdiği şey."
     }
   },
   "keybindings": {

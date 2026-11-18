@@ -434,7 +434,7 @@
       "minutes": "Độ dài buổi tập",
       "minutesHint": "Hôm nay lên kế hoạch luyện tập trong bao lâu. Bạn cũng có thể đổi ở Hôm nay.",
       "view": "Chế độ xem khi tập",
-      "viewHint": "Những gì buổi tập hiển thị khi bạn chơi. Nhấn V để đổi trong buổi tập."
+      "viewHint": "Những gì buổi tập hiển thị khi bạn chơi."
     }
   },
   "keybindings": {

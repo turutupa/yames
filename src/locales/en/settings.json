@@ -434,7 +434,7 @@
       "minutes": "Session length",
       "minutesHint": "How long Today plans your practice for. You can change it on Today too.",
       "view": "Practice view",
-      "viewHint": "What a Session shows while you play. Press V to switch during a Session."
+      "viewHint": "What a Session shows while you play."
     }
   },
   "keybindings": {

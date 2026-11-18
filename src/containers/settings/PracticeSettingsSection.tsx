@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { storeLoad } from "../../ipc";
+import { IS_MOBILE } from "../../platform";
 import { PLAN_MINUTES, type PlanMinutes } from "../../session/planner";
 import {
   PRACTICE_VIEWS,
@@ -85,7 +86,11 @@ export function PracticeSettingsSection({ practice }: { practice: PracticeSettin
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.practice.view")}</label>
-          <span className="setting-hint">{t("settings.practice.viewHint")}</span>
+          <span className="setting-hint">
+            {t("settings.practice.viewHint")}
+            {/* The key only where there is a keyboard to press it on. */}
+            {!IS_MOBILE && <> {t("session.view.keyHint", { key: "V" })}</>}
+          </span>
         </div>
         <div className="toggle-group" role="group" aria-label={t("settings.practice.view")}>
           {PRACTICE_VIEWS.map((v) => (

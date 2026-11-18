@@ -434,7 +434,7 @@
       "minutes": "Sitzungslänge",
       "minutesHint": "Wie lange „Heute“ dein Üben plant. Du kannst es auch dort ändern.",
       "view": "Übungsansicht",
-      "viewHint": "Was eine Sitzung beim Spielen zeigt. Mit V wechselst du während einer Sitzung."
+      "viewHint": "Was eine Sitzung beim Spielen zeigt."
     }
   },
   "keybindings": {
