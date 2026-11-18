@@ -554,13 +554,18 @@ export function OnboardingWizard({
                 footer only offers Back there. */}
             {!isLastStep && (
               <>
-                <button
-                  type="button"
-                  className="onboarding-btn onboarding-btn-ghost onboarding-skip"
-                  onClick={onSkip}
-                >
-                  {t("onboarding.skip")}
-                </button>
+                {/* "How will I hear you?" says "Skip, I'll set this up
+                    later" in its own body; a second Skip beside it made
+                    three ways out (acceptance pass 2, P2-11). */}
+                {current !== "audio-input" && (
+                  <button
+                    type="button"
+                    className="onboarding-btn onboarding-btn-ghost onboarding-skip"
+                    onClick={onSkip}
+                  >
+                    {t("onboarding.skip")}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="onboarding-btn onboarding-btn-primary"

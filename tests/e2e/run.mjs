@@ -26,7 +26,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** A result that met its bar: the pass leads with its closest call (UX audit SES-3). */
-const PASSED = /PASS BAR MET|CLOSEST TO THE BAR/i;
+// A pass heads its result "Passed · Bar …" (acceptance pass 2; it was "Closest to the bar").
+const PASSED = /PASS BAR MET|PASSED · /i;
 /** The Paths the suite plays: the one a new player starts on, and a second. */
 const PATHS = [loadPath(FIRST_PATH), loadPath(SECOND_PATH)];
 
@@ -318,7 +319,7 @@ async function playTake(d, exercise, style, label, { band = false, again = false
   } catch (e) {
     const why = await d.exec(`const b = document.querySelector('[data-testid="session-big"]');
       return { phase: document.querySelector('[data-testid="session-take"]')?.dataset.phase ?? null, big: b?.innerText,
-        disabled: b?.disabled, noInput: !!document.querySelector('[data-testid="session-no-input"]'),
+        disabled: b?.disabled || b?.getAttribute('aria-disabled') === 'true', noInput: !!document.querySelector('[data-testid="session-no-input"]'),
         alert: document.querySelector('[role="alert"]')?.innerText ?? null }`).catch(() => null);
     await shot(d, `no-start-${label}`);
     throw new Error(`${e.message}; the Take screen: ${JSON.stringify(why)}`);
@@ -451,7 +452,7 @@ async function scenarioPlacement() {
     check("placement: the next Take offered is the next tempo of the climb",
       new RegExp(`Go again, (up to )?${ladder[1]} BPM`, "i").test(good.text), firstLines(good.text, /Go again|Next|Move on/i));
     info.placementTake = row?.facts?.measures;
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
     await d.waitText(/How long have you got/, 15000);
   } finally {
     const report = await quitApp(d, "placement");
@@ -551,7 +552,20 @@ async function scenarioSession() {
     // What Progress must show after a restart: the clean tempo as it now stands.
     info.session.cleanBpm = cleanTempo(ceilingKey);
 
+    // 5. Leaving with Takes in the Session asks first, and "Keep going" stays.
     await d.clickText(/^Exit$/);
+    const asked = await d.waitFor(`return !!document.querySelector('[data-testid="leave-session"]')`, 3000);
+    check("Exit with Takes: asks \"Leave this Session?\"", asked, firstLines(await d.text(), /Leave|Session/i));
+    if (asked) {
+      await d.clickTestId("leave-session-stay");
+      const stayed = await d.waitFor(
+        `return !document.querySelector('[data-testid="leave-session"]') && !!document.querySelector('[data-testid="session-exit"]');`,
+        3000,
+      );
+      check("Exit with Takes: Keep going stays in the Session", stayed);
+    }
+
+    await d.leaveSession();
     await d.waitText(/How long have you got/, 15000);
   } finally {
     const report = await quitApp(d, "session");
@@ -637,9 +651,8 @@ async function scenarioWarmup() {
       const { hit } = await exerciseHere(d);
       if (!hit) break;
       await playTake(d, hit.exercise, "good", `warm-up: the block before it (${hit.exercise.id})`);
-      await d.clickText(/^Exit$/);
-      // With Takes in it, leaving may ask first.
-      await d.clickText(/^Leave$/, { timeoutMs: 2500 }).catch(() => {});
+      // With Takes in it, leaving asks first.
+      await d.leaveSession();
       await d.waitText(/How long have you got/, 15000);
       where = await findWarmup();
     }
@@ -710,7 +723,7 @@ async function scenarioWarmup() {
       await d.waitText(/Start warm-up/, 8000);
       check("warm-up: back on the warm-up, ready again", true);
     }
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
     await d.waitText(/How long have you got/, 15000);
     check("warm-up: Exit leaves for Today", true);
   } finally {
@@ -798,7 +811,7 @@ async function scenarioTwoPaths() {
     const allPassed = rows.length > 0 && rows.every((r) => r.passed === 1);
     console.log(`${allPassed ? "PASS" : "WARN"}  20 minutes: every good Take passed (advisory)  (${JSON.stringify(info.twoPaths)})`);
     results.push({ name: "20 minutes: every good Take passed (advisory)", ok: true, advisory: !allPassed, detail: JSON.stringify(info.twoPaths) });
-    await d.clickText(/^Exit$/).catch(() => d.clickText(/^Back to /));
+    await d.leaveSession().catch(() => d.clickText(/^Back to /));
   } finally {
     const report = await quitApp(d, "two-paths");
     if (report) printProbe("two Paths (3D neck on screen)", report);
@@ -830,7 +843,7 @@ async function scenarioFourFingers() {
     const clean = cleanTempo(`alternate-picking/${exercise.id}`);
     check(`${title} at ${target}: clean tempo ${target} stored`, clean === target, `clean tempo ${clean}`);
     info.fourFingers = row?.facts?.measures;
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
   } finally {
     const report = await quitApp(d, "four-fingers");
     if (report) printProbe("four fingers (3D neck on screen)", report);
@@ -917,7 +930,7 @@ async function scenarioBluesBand() {
     // A fresh Session: "Play this" is a five-minute one, and seven Takes outrun
     // it. In a fresh app: a Session started again after Exit in the same run
     // could not hear the input (see the report of 2026-11-16, B1).
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
     const first = await quitApp(d, "blues-band");
     if (first) printProbe("blues over the band", first);
     d = await launchApp();
@@ -940,7 +953,7 @@ async function scenarioBluesBand() {
       info.bluesBand.takes.push({ style, band: 0, bpm: r.bpm, measures: rr?.facts?.measures });
       console.log(`      control, band at 0, ${style}: ${summary(rr)}`);
     }
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
   } finally {
     const report = await quitApp(d, "blues-band-control");
     if (report) printProbe("blues, band at 0 (the control)", report);
@@ -991,11 +1004,11 @@ async function scenarioRestart() {
     await d.clickText(/^5$/);
     await d.clickText(/^Start(\n|$)/);
     await d.waitText(/Start take, (\d+) BPM/, 20000);
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
     await backToToday();
     await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: Start, Exit, Start");
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
     await backToToday();
 
     // 2. Exit, then a Step's "Play this".
@@ -1025,7 +1038,7 @@ async function scenarioRestart() {
 
     // 5. The Session screen has no rail: Tools is reached after Exit. Open a
     // tool, play nothing, come back to Today and start again.
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
     await backToToday();
     await d.clickText(/^Tools$/);
     await sleep(800);
@@ -1036,7 +1049,7 @@ async function scenarioRestart() {
     await backToToday();
     await d.clickText(/^Start(\n|$)/);
     await goodTakeHeard(d, "restart: Tools out and back");
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
   } finally {
     await quitApp(d, "restart");
   }
@@ -1075,7 +1088,7 @@ async function scenarioWrongNotes() {
           row?.passed === 0 && !PASSED.test(r.text) && m?.noteIdentity !== null && m.noteIdentity < 0.9, summary(row));
       }
     }
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
   } finally {
     await quitApp(d, "wrong-notes");
   }
@@ -1194,7 +1207,7 @@ async function scenarioNeck() {
     console.log(`neck: ${info.neck.kind}; CPU cores while playing: ${JSON.stringify(info.neck.cpuCoresWhilePlaying)}`);
     console.log(`neck: processes of ours nvidia-smi lists: ${JSON.stringify(info.neck.onTheGpu)}`);
     check("neck: every Take passed while the neck drew", info.neck.takes.every((t) => t.passed), JSON.stringify(info.neck.takes));
-    await d.clickText(/^Exit$/);
+    await d.leaveSession();
   } finally {
     const report = await quitApp(d, "neck");
     if (report) {

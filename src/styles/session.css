@@ -470,10 +470,10 @@
   font-size: 22px;
   border-radius: 12px;
 }
-.session-page .session-big:active:not(:disabled) {
+.session-page .session-big:active:not(:disabled, [aria-disabled="true"]) {
   transform: translateY(1px) scale(0.995);
 }
-.session-page .session-big:disabled {
+.session-page .session-big:is(:disabled, [aria-disabled="true"]) {
   background: var(--l-btn);
   color: var(--l-faint);
   box-shadow: 0 0 0 1px var(--l-line2) inset;
@@ -2784,7 +2784,7 @@
       0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
       0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
   }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:disabled {
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:is(:disabled, [aria-disabled="true"]) {
     background: var(--l-btn);
     box-shadow: 0 0 0 1px var(--l-line2) inset;
   }
@@ -4021,7 +4021,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px clamp(18px, 3vw, 40px);
-  margin: 6px 0 0;
+  /* Clear of the headline's descenders (acceptance pass 2, P2-5). */
+  margin: 18px 0 0;
 }
 .session-recap-stats div {
   display: flex;
@@ -4088,6 +4089,59 @@
   margin: 0;
   padding: 10px 0 8px;
   border-top: 1px solid var(--l-line);
+}
+
+/* "How", folded on every screen (acceptance pass 2, P1-4): the ready screen
+   says the hand and what is graded; the rest is one click away. A quiet row
+   with a chevron; the phone gives it a thumb-sized row of its own
+   (phone-learning.css). */
+.session-how > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  list-style: none;
+  color: var(--l-quiet);
+  font: 600 12px/1 var(--font-display, inherit);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.session-how > summary::-webkit-details-marker {
+  display: none;
+}
+.session-how > summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.session-how[open] > summary::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+.session-how > summary:hover {
+  color: var(--l-ink);
+}
+.session-how > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.session-how-body {
+  padding-top: 4px;
+  max-width: 90ch;
+}
+
+/* The metric beside the result's number ("even"), in the number's own
+   condensed face: the serif beside the condensed 87% read as two voices
+   (acceptance pass 2). */
+.session-moved-metric {
+  font: 600 clamp(26px, 4vh, 40px) / 1 var(--l-display);
+  letter-spacing: 0.02em;
+  color: var(--l-quiet);
 }
 
 /* The phone's scrolling tab (acceptance 2, N-P1-2): the staff spreads its

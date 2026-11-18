@@ -83,8 +83,10 @@ describe("when the fairness question is asked (acceptance P1-9)", () => {
     const row = (id: string, fair?: "yes" | "no") => ({ ...take("even-eighths.open-string"), id, facts: fair ? { fair } : {} });
     expect(recapFairOutcome(outcomes, [row("a"), row("b")])?.takeId).toBe("b");
     expect(recapFairOutcome(outcomes, [row("a", "yes"), row("b")])).toBeNull();
-    // Answered on the recap itself: it stays, with its thanks.
-    expect(recapFairOutcome(outcomes, [row("a"), row("b", "no")])?.takeId).toBe("b");
+    // Answered on the last Take's own result (acceptance pass 2: "Yes" on
+    // Take 1, and the recap still asked "Did today's grades feel fair?").
+    expect(recapFairOutcome(outcomes, [row("a"), row("b", "no")])).toBeNull();
+    expect(recapFairOutcome([graded("a", 87)], [row("a", "yes")])).toBeNull();
     expect(recapFairOutcome([], [])).toBeNull();
   });
 });

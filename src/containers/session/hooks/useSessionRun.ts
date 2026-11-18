@@ -94,6 +94,7 @@ import {
   runReducer,
   timedBpm,
   timedTempoAdjustable,
+  timedTempoLive,
   tempoNudges,
 } from "../../../session/runner";
 import type { BigAction, RunState, TakeOutcome } from "../../../session/runner";
@@ -644,6 +645,22 @@ export function useSessionRun(input: SessionRunInput) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.phase, run.stepIndex, run.paused, run.runs, step, enqueue]);
+
+  /**
+   * A warm-up's tempo moved while it plays (↑ / ↓, or its own - / +): the
+   * click follows at once, without starting the step over.
+   */
+  useEffect(() => {
+    if (run.phase !== "timed" || run.paused || run.ended || !step || !timedTempoLive(step)) return;
+    const entered = lastEntered.current;
+    if (entered?.index !== run.stepIndex || entered.runs !== run.runs || run.bpm <= 0) return;
+    const bpm = run.bpm;
+    void enqueue(async () => {
+      await setBpm(bpm).catch(() => {});
+    });
+    // Only a change of tempo: starting the step is the effect above's.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.bpm]);
 
   /** Leaving a timed step for anything else, or pausing it: stop what it started. */
   useEffect(() => {
@@ -1227,7 +1244,9 @@ export function useSessionRun(input: SessionRunInput) {
    */
   const nudgeTimed = useCallback((sign: 1 | -1) => {
     const state = runRef.current;
-    const timedNow = state.phase === "timedReady" || (state.phase === "timed" && (state.paused || state.ended));
+    const timedNow =
+      state.phase === "timedReady" ||
+      (state.phase === "timed" && (state.paused || state.ended || timedTempoLive(currentStep(state))));
     if (!timedNow || !timedTempoAdjustable(currentStep(state))) return false;
     dispatch({ type: "setBpm", bpm: timedBpm(state.bpm, sign * TIMED_BPM_STEP), now: Date.now() });
     return true;

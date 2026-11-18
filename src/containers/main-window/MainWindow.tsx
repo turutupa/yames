@@ -179,6 +179,8 @@ import {
   FULLSCREEN_EXIT_DELAY,
   platformKey,
   actionForCombo,
+  focusedControlTakesKey,
+  sessionKeyIsInert,
   eventToCombo,
   isTypingTarget,
 } from "../../hotkeys";
@@ -207,6 +209,8 @@ import "../../styles/tools-chrome.css";
  * on — so the choice is narrowed rather than left to a default nobody is
  * obliged to keep. `tests/layout/jam-camera.spec.ts` measures it.
  */
+/** The tools, by view: Escape in one goes back where it was opened from. */
+const TOOL_VIEW_IDS: ReadonlySet<string> = new Set(["beat", "setlist", "drill", "jam", "songs"]);
 const JAM_PREVIEW_CORNERS: readonly PreviewCorner[] = ["bottomLeft", "bottomRight"];
 
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
@@ -1489,7 +1493,20 @@ export function MainWindow() {
 
   // Escape in a tool, with nothing in it left to put away, goes back to Tools
   // (UX audit TOOL-3). What counts as "left to put away" is the hook's.
-  const leaveToTools = useCallback(() => setView("tools"), [setView]);
+  // Back where the tool was opened from: Alt+1-5 from Today opens a tool
+  // straight from Today, and Escape there landed on Tools, a page the player
+  // never saw (acceptance pass 2, P2-8). From Tools itself, or from another
+  // tool, it is Tools as before.
+  const toolOrigin = useRef<"today" | "paths" | "progress" | "tools">("tools");
+  const lastView = useRef(view);
+  useEffect(() => {
+    const from = lastView.current;
+    lastView.current = view;
+    if (from === view || !TOOL_VIEW_IDS.has(view)) return;
+    if (from === "today" || from === "paths" || from === "progress") toolOrigin.current = from;
+    else if (!TOOL_VIEW_IDS.has(from)) toolOrigin.current = "tools";
+  }, [view]);
+  const leaveToTools = useCallback(() => setView(toolOrigin.current), [setView]);
   useToolEscape({
     view,
     onLeave: leaveToTools,
@@ -1731,6 +1748,11 @@ export function MainWindow() {
         return;
       }
       if (!actionId) return;
+      // Enter or Space on a focused button is that button's (N-P1-1).
+      if (focusedControlTakesKey(e, view)) return;
+      // A Session key off the Session means nothing (the dispatcher drops it),
+      // so it must not eat the key either: Enter stays the page's own.
+      if (sessionKeyIsInert(actionId, view)) return;
       e.preventDefault();
       dispatchAction(actionId);
     };

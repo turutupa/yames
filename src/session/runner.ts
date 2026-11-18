@@ -143,6 +143,11 @@ export function timedTempoAdjustable(step: PlanStep | null): boolean {
   return !!step && (step.kind === "metronome" || (step.kind === "jam" && !!step.bpm));
 }
 
+/** A timed step whose tempo may move while it plays: a warm-up's click. */
+export function timedTempoLive(step: PlanStep | null): boolean {
+  return !!step && step.kind === "metronome";
+}
+
 export type RunEvent =
   | { type: "start"; plan: SessionPlan; now: number; untimed?: boolean }
   | { type: "takeStarted"; now: number }
@@ -362,8 +367,12 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
         };
       }
       if (event.type === "setBpm") {
-        // Between runs only: a tempo change mid-run would move the pattern under the player.
-        if (!(state.paused || state.ended) || !timedTempoAdjustable(currentStep(state))) return state;
+        // A jam between runs only: a tempo change mid-run would move the band
+        // under the player. A warm-up's click any time: nothing in it is
+        // graded, and slowing down to learn the pattern is the point of it
+        // (acceptance pass 2: the arrows did nothing while one played).
+        if (!timedTempoAdjustable(currentStep(state))) return state;
+        if (!(state.paused || state.ended) && !timedTempoLive(currentStep(state))) return state;
         return { ...state, bpm: event.bpm, now: event.now };
       }
       // Paused, the clock holds: the step's start moves with the time that passes.

@@ -28,6 +28,7 @@ import {
   minutesLeft,
   stepRemainingMs,
   timedTempoAdjustable,
+  timedTempoLive,
 } from "../../session/runner";
 import type { RunState, TakeOutcome } from "../../session/runner";
 import { CoachLine, TempoNudges, bigLabel, timedHowKey } from "./parts";
@@ -52,7 +53,6 @@ import { factsOf } from "../../session/progress";
 import type { PathTakeRow } from "../../ipc";
 import { totalsFrom } from "./ProgressView";
 import type { MainView } from "../main-window/MainHeader";
-import { IS_MOBILE } from "../../platform";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -100,12 +100,16 @@ function SessionBar({
       <button className="session-exit" onClick={onExit} data-testid="session-exit">
         {t("session.run.exit")}
       </button>
+      {/* One step is no progress to show: its single pip, lit, read as a
+          full bar over a clock counting up (acceptance pass 2). The empty row
+          keeps the clock where it was. */}
       <div
         className="session-pips"
-        role="img"
-        aria-label={t("session.run.stepOf", { n: run.stepIndex + 1, of: steps.length })}
+        role={steps.length > 1 ? "img" : undefined}
+        aria-label={steps.length > 1 ? t("session.run.stepOf", { n: run.stepIndex + 1, of: steps.length }) : undefined}
+        data-testid="session-pips"
       >
-        {steps.map((step, i) => (
+        {steps.length > 1 && steps.map((step, i) => (
           <i
             key={step.id}
             data-state={
@@ -119,7 +123,7 @@ function SessionBar({
           spent so far (UX audit SES-11). */}
       <span className="session-quiet session-bar-left" data-untimed={run.untimed ? "" : undefined}>
         {run.untimed
-          ? clockText(Math.max(0, run.now - run.startedAt))
+          ? t("session.run.played", { time: clockText(Math.max(0, run.now - run.startedAt)) })
           : left > 0
             ? t("session.run.minutesLeft", { minutes: left })
             : t("session.run.timeUp")}
@@ -222,7 +226,18 @@ function TakeScreen({
   // Said once a Session, before its first Take (UX audit SES-14), and not at
   // all where the coach's own line already says it (acceptance P1-4).
   const honest = run.outcomes.length === 0 ? readyHonestLineKey(exercise) : null;
-  const how = howText(exercise.howTo[0], exercise.position, [bar ? lineText(t, bar) : null, honest ? t(honest) : null]);
+  // The ready screen says three things (acceptance pass 2, P1-4): where the
+  // hand goes, what is graded, and a folded "how". The bar IS what is graded,
+  // so it is the coach's line; the Exercise's own tip and caveat go in the
+  // fold, and any sentence naming the fret or the tempo the screen already
+  // shows is left out of it.
+  const gradedLine = bar ? lineText(t, bar) : exercise.coachLine;
+  const how = howText(
+    exercise.howTo[0],
+    exercise.position,
+    [bar ? exercise.coachLine : null, honest ? t(honest) : null],
+    [exercise.tempo.passAtBpm, exercise.tempo.rungs[0]?.bpm, run.bpm],
+  );
 
   return (
     <div className="session-body" data-testid="session-take" data-phase={run.phase}>
@@ -272,9 +287,11 @@ function TakeScreen({
             ? live.countingIn
               ? t("session.run.countIn")
               : null
-            : // What the Exercise is, not why the planner picked it: that is
-              // Today's line, and in here it read as a log (UX audit TODAY-8).
-              exercise.purpose
+            : // Nothing on the ready screen's head: what the Exercise is was a
+              // fourth block of text over the hand, coach and how lines, and a
+              // ragged right-aligned one (acceptance pass 2, P1-4 and P2-3).
+              // The Step page says it.
+              null
         }
         statusTone={running ? "live" : "quiet"}
       />
@@ -301,12 +318,13 @@ function TakeScreen({
       <div className="session-mechlow" data-single="">
         <div className="session-col">
           {!running && <HandLine position={exercise.position} />}
-          <CoachLine>{exercise.coachLine}</CoachLine>
-          {/* One hand line, one coach line, one "how": the how-to, the bar and
-              the pick caveat as a single paragraph, with nothing the two
-              lines above it already said (acceptance P1-4). */}
+          {/* Ready: what is graded. Running: the Exercise's own tip. */}
+          <CoachLine>{running ? exercise.coachLine : gradedLine}</CoachLine>
+          {/* One hand line, one coach line, one "how", folded: the how-to, the
+              tip and the pick caveat, with nothing the lines above or the
+              picture already said (acceptance P1-4). */}
           {!running && how && (
-            <HowLines collapsed={IS_MOBILE}>
+            <HowLines>
               <div className="session-why session-how-text" data-testid="session-how-text">{how}</div>
             </HowLines>
           )}
@@ -334,17 +352,23 @@ function TakeScreen({
             {t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
           </span>
         )}
+        {/* Back to the warm-up before anything is played here (the e2e
+            `warmup` scenario; lost with acceptance P1-4's first pass). */}
+        {!running && session.canGoBack && <BackLink session={session} />}
         {/* The tempo nudges and the button travel together: on a phone the
             pair is what sticks to the bottom, so Slower and Faster are never
             under the button (acceptance P1-5). A plain run of the row on a
             desktop (`display: contents`). */}
         <div className="session-go" data-testid="session-go">
           {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
+          {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
+              ↑ reloads it, and a disabled button drops the keyboard's focus
+              to the page (acceptance pass 2, P2-9). */}
           <button
             className="session-big"
             data-size="mid"
-            onClick={actions.go}
-            disabled={!running && !canStart}
+            onClick={!running && !canStart ? undefined : actions.go}
+            aria-disabled={!running && !canStart ? true : undefined}
             data-testid="session-big"
           >
             {bigLabel(big, t)}
@@ -366,22 +390,26 @@ export function howText(
   first: string | undefined,
   position: { fret: number } | undefined,
   more: readonly (string | null)[],
+  /** Numbers already on screen (the tempo, the bar's): a sentence naming one goes. */
+  shown: readonly (number | null | undefined)[] = [],
 ): string {
   const fret = position && position.fret > 0 ? position.fret : null;
   const sentences = (first ?? "").split(/(?<=[.!?。！？])\s*/).filter((s) => s.trim() !== "");
-  const named = fret === null ? null : new RegExp(`(^|[^0-9])${fret}([^0-9]|$)`);
-  const kept = named ? sentences.filter((s) => !named.test(s)) : sentences;
+  const numbers = [fret, ...shown].filter((n): n is number => typeof n === "number" && n > 0);
+  const names = (s: string) => numbers.some((n) => new RegExp(`(^|[^0-9])${n}([^0-9]|$)`).test(s));
+  const kept = sentences.filter((s) => !names(s));
   return [...kept.map((s) => s.trim()), ...more.filter((m): m is string => !!m)].join(" ");
 }
 
 /**
- * The how-to under the coach's line. On a phone it folds behind "How"
- * (PHONE-2): three paragraphs there pushed the Start button a screen down and
+ * The how-to under the coach's line, folded behind "How" (PHONE-2, then
+ * acceptance pass 2 on every screen): three paragraphs there pushed the Start button a screen down and
  * read as a wall; the coach's line stays open, the rest is one tap away.
  */
-function HowLines({ collapsed, children }: { collapsed: boolean; children: React.ReactNode }) {
+function HowLines({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
-  if (!collapsed) return <>{children}</>;
+  // Folded everywhere since acceptance pass 2 (P1-4): open, it was the wall
+  // of text the owner keeps asking to be rid of.
   return (
     <details className="session-how" data-testid="session-how">
       <summary>{t("session.paths.howTo")}</summary>
@@ -400,7 +428,8 @@ function barText(check: Pick<BarCheck, "metric" | "min" | "max">, t: ReturnType<
 /**
  * The number the verdict turned on (UX audit SES-3), the same kind of number
  * whichever way the Take went: on a miss what held it back, on a pass the
- * closest call. Said in words above it, with the bar beside it, ✓ or ✗.
+ * closest call. Said in words above it: on a pass "Passed" and the bar it
+ * met; on a miss what held it back, with the bar beside it, ✗.
  */
 function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const { t } = useTranslation();
@@ -421,8 +450,12 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
   const bar = barText(check, t);
   return (
     <div className="session-decided" data-testid="session-moved" data-metric={check.metric} data-met={met ? "" : undefined}>
+      {/* A pass says so, with the bar it met ("Passed · Bar 85%"); "closest
+          to the bar" over a pass read as a near miss (acceptance pass 2). */}
       <div className="session-kick session-decided-why">
-        {t(met ? "session.result.decidedPass" : "session.result.decidedMiss")}
+        {met
+          ? [t("session.result.decidedPass"), bar].filter(Boolean).join(" · ")
+          : t("session.result.decidedMiss")}
       </div>
       <div className="session-moved">
         {/* The two numbers never part: "78 →" alone on a line above the
@@ -439,8 +472,8 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
             {percent ? "%" : ""}
           </span>
         </span>
-        <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
-        {bar !== null && (
+        <span className="session-moved-metric session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
+        {bar !== null && !met && (
           <span className="session-tag session-barchip" data-met={met ? "" : undefined} data-testid="session-barchip">
             <span aria-hidden="true">{met ? "✓" : "✗"}</span> {bar}
             <span className="sr-only"> {t(met ? "session.result.barMet" : "session.result.barMissed")}</span>
@@ -538,9 +571,10 @@ function BarByBar({ session, outcome }: { session: SessionRun; outcome: TakeOutc
 
 /**
  * The Take the recap asks "fair?" about, or null (acceptance P1-9): the last
- * graded one, at most once a Session. A player who already answered for
- * another Take of this Session (on a borderline result) is not asked again;
- * an answer given on the recap itself stays on screen with its thanks.
+ * graded one, at most once a Session. A player who already answered on any
+ * Take's result this Session, the last one's included, is not asked again.
+ * The recap decides this once, as it opens, so an answer given on the recap
+ * itself stays on screen with its thanks.
  */
 export function recapFairOutcome(
   outcomes: readonly TakeOutcome[],
@@ -553,8 +587,10 @@ export function recapFairOutcome(
     const row = takes.find((take) => take.id === id);
     return !!row && factsOf(row).fair !== undefined;
   };
-  const elsewhere = graded.some((o) => o !== last && answered(o.takeId));
-  return elsewhere ? null : last;
+  // Any Take of this Session, the last one included: a "Yes" on its own
+  // result is the answer (acceptance pass 2, P1-9). Called once, as the recap
+  // opens, so an answer given on the recap does not take the question away.
+  return graded.some((o) => answered(o.takeId)) ? null : last;
 }
 
 /**
@@ -1019,8 +1055,8 @@ function TimedScreen({
             {bpm > 0 && (
               <MetaTempo
                 bpm={bpm}
-                onSlower={adjustable && (ready || paused || ended) ? actions.slower : undefined}
-                onFaster={adjustable && (ready || paused || ended) ? actions.faster : undefined}
+                onSlower={adjustable && (ready || paused || ended || timedTempoLive(step)) ? actions.slower : undefined}
+                onFaster={adjustable && (ready || paused || ended || timedTempoLive(step)) ? actions.faster : undefined}
                 slowerKey="↓"
                 fasterKey="↑"
               />
@@ -1242,7 +1278,10 @@ function RecapScreen({ session }: { session: SessionRun }) {
   const raised = [...run.outcomes]
     .reverse()
     .find((o) => o.grade.cleanBpm !== null && (o.cleanBefore === null || o.grade.cleanBpm > o.cleanBefore));
-  const lastGraded = recapFairOutcome(run.outcomes, session.progress.takes);
+  // Decided once, as the recap opens: an answer given on a result earlier in
+  // the Session means no question here, and an answer given here keeps its
+  // thanks on screen rather than taking the question away.
+  const [lastGraded] = useState(() => recapFairOutcome(run.outcomes, session.progress.takes));
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),

@@ -139,6 +139,29 @@
   color: var(--l-clash, var(--text-primary));
 }
 
+/* A short window (1024x700): the Level's own lines sat cut off under the
+   footer (acceptance pass 2, P2-7). The step tightens to fit; the body still
+   scrolls if a language runs longer. */
+@media (max-height: 760px) and (min-width: 561px) {
+  .onboarding-overlay .onboarding-card[data-step="start"] {
+    padding-top: 18px;
+    gap: 12px;
+  }
+  .onboarding-start-group {
+    margin-top: 8px;
+    gap: 6px;
+  }
+  .onboarding-start-path {
+    padding: 7px 12px;
+  }
+  .onboarding-start-path-goal {
+    line-height: 1.3;
+  }
+  .onboarding-start-level {
+    padding: 6px;
+  }
+}
+
 @media (max-width: 520px) {
   .onboarding-start-paths {
     grid-template-columns: minmax(0, 1fr);
