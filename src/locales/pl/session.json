@@ -425,6 +425,10 @@
       "bass": "Ścieżki są na razie pisane na gitarę, a ścieżki na bas są w planach. Narzędzia działają z basem już teraz.",
       "openTools": "Otwórz narzędzia",
       "change": "Zmień instrument"
+    },
+    "tabstrip": {
+      "label": "Tabulatura: {{notes}}",
+      "bar": "takt {{n}}"
     }
   }
 }

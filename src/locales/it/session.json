@@ -417,6 +417,10 @@
       "bass": "I Percorsi sono scritti per chitarra, per ora, e quelli per basso sono in programma. Gli strumenti funzionano già con il basso.",
       "openTools": "Apri gli strumenti",
       "change": "Cambia strumento"
+    },
+    "tabstrip": {
+      "label": "Intavolatura: {{notes}}",
+      "bar": "battuta {{n}}"
     }
   }
 }

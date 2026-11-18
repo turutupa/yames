@@ -409,6 +409,10 @@
       "bass": "Paths are written for guitar for now, and bass Paths are planned. The tools work for bass today.",
       "openTools": "Open the tools",
       "change": "Change instrument"
+    },
+    "tabstrip": {
+      "label": "Tab: {{notes}}",
+      "bar": "bar {{n}}"
     }
   }
 }

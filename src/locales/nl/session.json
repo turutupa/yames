@@ -409,6 +409,10 @@
       "bass": "Leerpaden zijn voorlopig voor gitaar geschreven; leerpaden voor bas komen eraan. De tools werken nu al met bas.",
       "openTools": "Open de tools",
       "change": "Instrument wijzigen"
+    },
+    "tabstrip": {
+      "label": "Tab: {{notes}}",
+      "bar": "maat {{n}}"
     }
   }
 }

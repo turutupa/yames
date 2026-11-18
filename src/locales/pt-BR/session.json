@@ -417,6 +417,10 @@
       "bass": "As Trilhas são escritas para violão e guitarra, por enquanto, e Trilhas de baixo estão nos planos. As ferramentas já funcionam com baixo.",
       "openTools": "Abrir as ferramentas",
       "change": "Trocar de instrumento"
+    },
+    "tabstrip": {
+      "label": "Tablatura: {{notes}}",
+      "bar": "compasso {{n}}"
     }
   }
 }

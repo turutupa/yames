@@ -417,6 +417,10 @@
       "bass": "Las Rutas están escritas para guitarra, por ahora, y hay Rutas de bajo en camino. Las herramientas ya funcionan con el bajo.",
       "openTools": "Abrir las herramientas",
       "change": "Cambiar de instrumento"
+    },
+    "tabstrip": {
+      "label": "Tablatura: {{notes}}",
+      "bar": "compás {{n}}"
     }
   }
 }
