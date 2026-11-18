@@ -12,7 +12,60 @@
  * slow down to learn the pattern.
  */
 import { useTranslation } from "react-i18next";
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef } from "react";
+import type { ReactNode, RefObject } from "react";
+
+/** The head row's column gap (session.css `.practice-head-row`). */
+const ROW_GAP = 18;
+
+/**
+ * Keeps Neck · Runway · Tab on the title's row (acceptance pass 3 P2-3): where
+ * the kicker, the title and the switch with its words do not fit on one line
+ * (1024 px in Russian, say), the switch drops its words and keeps its icons,
+ * rather than wrapping onto a line of its own and taking the neck's height.
+ * Measured, not guessed from a breakpoint: what fits depends on the language.
+ * A phone lays the switch across its own row and is left alone.
+ */
+function useTightHead(row: RefObject<HTMLDivElement>) {
+  useLayoutEffect(() => {
+    const el = row.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    if (el.closest(".is-mobile")) return;
+    const natural = (node: HTMLElement | null) => {
+      if (!node) return 0;
+      const ws = node.style.whiteSpace;
+      node.style.whiteSpace = "nowrap";
+      const w = node.scrollWidth;
+      node.style.whiteSpace = ws;
+      return w;
+    };
+    const measure = () => {
+      const sw = el.querySelector<HTMLElement>(".session-viewswitch");
+      if (!sw) return;
+      // Measured with its words, then set.
+      el.removeAttribute("data-tight");
+      sw.removeAttribute("data-compact");
+      const need =
+        natural(el.querySelector<HTMLElement>(".practice-kick")) +
+        natural(el.querySelector<HTMLElement>(".practice-title")) +
+        sw.scrollWidth +
+        ROW_GAP * 3;
+      const tight = need > el.clientWidth;
+      el.toggleAttribute("data-tight", tight);
+      sw.toggleAttribute("data-compact", tight);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    // A language or a title arriving late changes the words, not the size.
+    const mo = new MutationObserver(measure);
+    mo.observe(el, { characterData: true, childList: true, subtree: true });
+    return () => {
+      observer.disconnect();
+      mo.disconnect();
+    };
+  }, [row]);
+}
 
 /** "1:43", from milliseconds, rounded up. */
 export function clockText(ms: number): string {
@@ -41,9 +94,11 @@ export function PracticeHead({
   /** "live": amber lamp (running); "hold": paused; "quiet": no lamp. */
   statusTone?: "live" | "hold" | "quiet";
 }) {
+  const top = useRef<HTMLDivElement>(null);
+  useTightHead(top);
   return (
     <div className="practice-head" data-testid="practice-head">
-      <div className="practice-head-row">
+      <div className="practice-head-row" ref={top}>
         <span className="session-kick practice-kick">{kick}</span>
         <h2 className="practice-title">{title}</h2>
         <span className="practice-grow" />

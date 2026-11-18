@@ -179,7 +179,7 @@
       "minutesLeft": "残り {{minutes}} 分",
       "played": "{{time}} 演奏",
       "timeUp": "時間です",
-      "pathStep": "{{path}}、ステップ {{step}}",
+      "pathStep": "{{path}}、ステップ {{step}}",
       "bpm": "BPM",
       "playTake": "テイク開始、{{bpm}} BPM",
       "endTake": "テイク終了",

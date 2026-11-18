@@ -181,7 +181,7 @@
       "minutesLeft": "Осталось {{minutes}} мин",
       "played": "Сыграно: {{time}}",
       "timeUp": "Время вышло",
-      "pathStep": "{{path}}, шаг {{step}}",
+      "pathStep": "{{path}}, шаг {{step}}",
       "bpm": "BPM",
       "playTake": "Начать дубль, {{bpm}} BPM",
       "endTake": "Закончить дубль",

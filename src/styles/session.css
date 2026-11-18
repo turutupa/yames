@@ -2775,6 +2775,42 @@
       0 0 0 10px var(--l-bg),
       0 -18px 22px 10px var(--l-bg);
   }
+  /* The neck and tab Takes' row is only the status, "↺ Again" and the pair,
+     and all of it sticks (acceptance pass 3 P2-1): "Listening…" and "↺ Again:
+     <warm-up>" sat under the block's fade at 390 px, where a tap on the link
+     landed on the nudges' row, and at 360 px the status line was not on
+     screen at all. One block over the fade, each control a thumb's size, so
+     nothing tappable is ever under it. (The runway's row carries its notes,
+     which stay in the page's flow.) */
+  .session-body:not([data-phase="playing"]) > .session-actions:not(:has(> .session-runway-notes)) {
+    position: sticky;
+    bottom: calc(10px + var(--safe-bottom, 0px));
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+    background: var(--l-bg);
+    box-shadow:
+      0 0 0 10px var(--l-bg),
+      0 -18px 22px 10px var(--l-bg);
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions:not(:has(> .session-runway-notes)) > .session-go {
+    position: static;
+    box-shadow: none;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-signal {
+    margin-right: 0;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin: -6px 0;
+    text-align: left;
+  }
   .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-nudges {
     justify-content: flex-end;
   }
@@ -3447,6 +3483,9 @@
 .practice-kick {
   font-size: 12px;
   letter-spacing: 0.18em;
+  /* Two even lines when it wraps, never "STEP" with its "1" alone under it
+     (acceptance pass 3 P2-2; the locales hold "step 1" with a no-break space). */
+  text-wrap: balance;
 }
 .practice-title {
   margin: 0;
@@ -3535,6 +3574,32 @@
 }
 .practice-head .session-viewswitch {
   margin-left: 0;
+}
+/* Too little room for the kicker, the title and the switch's words on one
+   line (PracticeChrome's useTightHead): the switch keeps its row, as icons, and
+   the words around it give way rather than it (acceptance pass 3 P2-3). */
+.practice-head-row[data-tight] {
+  flex-wrap: nowrap;
+}
+.practice-head-row[data-tight] > .practice-kick,
+.practice-head-row[data-tight] > .practice-title {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.practice-head-row > .session-viewswitch {
+  flex: none;
+}
+.session-page .session-viewswitch[data-compact] > button {
+  padding-inline: 12px;
+}
+/* The word stays for a screen reader and the tooltip; the icon carries it on screen. */
+.session-viewswitch[data-compact] > button > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* The view switch as the mock draws it: amber edge, the chosen one filled. */
@@ -4075,6 +4140,12 @@
   flex-direction: row;
   align-items: baseline;
   gap: 6px;
+}
+/* On one line, "next · then 8, 7": a dot between, so it never reads "next then"
+   as one phrase (acceptance pass 3 P2-8). */
+.practice-next-tag[data-row] [data-then]:not(:empty)::before {
+  content: "·";
+  margin-right: 6px;
 }
 /* A phone: the timing strip is a line under the numbers, not a block. */
 @media (max-width: 480px) {

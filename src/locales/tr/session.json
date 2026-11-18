@@ -179,7 +179,7 @@
       "minutesLeft": "{{minutes}} dk kaldı",
       "played": "{{time}} çalındı",
       "timeUp": "Süre doldu",
-      "pathStep": "{{path}}, adım {{step}}",
+      "pathStep": "{{path}}, adım {{step}}",
       "bpm": "BPM",
       "playTake": "Denemeyi başlat, {{bpm}} BPM",
       "endTake": "Denemeyi bitir",

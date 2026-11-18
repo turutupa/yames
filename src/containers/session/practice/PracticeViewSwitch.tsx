@@ -72,6 +72,7 @@ export function PracticeViewSwitch({
           data-on={view === v ? "" : undefined}
           disabled={locked}
           onClick={() => onChange(v)}
+          title={locked ? undefined : t(`session.view.${v}`)}
           data-testid={`practice-view-${v}`}
         >
           {ICONS[v]}

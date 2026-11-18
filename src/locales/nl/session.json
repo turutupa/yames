@@ -179,7 +179,7 @@
       "minutesLeft": "Nog {{minutes}} min",
       "played": "{{time}} gespeeld",
       "timeUp": "De tijd is om",
-      "pathStep": "{{path}}, stap {{step}}",
+      "pathStep": "{{path}}, stap {{step}}",
       "bpm": "BPM",
       "playTake": "Take starten, {{bpm}} BPM",
       "endTake": "Take beëindigen",

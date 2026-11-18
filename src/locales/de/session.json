@@ -179,7 +179,7 @@
       "minutesLeft": "Noch {{minutes}} Min.",
       "played": "{{time}} gespielt",
       "timeUp": "Die Zeit ist um",
-      "pathStep": "{{path}}, Schritt {{step}}",
+      "pathStep": "{{path}}, Schritt {{step}}",
       "bpm": "BPM",
       "playTake": "Take starten, {{bpm}} BPM",
       "endTake": "Take beenden",

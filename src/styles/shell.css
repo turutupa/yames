@@ -1988,6 +1988,30 @@ body[data-sheet-maximized] .rail {
   font-weight: 600;
 }
 
+/* Whole or not at all (Transport.tsx): the slot is one line of the note's
+   height and clips the rest. An empty first item of no width goes first, so a
+   note wider than the slot breaks onto the hidden second line rather than
+   overflowing the first. It takes nearly all of the bar's free width; the
+   spacer before it keeps a sliver. */
+.transport-note-slot {
+  flex: 1000 1 0;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.transport-note-slot::before {
+  content: "";
+  flex: 1 0 0;
+  height: 34px;
+}
+.transport-note {
+  flex: none;
+  white-space: nowrap;
+}
+
 /* The compact input readout that stands in for the sentence once the context
    bar has shed its own input chip. Hidden until then — see the breakpoint. */
 .transport-input-narrow {
@@ -2311,6 +2335,7 @@ body[data-sheet-maximized] .rail {
    The keyboard hint goes here too. It was shedding at 719, which is 240px
    later than the row could actually afford it. */
 @media (max-width: 961px) {
+  .transport-note-slot,
   .transport-note {
     display: none;
   }

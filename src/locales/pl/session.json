@@ -181,7 +181,7 @@
       "minutesLeft": "Zostało {{minutes}} min",
       "played": "Zagrano: {{time}}",
       "timeUp": "Czas minął",
-      "pathStep": "{{path}}, krok {{step}}",
+      "pathStep": "{{path}}, krok {{step}}",
       "bpm": "BPM",
       "playTake": "Zacznij podejście, {{bpm}} BPM",
       "endTake": "Zakończ podejście",

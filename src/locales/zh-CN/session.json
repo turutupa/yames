@@ -179,7 +179,7 @@
       "minutesLeft": "还剩 {{minutes}} 分钟",
       "played": "已弹 {{time}}",
       "timeUp": "时间到",
-      "pathStep": "{{path}}，第 {{step}} 步",
+      "pathStep": "{{path}}，第 {{step}} 步",
       "bpm": "BPM",
       "playTake": "开始这一遍，{{bpm}} BPM",
       "endTake": "结束这一遍",

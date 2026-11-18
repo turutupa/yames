@@ -180,7 +180,7 @@
       "minutesLeft": "Faltam {{minutes}} min",
       "played": "Tocado: {{time}}",
       "timeUp": "Acabou o tempo",
-      "pathStep": "{{path}}, etapa {{step}}",
+      "pathStep": "{{path}}, etapa {{step}}",
       "bpm": "BPM",
       "playTake": "Começar tomada, {{bpm}} BPM",
       "endTake": "Encerrar tomada",

@@ -179,7 +179,7 @@
       "minutesLeft": "Còn {{minutes}} phút",
       "played": "Đã chơi {{time}}",
       "timeUp": "Hết giờ",
-      "pathStep": "{{path}}, bước {{step}}",
+      "pathStep": "{{path}}, bước {{step}}",
       "bpm": "BPM",
       "playTake": "Bắt đầu lượt, {{bpm}} BPM",
       "endTake": "Kết thúc lượt",
