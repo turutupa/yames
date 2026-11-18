@@ -1767,8 +1767,10 @@ export function MainWindow() {
       // lands the user on the section that owns the mapping UI.
       setView("settings");
       setTimeout(() => {
+        // By id: Devices shares the `hotkeys-section` class and comes first,
+        // so the class landed the hint on the wrong panel.
         document
-          .querySelector("section.hotkeys-section")
+          .getElementById("settings-hotkeys")
           ?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 400);
     },
@@ -2505,16 +2507,24 @@ export function MainWindow() {
         </ViewTransition>
         {view === "settings" && (
           <SettingsTimeline
+            // One tick per section, in the order SettingsView draws them: the
+            // timeline finds a section by its position, so a section missing
+            // here moves every tick after it onto its neighbour (Songs was
+            // missing, until the settings revamp).
             sections={[
               { id: "general", label: t("settings.tabs.general") },
-              { id: "appearance", label: t("settings.tabs.appearance") },
               { id: "devices", label: t("settings.tabs.devices") },
-              // The coach, the widget and the hotkeys are not on this
+              // The coach, Songs, the widget and the hotkeys are not on this
               // screen on a phone, so the rail does not point at them.
               ...(IS_MOBILE
                 ? []
+                : [{ id: "smart-coach", label: t("settings.tabs.smartCoach") }]),
+              { id: "appearance", label: t("settings.tabs.appearance") },
+              { id: "tools", label: t("settings.tabs.tools") },
+              ...(IS_MOBILE
+                ? []
                 : [
-                    { id: "smart-coach", label: t("settings.tabs.smartCoach") },
+                    { id: "songs", label: t("settings.tabs.songs") },
                     { id: "widget", label: t("settings.tabs.widget") },
                     { id: "hotkeys", label: t("settings.tabs.hotkeys") },
                   ]),

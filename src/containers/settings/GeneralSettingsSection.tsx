@@ -6,10 +6,13 @@ import { storeLoad, storeSave } from "../../ipc";
 import { getLanguages } from "../../i18n";
 import { resetHints } from "../onboarding/hints/hintRuntime";
 import { IS_MOBILE } from "../../platform";
+import { SwitchFace } from "./SwitchFace";
 
 /**
- * General settings — auto-update, always-on-top, button flash, active border,
- * drill auto-collapse, and the two onboarding escape hatches ("Run setup
+ * General settings — language, auto-update, always-on-top, "open on my last
+ * tool", and the onboarding escape hatches. The tools' own switches (button
+ * flash, active border, drill auto-collapse) are in `ToolsSettingsSection`.
+ * The two onboarding escape hatches ("Run setup
  * again", "Reset hints"). Pure UI; state lives in the parent, except the
  * one-shot "Reset hints" confirmation, which is local.
  */
@@ -18,12 +21,6 @@ export function GeneralSettingsSection({
   setAutoCheckUpdates,
   alwaysOnTop,
   setAlwaysOnTop,
-  buttonFlash,
-  setButtonFlash,
-  activeBorder,
-  setActiveBorder,
-  drillAutoCollapse,
-  setDrillAutoCollapse,
   onRunSetupAgain,
   onTakeTour,
 }: {
@@ -31,12 +28,6 @@ export function GeneralSettingsSection({
   setAutoCheckUpdates: Dispatch<SetStateAction<boolean>>;
   alwaysOnTop: boolean;
   setAlwaysOnTop: (next: boolean) => void;
-  buttonFlash: boolean;
-  setButtonFlash: Dispatch<SetStateAction<boolean>>;
-  activeBorder: boolean;
-  setActiveBorder: Dispatch<SetStateAction<boolean>>;
-  drillAutoCollapse: boolean;
-  setDrillAutoCollapse: Dispatch<SetStateAction<boolean>>;
   /** Re-opens the first-run wizard at W0. Optional so existing tests and
    *  any other mount of this section keep working without it. */
   onRunSetupAgain?: () => void;
@@ -162,14 +153,14 @@ export function GeneralSettingsSection({
             </span>
           </div>
           <button
-            className={`toggle-btn ${autoCheckUpdates ? "active" : ""}`}
+            className={`toggle-btn setting-switch ${autoCheckUpdates ? "active" : ""}`}
             onClick={() => {
               const next = !autoCheckUpdates;
               setAutoCheckUpdates(next);
               storeSave("autoCheckUpdates", next);
             }}
           >
-            {autoCheckUpdates ? t("common.on") : t("common.off")}
+            <SwitchFace label={autoCheckUpdates ? t("common.on") : t("common.off")} />
           </button>
         </div>
         <div className="setting-row">
@@ -180,68 +171,14 @@ export function GeneralSettingsSection({
             </span>
           </div>
           <button
-            className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
+            className={`toggle-btn setting-switch ${alwaysOnTop ? "active" : ""}`}
             onClick={() => setAlwaysOnTop(!alwaysOnTop)}
           >
-            {alwaysOnTop ? t("common.on") : t("common.off")}
+            <SwitchFace label={alwaysOnTop ? t("common.on") : t("common.off")} />
           </button>
         </div>
         </>
       )}
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.buttonFlash")}</label>
-          <span className="setting-hint">
-            {t("settings.general.buttonFlashHint")}
-          </span>
-        </div>
-        <button
-          className={`toggle-btn ${buttonFlash ? "active" : ""}`}
-          onClick={() => {
-            const next = !buttonFlash;
-            setButtonFlash(next);
-            storeSave("buttonFlash", next);
-          }}
-        >
-          {buttonFlash ? t("common.on") : t("common.off")}
-        </button>
-      </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.activeBorder")}</label>
-          <span className="setting-hint">
-            {t("settings.general.activeBorderHint")}
-          </span>
-        </div>
-        <button
-          className={`toggle-btn ${activeBorder ? "active" : ""}`}
-          onClick={() => {
-            const next = !activeBorder;
-            setActiveBorder(next);
-            storeSave("activeBorder", next);
-          }}
-        >
-          {activeBorder ? t("common.on") : t("common.off")}
-        </button>
-      </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.drillAutoCollapse")}</label>
-          <span className="setting-hint">
-            {t("settings.general.drillAutoCollapseHint")}
-          </span>
-        </div>
-        <button
-          className={`toggle-btn ${drillAutoCollapse ? "active" : ""}`}
-          onClick={() => {
-            const next = !drillAutoCollapse;
-            setDrillAutoCollapse(next);
-            storeSave("drillAutoCollapse", next);
-          }}
-        >
-          {drillAutoCollapse ? t("common.on") : t("common.off")}
-        </button>
-      </div>
       <OpenOnRow />
       {onRunSetupAgain && (
         <div className="setting-row">

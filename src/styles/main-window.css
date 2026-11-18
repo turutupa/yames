@@ -19,3 +19,6 @@
 /* Last, and phone-only: every rule in it is under `.sheet` or
    `.main-window.is-mobile`, neither of which a desktop build ever renders. */
 @import "./sheet.css";
+/* After everything: Settings, the rail, the chips and the notices in the
+   learning side's type. Every rule is scoped (see the file's header). */
+@import "./chrome.css";

@@ -8,7 +8,9 @@
       "widget": "Widget",
       "hotkeys": "Scorciatoie",
       "support": "Supporto",
-      "about": "Informazioni"
+      "about": "Informazioni",
+      "tools": "Strumenti",
+      "songs": "Brani"
     },
     "appearance": {
       "title": "Aspetto",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Quello incluso in Yames",
       "chooseSoundSet": "Scegli un .sf2",
       "useBuiltInSoundSet": "Usa quello incluso"
+    },
+    "tools": {
+      "title": "Strumenti"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

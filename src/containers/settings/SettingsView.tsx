@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Dispatch, SetStateAction } from "react";
 import type {
   AudioOutputDevice,
@@ -18,6 +19,7 @@ import { SHARE_OPTIONS } from "../../constants/metronome";
 import { IS_MOBILE } from "../../platform";
 import { UpdateBanner } from "./UpdateBanner";
 import { GeneralSettingsSection } from "./GeneralSettingsSection";
+import { ToolsSettingsSection } from "./ToolsSettingsSection";
 import { AppearanceSettingsSection } from "./AppearanceSettingsSection";
 import { DevicesSettingsSection } from "./DevicesSettingsSection";
 import { CoachSettingsSection } from "./CoachSettingsSection";
@@ -230,6 +232,7 @@ export function SettingsView({
   shareTooltip,
   onShareOption,
 }: SettingsViewProps) {
+  const { t } = useTranslation();
   /** Why the last install attempt failed, for the banner to show. */
   const [updateError, setUpdateError] = useState<string | null>(null);
 
@@ -249,6 +252,15 @@ export function SettingsView({
 
   return (
     <>
+      {/* The page's own title, the way Today has one: a kicker and a serif
+          name. Not a section: the timeline and the deep links count
+          sections, and this is not one of them. */}
+      <header className="settings-head">
+        <span className="settings-head-kick">
+          {t("settings.page.kicker", { version: appVersion })}
+        </span>
+        <h1 className="settings-head-title">{t("tooltip.settings")}</h1>
+      </header>
       {/* The in-app updater is desktop-only. */}
       {!IS_MOBILE && (
         <UpdateBanner
@@ -263,23 +275,8 @@ export function SettingsView({
         setAutoCheckUpdates={setAutoCheckUpdates}
         alwaysOnTop={alwaysOnTop}
         setAlwaysOnTop={setAlwaysOnTop}
-        buttonFlash={buttonFlash}
-        setButtonFlash={setButtonFlash}
-        activeBorder={activeBorder}
-        setActiveBorder={setActiveBorder}
-        drillAutoCollapse={drillAutoCollapse}
-        setDrillAutoCollapse={setDrillAutoCollapse}
         onRunSetupAgain={onRunSetupAgain}
         onTakeTour={onTakeTour}
-      />
-
-      <AppearanceSettingsSection
-        themeId={themeId}
-        setTheme={setTheme}
-        viewTransitions={viewTransitions}
-        setViewTransitions={setViewTransitions}
-        animationStyle={animationStyle}
-        setAnimationStyle={setAnimationStyle}
       />
 
       <DevicesSettingsSection
@@ -297,7 +294,11 @@ export function SettingsView({
         setInstrument={setInstrument}
       />
 
-      {/* The coach's model, Songs' download watch, the floating widget and
+      {/* Order (settings revamp, 2026-11-17): what a player practising needs
+          first — the guitar and its input, then the coach — then how the app
+          looks, then the tools' own settings, then support and about.
+
+          The coach's model, Songs' download watch, the floating widget and
           the hotkeys are not part of the phone app (mobile plan §1, kept for
           the MVP): no section, no greyed-out card. */}
       {!IS_MOBILE && (
@@ -328,7 +329,31 @@ export function SettingsView({
           onStartDownload={onStartDownload}
           onRequestDownload={onRequestDownload}
         />
+        </>
+      )}
 
+      <AppearanceSettingsSection
+        themeId={themeId}
+        setTheme={setTheme}
+        viewTransitions={viewTransitions}
+        setViewTransitions={setViewTransitions}
+        animationStyle={animationStyle}
+        setAnimationStyle={setAnimationStyle}
+      />
+
+      {/* The tools' own switches, then the tools' own sections: Songs, the
+          widget and the hotkeys follow on a desktop. */}
+      <ToolsSettingsSection
+        buttonFlash={buttonFlash}
+        setButtonFlash={setButtonFlash}
+        activeBorder={activeBorder}
+        setActiveBorder={setActiveBorder}
+        drillAutoCollapse={drillAutoCollapse}
+        setDrillAutoCollapse={setDrillAutoCollapse}
+      />
+
+      {!IS_MOBILE && (
+        <>
         {/* W19 — catching a download is the only part of Songs that happens
             without being asked for, so it is the only part with a switch.
             Takes no props: it reads and writes `settings.json` itself. */}

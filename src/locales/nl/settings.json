@@ -8,7 +8,9 @@
       "widget": "Widget",
       "hotkeys": "Sneltoetsen",
       "support": "Steun",
-      "about": "Over"
+      "about": "Over",
+      "tools": "Tools",
+      "songs": "Nummers"
     },
     "appearance": {
       "title": "Weergave",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "Die bij Yames zit",
       "chooseSoundSet": "Kies een .sf2",
       "useBuiltInSoundSet": "Gebruik de ingebouwde"
+    },
+    "tools": {
+      "title": "Tools"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

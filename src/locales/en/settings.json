@@ -8,7 +8,9 @@
       "widget": "Widget",
       "hotkeys": "Hotkeys",
       "support": "Support",
-      "about": "About"
+      "about": "About",
+      "tools": "Tools",
+      "songs": "Songs"
     },
     "appearance": {
       "title": "Appearance",
@@ -393,6 +395,12 @@
       "soundSetBuiltIn": "The one Yames ships",
       "chooseSoundSet": "Choose a .sf2",
       "useBuiltInSoundSet": "Use the built-in one"
+    },
+    "tools": {
+      "title": "Tools"
+    },
+    "page": {
+      "kicker": "Yames {{version}}"
     }
   },
   "keybindings": {

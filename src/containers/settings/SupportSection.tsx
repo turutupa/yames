@@ -23,7 +23,7 @@ export function SupportSection({
 }) {
   const { t, i18n } = useTranslation();
   return (
-    <section className="settings-section about-section support-card">
+    <section className="settings-section about-section support-card" id="settings-support">
       <h2>{t("settings.support.title")}</h2>
       {/* Testers first: what happened, in their words, with the version and
           OS already filled in. A GitHub issue in their browser, which they
