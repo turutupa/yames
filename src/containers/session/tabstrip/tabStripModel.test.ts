@@ -21,6 +21,8 @@ import {
   patternModel,
   resultOfMark,
   resultsFromLights,
+  SCROLL_AT,
+  scrollLayout,
   segmentNotes,
   segmentPlace,
   staffGeometry,
@@ -339,5 +341,32 @@ describe("technique marks (card #40)", () => {
   it("marks nothing on a plain note", () => {
     const m = patternModel([n(1, 5, 0), n(1, 7, 960)], BAR, 1);
     expect(m.notes.every((x) => !x.link && !x.after)).toBe(true);
+  });
+});
+
+describe("the phone's scrolling view (acceptance 2, N-P1-2)", () => {
+  const sixteenths = (n: number) => Array.from({ length: n }, (_u, i) => ({ string: 2, fret: 5 + (i % 4), tick: i * 240, dur: 240 }));
+  for (const width of [290, 330]) {
+    it(`keeps the column a quarter in and at least the rest of a beat and the next beat ahead at ${width} px`, () => {
+      for (const notes of [eighths([5, 6, 7, 8, 7, 6, 5, 6]), sixteenths(16)]) {
+        const m = patternModel(notes, BAR, 1);
+        const l = scrollLayout(m, width, 300);
+        expect(l.cursorX / l.windowWidth).toBeCloseTo(SCROLL_AT, 1);
+        const aheadTicks = (l.windowWidth - l.cursorX) / l.ppt;
+        expect(aheadTicks).toBeGreaterThanOrEqual(m.beatTicks * 1.4);
+        // Neighbours never closer than about one and a half numbers.
+        expect(m.minGap * l.ppt).toBeGreaterThanOrEqual(l.fretPx * 1.4);
+        // x is linear in ticks: no inset at a bar line.
+        expect(noteXIn(BAR, l.ppt, m, l.geo) - noteXIn(0, l.ppt, m, l.geo)).toBeCloseTo(l.segWidth, 5);
+      }
+    });
+  }
+  it("shows a whole sparse bar ahead, and spreads the lines to a tall panel within reason", () => {
+    const m = patternModel(eighths([5, 7]).map((n, i) => ({ ...n, tick: i * 1920, dur: 1920 })), BAR, 1);
+    const l = scrollLayout(m, 330, 400);
+    expect(l.windowWidth - l.cursorX).toBeGreaterThanOrEqual(l.segWidth - 1);
+    expect(l.geo.gap).toBeLessThanOrEqual(Math.round(l.fretPx * 1.9));
+    expect(l.geo.gap).toBeGreaterThan(staffGeometry(l.fretPx).gap);
+    expect(l.geo.height).toBeLessThanOrEqual(400);
   });
 });

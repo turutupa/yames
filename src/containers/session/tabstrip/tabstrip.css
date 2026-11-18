@@ -269,3 +269,55 @@
 .tabstrip-seg[data-rel="later"] :is(.tabstrip-slur, .tabstrip-vib) { stroke-opacity: 0.25; }
 /* Inside the amber column: the halo in the column's colour, as the number's is. */
 .tabstrip-note[data-current] .tabstrip-tech:not([data-free]) { stroke: var(--ts-col); }
+
+/* The phone's scrolling follow view (acceptance 2, N-P1-2): the column stands
+   still a quarter of the way in and the bars move under it, every frame, so
+   the track takes no transition. The window's edges fade, so a number or a
+   bar's name coming in from the right reads as arriving, not as cut off. */
+.tabstrip[data-scroll] .tabstrip-track {
+  transition: none;
+}
+.tabstrip-window[data-scroll] {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 26px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 26px), transparent 100%);
+}
+/* What is coming is what the phone is for: the bars ahead stay readable. */
+.tabstrip[data-scroll] .tabstrip-seg[data-rel="next"] .tabstrip-note text,
+.tabstrip[data-scroll] .tabstrip-seg[data-rel="later"] .tabstrip-note text {
+  fill-opacity: 0.72;
+}
+.tabstrip[data-scroll] .tabstrip-seg[data-rel="later"] .tabstrip-label,
+.tabstrip[data-scroll] .tabstrip-seg[data-rel="later"] .tabstrip-count {
+  fill-opacity: 0.75;
+}
+.tabstrip[data-scroll] .tabstrip-seg .tabstrip-line {
+  display: none;
+}
+.tabstrip[data-scroll] .tabstrip-cursor {
+  transition: opacity 160ms ease;
+}
+.tabstrip-nowlabel {
+  position: absolute;
+  left: 10px;
+  transform: translateY(-80%);
+  font-family: var(--ts-face);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ts-quiet);
+  pointer-events: none;
+}
+.tabstrip-lines {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.tabstrip-lines i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.6px;
+  margin-top: -0.8px;
+  background: color-mix(in srgb, var(--ts-ink) 42%, transparent);
+}

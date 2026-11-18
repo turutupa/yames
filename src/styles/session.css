@@ -4142,4 +4142,44 @@
   font: 600 clamp(26px, 4vh, 40px) / 1 var(--l-display);
   letter-spacing: 0.02em;
   color: var(--l-quiet);
+
+/* The phone's scrolling tab (acceptance 2, N-P1-2): the staff spreads its
+   lines to the panel, and what height is left is shared above and below. */
+.session-page .practice-tab:not([data-compact]) .tabstrip[data-scroll] .tabstrip-fill {
+  justify-content: center;
+  padding-top: 0;
+}
+
+/* The runway's lanes as bands (acceptance 2, P1-8; `laneBands`): all six
+   strings keep a lane, the ones the Exercise plays are three times as tall,
+   the rest are dimmed context. So the runway fills its room at every size
+   and a one-string Exercise is one broad lane among quiet strings, not a
+   lane floating in an empty screen. */
+.runway[data-bands] {
+  max-height: none;
+  margin-block: 0;
+}
+.runway-lane[data-context] {
+  border-top-color: color-mix(in srgb, var(--lane) 16%, transparent);
+  border-top-style: dashed;
+}
+.runway-names span[data-context] {
+  font-size: 12px;
+  opacity: 0.45;
+}
+.runway-lane:not([data-context]) {
+  border-top-width: 2px;
+}
+/* A played string's band: a faint wash of its colour, edge to edge. */
+.runway-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--lane) 7%, transparent) 30%, color-mix(in srgb, var(--lane) 7%, transparent) 70%, transparent);
+  pointer-events: none;
+}
+/* On one line in a gap between two strings (a narrow neck): the pill only as
+   tall as the words, so it stays between the strings. */
+:root:not([data-theme="ember"]) .practice-next-tag[data-row] {
+  padding-block: 1px;
 }

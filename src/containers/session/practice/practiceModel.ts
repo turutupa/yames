@@ -80,10 +80,18 @@ export function nowNextNeck(
  */
 export function orderedNeck(shape: readonly NeckNote[], onsets: Onsets, theory = false): NeckNote[] {
   const order = new Map<string, number>();
+  // The numbers count the fretted places only. An open string is the "0"
+  // token by the nut, as tab writes it (acceptance 2, P1-3): numbering it put
+  // a "2" on the headstock, and a pedal tone between every note took a number
+  // the run of fretted notes then skipped.
+  const numbered = new Map<string, number>();
   let n = 0;
+  let f = 0;
   for (const o of onsets) {
     for (const p of o.places) {
-      if (!order.has(key(p))) order.set(key(p), ++n);
+      if (order.has(key(p))) continue;
+      order.set(key(p), ++n);
+      if (p.fret > 0) numbered.set(key(p), ++f);
     }
   }
   return shape.map((note) => {
@@ -92,7 +100,7 @@ export function orderedNeck(shape: readonly NeckNote[], onsets: Onsets, theory =
     return {
       ...note,
       kind: at === 1 ? "now" : at === 2 ? "next" : "box",
-      label: String(at),
+      label: note.fret > 0 ? String(numbered.get(key(note)) ?? at) : "0",
     };
   });
 }

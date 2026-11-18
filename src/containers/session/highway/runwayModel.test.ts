@@ -3,6 +3,7 @@ import { ALT } from "../../../session/testKit";
 import { buildTake } from "../../../session/take";
 import type { NeckNote } from "../../../stage3d/api";
 import {
+  laneBands,
   BARS_AHEAD,
   BARS_BEHIND,
   MIN_NOTE_PX,
@@ -127,5 +128,24 @@ describe("dotOffset and the setting", () => {
     expect(nextPracticeView("neck")).toBe("runway");
     expect(nextPracticeView("runway")).toBe("tab");
     expect(nextPracticeView("tab")).toBe("neck");
+  });
+});
+
+describe("lane bands (acceptance 2, P1-8)", () => {
+  it("gives one or two played strings the room, keeps the other four as dimmed context", () => {
+    const one = laneBands([5]);
+    expect(one).toHaveLength(6);
+    const a = one.find((b) => b.string === 5)!;
+    const quiet = one.filter((b) => !b.used);
+    expect(quiet).toHaveLength(5);
+    expect(a.height).toBeGreaterThan(quiet[0].height * 3);
+    expect(one.reduce((t, b) => t + b.height, 0)).toBeCloseTo(1, 6);
+    // In order, high e on top, no gaps.
+    one.forEach((b, i) => expect(b.top).toBeCloseTo(i === 0 ? 0 : one[i - 1].top + one[i - 1].height, 6));
+  });
+  it("is six even lanes when every string plays", () => {
+    const all = laneBands([1, 2, 3, 4, 5, 6]);
+    expect(new Set(all.map((b) => b.height.toFixed(6))).size).toBe(1);
+    expect(all.every((b) => b.used)).toBe(true);
   });
 });
