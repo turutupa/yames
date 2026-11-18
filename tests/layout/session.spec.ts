@@ -251,3 +251,63 @@ test.describe("the Session bar", () => {
     await expect(page.locator('[data-testid="session-pip-1"]')).toHaveAttribute("aria-current", "step");
   });
 });
+
+/*
+ * The neck before a Take (the owner, 2026-11-18): finger numbers on the dots,
+ * a "start here" pill off the strings, and Watch, which lights the order on
+ * the neck and never starts anything. A sweep, a one-string drill and a box
+ * lick, wide and narrow.
+ */
+const NECK_SCENES = ["session-neck-sweep", "session-neck-fingers", "session-neck-box"];
+for (const scene of NECK_SCENES) {
+  for (const size of [
+    { width: 1400, height: 900 },
+    { width: 620, height: 780 },
+  ]) {
+    test(`${scene}: the start pill finds room, Watch fits, at ${size.width}px`, async ({ page }) => {
+      await openShot(page, scene, size);
+      const pill = page.locator('[data-testid="practice-now-tag"]');
+      await expect(pill).toHaveText(/\S/);
+      await expect(pill).toHaveAttribute("data-start", "");
+      // Clear of every dot of the pattern, between two strings (`placeStart`).
+      await expect(pill).toHaveAttribute("data-clear", "");
+      const neck = (await page.locator('[data-testid="practice-neck"]').boundingBox())!;
+      const p = (await pill.boundingBox())!;
+      expect(p.x).toBeGreaterThanOrEqual(neck.x);
+      expect(p.x + p.width).toBeLessThanOrEqual(neck.x + neck.width + 0.5);
+      await expect(page.locator('[data-testid="practice-watch"]')).toBeVisible();
+      await insideViewport(page, '[data-testid="practice-watch"]', `${scene} at ${size.width}px`, size);
+      expect(await notHitTestable(page, '[data-testid="practice-watch"]')).toEqual([]);
+      // The neck's foot (the beat, the key, Watch) is drawn in the room its
+      // slot keeps for it (FOOT_PX), so Watch is inside the slot by design;
+      // anything else on top of anything is not.
+      const inFoot = (o: string) => o.startsWith("div.session-slot") && (o.includes("× button.practice-watch") || o.endsWith("× svg. \"\" (10×10)"));
+      expect((await overlapping(page)).filter((o) => !inFoot(o))).toEqual([]);
+      await noSidewaysScroll(page, `${scene} at ${size.width}px`);
+    });
+  }
+}
+
+test("Watch lights the order and starts nothing; its key and Start both stop it", async ({ page }) => {
+  await openShot(page, "session-neck-sweep", { width: 1400, height: 900 });
+  const watch = page.locator('[data-testid="practice-watch"]');
+  await expect(watch.locator("kbd")).toHaveText("L");
+  await watch.click();
+  await expect(watch).toHaveAttribute("aria-pressed", "true");
+  // The pill goes while it plays, the beat dots count, and nothing runs.
+  await expect(page.locator('[data-testid="practice-now-tag"]')).toBeHidden();
+  await expect(page.locator('[data-testid="practice-beats"] i[data-on]')).toHaveCount(1, { timeout: 3000 });
+  await expect(page.locator('[data-testid="session-live"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="session-take"]')).toHaveAttribute("data-phase", "ready");
+  // Its key stops it (pressed on the page, not on the button it just clicked).
+  await page.locator("body").click({ position: { x: 5, y: 400 } });
+  await page.keyboard.press("l");
+  await expect(watch).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator('[data-testid="practice-now-tag"]')).toBeVisible();
+  await page.keyboard.press("l");
+  await expect(watch).toHaveAttribute("aria-pressed", "true");
+  // Start take ends it: the Take runs and Watch is gone.
+  await page.locator('[data-testid="session-big"]').click();
+  await expect(page.locator('[data-testid="session-live"]')).toBeVisible();
+  await expect(watch).toHaveCount(0);
+});
