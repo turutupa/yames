@@ -153,7 +153,12 @@ export function FallbackNeck({
           .map((f) => {
             const c = (X(f) + X(f - 1)) / 2;
             const ys = DOUBLE(f) ? [(S(2) + S(3)) / 2, (S(4) + S(5)) / 2] : [(S(3) + S(4)) / 2];
-            return ys.map((y) => <circle key={`${f}:${y}`} cx={c} cy={y} r={sp * 0.24} fill={P.inlay} />);
+            // Small, and not drawn where a note stands on or beside it, as on
+            // the 3D neck: an inlay is a landmark, never a second dot.
+            const ri = sp * 0.17;
+            return ys
+              .filter((y) => !shown.some((n) => Math.hypot(noteX(n.fret) - c, S(n.string) - y) < R * 1.45 + ri + 3))
+              .map((y) => <circle key={`${f}:${y}`} data-testid="neck-inlay" cx={c} cy={y} r={ri} fill={P.inlay} />);
           })}
         {frets.map((f) => (
           <rect key={f} x={X(f) - fretW / 2} y={bT} width={fretW} height={bh} fill={P.fret} />

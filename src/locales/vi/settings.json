@@ -260,7 +260,8 @@
         "session-view": "Đổi chế độ xem",
         "session-pause": "Tạm dừng / tiếp tục",
         "session-restart": "Thu lại từ đầu",
-        "session-prev": "Về khối trước"
+        "session-prev": "Về khối trước",
+        "session-watch": "Xem thứ tự"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -318,7 +319,8 @@
         "session-view": "Trong buổi tập: Cần đàn, Đường chạy hoặc Tab. Bất cứ lúc nào khi khởi động; giữa các lượt khi được chấm",
         "session-pause": "Khi khởi động hoặc trong khối tính giờ: tạm dừng, hoặc tiếp tục",
         "session-restart": "Khi khởi động hoặc trong khối tính giờ: từ đầu. Sau một lượt: lượt đó thêm lần nữa",
-        "session-prev": "Trong buổi tập: quay về khối trước khối này"
+        "session-prev": "Trong buổi tập: quay về khối trước khối này",
+        "session-watch": "Trước một lượt, trên cần đàn: sáng các nốt theo thứ tự đúng tempo, hoặc dừng. Không tiếng, không chấm điểm"
       }
     },
     "inputTest": {

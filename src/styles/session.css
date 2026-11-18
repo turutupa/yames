@@ -3321,9 +3321,42 @@
   border-color: var(--l-amber);
   box-shadow: 0 0 12px var(--l-amber);
 }
-.practice-legend {
+.practice-foot-end {
   position: absolute;
   right: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+/* Watch: the whole order lit on the neck, before a Take. A quiet button by the key. */
+.practice-watch {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--l-line2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-ink);
+  font: 600 12px/1.4 var(--l-body);
+  cursor: pointer;
+}
+.practice-watch svg {
+  fill: var(--l-amber);
+}
+.practice-watch[aria-pressed="true"] {
+  border-color: var(--l-amber);
+  color: var(--l-tag-accent);
+}
+.practice-watch kbd {
+  padding: 0 5px;
+  border: 1px solid var(--l-line2);
+  border-radius: 4px;
+  font: 700 11px/1.4 var(--l-display);
+  color: var(--l-quiet);
+}
+.practice-legend {
   display: flex;
   gap: 14px;
   font-size: 12px;
@@ -3350,8 +3383,34 @@
   background: var(--l-tone);
   opacity: 0.7;
 }
+.practice-legend [data-k="fingers"]::before {
+  display: none;
+}
 @media (max-width: 700px) {
-  .practice-legend {
+  /* One row on a phone: Watch, the beat, the key, in the flow rather than
+     over each other. The word "beat" goes; the dots say it. Watch keeps a
+     thumb's 44 px without making the row taller than the room kept for it. */
+  .practice-neck-foot {
+    gap: 12px;
+  }
+  .practice-beats-label {
+    display: none;
+  }
+  .practice-foot-end {
+    display: contents;
+  }
+  .practice-watch {
+    order: -1;
+    min-height: 44px;
+    margin-block: -10px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  .practice-watch kbd {
+    display: none;
+  }
+  /* A phone keeps the one key the dots need: what their numbers are. */
+  .practice-legend > :not([data-k="fingers"]) {
     display: none;
   }
 }
@@ -4256,6 +4315,20 @@
   padding-block: 1px;
 }
 
+/* "start here" is a pill in every theme, Ember too, edged in the accent, so it
+   reads over the wood and the strings. */
+:root .practice-now-tag[data-start] {
+  background: var(--l-tag-pill);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--l-amber) 55%, transparent);
+  text-shadow: none;
+  font-size: 14px;
+  line-height: 1.1;
+  /* Four pixels round the words: what is right behind them is the pill, never
+     a string, which is also what the contrast gate samples. */
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
 /* ══ The Session bar's blocks, Previous and the input (owner, 2026-11-18) ══
  * Each block of the bar is a button: to that block's ready screen, back or
  * ahead. The visible bar stays 5 px; the button round it is the hit area,
@@ -4800,5 +4873,14 @@ button.session-input-chip:hover {
   }
   .session-swap-btn-word {
     display: none;
+  }
+}
+/* On a phone the strings are closer than the pill is tall: a smaller pill
+   keeps a couple of pixels clear of the strings either side of its gap. */
+@media (max-width: 700px) {
+  :root .practice-now-tag[data-start] {
+    font-size: 11px;
+    line-height: 1.1;
+    padding: 3px 7px;
   }
 }

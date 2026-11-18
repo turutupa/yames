@@ -990,6 +990,13 @@
       "globalKey": null,
       "globalAllowed": false,
       "group": "session"
+    },
+    {
+      "id": "session-watch",
+      "key": "L",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
     }
   ],
   "settingsKeys": {
