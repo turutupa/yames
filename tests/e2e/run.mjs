@@ -202,7 +202,14 @@ async function launchApp() {
   driverProc = null;
   await startDriver();
   const d = await new Driver().start(app);
-  await d.waitText(/Today/, 30000);
+  // The shell (the top bar's "Vol | Voice") paints before Today; on a busy
+  // machine the GPU X server's first launch has taken over 30 s to get there.
+  try {
+    await d.waitText(/Today/, 60000);
+  } catch (e) {
+    await shot(d, `no-today-launch-${launch}`);
+    throw e;
+  }
   // "What's new" is offered on every new version; it is not what this tests.
   await d.clickText(/^Got it$/, { timeoutMs: 3000 }).catch(() => {});
   return d;
