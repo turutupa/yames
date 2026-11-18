@@ -1836,8 +1836,8 @@ export function installShotMock(shot: Shot, theme: string): void {
       if (shot.settings?.update !== "available") return null;
       return {
         rid: 1,
-        currentVersion: "1.2.0",
-        version: "1.2.1",
+        currentVersion: APP_VERSION,
+        version: "1.2.2",
         date: null,
         body: "- A much smaller download, and the same band",
         rawJson: {},
