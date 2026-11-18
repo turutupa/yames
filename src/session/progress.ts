@@ -33,6 +33,12 @@ export type TakeFacts = {
   benchmark?: { day: number; exerciseId: string; bpm: number };
   /** The player's answer to "Was this grade fair?". Absent: not asked or not answered. */
   fair?: "yes" | "no";
+  /**
+   * Played without grading (owner, 2026-11-18): the input was off and the
+   * player chose to play anyway, or Settings has grading off. Practice, so it
+   * counts toward minutes and the streak; never an attempt at the bar.
+   */
+  ungraded?: "inputOff" | "gradingOff";
 };
 
 export type PlayerProgress = {
@@ -199,6 +205,11 @@ export function calendarDaysBetween(earlier: number, later: number): number {
     return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
   };
   return Math.round((day(later) - day(earlier)) / 86_400_000);
+}
+
+/** A Take played without grading, on purpose: practice, never an attempt at the bar. */
+export function isUngradedTake(take: PathTakeRow): boolean {
+  return factsOf(take).ungraded !== undefined;
 }
 
 /** The most recent Take that was actually heard, at any tempo. */

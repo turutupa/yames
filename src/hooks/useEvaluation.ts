@@ -41,6 +41,12 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   const [selectedDevice, setSelectedDevice] = useState<string | undefined>(undefined);
   /** 0-indexed channel index (0 = default, matches Rust-side). */
   const [selectedChannel, setSelectedChannel] = useState<number>(0);
+  /**
+   * The device the input is open on, as far as this hook knows: the selected
+   * one, or another a caller asked for once (`setListening(true, device)`), or
+   * null for the system default. Only meaningful while `enabled`.
+   */
+  const [openDevice, setOpenDevice] = useState<string | null>(null);
 
   // Keep a ref so that all three startEvaluation call sites always send the
   // current coachMode without needing it in their useCallback dep arrays.
@@ -238,15 +244,14 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   selectedChannelRef.current = selectedChannel;
 
   /** Start or stop now (inside `serial`), unless it already is. */
-  const apply = useCallback(async (on: boolean, device?: string, channel?: number) => {
+  const apply = useCallback(async (on: boolean, device?: string | null, channel?: number) => {
     if (on === enabledRef.current) return;
     if (on) {
       await refreshDevices();
-      await startEvaluation(
-        device ?? selectedDeviceRef.current,
-        channel ?? selectedChannelRef.current,
-        coachModeRef.current,
-      );
+      // `null` is "the system's default", asked for on purpose; `undefined` is "the selected one".
+      const name = device === null ? undefined : (device ?? selectedDeviceRef.current);
+      await startEvaluation(name, channel ?? selectedChannelRef.current, coachModeRef.current);
+      setOpenDevice(name ?? null);
     } else {
       await stopEvaluation();
     }
@@ -264,13 +269,18 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
    * stop and restart (`serial`), so the last call made is the state it ends in.
    */
   const setListening = useCallback(
-    (on: boolean) => {
+    /**
+     * `device`, on a start only: open this device this once, without making it
+     * the selected one (`null` is the system default). A Session uses it when
+     * the selected device is gone, rather than staying deaf.
+     */
+    (on: boolean, device?: string | null) => {
       wantRef.current = on;
       touchedRef.current = true;
       const intent = ++intentRef.current;
       return serial(async () => {
         try {
-          await apply(on);
+          await apply(on, on ? device : undefined);
         } finally {
           // A start that failed leaves it off, whatever was asked; only the
           // latest intent may say so.
@@ -298,6 +308,7 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
         try {
           await startEvaluation(device, channel, coachModeRef.current);
           enabledRef.current = true;
+          setOpenDevice(device ?? null);
         } finally {
           setEnabled(enabledRef.current);
           if (intentRef.current === intent) wantRef.current = enabledRef.current;
@@ -346,6 +357,8 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
 
   return {
     enabled,
+    /** The device the input is open on (null: the system default). Only meaningful while `enabled`. */
+    openDevice,
     toggle,
     setListening,
     devices,

@@ -1230,7 +1230,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     return () => { unlisten?.(); };
   }, [active]);
 
-  const startSessionNow = useCallback(async () => {
+  /**
+   * `listen: false` opens a coach session without turning the input on: a
+   * learning Session played without grading (owner, 2026-11-18) never asks for
+   * a microphone it will not use.
+   */
+  const startSessionNow = useCallback(async (options?: { listen?: boolean }) => {
     if (activeRef.current) {
       coachDebug("startSession.noop-already-active");
       return;
@@ -1406,9 +1411,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
 
     // Awaited, inside the lifecycle queue: an end asked for now runs after
     // the input is on, so its stop cannot overtake this start (B1).
-    await evaluation.setListening(true).catch((e: unknown) => {
-      console.error("[startSession] the input would not start:", e);
-    });
+    if (options?.listen !== false) {
+      await evaluation.setListening(true).catch((e: unknown) => {
+        console.error("[startSession] the input would not start:", e);
+      });
+    }
 
     // LLM paraphrase path — the coach LLM (when available) gets the
     // already-filled template + structured context and is asked to
@@ -1768,7 +1775,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     lifecycle.current = next.catch(() => {});
     return next;
   }, []);
-  const startSession = useCallback(() => inTurn(() => startNowRef.current()), [inTurn]);
+  const startSession = useCallback(
+    (options?: { listen?: boolean }) => inTurn(() => startNowRef.current(options)),
+    [inTurn],
+  );
   const isActive = useCallback(() => activeRef.current, []);
   const endSession = useCallback(() => inTurn(() => endNowRef.current()), [inTurn]);
 

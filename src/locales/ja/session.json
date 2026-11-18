@@ -111,7 +111,9 @@
         "keepWarmNew": "まずはお試し。"
       },
       "from": "{{path}} · {{level}} · ステップ {{step}}",
-      "fromNoLevel": "{{path}} · ステップ {{step}}"
+      "fromNoLevel": "{{path}} · ステップ {{step}}",
+      "startHere": "ここから始める ›",
+      "startHereLabel": "{{n}} からセッションを始める：{{title}}"
     },
     "why": {
       "firstEver": "はじめてなので {{bpm}} BPM から。速さではなく、タイミングの練習です。",
@@ -211,7 +213,9 @@
       "goAgainUp": "もう一度、{{bpm}} BPM に上げて",
       "slowerFloor": "この課題のいちばん遅いテンポです",
       "fasterCeiling": "この課題のいちばん速いテンポです",
-      "tempoLocked": "テストは合格テンポで弾くので、ここは変えられません"
+      "tempoLocked": "テストは合格テンポで弾くので、ここは変えられません",
+      "previous": "前へ",
+      "previousFirst": "最初のブロックなので、前はありません"
     },
     "result": {
       "kick": "テイク {{take}} · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -535,6 +539,49 @@
     },
     "placement": {
       "result": "ステップ{{n}}から始めます：{{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "いま",
+        "done": "完了",
+        "skipped": "スキップ",
+        "todo": "まだ"
+      }
+    },
+    "jump": {
+      "title": "止めて「{{title}}」に移動しますか？",
+      "body": "ここまで弾いた分は保存されています。",
+      "go": "移動する"
+    },
+    "input": {
+      "turnOnAndStart": "入力をオンにして開始",
+      "starting": "入力を開始しています…",
+      "startingShort": "開始中…",
+      "startingLong": "入力を開始しています。採点にはマイクかダイレクト入力が必要です。",
+      "listeningTo": "{{device}} を聴いています",
+      "fellBack": "選んだ入力がつながっていないので、このセッションは {{device}} を聴きます。",
+      "defaultDevice": "既定の入力",
+      "chooseInput": "入力を選ぶ",
+      "playUngraded": "採点なしで弾く",
+      "notGraded": "採点なし",
+      "turnOn": "入力をオンにする",
+      "noSignal": "信号なし",
+      "failed": {
+        "noDevice": "マイクもオーディオインターフェースも見つかりません。接続するか、選んでください。",
+        "permission": "Yames にマイクの使用が許可されていません。システム設定で許可してから、もう一度開始を押してください。",
+        "noAnswer": "入力から応答がありません。許可のダイアログが開いていれば答えてから、もう一度開始を押してください。",
+        "busy": "別のアプリが入力を使っています。そのアプリを閉じてから、もう一度開始を押してください。",
+        "other": "入力を開始できませんでした。確認するか、別の入力を選んでください。"
+      }
+    },
+    "ungraded": {
+      "ready": "採点なし：入力がオフなので、このセッションは聴いていません。",
+      "readyOff": "採点なし：設定で採点がオフになっています。",
+      "result": "採点なし：入力がオフでした",
+      "resultOff": "採点なし：設定で採点がオフになっています",
+      "body": "練習としてカウントされます（練習時間と連続記録）。クリーンテンポとステップは採点されたテイクでだけ進みます。",
+      "recap": "採点なし"
     }
   }
 }

@@ -259,7 +259,8 @@
         "tab-tools": "Werkzeuge",
         "session-view": "Ansicht wechseln",
         "session-pause": "Pause / weiter",
-        "session-restart": "Take neu starten"
+        "session-restart": "Take neu starten",
+        "session-prev": "Zurück zum vorigen Block"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -316,7 +317,8 @@
         "tab-tools": "Zu „Werkzeuge“ wechseln",
         "session-view": "In einer Session: Hals, Runway oder Tab. Beim Aufwärmen jederzeit; bei bewerteten Takes zwischen den Takes",
         "session-pause": "Beim Aufwärmen oder in einem Zeitblock: pausieren oder weitermachen",
-        "session-restart": "Beim Aufwärmen oder in einem Zeitblock: von vorn. Nach einem Take: derselbe Take nochmal"
+        "session-restart": "Beim Aufwärmen oder in einem Zeitblock: von vorn. Nach einem Take: derselbe Take nochmal",
+        "session-prev": "In einer Session: zurück zum Block davor"
       }
     },
     "inputTest": {
@@ -434,7 +436,9 @@
       "minutes": "Sitzungslänge",
       "minutesHint": "Wie lange „Heute“ dein Üben plant. Du kannst es auch dort ändern.",
       "view": "Übungsansicht",
-      "viewHint": "Was eine Sitzung beim Spielen zeigt."
+      "viewHint": "Was eine Sitzung beim Spielen zeigt.",
+      "grade": "Mein Spiel bewerten",
+      "gradeHint": "Aus: Sessions laufen, ohne zuzuhören, und bewerten nichts. Minuten und Serie zählen trotzdem."
     }
   },
   "keybindings": {

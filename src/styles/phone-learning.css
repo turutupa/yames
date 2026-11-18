@@ -277,3 +277,40 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
   flex: none;
   max-height: none;
 }
+
+/* The Session bar on a phone (owner, 2026-11-18): Exit, the clock, Previous
+   and Skip on the first row; the blocks, a thumb tall each, and the input on
+   the second, so neither is squeezed out. */
+.main-window.is-mobile .session-page .session-bar {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.main-window.is-mobile .session-page .session-bar .session-pips {
+  order: 10;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.main-window.is-mobile .session-page .session-bar .session-input-chip {
+  order: 11;
+  min-height: 44px;
+}
+.main-window.is-mobile .session-page .session-bar-left {
+  margin-left: auto;
+}
+.main-window.is-mobile .session-page .session-pips > .session-pip {
+  height: 44px;
+  margin: 0;
+}
+.main-window.is-mobile .session-page .session-prev .session-prev-word {
+  display: none;
+}
+.main-window.is-mobile .session-page .session-input-actions .session-secondary {
+  min-height: 44px;
+}
+/* Today's "Start here" is a hover hint; a phone has none, and the row is the button. */
+.main-window.is-mobile .session-plan-here {
+  display: none;
+}
+.main-window.is-mobile .session-today-plan .session-plan-item[data-go] {
+  min-height: 44px;
+}

@@ -18,11 +18,19 @@ export function LeaveSessionDialog({
   onLeave,
   onStay,
   saved = true,
+  words,
+  testId = "leave-session",
 }: {
   onLeave: () => void;
   onStay: () => void;
   /** Takes in this Session are kept, and the body says so. */
   saved?: boolean;
+  /**
+   * The same question about something else: a block of the bar asked for
+   * while a Take or a warm-up runs (owner, 2026-11-18). Already translated.
+   */
+  words?: { title: string; body: string; stay: string; leave: string };
+  testId?: string;
 }) {
   const { t } = useTranslation();
   const stayRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +76,7 @@ export function LeaveSessionDialog({
     return () => window.removeEventListener("keydown", onKey, true);
   }, [onLeave, onStay]);
   return (
-    <div className="unsaved-overlay" onClick={onStay} data-testid="leave-session">
+    <div className="unsaved-overlay" onClick={onStay} data-testid={testId}>
       <div
         className="unsaved-card"
         role="alertdialog"
@@ -79,19 +87,19 @@ export function LeaveSessionDialog({
       >
         <div className="unsaved-head">
           <span className="unsaved-title" id="leave-session-title">
-            {t("session.leave.title")}
+            {words?.title ?? t("session.leave.title")}
           </span>
         </div>
         <p className="unsaved-body" id="leave-session-body">
-          {t(saved ? "session.leave.body" : "session.leave.bodyNothingSaved")}
+          {words?.body ?? t(saved ? "session.leave.body" : "session.leave.bodyNothingSaved")}
         </p>
         <div className="unsaved-actions">
-          <button ref={stayRef} className="unsaved-cancel" onClick={onStay} data-testid="leave-session-stay">
-            {t("session.leave.stay")}
+          <button ref={stayRef} className="unsaved-cancel" onClick={onStay} data-testid={`${testId}-stay`}>
+            {words?.stay ?? t("session.leave.stay")}
           </button>
           <span className="unsaved-spacer" />
-          <button ref={leaveRef} className="unsaved-save" onClick={onLeave} data-testid="leave-session-leave">
-            {t("session.leave.leave")}
+          <button ref={leaveRef} className="unsaved-save" onClick={onLeave} data-testid={`${testId}-leave`}>
+            {words?.leave ?? t("session.leave.leave")}
           </button>
         </div>
       </div>

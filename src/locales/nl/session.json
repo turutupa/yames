@@ -111,7 +111,9 @@
         "keepWarmNew": "Een eerste kennismaking."
       },
       "from": "{{path}} · {{level}} · Stap {{step}}",
-      "fromNoLevel": "{{path}} · Stap {{step}}"
+      "fromNoLevel": "{{path}} · Stap {{step}}",
+      "startHere": "Hier beginnen ›",
+      "startHereLabel": "De sessie bij {{n}} beginnen: {{title}}"
     },
     "why": {
       "firstEver": "Je eerste, dus hij begint op {{bpm}} BPM. Het gaat hier om timing, niet om snelheid.",
@@ -211,7 +213,9 @@
       "goAgainUp": "Nog een keer, omhoog naar {{bpm}} BPM",
       "slowerFloor": "Al het langzaamste tempo van deze oefening",
       "fasterCeiling": "Al het snelste tempo van deze oefening",
-      "tempoLocked": "Een test speel je op het slagingstempo, dus dat blijft vast"
+      "tempoLocked": "Een test speel je op het slagingstempo, dus dat blijft vast",
+      "previous": "Vorige",
+      "previousFirst": "Dit is het eerste blok, er komt niets voor"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} maten",
@@ -535,6 +539,49 @@
     },
     "placement": {
       "result": "Je begint bij stap {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "nu",
+        "done": "klaar",
+        "skipped": "overgeslagen",
+        "todo": "nog niet gespeeld"
+      }
+    },
+    "jump": {
+      "title": "Stoppen en naar {{title}} gaan?",
+      "body": "Wat je tot nu toe hebt gespeeld, blijft bewaard.",
+      "go": "Ga daarheen"
+    },
+    "input": {
+      "turnOnAndStart": "Ingang aanzetten en starten",
+      "starting": "Je ingang start…",
+      "startingShort": "Starten…",
+      "startingLong": "Je ingang start. Voor beoordeling is een microfoon of directe ingang nodig.",
+      "listeningTo": "Ik luister naar {{device}}",
+      "fellBack": "Je gekozen ingang is niet aangesloten, dus deze sessie luister ik naar {{device}}.",
+      "defaultDevice": "je standaardingang",
+      "chooseInput": "Ingang kiezen",
+      "playUngraded": "Spelen zonder beoordeling",
+      "notGraded": "Niet beoordeeld",
+      "turnOn": "Ingang aanzetten",
+      "noSignal": "Geen signaal",
+      "failed": {
+        "noDevice": "Ik vind geen microfoon of audio-interface. Sluit er een aan of kies er een.",
+        "permission": "Yames mag de microfoon niet gebruiken. Sta het toe in je systeeminstellingen en druk dan opnieuw op Start.",
+        "noAnswer": "De ingang gaf geen antwoord. Staat er een toestemmingsvraag open, beantwoord die en druk dan opnieuw op Start.",
+        "busy": "Een andere app gebruikt je ingang. Sluit die en druk dan opnieuw op Start.",
+        "other": "Je ingang wilde niet starten. Controleer hem of kies een andere."
+      }
+    },
+    "ungraded": {
+      "ready": "Niet beoordeeld: de ingang staat uit, dus ik luister deze sessie niet.",
+      "readyOff": "Niet beoordeeld: beoordeling staat uit in Instellingen.",
+      "result": "Niet beoordeeld: de ingang stond uit",
+      "resultOff": "Niet beoordeeld: beoordeling staat uit in Instellingen",
+      "body": "Het telt als oefening, voor je minuten en je reeks. Je schone tempo en stappen bewegen alleen bij beoordeelde takes.",
+      "recap": "niet beoordeeld"
     }
   }
 }

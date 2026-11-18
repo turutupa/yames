@@ -112,7 +112,9 @@
         "keepWarmNew": "Un primo assaggio."
       },
       "from": "{{path}} · {{level}} · Tappa {{step}}",
-      "fromNoLevel": "{{path}} · Tappa {{step}}"
+      "fromNoLevel": "{{path}} · Tappa {{step}}",
+      "startHere": "Inizia da qui ›",
+      "startHereLabel": "Inizia la sessione da {{n}}: {{title}}"
     },
     "why": {
       "firstEver": "È la tua prima, quindi si parte a {{bpm}} BPM. Qui conta il tempo, non la velocità.",
@@ -212,7 +214,9 @@
       "goAgainUp": "Ancora, sali a {{bpm}} BPM",
       "slowerFloor": "È già il tempo più lento di questo esercizio",
       "fasterCeiling": "È già il tempo più veloce di questo esercizio",
-      "tempoLocked": "Un test si suona al tempo di superamento, quindi resta fisso"
+      "tempoLocked": "Un test si suona al tempo di superamento, quindi resta fisso",
+      "previous": "Precedente",
+      "previousFirst": "Questo è il primo blocco, prima non c'è niente"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} battute",
@@ -548,6 +552,49 @@
     },
     "placement": {
       "result": "Parti dal passo {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "ora",
+        "done": "fatto",
+        "skipped": "saltato",
+        "todo": "non ancora suonato"
+      }
+    },
+    "jump": {
+      "title": "Fermarsi e andare a {{title}}?",
+      "body": "Quello che hai suonato finora resta salvato.",
+      "go": "Vai lì"
+    },
+    "input": {
+      "turnOnAndStart": "Attiva l'ingresso e inizia",
+      "starting": "Sto attivando l'ingresso…",
+      "startingShort": "Attivo…",
+      "startingLong": "Sto attivando l'ingresso. Per la valutazione serve un microfono o un ingresso diretto.",
+      "listeningTo": "Ascolto {{device}}",
+      "fellBack": "L'ingresso scelto non è collegato, quindi in questa sessione ascolto {{device}}.",
+      "defaultDevice": "il tuo ingresso predefinito",
+      "chooseInput": "Scegli l'ingresso",
+      "playUngraded": "Suona senza valutazione",
+      "notGraded": "Non valutato",
+      "turnOn": "Attiva l'ingresso",
+      "noSignal": "Nessun segnale",
+      "failed": {
+        "noDevice": "Non trovo né un microfono né un'interfaccia audio. Collegane uno o sceglilo.",
+        "permission": "Yames non ha il permesso di usare il microfono. Consentilo nelle impostazioni di sistema, poi premi di nuovo Inizia.",
+        "noAnswer": "L'ingresso non ha risposto. Se c'è una richiesta di permesso aperta, rispondi, poi premi di nuovo Inizia.",
+        "busy": "Un'altra app sta usando l'ingresso. Chiudila, poi premi di nuovo Inizia.",
+        "other": "L'ingresso non è partito. Controllalo o scegline un altro."
+      }
+    },
+    "ungraded": {
+      "ready": "Non valutato: l'ingresso è spento, in questa sessione non ascolto.",
+      "readyOff": "Non valutato: la valutazione è disattivata nelle Impostazioni.",
+      "result": "Non valutato: l'ingresso era spento",
+      "resultOff": "Non valutato: la valutazione è disattivata nelle Impostazioni",
+      "body": "Conta come pratica, per i tuoi minuti e la tua serie. Il tempo pulito e gli step avanzano solo con take valutati.",
+      "recap": "non valutato"
     }
   }
 }

@@ -118,3 +118,106 @@ export function TempoNudges({
     </div>
   );
 }
+
+/**
+ * What the Take's Start says and does with the input in mind (owner, beta 6:
+ * "I hit start take but nothing happens"). Never a dead button: with the input
+ * off it offers to turn it on and start, and while that happens it says so.
+ */
+export function startButton(
+  session: SessionRun,
+  listening: boolean,
+  t: T,
+): { label: string; busy: boolean; needsInput: boolean } {
+  const { run, big, inputStart } = session;
+  const graded = !run.ungraded;
+  const needsInput = big.kind === "playTake" && graded && !listening;
+  if (!needsInput) return { label: bigLabel(big, t), busy: false, needsInput: false };
+  if (inputStart.status === "starting") return { label: t("session.input.starting"), busy: true, needsInput };
+  return { label: t("session.input.turnOnAndStart"), busy: false, needsInput };
+}
+
+/** The Take's own state: whether pressing Start would start it now. */
+export function takeCanStart(session: SessionRun, listening: boolean): boolean {
+  const { prepared, run, inputStart } = session;
+  if (!prepared) return false;
+  // Off and graded, Start turns the input on first: it is pressable, not dead.
+  if (!listening && !run.ungraded) return inputStart.status !== "starting";
+  return true;
+}
+
+/**
+ * Under a Take's ready screen: what the input is doing, in words, and the
+ * ways out when it will not come on (owner, beta 6). Graded with the input
+ * off, "Play without grading" is always offered; refused, the screen says what
+ * went wrong and offers "Check my sound" and "Choose input".
+ */
+export function ReadyInput({
+  session,
+  listening,
+  hasSignal,
+  onTestInput,
+  onChooseInput,
+}: {
+  session: SessionRun;
+  listening: boolean;
+  hasSignal: boolean;
+  onTestInput: () => void;
+  onChooseInput: () => void;
+}) {
+  const { t } = useTranslation();
+  const { run, inputStart, actions } = session;
+  if (run.phase !== "ready") return null;
+  if (run.ungraded) {
+    return (
+      <div className="session-input-note" role="status" data-testid="session-ungraded-note">
+        <span className="session-input-dot" data-state="ungraded" aria-hidden="true" />
+        <span>{t(run.ungraded === "gradingOff" ? "session.ungraded.readyOff" : "session.ungraded.ready")}</span>
+      </div>
+    );
+  }
+  if (listening) {
+    const device = inputStart.device;
+    return (
+      <div className="session-input-note" role="status" data-testid="session-input-on">
+        <span className="session-input-dot" data-state={hasSignal ? "on" : "quiet"} aria-hidden="true" />
+        <span>
+          {inputStart.fellBack
+            ? t("session.input.fellBack", { device: device ?? t("session.input.defaultDevice") })
+            : device
+              ? t("session.input.listeningTo", { device })
+              : t(hasSignal ? "session.run.hearing" : "session.run.waitingForSignal")}
+        </span>
+      </div>
+    );
+  }
+  if (inputStart.status === "failed") {
+    return (
+      <div className="session-glass session-card session-input-failed" role="alert" data-testid="session-input-failed">
+        <div className="session-why session-bad">{t(`session.input.failed.${inputStart.failure ?? "other"}`)}</div>
+        <div className="session-input-actions">
+          <button className="session-secondary" onClick={onTestInput} data-testid="session-check-sound">
+            {t("session.run.checkSound")}
+          </button>
+          <button className="session-secondary" onClick={onChooseInput} data-testid="session-choose-input">
+            {t("session.input.chooseInput")}
+          </button>
+          <button className="session-link" onClick={actions.playUngraded} data-testid="session-play-ungraded">
+            {t("session.input.playUngraded")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="session-input-note" role="status" data-testid="session-no-input">
+      <span className="session-input-dot" data-state="off" aria-hidden="true" />
+      <span>
+        {inputStart.status === "starting" ? t("session.input.startingLong") : t("session.run.noInput")}
+      </span>
+      <button className="session-link" onClick={actions.playUngraded} data-testid="session-play-ungraded">
+        {t("session.input.playUngraded")}
+      </button>
+    </div>
+  );
+}

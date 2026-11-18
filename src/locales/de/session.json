@@ -111,7 +111,9 @@
         "keepWarmNew": "Ein erster Vorgeschmack."
       },
       "from": "{{path}} · {{level}} · Schritt {{step}}",
-      "fromNoLevel": "{{path}} · Schritt {{step}}"
+      "fromNoLevel": "{{path}} · Schritt {{step}}",
+      "startHere": "Hier starten ›",
+      "startHereLabel": "Die Session bei {{n}} starten: {{title}}"
     },
     "why": {
       "firstEver": "Deine erste, deshalb geht es bei {{bpm}} BPM los. Hier geht es ums Timing, nicht ums Tempo.",
@@ -211,7 +213,9 @@
       "goAgainUp": "Noch mal, rauf auf {{bpm}} BPM",
       "slowerFloor": "Schon das langsamste Tempo dieser Übung",
       "fasterCeiling": "Schon das schnellste Tempo dieser Übung",
-      "tempoLocked": "Ein Test läuft im Bestehens-Tempo, darum bleibt es fest"
+      "tempoLocked": "Ein Test läuft im Bestehens-Tempo, darum bleibt es fest",
+      "previous": "Zurück",
+      "previousFirst": "Das ist der erste Block, davor gibt es nichts"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",
@@ -535,6 +539,49 @@
     },
     "placement": {
       "result": "Du startest bei Schritt {{n}}: {{step}}"
+    },
+    "blocks": {
+      "tip": "{{n}}. {{title}} · {{kind}} · {{state}}",
+      "state": {
+        "on": "jetzt",
+        "done": "fertig",
+        "skipped": "übersprungen",
+        "todo": "noch nicht gespielt"
+      }
+    },
+    "jump": {
+      "title": "Aufhören und zu {{title}} wechseln?",
+      "body": "Was du bisher gespielt hast, bleibt gespeichert.",
+      "go": "Dorthin"
+    },
+    "input": {
+      "turnOnAndStart": "Eingang einschalten und starten",
+      "starting": "Dein Eingang startet …",
+      "startingShort": "Startet …",
+      "startingLong": "Dein Eingang startet. Für die Bewertung braucht es ein Mikrofon oder einen direkten Eingang.",
+      "listeningTo": "Ich höre {{device}}",
+      "fellBack": "Dein gewählter Eingang ist nicht verbunden, deshalb höre ich in dieser Session {{device}}.",
+      "defaultDevice": "deinen Standard-Eingang",
+      "chooseInput": "Eingang wählen",
+      "playUngraded": "Ohne Bewertung spielen",
+      "notGraded": "Nicht bewertet",
+      "turnOn": "Eingang einschalten",
+      "noSignal": "Kein Signal",
+      "failed": {
+        "noDevice": "Ich finde kein Mikrofon und kein Audio-Interface. Schließ eins an oder wähle eins aus.",
+        "permission": "Yames darf das Mikrofon nicht benutzen. Erlaube es in den Systemeinstellungen und drück dann noch einmal Start.",
+        "noAnswer": "Der Eingang hat nicht geantwortet. Ist eine Berechtigungsabfrage offen, beantworte sie und drück dann noch einmal Start.",
+        "busy": "Eine andere App benutzt deinen Eingang. Schließ sie und drück dann noch einmal Start.",
+        "other": "Dein Eingang ließ sich nicht starten. Prüf ihn oder wähle einen anderen."
+      }
+    },
+    "ungraded": {
+      "ready": "Nicht bewertet: Der Eingang ist aus, ich höre in dieser Session nicht zu.",
+      "readyOff": "Nicht bewertet: Die Bewertung ist in den Einstellungen aus.",
+      "result": "Nicht bewertet: Der Eingang war aus",
+      "resultOff": "Nicht bewertet: Die Bewertung ist in den Einstellungen aus",
+      "body": "Es zählt als Übung, für deine Minuten und deine Serie. Sauberes Tempo und Steps bewegen sich nur bei bewerteten Takes.",
+      "recap": "nicht bewertet"
     }
   }
 }

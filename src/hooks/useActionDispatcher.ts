@@ -110,6 +110,8 @@ interface ActionDispatcherArgs {
     slower: () => void;
     faster: () => void;
     next: () => void;
+    /** Back one block, to its ready screen. */
+    previous?: () => void;
     /** A press of the single footswitch. Gestures are decided from these. */
     pedalPress: () => void;
     /** Leave the Session, as its Exit button does. */
@@ -299,6 +301,9 @@ export function useActionDispatcher({
             break;
           case "session-next":
             sessionActions?.next();
+            break;
+          case "session-prev":
+            sessionActions?.previous?.();
             break;
           case "session-pedal":
             sessionActions?.pedalPress();

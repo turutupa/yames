@@ -87,6 +87,7 @@ function PlanRow({
   paths,
   showPath,
   rowRef,
+  onStart,
 }: {
   step: PlanStep;
   index: number;
@@ -95,6 +96,8 @@ function PlanRow({
   /** Name the Path on the meta line: only when more than one is active (UX audit TODAY-6). */
   showPath: boolean;
   rowRef?: (el: HTMLElement | null) => void;
+  /** Start the Session at this row (owner, 2026-11-18). */
+  onStart?: () => void;
 }) {
   const { t } = useTranslation();
   const pathTitle = showPath ? pathTitleOf(step, paths) : null;
@@ -108,7 +111,20 @@ function PlanRow({
       data-kind={rowKind(step, paths)}
       data-role={roleOf(step)}
       data-first={index === 0 ? "" : undefined}
+      data-go={onStart ? "" : undefined}
     >
+      {/* The whole row is the button: one press starts the Session here.
+          Laid over the row rather than wrapped round it, so the row keeps its
+          grid and its words stay text (a button may hold no blocks). */}
+      {onStart && (
+        <button
+          type="button"
+          className="session-plan-go"
+          onClick={onStart}
+          aria-label={t("session.today.startHereLabel", { n: index + 1, title: stepTitle(step, t) })}
+          data-testid={`today-row-${index}`}
+        />
+      )}
       <span className="session-plan-dot" aria-hidden="true">
         {index + 1}
       </span>
@@ -135,6 +151,11 @@ function PlanRow({
           <small>{t("session.today.min")}</small>
         </div>
         {bpm && <div className="session-plan-bpm">{lineText(t, bpm)}</div>}
+        {onStart && (
+          <div className="session-plan-here" aria-hidden="true">
+            {t("session.today.startHere")}
+          </div>
+        )}
       </div>
     </li>
   );
@@ -333,6 +354,7 @@ export function TodayView({
                   paths={session.paths}
                   showPath={showPath}
                   rowRef={i === steps.length - 1 ? endRef : undefined}
+                  onStart={() => actions.startTodayAt(i)}
                 />
               ))}
             </ol>

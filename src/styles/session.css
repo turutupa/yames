@@ -4255,3 +4255,241 @@
 :root:not([data-theme="ember"]) .practice-next-tag[data-row] {
   padding-block: 1px;
 }
+
+/* ══ The Session bar's blocks, Previous and the input (owner, 2026-11-18) ══
+ * Each block of the bar is a button: to that block's ready screen, back or
+ * ahead. The visible bar stays 5 px; the button round it is the hit area,
+ * taller than it looks (44 px on a phone, phone-learning.css). The tooltip is
+ * drawn only while hovered or focused, so it can never widen the page. */
+.session-pips > .session-pip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 22px;
+  margin: -8px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+.session-pip > i {
+  display: block;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--l-wash) 16%, transparent);
+  transition: height 0.12s var(--l-ease, ease), background 0.12s;
+}
+.session-pip[data-state="done"] > i {
+  background: var(--l-tone);
+}
+.session-pip[data-state="on"] > i {
+  background: var(--l-amber);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--l-amber) 55%, transparent);
+}
+.session-pip[data-state="skipped"] > i {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-wash) 40%, transparent);
+}
+.session-pip:hover > i,
+.session-pip:focus-visible > i {
+  height: 8px;
+}
+.session-pip:hover:not([data-state]) > i {
+  background: color-mix(in srgb, var(--l-wash) 32%, transparent);
+}
+.session-pip:focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 2px;
+}
+.session-pip[data-tip]:hover::after,
+.session-pip[data-tip]:focus-visible::after,
+.session-input-chip[data-tip]:hover::after,
+.session-input-chip[data-tip]:focus-visible::after,
+.session-prev[data-tip]:hover::after,
+.session-prev[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: min(320px, 70vw);
+  padding: 6px 10px;
+  border: 1px solid var(--l-line2);
+  border-radius: 8px;
+  background: var(--l-panel-solid, var(--bg-secondary));
+  color: var(--l-ink);
+  font: 500 13px/1.35 var(--l-body);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  text-align: left;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--l-shade) 35%, transparent);
+  pointer-events: none;
+}
+.session-pip[data-edge="start"]:hover::after,
+.session-pip[data-edge="start"]:focus-visible::after {
+  left: 0;
+  transform: none;
+}
+.session-pip[data-edge="end"]:hover::after,
+.session-pip[data-edge="end"]:focus-visible::after,
+.session-prev[data-tip]:hover::after,
+.session-prev[data-tip]:focus-visible::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.session-page .session-prev {
+  position: relative;
+  padding-left: 10px;
+}
+.session-page .session-prev[aria-disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.session-page .session-prev[aria-disabled]:hover {
+  background: transparent;
+  border-color: var(--l-line);
+}
+
+/* The input, in the bar: one press from fixing it. */
+.session-input-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  min-height: 30px;
+  padding: 3px 10px;
+  border: 1px solid var(--l-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--l-quiet);
+  font: 600 13px/1 var(--l-body);
+  white-space: nowrap;
+}
+button.session-input-chip {
+  cursor: pointer;
+}
+button.session-input-chip:hover {
+  border-color: var(--l-line2);
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
+}
+.session-input-chip[data-state="on"] {
+  color: var(--l-tone-text);
+  border-color: color-mix(in srgb, var(--l-tone) 45%, transparent);
+}
+.session-input-chip[data-state="quiet"] {
+  color: var(--l-amber);
+  border-color: color-mix(in srgb, var(--l-amber) 45%, transparent);
+}
+.session-input-chip[data-state="off"] {
+  color: var(--l-clash);
+  border-color: color-mix(in srgb, var(--l-clash) 50%, transparent);
+}
+.session-input-chip[data-state="starting"] {
+  cursor: progress;
+}
+.session-input-chip .session-link {
+  font-size: 13px;
+}
+
+/* Under a Take's ready screen: what the input is doing, in words. */
+.session-input-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 14px;
+  color: var(--l-quiet);
+}
+.session-input-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--l-faint);
+}
+.session-input-dot[data-state="on"] {
+  background: var(--l-tone);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--l-tone) 60%, transparent);
+}
+.session-input-dot[data-state="quiet"] {
+  background: var(--l-amber);
+}
+.session-input-dot[data-state="off"] {
+  background: var(--l-clash);
+}
+.session-input-failed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.session-input-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.session-page .session-input-actions .session-secondary {
+  font-size: 15px;
+  min-height: 36px;
+}
+
+/* ══ Today's rows: each starts the Session there (owner, 2026-11-18) ══════ */
+.session-today-plan .session-plan-item[data-go] {
+  position: relative;
+  transition: background 0.14s var(--l-ease, ease);
+}
+.session-plan-go {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.session-plan-go:focus-visible {
+  outline: 2px solid var(--l-amber);
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+.session-today-plan .session-plan-item[data-go]:hover,
+.session-today-plan .session-plan-item[data-go]:has(.session-plan-go:focus-visible) {
+  background: color-mix(in srgb, var(--l-wash) 6%, transparent);
+}
+.session-plan-item[data-go]:hover .session-plan-dot,
+.session-plan-item[data-go]:has(.session-plan-go:focus-visible) .session-plan-dot {
+  border-color: var(--l-amber);
+  color: var(--l-amber);
+}
+.session-plan-here {
+  margin-top: 6px;
+  font: 600 12px/1 var(--l-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--l-amber);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.14s, transform 0.14s;
+}
+.session-plan-item[data-go]:hover .session-plan-here,
+.session-plan-item[data-go]:has(.session-plan-go:focus-visible) .session-plan-here {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-plan-here,
+  .session-pip > i {
+    transition: none;
+  }
+}

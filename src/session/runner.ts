@@ -80,7 +80,15 @@ export type TakeOutcome = {
   cleanBefore: number | null;
   /** The stored row's id, so an answer to "was this fair?" can be kept on it. */
   takeId?: string;
+  /**
+   * Played with nothing listening, on purpose: why it was not graded. Its
+   * grade is `ungraded` and it moved nothing (owner, 2026-11-18).
+   */
+  ungraded?: UngradedWhy;
 };
+
+/** Why a Take was played without grading: the player chose to, or grading is off in Settings. */
+export type UngradedWhy = "inputOff" | "gradingOff";
 
 export type RunState = {
   phase: RunPhase;
@@ -120,6 +128,17 @@ export type RunState = {
   /** Steps left before they were played out: shown as skipped, never as done. */
   skipped: string[];
   /**
+   * Steps played out: a Take heard and judged, or a timed block run to its
+   * end. Kept by id rather than read off `stepIndex`, because the bar's
+   * blocks can be jumped to in any order (owner, 2026-11-18).
+   */
+  done: string[];
+  /**
+   * The rest of this Session is played without grading: the player chose
+   * "Play without grading", or Settings has grading off. Null: graded.
+   */
+  ungraded: UngradedWhy | null;
+  /**
    * Started from a Step's page (Play this, Find my edge, Test out): no
    * countdown (UX audit SES-11). Its Exercise waits for the player however
    * long it takes, so time never turns "Go again" into "Next".
@@ -149,7 +168,22 @@ export function timedTempoLive(step: PlanStep | null): boolean {
 }
 
 export type RunEvent =
-  | { type: "start"; plan: SessionPlan; now: number; untimed?: boolean }
+  | {
+      type: "start";
+      plan: SessionPlan;
+      now: number;
+      untimed?: boolean;
+      /** Begin at this block rather than the first (Today's rows, 2026-11-18). */
+      at?: number;
+      ungraded?: UngradedWhy | null;
+    }
+  /**
+   * To block `index`'s ready screen, before or after this one: the bar's
+   * blocks and Previous. Never while a Take runs or is being scored.
+   */
+  | { type: "jump"; index: number; now: number }
+  /** Graded or not, for the rest of this Session. */
+  | { type: "setUngraded"; why: UngradedWhy | null }
   | { type: "takeStarted"; now: number }
   /** A timed step's Start was pressed: its clock begins now. */
   | { type: "timedStart"; now: number }
@@ -201,6 +235,8 @@ export const IDLE: RunState = {
   restarts: 0,
   ended: false,
   skipped: [],
+  done: [],
+  ungraded: null,
   untimed: false,
 };
 
@@ -227,12 +263,78 @@ function enter(state: RunState, index: number, now: number): RunState {
         : step.kind === "metronome"
           ? step.bpm
           : (step.bpm ?? 0),
-    timedSteps: [...state.timedSteps, step],
+    // Once each: a warm-up played again is still one warm-up.
+    timedSteps: state.timedSteps.some((s) => s.id === step.id) ? state.timedSteps : [...state.timedSteps, step],
   };
+}
+
+/** Whether the step on screen counts as played out if it is left now. */
+function playedOutHere(state: RunState): boolean {
+  const step = currentStep(state);
+  return (
+    (state.phase === "timed" && state.ended) ||
+    state.phase === "result" ||
+    (!!step && state.outcomes.some((o) => o.stepId === step.id))
+  );
+}
+
+/** Leave the step on screen: played out, it is done; otherwise skipped, unless it already was done. */
+function leaving(state: RunState): Pick<RunState, "done" | "skipped"> {
+  const step = currentStep(state);
+  if (!step) return { done: state.done, skipped: state.skipped };
+  if (playedOutHere(state)) {
+    return {
+      done: state.done.includes(step.id) ? state.done : [...state.done, step.id],
+      skipped: state.skipped.filter((id) => id !== step.id),
+    };
+  }
+  if (state.done.includes(step.id) || state.skipped.includes(step.id)) {
+    return { done: state.done, skipped: state.skipped };
+  }
+  return { done: state.done, skipped: [...state.skipped, step.id] };
+}
+
+/** The phases a block can be jumped from: nothing running, nothing being scored. */
+export function canJump(state: RunState): boolean {
+  return (
+    state.phase === "ready" ||
+    state.phase === "result" ||
+    state.phase === "timedReady" ||
+    state.phase === "timed"
+  );
+}
+
+/** Jumping away from here stops something running, so the player is asked first. */
+export function jumpNeedsAsking(state: RunState): boolean {
+  return (
+    state.phase === "playing" ||
+    state.phase === "listening" ||
+    (state.phase === "timed" && !state.ended && !state.paused)
+  );
+}
+
+/** Previous: the block before this one, if there is one. */
+export function hasPrevious(state: RunState): boolean {
+  return state.phase !== "idle" && state.phase !== "recap" && state.stepIndex > 0 && !!state.plan;
+}
+
+/** To block `index`: what is left here is marked, the block opens on its ready screen. */
+function jumpTo(state: RunState, index: number, now: number): RunState {
+  const steps = state.plan?.steps ?? [];
+  if (!canJump(state) || index < 0 || index >= steps.length || index === state.stepIndex) return state;
+  const marked = { ...state, ...leaving(state) };
+  const target = steps[index];
+  // A block jumped back to is being played again: no longer "skipped".
+  return enter({ ...marked, skipped: marked.skipped.filter((id) => id !== target.id) }, index, now);
 }
 
 export function runReducer(state: RunState, event: RunEvent): RunState {
   if (event.type === "cancel") return IDLE;
+  if (event.type === "jump") return jumpTo(state, event.index, event.now);
+  if (event.type === "setUngraded") {
+    if (state.phase === "idle" || state.phase === "recap") return state;
+    return state.ungraded === event.why ? state : { ...state, ungraded: event.why };
+  }
   if (event.type === "replaceRest") {
     if (!state.plan || state.phase === "idle" || state.phase === "recap") return state;
     const steps = [...state.plan.steps.slice(0, state.stepIndex + 1), ...event.steps];
@@ -244,8 +346,15 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
       if (event.type !== "start") return state;
       if (event.plan.steps.length === 0) return state;
       return enter(
-        { ...IDLE, plan: event.plan, startedAt: event.now, now: event.now, untimed: event.untimed === true },
-        0,
+        {
+          ...IDLE,
+          plan: event.plan,
+          startedAt: event.now,
+          now: event.now,
+          untimed: event.untimed === true,
+          ungraded: event.ungraded ?? null,
+        },
+        Math.max(0, Math.min(event.plan.steps.length - 1, event.at ?? 0)),
         event.now,
       );
 
@@ -312,10 +421,11 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           };
         case "next": {
           const plan = state.plan;
-          if (!event.insert || !plan) return enter(state, state.stepIndex + 1, event.now);
+          const marked = { ...state, ...leaving(state) };
+          if (!event.insert || !plan) return enter(marked, state.stepIndex + 1, event.now);
           const steps = [...plan.steps];
           steps.splice(state.stepIndex + 1, 0, event.insert);
-          return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
+          return enter({ ...marked, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
         }
         case "insertStep": {
           // Find my edge from a result: what is left of this step goes with it,
@@ -326,7 +436,7 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           const carried = Math.round(stepRemainingMs({ ...state, now: event.now }) / 1000) / 60;
           const steps = [...plan.steps];
           steps.splice(state.stepIndex + 1, 0, { ...event.step, minutes: event.step.minutes + carried });
-          return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
+          return enter({ ...state, ...leaving(state), plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
         }
         case "tick":
           return { ...state, now: event.now };
@@ -396,17 +506,24 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
 
 /** On to the next step from here; this one is marked skipped if it was not played out. */
 function onward(state: RunState, now: number, insert?: PlanStep): RunState {
-  const step = currentStep(state);
-  const playedOut =
-    (state.phase === "timed" && state.ended) ||
-    state.phase === "result" ||
-    state.outcomes.some((o) => o.stepId === step?.id);
-  const skipped = step && !playedOut && !state.skipped.includes(step.id) ? [...state.skipped, step.id] : state.skipped;
+  const marked = { ...state, ...leaving(state) };
   const plan = state.plan;
-  if (!insert || !plan) return enter({ ...state, skipped }, state.stepIndex + 1, now);
+  if (!insert || !plan) return enter(marked, state.stepIndex + 1, now);
   const steps = [...plan.steps];
   steps.splice(state.stepIndex + 1, 0, insert);
-  return enter({ ...state, skipped, plan: { ...plan, steps } }, state.stepIndex + 1, now);
+  return enter({ ...marked, plan: { ...plan, steps } }, state.stepIndex + 1, now);
+}
+
+/** What a block of the Session bar shows: the one on screen, played out, skipped, or still to come. */
+export type BlockState = "on" | "done" | "skipped" | "todo";
+
+export function blockState(state: RunState, index: number): BlockState {
+  const step = state.plan?.steps[index];
+  if (!step) return "todo";
+  if (index === state.stepIndex && state.phase !== "recap") return "on";
+  if (state.done.includes(step.id)) return "done";
+  if (state.skipped.includes(step.id)) return "skipped";
+  return "todo";
 }
 
 /**
@@ -453,7 +570,13 @@ export function hasTimeLeft(state: RunState): boolean {
 export function minutesLeft(state: RunState): number {
   const plan = state.plan;
   if (!plan) return 0;
-  const later = plan.steps.slice(state.stepIndex + 1).reduce((sum, s) => sum + s.minutes, 0);
+  // Every block still to play, wherever it is: the bar's blocks can be jumped
+  // to in any order, so "later" is not "after this index". A block played out
+  // or skipped gives nothing back, so jumping back to one does not refill the
+  // clock with the whole plan (owner, 2026-11-18: the budget keeps real time).
+  const later = plan.steps
+    .filter((s, i) => i !== state.stepIndex && !state.done.includes(s.id) && !state.skipped.includes(s.id))
+    .reduce((sum, s) => sum + s.minutes, 0);
   return Math.ceil(stepRemainingMs(state) / 60_000) + later;
 }
 

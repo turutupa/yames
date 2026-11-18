@@ -58,6 +58,7 @@ import {
   isExercisePassed,
   isGradable,
   isStepSkipped,
+  isUngradedTake,
   lastCaughtTake,
   takesOf,
 } from "./progress";
@@ -317,7 +318,8 @@ function siblingStart(
  *   second miss in a row here.
  */
 export function tempoFor(path: PathDoc, exercise: Exercise, progress: PlayerProgress): Tempo {
-  const takes = takesOf(progress, path.id, exercise.id);
+  // A Take played without grading said nothing about the bar: as if it were not there.
+  const takes = takesOf(progress, path.id, exercise.id).filter((t) => !isUngradedTake(t));
   const passAt = exercise.tempo.passAtBpm ?? firstRung(exercise);
   const values = { exercise: exercise.title };
 
