@@ -59,7 +59,7 @@ if (flag("--help")) {
   --keep              leave the profile and logs behind`);
   process.exit(0);
 }
-const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,two-paths,warmup,four-fingers,gpu-info").split(","));
+const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,two-paths,four-fingers,warmup,gpu-info").split(","));
 const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "target");
 const app = resolve(opt("--app", join(targetDir, "release", "yames")));
 const out = resolve(opt("--out", mkdtempSync(join(tmpdir(), "yames-e2e-out-"))));
@@ -557,22 +557,37 @@ async function scenarioWarmup() {
   const phase = () => d.exec(`return document.querySelector('[data-testid="session-timed"]')?.dataset ?? null`);
   const click = (id) => d.exec(`const b = document.querySelector('[data-testid="${id}"]'); if (!b) return false; b.click(); return true;`);
   try {
-    await startSession(d, 15);
-    // The plan decides where the warm-up is; N (the Session's Next key) walks
-    // past what comes before it without playing anything.
+    // The warm slot holds a due benchmark before it holds a warm-up: play
+    // that Take once, then a new Session's first block is the warm-up.
+    const findWarmup = async () => {
+      await startSession(d, 15);
+      for (let i = 0; i < 12; i++) {
+        await sleep(1500);
+        const kind = await d.exec(`return document.querySelector('[data-testid="session-timed"]')?.dataset.kind ?? null`);
+        if (kind === "metronome") return "found";
+        const big = await d.exec(`return document.querySelector('[data-testid="session-big"]')?.innerText ?? ""`);
+        if (/Start take/.test(big)) return "take";
+        if (/See how it went|Done/.test(big)) return "none";
+        await key("n", "KeyN");
+      }
+      return "none";
+    };
     const key = (k, code) =>
       d.exec(`document.activeElement?.blur?.(); document.dispatchEvent(new KeyboardEvent("keydown", { key: ${JSON.stringify(k)}, code: ${JSON.stringify(code)}, bubbles: true })); return true;`);
-    let found = false;
-    for (let i = 0; i < 8 && !found; i++) {
-      await sleep(1500);
-      const big = await d.exec(`return document.querySelector('[data-testid="session-big"]')?.innerText ?? ""`);
-      if (/Start warm-up/.test(big)) found = true;
-      else if (/See how it went|Done/.test(big)) break;
-      else await key("n", "KeyN");
+    let where = await findWarmup();
+    for (let tries = 0; where === "take" && tries < 2; tries++) {
+      const { hit } = await exerciseHere(d);
+      if (!hit) break;
+      await playTake(d, hit.exercise, "good", `warm-up: the block before it (${hit.exercise.id})`);
+      await d.clickText(/^Exit$/);
+      // With Takes in it, leaving may ask first.
+      await d.clickText(/^Leave$/, { timeoutMs: 2500 }).catch(() => {});
+      await d.waitText(/How long have you got/, 15000);
+      where = await findWarmup();
     }
-    if (!found) {
+    if (where !== "found") {
       await shot(d, "warmup-not-found");
-      check("warm-up: the Session has a warm-up to drive", false, await d.text());
+      check("warm-up: the Session has a warm-up to drive", false, (await d.text()).slice(0, 400));
       return;
     }
     const bpm0 = await bpmShown();
@@ -1210,8 +1225,8 @@ try {
   if (scenarios.has("session")) await scenarioSession();
   if (scenarios.has("relaunch")) await scenarioRelaunch();
   if (scenarios.has("two-paths")) await scenarioTwoPaths();
-  if (scenarios.has("warmup")) await scenarioWarmup();
   if (scenarios.has("four-fingers")) await scenarioFourFingers();
+  if (scenarios.has("warmup")) await scenarioWarmup();
   if (scenarios.has("blues-band")) await scenarioBluesBand();
   if (scenarios.has("restart")) await scenarioRestart();
   if (scenarios.has("wrong-notes")) await scenarioWrongNotes();
