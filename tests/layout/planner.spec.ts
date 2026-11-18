@@ -121,7 +121,7 @@ for (const size of SHORT_SIZES) {
       test(`${scene}, ${minutes} min: no page scroll, Start and the picker in view, at ${size.width}x${size.height}`, async ({ page }) => {
         await openShot(page, scene, size);
         await page.locator(".session-seg button", { hasText: new RegExp(`^${minutes}$`) }).first().click();
-        await expect(page.locator("li.session-plan-item").first()).toBeVisible();
+        await expect(page.locator(".session-plan-item").first()).toBeVisible();
         await noSidewaysScroll(page, `${scene} at ${size.width}`);
         const where = `${scene} ${minutes} min at ${size.width}x${size.height}`;
         const pageScroll = await page.evaluate(() => {

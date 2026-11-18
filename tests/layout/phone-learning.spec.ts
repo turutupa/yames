@@ -119,7 +119,8 @@ test.describe("the learning side on a phone", () => {
       await openShot(page, "phone-session-warmup-ready", size);
       await noSidewaysScroll(page, `phone-session-warmup-ready at ${size.width}px`);
       await settleAnimations(page);
-      const heights = await page.locator(".session-pip").evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+      // Its own height, not its box: a screen still scaling in (98.5% → 100%) reads 43.3.
+      const heights = await page.locator(".session-pip").evaluateAll((els) => els.map((e) => parseFloat(getComputedStyle(e).height)));
       expect(heights.length).toBeGreaterThan(1);
       for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
       expect(await notHitTestable(page, ".session-pip")).toEqual([]);
