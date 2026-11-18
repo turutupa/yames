@@ -1463,6 +1463,11 @@
   width: auto;
   min-width: 260px;
 }
+/* The nudges and the big button: one group so a phone can stick them
+   together; a desktop lays them out as part of the row. */
+.session-go {
+  display: contents;
+}
 .session-nudges {
   display: flex;
   flex-wrap: wrap;
@@ -2526,28 +2531,34 @@
   .session-body:not([data-phase="playing"]) > .session-actions > .session-signal {
     align-self: flex-start;
   }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-nudges {
-    align-self: flex-end;
-  }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-big {
+  /* The nudges stick with the button, above it (acceptance P1-5): at 390 px
+     the sticky button alone half covered Slower and Faster, and at 360 px hid
+     them. The pair is one sticky block over a fade of the page's colour. */
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go {
     position: sticky;
     bottom: calc(10px + var(--safe-bottom, 0px));
     z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    background: var(--l-bg);
     box-shadow:
-      0 1px 0 var(--l-gloss) inset,
-      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
-      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent),
       0 0 0 10px var(--l-bg),
       0 -18px 22px 10px var(--l-bg);
   }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-big:disabled {
-    background:
-      linear-gradient(var(--l-btn), var(--l-btn)),
-      var(--l-bg);
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-nudges {
+    justify-content: flex-end;
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big {
     box-shadow:
-      0 0 0 1px var(--l-line2) inset,
-      0 0 0 10px var(--l-bg),
-      0 -18px 22px 10px var(--l-bg);
+      0 1px 0 var(--l-gloss) inset,
+      0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
+      0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
+  }
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:disabled {
+    background: var(--l-btn);
+    box-shadow: 0 0 0 1px var(--l-line2) inset;
   }
 }
 @media (prefers-reduced-motion: reduce) {
