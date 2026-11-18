@@ -350,6 +350,15 @@ test.describe("the cheat sheet, maximized", () => {
     // nothing to press here — the button in the header shrinks it instead.
     await openShot(page, "jam-chords", { width: 1600, height: 1000 });
 
+    // The sheet slides in (`motion-sheet`); measured mid-slide it is still
+    // ~100px short of the left edge. Measure where it comes to rest. This was
+    // a race the test lost about one run in four, more on a busy machine.
+    await page.waitForSelector(".jam-sheet");
+    await page.waitForFunction(() =>
+      (document.querySelector(".jam-sheet")?.getAnimations() ?? []).every(
+        (a) => a.playState !== "running",
+      ),
+    );
     const sheet = (await (await page.waitForSelector(".jam-sheet")).boundingBox())!;
     const transport = await page.$(".transport");
     expect(transport, "no transport on the jam screen").toBeTruthy();
