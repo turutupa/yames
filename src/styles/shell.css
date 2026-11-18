@@ -3623,3 +3623,10 @@ body[data-sheet-maximized] .rail {
 .main-window.is-mobile .preset-save-area .preset-text-btn:disabled {
   display: none;
 }
+
+/* A page's heading takes focus when the page changes (NAV-10), so it is
+   announced and Tab carries on from it. It is a place, not a control: no
+   ring on it. */
+.main-content h1[tabindex="-1"]:focus {
+  outline: none;
+}

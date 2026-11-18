@@ -152,6 +152,7 @@ import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
+import { usePageFocus } from "./hooks/usePageFocus";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import { jamEscapeTarget } from "./jamEscape";
 import {
@@ -241,6 +242,8 @@ export function MainWindow() {
   // started from a Step comes back to that Step, scrolled where it was
   // (`usePathsPlace`).
   const pathsPlace = usePathsPlace(view, contentRef);
+  // A new page's heading, or a Session's big button, takes focus (NAV-10).
+  usePageFocus(contentRef, view);
   // A running Session, or Settings opened from one ("Check my sound"). Either
   // way the rail and the tab bar are away: a click on them would walk out of
   // the Session and end it without a word (UX audit NAV-2). Settings' own Back
