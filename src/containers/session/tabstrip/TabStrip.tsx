@@ -107,6 +107,18 @@ function useReducedMotion(): boolean {
 
 const TAB = ["T", "A", "B"] as const;
 
+/**
+ * The amber column's width. A little narrower when the pattern has technique
+ * marks between its numbers, so an "h" or a "/" beside the current note stays
+ * outside the column rather than half in it.
+ */
+function columnWidth(model: PatternModel, ppt: number, fretPx: number): number {
+  const slot = ppt * (model.minGap > 0 ? model.minGap : model.beatTicks);
+  return model.notes.some((n) => n.link)
+    ? Math.min(slot * 0.76, fretPx * 1.7)
+    : Math.min(slot * 0.92, fretPx * 2);
+}
+
 /** The left column: the six lines' start and TAB, still while the segments move. */
 function Letters({ geo }: { geo: StaffGeometry }) {
   return (
@@ -154,7 +166,7 @@ const Segment = memo(function Segment({ model, segment, segTicks, width, ppt, ge
   for (let b = Math.ceil(start / model.beatTicks) * model.beatTicks; b < start + segTicks; b += model.beatTicks) beats.push(b);
   const barStart = start % model.barTicks === 0;
   const markX = markAt === null || markAt === undefined ? null : x(markAt);
-  const colW = Math.min(ppt * (model.minGap > 0 ? model.minGap : model.beatTicks) * 0.92, geo.fretPx * 2);
+  const colW = columnWidth(model, ppt, geo.fretPx);
   return (
     <svg
       className="tabstrip-seg"
@@ -207,6 +219,7 @@ const Segment = memo(function Segment({ model, segment, segTicks, width, ppt, ge
             data-string={n.string}
             data-current={markAt !== null && markAt !== undefined && n.at - start === markAt ? "" : undefined}
           >
+            <TechMarks note={n} nx={nx} ly={ly} fromX={n.link ? x(n.at - start - n.link.fromTicks) : 0} inSegment={!!n.link && n.at - start - n.link.fromTicks >= 0} geo={geo} />
             <circle className="tabstrip-dot" cx={nx} cy={ly + geo.fretPx * 0.8} r={Math.max(2.5, geo.fretPx * 0.12)} />
             <text x={nx} y={ly} textAnchor="middle" dominantBaseline="central">
               {n.fret}
@@ -217,6 +230,105 @@ const Segment = memo(function Segment({ model, segment, segTicks, width, ppt, ge
     </svg>
   );
 });
+
+/**
+ * A note's technique marks, the standard tab way (card #40): "h", "p" and
+ * "t" between the two numbers on their string, with a slur over a hammer or a
+ * pull; "/" and "\\" for a slide; an arrow up after a bend, to the fret it bends
+ * to; "~" after a note held with vibrato. Each letter sits on the line with a
+ * halo, like the numbers, at a size that reads beside 34 px numbers.
+ */
+function TechMarks({
+  note,
+  nx,
+  ly,
+  fromX,
+  inSegment,
+  geo,
+}: {
+  note: StripNote;
+  nx: number;
+  ly: number;
+  fromX: number;
+  inSegment: boolean;
+  geo: StaffGeometry;
+}) {
+  const f = geo.fretPx;
+  const size = Math.max(10, Math.round(f * 0.66));
+  const near = f * 0.8;
+  const { link, after } = note;
+  if (!link && !after) return null;
+  // Between the two numbers, or just before this one when they are far apart
+  // or the note it comes from is in another segment.
+  const slur = !!link && inSegment && (link.mark === "h" || link.mark === "p") && nx - fromX <= f * 4.2;
+  // Under its slur's middle; otherwise close to the note it leads into, so it
+  // stays inside that note's column when the note is current.
+  const letterX = !link ? 0 : slur ? (fromX + nx) / 2 : inSegment ? Math.max((fromX + nx) / 2, nx - near) : nx - near;
+  // A number is about half as wide as it is tall per digit.
+  const numHalf = (String(note.fret).length * f * 0.5) / 2;
+  let ax = nx + numHalf + f * 0.12;
+  const afterParts: React.ReactNode[] = [];
+  if (after?.bendTo !== undefined) {
+    // A bend: an arrow curving up off the number, and the fret it bends to.
+    const w = Math.max(6, f * 0.34);
+    const rise = Math.max(5, f * 0.36);
+    const x0 = ax + f * 0.02;
+    const tipX = x0 + w;
+    const tipY = ly - rise;
+    const head = Math.max(2.5, f * 0.11);
+    afterParts.push(
+      <g key="b" className="tabstrip-bend" data-mark="bend">
+        <path
+          className="tabstrip-vib"
+          d={`M${x0.toFixed(1)},${(ly + rise * 0.35).toFixed(1)} Q${tipX.toFixed(1)},${(ly + rise * 0.35).toFixed(1)} ${tipX.toFixed(1)},${tipY.toFixed(1)} M${(tipX - head).toFixed(1)},${(tipY + head).toFixed(1)} L${tipX.toFixed(1)},${tipY.toFixed(1)} L${(tipX + head).toFixed(1)},${(tipY + head).toFixed(1)}`}
+          style={{ strokeWidth: Math.max(1.4, f * 0.06) }}
+        />
+        <text className="tabstrip-tech" data-free="" x={tipX + f * 0.1} y={tipY + size * 0.02} dominantBaseline="central" style={{ fontSize: size }}>
+          {after.bendTo}
+        </text>
+      </g>,
+    );
+    ax = tipX + f * 0.14 + size * String(after.bendTo).length * 0.48;
+  }
+  if (after?.slideOut) {
+    afterParts.push(
+      <text key="s" className="tabstrip-tech" data-mark="slide-out" x={ax + size * 0.1} y={ly} dominantBaseline="central" style={{ fontSize: size }}>
+        {after.slideOut}
+      </text>,
+    );
+    ax += size * 0.6;
+  }
+  if (after?.vibrato) {
+    const w = Math.max(10, f * 0.62);
+    const amp = Math.max(1.6, f * 0.07);
+    const x0 = ax + size * 0.12;
+    const steps = 4;
+    let d = `M${x0.toFixed(1)},${ly.toFixed(1)}`;
+    for (let i = 0; i < steps; i++) {
+      const xa = x0 + ((i + 0.5) * w) / steps;
+      const xb = x0 + ((i + 1) * w) / steps;
+      d += ` Q${xa.toFixed(1)},${(ly + (i % 2 === 0 ? -amp * 2 : amp * 2)).toFixed(1)} ${xb.toFixed(1)},${ly.toFixed(1)}`;
+    }
+    afterParts.push(<path key="v" className="tabstrip-vib" data-mark="vibrato" d={d} style={{ strokeWidth: Math.max(1.4, f * 0.06) }} />);
+  }
+  return (
+    <g className="tabstrip-techs" aria-hidden="true">
+      {slur && (
+        <path
+          className="tabstrip-slur"
+          d={`M${(fromX + f * 0.22).toFixed(1)},${(ly - f * 0.52).toFixed(1)} Q${((fromX + nx) / 2).toFixed(1)},${(ly - f * 0.92).toFixed(1)} ${(nx - f * 0.22).toFixed(1)},${(ly - f * 0.52).toFixed(1)}`}
+          style={{ strokeWidth: Math.max(1.2, f * 0.05) }}
+        />
+      )}
+      {link && (
+        <text className="tabstrip-tech" data-mark={link.mark === "\\" ? "slide-down" : link.mark === "/" ? "slide-up" : link.mark} x={letterX} y={ly} textAnchor="middle" dominantBaseline="central" style={{ fontSize: size }}>
+          {link.mark}
+        </text>
+      )}
+      {afterParts}
+    </g>
+  );
+}
 
 export function TabStrip({
   notes,
@@ -453,7 +565,7 @@ export function TabStrip({
               style={{
                 top: geo.top - geo.fretPx,
                 height: geo.bottom - geo.top + geo.fretPx * 2,
-                width: Math.min(fl.ppt * (model.minGap > 0 ? model.minGap : model.beatTicks) * 0.92, geo.fretPx * 2),
+                width: columnWidth(model, fl.ppt, geo.fretPx),
               }}
             />
             {followSegments.map((s) => {

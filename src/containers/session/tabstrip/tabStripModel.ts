@@ -12,6 +12,7 @@
  * other on a real pack.
  */
 import { TICKS, barLengthTicks } from "../../../paths/format";
+import type { PathTechnique } from "../../../paths/format";
 import type { ScoreSchedule } from "../../../songs/types";
 import type { TakePlan } from "../../../session/take";
 import type { TimingMark } from "../../songs/review/marks";
@@ -30,7 +31,25 @@ export type TabStripNoteInput = {
   tick: number;
   /** Length in ticks. Only the rhythm hint reads it. */
   dur: number;
+  /**
+   * How it is played, as the pack writes it (`PathNote.tech`): `hammer`,
+   * `pull` and `tap` on the note they arrive at, `slide` on the note it leaves.
+   */
+  tech?: readonly PathTechnique[];
+  /** Semitones, with `bend`. */
+  bend?: number;
 };
+
+/**
+ * A technique mark between two notes on one string, drawn the standard tab
+ * way: "5h7", "7p5", "12t", "5/7", "7\\5". It belongs to the note it arrives
+ * at; `fromTicks` is how far back the note it comes from is (round the
+ * pattern's seam when it is the last of the pass before).
+ */
+export type TechLink = { mark: "h" | "p" | "t" | "/" | "\\"; fromTicks: number };
+
+/** Marks after a note's number: a bend's target fret, vibrato, or a slide out to nowhere. */
+export type TechAfter = { bendTo?: number; vibrato?: boolean; slideOut?: "/" | "\\" };
 
 /** A pattern note with its place in the pattern. */
 export type PatternNote = TabStripNoteInput & {
@@ -38,6 +57,10 @@ export type PatternNote = TabStripNoteInput & {
   index: number;
   /** Which onset of the pattern it is, from 1: a chord's notes share one. */
   order: number;
+  /** The technique mark that leads into it, when it has one. */
+  link?: TechLink;
+  /** The marks after its number. */
+  after?: TechAfter;
 };
 
 export type PatternModel = {
@@ -78,7 +101,14 @@ export function patternModel(
   const passTicks = bar * bars;
   const sorted = input
     .filter((n) => n.string >= 1 && n.string <= 6 && Number.isFinite(n.tick))
-    .map((n) => ({ string: n.string, fret: n.fret, tick: n.tick, dur: n.dur }))
+    .map((n) => ({
+      string: n.string,
+      fret: n.fret,
+      tick: n.tick,
+      dur: n.dur,
+      ...(n.tech && n.tech.length > 0 ? { tech: n.tech } : {}),
+      ...(n.bend !== undefined ? { bend: n.bend } : {}),
+    }))
     .sort((a, b) => a.tick - b.tick || a.string - b.string);
   const onsets: number[] = [];
   for (const n of sorted) if (onsets[onsets.length - 1] !== n.tick) onsets.push(n.tick);
@@ -87,6 +117,7 @@ export function patternModel(
     index,
     order: onsets.indexOf(n.tick) + 1,
   }));
+  techMarks(notes, passTicks);
   let minGap = 0;
   const consider = (gap: number) => {
     if (gap > 0 && (minGap === 0 || gap < minGap)) minGap = gap;
@@ -102,6 +133,48 @@ export function patternModel(
     passTicks,
     minGap,
   };
+}
+
+/**
+ * The technique marks, from the pack's `tech` (card #40). A hammer, a pull
+ * or a tap is marked on the note it arrives at; a slide is written on the
+ * note it leaves, so its mark moves onto the next note on that string. The
+ * note before or after on a string is found round the pattern's seam, since
+ * a short pattern repeats.
+ */
+function techMarks(notes: PatternNote[], passTicks: number): void {
+  const onString = (s: number) => notes.filter((n) => n.string === s);
+  for (const n of notes) {
+    const tech = n.tech ?? [];
+    if (tech.length === 0) continue;
+    const mine = onString(n.string);
+    const at = mine.indexOf(n);
+    const prev = mine.length > 1 ? mine[(at - 1 + mine.length) % mine.length] : null;
+    const next = mine.length > 1 ? mine[(at + 1) % mine.length] : null;
+    const back = (from: PatternNote) => (n.tick - from.tick + passTicks) % passTicks || passTicks;
+    const arrive: TechLink["mark"] | null = tech.includes("tap")
+      ? "t"
+      : tech.includes("hammer")
+        ? "h"
+        : tech.includes("pull")
+          ? "p"
+          : null;
+    if (arrive && !n.link) n.link = { mark: arrive, fromTicks: prev ? back(prev) : passTicks };
+    const after: TechAfter = {};
+    if (tech.includes("bend") && n.bend !== undefined && n.bend > 0) after.bendTo = n.fret + Math.round(n.bend);
+    if (tech.includes("vibrato")) after.vibrato = true;
+    if (tech.includes("slide")) {
+      if (next && next.fret !== n.fret && !next.link) {
+        next.link = {
+          mark: next.fret > n.fret ? "/" : "\\",
+          fromTicks: (next.tick - n.tick + passTicks) % passTicks || passTicks,
+        };
+      } else if (!next || next.fret === n.fret) {
+        after.slideOut = "\\";
+      }
+    }
+    if (after.bendTo !== undefined || after.vibrato || after.slideOut) n.after = after;
+  }
 }
 
 /** The pass a tick falls in (negative through a count-in). */
