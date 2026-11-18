@@ -204,7 +204,8 @@
       "listeningBack": "Riascolto",
       "band": "Band",
       "bandHint": "La band non viene valutata. Col microfono, tienila bassa o usa le cuffie.",
-      "bandMicHint": "Col microfono sentirei la band come note tue, quindi parte spenta. Con le cuffie, alzala."
+      "bandMicHint": "Col microfono sentirei la band come note tue, quindi parte spenta. Con le cuffie, alzala.",
+      "skipped": "Saltato"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} battute",
@@ -291,7 +292,7 @@
       "double": "Doppio tocco",
       "doubleDoes": "Più lento",
       "hold": "Tieni premuto",
-      "holdDoes": "Avanti"
+      "holdDoes": "Di nuovo"
     },
     "recap": {
       "kick": "Sessione finita",
@@ -396,13 +397,30 @@
       "finger": "dito {{n}}",
       "start": "inizia qui",
       "legendNow": "suona ora",
-      "legendNext": "dopo",
+      "legendNext": "poi, in ordine",
       "legendPlayed": "appena suonata",
       "beats": "I movimenti della battuta",
       "hand": "Mano: indice al tasto {{fret}}, un dito per tasto.",
       "handShifts": "Mano: inizia con l'indice al tasto {{fret}}; si sposta lungo il manico.",
       "handOpen": "Mano: posizione aperta, indice sopra il tasto 1.",
-      "viewHint": "Cambia vista quando vuoi"
+      "viewHint": "Cambia vista quando vuoi",
+      "left": "rimasti",
+      "notGraded": "Senza voto. Finisce tra {{time}}; poi di nuovo, o avanti.",
+      "notChecked": "Non controllato. Finisce tra {{time}}; poi di nuovo, o avanti.",
+      "pausedFoot": "In pausa. Il tempo ti aspetta; più lento o più veloce, poi Riprendi.",
+      "pausedFootNeck": "In pausa. Tutte le battute sono nella vista Tab ({{key}}); più lento o più veloce, poi Riprendi.",
+      "switchAny": "Cambia vista quando vuoi durante il riscaldamento",
+      "barOf": "Battuta {{n}} di {{of}} · lasciati portare dal clic.",
+      "pausedAt": "In pausa alla battuta {{n}} di {{of}}",
+      "paused": "In pausa",
+      "pause": "Pausa",
+      "pauseKeys": "Pausa: {{key}}, Spazio o Invio",
+      "resume": "Riprendi",
+      "restart": "Ricomincia",
+      "back": "Di nuovo: {{title}}",
+      "ended": "Finito. Di nuovo, o avanti al prossimo.",
+      "endedFoot": "Senza voto. Rifallo, o vai avanti quando sei pronto.",
+      "again": "Di nuovo"
     },
     "runway": {
       "label": "Le prossime note, in arrivo sulla linea",
@@ -436,7 +454,12 @@
     },
     "tabstrip": {
       "label": "Intavolatura: {{notes}}",
-      "bar": "battuta {{n}}"
+      "bar": "battuta {{n}}",
+      "now": "ora · {{where}}",
+      "next": "dopo · {{where}}",
+      "barBeat": "battuta {{n}}, movimento {{beat}}",
+      "barBeats": "battuta {{n}}, movimenti {{from}}–{{to}}",
+      "pausedHere": "in pausa qui · {{where}}"
     }
   }
 }

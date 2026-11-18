@@ -249,7 +249,10 @@
         "session-exit": "Sessie verlaten",
         "tab-paths": "Leerpaden",
         "tab-progress": "Voortgang",
-        "tab-tools": "Tools"
+        "tab-tools": "Tools",
+        "session-view": "Weergave wisselen",
+        "session-pause": "Pauze",
+        "session-restart": "Nog eens"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -299,11 +302,14 @@
         "session-slower": "Tussen takes: een trede langzamer",
         "session-faster": "Tussen takes: een trede sneller",
         "session-next": "Tussen takes: door naar het volgende in de sessie",
-        "session-pedal": "Voor één voetschakelaar. Tikken: het volgende. Dubbeltikken: langzamer. Vasthouden: volgende stap",
+        "session-pedal": "Voor één voetschakelaar. Tikken: het volgende (pauzeert een lopende warming-up). Dubbel tikken: langzamer. Vasthouden: nog eens",
         "session-exit": "Tijdens een sessie: die verlaten, net als Stoppen. Een lopende take stopt eerst.",
         "tab-paths": "Naar Leerpaden",
         "tab-progress": "Naar Voortgang",
-        "tab-tools": "Naar Tools"
+        "tab-tools": "Naar Tools",
+        "session-view": "In een sessie: Hals, Baan of Tab. Altijd tijdens een warming-up; tussen takes bij een beoordeelde",
+        "session-pause": "Tijdens een warming-up of een getimed blok: pauzeren, of doorgaan",
+        "session-restart": "Tijdens een warming-up of een getimed blok: vanaf het begin. Na een take: dezelfde take nog eens"
       }
     },
     "inputTest": {

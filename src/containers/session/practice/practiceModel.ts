@@ -220,11 +220,12 @@ export type WarmupClock = {
  * that first beat). The first `countInBeats` are the count-in; then the
  * pattern runs and wraps on every pass, `songPass` counting the passes.
  */
-export function warmupPosition(clock: WarmupClock, beatsIn: number): BeatPosition {
+export function warmupPosition(clock: WarmupClock, beatsIn: number, fromBeats = 0): BeatPosition {
   if (beatsIn < clock.countInBeats) {
     return { songBar: null, songTick: 0, songPass: 0, songCountIn: true };
   }
-  const into = (beatsIn - clock.countInBeats) * clock.perQuarter;
+  // A Resume counts in again, then carries on from the bar it was paused in.
+  const into = (beatsIn - clock.countInBeats + Math.max(0, fromBeats)) * clock.perQuarter;
   const pass = clock.passTicks > 0 ? Math.floor(into / clock.passTicks) : 0;
   const at = clock.passTicks > 0 ? into - pass * clock.passTicks : into;
   return { songBar: 0, songTick: clock.start + at, songPass: pass, songCountIn: false };

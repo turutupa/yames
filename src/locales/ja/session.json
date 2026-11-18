@@ -203,7 +203,8 @@
       "listeningBack": "聞き返し中",
       "band": "バンド",
       "bandHint": "バンドは採点されません。マイク使用時は音量を下げるかヘッドホンを使ってください。",
-      "bandMicHint": "マイクだとバンドの音もあなたの音として聞こえるので、最初はオフです。ヘッドホンなら上げてください。"
+      "bandMicHint": "マイクだとバンドの音もあなたの音として聞こえるので、最初はオフです。ヘッドホンなら上げてください。",
+      "skipped": "スキップ"
     },
     "result": {
       "kick": "テイク {{take}} · {{title}} · {{bpm}} BPM · {{bars}} 小節",
@@ -290,7 +291,7 @@
       "double": "ダブルタップ",
       "doubleDoes": "遅く",
       "hold": "長押し",
-      "holdDoes": "次へ"
+      "holdDoes": "もう一度"
     },
     "recap": {
       "kick": "セッション完了",
@@ -388,13 +389,30 @@
       "finger": "{{n}}の指",
       "start": "ここから",
       "legendNow": "今弾く",
-      "legendNext": "次",
+      "legendNext": "その後、順番に",
       "legendPlayed": "弾いた音",
       "beats": "小節の拍",
       "hand": "手: 人差し指を{{fret}}フレットに、1フレット1本の指で。",
       "handShifts": "手: 人差し指を{{fret}}フレットから。ネックに沿って移動します。",
       "handOpen": "手: 開放ポジション、人差し指は1フレットの上。",
-      "viewHint": "表示はいつでも切り替えられます"
+      "viewHint": "表示はいつでも切り替えられます",
+      "left": "残り",
+      "notGraded": "採点なし。あと{{time}}で終了。その後もう一度か、次へ。",
+      "notChecked": "チェックなし。あと{{time}}で終了。その後もう一度か、次へ。",
+      "pausedFoot": "一時停止中。時計は待っています。テンポを変えてから再開できます。",
+      "pausedFootNeck": "一時停止中。全小節はタブ表示（{{key}}）で見られます。テンポを変えてから再開できます。",
+      "switchAny": "ウォームアップ中はいつでも表示を切り替えられます",
+      "barOf": "{{of}}小節中{{n}}小節目 · クリックに身を任せて。",
+      "pausedAt": "{{of}}小節中{{n}}小節目で一時停止",
+      "paused": "一時停止中",
+      "pause": "一時停止",
+      "pauseKeys": "一時停止：{{key}}、Space または Enter",
+      "resume": "再開",
+      "restart": "最初から",
+      "back": "もう一度：{{title}}",
+      "ended": "終了。もう一度か、次へ。",
+      "endedFoot": "採点なし。準備ができたらもう一度か、次へ。",
+      "again": "もう一度"
     },
     "runway": {
       "label": "ラインに向かって流れてくる次の音",
@@ -428,7 +446,12 @@
     },
     "tabstrip": {
       "label": "タブ譜: {{notes}}",
-      "bar": "{{n}}小節"
+      "bar": "{{n}}小節",
+      "now": "今 · {{where}}",
+      "next": "次 · {{where}}",
+      "barBeat": "{{n}}小節目・{{beat}}拍目",
+      "barBeats": "{{n}}小節目・{{from}}–{{to}}拍",
+      "pausedHere": "ここで一時停止 · {{where}}"
     }
   }
 }

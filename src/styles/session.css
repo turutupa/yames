@@ -2600,3 +2600,344 @@
 .runway[data-lanes="3"] {
   margin-block: auto;
 }
+
+/* ── The practice screen's frame, as the approved mock lays it out ──────────
+   (`.preview/practice-review/designer/mock.html`; owner, beta 5). A compact
+   head (kicker and title; then "1:43 left  70 BPM" small, the status at the
+   right), the picture, then one footer row. */
+.practice-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}
+.practice-head-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 18px;
+  row-gap: 6px;
+  min-width: 0;
+}
+.practice-grow {
+  flex: 1 1 0;
+}
+.practice-kick {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+.practice-title {
+  margin: 0;
+  font: 600 24px/1.15 var(--l-display);
+  color: var(--l-ink);
+  min-width: 0;
+}
+.practice-meta {
+  align-items: baseline;
+  column-gap: 26px;
+}
+.practice-num {
+  font: 600 44px/1 var(--l-num, var(--l-display));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--l-ink);
+}
+.practice-num small {
+  font: 400 14px/1 var(--l-body);
+  color: var(--l-quiet);
+  margin-left: 4px;
+}
+.practice-clock {
+  color: var(--l-amber);
+}
+.practice-clock[data-ready] {
+  opacity: 0.6;
+}
+.practice-tempo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.session-page .practice-step {
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--l-line2);
+  border-radius: 8px;
+  background: rgba(10, 7, 5, 0.6);
+  color: var(--l-ink);
+  font: 600 20px/1 var(--l-body);
+}
+.session-page .practice-step:hover {
+  border-color: rgba(255, 180, 84, 0.6);
+  color: var(--l-amber);
+}
+.practice-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  color: #d8c8b0;
+  text-align: right;
+  min-width: 0;
+}
+.practice-status::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--l-amber);
+}
+.practice-status[data-tone="quiet"] {
+  color: var(--l-quiet);
+}
+.practice-status[data-tone="quiet"]::before {
+  display: none;
+}
+.practice-status[data-tone="hold"] {
+  color: var(--l-amber);
+}
+.practice-status[data-tone="hold"]::before {
+  border-radius: 1px;
+  width: 9px;
+  height: 9px;
+  background: linear-gradient(90deg, var(--l-amber) 0 35%, transparent 35% 65%, var(--l-amber) 65%);
+}
+.practice-head .session-viewswitch {
+  margin-left: 0;
+}
+
+/* The view switch as the mock draws it: amber edge, the chosen one filled. */
+.session-page .session-viewswitch {
+  padding: 3px;
+  border: 1px solid rgba(255, 180, 84, 0.45);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.session-page .session-viewswitch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 15px;
+  font: 600 15px/1.2 var(--l-display);
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+.session-page .session-viewswitch button[data-on] {
+  background: var(--l-amber);
+  color: #2a1606;
+}
+.session-page .session-viewswitch[data-locked] button[data-on] {
+  background: rgba(255, 232, 200, 0.08);
+  color: var(--l-quiet);
+}
+
+/* The tab's panel (mock: 16 px corners, a faint amber edge, nearly black). */
+.session-page {
+  --l-tab-bg: #160f0b;
+}
+.session-page .practice-tab {
+  flex: 1 1 0;
+  min-height: 200px;
+  display: flex;
+  overflow: hidden;
+  padding: 0 20px;
+  border-radius: 16px;
+  background: var(--l-tab-bg);
+  border: 1px solid rgba(255, 180, 84, 0.18);
+  box-shadow: none;
+}
+.session-page .practice-tab[data-compact] {
+  flex: 0 0 auto;
+  height: clamp(110px, 19vh, 176px);
+  min-height: 0;
+  padding: 0 14px;
+}
+/* The slim fret strip under the tab (the Neck view's own, reused). */
+.practice-fretstrip {
+  position: relative;
+  flex: none;
+  height: 46px;
+  margin-top: 4px;
+}
+
+/* Paused, over a held neck or runway. */
+.session-body[data-paused] {
+  position: relative;
+}
+.practice-paused {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  translate: -50% 0;
+  z-index: 6;
+  padding: 8px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 180, 84, 0.6);
+  background: rgba(14, 9, 6, 0.86);
+  color: var(--l-amber);
+  font: 700 28px/1.1 var(--l-display);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* The footer: one row. The note at the left, the controls and the big button at the right. */
+.practice-foot {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding-top: 6px;
+}
+.practice-note {
+  font-size: 14px;
+  color: var(--l-quiet);
+}
+.practice-note b {
+  color: var(--l-ink);
+}
+.practice-controls {
+  display: inline-flex;
+  gap: 8px;
+}
+.session-page .practice-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.practice-key {
+  padding: 0 6px;
+  border: 1px solid var(--l-line2);
+  border-radius: 5px;
+  font: 600 12px/1.5 var(--l-body);
+  color: var(--l-quiet);
+}
+.practice-foot .session-big {
+  width: auto;
+  min-width: 0;
+}
+.session-page .practice-foot .session-big {
+  font-size: 26px;
+  padding: 14px 26px;
+  border-radius: 12px;
+}
+.session-page .practice-foot .session-big[data-size="mid"] {
+  font-size: 26px;
+}
+.practice-foot .session-big svg {
+  vertical-align: -1px;
+  margin-right: 4px;
+}
+@media (max-width: 700px) {
+  .practice-num {
+    font-size: 32px;
+  }
+  .practice-title {
+    font-size: 20px;
+  }
+  .practice-switchhint {
+    display: none;
+  }
+  .practice-foot .session-big,
+  .session-page .practice-foot .session-big {
+    flex: 1 1 100%;
+    font-size: 22px;
+    padding: 12px 18px;
+  }
+  .practice-foot .practice-note {
+    flex: 1 1 100%;
+  }
+}
+.practice-foot > .practice-note:first-child {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.practice-foot > .practice-note:first-child + .practice-grow {
+  display: none;
+}
+/* The mock's proportions: the tab's panel about 420 px tall at 1400x900, the
+   staff near its top, the fret strip under it, and the room left over above
+   the footer rather than inside the panel. */
+.session-page .practice-tab:not([data-compact]) {
+  flex: 0 1 440px;
+  margin-top: 14px;
+}
+.session-page .practice-tab:not([data-compact]) .tabstrip[data-mode="follow"] .tabstrip-fill {
+  justify-content: flex-start;
+  padding-top: 22px;
+}
+.practice-fretstrip + .practice-foot,
+.session-page .practice-tab:not([data-compact]) + .practice-foot {
+  margin-top: auto;
+}
+.practice-foot .session-link,
+.practice-switchhint {
+  white-space: nowrap;
+}
+
+/* The Neck view as the mock lays it out: the beat dots and the legend between
+   the fret numbers and the slim fret strip, not under the strip; NEXT as
+   amber words over its note ("then 7, 5" above "next"), no box. */
+.practice-neck-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 64px;
+  min-height: 20px;
+  z-index: 3;
+}
+@media (max-height: 640px) {
+  .practice-neck-foot {
+    bottom: 50px;
+  }
+}
+.practice-next-tag {
+  padding: 0;
+  background: none;
+  align-items: flex-start;
+  transform: translate(-30%, -100%);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
+}
+.practice-next-tag b {
+  font: 600 14px/1.15 var(--l-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.practice-next-tag [data-then] {
+  font: 600 15px/1.15 var(--l-body);
+  opacity: 0.85;
+}
+.practice-now-tag {
+  background: none;
+  padding: 0;
+  font-size: 17px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
+}
+.practice-legend {
+  font-size: 13px;
+  gap: 18px;
+}
+/* A step left before it was played out: an outline, not the green of done (SES-1). */
+.session-pips i[data-state="skipped"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 232, 200, 0.4);
+}
+.practice-next-link {
+  white-space: nowrap;
+}
+/* Paused: said where the eye is, in the head, as a chip (no box over the notes). */
+.practice-status[data-tone="hold"] {
+  padding: 5px 14px;
+  border: 1px solid rgba(255, 180, 84, 0.6);
+  border-radius: 999px;
+  background: rgba(255, 180, 84, 0.1);
+  font: 600 17px/1.2 var(--l-body);
+}
+.practice-foot .session-link {
+  align-self: center;
+}

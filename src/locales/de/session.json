@@ -203,7 +203,8 @@
       "listeningBack": "Wiedergabe",
       "band": "Band",
       "bandHint": "Die Band wird nicht bewertet. Mit Mikrofon leise halten oder Kopfhörer nutzen.",
-      "bandMicHint": "Mit Mikrofon würde ich die Band als deine Töne hören, darum ist sie aus. Mit Kopfhörern kannst du sie aufdrehen."
+      "bandMicHint": "Mit Mikrofon würde ich die Band als deine Töne hören, darum ist sie aus. Mit Kopfhörern kannst du sie aufdrehen.",
+      "skipped": "Übersprungen"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} Takte",
@@ -290,7 +291,7 @@
       "double": "Doppelt tippen",
       "doubleDoes": "Langsamer",
       "hold": "Halten",
-      "holdDoes": "Weiter"
+      "holdDoes": "Nochmal"
     },
     "recap": {
       "kick": "Session geschafft",
@@ -388,13 +389,30 @@
       "finger": "Finger {{n}}",
       "start": "hier beginnen",
       "legendNow": "jetzt spielen",
-      "legendNext": "als Nächstes",
+      "legendNext": "dann, der Reihe nach",
       "legendPlayed": "gerade gespielt",
       "beats": "Die Schläge des Takts",
       "hand": "Hand: Zeigefinger am {{fret}}. Bund, ein Finger pro Bund.",
       "handShifts": "Hand: Zeigefinger zuerst am {{fret}}. Bund; sie wandert den Hals entlang.",
       "handOpen": "Hand: offene Lage, Zeigefinger über dem 1. Bund.",
-      "viewHint": "Ansicht jederzeit wechseln"
+      "viewHint": "Ansicht jederzeit wechseln",
+      "left": "übrig",
+      "notGraded": "Ohne Bewertung. Endet in {{time}}; dann nochmal oder weiter.",
+      "notChecked": "Nicht geprüft. Endet in {{time}}; dann nochmal oder weiter.",
+      "pausedFoot": "Pausiert. Die Uhr wartet auf dich; langsamer oder schneller, dann Weiter.",
+      "pausedFootNeck": "Pausiert. Alle Takte stehen in der Tab-Ansicht ({{key}}); langsamer oder schneller, dann Weiter.",
+      "switchAny": "Beim Aufwärmen jederzeit die Ansicht wechseln",
+      "barOf": "Takt {{n}} von {{of}} · lass dich vom Klick tragen.",
+      "pausedAt": "Pausiert bei Takt {{n}} von {{of}}",
+      "paused": "Pausiert",
+      "pause": "Pause",
+      "pauseKeys": "Pause: {{key}}, Leertaste oder Enter",
+      "resume": "Weiter",
+      "restart": "Neu starten",
+      "back": "Nochmal: {{title}}",
+      "ended": "Fertig. Nochmal oder weiter zum Nächsten.",
+      "endedFoot": "Ohne Bewertung. Nochmal, oder weiter, wenn du so weit bist.",
+      "again": "Nochmal"
     },
     "runway": {
       "label": "Die nächsten Noten, die auf die Linie zulaufen",
@@ -428,7 +446,12 @@
     },
     "tabstrip": {
       "label": "Tabulatur: {{notes}}",
-      "bar": "Takt {{n}}"
+      "bar": "Takt {{n}}",
+      "now": "jetzt · {{where}}",
+      "next": "danach · {{where}}",
+      "barBeat": "Takt {{n}}, Schlag {{beat}}",
+      "barBeats": "Takt {{n}}, Schläge {{from}}–{{to}}",
+      "pausedHere": "hier pausiert · {{where}}"
     }
   }
 }

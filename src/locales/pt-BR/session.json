@@ -204,7 +204,8 @@
       "listeningBack": "Reproduzindo",
       "band": "Banda",
       "bandHint": "A banda não é avaliada. No microfone, deixe baixo ou use fones.",
-      "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente."
+      "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente.",
+      "skipped": "Pulado"
     },
     "result": {
       "kick": "Tomada {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compassos",
@@ -291,7 +292,7 @@
       "double": "Toque duplo",
       "doubleDoes": "Mais devagar",
       "hold": "Segurar",
-      "holdDoes": "Próximo"
+      "holdDoes": "De novo"
     },
     "recap": {
       "kick": "Sessão concluída",
@@ -396,13 +397,30 @@
       "finger": "dedo {{n}}",
       "start": "comece aqui",
       "legendNow": "toque agora",
-      "legendNext": "próxima",
+      "legendNext": "depois, em ordem",
       "legendPlayed": "acabou de tocar",
       "beats": "Os tempos do compasso",
       "hand": "Mão: indicador na casa {{fret}}, um dedo por casa.",
       "handShifts": "Mão: comece com o indicador na casa {{fret}}; ela se move pelo braço.",
       "handOpen": "Mão: posição aberta, indicador sobre a casa 1.",
-      "viewHint": "Troque de visualização quando quiser"
+      "viewHint": "Troque de visualização quando quiser",
+      "left": "restantes",
+      "notGraded": "Sem nota. Termina em {{time}}; depois de novo, ou segue.",
+      "notChecked": "Sem checagem. Termina em {{time}}; depois de novo, ou segue.",
+      "pausedFoot": "Pausado. O relógio espera por você; mais lento ou mais rápido, depois Retomar.",
+      "pausedFootNeck": "Pausado. Todos os compassos estão na vista Tab ({{key}}); mais lento ou mais rápido, depois Retomar.",
+      "switchAny": "Troque de vista quando quiser no aquecimento",
+      "barOf": "Compasso {{n}} de {{of}} · deixe o clique te levar.",
+      "pausedAt": "Pausado no compasso {{n}} de {{of}}",
+      "paused": "Pausado",
+      "pause": "Pausar",
+      "pauseKeys": "Pausar: {{key}}, Espaço ou Enter",
+      "resume": "Retomar",
+      "restart": "Recomeçar",
+      "back": "De novo: {{title}}",
+      "ended": "Concluído. De novo, ou para o próximo.",
+      "endedFoot": "Sem nota. Repita, ou siga quando estiver pronto.",
+      "again": "De novo"
     },
     "runway": {
       "label": "As próximas notas, chegando à linha",
@@ -436,7 +454,12 @@
     },
     "tabstrip": {
       "label": "Tablatura: {{notes}}",
-      "bar": "compasso {{n}}"
+      "bar": "compasso {{n}}",
+      "now": "agora · {{where}}",
+      "next": "depois · {{where}}",
+      "barBeat": "compasso {{n}}, tempo {{beat}}",
+      "barBeats": "compasso {{n}}, tempos {{from}}–{{to}}",
+      "pausedHere": "pausado aqui · {{where}}"
     }
   }
 }

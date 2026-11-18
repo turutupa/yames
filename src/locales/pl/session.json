@@ -205,7 +205,8 @@
       "listeningBack": "Odsłuch",
       "band": "Zespół",
       "bandHint": "Zespół nie jest oceniany. Przy mikrofonie ścisz go albo użyj słuchawek.",
-      "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go."
+      "bandMicHint": "Przez mikrofon słyszałbym zespół jako twoje dźwięki, więc startuje wyciszony. W słuchawkach podgłoś go.",
+      "skipped": "Pominięte"
     },
     "result": {
       "kick": "Podejście {{take}} · {{title}} · {{bpm}} BPM · takty: {{bars}}",
@@ -292,7 +293,7 @@
       "double": "Podwójne stuknięcie",
       "doubleDoes": "Wolniej",
       "hold": "Przytrzymanie",
-      "holdDoes": "Dalej"
+      "holdDoes": "Jeszcze raz"
     },
     "recap": {
       "kick": "Sesja zakończona",
@@ -404,13 +405,30 @@
       "finger": "palec {{n}}",
       "start": "zacznij tutaj",
       "legendNow": "graj teraz",
-      "legendNext": "następna",
+      "legendNext": "potem, po kolei",
       "legendPlayed": "właśnie zagrana",
       "beats": "Miary taktu",
       "hand": "Ręka: palec wskazujący na progu {{fret}}, jeden palec na próg.",
       "handShifts": "Ręka: zacznij palcem wskazującym na progu {{fret}}; przesuwa się wzdłuż gryfu.",
       "handOpen": "Ręka: pozycja otwarta, palec wskazujący nad progiem 1.",
-      "viewHint": "Zmieniaj widok, kiedy chcesz"
+      "viewHint": "Zmieniaj widok, kiedy chcesz",
+      "left": "zostało",
+      "notGraded": "Bez oceny. Koniec za {{time}}; potem jeszcze raz albo dalej.",
+      "notChecked": "Bez sprawdzania. Koniec za {{time}}; potem jeszcze raz albo dalej.",
+      "pausedFoot": "Pauza. Zegar na ciebie czeka; wolniej lub szybciej, potem Wznów.",
+      "pausedFootNeck": "Pauza. Wszystkie takty są w widoku Tab ({{key}}); wolniej lub szybciej, potem Wznów.",
+      "switchAny": "Zmieniaj widok kiedy chcesz podczas rozgrzewki",
+      "barOf": "Takt {{n}} z {{of}} · niech klik cię niesie.",
+      "pausedAt": "Pauza w takcie {{n}} z {{of}}",
+      "paused": "Pauza",
+      "pause": "Pauza",
+      "pauseKeys": "Pauza: {{key}}, Spacja lub Enter",
+      "resume": "Wznów",
+      "restart": "Od nowa",
+      "back": "Jeszcze raz: {{title}}",
+      "ended": "Gotowe. Jeszcze raz albo dalej.",
+      "endedFoot": "Bez oceny. Powtórz albo idź dalej, gdy będziesz gotów.",
+      "again": "Jeszcze raz"
     },
     "runway": {
       "label": "Kolejne nuty zbliżające się do linii",
@@ -444,7 +462,12 @@
     },
     "tabstrip": {
       "label": "Tabulatura: {{notes}}",
-      "bar": "takt {{n}}"
+      "bar": "takt {{n}}",
+      "now": "teraz · {{where}}",
+      "next": "dalej · {{where}}",
+      "barBeat": "takt {{n}}, miara {{beat}}",
+      "barBeats": "takt {{n}}, miary {{from}}–{{to}}",
+      "pausedHere": "pauza tutaj · {{where}}"
     }
   }
 }

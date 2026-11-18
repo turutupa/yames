@@ -203,7 +203,8 @@
       "listeningBack": "Terugluisteren",
       "band": "Band",
       "bandHint": "De band wordt niet beoordeeld. Met een microfoon: zacht houden of koptelefoon op.",
-      "bandMicHint": "Met een microfoon zou ik de band als jouw noten horen, dus hij begint uit. Met een koptelefoon op: zet hem hoger."
+      "bandMicHint": "Met een microfoon zou ik de band als jouw noten horen, dus hij begint uit. Met een koptelefoon op: zet hem hoger.",
+      "skipped": "Overgeslagen"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} maten",
@@ -290,7 +291,7 @@
       "double": "Dubbeltikken",
       "doubleDoes": "Langzamer",
       "hold": "Vasthouden",
-      "holdDoes": "Volgende"
+      "holdDoes": "Nog eens"
     },
     "recap": {
       "kick": "Sessie klaar",
@@ -388,13 +389,30 @@
       "finger": "vinger {{n}}",
       "start": "begin hier",
       "legendNow": "speel nu",
-      "legendNext": "hierna",
+      "legendNext": "daarna, op volgorde",
       "legendPlayed": "net gespeeld",
       "beats": "De tellen van de maat",
       "hand": "Hand: wijsvinger op fret {{fret}}, één vinger per fret.",
       "handShifts": "Hand: begin met de wijsvinger op fret {{fret}}; hij schuift langs de hals.",
       "handOpen": "Hand: open positie, wijsvinger boven fret 1.",
-      "viewHint": "Wissel wanneer je wilt van weergave"
+      "viewHint": "Wissel wanneer je wilt van weergave",
+      "left": "over",
+      "notGraded": "Geen cijfer. Klaar over {{time}}; dan nog eens, of verder.",
+      "notChecked": "Niet gecontroleerd. Klaar over {{time}}; dan nog eens, of verder.",
+      "pausedFoot": "Gepauzeerd. De klok wacht op je; langzamer of sneller, dan Hervatten.",
+      "pausedFootNeck": "Gepauzeerd. Elke maat staat in de Tab-weergave ({{key}}); langzamer of sneller, dan Hervatten.",
+      "switchAny": "Wissel van weergave wanneer je wilt tijdens de warming-up",
+      "barOf": "Maat {{n}} van {{of}} · laat de klik je dragen.",
+      "pausedAt": "Gepauzeerd bij maat {{n}} van {{of}}",
+      "paused": "Gepauzeerd",
+      "pause": "Pauze",
+      "pauseKeys": "Pauze: {{key}}, spatie of Enter",
+      "resume": "Hervatten",
+      "restart": "Opnieuw",
+      "back": "Nog eens: {{title}}",
+      "ended": "Klaar. Nog eens, of door naar de volgende.",
+      "endedFoot": "Geen cijfer. Nog eens, of ga verder als je klaar bent.",
+      "again": "Nog eens"
     },
     "runway": {
       "label": "De volgende noten, op weg naar de lijn",
@@ -428,7 +446,12 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
-      "bar": "maat {{n}}"
+      "bar": "maat {{n}}",
+      "now": "nu · {{where}}",
+      "next": "hierna · {{where}}",
+      "barBeat": "maat {{n}}, tel {{beat}}",
+      "barBeats": "maat {{n}}, tellen {{from}}–{{to}}",
+      "pausedHere": "hier gepauzeerd · {{where}}"
     }
   }
 }

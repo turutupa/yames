@@ -85,6 +85,10 @@ export type HotkeyAction =
   | "session-exit"
   /** V in a Session: Neck, Runway, Tab, round again (2026-11-17). */
   | "session-view"
+  /** K in a Session: pause or resume a warm-up or a timed block (owner, beta 5). */
+  | "session-pause"
+  /** R in a Session: a timed block from the top, or a graded Take again. */
+  | "session-restart"
   | "settings";
 
 export interface HotkeyEntry {
@@ -724,6 +728,23 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Switch view",
     key: "V",
     desc: "In a Session: Neck, Runway or Tab. Any time in a warm-up; between Takes in a graded one",
+    group: "session",
+  },
+  // A warm-up or a timed block can be held and played again without leaving
+  // (owner, beta 5). Space and Enter also pause one while it runs.
+  {
+    id: "session-pause",
+    action: "Pause",
+    // K, as a video player pauses: P is a common rebinding of Play.
+    key: "K",
+    desc: "In a warm-up or a timed block: pause it, or carry on",
+    group: "session",
+  },
+  {
+    id: "session-restart",
+    action: "Go again",
+    key: "R",
+    desc: "In a warm-up or a timed block: from the top. After a Take: the same Take again",
     group: "session",
   },
 ];

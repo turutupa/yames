@@ -431,7 +431,7 @@ export interface Shot {
    * chosen theme, drawing a real Exercise from a Path pack. See
    * `src/shots/tabstrip.tsx` for what each kind holds.
    */
-  tabstrip?: "preview" | "follow" | "playing" | "dense";
+  tabstrip?: "preview" | "follow" | "playing" | "dense" | "paused";
 }
 
 /**
@@ -1386,6 +1386,7 @@ export const SHOTS: Shot[] = [
   { id: "tabstrip-follow", suffix: "tabstrip-follow", window: "main", tabstrip: "follow", width: 1400, height: 900, settleMs: 100 },
   { id: "tabstrip-playing", suffix: "tabstrip-playing", window: "main", tabstrip: "playing", width: 1400, height: 900, settleMs: 100 },
   { id: "tabstrip-dense", suffix: "tabstrip-dense", window: "main", tabstrip: "dense", width: 1400, height: 900, settleMs: 100 },
+  { id: "tabstrip-paused", suffix: "tabstrip-paused", window: "main", tabstrip: "paused", width: 1400, height: 900, settleMs: 100 },
 ];
 
 /**

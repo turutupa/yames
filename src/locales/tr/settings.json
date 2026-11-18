@@ -249,7 +249,10 @@
         "session-exit": "Seanstan çık",
         "tab-paths": "Yollar",
         "tab-progress": "İlerleme",
-        "tab-tools": "Araçlar"
+        "tab-tools": "Araçlar",
+        "session-view": "Görünümü değiştir",
+        "session-pause": "Duraklat",
+        "session-restart": "Yeniden"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -299,11 +302,14 @@
         "session-slower": "Denemeler arasında: bir basamak yavaş",
         "session-faster": "Denemeler arasında: bir basamak hızlı",
         "session-next": "Denemeler arasında: seansta sıradaki şeye geç",
-        "session-pedal": "Tek bir ayak anahtarı için. Dokun: sıradaki şey. Çift dokun: daha yavaş. Basılı tut: sonraki adım",
+        "session-pedal": "Tek pedal için. Dokun: sıradaki (çalan ısınmayı duraklatır). Çift dokun: daha yavaş. Basılı tut: yeniden",
         "session-exit": "Seans sırasında: Çık gibi seanstan çık. Süren deneme önce durur.",
         "tab-paths": "Yollar'a git",
         "tab-progress": "İlerleme'ye git",
-        "tab-tools": "Araçlar'a git"
+        "tab-tools": "Araçlar'a git",
+        "session-view": "Bir oturumda: Sap, Pist ya da Tab. Isınmada her zaman; notlananda kayıtlar arasında",
+        "session-pause": "Isınmada ya da süreli blokta: duraklat ya da devam et",
+        "session-restart": "Isınmada ya da süreli blokta: baştan. Bir kayıttan sonra: aynı kayıt yeniden"
       }
     },
     "inputTest": {

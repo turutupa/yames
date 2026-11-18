@@ -203,7 +203,8 @@
       "listeningBack": "Đang nghe lại",
       "band": "Ban nhạc",
       "bandHint": "Ban nhạc không được chấm. Dùng micro thì để nhỏ hoặc đeo tai nghe.",
-      "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên."
+      "bandMicHint": "Qua micro tôi sẽ nghe ban nhạc như nốt của bạn, nên ban đầu tắt. Đeo tai nghe thì vặn lên.",
+      "skipped": "Đã bỏ qua"
     },
     "result": {
       "kick": "Lượt {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ô nhịp",
@@ -290,7 +291,7 @@
       "double": "Nhấn đúp",
       "doubleDoes": "Chậm hơn",
       "hold": "Giữ",
-      "holdDoes": "Tiếp theo"
+      "holdDoes": "Lại"
     },
     "recap": {
       "kick": "Xong buổi tập",
@@ -388,13 +389,30 @@
       "finger": "ngón {{n}}",
       "start": "bắt đầu ở đây",
       "legendNow": "chơi ngay",
-      "legendNext": "tiếp theo",
+      "legendNext": "rồi, theo thứ tự",
       "legendPlayed": "vừa chơi",
       "beats": "Các phách của ô nhịp",
       "hand": "Tay: ngón trỏ ở phím {{fret}}, mỗi ngón một phím.",
       "handShifts": "Tay: bắt đầu với ngón trỏ ở phím {{fret}}; tay di chuyển dọc cần đàn.",
       "handOpen": "Tay: thế bấm mở, ngón trỏ trên phím 1.",
-      "viewHint": "Đổi chế độ xem bất cứ lúc nào"
+      "viewHint": "Đổi chế độ xem bất cứ lúc nào",
+      "left": "còn lại",
+      "notGraded": "Không chấm điểm. Kết thúc sau {{time}}; rồi tập lại, hoặc tiếp.",
+      "notChecked": "Không kiểm tra. Kết thúc sau {{time}}; rồi tập lại, hoặc tiếp.",
+      "pausedFoot": "Đã tạm dừng. Đồng hồ chờ bạn; chậm hơn hoặc nhanh hơn, rồi Tiếp tục.",
+      "pausedFootNeck": "Đã tạm dừng. Mọi ô nhịp đều có trong chế độ Tab ({{key}}); chậm hơn hoặc nhanh hơn, rồi Tiếp tục.",
+      "switchAny": "Đổi chế độ xem bất cứ lúc nào khi khởi động",
+      "barOf": "Ô nhịp {{n}}/{{of}} · để tiếng click dẫn bạn.",
+      "pausedAt": "Tạm dừng ở ô nhịp {{n}}/{{of}}",
+      "paused": "Đã tạm dừng",
+      "pause": "Tạm dừng",
+      "pauseKeys": "Tạm dừng: {{key}}, Space hoặc Enter",
+      "resume": "Tiếp tục",
+      "restart": "Bắt đầu lại",
+      "back": "Lại: {{title}}",
+      "ended": "Xong. Tập lại, hoặc sang phần tiếp theo.",
+      "endedFoot": "Không chấm điểm. Tập lại, hoặc đi tiếp khi bạn sẵn sàng.",
+      "again": "Lại"
     },
     "runway": {
       "label": "Những nốt tiếp theo đang tiến đến vạch",
@@ -428,7 +446,12 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
-      "bar": "ô nhịp {{n}}"
+      "bar": "ô nhịp {{n}}",
+      "now": "bây giờ · {{where}}",
+      "next": "tiếp · {{where}}",
+      "barBeat": "ô nhịp {{n}}, phách {{beat}}",
+      "barBeats": "ô nhịp {{n}}, phách {{from}}–{{to}}",
+      "pausedHere": "tạm dừng ở đây · {{where}}"
     }
   }
 }

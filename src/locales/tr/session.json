@@ -203,7 +203,8 @@
       "listeningBack": "Geri dinleniyor",
       "band": "Grup",
       "bandHint": "Grup notlanmaz. Mikrofonla çalıyorsan sesini kıs ya da kulaklık tak.",
-      "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç."
+      "bandMicHint": "Mikrofonla grubu senin notaların sanırım, o yüzden kapalı başlar. Kulaklık takınca sesini aç.",
+      "skipped": "Atlandı"
     },
     "result": {
       "kick": "Deneme {{take}} · {{title}} · {{bpm}} BPM · {{bars}} ölçü",
@@ -290,7 +291,7 @@
       "double": "Çift dokun",
       "doubleDoes": "Daha yavaş",
       "hold": "Basılı tut",
-      "holdDoes": "Sonraki"
+      "holdDoes": "Yeniden"
     },
     "recap": {
       "kick": "Seans bitti",
@@ -388,13 +389,30 @@
       "finger": "{{n}}. parmak",
       "start": "buradan başla",
       "legendNow": "şimdi çal",
-      "legendNext": "sonraki",
+      "legendNext": "sonra, sırayla",
       "legendPlayed": "az önce çalındı",
       "beats": "Ölçünün vuruşları",
       "hand": "El: işaret parmağı {{fret}}. perdede, her perdeye bir parmak.",
       "handShifts": "El: işaret parmağıyla {{fret}}. perdeden başla; sap boyunca kayar.",
       "handOpen": "El: açık pozisyon, işaret parmağı 1. perdenin üstünde.",
-      "viewHint": "Görünümü istediğin zaman değiştir"
+      "viewHint": "Görünümü istediğin zaman değiştir",
+      "left": "kaldı",
+      "notGraded": "Notlanmaz. {{time}} sonra biter; sonra yeniden ya da devam.",
+      "notChecked": "Kontrol edilmez. {{time}} sonra biter; sonra yeniden ya da devam.",
+      "pausedFoot": "Duraklatıldı. Saat seni bekliyor; daha yavaş ya da hızlı, sonra Devam.",
+      "pausedFootNeck": "Duraklatıldı. Bütün ölçüler Tab görünümünde ({{key}}); daha yavaş ya da hızlı, sonra Devam.",
+      "switchAny": "Isınmada görünümü istediğin zaman değiştir",
+      "barOf": "Ölçü {{n}} / {{of}} · bırak klik seni taşısın.",
+      "pausedAt": "{{n}}. ölçüde duraklatıldı ({{of}} ölçüden)",
+      "paused": "Duraklatıldı",
+      "pause": "Duraklat",
+      "pauseKeys": "Duraklat: {{key}}, Boşluk ya da Enter",
+      "resume": "Devam",
+      "restart": "Baştan",
+      "back": "Yeniden: {{title}}",
+      "ended": "Bitti. Yeniden ya da sıradakine.",
+      "endedFoot": "Notlanmaz. Yeniden çal ya da hazır olunca devam et.",
+      "again": "Yeniden"
     },
     "runway": {
       "label": "Çizgiye doğru gelen sıradaki notalar",
@@ -428,7 +446,12 @@
     },
     "tabstrip": {
       "label": "Tab: {{notes}}",
-      "bar": "{{n}}. ölçü"
+      "bar": "{{n}}. ölçü",
+      "now": "şimdi · {{where}}",
+      "next": "sonra · {{where}}",
+      "barBeat": "ölçü {{n}}, vuruş {{beat}}",
+      "barBeats": "ölçü {{n}}, vuruşlar {{from}}–{{to}}",
+      "pausedHere": "burada duraklatıldı · {{where}}"
     }
   }
 }

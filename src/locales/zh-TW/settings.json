@@ -249,7 +249,10 @@
         "session-exit": "離開課程",
         "tab-paths": "路線",
         "tab-progress": "進度",
-        "tab-tools": "工具"
+        "tab-tools": "工具",
+        "session-view": "切換檢視",
+        "session-pause": "暫停",
+        "session-restart": "再來一次"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -299,11 +302,14 @@
         "session-slower": "兩遍之間：慢一檔",
         "session-faster": "兩遍之間：快一檔",
         "session-next": "兩遍之間：進入這節課的下一項",
-        "session-pedal": "用於單個腳踏開關。單踩：下一步操作。雙踩：慢一點。長踩：下一步",
+        "session-pedal": "用於單一踏板。輕踩：下一步（進行中的熱身會暫停）。雙踩：更慢。長按：再來一次",
         "session-exit": "課程中：和「退出」一樣離開。正在進行的這一遍會先停止。",
         "tab-paths": "前往「路線」",
         "tab-progress": "前往「進度」",
-        "tab-tools": "前往「工具」"
+        "tab-tools": "前往「工具」",
+        "session-view": "練習中：琴頸、跑道或六線譜。熱身時隨時可切換；評分練習在兩次錄製之間",
+        "session-pause": "熱身或計時段中：暫停，或繼續",
+        "session-restart": "熱身或計時段中：從頭開始。錄製之後：同一段再來一次"
       }
     },
     "inputTest": {

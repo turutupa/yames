@@ -22,13 +22,14 @@ import { TabStrip } from "../containers/session/tabstrip/TabStrip";
 import type { TabResult } from "../containers/session/tabstrip/TabStrip";
 import { patternModel, occurrences } from "../containers/session/tabstrip/tabStripModel";
 
-export type TabStripShotKind = "preview" | "follow" | "playing" | "dense";
+export type TabStripShotKind = "preview" | "follow" | "playing" | "dense" | "paused";
 
 const SOURCES: Record<TabStripShotKind, { pack: string; exercise: string }> = {
   preview: { pack: "blues-pentatonics", exercise: "box-one.first-lick" },
   follow: { pack: "blues-pentatonics", exercise: "box-one.first-lick" },
   playing: { pack: "blues-pentatonics", exercise: "box-one.first-lick" },
   dense: { pack: "shred", exercise: "crossing.outside-pairs" },
+  paused: { pack: "blues-pentatonics", exercise: "box-one.first-lick" },
 };
 
 const PACKS = import.meta.glob("../paths/packs/*.json");
@@ -49,12 +50,12 @@ const RECIPE: TabResult[] = ["good", "good", "early", "good", "late", "good", "g
 
 function Scene({ kind, exercise }: { kind: TabStripShotKind; exercise: Exercise }) {
   const barTicks = barLengthTicks(exercise.meter);
-  const mode = kind === "preview" ? "preview" : "follow";
+  const mode = kind === "preview" || kind === "paused" ? "preview" : "follow";
   // Held in bar 2, just after beat 3, where the lick has a note.
   const held = barTicks + barTicks / 2 + 20;
   const results = useMemo(() => {
     const map = new Map<number, TabResult>();
-    if (kind === "preview") return map;
+    if (kind === "preview" || kind === "paused") return map;
     const model = patternModel(exercise.notes, barTicks, exercise.bars);
     occurrences(model, 0, 1, TAKE_BARS)
       .filter((n) => n.at < held - barTicks / 32)
@@ -83,7 +84,7 @@ function Scene({ kind, exercise }: { kind: TabStripShotKind; exercise: Exercise 
         playing={kind === "playing"}
         results={results}
         mode={mode}
-        rhythm={kind === "dense"}
+        marker={kind === "paused" ? held : null}
       />
     </div>
   );
@@ -95,6 +96,7 @@ body{background:var(--bg-primary,#0a0705);color:var(--text-primary,#fbf5ea);font
 .tabstrip-shot{box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:18px;padding:28px clamp(12px,2vw,28px)}
 .tabstrip-shot header{display:flex;flex-direction:column;gap:6px}
 .tabstrip-shot-kick{font:600 13px/1 "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--text-secondary,#c9bba6)}
+.tabstrip-shot>.tabstrip{flex:1 1 auto;max-height:440px}
 .tabstrip-shot-title{font:700 clamp(28px,4vw,44px)/1 "Barlow Condensed",sans-serif}
 `;
 
