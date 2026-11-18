@@ -380,7 +380,14 @@
       "setlist": "Uma rotina que você monta e que toca em ordem.",
       "drill": "Sobe o andamento enquanto você toca e treina um plano que você escreve.",
       "jam": "Uma banda e os seus acordes. Nunca recebe nota.",
-      "songs": "Leia a tablatura de uma música e toque junto."
+      "songs": "Leia a tablatura de uma música e toque junto.",
+      "last": "Último",
+      "ramp": "Rampa",
+      "tempo": "Andamento",
+      "target": "Meta",
+      "steps": "{{count}} passo",
+      "steps_many": "{{count}} passos",
+      "steps_other": "{{count}} passos"
     },
     "view": {
       "label": "Visualização do treino",

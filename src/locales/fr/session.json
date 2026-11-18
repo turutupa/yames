@@ -380,7 +380,14 @@
       "setlist": "Une routine que tu construis toi-même, jouée dans l'ordre.",
       "drill": "Monte le tempo pendant que tu joues, et travaille un plan que tu écris.",
       "jam": "Un groupe et tes accords. Jamais noté.",
-      "songs": "Lis la tablature d'un morceau et joue avec."
+      "songs": "Lis la tablature d'un morceau et joue avec.",
+      "last": "Dernier",
+      "ramp": "Rampe",
+      "tempo": "Tempo",
+      "target": "Cible",
+      "steps": "{{count}} étape",
+      "steps_many": "{{count}} étapes",
+      "steps_other": "{{count}} étapes"
     },
     "view": {
       "label": "Vue d'entraînement",

@@ -388,7 +388,15 @@
       "setlist": "Rutyna, którą budujesz sam i grasz po kolei.",
       "drill": "Podnosi tempo, gdy grasz, i ćwiczy plan, który sam piszesz.",
       "jam": "Zespół i twoje akordy. Nigdy nieoceniane.",
-      "songs": "Czytaj tabulaturę utworu i graj razem z nią."
+      "songs": "Czytaj tabulaturę utworu i graj razem z nią.",
+      "last": "Ostatnio",
+      "ramp": "Rozbieg",
+      "tempo": "Tempo",
+      "target": "Cel",
+      "steps": "{{count}} krok",
+      "steps_few": "{{count}} kroki",
+      "steps_many": "{{count}} kroków",
+      "steps_other": "{{count}} kroku"
     },
     "view": {
       "label": "Widok ćwiczenia",

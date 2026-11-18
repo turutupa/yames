@@ -380,7 +380,14 @@
       "setlist": "Una routine che costruisci tu, suonata in ordine.",
       "drill": "Alza il tempo mentre suoni e allena un piano che scrivi tu.",
       "jam": "Una band e i tuoi accordi. Mai valutato.",
-      "songs": "Leggi la tablatura di un brano e suonaci sopra."
+      "songs": "Leggi la tablatura di un brano e suonaci sopra.",
+      "last": "Ultimo",
+      "ramp": "Rampa",
+      "tempo": "Tempo",
+      "target": "Obiettivo",
+      "steps": "{{count}} passo",
+      "steps_many": "{{count}} passi",
+      "steps_other": "{{count}} passi"
     },
     "view": {
       "label": "Vista di pratica",
