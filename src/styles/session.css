@@ -2054,6 +2054,7 @@
   font-size: 13px;
 }
 .session-prog-path {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   padding: 14px 16px 6px;
@@ -2096,6 +2097,30 @@
 .session-skill .session-spark,
 .session-skill .session-spark-none {
   margin-left: auto;
+}
+/* A narrow card (a phone): the number stays beside the name it belongs to,
+   the trend goes under them, instead of the row wrapping wherever it breaks. */
+@container (max-width: 460px) {
+  .session-skill {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .session-skill > .session-exercise-text {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .session-skill .session-spark,
+  .session-skill .session-spark-none {
+    grid-column: 1;
+    grid-row: 2;
+    margin-left: 0;
+  }
+  .session-skill .session-progress-value {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
 }
 .session-skill-name {
   font: 600 18px/1.12 var(--l-display);
