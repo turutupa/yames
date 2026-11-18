@@ -1,4 +1,4 @@
-// ⌥1 ⌥2 ⌥3 count down the tools (⌘1 ⌘2 ⌘3 until 2026-11-17).
+// ⌘5 ⌘6 ⌘7 count down the tools (⌘1 ⌘2 ⌘3 until 2026-11-17).
 //
 // The numbers are positional or they are arbitrary. When setlists became a
 // mode they arrived second in the rail, which moved Drill from ⌘2 to ⌘3 —
@@ -41,7 +41,7 @@ describe("the tab hotkeys", () => {
 
   it("binds them to consecutive digits", () => {
     expect(tabHotkeys().map((h) => h.key)).toEqual(
-      PLAY_TABS.map((_, i) => `⌥${i + 1}`),
+      PLAY_TABS.map((_, i) => `⌘${i + 5}`),
     );
   });
 
@@ -51,19 +51,19 @@ describe("the tab hotkeys", () => {
 });
 
 // The rail's learning side: ⌘1–⌘4, Today first (owner, 2026-11-17). They were
-// ⌘0 and ⌘6–⌘8 behind the tools' ⌘1–⌘5; the tools moved to ⌥1–⌥5.
+// ⌘0 and ⌘6–⌘8 behind the tools' ⌘1–⌘5; the tools moved to ⌘5–⌘9.
 describe("the learning side's keys", () => {
   const key = (id: string) => HOTKEYS.find((h) => h.id === id)?.key;
   const LEARN = ["tab-today", "tab-paths", "tab-progress", "tab-tools"];
 
-  it("are ⌘1 to ⌘4 in the rail's order, and the tools ⌥1 to ⌥5", () => {
+  it("are ⌘1 to ⌘4 in the rail's order, and the tools ⌘5 to ⌘9", () => {
     expect(LEARN.map(key)).toEqual(["⌘1", "⌘2", "⌘3", "⌘4"]);
-    expect(["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"].map(key)).toEqual(["⌥1", "⌥2", "⌥3", "⌥4", "⌥5"]);
+    expect(["tab-1", "tab-2", "tab-3", "tab-4", "tab-5"].map(key)).toEqual(["⌘5", "⌘6", "⌘7", "⌘8", "⌘9"]);
   });
 
   it("claim no key anything else in the table has", () => {
     const keys = HOTKEYS.map((h) => h.key).filter(Boolean);
-    for (const k of ["⌘1", "⌘2", "⌘3", "⌘4", "⌥1", "⌥2", "⌥3", "⌥4", "⌥5"]) {
+    for (const k of ["⌘1", "⌘2", "⌘3", "⌘4", "⌘5", "⌘6", "⌘7", "⌘8", "⌘9"]) {
       expect(keys.filter((x) => x === k), k).toHaveLength(1);
     }
   });
@@ -81,7 +81,7 @@ describe("the learning side's keys", () => {
       expect(actionForCombo(defaults, "⌘2", view), view).toBe("tab-paths");
       expect(actionForCombo(defaults, "⌘3", view), view).toBe("tab-progress");
       expect(actionForCombo(defaults, "⌘4", view), view).toBe("tab-tools");
-      expect(actionForCombo(defaults, "⌥3", view), view).toBe("tab-3");
+      expect(actionForCombo(defaults, "⌘7", view), view).toBe("tab-3");
     }
   });
 });

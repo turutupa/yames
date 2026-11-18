@@ -72,7 +72,7 @@ export function useKeybindings() {
       const version = await storeLoad<number>(KEYMAP_VERSION_KEY).catch(() => null);
       if (kb && typeof kb === "object") {
         const merged = { ...defaults, ...kb };
-        const moved = (version ?? 1) < KEYMAP_VERSION ? migrateNavKeys(merged) : merged;
+        const moved = (version ?? 1) < KEYMAP_VERSION ? migrateNavKeys(merged, version ?? 1) : merged;
         setKeyBindings(moved);
         // Saved here, not by the effect above: that one stands aside until the
         // restore has finished, and the mark below must not outlive the keys.

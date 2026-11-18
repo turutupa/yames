@@ -270,9 +270,9 @@ describe("a player's bindings (section 4.4)", () => {
     await waitFor(() => expect(result.current.keyBindings.play).toBe("P"));
     expect(result.current.keyBindings["songs-loop"]).toBe("⇧L");
     // 2026-11-17 (owner-approved): the tools' ⌘1–⌘5 were this file's defaults
-    // and moved with them, to ⌥1–⌥5 (`hooks/keybindingMigration.ts`). Keys the
+    // and moved with them, to ⌘5–⌘9 (`hooks/keybindingMigration.ts`). Keys the
     // player chose (P, ⇧L) are theirs and stay.
-    expect(result.current.keyBindings["tab-3"]).toBe("⌥3");
+    expect(result.current.keyBindings["tab-3"]).toBe("⌘7");
     // Every action has a key, stored or default, so nothing goes dead.
     for (const h of HOTKEYS) expect(result.current.keyBindings).toHaveProperty(h.id);
     expect(result.current.footBindings).toEqual(settings.footBindings);
@@ -322,7 +322,7 @@ describe("the whole file, through the whole app", () => {
     );
     expect(store.values.get("keyBindings")).toMatchObject({
       ...chosen,
-      ...Object.fromEntries(tabs.map((id, i) => [id, `⌥${i + 1}`])),
+      ...Object.fromEntries(tabs.map((id, i) => [id, `⌘${i + 5}`])),
     });
     expect(store.values.get("globalBindings")).toMatchObject(settings.globalBindings);
     expect(store.values.get("footBindings")).toEqual(settings.footBindings);

@@ -350,11 +350,11 @@ describe("the tab hotkeys", () => {
     expect(await observe(action, "beat")).toEqual([`setView ${mode}`]);
   });
 
-  // 2026-11-17, owner-approved: the tools moved from ⌘1–⌘5 to ⌥1–⌥5 so the
+  // 2026-11-17, owner-approved: the tools moved from ⌘1–⌘5 to ⌘5–⌘9 so the
   // learning side could have ⌘1–⌘4. Players on the old defaults are moved once
   // and anyone who remapped keeps theirs (`hooks/keybindingMigration.ts`).
-  it("are ⌥1 to ⌥5, in the rail's order", () => {
+  it("are ⌘5 to ⌘9, in the rail's order", () => {
     const keyOf = (id: string) => HOTKEYS.find((h) => h.id === id)?.key;
-    expect(TOOLS.map((t) => keyOf(t.action))).toEqual(["⌥1", "⌥2", "⌥3", "⌥4", "⌥5"]);
+    expect(TOOLS.map((t) => keyOf(t.action))).toEqual(["⌘5", "⌘6", "⌘7", "⌘8", "⌘9"]);
   });
 });

@@ -70,7 +70,7 @@ export type HotkeyAction =
   | "tab-today"
   // The rest of the rail's learning side (owner, 2026-11-17). Ids of their own
   // rather than `tab-1`…: those count the tools and are stored by name. The
-  // keys moved later that day: ⌘1–⌘4 are the learning side, the tools ⌥1–5.
+  // keys moved later that day: ⌘1–⌘4 are the learning side, the tools ⌘5–⌘9 (2026-11-18).
   | "tab-paths"
   | "tab-progress"
   | "tab-tools"
@@ -270,8 +270,9 @@ export function eventToCombo(e: KeyboardEvent): string {
   if (e.altKey) parts.push("⌥");
   if (e.shiftKey) parts.push("⇧");
   const unshifted = e.shiftKey ? SHIFTED_PUNCTUATION[e.code] : undefined;
-  // A digit with Shift or Option is still the digit (2026-11-17): the tools sit
-  // on ⌥1–5, and the browser reports Shift+1 as "!" on a US keyboard, '"' on
+  // A digit with Shift or Option is still the digit (2026-11-17): a player may
+  // bind ⌥1 or ⇧1 (the tools sat on ⌥1–5 for a day), and the browser reports
+  // Shift+1 as "!" on a US keyboard, '"' on
   // a German one, and Option+1 as "¡" on a Mac. The digit row's PHYSICAL key
   // is the same everywhere, so `code` answers.
   const digit = (e.shiftKey || e.altKey) && /^Digit[0-9]$/.test(e.code ?? "") ? e.code.slice(5) : null;
@@ -468,20 +469,17 @@ export const HOTKEYS: HotkeyEntry[] = [
     group: "navigation",
   },
   /**
-   * The tools are ⌥1–5 (Alt+1–5) since 2026-11-17 (owner): ⌘1–4 went to the
-   * learning side, which is the app's front door now. A player who never
-   * changed these is moved over once (`hooks/keybindingMigration.ts`); one who
-   * did keeps theirs.
-   *
-   * Not ⌘⇧1–5, which was tried first: macOS takes ⌘⇧3, ⌘⇧4 and ⌘⇧5 for
-   * screenshots before any app hears them. Alt/Option with a digit is free on
-   * Windows, Linux and macOS, in WebView2 and WebKit; the digit is read from
-   * `e.code`, so Option+1 typing "¡" on a Mac still means 1.
+   * The tools are ⌘5–⌘9 since 2026-11-18 (owner): all nine rail entries on
+   * ⌘1–⌘9 in rail order, one modifier. ⌥+digit (the 2026-11-17 layout) is
+   * what tiling window managers such as GlazeWM and i3 take for workspaces,
+   * and ⌘⇧3/4/5 are macOS screenshots; ⌘+digit is free in the app on every OS.
+   * Players on an older layout's defaults move once
+   * (`hooks/keybindingMigration.ts`); keys they chose themselves stay.
    */
   {
     id: "tab-1",
     action: "Metronome tab",
-    key: "⌥1",
+    key: "⌘5",
     desc: "Switch to Metronome tab",
     group: "navigation",
   },
@@ -496,28 +494,28 @@ export const HOTKEYS: HotkeyEntry[] = [
   {
     id: "tab-2",
     action: "Setlist tab",
-    key: "⌥2",
+    key: "⌘6",
     desc: "Switch to Setlist tab",
     group: "navigation",
   },
   {
     id: "tab-3",
     action: "Drill tab",
-    key: "⌥3",
+    key: "⌘7",
     desc: "Switch to Drill tab",
     group: "navigation",
   },
   {
     id: "tab-4",
     action: "Jam tab",
-    key: "⌥4",
+    key: "⌘8",
     desc: "Switch to Jam tab",
     group: "navigation",
   },
   {
     id: "tab-5",
     action: "Songs tab",
-    key: "⌥5",
+    key: "⌘9",
     desc: "Switch to Songs tab",
     group: "navigation",
   },

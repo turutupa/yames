@@ -167,7 +167,7 @@ describe("W3 — the Session leads", () => {
     const tools = nav.querySelector('[data-group="tools"]')!;
     expect(learning.textContent).toContain("Learning screens");
     expect(tools.textContent).toContain("Tools");
-    // One keycap per run: Ctrl 1–4 and Alt 1–5, read from the binding table.
+    // One keycap per run: Ctrl 1–4 and Ctrl 5–9, read from the binding table.
     const today = keysFor("tab-today");
     const tool1 = keysFor("tab-1");
     expect(Array.from(learning.querySelectorAll("kbd")).map((k) => k.textContent)).toEqual([
@@ -176,7 +176,7 @@ describe("W3 — the Session leads", () => {
     ]);
     expect(Array.from(tools.querySelectorAll("kbd")).map((k) => k.textContent)).toEqual([
       ...tool1.slice(0, -1),
-      "1–5",
+      "5–9",
     ]);
   });
 
