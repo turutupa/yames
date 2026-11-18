@@ -1785,6 +1785,22 @@
   text-align: left;
   color: inherit;
 }
+/* A thumb's height on a phone or a touch screen, measured on the button itself. */
+@media (max-width: 480px), (pointer: coarse) {
+  .session-page .session-path-open {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+/* Its hit box is the whole card (a thumb's target on a phone, and the
+   pointer's anywhere); Continue sits above it. */
+.session-page .session-path-open::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
 .session-page .session-path-open:focus-visible {
   outline: none;
 }
@@ -1802,6 +1818,8 @@
   max-width: 62ch;
 }
 .session-page .session-path-continue {
+  position: relative;
+  z-index: 1;
   align-self: flex-start;
   margin-top: 8px;
 }
