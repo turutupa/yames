@@ -358,7 +358,8 @@
       },
       "levelStart": "Adım {{n}}'den başlıyor · {{level}}",
       "skipped": "Atlandı",
-      "skippedHow": "Seviyenin ({{level}}) altında, bu yüzden Bugün onu atlıyor. Yine de burada çalabilir ya da geri getirmek için bu adımı seçebilirsin."
+      "skippedHow": "Seviyenin ({{level}}) altında, bu yüzden Bugün onu atlıyor. Yine de burada çalabilir ya da geri getirmek için bu adımı seçebilirsin.",
+      "startHereIf": "Şu durumda buradan başla"
     },
     "progress": {
       "title": "İlerleme",

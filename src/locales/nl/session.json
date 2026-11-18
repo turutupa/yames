@@ -358,7 +358,8 @@
       },
       "levelStart": "Je begint bij stap {{n}} · {{level}}",
       "skipped": "Overgeslagen",
-      "skippedHow": "Onder je niveau ({{level}}), dus Vandaag slaat hem over. Je kunt hem hier nog steeds spelen, of deze stap kiezen om hem terug te halen."
+      "skippedHow": "Onder je niveau ({{level}}), dus Vandaag slaat hem over. Je kunt hem hier nog steeds spelen, of deze stap kiezen om hem terug te halen.",
+      "startHereIf": "Begin hier als"
     },
     "progress": {
       "title": "Voortgang",

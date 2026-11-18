@@ -181,6 +181,8 @@ function PathDetail({
   const current = currentStepOf(progress, path);
   const levels = levelsOf(path);
   const level = chosenLevelOf(progress, path)?.id;
+  // No Level chosen plays as the first one: show it as chosen (UX audit TODAY-1).
+  const shownLevel = levels.find((l) => l.id === level) ?? levels[0] ?? null;
   const slot = useNeckSlot(WHOLE, [], { sweep: true });
   const neck3d = useNeck3d();
   const runnable = isRunnable(path.id);
@@ -306,8 +308,8 @@ function PathDetail({
                 {levels.map((l) => (
                   <button
                     key={l.id}
-                    className={l.id === level ? "on" : ""}
-                    aria-pressed={l.id === level}
+                    className={l.id === shownLevel?.id ? "on" : ""}
+                    aria-pressed={l.id === shownLevel?.id}
                     onClick={() => actions.chooseLevel(path, l.id)}
                     data-testid={`level-${l.id}`}
                   >
@@ -321,6 +323,16 @@ function PathDetail({
                     n: current.order,
                     level: t(`session.paths.levelName.${level}`),
                   })}
+                </div>
+              )}
+              {shownLevel && shownLevel.placement.startHereIf.length > 0 && (
+                <div className="session-col" style={{ gap: 2, marginTop: 7 }} data-testid="level-start-here-if">
+                  <div className="session-kick">{t("session.paths.startHereIf")}</div>
+                  {shownLevel.placement.startHereIf.map((line) => (
+                    <div className="session-quiet" key={line}>
+                      {line}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

@@ -358,7 +358,8 @@
       },
       "levelStart": "Start bei Schritt {{n}} · {{level}}",
       "skipped": "Übersprungen",
-      "skippedHow": "Unter deiner Stufe ({{level}}), deshalb lässt Heute ihn aus. Du kannst ihn hier trotzdem spielen oder diesen Schritt wählen, um ihn zurückzuholen."
+      "skippedHow": "Unter deiner Stufe ({{level}}), deshalb lässt Heute ihn aus. Du kannst ihn hier trotzdem spielen oder diesen Schritt wählen, um ihn zurückzuholen.",
+      "startHereIf": "Fang hier an, wenn"
     },
     "progress": {
       "title": "Fortschritt",

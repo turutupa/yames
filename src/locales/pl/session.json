@@ -374,7 +374,8 @@
       },
       "levelStart": "Start od kroku {{n}} · {{level}}",
       "skipped": "Pominięty",
-      "skippedHow": "Poniżej twojego poziomu ({{level}}), więc Dziś go pomija. Nadal możesz go tu zagrać albo wybrać ten krok, żeby go przywrócić."
+      "skippedHow": "Poniżej twojego poziomu ({{level}}), więc Dziś go pomija. Nadal możesz go tu zagrać albo wybrać ten krok, żeby go przywrócić.",
+      "startHereIf": "Zacznij tutaj, jeśli"
     },
     "progress": {
       "title": "Postępy",

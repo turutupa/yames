@@ -358,7 +358,8 @@
       },
       "levelStart": "Bắt đầu từ Bước {{n}} · {{level}}",
       "skipped": "Đã bỏ qua",
-      "skippedHow": "Thấp hơn Cấp độ của bạn ({{level}}), nên Hôm nay bỏ qua bước này. Bạn vẫn có thể chơi nó ở đây, hoặc chọn bước này để đưa nó trở lại."
+      "skippedHow": "Thấp hơn Cấp độ của bạn ({{level}}), nên Hôm nay bỏ qua bước này. Bạn vẫn có thể chơi nó ở đây, hoặc chọn bước này để đưa nó trở lại.",
+      "startHereIf": "Bắt đầu ở đây nếu"
     },
     "progress": {
       "title": "Tiến bộ",

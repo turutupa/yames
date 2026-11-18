@@ -366,7 +366,8 @@
       },
       "levelStart": "Começando no passo {{n}} · {{level}}",
       "skipped": "Pulado",
-      "skippedHow": "Abaixo do seu nível ({{level}}), então Hoje pula este passo. Você ainda pode tocá-lo aqui, ou escolher este passo para trazê-lo de volta."
+      "skippedHow": "Abaixo do seu nível ({{level}}), então Hoje pula este passo. Você ainda pode tocá-lo aqui, ou escolher este passo para trazê-lo de volta.",
+      "startHereIf": "Comece aqui se"
     },
     "progress": {
       "title": "Progresso",

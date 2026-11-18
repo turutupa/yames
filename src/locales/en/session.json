@@ -358,7 +358,8 @@
       },
       "levelStart": "Starting at Step {{n}} · {{level}}",
       "skipped": "Skipped",
-      "skippedHow": "Below your Level ({{level}}), so Today skips it. You can still play it here, or choose this Step to bring it back."
+      "skippedHow": "Below your Level ({{level}}), so Today skips it. You can still play it here, or choose this Step to bring it back.",
+      "startHereIf": "Start here if"
     },
     "progress": {
       "title": "Progress",

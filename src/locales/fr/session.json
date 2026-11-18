@@ -366,7 +366,8 @@
       },
       "levelStart": "Départ à l’étape {{n}} · {{level}}",
       "skipped": "Passée",
-      "skippedHow": "En dessous de ton niveau ({{level}}), donc Aujourd’hui la saute. Tu peux quand même la jouer ici, ou choisir cette étape pour la reprendre."
+      "skippedHow": "En dessous de ton niveau ({{level}}), donc Aujourd’hui la saute. Tu peux quand même la jouer ici, ou choisir cette étape pour la reprendre.",
+      "startHereIf": "Commence ici si"
     },
     "progress": {
       "title": "Progrès",
