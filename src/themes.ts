@@ -63,7 +63,18 @@ export const TOKEN_CONTRACT = [
   "--feedback-good",
   "--feedback-ok",
   "--feedback-miss",
+  "--neck-miss",
 ] as const;
+
+/**
+ * Variables a theme MAY define, each with a derived default when it does not:
+ * the neck's own colours (`src/stage3d/neckTheme.ts`). Only for a theme where
+ * the derivation looks off: `--neck-hit` is set where `--feedback-perfect` is
+ * not a green, or is too close to the accent to tell a played note from NOW.
+ * `applyTheme` clears the ones a theme leaves out, so a value never leaks
+ * from the previous theme.
+ */
+export const OPTIONAL_TOKENS = ["--neck-board", "--neck-fret", "--neck-string", "--neck-hit"] as const;
 
 export interface Theme {
   id: string;
@@ -154,6 +165,7 @@ const mono: Theme = {
     "--feedback-good": "#06b6d4",
     "--feedback-ok": "#f59e0b",
     "--feedback-miss": "#9399a4",
+    "--neck-miss": "#ff5d6c",
   },
 };
 
@@ -203,6 +215,7 @@ const obsidian: Theme = {
     "--feedback-good": "#eab308",
     "--feedback-ok": "#f97316",
     "--feedback-miss": "#8c939f",
+    "--neck-miss": "#ff5d6c",
   },
 };
 
@@ -252,6 +265,8 @@ const velvet: Theme = {
     "--feedback-good": "#838ef8",
     "--feedback-ok": "#f472b6",
     "--feedback-miss": "#9097a3",
+    "--neck-miss": "#ff5d6c",
+    "--neck-hit": "#4ade80",
   },
 };
 
@@ -301,6 +316,8 @@ const neon: Theme = {
     "--feedback-good": "#a78bfa",
     "--feedback-ok": "#fb923c",
     "--feedback-miss": "#8d94a0",
+    "--neck-miss": "#ff5d6c",
+    "--neck-hit": "#4ade80",
   },
 };
 
@@ -352,6 +369,8 @@ const aurora: Theme = {
     "--feedback-good": "#67e8f9",
     "--feedback-ok": "#c48cfc",
     "--feedback-miss": "#a0a5b0",
+    "--neck-miss": "#ff5d6c",
+    "--neck-hit": "#4ade80",
   },
 };
 
@@ -405,6 +424,7 @@ const ivory: Theme = {
     "--feedback-good": "#056178",
     "--feedback-ok": "#874a04",
     "--feedback-miss": "#535a66",
+    "--neck-miss": "#b3213a",
   },
 };
 
@@ -454,6 +474,8 @@ const arctic: Theme = {
     "--feedback-good": "#01547f",
     "--feedback-ok": "#8a3407",
     "--feedback-miss": "#425064",
+    "--neck-miss": "#b3261e",
+    "--neck-hit": "#15803d",
   },
 };
 
@@ -503,6 +525,7 @@ const sand: Theme = {
     "--feedback-good": "#644402",
     "--feedback-ok": "#931818",
     "--feedback-miss": "#4e4946",
+    "--neck-miss": "#b3213f",
   },
 };
 
@@ -552,6 +575,8 @@ const lavender: Theme = {
     "--feedback-good": "#4338ca",
     "--feedback-ok": "#86198f",
     "--feedback-miss": "#594a79",
+    "--neck-miss": "#b3261e",
+    "--neck-hit": "#15803d",
   },
 };
 
@@ -603,6 +628,8 @@ const prism: Theme = {
     "--feedback-good": "#7e22ce",
     "--feedback-ok": "#994104",
     "--feedback-miss": "#6e4e86",
+    "--neck-miss": "#b3261e",
+    "--neck-hit": "#15803d",
   },
 };
 
@@ -667,6 +694,7 @@ const ash: Theme = {
     "--feedback-good": "#67e8f9",
     "--feedback-ok": "#fbbf24",
     "--feedback-miss": "#888e9c",
+    "--neck-miss": "#ff5d6c",
   },
 };
 
@@ -717,6 +745,7 @@ const ember: Theme = {
     "--feedback-good": "#7fd8e8",
     "--feedback-ok": "#f5b53d",
     "--feedback-miss": "#838a97",
+    "--neck-miss": "#ff4f7b",
   },
 };
 
@@ -767,6 +796,7 @@ const manuscript: Theme = {
     "--feedback-good": "#1c6683",
     "--feedback-ok": "#8a510b",
     "--feedback-miss": "#585f6d",
+    "--neck-miss": "#b3261e",
   },
 };
 
@@ -784,6 +814,9 @@ export function applyTheme(theme: Theme) {
   const root = document.documentElement;
   for (const [key, value] of Object.entries(theme.vars)) {
     root.style.setProperty(key, value);
+  }
+  for (const key of OPTIONAL_TOKENS) {
+    if (!(key in theme.vars)) root.style.removeProperty(key);
   }
   // Set font on body
   if (theme.vars["--font-family"]) {

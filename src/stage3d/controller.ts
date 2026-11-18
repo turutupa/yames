@@ -9,6 +9,7 @@
  */
 import type { NeckKind, NeckNote, NeckStage, NeckView } from "./api";
 import type { EngineModule, SlotRect, StageEngine } from "./engineTypes";
+import { neckPalette, subscribeNeckPalette } from "./neckTheme";
 import { Adaptive } from "./quality";
 import { FrameScheduler, type SchedulerDeps } from "./scheduler";
 import { PROBE_FRAMES, judgeProbe, type ProbeVerdict } from "./speed";
@@ -75,6 +76,7 @@ export class StageController {
   private rectCheck: number | null = null;
   private takeRunning = false;
   private pluckSeq = 0;
+  private unsubPalette: (() => void) | null = null;
   /** The fallback is drawing because of the prefs (or the probe), so a change of prefs can undo it. */
   private flatFallback = false;
   /** The last probe's verdict, for the shot scenes and the e2e. */
@@ -132,9 +134,28 @@ export class StageController {
     window.addEventListener("resize", this.onResize);
     window.addEventListener("scroll", this.onScroll, { capture: true, passive: true });
     if (this.snap.slot) this.observeSlot(this.snap.slot);
+    this.unsubPalette = subscribeNeckPalette(this.onPalette);
     this.updatePaused();
     if (this.snap.view.kind !== "hidden") this.ensureBackend();
   }
+
+  /** The theme changed: the neck takes its new colours (the fallback and the strip re-render on their own). */
+  private onPalette = () => {
+    if (!this.engine) return;
+    const p = neckPalette();
+    const apply = () => {
+      if (!this.engine || neckPalette() !== p) return;
+      this.engine.setPalette(p);
+      this.scheduler.invalidate();
+    };
+    // The numerals are drawn into textures once: wait (briefly) for the theme's number face first.
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    if (!fonts?.load) return apply();
+    Promise.race([
+      Promise.all([fonts.load(`700 40px ${p.numFont}`), fonts.load(`500 40px ${p.numFont}`)]),
+      new Promise((r) => setTimeout(r, 800)),
+    ]).then(apply, apply);
+  };
 
   /** Stop, free the GPU, and take the canvas away. */
   detach(): void {
@@ -151,6 +172,8 @@ export class StageController {
     document.removeEventListener("visibilitychange", this.onVisibility);
     window.removeEventListener("resize", this.onResize);
     window.removeEventListener("scroll", this.onScroll, { capture: true });
+    this.unsubPalette?.();
+    this.unsubPalette = null;
     this.updatePaused();
     this.engine?.dispose();
     this.engine = null;
@@ -348,6 +371,7 @@ export class StageController {
           engine.dispose();
           return;
         }
+        engine.setPalette(neckPalette());
         engine.setNotes(this.snap.notes.slice(), 0);
         if (this.snap.view.kind !== "hidden") {
           this.lastRect = this.frameRect();

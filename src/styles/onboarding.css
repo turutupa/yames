@@ -1253,6 +1253,7 @@
   --feedback-good: #e8c547;
   --feedback-ok: #ff9a4a;
   --feedback-miss: #9a9184;
+  --neck-miss: #ff5d6c;
 
   background:
     radial-gradient(90% 70% at 60% 45%, rgba(42, 26, 16, 0.82) 0, rgba(18, 11, 7, 0.86) 55%, rgba(10, 7, 5, 0.92) 100%);

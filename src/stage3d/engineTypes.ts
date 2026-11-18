@@ -3,6 +3,7 @@
  * importing this file does not load three.js.
  */
 import type { NeckKind, NeckNote, NeckView } from "./api";
+import type { NeckPalette } from "./neckTheme";
 import type { QualityStep } from "./quality";
 
 export type SlotRect = { left: number; top: number; width: number; height: number };
@@ -19,6 +20,8 @@ export interface StageEngine {
   /** A place's marker on screen (viewport px), framed where the camera is going. */
   project(string: number, fret: number): { x: number; y: number; r: number } | null;
   sweep(): void;
+  /** The theme changed: recolour the neck (nothing is rebuilt). */
+  setPalette(p: NeckPalette): void;
   /** The window changed size. */
   resize(width: number, height: number): void;
   /** Advance by `dt` seconds and draw. True while something is still moving. */
