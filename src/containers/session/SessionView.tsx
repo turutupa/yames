@@ -206,7 +206,7 @@ function TakeScreen({
                   {scored > 0 ? `${Math.round((live.heard / scored) * 100)}%` : "–%"}
                   <small>{t("session.run.heardSoFar")}</small>
                 </span>
-                <span className="practice-num">
+                <span className="practice-num" data-testid="session-live-bars">
                   {live.bars}
                   <span className="session-stat-of"> / {take.bars}</span>
                   <small>{t("session.run.bars")}</small>

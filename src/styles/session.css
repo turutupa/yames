@@ -2977,3 +2977,13 @@
   transform: translate(-30%, 0);
   flex-direction: column;
 }
+/* A phone: every control a thumb's size. */
+.main-window.is-mobile .session-page .practice-step {
+  width: 44px;
+  height: 44px;
+}
+.main-window.is-mobile .session-page .practice-foot .session-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
