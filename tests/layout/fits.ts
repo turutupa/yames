@@ -432,6 +432,10 @@ export async function overlapping(page: Page, root = ".session-page"): Promise<s
         const cs = getComputedStyle(e);
         if (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0") return false;
       }
+      // Folded away inside a closed <details>: laid out, never drawn (the
+      // Step's technique notes). Its <summary> is what shows.
+      const folded = el.closest("details:not([open])");
+      if (folded && !el.closest("summary")) return false;
       // Drawn inside something that owns its own picture (a chart's labels).
       return !el.closest("svg") || el.tagName.toLowerCase() === "svg";
     });

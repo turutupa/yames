@@ -320,6 +320,11 @@ button.context-chip-input[data-off] {
   color: var(--text-secondary);
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
+/* On a phone it is an icon alone, and still a thumb's width. */
+.main-window.is-mobile button.context-chip-input[data-off] {
+  min-width: 44px;
+  justify-content: center;
+}
 @media (hover: hover) {
   button.context-chip-input[data-off]:hover {
     color: var(--text-primary);
