@@ -29,6 +29,7 @@ import { TICKS_PER_QUARTER } from "../../../songs/types";
 import { likelyCpuCompositing } from "../highway/Runway";
 import {
   FOLLOW_SEGMENTS,
+  SCROLL_BELOW,
   currentOnset,
   describePattern,
   followLayout,
@@ -36,6 +37,7 @@ import {
   occurrences,
   overviewLayout,
   patternModel,
+  scrollLayout,
   segmentAt,
   segmentNotes,
   segmentPlace,
@@ -120,11 +122,14 @@ function columnWidth(model: PatternModel, ppt: number, fretPx: number): number {
 }
 
 /** The left column: the six lines' start and TAB, still while the segments move. */
-function Letters({ geo }: { geo: StaffGeometry }) {
+function Letters({ geo, lines = 0 }: { geo: StaffGeometry; lines?: number }) {
+  // `lines`: the scrolling view's lines run on under the window from here, so
+  // its faded edges fade the numbers and never the strings.
+  const width = geo.letters + lines;
   return (
-    <svg className="tabstrip-letters" width={geo.letters} height={geo.height} aria-hidden="true">
+    <svg className="tabstrip-letters" width={width} height={geo.height} aria-hidden="true">
       {Array.from({ length: 6 }, (_u, i) => (
-        <line key={i} className="tabstrip-line" x1={geo.letters * 0.36} x2={geo.letters} y1={geo.top + i * geo.gap} y2={geo.top + i * geo.gap} />
+        <line key={i} className="tabstrip-line" x1={geo.letters * 0.36} x2={width} y1={geo.top + i * geo.gap} y2={geo.top + i * geo.gap} />
       ))}
       {TAB.map((letter, i) => (
         <text
@@ -389,7 +394,12 @@ export function TabStrip({
   }, []);
 
   const follow = mode === "follow";
-  const fl = useMemo(() => followLayout(model, size.width), [model, size.width]);
+  const scroll = follow && size.width > 0 && size.width < SCROLL_BELOW;
+  const fl = useMemo(() => {
+    if (!scroll) return { ...followLayout(model, size.width), scroll: false as const, cursorX: 0, windowWidth: 0 };
+    const sl = scrollLayout(model, size.width, size.height);
+    return { ...sl, split: 1, fits: true, scroll: true as const };
+  }, [model, size.width, size.height, scroll]);
   const ov = useMemo(
     () => overviewLayout(model, size.width, size.height, maxFretPx),
     [model, size.width, size.height, maxFretPx],
@@ -428,7 +438,7 @@ export function TabStrip({
   const [page, setPage] = useState(0);
   const latest = useRef({ model, fl, takeBars, page, follow, reduced });
   latest.current = { model, fl, takeBars, page, follow, reduced };
-  const shown = useRef({ onset: "", page: Number.NaN, countIn: false });
+  const shown = useRef({ onset: "", page: Number.NaN, countIn: false, dx: Number.NaN });
   const motion = useRef<CursorMotion | null>(null);
 
   /** Mark the note at `tick` current, put the column on it, and turn the page at a segment's end. */
@@ -438,6 +448,19 @@ export function TabStrip({
     const now = currentOnset(m, tick, graceOf(m), tb);
     const at = now ? now.at : Math.max(0, tick);
     const want = Math.max(0, segmentAt(l.segTicks, at));
+    if (l.scroll) {
+      // The bars move under a column that stands still: the tick under it is
+      // the music's own, held at the first note through the count-in and at
+      // the current note when motion is reduced.
+      const end = takeEnd(m, tb);
+      const under = latest.current.reduced && now ? now.at : Math.min(Math.max(0, tick), Number.isFinite(end) ? end : Number.POSITIVE_INFINITY);
+      const dx = l.cursorX - noteXIn(under, l.ppt, m, l.geo);
+      const track = trackRef.current;
+      if (track && !(Math.abs(dx - shown.current.dx) <= 0.05)) {
+        shown.current.dx = dx;
+        track.style.transform = `translate3d(${dx.toFixed(1)}px,0,0)`;
+      }
+    }
     if (want !== shownPage) {
       setPage(want);
       return;
@@ -465,7 +488,7 @@ export function TabStrip({
       track.querySelector(`.tabstrip-note[data-id="${now.pass * k + n.index}"]`)?.setAttribute("data-current", "");
     }
     if (col) {
-      const x = noteXIn(now.at - want * l.segTicks, l.ppt, m, l.geo);
+      const x = l.scroll ? l.cursorX : noteXIn(now.at - want * l.segTicks, l.ppt, m, l.geo);
       col.style.visibility = "visible";
       col.style.transform = `translate3d(${x.toFixed(1)}px,0,0)`;
     }
@@ -479,8 +502,9 @@ export function TabStrip({
     const before = lastPage.current;
     lastPage.current = page;
     shown.current.onset = "";
+    shown.current.dx = Number.NaN;
     placeAt(motion.current ? motion.current.floor : readPosition());
-    if (!track || before === null || before === page || reduced || Math.abs(page - before) > 1) return;
+    if (fl.scroll || !track || before === null || before === page || reduced || Math.abs(page - before) > 1) return;
     const dx = (page - before) * fl.segWidth;
     track.style.transition = "none";
     track.style.transform = `translate3d(${dx.toFixed(1)}px,0,0)`;
@@ -564,9 +588,12 @@ export function TabStrip({
   const followSegments = useMemo(() => {
     if (!follow || !(size.width > 0)) return [];
     const out: number[] = [];
-    for (let s = Math.max(0, page - 1); s <= page + FOLLOW_SEGMENTS; s++) if (s <= lastSegment) out.push(s);
+    // Scrolling: the bar behind, the one being played, and as many ahead as
+    // the window can show.
+    const ahead = fl.scroll ? Math.ceil(fl.windowWidth / Math.max(1, fl.segWidth)) + 1 : FOLLOW_SEGMENTS;
+    for (let s = Math.max(0, page - 1); s <= page + ahead; s++) if (s <= lastSegment) out.push(s);
     return out;
-  }, [follow, size.width, page, lastSegment]);
+  }, [follow, size.width, page, lastSegment, fl]);
 
   const markTick = marker === null || marker === undefined || marker < 0 ? null : marker % model.passTicks;
   const markOnset = useMemo(() => {
@@ -581,7 +608,60 @@ export function TabStrip({
   } as React.CSSProperties;
 
   let body: React.ReactNode = null;
-  if (size.width > 0 && follow) {
+  if (size.width > 0 && follow && fl.scroll) {
+    // The phone: the bars move under a column that stands still. "now · bar
+    // 2" stays at the window's left edge; every bar ahead is named at its own
+    // bar line, so a header and the counts under it always agree.
+    const geo = fl.geo;
+    const labelPx = Math.max(11, geo.fretPx * 0.5);
+    const nowSpot = segmentPlace(model, page, fl.segTicks);
+    const fitsLeft = (text: string) => text.length * labelPx * 0.56 <= fl.cursorX + 8;
+    const nowWords = [t("session.tabstrip.now", { where: t("session.tabstrip.bar", { n: nowSpot.bar }) }), t("session.tabstrip.bar", { n: nowSpot.bar })];
+    const nowLabel = nowWords.find(fitsLeft) ?? String(nowSpot.bar);
+    const endX = Number.isFinite(lastSegment) ? (lastSegment + 1) * fl.segWidth : null;
+    body = (
+      <div className="tabstrip-staff" style={{ height: geo.height }}>
+        <Letters geo={geo} lines={fl.windowWidth} />
+        <div className="tabstrip-window" data-scroll="" style={{ left: geo.letters, width: fl.windowWidth, height: geo.height }}>
+          <i
+            className="tabstrip-cursor"
+            ref={colRef}
+            style={{
+              top: geo.top - geo.fretPx,
+              height: geo.bottom - geo.top + geo.fretPx * 2,
+              width: columnWidth(model, fl.ppt, geo.fretPx),
+            }}
+          />
+          <div className="tabstrip-track" ref={trackRef} data-testid="tabstrip-strip">
+            {followSegments.map((s) => {
+              const rel = s === page ? "now" : s === page + 1 ? "next" : s < page ? "past" : "later";
+              return (
+                <Segment
+                  key={`${s}:${fl.segTicks}:${fl.fretPx}:${geo.gap}`}
+                  model={model}
+                  segment={s}
+                  segTicks={fl.segTicks}
+                  width={fl.segWidth}
+                  ppt={fl.ppt}
+                  geo={geo}
+                  notes={segmentNotes(model, s, fl.segTicks, takeBars)}
+                  rel={rel}
+                  label={s > page ? t("session.tabstrip.bar", { n: segmentPlace(model, s, fl.segTicks).bar }) : ""}
+                  left={s * fl.segWidth}
+                />
+              );
+            })}
+            {endX !== null && (
+              <i className="tabstrip-endline" style={{ left: endX, right: "auto", top: geo.top, height: geo.bottom - geo.top }} />
+            )}
+          </div>
+          <span className="tabstrip-nowlabel" style={{ top: geo.labelY, fontSize: labelPx }}>
+            {nowLabel}
+          </span>
+        </div>
+      </div>
+    );
+  } else if (size.width > 0 && follow) {
     const geo = fl.geo;
     const nextEndsBar = ((page + FOLLOW_SEGMENTS) * fl.segTicks) % model.barTicks === 0;
     body = (
@@ -691,6 +771,7 @@ export function TabStrip({
       data-moving={playing && follow ? "" : undefined}
       data-reduced={reduced ? "" : undefined}
       data-split={follow ? fl.split : ov.split}
+      data-scroll={scroll ? "" : undefined}
       role="img"
       aria-label={label}
       style={{ ...style, minHeight: follow && size.width > 0 ? fl.geo.height : undefined }}

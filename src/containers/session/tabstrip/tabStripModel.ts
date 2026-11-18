@@ -305,9 +305,9 @@ export type StaffGeometry = {
   inset: number;
 };
 
-export function staffGeometry(fretPx: number): StaffGeometry {
+export function staffGeometry(fretPx: number, lineGap?: number): StaffGeometry {
   const f = fretPx;
-  const gap = Math.round(f * 1.35);
+  const gap = lineGap && lineGap > 0 ? Math.round(lineGap) : Math.round(f * 1.35);
   const labelY = Math.round(Math.max(12, f * 0.47) + 4);
   const top = Math.round(labelY + f * 0.9 + 10);
   const bottom = top + 5 * gap;
@@ -489,6 +489,62 @@ export function overviewLayout(
     };
   }
   return pick;
+}
+
+/**
+ * The phone's follow view (acceptance 2, N-P1-2): a narrow panel cannot hold
+ * "now" and "next" as two pages, because a bar of eighths split into beats
+ * left four notes on screen, and at the end of a page the column stood at the
+ * right edge with nothing ahead of it. Below this width the staff SCROLLS
+ * instead: the column stands still about a quarter of the way in, the bars
+ * move under it, and everything to its right is what is coming.
+ */
+export const SCROLL_BELOW = 600;
+/** Where the column stands in a scrolling view, as a share of the window. */
+export const SCROLL_AT = 0.25;
+
+export type ScrollLayout = {
+  fretPx: number;
+  geo: StaffGeometry;
+  /** A bar is one segment; each is `segWidth` wide, with no inset, so x is linear in ticks. */
+  segTicks: number;
+  segWidth: number;
+  ppt: number;
+  /** The window the bars move in, and the column's x in it. */
+  windowWidth: number;
+  cursorX: number;
+};
+
+/**
+ * The scrolling layout: numbers as large as the width allows, neighbours at
+ * least 1.45 numbers apart, as wide as reads comfortably (2.6 numbers) unless
+ * that would push the rest of the bar out of sight; and the lines spread to
+ * the panel's height, up to 1.9 numbers, so a tall phone panel is a
+ * staff rather than a staff and an empty box.
+ */
+export function scrollLayout(
+  model: Pick<PatternModel, "barTicks" | "minGap" | "beatTicks">,
+  viewWidth: number,
+  viewHeight: number,
+): ScrollLayout {
+  // Not the two-page view's size: nothing here has to fit two bars across,
+  // so the numbers stay a size a phone on a stand reads (22 px at 390).
+  const fretPx = Math.round(Math.min(28, Math.max(20, viewWidth * 0.075)));
+  const base = staffGeometry(fretPx);
+  // The height without the five gaps, and what the gaps may then take.
+  const rest = base.height - 5 * base.gap;
+  const room = viewHeight > 0 ? (viewHeight - 24 - rest) / 5 : base.gap;
+  const lineGap = Math.max(base.gap, Math.min(Math.round(fretPx * 1.9), Math.floor(room)));
+  const geo = { ...staffGeometry(fretPx, lineGap), inset: 0 };
+  const windowWidth = Math.max(1, viewWidth - geo.letters);
+  const cursorX = Math.round(windowWidth * SCROLL_AT);
+  const gapTicks = gapTicksOf(model);
+  const least = (fretPx * 1.45) / gapTicks;
+  const comfortable = (fretPx * 2.6) / gapTicks;
+  // A whole bar ahead of the column, when the notes allow it.
+  const wholeBar = (windowWidth - cursorX) / model.barTicks;
+  const ppt = Math.max(least, Math.min(comfortable, wholeBar));
+  return { fretPx, geo, segTicks: model.barTicks, segWidth: model.barTicks * ppt, ppt, windowWidth, cursorX };
 }
 
 /** Which segment a tick falls in (the count-in is -1). */

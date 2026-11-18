@@ -4089,3 +4089,10 @@
   padding: 10px 0 8px;
   border-top: 1px solid var(--l-line);
 }
+
+/* The phone's scrolling tab (acceptance 2, N-P1-2): the staff spreads its
+   lines to the panel, and what height is left is shared above and below. */
+.session-page .practice-tab:not([data-compact]) .tabstrip[data-scroll] .tabstrip-fill {
+  justify-content: center;
+  padding-top: 0;
+}
