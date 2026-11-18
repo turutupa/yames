@@ -24,11 +24,16 @@ const RAD = 4.2;
 export const fretX = (n: number) => L * (1 - Math.pow(2, -n / 12));
 // Markers sit just behind the fret wire, where the finger goes, which leaves the inlay clear.
 export const NOTE_R = 0.05;
-// An open string's marker sits just left of the nut, on the stub of board before it (HEAD), so even
-// NOW's larger disc clears the nut and stays on the board (acceptance P1-3).
-export const noteX = (f: number) => (f <= 0 ? -0.1 : fretX(f) - NOTE_R - 0.021);
-/** Where the board starts: a short stub before the nut, for the open strings' markers. */
-export const HEAD = -0.2;
+/**
+ * An open string is a small "0" token just left of the nut, the way tab apps
+ * draw it (acceptance 2, P1-3): two thirds of a fretted marker, close enough
+ * to the nut that it reads as "this string, no fret" rather than as a note
+ * drawn on the headstock. Even NOW's larger token clears the nut.
+ */
+export const OPEN_K = 0.66;
+export const noteX = (f: number) => (f <= 0 ? -(NOTE_R * 1.45 * OPEN_K + 0.016) : fretX(f) - NOTE_R - 0.021);
+/** Where the board starts: a short stub before the nut, just room for the open strings' tokens. */
+export const HEAD = -0.13;
 const INLAY_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const DOUBLE = (f: number) => f === 12 || f === 24;
 // The taper, nut to the 24th fret. A real neck goes about 43 mm to 56 mm (0.77);
@@ -406,12 +411,13 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
   /** Paint a note for its kind and text in the current palette. `force` repaints after a theme change. */
   function styleNote(n: Note, kind: NeckKind, text: string, force = false) {
     if (force || n.kind !== kind) {
+      const open = n.disc.position.x < 0;
       n.kind = kind;
       const look = noteLook(kind, P);
       n.disc.material.map = T.noteDisc(look);
       n.disc.material.needsUpdate = true;
       n.halo.material.color.set(look.fill);
-      const sc = NOTE_SCALE[kind] ?? 1;
+      const sc = (NOTE_SCALE[kind] ?? 1) * (open ? OPEN_K : 1);
       n.disc.scale.setScalar(sc);
       n.label.scale.setScalar(0.118 * sc);
       n.text = "\u0000";

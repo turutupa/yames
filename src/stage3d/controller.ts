@@ -271,7 +271,21 @@ export class StageController {
     const dot = this.snap.slot?.querySelector<SVGElement>(
       `[data-testid="fret-dot"][data-string="${6 - string}"][data-fret="${Math.round(fret)}"]`,
     );
-    if (!dot) return null;
+    if (!dot) {
+      // No dot there: the place from the drawing's geometry (FallbackNeck's
+      // `data-geom`), strings counted on past the edges.
+      const svg = this.snap.slot?.querySelector<SVGSVGElement>("svg[data-geom]");
+      if (!svg) return null;
+      try {
+        const g = JSON.parse(svg.dataset.geom ?? "") as { a: number; top: number; sp: number; r: number; xs: number[] };
+        const x = g.xs[Math.round(fret) - g.a];
+        if (x === undefined) return null;
+        const box = svg.getBoundingClientRect();
+        return { x: box.left + x, y: box.top + g.top + (string - 1) * g.sp, r: g.r };
+      } catch {
+        return null;
+      }
+    }
     const b = dot.getBoundingClientRect();
     if (b.width === 0 && b.height === 0) return null;
     return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: b.width / 2 };

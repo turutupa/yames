@@ -189,34 +189,58 @@ export function NeckInstruction({
           // distance above the note, which in every theme put "next" on the
           // neighbouring string.
           const place = m.onsets[index + 1]?.places[0];
-          const gapAt = (up: boolean): number | null => {
-            if (!place) return null;
-            const ys = [-2, -1, 1, 2]
-              .map((d) => ({ d, pt: neck.project(place.string + d, place.fret) }))
-              .filter((o): o is { d: number; pt: { x: number; y: number; r: number } } => !!o.pt)
-              .map((o) => ({ d: o.d, y: o.pt.y - box.top }));
-            const side = ys.filter((o) => (up ? o.y < next.y : o.y > next.y)).sort((a, b) => Math.abs(a.d) - Math.abs(b.d));
-            const near = side[0];
-            if (!near) return null;
-            const far = side[1];
-            const spacing = Math.abs(near.y - next.y);
-            gap = far ? Math.abs(far.y - near.y) : spacing;
-            return far ? (near.y + far.y) / 2 : near.y + (up ? -spacing / 2 : spacing / 2);
-          };
-          let gap = 0;
-          // Two lines ("then 7, 6" over "next") fit a wide gap; a narrow one
-          // takes them side by side on one line.
+          // Where each string runs at NEXT's fret, from two above it to two
+          // below (a string past the edge is the board's edge).
+          const yAt = new Map<number, number>([[0, next.y]]);
+          if (place) {
+            for (const d of [-2, -1, 1, 2]) {
+              const sIdx = place.string + d;
+              if (sIdx < 0 || sIdx > 7) continue;
+              const pt = neck.project(sIdx, place.fret);
+              if (pt) yAt.set(d, pt.y - box.top);
+            }
+          }
+          // The tag in both shapes: "next" over "then 8, 7", and on one line.
           nt.removeAttribute("data-row");
-          gapAt(true);
-          if (gap > 0 && nt.offsetHeight > gap - 6) nt.setAttribute("data-row", "");
-          const tagH = nt.offsetHeight || 36;
-          const above = gapAt(true);
-          const useAbove = above !== null && above - tagH / 2 >= 4;
-          const centre = useAbove ? above : gapAt(false);
-          if (centre !== null) {
+          const colH = nt.offsetHeight || 36;
+          nt.setAttribute("data-row", "");
+          const rowH = nt.offsetHeight || 20;
+          nt.removeAttribute("data-row");
+          const H = box.height;
+          // A gap between two strings, centred on, with no inlay under the
+          // words (acceptance 2: "next then 8, 7" lay on the 7th fret's dot):
+          // the single dots are between the 3rd and 4th strings, the double
+          // ones (12, 24) between the 2nd and 3rd and the 4th and 5th. The tag
+          // spans the cell behind NEXT's fret wire and the one after it.
+          const f = place?.fret ?? 0;
+          const marked = (x: number) => [3, 5, 7, 9, 12, 15, 17, 19, 21, 24].includes(x);
+          const dbl = (x: number) => x === 12 || x === 24;
+          const onInlay = (a: number) =>
+            (a === 3 && (marked(f) || marked(f + 1))) || ((a === 2 || a === 4) && (dbl(f) || dbl(f + 1)));
+          type Spot = { centre: number; row: boolean; up: boolean };
+          let pick: Spot | null = null;
+          if (place) {
+            // Nearest first, above before below; then a string further out.
+            for (const lo of [-1, 0, -2, 1]) {
+              const y1 = yAt.get(lo);
+              const y2 = yAt.get(lo + 1);
+              if (y1 === undefined || y2 === undefined) continue;
+              if (onInlay(place.string + lo)) continue;
+              const gap = Math.abs(y2 - y1);
+              const centre = (y1 + y2) / 2;
+              const row = !(colH <= gap - 6);
+              const h = row ? rowH : colH;
+              if (row && rowH > gap - 2) continue;
+              if (centre - h / 2 < 2 || centre + h / 2 > H - 2) continue;
+              pick = { centre, row, up: centre < next.y };
+              break;
+            }
+          }
+          nt.toggleAttribute("data-row", !!pick?.row);
+          if (pick) {
             nt.setAttribute("data-gap", "");
-            nt.toggleAttribute("data-below", !useAbove);
-            nt.style.top = `${centre}px`;
+            nt.toggleAttribute("data-below", !pick.up);
+            nt.style.top = `${pick.centre}px`;
           } else {
             const fallback = next.y - Math.max(18, next.r * 1.9);
             const below = fallback < 34;
@@ -224,6 +248,11 @@ export function NeckInstruction({
             nt.toggleAttribute("data-below", below);
             nt.style.top = `${below ? next.y + Math.max(18, next.r * 1.9) : fallback}px`;
           }
+          // Inside the picture: an open string's NEXT is at the nut, at its very edge.
+          nt.style.left = `${next.x}px`;
+          const r = nt.getBoundingClientRect();
+          const shift = r.left < box.left + 4 ? box.left + 4 - r.left : r.right > box.right - 4 ? box.right - 4 - r.right : 0;
+          if (shift) nt.style.left = `${next.x + shift}px`;
         }
       }
     },
