@@ -180,7 +180,7 @@
       "minutesLeft": "Faltam {{minutes}} min",
       "played": "Tocado: {{time}}",
       "timeUp": "Acabou o tempo",
-      "pathStep": "{{path}}, etapa {{step}}",
+      "pathStep": "{{path}}, etapa {{step}}",
       "bpm": "BPM",
       "playTake": "Começar tomada, {{bpm}} BPM",
       "endTake": "Encerrar tomada",
@@ -253,7 +253,8 @@
       "offerBody": "Sobe a partir de {{bpm}} BPM enquanto você bater a meta, e guarda seu andamento limpo. Acrescenta {{minutes}} minutos.",
       "start": "Achar meu limite",
       "recap": "Limite",
-      "rungLabel": "{{bpm}} BPM: {{met}} batidas, {{missed}} perdidas"
+      "rungLabel": "{{bpm}} BPM: {{met}} batidas, {{missed}} perdidas",
+      "fairAsk": "As notas desta subida pareceram justas?"
     },
     "coach": {
       "passed": "Todas as notas entraram, regulares por {{bars}} compassos seguidos a {{bpm}} BPM.",

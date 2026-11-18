@@ -179,7 +179,7 @@
       "minutesLeft": "Noch {{minutes}} Min.",
       "played": "{{time}} gespielt",
       "timeUp": "Die Zeit ist um",
-      "pathStep": "{{path}}, Schritt {{step}}",
+      "pathStep": "{{path}}, Schritt {{step}}",
       "bpm": "BPM",
       "playTake": "Take starten, {{bpm}} BPM",
       "endTake": "Take beenden",
@@ -251,7 +251,8 @@
       "offerBody": "Steigt ab {{bpm}} BPM, solange du die Messlatte erreichst, und behält dein sauberes Tempo. Dauert {{minutes}} Minuten länger.",
       "start": "Mein Limit finden",
       "recap": "Limit",
-      "rungLabel": "{{bpm}} BPM: {{met}} geschafft, {{missed}} verfehlt"
+      "rungLabel": "{{bpm}} BPM: {{met}} geschafft, {{missed}} verfehlt",
+      "fairAsk": "Fühlten sich die Bewertungen dieses Anstiegs fair an?"
     },
     "coach": {
       "passed": "Jeder Ton saß, gleichmäßig über {{bars}} Takte am Stück bei {{bpm}} BPM.",

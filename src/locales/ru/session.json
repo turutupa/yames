@@ -181,7 +181,7 @@
       "minutesLeft": "Осталось {{minutes}} мин",
       "played": "Сыграно: {{time}}",
       "timeUp": "Время вышло",
-      "pathStep": "{{path}}, шаг {{step}}",
+      "pathStep": "{{path}}, шаг {{step}}",
       "bpm": "BPM",
       "playTake": "Начать дубль, {{bpm}} BPM",
       "endTake": "Закончить дубль",
@@ -255,7 +255,8 @@
       "offerBody": "Поднимается от {{bpm}} BPM, пока вы берёте планку, и сохраняет ваш чистый темп. Добавляет {{minutes}} мин.",
       "start": "Найти свой предел",
       "recap": "Предел",
-      "rungLabel": "{{bpm}} BPM: взято {{met}}, не взято {{missed}}"
+      "rungLabel": "{{bpm}} BPM: взято {{met}}, не взято {{missed}}",
+      "fairAsk": "Оценки за этот подъём были честными?"
     },
     "coach": {
       "passed": "Все ноты на месте, ровно {{bars}} тактов подряд на {{bpm}} BPM.",

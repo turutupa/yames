@@ -579,8 +579,12 @@ function BarByBar({ session, outcome }: { session: SessionRun; outcome: TakeOutc
 export function recapFairOutcome(
   outcomes: readonly TakeOutcome[],
   takes: readonly PathTakeRow[],
+  /** Find my edge steps: their climb asked once, as it ended (acceptance pass 3 P2-7). */
+  edgeSteps: ReadonlySet<string> = new Set(),
 ): TakeOutcome | null {
-  const graded = outcomes.filter((o) => o.takeId && o.grade.verdict !== "notCaught" && o.grade.verdict !== "ungraded");
+  const graded = outcomes.filter(
+    (o) => o.takeId && !edgeSteps.has(o.stepId) && o.grade.verdict !== "notCaught" && o.grade.verdict !== "ungraded",
+  );
   const last = graded[graded.length - 1];
   if (!last) return null;
   const answered = (id: string | undefined) => {
@@ -593,10 +597,18 @@ export function recapFairOutcome(
   return graded.some((o) => answered(o.takeId)) ? null : last;
 }
 
+/** How near the bar a result must be for the fairness question: points, or notes on a count. */
+export const FAIR_BAND = 3;
+
 /**
- * Close enough to the bar either way that the player's own view is worth
- * asking (UX audit SES-5, acceptance P1-9): within 5 points of the bar, or one
- * note on a count. Exported for its test.
+ * A verdict the player could plausibly dispute, so their view is worth asking
+ * (UX audit SES-5, acceptance P1-9, acceptance pass 3 P2-7): the deciding
+ * number within 3 points of its bar (one note on a count), and then only
+ * where the verdict could have gone the other way. A miss just under the bar
+ * always qualifies. A pass just over it qualifies only when the Take did not
+ * hold the bar in every bar it played: 87% against 85% with all ten bars held
+ * is a clear pass, and asking about it reads as doubt in the grader.
+ * Exported for its test.
  */
 export function borderline(outcome: TakeOutcome): boolean {
   const check = decidingCheck(outcome.grade);
@@ -604,7 +616,17 @@ export function borderline(outcome: TakeOutcome): boolean {
   const value = displayValue(check);
   const bar = displayBar(check);
   if (value === null || bar === null) return false;
-  return Math.abs(value - bar) <= (check.metric === "extraNotes" ? 1 : 5);
+  const count = check.metric === "extraNotes";
+  // Positive: on the passing side of the bar; negative: short of it.
+  const margin = count ? bar - value : value - bar;
+  const band = count ? 1 : FAIR_BAND;
+  if (Math.abs(margin) > band) return false;
+  if (outcome.grade.verdict === "belowBar") return true;
+  if (outcome.grade.verdict !== "passed") return false;
+  const pass = outcome.measures?.pass;
+  const played = outcome.measures?.barsPlayed ?? 0;
+  const heldThroughout = !!pass && played > 0 && pass.heldBars >= played;
+  return !heldThroughout;
 }
 
 function CleanTempoLine({ outcome }: { outcome: TakeOutcome }) {
@@ -748,6 +770,7 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   const slot = useExerciseSlot(session, passed ? "tone" : "aim", true, true);
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
+  const edgeDone = onEdge && edgeOf(run, exercise).done;
   const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);
   return (
     <div className="session-body" data-testid={passed ? "session-result" : "session-between"} data-verdict={outcome.grade.verdict}>
@@ -786,8 +809,13 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
             )}
           </div>
           {/* Asked where the answer is worth having: a result near its bar
-              either way. The recap asks about the rest (UX audit SES-5). */}
-          {borderline(outcome) && <FairTap session={session} outcome={outcome} />}
+              that could have gone the other way. The recap asks about the
+              rest (UX audit SES-5). Find my edge never asks Take by Take: a
+              climb is meant to end on a miss, so it asks once, about the
+              climb, when the edge is found (acceptance pass 3 P2-7). */}
+          {onEdge
+            ? edgeDone && <FairTap session={session} outcome={outcome} askKey="session.edge.fairAsk" />
+            : borderline(outcome) && <FairTap session={session} outcome={outcome} />}
           {passed && !onEdge && (
             <button
               className="session-choice session-glass"
@@ -1281,7 +1309,13 @@ function RecapScreen({ session }: { session: SessionRun }) {
   // Decided once, as the recap opens: an answer given on a result earlier in
   // the Session means no question here, and an answer given here keeps its
   // thanks on screen rather than taking the question away.
-  const [lastGraded] = useState(() => recapFairOutcome(run.outcomes, session.progress.takes));
+  const [lastGraded] = useState(() =>
+    recapFairOutcome(
+      run.outcomes,
+      session.progress.takes,
+      new Set((run.plan?.steps ?? []).filter((s) => isEdgeStep(s)).map((s) => s.id)),
+    ),
+  );
   const tomorrow = planSession({
     minutes: session.minutes,
     now: Date.now(),

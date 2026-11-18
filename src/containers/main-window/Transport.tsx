@@ -465,11 +465,18 @@ export function Transport({
           </div>
         ) : (
           <>
-            <div className="transport-note">
-              <CoachIcon />
-              <span>
-                {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
-              </span>
+            {/* The sentence shows whole or not at all: its slot takes the
+                bar's free width, and a sentence wider than that drops to a
+                second line the slot does not show, rather than running off
+                the window's edge (acceptance pass 3 P2-4: Metronome and Songs
+                at 1024 with the sidebar open, in any language). */}
+            <div className="transport-note-slot">
+              <div className="transport-note">
+                <CoachIcon />
+                <span>
+                  {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
+                </span>
+              </div>
             </div>
             <div className="transport-input transport-input-narrow">
               <MicIcon />

@@ -83,6 +83,12 @@ export type TabStripProps = {
   marker?: number | null;
   /** Preview only: the numbers' largest size (a compact overview under the neck). */
   maxFretPx?: number;
+  /**
+   * Preview only: where every row does not fit the panel, ask for the height
+   * they need rather than scrolling inside it. A phone's page scrolls, and a
+   * panel of 200 px showed "bar 2" over no staff (acceptance pass 3 P2-6).
+   */
+  growToFit?: boolean;
   className?: string;
 };
 
@@ -360,6 +366,7 @@ export function TabStrip({
   mode,
   marker = null,
   maxFretPx,
+  growToFit = false,
   className,
 }: TabStripProps) {
   const { t } = useTranslation();
@@ -779,7 +786,19 @@ export function TabStrip({
       data-scroll={scroll ? "" : undefined}
       role="img"
       aria-label={label}
-      style={{ ...style, minHeight: follow && size.width > 0 ? fl.geo.height : undefined }}
+      style={{
+        ...style,
+        minHeight:
+          size.width > 0
+            ? follow
+              ? fl.geo.height
+              : growToFit
+                ? // Whether or not it fits as it is: a height that comes and
+                  // goes with the fit would grow and shrink the panel in turn.
+                  ov.rows * ov.geo.height
+                : undefined
+            : undefined,
+      }}
     >
       <div className="tabstrip-view" ref={viewRef} aria-hidden="true">
         <div className="tabstrip-fill">{body}</div>

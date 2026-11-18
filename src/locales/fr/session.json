@@ -180,7 +180,7 @@
       "minutesLeft": "Encore {{minutes}} min",
       "played": "Joué : {{time}}",
       "timeUp": "C'est l'heure",
-      "pathStep": "{{path}}, étape {{step}}",
+      "pathStep": "{{path}}, étape {{step}}",
       "bpm": "BPM",
       "playTake": "Lancer la prise, {{bpm}} BPM",
       "endTake": "Terminer la prise",
@@ -253,7 +253,8 @@
       "offerBody": "Monte depuis {{bpm}} BPM tant que tu atteins le seuil, et garde ton tempo propre. Ajoute {{minutes}} minutes.",
       "start": "Trouver ma limite",
       "recap": "Limite",
-      "rungLabel": "{{bpm}} BPM : {{met}} réussies, {{missed}} manquées"
+      "rungLabel": "{{bpm}} BPM : {{met}} réussies, {{missed}} manquées",
+      "fairAsk": "Les notes de cette montée te semblent-elles justes ?"
     },
     "coach": {
       "passed": "Toutes les notes sont là, régulières sur {{bars}} mesures d'affilée à {{bpm}} BPM.",

@@ -17,6 +17,7 @@ import type { BeatPosition } from "../../../songs/position";
 import type { TakePlan } from "../../../session/take";
 import type { TimingMark } from "../../songs/review/marks";
 import { TabStrip } from "../tabstrip/TabStrip";
+import { IS_MOBILE } from "../../../platform";
 import { resultsFromLights, tabStripInputOfTake } from "../tabstrip/tabStripModel";
 
 /**
@@ -96,6 +97,7 @@ export function PracticeTab({
           mode={follow ? "follow" : "preview"}
           marker={paused && beat && !beat.songCountIn ? position : null}
           maxFretPx={compact ? 18 : undefined}
+          growToFit={IS_MOBILE && !running && !compact}
         />
       </div>
       {fretStrip && (

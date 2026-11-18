@@ -179,7 +179,7 @@
       "minutesLeft": "Còn {{minutes}} phút",
       "played": "Đã chơi {{time}}",
       "timeUp": "Hết giờ",
-      "pathStep": "{{path}}, bước {{step}}",
+      "pathStep": "{{path}}, bước {{step}}",
       "bpm": "BPM",
       "playTake": "Bắt đầu lượt, {{bpm}} BPM",
       "endTake": "Kết thúc lượt",
@@ -251,7 +251,8 @@
       "offerBody": "Tăng dần từ {{bpm}} BPM khi bạn còn đạt mức, và giữ tempo sạch của bạn. Thêm {{minutes}} phút.",
       "start": "Tìm giới hạn",
       "recap": "Giới hạn",
-      "rungLabel": "{{bpm}} BPM: đạt {{met}}, trượt {{missed}}"
+      "rungLabel": "{{bpm}} BPM: đạt {{met}}, trượt {{missed}}",
+      "fairAsk": "Điểm của lượt leo này có công bằng không?"
     },
     "coach": {
       "passed": "Nốt nào cũng vào, đều suốt {{bars}} ô nhịp liền ở {{bpm}} BPM.",

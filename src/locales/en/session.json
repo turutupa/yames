@@ -179,7 +179,7 @@
       "minutesLeft": "{{minutes}} min left",
       "played": "{{time}} played",
       "timeUp": "Time's up",
-      "pathStep": "{{path}}, step {{step}}",
+      "pathStep": "{{path}}, step {{step}}",
       "bpm": "BPM",
       "playTake": "Start take, {{bpm}} BPM",
       "endTake": "End take",
@@ -251,7 +251,8 @@
       "offerBody": "Goes up from {{bpm}} BPM while you meet the bar, and keeps your clean tempo. Adds {{minutes}} minutes.",
       "start": "Find my edge",
       "recap": "Edge",
-      "rungLabel": "{{bpm}} BPM: {{met}} met, {{missed}} missed"
+      "rungLabel": "{{bpm}} BPM: {{met}} met, {{missed}} missed",
+      "fairAsk": "Did the climb's grades feel fair?"
     },
     "coach": {
       "passed": "Every note landed, even across {{bars}} bars in a row at {{bpm}} BPM.",

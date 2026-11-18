@@ -180,7 +180,7 @@
       "minutesLeft": "Mancano {{minutes}} min",
       "played": "Suonato: {{time}}",
       "timeUp": "Tempo scaduto",
-      "pathStep": "{{path}}, tappa {{step}}",
+      "pathStep": "{{path}}, tappa {{step}}",
       "bpm": "BPM",
       "playTake": "Avvia la take, {{bpm}} BPM",
       "endTake": "Chiudi la take",
@@ -253,7 +253,8 @@
       "offerBody": "Sale da {{bpm}} BPM finché superi l'asticella, e salva il tuo tempo pulito. Aggiunge {{minutes}} minuti.",
       "start": "Trova il mio limite",
       "recap": "Limite",
-      "rungLabel": "{{bpm}} BPM: {{met}} riuscite, {{missed}} mancate"
+      "rungLabel": "{{bpm}} BPM: {{met}} riuscite, {{missed}} mancate",
+      "fairAsk": "Ti sono sembrati giusti i voti di questa salita?"
     },
     "coach": {
       "passed": "Tutte le note al loro posto, regolari per {{bars}} battute di fila a {{bpm}} BPM.",

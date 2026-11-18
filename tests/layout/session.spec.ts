@@ -165,3 +165,32 @@ test("a drummer's Today says the Paths are for guitar, and still starts", async 
   expect(n!.y, "the note sits above the Start button").toBeLessThan(start!.y);
   await expect(page.locator('[data-testid="today-start"]')).toBeEnabled();
 });
+
+/*
+ * Acceptance pass 3 P2-7: "Was this grade fair?" only where the verdict could
+ * have gone the other way. Not on a clear pass (87% against 85, every bar
+ * held), not on a Take in the middle of a Find my edge climb, and once, about
+ * the climb, when the edge is found.
+ */
+test.describe("the fairness question", () => {
+  test("is not asked on a clear pass", async ({ page }) => {
+    await openShot(page, "session-result", { width: 1400, height: 900 });
+    await expect(page.locator('[data-testid="session-result"]')).toBeVisible();
+    await expect(page.locator('[data-testid="session-fair"]')).toHaveCount(0);
+  });
+
+  test("is not asked on a Take of a Find my edge climb", async ({ page }) => {
+    test.slow();
+    await openShot(page, "session-edge", { width: 1400, height: 900 });
+    await expect(page.locator('[data-testid="session-edge"]')).toBeVisible();
+    await expect(page.locator('[data-testid="session-fair"]')).toHaveCount(0);
+  });
+
+  test("is asked once, about the climb, when the edge is found", async ({ page }) => {
+    test.slow();
+    await openShot(page, "session-edge-result", { width: 1400, height: 900 });
+    await expect(page.locator('[data-testid="session-edge"][data-done]')).toBeVisible();
+    await expect(page.locator('[data-testid="session-fair"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid="session-fair"]')).toContainText("climb");
+  });
+});

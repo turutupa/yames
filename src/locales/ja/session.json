@@ -179,7 +179,7 @@
       "minutesLeft": "残り {{minutes}} 分",
       "played": "{{time}} 演奏",
       "timeUp": "時間です",
-      "pathStep": "{{path}}、ステップ {{step}}",
+      "pathStep": "{{path}}、ステップ {{step}}",
       "bpm": "BPM",
       "playTake": "テイク開始、{{bpm}} BPM",
       "endTake": "テイク終了",
@@ -251,7 +251,8 @@
       "offerBody": "{{bpm}} BPM から合格ラインに届くかぎり上げていきます。クリーンテンポは保持されます。{{minutes}} 分追加。",
       "start": "限界に挑戦",
       "recap": "限界",
-      "rungLabel": "{{bpm}} BPM：達成 {{met}}、未達 {{missed}}"
+      "rungLabel": "{{bpm}} BPM：達成 {{met}}、未達 {{missed}}",
+      "fairAsk": "このクライムの採点は妥当でしたか？"
     },
     "coach": {
       "passed": "全部の音が鳴っていて、{{bpm}} BPM で {{bars}} 小節続けて均等です。",

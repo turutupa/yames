@@ -179,7 +179,7 @@
       "minutesLeft": "還剩 {{minutes}} 分鐘",
       "played": "已彈 {{time}}",
       "timeUp": "時間到",
-      "pathStep": "{{path}}，第 {{step}} 步",
+      "pathStep": "{{path}}，第 {{step}} 步",
       "bpm": "BPM",
       "playTake": "開始這一遍，{{bpm}} BPM",
       "endTake": "結束這一遍",
@@ -251,7 +251,8 @@
       "offerBody": "從 {{bpm}} BPM 開始，只要過及格線就往上升，並保留你的乾淨速度。增加 {{minutes}} 分鐘。",
       "start": "挑戰極限",
       "recap": "極限",
-      "rungLabel": "{{bpm}} BPM：達標 {{met}}，未達標 {{missed}}"
+      "rungLabel": "{{bpm}} BPM：達標 {{met}}，未達標 {{missed}}",
+      "fairAsk": "這次爬升的評分公平嗎？"
     },
     "coach": {
       "passed": "每個音都到位了，{{bpm}} BPM 下連續 {{bars}} 小節都很均勻。",

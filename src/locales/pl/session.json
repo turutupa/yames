@@ -181,7 +181,7 @@
       "minutesLeft": "Zostało {{minutes}} min",
       "played": "Zagrano: {{time}}",
       "timeUp": "Czas minął",
-      "pathStep": "{{path}}, krok {{step}}",
+      "pathStep": "{{path}}, krok {{step}}",
       "bpm": "BPM",
       "playTake": "Zacznij podejście, {{bpm}} BPM",
       "endTake": "Zakończ podejście",
@@ -255,7 +255,8 @@
       "offerBody": "Idzie w górę od {{bpm}} BPM, dopóki przeskakujesz poprzeczkę, i zapisuje twoje czyste tempo. Dodaje {{minutes}} min.",
       "start": "Znajdź mój limit",
       "recap": "Limit",
-      "rungLabel": "{{bpm}} BPM: zaliczone {{met}}, niezaliczone {{missed}}"
+      "rungLabel": "{{bpm}} BPM: zaliczone {{met}}, niezaliczone {{missed}}",
+      "fairAsk": "Czy oceny tej wspinaczki były uczciwe?"
     },
     "coach": {
       "passed": "Każda nuta na miejscu, równo przez {{bars}} taktów z rzędu przy {{bpm}} BPM.",

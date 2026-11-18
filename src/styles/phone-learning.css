@@ -268,3 +268,12 @@ body:has(.main-window.is-mobile .session-body:is([data-testid="session-result"],
 .main-window.is-mobile .session-page .session-exit {
   flex: none;
 }
+
+/* The Tab view's ready screen on a phone (acceptance pass 3 P2-6): the panel
+   takes the overview's own height (TabStrip's growToFit), every bar with its
+   staff, rather than 200 px with "bar 2" peeking over nothing. The page
+   scrolls; the panel does not. While a Take runs it is held to the window. */
+.main-window.is-mobile .session-page .practice-tab:not([data-compact]):not([data-running]) {
+  flex: none;
+  max-height: none;
+}

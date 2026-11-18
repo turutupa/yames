@@ -179,7 +179,7 @@
       "minutesLeft": "{{minutes}}분 남음",
       "played": "{{time}} 연주",
       "timeUp": "시간 끝",
-      "pathStep": "{{path}}, {{step}}단계",
+      "pathStep": "{{path}}, {{step}}단계",
       "bpm": "BPM",
       "playTake": "테이크 시작, {{bpm}} BPM",
       "endTake": "테이크 끝내기",
@@ -251,7 +251,8 @@
       "offerBody": "{{bpm}} BPM부터 통과 기준을 넘는 동안 올라가며, 클린 템포는 유지됩니다. {{minutes}}분이 추가됩니다.",
       "start": "한계 찾기",
       "recap": "한계",
-      "rungLabel": "{{bpm}} BPM: 달성 {{met}}, 미달 {{missed}}"
+      "rungLabel": "{{bpm}} BPM: 달성 {{met}}, 미달 {{missed}}",
+      "fairAsk": "이번 클라임의 채점이 공정했나요?"
     },
     "coach": {
       "passed": "모든 음이 제자리에, {{bpm}} BPM에서 {{bars}}마디 연속으로 고르게.",

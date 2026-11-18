@@ -179,7 +179,7 @@
       "minutesLeft": "{{minutes}} dk kaldı",
       "played": "{{time}} çalındı",
       "timeUp": "Süre doldu",
-      "pathStep": "{{path}}, adım {{step}}",
+      "pathStep": "{{path}}, adım {{step}}",
       "bpm": "BPM",
       "playTake": "Denemeyi başlat, {{bpm}} BPM",
       "endTake": "Denemeyi bitir",
@@ -251,7 +251,8 @@
       "offerBody": "Çıtayı geçtikçe {{bpm}} BPM'den yükselir ve temiz temponu korur. {{minutes}} dakika ekler.",
       "start": "Sınırımı bul",
       "recap": "Sınır",
-      "rungLabel": "{{bpm}} BPM: {{met}} geçti, {{missed}} kaldı"
+      "rungLabel": "{{bpm}} BPM: {{met}} geçti, {{missed}} kaldı",
+      "fairAsk": "Bu tırmanıştaki puanlar adil miydi?"
     },
     "coach": {
       "passed": "Her nota yerinde, {{bpm}} BPM'de art arda {{bars}} ölçü boyunca düzgün.",
