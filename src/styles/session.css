@@ -470,10 +470,10 @@
   font-size: 22px;
   border-radius: 12px;
 }
-.session-page .session-big:active:not(:disabled) {
+.session-page .session-big:active:not(:disabled, [aria-disabled="true"]) {
   transform: translateY(1px) scale(0.995);
 }
-.session-page .session-big:disabled {
+.session-page .session-big:is(:disabled, [aria-disabled="true"]) {
   background: var(--l-btn);
   color: var(--l-faint);
   box-shadow: 0 0 0 1px var(--l-line2) inset;
@@ -2784,7 +2784,7 @@
       0 -2px 0 color-mix(in srgb, var(--l-amber-deep) 45%, transparent) inset,
       0 2px 8px color-mix(in srgb, var(--l-shade) 50%, transparent);
   }
-  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:disabled {
+  .session-body:not([data-phase="playing"]) > .session-actions > .session-go > .session-big:is(:disabled, [aria-disabled="true"]) {
     background: var(--l-btn);
     box-shadow: 0 0 0 1px var(--l-line2) inset;
   }

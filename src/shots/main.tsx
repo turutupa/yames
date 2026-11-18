@@ -268,7 +268,7 @@ async function drive() {
         // and becomes a disabled Start until the next Take's song is loaded.
         const phase = () =>
           document.querySelector<HTMLElement>('[data-testid="session-take"]')?.dataset.phase;
-        const ready = () => phase() === "ready" && !!big() && !big()!.disabled;
+        const ready = () => phase() === "ready" && !!big() && !big()!.disabled && big()!.getAttribute("aria-disabled") !== "true";
         const verdict = () => !!byId("session-edge");
         const done = () => !!document.querySelector('[data-testid="session-edge"][data-done]');
         // One Take at a time: start it, let it end itself, read the verdict, and
@@ -328,7 +328,7 @@ async function drive() {
         // and becomes a disabled Start until the next Take's song is loaded.
         const phase = () =>
           document.querySelector<HTMLElement>('[data-testid="session-take"]')?.dataset.phase;
-        const ready = () => phase() === "ready" && !!big() && !big()!.disabled;
+        const ready = () => phase() === "ready" && !!big() && !big()!.disabled && big()!.getAttribute("aria-disabled") !== "true";
         await until("the Take to be ready", ready, 20000);
         if (stop !== "ready") {
           big()?.click();

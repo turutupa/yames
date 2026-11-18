@@ -200,7 +200,7 @@ export class Driver {
   async clickTestId(id, timeoutMs = 5000) {
     const ok = await this.waitFor(
       `const el = document.querySelector('[data-testid="${id}"]');
-       if (!el || el.disabled) return false;
+       if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return false;
        el.click();
        return true;`,
       timeoutMs,

@@ -358,11 +358,14 @@ function TakeScreen({
             desktop (`display: contents`). */}
         <div className="session-go" data-testid="session-go">
           {!running && <TempoNudges run={run} exercise={exercise} session={session} />}
+          {/* `aria-disabled`, not `disabled`, while the next Take loads: ↓ or
+              ↑ reloads it, and a disabled button drops the keyboard's focus
+              to the page (acceptance pass 2, P2-9). */}
           <button
             className="session-big"
             data-size="mid"
-            onClick={actions.go}
-            disabled={!running && !canStart}
+            onClick={!running && !canStart ? undefined : actions.go}
+            aria-disabled={!running && !canStart ? true : undefined}
             data-testid="session-big"
           >
             {bigLabel(big, t)}

@@ -318,7 +318,7 @@ async function playTake(d, exercise, style, label, { band = false, again = false
   } catch (e) {
     const why = await d.exec(`const b = document.querySelector('[data-testid="session-big"]');
       return { phase: document.querySelector('[data-testid="session-take"]')?.dataset.phase ?? null, big: b?.innerText,
-        disabled: b?.disabled, noInput: !!document.querySelector('[data-testid="session-no-input"]'),
+        disabled: b?.disabled || b?.getAttribute('aria-disabled') === 'true', noInput: !!document.querySelector('[data-testid="session-no-input"]'),
         alert: document.querySelector('[role="alert"]')?.innerText ?? null }`).catch(() => null);
     await shot(d, `no-start-${label}`);
     throw new Error(`${e.message}; the Take screen: ${JSON.stringify(why)}`);
