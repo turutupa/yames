@@ -53,7 +53,7 @@ const SESSION_ROWS: Array<{ key: string; actions: HotkeyAction[]; label: string 
 
 /**
  * Getting around, on one quiet line (2026-11-18): the learning screens on
- * ⌘1–⌘4 and the tools on ⌥1–⌥5, read from the same bindings as the rows above.
+ * ⌘1–⌘4 and the tools on ⌘5–⌘9, read from the same bindings as the rows above.
  */
 const NAV_GROUPS: Array<{ key: string; actions: HotkeyAction[] }> = [
   { key: "learning", actions: ["tab-today", "tab-paths", "tab-progress", "tab-tools"] },

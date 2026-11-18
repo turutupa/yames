@@ -1509,7 +1509,7 @@ export function MainWindow() {
 
   // Escape in a tool, with nothing in it left to put away, goes back to Tools
   // (UX audit TOOL-3). What counts as "left to put away" is the hook's.
-  // Back where the tool was opened from: Alt+1-5 from Today opens a tool
+  // Back where the tool was opened from: Ctrl+5-9 from Today opens a tool
   // straight from Today, and Escape there landed on Tools, a page the player
   // never saw (acceptance pass 2, P2-8). From Tools itself, or from another
   // tool, it is Tools as before.

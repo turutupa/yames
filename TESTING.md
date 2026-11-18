@@ -111,7 +111,7 @@ change the input in **Settings > Devices**.
 8. **The tools still work:** **Tools** in the rail opens Metronome, Setlist,
    Drill, Jam and Songs. Play with each for a minute.
 9. **Keys:** **Ctrl+1** Today, **Ctrl+2** Paths, **Ctrl+3** Progress,
-   **Ctrl+4** Tools; the tools are **Alt+1** to **Alt+5** (⌥ on a Mac)
+   **Ctrl+4** Tools; the tools are **Ctrl+5** to **Ctrl+9** (⌘ on a Mac), in the order of the sidebar
    (Metronome, Setlist, Drill, Jam, Songs), and **Ctrl+,** is Settings. On a
    Mac it is ⌘ instead of Ctrl. If you had changed any of these keys, yours
    are kept. **Escape** goes back: out of a Session to where you started it,

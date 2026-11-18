@@ -185,8 +185,11 @@ export type SessionRunInput = {
     /** `active` as of the calls made, not the last render (`useSession`). */
     isActive?: () => boolean;
     cardOpen: boolean;
-    /** `listen: false`: a Session played without grading, which never asks for the input. */
-    startSession: (options?: { listen?: boolean }) => Promise<void>;
+    /**
+     * `quiet`: a Session's coach session is for the history, not the coach's feed.
+     * `listen: false`: a Session played without grading, which never asks for the input.
+     */
+    startSession: (options?: { quiet?: boolean; listen?: boolean }) => Promise<void>;
     endSession: () => Promise<void>;
     toggleCard: () => void;
   };
@@ -1130,8 +1133,10 @@ export function useSessionRun(input: SessionRunInput) {
       setView("session");
       if (!theirs) {
         ownsCoach.current = true;
-        // Grading off: a coach session for the history, and no microphone.
-        void coach.startSession({ listen: ungraded === null }).catch(() => {});
+        // Quiet: the Session listens and saves through the coach, but the
+        // player never pressed the coach's Start, so its feed is left alone.
+        // Grading off: no microphone either.
+        void coach.startSession({ quiet: true, listen: ungraded === null }).catch(() => {});
       }
     },
     [progress, setView],

@@ -259,11 +259,10 @@ export function FeedMessageItem({
           ) : (
             message.content && <div className="coach-end-report-comment">{message.content}</div>
           )}
-          {message.report ? (
-            <EndReportSummary report={message.report} />
-          ) : (
-            !message.pending && <span className="coach-mini-report-text">{message.content}</span>
-          )}
+          {/* The comment above is the card's only text. Without a report this
+              used to print it a second time underneath, so "Session ended —
+              no data recorded." read as a title and a body saying the same. */}
+          {message.report && <EndReportSummary report={message.report} />}
           {message.segments && message.segments.length > 0 && (
             <SegmentTimeline segments={message.segments} sessionStart={message.segments[0].startTime ?? message.timestamp} />
           )}

@@ -77,7 +77,7 @@ interface RailProps {
 /**
  * Which action each rail entry's key is.
  *
- * Today, Paths, Progress and Tools are ⌘1–⌘4 and the tools ⌥1–⌥5, in rail
+ * Today, Paths, Progress and Tools are ⌘1–⌘4 and the tools ⌘5–⌘9, in rail
  * order (owner, 2026-11-17; they were ⌘0, ⌘6–⌘8 and ⌘1–⌘5). The keycaps read
  * the player's bindings, so a key they remapped shows as theirs.
  */
