@@ -211,9 +211,12 @@ async function drive() {
         button(i18n.t("onboarding.next"))!.click();
         await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
         const at = (id: string) => () => !!document.querySelector(`[data-step="${id}"]`);
+        // The input step has no footer Skip, only its own "Skip, I'll set this up later".
+        const skip = () =>
+          (button(i18n.t("onboarding.skip")) ?? document.querySelector<HTMLButtonElement>('[data-testid="audio-input-skip"]'))?.click();
         if (stop === "soundLook" || stop === "handsFree") {
           const id = stop === "soundLook" ? "sound-look" : "hands-free";
-          await pressUntil(`Skip to ${id}`, () => button(i18n.t("onboarding.skip"))?.click(), at(id), 20000);
+          await pressUntil(`Skip to ${id}`, skip, at(id), 20000);
         } else if (stop === "input" || stop === "ready") {
           await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
         } else {
@@ -222,7 +225,7 @@ async function drive() {
         if (stop === "ready") {
           button(i18n.t("onboarding.next"))!.click();
           const start = () => button(i18n.t("onboarding.ready.start"));
-          await pressUntil("Skip to the summary", () => button(i18n.t("onboarding.skip"))?.click(), () => !!start(), 20000);
+          await pressUntil("Skip to the summary", skip, () => !!start(), 20000);
         }
       }
     }
