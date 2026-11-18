@@ -120,6 +120,9 @@ export function JamSaveBar({
           className={`jam-sheet-btn jam-door${chordsOpen ? " active" : ""}`}
           data-sheet="chords"
           aria-pressed={chordsOpen}
+          // The jam-sheets hint points here, at the doors it is about, rather
+          // than floating over the transport's elapsed time.
+          data-hint="jam-sheets"
           onClick={onChords}
         >
           <ChordGlyph />

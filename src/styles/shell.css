@@ -1156,6 +1156,11 @@ button.jam-vibe-chip {
 .jam-save-area .jam-sheet-btn.jam-door {
   display: inline-flex;
   align-items: center;
+  /* "Set up" and "Cheat sheet" are one word each to the eye: never broken
+     over two lines in a 32 px chip (Obsidian's wider face did it). The
+     jam's name gives way first; it already ellipsises. */
+  flex-shrink: 0;
+  white-space: nowrap;
   gap: 7px;
   height: 32px;
   margin: 0;
@@ -1187,6 +1192,27 @@ button.jam-vibe-chip {
 .jam-door-glyph {
   flex-shrink: 0;
   opacity: 0.85;
+}
+
+/* Under 1300 px the bar's left half is ~400 px: the doors keep their words on
+   one line and the jam keeps its name by giving up what repeats elsewhere,
+   the doors' glyphs and the "Jam" badge (the rail says which tool this is). */
+@media (max-width: 1299px) {
+  .jam-save-area .jam-door-glyph,
+  .jam-save-area .jam-badge {
+    display: none;
+  }
+  .jam-save-area .preset-active-name {
+    min-width: 3.5em;
+  }
+}
+/* Narrower, with the rail still full width beside it, the vibe goes too: it
+   is one click away behind Set up, which is where it is changed. */
+@media (max-width: 1199px) {
+  .jam-save-area .jam-vibe-chip,
+  .jam-save-area .jam-vibe-chip + .jam-bar-divider {
+    display: none;
+  }
 }
 
 .preset-text-btn--feedback,

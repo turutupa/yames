@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useDrag } from "../../hooks/useDrag";
 import {
@@ -1792,6 +1793,10 @@ export function MainWindow() {
   // Two of the three hints point at the floating widget and the hotkeys
   // screen, neither of which a phone has; the third is written for a
   // desktop layout (plan §6 Q2).
+  // The jam's hints go in the jam page's own slot, in the flow, so they never
+  // cover a control or a readout (the elapsed time, for one). Found after the
+  // page mounts; until then, and anywhere else, a hint is anchored as before.
+  const [jamHintSlot, setJamHintSlot] = useState<HTMLElement | null>(null);
   const appHint = IS_MOBILE ? null : useAppHints({
     view,
     bpm: state.bpm,
@@ -1824,6 +1829,27 @@ export function MainWindow() {
       }, 400);
     },
   });
+  const appHintId = appHint?.id ?? null;
+  useLayoutEffect(() => {
+    // Looked for when the hint arrives, not only on the view: the jam page
+    // mounts its slot once a jam has loaded, which is also what the hints wait for.
+    if (view !== "jam" || !appHintId) {
+      setJamHintSlot(null);
+      return;
+    }
+    const find = () => document.querySelector<HTMLElement>(".jam-hint-slot");
+    const found = find();
+    setJamHintSlot(found);
+    if (found) return;
+    const watch = new MutationObserver(() => {
+      const el = find();
+      if (!el) return;
+      watch.disconnect();
+      setJamHintSlot(el);
+    });
+    watch.observe(document.body, { childList: true, subtree: true });
+    return () => watch.disconnect();
+  }, [view, appHintId]);
 
   // Resize window based on current view
   const sliderPercent = ((state.bpm - 20) / (300 - 20)) * 100;
@@ -1967,12 +1993,25 @@ export function MainWindow() {
           anchored overlay — two cards pointing at the same UI is noise) and
           of Zen (which renders its own `zen-first` card inside the overlay). */}
       {!IS_MOBILE && appHint && !onboarding.isOpen && !tour?.isOpen && !isFullscreen && !holdNudges && (
-        <HintCard
-          id={appHint.id}
-          onAction={appHint.onAction}
-          onDismiss={appHint.markShown}
-          animate={!reducedMotion}
-        />
+        jamHintSlot && appHint.id.startsWith("jam-") ? (
+          createPortal(
+            <HintCard
+              id={appHint.id}
+              inline
+              onAction={appHint.onAction}
+              onDismiss={appHint.markShown}
+              animate={!reducedMotion}
+            />,
+            jamHintSlot,
+          )
+        ) : (
+          <HintCard
+            id={appHint.id}
+            onAction={appHint.onAction}
+            onDismiss={appHint.markShown}
+            animate={!reducedMotion}
+          />
+        )
       )}
 
       {!IS_MOBILE && tour?.offerVisible && view !== "settings" && !holdNudges && (

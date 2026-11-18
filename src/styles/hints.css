@@ -147,3 +147,26 @@
     animation: none;
   }
 }
+
+/* The jam's hints, in the page's flow under its doors (MainWindow portals
+   them into `.jam-hint-slot`): one row, the sentence and "Got it" side by
+   side, quiet enough to sit among the jam's own panels. */
+.jam-hint-slot:empty {
+  display: none;
+}
+.jam-hint-slot .hint-card-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 10px 12px 10px 14px;
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
+}
+.jam-hint-slot .hint-card-inline .hint-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.jam-hint-slot .hint-card-inline .hint-card-actions {
+  flex: none;
+}
