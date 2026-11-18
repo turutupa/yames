@@ -225,6 +225,7 @@
       "barChipCount": "合格ライン：{{bar}} 以下",
       "barMissed": "合格ライン未達",
       "decidedPass": "いちばん際どかったところ",
+      "lastTime": "前回",
       "decidedMiss": "足りなかったところ",
       "notesNotChecked": "正しい音：今回は確認できず",
       "barsTitle": "小節ごと",

@@ -225,6 +225,7 @@
       "barChipCount": "及格线：不超过 {{bar}}",
       "barMissed": "未过及格线",
       "decidedPass": "最接近及格线的一项",
+      "lastTime": "上次",
       "decidedMiss": "卡在这里",
       "notesNotChecked": "音准：这次没有检查",
       "barsTitle": "逐小节",

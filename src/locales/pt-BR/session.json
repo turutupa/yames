@@ -226,6 +226,7 @@
       "barChipCount": "Meta: {{bar}} ou menos",
       "barMissed": "Meta não batida",
       "decidedPass": "O mais perto da meta",
+      "lastTime": "da última vez",
       "decidedMiss": "O que segurou",
       "notesNotChecked": "Notas certas: não conferidas desta vez",
       "barsTitle": "Compasso a compasso",

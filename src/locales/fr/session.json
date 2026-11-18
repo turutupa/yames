@@ -226,6 +226,7 @@
       "barChipCount": "Seuil : {{bar}} au plus",
       "barMissed": "Seuil non atteint",
       "decidedPass": "Le plus juste",
+      "lastTime": "la dernière fois",
       "decidedMiss": "Ce qui a coincé",
       "notesNotChecked": "Bonnes notes : pas vérifiées cette fois",
       "barsTitle": "Mesure par mesure",

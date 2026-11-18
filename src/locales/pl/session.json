@@ -227,6 +227,7 @@
       "barChipCount": "Poprzeczka: najwyżej {{bar}}",
       "barMissed": "Poprzeczka nie przeskoczona",
       "decidedPass": "Najbliżej poprzeczki",
+      "lastTime": "ostatnio",
       "decidedMiss": "Co zatrzymało",
       "notesNotChecked": "Właściwe nuty: tym razem niesprawdzone",
       "barsTitle": "Takt po takcie",

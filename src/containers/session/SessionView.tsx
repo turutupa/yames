@@ -62,9 +62,9 @@ function playedNotes(session: SessionRun) {
 }
 
 /** The neck framed on the Exercise's own frets, its notes in one colour. */
-function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
+function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false, clip = false) {
   const { view, notes } = exerciseNeck(playedNotes(session), kind, isTheoryTake(session));
-  return useNeckSlot(view, notes, { sweep });
+  return useNeckSlot(clip && view.kind === "zoom" ? { ...view, clip: true } : view, notes, { sweep });
 }
 
 /** What an Exercise step plays, in the pack's words: its purpose. */
@@ -395,10 +395,19 @@ function DecidingNumber({ outcome }: { outcome: TakeOutcome }) {
         {t(met ? "session.result.decidedPass" : "session.result.decidedMiss")}
       </div>
       <div className="session-moved">
-        {moved && <span className="session-moved-before">{before} →</span>}
-        <span className="session-moved-value" data-met={met ? "" : undefined}>
-          {value}
-          {percent ? "%" : ""}
+        {/* The two numbers never part: "78 →" alone on a line above the
+            result read as a heading (acceptance P1-2). */}
+        <span className="session-moved-pair">
+          {moved && (
+            <span className="session-moved-before" data-testid="session-moved-before">
+              <small>{t("session.result.lastTime")}</small>
+              {before} →
+            </span>
+          )}
+          <span className="session-moved-value" data-met={met ? "" : undefined}>
+            {value}
+            {percent ? "%" : ""}
+          </span>
         </span>
         <span className="session-h2 session-fade" style={rise(3)}>{t(`session.metric.${metric}`)}</span>
         {bar !== null && (
@@ -644,7 +653,8 @@ function ResultScreen({ session, pedalMapped }: { session: SessionRun; pedalMapp
   const passed = outcome?.grade.verdict === "passed";
   // The warm sweep on every result; the notes green when the bar was met.
   // A phone hides the neck here (phone-learning.css, PHONE-4).
-  const slot = useExerciseSlot(session, passed ? "tone" : "aim", true);
+  // Clipped to its own column: never behind the result's words (acceptance P1-2).
+  const slot = useExerciseSlot(session, passed ? "tone" : "aim", true, true);
   if (!outcome) return null;
   const onEdge = isEdgeStep(currentStep(run));
   const line = takeLine(outcome.grade, outcome.measures, outcome.bpm);

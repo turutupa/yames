@@ -225,6 +225,7 @@
       "barChipCount": "Lat: hoogstens {{bar}}",
       "barMissed": "Lat niet gehaald",
       "decidedPass": "Het dichtst bij de lat",
+      "lastTime": "vorige keer",
       "decidedMiss": "Waar het op stukliep",
       "notesNotChecked": "Juiste noten: deze keer niet gecontroleerd",
       "barsTitle": "Maat voor maat",

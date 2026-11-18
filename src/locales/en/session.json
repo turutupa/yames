@@ -225,6 +225,7 @@
       "barChipCount": "Bar: {{bar}} or fewer",
       "barMissed": "Bar not met",
       "decidedPass": "Closest to the bar",
+      "lastTime": "last time",
       "decidedMiss": "What held it back",
       "notesNotChecked": "Right notes: not checked this time",
       "barsTitle": "Bar by bar",

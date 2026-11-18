@@ -227,6 +227,7 @@
       "barChipCount": "Планка: не больше {{bar}}",
       "barMissed": "Планка не взята",
       "decidedPass": "Ближе всего к планке",
+      "lastTime": "в прошлый раз",
       "decidedMiss": "Что помешало",
       "notesNotChecked": "Верные ноты: в этот раз не проверялись",
       "barsTitle": "По тактам",

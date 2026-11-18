@@ -1499,6 +1499,38 @@
   color: var(--l-quiet);
   font-variant-numeric: lining-nums tabular-nums;
 }
+/* The two numbers on one line, whatever the width (acceptance P1-2). */
+.session-moved-pair {
+  display: inline-flex;
+  align-items: baseline;
+  gap: inherit;
+  white-space: nowrap;
+  min-width: 0;
+}
+/* "last time" over the old number, so "78 →" is not a bare number. */
+.session-moved-before {
+  position: relative;
+}
+.session-moved-before small {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 4px;
+  font: 600 12px/1 var(--l-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--l-quiet);
+}
+@media (max-width: 480px) {
+  .session-page .session-moved-before {
+    font-size: clamp(36px, 12vw, 52px);
+  }
+  .session-page .session-moved-value,
+  .session-page .session-between .session-moved-value {
+    font-size: clamp(64px, 24vw, 104px);
+  }
+}
 .session-moved-value {
   font: 700 clamp(100px, 20vh, 190px) / 0.84 var(--l-display);
   font-variant-numeric: lining-nums tabular-nums;

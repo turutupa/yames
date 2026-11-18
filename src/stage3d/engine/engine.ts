@@ -350,6 +350,15 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       if (rig.step(dt)) busy = true;
       if (guitar.update(dt)) busy = true;
       applyRig();
+      // A clipped view draws inside its slot only (acceptance P1-2). The canvas
+      // still clears whole, so nothing is left behind outside it.
+      const clip = current && current.view.kind === "zoom" && current.view.clip ? current.rect : null;
+      if (clip) {
+        renderer.setScissorTest(false);
+        renderer.clear();
+        renderer.setScissor(clip.left, H - clip.top - clip.height, clip.width, clip.height);
+        renderer.setScissorTest(true);
+      } else renderer.setScissorTest(false);
       renderer.autoClear = true;
       renderer.render(scene, camera);
       renderer.autoClear = false;
