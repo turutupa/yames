@@ -104,11 +104,12 @@
   --l-panel-on: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
   --l-met-fill: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
   --l-miss-fill: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
-  /* A note's words on the neck ("finger 2", "next · then 7, 8"): on an opaque
-     pill of the page, so the accent reads as it does on the page itself. */
+  /* A note's words on the neck ("finger 2", "next · then 7, 8"). The mock's
+     layout draws them bare with a halo (further down); the pill is for the
+     layouts that keep one. */
   --l-tag-ink: var(--l-ink);
   --l-tag-pill: var(--l-bg);
-  --l-tag-edge: var(--l-line);
+  --l-tag-edge: transparent;
   --l-tag-shadow: transparent;
   --l-then-opacity: 1;
   --l-status: var(--l-quiet);
@@ -189,7 +190,6 @@
   --l-miss-fill: rgba(100, 28, 38, 0.9);
   --l-tag-ink: #ffd9a0;
   --l-tag-pill: rgba(14, 9, 6, 0.78);
-  --l-tag-edge: transparent;
   --l-tag-shadow: rgba(0, 0, 0, 0.85);
   --l-then-opacity: 0.85;
   --l-held-ink: #ffb454;
