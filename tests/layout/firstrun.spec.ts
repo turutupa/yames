@@ -14,6 +14,7 @@ import { openShot, noSidewaysScroll, insideViewport } from "./fits";
 const SCENES: Record<string, string> = {
   "firstrun-welcome": ".onboarding-welcome-actions .onboarding-btn-primary",
   "firstrun-instrument": ".onboarding-footer .onboarding-btn-primary",
+  "firstrun-start": ".onboarding-footer .onboarding-btn-primary",
   "firstrun-sound-look": ".onboarding-footer .onboarding-btn-primary",
   "firstrun-hands-free": ".onboarding-footer .onboarding-btn-primary",
   "firstrun-input": ".onboarding-footer .onboarding-btn-primary",

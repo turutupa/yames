@@ -16,6 +16,7 @@ import type { MidiActivity, MidiBinding, MidiDeviceInfo } from "../../../types";
 import { mockInvoke, mockListen, setInvokeResponse } from "../../../test/mocks";
 import { OnboardingWizard } from "../OnboardingWizard";
 import type { OnboardingState } from "../onboardingMachine";
+import { keyRange } from "./HandsFreeStep";
 
 const HANDS_FREE: OnboardingState = {
   status: "step",
@@ -113,10 +114,17 @@ describe("W3 — the Session leads", () => {
       ...keysFor("play"),
       ...keysFor("session-go"),
     ]);
-    expect(within(card).getByText("or")).toBeInTheDocument();
-    expect(keysOn(card, "Faster, between Takes")).toEqual(keysFor("session-faster"));
-    expect(keysOn(card, "Slower, between Takes")).toEqual(keysFor("session-slower"));
+    expect(within(card).getAllByText("or").length).toBeGreaterThan(0);
+    expect(keysOn(card, "Faster or slower, between Takes")).toEqual([
+      ...keysFor("session-faster"),
+      ...keysFor("session-slower"),
+    ]);
     expect(keysOn(card, "Next step")).toEqual(keysFor("session-next"));
+    // Pause, again, the view and the way out (2026-11-18).
+    expect(keysOn(card, "Pause / resume")).toEqual(keysFor("session-pause"));
+    expect(keysOn(card, "Restart the Take")).toEqual(keysFor("session-restart"));
+    expect(keysOn(card, "Switch view: Neck, Runway or Tab")).toEqual(keysFor("session-view"));
+    expect(keysOn(card, "Leave the Session")).toEqual(keysFor("session-exit"));
     expect(within(card).getByText("Every key is remappable in Settings → Hotkeys.")).toBeInTheDocument();
   });
 
@@ -151,17 +159,32 @@ describe("W3 — the Session leads", () => {
     ).toBeInTheDocument();
   });
 
-  it("keeps the tools' keys, folded away and without the tab keys", async () => {
+  it("puts the learning screens' and the tools' keys on one quiet line", async () => {
     await mount();
-    const tools = screen.getByTestId("hands-free-tools");
-    expect(tools.tagName).toBe("DETAILS");
-    expect(tools).not.toHaveAttribute("open");
-    for (const id of ["play", "bpm-up", "bpm-down", "toggle-coach"]) {
-      expect(keysOn(tools, i18n.t(`settings.hotkeys.actions.${id}`)), id).toEqual(keysFor(id));
-    }
-    for (const id of ["tab-1", "tab-2"]) {
-      expect(within(tools).queryByText(i18n.t(`settings.hotkeys.actions.${id}`))).toBeNull();
-    }
+    const nav = screen.getByTestId("hands-free-nav");
+    expect(nav.tagName).toBe("P");
+    const learning = nav.querySelector('[data-group="learning"]')!;
+    const tools = nav.querySelector('[data-group="tools"]')!;
+    expect(learning.textContent).toContain("Learning screens");
+    expect(tools.textContent).toContain("Tools");
+    // One keycap per run: Ctrl 1–4 and Alt 1–5, read from the binding table.
+    const today = keysFor("tab-today");
+    const tool1 = keysFor("tab-1");
+    expect(Array.from(learning.querySelectorAll("kbd")).map((k) => k.textContent)).toEqual([
+      ...today.slice(0, -1),
+      "1–4",
+    ]);
+    expect(Array.from(tools.querySelectorAll("kbd")).map((k) => k.textContent)).toEqual([
+      ...tool1.slice(0, -1),
+      "1–5",
+    ]);
+  });
+
+  it("lists the keys one by one once a remap breaks the run", () => {
+    expect(keyRange([["Ctrl", "1"], ["Ctrl", "2"], ["Ctrl", "3"]])).toEqual([["Ctrl", "1–3"]]);
+    expect(keyRange([["Ctrl", "1"], ["Alt", "2"]])).toEqual([["Ctrl", "1"], ["Alt", "2"]]);
+    expect(keyRange([["Ctrl", "1"], ["Ctrl", "5"]])).toEqual([["Ctrl", "1"], ["Ctrl", "5"]]);
+    expect(keyRange([["Ctrl", "1"], []])).toEqual([["Ctrl", "1"]]);
   });
 });
 
@@ -260,7 +283,6 @@ describe("W3 — the cards never navigate", () => {
     const controls = [
       ...within(midiCard()).getAllByRole("button"),
       ...within(screen.getByTestId("hands-free-keyboard")).queryAllByRole("button"),
-      ...within(screen.getByTestId("hands-free-tools")).queryAllByRole("button"),
       ...within(screen.getByTestId("hands-free-gamepad")).queryAllByRole("button"),
     ];
     expect(controls.length).toBeGreaterThan(0);

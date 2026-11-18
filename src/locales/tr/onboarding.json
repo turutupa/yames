@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Bir grup çalar, sen çalarsın, Yames gitarını duyar. Elindeki dakikalara sığan çalışma.",
+      "tagline": "Dinleyen bir gitar koçu. Bir Yol seç; her seans elindeki dakikalara sığsın.",
+      "taglineMobile": "Dinleyen gitar çalışması. Bir Yol seç; her seans elindeki dakikalara sığsın.",
       "setup": "Kur (yaklaşık iki dakika)",
       "skip": "Sadece klik yeter",
       "footer": "Ücretsiz · yerel · açık kaynak · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "Ses ve görünüm",
-      "subtitle": "Bir kartın üzerine gelerek klik sesini duy ya da temayı gör. Beğendiğini seç.",
-      "subtitleTouch": "Tıkı duymak ya da temayı denemek için bir karta dokun. Fikrini değiştirmek için başka birine dokun.",
+      "subtitle": "Bir kartın üzerine gelerek klik sesini duy ya da temayı gör. Tema Bugün'ü, Yolları ve sapı giydirir.",
+      "subtitleTouch": "Tıkı duymak ya da temayı denemek için bir karta dokun. Tema Bugün'ü, Yolları ve sapı giydirir.",
       "soundHeading": "Klik sesi",
       "themeHeading": "Tema",
       "moreThemes": "Ayarlar'da daha fazla tema"
@@ -49,20 +50,18 @@
       "session": {
         "title": "Seansta",
         "go": "Kaydı başlat ya da bitir: büyük düğme",
-        "faster": "Daha hızlı, kayıtlar arasında",
-        "slower": "Daha yavaş, kayıtlar arasında",
         "next": "Sonraki adım",
-        "or": "ya da"
+        "or": "ya da",
+        "tempo": "Daha hızlı ya da yavaş, kayıtlar arasında",
+        "view": "Görünümü değiştir: {{neck}}, {{runway}} ya da {{tab}}"
       },
       "pedal": {
         "title": "Tek pedal",
         "tools": "Seans dışında bir dokunuş araçları başlatır ve durdurur."
       },
-      "tools": {
-        "title": "Araçlarda"
-      },
       "nav": {
-        "title": "Gezinme"
+        "learning": "Öğrenme ekranları",
+        "tools": "Araçlar"
       }
     },
     "coach": {
@@ -84,7 +83,7 @@
         "desc": "Qwen3 8B · ~5 GB indirme · ~8 GB RAM. Daha zengin geri bildirim ve çalışma planları."
       },
       "studioNeedsRam": "Studio en az 16 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
-      "standardNeedsRam": "Standard beyin en az 8 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
+      "standardNeedsRam": "Standart model en az 8 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
       "unavailableInBuild": "Bu sürümde kullanılamaz.",
       "reasonNoLlm": "Bu sürüm model çalıştıramıyor; burada dürüst seçim zamanlama geri bildirimi.",
       "reasonLowMemory": "Bu bilgisayarda {{gb}} GB RAM var — bir modeli rahat çalıştırmaya yetmez.",
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "Hazırsın",
-      "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
+      "subtitle": "İlk seansın Bugün'de hazır. Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
       "notificationNote": "Çalmaya ilk kez bastığında telefonun Yames’in bildirim gösterip gösteremeyeceğini soracak — izin ver, ekran kapalıyken de tık çalmaya devam etsin.",
       "rows": {
+        "path": "Yol",
         "instrument": "Enstrüman",
         "sound": "Klik sesi",
         "theme": "Tema",
         "control": "Kontrol",
-        "coach": "Çalışma koçu",
         "input": "Ses girişi"
       },
       "controlKeyboard": "Klavye",
       "controlFootswitch": "Pedal",
       "coachTiming": "Yalnızca zamanlama geri bildirimi",
-      "coachOn": "Açık",
       "inputNone": "Ayarlanmadı",
       "alwaysOnTop": "Her zaman üstte",
       "start": "Bugün'e git",
-      "tour": "Bana etrafı gezdir (30 sn)"
+      "tour": "Bana etrafı gezdir (30 sn)",
+      "moreOnToday": "Bugün'de {{count}} tane daha"
     },
     "hints": {
       "dismiss": "Anlaşıldı",
@@ -272,6 +271,12 @@
       "back": "Geri",
       "close": "Kapat",
       "alwaysOnTopNote": "Yames diğer pencerelerin üstünde kalır. Bunu Ayarlar → Genel'den değiştirebilirsiniz."
+    },
+    "start": {
+      "title": "Nereden başlıyorsun?",
+      "subtitle": "Bir Yol ve seviyeni seç. Bugün ilk seansını buradan kurar; ikisini de Yol sayfasında değiştirebilirsin.",
+      "pathHeading": "Yol",
+      "loading": "Yollar yükleniyor…"
     }
   },
   "whatsNew": {

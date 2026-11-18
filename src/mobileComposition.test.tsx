@@ -285,6 +285,7 @@ describe("the onboarding wizard on a phone", () => {
     expect(ONBOARDING_STEPS.map((s) => s.id)).toEqual([
       "welcome",
       "instrument",
+      "start",
       "audio-input",
       "hear-it-work",
       "sound-look",

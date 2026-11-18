@@ -165,6 +165,11 @@ export type SessionRunInput = {
   /** The jam library, for a jam step. */
   jams: Jam[];
   lineup?: JamBand;
+  /**
+   * Load the player's Paths and progress even off the learning side: the
+   * first-run wizard asks where to start, and can be opened over a tool.
+   */
+  preload?: boolean;
 };
 
 /** The current step's Exercise and its Path, when it has one. */
@@ -359,10 +364,11 @@ export function useSessionRun(input: SessionRunInput) {
     });
   }, []);
 
-  const onLearningSide =
-    view === "today" || view === "paths" || view === "progress" || view === "session";
+  // The learning side is on screen, or the first-run wizard is asking about it.
+  const wantsLearning =
+    view === "today" || view === "paths" || view === "progress" || view === "session" || input.preload === true;
   useEffect(() => {
-    if (!onLearningSide) return;
+    if (!wantsLearning) return;
     setPlanClock(Date.now());
     if (loadedRef.current) return;
     loadedRef.current = true;
@@ -380,14 +386,14 @@ export function useSessionRun(input: SessionRunInput) {
     void storeLoad<number>(BAND_VOLUME_KEY).then((saved) => {
       setBandChoice(readBandVolume(saved));
     });
-  }, [onLearningSide, refresh]);
+  }, [wantsLearning, refresh]);
 
   // The packs, in the language on screen: loaded with the learning side, and
   // again when the language changes. Ids and notes are the same in every
   // language, so a plan or a Take in progress keeps its place.
   const packsLanguage = useRef<string | null>(null);
   useEffect(() => {
-    if (!onLearningSide || packsLanguage.current === packLanguage) return;
+    if (!wantsLearning || packsLanguage.current === packLanguage) return;
     packsLanguage.current = packLanguage;
     let current = true;
     let done = false;
@@ -400,7 +406,7 @@ export function useSessionRun(input: SessionRunInput) {
       // Interrupted before it arrived: the next run must load it again.
       if (!done && packsLanguage.current === packLanguage) packsLanguage.current = null;
     };
-  }, [onLearningSide, packLanguage]);
+  }, [wantsLearning, packLanguage]);
 
   const setMinutes = useCallback((next: PlanMinutes) => {
     setMinutesState(next);
@@ -1080,6 +1086,43 @@ export function useSessionRun(input: SessionRunInput) {
     [progress],
   );
 
+  /**
+   * Start a Path at a Level in one write (the first-run wizard's "Where do you
+   * start?"): `subscribe` and `chooseLevel` together, as the Path page does them
+   * one press at a time, so the two never race to the store with two rows.
+   * Refused at the cap, as `subscribe` is.
+   */
+  const startPath = useCallback(
+    (path: PathDoc, level: string | null): SubscribeRefusal => {
+      const count = progress.states.filter((s) => isSubscribed(progress, s.pathId)).length;
+      if (!isSubscribed(progress, path.id) && count >= SUBSCRIPTION_CAP) return "cap";
+      const now = Date.now();
+      const stored = progress.states.find((s) => s.pathId === path.id);
+      const offered = level ? levelsOf(path).find((l) => l.id === level) : undefined;
+      const entry = offered ? levelEntryStep(progress, path, offered) : null;
+      const currentStepId = entry?.id ?? stored?.currentStepId;
+      const row: PathStateRow = {
+        pathId: path.id,
+        ...(offered ? { level: offered.id } : stored?.level ? { level: stored.level } : {}),
+        ...(currentStepId ? { currentStepId } : {}),
+        startedAt: stored?.startedAt ?? now,
+        updatedAt: now,
+      };
+      const unsubscribed = (progress.unsubscribed ?? []).filter((id) => id !== path.id);
+      setProgress((p) => ({
+        ...p,
+        unsubscribed,
+        states: [...p.states.filter((s) => s.pathId !== path.id), row],
+      }));
+      void savePathState(row).catch(() => {});
+      if (unsubscribed.length !== (progress.unsubscribed ?? []).length) {
+        void storeSave(UNSUBSCRIBED_KEY, unsubscribed).catch(() => {});
+      }
+      return null;
+    },
+    [progress],
+  );
+
   /** Unsubscribe: Today stops planning it. Its row and every Take stay. */
   const unsubscribe = useCallback(
     (path: PathDoc) => {
@@ -1442,6 +1485,7 @@ export function useSessionRun(input: SessionRunInput) {
       escape,
       stayInSession,
       subscribe,
+      startPath,
       unsubscribe,
       testOut,
       answerFair,

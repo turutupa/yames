@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Eine Band spielt, du spielst, und Yames hört deine Gitarre. Üben, das in die Minuten passt, die du hast.",
+      "tagline": "Ein Gitarren-Coach, der zuhört. Wähle einen Pfad, und jede Session passt in die Minuten, die du hast.",
+      "taglineMobile": "Gitarre üben, das zuhört. Wähle einen Pfad, und jede Session passt in die Minuten, die du hast.",
       "setup": "Einrichten (etwa zwei Minuten)",
       "skip": "Nur den Klick, bitte",
       "footer": "Kostenlos · lokal · Open Source · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "Klang & Aussehen",
-      "subtitle": "Fahre über eine Karte, um den Klick zu hören oder das Design zu sehen. Wähle, was dir gefällt.",
-      "subtitleTouch": "Tippe auf eine Karte, um den Klick zu hören oder das Design zu sehen. Tippe auf eine andere, um es dir anders zu überlegen.",
+      "subtitle": "Fahre über eine Karte, um den Klick zu hören oder das Design zu sehen. Das Design kleidet Heute, die Pfade und das Griffbrett.",
+      "subtitleTouch": "Tippe auf eine Karte, um den Klick zu hören oder das Design zu testen. Das Design kleidet Heute, die Pfade und das Griffbrett.",
       "soundHeading": "Klick-Sound",
       "themeHeading": "Design",
       "moreThemes": "Mehr Designs in den Einstellungen"
@@ -49,20 +50,18 @@
       "session": {
         "title": "In einer Session",
         "go": "Take starten oder beenden, also der große Button",
-        "faster": "Schneller, zwischen Takes",
-        "slower": "Langsamer, zwischen Takes",
         "next": "Nächster Schritt",
-        "or": "oder"
+        "or": "oder",
+        "tempo": "Schneller oder langsamer, zwischen Takes",
+        "view": "Ansicht wechseln: {{neck}}, {{runway}} oder {{tab}}"
       },
       "pedal": {
         "title": "Ein Fußschalter",
         "tools": "Außerhalb einer Session startet und stoppt ein Tippen die Werkzeuge."
       },
-      "tools": {
-        "title": "In den Werkzeugen"
-      },
       "nav": {
-        "title": "Navigation"
+        "learning": "Lernseiten",
+        "tools": "Werkzeuge"
       }
     },
     "coach": {
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "Alles bereit",
-      "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",
+      "subtitle": "Deine erste Session wartet unter Heute. Ändere hier etwas – oder später in den Einstellungen.",
       "notificationNote": "Wenn du zum ersten Mal auf Start drückst, fragt dein Telefon, ob Yames eine Benachrichtigung anzeigen darf — sag ja, dann läuft der Klick auch bei ausgeschaltetem Bildschirm weiter.",
       "rows": {
+        "path": "Pfad",
         "instrument": "Instrument",
         "sound": "Klick-Sound",
         "theme": "Design",
         "control": "Steuerung",
-        "coach": "Übungscoach",
         "input": "Audioeingang"
       },
       "controlKeyboard": "Tastatur",
       "controlFootswitch": "Fußschalter",
       "coachTiming": "Nur Timing-Feedback",
-      "coachOn": "An",
       "inputNone": "Nicht eingerichtet",
       "alwaysOnTop": "Immer im Vordergrund",
       "start": "Weiter zu Heute",
-      "tour": "Kurze Tour (30 s)"
+      "tour": "Kurze Tour (30 s)",
+      "moreOnToday": "+{{count}} weitere unter Heute"
     },
     "hints": {
       "dismiss": "Verstanden",
@@ -272,6 +271,12 @@
       "back": "Zurück",
       "close": "Schließen",
       "alwaysOnTopNote": "Yames bleibt über anderen Fenstern. Ändern kannst du das unter Einstellungen → Allgemein."
+    },
+    "start": {
+      "title": "Wo fängst du an?",
+      "subtitle": "Wähle einen Pfad und dein Level. Heute baut daraus deine erste Session; beides änderst du auf der Seite des Pfads.",
+      "pathHeading": "Pfad",
+      "loading": "Pfade werden geladen…"
     }
   },
   "whatsNew": {

@@ -53,6 +53,17 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "session.result.barIsCount",
   "session.result.unmeasuredNotes",
   "session.result.againSame",
+  // The wizard catches up with the app (2026-11-18). W3's Session card shows
+  // pause, restart, view and Escape now, with faster and slower on one row;
+  // its two folded "Getting around" and "In the tools" cards are one quiet
+  // line. W7's coach row is "Coach model" (Settings' word) with the tier's
+  // name, not "Practice coach: On".
+  "onboarding.handsFree.session.faster",
+  "onboarding.handsFree.session.slower",
+  "onboarding.handsFree.nav.title",
+  "onboarding.handsFree.tools.title",
+  "onboarding.ready.rows.coach",
+  "onboarding.ready.coachOn",
 ];
 
 function englishKeys(): string[] {

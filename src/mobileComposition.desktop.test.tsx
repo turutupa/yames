@@ -85,10 +85,11 @@ describe("MetronomeView on desktop", () => {
 });
 
 describe("the onboarding wizard on desktop", () => {
-  it("is all eight steps", () => {
+  it("is all nine steps", () => {
     expect(ONBOARDING_STEPS.map((s) => s.id)).toEqual([
       "welcome",
       "instrument",
+      "start",
       "audio-input",
       "hear-it-work",
       "coach",

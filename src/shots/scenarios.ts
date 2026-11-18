@@ -350,6 +350,8 @@ export interface Shot {
       | "welcome"
       /** W1, before anything is picked: what a new player first sees. */
       | "instrument"
+      /** "Where do you start?", Shred at its first Level preselected. */
+      | "start"
       | "input"
       | "inputSilent"
       | "inputNone"
@@ -733,7 +735,7 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   // The first run (MVP). Not on the site: the layout suite opens them.
-  ...(["welcome", "instrument", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "ready"] as const).map(
+  ...(["welcome", "instrument", "start", "input", "inputSilent", "inputNone", "soundLook", "handsFree", "ready"] as const).map(
     (stop): Shot => ({
       id: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
       suffix: `firstrun-${stop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
@@ -1481,6 +1483,7 @@ export const SHOTS: Shot[] = [
 export const PHONE_LEARNING_SCENES = [
   "firstrun-welcome",
   "firstrun-instrument",
+  "firstrun-start",
   "firstrun-input",
   "firstrun-sound-look",
   "firstrun-ready",

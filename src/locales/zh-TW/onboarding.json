@@ -2,7 +2,8 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "樂團在演奏，你在彈，Yames 在聽你的吉他。練習剛好填滿你有的那幾分鐘。",
+      "tagline": "會傾聽的吉他教練。選一條路線，每天的課程都剛好裝進你有的那幾分鐘。",
+      "taglineMobile": "會傾聽的吉他練習。選一條路線，每天的課程都剛好裝進你有的那幾分鐘。",
       "setup": "幫我設定（約兩分鐘）",
       "skip": "只要節拍聲",
       "footer": "免費 · 本機 · 開源 · v{{version}}"
@@ -17,8 +18,8 @@
     },
     "soundLook": {
       "title": "音色與外觀",
-      "subtitle": "把滑鼠移到卡片上即可試聽節拍音、預覽主題。選一個你喜歡的。",
-      "subtitleTouch": "點按卡片試聽節拍聲或預覽主題。想換就點另一張。",
+      "subtitle": "把滑鼠移到卡片上即可試聽節拍音、預覽主題。主題決定「今天」、路線和指板的樣子。",
+      "subtitleTouch": "點按卡片試聽節拍聲或預覽主題。主題決定「今天」、路線和指板的樣子。",
       "soundHeading": "節拍音",
       "themeHeading": "主題",
       "moreThemes": "更多主題在設定中"
@@ -49,20 +50,18 @@
       "session": {
         "title": "練習課中",
         "go": "開始或結束這一遍：大按鈕",
-        "faster": "更快（兩遍之間）",
-        "slower": "更慢（兩遍之間）",
         "next": "下一步",
-        "or": "或"
+        "or": "或",
+        "tempo": "更快或更慢（兩遍之間）",
+        "view": "切換檢視：{{neck}}、{{runway}}或{{tab}}"
       },
       "pedal": {
         "title": "一個腳踏開關",
         "tools": "在練習課之外，踩一下即可播放或停止工具。"
       },
-      "tools": {
-        "title": "在工具中"
-      },
       "nav": {
-        "title": "切換頁面"
+        "learning": "學習頁面",
+        "tools": "工具"
       }
     },
     "coach": {
@@ -84,7 +83,7 @@
         "desc": "Qwen3 8B · 約 5 GB 下載 · 約 8 GB 記憶體。更細緻的講評與練習計畫。"
       },
       "studioNeedsRam": "Studio 至少需要 16 GB 記憶體，本機只有 {{gb}} GB。",
-      "standardNeedsRam": "標準大腦至少需要 8 GB 記憶體，本機只有 {{gb}} GB。",
+      "standardNeedsRam": "標準模型至少需要 8 GB 記憶體，本機只有 {{gb}} GB。",
       "unavailableInBuild": "此版本不提供。",
       "reasonNoLlm": "此版本無法執行模型，因此這裡如實建議僅拍點回饋。",
       "reasonLowMemory": "本機記憶體為 {{gb}} GB，不足以順暢執行模型。",
@@ -167,24 +166,24 @@
     },
     "ready": {
       "title": "準備就緒",
-      "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",
+      "subtitle": "你的第一節課已在「今天」準備好。可以在這裡修改，也可以稍後在設定中修改。",
       "notificationNote": "第一次按下播放時，手機會詢問 Yames 是否可以顯示通知——同意後，關掉螢幕節拍聲也會繼續。",
       "rows": {
+        "path": "路線",
         "instrument": "樂器",
         "sound": "節拍音",
         "theme": "主題",
         "control": "控制方式",
-        "coach": "練習教練",
         "input": "音訊輸入"
       },
       "controlKeyboard": "鍵盤",
       "controlFootswitch": "踏板開關",
       "coachTiming": "僅節奏回饋",
-      "coachOn": "已開啟",
       "inputNone": "未設定",
       "alwaysOnTop": "永遠在最上層",
       "start": "前往今天",
-      "tour": "帶我逛一圈（30 秒）"
+      "tour": "帶我逛一圈（30 秒）",
+      "moreOnToday": "「今天」裡還有 {{count}} 項"
     },
     "hints": {
       "dismiss": "知道了",
@@ -272,6 +271,12 @@
       "back": "上一步",
       "close": "關閉",
       "alwaysOnTopNote": "Yames 會一直浮在其他視窗之上。可在設定 → 一般中修改。"
+    },
+    "start": {
+      "title": "從哪裡開始？",
+      "subtitle": "選一條路線和你的級別。「今天」會據此排好你的第一節課；兩者都可以在路線頁面修改。",
+      "pathHeading": "路線",
+      "loading": "正在載入路線…"
     }
   },
   "whatsNew": {
