@@ -39,9 +39,19 @@ export async function textContrast(page: Page, root = ".main-content, .session-p
         return (hi + 0.05) / (lo + 0.05);
       };
       const hex = (c: number[]) => "#" + c.map((x) => Math.round(x).toString(16).padStart(2, "0")).join("");
+      // Any CSS colour (a color-mix() computes to oklab() or color(srgb …), not rgb()) to
+      // sRGB 0..255 and alpha, by painting it: the browser does the conversion.
+      const px = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
       const parse = (s: string): number[] => {
-        const m = s.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0, 1];
-        return [m[0], m[1], m[2], m.length > 3 ? m[3] : 1];
+        const m = s.match(/^rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)$/);
+        if (m) return [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]];
+        px.clearRect(0, 0, 1, 1);
+        px.fillStyle = "#000";
+        px.fillStyle = s;
+        px.fillRect(0, 0, 1, 1);
+        const d = px.getImageData(0, 0, 1, 1).data;
+        const a = d[3] / 255;
+        return [d[0], d[1], d[2], a];
       };
       // The background: the most common colour on a ring just outside the line's box, where
       // there are no glyphs (a big bold numeral can cover most of its own box).
