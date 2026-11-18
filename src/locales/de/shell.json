@@ -85,6 +85,7 @@
     "coachReady": "Bereit",
     "coachInSession": "In Sitzung",
     "collapse": "Seitenleiste einklappen",
+    "collapseLabel": "Seitenleiste einklappen",
     "expand": "Seitenleiste ausklappen",
     "collapseWithShortcut": "Seitenleiste einklappen ({{shortcut}})",
     "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "Pausiert",
     "notificationStop": "Stopp",
     "notificationChannel": "Wiedergabe"
-  }
+  },
+  "skipLink": "Zum Hauptinhalt springen"
 }

@@ -85,6 +85,7 @@
     "coachReady": "Готов",
     "coachInSession": "В сессии",
     "collapse": "Свернуть боковую панель",
+    "collapseLabel": "Свернуть панель",
     "expand": "Развернуть боковую панель",
     "collapseWithShortcut": "Свернуть боковую панель ({{shortcut}})",
     "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "Пауза",
     "notificationStop": "Стоп",
     "notificationChannel": "Воспроизведение"
-  }
+  },
+  "skipLink": "Перейти к основному содержимому"
 }

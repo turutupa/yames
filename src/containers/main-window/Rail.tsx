@@ -665,7 +665,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
               <polyline points={libraryOpen ? "15.5 9.5 13 12 15.5 14.5" : "13 9.5 15.5 12 13 14.5"} />
             </svg>
           </span>
-          <span className="rail-action-label">{t("rail.collapse")}</span>
+          <span className="rail-action-label">{t("rail.collapseLabel")}</span>
         </button>
       </div>
     </nav>

@@ -3656,3 +3656,36 @@ body[data-sheet-maximized] .rail {
 .main-content h1[tabindex="-1"]:focus {
   outline: none;
 }
+
+/* ── Skip link (acceptance P2-8) ─────────────────────────────────────────
+   The window's first Tab stop; out of sight until it has keyboard focus. */
+.skip-link {
+  position: fixed;
+  top: 6px;
+  left: 50%;
+  z-index: 10000;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font-family: var(--ui-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translate(-50%, -200%);
+  pointer-events: none;
+}
+
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The volume bars in the context bar (P2-8): a range's own focus mark is a
+   9px thumb, which read as no focus at all. The chip says it has focus. */
+.context-chip-volume:has(.context-chip-range:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

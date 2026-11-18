@@ -85,6 +85,7 @@
     "coachReady": "Prêt",
     "coachInSession": "En session",
     "collapse": "Réduire la barre latérale",
+    "collapseLabel": "Réduire la barre latérale",
     "expand": "Développer la barre latérale",
     "collapseWithShortcut": "Réduire la barre latérale ({{shortcut}})",
     "expandWithShortcut": "Développer la barre latérale ({{shortcut}})",
@@ -107,5 +108,6 @@
     "notificationPaused": "En pause",
     "notificationStop": "Arrêt",
     "notificationChannel": "Lecture"
-  }
+  },
+  "skipLink": "Aller au contenu principal"
 }

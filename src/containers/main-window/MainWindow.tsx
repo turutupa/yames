@@ -154,6 +154,7 @@ import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
 import { usePageFocus } from "./hooks/usePageFocus";
+import { SkipLink } from "./SkipLink";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import { jamEscapeTarget } from "./jamEscape";
 import {
@@ -1949,6 +1950,7 @@ export function MainWindow() {
          you are actually in Settings — the row is right there. */
       data-newer-version={newerVersion.newest && view !== "settings" ? "" : undefined}
     >
+      <SkipLink root={contentRef} view={view} />
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       {!IS_MOBILE && <TitleBar />}
 
