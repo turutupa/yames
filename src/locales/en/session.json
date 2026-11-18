@@ -406,7 +406,8 @@
       "finishHow": "Pass {{need}} of {{count}} to finish this Step.",
       "tabPreview": "The first bars, as tab",
       "exerciseCount": "{{count}} exercise",
-      "exerciseCount_other": "{{count}} exercises"
+      "exerciseCount_other": "{{count}} exercises",
+      "levelSubscribed": "Subscribed · starting at Step {{n}}"
     },
     "progress": {
       "title": "Progress",

@@ -418,7 +418,8 @@
       "tabPreview": "Les premières mesures, en tablature",
       "exerciseCount": "{{count}} exercice",
       "exerciseCount_many": "{{count}} exercices",
-      "exerciseCount_other": "{{count}} exercices"
+      "exerciseCount_other": "{{count}} exercices",
+      "levelSubscribed": "Abonné · départ à l’étape {{n}}"
     },
     "progress": {
       "title": "Progrès",

@@ -418,7 +418,8 @@
       "tabPreview": "Le prime battute, in tablatura",
       "exerciseCount": "{{count}} esercizio",
       "exerciseCount_many": "{{count}} esercizi",
-      "exerciseCount_other": "{{count}} esercizi"
+      "exerciseCount_other": "{{count}} esercizi",
+      "levelSubscribed": "Iscritto · si parte dal passo {{n}}"
     },
     "progress": {
       "title": "Progressi",

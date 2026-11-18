@@ -406,7 +406,8 @@
       "finishHow": "{{count}}課題中{{need}}つ合格でこのステップは完了です。",
       "tabPreview": "最初の小節のタブ譜",
       "exerciseCount_other": "{{count}} 課題",
-      "exerciseCount": "{{count}} 課題"
+      "exerciseCount": "{{count}} 課題",
+      "levelSubscribed": "登録しました · ステップ{{n}}から開始"
     },
     "progress": {
       "title": "上達",

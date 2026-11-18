@@ -406,7 +406,8 @@
       "finishHow": "Bestehe {{need}} von {{count}}, um diesen Schritt abzuschließen.",
       "tabPreview": "Die ersten Takte als Tab",
       "exerciseCount": "{{count}} Übung",
-      "exerciseCount_other": "{{count}} Übungen"
+      "exerciseCount_other": "{{count}} Übungen",
+      "levelSubscribed": "Abonniert · Start bei Schritt {{n}}"
     },
     "progress": {
       "title": "Fortschritt",

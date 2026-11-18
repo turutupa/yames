@@ -406,7 +406,8 @@
       "finishHow": "{{count}}개 중 {{need}}개를 통과하면 이 단계가 끝나요.",
       "tabPreview": "첫 마디들의 타브",
       "exerciseCount_other": "과제 {{count}}개",
-      "exerciseCount": "과제 {{count}}개"
+      "exerciseCount": "과제 {{count}}개",
+      "levelSubscribed": "구독함 · {{n}}단계부터 시작"
     },
     "progress": {
       "title": "진도",

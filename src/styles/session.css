@@ -619,6 +619,13 @@
   color: var(--l-tone-text);
   border-color: color-mix(in srgb, var(--l-tone) 50%, transparent);
 }
+/* Following a Path is the accent's, not the pass colour's: a green tag read
+   as a grade, and sat off the palette in Ember (acceptance P2-9). */
+.session-tag[data-badge="subscribed"] {
+  color: var(--l-amber);
+  border-color: color-mix(in srgb, var(--l-amber) 50%, transparent);
+  background: color-mix(in srgb, var(--l-amber) 10%, transparent);
+}
 .session-glass {
   background: var(--l-panel);
   border: 1px solid var(--l-line);
@@ -1746,18 +1753,57 @@
   gap: 7px;
 }
 .session-path-card {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 18px;
   align-items: center;
   width: 100%;
-  padding: 10px 15px;
+  padding: 12px 15px;
   text-align: left;
   transition: border-color 0.25s, transform 0.25s var(--l-ease);
 }
-.session-path-card:hover {
+.session-path-card:hover,
+.session-path-card:focus-within {
   border-color: color-mix(in srgb, var(--l-amber) 55%, transparent);
   transform: translateY(-2px);
+}
+.session-path-card-main {
+  gap: 3px;
+  min-width: 0;
+}
+.session-path-card-side {
+  gap: 0;
+  min-width: 0;
+}
+/* The title is the card's button for a keyboard; a click anywhere on the card opens it. */
+.session-path-card {
+  cursor: pointer;
+}
+.session-page .session-path-open {
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+.session-page .session-path-open:focus-visible {
+  outline: none;
+}
+.session-path-card:has(.session-path-open:focus-visible) {
+  outline: 2px solid var(--l-amber);
+  outline-offset: 2px;
+}
+/* What the Path is for, two lines at most. */
+.session-path-goal {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 62ch;
+}
+.session-page .session-path-continue {
+  align-self: flex-start;
+  margin-top: 8px;
 }
 .session-path-card .session-pips {
   margin: 7px 0 5px;
@@ -1780,7 +1826,16 @@
 /* A page's one-line summary under its title: a reading measure, not the window's. */
 .session-lede {
   max-width: 72ch;
-  margin-top: 2px;
+  margin-top: 8px;
+}
+/* A page's title and the line under it (Paths, Progress): room between the two,
+   and between them and the page (acceptance P2-11). */
+.session-page .session-h1 + .session-why {
+  margin-top: 8px;
+  max-width: 72ch;
+}
+.session-page > .session-rise:first-child:has(> .session-h1) {
+  margin-bottom: 10px;
 }
 /*
  * A Path: the Steps on the left, and on the right what to do about them —
@@ -1954,18 +2009,37 @@
 }
 /* The Level: a segmented control, then who the chosen one is for and where it starts. */
 .session-level .session-level-seg {
-  /* Each Level as wide as its name, and a long one ("Продвинутый") wraps the
-     control to a second row rather than breaking mid-word or spilling out. */
+  /* One line, each Level as wide as its name, the padding what is left
+     (acceptance P1-7). Where even that does not fit (a wide theme font, a
+     long word such as "Продвинутый" in a narrow column) the type steps down,
+     and past that the control stacks, one Level a row, rather than leaving
+     one alone on a second row: `useRowFit` measures it. */
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-top: 8px;
 }
 .session-page .session-level .session-level-seg button {
   flex: 1 1 auto;
-  font-size: 16px;
-  padding: 9px 8px;
+  font-size: 15.5px;
+  padding: 9px 6px;
   white-space: nowrap;
   line-height: 1.05;
+  /* Colours only: an animated size would be measured mid-way by useRowFit. */
+  transition:
+    color 0.2s var(--l-ease),
+    background 0.2s var(--l-ease),
+    box-shadow 0.2s var(--l-ease);
+}
+.session-page .session-level .session-level-seg[data-fit="tight"] button {
+  font-size: 13.5px;
+  padding: 9px 3px;
+  letter-spacing: 0;
+}
+.session-level .session-level-seg[data-fit="stacked"] {
+  flex-direction: column;
+}
+.session-page .session-level .session-level-seg[data-fit="stacked"] button {
+  padding: 9px 12px;
 }
 .session-level-about {
   margin-top: 10px;

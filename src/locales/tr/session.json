@@ -406,7 +406,8 @@
       "finishHow": "Bu adımı bitirmek için {{count}} içinden {{need}} tanesini geç.",
       "tabPreview": "İlk ölçüler, tab olarak",
       "exerciseCount": "{{count}} alıştırma",
-      "exerciseCount_other": "{{count}} alıştırma"
+      "exerciseCount_other": "{{count}} alıştırma",
+      "levelSubscribed": "Abone olundu · Adım {{n}}'den başlıyor"
     },
     "progress": {
       "title": "İlerleme",

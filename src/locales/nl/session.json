@@ -406,7 +406,8 @@
       "finishHow": "Haal {{need}} van {{count}} om deze stap af te ronden.",
       "tabPreview": "De eerste maten als tab",
       "exerciseCount": "{{count}} oefening",
-      "exerciseCount_other": "{{count}} oefeningen"
+      "exerciseCount_other": "{{count}} oefeningen",
+      "levelSubscribed": "Geabonneerd · je begint bij stap {{n}}"
     },
     "progress": {
       "title": "Voortgang",

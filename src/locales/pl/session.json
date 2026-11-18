@@ -430,7 +430,8 @@
       "exerciseCount": "{{count}} ćwiczenie",
       "exerciseCount_few": "{{count}} ćwiczenia",
       "exerciseCount_many": "{{count}} ćwiczeń",
-      "exerciseCount_other": "{{count}} ćwiczenia"
+      "exerciseCount_other": "{{count}} ćwiczenia",
+      "levelSubscribed": "Subskrybowane · start od kroku {{n}}"
     },
     "progress": {
       "title": "Postępy",

@@ -406,7 +406,8 @@
       "finishHow": "Đạt {{need}} / {{count}} để xong bước này.",
       "tabPreview": "Mấy ô nhịp đầu, dạng tab",
       "exerciseCount_other": "{{count}} bài tập",
-      "exerciseCount": "{{count}} bài tập"
+      "exerciseCount": "{{count}} bài tập",
+      "levelSubscribed": "Đã đăng ký · bắt đầu từ Bước {{n}}"
     },
     "progress": {
       "title": "Tiến bộ",

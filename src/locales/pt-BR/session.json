@@ -418,7 +418,8 @@
       "tabPreview": "Os primeiros compassos, em tablatura",
       "exerciseCount": "{{count}} exercício",
       "exerciseCount_many": "{{count}} exercícios",
-      "exerciseCount_other": "{{count}} exercícios"
+      "exerciseCount_other": "{{count}} exercícios",
+      "levelSubscribed": "Inscrito · começando no passo {{n}}"
     },
     "progress": {
       "title": "Progresso",

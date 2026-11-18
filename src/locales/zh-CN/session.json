@@ -406,7 +406,8 @@
       "finishHow": "通过 {{count}} 个中的 {{need}} 个即可完成这一步。",
       "tabPreview": "前几小节的六线谱",
       "exerciseCount_other": "{{count}} 个练习",
-      "exerciseCount": "{{count}} 个练习"
+      "exerciseCount": "{{count}} 个练习",
+      "levelSubscribed": "已订阅 · 从第 {{n}} 步开始"
     },
     "progress": {
       "title": "进度",

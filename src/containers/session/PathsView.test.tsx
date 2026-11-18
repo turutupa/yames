@@ -117,3 +117,46 @@ describe("a Path whose pack names its subdivisions", () => {
     );
   });
 });
+
+describe("the Paths list and the Level (acceptance P2-9, P2-10)", () => {
+  it("a card says what the Path is for, and Continue on a followed Path goes to its Step", () => {
+    const { session } = fake(started);
+    render(<PathsView session={session} />);
+    expect(screen.getByTestId(`path-card-${ALT.id}`)).toHaveTextContent(ALT.goal);
+    fireEvent.click(screen.getByTestId(`path-continue-${ALT.id}`));
+    expect(screen.getByTestId("step-detail")).toBeInTheDocument();
+  });
+
+  it("no Continue on a Path not started", () => {
+    const { session } = fake({ states: [], takes: [], ceilings: [] });
+    render(<PathsView session={session} />);
+    expect(screen.queryByTestId(`path-continue-${ALT.id}`)).toBeNull();
+  });
+
+  it("picking a Level on a Path you don't follow says it subscribed you", () => {
+    const none: PlayerProgress = { states: [], takes: [], ceilings: [] };
+    const { session, actions } = fake(none);
+    const { rerender } = render(<PathsView session={session} />);
+    openPath();
+    fireEvent.click(screen.getByTestId("level-intermediate"));
+    expect(actions.chooseLevel).toHaveBeenCalledWith(ALT, "intermediate");
+    // The hook writes the row; the page re-renders with it.
+    const after = { ...session, progress: { ...none, states: [{ pathId: ALT.id, level: "intermediate", startedAt: NOW, updatedAt: NOW }] } };
+    rerender(<PathsView session={after as SessionRun} />);
+    expect(screen.getByTestId("level-start")).toHaveTextContent(/^Subscribed · starting at Step \d+$/);
+  });
+
+  it("picking a Level at the cap is refused, and says why", () => {
+    const four: PlayerProgress = {
+      states: ["a", "b", "c", "d"].map((pathId) => ({ pathId, startedAt: NOW, updatedAt: NOW })),
+      takes: [],
+      ceilings: [],
+    };
+    const { session, actions } = fake(four);
+    render(<PathsView session={session} />);
+    openPath();
+    fireEvent.click(screen.getByTestId("level-intermediate"));
+    expect(actions.chooseLevel).not.toHaveBeenCalled();
+    expect(screen.getByTestId("level-subscribe-cap")).toBeInTheDocument();
+  });
+});

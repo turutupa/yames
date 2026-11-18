@@ -430,7 +430,8 @@
       "exerciseCount": "{{count}} упражнение",
       "exerciseCount_few": "{{count}} упражнения",
       "exerciseCount_many": "{{count}} упражнений",
-      "exerciseCount_other": "{{count}} упражнения"
+      "exerciseCount_other": "{{count}} упражнения",
+      "levelSubscribed": "Подписка оформлена · начало с шага {{n}}"
     },
     "progress": {
       "title": "Прогресс",
