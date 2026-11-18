@@ -5,7 +5,7 @@
  * the rest of the app links to yet. Nothing is locked or priced: a Step can be
  * chosen from any point, and a Path the app cannot grade yet says "later".
  */
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Exercise, PathDoc, Step } from "../../paths/format";
@@ -19,8 +19,11 @@ import {
   currentStepOf,
   isExercisePassed,
   isGradable,
+  chosenLevelOf,
   isStepPassed,
+  isStepSkipped,
   isSubscribed,
+  passesNeeded,
   takesOf,
 } from "../../session/progress";
 import { SUBSCRIPTION_CAP } from "../../session/rotation";
@@ -31,6 +34,8 @@ import type { NeckView } from "../../stage3d/api";
 import { lineText } from "./lineText";
 import { rise } from "./TodayView";
 import { InstrumentNote } from "./InstrumentNote";
+import { PATHS_LIST, pathsUp } from "../main-window/hooks/usePathsPlace";
+import type { PathsAt, PathsPlace } from "../main-window/hooks/usePathsPlace";
 import "../../styles/session.css";
 
 const WHOLE: NeckView = { kind: "whole" };
@@ -175,7 +180,9 @@ function PathDetail({
   const { progress, actions } = session;
   const current = currentStepOf(progress, path);
   const levels = levelsOf(path);
-  const level = progress.states.find((s) => s.pathId === path.id)?.level;
+  const level = chosenLevelOf(progress, path)?.id;
+  // No Level chosen plays as the first one: show it as chosen (UX audit TODAY-1).
+  const shownLevel = levels.find((l) => l.id === level) ?? levels[0] ?? null;
   const slot = useNeckSlot(WHOLE, [], { sweep: true });
   const neck3d = useNeck3d();
   const runnable = isRunnable(path.id);
@@ -187,8 +194,8 @@ function PathDetail({
   return (
     <div className="session-page" data-testid="path-detail" data-neck3d={neck3d}>
       <div className="session-rise">
-        <button className="session-link" onClick={onBack}>
-          {t("session.paths.back")}
+        <button className="session-back" onClick={onBack} data-testid="paths-back">
+          <span aria-hidden="true">‹</span> {t("session.paths.back")}
         </button>
         <div className="session-row" data-wrap="" style={{ gap: 9 }}>
           <h1 className="session-h1">{path.title}</h1>
@@ -203,6 +210,7 @@ function PathDetail({
         <ol className="session-step-list">
           {path.steps.map((step, i) => {
             const passed = isStepPassed(progress, path.id, step);
+            const skipped = isStepSkipped(progress, path, step);
             const isCurrent = step.id === current.id && runnable;
             const gradable = step.exercises.filter(isGradable);
             const done = gradable.filter((e) => isExercisePassed(progress, path.id, e)).length;
@@ -212,12 +220,14 @@ function PathDetail({
                   className="session-step-row"
                   data-current={isCurrent ? "" : undefined}
                   data-passed={passed ? "" : undefined}
+                  data-skipped={skipped ? "" : undefined}
                   onClick={() => onOpenStep(step)}
                   data-testid={`step-row-${step.id}`}
                 >
                   <span className="session-step-num">{passed ? "✓" : step.order}</span>
                   <span className="session-step-text">
                     <span className="session-step-name">{step.title}</span>
+                    {skipped && <small data-testid={`step-skipped-${step.id}`}>{t("session.paths.skipped")}</small>}
                     {(isCurrent || passed) && gradable.length > 0 && (
                       <small>
                         {t("session.paths.exercisesPassed", { done, count: gradable.length })}
@@ -298,14 +308,33 @@ function PathDetail({
                 {levels.map((l) => (
                   <button
                     key={l.id}
-                    className={l.id === level ? "on" : ""}
-                    aria-pressed={l.id === level}
+                    className={l.id === shownLevel?.id ? "on" : ""}
+                    aria-pressed={l.id === shownLevel?.id}
                     onClick={() => actions.chooseLevel(path, l.id)}
+                    data-testid={`level-${l.id}`}
                   >
                     {l.title}
                   </button>
                 ))}
               </div>
+              {level && runnable && (
+                <div className="session-why" style={{ marginTop: 7 }} role="status" data-testid="level-start">
+                  {t("session.paths.levelStart", {
+                    n: current.order,
+                    level: t(`session.paths.levelName.${level}`),
+                  })}
+                </div>
+              )}
+              {shownLevel && shownLevel.placement.startHereIf.length > 0 && (
+                <div className="session-col" style={{ gap: 2, marginTop: 7 }} data-testid="level-start-here-if">
+                  <div className="session-kick">{t("session.paths.startHereIf")}</div>
+                  {shownLevel.placement.startHereIf.map((line) => (
+                    <div className="session-quiet" key={line}>
+                      {line}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           <div className="session-glass session-card session-rise">
@@ -437,6 +466,7 @@ function StepDetail({
   const { t } = useTranslation();
   const { progress, actions } = session;
   const isCurrent = currentStepOf(progress, path).id === step.id;
+  const skippedBy = isStepSkipped(progress, path, step) ? chosenLevelOf(progress, path) : null;
   // The Exercise to work on next: the first the app can grade and you have not passed.
   const next =
     step.exercises.find((e) => isGradable(e) && !isExercisePassed(progress, path.id, e)) ??
@@ -452,8 +482,8 @@ function StepDetail({
       data-scrim="split"
     >
       <div className="session-rise">
-        <button className="session-link" onClick={onBack}>
-          {path.title}
+        <button className="session-back" onClick={onBack} data-testid="paths-back">
+          <span aria-hidden="true">‹</span> {path.title}
         </button>
         <div className="session-kick">
           {t("session.paths.stepOf", { n: step.order, of: path.steps.length })}
@@ -463,6 +493,12 @@ function StepDetail({
           <KindTag kind={path.kind} />
         </div>
         <div className="session-why">{step.goal}</div>
+        {skippedBy && (
+          <div className="session-quiet" style={{ marginTop: 6 }} data-testid="step-skipped-note">
+            <span className="session-tag">{t("session.paths.skipped")}</span>{" "}
+            {t("session.paths.skippedHow", { level: t(`session.paths.levelName.${skippedBy.id}`) })}
+          </div>
+        )}
       </div>
       <div className="session-split">
         <div className="session-col">
@@ -512,7 +548,13 @@ function StepDetail({
                 {t("session.paths.testOut")}
               </button>
               <div className="session-why" data-testid="step-test-out-how">
-                {t(testOutRetests(path, step, progress) ? "session.paths.testOutRetests" : "session.paths.testOutHow")}
+                {testOutRetests(path, step, progress)
+                  ? t("session.paths.testOutRetests")
+                  : t("session.paths.testOutHow", {
+                      // The real count, not "about three of four" (UX audit PATH-5).
+                      need: passesNeeded(step.exercises.filter(isGradable).length),
+                      count: step.exercises.filter(isGradable).length,
+                    })}
               </div>
             </div>
           )}
@@ -533,28 +575,102 @@ type InstrumentNoteProps = Parameters<typeof InstrumentNote>[0];
 export function PathsView({
   session,
   instrumentNote,
+  place: given,
 }: {
   session: SessionRun;
   /** Guitar first: the same note Today shows, on the list of Paths only. */
   instrumentNote?: InstrumentNoteProps;
+  /**
+   * Which Path and Step are open, kept by the window so a Session started from
+   * here comes back here (`usePathsPlace`). Without one, the screen keeps its
+   * own, as it did before, for the tests and scenes that mount it alone.
+   */
+  place?: PathsPlace;
 }) {
-  const [pathId, setPathId] = useState<string | null>(null);
-  const [stepId, setStepId] = useState<string | null>(null);
-  const path = session.paths.find((p) => p.id === pathId) ?? null;
-  const step = path?.steps.find((s) => s.id === stepId) ?? null;
+  const own = useOwnPlace();
+  const place = given ?? own;
+  const { at, move, back } = place;
+  const path = session.paths.find((p) => p.id === at.pathId) ?? null;
+  const step = path?.steps.find((s) => s.id === at.stepId) ?? null;
+
+  // Back goes one page up: a Step to its Path, a Path to the list (UX audit
+  // NAV-4). Escape, Alt+Left and the mouse's back button, as anywhere else on
+  // a computer. On the window, after everything else has had its turn:
+  // whatever is open over the page (a sheet, a menu, the help) claims the key
+  // first.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const isBack = (e.key === "Escape" && !e.altKey) || (e.key === "ArrowLeft" && e.altKey);
+      if (!isBack) return;
+      // Not from a text field: Escape there is the field's. (Not `hotkeys.ts`'s
+      // `isTypingTarget`: the hotkey table stays out of the phone's bundle.)
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.("input:not([type=range]):not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable=true]")) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      if (back()) e.preventDefault();
+    };
+    // The mouse's back button is button 3. Taken on `mouseup`, the event the
+    // webview would otherwise turn into a history step.
+    const onMouse = (e: MouseEvent) => {
+      if (e.button !== 3 || e.defaultPrevented) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      e.preventDefault();
+      back();
+    };
+    const swallow = (e: MouseEvent) => {
+      if (e.button === 3) e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("mouseup", onMouse);
+    window.addEventListener("mousedown", swallow);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("mouseup", onMouse);
+      window.removeEventListener("mousedown", swallow);
+    };
+  }, [back]);
 
   if (path && step) {
-    return <StepDetail session={session} path={path} step={step} onBack={() => setStepId(null)} />;
+    return (
+      <StepDetail
+        session={session}
+        path={path}
+        step={step}
+        onBack={() => move({ pathId: path.id, stepId: null })}
+      />
+    );
   }
   if (path) {
     return (
       <PathDetail
         session={session}
         path={path}
-        onBack={() => setPathId(null)}
-        onOpenStep={(s) => setStepId(s.id)}
+        onBack={() => move(PATHS_LIST)}
+        onOpenStep={(s) => move({ pathId: path.id, stepId: s.id })}
       />
     );
   }
-  return <PathList session={session} onOpen={(p) => setPathId(p.id)} note={instrumentNote} />;
+  return (
+    <PathList
+      session={session}
+      onOpen={(p) => move({ pathId: p.id, stepId: null })}
+      note={instrumentNote}
+    />
+  );
+}
+
+/** A place of the screen's own, for a PathsView mounted without the window. */
+function useOwnPlace(): PathsPlace {
+  const [at, setAt] = useState<PathsAt>(PATHS_LIST);
+  const atRef = useRef(at);
+  atRef.current = at;
+  const move = useCallback((next: PathsAt) => setAt(next), []);
+  const back = useCallback(() => {
+    const up = pathsUp(atRef.current);
+    if (up) setAt(up);
+    return up !== null;
+  }, []);
+  const reset = useCallback(() => setAt(PATHS_LIST), []);
+  return { at, move, back, reset };
 }

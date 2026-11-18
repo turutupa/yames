@@ -73,6 +73,11 @@ const without = (...not: Where[]) => EVERYWHERE.filter((w) => !not.includes(w));
 const LEARNING = ["today", "paths", "progress", "session", "tools"] as const satisfies readonly Where[];
 /** The meter and tempo actions work on every tool, not on Settings. */
 const NOT_SETTINGS = without("settings", ...LEARNING);
+/**
+ * The view keys: everywhere but a running Session, which they used to end
+ * silently (UX audit NAV-2, 2026-11-17).
+ */
+const NOT_IN_SESSION = without("session");
 /** And the meter ones not on a loaded jam, where the groove owns the meter. */
 const METER = without("settings", "jam", "jamEditor", ...LEARNING);
 /** A tempo key: its tool meaning everywhere it has one, and `does` in a Session. */
@@ -141,15 +146,15 @@ const ACTIONS: Record<HotkeyAction, Row | Partial<Record<Where, readonly string[
     does: ["toggleCard"],
   },
   // The saved meaning of these five is exactly this, whatever else the rail grows.
-  "tab-1": { where: EVERYWHERE, does: ["setView beat"] },
-  "tab-2": { where: EVERYWHERE, does: ["setView setlist"] },
-  "tab-3": { where: EVERYWHERE, does: ["setView drill"] },
-  "tab-4": { where: EVERYWHERE, does: ["setView jam"] },
-  "tab-5": { where: EVERYWHERE, does: ["setView songs"] },
-  "tab-today": { where: EVERYWHERE, does: ["setView today"] },
-  "tab-paths": { where: EVERYWHERE, does: ["setView paths"] },
-  "tab-progress": { where: EVERYWHERE, does: ["setView progress"] },
-  "tab-tools": { where: EVERYWHERE, does: ["setView tools"] },
+  "tab-1": { where: NOT_IN_SESSION, does: ["setView beat"] },
+  "tab-2": { where: NOT_IN_SESSION, does: ["setView setlist"] },
+  "tab-3": { where: NOT_IN_SESSION, does: ["setView drill"] },
+  "tab-4": { where: NOT_IN_SESSION, does: ["setView jam"] },
+  "tab-5": { where: NOT_IN_SESSION, does: ["setView songs"] },
+  "tab-today": { where: NOT_IN_SESSION, does: ["setView today"] },
+  "tab-paths": { where: NOT_IN_SESSION, does: ["setView paths"] },
+  "tab-progress": { where: NOT_IN_SESSION, does: ["setView progress"] },
+  "tab-tools": { where: NOT_IN_SESSION, does: ["setView tools"] },
   // Only a running Session reads these; everywhere else they mean nothing.
   "session-go": { where: ["session"], does: ["session go"] },
   "session-slower": { where: ["session"], does: ["session slower"] },
@@ -341,8 +346,11 @@ describe("the tab hotkeys", () => {
     expect(await observe(action, "beat")).toEqual([`setView ${mode}`]);
   });
 
-  it("keep the keys players have learned", () => {
+  // 2026-11-17, owner-approved: the tools moved from ⌘1–⌘5 to ⌘⇧1–⌘⇧5 so the
+  // learning side could have ⌘1–⌘4. Players on the old defaults are moved once
+  // and anyone who remapped keeps theirs (`hooks/keybindingMigration.ts`).
+  it("are ⌘⇧1 to ⌘⇧5, in the rail's order", () => {
     const keyOf = (id: string) => HOTKEYS.find((h) => h.id === id)?.key;
-    expect(TOOLS.map((t) => keyOf(t.action))).toEqual(["⌘1", "⌘2", "⌘3", "⌘4", "⌘5"]);
+    expect(TOOLS.map((t) => keyOf(t.action))).toEqual(["⌘⇧1", "⌘⇧2", "⌘⇧3", "⌘⇧4", "⌘⇧5"]);
   });
 });

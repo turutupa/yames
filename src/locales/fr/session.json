@@ -100,7 +100,7 @@
         "reviewDueSlipped": "Ça a glissé la dernière fois, donc un cran plus bas.",
         "reviewDueLeft": "Reste de {{step}}, qui est terminé.",
         "finisher": "Avec le groupe, à un tempo que tu as déjà réussi.",
-        "placement": "Une prise facile, puis une au tempo de réussite. Réussis les deux et tu sautes une étape.",
+        "placement": "Une courte montée : environ 75 %, 100 % et 120 % du tempo de réussite, arrêt au premier raté. Réussis au tempo de réussite et tu sautes une étape.",
         "testOut": "Une prise au tempo de réussite. Réussie, et l'étape est validée.",
         "benchmark": "Jour {{day}} : la même prise à chaque fois, pour comparer.",
         "yourTurn": "Pas encore vérifié, donc c'est toi qui juges.",
@@ -166,10 +166,11 @@
       "skippedTodayYesterday": "{{path}} se repose aujourd'hui : joué hier.",
       "skippedTodayNever": "{{path}} se repose aujourd'hui : pas encore joué.",
       "finisher": "Pour finir : {{exercise}} avec le groupe à {{bpm}} BPM, un tempo déjà réussi. Non noté.",
-      "placement": "Nouveau ici ? Une prise facile à {{bpm}} BPM, puis une à {{pass}}. Réussis les deux et tu passes à l'étape suivante.",
+      "placement": "Nouveau ici ? Une courte montée de {{bpm}} BPM jusqu’à {{pass}} et au-delà, une prise chacun, arrêt au premier raté. Réussis à {{pass}} et tu passes à l’étape suivante.",
       "testOut": "Valider {{step}} : une prise au tempo de réussite, {{bpm}} BPM.",
       "benchmark": "Repère, jour {{day}} : le même exercice à {{bpm}} BPM à chaque fois, pour comparer.",
-      "yourTurn": "À toi : {{exercise}}. Pas encore vérifié, c'est toi qui juges."
+      "yourTurn": "À toi : {{exercise}}. Pas encore vérifié, c'est toi qui juges.",
+      "newFromSibling": "Nouveau. Il commence à {{bpm}} BPM, environ 80 % de ton tempo propre de {{clean}} BPM sur {{sibling}}."
     },
     "bar": {
       "summary": "Le seuil : {{even}} % de régularité et {{heard}} % des notes entendues, à {{bpm}} BPM."
@@ -204,7 +205,8 @@
       "listeningBack": "Réécoute",
       "band": "Groupe",
       "bandHint": "Le groupe n'est pas noté. Avec un micro, baisse-le ou mets un casque.",
-      "bandMicHint": "Avec un micro, j'entendrais le groupe comme tes notes : il démarre coupé. Avec un casque, monte-le."
+      "bandMicHint": "Avec un micro, j'entendrais le groupe comme tes notes : il démarre coupé. Avec un casque, monte-le.",
+      "skip": "Passer celui-ci"
     },
     "result": {
       "kick": "Prise {{take}} · {{title}} · {{bpm}} BPM · {{bars}} mesures",
@@ -355,8 +357,17 @@
       "subscribeCap": "Dans ce test, tu peux suivre jusqu'à {{cap}} parcours. Désabonne-toi d'abord d'un parcours ; son historique est conservé.",
       "unsubscribedNote": "Absent du plan du jour. Ton historique est conservé ; réabonne-toi quand tu veux.",
       "testOut": "Valider l'étape",
-      "testOutHow": "Une prise au tempo de réussite de chaque exercice pas encore réussi. Réussis environ trois sur quatre et l'étape est faite.",
-      "testOutRetests": "Tu as réussi tous les exercices ici, alors ceci les reteste tous : une prise chacun au tempo de réussite."
+      "testOutHow": "Une prise au tempo de réussite de chaque exercice pas encore réussi. Réussis-en {{need}} sur {{count}} et l'étape est faite.",
+      "testOutRetests": "Tu as réussi tous les exercices ici, alors ceci les reteste tous : une prise chacun au tempo de réussite.",
+      "levelName": {
+        "beginner": "Débutant",
+        "intermediate": "Intermédiaire",
+        "advanced": "Avancé"
+      },
+      "levelStart": "Départ à l’étape {{n}} · {{level}}",
+      "skipped": "Passée",
+      "skippedHow": "En dessous de ton niveau ({{level}}), donc Aujourd’hui la saute. Tu peux quand même la jouer ici, ou choisir cette étape pour la reprendre.",
+      "startHereIf": "Commence ici si"
     },
     "progress": {
       "title": "Progrès",
@@ -444,6 +455,15 @@
     "tabstrip": {
       "label": "Tablature : {{notes}}",
       "bar": "mesure {{n}}"
+    },
+    "leave": {
+      "title": "Quitter cette séance ?",
+      "body": "Tes prises jusqu’ici sont enregistrées.",
+      "stay": "Continuer",
+      "leave": "Quitter"
+    },
+    "placement": {
+      "result": "Tu commences à l’étape {{n}} : {{step}}"
     }
   }
 }

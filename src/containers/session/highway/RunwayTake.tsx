@@ -10,7 +10,7 @@
 import { kindOfPath } from "../../../session/kind";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { barLine, reasonLine } from "../../../session/coachWords";
+import { barLine } from "../../../session/coachWords";
 import { currentStep, isEdgeStep } from "../../../session/runner";
 import type { BeatPosition } from "../../../songs/position";
 import { TAKE_COUNT_IN_BARS } from "../../../session/take";
@@ -131,7 +131,8 @@ export function RunwayTakeScreen({
           {pathTitle && ` · ${t("session.run.pathStep", { path: pathTitle.title, step: stepNumber ?? 1 })}`}
         </span>
         <h2 className="session-h3">{exercise.title}</h2>
-        {!running && <span className="session-why">{lineText(t, reasonLine(step.why))}</span>}
+        {/* What the Exercise is, not the planner's reason (UX audit TODAY-8). */}
+        {!running && <span className="session-why">{exercise.purpose}</span>}
         <PracticeViewSwitch
           view={session.practiceView}
           onChange={session.setPracticeView}

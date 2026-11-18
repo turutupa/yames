@@ -57,8 +57,30 @@ function useExerciseSlot(session: SessionRun, kind: NeckKind, sweep = false) {
   return useNeckSlot(view, notes, { sweep });
 }
 
+/** What an Exercise step plays, in the pack's words: its purpose. */
+function purposeOf(session: SessionRun, step: PlanStep): string | null {
+  if (step.kind !== "exercise") return null;
+  const path = session.paths.find((p) => p.id === step.pathId);
+  for (const s of path?.steps ?? []) {
+    const found = s.exercises.find((e) => e.id === step.exerciseId);
+    if (found) return found.purpose;
+  }
+  return null;
+}
+
 /** Exit, how far along, and how long is left. The mocks' session bar. */
-function SessionBar({ run, onExit }: { run: RunState; onExit: () => void }) {
+function SessionBar({
+  run,
+  onExit,
+  onSkip,
+  skipKey,
+}: {
+  run: RunState;
+  onExit: () => void;
+  /** "Skip this" on a Take's ready screen (UX audit TODAY-2), with its key. */
+  onSkip?: () => void;
+  skipKey?: string;
+}) {
   const { t } = useTranslation();
   const steps = run.plan?.steps ?? [];
   const left = minutesLeft(run);
@@ -82,6 +104,12 @@ function SessionBar({ run, onExit }: { run: RunState; onExit: () => void }) {
       <span className="session-quiet session-bar-left">
         {left > 0 ? t("session.run.minutesLeft", { minutes: left }) : t("session.run.timeUp")}
       </span>
+      {onSkip && (
+        <button className="session-skip-this" onClick={onSkip} data-testid="session-skip-this">
+          {t("session.run.skip")}
+          {skipKey && <kbd>{skipKey}</kbd>}
+        </button>
+      )}
     </div>
   );
 }
@@ -180,7 +208,9 @@ function TakeScreen({
         </span>
         <h2 className="session-h3">{exercise.title}</h2>
         <ContextLine step={step} />
-        <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
+        {/* What the Exercise is, not why the planner picked it: that is Today's
+            line, and in here it read as a log (UX audit TODAY-8). */}
+        <span className="session-why">{exercise.purpose}</span>
         <PracticeViewSwitch
           view={session.practiceView}
           onChange={session.setPracticeView}
@@ -676,7 +706,9 @@ function TimedScreen({
       <div className="session-takeinfo">
         <span className="session-kick">{kick}</span>
         <h2 className="session-h3">{stepTitle(step, t)}</h2>
-        <span className="session-why">{lineText(t, reasonLine(step.why))}</span>
+        <span className="session-why">
+          {session.exercise?.purpose ?? lineText(t, reasonLine(step.why))}
+        </span>
         {/* Live the whole time: nothing here is graded, so the player may
             look at it whichever way helps, while it plays. */}
         {pattern && (
@@ -875,7 +907,9 @@ function RecapScreen({ session }: { session: SessionRun }) {
                     <span>{stepTitle(step, t)}</span>
                     <StepTag step={step} paths={session.paths} />
                   </div>
-                  <div className="session-why">{lineText(t, reasonLine(step.why))}</div>
+                  <div className="session-why">
+                    {purposeOf(session, step) ?? lineText(t, reasonLine(step.why))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -911,6 +945,7 @@ export function SessionView({
   hasSignal,
   bpmNow,
   viewKey = "V",
+  skipKey = "N",
   onCheckSound,
 }: {
   session: SessionRun;
@@ -925,6 +960,8 @@ export function SessionView({
   bpmNow: number;
   /** The key bound to switching views, as shown. */
   viewKey?: string;
+  /** The key bound to the next step, shown on Skip this. */
+  skipKey?: string;
   onCheckSound: () => void;
 }) {
   const { run, actions } = session;
@@ -942,7 +979,14 @@ export function SessionView({
 
   return (
     <div className="session-page session-run" data-testid="session" data-neck3d={tabShown ? undefined : neck3d}>
-      {run.phase !== "recap" && <SessionBar run={run} onExit={actions.exit} />}
+      {run.phase !== "recap" && (
+        <SessionBar
+          run={run}
+          onExit={actions.exit}
+          onSkip={run.phase === "ready" ? actions.next : undefined}
+          skipKey={skipKey}
+        />
+      )}
       {(run.phase === "ready" || run.phase === "playing") && session.practiceView === "runway" && (
         <RunwayTakeScreen
           session={session}

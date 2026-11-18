@@ -713,35 +713,35 @@
     },
     {
       "id": "tab-1",
-      "key": "⌘1",
+      "key": "⌘⇧1",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-2",
-      "key": "⌘2",
+      "key": "⌘⇧2",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-3",
-      "key": "⌘3",
+      "key": "⌘⇧3",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-4",
-      "key": "⌘4",
+      "key": "⌘⇧4",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-5",
-      "key": "⌘5",
+      "key": "⌘⇧5",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
@@ -895,7 +895,7 @@
     },
     {
       "id": "tab-today",
-      "key": "⌘0",
+      "key": "⌘1",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
@@ -937,21 +937,21 @@
     },
     {
       "id": "tab-paths",
-      "key": "⌘6",
+      "key": "⌘2",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-progress",
-      "key": "⌘7",
+      "key": "⌘3",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
     },
     {
       "id": "tab-tools",
-      "key": "⌘8",
+      "key": "⌘4",
       "globalKey": null,
       "globalAllowed": false,
       "group": "navigation"
@@ -1498,6 +1498,11 @@
       "written": true
     },
     "session.viewHintSeen": {
+      "store": "settings.json",
+      "read": true,
+      "written": true
+    },
+    "keyBindingsVersion": {
       "store": "settings.json",
       "read": true,
       "written": true

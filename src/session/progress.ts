@@ -4,7 +4,7 @@
  * Pure, and the only reader of the store's rows: the planner, the Paths list and
  * Progress all ask here, so "is this Step done" has one definition.
  */
-import type { Exercise, PathDoc, Step } from "../paths/format";
+import type { Exercise, Level, PathDoc, Step } from "../paths/format";
 import type { ExerciseCeilingRow, PathStateRow, PathTakeRow } from "../ipc";
 import type { TakeMeasures } from "./takeMeasures";
 import type { TakeVerdict } from "./grade";
@@ -109,11 +109,63 @@ export function isStepPassed(progress: PlayerProgress, pathId: string, step: Ste
   return done >= passesNeeded(gradable.length);
 }
 
-/** The Step this player is on: the stored one, or the Path's first. */
+/**
+ * The Level this player chose on this Path, or null: none chosen, the Path has
+ * no Levels, or the stored id is one the Path no longer offers.
+ */
+export function chosenLevelOf(progress: PlayerProgress, path: PathDoc): Level | null {
+  const id = progress.states.find((s) => s.pathId === path.id)?.level;
+  if (!id) return null;
+  return (path.levels ?? []).find((l) => l.id === id) ?? null;
+}
+
+/** Where a Level starts in `path.steps`: the index of its first Step, 0 if it has none. */
+export function levelStartIndex(path: PathDoc, level: Level | null): number {
+  if (!level) return 0;
+  const at = path.steps.findIndex((s) => s.id === level.stepIds[0]);
+  return Math.max(0, at);
+}
+
+/**
+ * A Step below the Level the player chose, and not passed: skipped, the way a
+ * Test out or a placement skips a Step (owner, 2026-11-17: "Levels must
+ * actually do something"). The planner starts past it and does not send its
+ * Exercises back as leftovers; the Path page marks it skipped. It is never
+ * locked: Play this still plays it, and choosing a lower Level, or this Step,
+ * brings it back.
+ */
+export function isStepSkipped(progress: PlayerProgress, path: PathDoc, step: Step): boolean {
+  const level = chosenLevelOf(progress, path);
+  if (!level) return false;
+  const at = path.steps.findIndex((s) => s.id === step.id);
+  return at >= 0 && at < levelStartIndex(path, level) && !isStepPassed(progress, path.id, step);
+}
+
+/**
+ * The Step a Level puts the player on: its first Step not passed yet, or its
+ * first if every one is. What choosing a Level sets as the current Step.
+ */
+export function levelEntryStep(progress: PlayerProgress, path: PathDoc, level: Level): Step {
+  const start = levelStartIndex(path, level);
+  const own = path.steps.slice(start).filter((s) => level.stepIds.includes(s.id));
+  return own.find((s) => !isStepPassed(progress, path.id, s)) ?? own[0] ?? path.steps[start] ?? path.steps[0];
+}
+
+/** The Level a Step belongs to, or null for a Path without Levels. */
+export function levelOfStep(path: PathDoc, stepId: string): Level | null {
+  return (path.levels ?? []).find((l) => l.stepIds.includes(stepId)) ?? null;
+}
+
+/**
+ * The Step this player is on: the stored one, or the Path's first, and never
+ * below the Level they chose. A row written before Levels did anything can say
+ * Intermediate and Step 1; it means Intermediate.
+ */
 export function currentStepOf(progress: PlayerProgress, path: PathDoc): Step {
   const state = progress.states.find((s) => s.pathId === path.id);
-  const stored = path.steps.find((s) => s.id === state?.currentStepId);
-  return stored ?? path.steps[0];
+  const storedAt = path.steps.findIndex((s) => s.id === state?.currentStepId);
+  const floor = levelStartIndex(path, chosenLevelOf(progress, path));
+  return path.steps[Math.max(storedAt, floor)] ?? path.steps[0];
 }
 
 /**

@@ -100,7 +100,7 @@
         "reviewDueSlipped": "Escorregou da última vez, então um degrau abaixo.",
         "reviewDueLeft": "Sobrou de {{step}}, que já está feito.",
         "finisher": "Com a banda, num tempo em que você já passou.",
-        "placement": "Um take fácil, depois um no tempo de aprovação. Passe nos dois e você pula um passo.",
+        "placement": "Uma subida curta: cerca de 75%, 100% e 120% do tempo de aprovação, parando no primeiro erro. Passe no tempo de aprovação e você pula um passo.",
         "testOut": "Um take no tempo de aprovação. Passe e o passo está feito.",
         "benchmark": "Dia {{day}}: o mesmo take toda vez, para comparar.",
         "yourTurn": "Ainda não verificado, então você julga.",
@@ -166,10 +166,11 @@
       "skippedTodayYesterday": "{{path}} descansa hoje: tocado ontem.",
       "skippedTodayNever": "{{path}} descansa hoje: ainda não tocado.",
       "finisher": "Para fechar: {{exercise}} com a banda a {{bpm}} BPM, um tempo que você já passou. Sem nota.",
-      "placement": "Novo aqui? Um take fácil a {{bpm}} BPM, depois um a {{pass}}. Passe nos dois e você pula para o próximo passo.",
+      "placement": "Novo aqui? Uma subida curta de {{bpm}} BPM passando por {{pass}}, um take cada, parando no primeiro erro. Passe em {{pass}} e você pula para o próximo passo.",
       "testOut": "Teste para pular {{step}}: um take no tempo de aprovação, {{bpm}} BPM.",
       "benchmark": "Referência, dia {{day}}: o mesmo exercício a {{bpm}} BPM toda vez, para comparar.",
-      "yourTurn": "Sua vez: {{exercise}}. Ainda não verificado, então você avalia."
+      "yourTurn": "Sua vez: {{exercise}}. Ainda não verificado, então você avalia.",
+      "newFromSibling": "Novo. Começa em {{bpm}} BPM, cerca de 80% do seu tempo limpo de {{clean}} BPM em {{sibling}}."
     },
     "bar": {
       "summary": "A meta: {{even}}% de regularidade e {{heard}}% das notas ouvidas, a {{bpm}} BPM."
@@ -204,7 +205,8 @@
       "listeningBack": "Reproduzindo",
       "band": "Banda",
       "bandHint": "A banda não é avaliada. No microfone, deixe baixo ou use fones.",
-      "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente."
+      "bandMicHint": "No microfone eu ouviria a banda como notas suas, então ela começa desligada. De fones, aumente.",
+      "skip": "Pular este"
     },
     "result": {
       "kick": "Tomada {{take}} · {{title}} · {{bpm}} BPM · {{bars}} compassos",
@@ -355,8 +357,17 @@
       "subscribeCap": "Neste teste você pode seguir até {{cap}} trilhas. Cancele uma primeiro; o histórico fica.",
       "unsubscribedNote": "Fora do plano de hoje. Seu histórico fica; inscreva-se de novo quando quiser.",
       "testOut": "Fazer teste",
-      "testOutHow": "Um take no tempo de aprovação de cada exercício em que você ainda não passou. Passe em cerca de três de quatro e o passo está feito.",
-      "testOutRetests": "Você já passou em todos os exercícios daqui, então isto testa todos de novo: um take de cada no tempo de aprovação."
+      "testOutHow": "Um take no tempo de aprovação de cada exercício que você ainda não passou. Passe {{need}} de {{count}} e o passo está feito.",
+      "testOutRetests": "Você já passou em todos os exercícios daqui, então isto testa todos de novo: um take de cada no tempo de aprovação.",
+      "levelName": {
+        "beginner": "Iniciante",
+        "intermediate": "Intermediário",
+        "advanced": "Avançado"
+      },
+      "levelStart": "Começando no passo {{n}} · {{level}}",
+      "skipped": "Pulado",
+      "skippedHow": "Abaixo do seu nível ({{level}}), então Hoje pula este passo. Você ainda pode tocá-lo aqui, ou escolher este passo para trazê-lo de volta.",
+      "startHereIf": "Comece aqui se"
     },
     "progress": {
       "title": "Progresso",
@@ -444,6 +455,15 @@
     "tabstrip": {
       "label": "Tablatura: {{notes}}",
       "bar": "compasso {{n}}"
+    },
+    "leave": {
+      "title": "Sair desta sessão?",
+      "body": "Seus takes até agora estão salvos.",
+      "stay": "Continuar",
+      "leave": "Sair"
+    },
+    "placement": {
+      "result": "Você começa no passo {{n}}: {{step}}"
     }
   }
 }

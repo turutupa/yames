@@ -755,6 +755,17 @@ export const SHOTS: Shot[] = [
     settleMs: 300,
   },
   {
+    // Find my level, played through (UX audit TODAY-3): pass at 75%, pass at the
+    // pass tempo, miss at 120%. The result says where the player starts.
+    id: "today-first-climb",
+    suffix: "today-first-climb",
+    window: "main",
+    session: { seed: "first", minutes: 5, take: ["pass", "pass", "below"], stop: "today" },
+    width: 1400,
+    height: 900,
+    settleMs: 300,
+  },
+  {
     // Guitar first: a drummer's Today, with the note at the top.
     id: "today-drums",
     suffix: "today-drums",

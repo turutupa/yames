@@ -100,7 +100,7 @@
         "reviewDueSlipped": "L'ultima volta è scivolato, quindi un gradino più giù.",
         "reviewDueLeft": "Rimasto da {{step}}, che è finito.",
         "finisher": "Con la band, a un tempo che hai già superato.",
-        "placement": "Una take facile, poi una al tempo di superamento. Superale entrambe e salti avanti di uno step.",
+        "placement": "Una breve salita: circa 75%, 100% e 120% del tempo di superamento, fermandosi al primo errore. Supera al tempo di superamento e salti avanti di un passo.",
         "testOut": "Una take al tempo di superamento. Superala e lo step è fatto.",
         "benchmark": "Giorno {{day}}: la stessa take ogni volta, per confrontare.",
         "yourTurn": "Non ancora controllato, quindi giudichi tu.",
@@ -166,10 +166,11 @@
       "skippedTodayYesterday": "{{path}} riposa oggi: suonato ieri.",
       "skippedTodayNever": "{{path}} riposa oggi: non ancora suonato.",
       "finisher": "Per finire: {{exercise}} con la band a {{bpm}} BPM, un tempo già superato. Senza voto.",
-      "placement": "Nuovo qui? Una take facile a {{bpm}} BPM, poi una a {{pass}}. Superale entrambe e passi al prossimo step.",
+      "placement": "Nuovo qui? Una breve salita da {{bpm}} BPM fino a {{pass}} e oltre, una take ciascuno, fermandosi al primo errore. Supera a {{pass}} e passi al passo successivo.",
       "testOut": "Supera {{step}}: una take al tempo di superamento, {{bpm}} BPM.",
       "benchmark": "Riferimento, giorno {{day}}: lo stesso esercizio a {{bpm}} BPM ogni volta, per confrontare.",
-      "yourTurn": "Tocca a te: {{exercise}}. Non ancora controllato, quindi giudichi tu."
+      "yourTurn": "Tocca a te: {{exercise}}. Non ancora controllato, quindi giudichi tu.",
+      "newFromSibling": "Nuovo. Parte da {{bpm}} BPM, circa l’80% del tuo tempo pulito di {{clean}} BPM su {{sibling}}."
     },
     "bar": {
       "summary": "L'asticella: {{even}}% di regolarità e {{heard}}% delle note sentite, a {{bpm}} BPM."
@@ -204,7 +205,8 @@
       "listeningBack": "Riascolto",
       "band": "Band",
       "bandHint": "La band non viene valutata. Col microfono, tienila bassa o usa le cuffie.",
-      "bandMicHint": "Col microfono sentirei la band come note tue, quindi parte spenta. Con le cuffie, alzala."
+      "bandMicHint": "Col microfono sentirei la band come note tue, quindi parte spenta. Con le cuffie, alzala.",
+      "skip": "Salta questo"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} battute",
@@ -355,8 +357,17 @@
       "subscribeCap": "In questo test puoi seguire fino a {{cap}} percorsi. Annulla prima un'iscrizione; la sua cronologia resta.",
       "unsubscribedNote": "Non è nel piano di oggi. La tua cronologia resta; iscriviti di nuovo quando vuoi.",
       "testOut": "Fai la verifica",
-      "testOutHow": "Una take al tempo di superamento di ogni esercizio non ancora superato. Superane circa tre su quattro e lo step è fatto.",
-      "testOutRetests": "Hai superato tutti gli esercizi qui, quindi questo li riverifica tutti: una take ciascuno al tempo di superamento."
+      "testOutHow": "Una take al tempo di superamento per ogni esercizio non ancora superato. Superane {{need}} su {{count}} e il passo è fatto.",
+      "testOutRetests": "Hai superato tutti gli esercizi qui, quindi questo li riverifica tutti: una take ciascuno al tempo di superamento.",
+      "levelName": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzato"
+      },
+      "levelStart": "Si parte dal passo {{n}} · {{level}}",
+      "skipped": "Saltato",
+      "skippedHow": "Sotto il tuo livello ({{level}}), quindi Oggi lo salta. Puoi comunque suonarlo qui, o scegliere questo passo per riprenderlo.",
+      "startHereIf": "Inizia qui se"
     },
     "progress": {
       "title": "Progressi",
@@ -444,6 +455,15 @@
     "tabstrip": {
       "label": "Intavolatura: {{notes}}",
       "bar": "battuta {{n}}"
+    },
+    "leave": {
+      "title": "Uscire da questa sessione?",
+      "body": "Le tue take finora sono salvate.",
+      "stay": "Continua",
+      "leave": "Esci"
+    },
+    "placement": {
+      "result": "Parti dal passo {{n}}: {{step}}"
     }
   }
 }

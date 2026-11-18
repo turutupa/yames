@@ -99,7 +99,7 @@
         "reviewDueSlipped": "It slipped last time, so one step lower.",
         "reviewDueLeft": "Left over from {{step}}, which is done.",
         "finisher": "Over the band, at a tempo you've passed.",
-        "placement": "An easy Take, then one at the pass tempo. Pass both and you skip ahead a Step.",
+        "placement": "A short climb: about 75%, 100% and 120% of the pass tempo, stopping at the first miss. Pass at the pass tempo and you skip ahead a Step.",
         "testOut": "One Take at the pass tempo. Pass it and the Step is done.",
         "benchmark": "Day {{day}}: the same Take each time, to compare.",
         "yourTurn": "Not checked yet, so you judge it.",
@@ -165,10 +165,11 @@
       "skippedTodayYesterday": "{{path}} rests today: played yesterday.",
       "skippedTodayNever": "{{path}} rests today: not played yet.",
       "finisher": "To finish: {{exercise}} with the band at {{bpm}} BPM, a tempo you've passed. Not graded.",
-      "placement": "New here? One easy Take at {{bpm}} BPM, then one at {{pass}}. Pass both and you skip ahead to the next Step.",
+      "placement": "New here? A short climb from {{bpm}} BPM through {{pass}}, one Take each, stopping at the first miss. Pass at {{pass}} and you skip ahead to the next Step.",
       "testOut": "Test out of {{step}}: one Take at the pass tempo, {{bpm}} BPM.",
       "benchmark": "Benchmark, day {{day}}: the same Exercise at {{bpm}} BPM each time, to compare.",
-      "yourTurn": "Your turn: {{exercise}}. Not checked yet, so you judge it."
+      "yourTurn": "Your turn: {{exercise}}. Not checked yet, so you judge it.",
+      "newFromSibling": "New. It starts at {{bpm}} BPM, about 80% of your clean {{clean}} BPM on {{sibling}}."
     },
     "bar": {
       "summary": "The bar: {{even}}% even and {{heard}}% of the notes heard, at {{bpm}} BPM."
@@ -203,7 +204,8 @@
       "listeningBack": "Listening back",
       "band": "Band",
       "bandHint": "The band is not graded. On a microphone, keep it low or use headphones.",
-      "bandMicHint": "On a microphone I'd hear the band as your notes, so it starts off. With headphones on, turn it up."
+      "bandMicHint": "On a microphone I'd hear the band as your notes, so it starts off. With headphones on, turn it up.",
+      "skip": "Skip this"
     },
     "result": {
       "kick": "Take {{take}} · {{title}} · {{bpm}} BPM · {{bars}} bars",
@@ -347,8 +349,17 @@
       "subscribeCap": "You can follow up to {{cap}} Paths in this test. Unsubscribe from one first; its history stays.",
       "unsubscribedNote": "Not in Today's plan. Your history is kept; subscribe again any time.",
       "testOut": "Test out",
-      "testOutHow": "One Take at the pass tempo of each Exercise you haven't passed yet. Pass about three of four and the Step is done.",
-      "testOutRetests": "You've passed every Exercise here, so this re-tests them all: one Take each at the pass tempo."
+      "testOutHow": "One Take at the pass tempo of each Exercise you haven't passed yet. Pass {{need}} of {{count}} and the Step is done.",
+      "testOutRetests": "You've passed every Exercise here, so this re-tests them all: one Take each at the pass tempo.",
+      "levelName": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "levelStart": "Starting at Step {{n}} · {{level}}",
+      "skipped": "Skipped",
+      "skippedHow": "Below your Level ({{level}}), so Today skips it. You can still play it here, or choose this Step to bring it back.",
+      "startHereIf": "Start here if"
     },
     "progress": {
       "title": "Progress",
@@ -435,6 +446,15 @@
     "tabstrip": {
       "label": "Tab: {{notes}}",
       "bar": "bar {{n}}"
+    },
+    "leave": {
+      "title": "Leave this Session?",
+      "body": "Your Takes so far are saved.",
+      "stay": "Keep going",
+      "leave": "Leave"
+    },
+    "placement": {
+      "result": "You start at Step {{n}}: {{step}}"
     }
   }
 }
