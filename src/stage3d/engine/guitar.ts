@@ -31,9 +31,9 @@ export const NOTE_R = 0.05;
  * drawn on the headstock. Even NOW's larger token clears the nut.
  */
 export const OPEN_K = 0.66;
-export const noteX = (f: number) => (f <= 0 ? -(NOTE_R * 1.45 * OPEN_K + 0.016) : fretX(f) - NOTE_R - 0.021);
+export const noteX = (f: number) => (f <= 0 ? -(NOTE_R * 1.45 * OPEN_K + 0.008) : fretX(f) - NOTE_R - 0.021);
 /** Where the board starts: a short stub before the nut, just room for the open strings' tokens. */
-export const HEAD = -0.13;
+export const HEAD = -0.115;
 const INLAY_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 const DOUBLE = (f: number) => f === 12 || f === 24;
 // The taper, nut to the 24th fret. A real neck goes about 43 mm to 56 mm (0.77);
