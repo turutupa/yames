@@ -1476,6 +1476,6 @@
 /* Cards draw their ring inside their own edge: their rows clip anything
    outside, and an inner ring cannot be mistaken for the selected border. */
 .onboarding-overlay
-  :is(.instrument-picker-card, .onboarding-sound-card, .onboarding-theme-card, .onboarding-coach-card, .onboarding-input-mode):focus-visible {
+  :is(.instrument-picker-card, .onboarding-sound-card, .onboarding-theme-card, .onboarding-coach-card, .onboarding-input-mode, .onboarding-start-path, .onboarding-start-level):focus-visible {
   outline-offset: -4px;
 }
