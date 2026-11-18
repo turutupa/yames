@@ -141,25 +141,31 @@ function TimingStrip({ deviations }: { deviations: readonly number[] }) {
   const MID = H / 2;
   const RANGE_MS = 50;
   const y = (ms: number) => MID - (Math.max(-RANGE_MS, Math.min(RANGE_MS, ms)) / RANGE_MS) * (MID - 8);
-  const step = (W - 44) / 24;
+  const step = (W - 12) / 24;
+  // The words are HTML beside the drawing, not SVG text in it: the drawing is
+  // scaled to its box, and at the head's 46 px they came out about 6 px tall
+  // (acceptance P2-5).
   return (
-    <svg
-      className="session-strip"
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label={t("session.run.stripLabel")}
-    >
-      <text x="0" y="13" className="session-strip-label">
-        {t("session.run.late")}
-      </text>
-      <text x="0" y={H - 4} className="session-strip-label">
-        {t("session.run.early")}
-      </text>
-      <line x1="40" x2={W} y1={MID} y2={MID} className="session-strip-grid" />
-      {deviations.map((ms, i) => (
-        <circle key={i} cx={40 + i * step} cy={y(ms)} r="4" className="session-strip-dot" />
-      ))}
-    </svg>
+    <span className="session-strip" role="img" aria-label={t("session.run.stripLabel")}>
+      <span className="session-strip-labels" aria-hidden="true">
+        <span>{t("session.run.late")}</span>
+        <span>{t("session.run.early")}</span>
+      </span>
+      <span className="session-strip-area" aria-hidden="true">
+        <svg className="session-strip-plot" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+          <line x1="0" x2={W} y1={MID} y2={MID} className="session-strip-grid" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <span className="session-strip-dots">
+          {deviations.map((ms, i) => (
+            <i
+              key={i}
+              className="session-strip-dot"
+              style={{ left: `${((6 + i * step) / W) * 100}%`, top: `${(y(ms) / H) * 100}%` }}
+            />
+          ))}
+        </span>
+      </span>
+    </span>
   );
 }
 

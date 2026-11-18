@@ -1395,16 +1395,48 @@
   height: 84px;
   align-self: center;
 }
-.session-strip-label {
-  fill: var(--l-quiet);
-  font: 500 12px var(--l-body);
+.session-strip {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.session-strip-labels {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font: 500 12px/1 var(--l-body);
+  color: var(--l-quiet);
+}
+.session-strip-area {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.session-strip-plot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Round dots whatever the box's shape: HTML over the stretched grid line. */
+.session-strip-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 .session-strip-grid {
   stroke: color-mix(in srgb, var(--l-tone) 35%, transparent);
   stroke-width: 1;
 }
 .session-strip-dot {
-  fill: var(--l-tone);
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--l-tone);
   filter: drop-shadow(0 0 4px color-mix(in srgb, var(--l-tone) 80%, transparent));
 }
 .session-mechlow {
