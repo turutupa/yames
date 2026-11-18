@@ -164,6 +164,50 @@ export class Driver {
     throw new Error(`no ${buttonRe} inside ${containerRe} within ${timeoutMs} ms`);
   }
 
+  /**
+   * Leave the running Session by its Exit button, answering "Leave this
+   * Session?" when it is asked. Exit asks once the Session has Takes or a
+   * block is running, and goes at once otherwise; both are fine here.
+   * Returns whether the dialog was asked.
+   */
+  async leaveSession({ timeoutMs = 15000, dialogMs = 2000 } = {}) {
+    await this.clickText(/^Exit$/, { timeoutMs });
+    const asked = await this.waitFor(
+      `return !!document.querySelector('[data-testid="leave-session"]')
+         || !document.querySelector('[data-testid="session-exit"]');`,
+      dialogMs,
+    );
+    const open = asked && (await this.exec(`return !!document.querySelector('[data-testid="leave-session"]')`));
+    if (open) await this.clickTestId("leave-session-leave");
+    return !!open;
+  }
+
+  /** Wait until a script returns truthy; false on time out. */
+  async waitFor(script, timeoutMs = 5000) {
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeoutMs) {
+      try {
+        if (await this.exec(script)) return true;
+      } catch {
+        /* page reloading */
+      }
+      await sleep(100);
+    }
+    return false;
+  }
+
+  /** Click the element with this data-testid; throws when it is not there in time. */
+  async clickTestId(id, timeoutMs = 5000) {
+    const ok = await this.waitFor(
+      `const el = document.querySelector('[data-testid="${id}"]');
+       if (!el || el.disabled) return false;
+       el.click();
+       return true;`,
+      timeoutMs,
+    );
+    if (!ok) throw new Error(`no [data-testid="${id}"] to click within ${timeoutMs} ms`);
+  }
+
   /** Every button's label on the page, for debugging a failed step. */
   buttons() {
     return this.exec(
