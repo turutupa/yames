@@ -176,7 +176,14 @@ impl Default for AppState {
             subdivision: 1,
             mode: "comfortable".to_string(),
             corner: "top-right".to_string(),
-            always_on_top: true,
+            // Off for a new install (UX audit SET-5, 2026-11-18): a main
+            // window that floats over everything is a surprise, and the
+            // first-run summary said Off while this said On. A player who
+            // has ever run Yames keeps their saved value — `persist_state`
+            // writes "alwaysOnTop" on every change and lib.rs restores it
+            // over this default. The widget stays on top: it is the
+            // floating window, and floating is what it is for.
+            always_on_top: false,
             widget_always_on_top: true,
             accent_color: "#e94560".to_string(),
             theme: "mono".to_string(),

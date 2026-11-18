@@ -229,15 +229,16 @@ describe("Devices", () => {
 });
 
 describe("Hotkeys (KEY-01 to KEY-13, MID-08)", () => {
-  /** The row for one action: its name, then its key, global and MIDI buttons. */
+  /** The row for one action: its name, then its key and MIDI buttons. (The
+   *  Global column is not drawn until global shortcuts exist: SET-4.) */
   function hotkeyRow(id: string) {
     const name = t(`settings.hotkeys.actions.${id}`);
     const found = [...document.querySelectorAll<HTMLElement>(".hotkey-row")].find(
       (r) => r.querySelector(".hotkey-action")?.textContent === name,
     );
     if (!found) throw new Error(`no hotkey row for ${id}`);
-    const [key, global, midi] = [...found.querySelectorAll<HTMLButtonElement>(".hotkey-bind-btn")];
-    return { key, global, midi };
+    const [key, midi] = [...found.querySelectorAll<HTMLButtonElement>(".hotkey-bind-btn")];
+    return { key, midi };
   }
 
   it.each(HOTKEYS.map((h) => [h.id] as const))("%s has its row, with its key", async (id) => {
@@ -338,5 +339,23 @@ describe("the ways back into onboarding", () => {
   it.each(["settings.general.runSetupAgain", "settings.general.takeTour"])("%s", async (key) => {
     await inSettings();
     expect(document.body.textContent).toContain(t(key));
+  });
+});
+
+describe("Practice (UX audit SET-1)", () => {
+  it("shows the saved length and view, and saves new ones under the Session's keys", async () => {
+    const { store } = await inSettings({ "session.minutes": 15, practiceView: "tab" });
+    const minutes = row("settings.practice.minutes");
+    await waitFor(() =>
+      expect(isChosen(within(minutes).getByRole("button", { name: "15 min" }))).toBe(true),
+    );
+    fireEvent.click(within(minutes).getByRole("button", { name: "20 min" }));
+    await waitFor(() => expect(store.values.get("session.minutes")).toBe(20));
+
+    const view = row("settings.practice.view");
+    expect(isChosen(within(view).getByRole("button", { name: t("session.view.tab") }))).toBe(true);
+    fireEvent.click(within(view).getByRole("button", { name: t("session.view.runway") }));
+    await waitFor(() => expect(store.values.get("practiceView")).toBe("runway"));
+    expect(isChosen(within(view).getByRole("button", { name: t("session.view.runway") }))).toBe(true);
   });
 });
