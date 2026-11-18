@@ -3900,3 +3900,9 @@
   align-items: baseline;
   gap: 6px;
 }
+/* A phone: the timing strip is a line under the numbers, not a block. */
+@media (max-width: 480px) {
+  .session-page .session-strip {
+    height: 48px;
+  }
+}
