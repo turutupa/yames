@@ -85,12 +85,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -187,12 +187,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -294,12 +294,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -404,12 +404,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -545,12 +545,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -663,12 +663,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -781,12 +781,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -899,12 +899,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -1131,12 +1131,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -1276,12 +1276,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -1439,12 +1439,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -1676,12 +1676,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -2108,12 +2108,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -2216,12 +2216,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -2451,12 +2451,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -2648,12 +2648,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -3276,12 +3276,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":55,"grading":"graded"},
-              {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
-              {"bpm":80,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 90
@@ -3434,11 +3434,11 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
               {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
@@ -4183,11 +4183,11 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":45,"grading":"graded"},
-              {"bpm":55,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"}
             ],
@@ -4293,12 +4293,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -4420,11 +4420,11 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":45,"grading":"graded"},
-              {"bpm":55,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
+              {"bpm":65,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
               {"bpm":90,"grading":"graded"}
             ],
@@ -4560,11 +4560,11 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
               {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
@@ -4705,11 +4705,11 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
               {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
@@ -5052,12 +5052,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
               {"bpm":90,"grading":"graded"},
-              {"bpm":100,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
+              {"bpm":105,"grading":"graded"},
               {"bpm":110,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -5161,12 +5161,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -5283,11 +5283,11 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
-              {"bpm":60,"grading":"graded"},
               {"bpm":70,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
+              {"bpm":80,"grading":"graded"},
               {"bpm":85,"grading":"graded"},
+              {"bpm":90,"grading":"graded"},
               {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
@@ -5517,12 +5517,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -5630,12 +5630,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -5755,12 +5755,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -6123,12 +6123,12 @@
           "rests": [],
           "tempo": {
             "rungs": [
-              {"bpm":50,"grading":"graded"},
               {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
               {"bpm":75,"grading":"graded"},
               {"bpm":80,"grading":"graded"},
-              {"bpm":90,"grading":"graded"},
+              {"bpm":85,"grading":"graded"},
+              {"bpm":95,"grading":"graded"},
               {"bpm":100,"grading":"graded"}
             ],
             "passAtBpm": 80
@@ -6427,12 +6427,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":35,"grading":"graded"},
-              {"bpm":40,"grading":"graded"},
-              {"bpm":45,"grading":"graded"},
               {"bpm":50,"grading":"graded"},
+              {"bpm":55,"grading":"graded"},
               {"bpm":58,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":72,"grading":"graded"}
             ],
             "passAtBpm": 58
@@ -6587,12 +6587,12 @@
           ],
           "tempo": {
             "rungs": [
-              {"bpm":35,"grading":"graded"},
-              {"bpm":40,"grading":"graded"},
-              {"bpm":45,"grading":"graded"},
               {"bpm":50,"grading":"graded"},
+              {"bpm":55,"grading":"graded"},
               {"bpm":58,"grading":"graded"},
+              {"bpm":60,"grading":"graded"},
               {"bpm":65,"grading":"graded"},
+              {"bpm":70,"grading":"graded"},
               {"bpm":72,"grading":"graded"}
             ],
             "passAtBpm": 58

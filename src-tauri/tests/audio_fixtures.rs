@@ -847,7 +847,9 @@ fn pack_pass_bars(path: &str, exercise: &str) -> Vec<PassBar> {
             _ => None,
         }
     }
-    let ex = find(&pack, exercise).unwrap_or_else(|| panic!("{exercise} in {path}"));
+    // A variant (`id#params`) carries its Exercise's bars.
+    let base = exercise.split('#').next().unwrap_or(exercise);
+    let ex = find(&pack, base).unwrap_or_else(|| panic!("{exercise} in {path}"));
     serde_json::from_value(ex["passBars"].clone()).expect("passBars as format.ts writes them")
 }
 

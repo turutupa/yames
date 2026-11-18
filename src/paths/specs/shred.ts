@@ -40,6 +40,8 @@ const right = (min: number, overBars = 4): PassBar => ({ metric: "noteIdentity",
 const accent = (min: number): PassBar => ({ metric: "accentPlacement", min, overBars: 4 });
 
 /** One string, slow enough to be strict: evenness 0.9. */
+/** Hammers from nowhere are attacks that must be heard, and they are quiet. */
+const LEGATO_TAPPED = [even(0.8), heard(0.85), extras(3), right(0.85)];
 const TIGHT = [even(0.9), heard(0.95), extras(2)];
 const TIGHT_NOTES = [...TIGHT, right(0.9)];
 /** Bursts, skips and odd groupings: the time is harder to hold, so 0.8. */
@@ -170,7 +172,7 @@ const BEGINNER: StepSpec[] = [
         howTo: ["Sixteenth notes on the open A string, strictly down-up, right through the take. Rest the picking hand lightly on the bridge so the low E stays quiet."],
         coach: "This one is only about time. I'll say how even your best eight bars in a row were and whether any note went missing.",
         tab: `/16 ${repeat("5:0", 16)} | ${repeat("5:0", 16)}`,
-        position: 5,
+        position: 0,
         rungs: ladder(60, 130, 5),
         passAt: 110,
         grade: "timing",
@@ -330,7 +332,7 @@ const BEGINNER: StepSpec[] = [
         ],
         coach: "Accent checks are rough. If the upstroke accents disappear on the recording, that is the thing to work on.",
         tab: `/16t ${repeat("5:0> 5:0 5:0 5:0> 5:0 5:0", 4)}`,
-        position: 5,
+        position: 0,
         rungs: ladder(50, 90, 5),
         passAt: 75,
         grade: "accents",
@@ -1224,7 +1226,7 @@ const ADVANCED: StepSpec[] = [
     goal: "Run three-note-per-string scales with one pick a string or less, hammering from nowhere going up and pulling off coming down.",
     why: "Three notes per string is where legato becomes a way to play scales fast with almost no picking. Going up, the first note of each new string has nothing to hammer from, so the finger hammers onto it from the air: the hammer-on from nowhere, and the skill that makes or breaks a legato run. Coming down, each string's first note is picked and the rest pulled.",
     howTo: [
-      "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it H like any hammer-on, although nothing on that string came before it. It has to be loud, because there is no pick to help.",
+      "Hammer-on from nowhere: the finger comes down hard and fast on the new string with no pick. The tab marks it T. It has to be loud, because there is no pick to help.",
       "Sextuplets: six to the click, two strings to each beat.",
       "Each Exercise is a picked bar, then the same notes legato. Match the legato bar to the picked one: same rhythm, same volume.",
     ],
@@ -1237,10 +1239,10 @@ const ADVANCED: StepSpec[] = [
         title: "Up with hammers, from nowhere",
         purpose: "Twelve notes up four strings, held at the top. Bar 1 picked; bar 2 picks the first note only, then hammers everything, the first note of each string from nowhere.",
         howTo: [
-          "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked H, with nothing before it on that string).",
+          "Sextuplets. Bar 1: alternate-pick the twelve notes from the low E's fret 5 up to the G string's fret 9 and hold the last one to the bar line. Bar 2: pick the first note, hammer the rest; on the A, D and G strings the first note is a hammer-on from nowhere (marked T).",
           "Fingers 1-3-4 on the low E (5, 7, 8) and the A (5, 7, 8); 1-2-4 on the D and G (5, 7, 9), so each hammer to the little finger comes from the second finger with the stretch in front of it.",
         ],
-        coach: "The picked first note carries the timing. A hammer-on I can't hear costs nothing, the ones from nowhere included, so judge their volume by ear.",
+        coach: "The hammer-ons from nowhere count as attacks here, so one too quiet for me to catch shows up as missed. Make them loud; the bar allows for a few.",
         vary: {
           values: { key: ["A", "B", "C", "D", "E"] },
           pooled: ["key"],
@@ -1256,7 +1258,7 @@ const ADVANCED: StepSpec[] = [
         rungs: ladder(55, 95, 5),
         passAt: 90,
         grade: "timingNotes",
-        pass: LEGATO,
+        pass: LEGATO_TAPPED,
         selfCheck: [VOLUME_CHECK, "Were the hammer-ons from nowhere as loud as the picked first note?"],
         minutes: 6,
       },
@@ -1796,7 +1798,7 @@ function pentPullsTab(): string {
 function hammerAscent(): string {
   const cells = nps(6, 4);
   const picked = cellsTab(cells);
-  const legato = cellsTab(cells, (_c, i) => (i === 0 ? "" : "h"));
+  const legato = cellsTab(cells, (_c, i) => (i === 0 ? "" : i % 3 === 0 ? "t" : "h"));
   return `/16t ${picked} hold | ${legato} hold`;
 }
 
@@ -1826,7 +1828,7 @@ export default definePath({
   orderRationale:
     "The teacher's fifteen-Step outline, in its order: one string, then accents and groupings, then four-finger independence, then crossings, so that by Step 5 every later technique has its parts. The Path rotates techniques instead of finishing one before the next, because a shredder needs them together and because a rotation keeps a daily Session from being one drill. Picking comes first and stays the backbone: economy picking (Step 10) is taught only after strict alternate picking is reliable across strings and skips, so it is a choice and not a crutch. Legato and sweeps come late because both lean on a fretting hand built by the chromatic Step, and because the app can grade them least: legato is tied to picked notes, and sweeps say 'timing only' in their titles. Tapping and the eight-bar run close it. Where it departs from the outline: Step 1 adds Alternate Picking's 'four of each' as a fourth graded Exercise, Step 6 lands the six-note licks on a quarter note so they stay in sixteenths, Step 10 keeps the alternate-picked arpeggios beside the economy ones for contrast, and every legato Exercise is a picked bar followed by the same notes legato.",
   gradingLimits:
-    "Picked single notes, sixteenths to about 120 BPM and sextuplets to about 90, are the case the app is built for: timing evenness, notes heard and extra notes, plus right notes where the notes are at least 75 ms apart and the pitch is clear, after the take. None of it has been tried on a real guitar. Legato: a hammer-on or pull-off the app doesn't hear costs nothing, so the timing leans on the picked notes and the volume of the legato notes is a self-check; a tap counts as an attack that must be heard. Sweeps are graded on timing only: swept notes ring into each other, right notes mostly read 'not checked', and their titles say so; only rungs with at least 150 ms between notes are graded. Accents are rough, louder or not. Pick direction is never heard: it is a checklist item wherever the strokes matter. Above sixteenths at 100 BPM, read the timing as provisional until the input delay is calibrated, and use a clean or light-crunch tone for graded takes.",
+    "Picked single notes, sixteenths to about 120 BPM and sextuplets to about 90, are the case the app is built for: timing evenness, notes heard and extra notes, plus right notes where the notes are at least 75 ms apart and the pitch is clear, after the take. None of it has been tried on a real guitar. Legato: a hammer-on or pull-off the app doesn't hear costs nothing, so the timing leans on the picked notes and the volume of the legato notes is a self-check; a hammer-on from nowhere and a tap count as attacks that must be heard. Sweeps are graded on timing only: swept notes ring into each other, right notes mostly read 'not checked', and their titles say so; only rungs with at least 150 ms between notes are graded. Accents are rough, louder or not. Pick direction is never heard: it is a checklist item wherever the strokes matter. Above sixteenths at 100 BPM, read the timing as provisional until the input delay is calibrated, and use a clean or light-crunch tone for graded takes.",
   steps: [...BEGINNER, ...INTERMEDIATE, ...ADVANCED],
   levels: [
     {

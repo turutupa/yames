@@ -238,7 +238,7 @@ function buildExercise(
   // Paced: re-spaced from the pass, pass and top kept. Only a graded Exercise has a
   // pass to space from; warm-ups and self-checked ones keep the ladder written.
   const paced = !!pathSpec.paceLadders && !spec.warmup && allowed && writtenPass !== null;
-  const rungs: TempoRung[] = paced ? rungsAt(paceLadder(writtenPass!, writtenTop)) : written;
+  const rungs: TempoRung[] = paced ? rungsAt(paceLadder(writtenPass!, writtenTop, spec.rungs[0])) : written;
   const gradedRungs = rungs.filter((r) => r.grading === "graded");
   const passAt = !allowed ? null : paced ? writtenPass : (spec.passAt ?? gradedRungs[gradedRungs.length - 1]?.bpm ?? null);
   const tempo = { rungs, passAtBpm: passAt };
