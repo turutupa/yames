@@ -645,7 +645,8 @@
     opacity: 1;
     pointer-events: auto;
     cursor: pointer;
-    max-width: 140px;
+    /* The gutter beside the column, less the tick and its gap. */
+    max-width: calc((100vw - 252px - 680px) / 2 - 50px);
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0;
@@ -712,6 +713,11 @@
   font-family: var(--ui-mono);
   font-weight: 600;
   border-bottom-width: 2px;
+}
+
+/* The phone's rail: its bottom tab bar. */
+.mobile-tabs {
+  font-family: var(--ui-body);
 }
 
 /* ── The top bar's chips ──────────────────────────────────────────────── */
