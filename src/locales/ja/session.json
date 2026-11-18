@@ -497,7 +497,6 @@
     },
     "practice": {
       "next": "次",
-      "then": "その後 {{frets}}",
       "finger": "{{n}}の指",
       "start": "ここから",
       "legendNow": "今弾く",

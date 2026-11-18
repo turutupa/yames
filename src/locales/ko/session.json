@@ -497,7 +497,6 @@
     },
     "practice": {
       "next": "다음",
-      "then": "그다음 {{frets}}",
       "finger": "{{n}}번 손가락",
       "start": "여기서 시작",
       "legendNow": "지금 연주",

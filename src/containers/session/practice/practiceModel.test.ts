@@ -11,7 +11,7 @@ import {
   fingering,
   nowNextNeck,
   readyNeck,
-  thenFrets,
+  SPAN_FRETS,
   warmupPosition,
   watchIndex,
   windowOver,
@@ -88,9 +88,12 @@ describe("the neck as the instruction", () => {
     expect(out.some((n) => n.kind === "next")).toBe(false);
   });
 
-  it("says what comes after next", () => {
-    expect(thenFrets(onsets, 0)).toEqual([8, 7]);
-    expect(thenFrets(onsets, 3)).toEqual([]);
+  it("keeps a played note's finger under its verdict's colour", () => {
+    const verdicts = new Map([[1, "tone" as const]]);
+    const out = nowNextNeck(shape, onsets, 2, verdicts, false, fingers);
+    expect(out.find((n) => n.fret === 5)).toMatchObject({ kind: "tone", label: "1" });
+    // No dot carries a fret number, whatever its kind.
+    for (const n of out) if (n.label !== undefined) expect(["0", "1", "2", "3", "4"]).toContain(n.label);
   });
 
   it("names a finger only where the hand is fixed and the fret is under it", () => {
@@ -205,6 +208,19 @@ describe("the camera", () => {
     expect(plan[1]).toEqual(plan[0]); // 7 still fits the first window
     expect(plan[2]).not.toEqual(plan[1]);
     expect(plan[2].to).toBeGreaterThanOrEqual(12);
+  });
+
+  it("frames a pattern that fits as the ready screen does: its frets and one either side", () => {
+    const fits = {
+      barTicks: [0, 1920, 3840],
+      onsets: [
+        { id: 1, tick: 0, places: [{ string: 1, fret: 5 }] },
+        { id: 2, tick: 1920, places: [{ string: 1, fret: 8 }] },
+      ],
+    };
+    const plan = cameraPlan(fits);
+    expect(plan.every((w) => w.from === 4 && w.to === 9)).toBe(true);
+    expect(plan[0]).toEqual(windowOver(5, 8, SPAN_FRETS));
   });
 
   it("does not move at all for a pattern that fits", () => {

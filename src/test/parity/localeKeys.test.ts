@@ -64,6 +64,10 @@ const DELIBERATELY_REMOVED: readonly string[] = [
   "onboarding.handsFree.tools.title",
   "onboarding.ready.rows.coach",
   "onboarding.ready.coachOn",
+  // The neck's numbers are fingers everywhere (acceptance pass 4, P1-1,
+  // 2026-11-18): "next" no longer says "then 8, 7", frets the player read as
+  // fingers. It says "next" alone.
+  "session.practice.then",
 ];
 
 function englishKeys(): string[] {

@@ -497,7 +497,6 @@
     },
     "practice": {
       "next": "next",
-      "then": "then {{frets}}",
       "finger": "finger {{n}}",
       "start": "start here",
       "legendNow": "play now",

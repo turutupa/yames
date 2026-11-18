@@ -339,10 +339,11 @@ describe("the stage with an engine", () => {
     c.detach();
   });
 
-  it("keeps the strip out of short slots", () => {
+  it("keeps the strip out of any slot it would cost the neck's legibility", () => {
     expect(stripHeight(120)).toBe(0);
-    expect(stripHeight(200)).toBe(42);
-    expect(stripHeight(400)).toBe(54);
+    expect(stripHeight(200)).toBe(0);
+    expect(stripHeight(299)).toBe(0);
+    expect(stripHeight(400)).toBe(34);
   });
 });
 

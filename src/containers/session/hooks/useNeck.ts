@@ -10,7 +10,8 @@ import { useEffect, useMemo, useRef } from "react";
 import type { RefObject } from "react";
 import { useNeck } from "../../../stage3d/api";
 import type { NeckKind, NeckNote, NeckView } from "../../../stage3d/api";
-import type { PathNote } from "../../../paths/format";
+import type { HandPosition, PathNote } from "../../../paths/format";
+import { fingering } from "../practice/practiceModel";
 import type { TakePlan } from "../../../session/take";
 import type { TimingMark } from "../../songs/review/marks";
 import type { MainView } from "../../main-window/MainHeader";
@@ -75,15 +76,35 @@ export function kindOfMark(mark: TimingMark): NeckKind | null {
 }
 
 /**
- * An Exercise's own notes, on the neck. Labelled with their fret numbers, as
- * the practice neck labels NOW and NEXT (UX audit SES-17: the result's neck
- * said letters where the practice neck said numbers); a Theory Exercise,
- * whose point is the notes' names, keeps its letters.
+ * An Exercise's notes on the neck, each dot carrying its FINGER (1 index to 4
+ * little finger, 0 an open string) as on the ready screen, and nothing where
+ * the finger is not certain (`fingering`). Never a fret number and never an
+ * order (the owner, 2026-11-18: a number on a dot is a finger, everywhere).
+ * A Theory Exercise, whose point is the notes' names, keeps the letter on a
+ * dot that has no finger.
  */
-export function exerciseNeck(notes: readonly PathNote[] | undefined, kind: NeckKind = "aim", letters = false) {
+export function fingeredNotes(
+  notes: readonly (Fretted & { tech?: readonly string[] })[] | undefined,
+  position: HandPosition | undefined,
+  kind: NeckKind = "aim",
+  letters = false,
+): NeckNote[] {
   const list = notes ?? [];
-  const placed = neckNotesOf(list, kind);
-  return { view: zoomOf(list), notes: letters ? placed : placed.map((n) => ({ ...n, label: String(n.fret) })) };
+  const fingers = fingering(list, position);
+  return neckNotesOf(list, kind).map((n) => ({
+    ...n,
+    label: fingers.get(`${n.string}:${n.fret}`) ?? (letters ? n.label : undefined),
+  }));
+}
+
+/** An Exercise on the neck: framed on its own frets, a fret either side, its dots fingered (`fingeredNotes`). */
+export function exerciseNeck(
+  notes: readonly PathNote[] | undefined,
+  kind: NeckKind = "aim",
+  letters = false,
+  position?: HandPosition,
+) {
+  return { view: zoomOf(notes ?? []), notes: fingeredNotes(notes, position, kind, letters) };
 }
 
 function viewKey(view: NeckView): string {

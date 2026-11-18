@@ -15,7 +15,7 @@
  */
 import * as THREE from "three";
 import type { NeckKind } from "../api";
-import { noteLook, type NeckPalette } from "../neckTheme";
+import { MARKER_SCALE, noteLook, type NeckPalette } from "../neckTheme";
 import * as T from "./textures";
 
 export const L = 6.5;
@@ -64,8 +64,8 @@ const INLAY_R = 0.019;
 /** How close a note's centre may come to an inlay's before the inlay steps aside. */
 const INLAY_CLEAR = NOTE_R * 1.45 + INLAY_R + 0.014;
 
-/** NOW is drawn larger than the rest, so the eye lands on it first. */
-const NOTE_SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
+/** NOW is drawn larger than the rest, so the eye lands on it first (`MARKER_SCALE`). */
+const NOTE_SCALE = MARKER_SCALE;
 
 type Arrays = { p: number[]; c: number[]; i: number[] };
 const arrays = (): Arrays => ({ p: [], c: [], i: [] });
@@ -395,7 +395,10 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
   overlay.add(overlayGroup);
   function makeNote(): Note {
     const disc = new THREE.Mesh(discGeo, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, depthTest: false, toneMapped: false }));
-    const halo = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+    // No depth test: the glow is a flat plane over a crowned board, and on an
+    // outer string the crown rose through it and cut it off square (acceptance
+    // 4, P2-9). It draws over the board and the strings, under every marker.
+    const halo = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false, toneMapped: false }));
     disc.renderOrder = 2;
     halo.renderOrder = 3;
     const label = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false, toneMapped: false }));
@@ -525,7 +528,8 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
 
   // Transient flashes on the board, for notes with no resting disc.
   const flashes = Array.from({ length: 8 }, () => {
-    const m = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+    // No depth test, as the NOW glow: a flat flash over the crowned board was cut off square.
+    const m = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false, toneMapped: false }));
     m.visible = false;
     m.renderOrder = 1;
     root.add(m);
@@ -598,7 +602,9 @@ export function createGuitar({ tier, overlay, palette }: { tier: number; overlay
 
   /** Where a place's marker sits, in world space (for `project`). */
   function notePoint(s: number, f: number): THREE.Vector3 {
-    const x = noteX(f);
+    // Where the marker is drawn, stagger included, so a ring or a word hung on
+    // it lands on the dot and not beside it.
+    const x = noteX(f) - (crowded.has(s + ":" + f) ? NOTE_R * 1.7 : 0);
     const z = strZ(s, x);
     const p = new THREE.Vector3(x, crown(z) + strH(x) + 0.012, z);
     return root.localToWorld(p);

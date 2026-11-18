@@ -15,7 +15,7 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import { GUITAR_STANDARD_TUNING } from "../components/fretboard";
 import type { NeckKind, NeckNote, NeckView } from "./api";
 import type { StageSnapshot } from "./controller";
-import { noteLook, useNeckPalette, type NeckPalette } from "./neckTheme";
+import { MARKER_SCALE, noteLook, useNeckPalette, type NeckPalette } from "./neckTheme";
 
 /** An open string's token, as a share of a marker: the 3D neck's `OPEN_K` (engine/guitar.ts, not imported: it brings three.js). */
 const OPEN_K = 0.66;
@@ -37,7 +37,7 @@ const DOUBLE = (f: number) => f === 12 || f === 24;
 /** String widths as a fraction of the string spacing, high e to low E (the 3D neck's progression). */
 const STR_K = [0.04, 0.05, 0.064, 0.082, 0.1, 0.118];
 /** NOW and NEXT are larger, as on the 3D neck. */
-const SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
+const SCALE: Partial<Record<NeckKind, number>> = MARKER_SCALE;
 const fx = (n: number) => 1 - Math.pow(2, -n / 12);
 
 
@@ -201,6 +201,9 @@ export function FallbackNeck({
               data-string={stringIndex(n.string)}
               data-fret={Math.round(n.fret)}
               data-kind={n.kind}
+              // The resting marker's radius here, which `project` reports as
+              // the 3D neck does (not this kind's drawn size).
+              data-r={R * kOf(n.fret)}
               className="neck-fallback-dot"
               cx={noteX(n.fret)}
               cy={S(n.string)}
