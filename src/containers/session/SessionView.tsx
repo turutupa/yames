@@ -293,9 +293,9 @@ function TakeScreen({
           <CoachLine>{exercise.coachLine}</CoachLine>
           {!running && exercise.howTo[0] && <div className="session-why">{exercise.howTo[0]}</div>}
           {!running && bar && <div className="session-why">{lineText(t, bar)}</div>}
-          {/* Said once, before the first Take of a step, not on every
+          {/* Said once a Session, before its first Take, not on every
               screen of it (UX audit SES-14). */}
-          {honest && !running && run.takes === 0 && (
+          {honest && !running && run.outcomes.length === 0 && (
             <div className="session-why" data-testid="pick-caveat">{t(honest)}</div>
           )}
           <BandVolume session={session} hint={!running} />
@@ -1310,7 +1310,8 @@ export function SessionView({
         (step?.kind === "metronome" || (step?.kind === "jam" && !!step.exerciseId))));
 
   return (
-    <div className="session-page session-run" data-testid="session" data-neck3d={tabShown ? undefined : neck3d}>
+    // The recap draws no neck either (UX audit SES-10): the page's own backdrop.
+    <div className="session-page session-run" data-testid="session" data-neck3d={tabShown || run.phase === "recap" ? undefined : neck3d}>
       {run.phase !== "recap" && (
         <SessionBar
           run={run}

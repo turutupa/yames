@@ -3656,4 +3656,7 @@
   .session-page .session-recap-actions .session-big {
     width: 100%;
   }
+  .session-page .session-recap .session-recap-head .session-h1 {
+    font-size: 32px;
+  }
 }
