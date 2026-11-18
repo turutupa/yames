@@ -54,9 +54,9 @@ describe("HintCard", () => {
     const onDismiss = vi.fn();
     render(<HintCard id="coach-ask" inline onDismiss={onDismiss} />);
     fireEvent.keyDown(document, { key: "Tab" });
-    fireEvent.pointerDown(screen.getByText(/./, { selector: ".hint-card-body" }));
+    fireEvent.click(screen.getByText(/./, { selector: ".hint-card-body" }));
     expect(onDismiss).not.toHaveBeenCalled();
-    fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 

@@ -117,16 +117,19 @@ export function HintCard({
       if (cardRef.current?.contains(e.target as Node)) return; // its own buttons
       dismiss();
     };
-    const onPointer = (e: PointerEvent) => {
+    // `click`, after the fact, not `pointerdown`: an inline hint takes room
+    // in the layout, and going on the way down moved whatever was under the
+    // pointer before the click could land on it.
+    const onPointer = (e: MouseEvent) => {
       if (cardRef.current?.contains(e.target as Node)) return;
       dismiss();
     };
     // Bubble, and passive in effect: nothing here prevents or stops anything.
     document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("click", onPointer);
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("click", onPointer);
     };
   }, [dismiss]);
 
