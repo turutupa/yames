@@ -85,6 +85,13 @@ describe("Where do you start? — what it offers", () => {
       states: [{ pathId: "blues-pentatonics", level: "intermediate", startedAt: 1, updatedAt: 1 }],
     };
     expect(defaultStart(PATHS, progress)).toEqual({ pathId: "blues-pentatonics", levelId: "intermediate" });
+    // A Path this run started comes first, once it is followed.
+    const both: PlayerProgress = {
+      ...progress,
+      states: [...progress.states, { pathId: "sweep-picking", startedAt: 2, updatedAt: 2 }],
+    };
+    expect(defaultStart(PATHS, both, "sweep-picking")).toEqual({ pathId: "sweep-picking", levelId: "beginner" });
+    expect(defaultStart(PATHS, progress, "sweep-picking")?.pathId).toBe("blues-pentatonics");
     mount(progress);
     expect(pathCard("blues-pentatonics")).toHaveAttribute("aria-pressed", "true");
     expect(levelButton("intermediate")).toHaveAttribute("aria-pressed", "true");
@@ -110,6 +117,8 @@ describe("Where do you start? — selection is not navigation", () => {
     const [path, level] = startPath.mock.calls[0];
     expect(path.id).toBe("classic-rock");
     expect(level).toBe("advanced");
+    // W7 and a Back here show this Path, whatever else the player follows.
+    expect(dispatch).toHaveBeenCalledWith({ type: "SET_CONTEXT", patch: { startPathId: "classic-rock" } });
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
   });
 

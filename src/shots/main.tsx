@@ -205,20 +205,25 @@ async function drive() {
       document.querySelector<HTMLButtonElement>(".instrument-picker-card")!.click();
       await until("Next", () => !!button(i18n.t("onboarding.next")) && !button(i18n.t("onboarding.next"))!.disabled);
       button(i18n.t("onboarding.next"))!.click();
-      await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
-      const at = (id: string) => () => !!document.querySelector(`[data-step="${id}"]`);
-      if (stop === "soundLook" || stop === "handsFree") {
-        const id = stop === "soundLook" ? "sound-look" : "hands-free";
-        await pressUntil(`Skip to ${id}`, () => button(i18n.t("onboarding.skip"))?.click(), at(id), 20000);
-      } else if (stop === "input" || stop === "ready") {
-        await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
-      } else {
-        await until("the trouble panel", () => !!document.querySelector('[data-testid="audio-input-trouble"]'), 20000);
-      }
-      if (stop === "ready") {
+      // "Where do you start?": the Paths load, Shred is preselected, Next starts it.
+      await until("the Paths to start on", () => !!document.querySelector(".onboarding-start-path.selected"), 20000);
+      if (stop !== "start") {
         button(i18n.t("onboarding.next"))!.click();
-        const start = () => button(i18n.t("onboarding.ready.start"));
-        await pressUntil("Skip to the summary", () => button(i18n.t("onboarding.skip"))?.click(), () => !!start(), 20000);
+        await until("the input step", () => !!document.querySelector('[data-step="audio-input"]'));
+        const at = (id: string) => () => !!document.querySelector(`[data-step="${id}"]`);
+        if (stop === "soundLook" || stop === "handsFree") {
+          const id = stop === "soundLook" ? "sound-look" : "hands-free";
+          await pressUntil(`Skip to ${id}`, () => button(i18n.t("onboarding.skip"))?.click(), at(id), 20000);
+        } else if (stop === "input" || stop === "ready") {
+          await until("the guitar heard", () => !!document.querySelector(".onboarding-input-gate.proven"), 20000);
+        } else {
+          await until("the trouble panel", () => !!document.querySelector('[data-testid="audio-input-trouble"]'), 20000);
+        }
+        if (stop === "ready") {
+          button(i18n.t("onboarding.next"))!.click();
+          const start = () => button(i18n.t("onboarding.ready.start"));
+          await pressUntil("Skip to the summary", () => button(i18n.t("onboarding.skip"))?.click(), () => !!start(), 20000);
+        }
       }
     }
   }

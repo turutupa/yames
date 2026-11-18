@@ -215,7 +215,7 @@
   color: var(--text-secondary);
 }
 .onboarding-theme-preview-neck {
-  height: 74px;
+  height: 86px;
 }
 .onboarding-theme-preview-neck .neck-fallback {
   width: 100%;
@@ -320,4 +320,7 @@
 }
 .onboarding-hf-nav-sep {
   margin-right: 4px;
+}
+.onboarding-first-session-role {
+  color: var(--text-tertiary);
 }

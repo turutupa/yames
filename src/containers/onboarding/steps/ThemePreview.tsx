@@ -34,7 +34,7 @@ const NOTES: NeckNote[] = [
   { string: 1, fret: 5, kind: "box" },
   { string: 1, fret: 8, kind: "box" },
 ];
-const VIEW: NeckView = { kind: "zoom", from: 3, to: 10, flat: true };
+const VIEW: NeckView = { kind: "zoom", from: 4, to: 9, flat: true };
 
 /** Rows for the card when there is no plan to borrow (outside the app, or still loading). */
 const SAMPLE_ROLES = ["warmUp", "new", "review"] as const;

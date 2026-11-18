@@ -38,6 +38,12 @@ export type OnboardingContext = {
   tryListening?: boolean;
   /** Set by W5 (O5) so W6 can gate itself. */
   inputConfigured?: boolean;
+  /**
+   * The Path "Where do you start?" started on this run. A re-run adds to the
+   * Paths already followed, so W7 and a Back to the step show this one rather
+   * than whichever the store lists first.
+   */
+  startPathId?: string;
 };
 
 /**

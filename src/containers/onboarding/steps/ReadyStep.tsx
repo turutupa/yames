@@ -14,6 +14,7 @@ import type { StepId } from "../onboardingMachine";
 import type { WizardStepProps } from "./types";
 import { defaultStart } from "./StartStep";
 import { stepTitle } from "../../session/TodayView";
+import { roleKey } from "../../session/todayPlan";
 import "../../../styles/onboarding-learning.css";
 
 /** Rows of the first Session W7 shows; Today has the rest. */
@@ -47,7 +48,7 @@ export function ReadyStep(_props: WizardStepProps) {
 
   // Where Today starts: the Path the player follows first, at its Level — what
   // "Where do you start?" wrote, or the default a skipped step leaves.
-  const start = defaultStart(learning.paths, learning.progress);
+  const start = defaultStart(learning.paths, learning.progress, machineContext.startPathId);
   const startPath = start ? learning.paths.find((p) => p.id === start.pathId) : undefined;
   const plan = learning.plan;
   const planSteps = plan?.steps ?? [];
@@ -194,7 +195,10 @@ export function ReadyStep(_props: WizardStepProps) {
                 <span className="onboarding-first-session-dot" aria-hidden="true">
                   {i + 1}
                 </span>
-                <span className="onboarding-first-session-name">{stepTitle(step, t)}</span>
+                <span className="onboarding-first-session-name">
+                  {stepTitle(step, t)}
+                  <span className="onboarding-first-session-role"> · {t(roleKey(step))}</span>
+                </span>
                 <span className="onboarding-first-session-min">
                   {t("session.today.minutes", { minutes: step.minutes })}
                 </span>

@@ -59,27 +59,32 @@ export function levelFor(path: PathDoc, progress: PlayerProgress): string | null
  * What the step shows before the player touches it: the first Path they
  * follow, at its Level; on a first run, the Path everybody starts on.
  */
-export function defaultStart(paths: readonly PathDoc[], progress: PlayerProgress): StartChoice | null {
+export function defaultStart(
+  paths: readonly PathDoc[],
+  progress: PlayerProgress,
+  /** The Path this run already started (`OnboardingContext.startPathId`), first if still followed. */
+  startedNow?: string,
+): StartChoice | null {
   const offered = startablePaths(paths);
   if (offered.length === 0) return null;
-  const followed = progress.states
-    .filter((s) => isSubscribed(progress, s.pathId))
-    .map((s) => offered.find((p) => p.id === s.pathId))
-    .find((p): p is PathDoc => !!p);
+  const ids = progress.states.filter((s) => isSubscribed(progress, s.pathId)).map((s) => s.pathId);
+  if (startedNow && ids.includes(startedNow)) ids.unshift(startedNow);
+  const followed = ids.map((id) => offered.find((p) => p.id === id)).find((p): p is PathDoc => !!p);
   const path = followed ?? offered.find((p) => p.id === FIRST_PATH_ID) ?? offered[0];
   return { pathId: path.id, levelId: levelFor(path, progress) };
 }
 
 export function StartStep(_props: WizardStepProps) {
   const { t } = useTranslation();
-  const { learning, setStepCommit, setNextEnabled } = useWizardEnv();
+  const { learning, setStepCommit, setNextEnabled, setMachineContext, machineContext } = useWizardEnv();
   const { paths, progress, startPath } = learning;
   const offered = useMemo(() => startablePaths(paths), [paths]);
 
   // Null until the player picks: the default follows the store as it loads,
   // so a re-run whose progress arrives a moment late still starts on their Path.
   const [picked, setPicked] = useState<StartChoice | null>(null);
-  const fallback = useMemo(() => defaultStart(paths, progress), [paths, progress]);
+  const startedNow = machineContext.startPathId;
+  const fallback = useMemo(() => defaultStart(paths, progress, startedNow), [paths, progress, startedNow]);
   const choice = picked ?? fallback;
   const path = choice ? offered.find((p) => p.id === choice.pathId) ?? null : null;
   const levels = path ? levelsOf(path) : [];
@@ -94,8 +99,15 @@ export function StartStep(_props: WizardStepProps) {
 
   useEffect(() => {
     setNextEnabled(!refused);
-    setStepCommit(path && !refused && !unchanged ? () => void startPath(path, level?.id ?? null) : null);
-  }, [path, level, refused, unchanged, startPath, setNextEnabled, setStepCommit]);
+    setStepCommit(
+      path && !refused
+        ? () => {
+            if (!unchanged) startPath(path, level?.id ?? null);
+            setMachineContext({ startPathId: path.id });
+          }
+        : null,
+    );
+  }, [path, level, refused, unchanged, startPath, setNextEnabled, setStepCommit, setMachineContext]);
 
   const entry = path && level ? levelEntryStep(progress, path, level) : null;
 
