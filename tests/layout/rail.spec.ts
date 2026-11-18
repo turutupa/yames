@@ -51,8 +51,9 @@ for (const scene of SCENES) {
       test(`${scene}: rail keycaps fit at ${size.width}px in ${lng}`, async ({ page }) => {
         await openShot(page, scene, size, "ember", { lng });
         const { count, trouble } = await keycapTrouble(page);
-        // Today, Paths, Progress, Tools, the five tools and Settings.
-        expect(count).toBe(10);
+        // Today, Paths, Progress, Tools and Settings; the five tools nest
+        // under Tools only while one of them is open (NAV-9).
+        expect(count).toBe(scene === "tools" ? 5 : 10);
         expect(trouble).toEqual([]);
         expect(await spillingLabels(page, ".rail")).toEqual([]);
       });

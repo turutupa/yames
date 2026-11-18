@@ -60,32 +60,35 @@ function toolGroup(root: ParentNode): Element | null {
  * Whatever opens the tool list, if something has to.
  *
  * The rail reads Today, Paths, Progress, Tools. The five tools show under Tools,
- * nested, while a tool or the Tools list is open; from anywhere else a player
- * clicks Tools first, which opens the Tools list and the rail's tool group with it.
+ * nested, only while a tool is open (NAV-9); from anywhere else a player clicks
+ * Tools first, which opens the Tools list, whose five cards are the tools.
  */
 function revealTools(root: ParentNode = document): void {
-  if (toolGroup(root)) return;
+  if (toolGroup(root) || root.querySelector("[data-testid='tools']")) return;
   const door = root.querySelector<HTMLElement>(".rail-learn .rail-mode[aria-label='Tools']");
   if (door) fireEvent.click(door);
+}
+
+/** Each visible tool's name, and the element a player clicks to open it. */
+function toolNames(root: ParentNode): HTMLElement[] {
+  const group = toolGroup(root);
+  if (group) return [...group.querySelectorAll<HTMLElement>(".rail-mode-label")];
+  const list = root.querySelector("[data-testid='tools']");
+  return [...(list?.querySelectorAll<HTMLElement>(".tools-card .tools-name") ?? [])];
 }
 
 /** The names of the tools a player can see, in order. */
 export function visibleToolLabels(root: ParentNode = document): string[] {
   revealTools(root);
-  const group = toolGroup(root);
-  if (!group) return [];
-  return [...group.querySelectorAll(".rail-mode-label")].map((n) => n.textContent ?? "");
+  return toolNames(root).map((n) => n.textContent ?? "");
 }
 
 /** Open a tool the way a player does: by clicking its name. */
 export async function openTool(tool: Tool): Promise<void> {
   const name = await waitFor(() => {
     revealTools();
-    const group = toolGroup(document);
-    const el = [...(group?.querySelectorAll<HTMLElement>(".rail-mode-label") ?? [])].find(
-      (n) => n.textContent === tool.label,
-    );
-    if (!el) throw new Error(`${tool.label} is not on the rail`);
+    const el = toolNames(document).find((n) => n.textContent === tool.label);
+    if (!el) throw new Error(`${tool.label} is not on the rail or the Tools list`);
     return el;
   });
   fireEvent.click(name);

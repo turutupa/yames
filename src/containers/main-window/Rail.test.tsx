@@ -73,13 +73,13 @@ describe("Rail", () => {
     ]);
   });
 
-  it("shows the tools under Tools only while a tool or the Tools list is open", () => {
+  it("shows the tools under Tools only while a tool is open, not beside the Tools list's cards", () => {
     const { container, props, rerender } = setup({ view: "today" });
     expect(container.querySelector('[role="group"]')).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Tools" }));
     expect(props.setView).toHaveBeenCalledWith("tools");
     rerender(<Rail {...props} view="tools" />);
-    expect(container.querySelectorAll('[role="group"] .rail-mode')).toHaveLength(5);
+    expect(container.querySelector('[role="group"]')).toBeNull();
     rerender(<Rail {...props} view="jam" />);
     expect(container.querySelectorAll('[role="group"] .rail-mode')).toHaveLength(5);
   });

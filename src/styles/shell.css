@@ -1445,6 +1445,40 @@ button.jam-vibe-chip {
   }
 }
 
+/* ── The tools, nested under Tools (NAV-9) ─────────────────────────────────
+ * Only while a tool is open. They hang off a hairline that drops from the
+ * Tools icon, a step in and a size down, so they read as Tools' children and
+ * not as a second list of places; Tools itself keeps its accent icon and full
+ * text (the door you came through) without the fill, which is the open tool's. */
+.rail-mode-row[data-parent] .rail-mode {
+  color: var(--text-primary);
+}
+.rail-mode-row[data-parent] .rail-mode svg {
+  color: var(--accent);
+}
+.rail-tools[data-nested] {
+  gap: 1px;
+  margin: -2px 0 6px 30px;
+  padding: 2px 10px 2px 6px;
+  border-left: 1px solid var(--border);
+}
+.rail-tools[data-nested] .rail-mode {
+  min-height: 36px;
+  font-size: 0.86rem;
+}
+.rail[data-collapsed] .rail-tools[data-nested] {
+  margin-left: 0;
+  padding: 0 10px;
+  border-left: none;
+}
+@media (width < 620px) {
+  .rail:not([data-library-open]) .rail-tools[data-nested] {
+    margin-left: 0;
+    padding: 0 10px;
+    border-left: none;
+  }
+}
+
 /* Over the row's own fill, the glyph's hover needs to be the stronger of the
    two or it reads as nothing happening. */
 @media (hover: hover) {
@@ -1571,9 +1605,14 @@ body[data-sheet-maximized] .rail {
 }
 
 .rail-action.active {
-  background: var(--accent-2-subtle);
-  border-left-color: var(--accent-2);
+  /* The same accent as a selected mode (NAV-8): Settings was the one teal
+     selection in an amber rail. Teal stays the coach's own glyph. */
+  background: var(--accent-subtle);
+  border-left-color: var(--accent);
   color: var(--text-primary);
+}
+.rail-action.active .rail-action-icon:not(.rail-action-coach) {
+  color: var(--accent);
 }
 
 .rail-action-icon {
@@ -2116,9 +2155,6 @@ body[data-sheet-maximized] .rail {
     box-shadow: inset 2px 0 0 var(--accent);
   }
 
-  .rail-action.active {
-    box-shadow: inset 2px 0 0 var(--accent-2);
-  }
 
   .rail-mode-label,
   .rail-mode-badge,
@@ -2617,9 +2653,6 @@ body[data-sheet-maximized] .rail {
   box-shadow: inset 2px 0 0 var(--accent);
 }
 
-.rail[data-collapsed] .rail-action.active {
-  box-shadow: inset 2px 0 0 var(--accent-2);
-}
 
 .rail[data-collapsed] .rail-mode-label,
 .rail[data-collapsed] .rail-mode-badge,
