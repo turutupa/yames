@@ -1,7 +1,13 @@
 /**
- * The 3D stage: one continuous scene (the neck on an abstract backdrop), a
+ * The 3D stage: one continuous scene (the neck on the theme's own backdrop), a
  * camera rig that frames the neck into a DOM slot, quality tiers, the
  * adaptive step-down and context loss.
+ *
+ * Art direction "A, graphic" (2026-11-17): everything is unlit and flat, in
+ * the theme's colours (`../neckTheme.ts`). No lights, no environment map, no
+ * shadow map, no tone mapping, no textures to compute at load. The canvas is
+ * transparent: the page behind it (`.neck-stage`, the theme's `--bg-primary`)
+ * shows through, and the backdrop shader only adds the soft accent pool.
  *
  * Ported from plans/revamp/concept/mocks-3d-v2/js/world.js, the neck only (no
  * amp, metronome, pedals or chart, no inset views, no post: neck shots go
@@ -17,13 +23,13 @@ import type { NeckKind, NeckNote } from "../api";
 import type { EngineOptions, SlotRect, StageEngine, VisibleView } from "../engineTypes";
 import { framingFor } from "../framing";
 import { pickTier, tierSettings, type QualityStep, type Tier } from "../quality";
+import { neckPalette, type NeckPalette } from "../neckTheme";
 import { NOTE_R, createGuitar, type Guitar } from "./guitar";
 import * as T from "./textures";
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const GUITAR_Y = 0.62;
-const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 
 type Rig = {
   pos: THREE.Vector3;
@@ -34,24 +40,15 @@ type Rig = {
   poolX: number;
   poolY: number;
   poolA: number;
-  keyPos: THREE.Vector3;
-  keyTgt: THREE.Vector3;
-  keyI: number;
-  keyAngle: number;
-  rimI: number;
-  envI: number;
 };
-const SCALARS = ["fov", "ox", "oy", "poolX", "poolY", "poolA", "keyI", "keyAngle", "rimI", "envI"] as const;
-const cloneRig = (s: Rig): Rig => ({ ...s, pos: s.pos.clone(), tgt: s.tgt.clone(), keyPos: s.keyPos.clone(), keyTgt: s.keyTgt.clone() });
+const SCALARS = ["fov", "ox", "oy", "poolX", "poolY", "poolA"] as const;
+const cloneRig = (s: Rig): Rig => ({ ...s, pos: s.pos.clone(), tgt: s.tgt.clone() });
 
 type Shot = {
   points: () => THREE.Vector3[];
   dir: [number, number, number];
   fov: number;
   numScale: number;
-  key: { angle: number; i: number; offset: [number, number, number] };
-  rim: number;
-  env: number;
   pool: number;
   dur: number;
   lift: number;
@@ -66,9 +63,6 @@ function shotFor(view: VisibleView, rect: SlotRect, guitar: Guitar): Shot {
       dir: f.dir,
       fov: f.fov,
       numScale: f.numScale,
-      key: { angle: 0.62, i: 3.1, offset: [-0.6, 7.4, 2.2] },
-      rim: 0.6,
-      env: 0.5,
       pool: f.pool,
       dur: 1.7,
       lift: 0.4,
@@ -81,9 +75,6 @@ function shotFor(view: VisibleView, rect: SlotRect, guitar: Guitar): Shot {
     dir: f.dir,
     fov: f.fov,
     numScale: f.numScale,
-    key: { angle: 0.52, i: 3.0, offset: [-0.9, 7.2, 2.4] },
-    rim: 0.6,
-    env: 0.46,
     pool: f.pool,
     dur: 1.3,
     lift: 0.3,
@@ -92,7 +83,7 @@ function shotFor(view: VisibleView, rect: SlotRect, guitar: Guitar): Shot {
 
 export async function createEngine(o: EngineOptions): Promise<StageEngine> {
   const { canvas, reduced } = o;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance", stencil: false });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: "high-performance", stencil: false });
   let gpu = "";
   try {
     const gl = renderer.getContext();
@@ -115,103 +106,50 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
   const dpr = () => Math.max(1, Math.min(window.devicePixelRatio || 1, settings.maxDpr) * dprScale);
   renderer.setPixelRatio(dpr());
   renderer.setSize(W, H, false);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1;
+  renderer.toneMapping = THREE.NoToneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = settings.shadows;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  T.setAniso(Math.min(renderer.capabilities.getMaxAnisotropy(), tier >= 2 ? 16 : 8));
+  renderer.setClearColor(0x000000, 0);
+  renderer.shadowMap.enabled = false;
 
   const scene = new THREE.Scene();
   const overlay = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(26, W / H, 0.1, 120);
-
-  // Studio lighting for reflections: dark room, long warm softboxes.
-  function buildEnv(): THREE.WebGLRenderTarget {
-    const s = new THREE.Scene();
-    const disposables: Array<{ dispose(): void }> = [];
-    const mesh = (g: THREE.BufferGeometry, m: THREE.Material) => {
-      disposables.push(g, m);
-      const x = new THREE.Mesh(g, m);
-      s.add(x);
-      return x;
-    };
-    mesh(new THREE.BoxGeometry(40, 20, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.02, 0.014, 0.01), side: THREE.BackSide }));
-    const box = (w: number, h: number, x: number, y: number, z: number, col: number, I: number, rx = 0, ry = 0) => {
-      const m = mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(col).multiplyScalar(I), side: THREE.DoubleSide }));
-      m.position.set(x, y, z);
-      m.rotation.set(rx, ry, 0);
-    };
-    box(22, 1.6, 0, 9.6, -3, 0xffdcae, 9, Math.PI / 2); // Long overhead softbox.
-    box(16, 0.7, 0, 9.4, 7, 0xfff1dd, 14, Math.PI / 2); // Thin front strip: frets and strings glint on this.
-    box(1.6, 12, -17, 5, 2, 0xffc48a, 2.6, 0, Math.PI / 2); // Warm side.
-    box(1, 10, 17, 4, -5, 0xb9c9e0, 1.6, 0, Math.PI / 2); // A little cool rim for separation.
-    box(26, 2, 0, 3, -19, 0xff9a4a, 0.9); // Glow on the far wall.
-    box(30, 7, 0, 3, 19, 0xffd2a0, 1.1); // Big, dim front fill.
-    const pm = new THREE.PMREMGenerator(renderer);
-    const rt = pm.fromScene(s, 0.025, 0.1, 60);
-    pm.dispose();
-    disposables.forEach((d) => d.dispose());
-    return rt;
-  }
-  let envRT = buildEnv();
-  scene.environment = envRT.texture;
-  scene.environmentIntensity = 0.62;
-
-  const key = new THREE.SpotLight(0xffe6cc, 2.6, 0, 0.5, 0.95, 0);
-  key.castShadow = settings.shadows;
-  if (key.castShadow) {
-    key.shadow.mapSize.set(2048, 2048);
-    key.shadow.bias = -0.00025;
-    key.shadow.normalBias = 0.006;
-    key.shadow.radius = 3;
-    key.shadow.camera.near = 2;
-    key.shadow.camera.far = 30;
-  }
-  scene.add(key, key.target);
-  const rim = new THREE.DirectionalLight(0xffc99a, 0.9);
-  rim.position.set(6, 5, -8);
-  scene.add(rim);
+  let palette: NeckPalette = neckPalette();
 
   // The fonts the fret numbers and note letters are drawn in. Not worth waiting long for.
   try {
     await Promise.race([
-      document.fonts?.load('700 40px "Barlow Condensed"'),
+      Promise.all([document.fonts?.load('700 40px "Barlow Condensed"'), document.fonts?.load('500 40px "Barlow Condensed"')]),
       new Promise((r) => setTimeout(r, 1500)),
     ]);
   } catch {
     /* the fallback face is fine */
   }
 
-  // Textures, sized to the tier and computed once. A frame between each keeps the page answering.
-  const S = (n: number) => Math.max(128, Math.round(n * settings.textureScale));
-  await nextFrame();
-  const rosewood = await T.wood({ w: S(2048), h: S(512), dark: "#1e0f0a", mid: "#4a2a1b", light: "#74452a", gf: 15, streak: 0.62, pores: S(3200), purple: 0.22, seed: 1, normal: 3 }, nextFrame);
-  await nextFrame();
-  const tex = { rosewood, pearl: T.pearl(tier >= 1 ? 128 : 64), wind: T.windings() };
-
-  // The backdrop: dark warm air, a soft pool of light behind the subject, a few still strings.
-  const LINES = tier >= 1 ? 7 : 4;
+  // The backdrop: only the soft pool of accent behind the subject, over the
+  // transparent canvas (the page's own background is the rest). Premultiplied.
   const backdropMat = new THREE.ShaderMaterial({
     depthTest: false,
     depthWrite: false,
-    uniforms: { uPool: { value: new THREE.Vector2(0.5, 0.5) }, uAmt: { value: 1 }, uAsp: { value: 1 } },
+    transparent: true,
+    premultipliedAlpha: true,
+    blending: THREE.NormalBlending,
+    uniforms: {
+      uPool: { value: new THREE.Vector2(0.5, 0.5) },
+      uAmt: { value: 1 },
+      uAsp: { value: 1 },
+      uCol: { value: new THREE.Color(palette.accent) },
+      uA: { value: palette.poolA },
+    },
     vertexShader: "varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,1.,1.);}",
-    fragmentShader: `varying vec2 vUv; uniform float uAmt,uAsp; uniform vec2 uPool;
+    fragmentShader: `varying vec2 vUv; uniform float uAmt,uAsp,uA; uniform vec2 uPool; uniform vec3 uCol;
       float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
       void main(){ vec2 d=(vUv-uPool)*vec2(min(uAsp,1.6),1.); float r=length(d);
-        vec3 base=vec3(.0065,.0042,.0030); vec3 warm=vec3(.060,.030,.014);
-        vec3 c=base+warm*uAmt*exp(-r*r*3.6);
-        float l=0.;
-        for(int i=0;i<${LINES};i++){ float fi=float(i); float y=.1+fi*${(0.8 / Math.max(1, LINES - 1)).toFixed(4)};
-          float a=sin(vUv.x*(2.2+fi*.5)+fi*1.9)*.022*(.5+.5*sin(fi));
-          float dy=abs(vUv.y-y-a*sin(3.14159*vUv.x)); l+=smoothstep(.0016,.0,dy);
-        }
-        c+=vec3(.05,.031,.018)*l*(.35+.65*exp(-r*r*2.4));
-        gl_FragColor=vec4(c,1.);
-        #include <tonemapping_fragment>
+        // Dithered: a pool this faint bands into rings at 8 bits without it.
+        float a=clamp(uA*min(uAmt,1.2)*exp(-r*r*3.6)+(h(gl_FragCoord.xy)-.5)/255.,0.,1.);
+        gl_FragColor=vec4(uCol,1.);
         #include <colorspace_fragment>
-        gl_FragColor.rgb+=(h(gl_FragCoord.xy)-.5)/255.;
+        gl_FragColor=vec4(gl_FragColor.rgb*a,a);
       }`,
   });
   const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), backdropMat);
@@ -219,7 +157,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
   backdrop.renderOrder = -1000;
   scene.add(backdrop);
 
-  const guitar = createGuitar({ tier, tex, overlay });
+  const guitar = createGuitar({ tier, overlay, palette });
   guitar.root.position.y = GUITAR_Y;
   scene.add(guitar.root);
   guitar.root.updateMatrixWorld(true);
@@ -234,12 +172,6 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     poolX: 0.5,
     poolY: 0.5,
     poolA: 1,
-    keyPos: V(0, 8, 3),
-    keyTgt: V(2, 0.6, 0),
-    keyI: 0,
-    keyAngle: 0.5,
-    rimI: 0.9,
-    envI: 0.62,
   };
   let from = cloneRig(R);
   let to = cloneRig(R);
@@ -311,12 +243,6 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     s.fov = f.fov;
     s.ox = f.ox;
     s.oy = f.oy;
-    s.keyTgt = f.tgt.clone();
-    s.keyPos = s.keyTgt.clone().add(V(...shot.key.offset));
-    s.keyI = shot.key.i;
-    s.keyAngle = shot.key.angle;
-    s.rimI = shot.rim;
-    s.envI = shot.env;
     return s;
   }
 
@@ -347,13 +273,6 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     camera.lookAt(R.tgt);
     camera.setViewOffset(W, H, -R.ox, -R.oy, W, H);
     camera.updateProjectionMatrix();
-    key.position.copy(R.keyPos);
-    key.target.position.copy(R.keyTgt);
-    key.target.updateMatrixWorld();
-    key.intensity = R.keyI;
-    key.angle = R.keyAngle;
-    rim.intensity = R.rimI;
-    scene.environmentIntensity = R.envI;
     const bu = backdropMat.uniforms;
     bu.uPool.value.set(R.poolX, R.poolY);
     bu.uAmt.value = R.poolA;
@@ -368,9 +287,6 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
     o.onLost();
   };
   const onRestored = () => {
-    envRT.dispose();
-    envRT = buildEnv();
-    scene.environment = envRT.texture;
     lost = false;
     o.onRestored();
   };
@@ -450,6 +366,12 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
       return { x, y, r };
     },
     resize,
+    setPalette(p: NeckPalette) {
+      palette = p;
+      backdropMat.uniforms.uCol.value.set(p.accent);
+      backdropMat.uniforms.uA.value = p.poolA;
+      guitar.setPalette(p);
+    },
     frame(dt: number): boolean {
       if (lost) return false;
       let busy = false;
@@ -461,8 +383,6 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
         R.pos.lerpVectors(from.pos, to.pos, e);
         R.pos.y += l;
         R.tgt.lerpVectors(from.tgt, to.tgt, e);
-        R.keyPos.lerpVectors(from.keyPos, to.keyPos, e);
-        R.keyTgt.lerpVectors(from.keyTgt, to.keyTgt, e);
         for (const k of SCALARS) R[k] = from[k] + (to[k] - from[k]) * e;
         if (flight.t >= 1) flight = null;
       }
@@ -482,16 +402,8 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
         resize(W, H);
         return true;
       }
-      if (!renderer.shadowMap.enabled) return false;
-      renderer.shadowMap.enabled = false;
-      key.castShadow = false;
-      guitar.addFakeShadows();
-      scene.traverse((obj) => {
-        const m = (obj as THREE.Mesh).material;
-        if (Array.isArray(m)) m.forEach((x) => (x.needsUpdate = true));
-        else if (m) m.needsUpdate = true;
-      });
-      return true;
+      // The flat neck has no shadow map to give up: nothing left to lower.
+      return false;
     },
     probe(frames: number): number[] {
       const gl = renderer.getContext();
@@ -527,10 +439,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
           else if (m) disposeMaterial(m);
         });
       }
-      [tex.rosewood.map, tex.rosewood.normalMap, tex.rosewood.roughnessMap, tex.pearl, tex.wind].forEach((t) => t.dispose());
       T.clearCaches();
-      envRT.dispose();
-      key.shadow.map?.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
     },

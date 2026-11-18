@@ -1,20 +1,21 @@
 /**
- * The neck without WebGL2: the app's SVG `Fretboard`, drawn into the slot,
- * with the stage's notes on it in the stage's colours.
+ * The neck without WebGL2: the same flat neck the 3D stage draws (art
+ * direction "A, graphic", 2026-11-17), as SVG, in the same theme colours
+ * (`neckTheme.ts`). A is literally drawable as SVG, so the fallback is not a
+ * downgrade: a flat board, crisp frets, solid strings heavier toward low E,
+ * flat inlays, bold marker fret numbers with an accent dot, the notes in the
+ * same looks as the 3D markers, and one soft shadow on a dark theme.
  *
- * `Fretboard` lights every place a pitch class falls; the stage names exact
- * places. So it is given the notes' pitch classes, and then every dot that is
- * not one of the stage's notes is hidden and the rest are coloured by kind
- * (`data-kind`, see stage.css) and labelled. Labels go in a group of our own
- * at the end of the SVG, positioned from the dots' own centres, so nothing
- * React rendered is rewritten.
+ * Each marker is a `[data-testid="fret-dot"]` circle carrying `data-string`
+ * (0 = low E, as the app's `Fretboard` numbers them), `data-fret` and
+ * `data-kind`: the controller's `project` finds a place's centre through it,
+ * and the flash on a pluck is a class on it.
  */
-import { useLayoutEffect, useMemo, useRef } from "react";
-import { Fretboard, GUITAR_STANDARD_TUNING } from "../components/fretboard";
-import type { NeckNote, NeckView } from "./api";
+import { useId, useLayoutEffect, useRef, useState } from "react";
+import { GUITAR_STANDARD_TUNING } from "../components/fretboard";
+import type { NeckKind, NeckNote, NeckView } from "./api";
 import type { StageSnapshot } from "./controller";
-
-const SVG_NS = "http://www.w3.org/2000/svg";
+import { noteLook, useNeckPalette } from "./neckTheme";
 
 /** Stage string (1 = high E) to Fretboard's index (0 = lowest string). */
 export const stringIndex = (s: number) => 6 - s;
@@ -28,46 +29,30 @@ export function fallbackRange(view: NeckView): { startFret: number; frets: numbe
   return lo <= 1 ? { startFret: 0, frets: hi } : { startFret: lo, frets: hi - lo + 1 };
 }
 
+const MARK = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
+const DOUBLE = (f: number) => f === 12 || f === 24;
+/** String widths as a fraction of the string spacing, high e to low E (the 3D neck's progression). */
+const STR_K = [0.04, 0.05, 0.064, 0.082, 0.1, 0.118];
+/** NOW and NEXT are larger, as on the 3D neck. */
+const SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
+const fx = (n: number) => 1 - Math.pow(2, -n / 12);
+const FONT = "'Barlow Condensed','Arial Narrow',system-ui,sans-serif";
+
 export function FallbackNeck({ view, notes, pluck }: { view: NeckView; notes: readonly NeckNote[]; pluck: StageSnapshot["pluck"] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const range = fallbackRange(view);
-  const pcs = useMemo(() => [...new Set(notes.map((n) => pitchOf(n.string, n.fret)))], [notes]);
-
+  const P = useNeckPalette();
+  const uid = useId().replace(/:/g, "");
+  const [size, setSize] = useState({ w: 0, h: 0 });
   useLayoutEffect(() => {
-    const svg = ref.current?.querySelector("svg");
-    if (!svg) return;
-    const byPlace = new Map(notes.map((n) => [`${stringIndex(n.string)}:${Math.round(n.fret)}`, n]));
-    let labels = svg.querySelector<SVGGElement>("g[data-neck-labels]");
-    if (!labels) {
-      labels = document.createElementNS(SVG_NS, "g") as SVGGElement;
-      labels.setAttribute("data-neck-labels", "");
-      labels.setAttribute("pointer-events", "none");
-    }
-    svg.appendChild(labels); // Always last, so labels sit above every dot.
-    labels.replaceChildren();
-    svg.querySelectorAll<SVGCircleElement>('[data-testid="fret-dot"]').forEach((dot) => {
-      const n = byPlace.get(`${dot.dataset.string}:${dot.dataset.fret}`);
-      if (!n) {
-        dot.style.display = "none";
-        dot.removeAttribute("data-kind");
-        return;
-      }
-      dot.style.display = "";
-      dot.setAttribute("data-kind", n.kind);
-      if (n.label) {
-        const t = document.createElementNS(SVG_NS, "text");
-        t.setAttribute("x", dot.getAttribute("cx") ?? "0");
-        t.setAttribute("y", dot.getAttribute("cy") ?? "0");
-        t.setAttribute("font-size", String(Number(dot.getAttribute("r") ?? 6) * 1.15));
-        t.setAttribute("text-anchor", "middle");
-        t.setAttribute("dominant-baseline", "central");
-        t.setAttribute("class", "neck-fallback-label");
-        t.setAttribute("data-kind", n.kind);
-        t.textContent = n.label;
-        labels!.appendChild(t);
-      }
-    });
-  });
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setSize({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // A heard note: flash its dot.
   useLayoutEffect(() => {
@@ -81,15 +66,147 @@ export function FallbackNeck({ view, notes, pluck }: { view: NeckView; notes: re
     dot.classList.add("neck-flash");
   }, [pluck]);
 
+  const whole = view.kind !== "zoom";
+  const range = fallbackRange(view);
+  const a = range.startFret === 0 ? 0 : range.startFret - 1;
+  const b = a + range.frets;
+  // happy-dom lays nothing out: draw at a nominal size there, the viewBox scales it.
+  const W = size.w || 800;
+  const H = size.h || 300;
+  const numH = Math.max(18, Math.min(46, H * 0.16));
+  const pad = 4;
+  const bh = Math.max(24, Math.min(H - numH - 2 * pad, W * (whole ? 0.115 : 0.45)));
+  const bT = pad + Math.max(0, (H - numH - 2 * pad - bh) / 2);
+  const bB = bT + bh;
+  const inset = bh * 0.075;
+  const sp = (bh - 2 * inset) / 5;
+  const S = (s: number) => bT + inset + (s - 1) * sp;
+  const R = sp * 0.46;
+  const mL = whole || a === 0 ? Math.max(14, R * 2.6) : 0;
+  const mR = whole ? 14 + W * 0.012 : 0;
+  const X = (f: number) => mL + ((fx(f) - fx(a)) / (fx(b) - fx(a))) * (W - mL - mR);
+  const xL = a === 0 ? X(0) : 0;
+  const xR = whole ? X(24) + (X(24) - X(23)) * 0.6 : W;
+  const fretW = Math.max(1, sp * 0.065);
+  const nutW = Math.max(3, sp * 0.16);
+  const noteX = (f: number) => (f <= 0 ? X(0) - R * 1.4 : X(f) - Math.min(0.3 * (X(f) - X(f - 1)), R * 1.5));
+  const fsMark = Math.max(12, Math.min(30, sp * 0.62));
+  const fsOther = fsMark * 0.68;
+  const numY = bB + numH * 0.62;
+
+  const frets: number[] = [];
+  for (let f = Math.max(1, a); f <= b; f++) frets.push(f);
+  const cells: number[] = [];
+  for (let f = Math.max(1, a + 1); f <= b; f++) cells.push(f);
+  const shown = notes.filter((n) => n.string >= 1 && n.string <= 6 && n.fret >= Math.max(0, a) && n.fret <= b);
+
   return (
     <div ref={ref} className="neck-fallback" data-testid="neck-fallback" data-view={view.kind}>
-      <Fretboard
-        startFret={range.startFret}
-        frets={range.frets}
-        size={view.kind === "zoom" ? "large" : "sheet"}
-        highlight={{ pitchClasses: pcs }}
-        ariaLabel={view.kind === "zoom" ? `Fretboard, frets ${range.startFret} to ${range.startFret + range.frets}` : "Fretboard, the whole neck"}
-      />
+      <svg
+        className="neck-fallback-svg"
+        width={W}
+        height={H}
+        viewBox={`0 0 ${W} ${H}`}
+        role="img"
+        aria-label={whole ? "Fretboard, the whole neck" : `Fretboard, frets ${range.startFret} to ${range.startFret + range.frets}`}
+      >
+        <defs>
+          {P.shadowA > 0 && (
+            <filter id={`${uid}sh`} x="-10%" y="-40%" width="120%" height="180%">
+              <feDropShadow dx="0" dy={bh * 0.055} stdDeviation={bh * 0.06} floodColor="#000" floodOpacity={P.shadowA} />
+            </filter>
+          )}
+          <radialGradient id={`${uid}glow`}>
+            <stop offset="0" stopColor={P.accent} stopOpacity={P.glowA} />
+            <stop offset="1" stopColor={P.accent} stopOpacity={0} />
+          </radialGradient>
+        </defs>
+        {/* Board, its edges, the inlays and the frets. */}
+        <rect x={xL} y={bT} width={xR - xL} height={bh} rx={whole ? 3 : 0} fill={P.board} filter={P.shadowA > 0 ? `url(#${uid}sh)` : undefined} />
+        <line x1={xL} x2={xR} y1={bT + 0.5} y2={bT + 0.5} stroke={P.edge} />
+        <line x1={xL} x2={xR} y1={bB - 0.5} y2={bB - 0.5} stroke={P.edge} />
+        {cells
+          .filter((f) => MARK.includes(f))
+          .map((f) => {
+            const c = (X(f) + X(f - 1)) / 2;
+            const ys = DOUBLE(f) ? [(S(2) + S(3)) / 2, (S(4) + S(5)) / 2] : [(S(3) + S(4)) / 2];
+            return ys.map((y) => <circle key={`${f}:${y}`} cx={c} cy={y} r={sp * 0.24} fill={P.inlay} />);
+          })}
+        {frets.map((f) => (
+          <rect key={f} x={X(f) - fretW / 2} y={bT} width={fretW} height={bh} fill={P.fret} />
+        ))}
+        {a === 0 && <rect x={X(0) - nutW} y={bT} width={nutW} height={bh} fill={P.nut} />}
+        {/* Strings. */}
+        {[1, 2, 3, 4, 5, 6].map((s) => {
+          const w = Math.max(0.8, sp * STR_K[s - 1]);
+          return <rect key={s} x={xL} y={S(s) - w / 2} width={xR - xL} height={w} fill={s >= 4 ? P.wound : P.string} />;
+        })}
+        {/* Fret numbers: the marker frets bold in the ink with an accent dot, the rest quiet. */}
+        {cells.map((f) => {
+          const m = MARK.includes(f);
+          if (whole && !m && f > 12) return null;
+          const c = (X(f) + X(f - 1)) / 2;
+          return (
+            <g key={f} className="neck-fallback-num">
+              <text x={c} y={numY} textAnchor="middle" fontFamily={FONT} fontWeight={m ? 700 : 500} fontSize={m ? fsMark : fsOther} fill={m ? P.num : P.numFaint} opacity={m ? 1 : 0.8}>
+                {f}
+              </text>
+              {m && <circle cx={c} cy={numY + fsMark * 0.32} r={Math.max(1.6, fsMark * 0.085)} fill={P.accent} />}
+            </g>
+          );
+        })}
+        {/* NOW's glow, under the markers. */}
+        {shown
+          .filter((n) => n.kind === "now")
+          .map((n) => (
+            <circle key={`g${n.string}:${n.fret}`} cx={noteX(n.fret)} cy={S(n.string)} r={R * 1.45 * 2.4} fill={`url(#${uid}glow)`} pointerEvents="none" />
+          ))}
+        {/* The markers. */}
+        {shown.map((n) => {
+          const look = noteLook(n.kind, P);
+          const r = R * (SCALE[n.kind] ?? 1) * look.size;
+          const lw = look.stroke ? r * look.strokeW : 0;
+          return (
+            <circle
+              key={`${n.string}:${n.fret}`}
+              data-testid="fret-dot"
+              data-string={stringIndex(n.string)}
+              data-fret={Math.round(n.fret)}
+              data-kind={n.kind}
+              className="neck-fallback-dot"
+              cx={noteX(n.fret)}
+              cy={S(n.string)}
+              r={r - lw / 2}
+              fill={look.fill}
+              stroke={look.stroke ?? "none"}
+              strokeWidth={lw}
+            />
+          );
+        })}
+        <g data-neck-labels="" pointerEvents="none">
+          {shown
+            .filter((n) => n.label)
+            .map((n) => {
+              const look = noteLook(n.kind, P);
+              const r = R * (SCALE[n.kind] ?? 1);
+              return (
+                <text
+                  key={`${n.string}:${n.fret}`}
+                  className="neck-fallback-label"
+                  data-kind={n.kind}
+                  x={noteX(n.fret)}
+                  y={S(n.string)}
+                  fontSize={r * 1.25}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fill={look.ink}
+                >
+                  {n.label}
+                </text>
+              );
+            })}
+        </g>
+      </svg>
     </div>
   );
 }

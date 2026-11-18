@@ -1,15 +1,21 @@
 /**
- * The neck: rosewood board, nickel frets, pearl dots, wound strings that
- * really move, quiet fret numbers, and notes that light the wood.
+ * The neck, as a UI surface (art direction "A, graphic", 2026-11-17): a flat
+ * board in the theme's colours, crisp fret bars, strings as solid lines that
+ * get heavier toward low E (the wound ones tinted toward the accent), flat
+ * inlay dots, bold fret numbers with an accent dot under the marker frets,
+ * and one soft shadow under the board on a dark theme. Everything is unlit
+ * (`MeshBasicMaterial`, not tone-mapped), so the theme's colours land exactly;
+ * there is no texture, no light and no shadow map. A theme change is
+ * `setPalette`: colours only, nothing is rebuilt.
  *
- * Ported from plans/revamp/concept/mocks-3d-v2/js/guitar.js, the parts the
- * stage needs (no Steps, no arc, no second neck). `update(dt)` returns true
- * while anything on the neck is still moving, which is what lets the stage
- * render on demand and then stop.
+ * The geometry (fret spacing, the taper, string heights, where a marker sits)
+ * is the realistic neck's, unchanged, so framing and placement are too.
+ * `update(dt)` returns true while anything on the neck is still moving, which
+ * is what lets the stage render on demand and then stop.
  */
 import * as THREE from "three";
-import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import type { NeckKind } from "../api";
+import { noteLook, type NeckPalette } from "../neckTheme";
 import * as T from "./textures";
 
 export const L = 6.5;
@@ -31,69 +37,41 @@ export const XEND = fretX(24) + 0.14;
 export const boardW = (x: number) => (0.46 + ((0.545 - 0.46) * Math.max(0, x)) / XEND) * NW;
 const crown = (z: number) => (-z * z) / (2 * RAD);
 const strH = (x: number) => 0.05 + (0.018 * x) / L;
-const GAUGE = [0.0034, 0.0043, 0.0056, 0.0074, 0.0092, 0.0112];
+/** Each string's drawn width, high e to low E: the mock's 2.2 to 6.6 px at the practice zoom. */
+const STR_W = [0.0042, 0.0054, 0.007, 0.0088, 0.0108, 0.0128];
+const WOUND = (s: number) => s >= 4;
+/** A fret bar's width (the mock's 3.5 px at the practice zoom), the nut's, and the edge hairline's. */
+const FRET_W = 0.0072;
+const NUT_W = 0.017;
+const EDGE_W = 0.0032;
+/** The inlay dots' radius. */
+const INLAY_R = 0.026;
 
-export const COLORS: Record<NeckKind, number> = {
-  aim: 0xffb454,
-  tone: 0x4ee08a,
-  tens: 0x5aa9ff,
-  clash: 0xff5d6c,
-  box: 0xffe2bd,
-  dim: 0x7d6a55,
-  now: 0xffb454,
-  next: 0xffb454,
-};
-const LETTER: Record<NeckKind, string> = {
-  aim: "#201507",
-  tone: "#07190f",
-  tens: "#06162a",
-  clash: "#2a0509",
-  box: "#e6dac8",
-  dim: "#8a7a68",
-  now: "#201507",
-  next: "#ffc978",
-};
 /** NOW is drawn larger than the rest, so the eye lands on it first. */
 const NOTE_SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
 
-type Arrays = { p: number[]; n: number[]; uv: number[]; c: number[]; i: number[] };
-const arrays = (): Arrays => ({ p: [], n: [], uv: [], c: [], i: [] });
-function toGeo(a: Arrays): THREE.BufferGeometry {
+type Arrays = { p: number[]; c: number[]; i: number[] };
+const arrays = (): Arrays => ({ p: [], c: [], i: [] });
+function toGeo(a: Arrays, colorSize = 0): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(a.p, 3));
-  if (a.uv.length) g.setAttribute("uv", new THREE.Float32BufferAttribute(a.uv, 2));
-  if (a.c.length) g.setAttribute("color", new THREE.Float32BufferAttribute(a.c, 3));
+  if (colorSize) g.setAttribute("color", new THREE.Float32BufferAttribute(a.c, colorSize));
   if (a.i.length) g.setIndex(a.i);
-  if (a.n.length) g.setAttribute("normal", new THREE.Float32BufferAttribute(a.n, 3));
-  else g.computeVertexNormals();
   return g;
 }
 
-function boardGeometry(tile: number) {
+/** The board's top: the crowned surface, nut to the end of the board. */
+function boardGeometry() {
   const xs = [-0.012];
-  for (let f = 1; f <= 24; f++) {
-    const x = fretX(f);
-    xs.push(x - 0.03, x - 0.012, x + 0.012, x + 0.03);
-  }
+  for (let f = 1; f <= 24; f++) xs.push(fretX(f));
   xs.push(XEND);
-  const cols = 14;
+  const cols = 10;
   const a = arrays();
   xs.forEach((x) => {
     const W = boardW(x);
-    let ao = 1;
-    for (let f = 1; f <= 24; f++) {
-      const d = Math.abs(x - fretX(f));
-      if (d < 0.013) ao = 0.34;
-      else if (d < 0.031) ao = Math.min(ao, 0.78);
-    }
     for (let c = 0; c <= cols; c++) {
-      const k = c / cols;
-      const z = (k - 0.5) * W;
+      const z = (c / cols - 0.5) * W;
       a.p.push(x, crown(z), z);
-      a.uv.push(x / tile, k * 0.96 + 0.02);
-      const edge = 0.72 + 0.28 * Math.min(1, Math.min(k, 1 - k) * 8);
-      const v = ao * edge;
-      a.c.push(v, v, v);
     }
   });
   for (let r = 0; r < xs.length - 1; r++) {
@@ -106,107 +84,104 @@ function boardGeometry(tile: number) {
   return toGeo(a);
 }
 
-function bindingGeometry() {
+/** A flat bar across the board at `x`, `w` wide, lying on the crown. */
+function barAcross(a: Arrays, x: number, w: number, lift: number) {
+  const cols = 8;
+  const W = boardW(x);
+  const base = a.p.length / 3;
+  for (let c = 0; c <= cols; c++) {
+    const z = (c / cols - 0.5) * W;
+    const y = crown(z) + lift;
+    a.p.push(x - w / 2, y, z, x + w / 2, y, z);
+  }
+  for (let c = 0; c < cols; c++) {
+    const i = base + c * 2;
+    a.i.push(i, i + 1, i + 2, i + 2, i + 1, i + 3);
+  }
+}
+
+/** All 24 fret bars, merged. */
+function fretsGeometry() {
   const a = arrays();
+  for (let f = 1; f <= 24; f++) barAcross(a, fretX(f), FRET_W, 0.0016);
+  return toGeo(a);
+}
+
+/** The board's two long edges, as hairlines just inside them. */
+function edgeGeometry() {
+  const a = arrays();
+  const xs = [-0.012, XEND / 2, XEND];
   [-1, 1].forEach((side) => {
     const base = a.p.length / 3;
-    const w = 0.004;
-    [-0.012, XEND].forEach((x) => {
-      const W = boardW(x) / 2;
-      const z = side * W;
-      const y = crown(z);
-      a.p.push(x, y + 0.0015, z - side * 0.004, x, y, z + side * w, x, y - 0.068, z + side * w);
+    xs.forEach((x) => {
+      const z = side * (boardW(x) / 2 - EDGE_W / 2);
+      const y = crown(z) + 0.0024;
+      a.p.push(x, y, z - EDGE_W / 2, x, y, z + EDGE_W / 2);
     });
-    const tri = side > 0 ? [0, 3, 1, 1, 3, 4, 1, 4, 2, 2, 4, 5] : [0, 1, 3, 1, 4, 3, 1, 2, 4, 2, 5, 4];
-    tri.forEach((t) => a.i.push(base + t));
-  });
-  const e = boardW(XEND) / 2;
-  a.p.push(XEND, 0, e, XEND, 0, -e, XEND, -0.07, -e, XEND, -0.07, e);
-  const b = a.p.length / 3 - 4;
-  a.i.push(b, b + 2, b + 1, b, b + 3, b + 2);
-  return toGeo(a);
-}
-
-function neckBackGeometry() {
-  const a = arrays();
-  const seg = 12;
-  [-0.03, 2, XEND].forEach((x) => {
-    const W = boardW(x) / 2 + 0.012;
-    const d = 0.27 + (0.05 * x) / L;
-    for (let i = 0; i <= seg; i++) {
-      const t = (Math.PI * i) / seg;
-      a.p.push(x, -0.065 - Math.sin(t) * d, Math.cos(t) * W);
-      a.uv.push(x * 0.7, i / seg);
+    for (let k = 0; k < xs.length - 1; k++) {
+      const i = base + k * 2;
+      a.i.push(i, i + 1, i + 2, i + 2, i + 1, i + 3);
     }
   });
-  for (let r = 0; r < 2; r++) {
-    for (let i = 0; i < seg; i++) {
-      const p = r * (seg + 1) + i;
-      const q = p + seg + 1;
-      a.i.push(p, q, p + 1, p + 1, q, q + 1);
-    }
-  }
   return toGeo(a);
 }
 
-function fretsGeometry(colsIn: number, rad: number) {
+/**
+ * The one soft shadow under the board (dark themes): a quad grid whose
+ * vertex alpha falls off smoothly over `blur` past the board's outline,
+ * pushed a little toward the low-E side, the way a light from above-front
+ * would throw it. Painted, not a shadow map.
+ */
+function shadowGeometry() {
+  const blur = 0.075;
+  const drop = 0.028;
+  const x0 = -0.012;
+  const x1 = XEND;
+  const steps = [-1, -0.6, -0.25, 0.25, 0.6, 1];
+  const fall = (d: number) => {
+    // d: distance inside the outline (negative outside), in units of blur.
+    const t = Math.max(0, Math.min(1, (d + 1) / 2));
+    return t * t * (3 - 2 * t);
+  };
+  const xs = [...steps.map((k) => x0 + k * blur), ...steps.map((k) => x1 + k * blur)];
   const a = arrays();
-  const hw = 0.0145;
-  const h = 0.0165;
-  const edge = [0, 0.004, 0.009, 0.015, 0.022];
-  const ks = [...edge];
-  for (let i = 1; i < colsIn - 9; i++) ks.push(0.022 + (0.956 * i) / (colsIn - 9));
-  ks.push(...edge.slice().reverse().map((e) => 1 - e));
-  const cols = ks.length - 1;
-  for (let f = 1; f <= 24; f++) {
-    const x = fretX(f);
-    const W = boardW(x) + 0.004;
-    const base = a.p.length / 3;
-    for (let c = 0; c <= cols; c++) {
-      const k = ks[c];
-      const z = (k - 0.5) * W;
-      const e = Math.min(1, (Math.min(k, 1 - k) * W) / 0.016);
-      const sc = Math.sqrt(Math.max(0.015, 1 - (1 - e) * (1 - e)));
-      for (let r = 0; r <= rad; r++) {
-        const t = (Math.PI * r) / rad;
-        a.p.push(x + Math.cos(t) * hw * sc, crown(z) - 0.001 + Math.sin(t) * h * sc, z);
-      }
-    }
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rad; r++) {
-        const i = base + c * (rad + 1) + r;
-        const j = i + rad + 1;
-        a.i.push(i, i + 1, j, j, i + 1, j + 1);
-      }
+  const zk = [...steps.map((k) => ({ side: -1, k })), ...steps.map((k) => ({ side: 1, k }))];
+  xs.forEach((x) => {
+    const W = boardW(Math.max(0, Math.min(XEND, x))) / 2;
+    const ax = fall(Math.min(x - x0, x1 - x) / blur);
+    zk.forEach(({ side, k }) => {
+      const z = side * W + k * blur + drop;
+      const az = fall(Math.min(z - drop + W, W - (z - drop)) / blur);
+      a.p.push(x, -0.03, z);
+      a.c.push(0, 0, 0, ax * az);
+    });
+  });
+  const n = zk.length;
+  for (let r = 0; r < xs.length - 1; r++) {
+    for (let c = 0; c < n - 1; c++) {
+      const i = r * n + c;
+      const j = i + n;
+      a.i.push(i, i + 1, j, j, i + 1, j + 1);
     }
   }
-  return toGeo(a);
+  return toGeo(a, 4);
 }
 
-function stringGeometry(s: number, segs: number, rad: number, wound: boolean) {
+/** A string: a flat ribbon `w` wide, facing up, nut to the end of the board. */
+function stringGeometry(s: number, segs: number, w: number) {
   const a = arrays();
   const aT: number[] = [];
-  const r0 = GAUGE[s - 1];
-  const pitch = wound ? 0.0062 : 1;
   for (let i = 0; i <= segs; i++) {
     const t = i / segs;
     const x = t * XEND;
     const z = strZ(s, x);
     const y = crown(z) + strH(x);
-    for (let j = 0; j <= rad; j++) {
-      const th = (j / rad) * Math.PI * 2;
-      a.p.push(x, y + Math.sin(th) * r0, z + Math.cos(th) * r0);
-      a.n.push(0, Math.sin(th), Math.cos(th));
-      a.uv.push(x / pitch + (j / rad) * 0.9, j / rad);
-      aT.push(t);
-    }
+    a.p.push(x, y, z - w / 2, x, y, z + w / 2);
+    aT.push(t, t);
   }
   for (let i = 0; i < segs; i++) {
-    for (let j = 0; j < rad; j++) {
-      const p = i * (rad + 1) + j;
-      const q = p + rad + 1;
-      a.i.push(p, q, p + 1, p + 1, q, q + 1);
-    }
+    const p = i * 2;
+    a.i.push(p, p + 1, p + 2, p + 2, p + 1, p + 3);
   }
   const g = toGeo(a);
   g.setAttribute("aT", new THREE.Float32BufferAttribute(aT, 1));
@@ -224,7 +199,6 @@ function ribbonGeometry(s: number, segs: number) {
     const y = crown(z) + strH(x) - 0.006;
     [-1, 1].forEach((v) => {
       a.p.push(x, y, z);
-      a.n.push(0, 1, 0);
       aT.push(t);
       aV.push(v);
     });
@@ -252,40 +226,43 @@ type StringUniforms = {
   uW: { value: number };
 };
 
-function vibrate(material: THREE.MeshStandardMaterial, u: StringUniforms) {
+/** A plucked string moves, and takes the note's colour where the pulse runs along it. */
+function vibrate(material: THREE.MeshBasicMaterial, u: StringUniforms) {
   material.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader
-      .replace("#include <common>", `#include <common>\nattribute float aT; uniform float uF,uA,uPh; varying float vS; varying float vT;`)
+      .replace("#include <common>", `#include <common>\nattribute float aT; uniform float uF,uA,uPh; varying float vS;`)
       .replace(
         "#include <begin_vertex>",
         `#include <begin_vertex>
-        float sp=(aT-uF)/(1.-uF); vT=aT; vS=sp;
+        float sp=(aT-uF)/(1.-uF); vS=sp;
         if(sp>0.){ float e=sin(3.14159*sp); transformed.z+=uA*(e*cos(uPh)+.35*sin(6.28318*sp)*cos(uPh*1.7+1.)); transformed.y+=uA*.35*e*sin(uPh*.9); }`,
       );
     sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", `#include <common>\nuniform vec3 uGC; uniform float uG,uP,uPA; varying float vS; varying float vT;`)
+      .replace("#include <common>", `#include <common>\nuniform vec3 uGC; uniform float uG,uP,uPA; varying float vS;`)
       .replace(
-        "#include <emissivemap_fragment>",
-        `#include <emissivemap_fragment>
-        if(vS>0.){ float dd=vS-uP; totalEmissiveRadiance+=uGC*(uG*(.25+.75*abs(sin(3.14159*vS*2.)))+uPA*exp(-dd*dd*90.)*2.4); }`,
+        "#include <color_fragment>",
+        `#include <color_fragment>
+        if(vS>0.){ float dd=vS-uP; float k=uG*(.25+.75*abs(sin(3.14159*vS*2.)))*.7+uPA*exp(-dd*dd*90.); diffuseColor.rgb=mix(diffuseColor.rgb,uGC,clamp(k,0.,1.)); }`,
       );
   };
-  material.customProgramCacheKey = () => "yames-string";
+  material.customProgramCacheKey = () => "yames-string-flat";
 }
 
+// The glow beside a ringing string: the note's colour, blended normally so it
+// shows on a light board as well as a dark one.
 const RIB_VERT = `attribute float aT; attribute float aV; uniform float uF,uA,uW; varying float vS,vV,vE;
 void main(){ float sp=(aT-uF)/(1.-uF); vS=sp; vV=aV; float e=sp>0.?sin(3.14159*sp):0.; vE=e;
  vec3 p=position; p.z+=aV*(uW+uA*(.2+1.25*e)); gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.); }`;
 const RIB_FRAG = `uniform vec3 uGC; uniform float uG,uP,uPA; varying float vS,vV,vE;
 void main(){ if(vS<0.) discard; float a=exp(-vV*vV*3.2)-.04; float dd=vS-uP; float wave=.22+.78*vE;
- float k=uG*wave*.55+uPA*exp(-dd*dd*70.)*.9; gl_FragColor=vec4(uGC*k*max(a,0.),1.);
+ float k=uG*wave*.35+uPA*exp(-dd*dd*70.)*.6; gl_FragColor=vec4(uGC,clamp(k*max(a,0.),0.,1.));
  #include <colorspace_fragment>
 }`;
 
 type GString = {
   s: number;
-  mesh: THREE.Mesh;
+  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
   rib: THREE.Mesh;
   u: StringUniforms;
   amp: number;
@@ -310,191 +287,86 @@ type Note = {
 
 export type GuitarNote = { s: number; f: number; kind: NeckKind; t: string };
 
-export type WoodTextures = { rosewood: T.WoodSet; pearl: THREE.Texture; wind: THREE.Texture };
+const flat = (color: string, extra: THREE.MeshBasicMaterialParameters = {}) =>
+  new THREE.MeshBasicMaterial({ color, toneMapped: false, side: THREE.DoubleSide, ...extra });
 
-export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTextures; overlay: THREE.Scene }) {
+export function createGuitar({ tier, overlay, palette }: { tier: number; overlay: THREE.Scene; palette: NeckPalette }) {
   const root = new THREE.Group();
-  const tile = 1.9;
+  let P = palette;
 
-  // Board.
-  const boardMat = new THREE.MeshPhysicalMaterial({
-    ...tex.rosewood,
-    color: 0xffffff,
-    vertexColors: true,
-    roughness: 1,
-    metalness: 0,
-    normalScale: new THREE.Vector2(0.6, 0.6),
-    envMapIntensity: 0.75,
-    clearcoat: 0.12,
-    clearcoatRoughness: 0.42,
-  });
-  const board = new THREE.Mesh(boardGeometry(tile), boardMat);
-  board.receiveShadow = true;
-  root.add(board);
-  const edgeMat = new THREE.MeshPhysicalMaterial({ color: 0x3b2115, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.3, side: THREE.DoubleSide });
-  const binding = new THREE.Mesh(bindingGeometry(), edgeMat);
-  binding.castShadow = true;
-  root.add(binding);
-  const backMat = new THREE.MeshPhysicalMaterial({ color: 0x5e3a20, roughness: 0.46, clearcoat: 0.55, clearcoatRoughness: 0.3 });
-  const back = new THREE.Mesh(neckBackGeometry(), backMat);
-  back.castShadow = true;
-  root.add(back);
+  // The shadow, under everything.
+  const shadowMat = flat("#000000", { vertexColors: true, transparent: true, depthWrite: false, opacity: P.shadowA });
+  const shadow = new THREE.Mesh(shadowGeometry(), shadowMat);
+  shadow.renderOrder = -10;
+  shadow.visible = P.shadowA > 0;
+  root.add(shadow);
 
-  // Nickel frets.
-  const fretMat = new THREE.MeshStandardMaterial({ color: 0xeeeae2, metalness: 1, roughness: 0.22, envMapIntensity: 1.45 });
-  const frets = new THREE.Mesh(fretsGeometry(tier >= 1 ? 22 : 12, tier >= 1 ? 7 : 5), fretMat);
-  frets.castShadow = true;
-  frets.receiveShadow = true;
-  root.add(frets);
+  // Board, its edges, the frets and the nut.
+  const boardMat = flat(P.board, { polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+  root.add(new THREE.Mesh(boardGeometry(), boardMat));
+  const edgeMat = flat(P.edge);
+  root.add(new THREE.Mesh(edgeGeometry(), edgeMat));
+  const fretMat = flat(P.fret);
+  root.add(new THREE.Mesh(fretsGeometry(), fretMat));
+  const nutMat = flat(P.nut);
+  const nutA = arrays();
+  barAcross(nutA, -0.012 + NUT_W / 2, NUT_W, 0.0026);
+  root.add(new THREE.Mesh(toGeo(nutA), nutMat));
 
-  // Bone nut.
-  const nut = new THREE.Mesh(
-    new RoundedBoxGeometry(0.05, 0.092, boardW(0) + 0.022, 2, 0.012),
-    new THREE.MeshPhysicalMaterial({ color: 0xf2e9d4, roughness: 0.38, clearcoat: 0.4, emissive: 0xf2e9d4, emissiveIntensity: 0.12 }),
-  );
-  nut.position.set(-0.024, 0.01, 0);
-  nut.castShadow = true;
-  root.add(nut);
-
-  // The strings stop on a clean nickel bar at the end of the neck.
-  const endBar = new THREE.Mesh(new RoundedBoxGeometry(0.05, 0.082, boardW(XEND) + 0.02, 2, 0.014), fretMat);
-  endBar.position.set(XEND - 0.012, 0.012, 0);
-  endBar.castShadow = true;
-  root.add(endBar);
-
-  // Pearl inlays, and the side dots a player actually looks at.
-  const pearlMat =
-    tier >= 1
-      ? new THREE.MeshPhysicalMaterial({
-          map: tex.pearl,
-          color: 0xd9d2c4,
-          roughness: 0.3,
-          clearcoat: 1,
-          clearcoatRoughness: 0.1,
-          iridescence: 0.8,
-          iridescenceIOR: 1.5,
-          iridescenceThicknessRange: [180, 520],
-          envMapIntensity: 1.5,
-          emissive: 0xe8e0d0,
-          emissiveIntensity: 0.1,
-          emissiveMap: tex.pearl,
-        })
-      : new THREE.MeshStandardMaterial({
-          map: tex.pearl,
-          color: 0xd9d2c4,
-          roughness: 0.32,
-          envMapIntensity: 1.4,
-          emissive: 0xe8e0d0,
-          emissiveIntensity: 0.18,
-          emissiveMap: tex.pearl,
-        });
-  const inlayGeo = new THREE.CircleGeometry(0.042, 32).rotateX(-Math.PI / 2);
-  const sideGeo = new THREE.CircleGeometry(0.017, 16);
+  // Flat inlay dots.
+  const inlayMat = flat(P.inlay);
+  const inlayGeo = new THREE.CircleGeometry(INLAY_R, 32).rotateX(-Math.PI / 2);
   INLAY_FRETS.forEach((f) => {
     const x = (fretX(f - 1) + fretX(f)) / 2;
     const place = (z: number) => {
-      const m = new THREE.Mesh(inlayGeo, pearlMat);
+      const m = new THREE.Mesh(inlayGeo, inlayMat);
       m.position.set(x, crown(z) + 0.0012, z);
-      m.receiveShadow = true;
       root.add(m);
     };
     if (DOUBLE(f)) {
       place(-0.112);
       place(0.112);
     } else place(0);
-    const hw = boardW(x) / 2 + 0.0048;
-    (DOUBLE(f) ? [-0.024, 0.024] : [0]).forEach((dx) =>
-      [1, -1].forEach((side) => {
-        const d = new THREE.Mesh(sideGeo, pearlMat);
-        d.position.set(x + dx, crown(hw) - 0.03, side * hw);
-        if (side < 0) d.rotation.y = Math.PI;
-        root.add(d);
-      }),
-    );
   });
 
-  // Strings.
+  // Strings: solid ribbons, heavier toward low E, the wound three tinted toward the accent.
   const strings: GString[] = [];
   const segs = tier >= 2 ? 150 : tier === 1 ? 110 : 80;
-  const radial = tier >= 2 ? 9 : 6;
   for (let s = 1; s <= 6; s++) {
-    const w = s >= 4;
     const u: StringUniforms = {
       uF: { value: 0 },
       uA: { value: 0 },
       uPh: { value: s * 1.7 },
-      uGC: { value: new THREE.Color(COLORS.aim) },
+      uGC: { value: new THREE.Color(P.accent) },
       uG: { value: 0 },
       uP: { value: 0 },
       uPA: { value: 0 },
       uW: { value: 0.006 + s * 0.0012 },
     };
-    const mat = new THREE.MeshStandardMaterial({
-      color: w ? 0xcdbb98 : 0xefeae0,
-      metalness: 1,
-      roughness: w ? 0.32 : 0.18,
-      envMapIntensity: 1.5,
-      normalMap: w ? tex.wind : null,
-      normalScale: new THREE.Vector2(0.55, 0.55),
-    });
+    const mat = flat(WOUND(s) ? P.wound : P.string);
     vibrate(mat, u);
-    const mesh = new THREE.Mesh(stringGeometry(s, segs, radial, w), mat);
-    mesh.castShadow = true;
+    const mesh = new THREE.Mesh(stringGeometry(s, segs, STR_W[s - 1]), mat);
     mesh.frustumCulled = false;
+    mesh.renderOrder = 1;
     root.add(mesh);
     const rib = new THREE.Mesh(
       ribbonGeometry(s, segs >> 1),
-      new THREE.ShaderMaterial({
-        uniforms: u,
-        vertexShader: RIB_VERT,
-        fragmentShader: RIB_FRAG,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      }),
+      new THREE.ShaderMaterial({ uniforms: u, vertexShader: RIB_VERT, fragmentShader: RIB_FRAG, transparent: true, depthWrite: false, side: THREE.DoubleSide }),
     );
     rib.visible = false;
     rib.frustumCulled = false;
+    rib.renderOrder = 2;
     root.add(rib);
     strings.push({ s, mesh, rib, u, amp: 0, glow: 0, pulse: 0, pulseA: 0, hz: 22 + (6 - s) * 3.2, ph: 0 });
   }
-
-  // Painted string shadows for tiers with no shadow map.
-  let fakeShadows: THREE.Mesh | null = null;
-  const addFakeShadows = () => {
-    if (fakeShadows) {
-      fakeShadows.visible = true;
-      return;
-    }
-    const a = arrays();
-    for (let s = 1; s <= 6; s++) {
-      const b = a.p.length / 3;
-      const wd = 0.012 + GAUGE[s - 1];
-      [0, XEND].forEach((x) => {
-        const z = strZ(s, x) + 0.012;
-        const y = crown(z) + 0.0022;
-        a.p.push(x, y, z - wd, x, y, z + wd);
-        a.uv.push(0, 0, 0, 1);
-        a.n.push(0, 1, 0, 0, 1, 0);
-      });
-      a.i.push(b, b + 2, b + 1, b + 1, b + 2, b + 3);
-    }
-    fakeShadows = new THREE.Mesh(
-      toGeo(a),
-      new THREE.MeshBasicMaterial({ color: 0x000000, alphaMap: T.softStrip(), transparent: true, opacity: 0.62, depthWrite: false, toneMapped: false }),
-    );
-    root.add(fakeShadows);
-  };
-  if (tier < 2) addFakeShadows();
 
   // Notes. Markers draw in the overlay scene, above the strings, so a wound string never crosses a letter.
   const discGeo = new THREE.CircleGeometry(NOTE_R, 40).rotateX(-Math.PI / 2);
   const haloGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
   const haloTex = T.radial([
     [0, "rgba(255,255,255,1)"],
-    [0.22, "rgba(255,255,255,.42)"],
-    [0.55, "rgba(255,255,255,.09)"],
+    [0.3, "rgba(255,255,255,.55)"],
+    [0.65, "rgba(255,255,255,.14)"],
     [1, "rgba(255,255,255,0)"],
   ]);
   const pool: Note[] = [];
@@ -503,12 +375,9 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
   overlay.add(overlayGroup);
   function makeNote(): Note {
     const disc = new THREE.Mesh(discGeo, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, depthTest: false, toneMapped: false }));
-    const halo = new THREE.Mesh(
-      haloGeo,
-      new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
-    );
+    const halo = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
     disc.renderOrder = 2;
-    halo.renderOrder = 1;
+    halo.renderOrder = 3;
     const label = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false, toneMapped: false }));
     label.scale.setScalar(0.118);
     label.renderOrder = 4;
@@ -525,22 +394,23 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     n.halo.position.set(x, y + 0.0028, z);
     n.label.position.set(x, top, z);
   }
-  function styleNote(n: Note, d: GuitarNote) {
-    if (n.kind !== d.kind) {
-      n.kind = d.kind;
-      n.disc.material.map = T.noteDisc(d.kind);
+  const GLOW_SCALE = 0.36;
+  /** Paint a note for its kind and text in the current palette. `force` repaints after a theme change. */
+  function styleNote(n: Note, kind: NeckKind, text: string, force = false) {
+    if (force || n.kind !== kind) {
+      n.kind = kind;
+      const look = noteLook(kind, P);
+      n.disc.material.map = T.noteDisc(look);
       n.disc.material.needsUpdate = true;
-      n.halo.material.color.set(COLORS[d.kind] ?? COLORS.box);
-      const hs = d.kind === "box" || d.kind === "dim" || d.kind === "next" ? 0.001 : d.kind === "now" ? 0.5 : 0.36;
-      n.halo.scale.setScalar(hs);
-      const sc = NOTE_SCALE[d.kind] ?? 1;
+      n.halo.material.color.set(look.fill);
+      const sc = NOTE_SCALE[kind] ?? 1;
       n.disc.scale.setScalar(sc);
       n.label.scale.setScalar(0.118 * sc);
       n.text = "\u0000";
     }
-    if (n.text !== d.t) {
-      n.text = d.t;
-      n.label.material.map = d.t ? T.noteLabel(d.t, LETTER[d.kind] ?? LETTER.box) : null;
+    if (n.text !== text) {
+      n.text = text;
+      n.label.material.map = text ? T.noteLabel(text, noteLook(kind, P).ink) : null;
       n.label.material.needsUpdate = true;
     }
   }
@@ -557,7 +427,7 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
         placeNote(n, d);
         n.o = fade ? 0 : 1;
       }
-      styleNote(n, d);
+      styleNote(n, d.kind, d.t);
       n.to = 1;
       n.fade = fade;
     });
@@ -580,12 +450,10 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
       n.label.material.opacity = v;
       n.disc.visible = v > 0.004;
       n.label.visible = v > 0.004 && !!n.text;
-      const isDim = n.kind === "box" || n.kind === "dim" || n.kind === "next";
-      const rest = n.kind === "now" ? 0.5 : 0.36;
-      n.halo.material.opacity = (isDim ? 0 : v * (n.kind === "now" ? 0.5 : 0.32)) + n.flash * 0.7;
+      const glow = n.kind === "now";
+      n.halo.material.opacity = (glow ? v * P.glowA : 0) + n.flash * 0.6;
       n.halo.visible = n.halo.material.opacity > 0.004;
-      if (n.flash > 0) n.halo.scale.setScalar(rest + (1 - n.flash) * 0.2);
-      else if (!isDim) n.halo.scale.setScalar(rest);
+      n.halo.scale.setScalar(GLOW_SCALE + (n.flash > 0 ? (1 - n.flash) * 0.12 : 0));
       if (n.o <= 0 && n.to === 0) {
         n.disc.visible = n.halo.visible = n.label.visible = false;
         active.delete(k);
@@ -595,36 +463,30 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     return busy;
   }
 
-  // Quiet fret numbers along the low-E edge, centred on the real fret spaces.
+  // Fret numbers along the low-E edge, centred on the fret spaces: the marker frets bold in the
+  // ink with an accent dot under them, the others quiet.
   const NUM_Z = (x: number) => boardW(x) / 2 + 0.092;
-  const numSprites: THREE.Sprite[] = [];
+  const numSprites: Array<{ sp: THREE.Sprite; f: number; marked: boolean }> = [];
+  const numberMap = (f: number, marked: boolean) =>
+    marked ? T.noteLabel(String(f), P.num, 700, P.accent) : T.noteLabel(String(f), P.numFaint, 500);
   for (let f = 1; f <= 24; f++) {
     const x = (fretX(f - 1) + fretX(f)) / 2;
     const marked = INLAY_FRETS.includes(f);
     if (!marked && f > 12) continue; // Up where the frets get tight, only the marked ones.
     const sp = new THREE.Sprite(
-      new THREE.SpriteMaterial({ map: T.noteLabel(String(f), "#efe0c6"), transparent: true, opacity: marked ? 0.86 : 0.46, depthTest: false, depthWrite: false, toneMapped: false }),
+      new THREE.SpriteMaterial({ map: numberMap(f, marked), transparent: true, opacity: marked ? 1 : 0.8, depthTest: false, depthWrite: false, toneMapped: false }),
     );
     sp.position.set(x, 0.001, NUM_Z(x));
-    sp.userData.base = marked ? 0.104 : 0.086;
+    sp.userData.base = marked ? 0.122 : 0.084;
     sp.scale.setScalar(sp.userData.base);
     sp.renderOrder = 1;
     overlayGroup.add(sp);
-    numSprites.push(sp);
+    numSprites.push({ sp, f, marked });
   }
 
-  // The note's light: a real point light, so frets near a note catch its colour.
-  const noteLight = new THREE.PointLight(0xffffff, 0, 1.1, 1.8);
-  noteLight.position.set(0, 0.18, 0);
-  root.add(noteLight);
-  let lightI = 0;
-
-  // Transient flashes on the wood, for notes with no resting disc.
+  // Transient flashes on the board, for notes with no resting disc.
   const flashes = Array.from({ length: 8 }, () => {
-    const m = new THREE.Mesh(
-      haloGeo,
-      new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
-    );
+    const m = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
     m.visible = false;
     m.renderOrder = 1;
     root.add(m);
@@ -632,10 +494,12 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
   });
   let fi = 0;
 
+  const kindColor = (kind: NeckKind) => noteLook(kind, P).fill;
+
   function pluck(s: number, f: number, kind: NeckKind, { amp = 0.0075, reduce = false } = {}) {
     const st = strings[s - 1];
     if (!st) return;
-    const col = COLORS[kind] ?? COLORS.aim;
+    const col = kindColor(kind);
     const x = noteX(f);
     st.u.uF.value = f > 0 ? fretX(f) / XEND : 0;
     st.amp = reduce ? 0 : Math.max(st.amp, amp);
@@ -650,26 +514,47 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     const z = strZ(s, x);
     F.m.position.set(x, crown(z) + 0.003, z);
     F.m.material.color.set(col);
-    F.v = 0.85;
+    F.v = 0.6;
     F.m.visible = true;
-    F.m.scale.setScalar(0.55);
-    noteLight.color.set(col);
-    noteLight.position.set(x, 0.2, strZ(s, x));
-    lightI = 1;
+    F.m.scale.setScalar(0.3);
   }
 
-  // A sweep of warm light that runs along the frets: arrivals and results.
+  // A soft band of the accent that runs along the frets: arrivals and results.
   let sweepT = -1;
   let sweepDur = 1;
   let sweepPow = 1;
   const sweepA = -0.2;
   const sweepB = 5.2;
-  const sweepLight = new THREE.PointLight(0xffd9a8, 0, 3.2, 1.5);
-  root.add(sweepLight);
+  const sweepMesh = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ map: haloTex, color: P.accent, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+  sweepMesh.scale.set(0.9, 1, 1.1);
+  sweepMesh.visible = false;
+  sweepMesh.renderOrder = 0;
+  root.add(sweepMesh);
   function sweep({ dur = 2.2, power = 2.6 } = {}) {
     sweepT = 0;
     sweepDur = dur;
     sweepPow = power;
+  }
+
+  /** Recolour everything for a new theme. Nothing is rebuilt. */
+  function setPalette(p: NeckPalette) {
+    P = p;
+    shadow.visible = P.shadowA > 0;
+    shadowMat.opacity = P.shadowA;
+    boardMat.color.set(P.board);
+    edgeMat.color.set(P.edge);
+    fretMat.color.set(P.fret);
+    nutMat.color.set(P.nut);
+    inlayMat.color.set(P.inlay);
+    strings.forEach((st) => st.mesh.material.color.set(WOUND(st.s) ? P.wound : P.string));
+    sweepMesh.material.color.set(P.accent);
+    numSprites.forEach(({ sp, f, marked }) => {
+      sp.material.map = numberMap(f, marked);
+      sp.material.needsUpdate = true;
+    });
+    active.forEach((n) => {
+      if (n.kind) styleNote(n, n.kind, n.text, true);
+    });
   }
 
   /** Where a place's marker sits, in world space (for `project`). */
@@ -718,29 +603,26 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
       u.uPA.value = st.pulseA;
       st.rib.visible = st.glow > 0 || st.pulseA > 0;
     });
-    lightI *= Math.exp(-dt * 3.4);
-    if (lightI < 0.01) lightI = 0;
-    else busy = true;
     if (sweepT >= 0) {
       busy = true;
       sweepT += dt / sweepDur;
       const e = sweepT;
       const x = sweepA + (sweepB - sweepA) * e;
       const env = Math.sin(Math.PI * Math.min(1, e));
-      sweepLight.position.set(x, 0.34, 0);
-      sweepLight.intensity = sweepPow * env;
+      sweepMesh.position.set(x, 0.003, 0);
+      sweepMesh.material.opacity = Math.min(P.dark ? 0.3 : 0.14, 0.12 * sweepPow * env);
+      sweepMesh.visible = true;
       if (sweepT >= 1) {
         sweepT = -1;
-        sweepLight.intensity = 0;
+        sweepMesh.visible = false;
       }
     }
-    noteLight.intensity = lightI * 0.55;
     flashes.forEach((F) => {
       if (F.v > 0) {
         busy = true;
-        F.v = Math.max(0, F.v - dt * 2.1);
+        F.v = Math.max(0, F.v - dt * 1.8);
         F.m.material.opacity = F.v;
-        F.m.scale.setScalar(0.55 + (0.85 - F.v) * 0.3);
+        F.m.scale.setScalar(0.3 + (0.6 - F.v) * 0.25);
         if (F.v === 0) F.m.visible = false;
       }
     });
@@ -752,13 +634,13 @@ export function createGuitar({ tier, tex, overlay }: { tier: number; tex: WoodTe
     root,
     overlayGroup,
     setNotes,
+    setPalette,
     pluck,
     sweep,
     windowPoints,
     notePoint,
     update,
-    addFakeShadows,
-    setNumberScale: (k: number) => numSprites.forEach((sp) => sp.scale.setScalar(sp.userData.base * k)),
+    setNumberScale: (k: number) => numSprites.forEach(({ sp }) => sp.scale.setScalar(sp.userData.base * k)),
   };
 }
 

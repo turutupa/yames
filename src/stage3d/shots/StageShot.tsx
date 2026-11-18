@@ -13,6 +13,7 @@ import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { NeckStageProvider, useNeck, type NeckNote } from "../api";
 import { stageDebug } from "../controller";
+import { applyTheme, getThemeById } from "../../themes";
 
 declare global {
   interface Window {
@@ -67,11 +68,11 @@ function Scene({ kind }: { kind: "whole" | "zoom" | "pluck" | "flat" }) {
 
 const CSS = `
 html,body,#root{margin:0;height:100%;background:transparent;}
-body{background:#0a0705;}
-#root{color:#fbf5ea;font-family:Inter,system-ui,sans-serif}
+body{background:var(--bg-primary);}
+#root{color:var(--text-primary);font-family:Inter,system-ui,sans-serif}
 .stage-shot{position:relative;height:100%;display:flex;flex-direction:column;padding:24px 28px;box-sizing:border-box}
 .stage-shot-head{display:flex;flex-direction:column;gap:4px;flex:none}
-.stage-shot-kick{font:600 13px/1 "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d6c9b4}
+.stage-shot-kick{font:600 13px/1 "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary)}
 .stage-shot-title{font:700 88px/1 "Barlow Condensed",sans-serif}
 .stage-shot-whole{flex-direction:column-reverse;justify-content:flex-end}
 .stage-shot-whole .stage-shot-slot{flex:none;height:300px;margin:30px -28px 20px}
@@ -91,6 +92,8 @@ export function mountStageShot(kind: "whole" | "zoom" | "pluck" | "flat") {
   const style = document.createElement("style");
   style.textContent = CSS;
   document.head.appendChild(style);
+  // The neck follows the theme: the scenes take `?theme=` like every other shot (Ember by default).
+  applyTheme(getThemeById(new URLSearchParams(window.location.search).get("theme") ?? "ember"));
   window.__NECK__ = stageDebug;
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

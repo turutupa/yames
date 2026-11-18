@@ -26,6 +26,7 @@ function fakeEngineModule(probeTimes: number[] = [6, 1, 1, 1, 1]): { mod: Engine
         setNotes: (n, fade) => e.calls.push(`notes:${n.length}:${fade}`),
         pluck: (s, f, k) => e.calls.push(`pluck:${s}:${f}:${k}`),
         sweep: () => e.calls.push("sweep"),
+        setPalette: () => e.calls.push("palette"),
         resize: () => e.calls.push("resize"),
         frame: () => {
           e.calls.push("frame");
