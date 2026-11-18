@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Một huấn luyện viên guitar biết lắng nghe. Chọn một Lộ trình, mỗi buổi tập vừa với số phút bạn có.",
+      "taglineMobile": "Luyện guitar biết lắng nghe. Chọn một Lộ trình, mỗi buổi tập vừa với số phút bạn có.",
       "setup": "Thiết lập (khoảng hai phút)",
       "skip": "Chỉ cần tiếng click",
       "footer": "Miễn phí · cục bộ · mã nguồn mở · v{{version}}"

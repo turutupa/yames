@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "A guitar coach that listens. Choose a Path, and each day's Session fits the minutes you have.",
+      "taglineMobile": "Guitar practice that listens. Choose a Path, and each day's Session fits the minutes you have.",
       "setup": "Set me up (about two minutes)",
       "skip": "Just give me the click",
       "footer": "Free · local · open source · v{{version}}"

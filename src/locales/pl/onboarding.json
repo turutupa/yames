@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Trener gitary, który słucha. Wybierz ścieżkę, a każda sesja zmieści się w minutach, które masz.",
+      "taglineMobile": "Ćwiczenie na gitarze, które słucha. Wybierz ścieżkę, a każda sesja zmieści się w minutach, które masz.",
       "setup": "Skonfiguruj mnie (około dwóch minut)",
       "skip": "Chcę tylko klik",
       "footer": "Darmowy · lokalny · open source · v{{version}}"

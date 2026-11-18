@@ -1122,6 +1122,7 @@
 "onboarding.welcome.setup",
 "onboarding.welcome.skip",
 "onboarding.welcome.tagline",
+"onboarding.welcome.taglineMobile",
 "onboarding.welcome.title",
 "playback.notificationBody",
 "playback.notificationChannel",

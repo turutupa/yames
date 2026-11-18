@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Un coach di chitarra che ascolta. Scegli un Percorso e ogni sessione sta nei minuti che hai.",
+      "taglineMobile": "Pratica di chitarra che ascolta. Scegli un Percorso e ogni sessione sta nei minuti che hai.",
       "setup": "Configurami (circa due minuti)",
       "skip": "Dammi solo il click",
       "footer": "Gratuito · locale · open source · v{{version}}"

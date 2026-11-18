@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Um coach de guitarra que escuta. Escolha uma Trilha, e cada sessão cabe nos minutos que você tem.",
+      "taglineMobile": "Prática de guitarra que escuta. Escolha uma Trilha, e cada sessão cabe nos minutos que você tem.",
       "setup": "Configurar (cerca de dois minutos)",
       "skip": "Só me dê o clique",
       "footer": "Grátis · local · código aberto · v{{version}}"

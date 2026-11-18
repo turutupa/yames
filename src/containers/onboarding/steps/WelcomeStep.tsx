@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
+import { IS_MOBILE } from "../../../platform";
 
 export function WelcomeStep({ isActive }: WizardStepProps) {
   const { t } = useTranslation();
@@ -63,7 +64,9 @@ export function WelcomeStep({ isActive }: WizardStepProps) {
         {t("onboarding.welcome.title")}
       </h1>
       <p className="onboarding-welcome-tagline">
-        {t("onboarding.welcome.tagline")}
+        {/* A phone has no coach model (no LLM in a phone build), so its line
+            sells the listening and the Paths without the word. */}
+        {t(IS_MOBILE ? "onboarding.welcome.taglineMobile" : "onboarding.welcome.tagline")}
       </p>
       <div className="onboarding-welcome-actions">
         <button

@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Un coach de guitare qui écoute. Choisis un Parcours, et chaque séance tient dans les minutes dont tu disposes.",
+      "taglineMobile": "La pratique de la guitare, à l'écoute. Choisis un Parcours, et chaque séance tient dans les minutes dont tu disposes.",
       "setup": "Me configurer (environ deux minutes)",
       "skip": "Juste le clic",
       "footer": "Gratuit · local · open source · v{{version}}"

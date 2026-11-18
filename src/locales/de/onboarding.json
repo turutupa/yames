@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Ein Gitarren-Coach, der zuhört. Wähle einen Pfad, und jede Session passt in die Minuten, die du hast.",
+      "taglineMobile": "Gitarre üben, das zuhört. Wähle einen Pfad, und jede Session passt in die Minuten, die du hast.",
       "setup": "Einrichten (etwa zwei Minuten)",
       "skip": "Nur den Klick, bitte",
       "footer": "Kostenlos · lokal · Open Source · v{{version}}"

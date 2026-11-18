@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Dinleyen bir gitar koçu. Bir Yol seç; her seans elindeki dakikalara sığsın.",
+      "taglineMobile": "Dinleyen gitar çalışması. Bir Yol seç; her seans elindeki dakikalara sığsın.",
       "setup": "Kur (yaklaşık iki dakika)",
       "skip": "Sadece klik yeter",
       "footer": "Ücretsiz · yerel · açık kaynak · v{{version}}"

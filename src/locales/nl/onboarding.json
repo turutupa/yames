@@ -3,6 +3,7 @@
     "welcome": {
       "title": "Yames",
       "tagline": "Een gitaarcoach die luistert. Kies een leerpad, en elke sessie past in de minuten die je hebt.",
+      "taglineMobile": "Gitaar oefenen dat luistert. Kies een leerpad, en elke sessie past in de minuten die je hebt.",
       "setup": "Stel me in (ongeveer twee minuten)",
       "skip": "Geef me gewoon de klik",
       "footer": "Gratis · lokaal · open source · v{{version}}"
