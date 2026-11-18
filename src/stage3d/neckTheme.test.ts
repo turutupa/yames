@@ -31,7 +31,7 @@ describe("the neck palette, every theme", () => {
   it.each(THEMES.map((t) => t.id))("%s: every part is an opaque colour", (id) => {
     const p = paletteOf(id);
     for (const [k, v] of Object.entries(p)) {
-      if (typeof v === "string") expect(v, k).toMatch(/^#[0-9a-f]{6}$/);
+      if (typeof v === "string" && k !== "numFont") expect(v, k).toMatch(/^#[0-9a-f]{6}$/);
     }
     expect(p.dark).toBe(getThemeById(id).group === "dark");
     // The shadow is a dark-theme thing.

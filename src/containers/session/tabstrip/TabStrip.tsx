@@ -1,23 +1,26 @@
 /**
  * The Session's tab: a short pattern drawn big enough to read from the
- * guitar, in place of alphaTab's engraving (which stays for Songs).
+ * guitar, in place of alphaTab's engraving (which stays for Songs). Drawn as
+ * the approved mock draws it (`.preview/practice-review/designer/mock.html`,
+ * `?view=tab`; the layout is `tabStripModel.ts`'s):
  *
- * Two modes:
+ * - The high e is the top line and every number sits ON its line, the line
+ *   broken around it by a halo in the panel's own colour (no dark boxes).
+ * - `follow`, while it runs: two segments, "now · bar 2" and "next · bar 3"
+ *   dimmed beside it. A rounded amber column goes from note to note across
+ *   "now"; at the bar line the next segment slides into its place. A played
+ *   note keeps its timing colour and a dot under it. A segment is a bar, or
+ *   half or a quarter of one when the notes are dense, so neighbours are
+ *   never closer than about twice a number's width.
+ * - `preview`, before the start and while paused: the whole pattern, one
+ *   pass, wrapped onto rows, every bar numbered, and where it was paused
+ *   marked (`marker`).
  *
- * - `preview`, before a Take: one pass of the pattern across the width, the
- *   notes numbered in the order they are played.
- * - `follow`, during one: a single line holding the bar being played and the
- *   next, scrolling under a fixed amber column 30 % in. The next bar is
- *   dimmed, a played note keeps its timing colour, the note under the column
- *   is drawn larger. The pattern repeats for as long as the Take runs.
- *
- * Cheap the way `highway/Runway.tsx` is: the notes are DOM built when the
- * pattern, the width or the pass window changes; each frame writes ONE
- * `transform` through a ref. Which bar is "now" and which note is current are
- * data attributes written when they change, not React state. The only render
- * while playing is when the strip needs the next pass of the pattern drawn.
+ * Cheap the way `highway/Runway.tsx` is: React draws a segment when it comes
+ * into view (once a bar, or once a half bar); the column and the "current"
+ * mark are written through refs from the frame loop, only when they change.
  */
-import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cursorTickAt, leadFromFrame, onReport } from "../../../songs/cursor";
 import type { CursorMotion } from "../../../songs/cursor";
@@ -25,23 +28,20 @@ import type { SongScore } from "../../../songs/types";
 import { TICKS_PER_QUARTER } from "../../../songs/types";
 import { likelyCpuCompositing } from "../highway/Runway";
 import {
-  CURRENT_SCALE,
-  STRING_NAMES,
-  barAt,
-  barLinePad,
-  barRel,
-  beamsFor,
+  FOLLOW_SEGMENTS,
   currentOnset,
   describePattern,
-  followScale,
+  followLayout,
+  noteXIn,
   occurrences,
-  passWindow,
+  overviewLayout,
   patternModel,
-  previewScale,
-  stripOffset,
+  segmentAt,
+  segmentNotes,
+  segmentPlace,
   takeEnd,
 } from "./tabStripModel";
-import type { PatternModel, StripNote, TabResult, TabStripMode, TabStripNoteInput } from "./tabStripModel";
+import type { PatternModel, StaffGeometry, StripNote, TabResult, TabStripMode, TabStripNoteInput } from "./tabStripModel";
 import "./tabstrip.css";
 
 export type { TabResult, TabStripMode, TabStripNoteInput } from "./tabStripModel";
@@ -62,7 +62,7 @@ export type TabStripProps = {
   patternBars: number;
   /** Bars the Take runs (`take.bars`): the pattern repeats to fill them. Absent: it loops for good. */
   takeBars?: number;
-  /** Ticks in a beat, for the counts and the rhythm hint. Default 960 (a quarter). */
+  /** Ticks in a beat, for the counts. Default 960 (a quarter). */
   beatTicks?: number;
   /**
    * Where the music is, in ticks from the start of the Take (negative through
@@ -77,8 +77,10 @@ export type TabStripProps = {
   /** How each note went, by the Take's note id (`pass * notes.length + index`). */
   results?: ReadonlyMap<number, TabResult>;
   mode: TabStripMode;
-  /** A small row of stems and beams under the staff. Off by default. */
-  rhythm?: boolean;
+  /** Preview only: where it was paused, in ticks from the start; its bar and note are marked. */
+  marker?: number | null;
+  /** Preview only: the numbers' largest size (a compact overview under the neck). */
+  maxFretPx?: number;
   className?: string;
 };
 
@@ -103,92 +105,116 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-type Geometry = { ppt: number; pad: number; showOrder: boolean };
+const TAB = ["T", "A", "B"] as const;
 
-/** Bar lines, labels, beat counts, notes: drawn once per pattern, width and pass window. */
-const Strip = memo(function Strip({
-  model,
-  notes,
-  bars,
-  geo,
-  rhythm,
-  barWord,
-}: {
-  model: PatternModel;
-  notes: StripNote[];
-  bars: number[];
-  geo: Geometry;
-  rhythm: boolean;
-  barWord: (n: number) => string;
-}) {
-  const x = (tick: number) => Math.round(tick * geo.ppt * 10) / 10;
-  const byBar = new Map<number, StripNote[]>();
-  for (const n of notes) byBar.set(n.bar, [...(byBar.get(n.bar) ?? []), n]);
-  const beatsInBar = Math.max(1, Math.round(model.barTicks / model.beatTicks));
+/** The left column: the six lines' start and TAB, still while the segments move. */
+function Letters({ geo }: { geo: StaffGeometry }) {
   return (
-    <>
-      {bars.map((bar) => {
-        const start = bar * model.barTicks;
-        const inBar = byBar.get(bar) ?? [];
-        // Onsets of this bar, for the rhythm hint's stems and beams.
-        const onsets: { at: number; dur: number }[] = [];
-        for (const n of inBar) if (onsets[onsets.length - 1]?.at !== n.at) onsets.push({ at: n.at, dur: n.dur });
-        const patternBar = (((bar % model.patternBars) + model.patternBars) % model.patternBars) + 1;
+    <svg className="tabstrip-letters" width={geo.letters} height={geo.height} aria-hidden="true">
+      {Array.from({ length: 6 }, (_u, i) => (
+        <line key={i} className="tabstrip-line" x1={geo.letters * 0.36} x2={geo.letters} y1={geo.top + i * geo.gap} y2={geo.top + i * geo.gap} />
+      ))}
+      {TAB.map((letter, i) => (
+        <text
+          key={letter}
+          className="tabstrip-tab"
+          x={geo.letters * 0.36}
+          y={geo.top + geo.gap * (1.3 + i * 1.2)}
+          textAnchor="middle"
+          dominantBaseline="central"
+          style={{ fontSize: geo.fretPx * 0.82 }}
+        >
+          {letter}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+type SegmentProps = {
+  model: PatternModel;
+  segment: number;
+  segTicks: number;
+  width: number;
+  ppt: number;
+  geo: StaffGeometry;
+  notes: StripNote[];
+  rel: "now" | "next" | "past" | "later" | "plain" | "mark";
+  label: string;
+  /** Preview: the note marked as where it was paused, by tick from the segment's start. */
+  markAt?: number | null;
+  left: number;
+};
+
+/** One segment: its lines (broken around each number), its bar line, label, counts and numbers. */
+const Segment = memo(function Segment({ model, segment, segTicks, width, ppt, geo, notes, rel, label, markAt, left }: SegmentProps) {
+  const start = segment * segTicks;
+  const x = (into: number) => Math.round(noteXIn(into, ppt, model, geo) * 10) / 10;
+  const beats: number[] = [];
+  for (let b = Math.ceil(start / model.beatTicks) * model.beatTicks; b < start + segTicks; b += model.beatTicks) beats.push(b);
+  const barStart = start % model.barTicks === 0;
+  const markX = markAt === null || markAt === undefined ? null : x(markAt);
+  const colW = Math.min(ppt * (model.minGap > 0 ? model.minGap : model.beatTicks) * 0.92, geo.fretPx * 2);
+  return (
+    <svg
+      className="tabstrip-seg"
+      data-seg={segment}
+      data-rel={rel}
+      width={width}
+      height={geo.height}
+      style={{ left }}
+      aria-hidden="true"
+    >
+      {markX !== null && (
+        <rect
+          className="tabstrip-mark"
+          x={markX - colW / 2}
+          y={geo.top - geo.fretPx}
+          width={colW}
+          height={geo.bottom - geo.top + geo.fretPx * 2}
+          rx={geo.fretPx * 0.3}
+        />
+      )}
+      {Array.from({ length: 6 }, (_u, i) => (
+        <line key={i} className="tabstrip-line" x1={0} x2={width} y1={geo.top + i * geo.gap} y2={geo.top + i * geo.gap} />
+      ))}
+      {barStart && <line className="tabstrip-barline" x1={1.5} x2={1.5} y1={geo.top} y2={geo.bottom} />}
+      {label && (
+        <text className="tabstrip-label" x={barStart ? 10 : 4} y={geo.labelY} style={{ fontSize: Math.max(11, geo.fretPx * 0.47) }}>
+          {label}
+        </text>
+      )}
+      {beats.map((b) => (
+        <text
+          key={b}
+          className="tabstrip-count"
+          x={x(b - start)}
+          y={geo.beatY}
+          textAnchor="middle"
+          style={{ fontSize: Math.max(10, geo.fretPx * 0.53) }}
+        >
+          {Math.floor((b % model.barTicks) / model.beatTicks) + 1}
+        </text>
+      ))}
+      {notes.map((n) => {
+        const nx = x(n.at - start);
+        const ly = geo.top + (n.string - 1) * geo.gap;
         return (
-          <div key={bar} className="tabstrip-bar" data-bar={bar}>
-            <i className="tabstrip-barline" style={{ left: x(start) - geo.pad }} />
-            {bar === bars[bars.length - 1] && (
-              <i className="tabstrip-barline" style={{ left: x(start + model.barTicks) - geo.pad }} />
-            )}
-            <span className="tabstrip-barlabel" style={{ left: x(start) - geo.pad + 8 }}>
-              {barWord(patternBar)}
-            </span>
-            {Array.from({ length: beatsInBar }, (_u, b) => (
-              <span key={`c${b}`} className="tabstrip-count" style={{ left: x(start + b * model.beatTicks) }}>
-                {b + 1}
-              </span>
-            ))}
-            {inBar.map((n) => (
-              <span
-                key={n.id}
-                className="tabstrip-note"
-                data-id={n.id}
-                data-string={n.string}
-                data-wide={n.fret >= 10 ? "" : undefined}
-                style={{ left: x(n.at) }}
-              >
-                <b>{n.fret}</b>
-                {geo.showOrder && (
-                  <sup className="tabstrip-order" aria-hidden="true">
-                    {n.order}
-                  </sup>
-                )}
-              </span>
-            ))}
-            {rhythm &&
-              onsets.map((o, i) => {
-                const beams = beamsFor(o.dur, model.beatTicks);
-                const next = onsets[i + 1];
-                const sameBeat =
-                  next && Math.floor(next.at / model.beatTicks) === Math.floor(o.at / model.beatTicks);
-                const width = sameBeat && beams > 0 ? x(next.at) - x(o.at) : beams > 0 ? 8 : 0;
-                return (
-                  <Fragment key={`r${o.at}`}>
-                    <i className="tabstrip-stem" style={{ left: x(o.at) }} />
-                    {Array.from({ length: beams }, (_u, k) => (
-                      <i
-                        key={k}
-                        className="tabstrip-beam"
-                        style={{ left: x(o.at), width, marginTop: -k * 4 }}
-                      />
-                    ))}
-                  </Fragment>
-                );
-              })}
-          </div>
+          <g
+            key={n.id}
+            className="tabstrip-note"
+            data-id={n.id}
+            data-string={n.string}
+            data-current={markAt !== null && markAt !== undefined && n.at - start === markAt ? "" : undefined}
+          >
+            <circle className="tabstrip-dot" cx={nx} cy={ly + geo.fretPx * 0.8} r={Math.max(2.5, geo.fretPx * 0.12)} />
+            <text x={nx} y={ly} textAnchor="middle" dominantBaseline="central">
+              {n.fret}
+            </text>
+          </g>
         );
       })}
-    </>
+    </svg>
   );
 });
 
@@ -203,7 +229,8 @@ export function TabStrip({
   playing,
   results,
   mode,
-  rhythm = false,
+  marker = null,
+  maxFretPx,
   className,
 }: TabStripProps) {
   const { t } = useTranslation();
@@ -213,13 +240,21 @@ export function TabStrip({
   );
   const reduced = useReducedMotion();
   const viewRef = useRef<HTMLDivElement>(null);
-  const stripRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const colRef = useRef<HTMLElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
     const view = viewRef.current;
     if (!view) return;
-    const measure = () => setWidth(Math.round(view.getBoundingClientRect().width));
+    const measure = () => {
+      const r = view.getBoundingClientRect();
+      setSize((s) => {
+        const width = Math.round(r.width);
+        const height = Math.round(r.height);
+        return s.width === width && s.height === height ? s : { width, height };
+      });
+    };
     measure();
     if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(measure);
@@ -228,102 +263,100 @@ export function TabStrip({
   }, []);
 
   const follow = mode === "follow";
-  const scale = useMemo(
-    () => (follow ? followScale(model, width) : previewScale(model, width)),
-    [follow, model, width],
+  const fl = useMemo(() => followLayout(model, size.width), [model, size.width]);
+  const ov = useMemo(
+    () => overviewLayout(model, size.width, size.height, maxFretPx),
+    [model, size.width, size.height, maxFretPx],
   );
-  const pad = barLinePad(model, scale.ppt);
-  const geo: Geometry = useMemo(() => ({ ppt: scale.ppt, pad, showOrder: !follow }), [scale.ppt, pad, follow]);
+  const endTick = takeEnd(model, takeBars);
 
   const readPosition = useCallback(
     () => (typeof position === "function" ? position() : position),
     [position],
   );
 
-  // Which passes are drawn. Changes only when the strip needs more pattern.
-  const [win, setWin] = useState(() => ({ from: 0, to: 1 }));
-  const endTick = takeEnd(model, takeBars);
-  const drawn = useMemo(() => {
-    if (!follow) return occurrences(model, 0, 0);
-    return occurrences(model, win.from, win.to, takeBars);
-  }, [follow, model, win, takeBars]);
-  const bars = useMemo(() => {
-    if (!follow) return Array.from({ length: model.patternBars }, (_u, i) => i);
-    const first = win.from * model.patternBars;
-    const last = (win.to + 1) * model.patternBars - 1;
-    const lastBar = Number.isFinite(endTick) ? Math.ceil(endTick / model.barTicks) - 1 : last;
-    const out: number[] = [];
-    for (let b = first; b <= Math.min(last, lastBar); b++) out.push(b);
-    return out;
-  }, [follow, model, win, endTick]);
+  const place = (where: { bar: number; fromBeat: number; toBeat: number; whole: boolean }) =>
+    where.whole
+      ? t("session.tabstrip.bar", { n: where.bar })
+      : where.fromBeat === where.toBeat
+        ? t("session.tabstrip.barBeat", { n: where.bar, beat: where.fromBeat })
+        : t("session.tabstrip.barBeats", { n: where.bar, from: where.fromBeat, to: where.toBeat });
 
-  // What the frame loop reads; written on every render, read without rendering.
-  const latest = useRef({ model, scale, takeBars, win, follow, reduced, width });
-  latest.current = { model, scale, takeBars, win, follow, reduced, width };
-  const shown = useRef({ tick: Number.NaN, bar: Number.NaN, onset: "" });
-  const notesEls = useRef(new Map<number, HTMLElement>());
+  // --- follow: which segment is "now" -------------------------------------
+  const [page, setPage] = useState(0);
+  const latest = useRef({ model, fl, takeBars, page, follow, reduced });
+  latest.current = { model, fl, takeBars, page, follow, reduced };
+  const shown = useRef({ onset: "", page: Number.NaN, countIn: false });
   const motion = useRef<CursorMotion | null>(null);
 
-  /** Put the strip at `tick`, and mark the bar and the note that are now. */
-  const place = useCallback((tick: number) => {
-    const { model: m, scale: s, takeBars: tb, win: w, follow: f, reduced: r, width: vw } = latest.current;
-    const strip = stripRef.current;
-    if (!strip || !f) return;
+  /** Mark the note at `tick` current, put the column on it, and turn the page at a segment's end. */
+  const placeAt = useCallback((tick: number) => {
+    const { model: m, fl: l, takeBars: tb, page: shownPage, follow: f } = latest.current;
+    if (!f || !(l.segWidth > 0)) return;
     const now = currentOnset(m, tick, graceOf(m), tb);
-    // Reduced motion: the strip steps from note to note instead of gliding.
-    const at = r ? (now ? now.at : tick) : tick;
-    if (at !== shown.current.tick) {
-      shown.current.tick = at;
-      strip.style.transform = `translate3d(${stripOffset(at, s).toFixed(1)}px,0,0)`;
+    const at = now ? now.at : Math.max(0, tick);
+    const want = Math.max(0, segmentAt(l.segTicks, at));
+    if (want !== shownPage) {
+      setPage(want);
+      return;
     }
-    const bar = barAt(m, tick);
-    if (bar !== shown.current.bar) {
-      shown.current.bar = bar;
-      strip.querySelectorAll<HTMLElement>(".tabstrip-bar").forEach((el) => {
-        el.dataset.rel = barRel(Number(el.dataset.bar), Math.max(0, bar));
-      });
+    const countIn = tick < 0;
+    if (countIn !== shown.current.countIn) {
+      shown.current.countIn = countIn;
+      if (colRef.current) colRef.current.toggleAttribute("data-countin", countIn);
     }
-    const key = now ? `${now.pass}:${now.index}` : "";
-    if (key !== shown.current.onset) {
-      shown.current.onset = key;
-      strip.querySelectorAll<HTMLElement>(".tabstrip-note[data-current]").forEach((el) => {
-        delete el.dataset.current;
-      });
-      if (now) {
-        const k = m.notes.length;
-        for (const n of m.notes) {
-          if (n.tick !== m.onsets[now.index]) continue;
-          notesEls.current.get(now.pass * k + n.index)?.setAttribute("data-current", "");
-        }
-      }
+    const key = now ? `${now.pass}:${now.index}:${want}` : "";
+    if (key === shown.current.onset) return;
+    shown.current.onset = key;
+    const track = trackRef.current;
+    if (!track) return;
+    track.querySelectorAll(".tabstrip-note[data-current]").forEach((el) => el.removeAttribute("data-current"));
+    const col = colRef.current;
+    if (!now) {
+      if (col) col.style.visibility = "hidden";
+      return;
     }
-    // More pattern needed: the one render a running Take asks for.
-    const want = passWindow(m, tick, s, vw);
-    if (want.from !== w.from || want.to !== w.to) setWin(want);
+    const k = m.notes.length;
+    const onsetTick = m.onsets[now.index];
+    for (const n of m.notes) {
+      if (n.tick !== onsetTick) continue;
+      track.querySelector(`.tabstrip-note[data-id="${now.pass * k + n.index}"]`)?.setAttribute("data-current", "");
+    }
+    if (col) {
+      const x = noteXIn(now.at - want * l.segTicks, l.ppt, m, l.geo);
+      col.style.visibility = "visible";
+      col.style.transform = `translate3d(${x.toFixed(1)}px,0,0)`;
+    }
   }, []);
 
-  // After every drawing: index the notes, and put marks back on them.
+  // A new page: slide the track from where the last one stood (one segment over).
+  const lastPage = useRef<number | null>(null);
   useLayoutEffect(() => {
-    const map = new Map<number, HTMLElement>();
-    stripRef.current?.querySelectorAll<HTMLElement>(".tabstrip-note").forEach((el) => {
-      map.set(Number(el.dataset.id), el);
-    });
-    notesEls.current = map;
-    shown.current = { tick: Number.NaN, bar: Number.NaN, onset: "" };
-    if (follow) place(motion.current ? motion.current.floor : readPosition());
-    else if (stripRef.current) stripRef.current.style.transform = `translate3d(${scale.cursorX}px,0,0)`;
+    if (!follow) return;
+    const track = trackRef.current;
+    const before = lastPage.current;
+    lastPage.current = page;
+    shown.current.onset = "";
+    placeAt(motion.current ? motion.current.floor : readPosition());
+    if (!track || before === null || before === page || reduced || Math.abs(page - before) > 1) return;
+    const dx = (page - before) * fl.segWidth;
+    track.style.transition = "none";
+    track.style.transform = `translate3d(${dx.toFixed(1)}px,0,0)`;
+    void track.getBoundingClientRect();
+    track.style.transition = "";
+    track.style.transform = "translate3d(0,0,0)";
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drawn, bars, geo, follow, scale, place]);
+  }, [page, follow, fl]);
 
-  // The results: a colour per note, written when they change or the drawing does.
+  // The results: a colour per note, written when they change or a segment is drawn.
   useLayoutEffect(() => {
-    notesEls.current.forEach((el, id) => {
-      const r = follow ? results?.get(id) : undefined;
+    trackRef.current?.querySelectorAll<SVGGElement>(".tabstrip-note").forEach((el) => {
+      const r = follow ? results?.get(Number(el.dataset.id)) : undefined;
       if (r) {
         if (el.dataset.result !== r) el.dataset.result = r;
       } else if (el.dataset.result) delete el.dataset.result;
     });
-  }, [results, drawn, follow]);
+  });
 
   // Smoothing a numeric position between the engine's reports (`songs/cursor.ts`).
   const clock = useMemo<SongScore | null>(
@@ -338,18 +371,18 @@ export function TabStrip({
     if (reported === null) return;
     if (!playing || !clock) {
       motion.current = null;
-      place(reported);
+      placeAt(reported);
       return;
     }
     motion.current = onReport(clock, motion.current, { tick: reported, pass: 0, atMs: performance.now() }, 100);
-  }, [reported, playing, clock, place]);
+  }, [reported, playing, clock, placeAt]);
 
   // Not playing, with a function: read it once whenever anything changes.
   useEffect(() => {
-    if (!playing && typeof position === "function") place(position());
-  }, [playing, position, place]);
+    if (!playing && typeof position === "function") placeAt(position());
+  }, [playing, position, placeAt, fl]);
 
-  // The frame loop: only in follow mode, only while the Take runs.
+  // The frame loop: only in follow mode, only while it runs.
   useEffect(() => {
     if (!playing || !follow) return;
     const slow = likelyCpuCompositing(navigator.userAgent);
@@ -377,19 +410,136 @@ export function TabStrip({
         motion.current = next.motion;
         tick = next.tick;
       } else return;
-      place(tick);
+      placeAt(tick);
       window.__TABSTRIP_FRAMES__ = (window.__TABSTRIP_FRAMES__ ?? 0) + 1;
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [playing, follow, position, clock, endTick, place]);
+  }, [playing, follow, position, clock, endTick, placeAt]);
+
+  // --- what is drawn -------------------------------------------------------
+  const lastSegment = Number.isFinite(endTick) ? Math.ceil(endTick / fl.segTicks) - 1 : Number.POSITIVE_INFINITY;
+  const followSegments = useMemo(() => {
+    if (!follow || !(size.width > 0)) return [];
+    const out: number[] = [];
+    for (let s = Math.max(0, page - 1); s <= page + FOLLOW_SEGMENTS; s++) if (s <= lastSegment) out.push(s);
+    return out;
+  }, [follow, size.width, page, lastSegment]);
+
+  const markTick = marker === null || marker === undefined || marker < 0 ? null : marker % model.passTicks;
+  const markOnset = useMemo(() => {
+    if (markTick === null) return null;
+    const now = currentOnset(model, markTick, graceOf(model));
+    return now ? now.at % model.passTicks : null;
+  }, [model, markTick]);
 
   const label = t("session.tabstrip.label", { notes: describePattern(model) });
-  const barWord = useCallback((n: number) => t("session.tabstrip.bar", { n }), [t]);
   const style = {
-    "--ts-fret": `${scale.fretPx}px`,
-    "--ts-current": CURRENT_SCALE,
+    "--ts-fret": `${follow ? fl.fretPx : ov.fretPx}px`,
   } as React.CSSProperties;
+
+  let body: React.ReactNode = null;
+  if (size.width > 0 && follow) {
+    const geo = fl.geo;
+    const nextEndsBar = ((page + FOLLOW_SEGMENTS) * fl.segTicks) % model.barTicks === 0;
+    body = (
+      <div className="tabstrip-staff" style={{ height: geo.height }}>
+        <Letters geo={geo} />
+        <div className="tabstrip-window" style={{ left: geo.letters, width: fl.segWidth * FOLLOW_SEGMENTS, height: geo.height }}>
+          <div className="tabstrip-track" ref={trackRef} data-testid="tabstrip-strip">
+            <i
+              className="tabstrip-cursor"
+              ref={colRef}
+              style={{
+                top: geo.top - geo.fretPx,
+                height: geo.bottom - geo.top + geo.fretPx * 2,
+                width: Math.min(fl.ppt * (model.minGap > 0 ? model.minGap : model.beatTicks) * 0.92, geo.fretPx * 2),
+              }}
+            />
+            {followSegments.map((s) => {
+              const rel = s === page ? "now" : s === page + 1 ? "next" : s < page ? "past" : "later";
+              const where = place(segmentPlace(model, s, fl.segTicks));
+              return (
+                <Segment
+                  key={`${s}:${fl.segTicks}:${fl.fretPx}`}
+                  model={model}
+                  segment={s}
+                  segTicks={fl.segTicks}
+                  width={fl.segWidth}
+                  ppt={fl.ppt}
+                  geo={geo}
+                  notes={segmentNotes(model, s, fl.segTicks, takeBars)}
+                  rel={rel}
+                  label={
+                    rel === "now"
+                      ? t("session.tabstrip.now", { where })
+                      : rel === "next"
+                        ? t("session.tabstrip.next", { where })
+                        : where
+                  }
+                  left={(s - page) * fl.segWidth}
+                />
+              );
+            })}
+          </div>
+          {nextEndsBar && (
+            <i className="tabstrip-endline" style={{ top: geo.top, height: geo.bottom - geo.top }} />
+          )}
+        </div>
+      </div>
+    );
+  } else if (size.width > 0) {
+    const geo = ov.geo;
+    const all = occurrences(model, 0, 0);
+    const rows: number[][] = [];
+    for (let s = 0; s < ov.segments; s++) {
+      const r = Math.floor(s / ov.perRow);
+      (rows[r] ??= []).push(s);
+    }
+    const markSeg = markOnset === null ? null : segmentAt(ov.segTicks, markOnset);
+    body = (
+      <div className="tabstrip-rows" data-fits={ov.fits ? "" : undefined}>
+        {rows.map((row, r) => (
+          <div className="tabstrip-staff" key={r} style={{ height: geo.height }}>
+            <Letters geo={geo} />
+            <div className="tabstrip-window" style={{ left: geo.letters, width: ov.segWidth * ov.perRow, height: geo.height }}>
+              {row.map((s, i) => {
+                const where = segmentPlace(model, s, ov.segTicks);
+                const startsBar = (s * ov.segTicks) % model.barTicks === 0;
+                const segNotes = all.filter((n) => n.at >= s * ov.segTicks && n.at < (s + 1) * ov.segTicks);
+                const marked = markSeg === s;
+                return (
+                  <Segment
+                    key={s}
+                    model={model}
+                    segment={s}
+                    segTicks={ov.segTicks}
+                    width={ov.segWidth}
+                    ppt={ov.ppt}
+                    geo={geo}
+                    notes={segNotes}
+                    rel={marked ? "mark" : "plain"}
+                    label={
+                      marked
+                        ? t("session.tabstrip.pausedHere", { where: place(where) })
+                        : startsBar
+                          ? t("session.tabstrip.bar", { n: where.bar })
+                          : ""
+                    }
+                    markAt={marked && markOnset !== null ? markOnset - s * ov.segTicks : null}
+                    left={i * ov.segWidth}
+                  />
+                );
+              })}
+              {((row[row.length - 1] + 1) * ov.segTicks) % model.barTicks === 0 && (
+                <i className="tabstrip-endline" style={{ top: geo.top, height: geo.bottom - geo.top }} />
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -398,28 +548,13 @@ export function TabStrip({
       data-mode={mode}
       data-moving={playing && follow ? "" : undefined}
       data-reduced={reduced ? "" : undefined}
-      data-rhythm={rhythm ? "" : undefined}
+      data-split={follow ? fl.split : ov.split}
       role="img"
       aria-label={label}
-      style={style}
+      style={{ ...style, minHeight: follow && size.width > 0 ? fl.geo.height : undefined }}
     >
-      <div className="tabstrip-names" aria-hidden="true">
-        {STRING_NAMES.map((name, i) => (
-          <span key={i} data-string={i + 1}>
-            {name}
-          </span>
-        ))}
-      </div>
       <div className="tabstrip-view" ref={viewRef} aria-hidden="true">
-        {STRING_NAMES.map((_n, i) => (
-          <i key={i} className="tabstrip-line" data-string={i + 1} />
-        ))}
-        <div className="tabstrip-strip" ref={stripRef} data-testid="tabstrip-strip">
-          {width > 0 && (
-            <Strip model={model} notes={drawn} bars={bars} geo={geo} rhythm={rhythm} barWord={barWord} />
-          )}
-        </div>
-        {follow && <i className="tabstrip-cursor" style={{ left: scale.cursorX }} />}
+        <div className="tabstrip-fill">{body}</div>
       </div>
     </div>
   );

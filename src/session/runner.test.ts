@@ -14,6 +14,10 @@ import {
   runReducer,
   stepRemainingMs,
   tempoNudges,
+  canGoBack,
+  timedBpm,
+  timedTempoAdjustable,
+  TIMED_BPM_STEP,
 } from "./runner";
 import type { RunEvent, RunState, TakeOutcome } from "./runner";
 import { NO_PROGRESS } from "./progress";
@@ -134,11 +138,15 @@ describe("the walk through a Session", () => {
     expect(s.phase).toBe("result");
   });
 
-  it("a timed step moves on by itself", () => {
+  it("a timed step ends by its clock and holds for Again or Next (SES-1)", () => {
     const start = run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "timedStart", now: NOW });
     const during = run(start, { type: "tick", now: NOW + MIN });
     expect(during.phase).toBe("timed");
-    const after = run(start, { type: "tick", now: NOW + 2 * MIN });
+    const ended = run(start, { type: "tick", now: NOW + 2 * MIN });
+    expect(ended.phase).toBe("timed");
+    expect(ended.ended).toBe(true);
+    expect(eventForBigAction(bigAction(ended, EX), NOW)).toEqual({ type: "next", now: NOW });
+    const after = run(ended, { type: "next", now: NOW + 2 * MIN });
     expect(after.phase).toBe("ready");
     expect(currentStep(after)?.id).toBe("focus");
   });
@@ -160,6 +168,8 @@ describe("the walk through a Session", () => {
     expect(s.phase).toBe("timedReady");
     s = run(s, { type: "timedStart", now: NOW });
     s = run(s, { type: "tick", now: NOW + twenty.steps[jamAt].minutes * MIN });
+    expect(s.ended).toBe(true);
+    s = run(s, { type: "next", now: NOW + twenty.steps[jamAt].minutes * MIN });
     expect(s.phase).toBe("recap");
   });
 });
@@ -313,7 +323,9 @@ describe("the seam for Ramp up", () => {
     expect(currentStep(during)?.id).toBe("edge");
     // It takes what was left of the focus block, plus its own two minutes.
     const focusMinutes = (currentStep(s) as PlanStep).minutes;
-    const after = run(during, { type: "tick", now: NOW + (2 + focusMinutes) * MIN });
+    const ended = run(during, { type: "tick", now: NOW + (2 + focusMinutes) * MIN });
+    expect(ended.ended).toBe(true);
+    const after = run(ended, { type: "next", now: NOW + (2 + focusMinutes) * MIN });
     expect(currentStep(after)?.id).toBe("block-1");
     expect(after.phase).toBe("ready");
   });
@@ -406,5 +418,77 @@ describe("Find my edge", () => {
     expect(isEdgeStep(currentStep(during))).toBe(true);
     const after = run(during, { type: "next", now: NOW });
     expect(currentStep(after)?.id).toBe("block-1");
+  });
+});
+
+describe("a timed step: pause, resume, restart, tempo, back (owner, beta 5)", () => {
+  const started = () => run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "timedStart", now: NOW });
+
+  it("pausing holds the clock; resuming carries on from where it was", () => {
+    let s = run(started(), { type: "tick", now: NOW + 30_000 });
+    const left = stepRemainingMs(s);
+    s = run(s, { type: "pause", now: NOW + 30_000 });
+    expect(s.paused).toBe(true);
+    s = run(s, { type: "tick", now: NOW + 90_000 }, { type: "tick", now: NOW + 5 * MIN });
+    expect(stepRemainingMs(s)).toBe(left);
+    expect(s.phase).toBe("timed");
+    const runs = s.runs;
+    s = run(s, { type: "resume", now: NOW + 5 * MIN });
+    expect(s.paused).toBe(false);
+    expect(s.runs).toBe(runs + 1);
+    expect(stepRemainingMs(s)).toBe(left);
+  });
+
+  it("a restart fills the clock again and starts a new run, paused or not", () => {
+    let s = run(started(), { type: "tick", now: NOW + MIN }, { type: "pause", now: NOW + MIN });
+    const runs = s.runs;
+    s = run(s, { type: "restart", now: NOW + MIN });
+    expect(s.paused).toBe(false);
+    expect(s.runs).toBe(runs + 1);
+    expect(stepRemainingMs(s)).toBe((currentStep(s)?.minutes ?? 0) * MIN);
+  });
+
+  it("the tempo moves before the start and while paused, not mid-run", () => {
+    let s = run(IDLE, { type: "start", plan: plan(), now: NOW });
+    expect(timedTempoAdjustable(currentStep(s))).toBe(true);
+    const bpm = s.bpm;
+    s = run(s, { type: "setBpm", bpm: timedBpm(bpm, -TIMED_BPM_STEP), now: NOW });
+    expect(s.bpm).toBe(timedBpm(bpm, -TIMED_BPM_STEP));
+    s = run(s, { type: "timedStart", now: NOW }, { type: "setBpm", bpm: 200, now: NOW });
+    expect(s.bpm).not.toBe(200);
+    s = run(s, { type: "pause", now: NOW }, { type: "setBpm", bpm: 200, now: NOW });
+    expect(s.bpm).toBe(200);
+    expect(timedBpm(31, -5)).toBe(30);
+    expect(timedBpm(30, -5)).toBe(30);
+  });
+
+  it("the step after a warm-up can go back to it, until something is played there", () => {
+    let s = run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "next", now: NOW });
+    expect(currentStep(s)?.kind).not.toBe("metronome");
+    expect(canGoBack(s)).toBe(true);
+    s = run(s, { type: "back", now: NOW });
+    expect(s.phase).toBe("timedReady");
+    expect(s.stepIndex).toBe(0);
+    expect(canGoBack(s)).toBe(false);
+  });
+
+  it("played out, it holds for Again or Next rather than moving on (SES-1)", () => {
+    let s = run(started(), { type: "tick", now: NOW + 60 * MIN });
+    expect(s.stepIndex).toBe(0);
+    expect(s.ended).toBe(true);
+    expect(s.phase).toBe("timed");
+    s = run(s, { type: "restart", now: NOW + 61 * MIN });
+    expect(s.ended).toBe(false);
+    expect(stepRemainingMs(s)).toBe((currentStep(s)?.minutes ?? 0) * MIN);
+    s = run(s, { type: "tick", now: NOW + 200 * MIN }, { type: "next", now: NOW + 200 * MIN });
+    expect(s.stepIndex).toBe(1);
+    expect(s.skipped).toEqual([]);
+  });
+
+  it("a block left before it was played out shows as skipped", () => {
+    const s = run(started(), { type: "next", now: NOW + MIN });
+    expect(s.skipped).toEqual([plan().steps[0].id]);
+    const t = run(IDLE, { type: "start", plan: plan(), now: NOW }, { type: "next", now: NOW });
+    expect(t.skipped).toEqual([plan().steps[0].id]);
   });
 });

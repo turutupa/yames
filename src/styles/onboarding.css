@@ -1213,6 +1213,9 @@
   --bg-card: #1d150e;
   --bg-panel: #130d09;
   --bg-raised: #271c13;
+  --bg-solid: #0e0906;
+  --bg-card-solid: #1d150e;
+  --bg-raised-solid: #271c13;
   --bg-widget: linear-gradient(135deg, #0e0906, #16100b);
   --bg-tertiary: #20170f;
   --bg-hover: #2a1e14;
@@ -1238,6 +1241,11 @@
   --accent-2-text: #1c1206;
   --beat-accent: #ffd08a;
   --font-family: var(--l-body);
+  /* The theme's faces too: the wizard's type is its own, like its colours. */
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-heading: Fraunces, Georgia, "Times New Roman", serif;
+  --font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --font-weight: 400;
   --radius: 10px;
   --radius-sm: 8px;

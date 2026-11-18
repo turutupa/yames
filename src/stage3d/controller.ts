@@ -142,8 +142,19 @@ export class StageController {
   /** The theme changed: the neck takes its new colours (the fallback and the strip re-render on their own). */
   private onPalette = () => {
     if (!this.engine) return;
-    this.engine.setPalette(neckPalette());
-    this.scheduler.invalidate();
+    const p = neckPalette();
+    const apply = () => {
+      if (!this.engine || neckPalette() !== p) return;
+      this.engine.setPalette(p);
+      this.scheduler.invalidate();
+    };
+    // The numerals are drawn into textures once: wait (briefly) for the theme's number face first.
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    if (!fonts?.load) return apply();
+    Promise.race([
+      Promise.all([fonts.load(`700 40px ${p.numFont}`), fonts.load(`500 40px ${p.numFont}`)]),
+      new Promise((r) => setTimeout(r, 800)),
+    ]).then(apply, apply);
   };
 
   /** Stop, free the GPU, and take the canvas away. */

@@ -116,6 +116,10 @@ interface ActionDispatcherArgs {
     exit?: () => void;
     /** Neck, Runway, Tab: the next view (locked while a graded Take runs). */
     cycleView?: () => void;
+    /** Pause or resume a warm-up or a timed block. */
+    togglePause?: () => void;
+    /** A timed block from the top, or a graded Take again. */
+    restart?: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -301,6 +305,12 @@ export function useActionDispatcher({
             break;
           case "session-view":
             sessionActions?.cycleView?.();
+            break;
+          case "session-pause":
+            sessionActions?.togglePause?.();
+            break;
+          case "session-restart":
+            sessionActions?.restart?.();
             break;
           case "session-exit":
             // Whatever is open over the Session closes first, on its own key

@@ -249,7 +249,10 @@
         "session-exit": "Esci dalla sessione",
         "tab-paths": "Percorsi",
         "tab-progress": "Progressi",
-        "tab-tools": "Strumenti"
+        "tab-tools": "Strumenti",
+        "session-view": "Cambia vista",
+        "session-pause": "Pausa",
+        "session-restart": "Di nuovo"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -299,11 +302,14 @@
         "session-slower": "Tra una take e l'altra: un gradino più lento",
         "session-faster": "Tra una take e l'altra: un gradino più veloce",
         "session-next": "Tra una take e l'altra: passa alla prossima cosa della sessione",
-        "session-pedal": "Per un solo footswitch. Tocco: la prossima cosa. Doppio tocco: più lento. Tieni premuto: tappa successiva",
+        "session-pedal": "Per un solo pedale. Tocco: la prossima azione (mette in pausa un riscaldamento in corso). Doppio tocco: più lento. Tieni premuto: di nuovo",
         "session-exit": "In una sessione: uscire, come fa Esci. Una take in corso si ferma prima.",
         "tab-paths": "Vai a Percorsi",
         "tab-progress": "Vai a Progressi",
-        "tab-tools": "Vai a Strumenti"
+        "tab-tools": "Vai a Strumenti",
+        "session-view": "In una sessione: Manico, Pista o Tab. In qualsiasi momento nel riscaldamento; tra le prese in una valutata",
+        "session-pause": "In un riscaldamento o in un blocco a tempo: mettilo in pausa, o continua",
+        "session-restart": "In un riscaldamento o in un blocco a tempo: dall'inizio. Dopo una presa: la stessa presa di nuovo"
       }
     },
     "inputTest": {

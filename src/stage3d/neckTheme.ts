@@ -67,6 +67,8 @@ export type NeckPalette = {
   poolA: number;
   /** The board's shadow, as an alpha of black (0 on light themes). */
   shadowA: number;
+  /** The theme's number face (`--font-num`): fret numbers and the notes' numerals. */
+  numFont: string;
 };
 
 /** Optional per-theme overrides, read when a theme sets them. */
@@ -145,6 +147,7 @@ function inkOn(fill: string): string {
 /** Defaults for the two tokens a theme may not have yet (an older build's store). */
 const MISS_DARK = "#ff5d6c";
 const MISS_LIGHT = "#b3261e";
+export const DEFAULT_NUM_FONT = '"Barlow Condensed","Arial Narrow",system-ui,sans-serif';
 
 /**
  * The palette for a theme, given a reader of its tokens (`--name` to its raw
@@ -195,6 +198,7 @@ export function paletteFrom(read: (name: string) => string, light: boolean): Nec
     glowA: dark ? 0.45 : 0.28,
     poolA: dark ? 0.08 : 0.05,
     shadowA: dark ? 0.45 : 0,
+    numFont: get("--font-num") || DEFAULT_NUM_FONT,
   };
 }
 

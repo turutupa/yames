@@ -226,7 +226,7 @@ test.describe("the learning side on a phone", () => {
     test(`phone-session-playing: the bar counter is one line at ${size.width}px`, async ({ page }) => {
       test.slow();
       await openShot(page, "phone-session-playing", size);
-      const lines = await page.$eval('[data-testid="session-live"] .session-stat:not([data-xl]) b', (b) => {
+      const lines = await page.$eval('[data-testid="session-live-bars"]', (b) => {
         const lh = parseFloat(getComputedStyle(b).lineHeight) || parseFloat(getComputedStyle(b).fontSize);
         return Math.round(b.getBoundingClientRect().height / lh);
       });

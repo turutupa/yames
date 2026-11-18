@@ -184,7 +184,7 @@ export function ThemeEffects({ themeId, currentBeat, isPlaying }: { themeId: str
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 9999,
+        zIndex: -1,
         pointerEvents: "none",
         mixBlendMode: config.blend as any,
       }}

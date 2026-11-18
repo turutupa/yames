@@ -1,27 +1,26 @@
-/* The Session's tab strip (TabStrip.tsx).
+/* The Session's tab strip (TabStrip.tsx), drawn as the approved mock draws it
+ * (`.preview/practice-review/designer/mock.html?view=tab`).
  *
- * Tokens: the app's theme variables by default, so the strip follows the
- * chosen theme (dark or light, Ivory included); inside the learning side's
- * page (`.session-page`, which keeps its own warm dark palette whatever the
- * theme) the `--l-*` tokens win. Sizes come from `--ts-fret`, which the
- * component sets from the view's width (34 px from 760 px wide, down to 20).
+ * Tokens: the app's theme variables by default; inside the learning side's
+ * page (`.session-page`) the `--l-*` tokens win. Sizes come from the layout
+ * (`tabStripModel.ts`), in px, on the SVG itself; `--ts-fret` is the number
+ * size it chose.
  */
 .tabstrip {
   --ts-ink: var(--text-primary, #fbf5ea);
-  --ts-quiet: var(--text-secondary, #c9bba6);
-  --ts-faint: var(--text-faint, #94866f);
-  --ts-bg: var(--bg-panel, #120c08);
+  --ts-quiet: var(--text-secondary, #a8977f);
+  --ts-faint: var(--text-faint, #8a7660);
+  --ts-bg: var(--bg-panel, #150e0a);
   --ts-edge: var(--border, rgba(255, 232, 200, 0.13));
   --ts-amber: var(--accent, #ffb454);
-  --ts-good: var(--feedback-perfect, #4ee08a);
+  --ts-good: var(--feedback-perfect, #4ade80);
   --ts-off: var(--feedback-ok, #fbbf24);
-  --ts-miss: #ff5d6c;
-  --ts-face: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
-
+  --ts-miss: #f87171;
+  --ts-num: var(--font-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --ts-face: var(--font-body, Inter, system-ui, sans-serif);
   --ts-fret: 34px;
-  --ts-gap: calc(var(--ts-fret) * 1.3);
-  --ts-top: calc(var(--ts-fret) * 1.1 + 18px);
-  --ts-bottom: calc(var(--ts-fret) * 0.5 + 22px);
+  /* The column's colour as a solid, so a number's halo inside it is invisible. */
+  --ts-col: color-mix(in srgb, var(--ts-amber) 22%, var(--ts-bg));
 
   position: relative;
   display: flex;
@@ -29,32 +28,25 @@
   width: 100%;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--ts-edge);
-  border-radius: 14px;
-  background: var(--ts-bg);
   color: var(--ts-ink);
+  background: var(--ts-bg);
   contain: layout paint;
 }
-:root[data-theme-group="light"] .tabstrip {
+:root[data-theme-group="light"] .tabstrip:not(.session-page *) {
   --ts-miss: #b4232f;
 }
 .session-page .tabstrip {
-  /* The Tab view's panel is taller than one staff: centre the staff in it.
-     (The size is the component's own, `--ts-fret` inline from its scale.) */
-  align-items: center;
   --ts-ink: var(--l-ink, #fbf5ea);
-  --ts-quiet: var(--l-quiet, #c9bba6);
-  --ts-faint: var(--l-faint, #94866f);
-  --ts-bg: #120c08;
-  --ts-edge: rgba(255, 180, 84, 0.18);
+  --ts-quiet: var(--l-quiet, #a8977f);
+  --ts-faint: var(--l-faint, #8a7660);
+  --ts-bg: var(--l-tab-bg, #150e0a);
   --ts-amber: var(--l-amber, #ffb454);
-  --ts-good: var(--l-tone, #4ee08a);
+  --ts-good: var(--l-tone, #4ade80);
   --ts-off: #fbbf24;
-  --ts-miss: var(--l-clash, #ff5d6c);
-  --ts-face: var(--l-display, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
-}
-.tabstrip[data-rhythm] {
-  --ts-bottom: calc(var(--ts-fret) * 0.5 + 46px);
+  --ts-miss: var(--l-clash, #f87171);
+  --ts-num: var(--l-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
+  --ts-face: var(--l-body, Inter, system-ui, sans-serif);
+  background: transparent;
 }
 .tabstrip *,
 .tabstrip *::before,
@@ -62,218 +54,184 @@
   box-sizing: border-box;
 }
 
-/* String names on the left. */
-.tabstrip-names {
-  flex: none;
-  position: relative;
-  width: calc(var(--ts-fret) * 0.75 + 8px);
-  height: calc(var(--ts-top) + 5 * var(--ts-gap) + var(--ts-bottom));
-}
-.tabstrip-names span {
-  position: absolute;
-  right: 4px;
-  transform: translateY(-50%);
-  font: 700 calc(var(--ts-fret) * 0.48) / 1 var(--ts-face);
-  color: var(--ts-faint);
-}
-.tabstrip [data-string="1"] { --s: 0; }
-.tabstrip [data-string="2"] { --s: 1; }
-.tabstrip [data-string="3"] { --s: 2; }
-.tabstrip [data-string="4"] { --s: 3; }
-.tabstrip [data-string="5"] { --s: 4; }
-.tabstrip [data-string="6"] { --s: 5; }
-.tabstrip-names span,
-.tabstrip-line,
-.tabstrip-note {
-  top: calc(var(--ts-top) + var(--s, 0) * var(--ts-gap));
-}
-
+/* The view is sized by its panel, never by what it holds: the layout reads
+   its width and height and chooses the numbers' size and the rows from them. */
 .tabstrip-view {
   position: relative;
   flex: 1 1 auto;
   min-width: 0;
-  height: calc(var(--ts-top) + 5 * var(--ts-gap) + var(--ts-bottom));
+  min-height: 0;
   overflow: hidden;
 }
-/* Staff lines: 1.6 px at about 40 % of the text colour. They do not move. */
-.tabstrip-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1.6px;
-  margin-top: -0.8px;
-  background: color-mix(in srgb, var(--ts-ink) 40%, transparent);
-  z-index: 0;
-}
-
-/* The one thing that moves: a transform per frame, on its own layer. */
-.tabstrip-strip {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 1px;
-  z-index: 2;
-}
-.tabstrip[data-moving] .tabstrip-strip {
-  will-change: transform;
-}
-.tabstrip-bar {
+.tabstrip-fill {
   position: absolute;
   inset: 0;
-  transition: opacity 160ms ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
 }
-.tabstrip-bar[data-rel="next"] {
-  opacity: 0.38;
+.tabstrip[data-mode="preview"] .tabstrip-fill {
+  overflow-y: auto;
+  justify-content: safe center;
 }
-.tabstrip-bar[data-rel="later"] {
-  opacity: 0.22;
+.tabstrip-rows {
+  display: flex;
+  flex-direction: column;
 }
-.tabstrip[data-reduced] .tabstrip-bar {
+.tabstrip-staff {
+  position: relative;
+  flex: none;
+  width: 100%;
+}
+.tabstrip-letters {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.tabstrip-window {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+}
+.tabstrip-track {
+  position: absolute;
+  inset: 0;
+  transition: transform 300ms cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.tabstrip[data-moving] .tabstrip-track {
+  will-change: transform;
+}
+.tabstrip[data-reduced] .tabstrip-track {
   transition: none;
 }
-
-/* Bar lines: 3 px, the staff's height. */
-.tabstrip-barline {
+.tabstrip-seg {
   position: absolute;
-  top: var(--ts-top);
-  height: calc(5 * var(--ts-gap));
+  top: 0;
+  overflow: visible;
+}
+
+/* Staff lines: 1.6 px at 42 % of the ink. Bar lines 3 px at 60 %. */
+.tabstrip-line {
+  stroke: color-mix(in srgb, var(--ts-ink) 42%, transparent);
+  stroke-width: 1.6;
+}
+.tabstrip-barline {
+  stroke: color-mix(in srgb, var(--ts-ink) 60%, transparent);
+  stroke-width: 3;
+}
+.tabstrip-endline {
+  position: absolute;
+  right: 0;
   width: 3px;
-  margin-left: -1.5px;
-  border-radius: 1px;
   background: color-mix(in srgb, var(--ts-ink) 60%, transparent);
 }
-.tabstrip-barlabel {
-  position: absolute;
-  top: 8px;
-  font: 600 calc(var(--ts-fret) * 0.42 + 2px) / 1 var(--ts-face);
-  letter-spacing: 0.04em;
-  color: var(--ts-quiet);
-  white-space: nowrap;
+.tabstrip-tab {
+  font-family: var(--ts-num);
+  font-weight: 700;
+  fill: var(--ts-faint);
+  /* On the lines, like the numbers: a halo breaks them. */
+  stroke: var(--ts-bg);
+  stroke-width: 8px;
+  paint-order: stroke;
+}
+.tabstrip-label {
+  font-family: var(--ts-face);
+  font-weight: 600;
+  fill: var(--ts-quiet);
+}
+.tabstrip-seg[data-rel="mark"] .tabstrip-label {
+  fill: var(--ts-amber);
 }
 .tabstrip-count {
-  position: absolute;
-  top: calc(var(--ts-top) + 5 * var(--ts-gap) + var(--ts-fret) * 0.5 + 4px);
-  transform: translateX(-50%);
-  font: 600 calc(var(--ts-fret) * 0.4 + 2px) / 1 var(--ts-face);
+  font-family: var(--ts-face);
   font-variant-numeric: tabular-nums;
-  color: var(--ts-faint);
+  fill: var(--ts-faint);
 }
 
-/* A fret number: bold, tabular, on a knock-out so the line does not cross it. */
-.tabstrip-note {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  min-width: calc(var(--ts-fret) * 0.72);
-  height: calc(var(--ts-fret) * 1.18);
-  padding: 0 calc(var(--ts-fret) * 0.11);
-  border-radius: calc(var(--ts-fret) * 0.2);
-  background: var(--ts-bg);
-  color: var(--ts-ink);
-  transform: translate(-50%, -50%);
-  transform-origin: 50% 50%;
-  transition: transform 90ms ease-out;
+/* A fret number ON its line: a halo in the panel's colour breaks the line
+   round it. No box. */
+.tabstrip-note text {
+  font-family: var(--ts-num);
+  font-size: var(--ts-fret);
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+  fill: var(--ts-ink);
+  stroke: var(--ts-bg);
+  stroke-width: calc(var(--ts-fret) * 0.32);
+  stroke-linejoin: round;
+  paint-order: stroke;
 }
-.tabstrip[data-reduced] .tabstrip-note {
-  transition: none;
+/* The next segment, dimmed; what slides out, quieter still. The halo stays
+   whole so the line stays broken. */
+.tabstrip-seg[data-rel="next"] .tabstrip-note text {
+  fill-opacity: 0.38;
 }
-.tabstrip-note b {
-  font: 700 var(--ts-fret) / 1 var(--ts-face);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
+.tabstrip-seg[data-rel="past"] .tabstrip-note text,
+.tabstrip-seg[data-rel="later"] .tabstrip-note text {
+  fill-opacity: 0.25;
+}
+.tabstrip-seg[data-rel="next"] .tabstrip-label,
+.tabstrip-seg[data-rel="next"] .tabstrip-count {
+  fill-opacity: 0.75;
 }
 /* The note under the column: 40 px where the rest are 34, amber-white. */
-.tabstrip-note[data-current] {
-  transform: translate(-50%, -50%) scale(var(--ts-current, 1.18));
-  color: color-mix(in srgb, var(--ts-amber) 45%, var(--ts-ink));
-  z-index: 1;
+.tabstrip-note[data-current] text {
+  font-size: calc(var(--ts-fret) * 40 / 34);
+  fill: #ffd38a;
+  fill-opacity: 1;
+  stroke: var(--ts-col);
 }
 /* Played: the timing colour stays on the number, and a dot under it. */
-.tabstrip-bar[data-rel="past"] .tabstrip-note:not([data-result]) {
-  color: var(--ts-faint);
+.tabstrip-dot {
+  display: none;
+  fill: currentColor;
+}
+.tabstrip-note[data-result] .tabstrip-dot {
+  display: inline;
 }
 .tabstrip-note[data-result="good"] { color: var(--ts-good); }
 .tabstrip-note[data-result="early"],
 .tabstrip-note[data-result="late"] { color: var(--ts-off); }
 .tabstrip-note[data-result="miss"] { color: var(--ts-miss); }
-.tabstrip-note[data-result]::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: calc(100% + 1px);
-  width: 7px;
-  height: 7px;
-  margin-left: -3.5px;
-  border-radius: 50%;
-  background: currentColor;
+.tabstrip-note[data-result] text {
+  fill: currentColor;
 }
-.tabstrip-note[data-result="early"]::after { transform: translateX(-7px); }
-.tabstrip-note[data-result="late"]::after { transform: translateX(7px); }
-.tabstrip-note[data-result="miss"]::after {
-  background: transparent;
-  border: 1.5px solid currentColor;
+.tabstrip-note[data-result="early"] .tabstrip-dot { transform: translateX(-7px); }
+.tabstrip-note[data-result="late"] .tabstrip-dot { transform: translateX(7px); }
+.tabstrip-note[data-result="miss"] .tabstrip-dot {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
 }
 
-/* Preview: the order each note is played in, as a small badge. */
-.tabstrip-order {
-  position: absolute;
-  top: calc(var(--ts-fret) * -0.42);
-  right: calc(var(--ts-fret) * -0.34);
-  min-width: calc(var(--ts-fret) * 0.46 + 2px);
-  height: calc(var(--ts-fret) * 0.46 + 2px);
-  padding: 0 3px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ts-amber) 22%, var(--ts-bg));
-  border: 1px solid color-mix(in srgb, var(--ts-amber) 55%, transparent);
-  color: var(--ts-ink);
-  font: 700 calc(var(--ts-fret) * 0.3 + 2px) / 1 var(--ts-face);
-  font-variant-numeric: tabular-nums;
-}
-
-/* The rhythm hint: a stem per onset, beams within a beat. */
-.tabstrip-stem,
-.tabstrip-beam {
-  position: absolute;
-  background: var(--ts-faint);
-}
-.tabstrip-stem {
-  top: calc(var(--ts-top) + 5 * var(--ts-gap) + var(--ts-fret) * 0.5 + 24px);
-  height: 16px;
-  width: 1.5px;
-  margin-left: -0.75px;
-}
-.tabstrip-beam {
-  top: calc(var(--ts-top) + 5 * var(--ts-gap) + var(--ts-fret) * 0.5 + 24px + 14px);
-  height: 2px;
-  margin-left: -0.75px;
-}
-
-/* Now: a fixed amber column with a soft glow, the strip passing under it. */
+/* Now: a rounded amber column on the current note, going from note to note.
+   Under the segments, so the lines run through it as in the mock. */
 .tabstrip-cursor {
   position: absolute;
-  top: calc(var(--ts-top) - var(--ts-fret) * 0.95);
-  height: calc(5 * var(--ts-gap) + var(--ts-fret) * 1.9);
-  width: calc(var(--ts-fret) * 1.7);
-  transform: translateX(-50%);
+  left: 0;
+  margin-left: calc(var(--w, 0px) * -0.5);
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--ts-amber) 70%, transparent);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--ts-amber) 6%, transparent),
-    color-mix(in srgb, var(--ts-amber) 24%, transparent) 50%,
-    color-mix(in srgb, var(--ts-amber) 6%, transparent)
-  );
-  box-shadow: 0 0 22px color-mix(in srgb, var(--ts-amber) 28%, transparent);
+  background: var(--ts-col);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--ts-amber) 22%, transparent);
   pointer-events: none;
-  z-index: 1;
+  translate: -50% 0;
+  transition: transform 110ms ease-out, opacity 160ms ease;
+  visibility: hidden;
+}
+.tabstrip[data-reduced] .tabstrip-cursor {
+  transition: none;
+}
+/* Through the count-in it waits on the first note, quieter. */
+.tabstrip-cursor[data-countin] {
+  border-style: dashed;
+  box-shadow: none;
+}
+/* Where it was paused, in the overview. */
+.tabstrip-mark {
+  fill: var(--ts-col);
+  stroke: color-mix(in srgb, var(--ts-amber) 70%, transparent);
+  stroke-width: 1;
 }
 
-/* A phone: the names column tighter, the corners smaller. */
-@media (max-width: 520px) {
-  .tabstrip {
-    border-radius: 10px;
-  }
-}

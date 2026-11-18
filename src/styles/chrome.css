@@ -32,9 +32,13 @@
   --ui-line: color-mix(in srgb, var(--border) 55%, transparent);
   --ui-line-strong: color-mix(in srgb, var(--border) 85%, transparent);
   /* The panel, and the well a control sits in. */
-  --ui-panel: color-mix(in srgb, var(--bg-card) 62%, var(--bg-primary));
-  --ui-well: color-mix(in srgb, var(--bg-primary) 72%, var(--bg-card));
-  --ui-raised: color-mix(in srgb, var(--bg-raised) 60%, var(--bg-card));
+  /* Always opaque. Aurora and Prism paint a gradient behind see-through
+     cards, and a gradient cannot be mixed: the panel came out transparent and
+     white text sat on the glow (owner, 2026-11-17). Every theme gives
+     solid stand-ins (`--bg-solid`, `--bg-card-solid`, `--bg-raised-solid`). */
+  --ui-panel: color-mix(in srgb, var(--bg-card-solid) 62%, var(--bg-solid));
+  --ui-well: color-mix(in srgb, var(--bg-solid) 72%, var(--bg-card-solid));
+  --ui-raised: color-mix(in srgb, var(--bg-raised-solid) 60%, var(--bg-card-solid));
 }
 
 /* ── The page ─────────────────────────────────────────────────────────── */

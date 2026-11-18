@@ -969,6 +969,20 @@
       "globalKey": null,
       "globalAllowed": false,
       "group": "session"
+    },
+    {
+      "id": "session-pause",
+      "key": "K",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
+    },
+    {
+      "id": "session-restart",
+      "key": "R",
+      "globalKey": null,
+      "globalAllowed": false,
+      "group": "session"
     }
   ],
   "settingsKeys": {

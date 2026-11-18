@@ -99,7 +99,43 @@ export type RunState = {
   outcomes: TakeOutcome[];
   /** A timed step skipped or run. Kept so the recap can say what was not graded. */
   timedSteps: PlanStep[];
+  /**
+   * A running timed step is paused: the click is off, the clock holds, the
+   * picture stays where it was (owner, beta 5). Only `timed` sets it.
+   */
+  paused: boolean;
+  /**
+   * Counts the times a timed step's sound was started: its Start, every
+   * Resume and every Restart. The effects hook starts the engine again when it
+   * moves, so a Restart from the top is a new run, not a toggle.
+   */
+  runs: number;
+  /** Counts Restarts alone, so the picture knows a run is from the top, not a Resume. */
+  restarts: number;
+  /**
+   * A timed step's clock ran out. It no longer moves on by itself (UX audit
+   * SES-1): the sound stops and the player chooses Again or Next.
+   */
+  ended: boolean;
+  /** Steps left before they were played out: shown as skipped, never as done. */
+  skipped: string[];
 };
+
+/** A warm-up's or a jam's tempo, one press of - or +: not graded, so any tempo is fine. */
+export const TIMED_BPM_STEP = 5;
+export const TIMED_BPM_MIN = 30;
+export const TIMED_BPM_MAX = 300;
+
+/** The tempo one press away, held to a sane range. */
+export function timedBpm(bpm: number, delta: number): number {
+  const next = Math.round((bpm + delta) / TIMED_BPM_STEP) * TIMED_BPM_STEP;
+  return Math.max(TIMED_BPM_MIN, Math.min(TIMED_BPM_MAX, next));
+}
+
+/** A timed step whose tempo the player may set: a warm-up, or a jam with one. Not a ramp, which moves it. */
+export function timedTempoAdjustable(step: PlanStep | null): boolean {
+  return !!step && (step.kind === "metronome" || (step.kind === "jam" && !!step.bpm));
+}
 
 export type RunEvent =
   | { type: "start"; plan: SessionPlan; now: number }
@@ -123,7 +159,20 @@ export type RunEvent =
   /** Leave. From any state. */
   | { type: "cancel" }
   /** The recap has been read. */
-  | { type: "close" };
+  | { type: "close" }
+  /** A running timed step: hold it where it is. */
+  | { type: "pause"; now: number }
+  /** A paused timed step: on from where it was. */
+  | { type: "resume"; now: number }
+  /** A running or paused timed step: from the top, its clock full again. */
+  | { type: "restart"; now: number }
+  /** A timed step, ready or paused: play it at this tempo. */
+  | { type: "setBpm"; bpm: number; now: number }
+  /**
+   * Before anything on this step has been played: back to the timed step
+   * before it, ready to start again (the warm-up once more, without Exit).
+   */
+  | { type: "back"; now: number };
 
 export const IDLE: RunState = {
   phase: "idle",
@@ -136,6 +185,11 @@ export const IDLE: RunState = {
   now: 0,
   outcomes: [],
   timedSteps: [],
+  paused: false,
+  runs: 0,
+  restarts: 0,
+  ended: false,
+  skipped: [],
 };
 
 export function currentStep(state: RunState): PlanStep | null {
@@ -150,7 +204,7 @@ export function nextStep(state: RunState): PlanStep | null {
 function enter(state: RunState, index: number, now: number): RunState {
   const step = state.plan?.steps[index];
   if (!step) return { ...state, phase: "recap", stepIndex: index, now };
-  const base = { ...state, stepIndex: index, stepStartedAt: now, takes: 0, now };
+  const base = { ...state, stepIndex: index, stepStartedAt: now, takes: 0, now, paused: false, ended: false };
   if (step.kind === "exercise") return { ...base, phase: "ready", bpm: step.bpm };
   return {
     ...base,
@@ -191,15 +245,12 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
           return { ...state, bpm: rungBelow(event.exercise, state.bpm), now: event.now };
         case "faster":
           return { ...state, bpm: rungAbove(event.exercise, state.bpm), now: event.now };
-        case "next": {
+        case "next":
           // Skip this. With `insert`, that step is played next (from a Step's
           // page, the next Exercise there: UX audit TODAY-2).
-          const plan = state.plan;
-          if (!event.insert || !plan) return enter(state, state.stepIndex + 1, event.now);
-          const steps = [...plan.steps];
-          steps.splice(state.stepIndex + 1, 0, event.insert);
-          return enter({ ...state, plan: { ...plan, steps } }, state.stepIndex + 1, event.now);
-        }
+          return onward(state, event.now, event.insert);
+        case "back":
+          return backOf(state, event.now);
         case "tick":
           return { ...state, now: event.now };
         default:
@@ -273,19 +324,51 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
 
     case "timedReady":
       if (event.type === "timedStart") {
-        return { ...state, phase: "timed", stepStartedAt: event.now, now: event.now };
+        return { ...state, phase: "timed", stepStartedAt: event.now, now: event.now, paused: false, runs: state.runs + 1 };
       }
-      if (event.type === "next") return enter(state, state.stepIndex + 1, event.now);
+      if (event.type === "next") return onward(state, event.now);
+      if (event.type === "back") return backOf(state, event.now);
+      if (event.type === "setBpm") {
+        return timedTempoAdjustable(currentStep(state)) ? { ...state, bpm: event.bpm, now: event.now } : state;
+      }
       // The clock is held at full until Start: the step's minutes are all still to come.
       if (event.type === "tick") return { ...state, stepStartedAt: event.now, now: event.now };
       return state;
 
     case "timed":
-      if (event.type === "next") return enter(state, state.stepIndex + 1, event.now);
+      if (event.type === "next") return onward(state, event.now);
+      if (event.type === "pause") {
+        return state.paused || state.ended ? state : { ...state, paused: true, now: event.now };
+      }
+      if (event.type === "resume") {
+        return state.paused ? { ...state, paused: false, runs: state.runs + 1, now: event.now } : state;
+      }
+      if (event.type === "restart") {
+        return {
+          ...state,
+          paused: false,
+          ended: false,
+          runs: state.runs + 1,
+          restarts: state.restarts + 1,
+          stepStartedAt: event.now,
+          now: event.now,
+        };
+      }
+      if (event.type === "setBpm") {
+        // Between runs only: a tempo change mid-run would move the pattern under the player.
+        if (!(state.paused || state.ended) || !timedTempoAdjustable(currentStep(state))) return state;
+        return { ...state, bpm: event.bpm, now: event.now };
+      }
+      // Paused, the clock holds: the step's start moves with the time that passes.
+      if (event.type === "tick" && state.paused) {
+        return { ...state, stepStartedAt: state.stepStartedAt + (event.now - state.now), now: event.now };
+      }
       if (event.type === "tick") {
+        if (state.ended) return { ...state, now: event.now };
         const step = currentStep(state);
         const ends = state.stepStartedAt + (step?.minutes ?? 0) * 60_000;
-        if (event.now >= ends) return enter(state, state.stepIndex + 1, event.now);
+        // Played out: it holds there, Again or Next (SES-1), rather than moving on under the player.
+        if (event.now >= ends) return { ...state, ended: true, paused: false, now: event.now };
         return { ...state, now: event.now };
       }
       return state;
@@ -293,6 +376,37 @@ export function runReducer(state: RunState, event: RunEvent): RunState {
     case "recap":
       return event.type === "close" ? IDLE : state;
   }
+}
+
+/** On to the next step from here; this one is marked skipped if it was not played out. */
+function onward(state: RunState, now: number, insert?: PlanStep): RunState {
+  const step = currentStep(state);
+  const playedOut =
+    (state.phase === "timed" && state.ended) ||
+    state.phase === "result" ||
+    state.outcomes.some((o) => o.stepId === step?.id);
+  const skipped = step && !playedOut && !state.skipped.includes(step.id) ? [...state.skipped, step.id] : state.skipped;
+  const plan = state.plan;
+  if (!insert || !plan) return enter({ ...state, skipped }, state.stepIndex + 1, now);
+  const steps = [...plan.steps];
+  steps.splice(state.stepIndex + 1, 0, insert);
+  return enter({ ...state, skipped, plan: { ...plan, steps } }, state.stepIndex + 1, now);
+}
+
+/**
+ * Back to the timed step just before this one, when nothing has been played
+ * here yet: a warm-up gone by on its own clock can be played again.
+ */
+export function canGoBack(state: RunState): boolean {
+  if (state.phase !== "ready" && state.phase !== "timedReady") return false;
+  if (state.takes > 0) return false;
+  const before = state.plan?.steps[state.stepIndex - 1];
+  return !!before && before.kind !== "exercise";
+}
+
+function backOf(state: RunState, now: number): RunState {
+  if (!canGoBack(state)) return state;
+  return enter(state, state.stepIndex - 1, now);
 }
 
 /** Milliseconds left on the current step, floored at zero. */

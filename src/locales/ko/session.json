@@ -205,7 +205,9 @@
       "band": "밴드",
       "bandHint": "밴드는 채점되지 않습니다. 마이크를 쓸 때는 작게 하거나 헤드폰을 쓰세요.",
       "bandMicHint": "마이크로는 밴드 소리를 당신의 음으로 듣게 되므로 꺼진 채 시작합니다. 헤드폰을 쓰면 올리세요.",
-      "skip": "건너뛰기"
+      "skip": "건너뛰기",
+      "skipped": "건너뜀",
+      "honestTiming": "타이밍은 듣지만 어떤 음인지는 듣지 않아요. 다운-업은 당신 몫이에요: 피킹 방향은 들을 수 없어요."
     },
     "result": {
       "kick": "테이크 {{take}} · {{title}} · {{bpm}} BPM · {{bars}}마디",
@@ -292,7 +294,7 @@
       "double": "더블 탭",
       "doubleDoes": "느리게",
       "hold": "길게 누르기",
-      "holdDoes": "다음"
+      "holdDoes": "다시"
     },
     "recap": {
       "kick": "세션 완료",
@@ -405,13 +407,31 @@
       "finger": "{{n}}번 손가락",
       "start": "여기서 시작",
       "legendNow": "지금 연주",
-      "legendNext": "다음",
+      "legendNext": "그다음, 순서대로",
       "legendPlayed": "방금 연주함",
       "beats": "마디의 박",
       "hand": "손: 검지를 {{fret}}프렛에, 한 프렛에 한 손가락.",
       "handShifts": "손: 검지를 {{fret}}프렛에서 시작해 넥을 따라 이동합니다.",
       "handOpen": "손: 개방 포지션, 검지는 1프렛 위.",
-      "viewHint": "언제든지 보기를 바꿀 수 있어요"
+      "viewHint": "언제든지 보기를 바꿀 수 있어요",
+      "left": "남음",
+      "notGraded": "채점 없음. {{time}} 후 끝나요. 그다음 다시, 또는 다음으로.",
+      "notChecked": "확인 없음. {{time}} 후 끝나요. 그다음 다시, 또는 다음으로.",
+      "pausedFoot": "일시정지됨. 시계가 기다려요. 더 느리게 또는 빠르게 한 뒤 다시 시작하세요.",
+      "pausedFootNeck": "일시정지됨. 모든 마디는 탭 보기({{key}})에 있어요. 더 느리게 또는 빠르게 한 뒤 다시 시작하세요.",
+      "switchAny": "워밍업 중에는 언제든 보기를 바꿀 수 있어요",
+      "barOf": "{{of}}마디 중 {{n}}마디 · 클릭에 몸을 맡기세요.",
+      "pausedAt": "{{of}}마디 중 {{n}}마디에서 일시정지",
+      "paused": "일시정지됨",
+      "pause": "일시정지",
+      "pauseKeys": "일시정지: {{key}}, Space 또는 Enter",
+      "resume": "다시 시작",
+      "restart": "처음부터",
+      "back": "다시: {{title}}",
+      "ended": "끝났어요. 다시, 또는 다음으로.",
+      "endedFoot": "채점 없음. 준비되면 다시 하거나 넘어가세요.",
+      "again": "다시",
+      "beatOf": "{{of}}박 중 {{n}}박"
     },
     "runway": {
       "label": "선으로 다가오는 다음 음들",
@@ -445,7 +465,12 @@
     },
     "tabstrip": {
       "label": "타브 악보: {{notes}}",
-      "bar": "{{n}}마디"
+      "bar": "{{n}}마디",
+      "now": "지금 · {{where}}",
+      "next": "다음 · {{where}}",
+      "barBeat": "{{n}}마디 {{beat}}박",
+      "barBeats": "{{n}}마디 {{from}}–{{to}}박",
+      "pausedHere": "여기서 일시정지 · {{where}}"
     },
     "leave": {
       "title": "이 세션을 나갈까요?",

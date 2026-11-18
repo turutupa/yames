@@ -88,7 +88,7 @@ export function OverviewStrip({ from, to, notes, height }: { from: number; to: n
                 {(f === 12 || f === 24 ? [-d, d] : [0]).map((dy) => (
                   <circle key={dy} cx={x} cy={cy + dy} r={r} fill={P.inlay} />
                 ))}
-                <text x={x} y={H - 2} textAnchor="middle" fontSize={12} fontWeight={600} fill={P.numFaint} fontFamily="'Barlow Condensed','Arial Narrow',sans-serif">
+                <text x={x} y={H - 2} textAnchor="middle" fontSize={12} fontWeight={600} fill={P.numFaint} style={{ fontFamily: "var(--font-num, 'Barlow Condensed', 'Arial Narrow', sans-serif)" }}>
                   {f}
                 </text>
               </g>

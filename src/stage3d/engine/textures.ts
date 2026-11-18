@@ -68,8 +68,20 @@ export function noteDisc(look: NoteLook): THREE.Texture {
  * accent dot under it (the marker frets' numbers).
  */
 const labelCache = new Map<string, THREE.Texture>();
+/** The theme's number face (`--font-num`, themes.ts), read when a label is drawn. */
+function numFace(): string {
+  try {
+    const face = getComputedStyle(document.documentElement).getPropertyValue("--font-num").trim();
+    if (face) return face;
+  } catch {
+    /* no document (a worker, a test) */
+  }
+  return '"Barlow Condensed","Arial Narrow",system-ui,sans-serif';
+}
+
 export function noteLabel(text: string, color: string, weight = 700, dot: string | null = null): THREE.Texture {
-  const k = `${text}\u0000${color}\u0000${weight}\u0000${dot}`;
+  const face = numFace();
+  const k = `${text}\u0000${color}\u0000${weight}\u0000${dot}\u0000${face}`;
   const hit = labelCache.get(k);
   if (hit) return hit;
   const S = 192;
@@ -78,7 +90,7 @@ export function noteLabel(text: string, color: string, weight = 700, dot: string
   g.fillStyle = color;
   g.textAlign = "center";
   g.textBaseline = "middle";
-  g.font = `${weight} ${text.length > 1 ? 96 : 118}px "Barlow Condensed","Arial Narrow",system-ui,sans-serif`;
+  g.font = `${weight} ${text.length > 1 ? 96 : 118}px ${face}`;
   g.fillText(text, S / 2, S / 2 + 6);
   if (dot) {
     g.fillStyle = dot;

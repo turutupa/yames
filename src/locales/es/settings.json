@@ -249,7 +249,10 @@
         "session-exit": "Salir de la sesión",
         "tab-paths": "Rutas",
         "tab-progress": "Progreso",
-        "tab-tools": "Herramientas"
+        "tab-tools": "Herramientas",
+        "session-view": "Cambiar vista",
+        "session-pause": "Pausa",
+        "session-restart": "Otra vez"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -299,11 +302,14 @@
         "session-slower": "Entre tomas: un peldaño más lento",
         "session-faster": "Entre tomas: un peldaño más rápido",
         "session-next": "Entre tomas: pasar a lo siguiente de la sesión",
-        "session-pedal": "Para un solo pedal. Pulsar: lo siguiente. Doble pulsación: más lento. Mantener: siguiente paso",
+        "session-pedal": "Para un solo pedal. Pulsar: lo siguiente (pausa un calentamiento en marcha). Doble pulsación: más lento. Mantener: otra vez",
         "session-exit": "En una sesión: salir, como hace Salir. Una toma en marcha se para antes.",
         "tab-paths": "Ir a Rutas",
         "tab-progress": "Ir a Progreso",
-        "tab-tools": "Ir a Herramientas"
+        "tab-tools": "Ir a Herramientas",
+        "session-view": "En una sesión: Mástil, Pista o Tab. En cualquier momento en un calentamiento; entre tomas en una calificada",
+        "session-pause": "En un calentamiento o un bloque cronometrado: pausarlo o seguir",
+        "session-restart": "En un calentamiento o un bloque cronometrado: desde el principio. Tras una toma: la misma toma otra vez"
       }
     },
     "inputTest": {

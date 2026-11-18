@@ -119,7 +119,7 @@ export async function createEngine(o: EngineOptions): Promise<StageEngine> {
   // The fonts the fret numbers and note letters are drawn in. Not worth waiting long for.
   try {
     await Promise.race([
-      Promise.all([document.fonts?.load('700 40px "Barlow Condensed"'), document.fonts?.load('500 40px "Barlow Condensed"')]),
+      Promise.all([document.fonts?.load(`700 40px ${palette.numFont}`), document.fonts?.load(`500 40px ${palette.numFont}`)]),
       new Promise((r) => setTimeout(r, 1500)),
     ]);
   } catch {

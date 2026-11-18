@@ -36,7 +36,7 @@ const STR_K = [0.04, 0.05, 0.064, 0.082, 0.1, 0.118];
 /** NOW and NEXT are larger, as on the 3D neck. */
 const SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
 const fx = (n: number) => 1 - Math.pow(2, -n / 12);
-const FONT = "'Barlow Condensed','Arial Narrow',system-ui,sans-serif";
+
 
 export function FallbackNeck({ view, notes, pluck }: { view: NeckView; notes: readonly NeckNote[]; pluck: StageSnapshot["pluck"] }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -148,7 +148,7 @@ export function FallbackNeck({ view, notes, pluck }: { view: NeckView; notes: re
           const c = (X(f) + X(f - 1)) / 2;
           return (
             <g key={f} className="neck-fallback-num">
-              <text x={c} y={numY} textAnchor="middle" fontFamily={FONT} fontWeight={m ? 700 : 500} fontSize={m ? fsMark : fsOther} fill={m ? P.num : P.numFaint} opacity={m ? 1 : 0.8}>
+              <text x={c} y={numY} textAnchor="middle" fontFamily={P.numFont} fontWeight={m ? 700 : 500} fontSize={m ? fsMark : fsOther} fill={m ? P.num : P.numFaint} opacity={m ? 1 : 0.8}>
                 {f}
               </text>
               {m && <circle cx={c} cy={numY + fsMark * 0.32} r={Math.max(1.6, fsMark * 0.085)} fill={P.accent} />}
@@ -197,6 +197,7 @@ export function FallbackNeck({ view, notes, pluck }: { view: NeckView; notes: re
                   x={noteX(n.fret)}
                   y={S(n.string)}
                   fontSize={r * 1.25}
+                  fontFamily={P.numFont}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fill={look.ink}

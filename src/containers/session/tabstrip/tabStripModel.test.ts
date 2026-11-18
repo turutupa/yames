@@ -5,24 +5,26 @@ import type { PathDoc } from "../../../paths/format";
 import { findExercise } from "../../../session/packs";
 import { buildTake } from "../../../session/take";
 import {
-  CURSOR_AT,
+  FOLLOW_SEGMENTS,
   FRET_PX,
-  barLinePad,
+  FRET_PX_MIN,
   barRel,
   beamsFor,
   currentOnset,
   describePattern,
-  followScale,
+  followLayout,
   fretPxFor,
+  minGapPxFor,
+  noteXIn,
   occurrences,
-  passWindow,
+  overviewLayout,
   patternModel,
-  previewScale,
   resultOfMark,
   resultsFromLights,
-  stripOffset,
+  segmentNotes,
+  segmentPlace,
+  staffGeometry,
   tabStripInputOfTake,
-  tickX,
 } from "./tabStripModel";
 
 const BAR = 3840;
@@ -84,58 +86,107 @@ describe("the pattern", () => {
   });
 });
 
-describe("tick to x", () => {
-  it("puts the cursor 30 % in and sizes the rest for this bar and the next", () => {
+const sixteenths = (bars = 1) =>
+  Array.from({ length: 16 * bars }, (_u, i) => ({ string: 1, fret: 12, tick: i * 240, dur: 240 }));
+
+describe("the layout (the approved mock)", () => {
+  it("shows two whole bars, now and next, at 34 px, ~65 px a note, for eighths at 1400 wide", () => {
     const m = patternModel(eighths([5, 7, 8, 7, 5, 3, 5, 3]), BAR, 1);
-    const s = followScale(m, 1300);
-    expect(s.cursorX).toBe(Math.round(1300 * CURSOR_AT));
-    expect(s.ppt * 2 * BAR).toBeCloseTo(1300 - s.cursorX, 5);
-    // The tick under the cursor is drawn at the cursor.
-    for (const tick of [0, 1234, 7680]) expect(tickX(tick, s) + stripOffset(tick, s)).toBeCloseTo(s.cursorX, 6);
-    expect(s.fretPx).toBe(FRET_PX);
+    const l = followLayout(m, 1300);
+    expect(l.split).toBe(1);
+    expect(l.segTicks).toBe(BAR);
+    expect(l.fretPx).toBe(FRET_PX);
+    expect(l.ppt * 480).toBeGreaterThanOrEqual(minGapPxFor(FRET_PX) - 0.5);
+    expect(l.segWidth * FOLLOW_SEGMENTS + l.geo.letters).toBeCloseTo(1300, 5);
   });
 
-  it("zooms in rather than let sixteenths collide", () => {
-    const m = patternModel(
-      Array.from({ length: 16 }, (_u, i) => ({ string: 1, fret: 5, tick: i * 240, dur: 240 })),
-      BAR,
-      1,
-    );
-    const s = followScale(m, 1000);
-    expect(s.ppt * 240).toBeGreaterThanOrEqual(s.minGapPx - 1e-9);
+  it("splits a bar of sixteenths in half rather than let them crowd, the numbers still 34 px", () => {
+    const m = patternModel(sixteenths(), BAR, 1);
+    const l = followLayout(m, 1300);
+    expect(l.split).toBe(2);
+    expect(l.fretPx).toBe(FRET_PX);
+    expect(l.ppt * 240).toBeGreaterThanOrEqual(minGapPxFor(l.fretPx) - 0.5);
+  });
+
+  it("keeps the gap on a phone, with smaller numbers and a shorter segment", () => {
+    const m = patternModel(eighths([5, 7, 8, 7, 5, 3, 5, 3]), BAR, 1);
+    const l = followLayout(m, 340);
+    expect(l.fits).toBe(true);
+    expect(l.fretPx).toBeLessThan(FRET_PX);
+    expect(l.fretPx).toBeGreaterThanOrEqual(18);
+    expect(l.ppt * 480).toBeGreaterThanOrEqual(minGapPxFor(l.fretPx) - 0.5);
   });
 
   it("keeps numbers at 34 px from 760 px wide and shrinks them on a phone", () => {
     expect(fretPxFor(1300)).toBe(34);
     expect(fretPxFor(960)).toBe(34);
     expect(fretPxFor(340)).toBeLessThan(34);
-    expect(fretPxFor(340)).toBeGreaterThanOrEqual(20);
+    expect(fretPxFor(340)).toBeGreaterThanOrEqual(18);
   });
 
-  it("preview fits one pass inside the width, margins included", () => {
-    const m = patternModel(eighths([5, 7, 8, 7, 5, 3, 5, 3]), BAR, 2);
-    const s = previewScale(m, 1200);
-    expect(s.margin + 2 * BAR * s.ppt + s.margin).toBeCloseTo(1200, 5);
-    expect(s.fretPx).toBe(34);
+  it("puts every number in the middle of its slot, never on a bar line", () => {
+    const m = patternModel(eighths([5, 7, 8, 7, 5, 3, 5, 3]), BAR, 1);
+    const l = followLayout(m, 1300);
+    const first = noteXIn(0, l.ppt, m, l.geo);
+    const last = noteXIn(BAR - 480, l.ppt, m, l.geo);
+    expect(first).toBeGreaterThan(l.geo.fretPx * 0.6);
+    expect(l.segWidth - last).toBeCloseTo(first, 5);
   });
 
-  it("preview shrinks the numbers before they collide, never below 15 px", () => {
-    const m = patternModel(
-      Array.from({ length: 64 }, (_u, i) => ({ string: 1, fret: 12, tick: i * 240, dur: 240 })),
-      BAR,
-      4,
-    );
-    const s = previewScale(m, 900);
-    expect(s.fretPx).toBeLessThan(34);
-    expect(s.fretPx).toBeGreaterThanOrEqual(15);
+  it("has the high e as the top line and the counts under the staff", () => {
+    const g = staffGeometry(34);
+    expect(g.bottom - g.top).toBe(5 * g.gap);
+    expect(g.labelY).toBeLessThan(g.top - 17);
+    expect(g.beatY).toBeGreaterThan(g.bottom + 17);
   });
 
-  it("puts a bar line a little before beat one, never on the note", () => {
-    const m = patternModel(eighths([5, 7]), BAR, 1);
-    const s = followScale(m, 1300);
-    const pad = barLinePad(m, s.ppt);
-    expect(pad).toBeGreaterThan(0);
-    expect(pad).toBeLessThanOrEqual(28);
+  it("names a segment by its bar, and its beats when it is part of one", () => {
+    const m = patternModel(sixteenths(4), BAR, 4);
+    expect(segmentPlace(m, 1, BAR)).toMatchObject({ bar: 2, whole: true });
+    expect(segmentPlace(m, 3, BAR / 2)).toMatchObject({ bar: 2, fromBeat: 3, toBeat: 4, whole: false });
+    expect(segmentPlace(m, 4, BAR)).toMatchObject({ bar: 1 });
+  });
+
+  it("gives a segment its notes, every pass that reaches it", () => {
+    const m = patternModel(eighths([5, 7, 8, 7, 5, 3, 5, 3]), BAR, 1);
+    expect(segmentNotes(m, 2, BAR).map((n) => n.id)).toEqual([16, 17, 18, 19, 20, 21, 22, 23]);
+    expect(segmentNotes(m, 1, BAR / 2).map((n) => n.at)).toEqual([1920, 2400, 2880, 3360]);
+    expect(segmentNotes(m, -1, BAR)).toEqual([]);
+    expect(segmentNotes(m, 3, BAR, 3)).toEqual([]);
+  });
+});
+
+describe("the overview (ready and paused)", () => {
+  const four = patternModel(
+    eighths([3, 5, 6, 8, 6, 5, 3, 5, 5, 6, 8, 10, 8, 6, 5, 6, 6, 8, 10, 12, 10, 8, 6, 8, 8, 10, 12, 13, 12, 10, 8, 10]),
+    BAR,
+    4,
+  );
+
+  it("wraps four bars onto even rows, the gap held, inside the height", () => {
+    const o = overviewLayout(four, 1300, 470);
+    expect(o.fits).toBe(true);
+    expect(o.split).toBe(1);
+    expect(o.segments).toBe(4);
+    expect(o.rows * o.perRow).toBeGreaterThanOrEqual(4);
+    expect(o.perRow === 4 || o.perRow === 2).toBe(true);
+    expect(o.rows * o.geo.height).toBeLessThanOrEqual(470);
+    expect(o.ppt * 480).toBeGreaterThanOrEqual(minGapPxFor(o.fretPx) - 0.5);
+  });
+
+  it("takes the largest numbers that fit, and smaller ones in a short panel", () => {
+    const tall = overviewLayout(four, 1300, 800);
+    const short = overviewLayout(four, 1300, 160);
+    expect(short.fretPx).toBeLessThan(tall.fretPx);
+    expect(short.fretPx).toBeGreaterThanOrEqual(FRET_PX_MIN);
+  });
+
+  it("splits a bar on a phone rather than cram it, and scrolls when nothing fits", () => {
+    const dense = patternModel(sixteenths(4), BAR, 4);
+    const o = overviewLayout(dense, 340, 300);
+    expect(o.ppt * 240).toBeGreaterThanOrEqual(minGapPxFor(o.fretPx) - 0.5);
+    expect(o.split).toBeGreaterThan(1);
+    expect(overviewLayout(dense, 0, 0)).toBeTruthy();
   });
 });
 
@@ -172,13 +223,6 @@ describe("looping", () => {
     expect(currentOnset(m, 10 * BAR, 0, 10)).toBeNull();
   });
 
-  it("draws enough passes to fill the view either side of the cursor", () => {
-    const s = followScale(m, 1300);
-    const w = passWindow(m, 5 * BAR + 100, s, 1300);
-    const passPx = BAR * s.ppt;
-    expect(w.from * passPx + stripOffset(5 * BAR + 100, s)).toBeLessThanOrEqual(0);
-    expect((w.to + 1) * passPx + stripOffset(5 * BAR + 100, s)).toBeGreaterThanOrEqual(1300);
-  });
 });
 
 describe("note emphasis", () => {

@@ -60,7 +60,7 @@
   overflow: visible;
 }
 .neck-fallback-label {
-  font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  font-family: var(--font-num, "Barlow Condensed", "Arial Narrow", system-ui, sans-serif);
   font-weight: 700;
 }
 .neck-fallback .neck-fallback-dot.neck-flash {

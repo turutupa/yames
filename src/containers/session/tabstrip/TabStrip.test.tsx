@@ -20,11 +20,12 @@ beforeEach(() => {
 });
 afterEach(() => rect.mockRestore());
 
-const notesIn = (container: HTMLElement) => [...container.querySelectorAll<HTMLElement>(".tabstrip-note")];
-const transformX = (container: HTMLElement) => {
-  const t = container.querySelector<HTMLElement>(".tabstrip-strip")!.style.transform;
+const notesIn = (container: Element) => [...container.querySelectorAll<SVGGElement>(".tabstrip-note")];
+const colX = (container: HTMLElement) => {
+  const t = container.querySelector<HTMLElement>(".tabstrip-cursor")!.style.transform;
   return Number(/translate3d\((-?[\d.]+)px/.exec(t)?.[1]);
 };
+const seg = (container: HTMLElement, rel: string) => container.querySelector<SVGSVGElement>(`.tabstrip-seg[data-rel="${rel}"]`);
 
 describe("TabStrip", () => {
   it("names the pattern for a screen reader", () => {
@@ -35,53 +36,63 @@ describe("TabStrip", () => {
     );
   });
 
-  it("previews one pass with every note numbered in order, no cursor", () => {
+  it("previews the whole pattern, every bar numbered, no column", () => {
     const { container } = render(
       <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={0} playing={false} mode="preview" />,
     );
     expect(notesIn(container)).toHaveLength(16);
-    const badges = [...container.querySelectorAll(".tabstrip-order")].map((b) => b.textContent);
-    expect(badges).toEqual(Array.from({ length: 16 }, (_u, i) => String(i + 1)));
+    const labels = [...container.querySelectorAll(".tabstrip-label")].map((l) => l.textContent);
+    expect(labels).toEqual(["bar 1", "bar 2"]);
     expect(container.querySelector(".tabstrip-cursor")).toBeNull();
+    expect(container.querySelector(".tabstrip-note[data-current]")).toBeNull();
   });
 
-  it("follows: the strip is offset so the position sits under the column", () => {
-    const { container, rerender } = render(
-      <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={0} playing={false} mode="follow" />,
+  it("marks where it was paused in the overview", () => {
+    const { container } = render(
+      <TabStrip notes={lick} barTicks={BAR} patternBars={2} position={0} marker={BAR + 2 * 480 + 10} playing={false} mode="preview" />,
     );
-    const cursor = container.querySelector<HTMLElement>(".tabstrip-cursor")!;
-    const cursorX = parseFloat(cursor.style.left);
-    expect(cursorX).toBe(390);
-    expect(transformX(container)).toBeCloseTo(390, 0);
-    rerender(
-      <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={BAR} playing={false} mode="follow" />,
-    );
-    // A bar is (1300 - 390) / 2 px wide.
-    expect(transformX(container)).toBeCloseTo(390 - 455, 0);
+    const marked = seg(container, "mark")!;
+    expect(marked.querySelector(".tabstrip-label")?.textContent).toBe("paused here · bar 2");
+    expect(marked.querySelector<SVGGElement>(".tabstrip-note[data-current]")?.dataset.id).toBe("10");
+    expect(marked.querySelector(".tabstrip-mark")).not.toBeNull();
   });
 
-  it("emphasises the current note and dims the next bar", () => {
+  it("follows: now and next labelled, the column on the current note, the next bar dimmed", () => {
     const { container } = render(
       <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={3 * 480 + 10} playing={false} mode="follow" />,
     );
-    const current = container.querySelectorAll<HTMLElement>(".tabstrip-note[data-current]");
+    expect(seg(container, "now")!.querySelector(".tabstrip-label")?.textContent).toBe("now · bar 1");
+    expect(seg(container, "next")!.querySelector(".tabstrip-label")?.textContent).toBe("next · bar 2");
+    const current = container.querySelectorAll<SVGGElement>(".tabstrip-note[data-current]");
     expect(current).toHaveLength(1);
     expect(current[0].dataset.id).toBe("3");
-    const rel = (bar: number) => container.querySelector<HTMLElement>(`.tabstrip-bar[data-bar="${bar}"]`)?.dataset.rel;
-    expect(rel(0)).toBe("now");
-    expect(rel(1)).toBe("next");
+    const x = Number(current[0].querySelector("text")!.getAttribute("x"));
+    expect(colX(container)).toBeCloseTo(x, 0);
   });
 
-  it("repeats the pattern past its own length, ids running on", () => {
-    const { container } = render(
-      <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={5 * BAR} playing={false} mode="follow" />,
+  it("turns the page at the bar line: the next bar becomes now", () => {
+    const { container, rerender } = render(
+      <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={100} playing={false} mode="follow" />,
     );
+    expect(seg(container, "now")!.dataset.seg).toBe("0");
+    act(() => {
+      rerender(
+        <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={BAR + 100} playing={false} mode="follow" />,
+      );
+    });
+    expect(seg(container, "now")!.dataset.seg).toBe("1");
+    expect(seg(container, "next")!.dataset.seg).toBe("2");
+  });
+
+  it("repeats the pattern past its own length, ids running on, never past the Take", () => {
+    const { container } = render(
+      <TabStrip notes={lick} barTicks={BAR} patternBars={2} takeBars={10} position={5 * BAR + 10} playing={false} mode="follow" />,
+    );
+    const now = seg(container, "now")!;
+    expect(now.querySelector(".tabstrip-label")?.textContent).toBe("now · bar 2");
     const ids = notesIn(container).map((n) => Number(n.dataset.id));
-    expect(ids).toContain(5 * 8); // bar 5's first note: pass 2, index 8
-    const first = container.querySelector<HTMLElement>('.tabstrip-note[data-id="40"]')!;
-    expect(first.textContent).toBe("5");
-    expect(container.querySelector<HTMLElement>('.tabstrip-bar[data-bar="5"]')?.dataset.rel).toBe("now");
-    // And never past the Take's end.
+    expect(ids).toContain(5 * 8);
+    expect(container.querySelector('.tabstrip-note[data-id="40"] text')?.textContent).toBe("5");
     expect(Math.max(...ids)).toBeLessThan(10 * 8);
   });
 
@@ -95,7 +106,7 @@ describe("TabStrip", () => {
     const { container, rerender } = render(
       <TabStrip notes={lick} barTicks={BAR} patternBars={2} position={2000} playing={false} mode="follow" results={results} />,
     );
-    const state = (id: number) => container.querySelector<HTMLElement>(`.tabstrip-note[data-id="${id}"]`)?.dataset.result;
+    const state = (id: number) => container.querySelector<SVGGElement>(`.tabstrip-note[data-id="${id}"]`)?.dataset.result;
     expect([0, 1, 2, 3, 4].map(state)).toEqual(["good", "early", "late", "miss", undefined]);
     rerender(
       <TabStrip notes={lick} barTicks={BAR} patternBars={2} position={2000} playing={false} mode="follow" results={new Map()} />,
@@ -103,7 +114,7 @@ describe("TabStrip", () => {
     expect(state(0)).toBeUndefined();
   });
 
-  it("moves on animation frames without re-rendering React", () => {
+  it("moves the column on animation frames without redrawing the bar", () => {
     const frames: FrameRequestCallback[] = [];
     const raf = vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
       frames.push(cb);
@@ -118,35 +129,13 @@ describe("TabStrip", () => {
     const before = container.querySelector(".tabstrip-note");
     const step = (now: number) => act(() => frames.shift()?.(now));
     step(16);
-    const x0 = transformX(container);
-    tick = 400;
+    const x0 = colX(container);
+    tick = 1000;
     step(32);
-    const x1 = transformX(container);
-    expect(x1).toBeLessThan(x0);
-    expect(x0 - x1).toBeCloseTo(300 * (910 / (2 * BAR)), 0);
-    // Same nodes: the frame wrote a transform, it did not redraw the strip.
+    const x1 = colX(container);
+    expect(x1).toBeGreaterThan(x0);
     expect(container.querySelector(".tabstrip-note")).toBe(before);
     raf.mockRestore();
     caf.mockRestore();
-  });
-
-  it("steps note to note under prefers-reduced-motion", () => {
-    const mm = vi.spyOn(window, "matchMedia").mockImplementation(
-      (q: string) =>
-        ({
-          matches: q.includes("reduce"),
-          media: q,
-          addEventListener: () => {},
-          removeEventListener: () => {},
-        }) as unknown as MediaQueryList,
-    );
-    const { container, rerender } = render(
-      <TabStrip notes={lick} barTicks={BAR} patternBars={2} position={490} playing={false} mode="follow" />,
-    );
-    const at480 = transformX(container);
-    rerender(<TabStrip notes={lick} barTicks={BAR} patternBars={2} position={560} playing={false} mode="follow" />);
-    expect(transformX(container)).toBe(at480);
-    expect(container.querySelector(".tabstrip")!.hasAttribute("data-reduced")).toBe(true);
-    mm.mockRestore();
   });
 });
