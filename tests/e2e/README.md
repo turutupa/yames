@@ -8,7 +8,7 @@ graded by the real scorer and saved in the real store, come back after a
 restart; and does the click hold while the 3D neck draws.
 
 ```sh
-npm run test:e2e                         # build, then placement, session, relaunch, warmup, two-paths, four-fingers, gpu-info
+npm run test:e2e                         # build, then placement, session, relaunch, two-paths, warmup, four-fingers, gpu-info
 npm run test:e2e -- --no-build           # use the binary already built
 npm run test:e2e:probe                   # the click with the neck vs the headless probe
 node tests/e2e/run.mjs --help

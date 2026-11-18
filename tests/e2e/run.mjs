@@ -59,7 +59,7 @@ if (flag("--help")) {
   --keep              leave the profile and logs behind`);
   process.exit(0);
 }
-const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,warmup,two-paths,four-fingers,gpu-info").split(","));
+const scenarios = new Set(opt("--scenarios", "placement,session,relaunch,two-paths,warmup,four-fingers,gpu-info").split(","));
 const targetDir = process.env.CARGO_TARGET_DIR || join(repo, "src-tauri", "target");
 const app = resolve(opt("--app", join(targetDir, "release", "yames")));
 const out = resolve(opt("--out", mkdtempSync(join(tmpdir(), "yames-e2e-out-"))));
@@ -557,8 +557,24 @@ async function scenarioWarmup() {
   const phase = () => d.exec(`return document.querySelector('[data-testid="session-timed"]')?.dataset ?? null`);
   const click = (id) => d.exec(`const b = document.querySelector('[data-testid="${id}"]'); if (!b) return false; b.click(); return true;`);
   try {
-    await startSession(d, 10);
-    await d.waitText(/Start warm-up/, 20000);
+    await startSession(d, 15);
+    // The plan decides where the warm-up is; N (the Session's Next key) walks
+    // past what comes before it without playing anything.
+    const key = (k, code) =>
+      d.exec(`document.activeElement?.blur?.(); document.dispatchEvent(new KeyboardEvent("keydown", { key: ${JSON.stringify(k)}, code: ${JSON.stringify(code)}, bubbles: true })); return true;`);
+    let found = false;
+    for (let i = 0; i < 8 && !found; i++) {
+      await sleep(1500);
+      const big = await d.exec(`return document.querySelector('[data-testid="session-big"]')?.innerText ?? ""`);
+      if (/Start warm-up/.test(big)) found = true;
+      else if (/See how it went|Done/.test(big)) break;
+      else await key("n", "KeyN");
+    }
+    if (!found) {
+      await shot(d, "warmup-not-found");
+      check("warm-up: the Session has a warm-up to drive", false, await d.text());
+      return;
+    }
     const bpm0 = await bpmShown();
     check("warm-up: Slower is there before the start", await click("practice-slower"), "no - button");
     await sleep(400);
@@ -593,8 +609,7 @@ async function scenarioWarmup() {
       `playing ${st.isPlaying}, ${st.bpm} BPM, clock ${c0} -> ${c1}`);
 
     // Space, as a player with a guitar in their hands would: pause, not skip.
-    await d.exec(`document.activeElement?.blur?.(); window.dispatchEvent(new KeyboardEvent("keydown", { key: " ", code: "Space", bubbles: true }));
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: " ", code: "Space", bubbles: true })); return true;`);
+    await key(" ", "Space");
     await sleep(1000);
     const afterSpace = await phase();
     st = await d.invoke("get_state");
@@ -615,9 +630,13 @@ async function scenarioWarmup() {
     const pip = await d.exec(`return document.querySelector('.session-pips i')?.dataset.state ?? null`);
     check("warm-up: Next moves on, the click stops, the warm-up shows skipped", st.isPlaying === false && pip === "skipped",
       `playing ${st.isPlaying}, first pip ${pip}`);
-    check("warm-up: the next step can go back to the warm-up", await click("session-back"));
-    await d.waitText(/Start warm-up/, 8000);
-    check("warm-up: back on the warm-up, ready again", true);
+    // Back from the step after it (its ready screen offers "Again: <warm-up>").
+    const back = await click("session-back");
+    check("warm-up: the next step can go back to the warm-up", back);
+    if (back) {
+      await d.waitText(/Start warm-up/, 8000);
+      check("warm-up: back on the warm-up, ready again", true);
+    }
     await d.clickText(/^Exit$/);
     await d.waitText(/How long have you got/, 15000);
     check("warm-up: Exit leaves for Today", true);
@@ -1190,8 +1209,8 @@ try {
   if (scenarios.has("placement")) await scenarioPlacement();
   if (scenarios.has("session")) await scenarioSession();
   if (scenarios.has("relaunch")) await scenarioRelaunch();
-  if (scenarios.has("warmup")) await scenarioWarmup();
   if (scenarios.has("two-paths")) await scenarioTwoPaths();
+  if (scenarios.has("warmup")) await scenarioWarmup();
   if (scenarios.has("four-fingers")) await scenarioFourFingers();
   if (scenarios.has("blues-band")) await scenarioBluesBand();
   if (scenarios.has("restart")) await scenarioRestart();
