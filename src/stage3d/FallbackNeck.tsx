@@ -15,7 +15,7 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import { GUITAR_STANDARD_TUNING } from "../components/fretboard";
 import type { NeckKind, NeckNote, NeckView } from "./api";
 import type { StageSnapshot } from "./controller";
-import { noteLook, useNeckPalette } from "./neckTheme";
+import { noteLook, useNeckPalette, type NeckPalette } from "./neckTheme";
 
 /** Stage string (1 = high E) to Fretboard's index (0 = lowest string). */
 export const stringIndex = (s: number) => 6 - s;
@@ -38,9 +38,21 @@ const SCALE: Partial<Record<NeckKind, number>> = { now: 1.45, next: 1.15 };
 const fx = (n: number) => 1 - Math.pow(2, -n / 12);
 
 
-export function FallbackNeck({ view, notes, pluck }: { view: NeckView; notes: readonly NeckNote[]; pluck: StageSnapshot["pluck"] }) {
+export function FallbackNeck({
+  view,
+  notes,
+  pluck,
+  palette,
+}: {
+  view: NeckView;
+  notes: readonly NeckNote[];
+  pluck: StageSnapshot["pluck"];
+  /** Paint in this palette rather than the live theme's (the wizard's theme preview). */
+  palette?: NeckPalette;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  const P = useNeckPalette();
+  const live = useNeckPalette();
+  const P = palette ?? live;
   const uid = useId().replace(/:/g, "");
   const [size, setSize] = useState({ w: 0, h: 0 });
   useLayoutEffect(() => {

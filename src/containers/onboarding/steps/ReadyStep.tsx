@@ -12,6 +12,12 @@ import { getThemeById } from "../../../themes";
 import { useWizardEnv } from "../WizardContext";
 import type { StepId } from "../onboardingMachine";
 import type { WizardStepProps } from "./types";
+import { defaultStart } from "./StartStep";
+import { stepTitle } from "../../session/TodayView";
+import "../../../styles/onboarding-learning.css";
+
+/** Rows of the first Session W7 shows; Today has the rest. */
+const FIRST_SESSION_ROWS = 4;
 
 type SummaryRow = {
   key: string;
@@ -36,9 +42,29 @@ export function ReadyStep(_props: WizardStepProps) {
     finish,
     onRequestTour,
     machineContext,
+    learning,
   } = useWizardEnv();
 
+  // Where Today starts: the Path the player follows first, at its Level — what
+  // "Where do you start?" wrote, or the default a skipped step leaves.
+  const start = defaultStart(learning.paths, learning.progress);
+  const startPath = start ? learning.paths.find((p) => p.id === start.pathId) : undefined;
+  const plan = learning.plan;
+  const planSteps = plan?.steps ?? [];
+
   const rows: SummaryRow[] = [
+    ...(startPath
+      ? [
+          {
+            key: "path",
+            label: t("onboarding.ready.rows.path"),
+            value: start?.levelId
+              ? `${startPath.title} · ${t(`session.paths.levelName.${start.levelId}`)}`
+              : startPath.title,
+            target: "start" as StepId,
+          },
+        ]
+      : []),
     {
       key: "instrument",
       label: t("onboarding.ready.rows.instrument"),
@@ -72,11 +98,13 @@ export function ReadyStep(_props: WizardStepProps) {
         },
         {
           key: "coach",
-          label: t("onboarding.ready.rows.coach"),
+          label: t("settings.coach.brain"),
           value:
             coachTier === "off"
               ? t("onboarding.ready.coachTiming")
-              : t("onboarding.ready.coachOn"),
+              : coachTier === "full"
+                ? t("settings.coach.brainStudio")
+                : t("settings.coach.brainStandard"),
           target: "coach",
         },
         ] as SummaryRow[])),
@@ -149,6 +177,37 @@ export function ReadyStep(_props: WizardStepProps) {
           </li>
         )}
       </ul>
+
+      {/* The first Session, as Today will show it: built from the Path and
+          Level above, one press away once the wizard closes. */}
+      {planSteps.length > 0 && plan && (
+        <section className="onboarding-first-session" data-testid="onboarding-first-session">
+          <div className="onboarding-first-session-head">
+            <span className="onboarding-first-session-title">{t("session.today.leadFirst")}</span>
+            <span className="onboarding-first-session-total">
+              {t("session.today.minutes", { minutes: plan.minutes })}
+            </span>
+          </div>
+          <ol>
+            {planSteps.slice(0, FIRST_SESSION_ROWS).map((step, i) => (
+              <li key={i}>
+                <span className="onboarding-first-session-dot" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <span className="onboarding-first-session-name">{stepTitle(step, t)}</span>
+                <span className="onboarding-first-session-min">
+                  {t("session.today.minutes", { minutes: step.minutes })}
+                </span>
+              </li>
+            ))}
+          </ol>
+          {planSteps.length > FIRST_SESSION_ROWS && (
+            <p className="onboarding-first-session-more">
+              {t("onboarding.ready.moreOnToday", { count: planSteps.length - FIRST_SESSION_ROWS })}
+            </p>
+          )}
+        </section>
+      )}
 
       {/* The one thing about a phone that the desktop app never had to warn
           anyone about: the first Play raises a permission prompt the user did

@@ -2,7 +2,7 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Un groupe joue, tu joues, et Yames entend ta guitare. Une pratique qui tient dans les minutes dont tu disposes.",
+      "tagline": "Un coach de guitare qui écoute. Choisis un Parcours, et chaque séance tient dans les minutes dont tu disposes.",
       "setup": "Me configurer (environ deux minutes)",
       "skip": "Juste le clic",
       "footer": "Gratuit · local · open source · v{{version}}"
@@ -17,8 +17,8 @@
     },
     "soundLook": {
       "title": "Son et apparence",
-      "subtitle": "Survolez une carte pour entendre le clic ou voir le thème. Choisissez ce qui vous plaît.",
-      "subtitleTouch": "Touche une carte pour entendre le clic ou essayer le thème. Touche-en une autre pour changer d'avis.",
+      "subtitle": "Survolez une carte pour entendre le clic ou voir le thème. Le thème habille Aujourd'hui, les Parcours et le manche.",
+      "subtitleTouch": "Touche une carte pour entendre le clic ou essayer le thème. Le thème habille Aujourd'hui, les Parcours et le manche.",
       "soundHeading": "Son du clic",
       "themeHeading": "Thème",
       "moreThemes": "Plus de thèmes dans les Réglages"
@@ -49,20 +49,18 @@
       "session": {
         "title": "Dans une Session",
         "go": "Lancer ou finir la prise : le grand bouton",
-        "faster": "Plus vite, entre deux prises",
-        "slower": "Plus lent, entre deux prises",
         "next": "Étape suivante",
-        "or": "ou"
+        "or": "ou",
+        "tempo": "Plus vite ou plus lent, entre deux prises",
+        "view": "Changer de vue : {{neck}}, {{runway}} ou {{tab}}"
       },
       "pedal": {
         "title": "Une seule pédale",
         "tools": "Hors Session, un appui lance et arrête les outils."
       },
-      "tools": {
-        "title": "Dans les outils"
-      },
       "nav": {
-        "title": "Se déplacer"
+        "learning": "Écrans d'apprentissage",
+        "tools": "Outils"
       }
     },
     "coach": {
@@ -84,7 +82,7 @@
         "desc": "Qwen3 8B · ~5 Go · ~8 Go de RAM. Retours plus riches et plans d'entraînement."
       },
       "studioNeedsRam": "Studio demande au moins 16 Go de RAM — cette machine en a {{gb}}.",
-      "standardNeedsRam": "Le cerveau Standard demande au moins 8 Go de RAM — cette machine en a {{gb}}.",
+      "standardNeedsRam": "Le modèle Standard demande au moins 8 Go de RAM — cette machine en a {{gb}}.",
       "unavailableInBuild": "Indisponible dans cette version.",
       "reasonNoLlm": "Cette version ne peut pas exécuter de modèle : le retour de timing est le choix honnête ici.",
       "reasonLowMemory": "Cette machine a {{gb}} Go de RAM — pas assez pour faire tourner un modèle confortablement.",
@@ -167,24 +165,24 @@
     },
     "ready": {
       "title": "Tout est prêt",
-      "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",
+      "subtitle": "Ta première séance t'attend dans Aujourd'hui. Modifie ce que tu veux ici, ou plus tard dans les Réglages.",
       "notificationNote": "La première fois que vous appuyez sur Lecture, votre téléphone demande si Yames peut afficher une notification — dites oui et le clic continue même écran éteint.",
       "rows": {
+        "path": "Parcours",
         "instrument": "Instrument",
         "sound": "Son du clic",
         "theme": "Thème",
         "control": "Contrôle",
-        "coach": "Coach d'entraînement",
         "input": "Entrée audio"
       },
       "controlKeyboard": "Clavier",
       "controlFootswitch": "Pédale",
       "coachTiming": "Retour de timing uniquement",
-      "coachOn": "Activé",
       "inputNone": "Non configurée",
       "alwaysOnTop": "Toujours au premier plan",
       "start": "Aller à Aujourd'hui",
-      "tour": "Faites-moi visiter (30 s)"
+      "tour": "Faites-moi visiter (30 s)",
+      "moreOnToday": "+{{count}} de plus dans Aujourd'hui"
     },
     "hints": {
       "dismiss": "Compris",
@@ -272,6 +270,12 @@
       "back": "Retour",
       "close": "Fermer",
       "alwaysOnTopNote": "Yames reste au-dessus des autres fenêtres. Vous pouvez le changer dans Réglages → Général."
+    },
+    "start": {
+      "title": "Par où commencer ?",
+      "subtitle": "Choisis un Parcours et ton niveau. Aujourd'hui en tire ta première séance ; tu peux changer les deux sur la page du Parcours.",
+      "pathHeading": "Parcours",
+      "loading": "Chargement des Parcours…"
     }
   },
   "whatsNew": {

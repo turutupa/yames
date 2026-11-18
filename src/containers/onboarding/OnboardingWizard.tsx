@@ -25,7 +25,9 @@ import {
   type WizardCoachEnv,
   type WizardEnv,
   type WizardEvaluationEnv,
+  type WizardLearningEnv,
 } from "./WizardContext";
+import { NO_PROGRESS } from "../../session/progress";
 import "../../styles/onboarding.css";
 import "../../styles/phone-learning.css";
 import { IS_MOBILE } from "../../platform";
@@ -90,6 +92,17 @@ const NO_EVALUATION: WizardEvaluationEnv = {
   avgDeviation: 0,
 };
 
+/**
+ * Stand-in for the learning side outside MainWindow: no Paths loaded, so
+ * "Where do you start?" says it is loading and W7 has no first Session to show.
+ */
+const NO_LEARNING: WizardLearningEnv = {
+  paths: [],
+  progress: NO_PROGRESS,
+  plan: null,
+  startPath: () => null,
+};
+
 export type OnboardingWizardProps = {
   state: OnboardingState;
   dispatch: (event: OnboardingEvent) => void;
@@ -122,6 +135,11 @@ export type OnboardingWizardProps = {
    * outside MainWindow.
    */
   evaluation?: WizardEvaluationEnv;
+  /**
+   * The learning side ("Where do you start?", W7's first Session): the app's
+   * `useSessionRun`, narrowed. Defaults to an empty stand-in outside MainWindow.
+   */
+  learning?: WizardLearningEnv;
 
   /** 80 BPM / volume 0.35 preview click, implemented in MainWindow. */
   startSoftClick: () => void;
@@ -167,6 +185,7 @@ export function OnboardingWizard({
   gamepadBindings = NO_GAMEPAD_BINDINGS,
   coach = NO_COACH,
   evaluation = NO_EVALUATION,
+  learning = NO_LEARNING,
   startSoftClick,
   stopSoftClick,
   softClickPlaying,
@@ -392,6 +411,7 @@ export function OnboardingWizard({
       gamepadBindings,
       coach,
       evaluation,
+      learning,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,
@@ -424,6 +444,7 @@ export function OnboardingWizard({
       gamepadBindings,
       coach,
       evaluation,
+      learning,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,

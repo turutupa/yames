@@ -2,7 +2,7 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Una band suona, tu suoni e Yames ascolta la tua chitarra. Pratica che sta nei minuti che hai.",
+      "tagline": "Un coach di chitarra che ascolta. Scegli un Percorso e ogni sessione sta nei minuti che hai.",
       "setup": "Configurami (circa due minuti)",
       "skip": "Dammi solo il click",
       "footer": "Gratuito · locale · open source · v{{version}}"
@@ -17,8 +17,8 @@
     },
     "soundLook": {
       "title": "Suono e aspetto",
-      "subtitle": "Passa sopra una scheda per sentire il click o vedere il tema. Scegli quello che ti piace.",
-      "subtitleTouch": "Tocca una scheda per sentire il clic o provare il tema. Toccane un'altra per cambiare idea.",
+      "subtitle": "Passa sopra una scheda per sentire il click o vedere il tema. Il tema veste Oggi, i Percorsi e il manico.",
+      "subtitleTouch": "Tocca una scheda per sentire il clic o provare il tema. Il tema veste Oggi, i Percorsi e il manico.",
       "soundHeading": "Suono del click",
       "themeHeading": "Tema",
       "moreThemes": "Altri temi nelle Impostazioni"
@@ -49,20 +49,18 @@
       "session": {
         "title": "In una Sessione",
         "go": "Avvia o chiudi la ripresa: il pulsante grande",
-        "faster": "Più veloce, tra una ripresa e l'altra",
-        "slower": "Più lento, tra una ripresa e l'altra",
         "next": "Passo successivo",
-        "or": "o"
+        "or": "o",
+        "tempo": "Più veloce o più lento, tra una take e l'altra",
+        "view": "Cambia vista: {{neck}}, {{runway}} o {{tab}}"
       },
       "pedal": {
         "title": "Un solo pedale",
         "tools": "Fuori da una Sessione, un tocco avvia e ferma gli strumenti."
       },
-      "tools": {
-        "title": "Negli strumenti"
-      },
       "nav": {
-        "title": "Spostarsi nell’app"
+        "learning": "Schermate di studio",
+        "tools": "Strumenti"
       }
     },
     "coach": {
@@ -84,7 +82,7 @@
         "desc": "Qwen3 8B · ~5 GB di download · ~8 GB di RAM. Feedback più ricco e piani di studio."
       },
       "studioNeedsRam": "Studio richiede almeno 16 GB di RAM: questa macchina ne ha {{gb}}.",
-      "standardNeedsRam": "Il cervello Standard richiede almeno 8 GB di RAM: questa macchina ne ha {{gb}}.",
+      "standardNeedsRam": "Il modello Standard richiede almeno 8 GB di RAM: questa macchina ne ha {{gb}}.",
       "unavailableInBuild": "Non disponibile in questa build.",
       "reasonNoLlm": "Questa build non può eseguire un modello: il feedback sul timing è la scelta onesta.",
       "reasonLowMemory": "Questa macchina ha {{gb}} GB di RAM: troppo poco per far girare bene un modello.",
@@ -167,24 +165,24 @@
     },
     "ready": {
       "title": "Tutto pronto",
-      "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
+      "subtitle": "La tua prima sessione ti aspetta in Oggi. Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
       "notificationNote": "La prima volta che premi play, il telefono ti chiederà se Yames può mostrare una notifica: rispondi di sì e il click continua anche a schermo spento.",
       "rows": {
+        "path": "Percorso",
         "instrument": "Strumento",
         "sound": "Suono del click",
         "theme": "Tema",
         "control": "Controllo",
-        "coach": "Coach di studio",
         "input": "Ingresso audio"
       },
       "controlKeyboard": "Tastiera",
       "controlFootswitch": "Pedale",
       "coachTiming": "Solo feedback sul tempo",
-      "coachOn": "Attivo",
       "inputNone": "Non configurato",
       "alwaysOnTop": "Sempre in primo piano",
       "start": "Vai a Oggi",
-      "tour": "Fammi fare un giro (30 s)"
+      "tour": "Fammi fare un giro (30 s)",
+      "moreOnToday": "+{{count}} in Oggi"
     },
     "hints": {
       "dismiss": "Ho capito",
@@ -272,6 +270,12 @@
       "back": "Indietro",
       "close": "Chiudi",
       "alwaysOnTopNote": "Yames resta sopra le altre finestre. Puoi cambiarlo in Impostazioni → Generale."
+    },
+    "start": {
+      "title": "Da dove parti?",
+      "subtitle": "Scegli un Percorso e il tuo livello. Oggi ci costruisce la tua prima sessione; puoi cambiarli entrambi nella pagina del Percorso.",
+      "pathHeading": "Percorso",
+      "loading": "Caricamento dei Percorsi…"
     }
   },
   "whatsNew": {

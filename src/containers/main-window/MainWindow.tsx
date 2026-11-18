@@ -55,7 +55,7 @@ import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
 import type { BrainTier, InstrumentId, ModelTier, Preset, Subdivision } from "../../types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
-import type { WizardCoachEnv, WizardEvaluationEnv } from "../onboarding/WizardContext";
+import type { WizardCoachEnv, WizardEvaluationEnv, WizardLearningEnv } from "../onboarding/WizardContext";
 import { FinishSetupChip } from "../onboarding/FinishSetupChip";
 import { useOnboarding } from "../onboarding/useOnboarding";
 import { CoachVoiceToast } from "../onboarding/CoachVoiceToast";
@@ -567,6 +567,8 @@ export function MainWindow() {
     directInput: evaluation.devices.find((d) => d.name === evaluation.selectedDevice)?.isInterface === true,
     jams: jamSession.jams,
     lineup: jamSession.lineup,
+    // "Where do you start?" lists the Paths, over whichever screen the wizard opened on.
+    preload: onboarding.isOpen,
   });
 
   /**
@@ -1206,6 +1208,18 @@ export function MainWindow() {
   // the rest of the app uses, and W6's eight beats go through the normal
   // analyzer — the only path that leaves a real calibration seed behind.
   const [wizardInputError, setWizardInputError] = useState<string | null>(null);
+  // "Where do you start?" and W7 use the app's single `useSessionRun`, as W5
+  // uses the single `useEvaluation`: a Path started in the wizard is the one
+  // Today plans and the Path page shows.
+  const wizardLearning: WizardLearningEnv = useMemo(
+    () => ({
+      paths: sessionRun.paths,
+      progress: sessionRun.progress,
+      plan: sessionRun.plan,
+      startPath: sessionRun.actions.startPath,
+    }),
+    [sessionRun.paths, sessionRun.progress, sessionRun.plan, sessionRun.actions.startPath],
+  );
   const wizardEvaluation: WizardEvaluationEnv = useMemo(
     () => ({
       devices: evaluation.devices,
@@ -2906,6 +2920,7 @@ export function MainWindow() {
       gamepadBindings={footBindings}
       coach={wizardCoach}
       evaluation={wizardEvaluation}
+      learning={wizardLearning}
       alwaysOnTop={state.alwaysOnTop}
       onAlwaysOnTopChange={alwaysOnTopSetter}
       startSoftClick={startSoftClick}

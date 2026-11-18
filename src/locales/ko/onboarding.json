@@ -2,7 +2,7 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "밴드가 연주하고, 당신이 연주하면, Yames가 기타 소리를 듣습니다. 가진 시간에 딱 맞는 연습.",
+      "tagline": "귀 기울여 듣는 기타 코치. 코스를 고르면 매일의 세션이 가진 시간에 딱 맞춰집니다.",
       "setup": "설정하기 (약 2분)",
       "skip": "클릭 소리만 주세요",
       "footer": "무료 · 로컬 · 오픈 소스 · v{{version}}"
@@ -17,8 +17,8 @@
     },
     "soundLook": {
       "title": "소리와 모양",
-      "subtitle": "카드에 마우스를 올리면 클릭 소리와 테마를 바로 확인할 수 있어요. 마음에 드는 것을 고르세요.",
-      "subtitleTouch": "카드를 누르면 클릭음을 듣거나 테마를 볼 수 있어요. 다른 카드를 누르면 바꿀 수 있습니다.",
+      "subtitle": "카드에 마우스를 올리면 클릭 소리와 테마를 확인할 수 있어요. 테마는 오늘, 코스, 지판을 꾸밉니다.",
+      "subtitleTouch": "카드를 누르면 클릭음을 듣거나 테마를 볼 수 있어요. 테마는 오늘, 코스, 지판을 꾸밉니다.",
       "soundHeading": "클릭 사운드",
       "themeHeading": "테마",
       "moreThemes": "더 많은 테마는 설정에서"
@@ -49,20 +49,18 @@
       "session": {
         "title": "세션에서",
         "go": "테이크 시작 또는 종료: 큰 버튼",
-        "faster": "더 빠르게, 테이크 사이에",
-        "slower": "더 느리게, 테이크 사이에",
         "next": "다음 단계",
-        "or": "또는"
+        "or": "또는",
+        "tempo": "더 빠르게 또는 느리게, 테이크 사이에",
+        "view": "보기 전환: {{neck}}, {{runway}}, {{tab}}"
       },
       "pedal": {
         "title": "풋스위치 하나",
         "tools": "세션 밖에서는 한 번 누르면 도구가 재생되거나 멈춰요."
       },
-      "tools": {
-        "title": "도구에서"
-      },
       "nav": {
-        "title": "화면 이동"
+        "learning": "학습 화면",
+        "tools": "도구"
       }
     },
     "coach": {
@@ -84,7 +82,7 @@
         "desc": "Qwen3 8B · 약 5 GB 다운로드 · 약 8 GB RAM. 더 풍부한 피드백과 연습 계획."
       },
       "studioNeedsRam": "스튜디오는 최소 16 GB RAM이 필요합니다. 이 컴퓨터는 {{gb}} GB입니다.",
-      "standardNeedsRam": "스탠다드 브레인은 최소 8 GB RAM이 필요합니다. 이 컴퓨터는 {{gb}} GB입니다.",
+      "standardNeedsRam": "기본 모델은 최소 8 GB RAM이 필요합니다. 이 컴퓨터는 {{gb}} GB입니다.",
       "unavailableInBuild": "이 빌드에서는 사용할 수 없습니다.",
       "reasonNoLlm": "이 빌드는 모델을 실행할 수 없어 타이밍 피드백이 정직한 선택입니다.",
       "reasonLowMemory": "이 컴퓨터의 RAM은 {{gb}} GB로, 모델을 편안하게 돌리기엔 부족합니다.",
@@ -167,24 +165,24 @@
     },
     "ready": {
       "title": "준비됐습니다",
-      "subtitle": "여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",
+      "subtitle": "첫 세션이 오늘에서 기다리고 있어요. 여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",
       "notificationNote": "처음 재생을 누르면 휴대폰이 Yames의 알림 표시를 허용할지 물어봅니다. 허용하면 화면을 꺼도 클릭이 계속 울립니다.",
       "rows": {
+        "path": "코스",
         "instrument": "악기",
         "sound": "클릭 사운드",
         "theme": "테마",
         "control": "조작",
-        "coach": "연습 코치",
         "input": "오디오 입력"
       },
       "controlKeyboard": "키보드",
       "controlFootswitch": "풋스위치",
       "coachTiming": "타이밍 피드백만",
-      "coachOn": "켜짐",
       "inputNone": "설정 안 됨",
       "alwaysOnTop": "항상 위에 표시",
       "start": "오늘로 가기",
-      "tour": "앱 둘러보기 (30초)"
+      "tour": "앱 둘러보기 (30초)",
+      "moreOnToday": "오늘에 {{count}}개 더"
     },
     "hints": {
       "dismiss": "알겠어요",
@@ -272,6 +270,12 @@
       "back": "이전",
       "close": "닫기",
       "alwaysOnTopNote": "Yames는 다른 창 위에 머무릅니다. 설정 → 일반에서 바꿀 수 있어요."
+    },
+    "start": {
+      "title": "어디서 시작할까요?",
+      "subtitle": "코스와 레벨을 고르세요. 오늘 화면이 여기서 첫 세션을 만듭니다. 둘 다 코스 페이지에서 바꿀 수 있어요.",
+      "pathHeading": "코스",
+      "loading": "코스를 불러오는 중…"
     }
   },
   "whatsNew": {

@@ -355,10 +355,12 @@ describe("W5/W6 — the isEnabled matrix", () => {
 
   // MVP, 2026-11-16: hearing the guitar comes straight after the instrument,
   // before the steps that only tune the tools.
-  it("puts both steps straight after the instrument, before the coach", () => {
+  // 2026-11-18: "Where do you start?" sits between the guitar and the input.
+  it("puts both steps straight after the instrument and the start, before the coach", () => {
     expect(ONBOARDING_STEPS.map((s) => s.id)).toEqual([
       "welcome",
       "instrument",
+      "start",
       "audio-input",
       "hear-it-work",
       "coach",

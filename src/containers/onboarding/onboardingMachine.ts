@@ -14,6 +14,8 @@
 export type StepId =
   | "welcome"
   | "instrument"
+  /** "Where do you start?": the first Path and its Level. */
+  | "start"
   | "sound-look"
   | "hands-free"
   | "coach"

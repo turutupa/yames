@@ -5,9 +5,14 @@
  * the flow. The shell reads this array for rendering and the machine reads
  * `{ id, isEnabled }` from it for navigation; neither needs editing.
  *
- * Flow (ONBOARDING_PLAN §3, reordered for the MVP on 2026-11-16):
- *   W0 welcome → W1 instrument → W5 audio-input → W6 hear-it-work →
+ * Flow (ONBOARDING_PLAN §3, reordered for the MVP on 2026-11-16; "Where do
+ * you start?" added on 2026-11-18):
+ *   W0 welcome → W1 instrument → start → W5 audio-input → W6 hear-it-work →
  *   W4 coach → W2 sound-look → W3 hands-free → W7 ready
+ *
+ * "Where do you start?" comes straight after the guitar: the Path and the
+ * Level are what Today plans from, so they are the first thing the app needs
+ * to know about the player, and W7 can then show the first Session they built.
  *
  * The learning side grades from the guitar (revamp BRIEF: "First Mechanics
  * grading needs a mic or direct input"), so hearing the guitar comes right
@@ -19,6 +24,7 @@ import type { StepGate } from "../onboardingMachine";
 import type { WizardStepDef } from "./types";
 import { WelcomeStep } from "./WelcomeStep";
 import { InstrumentStep } from "./InstrumentStep";
+import { StartStep } from "./StartStep";
 import { SoundLookStep } from "./SoundLookStep";
 import { HandsFreeStep } from "./HandsFreeStep";
 import { CoachStep } from "./CoachStep";
@@ -30,6 +36,8 @@ import { IS_MOBILE } from "../../../platform";
 export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "welcome", Component: WelcomeStep, hideInProgress: true },
   { id: "instrument", Component: InstrumentStep },
+  // On every run, phone included: the learning side is the app's front door.
+  { id: "start", Component: StartStep },
   // On every run (MVP, 2026-11-16). It used to be gated on the coach tier,
   // with an opt-in for timing-only users (plan decision 3); the learning side
   // cannot grade without an input, so the question is now asked of everyone,

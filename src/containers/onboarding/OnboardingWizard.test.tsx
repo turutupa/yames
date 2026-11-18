@@ -205,7 +205,7 @@ describe("W0 — welcome", () => {
     expect(screen.getByRole("heading", { name: "Yames" })).toBeInTheDocument();
     expect(
       screen.getByText(
-        "A band plays, you play, and Yames hears your guitar. Practice that fits the minutes you have.",
+        "A guitar coach that listens. Choose a Path, and each day's Session fits the minutes you have.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/v9\.9\.9/)).toBeInTheDocument();
@@ -624,7 +624,7 @@ describe("W7 — ready", () => {
       ["Click sound", "sound-look"],
       ["Theme", "sound-look"],
       ["Control", "hands-free"],
-      ["Practice coach", "coach"],
+      ["Coach model", "coach"],
       ["Audio input", "audio-input"],
     ];
     for (const [label, target] of rowTargets) {

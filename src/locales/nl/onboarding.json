@@ -2,7 +2,7 @@
   "onboarding": {
     "welcome": {
       "title": "Yames",
-      "tagline": "Een band speelt, jij speelt, en Yames hoort je gitaar. Oefenen dat past in de minuten die je hebt.",
+      "tagline": "Een gitaarcoach die luistert. Kies een leerpad, en elke sessie past in de minuten die je hebt.",
       "setup": "Stel me in (ongeveer twee minuten)",
       "skip": "Geef me gewoon de klik",
       "footer": "Gratis · lokaal · open source · v{{version}}"
@@ -17,8 +17,8 @@
     },
     "soundLook": {
       "title": "Geluid en uiterlijk",
-      "subtitle": "Beweeg over een kaart om de klik te horen of het thema te zien. Kies wat je mooi vindt.",
-      "subtitleTouch": "Tik op een kaart om de klik te horen of het thema te proberen. Tik op een andere om van gedachten te veranderen.",
+      "subtitle": "Beweeg over een kaart om de klik te horen of het thema te zien. Het thema kleedt Vandaag, de leerpaden en de hals.",
+      "subtitleTouch": "Tik op een kaart om de klik te horen of het thema te proberen. Het thema kleedt Vandaag, de leerpaden en de hals.",
       "soundHeading": "Klikgeluid",
       "themeHeading": "Thema",
       "moreThemes": "Meer thema's in Instellingen"
@@ -49,20 +49,18 @@
       "session": {
         "title": "In een sessie",
         "go": "De take starten of stoppen: de grote knop",
-        "faster": "Sneller, tussen takes",
-        "slower": "Langzamer, tussen takes",
         "next": "Volgende stap",
-        "or": "of"
+        "or": "of",
+        "tempo": "Sneller of langzamer, tussen takes",
+        "view": "Weergave wisselen: {{neck}}, {{runway}} of {{tab}}"
       },
       "pedal": {
         "title": "Eén voetschakelaar",
         "tools": "Buiten een sessie start en stopt een tik de tools."
       },
-      "tools": {
-        "title": "In de tools"
-      },
       "nav": {
-        "title": "Rondkijken"
+        "learning": "Leerschermen",
+        "tools": "Tools"
       }
     },
     "coach": {
@@ -84,7 +82,7 @@
         "desc": "Qwen3 8B · ~5 GB download · ~8 GB RAM. Rijkere feedback en oefenplannen."
       },
       "studioNeedsRam": "Studio heeft minstens 16 GB RAM nodig — deze computer heeft {{gb}} GB.",
-      "standardNeedsRam": "Het Standard-brein heeft minstens 8 GB RAM nodig — deze computer heeft {{gb}} GB.",
+      "standardNeedsRam": "Het Standaard-model heeft minstens 8 GB RAM nodig — deze computer heeft {{gb}} GB.",
       "unavailableInBuild": "Niet beschikbaar in deze build.",
       "reasonNoLlm": "Deze build kan geen model draaien, dus timingfeedback is hier de eerlijke keuze.",
       "reasonLowMemory": "Deze computer heeft {{gb}} GB RAM — te weinig om een model comfortabel te draaien.",
@@ -167,24 +165,24 @@
     },
     "ready": {
       "title": "Je bent klaar",
-      "subtitle": "Wijzig hier iets, of later in Instellingen.",
+      "subtitle": "Je eerste sessie staat klaar op Vandaag. Wijzig hier iets, of later in Instellingen.",
       "notificationNote": "De eerste keer dat je op afspelen drukt, vraagt je telefoon of Yames een melding mag tonen — zeg ja en de klik loopt door met het scherm uit.",
       "rows": {
+        "path": "Leerpad",
         "instrument": "Instrument",
         "sound": "Klikgeluid",
         "theme": "Thema",
         "control": "Bediening",
-        "coach": "Oefencoach",
         "input": "Audio-invoer"
       },
       "controlKeyboard": "Toetsenbord",
       "controlFootswitch": "Voetschakelaar",
       "coachTiming": "Alleen timingfeedback",
-      "coachOn": "Aan",
       "inputNone": "Niet ingesteld",
       "alwaysOnTop": "Altijd op voorgrond",
       "start": "Naar Vandaag",
-      "tour": "Laat me rondkijken (30 s)"
+      "tour": "Laat me rondkijken (30 s)",
+      "moreOnToday": "+{{count}} meer op Vandaag"
     },
     "hints": {
       "dismiss": "Duidelijk",
@@ -272,6 +270,12 @@
       "back": "Terug",
       "close": "Sluiten",
       "alwaysOnTopNote": "Yames blijft boven andere vensters. Je wijzigt dat in Instellingen → Algemeen."
+    },
+    "start": {
+      "title": "Waar begin je?",
+      "subtitle": "Kies een leerpad en je niveau. Vandaag bouwt daar je eerste sessie mee; beide wijzig je op de pagina van het leerpad.",
+      "pathHeading": "Leerpad",
+      "loading": "Leerpaden laden…"
     }
   },
   "whatsNew": {
