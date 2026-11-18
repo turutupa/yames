@@ -36,7 +36,8 @@ export const SHOT_THEMES = [
 export type ShotTheme = (typeof SHOT_THEMES)[number];
 
 /** What the mocked scorer reports for one Session Take. */
-export type TakeRecipe = "pass" | "below" | "noCatch";
+/** `nearMiss`: 83% against a bar of 85, the result the fairness question is for. */
+export type TakeRecipe = "pass" | "below" | "nearMiss" | "noCatch";
 
 export interface Shot {
   /** `?shot=` value, and the folder under docs/img/. */
@@ -964,12 +965,13 @@ export const SHOTS: Shot[] = [
     height: 900,
     settleMs: 300,
   },
-  // The result with "Was this grade fair?" answered.
+  // A result with "Was this grade fair?" answered: a miss just under the bar,
+  // which is where the question is asked (acceptance pass 3 P2-7).
   {
     id: "session-result-fair",
     suffix: "session-result-fair",
     window: "main",
-    session: { seed: "returning", minutes: 5, take: "pass", stop: "result", fair: "yes" },
+    session: { seed: "returning", minutes: 5, take: "nearMiss", stop: "between", fair: "yes" },
     width: 1400,
     height: 900,
     settleMs: 300,

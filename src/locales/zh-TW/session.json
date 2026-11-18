@@ -251,7 +251,8 @@
       "offerBody": "從 {{bpm}} BPM 開始，只要過及格線就往上升，並保留你的乾淨速度。增加 {{minutes}} 分鐘。",
       "start": "挑戰極限",
       "recap": "極限",
-      "rungLabel": "{{bpm}} BPM：達標 {{met}}，未達標 {{missed}}"
+      "rungLabel": "{{bpm}} BPM：達標 {{met}}，未達標 {{missed}}",
+      "fairAsk": "這次爬升的評分公平嗎？"
     },
     "coach": {
       "passed": "每個音都到位了，{{bpm}} BPM 下連續 {{bars}} 小節都很均勻。",

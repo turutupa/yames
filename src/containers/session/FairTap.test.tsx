@@ -60,22 +60,42 @@ describe("the fairness tap", () => {
   });
 });
 
-describe("when the fairness question is asked (acceptance P1-9)", () => {
-  const graded = (takeId: string, value: number) =>
+describe("when the fairness question is asked (acceptance P1-9, pass 3 P2-7)", () => {
+  const graded = (takeId: string, value: number, opts: { held?: number; played?: number; stepId?: string } = {}) =>
     ({
       takeId,
+      stepId: opts.stepId ?? "s1",
+      measures: {
+        barsPlayed: opts.played ?? 10,
+        pass: opts.held === undefined ? undefined : { heldBars: opts.held },
+      },
       grade: {
-        verdict: value >= 85 ? "passed" : "notYet",
+        verdict: value >= 85 ? "passed" : "belowBar",
         checks: [{ metric: "timingEvenness", value: value / 100, min: 0.85, met: value >= 85 }],
         unmeasured: [],
       },
     }) as unknown as TakeOutcome;
 
-  it("on a result only within 5 points of the bar", () => {
-    expect(borderline(graded("a", 87))).toBe(true);
-    expect(borderline(graded("a", 80))).toBe(true);
+  it("never on a clear pass: 87% against 85% with every bar held", () => {
+    expect(borderline(graded("a", 87, { held: 10, played: 10 }))).toBe(false);
     expect(borderline(graded("a", 97))).toBe(false);
+  });
+
+  it("on a pass just over the bar that did not hold throughout", () => {
+    expect(borderline(graded("a", 87, { held: 8, played: 10 }))).toBe(true);
+    expect(borderline(graded("a", 88, { held: 8, played: 10 }))).toBe(true);
+    expect(borderline(graded("a", 85))).toBe(true);
+  });
+
+  it("on a miss just under the bar, within 3 points", () => {
+    expect(borderline(graded("a", 84))).toBe(true);
+    expect(borderline(graded("a", 82))).toBe(true);
+    expect(borderline(graded("a", 81))).toBe(false);
     expect(borderline(graded("a", 60))).toBe(false);
+  });
+
+  it("not 4 points over, even when bars slipped", () => {
+    expect(borderline(graded("a", 89, { held: 6, played: 10 }))).toBe(false);
   });
 
   it("on the recap about the last graded Take, unless already answered this Session", () => {
@@ -88,5 +108,13 @@ describe("when the fairness question is asked (acceptance P1-9)", () => {
     expect(recapFairOutcome(outcomes, [row("a"), row("b", "no")])).toBeNull();
     expect(recapFairOutcome([graded("a", 87)], [row("a", "yes")])).toBeNull();
     expect(recapFairOutcome([], [])).toBeNull();
+  });
+
+  it("the recap leaves a Find my edge climb alone: it asked once, as it ended", () => {
+    const row = (id: string) => ({ ...take("even-eighths.open-string"), id, facts: {} });
+    const climb = [graded("e1", 90, { stepId: "edge" }), graded("e2", 84, { stepId: "edge" })];
+    expect(recapFairOutcome(climb, [row("e1"), row("e2")], new Set(["edge"]))).toBeNull();
+    const mixed = [graded("a", 84), ...climb];
+    expect(recapFairOutcome(mixed, [row("a"), row("e1"), row("e2")], new Set(["edge"]))?.takeId).toBe("a");
   });
 });

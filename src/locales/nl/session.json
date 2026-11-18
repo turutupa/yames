@@ -251,7 +251,8 @@
       "offerBody": "Gaat omhoog vanaf {{bpm}} BPM zolang je de lat haalt, en bewaart je schone tempo. Kost {{minutes}} minuten extra.",
       "start": "Mijn grens vinden",
       "recap": "Grens",
-      "rungLabel": "{{bpm}} BPM: {{met}} gehaald, {{missed}} gemist"
+      "rungLabel": "{{bpm}} BPM: {{met}} gehaald, {{missed}} gemist",
+      "fairAsk": "Voelden de beoordelingen van deze klim eerlijk?"
     },
     "coach": {
       "passed": "Elke noot zat erin, gelijkmatig over {{bars}} maten achter elkaar op {{bpm}} BPM.",

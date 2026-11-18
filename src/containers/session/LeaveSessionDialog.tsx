@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -11,6 +11,8 @@ import { useTranslation } from "react-i18next";
  * stays (a key that both asked and answered would be no question). "Keep
  * going" has the focus (acceptance P2-3), so Enter, a pedal's press or a
  * stray Space stays; leaving is a deliberate move to the other button.
+ * Tab stays inside it, and the focus goes back where it was when it closes
+ * (acceptance pass 3 P2-5).
  */
 export function LeaveSessionDialog({
   onLeave,
@@ -25,10 +27,32 @@ export function LeaveSessionDialog({
   const { t } = useTranslation();
   const stayRef = useRef<HTMLButtonElement>(null);
   const leaveRef = useRef<HTMLButtonElement>(null);
+  // Whatever had the focus before the dialog (Exit, or the Session's big
+  // button behind an Escape) gets it back when the dialog closes.
+  const [opener] = useState(() =>
+    document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null,
+  );
+  useEffect(
+    () => () => {
+      if (opener && opener.isConnected) opener.focus();
+    },
+    [opener],
+  );
   useEffect(() => {
     stayRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Tab") {
+        // A modal keeps the focus (acceptance pass 3 P2-5): Tab and Shift+Tab
+        // go round its two buttons, never on to the Session behind it.
+        e.preventDefault();
+        e.stopPropagation();
+        const order = [stayRef.current, leaveRef.current].filter((b): b is HTMLButtonElement => !!b);
+        const at = order.indexOf(document.activeElement as HTMLButtonElement);
+        const next = at === -1 ? 0 : (at + (e.shiftKey ? order.length - 1 : 1)) % order.length;
+        order[next]?.focus();
+      } else if (e.key === "Escape") {
         e.stopPropagation();
         e.preventDefault();
         onStay();

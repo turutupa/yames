@@ -253,7 +253,8 @@
       "offerBody": "Sube desde {{bpm}} BPM mientras llegues al listón, y guarda tu tempo limpio. Añade {{minutes}} minutos.",
       "start": "Buscar mi límite",
       "recap": "Límite",
-      "rungLabel": "{{bpm}} BPM: {{met}} superadas, {{missed}} fallidas"
+      "rungLabel": "{{bpm}} BPM: {{met}} superadas, {{missed}} fallidas",
+      "fairAsk": "¿Te parecieron justas las notas de esta subida?"
     },
     "coach": {
       "passed": "Entraron todas las notas, regulares durante {{bars}} compases seguidos a {{bpm}} BPM.",
