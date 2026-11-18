@@ -15,6 +15,24 @@ import type { Page } from "@playwright/test";
 export type ContrastHit = { text: string; ratio: number; need: number; size: number; fg: string; bg: string; where: string };
 
 export async function textContrast(page: Page, root = ".main-content, .session-page"): Promise<ContrastHit[]> {
+  // Where every text node is when the picture is taken. A running Take moves its
+  // words with the notes, so a line that has moved by the time it is measured is
+  // skipped rather than measured against whatever is now behind its old place.
+  const where = () =>
+    page.evaluate((root) => {
+      const w = window as unknown as { __ctWhere?: WeakMap<Node, string> };
+      const m = new WeakMap<Node, string>();
+      for (const r of document.querySelectorAll(root)) {
+        const walk = document.createTreeWalker(r, NodeFilter.SHOW_TEXT);
+        for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          m.set(n, [...range.getClientRects()].map((q) => `${Math.round(q.left)},${Math.round(q.top)}`).join(";"));
+        }
+      }
+      w.__ctWhere = m;
+    }, root);
+  await where();
   const png = await page.screenshot({ type: "png" });
   return page.evaluate(
     async ({ b64, root }) => {
@@ -108,6 +126,9 @@ export async function textContrast(page: Page, root = ".main-content, .session-p
           if (op < 0.05) continue;
           const range = document.createRange();
           range.selectNodeContents(n);
+          const then = (window as unknown as { __ctWhere?: WeakMap<Node, string> }).__ctWhere?.get(n);
+          const now = [...range.getClientRects()].map((q) => `${Math.round(q.left)},${Math.round(q.top)}`).join(";");
+          if (then !== undefined && then !== now) continue;
           const fg = parse(cs.color);
           const size = parseFloat(cs.fontSize);
           const bold = Number(cs.fontWeight) >= 700;

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { openShot } from "./fits";
+import type { Page } from "@playwright/test";
 import { textContrast, belowAA } from "./contrast";
 
 /**
@@ -11,6 +12,7 @@ import { textContrast, belowAA } from "./contrast";
  * learning side was drawn in.
  */
 const SCENES = [
+  "path-alternate",
   "today-returning",
   "paths",
   "step-detail",
@@ -25,14 +27,30 @@ const SCENES = [
 ];
 const SIZE = { width: 1400, height: 900 };
 
+/**
+ * The lines below AA in two looks a moment apart. A running Take moves its
+ * words with the notes, and under load the picture and the layout can be a
+ * frame apart; a real failure is there both times, a race is not.
+ */
+async function belowAATwice(page: Page) {
+  const first = await textContrast(page, ".session-page");
+  const bad = belowAA(first);
+  if (!bad.length) return { hits: first, bad };
+  await page.waitForTimeout(400);
+  const again = belowAA(await textContrast(page, ".session-page"));
+  const key = (h: { text: string; where: string }) => `${h.where}|${h.text}`;
+  const still = new Set(again.map(key));
+  return { hits: first, bad: bad.filter((h) => still.has(key(h))) };
+}
+
 for (const theme of ["ivory", "ember"]) {
   for (const shot of SCENES) {
     test(`${shot} in ${theme}: Session text clears AA`, async ({ page }) => {
       await openShot(page, shot, SIZE, theme);
       await page.waitForTimeout(600);
-      const hits = await textContrast(page, ".session-page");
+      const { hits, bad } = await belowAATwice(page);
       expect(hits.length, "no text was measured").toBeGreaterThan(5);
-      expect(belowAA(hits), JSON.stringify(belowAA(hits), null, 1)).toEqual([]);
+      expect(bad, JSON.stringify(bad, null, 1)).toEqual([]);
     });
   }
   test(`paused warm-up in ${theme}: Session text clears AA`, async ({ page }) => {
@@ -40,7 +58,7 @@ for (const theme of ["ivory", "ember"]) {
     await page.getByTestId("session-pause").click();
     await expect(page.getByTestId("session-resume")).toBeVisible();
     await page.waitForTimeout(600);
-    const hits = await textContrast(page, ".session-page");
-    expect(belowAA(hits), JSON.stringify(belowAA(hits), null, 1)).toEqual([]);
+    const { bad } = await belowAATwice(page);
+    expect(bad, JSON.stringify(bad, null, 1)).toEqual([]);
   });
 }

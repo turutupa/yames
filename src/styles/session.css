@@ -104,9 +104,8 @@
   --l-panel-on: color-mix(in srgb, var(--l-panel-solid) 84%, transparent);
   --l-met-fill: color-mix(in srgb, var(--l-tone) 28%, var(--l-bg));
   --l-miss-fill: color-mix(in srgb, var(--l-clash) 30%, var(--l-bg));
-  /* A note's words on the neck ("finger 2", "next · then 7, 8"). The mock's
-     layout draws them bare with a halo (further down); the pill is for the
-     layouts that keep one. */
+  /* A note's words on the neck ("finger 2", "next · then 7, 8"): on a pill of
+     the page in every theme but Ember, which draws them bare (further down). */
   --l-tag-ink: var(--l-ink);
   --l-tag-pill: var(--l-bg);
   --l-tag-edge: transparent;
@@ -160,6 +159,9 @@
   --l-on-tone: #fff;
   --l-on-tens: #fff;
   --l-gloss: rgba(255, 255, 255, 0.7);
+  /* A light theme's accent is a dark ink that carries white: its gradient's
+     top only just lifts, or the white on it washes out (the Level control). */
+  --l-amber-hi: color-mix(in srgb, var(--l-amber) 88%, #fff);
   --l-tone-text: color-mix(in oklab, var(--l-tone) 72%, var(--text-primary));
 }
 /* Ember is the learning side's own palette, kept to the value: the theme this
@@ -3476,6 +3478,17 @@
   padding: 0;
   font-size: 17px;
   text-shadow: 0 1px 2px color-mix(in srgb, var(--l-halo) 90%, transparent), 0 0 10px color-mix(in srgb, var(--l-halo) 75%, transparent);
+}
+/* Every theme but Ember (whose bare amber words are the learning side's own
+   design): the words on a pill of the page, as mock A draws "finger 3" and
+   "next · then", so they read over a glow, a string or a pale board alike. */
+:root:not([data-theme="ember"]) .practice-now-tag,
+:root:not([data-theme="ember"]) .practice-next-tag {
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: var(--l-bg);
+  box-shadow: 0 0 0 1px var(--l-line);
+  text-shadow: none;
 }
 .practice-legend {
   font-size: 13px;
